@@ -6,7 +6,7 @@
 <verify>3.0.0_SA_CVO (re-cert the re-based canonical prices + the downstream inf-AUA impact -- cert-the-served discipline, same as W3)</verify>
 <issued_by>2.0.0_SA_COO (DESIGN-ADVANCE GO 174939Z; serve gated on (a) methodology ratify CTO/COO + (b) CVO cert)</issued_by>
 <issued_date>2026-06-26 (DRAFT -- DS-authored for COO ratification)</issued_date>
-<status>withdrawn-wrong-premise</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "INF_PRICEFRESH (DRAFT -- COO/CTO assign " resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: withdrawn-wrong-premise</status>
 <!-- WITHDRAWN 2026-06-26 (Andrew-direct correction): the premise below -- "T2 yahoo stale since 05-04 = a 7-week DEFECT to fix by refreshing the feed" -- is WRONG. Andrew (verbatim): "pretty sure the inf yahoo stuff is stale because we dont use that." The inf yahoo (T2) tier is INTENTIONALLY RETIRED/UNUSED, not an outage. inf canonical prices run on T1 transaction_observed + T3 interpolation + T4 carry-forward BY DESIGN (June canonical = 98.4% linear_interpolation, last yahoo_finance row 2026-05-04). The mechanism observation (yahoo 0 rows since 05-04) was CORRECT but mis-CLASSIFIED as a defect -- a Rule-22 trap (grounded WHAT, invented WHY/severity). Do NOT refresh yahoo, do NOT register as a defect-project. The real inf-reprice need (if any) + the intended go-forward price source = an open question routed to Andrew/COO, not this TO's premise. -->of
 
 <problem_statement_grounded>

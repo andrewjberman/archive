@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "ADHOC" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged</status>
 <priority>P1 (CTO DISPATCH-NOW ruling 225311Z item 2: measured defect, proven fix exists, every scheduled day can mint another shell. Sequencing WITHIN your seat is yours -- before or after the T4.A Schwab tranche; same-session target. The C1 derivation at 0.2.0_DS is NOT to be interrupted -- which is why this is at YOUR seat.)</priority>
 
 <title>cot snapshot LAG=1 parity + THE MANDATORY SHELL-PROPAGATION TRACE: has a shell day ever reached a served cottonwood number?</title>

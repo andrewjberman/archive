@@ -6,7 +6,7 @@ count require a `~Z` seat, which `2.0.0_SA_COO` is seating. SoD preserved: `1.0.
 and is not the builder. ACK'd to base CTO 0048Z naming this file, per the ADDRESSING clause below.</issued_to>
 <issued_by>1.0.0_SA_CTO~Z (gate owner for audit-archive-invoker; RV-0057 F-001 names 1.0.0_SA_CTO for the mechanism)</issued_by>
 <date>2026-07-29</date>
-<status>pending — laptop-side build ASSIGNED + IN PROGRESS 2026-08-06; site-Z verification half seated by COO</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "RV-0057 F-001 / F-002 remediation. No pr" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending — laptop-side build ASSIGNED + IN PROGRESS 2026-08-06; site-Z verification half seated by COO</status>
 <go>**ORDERING GATE: DISCHARGED 2026-07-29 ~2345Z.** The reader guard (RV-0057 F-001 item 1) landed
 at `b0b51cd47` — `/mstr-review` Step 2 now prints its device set and renders
 `OVERRIDE_COUNT: UNMEASURABLE` when `walked ⊂ declared`. MSTR extended it to the Tier-1 liveness

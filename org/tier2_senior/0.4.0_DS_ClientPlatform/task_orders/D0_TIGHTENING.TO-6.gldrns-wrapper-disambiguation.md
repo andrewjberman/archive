@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:45Z</issued>
 <dated>2026-08-25 (the brief's date; COO-banked carry)</dated>
-<status>staged -- GO paired</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "D0_TIGHTENING" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged -- GO paired</status>
 <priority>P2</priority>
 <authority>D0_INFRA_TIGHTENING_PRD.md §4d + §6 row 6 at dispatch vintage @4bf291b26c. Placement: LAPTOP (CTO ruling FINAL; gold tree + deploy leg = S3-code deploy standard, DS lane per Rule 13).</authority>
 </task_order>

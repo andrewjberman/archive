@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps (pending inf-data ruling)</assigned_to>
 <issued_by>2.0.0_SA_COO (deferred from AE TO-6 RAVC2 disclosure 171929Z; DS flagged at P1-DS 162016Z)</issued_by>
 <issued_date>2026-06-11</issued_date>
-<status>pending-ruling -- LOW-PRI, NOT blocking (pre-existing drift, inf pipeline runs fine, comp-constants check rc=1 on these only). Do NOT touch canonical or sites until an inf-data ruling. Surfaces to Andrew/inf-data when worked.</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "ADHC_INFDATA (inf-data-cleanup, NEW low-" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending-ruling -- LOW-PRI, NOT blocking (pre-existing drift, inf pipeline runs fine, comp-constants check rc=1 on these only). Do NOT touch canonical or sites until an inf-data ruling. Surfaces to Andrew/inf-data when worked.</status>
 
 7 PRE-EXISTING inf-lane comp-constants drifts (surfaced by AE TO-6 comp-build, NOT introduced by cot registration):
 1. INFLECTION_REP_IDS (5 sites): registered canonical = [3,11,12] (3 ids); 5 LIVE sites use [3,6,11,12] (4 ids, includes rep 6). Sites: data/inf/manual_api/pull_inflection_{assets,representatives,transactions}.py + infra inf-pipeline inf-api-reps + inf-api-txn copies.

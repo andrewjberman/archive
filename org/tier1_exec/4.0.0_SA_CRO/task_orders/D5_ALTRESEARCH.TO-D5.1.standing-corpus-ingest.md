@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:50Z</issued>
 <dated>STANDING -- per batch, as Andrew provides transcripts</dated>
-<status>staged -- GO paired; STANDING (this TO does not close on a single batch)</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "D5_ALTRESEARCH" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged -- GO paired; STANDING (this TO does not close on a single batch)</status>
 <priority>P3 -- behind the ontology lock-down tranche, which is the fabric's critical path</priority>
 <authority>D5_ALT_RESEARCH_PRD.md §6 item 1 at dispatch vintage @9ad40bc0e8 (CVO verdict @715fe724d8, ACCEPT 0 P0). Placement: LAPTOP (CTO placement ruling FINAL 193804Z -- LAPTOP = D0/D1/D2/D3/D4/D5).</authority>
 </task_order>

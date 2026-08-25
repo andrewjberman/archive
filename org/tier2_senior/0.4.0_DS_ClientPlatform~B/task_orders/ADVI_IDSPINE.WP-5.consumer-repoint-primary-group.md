@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T20:45Z</issued>
 <dated>on WP-2 (= T2-DIMS) + WP-3 + CTO ratification</dated>
-<status>staged -- GATED ON WP-2/WP-3 + CTO RATIFY. P4-class: served semantics move here.</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "ADVI_IDSPINE" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged -- GATED ON WP-2/WP-3 + CTO RATIFY. P4-class: served semantics move here.</status>
 <priority>P1 -- this is where the group-based book ruling actually reaches a served figure</priority>
 <authority>SPEC_IDENTITY_SPINE_FAM_RESOLUTION_20260819.md §4 WP-5 + the Andrew ruling 2026-08-19 ~20:12Z (book = GROUP-BASED). Placement: LAPTOP; routed to ~B as the dims owner (they hold T2-DIMS and T1-ORACLE, so the producer and its re-point sit together).</authority>
 </task_order>

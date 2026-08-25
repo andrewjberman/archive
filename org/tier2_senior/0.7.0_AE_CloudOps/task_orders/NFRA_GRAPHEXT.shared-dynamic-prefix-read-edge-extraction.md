@@ -2,7 +2,7 @@
 
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "NFRA_GRAPHEXT" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged</status>
 <priority>MEDIUM (prevention-tier, shared dep) — CTO-ruled single-owner. Central graph-extractor capability serving BOTH comp-diff (edge-axis) AND comp-drift (consumer_evidence completeness). Sequence behind your live work (provisioning/cot); it's a shared P1 dep, not a fire.</priority>
 <date>2026-06-29</date>
 

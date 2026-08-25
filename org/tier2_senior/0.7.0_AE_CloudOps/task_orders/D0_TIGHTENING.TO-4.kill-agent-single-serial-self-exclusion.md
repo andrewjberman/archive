@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:45Z</issued>
 <dated>any window -- small, no gate</dated>
-<status>staged -- GO paired; UNGATED, take it whenever a window opens</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "D0_TIGHTENING" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged -- GO paired; UNGATED, take it whenever a window opens</status>
 <priority>P3 (small), but it is a self-inflicted-outage class -- a seat that kills itself while reaping is an expensive small bug</priority>
 <authority>D0_INFRA_TIGHTENING_PRD.md §4c + §6 row 4 at dispatch vintage @4bf291b26c. Placement: LAPTOP (CTO ruling FINAL); exercise on BOTH devices per §7.</authority>
 </task_order>

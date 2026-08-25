@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.8.0_AE_CloudComp~B</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "ADHOC" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged</status>
 <priority>P2 (instrument coverage hole on the monolith tree; CTO route-as-build 20260803T210604Z; third TO in your staged queue behind ADHOC.r4a + ADHOC.record-terraform-deploy)</priority>
 
 <title>comp-pipescript: close the assets-tree coverage hole -- data/assets/scripts/silver/* returns rc=2 (tree absent from the pipeline map)</title>

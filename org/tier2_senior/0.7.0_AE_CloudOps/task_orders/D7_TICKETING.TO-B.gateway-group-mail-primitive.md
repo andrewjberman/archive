@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:15Z</issued>
 <dated>on TO-A's outputs (the on-box capability read + Andrew's Q3 one-liner reply) — likely 08-20/21; behind your Friday-path rows at your discretion</dated>
-<status>staged -- GO paired; STAGED-ON-TO-A: do not build before the existence check lands (the scope-collapse rule is the point)</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "D7_TICKETING" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged -- GO paired; STAGED-ON-TO-A: do not build before the existence check lands (the scope-collapse rule is the point)</status>
 <priority>P1-program (D7 is the week's flagship per Andrew -- "water through the pipes") but behind your 49F Friday rows at the seat</priority>
 <authority>D7_TICKETING_INTAKE_PRD.md §TO-B at dispatch vintage @36a7fbd70e (CVO verdict + 2 protocol rulings absorbed); Andrew's four ticketing positions (internal-only v1; placement FINAL; 2PM-ET stands; bobby later). CTO gates the deploy.</authority>
 </task_order>

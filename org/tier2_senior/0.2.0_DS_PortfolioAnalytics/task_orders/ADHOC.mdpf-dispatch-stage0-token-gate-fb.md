@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-04</date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "ADHOC" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending</status>
 <priority>P2 (the F-B class-closer from the Orion-401 root cause; F-A (AE's schedule fix) covers the daily race -- this closes the CLASS for any future token/schedule drift; sequence AFTER your benchmarks-mapping TO)</priority>
 
 <title>MDPF dispatch stage-0: pre-pull token gate -- decode exp locally, bounded SM re-poll near expiry, else fail LOUD named TOKEN-EXPIRED (a gate in the flow, not an alarm)</title>

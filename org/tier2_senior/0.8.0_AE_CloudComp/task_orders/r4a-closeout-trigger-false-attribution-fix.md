@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.8.0_AE_CloudComp~B</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "r4a-closeout-trigger-false-attribution-f" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged</status>
 <priority>P2 (instrument-honesty defect; non-blocking, advisory-class producer)</priority>
 
 <title>R4-A closeout trigger: stop attributing registration commits as closeouts (token-sweep over-match)</title>

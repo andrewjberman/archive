@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.8.0_AE_CloudComp~B</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "ADHOC" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged</status>
 <priority>P2 (Andrew-direct law ~2240Z via CVO + CTO disposition 233234Z Part 1 -- "the part that must not be skipped." Queued FOURTH in your staged set, explicitly BEHIND tonight's served-integrity/apply-chain board per CTO; flagged now so a ruling with no owner does not evaporate.)</priority>
 
 <title>The comp-tool UNIVERSE AUDIT: classify every tool's projection universe -- canonical kuzu / declared territory / hand-drawn exception -- denominator printed; every hand-drawn universe justifies itself or becomes a build item</title>

@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-03</date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "ADHOC" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending</status>
 <!-- Leg 1 DELIVERED @a6d1dc1797, routed CTO cc COO 233544Z/233549Z (4 serve days x 12
      artifacts within surviving evidence; pre-07-19 UNKNOWN). Leg 2 resolved NO-DEFECT
      (diagnosis corrected on instrument evidence, no fix deployed); closes on tonight's

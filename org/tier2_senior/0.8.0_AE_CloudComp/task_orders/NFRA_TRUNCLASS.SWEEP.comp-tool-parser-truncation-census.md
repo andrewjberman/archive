@@ -4,7 +4,7 @@
 <issued_to>0.8.0_AE_CloudComp</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-20T00:58Z</issued>
-<status>staged -- GO paired; sequenced BEHIND the Andrew-prioritized dot-truncation fix, which is the specimen this census generalises</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "NFRA_TRUNCLASS" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged -- GO paired; sequenced BEHIND the Andrew-prioritized dot-truncation fix, which is the specimen this census generalises</status>
 <priority>P1 -- ANDREW-NAMED CLASS</priority>
 <authority>Andrew-direct 2026-08-20 ~005xZ at the MSTR terminal, VERBATIM: "Yes we need to impriove comp-adversary, truncated outputs is a very risky error type and one we've seen crop up many times". Relayed by 0.0.0_AB_MSTR (record+broadcast same turn), which routes the class-sweep half to COO for the cut. CTO is mandate owner on the comp-adversary row itself.</authority>
 </task_order>

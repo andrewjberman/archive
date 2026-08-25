@@ -1,7 +1,7 @@
 # TO_PORTALREFRESH_FE_01 — DataRefresh rollback UI: confirm dialog + in-flight lockout + progress display
 
 **Project:** OPAL_PORTALREFRESH  **Issuer:** 1.0.0_SA_CTO  **Assignee:** 0.2.0_DE_PortfolioAnalytics
-**Status:** ACTIVE  **Issued:** 2026-07-17T13:40Z  **Priority:** P1 (starts immediately; no dependency on the BE leg)
+**Status:** complete -- ACTIVE  **Issued:** 2026-07-17T13:40Z  **Priority:** P1 (starts immediately; no dependency on the BE leg) -- SPRING-CLEAN 2026-08-25: ORPHAN, project code "TO_PORTALREFRESH_FE_01" unregistered and unreferenced.
 
 ## Why (one paragraph, grounded)
 

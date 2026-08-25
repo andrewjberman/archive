@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-11T00:3xZ</issued>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "MDPF_REMED" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending</status>
 <priority>P0 — LIVE PRODUCER OUTAGE (opal-assets-daily-emitter down since 08-08; mdpf/feeds/* frozen;
 zeros in the aggregate; serve protected only by the 08-05 carry-forward). CTO ruled (a) at 003242Z;
 (b) re-create REFUSED (reverses Andrew's 08-07 deletion — needs HIS word and is not being sought);

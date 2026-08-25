@@ -3,7 +3,7 @@
 <project>NEVER6_LEDGER</project>
 <issued_to>0.4.0_DS_ClientPlatform~F</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "NEVER6_LEDGER" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending</status>
 <priority>P2 -- 14 days old, so an hour does not matter; it is on the queue because NEVER#6 makes it the COO's alarm and the alarm has never fired. NOT urgent, NOT deferrable indefinitely.</priority>
 <date>2026-08-25</date>
 <references>

@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DE_MarketIntelligence</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "details-ticker-json-staleness-fix" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged</status>
     <dispatch_state>STAGED, not urgent -- CTO-ruled ad-hoc, no PRD needed. Pick up whenever it fits (found during MKOV_RETFIX.TO-1, not blocking).</dispatch_state>
     <gate_note>None -- COO-resolvable whenever capacity allows.</gate_note>
   </metadata>

@@ -3,7 +3,7 @@
 <project>PORTAL_CITYPECHECK</project>
 <issued_to>UNSEATED -- no lane requested, deliberately. CORRECTED ~13:4xZ: this field previously read "requested from 0.0.0_AB_MSTR ~13:35Z" and NO SUCH REQUEST WAS EVER SENT. I wrote the request into the artifact and then never made it. At P2 no spawn is warranted; this TO waits for a DE lane that already exists to become free.</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "PORTAL_CITYPECHECK" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending</status>
 <priority>P2 -- AMENDED ~13:3xZ. NOT time-boxed, NOT discharging a hold, NOT urgent. 0.4.0_DE_ClientPlatform~C falsified the premise: ci.yml:59 runs `bun run build` = `tsc -b &amp;&amp; vite build`, so TYPE COVERAGE ALREADY EXISTS at step 5 and the false-green state CANNOT OCCUR. This is a naming/honesty correction to step 4, not a coverage restoration.</priority>
 <date>2026-08-25</date>
 <references>

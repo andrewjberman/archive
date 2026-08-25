@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-04</date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "ADHOC" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending</status>
 <!-- deployed 2026-08-04T01:05:46Z MATCH-verified (ledger 20260804T010546Z); closes on the
      next SCHEDULED 49f cycle reading no behavioral delta (acceptance per GO) -->
 <priority>P2 (the DEPLOY leg of the reviewed bd refresh -- ~B's review @28d0ce03ed verdicts both changes SAFE-AS-IS, zero excludes, so NO CTO ruling gates it; CTO's d-2 deliberate-act boundary is SATISFIED BY the review. Sequence at your seat with the T4.A residue; NOT tonight-urgent.)</priority>
