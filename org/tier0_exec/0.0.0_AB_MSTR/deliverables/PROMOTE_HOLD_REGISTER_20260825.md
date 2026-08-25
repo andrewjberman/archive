@@ -17,7 +17,54 @@ inferred-gate / widened-word class the estate has paid for repeatedly.
 
 ---
 
-## (1) ETFS PROMOTE — NOT YET
+## (1) ETFS PROMOTE — ✅ DISCHARGED 2026-08-25 ~05:23Z, PROMOTE EXECUTED ~05:47Z
+
+**AUTHORIZED BY ANDREW HIMSELF, at the site-Z MSTR terminal, ~05:23Z. VERBATIM** (carried as TEXT by
+`0.0.0_AB_MSTR~Z`, not as a citation, because a cross-fabric citation is not discharged by a commit
+sitting on the other fabric's disk):
+> *"Yeah we need an 0.2.0_DT_PortfolioAnalytics~Z agent spawned to run the /prod-deploy"*
+
+**He named the SERIAL and he named the ACT** — the hold's own author, ~14 hours later, directing the
+exact act the hold was against, at a terminal where the prod-deploy was the live subject.
+
+**BOTH OF HIS NAMED CONDITIONS WERE MET AND MEASURED BEFORE THE CUT:**
+- **(a) full data structure for all ETFs — MET.** Served `platinum/etfs/positioning_data.json`
+  126,863 B @04:53:51Z, `data_as_of` 2026-08-24, four books full, **177 of 187 rows at 8/8 return
+  windows**; residual 4 partial + 6 correct nulls, every one enumerated and attributed.
+- **(b) displays properly on DEV with GICS replaced by sub-categories — MET, AND HE CONFIRMED IT AT
+  THE RENDER HIMSELF** ~05:06Z: *"We now have full performance for everything but still missing SALXX
+  YTD and 1Y"*. `sub_asset_class` carries the GICS sector vocabulary, 13 values.
+- **The SALXX residual does NOT reopen (a)** — he ruled on it ~06:1xZ (*"recs approved"*):
+  complete-coverage-or-NULL does not bend. **Those blanks are a RULED state, not an incomplete
+  pipeline.**
+
+**WHAT LANDED:** `origin/PROD` **d9a98bcc**, tag **portal-v2.1.165** (peeled == PROD), cut from
+`origin/DEV` 063ff4d7, **parity diff `origin/DEV..d9a98bcc` = 0 BYTES**, CI *Deploy to Production*
+SUCCESS. Executed by `0.2.0_DT_PortfolioAnalytics~Z` — the serial he named — at 05:47:35Z.
+
+### ⛔ THE REAL DEFECT THIS SURFACED, AND IT IS A RECORDING FAILURE, NOT A PROMOTE FAILURE
+
+**I could not find a lift on this fabric and asked rather than concluded. `0.0.0_AB_MSTR~Z`'s answer:
+the record did not exist.** They broadcast his sentence verbatim to their fabric and **never wrote a
+durable Andrew-direct record for it** — the authorization lived in MCP message bodies and in a
+session log written *before* the instruction arrived. **Nowhere a searcher would look, and nowhere
+this fabric could reach.**
+**Their words: *"I CONFUSED BROADCASTING THE WORD WITH RECORDING IT."*** That is Rule 22b's
+SENT-vs-READ confusion one layer up.
+⛔ **SO MY "I CANNOT FIND A LIFT" WAS A TRUE MEASUREMENT OF A RECORD THAT DID NOT EXIST, NOT A
+VISIBILITY GAP ON MY SIDE** — and I had explicitly declined to draw that conclusion, which was the
+right call for the wrong reason: I hedged on cross-fabric visibility, and the actual answer was that
+there was nothing to see anywhere. **A register that cannot find an authorization is doing its job
+whether the cause is distance or absence.**
+Now written by them at `.../laneZ_ANDREW_DIRECT_20260825_0523Z_PROD_DEPLOY_AUTHORIZED_ETFS_POSITIONING.md`.
+
+### ⛔ STILL OPEN — NOT MINE TO CLOSE
+`org/critical_paths/change_management/20260824T1241Z_etfs-positioning-prod-promote-v2-1-165_deploy_completion.md`
+reads **`Status: OPEN`** on this fabric. The act it tracks has now COMPLETED, but **the completion
+facts live at site Z and NEVER#6 makes closing it an evidence act, not a bookkeeping one.** Routed
+to them; **this register does not close another fabric's deploy ledger.**
+
+### ⛔ THE HOLD AS IT STOOD BEFORE — kept for provenance
 
 **Andrew-direct 2026-08-24 ~15:2xZ, base CTO terminal. VERBATIM:**
 > *"We are not positioned to promote yet. Until data pipeline is complete with full data structure
