@@ -135,8 +135,21 @@ look natural, because the producer genuinely wants that data.
 | **ETFS-TO5-AC7** | ⛔ **THE FIRST *SCHEDULED* FIRE (`cron(0 13 * * ? *)` UTC) IS OBSERVED AT ITS OWN INVOCATION RECORD **AND** THE ARTIFACT.** A **DISAGREEMENT** between them is **PASS-WITH-FINDING, not a fail** (amended by `1.0.0_SA_CTO~Z` ~23:10Z, in advance, so nobody decides under time pressure whether a red record beats a green artifact). ⛔ **An AD-HOC invoke can never discharge this** — the artifact must carry `run_class: scheduled`. | `ETFS-d-1` | **EXERCISED (scheduled)** |
 
 > ⛔ **`ETFS-TO5-AC7` HAS A PREREQUISITE AND IT FIRES TWO HOURS EARLIER — ~11:00Z.**
-> Read the L1 pull's `run_manifest.json`: **`universe_count` (expect ~166, was 109)** and spot-check
-> that **`BBSEY` and `AMX`** are present in the emitted `characteristics.parquet`.
+> Read the L1 pull's `run_manifest.json`: **`universe_count` reconciles to ~166 — NOT `> 109`**
+> (**109 is the PRE-A5 count, and a PARTIAL extension satisfies a `>` threshold while the fill still
+> fails**) — and spot-check that **`BBSEY` and `AMX`** are in the emitted `characteristics.parquet`.
+>
+> ⛔⛔ **MATCH ON THE TICKER *TOKEN*, NOT THE BARE STRING.** The `security` column carries
+> **Bloomberg-format identifiers (`AAPL US Equity`)**, so a bare-ticker equality compare returns a
+> **CLEAN ABSENT FOR EVERY ROW** — which at 11:00Z, under time pressure, reads as *"A5 failed"* when
+> nothing failed at all. **This warning is the difference between the check working and the check
+> inverting.** *(From `0.0.0_AB_MSTR~Z`'s `org/XXX.md` carrier — see below.)*
+>
+> 📌 **THERE ARE TWO CARRIERS FOR THIS OBLIGATION AND `org/XXX.md` IS THE PRIMARY.** `0.0.0_AB_MSTR~Z`
+> landed it in the **MSTR row of `org/XXX.md` @`21d800c18d`** (00:03:59Z) — **that is the surface a
+> fresh seat actually reads at startup; this TO face is the second copy.** ⛔ **If the two ever
+> disagree, `org/XXX.md` WINS** — and full criteria + the pinned platinum baseline live at
+> `org/tier0_exec/0.0.0_AB_MSTR/logs/2026-08-24/mstrz_etfs_ingest_round_1355-2210Z.md` §7.
 > **IF ABSENT, DIVZ/IDVZ arrive at 13:00Z as FULL-LOOKING BOOKS WITH BLANK ANALYTICS — which is WORSE
 > than tonight's honest shells**, because a shell announces itself and a blank field does not.
 >
