@@ -132,11 +132,28 @@ look natural, because the producer genuinely wants that data.
 | **ETFS-TO5-AC3** | ⛔ **EXERCISED: a real fire produces the artifact at `platinum/etfs/positioning_data.json`.** Not a config read, not a dry run — the path runs | `ETFS-d-1`, `ETFS-e-2` | **EXERCISED** |
 | **ETFS-TO5-AC4** | The as-of the run stamps matches `lib/trading_calendar.expected_last_trading_day` — **NEVER#1 discipline, never wall-clock.** DS built the guard; this proves it survives deployment | `ETFS-d-1` | EXERCISED |
 | **ETFS-TO5-AC5** | ⛔ **NO ALARM, NO SNS TOPIC, NO SES SEND, NO FRESHNESS CHECKER, NO MONITOR.** The run manifest and the log ARE the record | `ETFS-d-1` | SOURCE |
+| **ETFS-TO5-AC7** | ⛔ **THE FIRST *SCHEDULED* FIRE (`cron(0 13 * * ? *)` UTC) IS OBSERVED AT ITS OWN INVOCATION RECORD **AND** THE ARTIFACT.** A **DISAGREEMENT** between them is **PASS-WITH-FINDING, not a fail** (amended by `1.0.0_SA_CTO~Z` ~23:10Z, in advance, so nobody decides under time pressure whether a red record beats a green artifact). ⛔ **An AD-HOC invoke can never discharge this** — the artifact must carry `run_class: scheduled`. | `ETFS-d-1` | **EXERCISED (scheduled)** |
+
+> ⛔ **`ETFS-TO5-AC7` HAS A PREREQUISITE AND IT FIRES TWO HOURS EARLIER — ~11:00Z.**
+> Read the L1 pull's `run_manifest.json`: **`universe_count` (expect ~166, was 109)** and spot-check
+> that **`BBSEY` and `AMX`** are present in the emitted `characteristics.parquet`.
+> **IF ABSENT, DIVZ/IDVZ arrive at 13:00Z as FULL-LOOKING BOOKS WITH BLANK ANALYTICS — which is WORSE
+> than tonight's honest shells**, because a shell announces itself and a blank field does not.
+>
+> **OWNER: whichever seat is alive at 11:00Z, resolved from the register at that hour.** Deliberately
+> not a named serial — **`0.7.0_AE_CloudOps~Z` has already said their seat will not be alive for it,
+> and a durable record has to work without knowing who reads it.**
+>
+> ⚠ **THERE IS NO `ETFS-TO5-AC6`.** It was never minted; the criterion `1.0.0_SA_CTO~Z` added by
+> message at ~22:22Z was numbered `AC7` and **seven messages already reference that name**, so
+> renaming it would orphan every one. **The gap is recorded, not lost.**
 
 <proof_of_spec>
   <!-- ISSUANCE half (COO). Firm-tokened ids; cell_refs are CVO's join.
        INVOCATION IS POSITIONAL -- no --expected-criteria flag:
-         python .tools/proof-of-spec-check.py <instance>.json ETFS-TO5-AC1,ETFS-TO5-AC2,ETFS-TO5-AC3,ETFS-TO5-AC4,ETFS-TO5-AC5
+         python .tools/proof-of-spec-check.py <instance>.json ETFS-TO5-AC1,ETFS-TO5-AC2,ETFS-TO5-AC3,ETFS-TO5-AC4,ETFS-TO5-AC5,ETFS-TO5-AC7
+       (AC7 is OPEN until the 13:00Z fire -- the filed instance MUST be re-filed to include it; a
+        5-of-5 pass over a 6-criterion contract is the coverage frame lying about its own domain.)
        CHECK THE RC, NEVER THE OUTPUT STRING. The coverage diff is BIDIRECTIONAL -- an expected id with
        no row refuses the instance, which is exactly what forced this TO to exist. -->
     <criterion id="ETFS-TO5-AC1" cell_refs="ETFS-d-1"/>
@@ -144,7 +161,8 @@ look natural, because the producer genuinely wants that data.
     <criterion id="ETFS-TO5-AC3" cell_refs="ETFS-d-1, ETFS-e-2"/>
     <criterion id="ETFS-TO5-AC4" cell_refs="ETFS-d-1"/>
     <criterion id="ETFS-TO5-AC5" cell_refs="ETFS-d-1"/>
-  <expected_criteria>ETFS-TO5-AC1,ETFS-TO5-AC2,ETFS-TO5-AC3,ETFS-TO5-AC4,ETFS-TO5-AC5</expected_criteria>
+    <criterion id="ETFS-TO5-AC7" cell_refs="ETFS-d-1"/>
+  <expected_criteria>ETFS-TO5-AC1,ETFS-TO5-AC2,ETFS-TO5-AC3,ETFS-TO5-AC4,ETFS-TO5-AC5,ETFS-TO5-AC7</expected_criteria>
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/ETFS_POSITIONING.TO-5_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
@@ -155,7 +173,10 @@ look natural, because the producer genuinely wants that data.
   entry at start (`org/critical_paths/change_management/`), close it at completion. **Unclosed at session
   end = COO alarm.**
 - **No shadow path, no parallel emitter, no standing comparator.**
-- **`ETFS-TO2-AC7`** (exercised ADVI fetch) is still open and rides your portal-auth leg — **not this TO.**
+- ⛔ **TWO DIFFERENT `AC7`s LIVE ON THIS PAGE — ALWAYS PROJECT-QUALIFY, NEVER SAY A BARE "AC7":**
+  **`ETFS-TO2-AC7`** = the exercised ADVI fetch, still open, rides the portal-auth leg — **NOT this TO.**
+  **`ETFS-TO5-AC7`** = the first scheduled fire, above — **this TO.**
+  *A successor searching this face for a bare `AC7` gets a CONFIDENT WRONG HIT, not a miss.*
 
 ## Surprise channel · reporting
 
