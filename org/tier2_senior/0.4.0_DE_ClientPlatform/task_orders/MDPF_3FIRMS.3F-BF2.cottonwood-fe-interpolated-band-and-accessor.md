@@ -6,7 +6,7 @@
 <issued_to>0.4.0_DE_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-23T03:53Z</issued_at>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_3FIRMS, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 <priority>ANDREW-DIRECT "I need both right now immediately" -> CTO 035119Z -> decompose + GO NOW.</priority>
 
 <authorization>Andrew-direct 022726Z + 0351Z -> CTO 035119Z -> COO. CVO clearance @816d48cc9 (pinned pair).</authorization>

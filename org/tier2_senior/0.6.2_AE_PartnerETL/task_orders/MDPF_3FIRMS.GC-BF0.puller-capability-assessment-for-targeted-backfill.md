@@ -6,7 +6,7 @@
 <issued_to>0.6.2_AE_PartnerETL~B</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-24T14:56Z</issued_at>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_3FIRMS, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <authorization>**ANDREW-DIRECT ~1452Z, VERBATIM** (at CTO's terminal, relayed 145314Z): *"Yeah I think we need TOs targeted at strategic backfill to the extent they are available for the missing dates, contingent on the ability to verify that backfill is pulling the verifiable targeted date. Some pullers may need ad-hoc or adjusted versions from their scheduled form to accomodate specific date targeting, those need to be assessed and validated for capability first."*</authorization>
 
 <references>

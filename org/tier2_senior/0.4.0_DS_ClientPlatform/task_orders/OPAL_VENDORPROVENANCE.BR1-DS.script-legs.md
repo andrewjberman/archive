@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-04</date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project OPAL_VENDORPROVENANCE, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <!-- GO 20260804T043442Z (COO); spec = BR1_EXECUTION_PLAN @7538cbc5f by reference; build
      order: puller (starts the 5-TD overlap clock) -> emitter (refusal leg exercised) ->
      overlap harness; staging-prefix ONLY pre-cut -->

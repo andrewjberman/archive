@@ -7,7 +7,7 @@
 <joint_assignee>0.7.0_AE_CloudOps (Terraform half — the apply is his, not yours)</joint_assignee>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T20:24Z</issued_at>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_3FIRMS, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 <authorization>LD-0333 am.1 @2eef569d2 -> CTO cascade 200805Z -> COO decomposition.</authorization>
 
 <references>

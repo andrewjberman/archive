@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.8.0_AE_CloudComp~D + 0.4.0_DS_ClientPlatform~B (comp-tool/graph builders) | CTO arch-gate + CVO fixes-re-verified cert</issued_to>
     <date>2026-07-08</date>
-    <status>staged -- GO after P1 (the verification matrix + confirmed break list). FIXES BEFORE OPTIMIZATIONS (Andrew's explicit order).</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_TOOLCHECK, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged -- GO after P1 (the verification matrix + confirmed break list). FIXES BEFORE OPTIMIZATIONS (Andrew's explicit order).</status>
     <prd_ref>docs/architecture/NFRA_TOOLCHECK_PRD.md (SS4 P2, SS5 fixes-before-optimizations, SS8 Q2/Q4)</prd_ref>
     <dispatch_state>STAGED. Gated on P1's real-use-grounded break list. The fixes are pre-populated + severity-ordered from Part 0.</dispatch_state>
     <gate_note>FIXES BEFORE OPTIMIZATIONS (Andrew's order). Do NOT retire a tool on starved telemetry -- the retire pass runs ONLY after the telemetry substrate is fixed (P1 req#1) + usage re-confirmed.</gate_note>

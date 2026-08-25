@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.7.0_AE_CloudOps~Z</issued_to>
     <date>2026-08-07</date>
-    <status>pending</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_CANPLAT, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
     <project_code>MDPF_CANPLAT</project_code>
     <supersedes>MDPF_CANRTE.P0-7 (body ADOPTED @a6ae64326). Criterion 1 (pre-enumeration EBS snapshot) is ALREADY DISCHARGED: snap-0fa2186f01fbc3785, 100%, StartTime 2026-08-06T20:48:38.684Z, vol-071d4d9e2d169bbb9 — AE~Z live-primitive re-confirmed 2026-08-07 ~0001Z. Do not re-snapshot; the open half is the ENUMERATION only.</supersedes>
     <governing>PRD @24d3eb2f8 · CONTRACT @a3106d585 (this capture is a PRECONDITION of the deferred EC2 teardown; the teardown itself remains NOT AUTHORIZED)</governing>

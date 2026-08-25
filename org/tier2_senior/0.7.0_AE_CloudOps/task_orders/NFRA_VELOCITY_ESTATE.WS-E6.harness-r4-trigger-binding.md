@@ -3,7 +3,7 @@
 <project>NFRA_VELOCITY_ESTATE</project>
 <issued_to>0.7.0_AE_CloudOps~E (lane to be spawned by 0.0.0_AB_MSTR on receipt of the sequence)</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_VELOCITY_ESTATE, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 
 <priority>P4 by the PRD phase order, PULLED FORWARD TO NOW on two grounds: (1) it is KIMI-INDEPENDENT -- it needs no lifecycle value, no user-input pipeline, and is unaffected by the Andrew gate that parked E1's values and E3; (2) its stated precondition IS ALREADY DONE. Andrew's standing rule is to defer the unsolvable and proceed past it. This is what "past it" looks like.</priority>
 

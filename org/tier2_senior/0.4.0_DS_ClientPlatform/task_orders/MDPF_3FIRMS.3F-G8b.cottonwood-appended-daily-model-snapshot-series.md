@@ -7,7 +7,7 @@
 <advisory>4.0.0_SA_CRO — authored the snapshot spec @26f218a75; holds the source-keying design. Consult, do not re-derive.</advisory>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T22:31Z</issued_at>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_3FIRMS, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 <authorization>Andrew-direct to CRO ~2210Z (spec @26f218a75) -> CTO ruling 222856Z (bindings below) -> COO wiring. Custody of the Andrew verbatim is CRO's.</authorization>
 
 <references>

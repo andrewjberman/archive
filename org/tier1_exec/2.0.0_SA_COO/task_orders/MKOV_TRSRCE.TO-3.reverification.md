@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MKOV_TRSRCE, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
     <dispatch_state>STAGED -- gated on MKOV_TRSRCE.TO-2's backfill completion. COO will GO this on TO-2's RAVC.</dispatch_state>
     <gate_note>Own proposed ownership/scope (SME/validation) per 0.2.0_DS_PortfolioAnalytics's own offer.</gate_note>
   </metadata>

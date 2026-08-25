@@ -6,7 +6,7 @@
 <verify>3.0.0_SA_CVO (reconcile the endpoint catalog + the billing-charge finding vs live BD)</verify>
 <issued_by>PROPOSED by 0.4.0_DS_ClientPlatform (Andrew-direct 2026-07-08 -- "wrap the REST API endpoint research into a DATA_PLATFORM TO"); PENDING 2.0.0_SA_COO issue+register</issued_by>
 <issued_date>2026-07-08</issued_date>
-<status>proposed</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project DATA_PLATFORM, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: proposed</status>
 <!-- Origin: Christa Bass (Cottonwood) 2026-07-08 "Mgmt fees hit Black Diamond today". DS probe (COO GO, Andrew-direct) proved the mgmt-fee CHARGES are ABSENT from cot bronze -- we ingest only qt1-5, none is a billing query type. Andrew then scoped the forward ask: a full BD REST endpoint+payload catalog for athletic a-la-carte querying outside the scheduled ETL. This D2b TO organizes that research (sibling to D2 spec + D4 SmartX endpoint sweep). -->
 
 <objective>

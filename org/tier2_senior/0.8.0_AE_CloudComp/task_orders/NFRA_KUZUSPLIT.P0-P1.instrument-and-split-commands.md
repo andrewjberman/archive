@@ -6,7 +6,7 @@
 <!-- STAFFING RESOLVED (Andrew-direct 2026-07-17 ~20:2xZ via COO): builder lane = 0.8.0~D (new lane, shared
      with NFRA_COMPSIMILAR — same platform domain; base stays Andrew-reserved per LD-0305). MSTR spawn requested. -->
 <date>2026-07-17</date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_KUZUSPLIT, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <!-- flipped staged->pending 2026-07-17 on ~D read of COO GO 203150Z (GO LIVE, Andrew-ratified O-1). P0 instrument in progress. -->
 <priority>P2 (Andrew batch 2026-07-17). GATE CLEARED: Andrew RATIFIED — GO fires on ~D registration.</priority>
 

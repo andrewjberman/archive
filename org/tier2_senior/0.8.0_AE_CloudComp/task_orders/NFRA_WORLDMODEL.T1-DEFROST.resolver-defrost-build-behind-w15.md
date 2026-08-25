@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:10Z</issued>
 <dated>behind W-15 in the same Thursday queue — the order is PROGRAM-CORRECT, not a capacity compromise (CRO 185935Z): the defrost's compile step derives roster/family fields, so building against the pre-propagation 29-roster would bake stale membership into the new compiler's first output. W-15 lands the ratified 28 -> T1 compiles against it.</dated>
-<status>staged -- activates at respawn; GO is this TO + the respawn (COO discretion)</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_WORLDMODEL, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged -- activates at respawn; GO is this TO + the respawn (COO discretion)</status>
 <priority>P1 — the DEHAND tranche is the fabric's CRITICAL PATH by Andrew's gate ruling @1044c49f2e (the ontology lock-down gates the estate backlog + the comp-estate/graph return)</priority>
 <authority>CRO's decomposition-ready package @df64992815 (SPEC: NFRA_WORLDMODEL_P1_DEHAND_TRANCHE_20260819.md; RUNS: P0 census pass-1 @61d89d2957/@47dee666e7 + alignment read @d8aa0f3048 — the 08-14 ground-truth law satisfied; every target row cites its run row) + Andrew's gate ruling @1044c49f2e + the ontology-as-RUNTIME frame (View_Time_Compiled v3.3). CRO leads the tranche; CVO assists post-PRD-pass; you build.</authority>
 </task_order>

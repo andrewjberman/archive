@@ -3,7 +3,7 @@
 <project>COT_CANON458</project>
 <issued_to>0.4.0_DS_ClientPlatform~I</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project COT_CANON458, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <priority>P1 -- measurement-only, fully unblocked. Produces the denominator the canonical-458M reconciliation needs and which nothing else in flight produces.</priority>
 <date>2026-08-25</date>
 <references>

@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DS_MarketIntelligence / 0.1.0_AE (co-owned per pipescript's producer ownership)</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MKOV_TRSRCE, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
     <dispatch_state>STAGED, CONTENT STALE (v1.0 scope, kept for reference) -- PRD revised to v1.1 (commit 41de08a6b): TO-2 is now EAFE-only, path-dependent on TO-1's answer (path a=cheap net-dividend adjustment on existing gross figure, b=moderate source-existing-net-series, c=heavier NDDUEAFE-direct fallback -- only path c resembles this file's current full-migration content). COO will REWRITE this TO to the actual path once TO-1 answers, not just GO the content as-written. Do NOT begin on this file's current content.</dispatch_state>
     <gate_note>Gates: depends on TO-1's answer (path a/b/c). Effort: 2-4h if path a/b [v1.1, much smaller], 1-2 sessions if path c [fallback, closer to this file's current scope].</gate_note>
   </metadata>

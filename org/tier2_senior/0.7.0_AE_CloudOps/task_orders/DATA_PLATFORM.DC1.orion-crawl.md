@@ -7,7 +7,7 @@
 <arch_gate>1.0.0_SA_CTO -- the DC0.4 LIVE-crawl gate (verifies the BUILT isolation works + ROE-compliance) BEFORE any live crawl</arch_gate>
 <issued_by>2.0.0_SA_COO (CTO DC1-3-unblocked 150331Z; Phase-1-DEEP decomposition; Andrew-ratified Recon ROE)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project DATA_PLATFORM, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <!-- GATED on (a) DC0 integration-ready (0.5.0's co-build landing) + (b) the DC0.4 live-crawl arch-gate. Authored now for coverage (CTO unblocked-to-author per the DC0 design arch-GO). Orion = the vendor-1 crawl-target (SmartX = vendor-2 / DC3, post-Orion; BD/cot = REST -> the D2-census, NOT a crawl-target). -->
 <!-- RE-SLOT 2026-07-02 (COO, per CTO heads-up 164658Z, Andrew-direct 0.7.0-base->YCharts pivot): SEQUENCED BEHIND the 0.7.0_AE-base YCharts-skill refinement (Andrew-direct priority). Owner UNCHANGED (0.7.0 base lead + 0.5.0 co); base resumes this AFTER ycharts lands. Not 0.7.0~A (it must stay responsive for the bd(a) box-rollout GO during the ETLFIX P0). Recon = not-hot-path (ETLFIX P0 does not depend on it -> no orphan by deferral). CONTINGENCY: if a downstream DATA_PLATFORM need surfaces before ycharts completes, re-route to a live cloud-ops hand at that point. -->
 <roe>MANDATORY: complies with docs/architecture/DATA_PLATFORM_RECON_ROE.md (Option-A passive capture + Option-B own-account, within the 4 constraints; careful/stealthy; forbidden-tier HARD-EXCLUDED; CTO rejects-forbidden at the DC0.4 gate).</roe>

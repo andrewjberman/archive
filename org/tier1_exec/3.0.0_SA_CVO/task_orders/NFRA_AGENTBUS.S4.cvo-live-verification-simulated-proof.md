@@ -2,7 +2,7 @@
 
 <issued_to>3.0.0_SA_CVO~B</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_AGENTBUS, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 
 <priority>HIGH -- the security controls are worthless unverified. CVO independence, on LIVE state. GATED on S2 + S3. SIMULATED PROOF ONLY. PRD SS5 + SS6.</priority>
 <date>2026-07-02</date>

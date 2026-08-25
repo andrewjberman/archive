@@ -3,7 +3,7 @@
 <project>NFRA_VELOCITY_CORE</project>
 <issued_to>0.8.0_AE_CloudComp~C</issued_to>
 <issued_by>2.1.0_SA_COO</issued_by>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_VELOCITY_CORE, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 
 <priority>P5 -- LAST, AND THE PLACEMENT IS SOVEREIGN-RULED. Do not pull it forward.</priority>
 

@@ -13,7 +13,7 @@
     <issued_by>0.7.0_AE_CloudOps (self-authored under Andrew-direct exclusive assignment; COO to ratify/own the GO)</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-07-13</date>
-    <status>pending -- PHASE A EXECUTED + VERIFIED 2026-07-14 (A1 record added by Patricia/TWLC, verified live; A2-A5 done: blog_public=0, re-key 943/943 residual 0, LE cert to 2026-10-12, stage-wire + strict verify GREEN on-box AND external; ledger 20260714T1748Z closed 7/7). AT A6 ANDREW+TWLC SIGN-OFF GATE on https://new.opalinvest.com/ . PHASE B only on Andrew's explicit word.</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_WEBSITE, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending -- PHASE A EXECUTED + VERIFIED 2026-07-14 (A1 record added by Patricia/TWLC, verified live; A2-A5 done: blog_public=0, re-key 943/943 residual 0, LE cert to 2026-10-12, stage-wire + strict verify GREEN on-box AND external; ledger 20260714T1748Z closed 7/7). AT A6 ANDREW+TWLC SIGN-OFF GATE on https://new.opalinvest.com/ . PHASE B only on Andrew's explicit word.</status>
     <dispatch_state>ANDREW-DIRECT 2026-07-13: "You will be working exclusively on the NFRA_WEBSITE task." Andrew chose STAGING-FIRST over a direct apex cutover. Supersedes the W3 plan in TO-1.</dispatch_state>
     <gate_note>
       SOVEREIGN DOMAIN CORRECTION (Andrew-direct 2026-07-13, VERBATIM):

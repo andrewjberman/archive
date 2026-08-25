@@ -3,7 +3,7 @@
 <project>NFRA_VELOCITY_ESTATE</project>
 <issued_to>UNASSIGNED -- P5, sequenced last (MSTR provisions at P5)</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_VELOCITY_ESTATE, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 
 <priority>P5 -- LAST, AND THEN STANDING FOREVER. **The placement is Andrew-ruled and is NOT a backlog artifact of low value.** Andrew-direct 2026-07-29 ~23:2xZ, VERBATIM: "the reason it is at the end, is because it is going to steer the fabric/estates velocity infrastructure in perpetuity." Confirmed NOT STARTED: zero commits fabric-wide reference WS-E7.</priority>
 

@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-07-17</date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project OPAL_TAXSMA_PT2, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 <priority>P2 (OPAL_TAXSMA_PT2, Andrew-direct via CTO). CUTTABLE NOW — WS-1's bronze shape is PUBLISHED (DT @TAXSMA_PT2_WS1_BRONZE_SHAPE). Build against the shape; the live silver RUN waits on live bronze (WS-1's Andrew-egress-gated pull).</priority>
 
 <authority>

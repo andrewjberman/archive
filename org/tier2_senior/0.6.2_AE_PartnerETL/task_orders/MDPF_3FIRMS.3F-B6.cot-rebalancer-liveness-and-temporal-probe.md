@@ -6,7 +6,7 @@
 <issued_to>0.6.2_AE_PartnerETL~A</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T20:23Z</issued_at>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_3FIRMS, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 <advisory>4.0.0_SA_CRO (probe spec author — consult, do not re-derive)</advisory>
 <authorization>LD-0333 am.1 @2eef569d2 -> CTO cascade 200805Z (explicit: "The 3F-B6 TEMPORAL-vs-CURRENT probe EXECUTES -- it is evidence-gathering, in scope, positive control mandatory").</authorization>
 

@@ -3,7 +3,7 @@
 <project>NFRA_VELOCITY_ESTATE</project>
 <issued_to>UNASSIGNED -- do not seat while GATED (MSTR provisions on unblock)</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>gated</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_VELOCITY_ESTATE, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: gated</status>
 
 <priority>P3. **GATED -- DO NOT START.** This TO exists so the gate is legible and the unblock condition is written down, not so someone begins. Filed per LD-0365: Kimi-DEPENDENT work is TO'd but MARKED GATED so the fabric does not stall on it.</priority>
 

@@ -6,7 +6,7 @@
 <verify>3.0.0_SA_CVO</verify>
 <issued_by>2.0.0_SA_COO (ETFS_SETUP decomposition wave-2; Andrew-direct 2026-06-23 "get started"; PRD docs/architecture/ETFS_SETUP.md)</issued_by>
 <issued_date>2026-06-23</issued_date>
-<status>active</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project ETFS_SETUP, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: active</status>
 <!-- GATED on W1 (the opal-data-etfs REUSE + write-out IAM + ETF-universe config + daily-artifact contract must land first). B1: 49F silver/RPS is EMPTY (this TO BUILDS it via /49-schwab-conv). B2: 49F Schwab = manual monthly batch (latest raw 06-09, next ~early-July) -> build the converter NOW (provable on the 06-09 batch); the daily-producer rides the next batch. REASSIGNED 0.7.0_AE_CloudOps -> 0.5.0_AE_OpalETL 2026-06-24 (2.0.0_SA_COO): W1 LANDED -> W2 ungated; base-AE fully-occupied on DC2-crawls + COTETL, 0.5.0 (OpalETL, 49F/Schwab role-fit) takes the converter-build. base-AE remains ETFS-owner (coordinate). TO stays in base-AE folder; 0.5.0 commits converter-code under its OpalETL lane; COO handles TO-status flips. -->
 <!-- B1: 49F silver/RPS is EMPTY (this TO BUILDS it via /49-schwab-conv). B2: 49F Schwab = manual monthly batch (latest raw 06-09, next ~early-July) -> build the converter NOW (provable on the 06-09 batch); the daily-producer rides the next batch. -->
 

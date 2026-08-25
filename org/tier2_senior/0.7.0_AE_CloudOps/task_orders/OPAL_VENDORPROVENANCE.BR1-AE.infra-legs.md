@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project OPAL_VENDORPROVENANCE, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 <priority>P1-staged (implementation leg 2 of the sovereign retire ruling @6f4ad98db; ACTIVATES AFTER your v3 apply completes -- nothing here competes with the 10:00 ET fire. THE PLAN @7538cbc5f IS THE SPEC.)</priority>
 
 <title>BR1-AE: the infra legs -- two Lambdas (Eclipse puller + completion-emitter) TF, the NEW silver floor (~15:15Z), the gold-floor rule live-verify, and eventually the G3 stop + TF retirement</title>

@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-14T05:0xZ</issued>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_TRGALN, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <priority>P0 — STAGED. GO comes ONLY from COO, citing proof_TO-1 + proof_TO-2 + proof_TO-3
 (desired+applied layers) validated AND all applies landed before 09:45Z. The acceptance cycle is
 TODAY'S OWN SCHEDULED FIRES if that clock held; otherwise tomorrow's (acceptance slips a day —

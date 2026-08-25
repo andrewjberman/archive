@@ -6,7 +6,7 @@
 <!-- STAFFING RESOLVED (Andrew-direct 2026-07-17 ~20:2xZ via COO): builder lane = 0.8.0~D (shared with
      NFRA_KUZUSPLIT; base stays Andrew-reserved per LD-0305). MSTR spawn requested. Still gated on CTO arch-gate below. -->
 <date>2026-07-17</date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_COMPSIMILAR, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <!-- GO LIVE 2026-07-17 ~20:5xZ (COO). CTO ARCH-GATED @c3aa13d05 (200221Z): PRD promoted to
      docs/architecture/NFRA_COMPSIMILAR_PRD.md; §9 rules all 6 decisions. BUILD corpus derive-at-scan + table
      DDL now; TF APPLY is the gated step (see standing condition below). Re-homed base->~D per Andrew staffing. -->

@@ -6,7 +6,7 @@
 <arch_gate>1.0.0_SA_CTO (folds into PRD S6b; partner-scoring synthesis)</arch_gate>
 <issued_by>2.0.0_SA_COO (CTO methodology-expansion routing 145443Z; Andrew-ratified Recon ROE)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>queued</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project DATA_PLATFORM, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: queued</status>
 <!-- QUEUED behind the critical path (DC0 + DC-REV anchor + the per-vendor crawls). Rides own-account access; per-vendor owners pick up alongside their crawl/leverage work. -->
 <roe>MANDATORY: complies with docs/architecture/DATA_PLATFORM_RECON_ROE.md -- OPTION-B (active own-account, within the 4 constraints: our data only / available+authorized endpoints only / read never scan / POLITE conservative-rate-limit + back-off). The forbidden tier (fuzzing/brute-force/auth-testing/out-of-account) is HARD-EXCLUDED.</roe>
 

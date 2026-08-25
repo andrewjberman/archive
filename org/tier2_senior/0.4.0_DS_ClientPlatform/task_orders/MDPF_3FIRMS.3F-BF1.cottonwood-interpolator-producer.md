@@ -7,7 +7,7 @@
 <advisory>4.0.0_SA_CRO (owns the interpolation design / the canonical schema @708661904)</advisory>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-23T03:52Z</issued_at>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_3FIRMS, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 <priority>ANDREW-DIRECT "I need both right now immediately" -> CTO 035119Z -> decompose + GO NOW.</priority>
 
 <authorization>

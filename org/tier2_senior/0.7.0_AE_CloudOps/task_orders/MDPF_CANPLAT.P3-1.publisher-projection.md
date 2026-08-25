@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.7.0_AE_CloudOps~Z</issued_to>
     <date>2026-08-06</date>
-    <status>staged</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_CANPLAT, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
     <go_condition>GO fires from 2.0.0_SA_COO~Z when BOTH hold: (1) MDPF_CANPLAT.P2-1's config objects are landed, (2) MDPF_CANPLAT.P1-1's gold is emitting the A4 canonical keys. Build/design work may begin on this TO's reading list now; NO DEPLOY before the GO.</go_condition>
     <project_code>MDPF_CANPLAT</project_code>
     <supersedes>MDPF_CANRTE.P3-1 (body ADOPTED @a6ae64326 — L-2-checked CLEAN by COO~Z 2026-08-06; deltas below)</supersedes>

@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (COTETL closeout; CTO-flagged 171350Z + 140130Z)</issued_by>
 <issued_date>2026-06-22</issued_date>
-<status>active</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project ADVI_COTETL, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: active</status>
 <!-- GO 2026-06-22 1723Z: DS signaled bandwidth (P0 closed, idle-available). NON-URGENT/DS-paced. Sequence (DS-proposed): Leg-1a comp-blast re-confirm 0 live cot consumers -> CTO rules retire-vs-snapshot-wire -> Leg-1c execute; Leg-2 ruff cleanup in parallel (no CTO-gate). Both NON-CORRECTNESS, cot-scoped, firm-separated. -->
 <!-- RECONCILE 2026-07-14 (DS, comp-state candidate routed by CTO 073443Z): the C2 cot-map re-scope
      (59249227c, applied+verified 07:2xZ) changes what the MONOLITH mirrors FROM opal-data-cot

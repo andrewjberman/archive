@@ -6,7 +6,7 @@
 <verify>3.0.0_SA_CVO (findings grounded; no exploit run; no injection acted-on)</verify>
 <issued_by>2.0.0_SA_COO (Andrew-direct 2026-06-24)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>active</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project SCTY, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: active</status>
 
 <!-- ============================================================ -->
 <!-- !!! HARD SAFETY RULE (Andrew-direct, 2026-06-24) -- READ FIRST !!! -->

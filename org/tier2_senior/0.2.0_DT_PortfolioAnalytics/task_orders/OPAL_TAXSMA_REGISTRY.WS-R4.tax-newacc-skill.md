@@ -5,7 +5,7 @@
 <issued_to>0.2.0_DT_PortfolioAnalytics</issued_to>
 <date>2026-07-17</date>
 <!-- PARKED 2026-07-20 by 0.2.0_DT per CTO sequence call 201850Z: MDPF_REVAMP is sole focus. Resume-trigger = MDPF parity+swap complete OR Andrew word. Clean-park, not started, nothing stranded. Resume owner = OPAL_TAXSMA then-owner (likely 0.5.0~A delegate); flag CTO to route. -->
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project OPAL_TAXSMA_REGISTRY, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 <priority>P2 (Andrew-direct via CTO). The operator surface. Depends on WS-R1 (registry), WS-R2 (resolver), WS-R5 (Alyssa's grant to invoke+enroll).</priority>
 
 <authority>

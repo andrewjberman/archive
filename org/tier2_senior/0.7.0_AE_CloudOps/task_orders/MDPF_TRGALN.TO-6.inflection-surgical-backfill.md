@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-14T05:1xZ (PRD v1.1 addendum @f50ee7223b)</issued>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_TRGALN, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <priority>P0 — STAGED. GO comes ONLY from COO, citing (1) TO-5's per-date truth table delivered +
 validated and (2) COO's routing check: if the truth table names a REGRESSION-AT-COMMIT/CUTOVER
 requiring a CODE change to the builder, that code fix routes to DS per Rule 13 FIRST and this TO's

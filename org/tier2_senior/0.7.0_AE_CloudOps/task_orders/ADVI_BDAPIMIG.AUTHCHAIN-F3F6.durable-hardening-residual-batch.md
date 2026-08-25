@@ -5,7 +5,7 @@
 <consult>0.6.2_AE_PartnerETL (auditor -- f7dc5c871; F5/F6 alarm-absence grounding); 1.0.0_SA_CTO (arch-gate auth-chain + any new alarm); 2.0.0_SA_COO (logged this as a durable follow-on)</consult>
 <issued_by>self-filed 0.7.0_AE_CloudOps~A 2026-07-02, per COO "F3-F6 = FOLLOW-UP batch ... log as a durable follow-on, non-urgent"</issued_by>
 <issued_date>2026-07-02</issued_date>
-<status>active-queued (NON-URGENT durable follow-on; the two HIGH gaps F1+F2 are handled separately -- 0.6.0 authors, 0.7.0 deploys+on-box-exercises, folded into the box-rollout)</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project ADVI_BDAPIMIG, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: active-queued (NON-URGENT durable follow-on; the two HIGH gaps F1+F2 are handled separately -- 0.6.0 authors, 0.7.0 deploys+on-box-exercises, folded into the box-rollout)</status>
 
 <priority>
 NON-URGENT. F1+F2 (the 2 HIGH source-grounded gaps = today's incident residual) are being landed NOW on a separate track. F3-F6 are the LOWER-tier residual from 0.6.2's durable-auth audit -- real hardening, no active fire. CRITICAL SEQUENCING CAVEAT (0.6.2/COO): F5 (+F6) are ALARM findings that must GROUND-THE-ALARM-ABSENCE FIRST -- F5 is flagged HYPOTHESIS in the audit (do NOT add a "direct rc=1 alarm" until it's confirmed no existing alarm already covers the rc=1 terminal; Rule-22a: a hypothesis cannot authorize a fix). F7 (cookie-freshness) is likely MOOT -- verify-then-drop.

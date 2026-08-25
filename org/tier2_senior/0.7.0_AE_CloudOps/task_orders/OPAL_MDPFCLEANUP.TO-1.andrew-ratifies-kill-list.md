@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-14T17:2xZ</issued>
-<status>staged — gate: COO validates proof_TO-0 (zero K4 rows remaining)</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project OPAL_MDPFCLEANUP, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged — gate: COO validates proof_TO-0 (zero K4 rows remaining)</status>
 <priority>Strict sequence position 2 (PRD §4)</priority>
 </task_order>
 

@@ -3,7 +3,7 @@
 <project>NFRA_VELOCITY_ESTATE</project>
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>active</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_VELOCITY_ESTATE, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: active</status>
 
 <priority>P2 -- THE CRITICAL PATH. NFRA_VELOCITY is the EXCLUSIVE work regime (Andrew GO 2026-07-31 ~0225Z). P1 is COMPLETE (E4.1 closed @c9cc2ea22a, E1 specimen landed @0bdca276e8, E3.0 safe slice executed @2da40ba711). WS-E2 is one of P2's two halves and it is UNGATED as of @e8c7a32fa2 (section-5.9 product baselines satisfied -- the BASELINE-BEFORE-TOUCH fence that held this workstream is DISCHARGED).</priority>
 
