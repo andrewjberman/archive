@@ -1,0 +1,97 @@
+<task_order>
+<id>D3_MODELOVERLAY.TO-R1-DS.join-spec-membership-table-projection</id>
+<project>D3_MODELOVERLAY</project>
+<issued_to>0.4.0_DS_ClientPlatform~K</issued_to>
+<issued_by>2.0.0_SA_COO</issued_by>
+<status>pending</status>
+<priority>P0 -- Andrew-direct 2026-08-25 ~12:0xZ named this project as one of two waiting on the decomp seat. D3 has SIX open TOs and has not begun; surface (a) has never been blocked.</priority>
+<date>2026-08-25</date>
+<references>
+  <ref type="decomp">workflows/atom_decomposition/runs/d3-account-model-overlay/20260825T123000Z/DECOMP.md</ref>
+  <ref type="prd">docs/architecture/D3_ACCOUNT_MODEL_OVERLAY_PRD.md (v1.0 + v1.1 s4b amendment)</ref>
+</references>
+<objective>
+The SMARTX_BD_EXACT_JOIN precondition spec (startable NOW), the account_model_membership
+gold table + producer at ACCOUNT GRAIN, and the platinum projection via the publisher.
+Portal overlay UI (surface d) is excluded to a DE lane; Cottonwood's binding (e-2) is a
+declared cross-project dependency on ADVI_COTKEY, not work to chase. An UNRESOLVED count
+greater than zero is a PUBLISHED NUMBER, never a dropped row.
+</objective>
+</task_order>
+
+# TASK ORDER — D3_MODELOVERLAY.TO-R1-DS · THE JOIN SPEC, THE MEMBERSHIP TABLE, THE PROJECTION
+
+**to:** `0.4.0_DS_ClientPlatform~K` · **issuer:** `2.0.0_SA_COO` · **cut:** 2026-08-25 ~12:35Z
+
+<decomp_ref>
+workflows/atom_decomposition/runs/d3-account-model-overlay/20260825T123000Z/DECOMP.md — cells
+D3-inv-1, D3-inv-2, D3-inv-3, D3-inv-4, D3-inv-5, D3-inv-6,
+D3-a-1, D3-a-2, D3-a-3, D3-a-4, D3-b-1, D3-b-2, D3-b-3, D3-b-4, D3-c-1, D3-c-2, D3-e-1, D3-e-3
+</decomp_ref>
+
+<decomp_context>
+⛔ **THREE OF THE DECOMP'S 21 CELLS ARE EXCLUDED, FOR TWO DIFFERENT REASONS — named so the 18-vs-21 difference is
+visible:**
+- **`D3-d-1`, `D3-d-2` (2) — THE PORTAL OVERLAY UI.** DE-class: the "seventy-thirty at a glance" render and the slice
+  pivots. **REAL WORK, another lane. Your gold table is what it consumes.**
+- **`D3-e-2` (1) — A DECLARED CROSS-PROJECT DEPENDENCY, NOT WORK.** Cottonwood's binding waits on `ADVI_COTKEY`
+  (Andrew's keying investigation). Per §4b the per-partner models plane is `model_aua_positions` at account grain for
+  49F + Inflection; **Cottonwood is NOT on it** (BD-side `fact_model_assignment` + `dim_model_portfolio`).
+  **Enumerated so it is not discovered at integration. Do not chase it.**
+</decomp_context>
+
+<proof_of_spec>
+  <!-- Positional: python .tools/proof-of-spec-check.py <instance>.json D3R1DS-AC1,D3R1DS-AC2,D3R1DS-AC3,D3R1DS-AC4,D3R1DS-AC5,D3R1DS-AC6 ; check the rc. -->
+  <criterion id="D3R1DS-AC1" cell_refs="D3-a-1, D3-a-4, D3-inv-3"/>
+  <criterion id="D3R1DS-AC2" cell_refs="D3-a-2, D3-a-3"/>
+  <criterion id="D3R1DS-AC3" cell_refs="D3-b-1, D3-b-2, D3-inv-1"/>
+  <criterion id="D3R1DS-AC4" cell_refs="D3-b-3"/>
+  <criterion id="D3R1DS-AC5" cell_refs="D3-b-4, D3-inv-2, D3-inv-6"/>
+  <criterion id="D3R1DS-AC6" cell_refs="D3-c-1, D3-c-2, D3-inv-4, D3-inv-5, D3-e-1, D3-e-3"/>
+  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~K/deliverables/D3_MODELOVERLAY.TO-R1-DS_PROOF_OF_SPEC.json</instance_path>
+  <expected_criteria>D3R1DS-AC1,D3R1DS-AC2,D3R1DS-AC3,D3R1DS-AC4,D3R1DS-AC5,D3R1DS-AC6</expected_criteria>
+  <alignment_denominators>cells in this TO: 18 (inv 6 · a 4 · b 4 · c 2 · e 2); criteria: 6; every criterion carries
+>=1 cell_ref; all 18 cells reachable. Unmapped 0; untraceable 0. Decomp total 21; 3 excluded for two declared
+reasons, named in decomp_context.</alignment_denominators>
+</proof_of_spec>
+
+---
+
+## WHY THIS EXISTS, IN HIS WORDS
+
+Andrew, S4: ***"very important that we get it to the account level… that is what's going to allow us to create those
+slices of various granularity."*** A 49F advisor, via the Mike Little call: ***"a quick way to see what [model a client
+is in] without having to dig… oh yeah, seventy-thirty."***
+**Account grain is not a preference — it is what makes every other slice free.**
+
+⛔ **SURFACE (a) IS STARTABLE NOW AND HAS NEVER BEEN BLOCKED. That is exactly why it has sat. Start there.**
+
+---
+
+## ACCEPTANCE CRITERIA
+
+| id | criterion | cells | grounding |
+|---|---|---|---|
+| **D3R1DS-AC1** | **Drive the measured 99.65% end-to-end join to 100%-CLASSIFIED** across `a06`'s two universes + the BD export's Original Account Number universe + fam `col_4`. ⛔ **The run #9 baselines (joint 5,277 / fam-only 1,925 / BD-only 868) ARE A VINTAGE — re-measure and print your own with its timestamp.** ⛔ **`a06`'s LOCKSTEP caveat is NOT evidence of universe agreement: two universes moving together is not two universes matching.** | `D3-a-1/4`, `D3-inv-3` | MEASURED |
+| **D3R1DS-AC2** | ⛔ **THE RESIDUAL ENUM IS A RULE 24 AUTHORING ACT AND THE PRD'S LIST IS A CANDIDATE, NOT AN ANSWER.** Finalize `{JOINED, NO_SMARTX_ALLOCATION, NOT_IN_ACCOUNT_UNIVERSE, NON_8DIGIT_KEY, OTHER_CUSTODIAN, CLOSED, UNRESOLVED}` **against MEASURED residuals**, with a **four-postulate record** (MECE · one grain · intent coherence · state coherence) + a token-hygiene census. **ADOPTING A SCHEMA AUTHORED ELSEWHERE IS ITSELF AN AUTHORING ACT.** The table design carries a **per-row, non-optional `evidence` column** — a status with no evidence is an assertion. | `D3-a-2/3` | SOURCE + Rule 24 |
+| **D3R1DS-AC3** | **`account_model_membership` at ACCOUNT × MODEL × as_of**, writing `gold/advi/canonical/account_model_membership/date={D}/` parquet **+ manifest carrying BOTH coverage denominators**. **NAME the U1 model-identity source explicitly** — an unnamed source is where the grain slips. ⛔ **FULL 8-DIGIT ACCOUNT NUMBERS ALWAYS. TWO MASTERS, NOT INTERCHANGEABLE: `08335338` = ADVI/BD · `08242234` = MDPF/SmartX. NEVER the 4-digit prefix.** **Placement rides the D2-landed grammar, confirmed with the D2 owner — D3 mints no new tree.** | `D3-b-1/2`, `D3-inv-1` | APPLIED |
+| **D3R1DS-AC4** | ⛔⛔ **THE PRD SAYS *"empty map partition = LOUD fail (vintages do not advance — a06 precedent)."* THAT PRECEDENT WAS MEASURED TODAY AND IT IS NOT THE ENDORSEMENT IT READS AS.** `a06` fails loud — **and it fails loud EVERY SUNDAY AND MONDAY BY CONSTRUCTION**: it takes `map_dates[-1]` with no trading-day filter, the map emits EMPTY weekend partitions (4,507 B, byte-identical, zero rows), and the map always lands ~30 min AFTER the chain fires — so `[-1]` is ALWAYS D-1. **The whole 49F gold chain has been dead two days a week; `c02_twr_daily` has not run since 08-22.** ⛔ **INHERIT THE LOUD FAIL. DO NOT INHERIT THE `[-1]` SELECTION.** Select by a **trading-day-resolved date**, or assert non-empty before aborting. **ORACLE: a weekend dry-run that does NOT abort.** | `D3-b-3` | EXERCISED |
+| **D3R1DS-AC5** | ⛔ **AN `UNRESOLVED` COUNT > 0 IS A PUBLISHED NUMBER, NEVER A DROPPED ROW.** *"Perfect" = joined + explained-residual = denominator, **zero silent drops**.* **Coverage below the registered floor = PUBLISH WITH THE BREACH FLAGGED in the manifest, and the flag PROPAGATES into the served artifact's provenance block, read by the publisher pair AT EVERY RUN** — so a regression is visible at every publish, not only at a one-time acceptance pass. ⛔ **NO ALARM MACHINERY. The PRD's own phrasing is the model: *the record simply has a recurring reader.*** | `D3-b-4`, `D3-inv-2/6` | EXERCISED |
+| **D3R1DS-AC6** | **Serving-shaped overlay JSON under `platinum/advi/49financial/`**, key family finalized against the D2-landed route contract; advisor-scoped access follows the scoped advisor-intelligence route pattern. **Key absent = route-level 404 (existing behavior); NO partial write** — exercise both paths. ⛔ **17b: PLATINUM IS SERVING AND THE PUBLISHER IS THE ONLY JSON PRODUCER — serving-shaped work does NOT go in gold.** **49F FIRST (the D2 template firm); INF/COT inherit by TEMPLATE, one implementation with firm-pinned invocations — never a fork.** **§4b's four-level additive runner contract (account / relationship-household-client / advisor / firm) is honoured at all four levels.** ⛔ **NO client-facing surface — Opal stays advisor-level.** | `D3-c-1/2`, `D3-inv-4/5`, `D3-e-1/3` | APPLIED |
+
+---
+
+## ⛔ WHAT WOULD FALSIFY THE WHOLE THING
+
+**`D3-inv-2`.** If the residual classification cannot reach **joined + explained = denominator** — if rows fall out
+unexplained — **the account-grain premise is not established, and every slice built above it inherits the gap
+silently.** **Publish the `UNRESOLVED` count and STOP. Do not narrow the denominator until it reconciles.**
+
+## SURPRISE CHANNEL (Rule 27)
+
+Spec FROZEN mid-round. One line by MCP to `3.0.0_SA_CVO`, cc me. You do not write `org/surprise_channel/**`.
+OBSERVATION never interrupts; **BLOCKING routes to me same-turn**; ARMED disarms same-turn via a NAMED owner, and
+**DISARMED IS NOT REMEDIATED.**
+
+⛔ **YOUR TO LIST WILL SHOW ~18 PENDING TOs FROM THE BASE SERIAL'S BACKLOG — `list_task_orders` has no lane concept and
+never validates the suffix. THIS TO IS YOUR ASSIGNMENT IN FULL.**
