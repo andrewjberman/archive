@@ -1,0 +1,184 @@
+{
+ "schema_version": "1.0",
+ "to_id": "D1_CATVIEWS.TO-R1-DE",
+ "firm": "MDPF",
+ "phase": "BUILD-GENERAL",
+ "decomp_ref": {
+  "doc": "workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md",
+  "vintage_commit": "469a9e9868",
+  "to_ref": "org/tier2_senior/0.4.0_DE_ClientPlatform~C/task_orders/D1_CATVIEWS.TO-R1-DE.portal-view-tree-l0-l1-l2.md"
+ },
+ "spec_ref": {
+  "doc": "docs/architecture/D1_ASSET_CATEGORY_VIEWS_PRD.md (s.8 + s.8.6 -- the view tree, Andrew-direct 2026-08-24 ~18:5xZ; group OTHER: D1 is not in the A/B/C/D/W/M/X/T families)",
+  "group": "OTHER",
+  "vintage_commit": "469a9e9868"
+ },
+ "assignee": "0.4.0_DE_ClientPlatform~C",
+ "artifacts_produced": [
+  {
+   "path_or_key": "portal/src/api/endpoints/aum.ts",
+   "kind": "frontend_component",
+   "commit_or_etag": "760504f0 (types + 3-state accessor), 4034239c (nullable-aum correction), cd2f059c (retracked to the corrected SMA contract)",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Portal DEV only; PROD promote is the DT lane and is explicitly NOT this TO. 760504f0 and 4034239c are on origin/DEV (git branch -r --contains); cd2f059c is LOCAL and rides integration."
+  },
+  {
+   "path_or_key": "portal/src/components/CategoryViewTree.tsx",
+   "kind": "frontend_component",
+   "commit_or_etag": "d1f8f38a (created), cd2f059c (not-separable path deleted), 7def244d (plane named on the L2 list)",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Portal DEV only. d1f8f38a is on origin/DEV and is its head as of the integration push; cd2f059c is LOCAL, rides integration."
+  },
+  {
+   "path_or_key": "portal/src/pages/ModelPortfolios.tsx",
+   "kind": "frontend_component",
+   "commit_or_etag": "d1f8f38a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Portal DEV only. Consumes the block via its own query key ['mdpf-category-views', effectiveFirmId]; no route change."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "D1R1DE-AC1",
+   "criterion_verbatim": "AMENDED BY THE ISSUER 2026-08-24 ~20:4xZ on DE~C's BLOCKING-INERT item 66518 -- comp-transform schema-check ModelPortfolios has NO DOMAIN on this flat single-file page ... The exercised discriminator for the same defect class (renders a field the response type does not carry) is: declare the category_views response types in @/api/endpoints/aum ... and let bun run typecheck (AC9) fail on any rendered field the type does not carry -- exercise it once with a mutant (render a field absent from the type -> typecheck FAILS). The comp-transform call stays ON RECORD as run-with-its-domain-disclosed, never deleted. comp-cache collisions re-run ...; DEV branch confirmed",
+   "method": "command",
+   "invocation": "comp-transform schema-check ModelPortfolios ; comp-cache collisions ; git -C portal branch --show-current ; bun run typecheck with a planted mutant reading b.predicate at the block root",
+   "output_evidence": "comp-transform: rc=1, single line '[WARN] types-resolution: no types.ts found near .../ModelPortfolios.tsx (searched co-located + 3 parent dirs + _shared/)', MISSING count 0, and its own 'SCHEMA CHECK:' header ABSENT -- recorded run-with-its-domain-disclosed, NOT as a pass. Positive controls that make the domain claim measurable rather than asserted: Correlation -> rc=0 'All rendered fields match their response types'; FactorTilts -> rc=0 naming a real gap. MUTANT on the real type: 'src/__DEC_AC1_mutant_DELETE_ME.ts(7,35): error TS2339: Property 'predicate' does not exist on type 'MdpfCategoryViews'.' rc=2; probe removed -> rc=0, deletion verified. comp-cache collisions: pre-existing ['model-portfolio-benchmarks'] shared by ModelPortfolios.tsx:533 and ModelPortfolioModal.tsx:114 -- NOT ours, no colliding key added. Branch: DEV.",
+   "denominator": "3 limbs (schema-check domain-disclosed / comp-cache collisions re-run / DEV confirmed) + 1 mutant; comp-transform positive controls 2 of 2 discriminated",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "D1R1DE-AC2",
+   "criterion_verbatim": "L0 renders the PRESENT subset; a fixture with one node at 0 AUM shows the tile ABSENT (not empty); with SMA AUM > 0 three tiles, else two",
+   "method": "manual_read_with_citation",
+   "invocation": "node scripts/ui-smoke.mjs portfolios <out>.png --port 5175 --select 49financial --fixtures ref_49financial.json ; same with --select inflection --fixtures ref_inflection.json (fixtures built by exercising build_category_views AT REF 23271aac64 in an isolated extraction, never the shared working tree)",
+   "output_evidence": "49financial: THREE tiles -- MODELS $1.47B, SMAS $22.94M, CLIENT $258.50M. Alternatives (0 AUM) renders NO TILE, not an empty one. Insurance never rendered (absent from view_plane.peers; not filtered by name). inflection: TWO tiles -- MODELS $144.86M, CLIENT $65.05M, with NO SMA tile at all (SMA aum 0.0, render_state 'no-members' = a true zero). Both screenshots READ.",
+   "denominator": "2 firms rendered of 3 emitting firms; 4 L0 values in the tree, <=3 rendered per firm by construction",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "D1R1DE-AC3",
+   "criterion_verbatim": "L1 drill per L0 value renders from the block: Client fee buckets (+ third), Models Primary/Custom, SMAs registry-driven; Alternatives click inert + labelled",
+   "method": "manual_read_with_citation",
+   "invocation": "node scripts/ui-smoke.mjs portfolios <out>.png --port 5175 --select inflection --fixtures ref_inflection.json --click 'Models $144.86M'",
+   "output_evidence": "Models L1 renders from the block: Primary $101.38M / Custom $43.48M. Client L1 renders the predicate state (see AC5). Alternatives is not rendered at all this round because no firm carries Alternatives AUM, so its inert-and-labelled state is NOT-YET-EVALUABLE rather than passed -- declared in declared_exclusions rather than claimed. The renderer draws the block's own `children` and never filters `Client > *` by name.",
+   "denominator": "3 of 4 L0 values present across the two firms rendered; Alternatives 0 of 3 firms",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "D1R1DE-AC4",
+   "criterion_verbatim": "L2 Custom list equals the block's Custom members; the DS-disclosed gap renders as a disclosure",
+   "method": "manual_read_with_citation",
+   "invocation": "same run as AC3; compared the rendered rows against the block's nodes.Models.children.Custom.members at ref 23271aac64",
+   "output_evidence": "Rendered L2 list: 3 rows against 3 members in the block -- Opal Global All Equity Total Return / 50/50 INT/LTC / 50/50 ST/INT -- none padded, none dropped, each carrying its disclosed unserved state. WORDING AMENDED AFTER READING IT (issuer-approved, COO 67612 on my own item 67549): the heading now reads 'Registered Custom models' + 'Registry membership -- not a per-firm holding.' and the flag reads 'not served as a standalone artifact'. BEFORE the change the panel showed Custom $43,484,499.68 inches from three bare 'not served' rows (0 of 3 served, measured at ref 23271aac64), which a reader resolves wrongly in either direction -- a registry-plane fact adjacent to a firm-plane number with neither plane named. Re-rendered and READ after the change @7def244d.",
+   "denominator": "3 rendered rows of 3 Custom members in the block; 0 of 3 members served, plane now named on screen",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "D1R1DE-AC5",
+   "criterion_verbatim": "RE-SIZED BY THE ISSUER 2026-08-24 ~22:0xZ on DS~F's census (66722): Inflection is NOT the unavailable case ... The cell STAYS and its exercise is now an explicit FIXTURE carrying predicate: 'unavailable' ...: the panel shows the unavailable state; both fee buckets ABSENT, not zero; no firm is named in the evidence",
+   "method": "manual_read_with_citation",
+   "invocation": "node scripts/ui-smoke.mjs portfolios <out>.png --port 5175 --select <firm> --fixtures <ref fixture carrying predicate 'unavailable'> --click '<Client tile>'",
+   "output_evidence": "The Client panel renders 'Fee split unavailable for this firm' plus the emitter's own predicate_reason ('... Render as fee split unavailable -- NEVER as Unsupervised = 0; a zero would assert a measurement we do not have'). BOTH fee buckets are ABSENT from the panel -- no Supervised row, no Unsupervised row, and no zero rendered anywhere. Screenshot READ.",
+   "denominator": "2 fee buckets expected-absent, 2 observed-absent; 0 zeros rendered",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "D1R1DE-AC6",
+   "criterion_verbatim": "Consumed vs empty-fallback cases BOTH captured and DISTINGUISHABLE in the test record (NON-NULL member lists for >=1 firm in the consumed case)",
+   "method": "manual_read_with_citation",
+   "invocation": "CONSUMED: --select inflection --fixtures ref_inflection.json --click 'Models $144.86M'. FALLBACK-AT-A-FIRM: --select inflection --fail 'category-views.json' (503 forced, evaluated BEFORE fixtures). ABSENT-BY-SCOPE: default global scope, no fetch issued.",
+   "output_evidence": "THREE states, each rendering DIFFERENT text, all READ: (1) CONSUMED -- tiles with figures plus a NON-NULL member list (3 Custom members rendered for inflection); (2) FALLBACK -- 'Category views are not available for this firm yet.'; (3) ABSENT-BY-SCOPE -- 'The category view tree is per-firm. Select a partner to see it.' plus the reason no global tree is published. The REST of the page is identical across all three, which is exactly why the panel and not the page is the discriminator (CVO @d476339293: 'the page is not evidence when the fallback renders the same page').",
+   "denominator": "3 distinguishable states captured of 3 reachable states; consumed case carries 3 non-null members for 1 firm",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "D1R1DE-AC7",
+   "criterion_verbatim": "Displayed L0 sum == total_aua - Insurance; each L1 sums to its L0 parent; no double-count expressible in the UI",
+   "method": "manual_read_with_citation",
+   "invocation": "read the invariant line the component renders, which recomputes the sum FROM THE RENDERED TILES rather than reading block.sums",
+   "output_evidence": "49financial: 'Displayed L0 total $1.75B vs total AUA minus Insurance $1.75B -- closes as of 2026-08-21'. inflection: 'Displayed L0 total $209.91M vs total AUA minus Insurance $209.91M -- closes as of 2026-08-21'. NO DOUBLE COUNT IS EXPRESSIBLE at Client: the renderer draws the block's `children` (one partition, reduced emitter-side by display_l1_nodes) and NEVER filters `Client > *` by name; the advisory axis rides `held_axes` with rendered_at_l1 false and is not drawn. The two Client partitions were subsequently measured $52,554,399.72 apart on inflection, so the double count would not have been a rounding tell.",
+   "denominator": "2 firms, 2 of 2 sums close to the cent; Client children drawn 2 of 4 (fee axis only), 2 held",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "D1R1DE-AC8",
+   "criterion_verbatim": "Screenshot READ on record + colour law checked on the silver canvas",
+   "method": "manual_read_with_citation",
+   "invocation": "scripts/ui-smoke.mjs runs above; each PNG opened and read, not merely produced",
+   "output_evidence": "5 screenshots READ: pre-state baseline, global absent-by-scope, 49F L0, 49F Models L1+L2, 49F Client predicate panel, inflection L0+L1+L2, inflection forced-fallback. CANVAS confirmed rgb(195,202,218) and LOC '/portfolios' on every run (no auth bounce). COLOUR LAW: every light-text surface sits inside a DARK Panel (variant 'chart'/'mixed'); nothing light renders on the silver canvas. READING the render also caught a defect no grep could: the not-separable copy ran two sentences together without a break -- fixed before commit, and that path has since been deleted entirely.",
+   "denominator": "5 screenshots read of 5 produced; canvas + LOC verified on 5 of 5 runs",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "D1R1DE-AC9",
+   "criterion_verbatim": "Commit on DEV under your author line via safe-commit.sh; bun run typecheck clean; proof instance VALID rc=0 positional",
+   "method": "command",
+   "invocation": "git -C portal commit --author '0.4.0_DE_ClientPlatform~C <...>' -F <unique msg file> -- <explicit pathspec> ; bun run typecheck (unpiped) ; python .tools/proof-of-spec-check.py <instance>.json D1R1DE-AC1,...,D1R1DE-AC9",
+   "output_evidence": "4 commits under my author line on portal DEV, each verified at source for author and file list: 760504f0, 4034239c, d1f8f38a, cd2f059c. NOTE ON THE COMMIT MECHANISM, stated rather than glossed: .tools/safe-commit.sh is WORKSPACE-scoped and does not cover the portal submodule, so portal commits go through git directly with an explicit --author and an explicit pathspec -- the house pattern in portal's own log. typecheck: rc=0 unpiped AT @cd2f059c. ATTRIBUTION (COO 67537): the tree went RED in between and 0.4.0_DE_ClientPlatform~D independently measured both errors INSIDE my change set and 0 elsewhere -- so this is a RED->GREEN pair attributable to my lane, not a clean-to-clean window flattered by a peer.",
+   "denominator": "4 of 4 commits verified for author + file list; typecheck 1 named ref; 2 of 2 errors attributed to my change set by an independent seat",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC1's substituted discriminator was planted with the exact defect class it replaces: a file reading `b.predicate` at the MdpfCategoryViews root, where that field does not live (it sits on nodes.Client).",
+   "expected": "bun run typecheck FAILS and names the missing property",
+   "observed": "src/__DEC_AC1_mutant_DELETE_ME.ts(7,35): error TS2339: Property 'predicate' does not exist on type 'MdpfCategoryViews'. rc=2. Probe removed -> rc=0, absence verified. A second, earlier mutant on a synthetic type confirmed include:[\"src\"] covers new unreferenced files, which is what makes the first mutant's location valid.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The same fixture rendered twice through ui-smoke.mjs at the same ref (inflection, ref_inflection.json) -- once for the L0 read and once with --click for the L1/L2 read -- with the L0 tiles and the invariant line compared across both runs.",
+   "observed": "Identical: MODELS $144.86M / CLIENT $65.05M, no SMA tile, and 'Displayed L0 total $209.91M vs total AUA minus Insurance $209.91M -- closes' in both. The component holds no state other than which tile is open.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "D1R1DE-AC3's Alternatives limb (inert click + labelled disabled state)",
+   "reason": "NOT-YET-EVALUABLE, not passed: no firm carries Alternatives AUM this round, so the tile does not render and its disabled state has no live case. The code path exists (NO_DRILL_NODES + disabled button); it is unexercised and is declared rather than counted."
+  },
+  {
+   "item": "The Client Supervised/Unsupervised/Unflagged fee buckets rendering with figures",
+   "reason": "Client.predicate is 'unavailable' on all three firms this round -- the per-firm fee feed is round-2 work (DS~F 67359). The buckets are therefore correctly ABSENT everywhere today; the populated-bucket path and the labelled third bucket are built but unexercised against live data."
+  },
+  {
+   "item": "cottonwood not rendered",
+   "reason": "Its block is shape-identical to inflection's at ref 23271aac64 (no SMA, Custom 0.00, predicate unavailable), so it exercises no path the two rendered firms do not. Stated rather than left as an unexplained 2-of-3."
+  },
+  {
+   "item": "Consumption of a genuinely SERVED artifact",
+   "reason": "category-views is emitted but not yet published to platinum, and per D1-inv-5 a commit and a code-channel upload are not execution. Every render above is driven by fixtures built from the emitter AT A NAMED REF, which is a contract-shape proof, not a served-artifact proof. AC6's 'consumed' case means the page consumes the BLOCK, not that the block is live."
+  }
+ ],
+ "surprises": [
+  "D1_CATVIEWS-S1 (filed, discharged): AC1's named oracle comp-transform schema-check aborts at types-resolution on this page, so its 0-MISSING is a non-result that reads as a pass -- BLOCKING x INERT, routed to the issuer, discharged by amending the TO.",
+  "D1_CATVIEWS-S2: pre-existing comp-cache collision ['model-portfolio-benchmarks'] across ModelPortfolios.tsx:533 and ModelPortfolioModal.tsx:114 -- on my edit surface, constrains me, not mine to fix.",
+  "D1_CATVIEWS-S3: the portal .runtmp promote worktree still registered at PROD a239e4a9 with local PROD ahead of origin/PROD 8a96c916 -- DT's lane, INERT (the disarm is a mandatory step of /prod-deploy itself).",
+  "Surfaced by MCP (67549), no action taken: the L2 Custom panel renders a registry-plane 'served' flag inches from a firm-plane dollar figure -- 0 of 3 members served against $43,484,499.68 of Custom AUM, which a reader resolves wrongly in either direction.",
+  "Surfaced by MCP (67434), became COO's standing rule 67436: build_category_views called from the SHARED WORKING TREE emitted a render_state value existing at no commit, because a peer's edit was in flight (33 insertions uncommitted). Evidence must be captured at a named ref."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform~C/logs/ -- pending at instance authoring; this instance predates the session log by design (proof instance + flip is one atomic commit).",
+ "compiler_tools": [
+  {
+   "tool": "comp-transform",
+   "invocation": "comp-transform schema-check ModelPortfolios (+ positive controls: Correlation, FactorTilts)",
+   "result": "rc=1, one WARN, no 'SCHEMA CHECK:' header -- the check ABORTS at types-resolution on this flat single-file page. Recorded run-with-its-domain-disclosed per the issuer ruling, never as a pass. The two positive controls returned rc=0 with real verdicts, which is what establishes that the instrument discriminates and simply has no domain here."
+  },
+  {
+   "tool": "comp-cache",
+   "invocation": "comp-cache collisions",
+   "result": "Pre-existing collision ['model-portfolio-benchmarks'] across ModelPortfolios.tsx:533 and ModelPortfolioModal.tsx:114. Not mine; no colliding key added -- category-views uses its own key ['mdpf-category-views', effectiveFirmId]."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find -i 'drilldown' portal/src/pages/ModelPortfolios.tsx (SPEC-AT-PICKUP oracle O-1)",
+   "result": "DENOMINATOR: 0 hit(s) across 1 file(s). Confirmed with case-insensitive greps for category_views / Supervised / Unsupervised / categoryViews (all 0 across 2,471 lines) and positive controls on the same file (ModelPortfolios 8, total_aua 4) so the zero is measured, not an artifact of a pattern that could not match."
+  },
+  {
+   "tool": "ui-smoke.mjs (/frontend-dev)",
+   "invocation": "node scripts/ui-smoke.mjs portfolios <out>.png --port 5175 [--select <firm>] [--fixtures <ref fixture>] [--click <name>] [--fail category-views.json]",
+   "result": "5 screenshots produced and READ. The harness's existing --select and --fail flags covered the partner-scoped and forced-failure cases, so no bespoke script was written (Build Ladder rung 2). One usage note for the next lane: the failure diagnostic prints textContent ('Models$1.47B') while --click matches the ACCESSIBLE NAME ('Models $1.47B'), so the printed names are not directly copy-pasteable as arguments."
+  }
+ ]
+}

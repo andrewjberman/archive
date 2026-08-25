@@ -97,3 +97,23 @@
 
 ## Status + reporting
 Cell-level status in a `<cell_status>` block on this file; proof instance + flip = one atomic commit. Report to COO at each flip (hash + push state, never bare "landed"); cc `3.0.0_SA_CVO` at AC6/AC7; cc the DS lane at render-verified so the projection owner sees the consumption result. Surprises: `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/D1_CATVIEWS/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580). **Nothing to `4.0.0_SA_CRO*` this session.**
+
+## `<cell_status>` -- 0.4.0_DE_ClientPlatform~C, 2026-08-25
+
+<cell_status>
+| cell | state | evidence |
+|---|---|---|
+| `D1-h-v1` L0 view | **COMPLETE** | 49F three tiles / inflection two tiles; Alternatives ABSENT (no tile, not an empty one); Insurance never rendered. Screenshots READ. |
+| `D1-h-p1` presence | **COMPLETE** | served AUM > 0 is the predicate; a 0-AUM node renders NO TILE. Exercised both directions (SMA present on 49F, absent on inf). |
+| `D1-h-v2` L1 drilldown | **COMPLETE, one limb DECLARED** | Models Primary/Custom and the Client predicate panel render from the block. Alternatives' inert+labelled state is NOT-YET-EVALUABLE -- no firm carries Alternatives AUM this round. Declared, not claimed. |
+| `D1-h-v3` L2 Custom | **COMPLETE** | 3 rows against 3 members; disclosure rendered, not hidden; plane named on screen after COO 67612. |
+| `D1-h-v4` predicate-unavailable | **COMPLETE** | "Fee split unavailable for this firm" + the emitter's own reason; BOTH fee buckets ABSENT and no zero rendered anywhere. |
+| `D1-c-1` consumed | **COMPLETE AT THE CONTRACT PLANE** | The page consumes the block via its own query key. NOT a served-artifact proof: category-views is emitted but unpublished, and per `D1-inv-5` a commit is not execution. |
+| `D1-c-2` empty fallback | **COMPLETE** | Three states render DIFFERENT text -- consumed / unavailable-at-a-firm / absent-by-scope. The rest of the page is identical across all three, which is exactly why the panel and not the page is the discriminator. |
+| `D1-inv-4` (render half) | **COMPLETE** | Sum recomputed FROM THE RENDERED TILES and printed beside `total_aua - Insurance`; closes on both firms. No double count expressible: children are drawn from the emitter's single partition and `held_axes` is never drawn. |
+
+**Proof instance:** `org/tier2_senior/0.4.0_DE_ClientPlatform~C/deliverables/D1_CATVIEWS.TO-R1-DE_PROOF_OF_SPEC.json` -- VALID rc=0 positional (9/9 criteria carry cell_refs; 8/8 cell_refs resolve to the decomp; 8/8 declared cells reachable from a criterion).
+**Portal commits (DEV, under my author line):** `760504f0`, `4034239c`, `d1f8f38a`, `cd2f059c`, `7def244d`.
+**Evidence discipline:** every fixture was built by exercising `build_category_views` AT REF `23271aac64` in an isolated extraction -- never from the shared working tree (COO standing rule 67436).
+**NOT CLAIMED:** a served-artifact read. AC2-AC8 prove the RENDER against the contract at a named ref; they do not prove a live emission, and `D1-inv-5` is why that distinction is stated rather than blurred.
+</cell_status>
