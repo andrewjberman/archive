@@ -1,22 +1,22 @@
 **TODAY SPRINT**
 
-• Model portfolios are live again for all four partner firms — five client-facing days of missing data closed tonight and confirmed on the live product.
+• Model portfolios are current again for all four partner firms — five client-facing days recovered.
 
-• The cause was not bad data: a quality check was applying a test where it did not belong, and refused correct numbers for five days straight.
+• ETF Positioning: per-security performance went from one time window to all eight. Nearly six years of history was already stored and never being shown. It is live now.
 
-• A finished model-portfolios feature was stopped before release — it would have halted the daily job for every firm, not just the one it touched.
+• ETF Positioning: fixed a breakdown that was silently dropping whole asset classes, so a published book now adds up to the actual portfolio.
 
-• Andrew closed 99 stale projects in one ruling: anything not attached to the directive list is closed, so the register is now the real list of work.
+• Model portfolio category views now produce for every firm — including the global view, emitting for the first time.
 
-• Andrew created Directive 10, Global Pipeline Structure — one written standard for how every pipeline ingests, stores and names data.
+• Andrew set the client-facing labels himself: "Client — Opal Supervised" and "Client — Opal Unsupervised". Per-firm rules are live for two firms.
 
-• Related ruling: processed data consolidates to one location per product or firm, ending folders scattered across the estate.
+• The category drilldown is built end to end — top-level categories, into models and SMAs, down to individual custom models by name.
 
-• The 49F historical data migration started — first file copied and verified byte-for-byte; half the set is paused on one naming decision.
+• 49F's historical data consolidation started and is landing now: 932 files moving into one permanent location, each verified against its source.
 
-• ETF Positioning on the other device: approved for production, with a full history backfill authorized.
+• Andrew created Directive 10 — a single standard for how every pipeline takes in, stores and names data. Related ruling: processed data consolidates to one place per product or firm.
 
-• Fabric: 804 commits by 34 agents across both devices; 32 direct decisions from Andrew recorded; no external engineering blockers.
+• Ticketing restructured: the standalone request page comes off in favour of the client-facing view it should have reused.
 
 &nbsp;
 
@@ -25,19 +25,19 @@
 **PROJECTS**
 
 **Item 0 — Infrastructure**
-The commit tool was found to fail silently in a way that can drop a change and let another agent absorb it. Caught after it took one edit; fix identified.
+Directive tracking got sharper: it can now answer which seats are working under which directive, and it closes a gap where a project could claim a directive without the directive listing it back.
 
 **Item 1 — Model Portfolios (asset-category views)**
-Both halves passed review, then testing against live data showed the release would break the daily job for every firm. Held. Two defects named, both fixable; nothing shipped.
+The strongest day on this item. Category views now emit for all four scopes, with global producing for the first time. Andrew ruled the client labels and the per-firm rules landed for two firms, cottonwood held with its missing input named. The portal drilldown is built and rendering. Release is held: live testing showed two defects that would stop the daily job, both named and fixable.
 
 **Item 2 — Advisor Intelligence**
-Historical 49F data migration began: 932 files, first one copied and verified. Half need a naming decision before they land, since that storage is permanent once written. Insurance work is at its ceiling until its data source is staffed.
+49F's historical data consolidation began — 932 files into one permanent location, each checked against its source as it lands. Performance reporting build-out continued. The insurance leg is now staffed and moving after being unstaffed all day.
 
 **Item 3 — Account-Level Model Overlay**
 No movement today; still sequenced behind 1 and 2.
 
 **Item 4 — ETF "Positioning" variant**
-Other device. Cleared for production and a full backfill of all securities as far back as data exists.
+Two real wins on the other device. Per-security performance went from one window to all eight, unlocking almost six years of history that was already stored. And a weight breakdown that quietly dropped non-standard asset classes was fixed, so published books now sum to the whole portfolio. Cleared for production with a full backfill.
 
 **Item 5 — Alt Research**
 No movement today.
@@ -46,16 +46,16 @@ No movement today.
 No movement today.
 
 **Item 7 — Opal Ticketing**
-On hold at Andrew's call: a separate request page had been built instead of reusing the client view, so it comes off the dashboard and gets rebuilt the intended way.
+On hold at Andrew's call. A separate request page had been built instead of reusing the client view; it comes off the dashboard and gets rebuilt the intended way.
 
 **Item 8 — Model Portfolios Pipeline Fortification**
-This item replaced the old "philosophy/modal edits" item, which is done and retired. Tonight's restore ran under it; the repair proved out and tomorrow's scheduled run is the real test.
+Replaced the old "philosophy/modal edits" item, which is done and retired. The five-day outage was diagnosed and repaired under this item; tomorrow's scheduled run is the real test.
 
 **Item 9 — Tax SMA Ops**
-Register entry corrected to the current project code. Still assess-first, waiting on the meeting.
+Register entry corrected to the current project. Still assess-first, waiting on the meeting.
 
 **Item 10 — Global Pipeline Structure**
-New, created by Andrew today. The written standard landed and every pipeline was measured against it; three of five areas differ, two already match and will be left alone.
+New, created by Andrew today. The standard is written and every model-portfolio pipeline was measured against it: three areas differ and will move, two already match and will be left alone.
 
 &nbsp;
 
@@ -66,16 +66,16 @@ New, created by Andrew today. The written standard landed and every pipeline was
 | Item | Timing | Status |
 |---|---|---|
 | 0 — Infrastructure | Ongoing | Unblocked |
-| 1 — Model Portfolios | ~2 weeks | Held: two defects to fix before it can ship. Neither blocks anything else |
-| 2 — Advisor Intelligence | Continuing | One naming decision needed before the bulk of the migration runs; being ruled internally |
+| 1 — Model Portfolios | ~2 weeks | Held on two fixes before release. Blocks nothing else |
+| 2 — Advisor Intelligence | Continuing | Migration landing; one naming decision on part of the set, ruled internally |
 | 3 — Model Overlay | ~6–7 weeks | Sequenced behind 1 and 2 |
 | 4 — ETF Positioning | Priority, other device | Production approved; backfill authorized |
 | 5 — Alt Research | Ongoing | Idle today |
 | 6 — Opal Analyst | Continuing | Idle today |
-| 7 — Opal Ticketing | Held | Rebuild the client-facing version; the separate page comes off |
-| 8 — Pipeline Fortification | Repair-first | Restored tonight; tomorrow's scheduled run is the acceptance |
+| 7 — Opal Ticketing | Held | Rebuild the client-facing version |
+| 8 — Pipeline Fortification | Repair-first | Repaired; tomorrow's scheduled run is the acceptance |
 | 9 — Tax SMA Ops | Assess then build | Waiting on the meeting |
-| 10 — Pipeline Structure | Canon-first | Standard written; nothing moves until Andrew says which products get their own location |
+| 10 — Pipeline Structure | Canon-first | Standard written; waiting on Andrew's call below |
 
 &nbsp;
 
@@ -87,4 +87,4 @@ New, created by Andrew today. The written standard landed and every pipeline was
 
 • **For Andrew — Tax SMA:** the meeting with Yang and Alyssa still gates that item.
 
-• **Carried, not revisited today:** the ticketing email distribution list, and whether insurance gets its own advisor tracking. Both unchanged since yesterday; neither was measured today.
+• **Carried, not revisited today:** the ticketing email distribution list, and whether insurance gets its own advisor tracking. Both unchanged; neither was measured today.
