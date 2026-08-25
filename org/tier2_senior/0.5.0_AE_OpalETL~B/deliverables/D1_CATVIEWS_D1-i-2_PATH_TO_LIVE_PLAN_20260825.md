@@ -139,6 +139,75 @@ success line, never a config read):
    purpose.** *That invocation is an ad-hoc QA instrument and is never production evidence; the
    scheduled run remains the acceptance.*
 
+---
+
+# ⛔ AMENDMENT 1 — 2026-08-25 ~21:0xZ. D1-i-2 IS A NO-SHIP, AND THE HOLD NO LONGER EXPIRES ON A CLOCK.
+
+`0.4.0_DS_ClientPlatform~N` 71413 (via COO 71422): D1_CATVIEWS adds
+`data/mdpf/scripts/gold/mdpf_category_registry.py`, the consolidator imports it **TOP-LEVEL AND
+UNGUARDED**, and **it is not in `build_package.py`'s PACKAGE list.** Re-derived at my seat because it
+is load-bearing for this plan — the artifact claim, not their method:
+
+```
+mdpf_gold_consolidator.py:84 @1234c8779e   import mdpf_category_registry as registry   <- top-level
+build_package.py PACKAGE list              mdpf_category_registry occurrences: 0
+  POSITIVE CONTROL, same file              mdpf_revamp_model_crosswalk occurrences: 1  (list IS greppable)
+```
+
+**TWO HOLDS NOW, AND THEY DO NOT EXPIRE TOGETHER:**
+1. **acceptance confound** — expires after tomorrow's 13:30Z read.
+2. **packaging defect** — **does NOT expire on a clock.** It expires when a commit adds
+   `mdpf_category_registry` to PACKAGE *and* that is verified as a MEMBER IN THE BUILT ZIP.
+
+**NEW PRECONDITION (blocking):** no re-pin to any pin containing the six D1_CATVIEWS commits as they
+stand. **New assertion A6: `mdpf_category_registry.py` present as a named member of the built AND
+deployed package.**
+
+## ⛔ AMENDMENT 1a — MY MEMBER-DIFF DOES *NOT* CATCH THIS, AND I AM DECLINING THE CREDIT
+
+COO 71422 says *"your member-by-member diff is the only check in the estate that catches it."*
+**IT IS NOT, AND IT CANNOT BE — proven by construction, not opinion:**
+
+```
+pre-package  members: {... consolidator ...}     registry ABSENT
+post-package members: {... consolidator ...}     registry ABSENT
+union → a module absent from BOTH can never appear in a pre-vs-post diff.  Result: CHANGED 1, and GREEN.
+```
+
+A member diff detects modules that CHANGED, never modules that were never there. **Taking this credit
+would have put a false guarantee under the next deploy** — the exact class of error we spent tonight
+naming, and it would have been believed because it was flattering.
+
+## ⛔ AMENDMENT 1b — THE ESTATE ALREADY OWNS THE RIGHT INSTRUMENT. IT IS WIRED TO THE OTHER BUILDER.
+
+`infra/aws/lambda/ci/import-closure-check.py` exists and is **exactly** this class of check.
+
+```
+SILVER builder  build-and-upload.sh:257   RUNS it as a build gate   (it fired on my silver build tonight)
+GOLD builder    build_package.py          occurrences: 0            <- NOT WIRED
+```
+
+**PROVEN BY EXERCISE, NOT INFERENCE** — built at the candidate pin locally (no upload, no deploy),
+extracted, ran the checker against the materialized package:
+
+```
+build_package.py --pin 1234c8779e   ->  "OK ... modules=21"     <- THE BUILDER REPORTS SUCCESS
+                                                                   ON A PACKAGE THAT CANNOT IMPORT
+mdpf_category_registry.py in the built zip:  False
+import-closure-check.py, TRUE rc = 1
+   ! mdpf_category_registry   (imported by: mdpf_gold_consolidator.py)
+```
+
+⛔ **THE REMEDY IS BUILD-LADDER RUNG 2 — WIRE THE EXISTING CHECK INTO `build_package.py`. DO NOT BUILD
+A NEW ONE.**
+
+⚠ **AND IT CANNOT BE WIRED AS-IS — the one detail that decides whether the gate survives.** The same
+run also flags `numpy pandas pyarrow yaml` because the gold manifest declares **`layers_expected`**
+while the checker reads **`layer_dependencies`**. Wired unchanged it would FAIL EVERY GOLD BUILD on
+four false positives, and **a gate that screams on every correct build gets switched off** — that is
+how this estate loses gates. Align the manifest key (or teach the checker `layers_expected`) FIRST,
+re-run, and require a clean pass before it gates anything. Routed as a candidate, not built here.
+
 ## 6. SEQUENCE (when released)
 
 1. Re-run §1's 21-module scope table. **2+ changed = STOP and re-scope.**
