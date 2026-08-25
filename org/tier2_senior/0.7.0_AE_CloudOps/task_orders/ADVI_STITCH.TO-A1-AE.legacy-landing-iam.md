@@ -28,7 +28,7 @@
 
 | # | Premise | Oracle |
 |---|---|---|
-| O-1 | The three landing prefixes are NEW paths (no existing grant covers them) | `aws s3 ls s3://opal-data-assets/blackdiamond/49financial/` `# rail-checked` → EMPTY at issuance |
+| O-1 | The three landing prefixes are NEW paths (no existing grant covers them) | `aws s3 ls s3://opal-data-assets/blackdiamond/49financial/` `# rail-checked` → EMPTY at issuance. ⚠ **EMPTY here means UNMINTED, which is the DECLARED expectation — NOT evidence about the live tree.** An unminted tree and a misnamed one are BYTE-IDENTICAL at this oracle, so this premise says nothing about where 49F data actually lives. **AC2's deny arm targets `blackdiamond/49f/` for exactly that reason.** |
 | O-2 | The DS lane's scope set is committed (your start condition) | `git log` on the DS lane's commit; read the declared prefix list from the FILE |
 | O-3 | A neighbouring grant exists to control against | an existing `blackdiamond/49f/silver/*` key, used as the positive control **in a separate invocation** |
 
@@ -48,7 +48,18 @@
 | id | criterion | cell_refs | grounding (Rule 22a) |
 |---|---|---|---|
 | **STIA1AE-AC1** | Write allowed on EACH of the three new prefixes: one `simulate-principal-policy` per exact key, ONE `--resource-arns` per call, positive control in a SEPARATE invocation, action names validated by `validate-policy`; plus live `get-role-policy` (APPLIED) and the TF plan 0-diff (DESIRED) | STI-b-4 | DESIRED + APPLIED + EXERCISED |
-| **STIA1AE-AC2** | ⛔ **NEGATIVE, and it is the criterion that carries his ruling into IAM:** the same principal is DENIED on the LIVE `blackdiamond/49financial/bronze/*` and `.../silver/*` tiers — one resource per call, deny shown, with the positive control from AC1 proving the instrument discriminates | STI-b-4, STI-inv-1 | EXERCISED |
+| **STIA1AE-AC2** | ⛔ **NEGATIVE, and it is the criterion that carries his ruling into IAM:** the same principal is DENIED on **`blackdiamond/49f/bronze/*` and `blackdiamond/49f/silver/*`** — one resource per call, deny shown, with the positive control from AC1 proving the instrument discriminates. **Cite a REAL KEY under each tier in your evidence.** *Optional ADDITIONAL arm, labelled PROSPECTIVE and NEVER a substitute for the live-tree arm: the mint's future `49financial/{bronze,silver}/*` leaves.* | STI-b-4, STI-inv-1 | EXERCISED |
+<!-- AMENDED 2026-08-25 ~20:46Z by 2.0.0_SA_COO (issuer), on 0.7.0_AE_CloudOps~J's ARMED surprise 71404, disarmed same-turn.
+     THE DEFECT: this row said "the LIVE `blackdiamond/49financial/bronze/*` and `.../silver/*` tiers". THOSE ARE NOT LIVE -- they are
+     UNMINTED. `blackdiamond/` has EXACTLY TWO children, `49f/` and `cottonwood/` (denominator 2 of 2 enumerated, positive control run).
+     The live 49F data sits under `blackdiamond/49f/{bronze,silver}/` -- real keys sampled in both.
+     WHY IT MATTERED: run as written, AC2 returns a TRUE, well-controlled, correctly-denominated DENY on a path holding NOTHING, and ships
+     GREEN on the criterion that carries the ruling into IAM -- while STI-inv-1's actual protective property goes COMPLETELY UNTESTED.
+     A FALSE GREEN ON A PROTECTIVE CONTROL, which is the worst direction for this class to fail in.
+     NOT AMENDED, because it is NOT a defect: the `blackdiamond/49financial/` landing prefix is a DELIBERATE MINT (Rule 17b
+     {vendor}/{firm}/{medallion}; `49f/` is the legacy alias and nothing under it moves; ADVI_INSURE mints into the same tree). O-1's
+     EMPTY is the DECLARED expectation for an unminted tree, not a vacuous pass. The DS lane's STI-b-0 root is UNCHANGED and ~Q was told so.
+     No cell_ref, criterion id, alignment denominator or acceptance row count changed -- this row's TARGET moved, nothing else. -->
 | **STIA1AE-AC3** | ⛔ **Q-s1 — THE BUCKET POLICY'S REACH, MEASURED NOT ASSUMED:** the parquet-deny policy is SEGMENT-matched on `bronze`, and `bronze_legacy` is a DIFFERENT segment. Run one denied-write probe under `bronze_legacy/` plus an ISOLATED positive control under a real `bronze/` segment, and REPORT which way it lands. **If the guard does not reach the legacy tier, the widening is a one-line policy segment addition PROPOSED TO CTO WITH THE PROBE RESULT — never self-applied (bucket policy is the infra lane).** Until then the no-parquet property rests on the DS lane's `inv-2` and the report says so | STI-b-4 | EXERCISED |
 
 ## Law that binds
