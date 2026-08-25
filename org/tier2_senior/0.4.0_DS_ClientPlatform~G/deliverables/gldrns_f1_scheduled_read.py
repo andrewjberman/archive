@@ -438,7 +438,7 @@ def main() -> int:
         len(refused_in_both)))
     print("   ...of which are D-only ....... {:,}   <- CORRECT refusals, no BMV exists".format(
         len(ref_accts & only_d)))
-    # ⛔ THE DENOMINATOR GUARD. Without this the next check passes VACUOUSLY whenever
+    # !! THE DENOMINATOR GUARD. Without this the next check passes VACUOUSLY whenever
     # the both-days set is empty -- prev_trading_day unresolvable, or the D-1
     # valuation partition absent. 0 refusals out of 0 accounts compares 0 == 0 and
     # reports PASS on the criterion Andrew's condition rests on.
