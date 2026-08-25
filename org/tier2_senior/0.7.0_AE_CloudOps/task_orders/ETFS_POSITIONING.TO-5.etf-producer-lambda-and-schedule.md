@@ -163,10 +163,21 @@ look natural, because the producer genuinely wants that data.
 >
 > ```
 > CHECK THE OUTCOME, NOT THE PATH -- read the gold rows:
->   FXFXX  -> Fixed Income / Ultra Short Duration    SALXX -> Fixed Income / Ultra Short Duration
->   AAPL   -> Equity  (negative control)             a silver is_cash=True row -> Cash
+>   FXFXX       -> Fixed Income / Ultra Short Duration   (issuer-FLAGGED money-market: a MAPPING)
+>   SALXX       -> Fixed Income / Ultra Short Duration   (UNFLAGGED money-market: a DETECTION)
+>   Cash&Other  -> Cash                                  (issuer-flagged ACTUAL cash: UNCHANGED)
+>   AAPL        -> Equity                                (negative control)
 >   ALL FOUR must be right. Any one wrong -> DO NOT FIRE; say which.
 > ```
+> ⛔ **CORRECTED 01:3xZ — the 4th cell previously read "a silver `is_cash=True` row -> Cash", AND
+> FXFXX **IS** ONE OF THOSE ROWS** (2 of the 4: PFDE 0.3300, PFOE 2.3400; the other two are
+> `Cash&Other`). **Cells 1 and 4 contradicted each other on the same security.** I transcribed the
+> ruling's own contradiction into the check instead of testing it against data I had already
+> measured. ⭐ **Naming `Cash&Other` fixes it AND makes the set strictly stronger: the two
+> issuer-flagged rows now differ in EXACTLY ONE property — money-market vs actual cash — so the pair
+> discriminates the ruling instead of merely illustrating it.**
+> ⭐ **Per `1.0.0_SA_CTO~Z`'s resolution: silver's `is_cash=True` STAYS TRUE and authoritative. This
+> changes where a true cash flag PRESENTS, never the flag** — Rule 17 and CONV-1 both intact.
 > **WHOEVER FIRES MUST STATE WHICH BRANCH THEY FIRED UNDER.** *(Still information, not a gate — but
 > the sovereign question that made it a disclosure is now ANSWERED, so the branches are pass/fail.)*
 >
