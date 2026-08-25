@@ -226,6 +226,73 @@ def _deployed_vs_ref(path, ref):
     }
 
 
+
+CHAIN_DOCUMENT = "advi-49f-chain-dispatch"
+SCHEDULED_SRC = "advi.49f.scheduled-floor"
+
+
+def _dispatch_record(limit_pages=20):
+    """The SCHEDULER-SIDE attribution, and the dispatch's own exit status.
+
+    ADDED after I told CVO and CTO that scheduled-ness was EVIDENCE-FOR and not proof
+    because the manifest carries no trigger field. THAT WAS TRUE OF THE ARTIFACT AND
+    FALSE OF THE WORLD -- the dispatcher writes the scheduler's own source tag into the
+    SSM command Comment (lambda_function.py:133,
+    Comment=f"advi 49f dispatch src={event.get('source','manual')}"), and the schedule's
+    Input supplies source=advi.49f.scheduled-floor. A MANUAL DISPATCH DEFAULTS TO
+    src=manual. So the two are distinguishable in a queryable record written by the
+    dispatcher, not by the thing being judged.
+
+    AND THE STATUS IS THE HALF THAT MATTERS MORE. On 2026-08-23 and 2026-08-24 the
+    scheduled dispatch returned Failed -- the chain aborted at a06_identity_crosswalk on
+    an empty allocation-map partition, nine stages before c02_twr_daily. The ARTIFACT
+    plane cannot show that: it looks identical to "the run has not happened yet".
+    A HARNESS THAT READS ONLY THE PARTITION CANNOT TELL A RUN THAT NEVER FIRED FROM ONE
+    THAT FIRED AND DIED.
+
+    PAGINATION IS LOAD-BEARING HERE, not a detail: ssm.list_commands returned an EMPTY
+    FIRST PAGE WITH A NextToken. Reading page one and stopping yields zero commands and
+    reads as "no dispatch history", which is CLAUDE.md's own trap in its worst form --
+    a clean zero that is a page artifact.
+
+    TIMEZONE IS ALSO LOAD-BEARING: RequestedDateTime carries tzlocal(), so strftime
+    renders LOCAL time. I rendered 12:45:41Z as "08:45Z" once and typed the Z myself.
+    Every timestamp below is .astimezone(utc)-pinned before formatting.
+    """
+    try:
+        ssm = boto3.client("ssm")
+    except Exception as exc:
+        return {"error": "ssm client: %s: %s" % (type(exc).__name__, exc)}
+    cmds, tok, pages = [], None, 0
+    while pages < limit_pages:
+        kw = {"MaxResults": 50}
+        if tok:
+            kw["NextToken"] = tok
+        try:
+            r = ssm.list_commands(**kw)
+        except Exception as exc:
+            return {"error": "list_commands: %s: %s" % (type(exc).__name__, exc)}
+        cmds += r.get("Commands", [])
+        pages += 1
+        tok = r.get("NextToken")
+        if not tok:
+            break
+    chain = [c for c in cmds if c.get("DocumentName") == CHAIN_DOCUMENT]
+    chain.sort(key=lambda c: c["RequestedDateTime"], reverse=True)
+    out = []
+    for c in chain[:6]:
+        u = c["RequestedDateTime"].astimezone(_dt.timezone.utc)
+        comment = c.get("Comment", "")
+        out.append({
+            "at_utc": u.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "status": c.get("Status"),
+            "comment": comment,
+            "scheduled": SCHEDULED_SRC in comment,
+        })
+    return {"pages": pages, "exhausted": not bool(tok), "total_commands": len(cmds),
+            "chain_dispatches": len(chain), "recent": out}
+
+
 def _execution_record(date):
     """The SCHEDULED-vs-AD-HOC discriminator, which the ARTIFACT cannot supply.
 
@@ -476,6 +543,34 @@ def main() -> int:
     print("     chain_backfill_...), but THAT IS A HUMAN CONVENTION AND NOT A CONTROL.")
     print("     The airtight source is the scheduler's invocation history, outside this read.")
 
+    # ---------- 8b. the dispatch record ----------
+    print()
+    print("8b. THE DISPATCH ITSELF -- scheduler-side attribution AND its exit status")
+    dr = _dispatch_record()
+    if "error" in dr:
+        print("   UNREADABLE: {}".format(dr["error"]))
+        print("   That is a LIMIT, not evidence the dispatch did not happen.")
+    else:
+        print("   materialised {:,} SSM command(s) over {} page(s), exhausted={}"
+              .format(dr["total_commands"], dr["pages"], dr["exhausted"]))
+        print("   (the FIRST page can be EMPTY with a NextToken -- reading page one",
+              "and stopping")
+        print("    yields a clean zero that is a page artifact, not a history)")
+        print("   {:<22} {:>9}  {}".format("dispatch (UTC)", "status", "comment"))
+        for d in dr["recent"]:
+            print("   {:<22} {:>9}  {}".format(d["at_utc"], d["status"], d["comment"][:52]))
+        if dr["recent"]:
+            top = dr["recent"][0]
+            chk("most recent dispatch was SCHEDULER-fired, not manual",
+                top["scheduled"], True,
+                "src=%s in the dispatcher-written Comment" % SCHEDULED_SRC)
+            chk("most recent dispatch SUCCEEDED", top["status"], "Success",
+                "a Failed dispatch means the chain died; the partition plane cannot show it")
+        else:
+            print("   NO chain dispatches in the materialised history -- a MEASURED",
+                  "absence over")
+            print("   {:,} commands, not a claim none occurred.".format(dr["total_commands"]))
+
     npass = sum(1 for ok, _ in checks if ok)
     print("\n" + "=" * 108)
     print("DENOMINATOR: {}/{} checks PASS over {:,} rows / {:,} accounts at D / {:,} at D-1"
@@ -486,10 +581,16 @@ def main() -> int:
     print("AC7 VERDICT: {}".format(
         "SATISFIED at this partition" if npass == len(checks)
         else "NOT SATISFIED -- see FAILs above"))
-    print("SCOPE: this reads ONE partition, and section 8 is EVIDENCE-FOR the run being")
-    print("  the scheduled one, never proof of it. The manifest carries no trigger field;")
-    print("  mode=production proves the FLAG, and the scheduler's own invocation history")
-    print("  is outside this read. An ad-hoc run is NEVER production evidence.")
+    print("SCOPE, UPDATED when section 8b landed -- an earlier version of this line said")
+    print("  the scheduler's invocation history was OUTSIDE this read. IT IS NOW INSIDE IT,")
+    print("  and leaving the old sentence would have been a status line outliving its body.")
+    print("  WHAT IS ESTABLISHED: the dispatcher-written SSM Comment carries the scheduler's")
+    print("    own source tag (src=advi.49f.scheduled-floor; a manual dispatch defaults to")
+    print("    src=manual), so SCHEDULED-vs-AD-HOC is now attributed from a record written")
+    print("    by the dispatcher rather than by the thing being judged -- and the dispatch's")
+    print("    EXIT STATUS is visible, which the partition plane cannot show at all.")
+    print("  WHAT IS NOT: this still reads ONE partition. An ad-hoc run is NEVER production")
+    print("    evidence, and nobody accelerates the run.")
     return 0 if npass == len(checks) else 1
 
 

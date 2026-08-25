@@ -88,6 +88,19 @@ def main() -> int:
     print("   twr columns .................................. 13  <- the shape the live 9-col")
     print("                                                     frontier cannot reach")
 
+    # STUB THE DISPATCH RECORD TOO. Section 8b (added after this control was written)
+    # reads LIVE SSM, and the live history currently shows the last dispatch Failed --
+    # so without this stub the positive control fails on a REAL fact about the world
+    # rather than on the fixture, and STOPS BEING A POSITIVE CONTROL AT ALL.
+    # A NEW CHECK SILENTLY INVALIDATED AN EXISTING CONTROL, and the only reason it was
+    # caught is that this file was re-run after the harness changed. A control is not
+    # a write-once artifact; it has to be re-exercised whenever its subject moves.
+    real_disp = h._dispatch_record
+    h._dispatch_record = lambda limit_pages=20: {
+        "pages": 1, "exhausted": True, "total_commands": 1, "chain_dispatches": 1,
+        "recent": [{"at_utc": "2026-08-25T12:45:41Z", "status": "Success",
+                    "comment": "advi 49f dispatch src=" + h.SCHEDULED_SRC,
+                    "scheduled": True}]}
     real_part, real_read = h._partitions, h._read
     h._partitions = lambda prefix: [PREV, D]
     h._read = _fixture
@@ -99,6 +112,7 @@ def main() -> int:
         rc = h.main()
     finally:                                    # restore, always -- a leaked patch would
         h._partitions, h._read = real_part, real_read   # poison every later call in-process
+        h._dispatch_record = real_disp
 
     print("\n" + "=" * 100)
     print("HARNESS rc = %d" % rc)
