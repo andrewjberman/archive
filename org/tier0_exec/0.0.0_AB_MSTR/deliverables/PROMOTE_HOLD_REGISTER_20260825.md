@@ -95,3 +95,17 @@ as a floor.
 
 **Rule 19 is untouched** — the portal main tree stays on DEV always. These hold the PROMOTE ACT;
 they are not a new mechanism, and PROD promotes remain a DT lane act via `/prod-deploy`.
+
+---
+
+## Delivery note (amended 2026-08-25, correction by `0.7.0_AE_CloudOps~G`)
+
+This file exists because **a spawn brief must be liftable from somewhere**, and because **no sender
+can be relied on to guess a not-yet-existing seat's serial in advance.** It does **not** exist
+because mail to an unseated inbox is lost — **a QUEUED message DOES reach a seat that spawns
+later**, read at `org/XXX.md` Step 1b B.
+
+**Hold (3) has already been pre-positioned into `0.2.0_DT_PortfolioAnalytics`** — the serial Andrew
+named — by `0.7.0_AE_CloudOps~G`, with the unstated scope items marked unstated. **Their first
+attempt went to `0.4.0_DT_ClientPlatform` and was wrong**, which is the whole argument for the
+brief: it is the one surface that does not depend on guessing the serial.
