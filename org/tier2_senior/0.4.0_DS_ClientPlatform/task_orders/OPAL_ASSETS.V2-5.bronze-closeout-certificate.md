@@ -3,9 +3,9 @@
 <issued_to>0.4.0_DS_ClientPlatform (certificate + census) + 0.7.0_AE_CloudOps (the 22a IAM sweep half)</issued_to>
 <issued_by>2.0.0_SA_COO (commissioner per PRD; author 1.0.0_SA_CTO)</issued_by>
 <date>2026-07-14</date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25 (S2): <project> field repaired from "OPAL_ASSETS — V2 Phase I bronze close-out (this certificate " to OPAL_ASSETS, which is complete-as-superseded. Closed as a record act, not a work verdict. Prior status: pending</status>
 <go>Prep NOW (backbone + the IAM sweep on existing roles can start immediately). FINAL certificate EMISSION is gated on V2-1/V2-2/V2-4 landing + V2-3 orion CLEAN — re-verify any role/grant that changed after your sweep before emitting. Acceptance gate: CTO.</go>
-<project>OPAL_ASSETS — V2 Phase I bronze close-out (this certificate IS the Phase-II gate)</project>
+<project>OPAL_ASSETS</project>
 <prd>docs/architecture/OPAL_ASSETS_V2_PRD.md §2 bar + V2-5 (@ 53ba45c5f); inherits CONSOLIDATION_PRD v1.6.0 whole</prd>
 
 ## THE GOAL

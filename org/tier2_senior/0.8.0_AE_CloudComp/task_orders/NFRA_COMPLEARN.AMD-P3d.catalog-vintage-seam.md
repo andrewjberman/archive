@@ -1,11 +1,11 @@
 <task_order>
 <id>NFRA_COMPLEARN.AMD-P3d</id>
-<project>NFRA_COMPLEARN (amendment follow-on; CTO~A B4)</project>
+<project>NFRA_COMPLEARN</project>
 <title>AMD P3d (B4) -- catalog-vintage seam: disclose source vintage so a fresh comp_learns_status.json can't hide a stale catalog (comp_learns_produce.py:189 terminal-lies fix)</title>
 <assigned_to>0.8.0_AE_CloudComp~E (lead) + 0.7.0_AE_CloudOps~B (coordinate)</assigned_to>
 <issued_by>2.0.0_SA_COO~A</issued_by>
 <issued_date>2026-07-10</issued_date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25 (S2): <project> field repaired from "NFRA_COMPLEARN (amendment follow-on; CTO~A B4)" to NFRA_COMPLEARN, which is complete. Closed as a record act, not a work verdict. Prior status: pending</status>
 <priority>Follow-on, NON-URGENT. BUILD gated on CTO~A arch-gate of the filed design (3e6f9c499).</priority>
 <dispatch>THIS IS A POINTER -- full spec at org/projects/NFRA_COMPLEARN/task_orders/NFRA_COMPLEARN.AMD-P3d.catalog-vintage-seam.md. Formalizes CTO~A's B4 for served-artifact traceability.</dispatch>
 <load_bearing_invariants>

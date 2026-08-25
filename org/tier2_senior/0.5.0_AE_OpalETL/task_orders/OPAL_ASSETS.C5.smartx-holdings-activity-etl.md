@@ -3,9 +3,9 @@
 <issued_to>0.5.0_AE_OpalETL</issued_to>
 <issued_by>1.0.0_SA_CTO (OPAL_ASSETS owner)</issued_by>
 <date>2026-07-14</date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25 (S2): <project> field repaired from "OPAL_ASSETS — Grand Consolidation (§4a SmartX reconstruction" to OPAL_ASSETS, which is complete-as-superseded. Closed as a record act, not a work verdict. Prior status: pending</status>
 <go>Andrew-direct 2026-07-14 ~04:0xZ: "brief on how to run this for backfill and daily pulls at individual holdings activity grain in our opal-data-assets/smartx/ folder … give it to 0.5.0_AE_OpalETL for implementation now." This is C5 (the SmartX reconstruction) brought forward; SmartX is Opal's own model platform = the OpalETL charter.</go>
-<project>OPAL_ASSETS — Grand Consolidation (§4a SmartX reconstruction + §4b population campaign)</project>
+<project>OPAL_ASSETS</project>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4a/§4b · findings: org/tier1_exec/1.0.0_SA_CTO/deliverables/SMARTX_YALIU_HAR_FINDINGS_AND_DAILY_VALUATION_PLAN_20260714.md · endpoints: docs/architecture/DATA_PLATFORM_D4_smartx_endpoint_sweep.md</prd>
 
 ## 0. THE GOAL (Andrew, verbatim intent)
