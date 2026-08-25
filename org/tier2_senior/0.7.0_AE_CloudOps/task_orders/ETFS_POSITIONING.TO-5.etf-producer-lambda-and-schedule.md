@@ -162,13 +162,24 @@ look natural, because the producer genuinely wants that data.
 > `MoneyMarketFlag=Y`) is UNTOUCHED and must remain `Cash`.**
 >
 > ```
-> CHECK THE OUTCOME, NOT THE PATH -- read the gold rows:
->   FXFXX       -> Fixed Income / Ultra Short Duration   (issuer-FLAGGED money-market: a MAPPING)
->   SALXX       -> Fixed Income / Ultra Short Duration   (UNFLAGGED money-market: a DETECTION)
->   Cash&Other  -> Cash                                  (issuer-flagged ACTUAL cash: UNCHANGED)
->   AAPL        -> Equity                                (negative control)
->   ALL FOUR must be right. Any one wrong -> DO NOT FIRE; say which.
+> CHECK THE OUTCOME -- and CALL classify() WITH ITS REAL SIGNATURE:
+>     classify(is_cash, gics, cash_sentinel)      <- THIRD ARG, defaults True. Omit it and
+>                                                    FXFXX returns Cash and looks BROKEN.
+>   FXFXX (True, None, cash_sentinel=False) -> Fixed Income / Ultra Short Duration   MUST PASS
+>   Cash&Other (True, None, True)           -> Cash / Cash & Cash Equivalents        MUST PASS
+>   AAPL  (False, 'Information Technology') -> Equity / Information Technology       MUST PASS
+>   SALXX (unflagged)                       -> Equity  *** EXPECTED. DEFERRED HALF. NOT A FAIL ***
 > ```
+> ⛔ **SALXX IS NOT A MUST-PASS AND THIS LINE IS THE CORRECTION.** The ruling split the work:
+> **FXFXX is a MAPPING (issuer already flagged it — landed @0c03c359f2); SALXX is a DETECTION and
+> was explicitly deferred.** An earlier version of this block listed SALXX as must-pass and **would
+> have FAILED A CORRECT BUILD.**
+> ⚠ **VERIFIED BY EXECUTION at 01:4xZ against the tree: FXFXX / Cash&Other / AAPL all PASS;
+> `SUB_ASSET_CLASS_VOCAB` now contains `Ultra Short Duration`.**
+> ⛔ **AND THE SIGNATURE TRAP IS REAL — I FELL IN IT: calling `classify(is_cash, gics)` with two args
+> takes `cash_sentinel=True`, returns Cash for FXFXX, and reads as the fix being broken.** I reported
+> 2-of-4 FAIL on a correct, ratified commit before catching it. **Pass the third argument.**
+
 > ⛔ **CORRECTED 01:3xZ — the 4th cell previously read "a silver `is_cash=True` row -> Cash", AND
 > FXFXX **IS** ONE OF THOSE ROWS** (2 of the 4: PFDE 0.3300, PFOE 2.3400; the other two are
 > `Cash&Other`). **Cells 1 and 4 contradicted each other on the same security.** I transcribed the
