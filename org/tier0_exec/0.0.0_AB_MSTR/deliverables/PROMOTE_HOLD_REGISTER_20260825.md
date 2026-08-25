@@ -133,7 +133,35 @@ than appended below.
   releases nothing of the other.** AE~G's conservative default is now **the ruled reading, not a
   working assumption.**
 
-### ⛔ THE SOVEREIGN RESIDUE — real, and smaller than "define it"
+### ✅ THE SOVEREIGN RESIDUE — DISCHARGED 2026-08-25 ~04:1xZ
+
+**Andrew ratified s.14. The card is closed.** At the base CTO terminal, VERBATIM:
+> *"I do want to publish i want to get this shit live but we need to validate that it actually works
+> on the backend side"*
+
+**What it settles:**
+- **PUBLISH INTENT IS AFFIRMED** — the direction is forward and his. Nothing downstream should
+  sequence as though going live were optional or distant.
+- **THE GATE'S TEST IS "ACTUALLY WORKS" = EXERCISED.** Not configured, not deployed, not green in a
+  plan. **That is Rule 22a's BEHAVIOR layer in his own words**, and it RAISES the bar on every
+  acceptance currently written as a config check.
+- **s.14's SHAPE IS RATIFIED**, with leg **(a) CHAIN weighted as the operative one**; (b) CONTENT
+  and (c) INDEPENDENT stand behind it. **The LIFT remains his at the promote act.**
+- **It does NOT touch the two holds' independence** — he addressed the backend condition, not the
+  register. (2) and (3) remain SEPARATE OBJECTS.
+
+⛔ **THE RE-ORDER THIS CAUSES, and it is the actionable half: THE twr D-1 MIRROR REMEDY IS NOW THE
+CRITICAL PATH TO A SOVEREIGN PUBLISH INTENT** — not a diagnostic, not a follow-on. `twr_daily`
+refuses **7,335 of 7,335** rows at the frontier; **until the remedy lands the backend computes not
+one return, and no amount of frontend work changes that.** Decomp @51e5086607, 26 cells,
+`0.4.0_DS_ClientPlatform~H` seated on 21 (surfaces (a)-(d)+(f); (e) held out).
+
+*Recorded for a successor: this seat HELD that remedy's seating earlier tonight on the ground that
+it was "not on round-1's critical path." That was true when said and is now exactly inverted — by
+his word, it is THE critical path. The hold was reversed before this ruling, on COO's showing that
+its basis had died; the ruling then confirmed the reversal from the other direction.*
+
+### ⛔ THE SOVEREIGN RESIDUE AS IT STOOD BEFORE — kept for provenance
 
 **One line from Andrew: RATIFY s.14 as the standard, REPLACE it, or NAME A DIFFERENT VERIFIER.**
 It rides CTO's open-calls list as the hold-(3) card. **Nothing in the chain requires any seat to
