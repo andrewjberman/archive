@@ -103,6 +103,36 @@ that rule forbids. A criterion reachable only by the prohibited act is unreachab
   REPORTS, not what it covers. `0.4.0_DS_ClientPlatform~J` correctly refused to amend the instance themselves — a
   criterion's status is the ISSUER's ruling and rewriting it at the executing seat is scope adjudication in the
   widening direction. **They were right to ask and right not to act.**
+- ⛔ **SILVER GRAMMAR RULED 2026-08-25 ~23:4xZ BY THE ISSUER, on `0.4.0_DS_ClientPlatform~J`'s BLOCKING
+  surprise (71849).** AC1's row reads `blackdiamond/49financial/silver/insurance_*`. **THE RULED FORM IS
+  THE FRAMEWORK'S:**
+  `blackdiamond/49financial/silver/{_fact_table(...)}/date={D}/data.parquet` via `silver_key()` —
+  e.g. `.../silver/fact_insurance_relationshipaccountdetailsearch/date=2026-08-25/data.parquet`.
+    - **THE TWO AUTHORITIES GOVERN DIFFERENT GRAINS AND DO NOT ACTUALLY COLLIDE.** PRD s.11 **Ruling 1
+      (Andrew-approved) rules THE TREE** — `blackdiamond/49financial/`, with `49f/` recorded as the
+      legacy alias. `insurance_*` in that sentence is **ILLUSTRATIVE OF THE TABLE, not a ruling on the
+      table-segment convention.** `data/assets/scripts/silver/silver_registry.py` — "the ONE conversion
+      framework" — rules **THE TABLE SEGMENT** (`_fact_table()`, `FACT_NAMING_CHANNEL_WIDE = True` at
+      `:67`). **Both are satisfied by the same key.** No ruling is overridden.
+      ⚠ **LIMIT OF THIS READING, STATED:** if Andrew intended Ruling 1 to fix the TABLE NAME as well as
+      the tree, this is wrong and one line from him corrects it. The ruling is read at the grain its own
+      words settle; it is not widened.
+    - **MEASURED (`~J`, denominator printed):** 12,522 keys under `blackdiamond/` walked client-side, 18
+      distinct silver table segments — **`fact_*` 16 tables / 1,006 keys · BARE 2 tables / 60 keys.**
+      POSITIVE CONTROL `/silver/fact_` → 1,006 FIRES. CROSS-SOURCE CONTROL under `schwab/` (the ruled
+      family) → 13,545 of 38,435 FIRES. ⚠ The two bare ones are named `dim_*` — **GOLD VOCABULARY IN A
+      SILVER PATH** — read as an anomaly, not a counter-convention.
+    - ⛔ **AND WRITING THE LITERAL FORM WOULD HAVE MADE THIS THE ONLY PRODUCER ON THIS SOURCE OUTSIDE THE
+      FRAMEWORK** — the one-producer-one-home defect, minted fresh by this TO.
+    - ⛔ **THE PARKED CELL IS CASHED.** `silver_registry.py:61-65`: *"CHANNEL-WIDE extension
+      (orion/eclipse/blackdiamond/etf/smartx) is PARKED to an open contract cell settling before those
+      families' first deploy (COO, V2-8 AMENDMENT-3 @ca90ae9dd)."* **THIS IS THAT FAMILY'S FIRST DEPLOY.**
+      RULED: `FACT_NAMING_CHANNEL_WIDE = True` **STANDS** for the blackdiamond family. **No code change** —
+      the constant already defaults True and 16 tables already ride it; what was missing was the ruling.
+      `~J` declined to cash it themselves: *"a seat could easily treat it as settled and proceed."*
+      **A DEFAULT THAT HAPPENS TO BE CORRECT IS NOT A DECISION.**
+  **No cell_ref, criterion id, alignment denominator or acceptance row count changed** — the DESTINATION
+  GRAMMAR is corrected.
 - ⛔ **`INSR1DS-AC2` (the GOLD TABLE) SPLITS, and I am correcting my own first wording of this amendment, which said
   AC1 *and* AC2 were gated and then listed AC2's own cells as reachable four lines later — a contradiction inside one
   edit.** **Its DESIGN limb — schema, partition grammar, spine-key set — IS DELIVERABLE NOW.** **Its APPLIED limb —
