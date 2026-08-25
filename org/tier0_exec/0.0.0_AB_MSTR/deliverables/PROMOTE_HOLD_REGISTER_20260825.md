@@ -72,21 +72,49 @@ named owners; neither blocks the DEV work his word authorises.
 
 ---
 
-## What is NOT stated — preserved as unresolved
+## Status of the four open questions — UPDATED 2026-08-25 ~01:5xZ
 
-Flagged by `0.7.0_AE_CloudOps~G`, who declined to resolve them. **Nobody has resolved them since.**
+Originally flagged by `0.7.0_AE_CloudOps~G`, who declined to resolve them. **Two have since been
+resolved and TWO OF THESE ENTRIES WERE STALE WITHIN THE HOUR** — corrected here, in place, rather
+than appended below.
 
-- **How wide is "this" in (3)?** Said answering a PERFRP question. Whether it reaches the wider 49F
-  ADVI serving surface is **not stated**.
-- **What counts as "verified end to end"?** Not defined. Whether the `twr_daily` BMV gap alone
-  satisfies it, or whether it wants a broader chain-to-card verification, is his call or the PRD
-  author's on his behalf.
-- **WHO VERIFIES?** His word names a verification standard and **names no verifier.** CVO has
-  explicitly **declined to appoint itself** — certifying "verified end to end" for PERFRP would be
-  materially larger than certifying a decomp's enumeration, which is all that seat has signed for.
-- **Are (2) and (3) one hold or two?** Not stated. Being treated as **INDEPENDENT** until he or CTO
-  says otherwise — satisfying one does not release the other. **This is a holding pattern, not a
-  ruling.**
+- **How wide is "this" in (3)? — STILL NOT STATED.** Said answering a PERFRP question. Whether it
+  reaches the wider 49F ADVI serving surface is **not stated, and nobody has defined it.**
+
+- **What counts as "verified end to end"? — DEFINED ON HIS BEHALF. NOT undefined.**
+  `1.0.0_SA_CTO` defined it as **PRD author** in `ADVI_PERFRP` **s.14** (`@5e25201f74`; verified on
+  `origin/CLOUD` and the text resolves there — a citation a reader can follow). **This is INSIDE the
+  delegation AE~G's own verbatim record names** — *"is his call OR THE PRD AUTHOR'S ON HIS BEHALF"*
+  — with **the LIFT explicitly reserved to Andrew**. A seat quietly defining a sovereign condition
+  would be widening it; a PRD author defining a verification standard inside a named delegation, in
+  the governed PRD, is the job the delegation exists for.
+  **The standard:** (a) CHAIN — every serving family's lineage at Rule 22a's three layers, incl. the
+  twr D-1 mirror remedy landed with real returns EMITTING on the scheduled run; deferred families
+  verified AS DECLARED, never silently waived. (b) CONTENT — the s.11 #12 parity report vs the BD
+  dashboard rendered on DEV and READ, per-figure deltas explained. (c) INDEPENDENT — CVO re-derives
+  both legs.
+  ⛔ **SO HOLD (3) IS `DEFINED-ON-HIS-BEHALF` AND `UNMET` — which is a state WITH A PATH**, not an
+  undefined condition. Do not read it as blocked on a definition.
+
+- **WHO VERIFIES? — ASSIGNED, and no seat self-appointed.** s.14(c) gives **CVO** the *independent
+  re-derivation of the two component legs* — the per-deliverable verification function that seat
+  already runs. **COO assembles** the satisfaction claim with denominators (the issuer act).
+  **ANDREW LIFTS** (the sovereign act). Three seats, three verbs.
+  **CVO's refusal STANDS and is compatible:** they declined to be certifier of the *whole lift
+  claim*, which s.14 never asks of them. CTO has invited CVO to say if their read of s.14(c) is
+  heavier than that, rather than letting the two positions diverge silently.
+
+- **Are (2) and (3) one hold or two? — RULED: TWO, INDEPENDENT.** `1.0.0_SA_CTO`, on the record:
+  the PERFRP DEV-only hold and the 49F switch hold (Mike) are **separate objects; satisfying one
+  releases nothing of the other.** AE~G's conservative default is now **the ruled reading, not a
+  working assumption.**
+
+### ⛔ THE SOVEREIGN RESIDUE — real, and smaller than "define it"
+
+**One line from Andrew: RATIFY s.14 as the standard, REPLACE it, or NAME A DIFFERENT VERIFIER.**
+It rides CTO's open-calls list as the hold-(3) card. **Nothing in the chain requires any seat to
+self-appoint to anything it refused**, and no seat should treat the standard as sovereign-ratified
+until he answers — it is authored under delegation, which is not the same thing.
 
 ## Provenance and limits
 
