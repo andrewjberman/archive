@@ -40,7 +40,7 @@ item, not something to absorb** — one line to `3.0.0_SA_CVO`, cc me. **Do not 
 workflows/atom_decomposition/runs/mdpf-cotremediation/20260825T161149Z/DECOMP.md — cells
 COTR-inv-1, COTR-inv-2, COTR-inv-3, COTR-inv-4, COTR-inv-5, COTR-inv-6, COTR-inv-7, COTR-inv-8, COTR-inv-9,
 COTR-a-1, COTR-a-2, COTR-a-3, COTR-a-4,
-COTR-b-1, COTR-b-2, COTR-b-3, COTR-b-3a,
+COTR-b-1, COTR-b-2, COTR-b-3, COTR-b-7,
 COTR-d-1, COTR-d-2, COTR-d-3,
 COTR-e-1, COTR-e-2, COTR-e-3,
 COTR-f-1, COTR-f-2, COTR-f-3,
@@ -61,7 +61,7 @@ COTR-g-1, COTR-g-2, COTR-g-3
   CVO has already GRADUATED both. **You cannot close them and they are not criteria against you.**
 - **`COTR-i-1..3` (3) — boundary cells, non-criterion-bearing.**
 
-**`COTR-b-3` and `COTR-b-3a` are SHARED with the AE seat and appear in BOTH TOs. That is deliberate:
+**`COTR-b-3` and `COTR-b-7` are SHARED with the AE seat and appear in BOTH TOs. That is deliberate:
 they ARE the handoff, and a shared cell is how an edge gets an owner on both sides.**
 </decomp_context>
 
@@ -74,13 +74,13 @@ they ARE the handoff, and a shared cell is how an edge gets an owner on both sid
   <criterion id="COTR1DS-AC5" cell_refs="COTR-e-3, COTR-a-4, COTR-inv-5"/>
   <criterion id="COTR1DS-AC6" cell_refs="COTR-f-1, COTR-f-2, COTR-f-3, COTR-inv-7"/>
   <criterion id="COTR1DS-AC7" cell_refs="COTR-g-1, COTR-g-2, COTR-g-3"/>
-  <criterion id="COTR1DS-AC8" cell_refs="COTR-b-3, COTR-b-3a, COTR-inv-8, COTR-inv-9"/>
+  <criterion id="COTR1DS-AC8" cell_refs="COTR-b-3, COTR-b-7, COTR-inv-8, COTR-inv-9"/>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~M/deliverables/MDPF_COTREMEDIATION.TO-R1-DS_PROOF_OF_SPEC.json</instance_path>
   <expected_criteria>COTR1DS-AC1,COTR1DS-AC2,COTR1DS-AC3,COTR1DS-AC4,COTR1DS-AC5,COTR1DS-AC6,COTR1DS-AC7,COTR1DS-AC8</expected_criteria>
   <alignment_denominators>cells in this TO: 29 (inv 9 - a 4 - b 4 - d 3 - e 3 - f 3 - g 3); criteria: 8; every
 criterion carries >=1 cell_ref; all 29 cells reachable by >=1 criterion. Unmapped 0; untraceable 0. Decomp total
 39; 10 excluded (4 to the AE lane, 3 routed to D8, 3 boundary non-criterion), each named in decomp_context.
-COTR-b-3 and COTR-b-3a are SHARED with MDPF_COTREMEDIATION.TO-R1-AE by design.</alignment_denominators>
+COTR-b-3 and COTR-b-7 are SHARED with MDPF_COTREMEDIATION.TO-R1-AE by design.</alignment_denominators>
 </proof_of_spec>
 
 ---
@@ -127,7 +127,7 @@ this TO's.** The bronze files are on disk. **This is the single most likely wast
 
 ⛔ **DTYPE: READ THE ACTUAL VALUES before declaring. Do not assume string.**
 
-### 2 — THE HANDOFF (`COTR-b-3`, `COTR-b-3a`) — SHARED, AND IT IS WHAT BROKE LAST TIME
+### 2 — THE HANDOFF (`COTR-b-3`, `COTR-b-7`) — SHARED, AND IT IS WHAT BROKE LAST TIME
 
 `mirror_schemas.py` lives in **TWO independently-editable homes**. `BUILD_MANIFEST.json` settles the
 direction: *"repo files are the source of truth; fix there and rebuild, never edit a zip."* **You edit

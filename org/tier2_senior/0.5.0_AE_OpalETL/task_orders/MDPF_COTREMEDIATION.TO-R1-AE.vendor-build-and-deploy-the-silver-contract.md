@@ -35,7 +35,7 @@ backlog by CVO's own sequencing, and does not gate your execution.** If a cell l
 <decomp_ref>
 workflows/atom_decomposition/runs/mdpf-cotremediation/20260825T161149Z/DECOMP.md — cells
 COTR-inv-1, COTR-inv-2, COTR-inv-3, COTR-inv-4, COTR-inv-5, COTR-inv-6, COTR-inv-7, COTR-inv-8, COTR-inv-9,
-COTR-b-3, COTR-b-3a, COTR-b-4,
+COTR-b-3, COTR-b-7, COTR-b-4,
 COTR-c-1, COTR-c-2, COTR-c-3
 </decomp_ref>
 
@@ -49,13 +49,13 @@ COTR-c-1, COTR-c-2, COTR-c-3
   defect, the `VendorDriftError` misnomer. **CVO has GRADUATED all three. Not criteria against you.**
 - **`COTR-i-1..3` (3) — boundary cells, non-criterion-bearing.**
 
-**`COTR-b-3` and `COTR-b-3a` are SHARED with the DS TO and appear in BOTH. That is deliberate — they ARE
+**`COTR-b-3` and `COTR-b-7` are SHARED with the DS TO and appear in BOTH. That is deliberate — they ARE
 the handoff, and a shared cell is how an edge gets an owner on both sides.**
 </decomp_context>
 
 <proof_of_spec>
   <!-- Positional: python .tools/proof-of-spec-check.py <instance>.json COTR1AE-AC1,COTR1AE-AC2,COTR1AE-AC3,COTR1AE-AC4 ; check the rc. -->
-  <criterion id="COTR1AE-AC1" cell_refs="COTR-b-3, COTR-b-3a, COTR-inv-8"/>
+  <criterion id="COTR1AE-AC1" cell_refs="COTR-b-3, COTR-b-7, COTR-inv-8"/>
   <criterion id="COTR1AE-AC2" cell_refs="COTR-b-4, COTR-inv-2, COTR-inv-3"/>
   <criterion id="COTR1AE-AC3" cell_refs="COTR-c-1, COTR-c-2"/>
   <criterion id="COTR1AE-AC4" cell_refs="COTR-c-3, COTR-inv-9"/>
@@ -64,7 +64,7 @@ the handoff, and a shared cell is how an edge gets an owner on both sides.**
   <alignment_denominators>cells in this TO: 15 (inv 9 - b 3 - c 3); criteria: 4; every criterion carries >=1
 cell_ref; all 15 cells reachable by >=1 criterion. Unmapped 0; untraceable 0. Decomp total 39; 24 excluded
 (18 to the DS lane, 3 routed to D8, 3 boundary non-criterion), each named in decomp_context. COTR-b-3 and
-COTR-b-3a are SHARED with MDPF_COTREMEDIATION.TO-R1-DS by design.</alignment_denominators>
+COTR-b-7 are SHARED with MDPF_COTREMEDIATION.TO-R1-DS by design.</alignment_denominators>
 </proof_of_spec>
 
 ---
@@ -136,7 +136,7 @@ bytes.** Resolve through the **build input**, never by filename — the repo hol
 and a filename-resolved check reports drift where there is none *and reads clean where two copies have
 silently diverged*.
 
-### 4 — CLOSE THE EDGE (`COTR-b-3a`) — ON A MEASUREMENT, NOT A REPORT
+### 4 — CLOSE THE EDGE (`COTR-b-7`) — ON A MEASUREMENT, NOT A REPORT
 
 After both legs land:
 ```
