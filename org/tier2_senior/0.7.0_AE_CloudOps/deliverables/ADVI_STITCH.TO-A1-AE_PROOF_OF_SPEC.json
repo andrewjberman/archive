@@ -1,0 +1,122 @@
+{
+  "task_order": "ADVI_STITCH.TO-A1-AE",
+  "project": "ADVI_STITCH",
+  "phase": "A",
+  "executor": "0.7.0_AE_CloudOps~J",
+  "completed_utc": "2026-08-25T21:35Z",
+  "decomp_ref": "workflows/atom_decomposition/runs/advi-stitch/20260824T222500Z/DECOMP.md @3ee0bec43b",
+  "cells_declared": ["STI-b-4", "STI-inv-1"],
+  "expected_criteria": ["STIA1AE-AC1", "STIA1AE-AC2", "STIA1AE-AC3"],
+  "alignment_denominators": {
+    "cells_declared": 2,
+    "criteria": 3,
+    "every_criterion_has_cell_ref": true,
+    "both_cells_reachable": true,
+    "unmapped": 0,
+    "untraceable": 0
+  },
+  "amendments_applied": [
+    "2.0.0_SA_COO 71408 -- AC2 negative control repointed from the UNMINTED 49financial/{bronze,silver}/* to the LIVE blackdiamond/49f/{bronze,silver}/*. Live-tree arm MANDATORY, prospective arm OPTIONAL.",
+    "2.0.0_SA_COO 71437 -- principal RULED: mint opal-advi-stitch-landing-role (dedicated, least-privilege).",
+    "2.0.0_SA_COO 71457 -- source root corrected to opal-data-bd, NOT blackdiamond/49f/."
+  ],
+  "artifact": {
+    "role_arn": "arn:aws:iam::313476888478:role/opal-advi-stitch-landing-role",
+    "created_utc": "2026-08-25T21:31:32Z",
+    "policy_name": "opal-advi-stitch-landing-scoped",
+    "statements": 6,
+    "terraform": "infra/aws/terraform/opal-assets/advi_stitch_landing.tf",
+    "commit": "596a4f429c",
+    "applied_targeted": true,
+    "targets": ["aws_iam_role.advi_stitch_landing", "aws_iam_role_policy.advi_stitch_landing"]
+  },
+  "criteria": [
+    {
+      "id": "STIA1AE-AC1",
+      "cell_refs": ["STI-b-4"],
+      "verdict": "PASS",
+      "grounding": "DESIRED + APPLIED + EXERCISED",
+      "evidence": {
+        "DESIRED": "terraform plan targeted -> 'No changes. Your infrastructure matches the configuration.' (0-diff after apply)",
+        "APPLIED": "aws iam get-role-policy --role-name opal-advi-stitch-landing-role --policy-name opal-advi-stitch-landing-scoped -> 6 statements, Sids as authored",
+        "EXERCISED": "simulate-principal-policy, ONE --resource-arns per call, three SEPARATE invocations",
+        "arms": {
+          "bronze_legacy/allocation_390224/2026-07-14/data.xlsx": "allowed",
+          "silver_legacy/dim_account_xref/date=2026-07-14/data.parquet": "allowed",
+          "opal-data-49financial/gold/advi/reference/bd_legacy_performance/date=2024-01-02/data.parquet": "allowed"
+        },
+        "positive_control_separate_invocation": {
+          "s3:GetObject opal-data-bd/silver/allocations/2026-01-16.parquet": "allowed",
+          "purpose": "proves this instrument CAN return allow for this principal, so the AC2 denies are informative"
+        },
+        "action_names_validated": "aws accessanalyzer validate-policy --policy-type IDENTITY_POLICY over all six statements incl. s3:prefix condition keys -> 0 findings. Closes the typo false-deny mode, which is byte-identical to a missing grant in a simulate result."
+      }
+    },
+    {
+      "id": "STIA1AE-AC2",
+      "cell_refs": ["STI-b-4", "STI-inv-1"],
+      "verdict": "PASS",
+      "grounding": "EXERCISED",
+      "evidence": {
+        "mandatory_live_tree_arms": {
+          "blackdiamond/49f/bronze/allocation_390224/2026-07-14/data.xlsx": "explicitDeny",
+          "blackdiamond/49f/silver/dim_account_xref/date=2026-07-14/data.parquet": "explicitDeny"
+        },
+        "these_are_the_tiers_holding_actual_data": "Real keys cited and sampled live: blackdiamond/49f/bronze/allocation_390224/2026-07-14/data.xlsx (10,684,756 B) and blackdiamond/49f/silver/dim_account_xref/date=2026-07-14/data.parquet (228,444 B).",
+        "prospective_arms_optional": {
+          "blackdiamond/49financial/bronze/*": "explicitDeny",
+          "blackdiamond/49financial/silver/*": "explicitDeny"
+        },
+        "discrimination": {
+          "claim": "The deny is MY explicit Deny statement firing, not an artifact of nothing being granted.",
+          "control_implicitDeny_arms": {
+            "opal-data-assets/schwab/08335338/silver/x.parquet": "implicitDeny",
+            "opal-data-bd/gold/canonical/nna_atomic/ (OUT-of-scope sibling)": "implicitDeny",
+            "opal-data-assets/blackdiamond/cottonwood/silver/x.parquet (NEVER#2 firm-sep)": "implicitDeny"
+          },
+          "reading": "THREE distinct verdicts from one instrument on one principal -- allowed / explicitDeny / implicitDeny. explicitDeny != implicitDeny proves the live-tier refusal is deliberate. The nna_atomic implicitDeny independently confirms the exact-segment source scoping; the cottonwood implicitDeny confirms firm separation."
+        },
+        "why_a_dedicated_principal_was_required": "Measured against user/Andrew_Berman BEFORE the mint: PutObject on a bucket we do not own -> allowed; organizations:LeaveOrganization -> allowed. Unrestricted admin, so every arm returns allowed regardless of truth and AC2 was UNOBTAINABLE, not merely unmet. Every existing bd49f role holds write on blackdiamond/49f/* (bd49f_pull.tf:88) and fails identically."
+      }
+    },
+    {
+      "id": "STIA1AE-AC3",
+      "cell_refs": ["STI-b-4"],
+      "verdict": "REPORTED -- the guard does NOT reach the legacy tier",
+      "grounding": "EXERCISED (policy-evaluation against the LIVE resource policy; no object written)",
+      "evidence": {
+        "live_bucket_policy": "aws s3api get-bucket-policy --bucket opal-data-assets -> one Deny, Sid DenyParquetUnderBronze17a, Principal '*', Action s3:PutObject, Resource opal-data-assets/*/bronze/*.parquet and opal-data-assets/bronze/*.parquet",
+        "mechanism": "Those patterns require the LITERAL /bronze/ segment. bronze_legacy/ does not contain it, so the deny does not match.",
+        "target_arm": {
+          ".parquet under blackdiamond/49financial/bronze_legacy/": "allowed -- guard does NOT reach"
+        },
+        "isolated_positive_control": {
+          "first_control_REJECTED": ".parquet under blackdiamond/49f/bronze/ returned explicitDeny, but that resource is ALSO inside this role's own NeverTheLiveTiers Deny, so it cannot discriminate the BUCKET-POLICY match. Discarded as confounded.",
+          "control_used": ".parquet under blackdiamond/cottonwood/bronze/ -> explicitDeny. This role does NOT deny cottonwood, so the deny is the BUCKET POLICY firing.",
+          "baseline": ".xlsx under blackdiamond/cottonwood/bronze/ -> implicitDeny. Proves the control's deny is the .parquet rule specifically, not a blanket refusal."
+        },
+        "disposition": "Per AC3 the widening is a ONE-LINE policy segment addition PROPOSED, never self-applied (bucket policy is the infra lane). Routed to 2.0.0_SA_COO, who ruled all routing for this wave. Until it lands, the no-parquet property on the legacy tier rests on the DS lane's inv-2, and this report says so.",
+        "not_claimed": "No write probe was executed. The landing prefixes hold no objects yet and a probe would leave a stray object in a tree the DS lane is about to build. This is policy-evaluation evidence against the real policy -- stronger than reading the policy text, weaker than an actual PutObject. Stated rather than blurred."
+      }
+    }
+  ],
+  "law_observed": {
+    "rule_18": "Applied via .tools/safe-apply.sh. HALT-GATE BLOCKED on first invocation (2 pending messages), both reviewed, re-run with HALT_ACK=1. NOT cited as evidence of not being halted -- a lane agent is unhaltable and a live Monitor drains the inbox the checkpoint reads.",
+    "never_6": "Deploy-completion ledger org/critical_paths/change_management/advi-stitch-landing-iam-20260825.md opened at deploy-start and CLOSED in-session.",
+    "targeting": "Applied with -target. An untargeted plan in this root returns '2 to add, 3 to change' -- three committed-but-unapplied changes authored by other seats and HELD on a gate per commit 1abc54fa4c. A bare apply would land another seat's deferred work, including a live Lambda env repoint of a served MDPF path.",
+    "never_2": "s3:ListBucket is prefix-conditioned per bucket. opal-data-assets/blackdiamond/ holds cottonwood/ -- a different firm.",
+    "q_s2": "opal-data-bd -> opal-data-49financial/gold/advi/reference/bd_legacy_* is a cross-BUCKET copy INSIDE ONE FIRM. NEVER#2 binds FIRMS, not buckets."
+  },
+  "scope_set_alignment": {
+    "declared_at": "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ADVI_STITCH.TO-A1-DS_AC2_SCOPE_SET.md @37c19ba8b6",
+    "read_from_file_not_message": true,
+    "source_root": "s3://opal-data-bd/",
+    "granted_read_equals_declared_in": "backfill_v2/ (WHOLE), forwardfill_v2/ (WHOLE), silver/ (WHOLE), gold/canonical/{performance,nna,holdings}/ (partial-of-gold)",
+    "exact_segments_not_wildcards": "The scope-set file enumerates 11 gold/canonical children: 3 IN (7,273 keys), 8 OUT (14,554). A nna* wildcard would reach nna_atomic/ and nna_validation/; holdings* would reach holdings_gaps/ -- all named OUT."
+  },
+  "residual_unknowns": [
+    "AC3's actual write-probe is deferred until the landing prefixes hold objects. Policy-evaluation evidence stands in its place and is labelled as such.",
+    "The bucket-policy widening for bronze_legacy is PROPOSED, not applied. DISARMED is not REMEDIATED.",
+    "This TO grants; it does not copy. The migration is 0.4.0_DS_ClientPlatform~Q's leg."
+  ]
+}

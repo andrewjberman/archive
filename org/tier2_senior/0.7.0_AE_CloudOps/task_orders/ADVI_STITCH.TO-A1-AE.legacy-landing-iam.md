@@ -10,7 +10,9 @@
 <placement>LAPTOP (Rule 26 — the apply runs on the device that owns the work, under the normal wrappers; nothing ferried).</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-25T00:0xZ</issued>
-<status>ACTIVE (start condition above; seating staged)</status>
+<status>COMPLETE 2026-08-25T21:3xZ by `0.7.0_AE_CloudOps~J` -- role minted, applied, verified on live IAM, AC1/AC2 PASS, AC3 REPORTED. Proof instance at the declared instance_path.</status>
+<cell_status cell="STI-b-4">DONE -- `opal-advi-stitch-landing-role` created 2026-08-25T21:31:32Z, 6-statement inline policy, targeted plan 0-diff. AC1 allowed on all three landing prefixes with a separate-invocation positive control.</cell_status>
+<cell_status cell="STI-inv-1">DONE (IAM half) -- `explicitDeny` on the live `49f/{bronze,silver}` tiers AND the prospective `49financial/{bronze,silver}` leaves, carried by an EXPLICIT Deny statement rather than a mere absence of grant, so a later attached policy cannot widen it. Discrimination shown: `allowed`/`explicitDeny`/`implicitDeny` are three distinct verdicts from one instrument on one principal. ⛔ The DATA-PLANE half of inv-1 (the landed-key path census) is the DS lane's, NOT closed here.</cell_status>
 <priority>P2 — Phase A gates nothing.</priority>
 <scope_guard>ONE PROJECT, TWO CELLS. **No alarm, no monitor, no freshness checker** (moratorium). No bucket-policy edit on your own word — see AC3. Surprises: one line by MCP to `3.0.0_SA_CVO`, cc `2.0.0_SA_COO`. **Nothing to `4.0.0_SA_CRO*`.**</scope_guard>
 <authority>PRD `ADVI_STITCH_PRD.md` v0.2 s.11 #1 (the landing) + CLAUDE.md Rule 22a (STATE/IAM grounding) + CTO's Q-s1/Q-s2 rulings (66836).</authority>
