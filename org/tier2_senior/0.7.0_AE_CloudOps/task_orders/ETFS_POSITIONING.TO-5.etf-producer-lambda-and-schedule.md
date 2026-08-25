@@ -146,6 +146,24 @@ look natural, because the producer genuinely wants that data.
 > THEN:         invoke etf-positioning-producer with a BARE payload -- no as-of argument exists,
 >               selection is automatic (newest trading day having BOTH silver and bbg).
 > ```
+> ⛔ **MANDATORY DISCLOSURE BEFORE FIRING — ADDED 01:2xZ. THIS IS INFORMATION, NOT A GATE.**
+> The release condition above is about the INPUT. It says nothing about whether the OUTPUT is right,
+> and one known defect is live:
+> ```
+> CHECK:  is "mmkt" in CASH_NAME_MARKERS  (etf_positioning_gold.py ~:488) ?
+>   NO  -> SALXX (a money-market fund) books as EQUITY.
+>          DIVZ alloc_cash ~= 0.00 and IDVZ ~= 0.00, instead of 0.58 / 0.89.
+>          THE ROW IS LOUD (bottom, dark, unclassified). THE TOTAL IS SILENT.
+>   YES -> the equity total is correct for SALXX.
+> ```
+> **WHOEVER FIRES MUST STATE WHICH BRANCH THEY FIRED UNDER.** ⛔ **I am NOT gating on it** — `Z-S35`'s
+> target value (`Cash` vs Andrew's `Fixed Income`/`Ultra Short Duration` for the sibling fund) is a
+> sovereign question, and `0.0.0_AB_MSTR~Z` has put the trade to Andrew directly: **firing early buys
+> hours at the cost of the client-facing number being quietly wrong.** ⭐ **His call, not a
+> precondition I invent — but nobody fires this without knowing which they are choosing.**
+> *(Gap disclosure: the condition I wrote at 01:06Z covered only the INPUT, and I made it ownerless
+> so any seat could act on it. Ownerless and INCOMPLETE is worse than owned — this closes that.)*
+
 > ⚠ **DO NOT fire while `bbg/2026-08-24/` is absent** — the producer steps back to 08-21, publishes a
 > further identical-looking artifact, and adds another ad-hoc decoy to a prefix already carrying
 > three at one as-of (all 76,149 B, three ETags). **That is the only thing the hold protects.**
