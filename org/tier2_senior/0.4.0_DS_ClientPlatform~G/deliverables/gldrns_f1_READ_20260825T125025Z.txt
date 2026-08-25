@@ -1,0 +1,133 @@
+GLD-f-1 AC7 READ -- the SCHEDULED 12:45Z emission of 2026-08-25
+read taken 2026-08-25T12:50:25Z by 0.4.0_DS_ClientPlatform~G
+harness: gldrns_f1_scheduled_read.py; TRUE RC=0; verdict AC7 SATISFIED 9/9
+captured VERBATIM below -- not retyped, not summarised
+================================================================================
+GLD-f-1/2/3 -- AC7 READ OF THE SCHEDULED twr_daily EMISSION
+OPAL_GLDRNS.TO-R1-DS, re-addressed to 0.4.0_DS_ClientPlatform~G (CTO 69386)
+============================================================================================================
+
+0. FRAME -- every denominator materialised, never a --query length()
+   twr_daily partitions ......... 530  (2024-07-09 .. 2026-08-24)
+   partition under read ......... 2026-08-24   <- newest present, not a date I typed
+
+1. THE PRIOR TRADING DAY -- from dim_calendar, never wall-clock (AC2)
+   calendar rows ................ 535
+   prev_trading_day(2026-08-24) ... 2026-08-21
+   The oracle is THE PRIOR TRADING DAY, not 'yesterday' and not 'Friday on a
+   Monday'. ~H measured a wall-clock D-1 resolving the WRONG partition on
+   118/533 = 22.1% of runs (102 Mondays + 16 post-holiday).
+
+2. THE EMITTED PARTITION
+   rows ......................... 7,339
+   columns ...................... 13  (9 = pre-remedy shape; 13 = the mirror landed)
+   status census (from the DATA, not the manifest):
+     NO-PRIOR-BALANCE-ACCOUNT-ABSENT        5
+     OK                            6,412
+     UNCOMPUTABLE-ZERO-BMV           922
+   manifest bmv_source .......... canonical_valuation date=2026-08-21
+   [PASS] manifest census == data census                         got={'OK': 6412, 'UNCOMPUTABLE-ZERO-BMV': 922, 'NO-PRIOR-BALANCE-ACCOUNT-ABSENT': 5} want={'OK': 6412, 'UNCOMPUTABLE-ZERO-BMV': 922, 'NO-PRIOR-BALANCE-ACCOUNT-ABSENT': 5}  -- the manifest is a CLAIM; the parquet is the artifact
+
+3. AC7 -- REFUSED-NO-BMV ZERO *FOR ACCOUNTS PRESENT AT BOTH D AND D-1*
+   accounts at D ................ 7,339
+   accounts at D-1 (2026-08-21) .. 7,335
+   present at BOTH .............. 7,334   <- AC7's denominator
+   at D but NOT at D-1 .......... 5   <- the legitimate residual
+   REFUSED-NO-BMV rows .......... 0
+   ...of which are in BOTH ...... 0   <- MUST BE ZERO
+   ...of which are D-only ....... 0   <- CORRECT refusals, no BMV exists
+   [PASS] AC7 denominator is NON-EMPTY (both-days set)           got=True      want=True  -- an empty both-set makes the scoped zero pass vacuously
+   [PASS] REFUSED-NO-BMV == 0 over accounts present at BOTH days got=0         want=0  -- the bare form of this check is FALSE and would fail a good run
+   [PASS] every REFUSED account is accounted for by the D/D-1 delta got=0         want=0  -- a refusal outside both populations is unexplained
+
+4. REPORTED AND EXPLAINED, NEVER DRIVEN TO ZERO (CTO s.14(a))
+   NO-PRIOR-TRADING-DAY              0   ABSENT at this partition
+   UNCOMPUTABLE-ZERO-BMV           922   present
+   These are NOT checked for zero and NOT checked for non-zero. Their value is
+   a fact about the data, and a bar demanding either would be broken, not high.
+   A ZERO on these WITH real returns present would mean the remedy MANUFACTURED
+   a BMV, which AC3 forbids -- so they are reported for a reader, not scored.
+
+5. REAL RETURNS EMITTING -- the substance of AC7
+   rows with a non-null r_net ... 6,412 of 7,339  (87.37%)
+   [PASS] real returns are present                               got=True      want=True  -- this is the criterion; a 100%-refused partition is the pre-remedy state
+
+6. RULE 22a CODE LAYER -- the bytes that WILL EXECUTE, not the ones on disk
+   IDENTITY READ AT 2026-08-25T12:50:28Z -- and that stamp is the point (CVO 69674).
+   DEPLOYED == BLOB IS A MOMENT, NOT A PROPERTY OF THE PATH. This harness re-reads
+   `_code/` live on every run, so the premise is never baked -- but a safe-deploy
+   from any tree between this read and the fire moves the executing bytes, and a
+   verdict quoting an earlier read would be true of a moment that had passed.
+   The SSM doc syncs s3://opal-data-49financial/_code/ on EVERY invocation and runs THAT
+   (advi_49f_floor.tf:226). A file in this checkout has no causal relationship
+   to the run. Rule 22a warns a staged object may be INERT -- that exemption is
+   earned here because the sync is INSIDE the runCommand, not first-boot-only.
+   c02_twr_engine.py          deployed=1c270beda617b07c blob=1c270beda617b07c worktree=22b0a5c245dcf27b
+                                deployed_bytes=13,522  deployed_crlf=0  worktree_crlf=240
+                                worktree raw=False  normalised=True   <- NEITHER is the AC7 check
+   [PASS] DEPLOYED bytes == the ref that built them: c02_twr_engine.py got=True      want=True  -- the only compare on this rung that is about the run
+   chain_49f_entrypoint.py    deployed=070765998b787e34 blob=070765998b787e34 worktree=fc97b99e44cdbeab
+                                deployed_bytes=25,508  deployed_crlf=0  worktree_crlf=418
+                                worktree raw=False  normalised=True   <- NEITHER is the AC7 check
+   [PASS] DEPLOYED bytes == the ref that built them: chain_49f_entrypoint.py got=True      want=True  -- the only compare on this rung that is about the run
+
+7. EXCLUDED AS CORROBORATION, DELIBERATELY
+   The c04 validation battery is NOT a second opinion on this read: its check 7
+   passes twr_daily=None and has never evaluated a return. It sits exactly where
+   a reader reaches for confirmation, and it could not have said otherwise.
+
+   PRIOR FIGURES -- CORROBORATION ONLY. NO CHECK ABOVE READS THESE.
+     0.4.0_DS_ClientPlatform~G (me, consumer-side, an earlier parti {COMPUTED 6329, NOT_COMPUTED_INPUTS_PRESENT 909}
+     3.0.0_SA_CVO (producer-side, same partition)                   {OK 6329, UNCOMPUTABLE-ZERO-BMV 901, REFUSED-NO-BMV 8}  (901+8=909)
+     0.4.0_DS_ClientPlatform~H (ad-hoc QA chain, --date 2026-08-19, {OK 6393, UNCOMPUTABLE-ZERO-BMV 922, REFUSED-NO-BMV 17}
+   If the fire disagrees with these, that is a FINDING to route, not a failed
+   check. I am one of these arms; scoring against them would be self-comparison.
+
+8. SCHEDULED OR AD-HOC -- the artifact cannot say, so read the RUN'S OWN LOG
+   The manifest carries NO trigger field, so scheduled-ness is not decidable
+   from the partition. The chain uploads its own log every run and the first
+   line records the mode (advi_49f_floor.tf:230).
+   log object                                           modified (UTC)    prod
+   chain_20260825T124542Z.log                      2026-08-25T12:47:33    True
+   chain_20260824T124542Z.log                      2026-08-24T12:47:13    True
+   chain_20260823T124542Z.log                      2026-08-23T12:47:17    True
+   chain_20260822T124602Z.log                      2026-08-22T12:47:41    True
+   chain_backfill_0819_20260821T151733Z.log        2026-08-21T15:19:25   False
+   chain_adhoc_qa_20260821T1411Z_DSB_date0819.l    2026-08-21T14:30:10   False
+   COVERING date=2026-08-24: chain_20260825T124542Z.log
+     first line: CHAIN START date=2026-08-24 mode=production workdir=/tmp/49f_chain_work stages=16
+     mode=production True | bare SSM-style name True
+   EVIDENCE-FOR, NOT PROOF, and the distinction is load-bearing:
+     mode=production proves the FLAG, never that the SCHEDULER fired it --
+     a human passing --production writes the identical line.
+     The ad-hoc runs here carry descriptive infixes (chain_adhoc_qa_...,
+     chain_backfill_...), but THAT IS A HUMAN CONVENTION AND NOT A CONTROL.
+     The airtight source is the scheduler's invocation history, outside this read.
+
+8b. THE DISPATCH ITSELF -- scheduler-side attribution AND its exit status
+   materialised 675 SSM command(s) over 15 page(s), exhausted=True
+   (the FIRST page can be EMPTY with a NextToken -- reading page one and stopping
+    yields a clean zero that is a page artifact, not a history)
+   dispatch (UTC)            status  comment
+   2026-08-25T12:45:41Z     Success  advi 49f dispatch src=advi.49f.scheduled-floor
+   2026-08-24T12:45:41Z      Failed  advi 49f dispatch src=advi.49f.scheduled-floor
+   2026-08-23T12:45:41Z      Failed  advi 49f dispatch src=advi.49f.scheduled-floor
+   2026-08-22T12:46:01Z     Success  advi 49f dispatch src=advi.49f.scheduled-floor
+   2026-08-21T12:45:42Z     Success  advi 49f dispatch src=advi.49f.scheduled-floor
+   2026-08-20T12:45:41Z      Failed  advi 49f dispatch src=advi.49f.scheduled-floor
+   [PASS] most recent dispatch was SCHEDULER-fired, not manual   got=True      want=True  -- src=advi.49f.scheduled-floor in the dispatcher-written Comment
+   [PASS] most recent dispatch SUCCEEDED                         got=Success   want=Success  -- a Failed dispatch means the chain died; the partition plane cannot show it
+
+============================================================================================================
+DENOMINATOR: 9/9 checks PASS over 7,339 rows / 7,339 accounts at D / 7,335 at D-1
+AC7 VERDICT: SATISFIED at this partition
+SCOPE, UPDATED when section 8b landed -- an earlier version of this line said
+  the scheduler's invocation history was OUTSIDE this read. IT IS NOW INSIDE IT,
+  and leaving the old sentence would have been a status line outliving its body.
+  WHAT IS ESTABLISHED: the dispatcher-written SSM Comment carries the scheduler's
+    own source tag (src=advi.49f.scheduled-floor; a manual dispatch defaults to
+    src=manual), so SCHEDULED-vs-AD-HOC is now attributed from a record written
+    by the dispatcher rather than by the thing being judged -- and the dispatch's
+    EXIT STATUS is visible, which the partition plane cannot show at all.
+  WHAT IS NOT: this still reads ONE partition. An ad-hoc run is NEVER production
+    evidence, and nobody accelerates the run.
