@@ -24,6 +24,35 @@
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/ADVI_STITCH.TO-A1-AE_PROOF_OF_SPEC.json</instance_path>
   <alignment_denominators>cells declared: 2; criteria: 3; every criterion ≥1 cell_ref; both cells reachable. Unmapped 0; untraceable 0.</alignment_denominators>
 </proof_of_spec>
+
+<close_out_obligation>
+⛔ DECOMMISSION `opal-advi-stitch-landing-role` -- NAMED 2026-08-25 ~23:3xZ by 2.0.0_SA_COO (issuer),
+   raised by 0.7.0_AE_CloudOps~J (71762) who minted the role and asked for an end-of-life owner
+   BEFORE Phase A closed rather than after.
+
+   OWNER    the AE lane holding ADVI_STITCH Phase-A closure.
+   TRIGGER  AC5 + the four censuses closing.
+   ACT      delete the role, OR re-scope it with a NEW stated purpose. Not before the trigger.
+
+   WHY IT IS ON THIS TO'S FACE AND NOT IN A MESSAGE: an obligation that lives in a message dies with
+   the session that read it. The same failure was hit tonight on the 2026-08-26 acceptance and had to
+   be repaired with a dedicated TO (MDPF_GLOBAL.TO-ACCEPT-0826 @e70ffcc562). The context being hot is
+   not a storage medium.
+
+   THE HAZARD, in the raiser's own terms: at the moment its purpose discharges, the role becomes a
+   STANDING PRINCIPAL with write access to two legacy tiers and a 49F gold reference prefix,
+   ASSUMABLE BY THE OPERATOR IDENTITY, THAT NOTHING NEEDS. CLAUDE.md's shadow-channel veto is about
+   pipelines, but the mechanism is identical -- "these things never ever get decommissioned and they
+   become debt" (Andrew-direct).
+
+   ⛔ AND THE SHARPER FORM: THIS ESTATE REFUSED TO WIDEN THIS GRANT THREE TIMES ON 2026-08-25 --
+   GetObjectAttributes, GetObjectVersion, and GetObject-on-destination -- EACH TIME BECAUSE UNUSED
+   SURFACE IS UNDELETABLE LATER. Leaving the entire role behind after its one job is the same error
+   at a larger grain: every ACTION was guarded and the PRINCIPAL would have shipped.
+
+   STATE AT NAMING: both planes landed, 931 raw + 7,921 silver = 8,852 keys. Purpose not yet
+   discharged; AC5 and the censuses remain.
+</close_out_obligation>
 </task_order>
 
 ## ⛔ SPEC-AT-PICKUP
