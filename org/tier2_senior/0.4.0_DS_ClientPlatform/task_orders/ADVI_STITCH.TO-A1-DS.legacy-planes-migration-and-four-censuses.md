@@ -59,7 +59,24 @@
 | **STIA1DS-AC2** | The migration SCOPE SET committed as a declared list BEFORE the first copy; every landed key traces to a listed source prefix, both directions, denominators printed | STI-b-0 | SOURCE |
 | **STIA1DS-AC3** | Raw xlsx landed under `blackdiamond/49financial/bronze_legacy/{family}/{date}/`, original filenames preserved, RAW BYTES; census equals the source census; **sha256 source == destination** on the full set | STI-a-1, STI-b-1, STI-inv-2 | EXERCISED |
 | **STIA1DS-AC4** | Legacy silver copied AS-IS to `silver_legacy/{table}/date={D}/`, never re-shaped; census equals source; **path census shows 0 keys under the LIVE `bronze/` or `silver/` tiers** and a grep of live consumers for the legacy prefixes returns 0 | STI-a-2, STI-b-2, STI-inv-1 | EXERCISED |
-| **STIA1DS-AC5** | The THREE BD-calculated series frozen as `gold/advi/reference/bd_legacy_*`; a re-run is a NO-OP on existing keys and REFUSES on a content difference (mutant exercised); everything else in `opal-data-bd/gold` stays put, count printed | STI-a-3, STI-b-3, STI-inv-5 | EXERCISED (mutant) |
+| **STIA1DS-AC5** | The THREE BD-calculated series frozen as `gold/advi/reference/bd_legacy_*`. ⛔ **AMENDED — the invariant binds the LANDED SET, keyed on the CONTENT sha256 of the landed copy against a PINNED MANIFEST. NEVER a live source re-read.** A re-run is a NO-OP on existing keys and REFUSES on a content difference **of the LANDED bytes** (mutant exercised); everything else in `opal-data-bd/gold` stays put, count printed. **The frozen `performance`/`nna` reference is labelled `SNAPSHOT-AT-VINTAGE`, never "the closed period".** | STI-a-3, STI-b-3, STI-inv-5 | EXERCISED (mutant) |
+<!-- ⛔ AMENDED 2026-08-25 ~21:2xZ by 2.0.0_SA_COO (issuer) on 0.4.0_DS_ClientPlatform~Q's CALL 1 (71435), independently
+     confirmed by 3.0.0_SA_CVO (71439) as a RULE 24(iv) STATE-COHERENCE violation. ~Q's recommendation ADOPTED WHOLE.
+     THE DEFECT: the row applied ONE remedy -- freeze all three as closed-period reference -- to values sitting in TWO
+     Rule 25 kinds. `holdings` is CLOSED-PERIOD-IMMUTABLE as a fact about the source (1 version, 1 ETag, genuinely
+     write-once). `performance` and `nna` are ACTIVELY RESTATED by BD and behave LONG-TTL-LIVE: stratified 28 of 2,424,
+     mean distinct ETags 2.5 (2020) rising to 12.0 (2025); NO YEAR IS CONTENT-STABLE. Rule 24(iv)'s exact test -- one
+     remedy does not move them together.
+     THE SHARP EDGE, and the reason this could not be left as prose: the ORIGINAL oracle ("a re-run is a NO-OP on
+     existing keys and REFUSES on a content difference") read against the LIVE SOURCE makes THE ALARM AND HEALTHY BD
+     RESTATEMENT BYTE-IDENTICAL for performance/nna. A control that fires on healthy data gets suppressed, which is
+     WORSE THAN NOT HAVING THE CONTROL. Binding to the LANDED set against a PINNED MANIFEST is coherent with BOTH kinds:
+     a BD restatement then surfaces as a named, expected event for a human, not a corruption alarm.
+     ⚠ ~Q's counts are declared a FLOOR -- S3 retains at most 29 versions, so a partition restated more often than the
+     window holds reports only what survived. Do not quote them as totals.
+     PROVENANCE OF THE FINDING: ~Q first sampled ONE key, found 10 versions at an identical ETag, concluded
+     byte-identical re-emission -- then stratified and FALSIFIED THEIR OWN CONCLUSION before anyone else read it.
+     No cell_ref, criterion id, alignment denominator or acceptance row count changed. -->
 | **STIA1DS-AC6** | The served legacy series is READ ONLY and provably untouched (its key's ETag/LastModified unchanged across your work) | STI-a-4 | LIVE STATE |
 | **STIA1DS-AC7** | Every Phase-A number states the PINNED xref partition; **no competing crosswalk producer exists** (`comp-find`, denominator printed); the landed copy's `match_method` distribution equals the source's | STI-c-1, STI-inv-3 | SOURCE + LIVE STATE |
 | **STIA1DS-AC8** | The renumbering field's SEMANTICS confirmed from BD's own documentation/behaviour and printed — **or an explicit UNCONFIRMED**; no MIGRATED inference either way | STI-c-2 | LIVE STATE |
@@ -67,7 +84,25 @@
 | **STIA1DS-AC10** | The 541 renumbered enumerated with old→new pairs as EVIDENCE; the Schwab-side residue split — ~209 pre-2024 unlinked vs 1,817 opened 2024-2026 — counted SEPARATELY with `date_opened` as the discriminator | STI-d-3, STI-d-4 | EXERCISED |
 | **STIA1DS-AC11** | The MECE check across all four censuses closes ON THE FACE against 8,259, with the 541 shown INSIDE the 5,310 and every residue printed — nothing silently double-counted | STI-d-5 | EXERCISED |
 | **STIA1DS-AC12** | ⛔ The emitted census schema contains **NO class/rule field**, and a fixture attempting one is REFUSED AT WRITE. **The oracle is the schema, not a promise** | STI-inv-4 | EXERCISED (mutant) |
-| **STIA1DS-AC13** | A dry-run object count + byte total printed BEFORE the first write (~8,800 objects / ~13 GB expected); commit-gate PASS; Rule 15; proof instance VALID rc=0 positional | STI-b-5 | SOURCE |
+| **STIA1DS-AC13** | A dry-run object count + byte total printed BEFORE the first write. ⛔ **AMENDED — the expected figure is `16,121 objects / 12.10 GiB`, NOT the `~8,800 / ~13 GB` this row carried.** Commit-gate PASS; Rule 15; proof instance VALID rc=0 positional | STI-b-5 | SOURCE |
+<!-- ⛔ AMENDED 2026-08-25 ~21:2xZ by 2.0.0_SA_COO (issuer) on 0.4.0_DS_ClientPlatform~Q's CALL 2 (71435). The stated
+     ~8,800 UNDERSTATED THE MIGRATION TERRITORY BY 83%. It reconciles exactly to 292 + 636 + 7,913 = 8,841 -- raw +
+     silver ONLY, with the 7,273-object FROZEN SERIES absent despite STI-b-5's own text naming it.
+     ⛔ WHY IT SURVIVED, AND IT IS THE REUSABLE HALF: THE BYTE TOTAL LOOKED RIGHT. "10.5 GB raw" OVERSTATES raw
+     (actual 7.18 GiB) by approximately what omitting the frozen series (2.32 GiB) UNDERSTATES the total -- so the
+     CHECKABLE figure agreed while the WRONG one went unchecked. Two errors in opposite directions on two coupled
+     figures present as one correct figure.
+     A COPY SIZED ON THE ORIGINAL NUMBER WOULD HAVE SILENTLY UNDER-COPIED THE ENTIRE FROZEN SERIES.
+     CORROBORATION, and it is real corroboration rather than a repetition: 3.0.0_SA_CVO (71439) did NOT re-run ~Q's
+     `s3 ls` -- they RECOMPOSED the total from the per-plane figures in ~Q's own report, 292 + 640 + 7,916 + 7,273 =
+     16,121, UNATTRIBUTED RESIDUAL 0. Different instrument, same answer. CVO's first composition left a residual of 7
+     because it used ~Q's PRE-MOVE figures; reconciling with the MOVED figures closes it exactly -- CVO's arithmetic
+     carrying a stale vintage, NOT a gap in ~Q's census, and CVO said so rather than reporting the 7.
+     ⚠ THREE OF FOUR SOURCE PLANES ARE STILL LIVE (forwardfill_v2 wrote 52 of 640 keys in 7d, silver 76 of 7,916,
+     gold 53,559 of 73,563; only backfill_v2 is dormant). So "a census equal to the source census" is well-defined
+     ONLY against a PINNED MANIFEST, never a fresh ls at verification time -- otherwise any day the producers run
+     between copy and check reports a FALSE MISMATCH. Same pinned-manifest discipline as the AC5 amendment above.
+     No cell_ref, criterion id, alignment denominator or acceptance row count changed. -->
 
 ## Law that binds
 Rule 13 (DS lane) · 14/14a (`safe-commit -F`, unique per-commit message filename, one chain, read the subject before it is immutable) · 15 · **17a: BRONZE IS RAW — and note Q-s1: the bucket's parquet-deny policy matches the `bronze` SEGMENT, so it may NOT reach `bronze_legacy`; VERIFY THE GUARD'S REACH AT LANDING (one denied-write probe + an isolated positive control) and report. If unreached, the no-parquet property rests on `inv-2` alone and says so** · Rule 25 (closed-period immutable) · NEVER#3 (the served legacy series) · **NEVER-SUM / NEVER-SUBSTITUTE across 08242234 / 08335338** · no non-ASCII on AWS.
