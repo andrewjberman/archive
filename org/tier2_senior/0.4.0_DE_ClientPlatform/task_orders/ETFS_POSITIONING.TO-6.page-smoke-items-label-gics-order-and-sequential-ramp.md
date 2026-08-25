@@ -102,6 +102,32 @@ not overlap, so it is a new table built to the same construction rule.
 | **`POS-TO6-AC5`** | **The unlabelled bucket is handled deliberately.** `sub_asset_class: None` is **1 row — `2602335D` / TPG Inc**, the known four-symptom row. It must not silently take a ramp colour that implies a sector. | `ETFS-d-2` | **EXERCISED** |
 | **`POS-TO6-AC6`** | ⛔ **NEGATIVE CONTROL: a sector with ZERO rows.** `Real Estate` is in both lists and **absent from today's data**. Show the ramp does not shift or mis-colour when a member of the ordered axis has no rows — **a ramp computed over PRESENT values instead of the DECLARED axis changes every colour whenever a sector empties.** | `ETFS-d-2` | **EXERCISED (fixture)** |
 
+> ⛔ **POST-VALIDATION CORRECTION 00:41Z — `AC5` AND `AC4` WERE BOTH DEFECTIVE AS I WROTE THEM.**
+> Andrew found two colour defects **after** my 6/6 validation. Recorded as **PASSED-WITH-FINDING**,
+> not silently re-passed, and the defects were in the CRITERIA:
+>
+> **`AC5` was a PROHIBITION where the requirement was DISCRIMINABILITY.** I wrote *"must not silently
+> take a ramp colour that implies a sector."* `0.4.0_DE_ClientPlatform~Z` complied **exactly** — and
+> the existing colour **was** `ASSET_CLASS_COLORS['Equity']`, so an **unclassified** row rendered in
+> the identical tone of a **classified** one. **A prohibition constrains the ARTIFACT; the property
+> that matters lives in the READER.** It should have read: ***"an unclassified row must be visually
+> DISTINGUISHABLE from every classified one — shown."*** *(Fixed at `36599dec`: `gray900`, **5.2×
+> darker by relative luminance**, a dark NEUTRAL **off the ramp**, so it cannot read as "the last
+> sector." That is discriminability, and it is stronger than a darker blue.)*
+>
+> **`AC4`'s "EXERCISED (rendered)" GROUNDING WAS UNSOUND** — it was discharged by the author
+> rendering and reading their own work, which is **self-comparison on the one axis the author is
+> least able to see.** ⛔ **A colour or layout claim cannot be discharged by its author. Name a
+> DIFFERENT renderer, or state the claim is unverifiable at this seat.** *(Also caught: ramp index 4
+> resolved to `PALETTE.blue500`, which **IS** `ASSET_CLASS.equity` — the IDENTICAL hex, not a
+> near-miss. No criterion forbade a ramp step colliding with an asset-class chip, and I would not
+> have thought to write one.)*
+>
+> ⭐ **THE CLASS, three instances on this page in one night:** a correct **null** indistinguishable
+> from a fetch failure · a correct **fallback** indistinguishable from a styling gap · a correct
+> **unclassified** row indistinguishable from a classified one. **The value is right and the reader
+> cannot tell it from a different meaningful state — and NO GATE IN THIS ESTATE CAN SEE ANY OF IT.**
+
 > **AC6 is the load-bearing one.** A ramp built from the sectors that happen to be present looks
 > perfect today and **re-colours the entire column the first day a sector drops out** — and nobody
 > would attribute that to the ramp.
