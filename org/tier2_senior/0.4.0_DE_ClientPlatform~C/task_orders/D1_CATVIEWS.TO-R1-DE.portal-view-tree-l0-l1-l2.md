@@ -88,7 +88,7 @@
 | **D1R1DE-AC6** | Consumed vs empty-fallback cases BOTH captured and DISTINGUISHABLE in the test record (NON-NULL member lists for ≥1 firm in the consumed case) | D1-c-1, D1-c-2 | EXERCISED |
 | **D1R1DE-AC7** | Displayed L0 sum == `total_aua − Insurance`; each L1 sums to its L0 parent; no double-count expressible in the UI | D1-inv-4 | EXERCISED |
 | **D1R1DE-AC8** | Screenshot READ on record + colour law checked on the silver canvas | D1-h-v1 | EXERCISED |
-| **D1R1DE-AC9** | Commit on DEV under your author line via `safe-commit.sh`; `bun run typecheck` clean; proof instance VALID rc=0 positional | D1-c-1 | SOURCE |
+| **D1R1DE-AC9** | Commit on DEV under your author line via `safe-commit.sh`; `bun run typecheck` clean; proof instance VALID rc=0 positional. ⛔ **PASS-ATTRIBUTION (added by the issuer on CVO 67546): A WHOLE-TREE TYPECHECK IS A STRONG INSTRUMENT ABOUT THE TREE AND NOT ABOUT YOUR LANE, so a bare green is a PASS THAT IS NOT ATTRIBUTABLE TO THE WORK IT ACCEPTS.** Two DE lanes and `1.0.0_SA_CTO~X` all write portal DEV; `~X` landed the AGG removal BETWEEN their commits, so this is measured, not hypothetical. **Record the typecheck as a PAIR OF NAMED REFS -- BEFORE your change and AFTER -- on the face of the proof instance: clean->clean ATTRIBUTES, red->green ATTRIBUTES, and clean->clean ACROSS A PEER'S COMMIT is DISCLOSED rather than claimed.** Same rule as the standing evidence-at-a-named-ref one, applied to a GATE instead of an artifact. **And the direction that needs this is the GREEN one: a peer's RED is loud and gets investigated in minutes; a peer's green is silent, and nobody investigates a pass.** | D1-c-1 | SOURCE + EXERCISED |
 
 ## Do not
 - No PROD promote (DT lane). Stop at DEV.
