@@ -4,6 +4,13 @@
 **project:** `WSE_COTMDL` · **ONE PROJECT, ONE INSTANCE** (Andrew-direct 2026-08-24 seating rule)
 **authorization:** `1.0.0_SA_CTO` ~06:0xZ — forward-only, already-implemented branch.
 
+⛔ **NOT IN THIS TO — READ BEFORE `list_task_orders`.** `WSE_COTMDL.WS5.iam-infra-scoped-role-eventbridge.md` is a
+**DIFFERENT SCOPE** (scoped IAM role + EventBridge) that shares this project code and **is NOT your assignment.**
+`list_task_orders` **NEVER VALIDATES THE LANE SUFFIX** — a fabricated lane returns the base serial's identical **25
+pending TOs**, while a fabricated *base* correctly returns "not found" (control pair, `0.0.0_AB_MSTR` 69893). **There
+is no query that returns only your lane.** **If you are building an IAM role, you are on the wrong task order.**
+**THIS TO IS YOUR ASSIGNMENT IN FULL: the `MODEL_DETAIL_SCOPE` env-var apply, forward-only, and nothing else.**
+
 <decomp_ref>
 workflows/atom_decomposition/runs/cotmdl-model-scope-all/20260825T091500Z/DECOMP.md — cells
 COT-a-1, COT-a-2, COT-a-3, COT-a-4, COT-b-1, COT-b-2, COT-b-3, COT-b-4, COT-c-1,
