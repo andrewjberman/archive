@@ -58,6 +58,48 @@
 | **STIA1DS-AC1** | Every inherited figure RE-GROUNDED at a pinned vintage and printed beside the run's, differences named | STI-d-0 | LIVE STATE |
 | **STIA1DS-AC2** | The migration SCOPE SET committed as a declared list BEFORE the first copy; every landed key traces to a listed source prefix, both directions, denominators printed | STI-b-0 | SOURCE |
 | **STIA1DS-AC3** | Raw xlsx landed under `blackdiamond/49financial/bronze_legacy/{family}/{date}/`, original filenames preserved, RAW BYTES; census equals the source census; **sha256 source == destination** on the full set | STI-a-1, STI-b-1, STI-inv-2 | EXERCISED |
+<!-- GRAMMAR AMENDED 2026-08-25 ~22:3xZ by 2.0.0_SA_COO (issuer) on 0.4.0_DS_ClientPlatform~Q's BLOCKING 71607,
+     raised BEFORE anything landed. THE ROW AS WRITTEN WAS UNSATISFIABLE: {family}/{date} is not derivable for
+     350 of 932 keys and STRICTLY IMPOSSIBLE for 3. Eight key shapes measured, denominator 932. Five rulings,
+     every one adopting the executing seat's own recommendation:
+
+       D1  3 UNDATED (backfill_v2/Transactions_OpalCapital_Weekly (5)/(6)/(7)) -> land at
+           .../bronze_legacy/transactions/_undated/, original filenames preserved incl. the literal space
+           and parentheses.
+           DO NOT SYNTHESISE A DATE FROM LastModified. A fabricated partition date in a
+           closed-period-immutable tier is INDISTINGUISHABLE FROM A REAL ONE FOREVER, and bronze_legacy is by
+           definition what the vendor delivered. _undated/ keeps the grammar's shape and makes the exception
+           VISIBLE AND GREPPABLE rather than hidden inside a plausible-looking date.
+
+       D2  282 depth-1 TXN_ files -> family=transactions, recorded as a DERIVED MAPPING, never as source truth.
+           Grounded BOTH directions: TXN_DAILY (97) + TRANSACTIONS_DAILY (63) inside the real transactions/
+           directory, and TXN_-prefixed files in ZERO of the other four families.
+
+       D3  62 date-RANGE files -> {date} = the START date, recorded as a CONVENTION and not a finding. No
+           evidence favours start over end; nothing is lost because the ORIGINAL FILENAME carries both
+           endpoints and is preserved, so the range stays recoverable from the landed key itself.
+
+       D4  119 _complete/{date}.json markers -> THEY LAND, mirroring source. AC3's "raw xlsx" clause
+           conflicted with its own "census equals the source census" clause, and dropping 119 objects fails
+           the second BY CONSTRUCTION. The narrower clause loses.
+           AND THE MARKERS ARE NOT A COMPLETENESS ORACLE -- measured coverage of file-dates by marker-dates:
+           allocations 8/125, assets 0/48, realized 47/110, transactions 56/160, unrealized 8/69, and
+           backfill_v2 has ZERO MARKERS AT ALL. EVIDENCE TO PRESERVE, NEVER A CHECK TO RELY ON. A landed
+           _complete/ tree LOOKS like an attestation of completeness and is not one -- and a future reader
+           will reach for it exactly when they need a completeness check most.
+
+       D5  forwardfill_v2/_perm_probe_*.txt -> DOES NOT LAND. EXCLUDED, DECLARED AND COUNTED. It is OUR
+           artifact, not the vendor's; landing our own permissions-probe residue in an immutable vendor tier
+           leaves a later reader unable to tell it from source data. NOT silently dropped.
+
+     CENSUS ARITHMETIC THIS ROW IS NOW JUDGED AGAINST:
+       932 enumerated = 465 unambiguous + 282 derived-family + 119 markers + 62 range-start + 3 undated
+                        + 1 EXCLUDED
+       931 landed. PRINT BOTH NUMBERS AND THE EXCLUSION, both directions, against the PINNED MANIFEST.
+       A silent 931 is the quiet-drop failure; an unexplained 931-vs-932 sends the next reader hunting.
+
+     No cell_ref, criterion id, alignment denominator or acceptance row count changed -- the DESTINATION
+     GRAMMAR is amended and the census arithmetic is stated. -->
 | **STIA1DS-AC4** | Legacy silver copied AS-IS to `silver_legacy/{table}/date={D}/`, never re-shaped; census equals source; **path census shows 0 keys under the LIVE `bronze/` or `silver/` tiers** and a grep of live consumers for the legacy prefixes returns 0 | STI-a-2, STI-b-2, STI-inv-1 | EXERCISED |
 | **STIA1DS-AC5** | The THREE BD-calculated series frozen as `gold/advi/reference/bd_legacy_*`. ⛔ **AMENDED — the invariant binds the LANDED SET, keyed on the CONTENT sha256 of the landed copy against a PINNED MANIFEST. NEVER a live source re-read.** A re-run is a NO-OP on existing keys and REFUSES on a content difference **of the LANDED bytes** (mutant exercised); everything else in `opal-data-bd/gold` stays put, count printed. **The frozen `performance`/`nna` reference is labelled `SNAPSHOT-AT-VINTAGE`, never "the closed period".** | STI-a-3, STI-b-3, STI-inv-5 | EXERCISED (mutant) |
 <!-- ⛔ AMENDED 2026-08-25 ~21:2xZ by 2.0.0_SA_COO (issuer) on 0.4.0_DS_ClientPlatform~Q's CALL 1 (71435), independently
