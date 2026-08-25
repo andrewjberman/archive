@@ -107,7 +107,39 @@ Same record, item (1). `org/projects/ADVI_49FSRC.json` PARKED.
 ⚠ **This is a SOURCING hold, not a promote hold.** Listed because the PERFRP record names it as a
 possible interaction — **not** because it is the same kind of thing.
 
-## (3) PERFRP — ⛔ FOUR EMPTY CARDS RENDER TO A 49F ADVISOR ON PROD. SURFACED, NOT ADJUDICATED.
+## (3) PERFRP — ✅ ADJUDICATED BY ANDREW 2026-08-25 ~08:5xZ. ACCEPT ON PROD, NO REVERT. THE DATA HALF STANDS.
+
+**ANDREW-DIRECT, base CTO terminal, VERBATIM** (relayed by `1.0.0_SA_CTO` 69834, recorded +
+broadcast same turn):
+> **"I'm fine with it on PROD, let's just get the data part sorted"**
+
+**THIS IS THE ADJUDICATION THIS REGISTER EXPLICITLY DECLINED TO MAKE.** The entry below stated two
+available readings and said the choice was his. **He chose, and he chose the reading neither
+recommendation favoured** — CTO's REC was REVERT; he ruled ACCEPT.
+
+⛔ **HIS CONDITION HAD TWO HALVES AND HE RELEASED EXACTLY ONE.** The original word was *"stay on
+the DEV branch not promoted to PROD **UNTIL WE KNOW THE DATA PIPELINE AND ALL UNDERLYING DATA IS
+VERIFIED END TO END**."*
+- **BRANCH HALF — RELEASED.** No revert, no promote hold, nothing owed by
+  `0.2.0_DT_PortfolioAnalytics~Z`, who was never at fault.
+- **DATA HALF — NOT RELEASED, AND NOW THE WHOLE OF IT.** *"let's just get the data part sorted"*
+  **says the data is not sorted.** The publish gate STANDS; zero PERFRP leaves served remains the
+  correct state.
+>> **READING THIS AS A GENERAL LIFT WOULD BE THE WIDENING THE LAW FORBIDS** — and it would invert
+him precisely: he dropped the half that was protecting nothing and pointed at the half that is. <<
+
+⛔ **AND HIS SENTENCE CONFIRMS THE STRUCTURAL FINDING RATHER THAN OVERRIDING IT.** What was
+measured here — that BRANCH POSITION PROTECTED NOTHING (two promotes in 45 minutes, two unrelated
+projects, neither naming a passenger, while the DATA gate held and nobody had designated it as the
+protection) — **is what he said in one sentence.** The branch was never the thing he cared about.
+*The finding was right; the recommendation drawn from it was the wrong half.*
+
+**WHAT "THE DATA PART" POINTS AT** (both already in flight, neither this register's to drive):
+`twr_daily`'s 12:45Z SCHEDULED run (`GLD-f-1`, `0.4.0_DS_ClientPlatform~G` — **nobody accelerates
+it; an ad-hoc run is not production evidence**), and Cottonwood's ingest gap
+(`MODEL_DETAIL_SCOPE=all`, `WSE_COTMDL`, authorized and still unseated).
+
+### ⛔ THE HOLD AS IT STOOD BEFORE — kept for provenance, INCLUDING the reading he did not take
 
 ⛔ **CORRECTED 2026-08-25 ~07:2xZ — THIS ENTRY FIRST SAID "ITS SUBJECT IS ON PROD", WHICH IS THE
 SOURCE PLANE AND IS NOT WHAT THE QUESTION IS ABOUT.** `0.4.0_DE_ClientPlatform~D` crossed to the
