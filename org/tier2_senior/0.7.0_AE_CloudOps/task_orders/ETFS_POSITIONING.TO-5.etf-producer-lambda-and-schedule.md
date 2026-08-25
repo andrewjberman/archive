@@ -169,7 +169,19 @@ look natural, because the producer genuinely wants that data.
 > sector map.** ⛔ **The four cells below all PASS on that build** — they exercise the function, not
 > the artifact. **Rule 22a's layer rule, and my check is on the wrong layer.**
 > ✅ **THE SUFFICIENT CHECK IS ARTIFACT-LEVEL: read the emitted book — `alloc_cash`, `alloc_equity`,
-> `alloc_fixed_income` and the sector map — NOT `classify()`'s return.** Not written here because the
+> `alloc_fixed_income` and the sector map — NOT `classify()`'s return.**
+> ⛔ **AND IT NEEDS A GUARD (`3.0.0_SA_CVO~Z`, falsifying their own oracle): `alloc_cash = 0.00`
+> CANNOT DISTINGUISH "the defect fired" FROM "the book is a SHELL" — and the shell state is TODAY's
+> CORRECT state.** DIVZ/IDVZ read `holdings=0, alloc_cash=0.0` right now with `Z-S35` NOT fired.
+> **A reader checking tomorrow against an unfixed partition would read 0.00 and report the defect
+> CONFIRMED on two empty books.**
+> ```
+> GUARD FIRST:  DIVZ.holdings > 0 AND IDVZ.holdings > 0   (holdings_status == "full")
+> THEN:         alloc_cash ~= 0.58 / 0.89 -> correct  ·  ~= 0.00 -> Z-S35 fired
+> GUARD FAILS:  shells. The partition fix has not landed and Z-S35 is UNMEASURABLE --
+>               not absent, not confirmed. REPORT THE GUARD, NOT THE NUMBER.
+> REFERENCE (instrument works on a full book): PFDE alloc_cash 0.36 · PFOE 2.35
+> ``` Not written here because the
 > build is on hold and the aggregations will change; **whoever resumes writes it against the emitted
 > JSON.**
 > ✅ **CONTAINED: `@0c03c359f2` is LOCAL, NOT DEPLOYED** — deployed package measured independently at
