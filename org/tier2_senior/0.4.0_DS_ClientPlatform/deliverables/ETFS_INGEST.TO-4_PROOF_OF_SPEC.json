@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_INGEST.TO-4",
+  "firm": "FABRIC",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_INGEST.TO-4.trueshares-holdings-feed-and-convention-implementation.md",
+    "group": "D",
+    "vintage_commit": "8174332fac"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/etf_conversion.py",
+      "kind": "script",
+      "commit_or_etag": "e442e30964",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "artifact_covered_by": [
+        "INGEST-TO4-AC1",
+        "INGEST-TO4-AC3",
+        "INGEST-TO4-AC5",
+        "INGEST-TO4-AC6"
+      ],
+      "deploy_evidence": "VENDOR half. A `holdings` FEED on the EXISTING convert_trueshares(), never a new converter (build-ladder rung 2). Also widened _TS_RE, which hardcoded BOTH `bronze/netassets/` and `.html` -- see the surprise entry: without that the feed would have been declared, wired, gate-clean and CONVERTED NOTHING. AE-class deploys opal-assets-silver-etf; I applied nothing."
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/etf_schemas.py",
+      "kind": "script",
+      "commit_or_etag": "e442e30964",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "artifact_covered_by": [
+        "INGEST-TO4-AC1",
+        "INGEST-TO4-AC5"
+      ],
+      "deploy_evidence": "The DECLARED TrueShares holdings shape per that file's explicit-schema law: TS_HOLDINGS_VENDOR (10 vendor columns verbatim, spaces preserved) + TS_HOLDINGS_ADDITIVE (date_std) + TS_HOLDINGS_HEADER as the typed boundary. Declared SEPARATELY from filepoint's HOLDINGS_VENDOR because the vendors RENDER DIFFERENTLY -- measured, not assumed."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/etfs-pipeline/etfs-netassets-daily/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "d7aa525fa9",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "artifact_covered_by": [
+        "INGEST-TO4-AC2",
+        "INGEST-TO4-AC3",
+        "INGEST-TO4-AC4",
+        "INGEST-TO4-AC5"
+      ],
+      "deploy_evidence": "UNIFIED half: the five ruled conventions in code. HOLDINGS_COLUMNS 17 -> 26. Lane verified AT THE AUTHORITY rather than from the TO's summary -- .owned-paths.yaml:1661 puts infra/aws/lambda/etfs-pipeline/** on POD4_OR_AE, 'DS authors producer code, AE deploys; longest-match overrides the infra/aws/** AE-only rule'. Nothing applied."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "INGEST-TO4-AC1",
+      "criterion_verbatim": "convert_trueshares() gains a holdings FEED -- a new feed in the EXISTING converter, NEVER a new converter -- with its shape DECLARED in etf_schemas.py per that file's explicit-schema law. Rule 17 STRICT: vendor columns VERBATIM (names and order as landed), plus deterministic additive only. Do NOT widen PATHFINDER_FUNDS.",
+      "method": "diff",
+      "invocation": "git show e442e30964 -- data/assets/scripts/silver/",
+      "output_evidence": "A FEED ON THE EXISTING CONVERTER: convert_trueshares() routes on kc.feed to _convert_trueshares_holdings; the netassets branch is untouched. DECLARED in etf_schemas.py: TS_HOLDINGS_VENDOR 10 columns VERBATIM including spaces ('Stock Ticker', 'Security Name', 'Market Value', 'Net Assets') + 1 additive (date_std) + 5 riders = 16 output columns, plus TS_HOLDINGS_HEADER as the typed boundary that RAISES naming the vendor on drift. *** THE SCHEMA IS DECLARED SEPARATELY FROM FILEPOINT'S BECAUSE I MEASURED THE RENDERING AND IT DIFFERS: TrueShares renders `Weightings` BARE ('2', '2.21', '0.8') -- grep -c '%' = 0 in BOTH funds' landed CSVs -- against filepoint's '0.26%'. Per the file's own DTYPE LAW that makes it float64 IN PLACE with NO both-store additive, where filepoint needs one. COPYING HOLDINGS_VENDOR WOULD HAVE BEEN WRONG IN A WAY NO TEST IN THAT FILE WOULD CATCH. *** NO SPLIT, and that is structural not omitted: the TrueShares sheet is delivered PER FUND (bronze scope DIVZ|IDVZ) so the delivery scope already IS the fund, where filepoint delivers both funds in one file and must split at silver (Q2). PATHFINDER_FUNDS UNTOUCHED. Rule 15 intact.",
+      "denominator": "10 vendor columns declared verbatim vs the 10-column landed header (asserted equal, both funds); 1 additive; 16 output columns; 0 new converters; 0 edits to PATHFINDER_FUNDS; 0 edits to the netassets branch",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO4-AC2",
+      "criterion_verbatim": "The five ruled conventions are IN CODE -- cash_basis, id_kind, as_of_basis, the explicit run_date column, and the 21-column issuer-namespaced superset. Cite the TO-2 deliverable section each one implements. If implementation forces a change to any ruling, STOP and route it -- do NOT re-rule it mid-build.",
+      "method": "diff",
+      "invocation": "git show d7aa525fa9 -- infra/aws/lambda/etfs-pipeline/etfs-netassets-daily/lambda_function.py",
+      "output_evidence": "ALL FIVE IN CODE. run_date (TO-2 s.5) an explicit column -- the run clock previously survived only in _ingested_at and the object KEY, and all three consumers read ROWS not keys. id_kind (TO-2 s.3) per row via _id_kind, cusip defined by the CHECK DIGIT not by length. as_of_basis (TO-2 s.5) per issuer. superset (TO-2 s.1) 5 previously-dropped vendor columns, ISSUER-NAMESPACED because `Date` and `Net Assets` collide across issuers with DIFFERENT MEANINGS. cash_basis (TO-2 s.2) -- see below. *** I STOPPED MID-BUILD ON CONV-1 RATHER THAN RE-RULE IT, WHICH IS THIS CRITERION'S OWN INSTRUCTION. *** Writing the assignment made me census the column: live bronze 20260824, DENOMINATOR 114 rows, MoneyMarketFlag = '' x110, 'Y' x4, 'N' ZERO TIMES. Filepoint is a PRESENCE FLAG and blank is how it says NO, so my own `vendor-blank -> is_cash MUST be null` would have flipped 110 of 114 rows -- 96% -- from a known False to NULL. I held cash_basis OUT of the schema rather than ship it always-null, routed to COO~Z/CTO~Z, and rebuilt to CTO~Z's ruling 5380: THE ENCODING IS A PROPERTY OF THE FEED, NOT OF THE ROW -- CASH_FLAG_ENCODING declares it per source (filepoint=presence-flag, trueshares=field-absent), _assert_cash_encoding asserts the declaration against the bytes just read, _is_cash_from_encoding derives is_cash from the declaration. DECLARED, NEVER INFERRED: 'if no negative token appears, treat it as a presence flag' is REJECTED because it makes the MEANING OF EVERY ROW A FUNCTION OF ITS COHORT. \u26d4 as_of_basis LABELS THE CURRENT SOURCE AND DOES NOT CHANGE IT -- the `date` assignment is Z-S16's locus with its own cell and owner, and I kept them one variable at a time per CTO~Z's ordering.",
+      "denominator": "5 conventions, 5 in code; HOLDINGS_COLUMNS 17 -> 26 (+3 convention columns, +1 run_date, +5 vendor payload); 1 ruling falsified by implementation, STOPPED and routed rather than re-ruled; 0 rows of live data changed by CONV-1 as ruled",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO4-AC3",
+      "criterion_verbatim": "EXERCISED ON THE DISCRIMINATING ROWS, and you already know which they are. SALXX (TrueShares cash, is_cash null -> cash_basis vendor-silent) - a filepoint BLANK MoneyMarketFlag (-> vendor-blank, NOT vendor-flag) - the PFDE BBGID BBG01Y2F01K3 (-> id_kind bbgid) - CASHEUR (-> unclassified, and NOT a cash sentinel) - a row where the issuer date != the run date (-> both as_of_basis and run_date legible).",
+      "method": "command",
+      "invocation": "ds_to4_exercise.py (the ACTUAL converter over the ACTUAL landed TrueShares oracle CSVs via an in-memory stub) + run_to4_ex.py (the unified half: _id_kind over the ENTIRE live population, the row builder end-to-end, and the CONV-1 controls)",
+      "output_evidence": "VENDOR HALF, on REAL VENDOR BYTES rather than bytes I invented (TrueShares bronze/holdings was 0 objects at authoring, positive control bronze/netassets = 40 per fund): DIVZ 30 source rows -> 30 in -> 30 out, IDVZ 44 -> 44 -> 44, 0 dropped, 0 dupes, SALXX present in both and stored verbatim with ZERO judgment columns in the output. FOUR CONTROLS ALL FIRED: header DRIFT raises naming the vendor; a FOREIGN Account under a delivery scope RAISES (a mis-delivery is never a row to drop -- filtering would be the Rule 17 business-row filter AND would hide one fund's holdings being attributed to another); a '%' in Weightings RAISES rather than being absorbed; and the POSITIVE CONTROL, a well-formed row, does NOT raise. UNIFIED HALF: the row builder produces both issuers' rows with all 26 columns, and the DIVZ row now SAYS as_of_basis='issuer-page-netassets' while carrying the sheet's own 8/24/2026 in vendor_trueshares_Date beside a `date` of 2026-08-21 -- Z-S16 is now legible FROM INSIDE THE PARTITION, where this evening it took a bronze read to see at all. \u26d4 THE TO'S NAMED CONV-1 DISCRIMINATOR IS SUPERSEDED BY THE RULING: 'a filepoint BLANK -> vendor-blank, NOT vendor-flag' is exactly the reading the 114-row census falsified; under the ruling a filepoint blank is cash_basis='presence-flag' and is_cash=False. Stated rather than quietly satisfied.",
+      "denominator": "vendor half: 74 real vendor rows across 2 funds, 0 dropped; 4 controls, 4 fired as declared. unified half: 8,079 rows / 73 partitions for id_kind; 2 rows through the row builder covering both issuers; 6 is_cash derivation cases; 2 CONV-1 controls",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO4-AC4",
+      "criterion_verbatim": "THE CHECK-DIGIT RULE GETS ITS INJECTION TEST, because you established that live data CANNOT falsify it. Show the mutant (a valid CUSIP with a corrupted check digit reclassifies; the length-only rule still says cusip). AND USE A MEASURED CONSTANT, NOT A REMEMBERED ONE -- your own positive control failed OPEN on a remembered CUSIP.",
+      "method": "command",
+      "invocation": "the injection battery against lf._id_kind, using the MEASURED live cusip for FXFXX (31846V328, read from the artifact) rather than a remembered one",
+      "output_evidence": "MUTANT: 31846V328 -> `cusip`; corrupt ONLY the check digit -> 31846V323 -> `unclassified`, CAUGHT. The length-only rule still calls it `cusip`, so the check digit is load-bearing against corruption rather than decorative. BBG at wrong length (11, 13) -> unclassified, not claimed as bbgid. POSITIVE CONTROLS: BBG01Y2F01K3 -> bbgid, Cash&Other -> vendor-sentinel, CASHEUR -> unclassified, ''/None -> unclassified. MEASURED CONSTANT USED, per the criterion's own warning about my earlier failure -- I read 31846V328 off the live parquet in this session instead of reusing 31846V336, which is a DIFFERENT REAL CUSIP with its own valid check digit and which is exactly why that earlier control passed while testing a value that never appears in this dataset. *** AND THE IMPLEMENTATION WAS RECONCILED AGAINST THE RULING'S OWN DISTRIBUTION, which first read as a failure: over the live population _id_kind returned 7850/73/146/10 against the ruled 7674/72/144/2 and printed DIVERGES on all four. IT WAS NOT A MISMATCH -- THE 22:00Z FIRE LANDED A 73rd PARTITION UNDER ME (7,892 -> 8,079 rows, +187 = 114 filepoint + 29 DIVZ + 44 IDVZ). Re-scoped to the SAME 72 partitions the ruling measured: 7674 / 72 / 144 / 2, FOUR OF FOUR MATCH, rows 7892 == 7892. A frozen figure compared against a moved corpus reads exactly like a broken implementation.",
+      "denominator": "1 mutant class (check-digit corruption) + 2 length mutants + 5 positive controls, 8 of 8 as declared; ruling reconciliation 4 of 4 values MATCH on the ruling's own 72-partition / 7,892-row population",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO4-AC5",
+      "criterion_verbatim": "Rule 17 compliance, stated per change: no field slimmed, no fillna/dropna, no business-row filter, no judgment at silver. The conservation check is a MANIFEST FIELD, NEVER A FILTER -- and note PFOE carries a NEGATIVE weight_pct (min -0.02), so a non-negativity assumption is wrong and dropping that row would be exactly the forbidden filter.",
+      "method": "manual_read_with_citation",
+      "output_evidence": "STATED PER CHANGE. VENDOR TIER: nothing slimmed (10 of 10 vendor columns land, and the superset RESTORES 5 columns the 17-col shape had dropped); no fillna, no dropna; the Account check RAISES rather than filtering, deliberately, because filtering a foreign Account would be the business-row filter AND would hide a mis-delivery; NO judgment -- the sheet carries no money-market column and that ABSENCE is recorded one tier up as cash_basis='field-absent', never invented here. UNIFIED TIER: cash_basis records the DECLARED FEED ENCODING (what the vendor's alphabet IS), not a conclusion about the row; id_kind types the identifier's FORM and asserts nothing about the instrument -- which is why all three CUSIP corruption modes land in `unclassified` rather than being repaired, since repair is judgment and Rule 17 puts it downstream; as_of_basis records WHERE the as-of came from, not whether it is fresh. NEGATIVE weight_pct: 44 of 7,892 rows carry one and EVERY ONE is the Cash&Other line (range -2.83 to +1.64) -- kept, never filtered; the conservation check remains a MANIFEST field at (fund x date) grain, deliberately a DIFFERENT GRAIN from the row conventions, which is why it is not a row column. NO new gate, alarm, SNS, SES, freshness checker or monitor. The _assert_cash_encoding guard is a PARSER GUARD that fails the run reading bad data -- CTO~Z ruled explicitly that the moratorium does not touch it.",
+      "denominator": "3 files x 4 Rule-17 dimensions stated per change, 0 blanket claims; 5 vendor columns restored (net ADDITIVE); 0 rows filtered anywhere; 44 negative-weight rows kept; 0 gates/alarms/monitors built",
+      "status": "PASS",
+      "invocation": "dsZ_ETFS_INGEST_TO2_CANONICAL_ROW_CONVENTIONS.md s.8 (the per-convention Rule-17 table) read against the three landed diffs @e442e30964 and @d7aa525fa9; negative-weight population re-derived from the live partitions (44 of 7,892, all Cash&Other)"
+    },
+    {
+      "criterion_id": "INGEST-TO4-AC6",
+      "criterion_verbatim": "Sequencing declared, not implied: state whether MSTR~Z's A5 fix had landed when you landed the unified-row half, measured (grep -n \"fillna(False)\" integrations/bloomberg/pipeline/etf_daily_pull.py), and which half you landed first. If A5 has not landed, land the VENDOR half only and say so.",
+      "method": "command",
+      "invocation": "grep -n \"fillna(False)\" integrations/bloomberg/pipeline/etf_daily_pull.py, run TWICE -- once before the vendor half and once before the unified half -- with a positive control both times",
+      "output_evidence": "DECLARED AND MEASURED AT SOURCE BOTH TIMES, never taken from the message traffic. BEFORE THE VENDOR HALF: grep returned NOTHING -- A5 had NOT landed -- with positive control `is_cash` = 1 occurrence proving the file and the pattern both work, so a zero was a real absence and not a blind probe. Per this criterion's own instruction I therefore landed THE VENDOR HALF ONLY (@e442e30964) and said so in that commit. BEFORE THE UNIFIED HALF: I re-measured rather than trusting the announcements, and A5 HAS landed at etf_daily_pull.py:97 `mask = h[\"is_cash\"].fillna(False).astype(bool)`. So the unified half went second (@d7aa525fa9), unblocked. ORDER AND ITS REASON: vendor first because the vendor artifact has NO found in-repo consumer (F5: 22 hits / 27,945 files, all converter/schema) so it carries no consumer risk, while the unified row has three live readers and carries all of it. Two commits, not one, for exactly that reason.",
+      "denominator": "2 independent A5 measurements at source (before each half), each with a positive control; 2 commits in the declared order; 1 consumer-risk-bearing artifact identified out of 2 halves",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THREE independent mutant classes across the two halves, each paired with a positive control. (1) VENDOR-TIER TYPED BOUNDARIES: a truncated header; a FOREIGN Account under a delivery scope; and a '%' injected into Weightings, which the dtype law must refuse rather than absorb. (2) CONV-2 CHECK DIGIT: a real MEASURED live CUSIP (31846V328) with ONLY its check digit corrupted -- the typo-shaped mutant a vendor would actually produce -- plus BBG at wrong lengths. (3) CONV-1 ENCODING ASSERTION, which CTO~Z's ruling required be SEEN to fire: today's real 114 filepoint rows must NOT trip it, the same rows plus ONE synthetic 'N' MUST.",
+      "expected": "every injected defect raises or reclassifies; every positive control passes cleanly. A harness that raises on everything proves nothing, and a guard nobody has seen fire is a comment.",
+      "observed": "ALL THREE CLASSES FIRED AS DECLARED. (1) header drift -> VendorDriftError naming the vendor; foreign Account -> VendorDriftError; '%' in Weightings -> ArrowInvalid; well-formed row -> converted, no raise. (2) 31846V323 -> unclassified (CAUGHT) while the length-only rule still says `cusip`; BBG len 11 and 13 -> unclassified; 5 positive controls pass. (3) real 114 rows -> did NOT raise, encoding 'presence-flag'; +1 synthetic 'N' -> RAISED SourceError naming the drift. NET DATA EFFECT OF CONV-1 AS RULED: re-derived through the new path on the real file, is_cash is 4 True / 110 False -- IDENTICAL to before, 0 rows changed, which is the point of the ruling.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every convention helper is a pure form test -- no I/O, no clock, no network, no randomness. The vendor-tier exercise runs against fixed committed oracle CSVs through an in-memory stub with the write captured. THE ONE NON-DETERMINISM IS NAMED AND IT BIT ME: the silver partition SET grows by one object per day at 22:00Z, and it grew MID-EXERCISE (72 -> 73 partitions, 7,892 -> 8,079 rows), which made a correct implementation print DIVERGES against a figure frozen before the fire.",
+      "status": "STABLE",
+      "observed": "Re-scoped to the ruling's own 72-partition population the implementation matches on 4 of 4 values with rows 7892 == 7892. The vendor-half exercise returned identical row counts and identical control outcomes across runs. Every count in this instance is stamped with the partition denominator it was taken over, precisely so a later re-run returning a different number is distinguishable from a contradiction."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "NO APPLY, NO DEPLOY",
+      "reason": "Rule 13 + .owned-paths.yaml:1661 -- DS authors producer code, AE-class deploys opal-assets-silver-etf and the etfs-pipeline Lambda. Rule 26: no apply crosses a fabric."
+    },
+    {
+      "item": "The Z-S16 `date` locus is NOT touched",
+      "reason": "CTO~Z ruled it a Rule-17 defect needing its own cell and named three distinct silver-layer items from one fire that must not be folded. as_of_basis LABELS the current source; it does not change it. One variable at a time."
+    },
+    {
+      "item": "The TrueShares branch is not touched by CONV-1",
+      "reason": "CTO~Z's ruling, and my own Z-S16 narrowing applied to me: filepoint is producing correct answers for 2 of 4 funds, and the cheapest way to break a working path is to repair it against a hazard it does not have."
+    },
+    {
+      "item": "The three CUSIP corruption modes are recorded, not repaired",
+      "reason": "Zero-padding a stripped CUSIP is a REPAIR and repair is judgment, which Rule 17 puts downstream. Routed as an input to the enrich leg (INGEST-T3-4). CONV-2 is not re-ruled."
+    },
+    {
+      "item": "BUILD_MANIFEST.json vendor_sha256 pins not regenerated",
+      "reason": "Part of the AE-class rebuild leg. Surfaced with the control run first: my 2 files were IN SYNC at HEAD and go stale only from this work, but mirror_conversion.py, mirror_schemas.py and silver_registry.py were ALREADY stale at HEAD -- that drift pre-dates this TO."
+    }
+  ],
+  "surprises": [
+    "*** THE FEED WOULD HAVE CONVERTED NOTHING, SILENTLY. *** _TS_RE hardcoded BOTH `bronze/netassets/` AND `.html`, and the classifier returned a hardcoded feed='netassets', so a TrueShares HOLDINGS bronze key fell through to 'unrecognized'. The new feed would have been declared, wired, gate-clean and produced zero rows with no error anywhere. Found by reading the PRODUCER'S OWN LANDING MAP (_bronze_key, monolith grammar) to learn the key the regex had to match, instead of assuming the shape from the netassets sibling. The risk-reflex then made me read a July record documenting the SAME CLASS one layer down: a seat retracting their own census row because 'my census derived expected silver prefix FROM the bronze prefix, so a feed violating that assumption read ABSENT rather than UNMEASURED'. A mapping assumption making a real thing read as absent.",
+    "*** MY OWN CONV-1 RULING WAS FALSIFIED BY ITS OWN IMPLEMENTATION, AT 96% OF ROWS. *** The live filepoint feed carries a BLANK MoneyMarketFlag on 110 of 114 rows and NEVER writes 'N' -- so blank is this vendor's ENCODING FOR NO, not an absence of assertion, and `vendor-blank -> is_cash MUST be null` would have flipped 110 rows from a known False to NULL. The defect was in the VALUE'S WORDING -- Rule 24(iii) inside a value, the same test I had used to reject `name-inferred` and `none` in that very enum six hours earlier. I STOPPED and routed rather than re-ruling mid-build, per AC2's own instruction.",
+    "AND I HAD READ THE EVIDENCE AGAINST ME AS EVIDENCE FOR ME. I quoted etf_schemas.py's dtype law approvingly as corroboration for CONV-1 -- 'mapping \\'\\' to False would be null-meaning judgment'. That line says the vendor tier must not decide BECAUSE '' IS AMBIGUOUS, i.e. the question is OPEN. I read it as the answer. A source saying 'this question is open' reads almost identically to one saying 'and here is the answer' when you already have an answer, and there is nothing to recompute -- only re-reading catches it.",
+    "THE CUSIP COLUMN CARRIES THREE DISTINCT CORRUPTION MODES, NOT ONE, and the residual held all of them rather than coercing any into a kind it is not. (a) LEADING ZEROS STRIPPED -- 5 rows, RECOVERABLE: zero-pad to 9 and the check digit passes 5 of 5, with negative controls (CASHEUR, ZZZZZZZ) failing and a positive control (SALXX) passing, so it is not coincidence at 1-in-10 per row. (b) GENUINE SEDOLs -- 2 rows (6455819, B247XZ6), not CUSIPs at all. (c) SCIENTIFIC-NOTATION MANGLING -- RTX `7.55E+105`, which is 75513E101 read as a NUMBER by a spreadsheet. \u26d4 (c) IS IRREVERSIBLE where (a) is not: the digits are gone and there is nothing to deterministically recover. LENGTH DOES NOT SEPARATE ANY OF THEM -- ABT is 7 chars and recovers, ICT is 7 chars and does not; only the check digit discriminates.",
+    "A CORRECT IMPLEMENTATION PRINTED 'DIVERGES' ON ALL FOUR VALUES because the corpus moved under the test: the 22:00Z fire landed a 73rd partition mid-exercise (7,892 -> 8,079 rows). Re-scoped to the ruling's own 72 partitions it matches 4 of 4 with rows 7892 == 7892. A frozen figure compared against a moved corpus is indistinguishable from a broken implementation, and the fix is to stamp every count with the denominator it was taken over.",
+    "TWO first-party definition homes exist for etf_conversion.py and etf_schemas.py (data/assets/scripts/silver/ and the Lambda vendoring dir), byte-identical at HEAD. BUILD_MANIFEST.json settles which is authoritative -- 'repo files are the source of truth; fix there and rebuild' -- so the edit is correctly placed. But its vendor_sha256 pins 8 modules and 5 now mismatch: 2 are mine (expected, the rebuild regenerates them) and 3 -- mirror_conversion, mirror_schemas, silver_registry -- were ALREADY STALE AT HEAD. I ran that HEAD control BEFORE attributing anything, specifically because I over-attributed a pre-existing separator flaw to myself earlier in the session and COO~Z had to correct me."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-24/",
+  "compiler_tools": [
+    {
+      "tool": "comp-find / comp-find -i",
+      "invocation": "comp-find -i 'SALXX' ; comp-find --name 'landing_guard.py' / 'backfill_status.py' / 'mirror_core.py' ; comp-find 'HOLDINGS_COLUMNS' ; comp-find -i 'portal/gold/etfs/positioning'",
+      "result": "PASS with denominators throughout. -i on the censuses because this estate capitalises its load-bearing words and the UNDERCOUNT is the dangerous case. `comp-find --name 'mirror_core.py'` returning nothing is what corrected my import guess to mirror_conversion; `--name 'landing_guard.py'` located it as a SIBLING of lambda_function.py, which is why the exercise runner inserts that directory on sys.path rather than stubbing the import."
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast etf_positioning_gold (TO-3 phase-1 mandate; exceeded 120s, backgrounded, then READ to completion rather than assumed)",
+      "result": "GAP -- TRUE rc=3 NOT-FOUND over a printed denominator of 20,779 canonical-graph nodes, with the tool's own caveat: 'This is a NOT-FOUND, not a nothing-breaks clear.' Exemplary instrument behaviour: it refused to let its silence read as a clear. TO-4's own mandate then explicitly stood comp-pipescript DOWN for this tree and told me to enumerate consumers by reading instead -- which is the correct response to a measured coverage gap rather than substituting --pipeline bd-gold, which would return a confident answer about the WRONG TREE."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "on every .py touched, rc captured before any pipe",
+      "result": "PASS rc=0 on all four files across three commits. It also CAUGHT non-ASCII (2 lines carrying U+26D4) that I had put in production Lambda comments -- WARN-only, but CLAUDE.md forbids non-ASCII in anything running on AWS, so I stripped them and re-gated to zero rather than shipping a warned commit."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "positional, rc taken WITHOUT a pipe, on the TO's expected_criteria",
+      "result": "Used on TO-2 and TO-3 (both VALID rc=0) and on this instance. Its artifact-coverage rule fires only on script/s3_object kinds and keys on the DS '{firm}-{group}-{artifact}-{check}' criterion-id grammar, which ETFS ids do not use -- so artifact_covered_by is set explicitly on each script rather than the ids being bent to satisfy a heuristic."
+    }
+  ]
+}
