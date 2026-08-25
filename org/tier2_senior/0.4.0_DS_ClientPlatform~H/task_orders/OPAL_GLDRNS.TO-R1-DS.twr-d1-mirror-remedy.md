@@ -18,7 +18,8 @@ change, it needs the 6 refused partitions classified by status first, and its re
 as a DECLARED DEPENDENCY of `GLD-inv-7`, not as work for this lane.
 </decomp_context>
 
-<criteria>
+<proof_of_spec>
+  <!-- Positional: python .tools/proof-of-spec-check.py <instance>.json GLDR1DS-AC1,GLDR1DS-AC2,GLDR1DS-AC3,GLDR1DS-AC4,GLDR1DS-AC5,GLDR1DS-AC6,GLDR1DS-AC7 ; check the rc. -->
   <criterion id="GLDR1DS-AC1" cell_refs="GLD-a-1, GLD-a-2, GLD-a-3"/>
   <criterion id="GLDR1DS-AC2" cell_refs="GLD-b-1, GLD-b-2, GLD-b-3, GLD-inv-2"/>
   <criterion id="GLDR1DS-AC3" cell_refs="GLD-a-4, GLD-inv-1, GLD-c-1, GLD-c-2"/>
@@ -26,12 +27,13 @@ as a DECLARED DEPENDENCY of `GLD-inv-7`, not as work for this lane.
   <criterion id="GLDR1DS-AC5" cell_refs="GLD-inv-3, GLD-inv-4, GLD-inv-5, GLD-inv-6"/>
   <criterion id="GLDR1DS-AC6" cell_refs="GLD-inv-7, GLD-c-3"/>
   <criterion id="GLDR1DS-AC7" cell_refs="GLD-f-1, GLD-f-2, GLD-f-3"/>
-</criteria>
+  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~H/deliverables/OPAL_GLDRNS.TO-R1-DS_PROOF_OF_SPEC.json</instance_path>
 <expected_criteria>GLDR1DS-AC1,GLDR1DS-AC2,GLDR1DS-AC3,GLDR1DS-AC4,GLDR1DS-AC5,GLDR1DS-AC6,GLDR1DS-AC7</expected_criteria>
 <alignment_denominators>cells in this TO: 23 (inv 7 · a 4 · b 3 · c 3 · d 3 · f 3); criteria: 7; every criterion carries
 ≥1 cell_ref; every one of the 23 cells is reachable from ≥1 criterion. Unmapped cells 0; untraceable criteria 0. Decomp
 total 26; surface (e) = 3, excluded by determination and named in `<decomp_context>` so the difference is visible.
 </alignment_denominators>
+</proof_of_spec>
 
 ---
 
