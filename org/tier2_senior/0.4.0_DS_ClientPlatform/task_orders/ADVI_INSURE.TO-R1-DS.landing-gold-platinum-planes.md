@@ -80,10 +80,15 @@ is **RAW API BYTES PER RUN** — **so AC1 is satisfiable only by fabricating raw
 that rule forbids. A criterion reachable only by the prohibited act is unreachable.**
 
 **RULED:**
-- **`INSR1DS-AC1` and `INSR1DS-AC2` are `UNCOMPUTABLE-BY-DEPENDENCY` until surface (a) lands.** Not failed, not
-  deferred by choice — **gated on a producer that is not seated.** The dependency is NAMED: `INS-a-1..3`,
-  `0.6.0_AE_PartnerETL`, the bd49f REST vehicle's insurance leg. **Seat requested; sequence stated here so it is not
+- **`INSR1DS-AC1` (the LANDING plane) is `UNCOMPUTABLE-BY-DEPENDENCY` until surface (a) lands.** Not failed, not
+  deferred by choice — **gated on a producer that is not seated.** Dependency NAMED: `INS-a-1..3`,
+  `0.6.0_AE_PartnerETL`, the bd49f REST vehicle's insurance leg. **Seat requested; sequence stated so it is not
   re-derived.**
+- ⛔ **`INSR1DS-AC2` (the GOLD TABLE) SPLITS, and I am correcting my own first wording of this amendment, which said
+  AC1 *and* AC2 were gated and then listed AC2's own cells as reachable four lines later — a contradiction inside one
+  edit.** **Its DESIGN limb — schema, partition grammar, spine-key set — IS DELIVERABLE NOW.** **Its APPLIED limb —
+  rows actually written — is dependency-gated with AC1.** Report it as **DESIGN-COMPLETE / APPLIED-GATED**, never as
+  a single verdict: *a criterion carrying two grounding layers cannot take one status honestly.*
 - ⛔ **DO NOT MINT PLACEHOLDER OR SYNTHETIC BYTES UNDER `bronze/` TO MAKE A CRITERION GO GREEN. Rule 17a exists so
   whatever the raw feed carried stays recoverable; a fabricated bronze partition destroys that permanently and would
   read as a PASS.**
