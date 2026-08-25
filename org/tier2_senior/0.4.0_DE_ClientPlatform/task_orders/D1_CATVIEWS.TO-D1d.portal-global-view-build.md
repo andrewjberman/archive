@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:35Z</issued>
 <dated>on TO-D1c's served artifact</dated>
-<status>staged -- GATED ON TO-D1c (the served block is this build's input)</status>
+<status>superseded -- by D1_CATVIEWS.TO-R1-DE (cells D1-c-1, D1-c-2, D1-h-v1..v4, D1-h-p1): the round-1 cut on the CERTIFIED v2 decomp (CVO @60d4e2f1b4); this pre-pipeline TO was STAGED and NEVER STARTED, so it carries no retrofitted decomp_ref. Set by the ISSUER (2.0.0_SA_COO, 2026-08-24 ~20:2xZ).</status>
 <priority>P1-program</priority>
 <authority>D1_ASSET_CATEGORY_VIEWS_PRD.md §4.3 + §6 item 4, at dispatch vintage @3e589fa1eb. Acceptance amended per CVO @d476339293 (the invisible-fallback class). Placement: LAPTOP (portal dev-server + screenshot verification proven here).</authority>
 </task_order>

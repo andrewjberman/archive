@@ -1,7 +1,7 @@
 # TO ETFS_POSITIONING.TO-1 — the ETF Positioning PRODUCER (a MINT) + the `sub_asset_class` VOCABULARY ACT
 
 <task_order id="ETFS_POSITIONING.TO-1" project="ETFS_POSITIONING">
-<decomp_ref>workflows/atom_decomposition/runs/etfs-positioning/20260821T194927Z/DECOMP.md — cells ETFS-d-1, ETFS-d-2 (reads ETFS-a-1..a-6; constrained by ETFS-a-7/a-8 boundaries)</decomp_ref>
+<decomp_ref>workflows/atom_decomposition/runs/etfs-positioning/20260821T194927Z/DECOMP.md — cells ETFS-d-1, ETFS-d-2, ETFS-a-5, ETFS-a-7, ETFS-a-8 (d-1/d-2 the build halves; a-5 the scheduled-landing oracle via AC5; a-7/a-8 the boundaries via AC7. The rest of the (a) plane — a-1 through a-6 — is READ AS INPUT ONLY and deliberately not prefixed here: the declared set is the DISCHARGED set. Clarified by the issuer 2026-08-24 during the decomp_ref back-fill — the prior phrasing (a prefixed reads-clause over a-1..a-6) parsed as a declared-cell claim the TO never discharges; no acceptance row or attestation changed)</decomp_ref>
 <certification>⛔ **UNCERTIFIED DECOMP.** This TO was cut before `3.0.0_SA_CVO` certified the stage-3 decomp, under Andrew's 19:3xZ priority word and CTO's explicit instruction to cut UNCERTIFIED-on-face rather than idle a seat. Permitted by the pipeline, disclosed here by the issuer, never silent. If CVO's cert returns a DECOMP-INVALIDATING item, this TO's premises are re-derived by the issuer — the executing seat does not adjudicate that.</certification>
 <issued_to>DS-class (data plane / producer). Seated: `0.4.0_DS_ClientPlatform` — universe-config owner (`config/etf_universe.json` names "0.4.0_DS_ClientPlatform (ETFS_SETUP DS-contract lane)"), `data/**` lane per Rule 13.</issued_to>
 <executor_class>DS-class</executor_class>

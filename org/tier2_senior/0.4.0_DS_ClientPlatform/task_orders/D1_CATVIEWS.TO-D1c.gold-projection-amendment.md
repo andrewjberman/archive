@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:35Z</issued>
 <dated>on TO-D1b's acceptance</dated>
-<status>staged -- GATED ON TO-D1b (registry is the vocabulary this projection emits against)</status>
+<status>superseded -- by D1_CATVIEWS.TO-R1-DS (cells D1-b-1, D1-inv-3, D1-h-p2): the round-1 cut on the CERTIFIED v2 decomp (CVO @60d4e2f1b4); this pre-pipeline TO was STAGED and NEVER STARTED, so it carries no retrofitted decomp_ref. Set by the ISSUER (2.0.0_SA_COO, 2026-08-24 ~20:2xZ).</status>
 <priority>P1-program</priority>
 <authority>D1_ASSET_CATEGORY_VIEWS_PRD.md §4.2 + §6 item 3, at dispatch vintage @3e589fa1eb. Acceptance carries THE PARTITION FORM from CTO's taxonomy-gate ruling. Placement: LAPTOP-ONLY (gold deploy cycle: safe-deploy + S3 verify).</authority>
 </task_order>

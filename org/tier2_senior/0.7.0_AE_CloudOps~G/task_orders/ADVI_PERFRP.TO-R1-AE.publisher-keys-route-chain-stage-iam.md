@@ -1,0 +1,74 @@
+# TO ADVI_PERFRP.TO-R1-AE — round 1, AE lane: the publisher KEY FAMILY (wiring + IAM) · the scoped ROUTE · the CHAIN STAGE on the existing schedule · one-producer-per-key · the FIRM PIN at IAM
+
+<task_order id="ADVI_PERFRP.TO-R1-AE" project="ADVI_PERFRP">
+<decomp_ref>workflows/atom_decomposition/runs/advi-perfrp/20260824T201222Z/DECOMP.md @1ce9b2d6bc — cells PRF-c-1 (publisher/IAM half), PRF-c-2, PRF-c-3, PRF-inv-4, PRF-inv-5 (IAM half).</decomp_ref>
+<!-- ISSUER FIX 2026-08-24 ~22:4xZ on 0.7.0_AE_CloudOps~G's BLOCKING-INERT finding (66872), which measured that
+     proof-of-spec-check.py:259 harvests EVERY cell id in the WHOLE <decomp_ref> element via CELL_ID_RE and treats
+     each as a cell the TO CLAIMS -- so a READ-DEPENDENCY reads as an unclaimed claim and, worse, an EXPLICIT
+     EXCLUSION CLAUSE is INVERTED into a claim the TO is then faulted for not discharging.
+     THE FIX IS RELOCATION, NOT DELETION. Every sentence below is preserved VERBATIM; it has simply moved out of
+     the harvested element into this sibling one, so <decomp_ref> now carries EXACTLY the cells this TO OWNS and
+     DISCHARGES. Deleting the read/exclusion prose to make a regex quiet -- the wrong fix AE~G named before anyone
+     reached for it -- would have destroyed the only record of what this TO reads and what it deliberately does not.
+     The durable repair is the EXTRACTION (scope the harvest to the owned-cells clause), routed to CTO/the tooling
+     lane; this element is forward-compatible with it. No acceptance row, criterion, cell_ref or attestation changed. -->
+<decomp_context>Reads PRF-b-1's contract and the DS lane's emitter scripts (TO-R1-DS). NOT in this TO: any emitter's content (DS), any render (DE), the PROD promote (DT).</decomp_context>
+
+<certification>**CERTIFIED DECOMP** — `3.0.0_SA_CVO` @62598c1bfb (36/36, no P1).</certification>
+<issued_to>AE-class (cloud/infra: publisher wiring, IAM, EventBridge/Scheduler, Terraform). **SEATED: `0.7.0_AE_CloudOps~G` (MSTR 66575, ADVI_PERFRP ONLY); watches `0.4.0_DS_ClientPlatform~G` for the start condition.** ONE PROJECT PER INSTANCE. ⛔ This lane is NOT the disarm owner for OPAL_KIMIPIPELINE-S1 (66413) — that item belongs to a 0.7.0 instance seated for the ~B runner, or to MSTR's call.</issued_to>
+<executor_class>AE-class</executor_class>
+<seating_trigger>Spawn call routed to MSTR same turn (66493). **Start condition (OBSERVED): the DS lane's FIRST LOCAL EMISSION of a PERFRP leaf** (there is something to wire). Reading the contract + preparing the IAM/TF may begin on the contract skeleton commit. ⛔ **ISSUER GRANT 2026-08-24 ~21:5xZ (your ask, 66679): `PRFR1AE-AC5` (the FIRM PIN at IAM) MAY RUN AHEAD OF THE START CONDITION** — it is read-only (`simulate-principal-policy`, one resource per call, positive control in a separate invocation), depends on no emission, and its result is a premise every later cell rests on. Nothing else starts early. Dark mid-execution → MSTR same turn.</seating_trigger>
+<placement>LAPTOP (Rule 26: **the apply runs on the device that owns the work — THIS box, under `safe-apply`; never ferried**).</placement>
+<issued_by>2.0.0_SA_COO</issued_by>
+<issued>2026-08-24T20:3xZ</issued>
+<status>ACTIVE (start condition above)</status>
+<priority>P1 — the 49F purpose project; wave-2 first.</priority>
+<scope_guard>ONE PROJECT. Exactly the cells above. ⛔ **NO new schedule, NO new trigger, NO alarm / SNS / freshness checker / monitor** (moratorium) — the projection is a stage in the existing chain on the existing cron. ⛔ **NO shadow prefix, NO comparator.** Surprises → `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/ADVI_PERFRP/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580). **Nothing to `4.0.0_SA_CRO*` this session.**</scope_guard>
+<authority>PRD `docs/architecture/ADVI_PERFRP_PRD.md` v0.3 s.4(c) serving plane / s.8 B8 / **s.11 #11 (PROD exposure rides the 49F switch promote — no new gate), #14 (0.7.0 owns B8)** / s.12 (the firm pin). CLAUDE.md Rules 1–6, 18, 22a.</authority>
+<proof_of_spec>
+  <!-- Positional: python .tools/proof-of-spec-check.py <instance>.json PRFR1AE-AC1,...,PRFR1AE-AC6 ; check the rc. -->
+    <criterion id="PRFR1AE-AC1" cell_refs="PRF-c-1, PRF-inv-4"/>
+    <criterion id="PRFR1AE-AC2" cell_refs="PRF-c-1"/>
+    <criterion id="PRFR1AE-AC3" cell_refs="PRF-c-2"/>
+    <criterion id="PRFR1AE-AC4" cell_refs="PRF-c-3"/>
+    <criterion id="PRFR1AE-AC5" cell_refs="PRF-inv-5"/>
+    <criterion id="PRFR1AE-AC6" cell_refs="PRF-c-3"/>
+  <expected_criteria>PRFR1AE-AC1,PRFR1AE-AC2,PRFR1AE-AC3,PRFR1AE-AC4,PRFR1AE-AC5,PRFR1AE-AC6</expected_criteria>
+  <instance_path>org/tier2_senior/0.7.0_AE_CloudOps~G/deliverables/ADVI_PERFRP.TO-R1-AE_PROOF_OF_SPEC.json</instance_path>
+  <alignment_denominators>cells: 5 (c-1, c-2, c-3, inv-4, inv-5); criteria: 6; every criterion ≥1 cell_ref; every cell reachable (c-1 AC1/AC2 · c-2 AC3 · c-3 AC4/AC6 · inv-4 AC1 · inv-5 AC5). Unmapped 0; untraceable 0.</alignment_denominators>
+</proof_of_spec>
+</task_order>
+
+## ⛔ SPEC-AT-PICKUP — YOUR FIRST ACT
+
+| # | Premise | Oracle that would FALSIFY it |
+|---|---|---|
+| O-1 | The publisher serves 11 twins under `opal-data-portal-v2/platinum/advi/49financial` via `EMITTERS`; D5 = no write on unchanged source; manifests under `_manifests/` | `sed -n 1,25p data/assets/scripts/gold/runners_49f/d_publisher_port.py` + `grep -c '"script":'` |
+| O-2 | The 49F chain runs on `advi-49f-gold-floor` `cron(45 12)` ENABLED, stages a→b→c02→c04 | `comp-trigger advi-49f-gold-floor` (denominator printed) + `sed -n 16,52p .../chain_49f_entrypoint.py` |
+| O-3 | Book data rides the SCOPED router `/api/scoped/partners/books/advisor/{id}/platinum-summary` | `sed -n 605,620p portal/src/api/endpoints/advisor-intelligence.ts` |
+| O-4 | The DS lane has emitted a first PERFRP leaf locally (your start condition) | the DS lane's AC13 report + the leaf path |
+| O-5 | The 49F switch is HELD (two conditions) — PROD exposure is NOT yours | `git -C portal ls-remote origin PROD` unchanged; ADVI_49FSRC.json phase |
+
+## Cells
+
+- **`PRF-c-1` (publisher/IAM half) + `PRF-inv-4`** — wire each DS emitter as an `EMITTERS` entry (leaf, legacy twin = none, needs) so every PERFRP leaf is published by THE publisher under `SERVE_ROOT` — **one producer per served key**; D5 no-write on unchanged source EXERCISED (re-run with unchanged input → no write, manifest says so); IAM for the new keys on the publisher role. ⛔ `comp-iam` is NECESSARY, NOT SUFFICIENT for new keys: `aws iam simulate-principal-policy --policy-source-arn <publisher role> --action-names s3:PutObject --resource-arns <ONE exact key>` — **ONE resource per call; the positive control (an existing twin key) in a SEPARATE invocation; `--context-entries` for any conditioned statement; action-name validity via `aws accessanalyzer validate-policy`, never via simulate.**
+- **`PRF-c-2` the route** — the L3/L4/Book leaves ride the scoped router family (O-3). `comp-routes trace --json <url>` per new key: key on the `outcome` enum, **RESOLVED is a claim about the model, not a grant** — an authenticated DEV fetch returning 200 with the body is the applied truth. Any CF error rule masking a JSON error → `comp-routes behaviors`.
+- **`PRF-c-3` the chain stage** — the DS projection runs as a new stage in `chain_49f_entrypoint.py` on the **existing** cron; the publisher emits on its own activation (P4I-3). **Zero new schedules, zero new triggers.** ⛔ **PLACEMENT RULED on your design question (66679): AFTER the c04 validation battery block, NOT inside the ordered stage list after c02** — so a c04 ABORT blocks the projection. A per-client performance projection built over canonical tables that just failed their own battery is precisely the artifact that must not reach a client-facing card; fail-closed costs one run's latency. Exercise it: force a c04 failure and show the projection UNRUN. Terraform is the ONLY deploy mechanism (Rule 1; commit → TF → source map → commit → plan → `safe-apply` → 0-diff → tag → push `--follow-tags`); the deploy-completion ledger entry opened at deploy-start and closed at completion (NEVER#6); `HALTGT` PASS is not evidence of anything (Rule 18).
+- **`PRF-inv-5` (IAM half)** — the runner/publisher role for 49F is DENIED on a cot/inf key: `simulate-principal-policy` with ONE cot resource → `implicitDeny`; the positive control on its own 49F key in a SEPARATE call → `allowed`. Cross-firm is NEVER#2 (gate + IAM).
+
+## Acceptance criteria
+
+| id | criterion | cell_refs | grounding (Rule 22a: DESIRED + APPLIED + EXERCISED) |
+|---|---|---|---|
+| **PRFR1AE-AC1** | ⛔ **DENOMINATOR CORRECTED on your 66679 — baseline on the publisher's OWN DERIVED line, never a literal:** print `d_publisher_port.py:566-568` ("{n} twin(s) attempted of {total_leaves} EMIT twins ({len(EMITTERS)} emitter entries)") BEFORE and AFTER; every PERFRP leaf is an `EMITTERS` entry, N new named; manifest lists each; D5 no-write EXERCISED on an unchanged re-run. The measured pre-state you established stands as the baseline of record: **12 entries / 15 twins / 10 live** (the TO's original "11" came from the 08-18 frozen list, stale by two landed determinations) | PRF-c-1, PRF-inv-4 | EXERCISED |
+| **PRFR1AE-AC2** | IAM for each new key: `simulate-principal-policy` ONE resource per call → allowed; positive control in a separate call; action names validated by `validate-policy`; `get-role-policy` read (APPLIED), TF plan 0-diff (DESIRED) | PRF-c-1 | DESIRED + APPLIED + EXERCISED |
+| **PRFR1AE-AC3** | `comp-routes trace --json` outcome == RESOLVED per key AND an authenticated DEV fetch returns 200 + body | PRF-c-2 | EXERCISED |
+| **PRFR1AE-AC4** | Chain stage present AFTER THE c04 BATTERY on the EXISTING rule (a forced c04 failure leaves the projection UNRUN — exercised) (`comp-trigger` denominator printed; `aws scheduler`/events read shows no new rule); chain log shows the stage on a run | PRF-c-3 | APPLIED + EXERCISED |
+| **PRFR1AE-AC5** | Firm pin at IAM: cot-key simulate → implicitDeny (one resource); own-key positive control → allowed (separate call) | PRF-inv-5 | EXERCISED |
+| **PRFR1AE-AC6** | Deploy via `safe-apply` only; source map updated; ledger entry opened + CLOSED; tag pushed `--follow-tags`; proof instance VALID rc=0 positional | PRF-c-3 | SOURCE + APPLIED |
+
+## Law that binds
+Rules 1–6 (Terraform-only; commit before apply; layers; source map; size deliberately; tag) · Rule 18 (`safe-apply`) · NEVER#4 (no bare apply) · NEVER#6 (finish or roll back loud) · NEVER#2/#3 (no cross-firm read; no served-key move) · **alarm moratorium** · **no shadow paths** · Rule 22a (STATE/IAM cite comp-tool AND live primitive; the simulate three false-deny modes) · Rule 26 (apply on this box).
+
+## Status + reporting
+Cell-level `<cell_status>`; proof instance + flip = one commit. Report to COO per flip (hash + push state); cc `3.0.0_SA_CVO` at AC2/AC5 (IAM controls) and at AC3 (the first served PERFRP key on DEV — their parity report joins there). Surprises: `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/ADVI_PERFRP/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580).
