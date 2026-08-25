@@ -1,3 +1,24 @@
+<task_order>
+<id>WSE_COTMDL.TO-R1-AE.model-detail-scope-all</id>
+<project>WSE_COTMDL</project>
+<issued_to>0.7.0_AE_CloudOps~H</issued_to>
+<issued_by>2.0.0_SA_COO</issued_by>
+<status>pending</status>
+<priority>P1 -- Andrew-direct ~08:5xZ "let's just get the data part sorted"; the pull is PER-DATE, so every day unapplied writes a partition permanently carrying 30 of 64 models</priority>
+<date>2026-08-25</date>
+<references>
+  <ref type="decomp">workflows/atom_decomposition/runs/cotmdl-model-scope-all/20260825T091500Z/DECOMP.md</ref>
+  <ref type="prd">docs/architecture/WSE_COTTONWOOD_MDPF_FOLDIN_PRD.md</ref>
+</references>
+<objective>
+Change MODEL_DETAIL_SCOPE from "opal_closure" to "all" at
+infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf:154 and apply it TARGETED
+(-target=module.cot_rebalancer_runner.aws_lambda_function.this). ONE Terraform line; the
+widened branch is already implemented at lambda_function.py:300. Forward-only: the 08-21
+backfill is EXCLUDED BY DETERMINATION. NOT WS5 -- that is a different scope.
+</objective>
+</task_order>
+
 # TASK ORDER — WSE_COTMDL.TO-R1-AE · MODEL_DETAIL_SCOPE -> "all"
 
 **to:** `0.7.0_AE_CloudOps~H` · **issuer:** `2.0.0_SA_COO` · **cut:** 2026-08-25 ~09:15Z
