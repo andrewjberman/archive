@@ -82,5 +82,12 @@ one field serving two intents (Rule 24(iii)) — after `is_cash` (skip-the-pull 
   hazard armed on the running bytes.
 - **Z-S35/36** — `@0c03c359f2`, the `is_cash` intent split; deploy stopped by its author over three
   aggregations keying the raw flag, block later lifted (no display harm measured).
-- **The 04:00Z L1 re-run** — scheduled at exactly local midnight (UTC-4). Measured margin: **zero
-  seconds**; a fire at 03:59Z resolves as-of `2026-08-21` again.
+- **The 04:00Z L1 re-run** — **DROPPED ENTIRELY, `1.0.0_SA_CTO~Z` 02:24Z.** The margin finding
+  stands (scheduled at exactly local midnight, UTC-4; a fire at 03:59Z resolves as-of `2026-08-21`
+  again) — **but it is no longer a reason to move the run, because the run buys nothing.** Measured:
+  `etf-positioning-producer-daily = cron(0 13 * * ? *)` is the ONLY consumer of `bbg/`, and the
+  SCHEDULED 11:00Z pull writes the same prefix two hours ahead of it. NEVER#4 applies directly — an
+  ad-hoc artifact is never production evidence, and the scheduled run overwrites the key anyway.
+  ⛔ **My own gap, recorded because it generalises: I measured whether that run would WORK and never
+  whether it was NEEDED.** One `list-rules` call answers the second question and I did not make it.
+  *"Will this work?" is the second question; "does this need to happen?" is the first.*
