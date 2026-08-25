@@ -245,6 +245,24 @@ look natural, because the producer genuinely wants that data.
 > emit them, at today's as-of*). **Those are different questions and only the first is settled.**
 > **RUN THE CHECK. Its cheap failure mode is now excluded; its purpose is not.**
 
+> ⛔⛔ **AND THE 11:00Z PULL IS NOT CLOUD-SCHEDULED — READ THIS BEFORE DIAGNOSING AN EMPTY PAGE.**
+> ```
+> EventBridge: 137 rules auto-paginated · rules at hour 11 ......... NONE
+>   etf-positioning-producer-daily  cron(0 13)  ENABLED   <- GOLD. In AWS. Fires regardless.
+> LOCAL Windows task on THIS BOX:
+>   OPAL_BBGTML_daily_pull   Ready   next run 2026-08-25 07:00 LOCAL (= 11:00Z)
+> ```
+> **GOLD FIRES FROM AWS; ITS INPUT DEPENDS ON THIS DESKTOP BEING AWAKE AT 07:00 LOCAL.**
+> ⛔ **If the box is down, the failure is INDISTINGUISHABLE FROM TONIGHT:** `skipped_no_bbg=
+> ['2026-08-24']`, as_of steps back to 08-21, **two shells and a well-formed artifact, with a log
+> line saying the guard worked.** **So if the books are empty at 13:00Z, THE FIRST QUESTION IS "did
+> `OPAL_BBGTML_daily_pull` run at 07:00 local?" — not "what is wrong with the producer."**
+> ⚠ *(This box has been restarted on the MSP's schedule before — planned N-able RMM restarts, six
+> seats down 5h10m, on someone else's calendar. Not a prediction; a stated single point of failure.)*
+> ⚠ **AND THAT TASK RUNS THE WORKING TREE** — so any edit landing in `etf_daily_pull.py` before
+> 07:00 local **IS a deploy into the delivery run.** Second reason `:1375` is correctly carded for
+> daylight.
+
 > ⛔ **`ETFS-TO5-AC7` HAS A PREREQUISITE AND IT FIRES TWO HOURS EARLIER — ~11:00Z.**
 > Read the L1 pull's `run_manifest.json`: **`universe_count` reconciles to ~166 — NOT `> 109`**
 > (**109 is the PRE-A5 count, and a PARTIAL extension satisfies a `>` threshold while the fill still
