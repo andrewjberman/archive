@@ -134,6 +134,18 @@ look natural, because the producer genuinely wants that data.
 | **ETFS-TO5-AC5** | ⛔ **NO ALARM, NO SNS TOPIC, NO SES SEND, NO FRESHNESS CHECKER, NO MONITOR.** The run manifest and the log ARE the record | `ETFS-d-1` | SOURCE |
 | **ETFS-TO5-AC7** | ⛔ **THE FIRST *SCHEDULED* FIRE (`cron(0 13 * * ? *)` UTC) IS OBSERVED AT ITS OWN INVOCATION RECORD **AND** THE ARTIFACT.** A **DISAGREEMENT** between them is **PASS-WITH-FINDING, not a fail** (amended by `1.0.0_SA_CTO~Z` ~23:10Z, in advance, so nobody decides under time pressure whether a red record beats a green artifact). ⛔ **An AD-HOC invoke can never discharge this** — the artifact must carry `run_class: scheduled`. | `ETFS-d-1` | **EXERCISED (scheduled)** |
 
+> ✅ **UPDATE 2026-08-25 ~01:0xZ — THE CAPABILITY HALF IS DISCHARGED EARLY AND IT PASSES. THE
+> OBLIGATION STILL STANDS. READ WHICH IS WHICH BEFORE SKIPPING IT.**
+> `0.0.0_AB_MSTR~Z`'s ad-hoc L1 run produced `bbg/2026-08-21/characteristics.parquet` at **170 rows
+> (was 109)** with **`BBSEY` · `AMX` · `CPA` · `BNPQY` all TOKEN-MATCHED** (positive control `AAPL`).
+> ⭐ **So A5 works and all four DIVZ/IDVZ ADRs resolve at Bloomberg — DS~Z's "full-looking books with
+> blank analytics" branch CANNOT happen. That was this check's worst outcome and it is closed.**
+> ⛔ **BUT IT WAS DISCHARGED AGAINST AN AD-HOC ARTIFACT AT `2026-08-21`, NOT AGAINST THE 11:00Z
+> SCHEDULED RUN'S OWN OUTPUT.** What is now known is a **CAPABILITY** claim (*Bloomberg can resolve
+> these four*). What remains unanswered is the **INSTANCE** claim (*did TODAY's scheduled run actually
+> emit them, at today's as-of*). **Those are different questions and only the first is settled.**
+> **RUN THE CHECK. Its cheap failure mode is now excluded; its purpose is not.**
+
 > ⛔ **`ETFS-TO5-AC7` HAS A PREREQUISITE AND IT FIRES TWO HOURS EARLIER — ~11:00Z.**
 > Read the L1 pull's `run_manifest.json`: **`universe_count` reconciles to ~166 — NOT `> 109`**
 > (**109 is the PRE-A5 count, and a PARTIAL extension satisfies a `>` threshold while the fill still
