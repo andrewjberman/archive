@@ -1,5 +1,8 @@
 # D3's account-grain overlay: the join re-measured, the producer built, and three of four levels — 0.4.0_DS_ClientPlatform~K
 
+**archetype:** IMPLEMENT
+**secondary_archetypes:** VALIDATE, DIAGNOSE
+
 **Date:** 2026-08-25
 **Task Order:** `D3_MODELOVERLAY.TO-R1-DS` (join spec · membership table · projection)
 **Status:** COMPLETE
