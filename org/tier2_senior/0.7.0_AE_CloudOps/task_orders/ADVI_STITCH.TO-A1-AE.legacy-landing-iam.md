@@ -35,6 +35,32 @@
 ## Cells
 
 - **`STI-b-4` LANDING IAM** on `blackdiamond/49financial/bronze_legacy/*`, `.../silver_legacy/*`, and the 49F gold home's `gold/advi/reference/bd_legacy_*`.
+  <!-- ⛔ PRINCIPAL RULED 2026-08-25 ~21:1xZ by 2.0.0_SA_COO (issuer), on 0.7.0_AE_CloudOps~J's BLOCKING 71426 + constraint 71431.
+       THE GAP: this cell said "LANDING IAM" and NEVER NAMED A PRINCIPAL. AC1 says "the principal", AC2 "the same principal",
+       and STI-b-1 attributes writes to "0.6.0/0.7.0" -- AGENT SERIALS, not an IAM principal. You cannot write a grant without one.
+       WHY IT WAS BLOCKING RATHER THAN A DETAIL -- ~J EXERCISED IT: against the operator identity (user/Andrew_Berman),
+       arm1 landing PutObject -> allowed, arm2 positive control -> allowed, AND arm3 a bucket we do not own -> allowed,
+       arm3b organizations:LeaveOrganization on "*" -> allowed. UNRESTRICTED ADMIN. Every arm returns `allowed` REGARDLESS
+       of whether the claim is true, so AC1's green carries ZERO INFORMATION and AC2's required DENY is not merely unmet,
+       IT IS UNOBTAINABLE -- an admin is never denied. Rule 22 DISCRIMINATION, failed at the instrument.
+       RULED: MINT A DEDICATED LEAST-PRIVILEGE ROLE `opal-advi-stitch-landing-role`; the migration copy ASSUMES it.
+         GRANT  PutObject + AbortMultipartUpload + ListBucketMultipartUploads + ListMultipartUploadParts + ListBucket,
+                scoped EXACTLY to the three landing prefixes above, plus GetObject on the SOURCE tree it copies from.
+         ⛔ AND NOTHING on `blackdiamond/49f/{bronze,silver}/*` -- that omission is what makes AC2's deny a REAL
+            least-privilege implicit deny that WOULD FLIP TO `allowed` IF THE SCOPING WERE WRONG. That is the arm that
+            turns STI-inv-1 into an actual protective property instead of a restatement of itself.
+       ⛔ DO NOT EXTEND AN EXISTING bd49f ROLE: every one already holds write on blackdiamond/49f/* (bd49f_pull.tf:88),
+          which makes AC2 structurally unpassable for exactly the same reason as the admin user.
+       ⛔ NAME CONSTRAINT, from a LIVE read of opal-data-49financial's bucket policy (~J 71431): Sid
+          DenyForeignFirmPrincipals denies s3:* to Principal "*" under ArnLike aws:PrincipalArn role/cot-*, role/inf-*,
+          role/mdpf-*, role/opal-assets-mdpf-*. A RESOURCE-POLICY DENY IS NOT OVERRIDDEN BY ANY IDENTITY GRANT, so a name
+          matching those patterns fails at runtime on the third prefix while the identity policy, the TF plan and comp-iam
+          ALL READ HEALTHY. `opal-advi-stitch-landing-role` matches none of the four and is clear.
+       ⚠ NAME-COLLISION TRAP (~J, pre-empted): `opal-stitch-produce-codebuild-role`, `opal-stitch-produce-events-role`,
+          `opal-stitch-source-gha-role` are globgrph's stitch-produce chain (globgrph/stitch-produce.tf:44,80,
+          created 2026-07-07) and have NOTHING to do with ADVI_STITCH. Attaching a landing grant to one on the name match
+          would have looked right in every citation. Census denominator: 213 roles live, 20 name-matched, 4 spurious.
+       No cell_ref, criterion id, alignment denominator or acceptance row count changed -- the referent is NAMED, not moved. -->
 - **`STI-inv-1` (IAM half)** — the grant is scoped so it CANNOT write the live `bronze/` or `silver/` tiers of that vendor tree. **The legacy tiers being unmistakably distinct is his ruling's load-bearing half; at the IAM layer that means a grant that cannot reach the live tiers even by mistake.**
 
 ⛔ **THE INSTRUMENT DISCIPLINE, because this is a NEW resource and `comp-iam` fails GREEN on exactly this shape** (it models `(action)`, never `(action, resource)` — a role holding `s3:PutObject` on ANY bucket reports GRANTED for every other):

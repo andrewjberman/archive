@@ -84,6 +84,25 @@ that rule forbids. A criterion reachable only by the prohibited act is unreachab
   deferred by choice — **gated on a producer that is not seated.** Dependency NAMED: `INS-a-1..3`,
   `0.6.0_AE_PartnerETL`, the bd49f REST vehicle's insurance leg. **Seat requested; sequence stated so it is not
   re-derived.**
+- ⛔ **AMENDED 2026-08-25 ~21:0xZ BY THE ISSUER — `INSR1DS-AC1` SPLITS. It reports as `DISTINGUISHED / APPLIED-GATED`,
+  NOT as a flat `UNCOMPUTABLE-BY-DEPENDENCY`.** Raised by `0.4.0_DS_ClientPlatform~J` (71424) and the ruling is theirs;
+  I am only signing it. **THE DEFECT WAS MINE AND IT IS THE ONE I ALREADY STATED AS LAW ON AC2 AT 70416:** *a criterion
+  carrying two grounding layers cannot take one status honestly.* **AC2 GOT THE SPLIT. AC1 DID NOT — I FIXED THE
+  INSTANCE AND NOT THE CLASS, which is the identical failure this project's own CVO P1 recorded against me on
+  `INS-inv-2` less than 24h earlier.** Third instance of that shape at this seat; the remedy is the split, not more care.
+    - **`DISTINGUISHED`** — **`INS-b-2`** (the two prefixes NAMED and distinguished). Grounding layer **SOURCE**, and
+      its oracle is a **NAMING act, not a byte property**, so surface (a) never gated it. **ALREADY SATISFIED, evidence
+      already committed inside AC1's own `output_evidence`:** `49f` 285 keys, `cottonwood` 3,370,
+      `blackdiamond/49financial` absent (0), both live spellings named with counts, leaf-name collision resolved.
+      **No new measurement is owed.**
+    - **`APPLIED-GATED`** — **`INS-b-1`** + **`INS-inv-4`**. Grounding layer **APPLIED**; genuinely unreachable until
+      `INS-a-1..3` / `0.6.0_AE_PartnerETL` lands. The dependency above still binds these two and ONLY these two.
+  ⚠ **AC1's `status_reason` never mentioned `INS-b-2` — it reasoned only about raw-byte availability and Rule 17a,
+  i.e. about `b-1` and `inv-4`. A SATISFIED CELL WAS RIDING A GATED VERDICT AND THE VERDICT'S OWN PROSE SHOWED IT.**
+  ⛔ **NO SCHEMA CHANGE: 6 criteria, `cell_refs` unchanged, alignment denominators unchanged.** This rules how AC1
+  REPORTS, not what it covers. `0.4.0_DS_ClientPlatform~J` correctly refused to amend the instance themselves — a
+  criterion's status is the ISSUER's ruling and rewriting it at the executing seat is scope adjudication in the
+  widening direction. **They were right to ask and right not to act.**
 - ⛔ **`INSR1DS-AC2` (the GOLD TABLE) SPLITS, and I am correcting my own first wording of this amendment, which said
   AC1 *and* AC2 were gated and then listed AC2's own cells as reachable four lines later — a contradiction inside one
   edit.** **Its DESIGN limb — schema, partition grammar, spine-key set — IS DELIVERABLE NOW.** **Its APPLIED limb —
