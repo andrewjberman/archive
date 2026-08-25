@@ -78,6 +78,39 @@ true and describes something that did not happen.
 41x headroom; max memory 107 MB of 512 MB). Tomorrow does more GETs -- **>= 64 + children vs 30
 today.** Even 3x lands near 1% of budget. **If it times out, that is a finding, not a retry.**
 
+## P0 -- GROUND THE RETRIEVAL BEFORE SCORING ANY PREDICTION
+
+⛔ **RUN THIS FIRST. A BROKEN RETRIEVAL PRODUCES A CLEAN, INTERNALLY CONSISTENT, COMPLETELY
+FALSE TABLE, AND EVERY RECONCILIATION BELOW WILL PASS ON IT.**
+
+Added after `0.4.0_DS_ClientPlatform~F` independently re-derived these same numbers and
+reported that their FIRST attempt did not: they guessed the roster JSON's item key and parsed
+ids with a digit-run regex against UUID filenames, and got
+
+```
+roster 0 | landed 30 | on-roster 0 | children 30 | gap 0
+CHECK on-roster + children == landed : True     (0 + 30 == 30)
+CHECK on-roster + gap      == roster : True     (0 +  0 ==  0)
+```
+
+**BOTH CHECKS PASSED. `roster gap 0` would have read as the ingest gap being CLOSED.** The
+checks test INTERNAL CONSISTENCY, and an empty population is perfectly self-consistent. What
+caught it was not a control -- it was that `roster=0` is absurd against a file whose own
+`totalResultCount` says 64.
+
+**SO THE RECONCILIATIONS IN P5 ARE NOT EVIDENCE THAT THE RETRIEVAL WORKED.** `22+8=30` and
+`22+42=64` reconcile in the broken shape too. Assert the retrieval itself:
+
+| # | assertion | why |
+|---|---|---|
+| P0a | roster list parsed from `pagedResults` -- **the literal key**, never guessed | the other names return empty, not an error |
+| P0b | `len(parsed_roster) == payload["totalResultCount"]` | the file DECLARES its own count; a parse that disagrees with it is broken, whatever it reconciles to |
+| P0c | detail ids taken as the **full filename stem** (UUIDs), never a digit-run regex | a digit regex on a UUID silently yields the wrong id |
+| P0d | positive control: a KNOWN roster id resolves; negative control: a bogus id does not | proves the membership test discriminates |
+| P0e | every population count printed with the denominator it came from | a number without its frame is what started all of this |
+
+**If P0b fails, STOP AND FIX THE READ. Do not score P1-P6 on it** -- they will all look fine.
+
 ## WHAT WOULD FALSIFY THE WHOLE CHAIN
 
 - **P4 fails** -> the fix did not fix the thing it was authorized for. Report and STOP.
