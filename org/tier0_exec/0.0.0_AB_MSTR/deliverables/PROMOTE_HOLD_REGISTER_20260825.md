@@ -48,6 +48,30 @@ VERBATIM:**
 Record `@34791b8d31`. **He authorises the DEV build explicitly** — *"we do want to build this
 out"* — so this holds the PROMOTE ACT only.
 
+### ⛔ UPDATED 2026-08-25 ~04:0xZ — HE RULED THE SCOPE, AND ATTACHED A CONDITION
+
+Andrew-direct, received DIRECTLY at `0.7.0_AE_CloudOps~G` answering their `/open-calls` CALL 1
+(record `@2e9c58991a`). **VERBATIM, typo included because the phrasing is the ruling:**
+> *"Agreeed with your rec"*
+
+**He ratified a TWO-PART rec and BOTH PARTS BIND:**
+1. **PUBLISHING IS PART OF "BUILD IT OUT."** The DEV-only hold binds **the PROMOTE ACT ALONE.**
+2. **THE ATTACHED CONDITION, now HIS and no longer a recommendation:** *"PERFRP keys publish only
+   after the round-1 emitters are wired and their first emission is read — never as a side effect
+   of someone activating the publisher's schedule for the ten legacy twins."*
+
+⛔ **A REC RATIFIED WHOLE IS RATIFIED WHOLE.** Reading only part 1 — the permissive half — and
+dropping part 2 would be the widening the law forbids. **The condition travels with the permission.**
+
+**THE MEASUREMENT THAT MADE THE CALL NECESSARY, and it is the durable half:** his 01:1xZ hold is
+**BRANCH-SHAPED** (*"stay on the DEV branch not promoted to PROD"*) — **but the data layer is not
+branch-scoped.** `platinum/advi/49financial/` is ONE key set in ONE bucket with no environment
+conditioning anywhere in the read path, and the portal's `adviKeyRepoint.ts` records an exercised
+200 through the auth path on DEV **and** on PROD. **PUBLISHING MAKES A KEY PROD-FETCHABLE WITH NO
+PROMOTE OCCURRING.** The promote and the data exposure are two different events, and his earlier
+sentence governed only one of them. *A branch-shaped instruction does not bind a plane that has no
+branches.*
+
 ### ⛔ Its condition is not merely PENDING — it has MEASURED counter-examples
 
 Contributed by `3.0.0_SA_CVO`, whose function is verification. Both filed in
