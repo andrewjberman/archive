@@ -82,10 +82,24 @@ verdict names the statement that produced it (or names none). This is not an und
 agreeing with itself.
 
 **Test 4 is the one the criterion did not ask for and is worth keeping.** Same bucket, one prefix
-over, zero matched statements: the publisher grant is **prefix-scoped, not bucket-wide**. The
-"one producer per served key" boundary is therefore real *at IAM*, not merely by convention in the
-publisher — which matters because `publish_one` also hard-asserts the prefix in code
-(`d_publisher_port.py:422`), and two independent belts is the correct posture for a served key.
+over, zero matched statements: **at the measurement instant below, the publisher grant evaluated as
+prefix-scoped rather than bucket-wide.** On that evidence the "one producer per served key" boundary
+was real *at IAM* and not merely by convention in the publisher — which matters because `publish_one`
+also hard-asserts the prefix in code (`d_publisher_port.py:422`), and two independent belts is the
+correct posture for a served key.
+
+⛔ **VINTAGE — AND THE REPO HEAD ABOVE DOES NOT VINTAGE THE CLAIMS ON THIS PAGE THAT MATTER MOST.**
+Every IAM verdict here is a fact about the **AWS account**, not about the repo. There is no ref that
+pins a policy: a `get-role-policy` result can change with nobody editing this file, this TO, or any
+commit. So the four decisions, the "prefix-scoped" reading, and the "both grants exist in Terraform"
+line are **MEASUREMENTS TAKEN AT 2026-08-24 (this session), NOT STANDING PROPERTIES OF THE ROLE.**
+They are stated in the past tense deliberately. **Anyone relying on them re-runs the reproduction
+block at the bottom rather than citing this page** — that is one command per claim and it is the only
+thing that makes them current.
+*Recorded because this page is re-derived by CVO under s.14(c), and an evidence artifact that reads as
+a standing property is the "moment encoded as a mechanism" class landing on the exact document a
+verifier trusts. Found by applying that class's own discriminator to my own artifact: could this
+change without anyone editing the sentence that asserts it? For every IAM line here, yes.*
 
 ---
 
