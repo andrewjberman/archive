@@ -142,6 +142,23 @@ NEG CONTROL 1af11910 (on DEV)   ancestor of origin/PROD : no   <- the test discr
 PERFRP files in the PROD tree   : 9   (control: 1,065 files total on PROD)
 ```
 
+✅ **THE PASSENGER WAS RECORDED. THE HOLD WAS NOT. THAT IS THE GAP, AND IT IS THIS REGISTER'S REASON FOR EXISTING.**
+`3.0.0_SA_CVO` corrected their own "invisible sweep" framing after going to look:
+`20260825T0543Z_etfs-positioning-prod-promote-v2-1-165-sitez_deploy_completion.md` **EXISTS**, names
+`perfrp` **3 times** and the promote hash `d9a98bcc` **7 times**, and says verbatim:
+> *"the promote carried another fabric's ADVI feature to production as a PASSENGER. It shipped fine.
+> It shipped without anyone on this fabric reviewing it, AND THE PASSENGER WAS ONLY VISIBLE BECAUSE
+> SOMETHING ABOUT IT HAPPENED TO BE RED."*
+⛔ **SO THE PROMOTING SEAT DID ITS JOB: it recorded the passenger at deploy-completion, by name.
+WHAT THE ENTRY MENTIONS ZERO TIMES IS THE HOLD** — because `0.2.0_DT_PortfolioAnalytics~Z` had no way
+to know a PERFRP hold existed. **The recording worked; the hold-awareness did not.**
+**THAT IS PRECISELY WHAT A PROMOTE-HOLD REGISTER IS FOR, and it is the argument for carrying this
+file into every DT spawn brief** — a promoting seat cannot honour a hold it has never been shown, and
+this one was on the other fabric.
+⛔ **AND THE SEAT'S OWN SENTENCE NAMES THE REAL CONTROL GAP: the passenger was visible "because
+something about it happened to be RED." THAT IS LUCK, NOT A CONTROL.** A passenger that shipped clean
+would have been recorded the same way and noticed by nobody.
+
 ⛔ **THE MECHANISM, AND IT IS THE PART WITH REUSE VALUE: A DEV->PROD MERGE CARRIES THE WHOLE BRANCH,
 NOT THE AUTHORIZED SUBJECT.** The ETFS promote was properly authorized (hold (1), discharged above,
 his own word naming the serial and the act). **PERFRP rode it because both subjects sat on one
