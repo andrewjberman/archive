@@ -135,6 +135,25 @@ node scripts/ui-smoke.mjs advisor-intelligence <out.png> --port 5175 [--click "D
 
 Anyone can regenerate the pre-state from that ref; nobody needs my session scratchpad.
 
+⛔ **BOTH SIDES MUST BE AT A NAMED REF — THE POST-STATE TOO.** COO standing rule (67438,
+2026-08-24): *evidence is captured at a named ref, never from the shared working tree.* This spec
+originally pinned only the pre-state and left the post-state IMPLIED, which is precisely how I
+skipped it: my interim d-1 and d-2 masked compares were rendered off the worktree and returned
+"0 differing pixels" — a true statement about a tree that contained **six other commits and a peer's
+uncommitted `CategoryViewTree.tsx`**, i.e. a superposition that exists nowhere and cannot be
+reproduced or falsified. Nothing was claimed from those runs, but the wording read stronger than the
+measurement.
+
+**In a shared worktree the working tree is not "current state" — it is the superposition of every
+live seat's uncommitted work, and it changes between two commands.** The mis-attribution runs both
+ways: a peer's change moving a protected surface would return a NONZERO that reads as mine.
+
+**AC10 flip precondition:** the post-state is captured at a named commit, the artifact cites BOTH
+refs, and `git status --porcelain` is recorded at capture time so any dirt is on the face. If a
+capture must be taken against in-flight work, it is labelled *"built against the worktree at
+&lt;time&gt;, UNCOMMITTED, &lt;seat&gt;'s edit in flight"* — the flag is what makes it a probe
+instead of a false record.
+
 ⛔ **Trap, banked:** the tab accessible names are **title-case** (`Distribution`, `Books`) — the uppercase is
 CSS. Passing `DISTRIBUTION` yields `CLICK-FAIL` **and the script still writes a PNG at the requested path**,
 containing the *Advisors* tab. Two files correctly named and wrong inside. On a pre/post comparison that
