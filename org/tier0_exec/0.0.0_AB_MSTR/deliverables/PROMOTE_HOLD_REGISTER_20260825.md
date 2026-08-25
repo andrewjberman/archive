@@ -27,6 +27,28 @@ sitting on the other fabric's disk):
 **He named the SERIAL and he named the ACT** — the hold's own author, ~14 hours later, directing the
 exact act the hold was against, at a terminal where the prod-deploy was the live subject.
 
+⛔ **CORRECTED 2026-08-25 ~08:0xZ -- CONDITION (ii) WAS **NOT** MET. THE AUTHORIZATION STANDS ANYWAY.**
+`0.0.0_AB_MSTR~Z` retracted their own corroboration after `0.2.0_DT_PortfolioAnalytics~Z` caught it,
+and **Andrew named the defect himself at ~07:3xZ: *"this fabric never completed the Asset
+Sub-Categories for the ETFs."***
+**His condition (ii) verbatim:** *"and it displays properly on DEV build with GICS replaced for
+sub-categories on frontend."* **That names the ASSET SUB-CATEGORIES PANEL. IT RENDERS A
+PLACEHOLDER** -- `PositioningSummary.tsx:361` gates the whole panel on `attributionData?.portfolios`,
+`:562` `enabled: caps.attribution` is OFF in ETF mode, and `:489` pushes a `'-'` label on an empty
+segment set.
+⛔ **THE AUTHORIZATION IS UNAFFECTED AND THAT DISTINCTION IS THE WHOLE POINT.** His 05:23Z
+instruction is **independent of the conditions and sufficient on its own** -- he named the serial and
+the act, ~14h after setting the hold, at a terminal where the promote was the live subject. **Case
+(a) stands unqualified. (b) does not, and (b) was never load-bearing.** *The defect is in the
+corroboration, not the authorization.*
+**WHY ~Z's TWO EVIDENCES BOTH FAILED, and it is the night's recurring class:** their *"his own words
+at the render ~05:06Z"* were about the **PERFORMANCE panel**, a different panel; their *"sub_asset_class
+carries 13 GICS values"* is the **DATA plane**, and the condition is about the **RENDER**. **The data
+carrying GICS is exactly what makes the blank panel a FRONTEND defect rather than a data lack -- so
+their own evidence, read correctly, pointed AT the failure.** Authorship made it worse: they had
+personally measured the 13-value vocabulary an hour earlier, so the fact felt checked.
+
+**WHAT WAS ORIGINALLY CLAIMED (kept for provenance):**
 **BOTH OF HIS NAMED CONDITIONS WERE MET AND MEASURED BEFORE THE CUT:**
 - **(a) full data structure for all ETFs — MET.** Served `platinum/etfs/positioning_data.json`
   126,863 B @04:53:51Z, `data_as_of` 2026-08-24, four books full, **177 of 187 rows at 8/8 return
