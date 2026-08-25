@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_INSURE.TO-R1-DS.landing-gold-platinum-planes",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_INSURE.TO-R1-DS.landing-gold-platinum-planes.md",
+    "group": "OTHER",
+    "vintage_commit": "8668ad19e4"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/advi-insure-snapshot-plane/20260825T122500Z/DECOMP.md",
+    "vintage_commit": "660deaa2cc",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_INSURE.TO-R1-DS.landing-gold-platinum-planes.md"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~J",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~J/deliverables/AC3_AM_BYTE_IDENTITY_BASELINE_BEFORE.json",
+      "kind": "config_data",
+      "commit_or_etag": "4d40f0d1c8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A baseline measurement has no deploy leg. LOCAL on branch CLOUD -- this seat does not push (integrator-only push gate), so it is reported as landed LOCAL @4d40f0d1c8 riding integration, NEVER as landed.",
+      "artifact_covered_by": ["INSR1DS-AC3"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~J/deliverables/insurance_forbidden_field_census.py",
+      "kind": "script",
+      "commit_or_etag": "e673f994ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A design-layer predicate run at this seat; not part of any pipeline chain, no deploy channel. It re-runs against the live parquet when one exists -- THAT run is the APPLIED claim, not this one. LOCAL on CLOUD, rides integration.",
+      "artifact_covered_by": ["INSR1DS-AC3"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~J/deliverables/ADVI_INSURE_PATTERN_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "e673f994ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "An architecture note; no deploy leg. LOCAL on CLOUD, rides integration.",
+      "artifact_covered_by": ["INSR1DS-AC5"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~J/deliverables/ADVI_INSURE_TO-R1-DS_DETERMINATIONS.md",
+      "kind": "doc",
+      "commit_or_etag": "e673f994ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A determinations record; no deploy leg. LOCAL on CLOUD, rides integration.",
+      "artifact_covered_by": ["INSR1DS-AC2", "INSR1DS-AC4", "INSR1DS-AC6"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "INSR1DS-AC1",
+      "criterion_verbatim": "Landing in the canonical grammar: blackdiamond/49financial/bronze/insurance_* (RAW API bytes per run) and .../silver/insurance_* (parquet). Rule 17a: NO parquet under bronze/. Rule 17: silver is DEDUP + DTYPE ONLY. 49financial and 49f are BOTH live spellings in this estate -- name which tree you wrote to and which join dims you read.",
+      "method": "live_read",
+      "invocation": "boto3 list_objects_v2 paginated CLIENT-SIDE over 4 named trees (never --query over a page, never --no-paginate); positive-control token 'allocation' over the same walked set",
+      "output_evidence": "0 insurance-bearing keys over 480,954 FULLY-WALKED keys: opal-data-assets/blackdiamond/ 3,655 (4 pages) | opal-data-assets/ 472,846 (473 pages) | opal-data-49financial/ 4,441 (5 pages) | opal-data-portal-v2/platinum/advi/ 12 (1 page). POSITIVE CONTROL 'allocation' = 416 hits over the same walked set, so the matcher DISCRIMINATES and the zero is MEASURED, not a dead filter. Firm spellings live under blackdiamond/: 49f (285 keys) and cottonwood (3,370); blackdiamond/49financial/ DOES NOT EXIST (0 keys) -- the ruled target prefix is a MINT, and unbuilt is not defective. Silver join dims read: the four under blackdiamond/49f/silver/, of which dim_advisor_fee_role was used for the spine.",
+      "denominator": "480,954 keys across 4 NAMED trees -- each named because a cross-tree absence claim requires enumeration; a 404 in the wrong bucket returns a clean, well-formed zero rather than an error",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "UNCOMPUTABLE-BY-DEPENDENCY (issuer's term, ruling 70416). AC1's grounding is APPLIED (keys exist, head-object) and Rule 17a defines bronze as RAW API BYTES PER RUN. Those bytes are produced by surface (a) -- INS-a-1..3, the bd49f REST vehicle's insurance leg -- which this TO EXCLUDES to 0.6.0_AE_PartnerETL and which has produced nothing. The criterion was therefore satisfiable ONLY by fabricating raw vendor bytes, the one act Rule 17a forbids: a fabricated bronze partition destroys the raw feed's recoverability PERMANENTLY and would read as a PASS. I did not mint placeholder bytes. The issuer named the un-named-seat gap as their own defect. NOT failed and NOT deferred by choice; the dependency is named."
+    },
+    {
+      "criterion_id": "INSR1DS-AC2",
+      "criterion_verbatim": "ONE additive current-state gold table in opal-data-49financial/gold/advi/ (candidate insurance_nav_current/date={D}/), one row per insurance account per asOfDate, carrying the spine keys (account -> relationship -> advisor -> firm from a00/a01) SO EVERY AGGREGATION IS A JOIN, NEVER A COMPUTATION IN THE FRONTEND.",
+      "method": "live_read",
+      "invocation": "pyarrow schema+data read of gold/advi/dimensions/{dim_account,dim_relationship}/date=2026-08-24/data.parquet and blackdiamond/49f/silver/dim_advisor_fee_role/date=2026-08-24/data.parquet; measured left-join resolution with printed denominators",
+      "output_evidence": "Spine measured LEG BY LEG. LEG 1 BD-native -> Opal account_id: JD2 dim_advisor_fee_role (160,091 rows / 44 cols; 5,337 at is_current) carries BOTH bd_account_id (BD-native, e.g. z0817426091) AND account_id (10-char zero-padded) -- 5,337 distinct each: ID JOIN EXISTS. LEG 2 account_id -> relationship_id: dim_relationship (7,357 rows / 14 cols) resolves 7,356 of 7,382 dim_account rows = 99.65%, 26 unassigned: ID JOIN EXISTS. LEG 3 ADVISOR: 0 of 95 columns across dim_account (37) + dim_relationship (14) + JD2 (44) carry an advisor identifier; every handle is a NAME STRING in two mutually unparseable formats -- 'ANDERSON  ROY CLAYTO' (UPPER, LAST-FIRST, double-spaced, 20-char truncated, 9 distinct over 7,202 rows) vs 'Campbell Huber' (Title Case, First Last, 141 distinct). The issuer independently re-ran this over a DELIBERATELY WIDER net and the finding SURVIVED.",
+      "denominator": "95 columns across 3 spine tables; 7,382 accounts for the relationship join; 5,337 distinct bd_account_id in JD2 at is_current",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "DESIGN-COMPLETE / APPLIED-GATED (issuer's term, ruling 70416, which corrected its own earlier wording for gating AC2 while listing AC2's cells as reachable). The DESIGN layer is COMPLETE and recorded: table at gold/advi/insurance/insurance_nav_current/date={D}/ in its OWN subtree, deliberately NOT under canonical/ because an enumerator over canonical/* would blend BY ADJACENCY what INS-inv-1 forbids -- never-blend holds BY CONSTRUCTION only when the tables do not share a prefix, and anywhere else it holds by discipline, which is not a control. Grain: one row per (bd_account_id, as_of_date), additive, with a CONFLICT REFUSAL on any value change to a closed as_of_date. Spine carries account/relationship/firm as REAL IDs; the advisor leg is declared NOT-DERIVABLE-UPSTREAM per issuer ruling 70462 and is NOT name-joined, because a name-string join across a 160,091-row dim is a silent-collision generator that returns a plausible number instead of an error -- an honestly missing leg beats a leg that is right most of the time. The APPLIED layer (rows actually written) is uncomputable this round: there is no silver to build gold from, per AC1."
+    },
+    {
+      "criterion_id": "INSR1DS-AC3",
+      "criterion_verbatim": "NO analytics fields, NO returns, NO series -- a schema census against the forbidden set, printed. A snapshot plane that grows a series has become an AM calculation. AND the byte-identity control on every existing AM figure, measured BEFORE and AFTER.",
+      "method": "command",
+      "invocation": "python org/tier2_senior/0.4.0_DS_ClientPlatform~J/deliverables/insurance_forbidden_field_census.py ; 3x determinism re-run sha256-hashed ; 3 planted mutants ; boto3 GET+sha256 over all 12 served objects",
+      "output_evidence": "CENSUS rc=0: CONTROL neg (clean schema, must be 0) = 0 OK; CONTROL pos (3 planted, must be >=3) = 3 OK [twr_ytd->returns_and_performance, nav_series->wider_time_axis, avg_weight->derived_aggregate]; DESIGNED SCHEMA 14 columns scanned, 0 violations, CLEAN. The module REFUSES to print a verdict unless both arms hold. MUTANTS: designed+twr_ytd -> 1; +nav_series -> 1 ['series']; +pct_of_total -> 1 ['pct']; unmutated stays 0 -- it DISCRIMINATES. DETERMINISM: 3 consecutive runs, sha256 d5b817547e3b8284 on all three, STABLE. BASELINE (BEFORE half, commit 4d40f0d1c8): 12 served objects under platinum/advi/49financial/ digested sha256 over the FULL GET BODY, not ETag -- a multipart ETag is not a content hash; 0 of 12 are multipart today and the method does not depend on that holding. last_modified + etag recorded per key so the AFTER can DISCRIMINATE 'the publisher re-ran' from 'insurance moved an AM figure'; only the second falsifies the design, and a bare sha256 diff could not tell them apart.",
+      "denominator": "14 designed columns scanned; 12 served objects digested; 3 determinism runs; 3 planted mutants",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "DESIGN-CLEAN / AFTER-HALF-GATED. The forbidden-field census is EXERCISED and clean at the DESIGN layer with both control arms reachable from DIFFERENT truths. The BEFORE half of the byte-identity control is CAPTURED AND COMMITTED -- taken FIRST precisely because it EXPIRES: a before-measurement taken after the fact is not a baseline, and had I built first my own falsifier would have been unfalsifiable. The AFTER half cannot exist until something changes, which is gated behind AC1, so the criterion as a whole is not computable this round. DECLARED HONESTLY: timeseries_chart.json and timeseries_chart_full.json are BYTE-IDENTICAL (same sha256, 7,260,521 B) though the emitter documents them as a divergent pair -- the BENIGN reading (the series' full domain sits inside the 1,091-day truncation window, making truncation a correct no-op) is at least as likely as a defect and I am NOT calling it one. Consequence for my OWN instrument: the AFTER comparison has at most 11 independent figures, not 12, and I will quote 11 rather than 12."
+    },
+    {
+      "criterion_id": "INSR1DS-AC4",
+      "criterion_verbatim": "ONE json under platinum/advi/49financial/, emitted by d_publisher_port.py so it joins the twin set and rides the publisher's activation. ONE PRODUCER PER SERVED KEY -- verify no second writer exists for that key. NEVER#3 does NOT attach -- you are MINTING a key, not moving one; state that positively.",
+      "method": "manual_read_with_citation",
+      "invocation": "read data/assets/scripts/gold/runners_49f/d_publisher_port.py:61-62 (SERVE_BUCKET/SERVE_ROOT), :466 (serve_key construction), :530-533 (unknown-key refusal), :94+ (EMITTERS registry) @e673f994ac tree; comp-keys prefix s3://opal-data-portal-v2/platinum/advi/49financial/",
+      "output_evidence": "ONE PRODUCER HOLDS BY CONSTRUCTION, not by promise: SERVE_BUCKET=opal-data-portal-v2 and SERVE_ROOT=platinum/advi/49financial pinned at :61-62; every write built as f'{SERVE_ROOT}/{row[leaf]}' at :466; :530-533 REFUSES unknown keys against the EMITTERS registry ('REFUSED: unknown keys ... the EMIT set is ...'). The writer CANNOT address a key outside its own serve root, so a second producer for this leaf is UNREACHABLE through this path rather than merely discouraged. The estate's live counter-example is why this matters: D_01 and D_04 both write platinum/firm/partner_analytics_*.json with disagreeing CacheControl, resolved only by write order. NEVER#3 DETERMINATION, stated POSITIVELY: platinum/advi/49financial/ holds 12 keys, fully walked, NONE insurance-bearing -- so the insurance leaf is a MINT. A MINT NEEDS NO NEVER-WIDEN SIGN-OFF; moving or repointing an existing served key does. No sign-off is owed here and I did NOT manufacture one -- an agent-invented approval step is invisible to the person it delays.",
+      "denominator": "12 served keys under the serve root, fully walked; 4 source line-ranges read in the writer path",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "DETERMINED / EMISSION-GATED. The one-producer property and the NEVER#3 mint determination are both ESTABLISHED -- the first at the SOURCE layer (the writer structurally cannot address a foreign key), the second at the APPLIED layer (a full walk of the serve root). Neither required an insurance byte. What is NOT computable this round is the actual EMISSION of the leaf, which is gated behind AC2, itself gated behind AC1. Boundary named so it is not blurred later: what WOULD attach NEVER#3 is repointing any of those 12 existing keys, changing a route that serves them, or relocating the insurance leaf once published -- none of the three is in this TO."
+    },
+    {
+      "criterion_id": "INSR1DS-AC5",
+      "criterion_verbatim": "bd<->cot SEPARATION IS ABSOLUTE -- 49F TREE ONLY. The pattern record names the structure Cottonwood reuses (grammar, gold table shape, platinum key form, class-axis value) with NO shared code, NO shared keys, NO cot prefix anywhere in it.",
+      "method": "command",
+      "invocation": "grep -o -i over org/tier2_senior/0.4.0_DS_ClientPlatform~J/deliverables/ADVI_INSURE_PATTERN_RECORD.md for 6 cot-prefix patterns; positive-control tokens 'blackdiamond' and 'insurance'; presence check for the 4 required items",
+      "output_evidence": "Note EXISTS, 180 lines, committed e673f994ac. COT-PREFIX CENSUS all ZERO: cottonwood=0, opal-data-cot=0, blackdiamond/cot=0, /cot/=0, cot_=0, COTKEY=0. POSITIVE CONTROL fires on the SAME file: blackdiamond=5, insurance=12 -- so the matcher CAN fire and the zeros are measured, not a dead grep. FOUR REQUIRED ITEMS all present: LANDING GRAMMAR=1, GOLD TABLE SHAPE=1, PLATINUM KEY FORM=1, CLASS-AXIS VALUE=1. Every path in the note is written with {firm} so no reader can lift a literal foreign prefix out of it, and its load-bearing sentence is that a pattern is a SHAPE TO COPY and never a MODULE TO CALL -- with the reason stated: firm separation is gate-enforced at commit and IAM-Deny-enforced at runtime.",
+      "denominator": "6 cot-prefix patterns + 2 positive-control tokens + 4 required items, over 180 lines",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INSR1DS-AC6",
+      "criterion_verbatim": "NO alarm / SNS / SES / monitor / freshness-checker; NO shadow path, NO parallel emitter, NO standing comparator. AND: the Advisor tab and Distribution tab are OUT CATEGORICALLY -- if any cell of yours touches DistributionTab or the Advisor tab, you are outside the TO.",
+      "method": "manual_read_with_citation",
+      "invocation": "review of all 4 artifacts produced this round + the 14-cell scope against the three prohibition classes, cited against the TO's decomp_ref cell list",
+      "output_evidence": "ZERO alarms, SNS topics, SES sends, monitors or freshness-checkers built or proposed. INS-c-3's cadence work is a PRINTED CENSUS from observed as_of_date history with NOTHING STANDING -- it does not compare to wall-clock and holds no threshold. ZERO shadow paths, parallel emitters or standing comparators: one landing prefix, one gold table, one platinum leaf, one producer. Advisor tab and Distribution tab UNTOUCHED -- my 14 cells are inv-1..6 / b-1..2 / c-1..3 / d-1..2 / f-1, and the ENTIRE frontend plane (e-1..5) is excluded to another lane, so no cell of mine can reach either file. ALSO RECORDED: this plane is explicitly NOT T-1 -- a statement-cycle asset judged on a trading calendar would manufacture a false outage every single day between statements, which is the NEVER#1 class pointed at the wrong subject.",
+      "denominator": "3 prohibition classes x 4 artifacts produced; 14 cells in scope, 0 touching the frontend plane",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The AC3 census is the deliverable most able to lie -- a schema check returning 0 looks identical whether the schema is clean or the matcher is dead. Three mutants plant one forbidden column each, one per forbidden group, onto the otherwise-clean designed schema.",
+      "expected": "Each mutant must raise exactly 1 violation naming its OWN group's token, while the unmutated designed schema stays at 0. A mutant that does not fire means the census cannot detect the thing it exists to detect.",
+      "observed": "M1 designed+twr_ytd -> 1 violation (returns_and_performance). M2 designed+nav_series -> 1 violation ['series'] (wider_time_axis). M3 designed+pct_of_total -> 1 violation ['pct'] (derived_aggregate). Unmutated designed schema -> 0, CLEAN. The module's own built-in arms also both held (neg=0 OK, pos=3 OK) and it refuses to print a verdict unless both do. Additionally the commit-gate itself acted as an unplanned mutant: it BLOCKED the first commit on ruff E402 because the docstring sat after 'from __future__ import annotations', making it a bare expression; after fixing the ordering I RE-RAN the controls, because a repair that silently breaks a control is worse than the lint error it cured.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The census was run three consecutive times and the full stdout sha256-hashed each time. Set iteration and dict ordering are the plausible instability sources in this predicate.",
+      "observed": "Three runs, sha256 d5b817547e3b8284 on all three. STABLE.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "INS-a-1..3, the ETL vehicle leg (3 of the decomp's 22 cells)",
+      "reason": "Excluded by the TO to 0.6.0_AE_PartnerETL. Named rather than silently absorbed, because AC1 depends on it and its absence is the entire reason AC1 is uncomputable. Measured and reported: 0.6.0_AE_PartnerETL is NOT LIVE on the broker roster (17 seats, read 12:5xZ); 0.7.0_AE_CloudOps~H is IDLE. I named who is free; the seating act is MSTR's and I did not make it."
+    },
+    {
+      "item": "INS-e-1..5, the frontend plane (5 of 22 cells)",
+      "reason": "Excluded by the TO to the DE lane, including the Rule 24 class-axis enumeration act for the 'Insurance' value. Real work, not deferred scope."
+    },
+    {
+      "item": "The APPLIED half of AC1, AC2, AC3's AFTER control, and AC4's emission",
+      "reason": "All four require insurance bytes that do not exist (0 of 480,954 walked). NOT claimed at any layer. Committing is not executing, and designing is not either."
+    },
+    {
+      "item": "Whether dim_relationship.rep_name is an advisor field at all",
+      "reason": "9 distinct values over 7,202 rows cannot carry 141 implementors, so I read it as a rep/registration code -- but I did NOT confirm that and I do not assert it. Stated as a read, flagged unconfirmed."
+    },
+    {
+      "item": "Whether the timeseries_chart twin byte-identity is a defect",
+      "reason": "Resolving it needs the series' actual date span read, which is inside another project's plane and not among my 14 cells. Reported as one line to CVO; no action taken, per the surprise-channel mandate."
+    },
+    {
+      "item": "Whether the insurance cohort overlaps JD2's account universe at all",
+      "reason": "UNMEASURABLE BY ANYONE today -- the cohort does not exist. An untestable PREMISE of the design, not a defect. Recorded in the design rather than buried, with the cheapest disarm named for the lane that owns it."
+    }
+  ],
+  "surprises": [
+    "BLOCKING / ARMED-NO -- AC1 unreachable by any act of this seat: 0 insurance-bearing keys over 480,954 fully-walked keys across 4 named trees, positive control 416. Routed to the ISSUER same-turn (2.0.0_SA_COO, 20260825T124440Z) as the TO requires; filed to 3.0.0_SA_CVO cc COO (70410/70411). Ruled UNCOMPUTABLE-BY-DEPENDENCY by the issuer at 70416, who named the un-named-seat gap as their own defect.",
+    "OBSERVATION / ARMED-NO -- An untestable premise in the gold spine: JD2's roles_source and fee_source are BOTH the single value bd-49f-allocation_390224, i.e. the ASSET-MANAGEMENT allocation feed, so the insurance cohort's overlap with JD2's 5,337 accounts may be near zero, making 'unassigned' the DEFAULT rather than the edge case -- in which case the spine aggregation AC2/INS-inv-3 and the Books rollup rest on would resolve for almost nobody. Filed to CVO cc COO (70445/70446). Did not interrupt; proceeded on the stated assumption with the assumption WRITTEN DOWN. Cheapest disarm named: one line in INS-a-1's oracle printing how many exported bd_account_id appear in JD2 at is_current, with the denominator -- cheap now, expensive after gold code exists.",
+    "OBSERVATION / ARMED-NO -- platinum/advi/49financial/timeseries_chart.json and timeseries_chart_full.json are byte-identical (sha256 117f6224b99e1069, 7,260,521 B) though d_publisher_port.py's EMITTERS comment documents them as a deliberately un-collapsed divergent pair (PLATINUM_NNA_TRUNC_DAYS=1091). Filed to CVO cc COO (70410/70411). EXPLICITLY NOT called a defect -- the benign reading (truncation is a correct no-op if the full domain fits the window) is at least as likely. Raised only because it changes MY OWN denominator from 12 to 11.",
+    "OBSERVATION / ARMED-NO -- The advisor spine leg has no identifier anywhere: 0 of 95 columns across the three spine tables. Converged with 0.4.0_DS_ClientPlatform~K hitting the same upstream BD template gap from D3_MODELOVERLAY within twenty minutes, neither lane knowing the other had. Routed to the issuer, ruled NOT-DERIVABLE-UPSTREAM (70462); the issuer routed the upstream vendor-template gap (BD dim 436 not selected by template 390224) to 1.0.0_SA_CTO as ONE item gating TWO directives.",
+    "OBSERVATION / ARMED-NO -- SELF-CORRECTION, recorded because the near-miss is the useful part. ~J, ~F, ~G, ~I and ~K are ALL absent from .owned-paths.yaml's enumerated DS lanes (only ~A..~E appear), and I was one step from reporting a gap affecting five live seats. I EXERCISED the gate instead of inferring from the enumeration, and the commit PASSED: the agent side strips one tilde so ~J inherits its base's membership, and tier-2 home paths are serial-prefix globs so 0.4.0_*/** matches ~J incidentally. THERE IS NO GAP. NOT routed as a finding, deliberately -- reporting it would have sent two senior seats chasing a non-problem and manufactured pressure to 'fix' a working gate. Enumeration is not authorization, and absence from a list is not absence of a grant."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~J/logs/2026-08-25/advi_insure_to-r1-ds_seating_and_reachable_planes_1227-1310Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"does an S3 prefix exist and what are its served keys for the 49financial insurance plane\"",
+      "result": "Surfaced a NEAR-TIE across comp-freshness / comp-keys / comp-whoread rather than silently guessing, and routed me to comp-keys as the S3-inventory instrument. I used its routing rather than reaching for a raw aws inspection."
+    },
+    {
+      "tool": "comp-keys",
+      "invocation": "comp-keys prefix s3://opal-data-assets/blackdiamond/ ; s3://opal-data-49financial/gold/advi/ ; s3://opal-data-portal-v2/platinum/advi/49financial/",
+      "result": "12 platinum keys under the 49F serve root, none insurance-bearing; no insurance table anywhere under gold/advi/; blackdiamond/49financial/ absent. Its own COVERAGE/BLIND header warns that a wrong prefix reads as a TRUE LOUD ZERO -- which is exactly why I then walked four NAMED trees with a positive control rather than trusting one prefix's answer."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'd_publisher_port.py' ; comp-find -i 'jd2' data/assets/scripts/gold/runners_49f/",
+      "result": "1 hit / 28,470 files scanned located the publisher; the jd2 search resolved the advisor basis to blackdiamond/49f/silver/dim_advisor_fee_role/, which is what made the LEG-1 and LEG-3 spine measurements possible at all. Used -i deliberately, per the case-sensitivity rule -- this estate capitalises its load-bearing words."
+    },
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to ADVI_INSURE.TO-R1-DS.landing-gold-platinum-planes",
+      "result": "Session TO_ID set race-free in the per-session file rather than by writing TO_ID= into the shared last-writer-wins .agent_context."
+    }
+  ]
+}
