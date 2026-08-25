@@ -1,6 +1,6 @@
 # TO D4_ETFPOS.TO-D4e — the Positioning page Models/ETFs flip UI (LAPTOP)
 
-<task_order id="D4_ETFPOS.TO-D4e" project="D4_ETF_POSITIONING">
+<task_order id="D4_ETFPOS.TO-D4e" project="ETFS_POSITIONING">
 <issued_to>0.4.0_DE_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:55Z</issued>

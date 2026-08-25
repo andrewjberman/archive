@@ -1,6 +1,6 @@
 # TO D4_ETFPOS.TO-D4c — ETF positioning projection producer + schedule (LAPTOP-ONLY)
 
-<task_order id="D4_ETFPOS.TO-D4c" project="D4_ETF_POSITIONING">
+<task_order id="D4_ETFPOS.TO-D4c" project="ETFS_POSITIONING">
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:55Z</issued>

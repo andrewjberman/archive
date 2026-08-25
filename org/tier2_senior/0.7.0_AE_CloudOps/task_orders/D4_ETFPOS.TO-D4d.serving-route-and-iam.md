@@ -1,6 +1,6 @@
 # TO D4_ETFPOS.TO-D4d — serving route + IAM for the ETF positioning keys (LAPTOP-ONLY, small)
 
-<task_order id="D4_ETFPOS.TO-D4d" project="D4_ETF_POSITIONING">
+<task_order id="D4_ETFPOS.TO-D4d" project="ETFS_POSITIONING">
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:55Z</issued>
