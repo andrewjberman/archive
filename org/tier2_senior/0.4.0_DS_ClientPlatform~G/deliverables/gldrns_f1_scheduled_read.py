@@ -117,11 +117,37 @@ def _partitions(prefix):
             return sorted(out)
 
 
+class PartitionShapeChanged(Exception):
+    """A partition stopped being one file. Raised, never absorbed -- see _read."""
+
+
 def _read(prefix, date):
+    """Read ONE partition, and REFUSE if it is not one file.
+
+    MEASURED 2026-08-25 across every partition this harness touches: twr_daily 529/529,
+    canonical_valuation 530/530, dim_calendar 5/5 are all single-file. So taking the one
+    key is correct TODAY.
+
+    IT IS ALSO A LATENT ASSUMPTION, and the failure mode is the one this whole TO keeps
+    producing: if the producer ever emits two files, `keys[0]` returns a FRACTION of the
+    partition and every count below it -- row totals, the status census, the D/D-1
+    account sets, the AC7 scoped zero -- is computed over part of the data and reads as
+    complete. A REFUSED-NO-BMV count taken over half a partition can be zero for the
+    worst possible reason.
+    Nothing in the output would say so, which is why this is an assertion rather than a
+    comment. A loud refusal on a shape change costs one run; a silent fraction costs the
+    verdict.
+    """
     r = s3.list_objects_v2(Bucket=GOLD, Prefix="%sdate=%s/" % (prefix, date))
     keys = [o["Key"] for o in r.get("Contents", []) if o["Key"].endswith(".parquet")]
     if not keys:
         return None
+    if len(keys) > 1:
+        raise PartitionShapeChanged(
+            "%sdate=%s/ holds %d parquet files; this harness reads one and every count "
+            "it prints would be a FRACTION reported as a total. Read them all, or "
+            "establish why there is more than one, before trusting any number below."
+            % (prefix, date, len(keys)))
     body = s3.get_object(Bucket=GOLD, Key=keys[0])["Body"].read()
     return pq.read_table(io.BytesIO(body)).to_pandas()
 
@@ -445,10 +471,10 @@ def main() -> int:
     print("AC7 VERDICT: {}".format(
         "SATISFIED at this partition" if npass == len(checks)
         else "NOT SATISFIED -- see FAILs above"))
-    print("SCOPE: this reads ONE partition. Whether the run that produced it was the")
-    print("  SCHEDULED fire or an ad-hoc QA invocation is NOT decidable from the artifact")
-    print("  alone -- the manifest carries no trigger field. That must come from the run's")
-    print("  own execution record, and an ad-hoc run is NEVER production evidence.")
+    print("SCOPE: this reads ONE partition, and section 8 is EVIDENCE-FOR the run being")
+    print("  the scheduled one, never proof of it. The manifest carries no trigger field;")
+    print("  mode=production proves the FLAG, and the scheduler's own invocation history")
+    print("  is outside this read. An ad-hoc run is NEVER production evidence.")
     return 0 if npass == len(checks) else 1
 
 
