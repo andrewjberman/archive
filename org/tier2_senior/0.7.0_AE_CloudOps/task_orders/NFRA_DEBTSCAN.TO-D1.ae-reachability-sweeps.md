@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (NFRA_DEBTSCAN decomposition, 180600Z 2026-06-12; per CTO PRD §9 handoff 7caee952a)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>queued — start after D8-AE Part B RAVC2 (D8-AE takes priority)</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_DEBTSCAN is complete; this TO was last touched 2026-06-12, predating the project close 2026-07-09. Closed as a record act, not a work verdict. Prior status: queued — start after D8-AE Part B RAVC2 (D8-AE takes priority)</status>
 <priority>P1 — first deliverable of NFRA_DEBTSCAN; unblocked (no cross-deps except Part B finish first)</priority>
 
 <background>

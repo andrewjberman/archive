@@ -2,7 +2,7 @@
 
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>dispatched</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_COMPPROOF is complete; this TO was last touched 2026-07-01, predating the project close 2026-07-07. Closed as a record act, not a work verdict. Prior status: dispatched</status>
 <!-- PROGRESS 2026-07-01 (0.8.0_AE_CloudComp~D): HARNESS BUILT + self-tested + committed 51196d3a9 (org/modules/graph/compproof/ under lane grant 38142e83b). Structural ACs MET: AC#1 STRIP DIFF-GATE 20/20; AC#2 isolation VOID-on-violation (structural); AC#4 3-axis scorer + gap-charter + aggregate + standing self-test; ADVI_BREAKS #1 worked example -> PARTIAL+charter. AC#3 (the 20-incident blind RUN) HANDED OFF to the execution phase -- MSTR spawns fresh solvers (spawn_payload only), CVO~B (B2) judges; I'm the AUTHOR (isolation-barred from solve/judge). TO stays open pending the blind-run. RAVC->COO~B, CC CTO+CVO~B. -->
 
 <priority>HIGH -- B is the SPINE (seeds C's intent-set + D's gap-feed). CTO arch-leads; you build. PRD NFRA_COMPPROOF_PRD.md (3d78e1f5b) SS2-B + SS6.</priority>

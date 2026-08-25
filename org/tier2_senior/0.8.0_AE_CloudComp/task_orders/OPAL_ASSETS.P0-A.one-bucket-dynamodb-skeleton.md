@@ -5,7 +5,7 @@
 <assigned_to>0.8.0_AE_CloudComp</assigned_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_date>2026-07-13</issued_date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project OPAL_ASSETS is complete-as-superseded; this TO was last touched 2026-07-12, predating the project close 2026-07-15. Closed as a record act, not a work verdict. Prior status: pending</status>
 <priority>P0 -- BUILDABLE NOW, no sovereign gate. Andrew-commissioned macro-project; MSTR-authorized P0 start (030x). This is the AE half of G5 (bucket + served artifact); the DS half (G4 avgcap fold + the mdpf emitter extension) is STAGED for DS post-Round-8 (OPAL_ASSETS.P0-B). The skeleton reads EXISTING served outputs, so it does NOT block on DS.</priority>
 <dispatch>GO 2026-07-13 by 2.0.0_SA_COO. You are the confirmed sole 0.8.0 lane (MSTR respawn, PID 29628). Read the PRD full_spec BEFORE building.</dispatch>
 <full_spec>docs/architecture/OPAL_ASSETS_PRD.md @ 79231da3e (PRD v0.1, CTO~B). This TO is the AE-side P0 slice of PRD sec 4 (G5) + sec 6 (P0). The PRD is authoritative on row shape, as_of semantics, and guardrails -- read sec 0, 3a, 3d, 4:G5, 6, 7 before building.</full_spec>

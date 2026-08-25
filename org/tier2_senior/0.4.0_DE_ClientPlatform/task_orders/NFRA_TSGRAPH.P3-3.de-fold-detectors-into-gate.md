@@ -5,7 +5,7 @@
 <consult>commit-gate / critical-surface owner (CTO for the gate policy; DT for the hook wiring) -- commit-through the gate owner</consult>
 <issued_by>2.0.0_SA_COO (CTO PRD section-9 handoff 151724Z; 2b61ac87e)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_TSGRAPH is complete; this TO was last touched 2026-06-18, predating the project close 2026-07-07. Closed as a record act, not a work verdict. Prior status: staged</status>
 <priority>MEDIUM -- GATED on P3-2 (folds the validated detectors). Closes the loop: detectors become preventive gates.</priority>
 
 <gate>P3-2 <status>complete</status> (validated frontend detectors exist). COO GOes after P3-2 RAVC2.</gate>

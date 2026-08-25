@@ -8,7 +8,7 @@
      moves to a dedicated lane so base keeps only R5 + owns the shared registration surface. The
      batch-GO assignment of R4R6 to base is SUPERSEDED. -->
 <date>2026-07-23</date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_MSBEFF is complete; this TO was last touched 2026-07-23, predating the project close 2026-07-29. Closed as a record act, not a work verdict. Prior status: pending</status>
 <priority>R4 = P2 (widest behavioral gap by stakes) · R6 = P3 (cheap hygiene, same batch)</priority>
 
 <authority>

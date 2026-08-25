@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.8.0_AE + 0.4.0_DS</issued_to>
     <date>2026-07-07</date>
-    <status>ready</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_COMPILERKIT is complete; this TO was last touched 2026-07-07, predating the project close 2026-07-07. Closed as a record act, not a work verdict. Prior status: ready</status>
     <dispatch_state>WRITTEN-NOT-DISPATCHED (wind-down 2026-07-07; Andrew directed decomposition materialized before device reboot; dispatch on restart per the allocation-map in the session handoff /log)</dispatch_state>
     <gate_note>COO-RESOLVABLE after P2. Owner 0.8.0 + DS.</gate_note>
   </metadata>

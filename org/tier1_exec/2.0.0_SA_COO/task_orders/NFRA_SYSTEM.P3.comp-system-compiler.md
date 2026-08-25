@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.8.0_AE_CloudComp~D (comp-tool lead, org/modules/graph -- built the class-3 inventory the compiler aggregates) | CTO arch-gate (grounded-against-live) + CVO cert (no-fabricated-current-state)</issued_to>
     <date>2026-07-08</date>
-    <status>staged -- GO'd (base COO LOCALROOT-P2 CTO-GO 225633Z closes SYSTEM-P2 + unblocks P3). Sequence AFTER ~D wraps TOOLCHECK P3 (imminent -- the HUD). Coordinate with base COO's LOCALROOT-P3 (the index reuses this compiler's 06 output).</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_SYSTEM is complete; this TO was last touched 2026-07-08, predating the project close 2026-07-09. Closed as a record act, not a work verdict. Prior status: staged -- GO'd (base COO LOCALROOT-P2 CTO-GO 225633Z closes SYSTEM-P2 + unblocks P3). Sequence AFTER ~D wraps TOOLCHECK P3 (imminent -- the HUD). Coordinate with base COO's LOCALROOT-P3 (the index reuses this compiler's 06 output).</status>
     <prd_ref>docs/architecture/NFRA_SYSTEM_PRD.md (Part 3 runtime-compiled current-state) + the class-6 synthesis + CTO Q1/Q2 rulings + NFRA_LOCALROOT-P2 (c345f4038, the index reuses 06)</prd_ref>
     <gate_note>THE HARD LINE (CTO, arch-gate-verified on P2): 06_current_state is the DYNAMIC half -- it MUST ground against LIVE state (comp-kuzu / comp-freshness / marker-oracle), auto-refresh on HEAD-advance, NEVER self-report or hand-fabricate numbers. The P2 stub already documents this contract; P3 fills it from grounded live state.</gate_note>
   </metadata>

@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.8.0_AE_CloudComp~Z (REDIRECTED 2026-07-14 from 0.4.0_DS~B [base-track + consumed by AoR lane] per Andrew-direct P3-extension ruling to CTO~Z, VERBATIM "yes P3 goes to 0.8.0~Z too" -- record @ ANDREW_DIRECT_ZGROUP_COMMS_PARTITION_20260714.md AMENDMENT 1; extends SOVEREIGN REDIRECT @ 14c2aeeba + 552667ccd which named P0/P1/P2 only. Gate UNCHANGED: MOTIF-P2 + FEDOBS-P2. Prior chain: DS~A down -> DS~B re-allocated 2026-07-08)</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_MOTIF is complete; this TO was last touched 2026-07-14, predating the project close 2026-07-14. Closed as a record act, not a work verdict. Prior status: staged</status>
     <prd_ref>docs/architecture/NFRA_MOTIF_PRD.md (P3 + AC3/AC5)</prd_ref>
     <dispatch_state>STAGED -- GO at Wave-3, AFTER MOTIF-P2 + FEDOBS-P2 (measurement). Authored by COO~B on the NFRA full-program completion drive.</dispatch_state>
     <gate_note>Gated on MOTIF-P2 (emergent systems) + FEDOBS-P2 (the co-occurrence measurement each candidate must carry). This is the MOTIF->PROMOTE handoff -- the "compose" middle of the learning loop.</gate_note>

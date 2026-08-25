@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.8.0_AE_CloudComp~D (framework) + 0.4.0_DS_ClientPlatform~A (recognizers)</issued_to>
     <date>2026-07-07</date>
-    <status>active</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_COMPILERKIT is complete; this TO was last touched 2026-07-07, predating the project close 2026-07-07. Closed as a record act, not a work verdict. Prior status: active</status>
     <prd_ref>docs/architecture/NFRA_COMPILERKIT_PRD.md (P1)</prd_ref>
     <backfill_note>TO FILE backfilled 2026-07-07 -- the SEMCTL plane was dispatched + built via MCP + arch-gate RAVC but the durable TO records were not materialized (Andrew/CTO caught the gap 2026-07-07). This TO reflects the REAL current state. Standing-fix adopted: TO-file + MCP-dispatch, both, every time.</backfill_note>
   </metadata>

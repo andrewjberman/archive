@@ -3,7 +3,7 @@
 <project>NFRA_ONTOCLARITY</project>
 <issued_to>0.8.0_AE_CloudComp~C</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_ONTOCLARITY is complete; this TO was last touched 2026-07-19, predating the project close 2026-07-20. Closed as a record act, not a work verdict. Prior status: staged</status>
 <priority>P2 -- definitional, startable after WS-A (inherits WS-A's two-layer root fix). The 5-scheme crosswalk is the highest-leverage clarity artifact (CTO). Context-owner ~C.</priority>
 
 <references>

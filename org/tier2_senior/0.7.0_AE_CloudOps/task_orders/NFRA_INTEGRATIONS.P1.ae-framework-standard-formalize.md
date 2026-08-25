@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-07-02</date>
-    <status>active</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_INTEGRATIONS is complete; this TO was last touched 2026-07-02, predating the project close 2026-07-08. Closed as a record act, not a work verdict. Prior status: active</status>
     <thread_serial>NFRA_INTEGRATIONS-001</thread_serial>
     <prd_ref>docs/architecture/NFRA_INTEGRATIONS_PRD.md (Pillar 1, sec 2) + docs/architecture/NFRA_INTEGRATIONS_STANDARD.md (v1, already exists)</prd_ref>
   </metadata>

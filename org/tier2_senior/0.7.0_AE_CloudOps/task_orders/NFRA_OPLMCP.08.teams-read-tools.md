@@ -7,7 +7,7 @@
 <verify>3.0.0_SA_CVO</verify>
 <issued_by>2.0.0_SA_COO (MSTR-requested formalization 212409Z; Andrew-direct /teams-assist)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>active</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_OPLMCP is build-complete; this TO was last touched 2026-06-24, predating the project close 2026-06-25. Closed as a record act, not a work verdict. Prior status: active</status>
 <!-- MSTR holds the /teams-assist SKILL side (authored+landed, PENDING); this TO is the ONE dependency: the read-only Teams-read tools on the M365 gateway. MSTR commits the fabric skill + finalizes once these tools land + validate end-to-end. Scopes ALREADY consented (no re-consent). -->
 
 <the_work>

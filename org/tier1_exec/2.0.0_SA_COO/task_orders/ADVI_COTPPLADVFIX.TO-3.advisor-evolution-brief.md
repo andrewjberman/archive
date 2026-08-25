@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: project ADVI_COTPPLADVFIX is complete; this TO was last touched 2026-07-07, predating the project close 2026-07-20. Closed as a record act, not a work verdict. Prior status: staged</status>
     <dispatch_state>STAGED, LOW-priority, NON-gating. Doc-only; not a gate on TO-1 or TO-2. Author when convenient AFTER TO-1's build lands (DS holds the role-assignment + rep-code data knowledge). CTO arch-reviews the evolution framing (PRD assigns TO-3 to 1.0.0_SA_CTO / 0.4.0_DS jointly). PRD docs/architecture/ADVI_COTPPLADVFIX_PRD.md S6 TO-3.</dispatch_state>
     <gate_note>Gates: none. Effort <1h.</gate_note>
   </metadata>

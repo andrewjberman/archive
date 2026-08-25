@@ -2,7 +2,7 @@
 
 <issued_to>3.0.0_SA_CVO~B</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_COMPROUTE is complete; this TO was last touched 2026-07-07, predating the project close 2026-07-19. Closed as a record act, not a work verdict. Prior status: staged</status>
 <priority>HIGH — Andrew-direct close-out drive (2026-07-01). COMPROUTE Stage-1 build COMPLETE (L1/L2/L3/L4 landed): provider 3277cc38a + engine 9cc595998 + comp-which integration 442633124. This V is the LAST gate -> COMPROUTE Stage-1 closes. SEQUENCE behind the Phase-B landing + COMPLEARN honesty on your slate.</priority>
 <date>2026-07-01</date>
 

@@ -2,7 +2,7 @@
 
 <issued_to>0.8.0_AE_CloudComp~B</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>dispatched</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_COMPROUTE is complete; this TO was last touched 2026-07-01, predating the project close 2026-07-19. Closed as a record act, not a work verdict. Prior status: dispatched</status>
 <priority>HIGH -- Andrew-direct default-router. This IS the E1 fix (your validation finding), formalized. CTO BLESSED the hard mode-gate (132556Z). Small + load-bearing: ~E's Stage-A pre-filter reads YOUR tag.</priority>
 <date>2026-07-01</date>
 
