@@ -50,6 +50,7 @@ EVIDENCE VINTAGE: live 49F plane; deployed-bytes read resolved at run time and p
 """
 from __future__ import annotations
 
+import datetime as _dt
 import argparse
 import hashlib
 import io
@@ -399,6 +400,15 @@ def main() -> int:
     # ---------- 6. deployed bytes ----------
     print()
     print("6. RULE 22a CODE LAYER -- the bytes that WILL EXECUTE, not the ones on disk")
+    _read_at = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    print("   IDENTITY READ AT %s -- and that stamp is the point (CVO 69674)." % _read_at)
+    print("   DEPLOYED == BLOB IS A MOMENT, NOT A PROPERTY OF THE PATH. This harness",
+          "re-reads")
+    print("   `_code/` live on every run, so the premise is never baked -- but a",
+          "safe-deploy")
+    print("   from any tree between this read and the fire moves the executing bytes,",
+          "and a")
+    print("   verdict quoting an earlier read would be true of a moment that had passed.")
     print("   The SSM doc syncs s3://%s/%s on EVERY invocation and runs THAT"
           % (GOLD, CODE_PREFIX))
     print("   (advi_49f_floor.tf:226). A file in this checkout has no causal relationship")
@@ -420,6 +430,11 @@ def main() -> int:
         chk("DEPLOYED bytes == the ref that built them: " + n,
             r["deployed_matches_ref"], True,
             "the only compare on this rung that is about the run")
+        if r.get("worktree_raw_match") is False and not r.get("worktree_norm_match"):
+            print("   {:<26}   !! WORKTREE DIFFERS FROM THE REF BEYOND LINE ENDINGS --"
+                  " a deploy".format(""))
+            print("   {:<26}      from this tree would change the executing bytes."
+                  .format("")) 
 
     print("\n7. EXCLUDED AS CORROBORATION, DELIBERATELY")
     print("   The c04 validation battery is NOT a second opinion on this read: its check 7")
