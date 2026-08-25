@@ -564,8 +564,21 @@ def main() -> int:
             chk("most recent dispatch was SCHEDULER-fired, not manual",
                 top["scheduled"], True,
                 "src=%s in the dispatcher-written Comment" % SCHEDULED_SRC)
-            chk("most recent dispatch SUCCEEDED", top["status"], "Success",
-                "a Failed dispatch means the chain died; the partition plane cannot show it")
+            IN_FLIGHT = ("Pending", "InProgress", "Delayed")
+            if top["status"] in IN_FLIGHT:
+                # RUNNING IS NOT FAILING. The 08-22 green took 96.8s end to end, so a
+                # read taken too soon after 12:45Z can catch the dispatch mid-flight --
+                # and a bare status != "Success" test would report a RUNNING chain as a
+                # failed one. That is the false-outage direction on the artifact Andrew
+                # is waiting for, produced by reading too early rather than by any defect.
+                print("   DISPATCH IS STILL {} -- NOT a failure. Re-read after it settles;"
+                      .format(top["status"]))
+                print("   the 2026-08-22 end-to-end green took 96.8s, so this should be",
+                      "brief.")
+                print("   NOT scoring this limb: an in-flight run is neither PASS nor FAIL.")
+            else:
+                chk("most recent dispatch SUCCEEDED", top["status"], "Success",
+                    "a Failed dispatch means the chain died; the partition plane cannot show it")
         else:
             print("   NO chain dispatches in the materialised history -- a MEASURED",
                   "absence over")
