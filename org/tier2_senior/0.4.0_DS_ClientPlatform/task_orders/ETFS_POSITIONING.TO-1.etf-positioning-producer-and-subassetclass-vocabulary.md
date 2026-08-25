@@ -308,3 +308,120 @@ act. "Landed" is not "running", and "deployed" is not "published."**
 **No ad-hoc republish before both criteria are in the running bytes. Nothing here is a gate: no
 approver, no sign-off, no hold on any seat — this is TO acceptance criteria and delivery order in the
 issuing lane, per Rule 27.**
+
+---
+
+## AMENDMENT D (issuer, 2026-08-25T03:22Z) — **`ETFS-TO1-AC9` IS RE-CUT. THE ISSUER'S FIRST FORM WAS DEFECTIVE BY THE EXACT MECHANISM AMENDMENT C CONDEMNS.**
+
+**AC9 as written in Amendment C is RETRACTED and REPLACED below. AC8 is UNAFFECTED and still binding
+in its stated order.**
+
+### The issuer's defect, stated first because it is the reusable part
+
+Amendment C says: *"An instruction not to re-derive is an instruction not to CHECK, and it is issued
+exactly when the router is most confident."* **Four minutes later, in that same document, I took
+`0.4.0_DE_ClientPlatform~Z`'s finding — which is correct — and sealed their REMEDY into a criterion
+without testing whether it could be executed.**
+
+>> **A FINDING AND ITS REMEDY ARE TWO CLAIMS, AND THEY CARRY DIFFERENT EVIDENCE.** DE~Z proved
+>> `SECTOR_INDICES != ECONOMY_ORDER`. **They did not prove the producer could emit `ECONOMY_ORDER`,
+>> and I did not ask.** `0.4.0_DS_ClientPlatform~Z` then measured that the producer's input carries
+>> `GICS_SECTOR_NAME` **strings and no code column at all** — so my criterion, as written, would have
+>> had them revert a possibly-correct commit toward something unbuildable. <<
+
+**AND THE AGGRAVATING FACT (`3.0.0_SA_CVO~Z`, measured): `ECONOMY_ORDER` reached FOUR SEATS INCLUDING
+ME at 23:28:39Z, and was re-broadcast with its exact 14 values at ~23:5xZ.** I held the right constant,
+by name, with its path, for three and three-quarter hours, then wrote a criterion around it without
+re-reading it — including the `65/90/95` entries that would have shown in one glance it is not a
+GICS list. **CVO~Z's formulation is the durable one and it names the COO failure exactly: A FACT IN
+THE CHANNEL IS NOT A FACT IN THE NEXT DECISION.**
+
+### The condition, and its resolution — both measured, by two seats, in opposite directions
+
+Andrew: *"**If you have access to ECONOMY CODE for these securities** we can order based on that
+**instead of GICS**."* — a CONDITIONAL, and both halves of it were tested:
+
+```
+DS~Z   characteristics.parquet has GICS_SECTOR_NAME (strings), NO code column   -> "condition FALSE"
+DE~Z   falsified the CONCLUSION from their own shipped code:
+       portal/src/pages/Positioning/shared/bookSet.ts   GICS_SECTOR_CODE   @de32bacb  (TO-6 AC3)
+       an 11-row DECLARED name->code map, keyed on THE EXACT SPELLINGS OUR DATA EMITS,
+       already rendering tonight on the live served bytes.
+```
+
+>> **THE CONDITION IS SATISFIED BY DECLARATION, NOT BY DELIVERY. A name->code map is a fixed public
+>> standard — you declare it once rather than receiving it — so no vendor field and no L1 change is
+>> required, and `etf_daily_pull.py` stays untouched under its hold.** ✅ **Build-ladder rung 2: the
+>> estate already has it. This is a REUSE, not a mint.** <<
+
+**DS~Z's measurement was right and their conclusion did not follow; the seat that falsified it is the
+one that had already hit the same wall and solved it. Neither could have closed this alone.**
+
+### `ETFS-TO1-AC9` (replaces the Amendment C form)
+
+**THE INVARIANT — this is the criterion, and it holds whichever list wins:**
+```
+the order of `segment.sector` as emitted  ==  the order the holdings table renders
+                                              ONE PAGE, ONE SECTOR SEQUENCE
+```
+**That is the whole of the observable harm: two orders on one page, both called "canonical." It is a
+defect under either list, so the invariant needs no premise the issuer has not tested.**
+
+**THE ORDER ITSELF IS *NOT* SETTLED BY THIS AMENDMENT, AND THE CRITERION DELIBERATELY DOES NOT NAME A
+LIST.** `3.0.0_SA_CVO~Z` measured the evidence rather than the claim, and it cuts both ways:
+
+```
+economy: 25 / economyName: 'Energy'   portfolio-optimization.ts:215-217
+   the ONLY code/name pairing in the entire portal -- and it sits inside getMockOptimizationData,
+   verbatim: "Generate mock optimization data for development. REMOVE THIS ONCE BACKEND IS READY."
+   GICS 25 is Consumer Discretionary. This pairing says Energy.
+```
+>> **IT CAN FALSIFY *"`ECONOMY_ORDER` is certainly a GICS code list"* — whoever hand-wrote that row did
+>> not think 25 meant Consumer Discretionary. IT CANNOT ESTABLISH *"Yang's codes are not GICS"* — a
+>> fixture marked for deletion is the author's belief about a backend that did not exist, n=1.** <<
+⛔ **SO THE DICTIONARY IS UNDETERMINED. `0.4.0_DE_ClientPlatform~Z`'s machinery is REAL, SHIPPED and
+RENDERED and is not in question — but IF Yang's economy codes are not GICS codes, a GICS name->code
+table drives that correct machinery to a CONFIDENT WRONG ORDER. Correct machinery, wrong dictionary,
+and nothing on the page would look wrong.**
+⚠ **AND THE ROOT OF THE WHOLE THREAD IS A COMMENT READ AS DATA:** CVO~Z's own 00:0xZ broadcast —
+*"`ECONOMY_ORDER` … 14 positions of GICS codes"* — was read off `constants.ts:103`'s
+`// Canonical sector/economy ordering (GICS codes)` **and presented as a measurement. Six hours and
+four seats reasoned from a comment.** *(Filed by CVO~Z against themselves.)*
+
+▶ **RULED BY `1.0.0_SA_CTO~Z` 03:20Z, AND IT DISSOLVES THE QUESTION RATHER THAN ANSWERING IT —
+ADOPT `GICS_SECTOR_CODE` (`Positioning/shared/bookSet.ts`, TO-6 AC3 @de32bacb) + sort by position in
+`ECONOMY_ORDER`.** The authority is Andrew's own, VERBATIM: *"i really dont care if its official gics
+or some general economy/sector thing, **WHATEVER WE CAN GET**."*
+>> **THE BAR HE SET IS DETERMINISTIC · DECLARED · NON-ARBITRARY · NOT ALPHABETICAL. IT IS NOT
+>> BYTE-IDENTICAL-TO-YANG.** Four seats spent half an hour chasing a precision his own sentence
+>> disclaims. **The dictionary question is REAL and does NOT need answering to ship this.** <<
+⚠ **LABEL THE RESIDUAL IN THE PRODUCER, one comment: this reproduces Yang's SEQUENCE under the
+assumption his codes are standard GICS; the assumption is UNVERIFIED, and if it is ever falsified the
+fix is ELEVEN ROWS IN ONE TABLE. Do NOT claim it reproduces Portfolio Management.**
+**`@4c234af208`'s SEQUENCE is superseded; its membership/spelling half stands.**
+
+⛔ **AND THE ISSUER'S SECOND DEFECT ON THIS ONE THREAD, WHICH IS THE MIRROR OF THE FIRST: I was
+about to park this at Andrew as a sovereign fork — a question HE HAD ALREADY ANSWERED, in a sentence
+sitting in the record.** First I adopted a remedy whose premise I had not tested; then I refused to
+act on a question whose answer I already held. **Both are the same failure — not re-reading what was
+already in hand — and CVO~Z had named it in this very thread before I repeated it: *A FACT IN THE
+CHANNEL IS NOT A FACT IN THE NEXT DECISION.***
+>> **OVER-CAUTION IS NOT THE SAFE SIDE OF THAT ERROR. Escalating a settled question spends the
+>> sovereign's attention and stalls a delivery, and it FEELS like rigour — which is exactly why it
+>> survived three revisions of this amendment while the under-cautious version was caught in four
+>> minutes.** <<
+
+**SPELLING IS THE HARD COUPLING** — key on the exact strings the data emits (`Health Care`,
+`Information Technology`). Order is free to change; a casing or wording drift drops the sector to the
+unmapped bucket. **KEEP DS~Z's out-of-vocabulary APPEND control**: an unanticipated key is appended,
+never dropped — a dict comprehension over a vocabulary silently deletes, and on a served weight map
+that is data loss dressed as a formatting change.
+
+**ONE NEW HAZARD, CREATED BY THIS REMEDY AND NAMED HERE RATHER THAN DISCOVERED LATER:** the map now
+exists in **TypeScript (`bookSet.ts`) and, after this change, in Python (the producer). TWO CARRIERS OF
+ONE MAPPING, IN TWO LANGUAGES, OWNED BY TWO LANES.** If they drift, the page shows two sector orders
+again — **the exact defect this criterion exists to close, re-armed by its own fix.**
+>> **`bookSet.ts GICS_SECTOR_CODE` IS THE PRIMARY. The producer's copy is a replica and says so at its
+>> definition.** Drift must be DETECTABLE, not merely unlikely — mechanism is the executor's call
+>> (a test reconciling the two row sets is the obvious one); **what is binding is that a silent
+>> divergence is not acceptable, because "we copied it carefully" is care, not a control.** <<
