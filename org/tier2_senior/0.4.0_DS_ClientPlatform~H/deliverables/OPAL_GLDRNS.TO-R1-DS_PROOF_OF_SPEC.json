@@ -1,0 +1,93 @@
+{
+ "schema_version": "1.0",
+ "to_id": "OPAL_GLDRNS.TO-R1-DS",
+ "phase": "BUILD-GENERAL",
+ "firm": "49F",
+ "assignee": "0.4.0_DS_ClientPlatform~G",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform~H/task_orders/OPAL_GLDRNS.TO-R1-DS.twr-d1-mirror-remedy.md",
+  "group": "OTHER",
+  "vintage_commit": "366a720f51"
+ },
+ "decomp_ref": {
+  "doc": "workflows/atom_decomposition/runs/gldrns-twr-d1-mirror/20260825T015000Z/DECOMP.md",
+  "vintage_commit": "366a720f51",
+  "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform~H/task_orders/OPAL_GLDRNS.TO-R1-DS.twr-d1-mirror-remedy.md"
+ },
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~G/logs/2026-08-25/session_0545-0745Z.md",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~G/deliverables/gldrns_f1_scheduled_read.py",
+   "kind": "test",
+   "commit_or_etag": "e1b6ceb4f0",
+   "artifact_covered_by": [
+    "GLDR1DS-AC7"
+   ],
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The AC7 read harness, built BEFORE the 12:45Z fire so the fire is a run-and-read rather than a build. Acceptance evidence only; never executed in production. Dry-run against the pre-remedy partition FAILS its two AC7 limbs and PASSES the two deployed-bytes checks -- a control that has never failed has not been tested."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "GLDR1DS-AC7",
+   "criterion_verbatim": "\u26d4 **REAL RETURNS EMITTING ON THE *SCHEDULED* RUN** \u2014 an ad-hoc run is a QA instrument and **NEVER production evidence**. `REFUSED-NO-BMV` \u2192 **ZERO FOR ACCOUNTS PRESENT AT BOTH D AND D-1**; residual is accounts absent at D-1, **reported with its count and the D/D-1 account-set delta beside it**. \u26d4 **The `c04` battery is NOT corroboration** \u2014 its check 7 passes `twr_daily=None` and has never evaluated a return. Rule 22a's three layers, APPLIED read on the deployed bytes against the ref that built them.",
+   "method": "live_read",
+   "invocation": "python org/tier2_senior/0.4.0_DS_ClientPlatform~G/deliverables/gldrns_f1_scheduled_read.py   [--date <D>] [--ref <ref>]",
+   "output_evidence": "NOT YET FIRED. The 12:45Z scheduled emission has not occurred, so the artifact AC7 reads does not exist. WHAT IS ALREADY MEASURED: GLD-f-2, the deployed-bytes rung, is DISCHARGED -- the EXECUTING plane is s3://opal-data-49financial/_code/ (advi_49f_floor.tf:226 syncs it INSIDE the runCommand, so it re-pulls every invocation and Rule 22a's first-boot-only INERT caveat does not bind), and c02_twr_engine.py deployed 1c270beda617b07c == blob 1c270beda617b07c, chain_49f_entrypoint.py deployed 070765998b787e34 == blob 070765998b787e34, read 2026-08-25T08:24:30Z. THAT IDENTITY IS A MOMENT, NOT A PROPERTY (CVO 69674) and the harness re-measures and re-stamps it at fire time. GLD-f-1 is time-gated on the fire. GLD-f-3 is a RECORD act, not a read, and COO 69719 owns it as an OPEN NEVER#6 item with a named owner -- there is no deploy-completion entry for the mirror remedy nor for the 07:17Z push of 24 objects to the executing plane (twr = 10 hits / 543 ledger files, newest 2026-08-19, zero entries after 07:00Z).",
+   "denominator": "529 twr_daily partitions materialised (never a --query length() over a paginated list-*); 534 dim_calendar rows; 2 code artifacts on the executing plane; 6 chain logs read for the mode discriminator; 4 harness checks against the pre-remedy partition, of which 2 FAIL by design until the fire.",
+   "status": "UNCOMPUTABLE",
+   "status_reason": "TIME-GATED, not un-measurable. The scheduled emission has not happened, so the artifact this criterion reads does not exist yet -- which is a genuine statement on the computability axis rather than a carrier of convenience. It becomes PASS or FAIL on the 12:45Z run and NOT BEFORE: an ad-hoc run is a QA instrument and NEVER production evidence, and nobody accelerates the run. NOTE ON SCHEDULED-NESS: the manifest carries NO trigger field, so it is not decidable from the artifact. The chain's own log first line (CHAIN START ... mode=production ... stages=16) is EVIDENCE-FOR and not proof -- mode=production proves the FLAG, never that the scheduler fired it, since a human passing --production writes the identical line, and the ad-hoc runs' descriptive log-key infixes are a HUMAN CONVENTION, not a control. INDEPENDENCE: this seat is one of the arms that corroborated this census, so the harness takes NO expected values from its author -- prior figures sit in a labelled block NO CHECK READS, and a disagreement at the fire is a FINDING, not a failed check."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The harness must be able to FAIL. Dry-run it against the current pre-remedy partition, which is 100% REFUSED-NO-BMV, and against a stubbed multi-file partition listing.",
+   "expected": "the two AC7 limbs FAIL; the multi-file guard RAISES PartitionShapeChanged",
+   "observed": "2 of 4 checks FAIL on the pre-remedy partition (REFUSED-NO-BMV over both-days accounts = 7,328, want 0; non-null r_net = 0 of 7,335); the multi-file guard fired when forced against a stubbed 2-key listing and stays silent on the live plane, where all partitions are single-file (twr_daily 529/529, canonical_valuation 530/530, dim_calendar 5/5)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Two same-input runs of the harness, byte-compared. The ONE deliberate non-determinism is the identity read-time stamp added on CVO 69674 -- normalised before the compare and named here rather than silently excluded, because an unexplained normalisation is how a real difference gets hidden.",
+   "observed": "raw diff = 1 line, and it is exactly the stamp (08:33:29Z vs 08:33:35Z). With the stamp normalised the two runs are byte-identical, md5 10ddfbfe9c2829529173449df6b2597b both. rc=1 both, which is correct on the pre-remedy partition.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "SURFACE (e) -- GLD-e-1/2/3, the backfill of already-refused partitions",
+   "reason": "EXCLUDED BY DETERMINATION in the TO's own <decomp_context>, not by this seat -- which is why it IS a declared exclusion while AC1-AC6 are not. It is the decomp's named Rule 24(iv) failure: it does not move on the entrypoint change, it needs the 6 refused partitions classified by status first, and its re-emission is a separately authorized act. Decomp total 26; TO cells 23; the difference is these 3 and it is visible rather than silent."
+  }
+ ],
+ "surprises": [
+  "18 perfrp modules AND d_publisher_port.py are on the EXECUTING code plane (_code/) as of 2026-08-25T07:17-07:18Z, but are INERT: the deployed chain_49f_entrypoint.py has ZERO textual references to perfrp, d_publisher_port, publish or platinum, and its 17-stage list ends at c02_twr_daily. The 12:45Z run therefore cannot reach the publisher and Andrew's ratified publish condition is intact. Inert-because-unwired is one stage-list edit from live; surfaced to AE~G who owns the wiring. NO ACTION TAKEN.",
+  "No deploy-completion ledger entry exists for the mirror-remedy deploy nor for the 07:17Z push of 24 objects to the executing plane. Filed by COO 69719 as an OPEN NEVER#6 item with a named owner; not written by this seat, which did not perform either deploy. NO ACTION TAKEN.",
+  "The 17-vs-16 stage count is UNRECONCILED: a crude regex over the deployed chain parsed 17 stage tokens while the run log's derived count reads stages=16. It does not bear on the perfrp/publisher answer and is recorded as unreconciled rather than reported as a discrepancy. NO ACTION TAKEN."
+ ],
+ "compiler_tools": [
+  {
+   "tool": "comp-trigger",
+   "invocation": "comp-trigger 49f ; comp-trigger advi",
+   "result": "PASS -- located aws_scheduler_schedule advi-49f-gold-floor (ENABLED, 12:45Z, flexible_time_window OFF) and SEPARATED it from the bd-49f-* events-rules, which are a DIFFERENT FIRM'S TREE. Matching on the string '49f' returns both; only one is this pipeline (NEVER#2)."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'chain_49f_entrypoint'",
+   "result": "PASS -- 121 hits / 26,370 files. Found the SSM document at infra/aws/terraform/opal-assets/advi_49f_floor.tf, which is what establishes the EXECUTING code plane and the run-log upload. Reading the repo alone would not have found either."
+  },
+  {
+   "tool": "comp-find --name",
+   "invocation": "comp-find --name '*GLDRNS*PROOF*' ; comp-find --name '*PERFRP*PROOF*'",
+   "result": "PASS -- 0 hits / 28,422 files, POSITIVE-CONTROLLED against '*PERFRP*PROOF*' = 3. That control is what makes the zero a finding rather than a failed search: no proof instance for this TO existed anywhere before this one."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find -i 'twr' org/critical_paths/change_management/",
+   "result": "WARN, RETRACTED AND REDONE -- 10 hits / 543 files. My FIRST run used BRE alternation (advi\\|49f) against a ripgrep/ERE tool and returned a TRUE-DENOMINATOR ZERO over a pattern that COULD NOT MATCH. Demonstrated both ways: 'advi|49f' = 772, 'advi\\|49f' = 0. Caught by a positive control (etfs = 124) and by ls|grep disagreeing at the same moment. Rule 21's hazard exactly, and the tool's own NO-HITS guard fired and said check the pattern."
+  },
+  {
+   "tool": "commit-gate.sh / safe-commit msg-verify / proof-of-spec-check",
+   "invocation": "commit-gate before every commit; safe-commit -F with msg-verify; python .tools/proof-of-spec-check.py <instance> <expected-from-TO>",
+   "result": "commit-gate BLOCKED twice, both real (an E731 lambda assignment and a py_compile failure from a shell-mangled escape). msg-verify MATCH on every commit. proof-of-spec-check run with the expected-criteria list taken FROM THE TO rather than typed -- the bare form prints COVERAGE UNCHECKED and that caveat should not be left standing."
+  }
+ ]
+}
