@@ -1,0 +1,330 @@
+"""GLD-f-1/2/3 -- the AC7 READ of the SCHEDULED twr_daily emission (OPAL_GLDRNS.TO-R1-DS).
+
+RE-ADDRESSED to this seat by 1.0.0_SA_CTO 69386 after 0.4.0_DS_ClientPlatform~H went
+dark with 21 of 23 cells delivered and this one open. THE NEW HOLDER BUILDS NOTHING --
+the remedy is deployed and APPLIED-verified at b9a665364f / 77ecd4f0de / 2ee5f8ca43.
+This file is a READ, and it is written BEFORE the 12:45Z fire so that the fire is a
+run-and-read rather than a build.
+
+============================================================================
+WHY THIS HARNESS TAKES NO EXPECTED VALUES FROM ITS AUTHOR
+============================================================================
+CTO named the cost of putting me on this read and I am taking the mirror obligation.
+I am one of the arms that CORROBORATED this census: my own emitter derived
+{COMPUTED 6329, NOT_COMPUTED_INPUTS_PRESENT 909} against CVO's producer-side
+{OK 6329, UNCOMPUTABLE-ZERO-BMV 901, REFUSED-NO-BMV 8}. If I walk into the fire
+carrying 6329 as the expected value, I am running a SELF-COMPARISON and it will confirm.
+
+  EVERY CHECK BELOW DERIVES ITS EXPECTATION FROM THE ARTIFACTS.
+  My prior figures appear ONCE, in a clearly-labelled corroboration line that NO CHECK
+  READS. If they disagree with the fire, that is a FINDING -- not a failed check, and
+  not something the harness can quietly absorb.
+
+An expected value supplied by the author is an instrument that could not have said
+otherwise. CVO's independent re-derivation must likewise not lean on this file's output.
+
+============================================================================
+WHAT AC7 ACTUALLY REQUIRES, and the three traps in it
+============================================================================
+"REAL RETURNS EMITTING ON THE *SCHEDULED* RUN -- an ad-hoc run is a QA instrument and
+NEVER production evidence. REFUSED-NO-BMV -> ZERO FOR ACCOUNTS PRESENT AT BOTH D AND
+D-1; residual is accounts absent at D-1, reported with its count and the D/D-1
+account-set delta beside it."
+
+TRAP 1 -- THE SCOPE OF THE ZERO. `REFUSED-NO-BMV -> 0` is FALSE as a bare statement and
+  true only over accounts present at BOTH days. An account that did not exist on D-1
+  has no BMV to find, and refusing it is CORRECT. A harness testing the bare form fails
+  a correct run; a harness ignoring the scope passes a broken one.
+
+TRAP 2 -- THE STATUSES THAT MUST NOT GO TO ZERO. `NO-PRIOR-TRADING-DAY` and
+  `UNCOMPUTABLE-ZERO-BMV` are REPORTED AND EXPLAINED, never driven to zero. CTO s.14(a):
+  a bar that cannot be satisfied is broken, not high. A zero on either would mean the
+  remedy MANUFACTURED a BMV, which AC3 forbids.
+
+TRAP 3 -- THE INSTRUMENT THAT CANNOT SAY OTHERWISE. The c04 validation battery is NOT
+  corroboration here: its check 7 passes `twr_daily=None` and has never evaluated a
+  return. It sits exactly where a reader reaches for a second opinion. This harness
+  prints that exclusion beside the verdict so nobody reaches for it later.
+
+EVIDENCE VINTAGE: live 49F plane; deployed-bytes read resolved at run time and printed.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import io
+import json
+import subprocess
+import sys
+
+import boto3
+import pyarrow.parquet as pq
+
+GOLD = "opal-data-49financial"
+CANON = "gold/advi/canonical/"
+DIMS = "gold/advi/dimensions/"
+
+# The producer and the chain whose DEPLOYED bytes AC7 reads at the APPLIED layer.
+CODE_UNDER_READ = (
+    "data/assets/scripts/gold/runners_49f/c02_twr_engine.py",
+    "data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py",
+)
+
+# Statuses that must be REPORTED and EXPLAINED, never driven to zero (trap 2).
+NEVER_ZERO = ("NO-PRIOR-TRADING-DAY", "UNCOMPUTABLE-ZERO-BMV")
+
+# Named rather than written inline: an escaped line-ending literal is the one thing in
+# this file that cannot survive being retyped through a shell, and it got mangled twice
+# while this harness was being written -- in the function whose whole subject is line
+# endings. chr() is unambiguous at every layer.
+CRLF = (chr(13) + chr(10)).encode("ascii")
+LF = chr(10).encode("ascii")
+
+# CORROBORATION ONLY -- NO CHECK READS THIS. See the header. Disagreement is a finding.
+PRIOR_CORROBORATION = {
+    "0.4.0_DS_ClientPlatform~G (me, consumer-side, an earlier partition)":
+        "{COMPUTED 6329, NOT_COMPUTED_INPUTS_PRESENT 909}",
+    "3.0.0_SA_CVO (producer-side, same partition)":
+        "{OK 6329, UNCOMPUTABLE-ZERO-BMV 901, REFUSED-NO-BMV 8}  (901+8=909)",
+    "0.4.0_DS_ClientPlatform~H (ad-hoc QA chain, --date 2026-08-19, NOT production)":
+        "{OK 6393, UNCOMPUTABLE-ZERO-BMV 922, REFUSED-NO-BMV 17}",
+}
+
+s3 = boto3.client("s3")
+
+
+def _partitions(prefix):
+    """MATERIALISE the list. A --query length() over a paginated list-* returns the
+    PAGE count, and an absence verdict from a truncated page is indistinguishable from
+    a real absence."""
+    out, tok = set(), None
+    while True:
+        kw = dict(Bucket=GOLD, Prefix=prefix, Delimiter="/")
+        if tok:
+            kw["ContinuationToken"] = tok
+        r = s3.list_objects_v2(**kw)
+        for c in r.get("CommonPrefixes", []) or []:
+            seg = c["Prefix"].rstrip("/").split("/")[-1]
+            if seg.startswith("date="):
+                out.add(seg.split("=", 1)[1])
+        tok = r.get("NextContinuationToken")
+        if not tok:
+            return sorted(out)
+
+
+def _read(prefix, date):
+    r = s3.list_objects_v2(Bucket=GOLD, Prefix="%sdate=%s/" % (prefix, date))
+    keys = [o["Key"] for o in r.get("Contents", []) if o["Key"].endswith(".parquet")]
+    if not keys:
+        return None
+    body = s3.get_object(Bucket=GOLD, Key=keys[0])["Body"].read()
+    return pq.read_table(io.BytesIO(body)).to_pandas()
+
+
+def _manifest(prefix, date):
+    try:
+        return json.loads(s3.get_object(
+            Bucket=GOLD, Key="%sdate=%s/manifest.json" % (prefix, date))["Body"].read())
+    except Exception as exc:                       # absence is a RESULT, not an error
+        return {"__absent__": "%s: %s" % (type(exc).__name__, exc)}
+
+
+def _deployed_vs_ref(path, ref):
+    """Rule 22a CODE layer, with tonight's CRLF class handled EXPLICITLY.
+
+    `core.autocrlf=true` is set in this repo, so a checked-out source file can carry
+    CRLF while its blob carries LF. MEASURED at this seat: 8 of 79 tracked .py under
+    runners_49f/ diverge that way -- INCLUDING BOTH FILES THIS FUNCTION READS. A raw
+    byte compare therefore reports a difference where none exists, which is exactly the
+    false provenance accusation CTO hit tonight against DS~H's deploy.
+
+    BOTH results are printed. Normalising SILENTLY would hide a real difference, which
+    is the opposite defect and the worse one.
+    """
+    try:
+        with io.open(path, "rb") as fh:
+            work = fh.read()
+    except OSError as exc:
+        return {"error": "worktree read failed: %s" % exc}
+    blob = subprocess.run(["git", "show", "%s:%s" % (ref, path)],
+                          capture_output=True).stdout
+    if not blob:
+        return {"error": "git show returned EMPTY for %s:%s -- a retrieval failure "
+                         "returns a VALUE; not reporting this as 'absent'" % (ref, path)}
+    def norm(b):
+        return b.replace(CRLF, LF)
+
+    return {
+        "raw_match": work == blob,
+        "normalised_match": norm(work) == norm(blob),
+        "worktree_sha256": hashlib.sha256(work).hexdigest()[:16],
+        "blob_sha256": hashlib.sha256(blob).hexdigest()[:16],
+        "worktree_crlf": work.count(b"\r\n"),
+        "blob_crlf": blob.count(b"\r\n"),
+        "delta_bytes": len(work) - len(blob),
+    }
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--date", help="the partition to read; default = newest present")
+    ap.add_argument("--ref", default="HEAD", help="the ref the deployed bytes are read against")
+    a = ap.parse_args()
+
+    print("GLD-f-1/2/3 -- AC7 READ OF THE SCHEDULED twr_daily EMISSION")
+    print("OPAL_GLDRNS.TO-R1-DS, re-addressed to 0.4.0_DS_ClientPlatform~G (CTO 69386)")
+    print("=" * 108)
+
+    parts = _partitions(CANON + "twr_daily/")
+    D = a.date or parts[-1]
+    print("\n0. FRAME -- every denominator materialised, never a --query length()")
+    print("   twr_daily partitions ......... {:,}  ({} .. {})".format(
+        len(parts), parts[0], parts[-1]))
+    print("   partition under read ......... {}{}".format(
+        D, "" if a.date else "   <- newest present, not a date I typed"))
+    if D not in parts:
+        print("   REFUSED: date={} is not present. This is a MEASURED absence over {:,} "
+              "partitions, not a failed read.".format(D, len(parts)))
+        return 2
+
+    # ---------- 1. the prior TRADING day, from dim_calendar ----------
+    print("\n1. THE PRIOR TRADING DAY -- from dim_calendar, never wall-clock (AC2)")
+    cal = _read(DIMS + "dim_calendar/", D)
+    if cal is None:
+        print("   REFUSED: dim_calendar absent at date=%s; the D-1 question is not "
+              "answerable and I will not substitute wall-clock arithmetic." % D)
+        return 2
+    prev_map = dict(zip(cal["trading_day"].astype(str), cal["prev_trading_day"].astype(str)))
+    prev = prev_map.get(D)
+    print("   calendar rows ................ {:,}".format(len(cal)))
+    print("   prev_trading_day({}) ... {}".format(D, prev))
+    print("   The oracle is THE PRIOR TRADING DAY, not 'yesterday' and not 'Friday on a")
+    print("   Monday'. ~H measured a wall-clock D-1 resolving the WRONG partition on")
+    print("   118/533 = 22.1% of runs (102 Mondays + 16 post-holiday).")
+
+    checks = []
+
+    def chk(name, got, want, note=""):
+        ok = got == want
+        checks.append((ok, name))
+        print("   [{}] {:<54} got={!s:<9} want={!s}{}".format(
+            "PASS" if ok else "FAIL", name, got, want, ("  -- " + note) if note else ""))
+
+    # ---------- 2. the emission ----------
+    print("\n2. THE EMITTED PARTITION")
+    twr = _read(CANON + "twr_daily/", D)
+    man = _manifest(CANON + "twr_daily/", D)
+    census = twr["status"].value_counts().to_dict()
+    print("   rows ......................... {:,}".format(len(twr)))
+    print("   columns ...................... {}  {}".format(
+        len(twr.columns),
+        "(9 = pre-remedy shape; 13 = the mirror landed)" if len(twr.columns) in (9, 13) else ""))
+    print("   status census (from the DATA, not the manifest):")
+    for k in sorted(census):
+        print("     {:<26} {:>8,}".format(k, census[k]))
+    print("   manifest bmv_source .......... {}".format(man.get("bmv_source", man)))
+    mcensus = man.get("status_census")
+    chk("manifest census == data census", mcensus, census,
+        "the manifest is a CLAIM; the parquet is the artifact")
+
+    # ---------- 3. AC7's scoped zero ----------
+    print("\n3. AC7 -- REFUSED-NO-BMV ZERO *FOR ACCOUNTS PRESENT AT BOTH D AND D-1*")
+    val_d = _read(CANON + "canonical_valuation/", D)
+    val_p = _read(CANON + "canonical_valuation/", prev) if prev else None
+    if val_d is None:
+        print("   REFUSED: canonical_valuation absent at D; the both-days set is not")
+        print("   derivable and the scoped zero cannot be evaluated. NOT a pass.")
+        return 2
+    set_d = set(val_d["account_id"].astype(str))
+    set_p = set(val_p["account_id"].astype(str)) if val_p is not None else set()
+    both = set_d & set_p
+    only_d = set_d - set_p
+    print("   accounts at D ................ {:,}".format(len(set_d)))
+    print("   accounts at D-1 ({}) .. {:,}{}".format(
+        prev, len(set_p), "   <- D-1 partition ABSENT" if val_p is None else ""))
+    print("   present at BOTH .............. {:,}   <- AC7's denominator".format(len(both)))
+    print("   at D but NOT at D-1 .......... {:,}   <- the legitimate residual".format(
+        len(only_d)))
+
+    refused = twr[twr["status"] == "REFUSED-NO-BMV"]
+    ref_accts = set(refused["account_id"].astype(str))
+    refused_in_both = ref_accts & both
+    print("   REFUSED-NO-BMV rows .......... {:,}".format(len(refused)))
+    print("   ...of which are in BOTH ...... {:,}   <- MUST BE ZERO".format(
+        len(refused_in_both)))
+    print("   ...of which are D-only ....... {:,}   <- CORRECT refusals, no BMV exists".format(
+        len(ref_accts & only_d)))
+    chk("REFUSED-NO-BMV == 0 over accounts present at BOTH days",
+        len(refused_in_both), 0, "the bare form of this check is FALSE and would fail a good run")
+    if refused_in_both:
+        print("     first 5 offenders: {}".format(sorted(refused_in_both)[:5]))
+    unexplained = ref_accts - both - only_d
+    chk("every REFUSED account is accounted for by the D/D-1 delta",
+        len(unexplained), 0, "a refusal outside both populations is unexplained")
+
+    # ---------- 4. the statuses that must NOT be zero ----------
+    print("\n4. REPORTED AND EXPLAINED, NEVER DRIVEN TO ZERO (CTO s.14(a))")
+    for st in NEVER_ZERO:
+        n = census.get(st, 0)
+        print("   {:<26} {:>8,}   {}".format(st, n, "present" if n else "ABSENT at this partition"))
+    print("   These are NOT checked for zero and NOT checked for non-zero. Their value is")
+    print("   a fact about the data, and a bar demanding either would be broken, not high.")
+    print("   A ZERO on these WITH real returns present would mean the remedy MANUFACTURED")
+    print("   a BMV, which AC3 forbids -- so they are reported for a reader, not scored.")
+
+    # ---------- 5. real returns ----------
+    print("\n5. REAL RETURNS EMITTING -- the substance of AC7")
+    computed = twr[twr["r_net"].notna()]
+    print("   rows with a non-null r_net ... {:,} of {:,}  ({:.2f}%)".format(
+        len(computed), len(twr), 100.0 * len(computed) / len(twr) if len(twr) else 0.0))
+    chk("real returns are present", len(computed) > 0, True,
+        "this is the criterion; a 100%-refused partition is the pre-remedy state")
+
+    # ---------- 6. deployed bytes ----------
+    print("\n6. RULE 22a CODE LAYER -- deployed bytes vs the ref that built them")
+    print("   BOTH raw and CRLF-normalised are printed. core.autocrlf=true here, and 8 of")
+    print("   79 tracked .py under runners_49f/ diverge worktree-vs-blob on line endings")
+    print("   ALONE -- including both files below. A raw mismatch is NOT evidence of drift.")
+    for path in CODE_UNDER_READ:
+        r = _deployed_vs_ref(path, a.ref)
+        n = path.split("/")[-1]
+        if "error" in r:
+            print("   {:<28} ERROR: {}".format(n, r["error"]))
+            continue
+        print("   {:<28} raw={!s:<6} normalised={!s:<6} worktree_crlf={:<5} delta={:+d} B"
+              .format(n, r["raw_match"], r["normalised_match"], r["worktree_crlf"],
+                      r["delta_bytes"]))
+    print("   NOTE: this compares the WORKTREE to a ref. The APPLIED question -- what the")
+    print("   scheduled runner EXECUTED -- is answered by the run's own log, not by a file")
+    print("   sitting on this disk. Reading an artifact proves what is THERE, never what RAN.")
+
+    # ---------- 7. exclusions and corroboration ----------
+    print("\n7. EXCLUDED AS CORROBORATION, DELIBERATELY")
+    print("   The c04 validation battery is NOT a second opinion on this read: its check 7")
+    print("   passes twr_daily=None and has never evaluated a return. It sits exactly where")
+    print("   a reader reaches for confirmation, and it could not have said otherwise.")
+    print("\n   PRIOR FIGURES -- CORROBORATION ONLY. NO CHECK ABOVE READS THESE.")
+    for who, what in PRIOR_CORROBORATION.items():
+        print("     {:<62} {}".format(who[:62], what))
+    print("   If the fire disagrees with these, that is a FINDING to route, not a failed")
+    print("   check. I am one of these arms; scoring against them would be self-comparison.")
+
+    npass = sum(1 for ok, _ in checks if ok)
+    print("\n" + "=" * 108)
+    print("DENOMINATOR: {}/{} checks PASS over {:,} rows / {:,} accounts at D / {:,} at D-1"
+          .format(npass, len(checks), len(twr), len(set_d), len(set_p)))
+    for ok, name in checks:
+        if not ok:
+            print("  FAILED: {}".format(name))
+    print("AC7 VERDICT: {}".format(
+        "SATISFIED at this partition" if npass == len(checks)
+        else "NOT SATISFIED -- see FAILs above"))
+    print("SCOPE: this reads ONE partition. Whether the run that produced it was the")
+    print("  SCHEDULED fire or an ad-hoc QA invocation is NOT decidable from the artifact")
+    print("  alone -- the manifest carries no trigger field. That must come from the run's")
+    print("  own execution record, and an ad-hoc run is NEVER production evidence.")
+    return 0 if npass == len(checks) else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
