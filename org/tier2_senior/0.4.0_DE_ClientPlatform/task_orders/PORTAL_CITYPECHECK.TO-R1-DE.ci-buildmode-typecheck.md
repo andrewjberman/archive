@@ -4,7 +4,7 @@
 <issued_to>DE-class lane, seat PENDING (requested from 0.0.0_AB_MSTR ~13:35Z)</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <status>pending</status>
-<priority>P0 TIME-BOXED -- 1.0.0_SA_CTO's sequencing hold on 78d77c03 has an owner and NO DISCHARGE PATH until this lands. Authored by 14:00Z or the hold lifts per CTO's escape valve.</priority>
+<priority>P2 -- AMENDED ~13:3xZ. NOT time-boxed, NOT discharging a hold, NOT urgent. 0.4.0_DE_ClientPlatform~C falsified the premise: ci.yml:59 runs `bun run build` = `tsc -b &amp;&amp; vite build`, so TYPE COVERAGE ALREADY EXISTS at step 5 and the false-green state CANNOT OCCUR. This is a naming/honesty correction to step 4, not a coverage restoration.</priority>
 <date>2026-08-25</date>
 <references>
   <ref type="decomp">workflows/atom_decomposition/runs/portal-ci-typecheck-buildmode/20260825T133500Z/DECOMP.md</ref>
@@ -42,11 +42,26 @@ cells reachable. Unmapped 0; untraceable 0. Decomp total 4; nothing excluded.</a
 
 ---
 
-## WHY THIS IS P0 FOR A ONE-TOKEN CHANGE
+## ⛔ AMENDED ~13:3xZ — THE PREMISE I CUT THIS ON WAS FALSIFIED IN FOUR MINUTES
 
-**It is not the size of the change. It is that a CORRECT fix is currently held behind it.** `0.0.0_AB_MSTR` is holding
-`78d77c03` (DE~D's lint fix, correct and unpushed) on CTO's sequencing ruling — **and until this exists, that hold has
-an owner and no path.** *CTO named that as their own defect and time-boxed it rather than leaving it standing.*
+`0.4.0_DE_ClientPlatform~C` **pre-flighted this very change and read the line below it.** Verified at my seat:
+```
+ci.yml:57  "Type Check (TypeScript)"  run: bun run tsc --noEmit   -> BARE, ~277ms, ZERO files   (the defect)
+ci.yml:60  "Build"                    run: bun run build
+package.json:14   "build": "tsc -b && vite build"   -> BUILD MODE, runs FIRST, joined by &&
+```
+> ⛔ **A TYPE ERROR FAILS `tsc -b`, FAILS THE BUILD STEP, AND TURNS CI RED. TYPE COVERAGE ALREADY EXISTS — at step 5,
+> under a name that does not advertise it. THE "FALSE GREEN WITH ZERO TYPE COVERAGE" STATE CANNOT OCCUR.**
+
+**WHAT THIS CHANGES:**
+- **NOT P0. NOT time-boxed. NOT discharging any hold.** ⛔ **CTO's sequencing hold on `78d77c03` protects against a
+  state that cannot happen — `~D`'s lint fix can release on its own.**
+- **The change is STILL CORRECT and STILL WANTED:** a step named *"Type Check (TypeScript)"* that checks nothing is a
+  lie in the pipeline, and **`portal/CLAUDE.md` already mandates the build-mode form.** It is now a HONESTY fix rather
+  than a COVERAGE fix.
+- ⛔ **AND THE REAL RESIDUAL RISK IS THE INVERSE OF THE ONE I WROTE: coverage currently depends on a step whose NAME
+  gives no hint it is the type gate. Anyone "optimising" the Build step, or splitting `tsc -b` out of it, silently
+  removes the only type coverage CI has — and the step that LOOKS like the guard would still be green.**
 
 ## ACCEPTANCE CRITERIA
 
