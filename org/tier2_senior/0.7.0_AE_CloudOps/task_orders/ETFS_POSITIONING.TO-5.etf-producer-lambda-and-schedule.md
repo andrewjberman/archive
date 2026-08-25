@@ -134,6 +134,25 @@ look natural, because the producer genuinely wants that data.
 | **ETFS-TO5-AC5** | ⛔ **NO ALARM, NO SNS TOPIC, NO SES SEND, NO FRESHNESS CHECKER, NO MONITOR.** The run manifest and the log ARE the record | `ETFS-d-1` | SOURCE |
 | **ETFS-TO5-AC7** | ⛔ **THE FIRST *SCHEDULED* FIRE (`cron(0 13 * * ? *)` UTC) IS OBSERVED AT ITS OWN INVOCATION RECORD **AND** THE ARTIFACT.** A **DISAGREEMENT** between them is **PASS-WITH-FINDING, not a fail** (amended by `1.0.0_SA_CTO~Z` ~23:10Z, in advance, so nobody decides under time pressure whether a red record beats a green artifact). ⛔ **An AD-HOC invoke can never discharge this** — the artifact must carry `run_class: scheduled`. | `ETFS-d-1` | **EXERCISED (scheduled)** |
 
+> ⛔ **ACT-2 RELEASE — MECHANICAL, OWNERLESS, AND DELIBERATELY NOT MINE.**
+> `2.0.0_SA_COO~Z` held act 2 (a bare `etf-positioning-producer` invoke) at 01:00Z on 2026-08-25.
+> ⛔ **A HOLD OWNED BY A SEAT THAT MAY NOT EXIST WHEN THE CONDITION IS MET IS AN INVISIBLE BLOCK** —
+> the exact shape the no-inferred-gates rule exists to stop. **So the release is a MEASUREMENT, not a
+> word, and ANY SEAT MAY MAKE IT:**
+> ```
+> RELEASE IFF:  bbg/2026-08-24/ exists in opal-data-etfs
+>               AND its characteristics.parquet is non-empty
+>               (positive control: bbg/2026-08-21/ must also list, or distrust the read)
+> THEN:         invoke etf-positioning-producer with a BARE payload -- no as-of argument exists,
+>               selection is automatic (newest trading day having BOTH silver and bbg).
+> ```
+> ⚠ **DO NOT fire while `bbg/2026-08-24/` is absent** — the producer steps back to 08-21, publishes a
+> further identical-looking artifact, and adds another ad-hoc decoy to a prefix already carrying
+> three at one as-of (all 76,149 B, three ETags). **That is the only thing the hold protects.**
+> ⭐ **`bbg/2026-08-24/` becomes writable after ~04:00Z (local midnight) with NO code change — the
+> existing `BDay(-1)` resolves correctly from then on, verified across four instants with both
+> wrong-side controls firing. The 11:00Z scheduled run also writes it correctly.**
+
 > ✅ **UPDATE 2026-08-25 ~01:0xZ — THE CAPABILITY HALF IS DISCHARGED EARLY AND IT PASSES. THE
 > OBLIGATION STILL STANDS. READ WHICH IS WHICH BEFORE SKIPPING IT.**
 > `0.0.0_AB_MSTR~Z`'s ad-hoc L1 run produced `bbg/2026-08-21/characteristics.parquet` at **170 rows
