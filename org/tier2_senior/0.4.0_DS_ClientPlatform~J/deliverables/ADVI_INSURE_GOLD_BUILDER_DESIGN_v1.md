@@ -10,6 +10,13 @@
 are gated at the **APPLIED** layer and the map does not touch them. This document extends the AC2
 design already accepted at 70569; it does not re-mint it.
 
+> ⛔⛔ **READ s.9 FIRST — v1 IS SUPERSEDED IN THREE PLACES BY REAL BYTES (2026-08-25 ~23:3xZ).**
+> **s.1–s.8 are PRESERVED VERBATIM as the pre-bytes record and are NOT edited**, because an
+> overturned design that erases its own prior state leaves nobody able to see what changed.
+> **What changed:** `carrier`/`product` are no longer `UNOBSERVED-CONTAINER` — they are **MEASURED
+> 106/106 at account grain**; s.3's egress conclusion was **FALSIFIED** (right conclusion, wrong
+> reason); and the s.4 advance premise is **no longer n=1** — it is **102/102**.
+
 ---
 
 ## 0. THE ANSWER THE ISSUER ASKED FOR
@@ -241,3 +248,124 @@ control watches existing AM figures, not this table's membership.
 single unblocker; it is not. **One item is closable tonight with no vendor call at all, and one item
 will still be open after the grant lands.** *(Both stated as reads for the issuer, who owns the
 routing. I am not routing either.)*
+
+---
+
+# 9. ⛔ v2 — MEASURED AGAINST REAL BYTES (2026-08-25 ~23:3xZ)
+
+**Bronze landed while this document was being written.** `2.0.0_SA_COO` (71758) instructed:
+*"bytes now exist for the first time, so re-read your gated rows against reality rather than against
+my say-so."* Done. **s.1–s.8 above are the pre-bytes record and stand unedited; this section is the
+current answer where they differ.**
+
+## 9.1 The landing plane, measured
+
+```
+s3://opal-data-assets/blackdiamond/49financial/bronze/insurance_*   6 keys, 2026-08-25   PRESENT
+s3://opal-data-assets/blackdiamond/49financial/silver/insurance_*   0 keys                ABSENT
+s3://opal-data-49financial/gold/advi/insurance/                     0 keys                ABSENT
+DENOMINATOR 9,143 keys fully walked, 3 NAMED prefixes, client-side paginated
+```
+**`INS-inv-4` (Rule 17a) COMPLIANT AND MEASURED:** 6 of 6 bronze objects are `.json`, **zero
+`.parquet`**. *Positive control:* `.parquet` under `blackdiamond/49financial/` = **7,910**, so the
+matcher discriminates and the zero is measured, not a dead filter.
+
+⛔ **`AC1` SPLITS AGAIN, THIS TIME ON MEDALLION: the bronze half is SATISFIED; the silver half is
+ABSENT — and the silver half is `INS-b-1`, which is MINE.** Its input now exists, so it is no longer
+dependency-gated.
+
+## 9.2 ⛔ A WRONG-GRAIN ZERO IN MY OWN PROBE — recorded because it nearly shipped
+
+My first probe iterated `data[]` and called the rows accounts. **`data[]` is RELATIONSHIP grain;
+accounts are NESTED at `data[].accounts[]`.** Every account-level field read **0/77** — a
+**WRONG-GRAIN ZERO, not an absent field.** Had it shipped it would have read as a flat contradiction
+of the issuer's `106/106` and looked like a genuine disagreement. **77 relationships carry 106
+accounts**, which reconciles exactly. *Same shape as the 12.3% export trap the issuer had warned
+about in the message I was acting on.*
+
+## 9.3 The v1 fields — SUPERSEDES s.1's basis assignments
+
+**Denominator 106 account records.**
+
+| column | source (ACCOUNT grain) | measured | v1 said |
+|---|---|---|---|
+| `bd_account_id` | `accounts[].id` | 106/106, 106 distinct | `MEASURED` ✅ unchanged |
+| `account_number` | `accounts[].accountNumber` | 106/106, **UNMASKED** | ✅ unchanged |
+| **`carrier`** | **`accounts[].custodian.name`** | **106/106, 10 distinct** | ⛔ **was `UNOBSERVED-CONTAINER` — NOW `MEASURED`** |
+| **`product`** | **`accounts[].accountRegistrationType.identifier`** | **106/106, 5 distinct** | ⛔ **was `UNOBSERVED-CONTAINER` — NOW `MEASURED`** |
+| `current_emv` | `accounts[].currentEmv.emv` | **102/106** — see 9.5 | `MEASURED` |
+| `as_of_date` | `accounts[].asOfDate` | 106/106, **4 distinct** — see 9.4 | `MEASURED` |
+
+⛔ **DO NOT SOURCE `carrier`/`product` FROM THE BULK EXPORT.** It carries Issuer / Product Type at
+**RELATIONSHIP grain, concatenated** (*"Allianz Life, Brighthouse Financial - Financial
+Professional"*). The issuer measured **13 of 106 account records disagree, all 13 carrying a comma,
+zero residual** — so the export mis-attributes **12.3%** of accounts **and looks correct on the 87%
+anyone would spot-check.** Rule 24(ii) same-grain, inside the vendor's own artifact.
+⚠ **NEAR-MISS, measured here: `custodian.dataFormatName` = `"ByAllAccounts"` (2 distinct) is THE
+AGGREGATOR, not the carrier.** It is the adjacent key that reads like a system field to skip.
+
+**Basis-axis consequence:** `carrier`/`product` move `UNOBSERVED-CONTAINER → MEASURED`. **This is
+postulate (iv) behaving exactly as declared** — one populated specimen cleared them, and
+`advisor_id` remains `NOT-DERIVABLE-UPSTREAM` and **did not move**, because its remedy is vendor
+template config. The axis predicted which values would move together, and they did.
+
+## 9.4 ⛔ THE PARTITION KEY AND `as_of_date` ARE NOT THE SAME THING
+
+**A single pull spans FOUR as-of dates:**
+```
+2026-08-24   99 (93.4%)  |  2025-11-17   4 (3.8%)  |  2024-03-28   2 (1.9%)  |  2026-02-06   1 (0.9%)
+7 of 106 accounts (6.6%) are STALE -- one cohort by ~17 months
+```
+So `date={D}` (the **ingest** partition) must not be conflated with the row's `as_of_date` (the
+**statement** key). The grain stays `(bd_account_id, as_of_date)`; the partition is the run.
+
+⭐ **AND THE s.4 PREMISE IS NO LONGER n=1 — IT IS 102/102.** `asOfDate == currentEmv.asOf` on
+**102 of 102** rows where both exist (**100.0%**); *negative control:* the same comparator vs
+`1900-01-01` = **0/102**, so it discriminates. **s.4 declined to close this on one Cottonwood
+specimen. It is closed now, on 49F's own cohort.** Binding the Ruling-7 advance predicate to
+`asOfDate` is grounded, not merely preferred.
+
+**Two consequences, neither mine to rule, surfaced not absorbed:** under Ruling 7 those 7 stale rows
+are written once and **never advance** — correct behaviour, but the table is not uniformly daily.
+Under Ruling 5 the client string *"statement as of MM/DD"* would render a date **up to 17 months
+old** for them. **That is surface (e), the frontend lane.**
+
+## 9.5 ⛔ FOUR ACCOUNTS CARRY NO NAV, AND THEY ARE NOT CLOSED
+
+```
+z0820076181 / 13898655  Allianz Life     z0820076191 / 13898656  Allianz Life
+z0821249311 / 14456139  Vanguard         z0821249321 / 14456140  Vanguard
+4 of 106 (3.8%)  |  currentEmv = None  |  closedDate = None
+```
+They arrive as **consecutive-id pairs**, which suggests linked policies rather than four independent
+gaps — *stated as a read, not asserted.*
+
+**These are ROW-LEVEL value conditions, so the `{attr}_basis` axis EXCLUDES them by its own grain
+clause** (s.2) — the axis is attribute-level and a row-level null is a value condition. They take
+**never-drop** handling instead, exactly as `spine_class = 'unassigned'` does.
+
+⛔ **THE COUNT IS PUBLISHED BESIDE THE TOTAL, NEVER ABSORBED.** A builder that **drops** them
+silently shrinks the denominator of every figure above; one that **sums them as zero** understates
+total insurance NAV by whatever those four are worth. **Both failures produce a plausible number
+rather than an error.**
+
+## 9.6 s.3 CORRECTED — right conclusion, wrong reason
+
+s.3 called the join key *"a correctness dependency on the egress grant."* ⛔ **FALSIFIED by 71758:**
+`accountNumber` is **UNMASKED on 106/106** on `/relationship/*` (confirmed here; *positive control:*
+the same mask matcher fires against the literal `XXXX5115`). The masking belongs to
+`/portfolioreporting/*` — **a THIRD surface** that s.3 conflated with the gated one. **The Ruling-2
+join never depended on the gated surface.**
+
+**s.3's operational conclusion stands — never source the key from the masked surface — but its stated
+REASON was wrong, and a right conclusion resting on a wrong reason is the kind that survives until
+someone acts on the reason.**
+
+## 9.7 What is STILL open
+
+| item | state |
+|---|---|
+| **row-selection predicate** | ⚠ **STILL THE GOVERNING QUESTION.** Bronze now holds an `insurancerelationshiplist` export (2 keys) — the cohort authority — so the mechanism is now **derivable rather than unobserved.** Not yet derived here. |
+| `advisor_id` | ⛔ `NOT-DERIVABLE-UPSTREAM`, unchanged and **will not be fixed by the egress grant** |
+| `silver/insurance_*` | **ABSENT and MINE** (`INS-b-1`) — no longer gated |
+| gold / platinum emission | downstream of silver |
