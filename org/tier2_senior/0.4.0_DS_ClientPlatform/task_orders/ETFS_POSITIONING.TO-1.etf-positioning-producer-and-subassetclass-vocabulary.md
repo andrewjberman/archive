@@ -42,7 +42,9 @@
     <criterion id="ETFS-TO1-AC5" cell_refs="ETFS-d-1, ETFS-a-5"/>
     <criterion id="ETFS-TO1-AC6" cell_refs="ETFS-d-2"/>
     <criterion id="ETFS-TO1-AC7" cell_refs="ETFS-a-7, ETFS-a-8"/>
-  <expected_criteria>ETFS-TO1-AC1,ETFS-TO1-AC2,ETFS-TO1-AC3,ETFS-TO1-AC5,ETFS-TO1-AC6,ETFS-TO1-AC7</expected_criteria>
+    <criterion id="ETFS-TO1-AC8" cell_refs="ETFS-d-1, ETFS-d-2"/>
+    <criterion id="ETFS-TO1-AC9" cell_refs="ETFS-d-1"/>
+  <expected_criteria>ETFS-TO1-AC1,ETFS-TO1-AC2,ETFS-TO1-AC3,ETFS-TO1-AC5,ETFS-TO1-AC6,ETFS-TO1-AC7,ETFS-TO1-AC8,ETFS-TO1-AC9</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ETFS_POSITIONING.TO-1_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 </task_order>
@@ -194,3 +196,115 @@ firing, before writing this). **`AC5` remains pending its OBSERVED anchor** — 
 2026-08-22 07:00 projection"* is exactly the discipline the criterion was written for.
 
 **Nothing else in this TO changes.**
+
+---
+
+## AMENDMENT C (issuer, 2026-08-25T03:15Z) — **TWO NEW CRITERIA ON `ETFS-d-1`, AND A BINDING REPAIR ORDER**
+
+Both arrive through the Rule-27 surprise channel as BLOCKING items routed to the issuer, both found by
+seats other than the executor, both on the producer. **Neither is a re-scope: `ETFS-d-1` is the
+projection producer and these are two of its emitted fields.**
+
+### `ETFS-TO1-AC8` — the allocation buckets reconcile against the book's own holdings
+
+**PROVENANCE, and it changes the repair** (`0.4.0_DS_ClientPlatform~Z`'s own filing, `3.0.0_SA_CVO~Z`
+verified with controls): `ASSET_CLASS_FIXED_INCOME` occurs **ZERO** times before `@0c03c359f2` and 2
+after; `alloc_fixed_income` occurs **ONCE in BOTH**. >> **THE LITERAL NEVER CHANGED — THE WORLD AROUND
+IT DID. `0.0` was TRUE BY CONSTRUCTION for the entire life of the line, because a book could not hold
+fixed income. Nobody pinned a lie; the vocabulary act invalidated a true constant from a distance.** <<
+**No diff on that line exists, so no review of the breaking commit could have caught it and no test
+failed.** That is why this criterion is written as a RECONCILIATION and not as a line fix.
+
+**BINDING REPAIR ORDER — ONE COMMIT, BOTH HALVES, IN THIS SEQUENCE:**
+1. **`alloc_fixed_income` becomes a SUM** over `asset_class == 'Fixed Income'`.
+2. **THEN** `cash_w` may key on `asset_class` instead of the raw `is_cash` flag.
+
+**REVERSING IT IS WORSE THAN THE DEFECT:** a key-only change moves the weight out of cash **into no
+bucket at all**, and `0.4.0_DE_ClientPlatform~Z`'s bar sums `cash + fixed_income`, so it would
+**silently LOSE 0.58% instead of mis-filing it.** Today's defect is invisible to every reader; that one
+would be visible to Andrew.
+
+**EXPECTED VALUES — MEASURED BY THE ISSUER ON THE SERVED BYTES (122,825 B @02:50:38Z), NOT DERIVED:**
+
+```
+                 today                          AFTER THE FIX
+BOOK   sum(w|FI)  sum(w|Cash)  alloc_cash    alloc_fixed_income   alloc_cash
+DIVZ     0.58        0.00         0.58              0.58             0.00
+IDVZ     0.89        0.00         0.89              0.89             0.00
+PFDE     0.33        0.03         0.36              0.33             0.03
+PFOE     2.34       -0.02         2.32              2.34            -0.02
+```
+
+`alloc_cash` today **IS** `sum(weight WHERE asset_class IN {Fixed Income, Cash})`, to the cent, on all
+four books. **A real `Cash` asset_class EXISTS on PFDE and PFOE (one is NEGATIVE) — `alloc_cash` does
+NOT become dead, and a fix that hardcodes it to zero swaps one literal for another.**
+
+**THE CRITERION (a reconciliation, so it never needs re-pinning):**
+
+```
+alloc_cash          == sum(weight WHERE asset_class == 'Cash')
+alloc_fixed_income  == sum(weight WHERE asset_class == 'Fixed Income')
+alloc_equity        == sum(weight WHERE asset_class == 'Equity')
+alloc_cash + alloc_fixed_income + alloc_equity == sum(ALL holding weights)      <- the invariant
+```
+
+**THE INVARIANT IS AGAINST THE BOOK'S OWN TOTAL, NOT AGAINST 100. THE BUCKETS DO NOT SUM TO 100 TODAY
+AND MUST NOT BE MADE TO — DIVZ sums to 99.80 and IDVZ to 99.51 because THE HOLDINGS THEMSELVES DO.**
+*(The issuer drafted this criterion as "sums to 100", which **would have failed on a correct build** —
+the exact pinned-constant defect `0.4.0_DS_ClientPlatform~Z` had flagged to the issuer one message
+earlier. Measuring instead of assuming is what caught it. It is recorded here because the criterion is
+the artifact that would have carried the error.)*
+
+**Grounding: EXERCISED on the PURE `build_tables()` apparatus (`0.7.0_AE_CloudOps~Z` verified zero-I/O)
+against the live 08-24 frames. Nothing written.**
+
+### `ETFS-TO1-AC9` — `segment.sector` ships in **`ECONOMY_ORDER`**, not `SECTOR_INDICES`
+
+**`@4c234af208` LANDED THE WRONG LIST AND MUST BE RE-LANDED BEFORE ANY DEPLOY.** Membership and
+spellings are correct and byte-identical; **the ORDER is not.**
+
+```
+SECTOR_INDICES (dataLoader.ts:236)                     ASCENDING GICS CODE    Energy first
+ECONOMY_ORDER  (PortfolioManagement/constants.ts:104)  YANG'S PM ORDER        Consumer Discretionary first
+                                                       [25,45,40,10,15,20,50,35,30,55,60,65,90,95]
+IDENTICAL? FALSE
+```
+
+**Andrew named Portfolio Management BY NAME, twice** — *"see how the frontend handles it in 'Portfolio
+Management' (Yang was very adamant on how sectors should be ordered)"*, and at DE~Z's terminal *"the
+canonical economy code order that yang uses in 'Portfolio Management'"*. **PM sorts `ECONOMY_ORDER`.**
+**`0.4.0_DE_ClientPlatform~Z`'s holdings table ALREADY sorts `ECONOMY_ORDER` and is shipped — so the
+landed commit would render the sector breakdown starting at Energy beside a holdings table starting at
+Consumer Discretionary. TWO ORDERS, ONE PAGE, BOTH CALLED "CANONICAL".**
+
+**HOW IT HAPPENED, AND IT IS THE PART THAT OUTLIVES THIS TO.** `constants.ts:103` reads
+`// Canonical sector/economy ordering (GICS codes)`. **"GICS codes" describes the VALUES, not the
+SORT** — read at speed it says *canonical GICS ordering*, which is the phrase that reached the executor.
+
+>> **AND THE PROPAGATOR WAS A KINDNESS: the routing said the canonical order was FOUND, *"so nobody
+>> re-derives it."* An instruction not to re-derive is an instruction not to CHECK, and it is issued
+>> exactly when the router is most confident. It converted one seat's unverified read into a fact the
+>> next seat had no reason to test.** **The seat that caught it is the one that had ALREADY cited
+>> `ECONOMY_ORDER` in TO-6 AC2 — i.e. the owner of the consuming surface. Sector-order truth lives in
+>> the frontend, and the producer cannot self-verify it.** <<
+
+**SPELLING IS THE ONE HARD COUPLING: emit the exact strings `DECLARED_SECTOR_AXIS` keys on. ORDER is
+free to change; a casing or wording drift drops the sector to the dark unmapped bucket** — the
+`Ultra Short Term` / `Ultra Short Duration` near-miss, respelled.
+
+**KEEP `0.4.0_DS_ClientPlatform~Z`'s control on the re-land: an UNANTICIPATED key must be APPENDED,
+never dropped.** A dict comprehension over a vocabulary silently deletes out-of-vocabulary keys — on a
+served weight map that is data loss dressed as a formatting change.
+
+### DELIVERY SEQUENCING — the issuer's call, asked for by `0.7.0_AE_CloudOps~Z` from the deploy seat
+
+**BATCH. ONE deploy + ONE publish covering AC8 + AC9 together.** AE~Z leaned this way weakly on
+publish-count grounds; **DE~Z's finding settles it on correctness grounds instead — item 1 as landed is
+WRONG, so deploying it now would ship a self-inconsistent page.** The weak lean became a hard call.
+
+**A COMMIT REACHES ANDREW ONLY THROUGH A DEPLOY *AND* A RUN — neither is `0.4.0_DS_ClientPlatform~Z`'s
+act. "Landed" is not "running", and "deployed" is not "published."**
+
+**No ad-hoc republish before both criteria are in the running bytes. Nothing here is a gate: no
+approver, no sign-off, no hold on any seat — this is TO acceptance criteria and delivery order in the
+issuing lane, per Rule 27.**
