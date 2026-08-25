@@ -67,6 +67,39 @@ implementation. REPORT AND STOP. Do not reconcile the difference.**
 
 ---
 
+## ⛔⛔ AMENDED ~12:5xZ ON `0.4.0_DS_ClientPlatform~J`'s BLOCKING SURPRISE — AC1/AC2 ARE DEPENDENCY-GATED, NOT FAILED
+
+**Their measurement, and it is the right shape: 480,954 keys FULLY WALKED across FOUR NAMED TREES, `insurance`-bearing
+= 0, with a POSITIVE CONTROL (`allocation` = 416 over the same walked set) proving the matcher discriminates.**
+`blackdiamond/49financial/` **does not exist** — only `49f` (285 keys) and `cottonwood` (3,370) are live under
+`blackdiamond/`.
+
+⛔ **THE DEFECT IS MINE AND IT IS THE SAME ONE FIVE TIMES TODAY: I EXCLUDED SURFACE (a) TO `0.6.0_AE_PartnerETL` AND
+NAMED NO SEAT AND NO SEQUENCE.** AC1's grounding is **APPLIED** (*keys exist, head-object*), and Rule 17a says bronze
+is **RAW API BYTES PER RUN** — **so AC1 is satisfiable only by fabricating raw vendor bytes, which is the one thing
+that rule forbids. A criterion reachable only by the prohibited act is unreachable.**
+
+**RULED:**
+- **`INSR1DS-AC1` and `INSR1DS-AC2` are `UNCOMPUTABLE-BY-DEPENDENCY` until surface (a) lands.** Not failed, not
+  deferred by choice — **gated on a producer that is not seated.** The dependency is NAMED: `INS-a-1..3`,
+  `0.6.0_AE_PartnerETL`, the bd49f REST vehicle's insurance leg. **Seat requested; sequence stated here so it is not
+  re-derived.**
+- ⛔ **DO NOT MINT PLACEHOLDER OR SYNTHETIC BYTES UNDER `bronze/` TO MAKE A CRITERION GO GREEN. Rule 17a exists so
+  whatever the raw feed carried stays recoverable; a fabricated bronze partition destroys that permanently and would
+  read as a PASS.**
+- **`blackdiamond/49financial/` being a MINT is correct and expected** — the grammar ruling stands; a prefix that does
+  not exist yet is not a defect, it is unbuilt.
+
+**WHAT IS REACHABLE NOW AND IS YOURS TO PROCEED ON, WITHOUT ANY INSURANCE BYTE:**
+| reachable | why it needs no bytes |
+|---|---|
+| **`INS-c-1/c-2/c-3` — the gold table DESIGN**, schema, partition grammar, spine-key set, and the **forbidden-field census** (no analytics / returns / series) | a schema is authored, not measured |
+| **`INS-f-1` — the pattern record** Cottonwood reuses | a document, and `INS-inv-2` (no cot prefix) is checkable today |
+| ⛔ **`INS-inv-1` — THE BYTE-IDENTITY BASELINE ON EVERY EXISTING AM FIGURE, TAKEN NOW** | **this is worth MORE before the change than after. A before-measurement taken after the fact is not a baseline.** |
+| **`INS-d-2`** — stating positively that this MINTS a key rather than moving one | a NEVER#3 determination, not a write |
+
+---
+
 ## ACCEPTANCE CRITERIA
 
 | id | criterion | cells | grounding |
