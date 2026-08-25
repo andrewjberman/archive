@@ -85,7 +85,69 @@ Same record, item (1). `org/projects/ADVI_49FSRC.json` PARKED.
 ⚠ **This is a SOURCING hold, not a promote hold.** Listed because the PERFRP record names it as a
 possible interaction — **not** because it is the same kind of thing.
 
-## (3) PERFRP — DEV ONLY, NO PROD PROMOTE
+## (3) PERFRP — ⛔ FOUR EMPTY CARDS RENDER TO A 49F ADVISOR ON PROD. SURFACED, NOT ADJUDICATED.
+
+⛔ **CORRECTED 2026-08-25 ~07:2xZ — THIS ENTRY FIRST SAID "ITS SUBJECT IS ON PROD", WHICH IS THE
+SOURCE PLANE AND IS NOT WHAT THE QUESTION IS ABOUT.** `0.4.0_DE_ClientPlatform~D` crossed to the
+plane that decides it and measured **the RENDER**:
+> **FOUR OF FIVE CARDS RENDER ON PROD** — as shells with declared-absence faces and no figures. The
+> slot is passed **UNCONDITIONALLY**: *"there is no branch that renders nothing."* The 4-of-5 ratio is
+> **mutant-proven** by their L16 leg, not read off. Measured at `origin/PROD`, not their worktree.
+
+**SO THE EXPOSURE IS VISIBLE UI ON A CLIENT-FACING SURFACE, NOT DORMANT CODE.** *"PERFRP commits are
+on PROD"* and *"a 49F advisor sees four empty performance cards"* are two very different things, and
+**only the second is what a sovereign would actually be ruling on.**
+
+⛔ **FOUR SEATS MEASURED THE SOURCE PLANE AND NONE ANSWERED THE QUESTION** — COO measured commits on
+PROD, CVO re-derived it with a negative control, AE~G confirmed independently, and **I put it in
+front of Andrew in that form.** Every ancestor test, every negative control and every denominator
+agreed with each other **because all of them were about the same wrong plane.** *No control inside
+the wrong plane can catch a wrong-plane answer* — our own law, costing four seats to notice, on the
+night it was re-recorded. **DE~D's question is the one that broke it: "nobody has said what a 49F
+advisor would SEE."**
+
+## (3) PERFRP — ⛔ THE SOURCE-PLANE MEASUREMENT — true, and NOT the deciding one
+
+**PERFRP CODE REACHED PROD ON THE AUTHORIZED ETFS PROMOTE.** Measured independently at this seat
+after `2.0.0_SA_COO` and `0.4.0_DE_ClientPlatform~D` raised it:
+```
+origin/PROD = d9a98bcc  "merge DEV->PROD: v2.1.165 -- ETFS_POSITIONING goes to production
+                         for the FIRST time"   author 0.2.0_DT_PortfolioAnalytics~Z  05:47:35Z
+
+79026413 (DE~D's PERFRP mount)  ancestor of origin/PROD : YES
+8ecb6b68                        ancestor of origin/PROD : YES
+NEG CONTROL 1af11910 (on DEV)   ancestor of origin/PROD : no   <- the test discriminates
+PERFRP files in the PROD tree   : 9   (control: 1,065 files total on PROD)
+```
+
+⛔ **THE MECHANISM, AND IT IS THE PART WITH REUSE VALUE: A DEV->PROD MERGE CARRIES THE WHOLE BRANCH,
+NOT THE AUTHORIZED SUBJECT.** The ETFS promote was properly authorized (hold (1), discharged above,
+his own word naming the serial and the act). **PERFRP rode it because both subjects sat on one
+branch.** Nobody promoted PERFRP; a promote of something else carried it.
+**NO SEAT DECIDED THIS AND NO SEAT IS AT FAULT FOR IT** — the authorizing word, the executing lane,
+and the promote act were each individually correct. **The hold was branch-shaped and the carrier was
+branch-shaped, and that is exactly the seam a per-subject hold has no way to hold.**
+
+⛔ **WHAT I DO NOT DECIDE, AND WILL NOT:** whether this BREACHES his DEV-only word. Two readings are
+both available and the choice is his:
+- **It does** — his sentence was *"stay on the DEV branch not promoted to PROD"*, and PERFRP is now
+  on PROD by any reading of the words.
+- **It does not** — at 04:0xZ he ruled the hold binds **the PROMOTE ACT alone**, publishing is part
+  of *"build it out"*, and **no promote act of PERFRP occurred**. The act that occurred was ETFS's,
+  and it was authorized.
+**ADJUDICATING A SOVEREIGN WORD'S BREADTH IS HIS, IN EITHER DIRECTION** — narrowing it to excuse this
+and widening it to condemn this are the same error with opposite signs.
+
+**WHAT IS NOT IN QUESTION:** his lift condition for PERFRP — *"validate that it actually works on the
+backend side"*, EXERCISED — **has not been met.** `twr_daily` refuses 7,335 of 7,335 rows at the
+frontier and the 12:45Z fire is the exercise. **So whatever the promote's status, the CONDITION the
+hold protects is still open**, and that is a fact rather than a reading.
+
+**NOT PROPOSING A ROLLBACK.** Moving served output is NEVER#3 and a rollback of a promote that also
+carries an AUTHORIZED subject would un-ship ETFS, which he explicitly wanted live. **Any remedy here
+trades one sovereign word against another and is his call, not an integrator's.**
+
+### ⛔ THE HOLD AS IT STOOD BEFORE — kept for provenance
 
 **Andrew-direct 2026-08-25 ~01:1xZ, received DIRECTLY at `0.7.0_AE_CloudOps~G` (not a relay).
 VERBATIM:**
