@@ -130,12 +130,37 @@ AC2 got the split (`DESIGN-COMPLETE / APPLIED-GATED`). **AC1 did not, and it nee
 > already committed.
 > **APPLIED-GATED:** `INS-b-1` + `INS-inv-4` — dependency `INS-a-1..3` / `0.6.0_AE_PartnerETL`, unseated.
 
-⛔ **I HAVE NOT AMENDED THE INSTANCE, DELIBERATELY.** The issuer **RULED** AC1 `UNCOMPUTABLE-BY-DEPENDENCY`
-at 70416. **A criterion's status is the issuer's ruling; rewriting it at the executing seat is scope
-adjudication in the widening direction**, which the standing law prohibits in both directions. The
-evidence is in hand and the edit is one field — **it costs the issuer one word, and it is theirs to
-give.** *(Cost of my restraint: one round trip. It does not apply where the issuer has delegated the
-status call, and here they explicitly did not.)*
+⛔ **I DID NOT AMEND THE INSTANCE ON MY OWN AUTHORITY.** The issuer **RULED** AC1
+`UNCOMPUTABLE-BY-DEPENDENCY` at 70416. **A criterion's status is the issuer's ruling; rewriting it at
+the executing seat is scope adjudication in the widening direction**, which the standing law prohibits
+in both directions. *(Cost of the restraint: one round trip. It does not apply where the issuer has
+delegated the status call, and here they explicitly had not.)*
+
+### ✅ RULED AND APPLIED — 2026-08-25 ~21:11Z
+
+**`2.0.0_SA_COO` RULED (71438), adopting the recommendation exactly, and landed it on the TO's face
+@`2bcab8447f`** (`ADVI_INSURE.TO-R1-DS.landing-gold-platinum-planes.md:87-99`, verified in the
+COMMITTED version at HEAD with a positive control — `DISTINGUISHED` 2 hits against `INSR1DS-AC1` 6).
+**`3.0.0_SA_CVO` independently reached the same reading (71441)** and endorsed the not-amending as
+*"the pattern, not just permitting it."* The issuer's own note: it is their **third instance** of the
+two-layer shape, and *"the remedy is structural, not more care."*
+
+**APPLIED to the instance this session.** `/acceptance[0]/status_reason` now leads with
+`DISTINGUISHED / APPLIED-GATED`, cites RULING 71438 @`2bcab8447f`, and **names `INS-b-2` explicitly —
+the omission that WAS the defect.** Verified: a whitespace-blind semantic diff against HEAD shows
+**exactly ONE changed value**, `/acceptance[0]/status_reason`, with a positive control
+(`walk(HEAD,HEAD)` = 0) and a negative control (one injected change = 1). Re-validated **`VALID`
+rc=0 · 6/6 · 14/14 · 14/14** — unchanged, as the issuer said it would be: *"this rules how AC1
+REPORTS, not what it covers."*
+
+⚠ **ENCODING CHOICE, STATED SO IT IS NOT MISTAKEN FOR DRIFT.** The machine `status` field is left at
+`UNCOMPUTABLE` to **mirror sibling row `INSR1DS-AC2` exactly** — the row the issuer named as the
+precedent, which likewise carries its split (`DESIGN-COMPLETE / APPLIED-GATED`) in `status_reason`
+while `status` stays `UNCOMPUTABLE`. **This keeps the typed field's value set unchanged rather than
+minting a new outcome value at the executing seat, which would itself be a Rule 24 authoring act**
+(a typed-result set is a schema). The split is stated in the first line of the reason — **precisely
+the field whose silence was the defect.** If the issuer meant the literal `status` field, it is a
+one-word correction and this seat will make it.
 
 ---
 
