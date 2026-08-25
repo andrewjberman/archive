@@ -70,28 +70,40 @@ today.** The surface is a **precondition** of the producer change reaching users
 
 | id | criterion | cell_refs | grounding layer |
 |---|---|---|---|
-| **`POS-TO7-AC1`** | **Each book resolves and renders its OWN latest available holdings**, with its own `data_as_of`. Today: PFDE/PFOE @ 08-21, DIVZ/IDVZ @ 08-24 — **all four present.** | `ETFS-d-1` | **EXERCISED** |
+| **`POS-TO7-AC1`** | **Each book resolves and renders its OWN latest available holdings**, with its own `data_as_of`. ⛔ **AND THAT DATE IS READ FROM THE ROWS, NEVER DERIVED FROM THE PARTITION NAME.** *(Amended 00:24Z on `Z-S29` / `3.0.0_SA_CVO~Z`: as first written this criterion was **SATISFIED BY A PARTITION-DERIVED DATE** — it would have PASSED while the defect stood. Gold currently writes `"data_as_of": as_of` — the RUN's value — and reads silver's row-level as-of **ZERO** times, against a positive control showing it reads **EIGHT** other silver columns by name.)* | `ETFS-d-1` | **EXERCISED (row-sourced, prove the provenance)** |
 | **`POS-TO7-AC2`** | ⛔ **The global selector is UNCHANGED in behaviour for funds that already worked.** PFDE/PFOE resolve to exactly what they resolve to today — **prove it, do not assert it.** | `ETFS-d-1` | **EXERCISED (before/after)** |
 | **`POS-TO7-AC3`** | **The artifact carries `data_as_of` PER BOOK** and the contract records that it may differ across books in one payload. | `ETFS-e-2` | **SOURCE + artifact** |
 | **`POS-TO7-AC4`** | ⛔ **A BOOK-LEVEL as-of is DISPLAYED beside each book.** The page-level `useYangDataAsOf('positioning', …)` is the **wrong grain** and must not be stretched to carry it. **State what you built and why the hook was not reused** (rung 2 requires saying why not). | `ETFS-f-1` | **EXERCISED (rendered)** |
 | **`POS-TO7-AC5`** | **`ETFS-f-3` holds: Models mode BYTE-IDENTICAL.** The `isEtfs ? null : dataAsOf` ternary is *in the mode switch* — **the Models branch must be provably untouched.** | `ETFS-f-1` | **EXERCISED (byte-verified)** |
 | **`POS-TO7-AC6`** | ⛔ **NEGATIVE CONTROL: a fund with NO holdings at any date.** Show it still renders as a labelled shell with an honest empty as-of — **not omitted, and not silently borrowing another book's date.** | `ETFS-d-1` | **EXERCISED (fixture)** |
+| **`POS-TO7-AC7`** | ⛔ **GOLD READS `data_as_of` FROM THE SILVER ROWS. The run's `as_of` is a SELECTION KEY, NEVER A PROVENANCE STAMP.** Measured now: `:649 "data_as_of": as_of` — the run value — `data_as_of` occurs **exactly once** in the gold file and it is a **WRITE**; `as_of_basis` occurs **zero** times. **POSITIVE CONTROL: gold reads EIGHT silver columns by name** (`holding_ticker`, `is_cash`, `security_name`, `cusip`, `weight_pct`, `market_value`, `shares`, `price`) — **so it CAN read row columns and DOES NOT read this one.** `as_of_basis` propagates too. | `ETFS-d-1`, `ETFS-e-2` | **SOURCE + EXERCISED** |
 
 > **AC6 is the load-bearing one.** Per-fund as-of makes "each book finds its own latest" the rule —
 > **and the failure mode of that rule is a book with nothing to find quietly inheriting a neighbour's
 > date.** That renders perfectly and is a lie about provenance, the day after Andrew ruled on
 > provenance.
 
+> ⛔ **`POS-TO7-AC7` IS THE ONE THAT MAKES ANDREW'S RULING REAL, AND IT IS SEPARABLE FROM AC1.**
+> AC1 decides **WHICH** partition each book uses; AC7 decides **WHERE THE DATE VALUE COMES FROM.**
+> **A perfect per-fund implementation that still stamps each book's partition name satisfies AC1 and
+> leaves the provenance defect standing** — which is exactly how one criterion comes to stand in for
+> another. ⛔ **Until AC7 lands, *"maintained from bronze ingestion onward"* is unimplemented at the
+> only layer the page reads, and `ETFS_INGEST.TO-7`'s silver fix — however perfect — is INVISIBLE at
+> platinum.**
+
 ## LANES and sequencing
 
-> ⛔ **PRIORITY AGAINST THE 13:00Z CLOCK — `1.0.0_SA_CTO~Z` ruled, and it OUTRANKS this TO:**
-> **if only one thing lands before 13:00Z, land `ETFS_INGEST.TO-7` AC3 (the bronze RE-DERIVE), NOT
-> `POS-TO7-AC1`.** *"Per-fund as-of is what makes all four funds VISIBLE; the re-derive is what makes
-> DIVZ/IDVZ's date TRUE. Shipping per-fund as-of without the re-derive shows DIVZ/IDVZ prominently,
-> labelled `2026-08-21`, on data captured 08-24 — **more visible AND still wrong**, which is a worse
-> combination than today's invisible-and-wrong."*
-> **`POS-TO7-AC4` (DE) is UNAFFECTED — different lane, no contention, and a precondition either way.**
-> *(My 00:03Z dispatch of this TO was unqualified and did not carry this; corrected 00:05Z.)*
+> ⛔ **RETRACTED 00:07Z BY ITS AUTHOR — DO NOT SEQUENCE OFF THE STRUCK TEXT BELOW.**
+> This TO carried, from 00:06Z to 00:24Z: *"if only one lands before 13:00Z, land the RE-DERIVE, not
+> per-fund as-of"*, on the grounds that per-fund as-of alone would make DIVZ/IDVZ *"more visible AND
+> still wrong."* **`1.0.0_SA_CTO~Z` retracted it on `Z-S29`: that scenario CANNOT OCCUR ON EITHER
+> BRANCH.** If `bbg/2026-08-24/` lands, as_of = 08-24, all four books fill and the served date
+> **matches the provider's own bronze `Date`** — correct with no re-derive and no per-fund as-of. If
+> it does not land, as_of = 08-21, TrueShares has **zero** rows — shells, **nothing to mislabel.**
+> **The preference rested on a third branch that does not exist.**
+> ✅ **THE RE-DERIVE IS DE-URGENTED off the 13:00Z clock — still correct, still wanted, no longer
+> racing.** ✅ **Per-fund as-of STANDS as a requirement, DEMOTED from an emergency** — Andrew's *"all
+> 4 ETFs every day"* still needs it on any day the funds' available dates genuinely diverge.
 
 
 - **`0.4.0_DS_ClientPlatform~Z`** — AC1/AC2/AC3/AC6, `data/etfs/scripts/gold/etf_positioning_gold.py`
@@ -112,7 +124,7 @@ today.** The surface is a **precondition** of the producer change reaching users
 
 <proof_of_spec>
   <!-- ISSUANCE half (COO~Z). POSITIONAL — no --expected-criteria flag:
-         python .tools/proof-of-spec-check.py <instance>.json POS-TO7-AC1,POS-TO7-AC2,POS-TO7-AC3,POS-TO7-AC4,POS-TO7-AC5,POS-TO7-AC6
+         python .tools/proof-of-spec-check.py <instance>.json POS-TO7-AC1,POS-TO7-AC2,POS-TO7-AC3,POS-TO7-AC4,POS-TO7-AC5,POS-TO7-AC6,POS-TO7-AC7
        CHECK THE RC, NEVER THE OUTPUT STRING; take it WITHOUT A PIPE. Coverage diff is BIDIRECTIONAL.
        The checker's `firm` enum still has no ETFS value — enter FABRIC and DECLARE it. Routed to
        CTO~Z as gate owner; neither lane edits a gate.
@@ -124,7 +136,7 @@ today.** The surface is a **precondition** of the producer change reaching users
   <criterion id="POS-TO7-AC4" cell_refs="ETFS-f-1"/>
   <criterion id="POS-TO7-AC5" cell_refs="ETFS-f-1, ETFS-f-3"/>
   <criterion id="POS-TO7-AC6" cell_refs="ETFS-d-1"/>
-  <expected_criteria>POS-TO7-AC1,POS-TO7-AC2,POS-TO7-AC3,POS-TO7-AC4,POS-TO7-AC5,POS-TO7-AC6</expected_criteria>
+  <expected_criteria>POS-TO7-AC1,POS-TO7-AC2,POS-TO7-AC3,POS-TO7-AC4,POS-TO7-AC5,POS-TO7-AC6,POS-TO7-AC7</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ETFS_POSITIONING.TO-7_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
