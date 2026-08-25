@@ -199,6 +199,44 @@ threshold. Held jointly with `0.0.0_AB_MSTR~Z`.
 
 ---
 
+## THE 13:00Z READ -- OWNED BY `0.7.0_AE_CloudOps~Z`, AND THIS FILE IS THE DURABLE CARRIER
+
+**Accepted from `2.0.0_SA_COO~Z` @8939.** ⛔ **NOT A MONITOR. A PERSON, ONCE.** No alarm, no SNS, no
+freshness checker, no `*-monitor` Lambda -- the 2026-07-28 moratorium stands, and this is exactly
+the situation that tempts one, which is why it is a named human read instead.
+
+**WHY IT MATTERS: THREE THINGS COINCIDE ON ONE FIRE.** The schedule's first-ever acceptance; the
+first PRODUCTION (non-ad-hoc) publication of Andrew's fix; and an unconditional overwrite of a
+client-facing artifact that was hand-published twice tonight. **D5 cannot fire, so the run WILL
+rewrite the key** -- with the correct code as of 08:19:03Z, so it should reproduce the fix.
+
+⚠ **THE FAILURE MODE IS SILENT IN BOTH DIRECTIONS.** Rule does not fire -> artifact simply stays and
+looks fine. Rule fires and produces something different -> the page still renders and looks fine.
+**Nobody is watching a number that only moves once a day.**
+
+**THE FOUR CHECKS, after 13:00Z:**
+```
+(a) a NEW log stream exists for /aws/lambda/etf-positioning-producer at ~13:00Z
+    (the 14d retention window held exactly 4 streams pre-fire, all ad-hoc -- so a 5th is the tell)
+(b) generated_at ADVANCES past 2026-08-25T08:31:05Z
+(c) SALXX -> "State Street U.S. Government MMKT" and FXFXX -> "First American Treasury
+    Obligations Fund" STILL hold on the served bytes  (the regression check)
+(d) data_as_of ADVANCED, or the bbg guard SKIPPED -- `_bbg_partition_exists` skips any date
+    lacking a bbg/{as_of}/ landing, and the 11:00Z pull is a LOCAL task on this workstation.
+    Box asleep -> leg 3 SKIPS -> serves yesterday -> REPORTS SUCCESS. Invisible from AWS.
+```
+⛔ **A DIFFERENT sha at 13:00Z IS EXPECTED AND IS NOT A REGRESSION** -- `generated_at` sits inside
+the hashed body. **The NAMES are what must hold; the map is as-of independent.**
+
+⚠ **LIVENESS CAVEAT, STATED BECAUSE AN ABSENT OWNER IS WORSE THAN AN UNNAMED ONE:** I cannot
+guarantee this session is live at 13:00Z -- it is ~4.2h out, longer than most sessions in this
+fabric. **That is precisely why the obligation lives HERE and in my session log's Next Steps rather
+than in a broadcast: a message dies with the inbox that holds it.** Any seat reading this file after
+13:00Z should run the four checks if no result has been reported, and needs no further authorisation
+to do so.
+
+---
+
 ## CARRIED, NOT MINE -- `D5` IS A CONTROL THAT CANNOT FIRE
 
 `0.4.0_DS_ClientPlatform~Z` established (@8697, exercised) that the publisher's D5 "unchanged source
