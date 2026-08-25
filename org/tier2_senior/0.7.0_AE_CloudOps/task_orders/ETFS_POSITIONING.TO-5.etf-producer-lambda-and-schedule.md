@@ -161,6 +161,21 @@ look natural, because the producer genuinely wants that data.
 > ⚠ **The CASH path stays for real cash: silver `is_cash=True` (4 rows tonight, filepoint's
 > `MoneyMarketFlag=Y`) is UNTOUCHED and must remain `Cash`.**
 >
+> ⛔⛔ **THIS CHECK IS INSUFFICIENT — IT IS A UNIT READ AND IT WOULD PASS A DEFECTIVE BUILD.**
+> `0.4.0_DS_ClientPlatform~Z` found (and I confirmed at source) that `@0c03c359f2` fixes `classify()`
+> and leaves **three book-level aggregations keyed on the RAW `is_cash` flag**:
+> `:691 cash_w` · `:692 eq_w` · `:697` the sector map. **So the ROW renders `Fixed Income` while its
+> WEIGHT stays in `alloc_cash` (PFOE 2.34%, PFDE 0.33%) and `Ultra Short Duration` never enters the
+> sector map.** ⛔ **The four cells below all PASS on that build** — they exercise the function, not
+> the artifact. **Rule 22a's layer rule, and my check is on the wrong layer.**
+> ✅ **THE SUFFICIENT CHECK IS ARTIFACT-LEVEL: read the emitted book — `alloc_cash`, `alloc_equity`,
+> `alloc_fixed_income` and the sector map — NOT `classify()`'s return.** Not written here because the
+> build is on hold and the aggregations will change; **whoever resumes writes it against the emitted
+> JSON.**
+> ✅ **CONTAINED: `@0c03c359f2` is LOCAL, NOT DEPLOYED** — deployed package measured independently at
+> my seat: `Ultra Short Duration` 0, `Fixed Income` 0, `cash_sentinel` 0, negative control fired.
+> **The defect cannot become live without a deploy. DO NOT DEPLOY.**
+
 > ```
 > CHECK THE OUTCOME -- and CALL classify() WITH ITS REAL SIGNATURE:
 >     classify(is_cash, gics, cash_sentinel)      <- THIRD ARG, defaults True. Omit it and
