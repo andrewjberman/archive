@@ -1,6 +1,6 @@
 # ADVI_COTETL.CLEANUP Leg-1 — RETIRE dead account_gains->C_00->C_02 path — STAGED (HELD, not applied)
 
-**Status:** EXECUTED 2026-06-22 ~1758Z (AE-first coordinated landing). AE de-chain DONE (7240a8933, live-verified -- SPRING-CLEAN 2026-08-25: closed WITH project ADVI_COTETL (no directive attachment). Record act, not a work verdict.
+**Status:** complete -- EXECUTED 2026-06-22 ~1758Z (AE-first coordinated landing). AE de-chain DONE (7240a8933, live-verified -- SPRING-CLEAN 2026-08-25: closed WITH project ADVI_COTETL (no directive attachment). Record act, not a work verdict.
 C_00/C_02 gone from opal-cot-gold-run); DS landed AFTER: D_00/D_00b fallback->fail-loud-raise (1703ac61d, deployed
 [cot], structurally proven no-silent-return) + C_00/C_02 source DELETED (bba478b66). Functional retire COMPLETE.
 RESIDUAL: 2 inert S3 code-orphans (code/gold/C_00.py,C_02.py -- safe-deploy doesn't S3-delete; de-chained-harmless)
