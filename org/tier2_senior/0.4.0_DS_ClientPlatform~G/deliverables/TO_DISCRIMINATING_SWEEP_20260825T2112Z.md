@@ -17,6 +17,30 @@ when a lane finishes -- so a discharged, certified TO is indistinguishable from 
 one. This sweep asks the question `<status>` only claims to answer: **does a proof-of-spec
 instance exist for this TO, and does `proof-of-spec-check` return `VALID rc=0` on it?**
 
+## ⛔ CORRECTION LANDED 2026-08-25T22:2xZ -- THE `SEAT` COLUMN IS UNSOUND THE SAME WAY
+
+**The box below declares that `CLOSE` is a RECORD-layer verdict which cannot prove work was done.
+IT IS CORRECT AND IT IS INCOMPLETE: I did not declare the same limit for `SEAT`, and `SEAT` has it
+just as badly.**
+
+**MEASURED, under COO 71560:** `P2-FLOOR-49F` is `SEAT` in the table below. At the artifact layer the
+floor is **APPLIED, ENABLED and PRODUCING** -- `advi-49f-gold-floor`, `cron(45 12)` UTC, created
+`2026-08-19T17:32:28Z`, with 7 of 8 canonical tables at `date=2026-08-24` (T-1, the correct current
+answer). **It has been live for six days.** Evidence:
+`ADVIPOINTERS_49F_ARTIFACT_LAYER_READ_20260825T2210Z.md`.
+
+> **`NO-INSTANCE` IS NOT `NOT-STARTED`.** Both columns infer world-state from the presence or absence
+> of a RECORD artifact. `CLOSE` reads "an instance exists and validates"; `SEAT` reads "no instance
+> exists". **Neither observes the world.** I policed one direction and left the other unguarded --
+> and the unguarded one is the one that puts a seat on finished work.
+
+**TREAT EVERY `SEAT` ROW BELOW AS UNPROVEN IN THE SAME DEGREE AS EVERY `CLOSE` ROW.** One of the 20
+is measured wrong. The other 19 are NOT re-checked -- **that is a stated gap, not a claim that they
+are fine.**
+
+*Recorded on the ARTIFACT and not only in the message that reported it: the message scrolls, this
+file persists, and the next reader of this table will not have the message.*
+
 ## ⛔ WHAT THIS TABLE IS AND IS NOT -- READ BEFORE USING THE `CLOSE` COLUMN
 
 **A `VALID rc=0` verdict proves the instance is STRUCTURALLY SOUND AND ALIGNED TO ITS DECOMP.
