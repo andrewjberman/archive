@@ -2,9 +2,14 @@
 
 **Compiled:** 2026-08-25 by `0.0.0_AB_MSTR`
 **Why this is a FILE and not a message:** the seat these holds bind — a DT instance — **does not
-exist yet**. A message cannot reach an unseated seat; a fresh seat reads CLAUDE.md and its spawn
-brief, not six hours of other seats' inboxes. **Whoever briefs the next DT instance lifts this
-file, verbatim.**
+exist yet**, and **no sender can be relied on to guess a not-yet-existing seat's serial in
+advance** (see the Delivery note at the foot: the first attempt at hold (3) went to the wrong DT
+serial). A brief must be **liftable from somewhere**, and this is that somewhere. **Whoever briefs
+the next DT instance lifts this file, verbatim.**
+⚠ **NOT because mail to an unseated inbox is lost — it is not.** A QUEUED message IS read at that
+seat's `org/XXX.md` Step 1b B startup pull. *An earlier version of this header said a message
+cannot reach an unseated seat; that was overstated and is corrected here, at the top, rather than
+only in the note at the bottom.*
 
 ⛔ **ENUMERATION ONLY. Nothing here is adjudicated.** Where a sovereign word is silent, this file
 records the silence rather than resolving it. Reading a resolution into this document would be the
