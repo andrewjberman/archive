@@ -38,7 +38,9 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import sys
+import tempfile
 
 sys.path.insert(0, "data/assets/scripts/gold/runners_49f")
 import perfrp_emit_core as core  # noqa: E402  the SUBJECT -- imported, never re-typed
@@ -54,8 +56,26 @@ def main() -> int:
     print("as-of %s" % ASOF)
     print("=" * 108)
 
-    rel = core._performance(ASOF, "relationship")
-    acct = core._performance(ASOF, "account")
+    # EMIT FOR REAL and read the two FILES back. Reading core._performance() in
+    # memory would verify the FUNCTION; AC11 is about the ARTIFACTS a verifier is
+    # handed, and after COO @0fe8a898f8 relocated the ids there are now TWO of them.
+    # Reading the files is also the only way the cross-tie means anything: it has to
+    # actually cross, and an in-memory structure has nothing to cross to.
+    tmp = tempfile.mkdtemp()
+    rel_path = os.path.join(tmp, "perf_rel.json")
+    acct_path = os.path.join(tmp, "perf_acct.json")
+    core.main("perfrp_performance_relationship", ["--date", ASOF, "--out", rel_path])
+    core.main("perfrp_performance_account", ["--date", ASOF, "--out", acct_path])
+    ver_path = rel_path[:-len(".json")] + core.VERIFICATION_SUFFIX
+
+    with open(rel_path, encoding="utf-8") as fh:
+        rel_doc = json.load(fh)
+    with open(acct_path, encoding="utf-8") as fh:
+        acct_doc = json.load(fh)
+    with open(ver_path, encoding="utf-8") as fh:
+        ver = json.load(fh)
+    rel, acct = rel_doc["entries"], acct_doc["entries"]
+    membership = ver["membership"]
 
     checks = []
 
@@ -65,26 +85,50 @@ def main() -> int:
         print("   [{}] {:<52} got={!s:<10} want={!s}{}".format(
             "PASS" if ok else "FAIL", name, got, want, ("  -- " + note) if note else ""))
 
-    # ---------- 1. the field is actually there, and populated ----------
-    print("\n1. THE FIELD ITSELF (an absent or empty field would make every check below vacuous)")
-    have = [e for e in rel if e.get("account_ids")]
-    print("   relationship entries ............ {:,}".format(len(rel)))
-    print("   carrying a NON-EMPTY account_ids  {:,}".format(len(have)))
-    print("   account entries ................. {:,}".format(len(acct)))
-    chk("every relationship entry carries account_ids", len(have), len(rel),
-        "None/empty would union to nothing and pass disjointness silently")
+    # ---------- 1. the two artifacts, and the SERVED one must be clean ----------
+    print()
+    print("1. THE TWO ARTIFACTS -- COO @0fe8a898f8 relocated the ids OUT of the payload")
+    print("   served relationship entries ..... {:,}".format(len(rel)))
+    print("   served account entries .......... {:,}".format(len(acct)))
+    print("   verification keys ............... {:,}".format(len(membership)))
+    print("   verification ids ................ {:,}".format(
+        sum(len(v) for v in membership.values())))
+    leaked = sum(1 for e in rel if "account_ids" in e
+                 or core.VERIFICATION_IDS_KEY in e)
+    chk("SERVED leaf carries NO ids", leaked, 0,
+        "a client fetch must not pay for a check that runs once")
+    chk("verification covers every served relationship",
+        set(membership) == {e["key"] for e in rel}, True)
+    chk("SAME ACT: verification as_of == served as_of", ver["as_of"],
+        rel_doc["as_of"], "a re-derivation would verify a DIFFERENT object")
+    chk("SAME ACT: contract_version matches", ver["contract_version"],
+        rel_doc["contract_version"])
+
+    # ---------- 1b. the cross-tie ----------
+    print()
+    print("1b. THE CROSS-TIE -- DE~D: the only assertion reaching BACK into served bytes")
+    print("    Co-emission alone leaves the two documents UNLINKED: the ids would prove")
+    print("    a partition over some population while the leaf asserts counts over")
+    print("    another, with nothing joining them.")
+    counts = {e["key"]: e.get("accounts") for e in rel}
+    bad = [(k, len(v), counts.get(k)) for k, v in membership.items()
+           if len(v) != counts.get(k)]
+    print("   relationships checked ........... {:,}".format(len(membership)))
+    print("   len(ids) != served `accounts` ... {:,}".format(len(bad)))
+    chk("len(ids) == served `accounts`, every key", len(bad), 0,
+        "asserted at emit AND re-checked here from the two files")
 
     # ---------- 2. the partition ----------
     print("\n2. THE PARTITION -- the clause DE~D could not discharge from a count")
     union = set()
     dupes = {}
     total_ids = 0
-    for e in rel:
-        ids = e.get("account_ids") or []
+    for k, ids in membership.items():
         total_ids += len(ids)
         for a in ids:
             if a in union:
-                dupes.setdefault(a, []).append(e["key"])
+                dupes.setdefault(a, []).append(k)
+            union.add(a)
             union.add(a)
     acct_keys = {e["key"] for e in acct}
     sum_counts = sum(int(e.get("accounts") or 0) for e in rel)
@@ -116,10 +160,10 @@ def main() -> int:
     print("3. EMITTED SIZE (COO's map-form bound; a breach routes to COO, NOT decided here)")
     print("   EVERY number below is FILE BYTES as main() writes them. That distinction is")
     print("   the whole of section 4 and it is why the first version of this section was wrong.")
-    doc = core.build("perfrp_performance_relationship", ASOF)
-    stripped = copy.deepcopy(doc)
-    for e in stripped["entries"]:
-        e.pop("account_ids", None)
+    doc = rel_doc                      # the SERVED bytes, read back from disk
+    augmented = copy.deepcopy(doc)     # what the payload WOULD carry, for the bound
+    for e in augmented["entries"]:
+        e["account_ids"] = membership.get(e["key"], [])
 
     def _file_bytes(d, compact=False):
         """Serialize EXACTLY as perfrp_emit_core.main() does, and measure the BYTES
@@ -130,20 +174,46 @@ def main() -> int:
 
     grid = {(lbl, k): _file_bytes(d, compact=c)
             for lbl, c in (("indent=1 (the emitter's own)", False), ("compact", True))
-            for k, d in (("without", stripped), ("with", doc))}
+            for k, d in (("served", doc), ("counterfactual", augmented))}
     print()
+    print("   THE IDS ARE NO LONGER IN THE PAYLOAD. The served column is what ships;",
+          "the")
+    print("   counterfactual is what it WOULD have cost, kept because COO's bound",
+          "asked.")
     print("   {:<30} {:>14} {:>14} {:>16}".format(
-        "serialization", "without ids", "with ids", "cost of the field"))
+        "serialization", "SERVED today", "counterfactual", "cost avoided"))
     for lbl in ("indent=1 (the emitter's own)", "compact"):
-        w, x = grid[(lbl, "without")], grid[(lbl, "with")]
-        print("   {:<30} {:>14,} {:>14,} {:>11,} ({:+.1f}%)".format(lbl, w, x, x - w,
-                                                                   100.0 * (x - w) / w))
-    ind_w, ind_x = grid[("indent=1 (the emitter's own)", "without")], grid[
-        ("indent=1 (the emitter's own)", "with")]
-    content = grid[("compact", "with")] - grid[("compact", "without")]
-    print("   ID CONTENT alone (the compact delta) {:>10,} B".format(content))
-    print("   FORMAT share of the indent=1 delta   {:>10.0f}%".format(
-        100.0 * (1 - content / float(ind_x - ind_w))))
+        w, x = grid[(lbl, "served")], grid[(lbl, "counterfactual")]
+        print("   {:<30} {:>14,} {:>14,} {:>11,} ({:+.1f}%)".format(
+            lbl, w, x, x - w, 100.0 * (x - w) / w))
+    ind_w = grid[("indent=1 (the emitter's own)", "served")]
+    ind_x = grid[("indent=1 (the emitter's own)", "counterfactual")]
+    total = ind_x - ind_w
+    struct_ids = grid[("compact", "counterfactual")] - grid[("compact", "served")]
+    # MEASURE the id characters; do NOT infer them from an assumed bytes-per-id.
+    n_ent = len(doc["entries"])
+    ids_only = sum(len(json.dumps(x)) + 1
+                   for v in membership.values() for x in v) - n_ent
+    key_struct = struct_ids - ids_only
+    indent_ws = total - struct_ids
+    print()
+    print("   THE COST DECOMPOSED -- three components, not two. A RESIDUAL BUCKET IS A")
+    print("   CLAIM, NOT A REMAINDER (DE~D 69331, against their own number): measuring",
+          "one")
+    print("   component and labelling the leftover with the name you are arguing for is",
+          "not")
+    print("   a measurement of that thing. The omitted component was the one that",
+          "mattered.")
+    for lbl, v in (("1. id characters + commas", ids_only),
+                   ("2. the key, brackets, separators -- THE FIELD", key_struct),
+                   ("3. indent whitespace -- the only recoverable part", indent_ws)):
+        print("     {:<52} {:>10,} {:>6.1f}%".format(lbl, v, 100.0 * v / total))
+    print("     {:<52} {:>10,} {:>6.1f}%".format("TOTAL", total, 100.0))
+    print("     self-check: components sum to the total: {}".format(
+        ids_only + key_struct + indent_ws == total))
+    print("   Only (3) is a serialization choice. (2) is the field itself -- a key name",
+          "is")
+    print("   not formatting, and filing it as such is what turned 31.5% into 60.5%.")
 
     print()
     print("4. THE BASELINE DISAGREEMENT, RESOLVED -- and it was a defect, not a rounding")
@@ -155,13 +225,17 @@ def main() -> int:
     print("   body_sha256 and D5's unchanged-skip compares it to the served object, so")
     print("   the same payload emitted on Windows and on Linux HASHED DIFFERENTLY --")
     print("   the idempotency guard would report a real diff on every platform switch.")
-    print("   Fixed in the same commit: main() now write_bytes(). Emitted CR bytes = 0.")
-    print("   DE~D's HEADLINE was right for a reason neither of us had: they differenced")
-    print("   the old FILE against the new STRING, and removing CRLF made the new string")
-    print("   BE the new file. Their +210,928 B / +16.0% is the true served-bytes delta.")
-    print("   Their 55%-is-indent SPLIT is the half that does not survive: measured")
-    print("   like-for-like the format share is {:.0f}%, not 55%.".format(
-        100.0 * (1 - content / float(ind_x - ind_w))))
+    print("   ALL THREE PLANES, so no one has to guess which two were differenced:")
+    print("     string LF -> string LF   1,289,850 -> 1,531,505   +241,655  +18.7%")
+    print("     file CRLF -> file CRLF   1,320,577 -> 1,578,337   +257,760  +19.5%")
+    print("     file CRLF -> string LF   1,320,577 -> 1,531,505   +210,928  +16.0%")
+    print("   The third is the one that circulated, and DE~D 69331 retracted it against")
+    print("   their own interest: it is not a size of ANYTHING, because one side carries")
+    print("   30,727 CR bytes the other does not. +18.7% is the operative figure now that")
+    print("   the emitter writes bytes; +19.5% describes the plane the old artifact was on.")
+    print("   I had endorsed +16.0% as standing. That was wrong and this line replaces it.")
+    print("   DE~D and I decomposed independently and converged: indent is 31.5%, and the")
+    print("   55%/60.5% figures both counted the field's own key as formatting.")
 
     npass = sum(1 for c in checks if c)
     print("\n" + "=" * 108)
