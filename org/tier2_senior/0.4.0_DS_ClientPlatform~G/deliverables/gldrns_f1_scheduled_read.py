@@ -438,10 +438,25 @@ def main() -> int:
         len(refused_in_both)))
     print("   ...of which are D-only ....... {:,}   <- CORRECT refusals, no BMV exists".format(
         len(ref_accts & only_d)))
-    chk("REFUSED-NO-BMV == 0 over accounts present at BOTH days",
-        len(refused_in_both), 0, "the bare form of this check is FALSE and would fail a good run")
-    if refused_in_both:
-        print("     first 5 offenders: {}".format(sorted(refused_in_both)[:5]))
+    # ⛔ THE DENOMINATOR GUARD. Without this the next check passes VACUOUSLY whenever
+    # the both-days set is empty -- prev_trading_day unresolvable, or the D-1
+    # valuation partition absent. 0 refusals out of 0 accounts compares 0 == 0 and
+    # reports PASS on the criterion Andrew's condition rests on.
+    # A CRITERION EVALUATED OVER AN EMPTY SET IS UNEVALUABLE, NOT SATISFIED.
+    chk("AC7 denominator is NON-EMPTY (both-days set)", len(both) > 0, True,
+        "an empty both-set makes the scoped zero pass vacuously")
+    if not both:
+        print("   REFUSING to score the scoped zero: the both-days population is EMPTY.")
+        print("   prev={!r}; accounts at D-1={}. Either the calendar did not resolve the".format(
+            prev, len(set_p)))
+        print("   prior trading day, or its canonical_valuation partition is absent.")
+        print("   THAT IS UNCOMPUTABLE, NOT SATISFIED -- and the difference is the whole")
+        print("   point of the guard above.")
+    else:
+        chk("REFUSED-NO-BMV == 0 over accounts present at BOTH days",
+            len(refused_in_both), 0, "the bare form of this check is FALSE and would fail a good run")
+        if refused_in_both:
+            print("     first 5 offenders: {}".format(sorted(refused_in_both)[:5]))
     unexplained = ref_accts - both - only_d
     chk("every REFUSED account is accounted for by the D/D-1 delta",
         len(unexplained), 0, "a refusal outside both populations is unexplained")
