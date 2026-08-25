@@ -80,6 +80,11 @@ NEVER_ZERO = ("NO-PRIOR-TRADING-DAY", "UNCOMPUTABLE-ZERO-BMV")
 CRLF = (chr(13) + chr(10)).encode("ascii")
 LF = chr(10).encode("ascii")
 
+# The EXECUTING code plane and the run's own log, both from the SSM document at
+# infra/aws/terraform/opal-assets/advi_49f_floor.tf (:226 sync, :230 log upload).
+CODE_PREFIX = "_code/"
+LOG_PREFIX = "gold/advi/_logs/"
+
 # CORROBORATION ONLY -- NO CHECK READS THIS. See the header. Disagreement is a finding.
 PRIOR_CORROBORATION = {
     "0.4.0_DS_ClientPlatform~G (me, consumer-side, an earlier partition)":
@@ -130,39 +135,124 @@ def _manifest(prefix, date):
 
 
 def _deployed_vs_ref(path, ref):
-    """Rule 22a CODE layer, with tonight's CRLF class handled EXPLICITLY.
+    """Rule 22a CODE layer -- read the bytes that EXECUTE, not the ones on this disk.
 
-    `core.autocrlf=true` is set in this repo, so a checked-out source file can carry
-    CRLF while its blob carries LF. MEASURED at this seat: 8 of 79 tracked .py under
-    runners_49f/ diverge that way -- INCLUDING BOTH FILES THIS FUNCTION READS. A raw
-    byte compare therefore reports a difference where none exists, which is exactly the
-    false provenance accusation CTO hit tonight against DS~H's deploy.
+    CORRECTED. The first version of this harness compared the WORKTREE to a git ref.
+    That is the wrong plane, and Rule 22a says so in its own words: reading an artifact
+    proves what is THERE, never what RUNS. The SSM document at
+    infra/aws/terraform/opal-assets/advi_49f_floor.tf:226 does
 
-    BOTH results are printed. Normalising SILENTLY would hide a real difference, which
-    is the opposite defect and the worse one.
+        aws s3 sync s3://opal-data-49financial/_code/ /tmp/advi_49f_code/ --delete
+        cd /tmp/advi_49f_code && python3 chain_49f_entrypoint.py --production
+
+    so THE EXECUTED BYTES COME FROM `_code/`. A file in this checkout has no causal
+    relationship to the 12:45Z run at all.
+
+    AND THIS IS THE CASE RULE 22a WARNS IS USUALLY *NOT* SAFE -- it says an S3-staged
+    object may be INERT, because a first-boot-only pull lets a box run a baked copy.
+    THAT EXEMPTION IS EARNED HERE FOR A SPECIFIC REASON, not assumed: the sync is INSIDE
+    the runCommand, so it re-pulls on EVERY invocation.
+
+    THREE PLANES, ALL PRINTED, because they answer different questions and tonight has
+    produced four separate errors from conflating two of them:
+      DEPLOYED (_code/)  what will run          <- the plane AC7 is about
+      BLOB (git ref)     what was committed
+      WORKTREE           what is on this disk   <- carries CRLF; says nothing about the run
+    core.autocrlf=true here, so the worktree diverges from the blob on 8 of 79 tracked
+    .py under runners_49f/ -- both files this reads included -- by line endings ALONE.
+    A raw worktree-vs-ref compare reports drift where there is none: exactly the false
+    provenance accusation CTO hit against DS~H's deploy.
     """
-    try:
-        with io.open(path, "rb") as fh:
-            work = fh.read()
-    except OSError as exc:
-        return {"error": "worktree read failed: %s" % exc}
     blob = subprocess.run(["git", "show", "%s:%s" % (ref, path)],
                           capture_output=True).stdout
     if not blob:
         return {"error": "git show returned EMPTY for %s:%s -- a retrieval failure "
-                         "returns a VALUE; not reporting this as 'absent'" % (ref, path)}
+                         "returns a VALUE; not reporting this as absent" % (ref, path)}
+    name = path.split("/")[-1]
+    try:
+        dep = s3.get_object(Bucket=GOLD, Key=CODE_PREFIX + name)["Body"].read()
+    except Exception as exc:                    # absence is a RESULT, not an error
+        return {"error": "deployed object %s%s unreadable: %s: %s"
+                         % (CODE_PREFIX, name, type(exc).__name__, exc)}
+    try:
+        with io.open(path, "rb") as fh:
+            work = fh.read()
+    except OSError:
+        work = None
+
     def norm(b):
         return b.replace(CRLF, LF)
 
+    def h(b):
+        return hashlib.sha256(b).hexdigest()[:16]
+
     return {
-        "raw_match": work == blob,
-        "normalised_match": norm(work) == norm(blob),
-        "worktree_sha256": hashlib.sha256(work).hexdigest()[:16],
-        "blob_sha256": hashlib.sha256(blob).hexdigest()[:16],
-        "worktree_crlf": work.count(b"\r\n"),
-        "blob_crlf": blob.count(b"\r\n"),
-        "delta_bytes": len(work) - len(blob),
+        "deployed_matches_ref": dep == blob,            # THE check AC7 rests on
+        "deployed_sha256": h(dep),
+        "blob_sha256": h(blob),
+        "worktree_sha256": h(work) if work is not None else "UNREADABLE",
+        "worktree_raw_match": (work == blob) if work is not None else None,
+        "worktree_norm_match": (norm(work) == norm(blob)) if work is not None else None,
+        "deployed_bytes": len(dep),
+        "deployed_crlf": dep.count(CRLF),
+        "worktree_crlf": work.count(CRLF) if work is not None else -1,
     }
+
+
+def _execution_record(date):
+    """The SCHEDULED-vs-AD-HOC discriminator, which the ARTIFACT cannot supply.
+
+    The first version of this harness said scheduled-ness was not decidable and stopped.
+    It is not decidable FROM THE PARTITION -- the manifest carries no trigger field --
+    but the chain uploads its own log on every run (advi_49f_floor.tf:230) and the log's
+    FIRST LINE is:
+
+        CHAIN START date=YYYY-MM-DD mode=production workdir=... stages=16
+
+    WHAT EACH SIGNAL DOES AND DOES NOT ESTABLISH, kept separate because they are not
+    equivalent and a verdict must not rest on the weakest one wearing the strongest
+    one's name:
+      mode=production  proves the FLAG the chain ran under. It does NOT prove the
+                       SCHEDULER fired it -- a human passing --production produces the
+                       identical line.
+      bare chain_<TS>.log key  proves the SSM document's own command line wrote it.
+                       Ad-hoc runs in this bucket have carried descriptive infixes
+                       (chain_adhoc_qa_..., chain_backfill_...) -- but that is a HUMAN
+                       CONVENTION, and a convention is not a control.
+      TS in the 12:45Z window  consistent with aws_scheduler_schedule
+                       advi-49f-gold-floor (flexible_time_window OFF, so exact).
+    TOGETHER: strong evidence, NOT proof. The airtight source is the scheduler's own
+    invocation history, which is outside this read. Reported as EVIDENCE-FOR with its
+    limit named, never as a discharged fact.
+    """
+    out, tok = [], None
+    while True:
+        kw = dict(Bucket=GOLD, Prefix=LOG_PREFIX)
+        if tok:
+            kw["ContinuationToken"] = tok
+        r = s3.list_objects_v2(**kw)
+        out += [(o["Key"], o["LastModified"]) for o in r.get("Contents", [])]
+        tok = r.get("NextContinuationToken")
+        if not tok:
+            break
+    rows = []
+    for key, mod in sorted(out, key=lambda t: t[1], reverse=True)[:6]:
+        try:
+            head = s3.get_object(Bucket=GOLD, Key=key)["Body"].read(400).decode(
+                "utf-8", "replace").splitlines()
+        except Exception:
+            head = []
+        first = head[0] if head else ""
+        leaf = key.split("/")[-1]
+        rows.append({
+            "key": leaf,
+            "modified": mod.isoformat(),        # boto3 = UTC; never `aws s3 ls` local
+            "first_line": first[:92],
+            "mode_production": "mode=production" in first,
+            "bare_ssm_name": leaf.startswith("chain_20"),
+            "covers_date": ("date=%s" % date) in first,
+        })
+    return rows
 
 
 def main() -> int:
@@ -281,24 +371,30 @@ def main() -> int:
         "this is the criterion; a 100%-refused partition is the pre-remedy state")
 
     # ---------- 6. deployed bytes ----------
-    print("\n6. RULE 22a CODE LAYER -- deployed bytes vs the ref that built them")
-    print("   BOTH raw and CRLF-normalised are printed. core.autocrlf=true here, and 8 of")
-    print("   79 tracked .py under runners_49f/ diverge worktree-vs-blob on line endings")
-    print("   ALONE -- including both files below. A raw mismatch is NOT evidence of drift.")
+    print()
+    print("6. RULE 22a CODE LAYER -- the bytes that WILL EXECUTE, not the ones on disk")
+    print("   The SSM doc syncs s3://%s/%s on EVERY invocation and runs THAT"
+          % (GOLD, CODE_PREFIX))
+    print("   (advi_49f_floor.tf:226). A file in this checkout has no causal relationship")
+    print("   to the run. Rule 22a warns a staged object may be INERT -- that exemption is")
+    print("   earned here because the sync is INSIDE the runCommand, not first-boot-only.")
     for path in CODE_UNDER_READ:
         r = _deployed_vs_ref(path, a.ref)
         n = path.split("/")[-1]
         if "error" in r:
-            print("   {:<28} ERROR: {}".format(n, r["error"]))
+            print("   {:<26} ERROR: {}".format(n, r["error"]))
+            checks.append((False, "deployed bytes readable: " + n))
             continue
-        print("   {:<28} raw={!s:<6} normalised={!s:<6} worktree_crlf={:<5} delta={:+d} B"
-              .format(n, r["raw_match"], r["normalised_match"], r["worktree_crlf"],
-                      r["delta_bytes"]))
-    print("   NOTE: this compares the WORKTREE to a ref. The APPLIED question -- what the")
-    print("   scheduled runner EXECUTED -- is answered by the run's own log, not by a file")
-    print("   sitting on this disk. Reading an artifact proves what is THERE, never what RAN.")
+        print("   {:<26} deployed={} blob={} worktree={}".format(
+            n, r["deployed_sha256"], r["blob_sha256"], r["worktree_sha256"]))
+        print("   {:<26}   deployed_bytes={:,}  deployed_crlf={}  worktree_crlf={}".format(
+            "", r["deployed_bytes"], r["deployed_crlf"], r["worktree_crlf"]))
+        print("   {:<26}   worktree raw={!s:<6} normalised={!s}   <- NEITHER is the AC7 check".format(
+            "", r["worktree_raw_match"], r["worktree_norm_match"]))
+        chk("DEPLOYED bytes == the ref that built them: " + n,
+            r["deployed_matches_ref"], True,
+            "the only compare on this rung that is about the run")
 
-    # ---------- 7. exclusions and corroboration ----------
     print("\n7. EXCLUDED AS CORROBORATION, DELIBERATELY")
     print("   The c04 validation battery is NOT a second opinion on this read: its check 7")
     print("   passes twr_daily=None and has never evaluated a return. It sits exactly where")
@@ -308,6 +404,36 @@ def main() -> int:
         print("     {:<62} {}".format(who[:62], what))
     print("   If the fire disagrees with these, that is a FINDING to route, not a failed")
     print("   check. I am one of these arms; scoring against them would be self-comparison.")
+
+    # ---------- 8. the execution record ----------
+    print()
+    print("8. SCHEDULED OR AD-HOC -- the artifact cannot say, so read the RUN'S OWN LOG")
+    print("   The manifest carries NO trigger field, so scheduled-ness is not decidable")
+    print("   from the partition. The chain uploads its own log every run and the first")
+    print("   line records the mode (advi_49f_floor.tf:230).")
+    recs = _execution_record(D)
+    print("   {:<44} {:>22} {:>7}".format("log object", "modified (UTC)", "prod"))
+    for r in recs:
+        print("   {:<44} {:>22} {:>7}".format(
+            r["key"][:44], r["modified"][:19], str(r["mode_production"])))
+    covering = [r for r in recs if r["covers_date"]]
+    if covering:
+        r = covering[0]
+        print("   COVERING date={}: {}".format(D, r["key"]))
+        print("     first line: {}".format(r["first_line"]))
+        print("     mode=production {} | bare SSM-style name {}".format(
+            r["mode_production"], r["bare_ssm_name"]))
+    else:
+        print("   NO log covering date={} among the {} most recent.".format(D, len(recs)))
+        print("   That is a MEASURED absence over the objects listed, NOT a claim the run")
+        print("   did not happen -- the log upload is best-effort in the SSM doc")
+        print("   (|| echo WARN), so a successful run CAN leave no log.")
+    print("   EVIDENCE-FOR, NOT PROOF, and the distinction is load-bearing:")
+    print("     mode=production proves the FLAG, never that the SCHEDULER fired it --")
+    print("     a human passing --production writes the identical line.")
+    print("     The ad-hoc runs here carry descriptive infixes (chain_adhoc_qa_...,")
+    print("     chain_backfill_...), but THAT IS A HUMAN CONVENTION AND NOT A CONTROL.")
+    print("     The airtight source is the scheduler's invocation history, outside this read.")
 
     npass = sum(1 for ok, _ in checks if ok)
     print("\n" + "=" * 108)
