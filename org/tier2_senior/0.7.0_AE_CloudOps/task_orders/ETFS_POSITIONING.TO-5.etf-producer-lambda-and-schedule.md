@@ -146,23 +146,35 @@ look natural, because the producer genuinely wants that data.
 > THEN:         invoke etf-positioning-producer with a BARE payload -- no as-of argument exists,
 >               selection is automatic (newest trading day having BOTH silver and bbg).
 > ```
-> ⛔ **MANDATORY DISCLOSURE BEFORE FIRING — ADDED 01:2xZ. THIS IS INFORMATION, NOT A GATE.**
-> The release condition above is about the INPUT. It says nothing about whether the OUTPUT is right,
-> and one known defect is live:
+> ⛔ **MANDATORY DISCLOSURE BEFORE FIRING — REWRITTEN 01:2xZ ON ANDREW-DIRECT. THE PREVIOUS VERSION
+> OF THIS CHECK WOULD HAVE CERTIFIED THE WRONG FIX AS CORRECT.**
+> It asked *"is `mmkt` in `CASH_NAME_MARKERS`?"* — so adding that marker would have flipped it to
+> **YES / green while routing SALXX to `Cash`, the answer Andrew REJECTED for its sibling.**
+> **A check keyed on the PATH, certifying an outcome it never looked at.**
+>
+> ✅ **ANDREW-DIRECT ~01:21Z, VERBATIM: *"Just fix it now and once its fixed lets rerun the pulls and
+> lock this in."*** Authorization to fix AND to re-run; no further call needed on either.
+> ⛔ **RULED (`1.0.0_SA_CTO~Z`, withdrawing their own `"mmkt"` recommendation): BOTH money-market
+> funds classify as `Fixed Income` / `Ultra Short Duration`** — his FXFXX ruling applied to the class.
+> **Two changes, not one: FXFXX must STOP resolving to `Cash` (it fires `treasury obligation` today);
+> SALXX must START resolving there (it falls through to `Equity`).**
+> ⚠ **The CASH path stays for real cash: silver `is_cash=True` (4 rows tonight, filepoint's
+> `MoneyMarketFlag=Y`) is UNTOUCHED and must remain `Cash`.**
+>
 > ```
-> CHECK:  is "mmkt" in CASH_NAME_MARKERS  (etf_positioning_gold.py ~:488) ?
->   NO  -> SALXX (a money-market fund) books as EQUITY.
->          DIVZ alloc_cash ~= 0.00 and IDVZ ~= 0.00, instead of 0.58 / 0.89.
->          THE ROW IS LOUD (bottom, dark, unclassified). THE TOTAL IS SILENT.
->   YES -> the equity total is correct for SALXX.
+> CHECK THE OUTCOME, NOT THE PATH -- read the gold rows:
+>   FXFXX  -> Fixed Income / Ultra Short Duration    SALXX -> Fixed Income / Ultra Short Duration
+>   AAPL   -> Equity  (negative control)             a silver is_cash=True row -> Cash
+>   ALL FOUR must be right. Any one wrong -> DO NOT FIRE; say which.
 > ```
-> **WHOEVER FIRES MUST STATE WHICH BRANCH THEY FIRED UNDER.** ⛔ **I am NOT gating on it** — `Z-S35`'s
-> target value (`Cash` vs Andrew's `Fixed Income`/`Ultra Short Duration` for the sibling fund) is a
-> sovereign question, and `0.0.0_AB_MSTR~Z` has put the trade to Andrew directly: **firing early buys
-> hours at the cost of the client-facing number being quietly wrong.** ⭐ **His call, not a
-> precondition I invent — but nobody fires this without knowing which they are choosing.**
-> *(Gap disclosure: the condition I wrote at 01:06Z covered only the INPUT, and I made it ownerless
-> so any seat could act on it. Ownerless and INCOMPLETE is worse than owned — this closes that.)*
+> **WHOEVER FIRES MUST STATE WHICH BRANCH THEY FIRED UNDER.** *(Still information, not a gate — but
+> the sovereign question that made it a disclosure is now ANSWERED, so the branches are pass/fail.)*
+>
+> ⛔⛔ **AND A SEPARATE GUARD ON HIS OWN RE-RUN INSTRUCTION: DO NOT RE-RUN L1 BEFORE 04:00Z.** At
+> 01:2xZ local is still MONDAY, so an L1 re-run lands under `bbg/2026-08-21/` **again** — the same
+> wrong key — **and would OVERWRITE the 170-row characteristics artifact everything currently relies
+> on.** **His authorization is real; the timing is not safe yet.** Gold fix + exercise now (no run
+> needed); L1 re-run after 04:00Z on unmodified code.
 
 > ⚠ **DO NOT fire while `bbg/2026-08-24/` is absent** — the producer steps back to 08-21, publishes a
 > further identical-looking artifact, and adds another ad-hoc decoy to a prefix already carrying
