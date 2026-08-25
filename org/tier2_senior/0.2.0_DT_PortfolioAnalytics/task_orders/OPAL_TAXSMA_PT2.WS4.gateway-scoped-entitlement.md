@@ -8,7 +8,7 @@
      CTO gates. -->
 <date>2026-07-17</date>
 <!-- PARKED 2026-07-20 by 0.2.0_DT per CTO sequence call 201850Z: MDPF_REVAMP is sole focus. Resume-trigger = MDPF parity+swap complete OR Andrew word (OR immediately if urgent -> flag CTO). Clean-park: the gateway-IAM apply STAYS HELD (not half-landed), pick-up-ready; on resume the 22a applied+exercised evidence routes to CTO as the SEV1 gate. -->
-<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project OPAL_TAXSMA_PT2, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
+<status>staged</status>
 <priority>P2 (Andrew-direct via CTO 205620Z). GATE: CTO hard plan-gate (net-new external-read grant) + WS-3 gold prefix exists (the verify target). Parallel to the data chain; the read path (WS-6) needs it.</priority>
 
 <authority>
