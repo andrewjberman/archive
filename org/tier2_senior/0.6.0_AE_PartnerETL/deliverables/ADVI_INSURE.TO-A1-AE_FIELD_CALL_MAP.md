@@ -11,6 +11,12 @@ in the estate, the committed API catalogue, and the vehicle source. The 49F prin
 
 ---
 
+> # ⛔ SUPERSEDED IN PART — READ §9 FIRST (v2, 2026-08-25T2315Z)
+> **Andrew granted vendor egress at 22:48:48Z and the surfaces have now been EXERCISED live on the
+> 49F principal.** Three verdicts below are overturned by measurement — including my own headline
+> claim that `carrier` and `product` are supplied by no call. **They are supplied.** §1–§8 are
+> preserved verbatim as the pre-egress record; **§9 is the current answer.**
+
 ## 0. THE HEADLINE — three things that change the build
 
 1. ⛔ **`carrier` and `product` — the two fields Ruling 6 puts in v1 — are supplied by NO call for which
@@ -223,3 +229,112 @@ corroboration, not repetition. Findings in §5 and §6 are **NOT in the decomp**
 
 **Not verified by me:** every `RECORDED` row above. I did not re-run any peer's method (TO posture), and
 I made no vendor call.
+
+---
+
+# 9. ⭐ v2 — THE MAP AFTER LIVE EXERCISE (2026-08-25T2315Z)
+
+**Authority:** Andrew-direct 2026-08-25T224848Z *"Youhave vendor egress"* (`@a1e9fbcca7`);
+`2.0.0_SA_COO` 71632 lifting the DRY-only constraint. **Leg:** `insurance_leg.py @d7583e51b2`.
+**Exercised on the 49F principal** — the first live 200s on this surface for this principal, which
+discharges the decomp's **L-1** (*"49F principal UNEXERCISED"*).
+
+## 9.1 WHAT I GOT WRONG IN §0–§3, AND WHY IT WAS WRONG THE RIGHT WAY
+
+| §3 said | v2 measured | why the v1 verdict happened |
+|---|---|---|
+| `carrier` **ABSENT** — no call supplies it | **SUPPLIED** by `accounts[].custodian.name` | true of the *estate's evidence*, false of the *vendor*. Nobody had ever run the call. |
+| `product` **ABSENT** | **SUPPLIED** by `accounts[].accountRegistrationType.identifier` | same |
+| cohort membership **ABSENT** | **SUPPLIED** — 77 relationships, 106 accounts | same |
+
+⛔ **The v1 map was a faithful report of a corpus, and a corpus is not a vendor.** Every `ABSENT`
+carried the qualifier *"no call **for which this estate holds evidence**"* — that qualifier was
+load-bearing and it is the only reason the verdict was honest rather than wrong.
+
+## 9.2 THE MAP — all v1 fields, ONE sanctioned call, ACCOUNT grain
+
+**Source: `POST /relationship/request/query/RelationshipAccountDetailSearch`** (S3), which returns
+account records nested under their relationship row.
+
+| # | v1 field | JSON path | measured value (specimen) |
+|---|---|---|---|
+| 1 | `bd_account_id` | `accounts[].id` | `"z0814328741"` |
+| 2 | **account number (join key)** | `accounts[].accountNumber` | `"12266924"` — **UNMASKED, 106 of 106** |
+| 3 | **`carrier`** | `accounts[].custodian.name` | `"Brighthouse Financial - Financial Professional"` |
+| 4 | **`product`** | `accounts[].accountRegistrationType.identifier` | `"INSURANCE_OTHER"` |
+| 5 | `currentEmv` | `accounts[].currentEmv.emv` | `382471.75` |
+| 6 | `asOfDate` | `accounts[].currentEmv.asOf` | `"2026-08-24T00:00:00"` |
+| 9 | account → relationship | parent row `.id` | `"z08117302"` |
+| 10 | relationship → advisor/firm | parent row `.teams[]` | team objects |
+
+```
+DOMAIN 10 | SUPPLIED-MEASURED 8 | ABSENT 0 | on GATED surfaces 0 | unmapped 0
+COHORT: 77 of 77 relationships materialised (paginated to the server total, NOT a page)
+        106 account records | accountNumber unmasked 106/106
+```
+
+## 9.3 ⛔ THE FINDING THAT MATTERS MOST — THE EXPORT IS THE WRONG GRAIN FOR carrier/product
+
+The bulk export **does** carry `Issuer` and `Product Type`, which makes it the tempting source.
+**It is at RELATIONSHIP grain and CONCATENATES** every carrier in the relationship into one cell:
+
+> `"Allianz Life, Brighthouse Financial - Financial Professional"`
+> `"INSURANCE_ANNUITY, INSURANCE_LIFEINSURANCE, INSURANCE_OTHER"`
+
+Ruling 6 asks for **account-level** fields. Measured over the full cohort:
+
+```
+account records whose relationship appears in the export : 106
+  export Issuer == account custodian.name                :  93
+  export Issuer != account custodian.name                :  13
+  of those 13, export cell contains a comma              :  13   <- ALL of them
+  residual mismatches NOT explained by concatenation     :   0
+```
+
+**Sourcing an account-level field from the export mis-attributes 12.3% of accounts to a
+multi-carrier string** — and it would look correct on the 87% you spot-check. Rule 24(ii)
+same-grain, violated inside the vendor's own artifact.
+
+⚠ **AND THE NEAR-MISS BESIDE IT:** `custodian.dataFormatName` is `"ByAllAccounts"` — the data
+**aggregator**. `custodian.name` is the **carrier**. Same object, adjacent keys, and the aggregator
+is the one that reads like a system field you should ignore.
+
+## 9.4 CORRECTIONS TO THE PROJECT'S OWN PREMISES
+
+1. **`/account-api/*` IS NOT REQUIRED FOR v1.** Its unique contribution is
+   `insuranceCharacteristics` / riders — which **Ruling 6 already DEFERS**. Carrier, product, value,
+   date, key and spine all come from a sanctioned surface. **The narrow question now with Andrew is
+   not load-bearing for v1.**
+2. **The masked-key finding stands but belongs to a THIRD surface.** `XXXX`-masking is real on
+   `/portfolioreporting/*` (`taxsma_resolver.py:10-19 @0ac99a72cb`). `/relationship/*` returns the
+   number **unmasked**. My §0 item 2 implied the unmasked key lived only on `/account-api/*` —
+   **wrong; it also lives on `/relationship/*`.**
+3. **The two token authorities are BYTE-IDENTICAL on the 49F principal** —
+   `sha256[:16]=e3c20170eedbafd3`, `len=66` both. `AUTHENTICATION.md` recorded interchangeability as
+   *"untested"*; it is now tested. **AC1's "shown to be distinct" is measured FALSE here.** The
+   routing was deliberately **not** collapsed onto that result — see `insurance_leg.py` header.
+4. **Download is keyed on `exportResultID` (int), NOT `resultGuid`.** The guid 404s on every path.
+5. **The export is ASYNC and answers HTTP 400 — not 404 — while building.** No status endpoint
+   exists (`status/{id}` → 404), so readiness is polled on the download itself.
+6. **A 200 is not a payload.** `/Api/Offline/ExportResults/{guid}` returns **200 with 5.5KB of
+   HTML**. A `status==200 and len>100` check lands a login page in bronze as data. Validate on
+   **magic bytes**.
+
+## 9.5 WHAT REMAINS OPEN
+
+| item | state |
+|---|---|
+| which of the record's **four dates** Ruling 5's client-facing *"statement as of MM/DD"* prints | **a RULING, not a measurement.** `currentEmv.asOf` is paired with the value it stamps and is the honest NAV vintage; the client-facing string is Andrew's call. |
+| `insuranceCharacteristics` populated shape | **unread — `/account-api/*` still held and mechanically refused.** No longer on the v1 critical path. |
+| riders / death benefit / cash value | **DEFERRED by Ruling 6** — outside v1, not a gap. |
+
+## 9.6 EVIDENCE
+
+Bronze landed RAW (Rule 17a), verified by live `ListObjectsV2` — never a producer self-report:
+```
+blackdiamond/49financial/bronze/insurance_relationshipaccountdetailsearch/2026-08-25/...   82,136 B
+blackdiamond/49financial/bronze/insurance_insurancerelationshiplist/2026-08-25/...             77 B
+blackdiamond/49financial/bronze/insurance_insurancerelationshiplist_export/2026-08-25/...  13,090 B
+```
+**Negative controls, all FIRED:** held surface refuses · unlisted surface refuses · firm-separation
+aborts on a `cot` prefix. **0 calls made to `/account-api/*`.**
