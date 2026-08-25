@@ -5,6 +5,9 @@
 **Basis:** **ANDREW-DIRECT ~23:2xZ** (visual smoke of the live page), relayed verbatim by
 `1.0.0_SA_CTO~Z` (5760). Covers his **items 4, 5, 6**.
 **Runs in parallel with** the 13:00Z provenance/conventions work — **this TO touches no producer.**
+**Status:** COMPLETE -- all 6 criteria PASS, exercised. Portal DEV @de32bacb (build) + @36599dec
+(Andrew's two colour corrections), LANDED LOCAL, on no remote branch; DE commits portal, DT pushes.
+proof-of-spec VALID rc=0, 6 rows, 0 violations.
 
 ## HIS WORD, the clauses this TO covers
 

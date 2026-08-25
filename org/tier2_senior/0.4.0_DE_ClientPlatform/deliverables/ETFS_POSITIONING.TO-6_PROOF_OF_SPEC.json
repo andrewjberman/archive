@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_POSITIONING.TO-6",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ETFS_POSITIONING.TO-6.page-smoke-items-label-gics-order-and-sequential-ramp.md",
+    "group": "OTHER",
+    "vintage_commit": "dc35e8737d"
+  },
+  "assignee": "0.4.0_DE_ClientPlatform~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/Positioning/shared/bookSet.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "de32bacb + 36599dec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal DEV, LANDED LOCAL, on no remote branch (git branch -r --contains returns EMPTY for both). DE commits portal, DT pushes -- I did not push. Carries HOLDING_NOUN, GICS_SECTOR_CODE, DECLARED_SECTOR_AXIS, sectorSortKey, SECTOR_RAMP, sectorRampColor, SECTOR_UNMAPPED_COLOR.",
+      "artifact_covered_by": ["POS-TO6-AC1", "POS-TO6-AC3", "POS-TO6-AC4", "POS-TO6-AC5", "POS-TO6-AC6"]
+    },
+    {
+      "path_or_key": "portal/src/pages/Positioning/panels/PositioningSummary.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "de32bacb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal DEV, LOCAL. The label (mode-conditional via HOLDING_NOUN[bookMode]) and the Asset Sub-Categories ordering.",
+      "artifact_covered_by": ["POS-TO6-AC1", "POS-TO6-AC3"]
+    },
+    {
+      "path_or_key": "portal/src/pages/Positioning/tabs/HoldingsTab.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "de32bacb + 36599dec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal DEV, LOCAL. subAssetBg (ramp + unmapped colour) and the canonicalOrder sort in sortHoldingsByCanonicalOrder.",
+      "artifact_covered_by": ["POS-TO6-AC4", "POS-TO6-AC5", "POS-TO6-AC6"]
+    },
+    {
+      "path_or_key": "portal/src/lib/chartColors.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "36599dec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal DEV, LOCAL. PALETTE.blue550 #3073f1 -- the ONE new colour in the change, added because Andrew ruled Industrials must not share the Equity asset-class tone while staying inside its ramp neighbours.",
+      "artifact_covered_by": ["POS-TO6-AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "POS-TO6-AC1",
+      "criterion_verbatim": "`# of ETFs` reads `# of Securities`. MEASURED: exactly ONE render site, PositioningSummary.tsx. And per ETFS-f-3, Models mode must stay BYTE-IDENTICAL -- this panel is shared.",
+      "method": "command",
+      "invocation": "grep -rn '# of ETFs' src (denominator 2: one comment, one render label); then bun run typecheck; then a value-level check that Models values do not resolve on the new path",
+      "output_evidence": "2 occurrences confirmed, matching the issuer's measurement exactly: PositioningSummary.tsx:249 (comment) and :501 (the render label). IMPLEMENTED MODE-CONDITIONALLY RATHER THAN AS A FLAT RENAME, and that was forced by the criterion's own second half: the panel is shared, so a flat string change would have moved Models. It is also semantically right -- a MODEL book's holdings genuinely ARE ETFs. HOLDING_NOUN is a Record<PositioningMode,string> mirroring the existing MODE_LABELS rather than a field on BookSetCapabilities, because that interface declares FEATURE AVAILABILITY and a display noun is a different intent on the same axis (Rule 24 iii). bookMode threaded into generateSections with a 'models' default, matching the file's own established pattern for this constraint.",
+      "denominator": "2 occurrences of the string across src; 1 render site; 1 comment.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "POS-TO6-AC2",
+      "criterion_verbatim": "The PM page's ACTUAL sector ordering behaviour is LOCATED and cited (file:line @ commit-ish), not inferred from a constant's name. If it is SECTORS, say what consumes it; if nothing does, say that.",
+      "method": "command",
+      "invocation": "grep -rn 'ECONOMY_ORDER' src (8 hits / 3 files); grep -rn 'SECTORS' consumers; read TradeTab.tsx:248-262",
+      "output_evidence": "LOCATED: ECONOMY_ORDER at PortfolioManagement/constants.ts:104, CONSUMED at TradeTab.tsx:255-262 where it sorts the sector list, and mirrored by utils/factorOrder.ts:6 which cites it as the pattern -- so the estate has reused it once already. @ portal d43b88c5. IT IS A THIRD LIST neither the issuer nor CTO~Z had named: they had SECTORS and SECTOR_INDICES. AND PER THE CRITERION'S OWN ALLOWANCE, SAID PLAINLY: SECTORS ('Sector list for filtering') has ZERO consumers -- reproduced independently at two seats. THE FINDING THAT MOVED THE TRAP: PM sorts by NUMERIC economy code and pairs economyName FROM THE DATA, so the ordering path never touches a sector-name string -- which is why the measured Technology/Healthcare vs Information Technology/Health Care spelling collision, real on SECTORS, CANNOT fire on the ordering mechanism. Correct trap, wrong list to fear it on.",
+      "denominator": "8 ECONOMY_ORDER occurrences across 3 files; 3 candidate lists enumerated; SECTORS consumers = 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "POS-TO6-AC3",
+      "criterion_verbatim": "The vocabulary bridge is EXPLICIT and EXERCISED on the two differing names. Show `Information Technology` and `Health Care` landing in their intended positions -- not in `Other`.",
+      "method": "command",
+      "invocation": "node check over the declared map: build DECLARED_SECTOR_AXIS from GICS_SECTOR_CODE sorted by ECONOMY_ORDER position, then resolve the two names",
+      "output_evidence": "Information Technology -> declared position 1; Health Care -> declared position 7. NEITHER lands in the unmapped bucket. The bridge is GICS_SECTOR_CODE, an 11-row DECLARED constant keyed on THE SPELLING OUR DATA USES ('Health Care', 'Information Technology'), never string-munged from a name at runtime -- which is precisely what makes the SECTORS spelling collision unreachable. Authorised by Andrew-direct ~23:44Z: 'If you have access to economy code for these securities we can order based on that instead of GICS.' We do -- our sub_asset_class values are GICS sector NAMES already pulled in GICS_SECTOR_NAME, so the bridge needed no new Bloomberg field. I re-derived CTO~Z's 10-of-10 mapping against standard GICS codes myself rather than adopting it.",
+      "denominator": "11 declared sector rows; 10 of 10 live sectors resolve; Real Estate declared and absent from today's data.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "POS-TO6-AC4",
+      "criterion_verbatim": "Sub-Asset renders a SEQUENTIAL light->dark ramp over the ordered axis. Reuse the located ordering -- rung 2, do not re-coin an ordering or a palette.",
+      "method": "manual_read_with_citation",
+      "invocation": "node scripts/ui-smoke.mjs positioning <out>.png --port 5199 --fixtures <real-artifact>.json --click ETFs; then READ the PNG",
+      "output_evidence": "RENDERED AND READ. The Sub-Asset column steps light->dark along the declared order: Consumer Discretionary lightest, then Information Technology, Financials, Energy, Materials, Industrials, Communication Services, Health Care, Consumer Staples, Utilities. TECHNIQUE taken from the Models ramp (holdings-shared.tsx:67-71, 'Progressive darkening following sort order'); ITS ORDER DELIBERATELY NOT TAKEN, because that axis is DURATION/SIZE and GICS sectors have no natural ordinal -- Energy is not 'less' than Financials. Steps are existing PALETTE members, so getSubAssetTextColor's 8-entry lightBackgrounds allowlist already classifies all nine correctly and needed NO change: the fourth site I had flagged as the one that would bite cost nothing precisely because nothing new was minted. ANDREW THEN CORRECTED ONE STEP AND HE WAS EXACTLY RIGHT: ASSET_CLASS.equity IS PALETTE.blue500 and Industrials resolved to that IDENTICAL hex -- not a similar tone. Fixed to PALETTE.blue550 #3073f1 = rgb(48,115,241), verified inside his stated bound on every channel (Materials blue400 rgb(96,165,250) >= it >= CommServices blue600 rgb(37,99,235)), after confirming ramp index 4 is used by exactly ONE declared position so nothing else moved.",
+      "denominator": "11 declared positions mapped onto 9 ramp steps; 1 step changed; 1 new PALETTE member.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "POS-TO6-AC5",
+      "criterion_verbatim": "The unlabelled bucket is handled deliberately. `sub_asset_class: None` is 1 row -- `2602335D` / TPG Inc, the known four-symptom row. It must not silently take a ramp colour that implies a sector.",
+      "method": "manual_read_with_citation",
+      "invocation": "focused fixture carrying one row per sector plus the unmapped row, rendered on port 5199 and READ",
+      "output_evidence": "PASS, BUT ONLY AFTER ANDREW CAUGHT MY FIRST IMPLEMENTATION -- recorded because the first version passed the criterion's letter. I implemented it as 'unmapped returns null from sectorRampColor and keeps its existing colour', which satisfied the stated prohibition exactly: no ramp step, no implied position. IT WAS STILL WRONG. The existing colour WAS ASSET_CLASS_COLORS['Equity'], so an UNCLASSIFIED row rendered in the exact tone of a CLASSIFIED equity one -- the bucket was invisible AS unlabelled. His word: \"'Other' should be much darker, should not just be same color as 'Equity'\". Now SECTOR_UNMAPPED_COLOR = PALETTE.gray900 #111827, 5.2x darker than equity blue by relative luminance, and a NEUTRAL rather than a darker blue so it sits off the ramp and cannot read as 'the last sector'. Cash is NOT routed here and keeps its own amber asset-class colour. Verified by render: the TPG row shows near-black, plainly distinct from every equity row above it.",
+      "denominator": "1 unmapped row of 114 (2602335D / TPG Inc); 1 cash category deliberately not routed to the unmapped colour.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "POS-TO6-AC6",
+      "criterion_verbatim": "NEGATIVE CONTROL: a sector with ZERO rows. `Real Estate` is in both lists and absent from today's data. Show the ramp does not shift or mis-colour when a member of the ordered axis has no rows -- a ramp computed over PRESENT values instead of the DECLARED axis changes every colour whenever a sector empties.",
+      "method": "manual_read_with_citation",
+      "invocation": "built a fixture with ALL 19 Financials rows deleted, re-rendered on port 5199, and compared every surviving sector's shade against the pre-drop render",
+      "output_evidence": "EXERCISED AND PASSED. Dropped all 19 Financials rows so that sector had ZERO, re-rendered, and EVERY SURVIVING SECTOR KEPT ITS EXACT SHADE -- Information Technology, Consumer Discretionary, Communication Services, Health Care, Industrials, Energy and Consumer Staples all unchanged; Financials simply absent. The ramp did not shift. STRUCTURAL REASON: the index is a pure function of position within DECLARED_SECTOR_AXIS over its FIXED length of 11, and that axis is Object.keys of a declared constant -- data cannot influence it. Real Estate is declared, has ZERO rows today, and holds its step (index 8) regardless. This is the criterion the issuer called load-bearing and they were right: a ramp built from present values looks perfect today and re-colours the whole column the first day a sector empties, which nobody would attribute to the ramp.",
+      "denominator": "19 Financials rows removed; 11 declared axis members; 7 surviving sectors compared, 0 shifted.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Injected a type error into the change itself -- replaced etfs: 'Securities' with etfs: 42 in the Record<PositioningMode,string> -- to prove the portal typecheck gate can actually fail rather than passing vacuously.",
+      "expected": "bun run typecheck returns non-zero naming the injected line.",
+      "observed": "RC=2, \"error TS2322: Type 'number' is not assignable to type 'string'\". RESTORED and re-verified: mutant string count 0, correct value count 1, typecheck back to RC=0. NOTE the gate identity matters here: bare `tsc --noEmit` checks NOTHING in this repo (root tsconfig files:[] + project refs) -- the law I landed on 2026-08-21 -- so the gate is `bun run typecheck`.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC6 is itself the determinism control for the ramp: the same declared axis was rendered twice, once with all sectors present and once with an entire sector deleted, and the surviving colours compared.",
+      "observed": "Identical shades across both renders. Independently, the ETFS-f-3 check was run as a VALUE-level assertion rather than a pixel compare, with a positive control: 0 of 10 live Models sub-asset values resolve on the sector ramp, while the ETF control fired (Information Technology=1, Health Care=6, Energy=2), so the check discriminates rather than passing vacuously.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Pushing the portal commits",
+      "reason": "DE commits portal, DT pushes (Rule 19 / the promote flow). Both commits are LANDED LOCAL on DEV, on no remote branch, verified by git branch -r --contains returning EMPTY."
+    },
+    {
+      "item": "A pre-change/post-change DOM capture via .frontend-dev/testing/ac3-models-dom.mjs",
+      "reason": "That harness is the stronger instrument for the Models byte-identical claim and I did NOT run it, because capturing a BEFORE would have required reverting my own files on a tree shared by ~6 seats. I used the value-level check instead and am naming the substitution rather than implying the stronger instrument ran."
+    },
+    {
+      "item": "Any producer or artifact change",
+      "reason": "This TO touches no producer and was explicitly scoped to run in parallel with the 13:00Z provenance work. Zero data files modified."
+    },
+    {
+      "item": "The 65 / 90 / 95 members of PM's ECONOMY_ORDER",
+      "reason": "Carried in the mirrored array for position fidelity and never rendered. Measured: they have NO declared name anywhere in src -- PM learns economy names from its payload at runtime, so there is no code-to-name table to reuse. Per the issuer's instruction, appended and said so rather than inventing a meaning."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION/INERT -- `mode` IS OVERLOADED IN PositioningSummary.tsx: generateSections already takes a `mode` parameter that is the VIEW mode ('portfolio'|'benchmark'|'relative'), a different axis from the BOOK mode ('models'|'etfs'). Same word, two axes, in one function signature. I named the new parameter bookMode deliberately and said why in the code, but a future reader threading 'mode' through that file can pick the wrong one and it will typecheck if the union happens to accept it.",
+    "OBSERVATION/INERT -- A FALSY-ZERO SORT-KEY HAZARD, caught while writing the fix rather than after: sortHoldingsByCanonicalOrder uses `SUB_ASSET_CLASS_ORDER[x] || 100`, and sectorSortKey returns 0 for Consumer Discretionary, the FIRST declared sector. `||` would have silently discarded it and dropped the leading sector into the fallback bucket -- the page still renders, just wrong, and only for the one sector that sorts first. Explicit undefined check used instead.",
+    "OBSERVATION/INERT -- MY EDITS HOT-RELOADED INTO PORT 5175 DURING ANDREW'S LIVE ASSESSMENT. Vite HMR watches the filesystem, so every save propagated into the session CTO~Z had reserved for him. I never restarted, killed or re-armed that server and rendered only on 5199, but the changes reached him unannounced -- which is the specific thing the hands-off instruction existed to prevent. Disclosed to the fabric; no harm, since the changes were what he had asked for.",
+    "OBSERVATION/INERT -- I REPORTED THE POSITIONING AS-OF SURFACE AS MISSING AND IT IS A GRAIN MISMATCH, NOT AN ABSENCE. My census found as_of_date written at etfAdapter.ts:131 and read nowhere in the plane, and I concluded no surface exists. Per ETFS_POSITIONING.TO-7 the hook EXISTS and is wired, but is keyed BY SOURCE, so it structurally cannot hold four books at four dates. I measured the right files for the wrong question."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-24/laneZ_etfs_ingest_to5_2020-2155Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-transform schema-check",
+      "invocation": "comp-transform schema-check HoldingsTab",
+      "result": "All rendered fields match their response types; no MISSING, so no runtime-undefined risk on the page Andrew is watching. Run as Phase 1 of the TO's compiler-tools mandate, before any write."
+    },
+    {
+      "tool": "comp-transform ternary-audit",
+      "invocation": "comp-transform ternary-audit HoldingsTab",
+      "result": "'No string-literal union types found in file or types.ts. Nothing to audit.' READ AS A SCOPE STATEMENT, NOT AN ABSENCE: PositioningMode lives in shared/bookSet.ts, outside the paths this tool resolves. The empty result measures the tool's scope, not the file's branching -- recorded so nobody cites it as 'no mode-branching exists', which would be exactly wrong for this file."
+    },
+    {
+      "tool": "comp-cache collisions",
+      "invocation": "comp-cache collisions",
+      "result": "No new query key introduced (this change adds no state). Pre-existing ['positioning-data'] is shared by ModelPortfolioModal, Attribution and Positioning -- deliberate, one artifact three readers -- and the ETF artifact already has its own distinct key per TO-3."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": ".tools/comp-find -i \"GICS\" portal/src",
+      "result": "6 hits, ZERO in pages/Positioning/. Reproduced the TO's premise oracle and, hours earlier and for an unrelated question, surfaced types/portfolio-optimization.ts:22 'industryGroup: GICS industry group' -- the lead that located PM's ordering. The AC2 answer came from a search I had already run."
+    }
+  ]
+}
