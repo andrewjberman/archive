@@ -107,6 +107,31 @@ def main() -> int:
     check("no rows -> NOT_COMPUTED_INPUTS_ABSENT, value is None",
           st == STATE_NOT_COMPUTED_INPUTS_ABSENT and v is None, "value=%r" % v)
 
+    print("\nAC8.3b -- NaN MUST COUNT AS UNCOMPUTED (DS~H 67960, mixed partitions)")
+    print("        latent behind a DATA SHAPE, not a code path: today's plane hands")
+    print("        None, so every fixture written against it used None.")
+    nan = float("nan")
+    v, st, d = link_returns([0.01, nan, 0.02], expected_days=3)
+    check("a NaN day is UNCOMPUTED, not present",
+          st == STATE_COMPUTED_PARTIAL and v == v and d["days_missing"] == 1,
+          "value=%.6f state=%s" % (v, st))
+    v, st, d = link_returns([nan, nan])
+    check("all-NaN -> NOT_COMPUTED, value None (was: nan labelled COMPUTED)",
+          v is None and st.startswith("NOT_COMPUTED"), "value=%r state=%s" % (v, st))
+    v_none, _, _ = link_returns([0.01, None, 0.02], expected_days=3)
+    v_nan, _, _ = link_returns([0.01, nan, 0.02], expected_days=3)
+    check("NaN and None are treated IDENTICALLY", v_none == v_nan,
+          "None->%.10f  NaN->%.10f" % (v_none, v_nan))
+    v, st, _ = link_returns([0.01, 0.02])
+    check("CONTROL: fix is not over-broad -- clean input still COMPUTED",
+          st == STATE_COMPUTED and abs(v - independent_link([0.01, 0.02])) < 1e-12)
+    rn = rollup([{"dollars": 1e6, "denominator": 1e6, "daily": [0.01, nan]},
+                 {"dollars": 2e6, "denominator": 2e6, "daily": [0.02, 0.01]}],
+                from_level="account", to_level="relationship")
+    check("rollup survives a NaN child-day without poisoning the parent",
+          rn["window_return"] == rn["window_return"] and rn["window_return"] is not None,
+          "parent=%+.8f state=%s" % (rn["window_return"], rn["window_return_state"]))
+
     print("\n        THE ZERO-BMV FIXTURE, which is the live shape today:")
     v, st, d = link_returns([None] * 5, expected_days=5)
     zero_would_be = summed_returns_MUTANT([None] * 5)
