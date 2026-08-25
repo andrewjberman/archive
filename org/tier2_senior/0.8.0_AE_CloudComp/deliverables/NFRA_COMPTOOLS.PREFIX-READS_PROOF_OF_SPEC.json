@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_COMPTOOLS.PREFIX-READS",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_COMPTOOLS.PREFIX-READS.pipescript-io-paginated-prefix-edges.md",
+    "group": "OTHER",
+    "vintage_commit": "095d90d8bd"
+  },
+  "assignee": "0.8.0_AE_CloudComp",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/modules/graph/extract_pipeline.py",
+      "kind": "script",
+      "commit_or_etag": "3b789c9d6f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Repo-local graph extractor behind comp-pipescript; no deploy target. Adds _extract_prefix_reads + the ScriptIO.local_prefix_reads field + the unconditional Step 4 call.",
+      "artifact_covered_by": [
+        "CP-1",
+        "CP-2",
+        "CP-3",
+        "CP-4"
+      ]
+    },
+    {
+      "path_or_key": "org/modules/graph/pipeline_cli.py",
+      "kind": "script",
+      "commit_or_etag": "3b789c9d6f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The comp-pipescript CLI entrypoint; no deploy target. Renders [PREFIX]/[LOCAL-CONST] rows, the never-dropped UNRESOLVED-PREFIX block, and the additive --json prefix edges.",
+      "artifact_covered_by": [
+        "CP-1",
+        "CP-3"
+      ]
+    },
+    {
+      "path_or_key": "org/modules/graph/comp-tools.yaml",
+      "kind": "config_data",
+      "commit_or_etag": "3b789c9d6f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Registry row io_prefix_reads. NOTE: this file is a CURATED SUBSET, not the authoritative registry -- the authoritative surface is the tools_index/manifest that comp-manifest-check validates. No denominator in this proof is derived from it.",
+      "artifact_covered_by": [
+        "CP-5"
+      ]
+    },
+    {
+      "path_or_key": "infra/system/06_current_state.{md,json}",
+      "kind": "doc",
+      "commit_or_etag": "0554b65c79",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The phase-2 discharge of the STRUCTURAL-TWOPHASE comp-system override taken at 3b789c9d6f. comp-system rc=0, grounded-against-live at as_of HEAD=3b789c9d6f."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CP-1",
+      "criterion_verbatim": "`comp-pipescript io B_00.canonical_holdings --pipeline bd` lists `SCHWAB_RPS_PREFIX` as a PREFIX read-edge resolving to the constant's value.",
+      "method": "command",
+      "invocation": "comp-pipescript io B_00.canonical_holdings --pipeline bd",
+      "output_evidence": "READS row now present and resolved: 'SCHWAB_RPS_PREFIX: schwab/08335338/silver/fact_rps/ [PREFIX] [LOCAL-CONST] <- (external/silver)', matching the literal at B_00.canonical_holdings.py:83 and the paginate call at :413. REPRODUCED ABSENT FIRST at HEAD before any edit -- READS was 9 rows with no SCHWAB_RPS_PREFIX -- so the defect was measured live, not assumed from the TO. The same run also surfaced two further real prefix reads the instrument had never shown: POSITIVE_CUBE via s3_layout (already visible) and the literal 'silver/allocations/' paginated at :677. --json carries the same three edges with kind=PREFIX plus unresolved_prefix_reads=[].",
+      "denominator": "1 of 1 named criterion read now resolves; 3 of 3 Prefix= call sites in B_00 (:373, :413, :677) are now represented",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CP-2",
+      "criterion_verbatim": "positive control — a known KEY-read script's io output is UNCHANGED (diff = 0 lines).",
+      "method": "diff",
+      "invocation": "before/after census: HEAD extractor (git show HEAD:...) vs patched, _extract_script_io over the SAME 356-file population; plus a named single-script control 'comp-pipescript io A_05.assets_dimension --pipeline bd' diffed across the same swap",
+      "output_evidence": "264 of 356 scripts byte-identical read-sets (diff = 0 lines). 92 changed, and EVERY change is purely additive: 0 removals across the whole corpus, so no prior read-edge was lost. 0 extractor errors. Named control A_05.assets_dimension (a KEY-read script): literal 'diff' of the two full text outputs returned 0 lines. INDEPENDENT CORROBORATION, different instrument: the pipescript-suite-gate fired on commit and ran 140 tests, all passed -- a regression signal I did not author and did not ask for.",
+      "denominator": "264 of 356 unchanged, 92 changed, 0 removals, 0 errors; parts sum 356 == 356",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CP-3",
+      "criterion_verbatim": "MUTANT — rename the prefix constant to a dynamic expression; the row flips to `UNRESOLVED-PREFIX` (shown able-to-fail; never silently absent).",
+      "method": "command",
+      "invocation": "planted mutant on B_00.canonical_holdings.py:83 -- binding rewritten to a dynamic concatenation while the Prefix= CALL SITE at :413 was left untouched -- then 'comp-pipescript io B_00.canonical_holdings --pipeline bd'",
+      "output_evidence": "Row flips, and is never silently absent: 'UNRESOLVED-PREFIX (1) -- a paginated read whose Prefix= is dynamic: SCHWAB_RPS_PREFIX: <dynamic> [UNRESOLVED-PREFIX]'. ⛔ THE MUTANT FAILED ON FIRST RUN AND CAUGHT A REAL DEFECT IN MY OWN FIX: the initial prefix regex was un-anchored, so on a concatenated binding it matched the FIRST literal and printed a confident, truncated 'schwab/' -- WORSE than the silence being fixed, because a wrong prefix that looks resolved displaces a loud UNRESOLVED row. It had passed CP-1 and CP-2 cleanly; only the mutant reached it. Anchored with a trailing '$', re-run, flips correctly. B_00 restored via git checkout and 'git status --porcelain' on that path verified EMPTY after restore.",
+      "denominator": "1 of 1 mutant flipped the verdict; anchor's live effect separately measured at 0 of 356 scripts mis-resolving today, positive control 152 prefix constants matched",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CP-4",
+      "criterion_verbatim": "DENOMINATOR CENSUS — a one-shot count of how many gold scripts across all trees carry a paginated prefix read that io could NOT see before this change, printed in the proof (\"N of M gold scripts\") — so we know how blind the instrument WAS, not just that it is now less blind.",
+      "method": "command",
+      "invocation": "census harness over _extract_script_io across every gold tree (data/*/scripts/gold, recursive, lib/ and dunder excluded)",
+      "output_evidence": "150 of 356 gold scripts (42.1%) carried a paginated prefix read io could NOT see before this change -- 252 newly-visible read-edges, 143 resolved and 109 UNRESOLVED-PREFIX. Reconciled against the 92 read-set changers so the two numbers cannot float apart: resolved-only 63 + both 29 = 92 changers, unresolved-only 58, and 63+29+58 = 150. The 58 unresolved-only scripts do not change their read-set BY DESIGN -- an unresolved prefix is surfaced as a loud row, never injected as a resolved edge. Spread across all 6 trees: assets, black_diamond, cot, etfs, inf, mdpf.",
+      "denominator": "150 of 356 gold scripts (42.1%); 252 read-edges = 143 resolved + 109 unresolved; 63+29+58 = 150",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CP-5",
+      "criterion_verbatim": "registry rows + `comp-manifest-check` clean; no new binary (extends the existing tool — build ladder rung 2).",
+      "method": "command",
+      "invocation": ".tools/commit-gate.sh; comp-manifest-check selfcheck | check --file | completeness; comp-coverage-check; git status --porcelain",
+      "output_evidence": "commit-gate rc=0 over both .py files. comp-manifest-check SELFCHECK PASS first (3 findings on its synthetic anti-pattern, 0 false-positive) so its clean verdict is a discriminating one, then check --file rc=0 with no findings and completeness PASS over 79 registered tools, explicitly '0 [drifted] in THIS commit's registrations'. comp-coverage-check PASS, 99 homed tools, 12 gate_contract rules, 0 unverifiable. NO NEW BINARY: 3 files modified, 0 added -- the existing tool extended at build-ladder rung 2. Registry row added as 'io_prefix_reads' following the established 'io_scope' sibling precedent; YAML re-parsed clean and both gates re-run PASS after the registry edit.",
+      "denominator": "3 files modified / 0 added; 79 registered tools completeness PASS; 99 homed tools coverage PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CP-3's planted mutant: B_00's SCHWAB_RPS_PREFIX binding rewritten to a dynamic concatenation with the Prefix= call site deliberately left untouched, so the ONLY variable is whether the resolver can still resolve it. Negative control: the unmutated file must resolve the same constant cleanly.",
+      "expected": "the resolved [PREFIX] row disappears and an UNRESOLVED-PREFIX row appears in its place; unmutated, the row resolves to the constant's value",
+      "observed": "FAILED ON FIRST RUN AND EARNED ITS PLACE. It exposed an un-anchored regex in my own fix that reported a confident, truncated 'schwab/' instead of flagging the dynamic binding -- a false RESOLUTION, which is worse than the silence this TO closes. That defect passed both CP-1 and CP-2. Anchored, re-run, flips correctly in both directions.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the 356-file census was run twice end to end (once pre-anchor-fix, once post) over an identical population, with set equality on the file list asserted between runs; the anchor's live effect was then measured by a separate standalone sweep carrying its own positive control",
+      "observed": "identical population both runs (assert passed), identical aggregate 150/356 across the anchor fix, parts summing 356 == 356 each time. The anchor changed 0 live values -- confirmed by direct measurement rather than inferred from the equal totals, since equal totals can hide offsetting changes.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the 109 UNRESOLVED-PREFIX edges are not resolved, only surfaced",
+      "reason": "OUT OF SCOPE BY DESIGN AND NAMED SO IT IS NOT DISCOVERED LATER. A dynamic Prefix= (f-string, concatenation, parameter, caller-supplied value) cannot be resolved by static extraction; the TO's own spec says to print an UNRESOLVED-PREFIX row and calls the trace a bonus. Resolving them would need dataflow analysis and is a separate act with its own owner. RULE 24(iv): these are the values that DO NOT MOVE on this build, and 58 scripts have ONLY unresolved prefixes, so their io read-set is unchanged -- they gain a loud row, not an edge."
+    },
+    {
+      "item": "prefix reads in non-gold code (Lambdas, silver/bronze scripts, portal)",
+      "reason": "The TO scopes the census to 'gold scripts across all trees' and CP-1 to a gold script. pipeline_cli.py's separate Lambda-path analyzer already has its own s3_prefix_reads handling; I did not touch it. The 356-file denominator is gold-only and says so on its face."
+    },
+    {
+      "item": "the pre-existing _extract_module_s3_constants file-key regex is left un-anchored",
+      "reason": "It carries the same latent truncation shape I fixed in my own prefix regex, but it is PRE-EXISTING machinery outside this TO's spec, and its required file-extension terminator makes the truncation far harder to reach. Surfaced as an OBSERVATION rather than fixed, because a mid-round off-spec edit to a shared extractor is exactly what the frozen-spec rule prohibits."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION -- the TO frames the defect as 'io enumerates KEY reads and is blind to PREFIX reads'. That framing is incomplete: SOME prefix reads were always visible (POSITIONS_CUBE_PREFIX resolves at HEAD via s3_layout). The real discriminator is WHERE THE CONSTANT IS DEFINED, not that it is a prefix -- a locally-defined KEY read is equally invisible. Three independent causes, each sufficient alone. Fixing the one I first hypothesised (the 'if not imported_names' gate) would have left the target read invisible while resolving two unrelated silver keys, i.e. it would have READ AS SUCCESSFUL. Falsified by exercising the hypothesis before building.",
+    "OBSERVATION -- COO 71624 warns that PREFIX-READS could look pre-discharged because s3_prefix_reads machinery landed 2026-05-26 against a TO dated 08-19. CONFIRMED NOT DISCHARGED at my seat and grounded at the artifact: that machinery lives in a DIFFERENT code path (the Lambda/blast analyzers at pipeline_cli.py:866 and :1098), not in the io command's _extract_script_io path, and the defect reproduced live at HEAD before my edit. An artifact that predates its TO is evidence the TO is about something else, exactly as COO stated.",
+    "OBSERVATION -- audit-archive-invoker at startup: baseline 2026-08-20T042433Z is 137.7h old with an uncaptured tail, snapshot deferred because this lane is not GOVERNANCE_AUDIT-permitted; also flags org/to-pos-override-audit.log as an audit-log-shaped file absent from MANIFEST. Owner 0.7.0_AE_CloudOps, gate 1.0.0_SA_CTO. Not chased.",
+    "OBSERVATION -- graph-call-manifest.yaml carries per-subcommand entries for comp-pipescript dag/chain/feeds/consumers/overlap/stats/inject and others, but a grep for 'comp-pipescript io' returns only the HUD router notes -- despite the backfill block's own comment stating the manifest already carried entries for THREE subcommands including io. comp-manifest-check completeness PASSES regardless, so this is a possible declarative gap in the manifest's self-description, not a gate failure. Not chased; surfaced for the registry owner."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-25/session_prefix_reads.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-pipescript",
+      "invocation": "comp-pipescript io B_00.canonical_holdings --pipeline bd  (and --json)",
+      "result": "The instrument under repair and the CP-1 oracle. Run at HEAD first to REPRODUCE the absence (9 reads, no SCHWAB_RPS_PREFIX), then after the fix to confirm the resolved [PREFIX] row."
+    },
+    {
+      "tool": "comp-manifest-check",
+      "invocation": "comp-manifest-check selfcheck ; check --file <both .py> ; completeness",
+      "result": "selfcheck PASS (3 findings on its synthetic anti-pattern, 0 false-positive) BEFORE trusting it; check rc=0; completeness PASS over 79 tools with 0 drift in this commit's registrations."
+    },
+    {
+      "tool": "comp-coverage-check",
+      "invocation": "comp-coverage-check",
+      "result": "PASS -- 99 homed tools, 12 gate_contract rules, 0 unverifiable. COO named this a BLOCKING gate on my commits; it did not fire, which is the designed outcome for a tool extended in place rather than a node added."
+    },
+    {
+      "tool": "comp-system",
+      "invocation": "comp-system",
+      "result": "rc=0, regenerated 06_current_state.{md,json} grounded-against-live at as_of HEAD=3b789c9d6f. Phase 2 of the two-phase land-then-recompile that discharges the STRUCTURAL-TWOPHASE override."
+    }
+  ]
+}
