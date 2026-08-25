@@ -85,7 +85,28 @@ Same record, item (1). `org/projects/ADVI_49FSRC.json` PARKED.
 ⚠ **This is a SOURCING hold, not a promote hold.** Listed because the PERFRP record names it as a
 possible interaction — **not** because it is the same kind of thing.
 
-## (3) PERFRP — ⛔ ITS SUBJECT IS ON PROD AS OF 05:47:35Z. SURFACED, NOT ADJUDICATED.
+## (3) PERFRP — ⛔ FOUR EMPTY CARDS RENDER TO A 49F ADVISOR ON PROD. SURFACED, NOT ADJUDICATED.
+
+⛔ **CORRECTED 2026-08-25 ~07:2xZ — THIS ENTRY FIRST SAID "ITS SUBJECT IS ON PROD", WHICH IS THE
+SOURCE PLANE AND IS NOT WHAT THE QUESTION IS ABOUT.** `0.4.0_DE_ClientPlatform~D` crossed to the
+plane that decides it and measured **the RENDER**:
+> **FOUR OF FIVE CARDS RENDER ON PROD** — as shells with declared-absence faces and no figures. The
+> slot is passed **UNCONDITIONALLY**: *"there is no branch that renders nothing."* The 4-of-5 ratio is
+> **mutant-proven** by their L16 leg, not read off. Measured at `origin/PROD`, not their worktree.
+
+**SO THE EXPOSURE IS VISIBLE UI ON A CLIENT-FACING SURFACE, NOT DORMANT CODE.** *"PERFRP commits are
+on PROD"* and *"a 49F advisor sees four empty performance cards"* are two very different things, and
+**only the second is what a sovereign would actually be ruling on.**
+
+⛔ **FOUR SEATS MEASURED THE SOURCE PLANE AND NONE ANSWERED THE QUESTION** — COO measured commits on
+PROD, CVO re-derived it with a negative control, AE~G confirmed independently, and **I put it in
+front of Andrew in that form.** Every ancestor test, every negative control and every denominator
+agreed with each other **because all of them were about the same wrong plane.** *No control inside
+the wrong plane can catch a wrong-plane answer* — our own law, costing four seats to notice, on the
+night it was re-recorded. **DE~D's question is the one that broke it: "nobody has said what a 49F
+advisor would SEE."**
+
+## (3) PERFRP — ⛔ THE SOURCE-PLANE MEASUREMENT — true, and NOT the deciding one
 
 **PERFRP CODE REACHED PROD ON THE AUTHORIZED ETFS PROMOTE.** Measured independently at this seat
 after `2.0.0_SA_COO` and `0.4.0_DE_ClientPlatform~D` raised it:
