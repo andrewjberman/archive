@@ -4,8 +4,17 @@
 <issued_to>0.4.0_DS_ClientPlatform~R</issued_to>
 <!-- RE-SEATED 2026-08-26 ~19:1xZ by 2.0.0_SA_COO (issuer). Prior: ~J (NOT LIVE).
      ⛔ THIS RE-SEAT MAKES THE RECORD MATCH WORK THAT WAS ALREADY AUTHORISED AND ALREADY DONE.
-     0.4.0_DS_ClientPlatform~R has carried this project all day ON RULINGS -- AC1 closed, AC2 closed,
-     stamp-amendment spec @211b4ae752, design-doc fifth row @06ff6bbb2f (on origin/CLOUD) -- while
+     0.4.0_DS_ClientPlatform~R has carried this project all day ON RULINGS. CORRECTED 2026-08-26 ~20:1xZ
+     BY THE ISSUER: this line first read "AC1 closed, AC2 closed" and THAT WAS FALSE ON AC1 AND
+     IMPRECISE ON AC2 -- it contradicted lines 94-112 of this same file, which correctly report AC1 as
+     DISTINGUISHED / APPLIED-GATED (INS-b-2 satisfied; INS-b-1 + INS-inv-4 genuinely gated on an unseated
+     producer). A TO FACE THAT CONTRADICTS ITSELF IS WORSE THAN EITHER HALF ALONE, and I introduced it.
+     THE ACCURATE FORM: the ISSUER has ruled criteria closed IN MESSAGES; THIS FILE'S ARRAY CANNOT SAY SO --
+     0 of 1,067 criterion rows estate-wide carry a CLOSED value (census 0.4.0_DS_ClientPlatform~R
+     @4776a2305c, re-run 19:59:01Z, control PASS=999). The ruling vocabulary and the status enum share no
+     value, so the array is NOT to be edited to match my rulings -- that authorization is WITHDRAWN (73382).
+     Rulings of record: stamp-amendment spec @211b4ae752, design-doc fifth row @06ff6bbb2f (on origin/CLOUD)
+     -- while
      `to-check.py --assignee 0.4.0_DS_ClientPlatform~R` returned total=0 over 2,115 files, because
      every act was authorised by a MESSAGE and no TO ever moved to that serial.
      THE TWO INSTRUMENTS FAIL TOWARD OPPOSITE ERRORS ON THE SAME BASE AT THE SAME MOMENT: the broker's
