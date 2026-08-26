@@ -98,12 +98,52 @@ dimension id 436 occurrences ......... 0
 dimension name containing "primary" .. 0
 ```
 
-**THE DECISIVE FACT: 105 of 105 enumerated dimensions are `isSelected=true`. THERE IS NO UNSELECTED
-POOL.** BD's enriched GET for this template returns the SELECTION, not the CATALOG.
+**THE DECISIVE FACT: 105 of 105 enumerated dimensions are `isSelected=true`, and the literal string
+`436` appears 0 times in all 37,055 bytes.**
 
 **Therefore dim 436 is not present-and-deselected -- it is absent from the body entirely, and there
-is no bit to flip.** The client-side-override workaround is not merely unwise; it is **not
-expressible**. A remedy must ADD a dimension object to a level's `dimensions[]` array.
+is no bit to flip.** The client-side-override workaround is dead **on the absence alone**: you
+cannot flip a field that is not there. A remedy must ADD a dimension object to a level's
+`dimensions[]` array.
+
+> ### CORRECTION, 2026-08-26 ~14:2xZ -- `3.0.0_SA_CVO` 72202 s.2, and the correction is theirs
+>
+> **This section originally generalized the census into a rule: "BD's enriched GET returns the
+> SELECTION, not the CATALOG." THAT RULE IS FALSE AS STATED ABOUT THIS DOCUMENT, and the same
+> document contradicts it.** `3.0.0_SA_CVO` re-derived the census on their own pull (md5
+> `f87c8cbd11f7736b1141dfb7f1367b26` == the S3 ETag, single-part, so an integrity check) and found
+> an `isSelected: false` inside these very bytes:
+>
+> ```
+> allocationChosenLevels.allocationMarketValues[1]
+> {"id": 28, "displayName": "Unaccrued Market Value", "isSelected": false,
+>  "willAppear": false, "isEnabled": false}
+> ```
+>
+> **So the payload CAN express an unselected item, and DOES -- for MEASURES.** What BD returns is
+> **MIXED**: catalog-with-flags for measures, selection-only *in this body* for dimensions.
+>
+> **WHAT SURVIVES AND WHAT DOES NOT:**
+>
+> | claim | standing |
+> |---|---|
+> | 436 is ABSENT from this body | **GROUNDED** -- measured, controlled, independently re-derived |
+> | no bit to flip for 436 in this body | **GROUNDED** -- follows from the absence alone |
+> | the vendor-side verdict of section 0 | **UNCHANGED** |
+> | *"BD structurally returns only selections for dimensions, therefore no such bit will ever exist"* | **INFERRED. WITHDRAWN.** |
+>
+> ⛔ **THE SHAPE OF MY ERROR, named because it is the transferable half: this is
+> artifact-describes-itself ONE LAYER OUT -- the same document was my evidence for the ABSENCE and
+> my evidence for the THEORY OF the absence, and only the first survives a control.** I applied
+> that test to `1.0.0_SA_CTO`'s finding in section 1 and did not apply it to my own next paragraph.
+>
+> **AND IT LOAD-BEARS ON ANDREW'S CARD**, which is why it is a correction rather than a footnote.
+> *"436 cannot be selected because BD does not expose dimension selection to us"* is a **settled
+> constraint**; *"436 is not in the body we hold, and we have not established what BD offers on that
+> level"* is an **open question.** Only the second is what we actually know, and the difference
+> decides whether he is asked to authorize a workaround or a measurement. **Section 4's residual
+> unknown is therefore not merely tidier -- it is REQUIRED, and `3.0.0_SA_CVO` strengthened the
+> sequencing rec to that footing.**
 
 **CORROBORATION, independent of me:** `Portfolio Group` = 2 dims here matches the runner's own
 sidecar census ("Portfolio Group": 2) and its export-column measurement ("columns containing
