@@ -66,7 +66,10 @@ visible:**
   <criterion id="D3R1DS-AC4" cell_refs="D3-b-3"/>
   <criterion id="D3R1DS-AC5" cell_refs="D3-b-4, D3-inv-2, D3-inv-6"/>
   <criterion id="D3R1DS-AC6" cell_refs="D3-inv-4, D3-inv-5, D3-e-1, D3-e-3"/>
-  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~K/deliverables/D3_MODELOVERLAY.TO-R1-DS_PROOF_OF_SPEC.json</instance_path>
+  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~S/deliverables/D3_MODELOVERLAY.TO-R1-DS_PROOF_OF_SPEC.json</instance_path>
+  <!-- RE-POINTED 2026-08-26 with the re-seating (~K -> ~S). It named a DEAD lane's folder: the
+       proof-of-spec check would have written its instance into an abandoned tree, and the TO would
+       have read compliant while its evidence landed where nobody looks. Surfaced by ~S. -->
   <expected_criteria>D3R1DS-AC1,D3R1DS-AC2,D3R1DS-AC3,D3R1DS-AC4,D3R1DS-AC5,D3R1DS-AC6</expected_criteria>
   <alignment_denominators>cells in this TO: 16 (inv 6 · a 4 · b 4 · e 2); criteria: 6; every criterion carries
 >=1 cell_ref; all 16 cells reachable. Unmapped 0; untraceable 0. Decomp total 21; 5 excluded for THREE declared
@@ -95,7 +98,7 @@ is in] without having to dig… oh yeah, seventy-thirty."***
 | **D3R1DS-AC3** | **`account_model_membership` at ACCOUNT × MODEL × as_of**, writing `gold/advi/canonical/account_model_membership/date={D}/` parquet **+ manifest carrying BOTH coverage denominators**. **NAME the U1 model-identity source explicitly** — an unnamed source is where the grain slips. ⛔ **FULL 8-DIGIT ACCOUNT NUMBERS ALWAYS. TWO MASTERS, NOT INTERCHANGEABLE: `08335338` = ADVI/BD · `08242234` = MDPF/SmartX. NEVER the 4-digit prefix.** **Placement rides the D2-landed grammar, confirmed with the D2 owner — D3 mints no new tree.** | `D3-b-1/2`, `D3-inv-1` | APPLIED |
 | **D3R1DS-AC4** | ⛔⛔ **THE PRD SAYS *"empty map partition = LOUD fail (vintages do not advance — a06 precedent)."* THAT PRECEDENT WAS MEASURED TODAY AND IT IS NOT THE ENDORSEMENT IT READS AS.** `a06` fails loud — **and it fails loud EVERY SUNDAY AND MONDAY BY CONSTRUCTION**: it takes `map_dates[-1]` with no trading-day filter, the map emits EMPTY weekend partitions (4,507 B, byte-identical, zero rows), and the map always lands ~30 min AFTER the chain fires — so `[-1]` is ALWAYS D-1. **The whole 49F gold chain has been dead two days a week; `c02_twr_daily` has not run since 08-22.** ⛔ **INHERIT THE LOUD FAIL. DO NOT INHERIT THE `[-1]` SELECTION.** Select by a **trading-day-resolved date**, or assert non-empty before aborting. **ORACLE: a weekend dry-run that does NOT abort.** | `D3-b-3` | EXERCISED |
 | **D3R1DS-AC5** | ⛔ **AN `UNRESOLVED` COUNT > 0 IS A PUBLISHED NUMBER, NEVER A DROPPED ROW.** *"Perfect" = joined + explained-residual = denominator, **zero silent drops**.* **Coverage below the registered floor = PUBLISH WITH THE BREACH FLAGGED in the manifest, and the flag PROPAGATES into the served artifact's provenance block, read by the publisher pair AT EVERY RUN** — so a regression is visible at every publish, not only at a one-time acceptance pass. ⛔ **NO ALARM MACHINERY. The PRD's own phrasing is the model: *the record simply has a recurring reader.*** | `D3-b-4`, `D3-inv-2/6` | EXERCISED |
-| **D3R1DS-AC6-AMENDED** | ⛔ **AMENDED ~12:4xZ ON `0.4.0_DS_ClientPlatform~K`'s BLOCKING SURPRISE (70396). THE PLATINUM PROJECTION IS REMOVED FROM THIS TO — IT IS NOT YOURS.** **PRD s4c ruling 9, THE ANDREW-APPROVED ROW (*"all recs approved"* ~19:1xZ), reads `0.7.0_AE_CloudOps (publisher key)`.** My decomp's sequencing line said DE-class and this TO assigned it to you; **both were mine and both widened past his approved owner row.** **WHAT REMAINS YOURS IN AC6:** ⛔ **17b — PLATINUM IS SERVING AND THE PUBLISHER IS THE ONLY JSON PRODUCER, so serving-shaped work does NOT go in your gold table.** That constraint binds your table whoever builds the publisher. **49F FIRST (the D2 template firm); INF/COT inherit by TEMPLATE, one implementation with firm-pinned invocations — never a fork.** **§4b's four-level additive runner contract (account / relationship-household-client / advisor / firm) is honoured at all four levels.** ⛔ **NO client-facing surface — Opal stays advisor-level.** | `D3-c-1/2`, `D3-inv-4/5`, `D3-e-1/3` | APPLIED |
+| **D3R1DS-AC6-AMENDED** | ⛔ **AMENDED ~12:4xZ ON `0.4.0_DS_ClientPlatform~K`'s BLOCKING SURPRISE (70396). THE PLATINUM PROJECTION IS REMOVED FROM THIS TO — IT IS NOT YOURS.** **PRD s4c ruling 9, THE ANDREW-APPROVED ROW (*"all recs approved"* ~19:1xZ), reads `0.7.0_AE_CloudOps (publisher key)`.** My decomp's sequencing line said DE-class and this TO assigned it to you; **both were mine and both widened past his approved owner row.** **WHAT REMAINS YOURS IN AC6:** ⛔ **17b — PLATINUM IS SERVING AND THE PUBLISHER IS THE ONLY JSON PRODUCER, so serving-shaped work does NOT go in your gold table.** That constraint binds your table whoever builds the publisher. **49F FIRST (the D2 template firm); INF/COT inherit by TEMPLATE, one implementation with firm-pinned invocations — never a fork.** **§4b's four-level additive runner contract (account / relationship-household-client / advisor / firm) is honoured at all four levels.** ⛔ **NO client-facing surface — Opal stays advisor-level.** | ~~`D3-c-1/2`~~ **STRUCK 2026-08-26** · `D3-inv-4/5`, `D3-e-1/3` | APPLIED |
 
 ---
 
@@ -110,6 +113,22 @@ silently.** **Publish the `UNRESOLVED` count and STOP. Do not narrow the denomin
 Spec FROZEN mid-round. One line by MCP to `3.0.0_SA_CVO`, cc me. You do not write `org/surprise_channel/**`.
 OBSERVATION never interrupts; **BLOCKING routes to me same-turn**; ARMED disarms same-turn via a NAMED owner, and
 **DISARMED IS NOT REMEDIATED.**
+
+⛔ **CELL-REF RULING 2026-08-26 (`2.0.0_SA_COO`, issuer), on `0.4.0_DS_ClientPlatform~S`'s read:**
+the `<proof_of_spec>` block was **ALREADY CORRECT** -- `D3R1DS-AC6` carries
+`cell_refs="D3-inv-4, D3-inv-5, D3-e-1, D3-e-3"` with **no c-cells** -- and `alignment_denominators`
+already says 16 cells with (c) named as excluded. **The staleness was in the ACCEPTANCE TABLE row,
+not the contract block**, and it is struck above. **~S's reading (prose authoritative, cell_refs
+stale) was RIGHT; its location for the stale copy was one block off** -- and the machine-checked
+artifact was the clean one, which is the direction that matters: `proof-of-spec-check.py` was never
+going to fault this. **Surface (c) is `0.7.0_AE_CloudOps`'s per PRD s4c ruling 9 and is NOT in this
+TO.**
+
+⛔ **AND THE WARNING BELOW IS MINE, WRITTEN 2026-08-25 -- THEN I VIOLATED IT MYSELF ON 08-26.**
+At 73046 s.3 I told `0.4.0_DS_ClientPlatform~S` *"you hold 4 pending TOs"* off the broker's
+base-folder rollup. **I authored the caution one day earlier and did not obey it.** `~S` refused to
+start work it could not confirm was its own and measured `to-check.py --assignee ~S -> total=0`.
+**A warning in an artifact only protects the reader who reads it, and the author is not exempt.**
 
 ⛔ **YOUR TO LIST WILL SHOW ~18 PENDING TOs FROM THE BASE SERIAL'S BACKLOG — `list_task_orders` has no lane concept and
 never validates the suffix. THIS TO IS YOUR ASSIGNMENT IN FULL.**
