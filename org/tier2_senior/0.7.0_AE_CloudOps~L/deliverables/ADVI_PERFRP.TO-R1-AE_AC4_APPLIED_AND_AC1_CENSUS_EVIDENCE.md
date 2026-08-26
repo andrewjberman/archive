@@ -315,6 +315,60 @@ deliver will pick it.**
 
 ---
 
+## 3b. THE ADVI PUBLISHER ACTIVATION IS NOT BUILT -- "serve" is not a toggle
+
+AE-plane infrastructure, this seat's cell (PRF-c-3 names the publisher's own activation, P4I-3).
+Measured because 2.0.0_SA_COO's 74034 two-serve boundary made the INERT premise worth re-grounding
+rather than re-asserting. **Nobody had read this surface.**
+
+### Three planes, each controlled
+
+| plane | measurement |
+|---|---|
+| **SCHEDULE** | `advi-49f-publisher` DISABLED, `cron(15 13 * * ? *)`, target `advi-49f-gold-dispatch`, Input names a DIFFERENT document: `{"document":"advi-49f-publisher-dispatch",...}` |
+| **SSM** | ⛔ **`advi-49f-publisher-dispatch` DOES NOT EXIST.** POSITIVE CONTROL: `advi-49f-chain-dispatch` reads `Status: Active` on the same call shape -- the instrument works, not a permissions artifact. DENOMINATOR: 20 self-owned documents materialised, 2 matching advi/49f, the publisher's not among them |
+| **LAMBDA** | the dispatcher resolves the event's `document` against an env allowlist (`lambda_function.py:110-114`) and refuses loud if unlisted. LIVE: `ALLOWED_DOCUMENTS` **UNSET** -> defaults to `SSM_DOCUMENT_NAME` = `advi-49f-chain-dispatch` **alone**. Publisher document NOT allowlisted |
+
+**Enabling that schedule today REFUSES at the Lambda before any SSM call. Two independent reasons it
+cannot fire: not allowlisted, and the document does not exist.**
+
+### ⛔ NOT A DEFECT -- DESIGNED, and the code says so in its own comments
+
+`lambda_function.py:26-28` -- *"`document` in the event is resolved against an env ALLOWLIST so the
+publisher stage (P4) can ride this same dispatcher with its own document later -- an unlisted document
+name REFUSES loud (no open dispatch surface)."*
+`:45-46` -- *"The publisher document is appended via env when its stage lands -- TF-only change, no code."*
+
+The P4 stage has not landed; the dispatcher is deliberately fail-closed until it does. **Recorded as a
+NOT-YET-BUILT state, explicitly not a breakage** -- "the activation path is broken" would be a false
+alarm with a serve decision live.
+
+### What it costs, so nobody discovers it at the moment of a yes
+
+A "yes, serve" answer does not produce a serve at the next fire. It commissions AE-plane work, none
+of it built: (1) author the `advi-49f-publisher-dispatch` SSM document -- **this is where `--publish`
+and `OPAL_ADVI_PUBLISH_GRANT=1` would live**; (2) extend `ALLOWED_DOCUMENTS` via **Terraform**;
+(3) enable the schedule.
+⚠ CTO's 73913 serving clock -- *"authoring minutes, push at the integrator, live at the next chain
+fire"* -- is right for the **DEFER** and is **NOT** the clock for the **SERVE**, which additionally
+needs a document and a TF apply.
+
+### Two things this improves
+
+- **A THIRD INDEPENDENT PLANE CONFIRMS THE OUTLIER IS INERT.** This seat measured the RUNTIME plane
+  (six leaves `WOULD_PUBLISH`); `0.4.0_DS_ClientPlatform~U` measured the CODE plane (three fail-closed
+  limbs at `:524`, `:525-528`, `:468-470`); the ACTIVATION plane is now fail-closed too. Re-measured
+  2026-08-26T23:36:59Z: still **0 perfrp objects** served (12 materialised; positive control
+  enumerates `leaderboard.json`, `cumulative_chart.json`, `clients-tab-slim.json`).
+- **THE SEQUENCING CONSTRAINT IS NOW TRIVIALLY SATISFIABLE.** Since the publisher document does not
+  yet exist, **there is no race to lose** -- the `deferred` commit can land well ahead of any
+  activation. The ordering risk is real but currently has a wide margin, not a tight one.
+
+**Nothing built, nothing proposed:** no document authored, no env changed, no Terraform touched, no
+schedule enabled, no EMITTERS entry edited.
+
+---
+
 ## 4. Standing state of TO-R1-AE
 
 | criterion | status | held by |
