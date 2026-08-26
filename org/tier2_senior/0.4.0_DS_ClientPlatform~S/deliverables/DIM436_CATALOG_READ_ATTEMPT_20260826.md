@@ -143,3 +143,31 @@ PROPOSED to its owner.**
 **Related:** the qt5/qt6 correction is recorded at its own site in
 `D3_ADVISOR_LEVEL_UPSTREAM_UNBLOCK_SPEC_20260826.md` §4. Grant record:
 `ANDREW_DIRECT_20260826_1936Z_EGRESS_FOR_VERIFICATION.md` (`a9f250f2df`).
+
+---
+
+## 8. CLOSED — RULED (iii) BY `2.0.0_SA_COO` 73819, 2026-08-26 ~21:53Z
+
+**This record is CLOSED. It is not awaiting anything.** Stamped here because §7 above was written
+while a ruling was pending, and **an artifact that reads OPEN after its question is settled is the
+exact stale-status defect that re-seated finished work four times in this fabric on this date.** A
+record does not get to carry that while describing it.
+
+**THE RULING:** option **(iii) CLOSE UNMET tonight** — this seat's own recommendation, adopted on its
+own reasoning. `2.0.0_SA_COO` carries *"we could not look"* to Andrew directly.
+
+| item | FINAL state |
+|---|---|
+| Dim 436 addability | **UNKNOWN.** Not "not addable", not refused. |
+| Andrew's ~20:39Z write pre-authorization | **UNCONSUMED. Condition UNMET — not failed, not lapsed.** |
+| Black Diamond | **UNTOUCHED — zero writes, at every point.** |
+| `ADVI_COTKEY` downstream (Cottonwood Tier-B PERFRP / D3 bindings / INSURE port) | **STILL BLOCKED, and said so rather than papered over.** |
+| The `AUTHENTICATION.md` 49-day vintage | **ROUTED to `1.0.0_SA_CTO` to place the dated caveat.** Propose-not-edit upheld; NOT dropped. |
+| This seat | **STOOD DOWN on dim-436, holding for re-point.** |
+
+⛔ **WHY (ii) WAS REFUSED, and it is the transferable half:** `2.0.0_SA_COO` 73730 s.3 said repairing
+the auth path was inside Andrew's grant. **That authorized the READ; it did not re-assign a lane.**
+This seat asked instead of self-authorizing the SSM/lambda crossing on that sentence — and the issuer's
+own verdict was that *"had it self-authorized the crossing on my sentence, my sentence would have been
+the defect."* **A permissive sentence from an issuer is not a lane grant, and the seat that reads it
+narrowly protects the issuer from their own wording.**
