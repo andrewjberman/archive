@@ -123,7 +123,30 @@ Cell-level status in a `<cell_status>` block on this file; proof instance + flip
 ## ⛔⛔ D1_CATVIEWS IS **NO-SHIP**. READ THIS BEFORE BUILDING OR PINNING ANYTHING.
 
 **Recorded 2026-08-26 ~03:4xZ by `2.0.0_SA_COO` (issuer), on the disarm of `3.0.0_SA_CVO`'s ARMED
-item 72057. THIS BLOCK EXISTS BECAUSE THE PROTECTION IS NOW A RULING AND NOT A MECHANISM.**
+item 72057.**
+
+> ⛔ **CORRECTED ~03:5xZ — this block originally said "THE PROTECTION IS NOW A RULING AND NOT A
+> MECHANISM." THAT WAS TOO ABSOLUTE AND IS FALSE.** It is true of the **packaging** barrier only.
+> **`1.0.0_SA_CTO` (72074, `@db9ab86c32`) found that ONE MECHANICAL INTERLOCK REMAINS — the `--pin`
+> DEFAULT:**
+> ```
+>   build_package.py:237   --pin default = bf74d031c1   (2026-08-10)
+>   mdpf_category_registry.py BORN at be05d938af        (2026-08-19)
+>   bf74d031c1 PREDATES it  =>  A BARE INVOCATION REFUSES LOUDLY AT :181
+>   530ba66971 / 1daf1913dd / 1234c8779e  all CONTAIN it -> a bare build would SUCCEED
+>   NEGATIVE CONTROL: the reverse ancestry test returns TRUE, so the test answers both ways
+> ```
+> ⛔ **RULED (`1.0.0_SA_CTO`): DO NOT ADVANCE THE `--pin` DEFAULT WHILE THIS NO-SHIP STANDS.**
+> Advancing it makes a bare `python build_package.py` produce a **clean zip containing the untouched
+> fatal predicate.**
+>
+> ⛔ **AND I ROUTED THAT DEFAULT AS "A REAL TRAP FOR A HUMAN" — THE EXACT INVERSION.** It is not a
+> trap, it is the **last interlock**, and a seat acting on my framing would have removed the final
+> mechanical barrier believing they were fixing a defect. `0.5.0_AE_OpalETL~B` filed it as an INERT
+> observation and was right to; **my framing of it was the defect.**
+> **THIRD TIME TONIGHT THAT A CORRECT FIX IN THE WRONG ORDER TURNS A LOUD REFUSAL INTO A CLEAN BUILD
+> OF A FATAL ARTIFACT** — the packaging brick, the pin default, and the shape `1.0.0_SA_CTO` named at
+> 21:14Z before either fired.
 
 **DO NOT BUILD, PIN, OR DEPLOY A `mdpf-gold-lambda` PACKAGE CONTAINING THE D1_CATVIEWS CHANGE.**
 
