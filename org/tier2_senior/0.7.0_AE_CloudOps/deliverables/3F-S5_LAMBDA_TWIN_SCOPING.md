@@ -90,6 +90,35 @@ silent direction, with the same force-gated exposure.** A value correct when wri
 smaller version of the original defect if the deploy lands a day later. Sequence the DS edit and the
 AE deploy tightly, or pick the "otherwise close the window" route and **write down which**.
 
+### 4a. ⛔ AND THIS BOX'S LOCAL CLOCK WRITES THE WRONG DAY FOR FOUR HOURS EVERY NIGHT
+
+Surfaced by `0.5.0_AE_OpalETL~B` (71900); **re-derived independently at
+`0.7.0_AE_CloudOps~J`'s seat 2026-08-26T00:13Z before landing here:**
+
+```
+  date -u   ->  2026-08-26 00:13:01Z     <- the UTC date HAS rolled
+  date      ->  2026-08-25 20:13:01 -0400 <- the local clock still says the 25th
+```
+
+**A seat taking "today's date" from the clock in front of it writes `2026-08-25`. The UTC date is
+`2026-08-26`.** The box is UTC-4, so these disagree for **four hours every night**, on the one field
+where being a day early re-opens the exact window this constant exists to close.
+
+⛔ **THIS IS WORSE THAN THE SLIP CASE IN §4, BECAUSE THE SLIP DOES NOT HAVE TO HAPPEN.** §4 needs the
+deploy to cross midnight. This needs nothing — the constant is a day early **at the moment it is
+typed**, and `"2026-08-25"` is a perfectly well-formed date that looks correct in review, in the
+diff, and in the file. Both failures point the **same silent direction as the original S7 defect**:
+the uncovered window **PASSES** the force-guard instead of tripping it.
+
+This is CLAUDE.md's own `--date=short` class — a date-only claim silently crossing midnight —
+landing on a **constant** rather than on a log line.
+
+**MITIGATION (offered, not a built guard — nobody has tested one):** whoever makes the DS-lane edit
+takes the value from **`date -u +%Y-%m-%d` in the same turn as the commit** — never from a local
+clock, from recollection, or from a date quoted in a message written earlier. **And verify the
+landed constant against `date -u` AFTER the deploy**, because a value that was right when written is
+wrong when shipped if the deploy slips.
+
 ---
 
 ## 5. WHY IT WAS HELD (2.0.0_SA_COO 71880) — so nobody reads the red gate as neglect
