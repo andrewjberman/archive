@@ -164,7 +164,7 @@ for tok, fname, size, mtime, commit, extra_key, live, why_tail in [
                "{_README, stats, edges}, and NOTABLY it carries NO `generated_from` key while its "
                "sibling does, so the two halves of this pair do not even declare provenance the "
                "same way",
-               "the _README is the only narrative account of what it holds."),
+               "the _README is the only narrative account of what it holds. DECLARED_OPINIONS IS NULL AND THE REASON IS THAT THE PRODUCER IS UNRESOLVED: enumerating the filters, thresholds and exclusions a store encodes requires knowing WHO DECIDES them, and no generator was found for this file by directory enumeration or a DEF-band sweep. Listing opinions inferred from the artifact alone would be reading the output and calling it the intent -- the substitution this axis exists to catch."),
             "UNKNOWN -- no generator resolved by this census for either half",
             how="A JSON edge corpus consumed by comp-pulse to score commit risk. Its producer was "
                 "NOT resolved: no generator path was found by directory enumeration of "

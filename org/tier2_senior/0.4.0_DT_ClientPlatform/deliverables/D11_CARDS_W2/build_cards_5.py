@@ -63,18 +63,29 @@ CARDS.append(card(
         "Directory enumerated at HEAD: 12 entries. 4 composer/pipeline scripts (c2_individuate.py "
         "40,828 B, c3_cover.py 16,495 B, kimi_pipeline.py 46,114 B, kimi_steps_monolith.py 8,915 "
         "B), 1 stage script (stage1_sides.py), 4 test files, 2 JSON outputs and a __pycache__. "
-        "COMPOSES the canonical graph projection; INVENTS the subdivision method itself.",
+        "COMPOSES the canonical graph projection; INVENTS the subdivision method itself. "
+        "DECLARED_OPINIONS IS NULL AND THE REASON IS THE GRAIN: this subject is a DIRECTORY, "
+        "which has no single producer whose filters, thresholds and definitional choices "
+        "could be enumerated. The opinions belong to the member scripts, and the two member "
+        "artifacts carded separately enumerate theirs. A directory-level opinion set would "
+        "have to be invented.",
         "3.0.0_SA_CVO",
         how="A self-contained harness that reads the canonical graph and emits C2 instance and C3 "
             "structure artifacts. It carries its OWN test suite in-tree -- 4 test files including "
             "test_producer_reader_executed.py and test_incontainer_reader_equivalence.py -- which "
-            "is unusual among the subjects this lane carded and is a strength worth naming. "
+            "is unusual among the subjects this lane carded and is a strength worth naming."
+            " DECLARED_OPINIONS IS NULL AND THE REASON IS THE GRAIN: this subject is a DIRECTORY, which has no single producer whose filters, thresholds and definitional choices could be enumerated. The opinions live in the member scripts, and the two member artifacts that are separately carded (c2_instances.json, c3_structures.json) enumerate theirs. Enumerating a directory-level opinion set would mean inventing one. "
             "DETERMINISM IS 'unknown' AND THAT IS A MEASURED REFUSAL, NOT A GAP I OVERLOOKED: I "
             "did NOT read kimi_pipeline.py, so I cannot say whether a model stage runs inside "
             "this harness. I nearly recorded 'hybrid' on the strength of the filename -- which "
             "is a NAME-BASED INFERENCE, the exact move this wave exists to prevent, and v2 "
             "rightly demands model + invocations_per_run + failure_is_loud before that claim is "
-            "expressible. I have none of the three, so 'unknown' is the honest value.",
+            "expressible. I have none of the three, so 'unknown' is the honest value. "
+            "DECLARED_OPINIONS IS NULL AND THE REASON IS THE GRAIN: this subject is a "
+            "DIRECTORY, which has no single producer whose filters, thresholds and "
+            "definitional choices could be enumerated. The opinions live in the member "
+            "scripts, and the two member artifacts carded separately enumerate theirs. A "
+            "directory-level opinion set would have to be invented.",
         determinism="unknown",
         composes=[ref("kuzu_nessie_db", "the canonical projection the composer reads")],
         invents=[ref("subdivision_method", "overlapping-domain-cover anchored on catalog anchor nodes")],

@@ -167,7 +167,7 @@ CARDS.append(card(
         "'published daily into this same bucket by the early-morning Nessie run and OVERWRITTEN "
         "each day'. That is the CONFIG's account of the producer, not an observation of it. "
         "0.8.0_AE_CloudComp~X (73339) measured the same object independently and states the "
-        "identical limit.",
+        "identical limit. DECLARED_OPINIONS IS NULL AND THE REASON IS THAT I NEVER OPENED THE OBJECT: its producer is known only from instance.tf prose, not observed, so any opinion set I listed would be the CONFIG's account of a producer rather than the producer's own choices.",
         "estate-report pipeline owner -- 0.7.0_AE_CloudOps lane per EC2 ownership",
         how="Per instance.tf, the early-morning Nessie run publishes the canonical kuzu graph to "
             "this key; the runner drops it at <clone>/infra/aws/globgrph/kuzu_nessie_db, which is "
