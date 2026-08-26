@@ -26,8 +26,7 @@ lineage every wave-1 card carries. QUALIFY ONLY: name defects and owners; fix no
 
 **to:** `0.4.0_DT_ClientPlatform~X` · **issuer:** `2.0.0_SA_COO~X` · **cut:** 2026-08-26 ~18:1xZ
 
-⛔ **UNCERTIFIED DECOMP.** Cert pending `3.0.0_SA_CVO~X`. **Practical effect: none** — a
-DECOMP-INVALIDATING verdict is MY act to re-decomp and re-issue.
+✅ **DECOMP CERTIFIED — PASS.** `3.0.0_SA_CVO~X`, `workflows/atom_decomposition/runs/nfra-substratecarding/20260826T172918Z/CERT_20260826T1836Z_3.0.0_SA_CVO~X_ATTEMPT1.md` @`5b390a5662`. Sealed mutant FOUND (`SC-f-4.executor_class`) with three independent discriminators; seal opened and matched on all four fields. ⚠ **A cert is a FLOOR, not a laundering** — the decomp still carries `SC-m-1` PARTIAL (the reduced freeze) and two P2 findings on its face. Nothing in this TO changes.
 
 <decomp_ref>
 workflows/atom_decomposition/runs/nfra-substratecarding/20260826T172918Z/DECOMP.md @aae317509b

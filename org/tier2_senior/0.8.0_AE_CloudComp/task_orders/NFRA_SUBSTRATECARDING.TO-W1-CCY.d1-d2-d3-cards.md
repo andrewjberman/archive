@@ -28,10 +28,7 @@ QUALIFY ONLY: name defects and their owners; remediate nothing.
 
 **to:** `0.8.0_AE_CloudComp~Y` · **issuer:** `2.0.0_SA_COO~X` · **cut:** 2026-08-26 ~17:5xZ
 
-⛔ **UNCERTIFIED DECOMP.** The stage-3 decomp this TO derives from is authored and merged but **NOT YET
-CERTIFIED** by `3.0.0_SA_CVO~X`. Stated on this TO's face per the pipeline's escape valve rather than
-holding your work behind it. **Practical effect on you: none** — a DECOMP-INVALIDATING verdict is MY act
-to re-decomp and re-issue; you do not re-run anything on your own initiative.
+✅ **DECOMP CERTIFIED — PASS.** `3.0.0_SA_CVO~X`, `workflows/atom_decomposition/runs/nfra-substratecarding/20260826T172918Z/CERT_20260826T1836Z_3.0.0_SA_CVO~X_ATTEMPT1.md` @`5b390a5662`. Sealed mutant FOUND (`SC-f-4.executor_class`) with three independent discriminators; seal opened and matched on all four fields. ⚠ **A cert is a FLOOR, not a laundering** — the decomp still carries `SC-m-1` PARTIAL (the reduced freeze) and two P2 findings on its face. Nothing in this TO changes.
 
 <decomp_ref>
 workflows/atom_decomposition/runs/nfra-substratecarding/20260826T172918Z/DECOMP.md @7c5de3e779

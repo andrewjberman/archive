@@ -27,9 +27,7 @@ QUALIFY ONLY: name defects and their owners; remediate nothing.
 
 **to:** `0.7.0_AE_CloudOps~X` · **issuer:** `2.0.0_SA_COO~X` · **cut:** 2026-08-26 ~18:1xZ
 
-⛔ **UNCERTIFIED DECOMP.** Cert pending `3.0.0_SA_CVO~X`. Stated on this TO's face per the pipeline's own
-escape valve rather than holding the work behind it. **Practical effect: none** — a DECOMP-INVALIDATING
-verdict is MY act to re-decomp and re-issue.
+✅ **DECOMP CERTIFIED — PASS.** `3.0.0_SA_CVO~X`, `workflows/atom_decomposition/runs/nfra-substratecarding/20260826T172918Z/CERT_20260826T1836Z_3.0.0_SA_CVO~X_ATTEMPT1.md` @`5b390a5662`. Sealed mutant FOUND (`SC-f-4.executor_class`) with three independent discriminators; seal opened and matched on all four fields. ⚠ **A cert is a FLOOR, not a laundering** — the decomp still carries `SC-m-1` PARTIAL (the reduced freeze) and two P2 findings on its face. Nothing in this TO changes.
 
 <decomp_ref>
 workflows/atom_decomposition/runs/nfra-substratecarding/20260826T172918Z/DECOMP.md @aae317509b
@@ -185,7 +183,7 @@ likely to expose it.**
   <step>
     <run>python -c "import json,jsonschema;s=json.load(open('org/standards/SUBSTRATE_CARD.schema.json'));[jsonschema.Draft202012Validator(s).validate(json.load(open(p))) for p in ['&lt;c3i&gt;.json','&lt;compsimilar&gt;.json']];print('2/2 VALID')"</run>
     <expect>2/2 VALID</expect>
-    <if_mismatch>fix the card, never the schema (boundary SC-bnd-4)</if_mismatch>
+    <if_mismatch>fix the card, never the schema (boundary BOUNDARY-4)</if_mismatch>
   </step>
 </phase>
 <phase id="3" when="after commit">
