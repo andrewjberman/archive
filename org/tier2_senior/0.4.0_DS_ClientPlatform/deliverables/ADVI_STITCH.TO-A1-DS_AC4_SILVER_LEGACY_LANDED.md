@@ -83,6 +83,25 @@ number reached zero:
 
 **No executable consumer references either legacy prefix.**
 
+## 4a. THINGS IN THIS TIER THAT LOOK LIKE DEBRIS AND ARE NOT — PRESERVED DELIBERATELY
+
+⛔ **Written here rather than said in a message, because the message scrolls and the artifact
+persists.** A future reader meets these files, not this session's traffic.
+
+| key | why it is here |
+|---|---|
+| `_single_file/incremental_allocation_manifest.json.bak-20260630T1900Z` | **present in source, preserved deliberately** |
+| `_single_file/incremental_allocation_manifest.json.bak-20260630T1916Z` | **present in source, preserved deliberately** |
+| `prices/backfill_telemetry.json` | same |
+| `transactions_enriched/` (519 keys) | same — and see s.5; its own warning file sits at the prefix root |
+
+Two hand-stamped backup copies of one manifest, sixteen minutes apart, from 2026-06-30. They are now
+permanent in a closed-period tier and they **look exactly like debris someone forgot to clean up.**
+They are not. `silver_legacy` preserves what the tier contained; **silently dropping them would have
+been the relevance judgement this tier exists to avoid** (D8 — and note D5's vendor-purity test does
+not exist here, silver being our own derived output). Raised by `3.0.0_SA_CVO`, who found them as a
+2-key gap in their own extension tally and resolved it rather than reporting it as a residual.
+
 ## 5. NOTED, NOT CHASED
 
 `silver/transactions_enriched/` landed whole (519 keys) with its own `_DIAGNOSTIC_ARTIFACT.txt`
