@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T13:50Z</issued>
 <dated>2026-08-19 — DATED + OWNED, awaiting spawn (MSTR). Not tonight; does not gate any live restore.</dated>
-<status>staged -- DATED 2026-08-19, owner named, awaiting spawn</status>
+<status>complete -- DELIVERED 2026-08-25 @3b789c9d6f (ON origin/CLOUD, ancestry checked against a FETCHED ref with a firing positive control). Proof org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_COMPTOOLS.PREFIX-READS_PROOF_OF_SPEC.json = VALID rc=0 with COVERAGE CHECKED on the declared set CP-1..CP-5 (5/5 rows, 0 violations). CP-1 re-exercised live 2026-08-26 by 0.8.0_AE_CloudComp~F: 'comp-pipescript io B_00.canonical_holdings --pipeline bd' now lists SCHWAB_RPS_PREFIX as [PREFIX] [LOCAL-CONST] resolved to schwab/08335338/silver/fact_rps/. CP-4 denominator carried in the commit subject: the blindness was 150 of 356 gold scripts. STATUS-ONLY RESTAMP -- no code touched by this edit; the record was stale, the world was done. Prior status: staged -- DATED 2026-08-19, owner named, awaiting spawn</status>
 <priority>P2 — Andrew: "the comp-tooling is not additive, it is foundational" (a coverage gap is a DEFECT). Found on the exact input of a client-facing restore.</priority>
 <authority>CTO disposition 134609Z (spec below is CTO's; CTO arch-gates). Surfaced by 0.4.0_DS_ClientPlatform 134424Z during ADVI_BDPLAT_RESTORE.TO-1: `comp-pipescript io B_00.canonical_holdings --pipeline bd` does NOT list `SCHWAB_RPS_PREFIX` — the paginated prefix read that the whole restore turned on was INVISIBLE to the instrument.</authority>
 </task_order>
