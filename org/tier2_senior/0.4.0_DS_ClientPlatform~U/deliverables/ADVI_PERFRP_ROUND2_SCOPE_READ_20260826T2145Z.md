@@ -127,7 +127,31 @@ This section originally read: *"the band can recur. It is upstream data, so neit
 
 **WHAT IS NOT CLAIMED:** no root cause — the upstream loader was not read. The **return math is not what is wrong**: `0.7.0_AE_CloudOps~L` measured the deployed emitter modules **8/8 MATCH with 4 of 5 vintage controls firing**. **Whether these accounts should produce a return at all is ARCHITECTURAL and no measurement answers it** — a zero-position account with a moving fair value may be a genuine cash or alternative holding rather than a defect.
 
-**AS A ROUND-2 INPUT:** this is the second candidate (with the O-2 provenance question in s.5) that **the decomp has no cell for.** Both are the issuer's to rule. **No cell minted, no id coined, no emitter changed.**
+### 5b.1 — THE OPTION SET IS TWO, AND THE COST OF EACH IS NOW MEASURED (added 2026-08-26T2215Z; reported 73891)
+
+`0.7.0_AE_CloudOps~L` measured its own plane (`d_publisher_port.py`) and removed an option everyone had been assuming: **per-account suppression is NOT EXPRESSIBLE at the publisher.** Only two mechanisms exist, both at **LEAF/FAMILY** grain — `deferred` (`:589-591`, checked before any flag, **fails CLOSED**, precedented at 1 of 23 entries) and `--hold-leaves` (`:516`, session-scoped, defaults empty, **fails OPEN**). `publish_one` publishes a whole leaf. **Composed with the daily-churn finding: a list would be obsolete daily AND the publisher could not hold one anyway.**
+
+| option | grain | lever | withholds |
+|---|---|---|---|
+| **(a)** defer the `perfrp_performance_*` family | family | AE lane, **exists today**, minutes | **all 6,415 accounts** |
+| **(b)** per-day plausibility rule | account | DS lane (**mine**), **does not exist — a BUILD** | **4–9 accounts** |
+**There is no (c). The two differ by a factor of ~700 in what they withhold.**
+
+**COST OF (b), measured at seven thresholds on both dates:**
+| threshold | 08-24 excl. (of 6,412) | 08-25 excl. (of 6,415) |
+|---|---|---|
+| 10% | **12** (0.187%) | 4 |
+| **15% – 45%** | **9** (0.140%) | **4** (0.062%) |
+| 50% | 9 | **3** |
+
+⛔ **THE "~15-45%" RANGE IS EMPIRICALLY EXACT, BOTH BOUNDS MEASURED:** at **10%** the 08-24 count jumps 9→12, catching legitimate movers (`-12.6%`, `+12.4%`, `-10.8%`) — **below 15% the rule stops being free.** At **50%** the 08-25 count drops 4→3, losing `0026099363` at exactly `-50.0%` — **above 45% it starts missing outliers.** Every value in between gives the identical answer on both days.
+**SAFETY MARGIN:** normal returns are tiny — 08-24 `p01/p50/p99 = -0.86%/-0.21%/+0.42%`, 08-25 `-0.12%/+0.42%/+0.82%`. **A 15% line sits 36x above p99 (08-24) and 18x (08-25); even p99.9 is ~5% on both days.** Nearest-legitimate margin is **7x** on both (`+12.55%` vs `+89.45%`; `+7.15%` vs `+50.00%`).
+
+⛔ **A DISTINCTION THAT DECIDES WHAT GETS BUILT:** *"the bimodal gap, threshold-robust ~15-45%"* names **two different rules.** A **FIXED THRESHOLD** is deterministic, auditable, and carries the evidence above. A **GAP-DETECTING** rule adapts to distribution shift **but requires a gap to exist** — on a day where the outliers form a continuum it has no defined answer, and its evidence is 2 of 2 days, which is not enough to lean on. **The gap JUSTIFIES choosing 15%; it should not be the runtime mechanism.** Architecture is `1.0.0_SA_CTO`'s call.
+
+⚠ **AND THE RULE IS A PLAUSIBILITY FILTER, NOT A FIX.** It stops implausible figures reaching a client card; it does not make the valuation correct. **A filter that hides the symptom can retire the urgency to fix the cause — if it ships, the architectural fork (should a zero-position account produce a return at all?) must stay open on the record rather than closing with it.**
+
+**AS A ROUND-2 INPUT:** this is the second candidate (with the O-2 provenance question in s.5) that **the decomp has no cell for.** Both are the issuer's to rule. **No cell minted, no id coined, no emitter changed, no rule built.**
 
 ---
 
