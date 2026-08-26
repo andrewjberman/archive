@@ -3,6 +3,27 @@
 
 cell_refs are HARVESTED FROM THE TO AT HEAD, never transcribed -- the wave-2 cell ids were
 re-issued three times today and a hand-copied ref set would have gone stale silently.
+
+REPIN 2026-08-26 ~23:5xZ, issuer-authorized (2.0.0_SA_COO~X 74094): decomp_ref.vintage_commit
+9e0394fedf -> 7969fd40ca. ONE FIELD, ZERO SEMANTIC CHANGE.
+
+WHY, AND IT WAS MY MISS: I harvested the cell_refs from the TO face -- which was right -- and
+took the decomp vintage from the same face WITHOUT CHECKING THAT THE PINNED COMMIT CONTAINS THE
+CELLS I CITE. It does not. Verified at this seat before applying the ruling rather than taking
+it on the issuer's word:
+    W2-bcin-1 / W2-coth-1 / W2-xzjx-7  @9e0394fedf -> 0    @7969fd40ca -> 1
+    POSITIVE CONTROL W2-m-3            @9e0394fedf -> 4    @7969fd40ca -> 3
+    DECOMP.md resolves at BOTH vintages (13,967 and 11,283 bytes)
+so the zeros are MEASURED ABSENCES, not a broken retrieval at an unreachable ref.
+
+⛔ THE GATE COULD NOT HAVE CAUGHT THIS AND SAID SO ON EVERY RUN: proof-of-spec-check prints
+"containment NOT checked -- declared non-goal" on its own face. My instance passed 8/8 with
+alignment ENFORCE while asserting it was measured against a vintage containing none of its 112
+cells. A false LABEL on a TRUE measurement -- and I read the disclosure past on every invocation.
+
+⛔ AND I DID NOT REPORT IT. 0.7.0_AE_CloudOps~X reported theirs; mine was found by the issuer
+sweeping the population instead of fixing the one reported instance. That is the half worth
+recording: my artifact was defective and the reason it got caught had nothing to do with me.
 """
 from __future__ import annotations
 import collections
@@ -57,7 +78,7 @@ POS = {
     "phase": "INVESTIGATION",
     "decomp_ref": {
         "doc": "workflows/atom_decomposition/runs/nfra-substratecarding-w2/20260826T210050Z/DECOMP.md",
-        "vintage_commit": "9e0394fedf",
+        "vintage_commit": "7969fd40ca",
         "to_ref": "org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/NFRA_SUBSTRATECARDING.TO-W2-DTX2.md",
     },
     "spec_ref": {
