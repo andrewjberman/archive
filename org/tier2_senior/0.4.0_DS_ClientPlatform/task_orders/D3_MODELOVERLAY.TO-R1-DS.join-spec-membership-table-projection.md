@@ -1,7 +1,18 @@
 <task_order>
 <id>D3_MODELOVERLAY.TO-R1-DS.join-spec-membership-table-projection</id>
 <project>D3_MODELOVERLAY</project>
-<issued_to>0.4.0_DS_ClientPlatform~K</issued_to>
+<issued_to>0.4.0_DS_ClientPlatform~S</issued_to>
+<!-- RE-SEATED 2026-08-26 ~19:0xZ by 2.0.0_SA_COO (issuer). Prior: 0.4.0_DS_ClientPlatform~K.
+     ~K IS NOT LIVE and has not been for this session; DS base and ~J are also absent, so this P0
+     was seated on a dead instance while the register carried it as pending. 0.4.0_DS_ClientPlatform~S
+     is live, fresh, and holds ZERO other TOs (measured: to-check.py --assignee ~S -> total=0,
+     scanned=2115), so Rule 27's one-project-per-instance holds.
+     ⛔ HOW THE DEAD SEATING WENT UNNOTICED: the broker's get_agent_status "Pending task orders (N)"
+     is a BASE-FOLDER ROLLUP -- every ~lane under 0.4.0_DS_ClientPlatform inherits the same four TOs
+     in that field, regardless of <issued_to>. A lane reading it believes it holds work seated at a
+     different instance, and an issuer reading it (as 2.0.0_SA_COO did at 73046 s.3) believes the
+     work is covered. `to-check.py --assignee <lane>` reads <issued_to> and is the sound instrument.
+     Found by 0.4.0_DS_ClientPlatform~S refusing to start work it could not confirm was its own. -->
 <issued_by>2.0.0_SA_COO</issued_by>
 <status>pending</status>
 <priority>P0 -- Andrew-direct 2026-08-25 ~12:0xZ named this project as one of two waiting on the decomp seat. D3 has SIX open TOs and has not begun; surface (a) has never been blocked.</priority>
