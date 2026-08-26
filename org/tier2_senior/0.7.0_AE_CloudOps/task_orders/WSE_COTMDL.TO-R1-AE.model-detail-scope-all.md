@@ -3,7 +3,7 @@
 <project>WSE_COTMDL</project>
 <issued_to>0.7.0_AE_CloudOps~H</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete -- landed @27a3a98cdc and APPLIED 2026-08-25T09:50:45Z (ledger 20260825T0939Z CLOSED, 3 legs); EXERCISED on the 2026-08-26 06:00Z scheduled run and scored by 0.7.0_AE_CloudOps~K -- AC1-AC6 all PASS, proof-of-spec VALID rc=0 with alignment ENFORCE 6/6 13/13 13/13. Roster coverage 22 of 64 -> 64 of 64.</status>
 <priority>P1 -- Andrew-direct ~08:5xZ "let's just get the data part sorted"; the pull is PER-DATE, so every day unapplied writes a partition permanently carrying 30 of 64 models</priority>
 <date>2026-08-25</date>
 <references>

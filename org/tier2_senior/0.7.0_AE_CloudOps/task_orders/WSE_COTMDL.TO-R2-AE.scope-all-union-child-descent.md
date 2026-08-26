@@ -3,7 +3,7 @@
 <project>WSE_COTMDL</project>
 <issued_to>0.7.0_AE_CloudOps~H</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete -- landed @b56ec0e8ce and APPLIED 2026-08-25T10:38:32Z (ledger 20260825T1032Z CLOSED, 4 legs); EXERCISED on the 2026-08-26 06:00Z scheduled run and scored by 0.7.0_AE_CloudOps~K -- AC1-AC4 all PASS, proof-of-spec VALID rc=0 with alignment ENFORCE 4/4 11/11 1/1. Non-roster children 8 -> 17, union confirmed operative on deployed bytes.</status>
 <priority>P1 -- next scheduled fire 2026-08-26 06:00Z (cron(0 6 * * ? *), rule cot-rebalancer-runner-daily ENABLED). The pull is PER-DATE: a partition written without child descent permanently loses the 8 sub-model composition files. NOT A HOLD on tomorrow's run -- the env var stays applied either way.</priority>
 <date>2026-08-25</date>
 <references>
