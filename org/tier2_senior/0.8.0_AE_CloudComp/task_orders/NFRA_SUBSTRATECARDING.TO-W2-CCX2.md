@@ -83,9 +83,7 @@ re-read 21:19Z, identical). **A measured fact, not a copied value.**
 | `org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/MOTIF_c2c3_materialize_s` | C2 | 2 |
 | `repo source tree` | C0, C1 | 1 |
 
-⛔ **These reached us as PROSE STRINGS from wave-1 `composes`/`projection_of`.** Where a subject shows
->1 spelling, wave 1 proved **no dedup heuristic can be correct** — resolve identity by reading the
-thing, not the string.
+⛔ **These reached us as PROSE STRINGS.** Resolve identity by reading the thing, not the string.
 
 ## 3. ACCEPTANCE
 
