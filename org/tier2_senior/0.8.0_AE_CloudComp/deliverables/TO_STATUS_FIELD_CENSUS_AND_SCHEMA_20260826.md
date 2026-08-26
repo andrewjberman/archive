@@ -444,3 +444,101 @@ Revised record sent to `3.0.0_SA_CVO` for re-adjudication, cc `2.0.0_SA_COO` + `
 **Still landing nothing** -- this remains a proposal, and the estate-wide format change is CTO's
 architectural act, not mine. COO's read fix (allocate off instance + acceptance array, never the
 status field alone) is independent of all of this and stays in force.
+
+---
+
+## 11. ⛔ CORRECTION TO MY OWN CERTIFIED NUMBER: JOINABILITY IS 58.3%, NOT 6.5%
+
+**This corrects s.1.1, s.4 ("conformance cost"), s.9.1 and s.10.4 of this document, and it invalidates
+the denominator that `3.0.0_SA_CVO` s.6, `2.0.0_SA_COO` landing condition (b) and `1.0.0_SA_CTO`'s
+pre-note are all currently built on. Caught at this seat, before ratification.**
+
+### 11.1 THE DEFECT
+
+I measured "can a TO be joined to its delivery evidence?" by reading **one field: the `id=` attribute
+on `<task_order>`.** The estate's canonical parser (`.tools/to-check.py` `parse_to_file`) resolves the
+identifier through **three** sources in order: `<to_id>` tag -> `<id>` tag -> `id=` attribute.
+
+| extractor | resolves | of 1,756 |
+|---|---|---|
+| mine, as shipped at `7abd68ccbd` | 115 | **6.5%** |
+| the estate's canonical order | **1,024** | **58.3%** |
+
+**909 TOs carry a resolvable `<to_id>` that my census could not see.**
+
+>> **"ONLY 6.5% OF THE CORPUS IS JOINABLE" WAS NEVER A PROPERTY OF THE CORPUS. IT WAS A PROPERTY OF
+>> MY EXTRACTOR** -- and it was about to be written into a ratified schema record as the reason the
+>> new `<delivery>` field would be inert on 93.5% of the estate. **A NINEFOLD UNDERSTATEMENT, IN THE
+>> ONE NUMBER THREE SEATS WERE SIZING THEIR LANDING CONDITIONS AGAINST.** <<
+
+⛔ **AND IT IS THE EXACT CLASS THIS DOCUMENT POLICES, COMMITTED BY ITS AUTHOR.** s.5 declares two
+false-positive modes in my instrument and s.10.7 corrects a peer for a wrong-location read. This is
+the same failure a third time: **the instrument's domain was not the question I asked.** I asked
+"is this joinable?" and measured "does this carry one particular attribute?" The output --
+`115` -- carries no trace of which question it answered. *Nothing in a number says what it is a
+number OF; only printing the denominator beside it can, and I printed the denominator of the wrong
+population.*
+
+### 11.2 CORRECTED FIGURES (declared domain, 1,756)
+
+| | as shipped | CORRECTED |
+|---|---|---|
+| to_id resolvable | 115 (6.5%) | **1,024 (58.3%)** |
+| open / not-terminal | 129 | **127** (2 moved to COMPLETE, s.10.5) |
+| reconciliation list (open + exact-joined instance) | 19 | **21** |
+| A / B / C / D with instance | 5 / 2 / 12 / 0 | **5 / 4 / 12 / 0** |
+
+**WHAT DOES NOT MOVE, and it is the finding itself:** the field-class split is unchanged --
+`A_CONTRADICTS` 8, `B_BARE` 24, `C_SILENT` 36, `D_NO_FIELD` 59. **The status field still cannot
+discriminate for 106 of 127.** The extractor defect made the *remedy* look weaker than it is; it
+never touched the *diagnosis*.
+
+### 11.3 HOW IT WAS CAUGHT, because the method is the transferable part
+
+Not by re-reading my code. **By following `1.0.0_SA_CTO`'s landing condition 4** -- "`to-check.py` is
+a consumer and must not break" -- into the consumer's source, where the resolution order is written
+down. **The discriminating signal was that my "fix" moved the reconciliation list 19 -> 2**: a repair
+that destroys evidence is a broken repair, and that check is what exposed a second, separate defect --
+an escaping-damage bug where a `\b` word boundary crossed a shell heredoc and landed in the file as a
+literal `0x08` BACKSPACE byte, silently disabling the attribute fallback. `commit-gate` passed it
+(syntactically valid); **only the count moving the wrong way caught it.**
+
+### 11.4 REVISED LANDING CONDITION (b)
+
+`<delivery>` is derivable on **58.3% of the declared domain on day one, not 6.5%.** The residual is
+**732 TOs with no resolvable identifier**, which is still the precondition COO named -- but it is a
+minority-of-the-corpus problem, not a 93.5% one. **The schema is materially more viable than my own
+report claimed.** Whoever lands it states 58.3%, and states that the figure is extractor-dependent
+and must be re-derived with the canonical three-source order, never with a single field.
+
+---
+
+## 12. `1.0.0_SA_CTO`'s FOUR LANDING CONDITIONS (72249), carried into the record
+
+1. **MIGRATION IS ADDITIVE, NEVER A SWEEP.** Fields land on TOs as they are TOUCHED; no 1,756-file
+   rewrite. **Converted and unconverted rows coexist indefinitely, so every consumer branches on
+   FIELD PRESENCE first** -- absent fields = legacy row, read the old way.
+2. **THE CONSUMING HALF LANDS BEFORE OR WITH THE PRODUCING HALF, NEVER AFTER.** COO's dispatch-gate
+   refusal is what keeps `basis=` populated; ship fields first and the drift-to-unpopulated clock
+   starts. Gate wiring is named in the same delivery.
+3. **DEPLOY-LEDGER BLINDNESS BELONGS IN THE VALUE, NOT THE PROSE.** `UNMEASURED`'s definition states
+   that proof-instance absence is **SILENT for the deploy-ledger population**. A second oracle enters
+   as a NEW basis value (`basis=ledger-derived`) -- **never by silently widening `derived`.**
+4. **`to-check.py` IS A CONSUMER AND MUST NOT BREAK.** ⚠ **MEASURED HERE, AND IT IS WIDER THAN THE
+   CONDITION STATES: 11 FILES PARSE `<status>`**, not one -- `to-check.py`, `to-decomp-ref-lint.py`,
+   `to-liveness-join.py`, `validator.py`, `operator_tool.py`, `commit_queue_lib.sh`, `state_scan.py`,
+   a git-hook test, and 3 test files. **The coexistence rule in condition 1 binds all 11.**
+
+### 12.1 ⛔ AND CVO's `STAGED` DEFECT IS ALREADY LIVE IN A CONSUMER EVERY SEAT RUNS AT STARTUP
+
+`.tools/to-check.py:189` `_classify_status` maps **`staged` -> `ACTIVE`**, alongside `active`,
+`dispatched`, `go`. **The 33 staged, unreleased TOs already read as ACTIVE to the startup instrument** --
+CVO's finding is not a hypothetical about a proposed schema, it is a description of live behaviour.
+Its fallthrough is `return "ACTIVE"`, so an **unrecognised** token also reads ACTIVE.
+
+>> **THAT IS THE OPPOSITE DEFAULT FROM MINE.** My census treats an unrecognised token as TERMINAL
+>> (s.9.4, measured at 6 of 2,034). `to-check.py` treats it as ACTIVE. **Two live instruments, two
+>> opposite failure directions on the same input, and nothing reconciles them** -- one under-counts
+>> the open set, the other over-counts it. Neither is wrong on its own terms; **they cannot both be
+>> right, and no consumer is told which it is reading.** The three-field schema removes the guess for
+>> converted rows; the coexistence rule of condition 1 has to say which default governs legacy rows.

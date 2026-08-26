@@ -66,6 +66,31 @@ def owner_of(f: pathlib.Path) -> str:
     return "/".join(parts[:-1])
 
 
+def resolve_to_id(text: str) -> str:
+    """Resolve a TO's identifier the way the estate's canonical parser does.
+
+    ORDER MATTERS AND IS COPIED FROM .tools/to-check.py parse_to_file():
+      <to_id> tag  ->  <id> tag  ->  id= attribute (the last two gated on an
+      uppercase project-code shape).
+
+    ONE-FIELD EXTRACTION WAS A MEASURED DEFECT IN THIS SCRIPT. Reading only the
+    id= ATTRIBUTE resolved 115 of 1,756 (6.5%); this order resolves 1,024 (58.3%).
+    The 6.5% was an artefact of the extractor, not a property of the corpus, and it
+    was about to be quoted as the schema's day-one derivability denominator.
+    """
+    m = re.search(r"<to_id>(.*?)</to_id>", text, re.S)
+    if m and " ".join(m.group(1).split()):
+        return " ".join(m.group(1).split())
+    m = re.search(r"<id>(.*?)</id>", text, re.S)
+    cand = " ".join(m.group(1).split()) if m else ""
+    if not cand:
+        m = re.search(r'<task_order[^>]*\bid="([^"]+)"', text)
+        cand = m.group(1) if m else ""
+    if cand and re.match(r"^[A-Z][A-Z0-9_]{2,}", cand.upper()):
+        return cand
+    return ""
+
+
 def load_instances(root: pathlib.Path):
     """Index proof instances by their declared to_id. Returns (index, n_parsed)."""
     by_toid = collections.defaultdict(list)
@@ -138,7 +163,7 @@ def main() -> int:
         text = f.read_text(encoding="utf-8", errors="replace")
         m = re.search(r"<status>(.*?)</status>", text, re.S)
         status = " ".join(m.group(1).split()) if m else None
-        tid = re.search(r'<task_order[^>]*\bid="([^"]+)"', text)
+        tid_resolved = resolve_to_id(text)
         issued = re.search(r"<issued_to>(.*?)</issued_to>", text, re.S)
         all_rows.append({
             "path": f,
@@ -146,7 +171,7 @@ def main() -> int:
             "status": status,
             "token": "<NO-STATUS-FIELD>" if status is None
                      else re.split(TOKEN_SPLIT, status.strip())[0].upper(),
-            "to_id": tid.group(1) if tid else None,
+            "to_id": tid_resolved or None,
             "issued_to": " ".join(issued.group(1).split()) if issued else None,
             "has_pos": "<proof_of_spec>" in text,
         })
@@ -165,7 +190,7 @@ def main() -> int:
     print("--- FIELD OCCUPANCY (denominator %d) ---" % n)
     for label, pred in (
         ("<status>", lambda r: r["status"] is not None),
-        ("id= attribute", lambda r: bool(r["to_id"])),
+        ("to_id resolvable", lambda r: bool(r["to_id"])),
         ("<issued_to>", lambda r: bool(r["issued_to"])),
         ("<proof_of_spec>", lambda r: r["has_pos"]),
     ):
@@ -221,7 +246,7 @@ def main() -> int:
     print("  %d of %d open-reading TOs have NO exact-joined instance." % (len(openset) - tot_i, len(openset)))
     print("  That is UNMEASURED, NOT not-delivered: only %d of %d TOs carry <proof_of_spec> at all,"
           % (sum(1 for r in all_rows if r["has_pos"]), n))
-    print("  and only %d carry an id= attribute to join on." % sum(1 for r in all_rows if r["to_id"]))
+    print("  and only %d resolve a to_id to join on." % sum(1 for r in all_rows if r["to_id"]))
     return 0
 
 
