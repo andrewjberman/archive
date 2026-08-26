@@ -179,7 +179,8 @@ PARTS.append(part(
 
 PARTS.append(part(
     "kuzu_nessie_db.s3", "projection", "s3://opal-estate-report/kuzu_nessie_db",
-    "projection", "current_state", ["graph_nodes", "graph_edges"], "kuzu:estate-report-published",
+    "projection", "current_state", ["graph_nodes (INFERRED)", "graph_edges (INFERRED)"],
+    "kuzu:estate-report-published",
     "the early-morning Nessie run per infra/aws/terraform/estate-report/instance.tf:136-143",
     "unknown", None,
     "DECLARED daily, overwritten each day (instance.tf:136-138)", "early-morning Nessie run",
@@ -194,7 +195,18 @@ PARTS.append(part(
     "MISSING OBJECT MUST READ AS INSTRUMENT_FAILED, NEVER AS no blast radius' -- a 20-day-STALE object "
     "is the case that comment does NOT cover, because it is present and it answers. "
     "NEAR-MISS DISCLOSURE: this part was nearly recorded ABSENT -- comp-keys prefix without --all "
-    "showed 40 of 129 keys and this key was past the cut; head-object corrected it.",
+    "showed 40 of 129 keys and this key was past the cut; head-object corrected it. "
+    "PER-FIELD BASIS, and the part-level basis field CANNOT express this: EXISTENCE, HOME, SIZE and "
+    "VINTAGE are MEASURED (head-object, with a positive control). LINEAGE IS *INFERRED* FROM "
+    "instance.tf's PROSE -- I HAVE NEVER OPENED THIS OBJECT and make no claim about its contents or "
+    "its generator. Corroborated by 0.8.0_AE_CloudComp~X (73339), who measured the same object "
+    "independently and states the same limit. "
+    "AND THE TRAP THEY NAMED, which I am recording because it would invert this row's treatment: "
+    "LastModified 2026-08-06 makes this look like a STALE COPY of kuzu_nessie_db.local (2026-08-26). "
+    "IT IS A DIFFERENT OBJECT, on a different plane, with a different id -- 'stale duplicate' and "
+    "'distinct store' take OPPOSITE manifest treatments, and AGE IS THE WRONG AXIS to tell them "
+    "apart. The F-1 staleness finding is against this object's OWN DECLARED DAILY CADENCE in "
+    "instance.tf, NOT against the local kuzu.",
     "estate-report pipeline owner (0.7.0_AE_CloudOps lane per EC2 ownership)",
     age_note="20 days against a DECLARED DAILY cadence and a temporal_claim of current_state: an "
              "expressible, testable violation of exactly the kind temporal_claim exists to express.",
