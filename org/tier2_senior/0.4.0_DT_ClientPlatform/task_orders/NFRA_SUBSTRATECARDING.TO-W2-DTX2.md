@@ -29,23 +29,24 @@ DECOMP-INVALIDATING verdict is the issuer's act to re-decomp and re-issue.
 <decomp_ref>
 workflows/atom_decomposition/runs/nfra-substratecarding-w2/20260826T210050Z/DECOMP.md @9e0394fedf
 Cells discharged (63, enumerated LITERALLY):
-W2-al-1, W2-al-2, W2-al-3, W2-al-4, W2-al-5, W2-al-6, W2-al-7, W2-am-1, W2-am-2, W2-am-3, W2-am-4,
-W2-am-5, W2-am-6, W2-am-7, W2-an-1, W2-an-2, W2-an-3, W2-an-4, W2-an-5, W2-an-6, W2-an-7, W2-av-1,
-W2-av-2, W2-av-3, W2-av-4, W2-av-5, W2-av-6, W2-av-7, W2-aw-1, W2-aw-2, W2-aw-3, W2-aw-4, W2-aw-5,
-W2-aw-6, W2-aw-7, W2-az-1, W2-az-2, W2-az-3, W2-az-4, W2-az-5, W2-az-6, W2-az-7, W2-ba-1, W2-ba-2,
-W2-ba-3, W2-ba-4, W2-ba-5, W2-ba-6, W2-ba-7, W2-bc-1, W2-bc-2, W2-bc-3, W2-bc-4, W2-bc-5, W2-bc-6,
-W2-bc-7, W2-bd-1, W2-bd-2, W2-bd-3, W2-bd-4, W2-bd-5, W2-bd-6, W2-bd-7
+W2-bcin-1, W2-bcin-2, W2-bcin-3, W2-bcin-4, W2-bcin-5, W2-bcin-6, W2-bcin-7, W2-coth-1, W2-coth-2,
+W2-coth-3, W2-coth-4, W2-coth-5, W2-coth-6, W2-coth-7, W2-jgzc-1, W2-jgzc-2, W2-jgzc-3, W2-jgzc-4,
+W2-jgzc-5, W2-jgzc-6, W2-jgzc-7, W2-nthk-1, W2-nthk-2, W2-nthk-3, W2-nthk-4, W2-nthk-5, W2-nthk-6,
+W2-nthk-7, W2-pcac-1, W2-pcac-2, W2-pcac-3, W2-pcac-4, W2-pcac-5, W2-pcac-6, W2-pcac-7, W2-qvzv-1,
+W2-qvzv-2, W2-qvzv-3, W2-qvzv-4, W2-qvzv-5, W2-qvzv-6, W2-qvzv-7, W2-rpcx-1, W2-rpcx-2, W2-rpcx-3,
+W2-rpcx-4, W2-rpcx-5, W2-rpcx-6, W2-rpcx-7, W2-vlov-1, W2-vlov-2, W2-vlov-3, W2-vlov-4, W2-vlov-5,
+W2-vlov-6, W2-vlov-7, W2-xnwo-1, W2-xnwo-2, W2-xnwo-3, W2-xnwo-4, W2-xnwo-5, W2-xnwo-6, W2-xnwo-7
 </decomp_ref>
 
 <proof_of_spec>
-  <criterion id="DTX2-AC1" cell_refs="W2-al-1, W2-al-2, W2-al-3, W2-al-4, W2-al-5, W2-al-6, W2-al-7, W2-am-1, W2-am-2, W2-am-3, W2-am-4, W2-am-5, W2-am-6, W2-am-7, W2-an-1, W2-an-2, W2-an-3, W2-an-4, W2-an-5, W2-an-6, W2-an-7, W2-av-1, W2-av-2, W2-av-3, W2-av-4, W2-av-5, W2-av-6, W2-av-7, W2-aw-1, W2-aw-2, W2-aw-3, W2-aw-4, W2-aw-5, W2-aw-6, W2-aw-7, W2-az-1, W2-az-2, W2-az-3, W2-az-4, W2-az-5, W2-az-6, W2-az-7, W2-ba-1, W2-ba-2, W2-ba-3, W2-ba-4, W2-ba-5, W2-ba-6, W2-ba-7, W2-bc-1, W2-bc-2, W2-bc-3, W2-bc-4, W2-bc-5, W2-bc-6, W2-bc-7, W2-bd-1, W2-bd-2, W2-bd-3, W2-bd-4, W2-bd-5, W2-bd-6, W2-bd-7"/>
-  <criterion id="DTX2-AC2" cell_refs="W2-al-2, W2-am-2, W2-an-2, W2-av-2, W2-aw-2, W2-az-2, W2-ba-2, W2-bc-2, W2-bd-2"/>
-  <criterion id="DTX2-AC3" cell_refs="W2-al-3, W2-am-3, W2-an-3, W2-av-3, W2-aw-3, W2-az-3, W2-ba-3, W2-bc-3, W2-bd-3"/>
-  <criterion id="DTX2-AC4" cell_refs="W2-al-4, W2-am-4, W2-an-4, W2-av-4, W2-aw-4, W2-az-4, W2-ba-4, W2-bc-4, W2-bd-4"/>
-  <criterion id="DTX2-AC5" cell_refs="W2-al-1, W2-al-2, W2-al-3, W2-al-4, W2-al-5, W2-al-6, W2-al-7, W2-am-1, W2-am-2, W2-am-3, W2-am-4, W2-am-5, W2-am-6, W2-am-7, W2-an-1, W2-an-2, W2-an-3, W2-an-4, W2-an-5, W2-an-6, W2-an-7, W2-av-1, W2-av-2, W2-av-3, W2-av-4, W2-av-5, W2-av-6, W2-av-7, W2-aw-1, W2-aw-2, W2-aw-3, W2-aw-4, W2-aw-5, W2-aw-6, W2-aw-7, W2-az-1, W2-az-2, W2-az-3, W2-az-4, W2-az-5, W2-az-6, W2-az-7, W2-ba-1, W2-ba-2, W2-ba-3, W2-ba-4, W2-ba-5, W2-ba-6, W2-ba-7, W2-bc-1, W2-bc-2, W2-bc-3, W2-bc-4, W2-bc-5, W2-bc-6, W2-bc-7, W2-bd-1, W2-bd-2, W2-bd-3, W2-bd-4, W2-bd-5, W2-bd-6, W2-bd-7"/>
-  <criterion id="DTX2-AC6" cell_refs="W2-al-6, W2-am-6, W2-an-6, W2-av-6, W2-aw-6, W2-az-6, W2-ba-6, W2-bc-6, W2-bd-6"/>
-  <criterion id="DTX2-AC7" cell_refs="W2-al-7, W2-am-7, W2-an-7, W2-av-7, W2-aw-7, W2-az-7, W2-ba-7, W2-bc-7, W2-bd-7"/>
-  <criterion id="DTX2-AC8" cell_refs="W2-al-1, W2-am-1, W2-an-1, W2-av-1, W2-aw-1, W2-az-1, W2-ba-1, W2-bc-1, W2-bd-1"/>
+  <criterion id="DTX2-AC1" cell_refs="W2-bcin-1, W2-bcin-2, W2-bcin-3, W2-bcin-4, W2-bcin-5, W2-bcin-6, W2-bcin-7, W2-coth-1, W2-coth-2, W2-coth-3, W2-coth-4, W2-coth-5, W2-coth-6, W2-coth-7, W2-jgzc-1, W2-jgzc-2, W2-jgzc-3, W2-jgzc-4, W2-jgzc-5, W2-jgzc-6, W2-jgzc-7, W2-nthk-1, W2-nthk-2, W2-nthk-3, W2-nthk-4, W2-nthk-5, W2-nthk-6, W2-nthk-7, W2-pcac-1, W2-pcac-2, W2-pcac-3, W2-pcac-4, W2-pcac-5, W2-pcac-6, W2-pcac-7, W2-qvzv-1, W2-qvzv-2, W2-qvzv-3, W2-qvzv-4, W2-qvzv-5, W2-qvzv-6, W2-qvzv-7, W2-rpcx-1, W2-rpcx-2, W2-rpcx-3, W2-rpcx-4, W2-rpcx-5, W2-rpcx-6, W2-rpcx-7, W2-vlov-1, W2-vlov-2, W2-vlov-3, W2-vlov-4, W2-vlov-5, W2-vlov-6, W2-vlov-7, W2-xnwo-1, W2-xnwo-2, W2-xnwo-3, W2-xnwo-4, W2-xnwo-5, W2-xnwo-6, W2-xnwo-7"/>
+  <criterion id="DTX2-AC2" cell_refs="W2-bcin-2, W2-coth-2, W2-jgzc-2, W2-nthk-2, W2-pcac-2, W2-qvzv-2, W2-rpcx-2, W2-vlov-2, W2-xnwo-2"/>
+  <criterion id="DTX2-AC3" cell_refs="W2-bcin-3, W2-coth-3, W2-jgzc-3, W2-nthk-3, W2-pcac-3, W2-qvzv-3, W2-rpcx-3, W2-vlov-3, W2-xnwo-3"/>
+  <criterion id="DTX2-AC4" cell_refs="W2-bcin-4, W2-coth-4, W2-jgzc-4, W2-nthk-4, W2-pcac-4, W2-qvzv-4, W2-rpcx-4, W2-vlov-4, W2-xnwo-4"/>
+  <criterion id="DTX2-AC5" cell_refs="W2-bcin-1, W2-bcin-2, W2-bcin-3, W2-bcin-4, W2-bcin-5, W2-bcin-6, W2-bcin-7, W2-coth-1, W2-coth-2, W2-coth-3, W2-coth-4, W2-coth-5, W2-coth-6, W2-coth-7, W2-jgzc-1, W2-jgzc-2, W2-jgzc-3, W2-jgzc-4, W2-jgzc-5, W2-jgzc-6, W2-jgzc-7, W2-nthk-1, W2-nthk-2, W2-nthk-3, W2-nthk-4, W2-nthk-5, W2-nthk-6, W2-nthk-7, W2-pcac-1, W2-pcac-2, W2-pcac-3, W2-pcac-4, W2-pcac-5, W2-pcac-6, W2-pcac-7, W2-qvzv-1, W2-qvzv-2, W2-qvzv-3, W2-qvzv-4, W2-qvzv-5, W2-qvzv-6, W2-qvzv-7, W2-rpcx-1, W2-rpcx-2, W2-rpcx-3, W2-rpcx-4, W2-rpcx-5, W2-rpcx-6, W2-rpcx-7, W2-vlov-1, W2-vlov-2, W2-vlov-3, W2-vlov-4, W2-vlov-5, W2-vlov-6, W2-vlov-7, W2-xnwo-1, W2-xnwo-2, W2-xnwo-3, W2-xnwo-4, W2-xnwo-5, W2-xnwo-6, W2-xnwo-7"/>
+  <criterion id="DTX2-AC6" cell_refs="W2-bcin-6, W2-coth-6, W2-jgzc-6, W2-nthk-6, W2-pcac-6, W2-qvzv-6, W2-rpcx-6, W2-vlov-6, W2-xnwo-6"/>
+  <criterion id="DTX2-AC7" cell_refs="W2-bcin-7, W2-coth-7, W2-jgzc-7, W2-nthk-7, W2-pcac-7, W2-qvzv-7, W2-rpcx-7, W2-vlov-7, W2-xnwo-7"/>
+  <criterion id="DTX2-AC8" cell_refs="W2-bcin-1, W2-coth-1, W2-jgzc-1, W2-nthk-1, W2-pcac-1, W2-qvzv-1, W2-rpcx-1, W2-vlov-1, W2-xnwo-1"/>
   <instance_path>org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/NFRA_SUBSTRATECARDING.TO-W2-DTX2_PROOF_OF_SPEC.json</instance_path>
   
   <expected_criteria>DTX2-AC1,DTX2-AC2,DTX2-AC3,DTX2-AC4,DTX2-AC5,DTX2-AC6,DTX2-AC7,DTX2-AC8</expected_criteria>

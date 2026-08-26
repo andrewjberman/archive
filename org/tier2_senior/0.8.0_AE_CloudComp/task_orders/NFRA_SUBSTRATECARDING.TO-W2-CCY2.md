@@ -28,29 +28,29 @@ DECOMP-INVALIDATING verdict is the issuer's act to re-decomp and re-issue.
 
 <decomp_ref>
 workflows/atom_decomposition/runs/nfra-substratecarding-w2/20260826T210050Z/DECOMP.md @9e0394fedf
-Cells discharged (77, enumerated LITERALLY):
-W2-ab-1, W2-ab-2, W2-ab-3, W2-ab-4, W2-ab-5, W2-ab-6, W2-ab-7, W2-ac-1, W2-ac-2, W2-ac-3, W2-ac-4,
-W2-ac-5, W2-ac-6, W2-ac-7, W2-ad-1, W2-ad-2, W2-ad-3, W2-ad-4, W2-ad-5, W2-ad-6, W2-ad-7, W2-ak-1,
-W2-ak-2, W2-ak-3, W2-ak-4, W2-ak-5, W2-ak-6, W2-ak-7, W2-ap-1, W2-ap-2, W2-ap-3, W2-ap-4, W2-ap-5,
-W2-ap-6, W2-ap-7, W2-aq-1, W2-aq-2, W2-aq-3, W2-aq-4, W2-aq-5, W2-aq-6, W2-aq-7, W2-ar-1, W2-ar-2,
-W2-ar-3, W2-ar-4, W2-ar-5, W2-ar-6, W2-ar-7, W2-be-1, W2-be-2, W2-be-3, W2-be-4, W2-be-5, W2-be-6,
-W2-be-7, W2-bf-1, W2-bf-2, W2-bf-3, W2-bf-4, W2-bf-5, W2-bf-6, W2-bf-7, W2-bg-1, W2-bg-2, W2-bg-3,
-W2-bg-4, W2-bg-5, W2-bg-6, W2-bg-7, W2-bh-1, W2-bh-2, W2-bh-3, W2-bh-4, W2-bh-5, W2-bh-6, W2-bh-7
+Cells discharged (63, enumerated LITERALLY):
+W2-dmua-1, W2-dmua-2, W2-dmua-3, W2-dmua-4, W2-dmua-5, W2-dmua-6, W2-dmua-7, W2-dxxm-1, W2-dxxm-2,
+W2-dxxm-3, W2-dxxm-4, W2-dxxm-5, W2-dxxm-6, W2-dxxm-7, W2-iarh-1, W2-iarh-2, W2-iarh-3, W2-iarh-4,
+W2-iarh-5, W2-iarh-6, W2-iarh-7, W2-ifqm-1, W2-ifqm-2, W2-ifqm-3, W2-ifqm-4, W2-ifqm-5, W2-ifqm-6,
+W2-ifqm-7, W2-igwg-1, W2-igwg-2, W2-igwg-3, W2-igwg-4, W2-igwg-5, W2-igwg-6, W2-igwg-7, W2-iivv-1,
+W2-iivv-2, W2-iivv-3, W2-iivv-4, W2-iivv-5, W2-iivv-6, W2-iivv-7, W2-jlsi-1, W2-jlsi-2, W2-jlsi-3,
+W2-jlsi-4, W2-jlsi-5, W2-jlsi-6, W2-jlsi-7, W2-kwjy-1, W2-kwjy-2, W2-kwjy-3, W2-kwjy-4, W2-kwjy-5,
+W2-kwjy-6, W2-kwjy-7, W2-mqju-1, W2-mqju-2, W2-mqju-3, W2-mqju-4, W2-mqju-5, W2-mqju-6, W2-mqju-7
 </decomp_ref>
 
 <proof_of_spec>
-  <criterion id="CCY2-AC1" cell_refs="W2-ab-1, W2-ab-2, W2-ab-3, W2-ab-4, W2-ab-5, W2-ab-6, W2-ab-7, W2-ac-1, W2-ac-2, W2-ac-3, W2-ac-4, W2-ac-5, W2-ac-6, W2-ac-7, W2-ad-1, W2-ad-2, W2-ad-3, W2-ad-4, W2-ad-5, W2-ad-6, W2-ad-7, W2-ak-1, W2-ak-2, W2-ak-3, W2-ak-4, W2-ak-5, W2-ak-6, W2-ak-7, W2-ap-1, W2-ap-2, W2-ap-3, W2-ap-4, W2-ap-5, W2-ap-6, W2-ap-7, W2-aq-1, W2-aq-2, W2-aq-3, W2-aq-4, W2-aq-5, W2-aq-6, W2-aq-7, W2-ar-1, W2-ar-2, W2-ar-3, W2-ar-4, W2-ar-5, W2-ar-6, W2-ar-7, W2-be-1, W2-be-2, W2-be-3, W2-be-4, W2-be-5, W2-be-6, W2-be-7, W2-bf-1, W2-bf-2, W2-bf-3, W2-bf-4, W2-bf-5, W2-bf-6, W2-bf-7, W2-bg-1, W2-bg-2, W2-bg-3, W2-bg-4, W2-bg-5, W2-bg-6, W2-bg-7, W2-bh-1, W2-bh-2, W2-bh-3, W2-bh-4, W2-bh-5, W2-bh-6, W2-bh-7"/>
-  <criterion id="CCY2-AC2" cell_refs="W2-ab-2, W2-ac-2, W2-ad-2, W2-ak-2, W2-ap-2, W2-aq-2, W2-ar-2, W2-be-2, W2-bf-2, W2-bg-2, W2-bh-2"/>
-  <criterion id="CCY2-AC3" cell_refs="W2-ab-3, W2-ac-3, W2-ad-3, W2-ak-3, W2-ap-3, W2-aq-3, W2-ar-3, W2-be-3, W2-bf-3, W2-bg-3, W2-bh-3"/>
-  <criterion id="CCY2-AC4" cell_refs="W2-ab-4, W2-ac-4, W2-ad-4, W2-ak-4, W2-ap-4, W2-aq-4, W2-ar-4, W2-be-4, W2-bf-4, W2-bg-4, W2-bh-4"/>
-  <criterion id="CCY2-AC5" cell_refs="W2-ab-1, W2-ab-2, W2-ab-3, W2-ab-4, W2-ab-5, W2-ab-6, W2-ab-7, W2-ac-1, W2-ac-2, W2-ac-3, W2-ac-4, W2-ac-5, W2-ac-6, W2-ac-7, W2-ad-1, W2-ad-2, W2-ad-3, W2-ad-4, W2-ad-5, W2-ad-6, W2-ad-7, W2-ak-1, W2-ak-2, W2-ak-3, W2-ak-4, W2-ak-5, W2-ak-6, W2-ak-7, W2-ap-1, W2-ap-2, W2-ap-3, W2-ap-4, W2-ap-5, W2-ap-6, W2-ap-7, W2-aq-1, W2-aq-2, W2-aq-3, W2-aq-4, W2-aq-5, W2-aq-6, W2-aq-7, W2-ar-1, W2-ar-2, W2-ar-3, W2-ar-4, W2-ar-5, W2-ar-6, W2-ar-7, W2-be-1, W2-be-2, W2-be-3, W2-be-4, W2-be-5, W2-be-6, W2-be-7, W2-bf-1, W2-bf-2, W2-bf-3, W2-bf-4, W2-bf-5, W2-bf-6, W2-bf-7, W2-bg-1, W2-bg-2, W2-bg-3, W2-bg-4, W2-bg-5, W2-bg-6, W2-bg-7, W2-bh-1, W2-bh-2, W2-bh-3, W2-bh-4, W2-bh-5, W2-bh-6, W2-bh-7"/>
-  <criterion id="CCY2-AC6" cell_refs="W2-ab-6, W2-ac-6, W2-ad-6, W2-ak-6, W2-ap-6, W2-aq-6, W2-ar-6, W2-be-6, W2-bf-6, W2-bg-6, W2-bh-6"/>
-  <criterion id="CCY2-AC7" cell_refs="W2-ab-7, W2-ac-7, W2-ad-7, W2-ak-7, W2-ap-7, W2-aq-7, W2-ar-7, W2-be-7, W2-bf-7, W2-bg-7, W2-bh-7"/>
-  <criterion id="CCY2-AC8" cell_refs="W2-ab-1, W2-ac-1, W2-ad-1, W2-ak-1, W2-ap-1, W2-aq-1, W2-ar-1, W2-be-1, W2-bf-1, W2-bg-1, W2-bh-1"/>
+  <criterion id="CCY2-AC1" cell_refs="W2-dmua-1, W2-dmua-2, W2-dmua-3, W2-dmua-4, W2-dmua-5, W2-dmua-6, W2-dmua-7, W2-dxxm-1, W2-dxxm-2, W2-dxxm-3, W2-dxxm-4, W2-dxxm-5, W2-dxxm-6, W2-dxxm-7, W2-iarh-1, W2-iarh-2, W2-iarh-3, W2-iarh-4, W2-iarh-5, W2-iarh-6, W2-iarh-7, W2-ifqm-1, W2-ifqm-2, W2-ifqm-3, W2-ifqm-4, W2-ifqm-5, W2-ifqm-6, W2-ifqm-7, W2-igwg-1, W2-igwg-2, W2-igwg-3, W2-igwg-4, W2-igwg-5, W2-igwg-6, W2-igwg-7, W2-iivv-1, W2-iivv-2, W2-iivv-3, W2-iivv-4, W2-iivv-5, W2-iivv-6, W2-iivv-7, W2-jlsi-1, W2-jlsi-2, W2-jlsi-3, W2-jlsi-4, W2-jlsi-5, W2-jlsi-6, W2-jlsi-7, W2-kwjy-1, W2-kwjy-2, W2-kwjy-3, W2-kwjy-4, W2-kwjy-5, W2-kwjy-6, W2-kwjy-7, W2-mqju-1, W2-mqju-2, W2-mqju-3, W2-mqju-4, W2-mqju-5, W2-mqju-6, W2-mqju-7"/>
+  <criterion id="CCY2-AC2" cell_refs="W2-dmua-2, W2-dxxm-2, W2-iarh-2, W2-ifqm-2, W2-igwg-2, W2-iivv-2, W2-jlsi-2, W2-kwjy-2, W2-mqju-2"/>
+  <criterion id="CCY2-AC3" cell_refs="W2-dmua-3, W2-dxxm-3, W2-iarh-3, W2-ifqm-3, W2-igwg-3, W2-iivv-3, W2-jlsi-3, W2-kwjy-3, W2-mqju-3"/>
+  <criterion id="CCY2-AC4" cell_refs="W2-dmua-4, W2-dxxm-4, W2-iarh-4, W2-ifqm-4, W2-igwg-4, W2-iivv-4, W2-jlsi-4, W2-kwjy-4, W2-mqju-4"/>
+  <criterion id="CCY2-AC5" cell_refs="W2-dmua-1, W2-dmua-2, W2-dmua-3, W2-dmua-4, W2-dmua-5, W2-dmua-6, W2-dmua-7, W2-dxxm-1, W2-dxxm-2, W2-dxxm-3, W2-dxxm-4, W2-dxxm-5, W2-dxxm-6, W2-dxxm-7, W2-iarh-1, W2-iarh-2, W2-iarh-3, W2-iarh-4, W2-iarh-5, W2-iarh-6, W2-iarh-7, W2-ifqm-1, W2-ifqm-2, W2-ifqm-3, W2-ifqm-4, W2-ifqm-5, W2-ifqm-6, W2-ifqm-7, W2-igwg-1, W2-igwg-2, W2-igwg-3, W2-igwg-4, W2-igwg-5, W2-igwg-6, W2-igwg-7, W2-iivv-1, W2-iivv-2, W2-iivv-3, W2-iivv-4, W2-iivv-5, W2-iivv-6, W2-iivv-7, W2-jlsi-1, W2-jlsi-2, W2-jlsi-3, W2-jlsi-4, W2-jlsi-5, W2-jlsi-6, W2-jlsi-7, W2-kwjy-1, W2-kwjy-2, W2-kwjy-3, W2-kwjy-4, W2-kwjy-5, W2-kwjy-6, W2-kwjy-7, W2-mqju-1, W2-mqju-2, W2-mqju-3, W2-mqju-4, W2-mqju-5, W2-mqju-6, W2-mqju-7"/>
+  <criterion id="CCY2-AC6" cell_refs="W2-dmua-6, W2-dxxm-6, W2-iarh-6, W2-ifqm-6, W2-igwg-6, W2-iivv-6, W2-jlsi-6, W2-kwjy-6, W2-mqju-6"/>
+  <criterion id="CCY2-AC7" cell_refs="W2-dmua-7, W2-dxxm-7, W2-iarh-7, W2-ifqm-7, W2-igwg-7, W2-iivv-7, W2-jlsi-7, W2-kwjy-7, W2-mqju-7"/>
+  <criterion id="CCY2-AC8" cell_refs="W2-dmua-1, W2-dxxm-1, W2-iarh-1, W2-ifqm-1, W2-igwg-1, W2-iivv-1, W2-jlsi-1, W2-kwjy-1, W2-mqju-1"/>
   <instance_path>org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_SUBSTRATECARDING.TO-W2-CCY2_PROOF_OF_SPEC.json</instance_path>
   
   <expected_criteria>CCY2-AC1,CCY2-AC2,CCY2-AC3,CCY2-AC4,CCY2-AC5,CCY2-AC6,CCY2-AC7,CCY2-AC8</expected_criteria>
-  <alignment_denominators>criteria: 8. Cells: 77 of 77 owned by this executor, all covered. Unmapped 0; untraceable 0.</alignment_denominators>
+  <alignment_denominators>criteria: 8. Cells: 63 of 63 owned by this executor, all covered. Unmapped 0; untraceable 0.</alignment_denominators>
 </proof_of_spec>
 
 ---
