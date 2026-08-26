@@ -70,18 +70,20 @@ re-read 21:19Z, identical). **A measured fact, not a copied value.**
 
 ## 2. YOUR 10 SUBJECTS
 
-| subject | named by (wave 1) | spellings |
-|---|---|---|
-| `NFRA_ONTOLOGY_RULE_BANK.yaml#c1_frontend_adapter` | C1 | 1 |
-| `NFRA_ONTOLOGY_RULE_BANK.yaml#node_bindings` | C0 | 1 |
-| `NFRA_ONTOLOGY_RULE_BANK.yaml#non_relation_edges` | C1 | 1 |
-| `NFRA_ONTOLOGY_RULE_BANK.yaml#relation_composites` | C1 | 1 |
-| `NFRA_ONTOLOGY_RULE_BANK.yaml#relations` | C1 | 1 |
-| `NFRA_ONTOLOGY_RULE_BANK.yaml#roles` | C0 | 1 |
-| `live AWS estate` | C0, C1 | 1 |
-| `org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/c2_individua` | C2 | 1 |
-| `org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/MOTIF_c2c3_materialize_s` | C2 | 2 |
-| `repo source tree` | C0, C1 | 1 |
+**`provenance` states how each entered the set — `head_43` (a wave-1 `composes`/`projection_of` head) · `co_resident_addition` (a field the first derivation never read) · `compound_split` (one string that named two objects) · `dropped_recovery` (named in a wave-1 entry and lost at head-extraction).**
+
+| subject | provenance |
+|---|---|
+| `NFRA_ONTOLOGY_RULE_BANK.yaml#c1_frontend_adapter` | head_43 |
+| `NFRA_ONTOLOGY_RULE_BANK.yaml#node_bindings` | head_43 |
+| `NFRA_ONTOLOGY_RULE_BANK.yaml#non_relation_edges` | head_43 |
+| `NFRA_ONTOLOGY_RULE_BANK.yaml#relation_composites` | head_43 |
+| `NFRA_ONTOLOGY_RULE_BANK.yaml#relations` | head_43 |
+| `NFRA_ONTOLOGY_RULE_BANK.yaml#roles` | head_43 |
+| `live AWS estate` | head_43 |
+| `org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/c2_individ` | head_43 |
+| `org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/MOTIF_c2c3_materialize` | head_43 |
+| `repo source tree` | head_43 |
 
 ⛔ **These reached us as PROSE STRINGS.** Resolve identity by reading the thing, not the string.
 

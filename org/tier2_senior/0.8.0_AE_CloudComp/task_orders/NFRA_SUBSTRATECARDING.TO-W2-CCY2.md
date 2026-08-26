@@ -70,24 +70,20 @@ re-read 21:19Z, identical). **A measured fact, not a copied value.**
 
 ## 2. YOUR 10 SUBJECTS
 
-⛔ **AMENDED 22:2xZ — 1 SUBJECT(S) ADDED.** The original derivation read `composes` +
-`projection_of` and **NEVER READ `location.co_resident_stores`** — a THIRD card field naming stores.
-`0.4.0_DT_ClientPlatform~X` measured it (4 of 4 positive controls firing). **Your existing cell ids are
-UNCHANGED** — ids derive from the subject string, so an addition moves nothing. Added here:
-- `graph_contracts`
+**`provenance` states how each entered the set — `head_43` (a wave-1 `composes`/`projection_of` head) · `co_resident_addition` (a field the first derivation never read) · `compound_split` (one string that named two objects) · `dropped_recovery` (named in a wave-1 entry and lost at head-extraction).**
 
-| subject | named by (wave 1) | spellings |
-|---|---|---|
-| `D1's EdgeKind semantic` | D2_path_flow | 1 |
-| `D3's delivery_cadence obligation` | D2_path_flow | 1 |
-| `NFRA_ONTOLOGY_C2C3_CANONICAL.yaml#c2_motif_families` | D2_path_flow | 1 |
-| `PSTMRT's completeness axis and TRIGGER_LAYER doctrine, named as proto-D3 oblig` | D3_contract_obligation | 1 |
-| `graph_contracts` | wave-1 co_resident_stores | 1 |
-| `live graph edge types: FLOWS_TO, READS_FIELD, HAS_FIELD, PROP_PASSES, WRITES, ` | D1_value_grain | 1 |
-| `live graph node types: Field, Prop, S3Key, S3_BUCKET, DYNAMODB_TABLE` | D1_value_grain | 1 |
-| `native CloudEdge direction` | D2_path_flow | 1 |
-| `the C0/C1 rung boundary` | D1_value_grain | 1 |
-| `the MDPF delivery-cadence contract` | D3_contract_obligation | 1 |
+| subject | provenance |
+|---|---|
+| `D1's EdgeKind semantic` | head_43 |
+| `D3's delivery_cadence obligation` | head_43 |
+| `NFRA_ONTOLOGY_C2C3_CANONICAL.yaml#c2_motif_families` | head_43 |
+| `PSTMRT's completeness axis and TRIGGER_LAYER doctrine, named as proto-D3 obl` | head_43 |
+| `graph_contracts` | co_resident_addition |
+| `live graph edge types: FLOWS_TO, READS_FIELD, HAS_FIELD, PROP_PASSES, WRITES` | head_43 |
+| `live graph node types: Field, Prop, S3Key, S3_BUCKET, DYNAMODB_TABLE` | head_43 |
+| `native CloudEdge direction` | head_43 |
+| `the C0/C1 rung boundary` | head_43 |
+| `the MDPF delivery-cadence contract` | head_43 |
 
 ⛔ **These reached us as PROSE STRINGS.** Resolve identity by reading the thing, not the string.
 

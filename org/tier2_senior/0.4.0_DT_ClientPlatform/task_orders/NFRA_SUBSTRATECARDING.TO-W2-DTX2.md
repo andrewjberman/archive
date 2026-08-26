@@ -14,7 +14,7 @@
   <ref type="law">CLAUDE.md Rule 28</ref>
 </references>
 <objective>
-Produce 15 conformant substrate cards -- the STORES -- validating against
+Produce 16 conformant substrate cards -- the STORES -- validating against
 SUBSTRATE_CARD.v2.schema.json. QUALIFY ONLY. NO deprecation verdicts (second pass).
 </objective>
 </task_order>
@@ -28,7 +28,7 @@ DECOMP-INVALIDATING verdict is the issuer's act to re-decomp and re-issue.
 
 <decomp_ref>
 workflows/atom_decomposition/runs/nfra-substratecarding-w2/20260826T210050Z/DECOMP.md @9e0394fedf
-Cells discharged (105, enumerated LITERALLY):
+Cells discharged (112, enumerated LITERALLY):
 W2-bcin-1, W2-bcin-2, W2-bcin-3, W2-bcin-4, W2-bcin-5, W2-bcin-6, W2-bcin-7, W2-coth-1, W2-coth-2,
 W2-coth-3, W2-coth-4, W2-coth-5, W2-coth-6, W2-coth-7, W2-hffm-1, W2-hffm-2, W2-hffm-3, W2-hffm-4,
 W2-hffm-5, W2-hffm-6, W2-hffm-7, W2-jgzc-1, W2-jgzc-2, W2-jgzc-3, W2-jgzc-4, W2-jgzc-5, W2-jgzc-6,
@@ -36,26 +36,27 @@ W2-jgzc-7, W2-lqzx-1, W2-lqzx-2, W2-lqzx-3, W2-lqzx-4, W2-lqzx-5, W2-lqzx-6, W2-
 W2-nthk-2, W2-nthk-3, W2-nthk-4, W2-nthk-5, W2-nthk-6, W2-nthk-7, W2-pcac-1, W2-pcac-2, W2-pcac-3,
 W2-pcac-4, W2-pcac-5, W2-pcac-6, W2-pcac-7, W2-qvzv-1, W2-qvzv-2, W2-qvzv-3, W2-qvzv-4, W2-qvzv-5,
 W2-qvzv-6, W2-qvzv-7, W2-rpcx-1, W2-rpcx-2, W2-rpcx-3, W2-rpcx-4, W2-rpcx-5, W2-rpcx-6, W2-rpcx-7,
-W2-ugdt-1, W2-ugdt-2, W2-ugdt-3, W2-ugdt-4, W2-ugdt-5, W2-ugdt-6, W2-ugdt-7, W2-vlov-1, W2-vlov-2,
-W2-vlov-3, W2-vlov-4, W2-vlov-5, W2-vlov-6, W2-vlov-7, W2-xnwo-1, W2-xnwo-2, W2-xnwo-3, W2-xnwo-4,
-W2-xnwo-5, W2-xnwo-6, W2-xnwo-7, W2-xzjx-1, W2-xzjx-2, W2-xzjx-3, W2-xzjx-4, W2-xzjx-5, W2-xzjx-6,
-W2-xzjx-7, W2-yjky-1, W2-yjky-2, W2-yjky-3, W2-yjky-4, W2-yjky-5, W2-yjky-6, W2-yjky-7, W2-znom-1,
-W2-znom-2, W2-znom-3, W2-znom-4, W2-znom-5, W2-znom-6, W2-znom-7
+W2-ukdh-1, W2-ukdh-2, W2-ukdh-3, W2-ukdh-4, W2-ukdh-5, W2-ukdh-6, W2-ukdh-7, W2-uvcz-1, W2-uvcz-2,
+W2-uvcz-3, W2-uvcz-4, W2-uvcz-5, W2-uvcz-6, W2-uvcz-7, W2-vlov-1, W2-vlov-2, W2-vlov-3, W2-vlov-4,
+W2-vlov-5, W2-vlov-6, W2-vlov-7, W2-xnwo-1, W2-xnwo-2, W2-xnwo-3, W2-xnwo-4, W2-xnwo-5, W2-xnwo-6,
+W2-xnwo-7, W2-xzjx-1, W2-xzjx-2, W2-xzjx-3, W2-xzjx-4, W2-xzjx-5, W2-xzjx-6, W2-xzjx-7, W2-yjky-1,
+W2-yjky-2, W2-yjky-3, W2-yjky-4, W2-yjky-5, W2-yjky-6, W2-yjky-7, W2-znom-1, W2-znom-2, W2-znom-3,
+W2-znom-4, W2-znom-5, W2-znom-6, W2-znom-7
 </decomp_ref>
 
 <proof_of_spec>
-  <criterion id="DTX2-AC1" cell_refs="W2-bcin-1, W2-bcin-2, W2-bcin-3, W2-bcin-4, W2-bcin-5, W2-bcin-6, W2-bcin-7, W2-coth-1, W2-coth-2, W2-coth-3, W2-coth-4, W2-coth-5, W2-coth-6, W2-coth-7, W2-hffm-1, W2-hffm-2, W2-hffm-3, W2-hffm-4, W2-hffm-5, W2-hffm-6, W2-hffm-7, W2-jgzc-1, W2-jgzc-2, W2-jgzc-3, W2-jgzc-4, W2-jgzc-5, W2-jgzc-6, W2-jgzc-7, W2-lqzx-1, W2-lqzx-2, W2-lqzx-3, W2-lqzx-4, W2-lqzx-5, W2-lqzx-6, W2-lqzx-7, W2-nthk-1, W2-nthk-2, W2-nthk-3, W2-nthk-4, W2-nthk-5, W2-nthk-6, W2-nthk-7, W2-pcac-1, W2-pcac-2, W2-pcac-3, W2-pcac-4, W2-pcac-5, W2-pcac-6, W2-pcac-7, W2-qvzv-1, W2-qvzv-2, W2-qvzv-3, W2-qvzv-4, W2-qvzv-5, W2-qvzv-6, W2-qvzv-7, W2-rpcx-1, W2-rpcx-2, W2-rpcx-3, W2-rpcx-4, W2-rpcx-5, W2-rpcx-6, W2-rpcx-7, W2-ugdt-1, W2-ugdt-2, W2-ugdt-3, W2-ugdt-4, W2-ugdt-5, W2-ugdt-6, W2-ugdt-7, W2-vlov-1, W2-vlov-2, W2-vlov-3, W2-vlov-4, W2-vlov-5, W2-vlov-6, W2-vlov-7, W2-xnwo-1, W2-xnwo-2, W2-xnwo-3, W2-xnwo-4, W2-xnwo-5, W2-xnwo-6, W2-xnwo-7, W2-xzjx-1, W2-xzjx-2, W2-xzjx-3, W2-xzjx-4, W2-xzjx-5, W2-xzjx-6, W2-xzjx-7, W2-yjky-1, W2-yjky-2, W2-yjky-3, W2-yjky-4, W2-yjky-5, W2-yjky-6, W2-yjky-7, W2-znom-1, W2-znom-2, W2-znom-3, W2-znom-4, W2-znom-5, W2-znom-6, W2-znom-7"/>
-  <criterion id="DTX2-AC2" cell_refs="W2-bcin-2, W2-coth-2, W2-hffm-2, W2-jgzc-2, W2-lqzx-2, W2-nthk-2, W2-pcac-2, W2-qvzv-2, W2-rpcx-2, W2-ugdt-2, W2-vlov-2, W2-xnwo-2, W2-xzjx-2, W2-yjky-2, W2-znom-2"/>
-  <criterion id="DTX2-AC3" cell_refs="W2-bcin-3, W2-coth-3, W2-hffm-3, W2-jgzc-3, W2-lqzx-3, W2-nthk-3, W2-pcac-3, W2-qvzv-3, W2-rpcx-3, W2-ugdt-3, W2-vlov-3, W2-xnwo-3, W2-xzjx-3, W2-yjky-3, W2-znom-3"/>
-  <criterion id="DTX2-AC4" cell_refs="W2-bcin-4, W2-coth-4, W2-hffm-4, W2-jgzc-4, W2-lqzx-4, W2-nthk-4, W2-pcac-4, W2-qvzv-4, W2-rpcx-4, W2-ugdt-4, W2-vlov-4, W2-xnwo-4, W2-xzjx-4, W2-yjky-4, W2-znom-4"/>
-  <criterion id="DTX2-AC5" cell_refs="W2-bcin-1, W2-bcin-2, W2-bcin-3, W2-bcin-4, W2-bcin-5, W2-bcin-6, W2-bcin-7, W2-coth-1, W2-coth-2, W2-coth-3, W2-coth-4, W2-coth-5, W2-coth-6, W2-coth-7, W2-hffm-1, W2-hffm-2, W2-hffm-3, W2-hffm-4, W2-hffm-5, W2-hffm-6, W2-hffm-7, W2-jgzc-1, W2-jgzc-2, W2-jgzc-3, W2-jgzc-4, W2-jgzc-5, W2-jgzc-6, W2-jgzc-7, W2-lqzx-1, W2-lqzx-2, W2-lqzx-3, W2-lqzx-4, W2-lqzx-5, W2-lqzx-6, W2-lqzx-7, W2-nthk-1, W2-nthk-2, W2-nthk-3, W2-nthk-4, W2-nthk-5, W2-nthk-6, W2-nthk-7, W2-pcac-1, W2-pcac-2, W2-pcac-3, W2-pcac-4, W2-pcac-5, W2-pcac-6, W2-pcac-7, W2-qvzv-1, W2-qvzv-2, W2-qvzv-3, W2-qvzv-4, W2-qvzv-5, W2-qvzv-6, W2-qvzv-7, W2-rpcx-1, W2-rpcx-2, W2-rpcx-3, W2-rpcx-4, W2-rpcx-5, W2-rpcx-6, W2-rpcx-7, W2-ugdt-1, W2-ugdt-2, W2-ugdt-3, W2-ugdt-4, W2-ugdt-5, W2-ugdt-6, W2-ugdt-7, W2-vlov-1, W2-vlov-2, W2-vlov-3, W2-vlov-4, W2-vlov-5, W2-vlov-6, W2-vlov-7, W2-xnwo-1, W2-xnwo-2, W2-xnwo-3, W2-xnwo-4, W2-xnwo-5, W2-xnwo-6, W2-xnwo-7, W2-xzjx-1, W2-xzjx-2, W2-xzjx-3, W2-xzjx-4, W2-xzjx-5, W2-xzjx-6, W2-xzjx-7, W2-yjky-1, W2-yjky-2, W2-yjky-3, W2-yjky-4, W2-yjky-5, W2-yjky-6, W2-yjky-7, W2-znom-1, W2-znom-2, W2-znom-3, W2-znom-4, W2-znom-5, W2-znom-6, W2-znom-7"/>
-  <criterion id="DTX2-AC6" cell_refs="W2-bcin-6, W2-coth-6, W2-hffm-6, W2-jgzc-6, W2-lqzx-6, W2-nthk-6, W2-pcac-6, W2-qvzv-6, W2-rpcx-6, W2-ugdt-6, W2-vlov-6, W2-xnwo-6, W2-xzjx-6, W2-yjky-6, W2-znom-6"/>
-  <criterion id="DTX2-AC7" cell_refs="W2-bcin-7, W2-coth-7, W2-hffm-7, W2-jgzc-7, W2-lqzx-7, W2-nthk-7, W2-pcac-7, W2-qvzv-7, W2-rpcx-7, W2-ugdt-7, W2-vlov-7, W2-xnwo-7, W2-xzjx-7, W2-yjky-7, W2-znom-7"/>
-  <criterion id="DTX2-AC8" cell_refs="W2-bcin-1, W2-coth-1, W2-hffm-1, W2-jgzc-1, W2-lqzx-1, W2-nthk-1, W2-pcac-1, W2-qvzv-1, W2-rpcx-1, W2-ugdt-1, W2-vlov-1, W2-xnwo-1, W2-xzjx-1, W2-yjky-1, W2-znom-1"/>
+  <criterion id="DTX2-AC1" cell_refs="W2-bcin-1, W2-bcin-2, W2-bcin-3, W2-bcin-4, W2-bcin-5, W2-bcin-6, W2-bcin-7, W2-coth-1, W2-coth-2, W2-coth-3, W2-coth-4, W2-coth-5, W2-coth-6, W2-coth-7, W2-hffm-1, W2-hffm-2, W2-hffm-3, W2-hffm-4, W2-hffm-5, W2-hffm-6, W2-hffm-7, W2-jgzc-1, W2-jgzc-2, W2-jgzc-3, W2-jgzc-4, W2-jgzc-5, W2-jgzc-6, W2-jgzc-7, W2-lqzx-1, W2-lqzx-2, W2-lqzx-3, W2-lqzx-4, W2-lqzx-5, W2-lqzx-6, W2-lqzx-7, W2-nthk-1, W2-nthk-2, W2-nthk-3, W2-nthk-4, W2-nthk-5, W2-nthk-6, W2-nthk-7, W2-pcac-1, W2-pcac-2, W2-pcac-3, W2-pcac-4, W2-pcac-5, W2-pcac-6, W2-pcac-7, W2-qvzv-1, W2-qvzv-2, W2-qvzv-3, W2-qvzv-4, W2-qvzv-5, W2-qvzv-6, W2-qvzv-7, W2-rpcx-1, W2-rpcx-2, W2-rpcx-3, W2-rpcx-4, W2-rpcx-5, W2-rpcx-6, W2-rpcx-7, W2-ukdh-1, W2-ukdh-2, W2-ukdh-3, W2-ukdh-4, W2-ukdh-5, W2-ukdh-6, W2-ukdh-7, W2-uvcz-1, W2-uvcz-2, W2-uvcz-3, W2-uvcz-4, W2-uvcz-5, W2-uvcz-6, W2-uvcz-7, W2-vlov-1, W2-vlov-2, W2-vlov-3, W2-vlov-4, W2-vlov-5, W2-vlov-6, W2-vlov-7, W2-xnwo-1, W2-xnwo-2, W2-xnwo-3, W2-xnwo-4, W2-xnwo-5, W2-xnwo-6, W2-xnwo-7, W2-xzjx-1, W2-xzjx-2, W2-xzjx-3, W2-xzjx-4, W2-xzjx-5, W2-xzjx-6, W2-xzjx-7, W2-yjky-1, W2-yjky-2, W2-yjky-3, W2-yjky-4, W2-yjky-5, W2-yjky-6, W2-yjky-7, W2-znom-1, W2-znom-2, W2-znom-3, W2-znom-4, W2-znom-5, W2-znom-6, W2-znom-7"/>
+  <criterion id="DTX2-AC2" cell_refs="W2-bcin-2, W2-coth-2, W2-hffm-2, W2-jgzc-2, W2-lqzx-2, W2-nthk-2, W2-pcac-2, W2-qvzv-2, W2-rpcx-2, W2-ukdh-2, W2-uvcz-2, W2-vlov-2, W2-xnwo-2, W2-xzjx-2, W2-yjky-2, W2-znom-2"/>
+  <criterion id="DTX2-AC3" cell_refs="W2-bcin-3, W2-coth-3, W2-hffm-3, W2-jgzc-3, W2-lqzx-3, W2-nthk-3, W2-pcac-3, W2-qvzv-3, W2-rpcx-3, W2-ukdh-3, W2-uvcz-3, W2-vlov-3, W2-xnwo-3, W2-xzjx-3, W2-yjky-3, W2-znom-3"/>
+  <criterion id="DTX2-AC4" cell_refs="W2-bcin-4, W2-coth-4, W2-hffm-4, W2-jgzc-4, W2-lqzx-4, W2-nthk-4, W2-pcac-4, W2-qvzv-4, W2-rpcx-4, W2-ukdh-4, W2-uvcz-4, W2-vlov-4, W2-xnwo-4, W2-xzjx-4, W2-yjky-4, W2-znom-4"/>
+  <criterion id="DTX2-AC5" cell_refs="W2-bcin-1, W2-bcin-2, W2-bcin-3, W2-bcin-4, W2-bcin-5, W2-bcin-6, W2-bcin-7, W2-coth-1, W2-coth-2, W2-coth-3, W2-coth-4, W2-coth-5, W2-coth-6, W2-coth-7, W2-hffm-1, W2-hffm-2, W2-hffm-3, W2-hffm-4, W2-hffm-5, W2-hffm-6, W2-hffm-7, W2-jgzc-1, W2-jgzc-2, W2-jgzc-3, W2-jgzc-4, W2-jgzc-5, W2-jgzc-6, W2-jgzc-7, W2-lqzx-1, W2-lqzx-2, W2-lqzx-3, W2-lqzx-4, W2-lqzx-5, W2-lqzx-6, W2-lqzx-7, W2-nthk-1, W2-nthk-2, W2-nthk-3, W2-nthk-4, W2-nthk-5, W2-nthk-6, W2-nthk-7, W2-pcac-1, W2-pcac-2, W2-pcac-3, W2-pcac-4, W2-pcac-5, W2-pcac-6, W2-pcac-7, W2-qvzv-1, W2-qvzv-2, W2-qvzv-3, W2-qvzv-4, W2-qvzv-5, W2-qvzv-6, W2-qvzv-7, W2-rpcx-1, W2-rpcx-2, W2-rpcx-3, W2-rpcx-4, W2-rpcx-5, W2-rpcx-6, W2-rpcx-7, W2-ukdh-1, W2-ukdh-2, W2-ukdh-3, W2-ukdh-4, W2-ukdh-5, W2-ukdh-6, W2-ukdh-7, W2-uvcz-1, W2-uvcz-2, W2-uvcz-3, W2-uvcz-4, W2-uvcz-5, W2-uvcz-6, W2-uvcz-7, W2-vlov-1, W2-vlov-2, W2-vlov-3, W2-vlov-4, W2-vlov-5, W2-vlov-6, W2-vlov-7, W2-xnwo-1, W2-xnwo-2, W2-xnwo-3, W2-xnwo-4, W2-xnwo-5, W2-xnwo-6, W2-xnwo-7, W2-xzjx-1, W2-xzjx-2, W2-xzjx-3, W2-xzjx-4, W2-xzjx-5, W2-xzjx-6, W2-xzjx-7, W2-yjky-1, W2-yjky-2, W2-yjky-3, W2-yjky-4, W2-yjky-5, W2-yjky-6, W2-yjky-7, W2-znom-1, W2-znom-2, W2-znom-3, W2-znom-4, W2-znom-5, W2-znom-6, W2-znom-7"/>
+  <criterion id="DTX2-AC6" cell_refs="W2-bcin-6, W2-coth-6, W2-hffm-6, W2-jgzc-6, W2-lqzx-6, W2-nthk-6, W2-pcac-6, W2-qvzv-6, W2-rpcx-6, W2-ukdh-6, W2-uvcz-6, W2-vlov-6, W2-xnwo-6, W2-xzjx-6, W2-yjky-6, W2-znom-6"/>
+  <criterion id="DTX2-AC7" cell_refs="W2-bcin-7, W2-coth-7, W2-hffm-7, W2-jgzc-7, W2-lqzx-7, W2-nthk-7, W2-pcac-7, W2-qvzv-7, W2-rpcx-7, W2-ukdh-7, W2-uvcz-7, W2-vlov-7, W2-xnwo-7, W2-xzjx-7, W2-yjky-7, W2-znom-7"/>
+  <criterion id="DTX2-AC8" cell_refs="W2-bcin-1, W2-coth-1, W2-hffm-1, W2-jgzc-1, W2-lqzx-1, W2-nthk-1, W2-pcac-1, W2-qvzv-1, W2-rpcx-1, W2-ukdh-1, W2-uvcz-1, W2-vlov-1, W2-xnwo-1, W2-xzjx-1, W2-yjky-1, W2-znom-1"/>
   <instance_path>org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/NFRA_SUBSTRATECARDING.TO-W2-DTX2_PROOF_OF_SPEC.json</instance_path>
   
   <expected_criteria>DTX2-AC1,DTX2-AC2,DTX2-AC3,DTX2-AC4,DTX2-AC5,DTX2-AC6,DTX2-AC7,DTX2-AC8</expected_criteria>
-  <alignment_denominators>criteria: 8. Cells: 105 of 105 owned by this executor, all covered. Unmapped 0; untraceable 0.</alignment_denominators>
+  <alignment_denominators>criteria: 8. Cells: 112 of 112 owned by this executor, all covered. Unmapped 0; untraceable 0.</alignment_denominators>
 </proof_of_spec>
 
 ---
@@ -72,36 +73,28 @@ W2-znom-2, W2-znom-3, W2-znom-4, W2-znom-5, W2-znom-6, W2-znom-7
 ⚠ `graph_vintage` is unchanged from wave 1 because the projection **has not rebuilt** (built 14:07:59Z,
 re-read 21:19Z, identical). **A measured fact, not a copied value.**
 
-## 2. YOUR 15 SUBJECTS
+## 2. YOUR 16 SUBJECTS
 
-⛔ **AMENDED 22:2xZ — 6 SUBJECT(S) ADDED.** The original derivation read `composes` +
-`projection_of` and **NEVER READ `location.co_resident_stores`** — a THIRD card field naming stores.
-`0.4.0_DT_ClientPlatform~X` measured it (4 of 4 positive controls firing). **Your existing cell ids are
-UNCHANGED** — ids derive from the subject string, so an addition moves nothing. Added here:
-- `.comp-graph/graph.json`
-- `infra/system/ontology/SYSTEM_DEFINITIONS.yaml`
-- `org/modules/graph/nerves-edges.json and nerves-risk-edges.json`
-- `org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/c2_instances.j`
-- `org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/c3_structures.`
-- `s3://opal-estate-report/kuzu_nessie_db`
+**`provenance` states how each entered the set — `head_43` (a wave-1 `composes`/`projection_of` head) · `co_resident_addition` (a field the first derivation never read) · `compound_split` (one string that named two objects) · `dropped_recovery` (named in a wave-1 entry and lost at head-extraction).**
 
-| subject | named by (wave 1) | spellings |
-|---|---|---|
-| `.comp-graph/graph.json` | wave-1 co_resident_stores | 1 |
-| `comp-heat` | comp-similar | 1 |
-| `data/firm_registry.json` | D3_contract_obligation | 1 |
-| `infra/system/ontology/SYSTEM_DEFINITIONS.yaml` | wave-1 co_resident_stores | 1 |
-| `kuzu_nessie_db` | D1_value_grain, D2_path_flow, comp-similar | 3 |
-| `org/modules/graph/keep-dormant.yaml` | D3_contract_obligation | 2 |
-| `org/modules/graph/nerves-edges.json and nerves-risk-edges.json` | wave-1 co_resident_stores | 1 |
-| `org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/` | C3.i-as-built | 1 |
-| `org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/c2_instances` | wave-1 co_resident_stores | 1 |
-| `org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/c3_structure` | wave-1 co_resident_stores | 1 |
-| `org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/motif_c2c3_materialize.j` | C2 | 2 |
-| `org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/motif_c2c3_materialize_a` | C2 | 2 |
-| `s3://opal-313476888478-globgrph/warehouse/globgrph/graph_edges_6629328d-a582-4` | C3.i-as-built, comp-similar | 1 |
-| `s3://opal-313476888478-globgrph/warehouse/globgrph/graph_nodes_4c6c23bd-fffa-4` | C3.i-as-built, comp-similar | 1 |
-| `s3://opal-estate-report/kuzu_nessie_db` | wave-1 co_resident_stores | 1 |
+| subject | provenance |
+|---|---|
+| `.comp-graph/graph.json` | co_resident_addition |
+| `comp-heat` | head_43 |
+| `data/firm_registry.json` | head_43 |
+| `infra/system/ontology/SYSTEM_DEFINITIONS.yaml` | co_resident_addition |
+| `kuzu_nessie_db` | head_43 |
+| `org/modules/graph/keep-dormant.yaml` | head_43 |
+| `org/modules/graph/nerves-edges.json` | compound_split |
+| `org/modules/graph/nerves-risk-edges.json` | compound_split |
+| `org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/` | head_43 |
+| `org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/c2_instanc` | co_resident_addition |
+| `org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/c3_structu` | co_resident_addition |
+| `org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/motif_c2c3_materialize` | head_43 |
+| `org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/motif_c2c3_materialize` | head_43 |
+| `s3://opal-313476888478-globgrph/warehouse/globgrph/graph_edges_6629328d-a582` | head_43 |
+| `s3://opal-313476888478-globgrph/warehouse/globgrph/graph_nodes_4c6c23bd-fffa` | head_43 |
+| `s3://opal-estate-report/kuzu_nessie_db` | co_resident_addition |
 
 ⛔ **These reached us as PROSE STRINGS.** Resolve identity by reading the thing, not the string.
 

@@ -14,7 +14,7 @@
   <ref type="law">CLAUDE.md Rule 28</ref>
 </references>
 <objective>
-Produce 6 conformant substrate cards -- C3.i / comp-similar definitions -- validating against
+Produce 7 conformant substrate cards -- C3.i / comp-similar definitions -- validating against
 SUBSTRATE_CARD.v2.schema.json. QUALIFY ONLY. NO deprecation verdicts (second pass).
 </objective>
 </task_order>
@@ -28,27 +28,28 @@ DECOMP-INVALIDATING verdict is the issuer's act to re-decomp and re-issue.
 
 <decomp_ref>
 workflows/atom_decomposition/runs/nfra-substratecarding-w2/20260826T210050Z/DECOMP.md @9e0394fedf
-Cells discharged (42, enumerated LITERALLY):
+Cells discharged (49, enumerated LITERALLY):
 W2-cadn-1, W2-cadn-2, W2-cadn-3, W2-cadn-4, W2-cadn-5, W2-cadn-6, W2-cadn-7, W2-dmjw-1, W2-dmjw-2,
 W2-dmjw-3, W2-dmjw-4, W2-dmjw-5, W2-dmjw-6, W2-dmjw-7, W2-dxyo-1, W2-dxyo-2, W2-dxyo-3, W2-dxyo-4,
-W2-dxyo-5, W2-dxyo-6, W2-dxyo-7, W2-snuw-1, W2-snuw-2, W2-snuw-3, W2-snuw-4, W2-snuw-5, W2-snuw-6,
-W2-snuw-7, W2-svdr-1, W2-svdr-2, W2-svdr-3, W2-svdr-4, W2-svdr-5, W2-svdr-6, W2-svdr-7, W2-widb-1,
-W2-widb-2, W2-widb-3, W2-widb-4, W2-widb-5, W2-widb-6, W2-widb-7
+W2-dxyo-5, W2-dxyo-6, W2-dxyo-7, W2-mrns-1, W2-mrns-2, W2-mrns-3, W2-mrns-4, W2-mrns-5, W2-mrns-6,
+W2-mrns-7, W2-snuw-1, W2-snuw-2, W2-snuw-3, W2-snuw-4, W2-snuw-5, W2-snuw-6, W2-snuw-7, W2-svdr-1,
+W2-svdr-2, W2-svdr-3, W2-svdr-4, W2-svdr-5, W2-svdr-6, W2-svdr-7, W2-widb-1, W2-widb-2, W2-widb-3,
+W2-widb-4, W2-widb-5, W2-widb-6, W2-widb-7
 </decomp_ref>
 
 <proof_of_spec>
-  <criterion id="COX2-AC1" cell_refs="W2-cadn-1, W2-cadn-2, W2-cadn-3, W2-cadn-4, W2-cadn-5, W2-cadn-6, W2-cadn-7, W2-dmjw-1, W2-dmjw-2, W2-dmjw-3, W2-dmjw-4, W2-dmjw-5, W2-dmjw-6, W2-dmjw-7, W2-dxyo-1, W2-dxyo-2, W2-dxyo-3, W2-dxyo-4, W2-dxyo-5, W2-dxyo-6, W2-dxyo-7, W2-snuw-1, W2-snuw-2, W2-snuw-3, W2-snuw-4, W2-snuw-5, W2-snuw-6, W2-snuw-7, W2-svdr-1, W2-svdr-2, W2-svdr-3, W2-svdr-4, W2-svdr-5, W2-svdr-6, W2-svdr-7, W2-widb-1, W2-widb-2, W2-widb-3, W2-widb-4, W2-widb-5, W2-widb-6, W2-widb-7"/>
-  <criterion id="COX2-AC2" cell_refs="W2-cadn-2, W2-dmjw-2, W2-dxyo-2, W2-snuw-2, W2-svdr-2, W2-widb-2"/>
-  <criterion id="COX2-AC3" cell_refs="W2-cadn-3, W2-dmjw-3, W2-dxyo-3, W2-snuw-3, W2-svdr-3, W2-widb-3"/>
-  <criterion id="COX2-AC4" cell_refs="W2-cadn-4, W2-dmjw-4, W2-dxyo-4, W2-snuw-4, W2-svdr-4, W2-widb-4"/>
-  <criterion id="COX2-AC5" cell_refs="W2-cadn-1, W2-cadn-2, W2-cadn-3, W2-cadn-4, W2-cadn-5, W2-cadn-6, W2-cadn-7, W2-dmjw-1, W2-dmjw-2, W2-dmjw-3, W2-dmjw-4, W2-dmjw-5, W2-dmjw-6, W2-dmjw-7, W2-dxyo-1, W2-dxyo-2, W2-dxyo-3, W2-dxyo-4, W2-dxyo-5, W2-dxyo-6, W2-dxyo-7, W2-snuw-1, W2-snuw-2, W2-snuw-3, W2-snuw-4, W2-snuw-5, W2-snuw-6, W2-snuw-7, W2-svdr-1, W2-svdr-2, W2-svdr-3, W2-svdr-4, W2-svdr-5, W2-svdr-6, W2-svdr-7, W2-widb-1, W2-widb-2, W2-widb-3, W2-widb-4, W2-widb-5, W2-widb-6, W2-widb-7"/>
-  <criterion id="COX2-AC6" cell_refs="W2-cadn-6, W2-dmjw-6, W2-dxyo-6, W2-snuw-6, W2-svdr-6, W2-widb-6"/>
-  <criterion id="COX2-AC7" cell_refs="W2-cadn-7, W2-dmjw-7, W2-dxyo-7, W2-snuw-7, W2-svdr-7, W2-widb-7"/>
-  <criterion id="COX2-AC8" cell_refs="W2-cadn-1, W2-dmjw-1, W2-dxyo-1, W2-snuw-1, W2-svdr-1, W2-widb-1"/>
+  <criterion id="COX2-AC1" cell_refs="W2-cadn-1, W2-cadn-2, W2-cadn-3, W2-cadn-4, W2-cadn-5, W2-cadn-6, W2-cadn-7, W2-dmjw-1, W2-dmjw-2, W2-dmjw-3, W2-dmjw-4, W2-dmjw-5, W2-dmjw-6, W2-dmjw-7, W2-dxyo-1, W2-dxyo-2, W2-dxyo-3, W2-dxyo-4, W2-dxyo-5, W2-dxyo-6, W2-dxyo-7, W2-mrns-1, W2-mrns-2, W2-mrns-3, W2-mrns-4, W2-mrns-5, W2-mrns-6, W2-mrns-7, W2-snuw-1, W2-snuw-2, W2-snuw-3, W2-snuw-4, W2-snuw-5, W2-snuw-6, W2-snuw-7, W2-svdr-1, W2-svdr-2, W2-svdr-3, W2-svdr-4, W2-svdr-5, W2-svdr-6, W2-svdr-7, W2-widb-1, W2-widb-2, W2-widb-3, W2-widb-4, W2-widb-5, W2-widb-6, W2-widb-7"/>
+  <criterion id="COX2-AC2" cell_refs="W2-cadn-2, W2-dmjw-2, W2-dxyo-2, W2-mrns-2, W2-snuw-2, W2-svdr-2, W2-widb-2"/>
+  <criterion id="COX2-AC3" cell_refs="W2-cadn-3, W2-dmjw-3, W2-dxyo-3, W2-mrns-3, W2-snuw-3, W2-svdr-3, W2-widb-3"/>
+  <criterion id="COX2-AC4" cell_refs="W2-cadn-4, W2-dmjw-4, W2-dxyo-4, W2-mrns-4, W2-snuw-4, W2-svdr-4, W2-widb-4"/>
+  <criterion id="COX2-AC5" cell_refs="W2-cadn-1, W2-cadn-2, W2-cadn-3, W2-cadn-4, W2-cadn-5, W2-cadn-6, W2-cadn-7, W2-dmjw-1, W2-dmjw-2, W2-dmjw-3, W2-dmjw-4, W2-dmjw-5, W2-dmjw-6, W2-dmjw-7, W2-dxyo-1, W2-dxyo-2, W2-dxyo-3, W2-dxyo-4, W2-dxyo-5, W2-dxyo-6, W2-dxyo-7, W2-mrns-1, W2-mrns-2, W2-mrns-3, W2-mrns-4, W2-mrns-5, W2-mrns-6, W2-mrns-7, W2-snuw-1, W2-snuw-2, W2-snuw-3, W2-snuw-4, W2-snuw-5, W2-snuw-6, W2-snuw-7, W2-svdr-1, W2-svdr-2, W2-svdr-3, W2-svdr-4, W2-svdr-5, W2-svdr-6, W2-svdr-7, W2-widb-1, W2-widb-2, W2-widb-3, W2-widb-4, W2-widb-5, W2-widb-6, W2-widb-7"/>
+  <criterion id="COX2-AC6" cell_refs="W2-cadn-6, W2-dmjw-6, W2-dxyo-6, W2-mrns-6, W2-snuw-6, W2-svdr-6, W2-widb-6"/>
+  <criterion id="COX2-AC7" cell_refs="W2-cadn-7, W2-dmjw-7, W2-dxyo-7, W2-mrns-7, W2-snuw-7, W2-svdr-7, W2-widb-7"/>
+  <criterion id="COX2-AC8" cell_refs="W2-cadn-1, W2-dmjw-1, W2-dxyo-1, W2-mrns-1, W2-snuw-1, W2-svdr-1, W2-widb-1"/>
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_SUBSTRATECARDING.TO-W2-COX2_PROOF_OF_SPEC.json</instance_path>
   
   <expected_criteria>COX2-AC1,COX2-AC2,COX2-AC3,COX2-AC4,COX2-AC5,COX2-AC6,COX2-AC7,COX2-AC8</expected_criteria>
-  <alignment_denominators>criteria: 8. Cells: 42 of 42 owned by this executor, all covered. Unmapped 0; untraceable 0.</alignment_denominators>
+  <alignment_denominators>criteria: 8. Cells: 49 of 49 owned by this executor, all covered. Unmapped 0; untraceable 0.</alignment_denominators>
 </proof_of_spec>
 
 ---
@@ -65,22 +66,19 @@ W2-widb-2, W2-widb-3, W2-widb-4, W2-widb-5, W2-widb-6, W2-widb-7
 ⚠ `graph_vintage` is unchanged from wave 1 because the projection **has not rebuilt** (built 14:07:59Z,
 re-read 21:19Z, identical). **A measured fact, not a copied value.**
 
-## 2. YOUR 6 SUBJECTS
+## 2. YOUR 7 SUBJECTS
 
-⛔ **AMENDED 22:2xZ — 1 SUBJECT(S) ADDED.** The original derivation read `composes` +
-`projection_of` and **NEVER READ `location.co_resident_stores`** — a THIRD card field naming stores.
-`0.4.0_DT_ClientPlatform~X` measured it (4 of 4 positive controls firing). **Your existing cell ids are
-UNCHANGED** — ids derive from the subject string, so an addition moves nothing. Added here:
-- `s3://opal-313476888478-globgrph/warehouse/globgrph/resource_summaries_b38ddc35-9`
+**`provenance` states how each entered the set — `head_43` (a wave-1 `composes`/`projection_of` head) · `co_resident_addition` (a field the first derivation never read) · `compound_split` (one string that named two objects) · `dropped_recovery` (named in a wave-1 entry and lost at head-extraction).**
 
-| subject | named by (wave 1) | spellings |
-|---|---|---|
-| `ANCHOR_CATALOG + HUB_TYPES read at runtime from org/tier2_senior/0.4.0_DS_Clie` | C3.i-as-built | 1 |
-| `org/modules/graph/comp_ladder.py` | C3.i-as-built | 1 |
-| `org/modules/graph/debtscan/dup_scan.py` | comp-similar | 1 |
-| `org/modules/graph/debtscan/summary_corpus.py` | comp-similar | 1 |
-| `s3://opal-313476888478-globgrph/warehouse/globgrph/resource_summaries_b38ddc35` | wave-1 co_resident_stores | 1 |
-| `the two BAKED STATIC SPEC LAYERS folded by ingest_c2c3_motif_producer` | C3.i-as-built | 1 |
+| subject | provenance |
+|---|---|
+| `.tools/comp-debris` | dropped_recovery |
+| `ANCHOR_CATALOG + HUB_TYPES read at runtime from org/tier2_senior/0.4.0_DS_Cl` | head_43 |
+| `org/modules/graph/comp_ladder.py` | head_43 |
+| `org/modules/graph/debtscan/dup_scan.py` | head_43 |
+| `org/modules/graph/debtscan/summary_corpus.py` | head_43 |
+| `s3://opal-313476888478-globgrph/warehouse/globgrph/resource_summaries_b38ddc` | co_resident_addition |
+| `the two BAKED STATIC SPEC LAYERS folded by ingest_c2c3_motif_producer` | head_43 |
 
 ⛔ **These reached us as PROSE STRINGS.** Resolve identity by reading the thing, not the string.
 
