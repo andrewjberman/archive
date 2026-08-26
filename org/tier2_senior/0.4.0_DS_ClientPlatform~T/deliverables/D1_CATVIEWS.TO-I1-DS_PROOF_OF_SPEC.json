@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D1_CATVIEWS.TO-I1-DS.path-to-live-channel-enumeration",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/D1_CATVIEWS.TO-I1-DS.path-to-live-channel-enumeration.md",
+    "group": "I1",
+    "vintage_commit": "35f7ea8ced"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~T",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~T/deliverables/D1_CATVIEWS.TO-I1-DS_PATH_TO_LIVE_CHANNEL_ENUMERATION.md",
+      "kind": "doc",
+      "commit_or_etag": "see commit of this instance",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DS-class READ-ONLY enumeration. There is no deploy leg and none was performed: no re-pin, no safe-apply, no pin advance, no S3 code-channel write, no served object touched.",
+      "artifact_covered_by": ["I1DS-AC1", "I1DS-AC2", "I1DS-AC3", "I1DS-AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "I1DS-AC1",
+      "criterion_verbatim": "Every one of the 19 pinned modules is classified by channel(s) reached, with the executing path named ZIP or S3 per module, and the denominator printed beside the count",
+      "method": "artifact_enumeration_plus_head_object",
+      "invocation": "aws lambda get-function --query Code.Location -> curl the zip -> zipfile.namelist(); safe_deploy_core.file_to_s3_target(repo_path) per member; aws s3api head-object per resolved key",
+      "output_evidence": "22 PACKAGE members classified, 22 of 22. EXECUTING artifact carries 23 entries = 22 members + a builder-GENERATED BUILD_MANIFEST.json. ZIP reached 22/22. S3: 14 EXISTS+writable, 3 EXISTS/NO-WRITER, 5 absent. EXECUTING PATH FOR THE SCHEDULED FLOOR = THE ZIP, for all 22 (build_package.py assembles from an immutable pin via git show at :230-232 and refuses a symbolic ref; the lambda executes /var/task).",
+      "status": "PASS",
+      "denominator_note": "THE TO'S STATED '19' IS A STALE VINTAGE, NOT THE CURRENT COUNT. Measured: PACKAGE = 22 entries / 18 .py at HEAD; 21/17 at the running pin 1b96f70ad3; 19 at a4d71e9544 (2026-08-06). The operative denominator used throughout is 22, printed beside every count. Reconciled rather than silently adopted."
+    },
+    {
+      "criterion_id": "I1DS-AC2",
+      "criterion_verbatim": "The third-route question is answered by a sweep that could have returned a third value -- the method is stated, and a two-value result is reported as a measured absence, not an assumption",
+      "method": "five_candidate_route_sweep_with_controls",
+      "invocation": "R1 deployed-zip enumeration; R2 file_to_s3_target + head_object; R3 downloaded BOTH attached lambda layers and enumerated 1507 entries; R4 EC2_MANIFEST.json exact-filename sweep over all 22 with positive+negative controls; R5 read the EXECUTING handler's own bytes for get_object/importlib/exec",
+      "output_evidence": "THE SWEEP RETURNED A THIRD VALUE. R4 FIRED: EC2_MANIFEST /services/mdpf-daily-runner/calendar_distribution = s3://opal-data-mdpf/code/scripts/gold/trading_calendar.py (2026-08-11 WS-A recovery); head_object 6979 B, LastModified 2026-08-11T08:36:56Z; negative control on a bogus key returned 404, so the read discriminates. EC2-reached 3 of 22 (trading_calendar.py, mdpf_calendar_binding.py, partner_roster.json), exact-filename with positive control (mdpf-accrual-bridge.tar.gz -> 1) and negative control (zzz_nonexistent.py -> 0). CONTROLLED NEGATIVES: R3 layers carry NO pinned module (third-party deps only); R5 no runtime code fetch (get_object reads DATA from the assets bucket, importlib loads the PACKAGED comparator from a local path).",
+      "status": "PASS",
+      "axis_note": "D1-i-1's axis is THREE-VALUED, not two: lambda-zip | s3-code-channel | ec2-distribution. The decomp's axis gains a value."
+    },
+    {
+      "criterion_id": "I1DS-AC3",
+      "criterion_verbatim": "No claim in the deliverable reports a served-output or 'live' property from a commit hash or an S3 code-channel upload",
+      "method": "executing_artifact_grounding",
+      "invocation": "every channel claim grounded on one of: the downloaded executing zip; head_object on the actual key with a 404 negative control; the downloaded layer contents; the manifest text with positive+negative controls",
+      "output_evidence": "No claim in the deliverable derives a live property from a commit or an S3 upload. inv-5 CHANGED THE METHOD MID-TASK AND IS RECORDED DOING SO: reading build_package.py AT THE RUNNING PIN showed mdpf_category_registry.py ABSENT from its PACKAGE list, and I was one step from reporting the registry is not in the running bundle. The ZIP BYTES show it IS present. The pin is an ephemeral cherry-pick whose build_package.py is an older vintage than the builder that actually ran -- Rule 22a's ephemeral-pin clause @4424c948f7, arriving a third time in one night at a third seat.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "I1DS-AC4",
+      "criterion_verbatim": "D1-i-2 is reported APPLIED-GATED with the NO-SHIP fence cited verbatim; no re-pin, no safe-apply, no pin advance is performed or proposed as ready",
+      "method": "non_execution_with_fence_citation",
+      "invocation": "none -- the cell was not executed by design",
+      "output_evidence": "No re-pin performed. No safe-apply run. No pin advance performed or proposed as ready. Fence cited VERBATIM in the deliverable s.4 (ruled 72364 s.3) plus 1.0.0_SA_CTO~Y's addition that the bundled registry copy is pre-defect AND unreferenced and a pin advance destroys both properties. THE TRAP WAS MET AND BEHAVED AS PREDICTED: mdpf_category_registry.py is PRESENT in the running bundle (measured in the zip), and its presence is NOT evidence of safety -- it is the inert copy the fence protects. The NO-SHIP lift is Andrew's by-name word and nobody else's.",
+      "status": "APPLIED-GATED",
+      "status_note": "APPLIED-GATED is the expected terminal status, NOT PASS. A PASS here would assert an apply that must not have happened."
+    }
+  ],
+  "cell_status": [
+    {
+      "cell": "D1-i-1",
+      "status": "OBSERVED-COMPLETE",
+      "basis": "the enumeration was performed end to end at this hand: deployed-zip download and member enumeration, per-member S3 resolution and head_object, layer download, EC2 manifest sweep, handler-bytes read."
+    },
+    {
+      "cell": "D1-i-2",
+      "status": "OBSERVED-DID-NOT-EXECUTE",
+      "basis": "I observed the fence and the decision not to run. I did NOT observe any property of a re-pin, because none occurred. Written from what was observed, not inferred from AC4's verdict."
+    },
+    {
+      "cell": "D1-inv-5",
+      "status": "OBSERVED-HELD",
+      "basis": "observed as a binding constraint that changed this seat's own method mid-task (deliverable s.5). NOT recorded as 'verified' as a property of the estate -- that is not what an invariant cell asserts."
+    }
+  ],
+  "controls": {
+    "discriminating_reads": [
+      "head_object negative control on a bogus S3 key -> 404 (so EXISTS verdicts discriminate)",
+      "EC2 manifest positive control: mdpf-accrual-bridge.tar.gz -> 1 leaf; negative control: zzz_nonexistent.py -> 0",
+      "layer sweep could have fired and did not: 1507 entries enumerated, no pinned module present",
+      "runtime-fetch arm could have fired and did not: handler bytes read directly for get_object/importlib/exec"
+    ],
+    "self_correction": "My first EC2 sweep matched on module STEMS and I read its output as containing two false positives. The exact-filename re-run WITH controls shows all three hits are real. The two sweeps returned the same count for different reasons; only the controlled one is evidence, and I am recording the wrong intermediate reading rather than only the right final one."
+  },
+  "declared_exclusions": [
+    {
+      "item": "D1-i-3 (portal render path-to-live)",
+      "reason": "Joined surface (i) at @eb73d94342 but is NOT in this TO's cell set. This TO was cut @35f7ea8ced on i-1/i-2/inv-5; alignment denominators read 3 cells / 4 criteria. A reader who sees 'surface (i)' on both and assumes coverage gets it wrong -- the issuer named that seam (73759 s.2) and this instance carries the name, not the assumption."
+    },
+    {
+      "item": "The remaining 28 of the decomp's 31 cells",
+      "reason": "Not this TO's. They are the carried + (h) + Client-L1 family, which 1.0.0_SA_CTO~Y's re-cert REFUSES on postulate (i) pending the issuer's absorbing amendment. Nothing else on D1_CATVIEWS was touched."
+    }
+  ],
+  "surprises": [
+    "trading_calendar.py HAS THREE ROUTES AND NO WRITER FOR THE ONE AN EC2 SERVICE CONSUMES. ZIP present (built from lib/trading_calendar.py at the pin); an S3 object EXISTS at code/scripts/gold/trading_calendar.py dated 2026-08-11 (15 days old); safe_deploy_core.file_to_s3_target('lib/trading_calendar.py') returns None, so NO DS deploy path writes that key -- it was placed by a one-off recovery; and mdpf-daily-runner (EC2) distributes FROM that key. A change to lib/trading_calendar.py reaches the lambda via the next pin and does NOT reach the EC2 runner. No existing instrument reports it: comp-pipescript deployed resolves the repo->S3 pair, and for this file that pair does not exist. Same shape as tonight's D8 defect one layer out, on the file NEVER#1 makes load-bearing for every staleness verdict in the estate. RECORDED, NOT CHASED per the refactoring/migration embargo (Andrew ~20:32Z); surfaced to 3.0.0_SA_CVO cc the issuer, and this lane kept working.",
+    "partner_roster.json and mdpf_model_registry.json also read EXISTS/NO-WRITER. Stated without action, same class."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~T/logs/2026-08-26/",
+  "compiler_tools": [
+    {
+      "tool": "comp-pipescript deployed",
+      "invocation": "not run for this TO",
+      "result": "N/A",
+      "note": "DELIBERATELY NOT USED AS THE INSTRUMENT HERE. It certifies the repo->S3 code-channel pair and is structurally silent about the lambda bundle -- the exact gap this TO exists to enumerate, and the gap that made trading_calendar.py's third route invisible. Using it would have answered a different question cleanly and wrongly."
+    },
+    {
+      "tool": "safe_deploy_core.file_to_s3_target",
+      "invocation": "imported and called per member to resolve the S3 code-channel target",
+      "result": "PASS",
+      "note": "Used the deploy's OWN resolver rather than re-deriving the bucket/prefix mapping by hand. It returned None for lib/trading_calendar.py and the org/ CVO deliverables, which is what surfaced the NO-WRITER class."
+    }
+  ]
+}
