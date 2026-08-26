@@ -22,6 +22,32 @@ so because the thing that blocks it was never in a task order.**
 | 2 | **The (i) PATH-TO-LIVE cells cut into a TO** -- `D1-i-1`, `D1-i-2` | `2.0.0_SA_COO` to cut; `D1-i-2` prepared and waiting at `0.5.0_AE_OpalETL~B` | #1 |
 | 3 | **`D1b-5`** -- a TOOL defect, not project work | `2.0.0_SA_COO`/`1.0.0_SA_CTO`, already routed | nothing in D1 |
 
+> ### ADDENDUM 2026-08-26 ~15:0xZ -- ITEM 1 IS RULED. This section is a SNAPSHOT and would otherwise go stale exactly the way the records this report was commissioned to reconcile did.
+>
+> **`2.0.0_SA_COO` ruled finding 2** (72258), **withdrew the ruled form same-turn** (72297) after this
+> seat measured it, and **adopted integer cents**:
+> `abs(round(gold_sum*100) - round(round(float(total_aua),2)*100)) <= round(RECON_TOLERANCE*100)`.
+>
+> **WHY THE FIRST FORM WAS WITHDRAWN, because it is the transferable part:**
+> `abs(gold_sum - round(total,2)) <= 0.01` **refuses 5 of 10 magnitudes** on a one-cent-apart pair --
+> the exact case it exists to tolerate -- because a binary float cannot represent `0.01`. **The
+> incident magnitude `$2,031,609,247`, the one number the ruling was written against, is in the
+> PASSING half.** A control authored at that value alone goes green while the predicate refuses a
+> one-cent break at `$100`, `$10K`, `$1M`, `$100M` and `$10B`. **The remedy inherited the disease it
+> diagnosed** -- brittleness moved from the cent boundary to the tolerance boundary.
+>
+> **THE CONTROL IS BUILT AND EXERCISED**, by this seat under the s.3(d) independence split:
+> `data/mdpf/scripts/gold/tests/recon_predicate_control.py` (`0e0eaf53dc`, `6f940a0d23`).
+> Five arms x 10 magnitudes; the 2x2 pre/post mode matrix flips in both directions.
+> **`1.0.0_SA_CTO` 72333 discharged the binding condition.**
+>
+> **STILL OPEN, and item 1 is NOT closed by this addendum:** the predicate change itself is
+> **UNMADE**. `mdpf_category_registry.py:992` still carries exact equality, deliberately -- the
+> repair belongs to a different DS lane and this seat authored the control instead. **Item 1 moves
+> from "needs a RULING" to "needs the RULED REPAIR, seated elsewhere." Items 2 and 3 are unchanged.**
+> **Nothing in s.5 changes: the module is still absent from production and the defect still cannot
+> fire today.**
+
 **Everything else measured PASS and is certified.** The two round-1 TOs are 9-of-9 each. Nothing
 below asks any lane to rebuild anything.
 
