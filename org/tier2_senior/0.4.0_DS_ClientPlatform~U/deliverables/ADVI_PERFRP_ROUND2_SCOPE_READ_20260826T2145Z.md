@@ -99,6 +99,38 @@ This section originally read: *"the band can recur. It is upstream data, so neit
 
 ---
 
+## 5b. ⛔ ADDED 2026-08-26T2205Z — THE OUTLIER COHORT. A ROUND-2 INPUT, AND THE REMEDY SHAPE IS NOT WHAT THE PACKET ASSUMES.
+
+`2.0.0_SA_COO` 73812 rules that Andrew's DATA half and `0.7.0_AE_CloudOps~L`'s outlier finding go to him in **one packet**, because the outlier **arms at the instant of a YES**. That message states the cause as **OPEN** — *"a near-zero BMV denominator and an unneutralised external cash flow both produce this shape, and the separating control was not run."* **I ran it** (emitter content is `TO-R1-DS`, this lane; read-only). Reported as 73823 and 73844.
+
+**BOTH NAMED CAUSES FAIL.**
+· **Cash flow — FALSIFIED on 2 of 4** at `date=2026-08-25`: `cf_net` is **exactly 0.00** for `0057178995` (+1054.3%) and `0012906417` (-88.1%). And `0013289888`'s flow is **NEGATIVE 10,000** while value rises **27.24x** — the wrong sign for the cash-flow story.
+· **Near-zero BMV — neither necessary nor sufficient.** `bmv<2,000`: **n=370, 3 extreme (0.81%)** — 367 of 370 are fine. `bmv>=2,000`: n=6,042, 1 extreme — and that one is the **+2722.3%**, at bmv **10,135**.
+
+**AND THE POPULATION IS NOT FOUR ACCOUNTS — IT IS A DAILY COHORT THAT CHURNS COMPLETELY.**
+
+| date | non-null `r_net` | \|r_net\|>20% | max | bimodal gap |
+|---|---|---|---|---|
+| 2026-08-24 | 6,412 | **9** | **+69,056.0%** (`0032486794`, bmv 57.00) | #9 -89.4% → #10 -12.6% = **7.1x** |
+| 2026-08-25 | 6,415 | **4** | +2,722.3% | #4 -50.0% → #5 +7.2% = **7.0x** |
+
+**INTERSECTION: EMPTY.** No account persists across the two days.
+⛔ **THE PACKET'S HEADLINE `+2722.3%` IS DATE-SCOPED AND IS NOT THE WORST OBSERVED — 08-24 printed `+69,056.0%`, 25x higher.** State the DATE as well as the GRAIN.
+⛔ **A SUPPRESSION LIST IS OBSOLETE THE DAY AFTER IT IS WRITTEN.** 73812 s.3's *"suppressing four keys of 6415 is small"* is true of a fixed set; **this set is not fixed.** The remedy must be a per-day RULE, not an enumeration.
+⛔ **AND A DENOMINATOR FLOOR MISSES MORE THAN HALF:** across both days, of **13** outliers a `bmv<2,000` floor catches **6** and misses **7** — including `-100.0%` at bmv **263,880.75** and `+108.6%` at bmv **241,834.54**. **BMV is not the discriminator at either date.**
+
+**THE THRESHOLD IS NOT MANUFACTURING THIS.** A chosen cutoff is exactly where an artifact would hide, so it was tested: **both days break independently at the same place** (7.1x and 7.0x gaps). Any line from ~15% to ~45% selects the identical sets.
+
+**BASE RATE: 2 of 2.** The five 9-col partitions (`2026-08-10`, `08-18`..`08-21`) carry **ZERO non-null `r_net`** — returns did not exist in that band, which corroborates the `INPUTS_ABSENT` story from the storage side. **Returns have EVER been computed on exactly two dates and BOTH produced a bimodal implausible-return cohort.** *Stated as 2 of 2, not as a rate — two dates is a small denominator for the word "every day."*
+
+**SECOND READ — `canonical_positions` + `canonical_valuation`, both dates:** all four 08-25 accounts carry `mkt_value_long` = `mkt_value_short` = **0.0** with the whole value in `fair_value`; **two hold ZERO positions on both dates** while their valuation moves; one gained a position (6→7) as value went 11.5x. **The valuation is not backed by a coherent position set.**
+
+**WHAT IS NOT CLAIMED:** no root cause — the upstream loader was not read. The **return math is not what is wrong**: `0.7.0_AE_CloudOps~L` measured the deployed emitter modules **8/8 MATCH with 4 of 5 vintage controls firing**. **Whether these accounts should produce a return at all is ARCHITECTURAL and no measurement answers it** — a zero-position account with a moving fair value may be a genuine cash or alternative holding rather than a defect.
+
+**AS A ROUND-2 INPUT:** this is the second candidate (with the O-2 provenance question in s.5) that **the decomp has no cell for.** Both are the issuer's to rule. **No cell minted, no id coined, no emitter changed.**
+
+---
+
 ## 6. WHAT THIS READ DID **NOT** DO
 
 No TO authored. No criterion id minted. No cell proposed. Nothing built, nothing deployed, no gate touched or expected-green'd. **`build_package.py:266`'s stale-pin interlock and `D1_CATVIEWS` were not approached** — flagged in 73736 s.4 and deliberately given a wide berth.
