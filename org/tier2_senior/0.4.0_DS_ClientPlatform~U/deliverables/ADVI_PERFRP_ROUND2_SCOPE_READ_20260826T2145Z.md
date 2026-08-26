@@ -81,7 +81,19 @@ Layer 5 derived **30 (three TOs) + 2 (CVO) + 4 (boundaries)** from the **TO face
 
 >> **THE ROUND-2 QUESTION, and it is a QUESTION not a claim: the projection's output is INPUT-DEPENDENT across a boundary nothing declares. A served figure computed on a 9-col partition and one computed on a 13-col partition are DIFFERENT COMPUTATIONS, and nothing on the artifact's face says which arm produced it.** That is the CLAUDE.md §4 shape — *a value must carry its claim, in a field a consumer can reject on* — and the consuming half is what makes it real. **Whether that warrants a provenance field is a DECOMP question and therefore the issuer's.** I have not minted a cell, named an id, or proposed a schema. <<
 
-**Second-order, stated once and not chased:** the band can recur. It is upstream data, so neither lane's code change caused it and neither can prevent it.
+⛔ **CORRECTED 2026-08-26T2150Z BY `0.7.0_AE_CloudOps~L` (73789). MY CAUSE CLAUSE WAS WRONG AND THE CORRECTION IS ACCEPTED IN FULL.**
+This section originally read: *"the band can recur. It is upstream data, so neither lane's code change caused it and neither can prevent it."*
+**IT IS A CODE FIX, IT IS DATED, AND IT IS ATTRIBUTABLE.** `_pull_prev_valuation_into_mirror` landed in **`b9a665364f`** (2026-08-25T02:57:56Z, `0.4.0_DS_ClientPlatform~H`, OPAL_GLDRNS twr D-1 mirror), an ancestor of the bytes measured DEPLOYED on 08-25 — **with a negative control (`b9915d8271` is NOT an ancestor), so the test discriminates.**
+**The decisive instrument is the two adjacent SCHEDULED chain fires, which I never looked at:**
+`chain_20260824T124542Z` → `date=2026-08-21`, **no prev-valuation-pull line at all** (pre-mirror code) → the **9-col** partition.
+`chain_20260825T124542Z` → `date=2026-08-24`, *"prev valuation pull: 2 object(s) for date=2026-08-21 (D-1 of 2026-08-24) -> mirror"* → the **13-col** partition.
+**The transition boundary in my census sits EXACTLY at the first chain fire after the fix reached `_code/`.** And the 08-22/08-23 hole is Saturday and Sunday — the D-1 pull took Friday 08-21 for chain date Monday 08-24, the prior TRADING day. Correct calendar behaviour, not a gap.
+
+**WHY MY VERSION WAS WRONG, and it is the transferable half:** I measured the **STORAGE** side (schema width across 531 partitions) and inferred a cause from it. **A schema census can establish WHEN a column set changed and is structurally blind to WHY** — the producer-side chain log and the commit ancestry are the instruments that discriminate cause, and I ran neither. ⚠ **`b9a665364f` was visible in my own first `git log` read of this session and I did not connect it.**
+⚠ **And the direction matters:** *"fragile upstream data"* is the **SAFE-SOUNDING** claim, so nobody would have pushed back on it. `0.7.0_AE_CloudOps~L` spent a message on one clause precisely because *"upstream data that can move back"* and *"a durable code fix"* carry **OPPOSITE RISK POSTURES** for the 49F serve, and Andrew's DATA half is being adjudicated against exactly this.
+
+**WHAT SURVIVES, per that seat's own boundary — it does not overshoot:** the band **can** still recur, for a **DIFFERENT reason than the one I named.** The mirror pull reads D-1's already-uploaded `canonical_valuation` from S3 and carries an explicit `ABSENT-IN-S3 ... holds 0` branch, so **a MISSING D-1 refuses again** — which is the shape of the 2026-08-11..08-17 hole filed below. **Durable against the recurrence I named; still exposed to a missing D-1. Two failure modes, two owners, not merged.**
+**AND THE ROUND-2 QUESTION GETS SHARPER, NOT WEAKER:** the arm boundary is now a **KNOWN, DATED, ATTRIBUTABLE** event, so a provenance field would have something concrete to record. Still a decomp candidate for the issuer; still not a cell either lane minted.
 
 **OBSERVATION x INERT, already filed (73683), restated only for completeness:** `twr_daily` has **no partitions for 2026-08-11..2026-08-17** — five trading days — immediately adjacent to the 9-col band. Not investigated: not my task, embargo respected, and the live frontier is a healthy T-1 (`date=2026-08-25` on Wed 2026-08-26; 08-22/08-23 were the weekend).
 
