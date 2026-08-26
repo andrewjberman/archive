@@ -1,0 +1,130 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.4.0_DT_ClientPlatform~X",
+  "subject": {
+    "id": "comp-heat",
+    "kind": "tool",
+    "declared_domain": "the estate OBJECT write-freshness and hygiene surface -- advisory-only, read-only, distinct from comp-freshness which covers data pipelines"
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T23:05:00Z",
+    "commit_ish": "100e7ea130",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "basis": "measured",
+      "evidence": "--help read at HEAD: 5 subcommands (freshness, drift, score, federated, compare), self-described as 'Estate OBJECT write-freshness + hygiene (NFRA_HEATMAP_OBJECT). ADVISORY-ONLY, read-only.' Executable at .tools/comp-heat, 19,267 bytes, 2026-08-04.",
+      "owner": "0.8.0_AE_CloudComp lane (comp-tool registration)",
+      "how": "A read-only advisory surface over git write-times and, in the federated mode, over estate assets joined to git code-heat. It COMPOSES git history and the estate asset set; it INVENTS the hot/warm/cold banding and the exponential recency score.",
+      "determinism": "deterministic",
+      "composes": [
+        {
+          "id": "git_history",
+          "note": null
+        },
+        {
+          "id": "estate_asset_set",
+          "note": "federated mode only, via Trino"
+        }
+      ],
+      "invents": [
+        {
+          "id": "heat_banding",
+          "note": "hot<=7d / warm<=30d / cold>30d"
+        },
+        {
+          "id": "recency_score",
+          "note": "exp(-ln2*age/half_life)"
+        }
+      ],
+      "materializer_standing": "canonical",
+      "declared_opinions": [
+        "the band barriers hot<=7d, warm<=30d, cold>30d -- chosen cutoffs, printed on every run",
+        "a 30-day half-life in the recency score",
+        "that write-time is a proxy for relevance at all, which is the tool's founding opinion"
+      ]
+    },
+    "cadence": {
+      "basis": "measured",
+      "evidence": "No schedule: an on-demand CLI. Every run computes from git state at call time. live_matches_declared is not_applicable because no rhythm is declared.",
+      "owner": "0.8.0_AE_CloudComp lane",
+      "declared_rhythm": null,
+      "actual_trigger": "a human or agent invocation",
+      "live_matches_declared": "not_applicable",
+      "live_instance_age": null
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "basis": "measured",
+      "evidence": "The tool persists nothing: `freshness` and `score` compute and print. PERSISTED FALSE IS MEASURED, NOT ASSUMED -- I ran both subcommands and no artifact appeared; the output is stdout only. (federated mode reads a live Trino federation, which I did not run.)",
+      "owner": "0.8.0_AE_CloudComp lane",
+      "persisted": false,
+      "authority_role": "none",
+      "mutation_policy": "not_applicable",
+      "form": null
+    },
+    "location": {
+      "basis": "measured",
+      "evidence": "Executable resolved at .tools/comp-heat and exercised from there.",
+      "owner": "0.8.0_AE_CloudComp lane",
+      "home": ".tools/comp-heat",
+      "projection_of": [],
+      "co_resident_stores": [
+        {
+          "id": "comp-debris",
+          "note": "the invoke-cold sibling named in the SAME wave-1 string that produced this subject"
+        }
+      ]
+    }
+  },
+  "trust": {
+    "coverage": {
+      "basis": "measured",
+      "evidence": "⛔ COVERAGE IS SCOPED TO WHAT I EXERCISED, AND THE DENOMINATOR SAYS SO: 3 of 5 subcommands were exercised (score, freshness, drift). `federated` was NOT run -- it requires a LIVE Trino federation. `compare` was NOT run. So this card's failure-mode row speaks for 3 of 5 surfaces and is silent about 2, rather than generalising from the 3 I happened to reach. Within `freshness` on org/modules/graph: 425 files scanned, bands hot=29 warm=58 cold=338, cold_frac 0.80.",
+      "owner": "0.8.0_AE_CloudComp lane",
+      "universe": "the 5 comp-heat subcommands",
+      "denominator": "3 of 5 subcommands exercised",
+      "explicitly_out": [
+        "federated -- needs a live Trino federation, not run",
+        "compare -- not run"
+      ]
+    },
+    "key": {
+      "basis": "inferred",
+      "evidence": "`freshness` keys on repo-root-relative PATHS (its own error text says so). `score` takes an arbitrary `id` string and, as measured below, never resolves it -- so for `score` the id is not an identity at all. crosses_spaces is TRUE because `federated` declares a join between estate ASSETS and git CODE-heat, two different id spaces, and no mapping between them is declared anywhere I could find.",
+      "owner": "0.8.0_AE_CloudComp lane",
+      "identity_space": "repo-root-relative path for freshness; an unresolved free string for score",
+      "key_is_stable": "unstable",
+      "crosses_spaces": true,
+      "declared_mapping": null,
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "inferred",
+        "declared_mapping": "inferred"
+      }
+    },
+    "failure_mode": {
+      "basis": "measured",
+      "evidence": "EXERCISED per subcommand, with arms reachable from different truths. ⛔ `score` IS A PURE FUNCTION OF --age-days AND NEVER RESOLVES ITS id. Four ids at --age-days 30 -- 'zzz/nonexistent/qqq.py', a real repo path, 'data/firm_registry.json', and the literal '!!!not even a path!!!' -- ALL returned score=0.5000 band=WARM. Varying --age-days on a FIXED real id moved it (7d->0.8507 HOT, 30d->0.5000 WARM, 90d->0.1250 COLD), so the discriminator is the flag and the id is echoed only. A garbage id yields a confident, well-formed band. ⚠ MY FIRST ATTEMPT AT THIS TEST WAS INVALID and I discarded it: both arms failed on a missing required --age-days, so they collapsed onto one truth and the identical output said nothing about miss-vs-hit. The result above is the re-run with both arms reachable. BY CONTRAST `freshness` RESOLVES: a nonexistent path returns 'comp-heat freshness: no tracked/untracked files under zzz/nonexistent/qqq/' while a real path returns a full band report -- loud and distinguishable. `drift` takes no positional target (rc=2 on both arms), so the miss-vs-hit question does not apply to it and I make no claim there.",
+      "owner": "0.8.0_AE_CloudComp lane",
+      "returns_on_failure": "score: a confident band+score computed from --age-days alone, id unresolved. freshness: an explicit no-files-found message. drift: takes no target.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "score accepts any id and returns a well-formed band, so a caller passing a wrong or stale id gets a plausible answer about nothing"
+      ],
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      }
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "An advisory, read-only, stateless tool that persists nothing and whose `freshness` surface fails loudly and correctly. QUALIFIED on one measured behaviour: `score` never resolves its id, so it will return a confident WARM/0.5000 for a string that is not a path at all. That is arguably by design for a calculator taking --age-days as input, and this card does not call it a defect -- but a consumer passing a resolved-from-elsewhere id would reasonably believe the score is ABOUT that object, and it is not.",
+    "blocking_defects": null
+  }
+}

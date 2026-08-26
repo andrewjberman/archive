@@ -1,0 +1,118 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.4.0_DT_ClientPlatform~X",
+  "subject": {
+    "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_edges_6629328d-a582-46d2-80bc-5059de1a77ce",
+    "kind": "store",
+    "declared_domain": "the governed Iceberg/Nessie graph_edges table -- the authoritative warehouse-plane store the canonical kuzu projection is built from"
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T22:55:00Z",
+    "commit_ish": "100e7ea130",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "basis": "measured",
+      "evidence": "Table located by enumerating the warehouse namespace: aws s3api list-objects-v2 over warehouse/globgrph/ with full pagination returned 181,412 keys, and table dirs were derived from key segment 3. This table holds 612 objects. Written by derive_runner.py; graph_nodes additionally by kuzu_incremental_refresh.py. WAREHOUSE_BUCKET/WAREHOUSE_NS_PREFIX are literals at kuzu_nessie_load.py:40-41.",
+      "owner": "0.8.0_AE_CloudComp lane (derive path)",
+      "how": "An Iceberg table under a Nessie catalog. Every Nessie REST commit writes a fresh metadata.json, so table state is anchored to the newest metadata file rather than to a live Nessie HEAD -- kuzu_nessie_load.py:11-17 records that the Nessie REST endpoint is in-VPC and unreachable from the dev box.",
+      "determinism": "deterministic",
+      "composes": [
+        {
+          "id": "live_aws_estate",
+          "note": null
+        },
+        {
+          "id": "repo_source_tree",
+          "note": null
+        }
+      ],
+      "invents": [],
+      "materializer_standing": "canonical",
+      "declared_opinions": [
+        "table state is pinned to the newest *.metadata.json rather than a true Nessie HEAD, because the REST endpoint is unreachable off-VPC -- a deliberate substitution the loader documents at its own :11-17"
+      ]
+    },
+    "cadence": {
+      "basis": "measured",
+      "evidence": "Newest metadata object LastModified 2026-08-26T02:09:51Z, computed as max over the MATERIALISED listing rather than by a paginated --query (which applies PER PAGE and returned ~130 values for this prefix) and not by a lexicographic sort (which reported 2026-06-12 for graph_nodes against a true 2026-08-26, because Iceberg metadata filenames do not sort chronologically). Both wrong methods were run and discarded before this figure.",
+      "owner": "0.8.0_AE_CloudComp lane",
+      "declared_rhythm": "nightly re-derive",
+      "actual_trigger": "schedule",
+      "live_matches_declared": "yes",
+      "live_instance_age": "newest metadata 2026-08-26T02:09:51Z"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "basis": "measured",
+      "evidence": "612 objects present under the table prefix in a fully paginated listing. Iceberg tables are append-plus-snapshot: existing data files are not edited, and a new state is a new metadata.json.",
+      "owner": "0.8.0_AE_CloudComp lane",
+      "persisted": true,
+      "authority_role": "source",
+      "mutation_policy": "append_only",
+      "form": "Iceberg table (parquet + metadata.json under a Nessie catalog)"
+    },
+    "location": {
+      "basis": "measured",
+      "evidence": "Prefix enumerated directly against the bucket with full pagination.",
+      "owner": "0.8.0_AE_CloudComp lane",
+      "home": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_edges_6629328d-a582-46d2-80bc-5059de1a77ce",
+      "projection_of": [],
+      "co_resident_stores": [
+        {
+          "id": "infra/aws/globgrph/kuzu_nessie_db",
+          "note": "the local projection built FROM this table"
+        }
+      ]
+    }
+  },
+  "trust": {
+    "coverage": {
+      "basis": "inferred",
+      "evidence": "58,224 edges at the pinned projection snapshot, read from comp-kuzu's provenance header in the same session. ⛔ PLANE NAMED: that count is the PROJECTION plane. The warehouse plane's own row count was NOT read -- doing so requires opening the Iceberg table through pyiceberg, which this card did not do. The two planes are known to differ (1.0.0_SA_CTO~X read the warehouse at 27,061/60,858 against the projection's 27,035/58,224), and reporting the projection figure as the warehouse figure would be exactly the conflation this wave exists to prevent.",
+      "owner": "0.8.0_AE_CloudComp lane",
+      "universe": "every relationship the derive emits between graph_nodes rows",
+      "denominator": "58,224 edges at the pinned projection snapshot -- PROJECTION plane; the warehouse-plane row count is unmeasured by this card",
+      "explicitly_out": [
+        "anything the derive cannot see",
+        "rows written after the pinned snapshot"
+      ],
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "measured",
+        "explicitly_out": "inferred"
+      }
+    },
+    "key": {
+      "basis": "absent",
+      "evidence": "The projection built from this table keys on CloudNode.node_id, of which 1,730 of 27,035 are ARN-shaped -- measured on the PROJECTION. I did NOT open the Iceberg table itself, so the warehouse-plane column names and key are inferred from the projection's shape rather than read from the table schema.",
+      "owner": "0.8.0_AE_CloudComp lane",
+      "identity_space": "node_id as surfaced in the projection; the table's own schema was not read",
+      "key_is_stable": "unknown",
+      "crosses_spaces": true,
+      "declared_mapping": null,
+      "basis_by_field": {
+        "identity_space": "inferred",
+        "key_is_stable": "absent",
+        "crosses_spaces": "inferred"
+      }
+    },
+    "failure_mode": {
+      "basis": "measured",
+      "evidence": "EXERCISED on the retrieval path with both arms reachable: head-object on warehouse/globgrph/zzz_no_such_table/metadata/v1.metadata.json returns 'An error occurred (404) when calling the HeadObject operation: Not Found'. POSITIVE CONTROL: head-object on a real metadata key of THIS table returns ContentLength 2094 in the same session. So a missing table is LOUD at the retrieval layer. ⛔ WHAT IS NOT COVERED: the loader pins to the NEWEST metadata.json, so a table whose newest metadata is old still resolves and returns successfully. Absence is loud; staleness is silent, and graph_contracts in this same namespace sits 71 days old while resolving normally.",
+      "owner": "0.8.0_AE_CloudComp lane",
+      "returns_on_failure": "404 Not Found on a missing table or metadata key",
+      "distinguishable_from_true_negative": "yes",
+      "silent_degrade_paths": [
+        "a stale newest-metadata.json resolves and returns successfully, so a frozen table is indistinguishable from a live one at read time"
+      ]
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "The governed, append-only, owned warehouse store with a loud absence failure and a fresh vintage measured today. QUALIFIED on two honest limits rather than on any defect: the row count reported here is the PROJECTION plane because the Iceberg table was not opened, and the key row is inferred from the projection's shape rather than read from the table schema. Both are stated in basis_by_field rather than smoothed over.",
+    "blocking_defects": null
+  }
+}
