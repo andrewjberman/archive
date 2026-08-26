@@ -170,6 +170,40 @@ a missing D-1. Both are true and they are different failure modes with different
 
 ---
 
+## 2b. CODE CURRENCY -- closing a gap in MY OWN claim, not anyone else's
+
+s.2 measured the census with **LOCAL repo** code. The scheduled chain runs from
+`s3://opal-data-49financial/_code/` via `s3 sync --delete`, and the stage invokes
+`d_publisher_port.py`, which imports `perfrp_emit_core` / `perfrp_emitters`. **If those deployed
+bytes were stale, my census would describe my laptop and not production** -- and s.1 only verified
+the ENTRYPOINT's bytes, not the modules it reaches.
+
+Compared LF-normalised, deployed `_code/` against repo `HEAD`:
+
+| file | deployed `_code/` | repo HEAD | |
+|---|---|---|---|
+| `d_publisher_port.py` | `6026639a203cca29` | `6026639a203cca29` | MATCH |
+| `perfrp_emit_core.py` | `2f4ff849c042ba2f` | `2f4ff849c042ba2f` | MATCH |
+| `perfrp_emitters.py` | `c372ce908c09084e` | `c372ce908c09084e` | MATCH |
+| `perfrp_performance_account.py` | `fddbd20eced941f7` | `fddbd20eced941f7` | MATCH |
+| `perfrp_performance_relationship.py` | `5e469bae56da6b43` | `5e469bae56da6b43` | MATCH |
+| `perfrp_rollup.py` | `e16d65691bef303a` | `e16d65691bef303a` | MATCH |
+| `perfrp_contract.py` | `c5ee11f4e1c06017` | `c5ee11f4e1c06017` | MATCH |
+| `perfrp_firm_pin.py` | `10113250a70d0f8d` | `10113250a70d0f8d` | MATCH |
+
+**DENOMINATOR: 8 compared, 8 MATCH, 0 DRIFT.**
+
+⛔ **A PERFECTLY UNIFORM PASS IS WHAT AN INSTRUMENT SIGNATURE LOOKS LIKE, so the control was run.**
+Same instrument, earlier vintages of `perfrp_emit_core.py`: `7034bff487` MATCH (it is HEAD for that
+file), then `056446003e`, `5ec0ab865f`, `23ed1e56d8`, `9af61d7e2e` all **DRIFT**. **4 of 5 controls
+fired.** The comparison can produce DRIFT and did, so the 8/8 is a measurement rather than a
+constant-true function.
+
+**CONSEQUENCE FOR THE PACKET:** the `6415 / 7348` and `3931 / 4398` figures describe **the code that
+production will execute at the next scheduled fire**, not a local variant.
+
+---
+
 ## 3. Surprise-channel item -- OBSERVATION, INERT (filed by `3.0.0_SA_CVO`, not by this seat)
 
 Four of the 6415 computed ACCOUNT returns sit outside any plausible band:
