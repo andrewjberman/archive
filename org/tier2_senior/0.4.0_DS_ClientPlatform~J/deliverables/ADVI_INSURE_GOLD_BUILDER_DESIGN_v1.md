@@ -101,7 +101,22 @@ declared and reused per attribute** — a consolidation, which is the sanctioned
 | `MEASURED` | populated from a field observed in captured vendor bytes | none — terminal |
 | `AWAITING-FIRST-RUN` | supplying call AND its response shape are known; no run has happened | **a scheduled run** |
 | `UNOBSERVED-CONTAINER` | a call names the field, but its populated shape has never been observed | **one populated specimen** |
-| `NOT-DERIVABLE-UPSTREAM` | no upstream field carries it under any name | ⛔ **vendor-side CONFIG change** |
+| `NOT-DERIVABLE-UPSTREAM` | no upstream field carries it under any name, **but a vendor-side config change could add one** | ⛔ **vendor-side CONFIG change** |
+| **`STRUCTURALLY-INAPPLICABLE`** | **the attribute is defined only for a population this table's asset class is not in; NO upstream change of any kind can populate it** | **NONE -- terminal** |
+
+> **AMENDED 2026-08-26 by `0.4.0_DS_ClientPlatform~R`** under an audited author override
+> (`2.0.0_SA_COO` ruling 72267 s.3; `~J` is dead, so this row would otherwise stand superseded on a
+> file nobody owns). **The fifth value's full Rule 24 four-postulate record -- including the amended
+> (i) MECE and (iv) STATE COHERENCE text, which this section's (i)/(iv) below PREDATE -- lives in
+> `ADVI_INSURE_BASIS_AXIS_AMENDMENT_SPEC_20260826.md` @`211b4ae752`.** Approved 72236; landed in the
+> producer @`e9697d309d`.
+> **THE DISCRIMINATING TEST between the two negative values:** *could ANY upstream change populate
+> this?* **YES -> `NOT-DERIVABLE-UPSTREAM`** (a BD template change: dim 436). **NO ->
+> `STRUCTURALLY-INAPPLICABLE`.** They were ONE constant in the producer until 2026-08-26, so the axis
+> reported one remedy covering both when it covered one -- **24(iv) unsatisfiable as built.**
+> Measured basis: `account_id` IS the Schwab account number (`dim_advisor_fee_role.account_id` ==
+> `dim_account_xref.schwab_account_id`, **5,337 of 5,337**, shuffle negative control **0 of 5,337**);
+> insurance assets are held at carriers, so no Schwab number exists to derive.
 
 - **(i) MECE over the declared domain.** *Exclusivity:* `NOT-DERIVABLE-UPSTREAM` (no field exists) vs
   `UNOBSERVED-CONTAINER` (field named, shape unseen) vs `AWAITING-FIRST-RUN` (shape known, no run)
@@ -111,6 +126,12 @@ declared and reused per attribute** — a consolidation, which is the sanctioned
   happened, still null" — that is a ROW-level value condition and is OUT of this axis's domain by
   the grain clause, not an uncovered member.**
 - **(ii) SAME GRAIN.** Every value is attribute-level. No row-level or cohort-level value sits beside them.
+  ⚠ **LIMIT ON `STRUCTURALLY-INAPPLICABLE`, added 2026-08-26 and stated so it is not discovered later:**
+  it is attribute-level **ONLY because every row in this table is one asset class.** **In a table mixing
+  insurance and AM rows, applicability would vary row-to-row and this value would BREAK the grain
+  postulate.** If such a table is ever built, the value does not travel to it unchanged -- it becomes a
+  row-level condition and needs a different home. `insurance_nav_current` is insurance-only by
+  construction, so the postulate holds here.
 - **(iii) INTENT COHERENCE.** One intent: *derivability*. It does **not** encode handling policy
   (never-drop is `spine_class`'s job) and does **not** encode data quality.
 - **(iv) STATE COHERENCE — ⛔ AND THE VALUES DO NOT MOVE TOGETHER, WHICH IS THE POINT.**
