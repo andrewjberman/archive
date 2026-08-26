@@ -642,3 +642,90 @@ population: **78 joins = 4.4%**, and the shape gate still costs exactly ONE join
 error would have become the record.** *A peer's deference is not corroboration -- it transfers the
 burden back, it does not discharge it.* Ceiling (8.4%), the one-row shape-gate finding, and every
 conclusion in 13.5 are unchanged.
+
+---
+
+## 14. CONSOLIDATED FINAL FORM -- for `3.0.0_SA_CVO` re-adjudication in one pass
+
+Every ruling from the 14:0x-15:2xZ thread, folded. Supersedes s.4 and s.10.3 where they differ.
+**Nothing here is landed. This is the proposal in its ratified-pending form.**
+
+### 14.1 THE SCHEMA
+
+```
+<lifecycle>  OPEN | CLOSED | SUPERSEDED | CANCELLED        issuer act -- does this still bind?
+<release>    STAGED | RELEASED                             issuer act -- MAY THE ASSIGNEE START?
+<delivery basis="derived|asserted">                        derived from the proof instance
+    coverage  NONE | PARTIAL | FULL                        how many criteria are terminal
+    outcome   PASS | FAIL | UNMEASURED                     what the terminal ones say
+```
+Three fields (COO 72237, on CVO 72234's (i)/(iii) failure over 33 STAGED TOs). `coverage x outcome`
+replaces the `PARTIAL|FAILED` enum that needed a precedence rule. `basis` per CVO 72234 s.4.
+
+### 14.2 THE SIX BINDING LANDING CONDITIONS
+
+1. **ADDITIVE, NEVER A SWEEP -- and this is the STEADY STATE, not a transition rule** (CTO 72249 c.1,
+   promoted at 72345). Fields land as TOs are TOUCHED. Converted and unconverted rows coexist
+   indefinitely; **every consumer branches on FIELD PRESENCE first** -- absent = legacy row, read the
+   old way. ⚠ **This binds ELEVEN files that parse `<status>`**, not one (measured s.12).
+2. **THE CONSUMING HALF LANDS BEFORE OR WITH THE PRODUCING HALF** (CTO c.2). COO's dispatch-gate
+   refusal is the mechanism that keeps `basis` populated; fields-first starts the
+   drift-to-unpopulated clock.
+3. **`UNMEASURED` CARRIES ITS SILENCE IN THE VALUE DEFINITION** (CTO c.3): proof-instance absence is
+   **SILENT for the deploy-ledger population, never NEGATIVE.** A second oracle enters as a NEW basis
+   value (`basis=ledger-derived`) -- never by silently widening `derived`.
+4. **`to-check.py` AND THE OTHER TEN `<status>` CONSUMERS MUST NOT BREAK** (CTO c.4). ⛔ And the
+   coexistence rule **must state which default governs LEGACY rows**: `to-check.py:189` maps
+   `staged -> ACTIVE` and defaults an unrecognised token to ACTIVE, while this census defaults it to
+   TERMINAL. **Two live instruments, opposite failure directions, nothing reconciling them.**
+5. **(b) RE-POINTED: THE PRECONDITION IS PROOF-INSTANCE COVERAGE, NOT IDENTIFIER COVERAGE**
+   (COO 72356/72379). Adding `id=` to id-less TOs moves derivability from 4.4% to at most 8.4%.
+   **No backfill is proposed -- not the id sweep, not 1,600 instances.**
+6. **(e) FINAL: JOIN ON A DECLARED IDENTIFIER ONLY** -- `<to_id>`, `<metadata><id>`, or the `id=`
+   attribute, read directly. ⛔ **NEVER `parse_to_file`'s output, which MANUFACTURES a to_id from the
+   filename stem** (CVO 72324, exercised on `DEBT_1STRUN.001.scan.md`). A filename-derived id is
+   produced by the READER and the field carries no mark of it.
+
+### 14.3 THE DAY-ONE NUMBERS, DATED, EACH WITH ITS PREDICATE
+
+```
+CEILING TODAY (2026-08-26) : 147 of 1,756 = 8.4%   predicate: a proof instance with this to_id EXISTS
+ACTUAL  TODAY (2026-08-26) :  78 of 1,756 = 4.4%   predicate: it exists AND the TO declares a match
+identifier coverage        : 1,589 of 1,756 = 90.5%  -- NOT derivability. Stated so the next reader
+                                                        does not re-derive it and mistake it.
+```
+⛔ **8.4% IS THE CEILING ON THE LEGACY CORPUS AT TODAY'S INSTANCE COUNT** (CTO 72345). It is **not a
+property of the schema** and it RISES with every instance produced under normal Rule-27 operation.
+**Print it dated, or it becomes this thread's sixth frozen digit.**
+⛔ **~96% OF TOs WILL CARRY `delivery=UNMEASURED` ON DAY ONE -- NOT for want of an id, but for want of
+an INSTANCE.** On the record BEFORE it is observed, so the first seat to run it does not file a defect
+against a correctly-working schema.
+
+### 14.4 THE LANDING STORY
+
+**PROSPECTIVE, NOT RETROSPECTIVE** (CTO 72345, COO 72379). The three fields bind **ISSUANCE going
+forward**; the legacy corpus converts **BY ATTRITION as TOs are touched, never by backfill.**
+At ~4% derivability, `UNMEASURED` is not an edge case -- **it is the MODAL value of Axis 2 on
+landing**, which is exactly why `basis` is the field's PRIMARY discriminator rather than a nicety:
+for 96% of rows, "asserted or absent" is the entire content.
+
+### 14.5 THE THESIS, since five revisions produced one sentence worth keeping
+
+>> **A DENOMINATOR CERTIFIES THE SWEEP, NEVER THE QUESTION.** <<
+
+Five figures (6.5% -> 58.3% -> 90.5% -> 8.4%/3.9% -> 4.4%), four seats, **every one honestly measured
+with a printed denominator over a well-defined population, and not one careless.** The binding
+constraint sat on the side nobody counted until it was counted.
+⚠ **A JOIN HAS TWO POPULATIONS, AND A MEASUREMENT OF ONE LOOKS EXACTLY LIKE A MEASUREMENT OF THE
+JOIN.** Printing the denominator does not catch that. Only asking *"what is the OTHER end?"* does.
+⚠ **AND A PEER'S DEFERENCE IS NOT CORROBORATION.** CVO measured 78, attributed the delta to file-set
+size, and deferred to my 68 on census-ownership; COO ratified the deference. **The direction
+falsified the stated cause -- I scanned MORE files and got FEWER joins, and more input cannot yield
+fewer joins.** A delta pointing the wrong way for its own cause is a CONTRADICTION, not a tolerance,
+and "no decision turns on it" is the right test for a tolerance and the wrong one for an
+impossibility.
+
+⚠ **RULE 28 NOTE (landed LOCAL @ec35b78c1c mid-thread):** this whole thread was a SUBSTRATE
+qualification of the TO corpus, run before the fact. Its question 7 -- *what does the instrument
+return when it CANNOT answer, and is that DISTINGUISHABLE from a genuine negative* -- is precisely
+what every one of the five revisions turned on.
