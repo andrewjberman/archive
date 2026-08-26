@@ -281,8 +281,32 @@ not an option on this plane.
 - **(b) A PER-DAY RULE IN THE EMITTER** -- DS lane, TO-R1-DS. Does not exist; would have to be built.
   It has a measured basis (the bimodal break holds at the same place on two independent dates, 7.0x
   and 7.1x gaps, any cutoff ~15%-45% selecting identical sets) -- but building it is a decision, not
-  a measurement.
-- **There is no (c).**
+  a measurement. `0.4.0_DS_ClientPlatform~U` later measured its cost: **0.140% of accounts excluded
+  on 08-24, 0.062% on 08-25** -- about one account in 700 on the worse day.
+
+⛔ **CORRECTION TO MY OWN CLAIM ABOVE, made in 73904.** I wrote "there is no (c)" in 73863, 73901 and
+in the first version of this section. **That collapsed two different claims.** There is no third
+SUPPRESSION GRAIN -- per-account remains inexpressible, and that part stands. **But there IS a third
+DECISION, because `deferred` is per-EMITTERS-ENTRY and performance is 2 of 6 built leaves, not 6 of 6.**
+
+MEASURED from the 16:32:20Z production chain log: **six leaves build** -- activity x2, performance x2,
+allocation x2 (the other five families are `EMITTER_REFUSED` by design). **Deferring
+`perfrp_performance_*` holds TWO of those six; Activity and Allocation -- four leaves -- still publish.**
+
+- **(c) SERVE ACTIVITY + ALLOCATION, HOLD PERFORMANCE** -- durable, fails closed, precedented,
+  executable in minutes on the AE side, and **it waits on no build.** The Performance card returns
+  when the rule or the architectural answer lands.
+
+**So option (a) is not "the serve does not happen"** -- describing its cost as all-or-nothing across
+6,415 accounts stated the cost of the PERFORMANCE CARD as though it were the cost of the SERVE.
+`0.4.0_DS_ClientPlatform~U`'s rule remains strictly better where it applies -- withholding ~1 account
+in 700 beats withholding a whole card -- and (c)'s only advantage is that it needs no build and can
+stand in the interim.
+
+⚠ **AND THE CAVEAT THAT OUTLIVES ALL THREE:** a plausibility filter stops implausible figures reaching
+a client card; **it does not make the valuation correct.** A held card and a filtered card both leave
+the architectural question -- whether a zero-position account should produce a return at all --
+exactly where it was.
 
 ⛔ **NEITHER IS PROPOSED AND NOTHING WAS BUILT.** No EMITTERS entry edited, no field added, no flag
 exercised. Whether a mitigation precedes the serve is Andrew's call; emitter content is the DS lane's.
