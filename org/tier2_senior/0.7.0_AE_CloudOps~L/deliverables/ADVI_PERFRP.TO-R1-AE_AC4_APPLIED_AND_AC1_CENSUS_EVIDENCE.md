@@ -240,6 +240,57 @@ produce this shape, and the control separating them was not run -- so the cause 
 
 ---
 
+## 3a. AE-PLANE MECHANISM -- per-account suppression is NOT EXPRESSIBLE at the publisher
+
+This is PRF-c-1 (publisher wiring), i.e. squarely this seat's cell, and it removes an option the
+packet implied existed. Source-read at `d_publisher_port.py`.
+
+**TWO suppression mechanisms exist, BOTH at LEAF / FAMILY grain:**
+
+| mechanism | site | lifetime | fails |
+|---|---|---|---|
+| `deferred` (spec field) | `:589-591` | **durable by construction** -- checked FIRST, before any flag; never publishes regardless of `--publish`, the grant env, `--keys`, the operator, or a session ignorant of the history | **CLOSED** |
+| `--hold-leaves` | `:516`, `:536-537`, `:592` | **session-scoped** -- parses to a set **defaulting to EMPTY**, so an invocation omitting it **publishes the held key** | **OPEN** |
+
+That distinction is already ruled and is not re-litigated here: COO 67133, CTO arch review 67145,
+ratified 67267; the comment at `:583-588` carries it verbatim.
+
+⛔ **AND THERE IS NO THIRD, FINER MECHANISM.** An EMITTERS spec carries exactly
+`['leaf', 'legacy', 'needs', 'script']` plus optional `deferred` / `multi`. **There is no per-entry,
+per-account or per-row filter anywhere in the publish path** -- `publish_one` takes a built leaf and
+publishes the whole object. **Account-grain suppression is not expressible at this plane at all.**
+
+**PRECEDENT, so the mechanism is not theoretical:** 1 of 23 EMITTERS entries carries `deferred`
+today -- `perfrp_transactions_relationship`, on the s.11 #6 sovereign ruling. Proven in use on this
+exact family set.
+
+### Why this composes with `0.4.0_DS_ClientPlatform~U`'s daily-cohort finding into a hard constraint
+
+That seat measured the outlier set as a **DAILY COHORT WITH ZERO OVERLAP** (9 on 08-24, 4 on 08-25,
+intersection EMPTY) and concluded a suppression LIST is obsolete the day after it is written.
+Compose that with the grain fact above: **a per-day list would be obsolete daily, AND the publisher
+could not hold a list even if it were stable.** "Maintain a suppression list at the serving edge" is
+not an option on this plane.
+
+### The actual option set
+
+- **(a) DEFER the `perfrp_performance_*` family** -- both leaves, at the publisher. One field per
+  entry, durable, fails closed, precedented, and it is this seat's cell: executable in minutes on
+  Andrew's word. **COST: the performance card does not serve AT ALL** -- all 6415 accounts, not the
+  outliers. All-or-nothing at this grain.
+- **(b) A PER-DAY RULE IN THE EMITTER** -- DS lane, TO-R1-DS. Does not exist; would have to be built.
+  It has a measured basis (the bimodal break holds at the same place on two independent dates, 7.0x
+  and 7.1x gaps, any cutoff ~15%-45% selecting identical sets) -- but building it is a decision, not
+  a measurement.
+- **There is no (c).**
+
+⛔ **NEITHER IS PROPOSED AND NOTHING WAS BUILT.** No EMITTERS entry edited, no field added, no flag
+exercised. Whether a mitigation precedes the serve is Andrew's call; emitter content is the DS lane's.
+**The reason this is reported at all: a decision maker offered an option their infrastructure cannot
+deliver will pick it.**
+
+---
+
 ## 4. Standing state of TO-R1-AE
 
 | criterion | status | held by |
