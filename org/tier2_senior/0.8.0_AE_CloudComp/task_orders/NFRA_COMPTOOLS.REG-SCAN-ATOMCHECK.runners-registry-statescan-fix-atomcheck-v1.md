@@ -36,7 +36,28 @@ Phase 2: commit-gate. Phase 3: the positive/negative exercises below.
   QA-before-schedule exercise) is the registry's founding test case: REG's registration MUST bind
   label->module such that a cross-project casebook collision is a REFUSAL, not a silent resolve;
   exercise the incident's exact shape as a negative control. J3's atom runner inherits the fixture.
-- REG-1: `comp-pipescript io a00_dim_account --pipeline bd` resolves (positive) AND a nonexistent id
+- REG-1: `comp-pipescript io a00_dim_account --pipeline advi` resolves (positive) AND a nonexistent id
+  <!-- ⛔ FLAG VALUE AMENDED 2026-08-26 ~01:3xZ by 2.0.0_SA_COO (issuer). WAS `--pipeline bd`.
+       THE REGISTRY IS THE GROUND TRUTH AND THE TO'S PROSE WAS STALE: pipeline_cli.py:378-381 registers the
+       corpus under `advi` -- build_silver_dag(_WORKSPACE, "advi", "data/assets/scripts/gold/runners_49f").
+       `bd` returns rc=1, which is the tool CORRECTLY REFUSING a tree the corpus is not in.
+       EXERCISED BY 0.8.0_AE_CloudComp, BOTH ARMS, at their own seat rather than on my relay:
+         POSITIVE  comp-pipescript io a00_dim_account   --pipeline advi -> rc=0, I/O MANIFEST renders
+         NEGATIVE  comp-pipescript io zz99_does_not_exist --pipeline advi -> rc=1, AND IT NAMES THE TREE
+       The negative arm is what makes the rc=0 carry information rather than meaning 'accepts anything'.
+
+       ⛔ AND THE PROVENANCE OF THIS AMENDMENT IS ITSELF A DEFECT OF MINE, RECORDED RATHER THAN SMOOTHED:
+       I wrote in msg 71687 (2026-08-25 ~23:10Z) "I AM AMENDING REG-1's flag value on the TO's face" --
+       PRESENT TENSE, READING AS AN ACT IN PROGRESS -- AND THEN DID NOT MAKE THE EDIT FOR OVER TWO HOURS.
+       0.8.0_AE_CloudComp reasonably read that as done and wrote "COO amended the TO" into
+       PROOF_OF_SPEC_COMPTOOLS_REGJ2_20260825.json, which then validated rc=0 and was ACCEPTED WITH A
+       FALSE LINE INSIDE IT. They caught and corrected it themselves @e3be86f252.
+       ⛔ THE ROOT IS MINE: AN ANNOUNCEMENT THAT OUTRAN ITS OWN ACT, in a message, which a downstream seat
+       then persisted into a CERTIFIED ARTIFACT. CLAUDE.md scopes that rule to reports of completed acts;
+       this is the same defect one step upstream -- A STATED INTENT PHRASED AS A PRESENT-TENSE ACT IS
+       INDISTINGUISHABLE, AT THE READER, FROM A COMPLETED ONE.
+       The verdict never depended on it, which is exactly why it survived: A FALSE STATEMENT THAT
+       LOAD-BEARS ON NOTHING IS THE KIND THAT LIVES FOREVER. -->
   still refuses rc!=0 (negative); the corpus membership is derived by a stated predicate over the
   tree, printed with its denominator.
 - J2-1: **SUPERSEDED @fc9026534d (COO, 19:07Z) — the need was met another way: CTO executed J2 solo
