@@ -578,8 +578,8 @@ Joins **achieved**, TO declared-id matched against instance `to_id`:
 
 | basis | joins | of 1,756 |
 |---|---|---|
-| shape-gated declared id (my 1,024) | 67 | 3.8% |
-| **any** declared id (CVO's 1,589) | **68** | **3.9%** |
+| shape-gated declared id (my 1,024) | 77 | 4.4% |
+| **any** declared id (CVO's 1,589) | **78** | **4.4%** |
 | **what the shape gate costs** | **1** | -- |
 
 The single row the shape gate costs is `COT_SUPERVISED.G4-ACCEPT-HANDOVER`
@@ -591,7 +591,7 @@ The single row the shape gate costs is `COT_SUPERVISED.G4-ACCEPT-HANDOVER`
 
 ```
 CEILING TODAY : 147 of 1,756 = 8.4%   predicate: a proof instance with this to_id EXISTS
-ACTUAL TODAY  :  68 of 1,756 = 3.9%   predicate: it exists AND the TO declares a matching id
+ACTUAL TODAY  :  78 of 1,756 = 4.4%   predicate: it exists AND the TO declares a matching id
 ```
 Both printed with their predicate, per the rule that a number restating a population must carry the
 population's definition.
@@ -599,7 +599,7 @@ population's definition.
 ### 13.5 ⛔ THIS REDIRECTS THE REMEDY, WHICH IS THE PART THAT MATTERS
 
 Landing condition (b) names `id=` as the precondition for Axis 2. **On these numbers it is not the
-binding one.** Giving all 167 id-less TOs an identifier tomorrow moves derivability from 3.9% to at
+binding one.** Giving all 167 id-less TOs an identifier tomorrow moves derivability from 4.4% to at
 most **8.4%** -- because 1,600 TOs have no instance to join *to*.
 
 **THE PRECONDITION IS PROOF-INSTANCE COVERAGE, NOT IDENTIFIER COVERAGE.** Different act, different
@@ -624,3 +624,21 @@ four was honestly measured and printed a correct denominator over a well-defined
 **and still wrong, for reasons unrelated to being close. Proximity is not correctness**, and a number
 that lands near the truth by a compensating error is more dangerous than one that is plainly off,
 because it survives a sanity check.
+
+### 13.7 CORRECTION TO 13.3, SAME HOUR: ACTUAL JOINS ARE 78 (4.4%), NOT 68
+
+⛔ **AN INCONSISTENCY INSIDE THIS DOCUMENT, CAUGHT BY A PEER AND CONFIRMED HERE.** s.13.2's CEILING of
+147 came from a BROAD sweep (`org/**/*.json`); s.13.3's ACTUAL came from a probe indexing only
+`org/**/deliverables/*.json`. **Two different populations in one report** -- the ceiling counted
+instances the join could not see, so ACTUAL under-reported at 68.
+
+`3.0.0_SA_CVO` measured **78** independently (72351) and attributed our delta of 10 to differing
+file-set sizes. **That explanation was the wrong one and the direction proves it: I scanned MORE
+JSONs (1,301) than they did (1,123), so my count should have been HIGHER, not lower.** The cause was
+a predicate mismatch inside my own probe, not a sweep-size difference. Re-run with ONE index over ONE
+population: **78 joins = 4.4%**, and the shape gate still costs exactly ONE join -- the same row.
+
+**CVO was right and deferred to my figure because I own the census; had I taken that deference, my
+error would have become the record.** *A peer's deference is not corroboration -- it transfers the
+burden back, it does not discharge it.* Ceiling (8.4%), the one-row shape-gate finding, and every
+conclusion in 13.5 are unchanged.

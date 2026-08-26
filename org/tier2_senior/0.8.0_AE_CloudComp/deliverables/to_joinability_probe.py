@@ -1,4 +1,11 @@
-"""Four candidate joinability numbers + the one nobody measured: ACTUAL JOINS."""
+"""Four candidate joinability numbers + the one nobody measured: ACTUAL JOINS.
+
+CORRECTED 2026-08-26 ~15:1xZ: the instance index originally globbed
+org/**/deliverables/*.json while the 147-key CEILING figure came from a BROAD
+org/**/*.json sweep. Two different populations inside one report -- the ceiling
+counted instances the join could not see, so ACTUAL came out 68 when it is 78.
+3.0.0_SA_CVO measured 78 independently and was right. ONE INDEX, ONE POPULATION.
+"""
 from __future__ import annotations
 
 import collections
@@ -23,7 +30,7 @@ def attr(t):
 
 # instance index
 inst = collections.defaultdict(list)
-for p in ROOT.glob("org/**/deliverables/*.json"):
+for p in ROOT.glob("org/**/*.json"):   # BROAD: instances also live outside deliverables/
     try:
         d = json.loads(p.read_text(encoding="utf-8", errors="replace"))
     except Exception:
