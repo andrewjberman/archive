@@ -133,9 +133,21 @@ This section originally read: *"the band can recur. It is upstream data, so neit
 
 | option | grain | lever | withholds |
 |---|---|---|---|
-| **(a)** defer the `perfrp_performance_*` family | family | AE lane, **exists today**, minutes | **all 6,415 accounts** |
+| **(a)** defer the `perfrp_performance_*` family | family | AE lane, **exists today** | **the Performance card** — see the correction below |
 | **(b)** per-day plausibility rule | account | DS lane (**mine**), **does not exist — a BUILD** | **4–9 accounts** |
-**There is no (c). The two differ by a factor of ~700 in what they withhold.**
+| **(c)** serve Activity + Allocation, hold Performance | family | AE lane, **no build** | the Performance card only |
+
+⛔ **CORRECTED 2026-08-26T2225Z — I WROTE "(a) withholds all 6,415 accounts" AND "there is no (c)". BOTH WERE WRONG, AND I CARRIED THEM FROM A CLAIM `0.7.0_AE_CloudOps~L` HAS SINCE CORRECTED IN ITSELF (73906, relayed 73909).**
+**MEASURED from the production chain log (`chain_20260826T163220Z.log`): SIX leaves build today** — `activity` x2, **`performance` x2**, `allocation` x2 (the other five families are `EMITTER_REFUSED` by design). **Deferring `perfrp_performance_*` holds 2 OF 6. Activity and Allocation — four leaves — STILL PUBLISH.**
+**So (a) is NOT "the serve does not happen." It is "the Activity and Allocation cards ship; the Performance card is held"** — which is a **third decision position, executable without a build.** That seat's own correction: *"there is no third SUPPRESSION GRAIN — per-account is still not expressible. But there IS a third DECISION, because the defer is per-family and performance is 2 of 6, not 6 of 6."*
+⚠ **MY ~700x FACTOR STANDS ONLY FOR THE PERFORMANCE CARD, NOT FOR THE SERVE.** I stated a per-card cost as a per-serve cost.
+
+⛔ **SEQUENCING CONSTRAINT — IT CANNOT BE FIXED AFTER THE FACT (`2.0.0_SA_COO` 73909 s.2).**
+**No perfrp leaf publishes today** — the publisher runs build-only and all six log `WOULD_PUBLISH`. **That is exactly why the outlier reads INERT.** Therefore a family defer **only binds once publishing is switched on, and the two acts are ORDERED**:
+>> **IF A YES ENABLES PUBLISH AND THE DEFER IS NOT ALREADY PRESENT IN `_code/` AT THAT MOMENT, THE FIRST SERVING RUN CARRIES THE OUTLIERS — and they are then SERVED OBJECTS, and moving a served key is NEVER#3.** <<
+**"Yes, but hold Performance" requires the defer commit PUSHED AND IN `_code/` BEFORE the publish-enabling act, not alongside it.** A sequencing fact, not a gate.
+
+⚠ **AND "EXECUTABLE IN MINUTES" WAS TRUE OF THE AUTHORING, NOT THE SERVING.** Three steps and only the first is minutes: (i) edit + commit the `deferred` field — AE's cell; (ii) **PUSH — the integrator's act, not that seat's**; (iii) live **at the next chain fire** (12:45Z scheduled, sooner on an ad-hoc QA fire). **Anyone holding the earlier wording is holding a shorter clock than the real one.**
 
 **COST OF (b), measured at seven thresholds on both dates:**
 | threshold | 08-24 excl. (of 6,412) | 08-25 excl. (of 6,415) |
