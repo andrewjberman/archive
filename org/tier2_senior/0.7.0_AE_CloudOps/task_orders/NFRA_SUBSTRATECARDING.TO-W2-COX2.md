@@ -91,7 +91,7 @@ account for** — a measurement anyone can run, not a suspicion.
 
 | id | criterion |
 |---|---|
-| **COX2-AC1** | 5 cards exist and **all VALIDATE** against v2. Every row carries `basis` + `evidence` + `owner`. |
+| **COX2-AC1** | 7 cards exist and **all VALIDATE** against v2. Every row carries `basis` + `evidence` + `owner`. *(count corrected 5 -> 7 from the CERTIFIED rectangle @5168510a28; the TO was cut before the subject set's final amendments and only this PROSE lagged. The machine-readable `cell_refs` were verified complete against the rectangle BEFORE this edit, so no obligation changed -- this is the count catching up to the spec, not a spec change.)* |
 | **COX2-AC2** | `cadence` worked on every card. |
 | **COX2-AC3** | `persistence` worked; `persisted: false` is legitimate **only if MEASURED**. |
 | **COX2-AC4** | `location.home` exact, or `null` **with evidence of where you looked and the search denominator**. |
