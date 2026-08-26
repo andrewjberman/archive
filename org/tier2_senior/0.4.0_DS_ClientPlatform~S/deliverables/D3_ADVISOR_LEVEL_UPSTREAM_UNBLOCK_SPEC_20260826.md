@@ -21,6 +21,29 @@ estate's puller replays verbatim and never authors.** The remedy is a template a
 Diamond. **A mechanism to perform that amendment from this estate EXISTS and is proven** (the cot
 G4 precedent), but it is a vendor API write and therefore Andrew's call, not an exec act.
 
+> ### ⛔ ANDREW HAS SINCE RULED — 2026-08-26 ~20:39Z. THIS DOCUMENT'S "RESERVED CARD AT ANDREW" IS ANSWERED.
+>
+> **Every line below that reads as an OPEN card at Andrew (§0 above, §3, §5) was written before he
+> spoke and is SUPERSEDED as to the ASK.** Stamped here rather than left standing, because **a
+> document that reads "awaiting Andrew" after Andrew has answered is the stale-status class** — the
+> same defect that re-seated finished work at three seats on this date.
+>
+> **HIS RULING (relayed `2.0.0_SA_COO` 73624; chain `1.0.0_SA_CTO` 73613 item 2, record `@d7cea57dd3`):**
+> the **dim-436 write is PRE-AUTHORIZED, CONDITIONAL** on an authorized catalog read confirming
+> addability — template **390224**, that **one** dimension. `ADVI_COTKEY` keying was ratified in the
+> same word (key of record = Portfolio Group / template 270648; value = advisor).
+>
+> **WHAT REMAINS OPEN IS NOT A CARD AT ANDREW — IT IS A CONDITION THAT COULD NOT BE TESTED.** The
+> catalog read was attempted 2026-08-26 ~21:0x–21:3xZ and **could not be performed from this device**
+> (401 on every data route with a bearer that mints successfully; AWS-origin authenticates on the same
+> secret). `2.0.0_SA_COO` 73819 ruled it **CLOSED UNMET — not failed, not refused, not lapsed** — and
+> carries *"we could not look"* to Andrew itself.
+> **Full attempt record + grant accounting: `DIM436_CATALOG_READ_ATTEMPT_20260826.md` (`d215234781`).**
+>
+> ⚠ **SO: 436 addability remains UNKNOWN and his pre-authorization remains UNCONSUMED.** The correct
+> read of this document today is *"the ask is answered; the measurement that would fire it has not been
+> taken"* — **NOT** *"a decision is waiting on Andrew."*
+
 ---
 
 ## 1. WHAT WAS ALREADY ESTABLISHED, AND WHAT I DID NOT RE-DERIVE
