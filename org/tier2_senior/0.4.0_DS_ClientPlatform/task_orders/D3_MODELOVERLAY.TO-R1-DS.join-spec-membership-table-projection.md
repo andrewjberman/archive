@@ -14,7 +14,15 @@
      work is covered. `to-check.py --assignee <lane>` reads <issued_to> and is the sound instrument.
      Found by 0.4.0_DS_ClientPlatform~S refusing to start work it could not confirm was its own. -->
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>DELIVERED + CERTIFIED 6/6 -- R1 CLOSED</status>
+<!-- ADVANCED 2026-08-26 ~19:3xZ by 2.0.0_SA_COO (issuer). It read `pending` while the work was
+     DELIVERED @fbf3ce7a44 (0.4.0_DS_ClientPlatform~K, 2026-08-25T09:15Z) and CERTIFIED 6/6 @c0fad0b548
+     (3.0.0_SA_CVO, 09:21Z). A stale `pending` is what re-seated a discharged TO onto a live lane as
+     unstarted P0 work -- and it would have done it again on the next register scan.
+     ⛔ THE ONE RESIDUAL IS NOT R1 WORK: the advisor level of the four-level contract is structurally
+     unbuildable (is_primary NULL 29,907/29,907), ruled OUT OF R1 by 2.0.0_SA_COO 70461, and its
+     unblock spec @9e86f635dc concludes the remedy is a BD vendor API write -- Andrew's call, not an
+     exec act. SOVEREIGN-GATED, NOT LANE-GATED. -->
 <priority>P0 -- Andrew-direct 2026-08-25 ~12:0xZ named this project as one of two waiting on the decomp seat. D3 has SIX open TOs and has not begun; surface (a) has never been blocked.</priority>
 <date>2026-08-25</date>
 <references>
@@ -66,7 +74,15 @@ visible:**
   <criterion id="D3R1DS-AC4" cell_refs="D3-b-3"/>
   <criterion id="D3R1DS-AC5" cell_refs="D3-b-4, D3-inv-2, D3-inv-6"/>
   <criterion id="D3R1DS-AC6" cell_refs="D3-inv-4, D3-inv-5, D3-e-1, D3-e-3"/>
-  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~S/deliverables/D3_MODELOVERLAY.TO-R1-DS_PROOF_OF_SPEC.json</instance_path>
+  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~K/deliverables/D3_MODELOVERLAY.TO-R1-DS_PROOF_OF_SPEC.json</instance_path>
+  <!-- ⛔ RESTORED 2026-08-26 ~19:3xZ by 2.0.0_SA_COO. I re-pointed this at ~S and it was WRONG.
+       THIS PATH HOLDS THE CVO-CERTIFIED INSTANCE: 28,199 B, AC1-AC6 all PASS, certified 6/6 VALID rc=0
+       by 3.0.0_SA_CVO @c0fad0b548 against delivery @fbf3ce7a44.
+       A DEAD LANE IS NOT A DEAD ARTIFACT. I reasoned dead-lane -> dead-folder -> re-point, and the
+       folder held the certification. Had the seating been executed, a NEW instance would have been
+       authored at the new path, proof-of-spec-check would have returned rc=0, this TO would have read
+       COMPLIANT -- and the certified instance would have been SILENTLY ORPHANED with a junior one
+       standing in its place. Caught by 0.4.0_DS_ClientPlatform~S refusing to start. -->
   <!-- RE-POINTED 2026-08-26 with the re-seating (~K -> ~S). It named a DEAD lane's folder: the
        proof-of-spec check would have written its instance into an abandoned tree, and the TO would
        have read compliant while its evidence landed where nobody looks. Surfaced by ~S. -->
