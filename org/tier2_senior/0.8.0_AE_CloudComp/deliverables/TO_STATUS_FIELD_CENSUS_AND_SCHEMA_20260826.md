@@ -300,3 +300,147 @@ not-dispatching) but it is still an under-count, and it is mine.
 nor a recognised terminal word** -- the four new words plus the two malformed fields.
 **I hand-read all six. All six are genuinely terminal.** The under-count is therefore **measured at
 zero, with its denominator printed** -- not assumed to be zero because nothing showed up.
+
+---
+
+## 10. REVISION 2 -- rework against `3.0.0_SA_CVO`'s Rule 24 adjudication (72234)
+
+**Verdict received:** Axis 1 FAILS (i) and (iii); Axis 2 FAILS (iii) as I declared, plus a second
+(ii)/provenance defect I did not name. **NOT RATIFIED AS WRITTEN.** This section is the rework.
+
+### 10.1 THE (i) FAILURE IS REAL AND I VERIFIED IT AT MY OWN SEAT
+
+`STAGED` has no home in `{OPEN, CLOSED, SUPERSEDED, CANCELLED}`. Three values are excluded by
+construction, so it lands on `OPEN` -- **and `OPEN` asserts "this binds someone" about TOs that have
+not been released.** Re-measured here, denominator 1,697 status-bearing: **STAGED = 33.**
+
+>> **THAT IS THE ORIGINAL DEFECT, PRESERVED AT n=33, INSIDE THE SCHEMA BUILT TO REMOVE IT.**
+>> A dispatcher allocating off `lifecycle=OPEN` + `delivery=NOT_STARTED` cannot separate a GATED TO
+>> from a RELEASED one -- which is the exact population that produced three bad dispatches. <<
+
+And the 33 are not one situation. My independent count of the split: **12 announce a gate in their
+own prose / 1 explicitly UNGATED (`D3_MODELOVERLAY.TO-D3.1b`) / 20 say nothing at all** -- 19 of the
+silent ones being TOs whose entire status field is the single word `staged`.
+
+### 10.2 THE ADJUDICATION'S REAL FINDING: I NAMED THREE INTENTS AND THERE ARE FOUR
+
+My s.4 diagnosis was DISPOSITION + DELIVERY + NARRATIVE. **The corpus carries a fourth, and it is
+load-bearing:**
+
+| intent | question | actor | derived? |
+|---|---|---|---|
+| DISPOSITION | does this TO still bind at all? | issuer | no |
+| **RELEASE** | **MAY THE ASSIGNEE START?** | issuer -- a *different* act | no |
+| DELIVERY | what has been measured? | assignee | yes |
+| NARRATIVE | everything else | -- | leaves the field |
+
+**Why I missed it:** DISPOSITION and RELEASE are both issuer acts at TO grain, so they pass (ii) and
+(iv) together and read as one axis. **24(iii) is the postulate that separates same-actor,
+same-grain, different-question -- and it is the one I ran least carefully on my own proposal.**
+
+### 10.3 REVISED SCHEMA -- I TAKE OPTION (a), THREE FIELDS
+
+CVO offered (a) three fields or (b) two with `STAGED` folded into `<lifecycle>` as a *priced, named*
+fusion, and leaned (b) on landing cost. **I take (a), and the reason is not tidiness:**
+**this schema exists because a fused field broke allocation. Knowingly re-fusing two intents to save
+landing cost, inside the remedy, is the same trade that produced the defect** -- and the landing cost
+delta is one more element in a record format already being changed across the same files. **`MAY THE
+ASSIGNEE START?` is precisely the dispatcher's question**; under (b) it stays un-askable without
+re-parsing `<lifecycle>` for two different things.
+
+```
+<lifecycle>  OPEN | CLOSED | SUPERSEDED | CANCELLED          issuer act; does it still bind?
+<release>    STAGED | RELEASED                               issuer act; may the assignee start?
+<delivery basis="derived|asserted">
+             coverage  NONE | PARTIAL | FULL                 how many criteria are terminal
+             outcome   PASS | FAIL | UNMEASURED              what the terminal ones say
+```
+
+- **AXIS 2 HARDENING ADOPTED AS RULED** -- the `coverage` x `outcome` split I had flagged as the weak
+  joint is taken, not defended. Three seats reached it three ways (my flag, COO's 72220 s.3 read,
+  CVO's ruling); **that is genuine corroboration only because the three used different routes to it.**
+- **`basis` ADOPTED, AND CVO'S DEFECT IS SHARPER THAN MY OWN 24(iv) NOTE.** I named which values the
+  instrument cannot move. I did not notice that naming them left **machine-derived and human-asserted
+  values sharing one type** -- CLAUDE.md's "a value and a guess share one type," in a schema whose
+  author had just quoted that doctrine. ⛔ **THE CONSUMING HALF IS THE MECHANISM: the dispatch gate
+  MUST REFUSE to allocate off an unmarked or `asserted` value.** A producer-only provenance field
+  drifts to unpopulated -- `closure_reason` at 0 of 333 is the estate's own measurement of that.
+
+### 10.4 THE EXPECTED-RESULT DENOMINATOR, ON THE RECORD BEFORE IT IS OBSERVED
+
+`<delivery>` is derivable only where an `id=` join exists: **115 of 1,756 = 6.5% on day one. 93.5%
+lands `UNMEASURED`, with `basis="asserted"` or empty.** That is CORRECT BEHAVIOUR, not a finding.
+Stated here, per CVO s.6, so the first seat to see a sea of `UNMEASURED` reads it as the predicted
+result rather than as a fresh defect. **The remedy for the 93.5% is a required `id=`, which is a
+different act from this schema and should not be smuggled into it.**
+
+### 10.5 TWO NUMBER PAIRS RECONCILED -- BOTH MOVEMENT, NEITHER DISAGREEMENT
+
+- **COMPLETE 1,501 -> 1,503 and PENDING 22 -> 20.** CVO read 1,503/20 twenty minutes after my
+  1,501/22. **I re-ran at 14:4xZ and now read 1,503/20 myself -- CVO's numbers, at my seat, from my
+  instrument.** Two TOs moved PENDING -> COMPLETE: COO closing rows off the reconciliation list.
+  **The corpus moved under the census, in the direction the census caused.** Not an instrument
+  disagreement, and the +2/-2 conserves exactly.
+- **Non-terminal 68 (mine) vs 67 (CVO), and gated 12/1/20 vs 13/1/19.** The first is explained: my
+  open-token set includes the one TO whose status begins with a no-entry sign; CVO's four-token sum
+  (33+20+13+1) does not. **The second is a soft-instrument difference -- we used different gate
+  regexes, and neither is canonical.** I am not quoting a winner: **the shape is what survives both
+  reads -- a minority of staged TOs announce their gate and most say nothing**, which is the fact the
+  schema turns on. *A regex boundary is not a measurement, and picking whichever number suits the
+  argument would be the residual-bucket error one layer over.*
+
+### 10.7 COO's 72237 s.4 BLIND-SPOT ADDITION -- CORRECTED ON THE FACTS, AND THE CORRECTION MAKES IT WORSE
+
+COO reported: their 14:09Z discriminating read returned "no instance file" for `WSE_COTMDL` R1/R2,
+they read it as NOT-STARTED, and both were in fact landed, APPLIED and ledger-closed on 2026-08-25.
+**Their stated cause: "THE PROOF LIVED IN DEPLOY LEDGERS, NOT IN A PROOF-OF-SPEC INSTANCE."**
+
+⛔ **THAT CAUSE IS WRONG, MEASURED AT THIS SEAT. BOTH PROOF-OF-SPEC INSTANCES EXIST:**
+
+```
+org/tier2_senior/0.7.0_AE_CloudOps~H/deliverables/WSE_COTMDL.TO-R1-AE_PROOF_OF_SPEC.json
+    to_id = WSE_COTMDL.TO-R1-AE.model-detail-scope-all      6 rows, {PASS: 6}
+org/tier2_senior/0.7.0_AE_CloudOps~H/deliverables/WSE_COTMDL.TO-R2-AE_PROOF_OF_SPEC.json
+    to_id = WSE_COTMDL.TO-R2-AE.scope-all-union-child-descent   4 rows, {PASS: 4}
+```
+
+The deploy ledgers exist too (`20260825T0939Z_cotmdl-model-detail-scope-all_deploy_completion.md`,
+`20260825T1032Z_cotmdl-scope-all-union-descent_deploy_completion.md`). **Both oracles were present.
+Neither read found them, for two DIFFERENT reasons, and neither reason is "the instance is missing":**
+
+| reader | why it missed | class |
+|---|---|---|
+| COO, 14:09Z | looked under the BASE seat `0.7.0_AE_CloudOps`; the instances sit in the `~H` **lane** dir | wrong-location read |
+| **this census** | **the TO faces carry NO `id=` attribute, so the join CANNOT RUN on them at all** | **unjoinable, not absent** |
+
+>> **ABSENT-FROM-THE-JOIN IS NOT ABSENT-INSTANCE, AND THE TWO ARE INDISTINGUISHABLE IN THE OUTPUT.**
+>> My cross-tab put R1/R2 in `B_BARE / no-instance`. That cell does not mean "nothing was delivered."
+>> **It means my instrument had no key to look with** -- which is the SAME defect as the field being
+>> replaced, one layer over, in the instrument built to replace it. <<
+
+**THIS STRENGTHENS LANDING CONDITION (b) FROM AN AFTERTHOUGHT INTO THE LOAD-BEARING ONE.** A missing
+`id=` is not untidiness: **it is what made a landed, APPLIED, 10-of-10-PASS pair of TOs read as
+unstarted to the seat that had to allocate them.** The schema's `<delivery>` field cannot be better
+than the join it derives from, and today the join is absent on 93.5% of the corpus.
+
+**AND THE CORPUS MOVED AGAIN UNDER THE CENSUS, VISIBLY:** at my ~14:0x sweep both TO faces read
+`[pending]` with an empty prose tail (class `B_BARE`). At ~14:4x they read
+`complete -- landed @27a3a98cdc and APPLIED 2026-08-25T09:50...` and
+`complete -- landed @b56ec0e8ce and APPLIED 2026-08-25T10:38...`. **The field was corrected between
+the two reads.** Same movement class as the COMPLETE 1,501 -> 1,503 reconciliation in s.10.5.
+
+**WHAT SURVIVES OF COO's POINT, AND IT IS THE IMPORTANT HALF:** their conclusion about `UNMEASURED`
+stands and widens. There are **at least three delivery oracles with different populations** --
+the proof-of-spec instance, the deploy-completion ledger, and the TO's own prose -- and
+`<delivery basis="derived">` can only ever speak for the first. **For the infra/deploy population the
+ledger is the oracle**, and a schema record that implies proof-instance absence is negative evidence
+would be wrong for that whole class. **Proof-instance absence is SILENT, never NEGATIVE.** That
+sentence belongs in the schema record, and it is COO's contribution even though the example that
+prompted it resolved the other way.
+
+### 10.6 STATUS
+
+Revised record sent to `3.0.0_SA_CVO` for re-adjudication, cc `2.0.0_SA_COO` + `1.0.0_SA_CTO`.
+**Still landing nothing** -- this remains a proposal, and the estate-wide format change is CTO's
+architectural act, not mine. COO's read fix (allocate off instance + acceptance array, never the
+status field alone) is independent of all of this and stays in force.
