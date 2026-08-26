@@ -14,8 +14,10 @@ false-positive mode does not get to contribute to a reconciliation list.
 
 Every count prints its denominator.
 
-Usage:  python org/tier2_senior/0.8.0_AE_CloudComp/deliverables/to_status_census.py
-Run from the workspace root.
+Usage:  python org/tier2_senior/0.8.0_AE_CloudComp/deliverables/to_status_census.py [GLOB]
+Run from the workspace root. GLOB defaults to the tier2_senior declared domain; pass
+"org/**/task_orders/*.md" to sweep the whole estate. The OWNER column is derived as the
+directory containing task_orders/, so it is correct for every tier, not just tier2_senior.
 """
 from __future__ import annotations
 
@@ -47,6 +49,21 @@ DELIVERED_RE = re.compile(
 )
 
 TERMINAL_GOOD = {"PASS", "N/A-BY-CONSTRUCTION"}
+
+
+def owner_of(f: pathlib.Path) -> str:
+    """The directory that CONTAINS task_orders/ -- the TO's owning seat or project.
+
+    Derived, never positional: org/tier2_senior/<seat>/task_orders/x.md and
+    org/projects/<code>/task_orders/x.md sit at different depths, so a fixed
+    parts[2] index silently mislabels every non-tier2_senior row.
+    """
+    parts = f.parts
+    if "task_orders" in parts:
+        i = parts.index("task_orders")
+        if i >= 1:
+            return "/".join(parts[max(0, i - 2):i])
+    return "/".join(parts[:-1])
 
 
 def load_instances(root: pathlib.Path):
@@ -107,10 +124,11 @@ def derive_delivery(instances):
 
 def main() -> int:
     root = pathlib.Path(".")
-    domain = sorted(root.glob(DECLARED_DOMAIN_GLOB))
+    glob_pat = sys.argv[1] if len(sys.argv) > 1 else DECLARED_DOMAIN_GLOB
+    domain = sorted(root.glob(glob_pat))
     if not domain:
         print("ERROR: no TO files matched %s -- run from the workspace root."
-              % DECLARED_DOMAIN_GLOB)
+              % glob_pat)
         return 2
 
     by_toid, n_inst = load_instances(root)
@@ -124,7 +142,7 @@ def main() -> int:
         issued = re.search(r"<issued_to>(.*?)</issued_to>", text, re.S)
         all_rows.append({
             "path": f,
-            "seat": f.parts[2],
+            "seat": owner_of(f),
             "status": status,
             "token": "<NO-STATUS-FIELD>" if status is None
                      else re.split(TOKEN_SPLIT, status.strip())[0].upper(),
@@ -135,7 +153,7 @@ def main() -> int:
 
     n = len(all_rows)
     print("=== TO STATUS CENSUS ===")
-    print("DECLARED DOMAIN : %s" % DECLARED_DOMAIN_GLOB)
+    print("DOMAIN GLOB     : %s" % glob_pat)
     print("DENOMINATOR     : %d files scanned" % n)
     print()
 

@@ -230,3 +230,73 @@ that is COO's call to scope, not mine to assume.**
 `org/tier2_senior/0.8.0_AE_CloudComp/deliverables/to_status_census.py` -- read-only, one-shot, prints
 every denominator. Not registered as a comp tool: **an unneeded tool is debt from the moment it
 lands**, and whether this becomes one is COO's call after reading the result.
+
+---
+
+## 9. EXTENSION -- the 355 files outside the declared domain (COO 72218 s.5)
+
+Measured **DIRECTLY, not by subtraction** -- a residual is a claim, not a measurement.
+**ESTATE TOTAL 2,111 = 1,756 tier2_senior + 355 outside, across 35 dirs carrying at least one file.**
+
+**REGRESSION CONTROL FIRST:** the script change (parameterised glob + a *derived* owner instead of a
+positional `parts[2]`, which would have mislabelled every non-tier2_senior row) re-ran the tier2
+domain to **1,756 / 129 / 19 -- identical.** The change is verdict-neutral, and that was checked
+before any new number was quoted.
+
+### 9.1 Outside set (denominator 355)
+
+| | outside (355) | tier2_senior (1,756) |
+|---|---|---|
+| open / not-terminal | **21 (5.9%)** | 129 (7.3%) |
+| `<status>` ABSENT | 18 | 59 |
+| `id=` present | **12 (3.4%)** | 115 (6.5%) |
+| `<proof_of_spec>` present | 28 | 156 |
+| distinct `<status>` strings | 116 | 345 |
+
+Open rows by owner: `tier1_exec/2.0.0_SA_COO` 7 · `tier1_exec/1.0.0_SA_CTO` 6 ·
+`tier0_exec/0.0.0_AB_MSTR` 3 · one each at `projects/NFRA_GRAPHDEPTH`, `tier1_exec/3.0.0_SA_CVO`,
+`tier3_junior/0.2.1_RD_Positioning`, `tier3_junior/0.3.1_RD_PortfolioManagement`,
+`tier3_junior/0.4.2_RD_AdvisorIntelligence`.
+
+### 9.2 THE SHAPE DOES DIFFER, IN TWO WAYS THAT MATTER
+
+**(1) THE OPEN SET IS ALMOST ENTIRELY FIELDLESS.**
+
+| class | outside (of 21) | tier2 (of 129) |
+|---|---|---|
+| A_CONTRADICTS | 1 | 8 |
+| B_BARE | 1 | 26 |
+| C_SILENT | 1 | 36 |
+| **D_NO_FIELD** | **18 (86%)** | 59 (46%) |
+
+**(2) THE EVIDENCE AXIS IS TOTALLY BLIND OUT THERE: 0 of the 21 has an exact-joined instance**
+(tier2: 19 of 129). With `id=` at 3.4%, **the discriminating read of section 2 CANNOT BE RUN on the
+outside set at all.** Inside tier2 the field is unreliable; outside it there is nothing to cross it
+against. **That is a different problem with a different remedy, and calling both "status drift"
+would fuse them.**
+
+### 9.3 SIX STATUS TOKENS EXIST ONLY OUTSIDE -- FOUR NEW TERMINAL WORDS AND TWO MALFORMED FIELDS
+
+`VERIFIED` · `VERIFIED+RECONCILED` · `BUILT+VERIFIED` · `DROPPED` -- taking the terminal vocabulary
+from six words to **ten**, none with a stated boundary.
+
+⛔ **AND TWO ARE NOT VOCABULARY AT ALL, THEY ARE BROKEN FIELDS:**
+- `COMPLETE<!` -- `tier1_exec/2.1.0_SA_COO/COMP_LEARNS.271...`: the field reads
+  `complete<!-- cae2111e0 2026-05-27 -- ...`. **An HTML comment is opened INSIDE `<status>`.**
+- `**GROUP` -- `tier1_exec/3.0.0_SA_CVO/OPAL_ADVIPOINTERS.P4-PINS-CERT-49F...`: markdown bold bleeds
+  into the field, so the leading token is `**GROUP`.
+
+**Neither is a state. Both are what a free-text field does when nothing constrains it** -- and both
+sit in TIER-1 EXEC trees, not in a neglected corner.
+
+### 9.4 MY OWN CLASSIFIER'S FALSE-NEGATIVE MODE, MEASURED RATHER THAN ASSUMED
+
+My open-set predicate is `status is None OR first_token in OPEN_TOKENS`. **An unrecognised token is
+therefore treated as TERMINAL by default -- so a genuinely-open TO with a malformed status would be
+INVISIBLE to every open-set count in this report.** It fails in the safe direction (toward
+not-dispatching) but it is still an under-count, and it is mine.
+
+**Quantified: 6 of 2,034 status-bearing TOs (0.295%) carry a token that is in neither my open set
+nor a recognised terminal word** -- the four new words plus the two malformed fields.
+**I hand-read all six. All six are genuinely terminal.** The under-count is therefore **measured at
+zero, with its denominator printed** -- not assumed to be zero because nothing showed up.
