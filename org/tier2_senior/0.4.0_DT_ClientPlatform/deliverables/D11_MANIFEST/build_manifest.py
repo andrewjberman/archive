@@ -154,7 +154,11 @@ for tid, tdir, utc, nobj in [
         utc,
         S3_EV if utc else "NOT SEPARATELY PROBED -- the per-table loop resolved only the first "
                           "cse_test_* prefix. STATED AS UNMEASURED RATHER THAN INHERITED FROM ITS SIBLING.",
-        "measured" if utc else "absent",
+        # basis describes THE PART, not one field. cse_test_bb57a916 EXISTS (13 objects measured);
+        # only its VINTAGE is unprobed, and vintage.measured_utc=null already says so. Using
+        # "absent" here would assert the TABLE is absent, which is false -- two different facts
+        # sharing one enum value is the exact defect this manifest exists to find.
+        "measured",
         "FINDING: A TEST TABLE PERSISTING IN THE GOVERNED PRODUCTION WAREHOUSE (%d objects). "
         "population_status=test is the field that makes this expressible; it exists in the schema "
         "because of this live finding. NOT REMEDIATED -- DTX-AC5 binds." % nobj,
@@ -270,8 +274,13 @@ PARTS.append(part(
     "infra/aws/globgrph/kuzu_incremental_refresh.py (the COND-2 persistent fallback sink)",
     "canonical", None, "on fallback only", "incremental-refresh fallback", "production",
     "2026-07-25T23:01:00Z", STAT_EV, "measured",
-    "1,232 bytes. UNTRACKED **AND NOT IGNORED**. Declared in graph-call-manifest.yaml:224 as the "
-    "COND-2 persistent .fallback.jsonl sink.",
+    "1,232 bytes. UNTRACKED **AND NOT IGNORED**. DECLARED in graph-call-manifest.yaml:224 as the "
+    "COND-2 persistent .fallback.jsonl sink -- I HAVE NOT OPENED THIS FILE and have NOT determined "
+    "whether it is a LIVE FALLBACK READ PATH or a dead artifact. 0.8.0_AE_CloudComp~X (73371) raised "
+    "the hypothesis worth naming: a fallback that STILL ANSWERS is the fails-open family this wave "
+    "has hit repeatedly, where a degraded path and a healthy one are byte-identical to the caller. "
+    "THAT IS A HYPOTHESIS ABOUT A NAME, NOT A FINDING -- neither of us chased it, and it belongs to "
+    "whoever owns the incremental-refresh path.",
     "0.8.0_AE_CloudComp lane", consumers=["comp-kuzu-inc provenance path"]))
 
 PARTS.append(part(
@@ -504,7 +513,23 @@ MANIFEST = {
             "comp-keys' 40-row default truncation nearly produced a false absence; (6) repo-wide "
             "filename sweep for *kuzu* -- 65 hits over 28,797 files scanned. "
             "ALL COUNTS COMPUTED FROM THE POPULATION, NEVER TYPED -- the first cut of this file "
-            "declared 39 against 35 rows and the TO's own phase-2 mandate caught it."),
+            "declared 39 against 35 rows and the TO's own phase-2 mandate caught it. "
+            "-- READ THIS BEFORE QUOTING ANY COUNT: PARTS ARE NOT OBJECTS, AND NEITHER IS A "
+            "SUBSTITUTE FOR THE OTHER. See the computed PARTS_VS_OBJECTS line appended below; the "
+            "figures there are derived from the population at build time, never typed. Cross-checked against an INDEPENDENT sweep: "
+            "0.8.0_AE_CloudComp~X (73371) ran comp-find --name 'kuzu_nessie_db' (7 hits / 28,837 "
+            "scanned) and found exactly the 7 sibling artifacts at that prefix; ALL 7 ARE ALREADY "
+            "REGISTERED HERE, carried by 2 parts -- 1 exact row plus the 6-member SET row. Their "
+            "instrument (repo filename sweep) DIFFERS from mine (directory enumeration), so this is "
+            "corroboration and not a repetition. "
+            "-- AND A LIMIT ON `consumers` THAT APPLIES TO NEARLY EVERY ROW: consumers are DECLARED "
+            "FROM CONFIG (graph-call-manifest.yaml, instance.tf, module source) and are NOT MEASURED "
+            "READS unless a row's evidence says EXERCISED. Exactly ONE row is exercised: "
+            "nerves-risk-edges.json, which safe-commit's risk reflex read live on this seat's own "
+            "commits (1,832 danger nodes). Everywhere else, a named consumer means 'something "
+            "declares it reads this', never 'I watched it read'. THE PRACTICAL CONSEQUENCE: a "
+            "declared consumer that has silently stopped reading, and a live one, are "
+            "INDISTINGUISHABLE in this manifest."),
         "population_searched": (
             "181,412 warehouse keys + 129 estate-report keys + 28,797 repo files scanned by filename "
             "sweep + 3 directories enumerated exhaustively"),
@@ -530,6 +555,22 @@ MANIFEST = {
     },
     "parts": PARTS,
 }
+
+# ---- PARTS vs OBJECTS: computed from the population, never typed ----
+SET_MEMBERS = {"kuzu_nessie_db.rebuild.tmp.SET": 6, "_build_manifest.json.SET": 3,
+               ".comp-graph/platinum.CACHE_SET": 5}
+_absent = [p for p in PARTS if p["basis"] == "absent"]
+_present = [p for p in PARTS if p["basis"] != "absent"]
+_objects = sum(SET_MEMBERS.get(p["id"], 1) for p in _present)
+MANIFEST["denominator"]["method"] += (
+    " PARTS_VS_OBJECTS (computed at build): %d parts total = %d describing a PRESENT thing + %d "
+    "recording an ABSENCE (the unbuilt C3 stages, which are NOT objects and must never be counted "
+    "as inventory). Of the %d present parts, %d are SET rows covering %d member objects, so the "
+    "present parts describe %d DISTINCT OBJECTS. A reader quoting '%d' as an object count "
+    "overstates by the absences and understates by the sets, in opposite directions, which is "
+    "exactly why both figures are printed."
+    % (len(PARTS), len(_present), len(_absent), len(_present), len(SET_MEMBERS),
+       sum(SET_MEMBERS.values()), _objects, len(PARTS)))
 
 with open(OUT, "w", encoding="utf-8") as f:
     json.dump(MANIFEST, f, indent=2, ensure_ascii=False)
