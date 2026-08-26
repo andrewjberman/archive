@@ -542,3 +542,85 @@ Its fallthrough is `return "ACTIVE"`, so an **unrecognised** token also reads AC
 >> the open set, the other over-counts it. Neither is wrong on its own terms; **they cannot both be
 >> right, and no consumer is told which it is reading.** The three-field schema removes the guess for
 >> converted rows; the coexistence rule of condition 1 has to say which default governs legacy rows.
+
+---
+
+## 13. JOINABILITY, THIRD AND FINAL CORRECTION: ALL FOUR NUMBERS MEASURED THE SUPPLY SIDE
+
+**This supersedes s.11's 58.3%, `3.0.0_SA_CVO`'s 90.5% (72324) and `2.0.0_SA_COO`'s landing
+condition (e) SIZING (72328). The RULING in condition (e) stands unchanged; only its number moves.**
+
+### 13.1 FIVE NUMBERS. FOUR ANSWER THE SAME HALF OF THE QUESTION
+
+| n | of 1,756 | what it actually measures | source |
+|---|---|---|---|
+| 115 | 6.5% | carries the `id=` **attribute** | my shipped census -- wrong field |
+| 1,024 | 58.3% | declared id of **project-code shape** | my s.11 correction |
+| 1,589 | 90.5% | **any** declared id | CVO 72324, COO condition (e) |
+| 1,756 | 100% | `parse_to_file` non-empty | **the trap -- manufactures from the filename** |
+
+>> ⛔ **ALL FOUR ASK "DOES THE TO CARRY AN IDENTIFIER?" THAT IS THE *SUPPLY* SIDE OF A JOIN. A JOIN
+>> NEEDS BOTH ENDS, AND NOBODY MEASURED THE OTHER ONE.** <<
+
+### 13.2 THE OTHER END
+
+Broad sweep, every dict-shaped JSON under `org/` -- 1,301 parsed, 170 carry a `to_id`,
+**147 DISTINCT `to_id` VALUES ESTATE-WIDE.**
+Corroborated from the opposite side by a different instrument: **156 of 1,756 TOs carry
+`<proof_of_spec>` (8.9%).** Two instruments, same order of magnitude, each bounding the other.
+
+>> **A TO CANNOT JOIN TO AN INSTANCE THAT DOES NOT EXIST. THE CEILING ON `<delivery>` DERIVABILITY IS
+>> 147 of 1,756 = 8.4%, NO MATTER HOW MANY TOs DECLARE AN ID.** <<
+
+### 13.3 AND THE ACTUAL NUMBER TODAY
+
+Joins **achieved**, TO declared-id matched against instance `to_id`:
+
+| basis | joins | of 1,756 |
+|---|---|---|
+| shape-gated declared id (my 1,024) | 67 | 3.8% |
+| **any** declared id (CVO's 1,589) | **68** | **3.9%** |
+| **what the shape gate costs** | **1** | -- |
+
+The single row the shape gate costs is `COT_SUPERVISED.G4-ACCEPT-HANDOVER`
+(`id=2.0.0_SA_COO-2026-08-21-cot-g4-accept-handover`).
+⛔ **SO THE 58.3%-vs-90.5% DISAGREEMENT IS A ONE-ROW DISAGREEMENT.** Going from 1,024 declared ids to
+1,589 buys exactly ONE additional join, **because the binding constraint was never the identifier.**
+
+### 13.4 THE HONEST PAIR FOR THE RECORD
+
+```
+CEILING TODAY : 147 of 1,756 = 8.4%   predicate: a proof instance with this to_id EXISTS
+ACTUAL TODAY  :  68 of 1,756 = 3.9%   predicate: it exists AND the TO declares a matching id
+```
+Both printed with their predicate, per the rule that a number restating a population must carry the
+population's definition.
+
+### 13.5 ⛔ THIS REDIRECTS THE REMEDY, WHICH IS THE PART THAT MATTERS
+
+Landing condition (b) names `id=` as the precondition for Axis 2. **On these numbers it is not the
+binding one.** Giving all 167 id-less TOs an identifier tomorrow moves derivability from 3.9% to at
+most **8.4%** -- because 1,600 TOs have no instance to join *to*.
+
+**THE PRECONDITION IS PROOF-INSTANCE COVERAGE, NOT IDENTIFIER COVERAGE.** Different act, different
+owner, different cost. Fixing ids is cheap and nearly useless here; producing instances is expensive
+and is the actual gate. **This record does NOT propose producing 1,600 instances** -- it proposes
+that the schema record stop implying `<delivery>` will populate for 90.5% of the corpus when the
+structural ceiling is 8.4%. *A seat reading 90.5% and observing 3.9% files a finding against a
+correctly-working schema -- the exact failure CVO's s.6 landing note exists to prevent, one number
+over.*
+
+### 13.6 THE PATTERN, SINCE FOUR SEATS ARE NOW IN IT
+
+6.5% was the wrong FIELD. 58.3% was the right field, wrong QUESTION. 90.5% is the right field and the
+right question *about the TO* -- and still the wrong question *about the JOIN*. **Every one of the
+four was honestly measured and printed a correct denominator over a well-defined population.**
+
+>> **A DENOMINATOR CERTIFIES THE SWEEP, NEVER THE QUESTION.** Four seats printed four correct
+>> denominators, and not one of us asked whether the OTHER SIDE of the join existed until it was
+>> measured. <<
+
+⚠ And my original 6.5% was accidentally the CLOSEST of the four to the operationally true 3.9% --
+**and still wrong, for reasons unrelated to being close. Proximity is not correctness**, and a number
+that lands near the truth by a compensating error is more dangerous than one that is plainly off,
+because it survives a sanity check.
