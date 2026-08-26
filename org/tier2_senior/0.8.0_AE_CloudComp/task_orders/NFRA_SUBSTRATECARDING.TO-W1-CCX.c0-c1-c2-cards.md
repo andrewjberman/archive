@@ -37,26 +37,26 @@ initiative. Disclosed because a silent uncertified decomp is the pipeline's sing
 <decomp_ref>
 workflows/atom_decomposition/runs/nfra-substratecarding/20260826T172918Z/DECOMP.md @7c5de3e779
 Cells discharged (21 CARD_MATRIX, enumerated LITERALLY -- a glob cannot be joined to a criterion):
-SC-C0-methodology, SC-C0-cadence, SC-C0-persistence, SC-C0-location, SC-C0-coverage, SC-C0-key, SC-C0-failure_mode,
-SC-C1-methodology, SC-C1-cadence, SC-C1-persistence, SC-C1-location, SC-C1-coverage, SC-C1-key, SC-C1-failure_mode,
-SC-C2-methodology, SC-C2-cadence, SC-C2-persistence, SC-C2-location, SC-C2-coverage, SC-C2-key, SC-C2-failure_mode
-Contributed-to (PROJECT_MECHANISM, not solely owned by this TO): SC-m-asof, SC-m-qualify
+SC-a-1, SC-a-2, SC-a-3, SC-a-4, SC-a-5, SC-a-6, SC-a-7,
+SC-b-1, SC-b-2, SC-b-3, SC-b-4, SC-b-5, SC-b-6, SC-b-7,
+SC-c-1, SC-c-2, SC-c-3, SC-c-4, SC-c-5, SC-c-6, SC-c-7
+Contributed-to (PROJECT_MECHANISM, not solely owned by this TO): SC-m-2, SC-m-5
 </decomp_ref>
 
 <proof_of_spec>
   <!-- python .tools/proof-of-spec-check.py <instance>.json CCX-AC1,CCX-AC2,CCX-AC3,CCX-AC4,CCX-AC5,CCX-AC6,CCX-AC7 ; check rc -->
-  <criterion id="CCX-AC1" cell_refs="SC-C0-methodology, SC-C0-cadence, SC-C0-persistence, SC-C0-location, SC-C0-coverage, SC-C0-key, SC-C0-failure_mode, SC-C1-methodology, SC-C1-cadence, SC-C1-persistence, SC-C1-location, SC-C1-coverage, SC-C1-key, SC-C1-failure_mode, SC-C2-methodology, SC-C2-cadence, SC-C2-persistence, SC-C2-location, SC-C2-coverage, SC-C2-key, SC-C2-failure_mode"/>
-  <criterion id="CCX-AC2" cell_refs="SC-m-asof"/>
-  <criterion id="CCX-AC3" cell_refs="SC-C0-coverage, SC-C1-coverage, SC-C2-coverage"/>
-  <criterion id="CCX-AC4" cell_refs="SC-C0-methodology, SC-C1-methodology, SC-C2-methodology"/>
-  <criterion id="CCX-AC5" cell_refs="SC-C0-methodology, SC-C0-cadence, SC-C0-persistence, SC-C0-location, SC-C0-coverage, SC-C0-key, SC-C0-failure_mode, SC-C1-methodology, SC-C1-cadence, SC-C1-persistence, SC-C1-location, SC-C1-coverage, SC-C1-key, SC-C1-failure_mode, SC-C2-methodology, SC-C2-cadence, SC-C2-persistence, SC-C2-location, SC-C2-coverage, SC-C2-key, SC-C2-failure_mode"/>
-  <criterion id="CCX-AC6" cell_refs="SC-m-qualify"/>
-  <criterion id="CCX-AC7" cell_refs="SC-C0-location, SC-C1-location, SC-C2-location, SC-C0-key, SC-C1-key, SC-C2-key, SC-C0-failure_mode, SC-C1-failure_mode, SC-C2-failure_mode"/>
+  <criterion id="CCX-AC1" cell_refs="SC-a-1, SC-a-2, SC-a-3, SC-a-4, SC-a-5, SC-a-6, SC-a-7, SC-b-1, SC-b-2, SC-b-3, SC-b-4, SC-b-5, SC-b-6, SC-b-7, SC-c-1, SC-c-2, SC-c-3, SC-c-4, SC-c-5, SC-c-6, SC-c-7"/>
+  <criterion id="CCX-AC2" cell_refs="SC-m-2"/>
+  <criterion id="CCX-AC3" cell_refs="SC-a-5, SC-b-5, SC-c-5"/>
+  <criterion id="CCX-AC4" cell_refs="SC-a-1, SC-b-1, SC-c-1"/>
+  <criterion id="CCX-AC5" cell_refs="SC-a-1, SC-a-2, SC-a-3, SC-a-4, SC-a-5, SC-a-6, SC-a-7, SC-b-1, SC-b-2, SC-b-3, SC-b-4, SC-b-5, SC-b-6, SC-b-7, SC-c-1, SC-c-2, SC-c-3, SC-c-4, SC-c-5, SC-c-6, SC-c-7"/>
+  <criterion id="CCX-AC6" cell_refs="SC-m-5"/>
+  <criterion id="CCX-AC7" cell_refs="SC-a-4, SC-b-4, SC-c-4, SC-a-6, SC-b-6, SC-c-6, SC-a-7, SC-b-7, SC-c-7"/>
   <instance_path>org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_SUBSTRATECARDING.TO-W1-CCX_PROOF_OF_SPEC.json</instance_path>
   <expected_criteria>CCX-AC1,CCX-AC2,CCX-AC3,CCX-AC4,CCX-AC5,CCX-AC6,CCX-AC7</expected_criteria>
   <alignment_denominators>
 criteria: 7. Cells discharged by this TO: 21 of 21 CARD_MATRIX cells for C0/C1/C2, plus 2 shared
-PROJECT_MECHANISM cells (SC-m-asof, SC-m-qualify) which this TO contributes to and does not solely own.
+PROJECT_MECHANISM cells (SC-m-2, SC-m-5) which this TO contributes to and does not solely own.
 CELL -> CRITERION: all 21 covered (AC1, AC5 and AC7 span them; AC3/AC4 add row-specific bars). Unmapped: 0.
 CRITERION -> CELL: all 7 carry >=1 cell_ref. Untraceable: 0.
   </alignment_denominators>
@@ -89,20 +89,23 @@ already 3 commits past `fe269171f2` twenty minutes after I pinned it. So:
 **27,061 / 60,858**. **Neither is wrong and they are not in conflict — they are two planes.** If you cite a
 warehouse-plane number, **say the plane in `evidence`**; do not re-pin `as_of` and do not "reconcile" them.
 
+**ROW LEGEND — your cell numbers, in the schema's own required order:**
+`-1` methodology · `-2` cadence · `-3` persistence · `-4` location · `-5` coverage · `-6` key · `-7` failure_mode
+
 ## 2. YOUR THREE SUBJECTS
 
 | cell prefix | subject | declared_domain to state | given (from `1.0.0_SA_CTO~X`, basis `held` — measure, do not inherit) |
 |---|---|---|---|
-| `SC-C0-*` | **C0** — facts / nodes | what C0 claims to cover | Not probed by CTO~X. A clean subject: start from zero. |
-| `SC-C1-*` | **C1** — interactions / edges | what C1 claims to cover | Not probed by CTO~X. A clean subject: start from zero. |
-| `SC-C2-*` | **C2** — motifs | what C2 claims to cover | Composers at `org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/` (`c2_individuate.py`, `c3_cover.py`). 6,207 instances, 13 canonical families; graph carries 19 class nodes = 13 families + 6 defect-detector motifs. Coverage by side: BACKEND 93.7% of scope / FRONTEND 28.2% / KNOWLEDGE 0-of-0 by construction. |
+| `SC-a-1..7` | **C0** — facts / nodes | what C0 claims to cover | Not probed by CTO~X. A clean subject: start from zero. |
+| `SC-b-1..7` | **C1** — interactions / edges | what C1 claims to cover | Not probed by CTO~X. A clean subject: start from zero. |
+| `SC-c-1..7` | **C2** — motifs | what C2 claims to cover | Composers at `org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/` (`c2_individuate.py`, `c3_cover.py`). 6,207 instances, 13 canonical families; graph carries 19 class nodes = 13 families + 6 defect-detector motifs. Coverage by side: BACKEND 93.7% of scope / FRONTEND 28.2% / KNOWLEDGE 0-of-0 by construction. |
 
 ⛔ **C2 CARRIES A TRAP AND IT IS THE SHARPEST THING IN THIS TO.** That layer **only began running in
 production TODAY (2026-08-26)** — it had never once imported in-container since 2026-08-07 (IndexError at
 module import, fixed `@ec0408628a`, confirmed by the 02:00Z nightly). **Any artifact, log, or claim about
 C2 dated before 2026-08-26 describes a layer that was not running.** Treat pre-today evidence as evidence
-about absence-of-execution, not about behaviour. This bears directly on `SC-C2-cadence`
-(`live_matches_declared`) and `SC-C2-failure_mode` — a failure mode never exercised in production is
+about absence-of-execution, not about behaviour. This bears directly on `SC-c-2`
+(`live_matches_declared`) and `SC-c-7` — a failure mode never exercised in production is
 `unmeasured`, not `yes`.
 
 ⛔ **The CTO~X figures above are `held`, not `measured` — they are a peer's published invocation at a
@@ -204,7 +207,7 @@ finding. These are all PASSES, do not treat any as rework:
 <cross_domain_coordination>
 - **`0.8.0_AE_CloudComp~Y`** holds D1/D2/D3. **D2 is defined against C2's motifs** (*"adds DIRECTION +
   TRANSFORM + TIME to C2 motifs; does not re-implement motif membership"*). **Your C2 card is an INPUT to
-  their D2 card.** MCP them your `SC-C2-methodology` finding when it lands; do not wait on them and do not
+  their D2 card.** MCP them your `SC-c-1` finding when it lands; do not wait on them and do not
   card D2 yourself.
 - **`0.7.0_AE_CloudOps~X`** holds C3.i-as-built + `comp-similar`. **C3.i consumes C2's classes** (19 class
   nodes). Coordinate before either of you claims a class-count figure, so two cards do not carry two numbers.

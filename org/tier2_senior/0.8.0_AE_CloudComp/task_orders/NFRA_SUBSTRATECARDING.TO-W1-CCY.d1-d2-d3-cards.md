@@ -36,26 +36,26 @@ to re-decomp and re-issue; you do not re-run anything on your own initiative.
 <decomp_ref>
 workflows/atom_decomposition/runs/nfra-substratecarding/20260826T172918Z/DECOMP.md @7c5de3e779
 Cells discharged (21 CARD_MATRIX, enumerated LITERALLY -- a glob cannot be joined to a criterion):
-SC-D1-methodology, SC-D1-cadence, SC-D1-persistence, SC-D1-location, SC-D1-coverage, SC-D1-key, SC-D1-failure_mode,
-SC-D2-methodology, SC-D2-cadence, SC-D2-persistence, SC-D2-location, SC-D2-coverage, SC-D2-key, SC-D2-failure_mode,
-SC-D3-methodology, SC-D3-cadence, SC-D3-persistence, SC-D3-location, SC-D3-coverage, SC-D3-key, SC-D3-failure_mode
-Contributed-to (PROJECT_MECHANISM, not solely owned by this TO): SC-m-asof, SC-m-qualify
+SC-e-1, SC-e-2, SC-e-3, SC-e-4, SC-e-5, SC-e-6, SC-e-7,
+SC-f-1, SC-f-2, SC-f-3, SC-f-4, SC-f-5, SC-f-6, SC-f-7,
+SC-g-1, SC-g-2, SC-g-3, SC-g-4, SC-g-5, SC-g-6, SC-g-7
+Contributed-to (PROJECT_MECHANISM, not solely owned by this TO): SC-m-2, SC-m-5
 </decomp_ref>
 
 <proof_of_spec>
   <!-- python .tools/proof-of-spec-check.py <instance>.json CCY-AC1,CCY-AC2,CCY-AC3,CCY-AC4,CCY-AC5,CCY-AC6,CCY-AC7 ; check rc -->
-  <criterion id="CCY-AC1" cell_refs="SC-D1-methodology, SC-D1-cadence, SC-D1-persistence, SC-D1-location, SC-D1-coverage, SC-D1-key, SC-D1-failure_mode, SC-D2-methodology, SC-D2-cadence, SC-D2-persistence, SC-D2-location, SC-D2-coverage, SC-D2-key, SC-D2-failure_mode, SC-D3-methodology, SC-D3-cadence, SC-D3-persistence, SC-D3-location, SC-D3-coverage, SC-D3-key, SC-D3-failure_mode"/>
-  <criterion id="CCY-AC2" cell_refs="SC-m-asof"/>
-  <criterion id="CCY-AC3" cell_refs="SC-D1-coverage, SC-D2-coverage, SC-D3-coverage"/>
-  <criterion id="CCY-AC4" cell_refs="SC-D1-methodology, SC-D2-methodology, SC-D3-methodology"/>
-  <criterion id="CCY-AC5" cell_refs="SC-D1-methodology, SC-D1-cadence, SC-D1-persistence, SC-D1-location, SC-D1-coverage, SC-D1-key, SC-D1-failure_mode, SC-D2-methodology, SC-D2-cadence, SC-D2-persistence, SC-D2-location, SC-D2-coverage, SC-D2-key, SC-D2-failure_mode, SC-D3-methodology, SC-D3-cadence, SC-D3-persistence, SC-D3-location, SC-D3-coverage, SC-D3-key, SC-D3-failure_mode"/>
-  <criterion id="CCY-AC6" cell_refs="SC-m-qualify"/>
-  <criterion id="CCY-AC7" cell_refs="SC-D2-persistence, SC-D2-location, SC-D3-persistence, SC-D3-location, SC-D1-persistence, SC-D1-location"/>
+  <criterion id="CCY-AC1" cell_refs="SC-e-1, SC-e-2, SC-e-3, SC-e-4, SC-e-5, SC-e-6, SC-e-7, SC-f-1, SC-f-2, SC-f-3, SC-f-4, SC-f-5, SC-f-6, SC-f-7, SC-g-1, SC-g-2, SC-g-3, SC-g-4, SC-g-5, SC-g-6, SC-g-7"/>
+  <criterion id="CCY-AC2" cell_refs="SC-m-2"/>
+  <criterion id="CCY-AC3" cell_refs="SC-e-5, SC-f-5, SC-g-5"/>
+  <criterion id="CCY-AC4" cell_refs="SC-e-1, SC-f-1, SC-g-1"/>
+  <criterion id="CCY-AC5" cell_refs="SC-e-1, SC-e-2, SC-e-3, SC-e-4, SC-e-5, SC-e-6, SC-e-7, SC-f-1, SC-f-2, SC-f-3, SC-f-4, SC-f-5, SC-f-6, SC-f-7, SC-g-1, SC-g-2, SC-g-3, SC-g-4, SC-g-5, SC-g-6, SC-g-7"/>
+  <criterion id="CCY-AC6" cell_refs="SC-m-5"/>
+  <criterion id="CCY-AC7" cell_refs="SC-f-3, SC-f-4, SC-g-3, SC-g-4, SC-e-3, SC-e-4"/>
   <instance_path>org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_SUBSTRATECARDING.TO-W1-CCY_PROOF_OF_SPEC.json</instance_path>
   <expected_criteria>CCY-AC1,CCY-AC2,CCY-AC3,CCY-AC4,CCY-AC5,CCY-AC6,CCY-AC7</expected_criteria>
   <alignment_denominators>
 criteria: 7. Cells discharged: 21 of 21 CARD_MATRIX cells for D1/D2/D3, plus 2 shared PROJECT_MECHANISM
-cells (SC-m-asof, SC-m-qualify) contributed to, not solely owned.
+cells (SC-m-2, SC-m-5) contributed to, not solely owned.
 CELL -> CRITERION: all 21 covered (AC1 and AC5 span them; AC3/AC4/AC7 add row-specific bars). Unmapped: 0.
 CRITERION -> CELL: all 7 carry >=1 cell_ref. Untraceable: 0.
   </alignment_denominators>
@@ -82,13 +82,16 @@ because a missing marker makes a reader ask and a false one makes them stop aski
 WAREHOUSE** (which `1.0.0_SA_CTO~X` measured at 27,061 / 60,858). Two planes, two vintages, **neither
 wrong**. Cite the plane in `evidence`; do not reconcile them and do not re-pin `as_of`.
 
+**ROW LEGEND — your cell numbers, in the schema's own required order:**
+`-1` methodology · `-2` cadence · `-3` persistence · `-4` location · `-5` coverage · `-6` key · `-7` failure_mode
+
 ## 2. YOUR THREE SUBJECTS — AND THEY ARE NOT EQUALLY SHAPED
 
 | cell prefix | subject | given (basis `held` from `1.0.0_SA_CTO~X` — measure, do not inherit) |
 |---|---|---|
-| `SC-D1-*` | **D1** — value / grain rail | **Not probed. A clean subject: start from zero.** |
-| `SC-D2-*` | **D2** — path / flow rail | `reserved_ratified`. Authority: `NFRA_ONTOLOGY_RULE_BANK.yaml#dynamic_rails.D2_path_flow` (rail block, **7 keys at 2026-08-20**). Defined as *"adds DIRECTION + TRANSFORM + TIME to C2 motifs; does not re-implement motif membership."* |
-| `SC-D3-*` | **D3** — contract rail | Sits between C2 and C3, so it **cannot be COMPLETED before C3.i exists.** |
+| `SC-e-1..7` | **D1** — value / grain rail | **Not probed. A clean subject: start from zero.** |
+| `SC-f-1..7` | **D2** — path / flow rail | `reserved_ratified`. Authority: `NFRA_ONTOLOGY_RULE_BANK.yaml#dynamic_rails.D2_path_flow` (rail block, **7 keys at 2026-08-20**). Defined as *"adds DIRECTION + TRANSFORM + TIME to C2 motifs; does not re-implement motif membership."* |
+| `SC-g-1..7` | **D3** — contract rail | Sits between C2 and C3, so it **cannot be COMPLETED before C3.i exists.** |
 
 ### 2.1 ⛔ D2 IS THE ONE ANDREW NAMED, AND ITS OPEN QUESTIONS ARE EXACTLY TWO
 
@@ -175,7 +178,7 @@ neighbouring artifact as though it were D3's is worse than an empty one, because
 - ⛔ **`0.8.0_AE_CloudComp~X` holds C0/C1/C2 and THEIR C2 CARD IS AN INPUT TO YOUR D2 CARD.** D2 is defined
   *against* C2's motifs. **Do NOT re-implement motif membership** — the D2 definition explicitly says it
   does not, and a D2 card that re-derives C2's families has carded the wrong thing. Take their
-  `SC-C2-methodology` finding when it lands; **do not block on it** — D2's persistence/location questions
+  `SC-c-1` finding when it lands; **do not block on it** — D2's persistence/location questions
   are independent of it.
 - ⛔ **AND DO NOT BOTH CARD THE SAME NUMBER.** If you and `~X` each need a motif/class count, coordinate by
   MCP first so two cards do not carry two figures at two vintages. One of you measures, the other cites
