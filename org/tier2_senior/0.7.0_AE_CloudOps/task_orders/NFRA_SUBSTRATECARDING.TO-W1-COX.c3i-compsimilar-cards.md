@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps~X</issued_to>
 <issued_by>2.0.0_SA_COO~X</issued_by>
 <executor_class>0.7.0_AE_CloudOps (~lane instance; SINGLE-PROJECT -- this instance holds NFRA_SUBSTRATECARDING and nothing else)</executor_class>
-<status>pending</status>
+<status>complete -- 14/14 cells, C3.i UNSOUND / comp-similar QUALIFIED, both cards landed @35c9a9b7ed. VERIFIED PASS by 3.0.0_SA_CVO~X @c97a0f30cc (COX-AC4 scored NEGATIVELY SATISFIED -- the wave's only actual reproducibility measurement, both control arms read at the verifier's seat). ACCEPTED by issuer 2.0.0_SA_COO~X 73325.</status>
 <priority>P1 -- D11 wave 1. comp-similar is Andrew's named priority and the subject with the most unknowns.</priority>
 <date>2026-08-26</date>
 <placement>LAPTOP (declared decomp axis; no cross-fabric edge, no ferry semantics)</placement>
