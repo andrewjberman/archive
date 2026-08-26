@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_COMPTOOLS.REG-SCAN-ATOMCHECK",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_COMPTOOLS.REG-SCAN-ATOMCHECK.runners-registry-statescan-fix-atomcheck-v1.md",
+    "group": "OTHER",
+    "vintage_commit": "095d90d8bd"
+  },
+  "assignee": "0.8.0_AE_CloudComp",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/modules/graph/pipeline_cli.py",
+      "kind": "script",
+      "commit_or_etag": "52a063f50a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Lines 378-381 register the runners_49f corpus via build_silver_dag under the 'advi' pipeline key. Landed 2026-08-20T12:24:34-04:00 by this serial under NFRA_TRUNCLASS.PSCRIPT2 -- a DIFFERENT project's commit, which is why the TO did not know about it.",
+      "artifact_covered_by": [
+        "REG-1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "REG-1",
+      "criterion_verbatim": "`comp-pipescript io a00_dim_account --pipeline bd` resolves (positive) AND a nonexistent id still refuses rc!=0 (negative); the corpus membership is derived by a stated predicate over the tree, printed with its denominator.",
+      "method": "command",
+      "invocation": "comp-pipescript io a00_dim_account --pipeline advi (positive); comp-pipescript io zz99_does_not_exist --pipeline advi (negative)",
+      "output_evidence": "⛔ RULED BY 2.0.0_SA_COO 71687: USE --pipeline advi. The TO's REG-1 text says '--pipeline bd' and that is STALE -- run exactly as written it returns rc=1 'Script not found'. The corpus is registered under advi, and advi is the architecturally correct home: runners_49f is the 49F/ADVI runner chain inside the SHARED assets gold tree, not the bd tree, and registering it under bd would smear a firm boundary. I surfaced the divergence rather than printing PASS against an invocation the criterion does not name; COO amended the TO. BOTH ARMS EXERCISED: positive rc=0, the I/O MANIFEST renders. Negative rc=1 AND it names the tree it searched -- 'this is the advi graph -- NOT a bd fallback; TOOL-02 provenance'. The negative arm is what makes the rc=0 informative: without it, a positive pass could have meant the tool accepts anything. PREDICATE-DERIVED, NOT A ROSTER -- build_silver_dag globs script_dir.glob('*.py'), so the next runner added registers itself and no hand list exists to drift. The 10 files under runners_49f/tests/ are invisible to the non-recursive glob and that is CORRECT: they are tests, not runners. Checked before calling it a gap; it is not one.",
+      "denominator": "70 of 70 top-level runner scripts registered; 0 excluded by the __-prefix filter; the tool's own Valid-IDs enumeration returns 70. Parts sum.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J2-1",
+      "criterion_verbatim": "**SUPERSEDED @fc9026534d (COO, 19:07Z) — the need was met another way: CTO executed J2 solo on Andrew-direct ~1817Z \"address while quiet\" (state_scan encoding fix + planted-byte self-test leg 4/4; COO-validated 19:05Z: `comp-state --self-test` PASS with no env var). Your instance's J2-1 row cites this supersession; zero work at your seat.**",
+      "method": "manual_read_with_citation",
+      "invocation": "git log -1 fc9026534d; read of the TO's own J2-1 text",
+      "output_evidence": "SUPERSEDED, and the TO says so on its own face: the need was met another way when 1.0.0_SA_CTO executed J2 solo on Andrew-direct ~1817Z (state_scan encoding fix + planted-byte self-test leg 4/4), COO-validated 19:05Z with comp-state --self-test PASS and no env var. The TO's own words: 'zero work at your seat.' I did none, and I am citing the supersession rather than re-deriving a fix that already landed.",
+      "denominator": "1 of 1 criterion superseded before dispatch; 0 lines of J2 work at this seat",
+      "status": "N/A-BY-CONSTRUCTION",
+      "status_reason": "Superseded @fc9026534d by the TO's own text before this seat was dispatched. Not a pass and not a failure -- the criterion was discharged elsewhere."
+    },
+    {
+      "criterion_id": "RSA-VAL",
+      "criterion_verbatim": "proof instance per group, rc=0 positional, grammar below.",
+      "method": "command",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> <its criteria, positionally>",
+      "output_evidence": "This instance validates rc=0 under positional-id validation and is named per the TO's own instance_path_grammar PROOF_OF_SPEC_COMPTOOLS_{group}_{YYYYMMDD}.json. Two instances exist because the TO's <dated> field splits the work into TWO groups (REG+J2 on 08-19, J3 on 08-20), and 'proof instance per group' is read against that split rather than per criterion.",
+      "denominator": "2 of 2 groups carry an instance",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "REG-1's own NEGATIVE ARM is the planted control: a nonexistent script id put to the same tree the positive arm resolved in.",
+      "expected": "rc!=0 and a refusal that NAMES the searched tree, so a positive resolve cannot be explained by the tool accepting anything",
+      "observed": "rc=1, 'Unknown script in tree [advi]', enumerating the 70 valid ids and stating 'NOT a bd fallback'. The arm discriminates.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "both arms re-run at this seat after COO's 71687 ruling",
+      "observed": "identical rc and identical tree-provenance line across runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "REG-0 FIXTURE (the label->module cross-project casebook collision negative control)",
+      "reason": "NOT CLAIMED AS DISCHARGED BY ME. REG-0 is an acceptance bullet but is NOT in the TO's <expected_criteria> (REG-1,J2-1,J3-1,RSA-VAL), so it is not positionally validated here. R-3's registration landed under a different project before this dispatch and I did not re-exercise the 08-19 wiring incident's exact shape as a negative control. Stated as an exclusion rather than silently folded into REG-1's PASS -- REG-1 is about corpus resolution, REG-0 is about collision refusal, and they are different claims."
+    }
+  ],
+  "surprises": [
+    "The TO's REG-1 named a flag value while the registry named a tree, and nothing joins the two -- COO 71687's words: decision-bearing content in a field nothing queries. Surfaced, ruled, amended."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-25/session_prefix_reads.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-pipescript",
+      "invocation": "io a00_dim_account --pipeline advi | --pipeline bd | io zz99_does_not_exist --pipeline advi",
+      "result": "The REG-1 oracle, both arms plus the as-written bd arm that exposed the stale flag."
+    }
+  ]
+}
