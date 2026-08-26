@@ -83,15 +83,43 @@ blanks, strict comparison identical.
 **I am reporting the structural fact and NOT the mechanism.** Why renumbering and non-resolution
 coincide is a causal claim, and causal claims about these accounts are R2 / Phase B.
 
-### Differences from the decomp's stated arithmetic — named, not adopted
+### ⛔ CORRECTION TO THIS SECTION — I MIS-ATTRIBUTED BOTH DECOMP FIGURES
 
-| decomp | measured |
-|---|---|
-| xref-only **65** | **94** |
-| **5,310** | `seed-xref` **5,375** |
+**An earlier draft of this file said the decomp's 5,310 was "J6/J7's Schwab-side coverage over
+7,336 — a different population" and that its 65 disagreed with my 94. BOTH CLAIMS WERE WRONG, and
+they were wrong in the direction that flatters my own numbers.** Corrected from the decomp's own
+J6 line and the live cross-tab:
 
-5,310 is J6/J7's **Schwab-side** coverage over 7,336 — a different population, not this one.
-**My universe partition closes without either figure**, so neither is load-bearing here.
+```
+in_0833_universe   False   True
+match_method
+seed-xref             65   5310
+unresolved           826      0
+```
+
+| decomp figure | what it actually is | measured |
+|---|---|---|
+| **5,310** | `in_0833_universe = True` — **a column in this very table**, not a Schwab population | **5,310 — EXACT** |
+| **65** | `seed-xref` ∩ `in_0833_universe = False` | **65 — EXACT** |
+
+**Both decomp figures re-ground EXACTLY.** There was no disagreement to name. My **94** is a
+*different and additional* measurement — xref rows whose `bd_account_id` is absent from
+`gold/entities/accounts/` — and it does not contradict the 65; they count different things.
+`5,375 = 5,310 + 65` closes on the face.
+
+**The lesson is mine: I named a "difference" without first identifying what the other number was
+measuring.** A residual bucket is a claim, not a remainder — and so is a discrepancy.
+
+### The contradiction that SURVIVES the correction, and is now stronger
+
+`in_0833_universe = True` is exactly `seed-xref ∩ in-universe`, so the decomp's "the 541 sit INSIDE
+the 5,310" is testable directly against the right field:
+
+**0 of 541 renumbered accounts are inside `in_0833_universe = True`. All 541 are `in_0833 = False`,
+and all 541 are `unresolved`.**
+
+Confirmed on **both** readings — 0 of 541 in `seed-xref`, and 0 of 541 in the 5,310. The claim is
+false against the correct field, not merely against a field I substituted for it.
 
 ## AC9 — `STI-d-1` + `STI-d-2` — census first, no class from silence
 
