@@ -1,0 +1,208 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SUBSTRATECARDING.TO-W1-CCY",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_SUBSTRATECARDING.TO-W1-CCY.d1-d2-d3-cards.md",
+    "group": "OTHER",
+    "vintage_commit": "f926e8fd29"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-substratecarding/20260826T172918Z/DECOMP.md",
+    "vintage_commit": "f926e8fd29",
+    "to_ref": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_SUBSTRATECARDING.TO-W1-CCY.d1-d2-d3-cards.md"
+  },
+  "assignee": "0.8.0_AE_CloudComp~Y",
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-26/substratecarding_d1_d2_d3_cards_1750-1935Z.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS/D1.json",
+      "kind": "doc",
+      "commit_or_etag": "c43050e9bb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Substrate card for D1 (value/grain rail). Validates against org/standards/SUBSTRATE_CARD.schema.json @944ca89492. Amended after c43050e9bb under 2.0.0_SA_COO~X RULING 1 + RULING 2 (msg 73211); the amendment rides the follow-on commit as a declared delta and was applied BEFORE any 3.0.0_SA_CVO~X pass began, so no verification was in flight.",
+      "artifact_covered_by": ["CCY-AC1", "CCY-AC2", "CCY-AC3", "CCY-AC4", "CCY-AC5", "CCY-AC7"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS/D2.json",
+      "kind": "doc",
+      "commit_or_etag": "c43050e9bb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Substrate card for D2 (path/flow rail). Validates against the schema @944ca89492. Incorporates 0.8.0_AE_CloudComp~X's SC-c-1 measurement as cited INPUT with attribution (msg 73170), not re-derived, per the TO's one-measures-one-cites rule.",
+      "artifact_covered_by": ["CCY-AC1", "CCY-AC2", "CCY-AC3", "CCY-AC4", "CCY-AC5", "CCY-AC7"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS/D3.json",
+      "kind": "doc",
+      "commit_or_etag": "c43050e9bb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Substrate card for D3 (contract/obligation rail). Validates against the schema @944ca89492. Carries this wave's falsification of the 'D3 cards empty' prior.",
+      "artifact_covered_by": ["CCY-AC1", "CCY-AC2", "CCY-AC3", "CCY-AC4", "CCY-AC5", "CCY-AC6", "CCY-AC7"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CCY-AC1",
+      "criterion_verbatim": "Three JSON cards (D1, D2, D3) exist and all three VALIDATE. All 21 rows carry non-empty basis + evidence + owner.",
+      "method": "schema_validation",
+      "invocation": "python -c \"import json,jsonschema; s=json.load(open('org/standards/SUBSTRATE_CARD.schema.json')); [jsonschema.Draft202012Validator(s).validate(json.load(open(p))) for p in ['.../D11_CARDS/D1.json','.../D2.json','.../D3.json']]; print('3/3 VALID')\" ; plus a per-row audit walking the schema's 7 rows x 3 cards asserting basis/evidence/owner non-empty.",
+      "output_evidence": "3/3 VALID printed, no exception raised -- re-run after each amendment and VALID at every state. Per-row audit printed 'rows checked 21 of 21; empty fields 0'. The 3/3 is a live pass, not a dead validator: see controls.mutant arm 1.",
+      "denominator": "3 of 3 cards VALID; 21 of 21 rows carry non-empty basis + evidence + owner; 0 empty fields.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCY-AC2",
+      "criterion_verbatim": "All three carry byte-identical as_of.commit_ish and as_of.graph_vintage per s.1.",
+      "method": "command",
+      "invocation": "python: collect {c['as_of']['commit_ish']} and {c['as_of']['graph_vintage']} across the three cards; assert each set has cardinality 1.",
+      "output_evidence": "distinct commit_ish={'fe269171f2'}; distinct graph_vintage={'kuzu_nessie_db@2902399899597701830'} -> PASS. Both copied verbatim from TO s.1, never derived. Independently corroborating that the measurements were taken AT the pinned plane: the comp-kuzu provenance header at read time reported nodes snapshot-id 2902399899597701830, edges 6557038275462806297, 27,035 nodes / 58,224 edges, built 2026-08-26T14:07:59Z -- identical to the pinned graph_vintage, so no graph figure in these cards was read from a drifting plane.",
+      "denominator": "3 of 3 cards; 1 distinct commit_ish of 1 expected; 1 distinct graph_vintage of 1 expected.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCY-AC3",
+      "criterion_verbatim": "coverage.denominator NON-NULL on all three, 'N of M', both numbers named. The schema PERMITS null (finding F-1); only this criterion catches it.",
+      "method": "command",
+      "invocation": "python: for each card assert trust.coverage.denominator is not None and ' of ' in it.",
+      "output_evidence": "D1 null=False has_'of'=True -- '8 of 53 distinct live edge types ... 5 of 58 distinct live node types ... 11 of 13 hold exactly, 2 of 13 DRIFTED'. D2 null=False has_'of'=True -- '11 of 53 ... 4 of 58 ... 6 hold and 9 DRIFTED of 15 ... the TIME axis resolves for 1 of 14'. D3 null=False has_'of'=True -- '14 of 14 records in carrier 1 (2 of 2 files parsed)', with carrier 2 named UNMEASURED-BY-THIS-LANE, carrier 3's 175 rows cited-not-measured, and the estate-wide M named as structurally UNENUMERATED rather than left null.",
+      "denominator": "3 of 3 denominators non-null; 3 of 3 carry an explicit 'N of M'.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCY-AC4",
+      "criterion_verbatim": "determinism in {inferential, hybrid} => populated inference_detail incl. failure_is_loud. The requirement lives in a description string with no if/then (finding F-2); only this criterion catches it.",
+      "method": "command",
+      "invocation": "python: for each card read process.methodology.determinism and .inference_detail; assert (determinism not in {inferential,hybrid}) or inference_detail populated.",
+      "output_evidence": "D1 determinism=deterministic binds=False inference_detail=null -> OK. D2 same -> OK. D3 same -> OK. THE CONDITION DOES NOT BIND ON ANY OF THE THREE, reported as a VACUOUS pass rather than a substantive one. BASIS FOR 'deterministic', stated so it is not read as a dodge: all three subjects are hand-authored static YAML blocks resolved by home, with no model, heuristic or sampling in producing or reading them; D3's validator is additionally a purely lexical token-resolution linter. inference_detail is explicitly null rather than omitted.",
+      "denominator": "3 of 3 cards audited; 0 of 3 have determinism in {inferential, hybrid}; 0 required inference_detail; 0 missing.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCY-AC5",
+      "criterion_verbatim": "verdict.standing is INCOMPLETE iff >=1 row is genuinely unworked. The schema permits SOUND over an unworked row (finding F-3). absent-with-evidence is WORKED.",
+      "method": "command",
+      "invocation": "python: for each card collect the 7 row bases and verdict.standing; assert standing == INCOMPLETE iff any row is blank/unworked.",
+      "output_evidence": "D1 standing=QUALIFIED bases={'measured'} unworked=0. D2 QUALIFIED {'measured'} 0. D3 QUALIFIED {'measured'} 0. Zero rows unworked across all three and none carries INCOMPLETE -- the biconditional holds in both directions. ON THE TWO GENUINELY-ABSENT ANSWERS: D3's location row reports carrier-2's row count UNMEASURED BY THIS LANE and carrier-3's 175 rows CITED-NOT-MEASURED. Those rows are WORKED because they name the instruments tried and why each could not answer -- comp-kuzu's CALL show_tables() returns only CloudNode and CloudEdge (the projection does not carry the warehouse table), and comp-icedrill's target grammar is 's3://bucket/prefix | s3://bucket/key.json | ddb | graph', with no form for an arbitrary Iceberg table. Per TO s.6 that is a PASS, not a rework.",
+      "denominator": "3 of 3 cards; 21 of 21 rows worked; 0 unworked; 0 of 3 standings INCOMPLETE and 0 of 3 required it.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCY-AC6",
+      "criterion_verbatim": "ZERO commits by this lane touching any rail it carded during the wave. QUALIFY-DO-NOT-FIX.",
+      "method": "command",
+      "invocation": "git log --author='0.8.0_AE_CloudComp~Y' --name-only --since='6 hours ago' to enumerate this lane's full committed file set; then git log --author=... --oneline -- <surface> for each of the 6 carded surfaces individually.",
+      "output_evidence": "This lane's entire committed file set is org/tier2_senior/0.8.0_AE_CloudComp/deliverables/** (the three cards, this instance, and the session log). Per-surface counts, all measured not asserted: NFRA_ONTOLOGY_RULE_BANK.yaml 0, estate-contracts/ 0, contract_declare_lint.py 0, SYSTEM_DEFINITIONS.yaml 0, SUBSTRATE_CARD.schema.json 0, keep-dormant.yaml 0. The planted mutant that exercised the linter's REJECT arm was written to the session scratchpad OUTSIDE the repository; no carded file was modified to produce it. No schema amendment was made despite F-1/F-2/F-3 being live -- those route to the issuer and 1.0.0_SA_CTO~X (boundary SC-bnd-4).",
+      "denominator": "6 of 6 carded surfaces checked against this lane's commit set; 0 touched.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCY-AC7",
+      "criterion_verbatim": "For every rail carding persisted: false or home: null, evidence names WHERE YOU LOOKED and the denominator of that search. This is the criterion D3 lives or dies on.",
+      "method": "command",
+      "invocation": "python: for each card read artifact.persistence.persisted and artifact.location.home to determine whether the criterion binds; then inspect every absence-shaped claim the cards actually make and confirm each carries a named search plane and a printed denominator.",
+      "output_evidence": "THE CRITERION DOES NOT BIND ON ANY OF THE THREE, AND THAT IS THIS TO'S PRIMARY RESULT. D1 persisted=True home=non-null; D2 persisted=True home=non-null; D3 persisted=True home=non-null. The TO s.2.2 and the PRD expected D3 to card persistence:none / location:null; measurement falsifies it -- D3 has an instance store at org/modules/graph/estate-contracts/ with 14 records across 2 of 2 files. 2.0.0_SA_COO~X ruled the expectation retired rather than the card wrong (msg 73049). THE SPIRIT OF AC7 IS DISCHARGED ANYWAY: every absence-shaped claim these cards DO make carries its search and denominator. The no-generator / no-second-store claims in D1 and D2 rest on comp-find --name sweeps returning 0 hits over 28,789 files across five patterns, with a POSITIVE CONTROL in the IDENTICAL call shape on a store known to exist (comp-find --name '*contracts*' --files -> 21 hits / 28,790 scanned) run BEFORE the zeros were trusted; the plane is named (REPO swept; S3 and the Iceberg warehouse NOT swept by this lane); and D3's two uncounted carriers name the exact instruments tried and why each failed. TRAP AUDIT per 2.0.0_SA_COO~X 73001/73103: all 12 of this lane's comp-find calls used --name ALONE or a content pattern ALONE, never both in one call, and every one printed a NON-ZERO scanned count, so no absence row rests on the 0-over-0 invocation trap. This lane ran ZERO comp-keys calls, so no row rests on the 40-key default truncation either.",
+      "denominator": "3 of 3 cards audited; 0 of 3 carry persisted:false; 0 of 3 carry home:null; 0 rows bind the criterion. Absence-evidence discipline verified on 5 of 5 absence-shaped claims actually made; 12 of 12 comp-find calls clean of the trap shape.",
+      "status": "PASS"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"what generates and persists the D1 value rail / D2 path-flow rail / D3 contract rail\"",
+      "result": "PARTIAL -- returned a declared near-tie (comp-estate --resource and comp-pipescript io both at 1.50, comp-platinum 0.44) over 80 tools, explicitly labelled 'TOP SCORES ARE TIED -- THE ORDER IS NOT A RANKING'. It named no generator, which is the TO's documented if_mismatch branch. Widened DELIBERATELY rather than concluding absent: --name sweeps across five rail-store patterns, then a content sweep, then the SYSTEM_DEFINITIONS registry entries. Recorded because an early stop and a true absence are identical in notes and opposite in the estate."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name '*value_grain*' / '*path_flow*' / '*value-grain*' / '*path-flow*' / '*.rails.*' / 'NFRA_ONTOLOGY_RULE_BANK*' / 'contract_declare_lint*' / '*contracts*' --files ; and comp-find -i 'contract_record' / 'lifecycle_class' / 'D1_value_grain' / 'D2_path_flow' --files",
+      "result": "PASS -- 12 calls, every one printing a non-zero scanned denominator. The five rail-store patterns returned 0 hits over 28,789 files scanned; the POSITIVE CONTROL in the identical call shape ('*contracts*') returned 21 hits over 28,790, proving the sweep can find a rail store, so the zeros are measured absences. 'NFRA_ONTOLOGY_RULE_BANK*' returned 2 hits over 28,780 and surfaced a NAME COLLISION (a same-leaf-name file in this lane's own base deliverables carrying zero rail content) that would mislead any seat citing the bank unqualified. All 12 audited against the content-pattern-plus---name trap: 12 of 12 clean."
+    },
+    {
+      "tool": "comp-kuzu",
+      "invocation": "comp-kuzu \"CALL show_tables() RETURN *\" ; \"CALL table_info('CloudEdge') RETURN *\" ; edge_type and node_type censuses ; FLOWS_TO props predicates for EdgeKind, dstField and condition ; row-grain probe",
+      "result": "PASS -- the provenance header was read on every call per CLAUDE.md Rule 20 and confirmed the pinned plane (snapshot 2902399899597701830, 27,035 nodes / 58,224 edges, built 2026-08-26T14:07:59Z), so every figure is at the wave vintage. Schema was DISCOVERED rather than assumed: a first query on e.type failed with 'Binder exception: Cannot find property type for e', and table_info returned the real property name edge_type. That failure is recorded rather than hidden because guessing the property would have produced a confident wrong census. Supplied every drift figure in all three cards, plus the two exercised failure-path arms."
+    },
+    {
+      "tool": ".tools/contract_declare_lint.py",
+      "invocation": "python .tools/contract_declare_lint.py org/modules/graph/estate-contracts/mdpf.contracts.yaml ; and again against a planted mutant in the session scratchpad ; plus importing its vocab() and find_records() to count records with the estate's own predicate rather than a grep",
+      "result": "PASS ON BOTH ARMS, REACHABLE FROM DIFFERENT TRUTHS -- real file: 'records=7 findings=0 / VERDICT: PASS'; mutant: 'records=1 findings=2' with both REJECT lines naming field, illegal value and ratified set, then 'VERDICT: REJECT'. Using its own find_records predicate (rather than my grep) gave the 14-record count that falsified the D3-cards-empty prior. AND THE CONTROL PRODUCED AN UNPLANNED FINDING: the REJECT run returns rc=0, byte-identical in exit code to the PASS run, so any gate wired to its exit code fails OPEN. Carded in D3's failure_mode row."
+    },
+    {
+      "tool": "jsonschema (Draft202012Validator)",
+      "invocation": "validate all three cards against org/standards/SUBSTRATE_CARD.schema.json @944ca89492 ; plus a negative control with the trust block deleted",
+      "result": "PASS -- 3/3 VALID, re-run after every amendment and VALID at each state. NEGATIVE CONTROL FIRED: the trust-removed card was REJECTED with \"'trust' is a required property\", so the 3/3 is a live pass rather than a dead validator."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> CCY-AC1,CCY-AC2,CCY-AC3,CCY-AC4,CCY-AC5,CCY-AC6,CCY-AC7",
+      "result": "FIRST RUN: INVALID -- and correctly so. My first instance invented six method names outside the ratified enum and added four properties the contract forbids (cell_refs on acceptance entries, read_vintage_note on decomp_ref, two extra controls keys), and omitted four required roots (compiler_tools, declared_exclusions, session_log, surprises). Recorded rather than quietly fixed, because the tool ALSO warned that its alignment figures 'are identical to what a VALID instance prints -- they are NOT evidence of validity', which is exactly the trap of quoting a mapping result off an invalid instance. Rewritten to the ratified shape; final verdict in the session log."
+    },
+    {
+      "tool": "comp-icedrill",
+      "invocation": "comp-icedrill --help (bounded single attempt to count D3 carrier-2, the Iceberg graph_contracts table)",
+      "result": "CANNOT ANSWER, recorded as evidence rather than dropped -- its target grammar is 's3://bucket/prefix | s3://bucket/key.json | ddb | graph', with no form for an arbitrary Iceberg table. Together with comp-kuzu's show_tables() returning only CloudNode and CloudEdge, this is the named 'where I looked' backing D3's UNMEASURED carrier-2 row."
+    },
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to NFRA_SUBSTRATECARDING.TO-W1-CCY.d1-d2-d3-cards",
+      "result": "PASS -- set the race-free per-session TO_ID rather than writing TO_ID into the repo-global .agent_context, per org/XXX.md Step 1b-E."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "C0, C1, C2",
+      "reason": "0.8.0_AE_CloudComp~X's cells (SC-a-*, SC-b-*, SC-c-*). Their SC-c-1 finding was consumed as INPUT to D2 with attribution and NOT re-derived."
+    },
+    {
+      "item": "C2 motif MEMBERSHIP and any motif/class count",
+      "reason": "Excluded by the rail's own definition ('does not re-implement motif membership') and by the TO's cross-domain rule that one lane measures and the other cites. The 12-family figure in D2 is cited from the ratified catalog with attribution; the 12-vs-13 two-vocabulary split is cited from 0.8.0_AE_CloudComp~X's measurement."
+    },
+    {
+      "item": "C3.i-as-built and comp-similar",
+      "reason": "0.7.0_AE_CloudOps~X's cells (SC-d-*, SC-h-*) under the same decomp."
+    },
+    {
+      "item": "SC-m-3, the graph-object manifest",
+      "reason": "0.4.0_DT_ClientPlatform~X's cell. This TO populates projection_of and co_resident_stores as their input; it does not assemble the manifest."
+    },
+    {
+      "item": "The S3 and Iceberg WAREHOUSE planes",
+      "reason": "Every absence sweep in these cards ran on the REPO plane (28,789 files, positive control fired). This lane did NOT sweep S3 or the warehouse for a rail store and ran zero comp-keys calls. The plane is named on each location row so no absence is read wider than it was swept -- a served-layer absence is not a product-layer absence."
+    },
+    {
+      "item": "D3 carrier-2 row count (Iceberg graph_contracts) and carrier-3 population (C7 influence-closure)",
+      "reason": "UNMEASURED by this lane, with the instruments tried named in the card. Carrier 2's last-write age (1703.6h) IS measured from the comp-kuzu provenance header; its row count is not. Carrier 3's 175 rows are cited from SYSTEM_DEFINITIONS.yaml:478, not measured."
+    },
+    {
+      "item": "SEMANTIC soundness of the definitions behind every count and rule carded",
+      "reason": "Per 2.0.0_SA_COO~X RULING 2 (msg 73211) and Andrew-direct ~1907Z: the suspicion axis is SEMANTIC, not vintage, and every drift figure here is a vintage comparison. No systematic semantic pass was run on any of the three rails. What surfaced did so incidentally and is named per-card in trust.coverage.explicitly_out. A count that HOLDS is evidence of stability, never of correctness."
+    },
+    {
+      "item": "Mapping CORRECTNESS across D3's three carriers",
+      "reason": "This TO measured that the mapping is ABSENT and that the three populations sit on three planes. It did NOT attempt to construct or verify a mapping -- a different question at a different cost, claimed by no card, and remediation is barred by QUALIFY-DO-NOT-FIX (boundary SC-bnd-3)."
+    },
+    {
+      "item": "The DECOMP read vintage",
+      "reason": "Stated rather than glossed, because a false vintage is worse than a missing one. This lane read the DECOMP from the WORKING TREE at ~2026-08-26T17:55Z while the tree was AHEAD of HEAD; the bytes read (including the SC-e/f/g cell-id grammar) were committed subsequently at f926e8fd29. The TO's face cites @7c5de3e779, which is NOT what this lane read. decomp_ref.vintage_commit here names the commit carrying the bytes actually read. Verified non-impact: the 21 cell ids used match the TO's <decomp_ref> literal enumeration exactly."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION (routed to 3.0.0_SA_CVO, cc 2.0.0_SA_COO~X, msg 72817/72818 at session start): .tools/check-inbox exists on disk and is mandated by org/XXX.md Step 1b-B as one of the two required inbox probes, but the bare name does not resolve in a harness shell -- the shim provisioner derives its scope from .tools/comp-* plus a named non-comp set that omits it. Exercised: 'check-inbox: command not found'. Not blocking; this lane substituted a direct lane-dir read plus the MCP probe. Also noted that XXX.md's A.3 PATH probe iterates .tools/comp-* only, so its 105-of-105 denominator is structurally blind to every non-comp tool XXX.md mandates.",
+    "OBSERVATION (no route needed -- already fabric-wide via 2.0.0_SA_COO~X 73001/73047 before this instance landed): the comp-find content-pattern-plus---name invocation trap. This lane audited all 12 of its own comp-find calls the turn the correction arrived and reported denominators rather than a self-assessment: 12 of 12 used --name alone or a content pattern alone, all with non-zero scanned counts. This lane ALSO measured the narrowing that 2.0.0_SA_COO~X adopted in 73047 -- --name WITH --files scans normally (28,789), so --files is not implicated and a lane dropping it on the wider reading loses collapse-to-filenames for no reason.",
+    "OBSERVATION (this instance's own tooling, surfaced here rather than routed separately since it is the same already-known class): .tools/proof-of-spec-check.py printed 'INVALID' with 20 schema violations and returned rc=0 -- the same verdict-on-stdout-not-in-rc shape this lane independently exercised and carded on .tools/contract_declare_lint.py. Two distinct estate instruments now measured with that property. NO CAUSAL STORY CARRIED and neither tool touched: qualify-do-not-fix, and neither is a D11 subject. Worth one line only because a lane wiring either into a gate by exit code would fail open.",
+    "OBSERVATION: the rule bank's D3 landing_state asserts 'no consumer has a declared D3 cadence yet (WS-E1's registry does not exist)'. The registry DOES exist -- org/modules/graph/estate-contracts/, 14 records -- and 1 of 14 carries a cadence. This is a false premise encoded in the rail's own text, and it is the clearest SEMANTIC defect this lane found: no vintage instrument could detect it, because the sentence is stale in meaning rather than in age. Carded in D2's failure_mode row and named in D2's semantic-axis entry rather than routed separately, per the TO's rule that a finding about a rail you are carding is the deliverable, not a surprise."
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO planted mutants, one per instrument this deliverable depends on, because a control on the schema validator says nothing about the D3 linter and vice versa -- verification independence is per axis, not per check. (1) SCHEMA: took the delivered D1 card and deleted its entire 'trust' block, then re-validated. (2) D3 LINTER: authored a contract_record carrying lifecycle_class 'ZZZ_NO_SUCH_CLASS_9999' and locality 'ZZZ_NO_SUCH_LOCALITY_9999' to a scratchpad path OUTSIDE the repository, then ran contract_declare_lint.py against it.",
+      "expected": "(1) The validator REJECTS the trust-removed card, proving the 3/3 VALID is a live pass and not a dead validator. (2) The linter REJECTS the illegal enum values, proving its PASS over the 14 real records is a live pass -- both arms reachable from different truths, so the PASS could have failed.",
+      "observed": "(1) REJECTED with \"'trust' is a required property\". The arm fired. (2) 'records=1 findings=2', both REJECT lines naming the field, the illegal value and the ratified set, then 'VERDICT: REJECT'. The arm fired. AND THE SECOND ARM PRODUCED AN UNPLANNED FINDING NOW CARDED AS A DEFECT: the REJECT run returned rc=0, byte-identical in exit code to the PASS run, so any gate wired to that exit code fails open. It was found BY the control rather than by inspection, which is the argument for running it. INSTRUMENT INDEPENDENCE, declared per Rule 22 so no reading is counted twice: the D3 record count was produced by the estate's OWN find_records predicate, not this lane's grep, and is corroborated by a DIFFERENT seat's yaml-parse at a DIFFERENT vintage (atom_layer0_run.json:209, 'UNDECLARED 12, PERMANENT 2 (of 14)'), which this lane's independent re-measurement reproduces exactly. CONVERSELY, DECLARED AS NON-INDEPENDENT AND THEREFORE NOT COUNTED AS CORROBORATION: on D2's drift this lane measured 6 of 11 counts drifted and the rule bank's own note records '6 of 11 drifted by 2026-08-20'; the COUNTS agree but this lane did NOT verify the MEMBERSHIP is the same six, and two measurements agreeing on a total is not agreement on a set.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs compared on both instruments this deliverable depends on: the schema validator over all three cards, and comp-kuzu on a representative census query (FLOWS_TO count) at the pinned vintage.",
+      "observed": "RUN A schema: 3/3 VALID. RUN B schema: 3/3 VALID. RUN A comp-kuzu FLOWS_TO: 961. RUN B comp-kuzu FLOWS_TO: 961.",
+      "status": "STABLE"
+    }
+  }
+}
