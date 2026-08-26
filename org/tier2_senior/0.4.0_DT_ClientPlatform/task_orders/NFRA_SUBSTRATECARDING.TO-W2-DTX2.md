@@ -73,9 +73,11 @@ W2-znom-4, W2-znom-5, W2-znom-6, W2-znom-7
 ⚠ `graph_vintage` is unchanged from wave 1 because the projection **has not rebuilt** (built 14:07:59Z,
 re-read 21:19Z, identical). **A measured fact, not a copied value.**
 
-## 2. YOUR 16 SUBJECTS
+## 2. YOUR 16 SUBJECTS  — ⛔ **SUBJECT SET IS FROZEN as of 22:5xZ**
 
-**`provenance` states how each entered the set — `head_43` (a wave-1 `composes`/`projection_of` head) · `co_resident_addition` (a field the first derivation never read) · `compound_split` (one string that named two objects) · `dropped_recovery` (named in a wave-1 entry and lost at head-extraction).**
+**FROZEN ON A MEASUREMENT, not an assertion:** `head_resolution_map.json` accounts for **55 of 55** raw heads
+from the three wave-1 store fields. **Reopening requires a BLOCKING surprise naming a head that map does not
+account for** — a measurement anyone can run, not a suspicion.
 
 | subject | provenance |
 |---|---|
