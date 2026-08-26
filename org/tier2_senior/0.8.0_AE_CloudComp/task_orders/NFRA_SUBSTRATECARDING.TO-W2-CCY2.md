@@ -14,7 +14,7 @@
   <ref type="law">CLAUDE.md Rule 28</ref>
 </references>
 <objective>
-Produce 11 conformant substrate cards -- d-rail definitions -- validating against
+Produce 9 conformant substrate cards -- d-rail definitions -- validating against
 SUBSTRATE_CARD.v2.schema.json. QUALIFY ONLY. NO deprecation verdicts (second pass).
 </objective>
 </task_order>
@@ -67,7 +67,14 @@ W2-kwjy-6, W2-kwjy-7, W2-mqju-1, W2-mqju-2, W2-mqju-3, W2-mqju-4, W2-mqju-5, W2-
 ⚠ `graph_vintage` is unchanged from wave 1 because the projection **has not rebuilt** (built 14:07:59Z,
 re-read 21:19Z, identical). **A measured fact, not a copied value.**
 
-## 2. YOUR 11 SUBJECTS
+## 2. YOUR 9 SUBJECTS
+
+⛔ **AMENDED 22:1xZ — was 11. `0.8.0_AE_CloudComp~Y` filed BLOCKING and MEASURED that 2 of the original 11
+were DUPLICATES; verified at source by the issuer.** `edgekind_semantic` has ONE definition site
+(`NFRA_ONTOLOGY_RULE_BANK.yaml:319`, a YAML key) — `:340` is a POINTER inside a string, and **a pointer is
+not a subject.** `c2_motif_families` likewise, one site at `NFRA_ONTOLOGY_C2C3_CANONICAL.yaml:35`.
+**Their measurement, the issuer's error.** Both collapses are recorded in `subjects.json`, so all 43 wave-1
+heads still reconstruct.
 
 | subject | named by (wave 1) | spellings |
 |---|---|---|
@@ -80,8 +87,6 @@ re-read 21:19Z, identical). **A measured fact, not a copied value.**
 | `native CloudEdge direction` | D2_path_flow | 1 |
 | `the C0/C1 rung boundary` | D1_value_grain | 1 |
 | `the MDPF delivery-cadence contract` | D3_contract_obligation | 1 |
-| `the ratified C2 motif topology` | D2_path_flow | 1 |
-| `the ratified EdgeKind value semantic on FLOWS_TO` | D1_value_grain | 1 |
 
 ⛔ **These reached us as PROSE STRINGS from wave-1 `composes`/`projection_of`.** Where a subject shows
 >1 spelling, wave 1 proved **no dedup heuristic can be correct** — resolve identity by reading the
