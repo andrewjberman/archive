@@ -1,7 +1,17 @@
 <task_order>
 <id>ADVI_INSURE.TO-R1-DS.landing-gold-platinum-planes</id>
 <project>ADVI_INSURE</project>
-<issued_to>0.4.0_DS_ClientPlatform~J</issued_to>
+<issued_to>0.4.0_DS_ClientPlatform~R</issued_to>
+<!-- RE-SEATED 2026-08-26 ~19:1xZ by 2.0.0_SA_COO (issuer). Prior: ~J (NOT LIVE).
+     ⛔ THIS RE-SEAT MAKES THE RECORD MATCH WORK THAT WAS ALREADY AUTHORISED AND ALREADY DONE.
+     0.4.0_DS_ClientPlatform~R has carried this project all day ON RULINGS -- AC1 closed, AC2 closed,
+     stamp-amendment spec @211b4ae752, design-doc fifth row @06ff6bbb2f (on origin/CLOUD) -- while
+     `to-check.py --assignee 0.4.0_DS_ClientPlatform~R` returned total=0 over 2,115 files, because
+     every act was authorised by a MESSAGE and no TO ever moved to that serial.
+     THE TWO INSTRUMENTS FAIL TOWARD OPPOSITE ERRORS ON THE SAME BASE AT THE SAME MOMENT: the broker's
+     rollup over-reports that lane at 4, the assignee scan under-reports it at 0, and the true answer
+     is NEITHER -- one project, carried on rulings, invisible to both. Surfaced by ~R with a positive
+     control (same command, ~J -> total=1, so the zero is measured and not a matcher artifact). -->
 <issued_by>2.0.0_SA_COO</issued_by>
 <status>pending</status>
 <priority>P0 -- Andrew-direct 2026-08-25 ~12:0xZ named this project as one of two waiting on the decomp seat. PRD v0.2 approved by him ~18:3xZ 08-24; the project has been unblocked and unseated since.</priority>
@@ -48,7 +58,8 @@ visible rather than lost:**
   <criterion id="INSR1DS-AC4" cell_refs="INS-d-1, INS-d-2, INS-inv-6"/>
   <criterion id="INSR1DS-AC5" cell_refs="INS-inv-2, INS-f-1"/>
   <criterion id="INSR1DS-AC6" cell_refs="INS-inv-3, INS-inv-5"/>
-  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~J/deliverables/ADVI_INSURE.TO-R1-DS_PROOF_OF_SPEC.json</instance_path>
+  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~R/deliverables/ADVI_INSURE.TO-R1-DS_PROOF_OF_SPEC.json</instance_path>
+  <!-- RE-POINTED with the re-seating; it named the dead ~J tree. -->
   <expected_criteria>INSR1DS-AC1,INSR1DS-AC2,INSR1DS-AC3,INSR1DS-AC4,INSR1DS-AC5,INSR1DS-AC6</expected_criteria>
   <alignment_denominators>cells in this TO: 14 (inv 6 · b 2 · c 3 · d 2 · f 1); criteria: 6; every criterion carries
 >=1 cell_ref; all 14 cells reachable. Unmapped 0; untraceable 0. Decomp total 22; 8 excluded to two other lanes,
@@ -161,7 +172,15 @@ that rule forbids. A criterion reachable only by the prohibited act is unreachab
 | **INSR1DS-AC1** | **Landing in the canonical grammar: `blackdiamond/49financial/bronze/insurance_*` (RAW API bytes per run) and `.../silver/insurance_*` (parquet).** ⛔ **Rule 17a: NO parquet under `bronze/` — coercing schema at ingest destroys bronze's one job. Rule 17: silver is DEDUP + DTYPE ONLY — no field slimming, no fillna, no business-row filter.** ⛔ **`49financial` and `49f` are BOTH live spellings in this estate — name which tree you wrote to and which join dims you read; a leaf-name collision here is silent.** | `INS-b-1/2`, `INS-inv-4` | APPLIED |
 | **INSR1DS-AC2** | **ONE additive current-state gold table** in `opal-data-49financial/gold/advi/` (candidate `insurance_nav_current/date={D}/`), **one row per insurance account per `asOfDate`**, ⛔ **carrying the spine keys (account → relationship → advisor → firm from `a00`/`a01`) SO EVERY AGGREGATION IS A JOIN, NEVER A COMPUTATION IN THE FRONTEND.** | `INS-c-1/2` | APPLIED |
 | **INSR1DS-AC3** | ⛔ **NO analytics fields, NO returns, NO series — a schema census against the forbidden set, printed.** *A snapshot plane that grows a series has become an AM calculation.* **AND the byte-identity control on every existing AM figure, measured BEFORE and AFTER.** | `INS-c-3`, `INS-inv-1` | EXERCISED |
-| **INSR1DS-AC4** | **ONE json under `platinum/advi/49financial/`, emitted by `d_publisher_port.py`** so it joins the twin set and rides the publisher's activation. ⛔ **ONE PRODUCER PER SERVED KEY — verify no second writer exists for that key.** *Live counter-example in this estate: `D_01` and `D_04` both write `platinum/firm/partner_analytics_*.json` with disagreeing `CacheControl`, resolved only by write order.* **NEVER#3 does NOT attach — you are MINTING a key, not moving one; state that positively.** | `INS-d-1/2`, `INS-inv-6` | APPLIED |
+| **INSR1DS-AC4** ⛔ **BLOCKED -- SOVEREIGN, AND IT IS NOT A SEPARATE "FREEZE" (2.0.0_SA_COO ruling 2026-08-26 ~19:1xZ).**
+This criterion emits through `d_publisher_port.py` under `platinum/advi/49financial/`. **That publisher is held by
+Andrew-direct 2026-08-21T19:18Z** -- the 49F flip waits on BOTH source gaps AND schedule. **MEASURED TONIGHT by
+`0.7.0_AE_CloudOps~K`: `advi-49f-publisher` State=DISABLED BY CONTRACTED DESIGN, `OPAL_ADVI_PUBLISH_GRANT` unset, and
+at least three of four source-gap rows open or unknown. BOTH conditions must clear; neither is sufficient.**
+>> **SO AC4 IS BEHIND THE *SAME* SOVEREIGN GATE AS `0.7.0_AE_CloudOps~K`'s AC1(2)/AC3/AC6 on ADVI_PERFRP -- one gate,
+>> two TOs, and it was being carried in two places as two different unknowns.** AC3 rides it too (it re-takes at
+>> emission). **A publish is the ACT, not a test of it: Andrew's drive-now law licenses ad-hoc QA and does NOT reach
+>> this.** AC4 stays shut; the executing lane owes nothing on it and should not re-ask per tick. | **ONE json under `platinum/advi/49financial/`, emitted by `d_publisher_port.py`** so it joins the twin set and rides the publisher's activation. ⛔ **ONE PRODUCER PER SERVED KEY — verify no second writer exists for that key.** *Live counter-example in this estate: `D_01` and `D_04` both write `platinum/firm/partner_analytics_*.json` with disagreeing `CacheControl`, resolved only by write order.* **NEVER#3 does NOT attach — you are MINTING a key, not moving one; state that positively.** | `INS-d-1/2`, `INS-inv-6` | APPLIED |
 | **INSR1DS-AC5** | ⛔ **bd↔cot SEPARATION IS ABSOLUTE — 49F TREE ONLY.** The pattern record names the structure Cottonwood reuses (grammar, gold table shape, platinum key form, class-axis value) **with NO shared code, NO shared keys, NO cot prefix anywhere in it.** | `INS-inv-2`, `INS-f-1` | SOURCE |
 | **INSR1DS-AC6** | ⛔ **NO alarm / SNS / SES / monitor / freshness-checker; NO shadow path, NO parallel emitter, NO standing comparator.** **AND: the Advisor tab and Distribution tab are OUT CATEGORICALLY** — if any cell of yours touches `DistributionTab` or the Advisor tab, you are outside the TO. | `INS-inv-3/5` | SOURCE |
 
