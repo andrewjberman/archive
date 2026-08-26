@@ -9,7 +9,7 @@
 <date>2026-08-26</date>
 <placement>LAPTOP</placement>
 <references>
-  <ref type="decomp">workflows/atom_decomposition/runs/nfra-substratecarding-w2/20260826T210050Z/DECOMP.md @9e0394fedf</ref>
+  <ref type="decomp">workflows/atom_decomposition/runs/nfra-substratecarding-w2/20260826T210050Z/DECOMP.md @7969fd40ca</ref>
   <ref type="contract">org/standards/SUBSTRATE_CARD.v2.schema.json -- v2 BINDS, wave 2 is the wave boundary</ref>
   <ref type="law">CLAUDE.md Rule 28</ref>
 </references>
@@ -23,11 +23,14 @@ SUBSTRATE_CARD.v2.schema.json. QUALIFY ONLY. NO deprecation verdicts (second pas
 
 **to:** `0.7.0_AE_CloudOps~X` · **issuer:** `2.0.0_SA_COO~X` · **cut:** 2026-08-26 ~21:2xZ
 
-⛔ **UNCERTIFIED DECOMP** — cert pending `3.0.0_SA_CVO~X`. No practical effect on this lane; a
-DECOMP-INVALIDATING verdict is the issuer's act to re-decomp and re-issue.
+✅ **DECOMP CERTIFIED** — `3.0.0_SA_CVO~X`, ATTEMPT 4 PASS, record `5168510a28` over packet
+`7969fd40ca`. Mutant `W2-jlsi-5.card_grain` found on three discriminators and the seal closed
+CRYPTOGRAPHICALLY (commitment recomputed from the certifier's own found values, byte-equal, no
+reveal round). The DECOMP face is now GENERATED from the rectangle — `build_decomp_face.py
+--check` exits 1 on drift — so the id space this TO cites cannot silently diverge again.
 
 <decomp_ref>
-workflows/atom_decomposition/runs/nfra-substratecarding-w2/20260826T210050Z/DECOMP.md @9e0394fedf
+workflows/atom_decomposition/runs/nfra-substratecarding-w2/20260826T210050Z/DECOMP.md @7969fd40ca
 Cells discharged (49, enumerated LITERALLY):
 W2-cadn-1, W2-cadn-2, W2-cadn-3, W2-cadn-4, W2-cadn-5, W2-cadn-6, W2-cadn-7, W2-dmjw-1, W2-dmjw-2,
 W2-dmjw-3, W2-dmjw-4, W2-dmjw-5, W2-dmjw-6, W2-dmjw-7, W2-dxyo-1, W2-dxyo-2, W2-dxyo-3, W2-dxyo-4,
