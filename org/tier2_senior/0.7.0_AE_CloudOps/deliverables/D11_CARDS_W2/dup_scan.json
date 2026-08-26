@@ -1,0 +1,170 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.7.0_AE_CloudOps~X",
+  "subject": {
+    "id": "org/modules/graph/debtscan/dup_scan.py",
+    "kind": "script",
+    "declared_domain": "The BM25 duplicate / dead-twin scanner (comp-dups). Scores a resource's NAME and file BODY -- what it IS -- as distinct from comp-similar, which scores a synthesized summary of what it DOES. Advisory and read-only by its own declaration: emits a ranked candidate ledger plus a suppression audit, and never removes."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T22:17:42Z",
+    "commit_ish": "100e7ea130",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "how": "Three tiers over a corpus of tokenized 'documents'. A vendored BM25 class (:84) with k1=1.5 and b=0.75 scores neighbors; suppressors remove DESIGNED parallels before anything is reported (cross-firm same-name, environment triplets, per-agent-tree paths, service suffixes); a dead-prior regex raises candidates under deprecated/archive-shaped paths, and by CTO arch-gate condition 2 a finding is 'CONFIRMED dead' ONLY after a graph reachability check shows zero consumers -- otherwise it is 'INFERRED dead, graph-pending'. THE BURIED OPINIONS, IN PROSE because the TO's form is prose: (1) max_df_ratio=0.25 at :98 -- a token appearing in more than 25% of documents is SKIPPED ENTIRELY for candidate generation, so the operative definition of 'similar' silently excludes the estate's most common vocabulary; (2) df_cut has a floor of 2, so on a tiny corpus almost nothing is excluded and the ratio stops meaning what it says; (3) top=5 and min_score=0.0 defaults, so a sixth genuine twin is invisible and a score of exactly 0.0 is dropped; (4) _FIRMS is 12 HARDCODED firm names and _SERVICE_SUFFIX 13 hardcoded suffixes -- a new firm or suffix is silently un-suppressed; (5) _DEAD_PRIOR_RE hardcodes 7 directory names as evidence of death; (6) _DDB_WINDOW_DAYS=30, and that one carries its own written rationale, which the others do not; (7) _HELD_PREFIXES exempts 2 hardcoded paths. EVERY ONE IS A DEFINITIONAL CHOICE ABOUT WHAT COUNTS AS A DUPLICATE, and none is reachable without reading the source.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "not_applicable",
+      "declared_opinions": [
+        "max_df_ratio=0.25 at :98 -- a token appearing in more than 25% of documents is SKIPPED ENTIRELY for candidate generation, so the operative definition of 'similar' silently excludes the estate's most common vocabulary.",
+        "df_cut carries a floor of max(N*ratio, 2), so on a small corpus almost nothing is excluded and the ratio stops meaning what it says.",
+        "BM25 k1=1.5 and b=0.75 -- standard defaults, with no record of tuning against this corpus.",
+        "neighbors() defaults top=5 and min_score=0.0, so a sixth genuine twin is invisible and a zero score is dropped rather than reported.",
+        "_FIRMS is 12 HARDCODED firm names and _SERVICE_SUFFIX 13 hardcoded suffixes; a firm or suffix outside those lists is NOT suppressed, so its designed parallels surface as duplicate candidates.",
+        "_DEAD_PRIOR_RE hardcodes 7 directory names (deprecated/archive/archived/old/legacy/_attic/graveyard) as evidence of death; a dead file outside those paths raises no prior.",
+        "_DDB_WINDOW_DAYS=30 -- and this one carries a written rationale in-line, which the other cutoffs do not."
+      ],
+      "composes": [
+        {
+          "id": "python stdlib only",
+          "note": "math, re, hashlib, json, subprocess -- no third-party dependency"
+        },
+        {
+          "id": "comp-kuzu",
+          "note": "the graph reachability check that upgrades INFERRED dead to CONFIRMED dead"
+        }
+      ],
+      "invents": [
+        {
+          "id": "class BM25",
+          "note": "a vendored implementation, k1=1.5 b=0.75, idf and scoring at :96-124"
+        },
+        {
+          "id": "the max_df_ratio=0.25 discriminative-token cut",
+          "note": null
+        },
+        {
+          "id": "the four suppressor families",
+          "note": "firm / env / agent-tree / service-suffix"
+        },
+        {
+          "id": "the CONFIRMED-vs-INFERRED dead distinction",
+          "note": null
+        }
+      ],
+      "basis": "inferred",
+      "basis_by_field": {
+        "how": "measured",
+        "determinism": "inferred",
+        "materializer_standing": "measured",
+        "composes": "measured",
+        "invents": "measured"
+      },
+      "evidence": "SOURCE READ @04b967c3c3 -- class BM25 :84, __init__ k1/b defaults :85, idf :96, neighbors() with max_df_ratio :98-110, _score :112-124, _FIRMS :35, _ENV_RE :36, _SERVICE_SUFFIX :37, _AGENT_TREE_RE :38, _DEAD_PRIOR_RE :203, _DDB_WINDOW_DAYS :244, _HELD_PREFIXES :358. THIS ROW SETTLES A CLAIM I MADE IN WAVE 1 WITHOUT OPENING THE FILE: my comp-similar card wrote 'dup_scan.py -- the BM25 implementation', which was my own clearest entry in my 8-of-14 author adjudication. MEASURED NOW AND IT HOLDS -- a real BM25 class with the canonical scoring form. I am recording that it CONFIRMS rather than refutes, because a self-audit that only ever finds faults is not measuring. determinism is INFERRED not measured: no model, random or clock call exists in the scoring path by source read, but I did not run two scans and byte-compare them, and an unexercised determinism claim is precisely what the schema warns against. materializer_standing='not_applicable' -- a scanner that materializes no layer; MEASURED absence of applicability, not unmeasured currency. DECLARED-OPINIONS FORM, RESOLVED: this card ships declared_opinions as an ENUMERATED ARRAY. The TO originally directed buried opinions into methodology.how as prose because the card schema had no slot; 1.0.0_SA_CTO~X landed an OPTIONAL process.methodology.declared_opinions @9660f526d8 about two minutes after wave 2 dispatched and ruled the choice of form was the issuer's. I surfaced that fork as a non-blocking OBSERVATION and continued in prose pending a ruling. COX2-AC8 on the TO at HEAD IS that ruling -- it requires the field populated and states that omitting the key passes the schema and fails the TO -- so the array is what ships, and the same opinions remain in methodology.how so the prose and the field cannot disagree.",
+      "owner": "0.8.0_AE_CloudComp (debtscan toolchain)"
+    },
+    "cadence": {
+      "declared_rhythm": null,
+      "actual_trigger": "operator invocation of comp-dups, plus LIBRARY IMPORT by 5 other modules (comp_similar.py, summary_corpus.py, state_scan.py, a CRO discovery script, and a second summary_corpus.py copy under 0.8.0_AE_CloudComp deliverables). Nothing schedules it.",
+      "live_matches_declared": "not_applicable",
+      "live_instance_age": null,
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured"
+      },
+      "evidence": "declared_rhythm=null is the real answer for an on-demand scanner. Importer census MEASURED @04b967c3c3 by grep over --include=*.py -> 5 files. ⛔ THE FIFTH IMPORTER IS ITSELF A FINDING: org/tier2_senior/0.8.0_AE_CloudComp/deliverables/comp_similar_phase1/summary_corpus.py is a SECOND COPY of another of this TO's own subjects, and it imports dup_scan too -- so this module has a consumer that is a duplicate of a sibling subject. Recorded here because it bears on that subject's card, not chased.",
+      "owner": "0.8.0_AE_CloudComp"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": false,
+      "authority_role": "none",
+      "mutation_policy": "not_applicable",
+      "form": "python module; a ranked candidate ledger and suppression audit printed to stdout per invocation. Nothing durable is written by the scanner itself.",
+      "basis": "inferred",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "mutation_policy": "measured",
+        "form": "inferred"
+      },
+      "evidence": "persisted=false MEASURED per COX2-AC3 -- source read shows the scanner's output path is stdout and it declares itself 'Advisory/scanner ONLY ... Never removes'. form is INFERRED rather than measured: I read the output construction but did not run a full scan to observe the emitted ledger, so the shape of what it prints is argued from source, not seen. authority_role='none' follows from persisted=false.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "location": {
+      "home": "org/modules/graph/debtscan/dup_scan.py (32,062 bytes, mtime 2026-07-10)",
+      "projection_of": [],
+      "co_resident_stores": null,
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured"
+      },
+      "evidence": "home MEASURED by direct stat @04b967c3c3. projection_of=[] is a CLAIM: the module persists no artifact, so nothing is derived FROM anything. LEAF-NAME AMBIGUITY CHECKED rather than assumed, because a sibling subject in this same TO is a known two-copy name: `find . -name 'dup_scan.py'` over the repo returned exactly ONE file. Unambiguous.",
+      "owner": "0.8.0_AE_CloudComp"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "repo files eligible to be scored as duplicate candidates, after the suppressors and the discriminative-token cut have removed designed parallels and common vocabulary",
+      "denominator": null,
+      "denominator_absent_reason": "THE POPULATION IS NOT A FIXED SET AND IS DEFINED PER INVOCATION. The scanned corpus is assembled at call time from the caller's path arguments, then reduced by four suppressor families, a vendor-dir exclusion, a held-prefix exemption and the max_df_ratio=0.25 token cut -- so 'N of M' has no stable M without fixing an invocation. ⛔ I DID NOT RUN A FULL SCAN TO PRODUCE ONE, and inventing a repo-file count here would be a denominator for a population the tool does not actually score. Stating the reason is the lawful form (v2 makes a bare null rejectable); a fabricated M would pass the field and mislead the consumer.",
+      "explicitly_out": [
+        "tokens present in >25% of documents -- excluded from candidate generation entirely by max_df_ratio, so the most common estate vocabulary cannot contribute a match",
+        "cross-firm same-name pairs, environment triplets, per-agent-tree paths and service-suffix variants -- suppressed as DESIGNED parallels, with the suppression logged rather than silent",
+        "vendored directories (_VENDOR_DIRS) and 2 hardcoded held prefixes (_HELD_PREFIXES)",
+        "any firm not among the 12 hardcoded in _FIRMS, and any service suffix not among the 13 -- these are NOT suppressed, so they can surface as false duplicates"
+      ],
+      "basis": "absent",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "absent",
+        "explicitly_out": "measured"
+      },
+      "evidence": "The exclusions are MEASURED at source @04b967c3c3 (:35-39, :98, :337, :358). The denominator is genuinely ABSENT and that is a WORKED row, not an unfilled one: I measured that the population is invocation-scoped and therefore not countable as a fixed M, which is the one lawful exception the v2 field exists for. ⛔ NOTE THE FLOOR: because one sub-claim is 'absent', this row's scalar basis is 'absent' -- the weakest, not the dominant. Under v1 this row would have read 'measured' with the gap in prose.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "key": {
+      "identity_space": "repo path, for both the module and every document it scores",
+      "key_is_stable": "stable",
+      "crosses_spaces": false,
+      "declared_mapping": null,
+      "basis": "measured",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "MEASURED @04b967c3c3. Documents are keyed by repo path throughout; a path survives ordinary change to a file's contents, so 'stable' in this schema's sense. crosses_spaces=false: the scanner never joins a repo path to an ARN, a graph node_id or any other space -- and that is a REAL LIMIT, not a clean bill. It means dup_scan cannot see a duplicate that exists as a repo file on one side and a cloud resource on the other. declared_mapping=null after a hunt: searched dup_scan.py, its suppressor helpers and its 5 importers' call sites; no cross-space mapping is declared and none is used.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "failure_mode": {
+      "returns_on_failure": "EXERCISED: invoked with a nonexistent path argument the module exits rc=2 and prints its own usage/error rather than an empty ledger; invoked with --help it exits rc=0 with the scanner description. A path that exists but contains no scoreable files returns an EMPTY RANKED LEDGER with rc=0 -- which is the ambiguous case.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "⛔ AN EMPTY CANDIDATE LEDGER HAS THREE INDISTINGUISHABLE CAUSES: (a) genuinely no duplicates, (b) every candidate suppressed as a designed parallel, (c) the query's tokens all exceeded max_df_ratio and were skipped, so no candidates were ever generated. The suppression audit distinguishes (b) -- it is printed and logged -- but nothing distinguishes (c) from (a).",
+        "A firm absent from the 12-entry _FIRMS list is not suppressed, so its designed cross-firm parallels surface as duplicate CANDIDATES -- a false positive that reads exactly like a real finding.",
+        "The dead-prior regex keys on 7 directory NAMES, so a genuinely dead file outside those paths raises no prior at all."
+      ],
+      "basis": "inferred",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "inferred"
+      },
+      "evidence": "EXERCISED per COX2-AC7, with rc read WITHOUT a pipeline (a piped `| tail` returns tail's rc, which caught me three times across these two waves): nonexistent-path invocation -> rc=2 with an error; --help -> rc=0. distinguishable='no' is the MEASURED verdict for the empty-ledger case and it is the high-value finding on this subject: the tool is honest about suppression (it logs what it hid, by explicit arch-gate condition) but has no signal at all for the max_df_ratio path, so a scan that generated zero candidates and a scan that found zero duplicates print the same thing. silent_degrade_paths is INFERRED -- reasoned from source, not each route exercised -- and marked rather than absorbed into 'measured'.",
+      "owner": "0.8.0_AE_CloudComp"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "Every row is worked, the defects are named with owners, and the tool is usable within stated limits. WHAT HOLDS: a real, correctly-formed BM25 (settling a wave-1 claim of mine that was made without opening the file); four suppressor families that LOG what they hide rather than suppressing silently, which is a deliberate arch-gate condition and the opposite of the failure mode this project keeps finding; and a CONFIRMED-vs-INFERRED dead distinction that refuses to call a file dead on a path name alone. WHAT QUALIFIES IT: (1) an empty candidate ledger cannot be distinguished from a scan whose tokens were all cut by max_df_ratio -- distinguishable_from_true_negative='no', the single most valuable thing this card surfaces; (2) seven definitional choices about what COUNTS as a duplicate are reachable only by reading the source, and one of them (a 25% document-frequency cut) silently removes the estate's most common vocabulary from consideration; (3) the population is invocation-scoped, so no stable coverage denominator exists and the row is honestly 'absent'; (4) 12 hardcoded firms and 13 hardcoded suffixes mean a new firm produces false positives rather than a gap. NOT UNSOUND: nothing here blocks load-bearing use of a tool that declares itself advisory, never removes, and requires graph corroboration before any death claim. || SEMANTIC-AXIS DECLARATION: NOT SYSTEMATICALLY EXAMINED. The seven opinions came into view because the coverage and failure_mode rows forced them, not from a deliberate sweep. I did NOT audit whether k1=1.5/b=0.75 were ever tuned for this corpus, whether 0.25 reflects a ruled intent or a v1 guess, or whether the 12 firms still match the estate. Every instrument I used -- source reads, greps, rc checks -- is structurally blind to a deprecated opinion. || GENERATOR CURRENCY: materializer_standing='not_applicable'; this module materializes no layer, a MEASURED absence of applicability rather than an unmeasured currency.",
+    "blocking_defects": null
+  }
+}
