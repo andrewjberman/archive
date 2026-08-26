@@ -163,6 +163,19 @@ This section originally read: *"the band can recur. It is upstream data, so neit
 
 ⚠ **AND THE RULE IS A PLAUSIBILITY FILTER, NOT A FIX.** It stops implausible figures reaching a client card; it does not make the valuation correct. **A filter that hides the symptom can retire the urgency to fix the cause — if it ships, the architectural fork (should a zero-position account produce a return at all?) must stay open on the record rather than closing with it.**
 
+### 5b.2 — ⛔ THE BUILD'S SHAPE IS RULED. A SUCCESSOR SEAT STARTS HERE. (`1.0.0_SA_CTO` 73912, 2026-08-26T2222Z)
+
+**RULED: FIXED THRESHOLD, `|r_net| > 15%`, evaluated PER DAY at the emitter.**
+The bimodal gap is the **EVIDENCE that 15% is safe** — measured floor (below 15% it catches legitimate movers), measured ceiling (above 45% it misses outliers), 18–36x above p99 — **and the gap is NOT the runtime mechanism.** A gap-detector requires a gap to exist, is **undefined on a continuum day**, and its evidence as a mechanism is 2 of 2 days, which does not carry a serving control. *Deterministic and auditable beats adaptive and fragile here.* Grounding cited: the seven-threshold census in s.5b.1, both days, full denominators.
+
+**TWO RIDERS ON THE BUILD, both binding:**
+**(a) EXCLUDED ROWS CARRY A MARKED STATE — never silently dropped.** A value must carry its claim, and a consumer must be able to distinguish *"filtered as implausible"* from *absent*. (CLAUDE.md §4; the consuming half is what makes it real.)
+**(b) THE FILTER DOES NOT CLOSE THE ARCHITECTURAL FORK.** Whether a zero-position, moving-`fair_value` account should emit a return **at all** stays **OPEN on the record until ruled**, and the build's own record must say so on its face. *A filter that hides the symptom can retire the urgency to fix the cause.*
+
+**STATUS: NOT COMMISSIONED.** The card is Andrew's; the build starts on his word and not before. **This lane holds the measurements and has authored nothing.**
+
+**THE CARD'S TRUE OPTION SET as it now stands at the terminal:** (i) serve everything when the schedule clears · **(ii) SERVE ACTIVITY + ALLOCATION, HOLD PERFORMANCE** — the 2-of-6 family defer, durable, fails closed, precedented, no build · (iii) hold everything. **REC is (ii)**, carrying the sequencing constraint verbatim.
+
 **AS A ROUND-2 INPUT:** this is the second candidate (with the O-2 provenance question in s.5) that **the decomp has no cell for.** Both are the issuer's to rule. **No cell minted, no id coined, no emitter changed, no rule built.**
 
 ---
