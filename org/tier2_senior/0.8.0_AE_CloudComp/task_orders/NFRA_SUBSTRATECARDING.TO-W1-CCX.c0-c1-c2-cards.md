@@ -36,7 +36,11 @@ initiative. Disclosed because a silent uncertified decomp is the pipeline's sing
 
 <decomp_ref>
 workflows/atom_decomposition/runs/nfra-substratecarding/20260826T172918Z/DECOMP.md @7c5de3e779
-This TO discharges the 21 CARD_MATRIX cells `SC-C0-*`, `SC-C1-*`, `SC-C2-*` (3 subjects x 7 rows).
+Cells discharged (21 CARD_MATRIX, enumerated LITERALLY -- a glob cannot be joined to a criterion):
+SC-C0-methodology, SC-C0-cadence, SC-C0-persistence, SC-C0-location, SC-C0-coverage, SC-C0-key, SC-C0-failure_mode,
+SC-C1-methodology, SC-C1-cadence, SC-C1-persistence, SC-C1-location, SC-C1-coverage, SC-C1-key, SC-C1-failure_mode,
+SC-C2-methodology, SC-C2-cadence, SC-C2-persistence, SC-C2-location, SC-C2-coverage, SC-C2-key, SC-C2-failure_mode
+Contributed-to (PROJECT_MECHANISM, not solely owned by this TO): SC-m-asof, SC-m-qualify
 </decomp_ref>
 
 <proof_of_spec>
