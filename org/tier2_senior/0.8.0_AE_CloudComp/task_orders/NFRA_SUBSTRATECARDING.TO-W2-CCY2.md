@@ -46,9 +46,11 @@ W2-bg-4, W2-bg-5, W2-bg-6, W2-bg-7, W2-bh-1, W2-bh-2, W2-bh-3, W2-bh-4, W2-bh-5,
   <criterion id="CCY2-AC5" cell_refs="W2-ab-1, W2-ab-2, W2-ab-3, W2-ab-4, W2-ab-5, W2-ab-6, W2-ab-7, W2-ac-1, W2-ac-2, W2-ac-3, W2-ac-4, W2-ac-5, W2-ac-6, W2-ac-7, W2-ad-1, W2-ad-2, W2-ad-3, W2-ad-4, W2-ad-5, W2-ad-6, W2-ad-7, W2-ak-1, W2-ak-2, W2-ak-3, W2-ak-4, W2-ak-5, W2-ak-6, W2-ak-7, W2-ap-1, W2-ap-2, W2-ap-3, W2-ap-4, W2-ap-5, W2-ap-6, W2-ap-7, W2-aq-1, W2-aq-2, W2-aq-3, W2-aq-4, W2-aq-5, W2-aq-6, W2-aq-7, W2-ar-1, W2-ar-2, W2-ar-3, W2-ar-4, W2-ar-5, W2-ar-6, W2-ar-7, W2-be-1, W2-be-2, W2-be-3, W2-be-4, W2-be-5, W2-be-6, W2-be-7, W2-bf-1, W2-bf-2, W2-bf-3, W2-bf-4, W2-bf-5, W2-bf-6, W2-bf-7, W2-bg-1, W2-bg-2, W2-bg-3, W2-bg-4, W2-bg-5, W2-bg-6, W2-bg-7, W2-bh-1, W2-bh-2, W2-bh-3, W2-bh-4, W2-bh-5, W2-bh-6, W2-bh-7"/>
   <criterion id="CCY2-AC6" cell_refs="W2-ab-6, W2-ac-6, W2-ad-6, W2-ak-6, W2-ap-6, W2-aq-6, W2-ar-6, W2-be-6, W2-bf-6, W2-bg-6, W2-bh-6"/>
   <criterion id="CCY2-AC7" cell_refs="W2-ab-7, W2-ac-7, W2-ad-7, W2-ak-7, W2-ap-7, W2-aq-7, W2-ar-7, W2-be-7, W2-bf-7, W2-bg-7, W2-bh-7"/>
+  <criterion id="CCY2-AC8" cell_refs="W2-ab-1, W2-ac-1, W2-ad-1, W2-ak-1, W2-ap-1, W2-aq-1, W2-ar-1, W2-be-1, W2-bf-1, W2-bg-1, W2-bh-1"/>
   <instance_path>org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_SUBSTRATECARDING.TO-W2-CCY2_PROOF_OF_SPEC.json</instance_path>
-  <expected_criteria>CCY2-AC1,CCY2-AC2,CCY2-AC3,CCY2-AC4,CCY2-AC5,CCY2-AC6,CCY2-AC7</expected_criteria>
-  <alignment_denominators>criteria: 7. Cells: 77 of 77 owned by this executor, all covered. Unmapped 0; untraceable 0.</alignment_denominators>
+  
+  <expected_criteria>CCY2-AC1,CCY2-AC2,CCY2-AC3,CCY2-AC4,CCY2-AC5,CCY2-AC6,CCY2-AC7,CCY2-AC8</expected_criteria>
+  <alignment_denominators>criteria: 8. Cells: 77 of 77 owned by this executor, all covered. Unmapped 0; untraceable 0.</alignment_denominators>
 </proof_of_spec>
 
 ---
@@ -95,6 +97,7 @@ thing, not the string.
 | **CCY2-AC4** | `location.home` exact, or `null` **with evidence of where you looked and the search denominator**. |
 | **CCY2-AC5** | ⛔ **`coverage.denominator` NON-NULL**, `"N of M"`; if genuinely uncountable, **`denominator_absent_reason` populated** (v2 makes this rejectable — use it). |
 | **CCY2-AC6** | `key`: `identity_space`, `key_is_stable`, `crosses_spaces`; `declared_mapping: null` **only after a hunt**. |
+| **CCY2-AC8** | ⛔ **`declared_opinions` POPULATED on every card** — an enumerated array, or `null` WITH the reason in `evidence`. **Omitting the key passes the schema and FAILS this TO** (s.5). |
 | **CCY2-AC7** | `failure_mode` **EXERCISED**, never read off a docstring. |
 
 ⛔ **AND BINDING ON EVERY ROW: `basis_by_field` IS POPULATED WHEREVER A ROW'S PROVENANCE IS MIXED.**
@@ -110,12 +113,34 @@ deprecation verdict at first delivery.** A lane that decides a subject is doomed
 backwards into the measurement it derives from.** If a subject looks obviously dead, **card it fully
 and say nothing about its fate.**
 
-## 5. KNOWN CONTRACT GAP — `declared_opinions` IS NOT IN THE CARD SCHEMA
+## 5. ⛔ CONTRACT GAP **CLOSED MID-WAVE** — `declared_opinions` NOW EXISTS. POPULATE IT.
 
-It exists only in the L0 manifest contract, and it is the field the canonical-materializer consumer
-reads. **Record buried filters/thresholds/exclusions in `methodology.how` prose as the fallback, and
-say in `evidence` that it is prose because the contract has no slot.** ⛔ **That is knowingly the F-2
-shape; it is routed to `1.0.0_SA_CTO~X` and is NOT this lane's to fix.**
+**SUPERSEDES the "record it in prose" instruction this TO shipped with.** `1.0.0_SA_CTO~X` landed it
+@`9660f526d8` at `process.methodology.declared_opinions` — an array of **every filter, threshold,
+exclusion, cutoff and definitional choice this subject's producer makes, ENUMERATED.**
+
+⛔ **`null` IS A LEGAL AND LOUD VALUE MEANING "THE OPINIONS ARE BURIED AND THIS SUBJECT IS UNREVIEWABLE
+ON THE SEMANTIC AXIS." That is itself the finding — it is not a blank.**
+
+⚠ **AND IT IS OPTIONAL IN THE SCHEMA, BY DESIGN — I EXERCISED IT: a card omitting the field entirely
+VALIDATES** (positive control fired: a card missing `trust` was REJECTED, so that pass is real).
+`1.0.0_SA_CTO~X` made it optional deliberately **because this wave was already dispatched against a
+contract without it**, and making it required mid-round would retroactively invalidate lanes already
+working. **That is the correct call and it means THE TO CARRIES THE BINDING, NOT THE VALIDATOR:**
+
+> ⛔ **THIS TO REQUIRES `declared_opinions` ON EVERY CARD — an enumerated array, or `null` WITH the
+> reason stated in `evidence`. A card that omits the key passes the schema and FAILS this TO.**
+
+**Why it is worth a mid-wave amendment:** it is the ONLY remedy for the semantic axis — *"the defect is
+not 'wrong opinion', it is 'opinion that cannot be found'"* — and **it is the single field the
+canonical-materializer consumer reads.** A visible `ANCHOR_CATALOG = {...}` is reviewable even when its
+content is wrong; a filter buried in a loop is not, **and no freshness instrument we hold can see it.**
+
+⚠ **`materializer_standing` is now REQUIRED in `methodology`** (`canonical | historical_in_use |
+superseded | unknown`). ⛔ **`historical_in_use` is the most dangerous standing in the schema — it
+WORKS, therefore nothing surfaces it.** `unknown` is honest; do not upgrade it because something ran
+recently.
+
 
 ## 6. INSTRUMENT TRAPS — BOTH MEASURED TODAY
 
