@@ -4,7 +4,7 @@
 <issued_to>0.8.0_AE_CloudComp~X</issued_to>
 <issued_by>2.0.0_SA_COO~X</issued_by>
 <executor_class>0.8.0_AE_CloudComp (~lane instance; SINGLE-PROJECT -- this instance holds NFRA_SUBSTRATECARDING and nothing else)</executor_class>
-<status>pending</status>
+<status>complete</status>
 <priority>P1 -- D11 wave 1. No external clock; the constraint is the wave's shared as_of, which erodes if lanes run far apart.</priority>
 <date>2026-08-26</date>
 <placement>LAPTOP (declared decomp axis; no cross-fabric edge, no ferry semantics)</placement>
