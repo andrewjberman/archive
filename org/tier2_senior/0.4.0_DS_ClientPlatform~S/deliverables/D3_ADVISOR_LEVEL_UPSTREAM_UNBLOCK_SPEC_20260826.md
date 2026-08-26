@@ -210,12 +210,34 @@ and a different firm tree, and cot is a completely separate firm pipeline from b
 
 **Two ways to close it, both requiring a vendor read that is not mine to make:**
 1. The BD UI -- open template 390224, inspect the Portfolio Group level's available dimensions.
-2. A catalog API read (the datamining dimension/level catalog endpoint for queryType 6), landed to
+2. A catalog API read (the datamining dimension/level catalog endpoint for **queryType 5**), landed to
    `_ops/probe/` the same way the template bodies were.
 
 **Until one of those runs, "add dim 436 to 390224" is a WELL-FORMED ASK WHOSE FEASIBILITY IS
 UNVERIFIED.** I am not asserting it will work. I am asserting precisely what blocks it and what the
 next measurement is.
+
+> ### ⛔ CORRECTION, 2026-08-26 ~21:1xZ -- ITEM 2 SAID `queryType 6`. IT IS `queryType 5`. MINE.
+>
+> **MEASURED at the landed body:** `390224` is `"Allocation_Template"`, **`queryTypeId: 5`**.
+> `data/black_diamond/API/domains/datamining/QUERY_TYPES.md:17-18` -- **qt5 = Allocation**;
+> **qt6 = BI Billing**, the billing gap, a different star schema entirely.
+>
+> **WHY IT MATTERS MORE THAN A TYPO:** the catalog endpoint is
+> `POST /datamining/request/Query/DimensionsFacts {"queryTypeId": N}`, and it **answers for whatever
+> N it is given.** A read at qt6 would have returned a complete, well-formed, correctly-authenticated
+> BI Billing catalog -- and **dim 436's absence from it would have said NOTHING about template
+> 390224.** No control inside that read could have caught it, because the read would not have failed:
+> it would have succeeded about the wrong population. **This is the estate's wrong-plane class, and
+> the instruction that would have caused it was mine.**
+>
+> **THE ERROR'S SHAPE, since it is the transferable half:** I named the query type from the
+> `qt6_fee_probe` worked example I had been reading (the billing investigation), **not from the
+> template I was writing about.** The nearest recent number won over the measured one. **A parameter
+> quoted from an adjacent investigation is not a measurement of your own subject.**
+>
+> Caught 2026-08-26 ~21:0xZ by reading `queryTypeId` off the landed probe body **before** issuing the
+> call, under Andrew's ~19:36Z egress-for-verification grant. Reported in 73722/73723.
 
 ---
 
