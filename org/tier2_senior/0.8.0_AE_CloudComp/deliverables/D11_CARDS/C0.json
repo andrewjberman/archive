@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "carded_by": "0.8.0_AE_CloudComp~X",
+  "subject": {
+    "id": "C0",
+    "kind": "rung",
+    "declared_domain": "The C0 rung of the C0..C4 system ladder: FACTS -- the role-typed objects of the Opal estate graph, spanning the BACKEND (AWS), FRONTEND (portal source) and KNOWLEDGE (Microsoft 365) substrate sides. The canon declares it as 'FACTS ~20k NODES: role-typed objects (14 roles)' and marks it VIEW-COMPILED (live derivation, never hand-declared)."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T18:17:02Z",
+    "commit_ish": "fe269171f2",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "how": "C0 is view-compiled, not authored. The globgrph derive runner scans the live AWS estate and the repo source tree and materializes each discovered object as a row in the Iceberg table graph_nodes, carrying node_id, node_type and a JSON props blob. A separate build projects that table into the local kuzu_nessie_db for traversal. The ROLE vocabulary (14 roles) lives in the rule bank and is COMPOSED onto the node population by the node_bindings map; it is not a field the producer writes. The producer therefore ORIGINATES the node_type vocabulary (58 distinct types live) while the rule bank DECLARES the 14-role vocabulary, and node_bindings is the only thing joining them.",
+      "determinism": "unknown",
+      "inference_detail": null,
+      "composes": [
+        "NFRA_ONTOLOGY_RULE_BANK.yaml#roles -- the 14-role vocabulary",
+        "NFRA_ONTOLOGY_RULE_BANK.yaml#node_bindings -- role to node_type binding",
+        "live AWS estate (CloudTrail management events + service describe scans)",
+        "repo source tree (portal, data, infra)"
+      ],
+      "invents": [
+        "the node_type vocabulary itself -- 58 distinct values live, of which 10 are named nowhere in the rule bank",
+        "node_id construction for non-ARN objects (repo-relative paths, S3 key glob patterns, synthetic motif:/motifi: ids)"
+      ],
+      "basis": "measured",
+      "evidence": "Producer read at infra/aws/globgrph/derive_runner.py:1357-1362 and :1645-1699 @ec0408628a (working tree clean at that commit). Live node_type census: comp-kuzu 'MATCH (n) RETURN n.node_type AS t, count(*) AS n ORDER BY n DESC' -> 58 distinct node_types over 27,035 nodes at snapshot 2902399899597701830. Role vocabulary read at org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml#roles @5fc45ad69d -> exactly 14: Source, Store, Producer, Transformer, Consumer, Sink, Gateway, Guard, Router, Trigger, Registry, Container, Observer, Custodian. DETERMINISM IS 'unknown' AND WAS NOT EXERCISED: I did not fire a second full derive to compare outputs. A re-run would not be a clean control in any case, because the estate mutates between runs and the CloudTrail incremental writes continuously -- so a diff would conflate producer non-determinism with genuine estate change. Naming the instrument that WOULD settle it: two derives against a pinned input snapshot, which is not a read this lane can perform.",
+      "owner": "0.4.0_DE_ClientPlatform (globgrph derive runner producer lane)"
+    },
+    "cadence": {
+      "declared_rhythm": "nightly 02:00Z full re-derive, plus a continuous event-driven CloudTrail incremental",
+      "actual_trigger": "EventBridge rule opal-globgrph-derive-runner-nightly, cron(0 2 * * ? *), ENABLED -- and EventBridge rule opal-globgrph-cloudtrail-mgmt, ScheduleExpression None (event pattern), ENABLED. Both measured on the LIVE events plane. The scheduler plane was swept separately and carries no C0 producer.",
+      "live_matches_declared": "yes",
+      "live_instance_age": "graph_nodes table last-write 5.1h before read, against a declared <6h cadence marker; the kuzu projection was built 2026-08-26T14:07:59Z (age 4.1h at read). Nessie HEAD reads 'current (pin == marker HEAD)'.",
+      "basis": "measured",
+      "evidence": "BOTH TRIGGER PLANES SWEPT, because a one-plane census returns a true, correctly-controlled answer about the wrong population. Events plane: aws events list-rules (paginated, materialized set filtered client-side, NOT --query length()) -> opal-globgrph-derive-runner-nightly cron(0 2 * * ? *) ENABLED; opal-globgrph-cloudtrail-mgmt None ENABLED. Scheduler plane: aws scheduler list-schedules -> 18 schedules total, of which the only graph-related member is globgrph-cse-producer-nightly (a DOWNSTREAM cse producer, not the C0 derive). Terraform corroboration at infra/aws/terraform/globgrph/item2a.tf:439 @d89cc4fc9c -> schedule_expression = cron(0 2 * * ? *). Live age read from the comp-kuzu provenance header at card time.",
+      "owner": "0.4.0_DE_ClientPlatform (globgrph derive runner producer lane)"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "projection",
+      "mutation_policy": "replaceable",
+      "form": "Iceberg table graph_nodes in the Nessie warehouse, snapshot-versioned; projected to a local kuzu database file for traversal",
+      "basis": "measured",
+      "evidence": "comp-kuzu provenance header at card time: source nessie; nodes snapshot-id 2902399899597701830; nodes metadata warehouse/globgrph/graph_nodes_4c6c23bd-fffa-427e-9cd9-7a9deaa3426d/metadata/00000-9c6dea4d-286d-4b75-93ff-c5c0405b163c.metadata.json. AUTHORITY_ROLE IS 'projection' AND THIS IS A DELIBERATE READ, NOT A DEFAULT: the ladder canon marks C0 VIEW-COMPILED (infra/system/ontology/C0_C1_C2_C3_C4_SYSTEM_LAYERS.md @4724becca8, 'C1/C0 | live derivation (graph, TF, source) | the estate changes | VIEW-COMPILED'), so graph_nodes is authoritative WITHIN the graph domain but is itself a derived view of the live estate. Editing it does not change the world; the next derive overwrites it. Calling it 'source' would tell a consumer the opposite.",
+      "owner": "0.4.0_DE_ClientPlatform"
+    },
+    "location": {
+      "home": "Iceberg/Nessie table graph_nodes, warehouse/globgrph/graph_nodes_4c6c23bd-fffa-427e-9cd9-7a9deaa3426d",
+      "projection_of": [
+        "live AWS estate (CloudTrail management events + service describe scans)",
+        "repo source tree (portal, data, infra)"
+      ],
+      "co_resident_stores": [
+        "kuzu_nessie_db -- the canonical local traversal projection; 27,035 nodes at snapshot 2902399899597701830, built 2026-08-26T14:07:59Z",
+        ".comp-graph/graph.json -- a SEPARATE and much smaller node store (2,249 nodes, reported 19.7d stale by 1.0.0_SA_CTO~X); feeds nerves_resolve",
+        "s3://opal-estate-report/kuzu_nessie_db -- a SECOND kuzu database, MEASURED BY THIS LANE at card time: 51,068,928 bytes, LastModified 2026-08-06T21:49:50Z (aws s3api head-object, an instrument independent of comp-keys), and present in a comp-keys prefix listing run WITH --all (129 of 129 keys shown, kuzu match 1). Originally carried as HELD from 1.0.0_SA_CTO~X 72561; upgraded to measured here."
+      ],
+      "basis": "measured",
+      "evidence": "home and the kuzu projection read from the comp-kuzu provenance header at card time (snapshot 2902399899597701830, metadata path as quoted). projection_of derived from the producer source at infra/aws/globgrph/derive_runner.py @ec0408628a. THE s3://opal-estate-report/kuzu_nessie_db ENTRY WAS HELD AND IS NOW MEASURED BY THIS LANE: head-object returns Size 51,068,928 and LastModified 2026-08-06T21:49:50Z, and a comp-keys prefix listing WITH --all shows 129 of 129 keys with the kuzu object present. THE --all IS LOAD-BEARING: 0.4.0_DT_ClientPlatform~X (73078) and 2.0.0_SA_COO~X (73102) both measured that comp-keys prefix TRUNCATES TO 40 BY DEFAULT and prints its true total AFTER the rows, so a default-view sweep of this exact bucket returns a clean, confident listing with this store absent. This lane had run ZERO comp-keys calls before that correction, so no row here ever rested on a truncated sweep; the store was measured only after the trap was known. The .comp-graph/graph.json node count and staleness are likewise CTO~X's figures; what this lane measured independently is only that the file is a distinct store from graph_nodes.",
+      "owner": "0.4.0_DT_ClientPlatform~X (graph-object manifest, SC-m-3) for the store census; 0.4.0_DE_ClientPlatform for graph_nodes itself"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every role-typed object the derive runner discovers across the three declared substrate sides: BACKEND (AWS resources), FRONTEND (portal React/TS source objects), KNOWLEDGE (Microsoft 365 files, folders, users).",
+      "denominator": "27,035 of 27,035 nodes carry a non-null node_type (58 distinct types) -- zero untyped. Of those, 20,750 of 27,035 nodes (76.8%) sit under a node_type that node_bindings maps to a role bucket; 6,285 of 27,035 (23.2%) do not. By type rather than volume: 48 of 58 live node_types are named in node_bindings, 10 of 58 are not.",
+      "explicitly_out": [
+        "TypeDecl, Type, Symbol, Concept -- declared scope_out in NFRA_ONTOLOGY_RULE_BANK.yaml#node_bindings, i.e. deliberately outside the role vocabulary rather than missed",
+        "the 10 live node_types absent from node_bindings entirely: C2Motif, C3System, CODEBUILD_PROJECT, EC2_INSTANCE, ECS_CLUSTER, ECS_TASK_DEFINITION, IAM_USER, LOAD_BALANCER, ROUTE53_RECORD, VPC_ENDPOINT -- these are NOT declared out, they are simply unbound, which is a different thing and is the finding",
+        "4 of the 14 declared roles carry NO node_binding at all: Custodian, Producer, Router, Source -- so those roles cannot be populated from node_type by the declared map"
+      ],
+      "basis": "measured",
+      "evidence": "Full census computed from the materialized comp-kuzu result set, not from a page: 'MATCH (n) RETURN n.node_type AS t, count(*) AS n ORDER BY n DESC' joined in python against NFRA_ONTOLOGY_RULE_BANK.yaml#node_bindings @5fc45ad69d. Untyped control: 'MATCH (n) WHERE n.node_type IS NULL RETURN count(n)' -> 0, against 'MATCH (n) RETURN count(n)' -> 27,035, so the 58-type census spans the whole population rather than a typed subset. NOTE ON PLANE: all figures are the kuzu PROJECTION plane at snapshot 2902399899597701830. 1.0.0_SA_CTO~X measured the Iceberg WAREHOUSE at 27,061 nodes; that is a different plane at a different vintage and the two are not in conflict. This card does not reconcile them and does not re-pin as_of.",
+      "owner": "0.4.0_DE_ClientPlatform (producer) for the unbound node_types; 4.0.0_SA_CRO / rule-bank ratification chain for the 4 unbound roles"
+    },
+    "key": {
+      "identity_space": "node_id -- a HETEROGENEOUS space with no single grammar: AWS ARNs for cloud resources, repo-relative paths for source objects, S3 key glob patterns for object-store keys, and synthetic prefixed ids (motif:, motifi:) for ladder objects materialized into the same table.",
+      "key_is_stable": "unknown",
+      "crosses_spaces": true,
+      "declared_mapping": "org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml#node_bindings @5fc45ad69d -- EXISTS but is PARTIAL on both sides: 10 of 14 roles bound, 48 of 58 live node_types mapped, 20,750 of 27,035 nodes (76.8%) covered.",
+      "basis": "measured",
+      "evidence": "A DECLARED MAPPING DOES EXIST AND THIS CARD ALMOST CLAIMED OTHERWISE. A first pass compared the 58 live node_types against the 14 role NAMES directly and found 0 of 58 matching, which reads as a total absence of mapping. That comparison was against the wrong object: node_bindings is a role -> [node_type] map read at NFRA_ONTOLOGY_RULE_BANK.yaml#node_bindings @5fc45ad69d (12 buckets: 10 roles plus 'contextual' and 'scope_out'), and re-running the join against it gives 48 of 58 mapped. The 0-of-58 figure was true and about the wrong question. key_is_stable IS 'unknown' AND WAS NOT EXERCISED: the space demonstrably MIXES stable and mutable members -- ARNs survive ordinary change, while repo-relative paths and S3 key globs such as 'opal-data-bd/gold/_parity/account_gains/*/scorecard.json' (read from a live C2Motif instance props blob) do not survive a rename or restructure -- but this lane did not exercise a rename and watch an identity die, so the composition of the space is measured and the survival property is not.",
+      "owner": "4.0.0_SA_CRO / rule-bank ratification chain (the mapping's completeness); 0.4.0_DE_ClientPlatform (node_id construction)"
+    },
+    "failure_mode": {
+      "returns_on_failure": "TWO DIFFERENT BEHAVIOURS ON TWO DIFFERENT PLANES, and only one is loud. A PROPERTY-plane error is LOUD: querying a misspelled property raises 'ERROR: query failed: Binder exception: Cannot find property nodetype for n' and returns no count at all. A VALUE-plane miss is SILENT: querying a node_type that does not exist returns a clean, instant, well-formed 0 -- byte-identical to a genuine negative.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "a stale kuzu projection answers every query cleanly at its own frozen vintage; the provenance header discloses the build time but the query result itself carries no vintage",
+        "a scratch database passed via --db-path is a frozen vintage that answers with full confidence",
+        "a node_type that was renamed upstream returns 0 under its old name with no signal that the name moved -- indistinguishable from the object genuinely not existing",
+        "the 6,285 nodes (23.2%) whose node_type is unbound in node_bindings are invisible to any role-keyed traversal, which returns a clean smaller answer rather than an error"
+      ],
+      "basis": "measured",
+      "evidence": "EXERCISED, FOUR ARMS, with the discriminating control run as a separate invocation. ARM 1 genuine negative -- real node_type LAMBDA with a node_id that does not exist -> 0. ARM 2 nonexistent node_type ZZZ_NO_SUCH_NODE_TYPE_9999 -> 0. ARM 3 nonexistent edge_type ZZZ_NO_SUCH_EDGE_9999 -> 0. ARM 4 misspelled PROPERTY n.nodetype -> Binder exception, loud. Arms 1 and 2 are byte-identical, which is the finding: the substrate cannot tell 'this does not exist' from 'you asked about a category I do not carry'. Arm 4 establishes that the instrument is live and CAN fail loudly, so the three zeros are real answers rather than a dead probe.",
+      "owner": "0.4.0_DE_ClientPlatform (producer); UNOWNED for the value-plane indistinguishability itself -- no seat currently owns making a C0 category-miss loud, and this card does not assign one"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "Every one of the seven rows is worked and carries basis, evidence and owner; no row is blank or guessed, so this is not INCOMPLETE. The subject is usable as load-bearing substrate WITHIN stated limits, which is why this is QUALIFIED rather than SOUND. Three measured defects bound that use: (1) the role mapping is PARTIAL in both directions -- 4 of 14 roles unbound and 6,285 of 27,035 nodes (23.2%) outside it -- so any role-keyed claim about C0 spans at most 76.8% of the population and must print that denominator; (2) a value-plane miss is INDISTINGUISHABLE from a genuine negative, exercised over four arms, so a clean zero from C0 is not evidence of absence; (3) determinism is unexercised and key stability is unexercised, both honestly marked unknown rather than assumed. None of the three blocks use outright -- each is a limit a consumer can respect if it is told, which is what this card does. NOT CLAIMED: that the 76.8% mapped subset is itself correct; this card measured mapping COVERAGE, never mapping CORRECTNESS.",
+    "blocking_defects": null
+  }
+}
