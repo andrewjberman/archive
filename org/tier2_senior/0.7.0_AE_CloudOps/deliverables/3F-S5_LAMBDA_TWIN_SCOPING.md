@@ -113,11 +113,23 @@ the uncovered window **PASSES** the force-guard instead of tripping it.
 This is CLAUDE.md's own `--date=short` class — a date-only claim silently crossing midnight —
 landing on a **constant** rather than on a log line.
 
-**MITIGATION (offered, not a built guard — nobody has tested one):** whoever makes the DS-lane edit
-takes the value from **`date -u +%Y-%m-%d` in the same turn as the commit** — never from a local
-clock, from recollection, or from a date quoted in a message written earlier. **And verify the
-landed constant against `date -u` AFTER the deploy**, because a value that was right when written is
-wrong when shipped if the deploy slips.
+### ⛔ THE RULE — `2.0.0_SA_COO`'s ruling @71907. This is binding, not advice.
+
+1. **`PROVENANCE_CONTRACT_START` IS WRITTEN FROM `date -u`, NEVER FROM THE LOCAL CLOCK.**
+   Same turn as the commit — not from recollection, and not from a date quoted in a message written
+   earlier (a message written before midnight carries the *previous* day).
+2. **IT IS VERIFIED AGAINST THE ACTUAL DEPLOY TIMESTAMP *AFTER* THE APPLY, NOT BEFORE.** If the
+   deploy crosses midnight UTC between the edit and the apply, a value that was correct when written
+   is wrong when shipped.
+3. ⛔ **THE TWO HAZARDS COMPOSE, AND BOTH PUSH THE SAME DIRECTION — *EARLY*.** Local-clock error is
+   up to **four hours of wrong-day every night**; the slip case adds more on top. **EARLY is the
+   direction that re-opens the window silently** — an early constant means dates inside the
+   uncovered window **PASS** the force-guard instead of tripping it. A *late* constant would fail
+   loudly and be noticed; an early one will not be.
+
+**It costs one line at deploy time.** It lives here rather than in the thread that produced it
+because **the seat who ships S5 will not be any of us, will not have read that thread, and will be
+looking at a local clock that says the wrong day.**
 
 ---
 
