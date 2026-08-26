@@ -1,94 +1,131 @@
-**TODAY SPRINT**
+TODAY SPRINT
 
-• Model portfolios: found and fixed the last data gap — $43.7M of client model assets now classified correctly, verified to the penny, publishing tomorrow morning.
+* Mapped all remaining advisory assets with Cottonwood, scheduled to publish tomorrow morning.
 
-• Andrew's full model-portfolio taxonomy is now the written standard: Models, SMAs and Client at the top, drilling into primary and custom models, SMA types, and supervised vs unsupervised.
+* After identifying ("DIVZ SMA", {no "Opal"}), I chartered a scanner to detect future unlabeled Opal products.
 
-• A mislabeled Opal SMA was caught and rebucketed the same day — and a scanner is now chartered to catch any unlabeled Opal product automatically going forward.
+* Multi-Tenant Taxonomy build is complete and certified, with only one deployment step left.
 
-• Category views passed an independent audit: the build is done and certified, one deploy step from a live demo. The audit also caught the plan lagging today's new definitions — fixed same day.
+* This means unified vocabulary fully implemented across all data sources -> pipeline infrastructure -> frontend.
 
-• Fidelity access is in: Andrew's Wealthscape session was scoped and it exposes exactly the performance data our reporting needs. Light-touch integration; not a blocker.
+* Fidelity access is in for 49. My Wealthscape session was scoped, and it exposes exactly the performance data.
 
-• Andrew opened the floodgates: performance reporting, insurance views, model overlay and category views all drive to done this week. Big replatforming deliberately waits until the products are out.
+* Sprint continues for performance reporting, insurance views, model overlay, and category views are all driving.
 
-• Performance reporting's client-facing screens took shape today — the book view, client tables and account rosters are built and wired.
+* Performance reporting's client-facing screens took shape today.
 
-• Account-level model overlay: the data foundation is confirmed complete and certified; Andrew's Black Diamond decisions unblocked the advisor-level build.
+* The book view, client tables, and account rosters are built and wired.
 
-&nbsp;
+* Data foundation for the account-level model overlay is confirmed complete and certified.
 
----
+* Building a "Positioning" fold-in for Cottonwood for their "Opal Satellite" portfolios.
 
-**PROJECTS**
+* 348 commits managed across 28 individual workers today, **governing all process architecture, product design, research, and platform engineering** via collaboration with a fully auditable cast of 4 executive managers and 8 divisions overseen by 12 managers, with total contributors numbering close to 120.
 
-**Item 0 — Infrastructure**
-A quiet-but-real win: Andrew approved an automatic check that stops finished work being handed out twice — the one record gap that bit repeatedly this week is now machine-caught.
+* Every single action ever taken is auditable, including **8,000+ hand-written logs** going back to December 2025.
 
-**Item 1 — Model Portfolios (asset-category views)**
-Andrew moved the target to today and the item responded: an independent audit confirmed the views are built and certified, one deploy step from demo, and caught the plan trailing today's taxonomy rulings — corrected same day. The new name-discovery scanner was chartered under this item with its scope fully ruled.
+PROJECTS
 
-**Item 2 — Advisor Intelligence**
-The floodgates week started here: fresh teams seated on performance reporting and the data migration, the insurance views approved to build straight to a first render, and the publishing switch pre-cleared so it flips the moment the data gaps close. Performance reporting's screens — book view, client tables, rosters — took real shape. Fidelity turned out to be a thin, tractable source.
+* Item 0 — Agent Infrastructure (Process Management)
 
-**Item 3 — Account-Level Model Overlay**
-Unblocked twice over: the account-level foundation is confirmed delivered and certified, and Andrew's Black Diamond rulings (how advisors key, and a pre-approved one-field vendor update) opened the advisor level. A seat is on it.
+  A quiet but meaningful win: I approved an automated check that prevents completed work from being assigned twice. The recurring record gap that caused problems several times this week will now be caught automatically.
 
-**Item 4 — ETF "Positioning" variant**
-No movement today; yesterday's production release and backfill stand.
+* Item 1 — Model Portfolios: Asset-Category Views
 
-**Item 5 — Alt Research**
-No movement today, by design.
+  I moved the target to today, and the item responded accordingly. An independent audit confirmed that the views are built and certified, with only one deployment step remaining before the demo. The audit also caught that the plan was trailing today's taxonomy rulings, which was corrected the same day.
 
-**Item 6 — Opal Analyst**
-No movement today.
+* Item 2 — Advisor Intelligence
 
-**Item 7 — Opal Ticketing**
-Quiet; yesterday's restructure (Ticket Center as the one client-facing surface) is live.
+  The big push started this week. I seated fresh teams on performance reporting and the data migration, approved the insurance views to proceed directly to a first render, and pre-cleared the publishing switch so it can flip as soon as the remaining data gaps close. Performance reporting's screens—the book view, client tables, and account rosters—took real shape today. Fidelity also proved to be a thin, tractable data source rather than a major integration challenge.
 
-**Item 8 — Model Portfolios Pipeline Fortification**
-The day's headline. Yesterday said the scheduled run was the real test — it ran, refused to publish bad numbers exactly as designed, the root cause was pinned and fixed within hours, and the fix verified to the penny. Andrew cleared publishing: tomorrow serves current data for every firm.
+* Item 3 — Account-Level Model Overlay
 
-**Item 9 — Tax SMA Ops**
-Still assess-first, waiting on the meeting.
+  This item has been blocked behind developments with Items 1 & 2 and is now unblocked significantly ahead of schedule. The account-level foundation is confirmed delivered and certified, and my Black Diamond rulings—how advisors should be keyed and a pre-approved one-field vendor update—opened the advisor-level build.
 
-**Item 10 — Global Pipeline Structure**
-Andrew ruled the sequencing: products ship first, then the whole platform does one focused restructuring pass. This item deliberately rests until the rollout is done — no mid-flight migrations.
+* Item 4 — Satellites "Positioning" Variant
 
-**Item 11 — Substrate Analysis**
-New directive, first full day: the inventory of every data store the platform stands on is underway, and Andrew set the end goal — one clean, standard build path per layer once the cards are in.
+  Scoped Cottonwood's demands, spec'd a solution, and have allocated a team to realizing a fold-in view and associated pipeline for tracking "Positioning"-level data and characteristics for the Opal Satellites. This follows additional research for Cottonwood's nomenclature/keying which I expect to be invaluable in developing their Advisor Intelligence resource.
 
-&nbsp;
+* Item 5 — Alt Research
 
----
+  No movement today.
 
-**PROCESS**
+* Item 6 — Opal Analyst
 
-| Item | Timing | Status |
-|---|---|---|
-| 0 — Infrastructure | Ongoing | Unblocked |
-| 1 — Model Portfolios | Today, per Andrew | One deploy step from demo; ship on Andrew's look |
-| 2 — Advisor Intelligence | This week | All lanes staffed and driving |
-| 3 — Model Overlay | This week | Advisor level unblocked; building |
-| 4 — ETF Positioning | Priority, other device | Live; quiet today |
-| 5 — Alt Research | Ongoing | Idle by design |
-| 6 — Opal Analyst | Continuing | Idle |
-| 7 — Opal Ticketing | Held | Restructure live; quiet |
-| 8 — Pipeline Fortification | Done pending tomorrow's publish | Fixed and verified; serving tomorrow |
-| 9 — Tax SMA Ops | Assess then build | Waiting on the meeting |
-| 10 — Pipeline Structure | After the rollout | Resting by Andrew's call |
-| 11 — Substrate Analysis | Inventory first | Cards underway |
+  No movement today.
 
-&nbsp;
+* Item 7 — Opal Ticketing
 
----
+  AJ and I have set up a recurring weekly meeting to drive this project forward.
 
-**BLOCKS**
+* Item 8 — Model Portfolios Pipeline Fortification
 
-• **For Andrew — category views go-live:** the demo lands imminently; shipping waits only on his look and word.
+  This was the day's headline. Yesterday, the scheduled run was identified as the real test. It ran, refused to publish suspect numbers, as designed, and surfaced the underlying issue: mapping breaks with unlabeled Opal SMAs. That has been rectified in the interim. I cleared publishing, so pending no surprises, tomorrow's run will unstick Global + Cottonwood.
 
-• **For Andrew — Tax SMA:** the meeting with Yang and Alyssa still gates that item.
+* Item 9 — Tax SMA Ops + YCharts
 
-• **Resolved today:** yesterday's open call on the pipeline standard — Andrew ruled products-first, restructuring after; per-product location calls stay his, taken at rollout's end.
+  Still in assess-first mode and waiting on the meeting.
 
-• **Carried, not revisited today:** the ticketing email distribution list, and whether insurance gets its own advisor tracking.
+* Item 10 — Global Pipeline Structure
+
+  I ruled on the sequencing: products ship first, and then the entire platform undergoes one focused restructuring pass. This item will deliberately remain at rest until the rollout is complete. There will be no mid-flight migrations.
+
+* Item 11 — Substrate/Tooling Enhancements
+
+  This was the first full day under the new directive. The inventory of every data store supporting the platform is underway. I also established the end goal: once the inventory cards are complete, each layer should have one clean, standardized build path.
+
+PROCESS
+
+* Item 0 — Agent Infrastructure (Process Management)
+  **Timeline: Ongoing.**
+  Status: Unblocked. The automated duplicate-assignment check has been approved and is now part of the infrastructure.
+
+* Item 1 — Model Portfolios: Asset-Category Views
+  **Timeline: Immediate.**
+  Status: Build complete and certified, with one deployment step remaining before the live demo. Shipping follows my final review.
+
+* Item 2 — Advisor Intelligence
+  **Timeline: This week.**
+  Status: All active lanes are staffed and driving. Performance reporting, data migration, insurance views, and publishing readiness are progressing in parallel.
+
+* Item 3 — Account-Level Model Overlay
+  **Timeline: This week.**
+  Status: Unblocked significantly ahead of schedule. The account-level foundation is certified, and the advisor-level build is underway.
+
+* Item 4 — Satellites "Positioning" Variant
+  **Timeline: Active build, likely Friday, next week if not.**
+  Status: Cottonwood's requirements have been scoped, the solution has been specified, and a team has been allocated to the fold-in view and associated pipeline.
+
+* Item 5 — Alt Research
+  **Timeline: Ongoing.**
+  Status: Idle by design while current product priorities are completed.
+
+* Item 6 — Opal Analyst
+  **Timeline: Ongoing.**
+  Status: Idle today.
+
+* Item 7 — Opal Ticketing
+  **Timeline: Weekly operating cadence.**
+  Status: AJ and I have established a recurring meeting to drive the project forward.
+
+* Item 8 — Model Portfolios Pipeline Fortification
+  **Timeline: Tomorrow morning's scheduled publish.**
+  Status: The immediate mapping issue has been resolved, publishing has been cleared, and the next run is expected to restore current Global and Cottonwood data.
+
+* Item 9 — Tax SMA Ops + YCharts
+  **Timeline: On hold.**
+  Status: Waiting on the meeting with Yang and Alyssa before implementation begins.
+
+* Item 10 — Global Pipeline Structure
+  **Timeline: After the current product rollout, Sep 2026.**
+  Status: Deliberately resting. Products will ship first, followed by one focused restructuring pass with no mid-flight migrations.
+
+* Item 11 — Substrate/Tooling Enhancements
+  **Timeline: Ongoing, sequenced behind inventory.**
+  Status: Data-store and tooling cards are underway. Standardized build paths will be established after the inventory is complete.
+
+BLOCKED
+
+* Tax SMA Ops + YCharts
+
+  The meeting with Yang and Alyssa remains the gating dependency for Tax. The item stays in assess-first mode until that discussion occurs. YCharts I figure we'll have time to discuss later next week.
