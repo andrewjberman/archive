@@ -92,12 +92,35 @@ genuinely transient class: `404` is *the read failed*, `412` is *the world moved
 
 This run: **0 DRIFTED, 0 retried.**
 
-## 6. `STI-a-4` / AC6 — THE SERVED SERIES IS UNTOUCHED
+## 6. `STI-a-4` / AC6 — THE SERVED SERIES
 
-`gold/timeseries/account_performance.parquet` baseline pinned **before** any work at
-`2026-08-25T21:17:31Z`: `VersionId=dqCah5NzuhEqJW8UqK0UEjBQIrytzwpz`, size 229,138,778.
-Unreachable from the scope set by construction — `gold/timeseries/` is not a declared source prefix.
-⚠ Its ETag ends `-28`, i.e. **MULTIPART — not a content digest.** `VersionId` is the sound oracle.
+Baseline pinned **before** any work at `2026-08-25T21:17:31Z`:
+`VersionId=dqCah5NzuhEqJW8UqK0UEjBQIrytzwpz`, ETag `9c22cd22…-28`, size 229,138,778.
+
+⛔ **AMENDED AT CLOSE — I CALLED `VersionId` "THE SOUND ORACLE" HERE AND THAT WAS WRONG FOR THIS
+CRITERION.** At close the `VersionId` **had changed** (`yI1D.f0rBRAjWHY.V024333ivDC8iFeQ`) while the
+ETag and size were **identical**. Read naively that is an AC6 failure. It is not:
+
+| oracle | reading | what it actually answers |
+|---|---|---|
+| ETag | **UNCHANGED** (identical across the newest 4 versions) | the CONTENT did not change |
+| Size | **UNCHANGED** | — |
+| VersionId | **CHANGED** | the object was RE-WRITTEN by someone |
+
+The rewrite is BD's **scheduled daily republish** — the version history runs ~00:04Z / ~05:03Z daily,
+and the new version at `2026-08-26T00:04:52Z` sits exactly on that cadence. Byte-identical
+re-emission, the same pattern measured on `canonical/performance` in AC1.
+
+**`VersionId` answers "was it rewritten"; AC6 asks "did YOUR work touch it" — and NO DIGEST ANSWERS
+THAT.** Only a structural argument does, and it is the one that holds:
+
+- `gold/timeseries/` is **not a declared source prefix** and is **not a destination anywhere** — the
+  scope set (AC2) reaches `gold/canonical/{performance,nna,holdings}/` and nothing else in `gold/`.
+- `opal-data-bd` is a **SOURCE** bucket for this work. The landing role holds `s3:GetObject` there
+  and **never `s3:PutObject`** — so no write path from this seat exists at all.
+
+**AC6 holds on its own stated oracle (ETag/size unchanged), and the structural argument is what makes
+"untouched by me" provable rather than merely asserted.**
 
 ## 7. RULE 17a — THE GUARD DOES NOT REACH `bronze_legacy`. EXERCISED.
 
