@@ -1,0 +1,159 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.8.0_AE_CloudComp~Y",
+  "subject": {
+    "id": "d1_bound_live_graph_edge_types",
+    "kind": "corpus",
+    "declared_domain": "The eight live graph edge types D1 binds a grain to -- FLOWS_TO, READS_FIELD, HAS_FIELD, PROP_PASSES (field grain) and WRITES, READS, WRITES_S3, READS_S3 (artifact grain) -- as a population in the kuzu_nessie_db projection. This card covers that BOUND SET: what it is, where it lives, how much of the live edge space it spans, and how it fails. It does NOT card the D1 rail (wave 1, SC-e-*), the node types (W2-ifqm), or edge DIRECTION (W2-igwg)."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T22:34:21Z",
+    "commit_ish": "100e7ea130",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "how": "⛔ THIS SUBJECT IS A SELECTION, NOT A THING -- and that is the whole of its methodology. The eight types are not a class the graph knows about; they are the subset of live edge_type values that D1's edge_grain_binding block names and assigns a grain to. The graph itself carries 53 distinct edge_type strings in one CloudEdge REL table with no notion that eight of them are special. So the set COMPOSES live graph edge types and the D1 grain axis, and INVENTS exactly one thing: the binding of each named type to one grain (field or artifact). The selection was made by hand when the D1 block was authored; no code computes it, and nothing re-derives it when new edge types appear in the graph.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "not_applicable",
+      "composes": [
+        { "id": "CloudEdge", "note": "the single REL table all 53 live edge types share; the eight are a hand-picked subset of its edge_type values" },
+        { "id": "org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml#dynamic_rails.D1_value_grain", "note": "the edge_grain_binding block that names the eight and assigns each a grain" }
+      ],
+      "invents": [
+        { "id": "d1_edge_grain_binding", "note": "the assignment of each named edge type to exactly one grain -- field for FLOWS_TO/READS_FIELD/HAS_FIELD/PROP_PASSES, artifact for WRITES/READS/WRITES_S3/READS_S3" }
+      ],
+      "declared_opinions": [
+        "ONE GRAIN PER TYPE: each edge type is bound to exactly one grain. FLOWS_TO is called field-grain even though 77 of its 961 edges were declared to carry no dstField -- so the binding describes the type's intent, not every instance.",
+        "EIGHT OF FIFTY-THREE: the selection is silent about the other 45 live edge types. Their grain is not 'unknown' in any field a consumer can read -- they are simply absent from the binding, which is a different and less visible thing.",
+        "PROP_PASSES AND RENDERS ARE EXCLUDED FROM RELATION BINDING BUT NOT FROM GRAIN: the D1 block records both as carrying field-grain flow while being UNMAPPED as relations, so this set includes PROP_PASSES on grain while the relation vocabulary does not admit it.",
+        "S3-SPECIFIC TYPES ARE SEPARATE: WRITES_S3 and READS_S3 are bound distinctly from WRITES and READS rather than treated as refinements, so a consumer counting 'writes' must decide whether to sum two types.",
+        "⛔ THE BLOCK MIXES GRAINS UNDER AN EDGE-NAMED KEY: `edge_grain_binding` has NINE members, not eight, and the ninth is `S3Key` -- a NODE type, bound under a `partition` grain alongside the eight edge types. A consumer iterating the block to enumerate edge types gets a node type in the result, and the block's own name asserts otherwise. This is the declared-domain problem in miniature: the key says edge, the contents say edge-and-one-node."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "how": "measured",
+        "composes": "measured",
+        "invents": "measured",
+        "declared_opinions": "measured",
+        "materializer_standing": "measured"
+      },
+      "evidence": "The eight names and their grain assignments read at org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml:301-312 @5fc45ad69d (the edge_grain_binding block, parsed with yaml.safe_load rather than grepped). The 53-type live population measured at the pinned vintage with count(DISTINCT e.edge_type) -> 53, and the single-table structure confirmed by CALL show_tables() -> CloudEdge (REL), CloudNode (NODE). materializer_standing is MEASURED as not_applicable: this set is a hand-authored selection inside a YAML block, not the output of any materializer -- a --name sweep for a generator over the rail returned 0 hits across 28,789 files with a positive control at 21, so there is no producer whose currency could be in question.",
+      "owner": "4.0.0_SA_CRO -- last authored the D1 block @5fc45ad69d; the rule bank is CRO-registered per its own changelog."
+    },
+    "cadence": {
+      "declared_rhythm": null,
+      "actual_trigger": "a human edit to the D1 block. ⛔ THE SET DOES NOT TRACK THE GRAPH: new edge types appearing in the projection do not enter this binding, and a bound type disappearing from the graph would not leave it. The two populations move independently and nothing reconciles them.",
+      "live_matches_declared": "no",
+      "live_instance_age": "The block's embedded counts carry counts_as_of 'comp-kuzu 2026-07-23' -- about 34 days at this carding. The block itself was last modified 2026-08-20 (@5fc45ad69d). ⛔ DEFINITION-AGE AND COUNT-AGE DIFFER BY ABOUT A MONTH and nothing in the block distinguishes them in a field a consumer can branch on.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "⛔ live_matches_declared IS 'no' AND IT IS MEASURED, NOT ASSUMED -- this is the substantive finding of the row. Re-counting all eight bound types against the live projection at the pinned vintage: FLOWS_TO 961 = 961 HOLD, READS_FIELD 2110 = 2110 HOLD, HAS_FIELD 4269 = 4269 HOLD, PROP_PASSES 1382 = 1382 HOLD, WRITES_S3 275 = 275 HOLD, READS_S3 323 = 323 HOLD, WRITES 562 -> 585 DRIFTED (+23), READS 712 -> 741 DRIFTED (+29). SIX OF EIGHT HOLD, TWO HAVE DRIFTED. counts_as_of read at the rule bank :300; block vintage from git log -1 -> 5fc45ad69d 2026-08-20T22:10:33-04:00. The no-tracking claim is structural: the binding is a static YAML list and no code reads the graph to update it.",
+      "owner": "4.0.0_SA_CRO -- the block's own counts_as_of instructs 're-stamp on any re-count', so the re-stamp is CRO's act."
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "reference",
+      "mutation_policy": "editable",
+      "form": "a YAML sub-block (edge_grain_binding) nested inside the D1 rail block inside the rule bank document; version-controlled in git",
+      "basis": "measured",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "form": "measured",
+        "mutation_policy": "measured"
+      },
+      "evidence": "Parsed directly at org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml:301-312 @5fc45ad69d. ⛔ authority_role IS 'reference', NOT 'source', AND THE CHOICE IS DELIBERATE: the edge types themselves are authoritative in the graph, not here -- this block does not create them and cannot. What it holds is a REFERENCE selection over them plus a grain opinion, so a consumer wanting the truth about an edge type reads the graph, and a consumer wanting to know which types D1 binds reads this. mutation_policy 'editable' is measured behaviour: SYSTEM_DEFINITIONS.yaml:29 @07391cdc54 records v3.17 adding counts_as_of to this very block, an in-place amendment.",
+      "owner": "4.0.0_SA_CRO"
+    },
+    "location": {
+      "home": "org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml#dynamic_rails.D1_value_grain.edge_grain_binding",
+      "projection_of": [
+        { "id": "kuzu_nessie_db", "note": "the embedded per-type counts were produced by comp-kuzu queries at counts_as_of 2026-07-23; the SELECTION itself is hand-authored and projects from nothing" }
+      ],
+      "co_resident_stores": [
+        { "id": "infra/system/ontology/SYSTEM_DEFINITIONS.yaml", "note": "registry entry pointing at the D1 block via resolves_via; declares, does not duplicate the binding" }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured",
+        "co_resident_stores": "measured"
+      },
+      "evidence": "Home verified by direct parse at the anchor above; registry pointer read at infra/system/ontology/SYSTEM_DEFINITIONS.yaml:461-466 @07391cdc54. ⛔ projection_of NAMES kuzu FOR THE COUNTS ONLY, and the note says so, because the manifest consumes this field: the eight NAMES are a hand-authored selection with no upstream store, while the NUMBERS beside them are a stale projection of one. A manifest treating the whole block as a kuzu projection would look for lag in a selection that cannot lag; treating it as purely authored would miss that the counts can. PLANE NAMED: repo plane plus the live projection. This lane ran ZERO comp-keys calls and makes no S3 claim about this subject.",
+      "owner": "4.0.0_SA_CRO"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Live edge_type values in the kuzu_nessie_db projection at the wave-pinned vintage.",
+      "denominator": "8 of 53 distinct live edge types carry a D1 grain binding -- 15%. Of the 8 bound types' embedded counts, 6 hold exactly against the live projection and 2 have drifted. The 45 unbound types are 85% of the type space and are covered by no grain claim at all.",
+      "denominator_absent_reason": null,
+      "explicitly_out": [
+        "the 45 live edge types with no grain binding -- including CONTAINS (29,271 edges, by far the largest single type), OWNED_BY (6,261), RENDERS (2,447) and CALLS (1,623). Their grain is not declared anywhere a consumer can read.",
+        "whether each binding is CORRECT -- this card measures which types are bound and whether their counts still hold, not whether FLOWS_TO is genuinely field-grain",
+        "row grain -- declared FORWARD and unpopulated by the D1 block; measured at 0 nodes in wave 1 with a 4,969 positive control",
+        "SEMANTIC soundness of the grain assignments -- no systematic semantic pass was run. What surfaced incidentally is in declared_opinions. Per 2.0.0_SA_COO~X RULING 2, stated as an explicit UNMEASURED so silence does not read as clean."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "measured",
+        "explicitly_out": "measured"
+      },
+      "evidence": "53 distinct types measured with count(DISTINCT e.edge_type) at the pinned vintage; the eight bound names parsed from the block; the eight per-type live counts measured individually in a single edge_type census (full ordered result read, not sampled). ⛔ THE 8-of-53 RATIO IS THE FINDING AND IT IS NOT VISIBLE FROM THE BLOCK: reading edge_grain_binding alone, the eight types look like a considered set. Measured against the live type space they are 15% of it, and the single largest type in the graph (CONTAINS at 29,271 edges, half the entire edge population) carries no grain claim. That is a coverage fact the block cannot state about itself because it does not know what it does not name.",
+      "owner": "4.0.0_SA_CRO for the binding's coverage; UNOWNED for the 45 unbound types -- no seat is named as owning their grain."
+    },
+    "key": {
+      "identity_space": "edge_type STRING literals, shared between the YAML block and the graph's CloudEdge.edge_type property -- one id space, matched by exact string.",
+      "key_is_stable": "stable",
+      "crosses_spaces": false,
+      "declared_mapping": null,
+      "basis": "measured",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "⛔ key_is_stable IS 'stable' AND IT IS MEASURED RATHER THAN ASSUMED, which is the opposite call from my other cards and the reason is specific: all eight names were matched EXACTLY against live edge_type values at the pinned vintage and all eight resolved, so the join between the YAML's strings and the graph's property works today with zero translation. That is a demonstrated match, not an inference from the names looking like names. crosses_spaces is FALSE and measured: both sides are the same edge_type string space, and declared_mapping is null because no second space exists to map to -- the not-applicable case rather than an undeclared mapping. ⚠ THE CONTRAST WITH THIS RAIL'S OTHER KEY IS WORTH RECORDING: D1's EdgeKind values DO cross spaces (ontology 'recompute_guarded' vs live 'recompute/guarded'), carded separately at W2-iarh. Edge TYPE names are clean; edge KIND values are not. Same block, two key spaces, opposite verdicts.",
+      "owner": "4.0.0_SA_CRO"
+    },
+    "failure_mode": {
+      "returns_on_failure": "A CLEAN ZERO WITH NO MARKER. Asking this binding for the grain of an unbound edge type returns nothing -- and 'this type has no declared grain', 'this type does not exist', and 'I misspelled the type' are the same answer. The block carries no unknown-grain value and no list of what it excludes, so absence from the binding is the only signal and it is silent.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "a grain lookup for any of the 45 unbound types returns nothing, indistinguishable from a typo or a nonexistent type",
+        "the embedded counts carry no live-vs-stamped marker in a branchable field, and 2 of the 8 are measurably wrong at this vintage",
+        "a consumer summing 'writes' must know to add WRITES and WRITES_S3; taking either alone returns a well-formed undercount",
+        "FLOWS_TO is bound as field-grain while the block's own coverage_boundary declared 77 of its 961 edges carry no dstField -- so a per-edge grain claim derived from the type binding is wrong for those, silently"
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "EXERCISED as a control pair from different truths, against the parsed block rather than against prose. ARM 1 (the failure): looked up CONTAINS -- the largest live edge type at 29,271 edges -- in edge_grain_binding: NOT PRESENT, returned as a clean absence with no error and no marker. ARM 2 (POSITIVE CONTROL, identical lookup on a bound type): FLOWS_TO -> PRESENT, grain=field. ⛔ AND THE SAME PARSE PRODUCED AN UNPLANNED FINDING, WHICH IS THE ARGUMENT FOR PARSING RATHER THAN READING: the block yields NINE members, not the eight its name implies -- FLOWS_TO, HAS_FIELD, PROP_PASSES, READS, READS_FIELD, READS_S3, S3Key, WRITES, WRITES_S3. S3Key is a NODE type carrying 232 nodes, bound under a `partition` grain inside a block named edge_grain_binding. A consumer enumerating edge types from this block gets a node type, and no field in the block flags it. I found this only because I iterated the parsed mapping instead of reading the eight names the TO handed me. The pair shows the lookup works and that its miss is silent. The FLOWS_TO/dstField degrade path is carried from wave 1's D1 card where I measured it directly (961 of 961 carry a non-null dstField live, against the block's declared 884 of 961 and its 77-carry-none boundary line) -- that measurement is mine and re-usable here, and the drift means the boundary line itself is now stale in the consumer's favour.",
+      "owner": "4.0.0_SA_CRO for the binding's silence; UNOWNED for the unbound-type grain question."
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "The bound set is real, exactly resolvable against the live graph, and its key space is clean -- all eight names matched live edge_type values with zero translation, which is a better result than most subjects in this wave. It is genuinely usable for the types it names. QUALIFIED rather than SOUND on three bounded defects: (1) it binds 8 of 53 live types and is SILENT about the other 45, including CONTAINS which alone is half the entire edge population, so a grain question about most of the graph returns nothing with no marker; (2) two of its eight embedded counts have drifted and the block has no refresh mechanism, while nothing in a branchable field distinguishes stamped counts from live ones; (3) the type-level binding does not hold per-edge -- FLOWS_TO is field-grain by declaration while its own boundary line concedes instances that are not, and that line is itself now stale. Not UNSOUND: the eight bindings resolve, six counts still hold, and a consumer who reads the graph for anything unbound gets correct answers. NOT INCOMPLETE: all 7 rows are worked and every scalar is 'measured' -- this is the first card in my set where nothing had to drop below it, because the subject was entirely reachable from this plane. ⛔ NO FORWARD DISPOSITION per W2-m-3: omitted, and nothing here is an opinion on this binding's future. Per QUALIFY-DO-NOT-FIX this lane remediated nothing and edited no carried surface.",
+    "blocking_defects": [
+      "For any consumer asking the grain of an edge type: 45 of 53 live types are unbound and the lookup returns a silent nothing. Check membership before trusting an absence. Owner UNOWNED.",
+      "For any consumer citing the embedded counts as current: WRITES and READS are measurably wrong at this vintage and there is no refresh. Owner 4.0.0_SA_CRO.",
+      "For any consumer deriving per-edge grain from the type binding: FLOWS_TO's field-grain claim does not hold for every instance, and the boundary line stating the exception is itself stale. Owner 4.0.0_SA_CRO.",
+      "For any consumer ENUMERATING edge types from edge_grain_binding: the block yields nine members and one (S3Key) is a NODE type. Filter by grain or the result set is wrong by one, silently. Owner 4.0.0_SA_CRO."
+    ]
+  }
+}

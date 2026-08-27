@@ -1,0 +1,157 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.8.0_AE_CloudComp~Y",
+  "subject": {
+    "id": "native_cloudedge_direction",
+    "kind": "other",
+    "declared_domain": "The directedness of CloudEdge in the kuzu_nessie_db projection -- the property D2 relies on when it declares 'direction: NATIVE -- CloudEdge is directed (a -> b)' and defines a path as the transitive closure over produces/consumes/FLOWS_TO. This card covers direction AS A PROPERTY OF THE EDGE STORE: where it comes from, whether it is real, what it spans and how it fails. It does NOT card the edge types themselves (W2-kwjy) or the D2 rail (wave 1, SC-f-*)."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T22:34:21Z",
+    "commit_ish": "100e7ea130",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "how": "⛔ DIRECTION IS NOT A FIELD ON AN EDGE -- IT IS A PROPERTY OF THE STORAGE MODEL, AND THAT IS THE WHOLE SUBSTANCE OF THIS SUBJECT. CloudEdge is a Kuzu REL table (CALL show_tables() returns type=REL), and Kuzu REL tables are directed by construction: every edge is stored as an ordered (source, destination) pair. Nothing in the edge's own property set carries a direction flag -- table_info('CloudEdge') returns exactly four properties (edge_type, layer, snapshot_ts, props) and none of them is directional. So direction COMPOSES the storage engine's relationship model rather than being invented by the estate, and the estate's contribution is the CHOICE to model produces/consumes as directed edges instead of as a symmetric relation carrying a role field. It INVENTS the closure semantics D2 rests on -- that walking those directed edges transitively IS a path.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "unknown",
+      "composes": [
+        { "id": "kuzu.REL", "note": "the Kuzu relationship-table model; directedness is inherited from it, not implemented per-edge" },
+        { "id": "CloudEdge", "note": "the single REL table carrying every edge in the projection" }
+      ],
+      "invents": [
+        { "id": "cloudedge_direction.closure_semantics", "note": "the declaration that a transitive walk over directed produces/consumes/FLOWS_TO edges constitutes a path -- D2's foundational move" },
+        { "id": "cloudedge_direction.producer_consumer_asymmetry", "note": "modelling produce and consume as opposite-direction edges rather than one relation with a role property" }
+      ],
+      "declared_opinions": [
+        "DIRECTED-NOT-ROLED: produce and consume are modelled as direction rather than as a role field on a symmetric relation. A consumer cannot ask 'what relation holds between a and b' without also choosing which way to look.",
+        "ONE REL TABLE FOR EVERYTHING: all 53 edge types share a single CloudEdge table and are discriminated by an edge_type STRING property rather than by separate typed relations. Directedness is therefore uniform across every semantic edge type, whether or not that type is naturally asymmetric.",
+        "CLOSURE IS A PATH: that a transitive walk over directed edges constitutes a meaningful path is a modelling choice inherited by every D2 derivation, including provenance and blast-radius."
+      ],
+      "basis": "inferred",
+      "basis_by_field": {
+        "how": "measured",
+        "composes": "measured",
+        "invents": "measured",
+        "declared_opinions": "measured",
+        "materializer_standing": "inferred"
+      },
+      "evidence": "Storage model measured directly at the pinned vintage: comp-kuzu 'CALL show_tables() RETURN *' returns exactly two tables -- CloudEdge (type REL) and CloudNode (type NODE). Property set measured with 'CALL table_info(''CloudEdge'') RETURN *' -> four properties (edge_type STRING, layer STRING, snapshot_ts INT64, props STRING); NO directional property exists, which is the positive evidence that direction is structural rather than declared per-edge. D2's reliance read at org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml:339-340 @5fc45ad69d. ⛔ materializer_standing is INFERRED and the scalar drops to match: the kuzu projection is demonstrably built by something (its provenance header reports a build time and source snapshots), but I did NOT identify which builder writes the CloudEdge schema, and therefore cannot say whether that builder is the canonical one or a historical one still in use. Per the standing currency rule, absence of a currency measurement is not evidence of currency, so 'unknown' is the honest value rather than a guess in either direction.",
+      "owner": "UNOWNED for the storage-model choice -- no seat is named in the rule bank or the canonical as owning the directed-not-roled decision. The kuzu projection's builder is unidentified by this lane."
+    },
+    "cadence": {
+      "declared_rhythm": null,
+      "actual_trigger": "direction has no refresh of its own. It is a schema property that exists for as long as CloudEdge is a REL table, and it is re-established on every rebuild of the projection rather than maintained. The projection's own build is what carries a cadence; direction inherits it and cannot drift independently.",
+      "live_matches_declared": "not_applicable",
+      "live_instance_age": "The property is re-established at each projection build; the current projection was built 2026-08-26T14:07:59Z, 8.4 hours before this carding. ⛔ AGE IS THE WRONG AXIS FOR THIS SUBJECT AND I AM SAYING SO RATHER THAN REPORTING A NUMBER THAT LOOKS MEANINGFUL: a schema property does not go stale. An 8-hour-old directed table and an 8-month-old one are equally directed. The projection's age matters for the EDGES; it does not bear on whether direction holds.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "Build time read from the comp-kuzu provenance header at carding: 'built: 2026-08-26T14:07:59.485515+00:00 (age: 8.4h)', nodes snapshot 2902399899597701830 matching the wave pin. No rhythm is declared for direction anywhere in the rule bank or the canonical, and none could be -- there is no artifact to refresh. live_matches_declared is not_applicable because nothing is declared to compare against.",
+      "owner": "UNOWNED -- the projection builder's owner was not identified by this lane."
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "projection",
+      "mutation_policy": "replaceable",
+      "form": "a structural property of a Kuzu REL table in the local kuzu_nessie_db file -- expressed in the table's storage layout, not in any row, column or property value",
+      "basis": "measured",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "form": "measured",
+        "mutation_policy": "measured"
+      },
+      "evidence": "⛔ authority_role IS 'projection', NOT 'source', AND THE DISTINCTION IS LOAD-BEARING FOR THIS SUBJECT: kuzu_nessie_db is a rebuilt projection of the Nessie-versioned graph_nodes and graph_edges tables -- its provenance header names both source snapshot-ids -- so the direction a consumer observes here is a faithful re-expression of the warehouse's edge orientation and not an independent authority on it. A consumer wanting the authoritative orientation reads the warehouse; this table is where it is queryable. mutation_policy 'replaceable' is measured from the same fact: the projection is rebuilt wholesale (header reports a single build timestamp for the whole DB), so the property is re-established rather than amended. persisted is true in the sense the schema requires -- the property survives across queries and sessions in a file on disk -- and is NOT a claim that direction is stored as data.",
+      "owner": "UNOWNED -- the projection builder is unidentified by this lane; the warehouse-side orientation is owned by whatever writes graph_edges."
+    },
+    "location": {
+      "home": "kuzu_nessie_db::CloudEdge",
+      "projection_of": [
+        { "id": "graph_edges", "note": "the Nessie-versioned warehouse table the projection is built from; edges snapshot-id 6557038275462806297 at the pinned vintage" },
+        { "id": "graph_nodes", "note": "supplies the endpoints each directed edge connects; nodes snapshot-id 2902399899597701830" }
+      ],
+      "co_resident_stores": [
+        { "id": "CloudNode", "note": "the only other table in the projection; holds the endpoints, not the direction" }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured",
+        "co_resident_stores": "measured"
+      },
+      "evidence": "Home and co-resident table measured by 'CALL show_tables()' at the pinned vintage -- exactly two tables, CloudEdge (REL) and CloudNode (NODE). projection_of read from the comp-kuzu provenance header, which names both source snapshot-ids and the nodes metadata path under warehouse/globgrph/. ⛔ THE HOME IS A LOCAL FILE AND THAT IS WORTH STATING: this subject exists in a projection on disk, not in the warehouse, so 'where direction lives' has two answers at two planes and this card's home is the queryable one. PLANE NAMED: the projection plane. I did NOT read the warehouse tables directly -- per the graph_contracts card, the Nessie REST catalog is in-VPC only -- so nothing here is a claim about warehouse-side storage layout. This lane ran ZERO comp-keys calls, so no row rests on a truncated key listing.",
+      "owner": "UNOWNED for the projection; the warehouse tables' owner was not identified by this lane."
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every edge in the kuzu_nessie_db projection, across every edge_type, at the wave-pinned vintage.",
+      "denominator": "58,224 of 58,224 edges are directed, and 53 of 53 distinct edge_types inherit it -- direction is TOTAL over the edge population by construction, because it is a property of the single REL table all edges live in rather than a per-edge attribute that could be absent.",
+      "denominator_absent_reason": null,
+      "explicitly_out": [
+        "whether each edge's direction is SEMANTICALLY CORRECT -- this card measures that direction exists, is real and is asymmetric, not that any given edge points the right way. A backwards-written edge would be perfectly directed and perfectly wrong, and nothing here would detect it.",
+        "cross-plane hops (aws -> portal via FETCHES/PROJECTS_TO) -- directed like everything else, but D2's own coverage_boundary records they carry no typed transform, so direction alone does not make them walkable as typed paths",
+        "warehouse-side edge orientation -- unread from this plane; this card covers the projection",
+        "SEMANTIC soundness of the directed-not-roled modelling choice -- no systematic semantic pass was run. What surfaced incidentally is in declared_opinions. Per 2.0.0_SA_COO~X RULING 2, stated as an explicit UNMEASURED so silence does not read as clean."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "measured",
+        "explicitly_out": "measured"
+      },
+      "evidence": "Edge total 58,224 and node total 27,035 read from the comp-kuzu provenance header at the pinned vintage; 53 distinct edge_types measured with count(DISTINCT e.edge_type). The totality claim is structural rather than sampled: because every edge lives in one REL table and REL tables are directed by construction, there is no representable edge that lacks a direction -- which is why the denominator is 58,224 of 58,224 rather than a count of edges I checked individually.",
+      "owner": "UNOWNED -- no seat is named as owning edge-orientation correctness."
+    },
+    "key": {
+      "identity_space": "The ordered pair (source CloudNode id, destination CloudNode id) together with edge_type. Direction is what makes the pair ORDERED rather than a set, so it is constitutive of edge identity rather than an attribute of it.",
+      "key_is_stable": "unknown",
+      "crosses_spaces": false,
+      "declared_mapping": null,
+      "basis": "absent",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "absent",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "The ordered-pair identity is measured: the ARM1/ARM2 control below shows (LAMBDA, S3_BUCKET) and (S3_BUCKET, LAMBDA) are DIFFERENT keys under the same edge_type, which is what it means for direction to be constitutive. crosses_spaces is FALSE and measured: both endpoints are CloudNode ids in one id space, and direction introduces no second space -- this subject is deliberately NOT where the estate's ARN-vs-MS/Git identity gap lives, and saying so keeps that finding attached to the subjects that do carry it. declared_mapping is null because there is no second space to map to, which is the not-applicable case rather than an undeclared mapping. ⛔ key_is_stable is 'unknown' with basis ABSENT: a node id's stability across projection rebuilds determines whether a directed pair is stable, and I did not compare edge endpoints across two builds -- only one projection vintage was available to me. Recording the gap rather than assuming stability from a single read.",
+      "owner": "UNOWNED -- node-id stability across rebuilds has no named owner in the sources this lane read."
+    },
+    "failure_mode": {
+      "returns_on_failure": "A CLEAN, WELL-FORMED ZERO. Querying a directed edge in the wrong orientation returns an empty result set with no error, no warning and no hint that the reverse orientation would have matched. 'These nodes are unrelated' and 'you asked in the wrong direction' are byte-identical answers.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "a reversed query returns 0 rather than an error -- measured below at exactly 0 against a true value of 280",
+        "a consumer walking the closure in the wrong direction gets a well-formed but empty provenance or blast-radius answer, and emptiness is a legal result for both",
+        "because all 53 edge types share one REL table, an edge type that is naturally symmetric is still stored asymmetrically, so a consumer must know per-type which orientation is meaningful and nothing in the schema tells them"
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "⛔ EXERCISED AS A CONTROL PAIR REACHABLE FROM DIFFERENT TRUTHS, which is what makes this a measurement rather than a restatement of the storage model. ARM 1, the declared orientation: MATCH (a)-[e:CloudEdge]->(b) WHERE e.edge_type='WRITES' AND a.node_type='LAMBDA' AND b.node_type='S3_BUCKET' -> 280. ARM 2, THE SAME EDGE TYPE REVERSED: a.node_type='S3_BUCKET' AND b.node_type='LAMBDA' -> 0, returned as a normal successful result set with no error and no marker. The pair proves two things at once: direction is REAL (a symmetric store would have returned 280 both ways) and its failure is SILENT (the wrong orientation returns a clean zero). It is also semantically sound in this instance -- a bucket does not write a lambda -- so the 0 is a true negative here, which is precisely why it is indistinguishable from the false one a consumer would get by asking backwards about a relationship that does hold.",
+      "owner": "UNOWNED -- no seat is named as owning orientation discoverability for a consumer."
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "Direction is real, total, and structurally guaranteed: it is inherited from the Kuzu REL model rather than implemented per-edge, so there is no representable edge that lacks it, and a control pair from different truths confirms it is asymmetric in practice (280 forward, 0 reversed) rather than merely declared. D2 can stand on it, and provenance and blast-radius -- both of which need only direction and grain -- are computable today because of it. QUALIFIED rather than SOUND on three bounded defects: (1) the wrong orientation returns a clean zero indistinguishable from a true negative, which is the failure a consumer will actually meet; (2) all 53 edge types share one REL table, so a naturally symmetric relation is still stored asymmetrically and nothing tells a consumer which orientation is meaningful per type; (3) direction guarantees ORDER, never CORRECTNESS -- a backwards-written edge is perfectly directed and perfectly wrong, and this card measures the former only. Not UNSOUND: none of these makes direction unusable, and the first two are properties a consumer can work around once told. NOT INCOMPLETE: all 7 rows are worked. Two scalars sit below measured -- methodology at 'inferred' because I could not identify the projection's builder and so cannot claim its currency, and key at 'absent' because node-id stability across rebuilds needs two vintages and I had one. ⛔ NO FORWARD DISPOSITION per W2-m-3: omitted, and nothing here is an opinion on this subject's future. Per QUALIFY-DO-NOT-FIX this lane remediated nothing.",
+    "blocking_defects": [
+      "For any consumer querying a directed edge: the wrong orientation returns 0, not an error. Check both directions before concluding two nodes are unrelated. Owner UNOWNED.",
+      "For any consumer treating direction as semantic correctness: it guarantees order only. A backwards edge is undetectable by this property. Owner UNOWNED.",
+      "For any consumer of a naturally symmetric edge type: it is still stored asymmetrically and the schema does not say which orientation is meaningful. Owner UNOWNED."
+    ]
+  }
+}

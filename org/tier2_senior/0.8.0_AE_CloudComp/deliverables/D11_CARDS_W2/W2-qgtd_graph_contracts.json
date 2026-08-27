@@ -1,0 +1,167 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.8.0_AE_CloudComp~Y",
+  "subject": {
+    "id": "graph_contracts",
+    "kind": "store",
+    "declared_domain": "The globgrph.graph_contracts Iceberg table and the CVO-authored YAML it is loaded from -- the value-surface contract carrier named as CARRIER 2 of D3's three populations. This card covers the store: how rows come to exist, where they live, what the table spans, and how it answers when it cannot. It does NOT re-card the D3 rail itself (wave 1, SC-g-*), and it does not adjudicate any row's ratification state."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T22:34:21Z",
+    "commit_ish": "100e7ea130",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "how": "TWO-STAGE, TWO-SEAT, AND THE STAGES ARE IN DIFFERENT PLACES. Stage 1: 3.0.0_SA_CVO authors row CONTENT declaratively into a hand-maintained 290-line YAML in the CVO contracts directory -- the value-layer lane. Stage 2: an AE seat runs `--load-contracts <that file>` IN-VPC, because the Nessie REST catalog is reachable only from inside the VPC and no dev-box pyiceberg write exists. Each row write is an attributable Nessie commit, and THE LOADER STAMPS `ratified_at` INTO THE LIVE TABLE AT WRITE TIME AND NEVER WRITES BACK TO THE YAML. It COMPOSES the CSE contract schema (flattened into hoisted query dims plus fidelity JSON blocks) and the shared globgrph namespace; it INVENTS the two-seat authoring split and the tiered ratification rule.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "historical_in_use",
+      "composes": [
+        { "id": "cse_schema.CSE_TABLE", "note": "the CSE contract SoT; graph_contracts is that contract flattened into hoisted query dims plus fidelity JSON blocks" },
+        { "id": "globgrph", "note": "the shared Iceberg namespace and catalog, same as the C1 graph tables (cse_store.py:85)" },
+        { "id": "warehouse/_branch_head.main.json", "note": "the single marker HEAD tracking four tables, shared with graph_nodes, graph_edges and cse (cse_store.py:88-91)" },
+        { "id": "org/tier1_exec/3.0.0_SA_CVO/contracts/graph_contracts.yaml", "note": "the declarative authoring source the table's rows are loaded from" }
+      ],
+      "invents": [
+        { "id": "graph_contracts.two_seat_authoring_split", "note": "CVO authors row content declaratively in YAML; an AE seat loads it in-VPC. Neither seat can complete a row alone." },
+        { "id": "graph_contracts.tiered_ratification", "note": "SEV1 rows require ratified_by [Andrew]; SEV2 rows co-signable by [CTO, COO]" },
+        { "id": "graph_contracts.authored_not_self_ratified", "note": "a row exists in the source before it is a sanctioning edit; the existence-in-window check keys on a real commit hash" },
+        { "id": "graph_contracts.ratified_at_loader_stamp", "note": "a Nessie commit hash written into the live table at load time and never written back to the source" }
+      ],
+      "declared_opinions": [
+        "TIERED RATIFICATION: which row is SEV1 (benchmark / headline / advisor_intelligence) versus SEV2 (peers / aum) is a declared judgement, not a derived property.",
+        "AUTHORED-HERE-BUT-NOT-SELF-RATIFIED: the YAML's own PENDING-*-SIGNOFF strings are deliberately non-authoritative; only a real commit hash in the live table counts as a sanctioning edit.",
+        "MARKER SCOPE: graph_contracts is one of exactly four tables tracked by a single marker HEAD, so its freshness is reported through a marker shared with three tables on different cadences.",
+        "IN-VPC WRITE ONLY: the authoring path deliberately excludes dev-box writes. A stated access constraint, not an incidental one."
+      ],
+      "basis": "inferred",
+      "basis_by_field": {
+        "how": "measured",
+        "composes": "measured",
+        "invents": "measured",
+        "declared_opinions": "measured",
+        "materializer_standing": "inferred"
+      },
+      "evidence": "Authoring model and lane split read at org/tier1_exec/3.0.0_SA_CVO/contracts/graph_contracts.yaml:18-31 @a2a0a8c2f2 (290 lines, last authored 2026-07-17 by 3.0.0_SA_CVO). Loader and marker mechanics read at infra/aws/globgrph/cse_store.py:85-91 -- MARKER_TABLES = (\"graph_nodes\", \"graph_edges\", \"graph_contracts\", CSE_TABLE), the comment stating the tuple is kept in sync with derive_runner.stamp_branch_head_marker. declared_opinions are enumerated from the file's own header block rather than inferred from behaviour. ⛔ THE ROW SCALAR IS 'inferred' AND THAT IS THE FLOOR RULE WORKING, NOT A WEAKER CARD: materializer_standing is the one sub-claim I could not measure -- the loader is demonstrably the live path, but I did not establish it is the MOST CURRENT one, and per 2.0.0_SA_COO~X RULING 1 as refined by 3.0.0_SA_CVO~X, absence of a currency measurement is not evidence of currency. Under v1 this row would have read basis 'measured' with that caveat buried in prose, which is exactly the 41%-of-rows defect this lane contributed 8 rows to. v2 makes the scalar the MIN over the map, so the row now under-promises in the field a consumer branches on and the map carries the detail.",
+      "owner": "3.0.0_SA_CVO for the YAML content; an AE seat for the in-VPC load. The loader script's own owner is UNNAMED in the sources read and this lane did not assign one."
+    },
+    "cadence": {
+      "declared_rhythm": null,
+      "actual_trigger": "a human authoring act followed by a manual in-VPC `--load-contracts` invocation. There is no schedule and no event trigger on this table's own writes. It is nonetheless SWEPT by the nightly marker re-stamp, which is a different thing from being written.",
+      "live_matches_declared": "not_applicable",
+      "live_instance_age": "LIVE TABLE last-write 1707.7 hours -- about 71 days -- read from the comp-kuzu provenance header's per-table vintage block at this card's carding time. The SOURCE YAML was last authored 2026-07-17 (@a2a0a8c2f2), about 40 days. ⛔ The two carriers therefore have DIFFERENT ages and the older one is the LIVE one, which is the opposite of the intuitive direction.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "Live-table age from the comp-kuzu provenance header at the pinned vintage, read at 22:34Z this session: 'graph_contracts: last-write 1707.7h ago'. ⚠ THE HEADER ITSELF WARNS THAT last-write IS THE TABLE'S WRITE TIME, NOT THE AGE OF THE DATA IN IT, and I report it only as the former. YAML age from git log -1 -> a2a0a8c2f2 2026-07-17T19:58:23-04:00. The write path is a manual in-VPC invocation documented at the YAML's :18-24; this lane did NOT sweep EventBridge or Scheduler for a trigger, so 'no schedule' is read from the documented design rather than from a trigger census -- stated so the absence is not read as swept. live_matches_declared is not_applicable because no rhythm is declared to compare against.",
+      "owner": "3.0.0_SA_CVO and the AE seat holding the in-VPC load; no seat is named as owning a cadence for this table."
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "source",
+      "mutation_policy": "append_only",
+      "form": "TWO carriers, deliberately distinct: (a) a 290-line hand-authored YAML in the CVO contracts directory, version-controlled in git; (b) an Apache Iceberg table on the Nessie-versioned warehouse, written only from inside the VPC.",
+      "basis": "inferred",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "form": "measured",
+        "mutation_policy": "inferred"
+      },
+      "evidence": "Both carriers confirmed present. YAML read directly (290 lines @a2a0a8c2f2). Table confirmed live and named in MARKER_TABLES at infra/aws/globgrph/cse_store.py:91, with a measured last-write age from the provenance header. ⛔ authority_role is 'source' FOR THE TABLE, AND THE FILE IS EXPLICITLY NOT THE AUTHORITY -- the YAML says so in its own words at :9-11: 'THE PROPERTY is the live globgrph.graph_contracts table. This YAML is the AUTHORING source and a PROXY for ratification. Ground on the table, never on this field.' ⚠ mutation_policy is INFERRED and the scalar drops to match: 'every row write = an attributable Nessie commit' (:20-21) plus Iceberg's snapshot model implies append-only at the table layer, but I did not exercise an update or delete against the table to establish that a row cannot be mutated in place -- and per the location row I structurally could not.",
+      "owner": "3.0.0_SA_CVO for the YAML; the in-VPC AE seat for the table."
+    },
+    "location": {
+      "home": "globgrph.graph_contracts",
+      "projection_of": [
+        { "id": "org/tier1_exec/3.0.0_SA_CVO/contracts/graph_contracts.yaml", "note": "the declarative authoring source; rows are loaded from here in-VPC" },
+        { "id": "cse_schema.CSE_TABLE", "note": "the CSE contract flattened into hoisted query dims plus fidelity JSON blocks" }
+      ],
+      "co_resident_stores": [
+        { "id": "graph_nodes", "note": "shares the single marker HEAD warehouse/_branch_head.main.json; distinct table, one freshness marker" },
+        { "id": "graph_edges", "note": "shares the same marker HEAD" },
+        { "id": "cse", "note": "shares the same marker HEAD; the C0 cse log" }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured",
+        "co_resident_stores": "measured"
+      },
+      "evidence": "⛔ THIS ROW CLOSES A WAVE-1 UNMEASURED WITH ITS CAUSE, WHICH IS WHAT WAVE 2 IS FOR. My wave-1 D3 card reported this carrier's row count as UNMEASURED BY THIS LANE and named the two instruments that failed (comp-kuzu's CALL show_tables() returns only CloudNode and CloudEdge, so the projection does not carry the warehouse table; comp-icedrill's target grammar has no form for an arbitrary Iceberg table). ⛔ THE REASON IS NOW MEASURED AND IT IS NOT AN INSTRUMENT GAP: the Nessie REST catalog is IN-VPC ONLY and 'no dev-box pyiceberg write' exists (graph_contracts.yaml:19-20). A laptop lane structurally cannot read the live table's contents -- which comp-icedrill states in its own words when handed the `graph` target: it 'does not re-implement the Nessie catalog read; it points at the ONE surface', that surface being comp-kuzu's provenance header. So the header's last-write age is not a consolation reading, it is the ONLY property of this table available from this plane, and that is a fact about the estate rather than about my tooling. PLANE NAMED: everything above is the REPO plane plus the provenance header. This lane did NOT read the table's rows and ran ZERO comp-keys calls, so no row here rests on a default-truncated key listing.",
+      "owner": "3.0.0_SA_CVO for the YAML home; the in-VPC AE seat for the table home. No seat is named as owning laptop-plane readability."
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Value-surface contract rows for the globgrph graph -- one row per contracted quantity (benchmark, headline, advisor_intelligence, peers, aum are the five named in the source).",
+      "denominator": null,
+      "denominator_absent_reason": "THE LIVE TABLE'S ROW COUNT IS NOT COUNTABLE FROM THIS PLANE, and the reason is structural rather than instrumental: the Nessie REST catalog is in-VPC only (graph_contracts.yaml:19-20), and the one laptop-reachable surface -- comp-kuzu's provenance header -- reports the table's write TIME, not its contents. Two instruments were tried and both are named in the location row. What IS countable and is offered instead of a bare null: the SOURCE YAML names 5 contracted quantities, which is a denominator over the AUTHORING carrier and NOT over the live table. ⛔ I am not presenting 5 as the table's row count -- the file's own header states the table's state differs from the file's, so source-count and table-count are different questions and only the first is answerable here.",
+      "explicitly_out": [
+        "the live table's row contents and row count -- unreadable from the laptop plane by construction, not by instrument gap",
+        "ratification STATE of any row -- the source declares its own ratified_at a stale proxy and instructs readers to ground on the table, which this lane cannot reach",
+        "the D3 rail itself -- carded in wave 1 (SC-g-*), not re-carded here",
+        "the C7 influence-closure population (D3's carrier 3) -- declared out of the store class by its own card as process-generated and NOT graph-materialized",
+        "SEMANTIC soundness of the contract definitions -- no systematic semantic pass was run on this subject. What surfaced incidentally is in the key and failure_mode rows. Per 2.0.0_SA_COO~X RULING 2, stated as an explicit UNMEASURED so per-card silence does not read as clean."
+      ],
+      "basis": "absent",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "absent",
+        "denominator_absent_reason": "measured",
+        "explicitly_out": "measured"
+      },
+      "evidence": "The 5 contracted quantities are enumerated from the source file's own header block (:5-8), read directly. The unreadability of the live table is established at :19-20 and corroborated by comp-icedrill's own response to the `graph` target, which declines the catalog read and points at the provenance header as the one surface. ⛔ THE ROW SCALAR IS 'absent' BECAUSE THE FLOOR IS THE MIN AND THE DENOMINATOR HAS NO BASIS -- three of four sub-claims are measured and the map says so. This is the v2 shape working as intended: under v1 this row would have read 'measured' with the uncountability in prose. The absent value is WORKED, not blank: I measured that the population is not countable from here and named where I looked, which is the one lawful exception to print-the-denominator.",
+      "owner": "3.0.0_SA_CVO for the contracted-quantity set; UNOWNED for laptop-plane countability."
+    },
+    "key": {
+      "identity_space": "Contracted-quantity names (benchmark, headline, advisor_intelligence, peers, aum) in the YAML, carried into the table as row keys; plus a per-row ratified_at carrying a 16-character Nessie commit hash in the live table.",
+      "key_is_stable": "unknown",
+      "crosses_spaces": true,
+      "declared_mapping": "PARTIALLY DECLARED, and the declaration is a WARNING rather than a mapping. The source states explicitly that its own ratified_at values are a stale proxy for the table's, names the divergence in detail (as of 2026-07-09 benchmark, peers and aum were LIVE + RATIFIED with real 16-char hashes while the file still read PENDING-*-SIGNOFF), and instructs readers to ground on the table. So the estate DECLARES that the two carriers disagree on this field -- but nothing lets a reader of the YAML derive the table's value. The quantity NAMES appear stable across both carriers; I did not verify that by reading the table.",
+      "basis": "absent",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "absent",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "Divergence declaration read verbatim at graph_contracts.yaml:4-15 @a2a0a8c2f2. ⛔ key_is_stable is 'unknown' with basis ABSENT, deliberately: stability is a claim about behaviour over time, and a single-vintage read of one of two carriers cannot establish it -- I found no declared key grammar and no rename history, and I cannot read the carrier that would settle it. Recording 'unknown' rather than inferring 'stable' from the names merely looking like names, which is the inference this project exists to refuse. ⚠ A HIGH-VALUE FINDING SITS IN THIS ROW AND IT IS THE FILE'S OWN: it records that a prior CVO bound TO-3 status to the stale proxy on 2026-07-09 and re-authored 5 rows that already existed, calling it 'the fourth application of the session through-line: partial-signal-read-as-whole'. That is a MEASURED PRIOR MISUSE of exactly the cross-carrier gap this row describes, disclosed by the artifact against itself.",
+      "owner": "3.0.0_SA_CVO -- the file names the divergence; the remedy (a loader that stamps back) sits with the in-VPC write path, unowned in the sources read."
+    },
+    "failure_mode": {
+      "returns_on_failure": "FROM THIS PLANE: a read of the live table does not fail loudly -- it is simply unavailable, and the only surface that answers returns a WRITE TIME with an explicit caveat that it is not the age of the data. FROM THE SOURCE FILE: a reader asking for ratification state gets a well-formed, confidently-wrong answer -- every row reads PENDING-*-SIGNOFF while the live table has real hashes for three of them.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "a reader taking the YAML's ratified_at at face value gets PENDING for rows that are LIVE + RATIFIED -- disclosed by the file itself, and recorded to have actually happened once (5 rows re-authored on that basis, 2026-07-09)",
+        "the provenance header's last-write is the TABLE's write time, not the data's age; the header says so, and a consumer reading only the number gets a freshness claim about the wrong thing",
+        "graph_contracts shares ONE marker HEAD with three tables on different cadences, so a marker-level freshness read cannot distinguish which table was written",
+        "from the laptop plane a row-level question has no answer at all, and 'unreachable' is indistinguishable from 'absent' without knowing the in-VPC constraint"
+      ],
+      "basis": "held",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "held",
+        "silent_degrade_paths": "held"
+      },
+      "evidence": "EXERCISED where exercisable from this plane. ARM 1: handed comp-icedrill the `graph` target -- it returned a typed refusal naming the one legitimate surface rather than an error or an empty result, which is a LOUD and correct failure. ARM 2: the provenance header returned 'graph_contracts: last-write 1707.7h ago' beside its own printed caveat that last-write is not data age -- honest, and silently misreadable. ⛔ THE STALE-PROXY PATH IS HELD, NOT EXERCISED, AND THE SCALAR DROPS TO 'held' TO SAY SO: I did not read the live table to confirm the three rows are ratified -- I structurally cannot. The divergence rests on the FILE'S OWN DECLARATION plus its record that a seat already acted wrongly on it. That is strong documentary evidence from a named authority, which is precisely what 'held' means, and under v1 I would have carried it inside a 'measured' row.",
+      "owner": "3.0.0_SA_CVO for the proxy divergence; UNOWNED for the shared-marker ambiguity and for laptop-plane reachability."
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "The store is real, has two clearly-separated carriers, an explicit authoring model, a named write path and a documented tiered-ratification rule -- and its authoritative carrier is UNREADABLE from the plane most seats work on. QUALIFIED rather than SOUND on four bounded defects, each with its own clock: (1) the authoring carrier's ratified_at is a self-declared stale proxy that has ALREADY caused a seat to act wrongly, and nothing writes back to close it; (2) the live table's freshness is reported through a marker shared with three tables on different cadences; (3) the table's last-write is ~71 days while its source is ~40, so the carriers age in the counter-intuitive direction; (4) from the laptop plane a row-level question is unanswerable, and unreachable is indistinguishable from absent without prior knowledge of the in-VPC constraint. Not UNSOUND: every one is named, several by the artifact against itself, and a consumer reading the table in-VPC gets the authoritative answer the design intends. NOT INCOMPLETE: all 7 rows are worked. ⛔ FOUR ROW SCALARS SIT BELOW 'measured' AND THAT IS THIS CARD'S MOST USEFUL PROPERTY, NOT ITS WEAKEST: methodology and persistence read 'inferred', coverage and key read 'absent', failure_mode reads 'held' -- each because the v2 floor rule makes the scalar the MIN over basis_by_field. Under v1 all five would have read 'measured' with the qualification in prose, which is the exact 41%-of-rows defect this lane contributed 8 rows to measuring. The fix fired on its author's own next card. ⛔ NO FORWARD DISPOSITION IS SET, per W2-m-3 and 3.0.0_SA_CVO~X 73816: the field is omitted entirely and nothing here is an opinion on this store's future. Per QUALIFY-DO-NOT-FIX this lane remediated nothing and touched no carried surface.",
+    "blocking_defects": [
+      "For any consumer reading ratification state: read the LIVE TABLE, never the YAML's ratified_at. The file declares its own field a stale proxy and records a prior seat acting wrongly on it. Owner 3.0.0_SA_CVO.",
+      "For any consumer on the laptop plane: the authoritative carrier is structurally unreadable (Nessie REST is in-VPC only). Unreachable is not absent. Owner UNOWNED.",
+      "For any consumer reading freshness: last-write is the TABLE's write time, not the data's age, and the marker is shared with three other tables. Owner UNOWNED."
+    ]
+  }
+}
