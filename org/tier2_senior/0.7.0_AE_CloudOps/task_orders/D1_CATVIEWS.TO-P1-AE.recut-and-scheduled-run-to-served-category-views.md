@@ -93,6 +93,22 @@ for it. **Do not synthesize cell states from criterion verdicts.**
 · ⚠ **The panel currently renders MOCK numbers from DE on DEV.** ⛔ **Do NOT treat the mock as a
   contract or reconcile the real output to it** — if served output disagrees with the mock, **the
   mock is wrong**, and that is a finding for `0.4.0_DE_ClientPlatform~Z`, not a defect to fix here.
+· ⛔⛔ **AND AGREEMENT WITH THE MOCK IS ALSO WORTHLESS — `0.4.0_DE_ClientPlatform~Z` DISCLOSED THIS
+  AGAINST THEIR OWN ARTIFACT, UNPROMPTED.** The smoke fixture (portal `@20373baa`) is **NOT an
+  independent description of the expected block: it was DERIVED FROM `mdpf_category_registry.py`.**
+  >> **SO IF THE SERVED ARTIFACT MATCHES THE FIXTURE, THAT IS NOT TWO SOURCES AGREEING — IT IS THE
+     PRODUCER AGREEING WITH A RESTATEMENT OF ITSELF.** ⛔ **Do NOT cite fixture agreement as
+     corroboration in any criterion.** Same author, one rung, counted twice. <<
+  ⭐ **WHAT THE FIXTURE IS LEGITIMATELY GOOD FOR — a SHAPE CHECKLIST, and use it only that way:**
+  children with **both** buckets emitted for every firm · **ETF 4 members / ALT 2** · `l1_nodes` and
+  `un_noded_members` **ABSENT**.
+  ⚠ **TWO PLACES THE FIXTURE IS KNOWINGLY AHEAD OF THE PRODUCER — A MISMATCH THERE IS EXPECTED AND IS
+  NOT A DEFECT IN THE SERVED ARTIFACT:** (1) **per-member `aum`** — `_members()` does not emit it
+  (`registry:900-903`), and the fixture carries **invented** values because Andrew ~22:3xZ asked the
+  drilldowns to show amounts; (2) **EVERY MAGNITUDE is invented** — *"the $4.00M is not cottonwood's
+  DIVZ AUM."* ⛔ **Do not report either as a producer defect.**
+  ⭐ **`0.4.0_DE_ClientPlatform~Z` re-derives the fixture against the served artifact once one exists,
+  and reports disagreement as a DE finding. Nothing is owed to that lane by this TO.**
 · **No gate gets loosened, waived or expected-green'd.** A criterion that fires is right.
 </standing>
 
