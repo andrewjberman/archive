@@ -189,3 +189,49 @@ APPLIED layer — the stored parquet WS-E actually published, not the producer's
 **Not claimed:** I have not measured whether any downstream consumer (portal, WS-A aggregation)
 re-derives or caches `non_model_aua` independently — the caveat scope above is stated over the WS-E
 feeder partitions I read, not over every surface that may quote the figure.
+
+
+---
+
+## 8. FINDING B HARDENED — MULTI-VINTAGE EQUIVALENCE (added 2026-08-27T16:5xZ)
+
+Section 3 rested on **one** vintage. A single-date cent-match is exactly the kind of evidence that can
+be a coincidence of one day's book, so I widened the denominator before letting the blocking claim
+stand.
+
+**Population:** 514 vintages common to all three prefixes (legacy 634, 08242234 566, 08335338 538),
+spanning **2024-07-08 .. 2026-07-23**. **Sample: 10 of 514, every 57th** — spread across the full
+two-year overlap, not clustered.
+
+| vintage | LEGACY | 08242234 | delta | 08335338 | delta |
+|---|---|---|---|---|---|
+| 2024-07-08 | 659,361,846.17 | 659,361,846.17 | **0.00** | 662,351,391.98 | +2,989,545.81 |
+| 2024-09-26 | 737,355,351.44 | 737,355,351.44 | **0.00** | 743,286,601.14 | +5,931,249.70 |
+| 2024-12-17 | 811,845,500.61 | 811,845,500.61 | **0.00** | 819,438,639.42 | +7,593,138.81 |
+| 2025-03-12 | 926,913,910.22 | 926,913,910.22 | **0.00** | 927,412,843.76 | +498,933.54 |
+| 2025-06-03 | 1,017,468,019.21 | 1,017,468,019.21 | **0.00** | 1,026,805,981.40 | +9,337,962.19 |
+| 2025-08-25 | 1,111,679,055.18 | 1,111,679,055.18 | **0.00** | 1,120,692,539.24 | +9,013,484.06 |
+| 2025-11-13 | 1,256,721,892.00 | 1,256,721,892.00 | **0.00** | 1,268,056,804.09 | +11,334,912.09 |
+| 2026-02-06 | 1,425,183,755.61 | 1,425,183,755.61 | **0.00** | 1,448,053,487.44 | +22,869,731.83 |
+| 2026-04-30 | 1,553,684,292.84 | 1,553,684,292.84 | **0.00** | 1,601,119,110.42 | +47,434,817.58 |
+| 2026-07-23 | 1,641,269,345.33 | 1,641,269,345.33 | **0.00** | 1,696,352,525.05 | +55,083,179.72 |
+
+**Exact match to the cent vs legacy: `08242234` = 10/10. `08335338` = 0/10.**
+
+Two things this adds that the single-vintage arm could not:
+
+1. **The match is not a coincidence of one book-date.** Ten independent vintages over two years, every
+   one exact to the cent, across a book that tripled in size (659M -> 1.64B). A wrong-account
+   hypothesis cannot survive that.
+2. **The 08335338 divergence is not noise — it GROWS**, roughly 3.0M (2024-07) -> 55.1M (2026-07).
+   That is the signature of a genuinely different and differently-growing book, not a reconciliation
+   gap or a rounding artifact. **Both arms of the control can fail and only one does** — the negative
+   arm (08335338) diverges on every single sampled date, which is what makes the positive arm's
+   10/10 informative rather than vacuous.
+
+**This is also the equivalence check FINDING C says the repoint owes**, executed at 10 vintages
+instead of one: on the correct account, `sum(market_value_settled_unsettled)` over `fact_rps` with
+`ticker_symbol` cash-exclusion reproduces the legacy `sum(market_value)` over `rps` with `ticker`
+cash-exclusion **exactly**, at every date tested. The column mapping in FINDING C is therefore
+value-preserving, and the repoint's only remaining semantic question is the account — which is
+FINDING B, held on COO's word.
