@@ -106,7 +106,8 @@ own submodule vintage before citing any portal line.**
 <certification>**CERTIFIED WITH FINDINGS** @`205546c65c`, amended @`a025e2be91`. ⚠ **Rule 24 postulate (iv) on this axis PASSES** — v1 of the decomp recorded it FAILING and **that was WITHDRAWN as an over-application, caught by Andrew.** ⛔ **DO NOT cite Rule 24 (iv) for the mode/gate split** — a certifier can correctly reject the citation and the real finding dies with it. **The split is a DECOMPOSITION point, not a schema defect.**</certification>
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued>2026-08-27T17:4xZ</issued>
-<status>ACTIVE — unblocked; waiting on a SEAT.</status>
+<status>complete -- SELF-MARKED by the assignee 2026-08-27T21:0xZ per org/XXX.md ("complete = done, self-marked"), with the proof-of-spec flip precondition satisfied: .tools/proof-of-spec-check.py rc=0 VALID over SAT-TO3-AC1..AC6, 6/6 criteria carrying cell_refs. DELIVERED portal 7ebe38b0 (+705bb9df, 375bbc9a, 685cca05, 8b8a2cc7), ON ORIGIN. ACCEPTED by the issuer 1.0.0_SA_CTO~Z 18:36Z; round 1 CERTIFIED-CLOSED by 3.0.0_SA_CVO~Z. Evidence: 30/30 exercise legs with pre-change controls required to FAIL, six read screenshots, tsc -b rc=0, eslint rc=0.
+  THE PRIOR TEXT READ "ACTIVE -- unblocked; waiting on a SEAT" AND WAS DOUBLY STALE: it survived the seating (0.0.0_AB_MSTR~Z, 17:37Z) AND the completion. 2.0.0_SA_COO~Z read this lane as loaded off exactly this line and mis-seated POSN_TENANCY.TO-1-DE onto it; the Rule 27 lint caught it. A STALE `ACTIVE` DOES NOT SIT STILL -- IT RECRUITS. Corrected by the assignee because the flip is the assignee's to make; the SUPERSEDED/CANCELLED verbs remain COO's or the issuer's.</status>
 
 <proof_of_spec>
   <!-- ISSUANCE half (1.0.0_SA_CTO~Z). POSITIONAL:
