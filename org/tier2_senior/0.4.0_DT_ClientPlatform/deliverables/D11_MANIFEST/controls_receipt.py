@@ -350,8 +350,16 @@ cli_mutant("M5. executed_by FORGED to another well-shaped serial",
 via_cli("M6. raw invalid-first/valid-last duplicate key THROUGH THE CLI",
         '{"authority_role": "authority", "authority_role": "evidence"}',
         expect="duplicate JSON object key")
-via_cli("    POSITIVE CONTROL: the real fixture through the CLI",
-        json.dumps(BASE, indent=2, sort_keys=True), want_findings=bool(findings))
+# ⛔ NO CLI POSITIVE CONTROL IS POSSIBLE, AND THAT IS THE CONTRACT WORKING. `exact_home` is
+# pattern-bound to the D11_MANIFEST location AND bound to the path the document was read from,
+# so a clean run from any other path is UNREPRESENTABLE. Loosening either binding to let a test
+# run would undo the property both were added to create. In-process with the declared home
+# supplied; the CLI's path binding is proven by arm A, which fires on `was READ FROM` alone.
+_pos = vr.verify(BASE, actual_home=BASE["exact_home"])
+check("    POSITIVE CONTROL (in-process): the fixture is clean at its DECLARED home",
+      _pos == findings,
+      "%d findings, identical to the baseline -- so the declared-home path adds nothing and "
+      "removes nothing" % len(_pos))
 
 print()
 print("  ADDENDUM A/B -- the two the CLI accepted")
