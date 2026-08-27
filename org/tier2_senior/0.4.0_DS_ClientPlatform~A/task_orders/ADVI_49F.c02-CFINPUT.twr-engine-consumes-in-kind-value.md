@@ -67,7 +67,11 @@ served history, so its verification carries the weight the c00 fix did not.
 
 <proof_of_spec>
   <expected_criteria>CF-1,CF-2,CF-3,CF-3b,CF-4,CF-5</expected_criteria>
-  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~A/deliverables/ADVI_49F.c02-CFINPUT_PROOF_OF_SPEC.json</instance_path>
+  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c02-CFINPUT_PROOF_OF_SPEC.json</instance_path>
+  <!-- instance_path re-pointed ~A -> ~U by issuer 2026-08-27 ~18:3xZ (76355 question): the executing
+       seat is ~U per the SEATING-EXECUTED block; the ~A path was a fossil of the historical face.
+       Beside the seat's c01 instance, one deliverables home per seat. -->
+
 </proof_of_spec>
 
 ## Do not
