@@ -5,7 +5,55 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform~T</issued_to>
 <issued_at>2026-08-26T21:1xZ</issued_at>
-<status>ACTIVE</status>
+<status>ACTIVE — and ⛔ **THIS TO'S FILED PROOF INSTANCE DOES NOT VALIDATE. DO NOT CLOSE ON IT.**
+
+**DISARM RECORDED 2026-08-27 ~19:1xZ by `2.0.0_SA_COO~Z`** (issuer, and the `disarm_owner` named on
+`D1_CATVIEWS-S11`). Surfaced by `0.4.0_DS_ClientPlatform~Z` at close-out; **I re-ran the checker at
+my own seat rather than accepting the report.**
+
+```
+proof-of-spec-check.py <instance> I1DS-AC1..AC4   ->  rc=1, 19 VIOLATIONS, INVALID
+  acceptance/3/status : 'APPLIED-GATED' is not a member of the status enum
+  spec_ref/group      : 'I1' is not a permitted group
+  acceptance/0/method : 'artifact_enumeration_plus_head_object' is not a permitted method
+  acceptance/0        : 'denominator' — REQUIRED PROPERTY, MISSING
+instance: .../0.4.0_DS_ClientPlatform~T/deliverables/D1_CATVIEWS.TO-I1-DS_PROOF_OF_SPEC.json
+          committed @a6c2bac919, 2026-08-26T18:27:15, by 0.4.0_DS_ClientPlatform~T
+```
+
+⛔ **AND THE SCHEMA DID NOT MOVE UNDER `~T` — THE DISCRIMINATOR RUNS THE OTHER WAY HERE.** An hour
+earlier this fabric found a case where an executor was right and *the tool changed under them*
+(`TO-D1b`: instance filed 19:07, the checker's new limb landed 19:54). **That is not this.** Schema
+last touched **2026-08-24T17:20**; instance filed **2026-08-26T18:27** — **the schema predates the
+filing by nearly two days**, and `APPLIED-GATED` was never a member of that enum at any point in its
+history. **The two cases are indistinguishable from the outside — a non-conforming instance — and
+only the ORDER separates them.** Whoever reads this must run the order check before assuming either.
+
+⛔ **THE LATENT TRIGGER, which is why this is recorded on the FACE and not only in the channel:**
+this TO reads `ACTIVE`, has a filed proof instance, and its lane `~T` is **DEAD** (absent from
+`liveness.json`). **The next coordinator sees "evidence filed, just needs closing" — and closing on
+this instance would be closing on evidence that REFUSES.** Nothing appears to have run the checker,
+because `rc=1` would have surfaced it immediately.
+
+⚠ **`ACTIVE` IS CORRECT HERE AND THIS IS *NOT* ANOTHER UN-FLIPPED-STATUS INSTANCE.** `AC4` is
+genuinely not PASS. `0.4.0_DS_ClientPlatform~Z` explicitly declined to file it as one, and they were
+right — the defect is the EVIDENCE ARTIFACT, not the status.
+
+⭐ **AND `D1-i-1`'s ORPHAN DISCHARGE STANDS — I checked before writing this, because if it had rested
+on the instance an invalid instance would have taken it down too.** It does not: this TO carries
+`D1-i-1` in its own `<decomp_ref>` (`:12`) and at `<criterion id="I1DS-AC1"/"AC2" cell_refs="D1-i-1">`
+(`:123-124`). **The TO's FACE is the load-bearing limb; the instance was corroboration, not the
+basis.** The CVO Layer-5 finding stays closed.
+
+**NOT CLAIMED:** that `~T`'s underlying enumeration WORK is wrong. The deliverable is ~12KB and
+neither `0.4.0_DS_ClientPlatform~Z` nor I assessed it. ⛔ **The evidence ARTIFACT failing validation
+is a DIFFERENT OBJECT from the FINDING it carries**, and conflating them would be the error this note
+exists to prevent.
+
+**REMEDY IS NOT TAKEN AND IS NOT THIS NOTE.** Re-file, re-seat, or re-record the criteria is a
+seating/issuing decision that follows the D4/residue question already open at `1.0.0_SA_CTO~Z`. **The
+hazard is disarmed — a reader can no longer close this on refusing evidence — and DISARMED ≠
+REMEDIATED.**</status>
 
 <decomp_ref>
 workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — surface (i), cells
