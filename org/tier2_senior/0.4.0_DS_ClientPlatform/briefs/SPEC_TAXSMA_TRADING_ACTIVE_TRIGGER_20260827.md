@@ -118,11 +118,20 @@ what "availability is not authorization" forbids.** That is an ask for him, not 
    the WS-R3 registry-read producer is deployed."* **I have not verified WS-R3's deploy state.**
    So Nixon and Tracey are now *recorded*, which is strictly better than invisible — but **do not
    read this as "they are in the pipeline."**
-4. ⛔ **The strategy grain defect stands and should be settled in the same spec** — the sheet carries
-   **SMA 145 (45% leverage)** and **SMA 200 (100%)**; the roster carries the single string
-   `"Opal Tax SMA 200/145"` on every entry, and D1's registry carries `tax` as one L1 member.
-   **A trigger that reads `Strategy` from the sheet will surface two values into a field that holds
-   one.** Rule 24(ii), and cheapest to settle before the SMA L1 contract change lands.
+4. ~~**The strategy grain defect stands and should be settled in the same spec** — the sheet carries
+   SMA 145 (45% leverage) and SMA 200 (100%); the roster carries the single string
+   `"Opal Tax SMA 200/145"` on every entry... Rule 24(ii).~~
+   ⛔ **DISSOLVED 2026-08-27 ~20:5xZ BY ANDREW-DIRECT, VERBATIM:** *"They are all meant to be rolled
+   up into tax, not two diff strategies or deeper drills/leaves."* **THERE WAS ONLY EVER ONE
+   STRATEGY.** The workbook's `SMA 145` / `SMA 200` are a **LEVERAGE ATTRIBUTE of one strategy**, not
+   two strategies, and *"deeper drills/leaves"* explicitly refuses a level beneath Tax.
+   **The roster's single `strategy` value is CORRECT AS IT STANDS.** No split, no row migration, and
+   `taxsma_newacc.py:23`'s `DEFAULT_STRATEGY` needs no change on grain grounds.
+   ⛔ **A trigger reading `Strategy` therefore surfaces ONE value into a field that holds one** —
+   the opposite of what this item claimed. **Struck rather than deleted so a reader of the earlier
+   draft sees it was ANSWERED, not dropped.**
+   *(No successor finding is raised. The `Leverage` column exists and the roster does not carry it;
+   manufacturing a new finding out of a dissolved one is its own defect — `1.0.0_SA_CTO~Z`, 10046.)*
 
 ---
 

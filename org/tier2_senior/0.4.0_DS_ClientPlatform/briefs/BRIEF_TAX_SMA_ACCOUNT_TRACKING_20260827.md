@@ -84,7 +84,20 @@ which is a governance fact, not a formatting one.
 
 ---
 
-## 5. ⛔ A TAXONOMY DEFECT WORTH RULING ON — the roster collapses two strategies into one
+## 5. ~~A TAXONOMY DEFECT WORTH RULING ON — the roster collapses two strategies into one~~
+## 5. ⛔ DISSOLVED — THERE WAS ONLY EVER ONE STRATEGY
+
+> **ANDREW-DIRECT 2026-08-27 ~20:5xZ, VERBATIM:** *"They are all meant to be rolled up into tax, not
+> two diff strategies or deeper drills/leaves."*
+
+**Tax is ONE strategy.** `SMA 145` / `SMA 200` are a **LEVERAGE ATTRIBUTE** of it, not two
+strategies, and *"deeper drills/leaves"* refuses any level beneath Tax. **The roster's single
+`strategy` value is CORRECT**, D1's registry carrying `tax` as one L1 member is **CONFIRMED, not
+changed**, and no migration exists to perform. The section below is preserved struck-through, because
+a reader of the earlier draft should see the claim was **ANSWERED, not quietly dropped**.
+*(No successor finding raised — see `1.0.0_SA_CTO~Z` 10046.)*
+
+### ~~(struck) the original claim~~
 
 ```
 WORKBOOK   "SMA 145"  (leverage 45%)   x7        <- two DISTINCT strategies
@@ -113,7 +126,13 @@ be answered before the SMA L1 node gains dollars under the scope-B contract chan
   the list; no ruling names it a system of record.
 - **No egress was spent.** Andrew granted it (*"egress permitted"*); the roster came from our own S3
   and the workbook from our own M365 tenant via the Opal gateway. **The grant is unused.**
-- **I did not modify anything** — no enrollment, no roster write, no workbook edit.
+- ~~**I did not modify anything** — no enrollment, no roster write, no workbook edit.~~
+  ⛔ **SUPERSEDED ~20:4xZ — TRUE WHEN WRITTEN, FALSE NOW.** Andrew subsequently instructed
+  *"enroll nixon and tracey if they are listed as active in that sheet"*, and this seat **DID
+  enroll both**: roster **3 → 5 entries**, 1,645 B → 3,027 B, `LastModified 2026-08-27T20:50:18Z`,
+  verified by re-read from S3. Both landed `pending_resolution` (a named tier-3 egress block, not a
+  failure — see `SPEC_TAXSMA_TRADING_ACTIVE_TRIGGER_20260827.md` §3). **The workbook was not
+  touched.** Struck rather than edited in place so the brief's original state stays legible.
 
 ---
 
