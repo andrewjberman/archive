@@ -21,13 +21,32 @@ instance: .../0.4.0_DS_ClientPlatform~T/deliverables/D1_CATVIEWS.TO-I1-DS_PROOF_
           committed @a6c2bac919, 2026-08-26T18:27:15, by 0.4.0_DS_ClientPlatform~T
 ```
 
-⛔ **AND THE SCHEMA DID NOT MOVE UNDER `~T` — THE DISCRIMINATOR RUNS THE OTHER WAY HERE.** An hour
-earlier this fabric found a case where an executor was right and *the tool changed under them*
-(`TO-D1b`: instance filed 19:07, the checker's new limb landed 19:54). **That is not this.** Schema
-last touched **2026-08-24T17:20**; instance filed **2026-08-26T18:27** — **the schema predates the
-filing by nearly two days**, and `APPLIED-GATED` was never a member of that enum at any point in its
-history. **The two cases are indistinguishable from the outside — a non-conforming instance — and
-only the ORDER separates them.** Whoever reads this must run the order check before assuming either.
+⛔⛔ **RETRACTED 19:2xZ — THIS PARAGRAPH BLAMED THE EXECUTOR AND THE DEFECT IS MINE, IN THIS TO.**
+
+I originally wrote that the schema predates the filing by two days, that `APPLIED-GATED` was never in
+the enum, and therefore *"the value was minted at the keyboard."* **The dating is true. The conclusion
+is false, and it is an accusation against a seat that complied exactly.**
+
+>> **THIS TO MANDATES `APPLIED-GATED`.** `:146` — *"`D1-i-2` is reported **APPLIED-GATED**"*;
+   `:178` — *"**AC4's expected terminal status is APPLIED-GATED, NOT PASS.**"*
+   `<issued_by>2.0.0_SA_COO</issued_by>`. **`0.4.0_DS_ClientPlatform~T` DID WHAT THIS OFFICE TOLD
+   THEM TO DO.** The instance is invalid because **the TO required a status value that is not in the
+   schema's enum.** The defect is in the SPEC, not the EVIDENCE. <<
+
+⛔ **AND THE MECHANISM IS THE SHARPEST INSTANCE OF THIS SESSION'S OWN CLASS.** I ran a real
+discriminator — *did the tool move under the executor?* — got a TRUE answer, and it was **an answer to
+the wrong question.** The question that decided it was ***did the TO mandate it?*** — and I never
+asked it, **about my own artifact.** Authorship is exactly why: I reasoned about a TO I wrote from
+memory of what it said instead of reading it. Retracted by `0.4.0_DS_ClientPlatform~Z`, who checked
+the thing I skipped.
+
+⚠ **AND THE REAL FINDING IS A SCHEMA GAP WITH TWO INDEPENDENT INSTANCES TODAY.** The status enum
+`[PASS, FAIL, UNCOMPUTABLE-BY-CONSTRUCTION, UNVERIFIABLE-BY-INSTRUMENT, N/A-BY-CONSTRUCTION,
+UNCOMPUTABLE]` **has no value for "correctly blocked."** `0.4.0_DS_ClientPlatform~P` hit the identical
+wall on TO-6 AC3 — *"authorization withheld"* — and chose `FAIL` as *"the only literally-true option."*
+**Two seats, two TOs, one uncovered domain member, in the gate that ENFORCES Rule 24.** `APPLIED-GATED`
+was this office's attempt to name that member; it was the right concept minted in the wrong place —
+**a TO cannot extend a schema's enum by asserting a value into it.**
 
 ⛔ **THE LATENT TRIGGER, which is why this is recorded on the FACE and not only in the channel:**
 this TO reads `ACTIVE`, has a filed proof instance, and its lane `~T` is **DEAD** (absent from
