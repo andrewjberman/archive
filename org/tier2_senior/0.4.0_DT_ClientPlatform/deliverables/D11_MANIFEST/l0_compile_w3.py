@@ -52,10 +52,36 @@ COMPILED_UTC = "2026-08-27T07:10:00Z"   # one clock read, per-run, stated
 ORDER = {"measured": 3, "held": 2, "inferred": 1, "absent": 0}
 
 
+def _no_dupes(pairs):
+    """object_pairs_hook that REFUSES duplicate raw object keys.
+
+    ⛔ JSON PERMITS DUPLICATE KEYS AND `json.load` SILENTLY KEEPS THE LAST. rework14 keyed
+    `variant_suffixes` by suffix on the ground that "duplicate keys are impossible" -- true of
+    the parsed dict, FALSE of the bytes. Without this hook a document carrying two `.wal` keys
+    validates cleanly with one silently discarded: the ambiguity the object shape was chosen to
+    make INEXPRESSIBLE, reintroduced one layer below the schema. Runs BEFORE validation, because
+    a validator only ever sees what the parser already collapsed.
+    """
+    seen = set()
+    for k, _v in pairs:
+        if k in seen:
+            raise SystemExit("REFUSING TO PARSE -- duplicate JSON object key %r; the parser "
+                             "would silently keep the last and no validator could see it" % k)
+        seen.add(k)
+    return dict(pairs)
+
+
+def load_json_strict(path: str):
+    """Every read in this compiler goes through here. One door, so the guard cannot be
+    bypassed by a future call site that simply forgot it."""
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh, object_pairs_hook=_no_dupes)
+
+
 def load_cards() -> dict:
     out = {}
     for f in sorted(glob.glob(CARD_GLOB, recursive=True)):
-        c = json.load(open(f, encoding="utf-8"))
+        c = load_json_strict(f)
         if c.get("schema_version") != 2:      # generators and non-cards live here too
             continue
         out[c["subject"]["id"]] = c
@@ -108,8 +134,8 @@ def card_generation_bits(c: dict) -> dict:
 
 
 def main() -> None:
-    base = json.load(open(BASE39, encoding="utf-8"))
-    mapping = json.load(open(MAP, encoding="utf-8"))
+    base = load_json_strict(BASE39)
+    mapping = load_json_strict(MAP)
     cards = load_cards()
     parts = {p["id"]: p for p in base["parts"]}
     base_count = len(parts)
@@ -429,27 +455,168 @@ def main() -> None:
     # ⛔ rework14 @b238f34351 -- an OBJECT KEYED BY SUFFIX, never an array: a JSON array's order
     # is DATA, so [".lock",".wal"] and [".wal",".lock"] are byte-, schema- and digest-distinct
     # spellings of one claim, and an object makes that ambiguity INEXPRESSIBLE rather than
-    # forbidden by instruction. The KEY SET is derived here; the per-suffix STATEMENTS are
-    # knowledge and cannot be sliced out of a path, so they are authored against source and a
-    # derived key with no authored statement REFUSES TO EMIT.
+    # forbidden by instruction.
+    #
+    # ⛔ 4.0.0_SA_CRO~A's BLOCKING SEMANTIC FORK, RESOLVED BY MEASUREMENT, NOT BY PREFERENCE.
+    # Deriving the key set FROM THE OBSERVED HOME cannot certify closure -- it certifies one
+    # 2026-08-25 stat. And the "prove .wal is exactly always-minted" branch is REFUTED at source
+    # by this estate's own code, three independent sites:
+    #   kuzu_incremental_refresh.py:315  "do NOT copy the .wal (A CLEAN CHECKPOINT)" -> after a
+    #                                    clean checkpoint there is NO .wal to copy
+    #   kuzu_stitch_load.py:64           `if os.path.exists(args.db + ".wal")`  -> conditional
+    #   kuzu_nessie_load.py:129-131      `wal = ...; if os.path.exists(wal)`    -> conditional
+    # ⛔ AND THE TRUE PRODUCER IS UNREADABLE: kuzu 0.11.3's suffix behaviour lives in the compiled
+    # _kuzu.cp312-win_amd64.pyd. The only Python-level "lock" hits in that package are
+    # threading.Lock() -- A TOKEN COLLISION, not a file suffix, and quoting them as producer
+    # evidence would be the wrong-population read this manifest exists to refuse.
+    # SO: THESE ARE POSSIBLE CONDITIONAL COMPANIONS, NOT AN EXACT MINTED SET, and the key set is
+    # derived from the nearest thing to producer authority the estate actually has -- its own
+    # side-artifact cleanup tuples -- CROSS-CHECKED ACROSS TWO INDEPENDENT SITES.
+    # ⛔ AUTHORITY_HOME is the file the contract NAMES for the companion repertoire (_rm_kuzu);
+    # the second site is a CROSS-CHECK, not a second authority. rework16 makes this a DIFFERENT
+    # pin from pattern_source_*: two axes, two producers, two pins.
+    AUTHORITY_HOME = "infra/aws/globgrph/_canonical.py"
+    CROSSCHECK_HOME = "infra/aws/globgrph/kuzu_incremental_refresh.py"
+
+    def _side_artifact_suffixes():
+        """Parse the `for <suffix> in (...)` cleanup tuples out of both owning sites and return
+        (suffixes, authority_line). Two independent declarations of one set: if they DISAGREE,
+        REFUSE -- a silently diverged pair would let one site's superset masquerade as the
+        estate's answer. THE LINE IS RETURNED FROM THE AST NODE, never typed beside it."""
+        import ast as _ast
+        seen, lineno = {}, {}
+        for _rel in (AUTHORITY_HOME, CROSSCHECK_HOME):
+            _tree = _ast.parse(open(os.path.join(WS, _rel), encoding="utf-8").read())
+            for _n in _ast.walk(_tree):
+                if not isinstance(_n, _ast.For) or not isinstance(_n.iter, _ast.Tuple):
+                    continue
+                _vals = [e.value for e in _n.iter.elts
+                         if isinstance(e, _ast.Constant) and isinstance(e.value, str)]
+                if len(_vals) == len(_n.iter.elts) and _vals and all(
+                        re.fullmatch(r"\.[A-Za-z0-9]+", v) for v in _vals):
+                    seen.setdefault(_rel, set()).update(_vals)
+                    lineno.setdefault(_rel, _n.lineno)
+        if len(seen) != 2:
+            raise SystemExit(
+                "REFUSING TO EMIT -- a side-artifact cleanup tuple was not found at every "
+                "owning site; the companion axis has no derivable authority: %s" % sorted(seen))
+        _sets = list(seen.values())
+        if _sets[0] != _sets[1]:
+            raise SystemExit(
+                "REFUSING TO EMIT -- the two side-artifact sites DISAGREE, so neither is the "
+                "estate's answer: %s" % {k: sorted(v) for k, v in seen.items()})
+        return sorted(_sets[0]), lineno[AUTHORITY_HOME]
+
+    # The per-suffix STATEMENTS are knowledge and cannot be sliced out of a path, so they are
+    # authored against source; a derived key with no authored statement REFUSES TO EMIT.
+    # Each value states THE CONDITION under which that companion appears (rework16). ⛔ THREE OF
+    # THE FOUR CONDITIONS ARE NOT DETERMINABLE FROM HERE and say so: kuzu 0.11.3's file
+    # behaviour is inside a compiled .pyd, and a CLEANUP list names what may be REMOVED, never
+    # when it is MINTED. Writing a plausible condition for those three would manufacture
+    # substrate, which is the failure Rule 28 exists to refuse -- an unknown condition stated as
+    # unknown is a claim a consumer can reject on; an invented one is not.
+    # ⛔ `mint` IS THE CLOSURE AXIS, PER COMPANION -- and NONE of these is `always`, because
+    # `always` requires evidence that the producer's code makes it unconditional and no such
+    # evidence exists from here: kuzu 0.11.3's file behaviour is inside a compiled .pyd.
+    # ONE OF THE FOUR IS `conditional` ON MEASURED GROUNDS; THREE ARE `unknown`. Those three are
+    # NOT weak conditionals -- a removal list names what MAY BE DELETED and never says when the
+    # artifact is MINTED, so the producer's rule is UNREAD, and reading a repertoire entry as a
+    # mint rule would be the wrong-population read this manifest exists to refuse.
+    # ⚠ ROUTED, NOT RESOLVED: the contract's `conditional` enum-definition says `note` states
+    # the condition, while `note`'s own description says it is what the companion HOLDS and
+    # explicitly NOT when it is minted. One line cannot serve two intents cleanly; `.wal`'s note
+    # below carries both, and the tension is 1.0.0_SA_CTO~X's to settle.
     _COMPANION_MEANING = {
-        ".wal": ("write-ahead log; kuzu writes a <db>.wal beside each single-file DB "
-                 "(_canonical.py:179-182) and a failed rebuild orphans it"),
+        ".wal": {
+            "mint": "conditional",
+            "note": ("write-ahead log for the rebuild tmp DB; present mid-flight or orphaned by "
+                     "an abnormal exit, absent after a clean checkpoint"),
+            "evidence": ("kuzu_incremental_refresh.py:315 declines to copy it precisely because "
+                         "a clean checkpoint has none; _canonical.py:179-186 reaps the orphan"),
+        },
+        ".lock": {
+            "mint": "unknown",
+            "note": "kuzu single-file-DB lock side-artifact; not observed in the 2026-08-25 stat",
+        },
+        ".shadow": {
+            "mint": "unknown",
+            "note": ("kuzu single-file-DB shadow side-artifact; not observed in the 2026-08-25 "
+                     "stat"),
+        },
+        ".tmp": {
+            "mint": "unknown",
+            "note": ("kuzu single-file-DB temporary side-artifact; not observed in the "
+                     "2026-08-25 stat"),
+        },
     }
-    _companion_keys = sorted({a for a in _groups[-1].split(",") if a})
+    _companion_keys, _authority_line = _side_artifact_suffixes()
+
+    # ⛔ THE PATTERN'S LINE IS DERIVED TOO. It was typed as 288 beside a parser that already
+    # knows how to find it -- a typed number beside a derived one always goes stale, and this
+    # one pins a file no lane here controls.
+    PATTERN_HOME = "infra/aws/globgrph/_canonical.py"
+
+    def _pattern_producer_line():
+        """Line of the `return f"...rebuild.tmp..."` inside _unique_tmp. Refuses on 0 or >1 --
+        two producers of one template is the identity split this contract exists to prevent."""
+        import ast as _ast
+        _tree = _ast.parse(open(os.path.join(WS, PATTERN_HOME), encoding="utf-8").read())
+        _hits = []
+        for _fn in _ast.walk(_tree):
+            if not (isinstance(_fn, _ast.FunctionDef) and _fn.name == "_unique_tmp"):
+                continue
+            for _n in _ast.walk(_fn):
+                if isinstance(_n, _ast.Return) and isinstance(_n.value, _ast.JoinedStr):
+                    _hits.append(_n.lineno)
+        if len(_hits) != 1:
+            raise SystemExit(
+                "REFUSING TO EMIT -- _unique_tmp has %d f-string returns, not exactly 1; the "
+                "family template has no single producing statement to pin: %s"
+                % (len(_hits), _hits))
+        return _hits[0]
+
+    _pattern_line = _pattern_producer_line()
+    _observed = sorted({a for a in _groups[-1].split(",") if a})
     assert all(re.fullmatch(r"\.[A-Za-z0-9]+", c) for c in _companion_keys), (
         "a derived companion suffix is not a real filename suffix: %s" % _companion_keys)
-    _unstated = [c for c in _companion_keys if not _COMPANION_MEANING.get(c)]
+    # ⛔ THE OBSERVED SET MUST BE A SUBSET OF THE DECLARED ONE. If a home carries a companion the
+    # cleanup sites do not name, the estate is leaking an artifact nothing reaps -- refuse loudly
+    # rather than quietly widen the claim to cover it.
+    _unnamed = [c for c in _observed if c not in _companion_keys]
+    assert not _unnamed, (
+        "REFUSING TO EMIT -- the home carries a companion NO cleanup site names, so something "
+        "is minting an artifact nothing reaps: %s" % _unnamed)
+    _unstated = [c for c in _companion_keys
+                 if not (_COMPANION_MEANING.get(c) or {}).get("note")]
     assert not _unstated, (
-        "REFUSING TO EMIT -- a companion suffix is in the home with no authored statement of "
-        "what it holds; a bare suffix is the loud-but-unresolvable class: %s" % _unstated)
+        "REFUSING TO EMIT -- a companion suffix has no authored statement of what it holds; a "
+        "bare suffix is the loud-but-unresolvable class: %s" % _unstated)
+    # 4.0.0_SA_CRO~A: the live schema still ADMITS multiline condition values. That is CTO's
+    # contract fix, not mine -- but the obligation moves to where it CAN be met, so this emitter
+    # refuses one on its own output rather than relying on a gate that is not there yet.
+    _multiline = [(c, k) for c in _companion_keys
+                  for k, v in _COMPANION_MEANING[c].items()
+                  if chr(10) in v or chr(13) in v]
+    assert not _multiline, (
+        "REFUSING TO EMIT -- a companion text spans lines; a multiline value is unreadable in "
+        "every consumer that renders one line: %s" % _multiline)
+    # ⛔ `always` IS A CLOSURE CLAIM AND CARRIES ITS PROOF OR IT IS NOT MADE. Enforced here too,
+    # not only in the schema, because this emitter is the thing that would make the claim.
+    _unproven = [c for c in _companion_keys
+                 if _COMPANION_MEANING[c]["mint"] == "always"
+                 and not _COMPANION_MEANING[c].get("evidence")]
+    assert not _unproven, (
+        "REFUSING TO EMIT -- mint=always without evidence is the set-level closure claim that "
+        "was already withdrawn, re-made one level down: %s" % _unproven)
     _companions = {c: _COMPANION_MEANING[c] for c in _companion_keys}
     _nef["member_set"] = {
         "enumerable": False,
         "pattern": _stem + "<pid>.<monotonic_ns>.<uniq>",
-        "pattern_source_home": "infra/aws/globgrph/_canonical.py",
-        "pattern_source_line": 288,
+        "pattern_source_home": PATTERN_HOME,
+        "pattern_source_line": _pattern_line,
         "variant_suffixes": _companions,
+        "variant_suffixes_source_home": AUTHORITY_HOME,
+        "variant_suffixes_source_line": _authority_line,
         "basis": _nef["basis"],
         "evidence": (
             "INSTANCE AXIS, UNBOUNDED: _unique_tmp at _canonical.py:288 builds the name from "
@@ -458,11 +625,23 @@ def main() -> None:
             "IS UNDEFINED and no member list can be true of this family. The literal prefix is the "
             "part's own home stem, derived here rather than retyped. COMPANION AXIS, FINITE: "
             "derived from the home's own sibling brace group; kuzu writes a <db>.wal beside each "
-            "single-file DB (:179-182). PER-INSTANCE cardinality is 1 + the number of KEYS, "
-            "DERIVED. OBSERVATION, ROUTED NOT DECIDED: _rm_kuzu at :188 clears FOUR side-artifact "
-            "suffixes (.wal .lock .shadow .tmp), so the source's possible-companion set is wider "
-            "than the measured one recorded here; this array is the MEASURED companion set as of "
-            "the part's 2026-08-25 stat, not a proof of closure."),
+            "single-file DB (:179-186). ⛔ COMPANION AXIS IS POSSIBLE-CONDITIONAL, NOT AN EXACT "
+            "MINTED SET, and NO EXACT PER-INSTANCE CARDINALITY IS CLAIMED: an instance carries "
+            "1 + a SUBSET of these keys, so the count is bounded above by 1 + 4 and is not "
+            "defined for the family. `.wal` is REFUTED as always-minted at three sites in this "
+            "estate's own code -- a CLEAN CHECKPOINT leaves none "
+            "(kuzu_incremental_refresh.py:315), and kuzu_stitch_load.py:64 and "
+            "kuzu_nessie_load.py:129-131 both guard it with os.path.exists. The KEY SET is "
+            "the PRODUCER'S REPERTOIRE -- what it CAN mint, never a closure claim over any one "
+            "instance -- derived from the estate's side-artifact cleanup tuples and "
+            "cross-checked across TWO independent sites which must agree or the emit refuses. "
+            "Its authority is pinned SEPARATELY from the pattern's, because the name template "
+            "and the companion repertoire are two axes with two producers, and BOTH SOURCE "
+            "LINES are returned from parsed AST nodes rather than typed beside them. THE TRUE PRODUCER IS "
+            "UNREADABLE: kuzu 0.11.3's behaviour is inside a compiled .pyd, so closure cannot be "
+            "certified by anyone from here -- stated as a limit, not walked past. Only `.wal` "
+            "was observed in the part's 2026-08-25 stat; the other three are declared-possible "
+            "and unobserved, which an after-the-fact stat cannot distinguish from absent."),
         "owner": _nef["owner"],
     }
 
@@ -580,8 +759,13 @@ def main() -> None:
             "CARD_GLOB is this instrument's configuration with a wave number baked into it. "
             "⛔ AND THE GLOB ROUTE IS CLOSED BY RULING, NOT MERELY INSUFFICIENT: 4.0.0_SA_CRO~A "
             "ruled W3-only INTENTIONAL-BUT-TEMPORAL and forbade widening CARD_GLOB; the "
-            "successor is an authored card_population_registry.v1.json whose receiver_sources "
-            "role starts EMPTY until each receiver source and its governed transform exist."),
+            "successor is an authored card_population_registry.v1.json with INDEPENDENT NAMED "
+            "POPULATIONS rather than one role enum -- extension_population pinning the exact 13 "
+            "W3 members for the existing map/enrich path only, and receiver_source_populations "
+            "keyed SEPARATELY by grain, key and failure_mode. Overlap across populations is "
+            "lawful: W3-extension participation and receiver-source participation are "
+            "independent consumer dimensions and one card may lawfully be in both. ALL RECEIVER "
+            "SOURCE POPULATIONS START EMPTY because no governed transform exists."),
     }
     _R_OWN = {
         "grain": _R_UNOWNED,
@@ -589,9 +773,10 @@ def main() -> None:
                 "(4.0.0_SA_CRO~A's contract) BEFORE any registry or transform question"),
         "failure_mode": ("UNOWNED -- and NO SINGLE OWNER CAN CLOSE IT. Three independent "
                          "changes are required and a glob change is NOT among them: an authored "
-                         "card_population_registry.v1.json receiver_sources role "
-                         "(4.0.0_SA_CRO~A's ruling, which explicitly forbids widening "
-                         "CARD_GLOB), a schema-bound card-to-L0 transform with a version, and a "
+                         "card_population_registry.v1.json failure_mode receiver-source "
+                         "population, one of three keyed independently (4.0.0_SA_CRO~A's ruling, "
+                         "which explicitly forbids widening CARD_GLOB), a schema-bound "
+                         "card-to-L0 transform with a pinned version, and a "
                          "declaring code path in this compiler, which this lane owns and which "
                          "does not exist at this commit"),
     }
@@ -641,7 +826,7 @@ def main() -> None:
         "the member_set partition does not sum over the emitted parts")
 
     # ---- validate, with the negative control ---------------------------------------
-    v = Draft202012Validator(json.load(open(SCHEMA, encoding="utf-8")))
+    v = Draft202012Validator(load_json_strict(SCHEMA))
     errs = sorted(v.iter_errors(out), key=lambda e: list(e.path))
     for e in errs[:10]:
         print("L0 SCHEMA ERROR:", list(e.path)[:4], e.message[:180])
@@ -696,7 +881,13 @@ def main() -> None:
     if errs:
         raise SystemExit("REFUSING TO WRITE -- the recompiled manifest does not validate.")
     with open(BASE, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(out, f, indent=2, ensure_ascii=True)
+        # ⛔ sort_keys: DETERMINISTIC EMISSION. Two runs producing identical data in
+        # different key order are byte-distinct and digest-distinct, so any hash-based
+        # comparison reports drift that does not exist -- the CRLF-vs-LF lesson in a
+        # different coordinate. Canonicalise where the bytes are WRITTEN; never leave it
+        # to each consumer, which is the unenforced-obligation defect this contract has
+        # now refused five times.
+        json.dump(out, f, indent=2, ensure_ascii=True, sort_keys=True)
         f.write("\n")
     print("OK: wrote %s" % os.path.relpath(BASE, WS).replace("\\", "/"))
 
