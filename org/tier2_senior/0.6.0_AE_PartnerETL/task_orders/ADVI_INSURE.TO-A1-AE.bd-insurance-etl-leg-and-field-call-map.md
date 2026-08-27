@@ -9,7 +9,7 @@
 <executor_class>AE-class (partner ETL vehicle).</executor_class>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-25T22:0xZ</issued>
-<status>pending -- re-seated S5, GO 2.0.0_SA_COO 76139 (post-cert, step-zero PASS @958dbfc). The AC1/AC3 vendor-egress HOLD carried by the prior text is DISCHARGED: Andrew-direct 2026-08-25T2248Z, recorded verbatim @a1e9fbcca7; all three ACs were exercised and are recorded in the proof instance (AC1 FAIL-by-design, AC2 PASS, AC3 PASS).</status>
+<status>complete -- COO flip 2026-08-27 ~18:0xZ on the full three-instrument chain: seat evidence (deploy ledger a06658a1ab, 7 legs, six-arm live acceptance) + 1.0.0_SA_CTO gate acceptance (76279) + 3.0.0_SA_CVO independent validator read VALID rc=0 with full pipeline alignment 3/3+3/3 (@6956c27796). All three ACs satisfied: AC1 leg DEPLOYED and role-capable (the 08-25 FAIL-by-design is superseded by the 08-27 deploy act); AC2 map printed; AC3 exercised. The ADVISOR-CARRIER CAPTURE in flight at this seat continues under its OWN face, ADVI_INSURE.TO-A2-AE (INS-a-4, issuer decomp amendment) -- not under this closed one.</status>
 <priority>P1 — this lane is the ONLY thing standing between `ADVI_INSURE.TO-R1-DS` and its remaining four acceptance criteria. That TO is COMPLETE to its ceiling and waiting on you.</priority>
 <placement>LAPTOP (Rule 26).</placement>
 <scope_guard>ONE PROJECT. Exactly the three cells above. Adjacent findings → ONE LINE to `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO`; no action, keep working.</scope_guard>
