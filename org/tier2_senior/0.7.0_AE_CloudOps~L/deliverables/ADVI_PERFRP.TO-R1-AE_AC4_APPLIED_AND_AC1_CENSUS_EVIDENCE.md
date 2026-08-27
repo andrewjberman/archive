@@ -458,6 +458,54 @@ artifact.**
 
 **Nothing designed, nothing built, no route proposed.**
 
+### 3c-i. THE `--date` VEHICLE, AND A RULE THAT WOULD BE CORRECTLY CITED AGAINST THE BACKFILL
+
+Recorded here rather than left in messages **because its entire purpose is to survive into a TO
+written by someone who was not in this thread.** Reported 74207; concurred by
+`0.4.0_DS_ClientPlatform~U` 74217, who is the seat that introduced the rule.
+
+**THE VEHICLE GAP.** `1.0.0_SA_CTO` 74193 rules the backfill loops
+`chain_49f_entrypoint.py --date D` over 531 partitions. **The `advi-49f-chain-dispatch` SSM document
+hardcodes `python3 chain_49f_entrypoint.py --production` and passes NO `--date`.** `--production` is
+documented at source as *"scheduled-fire form: derive T-1"* -- it derives the date and cannot be
+pointed at history. **The ruled loop has no vehicle today**; the document must be parameterized.
+AE-plane, and it belongs INSIDE the remediation TO (Build Ladder: the minimum code that makes the
+ruled design executable), not as a prerequisite side project.
+
+**THE CORRECT FORM IS `--date D --upload`, NEVER `--production`.** Source: `--upload` is *"with
+--date: ad-hoc QA fill with writes."* ⛔ **The failure this prevents is SILENT: `--production` derives
+T-1, so a 531-iteration loop would run THE SAME DATE 531 TIMES while every iteration reported
+success** -- the same silent-green shape as the all-refused case, one layer up.
+
+**THE SELF-HALT GATE.** `StartedByDispatcher` is an SSM document parameter, `default "false"`. A
+driver calling `ssm send-command` directly and omitting it gets `false`, so **the host stays up for
+the whole loop -- the safe path is the default path.** ⛔ **The trap is routing the backfill through
+the `advi-49f-gold-dispatch` Lambda**, which sets the parameter itself and would **halt the host
+after date 1 of 531.**
+
+### ⛔ AND THE RULE THAT WOULD BE CITED AGAINST THIS, CORRECTLY
+
+`--date` is labelled at source **"the ad-hoc QA form."** Estate law: *an ad-hoc run is never the
+production path and its artifacts are never production evidence.* **But the backfill MUST use
+`--date`, and its artifacts ARE the corrected production history.** As written, the rule bars the
+thing the ruled design requires.
+
+**THE DISTINCTION THAT RESOLVES IT (adopted by the seat who invoked the rule):** the ad-hoc rule bars
+an ad-hoc run from **STANDING IN FOR** a scheduled production fire. **A backfill stands in for
+nothing -- it repairs history the scheduled path already produced wrongly.** Different act, so this
+is a NAMED BOUNDARY, not a carve-out.
+
+⛔ **AND `~U`'s REFINEMENT, which is sharper than my original and is the part a TO must carry:
+THERE ARE TWO `--date` INVOCATIONS IN THIS SEQUENCE AND THEY HAVE DIFFERENT STANDING.**
+
+| invocation | standing |
+|---|---|
+| the **BACKFILL's own writes** (step 3) | the named exception applies -- its artifacts ARE the corrected history |
+| the **step-(4) VERIFICATION fire** | **NO exception.** Still a QA instrument, still not production evidence -- the acceptance is the artifact read directly (`@4a1fd3e09b`, `@e8ccd8eb77`), never a green run |
+
+**The exception covers the backfill's writes, NOT the verification fire.** They will be conflated
+unless the TO says so in one line.
+
 ---
 
 ## 4. Standing state of TO-R1-AE
