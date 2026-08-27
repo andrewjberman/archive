@@ -87,17 +87,40 @@ ever computed in the frontend**.
 | vendor id → firm account id | the firm's advisor/fee-role join dim | **CARRIED (id join)** |
 | account → relationship | the firm's relationship dim | **CARRIED (id join)** |
 | firm | constant on the tree | **CARRIED** |
-| **advisor** | — | ⛔ **`NOT-DERIVABLE-UPSTREAM`** |
+| **advisor** | — | ⛔ **`NOT-CAPTURED-PENDING-SURFACE`** |
 
-⛔ **THE ADVISOR LEG IS DECLARED ABSENT, AND THAT IS THE PATTERN, NOT A GAP IN IT.** Measured in
-the 49F instance: **zero** columns matching an advisor-identifier shape across all three spine
-tables (0 of 95 columns; re-run by the issuer over a deliberately wider net and it survived).
-Every advisor handle is a **name string**, and the two available name formats are not mutually
-parseable. **The only join available is a name match, and identity is by id, never by label.**
-A name-string join across a six-figure dim is a silent-collision generator: it returns a
-plausible number rather than an error. **An honestly missing level beats a level that is right
-most of the time** — and a porting firm inheriting this shape should check whether its own
-vendor supplies the identifier before assuming the leg is unbuildable there too.
+⛔ **THE ADVISOR LEG IS DECLARED ABSENT — BUT ITS STAMP WAS CORRECTED 2026-08-27 AND THE
+CORRECTION IS THE POINT OF THIS ROW.** This table read **`NOT-DERIVABLE-UPSTREAM`** until
+`0.4.0_DS_ClientPlatform~R`'s INS-a-2 census (@f05d754d43) falsified that value's premise, and
+`2.0.0_SA_COO` 76245 restamped it. **The prior text is preserved here rather than overwritten,
+because a porting firm needs the mistake more than the conclusion.**
+
+**What stays TRUE** (the original measurement, undisturbed): zero columns matching an
+advisor-identifier shape across all three spine tables (0 of 95 columns, re-run by the issuer
+over a wider net and it survived); every advisor handle is a **name string**; the two name
+formats are not mutually parseable. **A name-string join across a six-figure dim is a
+silent-collision generator — it returns a plausible number rather than an error.** Identity is
+by id, never by label, and **an honestly missing level beats a level that is right most of the
+time.**
+
+**What was FALSE:** that no upstream change could ever populate it, i.e. that the remedy lay
+with the vendor. Measured: the advisor carrier is the `relationshipdetail` surface's
+`financialTeam[]` — **already sanctioned in the vehicle's own egress allowlist, already routed,
+and simply never called** (zero landed objects; the landed relationship rows carry a `teams[]`
+key that is empty on 77 of 77, which is why the *absence* was real even though the *diagnosis*
+was wrong).
+
+>> ⛔ **THE PORTABLE LESSON, AND IT IS THE ONE THIS ROW EXISTS TO CARRY: `NOT-DERIVABLE` AND
+>> `NOT-CAPTURED` ARE DIFFERENT CLAIMS WITH DIFFERENT OWNERS.** "Not derivable" says the vendor
+>> cannot supply it and points at a vendor ask. "Not captured" says we never asked and points at
+>> ourselves. **A porting firm that inherits the wrong one hands its own gap to its vendor and
+>> waits.** Before stamping any leg absent, run the discriminating question — *what remedy moves
+>> this value: our own capture, a vendor config change, or nothing ever?* — and stamp the
+>> remedy, not the symptom. A confidently wrong absence-claim closes a question that an
+>> honestly empty field would have kept open. <<
+
+**A porting firm should therefore check whether its own vendor supplies the identifier on a
+surface it has not yet called**, before concluding the leg is unbuildable there.
 
 Unresolvable rows take a declared `spine_class` of `unassigned`. **They are NEVER dropped** —
 a dropped row silently shrinks the denominator of every figure above it.
