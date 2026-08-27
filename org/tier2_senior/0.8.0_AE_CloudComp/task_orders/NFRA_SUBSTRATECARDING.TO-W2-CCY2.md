@@ -4,7 +4,7 @@
 <issued_to>0.8.0_AE_CloudComp~Y</issued_to>
 <issued_by>2.0.0_SA_COO~X</issued_by>
 <executor_class>0.8.0_AE_CloudComp (~lane instance; SINGLE-PROJECT)</executor_class>
-<status>pending</status>
+<status>complete -- CUT SHORT AT THE DELIVERED BOUNDARY on Andrew-direct 00:15Z + 00:4xZ. 7 of 10 subjects DELIVERED and standing; 3 subjects (21 cells) closed SCOPE-SUPERSEDED, NOT abandoned -- the wave was re-aimed at materializers, the work was not found wanting. Nothing delivered is withdrawn, re-litigated or back-dated. ISSUER 2.0.0_SA_COO~X.</status>
 <priority>P1 -- D11 wave 2, Andrew-direct full scope</priority>
 <date>2026-08-26</date>
 <placement>LAPTOP</placement>
@@ -160,3 +160,31 @@ One line to `3.0.0_SA_CVO`, cc me. **OBSERVATION never interrupts. BLOCKING rout
 ⛔ **A finding about a subject you are carding is the DELIVERABLE, not a surprise.**
 
 Route to `3.0.0_SA_CVO~X` at the completion flip, cc me.
+
+---
+
+## ⛔ SCOPE CUT — Andrew-direct 2026-08-27 00:15Z + 00:4xZ
+
+**VERBATIM, the operative words (typos his, preserved — the phrasing is the ruling):**
+
+> *"the whole pioint of this is not to hit random phrases and concepts, it was to hit the actual
+> things that are resolvable crucial dependencies for materializers and ontological functions"*", 
+> *"i think we need to go surgical mode here, pivot, we need to find the materializers that actualy matter"*
+
+**DELIVERED AND STANDING — 7 of 10 subjects.** Verified or verifiable against the
+CERTIFIED decomp `@5168510a28`. **A scope re-aim does not reach backwards.**
+
+**SCOPE-SUPERSEDED — 3 subjects / 21 cells.** ⛔ **NOT abandoned.** The two read
+identically from a status field and take OPPOSITE wave-3 actions: superseded work is answered by
+the re-aimed wave; abandoned work gets re-attempted as-is.
+
+- `D1's EdgeKind semantic`
+- `D3's delivery_cadence obligation`
+- `live graph node types: Field, Prop, S3Key, S3_BUCKET, DYNAMODB_TABLE`
+
+**WHY THESE AND NOT THE OTHERS:** the wave-2 subject set was derived by harvesting `composes` /
+`projection_of` / `co_resident_stores` out of wave-1 card fields. Those fields hold artifact
+references AND prose descriptions — **one field, two grains, Rule 24(ii) violated at the SOURCE** —
+so the harvest faithfully returned a mixed-grain population. **The method was executed correctly and
+the population was wrong, and the population is the issuer's.** Measured: 10 of 44 subjects resolve
+to no openable artifact (`resolvability_assessment.json` @`322c41bbb4`).
