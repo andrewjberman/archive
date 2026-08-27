@@ -67,7 +67,8 @@ def _source_snapshot_utc() -> str:
     """Committer time of the newest PINNED INPUT: the ratified commit and the frozen schema.
     Deterministic for a given input set, and it moves only when an input does."""
     pins = []
-    for ref in (_registry_commit(), _schema_commit(), _compiler_commit()):
+    for ref in (_registry_commit(), _schema_commit(), _card_schema_commit(),
+                _compiler_commit(), _receipt_schema_commit()):
         if ref:
             r = subprocess.run(["git", "show", "-s", "--format=%cI", ref], cwd=WS,
                                capture_output=True, text=True)
@@ -94,6 +95,21 @@ def _registry_commit():
 
 def _schema_commit():
     r = subprocess.run(["git", "log", "-1", "--format=%H", "--", SCHEMA], cwd=WS,
+                       capture_output=True, text=True)
+    return r.stdout.strip() or None
+
+
+def _card_schema_commit():
+    r = subprocess.run(["git", "log", "-1", "--format=%H", "--", CARD_SCHEMA], cwd=WS,
+                       capture_output=True, text=True)
+    return r.stdout.strip() or None
+
+
+def _receipt_schema_commit():
+    """The receipt contract is a TEMPORAL pin too. If it moves, the meaning of every field in an
+    already-written receipt moves with it, and a snapshot blind to that is deterministic over a
+    closure that excludes its own definition."""
+    r = subprocess.run(["git", "log", "-1", "--format=%H", "--", RECEIPT_SCHEMA], cwd=WS,
                        capture_output=True, text=True)
     return r.stdout.strip() or None
 
@@ -380,19 +396,24 @@ def _rel(p: str) -> str:
     return os.path.relpath(p, WS).replace(os.sep, "/")
 
 
-def build_receipt(out_path: str, snapshot_utc: str, reg: dict) -> dict:
+def build_receipt(out_path: str, snapshot_utc: str, reg: dict,
+                  run_utc: str = None) -> dict:
     """The receipt for ONE emission. PURE apart from reading the tree -- callable by a control
     without running a compile, which is the only way a fixture stays honest about the emitter."""
     art = _rel(out_path)
     with open(out_path, "rb") as fh:
         raw = fh.read()
+    _run_utc = run_utc or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     return {
         "document_kind": "manifest_execution_receipt",
         "governing_schema": {"home": _rel(RECEIPT_SCHEMA),
                              "id": "https://opal.internal/schemas/MANIFEST_RECEIPT.v1.schema.json"},
-        # RUN-QUALIFIED: an immutable document cannot keep overwriting one fixed home.
+        # ⛔ QUALIFIED BY THE RUN, NOT THE CLOSURE. Qualifying by the SNAPSHOT made two
+        # emissions of an identical closure collide, so the second refused and replay evidence
+        # could never be furnished -- the immutability guard made the determinism claim beside
+        # it unprovable. Run identity and closure identity are two axes.
         "exact_home": "%s.%s.receipt.json" % (art.rsplit(".json", 1)[0],
-                                              snapshot_utc.replace("-", "").replace(":", "")),
+                                              _run_utc.replace("-", "").replace(":", "")),
         # FOUR INDEPENDENT AXES. A document's origin, its permitted future, its time semantics
         # and its standing move separately, and collapsing any two hides a real state.
         "authorship_mode": "machine_emitted",
@@ -404,6 +425,12 @@ def build_receipt(out_path: str, snapshot_utc: str, reg: dict) -> dict:
                       "sha256": hashlib.sha256(raw).hexdigest(),
                       "git_blob_id": _blob(art), "blob_presence": _presence(_blob(art))},
         "input_closure": {
+            # THE GOVERNING CONTRACT IS AN INPUT: it can change what every other field
+            # in this document MEANS, and it was absent from the closure meant to be complete.
+            "receipt_schema": _pin(_rel(RECEIPT_SCHEMA)),
+            # THREE DISTINCT SCHEMA ROLES: what governs THIS document, what governs the emitted
+            # MANIFEST, and what governs the INPUT CARDS. Conflating any two hides a swap.
+            "output_schema": _pin(_rel(SCHEMA)),
             "compiler": _pin(_rel(os.path.abspath(__file__))),
             "registry": _pin(_rel(CARD_REGISTRY)),
             "registry_schema": _pin(_rel(REGISTRY_SCHEMA)),
@@ -419,20 +446,24 @@ def build_receipt(out_path: str, snapshot_utc: str, reg: dict) -> dict:
                 # ⛔ ALL THREE. A subset validated before, so a derivation OMITTING THE
                 # SCHEMA COMMIT passed -- and a snapshot ignoring an input that can move is not
                 # deterministic over the closure it claims to cover.
-                "derived_from": ["registry_ratified_commit", "schema_commit",
-                                 "compiler_commit"],
+                "derived_from": ["registry_ratified_commit", "output_schema_commit",
+                                 "card_schema_commit", "compiler_commit",
+                                 "receipt_schema_commit"],
                 "value_utc": snapshot_utc},
             "complete": True,
         },
         "source_snapshot_utc": snapshot_utc,
-        "executed_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "executed_utc": _run_utc,
         "executed_by": ME,
         # ⛔ ONE emission per run, so the state is `not_performed` -- NOT "byte_identical:
         # false", which meant BOTH 'compared and differed' AND 'never compared'. One value over
         # two facts, and the second is the honest state of every single-emission run.
         # The digest here is the ARTIFACT'S OWN, which is what makes the claim checkable.
-        "replay": {"comparison_state": "not_performed", "emissions_compared": 1,
-                   "observed_digests": [hashlib.sha256(raw).hexdigest()]},
+        # PER-EMISSION EVIDENCE: the count IS the array length and the digests ARE its
+        # members, so a forged comparison cannot claim runs it has no record of.
+        "replay": {"comparison_state": "not_performed",
+                   "emissions": [{"sequence": 1, "digest": hashlib.sha256(raw).hexdigest(),
+                                  "executed_utc": _run_utc}]},
     }
 
 def main(out_path: str = None) -> None:
@@ -1239,6 +1270,38 @@ def main(out_path: str = None) -> None:
 
     if errs:
         raise SystemExit("REFUSING TO WRITE -- the recompiled manifest does not validate.")
+
+    # ⛔ THE END-TO-END GATE RUNS BEFORE ANYTHING LANDS. main() used to shape-validate and then
+    # WRITE, so a dirty closure could emit an immutable verifier-failing receipt AFTER the
+    # manifest was already on disk -- evidence that cannot be corrected because it is immutable
+    # and cannot be trusted because its pins do not bind. THE GATE A CONSUMER RUNS MUST BE THE
+    # GATE THE PRODUCER PASSES. The manifest is staged, the receipt is built against the staged
+    # bytes and fully verified, and only then do both land.
+    import tempfile as _tf
+    _fd, _stage = _tf.mkstemp(suffix=".json", prefix="stage_",
+                              dir=os.path.dirname(out_path))
+    try:
+        with os.fdopen(_fd, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(out, f, indent=2, ensure_ascii=True, sort_keys=True)
+            f.write("\n")
+        _receipt = build_receipt(_stage, SOURCE_SNAPSHOT_UTC, reg=load_registry())
+        _receipt["describes"]["home"] = os.path.relpath(out_path, WS).replace(os.sep, "/")
+        import importlib.util as _il
+        _sp = _il.spec_from_file_location("verify_receipt", os.path.join(HERE,
+                                                                        "verify_receipt.py"))
+        _vr = _il.module_from_spec(_sp)
+        _sp.loader.exec_module(_vr)
+        _f = _vr.verify(_receipt, actual_home=_receipt["exact_home"])
+        if _f:
+            raise SystemExit(
+                "REFUSING TO WRITE -- the receipt this run would emit FAILS the same gate a "
+                "consumer runs (%d findings):\n  %s" % (len(_f), "\n  ".join(_f)))
+    finally:
+        try:
+            os.remove(_stage)
+        except OSError:
+            pass
+
     with open(out_path, "w", encoding="utf-8", newline="\n") as f:
         # ⛔ sort_keys: DETERMINISTIC EMISSION. Two runs producing identical data in
         # different key order are byte-distinct and digest-distinct, so any hash-based
@@ -1254,7 +1317,7 @@ def main(out_path: str = None) -> None:
     # ⛔ v0 WAS NINE FREE KEYS WITH NO GOVERNING SCHEMA, so nothing could reject a missing pin,
     # a wrong blob or a collapsed clock -- and three seats quoted its digest as evidence while
     # it was an ungoverned producer self-report. Shape and contract: MANIFEST_RECEIPT.v1.
-    receipt = build_receipt(out_path, SOURCE_SNAPSHOT_UTC, reg=load_registry())
+    receipt = _receipt
     rerrs = list(Draft202012Validator(load_json_strict(RECEIPT_SCHEMA)).iter_errors(receipt))
     if rerrs:
         raise SystemExit(

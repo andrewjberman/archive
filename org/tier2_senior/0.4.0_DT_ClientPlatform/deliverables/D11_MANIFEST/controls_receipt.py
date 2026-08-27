@@ -66,7 +66,11 @@ Draft202012Validator.check_schema(SCHEMA)
 check("MANIFEST_RECEIPT.v1 meta-validates", True)
 
 ART = os.path.join(HERE, "graph_object_manifest.json")
-BASE = l0.build_receipt(ART, "2026-08-27T11:27:48Z", reg=l0.load_registry())
+# DERIVED, never typed: a constant here goes stale the moment the derivation gains
+# a pin, and the cheapest repair is to retype it, which is how a control stops
+# measuring without anyone deciding to stop measuring.
+SNAP = l0._source_snapshot_utc()
+BASE = l0.build_receipt(ART, SNAP, reg=l0.load_registry())
 BASE_BYTES = json.dumps(BASE, sort_keys=True)
 check("the emitter's OWN build_receipt() output validates",
       len(list(V.iter_errors(BASE))) == 0,
@@ -76,7 +80,8 @@ check("the emitter's OWN build_receipt() output validates",
 # pinned input is committed; under an edited-but-uncommitted compiler the verifier CORRECTLY
 # reports a commit:path mismatch. An arm demanding zero would have forced me to weaken the
 # verifier or to commit before the suite passed -- both are the tail wagging the dog.
-ROLES = ("compiler", "registry", "registry_schema", "base39", "card_part_map", "card_schema")
+ROLES = ("receipt_schema", "output_schema", "compiler", "registry", "registry_schema",
+         "base39", "card_part_map", "card_schema")
 dirty = set()
 for r in ROLES:
     pin = BASE["input_closure"][r]
@@ -90,7 +95,7 @@ check("the verifier's findings are EXACTLY the tree's dirty inputs",
       reported == {"input_closure.%s" % r for r in dirty},
       "dirty: %s | reported: %s -- EQUALITY is the claim, and it holds in both tree states"
       % (sorted(dirty) or "none", sorted(reported) or "none"))
-check("and every finding is a commit:path binding, nothing else",
+check("and every finding is an input-closure binding, nothing else",
       all(f.startswith("input_closure.") for f in findings),
       "%d findings" % len(findings))
 
@@ -220,31 +225,149 @@ mutate("   blob_presence FLIPPED against the measured truth",
            "computed_only" if _p["blob_presence"] == "in_object_db" else "in_object_db"))
 
 print()
-print("  THE REPLAY STATE -- every arm, because a clause that cannot be satisfied is a defect")
+print("  THE REPLAY STATE -- DERIVED FROM PER-EMISSION EVIDENCE, not asserted beside it")
+_ART = BASE["describes"]["sha256"]
+_T1, _T2 = "2026-08-27T12:00:00Z", "2026-08-27T12:00:01Z"
+
+
+def _em(seq, dig, when):
+    return {"sequence": seq, "digest": dig, "executed_utc": when}
+
+
 for label, rep, want_ok in [
-        ("not_performed / 1 emission / 1 digest (the honest single run)",
-         {"comparison_state": "not_performed", "emissions_compared": 1,
-          "observed_digests": [BASE["describes"]["sha256"]]}, True),
-        ("byte_identical / 2 emissions / 1 digest",
-         {"comparison_state": "byte_identical", "emissions_compared": 2,
-          "observed_digests": [BASE["describes"]["sha256"]]}, True),
-        ("byte_different / 2 emissions / 2 digests (drift must be expressible)",
-         {"comparison_state": "byte_different", "emissions_compared": 2,
-          "observed_digests": [BASE["describes"]["sha256"], "f" * 64]}, True),
-        ("byte_identical claimed on ONE emission",
-         {"comparison_state": "byte_identical", "emissions_compared": 1,
-          "observed_digests": [BASE["describes"]["sha256"]]}, False),
-        ("not_performed claiming TWO emissions",
-         {"comparison_state": "not_performed", "emissions_compared": 2,
-          "observed_digests": [BASE["describes"]["sha256"]]}, False),
-        ("byte_different with only ONE digest",
-         {"comparison_state": "byte_different", "emissions_compared": 2,
-          "observed_digests": [BASE["describes"]["sha256"]]}, False)]:
+        ("not_performed / one emission (the honest single run)",
+         {"comparison_state": "not_performed", "emissions": [_em(1, _ART, _T1)]}, True),
+        ("byte_identical / two emissions, one digest",
+         {"comparison_state": "byte_identical",
+          "emissions": [_em(1, _ART, _T1), _em(2, _ART, _T2)]}, True),
+        ("byte_different / two emissions, two digests (drift must be expressible)",
+         {"comparison_state": "byte_different",
+          "emissions": [_em(1, _ART, _T1), _em(2, "f" * 64, _T2)]}, True),
+        ("byte_identical claimed with ONE emission record",
+         {"comparison_state": "byte_identical", "emissions": [_em(1, _ART, _T1)]}, False),
+        ("not_performed claimed with TWO emission records",
+         {"comparison_state": "not_performed",
+          "emissions": [_em(1, _ART, _T1), _em(2, _ART, _T2)]}, False)]:
     d = copy.deepcopy(BASE)
     d["replay"] = rep
     n = len(list(V.iter_errors(d)))
-    check(label, (n == 0) == want_ok,
-          "%d errors, expected %s" % (n, "accept" if want_ok else "reject"))
+    check(label, (n == 0) == want_ok, "%d schema errors, expected %s"
+          % (n, "accept" if want_ok else "reject"))
+
+# The two CRO~A built by hand, which the count/set pair could not contradict.
+for label, rep in [
+        ("D1. byte_identical/2 FORGED -- schema-legal, evidence absent",
+         {"comparison_state": "byte_identical",
+          "emissions": [_em(1, _ART, _T1), _em(2, "a" * 64, _T2)]}),
+        ("D2. byte_different claiming MORE digests than emissions",
+         {"comparison_state": "byte_different",
+          "emissions": [_em(1, "b" * 64, _T1), _em(2, "c" * 64, _T2)]})]:
+    d = copy.deepcopy(BASE)
+    d["replay"] = rep
+    extra = [f for f in vr.verify(d) if f not in findings]
+    check(label, len(extra) > 0,
+          "%d NEW verifier findings: %s" % (len(extra), extra[0][:100] if extra else "-"))
+
+
+print()
+print("=" * 84)
+print("REWORK 3 -- SIX MUTANTS THROUGH THE ACTUAL CLI, NOT THE HELPER")
+print("=" * 84)
+# ⛔ MUTANT 6 EXISTED BECAUSE EVERY ARM ABOVE CALLS vr.verify() IN-PROCESS. The CLI is a
+# DIFFERENT PATH: it loads the file itself, and it was loading it with json.load. A suite that
+# only ever calls the helper proves the protection exists and never that the path uses it.
+VERIFIER = os.path.join(HERE, "verify_receipt.py")
+
+
+def via_cli(label, text, *, want_findings=True, expect=None):
+    """Write bytes, run `python verify_receipt.py <file>`, read rc and findings."""
+    fd, p = tempfile.mkstemp(suffix=".json", prefix="cli_")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(text)
+        r = subprocess.run([sys.executable, VERIFIER, p], cwd=WS,
+                           capture_output=True, text=True)
+        flagged = r.returncode != 0
+        # ⛔ SEARCH BOTH STREAMS. A SystemExit refusal prints to STDERR, so an expect-check
+        # reading only stdout reported the duplicate-key arm as not-fired while the refusal was
+        # sitting in the other pipe. A control blind to half its subject's output is blind.
+        both = (r.stdout or "") + (r.stderr or "")
+        ok = flagged == want_findings
+        if expect:
+            ok = ok and expect in both
+        check(label, ok,
+              "rc=%d  %s" % (r.returncode,
+                             ("MATCHED %r" % expect) if expect and expect in both
+                             else (both.strip().splitlines() or ["-"])[-1][:96]))
+    finally:
+        os.remove(p)
+
+
+def cli_mutant(label, fn, expect=None):
+    d = copy.deepcopy(BASE)
+    fn(d)
+    if json.dumps(d, sort_keys=True) == BASE_BYTES:
+        check(label, False, "*** INERT MUTATION ***")
+        return
+    via_cli(label, json.dumps(d, indent=2, sort_keys=True), expect=expect)
+
+
+cli_mutant("M1. describes.blob_presence FLIPPED",
+           lambda d: d["describes"].__setitem__(
+               "blob_presence",
+               "computed_only" if d["describes"]["blob_presence"] == "in_object_db"
+               else "in_object_db"))
+cli_mutant("M2. ONE admitted card's blob_presence FLIPPED",
+           lambda d: d["input_closure"]["admitted_cards"][0].__setitem__(
+               "blob_presence",
+               "computed_only"
+               if d["input_closure"]["admitted_cards"][0]["blob_presence"] == "in_object_db"
+               else "in_object_db"))
+
+
+def _earlier(d):
+    """An arbitrary EARLIER legal instant, with exact_home's qualifier adjusted to match --
+    the mutant CRO~A built, which passed because nothing re-derived the snapshot."""
+    e = "2026-08-27T09:00:00Z"
+    d["source_snapshot_utc"] = e
+    d["input_closure"]["source_snapshot_pin"]["value_utc"] = e
+    d["exact_home"] = ("org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/"
+                       "graph_object_manifest.%s.receipt.json"
+                       % e.replace("-", "").replace(":", ""))
+
+
+cli_mutant("M3. an arbitrary EARLIER snapshot, home adjusted to match", _earlier,
+           expect="source_snapshot_utc: claims")
+cli_mutant("M4. ONLY the run-qualified home's timestamp changed",
+           lambda d: d.__setitem__(
+               "exact_home",
+               "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/"
+               "graph_object_manifest.20260101T000000Z.receipt.json"),
+           expect="exact_home: qualifier does not match")
+cli_mutant("M5. executed_by FORGED to another well-shaped serial",
+           lambda d: d.__setitem__("executed_by", "0.7.0_AE_CloudOps~X"),
+           expect="executed_by")
+via_cli("M6. raw invalid-first/valid-last duplicate key THROUGH THE CLI",
+        '{"authority_role": "authority", "authority_role": "evidence"}',
+        expect="duplicate JSON object key")
+via_cli("    POSITIVE CONTROL: the real fixture through the CLI",
+        json.dumps(BASE, indent=2, sort_keys=True), want_findings=bool(findings))
+
+print()
+print("  ADDENDUM A/B -- the two the CLI accepted")
+_fake = copy.deepcopy(BASE)
+via_cli("A. a schema-valid receipt AT A FAKE PATH -> the PATH is flagged",
+        json.dumps(_fake, indent=2, sort_keys=True), expect="was READ FROM")
+for _f, _v in (("source_snapshot_utc", "2026-13-45T99:99:99Z"),
+               ("executed_utc", "2026-02-30T00:00:00Z")):
+    d = copy.deepcopy(BASE)
+    d[_f] = _v
+    if _f == "source_snapshot_utc":
+        d["input_closure"]["source_snapshot_pin"]["value_utc"] = _v
+    extra = [f for f in vr.verify(d) if f not in findings]
+    check("B. %s = %s (matches the pattern, is no calendar instant)" % (_f, _v),
+          any("NOT A REAL INSTANT" in f or "not a real instant" in f for f in extra),
+          "%d NEW findings" % len(extra))
 
 print()
 print("=" * 84)

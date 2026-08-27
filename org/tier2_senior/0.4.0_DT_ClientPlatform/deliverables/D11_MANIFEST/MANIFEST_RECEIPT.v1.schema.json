@@ -45,7 +45,7 @@
     "exact_home": {
       "type": "string",
       "pattern": "^org/tier2_senior/0\\.4\\.0_DT_ClientPlatform/deliverables/D11_MANIFEST/graph_object_manifest\\.[0-9]{8}T[0-9]{6}Z\\.receipt\\.json$",
-      "description": "RUN-QUALIFIED, AND DETERMINISTICALLY RELATED TO THE MANIFEST. ⛔ THE PRIOR REVISION PINNED ONE FIXED HOME WHILE DECLARING mutation_policy: immutable -- two clauses of this same contract contradicting each other, because the next run would overwrite the file the first run promised never to change. The stem is the manifest's; the qualifier is the source-snapshot instant, compact UTC. An emitter must REFUSE a home that already exists: immutability that depends on nobody re-running is not immutability."
+      "description": "RUN-QUALIFIED BY THE RUN, NOT BY THE CLOSURE. ⛔ IT WAS QUALIFIED BY source_snapshot_utc, which is DETERMINISTIC OVER THE INPUTS -- so two emissions of an identical closure computed the SAME home, the second refused, and replay evidence could never be furnished. The immutability guard made the determinism claim beside it unprovable. A RUN IDENTITY AND A CLOSURE IDENTITY ARE TWO AXES; the qualifier is now executed_utc and the snapshot stays a separate field."
     },
     "authorship_mode": {
       "const": "machine_emitted",
@@ -98,6 +98,8 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
+        "receipt_schema",
+        "output_schema",
         "compiler",
         "registry",
         "registry_schema",
@@ -108,7 +110,7 @@
         "source_snapshot_pin",
         "complete"
       ],
-      "description": "EVERY INPUT THAT COULD HAVE CHANGED THE OUTPUT, PINNED BY ROLE AND BY EXACT HOME. The prior revision typed each role as 'some legal path', so THE BASE39 ROLE COULD CARRY THE REGISTRY'S PIN and the closure still validated -- six correctly-shaped pins describing the wrong six files. A role whose home is not bound is a label, and a label cannot be wrong.",
+      "description": "EVERY INPUT THAT COULD HAVE CHANGED THE OUTPUT, PINNED BY ROLE AND BY EXACT HOME. The prior revision typed each role as 'some legal path', so THE BASE39 ROLE COULD CARRY THE REGISTRY'S PIN and the closure still validated -- six correctly-shaped pins describing the wrong six files. A role whose home is not bound is a label, and a label cannot be wrong. ⛔ AND THE GOVERNING CONTRACT ITSELF WAS MISSING FROM ITS OWN CLOSURE. MANIFEST_RECEIPT.v1.schema.json can change what every field in this document MEANS -- it is the one input whose movement rewrites all the others -- and it was pinned by nothing. It is a DISTINCT role from `card_schema` and from the L0 manifest schema; conflating them would hide exactly the substitution the per-role home binding exists to prevent.",
       "properties": {
         "compiler": {
           "$ref": "#/$defs/pinned_compiler"
@@ -148,16 +150,18 @@
           "properties": {
             "derived_from": {
               "type": "array",
-              "minItems": 3,
+              "minItems": 5,
               "uniqueItems": true,
               "items": {
                 "enum": [
                   "registry_ratified_commit",
-                  "schema_commit",
-                  "compiler_commit"
+                  "output_schema_commit",
+                  "card_schema_commit",
+                  "compiler_commit",
+                  "receipt_schema_commit"
                 ]
               },
-              "description": "ALL THREE NAMED TEMPORAL PINS, ALWAYS. The prior revision allowed any non-empty subset, so a derivation OMITTING THE SCHEMA COMMIT validated -- and a snapshot that ignores an input which can move is not deterministic over the closure it claims to cover. minItems 3 over a 3-member enum with uniqueItems makes the complete set the only legal value."
+              "description": "ALL FIVE NAMED TEMPORAL PINS. The prior list carried one ambiguous `schema_commit` token for two different schemas; each schema now has its own token, and minItems 5 over a 5-member enum with uniqueItems makes the complete set the only legal value."
             },
             "value_utc": {
               "$ref": "#/$defs/utc_instant"
@@ -167,6 +171,12 @@
         "complete": {
           "const": true,
           "description": "THE CLOSURE'S OWN CLAIM ABOUT ITSELF, and in v1 an INCOMPLETE closure is not a receipt. `false` was legal-and-loud, which is right for a field a human fills and wrong for one an emitter writes: the emitter either pinned every input or must refuse to emit."
+        },
+        "receipt_schema": {
+          "$ref": "#/$defs/pinned_receipt_schema"
+        },
+        "output_schema": {
+          "$ref": "#/$defs/pinned_output_schema"
         }
       }
     },
@@ -179,19 +189,17 @@
       "description": "THE REAL CLOCK, the only per-run value here, and STRICTLY LATER than source_snapshot_utc -- enforced by the verifier, which is where a comparison between two instants belongs. A RECEIPT WHOSE EXECUTION PRECEDES ITS SOURCE SNAPSHOT CLAIMS TO HAVE COMPILED INPUTS THAT DID NOT YET EXIST, which is exactly the defect that put a hard-coded 07:10:00Z in front of its own schema commit, and it validated here until now."
     },
     "executed_by": {
-      "type": "string",
-      "minLength": 1,
-      "pattern": "^[0-9.]+_[A-Za-z0-9_~]+$"
+      "const": "0.4.0_DT_ClientPlatform~X",
+      "description": "⛔ PINNED. A well-shaped serial belonging to ANOTHER seat validated, so this document could carry a forged author while every digest in it stayed true. A const is sufficient for a v1 owned by one emitter, and it is the only form that cannot be satisfied by a plausible-looking string."
     },
     "replay": {
       "type": "object",
       "additionalProperties": false,
       "required": [
         "comparison_state",
-        "emissions_compared",
-        "observed_digests"
+        "emissions"
       ],
-      "description": "A MECE STATE REPLACES AN OVERLAPPING BOOLEAN. `byte_identical: false` meant BOTH 'compared and differed' AND 'never compared' -- one value over two facts, and the second is the honest state of every single-emission run. A reader could not tell a failed replay from an absent one.",
+      "description": "A MECE STATE PLUS PER-EMISSION EVIDENCE. `byte_identical: false` used to mean BOTH 'compared and differed' AND 'never compared'; and the count/digest pair could not prove each other. The state is derived FROM the evidence by the verifier rather than asserted beside it.",
       "properties": {
         "comparison_state": {
           "enum": [
@@ -212,18 +220,32 @@
             "state_coherence": "another emission moves emissions_compared and MAY move this; it never moves the described artifact."
           }
         },
-        "emissions_compared": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "observed_digests": {
+        "emissions": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
           "items": {
-            "$ref": "#/$defs/sha256"
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sequence",
+              "digest",
+              "executed_utc"
+            ],
+            "properties": {
+              "sequence": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "digest": {
+                "$ref": "#/$defs/sha256"
+              },
+              "executed_utc": {
+                "$ref": "#/$defs/utc_instant"
+              }
+            }
           },
-          "description": "The DISTINCT digests actually observed. THE VERIFIER REQUIRES describes.sha256 TO BE AMONG THEM -- that is what makes a multi-emission claim independently checkable rather than an assertion. The prior revision accepted a forged two-emission claim whose digests belonged to nothing."
+          "description": "⛔ PER-EMISSION EVIDENCE, because a COUNT and a DIGEST SET could not prove each other. A forged `byte_identical / 2` carried no second emission, and `byte_different` could claim MORE DISTINCT DIGESTS THAN EMISSIONS -- arithmetic nothing in the document could contradict. Both are now inexpressible: the count IS the array length and the digests ARE its members, so neither can exceed or contradict the other."
         }
       },
       "allOf": [
@@ -240,21 +262,21 @@
           },
           "then": {
             "properties": {
-              "emissions_compared": {
-                "const": 1
-              },
-              "observed_digests": {
+              "emissions": {
                 "maxItems": 1
               }
             }
           },
-          "$comment": "no comparison => exactly one emission and one digest."
+          "$comment": "no comparison => exactly one emission record."
         },
         {
           "if": {
             "properties": {
               "comparison_state": {
-                "const": "byte_identical"
+                "enum": [
+                  "byte_identical",
+                  "byte_different"
+                ]
               }
             },
             "required": [
@@ -263,38 +285,12 @@
           },
           "then": {
             "properties": {
-              "emissions_compared": {
-                "minimum": 2
-              },
-              "observed_digests": {
-                "maxItems": 1
-              }
-            }
-          },
-          "$comment": "identity requires >=2 emissions producing exactly ONE distinct digest."
-        },
-        {
-          "if": {
-            "properties": {
-              "comparison_state": {
-                "const": "byte_different"
-              }
-            },
-            "required": [
-              "comparison_state"
-            ]
-          },
-          "then": {
-            "properties": {
-              "emissions_compared": {
-                "minimum": 2
-              },
-              "observed_digests": {
+              "emissions": {
                 "minItems": 2
               }
             }
           },
-          "$comment": "drift requires >=2 emissions and >=2 distinct digests."
+          "$comment": "any comparison requires at least two emission records."
         }
       ]
     }
@@ -438,6 +434,23 @@
         "mece": "in_object_db | computed_only spans it: git either holds the object or it does not.",
         "state_coherence": "committing moves this to in_object_db and moves NOTHING in the blob id itself -- the identity was always right and was never resolvable."
       }
+    },
+    "pinned_receipt_schema": {
+      "$ref": "#/$defs/tracked_input",
+      "properties": {
+        "home": {
+          "const": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/MANIFEST_RECEIPT.v1.schema.json"
+        }
+      }
+    },
+    "pinned_output_schema": {
+      "$ref": "#/$defs/tracked_input",
+      "properties": {
+        "home": {
+          "const": "org/standards/L0_GRAPH_SUBSTRATE_MANIFEST.schema.json"
+        }
+      },
+      "description": "The schema the EMITTED MANIFEST is validated against. ⛔ A DISTINCT ROLE from receipt_schema (which governs this document) and from card_schema (which governs the inputs). Conflating any two of the three is the substitution the per-role home binding exists to prevent, and the snapshot derivation was silently reading the card schema for the output schema's token."
     }
   }
 }
