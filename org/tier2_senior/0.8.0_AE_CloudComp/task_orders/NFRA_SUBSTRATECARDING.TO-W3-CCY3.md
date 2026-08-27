@@ -10,7 +10,7 @@ pipeline's own escape valve applies: a DECOMP-INVALIDATING verdict is the issuer
 re-decomp and re-issue. **Do not hold on it.**
 
 <decomp_ref>
-workflows/atom_decomposition/runs/nfra-substratecarding-w3/DECOMP.md @d2cf839c79
+workflows/atom_decomposition/runs/nfra-substratecarding-w3/DECOMP.md @e48a7466ba
 
 cells:
 W3-bzgw-1 W3-bzgw-2 W3-bzgw-3 W3-bzgw-4 W3-bzgw-5 W3-bzgw-6 W3-bzgw-7 W3-dljc-1 W3-dljc-2 W3-dljc-3
