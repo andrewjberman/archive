@@ -104,6 +104,37 @@ The direction exists upstream in `fact_trn` (`debit_credit` = LONG/SHORT) and **
 
 ---
 
+## 5b. ⛔ RULED + PRE-REGISTERED ACCEPTANCE (added 2026-08-27T0005Z, on `1.0.0_SA_CTO` 74122)
+
+**DEFECT 2 IS RULED.** *"An INTERNAL (intra-relationship) transfer IS a flow at ACCOUNT grain."*
+**The principle, so the fix inherits it rather than re-deriving it: FLOW CLASSIFICATION IS RELATIVE TO THE BOUNDARY OF THE POPULATION WHOSE RETURN IS BEING COMPUTED.** "Internal" is a RELATIONSHIP-grain label; at account grain any value crossing the ACCOUNT boundary is external to that account.
+⛔ **COROLLARY THE FIX MUST HOLD — the class filter is a FUNCTION OF GRAIN, NOT A CONSTANT:** account-grain returns neutralize `INTERNAL` + `EXTERNAL`; relationship-grain returns neutralize `EXTERNAL` only (the same leg nets *within* the boundary); **a shared implementation takes the boundary as a parameter.** Rule 24(iv): the two grains' figures move under different filters **by design**, so **the artifact states its boundary on its face.**
+
+### THE ACCEPTANCE TABLE — all 10, pre-registered, under BOTH fixes
+
+**10 of 10 collapse into a normal daily band** (that day's `p01`/`p99` were ≈ −0.9% / +0.8%; `p99.9` ≈ +5%).
+
+| account | emitted | **EXPECTED after both fixes** | flow delta applied | defect(s) |
+|---|---|---|---|---|
+| `0032486794` | +69,056.0% | **+0.00%** | +39,361.92 | 1 |
+| `0013289888` | +2,722.3% | **+0.03%** | +275,900.00 | 1 |
+| `0057178995` | +1,054.3% | **+3.35%** | +10,020.65 | 1+2 |
+| `0050000151` | +310.7% | **−0.00%** | +1,000.00 | **2 only** |
+| `0042335575` | +157.8% | **+0.08%** | +8,964.54 | 1+2 |
+| `0012942467` | +108.6% | **−0.12%** | +262,865.96 | 1+2 |
+| `0066766188` | −100.0% | **+0.00%** | −73.39 | **2 only** |
+| `0048403874` | −100.0% | **−0.38%** | −262,865.96 | 1+2 |
+| `0049284242` | −99.8% | **−0.67%** | −10,941.82 | 1+2 |
+| `0016371483` | −99.3% | **−0.26%** | −108,970.58 | 1+2 |
+
+⛔ **THE TWO-DEFECT MODEL IS JOINTLY CONFIRMED AND LEAVES NO RESIDUE.** `0032486794` is defect 1 alone; `0050000151` and `0066766188` are **defect 2 alone** (no in-kind leg at all); the other seven need both. **Every one of the ten worst returns in the estate is fully explained, and nothing is left unaccounted for.**
+
+⛔ **AND DIRECTION *IS* RECOVERABLE — remediation step (1) is proven achievable, not merely proposed.** Joining `flow_ledger` in-kind legs to `fact_trn` on `(account_id, |quantity|)` where `tr_cd == 'IC'` resolved `debit_credit` **LONG/SHORT for every leg of all ten accounts, with zero ambiguous cases.** *Method limit, stated: the join key would collide if one account had two in-kind legs of identical absolute quantity in opposite directions on the same day. That did not occur here — an ambiguous leg surfaces as a `{LONG, SHORT}` set and would be reported NOT PRE-REGISTRABLE rather than silently picked. The production fix should carry the direction forward on `txn_ref` rather than re-deriving it by quantity.*
+
+**STATUS: FROZEN, NOT COMMISSIONED.** `1.0.0_SA_CTO` 74122: nothing builds tonight; TOs cut when allocation unfreezes on Andrew's word. **The serve card is SUPERSEDED at the terminal** — with the publisher activation measured NOT BUILT (`0.7.0_AE_CloudOps~L` 74091), no serve decision is live. Remediation is **D2's critical path, LAPTOP** (placement map @0a96a52989).
+
+---
+
 ## 6. SEQUENCE THE REMEDIATION IMPLIES (stated, not commissioned)
 1. **`flow_ledger` carries a SIGNED in-kind value** (defect 3) — prerequisite; without it, step 2 is wrong on outflows.
 2. **`c02_twr_engine` incorporates in-kind value** (defect 1) — the pattern already exists at `c01_nna_canonical.py:44`.
