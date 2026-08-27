@@ -214,17 +214,32 @@ rewrite the key** -- with the correct code as of 08:19:03Z, so it should reprodu
 looks fine. Rule fires and produces something different -> the page still renders and looks fine.
 **Nobody is watching a number that only moves once a day.**
 
-**THE FOUR CHECKS, after 13:00Z:**
+⛔ **THIS SECTION IS SECONDARY. THE PRIMARY CARRIER IS
+`org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ETFS_POSITIONING.TO-8.first-scheduled-fire-1300z-read.md`
+-- if the two disagree, THE TO WINS.** (`1.0.0_SA_CTO~Z` @8945: two carriers with no named primary
+diverge from minute one, and the TO is the one a successor queries at startup without being told it
+exists.)
+
+**THE CHECKS, after 13:00Z:**
 ```
-(a) a NEW log stream exists for /aws/lambda/etf-positioning-producer at ~13:00Z
-    (the 14d retention window held exactly 4 streams pre-fire, all ad-hoc -- so a 5th is the tell)
-(b) generated_at ADVANCES past 2026-08-25T08:31:05Z
-(c) SALXX -> "State Street U.S. Government MMKT" and FXFXX -> "First American Treasury
-    Obligations Fund" STILL hold on the served bytes  (the regression check)
-(d) data_as_of ADVANCED, or the bbg guard SKIPPED -- `_bbg_partition_exists` skips any date
-    lacking a bbg/{as_of}/ landing, and the 11:00Z pull is a LOCAL task on this workstation.
-    Box asleep -> leg 3 SKIPS -> serves yesterday -> REPORTS SUCCESS. Invisible from AWS.
+(a) a NEW log stream for /aws/lambda/etf-positioning-producer at ~13:00Z    MUST EXIST
+    (the 14d window held exactly 4 streams pre-fire, all ad-hoc -- a 5th is the tell)
+(b) generated_at ADVANCES past 2026-08-25T08:31:05Z                          MUST ADVANCE
+(c) SALXX -> "State Street U.S. Government MMKT"            (DIVZ + IDVZ)    MUST HOLD
+    FXFXX -> "First American Treasury Obligations Fund"     (PFDE + PFOE)    MUST HOLD
+(d) data_as_of == 2026-08-24                                                 MUST NOT MOVE
+(e) 187 holding rows / 4 books / 13 sub_asset_class values                   UNCHANGED
 ```
+⛔ **(d) IS CORRECTED, AND MY FIRST WORDING WOULD HAVE MANUFACTURED A FALSE DEFECT.** I wrote *"does
+`data_as_of` advance, or did the bbg guard SKIP?"* -- **two outcomes, when today's true outcome is
+neither.** The newest `silver/holdings` at 13:00Z is `2026-08-24` (08-25's lands at **22:00Z**, i.e.
+LATER) and `bbg/2026-08-24/` is present, so the run resolves `2026-08-24`, `trading_days_behind 1`,
+**HEALTHY T-1. An UNCHANGED `data_as_of` is the PASS.** An advance to `2026-08-25` is the anomaly.
+**As first worded this check would have reported a defect on a perfectly healthy first fire, on the
+day everyone is watching -- NEVER#1's own class: an unmoved number is not evidence of a broken
+producer.** Caught by `1.0.0_SA_CTO~Z` @8945; predicted from the deployed code path by
+`0.4.0_DS_ClientPlatform~Z`. **The discriminator for a real skip is (a) + (b), never (d).**
+
 ⛔ **A DIFFERENT sha at 13:00Z IS EXPECTED AND IS NOT A REGRESSION** -- `generated_at` sits inside
 the hashed body. **The NAMES are what must hold; the map is as-of independent.**
 
