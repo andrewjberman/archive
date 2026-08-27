@@ -13,7 +13,7 @@ bytes correspond to a committed source vintage -- that content-identity is the D
 (the LF-normalised compare against the build input, per the c02 precedent). Conflating the two would
 be a claim this instrument cannot support.
 
-⛔ WHY CHECK 3 IS AST-ONLY, BANKED BECAUSE IT BIT ME. The first run of check 3 substring-scanned the
+WARN: WHY CHECK 3 IS AST-ONLY, BANKED BECAUSE IT BIT ME. The first run of check 3 substring-scanned the
 whole file for 'epoch'/'converter' and returned FAIL on 5 hits -- every one a COMMENT or ARGPARSE
 HELP STRING, including the help text that EXPLAINS the auto-derive ban. A common-noun scan over a
 file that documents its own prohibition reads the documentation as the violation. Comments and
