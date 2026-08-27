@@ -14,7 +14,22 @@
 > instance, 11 stale disarm_owner rows).
 
 this fabric** — `0.7.0_AE_CloudOps~Z` was closed out by Andrew. Seating is `0.0.0_AB_MSTR~Z`'s.
-**Status:** ACTIVE · **Cells:** `SAT-c-1` `SAT-c-2` `SAT-c-3` · **Invariant:** `SAT-inv-4`
+**Status:** recorded in the status element at the foot of this file, which is the ONLY carrier.
+**Cells:** `SAT-c-1` `SAT-c-2` `SAT-c-3` · **Invariant:** `SAT-inv-4`
+> WARN: **THIS HEADER CARRIES NO STATUS TOKEN, NO SERIALS, AND NO LITERAL TAG NAME. All three
+> omissions were paid for in this file, in three tries.**
+> 1. First amendment wrote a struck-through status word here. **STRIKETHROUGH IS INVISIBLE TO A
+>    PARSER** -- it reads as struck to a human eye and as a live value to the instrument.
+> 2. The same edit put serials in prose beside a resolvable field: `unresolved_serials` 2 -> 6.
+>    The COO office named this tonight -- *serials near a resolvable field are PARSER INPUT, not
+>    commentary* -- and I reproduced it hours after reading it.
+> 3. The second amendment referred to the status element BY ITS LITERAL TAG NAME in prose.
+>    **THE EXTRACTOR MATCHED THAT AS A SECOND ELEMENT** and swallowed this header as the status
+>    value; the first token became a backtick and the classifier fell through to ACTIVE.
+>    MEASURED by calling the parser directly, after guessing wrong twice. This is the COO
+>    office's defect verbatim: *I had also written the literal tag string inside that prose,
+>    which reads as a second element.*
+> **ONE FACT, ONE CARRIER. Describe a field in prose; never spell it.**
 
 ---
 
@@ -103,26 +118,50 @@ assumed.**
 <certification>**CERTIFIED WITH FINDINGS** @`205546c65c`, amended @`a025e2be91`. **CVO F2 (P1) is discharged by the four-postulate record linked above and is submitted for certification like any other artifact** — the issuer authoring it is not the issuer certifying it.</certification>
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued>2026-08-27T17:4xZ</issued>
-<status>ACTIVE -- and the VERB is deliberately unchanged; only a FALSIFIED FACT in the old text is corrected.
-  PRIOR TEXT: "waiting on TWO SEATS (DE + AE), and there is no AE seat on this fabric today."
-  DE LIMB: DELIVERED, ACCEPTED, CERTIFIED. modesFor(firm) TOTAL over firms UNION {null}, null failing
-    CLOSED, tamper arm exercised, both render arms read. portal 797c4f8d (+dfdd7f6d); proof-of-spec
-    .tools/proof-of-spec-check.py rc=0 VALID over SAT-TO4-AC1..AC5, 4/4 declared cells reachable.
-  AE SEAT: NOW EXISTS. ANDREW-DIRECT ~2026-08-27T21:0xZ, VERBATIM: "I just brought 0.7.0_AE_CloudOps~Z
-    online for this purpose, they should haev been reinstantiated when the ened for them becameapparent,
-    but its fine, they are starting up now" [sic, quoted exactly -- the phrasing IS the ruling].
-    Verified independently at the broker, not taken on the word alone: get_agent_status ->
-    0.7.0_AE_CloudOps~Z LIVE, PID 43492. So the "no AE seat" clause is FALSE as of that moment and is
-    struck; it had been true when 1.0.0_SA_CTO~Z wrote it at the cut.
-  ⛔ WHAT IS STILL OPEN, AND IT IS THE ISSUER'S, NOT THE ASSIGNEE'S: Andrew ruled (b) ACCESS at ~19:46Z
-    (@5f60dd944a), which makes this TO's client-side gate NECESSARY AND NOT SUFFICIENT and moves the
-    served-plane scoping to R5 under a NEW project. So whether this TO's AE limb is now `complete`
-    (DE half shipped, AE half absorbed by R5), `superseded` (whole TO overtaken), or genuinely still
-    live is a call with three defensible answers. 1.0.0_SA_CTO~Z as issuer holds it. THE ARRIVAL OF A
-    SEAT DOES NOT SETTLE WHAT THE SEAT SHOULD DO.
-  ⚠ A STANDING BLOCKER SAT IN THIS FIELD FROM THE CUT AND NOTHING ACTED ON IT: the TO named "there is
-    no AE seat on this fabric" at issuance, and the gap closed only when Andrew observed it directly.
-    A blocker stated in a TO's own status is not a signal any instrument reads.</status>
+<status>complete</status>
+<!--
+STATUS DETAIL (the verb above is kept bare so to-check parses it cleanly).
+
+complete -- SET BY THE ASSIGNEE ON THE ISSUER'S EXPLICIT RULING, cited rather than inferred.
+  RULING: 1.0.0_SA_CTO~Z, issuer, msg 10160 @2026-08-27T21:14Z: "ETFS_SATELLITES.TO-4 is COMPLETE,
+  not superseded", with the instruction "set TO-4 to COMPLETE on this ruling and cite it". I left
+  this verb unset for ~2h precisely because it was not mine to set; it is the issuer's, and the
+  issuer has now made it.
+
+  WHY COMPLETE AND NOT SUPERSEDED, in the issuer's terms, read by them AT SOURCE:
+  every DECLARED cell -- SAT-c-1, SAT-c-2, SAT-c-3, invariant SAT-inv-4 -- IS CLIENT-SIDE. No cell
+  in this TO ever required AE work. The AE limb was an ANTICIPATED NEED written into the issue at
+  cut time, NOT A CELL. `superseded` would assert the work was overtaken and not done; every
+  declared cell was delivered and certified.
+  >> SAT-c-3 IS WHAT MAKES THIS CLEAN RATHER THAN A JUDGEMENT CALL: it REQUIRED the artifact to
+     declare on its face that this is a VISIBILITY gate and NOT an authorization boundary, and that
+     "if it is meant to be an authorization boundary, THAT IS A DIFFERENT DESIGN AND A DIFFERENT
+     REVIEW". The TO declared its own boundary and delivered inside it. THE DIFFERENT DESIGN IS
+     POSN_TENANCY. Calling it superseded would retroactively read its own scope declaration as a
+     shortfall. <<
+
+  DELIVERED: portal 797c4f8d (+dfdd7f6d), ON ORIGIN. modesFor(firm) TOTAL over firms UNION {null},
+  null FAILING CLOSED, persisted-toggle tamper exercised and refused, both render arms read
+  (49financial two pills, cottonwood three). 24/24 legs, every allow-leg paired with a deny.
+  proof-of-spec rc=0 VALID over SAT-TO4-AC1..AC5, 4/4 declared cells reachable -- re-run AFTER this
+  edit, since the TO is its own spec_ref.
+
+  ⛔ THIS DOES NOT LIFT THE PROD PROMOTE HOLD, and nobody should read it that way. The issuer says so
+  in the same ruling. The ETFS_SATELLITES promote remains HELD by Andrew's ~19:46Z (b) ACCESS ruling
+  flowing through the issuer's pre-stated consequence -- not by any gate, and not by this status.
+  A COMPLETED TO AND A PROMOTABLE CHANGE ARE DIFFERENT CLAIMS.
+
+  ⛔ THE AE NEED IS REAL BUT LIVES ELSEWHERE. Andrew brought 0.7.0_AE_CloudOps~Z online ~21:0xZ "for
+  this purpose". THE SEAT IS RIGHT; THE TARGET MOVED -- his own ~19:46Z ruling relocated the served
+  plane to POSN_TENANCY ninety minutes before he seated it. Building served-plane scoping under THIS
+  TO would be a second build of POSN_TENANCY's PT-a-1/a-2/a-3 and b-1: a build-alongside on a
+  multi-tenant surface, which the NEVER-list forbids.
+
+  PRIOR TEXT, recorded rather than deleted: "ACTIVE -- unblocked on its merits; waiting on TWO SEATS
+  (DE + AE), and there is no AE seat on this fabric today." That AE-seat clause was TRUE at the cut
+  and FALSE from ~21:0xZ. I corrected the FACT while leaving the VERB untouched; 1.0.0_SA_CTO~Z and
+  3.0.0_SA_CVO~Z both confirmed that split was the right one.
+-->
 
 <proof_of_spec>
   <!-- ISSUANCE half (1.0.0_SA_CTO~Z). POSITIONAL:
