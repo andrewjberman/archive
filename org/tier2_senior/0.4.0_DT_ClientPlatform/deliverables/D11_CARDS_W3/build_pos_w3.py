@@ -97,6 +97,12 @@ ac8_control = len([ln for ln in sh("git", "log", "--all", "--format=%h %an",
 n = len(cards)
 tot_err = sum(errs.values())
 
+# The commit that LANDED these artifacts. DERIVED, not typed: `git log -1` over the card dir
+# answers "when did these files last change", which is the question commit_or_etag actually asks.
+# Typing it would put a hand-written hash beside generated content -- this session's most-repeated
+# defect class. Reads PENDING-COMMIT only before the first landing.
+_landed = sh("git", "log", "-1", "--format=%h", "--", CARD_DIR) or "PENDING-COMMIT"
+
 pos = {
     "schema_version": "1.0",
     "to_id": "NFRA_SUBSTRATECARDING.TO-W3-DTX3",
@@ -117,17 +123,17 @@ pos = {
     "artifacts_produced": [
         {"path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_W3/"
                         "W3-gkih__infra_aws_globgrph_kuzu_load_py.json",
-         "kind": "config_data", "commit_or_etag": "PENDING-COMMIT",
+         "kind": "config_data", "commit_or_etag": _landed,
          "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
          "deploy_evidence": "Substrate card, a governance record. No deploy surface."},
         {"path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_W3/"
                         "W3-mdiu__infra_aws_globgrph_kuzu_stitch_load_py.json",
-         "kind": "config_data", "commit_or_etag": "PENDING-COMMIT",
+         "kind": "config_data", "commit_or_etag": _landed,
          "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
          "deploy_evidence": "Substrate card, a governance record. No deploy surface."},
         {"path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_W3/"
                         "build_cards_w3.py",
-         "kind": "script", "commit_or_etag": "PENDING-COMMIT",
+         "kind": "script", "commit_or_etag": _landed,
          "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
          "deploy_evidence": "Generator. The cards are GENERATED, not hand-authored, so a "
                             "regeneration cannot silently disagree with them."},
