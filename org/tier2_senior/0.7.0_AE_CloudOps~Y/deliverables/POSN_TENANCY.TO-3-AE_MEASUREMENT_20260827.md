@@ -7,10 +7,45 @@
 
 ---
 
-## 0. THE HEADLINE, AND IT IS NOT WHAT THE CELL PRESUPPOSES
+## 0. THE HEADLINE: THE TARGET IS UNBUILT, MEASURED POSITIVELY
 
-`PT-a-1` is worded *"Positioning's artifact **is** served through `/api/scoped/`, firm-discriminated
-at the SERVING layer."* **It is not served through `/api/scoped/` at all.**
+⛔ **THE FRAME IS AN OPEN TIER-1 DISAGREEMENT AND THIS DELIVERABLE TAKES NO SIDE. I TOOK ONE ONCE AND
+AM WITHDRAWING IT.** After `db2409435c` I wrote that `1.0.0_SA_CTO~Z`'s correction settled the
+question. It has not:
+```
+1.0.0_SA_CTO~Z  10329/10344  PT-a-1 is an ACCEPTANCE TARGET. The statement column is the target
+                             state, not an assertion about today. Decomp sound, no re-cut, cert holds.
+2.0.0_SA_COO~Z  10338        "AND PT-a-1's PREMISE IS FALSE. I WROTE IT." Routed to CVO to rule.
+3.0.0_SA_CVO~Z  10349        certified TO-3-AE @2efba0f665 and RE-DERIVED "the premise is false".
+```
+⭐ **ALL THREE AGREE ON EVERY NUMBER IN THIS DOCUMENT. THE DISPUTE IS DECOMP GRAMMAR, NOT
+MEASUREMENT** -- and no verdict below moves on either reading. Recorded, not adjudicated; a Tier-2
+seat does not resolve a Tier-1 split, and `2.0.0_SA_COO~Z` has already routed it to the certifier.
+
+⭐ **AND ANDREW SETTLED THE UNDERLYING QUESTION AT ~21:52Z, WHICH IS NOT THE SAME AS SETTLING THE
+GRAMMAR.** Verbatim, relayed by `0.4.0_DS_ClientPlatform~L` (10363), recorded not adjudicated:
+> *"all of Positioning is general, it was always meant to be a general page, but we are making an
+> exception in the case of cottonwood here for the purpose of their "Satellites" portfolios."*
+⛔ **SO THE UNSCOPED SERVING THIS TO MEASURED IS THE INTENDED DESIGN, NOT A DEFECT** -- and the
+firm-specific content is a NAMED, SCOPED EXCEPTION (Cottonwood Satellites). **That makes
+`1.0.0_SA_CTO~Z`'s ordering constraint the operative one rather than a caution:** the exception is
+exactly the trigger in s.9, and it is now sovereign-confirmed as coming. ⚠ **What his word does to
+`PT-a-1`'s wording and to the uniformity constraint is `1.0.0_SA_CTO~Z` and `2.0.0_SA_COO~Z`'s call,
+not mine.**
+
+**MEASURED STATE: Positioning is not served through `/api/scoped/`.**
+
+⛔ **AND `3.0.0_SA_CVO~Z` (10349) RAN THE CONTROL I DID NOT, WHICH CHANGES WHAT THE ABSENCE MEANS:**
+```
+'api/scoped'  in portal/src -> 47 occurrences
+'api/general' in portal/src -> 166
+```
+>> **THE SCOPED PLANE EXISTS AND IS IN LIVE USE 47 TIMES. Positioning is not waiting on an unbuilt
+   feature -- it is the EXCEPTION to a plane the portal already uses.** << ⭐ **An absence that reads
+*"not built yet"* and one that reads *"built, and this one opted out"* carry DIFFERENT REMEDIES, and
+I established only that the control was absent, never that the plane was.** My s.1 sweep proved
+Positioning has no scoped route; it said nothing about whether the route family exists. **That is a
+missing control on my own finding, supplied by the certifier.**
 
 ```
 MEASURED   portal/src/api/portal-proxy.ts:1133 @portal 80af31ac
@@ -225,8 +260,11 @@ is byte-identical to a real one.** It matters because a seating rationale cited 
 ## 7. cell_status -- FROM OBSERVED STATES ONLY
 
 ```
-PT-a-1  OBSERVED -- FALSIFIED AS WORDED. Positioning is not served through /api/scoped/; it is on
-                    /api/general/, single unscoped artifact, no serving-layer firm discrimination.
+PT-a-1  OBSERVED -- TARGET UNMET (not "falsified": the statement column is the target state, and
+                    nothing has been built against it yet -- 1.0.0_SA_CTO~Z msg 10329). Positioning
+                    is on /api/general/, single unscoped artifact, no serving-layer firm
+                    discrimination. UNSIZED: whether those bytes are house/global or another
+                    partner firm's book is NOT measured -- routed as a cell, see s.9.
 PT-a-2  OBSERVED -- HOLDS. X-Firm-Id is JWT-injected and not client-assertable, exercised 5 arms
                     with a dynamic-envelope positive control. Residual: :211-212 early return.
 PT-a-3  OBSERVED -- DOES NOT HOLD on Positioning's path (cache key has no header; public/300s).
@@ -235,7 +273,30 @@ PT-a-3  OBSERVED -- DOES NOT HOLD on Positioning's path (cache key has no header
 
 ---
 
-## 8. ADDENDUM -- ANDREW'S ~21:3xZ ARCHITECTURE RULE, MEASURED AGAINST THIS CELL
+## 8. ADDENDUM -- THE UNIFORMITY CONSTRAINT, **WITHDRAWN BY ITS AUTHOR**
+
+⛔⛔ **READ THIS BEFORE THE SECTION BELOW. `1.0.0_SA_CTO~Z` WITHDREW THIS CONSTRAINT AT 10364, NAMING
+THIS SEAT: *"0.7.0_AE_CloudOps~Y: DO NOT BUILD TO MY 10329/10354 s.4. It is withdrawn as stated."***
+**Andrew-direct ~21:52Z** -- *"all of Positioning is general... we are making an exception in the case
+of cottonwood here for the purpose of their 'Satellites' portfolios"* -- **puts Satellites on a
+different footing from Models and ETFs BY DESIGN, which is exactly the shape the constraint forbade.
+They cannot both stand.** CTO~Z's own reason for which one goes: *"MINE WAS INFERRED FROM HIS ~21:3xZ
+FORKED-ROUTES RULE. HIS ~21:52Z IS A DIRECT STATEMENT ABOUT THIS PAGE. A DIRECT WORD BEATS MY
+INFERENCE FROM A GENERAL ONE, EVERY TIME."*
+
+⭐ **NOTHING WAS BUILT TO IT -- THIS WAS A MEASUREMENT TO, AND THE MEASUREMENT IS UNAFFECTED.** The
+5-of-5 uniformity figure below is a fact about the world and still holds. **What is withdrawn is what
+it IMPLIES for the remedy**, not the number. The section is kept rather than deleted so the withdrawal
+is legible; **do not read it as live guidance.**
+
+⚠ **`1.0.0_SA_CTO~Z` explicitly declined to adjudicate between Andrew's two statements** (~21:3xZ
+forked-routes vs ~21:52Z this-page) and put the narrow question up rather than resolving it, per
+CLAUDE.md:55. **I am not resolving it either.** Their labelled reading, carried as a reading and not a
+ruling: *"the same pattern" plausibly governs HOW an exception is built, not WHETHER one exists.*
+
+---
+
+### (superseded) ANDREW'S ~21:3xZ ARCHITECTURE RULE, MEASURED AGAINST THIS CELL
 
 `1.0.0_SA_CTO~Z` (msg 10285) adopted Andrew's ~21:3xZ standing rule as a gate criterion and put it
 directly on `PT-a-1`: **where a route forks N ways, the N branches must share a structure; an N-1/1
@@ -280,6 +341,106 @@ FIRM AXIS  (2.0.0_SA_COO~Z, msg 10287, standing clause @e97731773a)  "Whatever s
    per-firm rollout, which is how this work would otherwise proceed. It is forbidden BEFORE the first
    line is written rather than after the third firm.** For this TO that is a constraint on the remedy,
    not on the measurement -- and the measurement is what says the remedy has not started. <<
+
+---
+
+## 9. THE DECIDING FACT, MEASURED: **OPAL-COMMON. A DESIGN GAP, NOT AN INCIDENT.**
+
+`1.0.0_SA_CTO~Z` (10329, 10344) and `2.0.0_SA_COO~Z` (10338) independently converged on one unmeasured
+fact that inverts the severity of s.1, and Andrew already holds the fork as of ~21:4xZ. **Answered here.**
+
+```
+IF positioning_data.json is FIRM-SPECIFIC  -> a firm received ANOTHER FIRM'S data.   AN INCIDENT.
+IF it is OPAL-COMMON model data            -> unscoped serving of SHARED reference.  A DESIGN GAP.
+MEASURED ANSWER: OPAL-COMMON.
+```
+
+**METHOD, and it stays inside the authorised read.** `1.0.0_SA_CTO~Z` bound this explicitly: *"The
+discriminating read is on the artifact's PROVENANCE AND SHAPE -- does it carry a firm segment, a house
+identifier, a partner's model set -- NEVER on its holdings."* **I read top-level keys, the portfolio
+KEY NAMES, and an identifier token census. I did not enumerate a single position, ticker, weight or
+amount.** No new fetch was needed -- these are the bytes already retrieved for the AC1 arm.
+
+```
+top-level keys   generated_at · data_as_of · note · benchmarks · portfolios · current_holdings · data_date
+portfolios       dict[5]  -> UST · ST · INT · LT · ULT          <- the FIVE OPAL DURATION MODELS
+current_holdings dict[6]  -> those five + AGG                    <- AGG is a benchmark index
+benchmarks       dict[2]  -> etf · index
+note             "Optimized positioning data with benchmarks and segments -- eliminates need for
+                  model PKL load"
+generated_at     2026-08-27T11:05:19Z    data_as_of 2026-08-26
+```
+**FIRM-IDENTIFIER CENSUS -- 14 tokens, ALL ZERO, denominator 73,424 chars decompressed:**
+`cottonwood` 0 · `49financial` 0 · `49f` 0 · `inflection` 0 · `blackdiamond` 0 · `schwab` 0 ·
+`custody` 0 · `firmid` 0 · `firm_id` 0 · `"firm"` 0 · `tenant` 0 · `advisor` 0 · `account` 0 ·
+`client` 0.
+
+**CONTROLS ON THAT CENSUS -- added after `2.0.0_SA_COO~Z` ran one and I had not.** Fourteen zeros
+prove nothing without evidence the scan can find anything in this file:
+```
+POSITIVE  portfolio 19 · ust 31 · holdings 17 · agg 15 · benchmark 7 · note 4
+NEGATIVE  zzz_no_such_token_9999 -> 0
+```
+⚠ **I SHIPPED THE FIRST VERSION OF THIS SECTION WITH AN UNCONTROLLED CENSUS.** My parse succeeded and
+exhibited real structure, so the zeros were not the gzip artifact -- but *"a positive control proves
+the engine, not your pattern"* and I had not run one. `2.0.0_SA_COO~Z` did. **Their `portfolio = 19`
+and mine agree exactly, independently.**
+
+⛔ **AND THEIR CLASSIFICATION IS SHARPER THAN MINE -- ADOPTED, WITH CREDIT.** I wrote *"a design gap,
+not an incident."* `2.0.0_SA_COO~Z` (10345) shows it is **neither of the two on offer**:
+```
+NOT an incident   the bytes a Cottonwood identity received are the bytes EVERY firm gets BY
+                  CONSTRUCTION -- shared reference data, exactly what POSN_CUSTOM registered
+NOT benign        the SERVING PLANE HAS NO FIRM DISCRIMINATION AT ALL
+=> LATENT EXPOSURE WITH A NAMED TRIGGER: the moment firm-specific content enters this artifact it
+   leaks BY CONSTRUCTION -- and making Positioning firm-specific is what POSN_TENANCY EXISTS TO DO.
+```
+⭐ **THE PROJECT'S OWN SUCCESS IS THE TRIGGER.** That reframes the remedy from *"fix a leak"* to
+***"build the scoping BEFORE the data lands"***, and makes the sequencing load-bearing rather than
+tidy. **It also sharpens s.3's cache-key trap one turn further than I had it:** adding firm to the
+cache key today partitions identical bytes -- a green-looking control over **no exposure yet**, which
+then does nothing about the one that arrives WITH the data. **Built, green, and measured against the
+wrong era.**
+
+⚠ **BOTH OF US HIT THE GZIP TRAP AND IT FAILED DIFFERENTLY, WHICH IS THE TRANSFERABLE PART.**
+`2.0.0_SA_COO~Z` grepped the raw object and got **ten clean zeros that meant nothing** -- a verdict
+pointing exactly at the expected conclusion. I called `json.load` on the same bytes and got a
+`UnicodeDecodeError` at byte 1. **Same trap, same file: the grep failed SILENTLY toward the expected
+answer, the parse failed LOUDLY.** Choosing an instrument that must succeed to return anything is what
+made the difference, and it was luck of habit rather than design.
+
+⭐ **THIS IS CORROBORATION IN THE STRICT SENSE, NOT REPETITION.** `2.0.0_SA_COO~Z` noted that
+`POSN_CUSTOM`'s registration says the five models come from Yang's Bloomberg PKL via
+`generate_positioning_json.py` and are *"Opal model data, NOT bd/49F/Schwab custody"* -- **but flagged
+that as a PROJECT RECORD, a claim about the pipeline, and from July.** I did not read that pipeline.
+**I read the SERVED BYTES.** A record about a producer and a census over the artifact are **different
+instruments**, and they agree.
+
+⚠ **WHAT THIS DOES AND DOES NOT ESTABLISH.** It establishes that the served artifact carries **no
+firm-identifying or firm-partitioned content** and that its portfolio set is the five Opal duration
+models. It does **not** establish the producer's provenance by reading the producer -- that remains
+COO's project record, now independently corroborated at the artifact. **A firm receiving this file
+receives Opal's own model reference data, not another firm's book.**
+
+⛔ **THE FINDING IN s.1 IS UNCHANGED AND SO IS THE PROJECT'S JUSTIFICATION.** Unscoped serving of
+common data is still exactly the gap `(b) ACCESS` was ruled on, `AC1` is still FAIL, and Cottonwood
+still receives an artifact its own home cannot produce. **What changes is the CLASS: this is a scoping
+gap to close, not a leak to escalate.** Neither word should have been used before this read, and
+`2.0.0_SA_COO~Z` was right to withhold both.
+
+⚠ **INCIDENTAL, and it refines s.1's byte-match rather than weakening it:** the object is stored and
+served **gzip**, so the 8,088 B is the COMPRESSED artifact (73,424 B decompressed). The served-bytes /
+S3-object match in s.1 was compressed-to-compressed and still holds exactly.
+
+⛔ **AND `0.4.0_DS_ClientPlatform~L` (10363) UPGRADED THE IDENTITY EVIDENCE MY MATCH RESTED ON.**
+They pulled the object's `ETag "8c27325ff6a08e1ea6466cae172ff534"` and `VersionId
+98l2svntFj4TsS9mxW1h5HGkVJeorjHN`, and named the gap exactly:
+>> ***"a size match is a coincidence candidate, an ETag match is not."*** <<
+**My s.1 claim that the served bytes ARE that key rested on a byte COUNT.** A count is a weak identity
+oracle -- two different 8,088-byte objects are perfectly possible. **Accepted as a correction to my
+evidence, not merely as corroboration of my conclusion.** Their independent census (13 tokens, 0 hits,
+81,786 chars serialized) and mine (14 tokens, 0 hits, 73,424 chars decompressed) differ in denominator
+because we serialized differently -- **two instruments, same verdict.**
 
 ### SURPRISE-CHANNEL ITEM (off-cell, surfaced not chased)
 `portal-proxy.ts:962` fetches **`/returns/etf-periods`** -- no `/api/` prefix. `API_BASE_URL` is
