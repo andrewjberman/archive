@@ -44,6 +44,20 @@ to = open(TO, encoding="utf-8").read()
 crit = dict(re.findall(r'<criterion id="([^"]+)" cell_refs="([^"]*)"', to))
 REFS = {k: [x.strip() for x in v.split(",") if x.strip()] for k, v in crit.items()}
 
+# criterion_verbatim is HARVESTED from the TO's acceptance table, never typed.
+# 2.0.0_SA_COO~X 74116, on a class that reached SEVEN instances tonight: "a number a machine can
+# derive must not also be typed." My AC1 verbatim said "9 cards" and the TO now says 16 -- a typed
+# quote of a moving source. This closes that for every criterion at once rather than editing one.
+VERBATIM = dict(re.findall(r"^\|\s*\*\*(DTX2-AC\d)\*\*\s*\|\s*(.+?)\s*\|\s*$", to, re.M))
+assert len(VERBATIM) >= 8, "acceptance table harvest returned %d rows -- refusing to fall back to typed text" % len(VERBATIM)
+
+
+def verbatim(cid, fallback):
+    """Harvested text wins; the typed string survives only as a loud fallback that asserts."""
+    v = VERBATIM.get(cid)
+    assert v, "no harvested verbatim for %s" % cid
+    return v
+
 files = sorted(glob.glob(os.path.join(CARDS, "W2-*.json")))
 cards = [json.load(open(f, encoding="utf-8")) for f in files]
 st = collections.Counter(c["verdict"]["standing"] for c in cards)
@@ -104,13 +118,19 @@ POS = {
     ],
     "acceptance": [
         {"criterion_id": "DTX2-AC1",
-         "criterion_verbatim": "9 cards exist and all VALIDATE against v2. Every row carries basis + evidence + owner.",
+         "criterion_verbatim": verbatim("DTX2-AC1", "9 cards exist and all VALIDATE against v2. Every row carries basis + evidence + owner."),
          "method": "schema_validation",
          "invocation": "jsonschema.Draft202012Validator(SUBSTRATE_CARD.v2.schema.json).iter_errors(card) over all 16",
          "output_evidence":
-             "%d of %d cards VALID, 0 errors. NOTE THE COUNT: the criterion says 9 because it was "
-             "written before the subject set moved 9 -> 15 -> 16; the frozen set at a30be0d6ca "
-             "gives this lane 16 and all 16 are carded and valid. basis/evidence/owner are "
+             "%d of %d cards VALID, 0 errors. COUNT NOTE, now resolved at the source: this "
+             "criterion read '9 cards' when I answered it, because it was cut before the "
+             "subject set moved 9 -> 15 -> 16. I reported 16 against it and flagged the "
+             "mismatch rather than quietly answering the wrong bar; 2.0.0_SA_COO~X then swept "
+             "all four lanes (74116) and found ALL FOUR AC1 counts stale, correcting this one "
+             "to 16 @ce6765ce9d. The cell_refs were verified complete BEFORE that edit, so it "
+             "is a correction and not a spec amendment. This verbatim is now HARVESTED from "
+             "the TO face rather than typed, so it cannot drift from its source again. "
+             "basis/evidence/owner are "
              "schema-REQUIRED on every row, so their presence is structural. Run WITH live "
              "negative controls: an out-of-enum key_is_stable, a deleted required "
              "coverage.denominator, prose inside a joinable_ref id, and a SOUND verdict over an "
@@ -121,7 +141,7 @@ POS = {
          "denominator": "%d of %d cards; 7 rows each = %d rows, every one carrying basis+evidence+owner" % (n, n, n * 7),
          "status": "PASS"},
         {"criterion_id": "DTX2-AC2",
-         "criterion_verbatim": "cadence worked on every card.",
+         "criterion_verbatim": verbatim("DTX2-AC2", "cadence worked on every card."),
          "method": "command",
          "invocation": "count cards whose process.cadence.live_matches_declared is populated",
          "output_evidence":
@@ -136,7 +156,7 @@ POS = {
          "denominator": "%d of %d cadence rows populated" % (cad, n),
          "status": "PASS"},
         {"criterion_id": "DTX2-AC3",
-         "criterion_verbatim": "persistence worked; persisted: false is legitimate only if MEASURED.",
+         "criterion_verbatim": verbatim("DTX2-AC3", "persistence worked; persisted: false is legitimate only if MEASURED."),
          "method": "command",
          "invocation": "count persisted booleans; inspect every persisted:false row's basis and evidence",
          "output_evidence":
@@ -148,7 +168,7 @@ POS = {
          "denominator": "%d of %d rows; %d persisted:false, of which measured: %d" % (per, n, len(notpersisted), len(notpersisted)),
          "status": "PASS"},
         {"criterion_id": "DTX2-AC4",
-         "criterion_verbatim": "location.home exact, or null with evidence of where you looked and the search denominator.",
+         "criterion_verbatim": verbatim("DTX2-AC4", "location.home exact, or null with evidence of where you looked and the search denominator."),
          "method": "command",
          "invocation": "count non-null location.home",
          "output_evidence":
@@ -161,7 +181,7 @@ POS = {
          "denominator": "%d of %d homes exact; 0 null" % (homes, n),
          "status": "PASS"},
         {"criterion_id": "DTX2-AC5",
-         "criterion_verbatim": "coverage.denominator NON-NULL, 'N of M'; if genuinely uncountable, denominator_absent_reason populated.",
+         "criterion_verbatim": verbatim("DTX2-AC5", "coverage.denominator NON-NULL, 'N of M'; if genuinely uncountable, denominator_absent_reason populated."),
          "method": "command",
          "invocation": "count non-null coverage.denominator; for nulls, require denominator_absent_reason",
          "output_evidence":
@@ -178,7 +198,7 @@ POS = {
          "denominator": "%d of %d non-null; %d null, %d of those with denominator_absent_reason" % (den, n, n - den, denabs),
          "status": "PASS"},
         {"criterion_id": "DTX2-AC6",
-         "criterion_verbatim": "key: identity_space, key_is_stable, crosses_spaces; declared_mapping: null only after a hunt.",
+         "criterion_verbatim": verbatim("DTX2-AC6", "key: identity_space, key_is_stable, crosses_spaces; declared_mapping: null only after a hunt."),
          "method": "command",
          "invocation": "count key rows carrying all three required fields; count crossings and null mappings",
          "output_evidence":
@@ -194,7 +214,7 @@ POS = {
          "denominator": "%d of %d key rows complete; %d crossing; %d crossing with declared_mapping null" % (keyrows, n, crossing, nomap),
          "status": "PASS"},
         {"criterion_id": "DTX2-AC7",
-         "criterion_verbatim": "failure_mode EXERCISED, never read off a docstring.",
+         "criterion_verbatim": verbatim("DTX2-AC7", "failure_mode EXERCISED, never read off a docstring."),
          "method": "command",
          "invocation": "count failure_mode rows at basis 'measured' (i.e. exercised); inspect the rest",
          "output_evidence":
@@ -216,7 +236,7 @@ POS = {
          "denominator": "%d of %d exercised; %d recorded unexercised with the reason stated" % (exercised, n, n - exercised),
          "status": "PASS"},
         {"criterion_id": "DTX2-AC8",
-         "criterion_verbatim": "declared_opinions POPULATED on every card -- an enumerated array, or null WITH the reason in evidence. Omitting the key passes the schema and FAILS this TO.",
+         "criterion_verbatim": verbatim("DTX2-AC8", "declared_opinions POPULATED on every card -- an enumerated array, or null WITH the reason in evidence. Omitting the key passes the schema and FAILS this TO."),
          "method": "command",
          "invocation": "assert the key is present on all 16; for nulls, require the reason in methodology.evidence",
          "output_evidence":
