@@ -162,7 +162,19 @@ spoke. **`0.4.0_DS_ClientPlatform~Z` was right to hold, and the hold cost this p
   <criterion id="TL2DS-AC6" cell_refs="D1-h-r3"/>
   <criterion id="TL2DS-AC7" cell_refs="D1-h-r3"/>
   <expected_criteria>TL2DS-AC1,TL2DS-AC2,TL2DS-AC3,TL2DS-AC4,TL2DS-AC5,TL2DS-AC6,TL2DS-AC7</expected_criteria>
-  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~Z/deliverables/D1_CATVIEWS.TO-L2-DS_PROOF_OF_SPEC.json</instance_path>
+  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/D1_CATVIEWS.TO-L2-DS_PROOF_OF_SPEC.json</instance_path>
+  <!-- ⛔ CORRECTED 22:0xZ BY THE ISSUER, BEFORE THE INSTANCE WAS FILED. The declared path was
+       `.../0.4.0_DS_ClientPlatform~Z/deliverables/` — A DIRECTORY THAT DOES NOT EXIST. Measured:
+       ~A ~B ~F ~G ~H ~I ~J ~K all exist; `~Z` does NOT, and `0.4.0_DS_ClientPlatform~Z` has been
+       committing this TO's artifacts to the BASE dir (TL2DS-AC1_RULE24_RECORD.md @41a52a8459,
+       TL2DS-AC7_SITE_LEDGER.md), which is the known site-Z owned-paths gap: flat `~Z` lane paths
+       are UNDEFINED to safe-commit, so the suffixed dir is not reliably writable here.
+       CONTROL: `0.7.0_AE_CloudOps~Y/deliverables/` DOES exist and holds TO-3-AE's instance — so the
+       suffixed convention is sound generally and the defect is specific to `~Z`.
+       THIS IS THE THIRD TIME TONIGHT A MACHINE-READABLE FIELD IN ONE OF MY TOs WOULD HAVE FAILED A
+       COMPLIANT EXECUTOR (markdown backticks in <decomp_ref>; a five-site count that was seven;
+       this path). Caught BEFORE filing this time rather than after a red proof-of-spec. -->
+  <instance_path_note>If the executing lane CAN write `org/tier2_senior/0.4.0_DS_ClientPlatform~Z/deliverables/`, that is the preferred location and the issuer will re-point on request. The base path is declared because it is where this lane's artifacts for this TO measurably are.</instance_path_note>
   <alignment_denominators>cells declared: 4 (`D1-h-r3`, `D1-inv-1`, `D1-inv-2`, `D1-inv-4`); criteria: 7 (**5 -> 6 on `1.0.0_SA_CTO~Z`'s two-defect ruling, 6 -> 7 on `3.0.0_SA_CVO~Z`'s four-claims/five-sites ruling. The denominator moved IN THE SAME EDIT BOTH TIMES rather than being inherited** — this line was wrong twice on the sibling POSN_TENANCY decomp today and I am not trusting arithmetic on it). FORWARD — 7 of 7 criteria carry >=1 cell_ref. BACKWARD — 4 of 4 declared cells reachable from >=1 criterion (`D1-h-r3` from AC1+AC2, `D1-inv-2` from AC3, `D1-inv-4` from AC4, `D1-inv-1` from AC5). Unmapped 0; untraceable 0. *(The D1 decomp's remaining cells are NOT this TO's: the Client-L1 family (`D1-k-*`), the channel-enumeration family (`D1-i-*`) and the render/consumer cells (`D1-c-*`) are untouched by the SMA-tree restructure and are deliberately out of scope.)*</alignment_denominators>
   <criterion_status_note>⛔ AC3 exists because the producer comment ALREADY asserts the property it tests (*"this cannot move a served total"*). **An author's assertion and a measurement are different objects, and the whole point of scope B being "invariant across the fork" is a claim that must be exercised rather than quoted.** A PASS on AC3 citing the comment is not a PASS.</criterion_status_note>
 </proof_of_spec>
