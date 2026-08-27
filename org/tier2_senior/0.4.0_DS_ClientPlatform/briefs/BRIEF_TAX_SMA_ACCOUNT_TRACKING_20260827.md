@@ -92,8 +92,32 @@ which is a governance fact, not a formatting one.
 
 **Tax is ONE strategy.** `SMA 145` / `SMA 200` are a **LEVERAGE ATTRIBUTE** of it, not two
 strategies, and *"deeper drills/leaves"* refuses any level beneath Tax. **The roster's single
-`strategy` value is CORRECT**, D1's registry carrying `tax` as one L1 member is **CONFIRMED, not
-changed**, and no migration exists to perform. The section below is preserved struck-through, because
+`strategy` value is CORRECT**, and no strategy-row migration exists to perform.
+
+> ⛔ **CORRECTED AGAIN ~21:0xZ — I WROTE "D1's registry carrying `tax` as one L1 member is CONFIRMED,
+> NOT CHANGED." THAT IS WRONG TWICE.** A second Andrew-direct at `0.4.0_DE_ClientPlatform~Z`'s
+> terminal, ruled governing by **"DE is the correct one"**:
+>
+> ```
+> L1 SMAs = { ETF Strategies , ALT Strategies }     <- CHANGED. Two buckets.
+>   ETF Strategies -> PFOE, DIVZ, etf-based SMAs    <- the four move to L2
+>   ALT Strategies -> Tax, Muni
+> Tax = ONE strategy, NOTHING BENEATH IT            <- UNCHANGED
+> ```
+>
+> **(1) THE LEVEL CLAIM IS WITHDRAWN** — `tax` is not an L1 member; it is now **L2 under ALT
+> Strategies**. I checked MEMBERSHIP and reported LEVEL, the same one-of-two-axes conflation
+> `1.0.0_SA_CTO~Z` corrected in themselves (10063).
+> **(2) "NOT CHANGED" IS WRONG — THE REGISTRY DOES CHANGE.** The SMA L1 set moves from
+> `{Tax, Muni, DIVZ, PFOE}` to `{ETF Strategies, ALT Strategies}`.
+>
+> ⛔ **AND THE ERROR IS THE MIRROR OF THE ONE I WARNED ABOUT TWICE TODAY.** I kept saying *the
+> available error is reading a sovereign CONFIRMATION as a CHANGE ORDER* — then read a **change
+> order as a confirmation** and told readers the registry was settled. **Same axis, opposite
+> direction; guarding one direction left its mirror open.**
+>
+> **What survives untouched:** Tax is one strategy with nothing beneath it, the Rule 24(ii) grain
+> finding stays DISSOLVED (it was about *below* Tax), and no roster/strategy migration exists. The section below is preserved struck-through, because
 a reader of the earlier draft should see the claim was **ANSWERED, not quietly dropped**.
 *(No successor finding raised — see `1.0.0_SA_CTO~Z` 10046.)*
 
