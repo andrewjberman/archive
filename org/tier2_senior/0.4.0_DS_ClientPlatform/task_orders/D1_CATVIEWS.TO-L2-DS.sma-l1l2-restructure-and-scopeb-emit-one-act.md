@@ -125,11 +125,25 @@ Client  L0 -> {Opal Supervised, Opal Unsupervised} -> members
 >> ⛔ **"2 OF THE 3 DOING ONE THING AND THE OTHER ONE HAVING A UNIQUE PATTERN" IS EXACTLY THE SHAPE
    THIS TO EXISTS TO REMOVE — and it is now a SOVEREIGN PROHIBITION, not a preference.** <<
 
-⚠ **THE ISSUER READS THIS AS BEARING ON `AC1`'s BLOCKED QUESTION AND IS NOT RULING IT.** If
-`idvz`/`pfde` remain **un-noded**, SMA carries a structural feature Models and Client do not — a
-unique pattern in 1 of 3 forked routes. **That is an ARGUMENT, not his answer**: he was speaking about
-render branches and did not name those members. ⛔ **`AC1` STAYS BLOCKED-SOVEREIGN. DO NOT RESUME ON
-THIS PARAGRAPH.**
+⛔⛔ **SUPERSEDED 21:4xZ — `AC1` IS UNBLOCKED BY SOVEREIGN ANSWER, NOT BY THE INFERENCE BELOW.**
+**ANDREW-DIRECT: *"yes approve all recs"*, over `/open-calls` CALL 1 —**
+```
+CALL 1   are idvz/pfde inside "ETF Strategies"?   REC (a) YES   -> APPROVED
+```
+>> **`idvz` AND `pfde` ARE INSIDE "ETF Strategies". THE TREE IS MECE OVER SMA MEMBERS AND THE Rule 24
+   RECORD IS NOW WRITABLE. `TL2DS-AC1` IS RESUMED — this paragraph is the LIFT, issued by the office
+   that placed the hold.** <<
+⚠ **AND `un_noded_members` FOLLOWS FROM IT (`AC7`):** with both members homed, the concept has no
+remaining occupants — **that makes DISSOLVED the indicated disposition, but `AC7` still requires the
+disposition to be STATED and justified, not inherited from this line.**
+
+⭐ **WHAT THE PRIOR TEXT SAID, PRESERVED BECAUSE IT WAS THE RIGHT CALL AT THE TIME:** I had argued
+that leaving them un-noded would give SMA a structural feature Models and Client lack — a unique
+pattern in 1 of 3 forked routes, against his ~21:3xZ rule — **and I explicitly refused to resume the
+criterion on it, writing "DO NOT RESUME ON THIS PARAGRAPH."** The inference pointed the same way the
+sovereign answer landed. ⛔ **THAT IS NOT VINDICATION AND MUST NOT BE READ AS ANY.** A correct guess
+held as an argument is worth exactly what it was worth before the answer arrived: nothing, until he
+spoke. **`0.4.0_DS_ClientPlatform~Z` was right to hold, and the hold cost this project nothing.**
 
 · **Surprise channel:** anything odd that is not this task -> one line to `3.0.0_SA_CVO`, cc the
   issuer (`2.0.0_SA_COO~Z`), **and KEEP WORKING.**
