@@ -3,19 +3,19 @@
 <status>pending</status>
 
 **to:** `0.7.0_AE_CloudOps~X` · **issuer:** `2.0.0_SA_COO~X` · **certifier:** `3.0.0_SA_CVO~X`
-**scope:** 3 subjects / 21 cells · **contract:** `org/standards/SUBSTRATE_CARD.v2.schema.json`
+**scope:** 4 subjects / 28 cells · **contract:** `org/standards/SUBSTRATE_CARD.v2.schema.json`
 
 ✅ **DECOMP CERTIFIED?** NOT YET — cert is `3.0.0_SA_CVO~X`'s and runs on the cut packet. The
 pipeline's own escape valve applies: a DECOMP-INVALIDATING verdict is the issuer's act to
 re-decomp and re-issue. **Do not hold on it.**
 
 <decomp_ref>
-workflows/atom_decomposition/runs/nfra-substratecarding-w3/DECOMP.md @9f037ccfc9
+workflows/atom_decomposition/runs/nfra-substratecarding-w3/DECOMP.md @af384e8da1
 
 cells:
 W3-aonv-1 W3-aonv-2 W3-aonv-3 W3-aonv-4 W3-aonv-5 W3-aonv-6 W3-aonv-7 W3-cayu-1 W3-cayu-2 W3-cayu-3
-W3-cayu-4 W3-cayu-5 W3-cayu-6 W3-cayu-7 W3-goay-1 W3-goay-2 W3-goay-3 W3-goay-4 W3-goay-5 W3-goay-6
-W3-goay-7
+W3-cayu-4 W3-cayu-5 W3-cayu-6 W3-cayu-7 W3-nhvy-1 W3-nhvy-2 W3-nhvy-3 W3-nhvy-4 W3-nhvy-5 W3-nhvy-6
+W3-nhvy-7 W3-xpxc-1 W3-xpxc-2 W3-xpxc-3 W3-xpxc-4 W3-xpxc-5 W3-xpxc-6 W3-xpxc-7
 </decomp_ref>
 
 ---
@@ -30,7 +30,8 @@ here, pivot, we need to find the materializers that actualy matter"*.
 
 | subject | writer class | write evidence | paths measured |
 |---|---|---|---|
-| `infra/aws/globgrph/cse_store.py` | CLASS_3 | append; :581 --table with NO choices=; :338 create_table | **UNMEASURED — yours to resolve** |
+| `infra/aws/globgrph/cse_store.py :: PATH A -- append` | CLASS_3 | :577 --ingest JSONL_URI -> :602 ingest_jsonl -> :481 append_cses -> :386 table.append(pa_table). pyiceberg append, ONE Nessie commit, append-only. --d | 1 |
+| `infra/aws/globgrph/cse_store.py :: PATH B -- drop` | DESTRUCTIVE | :579 --drop -> :594-596 drop_cse_table(catalog, args.table); return 0 -> :353 catalog.drop_table((NAMESPACE, table)). ⛔ DESTRUCTIVE, NOT an append, an | 1 |
 | `infra/aws/globgrph/resource_summaries_store.py` | CLASS_3 | :349 --table NO choices=; :202 create_table creates whatever name it is handed; NAMESPACE=globgrph | **UNMEASURED — yours to resolve** |
 | `infra/aws/globgrph/snap_store.py` | CLASS_2 | append; :79 SURFACES 4 top-level keys (AST-measured); :415 choices=sorted(SURFACES) | **UNMEASURED — yours to resolve** |
 
@@ -43,7 +44,7 @@ multiplicity is measured for exactly one subject in this wave and assumed for no
 
 | id | criterion |
 |---|---|
-| **COX3-AC1** | 3 cards exist and all VALIDATE against the v2 contract. Every row carries `basis` + `evidence` + `owner`. |
+| **COX3-AC1** | 4 cards exist and all VALIDATE against the v2 contract. Every row carries `basis` + `evidence` + `owner`. |
 | **COX3-AC2** | `as_of` carries ONE wave pin: `commit_ish` and `graph_vintage` byte-identical across your cards. `carded_utc` is an HONEST clock read at a DECLARED grain (per-card or per-batch — **state which**), never estimated, never copied. |
 | **COX3-AC3** | **WHERE IS THE TABLE NAME BOUND** — every card states CLASS 1 / 2 / 3 with **the line that binds it**, and whether the bound set is **ENUMERABLE**. A class without a line number is not an answer. |
 | **COX3-AC4** | **WHAT IT WRITES** — a resolvable path or table name, never a description. ⛔ A card that says X is a materializer **without naming WHICH artifact is unfalsifiable** (1.0.0_SA_CTO~X's rule, six arrivals tonight). |
@@ -71,17 +72,17 @@ Route completion to `3.0.0_SA_CVO~X`, cc issuer. State **PUSH STATE as a MEASURE
 
 
 <proof_of_spec>
-  <criterion id="COX3-AC1" cell_refs="W3-aonv-1, W3-aonv-2, W3-aonv-3, W3-aonv-4, W3-aonv-5, W3-aonv-6, W3-aonv-7, W3-cayu-1, W3-cayu-2, W3-cayu-3, W3-cayu-4, W3-cayu-5, W3-cayu-6, W3-cayu-7, W3-goay-1, W3-goay-2, W3-goay-3, W3-goay-4, W3-goay-5, W3-goay-6, W3-goay-7"/>
-  <criterion id="COX3-AC2" cell_refs="W3-aonv-1, W3-aonv-2, W3-aonv-3, W3-aonv-4, W3-aonv-5, W3-aonv-6, W3-aonv-7, W3-cayu-1, W3-cayu-2, W3-cayu-3, W3-cayu-4, W3-cayu-5, W3-cayu-6, W3-cayu-7, W3-goay-1, W3-goay-2, W3-goay-3, W3-goay-4, W3-goay-5, W3-goay-6, W3-goay-7"/>
-  <criterion id="COX3-AC3" cell_refs="W3-aonv-1, W3-aonv-4, W3-cayu-1, W3-cayu-4, W3-goay-1, W3-goay-4"/>
-  <criterion id="COX3-AC4" cell_refs="W3-aonv-4, W3-cayu-4, W3-goay-4"/>
-  <criterion id="COX3-AC5" cell_refs="W3-aonv-2, W3-cayu-2, W3-goay-2"/>
-  <criterion id="COX3-AC6" cell_refs="W3-aonv-2, W3-aonv-3, W3-cayu-2, W3-cayu-3, W3-goay-2, W3-goay-3"/>
-  <criterion id="COX3-AC7" cell_refs="W3-aonv-5, W3-cayu-5, W3-goay-5"/>
-  <criterion id="COX3-AC8" cell_refs="W3-aonv-1, W3-cayu-1, W3-goay-1"/>
+  <criterion id="COX3-AC1" cell_refs="W3-aonv-1, W3-aonv-2, W3-aonv-3, W3-aonv-4, W3-aonv-5, W3-aonv-6, W3-aonv-7, W3-cayu-1, W3-cayu-2, W3-cayu-3, W3-cayu-4, W3-cayu-5, W3-cayu-6, W3-cayu-7, W3-nhvy-1, W3-nhvy-2, W3-nhvy-3, W3-nhvy-4, W3-nhvy-5, W3-nhvy-6, W3-nhvy-7, W3-xpxc-1, W3-xpxc-2, W3-xpxc-3, W3-xpxc-4, W3-xpxc-5, W3-xpxc-6, W3-xpxc-7"/>
+  <criterion id="COX3-AC2" cell_refs="W3-aonv-1, W3-aonv-2, W3-aonv-3, W3-aonv-4, W3-aonv-5, W3-aonv-6, W3-aonv-7, W3-cayu-1, W3-cayu-2, W3-cayu-3, W3-cayu-4, W3-cayu-5, W3-cayu-6, W3-cayu-7, W3-nhvy-1, W3-nhvy-2, W3-nhvy-3, W3-nhvy-4, W3-nhvy-5, W3-nhvy-6, W3-nhvy-7, W3-xpxc-1, W3-xpxc-2, W3-xpxc-3, W3-xpxc-4, W3-xpxc-5, W3-xpxc-6, W3-xpxc-7"/>
+  <criterion id="COX3-AC3" cell_refs="W3-aonv-1, W3-aonv-4, W3-cayu-1, W3-cayu-4, W3-nhvy-1, W3-nhvy-4, W3-xpxc-1, W3-xpxc-4"/>
+  <criterion id="COX3-AC4" cell_refs="W3-aonv-4, W3-cayu-4, W3-nhvy-4, W3-xpxc-4"/>
+  <criterion id="COX3-AC5" cell_refs="W3-aonv-2, W3-cayu-2, W3-nhvy-2, W3-xpxc-2"/>
+  <criterion id="COX3-AC6" cell_refs="W3-aonv-2, W3-aonv-3, W3-cayu-2, W3-cayu-3, W3-nhvy-2, W3-nhvy-3, W3-xpxc-2, W3-xpxc-3"/>
+  <criterion id="COX3-AC7" cell_refs="W3-aonv-5, W3-cayu-5, W3-nhvy-5, W3-xpxc-5"/>
+  <criterion id="COX3-AC8" cell_refs="W3-aonv-1, W3-cayu-1, W3-nhvy-1, W3-xpxc-1"/>
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_SUBSTRATECARDING.TO-W3-COX3_PROOF_OF_SPEC.json</instance_path>
 
   <expected_criteria>COX3-AC1,COX3-AC2,COX3-AC3,COX3-AC4,COX3-AC5,COX3-AC6,COX3-AC7,COX3-AC8</expected_criteria>
-  <alignment_denominators>criteria: 8. Cells: 21 of 21 owned by this executor, all covered. Unmapped 0; untraceable 0.</alignment_denominators>
+  <alignment_denominators>criteria: 8. Cells: 28 of 28 owned by this executor, all covered. Unmapped 0; untraceable 0.</alignment_denominators>
 </proof_of_spec>
 **Issuer-owned mechanism cells (not yours):** `W3-m-1` · `W3-m-2` · `W3-m-3` · `W3-m-4` · `W3-m-5`
