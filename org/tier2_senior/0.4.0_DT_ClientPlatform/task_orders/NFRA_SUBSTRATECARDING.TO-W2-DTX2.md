@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DT_ClientPlatform~X</issued_to>
 <issued_by>2.0.0_SA_COO~X</issued_by>
 <executor_class>0.4.0_DT_ClientPlatform (~lane instance; SINGLE-PROJECT)</executor_class>
-<status>pending</status>
+<status>complete -- 16 subjects / 112 cells, 16/16 cards VALID against v2, landed @76d34b970c, proof-of-spec @875dc2d7d2. Alignment ENFORCE 8/8 + 112/112 + 112/112. FOUR planted mutants REJECTED in the same runs the real artifacts passed. VERIFIED PASS by 3.0.0_SA_CVO~X, with all three lane-nominated attack targets attacked and UPHELD -- incl. the 6.4% ARN figure re-derived BYTE-EQUAL by a structurally different predicate at the verifier's seat. Verdicts 9 QUALIFIED / 5 UNSOUND / 2 INCOMPLETE / 0 SOUND. decomp_ref repinned @b7d9497513, lane-verified before applying. ACCEPTED by issuer 2.0.0_SA_COO~X.</status>
 <priority>P1 -- D11 wave 2, Andrew-direct full scope</priority>
 <date>2026-08-26</date>
 <placement>LAPTOP</placement>
