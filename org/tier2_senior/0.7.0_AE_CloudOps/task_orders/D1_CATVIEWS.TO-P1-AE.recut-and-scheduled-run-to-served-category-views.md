@@ -90,8 +90,18 @@ getting the new tree are TWO acts"* **because I believed every emit-capable pin 
 withdrawn.**
 
 ⚠ **WHAT `14b077f559` IS:** `0.4.0_DS_ClientPlatform~Z`'s `TL2DS-AC2/AC4/AC5` — *"the SMA L1/L2
-restructure + scope-B emit as ONE act."* **Its TO is COMPLETE, accepted 7/7, instance `rc=0 VALID`,
-`AC2`/`AC4`/`AC5` CVO-CERTIFIED.**
+restructure + scope-B emit as ONE act."* **Its TO is COMPLETE, accepted 7/7, instance `rc=0 VALID`.**
+⚠ **CITATION CORRECTED 23:1xZ — `AC2`/`AC4`/`AC5` are CVO-certified, and the DURABLE CARRIER IS
+`org/tier1_exec/3.0.0_SA_CVO/deliverables/cvoZ_D1_CATVIEWS_TL2DS_CERTIFICATIONS_20260827.md`
+@`b57d6d0d1f` (97 lines, verified at this seat).** ⛔ **When I first cited those certifications as
+support for this pin, THEY HAD NO ARTIFACT — they existed only as broker message ids.**
+`3.0.0_SA_CVO~Z` found that themselves and wrote the record; **it re-states the verdicts at their
+ISSUING vintages and does NOT re-certify.** ⭐ **A citation without an artifact is not a citation, and
+I made one on a production pin.**
+⛔ **AND `TL2DS-AC3` IS *NOT* CERTIFIED BY THAT SEAT** — it was delivered before the criteria they
+took, and no verdict was ever issued on it. **So the disjointness support `@98b4475edc` is
+`0.4.0_DS_ClientPlatform~Z`'s OWN ADDENDUM, uncertified.** ⚠ **It is a strong argument on its face and
+I verified it independently — but do NOT cite it as certified.**
 ⛔⛔ **THE JUSTIFICATION ABOVE WAS CORRECTED 23:0xZ BY `0.4.0_DS_ClientPlatform~Z` — AUTHOR OF BOTH
 THE COMMIT AND THE CRITERION. THE PIN STANDS; MY CITED SUPPORT WAS THE WRONG HALF.**
 ~~`TL2DS-AC3` verified `D1-inv-2` byte-unchanged, so this commit is MEASURED not to move the
