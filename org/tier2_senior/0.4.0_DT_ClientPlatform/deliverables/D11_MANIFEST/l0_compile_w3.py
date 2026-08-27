@@ -61,6 +61,31 @@ def load_cards() -> dict:
     return out
 
 
+def classify_home_space(home: str):
+    """4.0.0_SA_CRO~A's rules, FAIL CLOSED. Returns None when unclassifiable.
+
+    ⛔ NEVER GUESSES iceberg_table. An Iceberg table has no unambiguous surface form here -- the
+    same table is addressed as a tuple by pyiceberg and as a dotted name by Trino
+    (cse_schema.py:595), which is the very split `home_space` exists to record. Guessing it would
+    mint the defect the field was added to prevent.
+    """
+    h = str(home or "")
+    if h == "NONE":
+        return "none"
+    if h.startswith("s3://"):
+        return "s3_uri"
+    if (" " not in h) and ("/" in h) and not h.startswith("/"):
+        return "repo_path"
+    return None
+
+
+def _localize_home(card_home, card_subject):
+    """Prefer the card's home; fall back to the map's exact subject path when it is prose."""
+    if classify_home_space(card_home) is not None:
+        return card_home
+    return str(card_subject).split(" :: ")[0].split("#")[0].strip()
+
+
 def card_generation_bits(c: dict) -> dict:
     """The four L0 `generation` fields this card actually measures."""
     meth = c["process"]["methodology"]
@@ -174,7 +199,11 @@ def main() -> None:
         parts[pid] = {
             "id": pid,
             "part_class": "materializer",
-            "home": loc.get("home") or "UNBOUNDED -- see evidence",
+            # ⛔ 4.0.0_SA_CRO~A audit item 3: a card's `home` may be PROSE ("...py (436 lines)
+            # @76c58923ac; writes globgrph.<surface>..."), which is not a location a consumer can
+            # resolve. When it will not classify, fall back to the MAP ROW'S CARD SUBJECT, which is
+            # an exact path -- and say so in evidence rather than silently substituting.
+            "home": _localize_home(loc.get("home"), r["card_subject"]),
             "authority_role": per.get("authority_role", "none"),
             "temporal_claim": "current_state",
             "lineage": {
@@ -220,6 +249,23 @@ def main() -> None:
     out = dict(base)
     out["compiled_by"] = ME
     out["as_of"] = {"compiled_utc": COMPILED_UTC, "commit_ish": PIN}
+    # ⛔ home_space stamped MECHANICALLY, AUTHORED VALUES PRESERVED, FAIL CLOSED.
+    # An unclassifiable home aborts the emit rather than shipping a part whose address space is a
+    # guess -- 4.0.0_SA_CRO~A audit item 2.
+    _unclassifiable = []
+    for _p in parts.values():
+        if "home_space" in _p:          # authored upstream (base39's C3 triplet) -- never overwritten
+            continue
+        _hs = classify_home_space(_p.get("home"))
+        if _hs is None:
+            _unclassifiable.append((_p["id"], str(_p.get("home"))[:70]))
+        else:
+            _p["home_space"] = _hs
+    if _unclassifiable:
+        raise SystemExit(
+            "REFUSING TO EMIT -- home_space unclassifiable, and it is NOT guessed: "
+            + "; ".join("%s -> %r" % r for r in _unclassifiable))
+
     out["parts"] = sorted(parts.values(), key=lambda p: p["id"])
 
     # ⛔ SHALLOW-COPY ALIAS: `out = dict(base)` means out["denominator"] IS
