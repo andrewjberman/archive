@@ -26,7 +26,11 @@ His example — *"accounts that had $6 in them and someone deposits 500k … if 
 ext = led[led["final_class"] == "EXTERNAL"]
 cash_cf = ext.groupby([...])["signed_amount"].sum()
 ```
-It sums **`signed_amount` only.** Its own docstring at `:19` states the defect as the design: *"External CF(t) per account-day = SUM(C_00 signed_amount WHERE final_class == EXTERNAL)."*
+It sums **`signed_amount` only.**
+
+⛔ **CORRECTED 2026-08-27T18:0xZ (c02-CFINPUT first act) — I WROTE THAT THE DOCSTRING "STATES THE DEFECT AS THE DESIGN". IT DOES NOT. IT STATES THE CORRECT DESIGN, AND HAS SINCE THE FILE WAS BORN.** I quoted `:19` as *"External CF(t) per account-day = SUM(C_00 signed_amount WHERE final_class == EXTERNAL)."* and stopped at the line break. **The sentence continues onto `:20-21`:** *"...**+ signed in-kind values on EXTERNAL in-kind legs (valued rows only; unvalued flagged upstream)**."* Measured over the file's entire history — the phrase `signed in-kind values on EXTERNAL in-kind legs` is present in **5 of 5 commits**, from the original `a781ae9b5d` (2026-08-11). **A line-bounded read of a wrapped sentence, which is the same defect shape as a phrase grep returning a false zero across a line break — here it inverted an INTENT instead of hiding a hit.**
+
+>> **THIS CHANGES WHAT DEFECT 1 IS.** Not *"the design was wrong and the code implemented it faithfully"* but *"the design was RIGHT and the code implemented only its first clause."* The module has specified signed in-kind flows since day one and has never done it. **Consequences that actually bind: (i) `c02` consuming the signed field RESTORES this module's own stated spec rather than changing it — the ruled design and the file's original intent agree, independently arrived at three weeks apart; (ii) the `c00 → c01` half was never the only place the intent was written down, so "nobody knew" is not available as an account of how this survived; (iii) CF-4 still binds unchanged — served VALUES move for affected accounts whatever the docstring says, and a correction shipped silently is still indistinguishable from a regression.** <<
 
 **MEASURED in `flow_ledger`:**
 | date | in-kind rows | `signed_amount == 0` | `in_kind_value` POPULATED | `in_kind_unvalued = False` |
@@ -174,13 +178,19 @@ The direction exists upstream in `fact_trn` (`debit_credit` = LONG/SHORT) and **
 | date | account | `nna_unresolved_direction` now | **EXPECTED** | headline / inflow / outflow |
 |---|---|---|---|---|
 | 08-24 | `0016371483` | +89,946.62 | **−91,552.00** | 0.00 → 0.00 |
-| 08-24 | `0033493115` | +64,841.33 | **−88,158.89** | 0.00 → 0.00 |
+| 08-24 | `0033493115` | +64,841.33 → **CORRECTED +87,054.14** | **−88,158.89** → **CORRECTED −110,371.70** | 0.00 → 0.00 |
 | 08-24 | `0049284242` | +10,956.66 | **−10,926.98** | 0.00 → 0.00 |
 | 08-24 | `0032486794` | +39,361.92 | **+39,361.92 (NO MOVE)** | 0.00 → 0.00 |
 | 08-25 | *(2 accounts hold a leg)* | — | **NONE MOVE** (both LONG) | — |
 
 **`0032486794`'s NON-MOVE IS PART OF THE ACCEPTANCE** — it is an inflow, correctly positive today, and **a fix that flips it would be over-correcting.**
-⛔ **MAGNITUDES CHANGE, NOT ONLY SIGNS:** `0033493115` goes 64,841.33 → **−88,158.89**, which is *not* the negation of itself. **Those accounts hold MIXED-DIRECTION legs — the unsigned sum ADDS opposing transfers, the signed sum NETS them.** A fix validated only on sign-flip would pass while the magnitudes stayed wrong. **ASSERT THE VALUE, NOT THE SIGN.**
+⛔ **MAGNITUDES CHANGE, NOT ONLY SIGNS — the conclusion STANDS, my stated MECHANISM was WRONG, and one registered number was WRONG. Corrected 2026-08-27T17:2xZ under `ADVI_49F.c01-SIGNFIELD`, found by the acceptance harness this table exists to feed.**
+
+**THE NUMBER.** I registered `0033493115`'s pre-fix `nna_unresolved_direction` as **64,841.33**. It is **87,054.1359** — read directly from the LIVE S3 `nna_canonical` partition `date=2026-08-24`, and reproduced to the cent by a rebuild from `fact_trn`. The derived expectation −88,158.89 inherited the error; the correct expectation is **−110,371.70**. **The other three rows reproduce the live artifact EXACTLY**, so the method was never the variable — that one row was mis-transcribed when I authored the table. Neither was the INPUT: `fact_trn date=2026-08-24` carries `LastModified 2026-08-25T09:46:15Z` (`s3api` plane, UTC), *before* this table's own 2026-08-27T0050Z stamp. **A typed number beside a derived one, and the derived one carried the error forward silently.**
+
+**THE MECHANISM.** I wrote that these accounts hold **MIXED-DIRECTION legs**. **MEASURED, NONE OF THEM DO** — `0016371483` 15 of 15 SHORT, `0033493115` 30 of 30 SHORT, `0049284242` 14 of 14 SHORT, `0032486794` 1 of 1 LONG. Every one is pure-direction. **The real source of the asymmetry is the CASH component sharing the same `external-by-default` bucket**: cash legs carry `signed_amount`, which is signed BEFORE and AFTER, so it does not double, while the in-kind part flips. The identity is `post = cash + Σ(±ink)` against `pre = cash + Σ|ink|`, giving `post − pre = −2·Σ(out legs)` — exact on all four (`0033493115`: −11,658.78 cash + −98,712.92 in-kind = −110,371.70).
+
+>> **THE INSTRUCTION SURVIVES ITS OWN BROKEN EXAMPLE, AND IS SHARPER FOR IT: ASSERT THE VALUE, NOT THE SIGN.** A fix validated on sign-flip alone still passes here. But note what actually caught this: **not** the sign check, and **not** review — the harness re-read the LIVE ARTIFACT and refused to agree with the table. **A pre-registered acceptance is only as good as the substrate its "now" column was read from, and I never named that substrate when I wrote it.** Every row above now cites one. <<
 
 ⛔ **SCALE STILL UNMEASURED:** the 23.7% / 72.5% figures in s.4 were computed against **`twr_daily`** and **do not cover NNA.** The other **524 partitions are unmeasured and not extrapolated**, and `nna_unresolved_direction`'s downstream consumers have **not been traced** — so defect 3's client-facing impact is **UNQUANTIFIED, which is a different statement from "small."**
 

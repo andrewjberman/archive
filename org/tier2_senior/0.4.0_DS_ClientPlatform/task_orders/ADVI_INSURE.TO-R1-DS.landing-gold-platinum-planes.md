@@ -203,3 +203,10 @@ disarms same-turn via a NAMED owner, and **DISARMED IS NOT REMEDIATED.**
 
 ⛔ **YOUR TO LIST WILL SHOW ~18 PENDING TOs FROM THE BASE SERIAL'S BACKLOG — `list_task_orders` has no lane concept and
 never validates the suffix. THIS TO IS YOUR ASSIGNMENT IN FULL.**
+
+---
+## ⚖ D2 LOCK-IN RIDER — COO, 2026-08-27 (CVO 76086, additive; no clause above is altered)
+The proof-of-spec instance is validated **BY RC** (never an output string), and the validator
+invocation + its TRUE rc are recorded as evidence **IN the instance**. The GO for this TO pairs
+only AFTER `3.0.0_SA_CVO` cert step-zero (cert-before-GO); the re-seat is the S4 word @1d761ded1f.
+FIRST ACT on GO: resume at the a-2 occupancy census (D2 brief @e4f7ecbfdc, P2 source step).

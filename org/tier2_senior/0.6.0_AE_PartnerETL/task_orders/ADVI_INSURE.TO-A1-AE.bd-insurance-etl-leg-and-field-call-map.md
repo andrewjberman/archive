@@ -9,7 +9,7 @@
 <executor_class>AE-class (partner ETL vehicle).</executor_class>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-25T22:0xZ</issued>
-<status>ACTIVE — AC2 startable immediately. ⛔ AC1/AC3 HELD on a sovereign vendor-egress call (see THE HOLD).</status>
+<status>complete -- COO flip 2026-08-27 ~18:0xZ on the full three-instrument chain: seat evidence (deploy ledger a06658a1ab, 7 legs, six-arm live acceptance) + 1.0.0_SA_CTO gate acceptance (76279) + 3.0.0_SA_CVO independent validator read VALID rc=0 with full pipeline alignment 3/3+3/3 (@6956c27796). All three ACs satisfied: AC1 leg DEPLOYED and role-capable (the 08-25 FAIL-by-design is superseded by the 08-27 deploy act); AC2 map printed; AC3 exercised. The ADVISOR-CARRIER CAPTURE in flight at this seat continues under its OWN face, ADVI_INSURE.TO-A2-AE (INS-a-4, issuer decomp amendment) -- not under this closed one.</status>
 <priority>P1 — this lane is the ONLY thing standing between `ADVI_INSURE.TO-R1-DS` and its remaining four acceptance criteria. That TO is COMPLETE to its ceiling and waiting on you.</priority>
 <placement>LAPTOP (Rule 26).</placement>
 <scope_guard>ONE PROJECT. Exactly the three cells above. Adjacent findings → ONE LINE to `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO`; no action, keep working.</scope_guard>
@@ -57,7 +57,11 @@ so the hold blocks a third of it, not all of it.
 
 - **`INS-a-2` — THE FIELD→CALL MAP. ⛔ THIS IS THE ONE THE WHOLE PROJECT IS WAITING ON, AND IT NEEDS
   NO VENDOR CALL.** The bulk export path is `run → resultGuid → download` for the cohort;
-  `accountdetailsearch` supplies per-account identity + characteristics + `currentEmv` + `asOfDate`.
+  `relationshipaccountdetailsearch` (SANCTIONED) supplies per-account identity + `currentEmv` +
+  `asOfDate` — **ISSUER CORRECTION 2026-08-27 (COO, on ~R's measured census @f05d754d43 + CVO 76232):
+  this line previously named `accountdetailsearch`. That surface is EGRESS-REFUSED
+  (insurance_leg.py:78-89, the OPAL_TAXSMA gate) and supplies ONLY the Ruling-6-DEFERRED
+  `insuranceCharacteristics` — v1 needs NOTHING from it. Do not reach for it.**
   **NAME WHICH CALL SUPPLIES WHICH FIELD — DO NOT ASSUME ONE CALL COVERS BOTH.**
   *Oracle: the field→call map, PRINTED.*
   > **Why this is the unblocking act:** `0.4.0_DS_ClientPlatform~J` declined to build the gold
@@ -122,3 +126,11 @@ is load-bearing. Not how they got there.
 
 **CVO owns proof-of-spec and is a VERIFIER, NOT AN APPROVER** — never idle waiting on a cert you were
 not held by. **Nothing routes through CTO**; if you think you need CTO, it comes to me and I decide.
+
+---
+## ⚖ D2 LOCK-IN RIDER — COO, 2026-08-27 (CVO 76086, additive; no clause above is altered)
+The proof-of-spec instance is validated **BY RC** (never an output string), and the validator
+invocation + its TRUE rc are recorded as evidence **IN the instance**. The GO for this TO pairs
+only AFTER `3.0.0_SA_CVO` cert step-zero (cert-before-GO — this holds the GO, it does not hold a
+seated agent mid-work; the never-idle clause above is untouched). The re-seat is the S5 word
+@1d761ded1f (seat not in the live roster per CTO 76081).

@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_49F.P14-VEHICLE",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~L/task_orders/ADVI_49F.P14-VEHICLE.ssm-date-parameter-and-backfill-mechanics.md",
+    "group": "W",
+    "vintage_commit": "fe7b4bcba37f9eff2c0503e166ad8f4f0d254278"
+  },
+  "assignee": "0.7.0_AE_CloudOps~L",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/advi_49f_floor.tf",
+      "kind": "terraform",
+      "commit_or_etag": "a8907bf114",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws ssm get-document --name advi-49f-chain-dispatch reads DocumentVersion 2 (was 1), Status Active, carrying the Date parameter WITH allowedPattern ^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}$ and the rendered historical branch 'python3 chain_49f_entrypoint.py --date {{ Date }} --upload'. This is the APPLIED plane, not the tf diff. Post-apply targeted re-plan on the same binary: 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "path_or_key": "advi-49f-chain-dispatch (aws_ssm_document, us-east-1, DocumentVersion 2)",
+      "kind": "config_data",
+      "commit_or_etag": "DocumentVersion=2",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Live get-document read at 17:0xZ 2026-08-27 plus two EXERCISED sends (443caee1-c1a5-4276-bfe6-365dc7b3e1b7, 1c453cab-9da1-40c6-aa54-9b911c78ebe2) whose on-host stdout proves the document body ran: 'HISTORICAL BACKFILL date=<D> -- --production is PROHIBITED on this path' then 'CHAIN START date=<D> mode=qa-upload stages=17'."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260827T1652Z_advi-49f-p14-vehicle-ssm-date-param_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "a8907bf114",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy-completion ledger opened at deploy-START with all 4 legs declared and CLOSED only after every leg carried proof; deploy_ledger.py close printed 'all 4 legs proven; sentinel removed'. A record, not a deployed artifact."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "V14-1",
+      "criterion_verbatim": "V14-1 VEHICLE LIVE: the LIVE SSM document (get-document read, APPLIED state) accepts a date parameter and renders `--date {{Date}} --upload`; `--production` absent from the historical path.",
+      "method": "live_read",
+      "invocation": "aws ssm get-document --name advi-49f-chain-dispatch --output json  # rail-checked: no comp-tool reads live SSM document content",
+      "output_evidence": "DocumentVersion: 2 | Status: Active. PARAMETERS: Date -> {\"allowedPattern\": \"^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}$\", \"default\": \"\", \"type\": \"String\"}; StartedByDispatcher -> {\"allowedValues\": [\"true\",\"false\"], \"default\": \"false\"}. runCommand carries: 'if [ -z \"${DATE_ARG}\" ]; then / python3 chain_49f_entrypoint.py --production 2>&1 | tee ${LOG} / else / python3 chain_49f_entrypoint.py --date {{ Date }} --upload 2>&1 | tee ${LOG} / fi'. --production appears ONLY inside the empty-Date arm, i.e. it is unreachable on any historical run.",
+      "denominator": "2 of 2 parameters present on the live document (Date new, StartedByDispatcher pre-existing); 1 of 1 SSM document under test; --production occurrences on the historical path: 0 of 1 total occurrences in the body.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V14-2",
+      "criterion_verbatim": "V14-2 HALT TRAP RULED OUT BY EXERCISE: >=2 consecutive direct sends on a control date with the parameter omitted; host stays up across both (read from instance state, not send rc).",
+      "method": "live_read",
+      "invocation": "aws ssm send-command --document-name advi-49f-chain-dispatch --instance-ids i-01003b035d2988dfb --parameters 'Date=1990-01-02'  (then Date=1990-01-05); after each terminal status: aws ec2 describe-instances --instance-ids i-01003b035d2988dfb --query \"Reservations[].Instances[].State.Name\"",
+      "output_evidence": "cmd1 443caee1-c1a5-4276-bfe6-365dc7b3e1b7 -> Status Failed (expected: a00 refuses the control date), instance State.Name = 'running'. cmd2 1c453cab-9da1-40c6-aa54-9b911c78ebe2 -> Status Failed, instance State.Name = 'running'. StartedByDispatcher OMITTED on both (defaults 'false'); neither routed through the advi-49f-gold-dispatch Lambda. No 'CHAIN REFUSED: live lock' on cmd2, so the entrypoint mutex released between runs.",
+      "denominator": "2 of 2 consecutive sends completed with the host still running; 2 of 2 read from EC2 instance state rather than send rc (0 of 2 verdicts taken from rc).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V14-3",
+      "criterion_verbatim": "V14-3 GATE HONORED: zero backfill execution before c01-SIGNFIELD + c02-CFINPUT land -- the dependency block below is the record.",
+      "method": "manual_read_with_citation",
+      "invocation": "grep -n '<status>' on both dependency faces at HEAD, plus enumeration of every ssm send-command issued by this seat this session",
+      "output_evidence": "c01: org/tier2_senior/0.4.0_DS_ClientPlatform~U/task_orders/ADVI_49F.c01-SIGNFIELD.signed-in-kind-field-and-nna-sign-fix.md:7 = 'staged -- GO pairs on spawn confirmation'. c02: org/tier2_senior/0.4.0_DS_ClientPlatform~A/task_orders/ADVI_49F.c02-CFINPUT.twr-engine-consumes-in-kind-value.md:7 = 'staged -- gated on ADVI_49F.c00-FIX landing'. NEITHER reads complete, so the execution legs stayed held. Sends issued by this seat: exactly 3 -- one REFUSED at validation (injection negative control) and two on control dates 1990-01-02 / 1990-01-05 which wrote ZERO partitions ('CHAIN ABORT stage=a00_dim_account rc=1 -- nothing after this stage ran'). Zero sends on any date in the affected backfill set.",
+      "denominator": "0 of 531 ruled partitions driven; 2 of 2 dependency faces read directly at their own files at HEAD (not from my own TO's dependency attribute, which COO corrected at source @fe7b4bcba3 after I surfaced it as two-readable).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V14-4",
+      "criterion_verbatim": "V14-4 EXECUTION COVERAGE: every affected date driven; DENOMINATOR PRINTED (n of 531 at the ruled count -- re-derive the affected set at execution time, never copy 531 as a constant); per-date completion read from produced artifacts, never rc; failures enumerated by date.",
+      "method": "live_read",
+      "invocation": "NOT YET INVOKED -- the execution legs are gated by V14-3 and the gate has not cleared.",
+      "output_evidence": "No execution performed. The gate condition (both c01-SIGNFIELD and c02-CFINPUT reading complete at their own faces) is unmet as measured under V14-3; both read 'staged'. Reporting this as anything other than uncomputed would be the permissive misread this TO's own dependency-block correction exists to prevent.",
+      "denominator": "N/A -- criterion not yet reachable; the affected-set denominator is required to be RE-DERIVED at execution time and deliberately not carried here as a constant.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Names the later run explicitly: this criterion is computed at EXECUTION-COMPLETE, after the V14-3 gate clears (both ADVI_49F.c01-SIGNFIELD and ADVI_49F.c02-CFINPUT reading complete at their own faces, read at the faces at unlock time). At that run the affected-set denominator is RE-DERIVED rather than copied from 531, per-date completion is read from produced artifacts rather than rc, and failures are enumerated by date. Not computable now because zero of the ruled partitions have been driven and driving any of them before the gate would itself violate V14-3."
+    },
+    {
+      "criterion_id": "V14-5",
+      "criterion_verbatim": "V14-5 ACCEPTANCE RE-READS GREEN (joint with 0.4.0_DS_ClientPlatform~U): the all-ten table @4a1fd3e09b + the NNA delta table @e8ccd8eb77 re-read against the backfilled history. 0.4.0_DS_ClientPlatform~U validates; this seat produces.",
+      "method": "live_read",
+      "invocation": "NOT YET INVOKED -- depends on V14-4 output, which is gated.",
+      "output_evidence": "No backfilled history exists yet to re-read against, because V14-4 has not run. Joint criterion: 0.4.0_DS_ClientPlatform~U validates and this seat produces, so it cannot be closed unilaterally by this seat in any case.",
+      "denominator": "N/A -- criterion not yet reachable; depends on V14-4.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Names the later run explicitly: computed after V14-4 produces the backfilled history, at the joint re-read with 0.4.0_DS_ClientPlatform~U who validates while this seat produces. Not computable now because the history it re-reads against does not yet exist, and it is not unilaterally closable by this seat in any case."
+    },
+    {
+      "criterion_id": "V14-6",
+      "criterion_verbatim": "V14-6 proof instance VALID rc=0 positional: ids V14-1..V14-6, validated BY RC (never an output string), the validator invocation + its TRUE rc recorded as evidence IN the instance (D2 lock-in, CVO 76086 point 1).",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.7.0_AE_CloudOps~L/deliverables/ADVI_49F.P14-VEHICLE_PROOF_OF_SPEC.json V14-1,V14-2,V14-3,V14-4,V14-5,V14-6 ; echo \"TRUE_RC=$?\"   # positional expected_criterion_ids form -- WITHOUT it the validator prints 'COVERAGE UNCHECKED' and an omitted criterion is invisible to the run",
+      "output_evidence": "TRUE_RC=0 with 'proof-of-spec-check | structural=jsonschema | acceptance rows=6 | violations=0' and the verdict line 'VALID'. rc captured from $? immediately after the validator process exited, never parsed from stdout. Coverage CHECKED: the positional id list V14-1..V14-6 was passed, so the run is not the 'COVERAGE UNCHECKED' variant in which an omitted criterion is invisible. RECORDED BECAUSE IT IS THE HONEST HISTORY, NOT HIDDEN: the FIRST validation attempt of this instance returned TRUE_RC=1 / INVALID with 3 violations -- firm 'bd' not in the enum ['49F','INF','COT','MDPF','FABRIC'], and V14-4 + V14-5 each carrying status=UNCOMPUTABLE-BY-CONSTRUCTION without the status_reason the validator requires for any non-PASS status. All three were real defects in my instance, fixed at source, and the rc=0 above is the post-fix run. An instance that only ever reports its passing run is indistinguishable from one whose validator was never executed.",
+      "denominator": "6 of 6 expected criterion ids present (V14-1..V14-6); 1 of 1 validator invocation scored on rc rather than on any output string.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted mutant on a COPY of this instance: blanked the output_evidence string on the V14-1 acceptance row (the schema names empty output_evidence as invalidating -- 'a PASS row with empty output_evidence INVALIDATES the whole deliverable'). If the validator's rc were decorative, the mutated copy would still exit 0 and every PASS above would be worthless.",
+      "expected": "Validator exits NON-ZERO on the mutated copy while exiting 0 on the real instance.",
+      "observed": "MUTANT_RC=1 on the mutated copy vs TRUE_RC=0 on the real instance -- the rc discriminates. The mutant arm printed two violations naming the planted defect exactly: \"schema: acceptance/0/output_evidence: '' should be non-empty\" and 'acceptance[V14-1]: PASS with thin/empty output_evidence -- a bare value; INVALID'. rc captured from $? in both arms and re-captured outside a pipe (MUTANT_RC_DIRECT=1) so the value is the validator's own exit code and not a pipeline artifact.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Validator run twice against the identical unmodified instance file, rc captured from $? each time.",
+      "observed": "run1 TRUE_RC=0, run2 RUN2_RC=0 against the identical unmodified file -- identical. Both captured from $?.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "V14-4 execution coverage: the 531-partition (ruled count) full-chain backfill pass.",
+      "reason": "GATED by V14-3 and the gate is unmet. c01-SIGNFIELD and c02-CFINPUT both read 'staged' at their own faces at HEAD. COO's GO 76134 explicitly held these legs. The affected-set denominator will be RE-DERIVED at execution time and never copied from 531 as a constant."
+    },
+    {
+      "item": "V14-5 acceptance re-reads (all-ten table @4a1fd3e09b, NNA delta table @e8ccd8eb77).",
+      "reason": "Depends on V14-4 output which does not exist yet; and it is a JOINT criterion where 0.4.0_DS_ClientPlatform~U validates, so this seat cannot close it alone."
+    },
+    {
+      "item": "Stage-scoping of the chain (running only the ruled subset {c00 -> c01 -> c02 -> c04 dependents} + nna_canonical rather than the full chain per date).",
+      "reason": "Explicitly out of scope by the TO and the Build Ladder: no stage-scoping exists (@f62e93b9bb) and the TO forbids building it -- the full chain per date IS the ruled form."
+    },
+    {
+      "item": "comp-pipescript postdeps consumer enumeration for chain_49f_entrypoint.",
+      "reason": "The instrument has no subject of that name in the bd tree: it REFUSED with rc=2, 'unknown script id chain_49f_entrypoint -- not found in tree bd (universe searched: 30 tree script ids + 5 declared deps keys = 35 distinct)'. The chain actually lives at data/assets/scripts/gold/runners_49f/, i.e. the assets tree, which is not one of the --firm values (bd|inf|cot|mdpf). Recorded as an instrument gap rather than converted into a clean consumer list I did not measure. NOT read as 'no consumers'."
+    }
+  ],
+  "surprises": [
+    "infra/aws/terraform/opal-assets untargeted plan carries 4 changes, 3 FOREIGN to this seat: MDPF egress publisher AGGREGATE_PREFIX 'gold/mdpf_revamp/_aggregate_aua/' -> 'portal/gold/mdpf/_staging/aggregate_aua/', output mdpf_egress_publisher_live_serve_cosigned +true, and dynamodb opal-assets-daily-aua table_arn/table_name outputs -> null. Item 1 is served-output-shaped (NEVER-1 never-widen territory). Filed 76182 OBSERVATION/INERT, accepted and routed by 3.0.0_SA_CVO in 76186 to CTO+COO for owner identification. NO ACTION TAKEN; my own apply was -targeted so it swept none of them.",
+    "My TO's <status> staged->pending flip was swept into 2.0.0_SA_COO's commit fe7b4bcba3 under COO's author line while COO was editing the dependency block of the same file. safe-commit's contamination guard is PER-PATH and COO legitimately declared that path, so two seats editing the SAME FILE are not separable by it. Reported to COO; no history rewrite requested. NO ACTION TAKEN beyond the report.",
+    ".tools/safe-apply.sh printed 'WARN -- tombstone gate could NOT plan this tree, so it checked NOTHING. This is a GAP, not a pass.' The gate silently degraded to zero coverage on a tree it was invoked to protect. I closed it by hand for my own apply (7 tombstoned resources, none matching, plan 0-to-add) but the degradation itself is a standing instrument gap on every opal-assets apply. NO ACTION TAKEN."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~L/logs/session_ADVI_49F.P14-VEHICLE_20260827T1600-1730Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam service advi-49f-chain-dispatch",
+      "result": "NO SUBJECT -- 'No service matching advi-49f-chain-dispatch'; the tool enumerates 185 Lambda services and 178 IAM roles, and advi-49f-chain-dispatch is an SSM DOCUMENT, not a Lambda service. Recorded as instrument-has-no-subject, NOT as a pass and NOT as the <if_mismatch> STOP (no missing grant was found; nothing was found at all). Re-run against the correct subject below rather than reading this silence as clearance."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam service advi-49f-gold-dispatch",
+      "result": "The role that actually holds the SSM path: advi-49f-gold-dispatch-role, 5 operations, including ssm:SendCommand [UNRESOLVABLE-RESOURCE] and ssm:DescribeInstanceInformation [GRANTED-BROAD]. No missing grant surfaced, so no STOP. Tool states its own plane: DESIRED (Terraform), not APPLIED, plus 24 unattached policy blocks it has never seen and 2 unparsed deny statements. Treated as a FLOOR. NO NEW RESOURCE ARN is touched by this change (same document, same bucket, same role), so the simulate-principal-policy step the TO requires for a new ARN does not apply and was deliberately not run."
+    },
+    {
+      "tool": "comp-pipescript",
+      "invocation": "comp-pipescript postdeps chain_49f_entrypoint --firm bd",
+      "result": "REFUSED rc=2, 'unknown script id chain_49f_entrypoint -- not found in tree bd (universe searched: 30 tree script ids + 5 declared deps keys = 35 distinct)'. The refusal is CORRECT and is the tool's anti-typo guard: the chain lives in the assets tree (data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py), which --firm does not enumerate (bd|inf|cot|mdpf). Consumer set therefore UNMEASURED by this instrument; declared as an exclusion rather than reported as 'no consumers outside the ruled set'. A refusal is not a clean sweep."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam gaps -- NOT RUN",
+      "result": "N/A BY ITS OWN TRIGGER RULE, and recorded rather than silently skipped: the TO scopes this to 'Run ONLY if iam.tf changed'. No iam.tf changed in this deliverable -- the commit a8907bf114 touches infra/aws/terraform/opal-assets/advi_49f_floor.tf (the aws_ssm_document resource) plus records, and no IAM resource, policy or role was added or altered."
+    }
+  ]
+}

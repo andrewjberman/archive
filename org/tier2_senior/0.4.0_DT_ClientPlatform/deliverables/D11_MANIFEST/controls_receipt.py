@@ -237,17 +237,29 @@ def _em(seq, dig, when):
 for label, rep, want_ok in [
         ("not_performed / one emission (the honest single run)",
          {"comparison_state": "not_performed", "emissions": [_em(1, _ART, _T1)]}, True),
-        ("byte_identical / two emissions, one digest",
+        # ⛔ v1 CANNOT EXPRESS A COMPARISON, so these flip from ACCEPT to REJECT. A claim a
+        # single document makes about its own replay is self-mintable: copying the one row and
+        # bumping `sequence` forged a second identical emission and nothing could contradict it.
+        ("byte_identical / two emissions -- INEXPRESSIBLE in v1",
          {"comparison_state": "byte_identical",
-          "emissions": [_em(1, _ART, _T1), _em(2, _ART, _T2)]}, True),
-        ("byte_different / two emissions, two digests (drift must be expressible)",
+          "emissions": [_em(1, _ART, _T1), _em(2, _ART, _T2)]}, False),
+        ("byte_different / two emissions -- INEXPRESSIBLE in v1",
          {"comparison_state": "byte_different",
-          "emissions": [_em(1, _ART, _T1), _em(2, "f" * 64, _T2)]}, True),
+          "emissions": [_em(1, _ART, _T1), _em(2, "f" * 64, _T2)]}, False),
         ("byte_identical claimed with ONE emission record",
          {"comparison_state": "byte_identical", "emissions": [_em(1, _ART, _T1)]}, False),
         ("not_performed claimed with TWO emission records",
          {"comparison_state": "not_performed",
-          "emissions": [_em(1, _ART, _T1), _em(2, _ART, _T2)]}, False)]:
+          "emissions": [_em(1, _ART, _T1), _em(2, _ART, _T2)]}, False),
+        ("R4-3. a COPIED row with only `sequence` changed -- the self-mint",
+         {"comparison_state": "not_performed",
+          "emissions": [_em(1, _ART, _T1), _em(2, _ART, _T1)]}, False)]:
+    # NOTE: the FUTURE-2099 emission moved OUT of this schema-only loop -- see R4-3-CLI below.
+    # It is a CROSS-FIELD temporal bound (emission instant vs the receipt's own executed_utc),
+    # which JSON Schema cannot express at all, so asking the schema for it scored a real law
+    # against an instrument structurally incapable of holding it and read as a FAILING ARM.
+    # The law exists and the VERIFIER enforces it; the control now tests the instrument that
+    # actually holds it. An arm aimed at the wrong instrument is not evidence the law is missing.
     d = copy.deepcopy(BASE)
     d["replay"] = rep
     n = len(list(V.iter_errors(d)))
@@ -256,12 +268,11 @@ for label, rep, want_ok in [
 
 # The two CRO~A built by hand, which the count/set pair could not contradict.
 for label, rep in [
-        ("D1. byte_identical/2 FORGED -- schema-legal, evidence absent",
-         {"comparison_state": "byte_identical",
-          "emissions": [_em(1, _ART, _T1), _em(2, "a" * 64, _T2)]}),
-        ("D2. byte_different claiming MORE digests than emissions",
-         {"comparison_state": "byte_different",
-          "emissions": [_em(1, "b" * 64, _T1), _em(2, "c" * 64, _T2)]})]:
+        ("D1. an emission instant EARLIER than the source snapshot",
+         {"comparison_state": "not_performed",
+          "emissions": [_em(1, _ART, "2026-01-01T00:00:00Z")]}),
+        ("D2. an emission digest belonging to nothing this receipt describes",
+         {"comparison_state": "not_performed", "emissions": [_em(1, "b" * 64, _T1)]})]:
     d = copy.deepcopy(BASE)
     d["replay"] = rep
     extra = [f for f in vr.verify(d) if f not in findings]
@@ -331,9 +342,8 @@ def _earlier(d):
     e = "2026-08-27T09:00:00Z"
     d["source_snapshot_utc"] = e
     d["input_closure"]["source_snapshot_pin"]["value_utc"] = e
-    d["exact_home"] = ("org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/"
-                       "graph_object_manifest.%s.receipt.json"
-                       % e.replace("-", "").replace(":", ""))
+    # the home tracks run_id now, so the mutant leaves it alone and only the snapshot moves
+    _ = e
 
 
 cli_mutant("M3. an arbitrary EARLIER snapshot, home adjusted to match", _earlier,
@@ -342,7 +352,7 @@ cli_mutant("M4. ONLY the run-qualified home's timestamp changed",
            lambda d: d.__setitem__(
                "exact_home",
                "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/"
-               "graph_object_manifest.20260101T000000Z.receipt.json"),
+               "graph_object_manifest.20260101T000000000000Z.receipt.json"),
            expect="exact_home: qualifier does not match")
 cli_mutant("M5. executed_by FORGED to another well-shaped serial",
            lambda d: d.__setitem__("executed_by", "0.7.0_AE_CloudOps~X"),
@@ -376,6 +386,157 @@ for _f, _v in (("source_snapshot_utc", "2026-13-45T99:99:99Z"),
     check("B. %s = %s (matches the pattern, is no calendar instant)" % (_f, _v),
           any("NOT A REAL INSTANT" in f or "not a real instant" in f for f in extra),
           "%d NEW findings" % len(extra))
+
+print()
+print("  REWORK 4 -- the six CRO~A built, through the CLI")
+cli_mutant("R4-1a. output_schema.git_blob_id FORGED",
+           lambda d: d["input_closure"]["output_schema"].__setitem__("git_blob_id", "a" * 40),
+           expect="input_closure.output_schema")
+cli_mutant("R4-1b. output_schema.blob_presence FLIPPED",
+           lambda d: d["input_closure"]["output_schema"].__setitem__(
+               "blob_presence",
+               "computed_only"
+               if d["input_closure"]["output_schema"]["blob_presence"] == "in_object_db"
+               else "in_object_db"),
+           expect="input_closure.output_schema")
+cli_mutant("R4-1c. output_schema.commit NONEXISTENT",
+           lambda d: d["input_closure"]["output_schema"].__setitem__("commit", "e" * 40),
+           expect="input_closure.output_schema")
+# R4-2 -- THE REDIRECT MUST BE OBSERVABLE, OR IT TESTS NOTHING.
+# WARN: THIS ARM FAILED FOR A ROUND, AND THE LAW WAS NEVER THE PROBLEM. It redirected the registry
+# pin to HEAD -- and HEAD carries the registry file at the SAME BLOB as the pin (measured:
+# 2977bd517021 at both). A redirect to byte-identical content changes nothing a consumer can
+# observe, so nothing refused it, and the arm read as a missing authority binding. The binding
+# works: redirected to a commit where the registry bytes genuinely DIFFER, the verifier refuses
+# with a correctly-named `input_closure.registry` finding.
+# `cli_mutant`'s INERT-MUTATION guard could not catch this -- it asks "did the JSON change?"
+# (yes, a different commit string) and cannot ask "did anything OBSERVABLE change?". A mutant
+# that perturbs a field without perturbing the claim is the negative-arm twin of a control that
+# cannot fail. The redirect target is now DERIVED as a commit with differing bytes, and asserted
+# to differ before it is used, so this arm cannot silently go inert again.
+def _nonratification_commit_with_different_bytes():
+    home = BASE["input_closure"]["registry"]["home"]
+    pin = BASE["input_closure"]["registry"]["commit"]
+
+    def blob_at(c):
+        r = subprocess.run(["git", "rev-parse", "%s:%s" % (c, home)], cwd=WS,
+                           capture_output=True, text=True)
+        return r.stdout.strip() if r.returncode == 0 else None
+
+    pinned = blob_at(pin)
+    hist = subprocess.run(["git", "log", "--format=%H", "--follow", "--", home], cwd=WS,
+                          capture_output=True, text=True).stdout.split()
+    for c in hist:
+        b = blob_at(c)
+        if b and b != pinned:
+            return c
+    return None
+
+
+_R42 = _nonratification_commit_with_different_bytes()
+check("   R4-2 PRECONDITION: a valid non-ratification commit with DIFFERING registry bytes exists",
+      _R42 is not None,
+      "without one the redirect is inert and the arm would pass vacuously")
+if _R42:
+    cli_mutant("R4-2. registry pin REDIRECTED to a valid non-ratification commit (bytes differ)",
+               lambda d: d["input_closure"]["registry"].__setitem__("commit", _R42),
+               expect="input_closure.registry")
+cli_mutant("R4-5. run_id NOT carrying executed_utc",
+           lambda d: d.__setitem__("run_id", "20990101T000000000000Z"),
+           expect="run_id")
+# R4-1d -- the COMMIT:PATH BINDING, which is a different claim from the commit EXISTING.
+# R4-1c proves a nonexistent commit is refused. A commit that EXISTS but does not carry the
+# pinned path at that commit is the case a bare existence check waves through, and it is the
+# likelier real-world corruption: a pin copied from a neighbouring role resolves to a real
+# commit every time.
+cli_mutant("R4-1d. output_schema.commit REAL but does NOT carry that path",
+           lambda d: d["input_closure"]["output_schema"].__setitem__(
+               "commit", subprocess.run(["git", "rev-list", "--max-parents=0", "HEAD"], cwd=WS,
+                                        capture_output=True, text=True).stdout.split()[0]),
+           expect="input_closure.output_schema")
+# R4-3-CLI -- relocated from the schema-only loop. See the note at that loop: a cross-field
+# temporal bound is not schema-expressible, so this arm must run through the consumer path.
+cli_mutant("R4-3-CLI. a FUTURE-2099 emission inside a present receipt",
+           lambda d: d["replay"].__setitem__(
+               "emissions", [{"sequence": 1,
+                              "digest": d["describes"]["sha256"],
+                              "executed_utc": "2099-01-01T00:00:00Z"}]),
+           expect="replay.emissions")
+
+print()
+print("  R4-5. TWO SAME-SECOND RESERVATIONS MUST NOT COLLIDE")
+_ids = {l0.build_receipt(ART, SNAP, reg=l0.load_registry(),
+                         run_utc="2026-08-27T14:00:00Z")["run_id"] for _ in range(8)}
+check("   8 receipts built inside one second yield 8 DISTINCT run_ids",
+      len(_ids) == 8, "%d distinct of 8 -- a seconds-only qualifier gave 1" % len(_ids))
+_homes = {l0.build_receipt(ART, SNAP, reg=l0.load_registry(),
+                           run_utc="2026-08-27T14:00:00Z")["exact_home"] for _ in range(8)}
+check("   and 8 DISTINCT immutable homes", len(_homes) == 8, "%d distinct of 8" % len(_homes))
+
+print()
+print("  R4-4. LOGICAL-FINAL-HOME PREWRITE VALIDATION -- the would-be bytes, no final artifact")
+# The gate must validate the EXACT bytes that would land at the FINAL home, while writing
+# nothing there. Validating a staging path instead is the defect this replaced: `exact_home`
+# then derived from the staging name and failed its own pattern BY CONSTRUCTION -- a gate that
+# could only ever refuse, which is indistinguishable from a gate that works until you ask it to
+# pass something.
+_pre_listing = set(os.listdir(HERE))
+_r44 = l0.build_receipt(ART, SNAP, reg=l0.load_registry())
+_r44_home = os.path.join(WS, _r44["exact_home"])
+check("   the receipt is built against the LOGICAL FINAL home, not a staging path",
+      _r44["exact_home"].endswith(".receipt.json")
+      and "stage" not in _r44["exact_home"] and "tmp" not in _r44["exact_home"],
+      _r44["exact_home"])
+check("   NO final artifact exists at that home after validation",
+      not os.path.exists(_r44_home),
+      "prewrite validation must not create the thing it validates")
+_bytes_a = json.dumps(_r44, indent=2, sort_keys=True, ensure_ascii=True)
+_r44b = l0.build_receipt(ART, SNAP, reg=l0.load_registry(), run_utc=_r44["executed_utc"])
+_bytes_b = json.dumps(dict(_r44b, run_id=_r44["run_id"], exact_home=_r44["exact_home"]),
+                      indent=2, sort_keys=True, ensure_ascii=True)
+check("   the would-be bytes are DETERMINISTIC for a fixed run clock",
+      _bytes_a == _bytes_b,
+      "same inputs + same run clock must serialise identically, or 'the exact bytes' is undefined")
+check("   those exact bytes satisfy the schema",
+      not list(V.iter_errors(json.loads(_bytes_a))), "schema errors on the would-be final bytes")
+check("   and the verifier accepts them AT THE LOGICAL FINAL HOME",
+      len([f for f in vr.verify(json.loads(_bytes_a), _r44["exact_home"])
+           if "exact_home" in f]) == 0,
+      "the home the bytes name must be the home they are judged at")
+check("   POSITIVE CONTROL: the same bytes judged at a WRONG home are refused",
+      any("exact_home" in f for f in vr.verify(
+          json.loads(_bytes_a),
+          _r44["exact_home"].replace(".receipt.json", ".WRONG.receipt.json"))),
+      "if a wrong home also passed, the check above would be vacuous")
+
+print()
+print("  R4-6. THE PRODUCER PREWRITE GATE IS THE CONSUMER PATH -- identical, not merely similar")
+# WARN: "The producer runs the same checks" is a DESCRIPTION unless the two paths are the same
+# object. Two verifiers that agree today drift apart on the first edit to one of them, and the
+# producer is the copy nobody re-reads.
+_gate_src = os.path.join(HERE, "verify_receipt.py")
+_emitter_txt = open(os.path.join(HERE, "l0_compile_w3.py"), encoding="utf-8").read()
+check("   the emitter loads THE verifier module by path, not a reimplementation",
+      "verify_receipt.py" in _emitter_txt and "_vr.verify(" in _emitter_txt,
+      "the prewrite gate must call the shipped verifier")
+check("   and the CLI consumer entry point is that same file",
+      os.path.abspath(VERIFIER) == os.path.abspath(_gate_src), VERIFIER)
+check("   the emitter REFUSES TO WRITE when that gate finds anything",
+      "REFUSING TO WRITE" in _emitter_txt and "FAILS the same gate" in _emitter_txt,
+      "a gate whose failure does not stop the write is a log line")
+# no-debris / no-pair-touch: the whole control run above built receipts, ran the CLI many times,
+# and wrote temp files. NOTHING of that may remain here, and the preserved pair must be untouched.
+_post_listing = set(os.listdir(HERE))
+check("   NO DEBRIS: the control run added no files to the deliverables directory",
+      _post_listing == _pre_listing,
+      "added: %s" % sorted(_post_listing - _pre_listing))
+_PAIR = {"graph_object_manifest.json": "db684f932995d519a9087725b2d2539d249ea533",
+         "graph_object_manifest.receipt.json": "3da49495aa16c5f92563c9c955bbd888d4f85072"}
+for _name, _want in _PAIR.items():
+    _got = subprocess.run(["git", "hash-object", os.path.join(HERE, _name)], cwd=WS,
+                          capture_output=True, text=True).stdout.strip()
+    check("   NO PAIR TOUCH: %s still hashes to its preserved id" % _name,
+          _got == _want, "want %s got %s" % (_want[:12], _got[:12]))
 
 print()
 print("=" * 84)

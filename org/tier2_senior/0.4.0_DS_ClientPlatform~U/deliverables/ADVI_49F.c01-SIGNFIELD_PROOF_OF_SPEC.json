@@ -1,0 +1,197 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_49F.c01-SIGNFIELD",
+  "firm": "49F",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/task_orders/ADVI_49F.c01-SIGNFIELD.signed-in-kind-field-and-nna-sign-fix.md",
+    "group": "C",
+    "vintage_commit": "fea672efd5"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~U -- the seat that authored the ruled remediation design @69b2b7678c, re-instantiated as D2 S2. Released by 2.0.0_SA_COO GO 76133 on Andrew's ~16:05Z word @fb79e6a4cd. Acceptance scope amended mid-TO by 1.0.0_SA_CTO 76200, adopted as issuer word by 2.0.0_SA_COO 76211: one explicit nna_headline SUM assert folded in; no face change.",
+  "controls": {
+    "mutant": {
+      "description": "FOUR planted mutants, not one, because the four acceptance criteria are supposed to have INDEPENDENT discriminating power and a shared-fate control set cannot show that. (1) `resign` re-signs in_kind_value in place -- the exact design CTO 74187 ruled OUT. (2) `sign` inverts the LONG/SHORT map, leaving the old contract untouched, so ONLY consumer-side controls can catch it. (3) `drop` leaves every IC leg undirected (signed 0.0, flag set). (4) `c02` perturbs one EXTERNAL cash leg's signed_amount by a cent -- planted specifically because C01-4 stays GREEN under the other three and a control never seen to fire is a promise, not a control. A FIFTH control guards the harness's own baseline: BASELINE_COMMIT is repointed at the post-fix commit and the run must REFUSE.",
+      "expected": "Every mutant arm exits rc=1. `resign` must fire C01-1 and NOT C01-2; `sign` must fire C01-2 and NOT C01-1 (proving C01-2 is not riding C01-1); `drop` must fire both; `c02` must fire C01-4. The baseline guard must exit non-zero with a message naming the schema version it found.",
+      "observed": "ALL FIRED AS SPECIFIED. resign rc=1 (C01-1/3 FAIL both dates, C01-2 PASS, C01-4 PASS). sign rc=1 (C01-2 FAIL on 2026-08-24, C01-1/3 PASS -- independence demonstrated). drop rc=1 (C01-1/3 and C01-2 both FAIL). c02 rc=1 (C01-4 FAIL both dates, 2 differing cells each, plus C01-3 catching signed_amount:1). Baseline guard rc=1: 'REFUSED: baseline 0412a8d6d8 is not the pre-fix vintage (c00 SCHEMA_VERSION=1.2, signed field present=True)'. HONEST LIMIT, stated rather than hidden by the 5-of-6 PASS shape: under `sign`, C01-2 on 2026-08-25 PASSES, because that date carries no pre-registered rows and a sign inversion inside the segregated bucket moves none of the three invariants. C01-2 has NO discriminating power for a sign inversion on 2026-08-25; the 2026-08-24 arm carries that whole criterion.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "TWO distinct questions, answered separately. (a) REPEATABILITY: the harness run twice, its result JSON byte-compared. (b) CROSS-INSTRUMENT AGREEMENT, which repetition cannot give: the post-fix nna_headline sum was produced three ways -- the harness's in-process core, the REAL CLI entrypoints (c00_flow_ledger.py then c01_nna_canonical.py with --local-out, no --upload), and the LIVE SERVED S3 nna_canonical partition read directly. The third is a different substrate, not a different call of the same code.",
+      "observed": "(a) STABLE: two runs, both rc=0, result artifacts BYTE-IDENTICAL (sha256/16 equal). (b) AGREE TO THE CENT: harness in-process 1,205,074.50; CLI-produced partition 1,205,074.50 over 256 rows; live served S3 partition 1,205,074.50 over 256 rows. The headline invariance is therefore not an artifact of one code path. NOTE ON WHEN THIS CONTROL WAS RUN: the first determinism pair was executed AFTER the commit and returned rc=1 on both runs -- that is what exposed the harness's moving `HEAD` baseline (see acceptance C01-6 note). The pair recorded here was re-run against the repinned harness.",
+      "status": "STABLE"
+    }
+  },
+  "acceptance": [
+    {
+      "criterion_id": "C01-1",
+      "criterion_verbatim": "C01-1 NEW FIELD LIVE, OLD CONTRACT INTACT: the signed field present on IC legs in a produced flow_ledger partition; in_kind_value byte-identical semantics (unsigned) on the same rows. Field-level read cited, not schema prose.",
+      "method": "diff",
+      "invocation": "[method in schema vocabulary: diff/schema_validation; the specific shape is differential_rebuild] org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c01-SIGNFIELD_ACCEPTANCE_HARNESS.py -- builds flow_ledger TWICE on IDENTICAL inputs, PRE from the pinned pre-fix vintage b56bd2b7f0 recovered by CONTENT (git show <hash>:<path>), POST from the working tree; plus the real CLI c00_flow_ledger.py --date 2026-08-24 --local-out <mirror> --ref-local/--boundary-local/--prices-local.",
+      "output_evidence": "FIELD-LEVEL, not prose. Columns ADDED exactly ['in_kind_signed_value','in_kind_direction_unresolved']; columns DROPPED [] (the house law is fields ADD, never mutate). Of the 22 pre-existing data columns, ZERO differing cells across all 1,147 rows (2026-08-24) and all 1,034 rows (2026-08-25) -- in_kind_value included, so the unsigned contract is verified cell-by-cell rather than asserted. The 23rd pre-existing column, schema_version, is a metadata STAMP and is asserted POSITIVELY instead of excluded: ['1.1'] -> ['1.2'] on every row. Signed field on IC legs 2026-08-24: 44 in / 94 out / 3 zero of 141 legs (the 3 zeros are exactly the 3 in_kind_unvalued legs -- directed but unpriced, which is a legitimate distinct state); 2026-08-25: 62 in / 9 out / 0 zero of 71. |signed| != unsigned on a directed leg: 0. signed_zero_buried (valued AND directed yet 0.0): 0 -- the direction-plane twin of the c00-FIX zero_buried signature. Non-IC rows carrying a nonzero signed value: 0. Non-IC rows flagged direction-unresolved: 0. Real CLI produced the partition at 25 columns (was 23), 1,147 rows, identity in==out True.",
+      "denominator": "2 partitions of 531 in the ledger estate. 1,147 and 1,034 rows; 141 and 71 IC legs; 22 pre-existing data columns + 1 stamp column compared per row. The other 529 partitions are UNMEASURED and are not extrapolated to.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C01-2",
+      "criterion_verbatim": "C01-2 SIGN CORRECT AT THE CONSUMER: an in-kind OUTFLOW specimen emits NEGATIVE in NNA; the NNA delta table @e8ccd8eb77 re-read is the acceptance instrument.",
+      "method": "diff",
+      "invocation": "[method in schema vocabulary: diff/schema_validation; the specific shape is pre_registered_table_reread] Same harness: build_nna_canonical run on the PRE ledger with the pre-fix c01 and on the POST ledger with the post-fix c01, compared against the pre-registered delta table, VALUES asserted at TOL=0.01 (the estate's own RECON_TOLERANCE grain).",
+      "output_evidence": "OUTFLOWS NOW EMIT NEGATIVE, at the registered VALUES not merely the registered signs. 0016371483 (15 of 15 SHORT legs, bmv 110,063 -> emv 0.00) +89,946.62 -> -91,552.00 as registered. 0049284242 (14 of 14 SHORT) +10,956.66 -> -10,926.98 as registered. 0032486794 (1 LONG leg) +39,361.92 -> +39,361.92 UNCHANGED, which is part of the acceptance -- it is an inflow, correctly positive already, and a fix that flipped it would be over-correcting. 0033493115 +87,054.14 -> -110,371.70. THE ASSERTED INVARIANTS, which is the half that could have failed: nna_headline, daily_inflow and daily_outflow each moved 0 accounts of 256 and 226, max |delta| 0.0000 -- so the 'in-kind legs never reach the headline bucket' claim is now MEASURED on the produced partition rather than inferred from the 0-of-267 census. CTO 76200 / COO 76211 EXPLICIT SUM ASSERT: nna_headline SUM pre == post, 1,205,074.50 == 1,205,074.50 and 1,568,172.61 == 1,568,172.61, delta 0.0000 on both dates. nna_unresolved_direction moved 3 accounts of 256 and 1 of 226 -- the segregated line is the only thing that moves, as designed.",
+      "denominator": "4 pre-registered accounts on 2026-08-24 (the table registers none for 2026-08-25: 'both LONG, NONE MOVE' -- and none moved). Invariants swept over all 256 and all 226 accounts in the produced partitions, not a sample.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C01-3",
+      "criterion_verbatim": "C01-3 NEGATIVE CONTROL (non-IC plane): non-IC rows in the same partition bit-identical pre/post. Movement there = unauthorized widening.",
+      "method": "diff",
+      "invocation": "[method in schema vocabulary: diff/schema_validation; the specific shape is differential_rebuild] Same harness, asserted as its OWN subject rather than inferred from C01-1's whole-frame compare -- a control that rides another control's subject can pass on the wrong population.",
+      "output_evidence": "NONE. Zero differing cells on the non-IC plane across every pre-existing data column: 1,006 non-IC rows on 2026-08-24 and 963 on 2026-08-25. Shown able to FIRE, not merely observed quiet: under the planted `c02` mutant this same check reports {'signed_amount': 1} on both dates.",
+      "denominator": "1,006 of 1,147 and 963 of 1,034 rows; 22 data columns each.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C01-4",
+      "criterion_verbatim": "C01-4 NEGATIVE CONTROL (c02 plane): twr_daily bit-identical after THIS TO alone -- same instrument as c00-FIX's final-form control; movement means this TO touched the engine it is fenced from.",
+      "method": "diff",
+      "invocation": "[method in schema vocabulary: diff/schema_validation; the specific shape is interface_identity] c02_twr_engine.flows_from_ledger() run on the PRE ledger and the POST ledger and compared bit-for-bit. SUBSTITUTION DECLARED, not silent: this is the ENTIRE ledger->engine interface (c02 reads the ledger through this one function and only via signed_amount on EXTERNAL and FEE-MANAGEMENT rows, c02_twr_engine.py:141-162), so identity here is upstream of twr_daily and stronger than a twr_daily diff -- it holds for every downstream date, not just one, given identical valuation and calendar inputs. A full twr_daily run would additionally have exercised the D-1 valuation pull, which this TO does not touch.",
+      "output_evidence": "BIT-IDENTICAL on both dates: 68 rows vs 68 rows, .equals() True; 69 vs 69, .equals() True. AND THE CONTROL IS SHOWN ABLE TO FIRE -- this was the reason the fourth mutant was planted, since C01-4 stayed green under the first three: under `c02`, bit-identical=False with 2 differing cells on each date.",
+      "denominator": "68 and 69 (account, business_date) flow rows -- the complete interface output for those partitions, not a sample.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C01-5",
+      "criterion_verbatim": "C01-5 DEPLOY VERIFIED on deployed bytes resolved through the build input (Rule 22a CODE), never rc=0 or filename.",
+      "method": "diff",
+      "invocation": "[method in schema vocabulary: diff/schema_validation; the specific shape is content_digest_vs_build_input] .tools/safe-deploy.sh --author 0.4.0_DS_ClientPlatform~U <both scripts>; then comp-pipescript deployed <script> --pipeline advi; then an INDEPENDENT content compare -- boto3 get_object on s3://opal-data-49financial/_code/<file> vs `git show 0412a8d6d8:<path>`, LF-normalised sha256, with `git show 0412a8d6d8^:<path>` as the negative control.",
+      "output_evidence": "MATCH against the COMMITTED BUILD INPUT, not the working tree. c00_flow_ledger.py: S3 sha(LF) 4e4ec3548f8ee53b == commit sha(LF) 4e4ec3548f8ee53b, 25,452 B both, raw-byte equal True; parent-commit sha 7a89bc699552261f DIFFERS, so the comparison is shown able to distinguish a vintage. c01_nna_canonical.py: S3 1d547c16e89ac1ea == commit 1d547c16e89ac1ea, 10,788 B both; parent a63a6809aadc2e25 DIFFERS. Normalisation STATED on every row (LF) because a digest without its normalisation is not an identity on this box; CRLF was in fact absent from both the S3 object and the commit blob, so the raw and normalised compares agree here. comp-pipescript deployed returned MATCH for both with basis 'raw bytes', denominator 1 of 70 objects filtered from s3://opal-data-49financial/_code/ -- the known CRLF-vs-LF STALE trap did not fire and was not needed. The tool REFUSED without --pipeline (rc=2, 'NO GUESS IS MADE') before answering, which is the tool working; the bare invocation is not recorded as a result.",
+      "denominator": "2 of 2 scripts changed by this TO. 1 of 70 objects matched by filter in the advi _code tree, per file.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C01-6",
+      "criterion_verbatim": "C01-6 proof instance VALID rc=0 positional: ids C01-1..C01-6. MEASURED/RULED rows only; validated BY RC (never an output string), the validator invocation + its TRUE rc recorded as evidence IN the instance (D2 lock-in, CVO 76086 point 1).",
+      "method": "schema_validation",
+      "invocation": "[method in schema vocabulary: diff/schema_validation; the specific shape is validator_run] python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c01-SIGNFIELD_PROOF_OF_SPEC.json C01-1,C01-2,C01-3,C01-4,C01-5,C01-6 -- rc captured directly from the process, never parsed from stdout.",
+      "output_evidence": "VALID, rc=0 -- and the rc is the verdict, never a string in the output. INVOCATION: python .tools/proof-of-spec-check.py <this file> C01-1,C01-2,C01-3,C01-4,C01-5,C01-6. TRUE rc CAPTURED AS: process exit status read directly into a shell variable and echoed, with no pipe between the validator and the rc read -- a pipeline would report the LAST command's status and silently launder a failure. FIRST RUN OF THIS GATE RETURNED rc=2, NOT rc=1, AND THE DISTINCTION IS THE POINT: 'TypeError: decomp_ref must be an OBJECT, got NoneType' with the tool's own line 'NOT-A-VERDICT: this is a tool failure (rc=2), not an INVALID instance (rc=1).' I had written decomp_ref:null by copying a jq projection of a valid sibling instance, where jq renders an ABSENT key as null -- the key is simply absent there. Two further schema violations were fixed in the same pass: a top-level validator_evidence object (additionalProperties is false, so this evidence lives in this row instead) and surprises written as objects where the schema requires one string per entry. All three were caught BY RUNNING THE GATE, which is the whole reason the gate is run rather than reasoned about. SECOND RUN RETURNED rc=1 (a genuine INVALID, not a tool error) with 12 schema violations, ALL OF ONE KIND: I had invented enum values -- method 'differential_rebuild'/'pre_registered_table_reread'/'interface_identity'/'content_digest_vs_build_input'/'validator_run', kind 'harness'/'evidence'/'record', deployed_state 'NOT-DEPLOYED' -- where the schema already defines a closed vocabulary. Mapped to the real terms (diff, schema_validation, test, doc, COMMITTED-NOT-DEPLOY-SCOPE) with the specific shape preserved in the adjacent free text rather than discarded. Worth recording plainly: this is a schema whose validator REJECTS, and it caught every one of them at once -- which is the whole argument for running the gate instead of reasoning about it. The tool also refused to let its own alignment frames be quoted as validity: 'WARN: alignment above is computed on a STRUCTURALLY INVALID instance ... NOT evidence of validity.'",
+      "denominator": "6 of 6 criterion ids declared by the TO's <expected_criteria>; coverage checked by the validator itself, which fails on a missing OR an extra id.",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/c00_flow_ledger.py -> s3://opal-data-49financial/_code/c00_flow_ledger.py",
+      "kind": "script",
+      "commit_or_etag": "commit 0412a8d6d8 / deployed LF-sha256(16) 4e4ec3548f8ee53b, 25,452 B",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-deploy gate PASS rc=0, then verified with a DIFFERENT instrument than the gate's: the deployed object body compared by content digest against the COMMITTED blob, with the parent commit as a negative control that DIFFERS. Schema 1.1 -> 1.2, two columns added, none mutated.",
+      "artifact_covered_by": [
+        "C01-1",
+        "C01-3",
+        "C01-5"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/c01_nna_canonical.py -> s3://opal-data-49financial/_code/c01_nna_canonical.py",
+      "kind": "script",
+      "commit_or_etag": "commit 0412a8d6d8 / deployed LF-sha256(16) 1d547c16e89ac1ea, 10,788 B",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Same gate and same independent content compare, negative control DIFFERS. Schema 1.0 -> 1.1. Reads in_kind_signed_value; REFUSES a pre-1.2 ledger loudly rather than falling back to the unsigned column, since that fallback IS defect 3.",
+      "artifact_covered_by": [
+        "C01-2",
+        "C01-5"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c01-SIGNFIELD_ACCEPTANCE_HARNESS.py",
+      "kind": "test",
+      "commit_or_etag": "commit 0412a8d6d8, repinned in the follow-up commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "[artifact shape: harness] Repository artifact, not a pipeline script -- no S3 target and none expected. Carries the CTO 76200 / COO 76211 nna_headline SUM assert; this is the harness commit CVO 76206 names as the evidence on which the cert P2 observation discharges.",
+      "artifact_covered_by": [
+        "C01-1",
+        "C01-2",
+        "C01-3",
+        "C01-4"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c01-SIGNFIELD_ACCEPTANCE_RESULT.json",
+      "kind": "doc",
+      "commit_or_etag": "commit 0412a8d6d8, regenerated against the repinned harness",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "[artifact shape: evidence] The harness's own machine-readable output, ALL_PASS true, rc=0, byte-reproducible across runs.",
+      "artifact_covered_by": [
+        "C01-1",
+        "C01-2",
+        "C01-3",
+        "C01-4"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_PERFRP_OUTLIER_ROOT_CAUSE_20260826T2355Z.md",
+      "kind": "doc",
+      "commit_or_etag": "commit 0412a8d6d8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "[artifact shape: record] The acceptance instrument named by C01-2. CORRECTED by this TO in two places, with the originals kept beside the corrections rather than swapped out -- see surprises.",
+      "artifact_covered_by": [
+        "C01-2"
+      ]
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-pipescript io",
+      "invocation": "comp-pipescript io c01_nna_canonical --pipeline advi",
+      "result": "AS THE TO PRE-DECLARED, and the pre-declaration is what makes this readable: 'Group: C | Order: 200', READS '(none detected)', WRITES '(none detected)', plus the manual-review WARN. That WARN is the expected KNOWN-THIN output for a script with dynamic key construction, not a failure; the tool did not error, so the TO's STOP condition did not trigger. Manual body review of c01's reads/writes performed as the tool itself mandates: reads canonical/flow_ledger/date={date}/data.parquet, writes canonical/nna_canonical via rc.emit."
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast fact_trn",
+      "result": "DID NOT ANSWER, and was NOT recorded as a clear. 'NOT-FOUND: no graph node matches fact_trn' over a denominator of 27,035 nodes, with the tool's own closing line 'This is a NOT-FOUND, not a nothing-breaks clear.' The same run printed 'WARN: canonical rebuild failed (kuzu_nessie_load TIMED OUT after 1800s); serving existing' and 'BEHIND Nessie HEAD' -- so its zero came from a stale, degraded snapshot. Substituted a SECOND INSTRUMENT rather than accepting the absence: source enumeration of all 26 flow_ledger matches under the runners tree, every file opened, which found four d-plane readers outside the ruled set and measured them FIELD-DISJOINT (final_class=='FEE-MANAGEMENT' only). Surfaced to COO+CTO as 76194/76195 BEFORE commit; both seats verified independently at source and ruled NO REVERT (COO 76211, CTO 76200)."
+    },
+    {
+      "tool": "comp-validate",
+      "invocation": "comp-validate c01_nna_canonical --artifact <produced partition>; then nna_canonical, nna_atomic, flow_ledger, c00_flow_ledger",
+      "result": "UNVALIDATED -- NO CONFIG EXISTS FOR 49F GROUP C, and this is reported as such rather than signalled SAFE. 'c01_nna_canonical' and 'nna_canonical' both return not-found; --list shows the config covers the BD and INF trees. `nna_atomic` DOES resolve but is a DIFFERENT artifact on the BD plane -- running my 49F parquet through it was a wrong-subject read and its output is NOT quoted as validating this work (it returned ZERO_CHECKS/UNVALIDATED anyway, 0 PASS / 1 SKIP). TRAP NOTED: the not-found path returns rc=0, so rc does not discriminate here."
+    },
+    {
+      "tool": "comp-pipescript deployed",
+      "invocation": "comp-pipescript deployed c00_flow_ledger --pipeline advi; comp-pipescript deployed c01_nna_canonical --pipeline advi",
+      "result": "MATCH on both, basis 'raw bytes', denominator 1 of 70 objects per file in s3://opal-data-49financial/_code/. The bare form without --pipeline REFUSED at rc=2 ('NO GUESS IS MADE') -- correct behaviour, recorded, and not read as a result. The documented CRLF-vs-LF false-STALE trap did not fire; independently, CRLF was measured absent from both sides, so the trap was not merely unobserved."
+    },
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"how do I validate a proof of spec instance\"",
+      "result": "MISS, declared loudly: 'NO CURATED RULE MATCHED THIS QUESTION', all 3 candidates below the vetted band. Did not take the top-ranked fuzzy guess (comp-lease, score 0.63, unrelated). Resolved by direct listing instead: .tools/proof-of-spec-check.py + org/standards/PROOF_OF_SPEC.schema.json."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any emitter threshold, plausibility filter or magnitude band.",
+      "reason": "Brief P1.1 was STRUCK @2fc8f4011d on Andrew's no-filter word 74056, restated in the GO 76133 as a DO-NOT. The measurement in the root-cause doc s.4 independently vindicates it: a per-day plausibility filter would have caught 9 of 22 and 4 of 14 affected accounts and left 13 and 10 wrong-but-plausible returns serving."
+    },
+    {
+      "item": "c02_twr_engine.py -- the grain-parameterized class filter and the consumption of the signed field.",
+      "reason": "That is ADVI_49F.c02-CFINPUT, the successor TO at this seat, gated on this one. C01-4 exists precisely to prove this TO did not touch it."
+    },
+    {
+      "item": "Re-valuation of the 531 historical partitions.",
+      "reason": "ADVI_49F.P14-VEHICLE (0.7.0_AE_CloudOps~L), gated on this TO plus c02-CFINPUT. Until it runs, historical partitions carry the old sign -- the DECLARED state, not a silent one. c01's loud refusal of a pre-1.2 ledger makes that gap non-silent at the code level too."
+    },
+    {
+      "item": "Extending c01's row_quality vocabulary to carry the new direction-unresolved state.",
+      "reason": "row_quality is BRANCHED ON by a consumer (c01_account_performance.py:121 tests row_quality=='clean'), so adding a value is a taxonomy change owing a Rule 24 four-postulate record, and it is not in this TO. The producer's claim is instead consumed via a manifest census (in_kind_direction_census), which adds no vocabulary. Surfaced as an observation rather than built."
+    },
+    {
+      "item": "The 529 unmeasured flow_ledger partitions.",
+      "reason": "Acceptance was run on 2 of 531. The direction census is 141 of 141 and 71 of 71 directed on those two; over the rest it is UNMEASURED and is not extrapolated. The harness asserts direction_unresolved==0 as a PARTITION-SPECIFIC fact, and the schema treats an undirected leg as a legitimate expressible state, so a partition breaking the pattern fails loudly instead of being silently signed."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / INERT -- MY OWN PRE-REGISTERED ACCEPTANCE TABLE CARRIED A WRONG NUMBER AND A WRONG MECHANISM, and the harness it feeds is what caught it. I registered account 0033493115's pre-fix nna_unresolved_direction as 64,841.33 in the delta table @e8ccd8eb77; it is 87,054.1359, read from the LIVE S3 nna_canonical partition for date=2026-08-24 and reproduced to the cent by a rebuild from fact_trn, so the derived expectation -88,158.89 inherited the error and the correct expectation is -110,371.70 -- which is what the fix produced. Both alternative causes were MEASURED OUT: the input did not change (fact_trn date=2026-08-24 LastModified 2026-08-25T09:46:15Z, s3api plane, BEFORE the table's own 2026-08-27T00:50Z stamp) and the method did not differ (the other three registered rows reproduce the live artifact EXACTLY). Separately my stated MECHANISM was wrong: I wrote these accounts hold MIXED-DIRECTION legs and measured NONE do (15/15, 30/30, 14/14 SHORT, 1/1 LONG); the asymmetry is the CASH component in the same external-by-default bucket, signed before and after, so it does not double while the in-kind part flips. Corrected in the deliverable with the originals kept beside them. TRANSFERABLE: a pre-registered acceptance is only as good as the substrate its 'now' column was read from, and I never named that substrate when I wrote it. Reported to 2.0.0_SA_COO cc 1.0.0_SA_CTO; not filed as a hazard because it is a defect in my own record, remediated same turn, and it made the acceptance stronger rather than blocking it.",
+    "OBSERVATION / INERT -- THE HARNESS I COMMITTED HAD A MOVING BASELINE, AND THE DEFECT WAS INVISIBLE UNTIL THE COMMIT ITSELF LANDED. It read its PRE arm from `git show HEAD:<path>`, correct for exactly as long as the fix was uncommitted; the moment 0412a8d6d8 landed, HEAD BECAME the post-fix code, both arms loaded the same module, and the harness reported C01-1 FAIL -- a committed acceptance artifact that could no longer reproduce its own committed result. Found by running the determinism control AFTER the commit; run only before, it would have missed this entirely. The harness's own docstring cited Rule 22a ('resolve a pin by CONTENT, never by an ancestry predicate') while the code pinned to a moving symbol. REMEDIATED same turn: BASELINE_COMMIT is now the explicit hash b56bd2b7f0 and a guard REFUSES any baseline whose loaded module already carries the signed field, exercised as a positive control (rc=1, message naming the schema version found). Reported to 2.0.0_SA_COO cc 1.0.0_SA_CTO; carried because it bears on how any differential harness here pins a baseline.",
+    "OBSERVATION / INERT -- comp-blast's canonical graph is serving a snapshot BEHIND Nessie HEAD after a rebuild timeout, so any blast radius quoted from it today is quoted from stale data. Verbatim: 'WARN: canonical rebuild failed (RuntimeError: kuzu_nessie_load TIMED OUT after 1800s -- child killed (no-immortal-rebuild invariant)); serving existing', with 'BEHIND Nessie HEAD (writer=incremental_updater, committed_at=2026-08-27T15:34:55Z)'. Not my surface, not chased -- one line to 3.0.0_SA_CVO cc 2.0.0_SA_COO in 76194/76195; COO 76211 s.3 confirms it is correctly in the channel and not mine."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/logs/2026-08-27/ -- session in progress at instance authoring; work commit 0412a8d6d8, harness repin in the follow-up commit."
+}

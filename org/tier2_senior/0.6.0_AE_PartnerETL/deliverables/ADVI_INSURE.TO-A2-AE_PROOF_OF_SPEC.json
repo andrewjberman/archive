@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_INSURE.TO-A2-AE",
+  "firm": "49F",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/advi-insure-snapshot-plane/20260825T122500Z/DECOMP.md",
+    "vintage_commit": "35c7158815",
+    "to_ref": "org/tier2_senior/0.6.0_AE_PartnerETL/task_orders/ADVI_INSURE.TO-A2-AE.advisor-carrier-capture-relationshipdetail.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.6.0_AE_PartnerETL/task_orders/ADVI_INSURE.TO-A2-AE.advisor-carrier-capture-relationshipdetail.md",
+    "group": "A",
+    "vintage_commit": "35c7158815"
+  },
+  "assignee": "0.6.0_AE_PartnerETL",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-assets/blackdiamond/49financial/bronze/insurance_relationshipdetail/2026-08-27/insurance_relationshipdetail_page0.json",
+      "kind": "s3_object",
+      "commit_or_etag": "3093 bytes, read back post-landing",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ListObjectsV2 verify inside land_insurance_bronze (raises on KeyCount<1; did not raise) plus an INDEPENDENT head-object read: ContentType=application/json, ContentLength=3093, Metadata pull-asof=2026-08-27 bd-surface=relationshipdetail advi-project=ADVI_INSURE",
+      "artifact_covered_by": [
+        "INSA2AE-AC1",
+        "INSA2AE-AC2"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-assets/blackdiamond/49financial/bronze/insurance_relationshipaccountdetailsearch/2026-08-27/insurance_relationshipaccountdetailsearch_page0.json",
+      "kind": "s3_object",
+      "commit_or_etag": "82072 bytes",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "list-objects-v2 under the insurance_ prefix; this is the id-source call S4 structurally requires",
+      "artifact_covered_by": [
+        "INSA2AE-AC2",
+        "INSA2AE-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.6.0_AE_PartnerETL/deliverables/ADVI_INSURE.TO-A2-AE_CLIENTVIEW_AUTHORITY_401_FINDING.md",
+      "kind": "doc",
+      "commit_or_etag": "03d43dc4a3 + f5225cc842",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "safe-commit [msg-verify] committed lines read for both hashes",
+      "artifact_covered_by": [
+        "INSA2AE-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "INSA2AE-AC1",
+      "criterion_verbatim": "The capture EXERCISED on the 49F principal: a LANDING or a PER-SURFACE REFUSAL are both complete answers, denominator printed either way. RIDER (pre-registered before any byte was captured, COO 76310 + CVO concurring): an EMPTY financialTeam[] is a THIRD complete answer -- a Black Diamond CONFIGURATION finding. NO retry, NO widening. PROBE-FIRST binds execution: ONE relationship id read before the cohort is spent.",
+      "method": "live_read",
+      "invocation": "CAPTURE_LIMIT=1 python capture_advisor.py 2026-08-27 ; then head-object + get-object read-back of the landed key. METHOD NOTE: PROBE-FIRST honoured: CAPTURE_LIMIT=1. Minted both authorities, called S3 relationshipaccountdetailsearch once for the id source, then S4 relationshipdetail ONCE on relationship z08117302. Read financialTeam[] off the LANDED BRONZE BYTES (re-fetched from S3), not off the in-memory response.",
+      "output_evidence": "S4 relationshipdetail rel z08117302 -> HTTP-200, 3093 bytes, landed. financialTeam: KEY PRESENT, type=list, len=0, repr=[] -- AFFIRMATIVELY EMPTY, not absent and not null. financialTeamTemplateId=None (no template assigned either). Payload carries 26 top-level keys including 'financialTeam', so the surface DOES carry the advisor hop. THE PRE-REGISTERED EMPTY OUTCOME FIRED: this closes AC1 as MEASURED -- a Black Diamond CONFIGURATION state (no team assigned on 49F), the advisor-basis stamp moves to a vendor-config value, and the ask routes to Andrew. NO retry and NO widening performed: exactly 1 of 50 harvested ids was spent; the cohort was NOT spent.",
+      "denominator": "S4: 1 relationship measured DIRECTLY (z08117302) of server total=77. I do NOT claim all 77 are empty -- that is not measured. CORROBORATING, and it is MY OWN measurement rather than an inherited claim: on the S3 cohort page I landed, 50 of 50 rows carry a 'teams' key and 50 of 50 are EMPTY (page denominator 50; server total=77 -- A PAGE IS NOT A TOTAL). That independently reproduces the 77/77 prior supplied by another seat, on a different page of the same cohort.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INSA2AE-AC2",
+      "criterion_verbatim": "Any landed bytes are BRONZE RAW, byte-for-byte, under the deployed leg's landing tree (blackdiamond/49financial/bronze/insurance_*) -- no parquet, no transform (Rule 17a)",
+      "method": "live_read",
+      "invocation": "aws s3api list-objects-v2 --bucket opal-data-assets --prefix blackdiamond/49financial/bronze/insurance_ (parquet-count query, then total-count query); aws s3api head-object on the landed key. METHOD NOTE: land_insurance_bronze writes the response bytes directly with no parse before write; parquet was counted across the WHOLE insurance_ prefix, not just today's partition.",
+      "output_evidence": "parquet objects under the insurance bronze tree: 0, against a denominator of 8 total objects under that prefix. Both of today's landings are .json under blackdiamond/49financial/bronze/insurance_*/2026-08-27/. head-object: ContentType=application/json, ContentLength=3093, Metadata {pull-asof=2026-08-27, bd-surface=relationshipdetail, advi-project=ADVI_INSURE, to=ADVI_INSURE.TO-A1-AE}. Landing is under the RULED in-grammar 49financial mint, not the legacy 49f alias.",
+      "denominator": "0 parquet of 8 objects under blackdiamond/49financial/bronze/insurance_*; 2 objects landed this session.",
+      "status": "PASS",
+      "status_reason": "PASS on the criterion as written (raw, byte-for-byte, correct tree, no parquet, no transform). ONE DISCLOSURE the criterion does not cover and I am not silently absorbing: the object metadata stamps to=ADVI_INSURE.TO-A1-AE, because that string is HARDCODED in the deployed insurance_leg.py land_insurance_bronze, and the TO-A2-AE face was minted today -- after the leg was written and deployed. So the landed bytes carry a provenance stamp naming the WRONG TO. It does not touch the bytes (Rule 17a satisfied) and correcting it is a code change plus a redeploy that is NOT authorized under this TO. Surfaced, not chased."
+    },
+    {
+      "criterion_id": "INSA2AE-AC3",
+      "criterion_verbatim": "SCOPE HELD, shown not asserted: the session's calls enumerated -- relationshipdetail plus its structurally-required id source (relationshipaccountdetailsearch, the certified map's sanctioned S3) and the authority mints, no other surface; 49F principal only, read-only; zero /account-api/* calls. [CLAUSE AMENDED 2026-08-27 ~18:5xZ by issuer 2.0.0_SA_COO @1b3a7817e7 on this seat's 76383; delta-certified by 3.0.0_SA_CVO @5681c08447.]",
+      "method": "manual_read_with_citation",
+      "invocation": "enumeration of every vendor call in the capture run plus the two auth-arm diagnostic runs, read off the script control flow and SURFACE_EGRESS at insurance_leg.py:76-90 rather than asserted",
+      "output_evidence": "COMPLETE CALL ENUMERATION, 49F principal only, all read-only: (1) GET /session/token -- clientview authority mint, several attempts across the diagnostic rate test and the capture; (2) GET /datamining/auth/token -- datamining authority mint, 3 attempts in the rate test plus the capture's mint; (3) POST /relationship/request/query/RelationshipAccountDetailSearch -- ONE call, the id source; (4) GET /relationship/request/relationship/z08117302 -- ONE call, the probe. ZERO /account-api/* calls: accountdetailsearch is False in SURFACE_EGRESS and probe_surface returns NOT-ATTEMPTED-EGRESS-HELD without opening a socket, so it was never invoked. Zero writes to the vendor. Zero calls to any non-49F principal.",
+      "denominator": "4 distinct vendor endpoints touched; 1 call to S4; 1 call to S3; 0 calls to /account-api/*; 0 non-49F principals; 0 write operations.",
+      "status": "PASS",
+      "status_reason": "RE-SCORED FAIL -> PASS on the AMENDED clause, 2026-08-27 ~19:0xZ. NO NEW MEASUREMENT: the verdict moved because the CRITERION changed, not because the evidence did -- the call enumeration in output_evidence is byte-for-byte the one committed at @113354aa60, no vendor call was re-run, and no denominator moved. Limb-by-limb against the amended clause: relationshipdetail 1 call SATISFIED; its structurally-required id source S3 1 call SATISFIED; the authority mints SATISFIED; NO OTHER SURFACE -- exactly those four endpoints SATISFIED; 49F principal only SATISFIED; read-only, zero writes SATISFIED; zero /account-api/* calls SATISFIED (accountdetailsearch is False in SURFACE_EGRESS and probe_surface returns NOT-ATTEMPTED without opening a socket). THE PRIOR FAIL WAS CORRECT AND IS NOT RETRACTED. The original clause said 'relationshipdetail only', which was FALSE against work that must call S3 to obtain the id S4's path requires. Scoring PASS then would have silently retired a false clause; the issuer's amendment note says the same and credits the form. This row therefore records a criterion corrected forward, NOT a seat that was wrong and got overruled -- the distinction matters because the opposite reading would teach the next seat to score PASS against a false clause and wait to be corrected."
+    },
+    {
+      "criterion_id": "INSA2AE-AC4",
+      "criterion_verbatim": "Proof instance VALID rc=0 positional, ids INSA2AE-AC1..AC4, TRUE rc bare, validator invocation + rc recorded IN the instance (D2 lock-in)",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.6.0_AE_PartnerETL/deliverables/ADVI_INSURE.TO-A2-AE_PROOF_OF_SPEC.json INSA2AE-AC1,INSA2AE-AC2,INSA2AE-AC3,INSA2AE-AC4",
+      "output_evidence": "See the compiler_tools[] row whose result begins TRUE_RC= -- the D2 lock-in record, in the interim form 3.0.0_SA_CVO ruled in 76166 because the schema offers no rejectable slot (root and controls are both additionalProperties:false).",
+      "denominator": "4 criteria declared, 4 present, 0 omitted.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "SEALED PLANTED MUTANT on the load-bearing distinction of this entire TO: financialTeam[] AFFIRMATIVELY EMPTY vs KEY ABSENT. A probe that could not tell those apart would return the same verdict for both, and the vendor-config finding rests entirely on it being the FORMER. Took the landed bronze payload and planted three mutations: (A) removed the financialTeam key, (B) populated it with one planted advisor object, (C) set it to null.",
+      "expected": "four distinct states must yield four distinct verdicts; if any two collapse, the discriminator is not a discriminator and the vendor-config finding is unsupported",
+      "observed": "UNMUTATED -> AFFIRMATIVELY-EMPTY (config state); MUTANT A key removed -> KEY-ABSENT (surface does not carry the advisor hop); MUTANT B populated -> POPULATED (n=1); MUTANT C null -> NULL. FOUR DISTINCT VERDICTS FROM FOUR DISTINCT STATES.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs of the financialTeam verdict function over the re-fetched landed bronze bytes.",
+      "observed": "run1=AFFIRMATIVELY-EMPTY (config state); run2=AFFIRMATIVELY-EMPTY (config state); identical=True",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The remaining 49 harvested relationship ids, and the 27 beyond page 1 (server total 77)",
+      "reason": "PROBE-FIRST, pre-registered by COO 76310 and CVO 76309 BEFORE any byte was captured: read ONE relationship and stop if empty. It was empty, so spending the cohort adds only vendor egress and zero information. This is a rule honoured, NOT an incomplete capture."
+    },
+    {
+      "item": "Any retry of the empty result, or widening to other surfaces to hunt for advisor data",
+      "reason": "Explicitly forbidden by the same pre-registration: NO retry, NO widening, NO quiet absorption. An empty return is a complete finding."
+    },
+    {
+      "item": "/account-api/* (accountdetailsearch) and its insuranceCharacteristics",
+      "reason": "Carries OPAL_TAXSMA PRD D3's separate gate; the 2026-08-25 egress word was read surface-scoped and this carve-out stays carved. SURFACE_EGRESS is False for it, so probe_surface returns NOT-ATTEMPTED-EGRESS-HELD without opening a socket."
+    },
+    {
+      "item": "Any change to the 49F auth chain (bd-49f-auto-login, keepalive) during the ClientView outage",
+      "reason": "Another lane's surface. The bounded re-establishment was routed to and executed by 0.7.0_AE_CloudOps~L (76305/76345); this seat only reported the finding."
+    },
+    {
+      "item": "Correcting the hardcoded to=ADVI_INSURE.TO-A1-AE metadata stamp in the deployed leg",
+      "reason": "A code change plus a redeploy, not authorized under this TO. Surfaced in AC2's status_reason rather than chased."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.6.0_AE_PartnerETL/deliverables/ADVI_INSURE.TO-A2-AE_CLIENTVIEW_AUTHORITY_401_FINDING.md -- the authority-block finding, its binding resume protocol, and this capture's precondition, @03d43dc4a3 + @f5225cc842",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find -i \"keepalive\" --band HEAD ; comp-find -i \"blackdiamond/49f/session\" --band DEF",
+      "result": "5 HEAD / 10 DEF hits over 27317 files scanned. Resolved the 49F session owner set (bd-49f-keepalive, bd-49f-auto-login, run-bd-auto-login.sh) so the ClientView-401 remedy could be routed to the right component and, as importantly, so the HEALTHY keepalive could be named as the NON-target. An earlier GUESSED pattern (bd49f-session-keepalive) returned a MEASURED ZERO over the same corpus -- recorded because that zero was about my pattern, not about the estate."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.6.0_AE_PartnerETL/deliverables/ADVI_INSURE.TO-A2-AE_PROOF_OF_SPEC.json INSA2AE-AC1,INSA2AE-AC2,INSA2AE-AC3,INSA2AE-AC4",
+      "result": "TRUE_RC=0 -- acceptance rows=4, violations=0, VALID. rc captured as $? on the BARE command, never through a pipe (a piped $? is the last stage's rc, not the script's). Recorded per the D2 LOCK-IN RIDER in the INTERIM FORM 3.0.0_SA_CVO ruled in 76166: the result string BEGINS with the machine-greppable TRUE_RC=<n> token, because PROOF_OF_SPEC.schema.json is additionalProperties:false at BOTH the root and inside 'controls', so there is no rejectable slot for validator evidence and it must land in this free string. THE ROAD TO rc=0 IS PART OF THE EVIDENCE, recorded because a clean final rc hides it: the validator REJECTED this instance three times first -- (1) free text in the 'method', 'kind' and 'deployed_state' enum fields; (2) firm '49financial' not in the enum (correct value 49F) and spec_ref.group 'INSA2AE' not in the enum (correct value A); (3) artifact_covered_by given as prose instead of an ARRAY of bare criterion ids, which the checker specifically flagged as 'a citation to a row that is not there is worse than no citation'. Each rejection was a real defect in my instance, not a tool problem. GRAIN CAVEAT, unavoidable and self-referential: this rc came from the run against the content IMMEDIATELY PRECEDING the append of this row; the post-append re-run rc is carried by the committing hash."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.6.0_AE_PartnerETL/deliverables/ADVI_INSURE.TO-A2-AE_PROOF_OF_SPEC.json INSA2AE-AC1,INSA2AE-AC2,INSA2AE-AC3,INSA2AE-AC4   # RE-SCORE run, post AC3 FAIL->PASS",
+      "result": "TRUE_RC=0 -- the AC3 RE-SCORE validation, run after the FAIL->PASS edit on the amended clause. rc captured as $? on the BARE command. Distinct from the first TRUE_RC row above, which validated the instance as originally scored; both are kept so the record shows the criterion was amended and re-scored rather than quietly edited to PASS. Same unavoidable self-referential grain caveat: this rc is from the run against the content immediately preceding the append of this row; the post-append rc rides the committing hash."
+    }
+  ]
+}

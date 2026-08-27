@@ -94,7 +94,8 @@ def verify(receipt: dict, actual_home: str = None) -> list:
     def bad(where, msg):
         out.append("%s: %s" % (where, msg))
 
-    errs = list(Draft202012Validator(load_json_strict(SCHEMA)).iter_errors(receipt))
+    SCHEMA_DOC = load_json_strict(SCHEMA)
+    errs = list(Draft202012Validator(SCHEMA_DOC).iter_errors(receipt))
     for e in errs:
         bad("schema/" + "/".join(str(x) for x in e.path), e.message[:110])
     if errs:
@@ -139,8 +140,18 @@ def verify(receipt: dict, actual_home: str = None) -> list:
     # the governing contract was pinned and never checked. A field needs a whole PATH, not a
     # slot: schema, emitter, AND the code that assigns the verdict. My own baseline arm caught
     # it by comparing the verifier's findings against the tree's dirty set.
-    for name in ("receipt_schema", "compiler", "registry", "registry_schema", "base39",
-                 "card_part_map", "card_schema"):
+    # ⛔ DERIVED FROM THE CONTRACT, NOT TYPED. A hand-written role list fell behind the
+    # schema TWICE -- `receipt_schema` pinned and unchecked, then `output_schema` pinned and
+    # unchecked one round later, in the same tuple I had just edited to fix the first. The set
+    # of pinned files IS `input_closure.required` minus the non-file members, so a role added to
+    # the contract is checked the moment it exists.
+    _NON_FILE = {"admitted_cards", "source_snapshot_pin", "complete"}
+    _required = set(SCHEMA_DOC["properties"]["input_closure"]["required"]) - _NON_FILE
+    _missing_roles = _required - set(clo)
+    if _missing_roles:
+        bad("input_closure", "roles required by the contract are absent: %s"
+            % sorted(_missing_roles))
+    for name in sorted(_required & set(clo)):
         pin = clo[name]
         got = blob_of(pin["home"])
         if got is None:
@@ -247,6 +258,32 @@ def verify(receipt: dict, actual_home: str = None) -> list:
     # ⛔ `schema_commit` MAPPED TO card_schema WHILE THE EMITTER MEANT THE OUTPUT SCHEMA --
     # one ambiguous token for two different contracts, silently reading the wrong one. Each
     # schema now has its own token and its own role.
+    # ⛔ `registry_ratified_commit` MEANT "the commit that last touched the registry FILE",
+    # which is not the ratification at all -- a redirect to any current commit that happened to
+    # touch it recomputed a consistent snapshot and verified clean. The RATIFICATION is a value
+    # INSIDE the registry document, and that is what the token must resolve to.
+    _ratified = None
+    try:
+        _ratified = load_json_strict(
+            os.path.join(WS, clo["registry"]["home"]))["ratified_at_commit"]
+    except Exception:                              # noqa: BLE001 -- reported, never swallowed
+        bad("input_closure.registry", "cannot read ratified_at_commit from the registry document")
+    if _ratified and subprocess.run(["git", "cat-file", "-e", _ratified + "^{commit}"], cwd=WS,
+                                    capture_output=True).returncode != 0:
+        bad("input_closure.registry", "ratified_at_commit %s names no commit" % _ratified[:12])
+    # ---- REWORK 4 (2), AND A BINDING I WROTE AND REVERTED IN THE SAME SITTING ----------------
+    # I added `registry.commit MUST EQUAL ratified_at_commit` here and it fired on the CLEAN
+    # receipt: pin 82e795810ddf vs ratification 20da19b461bd. THE TWO ARE DIFFERENT AXES BY
+    # DESIGN and equating them was my error, not a defect:
+    #   registry.commit   -- WHICH COMMIT CARRIES THESE REGISTRY BYTES (feeds the commit:path
+    #                        blob resolution, and legitimately moves when the file is touched)
+    #   ratified_at_commit -- WHICH COMMIT RATIFIED THE REGISTRY (the snapshot AUTHORITY, and the
+    #                        value `registry_ratified_commit` already resolves to below)
+    # The token->ratification binding requirement 2 asks for ALREADY EXISTS at the `ref =` line.
+    # WARN: THE LESSON IS THE ONE THIS FILE KEEPS RE-LEARNING: a new check that fires on the known-good
+    # fixture is a FALSE POSITIVE, not a discovery, and the positive arm is what catches it. I ran
+    # the clean receipt through before believing my own mutant result -- without that, a green
+    # mutant would have shipped a verifier that refuses every honest receipt.
     _role_of = {"registry_ratified_commit": "registry",
                 "output_schema_commit": "output_schema",
                 "card_schema_commit": "card_schema",
@@ -257,7 +294,11 @@ def verify(receipt: dict, actual_home: str = None) -> list:
         pin = clo.get(_role_of[token])
         if not pin:
             continue
-        r = subprocess.run(["git", "show", "-s", "--format=%cI", pin["commit"]], cwd=WS,
+        # the registry token derives from the RATIFICATION, every other from its pin's commit
+        ref = _ratified if token == "registry_ratified_commit" else pin["commit"]
+        if not ref:
+            continue
+        r = subprocess.run(["git", "show", "-s", "--format=%cI", ref], cwd=WS,
                            capture_output=True, text=True)
         if r.returncode == 0 and r.stdout.strip():
             times.append(datetime.fromisoformat(r.stdout.strip()).astimezone(
@@ -277,11 +318,13 @@ def verify(receipt: dict, actual_home: str = None) -> list:
     # ⛔ BOUND TO THE RUN, NOT THE CLOSURE. This check compared against source_snapshot_utc
     # while the emitter moved to executed_utc -- and I changed the producer without changing the
     # consumer, which is the whole-path defect one file over from where I had just fixed it.
-    want_q = receipt["executed_utc"].replace("-", "").replace(":", "")
-    if not receipt["exact_home"].endswith(".%s.receipt.json" % want_q):
-        bad("exact_home",
-            "qualifier does not match executed_utc (%s); a run-qualified home whose qualifier "
-            "is free is a second, unbindable clock" % want_q)
+    if not receipt["exact_home"].endswith(".%s.receipt.json" % receipt["run_id"]):
+        bad("exact_home", "qualifier does not match run_id (%s)" % receipt["run_id"])
+    # ⛔ AND run_id MUST CARRY executed_utc, or the subsecond identity is a second free clock.
+    if receipt["run_id"][:15] != receipt["executed_utc"].replace("-", "").replace(":", "")[:15]:
+        bad("run_id", "%s does not carry executed_utc %s -- the run identity and the run clock "
+                      "are adjacent rather than bound"
+            % (receipt["run_id"], receipt["executed_utc"]))
 
     # ---- the two clocks must not collapse -------------------------------------------
     # ⛔ EQUALITY IS THE TELL, NOT A COINCIDENCE. A deterministic snapshot derived from commit
@@ -308,6 +351,18 @@ def verify(receipt: dict, actual_home: str = None) -> list:
             "the described artifact's digest %s is NOT among the emissions -- the comparison "
             "claim references nothing this receipt describes"
             % receipt["describes"]["sha256"][:12])
+    # ⛔ AN EMISSION INSTANT IS EVIDENCE AND MUST BE BOUNDED BY THE RUN IT CLAIMS TO BE IN.
+    # A future-2099 row sat in a present receipt and verified clean: it parsed, it was unique,
+    # and nothing compared it to the run's own window.
+    for e in ems:
+        t = e["executed_utc"]
+        if t < receipt["source_snapshot_utc"]:
+            bad("replay.emissions", "%s precedes the source snapshot %s"
+                % (t, receipt["source_snapshot_utc"]))
+        if t > receipt["executed_utc"]:
+            bad("replay.emissions", "%s is LATER than this receipt's own execution %s -- a "
+                                    "receipt cannot witness an emission that has not happened"
+                % (t, receipt["executed_utc"]))
     seqs = sorted(e["sequence"] for e in ems)
     if seqs != list(range(1, len(ems) + 1)):
         bad("replay.emissions", "sequences are not 1..%d: %s" % (len(ems), seqs))
