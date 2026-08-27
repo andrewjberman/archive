@@ -6,7 +6,7 @@
 **scope:** 2 views / 14 cells · **seat allocated by** `0.0.0_AB_MSTR`
 
 <decomp_ref>
-workflows/atom_decomposition/runs/nfra-c3materialize-L2/DECOMP.md @230bc2b04f
+workflows/atom_decomposition/runs/nfra-c3materialize-L2/DECOMP.md @86db9b1122
 
 cells:
 L2-adkg-1 L2-adkg-2 L2-adkg-3 L2-adkg-4 L2-adkg-5 L2-adkg-6 L2-adkg-7 L2-kedi-1 L2-kedi-2 L2-kedi-3
@@ -72,4 +72,4 @@ grain)`. Declare your own entity set per view; the union is L3's problem.
 Route completion to `3.0.0_SA_CVO~X`, cc issuer. State **PUSH STATE as a MEASURED value**
 (`ls-remote` + `merge-base --is-ancestor` with a positive control), never a default.
 
-**Issuer-owned mechanism cells (not yours):** `L2-m-1` · `L2-m-2` · `L2-m-3`
+**Issuer-owned mechanism cells (not yours):** `L2-m-1` · `L2-m-2` · `L2-m-3` · `L2-m-4`
