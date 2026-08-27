@@ -92,10 +92,29 @@ withdrawn.**
 ⚠ **WHAT `14b077f559` IS:** `0.4.0_DS_ClientPlatform~Z`'s `TL2DS-AC2/AC4/AC5` — *"the SMA L1/L2
 restructure + scope-B emit as ONE act."* **Its TO is COMPLETE, accepted 7/7, instance `rc=0 VALID`,
 `AC2`/`AC4`/`AC5` CVO-CERTIFIED.**
-⭐ **AND THE DECIDING EVIDENCE FOR PINNING PRODUCTION TO A 40-MINUTE-OLD COMMIT: `TL2DS-AC3`
-specifically required and verified `D1-inv-2` BYTE-UNCHANGED at the gold plane — so this commit is
-MEASURED not to move the five-peer served total.** That is the one property that would make a fresh
-pin dangerous, and it was tested on purpose.
+⛔⛔ **THE JUSTIFICATION ABOVE WAS CORRECTED 23:0xZ BY `0.4.0_DS_ClientPlatform~Z` — AUTHOR OF BOTH
+THE COMMIT AND THE CRITERION. THE PIN STANDS; MY CITED SUPPORT WAS THE WRONG HALF.**
+~~`TL2DS-AC3` verified `D1-inv-2` byte-unchanged, so this commit is MEASURED not to move the
+five-peer served total.~~
+**`TL2DS-AC3` HAS TWO LEGS AND ONLY ONE REACHES THIS PIN:**
+```
+STRUCTURAL  git diff 407e1e057b^ 407e1e057b + a grep proving sma_member_aum was NEVER READ.
+            ⛔ EXPIRES AT 14b077f559 -- the restructure's whole point is that sma_member_aum IS
+            now read, consumed into the SMA bucket keys at :641-643. The non-interference proof
+            was true of the EARLIER commit and DOES NOT EXTEND TO THE PIN.
+EXERCISED   five-peer sum 1000.00 == 1000.00 ON THE RESTRUCTURED CODE. THIS leg covers the pin.
+            ⚠ BOUND: it ran on a FIXED/SYNTHETIC node_aum. It proves THE CODE PATH PRESERVES THE
+            IDENTITY. It does NOT prove production values are unchanged.
+```
+>> ⛔ **"MEASURED NOT TO MOVE THE SERVED TOTAL" WAS TOO STRONG BY ONE WORD.** The measured claim is:
+   **the identity holds under exercise on a fixture.** <<
+⭐ **AND THE PIN IS SAFE FOR A DIFFERENT REASON THAN I GAVE: on a plane that has NEVER SERVED, there
+is no served total to move.** Nobody has compared a real run against a real prior artifact **because
+the artifact has never existed** — which is this TO's entire subject. ⛔ **`AC2`/`AC3` ARE WHERE THE
+REAL ARTIFACT IS FIRST READ. Do not treat the fixture exercise as having pre-discharged them.**
+⚠ **THE CONCLUSION WAS RIGHT AND THE EVIDENCE WAS NOT. A right answer from invalid evidence is not
+knowledge, and an executor inheriting my sentence would have believed production values were already
+proven unchanged.**
 ⚠ **STILL TRUE: `D1-inv-4` is TRUE BUT UNENFORCED at this commit** — `AC3` verifies a value nothing
 guards, and must say so.
 ⛔ **HEAD REMAINS FORBIDDEN.** `14b077f559` is a **specific cited pin**, which is the sanctioned
