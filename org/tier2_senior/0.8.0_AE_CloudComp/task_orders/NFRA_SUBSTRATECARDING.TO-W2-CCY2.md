@@ -188,3 +188,13 @@ references AND prose descriptions — **one field, two grains, Rule 24(ii) viola
 so the harvest faithfully returned a mixed-grain population. **The method was executed correctly and
 the population was wrong, and the population is the issuer's.** Measured: 10 of 44 subjects resolve
 to no openable artifact (`resolvability_assessment.json` @`322c41bbb4`).
+
+**PROOF-OF-SPEC INSTANCE: NONE OWED — issuer ruling 2026-08-27 ~01:1xZ.** The TO's 7 criteria span
+this lane's full declared cell set, part of which is now SCOPE-SUPERSEDED. An instance over the
+ORIGINAL set would assert criteria over cells that no longer exist (a false claim); a RE-SCOPED
+instance would be a different instrument wearing the specified instrument's name, so a later reader
+comparing this lane's "passed proof-of-spec" against another's would be comparing two different
+tests. **The absent instance is a PROPERTY OF THE CUT, not a gap.** This lane is DELIVERED-UNVERIFIED
+at TO level and CARD-CONFORMANT at card level (`3.0.0_SA_CVO~X` card-level battery: v2 schema 0
+errors, as_of uniform on the wave-2 anchor, all rows carry basis+evidence+owner, forward_disposition
+absent). An honest absence beats a green from a substituted instrument.
