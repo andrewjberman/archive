@@ -63,31 +63,33 @@
     {
       "criterion_id": "CF-4",
       "criterion_verbatim": "CF-4 NO SILENT RE-STATEMENT. Served TWR values will CHANGE for affected accounts. That is the point -- but it is a served-semantics change on 1,728 accounts, so it routes P4-class through CTO with per-key never-widen where served keys move. A correction shipped silently is indistinguishable from a regression.",
-      "method": "manual_read_with_citation",
-      "invocation": "Not yet run. The gate is 1.0.0_SA_CTO's, acknowledged as theirs in 76329 note (1): 'route the deploy through this seat when CF-2/CF-3/CF-5 close'.",
-      "output_evidence": "NOT SILENTLY RE-STATED -- the criterion is honored so far by NOT DEPLOYING. c02_twr_engine.py is committed at @cab1f8bff9 and deliberately NOT deployed; comp-pipescript deployed reads STALE for it, which is the CORRECT state under this criterion rather than a defect. No served TWR value has moved. A caveat is pre-registered for whoever verifies AFTER the deploy: c02_twr_engine.py is CRLF in the working tree while c00/c01 are LF, so a post-deploy STALE verdict must be resolved by normalised content compare before it is believed.",
-      "denominator": "0 of 1 deploys taken. 1 gate, at 1.0.0_SA_CTO.",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "NAMES THE LATER RUN: the P4 gate read by 1.0.0_SA_CTO with per-key never-widen, followed by the deploy routed through that seat. It cannot be computed at this seat and cannot be computed before CF-2 and CF-3 close, which is the ordering the criterion itself imposes. This instance will be re-filed with CF-4 measured once that gate runs."
+      "method": "diff",
+      "invocation": "[method in schema vocabulary: diff; the specific shape is a normalised content compare against the committed build input] Gate exercised by 1.0.0_SA_CTO 76420 (PASS TO DEPLOY, four conditions). Condition 2: cf4_condition2 re-measured the publisher activation on all three planes at deploy time. Deploy: .tools/safe-deploy.sh --author 0.4.0_DS_ClientPlatform~U data/assets/scripts/gold/runners_49f/c02_twr_engine.py -- that one file. Condition 3: boto3 get_object on s3://opal-data-49financial/_code/c02_twr_engine.py vs `git show cab1f8bff9:<path>`, LF-normalised, parent commit as negative control.",
+      "output_evidence": "ALL FOUR CONDITIONS MET; NOT SILENTLY RE-STATED. CONDITION 1 (vehicle+scope): one file deployed through the Rule-13 DS lane, nothing else rode; the deploy can affect only FUTURE canonical/twr_daily partitions, no historical partition is touched by the act. CONDITION 2 (basis RE-VERIFIED, not inherited): all three planes unchanged from @bfb74b20c2 and each with a LIVE positive control -- SCHEDULE advi-49f-publisher State=DISABLED (control: list_schedules returns 18); SSM advi-49f-publisher-dispatch ABSENT (control: advi-49f-chain-dispatch reads Active on the same call shape, so the absence is not a permissions artifact); LAMBDA advi-49f-gold-dispatch ALLOWED_DOCUMENTS UNSET so it defaults to advi-49f-chain-dispatch alone and the publisher document is not allowlisted. Enabling the schedule today still refuses at the Lambda before any SSM call. CONDITION 3 (normalised content) -- AND THE TRAP ACTUALLY FIRED, which is the whole reason the condition exists: the S3 object carries CRLF (21,428 B) while the commit blob is LF (21,073 B), so the RAW compare against the build input reads DIFFERENT -- 355 bytes of carriage returns, not a stale deploy. LF-normalised sha256/16 S3 3ff237d8364296d7 == commit cab1f8bff9 3ff237d8364296d7, with parent 1c270beda617b07c DIFFERING so the compare is shown able to tell vintages apart. comp-pipescript separately reports MATCH on basis 'raw bytes' because IT compares working-tree (CRLF) to S3 (CRLF) -- a different subject from mine, both correct, and the pair is exactly why a bare verdict without its basis is not evidence. CONDITION 4 (what the gate does NOT do): no serve, no flip, no backfill. Served TWR values move only at Andrew's arm-(a). CF-2 clause 2 remains OPEN and attributed; this deploy neither gates on it nor closes it.",
+      "denominator": "1 of 1 file deployed; 3 of 3 planes re-measured, each with its own positive control; 1 build-input compare with 1 negative control; 4 of 4 gate conditions addressed.",
+      "status": "PASS"
     },
     {
       "criterion_id": "CF-5",
       "criterion_verbatim": "CF-5 proof instance VALID rc=0 positional: ids CF-1,CF-2,CF-3,CF-3b,CF-4,CF-5 (widened from CF-1..CF-5 by this amendment; disclosed to 3.0.0_SA_CVO for delta-cert, the RPS 5->7 form). MEASURED/RULED-class run rows only. Cite the expected-id set the checker ran against -- a bare rc=0 does not establish positional coverage.",
       "method": "schema_validation",
       "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c02-CFINPUT_PROOF_OF_SPEC.json CF-1,CF-2,CF-3,CF-3b,CF-4,CF-5 -- the expected-id set CITED here is the widened one from the face @76fd92be30, and the rc is read directly from the process with no pipe.",
-      "output_evidence": "RECORDED AFTER THE RUN. THE ID SET THE CHECKER RAN AGAINST IS CITED ABOVE IN FULL, because the criterion says explicitly that a bare rc=0 does not establish positional coverage -- the checker fails on a missing OR an extra id, so citing the set is what makes the rc mean something. NOTE ON WHAT THIS INSTANCE CLAIMS: it is filed at the CURRENT state, not as a completion claim. CF-4 is UNCOMPUTABLE-BY-CONSTRUCTION and CF-2 is UNVERIFIABLE-BY-INSTRUMENT; the TO remains OPEN and its status has not been flipped. A valid instance is not a complete TO, and this row exists so nobody reads it as one.",
+      "output_evidence": "RECORDED AFTER THE RUN. THE ID SET THE CHECKER RAN AGAINST IS CITED ABOVE IN FULL, because the criterion says explicitly that a bare rc=0 does not establish positional coverage -- the checker fails on a missing OR an extra id, so citing the set is what makes the rc mean something. NOTE ON WHAT THIS INSTANCE CLAIMS, RE-FILED after the CF-4 gate: CF-4 is now PASS on measured evidence (gate exercised by 1.0.0_SA_CTO 76420, all four conditions met, deploy taken and content-verified). CF-2 REMAINS UNVERIFIABLE-BY-INSTRUMENT -- its clause 2 needs a Black Diamond matched-window read that only exists post-backfill, and 2026-03-24 is still UNMEASURED-PRE-BACKFILL. So five of six criteria are PASS and one is honestly short; the completion flip is 2.0.0_SA_COO + 3.0.0_SA_CVO ground, not this seat's, and I have not flipped the TO.",
       "denominator": "6 of 6 criterion ids in the widened set; coverage checked by the validator itself.",
       "status": "PASS"
     }
   ],
   "artifacts_produced": [
     {
-      "path_or_key": "data/assets/scripts/gold/runners_49f/c02_twr_engine.py",
+      "path_or_key": "data/assets/scripts/gold/runners_49f/c02_twr_engine.py -> s3://opal-data-49financial/_code/c02_twr_engine.py",
       "kind": "script",
-      "commit_or_etag": "commit cab1f8bff9",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "DELIBERATELY NOT DEPLOYED pending CF-4's P4 gate at 1.0.0_SA_CTO. comp-pipescript deployed reads STALE and that is the correct state under CF-4, not a defect. Exercised locally through the real CLI at both --flow-boundary values with no --upload.",
-      "artifact_covered_by": ["CF-1", "CF-4"]
+      "commit_or_etag": "commit cab1f8bff9 / deployed LF-normalised sha256(16) 3ff237d8364296d7, 21,428 B on S3 (CRLF) vs 21,073 B in the commit blob (LF)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Deployed under the CF-4 gate (CTO 76420) after re-measuring the publisher-not-built basis on three planes at deploy time. safe-deploy gate PASS rc=0, then verified with a DIFFERENT subject than the gate's own check: deployed bytes vs the COMMITTED build input, LF-normalised, parent commit as a negative control that DIFFERS. The documented CRLF false-STALE trap FIRED on the raw compare and was resolved by normalisation rather than accepted or dismissed bare.",
+      "artifact_covered_by": [
+        "CF-1",
+        "CF-4"
+      ]
     },
     {
       "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c02-CFINPUT_ACCEPTANCE_ALLTEN.py",
@@ -95,7 +97,10 @@
       "commit_or_etag": "commit cab1f8bff9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "[artifact shape: harness] Repository artifact, no S3 target. Carries the TESTABILITY GATE that demoted two arms-collapsed rows from PASS to NOT-TESTABLE.",
-      "artifact_covered_by": ["CF-1", "CF-2"]
+      "artifact_covered_by": [
+        "CF-1",
+        "CF-2"
+      ]
     },
     {
       "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c02-CFINPUT_CF3_SWEEP.py + _CF3_DISTRIBUTION.json",
@@ -103,7 +108,9 @@
       "commit_or_etag": "commit c9f215ef47",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "[artifact shape: instrument + measurement] The JSON carries its own input-availability constraint so a later reader cannot mistake 6 partitions for 538.",
-      "artifact_covered_by": ["CF-3"]
+      "artifact_covered_by": [
+        "CF-3"
+      ]
     },
     {
       "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c02-CFINPUT_CF3B_PAIRSCAN.py + _CF3B_PAIRSCAN.json",
@@ -111,7 +118,9 @@
       "commit_or_etag": "commit b49e7135c3",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "[artifact shape: instrument + measurement] The JSON carries the controlled/uncontrolled split so the two cannot be pooled back into one number.",
-      "artifact_covered_by": ["CF-3b"]
+      "artifact_covered_by": [
+        "CF-3b"
+      ]
     },
     {
       "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c02-CFINPUT_A00_ATTESTATION_CENSUS.py + _CHAIN_ABORT_20260324.log",
@@ -119,7 +128,9 @@
       "commit_or_etag": "commit c0e25a44aa",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "[artifact shape: instrument + raw evidence] The abort log is the unedited chain output; the census re-derives the 27-of-533 attested split from the converter's own records so another seat need not take this seat's number.",
-      "artifact_covered_by": ["CF-2"]
+      "artifact_covered_by": [
+        "CF-2"
+      ]
     }
   ],
   "compiler_tools": [
@@ -172,11 +183,8 @@
   ],
   "surprises": [
     "OBSERVATION / INERT -- THE C02 DOCSTRING STATES THE CORRECT DESIGN AND ALWAYS HAS, so defect 1 is a right design whose second clause was never implemented rather than a wrong design faithfully built. My root-cause record said the docstring 'states the defect as the design'; I had quoted line :19 and stopped at the line break, and the sentence continues onto :20-21 with '+ signed in-kind values on EXTERNAL in-kind legs'. Present in 5 OF 5 COMMITS of the file's history from a781ae9b5d (2026-08-11). A line-bounded read of a wrapped sentence -- the same shape as a phrase grep's false zero, except here it inverted an INTENT. Consequence that binds: this change RESTORES the module's own spec rather than altering it, which sharpens CF-4's framing without loosening the gate, since served values move regardless of what the docstring says. Corrected in the deliverable with the original kept beside it.",
-
     "BLOCKING (now resolved by ruling) -- A CIRCULAR GATE: CF-2's oracle day 2026-03-24 needs a schema-1.2 ledger -> which needs the c00 inputs re-minted -> whose ruled vehicle is P14-VEHICLE's full-chain pass -> whose V14-3 gate waits on c02-CFINPUT completing -> which needs CF-2. Four standing rulings, none individually wrong, jointly closed. Found by measuring the specimen day's input availability BEFORE running the harness rather than after. Surfaced with a proposed break rather than as a halt; CTO 76357 and COO 76359 confirmed the circle and sanctioned the break (a local full-chain QA run with zero S3 writes). The break then failed for a DIFFERENT reason -- the a00 attestation wall -- and the pre-approved specimen-substitution fallback carried CF-2's first clause.",
-
     "BLOCKING / DISARMED SAME-TURN -- P14-VEHICLE HAZARD 3, AND IT FIRES BEFORE THE OTHER TWO: the ruled full-chain backfill would ABORT at stage 1 of 15 on 506 of 533 dates. a00_runner.py:83-100 requires a meta/conversions record attesting fact_acc for the date; only 32 dates are attested (2026-07-14 .. 2026-08-26), of which 27 intersect the backfill set. EXERCISED on 2026-03-24 (real abort, 46.7s, c00 never ran) and ENUMERATED across all 533 from the converter's own 456 records, with both controls firing: dates the chain demonstrably ran on are attested, the date that aborted is not. Strictly friendlier than the two banked hazards -- a loud refusal on date 1 beats a silent wrong answer on date 531. Routed to 0.7.0_AE_CloudOps~L (owner) cc COO+CTO with the census script committed so their seat can re-derive the split independently; RULED same-turn by CTO 76378 (declared-historical mode, measured epoch, attestation_basis field, back-filled records BANNED). No fix built here.",
-
     "OBSERVATION / INERT -- I CITED AN ACT I HAD NOT YET PERFORMED. In 76369 to 0.7.0_AE_CloudOps~L I wrote that the census script 'is committed with the CF-3 artifacts'; at that moment it was in a scratch directory, and it rode its own commit rather than the CF-3 one. Self-corrected to that seat within minutes with the exact paths and commit. The class is why it matters: a 'where to find it' claim load-bears on nothing until someone tries the path, so it survives review and wastes the reader's time instead of the author's."
   ],
   "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/logs/2026-08-27/session_1755-1830Z_c02_cfinput.md (and session_1606-1755Z_c01_signfield.md for the gating TO). c02 commits: cab1f8bff9 implementation + all-ten acceptance, c9f215ef47 CF-3, b49e7135c3 CF-3b, c0e25a44aa the a00 evidence."
