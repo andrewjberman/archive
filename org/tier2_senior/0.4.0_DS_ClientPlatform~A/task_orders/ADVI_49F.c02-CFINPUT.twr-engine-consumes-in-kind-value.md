@@ -51,12 +51,22 @@ served history, so its verification carries the weight the c00 fix did not.
   point — but it is a served-semantics change on 1,728 accounts, so it routes **P4-class through
   CTO** with per-key never-widen where served keys move. **A correction shipped silently is
   indistinguishable from a regression.**
-- **CF-5 proof instance VALID rc=0 positional: ids CF-1..CF-5.** MEASURED/RULED-class run rows only.
-  Cite the expected-id set the checker ran against — a bare rc=0 does not establish positional
-  coverage.
+- **CF-3b THE PAIR-SCAN (issuer amendment 2026-08-27 ~18:1xZ, on CTO ruling 76330 — NON-GATING,
+  runs beside or after CF-3 full scope, never blocks it):** the cross-account pair-scan over
+  code-rule INTERNAL in-kind legs — same day, same CUSIP, opposite-direction quantity in ANOTHER
+  account's ledger. Rows where the scan ESTABLISHES a counterparty graduate into the admitted set
+  through the EXISTING pair-match provenance (zero new principle; the one-line
+  INTER_ACCOUNT_PROVENANCE mechanism untouched). Unestablished rows stay EXCLUDED,
+  refused-BY-REASON in the census, **and the P1.5 re-grade report CARRIES the residual's per-day
+  dollar size with its denominator** so the arm-(a) serve read is made with the number in view —
+  materiality at the serve gate is Andrew's judgment, never a silent drop.
+- **CF-5 proof instance VALID rc=0 positional: ids CF-1,CF-2,CF-3,CF-3b,CF-4,CF-5** (widened from
+  CF-1..CF-5 by this amendment; disclosed to `3.0.0_SA_CVO` for delta-cert, the RPS 5->7 form).
+  MEASURED/RULED-class run rows only. Cite the expected-id set the checker ran against — a bare
+  rc=0 does not establish positional coverage.
 
 <proof_of_spec>
-  <expected_criteria>CF-1,CF-2,CF-3,CF-4,CF-5</expected_criteria>
+  <expected_criteria>CF-1,CF-2,CF-3,CF-3b,CF-4,CF-5</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~A/deliverables/ADVI_49F.c02-CFINPUT_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
