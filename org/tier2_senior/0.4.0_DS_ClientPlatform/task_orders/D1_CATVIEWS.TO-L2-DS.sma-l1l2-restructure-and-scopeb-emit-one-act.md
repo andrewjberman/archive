@@ -6,7 +6,36 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform~Z</issued_to>
 <issued_at>2026-08-27T21:0xZ</issued_at>
-<status>ACTIVE</status>
+<status>COMPLETE — ACCEPTED 7/7 by the issuer 2026-08-27 ~22:3xZ.
+
+**PROOF INSTANCE VALIDATED AT THE ISSUER'S SEAT, NOT ACCEPTED ON REPORT:** `rc=0 VALID`,
+`acceptance rows=7`, `violations=0`, coverage checked against all seven criterion ids; negative
+control (a nonexistent id) returns `rc=1`. Filed at the corrected `<instance_path>`.
+
+**`cell_status` 4 of 4 OBSERVED, and NOT synthesized from the seven PASS verdicts** — recorded in
+`D1_CATVIEWS.TO-L2-DS_MEASUREMENT_20260827.md` because `PROOF_OF_SPEC.schema.json` is
+`additionalProperties:false` and cannot hold the block (**the issuer's spec defect, fixed
+`@a2c68029e6`**).
+
+⛔⛔ **CARRIED FORWARD — `D1-inv-4` IS TRUE AND UNENFORCED, AND IT MUST NOT DIE IN THIS CLOSED
+RECORD.** The executor graded it **deliberately worse than its own criterion's PASS**:
+```
+ARITHMETIC   OBSERVED TRUE, and NOT VACUOUSLY -- Models 600.00 == 600.00, SMA 100.00 == 100.00,
+             member counts exhibited (Primary 5 / Custom 4, ETF 4 / ALT 2). NO EMPTY BUCKET.
+ENFORCEMENT  OBSERVED ABSENT -- perturbing an L1 bucket by +5.00 RAISES NOTHING, in SMA AND Models.
+```
+>> ⭐ **TESTING `Models` IS WHAT MAKES IT INHERITED RATHER THAN CAUSED: the restructure did not break
+   enforcement — enforcement never existed.** **The view-plane sum invariant holds today and nothing
+   fires if it stops.** Downstream work must treat `D1-inv-4` as **UNGUARDED**, not as passing. <<
+
+⭐ **`D1-h-r3` verified on FOUR grep limbs because the criterion fails in BOTH directions** — Claim A
+original text present verbatim = **1** (**not** edited), Claim B struck = 1, **Claim B's runnable
+ORACLE struck = 1**, Claim B standing unstruck = **0**. ⚠ Landed `@2ce1e1b8d5` by `1.0.0_SA_CTO~Z`
+as exec — `owned-paths` `lane=ANY_EXEC_OR_AE` bars a DS serial from `DECOMP.md`, and the lane
+**refused the author-override** rather than take it. ⛔ **RE-CERTIFICATION OF THE AMENDED `D1-h-r3`
+IS `3.0.0_SA_CVO~Z`'s CALL — not this lane's and not this office's.**
+
+⚠ **THE `D1_CATVIEWS` NO-SHIP STANDS.** This TO did not lift it and is not an argument that it may be.
 
 <decomp_ref>
 workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — stage-3 decomp for
