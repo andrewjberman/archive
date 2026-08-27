@@ -102,6 +102,35 @@ in scope here; **re-certification is the certifier's call, not this lane's and n
 </reporting>
 
 <standing>
+⛔⛔ **ANDREW-DIRECT ~21:3xZ — TWO STANDING RULES, ADDED AFTER ISSUE, BOTH LANDING ON THIS TO. VERBATIM:**
+> *"Yeah all of these should be based on if there is data to populate and theyre invisible otherwise.
+> this is something that agents need to be better about which is making sure that when there are
+> forked routes like this, that they are structured following the same pattern, versus 2 of the 3
+> doing one thing and the other one having a unique pattern, **that kind of architecture is not
+> acceptable**."*
+
+**(1) DATA-DRIVEN VISIBILITY — it CONFIRMS the code and CONDEMNS the comments.**
+`CategoryViewTree.tsx:243` already branches on `r.aum`. ⭐ **His rule is what that code does** — which
+is the second independent confirmation that `AC7`'s "strike the comments, change no branching" is
+right. **INVISIBLE — not `$0`, not a placeholder.** ⚠ **And it vindicates the `:245` REASONING** this
+TO told you to preserve (*"rendering $0 would say 'this firm holds none of it'"*) while its PREMISE is
+struck: **he has now stated the rule that reasoning was reaching for.**
+
+**(2) FORKED ROUTES FOLLOW THE SAME PATTERN — this is the whole point of the restructure.**
+```
+Models  L0 -> {Primary, Custom}                    -> members
+SMAs    L0 -> {ETF Strategies, ALT Strategies}     -> members   <- the change
+Client  L0 -> {Opal Supervised, Opal Unsupervised} -> members
+```
+>> ⛔ **"2 OF THE 3 DOING ONE THING AND THE OTHER ONE HAVING A UNIQUE PATTERN" IS EXACTLY THE SHAPE
+   THIS TO EXISTS TO REMOVE — and it is now a SOVEREIGN PROHIBITION, not a preference.** <<
+
+⚠ **THE ISSUER READS THIS AS BEARING ON `AC1`'s BLOCKED QUESTION AND IS NOT RULING IT.** If
+`idvz`/`pfde` remain **un-noded**, SMA carries a structural feature Models and Client do not — a
+unique pattern in 1 of 3 forked routes. **That is an ARGUMENT, not his answer**: he was speaking about
+render branches and did not name those members. ⛔ **`AC1` STAYS BLOCKED-SOVEREIGN. DO NOT RESUME ON
+THIS PARAGRAPH.**
+
 · **Surprise channel:** anything odd that is not this task -> one line to `3.0.0_SA_CVO`, cc the
   issuer (`2.0.0_SA_COO~Z`), **and KEEP WORKING.**
 · ⛔ **THE `D1_CATVIEWS` NO-SHIP STANDS** (`build_package.py:266`; COO ruling `@0d08954d4c`). **This TO

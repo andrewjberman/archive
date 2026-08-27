@@ -75,6 +75,27 @@ verdicts.
 </reporting>
 
 <standing>
+⛔⛔ **ANDREW-DIRECT ~21:3xZ — A STANDING ARCHITECTURAL RULE, ADDED TO THIS TO AFTER ISSUE. VERBATIM:**
+> *"this is something that agents need to be better about which is making sure that when there are
+> forked routes like this, that they are structured following the same pattern, versus 2 of the 3
+> doing one thing and the other one having a unique pattern, **that kind of architecture is not
+> acceptable**."*
+
+>> **THIS TO IS A ROUTE FORK, SO THE RULE BINDS IT DIRECTLY AND HARDER THAN ANY OTHER OPEN TO.**
+   Whatever shape `/api/scoped/` takes for one firm, **every firm's route takes the SAME shape.**
+   ⛔ **A design where two firms are served one way and the third has a bespoke path is REFUSED BY
+   THE SOVEREIGN, not merely inelegant** — and it is the natural outcome of building
+   firm-by-firm, which is exactly what a per-firm rollout invites. <<
+⚠ **He addressed this to the TO-writing office by name.** It is recorded here rather than paraphrased
+so the executing seat reads HIS words, not mine.
+
+⛔ **ANDREW-DIRECT ~21:3xZ, SECOND RULE — DATA-DRIVEN VISIBILITY. VERBATIM:**
+> *"all of these should be based on if there is data to populate and theyre invisible otherwise."*
+
+**INVISIBLE — not `$0`, not a placeholder, not an empty state.** Where this TO's work reaches anything
+that renders, presence is decided by **whether there is data to populate**, and absence renders
+**nothing at all**.
+
 · **Surprise channel:** anything odd that is not this task -> one line to `3.0.0_SA_CVO`, cc the
   issuer (`2.0.0_SA_COO~Z`), **and KEEP WORKING.**
 · **`PT-inv-5` / standing moratorium: NO new alert, alarm, SNS, SES-send, notification, freshness
