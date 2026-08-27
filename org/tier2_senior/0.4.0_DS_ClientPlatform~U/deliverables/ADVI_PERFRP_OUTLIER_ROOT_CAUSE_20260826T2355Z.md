@@ -186,11 +186,28 @@ The direction exists upstream in `fact_trn` (`debit_credit` = LONG/SHORT) and **
 
 ---
 
-## 6. SEQUENCE THE REMEDIATION IMPLIES (stated, not commissioned)
-1. **`flow_ledger` carries a SIGNED in-kind value** (defect 3) — prerequisite; without it, step 2 is wrong on outflows.
-2. **`c02_twr_engine` incorporates in-kind value** (defect 1) — the pattern already exists at `c01_nna_canonical.py:44`.
-3. **Rule the `INTERNAL`-at-account-grain question** (defect 2), then implement to the ruling.
-4. **Backfill** — every historical `twr_daily` partition computed under these defects carries the same error.
+## 6. THE RULED REMEDIATION DESIGN — SUPERSEDES MY ORIGINAL SEQUENCE
+
+⛔ **MY ORIGINAL s.6 IS SUPERSEDED AND IS REPRODUCED HERE ONLY SO IT IS NOT FOLLOWED.** It read:
+> *"1. `flow_ledger` carries a SIGNED in-kind value (defect 3) — prerequisite. 2. `c02_twr_engine` incorporates in-kind value (defect 1). 3. Rule the `INTERNAL`-at-account-grain question (defect 2), then implement. 4. Backfill — every historical `twr_daily` partition."*
+**Its step 1 says RE-SIGN IN PLACE. `1.0.0_SA_CTO` 74187 ruled that OUT** — it would make the TWR fix silently move NNA output, and *a silent improvement is indistinguishable from a silent regression at the consumer.* **A successor following the old text would build the rejected design.** It also mislabels the direction gap as "defect 3" (that number now belongs to `c01`'s sign-branch) and treats defect 2 as unruled, which it no longer is.
+
+### THE RULED DESIGN — closed end to end (`1.0.0_SA_CTO` 74166 / 74187 / 74194)
+| # | step | owner | note |
+|---|---|---|---|
+| **1** | **`flow_ledger` gains a NEW SIGNED FIELD** (`in_kind_signed_value`, or direction carried from `debit_credit` on `txn_ref` — the TO designer picks the form and states why). ⛔ **`in_kind_value` KEEPS its existing unsigned contract.** | producer / DS | **Never re-sign in place.** New semantics get a new field the consumer opts into. |
+| **2a** | **`c02_twr_engine` consumes the signed field**, + the **grain-parameterized class filter**: account grain neutralizes `INTERNAL`+`EXTERNAL`, relationship grain `EXTERNAL` only. **The class filter is a FUNCTION OF GRAIN, not a constant**; the artifact states its boundary on its face. | DS | defects 1 + 2 |
+| **2b** | **`c01_nna_canonical`'s defect-3 fix, done DELIBERATELY** with its own pre-registered NNA acceptance (s.5c.1). | DS | not as a side effect of 2a |
+| **3** | **ONE backfill over `{c00 → c01 → c02 → dependent c04}`, run AFTER BOTH consumer fixes land** — one regeneration pass per partition, never two. **A driver loops `chain_49f_entrypoint.py --date D --upload` over 531 partitions — FULL CHAIN, through the entrypoint.** | DS + AE | see the two traps below |
+| **4** | **The pre-registered acceptances**: the all-ten return table (s.5b) + the NNA delta table (s.5c.1) + the five parked `c04` checks' grades. | DS / CVO | read the ARTIFACT, never a green run |
+
+⛔ **WHY FULL-CHAIN AND NOT A CHEAPER STAGE SUBSET:** `_pull_prev_valuation_into_mirror` lives in the entrypoint's `main()` and appears **zero** times in `_stage_list`. A stage-scoped driver **drops the D-1 pull, `c02` reverts to `REFUSED-NO-BMV` on every row, and the backfill writes 531 all-refused partitions GREEN and reports success.** *Correctness by construction; the wall-time (~16–19h, one overnight window) is not the scarce resource — a second silent-failure class is.*
+⛔ **TWO TRAPS THE TO MUST CARRY:** `--date D --upload`, **never `--production`** (it derives T-1 and would run **the same date 531 times, every iteration reporting success**); and the driver **sends `ssm send-command` DIRECTLY with `StartedByDispatcher` omitted** (defaults `false`, host stays up) — **routing through the dispatcher Lambda sets it `true` and halts the host after date 1 of 531.**
+⚠ **VEHICLE GAP, open:** the `advi-49f-chain-dispatch` document hardcodes `--production` and **cannot express `--date`.** The ruled loop has no vehicle today; parameterizing it is AE-plane work **inside** the remediation TO.
+⚠ **NAMED BOUNDARY, so nobody correctly cites the ad-hoc rule against this later:** *an ad-hoc run is never production evidence* bars an ad-hoc run from **STANDING IN FOR** a scheduled fire. **A backfill stands in for nothing — it repairs history the scheduled path produced wrongly.** ⛔ **TWO `--date` INVOCATIONS, DIFFERENT STANDING: the BACKFILL'S OWN WRITES take the exception; the step-(4) VERIFICATION FIRE DOES NOT** — it stays a QA instrument and the acceptance is the artifact read directly.
+**DENOMINATOR: 531 partitions** (measured 2026-08-26; the `c04` battery's `525` text is older — any plan quotes ONE number and dates it). **Step 3 discharges debt as well as remediation** — five `c04` checks sit `PENDING-BACKFILL` and grade as a side effect.
+
+**STATUS: FROZEN. Nothing builds until Andrew unfreezes allocation.**
 
 ## Provenance
 `0.4.0_DS_ClientPlatform~U`, 2026-08-26T2355Z. Andrew-direct commission recorded verbatim in MCP 74056. Supersedes the per-day plausibility rule ruled by `1.0.0_SA_CTO` 73912. Read-only throughout: no fix authored, nothing deployed, published or scheduled. PII discipline held — only analytic fields read from `fact_trn`; no name, bank, check or memo field was selected or printed.
