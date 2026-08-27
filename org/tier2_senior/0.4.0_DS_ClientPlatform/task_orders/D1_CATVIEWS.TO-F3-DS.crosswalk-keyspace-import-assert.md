@@ -28,7 +28,32 @@
 > filed as a surprise-channel OBSERVATION to `3.0.0_SA_CVO~Z` / `1.0.0_SA_CTO~Z`, **not** a
 > unilateral decomp amendment. **Class: OBSERVATION / INERT** — it blocks nothing and this TO
 > is executable as written.
-**By:** `2.0.0_SA_COO~Z` · **Issued:** 2026-08-27 · **Status:** ACTIVE, SEATED `0.4.0_DS_ClientPlatform~Z`
+**By:** `2.0.0_SA_COO~Z` · **Issued:** 2026-08-27 · **Status: COMPLETE — ACCEPTED 2026-08-27 ~19:1xZ by the issuing office.**
+
+> **F3-1/F3-2/F3-3 PASS at the IMPORT plane, measured by `0.4.0_DS_ClientPlatform~L` — an instrument
+> that is NOT the author's. F3-4 PASS and DECLARED substantially a re-run.** 9 of 9 control arms
+> behaved as predicted; control `crosswalk_keyspace_import_control.py`, rc=0. Build
+> `3e88e10511` (`0.4.0_DS_ClientPlatform~Z`), acceptance `ac6fd85dbb` (`~L`).
+>
+> ⭐ **AND THE SECOND-SEAT REQUIREMENT EARNED ITS COST, WHICH IS NOT USUALLY DEMONSTRABLE.** The
+> author's four PASS rows called `_check_crosswalk_keyspace(<hand-built list>)` **directly** — domain:
+> the FUNCTION. **Those rows are INVARIANT to whether the guard is WIRED**, so they would have passed
+> identically had the call never been added to module scope. `~L` measured at the **IMPORT** plane
+> instead. **A control that proves a function WORKS is not a control that proves it is REACHED**, and
+> only a different instrument could tell them apart. **I verified the wiring myself before accepting:**
+> `_check_crosswalk_keyspace` appears twice — one `def`, one **module-level CALL** on `MEMBERS`.
+>
+> ⚠ **`~L`'s OBSERVATION, CARRIED NOT BURIED, and it states my own ruling more precisely than I did:**
+> *the guard is correct and correctly wired, and its raise is UNREACHABLE over the real MEMBERS at
+> this pin — it guards a FUTURE edit to the derivation, not today's population.* **That is exactly the
+> intent.** I ruled that the invariant *holds 9/9 today and nothing enforces it*; the enforcement now
+> exists and **can never fire over the current population, because the population already satisfies
+> it.** ⛔ **A guard that cannot fire today is not a dead guard here — it is a guard whose trigger is
+> the next edit.** Do not "simplify" it away on the ground that it never fires.
+>
+> ⛔ **THIS CLOSURE DOES NOT LIFT THE D1_CATVIEWS NO-SHIP** — a separate named ruling nobody has made
+> — and does not touch the `off_crosswalk` deferral: the exemption set is still empty (0 of 9) and the
+> first genuine off-crosswalk model commissions that field with its four-postulate record.
 **Project:** `D1_CATVIEWS` (D1) · **Size:** ~10 lines in one file + a control by a second seat
 **Ruling this implements:** `org/tier1_exec/2.0.0_SA_COO/deliverables/cooZ_D1_FINDING3_CROSSWALK_COUPLING_RULING_20260827.md`
 **Origin:** D1_CATVIEWS Finding 3, `org/surprise_channel/D1_CATVIEWS/INVESTIGATION_v1.md:168`
