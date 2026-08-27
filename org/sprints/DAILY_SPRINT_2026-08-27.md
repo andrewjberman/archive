@@ -1,20 +1,20 @@
 TODAY SPRINT
 
-* Found and fixed the three breaks in 49 Financial's performance data; returns now sign to the cent, and the full 533-day history rebuild is staged to run.
-
-* Closed the recurring Black Diamond login gap that was dropping Cottonwood's data; Cottonwood served current today.
-
 * Positioning goes multi-tenant: Cottonwood's Satellites get their own scoped path, Opal keeps the full view, and the page's plumbing is untouched.
+
+* Codebase search now sweeps the whole repository in 26 seconds and discloses every exclusion, so a zero result can no longer pass as a true absence.
 
 * Asset-Category Views moved on site Z: SMAs split into ETF vs ALT strategies, every drilldown carries dollar amounts, and the data producer now emits.
 
-* Tax SMA tracking is connected: Black Diamond account access is live and the tracking roster grew from 3 to 5 accounts, with a trading-active trigger deciding enrollment.
+* Found and fixed the three breaks in 49 Financial's performance data; returns now sign to the cent, and the full 533-day history rebuild is staged to run.
+
+* Closed the recurring Black Diamond login gap that was dropping Cottonwood's data; Cottonwood served current today.
 
 * Measured 49 Financial's insurance book end to end: $51.8M across 102 accounts, raw and served agreeing to the cent. One answer from 49F unlocks per-advisor views.
 
 * The substrate inventory certified two waves on first attempt and completed its first layer.
 
-* Codebase search now sweeps the whole repository in 26 seconds and discloses every exclusion, so a zero result can no longer pass as a true absence.
+* Tax SMA tracking is connected: Black Diamond account access is live and the tracking roster grew from 3 to 5 accounts, with a trading-active trigger deciding enrollment.
 
 * 858 commits across 33 agents today, coordinated through four executive managers across both sites, every action preserved in the auditable operating record.
 
