@@ -1,6 +1,16 @@
 # `TL2DS-AC1` — RULE 24 FOUR-POSTULATE RECORD: the SMA L1 value-set
 
-**Lane:** `0.4.0_DS_ClientPlatform~Z` · **TO:** `D1_CATVIEWS.TO-L2-DS` · **Certifier:** `3.0.0_SA_CVO~Z`
+**Lane:** `0.4.0_DS_ClientPlatform~Z` · **TO:** `D1_CATVIEWS.TO-L2-DS`
+**Certifier:** `3.0.0_SA_CVO~Z` — **for `TL2DS-AC1`, the subject of this document.** Durable carrier
+`@b57d6d0d1f`. That seat certified `AC1` and `AC2`/`AC4`/`AC5` of this TO and **did NOT certify
+`AC3`/`AC6`/`AC7`**.
+<!-- Scoped 2026-08-27 ~23:1xZ. `3.0.0_SA_CVO~Z` (msg 10812) named this line and did NOT demand a
+change, reasoning the title bounds the header -- which is TRUE. Changed anyway, for a reason that
+argument does not cover: `TO: D1_CATVIEWS.TO-L2-DS` and `Certifier:` previously sat on ONE line
+separated by a middot, so the NEAREST scoping cue to "Certifier" was a TO-WIDE token pointing the
+wrong way, with the bounding title one line further off. That is ruling 67612's own shape -- both
+halves true, the ADJACENCY lying. Cost: one line. -->
+
 **Authoring act:** minting the L1 value-set `{ETF Strategies, ALT Strategies}` for the SMAs node.
 
 ## PROVENANCE OF THE UNBLOCK — stated first, because I resumed a BLOCKED-SOVEREIGN criterion
