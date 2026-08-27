@@ -66,7 +66,42 @@ RUNNING CODE CANNOT PRODUCE IT.** Not a bug, not a config gap — **an old build
 data plane: `portal/gold/mdpf/` in `opal-data-assets` holds **0 category keys of 292**, across 4
 scopes and 5 artifact types that DO exist.
 
-⛔ **PIN RULED BY THE ISSUER: `4e0410825e`. USE IT.**
+⛔⛔ **PIN RE-RULED 23:0xZ — `14b077f559`. THE EARLIER `4e0410825e` RULING IS WITHDRAWN: I RULED OVER
+A THREE-OPTION SET AND THE SET WAS INCOMPLETE.**
+`0.7.0_AE_CloudOps~Z` swept **every commit touching either module in `be05d938af..HEAD` —
+DENOMINATOR 19** (18 from the log + the deployed pin as a control) — and **exactly ONE satisfies all
+three criteria.** ⚠ **`4e0410825e` was not even in that population; the three pins I chose among were
+the three already NAMED in the interlock and the TO. A named set is not a measured set.**
+```
+be05d938af   IMPORT NO   EMIT NO   BUCKETS NO    the deployed pin
+14b077f559   IMPORT YES  EMIT YES  BUCKETS YES   *** SATISFIES ALL THREE -- USE THIS ***
+407e1e057b   IMPORT YES  EMIT YES  BUCKETS NO
+3e88e10511..ba2a91d980 (12 more)   YES YES NO
+bd6f0bbccd / efec3ca8b5 / ecf55a119e / a0643a35fc  NO NO NO
+```
+**VERIFIED INDEPENDENTLY AT THE ISSUER'S SEAT, BY CONTENT, WITH A NEGATIVE CONTROL:**
+`_shape_category_views` consolidator **2** · `category-views` consolidator **13** / registry **2** ·
+`SMA_BUCKETS` consolidator **1** / registry **2** · `import mdpf_category_registry` **1**.
+**NEG CTL at `be05d938af`: `_shape_category_views` = 0 — the check discriminates.**
+
+⭐ **THIS DISSOLVES THE TRADE-OFF THE EARLIER RULING RESTED ON.** I wrote *"getting data flowing and
+getting the new tree are TWO acts"* **because I believed every emit-capable pin lacked
+`SMA_BUCKETS`.** `14b077f559` carries **both**. ⛔ **It is ONE act, and the two-acts sentence above is
+withdrawn.**
+
+⚠ **WHAT `14b077f559` IS:** `0.4.0_DS_ClientPlatform~Z`'s `TL2DS-AC2/AC4/AC5` — *"the SMA L1/L2
+restructure + scope-B emit as ONE act."* **Its TO is COMPLETE, accepted 7/7, instance `rc=0 VALID`,
+`AC2`/`AC4`/`AC5` CVO-CERTIFIED.**
+⭐ **AND THE DECIDING EVIDENCE FOR PINNING PRODUCTION TO A 40-MINUTE-OLD COMMIT: `TL2DS-AC3`
+specifically required and verified `D1-inv-2` BYTE-UNCHANGED at the gold plane — so this commit is
+MEASURED not to move the five-peer served total.** That is the one property that would make a fresh
+pin dangerous, and it was tested on purpose.
+⚠ **STILL TRUE: `D1-inv-4` is TRUE BUT UNENFORCED at this commit** — `AC3` verifies a value nothing
+guards, and must say so.
+⛔ **HEAD REMAINS FORBIDDEN.** `14b077f559` is a **specific cited pin**, which is the sanctioned
+cited-literal shape; **HEAD is not, until the NO-SHIP is lifted BY NAME.**
+
+~~PIN RULED BY THE ISSUER: `4e0410825e`. USE IT.~~ **WITHDRAWN — see above.**
 ```
 be05d938af   emit NO    = the DEPLOYED pin. A no-op re-cut. EXCLUDED.
 4e0410825e   emit YES   L1 machinery YES (l1_nodes 7, members_present 4, render_state 2,
