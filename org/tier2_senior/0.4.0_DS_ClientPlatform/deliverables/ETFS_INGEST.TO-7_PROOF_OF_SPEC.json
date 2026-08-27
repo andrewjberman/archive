@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_INGEST.TO-7",
+  "firm": "FABRIC",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_INGEST.TO-7.provider-as-of-is-the-provenance-stamp.md",
+    "group": "D",
+    "vintage_commit": "fb87f2161e"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-ingest/20260824T2010Z/DECOMP.md",
+    "vintage_commit": "fcdf042972",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_INGEST.TO-7.provider-as-of-is-the-provenance-stamp.md"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~P",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/etfs-pipeline/etfs-netassets-daily/test_to7_asof_provenance.py",
+      "kind": "script",
+      "commit_or_etag": "a9fc3b7888",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "INGEST-TO7-AC4",
+        "INGEST-TO7-AC5",
+        "INGEST-TO7-AC6"
+      ],
+      "deploy_evidence": "A TEST FILE. It needs no deploy, and I am not routing an AE redeploy for it: AC2 is already confirmed satisfied in the deployed artifact, so there is nothing outstanding for AE on this TO unless 1.0.0_SA_CTO~Z rules AC3 IN. Push state: LOCAL @a9fc3b7888; 0.0.0_AB_MSTR~Z is the integrator and pushes."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/etfs-pipeline/etfs-netassets-daily/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "55caa4acbf",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "INGEST-TO7-AC1",
+        "INGEST-TO7-AC2",
+        "INGEST-TO7-AC4",
+        "INGEST-TO7-AC5"
+      ],
+      "deploy_evidence": "NOT AUTHORED BY THIS SEAT -- landed @55caa4acbf by 0.4.0_DS_ClientPlatform~Z 2026-08-24T23:51Z, deployed 2026-08-25T00:09:54Z, CodeSha256 6RFz1jbzLMXXoWOmEkjIe3JoEZAf7EaHpQ4CsZXzuK8=. This seat verified it in the DEPLOYED BYTES and did not modify it."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "INGEST-TO7-AC1",
+      "criterion_verbatim": "For source == \"trueshares\", a holdings row's data_as_of (and the date derived from it) is the holdings sheet's own Date, normalized. The filepoint branch is byte-unchanged.",
+      "method": "diff",
+      "invocation": "git show 55caa4acbf -- infra/aws/lambda/etfs-pipeline/etfs-netassets-daily/lambda_function.py ; git blame -L 1117,1122 ; s3api get-object silver/holdings/2026-08-25.parquet",
+      "output_evidence": "The trueshares branch reads the sheet's own Date via _v_ts_Date (TO-4's vendor capture), normalizes it through _norm_date, and stamps data_as_of from it. CONTENT-LOCATED at :1117 -- and the TO's :526 warning is CONFIRMED: :526 is the fallback `return s` inside _norm_date, a helper BOTH vendors call, where an edit would silently break filepoint. _norm_date is UNEDITED (0 changes in either TO-7 commit). The filepoint branch is untouched: it still assigns holdings_date to net_assets_as_of directly at :929, correct by construction. SERVED CONFIRMATION: silver/holdings/2026-08-25.parquet trueshares rows carry data_as_of = the sheet's date; filepoint rows are unchanged at their own holdings date.",
+      "denominator": "2 TO-7 commits inspected (55caa4acbf, 63ef598d5a); 1 substitution site; 0 edits to _norm_date; 0 edits to the filepoint branch; 3 served partitions read (08-24, 08-25, 08-26) covering 187 rows each",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO7-AC2",
+      "criterion_verbatim": "The change is EXERCISED IN THE DEPLOYED ARTIFACT, not the tree. Deployed-bytes token census shows the new logic present, with a negative control.",
+      "method": "diff",
+      "invocation": "aws lambda get-function --function-name etfs-netassets-daily ; curl the Code.Location ; unzip lambda_function.py ; grep -c per token ; diff deployed tree",
+      "output_evidence": "*** THE NO-OP TRAP THE TO FEARED IS DISCHARGED, and oracle 3 FLIPPED as the TO predicted it might. *** Deployed LastModified 2026-08-25T00:09:54+0000, CodeSha256 6RFz1jbzLMXXoWOmEkjIe3JoEZAf7EaHpQ4CsZXzuK8= -- MOVED from the BEITykjh... the TO recorded, so the Lambda WAS redeployed after the TO was written. DEPLOYED-BYTES CENSUS: _v_ts_Date 5, as_of_basis 6, issuer-holdings-file 2, issuer-page-netassets 2, _hold_as_of 4, and the NEGATIVE CONTROL zzz_no_such_token_9999 = 0. Tree counts are IDENTICAL on all six. *** AND A TOKEN CENSUS CANNOT SEE A CHANGED OPERATOR, so the census alone would not settle it: I also diffed deployed against tree. 2 hunks (@:394, @:1284), 40 lines, and THE TO-7 SURFACE DOES NOT APPEAR IN THE DIFF -- deployed and tree agree byte-for-byte on it. The 40-line gap is e692db801c (the Z-S31 guard), which landed 2026-08-25T00:16:53Z, i.e. AFTER the 00:09:54Z deploy. So TO-7 is deployed and a LATER, UNRELATED commit is not; 'deployed is behind tree' is true and is not about this TO.",
+      "denominator": "1 deployed package (26,316 bytes) vs tree; deployed member 1,436 lines vs tree 1,476; 6 tokens censused including 1 negative control; 2 diff hunks classified",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO7-AC3",
+      "criterion_verbatim": "GATED -- needs 1.0.0_SA_CTO~Z's word. silver/holdings/2026-08-24.parquet is REWRITTEN so its 73 TrueShares rows carry data_as_of = 2026-08-24.",
+      "method": "live_read",
+      "invocation": "aws s3api list-objects-v2 --bucket opal-data-etfs --prefix silver/holdings/ ; s3api get-object silver/holdings/2026-08-24.parquet ; pandas per-source value counts",
+      "output_evidence": "*** NOT DONE, AND A COMMIT TITLE SAYS OTHERWISE. *** silver/holdings/2026-08-24.parquet LastModified is STILL 2026-08-24T22:00:17+00:00 -- the original 22:00Z write. It was never rewritten. Read directly: 187 rows, 17 columns, NO as_of_basis column at all; trueshares 73 of 187 rows carry data_as_of = 2026-08-21 (the wrong, net-assets-page value), filepoint 114 of 187 carry 2026-08-24 (correct, untouched). Commit 63ef598d5a is titled 'feat(ETFS_INGEST.TO-7 AC3): RE-DERIVE FROM BRONZE' and landed the re-derive MECHANISM, not the rewrite -- DESIRED != APPLIED. Flagged to CTO~Z because the title reads as if AC3 were discharged while the artifact says it is not. CONTRAST that proves the producer fix works going forward: the 08-25 and 08-26 partitions, written AFTER the deploy, carry 27 columns with as_of_basis present and correct per-source as-ofs. Only the pre-fix 08-24 partition is stale.",
+      "denominator": "19 silver/holdings partitions enumerated (08-08 .. 08-26); 3 downloaded and read in full; 187 rows per partition, split 114 filepoint / 73 trueshares",
+      "status": "FAIL",
+      "status_reason": "*** WITHHELD BY 1.0.0_SA_CTO~Z, 2026-08-27T17:37Z, DECISION CITED. *** Routed as msg 9342; ruled in full the same turn. His four reasons, recorded as the conditions that would flip it rather than a permanent no: (1) THE BEFORE-IMAGE IS NOT DURABLY PRESERVED -- a VersionId is a LEASE, not provenance; where noncurrent-expiry is configured (14d on the buckets he knows) the overwritten bytes die on that clock, so the rewrite is irreversible in practice unless the current object is first copied to a durable non-expiring key. That copy is the precondition. (2) A SILVER REWRITE WITHOUT A MATCHING GOLD RE-RUN CREATES A SILVER/GOLD SPLIT THAT FAILS SILENT -- 08-24's gold was computed from the 17-column partition; rewriting silver to the corrected 27-column shape makes the two disagree about the same as-of and NOTHING IN THE ESTATE COMPARES THEM. AC3 is therefore two sequenced acts or it is a new inconsistency wearing the label of a fix. (3) DELTA IS NOT ZERO -- 73 of 187 rows change value, and the never-widen rule reserves a non-zero-delta move on served lineage for CTO + COO; he holds one half and declined to sign both, routing 2.0.0_SA_COO~Z the same turn. (4) HIS OWN STATED LIMIT: he cannot tell from his seat whether 08-24's wrong stamp is currently VISIBLE to any client, and named that as the single fact most likely to move him. ADDITIONALLY: there is NO AE SEAT ON THIS FABRIC -- 0.7.0_AE_CloudOps~Z was closed out by Andrew -- so if AC3 flips IN it needs a seat that does not currently exist. RECORDED BLOCKED AND NOT DROPPED, per the TO's own instruction: 'a criterion deleted to make a contract pass is the coverage frame lying about its own domain.' *** ENUM GAP DECLARED, same treatment as `firm`: the status enum is ['PASS','FAIL','UNCOMPUTABLE-BY-CONSTRUCTION','UNVERIFIABLE-BY-INSTRUMENT','N/A-BY-CONSTRUCTION','UNCOMPUTABLE'] and HAS NO VALUE FOR 'authorization withheld'. Recorded as FAIL because FAIL is the only value that is LITERALLY TRUE -- the criterion is measured and unmet, the partition does not carry the corrected stamp. I did NOT use N/A-BY-CONSTRUCTION: that would assert the criterion does not apply, which is false and would HIDE an unmet criterion behind a tidy label -- the coverage frame lying about its own domain, which is the exact failure the TO warns against. FAIL overstates fault and hides nothing; N/A hides. This is a Rule 24(i) coverage gap in the gate that enforces Rule 24, routed to 1.0.0_SA_CTO~Z as gate owner. NO SEAT EDITS A GATE TO MAKE ITS OWN INSTANCE PASS."
+    },
+    {
+      "criterion_id": "INGEST-TO7-AC4",
+      "criterion_verbatim": "as_of_basis moves WITH the value: a row stamped from the holdings file reads issuer-holdings-file. A row whose basis label and basis source disagree is the defect respelled.",
+      "method": "live_read",
+      "invocation": "pandas groupby(source) over silver/holdings/2026-08-25.parquet and 2026-08-26.parquet ; python test_to7_asof_provenance.py",
+      "output_evidence": "SERVED: both post-fix partitions carry 27 columns including as_of_basis, and every row of both sources reads issuer-holdings-file -- one distinct as-of and one distinct basis per source per partition, so label and value cannot disagree in the served data. IN CODE, the basis is the SAME _basis variable computed alongside _hold_as_of, not a second expression re-deriving the answer from source, so the two cannot drift apart. *** AND MY FIRST ATTEMPT TO TEST THIS DID NOT DISCRIMINATE -- see the mutant control. *** Asserting as_of_basis == 'issuer-holdings-file' alone PASSES under a revert, because _basis initialises to that literal while the VALUE moves to the page as-of: exactly the label/source disagreement AC4 forbids, passing a check written to forbid it. The assertion is now bound to label-value COHERENCE and the mutant fails it.",
+      "denominator": "2 post-fix partitions x 187 rows x 2 sources = 4 source-partition groups, all 1 distinct as_of and 1 distinct basis; 12 fixture assertions, 5 of which fail under the mutant",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO7-AC5",
+      "criterion_verbatim": "The operation clock stays a separate field and is NOT collapsed into the provenance stamp -- Andrew's 'a very different figure'.",
+      "method": "live_read",
+      "invocation": "pandas column census over silver/holdings/2026-08-25.parquet ; python test_to7_asof_provenance.py",
+      "output_evidence": "Both post-fix partitions carry data_as_of AND run_date as SEPARATE, independently valued columns, plus vendor_trueshares_Date preserving the vendor's raw stamp; run_ts_utc rides the row in code. *** QUALIFIER STATED RATHER THAN GLOSSED: on 08-25 and 08-26 data_as_of and run_date happen to be EQUAL, so the SERVED data shows separate-and-equal-today, which is not the same as proven-separable. The separation is proven in the fixture instead, where run_date=2026-08-24 and data_as_of=2026-08-21 are held apart by construction and the assertion requires them to differ. This is why AC6 is load-bearing for AC5 as well.",
+      "denominator": "27 columns censused per post-fix partition; 2 operation-clock fields (run_date, run_ts_utc) vs 1 provenance field (data_as_of); 2 fixture assertions on separation",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO7-AC6",
+      "criterion_verbatim": "NEGATIVE CONTROL ON THE FIX ITSELF: feed a fixture whose holdings Date and net-assets page as-of differ, and show the emitted stamp follows the holdings file. A fixture where they agree cannot distinguish fixed from broken.",
+      "method": "test_suite",
+      "invocation": "python infra/aws/lambda/etfs-pipeline/etfs-netassets-daily/test_to7_asof_provenance.py ; same suite re-run against a mutated SCRATCH COPY of lambda_function.py",
+      "output_evidence": "*** AC6 WAS NOT SATISFIED WHEN THIS SEAT PICKED THE TO UP. NO FIXTURE EXISTED. *** @55caa4acbf's commit message states 'AC6's discriminating fixture run', and `git show --stat` on BOTH TO-7 commits shows ONE file changed: lambda_function.py. The fixture was RUN and NEVER LANDED -- the criterion the TO calls load-bearing had no durable artifact, so nobody could re-check it. *** AND THE TO UNDERSTATED THE PROBLEM. *** The TO warns that live FILEPOINT rows cannot discriminate. MEASURED: the served TRUESHARES rows cannot either -- on 08-25 and 08-26 the sheet Date, data_as_of and run_date are ALL the same day, so a stamp from the sheet and a stamp from the run clock predict the IDENTICAL value on every partition in the estate. NOTHING IN PRODUCTION SEPARATES THE FIX FROM THE BUG. BUILT @a9fc3b7888: 12 assertions driving the REAL build_rows() with FUNDS + resolve_fund patched (shipped code, not a reimplementation -- a fixture that restates the logic it checks is a guard comparing an expression to itself), with three dates held apart (sheet 8/21, page as-of 08-19, run_date 08-24). Covers the discriminator; BOTH REFUSE DIRECTIONS (2 distinct sheet Dates and 0 sheet Dates, each falling back to the page as-of and LABELLING it issuer-page-netassets); and filepoint gated on source == 'trueshares' rather than on field presence, by feeding a filepoint row a planted _v_ts_Date of 1/01/1999 that it must ignore -- a leak production could NEVER reveal, because real filepoint rows carry no _v_ts_Date at all.",
+      "denominator": "12 assertions, 12 PASS on real code (rc=0); 5 FAIL under the mutant (rc=1); 2 refuse-direction cases; 1 cross-vendor leak case; 2 TO-7 commits checked for a fixture, 0 found",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "MUTATION TEST OF THE FIXTURE ITSELF, run on a SCRATCH COPY of lambda_function.py with the live file verified clean by git status before and after. The mutation reverts the source gate (`if rec.get(\"source\") == \"trueshares\":` -> `if False:`) to the pre-fix behaviour, asserted to match exactly 1 site. A fixture that cannot fail is not a fixture, and 'the buggy expression is gone' scores the same whether it was fixed or merely refactored.",
+      "expected": "the suite must FAIL on the mutant and PASS on real code, and the failures must land on the assertions that encode the criteria -- not merely somewhere.",
+      "observed": "*** THE CONTROL CAUGHT A DEFECT IN MY OWN FIXTURE, WHICH IS THE POINT OF RUNNING IT. *** First mutant run: 4 of 12 failed -- but the AC4 assertion PASSED under the revert. _basis initialises to 'issuer-holdings-file', so the label stood while the value moved to the page as-of: precisely the 'basis label and basis source disagree' defect AC4 exists to forbid, passing a check written to forbid it. I rebound AC4 from bare label equality to label-value COHERENCE. Second mutant run: 5 of 12 fail, now including AC4. Real code: 12 of 12 PASS, rc=0. Mutant: rc=1. The live lambda_function.py was confirmed clean (git status --porcelain empty) after the exercise.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The fixture is pure: no I/O, no network, no clock, no randomness. FUNDS and resolve_fund are patched and restored in a finally block, so the module is left as found. Dates are literal constants chosen to be mutually distinct; `now` is a fixed tz-aware datetime, not dt.datetime.now(), so the run is reproducible on any day. The served-artifact measurements are read-only S3 gets against immutable dated partitions.",
+      "status": "STABLE",
+      "observed": "The suite returned identical output across runs before and after the AC4 strengthening (12/12 real, rc=0). Every served count in this instance is stamped with the partition and row denominator it was taken over, so a later re-run returning a different number is distinguishable from a contradiction -- the 08-24 partition in particular WILL change the moment AC3 is executed, and that is the intended signal, not drift."
+    }
+  },
+  "surprises": [
+    "*** A TO WITH AN EXECUTOR CLASS AND NO INSTANCE READS AS ISSUED AND IS HELD BY NOBODY. *** TO-7 carried 'DS (producer code) + AE (deploy)' and no serial, so to-check.py rendered it '(unassigned)' for THREE DAYS while every other field looked complete -- including Andrew's sovereign word and a CTO~Z sequencing ruling reading 'if only one 13:00Z fix lands, THIS ONE GOES FIRST.' The work was ALREADY DONE the night it was written; what went missing was the VALIDATION, because no seat held the TO. Found by a 2.0.0_SA_COO~Z seat-census, by no gate. A CLASS IS NOT AN ASSIGNEE.",
+    "*** A COMMIT TITLE CLAIMED A CRITERION THE ARTIFACT DID NOT CARRY. *** 63ef598d5a is titled 'feat(ETFS_INGEST.TO-7 AC3): RE-DERIVE FROM BRONZE'. It landed the re-derive MECHANISM; silver/holdings/2026-08-24.parquet has never been rewritten and still carries data_as_of=2026-08-21 on its 73 trueshares rows, with no as_of_basis column at all. DESIRED != APPLIED, and the commit subject is the carrier most likely to be read as a completion. Anyone auditing this TO by reading git log would have scored AC3 satisfied.",
+    "*** THE SAME CLASS AGAIN, ONE CRITERION OVER: 55caa4acbf's message says 'AC6's discriminating fixture run' and no fixture was committed. *** Both TO-7 commits touched exactly one file. The fixture existed only in a session that has since closed, so the criterion the TO calls load-bearing was unverifiable by anyone but its author. Two commit messages on this one TO each claimed a criterion the tree could not corroborate -- and both claims were TRUE ABOUT AN ACT and FALSE ABOUT AN ARTIFACT.",
+    "*** PRODUCTION CANNOT DISCRIMINATE THIS FIX, AND THE TO ONLY HALF-KNEW IT. *** The TO warns that live FILEPOINT rows cannot tell a fixed stamp from a broken one, their two dates being equal by construction. Measured: the served TRUESHARES rows cannot either. On both 08-25 and 08-26 the sheet Date, the served data_as_of and run_date are the SAME DAY, so 'stamp follows the sheet' and 'stamp follows the run clock' predict the identical value on every partition in the estate. A quantity both hypotheses predict is not evidence. This is a standing property of the daily pipeline, not a one-off: the sheet is fetched on the day it is dated, so the two will keep coinciding and no future partition will separate them either. The fixture is the ONLY instrument that can.",
+    "MY OWN FIRST DISCRIMINATOR WAS FORMAT-NAIVE AND MANUFACTURED A FALSE ALARM. Comparing the vendor's raw sheet value '8/25/2026' against the served normalized '2026-08-25' printed 'STAMP DOES NOT MATCH THE SHEET' on data that was entirely correct -- a grain mismatch between the raw and normalized forms of the same date, reading as a defect. Caught by reading the two values side by side rather than trusting the comparison. The check was rewritten to normalize before comparing.",
+    "AN OBSERVATION, NOT A BLOCKING ITEM, ROUTED HERE RATHER THAN CHASED: `python .tools/audit-archive-invoker.py` at startup (org/XXX.md A.2) reported NON-APPEND-EDIT on 7 audit logs and ERROR-FAILCLOSED (live file missing) on 5 more, against a baseline whose sizes are far larger than this device's live files (e.g. git-author-override-audit.log baseline 2,114,503B vs live-head 245,251B). Consistent with the baseline snapshot having been minted on the other device rather than with tampering here, but I did not verify that and it is outside ETFS_INGEST. Surfaced for 3.0.0_SA_CVO~Z; no action taken."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "to-check.py",
+      "invocation": "python .tools/to-check.py --all --assignee 0.4.0_DS_ClientPlatform~P ; and again against the base serial",
+      "result": "PASS. total=1 projects=1 blocked=0 parse_errors=0 scanned=2128 unresolved_serials=0 for the lane; the base-serial run returned total=34 across 14 projects and surfaced the full DS instance roster. --all was kept per org/XXX.md: the default view scopes to PRDs <=14d old and would have gone blind to exactly the TOs stalled longest. NOTE the documented tilde-lane defect did NOT bite here -- ~P returned its real count rather than the zero that some lanes return -- but I ran the base serial as a positive control rather than trusting the lane read alone, because a zero from that defect and a true zero are identical."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh on the new test file, rc captured before any pipe",
+      "result": "PASS rc=0. It CAUGHT non-ASCII (1 line carrying U+26D4) in my own docstring -- WARN-only and non-blocking, but CLAUDE.md forbids non-ASCII in anything running on AWS and this file ships inside the Lambda package, so I stripped it, verified the file pure ASCII with an LC_ALL=C sweep, re-gated to zero warnings and re-ran the suite rather than shipping a warned commit."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "--author '0.4.0_DS_ClientPlatform~P <...@opal.agent>' -F <msgfile written by the Write tool, not a shell heredoc> --",
+      "result": "PASS rc=0, commit a9fc3b7888. The risk-reflex ran clean over a printed denominator of 1 file vs 1,351 danger nodes (danger map 17.4h old, stated rather than assumed). msg-verify reported MATCH len=4047 against the 4,048-byte file. Message file authored by a NON-SHELL writer per Rule 14a -- a printf/heredoc-built file re-opens the injection one step earlier."
+    },
+    {
+      "tool": "aws lambda get-function + s3api (via the .tools/aws shim)",
+      "invocation": "get-function --function-name etfs-netassets-daily ; s3api list-objects-v2 --bucket opal-data-etfs --prefix silver/holdings/ ; s3api get-object on 3 dated partitions",
+      "result": "PASS. s3api used rather than `aws s3 ls` deliberately: s3api renders UTC where `s3 ls` renders LOCAL time, and every LastModified in this instance is load-bearing (the 08-24 partition's 22:00:17Z is the evidence AC3 is undone). The list returned 19 partitions with no pagination token."
+    },
+    {
+      "tool": "comp-which (rail exercise, org/XXX.md A.3)",
+      "invocation": "PATH denominator probe + comp-which 'how do I grep the repo'",
+      "result": "PASS. 98 of 105 comp-tools resolve bare, and the EXERCISE half confirmed a forwarder actually RAN (produced its own banner) rather than merely resolving -- resolution is not execution, and the documented failure mode is 93-of-93 resolving while zero execute."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "NO DEPLOY, NO APPLY",
+      "reason": "Rule 13 + .owned-paths.yaml POD4_OR_AE: DS authors producer code, 0.7.0_AE_CloudOps~Z deploys. The one artifact this seat committed is a test file requiring no deploy, and AC2 is already satisfied in the deployed bytes, so no AE redeploy was routed for TO-7."
+    },
+    {
+      "item": "AC3's partition rewrite is NOT executed",
+      "reason": "Named in the TO as 1.0.0_SA_CTO~Z's to authorize, 'named here, not taken'. A production silver partition rewrite is a backfill interacting with the ad-hoc-runs rule. Routed as msg 9342; recorded BLOCKED, not dropped."
+    },
+    {
+      "item": "_norm_date is NOT edited",
+      "reason": "The :526 trap the TO names -- it is a shared helper both vendors call, and an edit there changes filepoint's date parsing, which is currently correct. Located by content instead."
+    },
+    {
+      "item": "The filepoint path is NOT touched",
+      "reason": "It is the reference implementation and is correct by construction. The TO forbids harmonizing it, and the cheapest way to break a working path is to repair it against a hazard it does not have. It is instead PROTECTED by a fixture case asserting it ignores a planted _v_ts_Date."
+    },
+    {
+      "item": "ETFS_INGEST.TO-6 (the GICS field) is NOT folded in",
+      "reason": "One variable at a time, per the TO's standing constraints. TO-6 additionally carries a PRE-EXISTING gate (INGEST-TO6-AC2) requiring CTO~Z's sequencing word be cited BEFORE the edit, on a RUNNER_TREE_IS_PRODUCTION file where saving IS deploying. Asked as msg 9342; etf_daily_pull.py untouched pending his word."
+    },
+    {
+      "item": "INGEST-INV-3 (derive FUNDS from config) is NOT folded in",
+      "reason": "Stays on A2's trigger per TO-6, even though it is the same file and the same hand."
+    },
+    {
+      "item": "firm is entered as FABRIC and this is DECLARED",
+      "reason": "proof-of-spec-check.py's firm enum is ['49F','INF','COT','MDPF','FABRIC'] and has no ETFS value -- a Rule 24(i) coverage failure inside the gate that enforces Rule 24. Same declaration as TO-2 and TO-4. Routed to CTO~Z as gate owner; no seat edits a gate to make its own instance pass."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-27/"
+}
