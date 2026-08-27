@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SUBSTRATECARDING.TO-W3-CCX3",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "assignee": "0.8.0_AE_CloudComp~X",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-substratecarding-w3/DECOMP.md",
+    "vintage_commit": "e48a7466ba",
+    "to_ref": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_SUBSTRATECARDING.TO-W3-CCX3.md",
+    "pin_note": "The TO on disk carried @af384e8da1 when I read it; 2.0.0_SA_COO~X repinned all four wave-3 TOs to @e48a7466ba (msg 74829) after 0.7.0_AE_CloudOps~X's BLOCKING established that cut_tos.py derived the pin from `git rev-parse HEAD` at emit time, which is STRUCTURALLY the commit preceding the decomp it points at. I cite the corrected pin. My cell_refs are unaffected -- cell ids derive from the subject string."
+  },
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_SUBSTRATECARDING.TO-W3-CCX3.md",
+    "group": "W",
+    "vintage_commit": "af384e8da1"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_W3/W3-bsft_derive_runner_PATH_A_graph_nodes_edges.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A substrate card is a governance artifact, not a deployable. CCX3-AC8 requires zero commits by this lane touching a module it cards; all three subjects were opened READ-ONLY and nothing was deployed."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_W3/W3-csnj_derive_runner_PATH_B_graph_contracts.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Governance artifact. READ-ONLY on the subject; nothing deployed."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_W3/W3-ggoq_comp_aws_cli_iceberg_commit.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Governance artifact. READ-ONLY on the subject; nothing deployed. The unguarded-nodes-arm defect this card names was NAMED, NOT PATCHED."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_W3/build_cards_ccx3.py",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The GENERATOR for the three cards, shipped so the wave pin and the AC2 uniformity check are reproducible rather than asserted. It writes only into this lane's own deliverables directory and touches no carded module."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CCX3-AC1",
+      "criterion_verbatim": "3 cards exist and all VALIDATE against the v2 contract. Every row carries basis + evidence + owner.",
+      "method": "schema_validation",
+      "invocation": "jsonschema.Draft202012Validator(org/standards/SUBSTRATE_CARD.v2.schema.json).iter_errors() over the DELIVERED BYTES of each card (re-read from disk, not the in-memory dicts), plus a programmatic sweep of the 7 required rows x 3 cards asserting basis/evidence/owner non-empty.",
+      "output_evidence": "3 of 3 VALID. Row sweep: 21 of 21 rows carry non-empty basis, evidence and owner; 0 defects. SCOPED BY EXPLICIT FILENAME, NOT BY GLOB -- 0.8.0_AE_CloudComp~Y writes its CCY3 cards into this SAME directory, and a `W3-*.json` glob picked up 5 cards mid-session. Authorship re-asserted programmatically: 3 of 3 carry carded_by=0.8.0_AE_CloudComp~X. A glob-scoped denominator here would have silently counted a sibling lane's work as my own.",
+      "denominator": "21 of 21 CARD_MATRIX rows (3 cards x 7 required rows); 3 of 3 cards validated; 6 mutant controls run",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCX3-AC2",
+      "criterion_verbatim": "as_of carries ONE wave pin: commit_ish and graph_vintage byte-identical across your cards. carded_utc is an HONEST clock read at a DECLARED grain (per-card or per-batch -- state which), never estimated, never copied.",
+      "method": "generated_invariant",
+      "invocation": "as_of is bound ONCE in build_cards_ccx3.py and stamped into all three cards; the builder then re-derives the distinct (commit_ish, graph_vintage, carded_utc) triples across the delivered cards and FAILS if the count is not 1.",
+      "output_evidence": "1 distinct triple across 3 cards. commit_ish=3b918f21b42366fce14f7c2076f18444cd782931. carded_utc=2026-08-27T06:37:53Z. *** GRAIN DECLARED: PER-BATCH. *** One `date -u +%Y-%m-%dT%H:%M:%SZ` read, stamped identically into all three; it is NOT a per-card read and the cards do not imply it is. THE PIN IS NOT MERELY HEAD: `git diff <PIN> -- infra/aws/globgrph/derive_runner.py org/modules/graph/comp_aws_cli.py` returned EMPTY, with a POSITIVE CONTROL on CLAUDE.md that returned a non-empty diff -- so the pin is the vintage of the bytes actually read, not the newest commit that happened to sit nearby. That distinction is the same one COO~X's BLOCKING was about, one level down.",
+      "denominator": "3 of 3 cards; 2 of 2 subject files diffed against the pin; 1 positive control",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCX3-AC3",
+      "criterion_verbatim": "WHERE IS THE TABLE NAME BOUND -- every card states CLASS 1 / 2 / 3 with the line that binds it, and whether the bound set is ENUMERABLE. A class without a line number is not an answer.",
+      "method": "source_read_with_line_citations",
+      "invocation": "AST-located every table-name binding and read each at source @ 3b918f21b4.",
+      "output_evidence": "ALL THREE SUBJECTS ARE CLASS 1 (module-local literal), each with its binding line, and ALL THREE BOUND SETS ARE ENUMERABLE AND CLOSED. PATH A: ns at derive_runner.py:263, nodes_id at :281, edges_id at :292 -> {globgrph.graph_nodes, globgrph.graph_edges}. PATH B: table_id at :202 and again at :1154 (and :1222 for the verify re-read) -> {globgrph.graph_contracts}. comp_aws_cli: ns at :3012, nodes_id at :3032, edges_id at :3045 -> {globgrph.graph_nodes, globgrph.graph_edges}. No subject of mine can write a table it does not name. NOTE THE CONTRAST WITH 0.7.0_AE_CloudOps~X's cse finding (msg 74756): their class-3 identity resolved OUTSIDE the swept tree via runtime sys.path injection. I checked for that shape and it is ABSENT in my three -- every binding is a literal in the file being carded, reachable by static read. I state that as a measured negative, not as an assumption.",
+      "denominator": "3 of 3 subjects; 8 binding sites cited with line numbers",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCX3-AC4",
+      "criterion_verbatim": "WHAT IT WRITES -- a resolvable path or table name, never a description. A card that says X is a materializer without naming WHICH artifact is unfalsifiable.",
+      "method": "source_read_with_line_citations",
+      "invocation": "artifact.location.home on each card names the fully-qualified table(s) plus the warehouse URI.",
+      "output_evidence": "PATH A writes globgrph.graph_nodes and globgrph.graph_edges. PATH B writes globgrph.graph_contracts. comp_aws_cli writes globgrph.graph_nodes and globgrph.graph_edges. Warehouse s3://opal-313476888478-globgrph/warehouse, read from WAREHOUSE_URI in taskdef globgrph-derive-runner:6, not from a doc. Every one is a resolvable table identifier, and the PATH A names are corroborated by the live run's own emissions ('ICEBERG_NODES_WRITTEN count=27067', 'ICEBERG_EDGES_WRITTEN count=60872').",
+      "denominator": "5 distinct table names across 3 cards; 3 of 3 cards name at least one",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCX3-AC5",
+      "criterion_verbatim": "TRIGGER -- plane (events / scheduler / event-driven / none-found) plus BASIS. An ECS rule target resolves to a CLUSTER, not a script: any 'X is triggered by Y' is INFERRED unless read from the task definition's container command. Mark it.",
+      "method": "live_two_plane_census_plus_taskdef_read",
+      "invocation": "aws events list-rules (auto-paginated, counted client-side) = 137 rules; aws scheduler list-schedules = 18 schedules; aws events describe-rule + list-targets-by-rule on the one match; aws ecs describe-task-definition globgrph-derive-runner:6; aws logs describe-log-streams + get-log-events on /ecs/globgrph/derive-runner.",
+      "output_evidence": "PATH A: EVENTS plane, rule opal-globgrph-derive-runner-nightly, cron(0 2 * * ? *), State=ENABLED, last fired 2026-08-27T02:10:24.659Z. *** THE AC5 TRAP FIRED EXACTLY AS WRITTEN AND I MARKED IT. *** The target Arn is the CLUSTER arn:aws:ecs:...:cluster/opal-globgrph; taskdef revision 6 has command=null AND entryPoint=null, so the task definition DOES NOT NAME THE SCRIPT. The trigger->script step rests on Dockerfile:186 CMD [\"python\", \"/app/derive_runner.py\"] + Dockerfile:60 COPY -- which is the BUILD INPUT, not the running bytes, and the image tag is ':latest' against an ECR repo declared image_tag_mutability=\"MUTABLE\" (item2a.tf:14) with no digest pin. cadence.basis_by_field.actual_trigger is therefore 'inferred' and the row scalar is 'inferred' by the floor rule. PATH B load path: none-found, BOTH PLANES, zero matches; its ENSURE half rides the PATH A nightly and IS measured ('GRAPH_CONTRACTS_ENSURED' in the same run). comp_aws_cli: none-found, BOTH PLANES; argparse-only at :3149/:3154, no executable caller estate-wide. TWO PLANES WERE SWEPT BECAUSE ONE IS NOT A POPULATION: aws events cannot see aws scheduler, and the globgrph namespace in fact uses BOTH (globgrph-cse-producer-nightly lives on the scheduler plane). A one-plane sweep would have returned a true, well-controlled answer about the wrong population.",
+      "denominator": "137 event rules + 18 schedules = 155 trigger objects swept across 2 planes; 1 rule matched; 1 taskdef read; 3 of 3 subjects assigned a plane + basis",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCX3-AC6",
+      "criterion_verbatim": "RULE 26 device/apply owner, and RULE 25 dormancy (>=90d stale = dormant absent a declared exception). Rule 26 is NOT a class constant -- measured non-uniform in wave 2.",
+      "method": "per_row_owner_assignment_plus_liveness_read",
+      "invocation": "Owners assigned PER ROW (not per card) from the authority that owns the REMEDY; dormancy from CloudWatch last-event timestamps.",
+      "output_evidence": "RULE 26 CONFIRMED NON-UNIFORM ACROSS MY THREE CARDS, and non-uniform WITHIN cards: 0.7.0_AE_CloudOps owns the PATH A infra rows (item2a.tf:5 'owner: 0.7.0_AE_CloudOps'); 3.0.0_SA_CVO owns every PATH B row (derive_runner.py:301-302 'CVO TO-3 owns its rows'); 0.8.0_AE_CloudComp owns the comp_aws_cli rows and ALSO owns trust.key on BOTH derive_runner cards -- because the identity-space remedy is a comp-tool concern, not an infra one. 21 of 21 rows carry an owner. RULE 25: PATH A NOT DORMANT, 4h27m since last run (0.19d against a 90d threshold). PATH B load path and comp_aws_cli: *** NO DORMANCY VERDICT RETURNED IN EITHER DIRECTION. *** I have no instrument for their last invocation -- no log group, no ECS task, no rule -- and 'no trigger found' is a COMPLIANCE fact, not a LIVENESS fact. comp_aws_cli's own source comment claims '2 invocations ever', which would imply dormancy; that is a producer self-report about its own history at an unstated vintage and I declined to convert it into a measured value. Returning 'dormant' here would have converted an absence of instrument into a measurement.",
+      "denominator": "21 of 21 rows carry an owner; 4 distinct owners across the set; 3 of 3 subjects assessed for dormancy, 1 verdict returned and 2 explicitly withheld",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCX3-AC7",
+      "criterion_verbatim": "DISCOVERABILITY IS NOT COVERAGE. No card asserts completeness of the writer population. If your subject can write tables it does not name, say the bound is UNBOUNDED.",
+      "method": "estate_census_second_instrument",
+      "invocation": "AST census over 7236 .py files under infra/, org/modules/, .tools/, data/, workflows/ (vendored pyiceberg-nessie-deps and __pycache__ excluded): files NAMING 'graph_nodes', then filtered to those carrying a strong (non-append) Iceberg write op.",
+      "output_evidence": "NO CARD ASSERTS WRITER-POPULATION COMPLETENESS; all three explicitly disclaim it in trust.coverage.explicitly_out. The BOUND is ENUMERABLE and CLOSED for all three (literal bindings, see AC3) -- none is UNBOUNDED. *** AND THE CENSUS CORRECTED MY OWN DRAFT. *** My first cards said graph_nodes has TWO writers (PATH A + comp_aws_cli), reasoning from the two files I had been handed. A second instrument on a DIFFERENT POPULATION -- who in the ESTATE names and writes this table, rather than which call sites in THESE TWO FILES are table ops -- returned 33 namers and 5 strong writers, of which THREE write globgrph.graph_nodes: derive_runner PATH A (full overwrite), comp_aws_cli:3051 (full overwrite), and infra/aws/lambda/globgrph/incremental_updater/lambda_function.py, table_id bound at :434 and written at :501 with overwrite_filter=combined_filter -- a SCOPED delete+append. All three cards were corrected before delivery. INDEPENDENTLY CORROBORATED: 0.8.0_AE_CloudComp~Y's CCY3 card W3-thav, carded from the Lambda side by a different seat with a different instrument, gives artifact.location.home = 'iceberg://globgrph.graph_nodes on Nessie branch main'. Same conclusion, neither inherited from the other. THE MECHANISM SPLIT MATTERS MORE THAN THE COUNT: two writers full-replace and one writes filtered, so a nightly full overwrite can silently discard an incremental update -- and lambda_function.py:43 already records a race on graph_nodes Nessie commits where the losing writer takes a 409.",
+      "denominator": "7236 .py files swept; 33 name graph_nodes; 5 carry a strong Iceberg write op; 3 write graph_nodes itself; 3 of 3 cards disclaim completeness",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCX3-AC8",
+      "criterion_verbatim": "QUALIFY-DO-NOT-FIX. Zero commits by this lane touching a module it cards. The Class-3 remedy (choices=, already written at snap_store.py:415) is NAMED, NOT APPLIED.",
+      "method": "git_pathspec_check",
+      "invocation": "All writes confined to org/tier2_senior/0.8.0_AE_CloudComp/deliverables/; carded modules opened read-only; safe-commit pathspec excludes every carded module.",
+      "output_evidence": "ZERO commits by this lane touching infra/aws/globgrph/derive_runner.py or org/modules/graph/comp_aws_cli.py. Four remedies NAMED AND NOT APPLIED: (1) the unguarded nodes arm in comp_aws_cli (:3049-3060 has no counterpart to the edges guard at :3081-3089); (2) the empty-derive silent-skip in PATH A (:330, :357); (3) the mutable ':latest' tag with no digest pin; (4) the append_only enum under-expression on PATH B. ON (1) I DELIBERATELY DID NOT PROPOSE THE OBVIOUS FIX: the source recommends that verb for deprecation, so adding a second guard may be the wrong remedy entirely, and choosing between guard and removal belongs to the owner, not the carder. AC8 ALSO CAUGHT ME ONCE, VIA THE CONTRACT: my first pass set forward_disposition.set_by to my own serial with basis='held'. The schema states set_by 'MUST NOT be the carding lane for its own subject' and 'NULL while undecided'. All three cards now ship standing='undecided', set_by=null, basis='absent'.",
+      "denominator": "3 of 3 cards at forward_disposition standing=undecided / set_by=null; 0 commits touching 2 carded modules; 4 remedies named, 0 applied",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Six mutants submitted to the SAME Draft 2020-12 validator that produced the 3-of-3 PASS, run AFTER the final edits so they certify the DELIVERED bytes rather than an earlier draft. M1 trust block deleted. M2 prose walked back into a joinable_ref id. M3 basis='measured' over an 'inferred' sub-claim (the floor rule). M4 the carding lane self-disposes its own subject (standing='deprecate', set_by=own serial). M5 an unexpected additional property. M6 verdict flipped to SOUND on a card carrying an 'absent' row.",
+      "expected": "All six REJECTED.",
+      "observed": "5 of 6 fired. M1, M2, M3, M5 rejected. M6 REJECTED ONLY AFTER ITS SUBJECT WAS CORRECTED -- run first against W3-bsft it was ACCEPTED, and that was MY error, not a contract hole: bsft has no 'absent' row, so the constraint had nothing to fire on. A positive control has its own SUBJECT and mine was the wrong one; re-run against W3-csnj (which carries two 'absent' rows) it rejected with \"'absent' should not be valid under {'const': 'absent'}\". M4 GENUINELY DOES NOT FIRE -- see surprises. Three further mutants arose UNPLANNED during authoring and all fired against me, which is the stronger evidence that the validator is live: the joinable_ref id rejection on ' -- ' and ' (' caught my first-pass prose strings in composes/invents/projection_of/co_resident_stores; the floor rule caught three rows where I had claimed basis='measured' over an inferred sub-claim; and additionalProperties caught my 'note'/'deterministic_part' keys inside inference_detail."
+    },
+    "negative_control_on_the_validator": {
+      "description": "Before trusting any PASS, an empty card {schema_version: 2} was submitted to the validator.",
+      "expected": "REJECT",
+      "observed": "REJECTED ('subject' is a required property). Run as the FIRST step of every build invocation and gated -- build_cards_ccx3.py exits 2 and declares every subsequent PASS UNMEASURED if this control ever accepts. A validator that cannot reject makes a clean pass meaningless."
+    },
+    "vintage_control": {
+      "description": "The wave pin claims to be the vintage of the bytes read, which is a stronger claim than 'HEAD at the time'.",
+      "expected": "Empty diff on both subject files against the pin, and a NON-empty diff on a control file.",
+      "observed": "Both subject files diffed EMPTY against 3b918f21b4; CLAUDE.md diffed NON-EMPTY, so the instrument fires. HEAD moved three times during this session (86db9b1122 -> 3b918f21b4 -> e258612057) as other seats committed; the pin did not follow it, because the pin answers 'what did I read' and not 'what is newest'."
+    },
+    "scope_control": {
+      "description": "The deliverables directory D11_CARDS_W3 is SHARED with 0.8.0_AE_CloudComp~Y, whose CCY3 cards appeared in it mid-session.",
+      "expected": "My denominators cover my 3 cards only.",
+      "observed": "A `W3-*.json` glob returned 5 cards. All acceptance denominators are scoped by EXPLICIT FILENAME and authorship is re-asserted programmatically (3 of 3 carded_by=0.8.0_AE_CloudComp~X). Had I kept the glob, a sibling lane's work would have inflated my denominator while looking like thoroughness."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Reading any ROW of globgrph.graph_contracts, graph_nodes or graph_edges",
+      "reason": "The Nessie catalog is a VPC-internal endpoint (http://nessie.opal-globgrph.local:19120) with no route from this device. PATH B's coverage denominator is therefore honestly 'absent'. I declined to substitute the 'table_row_count=' figure printed by a past run's log: that is a producer self-report about a run I did not observe, at a vintage I cannot state, and a number with an unstatable grain is worse than an honest absence."
+    },
+    {
+      "item": "Exercising --load-contracts or `comp-aws iceberg-commit`",
+      "reason": "Both are WRITE paths onto live canonical tables. A qualify-only TO does not warrant mutating the substrate being carded, and CCX3-AC8 forbids this lane touching its own subjects."
+    },
+    {
+      "item": "Verifying that the RUNNING container bytes match the carded source",
+      "reason": "The taskdef pins image ':latest' against a MUTABLE ECR repo with no digest, so the running bytes are not decidable from the trigger chain. Establishing it would require pulling and unpacking the image. NAMED as a limit on the PATH A card and as the reason cadence.actual_trigger is basis='inferred', rather than quietly asserted."
+    },
+    {
+      "item": "comp-blast on derive_runner.py",
+      "reason": "ATTEMPTED and ABANDONED: it did not complete within a 120s timeout (rc=143, SIGTERM). Recorded rather than dropped, because a tool that was tried and timed out is a different fact from a tool that was never run. The independent corroboration AC7 needed was obtained from the estate-wide AST census instead."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION (non-blocking, routed to 3.0.0_SA_CVO cc 2.0.0_SA_COO~X). *** THE v2 CONTRACT STATES TWO RULES ON forward_disposition AND ENFORCES NEITHER, AND I VIOLATED ONE OF THEM ON MY FIRST PASS. *** The schema says the slot is 'Born UNDECIDED and set in a SECOND pass by a seat with the authority to retire something', and set_by 'MUST NOT be the carding lane for its own subject -- describing and deciding are different acts and the carding seat has a stake in the second'. Measured at source: forward_disposition has NO allOf/if/then/dependentSchemas of any kind, so a card claiming standing='deprecate' with set_by set to the carding lane's own serial VALIDATES CLEANLY (mutant M4). My own first pass shipped set_by='0.8.0_AE_CloudComp~X' with basis='held' -- I complied with every ENFORCED constraint in the same file and violated the one carried only in prose. This is the measured shape: compliance tracks the validator, not the intent. Suggested remedy for the schema owner, NOT APPLIED: an if/then making standing!='undecided' require set_by non-null, and -- since the schema cannot know the carding lane -- a top-level check that set_by != carded_by, which IS expressible.",
+    "OBSERVATION (non-blocking, same route). SOUND is permitted over an 'inferred' row. The top-level allOf forbids verdict='SOUND' when any row basis is 'absent', but not when a row is 'inferred' -- while the SOUND enum definition reads 'Every row measured'. Mutant M7: W3-bsft with two 'inferred' rows flipped to SOUND validates. Both of my derive_runner cards would have passed as SOUND. I shipped QUALIFIED on all three because the enum's own words bind, not because the validator made me.",
+    "OBSERVATION (non-blocking, routed to 0.8.0_AE_CloudComp~Y and 2.0.0_SA_COO~X). globgrph.graph_nodes has THREE writers, not two, and they DISAGREE ABOUT MUTATION SHAPE: derive_runner PATH A and comp_aws_cli:3051 both FULL-overwrite; incremental_updater/lambda_function.py:501 writes with overwrite_filter=combined_filter (scoped delete+append). A full replace landing after a scoped update discards it. lambda_function.py:43 already records a race on graph_nodes Nessie commits where the losing writer takes a 409, so the contention is known at one site and invisible at the other two. Not carded as a defect of any single subject because it is a property of the SET, which no per-subject card owns.",
+    "OBSERVATION (non-blocking, routed to 2.0.0_SA_COO~X as a join-key input). The three-rendering identity split 0.7.0_AE_CloudOps~X measured for globgrph.cse (msg 74756) also holds for graph_nodes, and is one rendering WIDER than their subject needed: 2-TUPLE ('globgrph','graph_nodes') at derive_runner.py:281 and comp_aws_cli.py:3032; DOTTED 2-PART 'globgrph.graph_nodes' at derive_runner.py:1435-1436 -- IN THE SAME FILE as the tuple form; DOTTED 3-PART 'iceberg.globgrph.graph_nodes' at .tools/_trino_fed.py:44 and fedobs_views.sql:34. All three are correct addressings. CORROBORATION, NOT REPETITION: their instrument resolved the binding at source; mine enumerated addressing forms across the tree. Different instruments, same class, and mine found a third form.",
+    "OBSERVATION (non-blocking, routed to the schema owner via 3.0.0_SA_CVO). PATH B's mutation_policy has no exactly-fitting v2 member. The default branch is append-only (:1217) but a SCOPED overwrite exists behind --overwrite (:1214, flag at :2246), and the enum offers only editable/append_only/replaceable/immutable/not_applicable. Recorded as a floor-fit 'append_only' with the qualification carried in methodology.declared_opinions and artifact.persistence.evidence rather than silently widened -- following the precedent 2.0.0_SA_COO~X set for the missing DESTRUCTIVE member on COX3 (msg 74869).",
+    "OBSERVATION (non-blocking, already actioned by the issuer). The respawn brief I was launched with stated CCX3 went 3->4 subjects and 21->28 cells at the cse_store re-decomp @76c58923ac. MEASURED AGAINST THE RECTANGLE BEFORE STARTING: 76c58923ac touched TO-W3-COX3, DECOMP.md, rectangle.c0.json, seat_and_face.py and subjects.json -- NOT my TO; and rectangle.c0.json groups 21 cells under executor_class=0.8.0_AE_CloudComp~X against 28 under 0.7.0_AE_CloudOps~X. The 4/28 shape belonged to COX3 and CCY3, not CCX3. 2.0.0_SA_COO~X's msg 74829 independently confirms CCX3 3/21. Recorded because a scope brief and the artifact disagreed and the artifact won; had I taken the brief on trust I would have gone looking for a fourth subject that was never mine."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-27/ (written at session close, with a mandatory Compiler Tools section)",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"how do I grep the repo\" -- the org/XXX.md A.3 EXERCISE half",
+      "result": "A forwarder RAN and produced its own banner, so the comp-rail is live and not merely resolvable. Paired with the resolution half: 105 of 105 comp-tools resolve bare. Both halves run because resolution is not execution -- `command -v` cannot see a forwarder whose target is gone, which is how a 93-of-93 clean pass once masked a totally dead rail."
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast infra/aws/globgrph/derive_runner.py",
+      "result": "TIMED OUT at 120s (rc=143, SIGTERM). No blast-radius data obtained. Recorded as an attempted-and-failed instrument rather than omitted; the independent corroboration AC7 required came from the estate-wide AST census instead, over a printed denominator of 7236 files."
+    },
+    {
+      "tool": ".tools/jq.exe",
+      "invocation": "jq over workflows/atom_decomposition/runs/nfra-substratecarding-w3/rectangle.c0.json -- cells grouped by executor_class",
+      "result": "cell_total=82; 21 cells under 0.8.0_AE_CloudComp~X, 28 under 0.7.0_AE_CloudOps~X, 14 under 0.8.0_AE_CloudComp~Y, 14 under 0.4.0_DT_ClientPlatform~X, 5 under 2.0.0_SA_COO~X. This is the read that falsified the respawn brief's 4/28 scope claim for my lane before any carding work started."
+    },
+    {
+      "tool": "to-check.py",
+      "invocation": "python .tools/to-check.py --all --assignee 0.8.0_AE_CloudComp~X",
+      "result": "total=0 over scanned=2125. A KNOWN-BROKEN read, not evidence I hold nothing: org/XXX.md records that the `**to:** \\`serial\\`` prose notation is discarded by _assignees_from_field, and my TO uses exactly that notation. Work was located via the broker (list_task_orders -> 2 pending) and the filesystem instead. Recorded because a zero here reads identically to an empty queue."
+    }
+  ]
+}

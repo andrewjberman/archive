@@ -1,0 +1,176 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.8.0_AE_CloudComp~X",
+  "subject": {
+    "id": "infra/aws/globgrph/derive_runner.py :: PATH A -- graph_nodes + graph_edges",
+    "kind": "script",
+    "declared_domain": "The nightly full-replace materialization of the globgrph cloud graph: every node and edge derived from the live AWS control plane for account 313476888478, written to globgrph.graph_nodes and globgrph.graph_edges. DOMAIN EXCLUDES globgrph.graph_contracts, which this path touches ENSURE-ONLY (derive_runner.py:301-308) -- that is PATH B's and the CVO's domain, and the exclusion is enforced in code, not merely declared."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-27T06:37:53Z",
+    "commit_ish": "3b918f21b42366fce14f7c2076f18444cd782931",
+    "graph_vintage": "nessie:main batch_ts=1787796032859 (2026-08-27T02:00:32Z) -- the commit written by the /ecs/globgrph/derive-runner run whose log stream last-event is 2026-08-27T02:10:24.659Z; read from CloudWatch, not from a producer self-report of intent"
+  },
+  "process": {
+    "methodology": {
+      "how": "commit_to_iceberg() (:251-380) builds two pyarrow tables from the in-memory derive graph and writes each through the GENERIC helper _overwrite_with_retry(catalog, table_id, pa_table, label) (:125-164), called at :345 with nodes_id and :376 with edges_id. The helper RE-LOADS the table on every attempt (:138) before calling table.overwrite(pa_table) (:139), because a conflicted in-memory Table still points at pre-conflict metadata and would 409 forever. Full-replace semantics: each run replaces the ENTIRE table contents. The input graph is not derived here -- it comes from comp_aws_cli.cmd_derive(), imported and called at derive_runner.py:101.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "composes": [
+        {
+          "id": "org/modules/graph/comp_aws_cli.py::cmd_derive",
+          "note": "imported and called at derive_runner.py:101 @ 3b918f21b42366fce14f7c2076f18444cd782931; supplies the entire input graph. This path derives nothing itself."
+        },
+        {
+          "id": "aws:control-plane:313476888478",
+          "note": "live AWS control-plane APIs, us-east-1, read THROUGH cmd_derive rather than directly. Estate coverage is cmd_derive's property, not this path's."
+        },
+        {
+          "id": "nessie:opal-globgrph:main",
+          "note": "pyiceberg + Nessie REST catalog, NESSIE_URI=http://nessie.opal-globgrph.local:19120 in taskdef globgrph-derive-runner:6"
+        }
+      ],
+      "invents": [
+        {
+          "id": "graph_nodes.snapshot_ts",
+          "note": "and graph_edges.snapshot_ts. Set to batch_ts and stamped onto EVERY row at :342 and :378. A materializer-minted value, not a property of the AWS resource."
+        },
+        {
+          "id": "graph_nodes.layer",
+          "note": "and graph_edges.layer. Defaults to the literal 'aws' at :340 and :372 where the node or edge carries none. Contrast comp_aws_cli.py:3096, which hardcodes it unconditionally."
+        },
+        {
+          "id": "graph_nodes.source",
+          "note": "defaults to 'full-derive' at :341 where the node carries none. This is the comp-kuzu discriminator separating AWS nodes from MS-graph nodes."
+        },
+        {
+          "id": "graph_nodes.props",
+          "note": "and graph_edges.props. _props_and_guard at :343 and :380 JSON-encodes every non-fixed key into one string column."
+        }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "how": "measured",
+        "determinism": "measured",
+        "composes": "measured",
+        "invents": "measured"
+      },
+      "evidence": "infra/aws/globgrph/derive_runner.py:251-380 (commit_to_iceberg), :125-164 (_overwrite_with_retry), :139 (table.overwrite), :345 + :376 (the two call sites), :101 (comp_aws_cli.cmd_derive) @ 3b918f21b42366fce14f7c2076f18444cd782931. Write-method population established by AST (ast.Call over an attribute in the table-op set), NOT by regex -- a regex over this file returns 49 hits of which 45 are list.append; the 4 true table ops are :120 create_table, :139 overwrite, :1214 overwrite, :1217 append.",
+      "owner": "0.7.0_AE_CloudOps",
+      "materializer_standing": "canonical",
+      "declared_opinions": [
+        "derive_runner.py:301-302 asserts 'the derive overwrites graph_nodes/graph_edges but MUST NOT touch graph_contracts'. This is a COMMENT, and a comment is not a binding -- but it is CORROBORATED by live behaviour: the 2026-08-27T02:10Z run emitted 'GRAPH_CONTRACTS_ENSURED (net-new create or already-present; NEVER overwritten by the derive)' and NO CONTRACTS_APPENDED/CONTRACTS_OVERWRITTEN marker. Comment and exercise agree; the exercise is what carries the claim."
+      ]
+    },
+    "cadence": {
+      "declared_rhythm": "cron(0 2 * * ? *) -- daily 02:00 UTC, declared on EventBridge rule opal-globgrph-derive-runner-nightly and described at infra/aws/terraform/globgrph/item2a.tf:4",
+      "actual_trigger": "EVENTS plane. Rule opal-globgrph-derive-runner-nightly, State=ENABLED, ScheduleExpression=cron(0 2 * * ? *). Target Arn is the ECS CLUSTER arn:aws:ecs:us-east-1:313476888478:cluster/opal-globgrph with EcsParameters TaskDefinitionArn=globgrph-derive-runner:6, LaunchType=FARGATE. *** CCX3-AC5: THE CLUSTER IS NOT THE SCRIPT. *** Task definition revision 6 has command=null AND entryPoint=null, so the taskdef does NOT name derive_runner.py. The trigger->script step is INFERRED from infra/aws/globgrph/Dockerfile:186 CMD [\"python\", \"/app/derive_runner.py\"] plus Dockerfile:60 COPY of this file to that path -- which is the BUILD INPUT, not the running bytes.",
+      "live_matches_declared": "yes",
+      "live_instance_age": "4h27m at carded_utc. Last run log-stream last-event 2026-08-27T02:10:24.659Z (/ecs/globgrph/derive-runner, stream derive-runner/derive-runner/3d162efb...). NOT DORMANT under Rule 25 (>=90d); it is 0.19d stale.",
+      "basis": "inferred",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "inferred",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "aws events describe-rule --name opal-globgrph-derive-runner-nightly -> {ScheduleExpression: 'cron(0 2 * * ? *)', State: 'ENABLED'}; aws events list-targets-by-rule -> Arn=cluster/opal-globgrph, EcsParameters.TaskDefinitionArn=globgrph-derive-runner:6; aws ecs describe-task-definition globgrph-derive-runner:6 -> containerDefinitions[0].command=null, .entryPoint=null (THIS is why actual_trigger is basis=inferred); aws logs describe-log-streams /ecs/globgrph/derive-runner --order-by LastEventTime --descending -> lastEventTimestamp 1787796624659 = 2026-08-27T02:10:24.659Z; aws logs get-log-events on that stream -> 'OK: ICEBERG_NODES_WRITTEN count=27067', 'OK: ICEBERG_EDGES_WRITTEN count=60872', 'OK: NESSIE_COMMIT branch=main ts=1787796032859'. TRIGGER CENSUS SWEPT BOTH PLANES: events list-rules = 137 rules (4 globgrph-matching), scheduler list-schedules = 18 schedules (1 matching, globgrph-cse-producer-nightly, which is NOT this subject). A one-plane sweep would have returned a true, well-controlled answer about the wrong population.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "projection",
+      "mutation_policy": "replaceable",
+      "form": "Apache Iceberg tables globgrph.graph_nodes and globgrph.graph_edges, via pyiceberg against a Nessie REST catalog on branch main; parquet + metadata under s3://opal-313476888478-globgrph/warehouse",
+      "basis": "inferred",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "inferred",
+        "mutation_policy": "measured",
+        "form": "measured"
+      },
+      "evidence": "mutation_policy=replaceable is MEASURED: :139 table.overwrite(pa_table) with no overwrite_filter = full-table replace (contrast PATH B :1214, which passes overwrite_filter=In('contract_id', ids) and is therefore scoped). form/persisted from the pyiceberg Schema at :270-292 and WAREHOUSE_URI=s3://opal-313476888478-globgrph/warehouse in taskdef rev 6. *** authority_role IS INFERRED AND THE TENSION IS DELIBERATE: *** these tables are a PROJECTION of the live AWS control plane (nothing originates here -- a row deleted in AWS vanishes on the next overwrite), yet every downstream consumer (.tools/_trino_fed.py:44, fedobs_views.sql:34, the Kuzu loader) treats them as SOURCE. Naming it 'source' would license reading it as authoritative about resources AWS no longer has; naming it 'projection' is what the mechanism supports.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "location": {
+      "home": "nessie:main -> globgrph.graph_nodes and globgrph.graph_edges. Namespace bound at derive_runner.py:263 ns = \"globgrph\"; table names bound at :281 nodes_id = (ns, \"graph_nodes\") and :292 edges_id = (ns, \"graph_edges\"). Warehouse s3://opal-313476888478-globgrph/warehouse.",
+      "projection_of": [
+        {
+          "id": "aws:control-plane:313476888478",
+          "note": "us-east-1; read via comp_aws_cli.cmd_derive at derive_runner.py:101 @ 3b918f21b42366fce14f7c2076f18444cd782931"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "globgrph.graph_contracts",
+          "note": "SAME namespace, DIFFERENT writer and DIFFERENT authority. This path is ENSURE-ONLY on it at :301-308, inside a try/except that only WARNs."
+        },
+        {
+          "id": "globgrph.cse",
+          "note": "0.7.0_AE_CloudOps~X's subject this wave"
+        },
+        {
+          "id": "globgrph.resource_summaries",
+          "note": "0.7.0_AE_CloudOps~X's subject this wave"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "derive_runner.py:263 (ns), :281 (nodes_id), :292 (edges_id), :301-308 (the ensure-only contracts boundary), :416 (the four-table namespace list ('graph_nodes','graph_edges','graph_contracts','cse')) @ 3b918f21b42366fce14f7c2076f18444cd782931; WAREHOUSE_URI from aws ecs describe-task-definition globgrph-derive-runner:6.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every node and edge present in the derive graph returned by comp_aws_cli.cmd_derive for account 313476888478 at run time. NOT 'every AWS resource' -- coverage of the estate is cmd_derive's property, not this write path's, and this card does not inherit it.",
+      "denominator": "27067 nodes and 60872 edges, written by the 2026-08-27T02:10:24Z run. This is the COUNT THE MATERIALIZER WROTE, and it certifies the WRITE, not the estate: it is the denominator of what cmd_derive handed over, and says nothing about what cmd_derive failed to discover.",
+      "explicitly_out": [
+        "globgrph.graph_contracts row content -- ENSURE-ONLY here (:301-308); PATH B and 3.0.0_SA_CVO own it",
+        "the completeness of cmd_derive's estate discovery -- a DIFFERENT subject with a different owner",
+        "*** CCX3-AC7: THE WRITER POPULATION OF THESE TWO TABLES. *** This card does NOT assert it is the only writer, and it is NOT. MEASURED: globgrph.graph_nodes has THREE writers and this path is one of them. ESTATE CENSUS, INDEPENDENT INSTRUMENT, DENOMINATOR PRINTED: 7236 .py files swept under infra/, org/modules/, .tools/, data/, workflows/, excluding vendored pyiceberg-nessie-deps and __pycache__; 33 files NAME graph_nodes; 5 carry a strong non-append Iceberg write op by AST. THREE of those five write globgrph.graph_nodes itself: [1] derive_runner.py PATH A, FULL overwrite, nightly; [2] org/modules/graph/comp_aws_cli.py:3051, FULL overwrite, untriggered; [3] infra/aws/lambda/globgrph/incremental_updater/lambda_function.py, table_id bound at :434 and written at :501 with table.overwrite(pa_table, overwrite_filter=combined_filter) -- a SCOPED delete+append, NOT a full replace. The other two of the five write different tables (cse_store.py, resource_summaries_store.py). THIS IS A DIFFERENT INSTRUMENT ON A DIFFERENT POPULATION from the AST enclosure test that established the per-file write paths: that one asked which call sites in THOSE TWO FILES are table ops; this one asks who in the ESTATE names and writes this table. Only the second question can find a writer the first cannot see, and it found one. NOTE THE MECHANISM SPLIT, which matters more than the count: this path and comp_aws_cli FULL-overwrite; incremental_updater does a FILTERED overwrite. A full replace landing after a scoped update DISCARDS that update, and incremental_updater knows the table is contended -- lambda_function.py:43 records a race on graph_nodes Nessie commits where the losing writer takes a 409. Coordination between the three is NOT carded here and is not this lane's to design."
+      ],
+      "basis": "measured",
+      "evidence": "counts from the CloudWatch run log (see cadence.evidence). The other writers are measured at org/modules/graph/comp_aws_cli.py:3032, :3045, :3051, :3091 (the third card in this batch) and at infra/aws/lambda/globgrph/incremental_updater/lambda_function.py:434, :501, @ 3b918f21b42366fce14f7c2076f18444cd782931. ESTATE CENSUS, INDEPENDENT INSTRUMENT, DENOMINATOR PRINTED: 7236 .py files swept under infra/, org/modules/, .tools/, data/, workflows/, excluding vendored pyiceberg-nessie-deps and __pycache__; 33 files NAME graph_nodes; 5 carry a strong non-append Iceberg write op by AST. THREE of those five write globgrph.graph_nodes itself: [1] derive_runner.py PATH A, FULL overwrite, nightly; [2] org/modules/graph/comp_aws_cli.py:3051, FULL overwrite, untriggered; [3] infra/aws/lambda/globgrph/incremental_updater/lambda_function.py, table_id bound at :434 and written at :501 with table.overwrite(pa_table, overwrite_filter=combined_filter) -- a SCOPED delete+append, NOT a full replace. The other two of the five write different tables (cse_store.py, resource_summaries_store.py). THIS IS A DIFFERENT INSTRUMENT ON A DIFFERENT POPULATION from the AST enclosure test that established the per-file write paths: that one asked which call sites in THOSE TWO FILES are table ops; this one asks who in the ESTATE names and writes this table. Only the second question can find a writer the first cannot see, and it found one.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "TABLE identity: the pyiceberg 2-tuple (namespace, table) -- ('globgrph','graph_nodes'), ('globgrph','graph_edges'). ROW identity: node_id (StringType, required=True) for nodes; (src_id, dst_id, edge_type) for edges, all required=True. NOTE the row keys are required=True but NOT unique-constrained -- Iceberg has no uniqueness enforcement; required=True is satisfied by the EMPTY STRING, which is exactly how the A11 defect went silent (see failure_mode).",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "NONE -- there is no normalising layer, and this is the finding. The SAME table is addressed THREE ways in this estate: (1) 2-TUPLE ('globgrph','graph_nodes') -- derive_runner.py:281, comp_aws_cli.py:3032; (2) DOTTED 2-PART string 'globgrph.graph_nodes' -- derive_runner.py:1435-1436, catalog.load_table(\"globgrph.graph_nodes\"), i.e. INSIDE THIS VERY FILE, a different rendering from the one at :281; (3) DOTTED 3-PART Trino string 'iceberg.globgrph.graph_nodes' -- .tools/_trino_fed.py:44 and infra/aws/globgrph/fedobs/fedobs_views.sql:34, where 'iceberg' is the Trino CATALOG. All three are CORRECT addressings of one artifact; none is wrong. A join key built on string equality splits one table into up to three rows and announces nothing.",
+      "basis": "measured",
+      "evidence": "derive_runner.py:281, :292, :1435-1436; org/modules/graph/comp_aws_cli.py:3032, :3045; .tools/_trino_fed.py:44, :50; infra/aws/globgrph/fedobs/fedobs_views.sql:9-10, :34; schemas at derive_runner.py:270-292 @ 3b918f21b42366fce14f7c2076f18444cd782931. CORROBORATION, NOT REPETITION: 0.7.0_AE_CloudOps~X (msg 74756) measured this same two-plane split for globgrph.cse by RESOLVING THE BINDING at org/modules/graph/cse_schema.py:595. My instrument differs -- I enumerated the ADDRESSING FORMS of an already-known table across the tree -- and it surfaced a THIRD rendering their subject's evidence did not need: the dotted 2-part form, in the same file as the tuple form.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "failure_mode": {
+      "returns_on_failure": "COMMIT CONFLICT: _overwrite_with_retry retries CommitFailedException and CommitStateUnknownException up to COMMIT_MAX_ATTEMPTS (:58, default 5, env ICEBERG_COMMIT_MAX_ATTEMPTS) with a table RE-LOAD each attempt; on exhaustion it raises and the ECS task fails -- LOUD. CONTRACTS-ENSURE FAILURE: caught at :306-308, prints 'WARN: GRAPH_CONTRACTS_ENSURE_FAIL ...' and the run CONTINUES by design (the nodes/edges write is the declared critical path). EMPTY INPUT: no exception at all -- see silent_degrade_paths.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "*** THE SHARP ONE: `if all_nodes:` (:330) and `if all_edges:` (:357) guard the writes. If cmd_derive returns an EMPTY node or edge list, the overwrite is SKIPPED ENTIRELY -- no exception, no WARN, and NO 'ICEBERG_NODES_WRITTEN' marker. The table then retains the PREVIOUS run's rows. A consumer reading graph_nodes cannot distinguish 'tonight's estate, freshly written' from 'last night's estate, silently retained' -- both are a fully-populated table with a plausible snapshot_ts, because snapshot_ts belongs to the rows that were written, and stale rows carry the OLD batch_ts while nothing forces a reader to check it. THIS IS THE ANTI-CORRELATED SHAPE: the more completely the derive fails, the more intact the table looks.",
+        "'WARN: GRAPH_CONTRACTS_ENSURE_FAIL' is a WARN on a rc=0 run -- a consumer scoring the run on exit code sees success while graph_contracts may be absent.",
+        "The image tag is ':latest' and ECR image_tag_mutability is 'MUTABLE' (item2a.tf:14), while the taskdef pins no digest -- so 'the nightly runs THIS source' is not decidable from the trigger chain. Running bytes older than built bytes would pass every rung of this card."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "derive_runner.py:330 (`if all_nodes:`), :357 (`if all_edges:`), :125-164 (retry helper), :58 (COMMIT_MAX_ATTEMPTS), :304-308 (best-effort contracts ensure) @ 3b918f21b42366fce14f7c2076f18444cd782931; infra/aws/terraform/globgrph/item2a.tf:14 image_tag_mutability = \"MUTABLE\"; aws ecr describe-images opal-globgrph-derive-runner -> tag 'latest' currently resolves to sha256:b1e3da0989f42200aadf2377f5c1f783b2156790d773cec9108e66cd44f1f82e pushed 2026-08-26T00:48:59Z. distinguishable_from_true_negative='no' is MEASURED from the guard structure, not assumed: the empty-input path emits no marker and raises nothing, so its log signature is a SUBSET of a crash-before-write signature.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "All seven rows MEASURED against source at 3b918f21b42366fce14f7c2076f18444cd782931 and against live AWS + the 2026-08-27T02:10:24Z run; the write path is EXERCISED, not merely configured (27067 nodes / 60872 edges). Usable as load-bearing substrate WITHIN three named limits: (1) the trigger->script binding is INFERRED, not measured -- taskdef rev 6 carries command=null and the image tag is mutable, so this card cannot certify that the nightly runs the source it describes; (2) an empty derive silently retains stale rows with no marker and no error; (3) the artifact has TWO OTHER WRITERS -- comp_aws_cli.py cmd_iceberg_commit and the incremental_updater Lambda -- which this path neither knows about nor coordinates with, and one writes with a DIFFERENT mutation shape (filtered vs full replace), so a nightly full overwrite can silently discard an incremental update. None of the three blocks use; all three change what a consumer may CONCLUDE, which is why they are named rather than folded into a SOUND.",
+    "blocking_defects": []
+  },
+  "forward_disposition": {
+    "standing": "undecided",
+    "set_by": null,
+    "basis": "absent",
+    "evidence": "CCX3-AC8: this lane made ZERO commits touching any module it cards. Remedies are NAMED, not APPLIED. The mutable-tag and empty-input findings are surfaced to 0.7.0_AE_CloudOps and to 3.0.0_SA_CVO via the completion route; the identity-space finding is surfaced to 2.0.0_SA_COO~X as a join-key input. basis='held' because the disposition is this seat's assertion of scope discipline, not a measurement of anything.",
+    "decided_utc": null
+  }
+}
