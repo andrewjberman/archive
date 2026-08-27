@@ -41,8 +41,47 @@ AE seats came online. Nobody re-cut it.** This TO is ~90 minutes late.
 because PACKAGE names `mdpf_category_registry`, which **does not exist at `bf74d031c1` (2026-08-10)** —
 that pin **predates the module's birth at `be05d938af` (2026-08-19)**. **That refusal is the interlock
 working, not a breakage.**
-**The sanctioned shape is a CITED-LITERAL RE-CUT at a pin that CONTAINS the module** —
-`build_package.py` names the **`4e0410825e` precedent**. **AE-class, which is why it is yours.**
+**The sanctioned shape is a CITED-LITERAL RE-CUT** — `build_package.py` names the **`4e0410825e`
+precedent**. **AE-class, which is why it is yours.**
+
+⛔⛔ **PIN TEST CORRECTED 22:5xZ — "CONTAINS THE MODULE" IS NOT SUFFICIENT AND MY ORIGINAL WORDING WAS
+WRONG. Measured by `0.7.0_AE_CloudOps~Z` AT THE DEPLOYED BYTES, before building anything.**
+```
+DEPLOYED mdpf-gold-lambda  CodeSha256 57V6D/ZNiAGSKBe2UkJ33aevjHDCLj0HNRphN//+iKg=
+  mdpf_category_registry.py   12,602 B   build_category_views   ABSENT   ViewPlaneError ABSENT
+  mdpf_gold_consolidator.py   55,629 B   _shape_category_views  ABSENT   import registry ABSENT
+CONTENT-RESOLVED: both members EXACT match at be05d938af
+  NEG CONTROLS bf74d031c1 / 4e0410825e / HEAD all DIFFER -> the match DISCRIMINATES
+```
+>> ⛔ **`be05d938af` CONTAINS THE MODULE, IS WHAT IS DEPLOYED, AND EMITS NOTHING. A re-cut there passes
+   `build_package.py:181`, produces a clean zip, deploys GREEN — and changes nothing: a SILENT NO-OP
+   WEARING A SUCCESSFUL BUILD**, which `AC2`/`AC3`/`AC4` would then be measured against on an artifact
+   that never appeared. <<
+⭐ **THE CORRECT TEST IS THE EMIT PATH, NOT THE MODULE FILE:** does the pin carry
+`_shape_category_views` **and** `"category-views"` in the consolidator's A4 loop. **Resolve it by
+CONTENT (`git show <pin>:<file>`, normalised, with a negative control) — never by date, filename, or
+`is-ancestor`.**
+⭐ **AND IT ANSWERS ANDREW'S QUESTION AT THE ROOT: `category_views` has never existed because THE
+RUNNING CODE CANNOT PRODUCE IT.** Not a bug, not a config gap — **an old build.** Corroborated on the
+data plane: `portal/gold/mdpf/` in `opal-data-assets` holds **0 category keys of 292**, across 4
+scopes and 5 artifact types that DO exist.
+
+⛔ **PIN RULED BY THE ISSUER: `4e0410825e`. USE IT.**
+```
+be05d938af   emit NO    = the DEPLOYED pin. A no-op re-cut. EXCLUDED.
+4e0410825e   emit YES   L1 machinery YES (l1_nodes 7, members_present 4, render_state 2,
+                        absent_reason 3 -- IDENTICAL counts to HEAD)   SMA_BUCKETS ABSENT (0)
+HEAD         emit YES   everything   ⛔ FORBIDDEN -- the interlock bars HEAD until the NO-SHIP is
+                        lifted BY NAME, and this TO does not lift it
+```
+⚠ **STATED SO IT IS NOT DISCOVERED LATER: at `4e0410825e` the data flows on the OLD SMA STRUCTURE.
+`SMA_BUCKETS` is absent, so Andrew's ~20:5xZ ETF/ALT tree WILL NOT BE PRESENT in the emitted
+artifact.** That is **consistent with deployed reality** — `TO-L2-DS`'s restructure is committed and
+**not deployed** — and the new tree needs a later pin advance, which needs the NO-SHIP lifted.
+**Getting data flowing and getting the new tree are TWO acts, and this TO is the first.**
+⭐ **`0.7.0_AE_CloudOps~Z` hypothesised `4e0410825e` would yield EMPTY L1 sets and fail `AC3`, then
+MEASURED IT FALSE before sending — the L1 counts are identical at both pins.** The real delta is
+narrow and specific, and the narrow version is what this ruling rests on.
 
 ⛔⛔ **THE `D1_CATVIEWS` NO-SHIP STANDS AND THIS TO DOES NOT LIFT IT.** `build_package.py:266` names
 **"a COO/Andrew ship ruling"** as what lifts it. **This TO produces the EVIDENCE that would justify a
