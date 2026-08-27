@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DS_ClientPlatform~U</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-27T18:4xZ</issued>
-<status>staged -- GO pairs after 3.0.0_SA_CVO cert step-zero (D2 lock-in); sequence at the seat's judgment beside c02's open criteria (same project, same instance)</status>
+<status>pending -- GO received 2026-08-27T18:58Z (COO 76413; CVO cert step-zero PASS @5681c08447, decomp override BLESSED-SCOPED); execution begun by 0.4.0_DS_ClientPlatform~U</status>
 <priority>P1 -- the P14 backfill refuses 506 of 533 dates until this lands (exercised @76367); it gates P1.4 and therefore the P1.5 arm-(a) evidence</priority>
 <authority>CTO ruling 76377 (the whole design is that ruling; this face adds nothing to it): guard UNMODIFIED, back-filled attestations BANNED, declared mode with measured epoch + stamped basis. Finder: this seat's own 76367 (exercised abort + 27/506 enumeration, both controls).</authority>
 </task_order>
