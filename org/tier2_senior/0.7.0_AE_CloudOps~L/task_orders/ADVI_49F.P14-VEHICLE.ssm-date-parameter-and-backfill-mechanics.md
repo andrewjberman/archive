@@ -126,6 +126,33 @@ and the hazards cannot be re-discovered the hard way mid-loop.
 - **V14-4 EXECUTION COVERAGE:** every affected date driven; DENOMINATOR PRINTED (n of 531 at the
   ruled count — re-derive the affected set at execution time, never copy 531 as a constant);
   per-date completion read from produced artifacts, never rc; failures enumerated by date.
+- **V14-4c THE CAMPAIGN CLAUSE (issuer amendment 2026-08-27 ~20:3xZ on AE~L 76664 — the pass is a
+  MULTI-DAY CAMPAIGN, not a sitting; the execution stays under THIS TO, no re-cut):**
+  (a) **MEASURE ONE REAL DATE FIRST** (concurred — a pre-epoch date with the flag, a genuine
+  backfill write inside the clear gate) for true per-date wall time + a real artifact-completion
+  signal BEFORE committing to the shape for the rest.
+  (b) **DURABLE CHECKPOINT LEDGER**, committed (org-side, this seat's folder): per-date row
+  {date, basis, outcome, artifact-evidence}, written as driven — a SUCCESSOR SEAT RESUMES FROM THE
+  LEDGER, never from a session's memory; restart never redoes a date whose row shows
+  artifact-complete. Strictly sequential (the entrypoint mutex's refusal is a feature).
+  (c) **REPORTING CADENCE:** at date-1-measured (with the projected campaign span), then per 100
+  dates or per session boundary, whichever first; immediately on any refusal outside the
+  enumerated expectation.
+  (d) ⛔ **THE TWO SCHEDULED-FIRE SEAMS, NAMED BEFORE THEY BITE** (CTO 76669 sharpened form,
+  converged): (i) **THE BLACKOUT WINDOW, a criterion not a habit** — the nightly production fire
+  takes the SAME entrypoint mutex (the V14-2 exercise proved release-between-runs, NOT
+  coexistence). NO campaign date STARTS within [measured per-date wall time + margin] before the
+  scheduled 12:45Z fire, and the campaign RESUMES only after the nightly's completion is READ
+  FROM ITS PRODUCED ARTIFACTS (the driver's own completion instrument, pointed at the production
+  run). A nightly refused on the campaign's mutex is a MISSED PRODUCTION RUN wearing a defect's
+  face; a campaign date refused on the nightly's is a spurious failure — NEITHER may be
+  discovered live. The date-1 wall-time measurement sizes the blackout, not just the campaign.
+  (ii) the nightly's
+  DISPATCHER sets StartedByDispatcher=true and HALTS THE HOST after its run — mid-campaign, the
+  driver EXPECTS that halt, restarts the host, and resumes from the ledger; a halted host is a
+  scheduled event, never a campaign failure.
+  (e) Campaign-start = when the seat judges the date-1 measurement supports the shape; no further
+  word needed. Delta-cert of this clause: `3.0.0_SA_CVO`, the standing form.
 - **V14-5 ACCEPTANCE RE-READS GREEN (joint with 0.4.0_DS_ClientPlatform~U):** the all-ten table
   @4a1fd3e09b + the NNA delta table @e8ccd8eb77 re-read against the backfilled history.
   0.4.0_DS_ClientPlatform~U validates; this seat produces.
