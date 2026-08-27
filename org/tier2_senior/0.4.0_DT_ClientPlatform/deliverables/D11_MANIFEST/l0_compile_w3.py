@@ -29,6 +29,7 @@ import json
 import os
 import re
 import subprocess
+from datetime import datetime, timezone
 from collections import Counter, defaultdict
 
 from jsonschema import Draft202012Validator
@@ -45,15 +46,55 @@ BASE39 = os.path.join(HERE, "graph_object_manifest.base39.json")
 BASE = os.path.join(HERE, "graph_object_manifest.json")
 MAP = os.path.join(HERE, "w3_card_part_map.json")
 SCHEMA = os.path.join(WS, "org/standards/L0_GRAPH_SUBSTRATE_MANIFEST.schema.json")
-# ⛔ DISCOVERY ONLY. This pattern is NO LONGER AUTHORITY: it can REPORT a candidate the
-# registry does not admit, and it can never cause one to be read. The registry is the authority.
-CARD_DISCOVERY_GLOB = os.path.join(WS, "org/**/D11_CARDS_W3/*.json")
+# ⛔ NO DISCOVERY CONSTANT LIVES HERE ANY MORE. The registry's own `discovery_globs` is the
+# sole diagnostic source; a constant beside it was a second authority, and it was the inert one.
 CARD_REGISTRY = os.path.join(HERE, "card_population_registry.v1.json")
 REGISTRY_SCHEMA = os.path.join(HERE, "CARD_POPULATION_REGISTRY.v1.schema.json")
+CARD_SCHEMA = os.path.join(WS, "org/standards/SUBSTRATE_CARD.v2.schema.json")
 
 ME = "0.4.0_DT_ClientPlatform~X"
 PIN = "e48a7466ba"
-COMPILED_UTC = "2026-08-27T07:10:00Z"   # one clock read, per-run, stated
+# ⛔ THE PRIOR CONSTANT WAS A FALSIFIED EXECUTION TIME. It read 2026-08-27T07:10:00Z -- EARLIER
+# than the frozen schema commit and earlier than the compiler commit that would emit it, so the
+# artifact claimed to have been compiled before its own inputs existed. Determinism was being
+# bought by freezing a clock reading, which is not determinism, it is a false statement that
+# happens to repeat.
+# TWO FIELDS, TWO CLAIMS: the SOURCE SNAPSHOT is a deterministic property of the pinned inputs
+# and belongs in the artifact; the EXECUTION TIME is a per-run fact and belongs in a receipt
+# beside it, where a replay comparison can ignore it on purpose rather than by accident.
+def _source_snapshot_utc() -> str:
+    """Committer time of the newest PINNED INPUT: the ratified commit and the frozen schema.
+    Deterministic for a given input set, and it moves only when an input does."""
+    pins = []
+    for ref in (_registry_commit(), _schema_commit()):
+        if ref:
+            r = subprocess.run(["git", "show", "-s", "--format=%cI", ref], cwd=WS,
+                               capture_output=True, text=True)
+            if r.returncode == 0 and r.stdout.strip():
+                pins.append(r.stdout.strip())
+    if not pins:
+        raise SystemExit("REFUSING TO COMPILE -- no pinned input carries a commit time; a "
+                         "snapshot stamp with no source is the falsified clock one step over")
+    # ⛔ NORMALISE TO REAL UTC. `git show --format=%cI` emits the COMMITTER'S OFFSET, so the
+    # newest pin is picked correctly only after conversion, and a field named `_utc` carrying
+    # `-04:00` is the local-time-with-a-Z defect wearing the right name.
+    from datetime import timezone
+    from datetime import datetime as _dt
+    return max(_dt.fromisoformat(p).astimezone(timezone.utc) for p in pins).strftime(
+        "%Y-%m-%dT%H:%M:%SZ")
+
+
+def _registry_commit():
+    try:
+        return load_json_strict(CARD_REGISTRY)["ratified_at_commit"]
+    except Exception:
+        return None
+
+
+def _schema_commit():
+    r = subprocess.run(["git", "log", "-1", "--format=%H", "--", SCHEMA], cwd=WS,
+                       capture_output=True, text=True)
+    return r.stdout.strip() or None
 ORDER = {"measured": 3, "held": 2, "inferred": 1, "absent": 0}
 
 
@@ -83,8 +124,57 @@ def load_json_strict(path: str):
         return json.load(fh, object_pairs_hook=_no_dupes)
 
 
+def git_blob_id(path: str) -> str:
+    """⛔ THE IDENTITY PIN, AND IT IS NOT A DIGEST OF THE BYTES ON DISK.
+
+    The prior revision hashed the working-tree bytes with sha256 and 9 of 13 members failed
+    against Git-object bytes -- the CRLF/LF boundary on a Windows checkout, in the field whose
+    entire job is identity. A DIGEST WITHOUT ITS NORMALISATION IS NOT AN IDENTITY.
+    `git hash-object` applies the repo's own filters, so the pin and the check are computed the
+    same way and the comparison cannot straddle the boundary.
+    """
+    r = subprocess.run(["git", "hash-object", "--", path], cwd=WS,
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        raise SystemExit("REFUSING TO COMPILE -- git hash-object failed for %r: %s"
+                         % (path, r.stderr.strip()[:120]))
+    return r.stdout.strip()
+
+
+def resolve_inside_workspace(rel: str) -> str:
+    """⛔ A REGEX CANNOT RESOLVE A PATH, so containment is enforced HERE, not in the schema.
+
+    CRO Base reproduced an external invalid card admitted through BACKSLASH TRAVERSAL. On
+    Windows `a\\..\\..\\x` traverses and `\\\\host\\share` is a UNC alias for a location outside
+    the repo entirely -- and the old pattern only forbade FORWARD-slash dot segments, so both
+    walked straight through. The schema now rejects backslashes; this rejects everything a
+    pattern structurally cannot see.
+    """
+    if "\\" in rel:
+        raise SystemExit("REFUSING TO COMPILE -- backslash in an admitted path %r; it is a "
+                         "traversal and UNC vector the pattern cannot resolve" % rel)
+    full = os.path.realpath(os.path.join(WS, rel))
+    root = os.path.realpath(WS)
+    if os.path.commonpath([full, root]) != root:
+        raise SystemExit("REFUSING TO COMPILE -- admitted path %r resolves OUTSIDE the "
+                         "workspace: %s" % (rel, full))
+    # POSIX-normalised equality: the resolved path must be the declared one, not merely inside.
+    back = os.path.relpath(full, root).replace(os.sep, "/")
+    if back != rel:
+        raise SystemExit("REFUSING TO COMPILE -- admitted path %r normalises to %r; two "
+                         "spellings of one location is the identity split this registry exists "
+                         "to prevent" % (rel, back))
+    return full
+
+
 def load_registry() -> dict:
-    """The admitted-card registry, VALIDATED before use. 4.0.0_SA_CRO~A's admission ruling."""
+    """The admitted-card registry, VALIDATED and BOUND before use.
+
+    Validation is not enough on its own: a schema cannot check that a commit EXISTS, that a
+    path RESOLVES inside the workspace, or that the ratified candidate set is the one in front
+    of the ratifier. Each of those is enforced here and named as a schema limit rather than
+    assumed away.
+    """
     from jsonschema import Draft202012Validator
     doc = load_json_strict(CARD_REGISTRY)
     errs = list(Draft202012Validator(load_json_strict(REGISTRY_SCHEMA)).iter_errors(doc))
@@ -96,7 +186,35 @@ def load_registry() -> dict:
     if doc["registry_version"] != "v1":
         raise SystemExit("REFUSING TO COMPILE -- registry_version %r is not the v1 this "
                          "compiler reads" % doc["registry_version"])
+    # ⛔ EXISTENCE IS NOT A SCHEMA PROPERTY. A 40-hex string that names no object validated.
+    if subprocess.run(["git", "cat-file", "-e", doc["ratified_at_commit"] + "^{commit}"],
+                      cwd=WS, capture_output=True).returncode != 0:
+        raise SystemExit("REFUSING TO COMPILE -- ratified_at_commit %s names no commit in this "
+                         "repository" % doc["ratified_at_commit"])
+    # ⛔ AND THE COMMIT ALONE BINDS NOTHING ABOUT WHAT THE RATIFIER SAW.
+    got = candidate_set_digest(doc["ratified_discovery_globs"])
+    if got != doc["candidate_set_digest"]:
+        raise SystemExit(
+            "REFUSING TO COMPILE -- the candidate set has CHANGED since ratification "
+            "(pinned %s, now %s). The registry still admits exactly what it admitted; this "
+            "refusal says the DIAGNOSTIC ground moved and the ratification must be re-read, "
+            "not that admission is wrong." % (doc["candidate_set_digest"][:12], got[:12]))
     return doc
+
+
+def candidate_set_digest(globs) -> str:
+    """sha256 over the sorted `path\x00git_blob_id` lines of every candidate the globs match.
+
+    Binds a ratification to the SET IT SAW. `ratified_at_commit` alone names a moment and says
+    nothing about what was in front of the ratifier -- two different candidate sets at one
+    commit are indistinguishable, and "ratified at HEAD" would be true of both.
+    """
+    lines = []
+    for pattern in sorted(globs):
+        for p in glob.glob(os.path.join(WS, pattern), recursive=True):
+            rel = os.path.relpath(p, WS).replace(os.sep, "/")
+            lines.append(rel + chr(0) + git_blob_id(rel))
+    return hashlib.sha256(chr(10).join(sorted(lines)).encode("utf-8")).hexdigest()
 
 
 def load_cards() -> dict:
@@ -110,24 +228,30 @@ def load_cards() -> dict:
     A card is never read because a glob matched it. Unlisted candidates are REPORTED by
     registry_diagnostics() and admitted by nothing.
     """
+    from jsonschema import Draft202012Validator
     reg = load_registry()
+    card_validator = Draft202012Validator(load_json_strict(CARD_SCHEMA))
     out, failures = {}, []
     for m in reg["extension_population"]["members"]:
-        full = os.path.join(WS, m["path"])
+        full = resolve_inside_workspace(m["path"])
         if not os.path.exists(full):
             failures.append("%s: LISTED BUT MISSING" % m["path"])
             continue
+        got = git_blob_id(m["path"])
+        if got != m["git_blob_id"]:
+            failures.append("%s: BLOB MISMATCH (pinned %s, in tree %s)"
+                            % (m["path"], m["git_blob_id"][:12], got[:12]))
+            continue
         with open(full, "rb") as fh:
             raw = fh.read()
-        got = hashlib.sha256(raw).hexdigest()
-        if got != m["sha256"]:
-            failures.append("%s: DIGEST MISMATCH (pinned %s, on disk %s)"
-                            % (m["path"], m["sha256"][:12], got[:12]))
-            continue
         c = json.loads(raw.decode("utf-8"), object_pairs_hook=_no_dupes)
-        if c.get("schema_version") != 2:
-            failures.append("%s: SCHEMA MISMATCH -- schema_version %r is not 2"
-                            % (m["path"], c.get("schema_version")))
+        # ⛔ schema_version == 2 IS A LABEL, NOT A VALIDATION, and CRO Base walked an external
+        # invalid card straight through it. The card is now validated against the PINNED
+        # SUBSTRATE_CARD.v2 contract, which is the only thing that makes the label mean anything.
+        cerrs = list(card_validator.iter_errors(c))
+        if cerrs:
+            failures.append("%s: CARD INVALID against SUBSTRATE_CARD.v2 (%d errors, first: %s)"
+                            % (m["path"], len(cerrs), cerrs[0].message[:80]))
             continue
         subject = (c.get("subject") or {}).get("id")
         if subject != m["subject_id"]:
@@ -148,8 +272,14 @@ def registry_diagnostics() -> dict:
     """What the DISCOVERY glob can see versus what the registry ADMITS. Reporting only."""
     reg = load_registry()
     admitted = {m["path"] for m in reg["extension_population"]["members"]}
-    candidates = {os.path.relpath(p, WS).replace(os.sep, "/")
-                  for p in glob.glob(CARD_DISCOVERY_GLOB, recursive=True)}
+    # ⛔ THE REGISTRY'S OWN FIELD IS THE SOLE DIAGNOSTIC SOURCE. It previously carried
+    # discovery_globs while this function read a module constant, so the field was INERT and a
+    # reader editing it would have changed nothing. A second copy of a value is a second
+    # authority, and the inert one is the one people trust.
+    candidates = set()
+    for pattern in reg["discovery_globs"]:
+        candidates |= {os.path.relpath(p, WS).replace(os.sep, "/")
+                       for p in glob.glob(os.path.join(WS, pattern), recursive=True)}
     return {"admitted": sorted(admitted),
             "candidates": sorted(candidates),
             "unlisted": sorted(candidates - admitted),
@@ -203,9 +333,14 @@ def card_generation_bits(c: dict) -> dict:
     }
 
 
-def main() -> None:
+def main(out_path: str = None) -> None:
+    """out_path redirects the EMISSION only. ⛔ NOT a reduced mode: every read, every control
+    and every refusal is identical, so a clean replay is evidence about the real compile rather
+    than about a simplified stand-in."""
+    out_path = out_path or BASE
     base = load_json_strict(BASE39)
     mapping = load_json_strict(MAP)
+    SOURCE_SNAPSHOT_UTC = _source_snapshot_utc()
     cards = load_cards()
     _diag = registry_diagnostics()
     parts = {p["id"]: p for p in base["parts"]}
@@ -346,7 +481,17 @@ def main() -> None:
     # ---- reassemble ---------------------------------------------------------------
     out = dict(base)
     out["compiled_by"] = ME
-    out["as_of"] = {"compiled_utc": COMPILED_UTC, "commit_ish": PIN}
+    # ⛔ THE FIELD NAMES ARE THE FROZEN CONTRACT'S AND ARE NOT MINE TO RENAME -- `as_of` requires
+    # compiled_utc + commit_ish and forbids additional properties. What changes is the VALUE:
+    # compiled_utc was a HARD-CODED 2026-08-27T07:10:00Z, EARLIER than both the schema commit and
+    # the compiler commit that emits it, so the artifact claimed to predate its own inputs.
+    # Determinism bought by freezing a clock reading is not determinism; it is a false statement
+    # that happens to repeat. It is now DERIVED from the newest pinned input, so it is
+    # deterministic for a given input set and moves only when an input moves.
+    # ⛔ AND THE ACTUAL EXECUTION TIME GOES IN A SEPARATE RECEIPT, not here: a replay comparison
+    # must be able to ignore it ON PURPOSE, which it cannot do while it shares a field with a
+    # value that is supposed to be stable.
+    out["as_of"] = {"compiled_utc": SOURCE_SNAPSHOT_UTC, "commit_ish": PIN}
     # ⛔ home_space stamped MECHANICALLY, AUTHORED VALUES PRESERVED, FAIL CLOSED.
     # An unclassifiable home aborts the emit rather than shipping a part whose address space is a
     # guess -- 4.0.0_SA_CRO~A audit item 2.
@@ -381,7 +526,10 @@ def main() -> None:
             "(B) THE WAVE-3 MATERIALIZER POPULATION -- %d substrate cards conforming to "
             "SUBSTRATE_CARD.v2, produced by 4 lanes under NFRA_SUBSTRATECARDING wave 3 and read off "
             "disk at %s. Folded in as %d ENRICH mappings touching %d distinct parts, %d ADD, %d "
-            "UNRESOLVED-and-deliberately-unwritten. 13 = 9 + 3 + 1, and the partition sums. "
+            "UNRESOLVED-and-deliberately-unwritten. %d = %d + %d + %d, DERIVED from the map's "
+            "own action counts at compile -- the prior revision TYPED `13 = 9 + 3 + 1` beside a "
+            "map that actually reads 8 + 3 + 2, so the sentence asserted a partition the "
+            "artifact contradicted and still claimed it summed. "
             "The card->part join is DECLARED in w3_card_part_map.json rather than derived, because "
             "9 of 13 cards carry prose in artifact.location.home; that is a contract finding routed "
             "to the schema owner, not a lane defect. "
@@ -401,7 +549,8 @@ def main() -> None:
             "card, and wave 3's own decomp states on its face that its subject set enumerates "
             "writers we can FIND, never every writer that EXISTS."
             % (base_count, prior["method"], len(cards), PIN,
-               acts["enrich"], len(enriched), acts["add"], acts["unresolved"])),
+               acts["enrich"], len(enriched), acts["add"], acts["unresolved"],
+               len(rows), acts["enrich"], acts["add"], acts["unresolved"])),
         "population_searched": (
             "(A) %s || (B) org/**/D11_CARDS_W3/*.json across all lanes -- %d cards from %d lane "
             "directories, the complete wave-3 card population as it stood at compile time. A card "
@@ -593,10 +742,10 @@ def main() -> None:
     # NOT weak conditionals -- a removal list names what MAY BE DELETED and never says when the
     # artifact is MINTED, so the producer's rule is UNREAD, and reading a repertoire entry as a
     # mint rule would be the wrong-population read this manifest exists to refuse.
-    # ⚠ ROUTED, NOT RESOLVED: the contract's `conditional` enum-definition says `note` states
-    # the condition, while `note`'s own description says it is what the companion HOLDS and
-    # explicitly NOT when it is minted. One line cannot serve two intents cleanly; `.wal`'s note
-    # below carries both, and the tension is 1.0.0_SA_CTO~X's to settle.
+    # RESOLVED at rework18: `condition` is REQUIRED iff mint=conditional and PROHIBITED
+    # otherwise, so `note` carries artifact meaning ONLY and the two intents have two fields.
+    # The tension this comment used to describe is closed in the frozen contract; leaving the
+    # old text in place would have made a reader hunt for a defect that no longer exists.
     _COMPANION_MEANING = {
         ".wal": {
             "mint": "conditional",
@@ -661,9 +810,10 @@ def main() -> None:
     assert not _unstated, (
         "REFUSING TO EMIT -- a companion suffix has no authored statement of what it holds; a "
         "bare suffix is the loud-but-unresolvable class: %s" % _unstated)
-    # 4.0.0_SA_CRO~A: the live schema still ADMITS multiline condition values. That is CTO's
-    # contract fix, not mine -- but the obligation moves to where it CAN be met, so this emitter
-    # refuses one on its own output rather than relying on a gate that is not there yet.
+    # The frozen contract now binds every one-line field to $defs/one_line_text, which names
+    # eight terminator classes explicitly. This emitter-side refusal is therefore REDUNDANT with
+    # the schema rather than compensating for it -- kept as a cheap second arm, and labelled as
+    # redundant so nobody reads it as evidence the schema is still open.
     _multiline = [(c, k) for c in _companion_keys
                   for k, v in _COMPANION_MEANING[c].items()
                   if chr(10) in v or chr(13) in v]
@@ -820,7 +970,10 @@ def main() -> None:
         "The three receiver_source_populations are EMPTY, each with its own written "
         "admission predicate. ")
     _R_UNOWNED = ("UNOWNED -- needs an admitted-card registry and a schema-bound "
-                  "card-to-L0 transform; neither exists at this commit")
+                  "card-to-L0 transform. THE REGISTRY NOW EXISTS -- "
+                  "card_population_registry.v1.json, with this receiver's own population, its "
+                  "structured admission predicate and its blocking-layer set. The transform "
+                  "does not.")
     _R_EV = {
         "grain": (
             _R_SCOPE
@@ -874,7 +1027,8 @@ def main() -> None:
                          "landed, which forbids widening the discovery glob), a schema-bound "
                          "card-to-L0 transform with a pinned version, and a "
                          "declaring code path in this compiler, which this lane owns and which "
-                         "does not exist at this commit"),
+                         "does not exist at this commit. The registry population itself "
+                         "EXISTS and is empty, which is a different claim and the weaker one."),
     }
 
     # ⛔ setdefault WOULD HAVE PRESERVED a stale declared receiver while the compiler reported
@@ -983,7 +1137,7 @@ def main() -> None:
 
     if errs:
         raise SystemExit("REFUSING TO WRITE -- the recompiled manifest does not validate.")
-    with open(BASE, "w", encoding="utf-8", newline="\n") as f:
+    with open(out_path, "w", encoding="utf-8", newline="\n") as f:
         # ⛔ sort_keys: DETERMINISTIC EMISSION. Two runs producing identical data in
         # different key order are byte-distinct and digest-distinct, so any hash-based
         # comparison reports drift that does not exist -- the CRLF-vs-LF lesson in a
@@ -992,8 +1146,40 @@ def main() -> None:
         # now refused five times.
         json.dump(out, f, indent=2, ensure_ascii=True, sort_keys=True)
         f.write("\n")
-    print("OK: wrote %s" % os.path.relpath(BASE, WS).replace("\\", "/"))
+    print("OK: wrote %s" % os.path.relpath(out_path, WS).replace(os.sep, "/"))
+
+    # ---- THE EXECUTION RECEIPT, BESIDE THE ARTIFACT AND NEVER INSIDE IT ------------------
+    # Everything here is a PER-RUN fact. It is deliberately excluded from the manifest so a
+    # byte-comparison of two replays is a statement about the COMPILE, not about the clock.
+    receipt = {
+        "artifact": os.path.relpath(out_path, WS).replace(os.sep, "/"),
+        "artifact_sha256": hashlib.sha256(
+            open(out_path, "rb").read()).hexdigest(),
+        # A REAL CLOCK READ, and it belongs ONLY here. The prior line read the last COMMIT's
+        # timestamp and called it an execution time -- a value that is stable across runs, in
+        # the one field whose entire purpose is to vary with them.
+        "executed_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "executed_by": ME,
+        "source_snapshot_utc": SOURCE_SNAPSHOT_UTC,
+        "input_pin_commit_ish": PIN,
+        "registry_ratified_at_commit": _registry_commit(),
+        "schema_commit": _schema_commit(),
+        "compiler_blob": subprocess.run(
+            ["git", "hash-object", "--", os.path.relpath(__file__, WS).replace(os.sep, "/")],
+            cwd=WS, capture_output=True, text=True).stdout.strip() or None,
+    }
+    rpath = out_path.rsplit(".json", 1)[0] + ".receipt.json"
+    with open(rpath, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(receipt, f, indent=2, ensure_ascii=True, sort_keys=True)
+        f.write("\n")
+    print("OK: receipt %s  artifact sha256 %s"
+          % (os.path.relpath(rpath, WS).replace(os.sep, "/"), receipt["artifact_sha256"][:12]))
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    _ap = argparse.ArgumentParser(description=__doc__)
+    _ap.add_argument("--out", default=None,
+                     help="redirect the emission (replay control); default is the real manifest")
+    main(_ap.parse_args().out)

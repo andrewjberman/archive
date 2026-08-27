@@ -39,31 +39,53 @@ DISCOVERY_GLOBS = ["org/**/D11_CARDS_W3/*.json"]
 # The predicate is written out because "incomplete receiver payload cannot admit" is
 # unactionable until someone states what complete means. 1.0.0_SA_CTO~X supplied the exact
 # L0-side requirement for `key`; the other two follow the same shape.
-PREDICATES = {
-    "grain": (
-        "The card carries an AUTHORED GRAIN PROJECTION that satisfies the L0 declared `grain` "
-        "branch -- unit non-blank, basis in {measured, held, inferred}, evidence and owner "
-        "non-blank. No card in the estate carries such a projection today, admitted or not, "
-        "so this population is empty on a SOURCE fact rather than a configuration one."),
-    "key": (
-        "The card satisfies the L0 declared `key` branch: identity_space, key_expression, "
-        "key_is_stable, crosses_spaces, declared_mapping, basis in {measured, held, inferred}, "
-        "evidence, owner -- ALL NON-BLANK. ⛔ SUBSTRATE_CARD.v2 HAS NO key_expression FIELD "
-        "(it carries the other seven, i.e. every property of the key and never the key), so no "
-        "card of any vintage can satisfy this. Empty BY CONTRACT, not by oversight."),
-    "failure_mode": (
-        "The card carries a complete trust.failure_mode: returns_on_failure, "
-        "distinguishable_from_true_negative, silent_degrade_paths, basis in {measured, held, "
-        "inferred}, evidence, owner -- all non-blank. Payloads satisfying this DO exist outside "
-        "the admitted population, so this is the one receiver whose emptiness is not a "
-        "knowledge fact -- but admitting them still requires a schema-bound transform, which "
-        "does not exist, so no member can carry a transform_version yet."),
+# ⛔ STRUCTURED, NOT PROSE. The prior revision put the admission predicate, the blockage
+# census, the contract gap and the transform lifecycle in ONE free-text string, so no consumer
+# could branch on any of them and no two could move separately -- Rule 24 (iii) inside the
+# artifact that governs admission. Four independent axes now, each with its own field.
+RECEIVERS = {
+    "grain": {
+        "required_fields": ["trust.grain.unit", "trust.grain.basis", "trust.grain.evidence",
+                            "trust.grain.owner"],
+        "blocking_layers": ["source", "registry", "transform", "compiler"],
+        "source_gap_kind": "no_authored_projection",
+        "source_gap_detail": ("no card in the estate authors a grain projection, admitted or "
+                              "not; measured by 1.0.0_SA_CTO~X over the 23 exact-match cards"),
+    },
+    "key": {
+        "required_fields": ["trust.key.identity_space", "trust.key.key_expression",
+                            "trust.key.key_is_stable", "trust.key.crosses_spaces",
+                            "trust.key.declared_mapping", "trust.key.basis",
+                            "trust.key.evidence", "trust.key.owner"],
+        "blocking_layers": ["source", "registry", "transform", "compiler"],
+        "source_gap_kind": "no_field_in_card_contract",
+        "source_gap_detail": ("SUBSTRATE_CARD.v2 trust.key carries seven of these eight and has "
+                              "NO key_expression field -- every property of the key, never the key"),
+    },
+    "failure_mode": {
+        "required_fields": ["trust.failure_mode.returns_on_failure",
+                            "trust.failure_mode.distinguishable_from_true_negative",
+                            "trust.failure_mode.silent_degrade_paths",
+                            "trust.failure_mode.basis", "trust.failure_mode.evidence",
+                            "trust.failure_mode.owner"],
+        "blocking_layers": ["registry", "transform", "compiler"],
+        "source_gap_kind": "none",
+        "source_gap_detail": ("payloads satisfying this EXIST outside the admitted population; "
+                              "this is the one receiver with no source-level gap"),
+    },
 }
 
 
-def sha256_of(path: str) -> str:
-    with open(path, "rb") as fh:
-        return hashlib.sha256(fh.read()).hexdigest()
+def git_blob_id(rel: str) -> str:
+    """⛔ NOT sha256 OF THE WORKING-TREE BYTES. That is what the prior revision pinned, and 9 of
+    13 members failed against Git-object bytes -- the CRLF/LF boundary on a Windows checkout, in
+    the field whose entire job is identity. `git hash-object` applies the repo's own filters, so
+    the pin and the later check are computed identically."""
+    r = subprocess.run(["git", "hash-object", "--", rel], cwd=WS,
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        raise SystemExit("REFUSING -- git hash-object failed for %r: %s" % (rel, r.stderr[:120]))
+    return r.stdout.strip()
 
 
 def rel(path: str) -> str:
@@ -87,8 +109,22 @@ def member_of(path: str) -> dict:
         raise SystemExit("REFUSING -- %s has no subject.id; a member pinned by path and digest "
                          "alone cannot tell a substituted subject from an edited file"
                          % rel(path))
-    return {"path": rel(path), "sha256": hashlib.sha256(raw).hexdigest(),
+    return {"path": rel(path), "git_blob_id": git_blob_id(rel(path)),
             "subject_id": subject}
+
+
+def candidate_set_digest() -> str:
+    """sha256 over the sorted `path\\x00blob` lines of every candidate the globs match.
+
+    Binds the ratification to the SET IT SAW. `ratified_at_commit` alone names a moment and says
+    nothing about what was in front of the ratifier -- two different candidate sets at one commit
+    are indistinguishable, and "ratified at HEAD" would be true of both.
+    """
+    lines = []
+    for p in discover():
+        r = rel(p)
+        lines.append(r + chr(0) + git_blob_id(r))
+    return hashlib.sha256(chr(10).join(sorted(lines)).encode("utf-8")).hexdigest()
 
 
 def build() -> dict:
@@ -106,13 +142,26 @@ def build() -> dict:
     return {
         "registry_version": "v1",
         "ratified_at_commit": head,
+        "candidate_set_digest": candidate_set_digest(),
+        "ratified_discovery_globs": list(DISCOVERY_GLOBS),
+        "discovery_globs": list(DISCOVERY_GLOBS),
         "extension_population": {"members": members},
         "receiver_source_populations": {
-            r: {"members": [], "transform_version": None,
-                "declared_branch_predicate": PREDICATES[r]}
-            for r in ("grain", "key", "failure_mode")
+            r: {"members": [],
+                # ⛔ transform STATUS and transform REFERENCE are two axes. The prior single
+                # `transform_version` string conflated a lifecycle claim with an identity claim
+                # and accepted an arbitrary `v7` that named nothing.
+                "transform_status": "absent",
+                "transform_reference": None,
+                "admission_predicate": {
+                    "required_fields": cfg["required_fields"],
+                    "basis_allowed": ["measured", "held", "inferred"],
+                    "all_non_blank": True},
+                "blocking_layers": cfg["blocking_layers"],
+                "source_gap": {"kind": cfg["source_gap_kind"],
+                               "detail": cfg["source_gap_detail"]}}
+            for r, cfg in RECEIVERS.items()
         },
-        "discovery_globs": list(DISCOVERY_GLOBS),
     }
 
 
@@ -167,10 +216,10 @@ def main() -> None:
         full = os.path.join(WS, path)
         if not os.path.exists(full):
             missing.append(path)
-        elif sha256_of(full) != m["sha256"]:
+        elif git_blob_id(path) != m["git_blob_id"]:
             drifted.append(path)
     print("admitted but MISSING     : %d %s" % (len(missing), missing))
-    print("admitted but DIGEST DRIFT: %d %s" % (len(drifted), drifted))
+    print("admitted but BLOB DRIFT: %d %s" % (len(drifted), drifted))
     if errs or missing or drifted:
         sys.exit(1)
 

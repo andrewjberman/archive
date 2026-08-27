@@ -113,14 +113,32 @@ check("an UNLISTED card the glob still matches -> no output effect",
 # admission is a function of the registry ALONE, so any file not listed is inert by
 # construction. Demonstrated by adding a candidate directory to discovery and re-admitting.
 before = len(l0.registry_diagnostics()["admitted"])
-_saved_glob = l0.CARD_DISCOVERY_GLOB
-try:
-    l0.CARD_DISCOVERY_GLOB = os.path.join(WS, "org/**/D11_CARDS_W*/*.json")
-    diag = l0.registry_diagnostics()
-finally:
-    l0.CARD_DISCOVERY_GLOB = _saved_glob
+
+
+def _diag_with(doc):
+    """Run the diagnostic against a mutated REGISTRY, not a mutated module constant. ⛔ THE
+    DISTINCTION IS THE FINDING: the previous revision carried discovery_globs in the registry
+    while the compiler read its own constant, so the field was INERT -- and a control that
+    mutated the constant would have passed while the field did nothing."""
+    fd, path = tempfile.mkstemp(suffix=".json", prefix="reg_")
+    original = l0.CARD_REGISTRY
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
+            json.dump(doc, fh, indent=2, sort_keys=True)
+        l0.CARD_REGISTRY = path
+        return l0.registry_diagnostics()
+    finally:
+        l0.CARD_REGISTRY = original
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+
+
+wide = mutant(lambda x: x.__setitem__("discovery_globs", ["org/**/D11_CARDS_W*/*.json"]))
+diag = _diag_with(wide)
 cards, refusal = admit_with(BASELINE)
-check("a WIDER discovery glob (W* incl. wave 4) -> admission UNCHANGED",
+check("a WIDER glob IN THE REGISTRY FIELD -> admission UNCHANGED",
       len(cards or {}) == BASE_N and len(diag["admitted"]) == before,
       "discovery now sees %d candidates, %d of them UNLISTED; admitted stays %d"
       % (len(diag["candidates"]), len(diag["unlisted"]), len(cards or {})))
@@ -132,16 +150,17 @@ check("and the unlisted candidates are REPORTED, not silently dropped",
 # --- listed but MISSING ---------------------------------------------------------------
 d = mutant(lambda x: x["extension_population"]["members"].append(
     {"path": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_W3/NOPE.json",
-     "sha256": "0" * 64, "subject_id": "does/not/exist.py"}))
+     "git_blob_id": "0" * 40, "subject_id": "does/not/exist.py"}))
 cards, refusal = admit_with(d)
 check("a LISTED but MISSING member -> REFUSES", refusal is not None and "MISSING" in (refusal or ""),
       (refusal or "")[:96])
 
 # --- DIGEST mismatch ------------------------------------------------------------------
-d = mutant(lambda x: x["extension_population"]["members"][0].__setitem__("sha256", "a" * 64))
+d = mutant(lambda x: x["extension_population"]["members"][0].__setitem__(
+    "git_blob_id", "a" * 40))
 cards, refusal = admit_with(d)
-check("a DIGEST MISMATCH -> REFUSES",
-      refusal is not None and "DIGEST MISMATCH" in (refusal or ""), (refusal or "")[:96])
+check("a BLOB MISMATCH -> REFUSES",
+      refusal is not None and "BLOB MISMATCH" in (refusal or ""), (refusal or "")[:96])
 
 # --- SUBJECT mismatch -- the axis a digest catches only by accident --------------------
 d = mutant(lambda x: x["extension_population"]["members"][0].__setitem__(
@@ -163,10 +182,31 @@ with open(l0.REGISTRY_SCHEMA, encoding="utf-8") as _fh:
     RSCHEMA = json.load(_fh)
 RV = Draft202012Validator(RSCHEMA)
 d = mutant(lambda x: x["receiver_source_populations"]["key"]["members"].append(
-    {"path": "org/x/D11_CARDS_W3/a.json", "sha256": "b" * 64, "subject_id": "x"}))
+    {"path": "org/x/D11_CARDS_W3/a.json", "git_blob_id": "b" * 40, "subject_id": "x"}))
 n = len(list(RV.iter_errors(d)))
-check("a receiver member with transform_version=null -> SCHEMA REJECTS",
-      n > 0, "%d errors -- a member admitted without a transform pin has no provenance" % n)
+check("a PHANTOM receiver member under v1 -> SCHEMA REJECTS",
+      n > 0, "%d errors -- v1 makes a non-empty receiver population INEXPRESSIBLE, not "
+             "merely discouraged" % n)
+d = mutant(lambda x: x["receiver_source_populations"]["key"].__setitem__(
+    "transform_reference", "some/transform.py@" + "c" * 40))
+n = len(list(RV.iter_errors(d)))
+check("a transform REFERENCE beside transform_status=absent -> SCHEMA REJECTS",
+      n > 0, "%d errors -- status and reference are two axes and v1 pins both" % n)
+d = mutant(lambda x: x["extension_population"]["members"][0].__setitem__(
+    "path", "org/x/..\\..\\evil.json"))
+n = len(list(RV.iter_errors(d)))
+check("a BACKSLASH TRAVERSAL path -> SCHEMA REJECTS",
+      n > 0, "%d errors -- the end-to-end vector CRO Base reproduced" % n)
+d = mutant(lambda x: x.__setitem__("ratified_at_commit", "0" * 40))
+cards2, ref2 = admit_with(d)
+check("a NONEXISTENT ratified_at_commit -> REFUSES at load",
+      ref2 is not None and "names no commit" in (ref2 or ""),
+      "existence is not a schema property; enforced with git cat-file")
+d = mutant(lambda x: x.__setitem__("candidate_set_digest", "d" * 64))
+cards3, ref3 = admit_with(d)
+check("a WRONG candidate_set_digest -> REFUSES at load",
+      ref3 is not None and "candidate set has CHANGED" in (ref3 or ""),
+      "binds the ratification to the set it actually saw")
 check("POSITIVE CONTROL: the real registry validates",
       len(list(RV.iter_errors(BASELINE))) == 0)
 
@@ -176,13 +216,15 @@ check("POSITIVE CONTROL: the real registry validates",
 def _overlap(x):
     m = copy.deepcopy(x["extension_population"]["members"][0])
     x["receiver_source_populations"]["failure_mode"]["members"].append(m)
-    x["receiver_source_populations"]["failure_mode"]["transform_version"] = "v1"
+    x["receiver_source_populations"]["failure_mode"]["transform_status"] = "implemented"
 
 
 d = mutant(_overlap)
 n = len(list(RV.iter_errors(d)))
-check("a card in BOTH extension and a receiver population -> LAWFUL",
-      n == 0, "%d errors -- overlap across populations must not be refused" % n)
+check("overlap across populations is not refused FOR BEING OVERLAP",
+      not any("overlap" in str(e.message).lower() for e in RV.iter_errors(d)),
+      "%d errors, and none of them is an overlap rule -- v1 rejects it for being NON-EMPTY, "
+      "which is a different clause and lifts in v2" % n)
 
 # --- REPLAY: same inputs, byte-identical ------------------------------------------------
 a = json.dumps(admit_with(BASELINE)[0], sort_keys=True, ensure_ascii=True)
@@ -196,4 +238,4 @@ print("=" * 80)
 if FAILURES:
     print("RESULT: %d control(s) FAILED: %s" % (len(FAILURES), FAILURES))
     sys.exit(1)
-print("RESULT: all controls PASS. Denominator: 12 checks, NO generator run, registry untouched.")
+print("RESULT: all controls PASS. Denominator: 17 checks, NO generator run, registry untouched.")
