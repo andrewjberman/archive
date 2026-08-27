@@ -35,7 +35,7 @@ as exec — `owned-paths` `lane=ANY_EXEC_OR_AE` bars a DS serial from `DECOMP.md
 **refused the author-override** rather than take it. ⛔ **RE-CERTIFICATION OF THE AMENDED `D1-h-r3`
 IS `3.0.0_SA_CVO~Z`'s CALL — not this lane's and not this office's.**
 
-⚠ **THE `D1_CATVIEWS` NO-SHIP STANDS.** This TO did not lift it and is not an argument that it may be.
+⚠ **THE `D1_CATVIEWS` NO-SHIP STANDS.** This TO did not lift it and is not an argument that it may be.</status>
 
 <decomp_ref>
 workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — stage-3 decomp for
