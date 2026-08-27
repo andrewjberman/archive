@@ -53,12 +53,12 @@ ruled, costs its own pass regardless. The face claims exactly that and no more.
   act, STOP. *(This control is also the mechanical proof of SG-3's scope truth.)*
 - **SG-5 DEPLOY under the converged conditions** (the c00 file; arms re-fired on DEPLOYED bytes;
   LF-normalised verify with basis stated).
-- **SG-6 proof instance VALID rc=0 positional: ids SG-1..SG-6**, TRUE rc bare, validator run
+- **SG-6 proof instance VALID rc=0 positional: ids SG-1,SG-2,SG-2b,SG-3,SG-4,SG-5,SG-6** (widened 6->7 by CVO validator call 76799, the CF-3b precedent: an unconditional act with a conditional consequence always produces an evidence row the machine layer requires), TRUE rc bare, validator run
   recorded IN the instance; the SG-1 fork outcome recorded in the schema's own vocabulary
   (closes-as-impossible rows carry their measured basis, never a bare skip).
 
 <proof_of_spec>
-  <expected_criteria>SG-1,SG-2,SG-3,SG-4,SG-5,SG-6</expected_criteria>
+  <expected_criteria>SG-1,SG-2,SG-2b,SG-3,SG-4,SG-5,SG-6</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c00-SIGNING_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
