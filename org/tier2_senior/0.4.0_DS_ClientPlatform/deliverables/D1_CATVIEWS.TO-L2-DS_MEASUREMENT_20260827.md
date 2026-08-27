@@ -95,3 +95,58 @@ monitor proposed. No gate loosened; no approval gate invented.
 `origin/SITEZ` reads `5beef9448f` by `ls-remote` and the instance is **ABSENT** at that tip by content
 read — with `CLAUDE.md` **present** at the same sha as the positive control, so the ABSENT verdict is
 not a broken read. **Integrator-window push is not this lane's act.**
+
+---
+
+# ADDENDUM — THE PIN-COVERING SUPPORT FOR `D1-inv-2` AT `14b077f559`
+
+**Added 2026-08-27 ~23:0xZ on `1.0.0_SA_CTO~Z` msg 10784.** ⛔ **THIS ADDS SUPPORT; IT ALTERS NO
+ACCEPTED CRITERION.** `TO-L2-DS` reads `COMPLETE — ACCEPTED 7/7` and the instance at `@44955a2721` is
+**untouched**. `TL2DS-AC3` was and remains a PASS *for what it was written to prove*.
+
+## WHY AN ADDENDUM WAS NEEDED
+
+`14b077f559` became the **production pin** for `D1_CATVIEWS.TO-P1-AE` (`2.0.0_SA_COO~Z` `@0c04b480a4`),
+and the pin was justified on `TL2DS-AC3`. **AC3's structural leg does not reach that commit:**
+
+| leg | what it proves | covers the pin? |
+|---|---|---|
+| **structural** — `git diff 407e1e057b^ 407e1e057b` + grep: `sma_member_aum` is **never read** | true **at `407e1e057b`** | ⛔ **NO — EXPIRED** |
+| **exercised** — five-peer sum `1000.00 == 1000.00` on the restructured code | the code path preserves the identity | ✅ yes, **on a FIXTURE** |
+
+⛔ **THE EXPIRY HAS A SHAPE WORTH NAMING: the support was TRUE WHEN WRITTEN AND WAS FALSIFIED BY THE
+VERY CHANGE IT IS BEING USED TO JUSTIFY.** *"`sma_member_aum` is never read"* was correct at
+`407e1e057b`, and the restructure's **entire purpose** was to make it read (`:641-643`). An argument
+that expires silently when the code it describes changes — and **neither carrier announces it**.
+
+⚠ **AND THE EXERCISED LEG'S BOUND, STATED SO IT IS NOT INHERITED TOO STRONGLY:** it ran on a **fixed
+synthetic `node_aum`**, not production data. *"Measured not to move the five-peer served total"* is
+one word too strong — **there is no served total to move**, because this plane has never emitted.
+Rung 4 of the NO-SHIP lift is where a real artifact gets read; **this addendum does not anticipate it.**
+
+## THE ARGUMENT THAT HOLDS AT THE PIN — BY CONSTRUCTION, NOT BY EXERCISE
+
+**EXHAUSTIVE:** `node_aum` occurs **exactly 4 times** in `mdpf_gold_consolidator.py` — the denominator
+is the whole file, not a sample.
+
+```
+:625   node_aum = {"Models":…, "SMA":…, "Alternatives":0.0, "Insurance":0.0, "Client":…}   CONSTRUCT
+:629   node_aum[f"Models > {label}"]  = sum(…)                                             ADD
+:641   node_aum[f"SMA > {bucket}"]    = sum(…)                                             ADD
+:646   registry.build_category_views(…, node_aum=node_aum, …)                              PASS
+```
+
+1. **The five peer keys are written exactly once**, in the literal at `:625`, before either loop.
+2. `TOP_LEVEL_PEERS = ("Models", "SMA", "Alternatives", "Insurance", "Client")` (registry `:94`) —
+   every peer is a **bare token containing no `" > "`**.
+3. Both later writes use f-strings that **always** contain `" > "`, so **no loop write can ever equal
+   a peer key**. They ADD; they cannot REASSIGN.
+
+∴ `sum(TOP_LEVEL_PEERS)` is fixed by `:625` alone and is **structurally unreachable** from the
+restructure's additions. **This is a different instrument from AC3's exercised leg — a key-space
+disjointness argument versus an arithmetic run — so the two CORROBORATE rather than repeat.**
+
+⚠ **WHAT WOULD BREAK IT, named because a by-construction argument is only as good as its
+construction:** a peer minted with `" > "` in its name, or a loop writing a bare key. Neither exists
+today; both are silent if introduced. **The disjointness is load-bearing and nothing enforces it** —
+the same shape as `D1-inv-4` above, and it is filed the same way: **surfaced, not built.**
