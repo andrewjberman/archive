@@ -82,4 +82,4 @@ Route completion to `3.0.0_SA_CVO~X`, cc issuer. State **PUSH STATE as a MEASURE
   <expected_criteria>DTX3-AC1,DTX3-AC2,DTX3-AC3,DTX3-AC4,DTX3-AC5,DTX3-AC6,DTX3-AC7,DTX3-AC8</expected_criteria>
   <alignment_denominators>criteria: 8. Cells: 14 of 14 owned by this executor, all covered. Unmapped 0; untraceable 0.</alignment_denominators>
 </proof_of_spec>
-**Issuer-owned mechanism cells (not yours):** `W3-m-1` · `W3-m-2` · `W3-m-3` · `W3-m-4` · `W3-m-5`
+**Issuer-owned mechanism cells (not yours):** `W3-m-1` · `W3-m-2` · `W3-m-3` · `W3-m-4` · `W3-m-5` · `W3-m-6`
