@@ -707,35 +707,46 @@ MANIFEST = {
 }
 
 # ---- PARTS vs OBJECTS: computed from the population, never typed ----
-# ⛔ kuzu_nessie_db.rebuild.tmp.SET's 6 IS WITHDRAWN and is left here ONLY so this line is not
-# read as current. Its members are runtime-named (_canonical.py:288, pid + monotonic_ns), so the
-# family is NOT enumerable and 6 was an observation snapshot, never a cardinality -- map-owner
-# ruling 75073, 4.0.0_SA_CRO~A retracted 6 as a population. A typed count here is the exact
-# defect that ruling closed. NOT corrected in this commit: it changes emitted arithmetic and the
-# generator is under a no-run hold. FLAGGED FOR THE COORDINATED RERUN.
-SET_MEMBERS = {"kuzu_nessie_db.rebuild.tmp.SET": 6, "_build_manifest.json.SET": 3,
-               ".comp-graph/platinum.CACHE_SET": 5}
-# ⛔ RE-KEYED 2026-08-27. This partition USED to key on basis == "absent", and the basis
-# correction above (absent -> held on the three unbuilt C3 stages) would have moved all three
-# from _absent into _present -- making the sentence below count THREE UNBUILT THINGS AS PRESENT
-# OBJECTS while that same sentence says they "must never be counted as inventory".
-# ROOT CAUSE: `basis` was carrying TWO meanings -- the EPISTEMIC claim (how do we know?) and the
-# BUILT-NESS flag (does the thing exist?). Rule 24(iii): one axis, one intent. They are different
-# questions and they now have different fields. Built-ness is read from the home sentinel, which
-# is what actually states it.
+# ⛔ NON-ENUMERABLE FAMILIES ARE EXCLUDED FROM EVERY CARDINALITY COUNT, BY ASSERTION.
+# 4.0.0_SA_CRO~A, Base round 6: "a comment calling 6 withdrawn does not stop the generator from
+# publishing it." My previous revision commented the withdrawal and LEFT THE VALUE LIVE in the
+# arithmetic -- a protection that exists only as a description is not a protection, committed by
+# the seat that had cited that rule an hour earlier.
+# kuzu_nessie_db.rebuild.tmp.SET members are runtime-named (_canonical.py:288, pid +
+# monotonic_ns), so the family has UNDEFINED CARDINALITY -- map-owner ruling 75073. The 6 was an
+# observation snapshot and is gone from the arithmetic, not annotated inside it.
+NON_ENUMERABLE_FAMILIES = {"kuzu_nessie_db.rebuild.tmp.SET"}
+SET_MEMBERS = {"_build_manifest.json.SET": 3, ".comp-graph/platinum.CACHE_SET": 5}
+
+# SOURCE ASSERTION, fails closed: a non-enumerable family may never re-enter the counts.
+assert not (NON_ENUMERABLE_FAMILIES & set(SET_MEMBERS)), (
+    "a NON-ENUMERABLE family is in SET_MEMBERS: %s" % (NON_ENUMERABLE_FAMILIES & set(SET_MEMBERS)))
+
 _UNBUILT_HOME = "NOWHERE -- unbuilt"
 _absent = [p for p in PARTS if str(p["home"]).startswith(_UNBUILT_HOME)]
 _present = [p for p in PARTS if not str(p["home"]).startswith(_UNBUILT_HOME)]
-_objects = sum(SET_MEMBERS.get(p["id"], 1) for p in _present)
+_enum_sets = [p for p in _present if p["id"] in SET_MEMBERS]
+_nonenum = [p for p in _present if p["id"] in NON_ENUMERABLE_FAMILIES]
+_singletons = [p for p in _present if p["id"] not in SET_MEMBERS
+               and p["id"] not in NON_ENUMERABLE_FAMILIES]
+
+# ⛔ NO SINGLE "DISTINCT OBJECTS" TOTAL IS EMITTED. A population containing a family of undefined
+# cardinality has no object total, and printing one would state a number the estate does not have.
+# The partition is emitted instead, and it SUMS.
+assert len(_singletons) + len(_enum_sets) + len(_nonenum) == len(_present)
 MANIFEST["denominator"]["method"] += (
-    " PARTS_VS_OBJECTS (computed at build): %d parts total = %d describing a PRESENT thing + %d "
-    "recording an ABSENCE (the unbuilt C3 stages, which are NOT objects and must never be counted "
-    "as inventory). Of the %d present parts, %d are SET rows covering %d member objects, so the "
-    "present parts describe %d DISTINCT OBJECTS. A reader quoting '%d' as an object count "
-    "overstates by the absences and understates by the sets, in opposite directions, which is "
-    "exactly why both figures are printed."
-    % (len(PARTS), len(_present), len(_absent), len(_present), len(SET_MEMBERS),
-       sum(SET_MEMBERS.values()), _objects, len(PARTS)))
+    " PARTS_VS_OBJECTS (computed at build, NO SINGLE OBJECT TOTAL IS EMITTED): %d parts total = "
+    "%d present + %d recording an ABSENCE (the unbuilt C3 stages, which are NOT objects and must "
+    "never be counted as inventory; their `basis` is `held` on 1.0.0_SA_CTO~X 73215 and their "
+    "unbuilt-ness is read from `home`, not from `basis` -- two different questions). The %d "
+    "present parts partition as %d singleton parts + %d ENUMERABLE set rows covering %d named "
+    "member objects + %d NON-ENUMERABLE family whose members are runtime-named and whose "
+    "CARDINALITY IS UNDEFINED. ⛔ THEREFORE NO TOTAL DISTINCT-OBJECT COUNT EXISTS FOR THIS "
+    "POPULATION, and none is printed: a total spanning a family of undefined cardinality would be "
+    "a number the estate does not have. The enumerable subtotal is %d objects across %d set rows "
+    "and is the only object figure quotable here."
+    % (len(PARTS), len(_present), len(_absent), len(_present), len(_singletons), len(_enum_sets),
+       sum(SET_MEMBERS.values()), len(_nonenum), sum(SET_MEMBERS.values()), len(_enum_sets)))
 
 with open(OUT, "w", encoding="utf-8") as f:
     json.dump(MANIFEST, f, indent=2, ensure_ascii=False)
