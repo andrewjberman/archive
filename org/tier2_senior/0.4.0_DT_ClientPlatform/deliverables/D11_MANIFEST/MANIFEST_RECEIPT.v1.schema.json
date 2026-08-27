@@ -17,6 +17,7 @@
     "input_closure",
     "source_snapshot_utc",
     "executed_utc",
+    "run_id",
     "executed_by",
     "replay"
   ],
@@ -44,7 +45,7 @@
     },
     "exact_home": {
       "type": "string",
-      "pattern": "^org/tier2_senior/0\\.4\\.0_DT_ClientPlatform/deliverables/D11_MANIFEST/graph_object_manifest\\.[0-9]{8}T[0-9]{6}Z\\.receipt\\.json$",
+      "pattern": "^org/tier2_senior/0\\.4\\.0_DT_ClientPlatform/deliverables/D11_MANIFEST/graph_object_manifest\\.[0-9]{8}T[0-9]{12}Z\\.receipt\\.json$",
       "description": "RUN-QUALIFIED BY THE RUN, NOT BY THE CLOSURE. ⛔ IT WAS QUALIFIED BY source_snapshot_utc, which is DETERMINISTIC OVER THE INPUTS -- so two emissions of an identical closure computed the SAME home, the second refused, and replay evidence could never be furnished. The immutability guard made the determinism claim beside it unprovable. A RUN IDENTITY AND A CLOSURE IDENTITY ARE TWO AXES; the qualifier is now executed_utc and the snapshot stays a separate field."
     },
     "authorship_mode": {
@@ -202,23 +203,8 @@
       "description": "A MECE STATE PLUS PER-EMISSION EVIDENCE. `byte_identical: false` used to mean BOTH 'compared and differed' AND 'never compared'; and the count/digest pair could not prove each other. The state is derived FROM the evidence by the verifier rather than asserted beside it.",
       "properties": {
         "comparison_state": {
-          "enum": [
-            "not_performed",
-            "byte_identical",
-            "byte_different"
-          ],
-          "x-enum-definitions": {
-            "not_performed": "One emission. No comparison was possible, and this is the only honest state for a single run.",
-            "byte_identical": "Two or more emissions produced exactly ONE distinct digest.",
-            "byte_different": "Two or more emissions produced MORE THAN ONE distinct digest. Drift, recorded rather than hidden."
-          },
-          "x-rule24": {
-            "axis": "the OUTCOME of the replay comparison",
-            "grain": "one emission set",
-            "intent": "one -- what the comparison found; NOT how many runs (emissions_compared), NOT what they produced (observed_digests)",
-            "mece": "not_performed | byte_identical | byte_different spans it with no overlap: a comparison either did not happen, or happened and found one digest, or happened and found several.",
-            "state_coherence": "another emission moves emissions_compared and MAY move this; it never moves the described artifact."
-          }
+          "const": "not_performed",
+          "description": "⛔ v1 RECORDS ONE EMISSION AND MAKES NO COMPARISON CLAIM. `byte_identical` and `byte_different` are REMOVED, not merely constrained, because a comparison claim a single document makes about itself is SELF-MINTABLE: copying the one emission row and changing `sequence` to 2 forged a second identical emission, and nothing inside the document could contradict it. A multi-emission claim is only checkable when every prior emission resolves to a SEPARATELY EXISTING immutable receipt by exact home + digest, verified through the same consumer path -- which requires receipts that accumulate, and is therefore a v2 concern rather than a v1 field. **THE SMALLEST HONEST CONTRACT IS THE ONE THAT CANNOT STATE AN UNVERIFIABLE CLAIM.**"
         },
         "emissions": {
           "type": "array",
@@ -245,54 +231,20 @@
               }
             }
           },
-          "description": "⛔ PER-EMISSION EVIDENCE, because a COUNT and a DIGEST SET could not prove each other. A forged `byte_identical / 2` carried no second emission, and `byte_different` could claim MORE DISTINCT DIGESTS THAN EMISSIONS -- arithmetic nothing in the document could contradict. Both are now inexpressible: the count IS the array length and the digests ARE its members, so neither can exceed or contradict the other."
+          "description": "EXACTLY ONE emission record in v1. The count IS the array length; there is no separate count to contradict it, and no second row a copy could mint.",
+          "maxItems": 1
         }
       },
       "allOf": [
         {
-          "if": {
-            "properties": {
-              "comparison_state": {
-                "const": "not_performed"
-              }
-            },
-            "required": [
-              "comparison_state"
-            ]
-          },
-          "then": {
-            "properties": {
-              "emissions": {
-                "maxItems": 1
-              }
-            }
-          },
-          "$comment": "no comparison => exactly one emission record."
-        },
-        {
-          "if": {
-            "properties": {
-              "comparison_state": {
-                "enum": [
-                  "byte_identical",
-                  "byte_different"
-                ]
-              }
-            },
-            "required": [
-              "comparison_state"
-            ]
-          },
-          "then": {
-            "properties": {
-              "emissions": {
-                "minItems": 2
-              }
-            }
-          },
-          "$comment": "any comparison requires at least two emission records."
+          "$comment": "v1 carries exactly one emission and one state. The branch table that used to live here described states this version cannot express."
         }
       ]
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[0-9]{8}T[0-9]{6}[0-9]{6}Z$",
+      "description": "THE PER-RUN IDENTITY, subsecond, compact UTC. ⛔ IT IS A FIELD BECAUSE A QUALIFIER THAT LIVES ONLY IN A FILENAME CANNOT BE RE-DERIVED BY ANYONE -- which is the unbindable second clock the qualifier rule exists to prevent, and I re-opened it in the same edit that fixed the same-second collision. Its first 15 characters MUST equal `executed_utc` compacted, so the run identity and the run clock are bound rather than merely adjacent."
     }
   },
   "$defs": {

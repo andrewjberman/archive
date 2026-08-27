@@ -396,14 +396,20 @@ def _rel(p: str) -> str:
     return os.path.relpath(p, WS).replace(os.sep, "/")
 
 
-def build_receipt(out_path: str, snapshot_utc: str, reg: dict,
-                  run_utc: str = None) -> dict:
+def build_receipt(logical_home: str, snapshot_utc: str, reg: dict,
+                  run_utc: str = None, run_id: str = None, bytes_path: str = None) -> dict:
     """The receipt for ONE emission. PURE apart from reading the tree -- callable by a control
     without running a compile, which is the only way a fixture stays honest about the emitter."""
-    art = _rel(out_path)
-    with open(out_path, "rb") as fh:
+    # ⛔ PHYSICAL BYTES AND LOGICAL HOME ARE TWO THINGS. The gate hashes the STAGED bytes and
+    # describes the FINAL home; conflating them made the receipt describe a temp file and derive
+    # a home no pattern could accept.
+    art = _rel(logical_home)
+    with open(bytes_path or logical_home, "rb") as fh:
         raw = fh.read()
+    # ⛔ SUBSECOND. A seconds-only qualifier collides under same-second concurrency, and the
+    # per-run identity is the one value that must not.
     _run_utc = run_utc or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    _run_id = run_id or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     return {
         "document_kind": "manifest_execution_receipt",
         "governing_schema": {"home": _rel(RECEIPT_SCHEMA),
@@ -412,8 +418,7 @@ def build_receipt(out_path: str, snapshot_utc: str, reg: dict,
         # emissions of an identical closure collide, so the second refused and replay evidence
         # could never be furnished -- the immutability guard made the determinism claim beside
         # it unprovable. Run identity and closure identity are two axes.
-        "exact_home": "%s.%s.receipt.json" % (art.rsplit(".json", 1)[0],
-                                              _run_utc.replace("-", "").replace(":", "")),
+        "exact_home": "%s.%s.receipt.json" % (art.rsplit(".json", 1)[0], _run_id),
         # FOUR INDEPENDENT AXES. A document's origin, its permitted future, its time semantics
         # and its standing move separately, and collapsing any two hides a real state.
         "authorship_mode": "machine_emitted",
@@ -454,6 +459,7 @@ def build_receipt(out_path: str, snapshot_utc: str, reg: dict,
         },
         "source_snapshot_utc": snapshot_utc,
         "executed_utc": _run_utc,
+        "run_id": _run_id,
         "executed_by": ME,
         # ⛔ ONE emission per run, so the state is `not_performed` -- NOT "byte_identical:
         # false", which meant BOTH 'compared and differed' AND 'never compared'. One value over
@@ -1271,26 +1277,33 @@ def main(out_path: str = None) -> None:
     if errs:
         raise SystemExit("REFUSING TO WRITE -- the recompiled manifest does not validate.")
 
-    # ⛔ THE END-TO-END GATE RUNS BEFORE ANYTHING LANDS. main() used to shape-validate and then
-    # WRITE, so a dirty closure could emit an immutable verifier-failing receipt AFTER the
-    # manifest was already on disk -- evidence that cannot be corrected because it is immutable
-    # and cannot be trusted because its pins do not bind. THE GATE A CONSUMER RUNS MUST BE THE
-    # GATE THE PRODUCER PASSES. The manifest is staged, the receipt is built against the staged
-    # bytes and fully verified, and only then do both land.
+    # ⛔ THE END-TO-END GATE RUNS BEFORE ANYTHING LANDS, ON THE LOGICAL FINAL SHAPE.
+    # The previous version built the receipt against the STAGING path, so `exact_home` derived to
+    # `stage_<temp>.<run>.receipt.json` and failed its own pattern BY CONSTRUCTION -- a gate that
+    # could never have passed, on a field it created itself, never run because running it means
+    # running the compiler.
     import tempfile as _tf
-    _fd, _stage = _tf.mkstemp(suffix=".json", prefix="stage_",
-                              dir=os.path.dirname(out_path))
+    import importlib.util as _il
+
+    _sp = _il.spec_from_file_location("verify_receipt", os.path.join(HERE, "verify_receipt.py"))
+    _vr = _il.module_from_spec(_sp)
+    _sp.loader.exec_module(_vr)
+
+    _fd, _stage = _tf.mkstemp(suffix=".json", prefix="stage_", dir=os.path.dirname(out_path))
     try:
         with os.fdopen(_fd, "w", encoding="utf-8", newline="\n") as f:
             json.dump(out, f, indent=2, ensure_ascii=True, sort_keys=True)
             f.write("\n")
-        _receipt = build_receipt(_stage, SOURCE_SNAPSHOT_UTC, reg=load_registry())
-        _receipt["describes"]["home"] = os.path.relpath(out_path, WS).replace(os.sep, "/")
-        import importlib.util as _il
-        _sp = _il.spec_from_file_location("verify_receipt", os.path.join(HERE,
-                                                                        "verify_receipt.py"))
-        _vr = _il.module_from_spec(_sp)
-        _sp.loader.exec_module(_vr)
+        # LOGICAL home, PHYSICAL bytes. Retry the run id until the home is free, BEFORE the
+        # manifest is touched -- a reservation after the irreversible step is not a reservation.
+        for _attempt in range(64):
+            _receipt = build_receipt(out_path, SOURCE_SNAPSHOT_UTC, reg=load_registry(),
+                                     bytes_path=_stage)
+            if not os.path.exists(os.path.join(WS, _receipt["exact_home"])):
+                break
+        else:
+            raise SystemExit("REFUSING TO WRITE -- could not reserve a free immutable receipt "
+                             "home in 64 attempts")
         _f = _vr.verify(_receipt, actual_home=_receipt["exact_home"])
         if _f:
             raise SystemExit(
@@ -1298,7 +1311,7 @@ def main(out_path: str = None) -> None:
                 "consumer runs (%d findings):\n  %s" % (len(_f), "\n  ".join(_f)))
     finally:
         try:
-            os.remove(_stage)
+            os.remove(_stage)          # no stage debris, pass or fail
         except OSError:
             pass
 
@@ -1327,8 +1340,9 @@ def main(out_path: str = None) -> None:
                 for e in rerrs[:5])))
     rpath = os.path.join(WS, receipt["exact_home"])
     if os.path.exists(rpath):
-        raise SystemExit("REFUSING TO OVERWRITE AN IMMUTABLE RECEIPT at %s -- immutability that "
-                         "depends on nobody re-running is not immutability" % receipt["exact_home"])
+        raise SystemExit("REFUSING TO OVERWRITE AN IMMUTABLE RECEIPT at %s -- the home was "
+                         "reserved before the manifest was written, so reaching this means "
+                         "something else took it in between" % receipt["exact_home"])
     with open(rpath, "w", encoding="utf-8", newline="\n") as f:
         json.dump(receipt, f, indent=2, ensure_ascii=True, sort_keys=True)
         f.write("\n")
