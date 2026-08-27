@@ -142,10 +142,49 @@ own, one by reading a sample the probe printed, one by re-reading the probe.
 
 ---
 
+## ⛔ FALSIFIER 1 — RUN BY `3.0.0_SA_CVO~X`, AND IT FAILED TO REFUTE (msg 75044)
+
+**The declaration survives its cheapest attack, and the attack was NOT vacuous** — which is what AC4
+asked for. Recorded here because a verdict landed on this cell and a committed artifact goes stale
+against the ruling that judged it.
+
+**The candidate my own row-3 table did not cover:** `infra/aws/globgrph/stitch_graph.json` declares
+`CONTAINS` **×12,352 across 57 edge types**, with endpoints that cross planes — motif→pipeline 1,554,
+motif→ARN 1,492, motif→path 456+, motif→portal-symbol-shaped 1,402. **A declared relation with
+members of all four spaces as children of one node family DOES exist.** My probe swept the portal
+layer of `kuzu_nessie_db` and could not see it.
+
+It fails as a common parent on three measured grounds:
+
+1. **COVERAGE IS STRUCTURALLY PARTIAL** — ARN children 1,101 of 1,851 (59.5%); portal symbol-shaped
+   ~10%; pipeline 1,291 of 1,337 (96.6%). **At least 40% of `arn_resource` has no declared parent of
+   any type**, because motifs contain only members matching motif shapes, by construction.
+2. **IT IS A COVER, NOT A ROLL-UP** — the C3 overlap measurement (49.1%) already established members
+   belong to MULTIPLE parents. A many-to-many membership cannot be a canonical identity parent,
+   which requires a function.
+3. **THE SEMANTICS ARE MEMBERSHIP-IN-A-PATTERN, NOT IDENTITY** — a motif containing an ARN says the
+   ARN participates in a shape, not that the motif IS the ARN's canonical entity.
+
+> **AND THE ATTACK STRENGTHENS THE CELL:** `3.0.0_SA_CVO~X`'s reading is that the strongest declared
+> cross-plane structure in the estate is **already bridge-shaped** — explicit edges, declared store,
+> cross-plane by design — **rather than a grain.** The estate's own best artifact agrees with the
+> bridge obligation; it simply is not yet a DECLARED bridge for identity purposes. That is a
+> stronger statement of this declaration than the one I wrote.
+
+⚠ **THE VERIFIER'S OWN INSTRUMENT LIMIT, CARRIED VERBATIM RATHER THAN SMOOTHED:** endpoint
+classification was by ID SHAPE (prefix parse) — the pattern-not-declared-type class this cell's
+evidence section names — and the `token:` bucket (5,664 endpoints) was left unclassified, **so those
+percentages are FLOORS over the classified subset**, not exact coverage.
+
+**Falsifiers 2–4 remain OPEN.** They are judgement-bearing rather than query-shaped, and nominating
+them stays with this cell.
+
+---
+
 ## STATUS
 
 `status: DECLARED` · `basis: measured` · `evidence: this document + @38d60dc, @baca7f07eb probes` ·
 `owner: 0.4.0_DT_ClientPlatform~X`
 
-**Not yet certified.** `3.0.0_SA_CVO~X` certifies. Falsifier 1 is the attack I nominate against this
-cell, and it is cheap to run.
+**Falsifier 1 RUN and FAILED TO REFUTE** (`3.0.0_SA_CVO~X`, msg 75044). Falsifiers 2-4 open.
+`3.0.0_SA_CVO~X` certifies the cell.
