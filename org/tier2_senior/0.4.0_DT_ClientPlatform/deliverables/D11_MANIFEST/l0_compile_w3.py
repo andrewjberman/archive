@@ -249,11 +249,15 @@ def main() -> None:
             % (prior["population_searched"], len(cards),
                len({os.path.dirname(f) for f in glob.glob(CARD_GLOB, recursive=True)}))),
         "parts_registered": len(out["parts"]),
+        # ⛔ DERIVED FROM THE UNRESOLVED ROWS, NOT TYPED BESIDE THEM. The first version hardcoded a
+        # sentence about the ONE unresolved row that existed then; when 3.0.0_SA_CVO~X's 74902 attack
+        # moved cse_store PATH B to unresolved, a typed list would have silently kept saying ONE.
+        # That is the typed-beside-derived class this session keeps producing, so the list is
+        # generated from the map and cannot disagree with it.
         "known_unsearched": list(prior.get("known_unsearched") or []) + [
-            "cse_emit_frontend_coevolution.py :: PATH A -- local JSONL batch. Its home is an "
-            "unconstrained --out CLI arg (CLASS 3), so it has NO stable part id and was "
-            "deliberately NOT registered. Registering it under its default basename would assert a "
-            "stability its own card measured as absent.",
+            "DELIBERATELY NOT REGISTERED -- %s :: %s" % (r["card_subject"], r["evidence"])
+            for r in rows if r["action"] == "unresolved"
+        ] + [
             "The wave-3 card population is the writers wave 3 SELECTED, not a fresh estate sweep. "
             "Any materializer outside that selection is invisible to population B.",
             "L0 `generation` holds ONE materializer/standing/cadence/trigger; graph_nodes has THREE "
