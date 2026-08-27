@@ -8,12 +8,14 @@
 
 ## VERDICT
 
-**AC1 PASS · AC2 PASS · AC3 PASS · AC4 PASS.**
+**AC1 PASS · AC2 PASS · AC3 PASS · AC4 PASS. ACCEPTED 4/4 by `2.0.0_SA_COO~Z` @`e4b264c7c4`.**
 **Cottonwood Positioning presence at the served key: ABSENT — established as a MEASUREMENT, with
 three positive controls, not inferred from the absence of a pipeline.**
 
-⚠ **The proof instance is STRUCTURALLY VALID (jsonschema, 4 rows) and ALIGNMENT-INVALID, and the
-cause is in the TO, not the instance.** §5. I did not work around it.
+✅ **Proof instance `rc=0 VALID`, `violations=0`, 4 rows — re-verified at this seat after the issuer
+fixed the TO.** It first returned INVALID, and the cause was markdown backticks in the TO's
+`<decomp_ref>`, not the instance; `2.0.0_SA_COO~Z` diagnosed that at their own seat and owned it. §5.
+**I did not work around it, and the record of why is kept rather than tidied away.**
 
 ## 1. THE SERVED KEY — resolved on the rail, then measured live
 
@@ -113,7 +115,24 @@ make MISSING indistinguishable from UNAUTHENTICATED. That is `0.0.0_AB_MSTR~Z`'s
 docstring gives sufficient not necessary conditions. Re-measuring needs a live bearer against the
 distribution — outside a read-only substrate TO. Carried with its caveat rather than folded in.
 
-## 5. ⛔ PROOF-OF-SPEC: STRUCTURALLY VALID, ALIGNMENT-INVALID — AND THE CAUSE IS THE TO
+## 5. ⛔ PROOF-OF-SPEC: **RESOLVED @`e4b264c7c4`** — was alignment-INVALID, cause was the TO
+
+> ✅ **RESOLVED, and re-verified at THIS seat rather than accepted on report.** `2.0.0_SA_COO~Z`
+> found the cause at their own seat, named it as theirs — *"I wrapped the path in markdown backticks
+> … your instance was correct the whole time and my formatting failed it"* — and fixed it in all
+> three TOs carrying the construction. **Re-run here after the fix:** `rc=0 VALID`, `violations=0`,
+> 4 rows; `alignment-forward-1` 4/4 criteria carry cell_refs; `alignment-forward-2` 4/4 cell_refs
+> resolve; **negative control `rc=1`, fires**; the extractor now reads
+> `workflows/…/DECOMP.md` → resolves **True**. The section below is kept as the record of what the
+> failure looked like from the executor's side, **not** as an open blocker.
+>
+> ⚠ **One residual the checker discloses on its own face and it is the issuer's field:**
+> `alignment-backward` reads **2 of 5** declared cells reachable, because the `<decomp_ref>` is
+> UNDELIMITED and its wide harvest picks up `PT-b-2`, `PT-b-4`, `PT-inv-7` — the three ids this TO's
+> scope_fence **explicitly EXCLUDES**. The tool says so itself: *"an EXPLICIT EXCLUSION CLAUSE reads
+> here as a claim … NOT asserted as a violation. Add `<owned_cells>` to make this enforceable."*
+> **An exclusion and an ownership claim are indistinguishable to the harvest**, so the 2/5 is not a
+> coverage gap in this work. Not my artifact to amend.
 
 ```
 proof-of-spec-check ... T2DS-AC1,T2DS-AC2,T2DS-AC3,T2DS-AC4   -> rc=1, violations=2
