@@ -1,0 +1,199 @@
+{
+  "schema_version": "1.0",
+  "to_id": "POSN_TENANCY.TO-4-AE",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "docs/architecture/POSN_TENANCY_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "a7ba82d253"
+  },
+  "assignee": "0.7.0_AE_CloudOps~Y",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/posn-tenancy/20260827T200734Z/DECOMP.md",
+    "vintage_commit": "4a1d7a5e3c",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/POSN_TENANCY.TO-4-AE.satellites-scoped-path-additive.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda-edge/shared-advisor-router/index.mjs",
+      "kind": "script",
+      "commit_or_etag": "40697fe79d",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The SATELLITES_PREFIX branch. NOT deployed: the apply is HELD by the issuer (2.0.0_SA_COO~Z, msg 10679). No terraform apply, no lambda update-function-code. The live edge version remains shared-advisor-router:24.",
+      "artifact_covered_by": [
+        "T4AE-AC1",
+        "T4AE-AC5",
+        "T4AE-AC6"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/shared-advisor-router-response/index.mjs",
+      "kind": "script",
+      "commit_or_etag": "40697fe79d",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The PT-c-2 explicit-empty, placed AFTER the firm-isolation guard. Live edge version remains shared-advisor-router-response:5.",
+      "artifact_covered_by": [
+        "T4AE-AC3",
+        "T4AE-AC6"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/shared-advisor-router/test/satellites-registry.spec.mjs",
+      "kind": "test",
+      "commit_or_etag": "40697fe79d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 tests. Runs under `bun test test/` per package.json. SOURCE-rung evidence only, declared as such on the spec's own face.",
+      "artifact_covered_by": [
+        "T4AE-AC6"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/portal-auth/cloudfront-distribution.tf",
+      "kind": "terraform",
+      "commit_or_etag": "40697fe79d",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "One ordered_cache_behavior for /api/scoped/satellites/*, binding the EXISTING opal_scoped_advisor_by_firm policy. terraform plan run and read; NOT applied. This is the DESIRED plane and is never cited here as evidence anything is in force.",
+      "artifact_covered_by": [
+        "T4AE-AC2",
+        "T4AE-AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T4AE-AC1",
+      "criterion_verbatim": "BOTH ARMS, AT THE BYTES. Cottonwood obtains its Satellites artifact (200 + its own bytes) and a non-Cottonwood identity attempting the same path is REFUSED, status and body recorded for each. A single arm is not a PASS.",
+      "method": "command",
+      "invocation": "Not exercised. The path is not applied and no Satellites artifact exists at any key.",
+      "output_evidence": "BLOCKED, and on a different project's producer. Measured: 145,927 keys swept across opal-data-portal-v2 (4,125), opal-data-cot (6,599), opal-data-bd (122,356) and opal-data-49financial (11,847), EVERY sweep terminal IsTruncated=None, 'satellite' hits = 0. Positive control in the same sweep: opal-data-cot 'gold' 3,738 of 6,599 and 'silver' 681, so the instrument finds tokens and the zero is a measured absence. Source side: satelliteSet.ts:93 SATELLITE_REGISTRY = [] EMPTY BY DESIGN, its header naming ETFS_SATELLITES.TO-2 as the PRIMARY carrier; satelliteAdapter.ts:98 derives satellites CLIENT-SIDE with types-only imports and no fetch. The registry EXISTS as a declared set (satellites_registry.py @dc56a72c21) but NOTHING PUBLISHES IT: a negative sweep of seven write-verb patterns (put_object/upload/boto3/client(/json.dump/open(..'w'/write) over a printed denominator of 320 lines returned NO MATCH. I did NOT fabricate a fixture to green this arm; a fixture would satisfy the criterion and prove nothing about the served plane, which is this TO's own named false-pass class.",
+      "denominator": "145,927 keys across 4 buckets, all terminal IsTruncated=None; 0 satellite artifacts; 320 lines swept for 7 write verbs, 0 matches; 1 positive control firing at 3,738/6,599.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "The criterion requires bytes that do not exist anywhere. This is not a defect in the build and not a stall in this TO: the registry's producer is ETFS_SATELLITES.TO-2 in the DS lane, whose declared set is delivered and whose PUBLISH step does not exist in any lane's work. 2.0.0_SA_COO~Z ruled the apply HELD until the registry is populated, precisely so this arm and its negative twin can be exercised together in one pass rather than spending the first real exercise of a new firm-scoped route on an empty payload. Reported UNCOMPUTABLE-BY-CONSTRUCTION rather than FAIL because nothing about the serving layer is failing."
+    },
+    {
+      "criterion_id": "T4AE-AC2",
+      "criterion_verbatim": "ADDITIVE, PROVED NOT ASSERTED. positioning_data.json is byte-identical before/after (hash or ETag, printed), and the general route, Models and ETFs are unchanged. Denominator printed.",
+      "method": "live_read",
+      "invocation": "terraform plan -target=aws_cloudfront_distribution.portal (DESIRED); aws s3api head-object on four positioning keys at 22:2xZ and again at 22:5xZ (APPLIED); git show --stat and a sorted-set diff of every path_pattern between the commit and its parent.",
+      "output_evidence": "ADDITIVE PROVEN AT THE PLANE WHERE THE CHANGE EXISTS. terraform plan: 'Plan: 0 to add, 1 to change, 0 to destroy', and the ONLY behaviour delta is + path_pattern \\\"/api/scoped/satellites/*\\\". Sorted-set diff of path_patterns between 40697fe79d~1 and 40697fe79d: 26 -> 27, ONE addition, NOTHING REMOVED -- a set diff rather than a count, because a count cannot see a swap. The two edge-function files are +134/-0 (66+68), mechanically additive. GENERAL ARTIFACTS UNCHANGED, ETags re-read at 22:5xZ vs the 22:2xZ baseline: json/positioning/positioning_data.json 8c27325ff6a08e1ea6466cae172ff534 / 8,088; allocation_summary.json 2182392aa9dc4514c98bde0d3e915bf0 / 949; holdings_attribution_data.json 84d47b8e90bda658aa5f7a4998ff5f58 / 377,782; platinum/etfs/positioning_data.json a6682eaf7954123d5ec8aba829178a1a / 128,122 -- all four IDENTICAL. The /api/general/* behaviour keeps cache policy ce00305d and origin S3-opal-data-portal-v2-json, untouched in the plan.",
+      "denominator": "27 cache behaviours after vs 26 before; 4 positioning keys re-measured, 4 of 4 identical; 2 edge files at +134/-0; 1 plan read.",
+      "status": "PASS",
+      "status_reason": "PASS on the additive property, which is the substance of the criterion and is proven rather than asserted. NAMED LIMIT rather than glossed: the change is HELD, so the ETag stability across this window shows the artifacts did not move -- it cannot show that MY change does not move them, because my change is not applied. The load-bearing evidence is therefore the plan and the path_pattern set diff, not the ETag pair. A post-apply re-measure of these same four ETags is OWED and is named here so it cannot be quietly skipped."
+    },
+    {
+      "criterion_id": "T4AE-AC3",
+      "criterion_verbatim": "THE THREE FIRMS WITHOUT SATELLITES GET AN EXPLICIT EMPTY, NOT A MISSING KEY. The cheap implementation is the wrong one and will look right: a bare 404/403 for those firms lands them in the client's error branch. ABSENCE PRESENTS AS A REFUSAL. Exercise one no-Satellites firm and show what it receives.",
+      "method": "command",
+      "invocation": "Built, not exercised: the path is not applied. The measurement that MOTIVATES the contract was exercised on the live scoped family.",
+      "output_evidence": "THE CONTRACT IS BUILT AND THE HAZARD IT ANSWERS IS MEASURED. Exercised live on the existing scoped family, valid cottonwood bearer, a deliberately absent artifact: HTTP 403 {\\\"error\\\":\\\"artifact_forbidden\\\",\\\"uri\\\":\\\"/gold/artifacts/zzz_definitely_absent_probe.json\\\",\\\"firmId\\\":\\\"cottonwood\\\",\\\"status\\\":403} -- BYTE-IDENTICAL in shape to a genuine refusal, because the origin deliberately does not enumerate. Controls: no bearer -> 401 'Missing or invalid Authorization header'; bogus bearer -> 401 'Invalid or expired token' -- so auth-failure IS separable from artifact-absence, but ABSENT and FORBIDDEN are not. BUILT: shared-advisor-router-response converts 403/404 on the registry key into 200 {schema_version:1, firm_id, books:[], as_of:null, status:'no_registry_published', read_at}. ORDERING VERIFIED INDEPENDENTLY by 3.0.0_SA_CVO~Z positionally -- guard emit :182, guard 502 return :194, explicit empty :247, i.e. 53 lines AFTER the guard returns -- so a cross-firm mis-route is BLOCKED and can never be softened into a benign empty. as_of is NULL deliberately: SAT-a-4 requires the carrier resolve THE DATA'S OWN as-of at read time, and an absent registry has none; stamping read_at there would manufacture a freshness signal for something that does not exist.",
+      "denominator": "1 absent-artifact arm + 2 distinct negative controls, exercised on the scoped family; 3 source positions verified by an independent seat; 0 arms on the new path, which is not applied.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "The criterion says 'Exercise one no-Satellites firm and show what it receives.' That requires the path to be live, and the apply is HELD by the issuer. The contract is BUILT and unit-tested, and the hazard it exists to answer is EXERCISED on the sibling family -- but neither is the exercise this criterion asks for. Reported UNVERIFIABLE-BY-INSTRUMENT rather than PASS because a built contract and a served response are different rungs, and this TO's own AC6 is the rule that says so."
+    },
+    {
+      "criterion_id": "T4AE-AC4",
+      "criterion_verbatim": "Firm-scoped cache key on the exception path, measured AT THE EDGE (two firms, same path, distinct entries) -- and the GENERAL artifact's cache key is shown UNCHANGED. Firm-keying the common artifact partitions IDENTICAL BYTES: a correct-looking control over an exposure that does not exist.",
+      "method": "live_read",
+      "invocation": "aws cloudfront get-cache-policy on both policies (APPLIED); terraform plan for the new behaviour's binding (DESIRED); plan inspection of the /api/general/* behaviour.",
+      "output_evidence": "SECOND HALF DISCHARGED, FIRST HALF NOT. GENERAL ARTIFACT'S CACHE KEY UNCHANGED: /api/general/* still binds opal-api-general-5min-cache (ce00305d) -- HeaderBehavior none, QueryStringBehavior none, DefaultTTL 300 -- and the plan shows that behaviour untouched. The common artifact was NOT firm-keyed, which is the trap this criterion names: with one unscoped artifact, adding firm to its cache key would partition IDENTICAL BYTES and produce a green-looking control over no exposure. EXCEPTION PATH: the new behaviour binds opal_scoped_advisor_by_firm (45eb7514) -- measured APPLIED as HeaderBehavior whitelist ['X-Firm-Id'], QueryString whitelist ['firm'], DefaultTTL 60. That policy already exists and is already bound to the scoped S3 behaviours, so PT-a-3 is a WIRING act, not a build.",
+      "denominator": "3 cache policies read live; 27 behaviours in the planned distribution; 1 of 27 changed; 0 edge cache-entry observations on the new path.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "TWO independent blockers, and both are named rather than one standing in for the other. (1) The path is not applied, so there are no edge cache entries on it to observe. (2) Even applied, 'two firms, same path, distinct entries' needs TWO firm credentials and only ONE is obtainable at this seat -- jane@cottonwood.com; test-regression@49financial.com exists but was slated for decommission with no documented password, and I did not reset a production credential to manufacture an arm. The second blocker survives the apply and should be seated with the credential question that also blocks PT-inv-3."
+    },
+    {
+      "criterion_id": "T4AE-AC5",
+      "criterion_verbatim": "X-Firm-Id remains JWT-injected and NOT client-assertable AFTER the change -- re-exercised, not inherited from TO-3-AE.",
+      "method": "command",
+      "invocation": "Fresh bearer minted at 22:5xZ; GET the scoped artifact with no forged header and with three forged X-Firm-Id values; read the firm the server echoes back.",
+      "output_evidence": "RE-EXERCISED, NOT INHERITED -- these are fresh calls at 22:5xZ, not TO-3-AE's results quoted. Baseline (no forged header) -> firmId cottonwood. Forged X-Firm-Id: 49financial -> cottonwood; inflection -> cottonwood; opal-capital -> cottonwood. The JWT-derived firm wins in every arm; the client's assertion is ignored. Mechanism unchanged at source: auth-validator-edge:388 is a plain assignment that destroys any client value, running at viewer-request on every /api/scoped/* behaviour -- and the new behaviour declares that same viewer-request association.",
+      "denominator": "1 baseline + 3 forged arms, all on the live scoped family; 1 source site; 1 planned association.",
+      "status": "PASS",
+      "status_reason": "PASS on the substance -- the header is not client-assertable and this was re-exercised rather than inherited. NAMED LIMIT: the criterion says AFTER the change, and the change is HELD, so what is verified is that the mechanism is intact NOW and that the new behaviour declares the same viewer-request association. That is a precondition, not the post-apply verification. PT-inv-2 is the standing constraint that must refuse a new path on which this turns out to be false, and the post-apply re-exercise is OWED. Also unverified either way: whether the echoed firmId field can take a value other than cottonwood, which needs a second credential."
+    },
+    {
+      "criterion_id": "T4AE-AC6",
+      "criterion_verbatim": "DESIRED != APPLIED != EXERCISED on every claim. Terraform is DESIRED; a live policy read is APPLIED; a request that got a response is EXERCISED. No .tf cited as evidence of force. No render, screenshot or UI state as evidence.",
+      "method": "manual_read_with_citation",
+      "invocation": "Self-audit of every claim in this instance and in the build report.",
+      "output_evidence": "NO TERRAFORM FILE IS CITED AS EVIDENCE THAT ANYTHING IS IN FORCE. Rung assignment: DESIRED -- the new ordered_cache_behavior and the plan output, labelled as the planned state throughout and never as a live one. APPLIED -- the three cache policies, the 27-behaviour listing, the four S3 ETags/VersionIds, the 145,927-key sweeps. EXERCISED -- the 403 absent-artifact arm, the two distinct 401 controls, the four AC5 forgery arms. SOURCE -- auth-validator-edge:388, satelliteSet.ts:93, satelliteAdapter.ts:98, satellites_registry.py's 320-line write-verb sweep, and the 27 unit tests, every one labelled SOURCE and none counted as an acceptance discharge. NO render, screenshot, browser or UI state was used anywhere in this TO. comp-routes was used for the behaviour map and explicitly NOT cited as evidence of force, because it declares its own plane DESIRED.",
+      "denominator": "6 criteria audited; 4 rungs used; 0 DESIRED artifacts cited as force; 0 renders; 27 unit tests explicitly excluded from acceptance evidence.",
+      "status": "PASS",
+      "status_reason": "The discipline held under pressure in the one place it mattered: 27 green tests were in hand and are declared NOT to be AC evidence, because a unit test is SOURCE and AC1/AC3/AC4/AC5 are EXERCISED. Two instrument traps were caught by it and are recorded -- lambda-edge.tf DEFINES the edge functions but carries no event_type, so the viewer-request fact came only from the live distribution; and the CloudFront origin ID names a bucket that returns NoSuchBucket."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO mutants against the build's two load-bearing properties, because a passing suite that was never mutated has never been tested. M1 puts the firm INTO the key (platinum/satellites/cottonwood/registry.json) -- the thing the design deliberately forbids, since a path is caller-influenced and a JWT-derived bucket is not. M2 disarms firm discrimination by hardcoding one bucket for the satellites branch. Both were applied to the committed source, run, and reverted.",
+      "expected": "M1 fails the no-firm-segment and rewrite assertions; M2 fails the two-firm distinct-bucket assertions. If either passes, the suite does not test the property it claims to.",
+      "observed": "BOTH FIRED. M1 -> 25 pass / 2 fail. M2 -> 25 pass / 2 fail. Restored -> 27 pass / 0 fail. The suite can refuse. NAMED LIMIT: these mutants exercise the SOURCE rung only -- they prove the unit suite discriminates, not that the served path does, and the served path is not applied.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The full router suite was run four times across the mutant cycle (clean, M1, M2, restored); the four positioning ETags were read at 22:2xZ and again at 22:5xZ; the AC5 forgery matrix was run against a freshly minted bearer.",
+      "observed": "STABLE. The clean suite returned 27 pass / 0 fail on both the pre-mutant and post-restore runs, with 15 expect() calls each time. All four positioning ETags were byte-identical across the two reads. The forgery arms returned the same echoed firmId on every arm.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The terraform apply",
+      "reason": "HELD by the issuer (2.0.0_SA_COO~Z, msg 10679) -- not on doubt about the build, which they reviewed, but on timing: applying now spends the first real exercise of a new firm-scoped route on an empty payload and buys nothing, because satelliteAdapter derives client-side and no consumer fetches the path. local.shared_advisor_router_arn resolves to qualified_arn, so an apply would also publish NEW EDGE VERSIONS onto the LIVE advisor-intelligence path serving partner firms. Lifted by: SATELLITE_REGISTRY populated by its named producer."
+    },
+    {
+      "item": "The PUBLISH step -- writing the registry to platinum/satellites/registry.json in each firm's bucket",
+      "reason": "Rule 13: data/*/scripts/{gold,silver,bronze}/*.py INCLUDING aws s3 cp is the DS lane, and satellites_registry.py sits at data/assets/scripts/gold/. Measured absent (0 write verbs in 320 lines), and named as a seam between two delivered TOs rather than a failure inside either -- ETFS_SATELLITES TO-1/TO-2's proof-of-spec is rc=0 VALID on 5/5."
+    },
+    {
+      "item": "PT-inv-3 -- null firm fails closed",
+      "reason": "Declared in the TO's <undischarged_carried> with NO criterion, deliberately. Unexercisable under this grant: a firmless JWT needs signing-key use or a production identity mutation. Carried at decomp @6a07d17cbb. It lands on the new path too, since a null-firm identity must fail closed there."
+    },
+    {
+      "item": "A second firm credential",
+      "reason": "Blocks AC4's two-firm arm and bounds AC5. Only jane@cottonwood.com is obtainable; test-regression@49financial.com exists but was slated for decommission (COO log 2026-04-22) with no documented password. I did not reset a production credential to manufacture an arm. This blocker SURVIVES the apply and should be seated alongside PT-inv-3's credential question."
+    },
+    {
+      "item": "The derived-registry redesign (Andrew-direct ~22:5xZ)",
+      "reason": "His ruling that membership is a name test on the daily pull retires the declared-set design. It changes the CONTENT's provenance, not the carrier, so it implies no re-work at this seat -- and it is routed to 1.0.0_SA_CTO~Z (TO issuer), 2.0.0_SA_COO~Z (seating) and 3.0.0_SA_CVO~Z (the certification resting on the declared set), not here."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / INERT -- ordered_cache_behavior is a POSITIONAL list. My first placement of the new block mid-list, beside its logical siblings, made terraform re-diff EVERY behaviour below it: a ~20-block churn of shifting path_patterns on a distribution whose own file header reads 'a bad apply breaks the portal'. The pattern overlaps nothing, so position is functionally irrelevant and reviewability is not. Moved to the end of the list; the diff went from unreadable to one line. Self-caught before hand-off.",
+    "OBSERVATION / INERT -- shared-advisor-router:258's PII block returns 401 rather than 403, justified in its own comment by 'CF custom_error_response converts 403->200+index.html'. MEASURED: the applied distribution has CustomErrorResponses Quantity = 0, and cloudfront-distribution.tf records that the distribution-global custom_error_response was REMOVED under TRSB_LEDGER.011 precisely because it masked /api/* errors as HTML. So the workaround's stated justification is no longer in force. Whether the comment was true when written I did not measure; whether to change the code is not mine. Surfaced, not chased.",
+    "OBSERVATION / INERT -- the satellites drift oracle has ZERO production callers. comp-find over assert_no_drift: 8 hits across 27,313 files, complete -- 1 DEF, 2 self-references, 3 test calls, 1 config, 1 doc. It compares the declared set against the LIVE ROSTER (not a published artifact), so it is meaningful rather than structurally dead, and its author DISCLOSED the state in both their session log and their proof-of-spec ('No monitor, no alarm, no checker, nothing scheduled'). Residual: the tests feed it a dated fixture, so it measures drift-vs-snapshot rather than drift-vs-live, and the overcount direction its own docstring calls the one that 'NEVER announces itself' is exactly what a frozen fixture cannot see. Not mine.",
+    "OBSERVATION / INERT -- Andrew's ~22:5xZ derived-registry ruling creates a SECOND empty state: a firm whose satellites all leave the daily pull legitimately reaches zero members. That is distinct from 'no registry published'. The build separates them correctly and by construction, because the explicit-empty synthesis fires on the ORIGIN STATUS (403/404) rather than on the body -- so a published-but-empty registry passes through untouched carrying its own real as_of. The hazard is producer-side and the serving layer cannot repair it: a producer that DELETES on empty collapses the two states. 1.0.0_SA_CTO~Z has since made 'publish empty, never delete' an arch constraint."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~Y/logs/2026-08-27/posn_tenancy_to4ae_satellites_path_2222-2255Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'assert_no_drift'; 'drift_report' --files; 'positioning' -i --files; 'X-Firm-Id' -i --files",
+      "result": "Gave the caller census that answered 1.0.0_SA_CTO~Z's drift-oracle question -- 8 hits / 27,313 files, complete on page 1, banded so the 3 TEST calls were separable from the 1 DEF and the doc mentions. A raw grep would have returned the same 8 lines without the bands that make 'production callers: zero' readable."
+    },
+    {
+      "tool": "comp-routes behaviors",
+      "invocation": "comp-routes behaviors",
+      "result": "Used for the behaviour/origin map and for its disclosure that the advisor-intelligence origin is FIRM-PARAMETRIC (bucket chosen per requesting firm), which is the mechanism the new path reuses. DELIBERATELY NOT cited as evidence of force -- it declares its own plane DESIRED, and AC6 forbids that substitution. It also gated a raw aws call of mine on the Rule 21 rail, correctly."
+    },
+    {
+      "tool": "comp-pipescript io",
+      "invocation": "comp-pipescript io satellites_registry --pipeline cot-gold",
+      "result": "Returned 'Unknown script in tree [cot-gold]' with the valid ID list -- which is itself the finding: the registry script is in no pipeline graph, consistent with it having no publisher. A tool answering 'I do not model this' rather than guessing."
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test test/ in shared-advisor-router (the runner package.json declares; mocha was retired 2026-08-21 because it failed CLOSED under type=module)",
+      "result": "27 pass / 0 fail, 17 of them pre-existing and unchanged. Two mutants fired 2 failures each and the suite restored clean. The sibling response-handler suite could NOT be run: @aws-sdk/client-sns is absent with no node_modules, and installing it is egress off Opal infrastructure. Proven pre-existing rather than assumed -- the import is at pristine HEAD :52 and my diff adds zero import lines."
+    },
+    {
+      "tool": "terraform plan / validate / fmt",
+      "invocation": "terraform init; validate; plan -target=aws_cloudfront_distribution.portal; fmt",
+      "result": "The plan is the reviewable artifact: 0 to add, 1 to change, 0 to destroy. It also CAUGHT my positional-list error -- the first plan showed ~20 behaviours re-diffing, which is what sent me back to move the block. fmt realigned the whole file; the parent already failed fmt -check (rc=3), so that churn is pre-existing debt, measured rather than asserted."
+    },
+    {
+      "tool": "aws cloudfront / s3api (operational reads)",
+      "invocation": "get-cache-policy x3, get-distribution-config, head-object x8, list-objects-v2 x4 full sweeps",
+      "result": "The APPLIED plane throughout. Necessary rather than corroborating: lambda-edge.tf defines the edge functions but carries NO event_type, so the viewer-request association that AC5 turns on exists only in the live config."
+    }
+  ]
+}
