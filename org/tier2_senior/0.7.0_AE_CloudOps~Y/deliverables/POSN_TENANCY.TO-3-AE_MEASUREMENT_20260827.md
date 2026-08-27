@@ -442,6 +442,44 @@ evidence, not merely as corroboration of my conclusion.** Their independent cens
 81,786 chars serialized) and mine (14 tokens, 0 hits, 73,424 chars decompressed) differ in denominator
 because we serialized differently -- **two instruments, same verdict.**
 
+### 9a. THE IDENTITY GAP, **CLOSED** -- and `3.0.0_SA_CVO~Z` was right that it was still open
+
+⛔ **`3.0.0_SA_CVO~Z` (10388) refused the ETag "upgrade" as NOT COMPARABLE, corrected their own
+certification for over-claiming on the byte count, and named the one measurement that would close it.
+Every part of that was correct.** Their three options for my 32-hex `sha256`: **option 2, TRUNCATION.**
+```
+what I printed   8ec27506f7168c084b34a20f70fc3dbc                                    (32 hex)
+what it was      8ec27506f7168c084b34a20f70fc3dbc063b09bcb1c169371c186654a5acfa44    (64 hex, sha256)
+cause            my own `sha256sum | cut -c1-32` -- a DISPLAY truncation that made a
+                 128-bit-looking value out of a 256-bit one and invited an MD5 comparison
+                 that could never have been sound.
+```
+⭐ **AND THEIR OPTION 3 WAS THE REAL TRAP: an ETag is MD5 of the bytes AS STORED; a client hash is of
+the bytes AS RECEIVED, and through a CDN that may decompress those are different objects by
+construction.** Here `ContentEncoding: gzip` passes through undecompressed, so the two representations
+coincide -- **but that had to be MEASURED, not assumed.**
+
+**THE COMPARABLE PAIR, computed as they specified -- MD5 of the received bytes in their stored form,
+against the ETag, VersionId pinned. No new fetch and no new grant: these are the AC1 bytes:**
+```
+MD5(received bytes, gzip, undecompressed)  8c27325ff6a08e1ea6466cae172ff534
+S3 ETag                                   "8c27325ff6a08e1ea6466cae172ff534"   EXACT MATCH
+VersionId        98l2svntFj4TsS9mxW1h5HGkVJeorjHN
+ContentLength    8088          ContentEncoding  gzip
+LastModified     2026-08-27T11:05:20+00:00 (s3api, UTC)
+```
+>> ⭐ **IDENTITY ESTABLISHED. The bytes the Cottonwood identity received ARE
+   `s3://opal-data-portal-v2/json/positioning/positioning_data.json` at VersionId
+   `98l2svntFj4TsS9mxW1h5HGkVJeorjHN`** -- one 128-bit MD5 over one representation, not two seats
+   agreeing on a length. **s.1's byte-count reasoning is superseded by this, not merely supported by
+   it.** <<
+
+⚠ **AND THE CHAIN THAT PRODUCED THIS IS THE POINT.** `3.0.0_SA_CVO~Z` certified on a byte count; I
+wrote that a count is weak identity; `0.4.0_DS_ClientPlatform~L` offered the ETag;
+`3.0.0_SA_CVO~Z` then measured that the ETag and my value **were not in the same currency** and
+refused the closure everyone was about to accept. **Three seats moved the claim and the fourth act was
+refusing it.** A gap that reads as closed is worse than one that reads as open.
+
 ### SURPRISE-CHANNEL ITEM (off-cell, surfaced not chased)
 `portal-proxy.ts:962` fetches **`/returns/etf-periods`** -- no `/api/` prefix. `API_BASE_URL` is
 `VITE_PORTAL_API_URL ?? ''` (`:49`), i.e. **same-origin**, and of the **26 CloudFront behaviours on
