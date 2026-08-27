@@ -118,13 +118,54 @@ agreement between two independent producers.
 envelope (comparing the envelope returns a FALSE match by design, the LEVEL failure mode wearing the
 defect's clothes): 7348 account keys vs 4398 relationship keys, equality **False**, overlap **0**.
 
-### AC1 is NOT declared PASS, for two reasons
+### ⛔ 2026-08-27T00:0xZ -- WHAT THIS SECTION MEANS HAS CHANGED. COMPUTED IS NOT CORRECT.
+
+`0.4.0_DS_ClientPlatform~U` found root cause on Andrew's peak-priority forensics (`@ea7c227a24`).
+**Every measurement in s.2 above stands. Its IMPLICATION does not.**
+
+I reported the census moving `NOT_COMPUTED_INPUTS_ABSENT -> COMPUTED` as evidence bearing on Andrew's
+DATA half -- *"let's just get the data part sorted."* **That framing treated COMPUTING as the thing
+that mattered. It is necessary and it is nowhere near sufficient.**
+
+MEASURED by `~U`: in-kind transfers reach the return as **ZERO FLOW** (`c02_twr_engine.py:149` sums
+`signed_amount` only; in-kind rows carry `signed_amount == 0` on 141 of 141 and 71 of 71, while
+`in_kind_value` is populated with `in_kind_unvalued = False`). Transferred securities land in ending
+market value and are rendered as **performance**.
+
+>> **FLOW VALUE INVISIBLE TO THE RETURN CALCULATION: 23.7% (08-24) and 72.5% (08-25). Accounts
+carrying a wrong return: 22 and 14 of the 6,412 / 6,415 with a computed return -- AND ONLY 9 AND 4
+OF THOSE ARE VISIBLE AS OUTLIERS. THIRTEEN AND TEN CARRY A WRONG RETURN THAT LOOKS PLAUSIBLE.** <<
+
+**So a large share of the 6,415 COMPUTED figures I reported are wrong, and most of the wrong ones do
+not announce themselves.** My section 2 is a true statement that, left as written, produces a false
+picture -- the exact shape this file spends three other sections policing.
+
+**WHAT SURVIVES UNCHANGED:** the census numbers, the pre-registered discriminator holding both halves,
+the exact cross-instrument tie-out against `c02`, the code-currency verification, and the cause
+attribution to `b9a665364f`. The BMV/operand gap really did close and performance really did start
+computing. **What is withdrawn is the inference that computing means the data is sorted.**
+
+⚠ **AND THE FILTER-VS-ROOT-CAUSE POINT IS NOW MEASURED RATHER THAN ARGUED.** A per-day plausibility
+rule would have caught 9 of 22 and 4 of 14 -- suppressing the conspicuous cases, **leaving the
+plausible-looking wrong returns serving**, and manufacturing the belief the problem was handled.
+**Andrew ruled the filter out before anyone had this number.**
+
+⚠ **`~U` also refined my 74103 stage-order input, and the refinement is the useful part:** the stage
+order is FINE (`b00`/`b01` -> `c00` -> `c02`, and `c02` is the first to see both). **The defect is
+FIELD SELECTION and CLASS FILTERING, not ordering.** Andrew predicted the mechanism correctly; the
+cause sits one level in from where the word "sequenced" points.
+
+### AC1 is NOT declared PASS, for two reasons -- and now a third
 
 1. **D5 no-write remains UNEXERCISABLE BY CONSTRUCTION.** `publish_one` returns `would_publish` before
    reaching the sha256 compare whenever `--publish` is absent. It needs a live publish followed by a
    second identical run. No publish has occurred and none will from this seat while the holds stand.
 2. **Whether this discharges Andrew's ~08:5xZ DATA half is ANDREW'S CALL, not a measurement.** The
    artifact he was waiting on now carries computed figures; the ruling is his.
+3. ⛔ **AND ON `~U`'s ROOT CAUSE, THE HONEST ANSWER IS THAT IT DOES NOT DISCHARGE IT.** The computed
+   figures are materially wrong for 22 and 14 accounts, 13 and 10 of them invisibly, and **every
+   historical `twr_daily` partition was computed under these defects, so a backfill is implied.**
+   The DATA half is further from done than my own s.2 made it look.
 
 ---
 
