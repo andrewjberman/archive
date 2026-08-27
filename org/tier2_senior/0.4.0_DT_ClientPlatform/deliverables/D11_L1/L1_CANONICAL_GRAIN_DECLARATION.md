@@ -223,6 +223,48 @@ check reads. It was reachable only by running the falsifier I had declared and t
 
 ---
 
+## FALSIFIERS 3 AND 4 — RUN BY ME, BOTH FAIL TO REFUTE (`probe_falsifiers_3_4.py`)
+
+**Each states what would count as a HIT before showing its number**, so the bar is not moved after
+the measurement.
+
+**F3 — is any cross-plane join sound WITHOUT a declared bridge?** A hit requires two DIFFERENT
+declared id spaces sharing a key at the SAME grain with no hand-written parse. Strongest candidate
+was `file` ↔ `pipeline`:
+
+  portal Module paths 374 · PipelineScript nodes 133 · **RAW intersection 0**
+  PipelineScript ids that are path-shaped: **0 of 133** — they read `pipeline:bd:gold:A_00.accounts_dimension`
+
+**NO HIT.** The pipeline space names scripts **LOGICALLY, not by path** — which is
+`1.0.0_SA_CTO~X`'s own stated zero-join mechanism, reproduced here independently. Second candidate
+`MS_FILE` (4,957) intersects the file space at **0**: SharePoint item ids, a different corpus.
+
+**F4 — is an `arn_resource` or `chain_motif` CONTAINED BY a file?** A hit requires containment in the
+SAME SENSE a symbol is — the entity EXISTS INSIDE the file's text, so editing the file edits the
+entity. **A resource DECLARED by a file is not contained by it: deleting the `.tf` does not delete
+the bucket.**
+
+  stitch nodes carrying an `arn`: **1,811, of which 0 also carry a `path`**
+  stitch nodes that are motif ids: 19, of which 0 carry a `path`
+
+**NO HIT — and the question does not even arise**, because no ARN node is located in a file at all.
+Had one carried a path, it would have been a DECLARATION SITE, and `path` alone cannot distinguish
+declared-by from contained-in.
+
+### The battery is now complete
+
+| falsifier | run by | verdict |
+|---|---|---|
+| 1 — a common parent exists | `3.0.0_SA_CVO~X` | **failed to refute** (non-empty attack: stitch CONTAINS ×12,352) |
+| 2 — a plane is not closed | this lane | ⛔ **HIT** — `PLANE` was undefined; amended above |
+| 3 — the bridge is unnecessary | this lane | failed to refute |
+| 4 — containment is false | this lane | failed to refute |
+
+**Four declared, four RUN, one hit and repaired.** AC4 asked for falsifiable; declaring is the cheap
+half and running them is the control.
+
+---
+
 ## STATUS
 
 `status: DECLARED` · `basis: measured` · `evidence: this document + @38d60dc, @baca7f07eb probes` ·
