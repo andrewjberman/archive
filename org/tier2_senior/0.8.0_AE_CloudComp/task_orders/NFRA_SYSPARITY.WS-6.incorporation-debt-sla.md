@@ -3,7 +3,7 @@
 <project>NFRA_SYSPARITY</project>
 <issued_to>0.8.0_AE_CloudComp~A</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_SYSPARITY, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 <priority>P2 -- STAGED, sequenced AFTER ~A's WS-3 (both are ~A's drift-gate/NESTEDABSTRACT domain; don't parallel-collide the abstraction_loop). GO on WS-3 land. Context-reallocation continuation of ~A (NESTEDABSTRACT owner).</priority>
 
 <references>

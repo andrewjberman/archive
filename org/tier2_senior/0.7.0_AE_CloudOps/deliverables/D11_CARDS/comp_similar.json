@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "carded_by": "0.7.0_AE_CloudOps~X",
+  "subject": {
+    "id": "comp-similar",
+    "kind": "tool",
+    "declared_domain": "The substrate underlying comp-similar: the DERIVE-AT-SCAN functional-summary corpus over ARN-keyed AWS estate resources, plus the BM25 similarity engine scored over it, plus the resource_summaries Iceberg table that was built as its Phase-3 persistence. Answers 'do two resources do the same JOB?' -- distinct from comp-dups, which scores what a resource IS."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T19:09:51Z",
+    "commit_ish": "fe269171f2",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "how": "Two stages, both deterministic. STAGE 1 (corpus): for each ARN resource in the live graph, a summary document is SYNTHESIZED AT SCAN TIME from structure the graph already holds -- node_type + layer + arn + the edge neighborhood (producers -> served -> consumers) + wiring. It is built fresh per invocation, in memory, and is table-independent by construction. A deliberate CORPUS-COLLAPSE control excludes the resource's OWN name from its document, so comp-similar cannot degenerate into comp-dups; neighbor names ARE included as functional context. A BLIND-ROW control bands any document with too few purpose tokens as THIN=UNKNOWN rather than 'unique'. A binding CTO ruling forbids patching a thin summary from the AWS Description field. STAGE 2 (scoring): BM25 over that corpus, normalised as round(score/ceil, 3); --supersede additionally intersects summary-similarity with heat divergence from comp-heat (data-cold) and comp-debris (invoke-cold), confidence-graded both-cold=HIGH / one-cold=MEDIUM, with firm-cross / env / service / held suppressors so DESIGNED parallels are not flagged.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "composes": [
+        "org/modules/graph/debtscan/summary_corpus.py -- build_corpus, SimilarityIndex, coverage, _HELD_RX",
+        "org/modules/graph/debtscan/dup_scan.py -- the BM25 implementation and the _firm_of / _service_suffix_of / _strip_env designed-parallel suppressors",
+        "comp-heat (data-cold bands) and comp-debris (invoke-cold bands)",
+        "the live comp-kuzu graph as the corpus source"
+      ],
+      "invents": [
+        "the THIN/UNKNOWN blind-row band",
+        "the SIM_TWIN = 0.60 functional-twin threshold",
+        "the rank formula summary_sim * (HIGH=1.0 / MEDIUM=0.6)"
+      ],
+      "basis": "measured",
+      "evidence": "⛔ THIS ROW ANSWERS COX-AC4 IN THE OPPOSITE DIRECTION FROM THE TO'S SUSPICION, SO IT IS EXERCISED RATHER THAN ARGUED. determinism='deterministic' and inference_detail=null because the trigger condition {inferential, hybrid} is NOT met. EXERCISED, WITH A CONTROL THAT COULD HAVE FAILED: `comp-similar opal-data-assets` run twice, output byte-compared -> IDENTICAL, 2,477 bytes both runs; then the SAME comparison against a DIFFERENT subject (`comp-similar opal-mcp-audit`) -> DIFFERS, proving the byte-compare can fail and the first result is not an artifact of a dead instrument. Five DISTINCT pairwise runs returned five DISTINCT scores (0.43 / 0.628 / 0.622 / 0.405 / 0.508), so the engine discriminates across inputs. SOURCE CENSUS FOR MODEL USE @7bb29e2514: zero bedrock / anthropic / openai / invoke_model / prompt references in comp_similar.py or resource_summaries_store.py. An llm_class overlay DOES exist in summary_corpus.py, and it is the thing that would make this hybrid -- but it is structurally excluded from the scoring path: :361-367 record it as DISPLAY-ONLY and membership resolution as a FORBIDDEN llm consumer, :476 states a class value can never change a verdict, and :811 puts the llm prose deliberately OUTSIDE the BM25 `tokens`. A value that cannot enter the tokens cannot move a score. invocations_per_run is therefore 0 and the cost figure Andrew asked to be able to price is ZERO MODEL CALLS PER RUN -- which is the answer to the pricing question, not an evasion of it. ⛔ RESIDUE STATED: I did not exercise c2_individuate.compose(), which the corpus's membership clause reads; my determinism claim covers the comp-similar corpus + scoring path I ran, not that callee. || GENERATOR CURRENCY (2.0.0_SA_COO~X ruling 73255, in-evidence form -- the KEY form is schema-REJECTED and I exercised that independently before the ruling landed; 0.8.0_AE_CloudComp~X has priority on the finding): generator currency UNVERIFIED -- this lane measured what the named generators DO, never that any is the most-updated or most-relevant materializer for its layer; no instrument here was pointed at that. generator: org/modules/graph/debtscan/comp_similar.py + org/modules/graph/debtscan/summary_corpus.py",
+      "owner": "0.8.0_AE_CloudComp (comp-similar / debtscan toolchain)"
+    },
+    "cadence": {
+      "declared_rhythm": null,
+      "actual_trigger": "operator invocation of the CLI only. The corpus is rebuilt in memory on every call (derive-at-scan); nothing schedules it and nothing refreshes it in the background.",
+      "live_matches_declared": "not_applicable",
+      "live_instance_age": "not applicable to the live read path -- the corpus is constructed at invocation time and has no persisted instance to age. The resource_summaries table, which is NOT on that path, was last written 2026-07-18T21:11:05Z (38 days before this carding).",
+      "basis": "measured",
+      "evidence": "declared_rhythm=null is a REAL ANSWER here rather than a config gap, and it is the correct one for a derive-at-scan tool: summary_corpus.py's own header @7bb29e2514 states the corpus is 'SYNTHESIZED at scan time' and is 'table-independent and projection-independent by construction'. Confirmed by exercise -- build_corpus() executed directly in-process at 2026-08-26T19:0xZ and returned a populated 1,851-resource corpus with no scheduled component and no cache read. ⛔ THE CONSEQUENCE IS NOT NEUTRAL: because the corpus is rebuilt per call, its freshness is exactly the freshness of the kuzu projection it reads, which comp-kuzu's own header flagged [STALE > 6h cadence] at read time. The tool has no vintage of its own and inherits one it does not control.",
+      "owner": "0.8.0_AE_CloudComp"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": false,
+      "authority_role": "none",
+      "mutation_policy": "not_applicable",
+      "form": "in-memory {arn -> SummaryDoc} corpus, rebuilt per invocation; nothing written to disk or to a table on the live read path",
+      "basis": "measured",
+      "evidence": "persisted=false is about THE SUBSTRATE COMP-SIMILAR ACTUALLY READS, and it is the load-bearing distinction in this card. summary_corpus.py @7bb29e2514 declares derive-at-scan as the v1 corpus and states the gated pieces -- the resource_summaries Iceberg table and the kuzu LEFT-JOIN projection -- do NOT block it; comp_similar.py's header records the CTO ruling that put the resource_summaries TABLE behind NFRA_KUZUSPLIT and 'not this leg'. Exercised: build_corpus() returned a full corpus with the table untouched. ⛔ A PERSISTED ARTIFACT DOES EXIST AND IS NOT THIS -- see location.co_resident_stores. Carding persisted=true off that table would attribute to the live path a store the live path does not read.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "location": {
+      "home": null,
+      "projection_of": [
+        "kuzu_nessie_db -- the live graph projection the corpus is synthesized from",
+        "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_nodes_4c6c23bd-fffa-427e-9cd9-7a9deaa3426d",
+        "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_edges_6629328d-a582-46d2-80bc-5059de1a77ce",
+        "comp-heat and comp-debris ledgers (heat bands, --supersede leg only)"
+      ],
+      "co_resident_stores": [
+        "s3://opal-313476888478-globgrph/warehouse/globgrph/resource_summaries_b38ddc35-944f-4dd4-b801-120e96c6d4cd/ -- an Iceberg table that EXISTS and HOLDS DATA (71 keys: 64 under data/, 7 under metadata/), newest object 2026-07-18T21:11:05Z, i.e. 38 days stale at carding, and NOT read by the live comp-similar path. A STRANDED STORE: real, populated, unscheduled, unread."
+      ],
+      "basis": "measured",
+      "evidence": "home=null is a real answer: the live corpus has no home because it is never persisted. ⛔ THE co_resident_stores ROW IS DELIBERATELY DETAILED BECAUSE 0.4.0_DT_ClientPlatform~X's graph-object manifest CONSUMES THIS FIELD -- it is their input, not decoration. DESIRED vs APPLIED SEPARATED EXPLICITLY: resource_summaries_store.py:53-56 @7bb29e2514 DESCRIBES the table at WAREHOUSE_URI s3://opal-313476888478-globgrph/warehouse, NAMESPACE globgrph -- that is DESIRED, a description, never a state. APPLIED was read from S3 with TWO INSTRUMENTS THAT AGREE: comp-keys prefix ... --all on the NARROWED table prefix -> '-- 71 key(s); showing 71' (complete denominator, not truncated), and aws s3api list-objects-v2 --query length(Contents) -> 71 on the same prefix, with sort_by(...)[-1] giving newest 2026-07-18T21:11:05.000Z in ISO-8601 Z from s3api rather than aws s3 ls local time. ⛔ AND THE 73104 TRAP WAS ACTIVELY AVOIDED, NOT MERELY NOTED: comp-keys prefix on the PARENT warehouse/ path returned '5000 key(s) (CAPPED at 5000 -- rerun --max higher / narrow the prefix)', so no existence or absence claim in this card rests on that listing; I narrowed the prefix until the denominator printed complete. The independent s3api --delimiter listing enumerated 11 table prefixes under warehouse/globgrph/ and resource_summaries is one of them.",
+      "owner": "0.8.0_AE_CloudComp (tool); 1.0.0_SA_CTO (the stranded resource_summaries table -- no seat currently refreshes or reads it)"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "ARN-keyed AWS estate resources present in the live graph at scan time",
+      "denominator": "1,500 of 1,851",
+      "explicitly_out": [
+        "351 UNKNOWN-thin resources -- scanned and banded, but carrying too few purpose tokens to yield a known twin; they are IN the corpus and OUT of the answerable set",
+        "29 hold-marked resources (_HELD_RX: INF-chain / frozen / sovereign-named) -- summarized but excluded from candidate output",
+        "⛔ THE MICROSOFT AND GIT IDENTITY SPACES ENTIRELY -- the universe is ARN-keyed by construction, so non-AWS resources are not thin, they are ABSENT. Andrew named this himself, verbatim: 'ARN is a good stable key for AWS resources but obviously doesn't cover the MS or Git spaces.'",
+        "1,846 of 1,851 resources match no canonical motif; 606 of 1,851 carry no C2/C3 membership clause"
+      ],
+      "basis": "measured",
+      "evidence": "RE-DERIVED AT MY SEAT WITH MY OWN INVOCATION rather than copied from the TO's held figures: summary_corpus.coverage() called in-process 2026-08-26T19:0xZ @7bb29e2514 -> {'total_arn_resources': 1851, 'summarized': 1500, 'unknown_thin': 351, 'held_marked': 29, 'motif_matched': 5, 'motif_unmatched': 1846, 'membership_matched': 1245, 'membership_unmatched': 606, 'variance_verdicts': 48, 'fork_shadows': 6}; len(corpus) = 1851 independently. This REPRODUCES the TO's held 1,851 / 1,500 / 351 exactly, so those figures are now measured rather than held. ⛔ NOTE THE INSTRUMENT RELATIONSHIP HONESTLY: I called the tool's own coverage() function, which is the same code path the peer figure came from -- so this CONFIRMS the number is what the instrument reports, and it does NOT independently corroborate that the instrument counts correctly. A second, genuinely independent count of ARN resources was not run.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "key": {
+      "identity_space": "AWS ARN (with a name-alias fallback for resources addressed by bare name)",
+      "key_is_stable": "stable",
+      "crosses_spaces": false,
+      "declared_mapping": null,
+      "basis": "measured",
+      "evidence": "⛔ THIS IS THE CELL ANDREW NAMED HIMSELF AND THE ANSWER TURNS ON A DISTINCTION THE SCHEMA MAKES AND ORDINARY USAGE DOES NOT. WITHIN its declared universe the ARN is genuinely stable: it survives ordinary change to the resource it names, unlike C3.i's membership-derived id (see the C3i card, where the same schema field lands 'unstable'). crosses_spaces=false is the MEASURED answer to the schema's actual question -- 'can this key be joined to other id spaces WITHOUT a hand-written parse' -- and it cannot: an ARN carries no MS or Git identity and there is no join. ⛔ BUT false HERE IS A FINDING, NOT A CLEAN BILL, and reading it as reassurance would invert it. A key that is stable INSIDE its space and structurally absent OUTSIDE it is not the same thing as a stable key for the estate: the MS and Git resources are not poorly-keyed in this corpus, they are ABSENT FROM ITS UNIVERSE, so the gap presents as coverage (see trust.coverage.explicitly_out) while its cause is identity. declared_mapping=null WITH THE SEARCH NAMED so the null is a worked row rather than an unfilled one: I looked for a declared ARN<->MS<->Git mapping in summary_corpus.py (the corpus construction and its key handling), comp_similar.py, resource_summaries_store.py's schema, and the corpus keys themselves as returned by build_corpus(); none of the four declares one, and none references an external mapping table. The corpus is keyed by ARN with a bare-name alias and nothing else.",
+      "owner": "UNOWNED -- no seat owns a cross-space identity grammar for the estate. This is the same UNOWNED gap the C3i card records from the other direction, and naming a plausible owner here would be a guess."
+    },
+    "failure_mode": {
+      "returns_on_failure": "For an unresolvable subject: a single explicit line on stdout -- \"comp-similar: '<subject>' did not resolve to a corpus resource\" -- and exit code 1. For a graph-read failure the corpus layer raises GraphUnavailable LOUD by deliberate design, with its docstring recording that a failed query must NEVER be returned as a silent empty list.",
+      "distinguishable_from_true_negative": "yes",
+      "silent_degrade_paths": [
+        "⛔ THE DISCRIMINATION FAILURE THE TO ASKED ME TO MEASURE, REPRODUCED AT A DIFFERENT VALUE: `comp-similar opal-data-assets` returns EIGHT distinct S3_BUCKET_POLICY resources at BYTE-IDENTICAL sim=1.0 (opalinvest-portal, opal-served-key-write-trail-logs, opal-data-portal-v2, opal-data-demo, opal-data-49financial, opal-cur-313476888478, opal-cloudtrail-logs-313476888478, opal-313476888478-lambda-artifacts), every one of them flagged [THIN]. Eight distinct resources at one identical score carry ZERO BITS about which is the better match, and they sort ABOVE genuinely discriminating results (0.747, 0.539, 0.526) at the TOP of the displayed ranking.",
+        "The corpus inherits the kuzu projection's staleness with no vintage of its own; comp-kuzu's own header read [STALE > 6h cadence] during this carding, and nothing in comp-similar's output surfaces that to its reader.",
+        "A resource absent from the graph entirely is indistinguishable, in the neighbors output, from a resource with no similar peers -- both simply do not appear."
+      ],
+      "basis": "measured",
+      "evidence": "EXERCISED, NOT READ FROM A DOCSTRING. Unresolvable subject: `comp-similar 'arn:aws:s3:::THIS-RESOURCE-DOES-NOT-EXIST-9999'` -> the quoted message, rc=1. Resolvable control run separately: `comp-similar opal-data-assets` -> 41 lines, rc=0. ⛔ A CORRECTION AGAINST MY OWN FIRST MEASUREMENT, KEPT BECAUSE THE SHAPE IS THE LESSON: my first read of this captured rc through a pipeline (`comp-similar ... | tail -8; echo rc=$?`) and reported rc=0 for the failure case -- that was TAIL'S exit code, not comp-similar's, and it would have made me card a tool that cannot signal failure. Re-measured with the command redirected to a file and $? read directly: rc=1 vs rc=0. The instrument discriminates on BOTH stdout and rc; my first instrument did not. THE THIN CLUSTER, on the other hand, is a REAL and reproducible discrimination failure, and it is the single most valuable thing in this card. ⛔ THE CONTROL FOR IT IS ALREADY PRESENT AND PARTIALLY EFFECTIVE, which is why the verdict is QUALIFIED and not UNSOUND: the BLIND-ROW control (C3) bands these rows THIN and EXCLUDES them from --supersede candidate output, so the LOAD-BEARING path -- decommission candidates feeding OPAL_LCLRPO -- is protected. The gap is that the same rows are still DISPLAYED, unranked-against, at the top of the advisory neighbors view, where a reader sees eight perfect 1.0 'matches'. The tool marks them [THIN] on the same line, so it is honest on its face and the trap is positional -- the same shape as the two census-tool traps this wave has already surfaced. comp-similar --self-test PASSES 7/7 including the C2 corpus-collapse and C3 blind-row arms.",
+      "owner": "0.8.0_AE_CloudComp"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "Every one of the seven rows is measured, defects are present and named, each carries an owner, and the tool is usable within stated limits -- which is what QUALIFIED means and it is deliberately NOT the same verdict as the C3i card's UNSOUND. WHAT HOLDS: the process is genuinely deterministic and exercised as such, with a control that could have failed; it makes ZERO model invocations per run, which is the direct answer to the pricing question and it is zero rather than unmeasured; the coverage denominator reproduces independently at 1,500 of 1,851; the failure path is loud and discriminates on both stdout and exit code; --self-test passes 7/7; and the corpus-collapse and blind-row controls are real, deliberate, and load-bearing rather than decorative. WHAT QUALIFIES IT: (1) the THIN discrimination failure is REAL and reproduces -- eight distinct resources at byte-identical sim=1.0, above genuinely discriminating results in the displayed ranking; the blind-row control keeps them out of --supersede candidates, so the load-bearing path is protected and the advisory view is not; (2) the substrate has NO CADENCE AND NO VINTAGE OF ITS OWN, inheriting the freshness of a projection that read [STALE > 6h] during this carding, and surfacing none of that to its reader; (3) a REAL, POPULATED resource_summaries Iceberg table exists, is 38 days stale, and is read by nothing on the live path -- a stranded store; (4) the universe is ARN-only, so the MS and Git spaces Andrew named are absent rather than under-covered, and no seat owns a cross-space grammar. ⛔ ON THE ONE QUESTION THE TO SAID THIS SUBJECT LIVES ON, THE ANSWER CAME BACK OPPOSITE TO THE SUSPICION AND IS REPORTED THAT WAY: the determinism was suspected inferential, it measured deterministic, and COX-AC4's inference_detail trigger therefore does not fire. The 1.031 signature that prompted the suspicion did NOT reproduce on the pairwise path (five distinct pairs, five distinct values) -- but the SHAPE it was pointing at reproduces exactly on the neighbors path at 1.0, so the underlying observation was sound and only its mechanism is re-attributed: the cause is TEMPLATED THIN SUMMARIES SCORED DETERMINISTICALLY, not a non-deterministic process. || SEMANTIC-AXIS DECLARATION (2.0.0_SA_COO~X ruling 73212): ⛔ THE SEMANTIC AXIS WAS NOT SYSTEMATICALLY EXAMINED. UNMEASURED, stated explicitly so that per-card silence does not read as clean. WHAT I FOUND WAS INCIDENTAL: the THIN sim=1.0 cluster and the ARN-only universe surfaced because the failure_mode and key rows forced them into view -- the same forcing-function accident 0.8.0_AE_CloudComp~X reported on C2, not a deliberate sweep. WHAT I DID NOT DO: I did not audit whether the SIM_TWIN=0.60 threshold or the THIN banding cut still reflect a ruled intent rather than a v1 guess (comp_similar.py calls 0.60 'conservative v1; CTO may retune' -- an explicitly provisional value that has not been retuned and whose currency I did not establish); did not examine whether the corpus's definition of 'purpose' still matches what the estate means by it; did not check whether the designed-parallel suppressors (firm-cross / env / service) still describe the estate's real firm topology; and did not compare the derive-at-scan corpus's semantics against the stranded resource_summaries table's schema, which was authored for the same concept 38 days earlier and could encode a different one. ⛔ AND THE AXIS IS UNREACHABLE BY EVERY INSTRUMENT I USED: byte-compare, rc, self-test, coverage() and s3api LastModified are all structurally blind to a deprecated opinion. My determinism PASS in particular says the tool reliably reproduces its answer; it says NOTHING about whether that answer encodes a current definition. A tool can be perfectly deterministic about a deprecated opinion.",
+    "blocking_defects": null
+  }
+}

@@ -1,0 +1,172 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.8.0_AE_CloudComp~X",
+  "subject": {
+    "id": "org/modules/graph/comp_aws_cli.py",
+    "kind": "tool",
+    "declared_domain": "The comp-aws CLI module. AS A MATERIALIZER its domain is ONE write path: the iceberg-commit verb (cmd_iceberg_commit, :2964-3101), which overwrites globgrph.graph_nodes and globgrph.graph_edges from a graph JSON. The module's OTHER responsibilities -- deriving the cloud graph from live AWS (cmd_derive, consumed by derive_runner.py:101) -- are READS and are out of this card's domain."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-27T06:37:53Z",
+    "commit_ish": "3b918f21b42366fce14f7c2076f18444cd782931",
+    "graph_vintage": "nessie:main batch_ts=1787796032859 (2026-08-27T02:00:32Z) -- the commit written by the /ecs/globgrph/derive-runner run whose log stream last-event is 2026-08-27T02:10:24.659Z; read from CloudWatch, not from a producer self-report of intent"
+  },
+  "process": {
+    "methodology": {
+      "how": "*** THE TO LEFT write_paths AS 'UNMEASURED -- yours to resolve'. RESOLVED: ONE WRITE PATH, TWO TABLES. NOT a path-multiplicity surprise. *** All four Iceberg write operations in this 3174-line module live inside a SINGLE function, cmd_iceberg_commit() (:2964-3101): create_table for nodes (:3034), create_table for edges (:3047), nodes_table.overwrite (:3051), edges_table.overwrite (:3091). They share one invocation, one mechanism (full-table overwrite), one authority and one trigger, which is the same shape the decomp already treats as ONE path in derive_runner PATH A (graph_nodes + graph_edges through one helper). Mechanically: namespace create (:3013, exception-swallowed), then load-or-create each table against a locally-declared Schema (:3021-3037 nodes, :3038-3048 edges), then overwrite each from a pa.table built by list comprehension over all_nodes/all_edges. The edges branch runs an endpoint-resolution guard FIRST (:3072-3089) and REFUSES the overwrite with RC_FAIL if any edge has an empty endpoint.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "composes": [
+        {
+          "id": "json:--graph",
+          "note": "a graph JSON supplied via the --graph flag, typically this module's own cmd_derive output @ 3b918f21b42366fce14f7c2076f18444cd782931. Unlike PATH A this verb does not itself read live AWS; it consumes an already-materialised graph, so batch_ts at :3057/:3097 is its only per-run minted value."
+        },
+        {
+          "id": "nessie:opal-globgrph:main",
+          "note": "pyiceberg against a Nessie REST catalog at the --nessie-uri argument"
+        }
+      ],
+      "invents": [
+        {
+          "id": "graph_nodes.snapshot_ts",
+          "note": "and graph_edges.snapshot_ts, set to batch_ts on every row at :3057 and :3097"
+        },
+        {
+          "id": "graph_edges.layer",
+          "note": "the hardcoded literal 'aws' on EVERY edge row at :3096. THIS IS A CONSTANT here, whereas derive_runner PATH A reads a per-edge layer and only DEFAULTS to 'aws' at :372. The two writers of this one table disagree about how layer is determined, and because both full-overwrite, whichever ran last decides."
+        }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "how": "measured",
+        "determinism": "measured",
+        "composes": "measured",
+        "invents": "measured"
+      },
+      "evidence": "org/modules/graph/comp_aws_cli.py:2964-3101 (the whole function), :3012 (ns), :3032 (nodes_id), :3034, :3045 (edges_id), :3047, :3051, :3072-3089 (the endpoint guard), :3091, :3096 @ 3b918f21b42366fce14f7c2076f18444cd782931. THE ONE-PATH FINDING IS AST-MEASURED, NOT EYEBALLED: an ast.FunctionDef enclosure test over the four write linenos returned cmd_iceberg_commit (2964-3101) for all four. The same AST pass is what makes the count trustworthy at all -- a naive write-token census over this file returns 71 hits, of which 67 are list.append on locals (nodes, resources, behaviors, ...). Exactly the trap the TO named.",
+      "owner": "0.8.0_AE_CloudComp",
+      "materializer_standing": "superseded",
+      "declared_opinions": [
+        "*** A SELF-DESCRIPTION UNDER TEST, NOT ACCEPTED. *** The in-source comment at :3068-3071 states this verb 'is the stale duplicate of derive_runner.commit_to_iceberg', that it has had '2 invocations ever', and that it 'is recommended for deprecation rather than maintenance'. I am carrying the SUPERSEDED standing on the parts I could corroborate and REFUSING the part I could not. CORROBORATED INDEPENDENTLY: it writes the same two tables as derive_runner PATH A (:3032/:3045 vs derive_runner :281/:292); no EventBridge rule or Scheduler schedule targets it (137 + 18 sweep); no caller exists outside its own argparse dispatch (:3149, :3154); and derive_runner imports this module but calls cmd_derive (:101), NOT this verb. *** NOT CORROBORATED: the '2 invocations ever' count. *** That is a producer self-report about its own history, at an unstated vintage, and I have no instrument for it -- so it is not carried as a measured value anywhere on this card.",
+        "NAME COLLISION worth flagging: infra/aws/terraform/globgrph/item2a.tf:3 describes the NIGHTLY as 'comp-aws derive -> Nessie iceberg-commit'. That prose names PATH A's internal commit, NOT this module's iceberg-commit VERB. Two different things share a phrase, and the TF comment is the more authoritative-looking of the two. A reader resolving 'iceberg-commit' from that line lands on the wrong writer."
+      ]
+    },
+    "cadence": {
+      "declared_rhythm": null,
+      "actual_trigger": "none-found. This is a manual CLI verb: argparse subparser 'iceberg-commit' at :3149, bound to cmd_iceberg_commit at :3154. Reachable only as `comp-aws iceberg-commit` by an operator. BOTH TRIGGER PLANES SWEPT AND BOTH ARE NEGATIVE: aws events list-rules = 137 rules, aws scheduler list-schedules = 18 schedules, zero targeting this verb. The module IS baked into the nightly container (Dockerfile:53) but the container's CMD is derive_runner.py (:186), which calls cmd_derive (:101) and never this verb -- so PRESENT IN THE IMAGE is not TRIGGERED, and the two read identically to a file-level census.",
+      "live_matches_declared": "not_applicable",
+      "live_instance_age": "UNMEASURED. There is no log group, no ECS task and no rule for this verb, so this device has no instrument for when it last ran. *** RULE 25: I DO NOT RETURN A DORMANCY VERDICT HERE. *** The source comment claims 2 lifetime invocations, which would imply dormancy, but that is the self-report I declined above. 'No trigger found' is a COMPLIANCE fact; it is not a LIVENESS fact, and an operator ran this verb at least twice by its own account without any trigger existing. Calling it dormant would convert an absence of instrument into a measurement.",
+      "basis": "absent",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "absent"
+      },
+      "evidence": "Scalar is the FLOOR, not a summary: the two-plane trigger census IS measured and negative; live_instance_age has no basis, so the row reports 'absent'. A consumer wanting the trigger fact should read basis_by_field.actual_trigger, which is 'measured'. comp_aws_cli.py:3149, :3154 (argparse dispatch) @ 3b918f21b42366fce14f7c2076f18444cd782931; infra/aws/globgrph/Dockerfile:53 (COPY of this module) and :186 (CMD is derive_runner.py); derive_runner.py:101 (calls cmd_derive, not this verb). aws events list-rules -> 137 names, aws scheduler list-schedules -> 18 names, auto-paginated and counted client-side, grep for this verb = 0 on both planes. Repo-wide sweep for callers of cmd_iceberg_commit outside this file returned only .tools/tool_index.py (a catalogue), org/modules/graph/comp_icedrill.py (a docstring), infra/aws/globgrph/extract_portal_stitch.py (a docstring) and org/modules/graph/tests/test_comp_aws_cert_mutants.py (a test) -- no executable caller.",
+      "owner": "0.8.0_AE_CloudComp"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "projection",
+      "mutation_policy": "replaceable",
+      "form": "Apache Iceberg tables globgrph.graph_nodes and globgrph.graph_edges via pyiceberg + Nessie REST catalog. NOTE the schemas declared HERE (:3021-3027 nodes, :3038-3043 edges) are NARROWER than the ones derive_runner declares for the same tables: this module's nodes schema has 7 fields and NO 'source' and NO 'props' column; derive_runner's has 9 including both (:270-280). Two writers, one artifact, divergent schema declarations.",
+      "basis": "inferred",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "inferred",
+        "mutation_policy": "measured",
+        "form": "measured"
+      },
+      "evidence": "comp_aws_cli.py:3021-3048 (both Schema declarations), :3051 + :3091 (unfiltered overwrite = full replace) vs derive_runner.py:270-292 @ 3b918f21b42366fce14f7c2076f18444cd782931. authority_role='projection' inherits PATH A's reasoning -- same tables, same derived-from-AWS character. The SCHEMA DIVERGENCE is the sharp finding and it is measured by direct comparison of the two NestedField lists: because both writers issue a FULL overwrite, whichever ran last determines the table's shape.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "location": {
+      "home": "nessie:main -> globgrph.graph_nodes and globgrph.graph_edges. Namespace bound at comp_aws_cli.py:3012 ns = \"globgrph\"; table names bound as literal 2-tuples at :3032 nodes_id = (ns, \"graph_nodes\") and :3045 edges_id = (ns, \"graph_edges\"). Warehouse from the --warehouse argument.",
+      "projection_of": [
+        {
+          "id": "json:--graph",
+          "note": "the graph JSON handed to --graph, itself derived from live AWS control-plane state for account 313476888478"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "globgrph.graph_contracts",
+          "note": "same namespace; this module never addresses it"
+        },
+        {
+          "id": "globgrph.cse",
+          "note": "0.7.0_AE_CloudOps~X's wave-3 subject"
+        },
+        {
+          "id": "globgrph.resource_summaries",
+          "note": "0.7.0_AE_CloudOps~X's wave-3 subject"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "comp_aws_cli.py:3012, :3032, :3045 @ 3b918f21b42366fce14f7c2076f18444cd782931.",
+      "owner": "0.8.0_AE_CloudComp"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every node and edge in the graph JSON handed to `comp-aws iceberg-commit --graph FILE` on a given invocation.",
+      "denominator": null,
+      "denominator_absent_reason": "ABSENT because the verb has no observed invocation to take a denominator FROM. There is no log group, no ECS task and no scheduled run for it, so unlike PATH A -- where I could quote 27067/60872 from a specific run -- there is no run here to count. Fabricating one from the source comment's '2 invocations ever' would be quoting a self-report as a measurement.",
+      "explicitly_out": [
+        "cmd_derive and every other verb in this 3174-line module -- they are READS; this card's domain is the single write path",
+        "globgrph.graph_contracts -- never addressed here",
+        "*** CCX3-AC7: THE BOUND IS ENUMERABLE AND CLOSED, BUT THE WRITER POPULATION IS NOT. *** The table names this path can write are bound as module-local literals at :3032 and :3045 -- so the bound set is exactly {globgrph.graph_nodes, globgrph.graph_edges} and it is ENUMERABLE; this path cannot write a table it does not name. The WRITER population of those two tables is a different question and is NOT closed. MEASURED: THREE writers of globgrph.graph_nodes. ESTATE CENSUS, INDEPENDENT INSTRUMENT, DENOMINATOR PRINTED: 7236 .py files swept under infra/, org/modules/, .tools/, data/, workflows/, excluding vendored pyiceberg-nessie-deps and __pycache__; 33 files NAME graph_nodes; 5 carry a strong non-append Iceberg write op by AST. THREE of those five write globgrph.graph_nodes itself: [1] derive_runner.py PATH A, FULL overwrite, nightly; [2] org/modules/graph/comp_aws_cli.py:3051, FULL overwrite, untriggered; [3] infra/aws/lambda/globgrph/incremental_updater/lambda_function.py, table_id bound at :434 and written at :501 with table.overwrite(pa_table, overwrite_filter=combined_filter) -- a SCOPED delete+append, NOT a full replace. The other two of the five write different tables (cse_store.py, resource_summaries_store.py). THIS IS A DIFFERENT INSTRUMENT ON A DIFFERENT POPULATION from the AST enclosure test that established the per-file write paths: that one asked which call sites in THOSE TWO FILES are table ops; this one asks who in the ESTATE names and writes this table. Only the second question can find a writer the first cannot see, and it found one. This card asserts no completeness about who else may write them; it reports what one estate-wide sweep found, with its denominator printed."
+      ],
+      "basis": "absent",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "absent",
+        "explicitly_out": "measured"
+      },
+      "evidence": "Scalar is the FLOOR: the enumerable-bound finding is measured, the denominator has no basis because the verb has no observed run to count. comp_aws_cli.py:3032, :3045 (the literal bindings that make the bound enumerable) @ 3b918f21b42366fce14f7c2076f18444cd782931; the other writers at derive_runner.py:281, :292, :345, :376 and infra/aws/lambda/globgrph/incremental_updater/lambda_function.py:434, :501. ESTATE CENSUS, INDEPENDENT INSTRUMENT, DENOMINATOR PRINTED: 7236 .py files swept under infra/, org/modules/, .tools/, data/, workflows/, excluding vendored pyiceberg-nessie-deps and __pycache__; 33 files NAME graph_nodes; 5 carry a strong non-append Iceberg write op by AST. THREE of those five write globgrph.graph_nodes itself: [1] derive_runner.py PATH A, FULL overwrite, nightly; [2] org/modules/graph/comp_aws_cli.py:3051, FULL overwrite, untriggered; [3] infra/aws/lambda/globgrph/incremental_updater/lambda_function.py, table_id bound at :434 and written at :501 with table.overwrite(pa_table, overwrite_filter=combined_filter) -- a SCOPED delete+append, NOT a full replace. The other two of the five write different tables (cse_store.py, resource_summaries_store.py). THIS IS A DIFFERENT INSTRUMENT ON A DIFFERENT POPULATION from the AST enclosure test that established the per-file write paths: that one asked which call sites in THOSE TWO FILES are table ops; this one asks who in the ESTATE names and writes this table. Only the second question can find a writer the first cannot see, and it found one.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "key": {
+      "identity_space": "TABLE identity: pyiceberg 2-tuple (namespace, table). ROW identity: node_id (required=True) for nodes; (src_id, dst_id, edge_type) (all required=True) for edges. *** required=True IS SATISFIED BY THE EMPTY STRING, and that is not a hypothetical here -- it is the recorded mechanism of the A11 defect on this exact function. ***",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "NONE -- same three-rendering split as PATH A, and this module supplies one of the renderings: the 2-tuple at :3032/:3045, against the dotted 2-part form at derive_runner.py:1435-1436 and the dotted 3-part Trino form at .tools/_trino_fed.py:44 and fedobs_views.sql:34. One artifact, three addressings, no normaliser.",
+      "basis": "measured",
+      "evidence": "comp_aws_cli.py:3021-3024, :3038-3040 (the required=True NestedFields), :3032, :3045; the A11 record at :3062-3071 and its regression test at org/modules/graph/tests/test_comp_aws_cert_mutants.py:400-404; .tools/_trino_fed.py:44; infra/aws/globgrph/fedobs/fedobs_views.sql:34; derive_runner.py:1435-1436 @ 3b918f21b42366fce14f7c2076f18444cd782931.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "failure_mode": {
+      "returns_on_failure": "EDGES: fails closed since the A11 fix. The endpoint resolver _nid tries 'source'/'src' then 'target'/'dst' (:3072-3080); any edge resolving to an empty endpoint triggers a refusal -- prints the offender, prints 'REFUSING to overwrite globgrph.graph_edges', returns RC_FAIL (:3081-3089). NODES: NO equivalent guard. The nodes branch (:3049-3060) overwrites unconditionally on a truthy all_nodes, with n.get('id','') defaulting to the empty string per row. NAMESPACE: create_namespace failure is swallowed by a bare `except Exception: pass` (:3013-3015).",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "*** THE HISTORICAL DEFECT, RECORDED AT THE SITE (:3062-3071, CVO 2026-07-10): *** this function read e['src']/e['dst'] while both edges.append sites in the module emit {'source','target'}, so _nid returned '' for EVERY edge and graph_edges was overwritten with empty src_id/dst_id on all rows. It was SILENT precisely because the schema's required=True is satisfied by ''. The remedy landed and IS the :3081-3089 guard -- so the edges arm is now loud. I am recording it because it is the clearest measured instance in this wave of a NOT-NULL constraint failing to be an IS-MEANINGFUL constraint.",
+        "The nodes arm still carries the shape the edges arm was fixed for: n.get('id', '') at :3052 defaults to '' and no guard rejects it, so a node list with unresolvable ids overwrites graph_nodes with empty node_id rows and returns RC_OK. The asymmetry is measured, not alleged: the guard exists at :3081-3089 for edges and has no counterpart before :3051. NAMED, NOT FIXED (CCX3-AC8) -- and note this verb is recommended for deprecation, so the correct remedy may be removal rather than a second guard. That call is not this seat's.",
+        "`except Exception: pass` on create_namespace (:3013-3015) converts an instrument failure into a verdict -- a permissions or connectivity fault reads identically to 'namespace already exists'.",
+        "Both overwrites are full-table replaces with no filter, and this module's declared schemas are NARROWER than derive_runner's for the same tables (no 'source', no 'props'). An invocation of this verb after a nightly can therefore REMOVE columns the nightly writes -- last-writer-wins on shape, not merely on rows."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "comp_aws_cli.py:3013-3015 (bare except), :3049-3060 (unguarded nodes overwrite), :3052 (the '' default), :3062-3071 (the A11 record), :3072-3089 (the edges guard), :3091 @ 3b918f21b42366fce14f7c2076f18444cd782931; the schema-width comparison against derive_runner.py:270-280. distinguishable_from_true_negative='no' is scoped to the NODES arm: an all-empty node_id overwrite returns RC_OK and prints a normal 'WRITE OK: N nodes -> graph_nodes' line, so success and silent corruption share a signature. The EDGES arm alone would score 'yes'; the card takes the weaker of the two because the subject is the write path as a whole.",
+      "owner": "0.8.0_AE_CloudComp"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "All seven rows measured against source at 3b918f21b42366fce14f7c2076f18444cd782931 and against both live trigger planes. The TO's UNMEASURED write-path question is RESOLVED: ONE write path, two tables, one function, one mechanism -- NOT a BLOCKING path-multiplicity surprise, and the measurement (AST enclosure test over all four write linenos) is stated so it can be re-run. QUALIFIED, not SOUND, on four named defects, none of which blocks USE of this card: (1) the nodes arm has no endpoint guard and will overwrite graph_nodes with empty node_id rows at RC_OK -- the same shape the edges arm was repaired for; (2) this module's declared schemas for graph_nodes/graph_edges are narrower than derive_runner's for the SAME tables, and both writers full-overwrite, so shape is last-writer-wins; (3) a bare `except Exception: pass` on namespace creation turns instrument failure into a verdict; (4) no denominator -- this verb has no observed run to count. It is NOT UNSOUND: the verb is untriggered on both planes and has no executable caller, so the nodes-arm defect is latent rather than firing nightly. It would become UNSOUND the moment anything scheduled it.",
+    "blocking_defects": []
+  },
+  "forward_disposition": {
+    "standing": "undecided",
+    "set_by": null,
+    "basis": "absent",
+    "evidence": "CCX3-AC8: zero commits by this lane touching comp_aws_cli.py. The unguarded nodes arm is NAMED for 0.8.0_AE_CloudComp and routed to 3.0.0_SA_CVO, NOT patched -- and because the source recommends this verb for deprecation, adding a guard may be the wrong remedy entirely. Choosing between guard and removal is the owner's call, not the carder's. basis='absent', set_by=null -- this lane may not dispose of its own subject.",
+    "decided_utc": null
+  }
+}

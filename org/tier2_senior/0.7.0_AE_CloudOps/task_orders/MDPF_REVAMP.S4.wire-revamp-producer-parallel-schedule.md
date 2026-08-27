@@ -3,7 +3,7 @@
 <project>MDPF_REVAMP</project>
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project MDPF_REVAMP is complete; this TO was last touched 2026-07-21, predating the project close 2026-07-22. Closed as a record act, not a work verdict. Prior status: pending</status>
 <priority>P0</priority>
 <date>2026-07-21</date>
 

@@ -1,0 +1,456 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opal.internal/schemas/MANIFEST_RECEIPT.v1.schema.json",
+  "title": "Manifest execution receipt v1",
+  "description": "THE PROVENANCE OF ONE COMPILE, GOVERNED AND DOMAIN-BOUND. Authored by 0.4.0_DT_ClientPlatform~X; reworked to 4.0.0_SA_CRO~A's Base rework 2, which found ELEVEN schema-valid verifier-clean mutants in the prior revision. THE COMMON ROOT OF ALL ELEVEN WAS ONE THING: THE SHAPE WAS BOUND AND THE DOMAIN WAS NOT. Every field had the right TYPE and almost none had its right VALUE -- a `home` could be any legal path, a role enum could take any member, a replay claim could assert two emissions it never made. A contract that accepts a well-formed lie about a specific document is a type-checker, not a contract. Every value this document can legitimately hold is now pinned to what it must actually be, and the values v1 can never use are REMOVED rather than admitted. PLACED IN THE COMPILER'S OWN DELIVERABLE DIRECTORY, NOT org/standards/: promoting it is 4.0.0_SA_CRO~A's act.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "document_kind",
+    "governing_schema",
+    "exact_home",
+    "authorship_mode",
+    "mutation_policy",
+    "temporal_claim",
+    "authority_role",
+    "describes",
+    "input_closure",
+    "source_snapshot_utc",
+    "executed_utc",
+    "executed_by",
+    "replay"
+  ],
+  "properties": {
+    "document_kind": {
+      "const": "manifest_execution_receipt",
+      "description": "WHAT THIS DOCUMENT IS, stated in the document. A reader who finds this file with no context must not have to infer its kind from its filename -- a name is not an identity."
+    },
+    "governing_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "home",
+        "id"
+      ],
+      "description": "WHICH CONTRACT GOVERNS THIS DOCUMENT. BOTH VALUES ARE PINNED EXACTLY. The prior revision required only a legal path and an https URL, so a receipt could name a DIFFERENT schema -- or a nonexistent one -- and validate. A self-declared governing schema that may be any string identifies nothing.",
+      "properties": {
+        "home": {
+          "const": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/MANIFEST_RECEIPT.v1.schema.json"
+        },
+        "id": {
+          "const": "https://opal.internal/schemas/MANIFEST_RECEIPT.v1.schema.json"
+        }
+      }
+    },
+    "exact_home": {
+      "type": "string",
+      "pattern": "^org/tier2_senior/0\\.4\\.0_DT_ClientPlatform/deliverables/D11_MANIFEST/graph_object_manifest\\.[0-9]{8}T[0-9]{6}Z\\.receipt\\.json$",
+      "description": "RUN-QUALIFIED BY THE RUN, NOT BY THE CLOSURE. ⛔ IT WAS QUALIFIED BY source_snapshot_utc, which is DETERMINISTIC OVER THE INPUTS -- so two emissions of an identical closure computed the SAME home, the second refused, and replay evidence could never be furnished. The immutability guard made the determinism claim beside it unprovable. A RUN IDENTITY AND A CLOSURE IDENTITY ARE TWO AXES; the qualifier is now executed_utc and the snapshot stays a separate field."
+    },
+    "authorship_mode": {
+      "const": "machine_emitted",
+      "description": "WAS AN ENUM OF THREE AND v1 CAN ONLY EVER BE ONE. `hand_authored` and `machine_emitted_hand_amended` were dead vocabulary in a schema governing exactly one machine-emitted kind, and A HAND-AUTHORED SAME-RUN RECEIPT VALIDATED CLEANLY -- a forged provenance record wearing a legal enum member. A future kind that is hand-authored gets its own schema and its own const."
+    },
+    "mutation_policy": {
+      "const": "immutable",
+      "description": "Never edited after emission; a new compile writes a NEW receipt. `append_only` and `rewritable` were dead members here, and each admitted a document that could be lawfully altered after being cited as evidence."
+    },
+    "temporal_claim": {
+      "const": "point_in_time",
+      "description": "A receipt describes ONE execution and goes stale by design, never by defect. `current_state` was dead vocabulary that asserted the opposite."
+    },
+    "authority_role": {
+      "const": "evidence",
+      "description": "A RECEIPT IS EVIDENCE, NEVER AUTHORITY: it reports what a run did and can be wrong about it; the pinned artifacts are the authority. This was an enum whose own description said so while ACCEPTING `authority` -- an unenforced field inside the document authored to retire unenforced fields."
+    },
+    "describes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relationship",
+        "home",
+        "sha256",
+        "git_blob_id",
+        "blob_presence"
+      ],
+      "description": "THE ARTIFACT THIS RECEIPT IS ABOUT. The RELATIONSHIP is a field rather than an assumption: a provenance document that merely sits beside its subject is related to it BY DIRECTORY, which no consumer can verify.",
+      "properties": {
+        "relationship": {
+          "const": "emitted_by_same_run",
+          "description": "THE ONLY RELATIONSHIP UNDER WHICH THIS DOCUMENT'S EXECUTION FACTS ARE FIRST-HAND. `observed_after_the_fact` and `reconstructed` were dead members that let a receipt claim INFERRED knowledge while carrying `executed_utc` and `executed_by` as though witnessed. Those states are not interchangeable and only one belongs to an emitter."
+        },
+        "home": {
+          "const": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/graph_object_manifest.json"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "git_blob_id": {
+          "$ref": "#/$defs/git_blob_id",
+          "description": "NON-NULL, ALWAYS. The prior revision allowed null 'while uncommitted' -- but `git hash-object` computes a blob id for any readable file, committed or not, so null could only ever mean the emitter did not look. Expressible absence is right for a fact nobody can obtain; this one is always obtainable."
+        },
+        "blob_presence": {
+          "$ref": "#/$defs/blob_presence"
+        }
+      }
+    },
+    "input_closure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt_schema",
+        "output_schema",
+        "compiler",
+        "registry",
+        "registry_schema",
+        "base39",
+        "card_part_map",
+        "card_schema",
+        "admitted_cards",
+        "source_snapshot_pin",
+        "complete"
+      ],
+      "description": "EVERY INPUT THAT COULD HAVE CHANGED THE OUTPUT, PINNED BY ROLE AND BY EXACT HOME. The prior revision typed each role as 'some legal path', so THE BASE39 ROLE COULD CARRY THE REGISTRY'S PIN and the closure still validated -- six correctly-shaped pins describing the wrong six files. A role whose home is not bound is a label, and a label cannot be wrong. ⛔ AND THE GOVERNING CONTRACT ITSELF WAS MISSING FROM ITS OWN CLOSURE. MANIFEST_RECEIPT.v1.schema.json can change what every field in this document MEANS -- it is the one input whose movement rewrites all the others -- and it was pinned by nothing. It is a DISTINCT role from `card_schema` and from the L0 manifest schema; conflating them would hide exactly the substitution the per-role home binding exists to prevent.",
+      "properties": {
+        "compiler": {
+          "$ref": "#/$defs/pinned_compiler"
+        },
+        "registry": {
+          "$ref": "#/$defs/pinned_registry"
+        },
+        "registry_schema": {
+          "$ref": "#/$defs/pinned_registry_schema"
+        },
+        "base39": {
+          "$ref": "#/$defs/pinned_base39"
+        },
+        "card_part_map": {
+          "$ref": "#/$defs/pinned_card_part_map"
+        },
+        "card_schema": {
+          "$ref": "#/$defs/pinned_card_schema"
+        },
+        "admitted_cards": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/admitted_card"
+          },
+          "description": "EVERY card the run read, by path + subject + blob. uniqueItems REJECTS A DUPLICATED ENTRY -- the prior revision compared the claimed SET against the registry's SET, and a duplicate leaves a set unchanged, so a receipt claiming to have read one card twice was clean. MULTIPLICITY IS PART OF THE CLAIM."
+        },
+        "source_snapshot_pin": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "derived_from",
+            "value_utc"
+          ],
+          "description": "WHERE the deterministic snapshot came from, so it can be RE-DERIVED rather than trusted.",
+          "properties": {
+            "derived_from": {
+              "type": "array",
+              "minItems": 5,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "registry_ratified_commit",
+                  "output_schema_commit",
+                  "card_schema_commit",
+                  "compiler_commit",
+                  "receipt_schema_commit"
+                ]
+              },
+              "description": "ALL FIVE NAMED TEMPORAL PINS. The prior list carried one ambiguous `schema_commit` token for two different schemas; each schema now has its own token, and minItems 5 over a 5-member enum with uniqueItems makes the complete set the only legal value."
+            },
+            "value_utc": {
+              "$ref": "#/$defs/utc_instant"
+            }
+          }
+        },
+        "complete": {
+          "const": true,
+          "description": "THE CLOSURE'S OWN CLAIM ABOUT ITSELF, and in v1 an INCOMPLETE closure is not a receipt. `false` was legal-and-loud, which is right for a field a human fills and wrong for one an emitter writes: the emitter either pinned every input or must refuse to emit."
+        },
+        "receipt_schema": {
+          "$ref": "#/$defs/pinned_receipt_schema"
+        },
+        "output_schema": {
+          "$ref": "#/$defs/pinned_output_schema"
+        }
+      }
+    },
+    "source_snapshot_utc": {
+      "$ref": "#/$defs/utc_instant",
+      "description": "DETERMINISTIC -- a property of the pinned inputs, identical across replays of the same closure."
+    },
+    "executed_utc": {
+      "$ref": "#/$defs/utc_instant",
+      "description": "THE REAL CLOCK, the only per-run value here, and STRICTLY LATER than source_snapshot_utc -- enforced by the verifier, which is where a comparison between two instants belongs. A RECEIPT WHOSE EXECUTION PRECEDES ITS SOURCE SNAPSHOT CLAIMS TO HAVE COMPILED INPUTS THAT DID NOT YET EXIST, which is exactly the defect that put a hard-coded 07:10:00Z in front of its own schema commit, and it validated here until now."
+    },
+    "executed_by": {
+      "const": "0.4.0_DT_ClientPlatform~X",
+      "description": "⛔ PINNED. A well-shaped serial belonging to ANOTHER seat validated, so this document could carry a forged author while every digest in it stayed true. A const is sufficient for a v1 owned by one emitter, and it is the only form that cannot be satisfied by a plausible-looking string."
+    },
+    "replay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "comparison_state",
+        "emissions"
+      ],
+      "description": "A MECE STATE PLUS PER-EMISSION EVIDENCE. `byte_identical: false` used to mean BOTH 'compared and differed' AND 'never compared'; and the count/digest pair could not prove each other. The state is derived FROM the evidence by the verifier rather than asserted beside it.",
+      "properties": {
+        "comparison_state": {
+          "enum": [
+            "not_performed",
+            "byte_identical",
+            "byte_different"
+          ],
+          "x-enum-definitions": {
+            "not_performed": "One emission. No comparison was possible, and this is the only honest state for a single run.",
+            "byte_identical": "Two or more emissions produced exactly ONE distinct digest.",
+            "byte_different": "Two or more emissions produced MORE THAN ONE distinct digest. Drift, recorded rather than hidden."
+          },
+          "x-rule24": {
+            "axis": "the OUTCOME of the replay comparison",
+            "grain": "one emission set",
+            "intent": "one -- what the comparison found; NOT how many runs (emissions_compared), NOT what they produced (observed_digests)",
+            "mece": "not_performed | byte_identical | byte_different spans it with no overlap: a comparison either did not happen, or happened and found one digest, or happened and found several.",
+            "state_coherence": "another emission moves emissions_compared and MAY move this; it never moves the described artifact."
+          }
+        },
+        "emissions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sequence",
+              "digest",
+              "executed_utc"
+            ],
+            "properties": {
+              "sequence": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "digest": {
+                "$ref": "#/$defs/sha256"
+              },
+              "executed_utc": {
+                "$ref": "#/$defs/utc_instant"
+              }
+            }
+          },
+          "description": "⛔ PER-EMISSION EVIDENCE, because a COUNT and a DIGEST SET could not prove each other. A forged `byte_identical / 2` carried no second emission, and `byte_different` could claim MORE DISTINCT DIGESTS THAN EMISSIONS -- arithmetic nothing in the document could contradict. Both are now inexpressible: the count IS the array length and the digests ARE its members, so neither can exceed or contradict the other."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "comparison_state": {
+                "const": "not_performed"
+              }
+            },
+            "required": [
+              "comparison_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "emissions": {
+                "maxItems": 1
+              }
+            }
+          },
+          "$comment": "no comparison => exactly one emission record."
+        },
+        {
+          "if": {
+            "properties": {
+              "comparison_state": {
+                "enum": [
+                  "byte_identical",
+                  "byte_different"
+                ]
+              }
+            },
+            "required": [
+              "comparison_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "emissions": {
+                "minItems": 2
+              }
+            }
+          },
+          "$comment": "any comparison requires at least two emission records."
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "git_blob_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "git_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "utc_instant": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "description": "TRAILING Z, NO OFFSET FORM. A field named `_utc` carrying `-04:00` is the local-time-with-a-Z defect that turned 3h25m into 'seven hours' in a driver's call, and `git --format=%cI` emits the committer's offset, so the wrong value arrives looking right."
+    },
+    "tracked_input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "home",
+        "git_blob_id",
+        "commit",
+        "blob_presence"
+      ],
+      "description": "`commit` IS REQUIRED, NOT OPTIONAL. It was optional 'because an uncommitted input has none' -- and that let a FORGED COMMIT sit beside a real blob with nothing able to object, because the verifier only ever checked the blob. The verifier now proves the commit EXISTS and that `commit:path` RESOLVES THE CLAIMED BLOB, which is the only check that binds the two together.",
+      "properties": {
+        "home": {
+          "type": "string"
+        },
+        "git_blob_id": {
+          "$ref": "#/$defs/git_blob_id"
+        },
+        "commit": {
+          "$ref": "#/$defs/git_commit"
+        },
+        "blob_presence": {
+          "$ref": "#/$defs/blob_presence"
+        }
+      }
+    },
+    "pinned_compiler": {
+      "$ref": "#/$defs/tracked_input",
+      "properties": {
+        "home": {
+          "const": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/l0_compile_w3.py"
+        }
+      }
+    },
+    "pinned_registry": {
+      "$ref": "#/$defs/tracked_input",
+      "properties": {
+        "home": {
+          "const": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/card_population_registry.v1.json"
+        }
+      }
+    },
+    "pinned_registry_schema": {
+      "$ref": "#/$defs/tracked_input",
+      "properties": {
+        "home": {
+          "const": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/CARD_POPULATION_REGISTRY.v1.schema.json"
+        }
+      }
+    },
+    "pinned_base39": {
+      "$ref": "#/$defs/tracked_input",
+      "properties": {
+        "home": {
+          "const": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/graph_object_manifest.base39.json"
+        }
+      }
+    },
+    "pinned_card_part_map": {
+      "$ref": "#/$defs/tracked_input",
+      "properties": {
+        "home": {
+          "const": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/w3_card_part_map.json"
+        }
+      }
+    },
+    "pinned_card_schema": {
+      "$ref": "#/$defs/tracked_input",
+      "properties": {
+        "home": {
+          "const": "org/standards/SUBSTRATE_CARD.v2.schema.json"
+        }
+      }
+    },
+    "admitted_card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "subject_id",
+        "git_blob_id",
+        "blob_presence"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repo_relative_path"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "git_blob_id": {
+          "$ref": "#/$defs/git_blob_id"
+        },
+        "blob_presence": {
+          "$ref": "#/$defs/blob_presence"
+        }
+      }
+    },
+    "repo_relative_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?![/\\\\])(?!.*//)(?!.*(^|/)\\.\\.?(/|$))(?!.*[A-Za-z]:)[^\\s\\\\]+$",
+      "description": "Forward slashes only, no leading separator, no dot segments, no doubled separators, no drive letter, no backslash, no whitespace. A regex cannot RESOLVE a path; containment is a consumer obligation and that split is stated rather than assumed."
+    },
+    "blob_presence": {
+      "enum": [
+        "in_object_db",
+        "computed_only"
+      ],
+      "x-enum-definitions": {
+        "in_object_db": "The blob id names an object git actually holds; `git cat-file -e` succeeds.",
+        "computed_only": "`git hash-object` COMPUTED the id without writing it. The identity is correct arithmetic over the bytes and NAMES NO OBJECT -- a pin nobody else can resolve, and indistinguishable from a real one by shape."
+      },
+      "x-rule24": {
+        "axis": "whether the pinned identity EXISTS in the object database",
+        "grain": "one pinned file",
+        "intent": "one -- resolvability; NOT correctness of the digest, NOT commit membership",
+        "mece": "in_object_db | computed_only spans it: git either holds the object or it does not.",
+        "state_coherence": "committing moves this to in_object_db and moves NOTHING in the blob id itself -- the identity was always right and was never resolvable."
+      }
+    },
+    "pinned_receipt_schema": {
+      "$ref": "#/$defs/tracked_input",
+      "properties": {
+        "home": {
+          "const": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/MANIFEST_RECEIPT.v1.schema.json"
+        }
+      }
+    },
+    "pinned_output_schema": {
+      "$ref": "#/$defs/tracked_input",
+      "properties": {
+        "home": {
+          "const": "org/standards/L0_GRAPH_SUBSTRATE_MANIFEST.schema.json"
+        }
+      },
+      "description": "The schema the EMITTED MANIFEST is validated against. ⛔ A DISTINCT ROLE from receipt_schema (which governs this document) and from card_schema (which governs the inputs). Conflating any two of the three is the substitution the per-role home binding exists to prevent, and the snapshot derivation was silently reading the card schema for the output schema's token."
+    }
+  }
+}

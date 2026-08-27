@@ -1,0 +1,382 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opal.internal/schemas/CARD_POPULATION_REGISTRY.v1.schema.json",
+  "title": "Card population registry v1",
+  "description": "WHICH CARDS A COMPILER MAY READ, AND FOR WHAT. Authored by 0.4.0_DT_ClientPlatform~X to 4.0.0_SA_CRO~A's admission ruling, reworked to their release-gate FAIL. It exists because a GLOB WAS BEING USED AS AN AUTHORITY BOUNDARY: the discovery pattern had a wave number baked into it, so the compiler's honest '0 exact matches' was a true statement about its own configuration that every reader took as a statement about the estate (doctrine principle 13). A registry moves admission from a pattern that silently changes meaning each wave to an ENUMERATION that can only change by being edited. PLACED IN THE COMPILER'S OWN DELIVERABLE DIRECTORY, NOT org/standards/: this is a lane artifact proposed for promotion, and promoting it is 4.0.0_SA_CRO~A's act.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "registry_version",
+    "ratified_at_commit",
+    "candidate_set_digest",
+    "ratified_discovery_globs",
+    "discovery_globs",
+    "extension_population",
+    "receiver_source_populations"
+  ],
+  "properties": {
+    "registry_version": {
+      "const": "v1",
+      "description": "Pinned. A consumer branches on this before reading anything else, and the v1 clauses at the bottom of this file bind only while it reads v1."
+    },
+    "ratified_at_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$",
+      "description": "FULL 40-hex, never abbreviated. ⛔ A SHORT HASH IS NOT AN IDENTITY: the prior revision accepted 7 characters, so a nonexistent prefix validated and a real one could become ambiguous as the repo grows. EXISTENCE IS NOT CHECKABLE BY A SCHEMA and is enforced at load: `git cat-file -e <commit>^{commit}`."
+    },
+    "candidate_set_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "⛔ BINDS THE RATIFICATION TO THE CANDIDATE SET IT ACTUALLY SAW. sha256 over the sorted `path\\u0000git_blob_id` lines of every candidate `discovery_globs` matched at ratification. Without it `ratified_at_commit` names a moment and says NOTHING about what was in front of the ratifier -- two different candidate sets at one commit are indistinguishable, and 'ratified at HEAD' would be true of both."
+    },
+    "discovery_globs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^[^\\s\\\\]+$"
+      },
+      "description": "DIAGNOSTIC ONLY, AND THE SOLE SOURCE FOR REPORTING. A consumer may use these to REPORT candidates that are not admitted; it may never admit anything because a glob matched, and EDITING THEM CHANGES NO ADMISSION AND NO DIGEST. ⛔ THE PRIOR REVISION CARRIED THIS FIELD WHILE THE COMPILER READ ITS OWN CONSTANT -- so the field was INERT and a reader would have believed editing it changed the diagnostic. The compiler now reads only this one."
+    },
+    "extension_population": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "members"
+      ],
+      "description": "The cards feeding the EXISTING W3 map/enrich path, and nothing else. Membership here says NOTHING about receiver-source eligibility -- those are independent consumer dimensions and one card may lawfully sit in both.",
+      "properties": {
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/member"
+          },
+          "description": "EXACT membership. An empty array is the claim 'nothing is admitted here', which a consumer can branch on."
+        }
+      }
+    },
+    "receiver_source_populations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grain",
+        "key",
+        "failure_mode"
+      ],
+      "description": "THREE INDEPENDENT POPULATIONS, one per receiver, keyed separately. ⛔ NOT one role enum: 4.0.0_SA_CRO~A withdrew that and the reason is load-bearing -- extension participation and receiver-source participation are INDEPENDENT CONSUMER DIMENSIONS, and a single role field makes the lawful overlap case unrepresentable.",
+      "properties": {
+        "grain": {
+          "$ref": "#/$defs/receiver_population"
+        },
+        "key": {
+          "$ref": "#/$defs/receiver_population"
+        },
+        "failure_mode": {
+          "$ref": "#/$defs/receiver_population"
+        }
+      }
+    },
+    "ratified_discovery_globs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^[^\\s\\\\]+$"
+      },
+      "description": "FROZEN. The globs `candidate_set_digest` was computed over, and the ONLY ones that digest speaks about. ⛔ SPLIT FROM `discovery_globs` BECAUSE THEY ARE TWO AXES AND ONE FIELD MADE THE OTHER UNUSABLE: with a single field, widening the diagnostic changed the digest input and the compiler REFUSED TO ADMIT -- so a purely diagnostic act broke admission, and the control that widens the glob could not run at all. The ratification ground is frozen; the lens over it is free.",
+      "x-rule24": {
+        "axis": "the candidate ground the ratification was taken over",
+        "grain": "one ratification",
+        "intent": "one -- what the digest covers; NOT what a reader may look at",
+        "mece": "a glob is in the ratified ground or it is not",
+        "state_coherence": "re-ratifying moves this and candidate_set_digest together; editing discovery_globs moves NEITHER."
+      }
+    }
+  },
+  "$defs": {
+    "git_blob_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$",
+      "description": "⛔ THE GIT BLOB ID, NOT A DIGEST OF THE WORKING-TREE BYTES. The prior revision pinned sha256 of the bytes on disk and 9 of 13 members failed against Git-object bytes -- the CRLF/LF boundary, on a Windows checkout, in the field whose entire job is identity. A digest without its normalisation is not an identity. This value is produced and re-checked by `git hash-object`, so the SAME filters apply on both sides and the comparison cannot straddle the boundary."
+    },
+    "repo_relative_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?![/\\\\])(?!.*//)(?!.*(^|/)\\.\\.?(/|$))(?!.*[A-Za-z]:)[^\\s\\\\]+$",
+      "description": "Forward slashes only, no leading separator, no dot segments, no doubled separators, no drive letter, NO BACKSLASH ANYWHERE, no whitespace. ⛔ THE BACKSLASH CLAUSE IS NOT COSMETIC: on Windows `a\\..\\..\\x` traverses and `\\\\host\\share` is a UNC alias for a path outside the repo, and the prior pattern admitted both because it only forbade FORWARD-slash dot segments. A REGEX CANNOT RESOLVE A PATH, so containment inside the workspace is enforced at load, not here, and that split is stated rather than assumed."
+    },
+    "member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "git_blob_id",
+        "subject_id"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repo_relative_path"
+        },
+        "git_blob_id": {
+          "$ref": "#/$defs/git_blob_id"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "The card's own subject.id, PINNED HERE TOO. Path and blob identify the FILE; this identifies WHAT IT IS ABOUT, and a card whose subject was replaced under an unchanged path is caught by a content pin only because the bytes happened to move with it."
+        }
+      }
+    },
+    "receiver_population": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "members",
+        "transform_status",
+        "transform_reference",
+        "admission_predicate",
+        "blocking_layers",
+        "source_gap"
+      ],
+      "description": "⛔ FOUR INDEPENDENT AXES, NOT ONE FREE-TEXT BLOCK. The prior revision put the admission predicate, the census, the contract gap and the transform lifecycle in a single prose string, so no consumer could branch on any of them and no two could move separately -- Rule 24 (iii) inside the artifact that exists to govern admission.",
+      "properties": {
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/member"
+          },
+          "description": "Cards admitted as a source for THIS receiver. EMPTY IN v1 FOR ALL THREE, and the v1 clause below makes non-empty INEXPRESSIBLE rather than merely discouraged."
+        },
+        "transform_status": {
+          "enum": [
+            "absent",
+            "specified",
+            "implemented"
+          ],
+          "x-enum-definitions": {
+            "absent": "No card-to-L0 transform exists for this receiver, in any form.",
+            "specified": "A transform is specified and pinned but not implemented; still cannot admit.",
+            "implemented": "A transform exists and is pinned by transform_reference; admission is possible."
+          },
+          "x-rule24": {
+            "axis": "the LIFECYCLE STATE of this receiver's transform",
+            "grain": "one receiver population",
+            "intent": "one -- how far the transform has got; NOT which transform (transform_reference), NOT what a card must satisfy (admission_predicate), NOT why the population is empty (blocking_layers)",
+            "mece": "absent | specified | implemented spans it.",
+            "state_coherence": "implementing a transform moves this and sets transform_reference; it moves NOTHING in admission_predicate or source_gap."
+          }
+        },
+        "transform_reference": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[^\\s]+@[0-9a-f]{40}$",
+          "description": "The exact transform, as `<repo-relative-path>@<40-hex commit>`, or null. SEPARATE FROM transform_status because a status is a lifecycle claim and a reference is an identity claim: the prior single `transform_version` string conflated them and accepted an arbitrary `v7` that named nothing."
+        },
+        "admission_predicate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required_fields",
+            "basis_allowed",
+            "all_non_blank"
+          ],
+          "description": "What a card must satisfy to be admitted here, STRUCTURED so a consumer can evaluate it rather than read it.",
+          "properties": {
+            "required_fields": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^[a-z_][a-z0-9_.]*$"
+              },
+              "description": "Dotted paths inside the card that must be present."
+            },
+            "basis_allowed": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "measured",
+                  "held",
+                  "inferred"
+                ]
+              },
+              "description": "`absent` is excluded by construction: a receiver source with basis=absent asserts nothing."
+            },
+            "all_non_blank": {
+              "type": "boolean"
+            }
+          }
+        },
+        "blocking_layers": {
+          "type": "array",
+          "minItems": 0,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "source",
+              "registry",
+              "transform",
+              "compiler"
+            ]
+          },
+          "description": "WHY this population is empty, as a SET of independent layers -- the census axis. An empty array means nothing blocks it.",
+          "x-rule24": {
+            "axis": "which layers currently prevent admission",
+            "grain": "one receiver population",
+            "intent": "one -- the blockage census; NOT the remedy, NOT the lifecycle",
+            "mece": "source (no payload exists anywhere) | registry (payloads exist, unadmitted) | transform (no governed projection) | compiler (no code path assigns declared). A layer is present or it is not.",
+            "state_coherence": "closing one layer removes exactly that member and moves nothing else; the population becomes admissible only when the array is empty."
+          }
+        },
+        "source_gap": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "detail"
+          ],
+          "description": "The CONTRACT-LEVEL absence, separate from the census. A gap here cannot be closed by carding, globbing or transforming -- only by changing a contract.",
+          "properties": {
+            "kind": {
+              "enum": [
+                "none",
+                "no_field_in_card_contract",
+                "no_authored_projection"
+              ],
+              "x-enum-definitions": {
+                "none": "The card contract can express this receiver's payload.",
+                "no_field_in_card_contract": "SUBSTRATE_CARD.v2 has no field carrying the value at all.",
+                "no_authored_projection": "The field could exist but no card in the estate authors one."
+              }
+            },
+            "detail": {
+              "$ref": "#/$defs/one_line_text"
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "transform_status": {
+                "const": "implemented"
+              }
+            },
+            "required": [
+              "transform_status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "transform_reference": {
+                "type": "string"
+              }
+            }
+          },
+          "$comment": "implemented REQUIRES a reference: a lifecycle claim with nothing to point at is the unenforced-field defect."
+        },
+        {
+          "if": {
+            "properties": {
+              "transform_status": {
+                "enum": [
+                  "absent",
+                  "specified"
+                ]
+              }
+            },
+            "required": [
+              "transform_status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "members": {
+                "maxItems": 0
+              }
+            }
+          },
+          "$comment": "no implemented transform => no members. A member admitted without a governed projection is a value with no provenance."
+        }
+      ]
+    },
+    "one_line_text": {
+      "type": "string",
+      "minLength": 1,
+      "allOf": [
+        {
+          "not": {
+            "pattern": "^\\s*$"
+          }
+        },
+        {
+          "not": {
+            "pattern": "[\\r\\n\\u2028\\u2029\\u0085\\u000b\\u000c]"
+          }
+        }
+      ],
+      "description": "One line. Every terminator class is named EXPLICITLY -- CR, LF, U+2028, U+2029, NEL, vertical tab, form feed -- because `minLength` and a not-all-blank negative say nothing about line count, and 'one line' enforced by hope is how the shared contract shipped seven multi-line values."
+    },
+    "v1_empty_receiver": {
+      "type": "object",
+      "properties": {
+        "members": {
+          "maxItems": 0
+        },
+        "transform_status": {
+          "const": "absent"
+        },
+        "transform_reference": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "members",
+        "transform_status",
+        "transform_reference"
+      ],
+      "description": "v1 ONLY. Makes a non-empty receiver population INEXPRESSIBLE rather than discouraged. The prior revision described them as empty-by-contract in prose, and a phantom member, a duplicate, a conflicting overlap and an arbitrary transform version all validated cleanly -- a described constraint is not a constraint. When a governed transform exists, the registry moves to v2 and this clause stops binding by construction rather than by someone remembering to delete it."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "registry_version": {
+            "const": "v1"
+          }
+        },
+        "required": [
+          "registry_version"
+        ]
+      },
+      "then": {
+        "properties": {
+          "receiver_source_populations": {
+            "properties": {
+              "grain": {
+                "$ref": "#/$defs/v1_empty_receiver"
+              },
+              "key": {
+                "$ref": "#/$defs/v1_empty_receiver"
+              },
+              "failure_mode": {
+                "$ref": "#/$defs/v1_empty_receiver"
+              }
+            }
+          }
+        }
+      },
+      "$comment": "⛔ v1 MAKES A NON-EMPTY RECEIVER POPULATION INEXPRESSIBLE. The prior revision merely described them as empty-by-contract, and a phantom member, a duplicate, or an arbitrary transform version all validated cleanly. A described constraint is not a constraint."
+    }
+  ]
+}

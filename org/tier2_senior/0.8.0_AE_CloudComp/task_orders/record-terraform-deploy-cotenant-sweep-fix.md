@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.8.0_AE_CloudComp~B</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "record-terraform-deploy-cotenant-sweep-f" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged</status>
 <priority>P2 (deploy-record integrity; interim discipline already issued to DT by CTO -- post-commit diff verify)</priority>
 
 <title>record-terraform-deploy.sh: stop sweeping co-tenant dirty hunks of lambda-source-map.json into deploy-record commits</title>

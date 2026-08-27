@@ -4,7 +4,7 @@
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-10T23:4xZ</issued>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "MDPF_REMED" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged</status>
 <priority>Sequenced LAST by Andrew's word: "after the remediation is complete and the pipeline is
 functional moving forward, we will want to explore a robust targeted solution for backfill — which
 is the point of that emitter." GO comes from COO only after the plan-§5 completion bar reads true

@@ -1,6 +1,6 @@
 # TO D9_TAXSMA.TO-c1 — daily tracking (LAPTOP) — **WAIVED AHEAD OF THE MEETING, GATED ON THE GUARDRAIL TEST SET**
 
-<task_order id="D9_TAXSMA.TO-c1" project="D9_TAX_SMA_OPS">
+<task_order id="D9_TAXSMA.TO-c1" project="OPAL_TAXSMA">
 <issued_to>0.7.0_AE_CloudOps (build + staging); 1.0.0_SA_CTO applies</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T20:15Z</issued>

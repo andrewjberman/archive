@@ -1,0 +1,183 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.7.0_AE_CloudOps~X",
+  "subject": {
+    "id": "resource_summaries",
+    "kind": "store",
+    "declared_domain": "The Iceberg table built as comp-similar's Phase-3 persistence for the ARN-keyed functional-summary corpus: append-only, ARN-keyed, latest-version-wins, on the existing Iceberg/Nessie store in the globgrph namespace. Added to this lane's wave-2 set at 22:2xZ after 0.4.0_DT_ClientPlatform~X's BLOCKING established that the derivation never read location.co_resident_stores; it is comp-similar's own store and comp-similar is this lane's wave-1 subject."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T22:17:42Z",
+    "commit_ish": "100e7ea130",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "how": "A writer module (resource_summaries_store.py) materializes the summary corpus as an APPEND-ONLY Iceberg table via table.append(), one Nessie commit per batch, never an overwrite. Readers resolve MAX(summary_version) per arn, so version history is retained and the latest wins at read time. It reuses the EXISTING Iceberg/Nessie store rather than standing up a new one, and the module records why Glue was rejected: one Nessie catalog, one marker-HEAD, one refresh model, where a Glue table would force a second. Rows carry derive provenance plus the engine's own controls (thin/held/n_purpose) so the derivation is auditable. THE BURIED OPINIONS, IN PROSE because the TO's form is prose: (1) APPEND-ONLY WITH LATEST-VERSION-WINS is a durability choice that makes the table grow without bound and makes every read a max-aggregation; (2) the ARN key inherits comp-similar's universe, so the table cannot hold a non-AWS resource even in principle; (3) the module ships with ZERO SES/SNS/CloudWatch leg by explicit decision, so nothing observes it; (4) the pure row/schema/partition/versioning logic is dev-box self-testable while the write path is not, which decides what its self-test can and cannot cover.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "superseded",
+      "declared_opinions": [
+        "APPEND-ONLY WITH LATEST-VERSION-WINS is a durability choice that makes the table grow without bound and makes every correct read a MAX(summary_version) aggregation -- a convention held in the writer's docstring rather than in the table.",
+        "The ARN key inherits comp-similar's universe, so the table cannot hold a non-AWS resource even in principle; the MS and Git spaces are excluded by the key's choice, not by a coverage decision.",
+        "The module ships with ZERO SES/SNS/CloudWatch leg by explicit decision, so nothing observes the store -- which is why a 39-day-old last write is discoverable only by someone who goes and looks.",
+        "Glue was REJECTED in favour of reusing the existing Nessie catalog, on the stated ground that a second catalog would mean a second marker-HEAD and a second refresh model. A reasoned choice, recorded in-source.",
+        "Only the pure row/schema/partition/versioning logic is dev-box self-testable; the write path is not, which decides what the module's own self-test can and cannot cover."
+      ],
+      "composes": [
+        {
+          "id": "org/modules/graph/debtscan/summary_corpus.py",
+          "note": "the corpus whose rows it was built to persist"
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse",
+          "note": "the existing Iceberg/Nessie store, reused not re-minted"
+        },
+        {
+          "id": "pyiceberg",
+          "note": "table.append() as the write primitive"
+        }
+      ],
+      "invents": [
+        {
+          "id": "the append-only + MAX(summary_version) read convention",
+          "note": null
+        },
+        {
+          "id": "the per-row derive-provenance columns",
+          "note": "thin / held / n_purpose carried alongside the summary"
+        }
+      ],
+      "basis": "inferred",
+      "basis_by_field": {
+        "how": "measured",
+        "determinism": "inferred",
+        "materializer_standing": "measured",
+        "composes": "measured",
+        "invents": "measured"
+      },
+      "evidence": "SOURCE READ of infra/aws/globgrph/resource_summaries_store.py @04b967c3c3 -- header :3-25 (append-only / ARN-keyed / latest-version-wins, the Glue rejection, the zero-alerting decision), WAREHOUSE_URI :53, NAMESPACE :56, _rows_to_pa_table :108, provenance columns :122. ⛔ materializer_standing='superseded' IS THE LOAD-BEARING FIELD ON THIS CARD AND IT IS MEASURED, NOT INFERRED: comp-similar's live corpus is DERIVE-AT-SCAN and does not read this table -- measured in wave 1 by calling build_corpus() in-process and observing it return a full 1,851-resource corpus with the table untouched -- and comp_similar.py's own header records the CTO ruling that put the resource_summaries TABLE behind NFRA_KUZUSPLIT and 'not this leg'. A store that exists, holds data, and has been functionally replaced on the live path by the derive-at-scan corpus is superseded by the enum's own meaning. ⚠ THAT IS A STANDING CLAIM, NOT A DISPOSITION: it says what the live path does today, and says NOTHING about whether this table should be kept, rebuilt or removed. W2-m-3 puts that in a second pass and I express no view. determinism is INFERRED: the write path is deterministic by source read (no model, no random) but I did not run it -- writing to a live Iceberg table is not a read-only act and this TO is qualify-only. DECLARED-OPINIONS FORM, RESOLVED: this card ships declared_opinions as an ENUMERATED ARRAY. The TO originally directed buried opinions into methodology.how as prose because the card schema had no slot; 1.0.0_SA_CTO~X landed an OPTIONAL process.methodology.declared_opinions @9660f526d8 about two minutes after wave 2 dispatched and ruled the choice of form was the issuer's. I surfaced that fork as a non-blocking OBSERVATION and continued in prose pending a ruling. COX2-AC8 on the TO at HEAD IS that ruling -- it requires the field populated and states that omitting the key passes the schema and fails the TO -- so the array is what ships, and the same opinions remain in methodology.how so the prose and the field cannot disagree.",
+      "owner": "0.8.0_AE_CloudComp (writer module); 1.0.0_SA_CTO (the stranded table)"
+    },
+    "cadence": {
+      "declared_rhythm": null,
+      "actual_trigger": "NONE OBSERVED. No schedule, no event binding, and no live caller: the module is invoked manually if at all, and the corpus consumer that would populate it reads derive-at-scan instead. The last write is its own newest object.",
+      "live_matches_declared": "no",
+      "live_instance_age": "39 days at carding -- newest object 2026-07-18T21:11:05Z against carded_utc 2026-08-26T22:17:42Z, re-measured at wave-2 vintage rather than carried from wave 1",
+      "basis": "inferred",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "inferred",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "live_instance_age RE-MEASURED at this carding rather than reused: aws s3api list-objects-v2 sort_by(Contents,&LastModified)[-1] -> 2026-07-18T21:11:05.000Z, 2,153 bytes, in ISO-8601 Z from s3api rather than `aws s3 ls` local time. ⚠ THE FIGURE MOVED FROM MY WAVE-1 CARD: I wrote 38 days there and it is 39 here, because carded_utc is a later clock read on the same day -- a small thing, recorded because a staleness figure without its reference instant is not a measurement, and re-deriving it was cheaper than explaining the discrepancy later. declared_rhythm=null MEASURED: no schedule exists in the module and no trigger binds it. actual_trigger is INFERRED and I am marking it so rather than claiming measured -- I established that the LIVE COMP-SIMILAR PATH does not read or write it and that its newest object is 39 days old, but I did NOT sweep EventBridge and the Scheduler plane to prove no trigger exists anywhere. A one-plane or zero-plane absence claim is exactly the trap this estate has measured twice, so the honest basis is inferred.",
+      "owner": "1.0.0_SA_CTO"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "evidence",
+      "mutation_policy": "append_only",
+      "form": "Iceberg table (pyiceberg / Nessie catalog) in the globgrph namespace; 71 objects, of which 64 under data/ and 7 under metadata/",
+      "basis": "inferred",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "inferred",
+        "mutation_policy": "measured",
+        "form": "measured"
+      },
+      "evidence": "persisted=true MEASURED on the LIVE artifact with TWO agreeing instruments, not from the module's description -- DESIRED is never APPLIED. (1) aws s3api list-objects-v2 --query length(Contents) -> 71; the data/ prefix alone -> 64. (2) In wave 1, comp-keys prefix ... --all on the narrowed table prefix -> '-- 71 key(s); showing 71', a complete printed denominator. The two agree. ⛔ NO ABSENCE OR PRESENCE CLAIM HERE RESTS ON A TRUNCATED LISTING: comp-keys --all on the PARENT warehouse/ prefix returns 'CAPPED at 5000', so I narrowed to the table prefix until the denominator printed complete. mutation_policy='append_only' MEASURED at source (table.append(), one Nessie commit per batch, never overwrite). authority_role is INFERRED: 'evidence' is my reading -- the table holds observations of what the corpus contained at a past vintage, and nothing on the live path treats it as source or rebuilds it as a projection -- but no declaration anywhere states its role, so I am reasoning it rather than reading it.",
+      "owner": "1.0.0_SA_CTO"
+    },
+    "location": {
+      "home": "s3://opal-313476888478-globgrph/warehouse/globgrph/resource_summaries_b38ddc35-944f-4dd4-b801-120e96c6d4cd/ (Iceberg/Nessie, namespace globgrph)",
+      "projection_of": [
+        {
+          "id": "org/modules/graph/debtscan/summary_corpus.py",
+          "note": "the derive-at-scan corpus these rows were materialized from at write time"
+        },
+        {
+          "id": "kuzu_nessie_db",
+          "note": "the graph projection that corpus is itself synthesized from"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_nodes_4c6c23bd-fffa-427e-9cd9-7a9deaa3426d",
+          "note": "same namespace, same warehouse"
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_edges_6629328d-a582-46d2-80bc-5059de1a77ce",
+          "note": "same namespace, same warehouse"
+        }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured",
+        "co_resident_stores": "measured"
+      },
+      "evidence": "home MEASURED live and stated to the table-uuid level rather than the logical name, because the logical name alone is not an address. Corroborated by a SECOND instrument at a different grain: aws s3api list-objects-v2 --delimiter '/' over warehouse/globgrph/ enumerated 11 CommonPrefixes and resource_summaries is one of them, which is how its EXISTENCE was established independently of the narrowed key listing. DESIRED vs APPLIED held apart explicitly: resource_summaries_store.py:53-56 DESCRIBES WAREHOUSE_URI and NAMESPACE -- that is a description, never a state -- and everything above is the live read.",
+      "owner": "1.0.0_SA_CTO"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "ARN-keyed AWS estate resources whose summary was materialized into the table at its last write",
+      "denominator": null,
+      "denominator_absent_reason": "THE ROW COUNT WAS NOT READ AND I WILL NOT INFER IT FROM OBJECT COUNTS. 64 data objects is a measurement of FILES, not of rows, and an Iceberg table's row count is not derivable from its object count -- append-only writes mean many small files of unknown row width, and stating '64 of N' would be a denominator about the wrong population. Reading the true count requires a pyiceberg scan of the table, which I did not run: this TO is qualify-only, the table is not on any live read path, and a scan is a heavier act than the question warranted. ⛔ SO THE POPULATION IS COUNTABLE IN PRINCIPLE AND UNCOUNTED IN FACT, and I am saying which rather than printing a number of the wrong kind. The lawful form is this stated reason; a fabricated M would pass the field and mislead.",
+      "explicitly_out": [
+        "everything written after 2026-07-18T21:11:05Z -- nothing was, so the table's content is frozen at that instant regardless of how the estate has moved since",
+        "the MICROSOFT and GIT identity spaces entirely, inherited from the ARN-keyed corpus this table persists",
+        "any resource added to the estate in the 39 days since the last write"
+      ],
+      "basis": "absent",
+      "basis_by_field": {
+        "universe": "inferred",
+        "denominator": "absent",
+        "explicitly_out": "measured"
+      },
+      "evidence": "The exclusions are MEASURED: the last-write instant is a live s3api read, and the ARN-space limit is inherited from the corpus measured in wave 1 (coverage() -> 1,851 ARN resources, 0 non-AWS). universe is INFERRED -- I am describing what the table was BUILT to hold, from the writer's source, without having read a single row to confirm what it actually holds. ⛔ THE FLOOR MAKES THIS ROW 'absent', WHICH IS THE POINT: under v1 this row would have read basis='measured' on the strength of a genuinely measured object count and a genuinely measured staleness figure, with the uncounted rows disclosed in prose where no consumer could branch on it. That is the 41%-of-wave-1 class exactly, and here the contract catches it.",
+      "owner": "1.0.0_SA_CTO"
+    },
+    "key": {
+      "identity_space": "AWS ARN, plus an integer summary_version per arn (the append-only version axis)",
+      "key_is_stable": "stable",
+      "crosses_spaces": false,
+      "declared_mapping": null,
+      "basis": "inferred",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "inferred",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "identity_space MEASURED at source (ARN-keyed, MAX(summary_version) resolution, resource_summaries_store.py header :12-14). crosses_spaces=false MEASURED and it is a FINDING rather than a clean bill, in the same shape as the corpus it persists: an ARN carries no MS or Git identity, so those resources are ABSENT FROM THE UNIVERSE rather than poorly keyed. key_is_stable is INFERRED, and the distinction matters here: an ARN is stable in the schema's sense, but I did not read a single row, so I am reasoning about the DECLARED key rather than verifying the key the table actually carries. ⛔ AND THE COMPOUND KEY IS THE INTERESTING HALF: identity is (arn, summary_version), so a reader who resolves MAX gets the latest row and a reader who does not gets an arbitrary vintage -- the correctness of every read depends on a convention held in the writer's docstring, not in the table. declared_mapping=null after a hunt across the store module's schema construction, comp_similar.py, summary_corpus.py and the live table's own metadata prefix.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "failure_mode": {
+      "returns_on_failure": "NOT EXERCISED, and that is this row's honest answer rather than a guess. The table is off the live read path, so there is no caller to observe failing; exercising it would mean standing up a reader against a store nothing reads, which this qualify-only TO does not warrant. What IS measured: a consumer that resolved this table INSTEAD of the derive-at-scan corpus would receive well-formed rows frozen at 2026-07-18 with nothing in the response indicating their age.",
+      "distinguishable_from_true_negative": "unmeasured",
+      "silent_degrade_paths": [
+        "⛔ THE STORE'S DANGEROUS PROPERTY IS THAT IT ANSWERS. It exists, holds 64 data objects, and would return well-formed summaries to any reader that pointed at it -- 39 days stale, with no cadence, no writer running, and no field in the response carrying its vintage. A stale answer and a current answer are byte-identical in shape.",
+        "The module ships with ZERO alerting by explicit decision, so nothing observes that the last write was 39 days ago. The staleness is discoverable only by someone who goes and looks at LastModified.",
+        "MAX(summary_version) resolution is a READER convention recorded in a docstring. A reader that omits it gets a real row of an arbitrary vintage -- not an error, not an empty result, just an older answer."
+      ],
+      "basis": "absent",
+      "basis_by_field": {
+        "returns_on_failure": "absent",
+        "distinguishable_from_true_negative": "absent",
+        "silent_degrade_paths": "inferred"
+      },
+      "evidence": "⛔ basis 'absent' WITH EVIDENCE OF WHAT I TRIED IS A WORKED ROW, NOT AN UNFILLED ONE, AND THIS IS THE ONE PLACE IN THIS TO WHERE THAT IS THE RIGHT ANSWER. COX2-AC7 requires failure_mode EXERCISED and I did not exercise it: what I attempted was to identify a live caller to observe, and I established there is none -- comp-similar reads derive-at-scan (measured in wave 1 by calling build_corpus() with the table untouched), and no trigger or schedule writes it (39-day-old newest object, measured). ⛔ SO THE UNEXERCISED STATE IS ITSELF THE MEASUREMENT: there is no failure path to exercise because there is no live path at all. Writing 'yes' or 'no' here on the strength of reading the writer's code would be precisely the docstring-derived verdict the criterion forbids. distinguishable='unmeasured' is the honest enum value and the floor correctly drags this row to 'absent'. silent_degrade_paths is INFERRED -- reasoned from the store's measured state and the writer's source, not observed.",
+      "owner": "1.0.0_SA_CTO"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "Every row is worked and two are honestly 'absent' with evidence of what was attempted, which is a worked answer rather than a gap. WHAT HOLDS: the store is real, exists on the live plane with two agreeing instruments, is append-only with version history retained rather than overwritten, reuses the existing Nessie catalog rather than minting a second one, and carries per-row derive provenance so its contents are auditable. Its writer's Glue rejection is reasoned and recorded. WHAT QUALIFIES IT: (1) the last write is 39 DAYS OLD with NO cadence, NO trigger and NO live reader -- a store that exists, answers, and is connected to nothing; (2) IT WOULD ANSWER A READER WELL-FORMEDLY WITH FROZEN CONTENT, and nothing in the response carries its vintage, so stale and current are indistinguishable in shape; (3) correctness of every read depends on a MAX(summary_version) convention held in a docstring rather than in the table; (4) the row count is uncounted and NOT inferable from the 64 data objects, so the coverage denominator is honestly absent; (5) the failure mode could not be exercised because there is no live path to exercise -- and that absence is the measurement. ⛔ NOT UNSOUND: nothing here is defective as built. The table does what its writer says, and being unread is a fact about the estate's routing rather than a fault in the store. ⛔ AND NO DEPRECATION VERDICT IS EXPRESSED OR IMPLIED: materializer_standing='superseded' is a MEASURED statement about what the live path reads today, not a view on what should become of this table. W2-m-3 puts that in a second pass and the sequencing is load-bearing -- I carded it fully precisely because an expectation about its fate must not change how hard I looked. || SEMANTIC-AXIS DECLARATION: NOT SYSTEMATICALLY EXAMINED. The four opinions in methodology.how came from reading the writer's header while answering the persistence and cadence rows. I did NOT read a single ROW of the table, so I cannot say whether its schema still matches the corpus's current SummaryDoc shape, whether the thin/held/n_purpose columns still mean what they meant in July, or whether a definition drifted between the writer and the corpus in 39 days. ⛔ An object listing and a LastModified timestamp are structurally blind to all three. || GENERATOR CURRENCY: materializer_standing='superseded', basis MEASURED -- the live comp-similar path was measured NOT to read it.",
+    "blocking_defects": null
+  }
+}

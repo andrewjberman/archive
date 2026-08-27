@@ -2,7 +2,7 @@
 
 <issued_to>0.6.0_AE_PartnerETL</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project DATA_SSOTMG, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 <priority>HIGH — Andrew-direct GO (2026-06-29): stand up the unattended canonical ETL chain on the new direct-Schwab EC2. The whole pipeline (G1-G14 closed + dry-run verified) holds only on these automation seams.</priority>
 <date>2026-06-29</date>
 

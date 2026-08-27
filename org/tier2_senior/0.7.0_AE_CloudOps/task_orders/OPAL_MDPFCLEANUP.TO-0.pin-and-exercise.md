@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-14T17:2xZ</issued>
-<status>issued — GO (Andrew-direct "GO on OPAL_MDPFCLEANUP, dispatch to COO" @9364820b29; CTO dispatch 172234Z)</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project OPAL_MDPFCLEANUP, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: issued — GO (Andrew-direct "GO on OPAL_MDPFCLEANUP, dispatch to COO" @9364820b29; CTO dispatch 172234Z)</status>
 <priority>P1 — first of the strict TO-0..TO-5 sequence; everything downstream keys on these pins</priority>
 </task_order>
 

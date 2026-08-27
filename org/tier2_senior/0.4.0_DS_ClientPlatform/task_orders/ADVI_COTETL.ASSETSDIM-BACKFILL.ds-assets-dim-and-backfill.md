@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (decompose of CVO scope cb62104b1; Andrew-direct "do all")</issued_by>
 <issued_date>2026-06-22</issued_date>
-<status>active</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project ADVI_COTETL, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: active</status>
 <!-- GATED on AE's fresh-session signal (ADVI_COTETL.BACKFILL.ae-session) -- all live pulls/builds need the live session. NOT COT-launch-gating (parallel). DS-paced after the session lands. Full scope + findings: cb62104b1. -->
 
 <context>

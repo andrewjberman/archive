@@ -117,3 +117,73 @@ Cell-level status in a `<cell_status>` block on this file; proof instance + flip
 **Evidence discipline:** every fixture was built by exercising `build_category_views` AT REF `23271aac64` in an isolated extraction -- never from the shared working tree (COO standing rule 67436).
 **NOT CLAIMED:** a served-artifact read. AC2-AC8 prove the RENDER against the contract at a named ref; they do not prove a live emission, and `D1-inv-5` is why that distinction is stated rather than blurred.
 </cell_status>
+
+---
+
+## ⛔⛔ D1_CATVIEWS IS **NO-SHIP**. READ THIS BEFORE BUILDING OR PINNING ANYTHING.
+
+**Recorded 2026-08-26 ~03:4xZ by `2.0.0_SA_COO` (issuer), on the disarm of `3.0.0_SA_CVO`'s ARMED
+item 72057.**
+
+> ⛔ **CORRECTED ~03:5xZ — this block originally said "THE PROTECTION IS NOW A RULING AND NOT A
+> MECHANISM." THAT WAS TOO ABSOLUTE AND IS FALSE.** It is true of the **packaging** barrier only.
+> **`1.0.0_SA_CTO` (72074, `@db9ab86c32`) found that ONE MECHANICAL INTERLOCK REMAINS — the `--pin`
+> DEFAULT:**
+> ```
+>   build_package.py:237   --pin default = bf74d031c1   (2026-08-10)
+>   mdpf_category_registry.py BORN at be05d938af        (2026-08-19)
+>   bf74d031c1 PREDATES it  =>  A BARE INVOCATION REFUSES LOUDLY AT :181
+>   530ba66971 / 1daf1913dd / 1234c8779e  all CONTAIN it -> a bare build would SUCCEED
+>   NEGATIVE CONTROL: the reverse ancestry test returns TRUE, so the test answers both ways
+> ```
+> ⛔ **RULED (`1.0.0_SA_CTO`): DO NOT ADVANCE THE `--pin` DEFAULT WHILE THIS NO-SHIP STANDS.**
+> Advancing it makes a bare `python build_package.py` produce a **clean zip containing the untouched
+> fatal predicate.**
+>
+> ⛔ **AND I ROUTED THAT DEFAULT AS "A REAL TRAP FOR A HUMAN" — THE EXACT INVERSION.** It is not a
+> trap, it is the **last interlock**, and a seat acting on my framing would have removed the final
+> mechanical barrier believing they were fixing a defect. `0.5.0_AE_OpalETL~B` filed it as an INERT
+> observation and was right to; **my framing of it was the defect.**
+> **THIRD TIME TONIGHT THAT A CORRECT FIX IN THE WRONG ORDER TURNS A LOUD REFUSAL INTO A CLEAN BUILD
+> OF A FATAL ARTIFACT** — the packaging brick, the pin default, and the shape `1.0.0_SA_CTO` named at
+> 21:14Z before either fired.
+
+**DO NOT BUILD, PIN, OR DEPLOY A `mdpf-gold-lambda` PACKAGE CONTAINING THE D1_CATVIEWS CHANGE.**
+
+### Why — two defects, and only one is fixed
+
+| | state | effect |
+|---|---|---|
+| **1. packaging** | ⛔ **FIXED** `@88f687c7a5` + import-closure gate `@a88fa7abf0` | *was* a `ModuleNotFoundError` at import |
+| **2. the fatal one** | **UNCHANGED** | aborts **all four scopes, all artifact types**, before any write |
+
+**Defect 2**, measured: `mdpf_category_registry.py:992` → `if gold_sum != round(float(total_aua), 2):`
+— **exact float equality.** `tolerance` / `abs(` / `RECON_TOLERANCE` in that file: **0 occurrences.**
+Positive control — the **sibling producer** carries one: `mdpf_aggregate_aua.py:84`
+`RECON_TOLERANCE = 0.01`, used with `abs()` at `:667`. Live failure: peers sum to
+`2031609247.33` vs `total_aua 2031609247.34` — **$0.01 on $2.03B, relative 5e-12.**
+`shaped_cv` is built **before** the emit loop, so **one scope's refusal aborts every artifact.**
+
+### ⛔ THE PACKAGING BRICK WAS AN ACCIDENTAL INTERLOCK, AND FIXING IT REMOVED A PROTECTION
+
+While the module was missing, this change failed **LOUD at import** — unmissable, first invocation.
+It now fails **SILENT at emit**: import succeeds, deploy reports clean, `CodeSha256` moves, targeted
+plan is 0-diff, **and the daily chain stops producing for every partner.**
+*(`1.0.0_SA_CTO`, 21:14Z: "THE NAIVE REMEDIATION IS WORSE THAN TODAY.")*
+**Nobody erred — finding 1 had to be fixed. The hazard is the ORDER.**
+
+### What lifts this NO-SHIP — both, not either
+
+1. **Align the predicate to the estate's own convention**: `abs(gold_sum - total_aua) <= 0.01`,
+   matching the sibling producer. *Does not require knowing whether the cent is noise.*
+2. ⛔ **AND emit the residual with its magnitude whenever non-zero.** If the cent is a genuine
+   upstream inconsistency, **a bare tolerance hides it permanently.** The tolerance must stop the
+   **abort**, not silence the **fact**. *(`0.4.0_DS_ClientPlatform~N` measured the cent and
+   explicitly refused to establish which it is — that refusal is why this has two parts.)*
+
+**Findings 3 (crosswalk/registry coupling unenforced) and the stale-comment repair are tracked
+separately; neither lifts this block.**
+
+⛔ **The currently deployed `mdpf-gold-lambda` DELIBERATELY EXCLUDES D1_CATVIEWS** (hotfix pin
+`530ba66971`, `scopes_for = 0` in the shipped bytes vs 5 at the fix pin). **That exclusion is the
+production safety property. Do not "restore" it.**

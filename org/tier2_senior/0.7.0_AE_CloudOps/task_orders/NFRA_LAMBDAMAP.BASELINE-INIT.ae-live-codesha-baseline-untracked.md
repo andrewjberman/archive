@@ -5,7 +5,7 @@
 <consult>3.0.0_SA_CVO (comp-lambdamap write-governance owner -- gates --write per-entry, verdict ed13b714a pattern); 2.0.0_SA_COO (endorsed the follow-on)</consult>
 <issued_by>self-filed 0.7.0_AE_CloudOps~A 2026-07-02, per COO "file it in your lane" + CVO endorsement (both on the tranche-1 CI drift-coverage thread)</issued_by>
 <issued_date>2026-07-02</issued_date>
-<status>active-queued (LOW-PRI, non-urgent -- the ~34 are ancillary scanners/serving; the sensitive-6 are already covered by tranche-1)</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "NFRA_LAMBDAMAP" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: active-queued (LOW-PRI, non-urgent -- the ~34 are ancillary scanners/serving; the sensitive-6 are already covered by tranche-1)</status>
 
 <priority>
 LOW-PRI / non-urgent. This is a drift-DETECTION coverage-closer, not a live break. Feeds CLAUDE.md Rule-22a Clause-C (sha-coverage). The SENSITIVE subset (trade-authorizer/trade-auth-handler/trade-identifier-cache/opal-bd-transaction-consolidator/opal-inf-value-parity/opal-globgrph-freeze-monitor) was hand-written under CVO gate 2026-07-02 (commit 97059db92); this TO covers the REMAINING ~34 reusably (compiler-thesis: build the tool, don't hand-maintain 34 entries).

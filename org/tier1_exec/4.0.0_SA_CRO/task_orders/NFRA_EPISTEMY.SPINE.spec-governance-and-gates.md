@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>4.0.0_SA_CRO (base)</issued_to>
     <date>2026-08-20</date>
-    <status>pending -- GO rides this issuance; the spine runs for the program's life (Andrew-direct decomposition ~2008Z; round resolved 63641). MILESTONE 1 (envelope cert) PASSED 2026-08-20 ~2132Z: S7 proof VALID rc=0 positional S1-S7 at base (@26a5158732) AND re-run at COO's seat (rows=7, violations=0); S1 four harm surfaces OPEN never built against; S2 thirteen schema acts indexed, zero pending; S3 envelope cert ISSUED (CERTIFIED-WITH-CONDITION, D1 = rider R1); S4 discharged (agent-side Codex acks); S5 PASS-AS-SPEC @4c023d5725 (CTO 63767/63768 -- specification, not activation); S6 0.1.1 accepted @85f64c7142; next re-validation at the component-2 cert.</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_EPISTEMY, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending -- GO rides this issuance; the spine runs for the program's life (Andrew-direct decomposition ~2008Z; round resolved 63641). MILESTONE 1 (envelope cert) PASSED 2026-08-20 ~2132Z: S7 proof VALID rc=0 positional S1-S7 at base (@26a5158732) AND re-run at COO's seat (rows=7, violations=0); S1 four harm surfaces OPEN never built against; S2 thirteen schema acts indexed, zero pending; S3 envelope cert ISSUED (CERTIFIED-WITH-CONDITION, D1 = rider R1); S4 discharged (agent-side Codex acks); S5 PASS-AS-SPEC @4c023d5725 (CTO 63767/63768 -- specification, not activation); S6 0.1.1 accepted @85f64c7142; next re-validation at the component-2 cert.</status>
     <project_code>NFRA_EPISTEMY</project_code>
   </metadata>
 

@@ -10,7 +10,7 @@
      heat/dups research -- ~C reads base's deliverables when published, never tasks base. -->
 
 <date>2026-07-17</date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project OPAL_CONSOLIDATION, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <priority>P3 (Andrew-ratified standing allocation order, CTO relay 171739Z — behind P1 INF chain + P2 GLDRNS/re-key; parallelizable, dedicated instrument-builder)</priority>
 
 <authority>

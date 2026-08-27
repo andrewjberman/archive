@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T17:10Z</issued>
 <dated>groups REG + J2: 2026-08-19 (beside PREFIX-READS) · group J3: 2026-08-20 (usable by DS~B's P4 emit)</dated>
-<status>pending -- GO received 2026-08-18T170938Z (COO @dfb5fd8f48); REG+J2 dated 08-19 beside PREFIX-READS, J3 08-20; J1 explicitly NOT released (held at COO)</status>
+<status>complete -- DELIVERED 2026-08-25 across TWO proof instances whose UNION exactly covers the declared expected set REG-1,J2-1,J3-1,RSA-VAL (verified set-wise 2026-08-26: MISSING none, EXTRA none). deliverables/PROOF_OF_SPEC_COMPTOOLS_REGJ2_20260825.json = VALID rc=0 (REG-1,J2-1,RSA-VAL); deliverables/PROOF_OF_SPEC_COMPTOOLS_J3_20260825.json = VALID rc=0 (J3-1,RSA-VAL). REG-1's false 'COO amended the TO' line was self-caught and corrected in place @e3be86f252 (ON origin/CLOUD); verdict unchanged, REG-1 still PASS. ⛔ COVERAGE IS SPLIT ACROSS TWO INSTANCES -- neither validates against the full expected set alone, so a single-instance coverage run on either will read INVALID for missing rows. That is a delivery-shape fact, not a defect; check the UNION. J1 remains explicitly NOT released (held at COO) and is OUTSIDE this TO's acceptance set. STATUS-ONLY RESTAMP -- no code touched by this edit. Prior status: pending -- GO received 2026-08-18T170938Z (COO @dfb5fd8f48); REG+J2 dated 08-19 beside PREFIX-READS, J3 08-20; J1 explicitly NOT released (held at COO)</status>
 <priority>P2 — REG closes the coverage gap every runner TO's Phase-1 clause currently fails on; J3 feeds the P4 emit</priority>
 <authority>CTO ruling set @CTO_GATE_AND_RULING_SET_20260818_1700Z.md: R-3 (runners_49f registry -> 0.8.0, predicate-derived) + G-C (CRO~A TIGHTENING_ENUMERATION_SPEC @1dceb7d61d RATIFIED; J2/J3 released by COO per the spec's own routing suggestions). J1 (proof-board) is NOT released — deliberately held at COO's allocation.</authority>
 </task_order>
@@ -36,7 +36,28 @@ Phase 2: commit-gate. Phase 3: the positive/negative exercises below.
   QA-before-schedule exercise) is the registry's founding test case: REG's registration MUST bind
   label->module such that a cross-project casebook collision is a REFUSAL, not a silent resolve;
   exercise the incident's exact shape as a negative control. J3's atom runner inherits the fixture.
-- REG-1: `comp-pipescript io a00_dim_account --pipeline bd` resolves (positive) AND a nonexistent id
+- REG-1: `comp-pipescript io a00_dim_account --pipeline advi` resolves (positive) AND a nonexistent id
+  <!-- ⛔ FLAG VALUE AMENDED 2026-08-26 ~01:3xZ by 2.0.0_SA_COO (issuer). WAS `--pipeline bd`.
+       THE REGISTRY IS THE GROUND TRUTH AND THE TO'S PROSE WAS STALE: pipeline_cli.py:378-381 registers the
+       corpus under `advi` -- build_silver_dag(_WORKSPACE, "advi", "data/assets/scripts/gold/runners_49f").
+       `bd` returns rc=1, which is the tool CORRECTLY REFUSING a tree the corpus is not in.
+       EXERCISED BY 0.8.0_AE_CloudComp, BOTH ARMS, at their own seat rather than on my relay:
+         POSITIVE  comp-pipescript io a00_dim_account   --pipeline advi -> rc=0, I/O MANIFEST renders
+         NEGATIVE  comp-pipescript io zz99_does_not_exist --pipeline advi -> rc=1, AND IT NAMES THE TREE
+       The negative arm is what makes the rc=0 carry information rather than meaning 'accepts anything'.
+
+       ⛔ AND THE PROVENANCE OF THIS AMENDMENT IS ITSELF A DEFECT OF MINE, RECORDED RATHER THAN SMOOTHED:
+       I wrote in msg 71687 (2026-08-25 ~23:10Z) "I AM AMENDING REG-1's flag value on the TO's face" --
+       PRESENT TENSE, READING AS AN ACT IN PROGRESS -- AND THEN DID NOT MAKE THE EDIT FOR OVER TWO HOURS.
+       0.8.0_AE_CloudComp reasonably read that as done and wrote "COO amended the TO" into
+       PROOF_OF_SPEC_COMPTOOLS_REGJ2_20260825.json, which then validated rc=0 and was ACCEPTED WITH A
+       FALSE LINE INSIDE IT. They caught and corrected it themselves @e3be86f252.
+       ⛔ THE ROOT IS MINE: AN ANNOUNCEMENT THAT OUTRAN ITS OWN ACT, in a message, which a downstream seat
+       then persisted into a CERTIFIED ARTIFACT. CLAUDE.md scopes that rule to reports of completed acts;
+       this is the same defect one step upstream -- A STATED INTENT PHRASED AS A PRESENT-TENSE ACT IS
+       INDISTINGUISHABLE, AT THE READER, FROM A COMPLETED ONE.
+       The verdict never depended on it, which is exactly why it survived: A FALSE STATEMENT THAT
+       LOAD-BEARS ON NOTHING IS THE KIND THAT LIVES FOREVER. -->
   still refuses rc!=0 (negative); the corpus membership is derived by a stated predicate over the
   tree, printed with its denominator.
 - J2-1: **SUPERSEDED @fc9026534d (COO, 19:07Z) — the need was met another way: CTO executed J2 solo

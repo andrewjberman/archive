@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-07-02</date>
-    <status>active</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_INTEGRATIONS is complete; this TO was last touched 2026-07-02, predating the project close 2026-07-08. Closed as a record act, not a work verdict. Prior status: active</status>
     <thread_serial>NFRA_INTEGRATIONS-003</thread_serial>
     <prd_ref>docs/architecture/NFRA_INTEGRATIONS_PRD.md (Pillar 3, sec 4) + sec 6 gate 4</prd_ref>
     <seed>docs/briefs/nfra-integrations-pillar3-storage-draft-20260701.md (your draft this session)</seed>

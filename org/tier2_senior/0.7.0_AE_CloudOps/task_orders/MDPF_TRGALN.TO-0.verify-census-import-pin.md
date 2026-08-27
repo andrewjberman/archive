@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-14T05:0xZ</issued>
-<status>active</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_TRGALN, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: active</status>
 <priority>P0 — GO ON RECEIPT. Part A (census + imports + writer pin) executes NOW. Part B (vendor-window
 probes) executes LATE (~09:00–10:30Z) or FOLDS into today's first scheduled fire as the oracle (CTO
 risk-frame 20260814T044742Z). TIME-CRITICAL: TO-1/2/3 applies must land before 09:45Z (05:45 ET) for

@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-07-07</date>
-    <status>pending</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "NFRA_SCTY_PREMCP" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending</status>
     <dispatch_state>WRITTEN-NOT-DISPATCHED (wind-down 2026-07-07; Andrew directed decomposition materialized before device reboot; dispatch on restart per the allocation-map in the session handoff /log)</dispatch_state>
     <gate_note>CTO-DEFERRED until P1-phase-1 (L2-403) closes. Sequences after the L2-403 human-OAuth gate.</gate_note>
   </metadata>

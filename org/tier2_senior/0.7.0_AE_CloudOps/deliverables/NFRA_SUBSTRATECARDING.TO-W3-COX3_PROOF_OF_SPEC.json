@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SUBSTRATECARDING.TO-W3-COX3",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "assignee": "0.7.0_AE_CloudOps~X",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-substratecarding-w3/DECOMP.md",
+    "vintage_commit": "e48a7466ba",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_SUBSTRATECARDING.TO-W3-COX3.md"
+  },
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_SUBSTRATECARDING.TO-W3-COX3.md",
+    "group": "W",
+    "vintage_commit": "e48a7466ba"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D11_CARDS_W3/cse_store__PATH_A_append.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A substrate card is a governance artifact, not a deployable. Nothing was deployed and nothing was intended to be: COX3-AC8 requires ZERO commits by this lane touching a module it cards, and infra/aws/globgrph is read-only to this lane. The delivered state is COMMITTED and that is the terminal state for this artifact class."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D11_CARDS_W3/cse_store__PATH_B_drop.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A substrate card is a governance artifact, not a deployable. Nothing was deployed and nothing was intended to be: COX3-AC8 requires ZERO commits by this lane touching a module it cards, and infra/aws/globgrph is read-only to this lane. The delivered state is COMMITTED and that is the terminal state for this artifact class."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D11_CARDS_W3/resource_summaries_store.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A substrate card is a governance artifact, not a deployable. Nothing was deployed and nothing was intended to be: COX3-AC8 requires ZERO commits by this lane touching a module it cards, and infra/aws/globgrph is read-only to this lane. The delivered state is COMMITTED and that is the terminal state for this artifact class."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D11_CARDS_W3/snap_store.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A substrate card is a governance artifact, not a deployable. Nothing was deployed and nothing was intended to be: COX3-AC8 requires ZERO commits by this lane touching a module it cards, and infra/aws/globgrph is read-only to this lane. The delivered state is COMMITTED and that is the terminal state for this artifact class."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "COX3-AC1",
+      "criterion_verbatim": "4 cards exist and all VALIDATE against the v2 contract. Every row carries basis + evidence + owner.",
+      "method": "schema_validation",
+      "invocation": "jsonschema.Draft7Validator(org/standards/SUBSTRATE_CARD.v2.schema.json) over each of the 4 cards, plus a MUTANT CONTROL that sets basis=measured over an inferred sub-claim.",
+      "output_evidence": "4 of 4 VALID. MUTANT CONTROL REJECTED -- the validator fires, so the 4 passes are not a vacuous green. The floor rule was applied MECHANICALLY by the generator (basis = MIN over basis_by_field) and it DEMOTED 5 of 28 rows I had authored as measured: PATH_A.trust.failure_mode, resource_summaries.process.cadence, resource_summaries.trust.failure_mode, snap_store.process.cadence, snap_store.trust.failure_mode. Every non-measured basis in the delivered set came from the contract, not from me choosing a weaker word.",
+      "denominator": "28 of 28 cells (4 cards x 7 rows); 4 of 4 cards validated; 1 mutant control",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COX3-AC2",
+      "criterion_verbatim": "as_of carries ONE wave pin: commit_ish and graph_vintage byte-identical across the cards. carded_utc is an HONEST clock read at a DECLARED grain, never estimated, never copied.",
+      "method": "diff",
+      "invocation": "json.dumps(as_of, sort_keys=True) over all 4 cards, counting DISTINCT blocks; carded_utc from `date -u` in-session.",
+      "output_evidence": "1 distinct as_of block across 4 cards -- BYTE-IDENTICAL. commit_ish=76c58923ac. carded_utc=2026-08-27T06:07:00Z at a DECLARED PER-BATCH GRAIN (one clock read for the batch, stated here rather than implied per-card). graph_vintage is UNREAD and says so verbatim: comp-kuzu did not return within 120s and my own invocation was reaped. I did NOT copy wave 2's kuzu_nessie_db@2902399899597701830 -- that is exactly the stale-pin defect I filed against my own W2 instance, and an unread value declared as unread is worth more than a stale value that validates.",
+      "denominator": "4 of 4 cards compared; 1 distinct block",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COX3-AC3",
+      "criterion_verbatim": "WHERE IS THE TABLE NAME BOUND -- every card states CLASS 1/2/3 with the line that binds it, and whether the bound set is ENUMERABLE. A class without a line number is not an answer.",
+      "method": "manual_read_with_citation",
+      "invocation": "Direct read of each argparse site and each catalog call at @76c58923ac, with a NEGATIVE CONTROL across the class predicate (choices= present vs absent).",
+      "output_evidence": "4 of 4 carry class + binding LINE + enumerability. PATH_A: CLASS 3 at cse_store.py:581 (--table, no choices=), default bound one hop out at :86 and resolved to 'cse' at org/modules/graph/cse_schema.py:595 -- NOT ENUMERABLE. PATH_B: same :581 arg reached via :579/:594-596 -- NOT ENUMERABLE except the fail-closed :350-352 guard. resource_summaries_store: CLASS 3 at :349, module-literal default at :57 -- NOT ENUMERABLE. snap_store: CLASS 2 at :415 choices=sorted(SURFACES) with a second gate at :146 -- ENUMERABLE, 4 of 4. CONTROL FIRES: the predicate separates snap_store (choices=1) from the other two (choices=0), so it is discriminating rather than uniform.",
+      "denominator": "4 of 4 subjects; SURFACES keys AST-measured at 4 (a regex over the same dict text returns 8)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COX3-AC4",
+      "criterion_verbatim": "WHAT IT WRITES -- a resolvable path or table name, never a description.",
+      "method": "manual_read_with_citation",
+      "invocation": "Resolve table_id at each write site.",
+      "output_evidence": "4 of 4 name resolvable Iceberg tables, not descriptions. PATH_A -> globgrph.<args.table> default globgrph.cse (table_id=(NAMESPACE,table) at :326, NAMESPACE='globgrph' at :85). PATH_B -> acts on globgrph.<args.table>, deliberately without a default because the default is REFUSED by the guard. resource_summaries_store -> globgrph.resource_summaries (:190). snap_store -> FOUR named tables, globgrph.{ms_heat_snap, code_heat_snap, fedobs_coverage_snap, fedobs_coevolution_snap} via table_id=(NAMESPACE, surface) at :222 -- note the surface keys already END in _snap, so the table name is the key verbatim and NOT surface+'_snap', which a description-level answer would have got wrong.",
+      "denominator": "4 of 4 subjects; 7 distinct table names resolved",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COX3-AC5",
+      "criterion_verbatim": "TRIGGER -- plane plus BASIS. An ECS rule target resolves to a CLUSTER, not a script: any 'X is triggered by Y' is INFERRED unless read from the task definition's container command.",
+      "method": "live_read",
+      "invocation": "aws events list-rules + aws scheduler list-schedules, both counted CLIENT-SIDE; then aws ecs describe-task-definition to read container commands.",
+      "output_evidence": "TWO PLANES SWEPT: events=137, scheduler=18, both client-side counted -- `--query length(Rules)` returned 100 THEN 37, the per-page counts, exactly the Rule 22a pagination trap. The cse trigger exists ONLY on the Scheduler plane, so an events-only sweep returns a true, correctly-controlled answer about the wrong population. PATH_A: no trigger of its own; invoked as a LIBRARY by cse_producers_nightly.py:164,:209,:269 and cse_emit_graphhead.py:218; cse_producers_nightly IS triggered by globgrph-cse-producer-nightly, ENABLED, cron(30 3 * * ? *), target arn ...cluster/opal-globgrph -- which per AC5 would be INFERRED, so I read task definition globgrph-cse-producer:1 -> command ['python','/app/cse_producers_nightly.py']. MEASURED at the container command. PATH_B: none-found, sole caller is its own :595. resource_summaries_store: a task definition EXISTS naming it with its write flag (globgrph-resource-summaries-producer -> ['python','/app/resource_summaries_store.py','--build-append']) but NO trigger reaching that definition was found -- state recorded as DEFINED-AND-INVOCABLE, TRIGGER NOT ESTABLISHED. snap_store: none-found on both planes.",
+      "denominator": "events 137 + scheduler 18 = 155 trigger objects; 7 of 7 ACTIVE ECS families read; scheduler plane 18 of 18 resolved to Target.EcsParameters.TaskDefinitionArn; events plane 5 of 137 resolved -- 132 DECLARED UNSWEPT",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COX3-AC6",
+      "criterion_verbatim": "RULE 26 device/apply owner, and RULE 25 dormancy. Rule 26 is NOT a class constant.",
+      "method": "command",
+      "invocation": "git log -1 per subject for the code-freshness proxy; owner assigned per row, not per card.",
+      "output_evidence": "Rule 25: all four subjects are FRESH against the 90d threshold -- cse_store 48d, resource_summaries_store 39d, snap_store 41d. GRAIN DECLARED: this is LAST COMMIT TO THE CODE, which is a proxy and NOT last-run. I attempted the stronger signal and DISCARDED IT: aws ecs list-tasks --desired-status STOPPED returned 0 for the resource-summaries family AND 0 for the known-nightly globgrph-cse-producer, so the POSITIVE CONTROL DID NOT FIRE and the instrument is blind (ECS retains stopped tasks ~1h). A zero from a blind instrument is not evidence of never having run, and I am not recording it as one. Rule 26: owners are assigned PER ROW and are NOT uniform across the four cards -- the cse rows carry 1.0.0_SA_CTO for the C0 contract while the trigger and coverage rows carry 0.7.0_AE_CloudOps.",
+      "denominator": "3 files aged (cse_store covers both PATH A and PATH B); 28 of 28 rows carry an owner",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COX3-AC7",
+      "criterion_verbatim": "DISCOVERABILITY IS NOT COVERAGE. No card asserts completeness of the writer population. If your subject can write tables it does not name, say the bound is UNBOUNDED.",
+      "method": "manual_read_with_citation",
+      "invocation": "Each trust.coverage row states its universe, its denominator and whether the bound is enumerable.",
+      "output_evidence": "4 of 4 assert NO completeness of the writer population. THREE declare the bound UNBOUNDED: PATH_A (:581 accepts any string, :338 create_table CREATES it), PATH_B (unbounded EXCEPT globgrph.cse, refused at :350-352 -- stated with the exception because 'unbounded' and 'unbounded except its own table' are different safety stories), resource_summaries_store (:349 + :202). ONE is BOUNDED and enumerated: snap_store, 4 of 4, gated on both the CLI (:415) and the programmatic path (:146). ⛔ AC7 IS RECORDED AS BINDING EVEN ON THE BOUNDED CARD: snap_store's card asserts what THAT MODULE can write and asserts nothing about the estate's writer population.",
+      "denominator": "4 of 4 coverage rows; 3 UNBOUNDED, 1 BOUNDED at 4 of 4",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COX3-AC8",
+      "criterion_verbatim": "QUALIFY-DO-NOT-FIX. Zero commits by this lane touching a module it cards. The Class-3 remedy (choices=, already written at snap_store.py:415) is NAMED, NOT APPLIED.",
+      "method": "diff",
+      "invocation": "git diff --name-only over the session commit, checked against the four carded module paths.",
+      "output_evidence": "ZERO commits by this lane touch infra/aws/globgrph/. All four carded modules are READ-ONLY to this lane and were read only. The Class-3 remedy is NAMED on the resource_summaries_store card and in the cse_store PATH_A card -- 'choices= on two argparse lines, already written by the estate at snap_store.py:415' -- and is NOT applied. I also declined to act on the two measured properties of PATH_B (--dry-run does not gate the drop branch; the guard is keyed to the module's own table rather than to namespace membership): both are recorded as MEASURED PROPERTIES on the card face, neither is a defect claim and neither is remediated.",
+      "denominator": "4 of 4 carded modules untouched; 0 commits into infra/aws/globgrph/",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "method": "schema_validation",
+      "expected": "REJECTED -- the validator must refuse a card whose basis over-promises its weakest sub-claim",
+      "observed": "REJECTED. Two further mutants fired unplanned: the v2 enum refused authority_role='system-of-record' and mutation_policy='append-only'/'destructive', and the floor rule demoted 5 of 28 rows.",
+      "status": "FIRED-AS-EXPECTED",
+      "description": "A card with basis='measured' set over an 'inferred' sub-claim was submitted to the same Draft7 validator used for the PASS: REJECTED. The 4-of-4 VALID is therefore capable of failing. TWO further mutants arose unplanned and both fired against me: (1) the v2 enum rejected my authority_role='system-of-record' and mutation_policy='append-only'/'destructive' -- the last of which has NO legal destructive member at all, recorded as a floor-fit with the mismatch declared; (2) the FLOOR RULE demoted 5 of 28 rows I had authored as measured."
+    },
+    "determinism": {
+      "method": "command",
+      "expected": "a re-run of the generator reproduces all 4 cards byte-for-byte",
+      "observed": "re-run reproduced 4 of 4 cards and re-applied the floor rule to the same 5 rows",
+      "status": "STABLE",
+      "description": "The cards are emitted by a generator, not hand-authored, so a re-run reproduces them byte-for-byte and the floor rule cannot be applied inconsistently by hand. Every figure in this instance is recomputed from the delivered cards rather than transcribed from my own prose -- the wave-2 remedy for a typed number sitting beside a derived one."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "graph_vintage for this wave",
+      "reason": "comp-kuzu did not return within 120s; my own invocation was reaped as an orphan (child survived the parent at ppid=1, kill -9, 0 remaining, ps control 41 rows). Declared UNREAD rather than copied from wave 2."
+    },
+    {
+      "item": "132 of 137 EventBridge rules, unresolved to their ECS targets",
+      "reason": "The full per-rule sweep timed out at 120s. The Scheduler plane IS fully swept (18 of 18). actual_trigger is INFERRED on two cards for exactly this reason. An early stop and a true absence read identically, so the extent is printed rather than the conclusion."
+    },
+    {
+      "item": "ECS run history as a dormancy oracle",
+      "reason": "DISCARDED because its positive control did not fire -- list-tasks STOPPED returns 0 for the known-nightly cse-producer too. A blind instrument's zero is not a measurement."
+    },
+    {
+      "item": "exercise of any failure path",
+      "reason": "Every failure path on these four subjects ends in a write, and infra/aws/globgrph is read-only to this lane under COX3-AC8. returns_on_failure and silent_degrade_paths are marked inferred where they rest on control-flow reading rather than exercise."
+    }
+  ],
+  "surprises": [
+    "BLOCKING (74773, filed 3 minutes after dispatch, disarmed same-turn by naming the issuer, lane never held): cse_store.py has TWO write paths differing in mechanism and authority -- PATH A append (:386) and PATH B drop (:353) -- and no single card can carry both. UPHELD and executed @76c58923ac; COX3 went 3 subjects/21 cells -> 4/28. ⛔ I NEARLY OVERSTATED IT: from the main() dispatch alone PATH B reads as unbounded AND ungated; reading the FUNCTION found the fail-closed guard at :350-352. The dispatch and the function disagreed about severity and the dispatch is the one a control-flow sweep reads.",
+    "BLOCKING (74813), FILED AND RESOLVED BY THE ISSUER BEFORE THIS INSTANCE LANDED: this TO pinned a decomp vintage at which 14 of its own 28 declared cells did not exist (nhvy-*, xpxc-*, minted by the cse_store re-decomp). Measured with a firing positive control. 2.0.0_SA_COO~X upheld it @c02a43ae87 and found the root is STRUCTURAL, not a slip: cut_tos.py derived the pin from `git rev-parse HEAD` at emit time, which necessarily precedes the decomp commit, so a TO could never pin its own decomp by construction. All four TOs are repinned @e48a7466ba. ⛔ THIS INSTANCE THEREFORE MIRRORS THE REGENERATED PIN AND CARRIES NO DELTA -- per 3.0.0_SA_CVO~X 74826, if the issuer regenerates before the instance lands, mirror it and the delta disappears. Containment re-measured at the new pin: aonv-1, cayu-4, nhvy-1, xpxc-7 all resolve; NEGATIVE CONTROL W3-goay-1 = 0; file readable. The durable half is the issuer's: the cell list was DERIVED and the pin was TRANSCRIBED, and deriving a value from the wrong question makes it consistently wrong rather than right.",
+    "OBSERVATION-INERT: the v2 contract's mutation_policy enum [editable, append_only, replaceable, immutable, not_applicable] has NO DESTRUCTIVE MEMBER, and PATH B drops a table. Recorded as 'replaceable' -- a FLOOR-FIT, not an accurate value -- with the mismatch declared on the card's own face. Note the contract's own asymmetry: authority_role carries x-enum-definitions AND an x-rule24 block; mutation_policy carries neither, and the un-disciplined enum is the one with the uncovered member (Rule 24 postulate (i)). NOT amended by this lane.",
+    "OBSERVATION-INERT, a near-miss recorded because the shape transfers: I nearly filed a second BLOCKING falsifying the issuer's 'ids MOVED NONE' claim, having compared the DECOMP at HEAD against the TO text I had read 20 minutes earlier. Re-reading the TO at HEAD before sending showed it had been regenerated correctly. MY COPY WAS STALE WHILE THE ARTIFACT WAS FRESH -- the inverse of the staleness class this wave has catalogued, and a cross-vintage comparison manufactures a discrepancy that exists only in the reader."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-27/ (written at session close, with a mandatory Compiler Tools section)",
+  "compiler_tools": [
+    {
+      "tool": "comp-kuzu",
+      "invocation": "MATCH (n) RETURN count(n) -- attempted, to read the wave graph_vintage",
+      "result": "⛔ DID NOT RETURN within 120s. My own invocation was then found holding a lock directory and was reaped: the parent died and the CHILD SURVIVED at ppid=1 (the orphan shape), cleared with kill -9, 0 remaining against a ps control of 41 rows, lock gone with no residue. graph_vintage is recorded UNREAD rather than copied from wave 2. I also nearly routed a false alarm to another lane from this: the lock's mtime sat ~1 minute after my own call and I read temporal adjacency as an independent rebuild."
+    },
+    {
+      "tool": "aws events list-rules / aws scheduler list-schedules",
+      "invocation": "two-plane trigger sweep",
+      "result": "events=137, scheduler=18, both counted CLIENT-SIDE. `--query length(Rules)` returned 100 THEN 37 -- the per-page counts, the Rule 22a pagination trap, caught because two numbers appeared where one was expected. The cse trigger exists ONLY on the scheduler plane."
+    },
+    {
+      "tool": "aws ecs describe-task-definition",
+      "invocation": "container-command read across 7 ACTIVE families",
+      "result": "⛔ THE POSITIVE CONTROL CAUGHT TWO BROKEN SWEEPS OF MINE before either reached a card: my first loop printed only globgrph-trino (a multi-line shell command swallowed the rest) and my second returned blank for 6 of 7 families. The control -- describe-task-definition on globgrph-cse-producer -> 'python /app/cse_producers_nightly.py' -- proved both were instrument failures, not absences. The working form then found globgrph-resource-summaries-producer -> 'python /app/resource_summaries_store.py --build-append', which my broken sweep had reported as NONE."
+    },
+    {
+      "tool": "python ast",
+      "invocation": "AST parse of snap_store.SURFACES",
+      "result": "4 top-level keys. Used deliberately instead of a regex over the dict text, which the TO's own trap list records as returning 8 by catching nested payload keys."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "gate on this instance",
+      "result": "see acceptance rows; rc read DIRECTLY and not through a pipe -- a `| tail` swallowed the checker's rc and returned tail's 0 on my first run, the FOURTH instance of that trap across this session."
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.8.0_AE_CloudComp~B</issued_to>
 <date>2026-07-23</date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_TOOLBHVR is complete; this TO was last touched 2026-07-23, predating the project close 2026-07-29. Closed as a record act, not a work verdict. Prior status: staged</status>
 <priority>P1 — Andrew-direct; a persistent anti-pattern that causes mis-scoped TOs with incomplete data (the MDPF key scramble tonight)</priority>
 
 <authority>

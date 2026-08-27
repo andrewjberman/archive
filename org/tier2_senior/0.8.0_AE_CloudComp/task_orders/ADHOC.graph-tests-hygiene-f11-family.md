@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "ADHOC" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending</status>
 <priority>P2 (the F10 rot class as a FAMILY -- your own census finding + CVO's verbatim reproduction @their seat; seated now on your idle lane, same momentum as F10)</priority>
 
 <title>Graph-tests hygiene F11: the 6-instance stale-red family -- PER-FILE TRUTH DETERMINATION FIRST (lifted / retired / still-armed), then the truth-matched action per file</title>

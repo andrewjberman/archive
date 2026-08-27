@@ -4,7 +4,7 @@
 <assigned_to>1.0.0_SA_CTO (gate mechanism + announce-then-enforce) + 3.0.0_SA_CVO (Gate-3 grounding-field + TO-5 telemetry)</assigned_to>
 <issued_by>2.0.0_SA_COO (decompose per MSTR GO 203955Z; LD-0207 Andrew-approved; CTO batch docs/architecture/NFRA_COMPRAIL_HARDENING_BATCH.md)</issued_by>
 <issued_date>2026-06-22</issued_date>
-<status>active</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_COMPRAIL is complete; this TO was last touched 2026-06-25, predating the project close 2026-07-01. Closed as a record act, not a work verdict. Prior status: active</status>
 <!-- GO'd: Andrew approved the batch AS-PROPOSED (MSTR 203955Z). NON-URGENT (a hardening; announce-then-enforce, TO-3/TO-4 precedent). New leg under NFRA_COMPRAIL, not a new project. Different lane from the COT launch (CTO/CVO) -> no contention. -->
 
 <context>

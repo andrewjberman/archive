@@ -6,7 +6,7 @@
 <arch_gate>1.0.0_SA_CTO (A1 feeds A2/A3; CTO arch-gates A3 + the parity-cutover)</arch_gate>
 <issued_by>2.0.0_SA_COO (Andrew-direct via CTO 163929Z; PRD docs/architecture/DATA_ANALYTICS_PRD.md; sibling of DATA_PLATFORM)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>active</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project DATA_ANALYTICS, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: active</status>
 <!-- CAN-START-NOW: analyzes the EXISTING gold trees, NO DATA_PLATFORM-ingest dependency -- the foundational + highest-value first step. Paces alongside DATA_PLATFORM (cheap-to-start, immediately-valuable). DS freed (reverse-ETL prize closed -> A1 the next high-value DS-unit). -->
 
 <objective>

@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-07-09</date>
-    <status>staged</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_TERRAFORM, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
     <dispatch_state>DISPATCHED + GO 2026-07-09 (Andrew NFRA-first). Executes UNDER the CTO-ARCH-GATED remediation-safety model (infra/aws/NFRA_TERRAFORM_P2_remediation_safety_model.md, 603750209 + c70aeb817 clarification -- CTO arch-gate PASS stands). 0.5.0 owns it end-to-end (did P1 7b4c484fe + P1.5 6ca51a1c0; has the full grounding + wrote the safety model). LIVE-verified reachable (17 work-calls this tick).</dispatch_state>
     <gate_note>THE HIGHEST-RISK PHASE. safe-apply(HALTGT) for EVERY apply; deploy-completion ledger for each multi-step batch; CTO arch-gates each remediation BATCH; CVO certs 0-diff APPLIED==DESIRED (Rule 22a, EXERCISED not config-read).</gate_note>
   </metadata>

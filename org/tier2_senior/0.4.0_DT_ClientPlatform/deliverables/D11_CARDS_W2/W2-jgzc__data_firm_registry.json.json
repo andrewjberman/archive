@@ -1,0 +1,116 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.4.0_DT_ClientPlatform~X",
+  "subject": {
+    "id": "data/firm_registry.json",
+    "kind": "store",
+    "declared_domain": "the governed firm population source -- the file D3's obligation_types.completeness names as its population, reached via intent_source"
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T23:15:00Z",
+    "commit_ish": "100e7ea130",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "basis": "measured",
+      "evidence": "Parsed at HEAD: {_meta, firms, pseudo}. _meta self-declares canonical_path data/firm_registry.json, schema_version 1, authority 'NFRA_PSTMRT P1 (Andrew-direct handover @7cc6376e5)' and carries its own `law` block. Hand-authored, git-reviewed.",
+      "owner": "1.0.0_SA_CTO~Z (last author @1f54e16dfd, 2026-07-22T21:06:56-04:00)",
+      "how": "A hand-authored firm registry. Each firm carries firm_id, tree_token, display_name, aliases, kind, enabled, bucket and email_domain. COMPOSES nothing mechanically; INVENTS the firm_id and tree_token vocabularies.",
+      "determinism": "deterministic",
+      "composes": [],
+      "invents": [
+        {
+          "id": "firm_id_vocabulary",
+          "note": null
+        },
+        {
+          "id": "tree_token_vocabulary",
+          "note": "bd / inf / cot"
+        }
+      ],
+      "materializer_standing": "not_applicable",
+      "declared_opinions": [
+        "which firms are `enabled` -- an editorial flag, not a derivation",
+        "the alias sets, hand-listed and uneven across firms",
+        "the split between `firms` and `pseudo`"
+      ]
+    },
+    "cadence": {
+      "basis": "measured",
+      "evidence": "No scheduled producer; changed by human commit, last 2026-07-22 @1f54e16dfd, 35 days before carding. No rhythm is declared, so there is nothing for a live instance to match.",
+      "owner": "1.0.0_SA_CTO~Z",
+      "declared_rhythm": null,
+      "actual_trigger": "a human commit",
+      "live_matches_declared": "not_applicable",
+      "live_instance_age": "35 days at carding"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "basis": "measured",
+      "evidence": "5,094 bytes on disk, git-TRACKED (@1f54e16dfd resolves).",
+      "owner": "1.0.0_SA_CTO~Z",
+      "persisted": true,
+      "authority_role": "source",
+      "mutation_policy": "editable",
+      "form": "json"
+    },
+    "location": {
+      "basis": "measured",
+      "evidence": "Path read directly at HEAD; _meta.canonical_path independently self-declares the same path, so the file and the census agree on its own home.",
+      "owner": "1.0.0_SA_CTO~Z",
+      "home": "data/firm_registry.json",
+      "projection_of": [],
+      "co_resident_stores": [
+        {
+          "id": "comp-keys_exists_firm_scope",
+          "note": "comp-keys exists declares its firm scope as this file's enabled+pipeline set"
+        }
+      ]
+    }
+  },
+  "trust": {
+    "coverage": {
+      "basis": "measured",
+      "evidence": "COUNTED from the parsed file: 5 firms, enabled=true on 5 of 5 and enabled=false on 0; plus 1 pseudo entry. tree_token populated on 3 of 5 (bd, inf, cot) and NULL on 2 of 5 (mockadv, demo). Aliases uneven: 3 for 49financial, 0 for the other four.",
+      "owner": "1.0.0_SA_CTO~Z",
+      "universe": "firms this estate serves or simulates",
+      "denominator": "5 of 5 firms enabled; 3 of 5 carry a tree_token; 1 pseudo entry alongside",
+      "explicitly_out": [
+        "any firm not hand-added -- the registry cannot discover a firm"
+      ]
+    },
+    "key": {
+      "basis": "inferred",
+      "evidence": "firm_id is the key: 49financial, inflection, cottonwood, mockadv, demo. ⛔ CROSSES SPACES AND THE CROSSING IS PARTIAL: tree_token (bd/inf/cot) is a SECOND id space for the same firms, used in bucket and pipeline paths, and it is NULL for 2 of the 5. So a firm_id -> tree_token join succeeds for 3 and returns null for 2, with nothing declaring whether a null means 'no pipeline' or 'not yet assigned'. The mapping is declared IN-FILE per entry, which is better than most stores here -- it is its INCOMPLETENESS that is undeclared.",
+      "owner": "1.0.0_SA_CTO~Z",
+      "identity_space": "firm_id string; a second, partial space is tree_token",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "firm_id -> tree_token, declared in-file per entry, NULL on 2 of 5",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured",
+        "key_is_stable": "inferred"
+      }
+    },
+    "failure_mode": {
+      "basis": "measured",
+      "evidence": "EXERCISED, three arms in one run against a dict built on firm_id: .get('zzz_not_a_firm') returns SILENT None; ['zzz'] raises KeyError; the control .get('49financial') returns a 14-key dict. ⛔ SO DISTINGUISHABILITY IS A PROPERTY OF THE CONSUMER'S ACCESS PATTERN, NOT OF THIS STORE. A .get() consumer receives None and cannot separate a missing firm from a typo; a [] consumer gets a loud KeyError. The store offers both and mandates neither, so its failure mode is decided elsewhere.",
+      "owner": "1.0.0_SA_CTO~Z",
+      "returns_on_failure": "None via .get() (silent) or KeyError via [] (loud) -- the consumer chooses",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "a .get()-based consumer converts an unknown firm into an absent one",
+        "a null tree_token is indistinguishable from a firm with no pipeline"
+      ]
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "Small, owned, git-reviewed, self-declaring its own authority and canonical path, with a stable key -- the strongest provenance of the stores this lane carded. QUALIFIED on two measured axes: the firm_id -> tree_token crossing is NULL on 2 of 5 with no declared meaning for the null, and the failure mode is chosen by the consumer rather than the store, so a .get() caller silently turns an unknown firm into an absent one.",
+    "blocking_defects": null
+  }
+}

@@ -5,7 +5,7 @@
 <consult>3.0.0_SA_CVO (P3-1 catalog author -- the exemplar anchors); 1.0.0_SA_CTO (empirical-gate wording refinement, offered section-9)</consult>
 <issued_by>2.0.0_SA_COO (CTO PRD section-9 handoff 151724Z; 2b61ac87e)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_TSGRAPH is complete; this TO was last touched 2026-06-18, predating the project close 2026-07-07. Closed as a record act, not a work verdict. Prior status: staged</status>
 <priority>HIGH -- GATED on P3-1 (detectors anchor on the catalog's frontend partition + exemplars). The empirical-validation gate is the defining bar.</priority>
 
 <gate>P3-1 <status>complete</status> (catalog frontend partition + per-class exemplar incidents delivered). COO GOes after P3-1 RAVC2.</gate>

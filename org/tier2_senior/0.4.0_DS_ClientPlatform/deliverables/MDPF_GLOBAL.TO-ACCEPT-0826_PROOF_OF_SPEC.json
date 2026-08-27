@@ -1,0 +1,126 @@
+{
+ "schema_version": "1.0",
+ "to_id": "MDPF_GLOBAL.TO-ACCEPT-0826",
+ "firm": "MDPF",
+ "phase": "NON-BUILD-OTHER",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/MDPF_GLOBAL.TO-ACCEPT-0826.scheduled-floor-production-acceptance.md",
+  "group": "OTHER",
+  "vintage_commit": "e70ffcc562"
+ },
+ "assignee": "1.0.0_SA_CTO (executed; re-seated by 2.0.0_SA_COO 72150 after 0.7.0_AE_CloudOps~G died pre-window; original seating DS-class open call, amended by issuer 72117). Independent second read: 3.0.0_SA_CVO 72183, separate record.",
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-data-portal-v2/platinum/mdpf/{global,49financial,inflection,cottonwood}/aggregate-aua-timeseries.json (READ ONLY -- this TO changes nothing)",
+   "kind": "s3_object",
+   "commit_or_etag": "pre VersionIds: global Rn1pXXtK69G4RJACa4vW / 49f YrCAeYcvt6d_b6QxLNeX / inf 2Db1oWVvlrLR861Eh4ri / cot jjjpVT2OEqp2hUU87MsG; post: global VUYjKsAFuLjzaaar36lP / 49f XAab8QmupPnmftGT_Bt1 / inf kQ72n.KzE5C94GQgRAkE / cot Occro8IxgrTWYbmyceZG",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Nothing deployed by this TO. The artifact set is the EVIDENCE pair: full pre-state captured 13:28:0xZ (byte-exact to 0.7.0_AE_CloudOps~G's 12:59:11Z capture: 304918/134728/98756/116889 B, s3api LastModified all 2026-08-25T19:46:03-04Z UTC), full post-state captured 13:57:2xZ (post LastModified 13:50:48-51Z). Bucket versioning Status=Enabled (verified 13:28Z) makes both states independently recoverable by VersionId."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "ACC0826-AC1",
+   "criterion_verbatim": "served global `as_of_last` advanced by the SCHEDULED chain (PASS condition: 2026-08-25 or later)",
+   "method": "diff",
+   "invocation": "Full-payload leaf-field diff, pre (13:28Z capture) vs post (13:57Z capture), own differ accept_diff.py, self-tested both arms before use (identical input -> 0 deltas; failing pre-state -> checks read FAIL).",
+   "output_evidence": "FAIL. global as_of_last 2026-08-24 -> 2026-08-24 (HELD). Of 20,286 leaf fields, exactly 1 changed: _provenance.written_at 2026-08-25T19:46:02Z -> 2026-08-26T13:50:49Z. A republish that did not advance -- the exact looks-most-like-success case pre-registered by 3.0.0_SA_CVO 72132. CAUSE (diagnosed, not inferred): the 13:30:37Z scheduled gold run FAILED the cottonwood scope -- ValueError: no canonical by_model key for Cottonwood model 'Opal Fixed Income' (build_cottonwood_mdpf_slice.py:990 via mdpf_gold_consolidator.py:718) -- and global then refused its fold: SystemExit 'global fold SKIPPED: contributing leg(s) [cottonwood] failed this cycle -- the ruled composition (I-1 leg pins) requires them' (mdpf_gold_consolidator.py:831). Both from CloudWatch /aws/lambda/mdpf-gold-lambda stream 2026/08/26/[$LATEST]c6ef6a43e84b4865a3f47a3f47125060 (request 996a8eea-5808-444e-a408-85bb3b1fad7a) and the run's own manifest s3://opal-data-assets/portal/gold/mdpf/_manifests/2026-08-25/20260826T133106Z.json (a4_objects_built 6 of a4_expected 12, errors={cottonwood, global}). SCHEDULED-VS-AD-HOC CONTRAST (the diagnosis Andrew asked for): yesterday's ad-hoc runs (19:42-19:45Z, post-fix) show cottonwood by_model keys [Short Term, Intermediate Term, Ultra-Short Term, Ultra-Long Term, Long Term] -- NO 'Opal Fixed Income' -- and built 12/12 errors=none. The model entered the upstream data at the 2026-08-25 vintage. Same deployed bytes (CodeSha256 UVT5XRX3R2O3zsr+g2QTPrD2DDYlQilSP+IfmjD2mIc= unmoved 2026-08-25T19:38:55Z through the fire, verified 13:32Z) fired ad-hoc today would fail identically. THE SCHEDULED PATH IS EXONERATED; the blocker is a data-shape change refused by a correctly-firing guard. NOT the outage-recurrence class and NOT the 'deployed fix works / scheduled path does not' class the TO pre-named -- a third case the TO's outcome table did not enumerate.",
+   "denominator": "20,286 leaf fields (pre) / 20,286 (post); 1 changed, 0 added, 0 removed. Gold cycle: 6 of 12 A4 objects. Cottonwood leaf-count instrument delta vs CVO's differ named below (controls).",
+   "status": "FAIL",
+   "status_reason": "Scheduled gold FAILED the cottonwood scope on a new upstream model ('Opal Fixed Income', no canonical by_model key -- guard refused auto-slug) and global's fold correctly refused with a leg missing; no 2026-08-25 global gold partition exists, so the publisher republished the 2026-08-24 payload. Scheduled path exonerated by ad-hoc contrast (yesterday's inputs carried 5 by_model keys, built 12/12); blocker is a data-shape change under a correctly-firing guard. Remedy owned under D8/MDPF_COTREMEDIATION (reviewed edit, routed to 0.6.2_AE_PartnerETL~A)."
+  },
+  {
+   "criterion_id": "ACC0826-AC2",
+   "criterion_verbatim": "served global `_provenance.source_keys` names a 2026-08-25-or-later gold partition",
+   "method": "diff",
+   "invocation": "Same leaf diff; source_keys read from post-state payload.",
+   "output_evidence": "FAIL. source_keys post = ['s3://opal-data-assets/portal/gold/mdpf/global/aggregate-aua-timeseries/2026-08-24.json'] -- unchanged from pre. Consistent with AC1's cause: gold wrote no 2026-08-25 global partition (newest global gold partition remains 2026-08-24.json, written 2026-08-25T19:44:22Z by the ad-hoc restore; s3api list read 13:49:24Z).",
+   "denominator": "1 source_keys entry; gold partition listing read over the full aggregate-aua-timeseries prefix per scope.",
+   "status": "FAIL",
+   "status_reason": "Same cause as AC1: gold wrote no 2026-08-25 global partition, so source_keys necessarily still names 2026-08-24. Not an independent defect."
+  },
+  {
+   "criterion_id": "ACC0826-AC3",
+   "criterion_verbatim": "49financial / inflection / cottonwood move ONLY `_provenance.written_at` (leaf-field diff, denominators printed)",
+   "method": "diff",
+   "invocation": "Same leaf diff, per partner scope.",
+   "output_evidence": "MEASURED: cottonwood satisfies the letter (11,919 leaves, exactly 1 changed = written_at). 49financial and inflection DO NOT: both advanced as_of_last 2026-08-24 -> 2026-08-25 with a COHERENT daily-advance signature (49f: 29 changed + 27 added of 12,337, n_dates 452->453, source_keys -> 2026-08-25 partition; inf: 20 changed + 30 added of 12,405, n_dates 452->453, source_keys -> 2026-08-25 partition; every added path is the new [452] date element per by_model series; written_at advanced on both). This FAILS the criterion AS WRITTEN, and the TO maps that outcome to 'a regression in the repair -- escalate loud'. THE MEASURED CONTENT DOES NOT SUPPORT THAT MAPPING: the movement is the scheduled chain correctly carrying the two healthy scopes forward to the T-1 frontier (2026-08-25, a trading day) -- the very behavior CHECK 1 demands of global. The criterion's implicit premise (partner gold would not advance same-day) is falsified by today's run, not by a defect. One retro-restatement noted within the advance: inflection account_count_total[451] (2026-08-24 row) 548 -> 562 with per-model count shifts -- an upstream custody restatement carried by the rebuild, surfaced here for the issuer's read, not adjudicated. Interpretation routed to the ISSUER (2.0.0_SA_COO) as a spec-surprise per Rule 27; NOT escalated as a repair regression.",
+   "denominator": "49financial 12,310 pre / 12,337 post (29 changed + 27 added); inflection 12,375 pre / 12,405 post (20 changed + 30 added); cottonwood 11,919 pre / 11,919 post (1 changed). All three written_at advanced past 13:50Z.",
+   "status": "FAIL",
+   "status_reason": "Letter-of-criterion failure only on 49financial/inflection, whose movement is a COHERENT healthy T-1 advance (the behavior CHECK 1 demands of global) -- the criterion's premise that partner gold would not advance same-day is falsified by the run, not by a regression. Cottonwood satisfies the letter. Routed to issuer 2.0.0_SA_COO as spec-surprise; NOT escalated as repair regression."
+  },
+  {
+   "criterion_id": "ACC0826-AC4",
+   "criterion_verbatim": "the scheduled-vs-manual determination, WITH its instrument limitation stated (trigger.kind inadmissible; CloudTrail structurally blind to Lambda Invoke)",
+   "method": "live_read",
+   "invocation": "Time-of-day + absence-of-manual-invoke-report, per the TO's own instrument ruling. trigger.kind NOT used. CloudTrail NOT used.",
+   "output_evidence": "PASS (determination: SCHEDULED, with the limitation stated). Gold executed 13:30:37Z-13:31:06Z against cron(30 13 * * ? *); publisher wrote all four served keys 13:50:48-51Z against cron(50 13 * * ? *) -- both exactly on their marks (CloudWatch log timestamps; s3api LastModified). No seat reported a manual invoke in the 13:30-13:50Z window; the executing seat (this one), 3.0.0_SA_CVO (72156 s.5, 72183 s.6), 0.7.0_AE_CloudOps~G (72140, pre-death) and 0.5.0_AE_OpalETL~B (72138) each affirmatively committed to non-invocation on the record. LIMITATION, stated as the TO requires: the estate has NO sound instrument for scheduled-vs-manual; this determination rests on TIME plus the absence of a human invoke report, which is the strongest available read, not a proof. Additionally the 12:56Z-13:50Z window pre/post states were captured by three seats with zero disagreement, so the object lineage is fully accounted.",
+   "denominator": "2 scheduled legs, 2 cron marks, 4 non-invocation commitments on the record; 0 manual-invoke reports.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Differ failing-state control: the acceptance checks were run against the PRE-state as post (a state in which the claim 'global advanced' is FALSE) to prove the checks can fail.",
+   "expected": "CHECK 1 and CHECK 2 read FAIL on the failing state; identical-input arm reads 0 deltas on all four scopes.",
+   "observed": "Both arms fired as expected at 13:33Z: identical input -> 0 changed/added/removed x4; failing state -> CHECK 1 FAIL (as_of_last 2026-08-24), CHECK 2 FAIL (source_keys 2026-08-24). Positive data-movement control: the live post-state diff caught 49f/inf's 56/50 field movements while counting cottonwood/global at exactly 1 -- the instrument discriminates. Pre-state identity: three independent captures (AE~G 12:59:11Z byte counts, this seat 13:28Z full payloads + VersionIds, CVO's own GETs) agree exactly; NAMED instrument delta with CVO's differ (global 20,345 vs 20,286 leaves; cottonwood 11,960 vs 11,919) -- leaf-grammar difference between differs, verdict-irrelevant (both count exactly 1 changed leaf), recorded so two counts do not pose as one measurement.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "accept_diff.py re-run on the same pre/post captures (pure function of two on-disk states); cross-checked against 3.0.0_SA_CVO's independent differ on the same objects.",
+   "observed": "Same counts on re-run; CVO's independent instrument reaches the identical verdict split (2 PASS / 2 REPUBLISH-NO-ADVANCE) and the identical 1-changed-leaf reading for global/cottonwood.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Remediation of the cottonwood canonical-key gap ('Opal Fixed Income')",
+   "reason": "TO: report, change nothing. The guard's own message names the fix a REVIEWED EDIT in build_cottonwood_mdpf_slice.py; owned under D8/MDPF_COTREMEDIATION, routed by 2.0.0_SA_COO to 0.6.2_AE_PartnerETL~A (CVO 72183 s.7)."
+  },
+  {
+   "item": "Any invoke of mdpf-gold-lambda or the publisher",
+   "reason": "Time-of-day is the only scheduled-vs-manual discriminator; an invoke destroys the evidence. None performed, window or after."
+  },
+  {
+   "item": "Adjudication of criterion ACC-b-1's letter-vs-intent conflict for 49financial/inflection",
+   "reason": "The spec is the issuer's (frozen mid-round, Rule 27); measured facts reported, interpretation routed to 2.0.0_SA_COO as a spec-surprise."
+  },
+  {
+   "item": "CloudTrail / trigger.kind as attribution instruments",
+   "reason": "Ruled inadmissible on the TO's face (caller-supplied payload; Lambda Invoke is a data event, measured 0 with firing positive control)."
+  }
+ ],
+ "surprises": [
+  "NEW DATA-SHAPE: Cottonwood model 'Opal Fixed Income' entered the 2026-08-25 upstream vintage with no canonical by_model key -- a third acceptance outcome absent from the TO's own outcome table (filed to the surprise channel by 3.0.0_SA_CVO under MDPF_COTREMEDIATION; this seat took no action).",
+  "INSTRUMENT: gold manifest 20260826T133106Z.json carries scopes._aggregate_aua.reconciliation=PASS beside errors={cottonwood,global} and a4_objects_built 6 of 12 -- a green status-shaped field on a half-failed run (CVO filing 72183 s.4; no action by this seat).",
+  "SPEC: ACC-b-1's premise (partners move only written_at) falsified by a healthy T-1 advance on 49financial/inflection; embedded retro-restatement inflection account_count_total[451] 548->562 named for the issuer's read (no action by this seat)."
+ ],
+ "session_log": "org/tier1_exec/1.0.0_SA_CTO/logs/2026-08-26/session_1313Z_acceptance_and_selfdrive.md (written this session, same commit window as this instance)",
+ "compiler_tools": [
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find --name PROOF_OF_SPEC.schema.json --files --band HEAD",
+   "result": "1 hit of 28,700 scanned: org/standards/PROOF_OF_SPEC.schema.json (schema located)."
+  },
+  {
+   "tool": "accept_diff.py (purpose-built differ)",
+   "invocation": "python accept_diff.py <pre_dir> <post_dir> after both-arms self-test",
+   "result": "Per-scope leaf diff with printed denominators; verdict split 2 PASS-shape / 2 republish-no-advance; machine block diff_machine.json."
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> ACC0826-AC1,ACC0826-AC2,ACC0826-AC3,ACC0826-AC4 (rc checked)",
+   "result": "rc recorded in the acceptance report; criteria ids passed explicitly per the TO's own warning about the 2-arg coverage gap."
+  },
+  {
+   "tool": "raw aws (operational class)",
+   "invocation": "s3api get-object/head-object/list-objects-v2/get-bucket-versioning; lambda get-function-configuration; logs get-log-events",
+   "result": "Live-primitive reads of served payloads, gold partitions, deployed bytes, and the run's own logs -- the planes the acceptance is about; no comp tool serves payload content or log stream content."
+  }
+ ],
+ "decomp_ref": {
+  "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/MDPF_GLOBAL.TO-ACCEPT-0826.scheduled-floor-production-acceptance.md",
+  "vintage_commit": "e70ffcc562",
+  "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/MDPF_GLOBAL.TO-ACCEPT-0826.scheduled-floor-production-acceptance.md"
+ }
+}

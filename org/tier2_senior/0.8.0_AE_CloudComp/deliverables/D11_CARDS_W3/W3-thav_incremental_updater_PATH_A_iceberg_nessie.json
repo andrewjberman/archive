@@ -1,0 +1,163 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.8.0_AE_CloudComp~Y",
+  "subject": {
+    "id": "infra/aws/lambda/globgrph/incremental_updater/lambda_function.py :: PATH A -- Iceberg/Nessie atomic commit",
+    "kind": "script",
+    "declared_domain": "The write path by which the incremental_updater Lambda materializes rows into the Iceberg table globgrph.graph_nodes via a Nessie-backed REST catalog. Covers the ONE atomic commit envelope in commit_batch() -- both of its exclusive branches (:501 overwrite for batches carrying upserts, :504 delete for delete-only batches). It does NOT cover this file's OTHER write path, the S3 branch-head marker (carded separately as W3-uuxp), and it does not cover the nightly full-derive (derive_runner.py, 0.8.0_AE_CloudComp~X's subjects) which writes the same table by a different mechanism."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-27T06:46:16Z",
+    "commit_ish": "049ff4ca4a",
+    "graph_vintage": "graph_nodes@1462710383782792396 (branch-head marker committed_at_iso 2026-08-27T05:53:51.057095+00:00)"
+  },
+  "process": {
+    "methodology": {
+      "how": "SQS batch of CloudTrail management events -> extract changed ARNs -> bounded live AWS describe per ARN -> ONE pyiceberg commit into globgrph.graph_nodes. commit_batch() (:408) builds a SINGLE overwrite_filter spanning BOTH upsert keys and delete keys (:443), then applies exactly one of two exclusive branches: :501 table.overwrite(pa_table, overwrite_filter=combined_filter) when the batch carries nodes, or :504 table.delete(delete_filter=combined_filter) for a delete-only batch. Because overwrite = delete(filter) + append(rows), putting delete keys in the FILTER but not in the ROWS removes them in the same commit that refreshes the upserts. ⛔ I DELIBERATELY DO NOT SPLIT :501 AND :504 INTO TWO PATHS: same table, same bound (:434), same authority, same commit envelope, and the docstring at :412-424 states the single-envelope design explicitly. They are exclusive BRANCHES of one path, not two paths. The (FILE, WRITE PATH) grain distinguishes mechanism/bound/authority, and none of the three differs here.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "canonical",
+      "composes": [
+        { "id": "arn:aws:sqs:us-east-1:313476888478:opal-globgrph-incremental-events", "note": "the event source; ESM 589e1bca-7e54-4b8e-8ede-d0c5d2e53002, State=Enabled, BatchSize=100, MaximumBatchingWindowInSeconds=120" },
+        { "id": "opal-globgrph-cloudtrail-mgmt", "note": "the EventBridge rule that feeds that queue, resolved by reverse lookup on the queue ARN" },
+        { "id": "live AWS describe APIs", "note": "bounded_derive_node (:247) re-reads live state per ARN; 6 service branches implemented -- see coverage" },
+        { "id": "globgrph.graph_nodes", "note": "the target Iceberg table, via a pyiceberg RestCatalog against Nessie's Iceberg REST endpoint (_get_catalog :342)" }
+      ],
+      "invents": [
+        { "id": "drift_class=LIVE-INCREMENTAL", "note": "stamped on every node this path writes (:272 and each sibling branch). Terraform state is unreachable from the Lambda, so this path cannot compute a real drift class; it declares a marker value instead and defers reconciliation to the nightly full derive (:250-252)" },
+        { "id": "S3 object->bucket grain collapse", "note": ":266 collapses an object ARN to its bucket. A choice, not a read: it prevents the 23,664 phantom per-object S3_BUCKET nodes recorded at :264-265, at the cost of making object-grain events indistinguishable from bucket-grain ones" }
+      ],
+      "declared_opinions": [
+        "CORRECTNESS IS THE REF-CAS, NOT THE SNAPSHOT PARENT (:505-516). The code carries an explicit ruling that Nessie's branch-ref compare-and-swap is the off-branch guarantee and that Iceberg's parent_snapshot_id is cosmetically null by design. A prior produced.parent==expected assertion was REMOVED because it false-rejected every valid commit and caused the 2026-06-12 silent freeze. This is a declared position about which layer owns correctness, recorded in-code rather than derived.",
+        "A DELETE-AND-UPSERT COLLISION RESOLVES TO DELETE (:712-719). When the same key is both upserted and deleted in one batch, the upsert is dropped. That is a declared conflict rule, not a measured property of the event stream.",
+        "RETRY TUNING IS BOUNDED BY THE LAMBDA TIMEOUT, NOT BY CONVERGENCE (:41-49). COMMIT_MAX_ATTEMPTS=5, backoff cap 15s, chosen so worst-case retry wait fits inside the 180s timeout alongside derive+write. The cap is a deployment constraint presented as tuning."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "how": "measured",
+        "composes": "measured",
+        "invents": "measured",
+        "declared_opinions": "measured",
+        "materializer_standing": "measured"
+      },
+      "evidence": "Source read at infra/aws/lambda/globgrph/incremental_updater/lambda_function.py @049ff4ca4a, every line cited above opened rather than inferred. materializer_standing=canonical is MEASURED, not assumed: the live branch-head marker read at 2026-08-27T05:53:51Z carries writer_id=incremental_updater with graph_nodes last_write_iso=2026-08-27T05:53:50.865Z -- this path committed 65 minutes before this carding, so it is the current incremental writer and not a superseded one. ⛔ THE SOURCE I READ IS THE SOURCE THAT RUNS, verified rather than assumed: deployed CodeSha256 LkaTo3PF/3juhWVrTa2PgdIA166EUYIPV2wr3sOhPf0= equals base64(sha256()) of the local incremental_updater.zip byte-for-byte, and the zip's lambda_function.py member is sha 10cc591091e08bd5 == the on-disk file's sha, 35,213 bytes both. This is the CLAUDE.md Rule 22a CODE check done against the BUILD INPUT, not by filename.",
+      "owner": "0.8.0_AE_CloudComp -- the graph-module lane. Source last authored by 0.8.0_AE_CloudComp~Z @b0412f3d3e 2026-07-15."
+    },
+    "cadence": {
+      "declared_rhythm": "No clock. Event-driven with a ~2 minute debounce: the module docstring (:9-10) declares SQS MaximumBatchingWindowInSeconds=120 accumulating events so that all events in a window become one atomic Nessie commit.",
+      "actual_trigger": "EVENT-DRIVEN. CloudTrail management events -> EventBridge rule opal-globgrph-cloudtrail-mgmt -> SQS queue opal-globgrph-incremental-events -> Lambda event source mapping 589e1bca-7e54-4b8e-8ede-d0c5d2e53002 (State=Enabled) -> this handler. NOT a scheduled trigger on either AWS plane.",
+      "live_matches_declared": "yes",
+      "live_instance_age": "Last exercised 2026-08-27T05:53:50.865Z (graph_nodes last_write_iso in the live branch-head marker), 65 minutes before this carding. NOT dormant under Rule 25 by any margin -- the threshold is 90 days.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "⛔ TRIGGER BASIS IS THE EVENT SOURCE MAPPING, NOT A RULE TARGET -- which is exactly the discrimination CCY3-AC5 demands. aws lambda list-event-source-mappings --function-name opal-globgrph-incremental-updater returns UUID 589e1bca-7e54-4b8e-8ede-d0c5d2e53002, EventSourceArn arn:aws:sqs:us-east-1:313476888478:opal-globgrph-incremental-events, State=Enabled, BatchSize=100, MaximumBatchingWindowInSeconds=120. The ESM is the Lambda's OWN binding, so 'this queue invokes this function' is READ, not inferred -- no ECS-cluster-style indirection is in play on this path. The upstream hop is resolved with a second instrument, aws events list-rule-names-by-target --target-arn <the queue arn>, returning exactly one rule: opal-globgrph-cloudtrail-mgmt. live_matches_declared='yes' is MEASURED on the specific number: the docstring declares MaximumBatchingWindowInSeconds=120 and the live ESM reads 120. BOTH TRIGGER PLANES WERE SWEPT with denominators printed -- events plane 137 rules, scheduler plane 18 schedules -- because neither plane can see the other; the scheduler plane holds no schedule targeting this function.",
+      "owner": "0.8.0_AE_CloudComp for the handler; the EventBridge rule, SQS queue and ESM are declared in infra/aws/terraform/globgrph/item2b.tf, so the APPLY owner is the seat that owns that tree (Rule 26). Rule 26 is not a class constant and I did not treat it as one -- the trigger infrastructure and the code have different apply owners here."
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "source",
+      "mutation_policy": "replaceable",
+      "form": "Rows in the Iceberg table globgrph.graph_nodes, committed through Nessie's Iceberg REST catalog on branch main. Nine columns (node_id, arn, node_type, name, layer, drift_class, source, snapshot_ts, props) per the create schema at :377-387; the props column is written only if the live table already has it (:457, :478-485).",
+      "basis": "measured",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "form": "measured",
+        "mutation_policy": "measured"
+      },
+      "evidence": "authority_role='source' because this path ORIGINATES node rows from live AWS describe calls -- it is not projecting an upstream store. mutation_policy='replaceable' is the honest fit and I considered and rejected two neighbours: it is NOT 'append_only' (the overwrite at :501 deletes matching rows before appending, and :504 deletes outright) and it is NOT 'editable' (nothing edits a row in place; rows are replaced wholesale by key). ⚠ CONTRACT OBSERVATION, DECLARED ON THE FACE RATHER THAN SILENTLY WIDENED: v2's mutation_policy enum offers ['editable','append_only','replaceable','immutable','not_applicable'] and has no DESTRUCTIVE member, so the :504 delete-only branch -- which removes rows and appends nothing -- is carried under 'replaceable' as a floor fit. Routed as an observation to the schema owner, not fixed here (QUALIFY-DO-NOT-FIX). The same gap was independently reported this wave by 0.7.0_AE_CloudOps~X on cse_store PATH B. Schema read at org/standards/SUBSTRATE_CARD.v2.schema.json @049ff4ca4a.",
+      "owner": "0.8.0_AE_CloudComp for the writer; the table's schema contract is shared with derive_runner.py (0.8.0_AE_CloudComp~X's PATH A subject), which overwrites the same table on the nightly."
+    },
+    "location": {
+      "home": "iceberg://globgrph.graph_nodes on Nessie branch main, warehouse s3://opal-313476888478-globgrph/warehouse",
+      "projection_of": [],
+      "co_resident_stores": [
+        { "id": "globgrph.graph_edges", "note": "sibling table in the same namespace and the same Nessie branch. This path NEVER writes it -- the module docstring line :6 says 'graph_nodes / graph_edges', but the only table_id bound in code is graph_nodes (:371, :434). A docstring-level over-statement of this path's own reach, recorded rather than corrected." },
+        { "id": "globgrph.graph_contracts", "note": "same namespace; written only by derive_runner PATH B under an explicit invariant that derive must not touch it. This path never binds it." },
+        { "id": "globgrph.cse", "note": "same namespace; written by the nightly CSE producer chain. This path never binds it -- but it DOES stamp freshness metadata about it via its own PATH B (W3-uuxp)." }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured",
+        "co_resident_stores": "measured"
+      },
+      "evidence": "⛔ AC4 REQUIRES A RESOLVABLE NAME, NOT A DESCRIPTION, AND HERE IT IS EXACT: the table identity is the literal tuple ('globgrph','graph_nodes') at :434, with the same literal at :371 in _ensure_graph_nodes_table. The warehouse location is read from the WAREHOUSE_URI environment contract at :37 and confirmed live -- the branch-head marker for this warehouse resolves at s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json and its table_metadata.graph_nodes.metadata_location points into that warehouse. projection_of is an EMPTY ARRAY as a POSITIVE claim: this path derives rows from live AWS APIs, not from another store, so it projects nothing. ⛔ THE graph_edges CO-RESIDENT ENTRY IS A MEASURED CORRECTION OF THE FILE'S OWN DOCSTRING: :6 advertises 'graph_nodes / graph_edges' but an exhaustive read of every catalog binding in this file yields exactly one table name. A reader trusting the docstring would attribute edge writes to this path that it does not perform.",
+      "owner": "0.8.0_AE_CloudComp. The docstring over-statement at :6 is this lane's own module and is recorded, not edited, per AC8."
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "AWS resource-change events that CloudTrail emits as management events, are matched by the opal-globgrph-cloudtrail-mgmt rule, survive the SQS batching window, and carry an ARN this handler can both classify AND re-derive.",
+      "denominator": "⛔ 6 of 14. arn_to_class (:86-102) maps 14 AWS services to class keys; bounded_derive_node (:247-335) implements a derive branch for exactly 6 of them -- s3, lambda, iam, dynamodb, sns, sqs. The 8 mapped-but-underived classes are cloudfront, cloudwatch, ec2, events, kms, logs, secretsmanager, states. An ARN in those 8 classes is classified successfully and then silently dropped.",
+      "denominator_absent_reason": null,
+      "explicitly_out": [
+        "The S3 branch-head marker write -- this file's OTHER write path, carded separately as W3-uuxp. A file-grain card would merge them and state one bound.",
+        "graph_edges, graph_contracts and cse: named in the docstring or in this file's PATH B tuple, but never bound as a write target by THIS path.",
+        "Whether the nightly full derive (derive_runner.py) later reconciles what this path drops -- that is 0.8.0_AE_CloudComp~X's subject and I measured no reconciliation claim here.",
+        "⛔ COMPLETENESS OF THE WRITER POPULATION FOR graph_nodes. Per CCY3-AC7 this card asserts none. I measured what THIS path writes; I did not and cannot establish that this path plus derive_runner are the only writers of the table.",
+        "SEMANTIC correctness of the node rows produced -- no comparison of a derived node against the true live resource was run. Recorded as an explicit UNMEASURED so silence does not read as clean."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "measured",
+        "explicitly_out": "measured"
+      },
+      "evidence": "⛔ THE 6-OF-14 GAP IS SILENT, AND THE ASYMMETRY IS THE FINDING. Counted by parsing the source rather than by eye: the mapping dict at :86-101 yields 14 service keys; the if/elif chain in bounded_derive_node yields 6. The 8 uncovered classes fall through to :334 logger.debug('SKIP: bounded derive not implemented for class=%s ...') and return None. THE MODULE SETS logger.setLevel(logging.INFO) AT :34, so DEBUG is suppressed -- that skip line is never emitted to CloudWatch. Contrast :256, where an ARN whose service is NOT in the map is logged at logger.warning: the LESS-recognized case is LOUD and the BETTER-recognized case is SILENT. A resource class that the code knows about but cannot derive is the one that disappears without a trace. ec2 sits in that silent set. ⚠ THE BOUND ON MY OWN CLAIM: 6-of-14 is the denominator over CLASSES THE CODE NAMES, not over AWS services that exist or over events the rule actually delivers. I did not measure the live event mix, so I am NOT claiming 8/14 of real traffic is dropped -- only that 8 of 14 named classes have no derive path and fail silently.",
+      "owner": "0.8.0_AE_CloudComp. The log-level asymmetry and the 8 underived classes are both this lane's module; both are recorded as findings and NEITHER is fixed, per CCY3-AC8."
+    },
+    "key": {
+      "identity_space": "Two columns used as one match space: `arn` (the AWS ARN) and `node_id` (the short name). _match_filter (:391-405) builds In('arn',[...]) OR In('node_id',[...]) and the overwrite/delete filter matches a row if EITHER column hits.",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "delete_keys_from_event (:163-226) RECONSTRUCTS an ARN from a CloudTrail delete event's name fields, per event type, using account from recipientAccountId with fallback 313476888478 (:152) and region hardcoded us-east-1 (:153). That reconstruction IS the declared mapping between the name space and the ARN space.",
+      "basis": "measured",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "crosses_spaces is TRUE and measured, and the code says WHY it must: :148-151 records that CloudTrail delete events carry a NAME rather than always an ARN, and that reconstructing the ARN lets the filter match the exact node on the `arn` column 'rather than only the short name (node_id), avoiding cross-class name-collision over-delete.' So the file itself names the hazard the two-space match creates. key_is_stable='stable' is measured at the level the filter uses: an ARN is stable for a resource's lifetime and node_id is derived from it deterministically at :701 (node.get('arn') or node.get('id')). ⚠ THE STABILITY IS PER-RESOURCE, NOT ACROSS DELETE-RECREATE: an ARN reconstructed at :195 for a Lambda deleted and recreated under the same name is byte-identical, so the two incarnations are one key. Not a defect of this path -- a property of the ARN space -- but it means the key cannot distinguish resurrection from continuity. ⛔ THE REGION LITERAL IS A REAL BOUND ON THE MAPPING: _REGION='us-east-1' at :153 is hardcoded, so a delete event for a resource in any other region reconstructs an ARN that matches no row, and the delete silently no-ops. I did not measure whether any non-us-east-1 resource is in the graph, so I state the mechanism and not a count.",
+      "owner": "0.8.0_AE_CloudComp."
+    },
+    "failure_mode": {
+      "returns_on_failure": "THREE DIFFERENT THINGS, and only one of them is loud. (1) COMMIT FAILURE: after COMMIT_MAX_ATTEMPTS=5 CAS conflicts the handler logs ICEBERG_COMMIT_CAS_EXHAUSTED at ERROR, calls _publish_commit_failure, and RE-RAISES; the handler catches it at :735 and returns every messageId in batchItemFailures so SQS retries the whole batch. Loud and recoverable. (2) PER-RECORD FAILURE: an exception on one record logs RECORD_FAIL at ERROR and adds only that messageId to batchItemFailures (:705-707); the rest of the batch still commits. (3) ⛔ DERIVE MISS: bounded_derive_node returns None and the ARN is simply never written -- at :334 through a suppressed DEBUG line. Nothing is logged, nothing fails, the batch reports success. The commit still lands for the other ARNs and BATCH_END prints a nodes_written count that a reader will read as complete.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "⛔ THE PRIMARY ONE: an ARN in any of the 8 mapped-but-underived classes (cloudfront, cloudwatch, ec2, events, kms, logs, secretsmanager, states) is dropped at :334 behind a DEBUG line that :34's INFO level suppresses. The batch succeeds, failed_ids stays empty, and BATCH_END's nodes_written count is silently short. There is no signal at any level.",
+        "A live describe that throws is caught at :330 and logged BOUNDED_DERIVE_FAIL at WARNING, then returns None -- so the node is dropped, but unlike the case above it does leave a trace. This is the SAME OUTCOME reached by a LOUDER route, which is what makes the pair confusing to read in CloudWatch: two drop causes, two different volumes.",
+        "The Lambda runs in a VPC with no NAT and only S3/DynamoDB gateway endpoints (:235-237), so lambda/iam/sns/sqs describes are unroutable in-VPC and fail fast at 3s by design. Those failures land in the WARNING path above and present as ordinary derive misses rather than as a network fault.",
+        "Both SNS egress paths are documented UNROUTABLE from this VPC (:600-604, :634-640). _publish_commit_failure will therefore fail in-VPC and log COMMIT_FAILURE_SNS_FAIL at WARNING. The code names the intended real channel -- a CloudWatch Logs metric filter on the ERROR line feeding an alarm -- but that is a claim about infrastructure this card did NOT verify. I did not confirm any metric filter or alarm exists, so the loud channel is UNMEASURED at the far end.",
+        "A delete event for a resource outside us-east-1 reconstructs a non-matching ARN (:153) and the delete no-ops silently, leaving a stale node.",
+        "The marker stamp is wrapped so that its failure never fails the batch (:729-732); a commit can therefore land while the freshness marker does not advance. That is correct precedence, but it means marker staleness is not evidence the commit failed -- and the marker is the signal most readers reach for."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "EXERCISED AS A CONTROL PAIR OVER THE LOG-LEVEL PREDICATE, both arms reachable from different truths. ARM 1 (the silent drop): :334 is logger.debug and :34 sets INFO, so the call cannot emit -- read at source, both lines quoted above. ARM 2 (POSITIVE CONTROL, same file, same function family, different truth): :256 is logger.warning for the unknown-class case and :331 is logger.warning for the describe-failure case, both of which DO emit at INFO level. So the instrument (a log line in this module) is capable of producing output, and the silence at :334 is a property of that specific call rather than of the module's logging. That is what makes distinguishable_from_true_negative='no' a measured verdict and not an assumption: a batch in which 8-class ARNs were dropped and a batch in which no such ARN arrived produce BYTE-IDENTICAL CloudWatch output. ⛔ THE CONTROL THAT MATTERS MOST IS THE ONE ON MY OWN 'IT IS LIVE' CLAIM: the branch-head marker's graph_nodes last_write_iso 2026-08-27T05:53:50.865Z is one second before its own committed_at_iso 2026-08-27T05:53:51.057095Z, and its writer_id is incremental_updater -- so the commit and the stamp are the same execution of THIS path, not a coincidence of two writers.",
+      "owner": "0.8.0_AE_CloudComp for the log-level asymmetry and the region literal. UNOWNED for the far end of the loud channel: no seat is named as owning the CloudWatch metric filter and alarm that :636-638 says is the in-VPC-viable channel, and I did not verify it exists."
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "This path works and is demonstrably live: it committed to globgrph.graph_nodes 65 minutes before this carding, the deployed bytes are byte-identical to the source I read, its trigger chain is measured end to end at every hop, and its table bound is a single call-site literal that a name-keyed census finds. As the incremental writer of graph_nodes it does what it says. QUALIFIED rather than SOUND on three measured defects, all of them about what happens when it does NOT write: (1) 8 of the 14 resource classes it can classify have no derive branch and are dropped through a DEBUG line the module's own INFO level suppresses -- the drop is invisible at every log level, and the better-recognized failure is quieter than the worse-recognized one; (2) the far end of its loud channel is unverified -- both SNS paths are documented unroutable from this VPC and the CloudWatch metric-filter alarm the code names as the real channel was NOT confirmed to exist by this card; (3) the delete key space reconstructs ARNs against a hardcoded us-east-1, so an out-of-region delete no-ops silently. Not UNSOUND: nothing measured shows a wrong row being written, the CAS retry and loud re-raise are correct, and the delete-propagation design is sound. NOT INCOMPLETE: all 7 rows are worked, every scalar is 'measured', and the deployed-vs-source question is closed by content rather than by filename. ⛔ NO COMPLETENESS CLAIM ON THE WRITER POPULATION for graph_nodes, per CCY3-AC7. ⛔ NO FORWARD DISPOSITION -- omitted, and nothing here is an opinion on this path's future. Per QUALIFY-DO-NOT-FIX this lane committed nothing to this module and edited no carried surface.",
+    "blocking_defects": [
+      "For anyone relying on this path to keep graph_nodes current for ec2, events, kms, logs, cloudfront, cloudwatch, secretsmanager or states: those 8 classes are classified and then silently dropped at :334 behind a suppressed DEBUG line. Owner 0.8.0_AE_CloudComp.",
+      "For anyone treating an absent RED alert as evidence this path is healthy: both SNS egress paths are documented unroutable in-VPC, and this card did NOT verify that the CloudWatch metric filter and alarm named at :636-638 exist. Silence here is UNMEASURED, not clean. Owner UNOWNED -- no seat is named for that alarm.",
+      "For anyone reading the module docstring at :6: it advertises 'graph_nodes / graph_edges' while the only table bound in code is graph_nodes. A reader would attribute edge writes to this path that it does not perform. Owner 0.8.0_AE_CloudComp.",
+      "For anyone auditing delete propagation: _REGION is hardcoded us-east-1 at :153, so a delete event for an out-of-region resource reconstructs a non-matching ARN and no-ops without signal. Owner 0.8.0_AE_CloudComp."
+    ]
+  }
+}

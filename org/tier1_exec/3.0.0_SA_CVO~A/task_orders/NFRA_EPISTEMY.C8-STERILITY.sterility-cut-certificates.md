@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>3.0.0_SA_CVO~A (Codex lane; lane-administered by 3.0.0_SA_CVO base -- GO gates on YOUR agent-side ack, SENT is not READ; the S4 pattern CRO base runs for ~A/~B)</issued_to>
     <date>2026-08-20</date>
-    <status>pending -- STARTS on your ack (wave 2 of NFRA_EPISTEMY: envelope landed @45a2892ed2 + base S3 cert issued; CRO base 63752: "8 PARALLEL now -- precursors exercised; certifiable now; two conditions in the TO"; you read "awaiting scoped validation work" on the live roster 2110Z -- this is certificate work, the validation seat's own object)</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_EPISTEMY, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending -- STARTS on your ack (wave 2 of NFRA_EPISTEMY: envelope landed @45a2892ed2 + base S3 cert issued; CRO base 63752: "8 PARALLEL now -- precursors exercised; certifiable now; two conditions in the TO"; you read "awaiting scoped validation work" on the live roster 2110Z -- this is certificate work, the validation seat's own object)</status>
     <project_code>NFRA_EPISTEMY</project_code>
   </metadata>
 

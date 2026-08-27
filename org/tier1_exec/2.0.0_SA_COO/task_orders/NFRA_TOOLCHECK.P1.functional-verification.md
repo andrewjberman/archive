@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.8.0_AE_CloudComp~D (comp-tool verification + the telemetry-substrate hook fix) + 0.4.0_DS_ClientPlatform~B (org/modules/graph tools) | CTO arch-gate + CVO real-use-grounding cert</issued_to>
     <date>2026-07-08</date>
-    <status>dispatched -- Andrew-direct (via CTO 181353Z) decomp. Matters (the shared cognition every agent reasons from) but NOT a fire -- sequenced into the NFRA cadence, non-urgent. Part-0 pre-flight DONE (CTO, baked into PRD SS2 as the grounded starting inventory).</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_TOOLCHECK, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: dispatched -- Andrew-direct (via CTO 181353Z) decomp. Matters (the shared cognition every agent reasons from) but NOT a fire -- sequenced into the NFRA cadence, non-urgent. Part-0 pre-flight DONE (CTO, baked into PRD SS2 as the grounded starting inventory).</status>
     <prd_ref>docs/architecture/NFRA_TOOLCHECK_PRD.md (SS2 pre-flight findings, SS4 P1, SS5 principles, SS8 Q1)</prd_ref>
     <dispatch_state>DISPATCHED 2026-07-08 by COO~B on Andrew's decomp directive. CTO holds 3 detailed pre-flight agent reports (per-tool evidence) -- ping CTO if the executors want them.</dispatch_state>
     <gate_note>THE METHOD LESSON (Part 0, load-bearing): --help is a FALSE-GREEN (52/53 pass --help, but comp-drift FAILS 50% of REAL invocations). VERIFY ON REAL REPRESENTATIVE INVOCATIONS cross-checked against the usage-log (14,295 rows) ground truth -- NEVER --help.</gate_note>

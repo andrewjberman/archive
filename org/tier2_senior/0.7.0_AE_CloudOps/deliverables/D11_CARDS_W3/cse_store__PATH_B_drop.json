@@ -1,0 +1,148 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.7.0_AE_CloudOps~X",
+  "subject": {
+    "id": "infra/aws/globgrph/cse_store.py#PATH_B_drop",
+    "kind": "script",
+    "declared_domain": "The DESTRUCTIVE write path of the same file: --drop, which calls catalog.drop_table. Carded as a separate subject because it differs from PATH A in MECHANISM and AUTHORITY. This split is my own BLOCKING surprise 74773, filed 3 minutes after dispatch and upheld @76c58923ac."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-27T06:07:00Z",
+    "commit_ish": "76c58923ac",
+    "graph_vintage": "UNREAD-W3: comp-kuzu did not return within 120s and my own invocation was reaped (orphaned child, ppid=1, kill -9, 0 remaining, ps control 41 rows). No graph vintage was read this wave. NOT copied from wave 2 -- that would be the stale-pin defect I filed against my own W2 proof-of-spec."
+  },
+  "process": {
+    "methodology": {
+      "how": "argparse --drop at :579 -> main() :594-596 'if args.drop: drop_cse_table(catalog, args.table); return 0' -> :348 drop_cse_table -> :353 catalog.drop_table((NAMESPACE, table)). NOT an append. The branch returns immediately and ⛔ --dry-run is NOT consulted on it.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "not_applicable",
+      "declared_opinions": [
+        "⛔ --dry-run does not gate this branch. On PATH A the flag is threaded to ingest_jsonl (:584 -> :602); on PATH B main() calls drop_cse_table and returns 0 before any dry-run test. An operator who reaches for --dry-run as a safety habit gets it on one path of this file and not the other.",
+        "The protection is a SELF-protection, not a namespace membership check -- it is keyed to this module's own table name, so it bounds the path against harming its own log and not against harming a sibling's.",
+        "A destructive path sharing one unconstrained --table arg with an append path means the same typo has two very different consequences depending on which flag accompanies it."
+      ],
+      "composes": [
+        {
+          "id": "org/modules/graph/cse_schema.py",
+          "note": "CSE_TABLE='cse' at :595 is what the fail-closed guard compares against -- the guard's correctness depends on a value defined outside this file"
+        }
+      ],
+      "invents": [
+        {
+          "id": "the fail-closed scratch-only drop",
+          "note": ":350-352 raise ValueError when table == CSE_TABLE"
+        }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "how": "measured",
+        "determinism": "measured",
+        "materializer_standing": "measured",
+        "composes": "measured",
+        "invents": "measured"
+      },
+      "evidence": "SOURCE READ @76c58923ac. ⛔ I NEARLY OVERSTATED THIS ROW AND THE CHECK THAT STOPPED IT IS WORTH THE SPACE: from the main() dispatch alone (:594-596) PATH B reads as unbounded AND ungated, which is an alarming and wrong finding. Reading the FUNCTION shows :350-352 -- 'if table == CSE_TABLE: raise ValueError(REFUSED: cse is the real append-only C0 log -- never dropped here)'. The guard exists, does exactly what its docstring says, and protects the C0 log. The defensible version is weaker than the one I could have shipped: the guard is keyed to this module's OWN table name, so --table cse is refused and any other globgrph table name is not reached by it. Recorded as a MEASURED PROPERTY of the bound, NOT as a defect claim -- COX3-AC8 QUALIFY-DO-NOT-FIX binds this lane and globgrph is read-only to it.",
+      "owner": "1.0.0_SA_CTO (globgrph/C0 contract); 0.7.0_AE_CloudOps (apply surface)"
+    },
+    "cadence": {
+      "declared_rhythm": null,
+      "actual_trigger": "NONE-FOUND, and the negative is a real one. The ONLY caller of drop_cse_table in the swept tree is cse_store.py:595 itself -- the CLI dispatch. Sweep: grep for drop_cse_table( across infra/ and org/, excluding the definition, returned exactly one hit. No ECS task definition invokes cse_store.py at all (7 of 7 ACTIVE families read). So this path executes only when a human types --drop.",
+      "live_matches_declared": "not_applicable",
+      "live_instance_age": null,
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured"
+      },
+      "evidence": "TWO-PLANE SWEEP, client-side counted (never --query length on a paginated list -- events list-rules returned 100 then 37 as PAGE counts): events=137, scheduler=18. POSITIVE CONTROL FIRED and it caught a broken sweep of mine: my first container-command loop printed only globgrph-trino (a multi-line shell command swallowed the rest) and my second returned blank for 6 of 7 families; the control -- describe-task-definition on globgrph-cse-producer -> 'python /app/cse_producers_nightly.py' -- proved both were instrument failures rather than absences. The values here come from the form the control validated. 7 ACTIVE task-definition families, all read. A destructive path with no trigger is the correct and expected shape; recording it as MEASURED rather than assumed, because 'nothing triggers the dangerous thing' is exactly the claim that should not be taken on faith.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "source",
+      "mutation_policy": "replaceable",
+      "form": "Iceberg table drop against the Nessie catalog, namespace globgrph, branch main.",
+      "basis": "measured",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "mutation_policy": "measured",
+        "form": "measured"
+      },
+      "evidence": "⛔ mutation_policy IS RECORDED AS 'replaceable' AND THAT IS A FLOOR-FIT, NOT AN ACCURATE VALUE. The v2 enum is [editable, append_only, replaceable, immutable, not_applicable] and it has NO DESTRUCTIVE MEMBER; this path DROPS the table. I picked the closest legal value and am declaring the mismatch here rather than letting a legal-looking value imply the enum covered this case. Note the contrast in the contract itself: authority_role carries x-enum-definitions AND an x-rule24 block, mutation_policy carries neither -- the un-disciplined enum is the one with the uncovered member (Rule 24 postulate (i)). Routed separately; NOT amended here. The measured fact: drop MEASURED at :353 catalog.drop_table((NAMESPACE, table)). This is the row that made the split necessary: PATH A's mutation_policy is append-only and PATH B's is destructive, and no single card can carry both honestly.",
+      "owner": "1.0.0_SA_CTO"
+    },
+    "location": {
+      "home": "infra/aws/globgrph/cse_store.py (611 lines) @76c58923ac; acts on globgrph.<args.table>",
+      "projection_of": [],
+      "co_resident_stores": null,
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured"
+      },
+      "evidence": "home MEASURED at the pin. AC4: the artifact acted upon is globgrph.<args.table> -- resolvable, and deliberately NOT given a default here, because unlike PATH A the default is REFUSED by the guard.",
+      "owner": "1.0.0_SA_CTO"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Tables this path can drop.",
+      "denominator": "UNBOUNDED minus exactly one: every table in namespace globgrph EXCEPT globgrph.cse, which :350-352 refuses. The denominator is not enumerable.",
+      "denominator_absent_reason": null,
+      "explicitly_out": [
+        "globgrph.cse -- refused by the fail-closed guard at :350-352, MEASURED not assumed",
+        "every table outside namespace globgrph -- NAMESPACE is a module constant at :85, not parameterised",
+        "PATH A (append), carded separately"
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "measured",
+        "explicitly_out": "measured"
+      },
+      "evidence": "COX3-AC7: no completeness asserted. The bound is UNBOUNDED-except-one. Stated precisely because the difference between 'unbounded' and 'unbounded except its own table' is the whole safety story of this path, and the alarming version of this card would have omitted the exception.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "Iceberg table identity (namespace, table) = ('globgrph', args.table), same space as PATH A and same cross-plane duality (tuple here, 'iceberg.globgrph.cse' at fedobs_observe.py:48).",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "('globgrph','cse') == 'iceberg.globgrph.cse'; the guard compares against the BARE form 'cse' only, so it is a string comparison in ONE representation.",
+      "basis": "measured",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "MEASURED at :351. Recording the representation detail because the guard is a string equality test and the estate demonstrably carries two spellings of this table; the guard covers the spelling this module uses.",
+      "owner": "1.0.0_SA_CTO"
+    },
+    "failure_mode": {
+      "returns_on_failure": "Raises ValueError and does not drop, when table == CSE_TABLE (:351-352). Loud, fail-closed, and it is the one failure mode of this path that was DESIGNED rather than incidental.",
+      "distinguishable_from_true_negative": "yes",
+      "silent_degrade_paths": [
+        "--dry-run is accepted by the parser and silently has no effect on this branch -- the run proceeds",
+        "the guard's comparison value comes from an import (cse_schema.py:595); if that constant ever changed, the guard would still fire, but on a different name than an operator reading cse_store.py alone expects"
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "Guard behaviour READ AT SOURCE :350-352. silent_degrade_paths is MEASURED here (unlike PATH A) because both entries are readable control-flow facts, not exercise-dependent: the dry-run no-op is visible in the dispatch and the import indirection is visible at :86 and :65.",
+      "owner": "1.0.0_SA_CTO"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "The path is correctly and deliberately guarded for its stated purpose and I am not calling it defective. QUALIFIED on two measured properties a consumer must know: --dry-run does not gate it, and its protection is keyed to this module's own table rather than to namespace membership. Both are stated as properties, not as change requests -- COX3-AC8 holds and the remedy question is not this lane's.",
+    "blocking_defects": []
+  }
+}

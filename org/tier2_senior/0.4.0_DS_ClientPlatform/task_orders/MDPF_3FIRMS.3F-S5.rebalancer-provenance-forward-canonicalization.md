@@ -6,7 +6,7 @@
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T21:15Z</issued_at>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_3FIRMS, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <authorization>Your own 3F-S4 finding D4 -> CTO ruling 211330Z item 3 (AUTHOR 3F-S5, DS lane, Rule-17-sensitive, normal gates; CTO gates any schema change).</authorization>
 
 <references>

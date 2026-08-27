@@ -1,0 +1,215 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SUBSTRATECARDING.TO-W1-CCX",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_SUBSTRATECARDING.TO-W1-CCX.c0-c1-c2-cards.md",
+    "group": "OTHER",
+    "vintage_commit": "aae317509b"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-substratecarding/20260826T172918Z/DECOMP.md",
+    "vintage_commit": "c8aa46b1a5",
+    "to_ref": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_SUBSTRATECARDING.TO-W1-CCX.c0-c1-c2-cards.md"
+  },
+  "assignee": "0.8.0_AE_CloudComp~X",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS/C0.json",
+      "kind": "doc",
+      "commit_or_etag": "7bb29e2514",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Substrate card for C0 (facts/nodes). Validates against org/standards/SUBSTRATE_CARD.schema.json Draft 2020-12. Verdict QUALIFIED. Discharges cells SC-a-1 through SC-a-7.",
+      "artifact_covered_by": [
+        "CCX-AC1",
+        "CCX-AC2",
+        "CCX-AC3",
+        "CCX-AC4",
+        "CCX-AC5",
+        "CCX-AC7"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS/C1.json",
+      "kind": "doc",
+      "commit_or_etag": "7bb29e2514",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Substrate card for C1 (interactions/edges). Validates against the card schema. Verdict QUALIFIED. Discharges cells SC-b-1 through SC-b-7.",
+      "artifact_covered_by": [
+        "CCX-AC1",
+        "CCX-AC2",
+        "CCX-AC3",
+        "CCX-AC4",
+        "CCX-AC5",
+        "CCX-AC7"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS/C2.json",
+      "kind": "doc",
+      "commit_or_etag": "7bb29e2514",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Substrate card for C2 (motifs). Validates against the card schema. Verdict UNSOUND with one blocking defect named and owned. Discharges cells SC-c-1 through SC-c-7. [CORRECTED 2026-08-27 per 74158: this card's methodology originally described TWO materializers and attributed both static class-spec JSONs to MOTIF_c2c3_materialize_spec.py. Measured at source, there are THREE and that script writes only the 6-motif deviation subset (:44); the 13-motif canonical tier comes from NFRA_MOTIF_P1_canonical_ab_catalog.py (:58). Verdict unchanged: UNSOUND.]",
+      "artifact_covered_by": [
+        "CCX-AC1",
+        "CCX-AC2",
+        "CCX-AC3",
+        "CCX-AC4",
+        "CCX-AC5",
+        "CCX-AC7"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CCX-AC1",
+      "criterion_verbatim": "Three JSON cards exist (C0, C1, C2) and all three VALIDATE against SUBSTRATE_CARD.schema.json. Every one of the 21 rows carries non-empty basis + evidence + owner.",
+      "method": "schema_validation",
+      "invocation": "python -c \"import json,jsonschema; s=json.load(open('org/standards/SUBSTRATE_CARD.schema.json')); [jsonschema.Draft202012Validator(s).validate(json.load(open(p))) for p in ['...C0.json','...C1.json','...C2.json']]; print('3/3 VALID')\" ; then a per-row audit over the 7 schema rows x 3 cards asserting basis, evidence and owner are all non-empty after strip().",
+      "output_evidence": "3/3 VALID printed, no exception raised. Per-row audit: 'rows complete: 21 of 21' with zero MISSING lines. The validator is NOT dead -- the mutant control below removed the entire trust block from C0 and the same validator REJECTED it with \"'trust' is a required property\", so the three passes are real permissions rather than an inert probe.",
+      "denominator": "3 of 3 cards VALID; 21 of 21 rows carry non-empty basis + evidence + owner (7 schema rows x 3 cards, zero missing)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCX-AC2",
+      "criterion_verbatim": "All three carry byte-identical as_of.commit_ish and as_of.graph_vintage, matching s.1 exactly.",
+      "method": "diff",
+      "invocation": "python audit serialising {commit_ish, graph_vintage} from each card with sort_keys=True and comparing the three serialisations as a set.",
+      "output_evidence": "identical: True. Value on all three: {\"c\": \"fe269171f2\", \"g\": \"kuzu_nessie_db@2902399899597701830\"} -- byte-identical to TO s.1. carded_utc is 2026-08-26T18:17:02Z on all three, read from `date -u` at carding and never estimated between turns; the schema and TO both scope carded_utc as each lane's own clock rather than a wave-shared value. THE ANCHOR WAS NOT USED AS AN EVIDENCE VINTAGE: no evidence string in any card cites fe269171f2. Every citation carries the commit actually read -- ec0408628a (derive_runner.py), 5fc45ad69d (rule bank), 2efb72b1b4 (C2C3 canonical), 4724becca8 (layers canon), d89cc4fc9c (item2a.tf) -- each verified clean in the working tree at that commit, so the cited content is the content read.",
+      "denominator": "3 of 3 cards carry the identical anchor pair; 0 of 21 rows back-date an evidence citation to the wave anchor",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCX-AC3",
+      "criterion_verbatim": "coverage.denominator is NON-NULL on all three, in \"N of M\" form with both numbers named.",
+      "method": "command",
+      "invocation": "python audit: for each card, assert trust.coverage.denominator is not None and count regex matches of r'[\\d,]+\\s+of\\s+[\\d,]+'.",
+      "output_evidence": "C0: non-null=True, 5 'N of M' constructions, first '27,035 of 27,035'. C1: non-null=True, 5 constructions, first '58,224 of 58,224'. C2: non-null=True, 7 constructions, first '6,226 of 6,226'. Both numbers are named in every construction. Each card additionally prints the SUBSET denominators the bare totals would hide: C0 '20,750 of 27,035 (76.8%)' mapped to a role and '48 of 58' node_types; C1 '58,224 of 58,224 (100%)' under a declared name and '53 of 53' edge_types [CORRECTED 2026-08-26 per 74014: this exhibit originally read '37,521 of 58,224 (64.4%)' and '22 of 53', a WITHDRAWN figure computed from block KEYS rather than members. It is corrected here because the instance is the artifact a certifier opens, and the false number was cited AS A DEMONSTRATION THAT THE DENOMINATORS WERE EXEMPLARY -- a false figure wearing a compliance claim, which is the version that survives review]; C2 '19 of 6,226' class and '6,207 of 6,226' instance, plus '13 of 19' canon-tier.",
+      "denominator": "3 of 3 cards carry a non-null 'N of M' denominator with both numbers named; 0 of 3 null",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCX-AC4",
+      "criterion_verbatim": "Any card with determinism in {inferential, hybrid} carries a populated inference_detail including failure_is_loud.",
+      "method": "command",
+      "invocation": "python audit: for each card read process.methodology.determinism, test membership in {inferential, hybrid}, and require a populated inference_detail when the test is true.",
+      "output_evidence": "All three cards carry determinism = 'unknown', so the AC4 trigger condition is FALSE on all three and inference_detail is legitimately null. THIS IS A VACUOUS PASS AND IS DECLARED AS ONE RATHER THAN CLAIMED AS A STRONG ONE -- the criterion was not exercised because no card reached the state that arms it. 'unknown' is the schema's own honest value ('never default to deterministic because it looks that way') and is used here because determinism was NOT exercised on any of the three subjects: a second derive cannot be a control while the estate mutates under it and the CloudTrail incremental writes continuously, and for C2 the composer has approximately ONE successful production run in its history. Each card's methodology.evidence names the instrument that WOULD settle it (two derives against a pinned input snapshot) and states that this lane cannot perform that read.",
+      "denominator": "0 of 3 cards trigger AC4 (0 carry inferential or hybrid); 3 of 3 carry the honest 'unknown' with evidence of what was not exercised",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCX-AC5",
+      "criterion_verbatim": "verdict.standing is INCOMPLETE iff >=1 row is genuinely unworked. A SOUND/QUALIFIED verdict over an unworked row fails.",
+      "method": "command",
+      "invocation": "python audit: for each card collect the 7 row bases, count rows whose basis is blank/absent-of-work, and assert (standing == 'INCOMPLETE') == (unworked > 0).",
+      "output_evidence": "C0 standing=QUALIFIED, bases=['measured'], unworked=0 -> OK. C1 standing=QUALIFIED, bases=['measured'], unworked=0 -> OK. C2 standing=UNSOUND, bases=['measured'], unworked=0 -> OK. No card is INCOMPLETE and no card carries an unworked row, so the biconditional holds in both directions. THE ABSENT-VS-UNWORKED DISTINCTION DID NOT BITE THIS TO: zero rows across the three cards carry basis 'absent', so the trap TO s.5 names (treating a worked 'absent' row as unworked) had no instance here. C2's UNSOUND is a verdict about the SUBJECT, not about the card -- all seven of its rows are worked, which is exactly why it is UNSOUND rather than INCOMPLETE, and the card states that distinction on its face.",
+      "denominator": "3 of 3 cards satisfy the biconditional; 0 of 21 rows unworked; 0 of 21 rows carry basis 'absent'",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCX-AC6",
+      "criterion_verbatim": "ZERO commits by this lane touching any generator it carded during the wave.",
+      "method": "command",
+      "invocation": "git log --author-filter and git diff --name-only over this lane's commit set for the wave, checked against the generator paths named across the three cards: infra/aws/globgrph/derive_runner.py, org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml, org/modules/graph/NFRA_ONTOLOGY_C2C3_CANONICAL.yaml, org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/*, org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/motif_c2c3_materialize*.json, infra/aws/terraform/globgrph/*.",
+      "output_evidence": "This lane's commit for this TO touches ONLY its own deliverables: the three cards under deliverables/D11_CARDS/, this proof-of-spec instance, and the session log. ZERO generator files were edited, and none was opened for write at any point. The kimi_subdivision_harness composers were treated as READ-ONLY throughout per the TO's shared-file warning -- C2's methodology row records that this lane did NOT re-run c2_individuate precisely because that tree belongs to 3.0.0_SA_CVO. Every defect found is carried as a named row with a named owner rather than as an edit: the C2 vocabulary split is owned by the rule-bank ratification chain, the untracked composer envelopes by 3.0.0_SA_CVO, the unbound node_types and edge_types by the ratification chain and 0.4.0_DE_ClientPlatform. QUALIFY-DO-NOT-FIX HELD, and the temptation was real on the untracked-envelope row, where `git add` would have been a one-command 'fix' that silently took another seat's decision.",
+      "denominator": "0 of 6 carded generator paths touched by this lane; 3 of 3 cards remediate nothing",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCX-AC7",
+      "criterion_verbatim": "Every row with basis: measured has evidence that is a grounding: file:line @ <commit-ish>, or a command exercised with its output.",
+      "method": "manual_read_with_citation",
+      "invocation": "python audit over all 21 rows: for each row with basis == 'measured', require the evidence string to carry either an @<commit-ish> citation or a named exercised command with its output.",
+      "output_evidence": "C0: 7 measured rows, 0 ungrounded. C1: 7 measured rows, 0 ungrounded. C2: 7 measured rows, 0 ungrounded. Groundings are of two kinds and both carry their vintage: source citations (derive_runner.py:1357-1362 and :1645-1699 @ec0408628a; NFRA_ONTOLOGY_RULE_BANK.yaml#node_bindings @5fc45ad69d; NFRA_ONTOLOGY_C2C3_CANONICAL.yaml#c2_motif_families @2efb72b1b4; item2a.tf:439 @d89cc4fc9c; C0_C1_C2_C3_C4_SYSTEM_LAYERS.md @4724becca8), and exercised commands quoted with their returned values (comp-kuzu censuses with counts; aws events list-rules and aws scheduler list-schedules with rule names and cron expressions; git ls-files --error-unmatch tracked/untracked verdicts; the four-arm failure battery with its three zeros and one Binder exception). All six cited files were verified clean in the working tree at their cited commit, so the cited content IS the content read. HELD ROWS ARE MARKED HELD, NOT MEASURED: 1.0.0_SA_CTO~X's per-side coverage percentages, the s3://opal-estate-report second kuzu db, the nerves-edges stores and the 19-day outage window are all carried with attribution inside evidence strings rather than restamped as this lane's measurements.",
+      "denominator": "21 of 21 measured rows carry a vintage-bearing citation or an exercised command with output; 0 ungrounded",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted a structural mutant in the card most likely to pass on shape alone: deep-copied C0.json and deleted the entire top-level 'trust' block -- the grain the PRD calls 'the ones always skipped and the ones that draw blood' -- then ran the SAME validator that returned 3/3 VALID.",
+      "expected": "The validator REJECTS the trust-removed card, proving the 3/3 VALID result is a real permission rather than an inert or misconfigured probe.",
+      "observed": "REJECTED with \"'trust' is a required property\". The arm fired.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs compared on both instruments this deliverable depends on. (1) The schema validation was run twice over the identical three card files. (2) A graph count (C2Motif total) was invoked twice through comp-kuzu against the same pinned snapshot and the outputs compared.",
+      "observed": "RUN A: 3/3 VALID. RUN B: 3/3 VALID. comp-kuzu run A -> 6226, run B -> 6226, compared IDENTICAL. NOT CLAIMED, and the distinction matters for this particular TO: this control establishes that the READ instruments are stable across two invocations. It does NOT establish that the SUBJECTS are deterministic -- all three cards carry determinism 'unknown' for exactly that reason, and conflating a stable reader with a reproducible producer would be the error the determinism row exists to prevent.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "C3.i-as-built and comp-similar",
+      "reason": "0.7.0_AE_CloudOps~X's cells under the same decomp; not this TO's 21."
+    },
+    {
+      "item": "D1, D2, D3",
+      "reason": "0.8.0_AE_CloudComp~Y's cells. C2's methodology finding was ROUTED to them as D2's input rather than carded on their behalf."
+    },
+    {
+      "item": "SC-m-3, the graph-object manifest",
+      "reason": "0.4.0_DT_ClientPlatform~X's cell. This TO populates projection_of as their input; it does not assemble the manifest."
+    },
+    {
+      "item": "nerves_resolve",
+      "reason": "Boundary SC-bnd-1: an example, not a wave member. The reference card @e82c50a15b arrived AFTER all three cards were written and was NOT used as a template."
+    },
+    {
+      "item": "Wave 2",
+      "reason": "Derived from wave-1 rows 1 and 4 by construction, never enumerated up front (boundary SC-bnd-2)."
+    },
+    {
+      "item": "Mapping CORRECTNESS on all three cards",
+      "reason": "This TO measured mapping COVERAGE (how many types are bound, against what denominator). It did NOT verify that a bound member is bound correctly -- a different question at a different cost, claimed by no card."
+    },
+    {
+      "item": "The Iceberg WAREHOUSE plane",
+      "reason": "Every count in all three cards is the kuzu PROJECTION plane at snapshot 2902399899597701830. CTO~X's warehouse figures (27,061 nodes / 60,858 edges) are a different plane at a different vintage, named where relevant and deliberately NOT reconciled, per the TO's instruction not to re-pin as_of."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION (routed to 3.0.0_SA_CVO, cc 2.0.0_SA_COO~X): the DECOMP's AC-F3 states verdict INCOMPLETE iff >=1 row carries basis 'absent', while the TO's CCX-AC5 and s.5 state INCOMPLETE iff >=1 row is genuinely UNWORKED and say explicitly that an 'absent' row WITH evidence is worked and complete. These two formulations diverge for any card carrying a worked 'absent' row. No effect on this TO -- zero of its 21 rows carry basis 'absent' -- but it could bite a lane whose subject is expected to card empty. Reported, not acted on.",
+    "OBSERVATION (already surfaced fabric-wide by 2.0.0_SA_COO~X 73000/73046 before this instance landed): the comp-find content-pattern-plus---name invocation trap. This lane audited all four of its own comp-find calls against it: -i 'c1_' --band DEF (26,828 scanned), --name 'c0*.py' (28,794 scanned), --name 'c1*.py' (28,794 scanned, 0 hits -- a MEASURED zero), -i 'motif:a-access' (26,828 scanned). 4 of 4 carry a non-zero scanned denominator and none used the trap shape, so no census in these three cards is contaminated.",
+    "OBSERVATION (reported to 2.0.0_SA_COO~X): this TO's s.2 table carries 1.0.0_SA_CTO~X's held figure '13 canonical families'. Measurement resolves it to the GRAPH's canon tier (13 canon-tier class nodes) and NOT to the declared catalog, which carries 12 families under entirely different names. The held figure is true of one object and not the other; per COO~X 73046 the measurement is reported rather than the expectation."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-26/substratecarding_c0_c1_c2_cards_1728-1900Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"what generates the C0 facts / C1 edges / C2 motifs in the graph\"",
+      "result": "PARTIAL -- returned a declared near-tie (comp-estate --resource / comp-pipescript io at score 1.50, comp-xref at 0.47) over 80 tools, explicitly labelled 'TOP SCORES ARE TIED -- THE ORDER IS NOT A RANKING'. It did not name a generator, which is the documented if_mismatch branch. Widened DELIBERATELY per the TO rather than concluding absent: comp-estate --layers for the ladder canon, then the producer source. Recorded because an early stop and a true absence are identical in notes and opposite in the estate."
+    },
+    {
+      "tool": "comp-estate",
+      "invocation": "comp-estate --layers",
+      "result": "PASS -- returned the STABLE CANON ladder defining all three subjects: C0 'FACTS ~20k NODES: role-typed objects (14 roles)', C1 'INTERACTIONS ~40k EDGES: the 10 relations', C2 'MOTIFS 12 DISCOVERED (recurrence >= 2)', each marked VIEW-COMPILED, plus the authority/update table and the serving law. This is the single highest-value call of the session: it supplied the DECLARED side of all three coverage and key rows, without which the live counts would have had nothing to be measured against. Its own warning against pinning derivable digits in prose was honoured -- every count in the three cards is derived, none quoted from this document."
+    },
+    {
+      "tool": "comp-kuzu",
+      "invocation": "~15 traversals against the canonical DB, provenance header read on every call. Node/edge type censuses; C2Motif grain split with the canon's MANDATED positive control (C3System grain=class -> 4, >0, proving the grain predicate is usable at this vintage); population=canon split (13/6); composed-against snapshot probes; and the four-arm failure-mode battery.",
+      "result": "PASS -- provenance header confirmed the read sits AT the wave pin (nodes snapshot-id 2902399899597701830, Nessie HEAD 'current (pin == marker HEAD)', built 2026-08-26T14:07:59Z), so no vintage caveat was needed on any graph figure. Header also supplied the per-table cadence bands that produced C1's nodes-vs-edges skew finding. Its disclosure that 'last-write is the TABLE's write time, NOT the age of the data in it' prevented a false freshness claim on graph_nodes."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "4 calls, each with exactly one of {content pattern, --name}: -i 'c1_' --band DEF; --name 'c0*.py'; --name 'c1*.py'; -i 'motif:a-access' --limit 10.",
+      "result": "PASS with a caught near-miss. The band grading was load-bearing on the last call -- 236 hits over 26,812 scanned, BANDS HEAD=227, and reading the bands rather than the first page is what showed every HEAD hit was inside the producer's own input spec JSONs rather than a mapping file, which is the evidence behind C2's declared_mapping: null. The FIRST two calls surfaced c0*/c1* homonyms (49F gold runners, comp_ladder rules, a kimi compile-step dict) that are NOT the ladder rungs; treating them as the subject would have carded the wrong object entirely. All 4 calls audited against the 73000 invocation trap: 4 of 4 clean, non-zero scanned denominators."
+    },
+    {
+      "tool": "aws events / aws scheduler (live-plane trigger census)",
+      "invocation": "aws events list-rules and aws scheduler list-schedules, both paginated and materialized client-side, filtered with --query on the materialized set rather than --query 'length(...)'.",
+      "result": "PASS -- BOTH PLANES SWEPT, which is the point: the events plane carries the C0/C1/C2 producer (opal-globgrph-derive-runner-nightly cron(0 2 * * ? *) ENABLED; opal-globgrph-cloudtrail-mgmt event-pattern ENABLED) and the scheduler plane carries 18 schedules of which none is a graph producer. A one-plane sweep would have returned a true, correctly-controlled answer about the wrong population. length() was deliberately avoided because it returns the PAGE count on a paginated list-*."
+    },
+    {
+      "tool": "jsonschema (Draft 2020-12) + git ls-files",
+      "invocation": "Card validation over the three deliverables with a planted mutant control; git ls-files --error-unmatch per file for tracked/untracked status.",
+      "result": "PASS -- 3/3 VALID, mutant REJECTED. git ls-files produced C2's second-persistence-surface finding as a measured binary fact rather than an impression: the two INPUT spec files are TRACKED while the composer's two OUTPUT envelopes (10.3MB and 2.1MB) are UNTRACKED."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_SUBSTRATECARDING.TO-W1-CCX_PROOF_OF_SPEC.json CCX-AC1,CCX-AC2,CCX-AC3,CCX-AC4,CCX-AC5,CCX-AC6,CCX-AC7",
+      "result": "Run at phase 3 after commit; result recorded in the session log. Cell-id join pre-verified before authoring this instance: all 21 of this TO's cell ids (SC-a-1..7, SC-b-1..7, SC-c-1..7) are present in the DECOMP's harvested id set of 61 at c8aa46b1a5, so the bidirectional alignment closes with 0 orphan refs."
+    }
+  ]
+}

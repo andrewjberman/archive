@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.7.0_AE_CloudOps~Z</issued_to>
     <date>2026-08-07</date>
-    <status>staged</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_CANPLAT, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
     <go_condition>GO fires from 2.0.0_SA_COO~Z when DS~Z closes MDPF_CANPLAT.P1-1 with its module list + pinned commit + QA evidence (RAVC-4). Reading/design against @d136d5bb1 may begin any time; NO package build against an unclosed P1-1 commit — the modules may still move.</go_condition>
     <project_code>MDPF_CANPLAT</project_code>
     <supersedes>none — this is the seat the prior generation never authored (P2-1 deferred input-read grants + the adjacency exercise "to P1-2"; this is that TO)</supersedes>

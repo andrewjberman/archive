@@ -1,6 +1,6 @@
 # TO D4_ETFPOS.TO-D4b — DIVZ+IDVZ holdings: PROVENANCE FIRST, then the delivery path (LAPTOP; UNGATED)
 
-<task_order id="D4_ETFPOS.TO-D4b" project="D4_ETF_POSITIONING">
+<task_order id="D4_ETFPOS.TO-D4b" project="ETFS_POSITIONING">
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:55Z</issued>

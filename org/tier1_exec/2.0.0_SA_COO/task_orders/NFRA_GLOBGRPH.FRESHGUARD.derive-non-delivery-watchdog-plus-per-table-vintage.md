@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.7.0_AE_CloudOps (build both) + 1.0.0_SA_CTO (arch-gate both) + 3.0.0_SA_CVO (I3 red-fixture verify)</issued_to>
     <date>2026-07-08</date>
-    <status>dispatched</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_GLOBGRPH is complete; this TO was last touched 2026-07-08, predating the project close 2026-07-09. Closed as a record act, not a work verdict. Prior status: dispatched</status>
     <prd_ref>docs/architecture/NFRA_GLOBGRPH_PRD.md (freshness contract / marker-HEAD-oracle) + NFRA_SEMCTL_HONESTY_INVARIANTS.md (I1 false-freshness, I3 fires-when-exercised)</prd_ref>
     <dispatch_state>DISPATCHED 2026-07-08 by COO~B. Andrew-directed finding (0.7.0_AE surfaced live-grounded). CTO arch-RULED both fixes (025559Z). Non-P0 for loop-close (0.7.0's controlled derive run unblocks MOTIF-P0/INFRPT now); a fast systemic follow-on.</dispatch_state>
     <gate_note>THE FINDING: the nightly Fargate derive_runner (SOLE writer of graph_edges) did NOT deliver tonight; the marker-HEAD-oracle read FRESH because node/cse writers re-stamp the marker with graph_edges' EXISTING snapshot -> SILENT 23h edge-freeze (canonical GOV-A I1 false-freshness). Root of the MOTIF-P0 clusters-not-live + INFRPT-P3 L3-never-refreshed. Two SYSTEMIC guards (defense-in-depth), needed regardless of the RC 0.7.0 is isolating (schedule-fault vs broken-derive = the SPECIFIC repair, separate).</gate_note>

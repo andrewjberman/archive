@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SUBSTRATECARDING.TO-W3-DTX3",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/NFRA_SUBSTRATECARDING.TO-W3-DTX3.md",
+    "group": "W",
+    "vintage_commit": "e48a7466ba"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-substratecarding-w3/DECOMP.md",
+    "vintage_commit": "e48a7466ba",
+    "to_ref": "org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/NFRA_SUBSTRATECARDING.TO-W3-DTX3.md"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform~X",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_W3/W3-gkih__infra_aws_globgrph_kuzu_load_py.json",
+      "kind": "config_data",
+      "commit_or_etag": "a1349e7ce1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Substrate card, a governance record. No deploy surface."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_W3/W3-mdiu__infra_aws_globgrph_kuzu_stitch_load_py.json",
+      "kind": "config_data",
+      "commit_or_etag": "a1349e7ce1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Substrate card, a governance record. No deploy surface."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_W3/build_cards_w3.py",
+      "kind": "script",
+      "commit_or_etag": "a1349e7ce1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Generator. The cards are GENERATED, not hand-authored, so a regeneration cannot silently disagree with them."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DTX3-AC1",
+      "criterion_verbatim": "2 cards exist and all VALIDATE against the v2 contract. Every row carries `basis` + `evidence` + `owner`.",
+      "method": "schema_validation",
+      "invocation": "jsonschema Draft202012Validator over org/standards/SUBSTRATE_CARD.v2.schema.json against both W3-*.json; row sweep over the 7 (grain, field) pairs per card",
+      "output_evidence": "cards=2; validation errors: {\"W3-gkih__infra_aws_globgrph_kuzu_load_py.json\": 0, \"W3-mdiu__infra_aws_globgrph_kuzu_stitch_load_py.json\": 0}; TOTAL=0. Rows carrying all three of basis+evidence+owner: 14 of 14. NEGATIVE CONTROL (empty object vs the same schema) = 8 errors -> the control FIRES, so the zero is a real zero and not a dead validator.",
+      "denominator": "2 cards of 2 required; 14 rows of 14 (7 rows x 2 cards) = the 14 cells",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DTX3-AC2",
+      "criterion_verbatim": "`as_of` carries ONE wave pin: `commit_ish` and `graph_vintage` byte-identical across your cards. `carded_utc` is an HONEST clock read at a DECLARED grain (per-card or per-batch -- state which), never estimated, never copied.",
+      "method": "schema_validation",
+      "invocation": "set() over json.dumps(card['as_of'], sort_keys=True) for every card",
+      "output_evidence": "DISTINCT as_of stamps across the batch = 1 (1 required). Value: {\"carded_utc\": \"2026-08-27T06:36:02Z\", \"commit_ish\": \"e48a7466ba\", \"graph_vintage\": \"kuzu_nessie_db@2902399899597701830\"}. GRAIN DECLARED: PER-BATCH -- ONE `date -u` read at 2026-08-27T06:36:02Z, held in a single module constant in build_cards_w3.py so both cards take it by construction rather than by my remembering to copy it. PIN CORRECTNESS: e48a7466ba is the decomp's OWN last commit per 2.0.0_SA_COO~X 74831, NOT the superseded d2cf839c79/af384e8da1 that every wave-3 TO carried before the repin.",
+      "denominator": "1 distinct as_of required across 2 cards",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DTX3-AC3",
+      "criterion_verbatim": "WHERE IS THE TABLE NAME BOUND -- every card states CLASS 1 / 2 / 3 with the line that binds it, and whether the bound set is ENUMERABLE. A class without a line number is not an answer.",
+      "method": "manual_read_with_citation",
+      "invocation": "read at e48a7466ba: kuzu_load.py:142,:147 and kuzu_stitch_load.py:70,:74; recorded in each card's process.methodology.evidence",
+      "output_evidence": "BOTH CLASS 1, bound at the call site as DDL string literals, WITH LINES. kuzu_load.py:142 'CREATE NODE TABLE IF NOT EXISTS CloudNode(' + :147 'CREATE REL TABLE IF NOT EXISTS CloudEdge('. kuzu_stitch_load.py:70 + :74, same two names. BOUND SET ENUMERABLE = YES for both, exactly {CloudNode, CloudEdge}; no code path in either file derives a table name from input. Citations verified byte-identical at e48a7466ba and in the worktree (git hash-object both sides), positive control: git diff --name-only e48a7466ba HEAD non-empty.",
+      "denominator": "2 subjects of 2, 4 binding sites of 4",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DTX3-AC4",
+      "criterion_verbatim": "WHAT IT WRITES -- a resolvable path or table name, never a description. A card that says X is a materializer without naming WHICH artifact is unfalsifiable.",
+      "method": "manual_read_with_citation",
+      "invocation": "artifact.location.home + artifact.location.evidence on both cards; both written artifacts read on disk this session",
+      "output_evidence": "gkih writes TWO named artifacts: tables CloudNode + CloudEdge inside infra/aws/globgrph/kuzu_db (bound :30, derived from __file__), and infra/aws/globgrph/kuzu_db._build_manifest.json (path computed _provenance.py:34+:44-46, written kuzu_load.py:269). mdiu writes tables CloudNode + CloudEdge inside infra/aws/globgrph/kuzu_stitch_db (bound :30) and infra/aws/globgrph/kuzu_stitch_db._build_manifest.json (written :116). All four read on disk: kuzu_db 9,224,192 B, kuzu_stitch_db 9,170,944 B, manifests 327 B and 349 B.",
+      "denominator": "4 written artifacts across 2 subjects, all 4 resolved on disk",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DTX3-AC5",
+      "criterion_verbatim": "TRIGGER -- plane (`events` / `scheduler` / `event-driven` / `none-found`) plus BASIS. An ECS rule target resolves to a CLUSTER, not a script: any \"X is triggered by Y\" is INFERRED unless read from the task definition's container command. Mark it.",
+      "method": "command",
+      "invocation": "comp-find 'kuzu_load' --all and comp-find 'kuzu_stitch_load' --all; then the CONTAINER COMMAND read from infra/aws/globgrph/Dockerfile:186; then each artifact's own _build_manifest.json built_at",
+      "output_evidence": "PLANE = none-found FOR BOTH, basis=measured, on three instruments that fail differently. (1) repo-invocation plane: 187 hits for kuzu_load and 70 for kuzu_stitch_load over a PRINTED DENOMINATOR of 27,093 files scanned / 13 unreadable / 1,948 binary -- ZERO are invocations. (2) container plane, READ FROM THE IMAGE DEFINITION AS THIS CRITERION DEMANDS, not inferred from a rule target: Dockerfile:186 is CMD [\"python\", \"/app/derive_runner.py\"]; Dockerfile:156 states a local Kuzu DB is ABSENT in-container. (3) the discriminating oracle -- write_manifest is called unconditionally on every successful build, so kuzu_db's built_at of 2026-06-12 (75.68d) and kuzu_stitch_db's of 2026-07-07 (50.60d) mean no successful run in that span. RESIDUALS MARKED ON BOTH CARDS: a trigger that fires and FAILS leaves no stamp; a trigger writing to a non-default --db-path stamps elsewhere; `aws events list-rules` / `aws scheduler list-schedules` were NOT swept, so the claim is scoped to the default artifact and says so.",
+      "denominator": "2 subjects of 2; 3 instruments per subject; 27,093 files scanned",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DTX3-AC6",
+      "criterion_verbatim": "RULE 26 device/apply owner, and RULE 25 dormancy (>=90d stale = dormant absent a declared exception). Rule 26 is NOT a class constant -- measured non-uniform in wave 2.",
+      "method": "command",
+      "invocation": "git log -1 per module for the source clock; each artifact's own _build_manifest.json built_at for the artifact clock; arithmetic against a single `date -u` read of 2026-08-27T06:17:47Z",
+      "output_evidence": "RULE 25: BOTH CLOCKS REPORTED, because they disagree and reporting one would hide it. kuzu_load.py source 2026-07-25 = 32.78d while its ARTIFACT is 75.68d; kuzu_stitch_load.py source 2026-06-12 = 75.68d while its ARTIFACT is 50.60d. NEITHER reaches the 90d bar, so DORMANT DOES NOT FIRE for either -- stated explicitly on both cards so the UNSOUND verdicts are not misread as age findings. Rule 25's successor clause IS the operative half and is satisfied: successor MEASURED as kuzu_nessie_load.py -> kuzu_nessie_db (0.67d, 27,035 nodes), so both are MIGRATED, not abandoned. RULE 26 MEASURED PER SUBJECT AND NOT ASSUMED FROM THE CLASS: both run dev-box only with no automated applier, and both modules are NEVER-rule compliant on device-specificity (paths derived from __file__ at kuzu_load.py:29-30 and kuzu_stitch_load.py:28-30). The NON-UNIFORMITY IS REAL AND IS RECORDED: kuzu_stitch_db's live manifest embeds an absolute Windows device path as stitch_path while kuzu_db's does not -- the ARTIFACT carries a device fingerprint the CODE correctly avoids. Named as data, not logic, so not a NEVER-rule violation.",
+      "denominator": "2 subjects x 2 clocks (source + artifact) = 4 age measurements",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DTX3-AC7",
+      "criterion_verbatim": "DISCOVERABILITY IS NOT COVERAGE. No card asserts completeness of the writer population. If your subject can write tables it does not name, say so and say the bound is UNBOUNDED.",
+      "method": "manual_read_with_citation",
+      "invocation": "trust.coverage on both cards; re-read for any completeness claim",
+      "output_evidence": "NEITHER SUBJECT CAN WRITE A TABLE IT DOES NOT NAME -- both are CLASS 1 with an ENUMERABLE two-member bound, so the UNBOUNDED verdict does NOT apply on the table-name axis, and neither card claims it does. THE HONEST ADJACENT FINDING IS RECORDED INSTEAD: the DB PATH is unbounded from CLI input on both (--db-path :292 / --db :40), and under --force that operator-supplied path goes straight to shutil.rmtree (:257 / :59) -- the Class-3 shape displaced from the NAME axis onto the LOCATION axis. NAMED, NOT FIXED. Both coverage rows state on their face that they count what ONE MATERIALISATION contains and assert nothing about the writer population or the estate. mdiu's row additionally refuses to attribute a 290-node pipeline residual it cannot discriminate.",
+      "denominator": "2 coverage rows of 2; 0 completeness claims made",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DTX3-AC8",
+      "criterion_verbatim": "QUALIFY-DO-NOT-FIX. Zero commits by this lane touching a module it cards. The Class-3 remedy (`choices=`, already written at `snap_store.py:415`) is NAMED, NOT APPLIED.",
+      "method": "command",
+      "invocation": "git log --all --format='%h %an' -- <each carded module>, filtered to this lane's serial",
+      "output_evidence": "COMMITS BY 0.4.0_DT_ClientPlatform~X TOUCHING EITHER CARDED MODULE: 0. Rows: []. POSITIVE CONTROL (org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_W2): the IDENTICAL query shape -- --all, '%h %an', filtered to this same serial -- returns 5 commit(s), so the zero above is a real zero and not a broken query. The exercises run against both modules wrote ONLY into the session scratchpad via --db-path/--db; no repo artifact under infra/aws/globgrph/ was created, modified or deleted. Defects found in both modules are NAMED in verdict.blocking_defects with UNOWNED remedies, and none is repaired here.",
+      "denominator": "2 carded modules of 2 swept, full history (--all)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO planted mutants against the two limbs AC1 actually asserts. MUTANT A deletes `owner` from one card's process.methodology -- the 'every row carries basis+evidence+owner' limb. MUTANT B sets trust.coverage.basis='measured' while degrading one basis_by_field entry to 'inferred' -- the v2 FLOOR RULE, chosen because the schema enforces only the 'measured' case and a partially-enforced rule is the arm most worth exercising. A passing assertion never mutated has never been tested.",
+      "expected": "both mutants REJECTED by the same validator that accepts the real cards",
+      "observed": "MUTANT A (owner deleted): 1 validation error(s) -> FIRED. MUTANT B (measured over an inferred sub-claim): 1 validation error(s) -> FIRED. Real cards under the same validator: 0 errors.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "sha256 of both card files, then re-run build_cards_w3.py, then sha256 again -- the cards are GENERATED, so a regeneration that disagreed with the committed bytes would mean the artifact and its generator had diverged.",
+      "observed": "identical=True. W3-gkih__infra_aws_globgrph_kuzu_load_py.json 6747b445a23e; W3-mdiu__infra_aws_globgrph_kuzu_stitch_load_py.json ca3cdce83365",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The AWS trigger planes -- `aws events list-rules` and `aws scheduler list-schedules` were NOT swept.",
+      "reason": "An EventBridge or Scheduler target resolves to a cluster/task, not to a python script, so such a trigger could only reach either subject THROUGH the derive-runner container command, which was read directly (Dockerfile:186) and is derive_runner.py. The residual this leaves open is an ECS containerOverrides command set at run time, which no repo read can see; it is named on both cards rather than covered."
+    },
+    {
+      "item": "Whether the 290-node `pipeline` surplus in kuzu_stitch_db over kuzu_nessie_db is stale nodes since removed or genuine coverage the successor lost.",
+      "reason": "Not discriminable from counts alone -- the two DBs are 50 days apart and built from different sources. The settling instrument is a same-vintage rebuild, which was not run. Recorded as UNRESOLVED on the mdiu coverage row and explicitly excluded from that card's verdict rather than folded into it."
+    },
+    {
+      "item": "Any repair of the defects found in either carded module.",
+      "reason": "DTX3-AC8 qualify-do-not-fix. All are recorded in verdict.blocking_defects with UNOWNED remedies."
+    },
+    {
+      "item": "forward_disposition for both subjects.",
+      "reason": "Born `undecided` with set_by null, per the schema's own rule that the carding lane must not adjudicate its own subject's fate. Andrew's instruction is that dispositioning happens AFTER carding."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION -- the decomp cell's write_evidence for BOTH my subjects asserts 'standing=SUPERSEDED and REACHABLE FROM THE LIVE NIGHTLY'. SUPERSEDED is corroborated. REACHABLE FROM THE LIVE NIGHTLY is NOT: the derive-runner container command is derive_runner.py (Dockerfile:186), there is no invocation site across 27,093 files, and neither artifact has been successfully rebuilt in 75.68d / 50.60d measured from a stamp the writers emit unconditionally. Reported, not acted on; the cell text is the issuer's to amend.",
+    "OBSERVATION -- kuzu_stitch_load.py:123 passes len(best), the deduped INPUT count, into write_manifest. Under the file's own MERGE semantics that is not the store's node count. EXERCISED: manifest claimed 2 while the DB held 5. _provenance.py:6-8 states comp-kuzu prints this manifest as a provenance header on EVERY invocation, so the instrument built to make staleness checkable can misreport the store it describes. NOT FIXED (AC8).",
+    "OBSERVATION -- kuzu_load.py's default invocation against an existing DB writes nothing, prints 'OK: Kuzu DB at <path>' and exits rc=0. Anything that wires this into a schedule gets a permanently frozen DB reporting success forever. NOT FIXED (AC8).",
+    "OBSERVATION -- three Kuzu DBs share infra/aws/globgrph/ and the loaders declare tables of the SAME two names (CloudNode/CloudEdge) with THREE different column sets, guarded only by IF NOT EXISTS and by hand-written prose warnings in four sibling tools. Structural, pre-existing, and outside this TO.",
+    "OBSERVATION -- the wave-3 DECOMP.md face carries internally inconsistent totals: section 1 lists 11 subjects while section 2's preconditions report '9 of 9', section 3's class table sums to 70 cells and section 5's seating table sums to 77. My own 2 subjects / 14 cells are consistent everywhere, so nothing in DTX3 is blocked by it. Issuer's face to amend."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DT_ClientPlatform/logs/2026-08-27/dtx3_w3_kuzu_materializer_carding.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'kuzu_load' --all ; comp-find 'kuzu_stitch_load' --all",
+      "result": "187 and 70 hits over a printed denominator of 27,093 files scanned / 13 unreadable / 1,948 binary. Banded HEAD/SURFACED/CONFIG/DOC. Established the none-found trigger verdict on the repo-invocation plane and surfaced critical-surfaces.yaml:163's declared nightly, which is what made the DESIRED-vs-APPLIED gap measurable rather than merely suspected. Used with --all rather than piped through head, per the rail's own trap list."
+    },
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which 'how do I grep the repo' (startup A.3 exercise limb)",
+      "result": "Forwarder produced its own banner -- confirms the comp rail RESOLVES AND RUNS, not merely resolves. PATH read 105 of 105 comp-tools resolving bare."
+    },
+    {
+      "tool": "git hash-object / git show",
+      "invocation": "git show <pin>:<file> | git hash-object --stdin, against git hash-object <worktree file>, for all 5 cited files",
+      "result": "All 5 byte-identical at e48a7466ba and in the worktree. Positive control: git diff --name-only e48a7466ba HEAD returns rows, so the comparison can detect change. Comparing blob hashes on BOTH sides keeps the CRLF/LF normalisation identical, which a raw sha256sum across that boundary would not."
+    },
+    {
+      "tool": "jsonschema Draft202012Validator",
+      "invocation": "validate both cards against SUBSTRATE_CARD.v2.schema.json; empty object as negative control; two planted mutants",
+      "result": "0 errors on both cards; negative control 8 errors; both mutants rejected."
+    }
+  ]
+}

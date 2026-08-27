@@ -7,7 +7,7 @@
 <arch_gate>1.0.0_SA_CTO -- the Eclipse crawl-config + the DC0.4 live-gate + the Eclipse reverse-ETL method + leads the joint trade-plane build-vs-buy in D5</arch_gate>
 <issued_by>2.0.0_SA_COO (Andrew-direct recon scope-refinement via CTO 151514Z; Andrew-ratified Recon ROE)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project DATA_PLATFORM, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <!-- GATED on DC0-integration-ready + the DC0.4 live-gate + base-AE adding the Eclipse vendor-config to DC0 (same inf-exporter, the Eclipse-JWT-exchange path). Eclipse = a DISTINCT product (own UI orioneclipse.com + own Eclipse-JWT), NOT folded into Orion-Connect (DC1). -->
 <!-- RE-SLOT 2026-07-02 (COO, per CTO heads-up 164658Z, Andrew-direct 0.7.0-base->YCharts pivot): SEQUENCED BEHIND the 0.7.0_AE-base YCharts-skill refinement (Andrew-direct priority). Owner UNCHANGED (0.7.0 base lead + 0.5.0 co); base resumes this AFTER ycharts lands. Not 0.7.0~A (it must stay responsive for the bd(a) box-rollout GO during the ETLFIX P0). Recon = not-hot-path (ETLFIX P0 does not depend on it -> no orphan by deferral). CONTINGENCY: if a downstream DATA_PLATFORM need surfaces before ycharts completes, re-route to a live cloud-ops hand at that point. -->
 <roe>MANDATORY: complies with docs/architecture/DATA_PLATFORM_RECON_ROE.md (Option-A/B within the 4 constraints; careful/stealthy; forbidden-tier HARD-EXCLUDED).</roe>

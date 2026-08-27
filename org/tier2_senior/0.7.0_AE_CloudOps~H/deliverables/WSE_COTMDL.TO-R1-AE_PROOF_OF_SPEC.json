@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "to_id": "WSE_COTMDL.TO-R1-AE.model-detail-scope-all",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/WSE_COTMDL.TO-R1-AE.model-detail-scope-all.md",
+    "group": "OTHER",
+    "vintage_commit": "ea6f3f4f7c"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/cotmdl-model-scope-all/20260825T091500Z/DECOMP.md",
+    "vintage_commit": "4c9479aaae",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/WSE_COTMDL.TO-R1-AE.model-detail-scope-all.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~K",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf",
+      "kind": "terraform",
+      "commit_or_etag": "27a3a98cdc",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Line 154 MODEL_DETAIL_SCOPE = \"all\", committed 2026-08-25T05:36:58-04:00 by 0.7.0_AE_CloudOps~H, then applied via .tools/safe-apply.sh -chdir=infra/aws/terraform/opal-assets apply -target=module.cot_rebalancer_runner.aws_lambda_function.this -auto-approve, RC0. APPLIED read (Rule 22a): aws lambda get-function-configuration cot-rebalancer-runner -> Environment.Variables.MODEL_DETAIL_SCOPE = \"all\", re-confirmed live by 0.7.0_AE_CloudOps~K 2026-08-26. Ledger org/critical_paths/change_management/20260825T0939Z_cotmdl-model-detail-scope-all_deploy_completion.md CLOSED 20260825T095533Z, 3 legs proven.",
+      "artifact_covered_by": [
+        "COTR1AE-AC1",
+        "COTR1AE-AC2",
+        "COTR1AE-AC6"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~H/deliverables/WSE_COTMDL_PREREGISTERED_EXPECTATIONS_20260826_RUN.md",
+      "kind": "doc",
+      "commit_or_etag": "6c8bdc4318",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Predictions P0-P6 written 2026-08-25 BEFORE the 2026-08-26 06:00Z run they predict. A prediction recorded before the exercise cannot be rationalised after it. Scored by a DIFFERENT seat (~K) than the one that authored it and built the change (~H).",
+      "artifact_covered_by": [
+        "COTR1AE-AC3",
+        "COTR1AE-AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/WSE_COTMDL_EXERCISED_EVIDENCE_20260826_RUN.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING_SAFE_COMMIT_20260826",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The scored result: P0 retrieval grounded, P1-P6 all PASS, two populations reported separately with printed denominators, all 17 non-roster children itemised by id.",
+      "artifact_covered_by": [
+        "COTR1AE-AC3",
+        "COTR1AE-AC4",
+        "COTR1AE-AC5"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "COTR1AE-AC1",
+      "criterion_verbatim": "MEASURED BEFORE, denominators printed: the TF literal at a NAMED REF, the APPLIED env from aws lambda get-function-configuration (desired is not applied), rebalancer_model_detail.{count,scope} from the most recent emitted manifest. A before-number is what makes the after-number a finding.",
+      "method": "live_read",
+      "invocation": "aws s3 cp s3://opal-data-assets/blackdiamond/cottonwood/meta/2026-08-25-complete.json - ; aws lambda get-function-configuration --function-name cot-rebalancer-runner",
+      "output_evidence": "BEFORE, from the 2026-08-25 06:00Z scheduled run (manifest LastModified Tue, 25 Aug 2026 06:00:49 GMT, s3api UTC): types.rebalancer_model_detail = {\"count\": 30, \"scope\": \"opal_closure\"}. TF literal before change: cot_rebalancer_runner.tf:154 MODEL_DETAIL_SCOPE = \"opal_closure\" @f26f4668d8. APPLIED env before change: MODEL_DETAIL_SCOPE=opal_closure. TWO POPULATIONS, never fused: 22 roster models with detail of 64 roster (denominator from the roster file's own totalResultCount), plus 8 non-roster transitive children; 22 + 8 = 30 detail files, RECONCILES. True roster coverage was 22 of 64 and the gap was 42 -- NOT the '30 of 64 / gap 34' the TO originally stated, which fused two populations.",
+      "denominator": "64 roster models (roster file totalResultCount, 2026-08-25); 30 detail files landed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COTR1AE-AC2",
+      "criterion_verbatim": "TF :154 -> \"all\", committed before apply (Rule 2). safe-apply.sh, never bare terraform apply; Rule 26 puts the apply on THIS device, run by the seat that built it. Post-apply re-plan is 0-DIFF ON THE TARGETED RESOURCE with the non-mine pending changes named and counted -- not a blanket 0-diff. Then the APPLIED read shows MODEL_DETAIL_SCOPE=all on the live function.",
+      "method": "live_read",
+      "invocation": ".tools/safe-apply.sh -chdir=infra/aws/terraform/opal-assets apply -target=module.cot_rebalancer_runner.aws_lambda_function.this -auto-approve ; aws lambda get-function-configuration --function-name cot-rebalancer-runner",
+      "output_evidence": "Committed BEFORE apply @27a3a98cdc (one file, 1 insertion 1 deletion, safe-commit.sh -F, msg-verify MATCH len=2367). safe-apply RC0, TARGETED. Re-plan per the amended spec @12caf0a92f: 'Plan: 0 to add, 3 to change, 0 to destroy' -- 0-diff ON THE TARGETED RESOURCE, the 3 remaining NAMED AND COUNTED and NOT ours: aws_iam_role_policy.bd49f_reporting_io, aws_iam_role_policy.emitter, module.emitter.aws_lambda_function.this. Predicate audited: 14 raw cot_rebalancer_runner hits in the re-plan are ALL 'Refreshing state...' refresh-phase lines; change-bearing lines for the target = ZERO. APPLIED read at apply time: MODEL_DETAIL_SCOPE=all, LastModified 2026-08-25T09:50:45.000+0000, CodeSha256 UNCHANGED across the apply (env-only, as intended). RE-CONFIRMED LIVE by ~K 2026-08-26: Scope=all, RevisionId bf9be4de-116d-4826-885b-5dd4ce417591.",
+      "denominator": "1 targeted resource; 3 foreign pending changes named of 3 counted",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COTR1AE-AC3",
+      "criterion_verbatim": "COTR1AE-AC3-AMENDED: REPORT THE TWO POPULATIONS SEPARATELY, NEVER A SINGLE DELTA: roster coverage 22 -> 64 (of 64), and non-roster children 8 -> 0. A bare '30 -> 64, +34' is arithmetically true and describes something that did not happen. EXERCISED on the next SCHEDULED run -- an ad-hoc run is a QA instrument and NEVER production evidence.",
+      "method": "live_read",
+      "invocation": "aws s3 cp s3://opal-data-assets/blackdiamond/cottonwood/meta/2026-08-26-complete.json - ; aws s3api list-objects-v2 --bucket opal-data-assets --prefix blackdiamond/cottonwood/bronze/rebalancer_model_detail/2026-08-26/ (CLI paginating, set counted client-side)",
+      "output_evidence": "EXERCISED on the 2026-08-26 06:00Z SCHEDULED run (completed_at 2026-08-26T06:00:41Z; manifest LastModified Wed, 26 Aug 2026 06:00:56 GMT; exactly ONE REPORT line in the window, so no ad-hoc contamination). types.rebalancer_model_detail = {\"count\": 81, \"scope\": \"all\"}. TWO POPULATIONS, REPORTED SEPARATELY: roster coverage 22 of 64 -> 64 of 64 (0 missed, denominator RE-READ from today's own roster file, not carried forward); non-roster children 8 -> 17. Reconciliation, stated last and only as a check: 64 + 17 = 81 = manifest count = 81 keys in S3. Retrieval grounded FIRST per P0: roster parsed from the literal key 'pagedResults' (n=64) and validated against the payload's own totalResultCount (64); detail ids taken as the full filename stem, never a digit-run regex.",
+      "denominator": "64 roster models (2026-08-26 roster file totalResultCount, re-read); 81 detail files landed",
+      "status": "PASS",
+      "status_reason": "PASS on the criterion, which is the REPORTING OBLIGATION (two populations separately, never a fused delta) -- that obligation is met. The amended criterion's PREDICTED VALUE for population 2 was 'children 8 -> 0', which was correct at the time it was written: it described the world in which R1 landed ALONE and the :316 guard still switched descent off in all mode. TO-R2-AE was authorized and landed @b56ec0e8ce before this run, making 'all' UNION rather than replace, so the observed value is 8 -> 17 rather than 8 -> 0. The number moved because a subsequent authorized change moved it, not because the criterion failed. Recorded explicitly rather than silently scored against the superseded number."
+    },
+    {
+      "criterion_id": "COTR1AE-AC4",
+      "criterion_verbatim": "THE FALSIFYING CASE AND THE MUTANT, BOTH. The two Anna accounts' models are PRESENT -- they are why the defect was found, and their absence falsifies the fix whatever the count says. AND a MUTANT run forced back to opal_closure produces the LOWER count -- run BOTH ways. An after-number with no before and no mutant is consistent with the env var having done nothing.",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/cot-pipeline/cot-rebalancer-runner/test_lambda_function.py -q ; plus the live S3 id-membership read for the Anna case",
+      "output_evidence": "FALSIFYING CASE: both Anna models PRESENT in the 2026-08-26 detail set, matched on ID and never on name -- 1ae61190-70fb-4d6c-a259-cee9019ed125 ('Anna *9237') and 6ae9e540-9b27-474c-8ad9-3dfc5131c530 (' Anna *9238', leading space real and NOT normalised away). MUTANT, BOTH WAYS, SINGLE VARIABLE: the suite holds a clean isolation pair differing only in lf.MODEL_DETAIL_SCOPE with all other inputs identical -- test_transitive_closure_pulls_grandchild at 'opal_closure' lands 5 detail keys and asserts the non-Opal-named roster model CS50 is ABSENT; test_scope_all_unions_roster_and_closure at 'all' lands 6 and asserts CS50 PRESENT while USTX and GRANDKID are retained. opal_closure produces the LOWER count, as required. Suite re-run first-hand by ~K: 15 passed in 0.62s.",
+      "denominator": "2 of 2 Anna models present; mutant pair 2 of 2 directions exercised; suite 15 of 15 green",
+      "status": "PASS",
+      "status_reason": "The mutant is discharged at BUILD level by the single-variable test pair, which is the sound isolation. The cross-day production comparison (2026-08-25 at opal_closure -> 30 vs 2026-08-26 at all -> 81) is reported in the evidence doc but is deliberately NOT relied on as the mutant: TWO variables moved between those runs (R1's env var and R2's code change @b56ec0e8ce), so it is confounded and cannot isolate MODEL_DETAIL_SCOPE alone. A production scheduled run cannot be mutated, and forcing an ad-hoc opal_closure run would be a QA instrument masquerading as production evidence."
+    },
+    {
+      "criterion_id": "COTR1AE-AC5",
+      "criterion_verbatim": "NO alert / alarm / SNS / SES / notification / freshness-checker / monitor (standing moratorium). NO shadow path, NO parallel emitter, NO standing comparator (complete veto -- build correctly once and port; an ad-hoc QA read is run-and-read, nothing standing). NO served output moved -- NEVER#3 does not attach to a producer env var.",
+      "method": "manual_read_with_citation",
+      "invocation": "review of every artifact and act in this delivery against the three prohibitions",
+      "output_evidence": "Zero alarms, SNS topics, SES sends, notifications, freshness checkers or monitors created or modified. Zero shadow paths, parallel emitters or standing comparators: the scoring of the 2026-08-26 run is a run-and-read of artifacts the production pipeline already wrote, nothing standing, and the scratch scorer lives in the session scratchpad and is not committed as estate machinery. Zero served output moved -- cot-rebalancer-runner is a PRODUCER; NEVER#3 does not attach. No ad-hoc invoke of the runner: exactly one REPORT line exists in the window and it is the scheduled 06:00Z fire.",
+      "denominator": "3 of 3 prohibitions checked; 0 violations",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COTR1AE-AC6",
+      "criterion_verbatim": "NEVER#6: a deploy-completion ledger entry OPENED AT DEPLOY-START and CLOSED with per-leg proof (.tools/deploy_ledger.py). An entry opened and never written back reads identically to a stranded deploy. Every claim at a NAMED REF; timestamps from an offset-bearing formatter (%aI / s3api UTC), never a typed Z.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/critical_paths/change_management/20260825T0939Z_cotmdl-model-detail-scope-all_deploy_completion.md",
+      "output_evidence": "Ledger OPENED 20260825T093957Z by 0.7.0_AE_CloudOps~H with 3 legs; L1 git CLOSED 20260825T094100Z, L2 activation CLOSED 20260825T095304Z, L3 verify CLOSED 20260825T095532Z; entry CLOSED 20260825T095533Z -- 'all 3 legs proven', nothing stranded. Verified by READING the ledger, not by trusting the claim that it was closed. ~K opened NO new ledger: this seat deployed nothing, and scoring a past scheduled run is a READ. Timestamps in this delivery come from git %aI, s3api UTC LastModified, and CloudWatch REPORT lines; no Z was typed into a format string.",
+      "denominator": "3 of 3 legs closed; 1 of 1 ledger entries closed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Single-variable mutant on MODEL_DETAIL_SCOPE, run BOTH ways with all other inputs held identical, to prove the env var is the operative control rather than merely correlated with the count moving.",
+      "expected": "opal_closure produces the LOWER count and omits the non-Opal-named roster model; all produces the HIGHER count and includes it.",
+      "observed": "opal_closure -> 5 detail keys, CS50 (non-Opal-named roster model) ASSERTED ABSENT. all -> 6 detail keys, CS50 PRESENT, and the descent-only models USTX and GRANDKID retained. Suite 15/15 green, re-run first-hand by ~K in 0.62s. Separately, ~H's deploy-time mutant on the :316 guard (isolated scratch copy, one line) failed the union test precisely on the children while the opal_closure test still passed, proving that mutation surgical.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The scored population sets were derived twice from independently retrieved inputs: the manifest's self-declared types.rebalancer_model_detail.count, and a client-side count of the materialised S3 key set from a paginating list-objects-v2. Roster cardinality was cross-checked against the roster payload's own totalResultCount and against the manifest's types.rebalancer_models.total_result_count.",
+      "observed": "All three agree: manifest count 81, S3 materialised key set 81, on_roster 64 + children 17 = 81. Roster 64 from the payload's pagedResults length, 64 from its totalResultCount, 64 from the manifest -- three sources, one value. Note that internal reconciliation alone is NOT evidence of a sound retrieval (it reconciles in the broken shape too), which is why P0's positive/negative membership controls were run separately.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "COT-e-1 -- the 2026-08-21 backfill",
+      "reason": "EXCLUDED BY DETERMINATION in the TO; this change is FORWARD-ONLY. Whether current Opal-membership may be applied to the 08-21 canonical date, or 08-21 needs a re-pull at all scope, is AN OPEN CALL AT ANDREW and a separately authorized act. Consequence stated plainly rather than left implicit: every partition through 2026-08-25 inclusive permanently carries 22-of-64 roster coverage; 2026-08-26 is the first correct partition."
+    },
+    {
+      "item": "The 3 foreign committed-but-unapplied changes in the opal-assets workspace",
+      "reason": "NOT this TO's scope and NOT this lane's to apply or revert in either direction. Both applies were -targeted, which disarmed those two acts only, not the workspace. The three remain ARMED and are named and counted in AC2. CTO owns naming disarm owners."
+    },
+    {
+      "item": "A blanket 0-diff re-plan on the opal-assets workspace",
+      "reason": "STRUCTURALLY UNAVAILABLE while the 3 foreign pending changes exist. Per the COO spec amendment @12caf0a92f, the passing form is 0-diff ON THE TARGETED RESOURCE with the others named and counted; demanding a blanket 0-diff would force either a false report or a failed criterion on a seat doing the right thing."
+    },
+    {
+      "item": "WSE_COTMDL.WS5.iam-infra-scoped-role-eventbridge",
+      "reason": "A DIFFERENT SCOPE sharing this project code, explicitly named as not-in-this-TO by the TO itself. Held by this lane as separate open work."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION x INERT -- The dispatch seating this lane (2.0.0_SA_COO 72169, 2026-08-26T13:46:26Z) instructs 'R1 AND R2 ARE COUPLED AND ORDERED... Land them together', but both had already landed and been APPLIED on 2026-08-25 (@27a3a98cdc / @b56ec0e8ce, both ledgers CLOSED). The dispatch's premise was already discharged. No action taken beyond reporting it to the issuer; nothing was re-landed.",
+    "OBSERVATION x INERT -- Both TO <status> fields still read 'pending' while the work is landed, applied and now exercised. Declarative drift, not a build defect.",
+    "OBSERVATION x INERT -- The pre-registered doc writes the manifest field as top-level 'rebalancer_model_detail'; it actually lives at 'types.rebalancer_model_detail'. A top-level read returns a clean, well-formed None that reads as 'the producer stopped emitting it'. Notation shorthand only -- both days carry the identical shape.",
+    "OBSERVATION x INERT -- Native Python cannot spawn the extensionless .tools/aws shim (WinError 2), and .tools/aws.cmd is not spawnable via CreateProcess without a shell either. Worked around in-session by fetching through bash and parsing local files. Not investigated further -- off-mandate.",
+    "OBSERVATION x INERT -- MSYS tools do not resolve the 8.3 short path C:/Users/ANDREW~1 (wc reported 'No such file or directory' on a file that existed), while Win32 consumers resolve it fine, so aws s3 cp destinations written with the short form land somewhere the shell then cannot see. Used the long-name path instead."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~K/logs/2026-08-26/",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"how do I grep the repo\" (startup A.3 EXERCISE probe)",
+      "result": "A forwarder RAN and produced its own banner -- resolution AND execution both confirmed, per the A.3 mandate that resolution is not execution. PATH denominator: 104 of 105 comp-tools resolve bare."
+    },
+    {
+      "tool": "comp-heat",
+      "invocation": "not run (surfaced by the PreToolUse HUD nudge during a find over org/critical_paths)",
+      "result": "Declined deliberately: comp-heat freshness is advisory estate-hygiene over git write-history, and the question being asked was 'which deploy ledger entries name this project', which is a content lookup, not a staleness ranking. Recorded rather than silently ignored."
+    },
+    {
+      "tool": "comp-pipescript deployed",
+      "invocation": "not run",
+      "result": "Not applicable to this delivery. The AE minimum names it before every gold-run TRIGGER; this seat triggered no gold run and invoked no producer. The artifact under test is a Lambda producer whose deployed-vs-source currency was proven at the Rule 22a layer instead -- deployed package BYTES diffed against the BUILD INPUT resolved through the source map's source_dir, never by filename (R2 ledger L4)."
+    },
+    {
+      "tool": "comp-iam gaps",
+      "invocation": "not run",
+      "result": "Not applicable: no iam.tf change in R1 or R2. It becomes mandatory for WSE_COTMDL.WS5, which is the scoped IAM role and EventBridge work this lane holds as separate open work, and where comp-iam is NECESSARY BUT NOT SUFFICIENT -- it models (action) and never (action, resource), so a new-resource call needs simulate-principal-policy on the exact ARN, one --resource-arns per call, positive control as a separate invocation."
+    }
+  ]
+}

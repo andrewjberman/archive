@@ -6,7 +6,7 @@
 <arch_gate>1.0.0_SA_CTO (folds into PRD S6b; rejects any forbidden-tier drift)</arch_gate>
 <issued_by>2.0.0_SA_COO (CTO methodology-expansion routing 145443Z; Andrew-ratified Recon ROE)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>queued</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project DATA_PLATFORM, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: queued</status>
 <!-- QUEUED behind the critical path (DC0 harness + DC-REV anchor). Zero-vendor-traffic = can run anytime/parallel; 0.6.0 picks up after the fast-follows or a +1 lane takes it. -->
 <roe>MANDATORY: complies with docs/architecture/DATA_PLATFORM_RECON_ROE.md -- this is PURE OPTION-A (passive, zero vendor traffic). The forbidden tier (scanning/fuzzing/auth-testing/unauthorized-access) is HARD-EXCLUDED.</roe>
 

@@ -2,7 +2,7 @@
 
 <issued_to>0.8.0_AE_CloudComp</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_TOOLHEALTH, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 
 <priority>HIGH -- the load-bearing part (deliverable c). Today the loop is ACCUMULATES-BUT-INERT (COMPLEARN D1); TH-C makes it DRIVE decisions. GATED on TH-A + TH-B + COMPPROOF-D1. PRD SS4 + acceptance SS6.4.</priority>
 <date>2026-07-02</date>

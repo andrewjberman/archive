@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_DEPLOYLEDGER.HELD-STATE",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_DEPLOYLEDGER.HELD-STATE.schema-act-held-terminal-vocabulary.md",
+    "group": "OTHER",
+    "vintage_commit": "095d90d8bd"
+  },
+  "assignee": "0.8.0_AE_CloudComp",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/deploy_ledger.py",
+      "kind": "script",
+      "commit_or_etag": "6fc0b41fb0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Repo-local gate invoked by COO /drive and fabric-check; no deploy target. Adds REREAD_KINDS + the Rule-24 vocabulary statement in-source, _qualifies_as_held clause (d), cmd_hold's exactly-one-of enforcement, and the HELD-PAST-REREAD finding class.",
+      "artifact_covered_by": [
+        "HS-1",
+        "HS-2",
+        "HS-3"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_deploy_ledger_held.py",
+      "kind": "test",
+      "commit_or_etag": "6fc0b41fb0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "17-arm planted-mutant battery over SEALED fixtures with STATE_DIR, CM_DIR and COO_INBOX all redirected to a temp tree.",
+      "artifact_covered_by": [
+        "HS-1",
+        "HS-2",
+        "HS-4"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/.open_deploys/freshguard-leg4-writer-wiring-finish.json",
+      "kind": "config_data",
+      "commit_or_etag": "6fc0b41fb0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one live HELD sentinel, re-expressed with its re-read condition. Migrated THROUGH THE TOOL (deploy_ledger.py hold), never hand-edited; held_at preserved.",
+      "artifact_covered_by": [
+        "HS-4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HS-1",
+      "criterion_verbatim": "SCHEMA: HELD declared in the vocabulary with REQUIRED `hold-reason` + REQUIRED re-read condition (a date or a named event); a HELD missing either is NOT a valid HELD and stays RED — the easiest-pass route (labeling neglect HELD with no reason) is refused by construction.",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_deploy_ledger_held.py (HS-1 arms); python .tools/deploy_ledger.py hold --slug <s> --gate-type ... --gate-ref ...",
+      "output_evidence": "gate.reread {kind: date|event, value} is REQUIRED and enforced in BOTH places: refused at SET-time in cmd_hold (exactly one of --reread-date/--reread-event, ISO-validated) and again STRUCTURALLY at CHECK-time in _qualifies_as_held clause (d), so the easiest-pass route never reaches the sentinel and could not survive there if it did. A hold missing it is NOT a valid HELD and falls through to RED with 'HELD-CLAIM REJECTED: no re-read condition ... a hold that cannot say WHEN to look again is indistinguishable from neglect'. MUTANTS: missing reread REFUSED; off-enum kind REFUSED; EMPTY value REFUSED (blank is not a claim); non-ISO date REFUSED. NEGATIVE CONTROLS: well-formed date-gated and event-gated holds both qualify. AND THE ORIGINAL ANTI-ESCAPE-HATCH STILL FIRES WITH THE NEW CLAUSE PRESENT -- an open APPLY leg still cannot claim HELD, verified as its own arm so the new clause is not shown to have weakened the old guardrail.",
+      "denominator": "8 of 8 HS-1 arms pass (4 mutants, 2 negative controls, 1 regression guard, 1 naming)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "HS-2",
+      "criterion_verbatim": "PREDICATE: well-formed HELD = NOT-RED; HELD past its re-read date = its own finding class with its own line vocabulary (never merged into aged-OPEN); age-based re-surface cadence stated.",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_deploy_ledger_held.py (HS-2 arms); python .tools/deploy_ledger.py check",
+      "output_evidence": "Well-formed HELD = NOT-RED: freshguard-leg4 reads HELD-STALE (tracked, not stranded) after migration, exactly as before. HELD past its OWN re-read date fires HELD-PAST-REREAD, a distinct line vocabulary quoting the date the hold itself stated, checked BEFORE the age cadence so the sharper owner-stated condition wins when both would fire. It is NEVER merged into an aged OPEN and never into HELD-STALE -- asserted as its own arm. AN EVENT-GATED HOLD NEVER FIRES THIS CLASS: it cannot go past a date, so it re-surfaces on the age cadence with its named event printed -- the two conditions are not silently conflated, which is the same distinction the whole TO is about one level down. Age-based re-surface cadence stated and unchanged (HELD_NUDGE_SUPPRESS_HOURS=24h, DEFAULT_HELD_STALE_DAYS=4.0, --held-stale-days).",
+      "denominator": "6 of 6 HS-2 arms pass; 2 negative controls (future date stays plain HELD; event-gated never fires the date class)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "HS-3",
+      "criterion_verbatim": "RULE-24 STATEMENT: axis intent + grain + state-coherence declared in the deliverable.",
+      "method": "manual_read_with_citation",
+      "invocation": "this instance (below) + .tools/deploy_ledger.py constants block @6fc0b41fb0",
+      "output_evidence": "RULE-24 STATEMENT FOR THE LIFECYCLE AXIS (HS-3), stated because a schema act requires it. AXIS + INTENT: ONE axis, the ledger's LIFECYCLE state. It does NOT encode disposition, severity or ownership; those are separate axes and mixing any of them here would break the schema foundationally (24-iii). DECLARED DOMAIN: every sentinel ledger in STATE_DIR. VALUES, MECE over that domain (24-i): OPEN (work outstanding) | HELD (deliberate, gated, well-formed) | terminal (CLOSED/ROLLBACK/SUPERSEDED/...). Mutually exclusive -- a ledger is in exactly one -- and collectively exhaustive, with HELD reachable ONLY through the structural guardrails, never by asserting a status string. SAME GRAIN (24-ii): all three are LEDGER-level. HELD-PAST-REREAD and HELD-STALE are deliberately NOT values on this axis -- they are RE-SURFACE CONDITIONS of HELD, reported as their own finding classes. Putting them on the lifecycle axis would place a staleness OBSERVATION beside a STATE: two grains in one enum. STATE COHERENCE (24-iv): the three values move under DIFFERENT remedies, and that is the whole point of the axis. OPEN clears by DOING THE WORK. HELD clears by THE NAMED GATE MOVING, which is by construction not the ledger owner's act. Terminal moves under nothing. ONE REMEDY DOES NOT MOVE THEM TOGETHER -- which is precisely why a detector that cannot tell a hold from neglect manufactures the wrong reflex, and why HELD had to become checkable rather than claimable. The same statement is carried IN-SOURCE at the constants block so the next editor of the enum meets it where they work, not only in a deliverable they may never open -- a protection that exists only as a description is not a protection.",
+      "denominator": "4 of 4 postulates addressed (MECE over a named domain, same grain, intent coherence, state coherence); 3 values on the axis; 2 non-values named as such",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "HS-4",
+      "criterion_verbatim": "RE-CLASSIFICATION: the 4 sentinel rows + the LD-0420 #4 specimen re-expressed as valid HELD (reason + re-read condition quoted from each file's own gate), and `check --red` after shows them under the HELD class — with the mutant BOTH directions: (a) a hand-mutated HELD with its re-read date in the past FIRES the new class; (b) a hand-mutated reason-less HELD stays RED.",
+      "method": "command",
+      "invocation": "python .tools/deploy_ledger.py hold --slug freshguard-leg4-writer-wiring-finish --gate-type external --gate-ref '<its own verbatim ref>' --reread-event '<quoted from its own gate>' ; then python .tools/deploy_ledger.py check",
+      "output_evidence": "MIGRATED THROUGH THE TOOL, never by hand-editing the sentinel or the entry. Its re-read condition is QUOTED FROM ITS OWN GATE TEXT, not invented: the gate.ref already said in prose that the close path needs \"Andrew's word, then a fresh T_d' cycle\", so that became reread{kind: event}. check now shows it under the HELD class with re-read printed, and held_at is PRESERVED at 2026-07-09T13:11:12Z -- the 47.5d age did NOT reset, so the migration re-expressed the state without erasing its history. SEQUENCING WAS DELIBERATE AND IS THE PART THAT MATTERED: making reread REQUIRED instantly invalidates every pre-existing hold, and I measured that intermediate state -- freshguard-leg4 read 'HELD-CLAIM REJECTED ... stays RED' on a LIVE ledger owned by 0.7.0_AE_CloudOps. Schema and migration therefore land in ONE commit so nothing flips RED in between and no peer wakes to a red alarm on a hold that was always legitimate. MUTANTS BOTH DIRECTIONS on sealed fixtures: (a) re-read date in the PAST fires the new class; (b) a reason-less HELD stays RED.",
+      "denominator": "1 of 1 LIVE HELD sentinel migrated. See declared_exclusions[0]: the TO names FOUR HELD-STALE rows; the live corpus holds ONE. Measured, not assumed.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "HS-5",
+      "criterion_verbatim": "NOTHING ELSE MOVES: BYPASS count unchanged (0) before/after on the untouched corpus; true rc taken without a pipe.",
+      "method": "diff",
+      "invocation": "python .tools/deploy_ledger.py check > f 2>&1; echo RC=$?   (true rc, NO pipe) -- run before the schema change and after the migration",
+      "output_evidence": "BYPASS 1 before, 1 after. Scan denominator 2 of 2 sentinels before and after. The other seat's row (etfs-positioning-prod-promote-v2-1-165, OPEN PAST-WINDOW, author 0.4.0_DT_ClientPlatform) is unchanged apart from its ticking age. True rc = 1 both sides, taken WITHOUT a pipe as the criterion requires -- a piped rc would have been the last stage's, not the tool's. THE TO'S PARENTHETICAL '(0)' IS STALE AND I AM NOT QUIETLY MATCHING IT: BYPASS is 1 on BOTH sides because a peer's globgrph-derive-runner ledger opened at 00:08Z tonight, inside my window. What HS-5 asks for is UNCHANGED, and unchanged is what was measured. Reporting 0 would have required either ignoring a real bypass or waiting for someone else's work to close.",
+      "denominator": "BYPASS 1 -> 1; sentinels 2 -> 2; rc 1 -> 1; 1 peer row untouched",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "HS-6",
+      "criterion_verbatim": "proof instance VALID rc=0 positional: ids HS-1,HS-2,HS-3,HS-4,HS-5,HS-6.",
+      "method": "command",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> HS-1,HS-2,HS-3,HS-4,HS-5,HS-6",
+      "output_evidence": "This instance validates rc=0 positional over all six declared ids.",
+      "denominator": "6 of 6 expected criteria present",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "17-arm planted battery over SEALED fixtures -- STATE_DIR, CM_DIR *and* COO_INBOX redirected to a temp tree. Both HS-4 directions plus off-enum kind, empty value, non-ISO date, future date, event-gated, and a regression guard on the ORIGINAL anti-escape-hatch.",
+      "expected": "each mutant flips its own verdict; each negative control stays clean; the pre-existing open-APPLY-leg refusal still fires with the new clause present",
+      "observed": "17/17 as expected, 0 failed. Two arms exist purely to guard the notification moratorium: one asserts the temp inbox is EMPTY after every run, one greps the new branch's source for _held_nudge_alert/_red_alert. A print-only claim that nothing enforces is a description, not a protection.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "check run before the schema change, at the intermediate (schema-without-migration) state, and after migration; batteries re-run after the ASCII cleanup",
+      "observed": "stable and reproducible at each of the three points; the intermediate state was captured deliberately rather than skipped, because it is the evidence that the anti-easy-pass actually fires on a real ledger. Both batteries re-run green after the non-ASCII edit (17/17 and 22/22), so that hygiene pass is shown not to have regressed either tool.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the TO's 4 HELD-STALE sentinel rows -- only ONE exists in the live corpus",
+      "reason": "MEASURED, NOT ASSUMED. The TO (2026-08-18) names freshguard-leg4, freshguard-leg5-v2, mdpf-canrte-w1a and scty-premcp-p1. The live sentinel corpus that check --red enumerates holds TWO ledgers total: etfs-positioning (OPEN, another seat's) and freshguard-leg4 (HELD). The other three have change_management entries but NO live sentinel -- they closed between the TO's authorship and now. I migrated the one that exists and did not manufacture rows for three that do not. Fourth corpus-moved-under-a-TO instance this session; the pattern is reported, not worked around."
+    },
+    {
+      "item": "MSTR's LD-0420 #4 specimen was not re-expressed",
+      "reason": "The TO pairs it with the sentinel rows for re-classification and asks that MSTR be MCP'd because their #4 disposition text references the interim never-close-a-live-hold rule. It is a LEDGER RECORD in MSTR's own tree, not a sentinel this tool reads, and editing another Tier-0 seat's disposition text is not this lane's act. Routed to MSTR with the new vocabulary rather than edited -- and MSTR is currently UNMANNED, so the message QUEUES. Stated here so the residue is visible rather than assumed discharged."
+    },
+    {
+      "item": "the pre-existing HELD-STALE nudge to COO was neither removed nor extended",
+      "reason": "The moratorium binds what I ADD: the new HELD-PAST-REREAD class is print-only and two arms enforce that. The existing age-cadence nudge predates this act and removing it would be an out-of-scope change to a live signal a peer seat may rely on."
+    },
+    {
+      "item": "4 non-ASCII lines remain in deploy_ledger.py",
+      "reason": "PRE-EXISTING at HEAD and not mine. I stripped the 3 I added (and the 5 in atomcheck_cli.py, which were also mine). Editing a shared file's untouched lines mid-round for a WARN-level style rule is the out-of-scope edit the frozen-spec rule prohibits; the gate WARNs and does not block."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION -- the TO's HS-5 expects BYPASS '(0)'; it is 1 on both sides because a peer's ledger opened mid-window. Reported as unchanged-at-1 rather than massaged to match the parenthetical.",
+    "OBSERVATION -- 3 of the TO's 4 named HELD-STALE rows no longer exist as live sentinels. The TO's corpus statement is a 2026-08-18 vintage, not a current denominator.",
+    "OBSERVATION -- gate.ref was ALREADY doing the hold-reason job the TO asks for (it refuses vague prose and demands a named dependency). The genuinely missing half was the RE-READ condition. Saying so rather than claiming to have built both: the TO's framing implies neither existed."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-25/session_prefix_reads.md",
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "check (before / intermediate / after); hold --reread-event",
+      "result": "The instrument under repair and its own before/after oracle. The INTERMEDIATE run is the load-bearing one: it proved the anti-easy-pass fires on a real ledger."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "on all three edited .py files",
+      "result": "rc=0. It also WARNed non-ASCII, which is what prompted the hygiene pass on my own lines."
+    },
+    {
+      "tool": "comp-atomcheck",
+      "invocation": "--product advi --firm 49financial --atom 5",
+      "result": "Re-run as a REGRESSION check after the ASCII edit to its engine -- still renders. A hygiene pass on a landed deliverable has to be shown not to have broken it."
+    }
+  ]
+}

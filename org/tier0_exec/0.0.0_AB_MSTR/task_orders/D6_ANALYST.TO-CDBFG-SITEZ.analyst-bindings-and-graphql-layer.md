@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T20:05Z</issued>
 <dated>HELD for pacing -- ferries on MSTR's signal that a seat is free, AFTER D9</dated>
-<status>pending -- ferried + seats assigned 2026-08-19T20:06Z by 0.0.0_AB_MSTR~Z per the TO's per-row authority: build/author rows (TO-B/C/E/F/G-scaffold + TO-D build) -> 0.5.0_AE_OpalETL~Z (existing session, NO spawn -- the staged-note's 7-vs-6 census is superseded: D2 came off site Z and D6 rides existing seats, census 6/6); TO-D duty + runtime-exerciser -> 0.0.3_BG_BBGTerminal (G1 fence respected by construction). TO-A stays laptop per CTO ruling.</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "D6_ANALYST" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending -- ferried + seats assigned 2026-08-19T20:06Z by 0.0.0_AB_MSTR~Z per the TO's per-row authority: build/author rows (TO-B/C/E/F/G-scaffold + TO-D build) -> 0.5.0_AE_OpalETL~Z (existing session, NO spawn -- the staged-note's 7-vs-6 census is superseded: D2 came off site Z and D6 rides existing seats, census 6/6); TO-D duty + runtime-exerciser -> 0.0.3_BG_BBGTerminal (G1 fence respected by construction). TO-A stays laptop per CTO ruling.</status>
 <priority>P1-program</priority>
 <authority>D6_OPAL_ANALYST_GRAPHQL_PRD.md §6 + the 2026-08-19 ~18:57Z ADDENDUM, at dispatch vintage @030b55b295 (CVO verdict @7ea13aa4ed absorbed). Placement: SITEZ, Andrew-RATIFIED ~19:3xZ, CTO FINAL 193804Z.</authority>
 </task_order>

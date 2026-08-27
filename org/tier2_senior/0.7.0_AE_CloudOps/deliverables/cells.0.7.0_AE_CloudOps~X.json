@@ -1,0 +1,681 @@
+{
+  "carded_by": "0.7.0_AE_CloudOps~X",
+  "run": "nfra-substratecarding-w4",
+  "tranche": "REMOTE",
+  "to_id": "NFRA_SUBSTRATECARDING.TO-W4-REMOTE",
+  "note": "Per 2.0.0_SA_COO~X ruling @60404dcb80 step 1: this lane writes ONLY its own cells here and never touches rectangle.c0.json again. Values are extracted from this lane's own on-disk state, which is identical to HEAD (0 drift, measured) -- nothing in-flight.",
+  "cells": [
+    {
+      "cell_id": "W4-vjfd-1",
+      "value": "S3 JSON object re-stamped after an append by the ONE centralized marker stamp, _provenance.stamp_marker, carrying per-table last_write_iso over MARKER_TABLES.",
+      "status": "MEASURED",
+      "evidence": "cse_store.py:22-23 names warehouse/_branch_head.main.json verbatim as 'the GLOBGRPH marker-HEAD-oracle'; stamp_marker() delegates with ZERO local marker IO -- 'the S3 read/write/monotonicity logic lives ONLY in _provenance.stamp_marker'. So this is an S3 object, which is why an S3 instrument is the right plane for it. || aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-vjfd-2",
+      "value": "EVENT-DRIVEN, inherited. Same chain as PATH A: CloudTrail -> EventBridge rule opal-globgrph-cloudtrail-mgmt -> SQS opal-globgrph-incremental-events -> ESM 589e1bca-7e54-4b8e-8ede-d0c5d2e53002 -> handler -> :722 commit -> :730 stamp. This path has NO trigger of its own; it fires if and only if PATH A committed.",
+      "status": "MEASURED",
+      "evidence": "generation.trigger carried in the manifest and quoted verbatim rather than re-derived; this lane did not re-run the two-plane sweep for this part and is not claiming to have. ",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-vjfd-3",
+      "value": "persisted=true; authority_role=source; mutation_policy=editable; temporal_claim=current_state",
+      "status": "MEASURED",
+      "evidence": "persisted MEASURED by KeyCount at the declared home: 1 -> the object/prefix EXISTS. aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-vjfd-4",
+      "value": "s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json",
+      "status": "MEASURED",
+      "evidence": "⛔ W4-m-joinable: this is the s3:// URI VERBATIM from the manifest part's home field -- an EXACT IDENTITY a consumer can equality-join, not prose, not a description, not a path plus a sentence. Copied byte-for-byte from graph_object_manifest.json so a card->part join is derivable rather than declared. Wave 3 put prose in 9 of 13 of these and the L0 compile step could not derive the join at all. Existence at this exact key was then MEASURED: KeyCount=1.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-vjfd-5",
+      "value": "1 of 1 declared home resolves",
+      "status": "MEASURED",
+      "evidence": "DENOMINATOR PRINTED: this part contributes 1 of the 12 REMOTE-tranche subjects; tranche result is 11 RESOLVES / 1 ABSENT of 12. ⛔ NO COMPLETENESS OF THE WRITER OR ARTIFACT POPULATION IS ASSERTED BY THIS CARD. The 12 are '42 manifest parts MINUS 3 resolved by L1's exact join MINUS 3 unbuilt future layers = 36 cardable, of which the REMOTE tranche is 12' -- stated with its exclusions, never as a bare total. ⛔ MY FIRST SWEEP RETURNED KeyCount=0 ON ALL 12 AND IT WAS MY INSTRUMENT, NOT S3. Python print() on Windows emits CRLF, so a trailing \\r rode into every --prefix argument and matched nothing. Caught by the TO's own standing rule -- a uniform result across a set is an INSTRUMENT signature -- and refuted by a clean literal call returning 1. Fixed with tr -d '\\r'; the re-run is DISCRIMINATING (11 vs 1), which is what a real measurement looks like.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-vjfd-6",
+      "value": "s3 object key identity: bucket + key, exact string match. ",
+      "status": "MEASURED",
+      "evidence": "The identity space is the S3 (bucket, key) pair, which is what the instrument matched on. No same-named local artifact was found for this part, so a path-shaped instrument fails DOWNWARD (uniform miss) rather than upward.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-vjfd-7",
+      "value": "KeyCount=0 would be returned identically for: absent, wrong bucket, wrong region, or missing s3:ListBucket",
+      "status": "MEASURED",
+      "evidence": "⛔ A FAILED RETRIEVAL RETURNS A VALUE, NOT AN ERROR. KeyCount=0 is emitted identically for a true absence, a wrong bucket, a wrong region, and insufficient s3:ListBucket. That is why both controls are run as separate invocations and why ListBucket is evidenced: my POSITIVE control on the same bucket succeeded, so ListBucket is held and a 0 here is not a masked 403. head-object would additionally return 403 rather than 404 without ListBucket, making AccessDenied indistinguishable from absence -- a second reason it is the wrong instrument here.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-wvft-1",
+      "value": "Iceberg append. Rows are assembled by infra/aws/globgrph/code_heat_emit.py and WRITTEN by snap_store.py:256 t.append(table); one Nessie commit per batch, append-only.",
+      "status": "MEASURED",
+      "evidence": "⛔ THE MANIFEST NAMES THE ROW-BUILDER, NOT THE WRITER. generation.materializer here is infra/aws/globgrph/code_heat_emit.py, which ASSEMBLES rows. The write primitive is infra/aws/globgrph/snap_store.py:256 t.append(table) inside append_rows() :243, reached only via :417 --ingest-pending -> :283 ingest_pending -> :307. MEASURED BY THIS LANE IN WAVE 3 (card @e258612057): snap_store's SURFACES allow-list at :79 AST-measures to exactly 4 keys -- ms_heat_snap, code_heat_snap, fedobs_coverage_snap, fedobs_coevolution_snap -- and gates both the CLI (:415 choices=sorted(SURFACES)) and the programmatic path (:146 SURFACES[surface] KeyError). This is 2.0.0_SA_COO~X's measured class landing in this tranche: 0 of 39 census parts named snap_store.py while FOUR named their row-builder. Those four are these four. REPORTED, NOT PATCHED -- W4 qualify-do-not-fix. || aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-wvft-2",
+      "value": "none-found",
+      "status": "ABSENT",
+      "evidence": "generation.trigger is null in the manifest. ⛔ ABSENT is recorded rather than 'none-found': a null field is an UNPOPULATED CLAIM, not a measured negative, and collapsing the two is the defect this wave exists to stop. What would settle it: the two-plane sweep (aws events list-rules = 137, aws scheduler list-schedules = 18, client-side counted) plus an ECS container-command read, which is the method this lane used in wave 3.",
+      "basis": "absent",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-wvft-3",
+      "value": "persisted=true; authority_role=source; mutation_policy=append_only; temporal_claim=point_in_time",
+      "status": "MEASURED",
+      "evidence": "persisted MEASURED by KeyCount at the declared home: 1 -> the object/prefix EXISTS. aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions. mutation_policy append_only for the snap surfaces and cse is MEASURED at the write sites this lane carded in wave 3 (zero overwrite/delete calls in snap_store.py and in cse_store.py's PATH A).",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-wvft-4",
+      "value": "s3://opal-313476888478-globgrph/warehouse/globgrph/code_heat_snap_8b0bca7a-9078-4b8e-8868-ef04062d9952/",
+      "status": "MEASURED",
+      "evidence": "⛔ W4-m-joinable: this is the s3:// URI VERBATIM from the manifest part's home field -- an EXACT IDENTITY a consumer can equality-join, not prose, not a description, not a path plus a sentence. Copied byte-for-byte from graph_object_manifest.json so a card->part join is derivable rather than declared. Wave 3 put prose in 9 of 13 of these and the L0 compile step could not derive the join at all. Existence at this exact key was then MEASURED: KeyCount=1.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-wvft-5",
+      "value": "1 of 1 declared home resolves",
+      "status": "MEASURED",
+      "evidence": "DENOMINATOR PRINTED: this part contributes 1 of the 12 REMOTE-tranche subjects; tranche result is 11 RESOLVES / 1 ABSENT of 12. ⛔ NO COMPLETENESS OF THE WRITER OR ARTIFACT POPULATION IS ASSERTED BY THIS CARD. The 12 are '42 manifest parts MINUS 3 resolved by L1's exact join MINUS 3 unbuilt future layers = 36 cardable, of which the REMOTE tranche is 12' -- stated with its exclusions, never as a bare total. ⛔ MY FIRST SWEEP RETURNED KeyCount=0 ON ALL 12 AND IT WAS MY INSTRUMENT, NOT S3. Python print() on Windows emits CRLF, so a trailing \\r rode into every --prefix argument and matched nothing. Caught by the TO's own standing rule -- a uniform result across a set is an INSTRUMENT signature -- and refuted by a clean literal call returning 1. Fixed with tr -d '\\r'; the re-run is DISCRIMINATING (11 vs 1), which is what a real measurement looks like.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-wvft-6",
+      "value": "s3 object key identity: bucket + key, exact string match. ",
+      "status": "MEASURED",
+      "evidence": "The identity space is the S3 (bucket, key) pair, which is what the instrument matched on. No same-named local artifact was found for this part, so a path-shaped instrument fails DOWNWARD (uniform miss) rather than upward.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-wvft-7",
+      "value": "KeyCount=0 would be returned identically for: absent, wrong bucket, wrong region, or missing s3:ListBucket",
+      "status": "MEASURED",
+      "evidence": "⛔ A FAILED RETRIEVAL RETURNS A VALUE, NOT AN ERROR. KeyCount=0 is emitted identically for a true absence, a wrong bucket, a wrong region, and insufficient s3:ListBucket. That is why both controls are run as separate invocations and why ListBucket is evidenced: my POSITIVE control on the same bucket succeeded, so ListBucket is held and a 0 here is not a masked 403. head-object would additionally return 403 rather than 404 without ListBucket, making AccessDenied indistinguishable from absence -- a second reason it is the wrong instrument here.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-bqrk-1",
+      "value": "Iceberg append. cse_store.py:386 table.append(pa_table) inside append_cses() :357, one Nessie commit per batch, append-only. Invoked as a LIBRARY, not by its own CLI.",
+      "status": "MEASURED",
+      "evidence": "MEASURED BY THIS LANE IN WAVE 3 (card @e258612057, cse_store PATH A). Callers: cse_producers_nightly.py:164/:209/:269 and cse_emit_graphhead.py:218. The manifest's own materializer string already says '[THE WRITER] <- orchestrated by', which agrees. || aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-bqrk-2",
+      "value": "NO TRIGGER OF ITS OWN -- MEASURED, and the indirect path is measured too. This module is invoked as a LIBRARY: cse_producers_nightly.py:164,:209,:269 and cse_emit_graphhead.py:218 both call cse_store.append_cses(). cse_producers_nightly IS triggered: Scheduler plane, schedule globgrph-cse-producer-nightly, ENABLED, cron(30 3 * * ? *), target arn ...:cluster/opal-globgrph. Per COX3-AC5 an ECS target resolves to a CLUSTER not a script, so that alone would be INFERRED -- I read the task definition globgrph-cse-producer:1, container 'cse-producer', command ['python','/app/cse_producers_nightly.py']. MEASURED at the container command, which is the standard AC5 sets.",
+      "status": "MEASURED",
+      "evidence": "generation.trigger carried in the manifest and quoted verbatim rather than re-derived; this lane did not re-run the two-plane sweep for this part and is not claiming to have. ",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-bqrk-3",
+      "value": "persisted=true; authority_role=source; mutation_policy=append_only; temporal_claim=current_state",
+      "status": "MEASURED",
+      "evidence": "persisted MEASURED by KeyCount at the declared home: 1 -> the object/prefix EXISTS. aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions. mutation_policy append_only for the snap surfaces and cse is MEASURED at the write sites this lane carded in wave 3 (zero overwrite/delete calls in snap_store.py and in cse_store.py's PATH A).",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-bqrk-4",
+      "value": "s3://opal-313476888478-globgrph/warehouse/globgrph/cse_b557721f-8b81-4ec2-9289-fe5f44c3f272/",
+      "status": "MEASURED",
+      "evidence": "⛔ W4-m-joinable: this is the s3:// URI VERBATIM from the manifest part's home field -- an EXACT IDENTITY a consumer can equality-join, not prose, not a description, not a path plus a sentence. Copied byte-for-byte from graph_object_manifest.json so a card->part join is derivable rather than declared. Wave 3 put prose in 9 of 13 of these and the L0 compile step could not derive the join at all. Existence at this exact key was then MEASURED: KeyCount=1.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-bqrk-5",
+      "value": "1 of 1 declared home resolves",
+      "status": "MEASURED",
+      "evidence": "DENOMINATOR PRINTED: this part contributes 1 of the 12 REMOTE-tranche subjects; tranche result is 11 RESOLVES / 1 ABSENT of 12. ⛔ NO COMPLETENESS OF THE WRITER OR ARTIFACT POPULATION IS ASSERTED BY THIS CARD. The 12 are '42 manifest parts MINUS 3 resolved by L1's exact join MINUS 3 unbuilt future layers = 36 cardable, of which the REMOTE tranche is 12' -- stated with its exclusions, never as a bare total. ⛔ MY FIRST SWEEP RETURNED KeyCount=0 ON ALL 12 AND IT WAS MY INSTRUMENT, NOT S3. Python print() on Windows emits CRLF, so a trailing \\r rode into every --prefix argument and matched nothing. Caught by the TO's own standing rule -- a uniform result across a set is an INSTRUMENT signature -- and refuted by a clean literal call returning 1. Fixed with tr -d '\\r'; the re-run is DISCRIMINATING (11 vs 1), which is what a real measurement looks like.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-bqrk-6",
+      "value": "s3 object key identity: bucket + key, exact string match. ",
+      "status": "MEASURED",
+      "evidence": "The identity space is the S3 (bucket, key) pair, which is what the instrument matched on. No same-named local artifact was found for this part, so a path-shaped instrument fails DOWNWARD (uniform miss) rather than upward.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-bqrk-7",
+      "value": "KeyCount=0 would be returned identically for: absent, wrong bucket, wrong region, or missing s3:ListBucket",
+      "status": "MEASURED",
+      "evidence": "⛔ A FAILED RETRIEVAL RETURNS A VALUE, NOT AN ERROR. KeyCount=0 is emitted identically for a true absence, a wrong bucket, a wrong region, and insufficient s3:ListBucket. That is why both controls are run as separate invocations and why ListBucket is evidenced: my POSITIVE control on the same bucket succeeded, so ListBucket is held and a 0 here is not a masked 403. head-object would additionally return 403 rather than 404 without ListBucket, making AccessDenied indistinguishable from absence -- a second reason it is the wrong instrument here.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-jyvw-1",
+      "value": "S3 JSON marker object declared by a live producer as its watermark; cse_emit_frontend_coevolution.py:91 MARKER_KEY.",
+      "status": "MEASURED",
+      "evidence": "⛔ DECLARED IN LIVE CODE AND ABSENT FROM S3. cse_emit_frontend_coevolution.py:91 MARKER_KEY = 'warehouse/cse_producer_markers/frontend_coevolution.json' with the comment 'the S3 object leg-5 watches (option b) + the --since watermark'. A SIBLING key is declared at cse_emit_promote.py:77 (promote.json) under the same prefix. ⛔ I TESTED AND REJECTED THE OBVIOUS EXPLANATION: I inferred the per-producer scheme had been superseded by the centralized _branch_head marker, then grepped and found BOTH keys live in code. The scheme is not retired. || aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-jyvw-2",
+      "value": "NONE-FOUND on both AWS planes, inherited and mechanical. This path cannot fire independently -- it executes only inside emit() (:269), which requires --emit (:385) on a machine holding the portal submodule and DS~B's deliverables. The nightly ECS producer does NOT run this script: it sweeps staged JSONL instead, precisely because a Fargate task cannot see the git sources this producer needs.",
+      "status": "MEASURED",
+      "evidence": "generation.trigger carried in the manifest and quoted verbatim rather than re-derived; this lane did not re-run the two-plane sweep for this part and is not claiming to have. ",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-jyvw-3",
+      "value": "persisted=false; authority_role=source; mutation_policy=editable; temporal_claim=current_state",
+      "status": "MEASURED",
+      "evidence": "persisted MEASURED by KeyCount at the declared home: 0 -> NOTHING under the declared prefix. aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-jyvw-4",
+      "value": "s3://opal-313476888478-globgrph/warehouse/cse_producer_markers/frontend_coevolution.json",
+      "status": "MEASURED",
+      "evidence": "⛔ W4-m-joinable: this is the s3:// URI VERBATIM from the manifest part's home field -- an EXACT IDENTITY a consumer can equality-join, not prose, not a description, not a path plus a sentence. Copied byte-for-byte from graph_object_manifest.json so a card->part join is derivable rather than declared. Wave 3 put prose in 9 of 13 of these and the L0 compile step could not derive the join at all. Existence at this exact key was then MEASURED: KeyCount=0.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-jyvw-5",
+      "value": "0 of 1 declared home resolves",
+      "status": "MEASURED",
+      "evidence": "DENOMINATOR PRINTED: this part contributes 1 of the 12 REMOTE-tranche subjects; tranche result is 11 RESOLVES / 1 ABSENT of 12. ⛔ NO COMPLETENESS OF THE WRITER OR ARTIFACT POPULATION IS ASSERTED BY THIS CARD. The 12 are '42 manifest parts MINUS 3 resolved by L1's exact join MINUS 3 unbuilt future layers = 36 cardable, of which the REMOTE tranche is 12' -- stated with its exclusions, never as a bare total. ⛔ MY FIRST SWEEP RETURNED KeyCount=0 ON ALL 12 AND IT WAS MY INSTRUMENT, NOT S3. Python print() on Windows emits CRLF, so a trailing \\r rode into every --prefix argument and matched nothing. Caught by the TO's own standing rule -- a uniform result across a set is an INSTRUMENT signature -- and refuted by a clean literal call returning 1. Fixed with tr -d '\\r'; the re-run is DISCRIMINATING (11 vs 1), which is what a real measurement looks like.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-jyvw-6",
+      "value": "s3 object key identity: bucket + key, exact string match. ",
+      "status": "MEASURED",
+      "evidence": "The identity space is the S3 (bucket, key) pair, which is what the instrument matched on. No same-named local artifact was found for this part, so a path-shaped instrument fails DOWNWARD (uniform miss) rather than upward.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-jyvw-7",
+      "value": "KeyCount=0 OBSERVED; discriminated from instrument failure by controls and by a parent-prefix probe",
+      "status": "MEASURED",
+      "evidence": "⛔ A FAILED RETRIEVAL RETURNS A VALUE, NOT AN ERROR. KeyCount=0 is emitted identically for a true absence, a wrong bucket, a wrong region, and insufficient s3:ListBucket. That is why both controls are run as separate invocations and why ListBucket is evidenced: my POSITIVE control on the same bucket succeeded, so ListBucket is held and a 0 here is not a masked 403. head-object would additionally return 403 rather than 404 without ListBucket, making AccessDenied indistinguishable from absence -- a second reason it is the wrong instrument here. FOR THIS PART THE ABSENCE WAS DISCRIMINATED FURTHER: the parent prefix 'warehouse/cse_producer_markers/' returns None, 'warehouse/cse_producer' returns KeyCount=0, and a --delimiter query on 'warehouse/' returns 8 real sibling prefixes (axes_history, code_heat, cse_ingest, cse_ingest_staging, fedobs_obs_findings, fedobs_signals, globgrph, ms_heat) as a POSITIVE CONTROL that the listing works. The whole prefix is absent, so this is not a key typo.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kzhx-1",
+      "value": "Iceberg table created through cse_store.py's UNCONSTRAINED --table override (:581 no choices=, :338 catalog.create_table creates whatever name it is handed).",
+      "status": "INFERRED",
+      "evidence": "generation.materializer is null in the manifest and no code names this table. INFERRED from the name shape (cse_test_<hex>) plus the CLASS 3 binding this lane measured at cse_store.py:581 in wave 3 -- that path can create any table name in the globgrph namespace, and its docstring at :325 invites exactly this ('pass a scratch name (e.g. cse_test) for an ISOLATED test harness'). NOT MEASURED: I did not find the invocation that created it, and I am not claiming one. || aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "inferred",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kzhx-2",
+      "value": "none-found",
+      "status": "ABSENT",
+      "evidence": "generation.trigger is null in the manifest. ⛔ ABSENT is recorded rather than 'none-found': a null field is an UNPOPULATED CLAIM, not a measured negative, and collapsing the two is the defect this wave exists to stop. What would settle it: the two-plane sweep (aws events list-rules = 137, aws scheduler list-schedules = 18, client-side counted) plus an ECS container-command read, which is the method this lane used in wave 3.",
+      "basis": "absent",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kzhx-3",
+      "value": "persisted=true; authority_role=source; mutation_policy=editable; temporal_claim=point_in_time",
+      "status": "MEASURED",
+      "evidence": "persisted MEASURED by KeyCount at the declared home: 1 -> the object/prefix EXISTS. aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kzhx-4",
+      "value": "s3://opal-313476888478-globgrph/warehouse/globgrph/cse_test_24458e6c-667c-4e85-ba44-33751795e182/",
+      "status": "MEASURED",
+      "evidence": "⛔ W4-m-joinable: this is the s3:// URI VERBATIM from the manifest part's home field -- an EXACT IDENTITY a consumer can equality-join, not prose, not a description, not a path plus a sentence. Copied byte-for-byte from graph_object_manifest.json so a card->part join is derivable rather than declared. Wave 3 put prose in 9 of 13 of these and the L0 compile step could not derive the join at all. Existence at this exact key was then MEASURED: KeyCount=1.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kzhx-5",
+      "value": "1 of 1 declared home resolves",
+      "status": "MEASURED",
+      "evidence": "DENOMINATOR PRINTED: this part contributes 1 of the 12 REMOTE-tranche subjects; tranche result is 11 RESOLVES / 1 ABSENT of 12. ⛔ NO COMPLETENESS OF THE WRITER OR ARTIFACT POPULATION IS ASSERTED BY THIS CARD. The 12 are '42 manifest parts MINUS 3 resolved by L1's exact join MINUS 3 unbuilt future layers = 36 cardable, of which the REMOTE tranche is 12' -- stated with its exclusions, never as a bare total. ⛔ MY FIRST SWEEP RETURNED KeyCount=0 ON ALL 12 AND IT WAS MY INSTRUMENT, NOT S3. Python print() on Windows emits CRLF, so a trailing \\r rode into every --prefix argument and matched nothing. Caught by the TO's own standing rule -- a uniform result across a set is an INSTRUMENT signature -- and refuted by a clean literal call returning 1. Fixed with tr -d '\\r'; the re-run is DISCRIMINATING (11 vs 1), which is what a real measurement looks like.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kzhx-6",
+      "value": "s3 object key identity: bucket + key, exact string match. ",
+      "status": "MEASURED",
+      "evidence": "The identity space is the S3 (bucket, key) pair, which is what the instrument matched on. No same-named local artifact was found for this part, so a path-shaped instrument fails DOWNWARD (uniform miss) rather than upward.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kzhx-7",
+      "value": "KeyCount=0 would be returned identically for: absent, wrong bucket, wrong region, or missing s3:ListBucket",
+      "status": "MEASURED",
+      "evidence": "⛔ A FAILED RETRIEVAL RETURNS A VALUE, NOT AN ERROR. KeyCount=0 is emitted identically for a true absence, a wrong bucket, a wrong region, and insufficient s3:ListBucket. That is why both controls are run as separate invocations and why ListBucket is evidenced: my POSITIVE control on the same bucket succeeded, so ListBucket is held and a 0 here is not a masked 403. head-object would additionally return 403 rather than 404 without ListBucket, making AccessDenied indistinguishable from absence -- a second reason it is the wrong instrument here.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-dlqq-1",
+      "value": "Iceberg table created through cse_store.py's UNCONSTRAINED --table override (:581 no choices=, :338 catalog.create_table creates whatever name it is handed).",
+      "status": "INFERRED",
+      "evidence": "generation.materializer is null in the manifest and no code names this table. INFERRED from the name shape (cse_test_<hex>) plus the CLASS 3 binding this lane measured at cse_store.py:581 in wave 3 -- that path can create any table name in the globgrph namespace, and its docstring at :325 invites exactly this ('pass a scratch name (e.g. cse_test) for an ISOLATED test harness'). NOT MEASURED: I did not find the invocation that created it, and I am not claiming one. || aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "inferred",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-dlqq-2",
+      "value": "none-found",
+      "status": "ABSENT",
+      "evidence": "generation.trigger is null in the manifest. ⛔ ABSENT is recorded rather than 'none-found': a null field is an UNPOPULATED CLAIM, not a measured negative, and collapsing the two is the defect this wave exists to stop. What would settle it: the two-plane sweep (aws events list-rules = 137, aws scheduler list-schedules = 18, client-side counted) plus an ECS container-command read, which is the method this lane used in wave 3.",
+      "basis": "absent",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-dlqq-3",
+      "value": "persisted=true; authority_role=source; mutation_policy=editable; temporal_claim=point_in_time",
+      "status": "MEASURED",
+      "evidence": "persisted MEASURED by KeyCount at the declared home: 1 -> the object/prefix EXISTS. aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-dlqq-4",
+      "value": "s3://opal-313476888478-globgrph/warehouse/globgrph/cse_test_bb57a916-76de-454d-a71e-932dc173620e/",
+      "status": "MEASURED",
+      "evidence": "⛔ W4-m-joinable: this is the s3:// URI VERBATIM from the manifest part's home field -- an EXACT IDENTITY a consumer can equality-join, not prose, not a description, not a path plus a sentence. Copied byte-for-byte from graph_object_manifest.json so a card->part join is derivable rather than declared. Wave 3 put prose in 9 of 13 of these and the L0 compile step could not derive the join at all. Existence at this exact key was then MEASURED: KeyCount=1.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-dlqq-5",
+      "value": "1 of 1 declared home resolves",
+      "status": "MEASURED",
+      "evidence": "DENOMINATOR PRINTED: this part contributes 1 of the 12 REMOTE-tranche subjects; tranche result is 11 RESOLVES / 1 ABSENT of 12. ⛔ NO COMPLETENESS OF THE WRITER OR ARTIFACT POPULATION IS ASSERTED BY THIS CARD. The 12 are '42 manifest parts MINUS 3 resolved by L1's exact join MINUS 3 unbuilt future layers = 36 cardable, of which the REMOTE tranche is 12' -- stated with its exclusions, never as a bare total. ⛔ MY FIRST SWEEP RETURNED KeyCount=0 ON ALL 12 AND IT WAS MY INSTRUMENT, NOT S3. Python print() on Windows emits CRLF, so a trailing \\r rode into every --prefix argument and matched nothing. Caught by the TO's own standing rule -- a uniform result across a set is an INSTRUMENT signature -- and refuted by a clean literal call returning 1. Fixed with tr -d '\\r'; the re-run is DISCRIMINATING (11 vs 1), which is what a real measurement looks like.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-dlqq-6",
+      "value": "s3 object key identity: bucket + key, exact string match. ",
+      "status": "MEASURED",
+      "evidence": "The identity space is the S3 (bucket, key) pair, which is what the instrument matched on. No same-named local artifact was found for this part, so a path-shaped instrument fails DOWNWARD (uniform miss) rather than upward.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-dlqq-7",
+      "value": "KeyCount=0 would be returned identically for: absent, wrong bucket, wrong region, or missing s3:ListBucket",
+      "status": "MEASURED",
+      "evidence": "⛔ A FAILED RETRIEVAL RETURNS A VALUE, NOT AN ERROR. KeyCount=0 is emitted identically for a true absence, a wrong bucket, a wrong region, and insufficient s3:ListBucket. That is why both controls are run as separate invocations and why ListBucket is evidenced: my POSITIVE control on the same bucket succeeded, so ListBucket is held and a 0 here is not a masked 403. head-object would additionally return 403 rather than 404 without ListBucket, making AccessDenied indistinguishable from absence -- a second reason it is the wrong instrument here.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kyjs-1",
+      "value": "Iceberg append. Rows are assembled by infra/aws/globgrph/cse_emit_frontend_coevolution.py and WRITTEN by snap_store.py:256 t.append(table); one Nessie commit per batch, append-only.",
+      "status": "MEASURED",
+      "evidence": "⛔ THE MANIFEST NAMES THE ROW-BUILDER, NOT THE WRITER. generation.materializer here is infra/aws/globgrph/cse_emit_frontend_coevolution.py, which ASSEMBLES rows. The write primitive is infra/aws/globgrph/snap_store.py:256 t.append(table) inside append_rows() :243, reached only via :417 --ingest-pending -> :283 ingest_pending -> :307. MEASURED BY THIS LANE IN WAVE 3 (card @e258612057): snap_store's SURFACES allow-list at :79 AST-measures to exactly 4 keys -- ms_heat_snap, code_heat_snap, fedobs_coverage_snap, fedobs_coevolution_snap -- and gates both the CLI (:415 choices=sorted(SURFACES)) and the programmatic path (:146 SURFACES[surface] KeyError). This is 2.0.0_SA_COO~X's measured class landing in this tranche: 0 of 39 census parts named snap_store.py while FOUR named their row-builder. Those four are these four. REPORTED, NOT PATCHED -- W4 qualify-do-not-fix. || aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kyjs-2",
+      "value": "none-found",
+      "status": "ABSENT",
+      "evidence": "generation.trigger is null in the manifest. ⛔ ABSENT is recorded rather than 'none-found': a null field is an UNPOPULATED CLAIM, not a measured negative, and collapsing the two is the defect this wave exists to stop. What would settle it: the two-plane sweep (aws events list-rules = 137, aws scheduler list-schedules = 18, client-side counted) plus an ECS container-command read, which is the method this lane used in wave 3.",
+      "basis": "absent",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kyjs-3",
+      "value": "persisted=true; authority_role=source; mutation_policy=append_only; temporal_claim=point_in_time",
+      "status": "MEASURED",
+      "evidence": "persisted MEASURED by KeyCount at the declared home: 1 -> the object/prefix EXISTS. aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions. mutation_policy append_only for the snap surfaces and cse is MEASURED at the write sites this lane carded in wave 3 (zero overwrite/delete calls in snap_store.py and in cse_store.py's PATH A).",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kyjs-4",
+      "value": "s3://opal-313476888478-globgrph/warehouse/globgrph/fedobs_coevolution_snap_499558ba-0181-42ab-a008-93a518692299/",
+      "status": "MEASURED",
+      "evidence": "⛔ W4-m-joinable: this is the s3:// URI VERBATIM from the manifest part's home field -- an EXACT IDENTITY a consumer can equality-join, not prose, not a description, not a path plus a sentence. Copied byte-for-byte from graph_object_manifest.json so a card->part join is derivable rather than declared. Wave 3 put prose in 9 of 13 of these and the L0 compile step could not derive the join at all. Existence at this exact key was then MEASURED: KeyCount=1.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kyjs-5",
+      "value": "1 of 1 declared home resolves",
+      "status": "MEASURED",
+      "evidence": "DENOMINATOR PRINTED: this part contributes 1 of the 12 REMOTE-tranche subjects; tranche result is 11 RESOLVES / 1 ABSENT of 12. ⛔ NO COMPLETENESS OF THE WRITER OR ARTIFACT POPULATION IS ASSERTED BY THIS CARD. The 12 are '42 manifest parts MINUS 3 resolved by L1's exact join MINUS 3 unbuilt future layers = 36 cardable, of which the REMOTE tranche is 12' -- stated with its exclusions, never as a bare total. ⛔ MY FIRST SWEEP RETURNED KeyCount=0 ON ALL 12 AND IT WAS MY INSTRUMENT, NOT S3. Python print() on Windows emits CRLF, so a trailing \\r rode into every --prefix argument and matched nothing. Caught by the TO's own standing rule -- a uniform result across a set is an INSTRUMENT signature -- and refuted by a clean literal call returning 1. Fixed with tr -d '\\r'; the re-run is DISCRIMINATING (11 vs 1), which is what a real measurement looks like.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kyjs-6",
+      "value": "s3 object key identity: bucket + key, exact string match. ",
+      "status": "MEASURED",
+      "evidence": "The identity space is the S3 (bucket, key) pair, which is what the instrument matched on. No same-named local artifact was found for this part, so a path-shaped instrument fails DOWNWARD (uniform miss) rather than upward.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kyjs-7",
+      "value": "KeyCount=0 would be returned identically for: absent, wrong bucket, wrong region, or missing s3:ListBucket",
+      "status": "MEASURED",
+      "evidence": "⛔ A FAILED RETRIEVAL RETURNS A VALUE, NOT AN ERROR. KeyCount=0 is emitted identically for a true absence, a wrong bucket, a wrong region, and insufficient s3:ListBucket. That is why both controls are run as separate invocations and why ListBucket is evidenced: my POSITIVE control on the same bucket succeeded, so ListBucket is held and a 0 here is not a masked 403. head-object would additionally return 403 rather than 404 without ListBucket, making AccessDenied indistinguishable from absence -- a second reason it is the wrong instrument here.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-siwi-1",
+      "value": "Iceberg append. Rows are assembled by infra/aws/globgrph/emit_fedobs_snap.py and WRITTEN by snap_store.py:256 t.append(table); one Nessie commit per batch, append-only.",
+      "status": "MEASURED",
+      "evidence": "⛔ THE MANIFEST NAMES THE ROW-BUILDER, NOT THE WRITER. generation.materializer here is infra/aws/globgrph/emit_fedobs_snap.py, which ASSEMBLES rows. The write primitive is infra/aws/globgrph/snap_store.py:256 t.append(table) inside append_rows() :243, reached only via :417 --ingest-pending -> :283 ingest_pending -> :307. MEASURED BY THIS LANE IN WAVE 3 (card @e258612057): snap_store's SURFACES allow-list at :79 AST-measures to exactly 4 keys -- ms_heat_snap, code_heat_snap, fedobs_coverage_snap, fedobs_coevolution_snap -- and gates both the CLI (:415 choices=sorted(SURFACES)) and the programmatic path (:146 SURFACES[surface] KeyError). This is 2.0.0_SA_COO~X's measured class landing in this tranche: 0 of 39 census parts named snap_store.py while FOUR named their row-builder. Those four are these four. REPORTED, NOT PATCHED -- W4 qualify-do-not-fix. || aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-siwi-2",
+      "value": "none-found",
+      "status": "ABSENT",
+      "evidence": "generation.trigger is null in the manifest. ⛔ ABSENT is recorded rather than 'none-found': a null field is an UNPOPULATED CLAIM, not a measured negative, and collapsing the two is the defect this wave exists to stop. What would settle it: the two-plane sweep (aws events list-rules = 137, aws scheduler list-schedules = 18, client-side counted) plus an ECS container-command read, which is the method this lane used in wave 3.",
+      "basis": "absent",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-siwi-3",
+      "value": "persisted=true; authority_role=source; mutation_policy=append_only; temporal_claim=point_in_time",
+      "status": "MEASURED",
+      "evidence": "persisted MEASURED by KeyCount at the declared home: 1 -> the object/prefix EXISTS. aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions. mutation_policy append_only for the snap surfaces and cse is MEASURED at the write sites this lane carded in wave 3 (zero overwrite/delete calls in snap_store.py and in cse_store.py's PATH A).",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-siwi-4",
+      "value": "s3://opal-313476888478-globgrph/warehouse/globgrph/fedobs_coverage_snap_a9637eab-f8d2-4421-847c-4a2ca27cdc86/",
+      "status": "MEASURED",
+      "evidence": "⛔ W4-m-joinable: this is the s3:// URI VERBATIM from the manifest part's home field -- an EXACT IDENTITY a consumer can equality-join, not prose, not a description, not a path plus a sentence. Copied byte-for-byte from graph_object_manifest.json so a card->part join is derivable rather than declared. Wave 3 put prose in 9 of 13 of these and the L0 compile step could not derive the join at all. Existence at this exact key was then MEASURED: KeyCount=1.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-siwi-5",
+      "value": "1 of 1 declared home resolves",
+      "status": "MEASURED",
+      "evidence": "DENOMINATOR PRINTED: this part contributes 1 of the 12 REMOTE-tranche subjects; tranche result is 11 RESOLVES / 1 ABSENT of 12. ⛔ NO COMPLETENESS OF THE WRITER OR ARTIFACT POPULATION IS ASSERTED BY THIS CARD. The 12 are '42 manifest parts MINUS 3 resolved by L1's exact join MINUS 3 unbuilt future layers = 36 cardable, of which the REMOTE tranche is 12' -- stated with its exclusions, never as a bare total. ⛔ MY FIRST SWEEP RETURNED KeyCount=0 ON ALL 12 AND IT WAS MY INSTRUMENT, NOT S3. Python print() on Windows emits CRLF, so a trailing \\r rode into every --prefix argument and matched nothing. Caught by the TO's own standing rule -- a uniform result across a set is an INSTRUMENT signature -- and refuted by a clean literal call returning 1. Fixed with tr -d '\\r'; the re-run is DISCRIMINATING (11 vs 1), which is what a real measurement looks like.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-siwi-6",
+      "value": "s3 object key identity: bucket + key, exact string match. ",
+      "status": "MEASURED",
+      "evidence": "The identity space is the S3 (bucket, key) pair, which is what the instrument matched on. No same-named local artifact was found for this part, so a path-shaped instrument fails DOWNWARD (uniform miss) rather than upward.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-siwi-7",
+      "value": "KeyCount=0 would be returned identically for: absent, wrong bucket, wrong region, or missing s3:ListBucket",
+      "status": "MEASURED",
+      "evidence": "⛔ A FAILED RETRIEVAL RETURNS A VALUE, NOT AN ERROR. KeyCount=0 is emitted identically for a true absence, a wrong bucket, a wrong region, and insufficient s3:ListBucket. That is why both controls are run as separate invocations and why ListBucket is evidenced: my POSITIVE control on the same bucket succeeded, so ListBucket is held and a 0 here is not a masked 403. head-object would additionally return 403 rather than 404 without ListBucket, making AccessDenied indistinguishable from absence -- a second reason it is the wrong instrument here.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-teha-1",
+      "value": "Iceberg overwrite via derive_runner.py's generic helper _overwrite_with_retry, whose call sites carry the table name as a LITERAL.",
+      "status": "MEASURED",
+      "evidence": "derive_runner.py:345 _overwrite_with_retry(..., 'graph_nodes') and :376 (...'graph_edges') -- CLASS 1 in the wave-3 writer partition: the name is bound at the CALL SITE as a literal, so a name-keyed grep finds the write site and the parameterisation hides nothing. || aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-teha-2",
+      "value": "PER WRITER: infra/aws/globgrph/derive_runner.py :: PATH A -- graph_nodes + graph_edges=EVENTS plane. Rule opal-globgrph-derive-runner-nightly, State=ENABLED, ScheduleExpression=cron(0 2 * * ? *). Target Arn is the ECS CLUSTER arn:aws:ecs:us-east-1:313476888478:cluster/opal-globgrph with EcsParameters TaskDefinitionArn=globgrph-derive-runner:6, LaunchType=FARGATE. *** CCX3-AC5: THE CLUSTER IS NOT THE SCRIPT. *** Task definition revision 6 has command=null AND entryPoint=null, so the taskdef does NOT name derive_runner.py. The trigger->script step is INFERRED from infra/aws/globgrph/Dockerfile:186 CMD [\"python\", \"/app/derive_runner.py\"] plus Dockerfile:60 COPY of this file to that path -- which is the BUILD INPUT, not the running bytes.; org/modules/graph/comp_aws_cli.py=none-found. This is a manual CLI verb: argparse subparser 'iceberg-commit' at :3149, bound to cmd_iceberg_commit at :3154. Reachable only as `comp-aws iceberg-commit` by an operator. BOTH TRIGGER PLANES SWEPT AND BOTH ARE NEGATIVE: aws events list-rules = 137 rules, aws scheduler list-schedules = 18 schedules, zero targeting this verb. The module IS baked into the nightly container (Dockerfile:53) but the container's CMD is derive_runner.py (:186), which calls cmd_derive (:101) and never this verb -- so PRESENT IN THE IMAGE is not TRIGGERED, and the two read identically to a file-level census.",
+      "status": "MEASURED",
+      "evidence": "generation.trigger carried in the manifest and quoted verbatim rather than re-derived; this lane did not re-run the two-plane sweep for this part and is not claiming to have. ",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-teha-3",
+      "value": "persisted=true; authority_role=source; mutation_policy=editable; temporal_claim=current_state",
+      "status": "MEASURED",
+      "evidence": "persisted MEASURED by KeyCount at the declared home: 1 -> the object/prefix EXISTS. aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-teha-4",
+      "value": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_edges_6629328d-a582-46d2-80bc-5059de1a77ce/",
+      "status": "MEASURED",
+      "evidence": "⛔ W4-m-joinable: this is the s3:// URI VERBATIM from the manifest part's home field -- an EXACT IDENTITY a consumer can equality-join, not prose, not a description, not a path plus a sentence. Copied byte-for-byte from graph_object_manifest.json so a card->part join is derivable rather than declared. Wave 3 put prose in 9 of 13 of these and the L0 compile step could not derive the join at all. Existence at this exact key was then MEASURED: KeyCount=1.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-teha-5",
+      "value": "1 of 1 declared home resolves",
+      "status": "MEASURED",
+      "evidence": "DENOMINATOR PRINTED: this part contributes 1 of the 12 REMOTE-tranche subjects; tranche result is 11 RESOLVES / 1 ABSENT of 12. ⛔ NO COMPLETENESS OF THE WRITER OR ARTIFACT POPULATION IS ASSERTED BY THIS CARD. The 12 are '42 manifest parts MINUS 3 resolved by L1's exact join MINUS 3 unbuilt future layers = 36 cardable, of which the REMOTE tranche is 12' -- stated with its exclusions, never as a bare total. ⛔ MY FIRST SWEEP RETURNED KeyCount=0 ON ALL 12 AND IT WAS MY INSTRUMENT, NOT S3. Python print() on Windows emits CRLF, so a trailing \\r rode into every --prefix argument and matched nothing. Caught by the TO's own standing rule -- a uniform result across a set is an INSTRUMENT signature -- and refuted by a clean literal call returning 1. Fixed with tr -d '\\r'; the re-run is DISCRIMINATING (11 vs 1), which is what a real measurement looks like.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-teha-6",
+      "value": "s3 object key identity: bucket + key, exact string match. ",
+      "status": "MEASURED",
+      "evidence": "The identity space is the S3 (bucket, key) pair, which is what the instrument matched on. No same-named local artifact was found for this part, so a path-shaped instrument fails DOWNWARD (uniform miss) rather than upward.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-teha-7",
+      "value": "KeyCount=0 would be returned identically for: absent, wrong bucket, wrong region, or missing s3:ListBucket",
+      "status": "MEASURED",
+      "evidence": "⛔ A FAILED RETRIEVAL RETURNS A VALUE, NOT AN ERROR. KeyCount=0 is emitted identically for a true absence, a wrong bucket, a wrong region, and insufficient s3:ListBucket. That is why both controls are run as separate invocations and why ListBucket is evidenced: my POSITIVE control on the same bucket succeeded, so ListBucket is held and a 0 here is not a masked 403. head-object would additionally return 403 rather than 404 without ListBucket, making AccessDenied indistinguishable from absence -- a second reason it is the wrong instrument here.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kjhu-1",
+      "value": "Iceberg overwrite via derive_runner.py's generic helper _overwrite_with_retry, whose call sites carry the table name as a LITERAL.",
+      "status": "MEASURED",
+      "evidence": "derive_runner.py:345 _overwrite_with_retry(..., 'graph_nodes') and :376 (...'graph_edges') -- CLASS 1 in the wave-3 writer partition: the name is bound at the CALL SITE as a literal, so a name-keyed grep finds the write site and the parameterisation hides nothing. || aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kjhu-2",
+      "value": "PER WRITER: infra/aws/globgrph/derive_runner.py :: PATH A -- graph_nodes + graph_edges=EVENTS plane. Rule opal-globgrph-derive-runner-nightly, State=ENABLED, ScheduleExpression=cron(0 2 * * ? *). Target Arn is the ECS CLUSTER arn:aws:ecs:us-east-1:313476888478:cluster/opal-globgrph with EcsParameters TaskDefinitionArn=globgrph-derive-runner:6, LaunchType=FARGATE. *** CCX3-AC5: THE CLUSTER IS NOT THE SCRIPT. *** Task definition revision 6 has command=null AND entryPoint=null, so the taskdef does NOT name derive_runner.py. The trigger->script step is INFERRED from infra/aws/globgrph/Dockerfile:186 CMD [\"python\", \"/app/derive_runner.py\"] plus Dockerfile:60 COPY of this file to that path -- which is the BUILD INPUT, not the running bytes.; org/modules/graph/comp_aws_cli.py=none-found. This is a manual CLI verb: argparse subparser 'iceberg-commit' at :3149, bound to cmd_iceberg_commit at :3154. Reachable only as `comp-aws iceberg-commit` by an operator. BOTH TRIGGER PLANES SWEPT AND BOTH ARE NEGATIVE: aws events list-rules = 137 rules, aws scheduler list-schedules = 18 schedules, zero targeting this verb. The module IS baked into the nightly container (Dockerfile:53) but the container's CMD is derive_runner.py (:186), which calls cmd_derive (:101) and never this verb -- so PRESENT IN THE IMAGE is not TRIGGERED, and the two read identically to a file-level census.; infra/aws/lambda/globgrph/incremental_updater/lambda_function.py :: PATH A -- Iceberg/Nessie atomic commit=EVENT-DRIVEN. CloudTrail management events -> EventBridge rule opal-globgrph-cloudtrail-mgmt -> SQS queue opal-globgrph-incremental-events -> Lambda event source mapping 589e1bca-7e54-4b8e-8ede-d0c5d2e53002 (State=Enabled) -> this handler. NOT a scheduled trigger on either AWS plane.",
+      "status": "MEASURED",
+      "evidence": "generation.trigger carried in the manifest and quoted verbatim rather than re-derived; this lane did not re-run the two-plane sweep for this part and is not claiming to have. ",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kjhu-3",
+      "value": "persisted=true; authority_role=source; mutation_policy=editable; temporal_claim=current_state",
+      "status": "MEASURED",
+      "evidence": "persisted MEASURED by KeyCount at the declared home: 1 -> the object/prefix EXISTS. aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kjhu-4",
+      "value": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_nodes_4c6c23bd-fffa-427e-9cd9-7a9deaa3426d/",
+      "status": "MEASURED",
+      "evidence": "⛔ W4-m-joinable: this is the s3:// URI VERBATIM from the manifest part's home field -- an EXACT IDENTITY a consumer can equality-join, not prose, not a description, not a path plus a sentence. Copied byte-for-byte from graph_object_manifest.json so a card->part join is derivable rather than declared. Wave 3 put prose in 9 of 13 of these and the L0 compile step could not derive the join at all. Existence at this exact key was then MEASURED: KeyCount=1.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kjhu-5",
+      "value": "1 of 1 declared home resolves",
+      "status": "MEASURED",
+      "evidence": "DENOMINATOR PRINTED: this part contributes 1 of the 12 REMOTE-tranche subjects; tranche result is 11 RESOLVES / 1 ABSENT of 12. ⛔ NO COMPLETENESS OF THE WRITER OR ARTIFACT POPULATION IS ASSERTED BY THIS CARD. The 12 are '42 manifest parts MINUS 3 resolved by L1's exact join MINUS 3 unbuilt future layers = 36 cardable, of which the REMOTE tranche is 12' -- stated with its exclusions, never as a bare total. ⛔ MY FIRST SWEEP RETURNED KeyCount=0 ON ALL 12 AND IT WAS MY INSTRUMENT, NOT S3. Python print() on Windows emits CRLF, so a trailing \\r rode into every --prefix argument and matched nothing. Caught by the TO's own standing rule -- a uniform result across a set is an INSTRUMENT signature -- and refuted by a clean literal call returning 1. Fixed with tr -d '\\r'; the re-run is DISCRIMINATING (11 vs 1), which is what a real measurement looks like.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kjhu-6",
+      "value": "s3 object key identity: bucket + key, exact string match. ",
+      "status": "MEASURED",
+      "evidence": "The identity space is the S3 (bucket, key) pair, which is what the instrument matched on. No same-named local artifact was found for this part, so a path-shaped instrument fails DOWNWARD (uniform miss) rather than upward.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-kjhu-7",
+      "value": "KeyCount=0 would be returned identically for: absent, wrong bucket, wrong region, or missing s3:ListBucket",
+      "status": "MEASURED",
+      "evidence": "⛔ A FAILED RETRIEVAL RETURNS A VALUE, NOT AN ERROR. KeyCount=0 is emitted identically for a true absence, a wrong bucket, a wrong region, and insufficient s3:ListBucket. That is why both controls are run as separate invocations and why ListBucket is evidenced: my POSITIVE control on the same bucket succeeded, so ListBucket is held and a 0 here is not a masked 403. head-object would additionally return 403 rather than 404 without ListBucket, making AccessDenied indistinguishable from absence -- a second reason it is the wrong instrument here.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-glrp-1",
+      "value": "S3-resident projection of the kuzu graph database, rebuilt by the early-morning Nessie run.",
+      "status": "INFERRED",
+      "evidence": "generation.materializer is prose naming an infra terraform path rather than a resolvable write site, so the METHOD is inferred. ⛔ AND THIS PART HAS A NAME-COLLISION HAZARD I MEASURED: a LOCAL file infra/aws/globgrph/kuzu_nessie_db exists with the same tail, so a filesystem instrument returns TRUE for this part about a DIFFERENT object. Name identity is not content identity. || aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "inferred",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-glrp-2",
+      "value": "early-morning Nessie run",
+      "status": "MEASURED",
+      "evidence": "generation.trigger carried in the manifest and quoted verbatim rather than re-derived; this lane did not re-run the two-plane sweep for this part and is not claiming to have. ",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-glrp-3",
+      "value": "persisted=true; authority_role=projection; mutation_policy=replaceable; temporal_claim=current_state",
+      "status": "MEASURED",
+      "evidence": "persisted MEASURED by KeyCount at the declared home: 1 -> the object/prefix EXISTS. aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-glrp-4",
+      "value": "s3://opal-estate-report/kuzu_nessie_db",
+      "status": "MEASURED",
+      "evidence": "⛔ W4-m-joinable: this is the s3:// URI VERBATIM from the manifest part's home field -- an EXACT IDENTITY a consumer can equality-join, not prose, not a description, not a path plus a sentence. Copied byte-for-byte from graph_object_manifest.json so a card->part join is derivable rather than declared. Wave 3 put prose in 9 of 13 of these and the L0 compile step could not derive the join at all. Existence at this exact key was then MEASURED: KeyCount=1.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-glrp-5",
+      "value": "1 of 1 declared home resolves",
+      "status": "MEASURED",
+      "evidence": "DENOMINATOR PRINTED: this part contributes 1 of the 12 REMOTE-tranche subjects; tranche result is 11 RESOLVES / 1 ABSENT of 12. ⛔ NO COMPLETENESS OF THE WRITER OR ARTIFACT POPULATION IS ASSERTED BY THIS CARD. The 12 are '42 manifest parts MINUS 3 resolved by L1's exact join MINUS 3 unbuilt future layers = 36 cardable, of which the REMOTE tranche is 12' -- stated with its exclusions, never as a bare total. ⛔ MY FIRST SWEEP RETURNED KeyCount=0 ON ALL 12 AND IT WAS MY INSTRUMENT, NOT S3. Python print() on Windows emits CRLF, so a trailing \\r rode into every --prefix argument and matched nothing. Caught by the TO's own standing rule -- a uniform result across a set is an INSTRUMENT signature -- and refuted by a clean literal call returning 1. Fixed with tr -d '\\r'; the re-run is DISCRIMINATING (11 vs 1), which is what a real measurement looks like.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-glrp-6",
+      "value": "s3 object key identity: bucket + key, exact string match. ⛔ CROSSES SPACES: a same-named LOCAL file exists (infra/aws/globgrph/kuzu_nessie_db), so a path-shaped instrument returns a PASS about a different object.",
+      "status": "MEASURED",
+      "evidence": "The identity space is the S3 (bucket, key) pair, which is what the instrument matched on. For this part the same tail also names a local file, MEASURED: it is the single member of this tranche where the WRONG instrument fails UPWARD into a pass rather than into a uniform miss. Resolving it needs size/etag, not a path check.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-glrp-7",
+      "value": "KeyCount=0 would be returned identically for: absent, wrong bucket, wrong region, or missing s3:ListBucket",
+      "status": "MEASURED",
+      "evidence": "⛔ A FAILED RETRIEVAL RETURNS A VALUE, NOT AN ERROR. KeyCount=0 is emitted identically for a true absence, a wrong bucket, a wrong region, and insufficient s3:ListBucket. That is why both controls are run as separate invocations and why ListBucket is evidenced: my POSITIVE control on the same bucket succeeded, so ListBucket is held and a 0 here is not a masked 403. head-object would additionally return 403 rather than 404 without ListBucket, making AccessDenied indistinguishable from absence -- a second reason it is the wrong instrument here.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-cjtn-1",
+      "value": "Iceberg append. Rows are assembled by infra/aws/globgrph/ms_cloud_extract.py and WRITTEN by snap_store.py:256 t.append(table); one Nessie commit per batch, append-only.",
+      "status": "MEASURED",
+      "evidence": "⛔ THE MANIFEST NAMES THE ROW-BUILDER, NOT THE WRITER. generation.materializer here is infra/aws/globgrph/ms_cloud_extract.py, which ASSEMBLES rows. The write primitive is infra/aws/globgrph/snap_store.py:256 t.append(table) inside append_rows() :243, reached only via :417 --ingest-pending -> :283 ingest_pending -> :307. MEASURED BY THIS LANE IN WAVE 3 (card @e258612057): snap_store's SURFACES allow-list at :79 AST-measures to exactly 4 keys -- ms_heat_snap, code_heat_snap, fedobs_coverage_snap, fedobs_coevolution_snap -- and gates both the CLI (:415 choices=sorted(SURFACES)) and the programmatic path (:146 SURFACES[surface] KeyError). This is 2.0.0_SA_COO~X's measured class landing in this tranche: 0 of 39 census parts named snap_store.py while FOUR named their row-builder. Those four are these four. REPORTED, NOT PATCHED -- W4 qualify-do-not-fix. || aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-cjtn-2",
+      "value": "none-found",
+      "status": "ABSENT",
+      "evidence": "generation.trigger is null in the manifest. ⛔ ABSENT is recorded rather than 'none-found': a null field is an UNPOPULATED CLAIM, not a measured negative, and collapsing the two is the defect this wave exists to stop. What would settle it: the two-plane sweep (aws events list-rules = 137, aws scheduler list-schedules = 18, client-side counted) plus an ECS container-command read, which is the method this lane used in wave 3.",
+      "basis": "absent",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-cjtn-3",
+      "value": "persisted=true; authority_role=source; mutation_policy=append_only; temporal_claim=point_in_time",
+      "status": "MEASURED",
+      "evidence": "persisted MEASURED by KeyCount at the declared home: 1 -> the object/prefix EXISTS. aws s3api list-objects-v2 --bucket <b> --prefix <key> --max-keys 1 -> KeyCount. CONTROLS run as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> KeyCount=1; NEGATIVE prefix 'warehouse/zzz_no_such_prefix_99999/' -> KeyCount=0. Both fired, so a 0 here is a real 0. ⛔ head-object was NOT used: it returns 404 on Iceberg table PREFIXES (10 of these 12 homes) while list-objects on the SAME key returns 1 -- exercised, with head-object on warehouse/_branch_head.main.json -> ContentLength=1508 proving the 404 is a SHAPE MISMATCH rather than permissions. mutation_policy append_only for the snap surfaces and cse is MEASURED at the write sites this lane carded in wave 3 (zero overwrite/delete calls in snap_store.py and in cse_store.py's PATH A).",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-cjtn-4",
+      "value": "s3://opal-313476888478-globgrph/warehouse/globgrph/ms_heat_snap_a1875ebc-9d80-4078-b8e7-19e6455265bd/",
+      "status": "MEASURED",
+      "evidence": "⛔ W4-m-joinable: this is the s3:// URI VERBATIM from the manifest part's home field -- an EXACT IDENTITY a consumer can equality-join, not prose, not a description, not a path plus a sentence. Copied byte-for-byte from graph_object_manifest.json so a card->part join is derivable rather than declared. Wave 3 put prose in 9 of 13 of these and the L0 compile step could not derive the join at all. Existence at this exact key was then MEASURED: KeyCount=1.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-cjtn-5",
+      "value": "1 of 1 declared home resolves",
+      "status": "MEASURED",
+      "evidence": "DENOMINATOR PRINTED: this part contributes 1 of the 12 REMOTE-tranche subjects; tranche result is 11 RESOLVES / 1 ABSENT of 12. ⛔ NO COMPLETENESS OF THE WRITER OR ARTIFACT POPULATION IS ASSERTED BY THIS CARD. The 12 are '42 manifest parts MINUS 3 resolved by L1's exact join MINUS 3 unbuilt future layers = 36 cardable, of which the REMOTE tranche is 12' -- stated with its exclusions, never as a bare total. ⛔ MY FIRST SWEEP RETURNED KeyCount=0 ON ALL 12 AND IT WAS MY INSTRUMENT, NOT S3. Python print() on Windows emits CRLF, so a trailing \\r rode into every --prefix argument and matched nothing. Caught by the TO's own standing rule -- a uniform result across a set is an INSTRUMENT signature -- and refuted by a clean literal call returning 1. Fixed with tr -d '\\r'; the re-run is DISCRIMINATING (11 vs 1), which is what a real measurement looks like.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-cjtn-6",
+      "value": "s3 object key identity: bucket + key, exact string match. ",
+      "status": "MEASURED",
+      "evidence": "The identity space is the S3 (bucket, key) pair, which is what the instrument matched on. No same-named local artifact was found for this part, so a path-shaped instrument fails DOWNWARD (uniform miss) rather than upward.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    },
+    {
+      "cell_id": "W4-cjtn-7",
+      "value": "KeyCount=0 would be returned identically for: absent, wrong bucket, wrong region, or missing s3:ListBucket",
+      "status": "MEASURED",
+      "evidence": "⛔ A FAILED RETRIEVAL RETURNS A VALUE, NOT AN ERROR. KeyCount=0 is emitted identically for a true absence, a wrong bucket, a wrong region, and insufficient s3:ListBucket. That is why both controls are run as separate invocations and why ListBucket is evidenced: my POSITIVE control on the same bucket succeeded, so ListBucket is held and a 0 here is not a masked 403. head-object would additionally return 403 rather than 404 without ListBucket, making AccessDenied indistinguishable from absence -- a second reason it is the wrong instrument here.",
+      "basis": "measured",
+      "owner": "0.7.0_AE_CloudOps~X"
+    }
+  ]
+}

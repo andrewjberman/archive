@@ -10,7 +10,9 @@
 <placement>LAPTOP (Rule 26 — the apply runs on the device that owns the work, under the normal wrappers; nothing ferried).</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-25T00:0xZ</issued>
-<status>ACTIVE (start condition above; seating staged)</status>
+<status>COMPLETE 2026-08-25T21:3xZ by `0.7.0_AE_CloudOps~J` -- role minted, applied, verified on live IAM, AC1/AC2 PASS, AC3 REPORTED. Proof instance at the declared instance_path.</status>
+<cell_status cell="STI-b-4">DONE -- `opal-advi-stitch-landing-role` created 2026-08-25T21:31:32Z, 6-statement inline policy, targeted plan 0-diff. AC1 allowed on all three landing prefixes with a separate-invocation positive control.</cell_status>
+<cell_status cell="STI-inv-1">DONE (IAM half) -- `explicitDeny` on the live `49f/{bronze,silver}` tiers AND the prospective `49financial/{bronze,silver}` leaves, carried by an EXPLICIT Deny statement rather than a mere absence of grant, so a later attached policy cannot widen it. Discrimination shown: `allowed`/`explicitDeny`/`implicitDeny` are three distinct verdicts from one instrument on one principal. ⛔ The DATA-PLANE half of inv-1 (the landed-key path census) is the DS lane's, NOT closed here.</cell_status>
 <priority>P2 — Phase A gates nothing.</priority>
 <scope_guard>ONE PROJECT, TWO CELLS. **No alarm, no monitor, no freshness checker** (moratorium). No bucket-policy edit on your own word — see AC3. Surprises: one line by MCP to `3.0.0_SA_CVO`, cc `2.0.0_SA_COO`. **Nothing to `4.0.0_SA_CRO*`.**</scope_guard>
 <authority>PRD `ADVI_STITCH_PRD.md` v0.2 s.11 #1 (the landing) + CLAUDE.md Rule 22a (STATE/IAM grounding) + CTO's Q-s1/Q-s2 rulings (66836).</authority>
@@ -22,19 +24,74 @@
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/ADVI_STITCH.TO-A1-AE_PROOF_OF_SPEC.json</instance_path>
   <alignment_denominators>cells declared: 2; criteria: 3; every criterion ≥1 cell_ref; both cells reachable. Unmapped 0; untraceable 0.</alignment_denominators>
 </proof_of_spec>
+
+<close_out_obligation>
+⛔ DECOMMISSION `opal-advi-stitch-landing-role` -- NAMED 2026-08-25 ~23:3xZ by 2.0.0_SA_COO (issuer),
+   raised by 0.7.0_AE_CloudOps~J (71762) who minted the role and asked for an end-of-life owner
+   BEFORE Phase A closed rather than after.
+
+   OWNER    the AE lane holding ADVI_STITCH Phase-A closure.
+   TRIGGER  AC5 + the four censuses closing.
+   ACT      delete the role, OR re-scope it with a NEW stated purpose. Not before the trigger.
+
+   WHY IT IS ON THIS TO'S FACE AND NOT IN A MESSAGE: an obligation that lives in a message dies with
+   the session that read it. The same failure was hit tonight on the 2026-08-26 acceptance and had to
+   be repaired with a dedicated TO (MDPF_GLOBAL.TO-ACCEPT-0826 @e70ffcc562). The context being hot is
+   not a storage medium.
+
+   THE HAZARD, in the raiser's own terms: at the moment its purpose discharges, the role becomes a
+   STANDING PRINCIPAL with write access to two legacy tiers and a 49F gold reference prefix,
+   ASSUMABLE BY THE OPERATOR IDENTITY, THAT NOTHING NEEDS. CLAUDE.md's shadow-channel veto is about
+   pipelines, but the mechanism is identical -- "these things never ever get decommissioned and they
+   become debt" (Andrew-direct).
+
+   ⛔ AND THE SHARPER FORM: THIS ESTATE REFUSED TO WIDEN THIS GRANT THREE TIMES ON 2026-08-25 --
+   GetObjectAttributes, GetObjectVersion, and GetObject-on-destination -- EACH TIME BECAUSE UNUSED
+   SURFACE IS UNDELETABLE LATER. Leaving the entire role behind after its one job is the same error
+   at a larger grain: every ACTION was guarded and the PRINCIPAL would have shipped.
+
+   STATE AT NAMING: both planes landed, 931 raw + 7,921 silver = 8,852 keys. Purpose not yet
+   discharged; AC5 and the censuses remain.
+</close_out_obligation>
 </task_order>
 
 ## ⛔ SPEC-AT-PICKUP
 
 | # | Premise | Oracle |
 |---|---|---|
-| O-1 | The three landing prefixes are NEW paths (no existing grant covers them) | `aws s3 ls s3://opal-data-assets/blackdiamond/49financial/` `# rail-checked` → EMPTY at issuance |
+| O-1 | The three landing prefixes are NEW paths (no existing grant covers them) | `aws s3 ls s3://opal-data-assets/blackdiamond/49financial/` `# rail-checked` → EMPTY at issuance. ⚠ **EMPTY here means UNMINTED, which is the DECLARED expectation — NOT evidence about the live tree.** An unminted tree and a misnamed one are BYTE-IDENTICAL at this oracle, so this premise says nothing about where 49F data actually lives. **AC2's deny arm targets `blackdiamond/49f/` for exactly that reason.** |
 | O-2 | The DS lane's scope set is committed (your start condition) | `git log` on the DS lane's commit; read the declared prefix list from the FILE |
 | O-3 | A neighbouring grant exists to control against | an existing `blackdiamond/49f/silver/*` key, used as the positive control **in a separate invocation** |
 
 ## Cells
 
 - **`STI-b-4` LANDING IAM** on `blackdiamond/49financial/bronze_legacy/*`, `.../silver_legacy/*`, and the 49F gold home's `gold/advi/reference/bd_legacy_*`.
+  <!-- ⛔ PRINCIPAL RULED 2026-08-25 ~21:1xZ by 2.0.0_SA_COO (issuer), on 0.7.0_AE_CloudOps~J's BLOCKING 71426 + constraint 71431.
+       THE GAP: this cell said "LANDING IAM" and NEVER NAMED A PRINCIPAL. AC1 says "the principal", AC2 "the same principal",
+       and STI-b-1 attributes writes to "0.6.0/0.7.0" -- AGENT SERIALS, not an IAM principal. You cannot write a grant without one.
+       WHY IT WAS BLOCKING RATHER THAN A DETAIL -- ~J EXERCISED IT: against the operator identity (user/Andrew_Berman),
+       arm1 landing PutObject -> allowed, arm2 positive control -> allowed, AND arm3 a bucket we do not own -> allowed,
+       arm3b organizations:LeaveOrganization on "*" -> allowed. UNRESTRICTED ADMIN. Every arm returns `allowed` REGARDLESS
+       of whether the claim is true, so AC1's green carries ZERO INFORMATION and AC2's required DENY is not merely unmet,
+       IT IS UNOBTAINABLE -- an admin is never denied. Rule 22 DISCRIMINATION, failed at the instrument.
+       RULED: MINT A DEDICATED LEAST-PRIVILEGE ROLE `opal-advi-stitch-landing-role`; the migration copy ASSUMES it.
+         GRANT  PutObject + AbortMultipartUpload + ListBucketMultipartUploads + ListMultipartUploadParts + ListBucket,
+                scoped EXACTLY to the three landing prefixes above, plus GetObject on the SOURCE tree it copies from.
+         ⛔ AND NOTHING on `blackdiamond/49f/{bronze,silver}/*` -- that omission is what makes AC2's deny a REAL
+            least-privilege implicit deny that WOULD FLIP TO `allowed` IF THE SCOPING WERE WRONG. That is the arm that
+            turns STI-inv-1 into an actual protective property instead of a restatement of itself.
+       ⛔ DO NOT EXTEND AN EXISTING bd49f ROLE: every one already holds write on blackdiamond/49f/* (bd49f_pull.tf:88),
+          which makes AC2 structurally unpassable for exactly the same reason as the admin user.
+       ⛔ NAME CONSTRAINT, from a LIVE read of opal-data-49financial's bucket policy (~J 71431): Sid
+          DenyForeignFirmPrincipals denies s3:* to Principal "*" under ArnLike aws:PrincipalArn role/cot-*, role/inf-*,
+          role/mdpf-*, role/opal-assets-mdpf-*. A RESOURCE-POLICY DENY IS NOT OVERRIDDEN BY ANY IDENTITY GRANT, so a name
+          matching those patterns fails at runtime on the third prefix while the identity policy, the TF plan and comp-iam
+          ALL READ HEALTHY. `opal-advi-stitch-landing-role` matches none of the four and is clear.
+       ⚠ NAME-COLLISION TRAP (~J, pre-empted): `opal-stitch-produce-codebuild-role`, `opal-stitch-produce-events-role`,
+          `opal-stitch-source-gha-role` are globgrph's stitch-produce chain (globgrph/stitch-produce.tf:44,80,
+          created 2026-07-07) and have NOTHING to do with ADVI_STITCH. Attaching a landing grant to one on the name match
+          would have looked right in every citation. Census denominator: 213 roles live, 20 name-matched, 4 spurious.
+       No cell_ref, criterion id, alignment denominator or acceptance row count changed -- the referent is NAMED, not moved. -->
 - **`STI-inv-1` (IAM half)** — the grant is scoped so it CANNOT write the live `bronze/` or `silver/` tiers of that vendor tree. **The legacy tiers being unmistakably distinct is his ruling's load-bearing half; at the IAM layer that means a grant that cannot reach the live tiers even by mistake.**
 
 ⛔ **THE INSTRUMENT DISCIPLINE, because this is a NEW resource and `comp-iam` fails GREEN on exactly this shape** (it models `(action)`, never `(action, resource)` — a role holding `s3:PutObject` on ANY bucket reports GRANTED for every other):
@@ -48,7 +105,18 @@
 | id | criterion | cell_refs | grounding (Rule 22a) |
 |---|---|---|---|
 | **STIA1AE-AC1** | Write allowed on EACH of the three new prefixes: one `simulate-principal-policy` per exact key, ONE `--resource-arns` per call, positive control in a SEPARATE invocation, action names validated by `validate-policy`; plus live `get-role-policy` (APPLIED) and the TF plan 0-diff (DESIRED) | STI-b-4 | DESIRED + APPLIED + EXERCISED |
-| **STIA1AE-AC2** | ⛔ **NEGATIVE, and it is the criterion that carries his ruling into IAM:** the same principal is DENIED on the LIVE `blackdiamond/49financial/bronze/*` and `.../silver/*` tiers — one resource per call, deny shown, with the positive control from AC1 proving the instrument discriminates | STI-b-4, STI-inv-1 | EXERCISED |
+| **STIA1AE-AC2** | ⛔ **NEGATIVE, and it is the criterion that carries his ruling into IAM:** the same principal is DENIED on **`blackdiamond/49f/bronze/*` and `blackdiamond/49f/silver/*`** — one resource per call, deny shown, with the positive control from AC1 proving the instrument discriminates. **Cite a REAL KEY under each tier in your evidence.** *Optional ADDITIONAL arm, labelled PROSPECTIVE and NEVER a substitute for the live-tree arm: the mint's future `49financial/{bronze,silver}/*` leaves.* | STI-b-4, STI-inv-1 | EXERCISED |
+<!-- AMENDED 2026-08-25 ~20:46Z by 2.0.0_SA_COO (issuer), on 0.7.0_AE_CloudOps~J's ARMED surprise 71404, disarmed same-turn.
+     THE DEFECT: this row said "the LIVE `blackdiamond/49financial/bronze/*` and `.../silver/*` tiers". THOSE ARE NOT LIVE -- they are
+     UNMINTED. `blackdiamond/` has EXACTLY TWO children, `49f/` and `cottonwood/` (denominator 2 of 2 enumerated, positive control run).
+     The live 49F data sits under `blackdiamond/49f/{bronze,silver}/` -- real keys sampled in both.
+     WHY IT MATTERED: run as written, AC2 returns a TRUE, well-controlled, correctly-denominated DENY on a path holding NOTHING, and ships
+     GREEN on the criterion that carries the ruling into IAM -- while STI-inv-1's actual protective property goes COMPLETELY UNTESTED.
+     A FALSE GREEN ON A PROTECTIVE CONTROL, which is the worst direction for this class to fail in.
+     NOT AMENDED, because it is NOT a defect: the `blackdiamond/49financial/` landing prefix is a DELIBERATE MINT (Rule 17b
+     {vendor}/{firm}/{medallion}; `49f/` is the legacy alias and nothing under it moves; ADVI_INSURE mints into the same tree). O-1's
+     EMPTY is the DECLARED expectation for an unminted tree, not a vacuous pass. The DS lane's STI-b-0 root is UNCHANGED and ~Q was told so.
+     No cell_ref, criterion id, alignment denominator or acceptance row count changed -- this row's TARGET moved, nothing else. -->
 | **STIA1AE-AC3** | ⛔ **Q-s1 — THE BUCKET POLICY'S REACH, MEASURED NOT ASSUMED:** the parquet-deny policy is SEGMENT-matched on `bronze`, and `bronze_legacy` is a DIFFERENT segment. Run one denied-write probe under `bronze_legacy/` plus an ISOLATED positive control under a real `bronze/` segment, and REPORT which way it lands. **If the guard does not reach the legacy tier, the widening is a one-line policy segment addition PROPOSED TO CTO WITH THE PROBE RESULT — never self-applied (bucket policy is the infra lane).** Until then the no-parquet property rests on the DS lane's `inv-2` and the report says so | STI-b-4 | EXERCISED |
 
 ## Law that binds

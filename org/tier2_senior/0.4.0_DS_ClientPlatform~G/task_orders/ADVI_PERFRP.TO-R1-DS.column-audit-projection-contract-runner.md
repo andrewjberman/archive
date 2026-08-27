@@ -21,7 +21,27 @@
 <placement>LAPTOP (Rule 26; D2 is laptop-ruled). Nothing ferried.</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-24T20:3xZ</issued>
-<status>ACTIVE</status>
+<status>complete</status>
+<!-- FLIPPED ACTIVE -> complete 2026-08-25T20:4xZ by 0.4.0_DS_ClientPlatform~G (self-marked; TASK_ORDER_PROTOCOL
+     reserves superseded/cancelled to COO/the issuer and leaves `complete` to the assignee).
+     THE WORK WAS ALREADY DONE WHEN I WAS SEATED ON IT. This TO was re-dispatched to me in CTO's 20:14Z
+     wave-1 order (71346) and GO'd by COO (71353) as a zero-prep spawn; it was in fact discharged by the
+     PRIOR ~G instance and certified hours earlier. The record was lagging reality, not the delivery.
+     VERIFIED AT THE ARTIFACT THIS SESSION, not taken from the prior seat's report:
+       ACCEPTANCE  14/14 PASS in the instance; `proof-of-spec-check` re-run at MY seat -> VALID, rc=0,
+                   violations=0; alignment 14/14 forward, 18/18 cell_ref->decomp, 18/18 backward.
+       INSTANCE    org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ADVI_PERFRP.TO-R1-DS_PROOF_OF_SPEC.json
+                   -- note this is the BASE deliverables folder; <instance_path> above names the ~G folder
+                   and NO file exists there. The checker resolves it positionally, so the divergence is
+                   inert today; it is recorded here because a future reader following <instance_path>
+                   finds nothing and would reasonably conclude the instance was never emitted.
+       CERT        3.0.0_SA_CVO @6b211f4d46, cert commit 4fca973ad8, on origin/CLOUD. Cert names layer 5
+                   (are the TO's 18 cells the decomp's complete criterion-bearing subset of 36) as OPEN
+                   and explicitly states this lane is NOT HELD on it.
+       DEPLOYED    `comp-pipescript deployed` over the whole family: 18 MATCH / 0 STALE / 0 MISSING,
+                   DENOMINATOR 18 of 70 objects at s3://opal-data-49financial/_code/. Not a sample.
+       PUSH STATE  6b211f4d46 and 4fca973ad8 both on origin/CLOUD (git branch -r --contains).
+     NO NEW WORK WAS INVENTED TO JUSTIFY THE SEAT. -->
 <priority>P1 — the PURPOSE project of the 49F sub-program (finding 3); wave-2 first in CTO's dispatch order (PERFRP → INSURE → STITCH-A).</priority>
 <scope_guard>ONE PROJECT. Exactly the cells above. ⛔ **Do NOT build the plan's ~50-column `fact_account_return_daily`** (CTO ruling Q-p1: YAGNI; it would build ADVI_PERFORMANCE's unbuilt Phase-2 table inside PERFRP). ⛔ **Do NOT disambiguate / schedule the `account_gains / account_performance / client_performance` wrapper trio** (Q-p2: off this path). ⛔ **Do NOT brief the plan's author** — the `ADVI_PERFORMANCE_E2E_STANDARDIZATION_PLAN_20260806.md` is REUSED AS AN ARTIFACT; any method extension you need (netting rule, new/lost definition, the residual identity) is drafted by you and RULED by CTO, certified by CVO (s.11 #13). Surprises → `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/ADVI_PERFRP/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580), one line, keep working. **Nothing to `4.0.0_SA_CRO*` this session.**</scope_guard>
 <authority>PRD `docs/architecture/ADVI_PERFRP_PRD.md` v0.3 s.4 / s.6 / s.8 / **s.11 (rulings, FIXED)** / s.12 (partner bindings) + s.13 premise correction (CTO, on Q-p1) + run P1–P16. Andrew-direct finding 3 (verbatim, PRD s.0) + "approved all" (~18:5xZ).</authority>

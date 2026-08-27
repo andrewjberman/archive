@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform (the INF D_04 lane -- Rule 13: DS owns the full commit -> QA-deploy cycle for data/*/scripts/gold/*.py incl. the aws s3 cp)</issued_to>
     <date>2026-08-21</date>
-    <status>pending -- STARTS at the lane's next working block (no clock, no urgency; the served key changes at the NEXT SCHEDULED INF run, NEVER ad-hoc). ANDREW-DIRECT AUTHORIZATION, verbatim "rec approved" at the 4.0.0_SA_CRO terminal ~0052Z 2026-08-21 (record: org/tier1_exec/4.0.0_SA_CRO/deliverables/ANDREW_DIRECT_20260821_D04_RENAME_AUA_IDENTITY_RESIDUAL.md; routed to me by 4.0.0_SA_CRO 63977). His word is the authorization; the NEVER#3 never-widen sign-off is the mechanical check on the deploy act, and 1.0.0_SA_CTO has PRE-DISCHARGED their half (64019) -- see the acceptance criteria.</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "INF_D04" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending -- STARTS at the lane's next working block (no clock, no urgency; the served key changes at the NEXT SCHEDULED INF run, NEVER ad-hoc). ANDREW-DIRECT AUTHORIZATION, verbatim "rec approved" at the 4.0.0_SA_CRO terminal ~0052Z 2026-08-21 (record: org/tier1_exec/4.0.0_SA_CRO/deliverables/ANDREW_DIRECT_20260821_D04_RENAME_AUA_IDENTITY_RESIDUAL.md; routed to me by 4.0.0_SA_CRO 63977). His word is the authorization; the NEVER#3 never-widen sign-off is the mechanical check on the deploy act, and 1.0.0_SA_CTO has PRE-DISCHARGED their half (64019) -- see the acceptance criteria.</status>
     <project_code>ADVI_INFDRF</project_code>
   </metadata>
 

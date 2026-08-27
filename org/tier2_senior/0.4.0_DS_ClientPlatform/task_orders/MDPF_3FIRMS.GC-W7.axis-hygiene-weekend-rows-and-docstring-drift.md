@@ -6,7 +6,7 @@
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-24T14:20Z</issued_at>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_3FIRMS, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 <authorization>Andrew-direct ~1310Z at CTO's terminal -> CTO PRD @5d7522128 -> COO decomposition. SCOPE-BOUNDED to MDPF_REVAMP_GLOBAL_COUNT_CLOSEOUT W-1..W-7; the broader MDPF_3FIRMS_PRD decomposition REMAINS HELD on Andrew's word (LD-0333).</authorization>
 
 <sequencing>

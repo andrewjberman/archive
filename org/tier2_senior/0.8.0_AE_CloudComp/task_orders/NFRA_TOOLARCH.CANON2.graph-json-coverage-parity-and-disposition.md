@@ -4,7 +4,7 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-07-23</date>
-<status>leg-A-complete, leg-B-blocked -- Leg A (coverage-parity precheck, all 7 tools) DONE 2026-07-23; Leg B (re-point) blocked on reopening a deferred architectural decision (42b7f3c48a, escalated COO~B/CVO~B/CTO 2026-07-01, never closed) -- see NFRA_TOOLARCH_CANON_CANON2_STATUS_AUDIT_20260725.md @04d8aacb0</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_TOOLARCH is complete; this TO was last touched 2026-07-25, predating the project close 2026-07-29. Closed as a record act, not a work verdict. Prior status: leg-A-complete, leg-B-blocked -- Leg A (coverage-parity precheck, all 7 tools) DONE 2026-07-23; Leg B (re-point) blocked on reopening a deferred architectural decision (42b7f3c48a, escalated COO~B/CVO~B/CTO 2026-07-01, never closed) -- see NFRA_TOOLARCH_CANON_CANON2_STATUS_AUDIT_20260725.md @04d8aacb0</status>
 <priority>P2 — follow-on to CANON (the ACUTE exhibit is already neutralized by the loud-vintage interim @dcf153915, so this is correctness-not-urgency)</priority>
 
 <authority>

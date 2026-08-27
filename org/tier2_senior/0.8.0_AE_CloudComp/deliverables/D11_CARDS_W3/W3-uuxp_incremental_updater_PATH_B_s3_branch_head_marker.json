@@ -1,0 +1,169 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.8.0_AE_CloudComp~Y",
+  "subject": {
+    "id": "infra/aws/lambda/globgrph/incremental_updater/lambda_function.py :: PATH B -- S3 branch-head marker",
+    "kind": "script",
+    "declared_domain": "The write path by which the incremental_updater Lambda materializes the branch-head freshness marker -- a single S3 JSON object recording, per Iceberg table, the current snapshot_id, metadata_location and last_write_iso. Covers stamp_branch_head_marker (:567-587) and the _provenance.stamp_marker machinery it delegates to. It does NOT cover this file's Iceberg write path (carded separately as W3-thav), and it does not cover the OTHER writers that stamp the same object -- derive_runner and cse_store also call stamp_marker, and this card makes no claim about their behaviour."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-27T06:46:16Z",
+    "commit_ish": "049ff4ca4a",
+    "graph_vintage": "graph_nodes@1462710383782792396 (branch-head marker committed_at_iso 2026-08-27T05:53:51.057095+00:00)"
+  },
+  "process": {
+    "methodology": {
+      "how": "After a Nessie commit lands, the handler calls stamp_branch_head_marker (:730) inside its own try/except. That function is a pure arg-adapter (:583-587): it passes the pyiceberg catalog, the writer_id literal 'incremental_updater', the warehouse bucket derived from WAREHOUSE_URI (:548-550), and a FOUR-TABLE TUPLE LITERAL ('graph_nodes','graph_edges','graph_contracts','cse') into _provenance.stamp_marker. stamp_marker (_provenance.py:194-233) resolves EACH named table's current snapshot from the catalog, builds a marker dict, and dispatches on _cas_enabled(): CAS path if the env flag is on, otherwise _stamp_unconditional. ⛔ THE BOUND IS THE TUPLE, AND IT NAMES THREE TABLES THIS LAMBDA NEVER WRITES. graph_edges, graph_contracts and cse are written by other producers entirely; this path reads their snapshots and publishes freshness metadata about them.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "canonical",
+      "composes": [
+        { "id": "globgrph.graph_nodes", "note": "the only one of the four tables this Lambda actually writes (via its PATH A)" },
+        { "id": "globgrph.graph_edges", "note": "read-only here; snapshot resolved and republished. Written by derive_runner PATH A." },
+        { "id": "globgrph.graph_contracts", "note": "read-only here. Written by derive_runner PATH B under an explicit do-not-touch invariant." },
+        { "id": "globgrph.cse", "note": "read-only here. Written by the nightly CSE producer chain. Its presence in this tuple is the fix for the 2026-07-10 erasure -- see evidence." },
+        { "id": "infra/aws/globgrph/_provenance.py", "note": "vendored into the deployment zip as a task-root module; carries ALL the marker IO. This file carries none." },
+        { "id": "Nessie REST /api/v2/trees/main", "note": "_nessie_main_hash (:553-564) best-effort reads the branch HEAD hash; on failure the marker falls back to graph_nodes' snapshot_id (_provenance.py:223)" }
+      ],
+      "invents": [
+        { "id": "committed_at_iso", "note": "_provenance.py:207 stamps datetime.now(timezone.utc) at STAMP time. This is the marker's own monotonicity key and is NOT any table's write time -- the per-table last_write_iso values are separate and are resolved from each snapshot's timestamp_ms (:217)." },
+        { "id": "writer_id", "note": "the literal 'incremental_updater' at :584. Self-declared attribution: the marker records who claims to have stamped it, and nothing verifies that claim." }
+      ],
+      "declared_opinions": [
+        "A MARKER FAILURE MUST NEVER FAIL A LANDED COMMIT (:574, and the handler wrapper at :729-732). Correct precedence, and it is a declared position: it means marker staleness and commit failure are deliberately decoupled, so the marker cannot be read as a commit oracle.",
+        "THE UNCONDITIONAL PATH IS KEPT AS THE DEFAULT ON PURPose (_provenance.py:247-249): 'the CAS path FAILS CLOSED, and a fail-closed stamp with no alarm is a silent outage of the freshness oracle -- strictly worse than the clobber it fixes.' A ranked choice between two known defects, not a derived result.",
+        "ONE CENTRALIZED STAMP (:568-573). The per-writer triplication was deliberately collapsed into _provenance.stamp_marker so all writers share one implementation. The consequence is that this path's behaviour is governed by a module in a different tree, versioned separately."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "how": "measured",
+        "composes": "measured",
+        "invents": "measured",
+        "declared_opinions": "measured",
+        "materializer_standing": "measured"
+      },
+      "evidence": "Source read at lambda_function.py :567-587 and _provenance.py :194-268 @049ff4ca4a. ⛔ THE MODULE THAT RUNS IS NOT THE MODULE IN THE TREE, AND I CHECKED WHICH ONE MY LINE NUMBERS DESCRIBE. The zip's vendored _provenance.py is 27,072 bytes against 34,270 on disk. Controlling for the CRLF/LF boundary before calling that drift: the zip has 0 CRLF and the working tree has 641, so 641 bytes are line-ending inflation and 6,557 bytes are REAL content divergence (539 vs 641 lines, normalised sha unequal). I then bounded WHERE it diverges: lines 1-391 of both copies are BYTE-IDENTICAL after LF-normalisation (sha c58dddea55d8 on both sides), and the first differing line is 405. Every symbol this card cites -- MARKER_KEY :96, stamp_marker :194, _cas_enabled :236, _stamp_unconditional :242, _archive_superseded :271, _stamp_cas :305 -- sits inside the identical region and at the SAME line number in both copies. The 6,557-byte drift is confined to the dev-box header-READ surface (cohort_vintage_lines, format_provenance_header), which this write path never calls. So my citations describe the running code, verified rather than assumed. materializer_standing=canonical is measured: the live marker's writer_id is incremental_updater with committed_at_iso 2026-08-27T05:53:51.057095Z.",
+      "owner": "0.8.0_AE_CloudComp for the call site and the tuple. _provenance.py was last authored by 0.8.0_AE_CloudComp @996fcad53e 2026-07-22 -- SEVEN DAYS AFTER the zip was built (b0412f3d3e, 2026-07-15), which is why the vendored copy lags."
+    },
+    "cadence": {
+      "declared_rhythm": "None declared. The stamp is unconditionally attempted after every successful commit_batch (:730), so its rhythm is exactly PATH A's rhythm -- event-driven on the SQS batch.",
+      "actual_trigger": "EVENT-DRIVEN, inherited. Same chain as PATH A: CloudTrail -> EventBridge rule opal-globgrph-cloudtrail-mgmt -> SQS opal-globgrph-incremental-events -> ESM 589e1bca-7e54-4b8e-8ede-d0c5d2e53002 -> handler -> :722 commit -> :730 stamp. This path has NO trigger of its own; it fires if and only if PATH A committed.",
+      "live_matches_declared": "yes",
+      "live_instance_age": "Last written 2026-08-27T05:53:52Z (S3 LastModified on warehouse/_branch_head.main.json, read via s3api in UTC), 52 minutes before this carding. NOT dormant under Rule 25 -- the threshold is 90 days.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "The trigger is inherited and I state it as such rather than re-deriving a trigger this path does not have -- the ESM, rule and both-plane sweep (137 events rules / 18 scheduler schedules) are recorded on W3-thav. ⛔ THE PAIRING IS MEASURED, NOT ASSUMED: the live marker's committed_at_iso is 2026-08-27T05:53:51.057095Z and its table_metadata.graph_nodes.last_write_iso is 2026-08-27T05:53:50.865Z -- 192 milliseconds apart, in the correct order (commit then stamp), with writer_id=incremental_updater. That is one execution of the handler doing PATH A then PATH B, not two writers coinciding. S3 LastModified 2026-08-27T05:53:52 GMT sits one second after the stamp's own committed_at_iso, which is the expected put latency and a third consistent clock. ⚠ I USED s3api head-object, NOT `aws s3 ls`, because the latter renders LOCAL time while s3api returns UTC -- a one-instrument slip there would have mis-stated the age by the timezone offset.",
+      "owner": "0.8.0_AE_CloudComp. Apply owner for the trigger infrastructure is the seat owning infra/aws/terraform/globgrph/item2b.tf (Rule 26); the marker object itself is applied by no Terraform -- it is created at runtime by whichever writer stamps first."
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "evidence",
+      "mutation_policy": "replaceable",
+      "form": "ONE S3 JSON object, 1,508 bytes at this reading: top-level nessie_commit_hash, committed_at_iso, writer_id, and a table_metadata map keyed by table name, each carrying metadata_location, snapshot_id and last_write_iso.",
+      "basis": "measured",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "form": "measured",
+        "mutation_policy": "measured"
+      },
+      "evidence": "Object fetched and parsed, not described: 1,508 bytes, ContentType application/json, SSE AES256, ETag 824d3d5a166da778282723c3ae046095. authority_role='evidence' and the alternative was tempting: this object is what dev-box readers consult to learn the branch HEAD, which makes it FEEL like a source. It is not -- the source of truth is Nessie's commit graph and each table's Iceberg metadata; this object is a published RECORD of what a writer observed at stamp time. Calling it 'source' would assert the graph is fresh BECAUSE the marker says so, which is the exact over-reading this row should prevent. ⛔ mutation_policy='replaceable' IS THE HARD FACT OF THIS SUBJECT, NOT A CLASSIFICATION CHORE: _provenance.py:274-276 states it directly -- this is 'the one mutable, destructively-overwritten, history-less object in this bucket, and versioning is Andrew-locked OFF'. Each stamp replaces the whole object. Verified live: the history prefix that exists to preserve superseded copies holds ZERO objects (see failure_mode).",
+      "owner": "SHARED AND THAT IS THE RISK: three writer families stamp this one object -- incremental_updater (this path), derive_runner, and cse_store. No single seat owns the object; each owns its own call site. Rule 26 is not a class constant here."
+    },
+    "location": {
+      "home": "s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json",
+      "projection_of": [
+        { "id": "globgrph.graph_nodes", "note": "snapshot_id + metadata_location + last_write_iso projected from the live Iceberg table" },
+        { "id": "globgrph.graph_edges", "note": "same, projected read-only" },
+        { "id": "globgrph.graph_contracts", "note": "same, projected read-only" },
+        { "id": "globgrph.cse", "note": "same, projected read-only" }
+      ],
+      "co_resident_stores": [
+        { "id": "s3://opal-313476888478-globgrph/warehouse/_branch_head.history/", "note": "HISTORY_PREFIX at _provenance.py:102 -- the archive of superseded markers. MEASURED EMPTY; the prefix does not appear in the bucket's prefix listing at all." },
+        { "id": "s3://opal-313476888478-globgrph/warehouse/cse_producer_markers/", "note": "a DIFFERENT marker family, per-CSE-producer watermarks. Also measured absent. Written by W3-bzgw's path, not this one." }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured",
+        "co_resident_stores": "measured"
+      },
+      "evidence": "⛔ AC4 SATISFIED WITH A FULLY RESOLVABLE KEY, composed from two literals in two files: bucket from WAREHOUSE_URI (lambda_function.py:37, :548-550) and key from MARKER_KEY (_provenance.py:96, literal 'warehouse/_branch_head.main.json'). The composed path was then EXERCISED -- s3api head-object returns 200 with the byte count above, so the name resolves to a real object rather than to a plausible-looking path. projection_of is POPULATED with all four tables and that is the substance of this row: unlike PATH A, whose projection_of is empty because it originates rows, this path writes nothing of its own -- every value in the object is a projection of a table's live state. Three of the four are tables this Lambda never writes. The co-resident history prefix was checked with the same instrument that successfully returned 1 for the warehouse/_branch_head prefix, so its empty result is a measurement and not an instrument failure.",
+      "owner": "0.8.0_AE_CloudComp for this call site; the object is shared with derive_runner and cse_store."
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "The four Iceberg tables named in the tuple at :585, at the moment this Lambda finishes a commit.",
+      "denominator": "4 of 4 tables resolved and present in the live marker. The tuple is a call-site literal, so the bound is ENUMERABLE and its size is exactly 4. ⛔ THE BOUND IS NOT UNBOUNDED, BUT IT IS ALSO NOT AUTHORITATIVE: nothing reconciles this tuple against the set of tables that actually exist in the globgrph namespace, so a fifth table added tomorrow would be silently absent from every marker this writer stamps.",
+      "denominator_absent_reason": null,
+      "explicitly_out": [
+        "The Iceberg commit itself -- this file's PATH A, carded as W3-thav.",
+        "The OTHER writers of this same object (derive_runner, cse_store). I measured that this path stamps 4 tables; I make NO claim about what tuple those writers currently carry. The clobber hazard below is a property of the shared object, and establishing the fleet's full behaviour would require carding their call sites, which are other lanes' subjects.",
+        "Whether any consumer ACTS on this marker correctly -- comp-kuzu's provenance header reads it, but I did not exercise a consumer.",
+        "⛔ COMPLETENESS OF THE WRITER POPULATION for this object, per CCY3-AC7. I know of three writer families from code references; I did not establish that they are all of them.",
+        "The CAS path (_stamp_cas, _provenance.py:305-390) beyond establishing that it is NOT the path in use. Its internal correctness is UNMEASURED because it does not execute."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "measured",
+        "explicitly_out": "measured"
+      },
+      "evidence": "All four tables verified PRESENT in the live object with distinct, plausible per-table vintages: graph_nodes snap 1462710383782792396 @2026-08-27T05:53:50.865Z, graph_edges snap 7054410074033298589 @2026-08-27T02:09:10.995Z, graph_contracts snap 7372628383041021108 @2026-06-16T18:53:50.361Z, cse snap 4835858649021205307 @2026-08-27T03:31:05.283Z. ⛔ THE SHARPEST MEASUREMENT ON THIS CARD, AND IT IS A POSITIVE RESULT: the module documents (_provenance.py:245-247) that _stamp_unconditional REPLACES table_metadata wholesale, and that on 2026-07-10 a three-table incremental stamp at 05:00:19Z ERASED the cse row that derive had written at 02:09:13Z. That hazard is REAL and still in the running code. IT IS NOT FIRING FOR THIS WRITER, and the evidence discriminates: cse's last_write_iso in the live marker is 2026-08-27T03:31:05.283Z, which is 2 hours 22 minutes OLDER than the 05:53:51Z stamp that wrote the object. A wholesale replace by a writer carrying a 3-table tuple would have dropped that row entirely; instead it survived with its own older timestamp intact. That is only possible if this writer's tuple genuinely contains cse -- which is what :585 says. The fix described at :575-582 is therefore EXERCISED, not merely committed.",
+      "owner": "0.8.0_AE_CloudComp for this call site's tuple. The wholesale-replace SEMANTICS belong to _provenance.py's owner; the tuple each writer passes belongs to that writer's seat -- so the hazard has one owner and the exposure has three."
+    },
+    "key": {
+      "identity_space": "Two spaces meeting in one object. (1) TABLE NAME -- the string keys of table_metadata, matching Iceberg table names in the globgrph namespace. (2) THE OBJECT KEY ITSELF, a fixed singleton: there is exactly one marker per branch and its name encodes the branch ('main').",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "_provenance.py:211 catalog.load_table(('globgrph', name)) -- the table-name string is mapped into the catalog's (namespace, name) identifier space by prefixing the hardcoded namespace 'globgrph'. That prefixing IS the mapping, and it is implicit rather than declared anywhere as a contract.",
+      "basis": "measured",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "key_is_stable='stable' measured on both spaces: MARKER_KEY is a module-level literal (_provenance.py:96) that has not changed between the deployed and source copies (both at :96, inside the byte-identical region), and all four table-name strings from the :585 tuple resolved successfully against the live catalog -- every one appears in the live marker, so none is a name that fails to bind. crosses_spaces is TRUE and measured: the four bare strings in the Lambda's tuple are not catalog identifiers until _provenance.py:211 prefixes them with 'globgrph'. ⛔ THE CONSEQUENCE OF THAT IMPLICIT MAPPING IS A REAL SILENT FAILURE, and it is measured at the line rather than supposed: a table name that does not resolve is caught at :219-220, logged MARKER_TABLE_RESOLVE_FAIL at WARN, and simply OMITTED from the tables dict -- the stamp then proceeds with the remaining tables. So a typo'd or renamed table degrades to an ABSENT ROW, not an error, and an absent row is exactly what the wholesale-replace clobber also produces. Two different causes converge on one indistinguishable symptom.",
+      "owner": "0.8.0_AE_CloudComp for the tuple; _provenance.py's owner for the namespace prefixing."
+    },
+    "failure_mode": {
+      "returns_on_failure": "NOTHING THAT REACHES THE CALLER, BY DESIGN. stamp_marker never raises to its caller (_provenance.py:199-201), and the handler additionally wraps the call in its own try/except that logs MARKER_STAMP_FAIL at WARNING (:731-732). Inside stamp_marker there are three distinct silent outcomes: a table that fails to resolve is logged at WARN and omitted (:219-220); if NO table resolves the function returns None having written nothing (:221-222); and if the existing marker's committed_at_iso is >= ours the write is SKIPPED with an INFO line (:256-258). All three leave the previous object in place, and a reader of that object cannot tell any of them from a healthy stamp that simply has not happened yet.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "⛔ THE ARCHIVE THAT WAS RULED BLOCKING HAS NEVER EXECUTED. _archive_superseded (_provenance.py:271-303) preserves the marker about to be overwritten, and its docstring records that CTO ruled it BLOCKING on the merge landing (:279-280). MEASURED: it is called ONLY from _stamp_cas, never from _stamp_unconditional; _cas_enabled (:236-239) defaults to 'off'; the live Lambda's environment contains no GLOBGRPH_MARKER_CAS variable; and warehouse/_branch_head.history/ holds ZERO objects and does not appear in the bucket's prefix listing. So on a non-versioned, destructively-overwritten object, every superseded marker in this system's history is unrecoverable -- which is precisely the condition :276-278 says the archive exists to prevent.",
+        "The wholesale-replace clobber remains live in the running code even though THIS writer does not currently trigger it. Any writer of this object that passes a shorter tuple erases the rows it omits, silently, and the result is a well-formed marker that simply lacks a table. Nothing in the object records which writer dropped what.",
+        "A table-name resolution failure omits that table's row (:219-220) and the stamp still succeeds. An omitted row is byte-identical in the object to a row erased by the clobber above.",
+        "The monotonicity guard (:256) skips the write when an existing marker is not-older. That is correct behaviour, but it means a clock skew between writers, or a writer with a fast clock, can cause a genuinely newer stamp to be silently discarded with only an INFO line.",
+        "_nessie_main_hash (:553-564) is best-effort; on failure the marker's nessie_commit_hash silently falls back to graph_nodes' snapshot_id (_provenance.py:223). A consumer reading that field cannot tell a real Nessie hash from the fallback without checking its shape.",
+        "A marker failure never fails the batch (:729-732), so the marker can be stale while every commit is landing perfectly. The marker is the freshness oracle, and the thing it cannot report is its own failure to be written."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "THE ARCHIVE FINDING WAS EXERCISED ON THREE INDEPENDENT PLANES, each capable of returning the opposite answer. PLANE 1 (code, deployed copy not source): parsed the vendored _provenance.py's :242-268 and :305-390 separately -- '_archive_superseded' appears in the _stamp_cas body and does NOT appear in the _stamp_unconditional body. PLANE 2 (live configuration): aws lambda get-function-configuration returns four environment variables -- SNS_TOPIC_ARN, NESSIE_URI, WAREHOUSE_URI, AWS_REGION_OVERRIDE -- and GLOBGRPH_MARKER_CAS is not among them, so _cas_enabled reads its 'off' default and the unconditional branch is the one that runs. PLANE 3 (the artifact): warehouse/_branch_head.history/ returns no contents, and the prefix is absent from the bucket's delimiter listing, which independently returned ten real sibling prefixes -- so the instrument demonstrably reports prefixes that do exist. Three planes, three different ways to be wrong, one answer. ⚠ A BOUND I WILL NOT OVERSTATE: an empty prefix on a non-versioned bucket cannot by itself distinguish 'never written' from 'written and later deleted'. The code plane is what closes it -- the only caller of the archive is on a branch the live configuration does not select. I did not run the CAS path and make no claim about whether it would work if enabled.",
+      "owner": "0.8.0_AE_CloudComp for this call site. _provenance.py's owner for the dormant-archive structure. ⛔ UNOWNED: no seat is named as owning the decision to leave GLOBGRPH_MARKER_CAS off, and the ranked-choice comment at :247-249 explains the tradeoff without naming who holds it or what would change it."
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "This path does what it claims and I verified the claim that mattered most. It stamped the live marker 52 minutes before this carding; its bound is a call-site literal tuple of exactly four tables; and the erasure hazard its own module documents -- a short-tuple writer wiping rows for tables it does not write -- is measurably NOT firing here, evidenced by cse's last_write_iso surviving 2h22m older than the stamp that rewrote the object. The fix at :575-582 is exercised, not merely committed. I also closed the deployed-vs-source question by content rather than by filename: the vendored _provenance.py is 6,557 real bytes behind the tree, but the divergence begins at line 405 and every symbol this card cites sits in a byte-identical region, so these citations describe running code. QUALIFIED rather than SOUND on three measured defects: (1) the superseded-marker archive that CTO ruled BLOCKING has never executed once -- it is reachable only from the CAS path, CAS is off by default, the live function sets no override, and the history prefix is empty; on a destructively-overwritten object with versioning locked off, that makes every prior marker state unrecoverable; (2) the wholesale-replace clobber is still live in the running code and this path's safety from it rests entirely on one literal tuple that nothing reconciles against the namespace's real table set; (3) the failure surface is silent in every direction -- an unresolvable table, a total resolution failure, and a monotonicity skip all leave the previous object in place and are indistinguishable, in the artifact, from a healthy stamp that has not fired yet. Not UNSOUND: nothing measured shows a wrong value published, the monotonicity guard and the never-fail-the-commit precedence are both correct, and the four live rows are internally consistent across three clocks. NOT INCOMPLETE: all 7 rows worked, every scalar 'measured'. ⛔ NO COMPLETENESS CLAIM ON THE WRITER POPULATION for this object, per CCY3-AC7 -- I know three writer families exist and did not establish they are all. ⛔ NO FORWARD DISPOSITION. Per QUALIFY-DO-NOT-FIX nothing was fixed: the CAS flag was not flipped, no env var was set, and this lane committed nothing to _provenance.py or to the Lambda.",
+    "blocking_defects": [
+      "For anyone who would need to show what a previous branch-head marker held -- to adjudicate a freshness FAIL, or to reconstruct a clobber: no prior state exists. The archive ruled BLOCKING at _provenance.py:279-280 is unreachable on the default path, and warehouse/_branch_head.history/ is empty. A criterion comparing against a prior marker degrades from FAIL to UN-EVALUABLE, which is the exact outcome :276-278 was written to prevent. Owner: _provenance.py's owner for the structure; UNOWNED for the decision to leave CAS off.",
+      "For any writer of warehouse/_branch_head.main.json: the wholesale-replace at _provenance.py:242-268 is live, so a shorter tuple silently erases the omitted tables' rows. This path is safe only because :585 happens to carry all four names, and nothing checks that tuple against the namespace. Owner: each writer's seat for its own tuple.",
+      "For anyone using this marker as a health signal: a marker failure cannot fail the batch, an unresolvable table is omitted rather than raised, and a not-newer stamp is skipped at INFO. A stale marker is not evidence of a failed commit, and a complete-looking marker is not evidence that every table resolved. Owner 0.8.0_AE_CloudComp.",
+      "For anyone reading nessie_commit_hash: on a Nessie REST failure it silently falls back to graph_nodes' snapshot_id (_provenance.py:223), and the field does not record which it is. Owner: _provenance.py's owner."
+    ]
+  }
+}

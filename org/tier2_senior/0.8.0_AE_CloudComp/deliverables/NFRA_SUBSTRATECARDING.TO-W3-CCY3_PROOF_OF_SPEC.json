@@ -1,0 +1,249 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SUBSTRATECARDING.TO-W3-CCY3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.8.0_AE_CloudComp~Y",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-substratecarding-w3/DECOMP.md",
+    "vintage_commit": "e48a7466ba",
+    "to_ref": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_SUBSTRATECARDING.TO-W3-CCY3.md"
+  },
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_SUBSTRATECARDING.TO-W3-CCY3.md",
+    "group": "W",
+    "vintage_commit": "e48a7466ba"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_W3/W3-thav_incremental_updater_PATH_A_iceberg_nessie.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A substrate card is a governance artifact, not a deployable. CCY3-AC8 requires zero commits by this lane touching a module it cards; all four subjects were opened READ-ONLY and nothing was deployed.",
+      "artifact_covered_by": [
+        "W3-thav-1",
+        "W3-thav-2",
+        "W3-thav-3",
+        "W3-thav-4",
+        "W3-thav-5",
+        "W3-thav-6",
+        "W3-thav-7"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_W3/W3-uuxp_incremental_updater_PATH_B_s3_branch_head_marker.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Governance artifact; no deploy target. Read-only carding.",
+      "artifact_covered_by": [
+        "W3-uuxp-1",
+        "W3-uuxp-2",
+        "W3-uuxp-3",
+        "W3-uuxp-4",
+        "W3-uuxp-5",
+        "W3-uuxp-6",
+        "W3-uuxp-7"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_W3/W3-dljc_cse_emit_frontend_coevolution_PATH_A_local_jsonl.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Governance artifact; no deploy target. Read-only carding.",
+      "artifact_covered_by": [
+        "W3-dljc-1",
+        "W3-dljc-2",
+        "W3-dljc-3",
+        "W3-dljc-4",
+        "W3-dljc-5",
+        "W3-dljc-6",
+        "W3-dljc-7"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_W3/W3-bzgw_cse_emit_frontend_coevolution_PATH_B_s3_watermark.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Governance artifact; no deploy target. Read-only carding -- and specifically, this path's target object was NOT written: doing so would have manufactured the artifact whose absence is the card's central measurement.",
+      "artifact_covered_by": [
+        "W3-bzgw-1",
+        "W3-bzgw-2",
+        "W3-bzgw-3",
+        "W3-bzgw-4",
+        "W3-bzgw-5",
+        "W3-bzgw-6",
+        "W3-bzgw-7"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CCY3-AC1",
+      "criterion_verbatim": "2 cards exist and all VALIDATE against the v2 contract. Every row carries basis + evidence + owner.",
+      "method": "schema_validation",
+      "invocation": "jsonschema validation over the DELIVERED BYTES of each card, re-read from disk rather than from in-memory dicts, run under BOTH Draft7Validator and Draft202012Validator; plus a programmatic sweep of the 7 required rows x 4 cards asserting basis/evidence/owner non-empty, plus a programmatic assertion that carded_by == 0.8.0_AE_CloudComp~Y on every card.",
+      "output_evidence": "4 of 4 VALID under both validators. Row sweep: 28 of 28 rows carry non-empty basis, evidence and owner; 0 defects. Authorship: 4 of 4 carry carded_by=0.8.0_AE_CloudComp~Y. NOTE THE CRITERION SAYS 2 CARDS AND I DELIVERED 4 -- that is the re-decomp, not scope creep: my own BLOCKING split both subjects at (FILE, WRITE PATH) grain and the issuer re-cut CCY3 from 2 subjects/14 cells to 4 subjects/28 cells @e48a7466ba. The TO's own proof_of_spec block, regenerated at that commit, enumerates all 28 cells. SCOPED BY EXPLICIT FILENAME, NOT BY GLOB: 0.8.0_AE_CloudComp~X writes its CCX3 cards into this SAME directory, and a glob over D11_CARDS_W3/*.json returns 7 files of which 3 are theirs. A glob-scoped denominator would have silently reported 7 and mixed two lanes' work.",
+      "denominator": "4 cards / 28 rows, mine only, enumerated by explicit filename.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCY3-AC2",
+      "criterion_verbatim": "as_of carries ONE wave pin: commit_ish and graph_vintage byte-identical across your cards. carded_utc is an HONEST clock read at a DECLARED grain (per-card or per-batch -- state which), never estimated, never copied.",
+      "method": "command",
+      "invocation": "[method normalised to the contract enum \"command\"; the specific instrument mix is named here] json.dumps(card['as_of'], sort_keys=True) collected into a set across my 4 cards; set cardinality asserted == 1.",
+      "output_evidence": "1 distinct as_of block across 4 cards -- byte-identical. Pin: carded_utc 2026-08-27T06:46:16Z, commit_ish 049ff4ca4a, graph_vintage graph_nodes@1462710383782792396 (branch-head marker committed_at_iso 2026-08-27T05:53:51.057095+00:00). GRAIN DECLARED: PER-BATCH. carded_utc is ONE honest clock read -- `date -u +%Y-%m-%dT%H:%M:%SZ` executed once in-session, not estimated between turns and not copied from another artifact. commit_ish is HEAD read by git rev-parse at that moment, AND I verified my source reads still hold at it: git diff --name-only d2cf839c79 HEAD over all four source files I read returns empty, so the bytes I read are the bytes at the pin even though HEAD advanced under me three times during the session. GRAPH VINTAGE INSTRUMENT DISCLOSED: comp-kuzu TIMED OUT at 90s (rc=143) and produced no provenance header, so I did NOT use it. I pinned instead to the live branch-head marker, read directly with s3api -- which is arguably the better vintage for these subjects, since two of my four paths write the very tables that marker describes. Recorded as a substitution, not passed off as a comp-kuzu read. PIN PROVENANCE (folded here because decomp_ref admits no note field): I cite the CORRECTED pin. The TO carried @af384e8da1 when my session opened; 2.0.0_SA_COO~X repinned all four wave-3 TOs to @e48a7466ba (msg 74830) after 0.7.0_AE_CloudOps~X established that cut_tos.py derived the pin from `git rev-parse HEAD` at emit time -- structurally the commit PRECEDING the decomp it points at. MY CELL IDS DID MOVE, and not from that repin: they moved because MY OWN BLOCKING split both my subjects. cell ids derive from the subject string, and my subject strings gained ':: PATH A/B'. The pre-split ids (W3-jdyg-*, W3-tril-*) are superseded and appear nowhere in this instance. I re-read the TO after the re-decomp rather than working from the ids I was dispatched with.",
+      "denominator": "4 of 4 cards carry the identical pin.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCY3-AC3",
+      "criterion_verbatim": "WHERE IS THE TABLE NAME BOUND -- every card states CLASS 1 / 2 / 3 with the line that binds it, and whether the bound set is ENUMERABLE. A class without a line number is not an answer.",
+      "method": "manual_read_with_citation",
+      "invocation": "[method normalised to the contract enum \"manual_read_with_citation\"; the specific instrument mix is named here] Every binding site opened at source @049ff4ca4a and cited with its line number on the card face.",
+      "output_evidence": "4 of 4 carry a class WITH its binding line and an ENUMERABLE verdict. W3-thav: CLASS 1, table_id literal ('globgrph','graph_nodes') at lambda_function.py:434 (same literal :371); ENUMERABLE, size 1. W3-uuxp: CLASS 1, key literal _provenance.py:96, bound set = the 4-table tuple literal at lambda_function.py:585; ENUMERABLE, size 4 -- AND BOUND IN A DIFFERENT FILE FROM ITS CALL SITE, which is why it is a separate path. W3-dljc: CLASS 3, --out at cse_emit_frontend_coevolution.py:372 with NO choices=; NOT ENUMERABLE, and the card says so and carries the consequence into its own coverage denominator. W3-bzgw: CLASS 1, MARKER_BUCKET :90 and MARKER_KEY :91, both module-level literals with no interpolation; ENUMERABLE, size 1.",
+      "denominator": "4 of 4 subjects classified with a binding line.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCY3-AC4",
+      "criterion_verbatim": "WHAT IT WRITES -- a resolvable path or table name, never a description. A card that says X is a materializer without naming WHICH artifact is unfalsifiable.",
+      "method": "live_read",
+      "invocation": "[method normalised to the contract enum \"live_read\"; the specific instrument mix is named here] Each named target resolved at source, then EXERCISED against the live plane where one exists.",
+      "output_evidence": "W3-thav: iceberg://globgrph.graph_nodes -- exercised, its current snapshot 1462710383782792396 read live from the branch-head marker. W3-uuxp: s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json -- exercised, head-object returns 200, 1,508 bytes, ETag 824d3d5a166da778282723c3ae046095. W3-bzgw: s3://opal-313476888478-globgrph/warehouse/cse_producer_markers/frontend_coevolution.json -- exercised, head-object returns 404, AND the containing prefix is absent from a warehouse/ delimiter listing that returned ten real siblings. W3-dljc: THE HONEST CASE -- the destination is a runtime argument, so the resolvable thing is the ARGUMENT and its default (:372), and I say so rather than inventing a canonical path; the one surviving instance IS resolved and exercised at s3://opal-313476888478-globgrph/warehouse/cse_ingest_staging/cse_frontend_coevolution.jsonl, 259,918 bytes, 2026-07-08T15:49:06Z. THREE OF FOUR TARGETS RESOLVE TO A FIXED NAME; the fourth cannot, by construction, and the card states that as UNBOUNDED rather than smoothing it.",
+      "denominator": "4 of 4 named; 4 of 4 exercised against the live plane.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCY3-AC5",
+      "criterion_verbatim": "TRIGGER -- plane (events / scheduler / event-driven / none-found) plus BASIS. An ECS rule target resolves to a CLUSTER, not a script: any 'X is triggered by Y' is INFERRED unless read from the task definition's container command. Mark it.",
+      "method": "live_read",
+      "invocation": "[method normalised to the contract enum \"live_read\"; the specific instrument mix is named here] BOTH planes swept with denominators printed, because neither can see the other: aws events list-rules -> 137; aws scheduler list-schedules -> 18. Reverse lookup on the Lambda's queue via aws events list-rule-names-by-target. Event source mapping read via aws lambda list-event-source-mappings. The scheduler hit followed through aws scheduler get-schedule -> aws ecs describe-task-definition -> the orchestrator source.",
+      "output_evidence": "W3-thav / W3-uuxp: EVENT-DRIVEN. Basis is the Lambda's OWN event source mapping -- UUID 589e1bca-7e54-4b8e-8ede-d0c5d2e53002, EventSourceArn arn:aws:sqs:...:opal-globgrph-incremental-events, State=Enabled, BatchSize=100, MaximumBatchingWindowInSeconds=120 -- so 'this queue invokes this function' is READ, not inferred, and no ECS indirection is in play. Upstream hop resolved with a SECOND instrument: list-rule-names-by-target on the queue ARN returns exactly one rule, opal-globgrph-cloudtrail-mgmt. live_matches_declared is measured on the number itself: the docstring declares a 120s batching window and the live ESM reads 120. W3-dljc / W3-bzgw: NONE-FOUND, and THE AC5 TRAP FIRED EXACTLY AS WRITTEN. The scheduler plane DOES hold globgrph-cse-producer-nightly, ENABLED, cron(30 3 * * ? *) UTC -- a name-based read would have concluded my subject is triggered nightly. Its Target.Arn is arn:aws:ecs:...:cluster/opal-globgrph, A CLUSTER. I followed it to task definition globgrph-cse-producer:1, whose container command is [\"python\",\"/app/cse_producers_nightly.py\"] -- still not my subject. I then read THAT module, whose docstring at :21-25 names the sweep leg as 'the standing lane for the LOCAL-source producers (deploy / frontend_coevolution / promote / agent local emits), whose repo/git sources a Fargate task cannot see.' THREE HOPS, EACH READ. The conclusion is stronger than a bare absence: my subject is architecturally un-triggerable from AWS by design. This independently re-derives 1.0.0_SA_CTO~X's 'NO live trigger on either plane' with a different instrument and supplies the mechanism their finding did not carry -- corroboration, not repetition.",
+      "denominator": "2 planes swept (137 rules + 18 schedules); 4 of 4 subjects carry a plane and a basis.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCY3-AC6",
+      "criterion_verbatim": "RULE 26 device/apply owner, and RULE 25 dormancy (>=90d stale = dormant absent a declared exception). Rule 26 is NOT a class constant -- measured non-uniform in wave 2.",
+      "method": "command",
+      "invocation": "[method normalised to the contract enum \"command\"; the specific instrument mix is named here] git log -1 per source file for authorship and vintage; live artifact timestamps via s3api (UTC) for exercise age; declaring TF tree located for the apply-owner split.",
+      "output_evidence": "RULE 26 MEASURED NON-UNIFORM ACROSS MY OWN FOUR SUBJECTS, and I did not flatten it. The Lambda's code owner is 0.8.0_AE_CloudComp (source last authored by ~Z @b0412f3d3e), but its trigger infrastructure -- EventBridge rule, SQS queue, ESM -- is declared in infra/aws/terraform/globgrph/item2b.tf (with iam.tf), so the APPLY owner for the trigger surface is the seat owning that tree, not the module's author. W3-uuxp splits further: its behaviour lives in _provenance.py (authored 0.8.0_AE_CloudComp @996fcad53e), the object it writes is SHARED with derive_runner and cse_store, and NO SINGLE SEAT OWNS THE OBJECT -- each owns its own call site. The cse_emit subjects are 0.5.0_AE_OpalETL's (@dd60cb1a35), a different lane again, while the nightly schedule and ECS task definition that DON'T run them belong to yet another. Four subjects, four different owner shapes. RULE 25: NO DORMANCY VERDICT IS OWED ON ANY OF THE FOUR, and I declare none. Lambda paths exercised 2026-08-27T05:53:5xZ, ~1 hour before carding. cse_emit's only artifact is 2026-07-08 = 50 days, and 50 < 90, so the threshold is NOT met -- I record the exact age and explicitly decline the verdict rather than letting 'never ingested' slide into 'dormant', which is a different claim about a different property.",
+      "denominator": "4 of 4 subjects carry a Rule-26 owner; 4 of 4 carry a Rule-25 age with an explicit verdict-or-decline.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCY3-AC7",
+      "criterion_verbatim": "DISCOVERABILITY IS NOT COVERAGE. No card asserts completeness of the writer population. If your subject can write tables it does not name, say so and say the bound is UNBOUNDED.",
+      "method": "manual_read_with_citation",
+      "invocation": "[method normalised to the contract enum \"manual_read_with_citation\"; the specific instrument mix is named here] Each card's trust.coverage.explicitly_out carries an explicit no-completeness clause; verified by reading all four faces.",
+      "output_evidence": "4 of 4 carry an explicit refusal to assert writer-population completeness, on the face, in explicitly_out. W3-dljc carries a SECOND and stronger one, because its bound genuinely is unbounded: its --out is CLASS 3, so I state that my own 0-of-1 denominator is 'of the instances I could find', NOT 'of the instances that exist', and mark the output set UNBOUNDED. W3-uuxp states that I know of three writer families for its shared object from code references and did NOT establish they are all of them. W3-thav states it measured what THAT path writes and cannot establish that it plus derive_runner are the only writers of graph_nodes. W3-bzgw states the marker prefix is empty so the intended writer set cannot even be enumerated. NONE of the four claims a complete writer population, and the one that could most easily have implied it -- thav, whose bound is a single clean literal -- is the one I was most careful to bound, because an enumerable TABLE bound reads as a complete WRITER census if nobody says otherwise.",
+      "denominator": "4 of 4 cards carry the clause; 1 of 4 additionally declares UNBOUNDED.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CCY3-AC8",
+      "criterion_verbatim": "QUALIFY-DO-NOT-FIX. Zero commits by this lane touching a module it cards. The Class-3 remedy (choices=, already written at snap_store.py:415) is NAMED, NOT APPLIED.",
+      "method": "diff",
+      "invocation": "[method normalised to the contract enum \"diff\"; the specific instrument mix is named here] git status/diff over the carded module paths; the session commit's pathspec restricted to deliverables.",
+      "output_evidence": "ZERO commits by this lane touch any carded module. The only paths this session writes are under org/tier2_senior/0.8.0_AE_CloudComp/deliverables/ (4 cards + this instance) and the session log. All four subject files were opened READ-ONLY; git status over infra/aws/globgrph/ and infra/aws/lambda/globgrph/ shows no modification to any tracked file (the only entries are pre-existing untracked local build artifacts I did not create and did not touch). THE CLASS-3 REMEDY IS NAMED AND NOT APPLIED: W3-dljc's location row and blocking_defects both name choices= on the argparse call at cse_emit_frontend_coevolution.py:372, and cite that the estate already wrote the pattern at snap_store.py:415 -- and it was not applied. THREE FURTHER RESTRAINTS, each of which would have been easy and each of which would have destroyed evidence: I did NOT run cse_emit_frontend_coevolution.py --emit; I did NOT write anything to the W3-bzgw marker key (that PUT would have manufactured the very object whose absence is that card's central measurement); and I did NOT move, copy or re-stage the 259,918-byte batch from cse_ingest_staging/ into cse_ingest/pending/, even though that single copy would 'fix' the finding -- it is not this lane's call, and the seam is UNOWNED, which is itself the finding.",
+      "denominator": "0 commits touching 4 carded modules; 1 named-not-applied remedy; 3 declared act-restraints.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Seven mutants submitted to the SAME Draft 2020-12 validator that produced the 4-of-4 PASS, run AFTER the final edits so they certify the DELIVERED bytes rather than an earlier draft. M1 trust block deleted. M2 floor violation on trust.key (scalar 'measured' over an 'inferred' sub-claim). M3 prose walked into a composes id (the ' -- ' pattern). M4 verdict.standing set to a non-enum value. M5 an unexpected additional property. M6 mutation_policy set to 'DESTRUCTIVE'. M7 THE FLOOR RULE ON A DIFFERENT ARM -- artifact.persistence.basis forced to 'measured' on W3-bzgw, the one card that genuinely carries inferred sub-claims, so the control is reachable from a DIFFERENT TRUTH than M2 rather than being the same mutation twice.",
+      "expected": "All seven REJECTED.",
+      "observed": "7 of 7 fired. Baseline re-confirmed under both Draft7 and Draft 2020-12: 4 of 4 VALID under each, so the PASS is not an artifact of validator choice. ⛔ AND THE CONTRACT CAUGHT TWO REAL DEFECTS OF MINE BEFORE DELIVERY, which is the point of running it against delivered bytes. (1) FLOOR RULE: THE CONTRACT REJECTED MY FIRST PASS AND IT WAS RIGHT. W3-bzgw shipped artifact.persistence with basis='measured' while form and mutation_policy were honestly marked 'inferred' -- because I have never seen the object that path would write, so I read its shape from the code instead. RESOLUTION: I DEMOTED THE SCALAR TO 'inferred' (the MIN over the map). I did NOT upgrade the two sub-claims to 'measured' to clear the gate -- that would have been falsifying a claim to satisfy a validator, which is the exact inversion of what the floor rule is for. The same demotion is why W3-bzgw's verdict discusses the floor rule explicitly on its face. (2) W3-dljc carried a composes id of 'portal (git submodule)', which the contract's id pattern forbids. Fixed by moving the parenthetical into the note, where prose belongs. ⚠ AND A CONTROL OF MY OWN THAT OVER-REPORTED: My own proactive id-pattern scan reported 4 remaining violations after the fix, all on subject.id. THEY WERE FALSE POSITIVES OF MY SCAN, not real violations: the pattern constraint applies to composes/invents ids, and my walker applied it to every key named 'id' including subject.id -- a control whose SUBJECT was the wrong field. Resolved against the validator itself rather than against my scan: all 4 cards validate, and W3-thav/W3-uuxp had already validated with the identical ':: PATH A -- ' subject id form before the fix. Recorded because a scan that over-reports looks like rigour and would have driven me to mangle four correct subject ids.",
+      "note": "⛔ M2 AND M7 ARE THE SAME RULE ON TWO DIFFERENT CARDS AND THAT IS DELIBERATE, per the control-set law that both arms must be reachable from different truths: M2 mutates a card whose sub-claims are all measured (the violation is injected), M7 mutates a card whose sub-claims are genuinely mixed (the violation is a real over-claim I could plausibly have shipped). M6 additionally CORROBORATES a finding I recorded independently on the W3-thav face -- v2's mutation_policy enum has no DESTRUCTIVE member -- which is why that card carries 'replaceable' as a declared floor-fit rather than a silent widening. I did NOT re-run 0.8.0_AE_CloudComp~X's forward_disposition self-disposal mutant: my cards omit forward_disposition entirely per W2-m-3, and re-running their mutant by their method would be REPETITION, not corroboration. I cite their finding as theirs.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs on both instruments this deliverable depends on, because a control on the schema validator says nothing about the live S3 read -- verification independence is per axis, not per check. (1) SCHEMA: Draft202012Validator over the delivered bytes of all 4 cards, twice. (2) LIVE READ: s3api head-object on warehouse/_branch_head.main.json, twice, compared on both LastModified and ETag.",
+      "observed": "RUN A schema 4/4 VALID; RUN B schema 4/4 VALID. RUN A marker: Thu, 27 Aug 2026 05:53:52 GMT / ETag 824d3d5a166da778282723c3ae046095; RUN B marker: identical on both fields. ⚠ THE MARKER ARM IS STABLE ONLY BECAUSE THE WRITER DID NOT FIRE BETWEEN THE TWO READS -- this path is event-driven, so a CloudTrail event arriving mid-control would legitimately change ETag. Stability here is a fact about this window, not a property of the artifact, and I state it rather than banking it.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Reading any ROW of globgrph.graph_nodes, or executing any query against the Nessie catalog",
+      "reason": "The Nessie catalog is a VPC-internal endpoint (http://nessie.opal-globgrph.local:19120) with no route from this device. I therefore make NO claim about row counts, row content, or semantic correctness of what W3-thav writes. What I could reach -- the branch-head marker's per-table snapshot ids and last_write_iso, on the S3 plane -- I read directly, and every liveness claim on these cards rests on that rather than on a table read."
+    },
+    {
+      "item": "Running cse_emit_frontend_coevolution.py in any mode, including --self-test and the default dry-run",
+      "reason": "Two reasons, and the second is the binding one. (1) It requires the portal submodule and DS~B's deliverables and would compute over live git. (2) A --emit would WRITE the W3-bzgw marker key, manufacturing the very object whose absence is that card's central measurement. Not running it is the only way to preserve the evidence, so the write path's behaviour is read from source and marked INFERRED where it is inferred."
+    },
+    {
+      "item": "Verifying the far end of the incremental_updater's loud channel",
+      "reason": "The code names a CloudWatch Logs metric filter -> metric -> alarm -> SNS chain as the in-VPC-viable escalation path (lambda_function.py:636-638). I did NOT confirm that any metric filter or alarm exists. Both W3-thav's failure_mode and its blocking_defects state this as UNMEASURED rather than assuming the chain is intact -- an absent RED alert is therefore not evidence of health, and the card says so."
+    },
+    {
+      "item": "Locating or exercising the leg-5 watcher for the cse_producer_markers key",
+      "reason": "cse_emit_frontend_coevolution.py:91 declares the key is 'the S3 object leg-5 watches (option b)'. I did not find or run that watcher. W3-bzgw records the declaration as a declaration and marks the watcher end UNMEASURED, with the consequence stated: if it exists, it has been silent about a permanently absent object."
+    },
+    {
+      "item": "Determining WHY cse_ingest_staging/ differs from the swept cse_ingest/pending/",
+      "reason": "Whether the staging prefix is a superseded lane, a typo, or a deliberate hold is UNMEASURED and I decline to infer it. What is measured is that the producer's output is not where the consumer reads, and that this morning's sweep reported batches=0 with failed_legs=[]. Intent is a different claim from mechanism, and only the mechanism is evidenced."
+    },
+    {
+      "item": "Exercising the _provenance CAS path (_stamp_cas)",
+      "reason": "It does not execute in the live configuration (GLOBGRPH_MARKER_CAS is absent from the Lambda's environment). W3-uuxp establishes that it is NOT the path in use and makes no claim about whether it would work if enabled. Enabling it would be a production configuration change and is far outside a qualify-only TO."
+    }
+  ],
+  "surprises": [
+    "BLOCKING (ARMED, routed to 3.0.0_SA_CVO~X cc 2.0.0_SA_COO~X as msg 74809/74810, UPHELD AND EXECUTED @e48a7466ba, DISARMED same-turn). *** THE DECOMP'S write_evidence FOR MY SUBJECT NAMED AN ARTIFACT THE SUBJECT DOES NOT WRITE. *** rectangle.c0.json:29 and subjects.json:19 both carried, for cse_emit_frontend_coevolution.py, 'writes fedobs_coevolution_snap'. The file contains ZERO references to that token. The real writer is emit_fedobs_snap.py:50, with the schema entry at snap_store.py:128 -- neither is my subject, and snap_store.py is another lane's subject in this same wave. The instrument was an ESTATE-WIDE sweep with the positive members NAMED, not a scoped grep whose zero could be a floor: my subject is ABSENT from the set of files carrying the token while the two true writers are present. Root, confirmed by the issuer: the subject IMPORTS NFRA_FEDOBS_frontend_coevolution_producer at :78, so the FEDOBS stem is in the file while the artifact is not -- a name resolved from a shared stem rather than from a read. It was BLOCKING rather than an OBSERVATION because writer_class: UNCLASSIFIED rested on that string: the class was not merely unmeasured, its stated basis pointed at another file's output. 2.0.0_SA_COO~X upheld it and recorded that they had inherited the claim from a tranche handoff and given it the durability of a record without verifying it.",
+    "BLOCKING (ARMED, same message, UPHELD AND EXECUTED, DISARMED same-turn). *** BOTH MY SUBJECTS HAD MORE THAN ONE WRITE PATH. *** Both carried write_paths_measured: null; both measure 2. cse_emit_frontend_coevolution.py writes a local JSONL batch (:262-264, CLASS 3 via an unconstrained --out) AND an S3 watermark object (:149, CLASS 1 via two literals) -- differing in mechanism, bound and authority, with the second suppressible by --no-marker. incremental_updater writes an Iceberg/Nessie commit (:501/:504 on the literal at :434) AND an S3 branch-head marker (:583 -> _provenance.py:262, bound by a 4-table tuple literal at :585 in a DIFFERENT FILE) -- differing in mechanism (pyiceberg CAS vs S3 PutObject), bound (one table name vs four), and authority (the atomic commit that IS the deliverable vs best-effort that must never fail the batch). CCY3 was re-cut 2 subjects/14 cells -> 4 subjects/28 cells.",
+    "⛔ AND THE HALF I DECLINED TO SPLIT, which the issuer called the one that mattered most: lambda_function.py:501 (overwrite) and :504 (delete) are NOT two write paths. Same table, same bound, same authority, same atomic commit envelope -- the docstring at :412-424 states the single-envelope design explicitly. They are exclusive BRANCHES. A grain instruction that only ever produces MORE rows is being obeyed rather than applied, and a bounded answer is what makes the other three splits credible.",
+    "OBSERVATION (non-blocking, no action requested). *** A PROTECTION RULED BLOCKING HAS NEVER EXECUTED. *** _provenance.py:271-303 _archive_superseded preserves the branch-head marker about to be destructively overwritten; its docstring records that CTO ruled the archive BLOCKING on the merge landing (:279-280), because the object is non-versioned (versioning Andrew-locked OFF, :275) and without the archive a criterion comparing against a prior marker degrades from FAIL to UN-EVALUABLE. MEASURED ON THREE INDEPENDENT PLANES, each able to return the opposite answer: (code) _archive_superseded appears in the _stamp_cas body and NOT in the _stamp_unconditional body, parsed from the DEPLOYED vendored copy rather than the source tree; (configuration) the live Lambda's environment has no GLOBGRPH_MARKER_CAS, so _cas_enabled reads its 'off' default and the unconditional branch runs; (artifact) warehouse/_branch_head.history/ holds zero objects and is absent from a warehouse/ delimiter listing that returned ten real siblings. Full detail on the W3-uuxp face; owner is _provenance.py's owner for the structure, UNOWNED for the decision to leave CAS off.",
+    "OBSERVATION (non-blocking). *** A 259,918-BYTE VALID BATCH HAS SAT ONE PREFIX AWAY FROM ITS CONSUMER FOR 50 DAYS, AND EVERY INSTRUMENT READS GREEN. *** cse_producers_nightly.py:75 binds PENDING_PREFIX = 'warehouse/cse_ingest/pending/' and :178 paginates that prefix and no other -- read from the CONSTANT and its use, not from the docstring. My subject's only output sits at warehouse/cse_ingest_staging/cse_frontend_coevolution.jsonl. Distinct prefixes, both present as siblings in the bucket's own delimiter listing. This morning's receipt (warehouse/cse_ingest/last_run.json, 2026-08-27T03:31:05Z) records leg 'sweep' with batches=0, appended=0, rejected_batches=0 and failed_legs=[] -- a clean green, because a sweep of an empty prefix and a sweep with nothing to do are the same event. pending/, done/ and rejected/ are ALL empty, so nothing has ever been swept, completed or rejected. I did NOT move the file: the seam is UNOWNED and re-staging it is not this lane's call.",
+    "OBSERVATION (non-blocking). *** A DEPLOYED PACKAGE WHOSE CodeSha256 MATCHES PERFECTLY CAN STILL CARRY A STALE VENDORED MODULE, AND THE CHECK THAT CATCHES IT IS A CONTENT DIFF. *** The Lambda's deployed CodeSha256 equals base64(sha256()) of the local zip byte-for-byte, and the zip's lambda_function.py member is sha-identical to the on-disk source. But the zip's vendored _provenance.py is 27,072 bytes against 34,270 on disk. CONTROLLED FOR THE CRLF/LF BOUNDARY BEFORE CALLING IT DRIFT: zip has 0 CRLF, working tree has 641, so 641 bytes are line-ending inflation and 6,557 bytes are REAL content divergence (539 vs 641 lines). ⛔ AND THE RESULT WENT THE REASSURING WAY, WHICH IS WHY I BOUNDED IT RATHER THAN FILING AN ALARM: lines 1-391 are byte-identical after normalisation (sha c58dddea55d8 both sides) and the first differing line is 405. Every symbol my cards cite in that module sits inside the identical region AND at the same line number in both copies; the drift is confined to the dev-box header-READ surface, which the write path never calls. So the citations describe running code. The module was last committed 2026-07-22, seven days AFTER the zip was built, which is why the vendored copy lags.",
+    "OBSERVATION (non-blocking, and it is about a comment rather than code). *** _provenance.py DESCRIBES MY SUBJECT INCORRECTLY, IN BOTH THE DEPLOYED AND SOURCE COPIES. *** The line at :405 reads 'incremental_updater stamps 3 (no `cse`)'. MEASURED OTHERWISE at the live artifact: the marker stamped by writer_id=incremental_updater at 2026-08-27T05:53:51Z carries FOUR tables including cse, and cse's own last_write_iso (2026-08-27T03:31:05Z) survived that stamp 2h22m older -- which a 3-table wholesale replace would have erased. The call site at lambda_function.py:585 does pass the 4-tuple, and its comment at :575-582 records the fix. So the module's descriptive comment about this writer is stale against the writer's actual behaviour, in the copy that runs. Recorded, not edited (AC8)."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-27/ (written at session close, with a mandatory Compiler Tools section)",
+  "compiler_tools": [
+    {
+      "tool": "comp-kuzu",
+      "invocation": "comp-kuzu \"MATCH (n) RETURN count(n) AS n\" -- attempted for the as_of graph vintage",
+      "result": "FAILED. Timed out at 90s, rc=143 (SIGTERM), no provenance header obtained. Recorded as an attempted-and-failed instrument rather than omitted. The graph vintage was sourced instead from the live branch-head marker via s3api, and AC2's evidence discloses the substitution rather than presenting it as a comp-kuzu read."
+    },
+    {
+      "tool": "comp-rail (Rule 21 gate)",
+      "invocation": "Fired twice, unrequested, on Bash grep commands touching paths under infra/",
+      "result": "PASS -- the gate did its job and improved the work. The refused estate-wide token sweep was re-run with the ripgrep-backed Grep tool and returned a STRONGER instrument than the one refused: a named positive-member set rather than a scoped count, which is what made the BLOCKING-1 finding sound rather than a floor. A later .tf lookup carried an explicit '# rail-checked:' marker with its reason."
+    },
+    {
+      "tool": "jsonschema (v2 contract)",
+      "invocation": "Draft7Validator and Draft202012Validator over the delivered bytes of 4 cards, plus a 7-mutant battery and a 28-row basis/evidence/owner sweep",
+      "result": "PASS -- 4/4 VALID under both validators, 28/28 rows complete, 7/7 mutants rejected. AND IT CAUGHT TWO REAL DEFECTS OF MINE before delivery: a floor-rule violation on W3-bzgw (resolved by demoting the scalar, NOT by inflating the sub-claims) and a forbidden prose pattern in a W3-dljc composes id."
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "not run",
+      "result": "NOT ATTEMPTED, and stated rather than left blank. 0.8.0_AE_CloudComp~X recorded it timing out at 120s on a globgrph module this same session, so the expected value was low; the blast-radius question my subjects raise (who consumes the branch-head marker) was answered instead by reading _provenance.py's own consumer path and by the live marker's contents."
+    },
+    {
+      "tool": "git (ls-files / log / diff / rev-parse)",
+      "invocation": "tracked-status with a firing negative control; per-file vintages; a d2cf839c79..HEAD diff over all four source files; HEAD resolution for the pin",
+      "result": "PASS -- both subjects TRACKED (negative control on a nonexistent path FIRES with 'did not match any file(s)'). The diff returning EMPTY is what licenses pinning cards to 049ff4ca4a even though HEAD advanced three times mid-session."
+    },
+    {
+      "tool": "aws (lambda / events / scheduler / ecs / s3api)",
+      "invocation": "list-event-source-mappings, list-rule-names-by-target, list-rules, list-schedules, get-schedule, describe-task-definition, get-function-configuration, head-object, list-objects-v2 with and without --delimiter",
+      "result": "PASS -- supplied every live denominator and the three-hop trigger resolution. s3api used deliberately over `aws s3 ls` because the latter renders LOCAL time while s3api returns UTC; a slip there would have mis-stated every artifact age by the timezone offset. list-objects-v2 --query length() returns null rather than 0 on an empty prefix, so empty results were confirmed a second way with a delimiter listing that independently returned ten real sibling prefixes."
+    },
+    {
+      "tool": "session instrumentation (disclosure)",
+      "invocation": "see result",
+      "result": "A first attempt at the CRLF comparison died on a syntax error in my own one-liner, and a second on an MSYS /tmp path that does not resolve; both re-run from the scratchpad. Recorded so the successful third run is not read as a first-try result."
+    },
+    {
+      "tool": "session instrumentation (disclosure)",
+      "invocation": "see result",
+      "result": "Per-rule iteration over all 137 EventBridge rules TIMED OUT at 120s. Replaced with the direct reverse-lookup instrument (list-rule-names-by-target), which is both faster and sharper -- it answers 'what targets this queue' rather than 'what does each rule target'."
+    }
+  ]
+}

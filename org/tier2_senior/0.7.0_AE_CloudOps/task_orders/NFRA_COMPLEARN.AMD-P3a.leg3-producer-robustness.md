@@ -1,11 +1,11 @@
 <task_order>
 <id>NFRA_COMPLEARN.AMD-P3a</id>
-<project>NFRA_COMPLEARN (amendment)</project>
+<project>NFRA_COMPLEARN</project>
 <title>AMD P3a -- leg-3 producer robustness + HARD freshness gate + "make the nightly-Fargate emit claim TRUE or DELETE it"</title>
 <assigned_to>0.7.0_AE_CloudOps~B</assigned_to>
 <issued_by>2.0.0_SA_COO~A</issued_by>
 <issued_date>2026-07-10</issued_date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25 (S2): <project> field repaired from "NFRA_COMPLEARN (amendment)" to NFRA_COMPLEARN, which is complete. Closed as a record act, not a work verdict. Prior status: pending</status>
 <priority>#3 program leg, NON-URGENT / LAST -- leads behind the 0.8.0 P1 foundations. CloudOps infra.</priority>
 <dispatch>GO 2026-07-10 by COO~A. 0.7.0_AE_CloudOps~B is Andrew-cleared as OURS (base + ~A remain Andrew's -- OFF-LIMITS). THIS IS A DISPATCH POINTER -- the full arch-gated spec is authoritative; read it before building.</dispatch>
 <full_spec>org/projects/NFRA_COMPLEARN/task_orders/NFRA_COMPLEARN.AMD-P3a.leg3-producer-robustness.md @ 8dfcf1e75</full_spec>

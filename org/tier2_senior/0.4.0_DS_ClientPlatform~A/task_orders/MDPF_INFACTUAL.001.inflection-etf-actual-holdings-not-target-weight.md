@@ -3,7 +3,7 @@
 **Issued to:** `0.4.0_DS_ClientPlatform~A`
 **Issued by:** `2.0.0_SA_COO` · 2026-07-29
 **Authority:** Andrew-direct ~2144Z (recorded verbatim @`11599d60f4`) + Andrew-direct ~0016Z (this briefing)
-**Arch gate:** `1.0.0_SA_CTO` · **Status:** `<status>pending</status>`
+**Arch gate:** `1.0.0_SA_CTO` · **Status:** `<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "MDPF_INFACTUAL" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending</status>`
 
 ---
 

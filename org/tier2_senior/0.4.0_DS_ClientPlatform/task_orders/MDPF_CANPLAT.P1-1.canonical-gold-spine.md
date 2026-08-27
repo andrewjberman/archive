@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~Z</issued_to>
     <date>2026-08-06</date>
-    <status>pending</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_CANPLAT, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
     <project_code>MDPF_CANPLAT</project_code>
     <supersedes>MDPF_CANRTE.P1-1 (adopted @a6ae64326, deltas below) · MDPF_CANRTE.A / P0-4 / W2R (superseded; outputs adopted as inputs)</supersedes>
     <governing>PRD docs/architecture/MDPF_CANONICAL_PLATINUM_PRD.md @24d3eb2f8 · CONTRACT docs/architecture/MDPF_CANONICAL_PLATINUM_DELIVERABLE_CONTRACT.md @a3106d585</governing>

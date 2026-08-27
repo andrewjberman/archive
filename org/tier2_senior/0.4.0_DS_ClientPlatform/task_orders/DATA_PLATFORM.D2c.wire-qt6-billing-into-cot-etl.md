@@ -6,7 +6,7 @@
 <verify>3.0.0_SA_CVO (verify the 6th table lands + reconciles against the qt6 fee-probe finding)</verify>
 <issued_by>PROPOSED by 0.4.0_DS_ClientPlatform (COO-directed 2026-07-08, following the D2b/D2c fee-resolution finding); PENDING 2.0.0_SA_COO issue+register AFTER Andrew DATEMODE coordination</issued_by>
 <issued_date>2026-07-08</issued_date>
-<status>proposed-not-built</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project DATA_PLATFORM, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: proposed-not-built</status>
 <!-- SCOPE ONLY per COO 2026-07-08 GO: "SCOPE it as a proposed TO but do NOT build yet; it touches cot_bronze_ingest.py which is the DATEMODE-HELD file (Andrew's PRD), so it needs coordination -- I'll sequence D2c after I confirm the DATEMODE-coordination with Andrew." DO NOT implement against this TO until COO flips status to active/issued. -->
 
 <objective>

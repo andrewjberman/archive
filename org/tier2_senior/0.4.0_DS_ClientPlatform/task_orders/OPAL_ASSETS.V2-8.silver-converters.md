@@ -6,9 +6,9 @@
 <amendment id="3" date="2026-07-14" by="2.0.0_SA_COO">TABLE NAMING (Andrew-direct ~09:1xZ, dictionary v0.4 @ 8c2574c2e, via CTO 091657Z): silver tables = fact_{type} COMPLETE vendor tables; runner gold = tight dim_* projections; gold is the one parse-down point. BINDING NOW for the CRS family (0.6.2: rename pre-deploy). For every OTHER family (DS mirror-silver + ETF, 0.5.0 smartx incl. its five plan-pinned names): whether fact_ extends channel-wide is PARKED as an open cell in OPAL_ASSETS_V2_LAMBDA_CONTRACT.md -- build logic now, keep the table-name a one-line constant, and the cell settles (Andrew's word or contract review) BEFORE each family's first deploy. No mid-build churn.</amendment>
 <issued_by>2.0.0_SA_COO (V2 decomposition; PRD author 1.0.0_SA_CTO)</issued_by>
 <date>2026-07-14</date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25 (S2): <project> field repaired from "OPAL_ASSETS — V2 Phase II silver conversion layer" to OPAL_ASSETS, which is complete-as-superseded. Closed as a record act, not a work verdict. Prior status: pending</status>
 <go>BUILD NOW, both families -- ANDREW-DIRECT (2026-07-14 ~08:4xZ, COO session, verbatim: "Yes, start silver builds ahead of the certificate") SUPERSEDES the V2-5-cert half of the hard gate for the BUILD. Author + build converters against contract note v1 (d68982c1e). UNCHANGED: deploy lands into V2-7's applied container; CTO's converter code-review gates every converter before deploy; CTO's first-conversion signoff (AC-3) stands; the V2-5 certificate continues in parallel as the completeness instrument.</go>
-<project>OPAL_ASSETS — V2 Phase II silver conversion layer</project>
+<project>OPAL_ASSETS</project>
 <prd>docs/architecture/OPAL_ASSETS_V2_PRD.md §3 rulings 23/25 + V2-8 (@ 53ba45c5f); inherits CONSOLIDATION_PRD v1.6.0 whole</prd>
 
 ## THE GOAL (ruling 23 — THE SILVER CONTRACT, verbatim)

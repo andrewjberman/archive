@@ -2,10 +2,10 @@
 
 <task_order>
   <to_id>NFRA_GRAPHFEED.W1</to_id>
-  <project>NFRA_GRAPHFEED (registration in flight at COO; authority = LD-0299 pending that record)</project>
+  <project>NFRA_GRAPHFEED</project>
   <issued_by>0.0.0_AB_MSTR (wave owner; Andrew-direct GO 2026-07-15 ~18:5xZ, verbatim in LD-0299)</issued_by>
   <issued_to>0.8.0_AE_CloudComp~Z</issued_to>
-  <status>pending</status>
+  <status>complete -- SPRING-CLEAN 2026-08-25 (S2): <project> field repaired from "NFRA_GRAPHFEED (registration in flight at COO; authority = L" to NFRA_GRAPHFEED, which is closed. Closed as a record act, not a work verdict. Prior status: pending</status>
   <priority>P1 (Andrew: "Start with 1) as that is the highest leverage, but proceed through all 6 items")</priority>
 
   <context>

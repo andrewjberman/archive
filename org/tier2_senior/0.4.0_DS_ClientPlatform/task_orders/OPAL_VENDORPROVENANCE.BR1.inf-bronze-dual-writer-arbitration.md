@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project OPAL_VENDORPROVENANCE, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 <priority>P2-staged (COO ownership disposition on CTO routing 222345Z. NOT blocking T4.A or the T2.C apply. ACTIVATES on T4.A completion or explicit COO GO -- whichever first. Staged-not-parked: this TO exists so the finding cannot close as "covered."</priority>
 
 <title>BR1: the inf bronze DUAL WRITER (6 dim feeds, same key, last-writer-wins) -- decision brief for the CTO arbitration ruling, then implement</title>

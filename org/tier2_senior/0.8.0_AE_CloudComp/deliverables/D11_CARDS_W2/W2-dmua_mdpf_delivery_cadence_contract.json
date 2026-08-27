@@ -1,0 +1,156 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.8.0_AE_CloudComp~Y",
+  "subject": {
+    "id": "mdpf_delivery_cadence_contract",
+    "kind": "artifact",
+    "declared_domain": "The MDPF delivery-cadence contract that D3's seed names as 'a WRITTEN D3 instance' and parenthesises as 'T-1 by 02:00Z'. This card covers that contract AS AN ARTIFACT: whether it is written, where, what it actually says, and how it fails. It does NOT card the D3 rail (wave 1, SC-g-*), the estate-contracts store as a whole (W2-qgtd covers its sibling carrier), or the MDPF pipeline's operational health."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T22:34:21Z",
+    "commit_ish": "100e7ea130",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "how": "MDPF's delivery-cadence obligations are DECLARED, not derived: they are hand-authored contract_records in the estate-contracts store, written by an AE seat and loaded in-VPC. Three of the seven MDPF records carry a delivery_cadence obligation -- two process records (mdpf-daily-trigger, mdpf-daily-runner) and one artifact record (aggregate_aua_timeseries.json). The obligation is a TYPE reference into D3's obligation_types; the actual cadence value is a free-text string on the optional `cadence` field. It COMPOSES D3's obligation_types vocabulary and the contract_record shape; it INVENTS the per-subject MDPF cadence declarations themselves. ⛔ NOTHING GENERATES OR CHECKS THESE -- the store's own README states it fires nothing, renders records, and runs no scan and no schedule.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "not_applicable",
+      "composes": [
+        { "id": "org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml#dynamic_rails.D3_contract_obligation.obligation_types", "note": "delivery_cadence is a type reference into this vocabulary" },
+        { "id": "org/modules/graph/estate-contracts/mdpf.contracts.yaml", "note": "the carrier holding the seven MDPF contract_records" }
+      ],
+      "invents": [
+        { "id": "mdpf.delivery_cadence_declarations", "note": "the per-subject MDPF cadence claims -- which of the seven records carry the obligation and what each says" }
+      ],
+      "declared_opinions": [
+        "⛔ EVENT-ONLY AS A DECLARED CADENCE: the one MDPF record carrying a cadence VALUE declares it as 'event-only: S3 ObjectCreated on the INF spine completion marker; no schedule of its own'. Treating a dependency on another pipeline's completion marker AS the cadence -- rather than as an accelerator alongside one -- is a declared position, stated plainly in the record.",
+        "OBLIGATION WITHOUT VALUE: two of the three records declaring delivery_cadence carry no cadence value at all. That the obligation TYPE can be asserted without the value that would make it checkable is permitted by the contract_record shape, and MDPF exercises that permission twice.",
+        "PROCESS AND ARTIFACT RECORDS SHARE ONE OBLIGATION VOCABULARY: mdpf-daily-trigger (a process) and aggregate_aua_timeseries.json (an artifact) both carry delivery_cadence, so the obligation is asserted at two different grains in one file."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "how": "measured",
+        "composes": "measured",
+        "invents": "measured",
+        "declared_opinions": "measured",
+        "materializer_standing": "measured"
+      },
+      "evidence": "All seven MDPF records parsed with contract_declare_lint.py's OWN find_records predicate rather than a grep, over org/modules/graph/estate-contracts/mdpf.contracts.yaml @7ed8a737ac. Per-record obligation and cadence read directly from the parse: process:mdpf-daily-trigger obligation=['delivery_cadence'] cadence='event-only: S3 ObjectCreated on the INF spine completion marker; no schedule of its own'; process:mdpf-daily-runner obligation=['delivery_cadence'] cadence=None; aggregate_aua_timeseries.json obligation=['delivery_cadence','completeness'] cadence=None; process:mdpf-freshness-checker, {date}.json, account-distribution.json and {date}.parquet carry no delivery_cadence. Store's no-cadence design read at org/modules/graph/estate-contracts/README.md:61-65 @0bdca276e8. materializer_standing MEASURED as not_applicable: hand-authored declarations, no producer.",
+      "owner": "0.7.0_AE_CloudOps~D -- authored mdpf.contracts.yaml @7ed8a737ac."
+    },
+    "cadence": {
+      "declared_rhythm": "For the one record that states one: 'event-only: S3 ObjectCreated on the INF spine completion marker; no schedule of its own'. The other two delivery_cadence records declare no rhythm at all.",
+      "actual_trigger": "a human authoring act plus an in-VPC load, for the CONTRACT. For the SUBJECT the contract governs, the declared trigger is an S3 ObjectCreated event on another pipeline's completion marker.",
+      "live_matches_declared": "unmeasured",
+      "live_instance_age": "Contract records last authored 2026-07-31 (@7ed8a737ac), about 26 days at this carding.",
+      "basis": "inferred",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "inferred",
+        "live_instance_age": "measured"
+      },
+      "evidence": "Declared rhythm and trigger read verbatim from the parsed records. ⛔ live_matches_declared IS 'unmeasured' AND THE SCALAR DROPS TO 'inferred' TO SAY SO, rather than the row claiming a comparison I did not run: establishing whether MDPF actually delivers on the declared event would require reading the live trigger and the served artifact's vintages, and this lane did NOT do that -- it is a pipeline-health question outside this card's declared domain and outside my TO. I am recording the DECLARATION and explicitly not the APPLIED state. Naming that gap is the honest form; asserting a match or a mismatch from the contract text alone would be the description-is-never-a-state error D3 itself names.",
+      "owner": "0.7.0_AE_CloudOps~D for the declarations; the MDPF pipeline's operational owner is not named in this file."
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "source",
+      "mutation_policy": "append_only",
+      "form": "contract_record entries inside a per-firm YAML file in the estate-contracts store; version-controlled in git and loaded into the Iceberg graph_contracts table in-VPC",
+      "basis": "inferred",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "form": "measured",
+        "mutation_policy": "inferred"
+      },
+      "evidence": "⛔ THE CONTRACT IS WRITTEN, AND I NEARLY CARDED THE OPPOSITE. Measured: three MDPF contract_records carry a delivery_cadence obligation in a file that exists, parses, and validates against contract_declare_lint. persisted is unambiguously true. mutation_policy is INFERRED from the store's declared append-only discipline (README.md:55-58 @0bdca276e8, dated resolution records that 'can only ever be true') rather than exercised -- I did not attempt an update, and per the W2-qgtd card the live carrier is unreachable from this plane -- so the scalar drops to inferred. authority_role 'source' because these records ARE the declaration; the Iceberg table is loaded FROM them.",
+      "owner": "0.7.0_AE_CloudOps~D"
+    },
+    "location": {
+      "home": "org/modules/graph/estate-contracts/mdpf.contracts.yaml",
+      "projection_of": [],
+      "co_resident_stores": [
+        { "id": "graph_contracts", "note": "the Iceberg table these records are loaded into in-VPC; carded separately at W2-qgtd" },
+        { "id": "org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml#dynamic_rails.D3_contract_obligation", "note": "the seed sentence that NAMES this contract and parenthesises it as 'T-1 by 02:00Z'" }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured",
+        "co_resident_stores": "measured"
+      },
+      "evidence": "Home verified by direct parse. projection_of is an EMPTY ARRAY as a positive claim: these are hand-authored declarations projecting from nothing. ⛔ THE SEARCH THAT FOUND THIS HOME IS WORTH RECORDING BECAUSE MY FIRST SWEEP NEARLY PRODUCED A FALSE ABSENCE. Sweeping the literal phrase from the seed -- 'T-1 by 02:00' -- returned 22 hits over 27,009 files scanned, and EVERY ONE traces back to the seed itself: the rule bank :360, my own wave-1 D3.json:21 citing the seed, and three lines of the wave-2 rectangle derived from my card. A self-referential loop in which the estate's evidence for a written contract is the sentence asserting one exists. WIDENING IS WHAT SAVED IT: comp-find --name '*MDPF*CONTRACT*' -> 17 hits / 28,901 scanned and '*MDPF*CADENCE*' -> 8 hits, real artifacts under other wording, and following the D3-instance-store lead resolved it. PLANE NAMED: repo plane; the in-VPC table is unreadable from here (see W2-qgtd) and this lane ran ZERO comp-keys calls.",
+      "owner": "0.7.0_AE_CloudOps~D"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "MDPF subjects carrying a declared delivery-cadence obligation in the estate-contracts store.",
+      "denominator": "3 of 7 MDPF contract_records declare a delivery_cadence obligation, and 1 of those 3 carries an actual cadence VALUE. So the obligation is asserted three times and made checkable once. Against the whole store, this file is 7 of 14 records across 2 of 2 files.",
+      "denominator_absent_reason": null,
+      "explicitly_out": [
+        "⛔ THE SEED'S 'T-1 by 02:00Z' FORMULATION -- NOT LOCATED. See the key row. The concept of an MDPF cadence contract is well-attested; that specific delivery commitment is not found in the artifacts this lane opened.",
+        "23 further MDPF-named candidate files -- 17 matching *MDPF*CONTRACT* and 8 matching *MDPF*CADENCE*, of which this lane opened TWO (MDPF_3FIRMS_B5_cot_holdings_cadence_contract_20260722.md and MDPF_CANONICAL_PLATINUM_DELIVERABLE_CONTRACT.md) plus the estate-contracts carrier. The remainder are UNOPENED and the T-1 formulation could live in one of them.",
+        "whether MDPF actually delivers on the declared event -- an APPLIED-state question this card does not answer",
+        "the Iceberg-side copies of these records -- unreadable from this plane",
+        "SEMANTIC soundness of the event-only cadence position -- no systematic semantic pass was run. What surfaced incidentally is in declared_opinions and the failure_mode row. Per 2.0.0_SA_COO~X RULING 2, stated as an explicit UNMEASURED so silence does not read as clean."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "measured",
+        "explicitly_out": "measured"
+      },
+      "evidence": "Counts from the find_records parse over mdpf.contracts.yaml @7ed8a737ac: 7 records, 3 carrying delivery_cadence, 1 carrying a cadence value. The 17/8 candidate figures from comp-find --name sweeps with printed denominators (28,901 files scanned); the two opened candidates measured individually -- MDPF_3FIRMS_B5_cot_holdings_cadence_contract_20260722.md (105 lines @7bb8390444): 'T-1' 0 occurrences, '02:00' 3 occurrences all describing an operational 02:00-06:00Z window rather than a delivery obligation; MDPF_CANONICAL_PLATINUM_DELIVERABLE_CONTRACT.md (348 lines @ae8eef73d1): 'T-1' 0, '02:00' 0, 'cadence' 0. ⛔ THE UNOPENED 23 ARE STATED AS A BOUND, NOT WAVED AWAY: my absence claim about the T-1 formulation covers the artifacts I opened and no others, and I am not converting 'I did not find it in three files' into 'it does not exist'.",
+      "owner": "0.7.0_AE_CloudOps~D for the declarations; 4.0.0_SA_CRO for the seed sentence that characterises them."
+    },
+    "key": {
+      "identity_space": "Contract-record keys inside the MDPF file -- a mix of process ids (process:mdpf-daily-trigger, process:mdpf-daily-runner, process:mdpf-freshness-checker) and artifact filenames including templated ones ({date}.json, {date}.parquet, account-distribution.json, aggregate_aua_timeseries.json).",
+      "key_is_stable": "unknown",
+      "crosses_spaces": true,
+      "declared_mapping": null,
+      "basis": "absent",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "absent",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "⛔ THE SUBJECT AS NAMED DOES NOT RESOLVE TO THE SUBJECT AS WRITTEN, AND THAT IS THIS CARD'S KEY FINDING. D3's seed names 'the MDPF delivery-cadence contract (T-1 by 02:00Z)' -- one contract, one time-based commitment. What is written is THREE records across two grains, of which one carries a cadence value, and that value is 'event-only: S3 ObjectCreated on the INF spine completion marker; no schedule of its own' -- not a T-1 time commitment at all. The seed's name and the store's content are two id spaces with nothing declaring the mapping: no record cites the seed, and the seed cites no record. crosses_spaces is measured TRUE on that basis, and on a second crossing measured within the file -- process ids and artifact filenames are two key grammars in one obligation vocabulary, and two of the artifact keys are TEMPLATES ({date}.json) rather than identifiers, so they cannot be joined to a concrete object without expansion. key_is_stable is 'unknown' with basis ABSENT: templated keys are stable as templates and unresolvable as instances, and I did not establish which a consumer is expected to match on.",
+      "owner": "0.7.0_AE_CloudOps~D for the record keys; 4.0.0_SA_CRO for the seed's characterisation. The mapping between them is UNOWNED."
+    },
+    "failure_mode": {
+      "returns_on_failure": "SILENT AND WELL-FORMED IN BOTH DIRECTIONS. A consumer asking this contract for MDPF's delivery cadence gets: for two of three records, an obligation with no value -- a declared duty and nothing to check it against; for the third, a cadence string that names another pipeline's event rather than a time. Neither returns an error, and 'no cadence declared' is indistinguishable from 'cadence not yet authored'.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "two of three delivery_cadence records carry no cadence value, so an obligation is asserted with nothing that could fail -- the contract_record shape permits it and no lint objects",
+        "⛔ the one declared cadence is 'event-only ... no schedule of its own', which is the shape CLAUDE.md's own standing rule names as a defect -- a pipeline whose only trigger is another pipeline's success freezes silently when its upstream breaks. THE RECORD DECLARES THIS PLAINLY AND HONESTLY; I am recording that the declaration matches a named defect pattern, and per QUALIFY-DO-NOT-FIX and W2-m-3 I am NOT ruling on whether it should change.",
+        "the seed characterises the contract as 'T-1 by 02:00Z' while the located records say otherwise, so a consumer reading the rule bank and a consumer reading the store get different cadences for the same subject, both confidently",
+        "two record keys are templates ({date}.json, {date}.parquet); a consumer joining on them literally matches nothing and gets a clean zero"
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "EXERCISED as a control pair from different truths against the parsed store. ARM 1 (the failure): asked the three delivery_cadence records for their cadence value -- two returned None, a well-formed empty with no error and no marker distinguishing 'not authored yet' from 'deliberately none'. ARM 2 (POSITIVE CONTROL, same lookup on the record that has one): process:mdpf-daily-trigger returned the full event-only string, so the lookup works and its miss is silent. The seed-versus-store divergence is measured from both sides: the seed text read at rule bank :360 @5fc45ad69d, the record values read from the parse, and the literal-phrase sweep (22 hits / 27,009, all seed-derived) establishing that the seed's formulation appears in no independent artifact I opened.",
+      "owner": "0.7.0_AE_CloudOps~D for the unvalued obligations; 4.0.0_SA_CRO for the seed divergence; UNOWNED for the templated-key join."
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "The contract IS written -- three MDPF records declare a delivery_cadence obligation in a file that exists, parses and validates -- so the seed's claim that a written D3 instance exists is substantially true, and I nearly carded the opposite before widening. QUALIFIED rather than SOUND on four bounded defects: (1) the seed names it 'T-1 by 02:00Z' and no artifact I opened carries that formulation, while the one record with a cadence value declares something materially different; (2) two of three records assert the obligation with no value, so a duty is declared that nothing can check; (3) the declared cadence is event-only with no schedule of its own, which is the exact shape the estate's own standing rule names as freezing silently when upstream breaks -- declared honestly by the record, recorded here, NOT ruled on; (4) two record keys are templates that join to nothing literally. Not UNSOUND: the declarations are real, honest and readable, and a consumer who reads the store rather than the seed gets accurate information. NOT INCOMPLETE: all 7 rows are worked. Two scalars sit below measured -- cadence at 'inferred' because I deliberately did not measure the APPLIED delivery state, and key at 'absent' on unresolved template-vs-instance matching. ⛔ MY ABSENCE CLAIM IS BOUNDED: I opened three artifacts of twenty-six MDPF-named candidates, and the T-1 formulation could live in one of the twenty-three I did not open. ⛔ NO FORWARD DISPOSITION per W2-m-3: omitted, and nothing here is an opinion on this contract's future -- including the event-only cadence, which I have described and not judged. Per QUALIFY-DO-NOT-FIX this lane remediated nothing.",
+    "blocking_defects": [
+      "For any consumer taking MDPF's delivery cadence from D3's seed: the 'T-1 by 02:00Z' formulation is not in any artifact this lane opened, and the located record declares an event-only trigger instead. Read the store, not the seed. Owner 4.0.0_SA_CRO.",
+      "For any consumer relying on the delivery_cadence obligation being checkable: 2 of 3 records carry the obligation with no value. Owner 0.7.0_AE_CloudOps~D.",
+      "For any consumer joining on record keys: two are templates ({date}.json, {date}.parquet) and match nothing literally. Owner UNOWNED."
+    ]
+  }
+}

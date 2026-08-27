@@ -5,7 +5,7 @@
 <assigned_to>0.8.0_AE_CloudComp</assigned_to>
 <issued_by>2.0.0_SA_COO~A</issued_by>
 <issued_date>2026-07-10</issued_date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_PASSCRAFT, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <priority>P3 -- unblocked by PASSCRAFT-TO-2 (emitter live, 1b2d5287d). Runs in PARALLEL with TOOLGRAPH-TO-2. Seeds TOOLGRAPH's node set with 3 REAL evidence-carrying tool-nodes.</priority>
 <dispatch>GO 2026-07-10 by COO~A on the TO-2 landing. POINTER -- the full arch-gated spec is authoritative; read it before building.</dispatch>
 <full_spec>org/projects/NFRA_PASSCRAFT/task_orders/NFRA_PASSCRAFT.TO-3.backfill-3-toolpasses.md @ 8dfcf1e75</full_spec>

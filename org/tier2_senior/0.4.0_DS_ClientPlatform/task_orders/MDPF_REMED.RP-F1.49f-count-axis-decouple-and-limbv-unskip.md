@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-11T00:1xZ</issued>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "MDPF_REMED" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged</status>
 <priority>FOLLOW-ON, not a window change (CTO ruling 001216Z). GO comes from COO only after the
 RP-W1/W2/W3 atomic window lands and proves on a scheduled cycle. This is a SCOPE-ADD ruled by CTO:
 the 49F COUNT-axis decouple is NOT in RP-W1/W2 as written (W2 = the FRONTIER unlink; same word

@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>3.0.0_SA_CVO + 1.0.0_SA_CTO + 2.0.0_SA_COO</issued_to>
     <date>2026-07-07</date>
-    <status>ready</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "NFRA_SCTY" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: ready</status>
     <dispatch_state>WRITTEN-NOT-DISPATCHED (wind-down 2026-07-07; Andrew directed decomposition materialized before device reboot; dispatch on restart per the allocation-map in the session handoff /log)</dispatch_state>
     <gate_note>COO-RESOLVABLE to start; paces against hot priorities. No sovereign gate to BEGIN.</gate_note>
   </metadata>

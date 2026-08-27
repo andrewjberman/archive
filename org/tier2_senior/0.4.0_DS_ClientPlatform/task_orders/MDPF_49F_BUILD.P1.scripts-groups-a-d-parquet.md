@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued>2026-08-11</issued>
-    <status>active</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "MDPF_49F_BUILD" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: active</status>
     <gate>1.0.0_SA_CTO</gate>
     <verifier>3.0.0_SA_CVO</verifier>
   </metadata>

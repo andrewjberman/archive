@@ -1,0 +1,169 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.8.0_AE_CloudComp~X",
+  "subject": {
+    "id": "infra/aws/globgrph/derive_runner.py :: PATH B -- graph_contracts",
+    "kind": "script",
+    "declared_domain": "The operator-invoked load of CVO-authored contract rows from a YAML file into globgrph.graph_contracts, plus the create-if-absent of that table. Same FILE as PATH A, DIFFERENT write path: different mechanism (scoped append/overwrite vs full replace), different bound (one table, bound as a literal tuple at :202 and :1154), and different AUTHORITY (rows are authored by 3.0.0_SA_CVO; the nightly derive is forbidden from touching them). Excludes graph_nodes/graph_edges entirely."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-27T06:37:53Z",
+    "commit_ish": "3b918f21b42366fce14f7c2076f18444cd782931",
+    "graph_vintage": "nessie:main batch_ts=1787796032859 (2026-08-27T02:00:32Z) -- the commit written by the /ecs/globgrph/derive-runner run whose log stream last-event is 2026-08-27T02:10:24.659Z; read from CloudWatch, not from a producer self-report of intent"
+  },
+  "process": {
+    "methodology": {
+      "how": "TWO entry points onto one table. (a) ENSURE: ensure_graph_contracts_table(catalog) (:197-207) builds table_id = (\"globgrph\", \"graph_contracts\") at :202 and calls _ensure_table (:203), which load_table-or-create_table (:112-122, create at :120) against the RATIFIED schema _graph_contracts_schema() (:167). This is reachable from the NIGHTLY (PATH A calls it at :305) and from --ensure-contracts (:2232). It CREATES A TABLE but writes no rows. (b) LOAD: load_contracts_from_yaml() (:1102-1240), reached via --load-contracts (:2238). It normalises YAML rows, skips ids already present unless named in --overwrite (:1163), FAILS CLOSED on an unstampable ratified_at pin (:1204-1206, returns 1 with NOTHING written), then branches: if overwriting, tbl.overwrite(pa_table, overwrite_filter=In(\"contract_id\", ids)) at :1214 -- a SCOPED delete+append in one Nessie commit, rows outside the filter untouched; else tbl.append(pa_table) at :1217, append-only. It then RE-READS the table (:1222) and gates on a per-row integrity check, returning 1 if any row fails (:1233-1236).",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "composes": [
+        {
+          "id": "yaml:--load-contracts",
+          "note": "a CVO-authored YAML file passed to the --load-contracts flag, derive_runner.py:2238-2240 @ 3b918f21b42366fce14f7c2076f18444cd782931"
+        },
+        {
+          "id": "nessie:opal-globgrph:main",
+          "note": "read by _nessie_main_hash at :1199 to stamp ratified_at. This is the one non-fixed input, and it FAILS CLOSED on empty at :1204-1206 rather than substituting a placeholder, so non-determinism cannot leak into a written row."
+        },
+        {
+          "id": "derive_runner.py::_graph_contracts_schema",
+          "note": ":167, the RATIFIED NFRA_GCONTR PRD section-3 v0.1 schema"
+        }
+      ],
+      "invents": [
+        {
+          "id": "graph_contracts.ratified_at",
+          "note": "the Nessie main hash read at :1199 and stamped at :1204. Minted here, not present in the source YAML, and fail-closed on empty rather than placeholdered."
+        }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "how": "measured",
+        "determinism": "measured",
+        "composes": "measured",
+        "invents": "measured"
+      },
+      "evidence": "derive_runner.py:197-207 (ensure), :202 (the literal table_id tuple), :112-122 (_ensure_table), :167 (ratified schema), :1102-1240 (load_contracts_from_yaml), :1153-1154, :1163, :1173, :1199, :1204-1206, :1214, :1217, :1222, :1233-1236, :2232 + :2238 (the two CLI flags), :305 (the nightly's ensure-only call) @ 3b918f21b42366fce14f7c2076f18444cd782931. Table-op population by AST, not regex.",
+      "owner": "3.0.0_SA_CVO",
+      "materializer_standing": "canonical",
+      "declared_opinions": [
+        "The TO described PATH B as 'APPEND-ONLY (:116...'. MEASURED CORRECTION, and it is a REFINEMENT not a contradiction: append-only is the DEFAULT (:1217) and the skip message at :1163 says so verbatim -- 'already-present (append-only; pass --overwrite to replace)'. But a SCOPED OVERWRITE EXISTS at :1214 behind the --overwrite flag (:2246). So mutation_policy is append_only-by-default with an explicit, id-scoped operator escape -- not append_only absolutely. Carding it as pure append-only would tell a consumer that a contract row can never be replaced in place, which is false."
+      ]
+    },
+    "cadence": {
+      "declared_rhythm": "NONE for the LOAD path. --load-contracts is an operator-invoked CLI flag; no schedule declares it. The ENSURE half rides the PATH A nightly (cron(0 2 * * ? *)) as a best-effort side effect.",
+      "actual_trigger": "none-found for the LOAD path. Trigger census swept BOTH planes: aws events list-rules = 137 rules, aws scheduler list-schedules = 18 schedules; ZERO reference --load-contracts or graph_contracts. A repo sweep for a shell/tf/yaml invoker of load-contracts returned only documentation and census artifacts -- no wiring. The ENSURE half IS triggered, event-plane, via the PATH A nightly at :305, and that is MEASURED: the 2026-08-27T02:10:24Z run emitted 'OK: GRAPH_CONTRACTS_ENSURED (net-new create or already-present; NEVER overwritten by the derive)'.",
+      "live_matches_declared": "not_applicable",
+      "live_instance_age": "LOAD path: UNMEASURED. No CONTRACTS_APPENDED or CONTRACTS_OVERWRITTEN marker appears in the 2026-08-27T02:10:24Z run, which is expected (the nightly does not invoke it) and is NOT evidence about when the load last ran -- I did not sweep historical streams for it, and I am not going to imply a dormancy verdict I have not measured. ENSURE path: 4h27m (same run as PATH A). *** RULE 25 DORMANCY: UNDETERMINED for the load path, NOT 'dormant'. *** An absent trigger is a compliance fact, not a liveness fact.",
+      "basis": "absent",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "absent"
+      },
+      "evidence": "*** THE ROW SCALAR IS 'absent' BY THE SCHEMA'S FLOOR RULE, NOT BECAUSE THE ROW IS UNGROUNDED. *** The floor is the WEAKEST sub-claim, never the mode: three of four sub-claims here are measured and the trigger census was exhaustive, but live_instance_age has no basis at all, so the scalar reports 'absent'. Read basis_by_field, not the scalar, to see which half is solid -- that split is exactly what the v2 basis_by_field addition exists to preserve. aws events list-rules (137, client-side count after auto-paginate) + aws scheduler list-schedules (18) -- BOTH PLANES, denominators printed; neither carries a graph_contracts or load-contracts target. Repo sweep for load-contracts invokers across *.sh/*.tf/*.yaml/*.yml/*.json returned only org/tier1_exec/1.0.0_SA_CTO/deliverables/NFRA_TOOLUNIFY_CENSUS/D.raw_evidence.json (a census artifact, not a trigger). ENSURE liveness from CloudWatch /ecs/globgrph/derive-runner stream derive-runner/derive-runner/3d162efb..., message 'OK: GRAPH_CONTRACTS_ENSURED'. derive_runner.py:305, :2232, :2238 @ 3b918f21b42366fce14f7c2076f18444cd782931.",
+      "owner": "3.0.0_SA_CVO"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "source",
+      "mutation_policy": "append_only",
+      "form": "Apache Iceberg table globgrph.graph_contracts via pyiceberg + Nessie REST catalog on branch main; schema is the RATIFIED NFRA_GCONTR PRD section-3 v0.1 shape (_graph_contracts_schema, :167), including a period_defs map column",
+      "basis": "measured",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "mutation_policy": "measured",
+        "form": "measured"
+      },
+      "evidence": "authority_role='source' is MEASURED, and it is the row that most distinguishes this path from PATH A: the rows are AUTHORED by 3.0.0_SA_CVO and nothing derives them from an upstream system -- there is no other system that could regenerate a lost contract row. The code enforces that authority: derive_runner.py:301-302 forbids the nightly from touching this table and :305 restricts it to ensure-only, corroborated live by 'NEVER overwritten by the derive' in the 2026-08-27T02:10Z run. mutation_policy='append_only' is the DEFAULT branch at :1217; the schema enum has no 'append_only_with_scoped_override' member, so the qualification lives in methodology.declared_opinions and in the coverage row rather than being silently dropped -- the :1214 scoped overwrite behind --overwrite (:2246) is REAL and a consumer must not read append_only as 'immutable'.",
+      "owner": "3.0.0_SA_CVO"
+    },
+    "location": {
+      "home": "nessie:main -> globgrph.graph_contracts. Bound as a LITERAL 2-tuple in TWO places: derive_runner.py:202 table_id = (\"globgrph\", \"graph_contracts\") in ensure_graph_contracts_table, and :1154 catalog.load_table((\"globgrph\", \"graph_contracts\")) in load_contracts_from_yaml, with a third at :1222 for the post-write verify re-read. Warehouse s3://opal-313476888478-globgrph/warehouse.",
+      "projection_of": [],
+      "co_resident_stores": [
+        {
+          "id": "globgrph.graph_nodes",
+          "note": "same namespace, written by PATH A, which is explicitly forbidden from touching this table at :301-302"
+        },
+        {
+          "id": "globgrph.graph_edges",
+          "note": "same namespace, written by PATH A"
+        },
+        {
+          "id": "globgrph.cse",
+          "note": "0.7.0_AE_CloudOps~X's wave-3 subject"
+        },
+        {
+          "id": "globgrph.resource_summaries",
+          "note": "0.7.0_AE_CloudOps~X's wave-3 subject"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "derive_runner.py:202, :1154, :1222, :416 (the namespace's four-table list) @ 3b918f21b42366fce14f7c2076f18444cd782931. projection_of is EMPTY and that is a positive claim, not an omission: these rows have no upstream to be a projection OF -- they are authored, which is exactly why authority_role is 'source' and why an append-only default is the right mechanism.",
+      "owner": "3.0.0_SA_CVO"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "The contract rows present in the YAML file handed to --load-contracts on a given invocation, plus every row already in globgrph.graph_contracts from prior loads.",
+      "denominator": null,
+      "denominator_absent_reason": "UNMEASURED, and deliberately so. A denominator here would be the row count of globgrph.graph_contracts, which requires a live read of the Nessie/Iceberg table. This device has no reachable path to nessie.opal-globgrph.local:19120 (a VPC-internal endpoint), and I will not substitute the count printed by a past run's 'LOAD_CONTRACTS_COMPLETE table_row_count=' line -- that is a PRODUCER SELF-REPORT of a run I did not observe, at an unknown vintage. An honest absent beats a number whose grain I cannot state.",
+      "explicitly_out": [
+        "graph_nodes / graph_edges -- PATH A's domain, and this path never addresses them",
+        "the CONTENT correctness of CVO-authored contract rows -- 3.0.0_SA_CVO's domain",
+        "*** CCX3-AC7: the writer population of graph_contracts. *** This card does NOT assert PATH B is the only writer. What IS measured: the nightly derive is forbidden and observably does not write rows (ensure-only). No sweep for OTHER writers of this table was performed, so the bound on the writer population is UNMEASURED -- not zero."
+      ],
+      "basis": "absent",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "absent",
+        "explicitly_out": "measured"
+      },
+      "evidence": "Scalar is the FLOOR: universe and explicitly_out are measured, denominator has no basis, so the row reports 'absent'. universe + explicitly_out from derive_runner.py:1102-1240, :301-308 @ 3b918f21b42366fce14f7c2076f18444cd782931. denominator absent per denominator_absent_reason -- no live table read was possible from this device, and no substitute was accepted.",
+      "owner": "3.0.0_SA_CVO"
+    },
+    "key": {
+      "identity_space": "TABLE identity: the pyiceberg 2-tuple ('globgrph','graph_contracts'). ROW identity: contract_id -- and unlike PATH A's row keys this one IS actively used as a key: it drives the already-present skip (:1163), the overwrite id set (:1173), the overwrite_filter In('contract_id', ids) (:1214), and the post-write verify join (:1226-1228).",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "NONE. Same three-rendering class as PATH A and it is not hypothetical here: this table is addressed as a 2-TUPLE at :202/:1154/:1222 and as a DOTTED 3-PART Trino string 'iceberg.globgrph.graph_contracts' by the Trino/fedobs consumers of the globgrph namespace. A string-equality join key on artifact identity splits one table into multiple rows silently. Flagged to 2.0.0_SA_COO~X as a join-key input; the normalisation is not this seat's to build (CCX3-AC8).",
+      "basis": "inferred",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "inferred"
+      },
+      "evidence": "derive_runner.py:202, :1154, :1163, :1173, :1214, :1222 @ 3b918f21b42366fce14f7c2076f18444cd782931. declared_mapping is basis='inferred' for the Trino rendering SPECIFICALLY: I measured the dotted 3-part form for graph_nodes/graph_edges directly (.tools/_trino_fed.py:44, fedobs_views.sql:34) and am reasoning from the shared namespace to graph_contracts rather than from a line I read for THIS table. The tuple-form renderings ARE measured.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "failure_mode": {
+      "returns_on_failure": "FAILS CLOSED, repeatedly and by design -- this is the most defensive path in the file. Unstampable ratified_at pin -> print ERROR, return 1, NOTHING written (:1204-1206). Post-write integrity gate: re-reads the table (:1222), checks each written row (:1231), and on any failure prints 'ERROR: WRITE_VERIFY_GATE FAILED' and returns 1 (:1233-1236). Already-present id without --overwrite -> SKIPPED with a reason string (:1163), not silently merged.",
+      "distinguishable_from_true_negative": "yes",
+      "silent_degrade_paths": [
+        "The ENSURE half is the exception to this path's fail-closed character, and the asymmetry is worth stating plainly: when reached from the NIGHTLY (:305) a failure is swallowed into 'WARN: GRAPH_CONTRACTS_ENSURE_FAIL' on an rc=0 run (:306-308). That is a deliberate trade -- the comment at :303-304 says a contracts-ensure failure must not fail the nightly graph commit -- but a consumer scoring the nightly on exit code cannot see it.",
+        "The WRITE_VERIFY gate re-reads through the SAME catalog client that just wrote (:1222). It is a genuine read-back and it caught the real period_defs-wipe bug, but it shares an instrument with the write: a catalog-layer fault that corrupted both the write and the read-back identically would pass the gate. This is a residual, not an observed defect."
+      ],
+      "basis": "measured",
+      "evidence": "derive_runner.py:1163, :1204-1206, :1222-1236, :303-308 @ 3b918f21b42366fce14f7c2076f18444cd782931. distinguishable_from_true_negative='yes' is MEASURED from structure: every failure branch on the load path returns a non-zero rc AND prints a distinct ERROR string, so 'nothing was written because it failed' and 'nothing was written because there was nothing to write' (:1163 skip, which prints its own reason) have different, readable signatures. This is the opposite of PATH A's empty-input case, in the same file -- which is why the two paths could not honestly be carded as one.",
+      "owner": "3.0.0_SA_CVO"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "All seven rows measured against source at 3b918f21b42366fce14f7c2076f18444cd782931; the ENSURE half is EXERCISED live (2026-08-27T02:10:24Z, 'GRAPH_CONTRACTS_ENSURED'), the LOAD half is measured at source and NOT exercised by me. Qualified on three named limits: (1) coverage carries NO denominator -- the live table row count is unreachable from this device and I refused a producer self-report substitute; (2) the LOAD path's last-run age is UNMEASURED, so no Rule 25 dormancy verdict is offered in either direction -- an absent trigger is a compliance fact, not a liveness fact; (3) mutation_policy='append_only' is the enum's closest member but the scoped --overwrite escape at :1214 is real and must not be read as immutability. Nothing here blocks load-bearing use of graph_contracts; all three limits constrain what a consumer may conclude from this card.",
+    "blocking_defects": []
+  },
+  "forward_disposition": {
+    "standing": "undecided",
+    "set_by": null,
+    "basis": "absent",
+    "evidence": "CCX3-AC8: zero commits by this lane touching derive_runner.py. The append_only enum under-expression is NAMED for the contract owner, not patched here. basis='held' -- this is a scope assertion, not a measurement.",
+    "decided_utc": null
+  }
+}

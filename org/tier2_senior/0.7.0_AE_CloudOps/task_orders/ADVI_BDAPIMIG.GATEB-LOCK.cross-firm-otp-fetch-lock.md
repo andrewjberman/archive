@@ -2,7 +2,7 @@
 
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>on-hold</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project ADVI_BDAPIMIG, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: on-hold</status>
 <!-- ON-HOLD 2026-06-29 (CTO briefing 142313Z, Andrew Schwab-SSOT-migration GO): the thin-BD-tether direction makes BD's surviving role low-frequency, so 49f stays ATTENDED/periodic through the migration -- which sidesteps the cot/49f unattended concurrency entirely, so the unattended OTP-lock is not currently needed. LEG2 already proved the mechanism (49f cookie re-mints, durable port works). Design 09d0883cd + this TO stand READY if the migration PRD ever wants unattended 49f. Do NOT build until CTO/PRD calls for it. -->
 <priority>ON-HOLD — superseded by the Schwab-SSOT thin-tether right-sizing (49f attended-only); ready if PRD wants unattended</priority>
 <date>2026-06-29</date>

@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.2.1_RD_Positioning</issued_to>
     <date>2026-07-10</date>
-    <status>staged</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: project POSN_CUSTOM is complete; this TO was last touched 2026-07-10, predating the project close 2026-07-10. Closed as a record act, not a work verdict. Prior status: staged</status>
     <project_code>POSN_CUSTOM</project_code>
     <priority>P1 -- Andrew-prioritized 2026-07-10. STAGED behind POSN_CUSTOM.001: activates (GO) once .001's lifted custom-blend state lands. Do NOT begin until COO~C fires the GO on .001 completion.</priority>
   </metadata>

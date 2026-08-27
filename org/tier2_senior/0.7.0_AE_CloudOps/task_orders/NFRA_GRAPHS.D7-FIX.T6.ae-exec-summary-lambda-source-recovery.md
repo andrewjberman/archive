@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (D7-FIX.T4 DS surface flag, ~170000Z)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>active</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_GRAPHS, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: active</status>
 <priority>low — nightly Lambda is running (exec_summary.json being produced); source absence is a hygiene/maintenance gap, not production breakage</priority>
 
 <scope>

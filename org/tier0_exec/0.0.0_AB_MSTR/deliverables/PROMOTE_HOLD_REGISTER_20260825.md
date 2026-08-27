@@ -27,6 +27,28 @@ sitting on the other fabric's disk):
 **He named the SERIAL and he named the ACT** — the hold's own author, ~14 hours later, directing the
 exact act the hold was against, at a terminal where the prod-deploy was the live subject.
 
+⛔ **CORRECTED 2026-08-25 ~08:0xZ -- CONDITION (ii) WAS **NOT** MET. THE AUTHORIZATION STANDS ANYWAY.**
+`0.0.0_AB_MSTR~Z` retracted their own corroboration after `0.2.0_DT_PortfolioAnalytics~Z` caught it,
+and **Andrew named the defect himself at ~07:3xZ: *"this fabric never completed the Asset
+Sub-Categories for the ETFs."***
+**His condition (ii) verbatim:** *"and it displays properly on DEV build with GICS replaced for
+sub-categories on frontend."* **That names the ASSET SUB-CATEGORIES PANEL. IT RENDERS A
+PLACEHOLDER** -- `PositioningSummary.tsx:361` gates the whole panel on `attributionData?.portfolios`,
+`:562` `enabled: caps.attribution` is OFF in ETF mode, and `:489` pushes a `'-'` label on an empty
+segment set.
+⛔ **THE AUTHORIZATION IS UNAFFECTED AND THAT DISTINCTION IS THE WHOLE POINT.** His 05:23Z
+instruction is **independent of the conditions and sufficient on its own** -- he named the serial and
+the act, ~14h after setting the hold, at a terminal where the promote was the live subject. **Case
+(a) stands unqualified. (b) does not, and (b) was never load-bearing.** *The defect is in the
+corroboration, not the authorization.*
+**WHY ~Z's TWO EVIDENCES BOTH FAILED, and it is the night's recurring class:** their *"his own words
+at the render ~05:06Z"* were about the **PERFORMANCE panel**, a different panel; their *"sub_asset_class
+carries 13 GICS values"* is the **DATA plane**, and the condition is about the **RENDER**. **The data
+carrying GICS is exactly what makes the blank panel a FRONTEND defect rather than a data lack -- so
+their own evidence, read correctly, pointed AT the failure.** Authorship made it worse: they had
+personally measured the 13-value vocabulary an hour earlier, so the fact felt checked.
+
+**WHAT WAS ORIGINALLY CLAIMED (kept for provenance):**
 **BOTH OF HIS NAMED CONDITIONS WERE MET AND MEASURED BEFORE THE CUT:**
 - **(a) full data structure for all ETFs — MET.** Served `platinum/etfs/positioning_data.json`
   126,863 B @04:53:51Z, `data_as_of` 2026-08-24, four books full, **177 of 187 rows at 8/8 return
@@ -85,7 +107,39 @@ Same record, item (1). `org/projects/ADVI_49FSRC.json` PARKED.
 ⚠ **This is a SOURCING hold, not a promote hold.** Listed because the PERFRP record names it as a
 possible interaction — **not** because it is the same kind of thing.
 
-## (3) PERFRP — ⛔ FOUR EMPTY CARDS RENDER TO A 49F ADVISOR ON PROD. SURFACED, NOT ADJUDICATED.
+## (3) PERFRP — ✅ ADJUDICATED BY ANDREW 2026-08-25 ~08:5xZ. ACCEPT ON PROD, NO REVERT. THE DATA HALF STANDS.
+
+**ANDREW-DIRECT, base CTO terminal, VERBATIM** (relayed by `1.0.0_SA_CTO` 69834, recorded +
+broadcast same turn):
+> **"I'm fine with it on PROD, let's just get the data part sorted"**
+
+**THIS IS THE ADJUDICATION THIS REGISTER EXPLICITLY DECLINED TO MAKE.** The entry below stated two
+available readings and said the choice was his. **He chose, and he chose the reading neither
+recommendation favoured** — CTO's REC was REVERT; he ruled ACCEPT.
+
+⛔ **HIS CONDITION HAD TWO HALVES AND HE RELEASED EXACTLY ONE.** The original word was *"stay on
+the DEV branch not promoted to PROD **UNTIL WE KNOW THE DATA PIPELINE AND ALL UNDERLYING DATA IS
+VERIFIED END TO END**."*
+- **BRANCH HALF — RELEASED.** No revert, no promote hold, nothing owed by
+  `0.2.0_DT_PortfolioAnalytics~Z`, who was never at fault.
+- **DATA HALF — NOT RELEASED, AND NOW THE WHOLE OF IT.** *"let's just get the data part sorted"*
+  **says the data is not sorted.** The publish gate STANDS; zero PERFRP leaves served remains the
+  correct state.
+>> **READING THIS AS A GENERAL LIFT WOULD BE THE WIDENING THE LAW FORBIDS** — and it would invert
+him precisely: he dropped the half that was protecting nothing and pointed at the half that is. <<
+
+⛔ **AND HIS SENTENCE CONFIRMS THE STRUCTURAL FINDING RATHER THAN OVERRIDING IT.** What was
+measured here — that BRANCH POSITION PROTECTED NOTHING (two promotes in 45 minutes, two unrelated
+projects, neither naming a passenger, while the DATA gate held and nobody had designated it as the
+protection) — **is what he said in one sentence.** The branch was never the thing he cared about.
+*The finding was right; the recommendation drawn from it was the wrong half.*
+
+**WHAT "THE DATA PART" POINTS AT** (both already in flight, neither this register's to drive):
+`twr_daily`'s 12:45Z SCHEDULED run (`GLD-f-1`, `0.4.0_DS_ClientPlatform~G` — **nobody accelerates
+it; an ad-hoc run is not production evidence**), and Cottonwood's ingest gap
+(`MODEL_DETAIL_SCOPE=all`, `WSE_COTMDL`, authorized and still unseated).
+
+### ⛔ THE HOLD AS IT STOOD BEFORE — kept for provenance, INCLUDING the reading he did not take
 
 ⛔ **CORRECTED 2026-08-25 ~07:2xZ — THIS ENTRY FIRST SAID "ITS SUBJECT IS ON PROD", WHICH IS THE
 SOURCE PLANE AND IS NOT WHAT THE QUESTION IS ABOUT.** `0.4.0_DE_ClientPlatform~D` crossed to the
@@ -119,6 +173,23 @@ origin/PROD = d9a98bcc  "merge DEV->PROD: v2.1.165 -- ETFS_POSITIONING goes to p
 NEG CONTROL 1af11910 (on DEV)   ancestor of origin/PROD : no   <- the test discriminates
 PERFRP files in the PROD tree   : 9   (control: 1,065 files total on PROD)
 ```
+
+✅ **THE PASSENGER WAS RECORDED. THE HOLD WAS NOT. THAT IS THE GAP, AND IT IS THIS REGISTER'S REASON FOR EXISTING.**
+`3.0.0_SA_CVO` corrected their own "invisible sweep" framing after going to look:
+`20260825T0543Z_etfs-positioning-prod-promote-v2-1-165-sitez_deploy_completion.md` **EXISTS**, names
+`perfrp` **3 times** and the promote hash `d9a98bcc` **7 times**, and says verbatim:
+> *"the promote carried another fabric's ADVI feature to production as a PASSENGER. It shipped fine.
+> It shipped without anyone on this fabric reviewing it, AND THE PASSENGER WAS ONLY VISIBLE BECAUSE
+> SOMETHING ABOUT IT HAPPENED TO BE RED."*
+⛔ **SO THE PROMOTING SEAT DID ITS JOB: it recorded the passenger at deploy-completion, by name.
+WHAT THE ENTRY MENTIONS ZERO TIMES IS THE HOLD** — because `0.2.0_DT_PortfolioAnalytics~Z` had no way
+to know a PERFRP hold existed. **The recording worked; the hold-awareness did not.**
+**THAT IS PRECISELY WHAT A PROMOTE-HOLD REGISTER IS FOR, and it is the argument for carrying this
+file into every DT spawn brief** — a promoting seat cannot honour a hold it has never been shown, and
+this one was on the other fabric.
+⛔ **AND THE SEAT'S OWN SENTENCE NAMES THE REAL CONTROL GAP: the passenger was visible "because
+something about it happened to be RED." THAT IS LUCK, NOT A CONTROL.** A passenger that shipped clean
+would have been recorded the same way and noticed by nobody.
 
 ⛔ **THE MECHANISM, AND IT IS THE PART WITH REUSE VALUE: A DEV->PROD MERGE CARRIES THE WHOLE BRANCH,
 NOT THE AUTHORIZED SUBJECT.** The ETFS promote was properly authorized (hold (1), discharged above,

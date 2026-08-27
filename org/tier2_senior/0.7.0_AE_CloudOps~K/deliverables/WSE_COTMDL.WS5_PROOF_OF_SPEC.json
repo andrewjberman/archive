@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "to_id": "WSE_COTMDL.WS5.iam-infra-scoped-role-eventbridge",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/WSE_COTMDL.WS5.iam-infra-scoped-role-eventbridge.md",
+    "group": "W",
+    "vintage_commit": "ab268cb900"
+  },
+  "assignee": "0.7.0_AE_CloudOps~K",
+  "artifacts_produced": [
+    {
+      "path_or_key": "arn:aws:iam::313476888478:role/cot-rebalancer-runner-role",
+      "kind": "iam",
+      "commit_or_etag": "5d49bd8b1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Scoped execution role, landed 2026-07-21 via safe-apply (10 resources added), ledger org/critical_paths/change_management/20260721T2314Z_cot-ws5-rebalancer-runner_deploy_completion.md CLOSED 20260721T234513Z, 5 legs proven. RE-VERIFIED LIVE ON THE PRIMITIVE by 0.7.0_AE_CloudOps~K on 2026-08-26, not inherited from that ledger. Three inline policies (cot-rebalancer-runner-session-read, cot-rebalancer-runner-write-cot, cot-rebalancer-runner-invoke-silver-blackdiamond) plus attached opal-assets-one-way-fan-in-fence and AWSLambdaBasicExecutionRole. The write-cot policy carries an explicit Deny s3:* on arn:aws:s3:::opal-data-assets/blackdiamond/49f/* -- firm separation.",
+      "artifact_covered_by": ["WS5-AC1"]
+    },
+    {
+      "path_or_key": "EventBridge rules cot-rebalancer-runner-daily, cot-bronze-complete, cot-silver-complete",
+      "kind": "schedule",
+      "commit_or_etag": "5d49bd8b1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "cot-rebalancer-runner-daily ENABLED, cron(0 6 * * ? *), target arn:aws:lambda:us-east-1:313476888478:function:cot-rebalancer-runner. cot-bronze-complete and cot-silver-complete both ENABLED, each targeting arn:aws:lambda:us-east-1:313476888478:function:cot-bd-session-trigger. Targets read directly via list-targets-by-rule. The daily schedule is EXERCISED, not merely configured: it fired 2026-08-26T06:00:41Z and produced the run scored under TO-R1-AE/TO-R2-AE.",
+      "artifact_covered_by": ["WS5-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "77ab810b71",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "functions.cot-rebalancer-runner carries source_dir infra/aws/lambda/cot-pipeline/cot-rebalancer-runner, files [lambda_function.py, landing_guard.py], tf_file, tf_resource module.cot_rebalancer_runner.aws_lambda_function.this, artifact_s3_key opal-assets/cot-rebalancer-runner.zip, iam_role cot-rebalancer-runner-role. The two declared files match the two members of the live deployed package exactly, checked by reading the downloaded zip's namelist.",
+      "artifact_covered_by": ["WS5-AC3"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~K/logs/2026-08-26/session_20260826T1345-1500Z.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING_SAFE_COMMIT_20260826",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Session log whose Compiler Tools section reproduces all 8 simulate-principal-policy invocations including the 49f negative control, with the action-name typo trap explicitly handled.",
+      "artifact_covered_by": ["WS5-AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "WS5-AC1",
+      "criterion_verbatim": "Scoped role live with EXACT-ARN grants (S3 cottonwood prefixes + DDB MDPF table + secret/holdings reads), PAB-on, firm-sep DENY to blackdiamond/49f -- each verified on the live primitive (simulate-principal-policy, isolated positive control, negative control on 49f). AS AMENDED BY 2.0.0_SA_COO 72274: the silver/gold PutObject and holdings GetObject grants are DESCOPED PERMANENTLY, and the DDB PutItem grant is DEFERRED TO WS-4 to land in the same change as the code that calls it.",
+      "method": "live_read",
+      "invocation": "aws iam simulate-principal-policy --policy-source-arn arn:aws:iam::313476888478:role/cot-rebalancer-runner-role --action-names <one> --resource-arns <one exact ARN> (8 SEPARATE invocations, ONE resource ARN each); aws iam get-role-policy for each of 3 inline policies; aws s3api get-public-access-block --bucket opal-data-assets",
+      "output_evidence": "IN-SCOPE GRANTS, each a separate invocation: s3:PutObject on .../cottonwood/bronze/x.json = allowed; s3:PutObject on .../cottonwood/meta/x.json = allowed; secretsmanager:GetSecretValue on secret:blackdiamond/cot/session-jnzOyC = allowed. NEGATIVE CONTROL, firm separation: s3:PutObject on .../blackdiamond/49f/x.json = explicitDeny (an EXPLICIT deny, from the Deny s3:* statement in cot-rebalancer-runner-write-cot, not a mere absence of grant). CONTROL proving the secret grant is read-only: secretsmanager:PutSecretValue on the same ARN = implicitDeny. PAB on opal-data-assets: BlockPublicAcls, IgnorePublicAcls, BlockPublicPolicy, RestrictPublicBuckets all true. DESCOPED ITEMS, verified ABSENT: s3:PutObject on cottonwood/silver = implicitDeny, on cottonwood/gold = implicitDeny, s3:GetObject on cottonwood/silver = implicitDeny.",
+      "denominator": "8 of 8 simulate invocations run, one ARN each; 3 of 3 inline policies enumerated; 4 of 4 PAB flags true; 1 explicit firm-sep deny confirmed",
+      "status": "PASS",
+      "status_reason": "PASS against the AMENDED scope only. Against the ORIGINAL scope this criterion would FAIL on three grants, and that divergence is the substance of the finding rather than a technicality -- see declared_exclusions. The three absent grants were verified implicitDeny on the live primitive AND shown unreachable from the code, so the absence is proven from both directions rather than merely observed."
+    },
+    {
+      "criterion_id": "WS5-AC2",
+      "criterion_verbatim": "EventBridge schedule + stamp-triggers live (mirror estate); daily pull SCHEDULE arm-timed to WS-1 standing egress.",
+      "method": "live_read",
+      "invocation": "aws events list-rules (CLI paginating, filtered client-side) ; aws events list-targets-by-rule --rule <each> ; aws scheduler list-schedules",
+      "output_evidence": "cot-rebalancer-runner-daily: ENABLED, cron(0 6 * * ? *), target arn:aws:lambda:us-east-1:313476888478:function:cot-rebalancer-runner. cot-bronze-complete: ENABLED, target function:cot-bd-session-trigger. cot-silver-complete: ENABLED, target function:cot-bd-session-trigger. BOTH TRIGGER PLANES SWEPT: aws events list-rules (7 cot-matching rules) AND aws scheduler list-schedules (2 cot-matching schedules: opal-assets-ingest-mirror-cot-daily-et, cot-bd-session-daily-et) -- list-rules structurally CANNOT see the Scheduler plane, so a one-plane sweep returns a true, well-controlled answer about the wrong population. Target.Arn read DIRECTLY via list-targets-by-rule rather than through comp-trigger, which discards Target.Arn on the Scheduler plane and therefore false-negatives while printing an honest denominator. EXERCISED, not merely configured: the daily rule fired 2026-08-26T06:00:41Z, CloudWatch RequestId 62303f80-a76b-4c50-87f9-b63a92d65a6c, and produced the manifest scored under TO-R1-AE/TO-R2-AE. The WS-1 egress arm-timing question is moot: the schedule has been live and pulling for weeks.",
+      "denominator": "3 of 3 named rules verified ENABLED with targets resolved; 2 of 2 trigger planes swept",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WS5-AC3",
+      "criterion_verbatim": "Terraform 0-diff, pure-add, source-map updated, tag pushed. NO new alarm.",
+      "method": "manual_read_with_citation",
+      "invocation": "read infra/aws/lambda/ci/lambda-source-map.json ; git tag -l 'cot-rebalancer*' ; read both WS5 deploy-completion ledgers",
+      "output_evidence": "SOURCE-MAP: functions.cot-rebalancer-runner present and current -- its declared files [lambda_function.py, landing_guard.py] match the two members of the live deployed package byte-for-byte in name, checked against the downloaded zip namelist. TAG: cot-rebalancer-runner-v0.1.0 exists; the second WS5 leg additionally tagged opal-assets-v0.31.0, verified on origin at the time via git ls-remote --tags. 0-DIFF and PURE-ADD were verified AT DEPLOY TIME and are recorded per-leg in the two ledgers (20260721T2314Z L3: re-plan 'No changes. Your infrastructure matches the configuration.'; 20260722T1403Z L1: 'Plan: 2 to add, 0 to change, 0 to destroy'). NO ALARM, SNS, or monitor was created by WS5 or by this session.",
+      "denominator": "1 of 1 source-map entries present; 2 of 2 tags present; 2 of 2 ledgers CLOSED per-leg",
+      "status": "PASS",
+      "status_reason": "The 0-diff limb is cited at its ledger and NOT re-derived today, deliberately and with the reason stated: the opal-assets workspace currently carries 3 foreign committed-but-unapplied changes belonging to other lanes, so a BLANKET 0-diff is STRUCTURALLY UNAVAILABLE there and re-running a plan to claim one would produce either a false report or a failed criterion on work that is correct. Per the standing COO amendment the passing form in this workspace is 0-diff ON THE TARGETED RESOURCE with the foreign changes named and counted; they are named in declared_exclusions and remain ARMED and untouched."
+    },
+    {
+      "criterion_id": "WS5-AC4",
+      "criterion_verbatim": "Session log Compiler Tools section reproduces every <run> incl the per-ARN simulate + the 49f negative control.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/tier2_senior/0.7.0_AE_CloudOps~K/logs/2026-08-26/session_20260826T1345-1500Z.md",
+      "output_evidence": "The log's Compiler Tools section carries a dedicated WS5 AC4 subsection reproducing all 8 simulate-principal-policy invocations as a table -- action, exact resource ARN, decision, and the role each plays (TARGET / NEGATIVE CONTROL / CONTROL / descoped) -- including the 49f negative control returning explicitDeny. It also records the ONE-ARN-per-call and separate-invocation discipline and why it matters (2+ ARNs in one call silently flips held ones to implicitDeny, disarming the control the criterion depends on), and it handles the action-name typo trap explicitly: rows 6-8's implicitDeny results are NOT self-sufficient, because simulate-principal-policy does not validate action names and a typo returns a byte-identical implicitDeny. s3:PutObject is proven real by rows 1-2 returning allowed in separate calls; the s3:GetObject absence rests on the instrument-independent policy enumeration showing no GetObject statement on any of the three inline policies. The section also records comp-iam gaps as SKIPPED with its reason rather than left blank.",
+      "denominator": "8 of 8 simulate invocations reproduced; 1 of 1 negative controls reproduced",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The firm-separation negative control is a true single-variable mutant on this role: same principal, same action, ONE character class of difference in the resource ARN (the firm segment cottonwood vs 49f), each run as a separate invocation so neither poisons the other.",
+      "expected": "cottonwood prefixes ALLOW and the 49f prefix DENIES; if the 49f probe also returned allowed, or if the cottonwood probe returned denied, the fence would not be operative and the result would be a finding rather than a pass.",
+      "observed": "s3:PutObject cottonwood/bronze = allowed, cottonwood/meta = allowed, blackdiamond/49f = explicitDeny. The 49f result is an EXPLICIT deny rather than an implicit one, which discriminates a real fence from a mere absence of grant -- an implicitDeny there would have been consistent with nobody having granted 49f rather than with anybody having forbidden it. A second mutant pair on the same secret ARN varying only the action: GetSecretValue = allowed, PutSecretValue = implicitDeny, proving the grant read-only.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every grant claim was derived from TWO independent instruments: the IAM policy simulator (per-ARN, isolated invocations) and a direct enumeration of the role's three inline policy documents via get-role-policy. The trigger claims were derived from list-rules plus list-targets-by-rule, and cross-checked by the fact that the schedule demonstrably fired at 06:00:41Z today.",
+      "observed": "The two instruments agree on every grant, and they fail differently, which is the point: the simulator cannot distinguish a typo from a missing grant, and the policy enumeration cannot evaluate conditions or fence interactions. Where they agree the claim is sound; the descoped-item absences rest on the enumeration, which is the instrument that can see a statement is simply not present. Trigger state is corroborated by an EXERCISED fire rather than by configuration alone.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "s3:PutObject on blackdiamond/cottonwood/silver/** and /gold/** -- DESCOPED PERMANENTLY",
+      "reason": "Ruled by 2.0.0_SA_COO 72274 on this seat's BLOCKING surprise. The 2026-07-21 scope line was FALSIFIED BY AN ARCHITECTURE CHANGE WS5 ITSELF SHIPPED: WS5's own second ledger (20260722T1403Z) landed the OnSuccess handoff, after which silver/gold conversion belongs to opal-assets-silver-blackdiamond under its own role. Granting the runner silver/gold write would create a SECOND writer into a plane that now has a designated one, making a one-producer-per-key defect EXPRESSIBLE rather than merely over-provisioning. Source-grounded: lambda_function.py writes only BRONZE_PREFIX and META_PREFIX."
+    },
+    {
+      "item": "s3:GetObject on cot holdings silver -- DESCOPED PERMANENTLY",
+      "reason": "Ruled by 2.0.0_SA_COO 72274. The runner has no s3:GetObject statement on any of its three inline policies and no code path that reads holdings; it pulls from the vendor API and lands bytes. A grant no code exercises is a standing permission nobody removes later."
+    },
+    {
+      "item": "dynamodb:PutItem on the MDPF table -- DEFERRED TO WS-4",
+      "reason": "Ruled by 2.0.0_SA_COO 72274: it lands in the SAME change as the code that calls it, not before. WSE_COTMDL.WS4.mdpf-ddb-foldin is <status>staged</status> and was NOT dispatched to this lane. Source-grounded: lambda_function.py instantiates exactly two boto3 clients, secretsmanager and s3 -- there is NO dynamodb client at all, so the grant would today be unreachable by construction."
+    },
+    {
+      "item": "The 3 foreign committed-but-unapplied changes in the opal-assets Terraform workspace",
+      "reason": "aws_iam_role_policy.bd49f_reporting_io, aws_iam_role_policy.emitter, module.emitter.aws_lambda_function.this. STILL ARMED and untouched -- not this lane's to apply or revert in either direction. 1.0.0_SA_CTO owns naming disarm owners; 2.0.0_SA_COO 72274 explicitly declined to move that to this seat. Their presence is why a blanket 0-diff is structurally unavailable in this workspace."
+    },
+    {
+      "item": "WS-1 standing-egress arm-timing coordination",
+      "reason": "Moot rather than skipped: the TO required the daily SCHEDULE be arm-timed to WS-1's standing egress, but the schedule has been live and pulling successfully for weeks, most recently 2026-08-26T06:00:41Z. There is nothing left to time."
+    }
+  ],
+  "surprises": [
+    "BLOCKING x INERT, RULED SAME-TURN -- WS5's <in> scope named four grants absent from the live role. Surfaced to the issuer (2.0.0_SA_COO, 72269) rather than built or silently descoped, because the spec is frozen to an executing seat. Ruled in 72274: (a)+(b) descoped permanently, (c) deferred to WS-4. The issuer amends the TO face; this seat does not touch it.",
+    "OBSERVATION x INERT -- THIS INSTANCE IS ITSELF EXPOSED TO THE DEFECT THIS SEAT REPORTED, AND IT IS DISCLOSED RATHER THAN LEFT TO A CLEAN rc. proof-of-spec-check.py:271 resolves a governing TO by the needle id=\"<to_id>\" (attribute form); this TO declares <id>...</id> (element form) and carries NO <decomp_ref>, and no decomp run exists for WS5. So decomp_ref.to_ref -- the workaround that fixed the R1/R2 instances -- CANNOT be declared honestly here, since the schema requires a decomp doc that does not exist. This instance therefore lands in class D: alignment NOT EVALUATED, VALID rc=0. THE rc IS NOT EVIDENCE OF ALIGNMENT for this instance and must not be read as such. 3.0.0_SA_CVO measured the true exposure at 92 of 159 instances (58%).",
+    "OBSERVATION x INERT -- WS5 had been substantially landed since 2026-07-21/22 with both ledgers CLOSED, while its <status> read pending. Fourth instance today of a record failing to track work that moved; the issuer is carrying deploy-ledger state into their gate.",
+    "OBSERVATION x INERT -- The 9 newly-discovered non-roster child models from today's run have NO prior partition and appear on 2026-08-26 with no history. Anything joining model detail across dates will see them arrive. Named for whoever consumes that surface; not this lane's to act on."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~K/logs/2026-08-26/session_20260826T1345-1500Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-iam gaps",
+      "invocation": "not run",
+      "result": "SKIPPED with cause. The TO mandates it in phase 1 'before write' -- and nothing was written, because the measurement showed the infrastructure already exists and the ruling descoped the remainder. comp-iam is in any case a FLOOR that models (action) and never (action, resource), so it could not have answered the question this criterion actually turns on; the live per-ARN simulator did."
+    },
+    {
+      "tool": "aws iam simulate-principal-policy",
+      "invocation": "8 SEPARATE invocations, ONE --resource-arns each, controls isolated from targets",
+      "result": "PASS. bronze/meta allowed, 49f explicitDeny, secret Get allowed / Put implicitDeny, silver/gold/holdings implicitDeny. The action-name typo trap is handled explicitly rather than assumed away: a nonexistent action returns implicitDeny identically to a missing grant, so the descoped-item results are corroborated by the policy enumeration."
+    },
+    {
+      "tool": "aws events list-rules + list-targets-by-rule + aws scheduler list-schedules",
+      "invocation": "both trigger planes swept; Target.Arn read directly",
+      "result": "PASS. Deliberately NOT routed through comp-trigger, which sweeps both planes and prints an honest denominator but DISCARDS Target.Arn on the Scheduler plane -- a false negative made more persuasive by its true denominator."
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> WS5-AC1,WS5-AC2,WS5-AC3,WS5-AC4",
+      "result": "FAIL (silent, disclosed). Structural validation and the acceptance rows check normally, but the alignment join CANNOT run for this instance (element-form <id>, no declarable decomp_ref) and the tool still exits VALID rc=0. Recorded here so the terminal signal is not mistaken for an alignment pass."
+    },
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"how do I grep the repo\" (startup A.3 EXERCISE probe)",
+      "result": "PASS -- a forwarder RAN and produced its own banner. PATH: 104 of 105 comp-tools resolve bare."
+    }
+  ]
+}

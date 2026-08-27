@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>4.0.0_SA_CRO~C (Claude integration seat; normal delivery; GO rides this issuance)</issued_to>
     <date>2026-08-20</date>
-    <status>pending -- RIDES your existing runs; the 65-term atom_layer0 program stays PRIMARY per Andrew's "get it done"; TO work sits at BATCH BOUNDARIES under base's review gates</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_EPISTEMY, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending -- RIDES your existing runs; the 65-term atom_layer0 program stays PRIMARY per Andrew's "get it done"; TO work sits at BATCH BOUNDARIES under base's review gates</status>
     <project_code>NFRA_EPISTEMY</project_code>
   </metadata>
 

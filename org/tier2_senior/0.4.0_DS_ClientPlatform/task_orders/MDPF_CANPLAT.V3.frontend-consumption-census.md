@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~Z</issued_to>
     <date>2026-08-07</date>
-    <status>pending</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_CANPLAT, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
     <project_code>MDPF_CANPLAT</project_code>
     <governing>VALIDATION PRD @2dedd8f6a §2 V-3 (rubric rows V9/V10/V11 — V12 is NOT in this TO, it needs R3's cutover + the deployed edge) · PRD §0 binds · V-series MEASURES ONLY</governing>
     <capability_basis>portal repo now LOCAL at ajb_workspace/portal/ @DEV 604101df, 403 src files, clean tree (Andrew-direct via MSTR~Z 005808Z). The V-PRD's "cannot be done from here" limit was measured BEFORE this clone and is CLOSED. ⛔ portal/ is READ-ONLY REFERENCE — Rule 19 (main tree stays on DEV), no portal-write scope exists on this program.</capability_basis>

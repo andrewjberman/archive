@@ -11,7 +11,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-04</date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "ADHOC" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending</status>
 <priority>P1 TONIGHT (CRITICAL-PATH ELEVATION, Andrew via CTO~B ~200xZ per CVO 201039Z: the Kimi Phase-0 ratification sitting WAITS on comp-heat dial [CLOSED] + THIS BUILD -- "crucial touchpoints for Kimi to come to conclusions". Re-seated from the unspawnable ~E lane to this live seat 2011Z)</priority>
 
 <title>comp-cochange: co-change analysis over git history (agent-type-tagged), BORN-REGISTERED -- typed dispatch over existing substrate, no new git-walking engine</title>

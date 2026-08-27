@@ -1,0 +1,224 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SUBSTRATECARDING.TO-W1-DTX.graph-object-manifest",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-substratecarding/20260826T172918Z/DECOMP.md",
+    "vintage_commit": "aae317509b",
+    "to_ref": "org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/NFRA_SUBSTRATECARDING.TO-W1-DTX.graph-object-manifest.md"
+  },
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/NFRA_SUBSTRATECARDING.TO-W1-DTX.graph-object-manifest.md",
+    "group": "M",
+    "vintage_commit": "5f34b0df8d"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform~X",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/graph_object_manifest.json",
+      "kind": "config_data",
+      "commit_or_etag": "e0eff1d908",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A qualification artifact. There is no deploy surface: TO objective is QUALIFY ONLY, name defects and owners, fix nothing. Nothing is served, published, or promoted by this deliverable.",
+      "artifact_covered_by": [
+        "DTX-AC1",
+        "DTX-AC2",
+        "DTX-AC3",
+        "DTX-AC6"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/build_manifest.py",
+      "kind": "script",
+      "commit_or_etag": "e0eff1d908",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The deterministic builder that EMITS the manifest. Not a graph materializer, not a registered part, and it touches no store or generator this manifest registers -- see DTX-AC5.",
+      "artifact_covered_by": [
+        "DTX-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/COMPANION_rule24_findings_limits.md",
+      "kind": "doc",
+      "commit_or_etag": "e0eff1d908",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The Rule 24 four-postulate record, the routed findings, the C3-chain status and the instrument-trap disclosures. These live BESIDE the manifest because the adopted L0 schema is additionalProperties:false at its top level with exactly 5 keys, so they cannot ride inside it. TO s.8 explicitly permits 'in the manifest or beside it'.",
+      "artifact_covered_by": [
+        "DTX-AC3",
+        "DTX-AC6"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/phase_b_reconcile.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-COMMIT-THIS-TURN",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The phase-B reconcile output with both residues and their owners. Qualification artifact; no deploy surface.",
+      "artifact_covered_by": [
+        "DTX-AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/build_reconcile.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-COMMIT-THIS-TURN",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The deterministic reconcile builder. Not a graph materializer; touches no registered part or generator.",
+      "artifact_covered_by": [
+        "DTX-AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DTX-AC1",
+      "criterion_verbatim": "A machine-readable manifest JSON exists. Every store carries: exact location, form, what WRITES it, what READS it, and its vintage-at-observation with the plane named. [SUPERSEDED by 2.0.0_SA_COO~X 73225: DTX-AC1 is superseded by conformance to org/standards/L0_GRAPH_SUBSTRATE_MANIFEST.schema.json]",
+      "method": "schema_validation",
+      "invocation": "python -c \"import json,jsonschema; s=json.load(open('org/standards/L0_GRAPH_SUBSTRATE_MANIFEST.schema.json')); d=json.load(open('.../graph_object_manifest.json')); print(list(jsonschema.Draft202012Validator(s).iter_errors(d)))\"",
+      "output_evidence": "VALID -- 0 errors, against the ADOPTED contract (not the original AC1 prose). 39 parts, each carrying home (exact location), part_class (form), generation.materializer (what writes it), consumers (what reads it), and vintage{measured_utc, method} with the plane named in evidence. An earlier cut FAILED with 8 errors (5x coverage typed as string where the schema demands an object, 3x home null on the absent C3 stages); those were fixed and re-validated.",
+      "denominator": "39 of 39 parts validated; 12 required fields per part enforced by the schema; top-level additionalProperties:false over exactly 5 keys.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DTX-AC2",
+      "criterion_verbatim": "Every store is TAGGED TO ITS GENERATOR -- Andrew's explicit words. A store whose generator could not be found is recorded generator: UNKNOWN with evidence of the search, never omitted.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('.../graph_object_manifest.json'));print(sum(1 for p in d['parts'] if 'materializer' in p['generation']), 'of', len(d['parts']))\"",
+      "output_evidence": "39 of 39 parts carry generation.materializer as a present key (schema-required, so absence is structurally impossible). 24 name a materializer path; 15 carry null. EVERY null is accompanied by a stated search in the part's evidence string -- e.g. graph_contracts: 'not resolved to a named producer by directory enumeration of infra/aws/globgrph/ nor by the comp-find DEF-band sweep. RECORDED AS UNKNOWN RATHER THAN OMITTED'. ZERO stores were omitted for want of a generator. Four snapshot tables carry a generator INFERRED FROM NAME ADJACENCY and say so explicitly, with basis recorded so an inferred generator is not read as a measured one.",
+      "denominator": "39 parts: 24 named materializer, 15 null-with-search-evidence, 0 omitted.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DTX-AC3",
+      "criterion_verbatim": "The classification axis ships WITH its Rule 24 four-postulate record (i-iv), and states whether it REUSES the card schema's authority_role or mints new values -- with the reason.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/COMPANION_rule24_findings_limits.md section 1",
+      "output_evidence": "FOUR fields recorded, each with its own disposition. (1) authority_role -- REUSED VERBATIM from SUBSTRATE_CARD.schema.json artifact.persistence.authority_role, with the reason (build ladder: an existing ratified term beats a re-coined one) and citing its existing x-rule24 record at verdict pass. NOTE A CORRECTION OF RECORD: the TO located this enum at artifact.location; it is at artifact.persistence, and I read the schema rather than citing the TO. (2) weight_class -- MINTED, full four-postulate record, and postulate (iii) is MEASURED not assumed: heavy/light and authoritative/projection are shown NOT to co-vary by two counterexamples from this census (graph_contracts is LIGHT-and-AUTHORITATIVE at 21 objects; kuzu_nessie_db is HEAVY-and-PROJECTION at 82MB), which is why they ship as TWO FIELDS rather than one bundled axis. (3) materializer_standing -- ADOPTED from the L0 schema authored by 1.0.0_SA_CTO~X, with its own record, because adoption is an authoring act. (4) temporal_claim -- ADOPTED WITHOUT a four-postulate record, per 2.0.0_SA_COO~X 73225's explicit instruction to use it and to state that the record is absent and routed to its owner, and NOT to supply the record myself.",
+      "denominator": "4 classification fields, 4 dispositions recorded; 2 reused/adopted, 1 minted with a full record, 1 adopted-without-record-and-declared.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DTX-AC4",
+      "criterion_verbatim": "The reconcile prints BOTH denominators: stores named in cards but absent from the census, and census stores no card names. Both residues carry owners.",
+      "method": "command",
+      "invocation": "python org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/build_reconcile.py",
+      "output_evidence": "PHASE B RAN. Trigger OBSERVED not declared: 2.0.0_SA_COO~X measured 8/8 conformant cards committed with a positive control, and ruled MERGED = committed-to-CLOUD because this consumer reads the working tree on the same device (73421). BOTH RESIDUES PRINTED WITH OWNERS. RESIDUE 1 (named in cards, absent from census) = 5, EVERY ONE inside a limit the census DECLARED IN ADVANCE -- 4 are .yaml registries and the manifest's known_unsearched already said 'a store hiding as a .yaml in that tree would be missed'; the 5th sits in a tree the census never entered. The declared limit predicted its own residue. RESIDUE 2 (in census, no card names) = 26 of 39 parts, SUBCLASSIFIED because a flat 26 would overstate it: 3 are the UNBUILT C3 stages (a card naming them would be wrong) and 1 is nerves_resolve, the REFERENCE card's subject and not a wave member. THE NUMBER THAT CARRIES THE CLAIM IS 22 -- real, persisted, present graph objects that NO wave-1 card names. That is the half of the reconcile that only an INDEPENDENT phase A could produce: a manifest assembled from the cards is structurally incapable of finding it. NO SUMMING: I did not adopt 51/43/39/37/35 as a part count per 73421; card entries and census parts are different populations at different grains, and 3 single card entries each name TWO objects.",
+      "denominator": "8 of 8 cards read; 42 card entries examined (24 projection_of + 18 co_resident_stores); dispositions RESOLVED 25 / RESOLVED_MULTI 2 / RESOLVED_AS_GENERATOR 2 / OUT_OF_DOMAIN 6 / RESIDUE_1 7 entries resolving to 5 distinct stores / UNRESOLVED 0. ITEMISATION CHECK: dispositions SUM to 42, asserted in code -- nothing labelled by subtraction. RESIDUE 2 SUBCLASS CHECK: 3 + 1 + 22 == 26, asserted in code.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DTX-AC5",
+      "criterion_verbatim": "ZERO commits by this lane touching any store or generator it manifests.",
+      "method": "command",
+      "invocation": "git log --author='0.4.0_DT_ClientPlatform~X' --name-only --pretty=format:%h",
+      "output_evidence": "Commits by this lane at carding: d28b556c30 (seating record), 160827602d (two Andrew-direct records), plus this turn's deliverable commit. ALL land under org/tier2_senior/0.4.0_DT_ClientPlatform{~X,}/ -- records and deliverables. NONE touches infra/aws/globgrph/, .comp-graph/, org/modules/graph/, org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/, any Iceberg table, or any generator. The 158MB orphaned temp set, the two cse_test_* production-warehouse tables, and the 20-day-stale published graph object were NAMED WITH OWNERS AND LEFT IN PLACE.",
+      "denominator": "3 commits by this lane; 0 touching any of the 39 registered parts or their generators.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DTX-AC6",
+      "criterion_verbatim": "The manifest states its own coverage and its own limits -- what universe it swept, what it could not reach, and that the CTO~X starting list was a starting list.",
+      "method": "manual_read_with_citation",
+      "invocation": "read graph_object_manifest.json .denominator (method / population_searched / parts_registered / known_unsearched)",
+      "output_evidence": "The adopted schema's denominator block IS this criterion expressed as a field a consumer can reject on, which 2.0.0_SA_COO~X 73225 named as the better form. method states all six planes swept and their completeness; population_searched prints 181,412 warehouse keys + 129 estate-report keys + 28,797 repo files + 3 exhaustive directory enumerations; known_unsearched carries SEVEN entries and is deliberately NON-EMPTY (the schema notes an empty array is a claim of total coverage). The starting list is recorded IN method as a starting list, with the ordering stated: the estate was swept FIRST and the list diffed against it AFTERWARD, so the list stayed falsifiable rather than becoming a template. The widest gap is named explicitly: DynamoDB/RDS/non-S3 persistence was not swept at all.",
+      "denominator": "6 planes swept (4 complete, 1 partial, 1 by-filename); 7 known_unsearched entries printed; parts_registered 39 computed from the population, never typed.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two defects planted into an in-memory copy of the validated manifest and re-validated: (a) delete a required field (parts[0].owner); (b) set parts[0].population_status to an out-of-enum value 'bogus_value'. A green from a dead validator is not a pass, so the validator had to be shown capable of rejecting.",
+      "expected": "Both planted copies REJECTED, while the unmodified manifest validates in the same run.",
+      "observed": "(a) REJECTED, 1 error. (b) REJECTED. Unmodified manifest: VALID -- 0 errors, same run, same validator object. Both arms therefore reachable from different truths.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "build_manifest.py emits the manifest from a fixed in-script table with no clock call, no randomness, and no filesystem scan at build time -- the measured values were gathered in-session and are literals in the builder. Re-running rebuilds byte-identical output. The self-check asserts denominator.parts_registered == len(parts) and fails loudly on mismatch.",
+      "observed": "Re-run after the coverage/home fixes produced parts_registered 39, declared 39, SELF-CHECK PASS. The assert is a live arm: the FIRST cut of the hand-authored manifest declared 39 against 35 rows and that mismatch is exactly what this control now makes impossible to ship.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Phase B reconcile (DTX-AC4) and its two residues",
+      "reason": "Observed trigger (last wave-1 card MERGED) has not fired. TO s.2 defines the TO as two-phase and TO s.8 requires phase A be reported on its own clock rather than held."
+    },
+    {
+      "item": "Row counts for resource_summaries and the kuzu corpus",
+      "reason": "TO s.7 requires coordination with 0.7.0_AE_CloudOps~X before either seat publishes a count, so one measures and the other cites with attribution. Object counts are published instead and are explicitly labelled as object counts, not row counts."
+    },
+    {
+      "item": "DynamoDB / RDS / any non-S3 persistence",
+      "reason": "Not swept. Declared in known_unsearched as the single widest gap in the census rather than left as silence."
+    },
+    {
+      "item": "The site-Z fabric and any other AWS account or region",
+      "reason": "This census ran on the laptop fabric, one bucket, us-east-1. Every local-plane part describes THIS DEVICE. Declared in known_unsearched."
+    },
+    {
+      "item": "A four-postulate record for temporal_claim",
+      "reason": "2.0.0_SA_COO~X 73225 ruled explicitly: use the field, state that the record is absent and routed to 1.0.0_SA_CTO~X as the schema's owner, and DO NOT supply the record myself -- authoring a taxonomy for another seat's contract is not this lane's act."
+    },
+    {
+      "item": "Any remediation of the six routed findings",
+      "reason": "QUALIFY-DO-NOT-FIX. DTX-AC5 binds and the TO objective is explicit: name defects and owners, fix nothing."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION (routed 73076, reproduced by 2.0.0_SA_COO~X and ruled in 73105): comp-keys prefix truncates to 40 keys by default and prints its true total AFTER the rows. It fails in ONE DIRECTION ONLY -- it can only hide keys, so it produces FALSE ABSENCES, which is the exact direction every SC-*-4 location row and DTX-AC4's residue are built on. It nearly put a false absence into this manifest: s3://opal-estate-report/kuzu_nessie_db (51MB, the store D11 exists to find) sat past the 40-row cut and I had drafted the sentence calling it absent. Corrected by head-object.",
+    "OBSERVATION (routed 72990, reproduced independently by 2.0.0_SA_COO~X and 0.7.0_AE_CloudOps~X, corrected COO~X's 'transient' diagnosis in 73003): passing a CONTENT PATTERN and --name to comp-find in the same call scans ZERO files and reports 0 hits over 0 scanned. Four arms at this seat, ARM 3 (immediate re-run) proved it DETERMINISTIC not transient; ARM 4 positive control showed a pattern with 65 known hits collapsing to zero. Later narrowed by 0.8.0_AE_CloudComp~Y: --files alongside --name is fine, confirmed independently at this seat (28,797 scanned).",
+    "SELF-REPORTED CONTROL FAILURE (routed 73076): before head-object corrected me I held a positive control that fired GREEN -- I grepped the same 40 truncated rows for 'estate-report', got 38 of 40, and read it as proof the sweep was sound. It proved my GREP worked and said nothing about whether the LISTING was complete: a control on the FILTER while the defect was in the POPULATION. Worse than no control, because it looks like rigour and stops the asking.",
+    "SELF-CAUGHT, PRE-SHIP: two vintage-measurement errors. (a) 'sort | tail -1' on Iceberg metadata filenames is LEXICOGRAPHIC, not chronological -- it reported graph_nodes at 2026-06-12 against a true 2026-08-26. (b) aws --query 'sort_by(Contents,&LastModified)[-1]' applies PER PAGE on a paginated list-*, so the 131,975-object graph_nodes metadata prefix returned ~130 values instead of one. Both are in CLAUDE.md's instrument-trap catalogue; both were caught before they reached a row; the remedy taken was to materialise the set and compute the max client-side.",
+    "SELF-CAUGHT, PRE-SHIP: the first hand-authored cut of this manifest declared stores_enumerated 39 against a population of 35 rows -- a typed denominator that did not match its own population, in a deliverable whose whole subject is printed denominators. Caught by the TO's own compiler-tools phase-2 mandate ('parses; counts match'). Remedy: the manifest is now EMITTED by a builder that computes every count from the population and asserts declared == actual.",
+    "ANDREW-DIRECT x3 received first-hand at this seat's terminal mid-census, recorded verbatim and broadcast same turn (records @160827602d, broadcast 73172-73179): (1) historical materializers may not be the most updated/relevant; (2) the forward intent of ONE canonical agnostic materializer per layer c0-c3/d1-d3, trigger-gated on 'after reviewing all substrate cards' and therefore NOT authorized now; (3) the C3 chain is nerves_resolve -> affinity matrix -> similarity network fusion, 'we are nowhere even close to doing c3 right now', and any C3 card is 'simply representative of current state'. Andrew explicitly directed this seat to ask 1.0.0_SA_CTO~X, which is the sole authorization under which this lane initiated contact with that seat."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DT_ClientPlatform~X/logs/2026-08-26/ (ANDREW_DIRECT_1907Z + ANDREW_DIRECT_1911Z records committed @160827602d; full session log to follow at close per /log)",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"what graph stores exist and what writes each one\"",
+      "result": "PARTIAL -- returned a 3-way NEAR-TIE (comp-describe / comp-estate --resource / comp-graph status) over 80 tools, explicitly flagging 'TOP SCORES ARE TIED -- THE ORDER IS NOT A RANKING'. No single canonical route for a cross-plane store census, so I widened deliberately to comp-find / comp-keys / comp-kuzu per the mandate's if_mismatch clause rather than taking the first hit."
+    },
+    {
+      "tool": "comp-kuzu",
+      "invocation": "comp-kuzu \"MATCH (n) RETURN count(n) AS nodes\"",
+      "result": "PASS -- provenance header read on every kuzu access as mandated. Confirmed the wave as_of INDEPENDENTLY: 27,035 nodes / 58,224 edges, nodes snapshot 2902399899597701830, edges 6557038275462806297, built 2026-08-26T14:07:59Z, Nessie HEAD current. Its per-table vintage block also CORROBORATED my graph_contracts staleness from a different instrument (marker last-write 1703.4h = 70.97d vs my 71d from S3 object metadata)."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find -i 'kuzu_nessie_db' --band DEF --limit 15 | comp-find --name '*kuzu*' --all | comp-find --name '*motif_c2c3*' --all",
+      "result": "PASS on 3 of 3 census calls (361/26,830 scanned; 65/28,797; 3/28,803). A 4th call in the TRAP SHAPE (content pattern + --name) returned 0/0 and was discarded on the spot -- it FED NO ROW. Audited per 2.0.0_SA_COO~X's request with denominators rather than a self-assessment. GAP FOUND AND ROUTED: the trap itself, see surprises."
+    },
+    {
+      "tool": "comp-keys",
+      "invocation": "comp-keys prefix s3://opal-estate-report/ [--all]",
+      "result": "FAIL-THEN-PASS. The default call silently returned 40 of 129 keys and hid the 51MB kuzu_nessie_db object; --all returned all 129 and surfaced it. GAP FOUND AND ROUTED (73076, ruled by COO~X in 73105). This is the single most consequential tool finding of the session for D11, because every lane's location cell runs through this instrument."
+    },
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to NFRA_SUBSTRATECARDING.TO-W1-DTX.graph-object-manifest",
+      "result": "PASS -- session TO_ID set race-free per-session rather than via the shared .agent_context file."
+    },
+    {
+      "tool": "to-check.py",
+      "invocation": "python .tools/to-check.py --all --assignee 0.4.0_DT_ClientPlatform~X | --assignee 0.4.0_DT_ClientPlatform",
+      "result": "PARTIAL, as org/XXX.md warns. The lane serial returned total=0 over scanned=2,111 while the BASE returned 1 PENDING TO. Consistent with the documented SEATED-prose notation defect; I did not read the lane zero as 'I hold nothing' and took my TO from the dispatch message, which XXX.md names as the only read that has not failed."
+    },
+    {
+      "tool": "aws s3api (rail-checked)",
+      "invocation": "list-objects-v2 with full pagination + head-object, each call carrying '# rail-checked: <why>'",
+      "result": "PASS, and it is the instrument that CORRECTED comp-keys. Used for the warehouse table census (181,412 keys), the estate-report ground truth (129 keys), and the exact-key head-object that proved the 51MB store exists. Two traps hit and remedied in-flight: --query sort_by applying per-page on a paginated list, and a lexicographic-vs-chronological metadata read."
+    },
+    {
+      "tool": "jsonschema (Draft 2020-12)",
+      "invocation": "Draft202012Validator(L0_GRAPH_SUBSTRATE_MANIFEST.schema.json).iter_errors(manifest)",
+      "result": "PASS -- VALID, 0 errors, after fixing 8 (5 coverage-as-string, 3 home-null). Run WITH a live negative control: two planted mutants both REJECTED in the same run the unmodified manifest passed, so the green is not a dead validator."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": ".tools/safe-commit.sh --author '0.4.0_DT_ClientPlatform~X <...>' -F <msgfile> -- <paths>",
+      "result": "PASS x2 (d28b556c30, 160827602d). Message files authored with a non-shell writer then -F'd, per CLAUDE.md 14a -- a printf/heredoc-built message file re-opens the substitution hole one step earlier. Its risk-reflex also EXERCISED nerves-risk-edges.json live (1,832 danger nodes), which is how that part's row carries STATE at EXERCISED rather than merely APPLIED."
+    }
+  ]
+}

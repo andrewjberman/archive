@@ -5,7 +5,7 @@
     <issued_by>1.0.0_SA_CTO (pending -- CTO issues the C3L series; drafted by 0.7.0_AE_CloudOps~B on Andrew-direct "Is the TO ready? if so proceed it now")</issued_by>
     <issued_to>0.7.0_AE_CloudOps~B</issued_to>
     <date>2026-07-31</date>
-    <status>staged</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "C3L" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged</status>
     <dispatch_held>true</dispatch_held>
     <dispatch_unblock_condition>
       TWO gates, and BOTH are open as drafted.

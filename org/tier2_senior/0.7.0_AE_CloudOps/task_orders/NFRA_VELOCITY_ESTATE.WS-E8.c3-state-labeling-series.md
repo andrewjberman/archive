@@ -3,7 +3,7 @@
 <project>NFRA_VELOCITY_ESTATE</project>
 <issued_to>SERIES PARENT -- each sub-TO splits out to its named owner at dispatch</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending -- E8.1 STARTABLE NOW; E8.2-E8.5 ride base CTO's spec</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_VELOCITY_ESTATE, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending -- E8.1 STARTABLE NOW; E8.2-E8.5 ride base CTO's spec</status>
 
 <priority>ANDREW-DIRECT, 2026-07-31 ~1612-1615Z. Verbatim instruction: **"this needs a dedicated series of TOs wrapped into the project, relay all of this to CTO."** This file is that series. It sits UPSTREAM of two gated ESTATE workstreams (WS-E3, WS-E5's enforcement half) because it is the mechanism that MAINTAINS lifecycle stage.</priority>
 

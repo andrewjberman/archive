@@ -5,7 +5,7 @@
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T22:50Z</issued_at>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "ad-hoc (repair off COT_ADVI_DIAG)" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged</status>
 <priority>TIME-SENSITIVE: target land BEFORE ~01:30Z so the 02:00Z scheduled cron heals gold+platinum with NO ad-hoc gold run. CTO gated GO 224919Z off 0.7.0's COT_ADVI_DIAG mechanism report.</priority>
 
 <authorization>0.7.0 COT_ADVI_DIAG mechanism report (source-confirmed) -> CTO repair GO 224919Z with the bounds below. DS lane (Rule 13, data/cot/scripts/silver; normal commit->deploy cycle).</authorization>

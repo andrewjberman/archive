@@ -1,0 +1,133 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.4.0_DT_ClientPlatform~X",
+  "subject": {
+    "id": "s3://opal-estate-report/kuzu_nessie_db",
+    "kind": "projection",
+    "declared_domain": "the kuzu graph object published into the estate-report bucket for the estate-report EC2 runner to consume as its blast-radius substrate"
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T22:55:00Z",
+    "commit_ish": "100e7ea130",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "basis": "absent",
+      "evidence": "⛔ I HAVE NEVER OPENED THIS OBJECT. Its EXISTENCE, SIZE and VINTAGE are MEASURED by head-object; everything about HOW IT IS PRODUCED is read from infra/aws/terraform/estate-report/instance.tf:136-143 @HEAD, which declares it is 'published daily into this same bucket by the early-morning Nessie run and OVERWRITTEN each day'. That is the CONFIG's account of the producer, not an observation of it. 0.8.0_AE_CloudComp~X (73339) measured the same object independently and states the identical limit. DECLARED_OPINIONS IS NULL AND THE REASON IS THAT I NEVER OPENED THE OBJECT: its producer is known only from instance.tf prose, not observed, so any opinion set I listed would be the CONFIG's account of a producer rather than the producer's own choices.",
+      "owner": "estate-report pipeline owner -- 0.7.0_AE_CloudOps lane per EC2 ownership",
+      "how": "Per instance.tf, the early-morning Nessie run publishes the canonical kuzu graph to this key; the runner drops it at <clone>/infra/aws/globgrph/kuzu_nessie_db, which is where comp-blast resolves it with no flag. Placing the file IS the integration.",
+      "determinism": "unknown",
+      "composes": [
+        {
+          "id": "graph_nodes",
+          "note": "per instance.tf, not observed"
+        },
+        {
+          "id": "graph_edges",
+          "note": "per instance.tf, not observed"
+        }
+      ],
+      "invents": [],
+      "materializer_standing": "unknown",
+      "declared_opinions": null,
+      "basis_by_field": {
+        "how": "inferred",
+        "determinism": "absent",
+        "composes": "inferred"
+      }
+    },
+    "cadence": {
+      "basis": "measured",
+      "evidence": "DESIRED vs APPLIED, and they disagree. DECLARED: instance.tf:136-138 says published DAILY and OVERWRITTEN each day. MEASURED: head-object returns LastModified 2026-08-06T21:49:50Z -- 20 DAYS before carding. ⛔ The config's own comment anticipates a MISSING object ('A MISSING OBJECT MUST READ AS INSTRUMENT_FAILED, NEVER AS no blast radius') and does NOT cover a STALE one, which is present and answers.",
+      "owner": "estate-report pipeline owner",
+      "declared_rhythm": "daily, overwritten each day",
+      "actual_trigger": "the early-morning Nessie run",
+      "live_matches_declared": "no",
+      "live_instance_age": "20 days at carding"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "basis": "measured",
+      "evidence": "head-object: ContentLength 51,068,928, VersionId 1qzIq4TIzcemaprP8Rqq.3AaYvpnMy2O, ServerSideEncryption AES256. A VersionId is present, so the bucket is versioned and an overwrite would retain prior bytes.",
+      "owner": "estate-report pipeline owner",
+      "persisted": true,
+      "authority_role": "projection",
+      "mutation_policy": "replaceable",
+      "form": "kuzu database object"
+    },
+    "location": {
+      "basis": "inferred",
+      "evidence": "aws s3api head-object --bucket opal-estate-report --key kuzu_nessie_db -> rc=0. POSITIVE CONTROL: head-object on code/estate_report_runner.py returns a DIFFERENT LastModified in the same run, so the probe discriminates. ⛔ NEAR-MISS DISCLOSED: comp-keys prefix WITHOUT --all displays 40 of 129 keys and this key falls past the cut, so the default view shows it ABSENT. I had drafted the sentence calling it absent before head-object corrected me.",
+      "owner": "estate-report pipeline owner",
+      "home": "s3://opal-estate-report/kuzu_nessie_db",
+      "projection_of": [
+        {
+          "id": "graph_nodes",
+          "note": "per instance.tf, not observed"
+        },
+        {
+          "id": "graph_edges",
+          "note": "per instance.tf, not observed"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "infra/aws/globgrph/kuzu_nessie_db",
+          "note": "a DIFFERENT object sharing this leaf name: 82,567,168 bytes, local plane, 20 days newer"
+        }
+      ],
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "inferred"
+      }
+    }
+  },
+  "trust": {
+    "coverage": {
+      "basis": "inferred",
+      "evidence": "⛔ COVERAGE IS NOT MEASURABLE WITHOUT OPENING THE OBJECT, AND I DID NOT OPEN IT. The 51,068,928-byte size is measured; a node/edge count is not, because reading it would mean downloading and opening a kuzu database whose contents I make no claim about.",
+      "owner": "estate-report pipeline owner",
+      "universe": "whatever subset of the estate graph the publishing run wrote 20 days ago",
+      "denominator": null,
+      "denominator_absent_reason": "The object was never opened by this lane. Size is measured (51,068,928 bytes) but a row count requires downloading and opening the database, which was out of scope for a card whose subject is the published artifact. Stating this rather than inferring a count from the byte size, which would be a guess dressed as a measurement.",
+      "explicitly_out": [
+        "anything written to the warehouse after 2026-08-06T21:49:50Z"
+      ]
+    },
+    "key": {
+      "basis": "absent",
+      "evidence": "Not opened, so the internal key space is not observed. IF it is a copy of the canonical projection its key space would be CloudNode.node_id -- but that is exactly the inference this card refuses to make, because a 51MB object and an 82MB object are not the same object and the difference is unexplained.",
+      "owner": "estate-report pipeline owner",
+      "identity_space": "UNOBSERVED -- the object was not opened",
+      "key_is_stable": "unknown",
+      "crosses_spaces": false,
+      "declared_mapping": null,
+      "basis_by_field": {
+        "identity_space": "absent",
+        "key_is_stable": "absent",
+        "crosses_spaces": "absent"
+      }
+    },
+    "failure_mode": {
+      "basis": "measured",
+      "evidence": "EXERCISED on the retrieval path, which is the failure this store's CONSUMER actually meets: head-object on a key that cannot exist returns 'An error occurred (404) when calling the HeadObject operation: Not Found'. LOUD and distinguishable from the rc=0 + ContentLength of the real key in the same session. ⛔ BUT THE CONSUMER-SIDE FAILURE IS NOT THE 404: instance.tf states a missing object must read as INSTRUMENT_FAILED. The measured condition is a 20-day-STALE object, which returns rc=0 and full bytes -- so the runner receives a confident answer about a 20-day-old world, and NOTHING in the retrieval distinguishes that from a fresh one.",
+      "owner": "estate-report pipeline owner",
+      "returns_on_failure": "404 Not Found on absence; on staleness, a complete and successful read of old bytes",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "a stale object returns rc=0 with full bytes, so the declared INSTRUMENT_FAILED path never triggers and blast radius is computed against a 20-day-old graph"
+      ]
+    }
+  },
+  "verdict": {
+    "standing": "UNSOUND",
+    "why": "The store EXISTS and is retrievable, and its absence would be loud. It is UNSOUND because its declared cadence and its measured vintage disagree by 20 days on a DAILY contract, and the disagreement is invisible to its consumer: the config anticipates a missing object but not a stale one, so a successful read of 20-day-old bytes is indistinguishable from a correct read. Three of seven rows additionally rest on inference because the object was never opened, which this card records rather than papers over.",
+    "blocking_defects": [
+      "declared daily cadence vs 20-day measured vintage",
+      "staleness is invisible to the consumer -- the INSTRUMENT_FAILED path covers absence only",
+      "coverage and key space unmeasured because the object was not opened"
+    ]
+  }
+}

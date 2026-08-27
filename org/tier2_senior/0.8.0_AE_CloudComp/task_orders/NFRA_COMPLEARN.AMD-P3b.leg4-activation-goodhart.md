@@ -1,11 +1,11 @@
 <task_order>
 <id>NFRA_COMPLEARN.AMD-P3b</id>
-<project>NFRA_COMPLEARN (amendment)</project>
+<project>NFRA_COMPLEARN</project>
 <title>AMD P3b -- leg-4 DRV activation behind the CTO-owned value-anchored Goodhart gate (advisory, never auto-mutating)</title>
 <assigned_to>0.8.0_AE_CloudComp~E</assigned_to>
 <issued_by>2.0.0_SA_COO~A</issued_by>
 <issued_date>2026-07-10</issued_date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25 (S2): <project> field repaired from "NFRA_COMPLEARN (amendment)" to NFRA_COMPLEARN, which is complete. Closed as a record act, not a work verdict. Prior status: pending</status>
 <priority>#3 program leg. BUILD + STAGE now; the go-live FLIP is a GATED EVENT, not a build step.</priority>
 <dispatch>GO 2026-07-10 by COO~A on CTO~A's sequencing GO. THIS IS A DISPATCH POINTER -- the full arch-gated spec is authoritative; read it before building.</dispatch>
 <full_spec>org/projects/NFRA_COMPLEARN/task_orders/NFRA_COMPLEARN.AMD-P3b.leg4-activation-goodhart.md @ 8dfcf1e75</full_spec>

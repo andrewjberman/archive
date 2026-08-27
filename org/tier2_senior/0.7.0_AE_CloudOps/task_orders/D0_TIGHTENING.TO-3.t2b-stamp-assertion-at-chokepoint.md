@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:45Z</issued>
 <dated>ONLY after TO-2's stamps exist on checked paths</dated>
-<status>staged -- HARD-GATED ON TO-2 (asserting on a stamp that does not exist yet is a gate that fails on everything)</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "D0_TIGHTENING" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged -- HARD-GATED ON TO-2 (asserting on a stamp that does not exist yet is a gate that fails on everything)</status>
 <priority>P2</priority>
 <authority>D0_INFRA_TIGHTENING_PRD.md §4b + §6 row 3 at dispatch vintage @4bf291b26c. Placement: LAPTOP (CTO ruling FINAL; T2b's exercise needs a real deploy window, which lives here).</authority>
 </task_order>

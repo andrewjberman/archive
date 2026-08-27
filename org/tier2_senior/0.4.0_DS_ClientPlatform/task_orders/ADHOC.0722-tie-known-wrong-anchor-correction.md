@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "ADHOC" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged</status>
 <priority>P1-small (CTO 230622Z part 3, verbatim: "this leg is not optional and it is not cosmetic." Sequencing within your seat yours -- with the LAG TO + T4.A residue; the hazard grows with every day the wrong anchor stands.)</priority>
 
 <title>Anchor correction: the documented 07-22 DDB tie ($458,189,558.77) is KNOWN-WRONG -- annotate every record citing it as verification, supersede-in-place</title>

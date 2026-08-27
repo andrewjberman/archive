@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (AUAFIX scope-add, 2026-06-18; Andrew-direct business rule via AE; PRD update pending CTO)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project ADVI_COTETL, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <priority>HIGH (correctness -- a certified-AUA producer applies a WRONG exclusion rule) -- but bundles into DS tomorrow-AM re-engagement. DISTINCT from L1 (chain-freeze) + L2 (source-cadence): it's "the exclusion RULE is wrong", INDEPENDENT of the freeze. Andrew-direct business rule (relayed via AE 201554Z); CTO updating the PRD -- align framing if CTO's update adds nuance.</priority>
 
 <references>

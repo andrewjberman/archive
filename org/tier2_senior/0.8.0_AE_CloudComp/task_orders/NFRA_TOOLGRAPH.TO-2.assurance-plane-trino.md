@@ -5,7 +5,7 @@
 <assigned_to>0.8.0_AE_CloudComp~E</assigned_to>
 <issued_by>2.0.0_SA_COO~A</issued_by>
 <issued_date>2026-07-10</issued_date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_TOOLGRAPH, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <priority>P2 -- unblocked by PASSCRAFT-TO-2 (the ToolAudit stream is live, 1b2d5287d). Runs in PARALLEL with PASSCRAFT-TO-3. Its plane is read by TOOLGRAPH-TO-3 (the EFFECTIVE-axis wire + quality-adjusted JOIN).</priority>
 <dispatch>GO 2026-07-10 by COO~A on the TO-2 emitter landing. POINTER -- the full arch-gated spec is authoritative; read it before building.</dispatch>
 <full_spec>org/projects/NFRA_TOOLGRAPH/task_orders/NFRA_TOOLGRAPH.TO-2.assurance-plane-trino.md @ 8dfcf1e75</full_spec>

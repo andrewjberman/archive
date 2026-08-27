@@ -4,7 +4,7 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.8.0_AE_CloudComp (base lane — scope_contract.json is SYSPARITY WS-1's artifact)</issued_to>
 <date>2026-07-24</date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_SYSPARITY, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <priority>P1 — the estate's parity metric currently reads 100% on an axis it cannot see</priority>
 
 <authority>

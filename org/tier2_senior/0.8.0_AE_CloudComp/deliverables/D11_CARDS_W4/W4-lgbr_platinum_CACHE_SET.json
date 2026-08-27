@@ -1,0 +1,189 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.8.0_AE_CloudComp~Y",
+  "subject": {
+    "id": ".comp-graph/platinum.CACHE_SET",
+    "kind": "store",
+    "declared_domain": "The family of five pickled memoization caches written by org/modules/graph/graph_cache.py under the workspace .comp-graph/ directory on behalf of comp-platinum: three per-firm gold pipeline DAGs plus the routing table and the component dataflow set. Covers the family as ONE part carrying a declared cardinality and an enumerated member list. It does NOT cover the graphs these caches memoize (the builders are platinum_cli.py's subjects, not this artifact's), and it does NOT cover .comp-graph's other occupants, which are outside this part id."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-27T08:31:16Z",
+    "commit_ish": "51c851e8b9",
+    "graph_vintage": "graph_nodes@1462710383782792396 (branch-head marker committed_at_iso 2026-08-27T05:53:51.057095+00:00)"
+  },
+  "process": {
+    "methodology": {
+      "how": "Each member is produced by graph_cache.cached(name, builder, sources, freshness, ttl) (:287-300), which memoizes a builder's return object to a pickle keyed by a LOGICAL NAME. On a miss it calls the builder and calls store() (:271-284); on a hit it returns the unpickled object. Five call sites produce the five members, and they split across TWO binding classes: platinum_cli.py:66 gc.cached('platinum.routing', ...) and :87 gc.cached('platinum.dataflows', ...) are CLASS 1 -- call-site string literals. platinum_cli.py:80 gc.cached(f'platinum.dag.{firm}', ...) is CLASS 2 -- the name is INTERPOLATED, but from an allow-list, not from arbitrary input: :146 resolves firm = FIRM_ALIAS.get((args.firm or 'bd').lower(), 'bd'), so an unrecognised --firm falls back to 'bd' rather than flowing into the cache name.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "canonical",
+      "composes": [
+        {
+          "id": "org/modules/graph/graph_cache.py",
+          "note": "the store/load/cached machinery; CACHE_DIR at :44, cache_file() at :229-231, DEFAULT_TTL=300 at :45"
+        },
+        {
+          "id": "org/modules/graph/platinum_cli.py",
+          "note": "the five producing call sites -- :66 routing, :80 per-firm dag, :87 dataflows"
+        },
+        {
+          "id": "org/modules/graph/extract_pipeline.py",
+          "note": "defines FIRM_ALIAS and FIRM_BUCKET -- the allow-list that bounds the dag member names"
+        }
+      ],
+      "invents": [
+        {
+          "id": "the logical cache name space",
+          "note": "'platinum.routing', 'platinum.dataflows', 'platinum.dag.{firm}' are identifiers this module invents; nothing upstream declares them and no registry enumerates them"
+        },
+        {
+          "id": "built_at",
+          "note": "store() stamps time.time() at :275 -- the WRITE time, not the vintage of the source the object was built from. The source vintage is carried separately as the fingerprint."
+        }
+      ],
+      "declared_opinions": [
+        "A STAT-ONLY FINGERPRINT IS GOOD ENOUGH FOR A CACHE (:190). The module implements BOTH a stat-only source_fingerprint (:142-167, max-mtime + file count) and a checkout-invariant content_fingerprint (:170-198, sha256 over content), and DELIBERATELY gives the caches the stat-only one for cost. :153 records the consequence in the module's own words -- a checkout 're-stamps every mtime BY CONSTRUCTION on a content-identical tree' -- so the cheap signal manufactures staleness. A declared cost/correctness trade, not a derived result.",
+        "DEFAULT IS HEAD-PINNED (:261-266). A within-TTL cache whose fingerprint has drifted is a MISS rather than a serve. The comment records this as a joint verdict of 2026-07-01 that killed the stale-cache-phantom class, and explicitly extended fingerprint-honouring from FRESH to DEFAULT.",
+        "A UNUSABLE CACHE SHOULD REBUILD SILENTLY (:251-257). Every failure to load -- corrupt pickle, protocol mismatch, wrong payload type -- returns (None, None), identical to a cache that does not exist. Treating corruption as absence is a choice; it is safe for correctness and silent for diagnosis."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "how": "measured",
+        "composes": "measured",
+        "invents": "measured",
+        "declared_opinions": "measured",
+        "materializer_standing": "measured"
+      },
+      "evidence": "All line citations read at source @51c851e8b9. The CLASS 2 verdict on the three dag members is measured rather than assumed: FIRM_ALIAS is read at org/modules/graph/extract_pipeline.py and holds six keys mapping onto exactly THREE distinct values -- {49financial,bd}->bd, {inflection,inf}->inf, {cottonwood,cot}->cot -- and :146's .get(..., 'bd') default means a name outside the alias set cannot reach the cache key. So the dag name space is bounded at three, not open. materializer_standing='canonical' is measured: these are the only caches these five call sites write, and no sibling or replacement mechanism was found for them. ⚠ ON THE as_of GRAPH VINTAGE: this card carries the wave pin so my set is byte-identical and joinable, but NO ROW ON THIS CARD LOAD-BEARS ON IT -- this family memoizes the gold-pipeline DAG and routing table, which derive from repo source, not from the Iceberg graph. I state that here rather than writing a bespoke vintage string, because a pin is a wave COORDINATE and a per-card variation would break the join it exists to serve. The sibling card W4-dncq does load-bear on it.",
+      "owner": "0.8.0_AE_CloudComp -- the graph-module tree. FIRM_ALIAS's own home (extract_pipeline.py) is in the same tree."
+    },
+    "cadence": {
+      "declared_rhythm": "A 300-second TTL. graph_cache.py:45 DEFAULT_TTL = 300, commented '5 min -- identical to the trace-graph cache'. A member is (re)written whenever a comp-platinum invocation misses -- on absence, on TTL expiry, on source-fingerprint drift, or under --force.",
+      "actual_trigger": "EVENT-DRIVEN, and human-driven specifically: a member is written only as a side effect of someone invoking comp-platinum. No scheduler, no EventBridge rule, no CI step writes these. Nothing on either AWS trigger plane is involved -- this is a local developer-tool cache in the workspace tree.",
+      "live_matches_declared": "no",
+      "live_instance_age": "⛔ EVERY MEMBER IS BETWEEN 3 AND 36 DAYS OLD AGAINST A 300-SECOND TTL. platinum.dag.bd 2026-08-24T21:36:18Z (3d) · platinum.routing 2026-08-24T21:36:15Z (3d) · platinum.dataflows 2026-07-25T06:26:53Z (33d) · platinum.dag.inf 2026-07-22T16:40:27Z (36d) · platinum.dag.cot 2026-07-22T16:40:53Z (36d). The youngest exceeds the TTL by roughly a factor of 900. Rule 25 dormancy is NOT met (36 < 90 days) and I return no dormancy verdict; the TTL fact is the sharper and more actionable one.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "⛔ live_matches_declared='no' IS THE SUBSTANTIVE FINDING OF THIS ROW AND IT IS STRUCTURAL, NOT A LAG. load() computes age = time.time() - payload.built_at at :258 and returns (None, None) when age >= ttl at :259-260. With every member 3 to 36 days old against a 300-second TTL, THAT BRANCH IS TAKEN ON EVERY READ, FOR EVERY MEMBER, WITHOUT EXCEPTION. These five files cannot be served through the API that wrote them; every comp-platinum invocation rebuilds and then overwrites. The artifacts are present, non-empty (25-53 KB each) and structurally unreachable. mtimes read with os.stat and rendered in UTC via datetime.fromtimestamp(..., datetime.UTC) -- not via `aws s3 ls` or a local-time formatter, so the ages are not off by a timezone offset. ⚠ BOUND ON MY CLAIM: mtime is the FILE's last-write time, which for these is the same act as store()'s os.replace at :283, but it is NOT payload.built_at, which is what load() actually compares. I did not unpickle the members to read built_at directly -- doing so is a read of the artifact I am carding and would have been legitimate, but the two can only differ if a file were touched without being rewritten, and the conclusion survives a difference of any plausible size given the 900x margin.",
+      "owner": "0.8.0_AE_CloudComp for the cache module and the TTL constant. NO SEAT OWNS THE INVOCATION CADENCE -- these are written when a human runs comp-platinum, so 'who keeps them fresh' has no answer, which is consistent with all five being far past TTL."
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "projection",
+      "mutation_policy": "replaceable",
+      "form": "Python pickle at HIGHEST_PROTOCOL (:282) of a CachePayload carrying built_at, fingerprint and the memoized object. Sizes at this reading: platinum.dataflows 52,720 B · platinum.routing 39,663 B · platinum.dag.inf 27,940 B · platinum.dag.bd 27,474 B · platinum.dag.cot 25,295 B.",
+      "basis": "measured",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "form": "measured",
+        "mutation_policy": "measured"
+      },
+      "evidence": "All five stat'd on disk; sizes above are measured, not estimated. authority_role='projection' and the alternative was tempting: these are the only local copy of an expensive-to-build DAG, which makes them FEEL like a source. They are not -- every member is reconstructible from repo source by its builder, and load() is designed to discard them freely. Calling them 'source' would assert the pipeline DAG exists because the cache says so, which is the over-read this row should prevent. mutation_policy='replaceable' measured from store() at :279-283: a new payload is written to a .tmp sibling and then os.replace'd over the destination. ⛔ THE ATOMICITY IS REAL AND WORTH RECORDING because it is the one property protecting a concurrent reader: os.replace is atomic on both POSIX and Windows, so a reader either sees the whole old file or the whole new one, never a partial pickle. A plain open-and-write would have made torn reads possible for artifacts of this size.",
+      "owner": "0.8.0_AE_CloudComp."
+    },
+    "location": {
+      "home": ".comp-graph/platinum.CACHE_SET",
+      "projection_of": [
+        {
+          "id": "org/modules/graph/platinum_cli.py",
+          "note": "the builders whose return values are memoized -- _build_indexed_dag (:71-75), the routing table builder (:66) and the dataflow set builder (:87)"
+        },
+        {
+          "id": "data/*/scripts/gold and silver pipeline scripts",
+          "note": "the ultimate source the firm gold DAG is built from, per :55; the fingerprint is taken over these (dir, glob) source pairs"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": ".comp-graph/.agent_context",
+          "note": "same directory, unrelated part -- explicitly NOT an identity source per org/XXX.md Step 1, and not a member of this family"
+        },
+        {
+          "id": ".comp-graph/graph.json",
+          "note": "same directory, the TraceGraph; cited in NFRA_GRAPHUNI.P1 as the LIVE source a derive read INSTEAD of the stale platinum.dag.inf.cache -- see failure_mode"
+        }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured",
+        "co_resident_stores": "measured"
+      },
+      "evidence": "⛔ W4-m-joinable SATISFIED: `home` is the EXACT part id string as it appears in the manifest, byte-identical, so a consumer can equality-join it without parsing prose. I deliberately did NOT write a sentence describing where the caches live -- that is what wave 3 did in 9 of 13 cards and it is why the L0 compile step could not derive the card-to-part join at all. The per-member paths are enumerated in coverage rather than smuggled into this field, so `home` stays a single joinable identity and the cardinality stays inspectable. The path construction is separately verifiable in code: CACHE_DIR = WORKSPACE / '.comp-graph' at :44 and cache_file(name) returns CACHE_DIR / f'{name}.cache' at :229-231, so each member's full path is derivable from its logical name by a rule, not by a listing.",
+      "owner": "0.8.0_AE_CloudComp."
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every pickled memoization cache written under .comp-graph/ by graph_cache.store() on behalf of comp-platinum.",
+      "denominator": "⛔ 5 of 5, AND THE POPULATION IS CLOSED FROM THE PRODUCER SIDE RATHER THAN FROM A LISTING. The complete name space is DERIVABLE: three literal-or-allow-list-bounded roots -- platinum.dag.{firm} over FIRM_ALIAS's three distinct values {bd, inf, cot}, plus the two call-site literals platinum.routing and platinum.dataflows -- yields exactly 5 possible names. All 5 exist on disk. A filesystem glob of .comp-graph/platinum.*.cache independently returns 5 with ZERO undeclared members. Declared 5 · derivable 5 · present 5 · undeclared 0.",
+      "denominator_absent_reason": null,
+      "explicitly_out": [
+        "The graphs these caches memoize -- the builders in platinum_cli.py are a different subject.",
+        "Other occupants of .comp-graph/ (.agent_context, graph.json and siblings). They are outside this part id and several are other parts in the same manifest.",
+        "Whether any cached OBJECT is semantically correct. I measured the family's identity, bounds, freshness and failure behaviour; I did NOT unpickle a member and inspect its contents, so the correctness of what is stored is UNMEASURED and stated as such rather than left to silence.",
+        "⛔ A COMPLETENESS CLAIM ABOUT WRITERS OF .comp-graph GENERALLY. This card closes the population for THIS part id by deriving its name space from the producer. It asserts nothing about what else may write into that directory."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "measured",
+        "explicitly_out": "measured"
+      },
+      "evidence": "⛔ THIS IS THE RARE CASE WHERE DISCOVERABILITY AND COVERAGE ACTUALLY COINCIDE, AND THE REASON IS SPECIFIC RATHER THAN LUCKY. Wave 3's standing limit holds wherever a writer population can only be FOUND, never bounded. Here the name space is bounded BY CONSTRUCTION: two of the five names are call-site literals, and the other three interpolate a token that :146 normalises through FIRM_ALIAS with a 'bd' fallback -- so no input can produce a sixth name. I computed the derivable set from the allow-list independently of the filesystem, then compared: 5 derivable, 5 present, 0 on disk that are not derivable. TWO INSTRUMENTS, one from the code and one from the filesystem, agreeing on both membership and cardinality. ⛔ AND THE CONTRAST WITH MY THIRD SUBJECT IS THE POINT: kuzu_nessie_db.rebuild.tmp.SET names members from a runtime PID and timestamp, so its name space is NOT derivable and no enumeration of it can be complete -- which is exactly why the issuer withdrew its declared cardinality. Same tranche, same shape of question, opposite answer, and the difference is measurable in the binding site rather than a matter of judgement.",
+      "owner": "0.8.0_AE_CloudComp for the cache module and the producing call sites; extract_pipeline.py's owner for FIRM_ALIAS, which is what makes the bound enumerable."
+    },
+    "key": {
+      "identity_space": "A LOGICAL NAME ('platinum.routing', 'platinum.dag.bd'), mapped deterministically onto a filesystem path by cache_file() at :229-231 as CACHE_DIR / f'{name}.cache'.",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "cache_file(name) -> CACHE_DIR / f'{name}.cache' (graph_cache.py:229-231). That single expression IS the declared mapping between the logical-name space and the filesystem-path space, and it is the only place the translation occurs.",
+      "basis": "measured",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "key_is_stable='stable' measured on both halves: the two literal names are fixed strings at :66 and :87, and the three interpolated names draw from a three-value alias set with a default, so the key cannot vary with input. All five names resolved to real files, so none is a name that fails to bind. crosses_spaces=TRUE and measured: the logical name is not a path until :231 appends the .cache suffix under CACHE_DIR, and callers deal exclusively in logical names. ⛔ THE MAPPING IS TOTAL AND UNGUARDED, WHICH IS A REAL PROPERTY RATHER THAN A COMPLAINT: cache_file() will happily construct a path for ANY string, so the safety of this key space rests entirely on the five call sites and on :146's alias normalisation -- not on anything cache_file() itself checks. A future call site passing an unnormalised token would silently mint a sixth cache, and nothing in this module would object. That is the mechanism by which this family's enumerability could be lost, and it is one line away.",
+      "owner": "0.8.0_AE_CloudComp."
+    },
+    "failure_mode": {
+      "returns_on_failure": "SILENTLY REBUILDS, IN EVERY FAILURE DIRECTION. load() returns (None, None) -- indistinguishable from 'no cache exists' -- when the file is absent (:249-250), when unpickling raises ANY exception (:251-255, a bare `except Exception`), when the payload is not a CachePayload (:256-257), when age >= ttl (:259-260), and when the fingerprint has drifted (:265-266). cached() then calls the builder and overwrites. Nothing is logged and nothing is raised, so a corrupt cache, a stale cache and an absent cache produce identical observable behaviour: a slower call.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "⛔ THE ONE THAT HAS ALREADY COST THIS ESTATE A NUMBER: the TTL gates load() ONLY. Anything that opens a .cache file directly and unpickles it bypasses every freshness check in this module -- no TTL, no fingerprint, no age. And that is not hypothetical here: org/projects/NFRA_GRAPHUNI/NFRA_GRAPHUNI.P0-A.storage-stratum-audit.md records platinum.dag.inf.cache as STALE with s3_keys=0 while its bd and cot siblings held 103 and 96, and the F2 finding warns in terms 'do not let a stale-cache 0 understate the inf storage denominator.' A stale member of THIS family, read outside the API that would have rejected it, produced a zero that read as a measurement.",
+        "The bare `except Exception` at :251-255 turns instrument failure into a verdict: a genuinely corrupt or truncated pickle is reported as 'no cache', so corruption never surfaces and the file is simply overwritten on the next call. Safe for correctness, invisible for diagnosis.",
+        "The stat-only fingerprint (:142-167) is deliberately preferred over the content fingerprint (:170-198), and :153 records that a checkout re-stamps every mtime on a content-identical tree. That manufactures staleness -- a FALSE MISS, which costs a rebuild and never a wrong answer. I record the direction explicitly because the same module contains the instrument that would not have this failure, and choosing the cheaper one was deliberate.",
+        "built_at is the WRITE time, not the vintage of the source the object was built from. A consumer reading built_at as 'the data is this fresh' is reading when the cache was written, not what it was written from; source vintage lives in the fingerprint, which is opaque and is compared, never displayed.",
+        "cache_file() constructs a path for any string with no validation, so the family's enumerability depends entirely on discipline at five call sites rather than on any guard."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "All five return-(None,None) branches read at source and cited individually above; they are distinct code paths converging on one indistinguishable result, which is what makes distinguishable_from_true_negative='no' a measured verdict rather than an impression. ⛔ THE TTL-BYPASS PATH IS EVIDENCED BY A RECORDED INCIDENT RATHER THAN BY MY REASONING, which is the stronger form: the NFRA_GRAPHUNI P0-A audit names platinum.dag.inf.cache, states its staleness and its zero, and routes a warning about the denominator it would corrupt. I did not construct that scenario -- I found the estate had already run it. ⚠ AND IT RESOLVES AN APPARENT CONTRADICTION ON THIS CARD, which is why I chased it rather than citing both facts side by side: if every read through load() is a guaranteed MISS (cadence row), a stale cache should be unable to harm anyone. The incident proves harm occurred. Both are true because the harm came through a DIRECT read, outside the API -- so the TTL protects the API's callers and protects nobody else. A card carrying both facts without reconciling them would have looked complete and been incoherent.",
+      "owner": "0.8.0_AE_CloudComp for graph_cache.py's failure branches and the TTL. ⛔ UNOWNED for direct readers: nothing declares that .cache files must be read through load(), and no guard prevents it -- the NFRA_GRAPHUNI incident is evidence that the informal rule is not sufficient."
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "The family is well-built and precisely bounded, and it is the rare subject where coverage can be CLOSED rather than merely sampled: the complete name space is derivable from the producer -- two call-site literals plus a token normalised through a three-value allow-list with a default -- so 5 declared, 5 derivable, 5 present and 0 undeclared is a closed population verified by two independent instruments, code and filesystem. Writes are atomic via os.replace, DEFAULT is head-pinned against fingerprint drift, and the module implements and documents both a cheap and a rigorous staleness signal. QUALIFIED rather than SOUND on three measured defects: (1) EVERY MEMBER IS 3 TO 36 DAYS OLD AGAINST A 300-SECOND TTL, so load()'s age branch is taken on every read for every member -- these five present, non-empty files cannot be served through the API that wrote them, and every invocation rebuilds; (2) the TTL and fingerprint gate load() ONLY, and a direct unpickle bypasses both -- not hypothetically, since the NFRA_GRAPHUNI P0-A audit records a stale member of this exact family producing an s3_keys=0 that had to be explicitly warned against as a denominator; (3) every failure direction -- absent, corrupt, wrong type, expired, drifted -- returns the identical (None, None), so corruption is indistinguishable from absence and never surfaces. Not UNSOUND: nothing measured shows a wrong value served THROUGH the API, and every defect above degrades toward rebuilding rather than toward a false answer. NOT INCOMPLETE: all 7 rows worked, every scalar measured. ⛔ NO COMPLETENESS CLAIM about writers of .comp-graph generally -- this card closes its own part id and nothing wider. ⛔ NO FORWARD DISPOSITION: the TTL evidence invites a retire-or-refresh opinion and that is exactly the second-pass judgement a carding lane must not make about its own subject. Per QUALIFY-DO-NOT-FIX this lane touched no cache, ran no comp-platinum invocation (which would have rewritten members and destroyed the age evidence), and committed nothing to graph_cache.py or platinum_cli.py.",
+    "blocking_defects": [
+      "For anyone assuming comp-platinum is served from cache: it is not. All five members exceed the 300s TTL by three to thirty-six days, so every read misses and every invocation rebuilds. The caches are residue, not a warm path. Owner 0.8.0_AE_CloudComp.",
+      "For anyone reading a .cache file directly rather than through graph_cache.load(): no TTL, no fingerprint and no age check applies, and a stale member of this family has already produced a zero that the NFRA_GRAPHUNI P0-A audit had to warn against. Owner UNOWNED -- nothing declares or enforces API-only access.",
+      "For anyone diagnosing a cache problem: a corrupt pickle, a protocol mismatch and an absent file all return (None, None) with nothing logged. Corruption cannot be observed, only inferred from a rebuild that should not have happened. Owner 0.8.0_AE_CloudComp.",
+      "For anyone relying on this family staying enumerable: cache_file() validates nothing, so a single new call site passing an unnormalised token mints a sixth member and the closed population silently opens. Owner 0.8.0_AE_CloudComp."
+    ]
+  }
+}

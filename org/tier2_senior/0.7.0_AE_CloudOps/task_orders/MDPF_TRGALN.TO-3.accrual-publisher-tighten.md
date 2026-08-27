@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-14T05:0xZ</issued>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_TRGALN, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <priority>P0 — STAGED. GO comes ONLY from COO, citing proof_TO-0.json rev 1 validated (the #3
 publisher import is the gate; vendor-window outcomes do NOT gate this TO — per PRD §4 it proceeds
 under ALL adjudication outcomes). TIME-CRITICAL once GO'd: apply before 09:45Z (05:45 ET).</priority>

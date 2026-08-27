@@ -1,0 +1,231 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SUBSTRATECARDING.TO-W1-COX.c3i-compsimilar-cards",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "assignee": "0.7.0_AE_CloudOps~X",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-substratecarding/20260826T172918Z/DECOMP.md",
+    "vintage_commit": "aae317509b",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_SUBSTRATECARDING.TO-W1-COX.c3i-compsimilar-cards.md"
+  },
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_SUBSTRATECARDING.TO-W1-COX.c3i-compsimilar-cards.md",
+    "group": "W",
+    "vintage_commit": "5f34b0df8d"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D11_CARDS/C3i.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A substrate card is a governance artifact, not a deployable. Nothing was deployed by this TO and nothing was intended to be: COX-AC6 requires ZERO commits touching any generator carded, and infra/aws/globgrph/ is declared READ-ONLY for this TO."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D11_CARDS/comp_similar.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "As above. Read-only qualification act; no generator, tool or table was modified."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_SUBSTRATECARDING.TO-W1-COX_PROOF_OF_SPEC.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "COX-AC1",
+      "criterion_verbatim": "Two JSON cards exist and both VALIDATE. All 14 rows carry non-empty basis + evidence + owner.",
+      "method": "schema_validation",
+      "invocation": "python -c \"import json,jsonschema; s=json.load(open('org/standards/SUBSTRATE_CARD.schema.json')); [jsonschema.Draft202012Validator(s).validate(json.load(open(p))) for p in ['.../C3i.json','.../comp_similar.json']]\" ; then a programmatic sweep of the 7 required rows x 2 cards asserting basis/evidence/owner are non-empty strings",
+      "output_evidence": "VALID: C3i.json / VALID: comp_similar.json / 2/2 VALID. Row sweep: 'rows checked: 14 of 14   defects: 0'. POSITIVE CONTROL RUN SEPARATELY so the 2/2 can fail: a mutant card with the entire trust block deleted was REJECTED -- \"'trust' is a required property\". The control was re-run after the final edits and still rejects.",
+      "denominator": "14 of 14 CARD_MATRIX rows (2 cards x 7 required rows); 2 of 2 cards validated; 1 mutant control",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COX-AC2",
+      "criterion_verbatim": "Both carry byte-identical as_of.commit_ish and as_of.graph_vintage per s.1.",
+      "method": "diff",
+      "invocation": "programmatic equality compare of both cards' as_of blocks",
+      "output_evidence": "commit_ish equal: True (fe269171f2). graph_vintage equal: True (kuzu_nessie_db@2902399899597701830). carded_utc is per-card by contract and was read from the clock (date -u -> 2026-08-26T19:09:51Z), never estimated between turns. The wave anchor was COPIED from the TO, not derived; my own HEAD during evidence-gathering was 7bb29e2514 and every evidence citation carries that or a live-read timestamp instead -- no citation is back-dated to the anchor.",
+      "denominator": "2 of 2 pinned fields, across 2 of 2 cards",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COX-AC3",
+      "criterion_verbatim": "coverage.denominator NON-NULL on both, \"N of M\", both numbers named.",
+      "method": "command",
+      "invocation": "programmatic check of trust.coverage.denominator on both cards for non-null, ' of ' present, and both integers named",
+      "output_evidence": "C3i: NON-NULL, 'of' present, numbers ['4','27,035'] -- full string '4 of 27,035 nodes are C3System, and 6,226 of 27,035 are C2Motif, on the kuzu_nessie_db PROJECTION plane'. comp_similar: NON-NULL, 'of' present, numbers ['1,500','1,851']. The comp-similar shape is exactly the one the TO specified, with the 351 unknown-thin named in explicitly_out. This criterion exists because schema finding F-1 makes a null denominator schema-LEGAL; only this criterion catches it.",
+      "denominator": "2 of 2 coverage rows",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COX-AC4",
+      "criterion_verbatim": "determinism in {inferential,hybrid} => populated inference_detail incl. failure_is_loud and invocations_per_run.",
+      "method": "command",
+      "invocation": "EXERCISE, not code-reading: (1) `comp-similar opal-data-assets` twice, outputs byte-compared with cmp; (2) the SAME compare against a different subject as a control that could fail; (3) five distinct pairwise runs; (4) `comp-similar --self-test`; (5) a source census for bedrock/anthropic/openai/invoke_model/prompt across comp_similar.py and resource_summaries_store.py",
+      "output_evidence": "Two runs BYTE-IDENTICAL (2,477 bytes each); control against a DIFFERENT subject DIFFERS, so the compare can fail. Five distinct pairs -> five DISTINCT scores (0.43/0.628/0.622/0.405/0.508). --self-test PASS 7/7 including the C2 corpus-collapse and C3 blind-row arms. Model census: ZERO hits. The llm_class overlay exists but is structurally excluded from the BM25 tokens (summary_corpus.py:811 @7bb29e2514) and is display-only (:361-367, :476), so it cannot move a score. VERDICT: determinism='deterministic' on BOTH cards, so the {inferential,hybrid} trigger DOES NOT FIRE and inference_detail=null is the correct value -- verified programmatically on both cards. invocations_per_run is 0, which is the direct answer to Andrew's pricing question rather than an evasion of it. ⛔ THE TO'S SUSPICION WAS THE OPPOSITE AND IS REPORTED AS NOT CONFIRMED: the 1.031 signature did NOT reproduce on the pairwise path. But the SHAPE it pointed at DID reproduce on the neighbors path -- 8 distinct S3_BUCKET_POLICY resources at byte-identical sim=1.0, all [THIN] -- so the original observation was sound and only its MECHANISM is re-attributed, from a non-deterministic process to templated thin summaries scored deterministically. That finding is carried in the card's failure_mode.silent_degrade_paths, not suppressed.",
+      "denominator": "2 of 2 methodology rows; 5 pairwise arms + 2 determinism arms + 1 negative control + 7 self-test arms",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COX-AC5",
+      "criterion_verbatim": "verdict.standing is INCOMPLETE iff >=1 row is genuinely unworked.",
+      "method": "command",
+      "invocation": "programmatic sweep of all 14 rows for basis=='absent' or empty, compared against each card's verdict.standing",
+      "output_evidence": "C3i: standing=UNSOUND; rows with basis 'absent': none; unworked rows: 0. comp_similar: standing=QUALIFIED; rows with basis 'absent': none; unworked rows: 0. Neither card is INCOMPLETE and neither should be. ⛔ THE DISTINCTION THIS CRITERION POLICES IS HELD EXPLICITLY: C3.i is UNSOUND -- a verdict about the RESOURCE -- while its CARD is complete. Schema finding F-3 makes SOUND-over-an-unworked-row legal, so only this criterion separates 'we did not finish looking' from 'it is fine'. The two verdicts also differ from each other (UNSOUND vs QUALIFIED), which is evidence the verdict field was reasoned per subject rather than stamped.",
+      "denominator": "14 of 14 rows swept; 2 of 2 verdicts checked",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COX-AC6",
+      "criterion_verbatim": "ZERO commits by this lane touching any generator it carded. QUALIFY-DO-NOT-FIX.",
+      "method": "diff",
+      "invocation": "git status --porcelain over the carded generators and their trees, plus a review of every path this lane wrote",
+      "output_evidence": "This lane wrote exactly three paths, all under org/tier2_senior/0.7.0_AE_CloudOps/deliverables/, plus its session log and inbox-derived files. NOTHING under infra/aws/globgrph/ (declared READ-ONLY by the TO), NOTHING under org/modules/graph/debtscan/, and NOTHING in NFRA_MOTIF_P1_canonical_ab_catalog.py, NFRA_MOTIF_P1_c2_catalog.py, derive_runner.py, comp_similar.py, summary_corpus.py or resource_summaries_store.py -- every one of which this TO carded and every one of which was opened READ-ONLY. Findings against all of them are recorded IN THE CARDS with named owners, which is the deliverable; none was remediated. The one place I was tempted to act -- the frozen v1 schema's inability to carry generator_currency -- I did NOT edit, per boundary SC-bnd-4; I surfaced it to the issuer instead.",
+      "denominator": "6 of 6 carded generator/source files verified untouched; 3 of 3 written paths are this lane's own deliverables",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "COX-AC7",
+      "criterion_verbatim": "Both key rows state identity_space, key_is_stable and crosses_spaces, and where crosses_spaces is true, declared_mapping is either a real location or null WITH evidence of where a mapping was sought.",
+      "method": "live_read",
+      "invocation": "AST parse of ANCHOR_CATALOG; direct exercise of system_node_id over 5 arms; comp-kuzu id-space census with a positive control; a four-file search for a declared cross-space mapping on each subject",
+      "output_evidence": "C3i: identity_space='system:<theme>:<first 8 hex of sha1 over the sorted member-motif nid set>', key_is_stable='unstable', crosses_spaces=true, declared_mapping=null with the four searched files NAMED. ⛔ THIS ROW CORRECTS THE TO'S OWN held GIVEN: the TO states 'sha1(anchor_node_id)'; measured at source it is sha1 over the SORTED MEMBER-MOTIF NID SET (NFRA_MOTIF_P1_c2_catalog.py:73-81 @7bb29e2514). EXERCISED, 5 arms, one variable: identical set -> system:pipeline:03858936 twice; REORDERED -> same; ONE MOTIF ADDED -> d1b18ec6; ONE REMOVED -> 957742c8. The function's docstring claims 'STABLE by construction' and is TRUE on its own axis (reproducible for identical input) while FALSE on this schema's axis (survives ordinary change) -- two axes that look like one, which is why the row is 'unstable' and the docstring is not wrong. ID-SPACE CENSUS WITH A CONTROL THAT FIRED: 'sys-' prefix = 0 over a denominator of 27,035, while the control 'system:' = 4 on the same plane in the same minute -- so the zero is a measured absence, not a dead instrument. comp_similar: identity_space='AWS ARN', key_is_stable='stable', crosses_spaces=false, declared_mapping=null with four files searched and named. false here is a FINDING not a clean bill: MS and Git resources are not poorly-keyed, they are ABSENT from the ARN-keyed universe, so Andrew's named gap presents as coverage while its cause is identity.",
+      "denominator": "2 of 2 key rows; 5 exercise arms; id-space census over 27,035 nodes with 1 positive control; 4 files searched per subject for a declared mapping",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A card with the entire trust block deleted was submitted to the same Draft 2020-12 validator used for the PASS, to establish that the 2/2 VALID result is capable of failing. Re-run after the final card edits so it certifies the DELIVERED artifacts, not an earlier state. A second, unplanned mutant arose naturally and is reported because it fired against me: I added a semantic_axis_examination key to verdict per ruling 73212 and the validator REJECTED it (additionalProperties:false), which both caught my error and independently confirmed the schema cannot carry new fields.",
+      "expected": "REJECT with a required-property error, and REJECT an unexpected additional property",
+      "observed": "PASS 1: rejected -- \"'trust' is a required property\". PASS 2 (unplanned, against my own edit): rejected -- \"Additional properties are not allowed ('semantic_axis_examination' was unexpected)\". Both arms fired.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The deliverable's central claim is itself a determinism claim, so it was tested directly rather than by re-running the build: `comp-similar opal-data-assets` executed twice and byte-compared with cmp, then the same comparison run against a DIFFERENT subject so the compare could fail.",
+      "observed": "Two same-input runs BYTE-IDENTICAL at 2,477 bytes. Different-subject control DIFFERS. Five distinct pairwise inputs produced five distinct scores. `comp-similar --self-test` PASS 7/7 across two separate invocations.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "End-to-end exercise of the C3.i derive in-container",
+      "reason": "Not run by me. determinism='deterministic' on the C3i card is scoped to what WAS exercised -- system_node_id over 5 arms plus a source read establishing the cover is pure set intersection with no model call. The residue is stated in the card's own evidence rather than absorbed into the claim."
+    },
+    {
+      "item": "Inducing a live C2/C3 compose failure to observe the WARN path first-hand",
+      "reason": "The C3i failure_mode row's 'yes' rests on a source read of four None-returning branches plus 1.0.0_SA_CTO~X's exercised measurement in 71957, NOT on my own exercise. Stated in the row."
+    },
+    {
+      "item": "Independent re-count of the 1,851 ARN corpus population",
+      "reason": "I called summary_corpus.coverage(), which is the tool's OWN code path -- the same path the peer figure came from. That confirms the instrument reports 1,851/1,500/351; it does NOT independently corroborate that the instrument counts correctly. Named in the coverage row rather than presented as corroboration."
+    },
+    {
+      "item": "Reconciling the PROJECTION plane (27,035 nodes) against the WAREHOUSE plane (27,061, per 1.0.0_SA_CTO~X)",
+      "reason": "Forbidden by the TO and correct: two planes, two vintages, neither wrong. Every count in both cards names its plane; as_of was not re-pinned."
+    },
+    {
+      "item": "Re-sweeping the FRONTEND/KNOWLEDGE-side zero on C3.i",
+      "reason": "Structurally zero and already measured by 1.0.0_SA_CTO~X; the TO states reproducing it is not a finding. Carried as held and named in explicitly_out."
+    },
+    {
+      "item": "Tracing each of the 4 live C3System nodes back to its producer",
+      "reason": "The arithmetic match between the static-spec fold (1+3=4) and the measured live total (4) is reported as CONSISTENT WITH a static-only C3System tier and explicitly NOT as an established finding. An exact arithmetic match is not proof of provenance, and I did not do the trace that would settle it. Left as a named open question for the owner."
+    },
+    {
+      "item": "Systematic examination of the SEMANTIC axis on either subject",
+      "reason": "Declared UNMEASURED in both cards' verdict.why per 2.0.0_SA_COO~X ruling 73212. What I found was incidental -- forced into view by the key and failure_mode rows -- not a deliberate sweep. Every instrument used here (byte-compare, rc, self-test, mtime, snapshot id, coverage()) is structurally blind to a deprecated opinion."
+    },
+    {
+      "item": "Carrying generator_currency as a schema FIELD",
+      "reason": "Impossible in this contract and exercised as such: SUBSTRATE_CARD.schema.json v1 is additionalProperties:false with no generator field anywhere; adding process.methodology.generator_currency is REJECTED. Ruling 73212's authorized field form degrades to prose on a wave-1 card. Carried in prose in both cards and surfaced to the issuer; NOT fixed here (SC-bnd-4)."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION (72947, routed to 2.0.0_SA_COO~X as SC-m-1's owner rather than concluded on): comp-find returned 0 hits over 0 files SCANNED -- a zero over a zero denominator. Led to the estate-wide comp-find invocation trap; my own argv was the trap shape and I confirmed it with a 2-arm repro. I also recorded a correction against my own first framing: my proposed remedy (widen and re-run) would NOT have worked.",
+    "OBSERVATION: the frozen v1 card schema cannot carry ruling 73212's authorized generator_currency FIELD (additionalProperties:false, exercised and REJECTED), so on cards the claim degrades to prose a consumer cannot branch on -- CLAUDE.md section-4's defect inside the ruling written to close it. Surfaced to the issuer; no schema edit made.",
+    "OBSERVATION: comp-keys prefix --all is itself capped -- 'CAPPED at 5000' on the parent warehouse/ prefix. No absence claim in either card rests on that listing; I narrowed until a complete denominator printed and corroborated with s3api. Reported alongside 0.4.0_DT_ClientPlatform~X's 40-key default-truncation finding, which is a different layer of the same family.",
+    "OBSERVATION: a stranded store -- resource_summaries Iceberg table EXISTS with 64 data keys, 38 days stale, read by nothing on the live comp-similar path. Recorded in the card's co_resident_stores for 0.4.0_DT_ClientPlatform~X's manifest rather than chased."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-26/ (written at session close per the TO's deliverable 3, with a mandatory Compiler Tools section)",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"what builds the C3.i structures and what underlies comp-similar\"",
+      "result": "Near-tie across comp-estate / comp-kuzu / comp-similar, 80 tools ranked; router explicitly flagged the tie as NOT a ranking. Matched the TO's <expect> only partially -- it did NOT name ANCHOR_CATALOG or resource_summaries_store.py, so per <if_mismatch> I widened deliberately rather than concluding."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find nerves_resolve --name '*.json'",
+      "result": "0 hits / 0 files SCANNED -- THE TRAP SHAPE. A content pattern beside --name scans zero files. DISCARDED; it never fed a card row. Surfaced to 2.0.0_SA_COO~X and reproduced with a 2-arm control."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'nerves_resolve'   (--name ALONE -- the positive control arm)",
+      "result": "2 hits / 28,794 files scanned. CLEAN. Same term, same seat, same minute as the trap arm -- the only variable changed was dropping the content pattern."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find -i 'ANCHOR_CATALOG'   (content ALONE)",
+      "result": "123 hits / 26,823 scanned; BANDS HEAD=1 DEF=1 SURFACED=36 CONFIG=73 DOC=12. CLEAN. The DEF band located the real definition in a DS deliverable, NOT in infra/aws/globgrph/ where the TO's framing implied it would be."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find nerves_resolve   and   comp-find nerves_resolve --band CONFIG   (content ALONE / content+--band)",
+      "result": "209 hits / 26,821 scanned and 153 / 26,821. Both CLEAN -- --band beside a content pattern is not implicated, consistent with 2.0.0_SA_COO~X's 73048 narrowing."
+    },
+    {
+      "tool": "comp-kuzu",
+      "invocation": "MATCH (n) WHERE n.node_type IN ['C3System','C2Motif'] RETURN n.node_type, count(*)",
+      "result": "C3System 4, C2Motif 6226 on the PROJECTION plane. Provenance header read, not skipped: graph_nodes flagged [STALE > 6h cadence] and the header's own caveat that last-write is the TABLE's write time was carried into the cadence row rather than read past."
+    },
+    {
+      "tool": "comp-kuzu",
+      "invocation": "MATCH (n) WHERE n.node_id STARTS WITH 'sys-' RETURN count(*)  +  the 'system:' control  +  MATCH (n) RETURN count(*)",
+      "result": "sys- = 0; control system: = 4 (fires); total = 27,035 -- which equals the wave's pinned graph_vintage node count, confirming the read is on the pinned plane. The zero is a MEASURED absence over a printed denominator with a live control, not a dead sweep."
+    },
+    {
+      "tool": "comp-similar",
+      "invocation": "comp-similar --self-test",
+      "result": "PASS 7/7 (C1 false-twin, C2 corpus-collapse, C3 blind-row, C4 dogfood, C5 hold-aware, C-supp designed-parallel, C-conf confidence). Run twice across the session, PASS both times."
+    },
+    {
+      "tool": "comp-similar",
+      "invocation": "comp-similar opal-data-assets  (x2, byte-compared)  +  comp-similar opal-mcp-audit  (control)  +  5 distinct pairwise runs",
+      "result": "Two same-input runs BYTE-IDENTICAL (2,477 bytes); different-subject control DIFFERS so the compare can fail; five distinct pairs -> five distinct scores. ALSO SURFACED THE CARD'S HEADLINE FINDING: 8 distinct S3_BUCKET_POLICY resources at byte-identical sim=1.0, all [THIN], ranked ABOVE genuinely discriminating results."
+    },
+    {
+      "tool": "comp-similar",
+      "invocation": "comp-similar 'arn:aws:s3:::THIS-RESOURCE-DOES-NOT-EXIST-9999'   (failure-path exercise, rc read WITHOUT a pipeline)",
+      "result": "rc=1 with an explicit stdout message; resolvable control rc=0. ⛔ MY FIRST ATTEMPT READ rc THROUGH `| tail -8` AND REPORTED rc=0 -- that was tail's exit code. Caught and re-measured; had I not, I would have carded a tool that cannot signal failure."
+    },
+    {
+      "tool": "comp-keys",
+      "invocation": "comp-keys prefix s3://opal-313476888478-globgrph/warehouse/globgrph/resource_summaries --all",
+      "result": "'-- 71 key(s); showing 71' -- COMPLETE denominator, 64 data + 7 metadata. The parent warehouse/ prefix returned 'CAPPED at 5000', so I narrowed rather than concluding from it. No absence claim rests on a capped listing."
+    },
+    {
+      "tool": "aws s3api (second instrument, corroborating comp-keys)",
+      "invocation": "list-objects-v2 --query length(Contents) and sort_by(Contents,&LastModified)[-1]; plus --delimiter '/' over warehouse/globgrph/",
+      "result": "71 keys (AGREES with comp-keys --all); newest 2026-07-18T21:11:05.000Z in ISO-8601 Z from s3api rather than aws s3 ls local time; 11 table prefixes enumerated including resource_summaries. A genuinely different instrument on the same question."
+    },
+    {
+      "tool": "python ast (re-derivation instrument for the ANCHOR_CATALOG figure)",
+      "invocation": "ast.literal_eval over the ANCHOR_CATALOG assignment node in NFRA_MOTIF_P1_canonical_ab_catalog.py",
+      "result": "5 domains, 8 DISTINCT anchor types. ⛔ CORRECTS THE TO'S held GIVEN OF 'SEVEN hand-listed AWS node types' on BOTH counts -- it is 8, and 2 of the 8 (PipelineScript, PipelineFunction) are not AWS-shaped. Deliberately a DIFFERENT instrument from the peer's, not a re-run of their command."
+    },
+    {
+      "tool": "jsonschema (Draft 2020-12)",
+      "invocation": "validate both cards against org/standards/SUBSTRATE_CARD.schema.json; plus two mutant arms",
+      "result": "2/2 VALID. Mutant 1 (trust deleted) REJECTED. Mutant 2 (unplanned, my own added key) REJECTED. Re-run after final edits."
+    }
+  ]
+}

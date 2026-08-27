@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (CVO finding routed 131323Z; MSTR ground-truth 131300Z)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "ad-hoc (CVO P1 finding 20260612T131323Z;" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged</status>
 <priority>P1-operational — C: at 96% with transient 100% spike 13:05Z; every fresh `terraform init` adds ~700MB until fixed</priority>
 
 <references>

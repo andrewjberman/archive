@@ -6,7 +6,7 @@
 **Priority:** P1 (Andrew-direct, cost-attribution is a stated graph purpose)
 **Authority:** CTO PRD v0.2 a5e58490e (Andrew-direct ~19:15Z 2026-06-12)
 **Sequence:** queue after TO-D1 + TO-D2 AE RAVC2s (share AE 0.7 slot)
-**Status:** queued -- gated behind TO-D1 + TO-D2 AE RAVC2s (shares the AE 0.7 slot); P1 Andrew-direct. (Status line added 2026-06-18 by COO -- file had no status tag -> /to-check [??] UNKNOWN.)
+**Status:** complete -- queued -- gated behind TO-D1 + TO-D2 AE RAVC2s (shares the AE 0.7 slot); P1 Andrew-direct. (Status line added 2026-06-18 by COO -- file had no status tag -> /to-check [??] UNKNOWN.) -- SPRING-CLEAN 2026-08-25: project NFRA_DEBTSCAN is complete; TO last touched 2026-06-18 predates project close 2026-07-09. Record act, not a work verdict.
 
 ---
 

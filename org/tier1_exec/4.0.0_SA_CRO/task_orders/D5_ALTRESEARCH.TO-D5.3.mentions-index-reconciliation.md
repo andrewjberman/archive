@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:50Z</issued>
 <dated>any window -- minutes-scale</dated>
-<status>staged -- GO paired; UNGATED</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "D5_ALTRESEARCH" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged -- GO paired; UNGATED</status>
 <priority>P3</priority>
 <authority>D5_ALT_RESEARCH_PRD.md §6 item 3 (run #5 flag) at dispatch vintage @9ad40bc0e8. Placement: LAPTOP (CTO ruling FINAL).</authority>
 </task_order>

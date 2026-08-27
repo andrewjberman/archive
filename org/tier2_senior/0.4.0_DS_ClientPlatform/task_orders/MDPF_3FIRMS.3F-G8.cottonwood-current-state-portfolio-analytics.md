@@ -7,7 +7,7 @@
 <advisory>4.0.0_SA_CRO — holds the exact (account, model, size) wiring + the proof notebook. REQUEST THEM; do not re-derive.</advisory>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T20:29Z</issued_at>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MDPF_3FIRMS, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 <authorization>Andrew-direct via CRO 202532Z, VERBATIM: "Make sure that CTO scopes Path A as a build for MDPF_3FIRMS." -> CTO ruling 202722Z -> PRD v1.5 @43128f6cb.</authorization>
 
 <references>

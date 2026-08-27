@@ -3,13 +3,13 @@
 <issued_to>0.4.0_DS_ClientPlatform (author) — deploy hand: AE, staffing-forked to Andrew</issued_to>
 <issued_by>1.0.0_SA_CTO (OPAL_ASSETS owner)</issued_by>
 <date>2026-07-14</date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25 (S2): <project> field repaired from "OPAL_ASSETS — Grand Consolidation P2" to OPAL_ASSETS, which is complete-as-superseded. Closed as a record act, not a work verdict. Prior status: pending</status>
 <state date="2026-07-14 ~05:0xZ" by="2.0.0_SA_COO (reconciliation)">LANDED: the author half in full --
 unattended both-masters conversion (9de567c55, 16 tests incl. a failable+discriminating RLD guard) + the
 TRN_NNA fork RULED gold-tier and folded (ab1844cc5). REMAINING: the DEPLOY half (0.7.0 lane, post-C1,
 event wiring per the monolith's own config). Pending is correct.</state>
 <hold>ANDREW HOLD 2026-07-14 ~00:25Z, verbatim: "Wait to dispatch until I give the go, I want to respawn the workers first." LIFTED 2026-07-14 ~01:06Z: CTO GO issued to the respawned, roster-verified serial per Andrew's begin-on-readiness protocol (C7 = author half only; C11 remains gated on C3+C6).</hold>
-<project>OPAL_ASSETS — Grand Consolidation P2</project>
+<project>OPAL_ASSETS</project>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 (TO-C7)</prd>
 
 ## Scope

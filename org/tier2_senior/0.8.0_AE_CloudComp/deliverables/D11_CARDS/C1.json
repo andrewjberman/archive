@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "carded_by": "0.8.0_AE_CloudComp~X",
+  "subject": {
+    "id": "C1",
+    "kind": "rung",
+    "declared_domain": "The C1 rung of the C0..C4 system ladder: INTERACTIONS -- the typed directed edges over C0 facts. The canon declares it as 'INTERACTIONS ~40k EDGES: the 10 relations (produces, consumes, derives-from, depends-on, contains, triggers, guards, governs, denies, owns)' and marks it VIEW-COMPILED. The declared domain is therefore the RELATION vocabulary; the live artifact is an edge_type population, and this card measures the distance between them."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T18:17:02Z",
+    "commit_ish": "fe269171f2",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "how": "C1 is view-compiled by the same globgrph derive runner that produces C0. Each discovered relationship between two node_ids is materialized as a row in the Iceberg table graph_edges carrying source, target and edge_type, then projected into kuzu_nessie_db alongside the nodes. As with C0, the producer ORIGINATES the physical edge_type vocabulary (53 distinct values live) while the rule bank DECLARES a relation vocabulary of 10 relations plus 3 composites; a further 8 physical edge types are explicitly declared NON-relations, and a frontend-scoped adapter binds 11 more. Nothing joins the remaining 31.",
+      "determinism": "unknown",
+      "inference_detail": null,
+      "composes": [
+        "NFRA_ONTOLOGY_RULE_BANK.yaml#relations -- the 10 declared relations",
+        "NFRA_ONTOLOGY_RULE_BANK.yaml#relation_composites -- projects, routes-to, resolves-through",
+        "NFRA_ONTOLOGY_RULE_BANK.yaml#non_relation_edges -- 8 physical edge types declared NOT to be relations",
+        "NFRA_ONTOLOGY_RULE_BANK.yaml#c1_frontend_adapter -- 11 frontend edge types bound to existing relations",
+        "the C0 node population (every edge endpoint is a C0 node_id)"
+      ],
+      "invents": [
+        "the physical edge_type vocabulary -- 53 distinct values live, of which 31 are named nowhere in the rule bank",
+        "edge direction semantics not expressed in the relation vocabulary (the adapter records one known role-vs-edge-direction inversion on RENDERS and files it as recorded-not-blocking)"
+      ],
+      "basis": "measured",
+      "evidence": "Producer read at infra/aws/globgrph/derive_runner.py @ec0408628a (working tree clean at that commit). Live edge_type census from the materialized comp-kuzu result set: 'MATCH ()-[e]->() RETURN e.edge_type AS t, count(*) AS n ORDER BY n DESC' -> 53 distinct types over 58,224 edges at snapshot 2902399899597701830. Declared vocabularies read at org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml @5fc45ad69d: relations 10, relation_composites 3, non_relation_edges 8, c1_frontend_adapter.determinations 11. DETERMINISM IS 'unknown' AND WAS NOT EXERCISED, for the same reason as C0: a second derive cannot be a control while the estate mutates under it and the CloudTrail incremental writes continuously. GENERATOR CURRENCY: UNVERIFIED (2.0.0_SA_COO~X ruling 73208, applied under GREEN 73218). This lane measured what the named generators DO; it never established that any of them is the MOST-UPDATED or MOST-RELEVANT materializer for this layer, and no instrument here was pointed at that question. A file vintage is NOT a currency claim. SCHEMA NOTE, because the authorized form could not be applied literally: process.methodology is additionalProperties:false (allowed keys how/determinism/inference_detail/composes/invents/basis/evidence/owner), so a top-level generator_currency KEY is REJECTED by v1 -- exercised, with the unmodified card passing as control. Amending the schema is boundary SC-g-4 and not this lane's act, so the claim is carried in this evidence field, where a consumer still reads it, rather than in a key that would fail validation. SEMANTIC AXIS -- EXPLICITLY UNMEASURED (2.0.0_SA_COO~X ruling 73208 ruling 2). Same bounded pass as C0 and the same bound: the rule bank's scope_outs and a hardcoded-filter grep over derive_runner.py, which returned none. TWO PROBES, NOT AN AUDIT. NOTE A CANDIDATE THIS CARD DELIBERATELY DOES NOT ADJUDICATE: the 31 unbound edge_types and the frontend-scoped adapter could be read as opinionation (a partial vocabulary applied estate-wide), but distinguishing 'incomplete ratification' from 'deprecated opinion' requires reading intent this lane did not measure. Named as a candidate for the canonical-materializer review, NOT asserted as a finding.",
+      "owner": "0.4.0_DE_ClientPlatform (globgrph derive runner producer lane)"
+    },
+    "cadence": {
+      "declared_rhythm": "nightly 02:00Z full re-derive, plus a continuous event-driven CloudTrail incremental",
+      "actual_trigger": "EventBridge rule opal-globgrph-derive-runner-nightly, cron(0 2 * * ? *), ENABLED -- and EventBridge rule opal-globgrph-cloudtrail-mgmt, ScheduleExpression None (event pattern), ENABLED. Both measured on the LIVE events plane; the scheduler plane carries no C1 producer.",
+      "live_matches_declared": "yes",
+      "live_instance_age": "graph_edges table last-write 16.1h before read, against a declared <26h cadence marker. The sibling graph_nodes table last-wrote 5.1h before read against a <6h marker. The two tables therefore refresh on DIFFERENT effective cadences and carry different declared bands.",
+      "basis": "measured",
+      "evidence": "BOTH TRIGGER PLANES SWEPT. Events plane: aws events list-rules, paginated and materialized client-side (NOT --query length(), which returns the PAGE count) -> opal-globgrph-derive-runner-nightly cron(0 2 * * ? *) ENABLED; opal-globgrph-cloudtrail-mgmt None ENABLED. Scheduler plane: aws scheduler list-schedules -> 18 total, only globgrph-cse-producer-nightly is graph-adjacent and it is a downstream cse producer, not the C1 derive. Terraform corroboration infra/aws/terraform/globgrph/item2a.tf:439 @d89cc4fc9c. Ages read from the comp-kuzu provenance header at card time. A FINDING SITS INSIDE THIS ROW, and it is why the two ages are quoted together rather than separately: the provenance header states that graph_nodes is written by TWO producers -- the 02:00Z full re-derive AND the event-driven CloudTrail incremental -- while graph_edges carries the slower <26h band. An incremental that adds a node without adding its edges leaves the edge set lagging its own endpoints, and nothing in a query result discloses that skew. This lane MEASURED the two ages and the two declared bands; it did NOT exercise an incremental write and watch an edge lag, so the skew is a measured STRUCTURAL possibility, not an observed instance.",
+      "owner": "0.4.0_DE_ClientPlatform (globgrph derive runner producer lane)"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "projection",
+      "mutation_policy": "replaceable",
+      "form": "Iceberg table graph_edges in the Nessie warehouse, snapshot-versioned; projected to a local kuzu database file for traversal",
+      "basis": "measured",
+      "evidence": "comp-kuzu provenance header at card time: source nessie; edges snapshot-id 6557038275462806297; per-table vintage line 'graph_edges: last-write 16.1h ago (< 26h cadence)'. authority_role is 'projection' on the same deliberate reading as C0: the ladder canon marks C1 VIEW-COMPILED at infra/system/ontology/C0_C1_C2_C3_C4_SYSTEM_LAYERS.md @4724becca8 ('C1/C0 | live derivation (graph, TF, source) | the estate changes | VIEW-COMPILED'), so graph_edges is authoritative within the graph domain while being a derived view of the live estate. An edge hand-inserted here is overwritten by the next derive.",
+      "owner": "0.4.0_DE_ClientPlatform"
+    },
+    "location": {
+      "home": "Iceberg/Nessie table graph_edges in the globgrph warehouse (sibling of graph_nodes; edges snapshot-id 6557038275462806297)",
+      "projection_of": [
+        "live AWS estate (CloudTrail management events + service describe scans)",
+        "repo source tree (portal, data, infra)",
+        "the C0 node population -- every edge endpoint resolves to a graph_nodes node_id"
+      ],
+      "co_resident_stores": [
+        "kuzu_nessie_db -- the canonical local traversal projection; 58,224 edges at snapshot 6557038275462806297, built 2026-08-26T14:07:59Z",
+        "org/modules/graph/nerves-edges.json and nerves-risk-edges.json -- a separate edge store feeding comp-pulse (1,832 danger nodes per 1.0.0_SA_CTO~X msg 72561; HELD, not measured by this lane)",
+        "s3://opal-estate-report/kuzu_nessie_db -- a SECOND kuzu database, MEASURED BY THIS LANE at card time: 51,068,928 bytes, LastModified 2026-08-06T21:49:50Z (aws s3api head-object, an instrument independent of comp-keys), and present in a comp-keys prefix listing run WITH --all (129 of 129 keys shown, kuzu match 1). Originally carried as HELD from 1.0.0_SA_CTO~X 72561; upgraded to measured here."
+      ],
+      "basis": "measured",
+      "evidence": "home, snapshot id and the kuzu projection read from the comp-kuzu provenance header at card time. projection_of derived from the producer source at infra/aws/globgrph/derive_runner.py @ec0408628a, and the endpoint claim is corroborated structurally: an edge_type census over 58,224 edges returns 0 rows with a null edge_type, and edges resolve against node_ids in the same projection. THE nerves-edges STORES REMAIN HELD (1.0.0_SA_CTO~X msg 72561, carried with attribution; this lane did not open them). THE s3://opal-estate-report/kuzu_nessie_db ENTRY IS NOW MEASURED BY THIS LANE: head-object Size 51,068,928, LastModified 2026-08-06T21:49:50Z, plus a comp-keys prefix listing WITH --all (129 of 129 keys, kuzu present). The --all matters: comp-keys prefix truncates to 40 by default and prints its total after the rows (measured by 0.4.0_DT_ClientPlatform~X 73078 and 2.0.0_SA_COO~X 73102), so the default view of this bucket hides this store entirely. Listing them here is deliberate: they are 0.4.0_DT_ClientPlatform~X's input for the graph-object manifest (SC-m-3) and an unnamed store cannot be checked for lag.",
+      "owner": "0.4.0_DT_ClientPlatform~X (graph-object manifest, SC-m-3) for the store census; 0.4.0_DE_ClientPlatform for graph_edges itself"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every typed directed relationship the derive runner discovers between two C0 nodes, across the BACKEND, FRONTEND and KNOWLEDGE substrate sides.",
+      "denominator": "58,224 of 58,224 edges carry a non-null edge_type (53 distinct types) -- zero untyped. Against the FULL declared universe read at MEMBER level (relations.<r>.binds_up 47 physical names + relation_composites concrete/also + non_relation_edges 8 + c1_frontend_adapter determinations 11): 53 of 53 edge_types and 58,224 of 58,224 edges (100%) resolve to a declared name. ZERO unmapped. CORRECTED 2026-08-26 -- the original figure (22 of 53 types, 37,521 of 58,224, 64.4%) was computed from the block KEYS and is WITHDRAWN. SCOPE: this is a claim about the CANONICAL file org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml @5fc45ad69d; the same computation against the second copy at org/tier2_senior/0.8.0_AE_CloudComp/deliverables/ gives 42 of 53, because that copy predates the c1_frontend_adapter binding act.",
+      "explicitly_out": [
+        "8 physical edge types declared NON-relations in NFRA_ONTOLOGY_RULE_BANK.yaml#non_relation_edges -- DECLARES, ENCRYPTS_WITH, HAS_TYPE, INSTANTIATES, IS_ENDPOINT, MONITORS, REFERENCES_TYPE, SHARES_SOURCE. Deliberately outside the relation vocabulary, and all 8 are live (4,101 edges).",
+        "WITHDRAWN 2026-08-26: this row previously listed 31 live edge_types as 'NOT declared out, merely unbound'. That list was FALSE -- every one of the 31 is declared inside a relations.<r>.binds_up array. The entry is removed rather than reworded because there is no residual set: unmapped is 0 of 53."
+      ],
+      "basis": "measured",
+      "evidence": "CORRECTED 2026-08-26, AND THE CORRECTION IS THE POINT. The original computation built the declared universe from the block KEYS (produces, consumes, ...) and never opened the members, so the 47 physical names inside relations.<r>.binds_up were invisible to it. Re-read at MEMBER level against org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml @5fc45ad69d: 53 of 53 edge_types, 58,224 of 58,224 edges, zero unmapped. Spot-checked the four most doubtful, each resolving to a structured field rather than a note string: OWNED_BY -> relations.owns.binds_up; CALLS -> relations.triggers.binds_up; HAS_FIELD and CLUSTERS -> relations.contains.binds_up. A BLOCK'S KEYS ARE NOT ITS CONTENTS. Routed same-turn as blocking-class (73800/73801/73802), verifier-authorized by 3.0.0_SA_CVO~X (73805, verdict record annotated @7bff2c25a3), issuer-authorized by 2.0.0_SA_COO~X (74014). WHAT STANDS UNCHANGED: CONTAINS alone carries 29,271 of 58,224 edges (50.3%), so vocabulary coverage is far thinner than volume suggests -- that observation was independent of the error and is not withdrawn. PLANE: kuzu PROJECTION at snapshot 6557038275462806297; 1.0.0_SA_CTO~X measured the WAREHOUSE at 60,858 edges -- a different plane, not reconciled here.",
+      "owner": "4.0.0_SA_CRO / rule-bank ratification chain (binding the 31 unbound edge types); 0.4.0_DE_ClientPlatform (producer)"
+    },
+    "key": {
+      "identity_space": "An edge is identified by the triple (source node_id, edge_type, target node_id). Both endpoints live in the C0 heterogeneous node_id space (ARNs, repo paths, S3 key globs, synthetic motif ids), so C1 inherits C0's identity problems in both endpoint positions and adds edge_type as a third component.",
+      "key_is_stable": "unknown",
+      "crosses_spaces": true,
+      "declared_mapping": "org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml @5fc45ad69d -- COMPLETE for edge types against the live population (53 of 53). Assembled from four blocks: #relations (47 physical names in binds_up), #relation_composites (concrete + also), #non_relation_edges (8), #c1_frontend_adapter (11). CORRECTED 2026-08-26: previously stated PARTIAL with 31 of 53 unbound, which was false. Copy-specific -- see coverage.denominator.",
+      "basis": "measured",
+      "evidence": "Overlap computed against all four declared blocks read at NFRA_ONTOLOGY_RULE_BANK.yaml @5fc45ad69d. TWO SCOPE FACTS THAT MUST TRAVEL WITH THE NUMBERS, because omitting either manufactures a drift claim this lane did NOT measure. First: #c1_frontend_adapter carries its own denominator on its face -- '11 unmapped live edge types / 3912 edges (comp-kuzu @2026-07-23T14:52Z, HEAD current)' with verdict '11/11 bind to an existing relation additively; 0/11 require a new ratified relation'. Second: that adapter is FRONTEND-scoped by its own name and content, while this card's 31-of-53 / 20,703-edge figure is ESTATE-WIDE at 2026-08-26. THESE ARE DIFFERENT POPULATIONS AT DIFFERENT VINTAGES AND THIS CARD DOES NOT CALL THE DIFFERENCE DRIFT -- subtracting 11 from 31 to claim '20 new unbound types' would be exactly the residual-as-measurement error, since the two counts never spanned the same set. What IS measured: no estate-wide adapter exists, and 31 of 53 live edge_types carrying 20,703 of 58,224 edges are bound by no declared block at this vintage. key_is_stable IS 'unknown' AND WAS NOT EXERCISED: an edge key inherits both endpoints' stability and this lane did not exercise a rename in either position.",
+      "owner": "4.0.0_SA_CRO / rule-bank ratification chain (an estate-wide adapter, if one is wanted); 0.4.0_DE_ClientPlatform (edge_type construction)"
+    },
+    "failure_mode": {
+      "returns_on_failure": "Identical to C0, because C1 is read through the same projection: a PROPERTY-plane error is LOUD (a misspelled property raises 'Binder exception: Cannot find property ... for n' and returns no count), while a VALUE-plane miss is SILENT and returns a clean, instant, well-formed 0 that is byte-identical to a genuine negative.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "a stale kuzu projection answers every traversal cleanly at its own frozen vintage",
+        "an edge_type renamed upstream returns 0 under its old name with no signal that the name moved",
+        "the graph_nodes / graph_edges cadence skew (<6h vs <26h declared bands; 5.1h vs 16.1h observed) means a traversal can return a node whose edges have not yet been rebuilt -- a smaller, cleaner, entirely well-formed answer",
+        "the 20,703 edges (35.6%) under unbound edge_types are invisible to any relation-keyed traversal, which returns a confident smaller result rather than an error",
+        "an edge whose endpoint node_id changed shape (repo path rename) dangles or silently re-targets; the producer carries an explicit idempotent guard for one known instance of this class at derive_runner.py:1635 (_strip_c1_ladder_prefix), which is evidence the class is real and has been hit"
+      ],
+      "basis": "measured",
+      "evidence": "EXERCISED with the same four-arm battery used for C0, run as separate invocations. ARM 3 is the C1-specific arm: nonexistent edge_type ZZZ_NO_SUCH_EDGE_9999 -> clean 0. ARM 1 (genuine negative, real node_type + nonexistent node_id) -> 0, byte-identical. ARM 4 (misspelled property) -> loud Binder exception, which establishes the instrument CAN fail loudly and so the zeros are answers rather than a dead probe. The dangling-endpoint path is not hypothetical: the producer source at infra/aws/globgrph/derive_runner.py:1635-1645 @ec0408628a carries a belt-and-suspenders guard whose own docstring says a stray ladder-form target would otherwise dangle rather than co-key -- this lane read that guard, it did not exercise it.",
+      "owner": "0.4.0_DE_ClientPlatform (producer); UNOWNED for the value-plane indistinguishability itself"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "All seven rows are worked and carry basis, evidence and owner; none is blank or guessed, so this is not INCOMPLETE. C1 is usable within limits. AMENDED 2026-08-26: the defect originally listed first -- '31 of 53 edge_types bound by no declared block' -- is WITHDRAWN as FALSE; the declared mapping is COMPLETE at 53 of 53 against the canonical rule bank. C1 remains QUALIFIED rather than SOUND on the three measured defects that survive: (1) the 100% mapped figure is dominated by a single edge type, CONTAINS at 29,271 of 58,224 edges (50.3%), so vocabulary coverage is far thinner than the volume figure suggests and the two must be quoted together; (2) the value-plane failure mode is indistinguishable from a genuine negative, exercised over four arms; (3) graph_nodes and graph_edges carry different declared cadence bands (<6h vs <26h) and were observed at different ages (5.1h vs 16.1h), so an edge set can lag its own endpoints with nothing in a query result disclosing the skew. NOT CLAIMED: that the 53 mapped edge_types are mapped CORRECTLY -- this card measured mapping COVERAGE, never mapping CORRECTNESS.",
+    "blocking_defects": null
+  }
+}

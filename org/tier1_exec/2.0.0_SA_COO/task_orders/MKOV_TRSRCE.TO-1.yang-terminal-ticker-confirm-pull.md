@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project MKOV_TRSRCE, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
     <dispatch_state>DISPATCHED 2026-07-07T16:57Z -- REVISED scope per PRD v1.1 (commit 41de08a6b, project JSON 683c092d9). REPLACES the original "confirm ticker symbols + pull 3 tickers' full history" ask -- this is now a QUESTION not an extraction, per DS 0.2.0's new empirical evidence (real ex-date dividend flow, not synthetic smoothing). Likely much faster than v1.0's estimate.</dispatch_state>
     <gate_note>Gates: none (starting point). Effort: Yang-dependent, likely much faster than a full data pull (this is a question, not an extraction).</gate_note>
   </metadata>

@@ -1,0 +1,183 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.8.0_AE_CloudComp~Y",
+  "subject": {
+    "id": "infra/aws/globgrph/cse_emit_frontend_coevolution.py :: PATH B -- S3 watermark object",
+    "kind": "script",
+    "declared_domain": "The write path by which the frontend co-evolution CSE producer materializes its per-producer watermark: a single S3 JSON object recording the last-emitted portal HEAD, used as the default --since bound on the next run and declared as the leg-5 freshness marker. Covers _write_watermark (:143-151) and its call site at :269. It does NOT cover this file's local JSONL batch write (carded separately as W3-dljc), and it does NOT cover the branch-head marker family at warehouse/_branch_head.main.json -- a different object with a different writer set, carded as W3-uuxp."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-27T06:46:16Z",
+    "commit_ish": "049ff4ca4a",
+    "graph_vintage": "graph_nodes@1462710383782792396 (branch-head marker committed_at_iso 2026-08-27T05:53:51.057095+00:00)"
+  },
+  "process": {
+    "methodology": {
+      "how": "At the end of a successful --emit, and only if write_marker is true, emit() calls _write_watermark(head, len(acc)) (:269). That function builds a four-field dict -- producer, last_emitted_head, emitted_at, n_emitted_last_run (:146-148) -- and PUTs it to a fixed S3 key with ContentType application/json (:149-150), then prints an OK line naming the bucket, key and the first 12 chars of the head (:151). The value written is the COMPUTE HEAD returned by ensure_git_synced (:247), not the newest commit in the emitted set -- so the watermark advances to what the run computed over, even on a run that emitted zero CSEs. ⛔ THIS PATH IS THE STATE THAT MAKES THE PRODUCER INCREMENTAL. Its object is read back by _read_watermark (:133-140) as the default delta bound at :250; without it, :251 leaves since_shas None and coevolution_cses skips its window filter at :170 entirely.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "unknown",
+      "composes": [
+        {
+          "id": "portal git HEAD",
+          "note": "the value written; resolved by ensure_git_synced (:247, :103-125) as the sha the run computed over"
+        },
+        {
+          "id": "the accepted-CSE count from PATH A",
+          "note": "n_emitted_last_run is len(acc) passed at :269 -- this path publishes a fact about the sibling path's output"
+        }
+      ],
+      "invents": [
+        {
+          "id": "emitted_at",
+          "note": ":147 datetime.now(timezone.utc) formatted to second precision -- the STAMP time, not the time of any commit in the batch. A reader comparing it to portal history is comparing two different clocks."
+        },
+        {
+          "id": "producer = 'frontend_coevolution'",
+          "note": ":146 -- a self-declared literal identity for this producer within the marker family. Nothing verifies it and no registry enumerates the valid values."
+        }
+      ],
+      "declared_opinions": [
+        "ABSENT WATERMARK MEANS FULL BACKFILL (:134, :139-140). The code declares that no marker is an honest signal to backfill everything. That is a position about how to interpret missing state, and it is the position that makes this path's absence invisible -- see failure_mode.",
+        "THE MARKER IS SUPPRESSIBLE FOR DEV USE (:381, --no-marker). A declared escape hatch that lets the sibling batch be produced with no state advance at all, leaving no record that the run happened.",
+        "ONE OBJECT SERVES TWO PURPOSES (:91, comment). The same key is declared as BOTH the --since watermark AND 'the S3 object leg-5 watches (option b)' -- a freshness signal. Those are different consumers with different tolerances for staleness, joined by a decision rather than by a derivation."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "how": "measured",
+        "composes": "measured",
+        "invents": "measured",
+        "declared_opinions": "measured",
+        "materializer_standing": "measured"
+      },
+      "evidence": "Source read at infra/aws/globgrph/cse_emit_frontend_coevolution.py :143-151, :269, :133-140, :250-251 @049ff4ca4a; file unchanged between d2cf839c79 and HEAD. ⛔ materializer_standing='unknown' IS THE MEASURED VERDICT AND I CHOSE IT OVER THREE TEMPTING ALTERNATIVES. Not 'canonical': the object it writes DOES NOT EXIST (see coverage), so nothing about this path is currently authoritative. Not 'superseded': no replacement watermark for this producer exists anywhere. Not 'not_applicable': the path is real, reachable code with a real target. The honest reading is that this path's standing cannot be determined from the estate, because the one artifact that would evidence it has never been observed. ⚠ AND A BOUND ON ATTRIBUTION I WILL NOT PAPER OVER: the sibling path's only surviving artifact is dated 2026-07-08T15:49:06Z while this file's source commit dd60cb1a35 is 2026-07-08T19:33:16Z -- the artifact PREDATES the committed source by about 3h44m. So I cannot attribute that run to the code at this pin, and I therefore cannot conclude from it whether this path was invoked, suppressed with --no-marker, or absent from the version that produced it. UNMEASURED, and stated rather than guessed.",
+      "owner": "0.5.0_AE_OpalETL -- module author, named at :38. Last commit dd60cb1a35, 2026-07-08."
+    },
+    "cadence": {
+      "declared_rhythm": "Inherited from the sibling path: the NFRA_SYSTEM Q4 standing contract at :87-88 names 'a per-producer watermark/leg-5 marker' as a component of a STANDING, incremental producer. The declared rhythm is therefore once per --emit run.",
+      "actual_trigger": "NONE-FOUND on both AWS planes, inherited and mechanical. This path cannot fire independently -- it executes only inside emit() (:269), which requires --emit (:385) on a machine holding the portal submodule and DS~B's deliverables. The nightly ECS producer does NOT run this script: it sweeps staged JSONL instead, precisely because a Fargate task cannot see the git sources this producer needs.",
+      "live_matches_declared": "no",
+      "live_instance_age": "⛔ NO INSTANCE EXISTS. The target object returns HTTP 404 and the entire prefix that would contain it is absent from the bucket. There is no age to report, and I record that rather than substituting the sibling artifact's age -- they are different objects written by different paths.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "Trigger sweep is the same three-hop read recorded on W3-dljc and I do not re-derive it here: EventBridge 137 rules and EventBridge Scheduler 18 schedules both swept with denominators; the one plausible hit, globgrph-cse-producer-nightly, targets an ECS CLUSTER, whose task definition globgrph-cse-producer:1 runs [\"python\",\"/app/cse_producers_nightly.py\"], whose docstring at :21-25 names frontend_coevolution as a LOCAL-source producer it deliberately does not execute. Every hop READ, per CCY3-AC5's requirement that an ECS target never be treated as resolving to a script. live_matches_declared='no' is measured at the artifact, not argued: the declared per-run watermark has never been written even once.",
+      "owner": "0.5.0_AE_OpalETL for the producer. The nightly schedule and ECS task definition belong to another seat -- Rule 26's apply owner for the trigger surface is not this module's author."
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": false,
+      "authority_role": "evidence",
+      "mutation_policy": "replaceable",
+      "form": "DECLARED form, never observed: a single S3 JSON object of four scalar fields -- producer, last_emitted_head, emitted_at, n_emitted_last_run -- serialized with indent=2 and ContentType application/json (:146-150).",
+      "basis": "inferred",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "form": "inferred",
+        "mutation_policy": "inferred"
+      },
+      "evidence": "⛔ persisted=false IS THE CENTRAL MEASURED FACT OF THIS CARD, and it is measured at the artifact plane on two independent reads. FIRST: s3api head-object on bucket opal-313476888478-globgrph, key warehouse/cse_producer_markers/frontend_coevolution.json returns 'An error occurred (404) when calling the HeadObject operation: Not Found'. SECOND, and stronger because it does not depend on the exact key: a delimiter listing of warehouse/ returns ten CommonPrefixes -- axes_history, code_heat, cse_ingest, cse_ingest_staging, fedobs_obs_findings, fedobs_signals, globgrph, ms_heat, snap_ingest, tool_activity -- and cse_producer_markers/ IS NOT AMONG THEM. So it is not that one key is missing from a populated marker prefix; the prefix itself has never held an object. ⛔ NOTE THE FLOOR RULE APPLIED HONESTLY: form and mutation_policy are marked INFERRED, not measured, because I read them from the code that would write the object rather than from an object. I have never seen an instance, so I cannot claim measured knowledge of its shape. persisted and authority_role remain measured -- absence is something I DID observe. A card that marked all four 'measured' here would be claiming to have read a file that does not exist.",
+      "owner": "0.5.0_AE_OpalETL."
+    },
+    "location": {
+      "home": "s3://opal-313476888478-globgrph/warehouse/cse_producer_markers/frontend_coevolution.json",
+      "projection_of": [
+        {
+          "id": "portal git HEAD",
+          "note": "last_emitted_head is a projection of the compute HEAD resolved at :247"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json",
+          "note": "the OTHER marker family in the same warehouse -- table-level freshness, written by incremental_updater / derive_runner / cse_store. EXISTS and is current (2026-08-27T05:53:52Z). Same bucket, same purpose-class, opposite liveness."
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/cse_ingest/last_run.json",
+          "note": "the nightly orchestrator's run receipt, 2026-08-27T03:31:06Z. A THIRD freshness surface for the CSE chain, live, and not this one."
+        }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured",
+        "co_resident_stores": "measured"
+      },
+      "evidence": "⛔ AC4 IS FULLY SATISFIED HERE AND THAT IS PRECISELY WHAT MAKES THE ABSENCE MEANINGFUL: the target is CLASS 1, bound by two module-level literals read at source -- MARKER_BUCKET = 'opal-313476888478-globgrph' at :90 and MARKER_KEY = 'warehouse/cse_producer_markers/frontend_coevolution.json' at :91 -- so the name is fully resolvable with no runtime input, the bound set is ENUMERABLE and its size is exactly 1. There is no ambiguity about WHERE this path writes; the object is simply not there. That is a sharper finding than an unresolvable path would be, because no search-harder explanation is available. The two co-resident entries are measured live and are the control on my own conclusion: the same instrument, on the same bucket, returns present-and-current objects for two sibling freshness surfaces -- so a 404 here reflects the object, not my access. ⚠ THE BOUND ON 'NEVER WRITTEN': the bucket is non-versioned (versioning is recorded as Andrew-locked OFF at _provenance.py:275), so absence cannot by itself distinguish never-written from written-and-deleted. What narrows it is that the whole PREFIX is absent, and that the nightly maintenance sweep's scope is warehouse/globgrph/ (_provenance.py:283), which does not cover this key. I state the conclusion as 'no evidence of ever having been written' rather than as a proven never.",
+      "owner": "0.5.0_AE_OpalETL."
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Runs of this producer that complete --emit with the marker enabled. Each such run should leave exactly one object at the bound key.",
+      "denominator": "⛔ 0 of 1 possible objects exist. The bound is a single fixed key (CLASS 1, ENUMERABLE, size 1) and it holds nothing. The containing prefix holds nothing. Consequently the incremental machinery this path exists to enable has been exercised ZERO times: every run of emit() to date has taken the no-watermark branch at :250, leaving since_shas None at :251 and skipping the delta filter at :170 -- i.e. a FULL BACKFILL, every time.",
+      "denominator_absent_reason": null,
+      "explicitly_out": [
+        "The local JSONL batch write -- this file's OTHER path, carded as W3-dljc.",
+        "The branch-head marker family (warehouse/_branch_head.main.json) -- a different object, different writers, carded as W3-uuxp. Cited here only as a co-resident control.",
+        "Whether leg-5 actually watches this key. :91 declares it as 'the S3 object leg-5 watches (option b)', but I did NOT locate or exercise any leg-5 consumer, so the watcher end is UNMEASURED. I record the declaration, not a verified subscription.",
+        "⛔ COMPLETENESS OF THE WRITER POPULATION for the cse_producer_markers/ family, per CCY3-AC7. The prefix is empty, so I cannot enumerate which producers were meant to write there; the sibling literals in other producers were not surveyed.",
+        "Whether any past run used --no-marker. The flag exists (:381) and would fully explain the absence, but nothing records its use and I did not treat the absence as evidence of it."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "measured",
+        "explicitly_out": "measured"
+      },
+      "evidence": "The 0-of-1 is measured by head-object 404 plus the prefix's absence from a delimiter listing that successfully returned ten real siblings -- the instrument demonstrably reports prefixes that exist. ⛔ THE CONSEQUENCE IS TRACED THROUGH CODE, NOT ASSUMED, and it inverts the producer's headline property: _read_watermark returns None on absence (:139-140); emit() therefore sets watermark = None at :250; :251 computes since_shas only 'if watermark', so it stays None; coevolution_cses guards its window filter with 'if since_shas is not None' at :170, so the filter never applies. The declared contract at :87-88 and :158-159 -- 'delta-only, the log grows with REALITY not the clock' -- has never once been in force. Every emit this producer has ever performed was a full backfill wearing an incremental producer's documentation. ⚠ AND THE HONEST LIMIT ON THAT SENTENCE: it follows from the object's absence at THIS reading. If a marker existed and was deleted at some point, some historical run could have been incremental. Nothing in the estate would record it, so the claim is bounded to 'no evidence any run was incremental'.",
+      "owner": "0.5.0_AE_OpalETL."
+    },
+    "key": {
+      "identity_space": "A fixed singleton object key. The producer's identity within the marker family is carried twice: structurally by the key's basename (frontend_coevolution.json, :91) and as data by the producer field (:146). One producer, one key, no collection.",
+      "key_is_stable": "stable",
+      "crosses_spaces": false,
+      "declared_mapping": null,
+      "basis": "measured",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "key_is_stable='stable' is measured from construction: MARKER_BUCKET and MARKER_KEY are module-level string literals (:90-91) with no interpolation, no argument, and no environment lookup -- the key cannot vary between runs, machines, or invocations. crosses_spaces is FALSE and measured: this path writes one object at one literal key and introduces no second identifier space; the git sha it stores is a VALUE in the payload, not a key. declared_mapping is null because no second space exists to map into. ⚠ ONE PROPERTY WORTH RECORDING RATHER THAN SCORING: the producer identity is duplicated across the key basename and the payload's producer field, and nothing reconciles them -- a copied-and-edited sibling producer that changed one and not the other would write a correctly-named object claiming another producer's identity, or the reverse. Not observed, and I make no claim that it has occurred; recorded because the marker family is designed for multiple producers and the duplication is the kind that drifts. ⛔ NOTE THE CONTRAST WITH THIS FILE'S OTHER PATH, which is what the (FILE, WRITE PATH) grain exists to expose: PATH A's destination is CLASS 3, bound by an unconstrained --out with no choices=, and PATH B's is CLASS 1, bound by two literals. Same file, opposite bindability. A file-grain card would have to state one of them and would be silently wrong about the other.",
+      "owner": "0.5.0_AE_OpalETL."
+    },
+    "failure_mode": {
+      "returns_on_failure": "ON THE WRITE SIDE, LOUD BY OMISSION: _write_watermark (:143-151) has NO try/except. A PutObject failure -- denied, throttled, unroutable -- propagates out of emit() and crashes the run with a traceback. Because it is called at :269, AFTER the batch file is written at :262-265 and after the OK lines are printed, a failure here leaves a fully-written valid batch on disk and a run that exited non-zero. ⛔ ON THE READ SIDE, THE OPPOSITE AND IT IS THE DEFECT: _read_watermark (:133-140) wraps its get_object in a BARE `except Exception` that returns None. Absent object, denied credentials, network failure, throttling, and malformed JSON ALL return None, and None is consumed at :250 as a positive instruction to backfill everything.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "⛔ THE PRIMARY ONE: the bare except at :139 converts INSTRUMENT FAILURE INTO A VERDICT. A permissions regression on this key is indistinguishable from a genuine first run -- both silently become a full backfill. The code's own comment names two different causes and assigns them one outcome: 'absent/no-access -> honest full backfill on the first run'. It is honest about the first-run case and silently wrong about the no-access one, and no log line separates them.",
+        "The full backfill that results is not itself an error -- it re-emits every historical session, and the deterministic event_ids at :178 make the downstream re-ingest idempotent. So the degrade is invisible in the OUTPUT as well as in the logs: a backfill and a correct incremental emit differ only in volume, and volume is exactly what the sparsity design says not to read as a signal.",
+        "The marker is suppressible with --no-marker (:381), so a run can produce a real batch and advance no state at all, leaving nothing to distinguish it from a run that never happened.",
+        "The watermark advances to the COMPUTE HEAD (:269 passes ensure_git_synced's return), not to the newest commit actually emitted. A run that emits zero CSEs still advances the watermark past that window -- correct for the declared design, but it means the marker records what was LOOKED AT, not what was DELIVERED, and a consumer reading it as delivery evidence would be wrong.",
+        "The same object is declared to serve two consumers with different staleness tolerances -- the --since bound and leg-5's freshness watch (:91). A value correct for one can be misleading for the other, and no field distinguishes the two readings.",
+        "The leg-5 watcher end is UNMEASURED. If nothing watches this key, its absence has been generating no signal for the entire period it has not existed -- which is consistent with the observed estate, where nothing anywhere records that this marker is missing."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "Both handlers read at source and contrasted deliberately, because the asymmetry is the finding: :143-151 has no exception handling at all, while :136-140 catches the broadest possible class and returns a value that the caller cannot distinguish from a legitimate result. The 'noqa: BLE001' at :139 shows the blanket catch was flagged by a linter and consciously kept. distinguishable_from_true_negative='no' is therefore measured at the line rather than supposed: the function returns None on every failure mode and on genuine absence, and :250 consumes None as a single instruction with no branch on why. ⚠ WHAT I DID NOT DO, STATED SO SILENCE IS NOT READ AS RIGOUR: I did NOT run this producer, did not invoke --emit, and did not attempt a PutObject to the bound key. Doing any of those would have created the very object whose absence is this card's central measurement, destroying the evidence -- and per CCY3-AC8 this lane fixes nothing it cards. So the write path's behaviour is read from source and is INFERRED at the level of execution; only the object's absence is exercised. The control that makes the absence trustworthy is external: the same instrument returns present, current objects for two co-resident freshness surfaces in the same bucket.",
+      "owner": "0.5.0_AE_OpalETL for both handlers. ⛔ UNOWNED for the leg-5 watch end: :91 declares that something watches this key, and no seat is named as owning that watcher. If it exists, it has been silent about a permanently absent object; if it does not, the declaration is the only evidence of it."
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "This path is fully specified and has never run. Its target is CLASS 1 -- two module-level literals, no runtime input, an enumerable bound of exactly one key -- so there is no ambiguity about where it writes; the object simply does not exist, and neither does its prefix, measured on two independent reads against a bucket where two co-resident freshness objects return present and current. The consequence is traced through code rather than assumed and it inverts the producer's headline property: with no watermark, _read_watermark returns None, emit() leaves since_shas None, the delta filter at :170 never applies, and every emit this producer has ever performed was a FULL BACKFILL. The Q4 'delta-only, grows with reality not the clock' contract has never been in force. QUALIFIED rather than UNSOUND, deliberately: nothing here is broken code. The write function is correct and fails loudly; the absence is most likely explained by the path never having been reached with the marker enabled, and --no-marker exists precisely to allow that. The defects are (1) the bare `except Exception` at :139 converting instrument failure into a verdict -- a permissions regression and a genuine first run both silently become a full backfill, and the code's own comment assigns two causes one outcome; (2) the resulting backfill is invisible in output as well as in logs, because deterministic event_ids make re-ingest idempotent and volume is the one signal the design says not to read; (3) the declared leg-5 watcher is UNMEASURED, and if it exists it has been silent about a permanently absent object. NOT INCOMPLETE: all 7 rows worked. ⛔ AND I APPLIED THE FLOOR RULE AGAINST MYSELF rather than around it: artifact.persistence.form and mutation_policy are marked INFERRED, not measured, because I read them from the code that would write an object I have never seen -- and materializer_standing is 'unknown' rather than 'superseded' or 'not_applicable' because the estate cannot tell me. A card claiming 'measured' on the shape of a nonexistent file would be exactly the over-claim v2's floor rule exists to catch. ⛔ NO COMPLETENESS CLAIM ON THE WRITER POPULATION for this marker family, per CCY3-AC7. ⛔ NO FORWARD DISPOSITION. Per QUALIFY-DO-NOT-FIX this lane did not run the producer, did not invoke --emit, and wrote nothing to the bound key -- doing so would have manufactured the artifact whose absence is the measurement.",
+    "blocking_defects": [
+      "For anyone relying on this producer being incremental: it is not, and has never been. The watermark that makes it incremental does not exist, so every run takes the full-backfill branch at :250-251. Owner 0.5.0_AE_OpalETL.",
+      "For anyone who would diagnose this producer's state from a run's behaviour: _read_watermark's bare `except Exception` at :139 returns None for absence, denial, network failure and malformed JSON alike, and the caller branches on None alone. A permissions regression on this key is indistinguishable from a first run. Owner 0.5.0_AE_OpalETL.",
+      "For anyone treating the absence of a leg-5 freshness alert as evidence this producer is healthy: the object leg-5 is declared to watch (:91) has never existed, and I could not locate or exercise any watcher. Silence here is UNMEASURED, not clean. Owner UNOWNED -- no seat is named for the leg-5 watch.",
+      "For anyone reading last_emitted_head as delivery evidence should the object ever appear: it records the COMPUTE head (:269), so it advances even on a run that emitted zero CSEs. It reports what was examined, not what was delivered. Owner 0.5.0_AE_OpalETL."
+    ]
+  }
+}

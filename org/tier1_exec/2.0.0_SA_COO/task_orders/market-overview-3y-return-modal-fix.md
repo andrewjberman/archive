@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DE_MarketIntelligence</issued_to>
     <date>2026-07-07</date>
-    <status>held</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "market-overview-3y-return-modal-fix" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: held</status>
     <dispatch_state>RE-ROUTED 2026-07-07T16:19Z (CTO caught mis-route: IndexPerformanceModal is Pod 1 MarketIntelligence territory per pod_inventory.xml:421, not Pod 2 PortfolioAnalytics) -- HOLDING dispatch: this has since escalated to Andrew-direct P0 with 2 new specs (data-date anchor on ALL toggles + annualized display) and CTO is writing a full PRD that will supersede/absorb this ad-hoc TO as Wave-1 scope. Not firing this TO until the PRD lands, to avoid the exact divergence CTO flagged. Original ad-hoc ruling (no-PRD-needed) preserved below for reference/comparison once the PRD arrives.</dispatch_state>
     <gate_note>3 of 4 indices match Bloomberg to the bp once the fix is understood -- confirms the bug is isolated to the modal's own computation, not upstream data.</gate_note>
   </metadata>

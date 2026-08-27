@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.8.0_AE_CloudComp + 0.4.0_DE (AE/DE lane)</issued_to>
     <date>2026-07-07</date>
-    <status>ready</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_COMPTEAM, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: ready</status>
     <dispatch_state>WRITTEN-NOT-DISPATCHED (wind-down 2026-07-07; Andrew directed decomposition materialized before device reboot; dispatch on restart per the allocation-map in the session handoff /log)</dispatch_state>
     <gate_note>COO-RESOLVABLE now, fully independent of B2/SCTY. KEYSTONE: its strip-list + signature-root are what AGENTBUS-S3's controls 3+4 ride -> drive FIRST.</gate_note>
   </metadata>

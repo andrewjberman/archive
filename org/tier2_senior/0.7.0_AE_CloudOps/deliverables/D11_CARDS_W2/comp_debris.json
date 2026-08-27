@@ -1,0 +1,172 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.7.0_AE_CloudOps~X",
+  "subject": {
+    "id": ".tools/comp-debris",
+    "kind": "tool",
+    "declared_domain": "The coldest-first cloud-resource INVOCATION-coldness ledger. Ranks resources by oldest last-invocation (dormancy AFTER activity), coldest down, across lambda plus an s3/ddb/ec2/events resource-plane extension. Advisory and read-only by its own declaration: it NEVER deletes, and the reap verb stays human and never-widen-gated. Added to this lane's set as a dropped_recovery -- it was named in wave 1 as one of comp-similar's heat sources and lost in an early head extraction."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T22:17:42Z",
+    "commit_ish": "100e7ea130",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "how": "A read-only AWS sweep (list_functions plus CloudWatch metrics, and per-type adapters for the resource plane) that assigns every resource to one of five bands and ranks the cold tail. THE DESIGN RULES ARE ANDREW-DIRECT AND ARE THE OPPOSITE OF THE DEFAULT MISTAKE: never-invoked is NOT cold -- zero-history splits into TOO-YOUNG vs STILLBORN-OR-GUARD by creation age, which is a purpose review rather than a reap rank; UNKNOWN is a real band, because a blind row is not a dead row; held/frozen/sovereign resources are excluded ENTIRELY, in no band at all. Dormancy is counted on the TRADING-DAY frontier rather than wall-clock. Fusion with comp-heat/comp-dups/comp-deadgrant/comp-trigger is a SEPARATE confirmation pass over the cold tail and deliberately not machinery inside this tool. THE BURIED OPINIONS ARE ENUMERATED IN declared_opinions.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "not_applicable",
+      "declared_opinions": [
+        "--days default 30 -- the coldness window. A resource dormant 29 days is not in the cold tail and one dormant 31 is, and the boundary is a CLI default rather than a ruled figure.",
+        "--hot-days default 7 -- the recent-enough-to-be-HOT window, a second independent cutoff.",
+        "THE FIVE-BAND TAXONOMY IS THE TOOL'S CENTRAL OPINION: (HOT, COLD-DORMANT, TOO-YOUNG, STILLBORN-OR-GUARD, UNKNOWN). Splitting zero-history into TOO-YOUNG vs STILLBORN-OR-GUARD by creation age, and keeping UNKNOWN as a band rather than folding blind rows into cold, are both deliberate refusals of the obvious simplification -- and both are Andrew-direct.",
+        "_HELD_RX is a NAME-PATTERN REGEX (inf-gold, inf-canonical, inf-*dispatch/freshness/sentinel/guard, and further sovereign classes) whose matches are excluded from every band. A held resource whose NAME does not match the pattern is NOT protected, so protection depends on naming convention rather than on a declared hold list.",
+        "Dormancy is measured on the TRADING-DAY frontier, not wall-clock -- so a Friday-to-Monday gap is not dormancy. This is the estate's NEVER#1 rule folded into the instrument itself rather than left to the reader, and its self-test carries a mutant proving the fold changes the verdict.",
+        "--types defaults to 'lambda' alone, so the resource-plane extension (s3, ddb, ec2, events) is OPT-IN. A default invocation therefore reports on one plane and says nothing about the other four.",
+        "--region defaults to AWS_DEFAULT_REGION or us-east-1, so a resource outside that region is not in the population at all -- an absence that looks identical to a resource with no dormancy."
+      ],
+      "composes": [
+        {
+          "id": "boto3 list_functions + CloudWatch metrics",
+          "note": "the read-only activity read"
+        },
+        {
+          "id": "org/modules/graph/debris_adapters.py",
+          "note": "per-type activity adapters reusing classify()/BANDS/_HELD_RX verbatim so the resource plane cannot drift from the lambda plane"
+        },
+        {
+          "id": "lib/trading_calendar.py",
+          "note": "the trading-day frontier the dormancy basis is counted on"
+        }
+      ],
+      "invents": [
+        {
+          "id": "the five-band taxonomy",
+          "note": "HOT / COLD-DORMANT / TOO-YOUNG / STILLBORN-OR-GUARD / UNKNOWN"
+        },
+        {
+          "id": "the never-invoked-is-not-cold rule",
+          "note": "zero-history splits by creation age into a purpose review"
+        },
+        {
+          "id": "the per-row signal_basis field",
+          "note": "every row carries what its verdict rests on"
+        }
+      ],
+      "basis": "inferred",
+      "basis_by_field": {
+        "how": "measured",
+        "determinism": "inferred",
+        "materializer_standing": "measured",
+        "declared_opinions": "measured",
+        "composes": "measured",
+        "invents": "measured"
+      },
+      "evidence": "SOURCE READ @04b967c3c3 of .tools/comp-debris (the wrapper, :1-14) and org/modules/graph/comp_debris.py -- BANDS :65, _HELD_RX :62, the hold-exclusion at :162 and :249, --days/--hot-days/--types/--region defaults :278-283. Every figure in declared_opinions is read from a default= or a literal, not paraphrased. determinism is INFERRED not measured: the classification logic is pure and the self-test is deterministic, but the tool's INPUT is live CloudWatch metrics, so two real runs minutes apart legitimately differ -- I did not run two live sweeps and could not have compared them meaningfully if I had. Marking that rather than claiming a determinism I cannot exercise. materializer_standing='not_applicable' MEASURED: an advisory read-only ledger materializes no layer.",
+      "owner": "0.8.0_AE_CloudComp (debtscan toolchain)"
+    },
+    "cadence": {
+      "declared_rhythm": null,
+      "actual_trigger": "operator invocation only. Nothing schedules it, and by explicit design the fusion confirmation pass over its cold tail is a separate act rather than an automatic follow-on.",
+      "live_matches_declared": "not_applicable",
+      "live_instance_age": "not applicable -- the ledger is computed at invocation from live AWS reads and is not persisted, so there is no instance to age.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "declared_rhythm=null is the correct answer for an on-demand advisory scanner and is not a config gap. MEASURED by source read: the wrapper is a bare CLI passthrough with no scheduling component, and comp_debris.py's argparse block is the entire entrypoint. ⛔ THE CONSEQUENCE WORTH NAMING: because the ledger is computed fresh per call and never persisted, THERE IS NO RECORD OF WHAT WAS COLD LAST MONTH. A resource that was COLD-DORMANT in July and has since been invoked once leaves no trace of having been a candidate, so the tool cannot show a trend and nobody can audit what it once recommended.",
+      "owner": "0.8.0_AE_CloudComp"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": false,
+      "authority_role": "none",
+      "mutation_policy": "not_applicable",
+      "form": "a ranked ledger rendered to stdout (or --json) per invocation; nothing written to disk, table or cache by the tool itself",
+      "basis": "measured",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "mutation_policy": "measured",
+        "form": "measured"
+      },
+      "evidence": "persisted=false MEASURED per COX2-AC3, by exercise rather than by reading the docstring: `.tools/comp-debris --self-test` ran to completion writing nothing, and the wrapper's only output path is the python process's stdout. The one thing the wrapper DOES write is a comp_log_auto.py run record, which logs THAT the tool ran and is not the ledger. authority_role='none' follows: a tool that persists no artifact can be neither source nor projection, and the row exists to say so.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "location": {
+      "home": ".tools/comp-debris (970-byte bash wrapper, mtime 2026-07-14) delegating to org/modules/graph/comp_debris.py",
+      "projection_of": [],
+      "co_resident_stores": null,
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured"
+      },
+      "evidence": "home MEASURED by stat plus reading the wrapper's delegation line. projection_of=[] is a CLAIM: the tool persists nothing, so no artifact of its own derives from anything. LEAF-NAME AMBIGUITY CHECKED rather than assumed, because a sibling subject in this same TO (summary_corpus.py) is a known two-copy name: `find . -name 'comp_debris.py'` and `find . -name 'comp-debris'` each returned exactly ONE file. Unambiguous. ⚠ The wrapper resolves WORKSPACE from its own dirname rather than a baked path, which is the device-agnostic pattern and is worth noting as correct rather than as a finding.",
+      "owner": "0.8.0_AE_CloudComp"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "AWS resources in one region, of the types named by --types, that have an activity signal readable from CloudWatch or a per-type adapter",
+      "denominator": null,
+      "denominator_absent_reason": "THE POPULATION IS DEFINED PER INVOCATION BY THREE FLAGS AND I DID NOT RUN A LIVE SWEEP. --types defaults to 'lambda' alone (s3/ddb/ec2/events are opt-in), --region defaults to one region, and --days/--hot-days move the band boundaries -- so 'N of M' has no stable M without fixing an invocation, and each choice changes M rather than merely re-partitioning it. ⛔ I DELIBERATELY DID NOT RUN A LIVE SWEEP TO MANUFACTURE ONE: a real run reads live CloudWatch across an account, which is a heavier act than a qualify-only TO warrants, and the resulting M would describe my flag choices rather than the tool. Stating the reason is the lawful form; a number produced by picking defaults would look like a coverage measurement and be a measurement of my own arguments.",
+      "explicitly_out": [
+        "every resource whose NAME matches _HELD_RX -- excluded entirely, in NO band, so held resources are absent from the ledger rather than shown as protected",
+        "every resource type not named by --types; the default invocation covers lambda ALONE and is silent about s3, ddb, ec2 and events",
+        "every region other than the single --region value",
+        "⛔ NOT excluded, and this is the design's best feature: resources with NO activity history and resources with UNREADABLE history are kept IN the ledger, in the TOO-YOUNG / STILLBORN-OR-GUARD / UNKNOWN bands, rather than being dropped or folded into cold"
+      ],
+      "basis": "absent",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "absent",
+        "explicitly_out": "measured"
+      },
+      "evidence": "The exclusions and the band placements are MEASURED at source (_HELD_RX :62, exclusion :162 and :249, BANDS :65, defaults :278-283) and CONFIRMED BY EXERCISE: the self-test's `held_excluded`, `s3_new_is_too_young`, `s3_flat_old_is_stillborn` and `ec2_blind_is_unknown` arms all PASS, so the four claims above are demonstrated rather than read. The denominator is genuinely ABSENT and it is a WORKED row: I measured that the population is flag-scoped and chose not to fabricate an M. ⛔ THE FLOOR THEREFORE MAKES THIS ROW 'absent' -- the weakest sub-claim, not the dominant one. Under v1 it would have read 'measured' on the strength of the exclusions, with the missing denominator disclosed in prose.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "key": {
+      "identity_space": "resource NAME (per type), used both as the ledger key and as the input to the _HELD_RX hold-exclusion match",
+      "key_is_stable": "unstable",
+      "crosses_spaces": false,
+      "declared_mapping": null,
+      "basis": "inferred",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "inferred",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "identity_space MEASURED at source: rows are keyed by name and _HELD_RX matches against row['name'] at :162. ⛔ key_is_stable='unstable' AND THE REASON IS NOT THE USUAL ONE -- it is not that the key changes when the resource changes, but that THE KEY CARRIES POLICY. Because hold-protection is decided by a NAME-PATTERN match, renaming a protected resource out of the _HELD_RX pattern silently removes its protection and drops it back into the reap ranking, with no error and no band. The identity and the safety mechanism are the same string. Marked basis INFERRED rather than measured because I reasoned this from the regex and the exclusion site and did NOT exercise a rename to observe the protection lapse. crosses_spaces=false MEASURED: names are per-type and per-region and are never joined to ARNs or graph node_ids inside this tool. declared_mapping=null after a hunt across comp_debris.py, debris_adapters.py, the wrapper, and the fusion tools it names as a separate pass -- none declares a name-to-ARN mapping, which is also why the fusion pass is a separate human act rather than an automatic join.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "failure_mode": {
+      "returns_on_failure": "EXERCISED: `--self-test` runs fully offline and exits rc=0 with a per-arm PASS ledger. A resource whose activity history cannot be read is NOT dropped and NOT called cold -- it is placed in the UNKNOWN band, which the tool states plainly as 'a blind row is not a dead row'. A resource with no history at all is split by creation age into TOO-YOUNG or STILLBORN-OR-GUARD rather than ranked for reap.",
+      "distinguishable_from_true_negative": "yes",
+      "silent_degrade_paths": [
+        "⛔ THE HOLD-EXCLUSION IS THE ONE PLACE THIS TOOL CAN FAIL QUIETLY IN THE DANGEROUS DIRECTION: protection is a NAME-PATTERN match, so a held resource renamed out of _HELD_RX is not flagged as unprotected -- it simply reappears in the ranking as an ordinary candidate. The failure produces a plausible-looking reap candidate rather than an error.",
+        "A default invocation covers lambda in ONE region. An empty or short cold tail from a default run is indistinguishable, in the output, from an estate with little dormancy -- the flags that bounded the sweep are the reader's responsibility to recall.",
+        "Because nothing is persisted, a resource that WAS a cold candidate and has since been invoked leaves no trace of ever having been ranked, so the tool's own history cannot be audited."
+      ],
+      "basis": "inferred",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "inferred"
+      },
+      "evidence": "EXERCISED per COX2-AC7, with rc captured WITHOUT a pipeline: `.tools/comp-debris --self-test` -> rc=0, 13 arms, ALL PASS. ⛔ AND THIS SELF-TEST IS THE STRONGEST CONTROL SET I HAVE SEEN ACROSS EITHER WAVE, which is why distinguishable='yes' is measured rather than argued: it carries a MUTANT arm and its own negative control as a matched pair -- `MUTANT.t1_pipeline_weekend_is_HOT_not_debris` (a Friday-to-Monday gap is NOT dormancy under the trading-day basis) alongside `MUTANT.wall_clock_control_WOULD_have_flagged` (the SAME dates under wall-clock DO reap). The second arm exists purely to prove the first is not a no-op, which is exactly 'a control must fire on the defect event' implemented rather than asserted. Also PASSING: held_excluded, ec2_blind_is_unknown, s3_new_is_too_young, s3_flat_old_is_stillborn, signal_basis_on_every_row, and two cadence arms distinguishing a monthly 23-day gap (HOT) from a daily 21-day gap (a finding). silent_degrade_paths is INFERRED: the rename-out-of-protection route is reasoned from the regex and not exercised.",
+      "owner": "0.8.0_AE_CloudComp"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "Every row worked, defects named with owners, usable within stated limits -- and this is the best-controlled subject in either wave I have carded. WHAT HOLDS, and it is unusual enough to state plainly: the tool refuses the three simplifications that would make it dangerous. Never-invoked is NOT treated as cold; UNKNOWN is a real band rather than blind rows folded into the reap list; held resources are excluded entirely. Its self-test carries a MUTANT arm WITH a matched negative control proving the trading-calendar fold changes the verdict rather than being a no-op -- 13 of 13 PASS, exercised at rc=0. Every row carries a signal_basis. It never deletes and the reap verb stays human and never-widen-gated. WHAT QUALIFIES IT: (1) ⛔ HOLD-PROTECTION IS A NAME-PATTERN MATCH, so the identity and the safety mechanism are the same string and a rename out of _HELD_RX silently removes protection, producing a plausible reap candidate rather than an error -- the one place this careful tool fails in the dangerous direction; (2) the population is flag-scoped across three independent dimensions (--types, --region, --days), so a default run covers lambda in one region and its short cold tail is indistinguishable from a quiet estate; (3) no coverage denominator exists without fixing an invocation, and I declined to manufacture one; (4) nothing is persisted, so the tool's own recommendations cannot be audited after the fact and no trend is visible. NOT UNSOUND: nothing here blocks load-bearing use of an advisory tool that never deletes and whose verdicts require a separate human confirmation pass. || SEMANTIC-AXIS DECLARATION: NOT SYSTEMATICALLY EXAMINED. The seven opinions in declared_opinions came from reading defaults and band definitions while answering the coverage and key rows, not from a deliberate sweep. I did NOT audit whether 30 and 7 days were ever derived from observed invocation patterns, whether the five bands still partition the cases the estate actually produces, or whether _HELD_RX still matches the current held set -- that last one is the highest-value unexamined question on this subject, because the regex IS the protection. ⛔ A passing self-test tells me the bands work as CODED; it is structurally blind to whether they are still the RIGHT bands. || GENERATOR CURRENCY: materializer_standing='not_applicable' -- an advisory read-only ledger materializes no layer, a MEASURED absence of applicability rather than an unmeasured currency.",
+    "blocking_defects": null
+  }
+}

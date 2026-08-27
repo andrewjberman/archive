@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (LD-0178 f95c38861; CTO spec 305abc367)</issued_by>
 <issued_date>2026-06-10</issued_date>
-<status>pending -- PRIORITY LOW: sequenced BEHIND the entire live NFRA queue (12 TOs pull first); manual filing holds the discipline until this lands. GATE: CTO reviews implementation against the 6 ACs in s9.7 before live (fabric-wide commit-behavior change)</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "FABRIC_GOHOOK" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending -- PRIORITY LOW: sequenced BEHIND the entire live NFRA queue (12 TOs pull first); manual filing holds the discipline until this lands. GATE: CTO reviews implementation against the 6 ACs in s9.7 before live (fabric-wide commit-behavior change)</status>
 
 Build the post-commit hook that makes a TO-file commit the canonical dispatch: on commit of a task_orders/*.md with issued_to set, auto-deliver a GO into the assignee inbox.
 

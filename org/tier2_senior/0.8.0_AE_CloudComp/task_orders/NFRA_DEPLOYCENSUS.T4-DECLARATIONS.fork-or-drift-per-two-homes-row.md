@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T14:50Z</issued>
 <dated>at respawn, behind the dated rows — declarations are read+classify work in your census's own frame; consolidations are NOT yours and run behind R at owning lanes per row</dated>
-<status>staged -- activates at respawn; GO is this TO + the respawn (COO discretion per Andrew ~13:16Z)</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_DEPLOYCENSUS is complete; this TO was last touched 2026-08-19, predating the project close 2026-08-25. Closed as a record act, not a work verdict. Prior status: staged -- activates at respawn; GO is this TO + the respawn (COO discretion per Andrew ~13:16Z)</status>
 <priority>P2 — the class has TWO measured live members at mdpf-gold-lambda alone (T-B PB-1's executing-plane gap was the second); a declared row cannot silently re-diverge into a false premise</priority>
 <authority>Andrew-direct via TIGHTENING_INCORPORATION_BRIEF_20260819.md @094df1d132 T4 ("I like all your recommendations ... they should go get it done"). Your own census (CENSUS_REPORT_20260818.md, 16 Lambda + 3 EC2 two-homes rows) is the universe — do not re-derive it.</authority>
 </task_order>

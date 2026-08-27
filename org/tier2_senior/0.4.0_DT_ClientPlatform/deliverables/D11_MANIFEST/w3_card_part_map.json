@@ -1,0 +1,136 @@
+{
+  "_what": "THE DECLARED JOIN from wave-3 substrate cards to L0 manifest part ids. W3-m-6.",
+  "_why_declared_and_not_derived": "MEASURED, NOT ASSUMED: 9 of 13 wave-3 cards carry PROSE in artifact.location.home (whitespace-bearing), because SUBSTRATE_CARD.v2 types that field as a bare string with no joinability constraint -- unlike joinable_ref.id, which v2 REJECTS when it contains ' -- ' or ' ('. An EXACT-equality join on home therefore resolves only 2 of 13. A SUBSTRING join is what produced 1.0.0_SA_CTO~X's own 10/3 estimate, which they correctly flagged as INDICATIVE, and it is unsound here for a measured reason: the part id 'cse' substring-matches any prose containing the letters c-s-e, and a file-grain join maps derive_runner PATH A and PATH B onto the SAME parts, which would blend two write paths the wave split precisely to keep apart. So the join that cannot be derived is DECLARED here, one row per card, each carrying its own basis and evidence, in a file a validator can read.",
+  "_grain": "ONE ROW PER CARD, at (file, write path) grain -- the cards' grain, not file grain.",
+  "_partition_sums": "13 = 8 enrich + 3 add + 2 unresolved. A partition whose parts do not sum is a residual bucket. (Was 9/3/1 until the cse_store PATH B row was withdrawn on 3.0.0_SA_CVO~X's 74902 attack.)",
+  "_declared_by": "0.4.0_DT_ClientPlatform~X",
+  "_declared_utc": "2026-08-27T07:10:00Z",
+  "_pin": "e48a7466ba",
+  "rows": [
+    {
+      "card_subject": "infra/aws/globgrph/kuzu_load.py",
+      "action": "enrich",
+      "part_ids": [
+        "kuzu_db"
+      ],
+      "basis": "measured",
+      "evidence": "EXACT equality: card artifact.location.home 'infra/aws/globgrph/kuzu_db' == part kuzu_db home. No prose, no substring. One of only 2 of 13 cards that join mechanically."
+    },
+    {
+      "card_subject": "infra/aws/globgrph/kuzu_stitch_load.py",
+      "action": "enrich",
+      "part_ids": [
+        "kuzu_stitch_db"
+      ],
+      "basis": "measured",
+      "evidence": "EXACT equality: card home 'infra/aws/globgrph/kuzu_stitch_db' == part kuzu_stitch_db home."
+    },
+    {
+      "card_subject": "infra/aws/globgrph/cse_store.py#PATH_A_append",
+      "action": "enrich",
+      "part_ids": [
+        "cse"
+      ],
+      "basis": "measured",
+      "evidence": "Card home states 'writes to globgrph.<args.table>, default globgrph.cse'. Part 'cse' IS globgrph.cse. NOTE CARRIED INTO THE PART: this writer is CLASS 3 / UNBOUNDED, so the part captures the DEFAULT target only and is NOT a complete statement of what this path can write."
+    },
+    {
+      "card_subject": "infra/aws/globgrph/cse_store.py#PATH_B_drop",
+      "action": "unresolved",
+      "part_ids": [],
+      "basis": "measured",
+      "evidence": "\u26d4 WAS 'enrich -> cse'. WITHDRAWN 2026-08-27 after 3.0.0_SA_CVO~X attacked this row (74902) on my own nomination, and the attack YIELDS. RE-READ AT SOURCE AT THIS SEAT @e48a7466ba before editing: cse_store.py:348 def drop_cse_table; :351 `if table == CSE_TABLE:`; :352 raises ValueError('REFUSED: cse is the real append-only C0 log -- never dropped here'); :86 binds CSE_TABLE = cse_schema.CSE_TABLE = 'cse'; the docstring at :349-350 scopes the function to SCRATCH tables. Worktree byte-identical to the pin (git hash-object 47098758c8e4 both sides). THEREFORE PATH B's REACHABLE WRITE DOMAIN IS ANY TABLE IN THE NAMESPACE **EXCEPT** cse. My original evidence -- 'same default target as PATH A' -- is TRUE OF THE ARGPARSE DEFAULT AND FALSE OF THE REACHABLE DOMAIN: invoking --drop against the default RAISES before the catalog is touched. Enriching part 'cse' with this path's destructive opinions joined a writer to the ONE artifact it structurally CANNOT affect -- the inverse of a missing edge, and worse, because it reads as a measured destructive capability that does not exist. DISPOSITION: same treatment as the PATH A local JSONL -- a writer whose reachable targets (any scratch table except cse) have NO stable part id, recorded in known_unsearched with the guard cited rather than joined to a part. \u26d4 MY OWN ERROR CLASS: I read the argparse DEFAULT and called it the target, without reading the function the flag dispatches to. A default is not a domain."
+    },
+    {
+      "card_subject": "infra/aws/globgrph/resource_summaries_store.py",
+      "action": "enrich",
+      "part_ids": [
+        "resource_summaries"
+      ],
+      "basis": "measured",
+      "evidence": "Card home states 'writes globgrph.<args.table>, default globgrph.resource_summaries'. Part 'resource_summaries' IS that table. CLASS 3 caveat as above."
+    },
+    {
+      "card_subject": "infra/aws/globgrph/snap_store.py",
+      "action": "add",
+      "part_ids": [
+        "snap_store.WRITER"
+      ],
+      "basis": "measured",
+      "evidence": "GENUINE GAP, measured two ways: 'snap_store' returns 0 occurrences across the entire 39-part manifest JSON, and its card home shows it writes globgrph.<surface> with NO default -- a fully unbounded surface arg bound at :222. 1.0.0_SA_CTO~X found the same gap from the opposite direction (a generic-writer sweep), which is corroboration by a different instrument, not repetition."
+    },
+    {
+      "card_subject": "infra/aws/globgrph/derive_runner.py :: PATH A -- graph_nodes + graph_edges",
+      "action": "enrich",
+      "part_ids": [
+        "graph_nodes",
+        "graph_edges"
+      ],
+      "basis": "measured",
+      "evidence": "Card home names both tables with their binding lines (derive_runner.py:281 nodes_id, :292 edges_id). A file-grain join could NOT separate this from PATH B; the (file, write path) grain can."
+    },
+    {
+      "card_subject": "infra/aws/globgrph/derive_runner.py :: PATH B -- graph_contracts",
+      "action": "enrich",
+      "part_ids": [
+        "graph_contracts"
+      ],
+      "basis": "measured",
+      "evidence": "Card home names globgrph.graph_contracts ONLY, bound as a literal 2-tuple at derive_runner.py:202 and :1154. \u26d4 THIS IS THE ROW THAT PROVES THE GRAIN MATTERS: a file-grain join put PATH B onto graph_nodes+graph_edges, which is exactly the blend :301's 'MUST NOT touch graph_contracts' warns against."
+    },
+    {
+      "card_subject": "org/modules/graph/comp_aws_cli.py",
+      "action": "enrich",
+      "part_ids": [
+        "graph_nodes",
+        "graph_edges"
+      ],
+      "basis": "measured",
+      "evidence": "Card home names both tables with binding lines (comp_aws_cli.py:3032, :3045). A SECOND writer of the same two parts."
+    },
+    {
+      "card_subject": "infra/aws/lambda/globgrph/incremental_updater/lambda_function.py :: PATH A -- Iceberg/Nessie atomic commit",
+      "action": "enrich",
+      "part_ids": [
+        "graph_nodes"
+      ],
+      "basis": "measured",
+      "evidence": "Card home 'iceberg://globgrph.graph_nodes on Nessie branch main'. A THIRD writer of graph_nodes."
+    },
+    {
+      "card_subject": "infra/aws/lambda/globgrph/incremental_updater/lambda_function.py :: PATH B -- S3 branch-head marker",
+      "action": "add",
+      "part_ids": [
+        "_branch_head.main.json"
+      ],
+      "basis": "measured",
+      "evidence": "Card home is the resolvable object s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json. Token '_branch_head' returns 0 occurrences across the 39-part manifest -- a genuine gap, and a load-bearing one: critical-surfaces.yaml cites this exact marker as the baseline_vintage_anchor."
+    },
+    {
+      "card_subject": "infra/aws/globgrph/cse_emit_frontend_coevolution.py :: PATH B -- S3 watermark object",
+      "action": "add",
+      "part_ids": [
+        "cse_producer_markers/frontend_coevolution.json"
+      ],
+      "basis": "measured",
+      "evidence": "Card home is the resolvable object s3://opal-313476888478-globgrph/warehouse/cse_producer_markers/frontend_coevolution.json. Token 'cse_producer_markers' returns 0 occurrences across the 39 parts."
+    },
+    {
+      "card_subject": "infra/aws/globgrph/cse_emit_frontend_coevolution.py :: PATH A -- local JSONL batch",
+      "action": "unresolved",
+      "part_ids": [],
+      "basis": "measured",
+      "evidence": "NOT REGISTERED. \u26d4 THE CONCLUSION STANDS AND MY ORIGINAL REASON DID NOT -- corrected after 3.0.0_SA_CVO~X's 74911 attack, which was RIGHT ABOUT MY REASONING and reached the wrong disposition from it. MY WITHDRAWN REASON: 'identity is arbitrary runtime input, so no stable part id.' That reasons from the WRITER's unbounded domain about the ARTIFACT -- two grains, and it is my own 'a default is not a domain' slip pointed the other way. 3.0.0_SA_CVO~X caught it. THE ACTUAL REASON, MEASURED FROM THE CARD ITSELF (W3-dljc, artifact.persistence.evidence, read in full at this seat): '\u26d4 THE LOCAL FILE AND THE S3 OBJECT ARE TWO ARTIFACTS AND I AM NOT CONFLATING THEM: this path writes a LOCAL path only (:262 is a plain open(), no boto3). The S3 object above is that local file AFTER A HUMAN UPLOADED IT. I measured the S3 object because it is the only surviving instance; I did NOT measure the local file, which lived on someone's dev box 50 days ago.' SO PATH A's ARTIFACT IS A DEV-BOX LOCAL FILE THAT NO LONGER EXISTS AND WAS NEVER MEASURABLE. The 259,918-byte object at warehouse/cse_ingest_staging/cse_frontend_coevolution.jsonl is a DIFFERENT ARTIFACT WITH A DIFFERENT WRITER -- a human upload. Registering it as PATH A's output would attribute to this path something this path did not write, which is EXACTLY the fedobs_coevolution_snap mis-attribution class this same compile step flagged on the face. \u26d4 AND THE CARDING LANE WARNED ABOUT THIS CONFLATION IN THE CARD, IN ADVANCE. The attack reached for the S3 object as 'the artifact-in-fact' and the card had already ruled it out."
+    }
+  ],
+  "findings_surfaced_not_resolved": [
+    "CONTRACT GAP -- SUBSTRATE_CARD.v2 `artifact.location.home` is a bare string with no joinability constraint, and 9 of 13 wave-3 cards populate it with prose. v2 already solved exactly this for `joinable_ref.id` by REJECTING ids containing ' -- ' or ' (' after measuring 51 raw entries collapsing to 43 subjects. The same fix was not applied to `home`, so the field that the L0 compile step must join on is the one field it cannot join on. THIS IS THE 'I COMPLY WHERE A VALIDATOR WATCHES' LAW ON A FRESH POPULATION: constrained field 13 of 13 clean, unconstrained neighbour 4 of 13 clean. NOT A LANE DEFECT -- no lane could have avoided it while following the schema, and for an Iceberg table on a Nessie branch there is no canonical short form to write. Owner: the SUBSTRATE_CARD.v2 schema owner.",
+    "CONTRACT GAP -- L0 `generation` is SINGULAR (one materializer, one materializer_standing, one cadence, one trigger) but wave 3 MEASURED graph_nodes as having THREE writers (derive_runner PATH A, comp_aws_cli, incremental_updater PATH A) and graph_edges TWO, and cse TWO write paths of one file that differ in authority. 1.0.0_SA_CTO~X ruled 30 minutes earlier that MATERIALIZER IS A RELATION, NOT A PROPERTY; this is that ruling meeting the contract that encodes it as a property. The existing 39 already route around it by writing multi-writer PROSE into generation.materializer. This compiler does NOT blend: on multi-writer parts it keeps the existing standing when contributing cards disagree and source-prefixes every declared_opinion. Owner: the L0 schema owner (1.0.0_SA_CTO~X).",
+    "STALE ATTRIBUTION IN THE EXISTING 39 -- part `fedobs_coevolution_snap` names generation.materializer = infra/aws/globgrph/cse_emit_frontend_coevolution.py, but wave 3 carded BOTH of that file's write paths and NEITHER writes that Iceberg table (PATH A = local JSONL, PATH B = an S3 watermark object). 2.0.0_SA_COO~X independently falsified the same claim in 74880 ('FALSIFIED, zero references'). Either a third write path exists uncarded, or the attribution is wrong. NOT RESOLVED HERE -- flagged on the part itself so the next reader inherits the doubt rather than the claim. Owner: 2.0.0_SA_COO~X / 0.8.0_AE_CloudComp~Y.",
+    "CONTRACT GAP -- L0 v1 gives each part ONE `basis` covering twelve fields (existence, home, vintage, lineage, generation, coverage...). SUBSTRATE_CARD.v2 solved exactly this class with `basis_by_field`, added after measuring 4 of 21 rows in ACCEPTED cards reading basis='measured' while carrying a HELD sub-claim. The same defect is unfixed one level up. MEASURED HERE, ON MYSELF: my first compiler took a floor across contributing cards' generation-row bases and drove graph_nodes from `measured` to `absent` -- because comp_aws_cli's cadence.basis is genuinely `absent` -- which would have published 'no basis exists yet' for a part whose existence, home and vintage were all measured. A single scalar over a mixed-provenance unit forces a choice between over-claiming and destroying a true claim. The compiler now keeps the part-level basis and records the generation-row floor in evidence, which is the F-2 shape (a claim living where a validator cannot branch on it) accepted knowingly because L0 v1 has nowhere else to put it. Owner: the L0 schema owner (1.0.0_SA_CTO~X).",
+    "CLAIM-PRESERVATION -- a card's `actual_trigger: null` with cadence.basis=measured means MEASURED NONE-FOUND; L0's `trigger: null` means NOT KNOWN. Passing the null straight through silently converts a hard measured negative into an absence of information, and the DTX3 cards' none-found verdict was the most expensive measurement in that delivery. The compiler now writes 'NONE-FOUND (measured)' / 'NONE DECLARED (measured)' so the claim survives the fold. Caught by spot-reading the compiler's own output rather than by any gate.",
+    "ATTACK YIELDED, AND IT WAS THE ROW I NOMINATED. I asked 3.0.0_SA_CVO~X to attack the cse_store rows first because they were the judgment I trusted least; the attack found that PATH B (--drop) is fail-closed against the very table I joined it to. PATH A's row survived. The transferable is not 'check drop paths' -- it is that I resolved a write target from an ARGPARSE DEFAULT without reading the function the flag dispatches to, and a default is not a domain. Nominating the row is the only reason it was checked: no gate reads a declared join.",
+    "UNDER-COUNT CONFIRMED, ATTRIBUTION NOT -- and it needs an owner. 3.0.0_SA_CVO~X (74911) is right that the manifest carries no part for the 259,918-byte object at s3://opal-313476888478-globgrph/warehouse/cse_ingest_staging/cse_frontend_coevolution.jsonl (LastModified 2026-07-08T15:49:06Z, 50 days), and that this is a real, located, consumer-relevant artifact whose orphanhood is one of the wave's own findings. It is NOT registered here because its writer is A HUMAN UPLOAD, not any wave-3 materializer -- W3-dljc measured that explicitly -- and W3-m-6's scope is folding wave-3 MATERIALIZER cards into the manifest. Registering an artifact whose writer is outside the wave would be a scope expansion this lane does not own mid-round (Rule 27). RECOMMENDATION, for 2.0.0_SA_COO~X and the L0 owner: register it as a part with generation.materializer=null and materializer_standing='unknown', population_status='orphaned', evidence citing the human upload -- the registry already carries observed-not-intended artifacts that way (kuzu_db is registered orphaned). Recorded in known_unsearched so the gap is on the face rather than in this message.",
+    "CRITERION MISSING FROM THE FACE -- 3.0.0_SA_CVO~X's second point, accepted in full. Nothing on the manifest states whether an L0 part is a CANONICAL artifact (something the estate intends) or an OBSERVED instance (something a run produced), so the next compiler re-faces every registration decision without the reasoning. MEASURED ANSWER FROM THE ARTIFACT ITSELF, not from my preference: population_status carries 'orphaned' as a legal value and kuzu_db is registered with it, so the registry DEMONSTRABLY admits observed-not-intended artifacts. The criterion is therefore NOT canonical-only; it is 'artifacts a named writer actually writes, with intent recorded in population_status'. Now stated in denominator.method."
+  ]
+}

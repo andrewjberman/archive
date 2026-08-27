@@ -6,7 +6,7 @@
 <verify>3.0.0_SA_CVO</verify>
 <issued_by>2.0.0_SA_COO (Andrew-direct via CTO 184909Z; PRD docs/architecture/ASTN_WSJFT_PRD.md; new ASTN macro)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>active</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project ASTN_WSJFT, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: active</status>
 <!-- PACED: contained scheduled product, behind the hot recon (DC2-Eclipse) + nightly priorities. B1 is the load-bearing FIRST open item (the paywall-access-method shapes everything downstream + the ToS posture). -->
 <!-- DISCOVERY-RESULT (CTO ran it live 2026-06-24): WSJ one-shotter = FULL article text (citable-bullets feasible) -> WSJ-path GO. FT one-shotter = paywall-wall (body=subscription-page, headline-only). ANDREW DECISION: hold BOTH subs -> FT IN via the authenticated-session-ride (Bright-Data Scraping-Browser login -> session-cookies parked-in-SM -> 3am one-shotter rides -> refresh; MFA via inf-otp-relay/device-cookie -- the established parked-auth pattern, 4th instance). Bright-Data key ROTATED + ISOLATED (4 other BD consumers on distinct keys). FT GATED on Andrew handing WSJ/FT login-creds -> CTO SM-store + authed-full-body-test. BOTH-in (NOT WSJ-only-v1). -->
 

@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps~B + 0.0.0_AB_MSTR (window) + 3.0.0_SA_CVO~B (cert)</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_CMTQUE, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
     <dispatch_state>WRITTEN-NOT-DISPATCHED (wind-down 2026-07-07; Andrew directed decomposition materialized before device reboot; dispatch on restart per the allocation-map in the session handoff /log)</dispatch_state>
     <gate_note>GENUINELY-EXTERNAL but NARROW: gates only this RUN leg (11 live agents on the box). MSTR names a specific quiet window (no gold/rebuild/re-serve in flight) -- NOT passive-wait, NOT default-to-tonight.</gate_note>
   </metadata>

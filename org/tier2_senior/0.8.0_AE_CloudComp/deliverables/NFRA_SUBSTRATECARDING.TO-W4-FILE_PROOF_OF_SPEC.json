@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SUBSTRATECARDING.TO-W4-FILE",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "assignee": "0.8.0_AE_CloudComp~X",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-substratecarding-w4/DECOMP.md",
+    "vintage_commit": "4ec2452a02",
+    "to_ref": "org/tier1_exec/2.0.0_SA_COO/deliverables/D11_W4/NFRA_SUBSTRATECARDING.TO-W4-FILE.md"
+  },
+  "spec_ref": {
+    "doc": "org/tier1_exec/2.0.0_SA_COO/deliverables/D11_W4/NFRA_SUBSTRATECARDING.TO-W4-FILE.md",
+    "group": "W",
+    "vintage_commit": "1e7c66e996"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_W4/",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "21 substrate cards (W4-*.card.json) plus W4-FILE.cells.json and the generator build_cards_w4file.py. Governance artifacts, not deployables. QUALIFY-DO-NOT-FIX held: zero writes to any carded artifact -- every one of the 21 was opened READ-ONLY, and the two defects found (an empty directory, a prose manifest home) are REPORTED, not patched."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_W4/W4-FILE.cells.json",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The 148 cells (147 CARD_MATRIX + W4-m-joinable) rendered at cell grain, each carrying status/value/basis/evidence/owner, so the TO's cell-level acceptance is machine-checkable rather than asserted."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_W4/build_cards_w4file.py",
+      "kind": "doc",
+      "commit_or_etag": "see session commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The generator. Shipped so every count in every card is reproducible rather than asserted -- 21 subjects x 7 rows is exactly the scale at which hand-typed numbers go stale beside derived ones."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "W4FILE-AC1",
+      "criterion_verbatim": "21 subjects / 147 card cells carded against SUBSTRATE_CARD.v2.",
+      "method": "schema_validation",
+      "invocation": "jsonschema.Draft202012Validator(org/standards/SUBSTRATE_CARD.v2.schema.json).iter_errors() over each generated card, gated behind a negative control that runs FIRST at every build invocation and exits 2 if the validator ever accepts an empty card.",
+      "output_evidence": "21 of 21 VALIDATE. 147 card cells emitted (21 subjects x 7 rows), reconciling exactly with the TO's declared 21/147; the builder FAILS if either count diverges, so the match is enforced rather than observed. Subject set cross-checked against the decomp: the 21 entities carded are exactly the 21 distinct CARD_MATRIX entities the rectangle assigns to executor_class=0.8.0_AE_CloudComp~X, and 0 of my subjects were absent from the L0 manifest. The FLOOR RULE rejected my first pass on artifact.location (basis 'measured' over a 'held' projection_of sub-claim) across all 21 -- corrected to 'held' before delivery.",
+      "denominator": "21 of 21 cards valid; 147 of 147 card cells; 148 of 148 cells including the mechanism cell; 1 negative control",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "W4FILE-AC2",
+      "criterion_verbatim": "Every cell carries status, value, basis, evidence, owner.",
+      "method": "command",
+      "invocation": "Rendered all 148 cells to W4-FILE.cells.json by joining the rectangle's cell_ids to the delivered cards' rows, then swept every cell asserting all five fields non-empty.",
+      "output_evidence": "148 of 148 cells carry status, value, basis, evidence and owner; 0 defects. Independently, 147 of 147 card ROWS carry non-empty basis + evidence + owner. THE BASIS DISTRIBUTION IS THE POINT AND IT IS NOT UNIFORM: measured 29, held 65, inferred 34, absent 19 across the 147 rows. A tranche whose rows were all 'measured' would be the instrument signature this TO warns about -- a filesystem read CANNOT see a producer, a cadence or a trigger, so those rows are HELD from the L0 manifest or ABSENT, and they say so in a field a consumer can reject on.",
+      "denominator": "148 of 148 cells; 147 of 147 rows; basis values summed 29+65+34+19 = 147",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "W4FILE-AC3",
+      "criterion_verbatim": "Every count prints its denominator.",
+      "method": "command",
+      "invocation": "Swept trust.coverage.denominator across all 21 cards asserting non-null, and derived every denominator at build time from a parse of the artifact itself rather than typing one.",
+      "output_evidence": "21 of 21 carry a denominator, each derived from what the artifact actually IS: JSON object -> top-level key count; JSON array -> item count; JSONL -> record count; directory -> entry count; binary -> byte size with an explicit note that it is opaque to a structural count. Example: .comp-graph/pathrooting-census.json = 571 top-level array items, 101336 bytes. No denominator in this delivery was typed by hand.",
+      "denominator": "21 of 21 cards carry a non-null coverage.denominator",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "W4FILE-AC4",
+      "criterion_verbatim": "Every verdict names the instrument that produced it.",
+      "method": "command",
+      "invocation": "Regex sweep over verdict.why across all 21 cards for a named instrument or an explicit basis token (Path.exists / os.stat / git ls-files / parsed / MEASURED / HELD / instrument).",
+      "output_evidence": "21 of 21 name their instrument. Each verdict states which rows were MEASURED here (existence, kind, size, mtime, tracked state, parsed shape, denominator) and which are HELD from the L0 manifest and explicitly NOT re-derived (materializer, cadence, trigger, authority_role, owner, lineage). VERDICT DISTRIBUTION: 20 QUALIFIED, 1 UNSOUND, 0 SOUND. None is SOUND, and that is deliberate -- SOUND asserts every row measured, which is false for every subject in a tranche whose instrument is a filesystem read.",
+      "denominator": "21 of 21 verdicts name an instrument; 20 QUALIFIED + 1 UNSOUND = 21; 2 blocking_defects recorded",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "W4FILE-AC5",
+      "criterion_verbatim": "W4-m-joinable: artifact.location.home must be an EXACT IDENTITY A CONSUMER CAN EQUALITY-JOIN, never prose.",
+      "method": "command",
+      "invocation": "Applied a prose predicate (contains a space, an open-paren, or a semicolon -- the same shape test the v2 joinable_ref id constraint enforces) to artifact.location.home across all 21 delivered cards, then applied the IDENTICAL predicate to the L0 manifest's declared home for the same 21 parts.",
+      "output_evidence": "*** CARDS: 21 of 21 JOINABLE, 0 prose. *** Every home is the exact repo-relative path, resolved and stat'd this session -- no parentheticals, no commit-ish, no line counts, no behavioural claims. Wave 3 put prose in 9 of 13; this tranche is 0 of 21. POSITIVE CONTROL, and it fires on a real member: the same predicate applied to the MANIFEST returns 1 of 21 prose -- part 'snap_store.WRITER', whose declared home reads 'infra/aws/globgrph/snap_store.py (436 lines) @76c58923ac; writes globgrph.<surface> via table_id=(NAMESPACE, surface) at :222'. That is a path, a line count, a commit and a behavioural claim in ONE string. So the predicate CAN return True and does; the cards return False on all 21. \u26d4 THE DEFECT THIS ROW EXISTS FOR IS PRESENT IN THE MANIFEST THE WAVE IS BUILT FROM, NOT IN THE CARDS -- the card for that part emits the exact path as home and reports the manifest value as the defect rather than inheriting it.",
+      "denominator": "21 of 21 card homes joinable; 1 of 21 manifest homes prose; predicate exercised in both directions",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "W4FILE-AC6",
+      "criterion_verbatim": "as_of carries ONE wave pin across the tranche; carded_utc an honest clock read at a declared grain.",
+      "method": "command",
+      "invocation": "as_of bound ONCE in the generator and stamped into all 21; the builder then re-derives the distinct (commit_ish, graph_vintage, carded_utc) triples across the delivered cards and FAILS the build if the count is not 1.",
+      "output_evidence": "1 distinct triple across 21 cards. commit_ish=1e7c66e996 (the TO's own commit; the decomp is separately pinned @dd068ae99f in decomp_ref). carded_utc=2026-08-27T08:23:41Z. GRAIN DECLARED: PER-BATCH -- one clock read, stamped identically into all 21; it is NOT a per-card read and no card implies it is. graph_vintage is stated as N/A WITH ITS REASON rather than left a bare null: these subjects ARE the graph substrate's own artifacts, not reads of a graph snapshot, so each card carries its subject's OWN measured mtime instead.",
+      "denominator": "1 of 1 distinct as_of triple across 21 cards",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "W4FILE-AC7",
+      "criterion_verbatim": "QUALIFY, DO NOT FIX -- a defect found in a carded artifact is REPORTED, not patched.",
+      "method": "command",
+      "invocation": "All writes confined to org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_W4/ and the proof-of-spec instance; every carded artifact opened read-only; safe-commit pathspec excludes all 21 subjects.",
+      "output_evidence": "ZERO writes to any of the 21 carded artifacts. TWO defects found and REPORTED, NEITHER PATCHED: (1) kuzu_ac7.dir EXISTS AND IS EMPTY -- 0 entries, 0 bytes -- carded UNSOUND with a blocking_defect, and NOT deleted or populated; (2) the L0 manifest's home for snap_store.WRITER is prose -- reported to the manifest's owner, and the manifest was NOT edited. I also declined to delete any artifact to characterise its absence, which is why every failure_mode.returns_on_failure row carries basis='inferred' rather than 'measured': deleting a live artifact to observe a consumer's error would be the exact opposite of this rule, and an honest 'inferred' is the correct price.",
+      "denominator": "0 writes across 21 carded artifacts; 2 defects reported, 0 patched; 1 UNSOUND verdict issued rather than remediated",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "W4FILE-AC8",
+      "criterion_verbatim": "A UNIFORM RESULT ACROSS A SET IS AN INSTRUMENT SIGNATURE, NOT A DEFECT SIGNATURE. Suspect any perfectly clean or perfectly empty sweep.",
+      "method": "live_read",
+      "invocation": "Path.exists() over all 21 homes, then a deliberate negative control on four NEAR-MISS paths built from real members (a sibling suffix, a one-char change, and two near-misses on tracked and untracked members).",
+      "output_evidence": "The sweep returned 21 of 21 EXIST -- a perfectly clean result, which this criterion exists to make me distrust. Two things follow and both are reported. (1) THE INSTRUMENT CAN DISCRIMINATE: the negative control returned False on 4 of 4 near-miss paths, so Path.exists() is not stuck-on. (2) \u26d4 BUT THE 21/21 IS CIRCULAR AND I AM NOT REPORTING IT AS A FINDING: the FILE tranche was DEFINED by this very predicate -- the issuer's dispatch states the tranche is separable because 'Path.exists() is TRUE on 0 of those 14 [REMOTE] while the SAME instrument fires 21 of 28 on the file set'. My 21 ARE the 21 that fired. 21/21 restates the tranche's definition; it does not measure it. A clean sweep here would have been guaranteed even if every artifact were empty -- which is exactly what kuzu_ac7.dir turned out to be, and existence-only would have missed it.",
+      "denominator": "21 of 21 exist; 4 of 4 negative controls returned False; 1 subject exists-but-is-empty",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutants submitted to the SAME Draft 2020-12 validator that produced the 21-of-21 PASS, run after the final build so they certify the DELIVERED bytes. A negative control (an empty card, {schema_version: 2}) runs FIRST at every build invocation and the builder exits 2 declaring every subsequent PASS UNMEASURED if it ever accepts. Additionally the JOINABLE predicate was exercised in both directions rather than only the passing one.",
+      "expected": "The validator REJECTS a malformed card; the joinable predicate RETURNS TRUE on a real prose value.",
+      "observed": "NEG-CONTROL FIRED at every build ('subject' is a required property). THREE MUTANTS AROSE UNPLANNED AND ALL FIRED AGAINST ME, which is the stronger evidence that the validator is live rather than decorative: the FLOOR RULE rejected artifact.location carrying basis='measured' over a 'held' projection_of sub-claim, on ALL 21 cards at once, and I corrected the scalar to 'held' rather than upgrading the sub-claim. JOINABLE PREDICATE POSITIVE CONTROL: it returns True on the manifest's snap_store.WRITER home, proving it can detect prose, while returning False on all 21 card homes -- a predicate that only ever returned False would have certified nothing.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs of build_cards_w4file.py compared by digest: md5sum over the 21 delivered cards, re-run the generator unchanged, md5sum again, diff the two sorted digest sets. Plus a negative control on the comparator itself -- a 1-byte append to one card must change its digest.",
+      "observed": "STABLE. 21 of 21 cards byte-identical across the two runs. NEGATIVE CONTROL FIRED: the 1-byte append changed the digest, so the comparator can detect a difference and a match is meaningful. Determinism is by construction -- as_of is bound ONCE as a literal and every count is derived from probe JSON captured before the build, so there is no clock read or HEAD read at build time to drift. That is the same property AC6 depends on: a wave pin that re-derived itself per card could not be byte-identical across 21.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "SEMANTIC correctness of any artifact's contents",
+      "reason": "Nothing was compared against a source of truth. Structural shape, size, vintage and tracked state were measured; MEANING was not. Every card states this in trust.coverage.explicitly_out so silence does not read as clean."
+    },
+    {
+      "item": "Deleting or moving any artifact to observe a consumer's failure",
+      "reason": "That is the only way to MEASURE failure_mode.returns_on_failure, and it is forbidden by QUALIFY-DO-NOT-FIX on live artifacts. All 21 carry basis='inferred' on that sub-claim rather than a measured value obtained by breaking the estate."
+    },
+    {
+      "item": "Re-deriving the L0 manifest's generation and lineage fields (materializer, cadence, trigger, authority_role, owner)",
+      "reason": "Carried as basis='held' -- a named authority asserted them and I did not independently trace them to source. A filesystem instrument cannot see a producer. Marking them 'measured' would have been the exact over-promise the basis enum exists to prevent, and 65 of 147 rows are held for this reason."
+    },
+    {
+      "item": "Opening the four Kuzu database files with the Kuzu engine",
+      "reason": "kuzu_ac7.db, kuzu_db, kuzu_nessie_db.local and kuzu_stitch_db are binary databases. Their magic bytes were read (4b555a5527000000 = 'KUZU') and their sizes measured, but row-level identity requires the engine. Their coverage denominators are honestly stated in bytes with an explicit note that a byte size is opaque to a structural count -- not dressed up as a record count."
+    }
+  ],
+  "surprises": [
+    "\u26d4 FINDING, UNSOUND VERDICT ISSUED: kuzu_ac7.dir EXISTS AND IS EMPTY -- Path.exists() True, is_dir() True, ZERO entries, ZERO bytes. It is the clearest instance in this tranche of the TO's own instruction that EXISTENCE IS NOT CONFORMANCE. Every existence-based instrument in the estate reports this manifest part as PRESENT while it serves nothing, and an existence-only sweep -- which is what this tranche's defining predicate is -- would have passed it. Carded UNSOUND with a blocking_defect, NOT remediated. Owner: as recorded in the L0 manifest.",
+    "\u26d4 FINDING, 13 of 21 SUBJECTS ARE UNTRACKED-BUT-PRESENT: .comp-graph/baseline.json, .comp-graph/managed_policy_actions_cache.json, .comp-graph/pathrooting-census.json, .comp-graph/pydeps.json, c2_instances.json, c3_structures.json, kuzu_ac7.db, kuzu_ac7.dir, kuzu_db, kuzu_nessie_db.fallback.jsonl, kuzu_nessie_db.local, kuzu_stitch_db, stitch_graph.json. Measured by `git ls-files --error-unmatch` per path. These exist on THIS device and are in no commit, so they read as PRESENT to every filesystem instrument while the repository does not have them -- a second device following any of these cards' `home` resolves nothing. This is why 13 of the 21 key rows carry key_is_stable='unknown' rather than 'stable': I measured no instability, I measured the ABSENCE OF A GUARANTEE, and those are different claims.",
+    "\u26d4 FINDING ROUTED TO THE MANIFEST'S OWNER: the L0 manifest's declared `home` for part snap_store.WRITER is PROSE, not a joinable identity -- 'infra/aws/globgrph/snap_store.py (436 lines) @76c58923ac; writes globgrph.<surface> via table_id=(NAMESPACE, surface) at :222'. This is exactly the W4-m-joinable defect the whole wave exists to close, sitting in the manifest the wave is built FROM. 1 of 21 in this tranche. The card emits the exact path as home and reports the manifest value rather than inheriting it. NOT PATCHED (qualify-do-not-fix).",
+    "OBSERVATION, AND IT IS A CORRECTION OF MY OWN FIRST ANALYSIS: I compared each part's manifest vintage.measured_utc against the artifact's live mtime and found 8 of 21 disagreeing. My first reading was that the field carries TWO MEANINGS (artifact mtime for some parts, observer clock for others). THAT WAS A RESIDUAL BUCKET -- I had explained one cause and named the remainder after it. Decomposing until the parts summed gave FOUR causes, not two: 12 equal-to-the-second; 3 differing by EXACTLY 4h00 with seconds truncated to :00 (c2_instances.json, c3_structures.json, kuzu_nessie_db.fallback.jsonl) which is LOCAL TIME (EDT, UTC-4) WRITTEN INTO A FIELD NAMED _utc -- the instrument class CLAUDE.md Rule 22a names; 1 date-only midnight value (kuzu_ac7.dir); 3 genuinely rewritten since the manifest measured them (kuzu_nessie_db.local, kuzu_stitch_db, nerves-risk-edges.json) which is the vintage field working correctly; and 1 true observer-clock reading (snap_store.WRITER). PARTITION SUMS 21 OF 21, unexplained 0. My first partition summed to 33 because equal-to-the-second cases have sub-second mtime precision and fell through into 'rewritten' -- caught by requiring the parts to sum rather than by inspection.",
+    "OBSERVATION on this tranche's own defining predicate, reported so nobody quotes my clean sweep as evidence: Path.exists() returned TRUE on 21 of 21, but the FILE tranche was DEFINED by that predicate (the issuer's dispatch: 'Path.exists() is TRUE on 0 of those 14 while the SAME instrument fires 21 of 28 on the file set'). The result is CIRCULAR -- it restates the tranche's definition. The negative control (4 of 4 near-miss paths returned False) establishes the instrument can discriminate, but nothing establishes the tranche membership independently, and kuzu_ac7.dir shows exactly what an existence-only predicate misses.",
+    "PROCESS, CARRIED FORWARD FROM MY OWN WAVE-3 DEFECT: the TO's standing rules include 'RUN THE GATE ON THE WRAPPER', which is there because THIS LANE shipped a wave-3 proof-of-spec instance without running .tools/proof-of-spec-check.py on it and took 11 violations. This instance was gated BEFORE delivery, and the gate result is quoted in this session's completion message rather than assumed. Rigour on the object does not transfer to the wrapper that reports it.",
+    "\u26d4 GATE DEFECT, MEASURED WITH A FIRING POSITIVE CONTROL, AFFECTS ALL THREE WAVE-4 LANES AND IS NOT MINE TO FIX. .tools/proof-of-spec-check.py reports 'decomp_ref.to_ref ... resolves to an UNTRACKED file -- committed state is required to enforce against it' for TO-W4-FILE. THE CLAIM IS FALSE: git ls-files --error-unmatch returns rc=0, git cat-file -e HEAD:<path> resolves, git check-ignore reports not-ignored, and the file was committed in 1e7c66e996 alongside its two siblings. ROOT CAUSE AT SOURCE: :205 builds the corpus as `git ls-files -- '*/task_orders/*.md'` and :213 _is_tracked() tests membership of THAT GLOB. Wave-4 TOs live in org/tier1_exec/2.0.0_SA_COO/deliverables/D11_W4/, not a task_orders/ directory, so a TRACKED file reads as UNTRACKED. THE DISCRIMINATOR IS THE DIRECTORY, NOT TRACKED-NESS. Measured: corpus = 2126 files; my wave-3 TO (under task_orders/) IS in it -- positive control fires; all THREE wave-4 TOs are tracked and NONE is in it. TWO CONSEQUENCES, and the second is the dangerous one: (1) the message falsely accuses the issuer of shipping uncommitted work; (2) the gate then prints 'alignment: NOT EVALUATED ... Not a violation' -- so the forward/backward cell_ref enforcement is SILENTLY DISABLED for every wave-4 lane while nothing fails and the line reads as benign housekeeping. A function named _is_tracked that answers 'is this in my glob' is the same name-is-not-an-identity class this wave's TO warns about twice. Owner: the checker's owner via 3.0.0_SA_CVO~X. NOT PATCHED -- qualify-do-not-fix, and this instance is the artifact being judged by that very gate.",
+    "\u26d4 GATE DEFECT #2, MEASURED WITH A POSITIVE CONTROL, ISSUER/CHECKER-SIDE AND NOT LANE-FIXABLE. After the criterion map landed @0adc769b0c the gate reported two further violations against the TO: that cell_ref 'W4-m-joinable' does NOT exist in DECOMP.md, and that <owned_cells> contains 'non-id text (W4-m-joinable)'. BOTH ARE FALSE. The id IS in the face and it IS an id. ROOT CAUSE AT SOURCE: .tools/proof-of-spec-check.py:179 CELL_ID_RE = r'\b[A-Z][A-Z0-9]*-[a-z]{1,4}-[a-z]?\\d+\b' requires the FINAL SEGMENT TO BE DIGITS. Measured: the checker's own regex finds 252 of the 257 ids in DECOMP.md; the 5 it cannot see are exactly the word-suffixed mechanism cells W4-m-instrument, W4-m-joinable, W4-m-nested, W4-m-population, W4-m-unbuilt. POSITIVE CONTROL: W4-nubl-1 matches, so the pattern works on the numeric grammar. WHY IT NEVER FIRED BEFORE: wave 3's mechanism cells were W3-m-1..W3-m-5 -- NUMERIC -- so they matched; wave 4 named its mechanism cells after their subject and the id grammar changed underneath a regex that encodes the old one. A PREDICATE NAMED CELL_ID_RE THAT ACTUALLY MEANS 'CELL ID ENDING IN A NUMBER' -- the name-is-not-an-identity class, third instance tonight inside the instruments that judge this wave. CONSEQUENCE: the checker accuses the ISSUER of citing a nonexistent cell and of putting prose in a machine-parsed delimiter, and both accusations are artifacts of its own parser. NOT PATCHED -- qualify-do-not-fix, and this instance is the artifact that gate is judging. Owner: the checker's owner via 3.0.0_SA_CVO~X."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-27/ (written at session close, with a mandatory Compiler Tools section)",
+  "compiler_tools": [
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py on THIS instance, before delivery",
+      "result": "Run pre-delivery this time by standing rule. Verdict quoted in the completion message; the VERDICT LINE is read, never rc -- through a pipe $? returns tail's status, not the checker's."
+    },
+    {
+      "tool": ".tools/jq.exe",
+      "invocation": "jq over workflows/atom_decomposition/runs/nfra-substratecarding-w4/rectangle.c0.json, cells grouped by executor_class",
+      "result": "cell_total 257; 148 cells under 0.8.0_AE_CloudComp~X (147 CARD_MATRIX + 1 mechanism), 84 under 0.7.0_AE_CloudOps~X, 21 under 0.8.0_AE_CloudComp~Y, 4 under 2.0.0_SA_COO~X. Confirms the TO's 21/147 against the decomp rather than accepting the TO's own digits."
+    },
+    {
+      "tool": "git ls-files",
+      "invocation": "git ls-files --error-unmatch <home> per subject, rc==0 -> tracked",
+      "result": "8 tracked / 13 untracked of 21. The instrument for the untracked-but-present finding; a filesystem probe alone cannot produce it."
+    },
+    {
+      "tool": "comp-which",
+      "invocation": "startup A.3 exercise half",
+      "result": "PASS earlier this session -- 105 of 105 comp-tools resolve bare and a forwarder RAN. Not re-run for this TO; resolution state was established at startup and nothing since would have changed it."
+    }
+  ]
+}

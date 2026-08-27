@@ -4,7 +4,7 @@
 <assigned_to>0.6.0_AE_PartnerETL (staged for when the AE PartnerETL lane spins up; CVO/Andrew drive BD)</assigned_to>
 <issued_by>1.0.0_SA_CTO (PRD author/arch; re-scoped 2026-06-25 from Phase-0 after CVO drove the P0 recovery manually)</issued_by>
 <issued_date>2026-06-25 (re-scoped from the Phase-0 TO d09a612d4)</issued_date>
-<status>pending</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project ADVI_BDAPIMIG, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: pending</status>
 <!-- PHASE-0 P0 RECOVERY DONE 2026-06-25 by 3.0.0_SA_CVO (AE lane cold, BD on CVO per Andrew): auth proven
 live, blackdiamond/49f/session created, 4 templates provisioned (Custom dateRangeType), cot_bronze_ingest.py
 run firm-bound to bd (all 4 env vars explicit), 4 tables re-landed @06-24 to opal-data-bd/forwardfill_v2,

@@ -2,7 +2,7 @@
 
 **Lane:** DE/RD portal + DS data (mixed — see options); 0.4.0_DE_ClientPlatform + 0.4.2_RD_AdvisorIntelligence + DS
 **Priority:** P2 — 1 of Andrew's 5 Segment Analytics bugs (the non-pure-data one)
-**Status:** SCOPE-CORRECTED 2026-06-12 (DE verify-before-fix 223359Z) — **product decision GATED on Andrew** (he is engaged with DE directly)
+**Status:** complete -- SCOPE-CORRECTED 2026-06-12 (DE verify-before-fix 223359Z) — **product decision GATED on Andrew** (he is engaged with DE directly) -- SPRING-CLEAN 2026-08-25: ORPHAN, project code "ADVI_SEGFE" unregistered and unreferenced.
 
 ---
 

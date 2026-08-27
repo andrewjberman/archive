@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>0.4.0_DS_ClientPlatform (self-authored; COO-nodded 195533Z under CTO Rule A / NFRA_COT_RULE15)</issued_by>
 <issued_date>2026-06-17</issued_date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project ADVI_NNAATTR is complete; this TO was last touched 2026-06-17, predating the project close 2026-06-22. Closed as a record act, not a work verdict. Prior status: staged</status>
 <priority>LOW — pure lint debt, no behavior change. SEQUENCED: execute ONLY AFTER tonight's nightly validates the TO-1 architect_no_infer change in isolation, so the SEV1-relevant C_07 change verifies on the served artifact WITHOUT a second concurrent C_07 edit in the same nightly.</priority>
 
 <context>

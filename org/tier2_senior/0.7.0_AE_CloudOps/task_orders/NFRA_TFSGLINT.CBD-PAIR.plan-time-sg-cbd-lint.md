@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:55Z</issued>
 <dated>2026-08-24 — behind your full 49F push stack (fixture -> TO-4 -> P2 -> P4 IAM -> P5 opens 08-23). Not urgent; dated so it does not evaporate.</dated>
-<status>pending -- GO 165431Z @3bc88957c8; dated 08-24, sequenced behind the full 49F stack (fixture -> TO-4 -> P2 -> P4 -> P5)</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "NFRA_TFSGLINT" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: pending -- GO 165431Z @3bc88957c8; dated 08-24, sequenced behind the full 49F stack (fixture -> TO-4 -> P2 -> P4 -> P5)</status>
 <priority>P3 — closes the 08-15 class (TF plan is END-STATE, not PATH: replacement ORDER + in-place stop/start invisible in plan rows; an SG replace beside a live instance)</priority>
 <authority>Andrew-direct 2026-08-18 ~1537Z at the CTO terminal (verbatim: fourth section of org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260818_ALL_RECS_APPROVED_49F_END_TO_END_PUSH_AND_MDPF_UNUSED_DELETE.md): YOUR banked lint proposal APPROVED — deny new aws_security_group without create_before_destroy beside a persistent aws_instance, audited override. CTO gates the lint text (their routing note 164931Z). This TO carries the explicit Andrew word the no-new-gates rule requires — cite it in the lint's header.</authority>
 </task_order>

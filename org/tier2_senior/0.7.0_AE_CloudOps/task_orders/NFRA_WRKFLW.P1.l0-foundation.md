@@ -6,7 +6,7 @@
 <arch_gate>1.0.0_SA_CTO -- the TWO-ZONE PRIVACY DESIGN is the FIRST mandatory arch-gate; NOTHING mines until the scoping-lake holds zero identity (CTO + CVO confirm)</arch_gate>
 <issued_by>2.0.0_SA_COO (Andrew-direct via CTO 160626Z; PRD docs/architecture/NFRA_WRKFLW_PRD.md S6; MSTR scoping-owner, brief docs/briefs/oplmcp-workflow-scoping-20260624.md)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>queued</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project NFRA_WRKFLW, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: queued</status>
 <!-- PACED: substrate (.05/R8 audit-lake) is READY, but P1 build PACES BEHIND the DATA_PLATFORM deep-expansion + OPLMCP-completion hot-priorities (capacity). Authored now for coverage; executes when capacity frees. P2-P5 queued behind P1. -->
 
 <objective>

@@ -6,7 +6,7 @@
 <verify>3.0.0_SA_CVO (verifier-not-fixer: the control actually blocks the agent-hijack threat-class)</verify>
 <issued_by>2.0.0_SA_COO (Andrew-direct via CTO 175856Z; PRD docs/architecture/SCTY_PRD.md; new SCTY macro)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>active</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project SCTY, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: active</status>
 <!-- URGENT-first per CTO. The IMMEDIATE untrusted-DATA POSTURE is LIVE NOW (relayed to the recon lane in the BFS-phase-2 GO 180215Z) -- a discipline, no build needed. The built control DESIGNS now (CTO arch) + BUILDS paced behind base-AE's crawl-capacity (or a respawn). -->
 
 <objective>

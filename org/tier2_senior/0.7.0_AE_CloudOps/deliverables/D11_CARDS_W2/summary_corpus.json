@@ -1,0 +1,193 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.7.0_AE_CloudOps~X",
+  "subject": {
+    "id": "org/modules/graph/debtscan/summary_corpus.py",
+    "kind": "corpus",
+    "declared_domain": "comp-similar's Phase-1 DERIVE-AT-SCAN summary corpus. For each ARN resource in the live graph it SYNTHESIZES a purpose document at scan time from node_type + layer + arn + the edge neighborhood + wiring, and exposes BM25 similarity over that corpus. Table-independent and projection-independent by its own declaration."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-26T22:17:42Z",
+    "commit_ish": "100e7ea130",
+    "graph_vintage": "kuzu_nessie_db@2902399899597701830"
+  },
+  "process": {
+    "methodology": {
+      "how": "One graph read builds an in-memory {arn -> SummaryDoc} corpus; SimilarityIndex scores BM25 over it using the class IMPORTED from dup_scan rather than a second implementation. Two declared controls are load-bearing: CORPUS-COLLAPSE excludes a resource's OWN name from its document (so comp-similar cannot degenerate into comp-dups) while including neighbor names as functional context; BLIND-ROW bands a document with too few purpose tokens as THIN=UNKNOWN rather than 'unique'. A binding CTO ruling forbids patching a thin summary from the AWS Description field. THE BURIED OPINIONS, IN PROSE because the TO's form is prose: (1) the THIN cutoff -- what counts as 'too few purpose tokens' -- is the definitional choice that decides which 351 resources are unanswerable; (2) the document is assembled from a FIXED recipe (type + layer + arn + neighborhood + wiring), so any purpose not expressed in graph structure is invisible by construction; (3) an llm_class overlay is read but is DISPLAY-ONLY and deliberately excluded from the BM25 tokens, which is why this subject is deterministic rather than hybrid; (4) neighbors() applies min_norm=0.15 and top=8, so a ninth peer or a 0.14 score does not exist to a caller.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "historical_in_use",
+      "declared_opinions": [
+        "The THIN cutoff -- what counts as 'too few purpose tokens' -- is the definitional choice that decides which 351 of 1,851 resources are unanswerable, and it is expressed as a token count rather than a stated policy.",
+        "The summary document is assembled from a FIXED recipe (node_type + layer + arn + edge neighborhood + wiring), so any purpose not expressed in graph structure is invisible by construction.",
+        "An llm_class overlay is read but is DISPLAY-ONLY and deliberately excluded from the BM25 tokens (:811), which is the choice that makes this subject deterministic rather than hybrid.",
+        "neighbors() applies min_norm=0.15 and top=8, so a ninth peer or a 0.14 score does not exist to a caller.",
+        "CORPUS-COLLAPSE: a resource's OWN name is excluded from its own document while neighbor names are included -- a deliberate choice to keep comp-similar from degenerating into comp-dups.",
+        "NO DESCRIPTION FALLBACK: a thin summary is never patched from the AWS Description field, by binding CTO ruling. The thinness is preserved rather than filled."
+      ],
+      "composes": [
+        {
+          "id": "org/modules/graph/debtscan/dup_scan.py",
+          "note": "BM25 is IMPORTED, not reimplemented -- `from dup_scan import BM25`, measured at source"
+        },
+        {
+          "id": ".tools/comp-kuzu",
+          "note": "the live graph read, invoked as a subprocess at :152"
+        },
+        {
+          "id": "kuzu_nessie_db",
+          "note": "the projection the corpus is synthesized from"
+        }
+      ],
+      "invents": [
+        {
+          "id": "the SummaryDoc purpose-document recipe",
+          "note": null
+        },
+        {
+          "id": "the THIN / UNKNOWN blind-row band",
+          "note": null
+        },
+        {
+          "id": "the corpus-collapse control",
+          "note": "a resource's own name is excluded from its own document"
+        }
+      ],
+      "basis": "inferred",
+      "basis_by_field": {
+        "how": "measured",
+        "determinism": "measured",
+        "materializer_standing": "inferred",
+        "composes": "measured",
+        "invents": "measured"
+      },
+      "evidence": "SOURCE READ @04b967c3c3 -- header/controls :1-40, comp-kuzu invocation :146-161, _kuzu_json :163-190, build_corpus :830, SimilarityIndex :1094, neighbors() min_norm/top and the norm=round(score/ceil,3) form :1105-1117, coverage :1131, llm_class display-only :361-367 and :476, tokens exclusion :811. THE COMPOSES ROW IS THE ONE THAT MATTERS AND IT WAS MEASURED RATHER THAN ASSUMED: `from dup_scan import BM25` is present and 'class BM25' is ABSENT from this file, so BM25 is COMPOSED, not INVENTED -- which also settles, from the consuming side, that dup_scan.py and this module are two distinct subjects joined by an import edge rather than one subject under two names. That check was run because COO~X 73853 required each lane to find its subjects' DEFINITION SITES before carding, after 2 of another lane's 11 turned out to be duplicates. determinism='measured' is the one determinism claim in this TO that IS exercised: in wave 1 I ran the same query twice and byte-compared (identical, 2,477 bytes), with a different-subject control that DIFFERED so the compare could fail. materializer_standing='historical_in_use' is INFERRED: it is the live corpus comp-similar actually reads, and a Phase-3 resource_summaries table exists but is not on that path -- I am reasoning about its standing relative to a successor rather than measuring a currency claim, so INFERRED, not measured. DECLARED-OPINIONS FORM, RESOLVED: this card ships declared_opinions as an ENUMERATED ARRAY. The TO originally directed buried opinions into methodology.how as prose because the card schema had no slot; 1.0.0_SA_CTO~X landed an OPTIONAL process.methodology.declared_opinions @9660f526d8 about two minutes after wave 2 dispatched and ruled the choice of form was the issuer's. I surfaced that fork as a non-blocking OBSERVATION and continued in prose pending a ruling. COX2-AC8 on the TO at HEAD IS that ruling -- it requires the field populated and states that omitting the key passes the schema and fails the TO -- so the array is what ships, and the same opinions remain in methodology.how so the prose and the field cannot disagree.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "cadence": {
+      "declared_rhythm": null,
+      "actual_trigger": "operator invocation of comp-similar, which rebuilds the corpus in memory on every call. Nothing schedules it and nothing caches it between calls.",
+      "live_matches_declared": "not_applicable",
+      "live_instance_age": "no persisted instance exists to age. The corpus inherits the freshness of the kuzu projection it reads, which was built 2026-08-26T14:07:59Z and read [STALE > 6h cadence] by comp-kuzu's own header during this carding.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "EXERCISED in wave 1 by calling build_corpus() in-process, which returned a populated 1,851-resource corpus with no scheduled component and no cache read. ⛔ A FINDING THAT FOLLOWS: because _kuzu_json :163-190 seeks past comp-kuzu's provenance header to the first '[' and returns only rows, THE CORPUS NEVER CAPTURES THE SNAPSHOT ID IT WAS BUILT FROM. It does not merely inherit a vintage it does not control -- it cannot REPORT the one it inherited. Measured, and it is why answering 'which graph was this built from?' required a separate no-drift re-read rather than reading the artifact.",
+      "owner": "0.8.0_AE_CloudComp"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": false,
+      "authority_role": "none",
+      "mutation_policy": "not_applicable",
+      "form": "in-memory {arn -> SummaryDoc} dict, rebuilt per invocation and discarded",
+      "basis": "measured",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "mutation_policy": "measured",
+        "form": "measured"
+      },
+      "evidence": "persisted=false MEASURED per COX2-AC3 by exercise, not by reading a docstring: build_corpus() was called in-process and returned a full corpus with the resource_summaries Iceberg table untouched. The module's header declares derive-at-scan as the v1 corpus and states the gated pieces do not block it. authority_role='none' follows. ⛔ A PERSISTED ARTIFACT FOR THIS CONCEPT DOES EXIST AND IS NOT THIS -- see location.co_resident_stores; carding persisted=true off that table would attribute to the live path a store the live path never reads.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "location": {
+      "home": "org/modules/graph/debtscan/summary_corpus.py (89,498 bytes)",
+      "projection_of": [
+        {
+          "id": "kuzu_nessie_db",
+          "note": "the live graph projection the corpus is synthesized from"
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_nodes_4c6c23bd-fffa-427e-9cd9-7a9deaa3426d",
+          "note": null
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_edges_6629328d-a582-46d2-80bc-5059de1a77ce",
+          "note": null
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/resource_summaries_b38ddc35-944f-4dd4-b801-120e96c6d4cd/",
+          "note": "a STRANDED store: exists and holds data (71 keys, 64 under data/, 7 under metadata/), newest object 2026-07-18T21:11:05Z, and NOT read by the live comp-similar path"
+        },
+        {
+          "id": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/comp_similar_phase1/summary_corpus.py",
+          "note": "a SECOND FILE WITH THIS EXACT LEAF NAME, 23,030 bytes vs this file's 89,498, whose :152 is 'try:' where this file's is the comp-kuzu resolution"
+        }
+      ],
+      "basis": "held",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured",
+        "co_resident_stores": "held"
+      },
+      "evidence": "home MEASURED by stat. ⛔ THE LEAF-NAME COLLISION IS THE LOAD-BEARING ENTRY AND IT IS MINE TO DECLARE: in wave 1 I cited 'summary_corpus.py' BARE six times in an accepted card, and 0.8.0_AE_CloudComp~Y measured that the name resolves to TWO files, with the decoy sitting in a deliverables folder a reader chasing a comp-similar finding would search first. THIS SUBJECT IS THE DEBTSCAN FILE, confirmed by CONTENT not filename per the TO's instruction: :152 reads `tool = REPO / \".tools\" / \"comp-kuzu\"` here and `try:` in the other copy. co_resident_stores is basis HELD, not measured: the resource_summaries figures are my own wave-1 measurement at a prior vintage and the second-copy digests are 0.8.0_AE_CloudComp~Y's read, neither re-derived here -- so the FLOOR makes this whole row 'held' rather than letting the measured home carry it.",
+      "owner": "0.8.0_AE_CloudComp (module); 1.0.0_SA_CTO (the stranded resource_summaries table)"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "ARN-keyed AWS estate resources present in the live graph at scan time",
+      "denominator": "1,500 of 1,851",
+      "denominator_absent_reason": null,
+      "explicitly_out": [
+        "351 UNKNOWN-thin resources -- IN the corpus, OUT of the answerable set: scanned and banded, but carrying too few purpose tokens to yield a known twin",
+        "29 hold-marked resources (_HELD_RX) -- summarized but excluded from candidate output",
+        "the MICROSOFT and GIT identity spaces ENTIRELY -- the universe is ARN-keyed by construction, so non-AWS resources are not thin, they are ABSENT. Andrew named this himself: 'ARN is a good stable key for AWS resources but obviously doesn't cover the MS or Git spaces.'",
+        "1,846 of 1,851 match no canonical motif; 606 of 1,851 carry no C2/C3 membership clause"
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "measured",
+        "explicitly_out": "measured"
+      },
+      "evidence": "RE-DERIVED by calling summary_corpus.coverage() in-process rather than copying a peer's figure -> total_arn_resources 1851, summarized 1500, unknown_thin 351, held_marked 29, motif_matched 5, membership_matched 1245; len(corpus)=1851 independently. ⚠ THE INSTRUMENT RELATIONSHIP STATED HONESTLY: coverage() is the tool's OWN code path, so this confirms what the instrument REPORTS and does NOT independently corroborate that it counts correctly. A second, genuinely independent count of ARN resources was not run.",
+      "owner": "0.8.0_AE_CloudComp"
+    },
+    "key": {
+      "identity_space": "AWS ARN, with a bare-name alias for resources addressed by name",
+      "key_is_stable": "stable",
+      "crosses_spaces": false,
+      "declared_mapping": null,
+      "basis": "measured",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "MEASURED. Within its declared universe the ARN survives ordinary change to the resource it names -- 'stable' in this schema's sense. ⛔ crosses_spaces=false IS A FINDING, NOT A CLEAN BILL, and reading it as reassurance inverts it: an ARN carries no MS or Git identity and there is no join, so those resources are not poorly-keyed in this corpus, they are absent from its universe -- the gap presents as coverage while its cause is identity. declared_mapping=null after a hunt across summary_corpus.py's key handling, comp_similar.py, resource_summaries_store.py's schema and the corpus keys as returned by build_corpus(); none of the four declares one.",
+      "owner": "UNOWNED -- no seat owns a cross-space identity grammar for the estate; naming one is a guess"
+    },
+    "failure_mode": {
+      "returns_on_failure": "For an unresolvable subject, comp-similar prints \"'<subject>' did not resolve to a corpus resource\" and exits rc=1 (resolvable control: rc=0). For a graph-read failure the corpus layer raises GraphUnavailable LOUD by deliberate design, its docstring recording that a failed query must NEVER be returned as a silent [].",
+      "distinguishable_from_true_negative": "yes",
+      "silent_degrade_paths": [
+        "⛔ THE DISCRIMINATION FAILURE, REPRODUCED: `comp-similar opal-data-assets` returns EIGHT distinct S3_BUCKET_POLICY resources at BYTE-IDENTICAL sim=1.0, all flagged [THIN], sorted ABOVE genuinely discriminating results (0.747, 0.539, 0.526). Eight distinct resources at one identical score carry ZERO BITS about which is the better match. The blind-row control keeps them out of --supersede candidates, so the load-bearing path is protected and the advisory display is not.",
+        "The corpus cannot report the graph vintage it was built from (_kuzu_json discards the provenance header), so a corpus built on a stale projection and one built on a fresh one are indistinguishable from the artifact alone.",
+        "A resource absent from the graph entirely and a resource with no similar peers both simply do not appear in the neighbors output."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "EXERCISED per COX2-AC7, rc captured WITHOUT a pipeline after my first attempt in wave 1 read tail's rc and would have made me card a tool that cannot signal failure: unresolvable -> rc=1 with the quoted message; resolvable control run separately -> rc=0, 41 lines. The THIN cluster was observed directly in that run's output. --self-test PASSES 7/7 across two invocations, including the corpus-collapse and blind-row arms.",
+      "owner": "0.8.0_AE_CloudComp"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "Every row worked, defects named with owners, usable within stated limits. WHAT HOLDS: the corpus is genuinely deterministic and exercised as such with a control that could have failed; it makes ZERO model invocations per run (the llm_class overlay exists but is structurally excluded from the BM25 tokens, so it cannot move a score); the coverage denominator reproduces at 1,500 of 1,851; the failure path discriminates on both stdout and exit code; and BM25 is COMPOSED from dup_scan rather than reimplemented, which is the correct relationship and was measured rather than assumed. WHAT QUALIFIES IT: (1) the THIN discrimination failure is real and reproduces -- eight distinct resources at byte-identical sim=1.0 above genuinely discriminating results; (2) the corpus has no vintage of its own AND cannot report the one it inherits, because the provenance header is parsed past and dropped; (3) a real, populated resource_summaries table exists, is 38 days stale, and is read by nothing on the live path; (4) the universe is ARN-only, so the MS and Git spaces Andrew named are absent rather than under-covered, and no seat owns a cross-space grammar; (5) this file's own leaf name resolves to two files, one of which sits where a reader would look first. || SEMANTIC-AXIS DECLARATION: NOT SYSTEMATICALLY EXAMINED. The four opinions in methodology.how surfaced because the coverage and failure_mode rows forced them. I did NOT audit whether the THIN cutoff, min_norm=0.15 or top=8 reflect a ruled intent, nor whether the fixed document recipe still captures what the estate means by 'purpose'. My determinism PASS says the tool reproduces its answer; it says nothing about whether that answer encodes a current definition, and a tool can be perfectly deterministic about a deprecated opinion. || GENERATOR CURRENCY: materializer_standing='historical_in_use', basis INFERRED -- it is the corpus the live path reads, with a Phase-3 successor that exists but is not wired in; I reasoned that standing rather than measuring a currency claim, and mark it accordingly.",
+    "blocking_defects": null
+  }
+}

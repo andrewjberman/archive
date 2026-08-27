@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T20:45Z</issued>
 <dated>on WP-1</dated>
-<status>staged -- GATED ON WP-1</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "ADVI_IDSPINE" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: staged -- GATED ON WP-1</status>
 <priority>P1 -- this is the table that makes new accounts stop being invisible</priority>
 <authority>SPEC_IDENTITY_SPINE_FAM_RESOLUTION_20260819.md §2 Layer 1 + §4 WP-3. Placement: LAPTOP (Rule 13 DS lane).</authority>
 </task_order>

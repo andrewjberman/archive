@@ -4,7 +4,7 @@
 <assigned_to>3.0.0_SA_CVO (cert lead) + 0.7.0_AE_CloudOps (AE side)</assigned_to>
 <issued_by>2.0.0_SA_COO (AUAFIX PRD decomposition, 2026-06-18; CTO PRD ef04a08cc)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: closed WITH its project ADVI_COTETL, which was closed the same day for having no directive attachment. Closed as a record act, not a work verdict; the work is recoverable by re-minting the project. Prior status: staged</status>
 <priority>MEDIUM -- the CLOSEOUT gate. GATED on L1-L4 landing. CVO certifies. No leg self-reports DONE; L5 is the independent end-to-end re-verify on the SERVED artifacts + the standing guard that makes a future freeze impossible-to-be-silent.</priority>
 
 <references>

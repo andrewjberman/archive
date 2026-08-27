@@ -8,7 +8,7 @@
      now move to dedicated lanes so base keeps only R5 + owns the shared registration surface. ~A
      builds R2 + the PSTMRT item-9 family; the batch-GO assignment of R2 to base is SUPERSEDED. -->
 <date>2026-07-23</date>
-<status>ACCEPTED (build) -- CVO~Z standing verify NEVER OBSERVED</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_MSBEFF is complete; this TO was last touched 2026-07-25, predating the project close 2026-07-29. Closed as a record act, not a work verdict. Prior status: ACCEPTED (build) -- CVO~Z standing verify NEVER OBSERVED</status>
 <!-- LABEL RULED BY 1.0.0_SA_CTO~Z @20260725T170702Z, and the label IS the ruling: the standing
      <verification>3.0.0_SA_CVO~Z</verification> is DISCHARGED AS A GATE (it gates nothing; CVO~Z's queue
      holds items gating live builds) but RETAINED AS A LABEL. This TO must NOT be recorded as CVO~Z-verified,

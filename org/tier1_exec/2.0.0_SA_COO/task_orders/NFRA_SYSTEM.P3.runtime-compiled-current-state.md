@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.8.0_AE_CloudComp~D or 0.4.0_DS_ClientPlatform~B (graph/comp-tool lane -- the compiler lives with the other comp-tools) + 1.0.0_SA_CTO (arch-gate the compiler design) + 3.0.0_SA_CVO (cert reads-live-truth-not-aspirational)</issued_to>
     <date>2026-07-08</date>
-    <status>staged -- GO after P1 + P2. The load-bearing DIFFERENTIATOR (static architecture + runtime-compiled current-state).</status>
+    <status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_SYSTEM is complete; this TO was last touched 2026-07-08, predating the project close 2026-07-09. Closed as a record act, not a work verdict. Prior status: staged -- GO after P1 + P2. The load-bearing DIFFERENTIATOR (static architecture + runtime-compiled current-state).</status>
     <prd_ref>docs/architecture/NFRA_SYSTEM_PRD.md (SS4 Part-3, SS6 current-by-construction, SS9 Q1/Q2/Q4)</prd_ref>
     <dispatch_state>STAGED. Gated on P1 (what to compile) + P2 (where the output lives). Q1 lean: the compiler lives in org/modules/graph (with the tools), its OUTPUT lives in infra/system/06_current_state/ -- CTO rules Q1 as P1 grounds.</dispatch_state>
     <gate_note>CURRENT-BY-CONSTRUCTION: a stale current-state is a DESIGN failure, not a maintenance lapse. Mirrors the comp-tool philosophy -- the substrate is the source of truth; the doc reads FROM it.</gate_note>

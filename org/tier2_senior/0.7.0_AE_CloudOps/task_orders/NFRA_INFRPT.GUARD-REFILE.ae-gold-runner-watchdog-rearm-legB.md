@@ -2,7 +2,7 @@
 
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
+<status>complete -- SPRING-CLEAN 2026-08-25: project NFRA_INFRPT is complete; this TO was last touched 2026-06-29, predating the project close 2026-07-07. Closed as a record act, not a work verdict. Prior status: staged</status>
 <priority>LOW — belt-and-suspenders hardening, NOT an open exposure (Leg A nets the risk)</priority>
 <date>2026-06-29</date>
 

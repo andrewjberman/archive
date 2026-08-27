@@ -15,7 +15,7 @@
 
 ## TO-A -- W-E RE-CUT (ACTIVE) -- the three items, and only these three
 
-<issued_to>0.5.0_AE_OpalETL~Z</issued_to> <status>ACTIVE</status> <plane>Lambda (apply-gated; BUILD ONLY, no apply opened)</plane>
+<issued_to>0.5.0_AE_OpalETL~Z</issued_to> <status>complete -- SPRING-CLEAN 2026-08-25: ORPHAN. Its project code "D7_NOTIFY" resolves to no registration, and no live project references it. Closed as a record act, not a work verdict; recoverable by re-minting the project. Prior status: ACTIVE</status> <plane>Lambda (apply-gated; BUILD ONLY, no apply opened)</plane>
 
 **A1. FIELD COLLAPSE.** Release `DL_NOTICE_DEFERRED` (`title`, `requester_email`, `requester_name`, `requester_firm`) into `DL_NOTICE_FIELDS`. **PLUS `description`**, ruled released 2026-08-21 ~06:3xZ on the immutable-intake-vs-evolving-state principle.
 ⛔ **THE REST OF `WE-4-PROHIBITED` STAYS PROHIBITED:** `events` `source` `created_by` `status` `claimed_by` `assignee`. **The email carries the INTAKE SNAPSHOT in full and NO STATE.** A later change adding `status` on a *"we already relaxed WE-4"* argument is a misreading; flag it.
