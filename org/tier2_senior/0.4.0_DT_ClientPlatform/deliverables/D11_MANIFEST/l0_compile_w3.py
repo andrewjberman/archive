@@ -26,6 +26,7 @@ from __future__ import annotations
 import glob
 import json
 import os
+import re
 import subprocess
 from collections import Counter, defaultdict
 
@@ -348,18 +349,137 @@ def main() -> None:
     # meanings) and not on a prose prefix (which was the same defect one field over,
     # 1.0.0_SA_CTO~X ruling 75231).
     NON_ENUMERABLE_FAMILIES = {"kuzu_nessie_db.rebuild.tmp.SET"}
-    SET_MEMBERS = {"_build_manifest.json.SET": 3, ".comp-graph/platinum.CACHE_SET": 5}
-    assert not (NON_ENUMERABLE_FAMILIES & set(SET_MEMBERS)), (
-        "a NON-ENUMERABLE family entered SET_MEMBERS: %s"
-        % (NON_ENUMERABLE_FAMILIES & set(SET_MEMBERS)))
+    ENUMERABLE_SETS = ("_build_manifest.json.SET", ".comp-graph/platinum.CACHE_SET")
+
+    # ---- member_set EMITTED FIRST, MEMBERS DERIVED FROM EACH PART'S OWN HOME ---------
+    # 4.0.0_SA_CRO~A rework items 1 + 3 against 5e210c95fd. The prior cut hand-typed
+    # ["kuzu_nessie_db", "kuzu_db", "kuzu_stitch_db"] as members: those are the brace
+    # ALTERNATIVES, not artifact identities -- and each one is the id of a DIFFERENT PART
+    # in this same manifest, so the member array named three other parts. The home is the
+    # authoritative identity and the expansion is total, so DERIVE, never retype.
+    def _expand_braces(text):
+        """FULL RECURSIVE expansion. A single-group parser under-counted a nested pattern
+        at three seats; this handles nesting and the empty alternative in `{,.wal}`."""
+        i = text.find("{")
+        if i < 0:
+            return [text]
+        depth = 0
+        for j in range(i, len(text)):
+            if text[j] == "{":
+                depth += 1
+            elif text[j] == "}":
+                depth -= 1
+                if depth == 0:
+                    break
+        else:
+            raise SystemExit("REFUSING TO EMIT -- unbalanced brace in a home: %r" % text)
+        head, body, tail = text[:i], text[i + 1:j], text[j + 1:]
+        alts, d, cur = [], 0, ""
+        for ch in body:
+            if ch == "{":
+                d += 1
+            elif ch == "}":
+                d -= 1
+            if ch == "," and d == 0:
+                alts.append(cur)
+                cur = ""
+            else:
+                cur += ch
+        alts.append(cur)
+        expanded = []
+        for a in alts:
+            expanded.extend(_expand_braces(head + a + tail))
+        return expanded
+
+    _by_id = {p["id"]: p for p in out["parts"]}
+    for _pid in ENUMERABLE_SETS:
+        _p = _by_id[_pid]           # KeyError is the loud failure; a silent skip is not
+        _mem = _expand_braces(_p["home"])
+        assert not any("{" in m or "}" in m for m in _mem), (
+            "brace survived expansion for %s: %s" % (_pid, _mem))
+        assert len(_mem) == len(set(_mem)), "duplicate member for %s: %s" % (_pid, _mem)
+        assert len(_mem) >= 2, (
+            "a %d-member set is the ABSENT case wearing the PRESENT case's shape (%s)"
+            % (len(_mem), _pid))
+        assert _p["basis"] != "absent", "member basis cannot be `absent` (%s)" % _pid
+        _p["member_set"] = {
+            "enumerable": True,
+            "members": _mem,
+            "basis": _p["basis"],
+            "evidence": (
+                "MEMBER IDENTITIES DERIVED, NOT TYPED: full recursive brace expansion of this "
+                "part's own `home`, which is the authoritative artifact identity. The part's own "
+                "vintage.method records a stat on each member. NOTHING IS DERIVED FROM THE PART "
+                "ID -- a brace pattern is a claim about a set, and the id is not the pattern."),
+            "owner": _p["owner"],
+        }
+
+    # ---- the RUNTIME FAMILY, under 1.0.0_SA_CTO~X's rework12 ruling @8e95441c36 -------
+    # 4.0.0_SA_CRO~A held this shape (rework item 2) pending a representation that preserves
+    # BOTH sibling forms and the source provenance. That ruling landed: `variant_suffixes` is
+    # REQUIRED under enumerable=false ([] is the claim "no companions"), the placeholder names
+    # name the VARYING QUANTITY (<monotonic_ns>, never <mono>), and the literal segments
+    # INCLUDE THE PATH -- the template is the family's HOME shape. Emitting under it now.
+    _nef = _by_id["kuzu_nessie_db.rebuild.tmp.SET"]
+    _stem = _nef["home"].split("{", 1)[0]
+    _groups = re.findall(r"\{([^{}]*)\}", _nef["home"])
+    assert len(_groups) == 2, (
+        "the runtime family's home is not <stem>{instances}{siblings}: %r" % _nef["home"])
+    # DERIVED, not typed: the companion axis is the LAST brace group's non-empty alternatives.
+    # ⛔ rework14 @b238f34351 -- an OBJECT KEYED BY SUFFIX, never an array: a JSON array's order
+    # is DATA, so [".lock",".wal"] and [".wal",".lock"] are byte-, schema- and digest-distinct
+    # spellings of one claim, and an object makes that ambiguity INEXPRESSIBLE rather than
+    # forbidden by instruction. The KEY SET is derived here; the per-suffix STATEMENTS are
+    # knowledge and cannot be sliced out of a path, so they are authored against source and a
+    # derived key with no authored statement REFUSES TO EMIT.
+    _COMPANION_MEANING = {
+        ".wal": ("write-ahead log; kuzu writes a <db>.wal beside each single-file DB "
+                 "(_canonical.py:179-182) and a failed rebuild orphans it"),
+    }
+    _companion_keys = sorted({a for a in _groups[-1].split(",") if a})
+    assert all(re.fullmatch(r"\.[A-Za-z0-9]+", c) for c in _companion_keys), (
+        "a derived companion suffix is not a real filename suffix: %s" % _companion_keys)
+    _unstated = [c for c in _companion_keys if not _COMPANION_MEANING.get(c)]
+    assert not _unstated, (
+        "REFUSING TO EMIT -- a companion suffix is in the home with no authored statement of "
+        "what it holds; a bare suffix is the loud-but-unresolvable class: %s" % _unstated)
+    _companions = {c: _COMPANION_MEANING[c] for c in _companion_keys}
+    _nef["member_set"] = {
+        "enumerable": False,
+        "pattern": _stem + "<pid>.<monotonic_ns>.<uniq>",
+        "pattern_source_home": "infra/aws/globgrph/_canonical.py",
+        "pattern_source_line": 288,
+        "variant_suffixes": _companions,
+        "basis": _nef["basis"],
+        "evidence": (
+            "INSTANCE AXIS, UNBOUNDED: _unique_tmp at _canonical.py:288 builds the name from "
+            "os.getpid() + time.monotonic_ns() + next(_UNIQ) (an itertools.count at :37), and "
+            "_gc_stale_tmps (:291, called from the rebuild path) reaps them, so TOTAL CARDINALITY "
+            "IS UNDEFINED and no member list can be true of this family. The literal prefix is the "
+            "part's own home stem, derived here rather than retyped. COMPANION AXIS, FINITE: "
+            "derived from the home's own sibling brace group; kuzu writes a <db>.wal beside each "
+            "single-file DB (:179-182). PER-INSTANCE cardinality is 1 + the number of KEYS, "
+            "DERIVED. OBSERVATION, ROUTED NOT DECIDED: _rm_kuzu at :188 clears FOUR side-artifact "
+            "suffixes (.wal .lock .shadow .tmp), so the source's possible-companion set is wider "
+            "than the measured one recorded here; this array is the MEASURED companion set as of "
+            "the part's 2026-08-25 stat, not a proof of closure."),
+        "owner": _nef["owner"],
+    }
 
     _absent = [p for p in out["parts"] if p.get("home_space") == "none"]
     _present = [p for p in out["parts"] if p.get("home_space") != "none"]
-    _enum = [p for p in _present if p["id"] in SET_MEMBERS]
-    _nonenum = [p for p in _present if p["id"] in NON_ENUMERABLE_FAMILIES]
-    _single = [p for p in _present
-               if p["id"] not in SET_MEMBERS and p["id"] not in NON_ENUMERABLE_FAMILIES]
+    # THE PARTITION IS NOW DERIVED FROM THE EMITTED member_set, not from a parallel table.
+    _enum = [p for p in _present if p.get("member_set", {}).get("enumerable") is True]
+    _nonenum = [p for p in _present if p.get("member_set", {}).get("enumerable") is False]
+    _single = [p for p in _present if "member_set" not in p]
     assert len(_single) + len(_enum) + len(_nonenum) == len(_present), "partition does not sum"
+    assert {p["id"] for p in _enum} == set(ENUMERABLE_SETS), (
+        "the emitted enumerable sets are not the declared ones: %s" % sorted(p["id"] for p in _enum))
+    assert {p["id"] for p in _nonenum} == NON_ENUMERABLE_FAMILIES, (
+        "the emitted non-enumerable families are not the declared ones: %s"
+        % sorted(p["id"] for p in _nonenum))
+    # THE ONLY OBJECT FIGURE, DERIVED FROM THE EMITTED ARRAYS THEMSELVES.
+    _enum_objects = sum(len(p["member_set"]["members"]) for p in _enum)
 
     # CONTROL: the W3 compile must PRESERVE the C3 triplet it inherits from base39.
     _EXPECTED_UNBUILT = {"affinity_matrix", "similarity_network_fusion", "identity_and_succession"}
@@ -380,8 +500,8 @@ def main() -> None:
         "family of undefined cardinality would be a number the estate does not have. The enumerable "
         "subtotal is %d objects across %d set rows and is the only object figure quotable here."
         % (len(out["parts"]), len(_present), len(_absent), len(_present), len(_single),
-           len(_enum), sum(SET_MEMBERS.values()), len(_nonenum),
-           sum(SET_MEMBERS.values()), len(_enum)))
+           len(_enum), _enum_objects, len(_nonenum),
+           _enum_objects, len(_enum)))
 
 
     # ⛔ FINAL-STATE CONTROL, on the EMITTED object rather than on the logic that built it.
@@ -396,67 +516,129 @@ def main() -> None:
                     "3 are SET rows"):
         assert _legacy not in _final, "LEGACY claim survives in the emitted method: %r" % _legacy
 
-    # ---- RECEIVERS: 0 DECLARED / 42 COHERENT UNKNOWN ------------------------------
-    # ⛔ 4.0.0_SA_CRO~A 75304, and the boundary reasoning is the load-bearing half.
-    # NOTHING IS SYNTHESISED. The compiler admits exactly org/**/D11_CARDS_W3/*.json (13 cards),
-    # and exact SUBSTRATE_CARD.v2 /subject/id -> /parts/id matches among those 13 is ZERO.
-    # w3_card_part_map is an ARTIFACT-LOCATION/GENERATION join with one-to-many rows -- it is the
-    # right source for WHERE A WRITER'S OUTPUT LIVES and the WRONG source for WHICH PART A CARD'S
-    # TRUST BLOCK QUALIFIES. Using it here would be the parse-join wearing a receiver's costume.
-    # AND key_expression HAS NO SOURCE AT ALL: SUBSTRATE_CARD.v2 has no such field, so no card
-    # population of any size can supply a declared `key`.
-    # STRUCTURED UNKNOWN IS EXPRESSIBLE ABSENCE, which is what these receivers were built for --
-    # not a shortfall to be padded.
-    _R_EV = ("NO ADMITTED SOURCE. The compiler admits org/**/D11_CARDS_W3/*.json (13 cards); exact "
-             "card subject.id -> part.id matches among them = 0, measured. No declared payload is "
-             "synthesised from the artifact-location map or from non-admitted W2/W4 cards. "
-             "key_expression additionally has NO source field in SUBSTRATE_CARD.v2.")
-    _R_OWN = "UNOWNED -- a declared receiver needs an admitted-card registry and a schema-bound transform"
+    # ---- RECEIVERS: 42/42 CARRIED, 0/42 DECLARED ----------------------------------
+    # 4.0.0_SA_CRO~A 75304 + rework items 4 and 5. 0.0.0_AB_MSTR's bar is TWO NUMBERS:
+    # (1) EMISSION -- 42 of 42 parts CARRY all four receivers with a coherent claim_status;
+    # (2) DECLARATION -- the declared/unknown split printed beside it, never alone.
+    # NOTHING IS SYNTHESISED. The compiler admits exactly org/**/D11_CARDS_W3/*.json (13 cards)
+    # and exact card subject.id -> part.id among them is ZERO, measured. No declared payload is
+    # taken from w3_card_part_map (an ARTIFACT-LOCATION join, right source for where a writer's
+    # output lives, WRONG source for which part a card's trust block qualifies) or from cards the
+    # compiler does not admit.
+    #
+    # ⛔ AND "0 DECLARED" IS ONE NUMBER OVER THREE DIFFERENT FACTS. The evidence is per field
+    # because the remedies do not move together (Rule 24 iv). ⛔ EACH RECEIVER IS BLOCKED AT
+    # SEVERAL INDEPENDENT LAYERS AND THE LAYER SET IS THE POINT -- an earlier version of this
+    # comment said failure_mode was "one glob line from declared" and that is WITHDRAWN
+    # (1.0.0_SA_CTO~X 75362, verified in this file: ZERO code paths assign a declared receiver):
+    #   failure_mode  SOURCE PAYLOAD COMPLETE (23/23 W4 exact matches) + REGISTRY admission
+    #                 blocked + schema-bound TRANSFORM absent + no COMPILER path that declares
+    #   key           the three above, and SOURCE ABSENT TOO -- SUBSTRATE_CARD.v2 has no
+    #                 key_expression field, so there is nothing to admit or transform
+    #   grain         the three above, and SOURCE ABSENT TOO -- no authored grain projection
+    #                 exists in any card, admitted or not
+    # ⛔ A GLOB CHANGE IS NOT SUFFICIENT FOR ANY OF THEM, and 4.0.0_SA_CRO~A has RULED it is not
+    # even permitted: W3-only is INTENTIONAL-BUT-TEMPORAL, this file is a fail-closed 13-card W3
+    # extension compiler rather than a durable receiver-source boundary, and the successor is an
+    # authored card_population_registry.v1.json -- globs become candidate-discovery diagnostics
+    # that never expand authority. DO NOT WIDEN CARD_GLOB.
+    _R_SCOPE = (
+        "The compiler admits org/**/D11_CARDS_W3/*.json (13 cards); exact card subject.id -> "
+        "part.id among them = 0, measured by this lane. ")
+    _R_UNOWNED = ("UNOWNED -- needs an admitted-card registry and a schema-bound "
+                  "card-to-L0 transform; neither exists at this commit")
+    _R_EV = {
+        "grain": (
+            _R_SCOPE
+            + "A SOURCE FACT, INDEPENDENT OF THE GLOB: no authored grain projection exists to "
+            "admit. 1.0.0_SA_CTO~X measured the 23 exact-match cards outside the admitted glob "
+            "and found an authored grain projection in 0 of 23 -- no key containing 'grain' "
+            "anywhere in them (75350, their instrument, cited not re-derived). Widening the "
+            "admitted population would not move this receiver."),
+        "key": (
+            _R_SCOPE
+            + "A KNOWLEDGE FACT, INDEPENDENT OF THE GLOB: L0 requires key_expression and "
+            "SUBSTRATE_CARD.v2's trust.key HAS NO SUCH FIELD. It carries seven of the eight "
+            "L0-required fields -- identity_space, key_is_stable, crosses_spaces, "
+            "declared_mapping, basis, evidence, owner -- i.e. every PROPERTY of the key and "
+            "never the key itself (1.0.0_SA_CTO~X 75342). No card population of any size can "
+            "supply a declared key, so carding harder cannot move this receiver."),
+        "failure_mode": (
+            _R_SCOPE
+            + "BLOCKED AT FOUR INDEPENDENT LAYERS -- SOURCE PAYLOAD COMPLETE, but REGISTRY "
+            "admission blocked, schema-bound TRANSFORM absent, and NO COMPILER PATH DECLARES. "
+            "The PAYLOADS EXIST: "
+            "1.0.0_SA_CTO~X measured trust.failure_mode complete in 23 of 23 exact-match cards "
+            "outside the admitted glob (75350). ⛔ BUT WIDENING CARD_GLOB WOULD DECLARE "
+            "NOTHING: it makes 23 payloads REACHABLE and this compiler has NO CODE PATH THAT "
+            "ASSIGNS A DECLARED RECEIVER AT ALL (75362, corrected at source; re-verified in this "
+            "file -- 0 assignments of claim_status `declared`, positive control 3 for `unknown`). "
+            "That distinction is the whole point: DATA EXISTING is a weaker claim than a value "
+            "being reachable, and this is the only receiver where even the weaker one holds. "
+            "Doctrine principle 13 still binds the 0 -- a coverage fraction is evidence only if "
+            "its denominator comes from outside the instrument's own configuration, and "
+            "CARD_GLOB is this instrument's configuration with a wave number baked into it. "
+            "⛔ AND THE GLOB ROUTE IS CLOSED BY RULING, NOT MERELY INSUFFICIENT: 4.0.0_SA_CRO~A "
+            "ruled W3-only INTENTIONAL-BUT-TEMPORAL and forbade widening CARD_GLOB; the "
+            "successor is an authored card_population_registry.v1.json whose receiver_sources "
+            "role starts EMPTY until each receiver source and its governed transform exist."),
+    }
+    _R_OWN = {
+        "grain": _R_UNOWNED,
+        "key": ("UNOWNED -- needs a key_expression field in SUBSTRATE_CARD.v2 "
+                "(4.0.0_SA_CRO~A's contract) BEFORE any registry or transform question"),
+        "failure_mode": ("UNOWNED -- and NO SINGLE OWNER CAN CLOSE IT. Three independent "
+                         "changes are required and a glob change is NOT among them: an authored "
+                         "card_population_registry.v1.json receiver_sources role "
+                         "(4.0.0_SA_CRO~A's ruling, which explicitly forbids widening "
+                         "CARD_GLOB), a schema-bound card-to-L0 transform with a version, and a "
+                         "declaring code path in this compiler, which this lane owns and which "
+                         "does not exist at this commit"),
+    }
+
+    # ⛔ setdefault WOULD HAVE PRESERVED a stale declared receiver while the compiler reported
+    # 0/42 declared -- a wrong value protected by the very call meant to be conservative
+    # (4.0.0_SA_CRO~A rework item 4). Assert the frozen input is clean, then ASSIGN.
+    _RFIELDS = ("grain", "key", "failure_mode")
+    _preexisting = [(p["id"], f) for p in out["parts"] for f in _RFIELDS if f in p]
+    assert not _preexisting, (
+        "the input already carries a receiver object; a merge would have hidden it behind a "
+        "0/42-declared report: %s" % _preexisting)
 
     for _p in out["parts"]:
-        _p.setdefault("grain", {
+        _p["grain"] = {
             "claim_status": "unknown", "unit": None,
-            "basis": "absent", "evidence": _R_EV, "owner": _R_OWN})
-        _p.setdefault("key", {
+            "basis": "absent", "evidence": _R_EV["grain"], "owner": _R_OWN["grain"]}
+        _p["key"] = {
             "claim_status": "unknown", "identity_space": None, "key_expression": None,
             "key_is_stable": None, "crosses_spaces": None, "declared_mapping": None,
-            "basis": "absent", "evidence": _R_EV, "owner": _R_OWN})
-        _p.setdefault("failure_mode", {
+            "basis": "absent", "evidence": _R_EV["key"], "owner": _R_OWN["key"]}
+        _p["failure_mode"] = {
             "claim_status": "unknown", "returns_on_failure": None,
             "distinguishable_from_true_negative": None, "silent_degrade_paths": None,
-            "basis": "absent", "evidence": _R_EV, "owner": _R_OWN})
+            "basis": "absent", "evidence": _R_EV["failure_mode"],
+            "owner": _R_OWN["failure_mode"]}
 
-    # ---- member_set: EXACTLY the 3 SET parts, two shapes -----------------------------
-    # enumerable=true  -> members, pattern* FORBIDDEN.  enumerable=false -> pattern*, members FORBIDDEN.
-    _MEMBERS = {
-        "_build_manifest.json.SET": ["kuzu_nessie_db", "kuzu_db", "kuzu_stitch_db"],
-        ".comp-graph/platinum.CACHE_SET": ["dag.bd", "dag.cot", "dag.inf", "dataflows", "routing"],
-    }
-    _by_id = {p["id"]: p for p in out["parts"]}
-    for _pid, _mem in _MEMBERS.items():
-        if _pid in _by_id:
-            _by_id[_pid]["member_set"] = {
-                "enumerable": True, "members": _mem, "basis": "measured",
-                "evidence": ("brace expansion of the part's own home, every member verified present "
-                             "on disk; expanded with a FULL recursive expander after a single-group "
-                             "parser under-counted a nested pattern at three seats."),
-                "owner": ME}
-    if "kuzu_nessie_db.rebuild.tmp.SET" in _by_id:
-        _by_id["kuzu_nessie_db.rebuild.tmp.SET"]["member_set"] = {
-            "enumerable": False,
-            "pattern": "kuzu_nessie_db.rebuild.tmp.<pid>.<mono>.<seq>",
-            "pattern_source_home": "infra/aws/globgrph/_canonical.py",
-            "pattern_source_line": 288,
-            "basis": "measured",
-            "evidence": ("members are RUNTIME-NAMED from os.getpid() + time.monotonic_ns() + a "
-                         "counter and are reaped by _gc_stale_tmps (:292, called :603), so the "
-                         "family has UNDEFINED CARDINALITY and no member list can be true of it. "
-                         "Map-owner ruling 75073; the earlier '6' was an observation snapshot, "
-                         "withdrawn."),
-            "owner": ME}
-
-    _ms = [p["id"] for p in out["parts"] if "member_set" in p]
-    assert len(_ms) == 3, "member_set must land on EXACTLY 3 SET parts, got %d: %s" % (len(_ms), _ms)
+    # ---- FINAL-STATE CONTROLS ON THE EMITTED OBJECT --------------------------------
+    # Presence and declaration are SEPARATE assertions because they are the bar's two numbers.
+    _missing = [(p["id"], f) for p in out["parts"]
+                for f in _RFIELDS + ("home_space",) if f not in p]
+    assert not _missing, "EMISSION bar fails -- receiver not carried: %s" % _missing
+    _declared = {f: sum(1 for p in out["parts"] if p[f]["claim_status"] != "unknown")
+                 for f in _RFIELDS}
+    assert set(_declared.values()) == {0}, (
+        "a declared receiver was synthesised from an unadmitted source: %s" % _declared)
+    assert all(p["home_space"] in ("repo_path", "s3_uri", "iceberg_table", "none")
+               for p in out["parts"]), "home_space carries a value outside the declared enum"
+    # ⛔ EXACT ID EQUALITY, not len()==3: a count passes while the wrong parts carry it.
+    _ms_ids = {p["id"] for p in out["parts"] if "member_set" in p}
+    assert _ms_ids == set(ENUMERABLE_SETS) | NON_ENUMERABLE_FAMILIES, (
+        "member_set landed on the wrong parts: %s" % sorted(_ms_ids))
+    # member_set is NEVER required of the other 39: the only shape a singleton could take is a
+    # one-member set, which is the defect minItems:2 closed (1.0.0_SA_CTO~X 75331).
+    _singletons = [p["id"] for p in out["parts"] if "member_set" not in p]
+    assert len(out["parts"]) == len(_ms_ids) + len(_singletons), (
+        "the member_set partition does not sum over the emitted parts")
 
     # ---- validate, with the negative control ---------------------------------------
     v = Draft202012Validator(json.load(open(SCHEMA, encoding="utf-8")))
@@ -476,6 +658,37 @@ def main() -> None:
     print("unresolved        : %d  %s" % (len(unresolved), [r["card_subject"] for r in unresolved]))
     print("PARTS REGISTERED  : %d   (> %d required by the oracle: %s)"
           % (len(out["parts"]), base_count, len(out["parts"]) > base_count))
+    # ---- 0.0.0_AB_MSTR's BAR, BOTH HALVES, DERIVED FROM THE EMITTED OBJECT ----------
+    # (1) EMISSION is a CONTRACT-SHAPE claim. (2) DECLARATION is a KNOWLEDGE claim.
+    # ⛔ (2) IS PER RECEIVER AND IS NEVER SUMMED (amendment 75355): one figure moving
+    # 0/42 -> 23/42 would read as one-third of the way to a target when it is one receiver
+    # changing state and two staying exactly as unreachable.
+    # ⛔ AND THE FATE COLUMN NAMES BLOCKING LAYERS, NOT ONE WORD (correction 75362): the
+    # earlier "CONFIGURATION -- one glob line away" was WITHDRAWN because no receiver is one
+    # line from declared. Widening CARD_GLOB moves the declaration count by ZERO -- there is no
+    # transform to run on what it would admit. A LAYER SET is what a reader can act on: it says
+    # how many independent things must change, and by whom.
+    _BAR = ("home_space", "failure_mode", "key", "grain")
+    _FATE = {
+        "home_space":   "NONE          mechanical, classified in-compiler from the home, fail-closed",
+        "failure_mode": "REGISTRY + TRANSFORM + COMPILER   payloads EXIST (23/23), nothing reads them",
+        "key":          "the three above + SOURCE          no key_expression field in the contract",
+        "grain":        "the three above + SOURCE          no authored projection exists anywhere",
+    }
+    _carry = sum(1 for p in out["parts"] if all(f in p for f in _BAR))
+    print("BAR (1) EMISSION  : %d of %d parts CARRY all four receivers  -> %s"
+          % (_carry, len(out["parts"]),
+             "MET" if _carry == len(out["parts"]) else "*** NOT MET ***"))
+    print("BAR (2) DECLARATION -- PER RECEIVER, NEVER SUMMED (0.0.0_AB_MSTR 75355 as corrected):")
+    for _f in _BAR:
+        if _f == "home_space":
+            _n = sum(1 for p in out["parts"] if p.get(_f) is not None)
+        else:
+            _n = sum(1 for p in out["parts"] if p[_f].get("claim_status") != "unknown")
+        print("    %-13s %2d/%d declared   blocked at: %s"
+              % (_f, _n, len(out["parts"]), _FATE[_f]))
+    print("    member_set is NOT ON THIS BAR: applicable to %d of %d parts; requiring it would "
+          "force a one-member set on every singleton" % (len(_ms_ids), len(out["parts"])))
     print("VALIDATION ERRORS : %d" % len(errs))
     print("NEGATIVE CONTROL  : %d errors on {} -> %s"
           % (neg, "FIRES" if neg else "*** DEAD CONTROL ***"))
