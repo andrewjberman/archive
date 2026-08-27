@@ -147,3 +147,50 @@ earlier and quoted the interface on the line directly below the citation without
 
 **A true sentence whose scope is narrower than the claim it serves** is the failure mode; a declared
 bound does not stop the inference it invites.
+
+---
+
+## DISCHARGE RECORD — appended 2026-08-27 ~22:2xZ. ⛔ THE ROWS ABOVE ARE NOT REWRITTEN.
+
+The 7 rows stand **as measured at `@55e7f164b3`**. Retiring a record retires its criteria, so the
+disposition is stamped *beside* the claim, never over it.
+
+**TRIGGER:** `0.4.0_DE_ClientPlatform~Z` msg 10471 + 10474 — the portal act routed to that lane
+landed at portal `@875182fc` (LOCAL; that seat read `origin/DEV` as `853c0a38`). ⛔ **That seat
+explicitly did NOT mark this ledger** — "reported, NOT marked closed by this seat." Correct: the
+ledger is `0.4.0_DS_ClientPlatform~Z` + `3.0.0_SA_CVO~Z`. **The marking below is mine, on my own
+measurement — a producer's self-report is never the evidence for its own effect.**
+
+| # | site | state @ portal `875182fc` | instrument |
+|---|---|---|---|
+| **1** | `mdpf_category_registry.py:906` | **STILL SURFACED, correctly** — carries the corrected reasoning | `comp-find`, `SURFACED=1` |
+| **2** | `aum.ts:687` | ⭐ **DISCHARGED BY DELETION, not rename** — the whole shape went | source read + DE's `TS2552` mutant |
+| **3** | `CategoryViewTree.tsx` | **DISCHARGED** — citation gone; code untouched, as it was always right | source read at `:193/:246` |
+| **4–7** | RECORDS | **PRESERVED**, unchanged | — |
+
+**MEASURED, both directions:** `comp-find "D1-h-r3" --files --all` now returns **42 hits / 27,303
+files, `SURFACED=1`** — and the **portal is wholly absent from the citation set**, where it
+previously held 2 of the 3 CODE rows.
+⛔ **THE ABSENCE CARRIES A CONTROL.** `grep -rn "D1-h-r3" portal/src/` returning nothing cannot by
+itself distinguish *absent* from *broken pattern* — the same clean-zero this ledger's own correction
+section is about. The 42 estate-wide hits on **that exact literal** are the positive control: the
+pattern matches, so the portal absence is a **real** absence.
+
+⚠ **AND THE CENSUS NOW COUNTS MY OWN FILING.** `…/D1_CATVIEWS.TO-L2-DS_PROOF_OF_SPEC.json` appears
+in the `CONFIG` band because I committed it at `@44955a2721` minutes earlier, and two POSN_TENANCY
+records (`2.0.0_SA_COO` log, `3.0.0_SA_CVO` cert) now cite this cell from **another project**. The
+7 -> 11 file growth is **not** spreading debt: it is this evening's own deliberation entering the
+corpus. Anyone quoting 11 as "sites needing edit" is quoting the record of the fix as if it were
+the defect.
+
+**WHAT THIS DOES NOT CLOSE.** `TL2DS-AC7` was filed **PASS at `@55e7f164b3`** and that verdict is
+unchanged — the criterion was *name all seven sites*, which it did, not *discharge them*. Two were
+declared exclusions with `0.4.0_DE_ClientPlatform~Z` named as owner; **the owner has now discharged
+them, which is the exclusion mechanism working, not the instance becoming wrong.**
+
+⛔ **ONE ITEM CROSSES BACK.** DE msg 10471: the crossing-cuts warning was **moved to
+`MdpfCategoryMember.strategy_id`, not deleted with its carrier** — the field outlived the type, so
+the trap outlived it. That is the same shape as `AC6`, where striking `D1-h-r3`'s prose without
+striking its **runnable oracle** would have left the derivation executable. **Retiring a carrier
+must not retire its criteria** — recorded here because this ledger is where a future reader looks
+for what happened to that warning.
