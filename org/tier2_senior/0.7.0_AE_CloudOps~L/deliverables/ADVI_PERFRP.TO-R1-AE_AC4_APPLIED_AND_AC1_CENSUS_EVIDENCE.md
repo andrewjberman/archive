@@ -279,6 +279,36 @@ distribution and stopped. A near-zero BMV denominator and an unneutralised exter
 produce this shape, and the control separating them was not run -- so the cause is **OPEN**, not
 "probably a cash flow".
 
+### ⛔⛔ SECTION 3 IS SUPERSEDED ABOVE THIS LINE. 2026-08-27T01:0xZ, self-audit.
+
+**Everything above in s.3 was true when written and is now WRONG IN TWO WAYS.** Preserved rather than
+deleted so a reader who half-remembers it can see it was retired deliberately -- the pattern
+`0.4.0_DS_ClientPlatform~U` used on its own s.6, and this audit exists because that seat's 74244
+turned my own committing-vs-acking argument into a test and ran it on its artifact. **I then owed the
+same test to mine, and mine failed too.**
+
+**(1) THE CAUSE IS NOT OPEN. IT IS FOUND.** `~U` ran the separating control I declined to run: BOTH
+candidates I named are **FALSIFIED** (`cf_net` exactly 0.00 on two of four; the worst account's flow
+is NEGATIVE 10,000 while value rises 27x -- wrong sign for the cash-flow story). Root cause
+`@ea7c227a24`: **in-kind transfers reach the return as ZERO FLOW** -- `c02_twr_engine.py:149` sums
+`signed_amount` only, in-kind rows carry `signed_amount == 0` on 141/141 and 71/71 while
+`in_kind_value` is populated, so transferred securities land in ending market value and are rendered
+as performance. **Andrew's `$6 account / $500k deposit` hypothesis, with the deposit in SECURITIES.**
+⚠ **A reader following my "cause is OPEN between BMV and cash flow" line would chase two dead ends,
+and my BMV candidate is worse than dead -- it is actively MISLEADING as a remedy basis**, because a
+denominator floor catches 6 of 13 across both days and misses the worst.
+
+**(2) "FOUR ACCOUNTS" IS DATE-SCOPED AND UNDERSTATES IT BY ~25x.** The set is a **DAILY COHORT with
+ZERO overlap** -- 9 on 08-24, 4 on 08-25, intersection EMPTY. **Worst observed is +69,056.0%**
+(`0032486794`, 08-24), not the +2722.3% my table leads with. And **only 9 and 4 of the 22 and 14
+affected accounts are VISIBLE as outliers -- 13 and 10 carry a wrong return that looks entirely
+plausible.** The visible outliers were never the problem; they were the only part that announced
+itself.
+
+**WHAT IN s.3 STILL STANDS:** the bimodal-gap discriminator (independently confirmed by `~U` at 7.0x
+and 7.1x on two dates), the grain-disagreement warning, and the INERT standing with its positive
+control -- **all three survive.** Only the cause and the scale were wrong.
+
 ---
 
 ## 3a. AE-PLANE MECHANISM -- per-account suppression is NOT EXPRESSIBLE at the publisher
@@ -512,23 +542,46 @@ unless the TO says so in one line.
 
 | criterion | status | held by |
 |---|---|---|
-| AC1 | UNCOMPUTABLE | D5-by-construction + Andrew's DATA half. Census half now measured (s.2). |
+| AC1 | UNCOMPUTABLE | D5-by-construction + Andrew's DATA half. ⛔ Census measured (s.2) but **COMPUTED != CORRECT** -- see the 00:0xZ block in s.2; a full-history backfill is implied. |
 | AC2 | **PASS** | `~G`, 2026-08-25, read-only IAM |
 | AC3 | UNCOMPUTABLE | TWO independent sovereign holds; 0 perfrp served, so the EXERCISED half has nothing to fetch |
 | AC4 | **APPLIED + EXERCISED closed** (s.1) | schema-status flip is the issuer's call |
 | AC5 | **PASS** | `~G`, 2026-08-24, read-only IAM |
 | AC6 | not begun | no deploy owed that this seat can see -- AC2 already recorded the IAM plan at 0-diff |
 
-## 5. Open asks to `2.0.0_SA_COO` (73691), none blocking
+## 5. The three asks of `2.0.0_SA_COO` (73691) -- ALL ANSWERED, 73895. Nothing open.
 
-1. **Start trigger** -- TO face names DS `~G`; dispatch 73606 names `~U`. `~U` reports TO-R1-DS
-   DISCHARGED (COO 73653) and the chain builds six perfrp families. Reads as fired; asked rather than
-   assumed.
-2. **Seat collision** -- the 16:31Z ad-hoc carried `source: advi.49f.adhoc-qa-perfrp-ac4` and was fired
-   ~4h before this seat existed. Not this seat's run. A second invocation a minute later was correctly
-   REFUSED by the live mutex (rc=3, Group W).
-3. **TO-face notation.** `to-check.py --all --assignee 0.7.0_AE_CloudOps~L` returns 0 active TOs over
-   `scanned=2115`. Per `org/XXX.md`, the cause is the **`**SEATED: <serial>**` prose notation** in
-   `<issued_to>`, **not** the tilde -- `_assignees_from_field` discards serials found in that shape.
-   **So re-filing the FILE under this lane would not restore visibility; the NOTATION is the cause.**
-   Not edited unilaterally.
+**This section read "Open asks ... none blocking" until the 01:0xZ self-audit. All three were closed
+hours earlier and the file still presented them as pending.** Answers recorded here so a successor
+does not re-raise them:
+
+1. **Start trigger -- FIRED, LONG BEFORE THIS SEAT EXISTED.** `TO-R1-DS` is DELIVERED, CERTIFIED and
+   on origin (proof-of-spec VALID rc=0). Not pending.
+2. **Seat collision -- THERE IS NONE.** `0.7.0_AE_CloudOps~K` is NOT REGISTERED; the 16:31Z ad-hoc
+   was its run before it died, and this lane holds TO-R1-AE alone. ⚠ COO's own caution, recorded
+   because it is the same class as everything else in this file: the broker showed `~K` with
+   "Pending task orders (3)", and **that count is a BASE-FOLDER ROLLUP, not a lane holding** -- COO
+   flagged it as unmeasured rather than claiming those TOs are stranded.
+3. **TO-face notation -- CONFIRMED a real `to-check` instrument defect**, routed to `1.0.0_SA_CTO`
+   alongside the face-flip check spec. The mechanism stands as recorded: the `SEATED: <serial>` prose
+   notation is discarded by `_assignees_from_field`, **not** the tilde, **so re-filing the FILE would
+   produce something that looks correctly seated and is still invisible to the assignee scan.** Not
+   minted; nothing held on it.
+
+---
+
+## 6. Self-audit note -- why this file was re-read at 01:0xZ
+
+`0.4.0_DS_ClientPlatform~U` 74244 took my own stated reason for COMMITTING rather than ACKing --
+*"the next reader was not in this thread; a message scrolls, the artifact persists"* -- **treated it
+as a TEST, ran it against its own root-cause artifact, and it FAILED**: its sequence section still
+pointed at the re-sign-in-place design `1.0.0_SA_CTO` had ruled out, using reasoning quoted from that
+same seat.
+
+**I owed the identical test to this file, and it failed too** -- s.3's cause was superseded twice
+over and s.5 presented three answered asks as open.
+
+>> **THE CLASS, worth carrying past this file: a SUPERSEDED PLAN SITTING IN A LIVE ARTIFACT is the
+defect nobody looks for, precisely BECAUSE the artifact is the thing everyone trusted enough to commit
+to.** Every seat tonight audited someone else's record. The rulings arrived fast and correct; **the
+files they were meant to correct were never re-read by their own authors.** Cost: one pass. <<
