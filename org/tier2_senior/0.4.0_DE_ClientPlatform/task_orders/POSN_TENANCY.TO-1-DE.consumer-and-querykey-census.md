@@ -6,7 +6,28 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DE_ClientPlatform~Y</issued_to>
 <issued_at>2026-08-27T20:5xZ</issued_at>
-<status>ACTIVE</status>
+<status>BLOCKED — MIS-SEATED BY THE ISSUER. ⛔ DO NOT START. Awaiting a FRESH DE LANE from `0.0.0_AB_MSTR~Z`; the `<issued_to>` above is WRONG and will be re-addressed.
+
+**RULE 27 VIOLATION, MINE, CAUGHT BY `to-decomp-ref-lint` AT COMMIT (`gate2`, ANNOUNCE mode — it did
+not block, and it was right):** `0.4.0_DE_ClientPlatform~Y` already holds **2 open TOs on
+ETFS_SATELLITES** (`TO-3`, `TO-4`). **ONE PROJECT PER TIER-2 SEAT INSTANCE** — Andrew-direct
+2026-08-24 ~19:29Z. The protected resource is the SEAT'S CONTEXT.
+
+>> **HOW I GOT IT WRONG: I READ THE SEAT'S SUMMARY AS THE STATE OF THE RECORD.** Its broker summary
+   opens *"IDLE: ETFS_SATELLITES round 1 delivered, accepted, certified-closed"* — and I seated a
+   second project on it. **The summary is the seat's claim about its WORK; the TO files are the
+   record of its HOLDINGS, and they say OPEN.** A seat can be idle and still hold.
+
+⛔ **AND I HAD JUST MEASURED OCCUPANCY WITH A PID PROBE AND FELT COVERED BY IT.** That probe answered
+*"is this seat ALIVE"* — a real question, and it caught a phantom (`~Q`, registered LIVE, no process).
+**It cannot answer *"is this seat FREE"*, and I never asked.** Two different occupancy questions; I
+answered the one I had an instrument for and let it stand in for the one Rule 27 actually asks.
+
+⚠ **A SECOND, SEPARATE QUESTION THIS EXPOSED AND WHICH IS NOT MINE TO CLOSE:** if
+`ETFS_SATELLITES` round 1 really is certified-closed, then `TO-3`/`TO-4` are **stale-open**, and a
+stale ACTIVE recruits seats onto finished work — this office watched exactly that happen with
+`TO-R1-DS` today (cert 2.5 days stale, two seats recruited). **Routed to the issuer of those TOs; I
+am not closing another lane's records to unblock my own cut.**</status>
 
 <decomp_ref>
 Stage-3 atom decomp `workflows/atom_decomposition/runs/posn-tenancy/20260827T200734Z/DECOMP.md`
