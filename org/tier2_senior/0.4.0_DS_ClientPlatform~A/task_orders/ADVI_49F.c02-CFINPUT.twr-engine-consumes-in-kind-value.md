@@ -71,3 +71,31 @@ served history, so its verification carries the weight the c00 fix did not.
 ## Reporting
 COO at implemented and at harness-verified; **cc CTO (the P4 gate) and CRO~A (harness owner).**
 Session log w/ Compiler Tools section = deliverable.
+
+---
+## ⚖ COO RECONCILIATION 2026-08-27 (P0.2 record pass, D2 brief @e4f7ecbfdc) — **ABSORBED into the ruled 08-26 remediation design; face re-based BEFORE any GO**
+
+Verdict: **ABSORB.** The need stands (this TO IS brief phase P1.2), but two clauses above predate
+the 08-26 rulings and would point a fresh seat at a design CTO ruled OUT (74187) — the exact
+superseded-plan-in-a-live-artifact class DS~U corrected in their own record @69b2b7678c.
+
+**MECHANISM RE-BASED (supersedes the Objective + CF-1 wording above where they differ):**
+- `in_kind_value` **KEEPS its unsigned contract** — do NOT re-sign in place, do NOT have c02 consume
+  it raw. The ruled design: a **NEW SIGNED FIELD** lands in `flow_ledger` (c00/c01 plane, with c01's
+  deliberate defect-3 sign-branch fix @07bcdafb2b carrying its own acceptance), and **c02 consumes
+  the new signed field via the grain-parameterized filter**. Root cause record @ea7c227a24; ruled
+  design end-to-end in DS~U's corrected artifact @69b2b7678c.
+- CF-2 (harness re-read = acceptance), CF-3 (magnitude distribution), CF-4 (no silent re-statement,
+  P4-class through CTO) **stand unchanged**.
+- The "Do not re-value HISTORY here" exclusion is **RESOLVED, not deleted**: the backfill is now
+  RULED as **ONE full-chain entrypoint-driven pass over the 531 partitions covering
+  {c00 -> c01 -> c02 -> dependent c04} + nna_canonical** (brief P1.4), a separate TO carrying its
+  two pre-measured hazards: no stage-scoping exists (@f62e93b9bb) + the SSM `--date` vehicle gap
+  (@4da71d969b, `--date D --upload`, direct send, never via the dispatcher Lambda — halt trap).
+- Pre-registered acceptances for the chain: the all-ten table @4a1fd3e09b + the NNA delta table
+  @e8ccd8eb77. The backfill's own writes take the named ad-hoc/backfill boundary (74218); the
+  verification fire does NOT.
+
+**SEATING:** `<issued_to>` re-points at re-seat to the P1 DS seat Andrew instantiates (the DS~U
+remediation-author context per the 08-27 seat list); DS~A's lane context is closed. Status remains
+`staged`; GO on re-seat.

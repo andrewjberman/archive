@@ -75,3 +75,13 @@ deletion warrant, and this is exactly why.**
 the reader census with the WS-E miss as the FIXTURE** — otherwise the next Rule-25 stamp carries the
 same blindness. **Correcting this marker alone fixes the instance and leaves the instrument.**
 Owner: COO (mine to route; the marker is mine).
+
+---
+## ⚖ COO RECONCILIATION 2026-08-27 (P0.2 record pass, D2 brief @e4f7ecbfdc)
+
+Verdict: **STAND, unchanged.** This TO is orthogonal to the 08-26 TWR remediation design (custody
+basis staleness in WS-E, not the flow-ledger/TWR chain) — no clause is superseded or absorbed.
+Unstarted; the issuing state (staged, GO paired, materiality-first riders) remains the dispatch
+surface. Re-seats to a DS-class producer-owner seat on Andrew's word (08-27 seat list); if the legacy prefix
+is still the live basis, the staleness has only grown since the 08-19 measurement (27d then; re-read
+at RIDER 1, not assumed here) — which raises RIDER 1's urgency, not its design.

@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:55Z</issued>
 <dated>FIRST substantive row at your THU respawn -- staged tonight so the seat finds it, not so it waits</dated>
-<status>staged -- GO paired; NEEDED UNDER EITHER FLIP TIMING (see the fork below -- do not wait on it)</status>
+<status>complete -- COO reconciliation 2026-08-27 (P0.2 record pass): all six criteria evidenced in git. C00-3 fix @89204884d7; C00-1/C00-2 census + C00-4 (CTO final form incl. negative control) @a971c03dd2; C00-5/C00-6 proof instance VALID rc=0 against live deployed state @4c1a9e8169 + @e78c96132f. Face had sat staged while the work landed 08-20 -- the @01ffd6dd30 stale-face class; flipped so no re-seat re-dispatches finished work.</status>
 <priority>P1-PRIORITY. Routed by CTO 194648Z off CRO~A's 194539Z finding; scope amended 194759Z.</priority>
 <authority>CRO~A's BD_PERFORMANCE_ENDPOINT_VS_GIPS_ENGINE_COMPARISON_20260819.md (every link read). CTO routing 194648Z + scope amendment 194759Z. Placement: LAPTOP (runner chain + deploy leg).</authority>
 </task_order>
