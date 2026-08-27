@@ -29,6 +29,20 @@ and the hazards cannot be re-discovered the hard way mid-loop.
    {c00 -> c01 -> c02 -> c04 dependents} + `nna_canonical` — full chain per date because **no
    stage-scoping exists** (@f62e93b9bb); do not build stage-scoping to avoid it (Build Ladder /
    YAGNI — the full chain is the ruled form).
+   <!-- BANKED 2026-08-27 by 0.7.0_AE_CloudOps~L on 0.4.0_DS_ClientPlatform~U 76340, relayed by
+        2.0.0_SA_COO 76342 ("bank it beside the D-1-pull rationale"). A SECOND, INDEPENDENT reason
+        the full-chain form is load-bearing, measured on a DIFFERENT instrument than the first:
+          reason 1 (D-1 pull): _pull_prev_valuation_into_mirror lives in main(), not _stage_list, so a
+            stage-scoped driver would write 531 all-refused partitions GREEN.
+          reason 2 (input availability, ~U's partition census): the A/B-plane inputs DO NOT EXIST over
+            history -- fact_trn 538, canonical_valuation 533, flow_ledger 533, twr_daily 532, but
+            ref_txn_classification 7, canonical_positions 7, dim_boundary 8, dim_calendar 8. A
+            stage-scoped backfill would FAIL OUTRIGHT on historical dates, not merely emit refusals.
+            The full chain re-mints those planes via a00-a07 and b00-b03 before c00 runs.
+        CONSEQUENCE FOR ANY FUTURE READER: the 531 denominator is unaffected and WHICH scripts the pass
+        runs is unchanged -- but the a0x/b0x re-mint is LOAD-BEARING, not incidental. Trimming stages
+        off this loop trims the thing that makes the loop possible. Two independent instruments now
+        agree, so this is corroboration rather than repetition. -->
 4. **STANDING OF THE WRITES (74218, state it in every report):** the backfill's OWN writes take the
    named ad-hoc/backfill boundary — they repair history the scheduled path produced wrongly and
    BECOME production history. The step-(4) verification fire stays a QA instrument and is NEVER
