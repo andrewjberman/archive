@@ -5,7 +5,19 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:35Z</issued>
 <dated>first substantive row at your THU-AM spawn, behind your R-WATCH/PB-1 Friday-path duties</dated>
-<status>pending -- BUILT @be05d938af. D1b-1..D1b-4 measured PASS (existence check controlled; 6 F5 raise-paths exercised with 4 positive controls; Q1-closed shape, data-driven property measured). D1b-5 blocked on the SAME artifact-coverage heuristic as WP-1 -- now characterised, routed to COO/CTO. Deploy leg deliberately NOT run (rides TO-D1c). Terminal status left to COO.</status>
+<status>COMPLETE -- 5 of 5 criteria PASS. TERMINAL STATUS RULED 2026-08-27 ~17:3xZ by 2.0.0_SA_COO~Z, who holds this office (laptop-MSTR ruling: "a TO field authored before a placement move names the OFFICE, not the incumbent"). BUILT @be05d938af. D1b-1..D1b-4 measured PASS (existence check controlled; 6 F5 raise-paths exercised with 4 positive controls; Q1-closed shape, data-driven property measured). D1b-5 AMENDED UNCOMPUTABLE-BY-CONSTRUCTION -> PASS: the row named its own discharge condition ("flips to PASS under ... an extension of the checker's heuristic") and that condition has since been met -- proof-of-spec-check.py D1b-1..D1b-5 returns acceptance rows=5, violations=0, VALID, rc=0 captured before any pipe. THREE CONTROLS confirm the instrument can still refuse (bogus id -> rc=1; wrong id grammar -> rc=1; 2-arg form -> rc=0 COVERAGE UNCHECKED, a meaningless zero). NO ID RE-MINT was performed -- D1b-1..D1b-5 stand unchanged, so nothing was re-keyed to manufacture the pass. Deploy leg deliberately NOT run and REMAINS OUT OF SCOPE -- it rides TO-D1c by this TO's own text and is NOT carried by this closure. ⛔ THIS CLOSURE DOES NOT LIFT THE D1_CATVIEWS NO-SHIP, which is a separate named ruling nobody has made. ⛔ THE TOOL GAP IS NOT CLOSED: the executor characterised TWO instances (this + ADVI_IDSPINE.WP-1); only THIS one was re-measured, so one instance passing is not the class resolved -- surfaced to 1.0.0_SA_CTO~Z with the denominator stated.</status>
+
+<!-- ⛔ THE PRIOR RECOMMENDATION TO ANDREW IS WITHDRAWN AS MOOT, NOT OVERRULED. This office had a
+     standing rec with him: "scoped close -- accept D1b-1..4, carry D1b-5 to TO-D1c with the deploy
+     leg." That rec rested on D1b-5 being OPEN, and it is not. It also CONFLATED TWO DIFFERENT
+     THINGS: D1b-5 is a proof-of-spec VALIDATOR criterion (a tool gap), while the deploy leg is a
+     SCOPE decision this TO had already made and deferred. Carrying D1b-5 "with the deploy leg"
+     would have attached a checker defect to a deploy TO where it does not belong, and it would have
+     re-manufactured the identical UNCOMPUTABLE at TO-D1c, because the cause travels with the ID
+     GRAMMAR, not with the work. A FINDING AND ITS REMEDY ARE TWO CLAIMS: the finding (D1b-5 not
+     green) was right; the remedy (carry it to D1c) was wrong. Andrew was never answered and no
+     longer needs to be -- there is nothing to carry. -->
+
 <priority>P1-program; behind the 49F Friday path at the seat</priority>
 <authority>D1_ASSET_CATEGORY_VIEWS_PRD.md §4.1 + §6 item 2, at dispatch vintage @3e589fa1eb (CVO verdict @d476339293 absorbed + THE TAXONOMY GATE RULED -- D1_TAXONOMY_GATE_RULING_20260819.md). Placement: LAPTOP by the EITHER-defaults-laptop rule (Andrew-direct ~19:3xZ leaves the residual placement axis to CTO; this row is EITHER, so the default governs).</authority>
 </task_order>
