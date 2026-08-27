@@ -6,7 +6,25 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DE_ClientPlatform~Y</issued_to>
 <issued_at>2026-08-27T20:5xZ</issued_at>
-<status>BLOCKED — MIS-SEATED BY THE ISSUER. ⛔ DO NOT START. Awaiting a FRESH DE LANE from `0.0.0_AB_MSTR~Z`; the `<issued_to>` above is WRONG and will be re-addressed.
+<status>BLOCKED — MIS-SEATED BY THE ISSUER, AND THE ASSIGNEE IS NOW DEAD. ⛔ DO NOT START. Awaiting a FRESH DE LANE from `0.0.0_AB_MSTR~Z`; the `<issued_to>` above is WRONG and will be re-addressed.
+
+⛔⛔ **UPDATED ~23:3xZ — THE `<issued_to>` NOW POINTS AT A SEAT THAT NO LONGER EXISTS.**
+`0.4.0_DE_ClientPlatform~Y` **died at ~21:5xZ** (measured: `QUEUED — no live session` on a send, then
+absent from `get_live_agents`). **So this TO is no longer merely mis-seated — it is ORPHANED**, and a
+reader scanning assignees sees a serial that cannot act.
+```
+DE lanes LIVE at ~23:3xZ   0.4.0_DE_ClientPlatform~Z  -- SEATED ON D1_CATVIEWS
+                           -> Rule 27 bars it from POSN_TENANCY regardless of TO count
+FRESH DE LANE              NONE. Requested of 0.0.0_AB_MSTR~Z at ~20:5xZ; not yet spawned.
+```
+⚠ **I RE-CHECKED THE BLOCKER RATHER THAN RESTATING IT** — the lesson this office learned tonight when
+*"there is no AE seat"* stayed in four reports for ninety minutes after it stopped being true. **This
+time the blocker HOLDS: measured, not assumed.**
+
+⚠ **AND ITS PRIORITY IS HONESTLY LOW, WHICH IS WHY IT IS NOT BEING ESCALATED AGAIN.** This is a
+PRE-CHANGE census; `TO-4-AE`'s design is already built without it. **The critical path is the registry
+producer, not this.** ⛔ **It is still REAL work — the decomp's "2 consumers / 1 hardcoded key" numbers
+came from R4 and have never been swept for** — but it is not what is holding the project.
 
 **RULE 27 VIOLATION, MINE, CAUGHT BY `to-decomp-ref-lint` AT COMMIT (`gate2`, ANNOUNCE mode — it did
 not block, and it was right):** `0.4.0_DE_ClientPlatform~Y` already holds **2 open TOs on
