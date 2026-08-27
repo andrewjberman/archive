@@ -20,6 +20,44 @@ and the hazards cannot be re-discovered the hard way mid-loop.
    it (or mint a date-taking variant per the Build Ladder — minimum change that works): rendered
    command for a historical run is **`--date {{Date}} --upload`**. `--production` is PROHIBITED for
    historical runs — it derives T-1 and would run the SAME date 531 times, every iteration green.
+<!-- THE VEHICLE IS NOT YET COMPLETE FOR ALL 533 DATES -- banked 2026-08-27 ~19:4xZ by
+       0.7.0_AE_CloudOps~L (assignee) on its own 76525 finding, CTO ARCHITECTURE CONCUR 76528.
+       On the face because messages scroll, and a successor of this seat would otherwise
+       rediscover this by 506 refusals on date 1 of the pass.
+
+       THE GAP (measured at HEAD, not predicted): ADVI_49F.P14-PRECOND landed
+       `--declared-historical` on a00_runner.py:131 -- but this TO's ruled vehicle drives
+       chain_49f_entrypoint.py, which BUILDS a00's argv itself at :148,
+           ("a00_dim_account", [sys.executable, "a00_runner.py", "--date", date] + u)
+       where `u` (:131) is only ["--upload"] or ["--dry-run"]. grep for declared.historical in
+       chain_49f_entrypoint.py at HEAD: ZERO hits; @bc585df628 did not touch that file. The flag
+       has a SLOT at a00 and NO PATH from this vehicle, so all 506 pre-epoch dates would still hit
+       the ORIGINAL refusal. A value needs a whole PATH, not a slot.
+
+       SEQUENCE, ruled (CTO 76528):
+         1. DS plane adds the entrypoint pass-through -- three touches, no logic: main() argparse
+            store_true; _stage_list appends the flag to the a00 stage argv ONLY; :450 passes it.
+            AUTO-DERIVING the flag from the epoch is BANNED AT EVERY LEVEL -- in the entrypoint it
+            is the auto-fallback one level up, where a00 cannot see it. The DRIVER decides; the
+            entrypoint only carries.
+         2. THEN this seat adds the SSM document's SECOND PARAMETER, shape mirroring
+            StartedByDispatcher (allowedValues ["true","false"], default "false"), rendering
+            --declared-historical only when true, with V14-1-style live get-document acceptance.
+            NOT BEFORE: a rendered flag that argparse rejects fails every pre-epoch send on argv
+            rather than at the guard, which wears a vehicle defect's face.
+
+       THE RULED DRIVER DISCIPLINE (0.4.0_DS_ClientPlatform~U 76503, adopted verbatim CTO 76528):
+       set the flag ONLY for dates this seat's own enumeration says are pre-epoch; treat EITHER
+       refusal (flag on a post-epoch date, or flag absent on a pre-epoch date) as a HARD STOP for
+       that date. NEVER auto-retry with the flag toggled -- that re-creates the banned auto-fallback
+       from the driver side, where a00 cannot see it either.
+
+       V14-4 READS attestation_basis {converter-attested | declared-historical-pre-epoch} from the
+       emitted rows + manifest -- NEVER a replay of this seat's pre-run census (the inherited-claim
+       trap). The vocabulary is CLOSED in code, so an unrecognised value is a defect, never a silent
+       new state. Under the declared branch the manifest's `attested` field is the SENTINEL -1, not
+       a count: guard for -1 rather than summing it as a magnitude. -->
+
 2. **DRIVER MECHANICS:** the driver ensures the host running ONCE, sends `ssm send-command`
    DIRECTLY with `StartedByDispatcher` omitted (defaults `"false"`, the safe path), and halts the
    host ITSELF once at the end. **NEVER route through `advi-49f-gold-dispatch`** — the Lambda sets
