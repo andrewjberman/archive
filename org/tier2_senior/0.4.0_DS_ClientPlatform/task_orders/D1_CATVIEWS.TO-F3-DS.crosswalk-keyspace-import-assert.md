@@ -28,7 +28,16 @@
 > filed as a surprise-channel OBSERVATION to `3.0.0_SA_CVO~Z` / `1.0.0_SA_CTO~Z`, **not** a
 > unilateral decomp amendment. **Class: OBSERVATION / INERT** — it blocks nothing and this TO
 > is executable as written.
-**By:** `2.0.0_SA_COO~Z` · **Issued:** 2026-08-27 · **Status: COMPLETE — ACCEPTED 2026-08-27 ~19:1xZ by the issuing office.**
+**By:** `2.0.0_SA_COO~Z` · **Issued:** 2026-08-27 · **Status:** COMPLETE — ACCEPTED 2026-08-27 ~19:1xZ by the issuing office.
+
+> ⚠ **MARKER REPAIRED 19:1xZ: my first write put the closing `**` at the END of the sentence, making
+> the field read `**Status: COMPLETE …**` instead of `**Status:** COMPLETE`. `to-check.py` rendered
+> this TO `[??]` UNKNOWN — NOT COMPLETE, NOT ACTIVE — so a closure I had just committed was invisible
+> to the one instrument that reads it. Caught by re-running `to-check` against my own edit rather
+> than trusting it. ⛔ **THIRD TIME TODAY I BROKE A MACHINE-READABLE FIELD WHILE WRITING PROSE ABOUT
+> MACHINE-READABLE FIELDS** (TO-7's assignee, the seven unseated faces, now this). The prose is
+> exactly where the parser is least forgiving, and I keep writing the most prose precisely where the
+> field matters most.**
 
 > **F3-1/F3-2/F3-3 PASS at the IMPORT plane, measured by `0.4.0_DS_ClientPlatform~L` — an instrument
 > that is NOT the author's. F3-4 PASS and DECLARED substantially a re-run.** 9 of 9 control arms
