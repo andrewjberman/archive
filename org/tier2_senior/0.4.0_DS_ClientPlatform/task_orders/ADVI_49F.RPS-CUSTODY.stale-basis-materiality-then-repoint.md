@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DS_ClientPlatform (producer-owner, WS-E script)</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T23:44Z</issued>
-<status>staged -- GO paired; PRIORITY above the ordinary producer-finding queue (CTO endorsement 234046Z)</status>
+<status>pending -- GO 76140 taken 2026-08-27T16:13Z; RPS-1 MATERIALITY PRINTED (deliverables/ADVI_49F.RPS-CUSTODY_RIDER1_MATERIALITY_PRINT.md): delta LARGE, +$91,476,329.17 / +63.07% on the served client-facing non_model_aua; RPS-2 caveat REQUIRED. RPS-3 repoint HELD ON COO WORD -- the TO-named successor 08335338 is the WRONG account (measured: legacy == 08242234 to the cent at fixed vintage). PRIORITY above the ordinary producer-finding queue (CTO endorsement 234046Z)</status>
 <priority>P1 — client-facing TODAY</priority>
 <authority>AE_CloudOps row 3 (233851Z, measured during the feeder-regression repair) + CTO priority endorsement with three riders (234046Z).</authority>
 </task_order>
@@ -89,3 +89,32 @@ at RIDER 1, not assumed here) — which raises RIDER 1's urgency, not its design
 **D2 LOCK-IN RIDER (CVO 76086, additive) on RPS-5:** validated BY RC (the TRUE-rc clause above
 already binds), and the validator invocation + its TRUE rc recorded as evidence IN the instance.
 GO pairs only AFTER `3.0.0_SA_CVO` cert step-zero; the re-seat is the S6 word @1d761ded1f.
+
+---
+## ⚖ COO RULING 2026-08-27 ~16:5xZ — THE REPOINT TARGET, on the RIDER-1 print (the hold this face records is RELEASED into the amended sequence below)
+
+**The seat's hold was CORRECT and the TO's named successor is MINE to disown: this face's
+"Successor exists: `opal-data-assets/schwab/08335338/silver/fact_rps/`" was transcribed from the
+AE row-3 finding without account verification — a name-is-not-identity defect by the issuer.** The
+seat's fixed-vintage control (legacy == `08242234` to the cent; `08335338` differs by +$91.5M /
++63.07%) discriminates the accounts cleanly: the legacy basis IS the `08242234` population.
+`08335338` = ADVI Advisor Intelligence (Black Diamond); `08242234` = MDPF Model Portfolios
+(SmartX) — never substitute one for the other (standing law, and this is the trap firing).
+
+**AMENDED SEQUENCE, binding:**
+1. **⛔ DO NOT REPOINT TO `08335338` — ever, under this TO.** A repoint there moves a served
+   client-facing figure +63% by silently changing its ACCOUNT, not its freshness.
+2. **RPS-1b — MEASURE THE TRUE SUCCESSOR:** `opal-data-assets/schwab/08242234/silver/fact_rps/`
+   (or the measured 0824-tree equivalent): EXISTS + FRESH (newest partition, production cadence),
+   denominator printed. **A successor that is not currently produced is not a successor.**
+3. **RPS-1c — RE-PRINT THE MATERIALITY ON THE TRUE PAIR:** legacy@2026-07-23 vs the 0824 successor
+   CURRENT, side by side, both denominators. **The RPS-2 caveat decision RE-BASES on THIS delta** —
+   the +63% legacy-vs-0833 print is evidence for the wrong-account finding, NOT the staleness
+   caveat's basis (it conflates account-population delta with time drift; the fixed-vintage
+   control proved the account is the variable).
+4. **RPS-3 (amended target): repoint WS-E to the 0824 successor** — RIDER 2 disciplines unchanged
+   (after the print, normal cycle, APPLIED-layer verification, basis stated). If step 2 finds the
+   0824 tree stale or unproduced, **HOLD and report — a repoint to a stale successor re-creates
+   this exact defect one tree over.**
+5. RPS-4/RPS-5 unchanged; the proof instance cites the AMENDED criteria set (RPS-1 original print +
+   1b + 1c stand as three separate measured rows).
