@@ -1,0 +1,170 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D1_CATVIEWS.TO-L2-DS.sma-l1l2-restructure-and-scopeb-emit-one-act",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "docs/architecture/D1_ASSET_CATEGORY_VIEWS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "14b077f559"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~Z",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md",
+    "vintage_commit": "2ce1e1b8d5",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/D1_CATVIEWS.TO-L2-DS.sma-l1l2-restructure-and-scopeb-emit-one-act.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_category_registry.py",
+      "kind": "script",
+      "commit_or_etag": "14b077f559",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "TL2DS-AC1",
+        "TL2DS-AC2",
+        "TL2DS-AC4",
+        "TL2DS-AC5",
+        "TL2DS-AC7"
+      ],
+      "deploy_evidence": "VIEW_TREE 11->13 (adds 'SMA > ETF Strategies' and 'SMA > ALT Strategies'); SMA_MEMBERS gains a BUCKET column as registry DATA; _sma_members() sets view_path to the bucket path exactly as _model_members() already did; the emit replaces l1_nodes + un_noded_members with a children map. DELIBERATELY NOT DEPLOYED: D1_CATVIEWS is NO-SHIP, build_package.py:266 lifts only by a named COO/Andrew ship ruling and none exists. The projection has never produced served output, so nothing client-facing carried the old tree or carries the new one."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_gold_consolidator.py",
+      "kind": "script",
+      "commit_or_etag": "14b077f559",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "TL2DS-AC2",
+        "TL2DS-AC3",
+        "TL2DS-AC4",
+        "TL2DS-AC5"
+      ],
+      "deploy_evidence": "node_aum gains the two SMA bucket keys, summed from sma_member_aum through registry.members_for(). This is where the per-strategy dollars kept at :596 (@407e1e057b) are finally CONSUMED -- the scope-B half of the one act."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TL2DS-AC1",
+      "criterion_verbatim": "The Rule 24 four-postulate record for the EMITTED value-set lands WITH the change, or there is no change -- MECE over a declared domain, same grain, intent coherence, state coherence, plus a word-boundary token census.",
+      "method": "manual_read_with_citation",
+      "invocation": "deliverable D1_CATVIEWS.TL2DS-AC1_RULE24_RECORD.md @41a52a8459; CERTIFIED by 3.0.0_SA_CVO~Z msg 10334",
+      "output_evidence": "CERTIFIED. (i) MECE measured over a DECLARED closed domain of 6: ETF{divz,idvz,pfde,pfoe}=4, ALT{muni,tax}=2, union==domain, UNCOVERED=[], overlap=[]. THE HUNT WAS NOT VACUOUS -- under the rival reading it was 4 of 6 with idvz/pfde uncovered and postulate (i) FAILING, and the record names that branch. (ii) SAME GRAIN: L1=buckets, L2=members -- and the PRIOR tree violated this, its L1 values WERE members while idvz/pfde sat at the same level with no node at all, so the restructure FIXES a grain defect rather than merely avoiding one. (iii) INTENT COHERENCE: the L1 axis (is ETF-based) and strategy_id (has a registered strategy) are DIFFERENT CUTS -- crossing cell {divz,pfoe}, one-directional implication, an implementer meets the TRUE direction first and wrongly concludes it is derivable. (iv) STATE COHERENCE stated as a FUTURE-INPUT probe rather than a current state. Token census banded and honest about its own corpus; a real homonym found -- bare ALT vs the HTML alt attribute, 12 files case-folded against 1 case-sensitive two-word.",
+      "denominator": "4 postulates + 1 token census; domain denominator 6; census 32 hits / 27,294 files with 1 UNREADABLE + 1,822 BINARY not searched",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TL2DS-AC2",
+      "criterion_verbatim": "The restructure and the scope-B emit contract are delivered as ONE change to ONE surface. If they prove separable, report that as a finding -- do not silently split.",
+      "method": "command",
+      "invocation": "build_category_views on a fixed node_aum, inspecting children keys per L0 card; git show --stat 14b077f559",
+      "output_evidence": "ONE commit, 2 files, +52/-18. Models children=2 ['Primary','Custom']; SMA children=2 ['ETF Strategies','ALT Strategies']; Client children=2 when its predicate is available. l1_nodes ABSENT from the SMA node; un_noded_members ABSENT. They did NOT prove separable, and the reason is structural: view_path IS the tree and the emit reads it, so changing one without the other yields a node whose children do not resolve.",
+      "denominator": "3 L0 cards inspected of 3 that carry children; 2 files in 1 commit",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TL2DS-AC3",
+      "criterion_verbatim": "D1-inv-2 BYTE-UNCHANGED at the gold plane -- the five-peer sum to total_aua must not move. Exercised with the denominator printed, NOT argued from the 'carried beside, never instead' comment.",
+      "method": "command",
+      "invocation": "structural: git diff 407e1e057b^ 407e1e057b plus a grep for every sma_member_aum occurrence. exercised: build_category_views on a fixed node_aum, sum over TOP_LEVEL_PEERS.",
+      "output_evidence": "NOT argued from the comment, as the criterion demands. STRUCTURAL: the :577 change adds exactly 3 non-comment lines, all of them writing sma_member_aum, and that name appears at only those 3 lines -- never passed to build_category_views and never read -- so its inputs are provably unchanged. EXERCISED: five-peer sum 1000.00 == total 1000.00. NEGATIVE CONTROL, and MY FIRST ONE WAS BADLY CHOSEN: perturbing a peer by +0.01 did NOT refuse, because 0.01 is EXACTLY RECON_TOLERANCE. Swept it -- 0.005 and 0.01 silent, 0.02 / 0.5 / 5.0 all raise ViewPlaneError. The guard is correct; reporting 'the control did not fire' without sweeping would have filed a false finding against a working guard.",
+      "denominator": "5 top-level peers; 3 non-comment lines in the producer diff; control swept at 5 magnitudes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TL2DS-AC4",
+      "criterion_verbatim": "D1-inv-4 re-verified against the NEW L1 set -- every L1 bucket sums to its L0 parent with the two new buckets in place, denominator printed. An L1 set that sums correctly because it is EMPTY is not a pass; exhibit the member counts.",
+      "method": "command",
+      "invocation": "build_category_views with SMA bucket aums; per-parent sum of children aum against the parent aum; member counts per bucket",
+      "output_evidence": "Models L1sum 600.00 == L0 600.00; SMA L1sum 100.00 == L0 100.00. NOT VACUOUS, member counts exhibited exactly as the criterion demands: Primary 5 / Custom 4, ETF Strategies 4 / ALT Strategies 2 -- every bucket non-empty. ALSO SURFACED, see controls.mutant: the L1-sums-to-L0 half of D1-inv-4 is TRUE here and ENFORCED BY NOTHING, and Models carries the identical gap, so the restructure INHERITS it rather than introducing it.",
+      "denominator": "2 parents carrying children (Models, SMA); 4 buckets; 15 registered members total",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TL2DS-AC5",
+      "criterion_verbatim": "Membership comes from the registry (D1-inv-1), not a literal tree at a call site. No criterion is discharged by a RENDER or a screenshot, and none by 'the commit gate passed'.",
+      "method": "manual_read_with_citation",
+      "invocation": "read both call sites -- the registry emit block and the consolidator bucket aggregation",
+      "output_evidence": "Both call sites resolve membership through registry.members_for() on the bucket path. The bucket itself is a COLUMN in SMA_MEMBERS -- registry DATA -- not a literal mapping at either call site, which is what keeps D1-inv-1 true through the restructure. No render or screenshot was used for any criterion, and the commit gate is cited for hygiene only, never as a criterion's evidence.",
+      "denominator": "2 call sites, both registry-resolved; 6 SMA members each carrying a bucket value",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TL2DS-AC6",
+      "criterion_verbatim": "D1-h-r3 IS DISCHARGED BY TWO DIFFERENT ACTS, AND DOING EITHER ONE TWICE IS A FAILURE. (a) Claim A PRESERVED verbatim with a vintage stamp and a supersession note; (b) Claim B STRUCK, with the one-directional implication stated in its place.",
+      "method": "command",
+      "invocation": "four grep-verified limbs after the edit; landed by 1.0.0_SA_CTO~Z as exec @2ce1e1b8d5 because owned-paths lane=ANY_EXEC_OR_AE bars a DS serial from DECOMP.md",
+      "output_evidence": "FOUR LIMBS, because AC6 fails BOTH ways: Claim A original text present verbatim = 1 (not edited); Claim B struck = 1; Claim B's ORACLE struck = 1; Claim B standing unstruck = 0. I ALSO STRUCK THE ORACLE, which the criterion does not name but the defect does -- the Executor column carried a runnable check that was Claim B ENCODED AS A TEST, and striking only the prose would have left the derivation executable and re-armed the crossing-cuts trap at every future run against the very cell the amendment disarms. Replaced with a registry-sourced oracle plus the state-coherence probe. I refused GIT_COMMIT_AUTHOR_OVERRIDE: it would have worked, and using it would be a DS lane granting itself an exec lane on a certified decomp.",
+      "denominator": "4 verification limbs; 1 cell amended; 2 opposite remedies, neither applied twice",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TL2DS-AC7",
+      "criterion_verbatim": "All SEVEN sites of the D1-h-r3 strike are named, split RECORDS / CODE (amended from five @f4e059cf7d).",
+      "method": "manual_read_with_citation",
+      "invocation": "comp-find 'D1-h-r3' --files --all; deliverable D1_CATVIEWS.TL2DS-AC7_SITE_LEDGER.md @55e7f164b3",
+      "output_evidence": "7 files: 6 cite D1-h-r3 by name plus 1 that encodes the struck premise without citing it. THREE categories that are not interchangeable -- EDIT (registry :906, the emitter, the only producer change); EDIT (portal aum.ts:687, the docstring ON the contract interface, and the TYPE NAME MdpfCategorySmaL1Node itself names the wrong level, bounded to ONE source file with 0 .runtmp copies so it is a contained rename that should RIDE scope-B); and DATA (CategoryViewTree.tsx :188/:245 -- comments stale, code data-driven, changes behaviour with NO commit once sma_member_aum reaches the client). 4 RECORDS preserved, true at their pins. REUSABLE NOTE, credited by the issuer to this lane: SWEEP THE CITATION, NOT THE TOPIC -- 'SMA L1' returns 16 candidate files, 'D1-h-r3' returns the dependents.",
+      "denominator": "23 hits / 27,290 files scanned; BANDS SURFACED=2 DOC=21 across 6 citing files, plus 1 non-citing file = 7; 1 UNREADABLE + 1,822 BINARY not searched",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative controls on both invariants, plus the state-coherence probe the certified Rule 24 record names. (1) D1-inv-2 five-peer perturbation swept across magnitudes. (2) D1-inv-4 L1-bucket perturbation on the NEW SMA buckets. (3) THE DISCRIMINATING TEST -- the same perturbation applied to MODELS, to establish whether a non-firing control indicates a gap this change introduced or one that pre-existed it. (4) STATE COHERENCE -- give idvz a strategy_id and re-derive its bucket.",
+      "expected": "(1) refuse above RECON_TOLERANCE. (2) refuse. (3) discriminates inherited from introduced. (4) bucket UNCHANGED.",
+      "observed": "(1) FIRED CORRECTLY: 0.005 and 0.01 silent -- 0.01 IS the tolerance, so my first control was badly chosen -- then 0.02 / 0.5 / 5.0 all raise ViewPlaneError. (2) DID NOT FIRE: SMA bucket +5.00 -> NO REFUSAL. (3) DECISIVE: Models +5.00 -> NO REFUSAL EITHER, while the L0 five-peer +5.00 DOES raise. So the L1-sums-to-L0 half of D1-inv-4 is ENFORCED BY NOTHING, Models carries the identical gap, and the restructure INHERITS it rather than introducing it -- established by testing Models BEFORE reporting, without which this would have read as a defect I had just created. Confirmed and bounded by 3.0.0_SA_CVO~Z: 28 registry raise sites with ZERO touching the arithmetic; the registry docstring :875-878 CLAIMS every L1 set sums to its L0 parent while nothing raises; and the control EXISTS in a sibling pipeline (runners_49f/d04_clients_tab.py:81), which makes this a gap mdpf lacks rather than one nobody invented. NOT FIXED HERE -- a guard for an unenforced invariant is its own TO with a second seat's control; routed to 2.0.0_SA_COO~Z. (4) PASSED: idvz bucket is 'SMA > ETF Strategies' before and after gaining a strategy_id -- had it moved, the level was derived from the field.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "self_test run and scored on the true rc captured before any pipe or substitution could reset it, corroborated by a FAIL-line census over the captured stdout.",
+      "observed": "rc=0, 0 FAIL lines, 13 declared view nodes (was 11). commit-gate rc=0 over 2 of 2 files -- py_compile + ds-precommit + ruff py39.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The D1-inv-4 L1-sums-to-L0 guard",
+      "reason": "SURFACED, NOT BUILT. The invariant is true here and enforced by nothing, and Models shares the gap. Building the guard inside a restructure TO would be the widening this TO's out-of-scope discipline forbids -- 'true today and enforced by nothing' WAS TO-F3-DS's Finding 3, and its remedy was a dedicated TO with its own acceptance criteria and a second seat's control. Owner: 2.0.0_SA_COO~Z as issuer."
+    },
+    {
+      "item": "The MdpfCategorySmaL1Node rename",
+      "reason": "Portal-lane. The type name encodes the wrong level under the new tree, bounded to ONE source file with 0 .runtmp copies. It should RIDE scope-B on the DE surface rather than become a second edit to one interface in one session -- two edits to one interface is how a contract acquires two vocabularies. Owner: 0.4.0_DE_ClientPlatform~Z."
+    },
+    {
+      "item": "CategoryViewTree.tsx comment corrections",
+      "reason": "Portal-lane, and the CODE is already correct by Andrew's ~21:3xZ rule because it branches on r.aum. Only the comments assert the struck categorical premise. The :245 REASONING must survive the edit even though its PREMISE is stale. Owner: 0.4.0_DE_ClientPlatform~Z."
+    },
+    {
+      "item": "Any deploy, re-pin or safe-apply",
+      "reason": "D1_CATVIEWS is NO-SHIP (COO ruling @0d08954d4c); build_package.py:266 lifts only by a named ship ruling and none exists. A disarmed condition is not a ship decision."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / INERT: the registry's own docstring at :875-878 claims 'TWO PLANES, BOTH ASSERTED ... every L1 set sums to its L0 parent' while nothing in the file raises on that arithmetic -- a doc-vs-code disagreement inside the file this TO edits. Measured by 3.0.0_SA_CVO~Z: 28 raise sites, 0 touching the arithmetic. Filed, not fixed.",
+    "OBSERVATION / INERT: the TO's declared instance_path named a ~Z-suffixed deliverables directory that does not exist -- flat ~Z lane paths are undefined to safe-commit on this device. Corrected by the issuer @27e8cdaabf BEFORE filing rather than after. Control: 0.7.0_AE_CloudOps~Y/deliverables/ DOES exist, so the convention is sound and the defect is ~Z-specific.",
+    "OBSERVATION / INERT: a census of the new enum values run today cannot distinguish 'this term is established in the estate' from 'we started writing it ninety minutes ago' -- whole-repo went 0 -> 107 for 'ETF Strategies' in about 40 minutes, and every non-zero CODE signal is the remedy in flight. Anyone quoting the total as adoption is quoting this evening's conversation back to itself."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-27/",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'D1-h-r3' --files --all ; comp-find 'MdpfCategorySmaL1Node' --files --all ; comp-find -i 'ETF Strategies' --files --all",
+      "result": "RUN, and it is the instrument the issuer adopted into AC7. SWEEP THE CITATION, NOT THE TOPIC: 'SMA L1' returns 16 candidate files while 'D1-h-r3' returns the 2 SURFACED dependents. It also caught my own scoped-true claim -- a path-scoped sweep of data/mdpf/ hid the portal citation that the unscoped sweep returned in one call."
+    },
+    {
+      "tool": "comp-pipescript io",
+      "invocation": "comp-pipescript io mdpf_category_registry.py --pipeline mdpf",
+      "result": "WARN -- 'READS/WRITES none detected', no s3_layout constants. Recorded as the TOOL'S BLIND SPOT rather than a finding: this module is a pure in-process registry with no S3 I/O by design."
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh mdpf_category_registry.py mdpf_gold_consolidator.py",
+      "result": "rc=0, 'clean for 2 of 2 file(s)'. Cited for hygiene ONLY -- AC5 forbids discharging any criterion on the gate, and the gate reads .py/.sh/.tf so it is structurally silent on the portal half of this work."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this file> TL2DS-AC1,...,TL2DS-AC7",
+      "result": "RUN positionally with all 7 ids and scored on the TRUE rc, never the output string. Recorded with the caveat the estate has banked: rc=0 is NOT proof a criterion ran, because the validator will pass a placeholder row -- which is why every acceptance row above carries a measured artifact rather than a restatement of its criterion."
+    }
+  ]
+}
