@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_49F.P14-PRECOND",
+  "firm": "49F",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/task_orders/ADVI_49F.P14-PRECOND.a00-declared-historical-mode.md",
+    "group": "A",
+    "vintage_commit": "3982ab3a43"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~U. GO 2.0.0_SA_COO 76413 after 3.0.0_SA_CVO cert step-zero PASS @5681c08447 (decomp override BLESSED-SCOPED). The whole design is CTO ruling 76377 and the ruling wins on any divergence from the face. Finder of the hazard this TO closes: this seat's own 76367.",
+  "controls": {
+    "mutant": {
+      "description": "THE EPOCH MUTANT (DH-3): a synthetic conversion record attesting an absurdly early date (2019-01-02) is injected into the record set the epoch is computed from, holding every other input constant. If the epoch is DERIVED it must move to the planted date; if it is pinned anywhere -- a literal, a cached constant, a default -- it will not. Paired with a control-of-the-control: with the injection removed the epoch must return to its measured value, so a mutant that merely broke the function cannot masquerade as a mutant that moved it. SEPARATELY, two REFUSAL arms are exercised as their own controls: a third attestation_basis value must be rejected (closed vocabulary), and a NUMBER passed as attested_rows under the declared basis must be rejected (the self-count arm, closed in code rather than merely discouraged).",
+      "expected": "The planted record MOVES the computed epoch to 2019-01-02; removing it returns 2026-07-14. The third-value and self-count arms both raise rather than proceed.",
+      "observed": "MOVED: epoch computed 2019-01-02 under the plant, 2026-07-14 without it (control-of-the-control fired). REFUSALS BOTH FIRED: attestation_basis='probably-fine' -> ValueError 'unknown attestation_basis ... the vocabulary is closed'; attested_rows=6713 under declared-historical-pre-epoch -> ValueError 'a pre-epoch date HAS no converter-attested count, so a number here can only be a self-count or a back-filled attestation. Both are banned (CTO 76377).'",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every acceptance arm invokes a00_runner as a REAL SUBPROCESS and reads its true rc and stdout -- the criteria say 'exercised' and 'run it; do not assert it', and an in-process call would not exercise the argparse wiring the driver actually uses. Both branches were run on the same date so the ONLY varied input is the flag. Nothing was uploaded: every arm is --dry-run.",
+      "observed": "STABLE and both branches reachable from the SAME input. date=2026-03-24 without the flag -> rc=1 and the original refusal; with the flag -> rc=0 and the declared path, 6,713 rows read, tie not run. The converter-attested arm on 2026-07-14 -> attested 7,139, tie_ran=True. Two branches, one date changed only by the flag, plus the other arm on an attested date -- so neither branch is an artifact of the input.",
+      "status": "STABLE"
+    }
+  },
+  "acceptance": [
+    {
+      "criterion_id": "DH-1",
+      "criterion_verbatim": "DH-1 EXPLICIT-MODE ONLY, exercised: without the flag, the 2026-03-24 abort REPRODUCES byte-for-same-reason (the existing refusal is the negative control and it must still fire); with the flag, the same date proceeds past a00. No auto-fallback path exists in the diff.",
+      "method": "command",
+      "invocation": "python a00_runner.py --date 2026-03-24 --dry-run   (flagless arm), then python a00_runner.py --date 2026-03-24 --dry-run --declared-historical   (flagged arm). Real subprocesses; rc read from the process, output captured.",
+      "output_evidence": "BOTH ARMS EXERCISED FROM THE REAL FAILING STATE -- 2026-03-24 is the date whose abort opened this whole item, not a synthetic case. FLAGLESS -> rc=1, verbatim: 'REFUSED: no conversion record attests fact_acc 2026-03-24 (scanned 456 records) -- the tie guard has no denominator'. MATCHED ON THE ORIGINAL REASON, NOT ON THE RC: any unrelated error also exits non-zero, so an rc-only check would have accepted a broken build as a preserved guard -- the negative control is the refusal TEXT. FLAGGED -> rc=0, verbatim: 'DECLARED-HISTORICAL: date=2026-03-24 < measured epoch 2026-07-14 ... No converter denominator exists for this date, so THE SHORT-READ TIE DOES NOT RUN ... This declares a CONTROL REGIME; it asserts nothing about a count.' / 'fact_acc date=2026-03-24: 6,713 rows read; NO attested count (declared-historical)' / 'attestation_basis=declared-historical-pre-epoch short_read_tie_ran=False'. NO AUTO-FALLBACK IN THE DIFF: attested_count() and its refusal are untouched -- the diff shows no edit inside that function; the branch is selected only by an explicit argparse flag with no except/retry path around the guard.",
+      "denominator": "2 of 2 arms run on 1 date, the flag the only varied input; 1 of 1 refusal texts matched verbatim.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DH-2",
+      "criterion_verbatim": "DH-2 THE MODE'S OWN GUARD, exercised: the flag + a date >= the measured epoch REFUSES loudly, naming the epoch and the reason. Run it; do not assert it.",
+      "method": "command",
+      "invocation": "python a00_runner.py --date 2026-07-14 --dry-run --declared-historical -- where 2026-07-14 is not typed but taken from attestation_epoch() at run time, so the test cannot drift away from the boundary it is testing.",
+      "output_evidence": "RUN, NOT ASSERTED -> rc=1, verbatim: 'REFUSED: --declared-historical is for PRE-EPOCH dates only. date=2026-07-14 is at or after the measured attestation epoch 2026-07-14, where the converter tie CAN bind -- so the ordinary guard governs and a missing record there is a real defect, not a historical gap. Re-run without the flag.' It NAMES the epoch and NAMES the reason, so the operator learns why rather than only that. Boundary chosen deliberately at date == epoch, the inclusive edge, because that is the case a >= vs > slip would silently pass. The mode therefore cannot be used to bypass the guard anywhere the guard can bind.",
+      "denominator": "1 of 1 arm run, at the exact inclusive boundary; the epoch taken from the runtime measurement rather than typed into the test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DH-3",
+      "criterion_verbatim": "DH-3 EPOCH MEASURED: shown derived from the converter record set at runtime; a planted extra record moves it (mutant control) -- no literal date in code, ever.",
+      "method": "test_suite",
+      "invocation": "attestation_epoch() called against the live record set; then against the same set with one synthetic record injected; then again unplanted. Plus an AST walk of a00_runner.py for date-shaped string constants excluding docstrings, and a targeted walk of attestation_epoch()'s own body.",
+      "output_evidence": "DERIVED, PROVEN BY MOVING IT: planted record attesting 2019-01-02 -> epoch computes 2019-01-02; unplanted -> 2026-07-14 (control-of-the-control, so a merely-broken function cannot pass as a moved one). NO LITERAL IN CODE: AST constants excluding docstrings contain zero date-shaped strings, and attestation_epoch()'s own body contains zero. ⛔ AND MY FIRST VERSION OF THIS CHECK FAILED THE CRITERION FOR THE WRONG REASON, which is recorded because it cuts both ways: a line-based filter reported three 'literals' -- a --date usage example in the module docstring, an author line, and a trailing comment -- none of them a typed epoch. A line filter cannot distinguish code from prose; a PARSER can, and comments never enter the tree at all. Had the same crude filter erred in the other direction it would have reported a PASS over a real typed date. The code was correct throughout; the instrument was not, and the instrument is what I fixed.",
+      "denominator": "3 epoch computations (live, planted, unplanted); 1 AST walk over the whole module plus 1 targeted walk of the epoch function.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DH-4",
+      "criterion_verbatim": "DH-4 BASIS STAMPED + CONSUMED: attestation_basis present on emitted partitions + manifest with exactly the two-value vocabulary; the P1.5 re-grade surface and the parity-harness read path each shown READING it (cite file:line of the consuming half -- an unread provenance field drifts to unpopulated, so the consumers are part of THIS TO's acceptance, not a later one's).",
+      "method": "live_read",
+      "invocation": "build_dim_account run on a pre-epoch date and on an attested date, reading attestation_basis off the BUILT dim and the manifest; both refusal arms exercised. Then a measurement of whether either named consuming surface exists: python .tools/to-check.py --all across 2,128 scanned TOs for any P1.5 / re-grade item, and a filesystem search for any BDPARITY harness script.",
+      "output_evidence": "SPLIT BY HALF, because the two halves did not fare the same. STAMPING HALF -- PASS, read off built artifacts rather than asserted: attestation_basis present on all 6,713 emitted rows of the pre-epoch build with the single value declared-historical-pre-epoch; manifest carries attestation_basis + short_read_tie_ran=False + attested=-1 (a SENTINEL, deliberately not 0 which reads as 'attested zero rows', and never len(acc)). BOTH VOCABULARY VALUES REACHABLE, control on the other arm: 2026-07-14 -> converter-attested, short_read_tie_ran=True, attested=7,139. BOTH REFUSAL ARMS FIRE: a third value raises, and a number under the declared basis raises. CONSUMING HALF -- NEITHER SURFACE EXISTS, measured not assumed: no P1.5 re-grade TO exists anywhere in the register (to-check --all over 2,128 scanned returns nothing for P1.5 or re-grade), and there is NO BDPARITY harness SCRIPT -- a filesystem search for any bdparity *.py returns empty; what exists at 4.0.0_SA_CRO~A is four JSON/CSV deliverable OUTPUTS dated 2026-08-18, not a code path a read can be wired into. I did NOT create a consumer to satisfy the criterion; per 2.0.0_SA_COO 76414, a file created solely to be cited would be worse than an honest gap.",
+      "denominator": "Stamping: 6,713 rows on the declared arm + 7,139 on the attested arm; 2 of 2 vocabulary values reached; 2 of 2 refusal arms fired. Consuming: 2 of 2 named surfaces searched for, 0 of 2 found; 2,128 TOs scanned for the first, filesystem-wide for the second.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "SUBSTITUTE: none available and none invented. The stamping half is PASS on measured artifacts. The consuming half is CASE (b) -- both named surfaces are ABSENT, so there is no file:line to cite and no read to wire. 2.0.0_SA_COO's issuer pre-commitment (76414) therefore FIRES: the consuming half TRANSFERS as a named acceptance criterion on each consuming surface's own TO at its cut -- the P1.5 re-grade TO and the BDPARITY harness face each to carry 'reads attestation_basis and states the attested/declared split beside its denominators', citing this DH-4 record as the producer half, with 3.0.0_SA_CVO's P1.5 bar as the independent verifier. Scored UNVERIFIABLE rather than PASS because the criterion's own words make the consumers part of THIS TO, and scoring a transferred obligation as met here would be the 'stamped, will be read later' evaporation the criterion exists to prevent. SCORING LABEL: TRANSFERRED-WITH-NAMED-CARRIER per COO 76414."
+    },
+    {
+      "criterion_id": "DH-5",
+      "criterion_verbatim": "DH-5 proof instance VALID rc=0 positional: ids DH-1..DH-5, TRUE rc bare, validator invocation + rc recorded IN the instance (D2 lock-in).",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.P14-PRECOND_PROOF_OF_SPEC.json DH-1,DH-2,DH-3,DH-4,DH-5 -- the expected-id set is CITED here in full, and the rc is read directly from the process with no pipe, because a pipeline reports the LAST command's status and would launder a failure.",
+      "output_evidence": "RECORDED AFTER THE RUN. The id set the checker ran against is cited above; the checker fails on a missing OR an extra id, which is what makes the rc mean coverage rather than merely structure. WHAT THIS INSTANCE CLAIMS: DH-1, DH-2, DH-3 PASS on exercised evidence with quoted outputs; DH-4's stamping half PASS and its consuming half TRANSFERRED with a named carrier; the mode is deployed and content-verified. The TO's own completion flip is 2.0.0_SA_COO + 3.0.0_SA_CVO ground and I have not flipped it -- a seat scoring its own transferred-obligation criterion as complete is exactly the call that should not be self-served. FIRST RUN OF THIS GATE RETURNED rc=1 -- one violation, and it was mine and of a kind I had already made once today: 'Additional properties are not allowed (status_reason_carrier was unexpected)'. I invented a field to carry the TRANSFERRED-WITH-NAMED-CARRIER label instead of using status_reason, which already exists for exactly that. Folded in and re-run. Worth recording rather than quietly fixing: the c01 instance failed on twelve invented enum values, I carried that lesson into c02 (VALID first run), and then invented a KEY here -- the same reach-for-a-new-slot reflex one level up. The schema rejects, which is why it keeps catching me; an unenforced surface would have shipped all three.",
+      "denominator": "5 of 5 criterion ids in the declared set; coverage checked by the validator itself.",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/a00_runner.py -> s3://opal-data-49financial/_code/a00_runner.py",
+      "kind": "script",
+      "commit_or_etag": "commit bc585df628 / deployed LF-normalised sha256(16) 47ec32f76a6335fd",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Deployed under the CONVERGED instruction -- 2.0.0_SA_COO 76509 governs (normal Rule-13 DS QA lane, not a full P4 gate), after 1.0.0_SA_CTO 76516 struck their own gate label on the asymmetry: c02's gate existed because SERVED VALUES MOVE on that deploy, whereas a00's flagless behaviour is unchanged (DH-1 proves the refusal preserved) and the mode cannot fire without an explicit flag only the P14 driver passes. safe-deploy gate PASS rc=0, then verified with a DIFFERENT subject than the gate's own check: deployed bytes vs the COMMITTED build input, LF-normalised, with the parent commit as a negative control that DIFFERS (45a6600d7ff494ed).",
+      "artifact_covered_by": [
+        "DH-1",
+        "DH-2",
+        "DH-3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/a00_dim_account.py -> s3://opal-data-49financial/_code/a00_dim_account.py",
+      "kind": "script",
+      "commit_or_etag": "commit bc585df628 / deployed LF-normalised sha256(16) ddf9f47ca52c7c09",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Same lane and same independent content verification; parent negative control ca9bff1ff53dce11 DIFFERS. Carries the closed vocabulary, the BuildReport fields, and the row stamp. MANIFEST_SCHEMA_VERSION stays PINNED -- this surface's own law is 'fields only ADD, never mutate', which is precisely what an additive field is entitled to.",
+      "artifact_covered_by": [
+        "DH-4"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.P14-PRECOND_ACCEPTANCE_DH.py",
+      "kind": "test",
+      "commit_or_etag": "commit bc585df628",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "[artifact shape: acceptance harness] Repository artifact, no S3 target. Invokes a00_runner as real subprocesses; carries the epoch mutant, its control-of-the-control, and the AST-based literal check that replaced my failed line-based one.",
+      "artifact_covered_by": [
+        "DH-1",
+        "DH-2",
+        "DH-3"
+      ]
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-pipescript io",
+      "invocation": "comp-pipescript io a00_dim_account --pipeline advi",
+      "result": "The pre-declared KNOWN-THIN manifest: Group A / Order 0, READS and WRITES both '(none detected)', manual-review WARN. Not an error, so the face's STOP condition did not trigger; manual body review recorded in the session log as the tool's own mandate requires."
+    },
+    {
+      "tool": "comp-pipescript deployed",
+      "invocation": "run inside safe-deploy for both a00 files",
+      "result": "VERIFY OK on both. Not treated as the verdict on its own -- an independent LF-normalised compare against the COMMITTED build input was run afterwards with a parent-commit negative control, because the tool compares working tree to S3 and that is a different subject from build-input identity. Both files raw-equal here (no CRLF on either side), so unlike c02 the normalisation made no difference -- stated because 'the trap did not fire' is only meaningful if you also say you looked."
+    },
+    {
+      "tool": "commit-gate / safe-commit / safe-deploy",
+      "invocation": "the standard Rule 13/14/14a lane on every commit and both deploys",
+      "result": "PASS throughout. One commit in this TO's window was BLOCKED by .git/index.lock (rc=128, twice) -- shared-worktree contention, not a gate refusal; resolved by retry after the holder cleared, and the landing was confirmed by asking the REPOSITORY rather than reading the tool's stdout, which safe-commit's own refusal text explicitly instructs."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any modification to attested_count() or its refusal.",
+      "reason": "CTO 76377: the guard STANDS UNMODIFIED. The diff shows no edit inside that function; the historical path is a separate explicit branch beside it, and DH-1's flagless arm exists to prove the original refusal still fires."
+    },
+    {
+      "item": "Back-filled conversion records, in any form or framing.",
+      "reason": "BANNED by CTO 76377 -- attesting conversions nobody witnessed is the self-count the guard forbids wearing the record format's clothing. Not written, and the code additionally REFUSES a number passed as attested_rows under the declared basis so the substitution cannot be made accidentally downstream."
+    },
+    {
+      "item": "Building either DH-4 consuming surface (the P1.5 re-grade report, the BDPARITY harness read path).",
+      "reason": "Neither exists, and inventing one to be cited would be worse than an honest gap (COO 76414). The obligation transfers to those surfaces' own TOs at their cut with a named verifier, rather than being satisfied here by a file created for the citation."
+    },
+    {
+      "item": "Running the declared-historical mode with --upload against any date.",
+      "reason": "Every acceptance arm was --dry-run. Nothing is stamped in S3. Minting historical partitions is P14-VEHICLE's pass at 0.7.0_AE_CloudOps~L, driven with the flag whose syntax was delivered to that seat before their execution legs unlock."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / INERT -- MY OWN DH-3 CHECK FAILED THE CRITERION FOR THE WRONG REASON, and the direction it failed in was the lucky one. A line-based filter over a00_runner.py reported three date 'literals in code'; all three were prose -- a --date usage example in the module docstring, an author line, and a trailing comment on a code line. A line filter cannot separate code from prose. Replaced with an AST walk over string constants excluding docstrings (comments never enter the tree) plus a targeted walk of attestation_epoch()'s own body; both empty. The transferable half: this instrument could just as easily have erred the other way and reported PASS over a genuinely typed epoch, and nothing downstream would have caught it -- the criterion's whole point is that a pinned date is invisible once it exists.",
+    "OBSERVATION / INERT -- A LOAD-BEARING COMMIT WAS BLOCKED BY ANOTHER SEAT'S LIVE git index.lock, AND THE CORRECT ACT WAS TO NOT RESOLVE IT. Two safe-commit attempts returned rc=128 on .git/index.lock while three seats were waiting on the line that commit carried. My instruments could establish only that the lock was QUIET -- unchanged size and mtime across a probe -- which is consistent with abandoned but is not proof of it, and MSYS ps structurally cannot see detached native git processes so 'no live git' was never evidence. I refused to delete it and reported the block instead. 1.0.0_SA_CTO then identified the holder with Windows-native enumeration as a LIVE git process waiting on a commit-message editor with a dead parent -- a write that could never finish, and one that deleting the lock would have raced. The lock later cleared by some means I did not observe and did not cause; the commit landed on retry. Recorded because the tempting act (delete a quiet lock on a shared tree) and the correct act (report and wait) look identical in cost right up until they don't.",
+    "OBSERVATION / INERT -- I REPORTED A BLOCKED ACT BEFORE RESOLVING IT, WHICH TURNED OUT TO MATTER. Because the block was surfaced immediately rather than after a fix, 0.7.0_AE_CloudOps~L kept a correct hold on their unlock read instead of acting on an expectation, and no seat spent time on a line they believed was already in place. The inverse -- reporting the append as done and then discovering the commit had not landed -- was available and would have propagated a false state to three seats and a gated 531-partition pass."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/logs/2026-08-27/ -- commits: bc585df628 (mode + acceptance harness), a3e945bb56 (the c02 face token, serving c02-CFINPUT not this TO), and this instance. a00 deploy verified against build input bc585df628."
+}
