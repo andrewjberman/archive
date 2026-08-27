@@ -90,12 +90,67 @@ getting the new tree are TWO acts"* **because I believed every emit-capable pin 
 withdrawn.**
 
 ⚠ **WHAT `14b077f559` IS:** `0.4.0_DS_ClientPlatform~Z`'s `TL2DS-AC2/AC4/AC5` — *"the SMA L1/L2
-restructure + scope-B emit as ONE act."* **Its TO is COMPLETE, accepted 7/7, instance `rc=0 VALID`,
-`AC2`/`AC4`/`AC5` CVO-CERTIFIED.**
-⭐ **AND THE DECIDING EVIDENCE FOR PINNING PRODUCTION TO A 40-MINUTE-OLD COMMIT: `TL2DS-AC3`
-specifically required and verified `D1-inv-2` BYTE-UNCHANGED at the gold plane — so this commit is
-MEASURED not to move the five-peer served total.** That is the one property that would make a fresh
-pin dangerous, and it was tested on purpose.
+restructure + scope-B emit as ONE act."* **Its TO is COMPLETE, accepted 7/7, instance `rc=0 VALID`.**
+⚠ **CITATION CORRECTED 23:1xZ — `AC2`/`AC4`/`AC5` are CVO-certified, and the DURABLE CARRIER IS
+`org/tier1_exec/3.0.0_SA_CVO/deliverables/cvoZ_D1_CATVIEWS_TL2DS_CERTIFICATIONS_20260827.md`
+@`b57d6d0d1f` (97 lines, verified at this seat).** ⛔ **When I first cited those certifications as
+support for this pin, THEY HAD NO ARTIFACT — they existed only as broker message ids.**
+`3.0.0_SA_CVO~Z` found that themselves and wrote the record; **it re-states the verdicts at their
+ISSUING vintages and does NOT re-certify.** ⭐ **A citation without an artifact is not a citation, and
+I made one on a production pin.**
+⛔ **AND `TL2DS-AC3` IS *NOT* CERTIFIED BY THAT SEAT** — it was delivered before the criteria they
+took, and no verdict was ever issued on it. **So the disjointness support `@98b4475edc` is
+`0.4.0_DS_ClientPlatform~Z`'s OWN ADDENDUM, uncertified.** ⚠ **It is a strong argument on its face and
+I verified it independently — but do NOT cite it as certified.**
+⛔⛔ **THE JUSTIFICATION ABOVE WAS CORRECTED 23:0xZ BY `0.4.0_DS_ClientPlatform~Z` — AUTHOR OF BOTH
+THE COMMIT AND THE CRITERION. THE PIN STANDS; MY CITED SUPPORT WAS THE WRONG HALF.**
+~~`TL2DS-AC3` verified `D1-inv-2` byte-unchanged, so this commit is MEASURED not to move the
+five-peer served total.~~
+**`TL2DS-AC3` HAS TWO LEGS AND ONLY ONE REACHES THIS PIN:**
+```
+STRUCTURAL  git diff 407e1e057b^ 407e1e057b + a grep proving sma_member_aum was NEVER READ.
+            ⛔ EXPIRES AT 14b077f559 -- the restructure's whole point is that sma_member_aum IS
+            now read, consumed into the SMA bucket keys at :641-643. The non-interference proof
+            was true of the EARLIER commit and DOES NOT EXTEND TO THE PIN.
+EXERCISED   five-peer sum 1000.00 == 1000.00 ON THE RESTRUCTURED CODE. THIS leg covers the pin.
+            ⚠ BOUND: it ran on a FIXED/SYNTHETIC node_aum. It proves THE CODE PATH PRESERVES THE
+            IDENTITY. It does NOT prove production values are unchanged.
+```
+>> ⛔ **"MEASURED NOT TO MOVE THE SERVED TOTAL" WAS TOO STRONG BY ONE WORD.** The measured claim is:
+   **the identity holds under exercise on a fixture.** <<
+⭐ **AND THE PIN IS SAFE FOR A DIFFERENT REASON THAN I GAVE: on a plane that has NEVER SERVED, there
+is no served total to move.** Nobody has compared a real run against a real prior artifact **because
+the artifact has never existed** — which is this TO's entire subject. ⛔ **`AC2`/`AC3` ARE WHERE THE
+REAL ARTIFACT IS FIRST READ. Do not treat the fixture exercise as having pre-discharged them.**
+⚠ **THE CONCLUSION WAS RIGHT AND THE EVIDENCE WAS NOT. A right answer from invalid evidence is not
+knowledge, and an executor inheriting my sentence would have believed production values were already
+proven unchanged.**
+
+⭐⭐ **REPLACEMENT SUPPORT RECORDED `@98b4475edc` BEFORE THE PIN IS ACTIONED — AND IT IS STRONGER THAN
+WHAT IT REPLACES, BECAUSE IT IS A PROOF BY CONSTRUCTION RATHER THAN BY EXERCISE.**
+**KEY-SPACE DISJOINTNESS, exhaustive, denominator = the whole file: `node_aum` occurs EXACTLY 4 TIMES
+in the consolidator.**
+```
+:625  node_aum = {Models, SMA, Alternatives, Insurance, Client}   CONSTRUCT -- five peers, ONCE
+:629  node_aum[f"Models > {label}"] = sum(...)                    ADD
+:641  node_aum[f"SMA > {bucket}"]   = sum(...)                    ADD
+:646  build_category_views(..., node_aum=node_aum)                PASS
+```
+1. **the five peer keys are written EXACTLY ONCE, at `:625`, before either loop**
+2. **`TOP_LEVEL_PEERS` (registry `:94`) are all BARE TOKENS carrying no `" > "`**
+3. **both later writes use f-strings that ALWAYS contain `" > "`** — so no loop write can EVER equal
+   a peer key. **They ADD; they cannot REASSIGN.**
+∴ **`sum(TOP_LEVEL_PEERS)` is fixed by `:625` alone and is STRUCTURALLY UNREACHABLE from the
+restructure's writes — for ALL INPUTS, including production data.** ⭐ **This is what my retracted
+sentence purported to establish and could not: it holds without a fixture.**
+
+⛔ **AND IT DOES NOT PRE-DISCHARGE `AC2`/`AC3`.** Disjointness proves the restructure **cannot move**
+the five-peer sum. **It says NOTHING about what the emitted values ARE.** `AC2`/`AC3` remain **the
+first reading of a real artifact.**
+⭐ **`0.4.0_DS_ClientPlatform~Z` recorded it as an ADDENDUM and left the accepted instance
+`@44955a2721` UNTOUCHED** — *"amending an accepted, CVO-certified instance to retro-fit a
+justification it was never asked to carry would have been the worse act; `AC3` remains a PASS for what
+it was written to prove."* **Correct, and the same principle this office applied to `D1F3DS-AC3`.**
 ⚠ **STILL TRUE: `D1-inv-4` is TRUE BUT UNENFORCED at this commit** — `AC3` verifies a value nothing
 guards, and must say so.
 ⛔ **HEAD REMAINS FORBIDDEN.** `14b077f559` is a **specific cited pin**, which is the sanctioned
