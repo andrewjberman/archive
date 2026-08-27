@@ -1,0 +1,186 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_49F.RPS-CUSTODY",
+ "firm": "49F",
+ "phase": "P3-REPOINTS",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_49F.RPS-CUSTODY.stale-basis-materiality-then-repoint.md",
+  "group": "OTHER",
+  "vintage_commit": "a53fcf6459"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform (producer-owner, WS-E script), seated by Andrew's D2 S6 word and released by 2.0.0_SA_COO GO 76140. Repoint target amended mid-TO by issuer ruling 76210 after this seat's RIDER-1 print falsified the TO's named successor; 76212 confirmed nothing further gates.",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/mdpf/scripts/gold/build_mdpf_wse_49f_non_model_aua.py -> s3://opal-data-mdpf/code/scripts/gold/build_mdpf_wse_49f_non_model_aua.py",
+   "kind": "script",
+   "commit_or_etag": "commit d5fd2e4c79 / deployed ETag \"c15ba5d5e1557b35fb333a85bb0e3bbc\"",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-deploy.sh gate PASS, TRUE rc=0 measured without a pipe (the gate fail-closed first on IDENTITY UNRESOLVED rc=3 until the session serial file was written -- not overridden). APPLIED-layer verification then done with a DIFFERENT instrument than the gate's comp-pipescript: the deployed object was downloaded and read back (LastModified 2026-08-27T17:14:00Z, 44,431 B), LF-normalised sha256 b6c8a6acf95f1a64600d722c5abbb76ce0ac08896fccb10c183ea02c0c51c6af == local, normalisation stated on both sides per the CRLF/LF hazard. 7 of 7 positive probes PRESENT in the deployed bytes (RPS_MASTER_ACCOUNT=\"08242234\", the fact_rps prefix, ASSETS_BUCKET, both column constants, the hyphenated partition regex, the new custody_scope); 3 of 3 negative controls ABSENT from the deployed code path after stripping docstrings and comments (the old prefix constant, the BD_BUCKET paginate call, the compact date regex); control-of-the-control fires (RPS_CASH_TICKERS still present in the stripped text, so the strip did not empty the file and manufacture the absences).",
+   "artifact_covered_by": [
+    "RPS-3",
+    "RPS-4"
+   ]
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ADVI_49F.RPS-CUSTODY_RIDER1_MATERIALITY_PRINT.md",
+   "kind": "doc",
+   "commit_or_etag": "a53fcf6459 (sections 1-7, on origin) + 5c3ed23e92 (section 8, the 10-vintage hardening)",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The RIDER-1 materiality print. A document deliverable -- nothing to deploy. Carries every figure cited in rows RPS-1, RPS-1b, RPS-1c and RPS-2 with denominators printed beside each.",
+   "artifact_covered_by": [
+    "RPS-1",
+    "RPS-1b",
+    "RPS-1c",
+    "RPS-2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/advi-49f-rps-custody-wse-repoint-20260827.md",
+   "kind": "doc",
+   "commit_or_etag": "d5fd2e4c79",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEVER#6 deploy ledger, opened BEFORE the deploy and closed at completion in the same session. Records all 7 legs, the pre-deploy evidence table, and an explicit 'what this ledger does NOT close' section.",
+   "artifact_covered_by": [
+    "RPS-3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "RPS-1",
+   "criterion_verbatim": "RPS-1 MATERIALITY PRINTED -- legacy vs successor partner_custody_total, side by side, both denominators, before any change.",
+   "method": "live_read",
+   "invocation": "boto3 get_object + pandas.read_parquet over the named partitions, replicating compute_partner_custody_total_schwab() (build_mdpf_wse_49f_non_model_aua.py:564 @ fb79e6a4cd) exactly: sum of market value excluding literal-cash rows (ticker.strip().upper() in RPS_CASH_TICKERS). Run BEFORE any code change -- the repoint commit d5fd2e4c79 post-dates the print commit a53fcf6459.",
+   "output_evidence": "PRINTED, and the delta is LARGE. LEGACY s3://opal-data-bd/schwab/silver/rps/date=20260723 = $1,641,269,345.33. SUCCESSOR (correct account) s3://opal-data-assets/schwab/08242234/silver/fact_rps/date=2026-08-26 = $1,732,745,674.50. TO-named successor 08335338 @2026-08-26 = $1,790,858,012.07. Impact lands on the RESIDUAL, not the base: non_model_aua = custody(FROZEN) - model(ADVANCING) - sma, so the served client-facing figure at as_of 2026-08-26 is understated +$91,476,329.17 = +63.07%, drifting a further -$1,937,073/day. Across the 18 most-recent served partitions the custody base is bit-identical (+0.00) while model_aua_input moved +$32,820,737.26. DISCRIMINATION: the served row reproduces to the cent from the July-23 partition (1,641,269,345.33 - 1,473,258,520.42 - 22,982,667.04 = 145,028,157.87 = the served non_model_aua) -- an identity that closes on no other basis, confirming the staleness at the APPLIED/served layer rather than inferring it from the producer's source. Staleness re-read rather than carried forward from the 08-19 finding: legacy still newest date=20260723, 634 partitions unadvanced, = 25 TRADING days behind the frontier (lib/trading_calendar.py trading_days_behind; the TO's '27' was calendar days). Basis confirmed LIVE: SSM /mdpf/custody_source = 'schwab'.",
+   "denominator": "LEGACY 93,126 rows read / 93,125 positions summed / 6,005 distinct accounts. SUCCESSOR 08242234 101,080 / 101,079 / 6,148. SUCCESSOR 08335338 103,203 / 103,202 / 6,174. Served drift measured over 18 of 65 total feeder partitions. Legacy partition census 634.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RPS-1b",
+   "criterion_verbatim": "RPS-1b -- MEASURE THE TRUE SUCCESSOR: opal-data-assets/schwab/08242234/silver/fact_rps/ (or the measured 0824-tree equivalent): EXISTS + FRESH (newest partition, production cadence), denominator printed. A successor that is not currently produced is not a successor.",
+   "method": "live_read",
+   "invocation": "s3api list-objects-v2 over the full successor prefix, client-side unique partition extraction (auto-paginated, not --no-paginate), plus per-object LastModified; trading-day coverage computed against lib/trading_calendar.is_trading_day.",
+   "output_evidence": "EXISTS and is PRODUCED DAILY -- not merely present, which is the distinction COO 76210 asked to be stated explicitly. Newest partition date=2026-08-26 (T-1, correct for a T-1 pipeline). Production cadence: 40 of 40 trading days present over 2026-07-01..2026-08-26 with ZERO missing, each object written ~10:16Z on T+1 (e.g. date=2026-08-26 written 2026-08-27T10:16Z). Contrast the source it replaces: the legacy prefix has produced NOTHING since date=20260723. NOTE the instrument trap that nearly inverted this row: my first partition sweep matched date=[0-9]{8} against the successor's HYPHENATED date=YYYY-MM-DD keys and returned ZERO partitions for both candidate accounts -- a format-mismatched grep returns a zero byte-identical to a genuine absence, and had I trusted it I would have reported 'the successor does not exist'. Caught only by re-reading the raw listing rather than the filtered count.",
+   "denominator": "566 partitions total under the successor prefix, range 2024-05-24..2026-08-26; trading-day coverage 40/40 over the 2026-07-01..2026-08-26 window; 538 partitions under the rejected 08335338 prefix.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RPS-1c",
+   "criterion_verbatim": "RPS-1c -- RE-PRINT THE MATERIALITY ON THE TRUE PAIR: legacy@2026-07-23 vs the 0824 successor CURRENT, side by side, both denominators. The RPS-2 caveat decision RE-BASES on THIS delta.",
+   "method": "live_read",
+   "invocation": "Same replication of compute_partner_custody_total_schwab() over the true pair, plus a FIXED-VINTAGE control arm (both accounts read at date=2026-07-23) that holds the vintage constant so account-population delta and time drift cannot be conflated, plus account_id set arithmetic with zero-padding normalised.",
+   "output_evidence": "PASS -- and the re-base is a NO-OP because the +63.07% figure was ALREADY computed on the true pair. Stating that plainly rather than silently re-deriving it: COO's ruling prose attributes '+$91.5M / +63.07%' to the legacy-vs-08335338 comparison; it is in fact the legacy-vs-08242234 (correct account) delta. The legacy-vs-08335338 figure is +$149,588,666.74 / +103.14%, and the fixed-vintage 0833-vs-legacy population delta is +$55,083,179.72 / +3.36%. COO's own 76210 covering message states the correct attribution ('your +91.5M delta IS the 1c true-pair print'), so the prose block on the TO face carries the swap while the message does not -- flagged so the record does not keep the wrong attribution, with no change to any decision, since the accepted caveat text was already based on the true pair. TRUE PAIR: legacy@2026-07-23 $1,641,269,345.33 vs successor 08242234 @2026-08-26 $1,732,745,674.50, delta +$91,476,329.17 (+5.57% on the custody base, +63.07% on the served residual). FIXED-VINTAGE CONTROL, both at date=2026-07-23: 08242234 = $1,641,269,345.33, identical TO THE CENT to legacy, 6,005 accounts intersecting 6,005 with ZERO on either side of the difference; 08335338 = $1,696,352,525.05 with 12 legacy-only and 38 successor-only accounts and not a superset. Hardened to 10 vintages across 2024-07-08..2026-07-23: 08242234 matched exactly 10 of 10, 08335338 matched 0 of 10 with a divergence that GROWS from ~$3.0M to ~$55.1M -- the signature of a different, differently-growing book rather than a reconciliation gap.",
+   "denominator": "True pair as in RPS-1. Fixed-vintage control: legacy 93,126 rows / 6,005 accounts, 08242234 93,131 / 6,005, 08335338 94,637 / 6,031. Multi-vintage sample: 10 of 514 vintages common to all three prefixes, every 57th across the full overlap.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RPS-2",
+   "criterion_verbatim": "RPS-2 CAVEAT DECISION STATED -- whether the recovered headline needs one, on the RPS-1 number.",
+   "method": "manual_read_with_citation",
+   "invocation": "Decision stated on the RPS-1c true-pair delta and reported to the issuer at 20260827T165429Z before any repoint; ACCEPTED by 2.0.0_SA_COO 76210 s.2, which also records that COO is surfacing the understatement to Andrew.",
+   "output_evidence": "STATED: A CAVEAT IS REQUIRED. Large by every reading -- +63.07% on the served client-facing figure, $91.5M absolute, drifting a further -$1.94M/day, and already outside the design's own stated observed range (~$180M-$203M, build_mdpf_wse_49f_non_model_aua.py:166) without any alarm firing. Accepted text: 'Non-model AUA is computed against a custody snapshot frozen at 2026-07-23; the figure is understated by approximately $91M (+63%) as at 2026-08-26 and the understatement grows ~$1.9M per day until the custody basis is repointed.' Scope, with its limit kept in the accepted form: it covers every as_of from 2026-07-24 onward -- the WS-E feeder partitions I read -- and NOT every surface that may quote the figure, because I did not measure whether any downstream consumer re-derives or caches non_model_aua. This is a stated caveat on a live figure, NOT a correction: no served artifact was rewritten, and no backfill of the affected partitions is authorized by this TO.",
+   "denominator": "23 served partitions carry the July-23 basis (2026-07-24..2026-08-26); 18 of them read directly and confirmed bit-identical on partner_custody_total; 65 feeder partitions exist in total.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RPS-3",
+   "criterion_verbatim": "RPS-3 REPOINT LANDED to the successor, verified on the stored/served artifact (Rule 22a APPLIED layer), never rc=0.",
+   "method": "command",
+   "invocation": ".tools/safe-deploy.sh --author 0.4.0_DS_ClientPlatform data/mdpf/scripts/gold/build_mdpf_wse_49f_non_model_aua.py, TRUE rc captured by redirecting to a file rather than piping. Then an INDEPENDENT APPLIED-layer read: boto3 get_object on the deployed key, LF-normalised sha256 compare, 7 positive content probes and 3 negative controls over the docstring/comment-stripped deployed source.",
+   "output_evidence": "LANDED AND VERIFIED AT THE APPLIED LAYER, and the rc is cited as process evidence only -- the acceptance rests on the deployed bytes. safe-deploy TRUE rc=0 (first attempt fail-closed rc=3 on IDENTITY UNRESOLVED; resolved by writing the sanctioned org/mcp/sessions/<session-id>.serial identity file, NOT by overriding the gate). Deployed object read back from s3://opal-data-mdpf/code/scripts/gold/build_mdpf_wse_49f_non_model_aua.py: LastModified 2026-08-27T17:14:00Z, 44,431 B, LF-normalised sha256 b6c8a6ac...c0c51c6af MATCHING local with the normalisation stated on both sides. Positive probes 7/7 PRESENT; negative controls 3/3 ABSENT from the code path; control-of-the-control fires. The repoint moves bucket opal-data-bd -> opal-data-assets, prefix schwab/silver/rps -> schwab/08242234/silver/fact_rps, partition date=YYYYMMDD -> date=YYYY-MM-DD, value column market_value -> market_value_settled_unsettled, ticker column ticker -> ticker_symbol. Behavioural confirmation through the PRODUCTION entry point (ad-hoc QA run, permitted for QA; the scheduled fire remains the production acceptance): resolved date=2026-08-26 from the hyphenated partitions, read the successor, returned partner_custody_total $1,732,745,674.50 -- identical TO THE CENT to my independent boto3/pandas measurement, which is a different instrument reading the same object. Coherence gate PASS. Sequencing honoured: the print commit a53fcf6459 precedes the repoint commit d5fd2e4c79.",
+   "denominator": "1 script deployed of 1 in scope; 7 positive probes / 3 negative controls / 1 control-of-the-control; 2 sha256 digests compared under one stated normalisation.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RPS-4",
+   "criterion_verbatim": "RPS-4 BASIS STATED in the artifact so the change is visible downstream rather than silent.",
+   "method": "live_read",
+   "invocation": "Ad-hoc QA emission with --out-dir to a scratch directory and WITHOUT --upload (opt-in flag), so the row could be read without writing into the production feeder path; emitted parquet then read back with pandas and compared field-by-field against the served 2026-08-26 row.",
+   "output_evidence": "STATED AND LEGIBLE IN THE EMITTED ROW. custody_scope moves 'schwab_native_rps_assets_only' -> 'schwab_native_rps_assets_only_08242234_fact_rps' -- it now names both the ACCOUNT (08242234) and the SUCCESSOR TABLE (fact_rps), so a future reader can tell which basis produced any row instead of having to infer it. The custody dict additionally gains custody_source_uri carrying the full s3:// path of the partition actually read. Schema stability confirmed against the WS-A consumer: emitted column list is byte-for-byte the same 11 columns in the same order as the served 08-26 row. Safe because both fields are passthrough descriptors -- estate-wide census for the OLD value returns 2 content hits, being this producer and one doc, so NO consumer branches on the string.",
+   "denominator": "1 emitted row, 11 columns compared against the 11 of the served 2026-08-26 row; 2 estate-wide content hits for the pre-change custody_scope value (denominator 27,293 files scanned, 13 unreadable, 1,949 binary).",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RPS-5",
+   "criterion_verbatim": "RPS-5 proof instance VALID rc=0, ids RPS-1..RPS-5, run against the named expected-id set with the TRUE rc cited (measured without a pipe). D2 LOCK-IN RIDER (CVO 76086): validated BY RC, and the validator invocation + its TRUE rc recorded as evidence IN the instance.",
+   "method": "schema_validation",
+   "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ADVI_49F.RPS-CUSTODY_PROOF_OF_SPEC.json RPS-1,RPS-1b,RPS-1c,RPS-2,RPS-3,RPS-4,RPS-5 -- stdout redirected to a file, never piped, and the exit status read from $? so the TRUE rc is captured rather than a pipeline's last-stage rc.",
+   "output_evidence": "VALID, TRUE rc=0, 0 violations over 7 acceptance rows, expected-id coverage 7 of 7 with 0 missing and 0 extra. Expected-id set is the AMENDED 7-id set per COO ruling 76210 s.5 (RPS-1 plus 1b plus 1c as three separate measured rows); the TO face's <expected_criteria> element was updated to match the issuer's own written amendment so the machine-readable half does not contradict the ruling prose above it -- implementing the amendment, not adjudicating it. FULL VALIDATOR RUN RECORD, INCLUDING THE FAILED PASS, because a gate that only ever reports its successful run is not evidence that it was run: PASS 1 -> TRUE rc=1, INVALID, 3 violations, all structural and all in THIS wrapper rather than in any measured object -- spec_ref/group carried 'P3-REPOINTS' which is not in the schema's group enum ['A','B','C','D','W','M','X','T','OTHER'], and both surprises entries were authored as objects where the schema requires strings. PASS 2 (after correcting group to OTHER and flattening the two surprises to strings) -> TRUE rc=0, VALID, violations=0. PASS 3, a confirming re-run after this evidence text was itself written into the instance, to check that recording the result did not break the artifact recording it -> TRUE rc=0, VALID. Every rc measured by redirecting stdout to a file and reading $?, never through a pipe. THE FAILED PASS IS THE POINT: every object this instance describes had already been verified with controls -- the deployed bytes, the account identity at 10 vintages, the emitted row -- and the wrapper reporting all of that still failed its own gate on the first run. Rigour on the object does not transfer to the wrapper. ALIGNMENT FRAME as printed by the validator: project=ADVI_49F, dep_stage=EXECUTING, governing TO resolved by declared id from 2,126 scanned; ANNOUNCE not ENFORCE, because the governing TO carries no <decomp_ref> -- pre-pipeline work completing under its own spec (CTO ruling 66492), which is a declared non-requirement here and not a silently skipped check.",
+   "denominator": "7 expected criterion ids / 7 acceptance rows present / 0 missing / 0 extra; 3 artifacts_produced rows, each covered by at least one acceptance id.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "SEALED MUTANT on the acceptance predicate that decides this TO's central question. The RPS-3 equivalence check asserts successor@legacy-vintage == legacy to the cent; the mutant plants the WRONG account (08335338, the successor the TO originally named) into that check while holding vintage, columns, cash rule and code path constant, so the ONLY varied field is the field under test.",
+   "expected": "The equivalence check PASSES on the true account 08242234 and FAILS on the planted 08335338. Both arms must be reachable from the field under test -- a check that cannot fail proves nothing.",
+   "observed": "TRUE arm account=08242234 -> $1,641,269,345.33, equivalence PASS. MUTANT arm account=08335338 -> $1,696,352,525.05, equivalence FAIL, mutant delta $55,083,179.72. The check discriminates: it is not a predicate that always passes. Corroborated at scale by the 10-vintage sweep -- 10/10 exact on the true account, 0/10 on the mutant account, with the mutant's divergence growing monotonically from ~$3.0M to ~$55.1M.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Re-read the same S3 partition through two independent invocations of the measurement and compared partner_custody_total. Separately, the producer's own code path (ad-hoc QA run through the production entry point) was compared against my independent boto3/pandas harness -- a DIFFERENT instrument reading the same object, which tests reproducibility across methods and not merely across repetitions of one method.",
+   "observed": "STABLE. Read 1 = $1,732,745,674.50, read 2 = $1,732,745,674.50, identical. Cross-instrument: the producer's own run reported $1,732,745,674.50 for the same partition -- identical to the cent to my independent harness.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Backfill / restatement of the 23 served non_model_aua partitions (2026-07-24..2026-08-26) that carry the frozen July-23 custody basis.",
+   "reason": "NOT authorized by this TO, which scopes to materiality-then-repoint. The RPS-2 caveat is the agreed treatment for the affected window and COO 76210 s.2 records that the understatement is being surfaced to Andrew. Restating served client-facing history is a separate decision with its own authority."
+  },
+  {
+   "item": "The false Rule-25 dormancy marker on opal-data-bd/schwab/silver/rps/ and the re-run of the reader census that produced it.",
+   "reason": "Explicitly COO's lane -- named as a SEPARATE DEFECT ROW on the TO face, scoped away from this seat by GO 76140 and re-affirmed by 76210 s.4. Untouched here. Flagged forward: the marker becomes MORE dangerous after this repoint, not less, because once WS-E stops reading the legacy prefix the marker's 'no live reader' claim becomes true-by-accident while the blind census that produced it stays uncorrected."
+  },
+  {
+   "item": "Whether any downstream consumer (portal, WS-A aggregation) re-derives or caches non_model_aua independently of the WS-E feeder.",
+   "reason": "Unmeasured by this seat. Stated as a limit on the RPS-2 caveat's scope rather than left as an unexamined assumption -- the caveat is asserted over the feeder partitions I read, not over every surface that may quote the figure."
+  },
+  {
+   "item": "Any alert, alarm, monitor or freshness-checker on the frozen-basis condition, including the ~49-day runway to the fail-closed floor.",
+   "reason": "Standing moratorium -- no such thing may be built without Andrew's explicit ask. The drift rate and runway are recorded as findings and the control-shape lesson was filed to the surprise channel (CVO 76203, banked), not wired to anything."
+  }
+ ],
+ "surprises": [
+  "OBSERVATION / INERT -- A MAGNITUDE SANITY BAND CANNOT SEE A FROZEN-BASIS DRIFT. WS-E's runtime backstop SCHWAB_NON_MODEL_SANE = (50M, 500M) is a band on the DERIVED residual; with the minuend frozen and the subtrahend advancing, the residual walks downward through the middle of the band at ~-$1.9M/day and stays 'sane' for ~49 more days before tripping. It had already walked below the design's own stated observed range (~$180M-$203M) without firing, because that honest range lives in a COMMENT while the coded band is ten times wider. General shape: A BAND ON A DERIVED VALUE CANNOT DISCRIMINATE A FROZEN INPUT FROM A MOVING ONE -- the discriminating check is a STATE check on the input (does the input partition date advance between runs), one comparison, not a magnitude check on the output. ROUTING: filed to 3.0.0_SA_CVO cc 2.0.0_SA_COO as 76196; ACKNOWLEDGED and RECORDED by CVO 76203 at org/surprise_channel/ADVI_49F/INVESTIGATION_v1.md @674b147e71, banked verbatim, control-shape remediation queued for round close. No remediation built by this seat (moratorium).",
+  "OBSERVATION / INERT -- THE TO'S NAMED SUCCESSOR WAS THE WRONG ACCOUNT, surfaced INSIDE the TO's own scope rather than out-of-band, because RIDER 1 exists precisely to catch a repoint that would move a client-facing figure by an unknown amount. Reported to the issuer before any repoint; issuer DISOWNED the name as a name-is-not-identity defect (76210) and confirmed 08242234. Recorded because the near-miss is the reusable part: a single legacy-vs-successor delta would have shown a plausible-looking +103% and hidden a silent account swap inside it; only the FIXED-VINTAGE control arm separated population from vintage. ROUTING: issuer 2.0.0_SA_COO, resolved same-session by 76210 + 76212."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-27/ (session in progress at instance authoring; RIDER-1 print committed a53fcf6459, hardening 5c3ed23e92, repoint + ledger d5fd2e4c79)",
+ "compiler_tools": [
+  {
+   "tool": "comp-which",
+   "invocation": "comp-which \"which script computes partner_custody_total for 49F WS-E custody source schwab\"; comp-which \"validate a proof of spec instance against expected criteria ids\"",
+   "result": "MISS on both, and the tool said so loudly rather than guessing -- 'NO CURATED RULE MATCHED THIS QUESTION', all candidates below the vetted band. Correctly did not pick the top-ranked fuzzy guess. Routed to comp-find instead, which resolved the producer in one call."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find '49f_straight_rps_custody_minus_smartx' --files; comp-find 'partner_custody_total' --files; comp-find 'schwab_native_rps_assets_only'; comp-find --name 'proof_of_spec'",
+   "result": "HIT. Resolved WS-E to data/mdpf/scripts/gold/build_mdpf_wse_49f_non_model_aua.py from 2 hits across 27,245 files. The custody_scope census (2 hits: this producer + one doc) is what licensed the RPS-4 field change as schema-safe -- the denominator, not the absence of a recalled consumer, is the evidence."
+  },
+  {
+   "tool": "comp-pipescript",
+   "invocation": "comp-pipescript io build_mdpf_wse_49f_non_model_aua.py (Rule 20 pre-change graph query); comp-pipescript deployed (invoked internally by safe-deploy.sh)",
+   "result": "PARTIAL and it declared its own limit: the graph could not statically resolve the dynamic Prefix= and printed 'manual review of the script body is required' rather than returning a confident empty. Took the warning at face value and did the manual body review. The deployed-check returned MATCH inside safe-deploy, which is the trustworthy direction of that instrument (a STALE would have been unreliable on the CRLF/LF axis) -- and it was not relied on alone: an independent byte-level read of the deployed object was run separately."
+  },
+  {
+   "tool": ".tools/safe-deploy.sh",
+   "invocation": ".tools/safe-deploy.sh --author 0.4.0_DS_ClientPlatform data/mdpf/scripts/gold/build_mdpf_wse_49f_non_model_aua.py",
+   "result": "PASS, TRUE rc=0. GAP FOUND AND IT WAS THE GATE WORKING: the first invocation fail-closed rc=3 on IDENTITY UNRESOLVED because no org/mcp/sessions/<session-id>.serial existed for this session, so the gate could not name its own principal and refused to scan an inbox it might not own. Fixed by writing the sanctioned identity file, not by overriding -- the override would have meant deploying while blind to my own STOP messages."
+  },
+  {
+   "tool": ".tools/safe-commit.sh + commit-gate",
+   "invocation": "safe-commit.sh --author \"0.4.0_DS_ClientPlatform <...>\" -F <msgfile written by a non-shell writer> -- <explicit pathspec>",
+   "result": "PASS on all three commits; commit-gate clean (py_compile + ds-precommit + ruff py39, 'All checks passed'), risk-reflex CLEAN against 1,891 danger nodes with the denominator printed, msg-verify MATCH on each. Staged-index checked before every commit per the live shared-worktree hazard (0 staged each time)."
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> RPS-1,RPS-1b,RPS-1c,RPS-2,RPS-3,RPS-4,RPS-5",
+   "result": "VALID rc=0 over the amended 7-id set, 0 missing, 0 extra. Run explicitly rather than assumed -- an instance that wraps well-verified objects can still fail its own gate, and the gate is the only thing that checks the wrapper."
+  },
+  {
+   "tool": "lib/trading_calendar.py",
+   "invocation": "trading_days_behind('2026-07-23', expected_last_trading_day(2026-08-27)); is_trading_day over the cadence window",
+   "result": "25 trading days behind. Used before any staleness claim per NEVER#1, which is why this instance says 25 TRADING days rather than repeating the TO's 27 calendar days; also supplied the 40/40 trading-day denominator for the successor cadence in RPS-1b."
+  }
+ ]
+}

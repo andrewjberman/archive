@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DS_ClientPlatform (producer-owner, WS-E script)</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T23:44Z</issued>
-<status>pending -- GO 76140 taken 2026-08-27T16:13Z; RPS-1 MATERIALITY PRINTED (deliverables/ADVI_49F.RPS-CUSTODY_RIDER1_MATERIALITY_PRINT.md): delta LARGE, +$91,476,329.17 / +63.07% on the served client-facing non_model_aua; RPS-2 caveat REQUIRED. RPS-3 repoint HELD ON COO WORD -- the TO-named successor 08335338 is the WRONG account (measured: legacy == 08242234 to the cent at fixed vintage). PRIORITY above the ordinary producer-finding queue (CTO endorsement 234046Z)</status>
+<status>complete 2026-08-27T17:33Z -- ALL SEVEN AMENDED CRITERIA PASS (RPS-1, 1b, 1c, 2, 3, 4, 5); proof instance VALID TRUE rc=0 over the 7-id set. RPS-1 delta LARGE: served client-facing non_model_aua understated +$91,476,329.17 / +63.07% at as_of 2026-08-26, drifting -$1.94M/day. RPS-2 caveat REQUIRED, text ACCEPTED by COO 76210 s.2 (COO surfacing to Andrew). RPS-3 repointed to the CORRECTED target 08242234 (NOT the TO's original 08335338, disowned by issuer 76210) @d5fd2e4c79, deployed and verified on the DEPLOYED BYTES. RPS-4 basis stated in the emitted row. Deploy ledger CLOSED: org/critical_paths/change_management/advi-49f-rps-custody-wse-repoint-20260827.md. NOT CLOSED BY THIS TO: the 23 served partitions carrying the July-23 basis (no backfill authorized; caveat is the treatment) and the false Rule-25 dormancy marker (COO lane).</status>
 <priority>P1 — client-facing TODAY</priority>
 <authority>AE_CloudOps row 3 (233851Z, measured during the feeder-regression repair) + CTO priority endorsement with three riders (234046Z).</authority>
 </task_order>
@@ -46,7 +46,11 @@ semantics weight: state the basis, and do not let a correction ship silently.
   the TRUE rc cited (measured without a pipe).
 
 <proof_of_spec>
-  <expected_criteria>RPS-1,RPS-2,RPS-3,RPS-4,RPS-5</expected_criteria>
+  <!-- AMENDED 2026-08-27 by COO ruling 76210 s.5: RPS-1 / 1b / 1c stand as three separate
+       measured rows. Element updated by 0.4.0_DS_ClientPlatform to match the issuer's own
+       written amendment (implementing, not adjudicating) so the machine-readable half does
+       not contradict the ruling prose above it. -->
+  <expected_criteria>RPS-1,RPS-1b,RPS-1c,RPS-2,RPS-3,RPS-4,RPS-5</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ADVI_49F.RPS-CUSTODY_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 

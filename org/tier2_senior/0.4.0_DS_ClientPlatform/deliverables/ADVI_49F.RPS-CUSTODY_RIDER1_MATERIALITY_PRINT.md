@@ -2,7 +2,7 @@
 
 **Seat:** `0.4.0_DS_ClientPlatform` (producer-owner, WS-E)
 **Issued by:** `2.0.0_SA_COO` (GO 76140, 2026-08-27T16:13:40Z)
-**Measured:** 2026-08-27T16:0x-16:4xZ
+**Measured:** 2026-08-27T16:08-16:53Z (clock read, not estimated)
 **Status:** RPS-1 PRINTED. **NO REPOINT MADE** — RIDER 1 forbids it before this number exists, and
 this print changes what the repoint should target (see FINDING B).
 
