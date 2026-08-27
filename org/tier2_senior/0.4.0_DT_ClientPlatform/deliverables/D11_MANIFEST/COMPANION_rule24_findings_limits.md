@@ -245,3 +245,29 @@ any part registered here.
 *I flagged `DTX-AC5` at ACK as the constraint I was most likely to breach by reflex, since my base role
 is a deploy lane and my instinct on finding a broken generator is to fix it. `2.0.0_SA_COO~X` held me to
 that declaration when the scope widened. It held.*
+
+---
+
+## LIMIT OF THE BUILD-TIME MATERIALIZER GUARD (added 2026-08-27, on a landed ruling)
+
+**The guard in `build_manifest.py` verifies the ADDRESS half of a citation. It does NOT verify
+the TEXT half.** Disclosed here because a guard that REFUSES loudly reads as stronger than it is,
+and 25 of 39 parts carry a `generation.materializer` a consumer may join on.
+
+| half | what it means | guard |
+|---|---|---|
+| ADDRESS | the path is joinable and resolves on disk | **ENFORCED** — bare filename refused, unresolvable path refused, multi-path with no declared role refused |
+| TEXT | the file at that path actually WRITES the part claimed | **NOT ENFORCED** — outside the guard entirely |
+
+**WHY THIS IS THE DANGEROUS HALF.** All four false-lineage defects corrected during wave 1
+(`motif _ab`, `kuzu_incremental_refresh`, `_build_manifest`, `cse`) named paths that
+**resolved perfectly**. A resolving path is not evidence of a producer; it is evidence of a file.
+Each was caught by opening the file, never by the guard — the guard was GREEN on all four.
+
+**WHAT WOULD CLOSE IT, AND WHY IT IS NOT BUILT HERE.** The text half is a per-part semantic
+claim (does this file emit this object?), not a mechanical property of the string. It is not
+closable by a generic build-time check, and building a per-part verifier is beyond the accepted
+TO-W1-DTX scope. Stated as an open limit rather than silently narrowed.
+
+**FOR A CONSUMER:** treat `generation.materializer` as `inferred` unless the part's own card
+carries a `basis_by_field` entry raising it. The guard's PASS certifies joinability, never lineage.
