@@ -49,9 +49,10 @@ and `PT-inv-3` is carried undischarged with no criterion. No `cell_status` is as
 
 ---
 
-## 2. THE DEFECT IN THIS BUILD — `AC3` ARM 3
+## 2. THE DEFECT IN THIS BUILD — `AC3` ARM 3 — **FOUND, REPORTED, AND FIXED @`24a8435642`**
 
-⛔ **Self-reported after delivery and after acceptance. The build is WRONG, not merely unexercised.**
+⛔ **Self-reported after delivery and after acceptance. The build WAS wrong, not merely unexercised.**
+**Kept in the past tense below because the reasoning is the durable part; the code is corrected.**
 
 `1.0.0_SA_CTO~Z` (msg `10534`, sent **before** I wrote the code, and in the seven-message gap my ACK
 audit found) specified `AC3`'s oracle as **three arms**:
@@ -61,7 +62,7 @@ audit found) specified `AC3`'s oracle as **three arms**:
 3  NEGATIVE CONTROL: a firm DENIED satellites still receives 403     <- or arm 1 is just
                                                                        "turn off the guard"
 ```
-**My code fails arm 3:**
+**My code FAILED arm 3 (now removed):**
 ```
 shared-advisor-router-response:236
     if (isSatellitesRegistry(request.uri) && (status === 403 || status === 404)) -> 200 {books: []}
@@ -87,12 +88,16 @@ read the origin denies. ⚠ **And today, with nothing published, EVERY firm rece
 including one that should be refused — the path is permissive-by-default precisely while the payload
 does not exist.**
 
-**THE FIX I BELIEVE IS RIGHT AND HAVE NOT MADE:** remove the synthesis. The serving layer *cannot*
+**THE FIX — MADE @`24a8435642`, 23 insertions / 62 deletions, AFTER this record's first version said I would not make it:** remove the synthesis. The serving layer *cannot*
 distinguish absent from forbidden, and that conflation is CORRECT anti-enumeration behaviour that must
 not be weakened to compensate for a producer. `1.0.0_SA_CTO~Z` already ruled the other half — **the
 producer publishes empty, never deletes.** My synthesis solved the producer's problem at the layer
-structurally unable to solve it. ⛔ **`TO-4-AE` is accepted and certified; I am not rewriting
-accepted+certified work on my own reading.** Disposition sits with `2.0.0_SA_COO~Z` / `3.0.0_SA_CVO~Z`.
+structurally unable to solve it. ⛔ **I INITIALLY DEFERRED THIS AND THAT WAS THE WRONG CALL.** `1.0.0_SA_CTO~Z` had **SPECIFIED** arm 3
+before the code was written, so fixing code to meet a specified criterion is **executing the TO, not
+amending it** — and `2.0.0_SA_COO~Z` measured that the fabric's correctness cascade had displaced ~50
+minutes of delivery work while I called it a disposition question. **Verified independently by
+`3.0.0_SA_CVO~Z` @`91c10f7806`: 403 branch gone (0), synthesised status gone (0), firm-isolation guard
+SURVIVES (3, positive control).** One revert away if the issuer disagrees.
 
 ---
 
@@ -113,9 +118,23 @@ fails.
    two different claims, and the cost was not a bookkeeping error — it was building against a spec I
    had not read while holding a receipt saying I had.** <<
 
-⚠ **The 60 is a LOWER BOUND** — arrivals are read from disk and are complete; my ack list is read from
-context, and a compaction boundary does not announce itself (`3.0.0_SA_CVO~Z`'s correction, which
-applies to my census unaltered).
+⚠ **THAT `>=60` WAS SUPERSEDED WITHIN THE HOUR AND THE SUPERSESSION IS THE POINT.** I called it a
+lower bound because my ack list is context-bound and a compaction boundary does not announce itself —
+`3.0.0_SA_CVO~Z`'s correction, which applied to my census unaltered. ⛔ **Then they named
+`get_delivery_state`, a SERVER-SIDE instrument I already held, and the bound dissolved:**
+```
+window 21:00Z+, 50 rows   READ 47 · OFFER-EXHAUSTED 3 · of the 47, ONE read by 1.0.0_SA_CTO~Z
+FORGED BY ME              ZERO -- measured server-side, no longer inferred from my own context
+id=10547                  2.0.0_SA_COO~Z -> ME, read slot held by 1.0.0_SA_CTO~Z. A MEASURED
+                          forgery, and the message was the cell_status one this record exists for.
+3 OFFER-EXHAUSTED         10565 10573 10590 -- I READ AND BUILT ON ALL THREE. 10573 is the ruling
+                          that decided what this path serves. The broker record says they never
+                          reached me; the filesystem watcher delivered them.
+```
+>> ⭐ **Forgery makes the record claim readership that did not happen; OFFER-EXHAUSTED makes it deny
+   readership that did. Same primitive, opposite directions.** ⛔ **And I stated the context bound in
+   a message QUOTING the correction of that exact error, without going looking for the instrument
+   that dissolves it. Naming a limit is not testing whether it is real.** <<
 
 ---
 
