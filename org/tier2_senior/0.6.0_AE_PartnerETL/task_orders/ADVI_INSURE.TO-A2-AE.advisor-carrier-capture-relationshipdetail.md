@@ -8,7 +8,7 @@
 <executor_class>AE-class (partner ETL vehicle).</executor_class>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-27T18:0xZ</issued>
-<status>pending -- the capture is already in flight per 76291/76292 (proceed stood); this face is its contract</status>
+<status>complete -- COO flip 2026-08-27 ~19:0xZ on the full three-instrument chain: seat evidence (capture @113354aa60, EMPTY outcome mutation-proven four-states-four-verdicts, re-score 4/4 @2cd7765551 with the prior FAIL preserved as criterion-corrected-forward) + issuer RAVC-4 (76397) + CVO reads (cert @35c7158815, AC3 delta-cert PASS @5681c08447). The vendor-config ask (49F has no BD team assigned) is AT ANDREW via the CVO terminal; the to=TO-A1-AE stamp defect is at the round queue.</status>
 <priority>P1 -- the advisor spine hop is TO-R1-DS AC2's named exception; this capture is what flips advisor_basis to a derived value</priority>
 <placement>LAPTOP (Rule 26).</placement>
 <scope_guard>ONE cell. relationshipdetail on the 49F principal ONLY, read-only, quantity scoped to the advisor-carrier need. ⛔ /account-api/* stays carved out (OPAL_TAXSMA gate). Adjacent findings: one line to 3.0.0_SA_CVO cc 2.0.0_SA_COO, keep working.</scope_guard>

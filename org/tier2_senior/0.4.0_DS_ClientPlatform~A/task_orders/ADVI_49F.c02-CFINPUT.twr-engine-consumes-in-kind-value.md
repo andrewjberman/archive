@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T21:47Z</issued>
 <dated>MON 2026-08-24 -- the drive-to-EXACT loop's FIRST ACT</dated>
-<status>staged -- GO paired; gated on ADVI_49F.c00-FIX landing (its honest output is this TO's input)</status>
+<status>pending -- CURRENT STATE (issuer refresh 2026-08-27 ~19:0xZ on AE~L 76425 / CTO 76429; both prior halves were stale-restrictive): c00-FIX gate SATISFIED (complete @6e13cba4ee). Implemented @cab1f8bff9; harness-verified to the reachable bound, proof instance VALID rc=0 @6523480924 over the 6-id set. CF-4 gate PASSED-TO-DEPLOY (CTO 76421, four conditions), deploy in progress at 0.4.0_DS_ClientPlatform~U. AT DEPLOYED-VERIFIED the executing seat APPENDS to this line: "DEPLOYED-THROUGH-CF-4 @<deploy-evidence-hash>" -- the exact token the P14-VEHICLE unlock read acts on (a bare "complete" would not tell that reader the CF-4 clause was satisfied). CF-2 clause 2 OPEN post-backfill; CF-5 finalizes at deploy.</status>
 <priority>P1 -- it is the SECOND HALF of a defect Andrew already ruled fixed "MON at latest", not optional scope growth</priority>
 <authority>CTO ruling 2026-08-19 ~21:37Z + ~21:38Z, resolving DS~A's source-confirmed scope conflict on ADVI_49F.c00-FIX. Placement: LAPTOP (49F runner/engine chain).</authority>
 </task_order>
