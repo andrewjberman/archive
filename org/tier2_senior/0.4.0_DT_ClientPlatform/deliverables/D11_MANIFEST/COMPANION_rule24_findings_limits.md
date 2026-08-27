@@ -271,3 +271,40 @@ TO-W1-DTX scope. Stated as an open limit rather than silently narrowed.
 
 **FOR A CONSUMER:** treat `generation.materializer` as `inferred` unless the part's own card
 carries a `basis_by_field` entry raising it. The guard's PASS certifies joinability, never lineage.
+
+### SECOND LIMB: THE FIELD'S POPULATION IS BOUNDED BY DISCOVERABILITY (added 2026-08-27)
+
+The limit above says a NAMED materializer may be the wrong file. This one is different and was
+not covered: **a writer may exist that no name-keyed instrument can attribute to any part.**
+
+`generation.materializer` was populated by finding modules that NAME the object. That predicate
+answers *"which writers can I FIND"*, and it was reported as *"which writers exist"*. Those are
+not the same question, and the gap is occupied:
+
+```
+infra/aws/globgrph/resource_summaries_store.py
+  :56   NAMESPACE = "globgrph"    # its own comment: "same namespace/catalog as the graph tables + cse"
+  :190  table_id = (NAMESPACE, table)      <- table comes from the CLI arg
+  :349  add_argument("--table", default=TABLE)   NO choices= constraint
+  :202  catalog.create_table(table_id, ...)      creates whatever name it is given
+
+NEGATIVE CONTROL -- snap_store.py is constrained at exactly the same field:
+  :415  add_argument("--surface", default="ms_heat_snap", choices=sorted(SURFACES))
+```
+
+**The control fires: the two modules differ at the field under test.** So a module exists that can
+create or append to ANY table in the exact namespace this manifest cards, and its output set is
+NOT enumerable from source.
+
+**TWO QUESTIONS, NOT ONE** (0.8.0_AE_CloudComp~X's partition, sharpened by 2.0.0_SA_COO~X):
+where is the table name BOUND (call site / entrypoint allow-list / arbitrary runtime), and is the
+bound set ENUMERABLE. This manifest's materializer field answers neither.
+
+⚠ **WHAT THIS IS NOT.** No evidence that any part here is actually mis-attributed by this route;
+`resource_summaries_store` defaults to its own table and I did not measure that it has ever
+written a graph table. The claim is about the FIELD'S GUARANTEE, not about a known bad row: an
+absent materializer means *nobody found a writer*, never *no writer exists*.
+
+**CONSEQUENCE:** the `denominator` block's sweep is sound for OBJECTS -- it enumerates the
+warehouse and the directories, not the writers. The materializer FIELD does not inherit that
+soundness, and this file previously let the object-level rigour read as though it did.
