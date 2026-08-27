@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_SATELLITES.TO-4",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ETFS_SATELLITES.TO-4.the-firm-gate-modesFor-DE-PLUS-AE.md",
+    "group": "D",
+    "vintage_commit": "d5b1139e9f"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-satellites/20260827T160438Z/DECOMP.md",
+    "vintage_commit": "936b9ae1e9",
+    "to_ref": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ETFS_SATELLITES.TO-4.the-firm-gate-modesFor-DE-PLUS-AE.md"
+  },
+  "assignee": "0.4.0_DE_ClientPlatform~Y",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/Positioning/shared/modeAccess.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "797c4f8d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "modesFor(firm) plus MODE_FIRM_ALLOWLIST, a Record<PositioningMode, ReadonlySet<string>|null> so the mapping is MODE-TOTAL (a new mode must state its visibility) and firm-total (null/undefined/'' all hit the fail-closed arm). Opens by DECLARING this a VISIBILITY gate and NOT an authorization boundary, with the reason and with what would be required if the intent were authorization. Cites the viewer-firm source file:line in its own comment and names the model-plane lookalike (hierarchy.firmId) as the thing it must never read.",
+      "artifact_covered_by": ["SAT-TO4-AC1", "SAT-TO4-AC2", "SAT-TO4-AC4", "SAT-TO4-AC5"]
+    },
+    {
+      "path_or_key": "portal/src/pages/Positioning/Positioning.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "797c4f8d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The wiring, and BOTH halves of it. `visibleModes = modesFor(claims?.firmId ?? null)` from useAuth; visibleModes is passed to ModeFlip (which pills render) AND to usePersistentToggle as the allowed set (which stored values are accepted). The second is the tamper refusal, not tidiness. Also corrects the now-false comment that said POSITIONING_MODES is the allowed set -- a normative line that stayed true of the mechanism and false about the value.",
+      "artifact_covered_by": ["SAT-TO4-AC1", "SAT-TO4-AC3"]
+    },
+    {
+      "path_or_key": "portal/src/lib/firmAccess.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "797c4f8d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "INTERNAL_FIRM_ID exported. An export keyword and a comment, no behaviour change -- so the internal-firm slug exists ONCE rather than being re-typed in the gate.",
+      "artifact_covered_by": ["SAT-TO4-AC1"]
+    },
+    {
+      "path_or_key": "portal/scripts/satellites-firm-gate-exercise.mjs",
+      "kind": "test",
+      "commit_or_etag": "797c4f8d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "24 legs, all PASS. Every allow-leg is paired with a deny-leg, the tamper arm is exercised rather than described, and the gate is separately shown able to DISCRIMINATE. Run: bun --tsconfig-override=tsconfig.app.json scripts/satellites-firm-gate-exercise.mjs",
+      "artifact_covered_by": ["SAT-TO4-AC1", "SAT-TO4-AC2", "SAT-TO4-AC3", "SAT-TO4-AC5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SAT-TO4-AC1",
+      "criterion_verbatim": "The gate reads the NAMED viewer-firm source (AuthContext claims via /auth/me), cited file:line @ commit-ish in the delivered code's own comment. Do NOT read window.__devBypass or any client-settable value as the firm. AMENDED 2026-08-27T181934Z: and the delivered code must not read hierarchy.firmId, or any model-plane firm field, as the viewer's firm",
+      "method": "test_suite",
+      "invocation": "bun --tsconfig-override=tsconfig.app.json scripts/satellites-firm-gate-exercise.mjs (legs AC1-a / AC1-b / AC1-c)",
+      "output_evidence": "CITED IN THE CODE'S OWN COMMENT, at portal 7ebe38b0 (= 4ac152f8 plus TO-3; none of the cited files were touched by it): AuthContext.tsx:198-200 claims = parseClaims(meData.user) off GET /auth/me with the bearer, so the firm is SERVER-DERIVED and the client does not assert it; AuthContext.tsx:352-354 the /auth/me-FAILURE fallback that produces firmId: null; AuthContext.context.ts:32 Claims.firmId: string | null; firmAccess.ts:99-106 isPathAllowedForFirm's ?? false, the deny-default this mirrors. The exercise ASSERTS those citations are present rather than trusting them. THE AMENDMENT LEG IS THE ONE THAT MATTERED: hierarchy.firmId in the rebalancer bronze artifact is the MODEL'S OWNING firm, the SAME CONSTANT (4175) across all nine members, so a gate wired to it gates NOTHING OR EVERYTHING and typechecks cleanly -- a value that never varies by VIEWER cannot separate viewers, and from inside the satellites path 'every viewer passes' and 'every viewer fails' are indistinguishable. Swept all SIX files on the satellites path for a `hierarchy` access IN CODE: 0 hits over 6 files. Comments are excluded from that census ON PURPOSE and the script says so -- this code deliberately NAMES the trap, and a mention-blind census would force deleting the warning to make the test pass. No client-settable value is consulted: no __devBypass, no storage read in the gate's own code (devBypass is DEV-only, import.meta.env.DEV, and is not the production path).",
+      "denominator": "3 of 3 required source citations present in the delivered comment; 0 model-plane firm accesses across 6 of 6 satellites-path files; 0 client-settable reads in the gate module",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SAT-TO4-AC2",
+      "criterion_verbatim": "modesFor(firm) is TOTAL over firms UNION {null}. null -> TWO pills. Fail CLOSED, mirroring isPathAllowedForFirm's ?? false. Exercise the /auth/me-failure path and assert the satellites pill is absent -- an identity outage must never hand out a third firm's view",
+      "method": "test_suite",
+      "invocation": "exercise legs AC2.mode-total / AC2.null-fails-closed[null] / AC2.null-fails-closed[undefined] / AC2.empty-string",
+      "output_evidence": "TOTAL ON BOTH AXES AND THE null ARM IS EXERCISED, NOT ASSERTED. Mode axis: MODE_FIRM_ALLOWLIST is a Record<PositioningMode, ...> covering 3 of 3 declared modes, so the compiler makes a new mode state its visibility rather than inherit one. Firm axis: modesFor(null) -> ['models','etfs'], modesFor(undefined) -> ['models','etfs'], modesFor('') -> ['models','etfs'] -- the TWO-pill set in every case. THE DOMAIN IS firms UNION {null} AND null IS NOT A FIRM, which is exactly why the decomp's 'every other firm sees two' had an uncovered member (CVO F2, caught before a line was written): AuthContext.tsx:354 produces firmId: null when /auth/me FAILS -- an authenticated session whose firm is UNKNOWN, not absent. It fails CLOSED, mirroring isPathAllowedForFirm's ?? false, because failing open would make 'break /auth/me' the way to see another firm's mode. TWO DISTINCT UPSTREAM STATES COLLAPSE TO null AND BOTH ARE DENIED -- claims === null (auth unresolved) and claims.firmId === null (/auth/me failed) -- and Rule 24 postulate (iv) is stated on the artifact: one remedy moves neither, since adding a firm to the allowlist only moves a KNOWN firm that is currently denied.",
+      "denominator": "3 of 3 modes covered by the allowlist Record; 3 of 3 falsy-firm inputs (null, undefined, '') denied",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SAT-TO4-AC3",
+      "criterion_verbatim": "THE NEGATIVE CONTROL IS THE LOAD-BEARING ONE: a non-Cottonwood viewer gets two pills AND CANNOT REACH the satellites mode by HAND-EDITING THE PERSISTED TOGGLE. Exercise the tamper and show the refusal. A positive-only test proves the gate runs, not that it gates",
+      "method": "test_suite",
+      "invocation": "exercise legs AC3-a.allow[x2] / AC3-a.deny[x6] / AC3-b.tamper-refused / AC3-b.wiring-is-the-gated-set / AC3-b.flip-renders-gated-set; plus a two-arm headless render (node scripts/ui-smoke.mjs positioning --firm 49financial | --firm cottonwood)",
+      "output_evidence": "BOTH ARMS, MECHANICALLY AND AT RENDER. Allow: modesFor('opal-capital') and modesFor('cottonwood') each -> ['models','etfs','satellites'], three pills. Deny: SIX firms -> ['models','etfs'], two pills -- 49financial, inflection, demo, not-a-real-firm, and DELIBERATELY 'COTTONWOOD' and 'cottonwood ', because a case-folding or trimming match would admit them and both are DENIED, so the match is exact. THE TAMPER IS EXERCISED: usePersistentToggle validates EVERY read against the allowed set it is GIVEN and clears anything outside it, and Positioning.tsx gives it visibleModes -- so a non-Cottonwood viewer hand-editing sessionStorage to 'satellites' has that value rejected, the key cleared, and the mode fall back to 'models'. AND THE WIRING IS ASSERTED RATHER THAN ASSUMED, because this is where the hole would be: a leg regex-matches that usePersistentToggle receives visibleModes and NOT POSITIONING_MODES. Passing the declared set there would hide the pill while leaving the mode reachable -- a gate with a hole behind it -- and would have made the refusal above vacuous. AT RENDER, which is where a client-side gate is actually true or false: firmId=49financial renders MODELS | ETFS and no SATELLITES; firmId=cottonwood renders MODELS | ETFS | SATELLITES. Screenshots read, not inferred.",
+      "denominator": "2 of 2 allowed firms get three pills; 6 of 6 denied firms get exactly two; 3 of 3 wiring assertions hold; 2 of 2 rendered firm arms match",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SAT-TO4-AC4",
+      "criterion_verbatim": "The artifact STATES ON ITS FACE that this is a VISIBILITY gate, not an authorization boundary, with the reason (the models payload is already served; satellites are arithmetic over it). If the intent is authorization, say so and STOP -- different design, different review, not a client-side decision",
+      "method": "manual_read_with_citation",
+      "invocation": "modeAccess.ts header block, asserted present by exercise leg AC4.visibility-not-authorization",
+      "output_evidence": "STATED, AND THE ANSWER IS PICKED RATHER THAN LEFT TO DRIFT: it IS a visibility gate. modeAccess.ts opens with 'THIS IS A VISIBILITY GATE. IT IS NOT AN AUTHORIZATION BOUNDARY. (SAT-c-3)' and gives the reason -- the models payload these satellites are computed from is ALREADY SERVED to this viewer, so a satellite is arithmetic over bytes they already have, and nothing here stands between a viewer and data they should not see. IT ALSO STATES WHAT WOULD BE REQUIRED IF THE INTENT WERE AUTHORIZATION, which is the half that stops the drift: a client-side decision CANNOT be an authorization boundary, because the bundle ships to the viewer and anyone who can open devtools can call the function; authorization lives at the API boundary (auth-validator-edge / the API authorizer). The file explicitly instructs a successor NOT to 'strengthen' it into a boundary but to move the decision instead. Three separate sentences of that block are asserted by the exercise, so the declaration cannot be quietly edited out.",
+      "denominator": "3 of 3 required declaration clauses present and asserted (visibility-not-authorization, the already-served reason, the what-if-authorization instruction)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SAT-TO4-AC5",
+      "criterion_verbatim": "SAT-inv-4: other firms byte-identical, two pills, exercised not assumed. Byte-diff a non-Cottonwood viewer's rendered payload pre- and post-change",
+      "method": "test_suite",
+      "invocation": "exercise legs AC5.declared-set-untouched / AC5.other-firms-two-pills / AC5.ungated-modes-untouched / AC5.control-gate-can-deny; plus the --firm 49financial render",
+      "output_evidence": "IDENTICAL TO THE PRE-SATELLITES WORLD, WHICH IS THE GRAIN THE INVARIANT IS ABOUT -- STATED PRECISELY BECAUSE 'PRE-CHANGE' IS AMBIGUOUS HERE. Relative to 4ac152f8 (before satellites existed) a non-Cottonwood viewer's mode set is ['models','etfs'], and modesFor('49financial') returns exactly ['models','etfs'] -- byte-identical, asserted as a literal. Relative to TO-3-only (satellites declared but UNGATED) that viewer CORRECTLY LOSES the third pill; that is the whole purpose of this commit and is not a regression. Both readings are recorded so neither is mistaken for the other. Exercised over a SET of denied firms (6 of 6 identical) rather than asserted from one sample. models and etfs are declared UNGATED (null in the allowlist), so no viewer who could see them before can lose them -- the gate is strictly additive over the pre-existing two. THE DECLARED SET IS UNTOUCHED BY THIS COMMIT, ASKED OF GIT RATHER THAN OF THE MODULE: TO-4's diff is firmAccess.ts + Positioning.tsx (+ the new gate module and its exercise), and no mode-declaration module appears in it. THAT LEG FAILED ONCE AND WAS RIGHT TO -- it named satelliteSet.ts while an unrelated comment edit sat in the working tree, so that edit was split into its own commit (705bb9df) rather than the assertion being weakened. CONTROL: the gate is shown able to DISCRIMINATE (cottonwood != 49financial); without it every allow-leg would pass on a gate that does nothing. At render, the 49financial page is identical to the pre-gate models view -- same five book columns, same four View options, same description.",
+      "denominator": "6 of 6 denied firms return the identical pre-satellites pair; 2 of 2 pre-existing modes declared ungated; 0 mode-declaration modules in TO-4's diff; 1 discrimination control",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The gate's own DENY arm is the standing control, and it is exercised on every leg rather than run once: every allow-assertion is paired with a deny-assertion, and a dedicated leg asserts that the two differ (cottonwood != 49financial). Without that pairing, a gate that returned the full mode list for every input would satisfy every positive leg. Adversarial inputs were chosen to be the ones a sloppy match would admit: 'COTTONWOOD' (case) and 'cottonwood ' (trailing space) are both DENIED, so the match is exact rather than fuzzy. The TAMPER arm is the mutant for the wiring: a hand-edited persisted 'satellites' from a denied firm is refused by the allowed set the hook is given, and a separate leg asserts the hook is given the GATED set -- because passing the declared set there would leave the tamper refusal vacuous while every other leg still passed.",
+      "expected": "Denied firms must return exactly ['models','etfs']; a tampered persisted value must not appear in the allowed set; the gate's output for an allowed firm must DIFFER from its output for a denied firm; and TO-4's diff must contain no mode-declaration module.",
+      "observed": "FIRED AS EXPECTED, INCLUDING ONE GENUINE REFUSAL. 6 of 6 denied firms returned exactly ['models','etfs'] including the case and whitespace variants; the tamper value was absent from the denied viewer's allowed set; cottonwood ['models','etfs','satellites'] differs from 49financial ['models','etfs']. AC5.declared-set-untouched FAILED on its first run and was CORRECT to -- it named satelliteSet.ts, which carried an unrelated comment edit in the working tree. The commit was split (705bb9df) rather than the assertion loosened, and the leg then passed. A SEPARATE DEFECT WAS CAUGHT BY RE-RUNNING TO-3's EXERCISE AS A REGRESSION CHECK: its pre-change rev defaulted to HEAD, which stopped meaning 'pre-change' the moment TO-3 landed, so the script died at import rather than comparing the new code to itself. Fixed at 375bbc9a by resolving the rev from the repository (the add-commit of satelliteSet.ts, first parent).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "modesFor is a pure function of its argument over a frozen allowlist -- no clock, no network, no storage. The exercise was run repeatedly across the split-commit sequence and its printed output compared; the renders were taken on two firm identities through the same instrument.",
+      "observed": "STABLE: repeated runs produced the same 24 legs and byte-identical output, and the leg count moved only when the working tree changed (23/24 -> 24/24 after the commit split), which is the instrument responding to the world rather than to itself. Cross-instrument agreement: the mechanical result (49financial -> two pills, cottonwood -> three) matches the rendered pages exactly, on a different instrument from the one that computed it.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The AE limb of TO-4 (deploy / infra)",
+      "reason": "TO-4 is issued JOINTLY to DE-class and AE-class. The AE half is NOT seated on me and there is no AE seat on this fabric today (0.7.0_AE_CloudOps~Z closed out by Andrew). MSTR's dispatch: 'Route it, do not perform it.' I performed the DE half only; the AE half is unstarted and unclaimed, and it is named here rather than left implicit."
+    },
+    {
+      "item": "comp-routes trace /positioning and comp-iam service <lambda> (TO-4 phase-1/3 mandate)",
+      "reason": "Both are scoped to the AE half -- the TO says so on its face ('the AE half of this TO lives here' for comp-routes; comp-iam is conditioned on 'IF the AE half touches a boto3 call, CF behavior, SSM target or a new S3 prefix'). The DE half adds no route, no serving path and no IAM surface: this commit is a client-side visibility filter over a payload that is already served. Not run, and NOT reported as clean."
+    },
+    {
+      "item": "PROD promote",
+      "reason": "SAT-f-3 -- the DT lane, and Andrew's word. Portal main worktree stayed on DEV throughout (Rule 19). ⛔ THE PROMOTE MUST CARRY TO-3 AND TO-4 TOGETHER: TO-3 alone on PROD is an ungated declared set, i.e. every firm sees the satellites pill, which is the multi-tenant exposure that ships green."
+    },
+    {
+      "item": "A literal byte-diff of a rendered DOM payload pre/post",
+      "reason": "AC5's wording suggests one; the grain that actually carries the invariant is the mode SET a non-Cottonwood viewer receives, asserted as a literal against the pre-satellites pair, plus a read of both rendered arms. Stated rather than claimed as a byte-diff I did not perform."
+    },
+    {
+      "item": "Server-side derivation or validation of modesFor",
+      "reason": "SAT-c-2 reads 'SERVER-DERIVED OR SERVER-VALIDATED, NEVER CLIENT-ASSERTED'. The gate satisfies this by reading a SERVER-DERIVED firm (claims from GET /auth/me + bearer; the client does not assert its own firm) rather than by adding a server-side mode endpoint. Recorded explicitly because 'server-derived' is satisfied here by the INPUT's provenance, not by moving the decision -- and moving the decision is what would be required if this were ever meant as an authorization boundary, which SAT-c-3 declares it is not."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / INERT -- MY OWN TO-3 COMMIT BROKE MY OWN TO-3 EVIDENCE SCRIPT, and nothing would have reported it until someone tried to reproduce the evidence. satellites-mode-axis-exercise.mjs resolved its pre-change modules from `SAT_BEFORE_REV || 'HEAD'`. That was correct exactly while the work was uncommitted and wrong the instant 7ebe38b0 landed, because HEAD then CONTAINS the change and every before/after control would compare the new code to itself. It happened to die at import instead (the pre-change gridConfig imports './satelliteSet', absent from .before/), so it failed loudly -- but that was luck of the import graph, not design: had TO-3 added no new module it would have gone green while measuring nothing. A default that is right only until your own commit lands is a control with an expiry date on it. Fixed at 375bbc9a by resolving the rev from the repository. Found by re-running the older exercise as a regression check while building TO-4.",
+    "OBSERVATION / INERT -- comp-transform ternary-audit and comp-blast are NOT USABLE as evidence on this plane, same as recorded for TO-3: ternary-audit reports 'No string-literal union types found' because PositioningMode lives in shared/bookSet.ts, outside its file+types.ts scope, and comp-blast returns NOT-FOUND for these symbols over its 20,779-node graph. Both are reported as measuring nothing rather than quoted as clean.",
+    "OBSERVATION / INERT -- the TO-4 gate depends on ProtectedRoute's loading behaviour, which is a property of another component and not of this file. usePersistentToggle does a LAZY INITIAL READ validated against the allowed set, so if this page could mount before auth resolved, `claims` would be null, the allowed set would be the two-pill set, and a legitimate Cottonwood viewer's stored 'satellites' would be REJECTED AND CLEARED on every load. It does not happen because ProtectedRoute.tsx:24 renders a LoadingOverlay while isLoading, so the page does not mount until auth has resolved. Written into the code as a stated dependency rather than left as a property that happens to hold -- a change to ProtectedRoute's loading behaviour would silently start clearing legitimate viewers' remembered choice."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-27/laneY_etfs_satellites_to3_to4.md",
+  "compiler_tools": [
+    {
+      "tool": "tsc -b (portal typecheck)",
+      "invocation": "./node_modules/.bin/tsc -b --force",
+      "result": "rc=0, zero diagnostics. Via `tsc -b`, never bare `tsc --noEmit` (the root tsconfig.json is files:[] with project references only, so the bare form compiles an empty set and returns rc=0 on deliberate errors)."
+    },
+    {
+      "tool": "eslint",
+      "invocation": "./node_modules/.bin/eslint src/pages/Positioning/ src/lib/firmAccess.ts scripts/satellites-firm-gate-exercise.mjs",
+      "result": "rc=0, zero findings."
+    },
+    {
+      "tool": "satellites-firm-gate-exercise (this TO's own instrument)",
+      "invocation": "bun --tsconfig-override=tsconfig.app.json scripts/satellites-firm-gate-exercise.mjs",
+      "result": "24 of 24 legs PASS. Every allow-leg paired with a deny-leg; the tamper arm exercised; the gate separately shown able to discriminate. One leg (AC5.declared-set-untouched) FAILED on first run and was correct to -- the commit was split rather than the assertion weakened."
+    },
+    {
+      "tool": "satellites-mode-axis-exercise (TO-3's instrument, re-run as a regression check)",
+      "invocation": "bun --tsconfig-override=tsconfig.app.json scripts/satellites-mode-axis-exercise.mjs",
+      "result": "30 of 30 legs PASS after the pre-change-rev fix (375bbc9a). Re-running it is what SURFACED that defect -- it had been committed broken an hour earlier and no gate would have caught it."
+    },
+    {
+      "tool": "/frontend-dev ui-smoke (two firm identities)",
+      "invocation": "node scripts/ui-smoke.mjs positioning <out.png> --port 5176 --firm 49financial; ... --firm cottonwood",
+      "result": "Both screenshots READ. 49financial: MODELS | ETFS, no SATELLITES, and the rest of the page identical to the pre-gate models view. cottonwood: MODELS | ETFS | SATELLITES. This is where a client-side gate is actually true or false, and it agrees with the mechanical legs on a different instrument."
+    },
+    {
+      "tool": "comp-transform ternary-audit / comp-blast",
+      "invocation": "comp-transform ternary-audit Positioning|PositioningSummary; comp-blast capabilitiesFor",
+      "result": "MEASURED NOTHING on this plane -- 'No string-literal union types found in file or types.ts' (PositioningMode lives in shared/bookSet.ts, outside the tool's file+types.ts scope) and NOT-FOUND over 20,779 graph nodes. Reported as out-of-scope silence, NOT as a pass."
+    },
+    {
+      "tool": "safe-commit.sh (commit-gate + risk-reflex)",
+      "invocation": "GIT_COMMITTER_NAME/EMAIL per-invocation (never written into the shared portal config); bash ../.tools/safe-commit.sh --author '0.4.0_DE_ClientPlatform~Y <...>' -F <msgfile>",
+      "result": "rc=0, commit 797c4f8d, msg-verify MATCH len=5352. Three further commits in this sequence: 7ebe38b0 (TO-3), 705bb9df (TO-3 addendum), 375bbc9a (TO-3 exercise fix). Message files written by the Write tool, not a shell heredoc (F-010)."
+    }
+  ]
+}
