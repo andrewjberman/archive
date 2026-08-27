@@ -28,10 +28,24 @@ ruled, costs its own pass regardless. The face claims exactly that and no more.
   named subclass) → this TO CLOSES-AS-IMPOSSIBLE on that measured answer for that subclass — a
   COMPLETE outcome, not a failure; the campaign proceeds without it and keeper #10 stays banked
   with the measured why.**
-- **SG-2 THE SIGNING (recoverable subclasses only):** c00 assigns `signed_amount` from the
-  RECOVERED direction — the `dirred` set widens by exactly the measured-recoverable class, nothing
-  else. **NO admission change: c02, its grain filter, and INTER_ACCOUNT_PROVENANCE are
-  UNTOUCHED** (diff-proven).
+- **SG-2 THE SIGNING — SCOPED TO FC BY THE COMPLETED JOINT ADJUDICATION** *(SG-1's answer landed
+  @37ad2241d8 while this face was in cert: FC-coded legs sign EXACTLY — four independent accounts
+  to the cent on c00's existing CREDIT/DEBIT convention; TR NOT recoverable on current evidence
+  (n=3, mutually inconsistent — nothing, in either direction); adjudicated CTO 76787 + COO concur
+  same-window)*: c00 assigns `signed_amount` on **FC-coded code-rule INTERNAL legs** from the
+  existing convention — the `dirred` set widens by exactly that measured class, nothing else.
+  **NO admission change: c02, its grain filter, and INTER_ACCOUNT_PROVENANCE are UNTOUCHED**
+  (diff-proven).
+- **SG-2b THE TR CENSUS + THE LATE-JOIN RULE (CTO 76787, binding):** run the TR direction-convention
+  census at n>3 single-class accounts inside this TO's window — it is FREE in the deciding sense
+  (fits inside the P14-STAMP window that already gates campaign-start) and its payoff is
+  asymmetric. **IF a consistent TR convention lands BEFORE this TO's deploy step, TR RIDES this
+  act with its own arm; AFTER that point TR stays OUT and is banked with the measured answer — a
+  campaign-gating act does not grow past its deploy step.** Either terminal is complete.
+- **THE NAMING DISCIPLINE, BINDING (DS~U's own line, adopted verbatim by both execs):** this act
+  is NEVER described as closing keeper #10 — it closes the FC SUB-CLASS; the keeper record and
+  the P1.5 report carry the FC/TR split with the TR residue NAMED, and the four-clause bar reads
+  the rate SPLIT BY SUB-CLASS from here on.
 - **SG-3 NEGATIVE CONTROL (untouched population):** non-code-rule rows bit-identical pre/post on
   a produced partition.
 - **SG-4 NEGATIVE CONTROL (the serve plane):** `twr_daily` BIT-IDENTICAL under this TO alone —
