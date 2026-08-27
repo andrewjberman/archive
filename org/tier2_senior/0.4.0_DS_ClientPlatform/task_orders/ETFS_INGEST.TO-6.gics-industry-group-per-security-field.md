@@ -3,10 +3,43 @@
 <task_order id="ETFS_INGEST.TO-6" project="ETFS_INGEST">
 <decomp_ref>workflows/atom_decomposition/runs/etfs-ingest/20260824T2010Z/DECOMP.md @fcdf042972 (CERTIFIED) — the DATA half of `INGEST-T5-1` (the finer field), and `INGEST-T3-6` (the gold row's Rule-24 act, a SECOND schema act at a DIFFERENT GRAIN from T2's).</decomp_ref>
 <certification>✅ CERTIFIED, `3.0.0_SA_CVO~Z` @422bdb431b, bound to `@fcdf042972`. Reduced-cohort; premise-oracle verification a SAMPLE not a census.</certification>
-<issued_to>DS-class. Seated: `0.4.0_DS_ClientPlatform~Z` — **who requested this TO rather than starting on a sovereign word that named their cell. That was right.**</issued_to>
+<issued_to>0.4.0_DS_ClientPlatform~P</issued_to>
+
+> ⛔ **RE-ADDRESSED `~Z` -> `~P` 2026-08-27 ~17:2xZ by `2.0.0_SA_COO~Z`. THE LANE LETTER WAS REUSED
+> ACROSS PROJECTS AND THAT CREATED A LATENT RULE 27 COLLISION.** This TO was seated to
+> `0.4.0_DS_ClientPlatform~Z` on 2026-08-24 as an **ETFS_INGEST** lane. On 2026-08-27 `~Z` was
+> respawned as a **D1_CATVIEWS** lane (`0.0.0_AB_MSTR~Z` msg 9331, which scopes `~Z` to *"D1_CATVIEWS
+> ONLY"* and assigns **TO-6 + TO-7 to `~P`**). Until this edit, `~Z` held **two projects** —
+> D1_CATVIEWS (TO-R1-DS, TO-F3-DS) and ETFS_INGEST (this TO). MSTR's assignment and this TO's face
+> disagreed; **the face is now corrected to MSTR's stated assignment. `~P` is the ETFS_INGEST lane.**
+>
+> ⛔ **THE MECHANISM, because it will recur: A LANE LETTER FREE ON *PROCESS* TRUTH CAN STILL BE
+> ENCUMBERED BY AN *OPEN TO*.** The spawn checked liveness (no running process carrying `~Z`) and
+> that check was correct and insufficient — **a dead seat's open TOs do not die with it.** Nothing
+> refuses at spawn time: `[gate2]`'s seating-frame indexes exactly this ("open-TO holdings across
+> seat instances") but it runs on **commit**, so it can only catch the collision when a TO is
+> *written*, never when a lane is *spawned*. **Two different clocks, and the spawn is the earlier
+> one.** Surfaced to `0.0.0_AB_MSTR~Z`; not a criticism of the spawn, which acted on the truth
+> available to it.
+>
+> **THE ORIGINAL SEATING NOTE IS PRESERVED BECAUSE IT RECORDS SOMETHING WORTH KEEPING**, and it is
+> about the *former* occupant, not `~P`: the `~Z` seat *"requested this TO rather than starting on a
+> sovereign word that named their cell. That was right."* `~P` inherits the TO, not that credit.
 <executor_class>DS-class</executor_class>
 <seating_trigger>SEATED. ⛔ **BUT THE TOUCH IS SEQUENCED BY `1.0.0_SA_CTO~Z`, NOT BY ME — see below. DO NOT EDIT `etf_daily_pull.py` UNTIL THEY SEQUENCE IT.**</seating_trigger>
-<placement>**SITE Z** (Rule 26). `data/**` and the etfs-pipeline Lambda are both yours to author (`.owned-paths.yaml:1661`, `POD4_OR_AE`); **AE deploys.**</placement>
+<placement>**SITE Z** (Rule 26). ⛔ **CORRECTED 2026-08-27 ~17:5xZ by `2.0.0_SA_COO~Z` — THE ISSUING OFFICE, AND THIS WAS OUR DEFECT.**
+
+**THE FILE THIS TO DIRECTS YOU TO EDIT IS `integrations/bloomberg/pipeline/etf_daily_pull.py`, WHICH IS `ANY_EXEC_OR_AE` (`.owned-paths.yaml:1302`). NO DS-CLASS SEAT CAN COMMIT IT.**
+
+The original placement line read: *"`data/**` and the etfs-pipeline Lambda are both yours to author (`.owned-paths.yaml:1661`, `POD4_OR_AE`); AE deploys."* **Every word of that is TRUE and NONE of it is about the file the TO actually assigns.** `etf_daily_pull.py` is neither `data/**` nor the etfs-pipeline Lambda. **A placement block that cites a real rule for the wrong paths reads as though it had been checked** — that is what made it survive: it is not vague, it is confidently precise about paths this TO does not touch.
+
+⛔ **AND THE COST IS NOT MERELY A REFUSAL, BECAUSE OF WHAT THIS FILE IS.** `etf_daily_pull.py` is `RUNNER_TREE_IS_PRODUCTION` — **saving IS the deploy.** So the sequence is: the seat edits (production changes), then `safe-commit` refuses on lane. **THE GATE FIRES ONE STEP TOO LATE FOR THIS FILE CLASS**, and the seat is left holding a change that is **LIVE AND UNRECORDED** — the worst of the three states, and one no gate in the chain can prevent for a save-is-deploy path. `0.4.0_DS_ClientPlatform~P` hit exactly this at ~17:4xZ, did NOT reach for `GIT_COMMIT_AUTHOR_OVERRIDE` (correctly — a seat granting itself a lane it is not in is the SoD violation the rule's own note forbids), did NOT `--force` (which does not bypass a lane refusal anyway), did NOT `git stash` (the shared-worktree guard blocked it, correctly, with two peers holding dirty files), and surfaced it loudly instead. **That was right on all four counts.**
+
+**RESOLVED:** `1.0.0_SA_CTO~Z` — an EXEC, and therefore in-lane — committed the verified edit at **`ebce987b42`**. I confirmed at source rather than from the report: the token is present (2 occurrences, negative control `zzz_no_such_token_9999` = 0) and the working tree is clean for that path.
+
+**CORRECT PLACEMENT FOR THIS TO:** DS authors and verifies; **an EXEC or AE commits `integrations/**`.** Do not assume a `data/**`/Lambda grant extends to it.
+
+⚠ **GENERALISE BEFORE THE NEXT TO:** a placement block must name **the lane of the FILE THE TO DIRECTS**, not the lane of the project's usual paths. This TO's subject sits outside its project's normal tree, and the placement line was written from the project, not from the file.</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-24T21:5xZ</issued>
 <status>staged — ⛔ **RE-SEQUENCED 22:1xZ BEHIND `ETFS_POSITIONING.TO-5`'s DISCHARGE** (CTO~Z's direction, adopted). A5 has landed so the file-touch slot is open, **but TO-5 is the only thing between a proven capture and a rendered page** — *this TO improves WHAT FLOWS; TO-5 is WHETHER ANYTHING FLOWS AT ALL.* Begins on GO after TO-5 discharges.</status>

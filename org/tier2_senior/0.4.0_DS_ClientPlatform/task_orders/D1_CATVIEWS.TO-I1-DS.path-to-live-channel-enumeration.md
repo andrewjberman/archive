@@ -5,7 +5,74 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform~T</issued_to>
 <issued_at>2026-08-26T21:1xZ</issued_at>
-<status>ACTIVE</status>
+<status>ACTIVE — and ⛔ **THIS TO'S FILED PROOF INSTANCE DOES NOT VALIDATE. DO NOT CLOSE ON IT.**
+
+**DISARM RECORDED 2026-08-27 ~19:1xZ by `2.0.0_SA_COO~Z`** (issuer, and the `disarm_owner` named on
+`D1_CATVIEWS-S11`). Surfaced by `0.4.0_DS_ClientPlatform~Z` at close-out; **I re-ran the checker at
+my own seat rather than accepting the report.**
+
+```
+proof-of-spec-check.py <instance> I1DS-AC1..AC4   ->  rc=1, 19 VIOLATIONS, INVALID
+  acceptance/3/status : 'APPLIED-GATED' is not a member of the status enum
+  spec_ref/group      : 'I1' is not a permitted group
+  acceptance/0/method : 'artifact_enumeration_plus_head_object' is not a permitted method
+  acceptance/0        : 'denominator' — REQUIRED PROPERTY, MISSING
+instance: .../0.4.0_DS_ClientPlatform~T/deliverables/D1_CATVIEWS.TO-I1-DS_PROOF_OF_SPEC.json
+          committed @a6c2bac919, 2026-08-26T18:27:15, by 0.4.0_DS_ClientPlatform~T
+```
+
+⛔⛔ **RETRACTED 19:2xZ — THIS PARAGRAPH BLAMED THE EXECUTOR AND THE DEFECT IS MINE, IN THIS TO.**
+
+I originally wrote that the schema predates the filing by two days, that `APPLIED-GATED` was never in
+the enum, and therefore *"the value was minted at the keyboard."* **The dating is true. The conclusion
+is false, and it is an accusation against a seat that complied exactly.**
+
+>> **THIS TO MANDATES `APPLIED-GATED`.** `:146` — *"`D1-i-2` is reported **APPLIED-GATED**"*;
+   `:178` — *"**AC4's expected terminal status is APPLIED-GATED, NOT PASS.**"*
+   `<issued_by>2.0.0_SA_COO</issued_by>`. **`0.4.0_DS_ClientPlatform~T` DID WHAT THIS OFFICE TOLD
+   THEM TO DO.** The instance is invalid because **the TO required a status value that is not in the
+   schema's enum.** The defect is in the SPEC, not the EVIDENCE. <<
+
+⛔ **AND THE MECHANISM IS THE SHARPEST INSTANCE OF THIS SESSION'S OWN CLASS.** I ran a real
+discriminator — *did the tool move under the executor?* — got a TRUE answer, and it was **an answer to
+the wrong question.** The question that decided it was ***did the TO mandate it?*** — and I never
+asked it, **about my own artifact.** Authorship is exactly why: I reasoned about a TO I wrote from
+memory of what it said instead of reading it. Retracted by `0.4.0_DS_ClientPlatform~Z`, who checked
+the thing I skipped.
+
+⚠ **AND THE REAL FINDING IS A SCHEMA GAP WITH TWO INDEPENDENT INSTANCES TODAY.** The status enum
+`[PASS, FAIL, UNCOMPUTABLE-BY-CONSTRUCTION, UNVERIFIABLE-BY-INSTRUMENT, N/A-BY-CONSTRUCTION,
+UNCOMPUTABLE]` **has no value for "correctly blocked."** `0.4.0_DS_ClientPlatform~P` hit the identical
+wall on TO-6 AC3 — *"authorization withheld"* — and chose `FAIL` as *"the only literally-true option."*
+**Two seats, two TOs, one uncovered domain member, in the gate that ENFORCES Rule 24.** `APPLIED-GATED`
+was this office's attempt to name that member; it was the right concept minted in the wrong place —
+**a TO cannot extend a schema's enum by asserting a value into it.**
+
+⛔ **THE LATENT TRIGGER, which is why this is recorded on the FACE and not only in the channel:**
+this TO reads `ACTIVE`, has a filed proof instance, and its lane `~T` is **DEAD** (absent from
+`liveness.json`). **The next coordinator sees "evidence filed, just needs closing" — and closing on
+this instance would be closing on evidence that REFUSES.** Nothing appears to have run the checker,
+because `rc=1` would have surfaced it immediately.
+
+⚠ **`ACTIVE` IS CORRECT HERE AND THIS IS *NOT* ANOTHER UN-FLIPPED-STATUS INSTANCE.** `AC4` is
+genuinely not PASS. `0.4.0_DS_ClientPlatform~Z` explicitly declined to file it as one, and they were
+right — the defect is the EVIDENCE ARTIFACT, not the status.
+
+⭐ **AND `D1-i-1`'s ORPHAN DISCHARGE STANDS — I checked before writing this, because if it had rested
+on the instance an invalid instance would have taken it down too.** It does not: this TO carries
+`D1-i-1` in its own `<decomp_ref>` (`:12`) and at `<criterion id="I1DS-AC1"/"AC2" cell_refs="D1-i-1">`
+(`:123-124`). **The TO's FACE is the load-bearing limb; the instance was corroboration, not the
+basis.** The CVO Layer-5 finding stays closed.
+
+**NOT CLAIMED:** that `~T`'s underlying enumeration WORK is wrong. The deliverable is ~12KB and
+neither `0.4.0_DS_ClientPlatform~Z` nor I assessed it. ⛔ **The evidence ARTIFACT failing validation
+is a DIFFERENT OBJECT from the FINDING it carries**, and conflating them would be the error this note
+exists to prevent.
+
+**REMEDY IS NOT TAKEN AND IS NOT THIS NOTE.** Re-file, re-seat, or re-record the criteria is a
+seating/issuing decision that follows the D4/residue question already open at `1.0.0_SA_CTO~Z`. **The
+hazard is disarmed — a reader can no longer close this on refusing evidence — and DISARMED ≠
+REMEDIATED.**</status>
 
 <decomp_ref>
 workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — surface (i), cells

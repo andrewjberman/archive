@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "POSN_TENANCY.TO-2-DS",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "docs/architecture/POSN_TENANCY_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "a7ba82d253"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~L",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/posn-tenancy/20260827T200734Z/DECOMP.md",
+    "vintage_commit": "07de844b12",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/POSN_TENANCY.TO-2-DS.cottonwood-home-and-empty-vs-missing.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~L/deliverables/POSN_TENANCY.TO-2-DS_MEASUREMENT_20260827.md",
+      "kind": "doc",
+      "commit_or_etag": "2be92878c0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The measurement record, carrying the cell_status block that this schema has NO SLOT for (see surprises). READ-ONLY TO: no S3 object written, no build advanced, no deploy performed."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~L/deliverables/posn_probe.py",
+      "kind": "script",
+      "commit_or_etag": "2be92878c0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The presence probe. Committed so every count below is RE-DERIVABLE rather than quoted from this file. It issues only list-objects-v2; head-object was run separately at the shell. Neither writes."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T2DS-AC1",
+      "criterion_verbatim": "Cottonwood's Positioning presence is established at the served key with a COMPLETE listing -- NextToken shown ABSENT, or the listing paginated to exhaustion. --max-items / head / | head are BANNED for this count.",
+      "method": "live_read",
+      "invocation": "posn_probe.py -> aws s3api list-objects-v2 --bucket <b> --prefix <p> --output json --no-paginate, looping on --continuation-token until IsTruncated == False. The served key was resolved on the rail FIRST: comp-routes trace '/api/general/positioning/positioning_data.json' -> behavior /api/general/*, rewrite /api/general/ -> json/, S3 URI s3://opal-data-portal-v2/json/positioning/positioning_data.json.",
+      "output_evidence": "COTTONWOOD POSITIONING PRESENCE AT THE SERVED KEY: ABSENT, measured two ways. (1) The served Positioning prefix s3://opal-data-portal-v2/json/positioning/ holds exactly 3 keys -- allocation_summary.json, holdings_attribution_data.json, positioning_data.json -- fetched in 1 page with terminal IsTruncated=False. THERE IS NO FIRM DIMENSION IN ANY KEY: the artifact is a single unscoped object, which is the PRD's own 'served on api/general to every authenticated user of every firm'. (2) Across the ENTIRE served json/ prefix -- 954 keys, 1 page, terminal IsTruncated=False -- 0 keys contain 'cotton', 'cot/', '/cot', 'tenant' or 'scoped' (case-insensitive). \u26d4 PAGINATION NOTE, because the criterion turns on it: the CLI's auto-paginate MERGES pages and DROPS IsTruncated/NextToken, so the very field this criterion asks me to show is the one auto-paginate removes, and KeyCount reads absent for every prefix. Each page was therefore fetched with --no-paginate and the loop terminates ONLY on IsTruncated==False -- exhaustion PROVEN, not assumed. --max-items and head appear nowhere in the probe. \u26d4 SUBSTRING TRAP, caught and reported rather than silently counted: token 'firm' returned 2 hits, both FALSE -- it matched inside 'mullin-confirmation-hearing.json'. A case-folded substring census is not a census of the concept.",
+      "denominator": "3 keys in the served Positioning prefix (1 page, IsTruncated=False); 954 keys across the whole served json/ prefix (1 page, IsTruncated=False); 0 of 954 Cottonwood-scoped; 31 buckets in account 313476888478, of which opal-data-cottonwood is ABSENT and opal-data-inflection is ABSENT (client-side filter over the full list-buckets result, no --max-items).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2DS-AC2",
+      "criterion_verbatim": "The ABSENT verdict carries a POSITIVE CONTROL -- the same probe, same form, run against a firm whose Positioning data is known present, shown returning a non-empty result. A failed retrieval and a true absence are byte-identical without it.",
+      "method": "live_read",
+      "invocation": "Same posn_probe.py list_all() function, same command form, three controls; plus a head-object discriminating pair at the shell.",
+      "output_evidence": "THREE POSITIVE CONTROLS, ALL NON-EMPTY, so no ABSENT verdict above is a measurement of a broken probe. (1) SAME PREFIX, PROBE CAN FIND KEYS: the served Positioning prefix returns 3 keys NON-EMPTY -- the identical call that returns 0 cottonwood-scoped keys returns non-zero here. (2) A FIRM BUCKET, NOT JUST THE SERVED ONE: s3://opal-data-49financial/ returns 11,847 keys over 12 pages, terminal IsTruncated=False -- proving the probe works against a per-firm bucket at multi-page scale, which is the shape Cottonwood's home has. (3) COTTONWOOD'S OWN HOME IS NON-EMPTY: s3://opal-data-cot/ returns 6,599 keys over 7 pages, terminal IsTruncated=False, spanning gold=3535 platinum=1125 forwardfill_v2=695 silver=596 logs=424 code=150 bronze=73 blackdiamond=1. \u26d4 THIS IS THE CONTROL THAT MATTERS MOST: the ABSENCE is not 'the bucket is empty' or 'the credential cannot see it' -- the same probe reads 6,599 objects out of that exact bucket and 0 of them are Positioning. HOME PRESENT, POSITIONING ABSENT, both measured by one instrument. \u26d4 GRAIN TRAP, caught and reported: token 'position' matches 922 of those 6,599 keys -- positions_cube.py, canonical_positions.py, 0_composition.json. Those are the CANONICAL POSITIONS pipeline, a different grain from the portal's Positioning page artifact. A naive token census would have returned 922 and INVERTED this criterion's answer. The measured tokens are 'positioning' -> 0, 'allocation_summary' -> 0, 'holdings_attribution' -> 0. Additionally a head-object DISCRIMINATING PAIR on one bucket/prefix: json/positioning/model.json -> rc=254 HTTP 404 Not Found; json/positioning/positioning_data.json -> rc=0, ContentLength 8088, LastModified 2026-08-27T11:05:20+00:00 (s3api, UTC). Same command form, opposite verdicts.",
+      "denominator": "3 positive controls; 3 + 11,847 + 6,599 keys returned non-empty across 1 + 12 + 7 pages, every one terminating on IsTruncated=False; 922 of 6,599 'position' hits examined and excluded on GRAIN; 0 of 6,599 match the Positioning artifact tokens.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2DS-AC3",
+      "criterion_verbatim": "Whether the Positioning consumer distinguishes a MISSING key from an EMPTY artifact is reported as an observed behaviour with the deciding code path cited file:line @ <commit-ish>. If it does NOT distinguish them, that is a finding and is reported as one -- do not design the fix, do not build it.",
+      "method": "manual_read_with_citation",
+      "invocation": "git -C portal show HEAD:src/api/portal-proxy.ts, line numbers DERIVED by grep at that commit rather than recalled; all cited files confirmed clean vs HEAD by git status --porcelain with a negative control that shows the one dirty path.",
+      "output_evidence": "ANSWER: YES, IT DISTINGUISHES THEM TODAY -- but incidentally at the transport layer, not by any empty contract, and the MISSING branch is LOSSY. All citations @portal 4a52439cbe. MISSING KEY: portal-proxy.ts:94 `if (!response.ok) {` -> :112 `throw new Error(\\`API request failed: ${response.status} ${response.statusText} - ${errorBody}\\`)`. A non-ok response THROWS, so a missing key lands in React Query's error state (queryFn: getPositioningData at ModelPortfolioModal.tsx:134 and Attribution.tsx:36). EMPTY ARTIFACT: :115 `return response.json()` resolves, then :1133 hands portfolios to canonicalizeCodeKeys, whose :42 is `if (!rec) return rec` -- an empty or absent portfolios map returns harmlessly and does NOT throw. So EMPTY -> success state with no data; MISSING -> error state. Different consumer states, therefore distinguishable. \u26d4 THE QUALIFICATION, WHICH IS THE PART WORTH READING: the discrimination is a BYPRODUCT of `!response.ok`, not a designed contract. The MISSING branch collapses into ONE undifferentiated Error string that also carries auth failure, expired token and edge errors; nothing downstream can tell 'this firm has no data' from 'your token expired'. And per a served-plane control recorded at :1099-1100 a NONEXISTENT PATH returns 401, not 404, because auth is enforced before path resolution -- so MISSING is indistinguishable from UNAUTHENTICATED at the consumer. \u26a0 THAT 401 CLAUSE IS RELAYED, NOT RE-DERIVED BY ME: it is 0.0.0_AB_MSTR~Z's measurement recorded in that docstring, and a docstring gives sufficient not necessary conditions. Re-measuring it needs a live bearer against the distribution, which is outside a read-only substrate TO. Marked relayed rather than folded into my own evidence. NOTE FOR PT-c-2's PRODUCER HALF: there is no explicit-empty contract to observe because no producer emits one -- that half does not exist yet.",
+      "denominator": "4 live positioning fetches in the client (portal-proxy.ts:1133, :1381, :1832, :1938) against 3 keys present in the served prefix; 2 further positioning paths at :1828 and :1935 are COMMENTED OUT and were confirmed non-live by reading, not assumed from the path shape; 2 React Query call sites consuming getPositioningData; 1069 tracked portal files searched for consumers.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2DS-AC4",
+      "criterion_verbatim": "No criterion is discharged by a RENDER or screenshot (PT-inv-1), nor by 'the commit gate passed' / comp-constants check -- that checker dispatches on .py/.sh/.tf only. And no S3 object is written by this TO -- state that as measured.",
+      "method": "command",
+      "invocation": "Inventory of every AWS call issued this session, plus the absence of any render/screenshot instrument.",
+      "output_evidence": "NO RENDER WAS USED AND NONE COULD HAVE BEEN: every verdict above rests on bytes -- S3 object listings, a head-object metadata read, and source lines at a named commit. No screenshot, no browser, no Playwright call was made; PT-inv-1 is satisfied by construction of the method, not by assertion. NO GATE STANDS IN FOR A CRITERION: no criterion here cites commit-gate or comp-constants, and comp-constants would be structurally blind anyway -- it dispatches on .py/.sh/.tf and the consumer evidence is .ts (PT-inv-7). NO S3 OBJECT WAS WRITTEN, stated as a MEASURED inventory rather than an intention: the complete set of AWS verbs issued was sts get-caller-identity, s3api list-buckets, s3api list-objects-v2, s3api head-object. All four are read-only; no put-object, copy-object, delete-object, sync or cp appears anywhere in posn_probe.py or in any shell command of this session. The probe's only AWS call site is list_all(), which issues list-objects-v2 exclusively.",
+      "denominator": "4 distinct AWS verbs issued, 4 of 4 read-only, 0 write verbs; 1 probe script with exactly 1 AWS call site; 0 render/screenshot instruments invoked; 0 criteria discharged by a gate.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The controls here are POSITIVE CONTROLS ON ABSENCE, which is the shape this TO's evidence actually needs -- three of the four criteria turn on something NOT being there, and a failed retrieval is byte-identical to a true absence. (1) SAME-PROBE control: the identical list_all() call that returns 0 Cottonwood keys returns 3 keys on the served prefix. (2) SCALE control: the same call returns 11,847 keys over 12 pages against a per-firm bucket, so multi-page exhaustion is exercised and not merely assumed from a 1-page case. (3) SAME-BUCKET control: Cottonwood's own home returns 6,599 objects, so the absence is not credential-blindness or an empty bucket. (4) DISCRIMINATING PAIR at head-object: model.json 404 vs positioning_data.json 200 on one bucket, one prefix, one command form. (5) RETRIEVAL-FAILURE ARM built into the instrument: list_all() returns a distinct RETRIEVAL-FAILED outcome on any non-zero rc, so a broken read can never be rendered as an absence -- the failure mode is separated from the finding by construction rather than by care.",
+      "expected": "(1) non-empty. (2) non-empty, multi-page, terminal IsTruncated=False. (3) non-empty. (4) 404 and 200 respectively. (5) no arm returned RETRIEVAL-FAILED.",
+      "observed": "(1) 3 keys. (2) 11,847 keys, 12 pages, IsTruncated=False. (3) 6,599 keys, 7 pages, IsTruncated=False. (4) rc=254/404 and rc=0/8088 bytes. (5) 0 of 5 probes returned RETRIEVAL-FAILED. All as expected.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The served Positioning prefix was listed TWICE in one run as two independently-labelled probes (AC1-a and AC2-a), issued as separate subprocess calls.",
+      "observed": "Both returned the identical 3 keys, 1 page, IsTruncated=False. NOT a strong determinism claim and not offered as one: S3 listings are live state and a write between the two calls would legitimately change them. It establishes call-level repeatability within the run, nothing about stability over time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Naming a PRODUCER for Cottonwood Positioning data (PT-c-1)",
+      "reason": "Fenced out by the TO's scope_fence and BLOCKED by PT-b-2, which is NOT CERTIFIED -- no substrate shape has been selected, and naming a producer before the shape is chosen binds a lane to a shape nobody picked. Owner: 2.0.0_SA_COO~Z + 1.0.0_SA_CTO~Z."
+    },
+    {
+      "item": "Designing or building the EXPLICIT EMPTY contract",
+      "reason": "AC3 says report the behaviour, do not design the fix and do not build it. I reported what the consumer does today and stopped. Owner: 2.0.0_SA_COO~Z."
+    },
+    {
+      "item": "The blackdiamond/49f/ vs blackdiamond/49financial/ two-prefix condition (PT-b-4)",
+      "reason": "UNCERTIFIED and named OUT OF SCOPE by the TO's standing block, which also says three seats have already measured it and a fourth measurement is not what it needs. My AC2-b sweep of opal-data-49financial necessarily traversed those objects; I report only that the sweep touched them and took no action. Owner: 2.0.0_SA_COO~Z."
+    },
+    {
+      "item": "Re-measuring the 401-on-nonexistent-path behaviour at the served plane",
+      "reason": "Requires a live bearer against the distribution; outside a read-only substrate TO. Carried in AC3 explicitly as RELAYED from 0.0.0_AB_MSTR~Z's recorded measurement rather than folded into my own evidence. Owner: unchanged."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / INERT -- LATENT, NOT LIVE, and the caller check is what demoted it. The client fetches /api/general/positioning/model.json at portal-proxy.ts:1381, comp-routes resolves it to s3://opal-data-portal-v2/json/positioning/model.json on the same behavior and rewrite as the keys that DO exist, and head-object returns HTTP 404 (rc=254) against a positive control that returns 200. So a served key referenced by client code does not exist. \u26d4 I ALMOST REPORTED THIS AS A LIVE BREAKAGE. getModelData has ZERO call sites: 2 code occurrences across 1069 tracked portal files, both in portal-proxy.ts (the definition :1379 and the barrel export :2450), every other hit a doc file; negative control on getPositioningData returns many. The portal's own docs record the call being deliberately removed for performance -- etl/OPTIMIZED_JSON_STRUCTURE.md:387 and etl/IMPLEMENTATION_SUMMARY.md:414 both say 'Remove getModelData() call' against a 16 MB PKL costing 5+ seconds. So the consumer was retired on purpose, the key went with it, and an exported wrapper was left behind. Not a defect today; it becomes one the moment anything calls the exported function, which would land on exactly the MISSING path AC3 describes. Also worth one line: the docstring at :1371 says 'Lambda: Checks X-User-Tier header', which reads as a different origin and would have explained the absence benignly -- comp-routes shows it resolving to the same S3 origin as its neighbours, so the rival was checked and excluded rather than assumed away. Surfaced to 3.0.0_SA_CVO~Z cc 2.0.0_SA_COO~Z. No action taken.",
+    "OBSERVATION / INERT: this TO's reporting block MANDATES a cell_status per cell, and PROOF_OF_SPEC.schema.json has NO SLOT for it -- 'cell_status' appears nowhere in the schema and the root is additionalProperties:false, so putting it in this instance would make the instance INVALID. The cell_status block therefore lives in the measurement deliverable. This is the same class the schema's own decomp_ref comment documents at line 41 ('this schema's root is additionalProperties:false, so before this there was NO SLOT for a decomp_ref, and the estate had already routed around the gap ... That is the schema forcing a free-text workaround'). A TO requiring a field the schema forbids produces either an invalid instance or an unjoinable prose workaround, and I took the second knowingly. Not my artifact to amend; surfaced to 3.0.0_SA_CVO~Z cc 2.0.0_SA_COO~Z.",
+    "OBSERVATION / INERT, method note rather than a defect in anything: the shared checkout moved under me TWICE mid-task. The workspace HEAD advanced between two consecutive calls (a find for the TO file returned nothing, then the file was present), and the portal submodule HEAD advanced from 8b8a2cc775 to 4a52439cbe between reading portal-proxy.ts and citing it. Every file:line in AC3 was therefore RE-DERIVED by grep at the current commit rather than carried forward from the earlier read. A citation whose vintage moved is not a citation, and on a ~12-seat shared tree the vintage moves without any signal to the reader."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~L/logs/2026-08-27/dsl_posn_tenancy_to2ds_2053-2130Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"which S3 bucket and prefix is the served key for a firm's Positioning data, and how do I list a prefix completely\"",
+      "result": "RUN, and it is the reason raw s3api is legal here. It returned a NEAR-TIE of comp-kuzu / comp-parity / comp-whoread and printed its own '*** TOP SCORES ARE TIED -- THE ORDER IS NOT A RANKING ***'. None of the three lists an S3 prefix, so Rule 21's exception condition (comp-which confirms no tool fits) is MET rather than assumed, and every raw aws call carries a # rail-checked marker naming this."
+    },
+    {
+      "tool": "comp-routes",
+      "invocation": "comp-routes behaviors; comp-routes trace '/api/general/positioning/positioning_data.json'; and the same trace for model.json plus a known-present control",
+      "result": "RUN. This is the instrument that produced the SERVED KEY rather than my inferring it: behavior /api/general/* -> origin S3-opal-data-portal-v2-json, rewrite /api/general/ -> json/, S3 URI s3://opal-data-portal-v2/json/positioning/positioning_data.json. It also DISCRIMINATED the model.json rival by showing the same S3 origin as its neighbours. Its own banner declares PLANE: desired -- parsed Terraform and committed router source, never a live describe-distribution -- so every presence verdict was then taken on the LIVE plane by s3api. It also caught an MSYS leading-slash mangle in my argument and reported reading the corrected form."
+    },
+    {
+      "tool": "comp-find / comp-estate",
+      "invocation": "comp-find 'positioning_data.json' --all ; comp-estate --resource positioning",
+      "result": "RUN. comp-find returned 680 hits across 27,280 files with bands printed. USED FOR ORIENTATION ONLY AND NOT AS EVIDENCE: its top hits were compproof records of PAST investigations carrying laptop paths and naming opal-data-portal-v2, which CONFLICTED with the PRD's 'substrate opal-data-assets TODAY'. That conflict is exactly why the served key was resolved on comp-routes and then measured live, rather than read out of a record."
+    },
+    {
+      "tool": ".tools/aws (s3api), rail-checked exception",
+      "invocation": "list-buckets; list-objects-v2 with manual --continuation-token pagination; head-object",
+      "result": "RUN, read-only. 31 buckets enumerated client-side with no --max-items. Five prefix listings totalling 19,403 keys over 28 pages, every one terminating on IsTruncated=False. One head-object discriminating pair. No write verb issued."
+    }
+  ]
+}

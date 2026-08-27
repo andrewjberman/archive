@@ -1,13 +1,52 @@
 # TO ETFS_INGEST.TO-7 — the PROVIDER's "as of" IS the provenance stamp (`ETFS_INGEST-Z-S16`)
 
+<task_order id="ETFS_INGEST.TO-7" project="ETFS_INGEST">
+
+> ⛔ **ADDED 2026-08-27 ~18:0xZ by `2.0.0_SA_COO~Z` — THE ISSUING OFFICE. THIS BLOCK WAS MISSING FOR
+> THREE DAYS AND ITS ABSENCE IS THE SAME DEFECT CLASS AS THIS TO'S OTHER ONE.**
+> Surfaced by `0.4.0_DS_ClientPlatform~P`: `proof-of-spec-check.py` reported *"governing TO UNRESOLVED
+> ... scanned 2132 TO file(s)"* until they declared `decomp_ref.to_ref` explicitly to work around it.
+> **POSITIVE CONTROL, measured: sibling `ETFS_INGEST.TO-6` carries the block (count 1); this file
+> carried 0.** So the checker was not broken and the scan was not too narrow — **the anchor simply
+> was not here.**
+>
+> **THE CLASS, and it is this TO's second instance of it:** the human-readable title line
+> `# TO ETFS_INGEST.TO-7 — ...` names the id perfectly, so **every human reader resolves it and every
+> tool fails.** That is precisely the shape of the assignee-field defect on this same face — an
+> executor **CLASS** (`DS + AE`) where an **INSTANCE** was owed, which left this TO reading as issued
+> and held by nobody for three days while its producer work was already landed and unvalidated.
+> **TWICE ON ONE ARTIFACT, the record was legible to a person and unresolvable to a machine** — and
+> both times the failure was silent, because a human reviewing the face sees nothing wrong.
+>
+> ⚠ **A TITLE IS NOT AN IDENTIFIER.** If a tool must resolve it, it needs a field, not a heading.
 **Issued:** 2026-08-24T23:20Z by `2.0.0_SA_COO~Z`
 **Executor class:** DS (producer code) + AE (deploy) — see LANES
+
+<issued_to>0.4.0_DS_ClientPlatform~P</issued_to>
+
+> ⛔ **SEATED 2026-08-27 ~17:2xZ by the COO office — THIS TO SAT UNASSIGNED FOR THREE DAYS AND
+> NOTHING SURFACED IT.** It carried an executor CLASS (`DS + AE`) and no INSTANCE, so
+> `to-check.py` rendered it `-> (unassigned)` while every other field looked complete — including a
+> **sovereign word** and a CTO sequencing ruling that says *"if only one 13:00Z fix
+> lands, THIS ONE GOES FIRST."* **A TO with a class and no instance reads as issued and is held by
+> nobody**, and the highest-priority item in its project is exactly where that is most expensive.
+> **A CLASS IS NOT AN ASSIGNEE.** Found by a COO seat-census, not by any gate — recorded so the next
+> census knows to look at the instance field, not the class field.
+> ⚠ **AND THE PROSE BELOW WAS DE-SERIALISED 2026-08-27 ~18:0xZ: my first version of this very note
+> named five serials, and `to-check.py` READ ONE OF THEM AS THE ASSIGNEE** (`-> SA_COO~Z +DS`). **A
+> NOTE EXPLAINING THE ASSIGNEE DEFECT RE-CREATED IT ON THE SAME FIELD.** Serials near a resolvable
+> field are parser input, not commentary — say the role, not the serial, in prose beside a tag.
+> Seat: the ~P DS lane named in the issued_to element above (fresh lane, `ETFS_INGEST` ONLY per
+> Rule 27; spawned by MSTR msg 9331 on this office's call). **The AE deploy limb is NOT seated by this
+> line** — it stays an AE-class act and `~P` must route it, not perform it.
 **Basis:** **ANDREW-DIRECT ~23:0xZ**, relayed verbatim by `1.0.0_SA_CTO~Z` (5645), recorded at
 `org/tier1_exec/1.0.0_SA_CTO/deliverables/ctoZ_ANDREW_DIRECT_20260824_PROVIDER_AS_OF_IS_THE_PROVENANCE_STAMP_FROM_BRONZE_ONWARD.md`
 **Sequencing:** `1.0.0_SA_CTO~Z` ruling (2) — **if only one 13:00Z fix lands, THIS ONE GOES FIRST.**
 **Decomp cell:** **`INGEST-T2-4`** — *"THE AS-OF CONVENTION — three date semantics in ONE artifact …
 One declared as-of per row + the issuer's date both-stored"*, SIZED, certified `@fcdf042972`.
 **Surprise-channel item:** `ETFS_INGEST-Z-S16` (`3.0.0_SA_CVO~Z`), BLOCKING, now carrying sovereign word.
+
+</task_order>
 
 > ⭐ **THIS IS IN SPEC, AND I NEARLY SHIPPED IT AS AN EXCEPTION.** My first draft of this TO declared
 > it *"issued outside the certified decomp"* as a Rule-27 surprise-channel remediation. **That was

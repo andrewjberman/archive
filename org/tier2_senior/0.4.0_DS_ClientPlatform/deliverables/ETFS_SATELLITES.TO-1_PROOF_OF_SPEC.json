@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_SATELLITES.TO-1",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_SATELLITES.TO-1.weights-from-rebalancer-detail-and-the-vintage-policy.md",
+    "group": "D",
+    "vintage_commit": "d5b1139e9f"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~W",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/satellites_weights.py",
+      "kind": "script",
+      "commit_or_etag": "dc56a72c21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The weight derivation: hierarchy.children[].relativeAllocation -> per-satellite {book, weight}, plus the declared name->book map and the vintage policy. WRITES NOTHING -- it derives, it does not publish, SAT-a-4 was RULED at 18:21Z (build-time constant OUT, form delegated to this seat) and the module now carries the CARRIER CONTRACT: payload() emits `as_of` as a FACT, read() computes the verdict at READ time, and assert_no_baked_verdict() REFUSES a payload that froze one -- so the ruled-out class is inexpressible, not merely avoided. LOCATION IS LOAD-BEARING: data/assets/** is deliberately outside safe_deploy_core.PIPELINE_MAP {black_diamond, inf, cot}, so this does NOT auto-deploy on push -- the same reasoning build_dim_model_portfolio.py records for itself. BUILD LADDER: the silver sibling rebalancer_conversion.py already lands relative_allocation and was deliberately NOT reused, because SAT-a-1's oracle requires the ARTIFACT'S OWN BYTES as the exhibit and a silver table is a derived copy. commit-gate PASS (rc=0 captured before any pipe). \u26d4 NOT DEPLOYED TO S3, AND THAT IS A MEASURED DECISION, NOT AN OMISSION -- see the S3 exclusion below.",
+      "artifact_covered_by": [
+        "SAT-TO1-AC1",
+        "SAT-TO1-AC2",
+        "SAT-TO1-AC3",
+        "SAT-TO1-AC4"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/tests/test_satellites.py",
+      "kind": "test",
+      "commit_or_etag": "dc56a72c21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "24 tests covering all nine criteria across TO-1 and TO-2. 23 offline on a trimmed fixture; 1 marked `integration` reading LIVE bronze bytes. THE LIVE TEST RAN AND PASSED -- it is not a skip. Per the house conftest marker, a skip there would have been a GAP in the evidence, never a pass.",
+      "artifact_covered_by": [
+        "SAT-TO1-AC1",
+        "SAT-TO1-AC2",
+        "SAT-TO1-AC3",
+        "SAT-TO1-AC4"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/tests/fixtures/satellites/{roster,detail}_2026-08-27.json",
+      "kind": "test",
+      "commit_or_etag": "dc56a72c21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TRIMMED fixtures derived from the measured bronze bytes, each carrying a _fixture_provenance block naming the source key, LastModified, byte count and exactly what was trimmed. ALL 65 ROSTER ROWS ARE RETAINED so the denominator survives the trim -- a fixture keeping only the interesting rows would make every coverage claim unfalsifiable.",
+      "artifact_covered_by": [
+        "SAT-TO1-AC1",
+        "SAT-TO1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SAT-TO1-AC1",
+      "criterion_verbatim": "Weights reproduce from rebalancer_model_detail ALONE, file bytes as the exhibit. PLUS THE MUTANT: one altered relativeAllocation in a scratch copy changes the rendered weight. If it does not move, the read is decorative and this FAILS",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/gold/tests/test_satellites.py (24 tests, rc=0 captured before any pipe); plus the standalone mutant driver printing before/after per the TO Phase-2 mandate",
+      "output_evidence": "REPRODUCED FROM THE BYTES, AND THE MUTANT MOVES THE NUMBER. LIVE ARM (the exhibit AC1's wording names): test_LIVE_weights_reproduce_from_the_bronze_bytes PASSED -- boto3 get_object on s3://opal-data-assets/blackdiamond/cottonwood/bronze/rebalancer_model_detail/2026-08-27/c27d435c-190c-46b8-9221-211e07731e81.json, parsed from the response bytes, yielding ('Opal Intermediate-Term','INT',1.0); the mutant on those SAME live bytes (relativeAllocation -> 0.42) returned 0.42. NOT A SKIP. OFFLINE MUTANT, values printed: target Opal Satellite 30, hierarchy.children[0].relativeAllocation; BEFORE {'Opal Intermediate-Term': 0.25, 'Opal Short-Term': 0.75}; AFTER(0.99) {'Opal Intermediate-Term': 0.99, 'Opal Short-Term': 0.75}; MOVED=True. TWO CONTROLS make the mutant DISCRIMINATING rather than merely loud: (a) the UNTOUCHED SIBLING did not move (0.75 -> 0.75), so the mutant is targeted and not a global reset that would pass for the wrong reason; (b) re-reading the ORIGINAL object still returns 0.25, so the scratch copy is real and the fixture was not mutated in place. ALSO ASSERTED: all nine members' constituents sum to 1.0000 (a property of the artifact, so a partial read cannot pass as a complete one), and every row carries source_field='hierarchy.children[].relativeAllocation'. THE SILENT-ZERO TRAP IS GUARDED: a top-level `children` read returns None on every file and would derive zero weights silently -- satellite_weights RAISES instead, and a test asserts top-level `children` genuinely does not exist so the refusal still tests the trap it was written for.",
+      "denominator": "9 of 9 satellites derived; 13 constituent rows; 1 of 1 live-bytes test PASSED (0 skipped); mutant exercised on 1 live artifact + 1 offline, each with a paired non-movement control",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SAT-TO1-AC2",
+      "criterion_verbatim": "Every constituent name across the satellite set resolves to a book, with the UNRESOLVED count PRINTED. A silent drop is the defect, not a tidy result",
+      "method": "test_suite",
+      "invocation": "sw.format_resolution(sw.resolve_set(details)) printed in test_AC2_every_constituent_resolves_and_the_count_is_printed, and re-run standalone per TO Phase-3",
+      "output_evidence": "PRINTED, WITH ITS DENOMINATOR BESIDE IT, AND THE COUNT IS 0. Verbatim output: 'satellites: 9 / constituent rows: 13 <- DENOMINATOR / distinct names: 4 / UNRESOLVED: 0 / unresolved names: none'. The 13 is MEASURED, not assumed -- five members carry one child and four carry two (5 + 8); an earlier draft of this test asserted 14 from memory and FAILED, which is how the number came to be measured. The four distinct constituent names are Opal Short-Term, Opal Intermediate-Term, Opal Conservative Growth, Opal Long-Term Aggressive. A REAL HAZARD WAS FOUND AND CLOSED HERE, and it is the silent kind AC2 is written against: the portal's own alias map (portal/src/lib/modelPortfolioColors.ts, CANONICAL_MODEL_NAME) is keyed WITHOUT the 'Opal ' prefix ('Short-Term', 'Long-Term Aggressive'), while every constituent name in these artifacts CARRIES it. resolveCanonicalModelName returns an unknown string VERBATIM by design, so routing these names through it yields a plausible non-book key and NO ERROR -- an empty join that reads as 'no weights' rather than 'no match'. The map is therefore declared against the artifact's ACTUAL name form, and a test asserts the unprefixed keys are ABSENT so it cannot be 'simplified' back to the portal's key form without failing. Every value the map can emit is asserted to be one of bookSet.ts MODEL_BOOKS. INDEPENDENT CORROBORATION, not a re-run of my own read: build_cottonwood_mdpf_slice.py:152-157 CANONICAL_KEY already carries these exact prefixed names for MDPF. It is CITED, not imported -- its values are MDPF slugs, a different vocabulary from Positioning book codes, and bridging two vocabularies through one map arms a latent collision the first time either side adds a key.",
+      "denominator": "13 of 13 constituent rows resolved; 4 of 4 distinct names; unresolved 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SAT-TO1-AC3",
+      "criterion_verbatim": "CVO F3 -- Opal Satellite 60 IS IN THE FIXTURE BY NAME. Its displayName carries a dash ('Opal - Satellite 60') while the other 8 match exactly, and it is the 81-account book. Show the join resolves it, and show the counter CAN be non-zero (positive control)",
+      "method": "test_suite",
+      "invocation": "test_AC3_satellite_60_is_in_the_fixture_by_name_and_the_join_resolves_it; test_AC3_POSITIVE_CONTROL_the_unresolved_counter_can_be_non_zero",
+      "output_evidence": "IN THE FIXTURE BY NAME, THE JOIN RESOLVES IT, AND THE COUNTER IS PROVEN NON-ZEROABLE. 'Opal Satellite 60' is a key in the committed detail fixture. Measured at the 2026-08-27 roster: displayName='Opal - Satellite 60' (THE DASH), accountCount=81, displayName != name. THE MISMATCH IS EXACTLY ONE MEMBER: sweeping all nine, the only member whose displayName differs from its name is Opal Satellite 60. CORROBORATION THAT IT IS A ROSTER PROPERTY AND NOT A TYPO: displayName is present on 25 of 65 rows and NULL on 40, so a null branch sits beside the mismatch branch; and 'Opal UST/ Sat 70' -> 'Opal UST/ Satellite 70' shows the same abbreviation-expansion shape on an unrelated row. THE JOIN RESOLVES IT: ('Opal Intermediate-Term','INT',1.0) -- not an empty result, which is the failure mode AC3 names, because empty reads as 'Satellite 60 has no weights' rather than 'the key did not match'. POSITIVE CONTROL (a counter that cannot be non-zero is not a counter): renaming that constituent to 'Opal - Intermediate-Term' drove UNRESOLVED to 1 with unresolved_names=['Opal - Intermediate-Term'] and the printed line 'UNRESOLVED:        1'; the clean set still reads 0, so the two arms are DISTINGUISHABLE. AND THE DENOMINATOR DID NOT SHRINK -- constituent_rows stayed 13 with the row surviving at book=None, so an unresolved name is REPORTED rather than dropped out of the frame.",
+      "denominator": "1 of 9 members carries a displayName mismatch (the sweep covered all 9); displayName present 25 / null 40 of 65 roster rows; counter exercised at 0 and at 1",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SAT-TO1-AC4",
+      "criterion_verbatim": "A controlled STALE partition produces a visibly different state (marker/refusal), not silently older numbers. Resolve the TRADING CALENDAR first (NEVER#1) -- count trading days via lib/trading_calendar.py; a wall-clock check false-alarms every Monday",
+      "method": "test_suite",
+      "invocation": "test_AC4_ARM1_marker_a_stale_partition_reads_STALE_not_silently_older; test_AC4_ARM2_refusal; test_AC4_NEVER1_friday_is_mondays_answer -- all on lib.trading_calendar; PLUS the carrier arms -- test_CARRIER_the_SAME_stored_payload_yields_DIFFERENT_verdicts_as_now_moves, test_CARRIER_a_baked_verdict_is_REFUSED_and_the_guard_can_fail, test_CARRIER_the_refusal_arm_still_refuses_THROUGH_the_carrier, test_CARRIER_does_not_convert_a_calendar_daily_feed_into_a_build_cadence",
+      "output_evidence": "BOTH ARMS EXERCISED, AND THE CALENDAR WAS RESOLVED BY MEASUREMENT BEFORE THE POLICY WAS WRITTEN. NEVER#1 FIRST: the partition cadence was MEASURED against the live bucket rather than assumed -- 2026-08-22 (Saturday) and 2026-08-23 (Sunday) BOTH carry the full detail artifact, 8002 bytes each, LastModified ~06:00Z via s3api (UTC; the decomp's '~02:00Z' is the same instant in ET). THIS FEED LANDS EVERY CALENDAR DAY, WEEKENDS INCLUDED. That measurement is what selects the basis: a calendar-day check would alarm on a Saturday for a feed whose business content cannot have changed, whereas the trading-day frontier is correct on both arms with NO special case. Exercised: vintage('2026-08-21' Friday, now=Saturday 08-22) -> FRESH, and now=Sunday 08-23 -> FRESH, because expected_last_trading_day returns FRIDAY on a non-trading day -- FRIDAY IS MONDAY'S ANSWER, mechanically. now=Monday 08-24 -> STALE, trading_days_behind=1. A NAIVE WALL-CLOCK CHECK WOULD HAVE CALLED FRIDAY STALE ON SATURDAY, and the test asserts that gap is 1 calendar day so the false alarm it avoids is EXHIBITED rather than described. ARM 1 (marker): as_of 2026-08-27 -> FRESH/0; as_of 2026-08-25 -> STALE/2; the states DIFFER, so a consumer can reject on it. ARM 2 (refusal): assert_fresh raises SatelliteWeightError('STALE PARTITION: ...') on the stale date and returns FRESH on the current one. freshness_basis='trading-day-frontier' rides on the face of every result, so a consumer never has to guess which clock produced the verdict. RESIDUAL NAMED, NOT GLOSSED: SAT-a-4 is unmade, and a build-time constant would carry the vintage of the BUILD rather than of the data -- vintage() would then be measuring the wrong clock while still returning FRESH. That is stated in the module, and the staleness arm must be RE-EXERCISED at whatever boundary COO chooses. || RE-EXERCISED THROUGH THE CARRIER after 2.0.0_SA_COO~Z's 18:21Z SAT-a-4 ruling, which ruled OUT the build-time-constant class, LEFT THE FORM TO THIS SEAT, and required in terms: 'the staleness arm MUST be re-exercised at that boundary ... THE CARRIER IS EXACTLY WHAT THE TEST WAS NOT VARYING.' IT IS NOW VARIED. THE CHOSEN CONTRACT: the artifact carries `as_of` (a FACT, claim measured, it does not age) and THE READER COMPUTES THE VERDICT via vintage(as_of, now) at read time. \u26d4 THE RULED-OUT CLASS IS WIDER THAN THE NAMED FORM AND THAT IS THE DESIGN: a served block that STAMPS `state: FRESH` at PRODUCE time fails IDENTICALLY to a build-time constant -- true when written, ageing silently -- so the payload is FORBIDDEN from carrying a verdict and `assert_no_baked_verdict` ENFORCES it, making the defect INEXPRESSIBLE rather than discouraged. THE DISCRIMINATING TEST: ONE set of stored bytes, `now` moved and nothing else -- read(block, 2026-08-27) -> FRESH/0 and read(block, 2026-08-31) -> STALE/2, with as_of and rows asserted IDENTICAL across both. A build-time constant and a stamped block both return the same verdict forever; this asserts the opposite property, so if anyone later bakes `state` in, THIS test fails rather than a style review catching it. THE GUARD MADE TO FAIL ON DEMAND: three baked fields (state, trading_days_behind, freshness_basis) each raise, on assert_no_baked_verdict AND on read(), with the clean payload as the POSITIVE CONTROL that does not raise. COO'S NEVER#1 RIDER IS ALSO EXERCISED ('a weekly-built constant against a daily-landing feed is the same defect wearing a different hat'): the payload records NO produce-time field at all -- `checked_at` is in CARRIER_FORBIDDEN_FIELDS -- so there is nothing to convert into a build cadence, and Friday's payload read on Saturday and Sunday is FRESH while Monday is STALE, the weekend arms surviving the new boundary intact. FORM-AGNOSTIC ON PURPOSE: served block, portal fetch or API response all satisfy this contract and all fail it identically if they stamp a verdict -- it rules out the CLASS, which is what was ruled, rather than picking a transport this lane does not own.",
+      "denominator": "2 weekend partitions head-checked (both present, 8002 bytes each); 5 (as_of, now) pairs exercised directly plus 7 THROUGH the carrier; 1 payload read at 2 different `now` values yielding 2 different verdicts from identical bytes; 3 baked-verdict fields each refused on 2 call paths, against 1 clean positive control",
+      "status": "PASS"
+    }
+  ],
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-satellites/20260827T160438Z/DECOMP.md",
+    "vintage_commit": "936b9ae1e9",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_SATELLITES.TO-1.weights-from-rebalancer-detail-and-the-vintage-policy.md"
+  },
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-27/dsw_etfs_satellites_to1_to2_1737-1805Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"where is rebalancer_model_detail read or parsed in this estate\"",
+      "result": "NEAR-TIE across 3 tools, printed as a tie rather than a silent guess. Routed to comp-find, which is what actually answered."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'rebalancer_model_detail' --files",
+      "result": "DENOMINATOR 210 hits across 27,216 files scanned. The [DEF] band named the existing silver converter rebalancer_conversion.py + rebalancer_schemas.py -- build-ladder rung 2. rebalancer_schemas.py carries two documented bytes-vs-PRD deltas (structural fields under `hierarchy` not top-level; children[] vs components[]) that this build would otherwise have rediscovered by failing."
+    },
+    {
+      "tool": "comp-estate",
+      "invocation": "comp-estate --resource rebalancer_model_detail",
+      "result": "'no chain references it' -- a TRUE NEGATIVE, consistent with data/assets/** sitting outside safe_deploy_core.PIPELINE_MAP."
+    },
+    {
+      "tool": "comp-pipescript io",
+      "invocation": "comp-pipescript io satellites_weights.py --pipeline cot-gold (+ POSITIVE CONTROL on build_dim_model_portfolio.py)",
+      "result": "UNKNOWN SCRIPT IN TREE -- and the positive control is what makes that readable: the SAME invocation on the established sibling build_dim_model_portfolio.py returns the SAME 'Unknown script in tree'. So data/assets/** gold scripts are NOT in comp-pipescript's DAG at all; the verdict is a SCOPE fact about the tool, not a defect in the module. The DS mandate's comp-pipescript limb is UNSATISFIABLE for this directory -- surfaced to 1.0.0_SA_CTO~Z, no action taken."
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <the 3 .py files>",
+      "result": "PASS, rc=0 CAPTURED BEFORE ANY PIPE. First run BLOCKED on two unused imports (Iterable, Sequence in satellites_weights.py); fixed and re-run clean."
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/gold/tests/test_satellites.py",
+      "result": "24 passed, rc=0 captured before any pipe. 23 offline + 1 live-S3 `integration` that RAN (not skipped)."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION/INERT -- TO-2 s.7's routed `hierarchy.components[]` question is ANSWERED by measurement and is NEITHER of its two branches: components[] is empty on the ROOT Strategy node and POPULATED on the depth-1 Model children (16-20 security leaves each, all nine satellites). Corroborated by an independent instrument, data/assets/scripts/silver/rebalancer_schemas.py:19-24, which documents exactly this shape. The 'universally empty' reading came from looking only at the root. No action taken.",
+    "OBSERVATION/INERT, filed PROMPTLY because it lands on 0.4.0_DE_ClientPlatform~Y's TO-4 surface: the bronze detail artifact DOES carry hierarchy.firmId = 4175, on all nine satellites. SAT-c-1's 'ZERO firm-id references' is about the POSITIONING DIRECTORY and remains true. THIS IS NOT THE VIEWER-FIRM SOURCE modesFor(firm) NEEDS, and its danger is that it LOOKS like one: it is the model's OWNING firm, it is the same constant 4175 across all nine, and a gate wired to it would gate nothing or gate everything while typechecking cleanly. Surfaced so it is dismissed deliberately rather than found and trusted. No action taken and none proposed -- TO-4 is not this lane.",
+    "OBSERVATION/INERT -- the decomp records the partition landing '~02:00Z'; measured via s3api (UTC) it is ~06:00Z. Same instant, different zone, not a discrepancy. Noted because the vintage policy states its basis explicitly so the two are never compared as one clock.",
+    "OBSERVATION/INERT for 1.0.0_SA_CTO~Z -- the DS compiler-tools mandate requires `comp-pipescript io <script> --pipeline <tree>` for every gold script touched, and data/assets/** gold scripts are in no comp-pipescript tree (established with a positive control). The mandate is unsatisfiable for this directory. No action taken."
+  ],
+  "controls": {
+    "mutant": {
+      "description": "SAT-a-1's named mutant: alter ONE hierarchy.children[].relativeAllocation in a scratch copy and require the derived weight to move. Run on the LIVE bronze bytes AND offline, each with a paired non-movement control.",
+      "expected": "the altered constituent's weight changes; the untouched sibling does not; the original object still reads its original value",
+      "observed": "FIRED. LIVE: relativeAllocation -> 0.42 produced weight 0.42 from bytes that read 1.0 unmutated. OFFLINE (Opal Satellite 30): BEFORE {'Opal Intermediate-Term': 0.25, 'Opal Short-Term': 0.75} -> AFTER(0.99) {'Opal Intermediate-Term': 0.99, 'Opal Short-Term': 0.75}; sibling UNCHANGED at 0.75; re-reading the original still returns 0.25. A SECOND mutant class also fired: renaming a constituent drove the UNRESOLVED counter 0 -> 1, proving the counter can be non-zero.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the full suite run twice on identical input (fixture + live partition 2026-08-27), rc and counts compared",
+      "observed": "STABLE -- 24 passed both runs; resolve_set returned constituent_rows=13, distinct_names=4, unresolved_count=0 identically. The derivation has no clock and no randomness; vintage() takes `now` as an explicit PARAMETER rather than reading a clock, which is what makes the staleness arms reproducible at all.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "SAT-a-4 -- the DELIVERY FORM. NO LONGER EXCLUDED: RULED 2026-08-27 ~18:21Z and the form was delegated to this seat. Recorded as a WITHDRAWN exclusion rather than deleted, because a silently-vanishing exclusion and a discharged one read the same.",
+      "reason": "AT WRITE TIME this was correctly out of scope (COO's call by the decomp's class assignment; TO-1 s.4 says 'ask, do not assume'). 2.0.0_SA_COO~Z then ruled -- BUILD-TIME CONSTANT IS OUT, because it makes vintage() measure the BUILD clock, 'a freshness indicator structurally incapable of reporting staleness ... a green light wired to the wrong sensor' -- and explicitly left the FORM here: 'the derivation being indifferent to the carrier is precisely why the person holding the code should choose it.' BUILT ACCORDINGLY and covered by SAT-TO1-AC4 above: the artifact carries `as_of`, the READER computes the verdict, and a payload carrying a baked verdict is REFUSED. The staleness arm was re-exercised THROUGH the carrier as the ruling required. What remains genuinely out of this lane is the TRANSPORT (which service serves the block) -- the contract is deliberately form-agnostic so that choice cannot reintroduce the ruled-out class."
+    },
+    {
+      "item": "The portal-side edit that would let the page consume these weights (portal/src/**).",
+      "reason": "DE lane, not DS. SAT-a-2 is classed DE in the decomp and the mode axis/panels are TO-3 (0.4.0_DE_ClientPlatform~Y). This TO's AC2/AC3 are discharged by the DECLARED resolution and its printed UNRESOLVED count, which is what the criteria name. No portal file was modified."
+    },
+    {
+      "item": "Any deploy or publish of these weights.",
+      "reason": "OUT OF SCOPE BY CONSTRUCTION. The module writes nothing, and data/assets/** is deliberately outside safe_deploy_core.PIPELINE_MAP so nothing here auto-deploys on push. TO-1 s.7 declares <no_reprocess_needed>."
+    },
+    {
+      "item": "THE S3 FIRST-MINT into s3://opal-data-mdpf/code/scripts/assets_gold/ for satellites_registry.py, satellites_weights.py and tests/test_satellites.py.",
+      "reason": "DELIBERATELY NOT DONE, MEASURED RATHER THAN ASSUMED. 0.0.0_AB_MSTR~Z correctly measured all three ABSENT (positive control: the prefix is reachable and holds 4 producers) and correctly identified the safe-deploy SUCCESS LINE as a defect -- it printed 'all files deployed and verified' after skipping all three. THE SKIP WAS RIGHT AND SO IS LEAVING IT: (1) THE TEST FILE -- this estate deploys ZERO gold tests. Measured denominator: 6 test files in data/assets/scripts/gold/tests/, 0 on S3, against a positive control showing the parent prefix reachable with exactly 4 producer members. Minting tests/ would START a practice, not catch one up. (2) THE TWO MODULES -- NOTHING imports them: the only references estate-wide are inside test_satellites.py itself. mdpf-daily-dispatch.sh:125 syncs code/scripts/ onto the PRODUCTION MDPF runner with --delete and puts assets_gold on the nightly chain's PYTHONPATH (:538-546), so a first-mint would place three unused files -- one of them a pytest module that imports boto3 and reaches live S3 -- into a production runtime tree for no consumer. (3) Rule 13's 'first-mints explicit' makes a mint a DELIBERATE named act; the membership guard skipping a non-member is that rule working, not failing. THE MINT BECOMES CORRECT WHEN A CONSUMER EXISTS -- and under the SAT-a-4 contract the consumer is the carrier, which is transport not yet chosen. Routed to 0.0.0_AB_MSTR~Z and 2.0.0_SA_COO~Z with the denominators; not self-approved silently."
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D1_CATVIEWS.TO-F3-DS",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier1_exec/2.0.0_SA_COO/deliverables/cooZ_D1_FINDING3_CROSSWALK_COUPLING_RULING_20260827.md",
+    "group": "OTHER",
+    "vintage_commit": "300da2ab3f"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~Z",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md",
+    "vintage_commit": "f26ebb57b5",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/D1_CATVIEWS.TO-F3-DS.crosswalk-keyspace-import-assert.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_category_registry.py",
+      "kind": "script",
+      "commit_or_etag": "3e88e10511",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "1 file changed, 34 insertions(+), 0 deletions. Adds `_check_crosswalk_keyspace(members)` beside `_build_identity_map()` and calls it at import over MEMBERS. DELIBERATELY NOT DEPLOYED: D1_CATVIEWS is NO-SHIP and the TO's out-of-scope block forbids advancing the build pin. mdpf-gold-lambda assembles its package FROM A PINNED COMMIT (build_package.py, 'never from the working tree'), so this commit does not and must not reach the running Lambda -- committing is not executing (D1-inv-5). Push state: LOCAL @3e88e10511; 0.0.0_AB_MSTR~Z is the integrator."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D1F3DS-AC1",
+      "criterion_verbatim": "The assert exists and RAISES at import on a member_id outside the keyspace. Positive arm: the `opal_conservative_growth` specimen registers -> RegistryError. Name the input that makes the guard refuse.",
+      "method": "command",
+      "invocation": "python -c \"import mdpf_category_registry as R; R._check_crosswalk_keyspace(list(R.MEMBERS) + [R.CategoryMember(member_id='opal_conservative_growth', asset_category='models', qualifier='custom', strategy_id=None, display_name='Opal Conservative Growth', view_path='Models > Custom', served=False)])\" (cwd data/mdpf/scripts/gold)",
+      "output_evidence": "THE INPUT THAT MAKES THE GUARD REFUSE, named: a CategoryMember with asset_category='models' and member_id='opal_conservative_growth' -- the original incident's own specimen, the display label a seat actually misread, which would have moved $34,585,361.39 of PRIMARY AUA into Custom. RAISED RegistryError: \"model-class member_id 'opal_conservative_growth' is ABSENT from the crosswalk canonical keyspace (mdpf_revamp_model_crosswalk.CANONICAL_MODELS, 11 model_keys). Register the member under its crosswalk model_key, or add a CROSSWALK_IDENTITY_MAP row naming BOTH id families. Do NOT match on display_name -- an identity obvious to a reader is still ambiguous to a machine\". CROSS-CHECK that the guard is NEW coverage and not a duplicate of an existing one, both limbs measured on the same specimen: 'opal_conservative_growth' in R._INDEX -> False, i.e. the :376 id-unique assert PASSES on it; and _build_identity_map's three raises (:557/:562/:568) all iterate `for row in CROSSWALK_IDENTITY_MAP`, whose domain is the map's PRESENT rows, so a member ABSENT from the map is outside their domain by construction. *** WHAT THIS ROW IS NOT EVIDENCE OF -- added 2026-08-27 ~19:4xZ on the second seat's acceptance control (0.4.0_DS_ClientPlatform~L @ac6fd85dbb), REPRODUCED AT THIS SEAT ON A SCRATCH COPY BEFORE ACCEPTING THE GRADE: this invocation calls _check_crosswalk_keyspace() DIRECTLY, so it exercises the FUNCTION and not the WIRING. Measured discriminator -- plant the bad member, then comment out the import-time call at :613: `import mdpf_category_registry` -> rc=0 CLEAN (their arm CATCHES the de-wiring) while THIS ROW'S OWN COMMAND -> rc=1 RAISES (blind to it). The wiring IS present at :613, module scope, column 1 -- so this is a statement about what this evidence is evidence OF, not a contradiction of the result. ALL FOUR of my arms share that blind spot: I varied the INPUT four ways and never varied the WIRING. Four arms, one plane. *** AND THE POPULATION CANNOT VIOLATE THE INVARIANT AT THIS PIN: _model_members() DERIVES member_id from _xw.CANONICAL_MODELS and the guard then tests membership in that same set -- the value is drawn from the set it is tested against. Reproduced: renaming a crosswalk model_key (4 occurrences) leaves import CLEAN, 9 of 9 still in keyspace, and the registered member SILENTLY RENAMES WITH IT. So the 9/9 held BY CONSTRUCTION, not by convention, and the specimen is unregistrable by any code path in this module today. The guard is a tripwire on a door currently welded shut -- and it is on the right door; placing it before the hazard is the correct order, which is why nothing here asks for a change.",
+      "denominator": "1 specimen exercised, pinned to the incident record (INVESTIGATION_v1.md:168 / the TO's own EXERCISED block); 3 pre-existing raises inspected at source and confirmed to share one domain (CROSSWALK_IDENTITY_MAP rows) that structurally excludes this input.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D1F3DS-AC2",
+      "criterion_verbatim": "It does NOT raise on the current, correct population. Negative arm: all 9 of 9 model members import clean; print the denominator, not \"all pass\".",
+      "method": "command",
+      "invocation": "python -c \"import mdpf_category_registry as R, mdpf_revamp_model_crosswalk as X; ks={e.model_key for e in X.CANONICAL_MODELS}; mm=[m for m in R.MEMBERS if m.asset_category=='models']; print(sum(1 for m in mm if m.member_id in ks), 'of', len(mm), 'keyspace', len(ks))\" (cwd data/mdpf/scripts/gold)",
+      "output_evidence": "DENOMINATORS PRINTED, not 'all pass': model-class members checked = 9; IN canonical keyspace = 9 of 9; OUT of keyspace = 0, list []. Keyspace = 11 unique model_keys derived from 11 CANONICAL_MODELS rows (11 rows -> 11 unique keys, so no key collapses). The module IMPORTS CLEAN, which is itself the criterion's evidence: `_check_crosswalk_keyspace(MEMBERS)` runs at import, so a raise here would make every consumer of this module fail to import. SEPARATE FALSIFIABILITY CONTROL so this row is not a green that cannot fail: re-running the same function on the unchanged population raises nothing, while AC1's one-member delta raises -- the guard discriminates on the input, it is not raise-always and it is not pass-always.",
+      "denominator": "9 model-class members of 15 registered members total; 11 model_keys in the canonical keyspace; 0 members outside it; 0 exemptions (the exemption set is empty by construction -- there is no exemption path, per the TO's out-of-scope block).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D1F3DS-AC3",
+      "criterion_verbatim": "The two SMA members routed via `CROSSWALK_IDENTITY_MAP` still resolve. `resolve_any('opal_div_sma')` and `resolve_any('opal_growth_sma')` return `divz` / `pfoe`.",
+      "method": "command",
+      "invocation": "python -c \"import mdpf_category_registry as R; print(R.resolve_any('opal_div_sma').member_id, R.resolve_any('opal_growth_sma').member_id)\" (cwd data/mdpf/scripts/gold); plus `python mdpf_category_registry.py` self_test which re-walks the map",
+      "output_evidence": "resolve_any('opal_div_sma') -> 'divz'; resolve_any('opal_growth_sma') -> 'pfoe'. Both expected values returned. CROSSWALK_IDENTITY_MAP rows = 2, unchanged by this commit (0 rows added, 0 removed, 0 edited). self_test independently re-walks the map and prints 'OK: identity-family map (2 row(s)) crosswalk_model_key -> registry_member_id / opal_div_sma -> divz (Dividend SMA) / opal_growth_sma -> pfoe (Opal Equity Growth SMA)'. WHY THIS COULD HAVE BROKEN AND DID NOT: divz and pfoe carry asset_category='strategy', not 'models', so they are outside the new guard's domain and it never inspects them -- the guard's first predicate is `m.asset_category != \"models\" -> continue`. The risk this criterion screens for is a guard written over ALL members rather than model-class ones, which would have raised on both SMA ids at import.",
+      "denominator": "2 of 2 CROSSWALK_IDENTITY_MAP rows resolved to their expected member_id; 6 SMA_MEMBERS registered, 0 touched.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D1F3DS-AC4",
+      "criterion_verbatim": "`self_test` still `rc=0`; `py_compile` + ruff py39 clean. Evidence: `.tools/commit-gate.sh` output.",
+      "method": "command",
+      "invocation": "cd data/mdpf/scripts/gold && python mdpf_category_registry.py ; rc captured immediately. Then: bash .tools/commit-gate.sh data/mdpf/scripts/gold/mdpf_category_registry.py",
+      "output_evidence": "self_test rc=0, captured into a variable on the line that ran it before any pipe or substitution could reset $?. Independent corroboration that rc=0 is not an empty-run artifact: grep -c '^FAIL' over the captured stdout = 0, and the run emits its full OK ladder (11 declared view nodes, 15 members across 5 top-level peers, gold-plane and view-plane peer sums, the 2-row identity-family map, the resolve_any unmapped raise, the F5 node raise). commit-gate.sh rc=0: 'All checks passed! / OK: no unguarded strict-utf8 log reads. / OK: pre-commit gate clean for 1 file(s)' -- that gate is py_compile + ds-precommit + ruff py39. safe-commit.sh additionally ran the NFRA_NERVES risk reflex: 'DENOMINATOR: 1 file(s) checked against 1351 danger node(s), REFLEX CLEAN -- a MEASURED result'.",
+      "denominator": "1 file gated; 2 independent rc=0 readings (self_test, commit-gate) plus a 0-count FAIL-line census over self_test stdout; 1351 danger nodes in the risk-reflex denominator.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "FOUR ARMS, because a one-arm guard proof cannot separate 'it catches the hazard' from 'it refuses everything' from 'the remedy it names is unreachable'. (1) POSITIVE: the opal_conservative_growth specimen planted as a model-class member. (2) NEGATIVE: the unchanged population re-run through the same function. (3) ESCAPE-ACCEPTED: the specimen plus a CROSSWALK_IDENTITY_MAP row naming a REAL crosswalk key ('opal_blend_5050_int_ltc') -- this tests that the remedy the error message TELLS the operator to use is one the guard actually honours. (4) ESCAPE-SHUT: the same specimen plus a row naming a BOGUS crosswalk key ('not_a_real_key') -- this tests that the escape cannot be used to launder an unknown member in.",
+      "expected": "(1) RegistryError. (2) no raise. (3) no raise. (4) RegistryError.",
+      "observed": "(1) RAISED RegistryError naming the id, the 11-key keyspace and both remedies. (2) no raise. (3) no raise -- the named remedy IS accepted. (4) RAISED -- a bogus crosswalk key cannot launder a member in. 4 of 4 arms behaved as expected. Arms 3 and 4 are the pair that matters: they differ in ONE field of ONE row (the crosswalk_model_key's membership in the keyspace) and produce OPPOSITE verdicts, so the guard is discriminating on that field and not on the row's mere presence.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs of `python mdpf_category_registry.py` compared byte-for-byte with diff -q; stdout+stderr captured to separate files.",
+      "observed": "rc=0 on both runs; outputs byte-identical at 1950 bytes. No timestamp, ordering or hash-seed variance -- the module's sets are only ever membership-tested, never iterated for output.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "An `off_crosswalk` field on CategoryMember, and any exemption path",
+      "reason": "Named OUT OF SCOPE by the TO, and the reason is a rule not a preference. The exemption set is EMPTY TODAY (0 of 9). Adding a value axis is a Rule 24 schema act owing a four-postulate record, and an axis authored before its first member is untestable. The first genuine off-crosswalk model is the event that commissions that field, with its record. Owner: 2.0.0_SA_COO~Z -- the TO says STOP and surface if a real member needs it; no such member exists at this commit."
+    },
+    {
+      "item": "The three existing raises in `_build_identity_map()` (:557, :562, :568)",
+      "reason": "Named OUT OF SCOPE by the TO: they are CORRECT FOR THEIR DOMAIN (the map's present rows -- duplicate crosswalk key, two crosswalk keys claiming one member, a row mapping to an unregistered member). This TO covers the INVERSE and adds coverage beside them rather than altering them. 0 lines of those three raises changed. Owner: unchanged, the module."
+    },
+    {
+      "item": "Advancing the build pin / deploying to the running Lambda",
+      "reason": "Named OUT OF SCOPE by the TO and blocked by a standing NO-SHIP. D1_CATVIEWS is NO-SHIP; build_package.py:266 states the NO-SHIP lifts ONLY 'BY NAME (a COO/Andrew ship ruling, cited here)' and no such ruling exists. This deliverable is not an argument that it may be lifted, and a disarmed condition is not a ship decision. Owner: 2.0.0_SA_COO~Z / Andrew."
+    },
+    {
+      "item": "Whether the crosswalk keyspace is itself the RIGHT authority for model identity",
+      "reason": "Out of this TO's frame by construction. The TO implements the ruling's limb -- enforce the invariant that already holds 9/9 -- and takes CANONICAL_MODELS as the declared keyspace. Questioning that choice would be re-opening the Finding 3 ruling, which is COO's. Owner: 2.0.0_SA_COO~Z."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / INERT, blocks nothing, and it is a RECORD-vs-RECORD disagreement rather than a code one: `D1_CATVIEWS.TO-R1-DS` is addressed on disk to `0.4.0_DS_ClientPlatform~F` with `<status>ACTIVE</status>`, and to-check.py renders it '-> DS_ClientPlatform~F'. Both 0.0.0_AB_MSTR~Z (msg 9328) and 2.0.0_SA_COO~Z (msg 9334) assign it to THIS lane, and COO's message lists the three re-addresses it verified after its edit -- TO-6, TO-7, TO-F3-DS -- which does not include TO-R1-DS. Surfaced to 3.0.0_SA_CVO~Z cc 2.0.0_SA_COO~Z; no action taken on the artifact, which is the issuer's.",
+    "OBSERVATION / INERT: the same TO's 9 acceptance criteria are all PASS in `0.4.0_DS_ClientPlatform~F/deliverables/D1_CATVIEWS.TO-R1-DS_PROOF_OF_SPEC.json`, and 3.0.0_SA_CVO CERTIFIED it at @989a92e806 (2026-08-25T06:05Z, ancestor of HEAD; rc=0 VALID, 9 of 9 PASS, 18/18 cell_refs resolving both directions). CITE BOTH HASHES, and this row previously did not: the INSTANCE is @e3f885876a, authored by the EXECUTOR 0.4.0_DS_ClientPlatform~F; the CERTIFICATION is @989a92e806 by 3.0.0_SA_CVO. An earlier revision of this row read 'CVO certified that instance @e3f885876a', which names the CERTIFIED OBJECT and is heard as naming the CERTIFYING ACT -- 2.0.0_SA_COO~Z briefly reached 'no certification exists' off exactly that conflation before searching again (msg 9437). The cert commit's own subject invites it: 'cert(D1_CATVIEWS.TO-R1-DS instance @e3f885876a)', so the hash most visible in the certification is the thing certified. Re-resolved at this seat by a DIFFERENT instrument than the relay -- `git log --diff-filter=A` on the cert doc, i.e. which commit ADDED the certificate -- with a bogus-hash negative control that fails. A certified 9-of-9 instance sitting under a status that still reads ACTIVE is a status-flip that did not happen, not obviously outstanding work. TERMINAL STATUS SINCE RULED: 2.0.0_SA_COO~Z closed TO-R1-DS COMPLETE @8389c4ead7 on this surfacing. I did NOT re-execute any part of it -- re-running certified work is a rewind, not a verification.",
+    "OBSERVATION / INERT, already surfaced by the TO's own author and recorded here so it travels with the deliverable: the 31-cell decomp REFERENCES the crosswalk->registry identity map (DECOMP.md:170) but enumerates NO CELL whose criterion is the keyspace invariant. D1-inv-1 is ADJACENT, not identical -- it forbids a producer hardcoding a parallel membership source; this TO covers the inverse. The decomp is CERTIFIED and mid-round FROZEN, so this is a coverage gap to record, not a unilateral amendment."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-27/dsz_d1catviews_to_f3ds_1722-1800Z.md",
+  "compiler_tools": [
+    {
+      "tool": "to-check.py",
+      "invocation": "python .tools/to-check.py D1_CATVIEWS",
+      "result": "RUN, rc=0. 25 active TOs / 7 projects; D1_CATVIEWS shows 4 ACTIVE + 1 PENDING. This is the instrument that MEASURED the TO-R1-DS addressing surprise above -- it renders the To: field as it stands on disk rather than as a message describes it, which is exactly why COO used it to verify its own edit. Same instrument, opposite finding: it confirmed TO-F3-DS -> DS_ClientPlatform~Z and showed TO-R1-DS still -> DS_ClientPlatform~F."
+    },
+    {
+      "tool": "comp-which (A.3 startup exercise)",
+      "invocation": "comp-which \"how do I grep the repo\"",
+      "result": "RUN and scored on OUTPUT, not rc: a forwarder produced its own banner, so the rail is live rather than merely resolvable. PATH denominator printed alongside: 98 of 105 comp-tools resolve bare; the remaining 7 need an explicit .tools/<tool> prefix."
+    },
+    {
+      "tool": "comp-pulse diff (NFRA_NERVES risk reflex, invoked by safe-commit.sh)",
+      "invocation": "comp-pulse diff data/mdpf/scripts/gold/mdpf_category_registry.py (days=7 top=8)",
+      "result": "RUN, REFLEX CLEAN as a MEASURED result. DENOMINATOR: 1 file checked against 1351 danger nodes; danger map 17.3h old, which is the vintage the verdict is scoped to."
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/mdpf/scripts/gold/mdpf_category_registry.py",
+      "result": "RUN, rc=0. py_compile + ds-precommit + ruff py39 clean over 1 file; also 'no unguarded strict-utf8 log reads'. This is AC4's named evidence."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/D1_CATVIEWS.TO-F3-DS_PROOF_OF_SPEC.json D1F3DS-AC1,D1F3DS-AC2,D1F3DS-AC3,D1F3DS-AC4",
+      "result": "RUN positionally with the four ids (the 2-arg form returns rc=0 with COVERAGE UNCHECKED, so the ids are passed). Scored on the TRUE rc, not the output string. Recorded with the caveat the TO itself states: rc=0 is NOT proof a criterion ran -- the validator will pass a placeholder row -- which is why every acceptance row above carries a measured artifact rather than a restatement of its criterion."
+    }
+  ]
+}

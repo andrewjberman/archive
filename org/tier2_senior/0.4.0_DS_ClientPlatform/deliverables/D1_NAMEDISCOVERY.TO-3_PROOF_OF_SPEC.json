@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D1_NAMEDISCOVERY.TO-3",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/D1_NAMEDISCOVERY.TO-3.provenance-surface-unknown-vs-nomatch-and-the-enforcement-ruling.md",
+    "group": "OTHER",
+    "vintage_commit": "9181534a61"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~Q",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/d1-namediscovery/20260826T214534Z/DECOMP.md",
+    "vintage_commit": "669e04f27b",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/D1_NAMEDISCOVERY.TO-3.provenance-surface-unknown-vs-nomatch-and-the-enforcement-ruling.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_name_discovery.py",
+      "kind": "script",
+      "commit_or_etag": "fd15cd5cf3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The provenance surface and output-state axis: satisfied_forms() (a SET), discover_name() markers/not_confirmed, unknown_row(), sweep() (CONTINUE-AND-EMIT-UNKNOWN), served_key_for() (ND-f-1 refusal), require_claim() (ND-inv-3 consuming half). <data_reprocess_scope> is <no_reprocess_needed>: emits provenance rows, writes no silver/bronze partition, reclassifies nothing historical, and ND-f-1 forbids reaching a served key at all. commit-gate.sh rc=0. Push state: LOCAL @fd15cd5cf3; 0.0.0_AB_MSTR~Z is the integrator."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_name_discovery_declared.json",
+      "kind": "config_data",
+      "commit_or_etag": "fd15cd5cf3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Carries the ND-e-2 enforcement policy ON THE ARTIFACT'S FACE with its three reasons (enforcement_policy), the three-value output axis with its state-coherence note (output_states), and the form_match_relation block recording the many-to-one cardinality and the deliberate absence of a precedence rule. Push state: LOCAL @fd15cd5cf3."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "ND-TO3-AC1",
+      "criterion_verbatim": "form IS A SET. Exercise 'Opal DIVZ SMA' and assert the emitted forms has length 4. A single-valued form field FAILS this cell. The provenance is a FIELD -- never a docstring, a naming convention, or a reader's memory. DO NOT ADD A PRECEDENCE RULE",
+      "method": "command",
+      "invocation": "python test_mdpf_name_discovery.py TO3ProvenanceAndStates.test_AC1_forms_is_a_set_of_length_four (cwd data/mdpf/scripts/gold/tests)",
+      "output_evidence": "EXERCISED: discover_name('Opal DIVZ SMA') -> hits[0].forms = ['bare','token_sma','opal_token','opal_token_sma'], LENGTH 4, asserted both by length and by set equality. It is a FIELD on the emitted row, not a docstring or a convention -- a consumer branches on row['hits'][i]['forms']. NO PRECEDENCE RULE EXISTS IN THE CODE, and the non-nesting that makes one IMPOSSIBLE rather than merely unwanted is EXERCISED rather than quoted: discover_name('Opal DIVZ Fund, DIVZ SMA') -> ['bare','token_sma','opal_token'], which satisfies token_sma AND opal_token AND NOT opal_token_sma. Those two are siblings, so any 'most specific wins' rule would need an arbitrary sibling tie-break, and an arbitrary tie-break buried in a provenance field is the same defect one level down. The SET needs none. CVO F1's silent-and-biased failure is what this refuses: a scalar implementation iterating declared['forms'] in order would have returned 'bare' -- the LEAST specific -- while looking populated.",
+      "denominator": "1 length-4 assertion on the specified name; 1 sibling non-nesting case exercised (3 forms, opal_token_sma absent); 5 declared form classes of which 4 carry templates and 1 is declared-OPEN with no template; 0 precedence rules in code.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ND-TO3-AC2",
+      "criterion_verbatim": "A Muni candidate carries the early/suspect marker. Expected true-positive count today is ZERO (products not live). A silent Muni pass is the defect -- not the match, the unmarked match",
+      "method": "command",
+      "invocation": "python test_mdpf_name_discovery.py TO3ProvenanceAndStates.test_AC2_muni_carries_the_early_suspect_marker (cwd data/mdpf/scripts/gold/tests)",
+      "output_evidence": "discover_name('Opal Muni SMA') -> the Muni hit carries markers ['early_or_suspect'] and a not_confirmed line containing 'not live yet'. DISCRIMINATING CONTROL so the marker is not decoration that fires on every row: discover_name('Opal DIVZ SMA') -> the DIVZ hit carries markers []. The marker is data-driven rather than a special case in code -- discover_name reads tokens[*].expected_true_positives_today and emits required_marker when value == 0, so a second token whose expected count becomes zero is marked by a DATA edit. Authority carried on the artifact: Andrew ~18:06Z, 'it would literally say Muni and I dont think those are live yet'.",
+      "denominator": "1 of 6 declared tokens carries expected_true_positives_today = 0; 1 marked case exercised; 1 unmarked control exercised; 0 hard-coded token names in the marking path.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ND-TO3-AC3",
+      "criterion_verbatim": "A CONTROL, NOT AN ASSERTION: construct a case where the mechanism cannot answer (surface unreadable / substrate absent) and show the output is provably different from a genuine no-match. Print both outputs side by side. Conflating them fails SILENT -- this is the DIVZ incident mechanised",
+      "method": "command",
+      "invocation": "python test_mdpf_name_discovery.py TO3ProvenanceAndStates.test_AC3_unknown_is_provably_different_from_no_match (cwd data/mdpf/scripts/gold/tests)",
+      "output_evidence": "BOTH PRINTED SIDE BY SIDE from one run. NO-MATCH: {\"name\": \"Opal Conservative Growth\", \"state\": \"NO-MATCH\", \"claim\": \"measured\", \"hits\": []}. UNKNOWN: {\"name\": null, \"state\": \"UNKNOWN\", \"claim\": \"absent\", \"reason\": \"s3 read failed: NoSuchKey\"}. The no-match arm is a REAL Cottonwood model name (build_cottonwood_mdpf_slice.py:156 @2d5f8a7f74), not a synthetic string, so it is a genuine negative rather than a manufactured one. THEY DIFFER ON THREE VALUES A CONSUMER CAN BRANCH ON, each asserted: state (NO-MATCH vs UNKNOWN), claim (measured vs absent), and reason (absent vs present and carrying the cause). The claim axis is the load-bearing one for ND-inv-3: a genuine negative is a MEASURED statement about data, while UNKNOWN is an ABSENT claim -- a statement about the mechanism's own health. That asymmetry is exactly why UNKNOWN is its own value and not a flavour of NO-MATCH: one remedy does not move all three.",
+      "denominator": "2 outputs produced in a single sweep and printed side by side; 3 distinguishing fields asserted (state, claim, reason); 1 real Cottonwood name used as the genuine negative.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ND-TO3-AC4",
+      "criterion_verbatim": "The CTO ruling in section 4 is implemented and stated on the artifact's face with its reason: CONTINUE-AND-EMIT-UNKNOWN, neither RAISE nor silent SKIP. Oracle: a run over N surfaces with one deliberately unreadable emits N surface-rows, exactly one UNKNOWN with a reason. The ruling does not set the CONSUMER's policy -- do not implement one",
+      "method": "command",
+      "invocation": "python test_mdpf_name_discovery.py TO3ProvenanceAndStates.test_AC4_continue_and_emit_unknown (cwd data/mdpf/scripts/gold/tests)",
+      "output_evidence": "THE ORACLE RUN, over the five REAL cottonwood surface ids with the third deliberately raising SurfaceUnreadable('permission denied'): swept 5, emitted 5, UNKNOWN = 1 with its reason. Per-surface: dim_model_portfolio -> CANDIDATE, fact_model_roster -> NO-MATCH, fact_model_blend -> UNKNOWN, fact_model_assignment -> CANDIDATE, fact_holdings -> NO-MATCH. NEITHER FAILURE MODE OCCURRED, and both are asserted rather than observed: sweep() did not raise (so not the RAISE policy), and len(rows) == len(readers) is asserted INSIDE sweep() itself with the message 'a surface was DROPPED' (so not the silent SKIP). The other surfaces' results SURVIVED the unreadable one -- the whole point, and the inverse of the measured 'one scope aborts all four' shape. THE POLICY IS ON THE ARTIFACT'S FACE WITH ITS REASON: declared['enforcement_policy'].policy == 'CONTINUE_AND_EMIT_UNKNOWN' with exactly 3 reasons asserted present (RAISE destroys the partial answer; SILENT SKIP is ND-e-1's defect; CONTINUE-AND-EMIT is the only option satisfying ND-e-1 at the SURFACE grain). NO CONSUMER POLICY IS IMPLEMENTED: the artifact carries a does_not_set_consumer_policy field, sweep() has no exit code and no refusal, and nothing in the module rejects a run containing UNKNOWN rows.",
+      "denominator": "5 surfaces swept, 5 rows emitted, 1 UNKNOWN, 0 dropped, 0 raised; 3 declared reasons asserted; 0 consumer policies implemented.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ND-TO3-AC5",
+      "criterion_verbatim": "Exercised: a fuzzy candidate cannot reach a served key without passing ND-inv-2's deliberate step. Attempt it in a test and show the refusal",
+      "method": "command",
+      "invocation": "python test_mdpf_name_discovery.py TO3ProvenanceAndStates.test_AC5_a_fuzzy_candidate_cannot_reach_a_served_key (cwd data/mdpf/scripts/gold/tests)",
+      "output_evidence": "THE ATTEMPT AND THE REFUSAL: served_key_for(discover_name('Opal DIVZ SMA')) raised ServedKeyRefused -- \"REFUSED: 'Opal DIVZ SMA' is a fuzzy discovery candidate, not a served key. A served key requires a deliberate, attributable classification act (ND-inv-2). Discovery surfaces; it never silently classifies.\" THE GATE OPENS UNDER THE DELIBERATE ACT, exercised so that the refusal is a gate rather than a dead end (a gate that can never open is not a gate): served_key_for(row, {'served_key':'opal_div_sma','claim':'held','by':'Andrew-direct 2026-08-26 ~17:42Z'}) -> 'opal_div_sma'. THAT VALUE IS THE STANDING EXAMPLE AND IT IS THE WHOLE POINT: the DIVZ SMA's served key is 'opal_div_sma', NOT 'DIVZ' -- an auto-slug of the discovered name would have minted the WRONG key while looking successful (corroborated at source: mdpf_model_registry.json:19 @e88c54e238 carries model_key 'opal_div_sma' with display_name 'Dividend SMA'). ND-inv-3's CONSUMING HALF exercised in the same test: an UNMARKED deliberate act, {'served_key':'opal_div_sma'} with no claim field, raises UnmarkedValueError -- the refusal is BUILT, not merely declared, so the claim field cannot drift to unpopulated unnoticed.",
+      "denominator": "3 arms exercised on one candidate: refusal without a deliberate act, success with a claim-carrying one, refusal of an unmarked one; 0 served keys derivable from a fuzzy match.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ND-TO3-AC6",
+      "criterion_verbatim": "CVO F3 -- 843d875b IS IN THE FIXTURE BY NAME, with the expected behaviour stated: the PFOE token fires on a label belonging to a different product (SmartX labels it 'Pathfinder Focused Opportunities' while the model IS the Opal Equity Growth SMA), the candidate surfaces, and ND-d-1's 'what was NOT confirmed' field carries the mismatch",
+      "method": "command",
+      "invocation": "python test_mdpf_name_discovery.py TO3ProvenanceAndStates.test_AC6_the_843d875b_fixture_by_name (cwd data/mdpf/scripts/gold/tests)",
+      "output_evidence": "843d875b IS IN THE FIXTURE BY NAME, in both the test and the declared artifact. Test: specimen_id = '843d875b-62f7-4ef8-b833-5078a3f637d5', smartx_label = 'Pathfinder Focused Opportunities', true_identity = 'Opal Equity Growth SMA'. Artifact: tokens[PFOE].known_wrong_product_label carries the specimen, the note and claim='measured'. THE CLAIM IS MEASURED AT SOURCE, not inherited from the finding: data/mdpf/scripts/gold/mdpf_model_registry.json:6 @e88c54e238 _smartx_display_name_trap states 'SmartX modelId 843d875b returns the display name Pathfinder Focused Opportunities -- which is the PFOE ETF fund name, NOT this model identity. It is the Opal Equity Growth SMA... Map on the SmartX shortName, never the display name'; :13 carries model_key 'opal_growth_sma' with display_name 'Opal Equity Growth SMA' and smartx_name 'Pathfinder Focused Opportunities'. EXPECTED BEHAVIOUR EXERCISED: discover_name('PFOE SMA') -> state=CANDIDATE (SURFACED, never classified, ND-inv-2) and the PFOE hit's not_confirmed carries the specimen id and the mismatch text, asserted by substring on trap['specimen']. WHY IT COSTS WHAT IT COSTS, restated so the row is not read as alarm: the crosswalk is immune because it keys on model_id; D1 is LABEL-based by ruling, so D1 is not -- the gap was a MISSING FIXTURE, not a broken invariant, and this row closes it.",
+      "denominator": "1 specimen, named in 2 places (test fixture + declared artifact); 3 source lines cited at one vintage (@e88c54e238 :6, :13); 1 candidate exercised end to end; 0 classifications written.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "FOUR mutants planted in mdpf_name_discovery.py, each aimed at a DIFFERENT criterion of this round, because one mutant proves one assertion and this instance carries several. M1: satisfied_forms() returns out[:1] -- the scalar CVO F1 refuses. M2: matches_word_boundary() degraded to substring matching. M3: annotate_registry() sets NO_MATCH when a token is un-noded -- the exact ND-c-3 inversion. M4: the normalise() call removed from _boundary_pattern() -- the REAL defect this build found in itself, which had already passed a presence-style test once. The module was restored from a byte copy after each mutant.",
+      "expected": "M1 -> the ND-TO3-AC1 length-4 assertion FAILS. M2 -> the ND-TO2-AC1 both-arms control FAILS. M3 -> the in-code ND-c-3 assertion RAISES. M4 -> the ND-TO1-AC3 discriminator assertion FAILS. Baseline before and after -> 15 of 15 PASS, rc=0.",
+      "observed": "ALL FOUR FIRED. M1 -> AssertionError '1 != 4 : forms=[bare]' -- and bare is precisely the least-specific value CVO F1 predicted a scalar implementation would silently return, so the mutant reproduced the PREDICTED failure and not merely some failure. M2 -> FAILED (failures=1): the estate-vocabulary baits are caught. M3 -> AssertionError 'ND-c-3 VIOLATION: registry annotation changed the verdict CANDIDATE -> NO-MATCH. A registry miss is not not-Opal.' x3 (failures=3). M4 -> AssertionError \"'partner_tax_free_descriptor' not found in [] : discriminator did not fire on 'CA Tax-Free Bond' -- it is INERT\". Baseline rc=0 / Ran 15 tests / OK both BEFORE the first mutant and AFTER the last restore, and `git diff --stat` over the module is EMPTY -- so the passing run is the committed bytes, not a mutated or partially-restored tree.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs of the full 15-test suite compared byte-for-byte, with only the wall-clock line 'Ran 15 tests in <N>s' normalised -- it is elapsed time by construction and is the one field that cannot be stable.",
+      "observed": "rc=0 both runs; outputs byte-identical at 9553 bytes / 99 lines after that one normalisation.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A precedence rule over the form set",
+      "reason": "EXPLICITLY FORBIDDEN by ND-d-1 and TO-3 AC1, and the reason is measured rather than stylistic: the four forms are not strictly nested, so 'most specific wins' needs an arbitrary sibling tie-break -- the same defect one level down. The non-nesting is EXERCISED, not asserted: 'Opal DIVZ Fund, DIVZ SMA' satisfies token_sma and opal_token and NOT opal_token_sma."
+    },
+    {
+      "item": "Remediating the 843d875b label trap at its producers",
+      "reason": "CVO F3's gap is a MISSING FIXTURE, not a broken invariant -- the crosswalk is immune because it keys on model_id, while D1 is label-based by ruling. The fixture is now present by name. Changing how any producer resolves that model is outside this TO and outside D1."
+    },
+    {
+      "item": "ND-g-1 -- security grain",
+      "reason": "OUT OF DOMAIN by sovereign word, NOT deferred: 'Constituent-level means the model/sleeve name space, not security grain' (Andrew ~18:06Z @4b6503cdbd). Every denominator in this instance is counted over the model/sleeve name space and no other."
+    },
+    {
+      "item": "ND-g-2 -- the canonical_key('DIVZ SMA') raise",
+      "reason": "A named FORWARD HAZARD on a producer this project does not own (build_cottonwood_mdpf_slice.py:243-257 @2d5f8a7f74). RECORDED in the module's RESOLUTION_SURFACES so the next reader inherits it rather than rediscovering it, and NOT REMEDIATED. Owner: the cottonwood slice producer's lane, not this seat."
+    },
+    {
+      "item": "ND-g-3 -- the classification act itself",
+      "reason": "Downstream of this mechanism and outside it by ND-inv-2. Discovery surfaces; deciding what a surfaced candidate IS, and by whom, is a separate deliberate attributable act. This is precisely why 'CA Tax-Free Bond' still surfaces as a CANDIDATE carrying its discriminator marker instead of being auto-rejected -- rejecting it would BE the classification act."
+    },
+    {
+      "item": "ND-g-4 -- partners beyond cottonwood",
+      "reason": "In the declared CLASS, outside v1 COVERAGE. Declared-in-domain, not-yet-covered is NOT out of scope, and the artifact says so on its face (partner_surfaces.not_yet_covered.closure = OPEN). ND-TO1-AC5 exercises that adding one is a pure data edit."
+    },
+    {
+      "item": "Any consumer policy over UNKNOWN rows",
+      "reason": "The ND-e-2 CTO ruling explicitly does NOT set the consumer's policy, and TO-3 AC4 says 'do not implement one'. sweep() has no exit code and no refusal path; a consumer may legitimately refuse a run containing UNKNOWN rows as its own declared act under ND-inv-3's consuming half."
+    },
+    {
+      "item": "Any alert, monitor, freshness checker or notification",
+      "reason": "Standing moratorium -- not asked for by Andrew. The mechanism emits rows; it raises no alarm and schedules nothing. Zero crons armed this session."
+    },
+    {
+      "item": "Any live sweep of real cottonwood S3 partitions",
+      "reason": "NOT PERFORMED, deliberately. The five surfaces are enumerated from each producer's OWN READS declaration at a pinned commit, and sweep() takes injected readers. This TO's <data_reprocess_scope> is <no_reprocess_needed>; nothing here reads or writes a partition. A live sweep is a separate act with its own authorization."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / INERT, blocks nothing. CORRECTED 2026-08-27 ~19:2xZ, POST-CERTIFICATION, BY ME, AND THE ERROR WAS MINE: this entry originally read '11 integrity findings ... 7 NON-APPEND-EDIT and 4 ERROR-FAILCLOSED'. THE TRUE CENSUS IS 13 -- 8 NON-APPEND-EDIT and 5 ERROR-FAILCLOSED. I produced the wrong figure by running the invoker under `tail -12` and counting the VISIBLE lines as the census; the output is 19 lines. A truncated read reported as a denominator, which is the exact class this estate has banked as 'never head OR tail a search whose count carries a verdict' and 'a denominator is an artifact, not a summary'. Re-run untruncated: rc=1, 19 lines, `grep -c INTEGRITY/` = 13, split 8/5. CERTIFICATION IMPACT: NONE, and I am not claiming that to excuse the error -- the figure lives in this surprises array, not in any acceptance row; no criterion, denominator or verdict reads it, and 3.0.0_SA_CVO~Z certified the acceptance rows. It is corrected here rather than left standing because a wrong number in a certified record is a wrong number. SUBSTANCE, now measured rather than hypothesised: 0.0.0_AB_MSTR~Z established the mechanism at source (@e4f3b36f41, org/XXX.md A.2) -- audit-archive-invoker's chain_root() returns archive/<device>/ ONLY IF that dir exists and otherwise falls back to the legacy flat root, which its own docstring says IS THE LAPTOP CHAIN, so a site-Z seat compares device-local live logs against the LAPTOP's baseline. The per-device code landed; the migration has not. This is the DESIGNED intermediate state, not a defect. I VERIFIED BOTH HALVES AT THIS SEAT RATHER THAN RELAYING THEM. (1) The named discriminator is DIRECTION, not magnitude: over all 8 sized rows, shrank=8 grew=0 unchanged=0 (1.46x to 23.81x -- a wide spread is what the DEVICE-AXIS reading predicts, since each log shrinks by its own local activity; a tamper reading predicts mixed directions with some logs UNCHANGED, and 0 of 8 are unchanged). This independently reproduces 0.4.0_DS_ClientPlatform~L's 8/8 result from a different seat and a different run. (2) The RESOLUTION CONDITION is not yet met: org/audit/archive/ holds 0 device-level subdirs -- every subdir is a flat timestamp (extraction proven non-empty by sampling three basenames), so the fallback is still active and the benign reading HOLDS. THE INVARIANT IS THE ZERO, NOT THE TOTAL: I read 29 subdirs at ~19:2xZ and 1.0.0_SA_CTO~Z read 32 minutes later; the total grows as archives are minted and is wrong the moment it is written, while '0 device-level' is the thing the fallback actually keys on. Recording the perishable total as the finding would have manufactured a false disagreement between two correct reads. If these findings PERSIST once a <device>/ dir appears, the device-axis explanation no longer covers them and it IS a finding -- owner 0.7.0_AE_CloudOps, gate 1.0.0_SA_CTO. Not re-escalated; recorded.",
+    "OBSERVATION / INERT, and it WIDENS a finding rather than contradicting it: CVO F2 names THREE resolution surfaces over this name space; there are FIVE. The two unnamed are data/mdpf/scripts/gold/mdpf_model_registry.json:1 @e88c54e238 -- whose declared absence policy (emits model_key=null + model_key_unmapped=<native id>, 'surfaced, never silently dropped') is the ONE estate surface that already matches ND-c-3 -- and data/assets/scripts/gold/build_cottonwood_mdpf_slice.py:151,243-257 @2d5f8a7f74, whose canonical_key() RAISES and which is ND-g-2's named forward hazard, RECORDED and NOT REMEDIATED (a producer this project does not own). Both are recorded in the module's RESOLUTION_SURFACES. This changes nothing about the discharge. Surfaced to 3.0.0_SA_CVO~Z cc 1.0.0_SA_CTO~Z.",
+    "OBSERVATION / INERT: proof-of-spec-check.py REFUSED the first draft of all three instances (missing controls / declared_exclusions / surprises / session_log / compiler_tools, and 'vintage_note' not permitted on decomp_ref). Recorded because it is the positive control on the instrument for this round -- a checker that had accepted a malformed instance would have told me nothing about the ones it later passed.",
+    "OBSERVATION / INERT, and it re-vintages this instance's own citation: 2.0.0_SA_COO~Z re-seated all three of these TO faces at @9181534a61 (msg 9467) WHILE this seat was building them -- the <issued_to> elements had read 'DS-class ... SEAT NOT ASSIGNED', so to-check.py rendered the TOs unassigned or resolved a serial out of prose. MEASURED before re-pinning spec_ref, rather than assumed: git diff 2162f50620 9181534a61 over each of the three TO files changes 10 lines each and 0 of them are criterion-bearing (grep over ND-TO|<criterion|expected_criteria|Acceptance criteria|cell_refs), with a POSITIVE CONTROL that the same pattern matches 14 lines in the file itself -- so those zeros are measured absences, not a broken pattern. Only <issued_to> and an added seating note moved. The build is unaffected and no criterion was re-read. spec_ref.vintage_commit is pinned to 9181534a61, the CURRENT face, rather than to the vintage this seat happened to open."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-27/dsq_d1namediscovery_round1_1737-1810Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"where is the declared token set for Opal SMA and ETF strategy names like DIVZ PFOE PFDE IDVZ\"",
+      "result": "NO CURATED RULE MATCHED -- every candidate scored below the vetted band, which is the tool's OWN verdict that the catalog does not cover this question. That verdict is what licenses a direct search under Rule 21 rather than a guess at a comp-tool."
+    },
+    {
+      "tool": "comp-find --name",
+      "invocation": "comp-find --name '*name_discovery*' ; comp-find --name '*namediscovery*'",
+      "result": "1 hit across 29039 files -- ANDREW_DIRECT_20260826_1756Z_SMA_ETF_CONSTITUENT_NAME_DISCOVERY_MECHANISM.md, the ruling RECORD, not a machine-readable declared artifact. Rule 5 pre-authoring check: the artifact does NOT already exist in the form this TO authors, so scope did NOT collapse to verify+rerun."
+    },
+    {
+      "tool": "comp-find -i (token census)",
+      "invocation": "comp-find -i --files --all <token>, for each of DIVZ PFOE PFDE IDVZ Tax Muni",
+      "result": "Denominators printed by the tool itself rather than summarised: Tax 25149 hits / 27217 files scanned; Muni 1801; DIVZ 9266; IDVZ 4571; PFOE 3353; PFDE 2912. The Tax figure IS the ND-c-1 evidence -- measured on this estate, not quoted from the cell."
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/mdpf/scripts/gold/mdpf_name_discovery.py data/mdpf/scripts/gold/tests/test_mdpf_name_discovery.py",
+      "result": "rc=0 -- 'pre-commit gate clean for 2 file(s)' (py_compile + ds-precommit + ruff py39)."
+    },
+    {
+      "tool": "comp-pulse diff (risk reflex, inside safe-commit)",
+      "invocation": "automatic pre-commit reflex; argv: diff <the 3 staged files>",
+      "result": "REFLEX CLEAN -- a MEASURED result: 3 files checked against 1351 danger nodes, danger map 17.8h old."
+    }
+  ]
+}

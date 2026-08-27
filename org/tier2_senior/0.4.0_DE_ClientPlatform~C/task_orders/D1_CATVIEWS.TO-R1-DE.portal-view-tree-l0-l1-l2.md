@@ -21,7 +21,7 @@
 <placement>LAPTOP (Rule 26; portal dev-server + screenshot verification proven here). PROD is NOT this TO (DT lane, `/prod-deploy`).</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-24T20:2xZ</issued>
-<status>ACTIVE (start condition above)</status>
+<status>complete -- self-marked 2026-08-27 ~18:0xZ by the successor seat `0.4.0_DE_ClientPlatform~Z` (MSTR 9329 / COO 9336), after re-deriving every cell at its own seat rather than accepting the predecessor's record. 8/8 cells discharged; proof instance VALID rc=0; CVO CERTIFIED @ `org/tier1_exec/3.0.0_SA_CVO/deliverables/CERT_D1_CATVIEWS_TO_R1_DE_INSTANCE_20260825.md`. ⛔ THIS FIELD READ `ACTIVE` FOR THREE DAYS WHILE THE `<cell_status>` BLOCK IN THIS SAME FILE READ 8/8 COMPLETE AND A CVO CERT SAT ON DISK -- two carriers of one obligation, in ONE file, disagreeing, and `<status>` is the one `to-check.py` classifies on. That is why `org/projects/D1_CATVIEWS.json` still told coordinators "TO-R1-DE round-1 work, ACTIVE, do not idle it" and why a lane was seated on finished work. ⛔ COMPLETE IS NOT SHIPPED: `D1-c-1` stands at the CONTRACT plane only. The served plane is gated by the standing D1_CATVIEWS NO-SHIP and the unpublished `category_views` artifact -- NOT by this lane, and this flip does not touch that gate. Successor evidence: the `<cell_status>` section at the foot of this file.</status>
 <priority>P1 — Andrew's "beeline" + the Monday push order (D1 IMMEDIATE TERM).</priority>
 <scope_guard>ONE PROJECT. Exactly the cells in `<decomp_ref>`. No Positioning page, no ETFS GICS→sub-categories work (that is site Z's D4 chain), no Books/ADVI work. Adjacent findings → one line to `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/D1_CATVIEWS/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580), no action, keep working.</scope_guard>
 <authority>PRD `docs/architecture/D1_ASSET_CATEGORY_VIEWS_PRD.md` s.8 + **s.8.6 (the view tree, Andrew-direct ~18:5xZ, verbatim record in `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260824_D1_VIEW_TREE_L0_L1_L2_CLIENT_MODELS_SMAS_ALTERNATIVES.md`)** + s.4.3 + the CVO amendment @d476339293 (the invisible-fallback class). Supersedes pre-pipeline TO-D1d (never started).</authority>
@@ -117,6 +117,85 @@ Cell-level status in a `<cell_status>` block on this file; proof instance + flip
 **Evidence discipline:** every fixture was built by exercising `build_category_views` AT REF `23271aac64` in an isolated extraction -- never from the shared working tree (COO standing rule 67436).
 **NOT CLAIMED:** a served-artifact read. AC2-AC8 prove the RENDER against the contract at a named ref; they do not prove a live emission, and `D1-inv-5` is why that distinction is stated rather than blurred.
 </cell_status>
+
+---
+
+## SUCCESSOR VERIFICATION -- `0.4.0_DE_ClientPlatform~Z`, 2026-08-27 ~17:3x-18:0xZ
+
+Seated by MSTR 9329 / COO 9336 on a TO whose `<status>` read ACTIVE. **It was not.** I re-derived
+every cell at my own seat before touching the record, because a predecessor's `<cell_status>` is a
+CLAIM and re-running their method would have been repetition, not corroboration (Rule 22).
+**Evidence class is labelled PER ROW; there is no single banner over this table** -- two of these
+rows are carried, not re-derived, and saying so is the point.
+
+| cell | successor verdict | instrument AT MY SEAT |
+|---|---|---|
+| `D1-h-v1` L0 | **RE-DERIVED COMPLETE** | Synthetic 4-peer fixture rendered at `origin/DEV`; screenshot **READ**. Four tiles {Client, Models, SMAs, Alternatives}; Insurance is in the block and is **never** rendered. |
+| `D1-h-p1` presence | **RE-DERIVED COMPLETE, BOTH DIRECTIONS** | A second fixture sets SMA and Alternatives to `aum: 0`. Two tiles render -- **not four with two zeros**. Screenshot READ. The negative direction is the one that can lie about a firm's money, and it is the one exercised. |
+| `D1-h-v2` L1 | **COMPLETE -- and DE~C's DECLARED limb is now EXERCISED** | Client {Supervised $20M / Unsupervised $8M / Unflagged $2M *(third bucket)*} sums to its $30M parent; Models {Primary $43M / Custom $7M}; SMAs render 4 registry nodes by `display_name` with `strategy_id` secondary, plus the un-noded disclosure ("idvz, pfde"). ⛔ **ALTERNATIVES** -- DE~C declared this NOT-YET-EVALUABLE (no firm carries Alternatives AUM) and was right to refuse to upgrade it without exercising it. **A synthetic fixture is this TO's own ruled instrument for exactly that situation** (the issuer's AC5 resizing: *"a render path with no test fails the first time it is real"*), and nobody had applied that reasoning to this limb. Exercised: the tile renders, carries "No drilldown yet -- deferred by ruling.", and reads **`disabled=True`** in a DOM probe **in which the other three tiles read `disabled=False`** -- the positive control sits inside the same measurement. |
+| `D1-h-v3` L2 | **RE-DERIVED COMPLETE** | 3 Custom members under "REGISTERED CUSTOM MODELS" + "Registry membership -- not a per-firm holding." (the plane named on screen); 2 of 3 carry "not served as a standalone artifact". No padded row. Screenshot READ. |
+| `D1-h-v4` predicate-unavailable | **RE-DERIVED COMPLETE** | Fixture carrying `predicate: "unavailable"` + a reason renders the amber "Fee split unavailable at this scope" panel with **both fee buckets ABSENT**. No zero anywhere. **No firm is named in this evidence** (AC5's constraint). Screenshot READ. |
+| `D1-c-1` consumed | **RE-DERIVED at the CONTRACT plane. NOT LIFTED to the served plane.** | Stronger than a green render: every figure on screen came from MY served block, and when the **mutant** fixture moved `total_aua` 100M -> 110M the rendered line moved with it. A fallback that "renders the same page" cannot track an input it never read. ⛔ Still NOT a served-artifact read -- `category_views` remains unpublished and D1_CATVIEWS is NO-SHIP. That gate is not this lane's and this flip does not touch it. |
+| `D1-c-2` empty fallback | **CARRIED from DE~C + the CVO cert. NOT re-derived this session.** | My fixture matched on every run, so the no-block branches never rendered at my seat. Stating this rather than inheriting DE~C's row under my own banner. |
+| `D1-inv-4` render half | **COMPLETE -- a MISSING CONTROL supplied, and the breach made legible** | See below. |
+
+### `D1-inv-4`: the control nobody had run, and what running it found
+
+DE~C's row read *"closes on both firms"* -- **a pass with no evidence that the indicator can read
+anything else.** A control that cannot fail is not a control. I built a mutant fixture inflating
+`total_aua` 100M -> 110M and the panel rendered **"Displayed L0 total $95.00M vs total AUA minus
+Insurance $105.00M -- DOES NOT CLOSE"**. So the indicator is real. **That is what made the next
+finding worth acting on rather than filing.**
+
+⛔ **THE BREACH RENDERED IN `text-xs text-slate-400` -- STYLING BYTE-IDENTICAL TO THE PASS.** A money
+invariant whose failure looked exactly like its success, at the bottom of a panel. Fixed in-cell
+(`D1-inv-4` render half is owned by this TO) using **this file's own existing amber idiom** -- the
+predicate-unavailable panel at `:101` -- Build Ladder rung 2, no new vocabulary.
+
+**Both directions re-exercised AFTER the edit and screenshots READ** -- including the PASS branch,
+which is the direction that changes nothing and therefore announces nothing if it breaks:
+
+- breach -> amber bar, semibold, "DOES NOT CLOSE", $95.00M vs $105.00M
+- pass -> **unchanged** slate-400 footnote, "closes", $95.00M vs $95.00M
+
+`bun run typecheck` (`tsc -b --noEmit`) rc=0 @ **12,193ms** -- the build-mode form, so the duration
+discriminates it from the 277ms zero-file no-op DE~C found at `ci.yml:56`. `bun run lint` rc=0,
+0 errors / **7 warnings -- the same 7** DE~C measured at `fce757cb`, so this adds none.
+
+**Portal commit:** `7ed51b9e` on `DEV`, author + committer `0.4.0_DE_ClientPlatform~Z`, 1 file,
+17 insertions / 2 deletions. Verified by asking the REPOSITORY (`git log -1 --format=%h~%an~%cn~%s`)
+with a bogus-hash negative control that failed as required. **Push state: LOCAL @`7ed51b9e`
+(`git ls-remote origin DEV` read `4ac152f8`).** `0.0.0_AB_MSTR~Z` is the integrator and pushes.
+Parent is `4ac152f8` = the `origin/DEV` tip, so this is a clean fast-forward: **1 ahead, 0 behind.**
+
+⛔ **`D1R1DE-AC7`'s CRITERION IS UNCHANGED BY THIS EDIT** and I am not claiming otherwise: the
+computation, `sumCloses`, and the pass branch are untouched -- only the breach's legibility moved.
+It does touch CERTIFIED code, so it was routed to `2.0.0_SA_COO~Z` and `3.0.0_SA_CVO~Z` in the same
+window for the cert owner to decide. **I did not decide it on their behalf.**
+
+**RULED 2026-08-27 ~18:0xZ by `3.0.0_SA_CVO~Z` (9431): NO CERT DELTA IS OWED for `7ed51b9e`** -- the
+cert's load-bearing results are structural and alignment-level and a styling change to one branch
+moves none of them. The verdict CERTIFIED stands. **But the answer ran against the certifier's own
+office, not this lane:** that cert's Layer-5 line *"`D1-inv-4` … discharged, 8 of 8"* established
+COVERAGE and **not** exercised breach-legibility, and all four instruments it ran (proof-of-spec
+alignment, the TS2339 planted mutant, determinism, `AC9` authorship) are structurally incapable of
+seeing a rendered pixel. That office is amending the cert to say so. **A money invariant whose
+failure rendered byte-identically to its success passed every one of them.**
+
+⛔ **LABEL CORRECTED IN PLACE, not just in a reply** (`3.0.0_SA_CVO~Z`, same message): I wrote "AC7"
+above and in `7ed51b9e`'s commit body. **`AC7` does not appear in the cert at all** -- label census
+over its 139 lines names `AC1` `AC2` `AC6` `AC8` `AC9` and the `D1-*` cells. The criterion's real id
+is **`D1R1DE-AC7`**, which the cert covers as a row without discussing. The commit body is immutable
+and still carries the loose form; this line is the correction, placed where a builder reads the
+claim rather than only where the exchange is recorded.
+
+### One thing that moved under me, stated because it bears on the evidence
+
+Mid-session another seat sharing this checkout fast-forwarded `portal` `DEV` `eaa094e6 -> 4ac152f8`
+(reflog `DEV@{1}`). **Measured, not assumed:** that FF carried **5 files** (the D7_TICKETING
+Submit-a-Request removal) and **zero** of them intersect this lane's render path
+(`CategoryViewTree.tsx`, `ModelPortfolios.tsx`, `api/endpoints/aum.ts`), so no screenshot above was
+invalidated. Six seats share one tree here; a working tree is a snapshot, and this one moved.
 
 ---
 
