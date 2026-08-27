@@ -24,6 +24,7 @@ WH = "s3://opal-313476888478-globgrph/warehouse/globgrph/"
 
 DERIVE = "infra/aws/globgrph/derive_runner.py"
 LAMBDA_WRITER = "infra/aws/lambda/globgrph/incremental_updater/lambda_function.py"
+FULL_EXTRACTOR = "org/modules/graph/comp_aws_cli.py"
 S3_EV = "aws s3api list-objects-v2, full pagination, max(LastModified) computed client-side over the MATERIALISED set"
 STAT_EV = "stat -c %s/%Y + git ls-files/check-ignore, read at HEAD 14da312322"
 
@@ -70,7 +71,7 @@ PARTS = []
 PARTS.append(part(
     "graph_nodes", "store", wh("graph_nodes_4c6c23bd-fffa-427e-9cd9-7a9deaa3426d"),
     "source", "current_state", [], "iceberg:graph_nodes",
-    DERIVE + " + " + LAMBDA_WRITER, "canonical", None,
+    DERIVE + " -> " + FULL_EXTRACTOR + " + " + LAMBDA_WRITER, "canonical", None,
     "02:00Z full re-derive + event-driven CloudTrail incremental", "schedule + CloudTrail event",
     "production", "2026-08-26T12:50:48Z", S3_EV, "measured",
     "180,225 objects under the table prefix; newest metadata object 2026-08-26T12:50:48Z. "
@@ -93,7 +94,7 @@ PARTS.append(part(
 PARTS.append(part(
     "graph_edges", "store", wh("graph_edges_6629328d-a582-46d2-80bc-5059de1a77ce"),
     "source", "current_state", [], "iceberg:graph_edges",
-    DERIVE + " + " + LAMBDA_WRITER, "canonical", None,
+    DERIVE + " -> " + FULL_EXTRACTOR + " + " + LAMBDA_WRITER, "canonical", None,
     "nightly re-derive + event-driven CloudTrail incremental", "schedule + SQS", "production",
     "2026-08-26T02:09:51Z", S3_EV, "measured",
     "612 objects; sort_by(LastModified)[-1] on metadata/, single page so no pagination spill",
@@ -558,7 +559,23 @@ MANIFEST = {
             "classified. A store hiding as a .yaml in that tree would be missed.",
             "IN-MEMORY / EPHEMERAL graph state -- out of scope by form.",
             "PORTAL-SIDE graph surfaces -- not swept; the portal repo was not entered for this census.",
-            "⛔ RETIRED AS A GAP BY MEASUREMENT, KEPT AS A LESSON: infra/aws/lambda/ was never swept "
+            "⛔ THE PRODUCER SURFACE IS WIDER THAN ANY TREE I SWEPT, AND THE RIGHT PREDICATE IS NOT "
+            "A DIRECTORY LIST: per 1.0.0_SA_CTO~X 74305 it is ANY TREE REACHED BY SYS.PATH INSERTION "
+            "FROM A MATERIALIZER. derive_runner.py:36 inserts WS=/app and :40 imports comp_aws_cli "
+            "from org/modules/graph/ -- a tree I DID sweep, where a 157,941-byte module with 79 "
+            "describe/list/get sites carries the estate's entire AWS extraction surface, and ZERO of "
+            "my 39 parts matched it. A cross-tree import is not an unreachable node; IT IS NOT A NODE "
+            "AT ALL, so no reachability denominator I built ever had a slot for it. "
+            "⛔ AND I REPRODUCED THE PREDICATE FAILURE AT MY OWN SEAT: a static grep for "
+            "client('ec2')-style literals returns 0 over that file, because :87 builds every client "
+            "through `boto3.client(svc, region_name=region)`. A zero that disagrees with the node "
+            "types the same file mints is the tell, and the count is not. "
+            "⛔ HOLD DECLARED, SO 39 IS NOT READ AS A CLOSED CENSUS: 1.0.0_SA_CTO~X instructed this "
+            "lane to HOLD the 40th part because it is AT LEAST TWO (comp_aws_cli.py and the "
+            "incremental Lambda) and a THIRD producer -- lambda infrastructure-daily-snapshot on "
+            "cron(0 7), ENABLED -- is resolved by target and OTHERWISE UNEXAMINED. Those parts are "
+            "NOT registered here and their absence is a declared hold, not a measured absence. "
+            "-- KEPT AS A LESSON: infra/aws/lambda/ was never swept "
             "by this census, and the WRITER of graph_nodes and graph_edges lives there -- "
             "infra/aws/lambda/globgrph/incremental_updater/lambda_function.py, found by "
             "1.0.0_SA_CTO~X (74284) after 0.8.0_AE_CloudComp~X refused to guess it. ZERO of these 39 "
