@@ -57,7 +57,11 @@ so the hold blocks a third of it, not all of it.
 
 - **`INS-a-2` — THE FIELD→CALL MAP. ⛔ THIS IS THE ONE THE WHOLE PROJECT IS WAITING ON, AND IT NEEDS
   NO VENDOR CALL.** The bulk export path is `run → resultGuid → download` for the cohort;
-  `accountdetailsearch` supplies per-account identity + characteristics + `currentEmv` + `asOfDate`.
+  `relationshipaccountdetailsearch` (SANCTIONED) supplies per-account identity + `currentEmv` +
+  `asOfDate` — **ISSUER CORRECTION 2026-08-27 (COO, on ~R's measured census @f05d754d43 + CVO 76232):
+  this line previously named `accountdetailsearch`. That surface is EGRESS-REFUSED
+  (insurance_leg.py:78-89, the OPAL_TAXSMA gate) and supplies ONLY the Ruling-6-DEFERRED
+  `insuranceCharacteristics` — v1 needs NOTHING from it. Do not reach for it.**
   **NAME WHICH CALL SUPPLIES WHICH FIELD — DO NOT ASSUME ONE CALL COVERS BOTH.**
   *Oracle: the field→call map, PRINTED.*
   > **Why this is the unblocking act:** `0.4.0_DS_ClientPlatform~J` declined to build the gold
