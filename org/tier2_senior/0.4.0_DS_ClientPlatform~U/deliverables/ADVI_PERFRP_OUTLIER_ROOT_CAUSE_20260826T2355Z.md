@@ -135,6 +135,36 @@ The direction exists upstream in `fact_trn` (`debit_credit` = LONG/SHORT) and **
 
 ---
 
+## 5c. ⛔ DEFECT 3 — `c01_nna_canonical` SPENDS AN UNSIGNED VALUE AS A SIGNED ONE (added 2026-08-27T0015Z)
+
+**Found by checking why `c01` was absent from `1.0.0_SA_CTO` 74166's ruled minimal set `{c00 → c02 → c04}`.**
+
+**THE GAP FIRST:** `c01_nna_canonical.py:36` — *"ledger = C_00 flow_ledger partition."* **`c01` CONSUMES `flow_ledger`, so step (1) invalidates every historical `nna_canonical` partition** on exactly the reasoning that ruled c02-only out. **The minimal set is `{c00 → c01 → c02 → dependent c04}`.**
+
+**THE DEFECT:**
+· **PRODUCER `c00_flow_ledger.py:264`** — `in_kind_value = quantity.abs() * eff`. ⛔ **`.abs()` — MAGNITUDE ONLY, BY CONSTRUCTION.**
+· **CONSUMER `c01_nna_canonical.py:44-46, 60-61`** — reads `in_kind_value` as the flow, then `pos_h = flow.where(flow > 0, 0.0)` / `neg_h = flow.where(flow < 0, 0.0)`. **IT BRANCHES ON SIGN.**
+>> **An in-kind leg can never be negative, so no in-kind outflow can ever reach `daily_outflow`. Every in-kind transfer — in or out — is spent as a POSITIVE flow.** <<
+
+**MEASURED LIVE, `nna_canonical` date=2026-08-24:**
+| account | direction (traced from `fact_trn`) | `nna_unresolved_direction` |
+|---|---|---|
+| `0016371483` | **OUT** (all SHORT, bmv 110,063 → emv 0.00) | **+89,946.62** |
+| `0049284242` | **OUT** (all SHORT) | **+10,956.66** |
+| `0032486794` | **IN** | +39,361.92 |
+**Outflows and inflows emit the same sign.**
+⚠ **THE FIELD NAME IS HONEST AND THAT IS THE TRAP.** `nna_unresolved_direction` says direction is unresolved — the estate has carried an **accurate label on an unusable number**. *A correctly-named field is not a correct value, and the name has been absorbing the defect.*
+
+### THE SCHEMA DECISION THIS FORCES ON STEP (1) — not yet in the sequence
+**(a) RE-SIGN `in_kind_value` IN PLACE** — c02 gets what it needs, **and `c01`'s emitted NNA figures MOVE** (outflows flip negative). ⛔ **A TWR fix silently changing NNA.** It happens to be a *correction*, which makes it worse: **a silent improvement is indistinguishable from a silent regression at the consumer.**
+**(b) ADD A NEW SIGNED FIELD** (`in_kind_signed_value`, or carry `direction` from `debit_credit` on `txn_ref`) — **`c01` bit-for-bit unaffected; `c02` opts in.** ⛔ **Leaves defect 3 unfixed**, so `c01` is then fixed **deliberately, with its own acceptance.**
+**REC — (b), then fix `c01` explicitly.** Rule 24(iv): **three defects, three remedies, three acceptances.** *The thing not to do is let the NNA correction ride in as a side effect of the TWR fix.* **`1.0.0_SA_CTO`'s call; not chosen here.**
+
+**WHY IT MATTERS BEYOND TWR:** per `TO-R1-DS` the projection consumes **`nna_canonical` (headline NNA)** — **a CLIENT-FACING figure on a SEPARATE served surface from the returns.** A remediation scoped as *"fix the performance card"* would leave it standing.
+⛔ **AND THE SCALE OF DEFECT 3 IS UNMEASURED.** The 23.7% / 72.5% figures in s.4 were computed against **`twr_daily`** and **do not cover NNA.** No blast radius is quoted for defect 3 because none has been measured.
+
+---
+
 ## 6. SEQUENCE THE REMEDIATION IMPLIES (stated, not commissioned)
 1. **`flow_ledger` carries a SIGNED in-kind value** (defect 3) — prerequisite; without it, step 2 is wrong on outflows.
 2. **`c02_twr_engine` incorporates in-kind value** (defect 1) — the pattern already exists at `c01_nna_canonical.py:44`.
