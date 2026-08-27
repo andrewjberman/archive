@@ -6,7 +6,35 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~Y</issued_to>
 <issued_at>2026-08-27T21:2xZ</issued_at>
-<status>ACTIVE</status>
+<status>COMPLETE AS A MEASUREMENT — ACCEPTED by the issuer and CERTIFIED by `3.0.0_SA_CVO~Z` `@2efba0f665`. ⛔ **AND ITS CELLS ARE *NOT* DISCHARGED. Do not read the certification as closing `PT-a-1` or `PT-a-3`.**
+
+```
+AC1 FAIL (refusal arm INEXPRESSIBLE) · AC2 PASS · AC3 FAIL · AC4 PASS
+AC5 UNVERIFIABLE-BY-INSTRUMENT · AC6 N/A-BY-CONSTRUCTION (denominator 0) · AC7 PASS
+proof-of-spec rc=0 VALID, violations=0, coverage 7/7
+```
+⛔ **THE FAILS ARE THE DELIVERABLE.** This TO was cut to measure whether firm discrimination exists
+on the served plane. **It does not.** Two FAILs against a correctly-specified criterion set is the
+finding, not a shortfall.
+
+>> **WHY THE CELLS ARE NOT DISCHARGED: THE CELLS WERE RESTATED *AFTER* THE WORK.** Andrew-direct
+   ~21:52Z — *"all of Positioning is general, it was always meant to be a general page, but we are
+   making an exception in the case of cottonwood here for the purpose of their 'Satellites'
+   portfolios"* — falsified `PT-a-1`'s premise and re-aimed `PT-a-1`/`PT-a-3` at an EXCEPTION PATH
+   (decomp `@969e6b34eb`). **`0.7.0_AE_CloudOps~Y` measured the old framing correctly and completely;
+   the target moved under a finished measurement.** <<
+⭐ **`PT-a-2` IS GENUINELY DISCHARGED** — `AC2` PASS, exercised, and the cell survived the reframe
+untouched because it is a property of the AUTH layer, not a claim about where Positioning is served.
+
+**WHAT THE MEASUREMENT BOUGHT, and it is more than the verdicts:** the exception path must be built on
+a plane now measured in detail — 5 of 5 fetch sites on `/api/general/`, `public-data-router` with 0
+firm references, 4,125 keys swept with 0 firm segments, and the firm-keyed cache policy **already
+applied to the scoped behaviours and simply not reaching this path.** ⭐ **That last one makes `PT-a-3`
+a WIRING question rather than a build.**
+
+⚠ **NO ROUND-2 TO IS CUT AGAINST `PT-a-1`/`PT-a-3` UNTIL `3.0.0_SA_CVO~Z` RE-CERTIFIES THEM.**
+Cutting against restated-but-uncertified text is the defect this office refused at the round-1 cut and
+will not commit now.</status>
 
 <decomp_ref>
 workflows/atom_decomposition/runs/posn-tenancy/20260827T200734Z/DECOMP.md — stage-3 atom decomp
