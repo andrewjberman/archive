@@ -1,0 +1,177 @@
+{
+  "schema_version": "1.0",
+  "to_id": "POSN_TENANCY.TO-3-AE",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "docs/architecture/POSN_TENANCY_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "a7ba82d253"
+  },
+  "assignee": "0.7.0_AE_CloudOps~Y",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/posn-tenancy/20260827T200734Z/DECOMP.md",
+    "vintage_commit": "07de844b12",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/POSN_TENANCY.TO-3-AE.served-plane-firm-discrimination.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~Y/deliverables/POSN_TENANCY.TO-3-AE_MEASUREMENT_20260827.md",
+      "kind": "doc",
+      "commit_or_etag": "db2409435c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The measurement record, carrying the cell_status block this schema has no slot for. READ-ONLY TO: no Terraform applied, no Lambda deployed, no S3 object written, no CloudFront config changed. Nothing in the estate moved."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T3AE-AC1",
+      "criterion_verbatim": "Firm discrimination is exercised with BOTH ARMS: firm A obtains its own bytes (200), and firm A attempting firm B's artifact is REFUSED -- status and body recorded for each. A single-arm result is not a PASS: 'A got its data' is consistent with no discrimination existing at all.",
+      "method": "command",
+      "invocation": "POST /auth/login (API GW 7k3ed8px20) as jane@cottonwood.com -> RS256 JWT, firmId=cottonwood, TTL 900s. GET https://d2n2nzpeqf34ge.cloudfront.net/api/general/positioning/positioning_data.json with (a) that bearer, (b) no bearer, (c) a bogus bearer. Origin swept with aws s3api list-objects-v2 --bucket opal-data-portal-v2, IsTruncated read on the terminal page.",
+      "output_evidence": "ARM 1: HTTP 200, 8088 bytes, sha256 8ec27506f7168c084b34a20f70fc3dbc. NEG CTL A (no bearer): HTTP 401, 51 B, {\"error\":\"Missing or invalid Authorization header\"}. NEG CTL B (bogus bearer): HTTP 401, 36 B, {\"error\":\"Invalid or expired token\"} -- the two negative arms are DISTINCT, so the instrument discriminates and the 200 is real. THE REFUSAL ARM CANNOT BE CONSTRUCTED: there is no 'firm B's artifact'. Full origin sweep of opal-data-portal-v2 returned 4,125 keys with IsTruncated: None (no pagination gap); exactly 7 contain 'positioning' and ZERO of the 7 carry a firm segment. The served key json/positioning/positioning_data.json is 8,088 B -- byte-identical to what the Cottonwood identity received, so the artifact exhibits its own plane rather than my asserting which object was served. DECISIVE CROSS-CHECK: 0.4.0_DS_ClientPlatform~L measured under TO-2-DS (PT-b-3) that Cottonwood has a data HOME and NO Positioning data in it (6,599 objects in opal-data-cot, 0 Positioning). A Cottonwood user nonetheless received 8,088 bytes of Positioning data -- bytes that cannot be Cottonwood's. That is the access boundary failing, exercised, not inferred. NAMED LIMIT: I did not obtain a second firm's credential; test-regression@49financial.com exists but was slated for decommission (COO log 2026-04-22) with no documented password, and I did not reset a production credential to manufacture an arm. The single-artifact result is structural and does not depend on a second identity -- with one key and no firm dimension every authenticated identity resolves to the same bytes by construction.",
+      "denominator": "4,125 keys swept in opal-data-portal-v2, terminal IsTruncated: None; 7 of 4,125 contain 'positioning'; 0 of 7 firm-segmented; 3 keys under json/positioning/; 3 live HTTP arms (1 positive, 2 distinct negative controls).",
+      "status": "FAIL",
+      "status_reason": "FAIL is the measured state of the world, not a defect in this TO's execution. Positioning is not served through /api/scoped/ and is not firm-discriminated at any serving layer: one unscoped artifact (json/positioning/positioning_data.json, 8,088 B) is returned to every authenticated identity. The criterion's refusal arm is not merely unmet, it is INEXPRESSIBLE -- there is no 'firm B's artifact' to attempt, because across a 4,125-key sweep zero positioning keys carry a firm segment. Reported as FAIL rather than N/A-BY-CONSTRUCTION because the cell asserts a property of the served plane and that property is absent, which is exactly the finding POSN_TENANCY exists to establish."
+    },
+    {
+      "criterion_id": "T3AE-AC2",
+      "criterion_verbatim": "X-Firm-Id FORGERY IS EXERCISED, NOT DESCRIBED. A request carrying a client-supplied/edited X-Firm-Id that disagrees with the JWT is shown refused or ignored, with the deciding code or policy cited file:line @ <commit-ish>. A configuration that merely reads the header from the token is not evidence -- the test is what happens when a caller sends their own.",
+      "method": "command",
+      "invocation": "Same valid cottonwood bearer + an added X-Firm-Id header taking 5 foreign values (49financial, inflection, opal-capital, bd, demo), against /api/scoped/advisor-intelligence/artifacts/advisor_summary.json, whose 403 envelope ECHOES the firm the server resolved. Positive control: same bearer, 3 different URIs, to test whether that envelope is dynamic or a constant.",
+      "output_evidence": "MY FIRST TEST WAS WORTHLESS AND IS RECORDED RATHER THAN QUIETLY REPLACED: forging X-Firm-Id against the /api/general/ Positioning path returned byte-identical 200s, which is what BOTH hypotheses predict (header overwritten, OR header honoured but the path ignores firm entirely). A quantity both hypotheses predict is not evidence. DISCARDED. THE DISCRIMINATING ORACLE: the scoped 403 body echoes the resolved firm, and the two hypotheses predict DIFFERENT values of that field. All 5 forged values returned {\"error\":\"artifact_forbidden\",\"uri\":\"/gold/artifacts/advisor_summary.json\",\"firmId\":\"cottonwood\",\"status\":403} -- the JWT-derived firm, never the asserted one. POSITIVE CONTROL (the envelope is not a constant): varying the URI produced \"uri\":\"/gold/artifacts/advisor_summary.json\", \"/gold/artifacts/zzz_control_probe.json\", \"/gold/entities/xyz/abc.json\" -- built per request. SOURCE @a2fcc5efc4: infra/aws/lambda-edge/auth-validator-edge/index.mjs:388 request.headers[\"x-firm-id\"] = [{...payload.firmId...}] is a plain ASSIGNMENT, destroying any client value. APPLIED: that function is associated as viewer-request (auth-validator-edge:18) on the Positioning behaviour and every /api/scoped/* behaviour, so it runs on every request ahead of cache-key computation. RESIDUAL REPORTED NOT WAVED: :211-212 returns the request UNMODIFIED for uri.startsWith('/auth/') or method OPTIONS, before the :388 injection. Measured mitigation -- the live /auth/* behaviour carries NO Lambda association at all (26 behaviours enumerated), and shared-advisor-router:92-93 synthesises a 204 for OPTIONS before any artifact is reached. Not exploitable as measured; not a clean guarantee either, since it rests on two unrelated configurations staying as they are. UNMEASURED AND STATED: whether the echoed firmId takes a value other than 'cottonwood' for a different identity -- one credential; the field's dynamism is controlled, its cross-firm variability is not.",
+      "denominator": "5 forged X-Firm-Id values, 5 refusals to honour; 1 no-header baseline; 3 URI arms in the dynamism positive control; 26 live CloudFront behaviours enumerated to establish the /auth/* mitigation.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T3AE-AC3",
+      "criterion_verbatim": "Two firms requesting the same path produce DISTINCT cache entries, measured AT THE EDGE (cache key / Vary / behaviour config, plus an observed response), not inferred from a distribution setting. comp-routes declares its own plane as DESIRED -- an edge claim needs an APPLIED or EXERCISED reading.",
+      "method": "live_read",
+      "invocation": "aws cloudfront get-distribution-config --id EVTSA9VEHNZVH (APPLIED); aws cloudfront get-cache-policy for each policy id bound to the relevant behaviours; plus observed response headers on the live Positioning fetch (EXERCISED). No comp-routes DESIRED-plane reading was used as evidence.",
+      "output_evidence": "Positioning is served by the /api/general/* behaviour, whose cache policy is opal-api-general-5min-cache (ce00305d): HeaderBehavior=none, QueryStringBehavior=none, DefaultTTL=300. X-FIRM-ID IS NOT IN THE CACHE KEY. Observed response headers on the authenticated fetch: 'Cache-Control: public, max-age=300, s-maxage=300', 'X-Cache: Miss from cloudfront' -- a PUBLICLY cacheable, 300s, firm-agnostic entry for a bearer-authenticated artifact. THE CORRECT POLICY EXISTS AND IS APPLIED ELSEWHERE: opal-scoped-advisor-by-firm (45eb7514) has HeaderBehavior=whitelist ['X-Firm-Id'] and QueryString whitelist ['firm'], and is bound to the /api/scoped/advisor-intelligence/{artifacts,entities,*.json} S3 behaviours -- not to the path Positioning uses. All /api/scoped/* APIGateway behaviours use Managed-CachingDisabled (TTL 0). QUALIFICATION THAT MATTERS FOR THE REMEDY: with ONE unscoped artifact, adding firm to the cache key merely partitions identical bytes into per-firm entries. The cache key is downstream of the real defect, and fixing it alone would produce a correct-looking control over an unchanged exposure.",
+      "denominator": "26 cache behaviours enumerated on the single live distribution (list-distributions returned 1 of 1); 3 distinct cache policies resolved and read live; 1 exercised response header set.",
+      "status": "FAIL",
+      "status_reason": "FAIL, measured at the APPLIED and EXERCISED rungs. Positioning's behaviour (/api/general/*) binds cache policy opal-api-general-5min-cache: HeaderBehavior=none, DefaultTTL=300, and the observed response carries 'Cache-Control: public, max-age=300'. X-Firm-Id is not in the cache key. The firm-keyed policy opal-scoped-advisor-by-firm (whitelist ['X-Firm-Id']) EXISTS and IS applied -- to the scoped S3 behaviours, not to the path Positioning uses. Noted for whoever writes the remedy: with a single unscoped artifact, adding firm to the cache key partitions identical bytes and would produce a correct-looking control over an unchanged exposure."
+    },
+    {
+      "criterion_id": "T3AE-AC4",
+      "criterion_verbatim": "THE BYTES, NOT THE PIXELS (PT-inv-1). No criterion is discharged by a render, a screenshot, or a hidden UI element. The shipped client gate ALREADY hides the pill while the bytes reach everyone -- that is the exact defect this TO exists to close, so a green render is affirmative evidence of nothing.",
+      "method": "manual_read_with_citation",
+      "invocation": "Self-audit of every evidence item used above, against the prohibition.",
+      "output_evidence": "Every verdict rests on HTTP status codes, response byte counts, sha256 of response bodies, S3 object listings, and live CloudFront policy reads. NO render, screenshot, browser, or UI state was used or consulted anywhere in this TO. The client gate modesFor(firm) was deliberately NOT exercised and is cited for nothing. Note: portal/scripts/satellites-firm-gate-exercise.mjs exists and exercises that client gate at source level; I read it, identified it as PT-inv-1-barred as evidence for these cells, and did not run or cite it.",
+      "denominator": "7 criteria in this TO; 0 discharged by a render; 1 available render-adjacent instrument identified and deliberately excluded.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T3AE-AC5",
+      "criterion_verbatim": "PT-inv-3 -- null FIRM FAILS CLOSED, exercised not assumed: an identity resolution failure must not widen access. Already correct today; this TO must show it SURVIVED.",
+      "method": "manual_read_with_citation",
+      "invocation": "Attempted: requires a JWT whose firmId claim is absent. Every available credential carries a firm; minting a firmless token requires either signing-key access or mutating a production user record in opal-users-v2.",
+      "output_evidence": "UNMEASURED BY EXERCISE, reported rather than inferred. The source at auth-validator-edge:388 reads payload.firmId || \"\" and shared-advisor-router:113 refuses an empty firmId with 403 'Missing firm identity' -- that is a defensible DESIGN, but it is SOURCE, and the criterion asked for an exercise. I did not mint a firmless JWT because both routes to one are outside this TO's grant (no signing-key use authorized; mutating a production identity record is a change this READ-ONLY TO does not carry). Recording UNMEASURED rather than reading the source as the behaviour, because the whole point of AC7 is that those are different rungs.",
+      "denominator": "0 exercised arms; 2 source sites read (auth-validator-edge:388, shared-advisor-router:113); 2 blocked routes to a firmless token, both named.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "UNVERIFIABLE-BY-INSTRUMENT, not FAIL and not PASS. The criterion demands an EXERCISE of a null-firm identity. Producing one requires a JWT with the firmId claim absent, and both routes to that are outside this TO's grant: signing-key use was not authorized, and mutating a production user record in opal-users-v2 is a change a read-only measurement TO does not carry. The source is defensible (auth-validator-edge:388 reads payload.firmId || '' and shared-advisor-router:113 refuses an empty firmId with 403 'Missing firm identity') but AC7 is the whole reason I may not report source as behaviour. Needs a seat holding either credential-minting or a firmless fixture."
+    },
+    {
+      "criterion_id": "T3AE-AC6",
+      "criterion_verbatim": "PT-inv-4 -- OTHER FIRMS BYTE-IDENTICAL where they are not the subject of a change, with the denominator printed.",
+      "method": "live_read",
+      "invocation": "git status on the workspace and the portal submodule; enumeration of AWS mutating calls issued this session.",
+      "output_evidence": "VACUOUSLY SATISFIED, DENOMINATOR ZERO, and recorded as vacuous rather than PASS. This TO changed no code, no Terraform, no Lambda, no CloudFront configuration, no S3 object and no IAM policy. Every AWS call issued was a read (list-distributions, get-distribution-config, get-cache-policy, list-objects-v2, dynamodb scan) plus authenticated HTTP GETs and one POST /auth/login that mints a short-lived token and mutates nothing. With zero changes, nothing could differ for any firm. A criterion that cannot fail over its own window has not been tested, and I am not claiming it as evidence of anything.",
+      "denominator": "0 changes made; 0 firms affected; 4 distinct read-only AWS APIs called; 1 token-minting POST that writes no durable state.",
+      "status": "N/A-BY-CONSTRUCTION",
+      "status_reason": "N/A-BY-CONSTRUCTION with denominator ZERO, and recorded as such rather than as a PASS. This TO changed no code, no Terraform, no Lambda, no CloudFront configuration, no S3 object and no IAM policy; every AWS call was a read and the single POST minted a short-lived token writing no durable state. With zero changes nothing could differ for any firm, so the criterion could not have failed over its own window and has therefore not been tested. Claiming PASS here would be a control that cannot fail."
+    },
+    {
+      "criterion_id": "T3AE-AC7",
+      "criterion_verbatim": "DESIRED != APPLIED != EXERCISED, and every claim in the deliverable names which it is. Terraform is DESIRED; a live policy read is APPLIED; a request that got a response is EXERCISED. PT-inv-6 was overstated in v1 for exactly this reason -- a .tf file is never evidence that a policy is in force.",
+      "method": "manual_read_with_citation",
+      "invocation": "Self-audit of the deliverable, claim by claim.",
+      "output_evidence": "NO TERRAFORM FILE IS CITED AS EVIDENCE THAT ANYTHING IS IN FORCE anywhere in this deliverable. Rung assignment: APPLIED -- the 26 cache behaviours, the 3 cache policies, the Lambda@Edge associations and their versions, the 4,125-key origin listing (all live AWS API reads). EXERCISED -- the 200/401/401 arms, the 5 forgery arms, the 3 dynamism-control arms, the response Cache-Control headers, the 8,088-byte match. SOURCE (labelled as such at every use, never as behaviour) -- auth-validator-edge:388 and :211-212, public-data-router:64-67 and its 0-of-71 firm reference count, portal-proxy.ts:1133/:1328/:1381/:1938/:897/:49. One instrument trap was caught by this discipline and is reported: infra/aws/terraform/portal-auth/lambda-edge.tf DEFINES the edge functions but carries NO event_type association -- reading it would have told me nothing about which trigger runs where, and the viewer-request fact that AC2 turns on came only from the live distribution read. A second trap: the CloudFront origin ID is 'S3-opal-data-portal-v2-json' while the actual bucket is 'opal-data-portal-v2'; listing the bucket the ID names returns NoSuchBucket. The label was resolved against the world before use.",
+      "denominator": "3 rungs used; 0 DESIRED-plane artifacts cited as evidence of force; 5 SOURCE citations, all re-derived by grep at a2fcc5efc4 / portal 80af31ac rather than recalled; 2 instrument traps caught and named.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THE MUTANT THAT MATTERS IS ON AC2, because AC2 is the only PASS whose whole content is that an input is IGNORED -- and an assertion that an input is ignored passes trivially against an instrument that ignores everything. MUTATION APPLIED: vary the request URI while holding the bearer fixed, against the same scoped 403 envelope that reports the resolved firm. If the envelope were a constant string, the mutation changes nothing and AC2's 5 forgery arms prove nothing. FULL CONTROL SET CARRIED FORWARD: (1) authentication negative controls, DISTINCT: No bearer -> HTTP 401 51 B 'Missing or invalid Authorization header'. Bogus bearer -> HTTP 401 36 B 'Invalid or expired token'. Two different refusals, so the 200 on the valid bearer is a real authorization outcome and not a permissive endpoint. | (2) forgery oracle dynamism (the control that makes AC2 mean anything): The scoped 403 envelope echoes both the resolved firmId and the rewritten uri. Varying the request URI produced 3 distinct echoed uri values, proving the envelope is constructed per request. Without this, the constant 'cottonwood' across 5 forgery arms would be indistinguishable from a hardcoded string. | (3) discarded non-control, recorded: The first forgery test (forged X-Firm-Id against /api/general/) returned byte-identical 200s -- a result BOTH hypotheses predict, since that path ignores firm entirely. It could not discriminate and was discarded rather than reported as a pass. | (4) owned-paths instrument, exercised with 3 arms: 0.7.0_AE_CloudOps~Y passes on infra/aws terraform paths (rc=0) and is REFUSED on portal/, CLAUDE.md and a CTO deliverable (rc=1, 3 of 4) -- so the tool can refuse this serial. 0.4.0_DE_ClientPlatform~Y and 0.4.0_DS_ClientPlatform~L both rc=1 VIOLATION on the identical two infra paths -- so the permission is discriminating, not vacuous. | (5) origin sweep completeness: list-objects-v2 over opal-data-portal-v2 returned 4,125 keys with terminal IsTruncated: None. No --max-items, no head, no client-side truncation. The 'zero firm-segmented positioning keys' verdict is over the whole bucket, not a page. | (6) origin label resolved against the world: The CloudFront origin ID reads S3-opal-data-portal-v2-json; listing that name returns NoSuchBucket. The real DomainName is opal-data-portal-v2.s3.us-east-1.amazonaws.com. A code/config literal was not taken as evidence of what exists.",
+      "expected": "Varying the URI changes the echoed uri field; if it does not, the envelope is a constant and AC2 is unsupported.",
+      "observed": "FIRED. Three URIs produced three distinct echoed values -- /gold/artifacts/advisor_summary.json, /gold/artifacts/zzz_control_probe.json, /gold/entities/xyz/abc.json -- so the envelope is built per request and the constant firmId=cottonwood across 5 forged headers is a real resolution. NAMED LIMIT, NOT PAPERED OVER: the mutant fired on the URI FIELD, not on the FIRM FIELD. I never observed the firm field take a value other than cottonwood, because only one credential was obtainable. So AC2 rests on: a dynamic envelope (controlled), 5 ignored forgeries (exercised), and an unconditional overwrite at auth-validator-edge:388 running at viewer-request (source + applied). The strictly stronger control -- a second firm's bearer showing the field move -- was not run and its absence is stated rather than implied.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The Positioning artifact was fetched repeatedly across the session with the same bearer and the response hashed each time; the scoped 403 envelope was issued 9 times across the forgery and URI-variation arms.",
+      "observed": "STABLE. Every fetch of /api/general/positioning/positioning_data.json returned HTTP 200, 8,088 bytes, sha256 8ec27506f7168c084b34a20f70fc3dbc -- identical across the baseline and all four /api/general forgery arms. The scoped envelope returned byte-identical bodies for all 6 firm-header arms and varied ONLY where the URI varied. Two S3 sweeps of opal-data-portal-v2 returned the same 4,125-key result with terminal IsTruncated: None.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "PT-a-1's PORTAL limb (the React Query key and the client fetch path)",
+      "reason": "DE-class. TO-1-DE is BLOCKED on a fresh DE lane. Not built, not designed. The seam was MEASURED rather than accepted: owned-paths-validate.py refuses this serial on portal/src/app/positioning/page.tsx (rc=1) while passing it on the infra/aws terraform paths (rc=0), so the boundary is mechanically enforced, not conventional. Owner: a DE lane, unseated."
+    },
+    {
+      "item": "Selecting a substrate shape (PT-b-2)",
+      "reason": "UNCERTIFIED by 3.0.0_SA_CVO~Z -- 'DO NOT CUT AGAINST'. This measurement does not force a shape: the finding (Positioning is served on the general path with no firm dimension at all) holds identically under shared-prefix and per-firm-bucket. Owner: 2.0.0_SA_COO~Z + 1.0.0_SA_CTO~Z."
+    },
+    {
+      "item": "The two live blackdiamond prefixes for one firm (PT-b-4)",
+      "reason": "UNCERTIFIED and explicitly 'report what you see, do not act on it' in the TO's standing block. Not touched. Owner: the decomp."
+    },
+    {
+      "item": "Migration order (PT-e-1) and the single named substrate indirection (PT-b-1)",
+      "reason": "Explicitly deferred by this TO's <deferred> clause -- PT-e-1 is CTO+AE round 2 and cannot be stated until a design exists; PT-b-1 is blocked by PT-b-2. Owner: 1.0.0_SA_CTO~Z with this lane."
+    },
+    {
+      "item": "The unscoped-default question (PT-e-2)",
+      "reason": "COO+CTO decision, named non-delegable in the decomp. Not answered here. Owner: 2.0.0_SA_COO~Z + 1.0.0_SA_CTO~Z."
+    },
+    {
+      "item": "THE REMEDY for the two FAIL criteria (AC1, AC3)",
+      "reason": "Moving Positioning to a firm-scoped serving path and producing a per-firm artifact is a DESIGN act that spans a blocked DE lane, an unselected substrate shape (PT-b-2) and an undecided PT-e-2 -- and it now also carries Andrew's ~21:3xZ same-pattern constraint on two axes (modes, per 1.0.0_SA_CTO~Z; firms, per 2.0.0_SA_COO~Z's standing clause @e97731773a). This TO is a MEASUREMENT round. Nothing was built and no design is proposed."
+    },
+    {
+      "item": "Exercising the client gate modesFor(firm)",
+      "reason": "Barred as evidence by PT-inv-1 (THE BYTES, NOT THE PIXELS). portal/scripts/satellites-firm-gate-exercise.mjs exists and would have produced a green-looking result; it was read, identified as render/source-plane, and deliberately not run or cited."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / INERT -- owned-paths-validate.py --check-agent <agent> <yaml> with EMPTY STDIN returns rc=0 for EVERY agent -- it reads its path list from stdin (:229), so an empty list is zero checks and a clean exit. A vacuous pass is byte-identical to a real one. It matters because a seating rationale cited this tool. Filed to 3.0.0_SA_CVO~Z cc 2.0.0_SA_COO~Z (msgs 10212/10213); CVO classed it with the commit gate's 'clean for 0 file(s)'. Not chased.",
+    "OBSERVATION / INERT -- portal-proxy.ts:962 fetches /returns/etf-periods with no /api/ prefix, against a same-origin base (API_BASE_URL = VITE_PORTAL_API_URL ?? '', :49). Of 26 live CloudFront behaviours, ZERO match /returns* -- so it falls through to the DEFAULT behaviour whose origin is the SPA bucket. SOURCE-level only: I did not read the build env, and a set VITE_PORTAL_API_URL would change this entirely. DE/portal surface, off-cell. Surfaced, not investigated.",
+    "OBSERVATION / INERT -- ANDREW-DIRECT ~21:3xZ (relayed by 3.0.0_SA_CVO~Z msg 10278, adopted as a gate criterion by 1.0.0_SA_CTO~Z msg 10285) puts an architectural constraint on PT-a-1 that was not in the cell's wording: forked routes must share a pattern, and an N-1/1 split is a defect on its face. MEASURED against this cell: all 5 live Positioning-page fetch sites are on /api/general/, so the three modes are UNIFORM TODAY and the 2-of-3 divergence does not currently exist. It would be CREATED by scoping one mode and not the others. Recorded as a measured constraint on the remedy; how it resolves is the decomp's call and neither CTO~Z nor I ruled it.",
+    "OBSERVATION / INERT -- auth-validator-edge:211-212 returns the request UNMODIFIED for /auth/* and OPTIONS, ahead of the :388 X-Firm-Id injection. Measured mitigation: the live /auth/* behaviour has no Lambda association at all, and the router synthesises a 204 for OPTIONS. Not exploitable as measured; reported because it rests on two unrelated configurations staying as they are, and PT-inv-2 is the standing constraint that should refuse any change making the header client-assertable."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~Y/logs/2026-08-27/posn_tenancy_to3ae_served_plane_2117-2145Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'X-Firm-Id' -i --files; comp-find 'positioning' -i --files; comp-find 'auth/login' --files; comp-find 'owned-paths' --files; comp-find 'POSN_TENANCY' --files",
+      "result": "Located the three Lambda@Edge functions via the [DEF] band -- shared-advisor-router and shared-advisor-router-response matched on DEFINITION lines, which is what pointed at the injection site rather than the 335 DOC-band mentions. Denominators printed on every sweep (524 hits / 27,286 files for X-Firm-Id). No --page-1-only conclusions; band filters used instead of head."
+    },
+    {
+      "tool": "owned-paths-validate.py",
+      "invocation": "printf paths | python .tools/owned-paths-validate.py --check-agent <serial> .owned-paths.yaml, rc captured BEFORE any pipe",
+      "result": "Exercised with 3 controls. Found a vacuous-pass mode (empty stdin -> rc=0 for every agent) which my first two runs hit; caught because the negative control did not fire. Surfaced."
+    },
+    {
+      "tool": "aws cloudfront (list-distributions, get-distribution-config, get-cache-policy)",
+      "invocation": "operational read via the .tools/aws shim",
+      "result": "The APPLIED plane for AC2 and AC3. Supplied the viewer-request trigger fact and the three cache policies. Note the Terraform file lambda-edge.tf carries no event_type association at all, so this read was necessary, not merely corroborating."
+    },
+    {
+      "tool": "aws s3api list-objects-v2",
+      "invocation": "--bucket opal-data-portal-v2 (full sweep) and --prefix json/positioning/",
+      "result": "4,125 keys, terminal IsTruncated: None. Gave the 8,088-byte served-key match. First attempt used the bucket name the CloudFront origin ID implies and returned NoSuchBucket -- the label was resolved against the world before use."
+    },
+    {
+      "tool": "curl (live exercise)",
+      "invocation": "POST /auth/login for a bearer; GET the positioning artifact and the scoped artifact with valid / absent / bogus / forged-header arms",
+      "result": "The EXERCISED rung for AC1 and AC2. Produced the discriminating firmId-echo oracle and the two distinct 401 controls."
+    },
+    {
+      "tool": "comp-routes",
+      "invocation": "NOT USED AS EVIDENCE -- deliberately",
+      "result": "The TO's AC3 warns comp-routes declares its own plane as DESIRED. Since AC3 demands APPLIED or EXERCISED, the behaviour/cache facts were taken from live cloudfront get-* calls instead. Recorded because 'why a listed tool was not run' is part of this section."
+    }
+  ]
+}
