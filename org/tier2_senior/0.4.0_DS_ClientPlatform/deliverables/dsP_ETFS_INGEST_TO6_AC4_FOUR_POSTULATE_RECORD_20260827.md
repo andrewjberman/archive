@@ -146,3 +146,59 @@ asserted, and the ruling has the numbers it needs.
 **Owner of the call:** `2.0.0_SA_COO~Z` (TO author) with `1.0.0_SA_CTO~Z` on the served-contract half.
 **Nothing else in TO-6 is blocked on this** — AC1/AC2/AC5 are done; AC3/AC6 wait on the
 2026-08-28T11:00Z scheduled fire.
+
+---
+
+## DISPOSITION — RULED 2026-08-27T18:07Z by `1.0.0_SA_CTO~Z`, cited rather than summarised
+
+**`INGEST-TO6-AC4` is HELD. The gold-row emission does NOT happen under TO-6.** None of the three
+options above was taken; the ruling is that the question does not belong to this TO at all.
+
+1. **The emission is HELD** — *"a sibling `gics_industry_group` puts the GICS CHILD beside the GICS
+   PARENT — the same axis at two grains, which is the thing AC4 forbids."* The refusal to emit **is**
+   the disposition, not an omission awaiting one.
+2. ⛔ **THE COLLISION PRE-DATES TO-6 AND IS NOT TO-6's TO REPAIR.** *"`classify()` returns
+   `ASSET_CLASS_EQUITY, val` where `val` IS the GICS sector name — that is true today, with the field
+   unadded and TO-6 untouched. TO-6 did not create it and cannot fix it. A TO whose acceptance
+   criterion is discharged only by repairing a defect one layer up is mis-scoped, and the correct act
+   is to say so rather than widen the TO to swallow it."*
+3. **TO-6's delivered half stands: AC1 is landed `@ebce987b42`.** Andrew's 2026-08-24 ~22:12Z ruling
+   separates them — **the PULL is TO-6's; the GOLD-ROW vocabulary act is `INGEST-T3-6`, a different
+   cell at a different grain.** The hold falls on the second, not the first.
+4. ⛔ **DO NOT SPLIT `sub_asset_class` — not under TO-6, not by this lane, not this round.** It is a
+   **served-field migration** touching a client-facing page and needs its own PRD and decomp.
+5. **Routed to the ETFS_INGEST surprise channel as OBSERVATION, not BLOCKING** — nothing renders
+   wrong today and it fails safe. **`1.0.0_SA_CTO~Z` is the routing owner**; `3.0.0_SA_CVO~Z` mans the
+   channel; `2.0.0_SA_COO~Z` owns any TO-6 amendment.
+
+### The finding inside the finding — `sub_asset_class` carries at least THREE vocabularies
+
+CTO~Z asked this be carried explicitly because it is the kind of detail a summary drops, and it
+**raises the cost of any eventual split**:
+
+```
+  GICS sector names ....... 180 of 189   a SECTOR taxonomy
+  "Ultra Short Duration" .... 8 of 189   a DURATION / asset-class taxonomy
+  null ...................... 1 of 189   deliberate: None, not an "Other" bucket
+```
+
+**So the collision is not GICS-vs-nothing — it is ALREADY GICS-vs-duration**, and the proposed field
+would have made it GICS-vs-duration-vs-GICS-at-a-finer-grain. The deliberate `None`-not-`Other` null
+is a considered choice by another author and is **not in scope**.
+
+⚠ **RELAYED, NOT MEASURED BY THIS SEAT** — carried with its provenance per the relayer rule: CTO~Z
+reports that a prior ETFS_INGEST record measured the portal's display and colour maps carrying
+**0 of 11 GICS sector names across three tables**, i.e. the served vocabulary and the portal's lookup
+tables are **already mismatched**. I have not verified this and do not cite it as my own; it matters
+because a split would move a field those tables already fail to resolve. **Two defects on one
+surface.**
+
+### The `status` value this criterion gets, and why it is the least-wrong one
+
+**`UNCOMPUTABLE-BY-CONSTRUCTION`**, naming this ruling. Per CTO~Z, stated by him as such rather than
+presented as a clean fit: **the `status` enum has no value for *"held by ruling"*** — the same
+Rule 24 (i) gap this seat found on AC3 and which he owns and has not yet closed. The criterion
+genuinely cannot be computed until the axis question is settled elsewhere, which is what
+`UNCOMPUTABLE-BY-CONSTRUCTION` comes closest to saying.
+⛔ **It is NOT `FAIL`** — nothing was attempted and found wanting; and it is **NOT** left silently
+open. A ruled disposition and an abandoned criterion must not read alike.
