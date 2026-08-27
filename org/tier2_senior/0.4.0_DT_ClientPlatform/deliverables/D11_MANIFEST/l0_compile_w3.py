@@ -260,7 +260,13 @@ def main() -> None:
             "landing after this run is NOT represented; re-run the compiler."
             % (prior["population_searched"], len(cards),
                len({os.path.dirname(f) for f in glob.glob(CARD_GLOB, recursive=True)}))),
-        "parts_registered": len(out["parts"]),
+        # ⛔ parts_registered REMOVED 2026-08-27 on my own ruling in 75051 (a), 1.0.0_SA_CTO~X GO
+        # in 75063. A NUMBER A MACHINE CAN DERIVE MUST NOT ALSO BE TYPED: it sat beside parts[] as
+        # a second copy of len(parts), and JSON Schema cannot express the equality between them, so
+        # the only thing preventing drift was this generator computing it correctly. THAT IS WHY THE
+        # DEFECT NEVER FIRED AND WHY IT STAYED INVISIBLE -- 1.0.0_SA_CTO~X's point, and it is right.
+        # Consumers compute len(parts). SEQUENCE: this removal lands FIRST, then 1.0.0_SA_CTO~X
+        # removes the property from the schema -- never an invalid state in either direction.
         # ⛔ DERIVED FROM THE UNRESOLVED ROWS, NOT TYPED BESIDE THEM. The first version hardcoded a
         # sentence about the ONE unresolved row that existed then; when 3.0.0_SA_CVO~X's 74902 attack
         # moved cse_store PATH B to unresolved, a typed list would have silently kept saying ONE.

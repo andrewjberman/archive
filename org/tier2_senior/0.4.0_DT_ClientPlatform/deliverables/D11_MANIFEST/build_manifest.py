@@ -578,7 +578,8 @@ MANIFEST = {
         "population_searched": (
             "181,412 warehouse keys + 129 estate-report keys + 28,797 repo files scanned by filename "
             "sweep + 3 directories enumerated exhaustively"),
-        "parts_registered": len(PARTS),
+        # parts_registered REMOVED 2026-08-27 -- see l0_compile_w3.py for the full reasoning.
+        # A number a machine can derive must not also be typed; consumers compute len(parts).
         "known_unsearched": [
             "OTHER AWS ACCOUNTS AND REGIONS -- the warehouse sweep is one bucket in us-east-1. A "
             "graph store in another account is invisible here and no claim is made about it.",
@@ -765,10 +766,12 @@ def _check_materializers(parts):
 
 _check_materializers(PARTS)
 
-print("parts_registered:", len(PARTS))
-print("declared:", MANIFEST["denominator"]["parts_registered"])
-assert MANIFEST["denominator"]["parts_registered"] == len(MANIFEST["parts"])
-print("SELF-CHECK: declared denominator == population  PASS")
+# ⛔ THE SELF-CHECK THAT USED TO LIVE HERE WAS THE DEFECT'S OWN JUSTIFICATION.
+# It printed len(PARTS), printed the declared parts_registered, and asserted they were equal --
+# a HAND-MAINTAINED INVARIANT CHECKED AT RUNTIME BECAUSE THE SCHEMA CANNOT EXPRESS IT. That assert
+# passing every time is exactly why the duplication never fired and never got noticed. The field is
+# gone; there is no second copy to cross-check, so there is nothing left to assert.
+print("parts:", len(MANIFEST["parts"]), "-- denominator carries no second copy to drift from")
 cls = {}
 for p in PARTS:
     cls[p["part_class"]] = cls.get(p["part_class"], 0) + 1
