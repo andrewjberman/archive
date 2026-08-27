@@ -61,8 +61,7 @@ while each quoted string still exists somewhere in the file. The hash comparison
 
 ### ⚠ One imprecision, not a refutation
 
-The entry says the raise happens *"before the catalog is touched."* Measured, `:592
-catalog = get_catalog()` runs **before** `drop_cse_table` is called at `:595`. **The catalog IS
+The entry says the raise happens *"before the catalog is touched."* Measured, `:593 catalog = get_catalog()` runs **before** `drop_cse_table` is called at `:595`. **The catalog IS
 obtained; what is never reached is the destructive `catalog.drop_table()` at `:353`.** The entry's
 conclusion is correct and its phrasing overstates by one step. Recorded because this unit exists to
 check exactly this kind of load-bearing wording.
@@ -142,6 +141,11 @@ different call than the one that produced the finding.**
 |---|---|---|---|---|
 | `[8]` | **STILL TRUE** | 7 of 7 | 2 of 2 fired | 1 phrasing imprecision (`get_catalog()` precedes the raise) |
 | `[9]` | **STILL TRUE** | 3 of 3 | 2 of 2 fired (2nd attempt) | boto3 present in-file though not in-path; quotation re-emphasised vs the card |
+
+> ⛔ **CORRECTION, 13:07Z.** This report first cited `get_catalog()` at **`:592`**. It is at
+> **`:593`** -- verified `grep -n`, and `0.4.0_DT_ClientPlatform~X` caught it (76004) while
+> confirming the finding it belongs to. **I made an off-by-one line citation inside a finding whose
+> subject is an imprecise line-scoped claim.** The finding stands; my citation of it did not.
 
 **Neither entry is `NO LONGER TRUE`, `UNMEASURABLE`, or `WAS NEVER MEASURED`.** Both were held at a
 named vintage, both re-derive cleanly at that vintage, and the two entries in this tranche are among
