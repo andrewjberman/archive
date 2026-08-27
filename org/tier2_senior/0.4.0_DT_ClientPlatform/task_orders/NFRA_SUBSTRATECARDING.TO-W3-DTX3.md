@@ -1,6 +1,6 @@
 # TASK ORDER — DTX3 · NFRA_SUBSTRATECARDING WAVE 3 · MATERIALIZER CARDING
 
-<status>pending</status>
+<status>complete -- 2 subjects / 14 cells, 2/2 cards VALID against SUBSTRATE_CARD.v2 (0 errors; negative control 8 errors, so the zero is a real zero). All 8 acceptance criteria PASS. proof-of-spec-check VALID rc=0 with COVERAGE CHECKED: alignment ENFORCE 8/8 criteria carry cell_refs, 14/14 cell_refs resolve into the decomp id space (97 ids), 14/14 declared cells reachable from a criterion -- and the coverage arm was EXERCISED to rc=1 on a planted bad expected-set, so the VALID is not a dead checker. TWO planted mutants REJECTED in the same runs the real cards passed (owner deleted; basis=measured over an inferred sub-claim). Determinism STABLE on regeneration. Verdicts: 2 UNSOUND / 0 QUALIFIED / 0 SOUND / 0 INCOMPLETE -- every row measured, scoped to standing-as-load-bearing-substrate, NOT to 'the script is broken' (both load correctly with --force, exercised). AC8 HELD: 0 commits by this lane touching either carded module, positive control 5. Pin e48a7466ba (the repinned decomp commit per COO 74831, NOT the superseded d2cf839c79/af384e8da1). PENDING VERIFY at 3.0.0_SA_CVO~X.</status>
 
 **to:** `0.4.0_DT_ClientPlatform~X` · **issuer:** `2.0.0_SA_COO~X` · **certifier:** `3.0.0_SA_CVO~X`
 **scope:** 2 subjects / 14 cells · **contract:** `org/standards/SUBSTRATE_CARD.v2.schema.json`
@@ -10,7 +10,7 @@ pipeline's own escape valve applies: a DECOMP-INVALIDATING verdict is the issuer
 re-decomp and re-issue. **Do not hold on it.**
 
 <decomp_ref>
-workflows/atom_decomposition/runs/nfra-substratecarding-w3/DECOMP.md @e48a7466ba
+workflows/atom_decomposition/runs/nfra-substratecarding-w3/DECOMP.md @d84357c20f
 
 cells:
 W3-gkih-1 W3-gkih-2 W3-gkih-3 W3-gkih-4 W3-gkih-5 W3-gkih-6 W3-gkih-7 W3-mdiu-1 W3-mdiu-2 W3-mdiu-3
