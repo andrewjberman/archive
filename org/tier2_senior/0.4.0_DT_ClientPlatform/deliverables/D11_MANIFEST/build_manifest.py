@@ -116,10 +116,12 @@ PARTS.append(part(
 PARTS.append(part(
     "cse", "store", wh("cse_b557721f-8b81-4ec2-9289-fe5f44c3f272"),
     "source", "current_state", [], "iceberg:cse",
-    "infra/aws/globgrph/cse_producers_nightly.py + infra/aws/globgrph/cse_emit_agent.py + infra/aws/globgrph/cse_emit_deploy.py + infra/aws/globgrph/cse_emit_frontend_coevolution.py + infra/aws/globgrph/cse_emit_graphhead.py + infra/aws/globgrph/cse_emit_promote.py + infra/aws/globgrph/cse_store.py",
+    "infra/aws/globgrph/cse_store.py [THE WRITER] <- orchestrated by infra/aws/globgrph/cse_producers_nightly.py [reads and delegates] over emitters infra/aws/globgrph/cse_emit_agent.py + infra/aws/globgrph/cse_emit_deploy.py + infra/aws/globgrph/cse_emit_frontend_coevolution.py + infra/aws/globgrph/cse_emit_graphhead.py + infra/aws/globgrph/cse_emit_promote.py",
     "canonical", None, "nightly (<26h per the provenance header)", "schedule", "production",
     "2026-08-26T03:31:12Z", S3_EV, "measured",
-    "389 objects; corroborated by comp-kuzu provenance header 'cse: last-write 14.8h ago (< 26h cadence)'",
+    "389 objects; corroborated by comp-kuzu provenance header 'cse: last-write 14.8h ago "
+    "(< 26h cadence)'. ⛔ WRITER vs ORCHESTRATOR SEPARATED ON THE SOURCE'S OWN WORDS after "
+    "1.0.0_SA_CTO~X 74425: cse_producers_nightly.py:46 states 'cse_store.py (validate/append/marker -- THE ONLY WRITER)', and :109 loads the table only to scan event_id for a dedup filter, which is a READ; its sole .append( is on a plain list. cse_store.py is independently AST-JOIN CONFIRMED as a writer, so the delegation survives in the join result. MY FIRST CUT LISTED ALL SEVEN FILES UNDIFFERENTIATED, which reads as seven writers where the file itself says one.",
     "0.8.0_AE_CloudComp lane", consumers=["comp-kuzu"]))
 
 PARTS.append(part(
@@ -591,8 +593,13 @@ MANIFEST = {
             "OF THE SEVEN WERE NEVER A SWEPT PLANE HERE. "
             "⛔ THE 40 IS NOW PARTITIONED BY MEASUREMENT (1.0.0_SA_CTO~X 74368, resolved by DIFFING "
             "THE LISTS rather than picking between two counts): 48 files REFERENCE the graph "
-            "tables; 41 of those are ALSO write-shaped (their predicate, tests included); 7 "
-            "reference them ONLY and are CONSUMERS. A reference-based population therefore "
+            "tables; 7 "
+            "reference them ONLY and are CONSUMERS. ⛔ THE WRITE-SHAPED FIGURE MOVED 41 -> 38 "
+            "(1.0.0_SA_CTO~X 74425, correcting THEIR OWN predicate): two of the eight tokens "
+            "they called strong-write indicators ARE NOT WRITES -- `to_arrow(` is a READ "
+            "(t.scan(...).to_arrow()) and `load_table(` merely obtains a handle. 3 files "
+            "matched ONLY on those two. CARRY 38, NOT 41, AND IT IS STILL A FLOOR. "
+            "A reference-based population therefore "
             "admits consumers as materializers -- WHICH IS THE EXACT DEFECT THIS MANIFEST "
             "COMMITTED EARLIER TONIGHT, when it named kuzu_incremental_refresh.py as a "
             "producer of graph_nodes. For a census whose subjects are materializers the WRITE "
