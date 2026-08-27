@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opal.internal/schemas/CARD_POPULATION_REGISTRY.v1.schema.json",
+  "title": "Card population registry v1",
+  "description": "WHICH CARDS A COMPILER MAY READ, AND FOR WHAT. Authored by 0.4.0_DT_ClientPlatform~X to 4.0.0_SA_CRO~A's admission ruling. It exists because a GLOB WAS BEING USED AS AN AUTHORITY BOUNDARY: `CARD_GLOB` had a wave number baked into it, so the compiler's honest '0 exact matches' was a true statement about its own configuration that every reader took as a statement about the estate (doctrine principle 13). A registry moves admission from a pattern that silently changes meaning each wave to an ENUMERATION that can only change by being edited. PLACED IN THE COMPILER'S OWN DELIVERABLE DIRECTORY, NOT org/standards/: this is a lane artifact proposed for promotion, and promoting it is 4.0.0_SA_CRO~A's act, not mine.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["registry_version", "ratified_at_commit", "extension_population", "receiver_source_populations", "discovery_globs"],
+  "properties": {
+    "registry_version": {
+      "const": "v1",
+      "description": "Pinned. A consumer branches on this before reading anything else."
+    },
+    "ratified_at_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{7,40}$",
+      "description": "The commit whose CARD_GLOB result this registry RATIFIES. v1's extension population is exactly what that glob admitted at that commit -- a one-time hand-off from pattern to enumeration, recorded so nobody later reads the enumeration as independently derived."
+    },
+    "extension_population": {
+      "$ref": "#/$defs/population",
+      "description": "The cards feeding the EXISTING W3 map/enrich path, and nothing else. Membership here says NOTHING about receiver-source eligibility."
+    },
+    "receiver_source_populations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["grain", "key", "failure_mode"],
+      "description": "THREE INDEPENDENT POPULATIONS, one per receiver, keyed separately. ⛔ NOT one role enum: 4.0.0_SA_CRO~A withdrew that and the reason is load-bearing -- extension participation and receiver-source participation are INDEPENDENT CONSUMER DIMENSIONS, and one card may lawfully sit in several. A single role field would have made the lawful case unrepresentable.",
+      "properties": {
+        "grain": {"$ref": "#/$defs/receiver_population"},
+        "key": {"$ref": "#/$defs/receiver_population"},
+        "failure_mode": {"$ref": "#/$defs/receiver_population"}
+      }
+    },
+    "discovery_globs": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "description": "DIAGNOSTIC ONLY. A consumer may use these to REPORT candidates that are not admitted; it may never admit anything because a glob matched. This field exists so the demotion is written down rather than remembered -- an unwritten demotion is the protection that exists only as a description."
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Full digest of the file's RAW BYTES. Not a truncation: a shortened digest is a different claim wearing the same name."
+    },
+    "repo_relative_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*//)(?!.*(^|/)\\.\\.?(/|$))(?!.*[A-Za-z]:)[^\\s]+$",
+      "description": "Forward slashes, no leading slash, no dot segments, no doubled separators, no drive letter, no whitespace."
+    },
+    "member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "subject_id"],
+      "properties": {
+        "path": {"$ref": "#/$defs/repo_relative_path"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "The card's own subject.id, PINNED HERE TOO. Path and digest identify the FILE; this identifies WHAT IT IS ABOUT, and a card whose subject changed under an unchanged path is exactly the substitution a digest catches only by accident."
+        }
+      }
+    },
+    "population": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["members"],
+      "properties": {
+        "members": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/member"},
+          "description": "EXACT membership. An empty array is the claim 'nothing is admitted here', which a consumer can branch on."
+        }
+      }
+    },
+    "receiver_population": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["members", "transform_version", "declared_branch_predicate"],
+      "properties": {
+        "members": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/member"},
+          "description": "EMPTY IN v1 FOR ALL THREE, BY CONTRACT AND NOT BY OVERSIGHT. No schema-bound card-to-L0 transform exists; `key` additionally has no key_expression field in SUBSTRATE_CARD.v2 and `grain` has no authored projection in any card. An empty role that a later reader mistakes for an unfinished one is the failure this description exists to prevent."
+        },
+        "transform_version": {
+          "type": ["string", "null"],
+          "pattern": "^v[0-9]+$",
+          "description": "The pinned version of the card-to-L0 transform that produced these members. NULL is legal ONLY alongside an empty members array -- a member admitted without a transform pin is a value with no provenance, and two members carrying different pins in one population is a population that cannot replay."
+        },
+        "declared_branch_predicate": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "The exact condition a card must satisfy to be admitted as a source for THIS receiver. Written out rather than referenced, because 'incomplete receiver payload cannot admit' is unactionable until someone says what complete means."
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"transform_version": {"type": "null"}}, "required": ["transform_version"]},
+          "then": {"properties": {"members": {"maxItems": 0}}},
+          "$comment": "no transform pin => no members. The converse (members => a pin) follows from the pattern on the string form."
+        }
+      ]
+    }
+  }
+}

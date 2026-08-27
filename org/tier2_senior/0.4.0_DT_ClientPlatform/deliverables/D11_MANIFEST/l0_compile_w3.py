@@ -24,6 +24,7 @@ WHAT IT DOES NOT DO, STATED SO THE LIMIT IS NOT DISCOVERED LATER:
 """
 from __future__ import annotations
 import glob
+import hashlib
 import json
 import os
 import re
@@ -44,7 +45,11 @@ BASE39 = os.path.join(HERE, "graph_object_manifest.base39.json")
 BASE = os.path.join(HERE, "graph_object_manifest.json")
 MAP = os.path.join(HERE, "w3_card_part_map.json")
 SCHEMA = os.path.join(WS, "org/standards/L0_GRAPH_SUBSTRATE_MANIFEST.schema.json")
-CARD_GLOB = os.path.join(WS, "org/**/D11_CARDS_W3/*.json")
+# ⛔ DISCOVERY ONLY. This pattern is NO LONGER AUTHORITY: it can REPORT a candidate the
+# registry does not admit, and it can never cause one to be read. The registry is the authority.
+CARD_DISCOVERY_GLOB = os.path.join(WS, "org/**/D11_CARDS_W3/*.json")
+CARD_REGISTRY = os.path.join(HERE, "card_population_registry.v1.json")
+REGISTRY_SCHEMA = os.path.join(HERE, "CARD_POPULATION_REGISTRY.v1.schema.json")
 
 ME = "0.4.0_DT_ClientPlatform~X"
 PIN = "e48a7466ba"
@@ -78,14 +83,79 @@ def load_json_strict(path: str):
         return json.load(fh, object_pairs_hook=_no_dupes)
 
 
+def load_registry() -> dict:
+    """The admitted-card registry, VALIDATED before use. 4.0.0_SA_CRO~A's admission ruling."""
+    from jsonschema import Draft202012Validator
+    doc = load_json_strict(CARD_REGISTRY)
+    errs = list(Draft202012Validator(load_json_strict(REGISTRY_SCHEMA)).iter_errors(doc))
+    if errs:
+        raise SystemExit(
+            "REFUSING TO COMPILE -- the card registry does not validate (%d errors): %s"
+            % (len(errs), "; ".join("%s: %s" % ("/".join(str(x) for x in e.path), e.message[:90])
+                                    for e in errs[:5])))
+    if doc["registry_version"] != "v1":
+        raise SystemExit("REFUSING TO COMPILE -- registry_version %r is not the v1 this "
+                         "compiler reads" % doc["registry_version"])
+    return doc
+
+
 def load_cards() -> dict:
-    out = {}
-    for f in sorted(glob.glob(CARD_GLOB, recursive=True)):
-        c = load_json_strict(f)
-        if c.get("schema_version") != 2:      # generators and non-cards live here too
+    """ADMISSION BY ENUMERATION. Every member is verified on THREE axes before it is read:
+    the file EXISTS, its raw bytes hash to the pinned digest, and its subject.id is the pinned
+    one. ⛔ THE THIRD IS NOT REDUNDANT: path+digest identify the FILE, subject_id identifies
+    WHAT IT IS ABOUT, and a card whose subject was replaced under an unchanged path is caught
+    by the digest only because the bytes happened to change with it. Pinning the subject makes
+    the check direct instead of incidental.
+
+    A card is never read because a glob matched it. Unlisted candidates are REPORTED by
+    registry_diagnostics() and admitted by nothing.
+    """
+    reg = load_registry()
+    out, failures = {}, []
+    for m in reg["extension_population"]["members"]:
+        full = os.path.join(WS, m["path"])
+        if not os.path.exists(full):
+            failures.append("%s: LISTED BUT MISSING" % m["path"])
             continue
-        out[c["subject"]["id"]] = c
+        with open(full, "rb") as fh:
+            raw = fh.read()
+        got = hashlib.sha256(raw).hexdigest()
+        if got != m["sha256"]:
+            failures.append("%s: DIGEST MISMATCH (pinned %s, on disk %s)"
+                            % (m["path"], m["sha256"][:12], got[:12]))
+            continue
+        c = json.loads(raw.decode("utf-8"), object_pairs_hook=_no_dupes)
+        if c.get("schema_version") != 2:
+            failures.append("%s: SCHEMA MISMATCH -- schema_version %r is not 2"
+                            % (m["path"], c.get("schema_version")))
+            continue
+        subject = (c.get("subject") or {}).get("id")
+        if subject != m["subject_id"]:
+            failures.append("%s: SUBJECT MISMATCH (pinned %r, in file %r)"
+                            % (m["path"], m["subject_id"], subject))
+            continue
+        if subject in out:
+            failures.append("%s: DUPLICATE SUBJECT within one population" % m["path"])
+            continue
+        out[subject] = c
+    if failures:
+        raise SystemExit("REFUSING TO COMPILE -- %d admitted member(s) failed verification:\n  %s"
+                         % (len(failures), "\n  ".join(failures)))
     return out
+
+
+def registry_diagnostics() -> dict:
+    """What the DISCOVERY glob can see versus what the registry ADMITS. Reporting only."""
+    reg = load_registry()
+    admitted = {m["path"] for m in reg["extension_population"]["members"]}
+    candidates = {os.path.relpath(p, WS).replace(os.sep, "/")
+                  for p in glob.glob(CARD_DISCOVERY_GLOB, recursive=True)}
+    return {"admitted": sorted(admitted),
+            "candidates": sorted(candidates),
+            "unlisted": sorted(candidates - admitted),
+            "receiver_populations": {
+                r: len(v["members"])
+                for r, v in sorted(reg["receiver_source_populations"].items())}}
 
 
 def classify_home_space(home: str):
@@ -137,6 +207,7 @@ def main() -> None:
     base = load_json_strict(BASE39)
     mapping = load_json_strict(MAP)
     cards = load_cards()
+    _diag = registry_diagnostics()
     parts = {p["id"]: p for p in base["parts"]}
     base_count = len(parts)
 
@@ -336,7 +407,7 @@ def main() -> None:
             "directories, the complete wave-3 card population as it stood at compile time. A card "
             "landing after this run is NOT represented; re-run the compiler."
             % (prior["population_searched"], len(cards),
-               len({os.path.dirname(f) for f in glob.glob(CARD_GLOB, recursive=True)}))),
+               len({os.path.dirname(f) for f in _diag["admitted"]}))),
         # ⛔ parts_registered REMOVED 2026-08-27 on my own ruling in 75051 (a), 1.0.0_SA_CTO~X GO
         # in 75063. A NUMBER A MACHINE CAN DERIVE MUST NOT ALSO BE TYPED: it sat beside parts[] as
         # a second copy of len(parts), and JSON Schema cannot express the equality between them, so
@@ -529,10 +600,9 @@ def main() -> None:
     _COMPANION_MEANING = {
         ".wal": {
             "mint": "conditional",
-            "note": ("write-ahead log for the rebuild tmp DB; present mid-flight or orphaned by "
-                     "an abnormal exit, absent after a clean checkpoint"),
-            "evidence": ("kuzu_incremental_refresh.py:315 declines to copy it precisely because "
-                         "a clean checkpoint has none; _canonical.py:179-186 reaps the orphan"),
+            "note": "write-ahead log for the rebuild tmp DB",
+            "condition": ("a rebuild is mid-flight, or one exited abnormally and orphaned it; "
+                          "absent after a clean checkpoint"),
         },
         ".lock": {
             "mint": "unknown",
@@ -602,12 +672,24 @@ def main() -> None:
         "every consumer that renders one line: %s" % _multiline)
     # ⛔ `always` IS A CLOSURE CLAIM AND CARRIES ITS PROOF OR IT IS NOT MADE. Enforced here too,
     # not only in the schema, because this emitter is the thing that would make the claim.
-    _unproven = [c for c in _companion_keys
-                 if _COMPANION_MEANING[c]["mint"] == "always"
-                 and not _COMPANION_MEANING[c].get("evidence")]
-    assert not _unproven, (
-        "REFUSING TO EMIT -- mint=always without evidence is the set-level closure claim that "
-        "was already withdrawn, re-made one level down: %s" % _unproven)
+    # rework18 made the three branches EXCLUSIVE: always needs evidence and forbids condition;
+    # conditional needs condition and forbids evidence; unknown carries neither. Enforced here
+    # too, because this emitter is the thing that would make the claim.
+    _REQUIRED_BY_MINT = {"always": "evidence", "conditional": "condition", "unknown": None}
+    _mint_shape = []
+    for c in _companion_keys:
+        _m = _COMPANION_MEANING[c]["mint"]
+        _need = _REQUIRED_BY_MINT[_m]
+        _extra = [k for k in ("evidence", "condition")
+                  if k != _need and k in _COMPANION_MEANING[c]]
+        if _need and not _COMPANION_MEANING[c].get(_need):
+            _mint_shape.append("%s: mint=%s without %s" % (c, _m, _need))
+        if _extra:
+            _mint_shape.append("%s: mint=%s carries %s" % (c, _m, _extra))
+    assert not _mint_shape, (
+        "REFUSING TO EMIT -- a companion's payload does not match its mint branch; mint=always "
+        "without evidence is the withdrawn closure claim re-made one level down: %s"
+        % _mint_shape)
     _companions = {c: _COMPANION_MEANING[c] for c in _companion_keys}
     _nef["member_set"] = {
         "enumerable": False,
@@ -617,6 +699,14 @@ def main() -> None:
         "variant_suffixes": _companions,
         "variant_suffixes_source_home": AUTHORITY_HOME,
         "variant_suffixes_source_line": _authority_line,
+        # ⛔ `unknown`, NOT `partial`, AND THE DIFFERENCE IS THE WHOLE POINT. Both other values
+        # presuppose that variant_suffixes_source_home names the MINTING producer -- closed_at
+        # _source says "these are ALL it can mint", partial says "more may exist elsewhere IN
+        # THE PRODUCER". The pinned file is a REMOVAL repertoire (_rm_kuzu), and the thing that
+        # actually mints these is kuzu's compiled _kuzu.cp312-win_amd64.pyd, which nobody here
+        # can read. Completeness is therefore NOT ESTABLISHED, and claiming `partial` would
+        # quietly assert the cleanup list is the producer.
+        "variant_suffixes_completeness": "unknown",
         "basis": _nef["basis"],
         "evidence": (
             "INSTANCE AXIS, UNBOUNDED: _unique_tmp at _canonical.py:288 builds the name from "
@@ -699,8 +789,9 @@ def main() -> None:
     # 4.0.0_SA_CRO~A 75304 + rework items 4 and 5. 0.0.0_AB_MSTR's bar is TWO NUMBERS:
     # (1) EMISSION -- 42 of 42 parts CARRY all four receivers with a coherent claim_status;
     # (2) DECLARATION -- the declared/unknown split printed beside it, never alone.
-    # NOTHING IS SYNTHESISED. The compiler admits exactly org/**/D11_CARDS_W3/*.json (13 cards)
-    # and exact card subject.id -> part.id among them is ZERO, measured. No declared payload is
+    # NOTHING IS SYNTHESISED. The compiler admits exactly the registry's extension_population
+    # (13 members, digest-pinned) and exact card subject.id -> part.id among them is ZERO,
+    # measured. A glob can report an unlisted candidate and can admit nothing. No payload is
     # taken from w3_card_part_map (an ARTIFACT-LOCATION join, right source for where a writer's
     # output lives, WRONG source for which part a card's trust block qualifies) or from cards the
     # compiler does not admit.
@@ -716,14 +807,18 @@ def main() -> None:
     #                 key_expression field, so there is nothing to admit or transform
     #   grain         the three above, and SOURCE ABSENT TOO -- no authored grain projection
     #                 exists in any card, admitted or not
-    # ⛔ A GLOB CHANGE IS NOT SUFFICIENT FOR ANY OF THEM, and 4.0.0_SA_CRO~A has RULED it is not
-    # even permitted: W3-only is INTENTIONAL-BUT-TEMPORAL, this file is a fail-closed 13-card W3
-    # extension compiler rather than a durable receiver-source boundary, and the successor is an
-    # authored card_population_registry.v1.json -- globs become candidate-discovery diagnostics
-    # that never expand authority. DO NOT WIDEN CARD_GLOB.
+    # ⛔ NO GLOB CHANGE REACHES ANY OF THEM, AND THERE IS NO LONGER A GLOB TO CHANGE: admission
+    # moved to card_population_registry.v1.json, and a discovery pattern now only REPORTS.
+    # W3-only remains INTENTIONAL-BUT-TEMPORAL; adding a receiver source means adding a member
+    # to that receiver's population WITH a transform_version, which no transform can supply.
     _R_SCOPE = (
-        "The compiler admits org/**/D11_CARDS_W3/*.json (13 cards); exact card subject.id -> "
-        "part.id among them = 0, measured by this lane. ")
+        "ADMISSION IS BY REGISTRY, NOT BY GLOB (4.0.0_SA_CRO~A's ruling, landed): the "
+        "compiler reads card_population_registry.v1.json, whose extension_population pins "
+        "13 members by path + SHA256 + subject.id, and every member is verified on all "
+        "three axes before it is read. Exact card subject.id -> part.id among them = 0, "
+        "measured by this lane. The discovery glob can only REPORT an unlisted candidate. "
+        "The three receiver_source_populations are EMPTY, each with its own written "
+        "admission predicate. ")
     _R_UNOWNED = ("UNOWNED -- needs an admitted-card registry and a schema-bound "
                   "card-to-L0 transform; neither exists at this commit")
     _R_EV = {
@@ -748,18 +843,19 @@ def main() -> None:
             "admission blocked, schema-bound TRANSFORM absent, and NO COMPILER PATH DECLARES. "
             "The PAYLOADS EXIST: "
             "1.0.0_SA_CTO~X measured trust.failure_mode complete in 23 of 23 exact-match cards "
-            "outside the admitted glob (75350). ⛔ BUT WIDENING CARD_GLOB WOULD DECLARE "
+            "outside the admitted population (75350). ⛔ BUT ADMITTING THEM WOULD DECLARE "
             "NOTHING: it makes 23 payloads REACHABLE and this compiler has NO CODE PATH THAT "
             "ASSIGNS A DECLARED RECEIVER AT ALL (75362, corrected at source; re-verified in this "
             "file -- 0 assignments of claim_status `declared`, positive control 3 for `unknown`). "
             "That distinction is the whole point: DATA EXISTING is a weaker claim than a value "
             "being reachable, and this is the only receiver where even the weaker one holds. "
             "Doctrine principle 13 still binds the 0 -- a coverage fraction is evidence only if "
-            "its denominator comes from outside the instrument's own configuration, and "
-            "CARD_GLOB is this instrument's configuration with a wave number baked into it. "
+            "its denominator comes from outside the instrument's own configuration -- which "
+            "is exactly why the wave-numbered glob was retired as the authority: it WAS this "
+            "instrument's configuration answering a question about the estate. "
             "⛔ AND THE GLOB ROUTE IS CLOSED BY RULING, NOT MERELY INSUFFICIENT: 4.0.0_SA_CRO~A "
-            "ruled W3-only INTENTIONAL-BUT-TEMPORAL and forbade widening CARD_GLOB; the "
-            "successor is an authored card_population_registry.v1.json with INDEPENDENT NAMED "
+            "ruled W3-only INTENTIONAL-BUT-TEMPORAL and forbade widening the glob; the "
+            "successor LANDED as card_population_registry.v1.json with INDEPENDENT NAMED "
             "POPULATIONS rather than one role enum -- extension_population pinning the exact 13 "
             "W3 members for the existing map/enrich path only, and receiver_source_populations "
             "keyed SEPARATELY by grain, key and failure_mode. Overlap across populations is "
@@ -775,7 +871,7 @@ def main() -> None:
                          "changes are required and a glob change is NOT among them: an authored "
                          "card_population_registry.v1.json failure_mode receiver-source "
                          "population, one of three keyed independently (4.0.0_SA_CRO~A's ruling, "
-                         "which explicitly forbids widening CARD_GLOB), a schema-bound "
+                         "landed, which forbids widening the discovery glob), a schema-bound "
                          "card-to-L0 transform with a pinned version, and a "
                          "declaring code path in this compiler, which this lane owns and which "
                          "does not exist at this commit"),
@@ -834,7 +930,14 @@ def main() -> None:
 
     print("base parts        : %d" % base_count)
     print("cards read        : %d  (from %d lane dirs)"
-          % (len(cards), len({os.path.dirname(f) for f in glob.glob(CARD_GLOB, recursive=True)})))
+          % (len(cards), len({os.path.dirname(f) for f in _diag["admitted"]})))
+    print("REGISTRY ADMISSION: %d admitted / %d glob candidates / %d UNLISTED %s"
+          % (len(_diag["admitted"]), len(_diag["candidates"]), len(_diag["unlisted"]),
+             _diag["unlisted"]))
+    print("    ^ unlisted candidates are REPORTED, NEVER ADMITTED. A glob is a discovery "
+          "instrument; it was being used as an authority boundary and no longer is.")
+    print("    receiver source populations: %s -- empty by contract, not by oversight"
+          % _diag["receiver_populations"])
     print("map rows          : %d  -> enrich=%d add=%d unresolved=%d  (sums: %s)"
           % (len(rows), acts["enrich"], acts["add"], acts["unresolved"],
              acts["enrich"] + acts["add"] + acts["unresolved"] == len(rows)))
@@ -850,7 +953,7 @@ def main() -> None:
     # changing state and two staying exactly as unreachable.
     # ⛔ AND THE FATE COLUMN NAMES BLOCKING LAYERS, NOT ONE WORD (correction 75362): the
     # earlier "CONFIGURATION -- one glob line away" was WITHDRAWN because no receiver is one
-    # line from declared. Widening CARD_GLOB moves the declaration count by ZERO -- there is no
+    # line from declared. Admitting more cards moves the declaration count by ZERO -- there is no
     # transform to run on what it would admit. A LAYER SET is what a reader can act on: it says
     # how many independent things must change, and by whom.
     _BAR = ("home_space", "failure_mode", "key", "grain")
