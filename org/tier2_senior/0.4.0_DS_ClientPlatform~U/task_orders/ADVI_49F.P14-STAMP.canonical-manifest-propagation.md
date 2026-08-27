@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DS_ClientPlatform~U</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-27T20:4xZ</issued>
-<status>staged -- GO pairs after 3.0.0_SA_CVO cert step-zero (D2 lock-in); campaign-start waits on this + the date-1 re-drive</status>
+<status>pending -- GO live 2026-08-27 ~21:5xZ (COO 76815 'both GO'd'); CVO delta-cert PASS VERIFIED AT THE REPOSITORY @2f1e693f8d, not taken from the message. Building ruling (i) per the amended mechanism @cc18451739.</status>
 <priority>P1 -- blocks campaign-start by ruling 76704 s.4; the before/after asymmetry is a second 533-date campaign</priority>
 <authority>CTO ruling 76704 (the whole design is that ruling; ruling wins on any divergence). Finder: 0.7.0_AE_CloudOps~L 76693 (the 1-of-5 manifest census at date 1). Same blessed-scoped decomp-override class as P14-PRECOND if the lint refuses: single-surface TO executing a same-window Tier-1 ruling verbatim.</authority>
 </task_order>

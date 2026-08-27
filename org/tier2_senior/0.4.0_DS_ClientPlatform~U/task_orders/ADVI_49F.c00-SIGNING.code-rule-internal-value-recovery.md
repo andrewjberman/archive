@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DS_ClientPlatform~U</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-27T21:2xZ</issued>
-<status>staged -- GO pairs after 3.0.0_SA_CVO cert step-zero; campaign-start = P14-STAMP + THIS both deployed-verified + the date-1 re-drive (the joint materiality decision's amended condition)</status>
+<status>pending -- GO live 2026-08-27 ~21:5xZ (COO 76815); CVO cert step-zero PASS VERIFIED AT THE REPOSITORY @23f08e3ce8. SG-2b ALREADY DELIVERED and ACCEPTED (@c46d26a059, NEGATIVE at n=49) -- TR does not late-join; SG-2 is FC-only. This act closes the FC SUB-CLASS and is never described as closing keeper #10.</status>
 <priority>P1 -- rides the pre-campaign window so the ledger is honest in ONE 533-date pass instead of two (~750 projected signature instances, each shaped like proven specimen 0086046319: a $59.5k inflow served as +158%)</priority>
 <authority>The JOINT MATERIALITY DECISION: CTO half 76764 (MATERIAL, economics corrected) + COO half 76768 (CONCUR, scope pinned) + CTO confirmation 76771 (scope CONFIRMED, honest consequence stated). Finder: this seat's own 76741 specimen + 76756 rate (@d3c0e45758). Same blessed-scoped decomp-override class if the lint refuses.</authority>
 </task_order>
