@@ -37,6 +37,51 @@ MODELS / ETFS           -> UNTOUCHED. No re-plumbing, no migration, no re-point
 forecloses cheap reversal is off-spec.
 </basis>
 
+<payload_blocker>
+⛔⛔ **`AC1`'s POSITIVE ARM AND `AC3` ARE BLOCKED — AND THE PRECISE STATE IS "DEFINED IN SHAPE,
+UNPOPULATED, PRODUCER NAMED", *NOT* "nothing exists".** Measured by `0.7.0_AE_CloudOps~Y` BEFORE
+writing any Terraform, which is why this cost nothing; **reframed by `3.0.0_SA_CVO~Z`, and the
+difference decides what gets built.**
+
+⭐ **THE PAYLOAD EXISTS AND ITS CONTRACT ALREADY DOES TOO — `satelliteAdapter.ts:1-4`:** *"synthesise
+the `satellites` payload from **the ALREADY-SERVED models payload PLUS the declared registry**."*
+```
+market / holdings data  -> the ALREADY-SERVED general artifact. Every firm receives it.  COMMON
+SATELLITE_REGISTRY      -> which books, which blends, which weights.        COTTONWOOD-SPECIFIC
+```
+>> ⛔ **SO THE FIRM-SPECIFIC OBJECT IS THE *REGISTRY READ*, NOT MARKET DATA — AND THE DECOMP'S HAZARD
+   MODEL ASSUMED OTHERWISE.** What the scoped path must serve, and what must never reach another
+   firm, is **membership/blends/weights**, not prices. **`SatelliteBook` is the declared shape, so
+   the contract is not an open design question.** <<
+⭐ **That makes the scoped payload SMALLER and already-shaped** — a registry read, not a data plane.
+```
+SWEEPS, every one terminal IsTruncated=None:
+  opal-data-portal-v2      4,125 keys   'satellite' -> 0
+  opal-data-cot            6,599 keys   'satellite' -> 0
+  opal-data-bd           122,356 keys   'satellite' -> 0
+  opal-data-49financial   11,847 keys   'satellite' -> 0
+  TOTAL 145,927 keys, ZERO satellite artifacts anywhere
+POSITIVE CONTROL, same sweep/bucket: 'gold' 3,738 of 6,599, 'silver' 681
+  -> the instrument FINDS tokens, so the zero is a MEASURED ABSENCE, not a broken probe
+```
+**`satelliteSet.ts:93` — `SATELLITE_REGISTRY: readonly SatelliteBook[] = []` — EMPTY BY DESIGN**, its
+own header naming **`ETFS_SATELLITES.TO-2` as the PRIMARY CARRIER** of the member set (shipped empty
+deliberately to avoid a second carrier). **`satelliteAdapter.ts:98` derives Satellites CLIENT-SIDE
+into positioning shape and performs NO fetch.**
+
+>> ⛔ **THE CHAIN, EVERY LINK MEASURED:** a scoped path was commissioned for a payload that **has no
+   server-side existence**; its member set lives in an **empty registry**; that registry's declared
+   primary carrier is **`ETFS_SATELLITES.TO-2`**, held by **`0.4.0_DS_ClientPlatform~W` — A SEAT THAT
+   DIED TONIGHT** — whose own status reads *"ACTIVE — unblocked; waiting on a SEAT"*; and the
+   registry's **`REGISTRY_MAINTAINER` is `None`**, the one item standing open at Andrew. <<
+⭐ **THE MAINTAINER QUESTION IS NOT HOUSEKEEPING. IT IS THIS PROJECT'S CRITICAL PATH.**
+
+**WHAT STILL PROCEEDS, and it is most of the TO:** `AC2` (additive proof), `AC4` (cache key wiring),
+`AC5` (`X-Firm-Id` survives), `AC6` (rung discipline) **need no payload.** ⛔ **Do NOT invent a
+fixture payload to unblock `AC1`/`AC3`** — a scoped path proved against a manufactured artifact
+proves the plumbing and nothing about the boundary.
+</payload_blocker>
+
 <additive_fence>
 ⛔⛔ **THIS TO IS ADDITIVE. NOTHING EXISTING CHANGES MODE.**
 `0.7.0_AE_CloudOps~Y` measured the three Positioning modes UNIFORM on `/api/general/` and warned that
