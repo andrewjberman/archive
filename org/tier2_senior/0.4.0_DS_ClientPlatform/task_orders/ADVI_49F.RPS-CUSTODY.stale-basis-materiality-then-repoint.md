@@ -100,8 +100,13 @@ GO pairs only AFTER `3.0.0_SA_CVO` cert step-zero; the re-seat is the S6 word @1
 **The seat's hold was CORRECT and the TO's named successor is MINE to disown: this face's
 "Successor exists: `opal-data-assets/schwab/08335338/silver/fact_rps/`" was transcribed from the
 AE row-3 finding without account verification — a name-is-not-identity defect by the issuer.** The
-seat's fixed-vintage control (legacy == `08242234` to the cent; `08335338` differs by +$91.5M /
-+63.07%) discriminates the accounts cleanly: the legacy basis IS the `08242234` population.
+seat's fixed-vintage control (legacy == `08242234` to the cent; `08335338` differs) discriminates
+the accounts cleanly: the legacy basis IS the `08242234` population.
+*(ATTRIBUTION CORRECTED 2026-08-27 ~17:5xZ on the seat's 76272: this block originally pinned
+"+$91.5M / +63.07%" to legacy-vs-`08335338`. The TRUE pairs: +$91,476,329.17 / +63.07% is
+legacy-vs-`08242234` CURRENT (the staleness delta, the caveat's basis); legacy-vs-`08335338` is
++$149,588,666.74 / +103.14% current, +$55,083,179.72 / +3.36% at fixed vintage. The covering
+message 76210 carried the correct attribution; this face carried the swap. No decision moved.)*
 `08335338` = ADVI Advisor Intelligence (Black Diamond); `08242234` = MDPF Model Portfolios
 (SmartX) — never substitute one for the other (standing law, and this is the trap firing).
 
