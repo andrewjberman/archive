@@ -9,7 +9,7 @@
 <executor_class>AE-class (partner ETL vehicle).</executor_class>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-25T22:0xZ</issued>
-<status>ACTIVE — AC2 startable immediately. ⛔ AC1/AC3 HELD on a sovereign vendor-egress call (see THE HOLD).</status>
+<status>pending -- re-seated S5, GO 2.0.0_SA_COO 76139 (post-cert, step-zero PASS @958dbfc). The AC1/AC3 vendor-egress HOLD carried by the prior text is DISCHARGED: Andrew-direct 2026-08-25T2248Z, recorded verbatim @a1e9fbcca7; all three ACs were exercised and are recorded in the proof instance (AC1 FAIL-by-design, AC2 PASS, AC3 PASS).</status>
 <priority>P1 — this lane is the ONLY thing standing between `ADVI_INSURE.TO-R1-DS` and its remaining four acceptance criteria. That TO is COMPLETE to its ceiling and waiting on you.</priority>
 <placement>LAPTOP (Rule 26).</placement>
 <scope_guard>ONE PROJECT. Exactly the three cells above. Adjacent findings → ONE LINE to `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO`; no action, keep working.</scope_guard>
