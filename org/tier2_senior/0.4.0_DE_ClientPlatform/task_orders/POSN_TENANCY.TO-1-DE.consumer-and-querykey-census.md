@@ -30,7 +30,7 @@ stale ACTIVE recruits seats onto finished work — this office watched exactly t
 am not closing another lane's records to unblock my own cut.**</status>
 
 <decomp_ref>
-Stage-3 atom decomp `workflows/atom_decomposition/runs/posn-tenancy/20260827T200734Z/DECOMP.md`
+Stage-3 atom decomp workflows/atom_decomposition/runs/posn-tenancy/20260827T200734Z/DECOMP.md
 v1.4, authored by `2.0.0_SA_COO~Z`. **Certified PARTIAL by `3.0.0_SA_CVO~Z`** — 18 of 19 cells + 6
 invariants CERTIFIED WITH FINDINGS at pin `@07de844b12`; `PT-b-2`, `R-pt1`, `PT-b-4` and `PT-inv-7`
 (as a cell) NOT certified.

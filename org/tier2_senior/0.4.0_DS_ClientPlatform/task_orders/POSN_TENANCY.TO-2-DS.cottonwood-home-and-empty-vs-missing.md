@@ -6,10 +6,48 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform~L</issued_to>
 <issued_at>2026-08-27T20:5xZ</issued_at>
-<status>ACTIVE</status>
+<status>COMPLETE — ACCEPTED 4/4 by the issuer 2026-08-27 ~21:2xZ. Deliverable `@2be92878c0`.
+
+**PROOF INSTANCE VALIDATED AT THE ISSUER'S SEAT, NOT ACCEPTED ON THE REPORT:** `rc=0 VALID`,
+`violations=0`, `acceptance rows=4`, coverage checked against the embedded criterion set; negative
+control (a nonexistent criterion id) returns `rc=1`.
+
+⛔ **AND THE FIRST RUN CAME BACK `INVALID` BECAUSE OF A DEFECT IN THIS TO, NOT IN THE WORK.** I wrote
+the `<decomp_ref>` path wrapped in markdown backticks; the checker reads raw tag content, so the TO's
+path *"does not resolve to a file"* and "disagreed" with the instance. **`0.4.0_DS_ClientPlatform~L`'s
+instance was correct and my formatting failed it.** Fourth machine-readable field this office broke
+with prose decoration today. Fixed here and in the two sibling TOs carrying the same construction.
+
+**VERDICT PER CRITERION — the two that earned it:**
+- **`AC2` (the positive control):** Cottonwood's own home reads **6,599 objects** (gold 3535,
+  platinum 1125, forwardfill_v2 695, silver 596, logs 424, code 150, bronze 73, blackdiamond 1) with
+  **0 Positioning** — so the absence is **HOME PRESENT / POSITIONING ABSENT**, not an empty bucket and
+  not a blind credential. Plus a `head-object` discriminating pair on one bucket/prefix/form:
+  `model.json` rc=254/404 vs `positioning_data.json` rc=0/8088 bytes.
+- ⭐ **THE GRAIN TRAP THEY CAUGHT WOULD HAVE INVERTED THIS CRITERION.** Token `position` matches
+  **922 of 6,599** in Cottonwood's home — `positions_cube.py`, `canonical_positions.py` — **the
+  CANONICAL POSITIONS pipeline, a different grain from the portal Positioning artifact.** A naive
+  census returns 922 and reports PRESENT. Measured at the right grain: `positioning` 0,
+  `allocation_summary` 0, `holdings_attribution` 0. A substring trap was caught beside it (`firm` → 2
+  hits, both inside `mullin-confirmation-hearing.json`).
+
+**`AC1`** complete listings, `IsTruncated=False` on every page, `--no-paginate` per page **because
+auto-paginate merges pages and DROPS the very field the criterion asks to see**; `--max-items`/`head`
+appear nowhere in the probe. **`AC3`** the consumer DOES distinguish MISSING from EMPTY today —
+`portal-proxy.ts:94/:112` (error state) vs `:115`→`:42` (success, no data) `@portal 4a52439cbe` —
+but **incidentally, as a byproduct of `!response.ok`, NOT as a contract**, and MISSING collapses into
+one Error string shared with auth failure. Reported as a finding, not designed around. **`AC4`**
+read-only verified: 4 read verbs, **0 write verbs**, no S3 object written.
+
+⚠ **`PT-b-3` OBSERVED; `PT-c-2` PARTIALLY OBSERVED** (consumer half only — the producer half does not
+exist yet). Cell states are as observed and were **not** synthesized from criterion verdicts.
+⚠ **RELAYED, NOT RE-DERIVED, and correctly flagged as such by the executor:** `:1099-1100` records a
+nonexistent path returning **401 not 404**, which would make MISSING indistinguishable from
+UNAUTHENTICATED. That is `0.0.0_AB_MSTR~Z`'s measurement; re-running it needs a live bearer and is
+outside a read-only substrate TO. **It is the open thread this TO leaves behind.**</status>
 
 <decomp_ref>
-Stage-3 atom decomp `workflows/atom_decomposition/runs/posn-tenancy/20260827T200734Z/DECOMP.md`
+Stage-3 atom decomp workflows/atom_decomposition/runs/posn-tenancy/20260827T200734Z/DECOMP.md
 v1.4, authored by `2.0.0_SA_COO~Z`. **Certified PARTIAL by `3.0.0_SA_CVO~Z`** — 18 of 19 cells + 6
 invariants CERTIFIED WITH FINDINGS at pin `@07de844b12`; `PT-b-2`, `R-pt1`, `PT-b-4` and `PT-inv-7`
 (as a cell) NOT certified. Cells bind in their **v1.3/v1.4 corrected wording** — a certification with

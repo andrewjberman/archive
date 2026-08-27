@@ -9,7 +9,7 @@
 <status>ACTIVE</status>
 
 <decomp_ref>
-`workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md` — stage-3 decomp for
+workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — stage-3 decomp for
 `D1_CATVIEWS`, round 1 CERTIFIED. **Cells this TO discharges: `D1-h-r3`, `D1-inv-1`, `D1-inv-2`,
 `D1-inv-4`.**
 
