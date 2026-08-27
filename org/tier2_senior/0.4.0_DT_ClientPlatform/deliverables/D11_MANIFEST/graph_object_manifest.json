@@ -371,7 +371,7 @@
         "source_identity": "kuzu:kuzu_nessie_db@2902399899597701830"
       },
       "generation": {
-        "materializer": "infra/aws/globgrph/kuzu_nessie_load.py + infra/aws/globgrph/kuzu_incremental_refresh.py",
+        "materializer": "infra/aws/globgrph/kuzu_nessie_load.py [FULL re-load] + infra/aws/globgrph/kuzu_incremental_refresh.py [INCREMENTAL]",
         "materializer_digest": null,
         "materializer_standing": "canonical",
         "declared_opinions": null,
@@ -558,7 +558,7 @@
         "source_identity": "json:stitch_graph"
       },
       "generation": {
-        "materializer": "infra/aws/globgrph/derive_stitch.py + infra/aws/globgrph/extract_portal_stitch.py",
+        "materializer": "infra/aws/globgrph/derive_stitch.py [THE WRITER] <- infra/aws/globgrph/extract_portal_stitch.py [builds the graph dict]",
         "materializer_digest": null,
         "materializer_standing": "unknown",
         "declared_opinions": null,
@@ -648,7 +648,7 @@
         "source_identity": null
       },
       "generation": {
-        "materializer": "infra/aws/globgrph/kuzu_load.py + infra/aws/globgrph/kuzu_nessie_load.py + infra/aws/globgrph/kuzu_stitch_load.py",
+        "materializer": "infra/aws/globgrph/_provenance.py [THE WRITER] <- called by infra/aws/globgrph/kuzu_load.py + infra/aws/globgrph/kuzu_nessie_load.py + infra/aws/globgrph/kuzu_stitch_load.py [all three DELEGATE the stamp]",
         "materializer_digest": null,
         "materializer_standing": "canonical",
         "declared_opinions": null,
@@ -662,7 +662,7 @@
         "age_note": null
       },
       "basis": "measured",
-      "evidence": "3 objects. UNTRACKED, ignored via infra/aws/globgrph/.gitignore '*._build_manifest.json' -- DELIBERATELY, per its own TO-F1 comment (machine-specific source paths, runtime artifacts, never committed). NOTE: these are the substrate the ENTIRE provenance-header contract stands on, and they are device-local and uncommitted BY DESIGN -- a manifest-less DB reads as UNKNOWN VINTAGE. SET ROW: covers 3 objects.",
+      "evidence": "3 objects. ⛔ WRITER CORRECTED: my first cut credited the three LOADERS. `_build_manifest` appears ZERO times in all three of them. The writer is infra/aws/globgrph/_provenance.py -- :34 defines MANIFEST_SUFFIX, :46 resolves the path, :68-69 opens it for write and json.dumps -- and the three loaders each IMPORT _provenance, i.e. they DELEGATE the stamp. I had the delegation backwards, naming the delegators and omitting the writer -- the same shape as the cse row, and found by my own build-time guard rather than by a peer. UNTRACKED, ignored via infra/aws/globgrph/.gitignore '*._build_manifest.json' -- DELIBERATELY, per its own TO-F1 comment (machine-specific source paths, runtime artifacts, never committed). NOTE: these are the substrate the ENTIRE provenance-header contract stands on, and they are device-local and uncommitted BY DESIGN -- a manifest-less DB reads as UNKNOWN VINTAGE. SET ROW: covers 3 objects.",
       "owner": "0.7.0_AE_CloudOps (NFRA_GLOBGRPH TO-F1)"
     },
     {

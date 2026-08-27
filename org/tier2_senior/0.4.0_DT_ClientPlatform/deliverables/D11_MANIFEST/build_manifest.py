@@ -14,6 +14,7 @@ materializer, is not a part registered below, and touches no store or generator.
 from __future__ import annotations
 import json
 import os
+import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "graph_object_manifest.json")
@@ -195,7 +196,7 @@ PARTS.append(part(
     "kuzu_nessie_db.local", "projection", "infra/aws/globgrph/kuzu_nessie_db",
     "projection", "current_state", ["graph_nodes", "graph_edges", "cse", "graph_contracts"],
     "kuzu:kuzu_nessie_db@2902399899597701830",
-    "infra/aws/globgrph/kuzu_nessie_load.py + infra/aws/globgrph/kuzu_incremental_refresh.py",
+    "infra/aws/globgrph/kuzu_nessie_load.py [FULL re-load] + infra/aws/globgrph/kuzu_incremental_refresh.py [INCREMENTAL]",
     "canonical", None, "rebuilds engine-internally on Nessie-HEAD-advance", "Nessie HEAD advance",
     "production", "2026-08-26T14:07:59Z",
     "comp-kuzu provenance header (built-time + snapshot ids + counts) cross-read against stat mtime",
@@ -272,7 +273,7 @@ PARTS.append(part(
 PARTS.append(part(
     "stitch_graph.json", "output_artifact", "infra/aws/globgrph/stitch_graph.json",
     "projection", "point_in_time", [], "json:stitch_graph",
-    "infra/aws/globgrph/derive_stitch.py + infra/aws/globgrph/extract_portal_stitch.py", "unknown", None, None, None,
+    "infra/aws/globgrph/derive_stitch.py [THE WRITER] <- infra/aws/globgrph/extract_portal_stitch.py [builds the graph dict]", "unknown", None, None, None,
     "unknown", "2026-07-25T18:44:34Z", STAT_EV, "measured",
     "NOT ON THE STARTING LIST. 25,489,187 bytes -- a 25MB graph JSON. UNTRACKED, ignored via "
     "infra/aws/globgrph/.gitignore:7.",
@@ -313,10 +314,16 @@ PARTS.append(part(
     "_build_manifest.json.SET", "output_artifact",
     "infra/aws/globgrph/{kuzu_nessie_db,kuzu_db,kuzu_stitch_db}._build_manifest.json",
     "evidence", "point_in_time", [], None,
-    "infra/aws/globgrph/kuzu_load.py + infra/aws/globgrph/kuzu_nessie_load.py + infra/aws/globgrph/kuzu_stitch_load.py", "canonical", None,
+    "infra/aws/globgrph/_provenance.py [THE WRITER] <- called by infra/aws/globgrph/kuzu_load.py + infra/aws/globgrph/kuzu_nessie_load.py + infra/aws/globgrph/kuzu_stitch_load.py [all three DELEGATE the stamp]", "canonical", None,
     "stamped beside each DB at build", "db build", "production",
     "per-DB, matches each DB", "stat; gitignore rule read at HEAD", "measured",
-    "3 objects. UNTRACKED, ignored via infra/aws/globgrph/.gitignore '*._build_manifest.json' -- "
+    "3 objects. ⛔ WRITER CORRECTED: my first cut credited the three LOADERS. `_build_manifest` "
+    "appears ZERO times in all three of them. The writer is infra/aws/globgrph/_provenance.py -- :34 "
+    "defines MANIFEST_SUFFIX, :46 resolves the path, :68-69 opens it for write and json.dumps "
+    "-- and the three loaders each IMPORT _provenance, i.e. they DELEGATE the stamp. I had the "
+    "delegation backwards, naming the delegators and omitting the writer -- the same shape as "
+    "the cse row, and found by my own build-time guard rather than by a peer. "
+    "UNTRACKED, ignored via infra/aws/globgrph/.gitignore '*._build_manifest.json' -- "
     "DELIBERATELY, per its own TO-F1 comment (machine-specific source paths, runtime artifacts, never "
     "committed). NOTE: these are the substrate the ENTIRE provenance-header contract stands on, and "
     "they are device-local and uncommitted BY DESIGN -- a manifest-less DB reads as UNKNOWN VINTAGE. "
@@ -712,6 +719,51 @@ MANIFEST["denominator"]["method"] += (
 
 with open(OUT, "w", encoding="utf-8") as f:
     json.dump(MANIFEST, f, indent=2, ensure_ascii=False)
+
+# ---------------------------------------------------------------------------
+# SELF-ENFORCEMENT ON generation.materializer -- the validator this contract lacks.
+#
+# THREE defects of ONE class landed in this free-string field in a single night, each
+# invisible until an INDEPENDENT instrument tried to join on it:
+#   bare filename          -> an IDENTITY a join cannot resolve   (5 of 39 parts)
+#   "a -> b + c"           -> a RELATION a join cannot resolve    (graph_nodes/graph_edges)
+#   seven names, one "+"   -> a ROLE a join cannot resolve        (cse)
+#
+# Measured the same night, same author, same hour: 0 of 16 defective in a field a schema
+# REJECTS (joinable_ref.id), 5 of 39 here where nothing does. Holding the rule in mind did
+# not produce compliance; a machine refusing the value did. So this build refuses it.
+#
+# NOT a schema change and NOT a proposal to one -- L0 types this field as a string and that
+# is 1.0.0_SA_CTO~X's call as owner. This is a LOCAL guard on my own emitter.
+def _check_materializers(parts):
+    # derive the workspace root, never bake it (CLAUDE.md: device-agnostic by default)
+    ws = os.path.abspath(os.path.join(HERE, "..", "..", "..", "..", ".."))
+    bad = []
+    for p in parts:
+        m = (p.get("generation") or {}).get("materializer")
+        if not m:
+            continue
+        toks = re.findall(r"[\w./-]+\.py", m)
+        bare = [t for t in toks if "/" not in t]
+        if bare:
+            bad.append((p["id"], "BARE FILENAME, not joinable: %s" % bare))
+        missing = [t for t in toks if "/" in t and not os.path.exists(os.path.join(ws, t))]
+        if missing:
+            bad.append((p["id"], "PATH DOES NOT RESOLVE ON DISK: %s" % missing))
+        if len(toks) > 1 and not re.search(r"\[[A-Za-z ]+\]|->", m):
+            bad.append((p["id"], "%d paths named with NO declared role or arrow -- "
+                                 "reads as N co-equal writers" % len(toks)))
+    if bad:
+        for i, why in bad:
+            print("  MATERIALIZER DEFECT  %-28s %s" % (i, why))
+        raise SystemExit("BUILD REFUSED: %d materializer field(s) unjoinable. "
+                         "A correct claim that cannot be joined reads as an absent claim." % len(bad))
+    print("materializer guard: %d part(s) checked, 0 defects "
+          "(paths resolve on disk; multi-path rows declare a role)"
+          % sum(1 for p in parts if (p.get("generation") or {}).get("materializer")))
+
+
+_check_materializers(PARTS)
 
 print("parts_registered:", len(PARTS))
 print("declared:", MANIFEST["denominator"]["parts_registered"])
