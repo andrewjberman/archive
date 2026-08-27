@@ -103,7 +103,26 @@ assumed.**
 <certification>**CERTIFIED WITH FINDINGS** @`205546c65c`, amended @`a025e2be91`. **CVO F2 (P1) is discharged by the four-postulate record linked above and is submitted for certification like any other artifact** — the issuer authoring it is not the issuer certifying it.</certification>
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued>2026-08-27T17:4xZ</issued>
-<status>ACTIVE — unblocked on its merits; waiting on TWO SEATS (DE + AE), and there is no AE seat on this fabric today.</status>
+<status>ACTIVE -- and the VERB is deliberately unchanged; only a FALSIFIED FACT in the old text is corrected.
+  PRIOR TEXT: "waiting on TWO SEATS (DE + AE), and there is no AE seat on this fabric today."
+  DE LIMB: DELIVERED, ACCEPTED, CERTIFIED. modesFor(firm) TOTAL over firms UNION {null}, null failing
+    CLOSED, tamper arm exercised, both render arms read. portal 797c4f8d (+dfdd7f6d); proof-of-spec
+    .tools/proof-of-spec-check.py rc=0 VALID over SAT-TO4-AC1..AC5, 4/4 declared cells reachable.
+  AE SEAT: NOW EXISTS. ANDREW-DIRECT ~2026-08-27T21:0xZ, VERBATIM: "I just brought 0.7.0_AE_CloudOps~Z
+    online for this purpose, they should haev been reinstantiated when the ened for them becameapparent,
+    but its fine, they are starting up now" [sic, quoted exactly -- the phrasing IS the ruling].
+    Verified independently at the broker, not taken on the word alone: get_agent_status ->
+    0.7.0_AE_CloudOps~Z LIVE, PID 43492. So the "no AE seat" clause is FALSE as of that moment and is
+    struck; it had been true when 1.0.0_SA_CTO~Z wrote it at the cut.
+  ⛔ WHAT IS STILL OPEN, AND IT IS THE ISSUER'S, NOT THE ASSIGNEE'S: Andrew ruled (b) ACCESS at ~19:46Z
+    (@5f60dd944a), which makes this TO's client-side gate NECESSARY AND NOT SUFFICIENT and moves the
+    served-plane scoping to R5 under a NEW project. So whether this TO's AE limb is now `complete`
+    (DE half shipped, AE half absorbed by R5), `superseded` (whole TO overtaken), or genuinely still
+    live is a call with three defensible answers. 1.0.0_SA_CTO~Z as issuer holds it. THE ARRIVAL OF A
+    SEAT DOES NOT SETTLE WHAT THE SEAT SHOULD DO.
+  ⚠ A STANDING BLOCKER SAT IN THIS FIELD FROM THE CUT AND NOTHING ACTED ON IT: the TO named "there is
+    no AE seat on this fabric" at issuance, and the gap closed only when Andrew observed it directly.
+    A blocker stated in a TO's own status is not a signal any instrument reads.</status>
 
 <proof_of_spec>
   <!-- ISSUANCE half (1.0.0_SA_CTO~Z). POSITIONAL:
