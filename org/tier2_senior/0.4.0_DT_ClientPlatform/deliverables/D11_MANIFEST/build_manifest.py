@@ -105,7 +105,7 @@ PARTS.append(part(
 PARTS.append(part(
     "cse", "store", wh("cse_b557721f-8b81-4ec2-9289-fe5f44c3f272"),
     "source", "current_state", [], "iceberg:cse",
-    "infra/aws/globgrph/cse_producers_nightly.py + cse_emit_*.py (5 emitters); store layer cse_store.py",
+    "infra/aws/globgrph/cse_producers_nightly.py + infra/aws/globgrph/cse_emit_agent.py + infra/aws/globgrph/cse_emit_deploy.py + infra/aws/globgrph/cse_emit_frontend_coevolution.py + infra/aws/globgrph/cse_emit_graphhead.py + infra/aws/globgrph/cse_emit_promote.py + infra/aws/globgrph/cse_store.py",
     "canonical", None, "nightly (<26h per the provenance header)", "schedule", "production",
     "2026-08-26T03:31:12Z", S3_EV, "measured",
     "389 objects; corroborated by comp-kuzu provenance header 'cse: last-write 14.8h ago (< 26h cadence)'",
@@ -182,7 +182,7 @@ PARTS.append(part(
     "kuzu_nessie_db.local", "projection", "infra/aws/globgrph/kuzu_nessie_db",
     "projection", "current_state", ["graph_nodes", "graph_edges", "cse", "graph_contracts"],
     "kuzu:kuzu_nessie_db@2902399899597701830",
-    "infra/aws/globgrph/kuzu_nessie_load.py (full) + kuzu_incremental_refresh.py (incremental)",
+    "infra/aws/globgrph/kuzu_nessie_load.py + infra/aws/globgrph/kuzu_incremental_refresh.py",
     "canonical", None, "rebuilds engine-internally on Nessie-HEAD-advance", "Nessie HEAD advance",
     "production", "2026-08-26T14:07:59Z",
     "comp-kuzu provenance header (built-time + snapshot ids + counts) cross-read against stat mtime",
@@ -259,7 +259,7 @@ PARTS.append(part(
 PARTS.append(part(
     "stitch_graph.json", "output_artifact", "infra/aws/globgrph/stitch_graph.json",
     "projection", "point_in_time", [], "json:stitch_graph",
-    "infra/aws/globgrph/derive_stitch.py + extract_portal_stitch.py", "unknown", None, None, None,
+    "infra/aws/globgrph/derive_stitch.py + infra/aws/globgrph/extract_portal_stitch.py", "unknown", None, None, None,
     "unknown", "2026-07-25T18:44:34Z", STAT_EV, "measured",
     "NOT ON THE STARTING LIST. 25,489,187 bytes -- a 25MB graph JSON. UNTRACKED, ignored via "
     "infra/aws/globgrph/.gitignore:7.",
@@ -300,7 +300,7 @@ PARTS.append(part(
     "_build_manifest.json.SET", "output_artifact",
     "infra/aws/globgrph/{kuzu_nessie_db,kuzu_db,kuzu_stitch_db}._build_manifest.json",
     "evidence", "point_in_time", [], None,
-    "kuzu_load.py / kuzu_nessie_load.py / kuzu_stitch_load.py", "canonical", None,
+    "infra/aws/globgrph/kuzu_load.py + infra/aws/globgrph/kuzu_nessie_load.py + infra/aws/globgrph/kuzu_stitch_load.py", "canonical", None,
     "stamped beside each DB at build", "db build", "production",
     "per-DB, matches each DB", "stat; gitignore rule read at HEAD", "measured",
     "3 objects. UNTRACKED, ignored via infra/aws/globgrph/.gitignore '*._build_manifest.json' -- "
@@ -381,7 +381,7 @@ PARTS.append(part(
 PARTS.append(part(
     "estate-coverage-resolver.json", "store", "org/modules/graph/estate-coverage-resolver.json",
     "projection", "current_state", [], "json:estate-coverage-resolver",
-    "gen-estate-resolver.py (joins CVO manifest 61e91d334 + census 2d9a0a2a1)", "unknown", None,
+    "org/modules/graph/gen-estate-resolver.py", "unknown", None,
     None, None, "production", "2026-08-20T18:59:22Z", STAT_EV, "measured",
     "213,450 bytes, TRACKED. Generator named from graph-call-manifest.yaml:706, NOT source-confirmed "
     "at the file itself.", "UNKNOWN", age_note="6 days at carding.",
