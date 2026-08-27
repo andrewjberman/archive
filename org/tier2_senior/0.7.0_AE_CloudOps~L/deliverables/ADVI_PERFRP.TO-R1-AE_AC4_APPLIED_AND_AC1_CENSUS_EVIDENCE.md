@@ -410,6 +410,56 @@ schedule enabled, no EMITTERS entry edited.
 
 ---
 
+## 3c. BACKFILL FEASIBILITY (remediation step 3) -- and the trap that would run green
+
+`1.0.0_SA_CTO` 74165 ruled the minimal per-date set CONDITIONAL on stage-scoped invocation existing,
+and recorded that existence as **unread**. It is this seat's plane. Measured; reported 74190.
+
+**STAGE-SCOPING DOES NOT EXIST IN THE ENTRYPOINT.** `chain_49f_entrypoint.py`'s entire argparse
+surface is `--date`, `--production`, `--upload`, `--workdir`. No `--only`/`--stages`/`--from`/`--to`.
+`_stage_list()` is built whole at `:450` and iterated whole; the SSM document runs
+`python3 chain_49f_entrypoint.py --production`, full stop. **The stage SCRIPTS are independently
+invocable** -- so a driver CAN run a subset, just not through the entrypoint.
+
+### ⛔ AND THAT IS THE TRAP
+
+`_pull_prev_valuation_into_mirror` is defined at `:201`, called at `:472` **in `main()`**, and appears
+**ZERO times inside `_stage_list`**. It is ENTRYPOINT-INTERNAL with no standalone invocation.
+`c02_twr_engine:171` documents `--canonical-local` as *"local dir holding
+canonical/{valuation,flow_ledger}"* -- **c02 reads both from that mirror, and the D-1 valuation only
+arrives there via that entrypoint-internal pull.**
+
+>> **A STAGE-SCOPED BACKFILL DRIVING c00/c01/c02 DIRECTLY LOSES THE D-1 PULL, AND c02 REVERTS TO
+`REFUSED-NO-BMV` ON EVERY ROW -- exactly the pre-remedy state `b9a665364f` fixed. It would run green,
+write 531 all-refused partitions, and report success.** The `chain_backfill_0819` artifact is the
+proof of shape: `single-partition exercise: {'REFUSED-NO-BMV': 7332} -- prior partition not loaded`.
+**That is what a stage-scoped run looks like, and it looks fine.** <<
+
+### The mirror dependency graph, read at source rather than from the docstring
+
+Writers (`--local-out mirror`): a02, a04, a05, b00, b01, c00, c01.
+Readers: **c00** <- `--ref-local` (a05) + `--boundary-local` (a02) + `--prices-local` (b01) ·
+**c01** <- `--canonical-local` (b00) · **c02** <- `--canonical-local` (b00) + `--calendar-local` (a04).
+
+**Five upstream stages must run per date purely to populate the mirror.** So the minimal set is
+`{a02, a04, a05, b00, b01} -> c00 -> c01 -> c02 -> dependent c04` **plus the D-1 pull, which is not a
+stage and must be re-implemented or lifted out of `main()` by the TO.** **9 of 17 stages, not 3.**
+(`c01` per `0.4.0_DS_ClientPlatform~U` 74177 -- it consumes `flow_ledger`, so step (1) invalidates its
+output on the same reasoning that ruled c02-only out.)
+
+**COST:** narrows the fork without collapsing it. Fallback full-chain figure stands at **110-130s/date
+measured**, ~16-19h sequential over 531 dates, and the host self-halts after each dispatcher-started
+run (`shutdown -h +2`, gated on `StartedByDispatcher`).
+
+**ONE REASSURANCE:** the pre-registered acceptance (`~U`'s all-ten table `@4a1fd3e09b`) **already
+discriminates against this failure** -- a dropped D-1 pull yields all-refused rows and no computed
+return to compare, so it fails loudly. **The danger is only reading a green run instead of the
+artifact.**
+
+**Nothing designed, nothing built, no route proposed.**
+
+---
+
 ## 4. Standing state of TO-R1-AE
 
 | criterion | status | held by |
