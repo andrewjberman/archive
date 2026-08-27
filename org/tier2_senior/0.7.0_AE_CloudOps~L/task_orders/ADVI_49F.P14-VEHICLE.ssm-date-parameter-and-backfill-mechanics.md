@@ -147,12 +147,94 @@ and the hazards cannot be re-discovered the hard way mid-loop.
   run). A nightly refused on the campaign's mutex is a MISSED PRODUCTION RUN wearing a defect's
   face; a campaign date refused on the nightly's is a spurious failure — NEITHER may be
   discovered live. The date-1 wall-time measurement sizes the blackout, not just the campaign.
+  <!-- IMPLEMENTED + CORRECTED 2026-08-27 ~22:3xZ by 0.7.0_AE_CloudOps~L (assignee), banked here
+       because the clause as written is READ as one window and it is TWO, and the permissive half
+       is the one that is silent.
+
+       WHAT BIT ME, in my own driver, 30 minutes after I committed it: the sentence a reader acts
+       on is "no date STARTS within [wall + margin] BEFORE the fire", so that is what I built. But
+       seconds-to-next-anchor jumps from ~0 to ~24h THE INSTANT THE ANCHOR PASSES. At 12:47Z, with
+       the nightly holding the entrypoint mutex, that test reads 23.97h and says CLEAR. The guard
+       is structurally blind for exactly the span of the run it exists to avoid.
+
+       THE FIX IS ALREADY IN THIS CLAUSE -- "RESUMES only after the nightly's completion is READ
+       FROM ITS PRODUCED ARTIFACTS". I had even written the artifact-reading function, then called
+       it only to PRINT inside the pause branch and never to GATE resumption. A check that is
+       computed and not consumed reads as rigour and enforces nothing; it is the same class as a
+       declared-but-unrun falsifier, and CLAUDE.md s.4's consuming-half law at its smallest grain.
+
+       SO THE CRITERION, STATED AS THE TWO WINDOWS AN IMPLEMENTER MUST BUILD:
+         PRE-FIRE   held when [wall + margin] does not fit before the anchor.
+         POST-FIRE  held FROM the anchor UNTIL the nightly's own artifact is read. The schedule
+                    having FIRED is not evidence; only the artifact is.
+         OVERDUE    past a bounded grace (2h as built) it STOPS and asks a human -- "not finished
+                    yet" and "never ran" are indistinguishable from here, and only one is safe to
+                    drive through.
+         DISABLED   nightly not ENABLED on the applied plane -> no contender, campaign runs.
+                    UNREADABLE is treated as ENABLED: an unreadable schedule is exactly when an
+                    assumption is least affordable.
+       Exercised at 7 clock positions + the disabled arm, all correct. One of MY controls was wrong
+       before the code was (I expected 12:20Z HELD; it is correctly CLEAR, 25 min > the 16.9 min
+       budget) -- recorded because an expectation that was wrong is data about the instrument.
+
+       MEASURED, and it sizes the blackout's other half: the nightly's OWN wall time is ~2.6 min
+       (twr_daily date=2026-08-26 written 12:47:36Z against the 12:45:00Z anchor).
+
+       BLAST RADIUS, measured on BOTH trigger planes so the single-window design is justified
+       rather than assumed: only advi-49f-gold-floor cron(45 12) UTC contends (advi-49f-publisher
+       cron(15 13) is DISABLED -- a latent SECOND window if anyone enables it).
+       bd-49f-session-complete keys on document-name `opal-bd-49f-session-fetch`, NOT
+       advi-49f-chain-dispatch, so the campaign's sends CANNOT fire {mode: runner-run};
+       opal-49f-served-guard-on-write keys on a different bucket+key. -->
   (ii) the nightly's
   DISPATCHER sets StartedByDispatcher=true and HALTS THE HOST after its run — mid-campaign, the
   driver EXPECTS that halt, restarts the host, and resumes from the ledger; a halted host is a
   scheduled event, never a campaign failure.
   (e) Campaign-start = when the seat judges the date-1 measurement supports the shape; no further
   word needed. Delta-cert of this clause: `3.0.0_SA_CVO`, the standing form.
+  <!-- (e) AMENDED BY THE JOINT MATERIALITY DECISION, banked 2026-08-27 ~22:1xZ by
+       0.7.0_AE_CloudOps~L on 2.0.0_SA_COO 76783 + 1.0.0_SA_CTO 76746, semantics pinned by COO
+       76863. Campaign-start now reads THREE inputs, all at the FACES:
+         (1) ADVI_49F.P14-STAMP  TERMINAL ON ITS FACE -- and 76863 pins that this means the
+             COMPLETION FLIP, *not* the deploy leg's report. The deploy is verified @9644276a3a
+             while the face still reads pending; the FACE is the operative read.
+         (2) ADVI_49F.c00-SIGNING TERMINAL -- deployed-verified for the FC sub-class OR
+             closed-as-impossible with the TR disposition recorded. Either is terminal.
+             (SG-2b already answered NEGATIVE at n=49 @c46d26a059: TR does not late-join.)
+         (3) THE DATE-1 RE-DRIVE, run AFTER (1) and (2) so the ledger's first row carries
+             full-coverage stamps. Running it before is discarded work.
+       All three, then this seat's (e) judgment. Nothing else about the driver, ledger or blackout
+       changes. -->
+
+- **THE CAMPAIGN VEHICLE, BUILT 2026-08-27 ~22:2xZ (V14-4c(b) discharged as artifacts, not design):**
+  - `org/tier2_senior/0.7.0_AE_CloudOps~L/deliverables/ADVI_49F.P14-VEHICLE_CAMPAIGN_DRIVER.py`
+    @6914a73fd1 (+ blackout fix @42ce31beec). `--plan` is the DEFAULT; `--run` REFUSES without
+    `--confirm-campaign-start` because these writes take the 74218 boundary and BECOME production
+    history. `--status` reads the ledger without touching AWS.
+  - LEDGER `ADVI_49F.P14-VEHICLE_CAMPAIGN_LEDGER.jsonl` (same dir) -- append-only, one row per date
+    {date, basis, outcome, artifact-evidence, command_id, wall}; last row wins; a torn line WARNs
+    rather than vanishing. A successor RESUMES FROM THIS FILE. Dates whose row reads
+    ARTIFACT-COMPLETE are never redone.
+  - ⛔ THE COMPLETION ORACLE IS THE ARTIFACTS, and it REFUSES TODAY'S STATE BY CONSTRUCTION. Three
+    discriminators, each exercised with today's wrong state as the firing negative: basis-presence
+    (3 of 4 manifests carry no `attestation_basis` until P14-STAMP lands), freshness (LastModified
+    strictly after this run's send -- the control date also had 2 objects, so PRESENCE IS NOT
+    REPAIR and COUNT IS NOT AN ORACLE), and branch-agreement (the stamp must equal the branch the
+    driver drove). `attested` is guarded as the -1 SENTINEL, never summed. CONSEQUENCE: the driver
+    CANNOT mark a date complete before P14-STAMP -- the gate lives in the instrument, not only in
+    this seat's judgment.
+  - The flag is decided from `ADVI_49F.P14-VEHICLE_A00_ATTESTATION_REDERIVATION.py::derive()` and
+    NO other predicate -- a second transcription of a00's gate is how two artifacts drift while
+    both look right.
+- **APPLIED-ENTRYPOINT RE-VERIFICATION (this seat's named step, CTO 76738) PASSED @a52a2224ce** on
+  DEPLOYED bytes (`s3://opal-data-49financial/_code/`, LastModified 22:08:00Z): a00-only argv scope
+  (1 of 15 stages carries the flag), mirror membership (a00 joins the mirror per ruling (i)), no
+  auto-derive (AST-only), and ARGV SURFACE AGREEMENT (deployed a00 accepts all 5 options the
+  entrypoint sends -- without this, `--local-out` would have killed all 533 dates on argv rather
+  than at the guard). Every check carries a negative control that FIRES. Re-runnable:
+  `ADVI_49F.P14-VEHICLE_APPLIED_ENTRYPOINT_VERIFY.py`, rc=0 read bare.
+  LIMIT STATED: this verifies what the deployed bytes DO. It does NOT claim they match a committed
+  source vintage -- that identity is the DS lane's deploy leg (COO 76863 confirmed the division).
 - **V14-5 ACCEPTANCE RE-READS GREEN (joint with 0.4.0_DS_ClientPlatform~U):** the all-ten table
   @4a1fd3e09b + the NNA delta table @e8ccd8eb77 re-read against the backfilled history.
   0.4.0_DS_ClientPlatform~U validates; this seat produces.
