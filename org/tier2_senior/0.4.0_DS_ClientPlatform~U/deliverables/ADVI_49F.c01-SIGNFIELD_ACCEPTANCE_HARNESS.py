@@ -16,6 +16,15 @@ working-tree modules -- and compares.
 NEGATIVE CONTROL ON THE HARNESS ITSELF: a planted mutant must make C01-1 and C01-2 FAIL.
 Run with --mutant to exercise that arm.
 
+THE BASELINE IS PINNED BY HASH, NOT BY `HEAD`, AND THE PIN IS CONTENT-CHECKED.
+This harness first read its PRE arm from `HEAD`. That was correct for exactly as long as the
+fix was uncommitted: the moment the fix landed, `HEAD` BECAME the post-fix code, both arms
+loaded the same module, and the harness reported C01-1 FAIL -- a committed acceptance artifact
+that could no longer reproduce its own recorded result. The docstring below already cited
+Rule 22a ("resolve a pin by CONTENT, never by an ancestry predicate") while the code pinned to
+a moving symbol. So: BASELINE_COMMIT is an explicit hash, and `_assert_baseline` REFUSES a
+baseline whose loaded module already carries the new field. A wrong baseline is now LOUD.
+
 Read-only against S3. Analytic fields only.
 """
 import argparse
@@ -30,6 +39,8 @@ sys.path.insert(0, str(RUNNERS))
 import pandas as pd  # noqa: E402
 import runner_common as rc  # noqa: E402
 
+# The PRE-fix vintage, pinned by hash. `HEAD` is not a baseline -- see the docstring.
+BASELINE_COMMIT = "b56bd2b7f0"
 DATES = ["2026-08-24", "2026-08-25"]
 NEW_COLS = ["in_kind_signed_value", "in_kind_direction_unresolved"]
 
@@ -68,7 +79,8 @@ TOL = 0.01   # the estate's own RECON_TOLERANCE grain: these are cent-rounded do
 def _load_at_head(name: str, relpath: str, workdir: Path):
     """Import a module from its git-HEAD CONTENT (Rule 22a CODE: resolve a pin by content,
     never by filename or by an ancestry predicate)."""
-    src = subprocess.run(["git", "show", f"HEAD:{relpath}"], capture_output=True, check=True).stdout
+    src = subprocess.run(["git", "show", f"{BASELINE_COMMIT}:{relpath}"],
+                         capture_output=True, check=True).stdout
     dst = workdir / f"{name}.py"
     dst.write_bytes(src)
     spec = importlib.util.spec_from_file_location(name, dst)
@@ -280,11 +292,20 @@ def main() -> int:
         "c00_pre", "data/assets/scripts/gold/runners_49f/c00_flow_ledger.py", work)
     c01_pre, _ = _load_at_head(
         "c01_pre", "data/assets/scripts/gold/runners_49f/c01_nna_canonical.py", work)
+    # POSITIVE CONTROL ON THE BASELINE ITSELF. The whole comparison is meaningless if the
+    # PRE arm already contains the fix, and that failure mode is silent -- it renders as a
+    # C01-1 FAIL, which reads like a defect in the CHANGE rather than in the HARNESS.
+    if c00_pre.SCHEMA_VERSION != "1.1" or "in_kind_signed_value" in c00_src.decode("utf-8"):
+        raise SystemExit(
+            f"REFUSED: baseline {BASELINE_COMMIT} is not the pre-fix vintage "
+            f"(c00 SCHEMA_VERSION={c00_pre.SCHEMA_VERSION}, signed field present="
+            f"{'in_kind_signed_value' in c00_src.decode('utf-8')}). Both arms would load the "
+            "same code and every difference-based control would go quiet. Repin BASELINE_COMMIT.")
     c00_post = _load_live("c00_post", RUNNERS / "c00_flow_ledger.py")
     c01_post = _load_live("c01_post", RUNNERS / "c01_nna_canonical.py")
     c02 = _load_live("c02_engine", RUNNERS / "c02_twr_engine.py")
-    print(f"PRE modules from git HEAD by CONTENT ({len(c00_src)} bytes c00) | "
-          f"POST from the working tree")
+    print(f"PRE modules from PINNED baseline {BASELINE_COMMIT} by CONTENT "
+          f"({len(c00_src)} bytes c00, pin content-checked) | POST from the working tree")
     print(f"  c00 SCHEMA_VERSION pre={c00_pre.SCHEMA_VERSION} post={c00_post.SCHEMA_VERSION}")
     print(f"  c01 SCHEMA_VERSION pre={c01_pre.SCHEMA_VERSION} post={c01_post.SCHEMA_VERSION}")
     res["schema_versions"] = {"c00_pre": c00_pre.SCHEMA_VERSION, "c00_post": c00_post.SCHEMA_VERSION,
