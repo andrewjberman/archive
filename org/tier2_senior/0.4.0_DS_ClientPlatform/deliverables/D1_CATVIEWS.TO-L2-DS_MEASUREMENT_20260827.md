@@ -1,6 +1,18 @@
 # `D1_CATVIEWS.TO-L2-DS` — MEASUREMENT RECORD
 
-**Lane:** `0.4.0_DS_ClientPlatform~Z` · **Issuer:** `2.0.0_SA_COO~Z` · **Certifier:** `3.0.0_SA_CVO~Z`
+**Lane:** `0.4.0_DS_ClientPlatform~Z` · **Issuer:** `2.0.0_SA_COO~Z`
+**Certifier:** `3.0.0_SA_CVO~Z` — ⛔ **PARTIAL, AND THE SCOPE IS THE POINT: `AC1` and `AC2`/`AC4`/`AC5`
+ONLY.** Durable carrier `@b57d6d0d1f`. ⛔ **`AC3` IS NOT CERTIFIED BY THAT SEAT** — it was delivered
+before the criteria that seat took, and no verdict was ever issued on it (`3.0.0_SA_CVO~Z` msg 10804,
+stated in that record's §1). `AC6`/`AC7` likewise carry no verdict from it.
+⚠ **THIS LINE PREVIOUSLY READ "Certifier: `3.0.0_SA_CVO~Z`" WITH NO SCOPE — AN OVERSTATEMENT BY
+OMISSION**, and the exact misreading msg 10804 names: *"CVO certified TO-L2-DS"* read as covering
+`AC3`. It is the criterion a production pin rested on, so an unscoped certifier line beside it is the
+worst place in this record for that ambiguity. Corrected here rather than argued.
+⚠ **AND THE CITATIONS WERE MESSAGE-IDS.** `AC1`'s row in the instance cites `msg 10334`; a broker
+message id is not a durable carrier, and that certification had **no artifact at all** until
+`@b57d6d0d1f` (self-disclosed by the issuing seat). **The instance is ACCEPTED and stays UNAMENDED**;
+the durable pointer lands here, in the prose carrier, which is where a later reader can join it.
 **Instance:** `D1_CATVIEWS.TO-L2-DS_PROOF_OF_SPEC.json` `@44955a2721` — 7/7 PASS, `VALID`, true `rc=0`
 **Producer commit:** `@14b077f559` · **Decomp vintage:** `@2ce1e1b8d5`
 
