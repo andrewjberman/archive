@@ -1,0 +1,198 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.8.0_AE_CloudComp~Y",
+  "subject": {
+    "id": "_build_manifest.json.SET",
+    "kind": "artifact",
+    "declared_domain": "The family of three Kuzu build-provenance manifests written beside each Kuzu database in infra/aws/globgrph/ by _provenance.write_manifest, and read by comp-kuzu to print a provenance header on every invocation. Covers the family as ONE part carrying a declared cardinality of 3 and an enumerated member list. It does NOT cover the Kuzu databases themselves, the three loaders that build them (kuzu_load / kuzu_nessie_load / kuzu_stitch_load -- other lanes' subjects), or the branch-head marker, which is a different provenance artifact on a different plane. NOTE ON THIS FIELD: the TO's subject table classes this part 'output_artifact', which is the MANIFEST's part_class vocabulary, NOT this contract's subject.kind enum -- two taxonomies over the same objects. The contract's nearest true member is 'artifact' and that is what this card carries; the manifest's part_class is unchanged and is not this lane's to edit."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-27T08:31:16Z",
+    "commit_ish": "51c851e8b9",
+    "graph_vintage": "graph_nodes@1462710383782792396 (branch-head marker committed_at_iso 2026-08-27T05:53:51.057095+00:00)"
+  },
+  "process": {
+    "methodology": {
+      "how": "_provenance.write_manifest (:49) serialises a fixed v1 record -- schema_version, source_kind, source_vintage, built_at, node_count, edge_count -- to a path derived from the database path by manifest_path() (:44), which appends MANIFEST_SUFFIX '._build_manifest.json' (:34). It is written by each Kuzu loader on a SUCCESSFUL build, so the manifest's existence is itself a claim that a build completed. The three members correspond 1:1 to three build mechanisms, and each records a source_vintage shaped for its own mechanism: 'nessie' carries Iceberg metadata keys and snapshot ids, 'tarball' carries a bucket and tarball key, 'stitch' carries a source path and mtime.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "canonical",
+      "composes": [
+        {
+          "id": "infra/aws/globgrph/_provenance.py",
+          "note": "write_manifest :49, read_manifest :74, manifest_path :44, MANIFEST_SUFFIX :34, and the header renderer at :575-578"
+        },
+        {
+          "id": "org/modules/graph/kuzu_cli.py",
+          "note": "the consumer -- prints the provenance header on EVERY comp-kuzu invocation per the module docstring :6-8"
+        },
+        {
+          "id": "the three Kuzu loaders",
+          "note": "kuzu_load / kuzu_nessie_load / kuzu_stitch_load, one per source_kind; each writes its own member on a successful build. They are other lanes' subjects and I make no claim about their internals."
+        }
+      ],
+      "invents": [
+        {
+          "id": "node_count / edge_count",
+          "note": "counts stamped at build time. They describe the DB as built, and nothing re-derives or re-checks them afterwards -- a consumer reading them is reading a build-time assertion, not a live count."
+        },
+        {
+          "id": "source_kind",
+          "note": "the three-value vocabulary tarball|nessie|stitch, declared in the module docstring at :12-14. It is this module's own taxonomy; nothing upstream supplies it."
+        }
+      ],
+      "declared_opinions": [
+        "THE MANIFEST IS A SIBLING, NOT A CHILD (:21-23). Placed at <db_path>._build_manifest.json rather than inside the DB, explicitly so it survives whether Kuzu materialises the DB as a file or a directory, AND so a --force wipe of the DB never clobbers the about-to-be-rewritten manifest. A deliberate placement with two stated reasons.",
+        "PROVENANCE GOES TO STDERR, NEVER STDOUT (:24-25). So comp-kuzu --json and table output stay machine-parseable while provenance is still always surfaced. A declared position about not making the caller choose between clean output and knowing the vintage.",
+        "AN ABSENT MANIFEST MUST BE LOUD, NEVER SILENT (:26). The module states this as a design commitment (F1), and unusually for a claim of this kind it is honoured in code -- see failure_mode."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "how": "measured",
+        "composes": "measured",
+        "invents": "measured",
+        "declared_opinions": "measured",
+        "materializer_standing": "measured"
+      },
+      "evidence": "All line citations read at source in infra/aws/globgrph/_provenance.py @51c851e8b9, and the three members' CONTENTS were read rather than described -- the field list above is transcribed from the actual JSON, not from the docstring's schema block. The 1:1 between members and source_kinds is measured from the files: kuzu_nessie_db carries source_kind 'nessie', kuzu_db carries 'tarball', kuzu_stitch_db carries 'stitch' -- three members, three kinds, no overlap and no member sharing a kind. materializer_standing='canonical': write_manifest is the only writer of this suffix and read_manifest the only reader in the module, with no sibling or superseding mechanism found.",
+      "owner": "0.8.0_AE_CloudComp -- _provenance.py last authored by this base serial @996fcad53e. The three loaders that CALL write_manifest belong to other lanes, so the writer and the callers have different owners."
+    },
+    "cadence": {
+      "declared_rhythm": "None declared. A member is written exactly once per successful build of its database -- the rhythm is the build's rhythm, and each of the three has a different one.",
+      "actual_trigger": "EVENT-DRIVEN, per member, and NOT uniform across the family. Each manifest is written as a side effect of its own loader completing a build; no scheduler writes any of them. Nothing on either AWS trigger plane targets this family, which is expected -- these are local artifacts beside local databases.",
+      "live_matches_declared": "not_applicable",
+      "live_instance_age": "⛔ THREE MEMBERS, THREE VERY DIFFERENT AGES, measured from built_at inside each file rather than from mtime: kuzu_nessie_db 2026-08-26T14:07:59Z (about 18 hours) · kuzu_stitch_db 2026-07-07T15:46:38Z (51 days) · kuzu_db 2026-06-12T13:55:02Z (76 days). RULE 25 DORMANCY IS NOT MET BY ANY MEMBER and I return no dormancy verdict: 76 < 90. I state the exact figure rather than the verdict because the two are different claims, and because kuzu_db crosses the 90-day line around 2026-09-10 if nothing rebuilds it.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "Ages read from the built_at field INSIDE each manifest, which is the artifact's own claim about itself, and cross-checked against filesystem mtime -- the two agree per member to within a second, so the record and the file tell the same story and neither is standing in for the other. live_matches_declared='not_applicable' is a deliberate choice over 'no': the family declares no rhythm to match, so scoring it 'no' would manufacture a broken promise the artifact never made. ⚠ THE FAMILY'S SPREAD IS THE HONEST HEADLINE AND A UNIFORM VERDICT WOULD HIDE IT: one member is hours old and two are months old. That is not a defect -- three databases with three different purposes rebuild at three different rates -- but it means any single freshness statement about 'the manifests' is false of two thirds of them.",
+      "owner": "0.8.0_AE_CloudComp for the writer. ⛔ THE REBUILD CADENCE IS UNOWNED PER MEMBER: nothing schedules any of the three loaders, so 'who keeps kuzu_db current' has no answer -- which is consistent with its manifest being 76 days old."
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "evidence",
+      "mutation_policy": "replaceable",
+      "form": "A small JSON object per member, v1 schema: schema_version, source_kind, source_vintage (a nested object whose SHAPE VARIES BY KIND), built_at (UTC ISO), node_count, edge_count. Sizes at this reading: kuzu_nessie_db 902 B, kuzu_stitch_db 349 B, kuzu_db 327 B.",
+      "basis": "measured",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "form": "measured",
+        "mutation_policy": "measured"
+      },
+      "evidence": "All three opened and parsed; the field list and the varying source_vintage shape are transcribed from the files. authority_role='evidence' is exact for this family and I considered 'source': a manifest is the ONLY record of what a given Kuzu DB was built from, which makes it feel authoritative, but it is a WITNESS STATEMENT about a build event, not the thing itself -- the authoritative vintage lives in the Iceberg snapshot, the tarball, or the stitch file it names. Calling it 'source' would let a stale manifest assert a DB's currency. mutation_policy='replaceable': write_manifest overwrites in place on each successful build, and :21-23 records that sibling placement exists precisely so a --force DB wipe cannot clobber it. ⛔ AND A PROPERTY THE FILES CARRY THAT THE SCHEMA DOES NOT DECLARE: source_vintage is polymorphic by source_kind -- nessie carries metadata keys and snapshot ids, tarball a bucket and key, stitch a path and mtime. A consumer that reads source_vintage generically gets three incompatible shapes, and nothing in the record declares which shape to expect beyond source_kind itself.",
+      "owner": "0.8.0_AE_CloudComp."
+    },
+    "location": {
+      "home": "_build_manifest.json.SET",
+      "projection_of": [
+        {
+          "id": "globgrph.graph_nodes",
+          "note": "kuzu_nessie_db's member projects nodes_snapshot_id and metadata keys from the live Iceberg table"
+        },
+        {
+          "id": "globgrph.graph_edges",
+          "note": "same member, edges_snapshot_id and metadata key"
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/snapshots/20260612/graph-20260612.tar.gz",
+          "note": "kuzu_db's member projects this exact tarball key as its vintage"
+        },
+        {
+          "id": "infra/aws/globgrph/stitch_graph.json",
+          "note": "kuzu_stitch_db's member projects this path and its mtime"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "kuzu_nessie_db.rebuild.tmp.SET",
+          "note": "the transient rebuild family in the SAME directory, and my third subject in this tranche -- HELD pending the map owner's disposition after the issuer withdrew its declared cardinality"
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json",
+          "note": "a DIFFERENT provenance artifact for the same underlying tables, on the S3 plane, written by the Iceberg writers rather than by the Kuzu loaders. Carded separately as W3-uuxp."
+        }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured",
+        "co_resident_stores": "measured"
+      },
+      "evidence": "⛔ W4-m-joinable SATISFIED: `home` is the EXACT part id string, byte-identical to the manifest, with no prose. The per-member paths are enumerated in coverage rather than folded into this field, so `home` remains a single equality-joinable identity. The path rule is independently derivable in code rather than by listing: manifest_path(db_path) at :44 appends MANIFEST_SUFFIX (:34) to the database path, so each member's location follows from its DB's location by a stated rule. projection_of is POPULATED and specific -- each entry names the actual upstream that member records, read out of that member's own source_vintage, which is why the four entries are heterogeneous: an Iceberg table, a second Iceberg table, an S3 tarball key, and a local file. ⚠ THE STITCH MEMBER'S VINTAGE IS A DEVICE-ABSOLUTE PATH -- 'C:\\Users\\AndrewBerman\\Desktop\\ajb_workspace\\infra\\aws\\globgrph\\stitch_graph.json' -- recorded verbatim in the file. I record it as measured and flag it in failure_mode rather than treating it as a defect of this card's subject: it is a value the writer stamped, and it resolves on exactly one device.",
+      "owner": "0.8.0_AE_CloudComp for the path rule; each loader's owner for what its member records as vintage."
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Kuzu build-provenance manifests present beside a Kuzu database in infra/aws/globgrph/ on THIS device.",
+      "denominator": "3 of 3 declared members present, and 0 undeclared. A filesystem sweep of infra/aws/globgrph/*_build_manifest.json returns exactly the three declared paths -- no extra manifest, no missing one. ⛔ AND THE DENOMINATOR IS DEVICE-SCOPED, WHICH IS THE QUALIFIER THAT MATTERS: all three members are UNTRACKED in git (git ls-files --error-unmatch fails on each; none is gitignored). So '3 of 3' is a fact about this workstation, NOT about the estate. Another device with a different set of built databases would carry a different set of manifests, and no repository-plane instrument can see any of them.",
+      "denominator_absent_reason": null,
+      "explicitly_out": [
+        "The three Kuzu databases themselves and the three loaders that build them -- other lanes' subjects.",
+        "Whether any recorded node_count or edge_count is TRUE of its database. I read what the manifests claim; I did not open a Kuzu DB and count. The counts are build-time assertions and I card them as such.",
+        "The rebuild.tmp family in the same directory -- my third subject, HELD.",
+        "⛔ ANY CLAIM THAT THIS FAMILY IS COMPLETE ACROSS THE ESTATE. Because the members are untracked, this card's population is closed only for this device. Unlike my sibling card W4-lgbr, whose name space is derivable from an allow-list in code, THIS family's membership is determined by which databases happen to have been built here -- which is not derivable, only observed."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "measured",
+        "explicitly_out": "measured"
+      },
+      "evidence": "Sweep run with a glob over the declared directory and compared against the declared list: 3 present, 0 declared-but-absent, 0 present-but-undeclared. Tracked status measured per file with git ls-files --error-unmatch, and gitignore status with git check-ignore -- all three UNTRACKED and NOT ignored. ⛔ THAT COMBINATION IS THE RECORDED UNTRACKED-BUT-PRESENT CLASS: a file on disk and in no commit reads as PRESENT to every filesystem instrument and ABSENT to every repository one. It is why this card's denominator carries 'on THIS device' in the universe statement rather than in a footnote. ⛔ AND IT IS THE SAME PROPERTY THAT PRODUCED MY BLOCKING ON THE THIRD SUBJECT IN THIS TRANCHE -- there the declared members and the true members were disjoint because the enumeration came from a repository-plane source while the artifacts live only on disk. Here the enumeration happens to be correct; the exposure is identical, and the difference is luck rather than method. A card that reported a clean 3 of 3 without that qualifier would be true and misleading in the same breath.",
+      "owner": "0.8.0_AE_CloudComp for the writer. ⛔ UNOWNED for the estate-level question of which devices hold which manifests -- no registry tracks it and nothing could, given the artifacts are untracked."
+    },
+    "key": {
+      "identity_space": "The DATABASE PATH. A manifest has no identifier of its own -- its identity is entirely derived from the DB it sits beside, via manifest_path(db_path) = db_path + '._build_manifest.json' (:44, :34).",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "manifest_path(db_path) -> f'{db_path}{MANIFEST_SUFFIX}' (:44 with the suffix constant at :34). That expression is the whole mapping between the database-path space and the manifest-path space.",
+      "basis": "measured",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "key_is_stable='stable' measured by construction and by observation: the suffix is a module-level constant, the transform is pure string concatenation, and all three declared paths resolve to real files, so no member carries a name that fails to bind. crosses_spaces=TRUE and measured -- a DB path is not a manifest path until the suffix is appended, and the two spaces are distinct even though one is a prefix of the other. ⛔ THE DERIVED IDENTITY IS THE FAMILY'S CENTRAL STRENGTH AND ITS CENTRAL FRAGILITY, AND BOTH FOLLOW FROM THE SAME LINE. Strength: a manifest can never be orphaned from its DB by a rename of the manifest, because nothing references the manifest by name -- the reader always reconstructs the path from the DB it was asked about. Fragility: RENAME OR MOVE THE DATABASE AND THE MANIFEST SILENTLY STOPS BEING FOUND. It is not deleted and it is not stale; it simply no longer sits at the derived path, and the reader reports UNKNOWN VINTAGE for a database whose provenance is intact one filename away. Nothing in the module detects that case, because from the reader's side it is byte-identical to a build that never wrote a manifest.",
+      "owner": "0.8.0_AE_CloudComp."
+    },
+    "failure_mode": {
+      "returns_on_failure": "⛔ LOUD, AND THIS IS THE FAMILY'S BEST PROPERTY -- rare enough on this wave that I verified it in code rather than accepting the docstring. read_manifest (:74) returns None when the manifest is absent or unparseable, and the header renderer does NOT silently omit the section: at :575 it calls read_manifest and at :578, on None, appends the literal '!! UNKNOWN VINTAGE -- no _build_manifest.json beside this DB.' to the provenance header that comp-kuzu prints on EVERY invocation. So a missing manifest surfaces to the caller as an explicit banner, not as absence.",
+      "distinguishable_from_true_negative": "yes",
+      "silent_degrade_paths": [
+        "A RENAMED OR MOVED DATABASE takes its manifest out of the derived path. The reader then prints UNKNOWN VINTAGE -- loud, but WRONG about the cause: the provenance exists and is intact, it is simply no longer where the rule looks. Loud about the symptom, silent about the reason.",
+        "node_count and edge_count are build-time assertions that nothing re-derives. A DB modified after its build carries a manifest whose counts are confidently stale, and no mechanism compares them to reality.",
+        "⛔ A RECORDED VINTAGE CAN BE SUPERSEDED WITHOUT ANY SIGNAL, AND ONE CURRENTLY IS: kuzu_nessie_db's manifest records nodes_snapshot_id 2902399899597701830 from its 2026-08-26T14:07:59Z build. The LIVE graph_nodes snapshot at this carding is 1462710383782792396, per the branch-head marker stamped 2026-08-27T05:53:51Z. The DB is built from a superseded snapshot. THE MANIFEST IS NOT WRONG -- it correctly records what the build read -- but nothing in this family compares its recorded vintage to the live one, so the divergence is visible only to a reader who fetches both and compares them, which is what I did rather than assumed.",
+        "source_vintage is polymorphic by source_kind with three incompatible shapes, and a consumer reading it generically must branch on source_kind or mis-read two of the three.",
+        "kuzu_stitch_db's recorded stitch_path is a device-absolute Windows path. It is accurate on this workstation and meaningless anywhere else, so the provenance value does not travel with the record.",
+        "All three members are untracked, so no repository-plane instrument -- audit, census, battery or CI check -- can observe their existence, contents or absence."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "⛔ distinguishable_from_true_negative='yes' IS THE ONLY SUCH VERDICT I HAVE RETURNED ACROSS SEVEN CARDS IN TWO WAVES, so I did not take it on the module's word. The docstring claims it at :26; I located the implementation and read it: :575 read_manifest, :578 the literal UNKNOWN VINTAGE banner appended to the header. Claim and code AGREE -- which is worth stating explicitly, because this same session produced the opposite result twice (a comment at _provenance.py:405 that describes a sibling writer's behaviour incorrectly in both the deployed and source copies, and a wave-3 doc that was false about its own mechanism for six weeks). A self-description that happens to be TRUE still has to be checked; the checking is what distinguishes it from one that is not. ⛔ THE SUPERSEDED-VINTAGE FINDING IS MEASURED ACROSS TWO PLANES rather than inferred from one: the recorded snapshot id was read out of the manifest file, and the live snapshot id out of the S3 branch-head marker via s3api. Two artifacts, two planes, two different writers, compared on a shared field. Neither inherited the value from the other, so the disagreement is real and not an artifact of one producer's self-report.",
+      "owner": "0.8.0_AE_CloudComp for _provenance.py's reader, writer and path rule. Each loader's owner for what its own member records. ⛔ UNOWNED for vintage reconciliation: no seat and no mechanism compares a manifest's recorded vintage against the live source, which is why the kuzu_nessie_db divergence above is visible only to someone who goes looking."
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "This is the healthiest family I have carded across two waves, and its central property is one almost nothing else on this estate has: IT FAILS LOUD. An absent manifest does not degrade to silence -- comp-kuzu prints an explicit UNKNOWN VINTAGE banner on every invocation, and I verified that in the implementation at :575-578 rather than accepting the docstring's claim at :26, because this same session produced two instances of a module describing itself incorrectly. It is the only card in my set carrying distinguishable_from_true_negative='yes'. The family is 3 of 3 present with 0 undeclared, its members map 1:1 onto three distinct source_kinds, its identity is derived from the DB path so a manifest cannot be orphaned by its own rename, and its sibling placement is documented with two reasons. QUALIFIED rather than SOUND on four measured defects: (1) all three members are UNTRACKED and not gitignored, so the clean 3-of-3 is a fact about THIS DEVICE and no repository-plane instrument can observe the family at all -- the same property that made my third subject's enumeration disjoint from reality, where this family's correctness is luck rather than method; (2) one member's recorded vintage is already superseded -- kuzu_nessie_db records nodes_snapshot 2902399899597701830 while live is 1462710383782792396 -- and nothing anywhere compares the two, so the divergence surfaces only to a reader who fetches both planes; (3) the derived identity means a MOVED database produces a loud UNKNOWN VINTAGE that is right about the symptom and wrong about the cause, indistinguishable from a build that never wrote provenance; (4) source_vintage is polymorphic across three incompatible shapes with no declared discriminator beyond source_kind, and one member's vintage is a device-absolute path that resolves on exactly one machine. Not UNSOUND: every member is present, parseable, internally consistent, and honest about what it recorded. NOT INCOMPLETE: all 7 rows worked, every scalar measured. ⛔ NO COMPLETENESS CLAIM ACROSS THE ESTATE -- the untracked members make that unmeasurable, and I say so rather than reporting a device count as an estate count. ⛔ NO FORWARD DISPOSITION. Per QUALIFY-DO-NOT-FIX this lane rebuilt nothing, ran no loader, and committed nothing to _provenance.py or to any Kuzu database.",
+    "blocking_defects": [
+      "For anyone treating a Kuzu DB as current because its manifest exists: kuzu_nessie_db records a superseded nodes_snapshot_id, and nothing in this family compares a recorded vintage to the live one. Manifest presence is evidence of a build, never of currency. Owner UNOWNED -- no mechanism performs the comparison.",
+      "For any repository-plane audit, census or CI check over this family: it cannot see any member. All three are untracked and not gitignored, so a git-based instrument reports the family as absent while the filesystem reports it complete. Owner 0.8.0_AE_CloudComp.",
+      "For anyone diagnosing an UNKNOWN VINTAGE banner: a moved or renamed database produces it with the manifest fully intact one filename away. The banner is loud about the symptom and says nothing about the cause. Owner 0.8.0_AE_CloudComp.",
+      "For anyone parsing source_vintage generically: it carries three incompatible shapes across the three members, and kuzu_stitch_db's stitch_path is a device-absolute Windows path that resolves on one machine. Owner: each loader's owner for its own member's shape."
+    ]
+  }
+}
