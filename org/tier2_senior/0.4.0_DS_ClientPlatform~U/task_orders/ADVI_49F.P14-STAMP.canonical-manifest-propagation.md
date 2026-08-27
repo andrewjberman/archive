@@ -41,8 +41,11 @@
 ## Acceptance criteria
 - **PS-1 PROPAGATION IMPLEMENTED AS COPY:** the three writers read the MIRROR's dim_account record
   and copy the three fields; a00's `--local-out` branch + the entrypoint's `m` token shown in the
-  diff; NO derivation logic in any writer and NO `--declared-historical` argv widening (AST or
-  diff evidence — zero epoch/attestation-computation identifiers added to any writer); a00
+  diff, **AND c02's chain stage gains the same `m` token (CTO ruling 76887 on DS~U 76881, option
+  (a): c02 was the only c-stage without the mirror, and without it the sanctioned dry-run QA form
+  is structurally 3-of-4 — the criterion names what consumers need demonstrated and the invocation
+  rises to it)**; NO derivation logic in any writer and NO `--declared-historical` argv widening
+  (AST or diff evidence — zero epoch/attestation-computation identifiers added to any writer); a00
   dry-run shown writing the mirror record and NO S3 object (the pinned semantic, exercised).
 - **PS-2 PRE-EPOCH ARM EXERCISED:** a pre-epoch date run end-to-end shows ALL FOUR manifests
   (dim_account + the three writers) carrying `declared-historical-pre-epoch`,
@@ -53,8 +56,10 @@
   REFUSE loudly, naming the missing record — run it, do not assert it.
 - **PS-5 DEPLOY under the converged conditions** (the FIVE touched files alone — a00_runner,
   chain_49f_entrypoint, and the three writers; arms PS-2/3/4 re-fired on DEPLOYED bytes fetched
-  from S3, PLUS the flagless-entrypoint invariance arm from the DH-6 precedent; LF-normalised
-  verify with basis stated).
+  from S3, PLUS the flagless-entrypoint invariance arm from the DH-6 precedent **with the EXPECTED
+  DELTA SET widened to exactly the TWO ruled stage-token changes (a00's per ruling 76736(i), c02's
+  `m` per ruling 76887) — the arm still proves nothing ELSE changed, re-run against the redeployed
+  entrypoint (76887 mechanic 1)**; LF-normalised verify with basis stated).
 - **PS-6 proof instance VALID rc=0 positional: ids PS-1..PS-6**, TRUE rc bare, validator
   invocation + rc recorded IN the instance.
 
