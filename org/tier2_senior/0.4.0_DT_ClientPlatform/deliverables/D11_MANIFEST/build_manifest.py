@@ -536,7 +536,11 @@ for pid, stage, wr, ww in [
     PARTS.append(part(
         pid, "materializer", "NOWHERE -- unbuilt; no code, no store, no artifact", "none", "unknown", [], None,
         None, "unknown", None, None, None, "unknown", None,
-        "ABSENT -- no code, no store, no artifact to measure", "absent",
+        # basis absent -> HELD, 4.0.0_SA_CRO~A Base round 6. Each row's evidence cites
+        # 1.0.0_SA_CTO~X 73215 -- a NAMED AUTHORITY asserting the fact without independent
+        # measurement here, which is the definition of `held`. `absent` claimed no basis exists,
+        # and one does.
+        "ABSENT -- no code, no store, no artifact to measure", "held",
         "C3 CHAIN STAGE %d -- ABSENT. WOULD READ: %s. WOULD WRITE: %s. %s" % (stage, wr, ww, CHAIN_EV),
         "UNOWNED -- unbuilt"))
 
@@ -703,10 +707,25 @@ MANIFEST = {
 }
 
 # ---- PARTS vs OBJECTS: computed from the population, never typed ----
+# ⛔ kuzu_nessie_db.rebuild.tmp.SET's 6 IS WITHDRAWN and is left here ONLY so this line is not
+# read as current. Its members are runtime-named (_canonical.py:288, pid + monotonic_ns), so the
+# family is NOT enumerable and 6 was an observation snapshot, never a cardinality -- map-owner
+# ruling 75073, 4.0.0_SA_CRO~A retracted 6 as a population. A typed count here is the exact
+# defect that ruling closed. NOT corrected in this commit: it changes emitted arithmetic and the
+# generator is under a no-run hold. FLAGGED FOR THE COORDINATED RERUN.
 SET_MEMBERS = {"kuzu_nessie_db.rebuild.tmp.SET": 6, "_build_manifest.json.SET": 3,
                ".comp-graph/platinum.CACHE_SET": 5}
-_absent = [p for p in PARTS if p["basis"] == "absent"]
-_present = [p for p in PARTS if p["basis"] != "absent"]
+# ⛔ RE-KEYED 2026-08-27. This partition USED to key on basis == "absent", and the basis
+# correction above (absent -> held on the three unbuilt C3 stages) would have moved all three
+# from _absent into _present -- making the sentence below count THREE UNBUILT THINGS AS PRESENT
+# OBJECTS while that same sentence says they "must never be counted as inventory".
+# ROOT CAUSE: `basis` was carrying TWO meanings -- the EPISTEMIC claim (how do we know?) and the
+# BUILT-NESS flag (does the thing exist?). Rule 24(iii): one axis, one intent. They are different
+# questions and they now have different fields. Built-ness is read from the home sentinel, which
+# is what actually states it.
+_UNBUILT_HOME = "NOWHERE -- unbuilt"
+_absent = [p for p in PARTS if str(p["home"]).startswith(_UNBUILT_HOME)]
+_present = [p for p in PARTS if not str(p["home"]).startswith(_UNBUILT_HOME)]
 _objects = sum(SET_MEMBERS.get(p["id"], 1) for p in _present)
 MANIFEST["denominator"]["method"] += (
     " PARTS_VS_OBJECTS (computed at build): %d parts total = %d describing a PRESENT thing + %d "
