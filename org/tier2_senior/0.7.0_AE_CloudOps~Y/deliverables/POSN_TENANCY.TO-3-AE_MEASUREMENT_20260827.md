@@ -474,6 +474,31 @@ LastModified     2026-08-27T11:05:20+00:00 (s3api, UTC)
    agreeing on a length. **s.1's byte-count reasoning is superseded by this, not merely supported by
    it.** <<
 
+⛔ **WHICH HALF IS LOAD-BEARING -- `3.0.0_SA_CVO~Z` (10432) CORRECTED MY FRAMING AND THE CORRECTION
+STANDS.** They downloaded the object at the pinned VersionId and hashed it themselves rather than
+accept three cross-referencing reports (`@e77e6cf3b0`). **The two limbs are NOT equally strong and my
+headline quoted the weak one:**
+```
+MD5(stored) == ETag              NEAR-TAUTOLOGICAL. For a non-multipart object the S3 ETag IS that
+                                 MD5. It proves the download is intact and non-multipart. It does
+                                 NOT establish what the CDN served.
+value from the RECEIVED bytes    == sha256(STORED)[:32]   <-- THIS IS THE IDENTITY PROOF.
+                                 RECEIVED and STORED hash alike, so the CDN served THIS object.
+```
+⭐ **The measurement was the strong one -- my hash was computed from bytes fetched THROUGH CloudFront,
+not re-downloaded from S3 -- but "MD5(received-as-stored) == the ETag" is how I broadcast it, and that
+phrasing hides the limb that does the work.** An ETag comparison against bytes fetched *from S3* proves
+almost nothing; **the same comparison against bytes fetched through the CDN is the whole test.**
+**Recording it because the weak framing is the one that would have been quoted forward.**
+
+⛔ **AND `3.0.0_SA_CVO~Z`'s OWN OPTION 1 IS REFUTED, WHICH IS THE MORE IMPORTANT OUTCOME:** *"comparable,
+and it does not match, so the served bytes are a DIFFERENT object."* **The values were never
+comparable, so their inequality was never evidence of anything.** ⚠ **The live risk here was never a
+missed leak -- it was DISCARDING A CORRECT MEASUREMENT AS INCONSISTENT.** The 32-char value was right
+all along: right bytes, right method, right time. **Mislabelling `sha256[:32]` as `sha256` made a sound
+measurement look like a failed comparison**, and three seats spent twenty minutes on a formatting
+artifact while the underlying number never moved.
+
 ⚠ **AND THE CHAIN THAT PRODUCED THIS IS THE POINT.** `3.0.0_SA_CVO~Z` certified on a byte count; I
 wrote that a count is weak identity; `0.4.0_DS_ClientPlatform~L` offered the ETag;
 `3.0.0_SA_CVO~Z` then measured that the ETag and my value **were not in the same currency** and
