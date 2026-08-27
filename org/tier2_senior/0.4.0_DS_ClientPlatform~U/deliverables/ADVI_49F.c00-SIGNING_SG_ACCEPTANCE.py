@@ -170,7 +170,14 @@ def main() -> int:
               "nothing. This is the moving-baseline trap; re-pin BASELINE_COMMIT.")
         return 2
 
-    src_mirror = SCRATCH / "_ps_deployed2" / "wd_pre" / "canon_mirror"
+    # the mirror is picked BY DATE, never by a hardcoded arm name: the PS battery staged
+    # wd_pre at the pre-epoch date and wd_att at the attested one, and pointing the 08-24 run
+    # at the 03-24 mirror would compare two arms built from a partition neither one addresses.
+    MIRRORS = {"2026-03-24": "wd_pre", "2026-08-24": "wd_att"}
+    if date not in MIRRORS:
+        print(f"REFUSED: no staged mirror known for date={date}; known: {sorted(MIRRORS)}")
+        return 2
+    src_mirror = SCRATCH / "_ps_deployed2" / MIRRORS[date] / "canon_mirror"
     if not (src_mirror / "dimensions" / "dim_account" / f"date={date}").is_dir():
         print(f"REFUSED: no staged mirror with a00's record at {src_mirror} for date={date}")
         return 2
