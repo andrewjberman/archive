@@ -160,8 +160,29 @@ The direction exists upstream in `fact_trn` (`debit_credit` = LONG/SHORT) and **
 **(b) ADD A NEW SIGNED FIELD** (`in_kind_signed_value`, or carry `direction` from `debit_credit` on `txn_ref`) — **`c01` bit-for-bit unaffected; `c02` opts in.** ⛔ **Leaves defect 3 unfixed**, so `c01` is then fixed **deliberately, with its own acceptance.**
 **REC — (b), then fix `c01` explicitly.** Rule 24(iv): **three defects, three remedies, three acceptances.** *The thing not to do is let the NNA correction ride in as a side effect of the TWR fix.* **`1.0.0_SA_CTO`'s call; not chosen here.**
 
-**WHY IT MATTERS BEYOND TWR:** per `TO-R1-DS` the projection consumes **`nna_canonical` (headline NNA)** — **a CLIENT-FACING figure on a SEPARATE served surface from the returns.** A remediation scoped as *"fix the performance card"* would leave it standing.
-⛔ **AND THE SCALE OF DEFECT 3 IS UNMEASURED.** The 23.7% / 72.5% figures in s.4 were computed against **`twr_daily`** and **do not cover NNA.** No blast radius is quoted for defect 3 because none has been measured.
+**WHY IT MATTERS BEYOND TWR:** the projection consumes `nna_canonical` — **a SEPARATE served surface from the returns.** A remediation scoped as *"fix the performance card"* would leave it standing.
+
+### 5c.1 — ⛔ NARROWING MY OWN CLAIM, AND THE PRE-REGISTERED NNA ACCEPTANCE (added 2026-08-27T0050Z)
+
+**I wrote above and in 74175 that this hits *headline* NNA. MEASURED, it does not.**
+`c01`'s headline bucket is `HEADLINE_PROVENANCE = {"code-rule", "dc-resolved"}` (`c01_nna_canonical.py:33`). In-kind EXTERNAL legs censused across **7 partitions** (2026-08-10, 08-18..08-21, 08-24, 08-25): **267 legs, ALL `external-by-default`. In headline provenance: 0 of 267.**
+>> **DEFECT 3 IS CONFINED TO `nna_unresolved_direction`. `nna_headline`, `daily_inflow` and `daily_outflow` DO NOT MOVE.** The SURFACE is client-facing; the FIELD that moves is not the headline field — my sentence let those read as one. **The defect is real and the correction stands; its REACH is smaller than I stated.** <<
+⚠ **BOUND:** 267 of 267 over **7 of 531 partitions** — not a proven universal. The structural reason is plausible (an in-kind leg has no cash debit/credit for the classifier to resolve from, so it defaults) **but the classifier has NOT been read and that mechanism is NOT asserted.** **The acceptance ASSERTS headline-unchanged rather than assuming it**, so a partition breaking the pattern fails loudly.
+
+**THE PRE-REGISTERED DELTA TABLE** (computed BEFORE the fix, on the ruled design — new signed field, `c01` consumes it):
+
+| date | account | `nna_unresolved_direction` now | **EXPECTED** | headline / inflow / outflow |
+|---|---|---|---|---|
+| 08-24 | `0016371483` | +89,946.62 | **−91,552.00** | 0.00 → 0.00 |
+| 08-24 | `0033493115` | +64,841.33 | **−88,158.89** | 0.00 → 0.00 |
+| 08-24 | `0049284242` | +10,956.66 | **−10,926.98** | 0.00 → 0.00 |
+| 08-24 | `0032486794` | +39,361.92 | **+39,361.92 (NO MOVE)** | 0.00 → 0.00 |
+| 08-25 | *(2 accounts hold a leg)* | — | **NONE MOVE** (both LONG) | — |
+
+**`0032486794`'s NON-MOVE IS PART OF THE ACCEPTANCE** — it is an inflow, correctly positive today, and **a fix that flips it would be over-correcting.**
+⛔ **MAGNITUDES CHANGE, NOT ONLY SIGNS:** `0033493115` goes 64,841.33 → **−88,158.89**, which is *not* the negation of itself. **Those accounts hold MIXED-DIRECTION legs — the unsigned sum ADDS opposing transfers, the signed sum NETS them.** A fix validated only on sign-flip would pass while the magnitudes stayed wrong. **ASSERT THE VALUE, NOT THE SIGN.**
+
+⛔ **SCALE STILL UNMEASURED:** the 23.7% / 72.5% figures in s.4 were computed against **`twr_daily`** and **do not cover NNA.** The other **524 partitions are unmeasured and not extrapolated**, and `nna_unresolved_direction`'s downstream consumers have **not been traced** — so defect 3's client-facing impact is **UNQUANTIFIED, which is a different statement from "small."**
 
 ---
 
