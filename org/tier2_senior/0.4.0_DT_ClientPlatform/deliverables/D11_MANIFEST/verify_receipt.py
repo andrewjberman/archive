@@ -27,6 +27,43 @@ HERE = os.path.join(WS, "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D
 SCHEMA = os.path.join(HERE, "MANIFEST_RECEIPT.v1.schema.json")
 
 
+def _no_dupes(pairs):
+    """⛔ THE VERIFIER USED json.load, WHICH IS LAST-WINS -- so an invalid-first/valid-last
+    duplicate key COLLAPSED and this module returned ZERO findings on a document carrying a
+    forgery. The compiler had this guard; the thing that checks the compiler's output did not."""
+    seen = set()
+    for k, _val in pairs:
+        if k in seen:
+            raise SystemExit("REFUSING TO PARSE -- duplicate JSON object key %r" % k)
+        seen.add(k)
+    return dict(pairs)
+
+
+def load_json_strict(path: str):
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh, object_pairs_hook=_no_dupes)
+
+
+def canonical_mismatch(rel: str):
+    """⛔ `ORG/...` RESOLVES TO THE SAME BLOB AS `org/...` ON THIS DEVICE -- measured, rc=0.
+    A case alias is a second spelling of one location, and every digest check agrees across it,
+    so nothing downstream can tell them apart. Compare each segment against what the directory
+    actually holds."""
+    cur = WS
+    for seg in rel.split("/"):
+        try:
+            entries = os.listdir(cur)
+        except OSError:
+            return None
+        if seg not in entries:
+            match = [e for e in entries if e.lower() == seg.lower()]
+            if match:
+                return "%s (on disk: %s)" % (seg, match[0])
+            return None
+        cur = os.path.join(cur, seg)
+    return None
+
+
 def blob_of(rel: str):
     """git hash-object, so the pin and the check cross the SAME filters. Hashing the bytes on
     disk with sha256 is what put 9 of 13 registry pins on the wrong side of CRLF."""
@@ -50,8 +87,7 @@ def verify(receipt: dict) -> list:
     def bad(where, msg):
         out.append("%s: %s" % (where, msg))
 
-    with open(SCHEMA, encoding="utf-8") as fh:
-        errs = list(Draft202012Validator(json.load(fh)).iter_errors(receipt))
+    errs = list(Draft202012Validator(load_json_strict(SCHEMA)).iter_errors(receipt))
     for e in errs:
         bad("schema/" + "/".join(str(x) for x in e.path), e.message[:110])
     if errs:
@@ -79,6 +115,34 @@ def verify(receipt: dict) -> list:
         elif got != pin["git_blob_id"]:
             bad("input_closure.%s" % name,
                 "blob claimed %s, tree has %s" % (pin["git_blob_id"][:12], got[:12]))
+        # ⛔ A COMMIT BESIDE A BLOB IS TWO UNRELATED CLAIMS UNTIL SOMETHING BINDS THEM. Checking
+        # only the blob let a FORGED COMMIT ride along clean. Two checks: the commit must exist,
+        # and `commit:path` must resolve to the blob the receipt claims.
+        alias = canonical_mismatch(pin["home"])
+        if alias:
+            bad("input_closure.%s" % name,
+                "PATH CASE ALIAS -- claimed %r but the filesystem holds %s; two spellings of "
+                "one location and every digest agrees across both" % (pin["home"], alias))
+        if pin["blob_presence"] == "in_object_db" and got and subprocess.run(
+                ["git", "cat-file", "-e", got], cwd=WS, capture_output=True).returncode != 0:
+            bad("input_closure.%s" % name,
+                "claims blob_presence=in_object_db but %s is NOT in the object database -- a "
+                "COMPUTED identity, resolvable by nobody" % got[:12])
+        commit = pin["commit"]
+        if subprocess.run(["git", "cat-file", "-e", commit + "^{commit}"], cwd=WS,
+                          capture_output=True).returncode != 0:
+            bad("input_closure.%s" % name, "commit %s names no object" % commit[:12])
+        else:
+            at = subprocess.run(["git", "rev-parse", "%s:%s" % (commit, pin["home"])], cwd=WS,
+                                capture_output=True, text=True)
+            resolved = at.stdout.strip() if at.returncode == 0 else None
+            if resolved is None:
+                bad("input_closure.%s" % name,
+                    "%s does not exist at commit %s" % (pin["home"], commit[:12]))
+            elif resolved != pin["git_blob_id"]:
+                bad("input_closure.%s" % name,
+                    "commit %s resolves %s to %s, receipt claims %s"
+                    % (commit[:12], pin["home"], resolved[:12], pin["git_blob_id"][:12]))
 
     # ---- the admitted-card closure MUST equal the registry's own population ----------
     # ⛔ THE REGISTRY BLOB PINS THE LIST; THIS PINS WHAT THE LIST RESOLVED TO. A correct
@@ -86,16 +150,22 @@ def verify(receipt: dict) -> list:
     # on the cards -- and the v0 receipt pinned neither.
     reg_home = clo["registry"]["home"]
     try:
-        with open(os.path.join(WS, reg_home), encoding="utf-8") as fh:
-            reg = json.load(fh)
+        reg = load_json_strict(os.path.join(WS, reg_home))
         declared = {(m["path"], m["subject_id"], m["git_blob_id"])
                     for m in reg["extension_population"]["members"]}
     except Exception as exc:                      # noqa: BLE001 - reported, never swallowed
         declared = None
         bad("input_closure.registry", "unreadable (%s)" % type(exc).__name__)
     if declared is not None:
-        claimed = {(c["path"], c["subject_id"], c["git_blob_id"])
-                   for c in clo["admitted_cards"]}
+        # ⛔ MULTIPLICITY IS PART OF THE CLAIM. A SET comparison is blind to a duplicated
+        # entry -- adding a card twice leaves the set identical -- so a receipt claiming to have
+        # read one card twice was clean. Counted, then compared.
+        rows = [(c["path"], c["subject_id"], c["git_blob_id"]) for c in clo["admitted_cards"]]
+        if len(rows) != len(set(rows)):
+            dupes = sorted({r[0] for r in rows if rows.count(r) > 1})
+            bad("input_closure.admitted_cards",
+                "DUPLICATE entries (%d rows, %d distinct): %s" % (len(rows), len(set(rows)), dupes))
+        claimed = set(rows)
         if claimed != declared:
             bad("input_closure.admitted_cards",
                 "INCOMPLETE CLOSURE -- %d claimed vs %d in the registry; missing %d, extra %d"
@@ -112,9 +182,25 @@ def verify(receipt: dict) -> list:
     # ⛔ EQUALITY IS THE TELL, NOT A COINCIDENCE. A deterministic snapshot derived from commit
     # times and a real execution clock agreeing to the second means one was copied from the
     # other, which is how the v0 compiler bought "determinism" with a frozen clock reading.
-    if receipt["source_snapshot_utc"] == receipt["executed_utc"]:
-        bad("clocks", "source_snapshot_utc == executed_utc -- the two have COLLAPSED; a "
-                      "deterministic pin and a per-run clock cannot legitimately coincide")
+    # ⛔ STRICTLY LATER, not merely different. Equality is collapse; EARLIER is worse -- a
+    # receipt whose execution precedes its source snapshot claims to have compiled inputs that
+    # did not yet exist, and that ordering validated until now.
+    if receipt["executed_utc"] <= receipt["source_snapshot_utc"]:
+        bad("clocks", "executed_utc %s is NOT STRICTLY LATER than source_snapshot_utc %s -- the "
+                      "run claims to precede or coincide with the inputs it compiled"
+                      % (receipt["executed_utc"], receipt["source_snapshot_utc"]))
+    # ⛔ AND THE REPLAY CLAIM MUST BE INDEPENDENTLY CHECKABLE. Digests belonging to nothing made
+    # a two-emission claim unfalsifiable; the described artifact's own digest must be among them.
+    rep = receipt["replay"]
+    if receipt["describes"]["sha256"] not in rep["observed_digests"]:
+        bad("replay.observed_digests",
+            "the described artifact's digest %s is NOT among the observed digests -- the "
+            "comparison claim references nothing this receipt describes"
+            % receipt["describes"]["sha256"][:12])
+    if rep["comparison_state"] == "byte_identical" and rep["observed_digests"] != [
+            receipt["describes"]["sha256"]]:
+        bad("replay", "byte_identical claimed, but the single observed digest is not the "
+                      "described artifact's")
     if receipt["input_closure"]["source_snapshot_pin"]["value_utc"] != receipt["source_snapshot_utc"]:
         bad("clocks", "source_snapshot_pin.value_utc disagrees with source_snapshot_utc")
     if not receipt["input_closure"]["complete"]:

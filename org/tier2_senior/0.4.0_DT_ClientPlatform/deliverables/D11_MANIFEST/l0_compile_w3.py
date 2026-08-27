@@ -67,7 +67,7 @@ def _source_snapshot_utc() -> str:
     """Committer time of the newest PINNED INPUT: the ratified commit and the frozen schema.
     Deterministic for a given input set, and it moves only when an input does."""
     pins = []
-    for ref in (_registry_commit(), _schema_commit()):
+    for ref in (_registry_commit(), _schema_commit(), _compiler_commit()):
         if ref:
             r = subprocess.run(["git", "show", "-s", "--format=%cI", ref], cwd=WS,
                                capture_output=True, text=True)
@@ -95,6 +95,16 @@ def _registry_commit():
 def _schema_commit():
     r = subprocess.run(["git", "log", "-1", "--format=%H", "--", SCHEMA], cwd=WS,
                        capture_output=True, text=True)
+    return r.stdout.strip() or None
+
+
+def _compiler_commit():
+    """⛔ THE COMPILER IS A TEMPORAL PIN TOO, and leaving it out of the snapshot derivation was
+    the same omission one file over: the thing that PRODUCES the output can move, and a snapshot
+    blind to it is deterministic over a closure that does not include the producer."""
+    r = subprocess.run(["git", "log", "-1", "--format=%H", "--",
+                        os.path.relpath(os.path.abspath(__file__), WS).replace(os.sep, "/")],
+                       cwd=WS, capture_output=True, text=True)
     return r.stdout.strip() or None
 ORDER = {"measured": 3, "held": 2, "inferred": 1, "absent": 0}
 
@@ -335,14 +345,29 @@ def card_generation_bits(c: dict) -> dict:
 
 
 
-def _pin(rel: str, with_commit: bool = False) -> dict:
-    """One input, pinned by CONTENT. `commit` only where a commit is meaningful."""
-    d = {"home": rel, "git_blob_id": _blob(rel)}
-    if with_commit:
-        r = subprocess.run(["git", "log", "-1", "--format=%H", "--", rel], cwd=WS,
-                           capture_output=True, text=True)
-        d["commit"] = r.stdout.strip() or None
-    return d
+def _presence(blob):
+    """⛔ A COMPUTED IDENTITY IS NOT AN ADMITTED ONE. `git hash-object` without -w does correct
+    arithmetic over the bytes and writes nothing, so the id names no object anyone else can
+    resolve -- and it is indistinguishable from a real one by shape. Stated per pin."""
+    if not blob:
+        return "computed_only"
+    ok = subprocess.run(["git", "cat-file", "-e", blob], cwd=WS, capture_output=True).returncode
+    return "in_object_db" if ok == 0 else "computed_only"
+
+
+def _pin(rel: str) -> dict:
+    """One input, pinned by CONTENT **and** COMMIT. ⛔ `commit` WAS OPTIONAL AND THAT LET A
+    FORGED COMMIT SIT BESIDE A REAL BLOB with nothing able to object, because the verifier only
+    ever checked the blob. Both are required now and the verifier binds them: the commit must
+    EXIST and `commit:path` must RESOLVE THE CLAIMED BLOB."""
+    r = subprocess.run(["git", "log", "-1", "--format=%H", "--", rel], cwd=WS,
+                       capture_output=True, text=True)
+    commit = r.stdout.strip()
+    if not commit:
+        raise SystemExit("REFUSING TO EMIT A RECEIPT -- input %r has no commit, so its pin "
+                         "cannot be bound to anything" % rel)
+    b = _blob(rel)
+    return {"home": rel, "git_blob_id": b, "commit": commit, "blob_presence": _presence(b)}
 
 
 def _blob(rel: str):
@@ -365,7 +390,9 @@ def build_receipt(out_path: str, snapshot_utc: str, reg: dict) -> dict:
         "document_kind": "manifest_execution_receipt",
         "governing_schema": {"home": _rel(RECEIPT_SCHEMA),
                              "id": "https://opal.internal/schemas/MANIFEST_RECEIPT.v1.schema.json"},
-        "exact_home": art.rsplit(".json", 1)[0] + ".receipt.json",
+        # RUN-QUALIFIED: an immutable document cannot keep overwriting one fixed home.
+        "exact_home": "%s.%s.receipt.json" % (art.rsplit(".json", 1)[0],
+                                              snapshot_utc.replace("-", "").replace(":", "")),
         # FOUR INDEPENDENT AXES. A document's origin, its permitted future, its time semantics
         # and its standing move separately, and collapsing any two hides a real state.
         "authorship_mode": "machine_emitted",
@@ -374,31 +401,38 @@ def build_receipt(out_path: str, snapshot_utc: str, reg: dict) -> dict:
         # ⛔ evidence, NEVER authority: this reports what a run did and can be wrong about it.
         "authority_role": "evidence",
         "describes": {"relationship": "emitted_by_same_run", "home": art,
-                      "sha256": hashlib.sha256(raw).hexdigest(), "git_blob_id": _blob(art)},
+                      "sha256": hashlib.sha256(raw).hexdigest(),
+                      "git_blob_id": _blob(art), "blob_presence": _presence(_blob(art))},
         "input_closure": {
-            "compiler": _pin(_rel(os.path.abspath(__file__)), with_commit=True),
-            "registry": _pin(_rel(CARD_REGISTRY), with_commit=True),
-            "registry_schema": _pin(_rel(REGISTRY_SCHEMA), with_commit=True),
+            "compiler": _pin(_rel(os.path.abspath(__file__))),
+            "registry": _pin(_rel(CARD_REGISTRY)),
+            "registry_schema": _pin(_rel(REGISTRY_SCHEMA)),
             "base39": _pin(_rel(BASE39)),
             "card_part_map": _pin(_rel(MAP)),
-            "card_schema": _pin(_rel(CARD_SCHEMA), with_commit=True),
+            "card_schema": _pin(_rel(CARD_SCHEMA)),
             # THE LIST vs WHAT THE LIST RESOLVED TO -- two claims, and v0 pinned neither.
             "admitted_cards": [{"path": m["path"], "subject_id": m["subject_id"],
-                                "git_blob_id": m["git_blob_id"]}
+                                "git_blob_id": m["git_blob_id"],
+                                "blob_presence": _presence(m["git_blob_id"])}
                                for m in reg["extension_population"]["members"]],
             "source_snapshot_pin": {
-                "derived_from": ["registry_ratified_commit", "schema_commit"],
+                # ⛔ ALL THREE. A subset validated before, so a derivation OMITTING THE
+                # SCHEMA COMMIT passed -- and a snapshot ignoring an input that can move is not
+                # deterministic over the closure it claims to cover.
+                "derived_from": ["registry_ratified_commit", "schema_commit",
+                                 "compiler_commit"],
                 "value_utc": snapshot_utc},
             "complete": True,
         },
         "source_snapshot_utc": snapshot_utc,
         "executed_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "executed_by": ME,
-        # ONE emission per run, so the verdict is FORCED false. A replay control compares two
-        # receipts; a single run claiming byte-identity would be comparing itself.
-        "replay": {"emissions_compared": 1,
-                   "comparison_digests": [hashlib.sha256(raw).hexdigest()],
-                   "byte_identical": False},
+        # ⛔ ONE emission per run, so the state is `not_performed` -- NOT "byte_identical:
+        # false", which meant BOTH 'compared and differed' AND 'never compared'. One value over
+        # two facts, and the second is the honest state of every single-emission run.
+        # The digest here is the ARTIFACT'S OWN, which is what makes the claim checkable.
+        "replay": {"comparison_state": "not_performed", "emissions_compared": 1,
+                   "observed_digests": [hashlib.sha256(raw).hexdigest()]},
     }
 
 def main(out_path: str = None) -> None:
@@ -1228,7 +1262,10 @@ def main(out_path: str = None) -> None:
             "(%d errors): %s" % (len(rerrs), "; ".join(
                 "%s: %s" % ("/".join(str(x) for x in e.path), e.message[:80])
                 for e in rerrs[:5])))
-    rpath = out_path.rsplit(".json", 1)[0] + ".receipt.json"
+    rpath = os.path.join(WS, receipt["exact_home"])
+    if os.path.exists(rpath):
+        raise SystemExit("REFUSING TO OVERWRITE AN IMMUTABLE RECEIPT at %s -- immutability that "
+                         "depends on nobody re-running is not immutability" % receipt["exact_home"])
     with open(rpath, "w", encoding="utf-8", newline="\n") as f:
         json.dump(receipt, f, indent=2, ensure_ascii=True, sort_keys=True)
         f.write("\n")
