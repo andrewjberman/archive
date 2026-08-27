@@ -129,6 +129,25 @@ Do not spend that advantage by capturing broadly and deciding the interpretation
 
 ## Status
 
-`INSA2AE-AC1`: **UNCOMPUTABLE-BY-DEPENDENCY**, dependency named — the ClientView authority mint on the
-49F principal. Not a refusal, not an absence, not a failure of the capture design. Nothing landed;
-no bronze written. The capture resumes the moment a ClientView mint succeeds, unchanged.
+~~`INSA2AE-AC1`: **UNCOMPUTABLE-BY-DEPENDENCY**, dependency named — the ClientView authority mint on
+the 49F principal. Nothing landed; no bronze written.~~
+
+⛔ **SUPERSEDED 2026-08-27 ~18:3xZ — THE DEPENDENCY WAS DISCHARGED AND THE CAPTURE RAN.** Struck rather
+than deleted, because the block was real and its evidence is what routed the remedy.
+
+`0.7.0_AE_CloudOps~L` restored the ClientView authority (76345, bounded single act: clientview **3/3**,
+datamining **3/3** held as the control). The probe fired immediately after, under the protocol above.
+
+**RESULT — the pre-registered EMPTY outcome fired.** `relationshipdetail` on 49F relationship
+`z08117302`: HTTP-200, 3093 bytes, landed raw. **`financialTeam` is PRESENT, a list, length 0 —
+affirmatively empty, not absent and not null**; `financialTeamTemplateId` is `None`. The surface DOES
+carry the advisor hop and 49F has no team assigned: a **Black Diamond CONFIGURATION state**. Probe-first
+was honoured — **1 of 50 harvested ids spent, the cohort was not.**
+
+`INSA2AE-AC1` closes **PASS/MEASURED**. Full scoring, controls and denominators:
+`ADVI_INSURE.TO-A2-AE_PROOF_OF_SPEC.json` (VALID, `TRUE_RC=0`, 4 rows, 0 violations).
+
+**One residual, stated because the finding must not be read wider than it is:** 1 relationship was
+measured *directly*, of a server total of **77**. I do not claim all 77 are empty. The corroboration is
+that the sibling `teams[]` is empty on **50 of 50** rows of the cohort page I landed myself — which
+independently reproduces the 77/77 prior from another seat, on a different page of the same cohort.
