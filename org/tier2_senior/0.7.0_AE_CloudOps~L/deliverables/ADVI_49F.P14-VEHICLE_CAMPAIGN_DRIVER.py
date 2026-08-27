@@ -88,6 +88,10 @@ OUT_SEND_FAILED = "SEND-FAILED"         # never reached the chain
 BLACKOUT_ANCHOR_HHMM = (12, 45)
 DATE1_WALL_SECONDS = 114.5              # the one measured sample; superseded by ledger medians
 BLACKOUT_MARGIN_SECONDS = 900           # 15 min on top of the wall estimate
+# How long past the anchor the driver waits for the nightly's artifact before it stops asking and
+# hands the question to a human. Past this, "the nightly has not finished" and "the nightly never
+# ran" look identical from here, and only one of them is safe to drive through.
+POST_ANCHOR_GRACE_SECONDS = 7200        # 2h
 
 s3 = boto3.client("s3")
 ssm = boto3.client("ssm")
@@ -267,6 +271,42 @@ def wall_estimate(ledger_rows):
     return med, f"median of {len(walls)} observed"
 
 
+def blackout_verdict(now, est, nightly_enabled):
+    """THE BLACKOUT IS TWO WINDOWS, NOT ONE. Returns (may_start, reason).
+
+    The face names the PRE-FIRE window: no date STARTS within [wall + margin] of the 12:45Z fire.
+    That half alone is not the criterion, and the first version of this driver implemented only it.
+    The gap: `seconds_to_next_anchor` jumps from ~0 to ~24h the INSTANT the anchor passes, so at
+    12:47Z -- with the nightly holding the entrypoint mutex -- the pre-fire test reads "23.97h to
+    go, clear to start" and the campaign walks straight into the collision the window exists to
+    prevent. The refused run would then surface as either a spurious campaign failure or a MISSED
+    PRODUCTION RUN wearing a defect's face, and the face is explicit that NEITHER may be discovered
+    live.
+
+    So the POST-FIRE window is gated on the thing the face actually specifies: the nightly's
+    completion READ FROM ITS OWN PRODUCED ARTIFACTS, never from the schedule having fired.
+    """
+    need = est + BLACKOUT_MARGIN_SECONDS
+    to_anchor = seconds_to_next_anchor(now)
+    if to_anchor < need:
+        return False, (f"PRE-FIRE window: {to_anchor/60:.1f} min to the anchor, "
+                       f"need {need/60:.1f} min")
+    if not nightly_enabled:
+        return True, "nightly DISABLED on the applied plane -- no mutex contender today"
+    anchor = nightly_anchor_today(now)
+    if now < anchor:
+        return True, "outside both windows"
+    ok, why = nightly_completed_today(now)
+    if ok:
+        return True, f"POST-FIRE cleared: {why}"
+    past = (now - anchor).total_seconds()
+    if past > POST_ANCHOR_GRACE_SECONDS:
+        return False, (f"POST-FIRE OVERDUE -- {past/3600:.1f}h past the anchor with no nightly "
+                       f"artifact ({why}). A MISSED PRODUCTION RUN looks EXACTLY like this from "
+                       f"here. Operator judgment required before the campaign resumes.")
+    return False, f"POST-FIRE: nightly not yet complete ({why})"
+
+
 def nightly_completed_today(now):
     """Read the NIGHTLY's completion from ITS OWN produced artifacts -- the driver's completion
     instrument pointed at the production run, never a schedule-fired assumption."""
@@ -415,6 +455,16 @@ def main():
     print("  blackout schedules (APPLIED plane, re-read not assumed):")
     for k, v in live.items():
         print(f"    {k:24s} {v[0]:10s} {v[1]}")
+    nightly_enabled = live.get(NIGHTLY_SCHEDULE, ("UNREADABLE",))[0] == "ENABLED"
+    # UNREADABLE is treated as ENABLED: the blackout is the safe direction, and an unreadable
+    # schedule is exactly when an assumption is least affordable.
+    if live.get(NIGHTLY_SCHEDULE, ("UNREADABLE",))[0] == "UNREADABLE":
+        nightly_enabled = True
+        print(f"    WARN: {NIGHTLY_SCHEDULE} UNREADABLE -- assuming ENABLED (blackout stays armed)")
+    now0 = utcnow()
+    may0, why0 = blackout_verdict(now0, est, nightly_enabled)
+    print(f"  blackout verdict now ({now0.strftime('%H:%M:%SZ')}): "
+          f"{'CLEAR' if may0 else 'HELD'} -- {why0}")
 
     if not args.run:
         print()
@@ -447,14 +497,10 @@ def main():
             break
 
         now = utcnow()
-        need = est + BLACKOUT_MARGIN_SECONDS
-        to_anchor = seconds_to_next_anchor(now)
-        if to_anchor < need:
-            print(f"\nBLACKOUT: {to_anchor/60:.1f} min to the {BLACKOUT_ANCHOR_HHMM[0]:02d}:"
-                  f"{BLACKOUT_ANCHOR_HHMM[1]:02d}Z fire, need {need/60:.1f} min. NOT starting {d}.")
-            ok, why = nightly_completed_today(now)
-            print(f"  nightly completion (read from ITS artifacts): {ok} -- {why}")
-            print("  campaign PAUSES here. Re-invoke after the nightly completes; the ledger resumes.")
+        may_start, why = blackout_verdict(now, est, nightly_enabled)
+        if not may_start:
+            print(f"\nBLACKOUT -- NOT starting {d}: {why}")
+            print("  campaign PAUSES here. Re-invoke once clear; the ledger resumes exactly here.")
             break
 
         basis = basis_for(d)
