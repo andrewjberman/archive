@@ -2,11 +2,11 @@
 
 <status>pending</status>
 
-**to:** `4.0.0_SA_CRO~A` · **issuer:** `2.0.0_SA_COO~X` · **certifier:** `3.0.0_SA_CVO~X`
+**to:** `4.0.0_SA_CRO~X` · **issuer:** `2.0.0_SA_COO~X` · **certifier:** `3.0.0_SA_CVO~X`
 **scope:** 2 views / 14 cells · **seat allocated by** `0.0.0_AB_MSTR`
 
 <decomp_ref>
-workflows/atom_decomposition/runs/nfra-c3materialize-L2/DECOMP.md @86db9b1122
+workflows/atom_decomposition/runs/nfra-c3materialize-L2/DECOMP.md @6eae2dc9ab
 
 cells:
 L2-adkg-1 L2-adkg-2 L2-adkg-3 L2-adkg-4 L2-adkg-5 L2-adkg-6 L2-adkg-7 L2-kedi-1 L2-kedi-2 L2-kedi-3
@@ -14,6 +14,30 @@ L2-kedi-4 L2-kedi-5 L2-kedi-6 L2-kedi-7
 </decomp_ref>
 
 ---
+
+## RE-SEATED 2026-08-27 -- CRO~A -> CRO~X. NO GO RIDES WITH THIS.
+
+**Assignee amended** on Andrew's direct coverage transfer (`4.0.0_SA_CRO~X` takes up
+responsibilities assigned to `4.0.0_SA_CRO~A`), with `0.0.0_AB_MSTR`'s concurrence as the original
+seating seat. Decomp re-seated @`6eae2dc9ab`; this face re-pinned to it.
+
+STOP: **THIS UNIT IS HELD AND THE RE-SEAT DOES NOT RELEASE IT.** Andrew's 2026-08-27
+reorientation holds L2, and he RE-CONFIRMED IT AT ~21:4xZ IN THE SAME BREATH AS RELEASING
+SOMETHING ELSE -- verbatim *"rec approved"* on the L0 REWORK-4 tranche, with **"L2 STAYS
+HELD. Nothing else in his word."** (relayed 1.0.0_SA_CTO~X 76802, recorded @ab9d42206f).
+That is the strongest form of a hold: a sovereign who released the adjacent item in the same
+sentence and left this one alone. This amendment changes WHO WOULD DELIVER, never
+WHETHER DELIVERY MAY BEGIN. `4.0.0_SA_CRO~X`: if you hold his word to proceed, cite it to
+`2.0.0_SA_COO~X` and it governs -- do not infer it from this re-seat.
+
+**The 14 cell ids are UNCHANGED** and the `<decomp_ref>` list below is byte-identical to the
+pre-re-seat one: `surface()` derives each token from the VIEW NAME, not the seat. Zero cells were
+delivered under the prior seating, so nothing is orphaned.
+
+NOTE: **The filename and folder still read `CROA`.** Deliberate -- a path is an identifier and
+renaming it would break every existing citation, including this TO's own history. The FACE is
+authoritative for the assignee; the path is a historical id. Folder relocation was NOT authorized
+(paperwork only) and is flagged, not taken.
 
 ## AUTHORITY AND WHY THIS RUNS NOW
 
