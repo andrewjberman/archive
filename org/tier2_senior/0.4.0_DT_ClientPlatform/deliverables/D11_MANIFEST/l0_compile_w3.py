@@ -222,50 +222,11 @@ def main() -> None:
     out["as_of"] = {"compiled_utc": COMPILED_UTC, "commit_ish": PIN}
     out["parts"] = sorted(parts.values(), key=lambda p: p["id"])
 
-    # ---- PARTS_VS_OBJECTS, DERIVED HERE over the FINAL population -------------------
-    # ⛔ 4.0.0_SA_CRO~A's instruction: prefer DERIVING this after the final population exists over
-    # freezing another count in base39 prose. base39 is an INPUT; a count frozen in an input is
-    # stale the moment the population changes, and it had (39 -> 42).
-    # KEYED ON home_space == "none", the DECLARED ENUM -- not on `basis` (which was carrying two
-    # meanings) and not on a prose prefix (which was the same defect one field over,
-    # 1.0.0_SA_CTO~X ruling 75231).
-    NON_ENUMERABLE_FAMILIES = {"kuzu_nessie_db.rebuild.tmp.SET"}
-    SET_MEMBERS = {"_build_manifest.json.SET": 3, ".comp-graph/platinum.CACHE_SET": 5}
-    assert not (NON_ENUMERABLE_FAMILIES & set(SET_MEMBERS)), (
-        "a NON-ENUMERABLE family entered SET_MEMBERS: %s"
-        % (NON_ENUMERABLE_FAMILIES & set(SET_MEMBERS)))
-
-    _absent = [p for p in out["parts"] if p.get("home_space") == "none"]
-    _present = [p for p in out["parts"] if p.get("home_space") != "none"]
-    _enum = [p for p in _present if p["id"] in SET_MEMBERS]
-    _nonenum = [p for p in _present if p["id"] in NON_ENUMERABLE_FAMILIES]
-    _single = [p for p in _present
-               if p["id"] not in SET_MEMBERS and p["id"] not in NON_ENUMERABLE_FAMILIES]
-    assert len(_single) + len(_enum) + len(_nonenum) == len(_present), "partition does not sum"
-
-    # CONTROL: the W3 compile must PRESERVE the C3 triplet it inherits from base39.
-    _EXPECTED_UNBUILT = {"affinity_matrix", "similarity_network_fusion", "identity_and_succession"}
-    assert {p["id"] for p in _absent} == _EXPECTED_UNBUILT, (
-        "the unbuilt set is not the C3 triplet after compile: %s"
-        % sorted(p["id"] for p in _absent))
-    assert all(p["basis"] == "held" and p["home"] == "NONE" for p in _absent), (
-        "the compile did not preserve the C3 triplet (basis=held, home=NONE, home_space=none)")
-
-    out["denominator"]["method"] += (
-        " PARTS_VS_OBJECTS, DERIVED AT COMPILE over the FINAL population, NO SINGLE OBJECT TOTAL: "
-        "%d parts = %d present + %d recording an ABSENCE (the unbuilt C3 stages, keyed on "
-        "home_space=='none' -- their `basis` is `held` on a named authority and their UNBUILT-NESS "
-        "is a different question from their epistemic basis). The %d present parts partition as %d "
-        "singleton + %d ENUMERABLE set rows covering %d named members + %d NON-ENUMERABLE family "
-        "whose members are runtime-named and whose CARDINALITY IS UNDEFINED. ⛔ NO TOTAL "
-        "DISTINCT-OBJECT COUNT EXISTS FOR THIS POPULATION and none is printed -- a total spanning a "
-        "family of undefined cardinality would be a number the estate does not have. The enumerable "
-        "subtotal is %d objects across %d set rows and is the only object figure quotable here."
-        % (len(out["parts"]), len(_present), len(_absent), len(_present), len(_single),
-           len(_enum), sum(SET_MEMBERS.values()), len(_nonenum),
-           sum(SET_MEMBERS.values()), len(_enum)))
-
-    prior = base["denominator"]
+    # ⛔ SHALLOW-COPY ALIAS: `out = dict(base)` means out["denominator"] IS
+    # base["denominator"]. Anything appended to it before this line MUTATES the frozen phase-A
+    # method that the very next statement embeds as "unchanged and NOT re-run by this compiler".
+    # Snapshotted so that sentence stays true of its own content.
+    prior = dict(base["denominator"])
     out["denominator"] = {
         # ⛔ NAMES BOTH POPULATIONS RATHER THAN BLENDING THEM -- the oracle's own words.
         "method": (
@@ -327,6 +288,67 @@ def main() -> None:
             "express per-writer standing, so that dimension is UNREPRESENTED rather than resolved.",
         ],
     }
+
+    # ---- PARTS_VS_OBJECTS, DERIVED AFTER THE DENOMINATOR OBJECT EXISTS --------------
+    # ⛔ MOVED HERE from before the replacement, 4.0.0_SA_CRO~A pre-commit finding. Appending
+    # to out["denominator"] before `out["denominator"] = {...}` wrote through the shallow
+    # alias into base's FROZEN method, which the new object then embedded as population A's
+    # "unchanged" method -- so the 42-part split was emitted MIS-ATTRIBUTED to the 39-part
+    # population rather than discarded. Order is the whole fix.
+    # ⛔ 4.0.0_SA_CRO~A's instruction: prefer DERIVING this after the final population exists over
+    # freezing another count in base39 prose. base39 is an INPUT; a count frozen in an input is
+    # stale the moment the population changes, and it had (39 -> 42).
+    # KEYED ON home_space == "none", the DECLARED ENUM -- not on `basis` (which was carrying two
+    # meanings) and not on a prose prefix (which was the same defect one field over,
+    # 1.0.0_SA_CTO~X ruling 75231).
+    NON_ENUMERABLE_FAMILIES = {"kuzu_nessie_db.rebuild.tmp.SET"}
+    SET_MEMBERS = {"_build_manifest.json.SET": 3, ".comp-graph/platinum.CACHE_SET": 5}
+    assert not (NON_ENUMERABLE_FAMILIES & set(SET_MEMBERS)), (
+        "a NON-ENUMERABLE family entered SET_MEMBERS: %s"
+        % (NON_ENUMERABLE_FAMILIES & set(SET_MEMBERS)))
+
+    _absent = [p for p in out["parts"] if p.get("home_space") == "none"]
+    _present = [p for p in out["parts"] if p.get("home_space") != "none"]
+    _enum = [p for p in _present if p["id"] in SET_MEMBERS]
+    _nonenum = [p for p in _present if p["id"] in NON_ENUMERABLE_FAMILIES]
+    _single = [p for p in _present
+               if p["id"] not in SET_MEMBERS and p["id"] not in NON_ENUMERABLE_FAMILIES]
+    assert len(_single) + len(_enum) + len(_nonenum) == len(_present), "partition does not sum"
+
+    # CONTROL: the W3 compile must PRESERVE the C3 triplet it inherits from base39.
+    _EXPECTED_UNBUILT = {"affinity_matrix", "similarity_network_fusion", "identity_and_succession"}
+    assert {p["id"] for p in _absent} == _EXPECTED_UNBUILT, (
+        "the unbuilt set is not the C3 triplet after compile: %s"
+        % sorted(p["id"] for p in _absent))
+    assert all(p["basis"] == "held" and p["home"] == "NONE" for p in _absent), (
+        "the compile did not preserve the C3 triplet (basis=held, home=NONE, home_space=none)")
+
+    out["denominator"]["method"] += (
+        " PARTS_VS_OBJECTS, DERIVED AT COMPILE over the FINAL population, NO SINGLE OBJECT TOTAL: "
+        "%d parts = %d present + %d recording an ABSENCE (the unbuilt C3 stages, keyed on "
+        "home_space=='none' -- their `basis` is `held` on a named authority and their UNBUILT-NESS "
+        "is a different question from their epistemic basis). The %d present parts partition as %d "
+        "singleton + %d ENUMERABLE set rows covering %d named members + %d NON-ENUMERABLE family "
+        "whose members are runtime-named and whose CARDINALITY IS UNDEFINED. ⛔ NO TOTAL "
+        "DISTINCT-OBJECT COUNT EXISTS FOR THIS POPULATION and none is printed -- a total spanning a "
+        "family of undefined cardinality would be a number the estate does not have. The enumerable "
+        "subtotal is %d objects across %d set rows and is the only object figure quotable here."
+        % (len(out["parts"]), len(_present), len(_absent), len(_present), len(_single),
+           len(_enum), sum(SET_MEMBERS.values()), len(_nonenum),
+           sum(SET_MEMBERS.values()), len(_enum)))
+
+
+    # ⛔ FINAL-STATE CONTROL, on the EMITTED object rather than on the logic that built it.
+    # My static controls tested the computation and could not have seen the mis-attribution,
+    # because the computation was correct and its DESTINATION was wrong.
+    _final = out["denominator"]["method"]
+    assert "PARTS_VS_OBJECTS, DERIVED AT COMPILE" in _final, (
+        "the derived split is not in the EMITTED method")
+    assert ("%d parts = %d present" % (len(out["parts"]), len(_present))) in _final, (
+        "the emitted split does not carry the FINAL population counts")
+    for _legacy in ("14 member objects", "47 DISTINCT OBJECTS", "6-member SET row",
+                    "3 are SET rows"):
+        assert _legacy not in _final, "LEGACY claim survives in the emitted method: %r" % _legacy
 
     # ---- validate, with the negative control ---------------------------------------
     v = Draft202012Validator(json.load(open(SCHEMA, encoding="utf-8")))
