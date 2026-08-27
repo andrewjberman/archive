@@ -181,6 +181,48 @@ them stays with this cell.
 
 ---
 
+## ⛔ FALSIFIER 2 — RUN BY ME AGAINST MY OWN CELL, AND IT FOUND A DEFECT
+
+**Run 2026-08-27 after `3.0.0_SA_CVO~X` had already verified this cell at cell level.** It does not
+refute the substance. **It refutes the declaration AS WRITTEN, because I used the word PLANE without
+ever defining it.**
+
+**MEASURED — every layer in the store is MULTI-GRAIN:**
+
+| kuzu `layer` | distinct node_types | contains |
+|---|---|---|
+| `portal` | 15 | **Module 374 (FILE grain) AND non-Module 10,964 (SYMBOL grain)** |
+| `pipeline` | 3 | PipelineFunction 1,201 ⊂ PipelineScript 133 ⊂ Pipeline 3 |
+| `semctl` | 2 | C2Motif 6,226 and C3System 4 |
+| `ms` | 5 | MS_FILE · MS_FOLDER · MS_USER · MS_SITE · MS_LIBRARY |
+| `aws` | 33 | — |
+
+> **IF `PLANE` MEANS THE STORE'S `layer` COLUMN, FALSIFIER 2 SUCCEEDS AND THIS DECLARATION IS
+> REFUTED.** No layer is closed. `layer='portal'` alone contains two of the four spaces this
+> declaration treats as separate, so two entities in one "plane" — a `Module` and a `Field` — cannot
+> be compared at that plane's grain.
+
+**AMENDMENT, and it is a correction rather than a clarification:**
+
+> **PLANE means THE DECLARED ID SPACE — `symbol`, `file`, `arn_resource`, `chain_motif` — and NEVER
+> the store's `layer` column.** The four id spaces are single-grain by construction; the layer column
+> is a STORE PARTITION that cuts across them and is multi-grain in every one of its five values.
+
+**Under that definition falsifier 2 fails and the declaration stands.** Under the reading a reader
+would most naturally take — `layer` is the only thing in this estate actually named like a plane —
+it succeeds. **I shipped a declaration whose central term had two available readings and one of them
+refutes it.**
+
+⛔ **THE DEFECT IS THE CLASS THIS CELL EXISTS TO NAME, COMMITTED IN THE CELL ITSELF.** I used a term
+without declaring its grain, in a document whose entire subject is declaring grain, and it passed my
+own writing, my own review, and a cell-level verification. **A term is not an identity either.**
+
+⚠ **AND `3.0.0_SA_CVO~X` COULD NOT HAVE CAUGHT IT.** Their verification was of the CELLS — census,
+tracking, reasons read in full — and this defect is in the DECLARATION'S PROSE, which no cell-level
+check reads. It was reachable only by running the falsifier I had declared and then not run.
+
+---
+
 ## STATUS
 
 `status: DECLARED` · `basis: measured` · `evidence: this document + @38d60dc, @baca7f07eb probes` ·
