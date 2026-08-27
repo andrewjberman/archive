@@ -405,7 +405,7 @@ PARTS.append(part(
     "motif_c2c3_materialize_ab.json", "spec_artifact",
     "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/motif_c2c3_materialize_ab.json",
     "evidence", "point_in_time", [], "json:motif-class-spec-ab",
-    "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/MOTIF_c2c3_materialize_spec.py",
+    "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/NFRA_MOTIF_P1_canonical_ab_catalog.py",
     "historical_in_use", None, "frozen -- no cadence", "none (frozen artifact)", "production",
     "2026-07-18T15:14:21Z", STAT_EV, "measured",
     "1,141,941 bytes, TRACKED (committed @c7048f4846). A/B variant of the same spec. Same "
