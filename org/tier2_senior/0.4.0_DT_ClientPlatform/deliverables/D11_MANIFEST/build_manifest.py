@@ -37,11 +37,14 @@ def wh(tbl_dir):
 def part(id, part_class, home, authority_role, temporal_claim, projection_of, source_identity,
          materializer, standing, declared_opinions, cadence, trigger, population_status,
          measured_utc, method, basis, evidence, owner, age_note=None, coverage=None,
-         consumers=None, digest=None):
+         consumers=None, digest=None, home_space=None):
     p = {
         "id": id,
         "part_class": part_class,
         "home": home,
+        # home_space: WHICH ADDRESS SPACE `home` is rendered in. Emitted only when declared, so
+        # rows that have not been classified stay silent rather than claiming a space.
+        **({"home_space": home_space} if home_space else {}),
         "authority_role": authority_role,
         "temporal_claim": temporal_claim,
         "lineage": {"projection_of": projection_of, "source_identity": source_identity},
@@ -534,7 +537,7 @@ for pid, stage, wr, ww in [
      "an identity register carrying birth/death/split/merge -- UNBUILT"),
 ]:
     PARTS.append(part(
-        pid, "materializer", "NOWHERE -- unbuilt; no code, no store, no artifact", "none", "unknown", [], None,
+        pid, "materializer", "NONE", "none", "unknown", [], None,
         None, "unknown", None, None, None, "unknown", None,
         # basis absent -> HELD, 4.0.0_SA_CRO~A Base round 6. Each row's evidence cites
         # 1.0.0_SA_CTO~X 73215 -- a NAMED AUTHORITY asserting the fact without independent
@@ -542,7 +545,7 @@ for pid, stage, wr, ww in [
         # and one does.
         "ABSENT -- no code, no store, no artifact to measure", "held",
         "C3 CHAIN STAGE %d -- ABSENT. WOULD READ: %s. WOULD WRITE: %s. %s" % (stage, wr, ww, CHAIN_EV),
-        "UNOWNED -- unbuilt"))
+        "UNOWNED -- unbuilt", home_space="none"))
 
 
 MANIFEST = {
@@ -722,9 +725,13 @@ SET_MEMBERS = {"_build_manifest.json.SET": 3, ".comp-graph/platinum.CACHE_SET": 
 assert not (NON_ENUMERABLE_FAMILIES & set(SET_MEMBERS)), (
     "a NON-ENUMERABLE family is in SET_MEMBERS: %s" % (NON_ENUMERABLE_FAMILIES & set(SET_MEMBERS)))
 
-_UNBUILT_HOME = "NOWHERE -- unbuilt"
-_absent = [p for p in PARTS if str(p["home"]).startswith(_UNBUILT_HOME)]
-_present = [p for p in PARTS if not str(p["home"]).startswith(_UNBUILT_HOME)]
+# ⛔ RE-KEYED AGAIN, 1.0.0_SA_CTO~X ruling 75231. My previous key was
+# `home startswith "NOWHERE -- unbuilt"` -- WHICH READS A PROSE SENTENCE, the exact value that seat
+# had ruled out of `home` forty minutes earlier. I diagnosed `basis` carrying two meanings and then
+# replaced it with a PROSE PARSE: THE SAME DEFECT ONE FIELD OVER, committed inside the fix for it.
+# The key is now the DECLARED ENUM the rerun emits.
+_absent = [p for p in PARTS if p.get("home_space") == "none"]
+_present = [p for p in PARTS if p.get("home_space") != "none"]
 _enum_sets = [p for p in _present if p["id"] in SET_MEMBERS]
 _nonenum = [p for p in _present if p["id"] in NON_ENUMERABLE_FAMILIES]
 _singletons = [p for p in _present if p["id"] not in SET_MEMBERS
@@ -734,6 +741,13 @@ _singletons = [p for p in _present if p["id"] not in SET_MEMBERS
 # cardinality has no object total, and printing one would state a number the estate does not have.
 # The partition is emitted instead, and it SUMS.
 assert len(_singletons) + len(_enum_sets) + len(_nonenum) == len(_present)
+# CONTROL: the unbuilt set is EXACTLY the three C3 stages -- not two, not four, and not whichever
+# rows happen to share a prose prefix.
+_EXPECTED_UNBUILT = {"affinity_matrix", "similarity_network_fusion", "identity_and_succession"}
+assert {p["id"] for p in _absent} == _EXPECTED_UNBUILT, (
+    "unbuilt set is not the C3 triplet: %s" % sorted(p["id"] for p in _absent))
+assert all(p["basis"] == "held" and p["home"] == "NONE" for p in _absent), (
+    "a C3 unbuilt row is missing part of the triplet (basis=held, home=NONE, home_space=none)")
 MANIFEST["denominator"]["method"] += (
     " PARTS_VS_OBJECTS (computed at build, NO SINGLE OBJECT TOTAL IS EMITTED): %d parts total = "
     "%d present + %d recording an ABSENCE (the unbuilt C3 stages, which are NOT objects and must "
