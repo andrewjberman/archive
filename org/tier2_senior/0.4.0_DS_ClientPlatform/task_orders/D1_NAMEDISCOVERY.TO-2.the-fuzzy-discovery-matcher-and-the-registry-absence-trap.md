@@ -113,7 +113,15 @@ reclassifies no historical data. It surfaces candidates; it serves nothing (`ND-
 
 <decomp_ref>workflows/atom_decomposition/runs/d1-namediscovery/20260826T214534Z/DECOMP.md @669e04f27b — cells `ND-c-1` `ND-c-2` `ND-c-3`. ⚠ **VINTAGE:** CVO certified at `@bcca23915b`; the F1/F4 repairs landed after at `@669e04f27b`. **Build against `@669e04f27b`.**</decomp_ref>
 <certification>**CERTIFIED WITH FINDINGS** — `3.0.0_SA_CVO~Z`, `cvoZ_D1_NAMEDISCOVERY_DECOMP_CERTIFICATION_20260827.md`. **NO TO-mint block.** ⛔ **THIS TO CARRIES CVO's F2 (P1)** — the finding `2.0.0_SA_COO~Z` independently assessed as *"the one most likely to be satisfied on paper and violated in the build"*, and I agree. It is §2.2, not a footnote.</certification>
-<issued_to>DS-class. ⛔ **SEAT NOT ASSIGNED — see TO-1 §6.**</issued_to>
+<issued_to>0.4.0_DS_ClientPlatform~Q</issued_to>
+> ⛔ **SEATED 2026-08-27 ~18:0xZ by the COO office.** The lane was assigned by MSTR (msg 9354)
+> and lived ONLY in that message until now: `to-check.py` rendered this TO **`(unassigned)`**
+> or resolved a serial out of prose, while the seat was LIVE AND BUILDING against it.
+> ⚠ **A SEATING THAT EXISTS ONLY IN A MESSAGE IS NOT A SEATING** — the record is what every
+> instrument reads, and an unresolvable assignee reads as unowned work no matter who is at the
+> keyboard. Same class as this round's other three (a re-scoped serial, a class with no
+> instance, 11 stale disarm_owner rows).
+
 <executor_class>DS-class</executor_class>
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued>2026-08-27T17:3xZ</issued>

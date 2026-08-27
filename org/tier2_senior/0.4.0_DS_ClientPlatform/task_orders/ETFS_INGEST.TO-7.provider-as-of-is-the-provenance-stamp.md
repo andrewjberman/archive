@@ -12,7 +12,7 @@
 >
 > **THE CLASS, and it is this TO's second instance of it:** the human-readable title line
 > `# TO ETFS_INGEST.TO-7 — ...` names the id perfectly, so **every human reader resolves it and every
-> tool fails.** That is precisely the shape of the `<issued_to>` defect on this same face — an
+> tool fails.** That is precisely the shape of the assignee-field defect on this same face — an
 > executor **CLASS** (`DS + AE`) where an **INSTANCE** was owed, which left this TO reading as issued
 > and held by nobody for three days while its producer work was already landed and unvalidated.
 > **TWICE ON ONE ARTIFACT, the record was legible to a person and unresolvable to a machine** — and
@@ -24,16 +24,20 @@
 
 <issued_to>0.4.0_DS_ClientPlatform~P</issued_to>
 
-> ⛔ **SEATED 2026-08-27 ~17:2xZ by `2.0.0_SA_COO~Z` — THIS TO SAT UNASSIGNED FOR THREE DAYS AND
+> ⛔ **SEATED 2026-08-27 ~17:2xZ by the COO office — THIS TO SAT UNASSIGNED FOR THREE DAYS AND
 > NOTHING SURFACED IT.** It carried an executor CLASS (`DS + AE`) and no INSTANCE, so
 > `to-check.py` rendered it `-> (unassigned)` while every other field looked complete — including a
-> **sovereign word** and a `1.0.0_SA_CTO~Z` sequencing ruling that says *"if only one 13:00Z fix
+> **sovereign word** and a CTO sequencing ruling that says *"if only one 13:00Z fix
 > lands, THIS ONE GOES FIRST."* **A TO with a class and no instance reads as issued and is held by
 > nobody**, and the highest-priority item in its project is exactly where that is most expensive.
 > **A CLASS IS NOT AN ASSIGNEE.** Found by a COO seat-census, not by any gate — recorded so the next
 > census knows to look at the instance field, not the class field.
-> Seat: `0.4.0_DS_ClientPlatform~P` (fresh lane, `ETFS_INGEST` ONLY per Rule 27; spawned by
-> `0.0.0_AB_MSTR~Z` msg 9331 on this office's call). **The AE deploy limb is NOT seated by this
+> ⚠ **AND THE PROSE BELOW WAS DE-SERIALISED 2026-08-27 ~18:0xZ: my first version of this very note
+> named five serials, and `to-check.py` READ ONE OF THEM AS THE ASSIGNEE** (`-> SA_COO~Z +DS`). **A
+> NOTE EXPLAINING THE ASSIGNEE DEFECT RE-CREATED IT ON THE SAME FIELD.** Serials near a resolvable
+> field are parser input, not commentary — say the role, not the serial, in prose beside a tag.
+> Seat: the ~P DS lane named in the issued_to element above (fresh lane, `ETFS_INGEST` ONLY per
+> Rule 27; spawned by MSTR msg 9331 on this office's call). **The AE deploy limb is NOT seated by this
 > line** — it stays an AE-class act and `~P` must route it, not perform it.
 **Basis:** **ANDREW-DIRECT ~23:0xZ**, relayed verbatim by `1.0.0_SA_CTO~Z` (5645), recorded at
 `org/tier1_exec/1.0.0_SA_CTO/deliverables/ctoZ_ANDREW_DIRECT_20260824_PROVIDER_AS_OF_IS_THE_PROVENANCE_STAMP_FROM_BRONZE_ONWARD.md`

@@ -3,6 +3,16 @@
 **Project:** `ETFS_SATELLITES` · **Directive:** D4 (SITEZ) · **Round:** 1
 **Issued by:** `1.0.0_SA_CTO~Z` · 2026-08-27 ~17:4xZ
 **Issued to:** DS-class. ⛔ **SEAT NOT ASSIGNED** — lane letter is `0.0.0_AB_MSTR~Z`'s to assign.
+
+<issued_to>0.4.0_DS_ClientPlatform~W</issued_to>
+> ⛔ **SEATED 2026-08-27 ~18:0xZ by the COO office.** The lane was assigned by MSTR (msg 9354)
+> and lived ONLY in that message until now: `to-check.py` rendered this TO **`(unassigned)`**
+> or resolved a serial out of prose, while the seat was LIVE AND BUILDING against it.
+> ⚠ **A SEATING THAT EXISTS ONLY IN A MESSAGE IS NOT A SEATING** — the record is what every
+> instrument reads, and an unresolvable assignee reads as unowned work no matter who is at the
+> keyboard. Same class as this round's other three (a re-scoped serial, a class with no
+> instance, 11 stale disarm_owner rows).
+
 **Status:** ACTIVE · **Cells:** `SAT-a-1` `SAT-a-2` `SAT-a-3`
 
 ---

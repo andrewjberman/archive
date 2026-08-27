@@ -141,7 +141,15 @@ not on a decision.**
 
 <decomp_ref>workflows/atom_decomposition/runs/d1-namediscovery/20260826T214534Z/DECOMP.md @669e04f27b — cells `ND-a-1` `ND-a-2` `ND-a-3` `ND-b-1` `ND-b-2`. ⚠ **VINTAGE NOTE, stated because the two are not the same commit:** `3.0.0_SA_CVO~Z` CERTIFIED at `@bcca23915b`; `2.0.0_SA_COO~Z` then landed the CVO F1/F4 repairs at `@669e04f27b`. **Build against `@669e04f27b`** — it carries the certified content PLUS both repairs. A citation without a vintage is not a citation (Rule 22).</decomp_ref>
 <certification>**CERTIFIED WITH FINDINGS** — `3.0.0_SA_CVO~Z`, `org/tier1_exec/3.0.0_SA_CVO/deliverables/cvoZ_D1_NAMEDISCOVERY_DECOMP_CERTIFICATION_20260827.md`. **NO TO-mint block.** ⛔ **What the signature does NOT buy:** F2 and F3 are LIVE P1 findings routed into TO-2 and TO-3 respectively; none lands on this TO's cells. The certifier reproduced the cell census exactly (20 cells, 16 criterion-bearing) and swept scope forks across THREE planes (SITEZ, origin/CLOUD, a commit-message sweep, denominator 491 commits).</certification>
-<issued_to>DS-class. ⛔ **SEAT NOT ASSIGNED — the lane letter is `0.0.0_AB_MSTR~Z`'s to assign. See §6.**</issued_to>
+<issued_to>0.4.0_DS_ClientPlatform~Q</issued_to>
+> ⛔ **SEATED 2026-08-27 ~18:0xZ by the COO office.** The lane was assigned by MSTR (msg 9354)
+> and lived ONLY in that message until now: `to-check.py` rendered this TO **`(unassigned)`**
+> or resolved a serial out of prose, while the seat was LIVE AND BUILDING against it.
+> ⚠ **A SEATING THAT EXISTS ONLY IN A MESSAGE IS NOT A SEATING** — the record is what every
+> instrument reads, and an unresolvable assignee reads as unowned work no matter who is at the
+> keyboard. Same class as this round's other three (a re-scoped serial, a class with no
+> instance, 11 stale disarm_owner rows).
+
 <executor_class>DS-class</executor_class>
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued>2026-08-27T17:3xZ</issued>
