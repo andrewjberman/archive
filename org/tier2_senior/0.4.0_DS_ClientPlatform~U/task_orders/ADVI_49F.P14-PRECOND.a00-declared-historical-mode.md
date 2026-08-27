@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DS_ClientPlatform~U</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-27T18:4xZ</issued>
-<status>pending -- GO received 2026-08-27T18:58Z (COO 76413; CVO cert step-zero PASS @5681c08447, decomp override BLESSED-SCOPED); execution begun by 0.4.0_DS_ClientPlatform~U</status>
+<status>complete -- COO FLIP 2026-08-27 ~20:1xZ on the full three-instrument chain: seat evidence (mode @bc585df628, DH-6 @43a2b1d872, all arms re-fired on DEPLOYED bytes, instance VALID rc=0 @8358523dd6) + issuer RAVC-4 (76629) + CVO completion read PASS @d091ce16c6. DH-4's consuming half is TRANSFERRED-WITH-NAMED-CARRIER (the P1.5 re-grade TO + the BDPARITY harness faces each carry the attestation-split read as a named criterion at their cut, COO-owed on the record). **V14-3 UNLOCK LEG 3 CLOSES ON THIS FLIP** -- the P14-VEHICLE unlock read now finds all three legs at their faces.</status>
 <priority>P1 -- the P14 backfill refuses 506 of 533 dates until this lands (exercised @76367); it gates P1.4 and therefore the P1.5 arm-(a) evidence</priority>
 <authority>CTO ruling 76377 (the whole design is that ruling; this face adds nothing to it): guard UNMODIFIED, back-filled attestations BANNED, declared mode with measured epoch + stamped basis. Finder: this seat's own 76367 (exercised abort + 27/506 enumeration, both controls).</authority>
 </task_order>
