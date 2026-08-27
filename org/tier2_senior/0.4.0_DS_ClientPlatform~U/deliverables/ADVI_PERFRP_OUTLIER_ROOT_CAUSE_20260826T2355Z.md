@@ -174,13 +174,19 @@ The direction exists upstream in `fact_trn` (`debit_credit` = LONG/SHORT) and **
 | date | account | `nna_unresolved_direction` now | **EXPECTED** | headline / inflow / outflow |
 |---|---|---|---|---|
 | 08-24 | `0016371483` | +89,946.62 | **−91,552.00** | 0.00 → 0.00 |
-| 08-24 | `0033493115` | +64,841.33 | **−88,158.89** | 0.00 → 0.00 |
+| 08-24 | `0033493115` | +64,841.33 → **CORRECTED +87,054.14** | **−88,158.89** → **CORRECTED −110,371.70** | 0.00 → 0.00 |
 | 08-24 | `0049284242` | +10,956.66 | **−10,926.98** | 0.00 → 0.00 |
 | 08-24 | `0032486794` | +39,361.92 | **+39,361.92 (NO MOVE)** | 0.00 → 0.00 |
 | 08-25 | *(2 accounts hold a leg)* | — | **NONE MOVE** (both LONG) | — |
 
 **`0032486794`'s NON-MOVE IS PART OF THE ACCEPTANCE** — it is an inflow, correctly positive today, and **a fix that flips it would be over-correcting.**
-⛔ **MAGNITUDES CHANGE, NOT ONLY SIGNS:** `0033493115` goes 64,841.33 → **−88,158.89**, which is *not* the negation of itself. **Those accounts hold MIXED-DIRECTION legs — the unsigned sum ADDS opposing transfers, the signed sum NETS them.** A fix validated only on sign-flip would pass while the magnitudes stayed wrong. **ASSERT THE VALUE, NOT THE SIGN.**
+⛔ **MAGNITUDES CHANGE, NOT ONLY SIGNS — the conclusion STANDS, my stated MECHANISM was WRONG, and one registered number was WRONG. Corrected 2026-08-27T17:2xZ under `ADVI_49F.c01-SIGNFIELD`, found by the acceptance harness this table exists to feed.**
+
+**THE NUMBER.** I registered `0033493115`'s pre-fix `nna_unresolved_direction` as **64,841.33**. It is **87,054.1359** — read directly from the LIVE S3 `nna_canonical` partition `date=2026-08-24`, and reproduced to the cent by a rebuild from `fact_trn`. The derived expectation −88,158.89 inherited the error; the correct expectation is **−110,371.70**. **The other three rows reproduce the live artifact EXACTLY**, so the method was never the variable — that one row was mis-transcribed when I authored the table. Neither was the INPUT: `fact_trn date=2026-08-24` carries `LastModified 2026-08-25T09:46:15Z` (`s3api` plane, UTC), *before* this table's own 2026-08-27T0050Z stamp. **A typed number beside a derived one, and the derived one carried the error forward silently.**
+
+**THE MECHANISM.** I wrote that these accounts hold **MIXED-DIRECTION legs**. **MEASURED, NONE OF THEM DO** — `0016371483` 15 of 15 SHORT, `0033493115` 30 of 30 SHORT, `0049284242` 14 of 14 SHORT, `0032486794` 1 of 1 LONG. Every one is pure-direction. **The real source of the asymmetry is the CASH component sharing the same `external-by-default` bucket**: cash legs carry `signed_amount`, which is signed BEFORE and AFTER, so it does not double, while the in-kind part flips. The identity is `post = cash + Σ(±ink)` against `pre = cash + Σ|ink|`, giving `post − pre = −2·Σ(out legs)` — exact on all four (`0033493115`: −11,658.78 cash + −98,712.92 in-kind = −110,371.70).
+
+>> **THE INSTRUCTION SURVIVES ITS OWN BROKEN EXAMPLE, AND IS SHARPER FOR IT: ASSERT THE VALUE, NOT THE SIGN.** A fix validated on sign-flip alone still passes here. But note what actually caught this: **not** the sign check, and **not** review — the harness re-read the LIVE ARTIFACT and refused to agree with the table. **A pre-registered acceptance is only as good as the substrate its "now" column was read from, and I never named that substrate when I wrote it.** Every row above now cites one. <<
 
 ⛔ **SCALE STILL UNMEASURED:** the 23.7% / 72.5% figures in s.4 were computed against **`twr_daily`** and **do not cover NNA.** The other **524 partitions are unmeasured and not extrapolated**, and `nna_unresolved_direction`'s downstream consumers have **not been traced** — so defect 3's client-facing impact is **UNQUANTIFIED, which is a different statement from "small."**
 

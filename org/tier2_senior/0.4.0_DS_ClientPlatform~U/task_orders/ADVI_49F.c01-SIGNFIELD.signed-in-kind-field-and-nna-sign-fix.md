@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DS_ClientPlatform~U</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-27T15:2xZ</issued>
-<status>staged -- GO pairs on spawn confirmation (Andrew-direct instantiation via 0.0.0_AB_MSTR, COO 76082)</status>
+<status>pending -- GO received 2026-08-27T16:09Z (COO 76133; Andrew released ~16:05Z @fb79e6a4cd); execution begun by 0.4.0_DS_ClientPlatform~U</status>
 <priority>P1 -- critical path (D2 brief @e4f7ecbfdc phase P1); client-facing NNA sign defect live today</priority>
 <authority>The ruled 08-26 remediation design: root cause @ea7c227a24; CTO 74187 (no re-sign-in-place); defect-3 record @07bcdafb2b; the assignee's own corrected end-to-end design @69b2b7678c. Andrew-direct seat word 2026-08-27 ~15:0xZ @1d761ded1f.</authority>
 </task_order>
