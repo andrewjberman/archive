@@ -113,6 +113,16 @@ and the hazards cannot be re-discovered the hard way mid-loop.
        a 531-partition production-history write, hence this note at the source. -->
   <dependency agent="0.4.0_DS_ClientPlatform~U" task="ADVI_49F.c01-SIGNFIELD" status="complete" scope="execution leg only -- vehicle work (V14-1, V14-2) is ungated"/>
   <dependency agent="0.4.0_DS_ClientPlatform~U" task="ADVI_49F.c02-CFINPUT" status="complete" scope="execution leg only"/>
+  <!-- ISSUER RULING 2026-08-27 ~18:5xZ, pre-empting circle #2 (76402: CF-2 clause 2 needs the
+       BACKFILLED history this TO produces, so a literal read of "c02 complete" would deadlock the
+       same way the CF-2 oracle did). c02's UNLOCK CONDITION for the execution legs is:
+       c01-SIGNFIELD complete AND c02's fix DEPLOYED THROUGH THE CF-4 GATE (1.0.0_SA_CTO's P4
+       pass, verified on deployed bytes) AND ADVI_49F.P14-PRECOND complete (the declared-historical
+       mode this pass requires) -- with CF-2 clause 2 ("SI ties BD in-band", original specimen)
+       EXPLICITLY CARRIED as a POST-BACKFILL acceptance the P1.5 re-grade consumes, never a
+       pre-unlock gate. A criterion whose evidence this pass itself produces cannot gate this
+       pass. Read the c02 + P14-PRECOND faces at unlock time, as always. -->
+
 </dependencies>
 
 <cross_domain_coordination>
