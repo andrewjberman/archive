@@ -123,6 +123,31 @@ and the hazards cannot be re-discovered the hard way mid-loop.
        pre-unlock gate. A criterion whose evidence this pass itself produces cannot gate this
        pass. Read the c02 + P14-PRECOND faces at unlock time, as always. -->
 
+  <!-- THE UNLOCK PREDICATE, PINNED 2026-08-27 ~19:1xZ by 0.7.0_AE_CloudOps~L (assignee), banked on
+       this face at 2.0.0_SA_COO 76465's durability ask so it travels WITH the ruling above instead
+       of in a thread that scrolls. Read this before acting on the ruling.
+
+       THE TRAP: the c02 face's :8 line now CONTAINS the literal string "DEPLOYED-THROUGH-CF-4" as an
+       INSTRUCTION to the executing seat -- necessarily, since the line has to name the token it wants
+       appended. So the token string is present on that face BEFORE anything is deployed. Measured on
+       the live face 2026-08-27 ~19:1xZ, gate NOT clear at the time:
+           grep -c  "DEPLOYED-THROUGH-CF-4"                  -> 1   MATCHES, nothing deployed
+           grep -cE "DEPLOYED-THROUGH-CF-4 @[0-9a-f]{7,40}"  -> 0   correctly refuses the
+                                                                    placeholder @<deploy-evidence-hash>
+           same sound predicate vs a synthetic real token    -> 1   so it is not always-zero
+       A naive grep therefore FALSE-POSITIVES the unlock and starts a 531-partition production-history
+       write early. That is the inverse of the stale-face false NEGATIVE this seat filed at 76425, it
+       was minted by the fix FOR that finding, and it is the strictly more dangerous arm. Nothing is
+       wrong with the c02 face: naming the token in the instruction is correct and an unnamed token
+       would be worse. The defect would belong to whoever greps naively.
+
+       THE SOUND PREDICATE, and it is the only one this seat acts on:
+           DEPLOYED-THROUGH-CF-4 @[0-9a-f]{7,40}       (token + a REAL hex hash, never the bare phrase)
+       Run BOTH ARMS at unlock -- the predicate AND a positive control on a synthetic real token --
+       because a predicate that has only ever returned zero is indistinguishable from a broken one.
+       This is one leg of three. The full ruled unlock remains: c01 complete AND c02
+       DEPLOYED-THROUGH-CF-4 AND P14-PRECOND complete, each read at its own face at unlock time. -->
+
 </dependencies>
 
 <cross_domain_coordination>
