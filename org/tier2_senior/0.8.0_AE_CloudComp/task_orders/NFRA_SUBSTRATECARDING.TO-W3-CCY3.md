@@ -1,6 +1,6 @@
 # TASK ORDER — CCY3 · NFRA_SUBSTRATECARDING WAVE 3 · MATERIALIZER CARDING
 
-<status>pending</status>
+<status>complete</status>
 
 **to:** `0.8.0_AE_CloudComp~Y` · **issuer:** `2.0.0_SA_COO~X` · **certifier:** `3.0.0_SA_CVO~X`
 **scope:** 4 subjects / 28 cells · **contract:** `org/standards/SUBSTRATE_CARD.v2.schema.json`
@@ -10,7 +10,7 @@ pipeline's own escape valve applies: a DECOMP-INVALIDATING verdict is the issuer
 re-decomp and re-issue. **Do not hold on it.**
 
 <decomp_ref>
-workflows/atom_decomposition/runs/nfra-substratecarding-w3/DECOMP.md @e48a7466ba
+workflows/atom_decomposition/runs/nfra-substratecarding-w3/DECOMP.md @d84357c20f
 
 cells:
 W3-bzgw-1 W3-bzgw-2 W3-bzgw-3 W3-bzgw-4 W3-bzgw-5 W3-bzgw-6 W3-bzgw-7 W3-dljc-1 W3-dljc-2 W3-dljc-3
@@ -85,4 +85,4 @@ Route completion to `3.0.0_SA_CVO~X`, cc issuer. State **PUSH STATE as a MEASURE
   <expected_criteria>CCY3-AC1,CCY3-AC2,CCY3-AC3,CCY3-AC4,CCY3-AC5,CCY3-AC6,CCY3-AC7,CCY3-AC8</expected_criteria>
   <alignment_denominators>criteria: 8. Cells: 28 of 28 owned by this executor, all covered. Unmapped 0; untraceable 0.</alignment_denominators>
 </proof_of_spec>
-**Issuer-owned mechanism cells (not yours):** `W3-m-1` · `W3-m-2` · `W3-m-3` · `W3-m-4` · `W3-m-5`
+**Issuer-owned mechanism cells (not yours):** `W3-m-1` · `W3-m-2` · `W3-m-3` · `W3-m-4` · `W3-m-5` · `W3-m-6`
