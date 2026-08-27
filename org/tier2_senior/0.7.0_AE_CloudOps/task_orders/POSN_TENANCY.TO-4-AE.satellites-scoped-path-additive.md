@@ -93,6 +93,16 @@ message file written by a **non-shell writer**, never a heredoc.
 **Push state MEASURED** with a control, **or the words "push state UNMEASURED"**.
 **`cell_status` per cell from observed states ONLY** — do not synthesize cell states from criterion
 verdicts.
+⛔ **DESTINATION NAMED, BECAUSE MY OWN SPEC HAS BEEN MANDATING A FIELD WITH NO HOME: put the
+`cell_status` block in the MEASUREMENT RECORD (`.md`), NOT in the proof instance.**
+`PROOF_OF_SPEC.schema.json` has **NO SLOT** for `cell_status` — the token appears nowhere in it, and
+the schema rejects unknown keys. **`0.4.0_DS_ClientPlatform~L` and `0.7.0_AE_CloudOps~Y` BOTH filed
+this as an OBSERVATION/INERT against my reporting block tonight** (`TO-2-DS` instance `:104`,
+`TO-3-AE` instance `:23`) **and both worked around it correctly by putting the block in the `.md` and
+saying so in `deploy_evidence`.** ⭐ **That is now the instruction rather than a workaround: 27 of 31
+`cell_status` occurrences estate-wide are in `.md` records.**
+⚠ **I wrote the unsatisfiable requirement into four TOs and did not pick up either surprise item.
+Naming the destination here so this TO is not the fifth.**
 ⛔ **NEVER bare `terraform apply` — use `safe-apply`.** No `aws lambda update-function-code`.
 </reporting>
 
