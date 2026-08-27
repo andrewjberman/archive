@@ -51,6 +51,7 @@ SCHEMA = os.path.join(WS, "org/standards/L0_GRAPH_SUBSTRATE_MANIFEST.schema.json
 CARD_REGISTRY = os.path.join(HERE, "card_population_registry.v1.json")
 REGISTRY_SCHEMA = os.path.join(HERE, "CARD_POPULATION_REGISTRY.v1.schema.json")
 CARD_SCHEMA = os.path.join(WS, "org/standards/SUBSTRATE_CARD.v2.schema.json")
+RECEIPT_SCHEMA = os.path.join(HERE, "MANIFEST_RECEIPT.v1.schema.json")
 
 ME = "0.4.0_DT_ClientPlatform~X"
 PIN = "e48a7466ba"
@@ -332,6 +333,73 @@ def card_generation_bits(c: dict) -> dict:
                      key=lambda v: ORDER[v]),
     }
 
+
+
+def _pin(rel: str, with_commit: bool = False) -> dict:
+    """One input, pinned by CONTENT. `commit` only where a commit is meaningful."""
+    d = {"home": rel, "git_blob_id": _blob(rel)}
+    if with_commit:
+        r = subprocess.run(["git", "log", "-1", "--format=%H", "--", rel], cwd=WS,
+                           capture_output=True, text=True)
+        d["commit"] = r.stdout.strip() or None
+    return d
+
+
+def _blob(rel: str):
+    r = subprocess.run(["git", "hash-object", "--", rel], cwd=WS,
+                       capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 else None
+
+
+def _rel(p: str) -> str:
+    return os.path.relpath(p, WS).replace(os.sep, "/")
+
+
+def build_receipt(out_path: str, snapshot_utc: str, reg: dict) -> dict:
+    """The receipt for ONE emission. PURE apart from reading the tree -- callable by a control
+    without running a compile, which is the only way a fixture stays honest about the emitter."""
+    art = _rel(out_path)
+    with open(out_path, "rb") as fh:
+        raw = fh.read()
+    return {
+        "document_kind": "manifest_execution_receipt",
+        "governing_schema": {"home": _rel(RECEIPT_SCHEMA),
+                             "id": "https://opal.internal/schemas/MANIFEST_RECEIPT.v1.schema.json"},
+        "exact_home": art.rsplit(".json", 1)[0] + ".receipt.json",
+        # FOUR INDEPENDENT AXES. A document's origin, its permitted future, its time semantics
+        # and its standing move separately, and collapsing any two hides a real state.
+        "authorship_mode": "machine_emitted",
+        "mutation_policy": "immutable",
+        "temporal_claim": "point_in_time",
+        # ⛔ evidence, NEVER authority: this reports what a run did and can be wrong about it.
+        "authority_role": "evidence",
+        "describes": {"relationship": "emitted_by_same_run", "home": art,
+                      "sha256": hashlib.sha256(raw).hexdigest(), "git_blob_id": _blob(art)},
+        "input_closure": {
+            "compiler": _pin(_rel(os.path.abspath(__file__)), with_commit=True),
+            "registry": _pin(_rel(CARD_REGISTRY), with_commit=True),
+            "registry_schema": _pin(_rel(REGISTRY_SCHEMA), with_commit=True),
+            "base39": _pin(_rel(BASE39)),
+            "card_part_map": _pin(_rel(MAP)),
+            "card_schema": _pin(_rel(CARD_SCHEMA), with_commit=True),
+            # THE LIST vs WHAT THE LIST RESOLVED TO -- two claims, and v0 pinned neither.
+            "admitted_cards": [{"path": m["path"], "subject_id": m["subject_id"],
+                                "git_blob_id": m["git_blob_id"]}
+                               for m in reg["extension_population"]["members"]],
+            "source_snapshot_pin": {
+                "derived_from": ["registry_ratified_commit", "schema_commit"],
+                "value_utc": snapshot_utc},
+            "complete": True,
+        },
+        "source_snapshot_utc": snapshot_utc,
+        "executed_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "executed_by": ME,
+        # ONE emission per run, so the verdict is FORCED false. A replay control compares two
+        # receipts; a single run claiming byte-identity would be comparing itself.
+        "replay": {"emissions_compared": 1,
+                   "comparison_digests": [hashlib.sha256(raw).hexdigest()],
+                   "byte_identical": False},
+    }
 
 def main(out_path: str = None) -> None:
     """out_path redirects the EMISSION only. ⛔ NOT a reduced mode: every read, every control
@@ -1148,32 +1216,25 @@ def main(out_path: str = None) -> None:
         f.write("\n")
     print("OK: wrote %s" % os.path.relpath(out_path, WS).replace(os.sep, "/"))
 
-    # ---- THE EXECUTION RECEIPT, BESIDE THE ARTIFACT AND NEVER INSIDE IT ------------------
-    # Everything here is a PER-RUN fact. It is deliberately excluded from the manifest so a
-    # byte-comparison of two replays is a statement about the COMPILE, not about the clock.
-    receipt = {
-        "artifact": os.path.relpath(out_path, WS).replace(os.sep, "/"),
-        "artifact_sha256": hashlib.sha256(
-            open(out_path, "rb").read()).hexdigest(),
-        # A REAL CLOCK READ, and it belongs ONLY here. The prior line read the last COMMIT's
-        # timestamp and called it an execution time -- a value that is stable across runs, in
-        # the one field whose entire purpose is to vary with them.
-        "executed_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "executed_by": ME,
-        "source_snapshot_utc": SOURCE_SNAPSHOT_UTC,
-        "input_pin_commit_ish": PIN,
-        "registry_ratified_at_commit": _registry_commit(),
-        "schema_commit": _schema_commit(),
-        "compiler_blob": subprocess.run(
-            ["git", "hash-object", "--", os.path.relpath(__file__, WS).replace(os.sep, "/")],
-            cwd=WS, capture_output=True, text=True).stdout.strip() or None,
-    }
+    # ---- THE GOVERNED EXECUTION RECEIPT ---------------------------------------------
+    # ⛔ v0 WAS NINE FREE KEYS WITH NO GOVERNING SCHEMA, so nothing could reject a missing pin,
+    # a wrong blob or a collapsed clock -- and three seats quoted its digest as evidence while
+    # it was an ungoverned producer self-report. Shape and contract: MANIFEST_RECEIPT.v1.
+    receipt = build_receipt(out_path, SOURCE_SNAPSHOT_UTC, reg=load_registry())
+    rerrs = list(Draft202012Validator(load_json_strict(RECEIPT_SCHEMA)).iter_errors(receipt))
+    if rerrs:
+        raise SystemExit(
+            "REFUSING TO WRITE A RECEIPT -- it does not satisfy its own governing schema "
+            "(%d errors): %s" % (len(rerrs), "; ".join(
+                "%s: %s" % ("/".join(str(x) for x in e.path), e.message[:80])
+                for e in rerrs[:5])))
     rpath = out_path.rsplit(".json", 1)[0] + ".receipt.json"
     with open(rpath, "w", encoding="utf-8", newline="\n") as f:
         json.dump(receipt, f, indent=2, ensure_ascii=True, sort_keys=True)
         f.write("\n")
     print("OK: receipt %s  artifact sha256 %s"
-          % (os.path.relpath(rpath, WS).replace(os.sep, "/"), receipt["artifact_sha256"][:12]))
+          % (os.path.relpath(rpath, WS).replace(os.sep, "/"),
+             receipt["describes"]["sha256"][:12]))
 
 
 if __name__ == "__main__":
