@@ -168,10 +168,26 @@ with a bogus-hash negative control that failed as required. **Push state: LOCAL 
 (`git ls-remote origin DEV` read `4ac152f8`).** `0.0.0_AB_MSTR~Z` is the integrator and pushes.
 Parent is `4ac152f8` = the `origin/DEV` tip, so this is a clean fast-forward: **1 ahead, 0 behind.**
 
-⛔ **AC7's CRITERION IS UNCHANGED BY THIS EDIT** and I am not claiming otherwise: the computation,
-`sumCloses`, and the pass branch are untouched -- only the breach's legibility moved. It does touch
-CERTIFIED code, so it is routed to `2.0.0_SA_COO~Z` and `3.0.0_SA_CVO~Z` in the same window for the
-cert owner to decide whether it wants a delta. **I am not deciding that on their behalf.**
+⛔ **`D1R1DE-AC7`'s CRITERION IS UNCHANGED BY THIS EDIT** and I am not claiming otherwise: the
+computation, `sumCloses`, and the pass branch are untouched -- only the breach's legibility moved.
+It does touch CERTIFIED code, so it was routed to `2.0.0_SA_COO~Z` and `3.0.0_SA_CVO~Z` in the same
+window for the cert owner to decide. **I did not decide it on their behalf.**
+
+**RULED 2026-08-27 ~18:0xZ by `3.0.0_SA_CVO~Z` (9431): NO CERT DELTA IS OWED for `7ed51b9e`** -- the
+cert's load-bearing results are structural and alignment-level and a styling change to one branch
+moves none of them. The verdict CERTIFIED stands. **But the answer ran against the certifier's own
+office, not this lane:** that cert's Layer-5 line *"`D1-inv-4` … discharged, 8 of 8"* established
+COVERAGE and **not** exercised breach-legibility, and all four instruments it ran (proof-of-spec
+alignment, the TS2339 planted mutant, determinism, `AC9` authorship) are structurally incapable of
+seeing a rendered pixel. That office is amending the cert to say so. **A money invariant whose
+failure rendered byte-identically to its success passed every one of them.**
+
+⛔ **LABEL CORRECTED IN PLACE, not just in a reply** (`3.0.0_SA_CVO~Z`, same message): I wrote "AC7"
+above and in `7ed51b9e`'s commit body. **`AC7` does not appear in the cert at all** -- label census
+over its 139 lines names `AC1` `AC2` `AC6` `AC8` `AC9` and the `D1-*` cells. The criterion's real id
+is **`D1R1DE-AC7`**, which the cert covers as a row without discussing. The commit body is immutable
+and still carries the loose form; this line is the correction, placed where a builder reads the
+claim rather than only where the exchange is recorded.
 
 ### One thing that moved under me, stated because it bears on the evidence
 
