@@ -23,6 +23,7 @@ COMMIT_ISH = "14da312322"               # HEAD when the tree was read; NOT back-
 WH = "s3://opal-313476888478-globgrph/warehouse/globgrph/"
 
 DERIVE = "infra/aws/globgrph/derive_runner.py"
+LAMBDA_WRITER = "infra/aws/lambda/globgrph/incremental_updater/lambda_function.py"
 S3_EV = "aws s3api list-objects-v2, full pagination, max(LastModified) computed client-side over the MATERIALISED set"
 STAT_EV = "stat -c %s/%Y + git ls-files/check-ignore, read at HEAD 14da312322"
 
@@ -69,12 +70,21 @@ PARTS = []
 PARTS.append(part(
     "graph_nodes", "store", wh("graph_nodes_4c6c23bd-fffa-427e-9cd9-7a9deaa3426d"),
     "source", "current_state", [], "iceberg:graph_nodes",
-    DERIVE + " + infra/aws/globgrph/kuzu_incremental_refresh.py", "canonical", None,
+    DERIVE + " + " + LAMBDA_WRITER, "canonical", None,
     "02:00Z full re-derive + event-driven CloudTrail incremental", "schedule + CloudTrail event",
     "production", "2026-08-26T12:50:48Z", S3_EV, "measured",
     "180,225 objects under the table prefix; newest metadata object 2026-08-26T12:50:48Z. "
     "TWO PRODUCERS write this table (comp-kuzu provenance header), so one incremental row makes "
-    "the whole table read as freshly written -- last-write is NOT the age of the data.",
+    "the whole table read as freshly written -- last-write is NOT the age of the data. "
+    "CORRECTION OF RECORD, source-confirmed after 1.0.0_SA_CTO~X 74284: my first cut named "
+    "kuzu_incremental_refresh.py as the second producer. IT IS NOT A PRODUCER OF THIS TABLE -- its "
+    ":65 reads the HEAD Iceberg graph_nodes/graph_edges and its :123 _apply_node_upsert writes the "
+    "KUZU PROJECTION. IT IS A CONSUMER. The real second writer is the Lambda named above, whose own "
+    "header reads 'pyiceberg upsert into graph_nodes / graph_edges ... ONE Nessie commit per SQS "
+    "batch', triggered by opal-globgrph-cloudtrail-mgmt -> SQS. I KNEW THERE WERE TWO PRODUCERS -- "
+    "the provenance header says so and I quoted it -- AND I MATCHED THE WORD 'incremental' IN A "
+    "FILENAME TO THE HEADER'S PHRASE 'event-driven CloudTrail incremental'. A fourth name-based "
+    "inference, on the two most load-bearing parts in the estate.",
     "0.8.0_AE_CloudComp lane (derive path)",
     age_note="180,225 objects for a 27,035-node table: heavy small-file accumulation. Observation, not chased.",
     coverage={"population": "the canonical node set", "denominator": "27,035 nodes at the wave projection vintage (PROJECTION plane, not warehouse)"},
@@ -82,8 +92,10 @@ PARTS.append(part(
 
 PARTS.append(part(
     "graph_edges", "store", wh("graph_edges_6629328d-a582-46d2-80bc-5059de1a77ce"),
-    "source", "current_state", [], "iceberg:graph_edges", DERIVE, "canonical", None,
-    "nightly re-derive", "schedule", "production", "2026-08-26T02:09:51Z", S3_EV, "measured",
+    "source", "current_state", [], "iceberg:graph_edges",
+    DERIVE + " + " + LAMBDA_WRITER, "canonical", None,
+    "nightly re-derive + event-driven CloudTrail incremental", "schedule + SQS", "production",
+    "2026-08-26T02:09:51Z", S3_EV, "measured",
     "612 objects; sort_by(LastModified)[-1] on metadata/, single page so no pagination spill",
     "0.8.0_AE_CloudComp lane (derive path)",
     coverage={"population": "the canonical edge set", "denominator": "58,224 edges at the wave projection vintage (PROJECTION plane)"},
@@ -546,6 +558,13 @@ MANIFEST = {
             "classified. A store hiding as a .yaml in that tree would be missed.",
             "IN-MEMORY / EPHEMERAL graph state -- out of scope by form.",
             "PORTAL-SIDE graph surfaces -- not swept; the portal repo was not entered for this census.",
+            "⛔ RETIRED AS A GAP BY MEASUREMENT, KEPT AS A LESSON: infra/aws/lambda/ was never swept "
+            "by this census, and the WRITER of graph_nodes and graph_edges lives there -- "
+            "infra/aws/lambda/globgrph/incremental_updater/lambda_function.py, found by "
+            "1.0.0_SA_CTO~X (74284) after 0.8.0_AE_CloudComp~X refused to guess it. ZERO of these 39 "
+            "parts named it. My census swept the graph MODULE and the WAREHOUSE and treated those as "
+            "the producer surface; a producer one directory away was structurally invisible to every "
+            "sweep I ran.",
             "GENERATOR CURRENCY on 20 of 24 materializer-bearing parts, and THE SEMANTIC-DEFECT AXIS "
             "ON EVERY PART -- no instrument in this estate discriminates a deprecated opinion "
             "(1.0.0_SA_CTO~X 73215 Q3, converging with 2.0.0_SA_COO~X ruling 2). Not a plane, but "

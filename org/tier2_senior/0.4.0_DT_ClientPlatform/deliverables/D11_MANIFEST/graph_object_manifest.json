@@ -16,6 +16,7 @@
       "org/modules/graph/ beyond graph-bearing JSON -- ~100 further .py/.yaml files were not classified. A store hiding as a .yaml in that tree would be missed.",
       "IN-MEMORY / EPHEMERAL graph state -- out of scope by form.",
       "PORTAL-SIDE graph surfaces -- not swept; the portal repo was not entered for this census.",
+      "⛔ RETIRED AS A GAP BY MEASUREMENT, KEPT AS A LESSON: infra/aws/lambda/ was never swept by this census, and the WRITER of graph_nodes and graph_edges lives there -- infra/aws/lambda/globgrph/incremental_updater/lambda_function.py, found by 1.0.0_SA_CTO~X (74284) after 0.8.0_AE_CloudComp~X refused to guess it. ZERO of these 39 parts named it. My census swept the graph MODULE and the WAREHOUSE and treated those as the producer surface; a producer one directory away was structurally invisible to every sweep I ran.",
       "GENERATOR CURRENCY on 20 of 24 materializer-bearing parts, and THE SEMANTIC-DEFECT AXIS ON EVERY PART -- no instrument in this estate discriminates a deprecated opinion (1.0.0_SA_CTO~X 73215 Q3, converging with 2.0.0_SA_COO~X ruling 2). Not a plane, but recorded here because it is the largest UNMEASURED surface and silence must not read as clean."
     ]
   },
@@ -31,7 +32,7 @@
         "source_identity": "iceberg:graph_nodes"
       },
       "generation": {
-        "materializer": "infra/aws/globgrph/derive_runner.py + infra/aws/globgrph/kuzu_incremental_refresh.py",
+        "materializer": "infra/aws/globgrph/derive_runner.py + infra/aws/lambda/globgrph/incremental_updater/lambda_function.py",
         "materializer_digest": null,
         "materializer_standing": "canonical",
         "declared_opinions": null,
@@ -45,7 +46,7 @@
         "age_note": "180,225 objects for a 27,035-node table: heavy small-file accumulation. Observation, not chased."
       },
       "basis": "measured",
-      "evidence": "180,225 objects under the table prefix; newest metadata object 2026-08-26T12:50:48Z. TWO PRODUCERS write this table (comp-kuzu provenance header), so one incremental row makes the whole table read as freshly written -- last-write is NOT the age of the data.",
+      "evidence": "180,225 objects under the table prefix; newest metadata object 2026-08-26T12:50:48Z. TWO PRODUCERS write this table (comp-kuzu provenance header), so one incremental row makes the whole table read as freshly written -- last-write is NOT the age of the data. CORRECTION OF RECORD, source-confirmed after 1.0.0_SA_CTO~X 74284: my first cut named kuzu_incremental_refresh.py as the second producer. IT IS NOT A PRODUCER OF THIS TABLE -- its :65 reads the HEAD Iceberg graph_nodes/graph_edges and its :123 _apply_node_upsert writes the KUZU PROJECTION. IT IS A CONSUMER. The real second writer is the Lambda named above, whose own header reads 'pyiceberg upsert into graph_nodes / graph_edges ... ONE Nessie commit per SQS batch', triggered by opal-globgrph-cloudtrail-mgmt -> SQS. I KNEW THERE WERE TWO PRODUCERS -- the provenance header says so and I quoted it -- AND I MATCHED THE WORD 'incremental' IN A FILENAME TO THE HEADER'S PHRASE 'event-driven CloudTrail incremental'. A fourth name-based inference, on the two most load-bearing parts in the estate.",
       "owner": "0.8.0_AE_CloudComp lane (derive path)",
       "coverage": {
         "population": "the canonical node set",
@@ -68,12 +69,12 @@
         "source_identity": "iceberg:graph_edges"
       },
       "generation": {
-        "materializer": "infra/aws/globgrph/derive_runner.py",
+        "materializer": "infra/aws/globgrph/derive_runner.py + infra/aws/lambda/globgrph/incremental_updater/lambda_function.py",
         "materializer_digest": null,
         "materializer_standing": "canonical",
         "declared_opinions": null,
-        "cadence": "nightly re-derive",
-        "trigger": "schedule"
+        "cadence": "nightly re-derive + event-driven CloudTrail incremental",
+        "trigger": "schedule + SQS"
       },
       "population_status": "production",
       "vintage": {
