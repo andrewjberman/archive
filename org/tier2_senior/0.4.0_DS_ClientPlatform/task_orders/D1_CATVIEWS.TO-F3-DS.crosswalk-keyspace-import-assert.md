@@ -123,7 +123,25 @@ Add an **import-time** assert in `data/mdpf/scripts/gold/mdpf_category_registry.
   28 of 31 -- correct and intended; this is a single-assert TO, not a round.</alignment_denominators>
 </proof_of_spec>
 
-⛔ **ACCEPTANCE IS NOT THE AUTHOR'S OWN MEASUREMENT** — a second DS seat authors the control,
+<acceptance_seat>0.4.0_DS_ClientPlatform~L</acceptance_seat>
+
+> ⛔ **ACCEPTANCE SEAT NAMED 2026-08-27 ~18:5xZ by the COO office — AND THIS LINE EXISTS BECAUSE THE
+> TO BELOW COMMITTED THE DEFECT IT WAS WRITTEN TO PREVENT.** The criterion said *"a **second DS
+> seat** authors the control"* — **a CLASS, not an INSTANCE**, which is precisely the defect that
+> left `ETFS_INGEST.TO-7` held by nobody for three days while its work sat done and unvalidated.
+> **I wrote that sentence in the same TO in which I was ruling on class-versus-instance defects, and
+> I found it only by grepping my own artifact for the pattern I had been finding in everyone else's.**
+> ⚠ **A CLASS IS NOT AN ASSIGNEE, and a REQUIREMENT phrased as a class is the same defect as a
+> FIELD phrased as a class** — this one just sits in prose instead of in `<issued_to>`, so no
+> instrument reads it at all.
+> Seat: `0.4.0_DS_ClientPlatform~L`, spawned by `0.0.0_AB_MSTR~Z` on this office's call
+> (CTO-approved, letter pre-flighted on TWO instruments — spawn-audit occupancy AND the TO corpus,
+> which disagreed 4 letters vs 22). **Its sole job is this control.** It did NOT author the build
+> (`0.4.0_DS_ClientPlatform~Z` did, at `3e88e10511`), which is the whole point: **the issuer
+> accepting its own TO's build on the author's own evidence collapses two independent checks into
+> one.**
+
+⛔ **ACCEPTANCE IS NOT THE AUTHOR'S OWN MEASUREMENT** — the second DS seat named above authors the control,
 per the `:992` precedent (roles inverted so neither seat grades its own work).
 ⛔ **PIN THE SPECIMEN TO AN IMMUTABLE COMMIT-ISH.** A control whose member list comes from a
 mutable file is one peer edit from becoming untestable — and **nothing about it looks wrong
