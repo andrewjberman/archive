@@ -396,6 +396,68 @@ def main() -> None:
                     "3 are SET rows"):
         assert _legacy not in _final, "LEGACY claim survives in the emitted method: %r" % _legacy
 
+    # ---- RECEIVERS: 0 DECLARED / 42 COHERENT UNKNOWN ------------------------------
+    # ⛔ 4.0.0_SA_CRO~A 75304, and the boundary reasoning is the load-bearing half.
+    # NOTHING IS SYNTHESISED. The compiler admits exactly org/**/D11_CARDS_W3/*.json (13 cards),
+    # and exact SUBSTRATE_CARD.v2 /subject/id -> /parts/id matches among those 13 is ZERO.
+    # w3_card_part_map is an ARTIFACT-LOCATION/GENERATION join with one-to-many rows -- it is the
+    # right source for WHERE A WRITER'S OUTPUT LIVES and the WRONG source for WHICH PART A CARD'S
+    # TRUST BLOCK QUALIFIES. Using it here would be the parse-join wearing a receiver's costume.
+    # AND key_expression HAS NO SOURCE AT ALL: SUBSTRATE_CARD.v2 has no such field, so no card
+    # population of any size can supply a declared `key`.
+    # STRUCTURED UNKNOWN IS EXPRESSIBLE ABSENCE, which is what these receivers were built for --
+    # not a shortfall to be padded.
+    _R_EV = ("NO ADMITTED SOURCE. The compiler admits org/**/D11_CARDS_W3/*.json (13 cards); exact "
+             "card subject.id -> part.id matches among them = 0, measured. No declared payload is "
+             "synthesised from the artifact-location map or from non-admitted W2/W4 cards. "
+             "key_expression additionally has NO source field in SUBSTRATE_CARD.v2.")
+    _R_OWN = "UNOWNED -- a declared receiver needs an admitted-card registry and a schema-bound transform"
+
+    for _p in out["parts"]:
+        _p.setdefault("grain", {
+            "claim_status": "unknown", "unit": None,
+            "basis": "absent", "evidence": _R_EV, "owner": _R_OWN})
+        _p.setdefault("key", {
+            "claim_status": "unknown", "identity_space": None, "key_expression": None,
+            "key_is_stable": None, "crosses_spaces": None, "declared_mapping": None,
+            "basis": "absent", "evidence": _R_EV, "owner": _R_OWN})
+        _p.setdefault("failure_mode", {
+            "claim_status": "unknown", "returns_on_failure": None,
+            "distinguishable_from_true_negative": None, "silent_degrade_paths": None,
+            "basis": "absent", "evidence": _R_EV, "owner": _R_OWN})
+
+    # ---- member_set: EXACTLY the 3 SET parts, two shapes -----------------------------
+    # enumerable=true  -> members, pattern* FORBIDDEN.  enumerable=false -> pattern*, members FORBIDDEN.
+    _MEMBERS = {
+        "_build_manifest.json.SET": ["kuzu_nessie_db", "kuzu_db", "kuzu_stitch_db"],
+        ".comp-graph/platinum.CACHE_SET": ["dag.bd", "dag.cot", "dag.inf", "dataflows", "routing"],
+    }
+    _by_id = {p["id"]: p for p in out["parts"]}
+    for _pid, _mem in _MEMBERS.items():
+        if _pid in _by_id:
+            _by_id[_pid]["member_set"] = {
+                "enumerable": True, "members": _mem, "basis": "measured",
+                "evidence": ("brace expansion of the part's own home, every member verified present "
+                             "on disk; expanded with a FULL recursive expander after a single-group "
+                             "parser under-counted a nested pattern at three seats."),
+                "owner": ME}
+    if "kuzu_nessie_db.rebuild.tmp.SET" in _by_id:
+        _by_id["kuzu_nessie_db.rebuild.tmp.SET"]["member_set"] = {
+            "enumerable": False,
+            "pattern": "kuzu_nessie_db.rebuild.tmp.<pid>.<mono>.<seq>",
+            "pattern_source_home": "infra/aws/globgrph/_canonical.py",
+            "pattern_source_line": 288,
+            "basis": "measured",
+            "evidence": ("members are RUNTIME-NAMED from os.getpid() + time.monotonic_ns() + a "
+                         "counter and are reaped by _gc_stale_tmps (:292, called :603), so the "
+                         "family has UNDEFINED CARDINALITY and no member list can be true of it. "
+                         "Map-owner ruling 75073; the earlier '6' was an observation snapshot, "
+                         "withdrawn."),
+            "owner": ME}
+
+    _ms = [p["id"] for p in out["parts"] if "member_set" in p]
+    assert len(_ms) == 3, "member_set must land on EXACTLY 3 SET parts, got %d: %s" % (len(_ms), _ms)
+
     # ---- validate, with the negative control ---------------------------------------
     v = Draft202012Validator(json.load(open(SCHEMA, encoding="utf-8")))
     errs = sorted(v.iter_errors(out), key=lambda e: list(e.path))
