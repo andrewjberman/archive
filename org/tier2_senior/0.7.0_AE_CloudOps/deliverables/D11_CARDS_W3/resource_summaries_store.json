@@ -1,0 +1,156 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.7.0_AE_CloudOps~X",
+  "subject": {
+    "id": "infra/aws/globgrph/resource_summaries_store.py",
+    "kind": "script",
+    "declared_domain": "The writer for the ARN-keyed functional-summary Iceberg overlay. AC4: writes globgrph.<args.table>, default globgrph.resource_summaries. Templated on cse_store.py and carries its unconstrained --table forward, which makes it the second confirmed CLASS 3 member."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-27T06:07:00Z",
+    "commit_ish": "76c58923ac",
+    "graph_vintage": "UNREAD-W3: comp-kuzu did not return within 120s and my own invocation was reaped (orphaned child, ppid=1, kill -9, 0 remaining, ps control 41 rows). No graph vintage was read this wave. NOT copied from wave 2 -- that would be the stale-pin defect I filed against my own W2 proof-of-spec."
+  },
+  "process": {
+    "methodology": {
+      "how": "argparse --build-append at :347 -> main() :372 ensure_table(catalog, args.table) -> :375 append_rows(table, rows) -> :228 table.append(pa_table). ONE write path -- MEASURED, not assumed: the file contains zero drop_table and zero .delete( calls.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "canonical",
+      "declared_opinions": [
+        "APPEND-ONLY WITH LATEST-VERSION-WINS makes the table grow without bound and makes every correct read a MAX(summary_version) aggregation -- a convention held in the writer's docstring rather than in the table.",
+        "⛔ The unconstrained --table is INHERITED, not authored: :9 and :37 name cse_store.py as the template, and snap_store.py:34 names the SAME parent while having ADDED choices=sorted(SURFACES) at :415. Two descendants of one template diverged on exactly this field.",
+        "The --table override is deliberate and documented at :188-189 ('Pass a scratch name for an ISOLATED test harness'), so the unbounded bound is a design choice for harness isolation, not an oversight."
+      ],
+      "composes": [
+        {
+          "id": "infra/aws/globgrph/cse_store.py",
+          "note": "declared template at :9/:37 (catalog/ensure/append + self-test); the CLASS 3 binding descends from here"
+        },
+        {
+          "id": "pyiceberg catalog",
+          "note": "table.append(pa_table) at :228 is the write primitive"
+        }
+      ],
+      "invents": [
+        {
+          "id": "the append-only + MAX(summary_version) read convention",
+          "note": "held in the writer's docstring, not enforced by the table"
+        }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "how": "measured",
+        "determinism": "measured",
+        "materializer_standing": "measured",
+        "composes": "measured",
+        "invents": "measured"
+      },
+      "evidence": "SOURCE READ @76c58923ac. AC3 BINDING: CLASS 3 at :349 ap.add_argument('--table', default=TABLE) with NO choices=; the default is a MODULE LITERAL at :57 TABLE='resource_summaries', so unlike its template parent this module is greppable by its own default. :202 catalog.create_table CREATES whatever name it is handed -- there is no membership deref (negative control: snap_store.py:146 SURFACES[surface] KeyError-gates the programmatic path and :415 choices= gates the CLI; this file has neither). ⛔ THE .append( TRAP FIRED HERE IN MY OWN FIRST SWEEP: :168 rows.append(summarydoc_to_row(...)) is a PYTHON LIST append inside build_rows :159 and is token-identical to the real write 60 lines later. Resolved by RECEIVER, per the COX3 trap list.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "cadence": {
+      "declared_rhythm": null,
+      "actual_trigger": "A TASK DEFINITION EXISTS AND NAMES THIS SCRIPT WITH ITS WRITE FLAG -- ECS family globgrph-resource-summaries-producer, container command ['python','/app/resource_summaries_store.py','--build-append']. MEASURED at the container command per AC5. ⛔ BUT NO TRIGGER REACHING IT WAS FOUND: the Scheduler plane is FULLY swept (18 of 18, resolving each schedule's Target.EcsParameters.TaskDefinitionArn) and none targets this family. The Events plane is swept only for the 5 globgrph-named rules of 137; the other 132 are DECLARED UNSWEPT. So the honest state is DEFINED-AND-INVOCABLE, TRIGGER NOT ESTABLISHED -- not 'untriggered'.",
+      "live_matches_declared": "unmeasured",
+      "live_instance_age": null,
+      "basis": "inferred",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "inferred",
+        "live_matches_declared": "inferred"
+      },
+      "evidence": "TWO-PLANE SWEEP, client-side counted (never --query length on a paginated list -- events list-rules returned 100 then 37 as PAGE counts): events=137, scheduler=18. POSITIVE CONTROL FIRED and it caught a broken sweep of mine: my first container-command loop printed only globgrph-trino (a multi-line shell command swallowed the rest) and my second returned blank for 6 of 7 families; the control -- describe-task-definition on globgrph-cse-producer -> 'python /app/cse_producers_nightly.py' -- proved both were instrument failures rather than absences. The values here come from the form the control validated. 7 ACTIVE task-definition families, all read. ⛔ actual_trigger is INFERRED and the reason is a FLOOR I am declaring rather than hiding: 132 of 137 events rules were not resolved to their ECS targets (the full per-rule sweep timed out at 120s). An early stop and a true absence read identically. I ALSO tried ECS run history as a stronger dormancy signal and DISCARDED it: aws ecs list-tasks --desired-status STOPPED returned 0 for this family AND 0 for the known-nightly globgrph-cse-producer, so the POSITIVE CONTROL DID NOT FIRE and the instrument is blind (ECS retains stopped tasks only ~1h). A 0 from a blind instrument is not evidence of never having run.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "source",
+      "mutation_policy": "append_only",
+      "form": "Iceberg table in the Nessie catalog, namespace globgrph, partitioned by (node_type, authored_date).",
+      "basis": "measured",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "mutation_policy": "measured",
+        "form": "measured"
+      },
+      "evidence": "persisted=true MEASURED at :228. mutation_policy=append-only MEASURED: :186-187 declares ENSURE-ONLY ('NEVER overwrites or repartitions an existing table') and the file has zero overwrite/delete calls.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "location": {
+      "home": "infra/aws/globgrph/resource_summaries_store.py (384 lines) @76c58923ac; writes globgrph.<args.table>, default globgrph.resource_summaries",
+      "projection_of": [
+        {
+          "id": "infra/aws/globgrph/cse_store.py",
+          "note": "declared template; this file's structure and its CLASS 3 binding both descend from it"
+        }
+      ],
+      "co_resident_stores": null,
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured"
+      },
+      "evidence": "home MEASURED at the pin. AC4 satisfied with a resolvable table name: globgrph.resource_summaries via table_id=(NAMESPACE, table) at :190.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Tables this module can write.",
+      "denominator": "1 named (globgrph.resource_summaries) of an UNBOUNDED set.",
+      "denominator_absent_reason": null,
+      "explicitly_out": [
+        "every table outside namespace globgrph -- NAMESPACE is a module constant and is not parameterised",
+        "the graph tables it READS at :304-305 (globgrph.graph_nodes, globgrph.graph_edges) -- those are load_table calls, and load_table is a READ per the COX3 trap list"
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "measured",
+        "explicitly_out": "measured"
+      },
+      "evidence": "COX3-AC7: no completeness asserted; the BOUND IS UNBOUNDED. :349 accepts any string and :202 creates it. This module can write tables it does not name, and it is the member that made CLASS 3 non-empty after that class was recorded as 'none found yet' in 74690.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "Iceberg table identity ('globgrph', args.table); rows keyed by ARN with latest-version-wins on MAX(summary_version).",
+      "key_is_stable": "stable",
+      "crosses_spaces": false,
+      "declared_mapping": null,
+      "basis": "measured",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "crosses_spaces=false MEASURED -- unlike cse, this table's name has ONE representation in the swept tree; grep for 'resource_summaries' found no dotted iceberg.globgrph.* form. Stated as a measured negative against the same predicate that returned TRUE for cse, so the two answers are comparable.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "failure_mode": {
+      "returns_on_failure": "Fail-closed on the graph read: the module raises rather than writing an empty corpus when the source tables are unavailable.",
+      "distinguishable_from_true_negative": "yes",
+      "silent_degrade_paths": [
+        "the ENSURE-ONLY early return at :196-198 returns an existing table without any schema comparison, so a table created earlier under a DIFFERENT schema is loaded and appended to rather than refused -- reachable only via the --table override",
+        "--limit at :350 caps the corpus to the first N arns for smoke tests, and a capped run writes a REAL partial batch to the real table with nothing in the row marking it as capped"
+      ],
+      "basis": "inferred",
+      "basis_by_field": {
+        "returns_on_failure": "inferred",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "silent_degrade_paths MEASURED at :196-198 and :350. returns_on_failure marked INFERRED: I did not EXERCISE a failing run -- globgrph is read-only to this lane under COX3-AC8 and the failure path ends in a write.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "Every row measured at source. QUALIFIED on three stated properties: the bound is UNBOUNDED (CLASS 3, inherited from its template), a task definition invokes it but no trigger reaching that definition was established on the swept plane, and --limit can write a real partial batch that the rows do not mark. None is a defect claim and none is remediated here -- COX3-AC8 holds.",
+    "blocking_defects": []
+  }
+}

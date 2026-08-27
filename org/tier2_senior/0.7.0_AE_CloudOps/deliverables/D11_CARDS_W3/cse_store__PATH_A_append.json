@@ -1,0 +1,156 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.7.0_AE_CloudOps~X",
+  "subject": {
+    "id": "infra/aws/globgrph/cse_store.py#PATH_A_append",
+    "kind": "script",
+    "declared_domain": "The APPEND write path of the C0 feedback-contract log writer. AC4: it writes Iceberg table globgrph.<args.table>, default globgrph.cse. Reached by --ingest JSONL_URI and, more importantly, as a LIBRARY by external callers. This is one of TWO write paths in the file; PATH B (drop) is carded separately after my BLOCKING 74773 was upheld @76c58923ac."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-27T06:07:00Z",
+    "commit_ish": "76c58923ac",
+    "graph_vintage": "UNREAD-W3: comp-kuzu did not return within 120s and my own invocation was reaped (orphaned child, ppid=1, kill -9, 0 remaining, ps control 41 rows). No graph vintage was read this wave. NOT copied from wave 2 -- that would be the stale-pin defect I filed against my own W2 proof-of-spec."
+  },
+  "process": {
+    "methodology": {
+      "how": "argparse --ingest at :577 -> main() :602 ensure_cse_table then ingest_jsonl(...) :461 -> :481 append_cses(catalog, accepted, table=table) -> :357 append_cses -> :386 table.append(pa_table). One pyiceberg append, one Nessie commit, append-only. --dry-run IS threaded through (:584 -> :602).",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "canonical",
+      "declared_opinions": [
+        "The module's own docstring calls it 'the ONLY writer' for the cse log, and cse_producers_nightly.py:46 repeats that claim ('cse_store.py (validate/append/marker -- the only writer)'). MEASURED TRUE for the cse table within the swept tree, but it is a claim about a population, and the sweep that supports it is infra/+org/ only.",
+        "APPEND-ONLY with no compaction path is a durability choice that makes the log grow without bound.",
+        "The write is a LIBRARY call, so the module has no trigger of its own and its execution cadence is a property of its CALLERS, not of itself."
+      ],
+      "composes": [
+        {
+          "id": "org/modules/graph/cse_schema.py",
+          "note": "supplies CSE_TABLE='cse' at :595 -- the identity SoT, imported at cse_store.py:65 after a runtime sys.path.insert at :63"
+        },
+        {
+          "id": "pyiceberg catalog",
+          "note": "table.append(pa_table) at :386 is the write primitive"
+        }
+      ],
+      "invents": [
+        {
+          "id": "the fail-closed C0-log protection",
+          "note": "PATH B's :350-352 guard; named here because it is the only bound on the shared --table arg and it protects only this path's default table"
+        }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "how": "measured",
+        "determinism": "measured",
+        "materializer_standing": "measured",
+        "composes": "measured",
+        "invents": "measured"
+      },
+      "evidence": "SOURCE READ @76c58923ac. Write primitive :386 table.append(pa_table) inside append_cses() :357. Entry :577 --ingest -> :602 -> ingest_jsonl :461 -> :481. AC3 BINDING: CLASS 3 at :581 ap.add_argument('--table', default=CSE_TABLE) with NO choices= (negative control: snap_store.py:415 carries choices=sorted(SURFACES), so the predicate distinguishes). The DEFAULT is bound one hop out at :86 CSE_TABLE = cse_schema.CSE_TABLE, resolved to the literal 'cse' at org/modules/graph/cse_schema.py:595 -- READ AT SOURCE, not taken from cse_store.py:86's inline comment, which is what every prior statement in this thread (mine included) was quoting. The comment was TRUE; opening it changed no value and was still the right check, because the SoT sits OUTSIDE infra/ and no infra-scoped sweep can see it.",
+      "owner": "1.0.0_SA_CTO (globgrph/C0 contract); 0.7.0_AE_CloudOps (apply surface)"
+    },
+    "cadence": {
+      "declared_rhythm": null,
+      "actual_trigger": "NO TRIGGER OF ITS OWN -- MEASURED, and the indirect path is measured too. This module is invoked as a LIBRARY: cse_producers_nightly.py:164,:209,:269 and cse_emit_graphhead.py:218 both call cse_store.append_cses(). cse_producers_nightly IS triggered: Scheduler plane, schedule globgrph-cse-producer-nightly, ENABLED, cron(30 3 * * ? *), target arn ...:cluster/opal-globgrph. Per COX3-AC5 an ECS target resolves to a CLUSTER not a script, so that alone would be INFERRED -- I read the task definition globgrph-cse-producer:1, container 'cse-producer', command ['python','/app/cse_producers_nightly.py']. MEASURED at the container command, which is the standard AC5 sets.",
+      "live_matches_declared": "yes",
+      "live_instance_age": null,
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured"
+      },
+      "evidence": "TWO-PLANE SWEEP, client-side counted (never --query length on a paginated list -- events list-rules returned 100 then 37 as PAGE counts): events=137, scheduler=18. POSITIVE CONTROL FIRED and it caught a broken sweep of mine: my first container-command loop printed only globgrph-trino (a multi-line shell command swallowed the rest) and my second returned blank for 6 of 7 families; the control -- describe-task-definition on globgrph-cse-producer -> 'python /app/cse_producers_nightly.py' -- proved both were instrument failures rather than absences. The values here come from the form the control validated. 7 ACTIVE task-definition families, all read. ONLY the Scheduler plane carries the cse trigger -- an events-only sweep returns a TRUE, correctly-controlled answer about the wrong population. declared_rhythm=null is a real answer: the module declares no cadence anywhere in its source; its rhythm belongs to its callers.",
+      "owner": "0.7.0_AE_CloudOps (trigger plane); 1.0.0_SA_CTO (the producer that calls it)"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "source",
+      "mutation_policy": "append_only",
+      "form": "Iceberg table in the Nessie catalog, namespace globgrph, branch main.",
+      "basis": "measured",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "mutation_policy": "measured",
+        "form": "measured"
+      },
+      "evidence": "persisted=true MEASURED at the write site :386 (a real pyiceberg append, not a list append -- the COX3 trap list names this and it fired in my own first sweep, where 4 of 6 .append( hits in this file were python list appends at :304/:306/:457/:511). mutation_policy=append-only measured: PATH A contains no overwrite or delete; the file's only destructive call is PATH B's, carded separately.",
+      "owner": "1.0.0_SA_CTO"
+    },
+    "location": {
+      "home": "infra/aws/globgrph/cse_store.py (611 lines) @76c58923ac; writes to globgrph.<args.table>, default globgrph.cse",
+      "projection_of": [
+        {
+          "id": "org/modules/graph/cse_schema.py",
+          "note": "the table identity comes from here, not from this file"
+        }
+      ],
+      "co_resident_stores": null,
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured"
+      },
+      "evidence": "home MEASURED by direct read at the pin. AC4 satisfied with a RESOLVABLE table name rather than a description: globgrph.cse via table_id=(NAMESPACE, table) at :326, NAMESPACE='globgrph' at :85.",
+      "owner": "1.0.0_SA_CTO"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Tables this path can write.",
+      "denominator": "1 named (globgrph.cse) of an UNBOUNDED set -- the denominator is not enumerable and that is the finding, not a gap in the measurement.",
+      "denominator_absent_reason": null,
+      "explicitly_out": [
+        "every table outside namespace globgrph -- NAMESPACE is a module constant at :85 and is not parameterised, so the unbounded --table cannot escape the namespace",
+        "PATH B (drop), carded separately"
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "measured",
+        "explicitly_out": "measured"
+      },
+      "evidence": "COX3-AC7 DISCOVERABILITY IS NOT COVERAGE: this card asserts NO completeness of the writer population. The BOUND IS UNBOUNDED -- :581 accepts any string and :338 catalog.create_table CREATES whatever name it is handed, so this path can write tables it does not name. ⛔ AND THE PARENT IS LESS DISCOVERABLE THAN ITS DESCENDANT (0.8.0_AE_CloudComp~X's sharpening, 74751): this module's default is IMPORTED one hop out, while resource_summaries_store.py's is a module literal at :57 -- so a census that finds the descendant by grepping its literal has no reason to expect the template parent looks different.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "Iceberg table identity (namespace, table) = ('globgrph', args.table). ⛔ THE SAME LOGICAL TABLE CARRIES TWO REPRESENTATIONS IN THE ESTATE: this plane addresses it as the TUPLE ('globgrph','cse') at :326, while fedobs/fedobs_observe.py:48 addresses it as the dotted string 'iceberg.globgrph.cse'. Both are CORRECT -- pyiceberg takes a tuple, Trino takes catalog.schema.table -- so it is a PLANE difference, not naming drift.",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "('globgrph','cse') == 'iceberg.globgrph.cse'. A (file,artifact) join keyed on string equality splits this one artifact into two rows and neither failure announces itself.",
+      "basis": "measured",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "crosses_spaces=true MEASURED at both sites. Finding originated by 0.8.0_AE_CloudComp~X (74751); I corroborated it with a DIFFERENT instrument -- resolving the binding chain to cse_schema.py:595 -- rather than by re-running theirs, per Rule 22's repetition clause.",
+      "owner": "1.0.0_SA_CTO (contract SoT); 0.7.0_AE_CloudOps (the join-key consequence)"
+    },
+    "failure_mode": {
+      "returns_on_failure": "Fail-closed on validation: :160 raises CSEValidationError when any row is rejected, so a partial batch does not silently half-write.",
+      "distinguishable_from_true_negative": "yes",
+      "silent_degrade_paths": [
+        "--dry-run on PATH A validates and builds but does not write (:584 -> :602), so a dry run and a real run differ only in a flag -- an operator reading only the console cannot tell them apart from the exit code",
+        "the append is one Nessie commit per batch; a mid-batch failure leaves no partial commit, but the module does not report WHICH batch a retry would duplicate"
+      ],
+      "basis": "inferred",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "inferred"
+      },
+      "evidence": "Fail-closed behaviour READ AT SOURCE :156-160. silent_degrade_paths marked INFERRED because I did not EXERCISE a failing append against a live catalog -- globgrph is read-only to this lane under COX3-AC8 and an exercise would be a write.",
+      "owner": "1.0.0_SA_CTO"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "Every row measured at source with a firing negative control on the class predicate. The path is sound and does what it says. QUALIFIED rather than SOUND for one reason stated on the face: the write BOUND is UNBOUNDED (CLASS 3), so any consumer joining on 'what does cse_store write' gets a true answer about the default and no answer about the reachable set.",
+    "blocking_defects": []
+  }
+}

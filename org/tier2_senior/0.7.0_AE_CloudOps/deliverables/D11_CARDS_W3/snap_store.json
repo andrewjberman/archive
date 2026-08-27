@@ -1,0 +1,166 @@
+{
+  "schema_version": 2,
+  "carded_by": "0.7.0_AE_CloudOps~X",
+  "subject": {
+    "id": "infra/aws/globgrph/snap_store.py",
+    "kind": "script",
+    "declared_domain": "The generic surface-snapshot writer -- 'THE ONE writer for all siblings' per its own docstring. AC4: writes globgrph.<surface> for surface in a 4-entry allow-list. The CLASS 2 member, and the descendant of cse_store.py that HARDENED the inherited binding."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-27T06:07:00Z",
+    "commit_ish": "76c58923ac",
+    "graph_vintage": "UNREAD-W3: comp-kuzu did not return within 120s and my own invocation was reaped (orphaned child, ppid=1, kill -9, 0 remaining, ps control 41 rows). No graph vintage was read this wave. NOT copied from wave 2 -- that would be the stale-pin defect I filed against my own W2 proof-of-spec."
+  },
+  "process": {
+    "methodology": {
+      "how": "argparse --ingest-pending at :417 -> main() :430-431 ingest_pending(catalog, args.surface, dry_run=args.dry_run) :283 -> :307 append_rows(catalog, surface, rows) :243 -> :256 t.append(table). ONE write path -- MEASURED: zero drop_table and zero .delete( in the file. Rows are sourced from the S3 staging prefix warehouse/snap_ingest/pending/<surface>/.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "canonical",
+      "declared_opinions": [
+        "⛔ THE STAGING PREFIX IS OPEN ON WRITE AND CLOSED ON LAND (0.8.0_AE_CloudComp~X's finding, 74690): any producer can drop JSONL under warehouse/snap_ingest/pending/<anything>/ because S3 accepts any key, but nothing LANDS unless <anything> is one of the four allow-listed surfaces. The reachability invisible to static analysis is not the reachability that is unbounded.",
+        "This module is the same template's descendant as resource_summaries_store.py (:34 names cse_store.py) and it ADDED the constraint the other two lack. The remedy for CLASS 3 is written here, at :415.",
+        "A single generic writer parameterised over surface is deliberately un-nameable by a name-keyed census -- 0 of 39 wave-2 census parts named this file while four named their row-BUILDER as the materializer."
+      ],
+      "composes": [
+        {
+          "id": "infra/aws/globgrph/cse_store.py",
+          "note": "declared template at :34 (catalog/append/retry/marker discipline)"
+        },
+        {
+          "id": "pyiceberg catalog",
+          "note": "t.append(table) at :256 is the write primitive"
+        },
+        {
+          "id": "s3://.../warehouse/snap_ingest/pending/<surface>/",
+          "note": "the staging prefix ingest_pending drains at :283-311"
+        }
+      ],
+      "invents": [
+        {
+          "id": "the SURFACES allow-list",
+          "note": ":79, 4 top-level keys, doing double duty as the CLI constraint at :415 and the payload schema registry at :146"
+        }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "how": "measured",
+        "determinism": "measured",
+        "materializer_standing": "measured",
+        "composes": "measured",
+        "invents": "measured"
+      },
+      "evidence": "SOURCE READ @76c58923ac. AC3 BINDING: CLASS 2 -- the name is bound at the ENTRYPOINT from an allow-list, :415 ap.add_argument('--surface', default='ms_heat_snap', choices=sorted(SURFACES)), and the programmatic path is independently gated at :146 SURFACES[surface]['payload'] which raises KeyError on an unknown surface. ENUMERABLE: YES. SURFACES keys AST-MEASURED at 4 -- ms_heat_snap, code_heat_snap, fedobs_coverage_snap, fedobs_coevolution_snap -- deliberately by AST and not by regex, because the COX3 trap list records a regex over this same dict text returning 8 by catching nested payload keys.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "cadence": {
+      "declared_rhythm": null,
+      "actual_trigger": "NONE-FOUND on both planes, and the negative is bounded. No ECS task definition invokes snap_store.py (7 of 7 ACTIVE families read, with a firing positive control). Scheduler plane fully swept, 18 of 18, no target. Events plane swept for the 5 globgrph-named rules only; 132 of 137 DECLARED UNSWEPT. The only caller of ingest_pending in the swept tree is :431, its own main().",
+      "live_matches_declared": "unmeasured",
+      "live_instance_age": null,
+      "basis": "inferred",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "inferred",
+        "live_matches_declared": "inferred"
+      },
+      "evidence": "TWO-PLANE SWEEP, client-side counted (never --query length on a paginated list -- events list-rules returned 100 then 37 as PAGE counts): events=137, scheduler=18. POSITIVE CONTROL FIRED and it caught a broken sweep of mine: my first container-command loop printed only globgrph-trino (a multi-line shell command swallowed the rest) and my second returned blank for 6 of 7 families; the control -- describe-task-definition on globgrph-cse-producer -> 'python /app/cse_producers_nightly.py' -- proved both were instrument failures rather than absences. The values here come from the form the control validated. 7 ACTIVE task-definition families, all read. actual_trigger INFERRED for the same declared floor as the resource_summaries card: 132 events rules unresolved to their ECS targets. I am not calling this module untriggered; I am saying no trigger was found within a sweep whose extent I have printed.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "source",
+      "mutation_policy": "append_only",
+      "form": "Iceberg tables in the Nessie catalog, namespace globgrph, one per allow-listed surface.",
+      "basis": "measured",
+      "basis_by_field": {
+        "persisted": "measured",
+        "authority_role": "measured",
+        "mutation_policy": "measured",
+        "form": "measured"
+      },
+      "evidence": "persisted=true MEASURED at :256 (a real pyiceberg append -- the file's other .append( hits at :200/:203/:291/:311 are python list appends, and resolving by receiver is what separates them).",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "location": {
+      "home": "infra/aws/globgrph/snap_store.py (436 lines) @76c58923ac; writes globgrph.<surface> via table_id=(NAMESPACE, surface) at :222",
+      "projection_of": [
+        {
+          "id": "infra/aws/globgrph/cse_store.py",
+          "note": "declared template at :34"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "s3://.../warehouse/snap_ingest/pending/<surface>/",
+          "note": "co-resident staging store; open on write, closed on land"
+        }
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "home": "measured",
+        "projection_of": "measured",
+        "co_resident_stores": "measured"
+      },
+      "evidence": "home MEASURED at the pin. AC4 satisfied with FOUR resolvable table names rather than a description: globgrph.ms_heat_snap, globgrph.code_heat_snap, globgrph.fedobs_coverage_snap, globgrph.fedobs_coevolution_snap -- note the surface keys already END in _snap, so the table name is the key verbatim via table_id=(NAMESPACE, surface) at :222, NOT surface+'_snap'.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Tables this module can write.",
+      "denominator": "4 of 4 -- ENUMERABLE and fully enumerated, AST-measured from SURFACES at :79.",
+      "denominator_absent_reason": null,
+      "explicitly_out": [
+        "every table outside the 4-entry allow-list -- refused at :415 by choices= on the CLI and at :146 by the SURFACES deref on the programmatic path",
+        "every table outside namespace globgrph"
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "universe": "measured",
+        "denominator": "measured",
+        "explicitly_out": "measured"
+      },
+      "evidence": "⛔ COX3-AC7 STILL BINDS EVEN THOUGH THE BOUND IS ENUMERABLE: this card asserts what THIS MODULE can write, and asserts NOTHING about the completeness of the estate's writer population. The bound here is BOUNDED (4 of 4), which is the measured contrast that makes CLASS 2 a different remedy class from CLASS 3 -- and the reason the S3-prefix sweep proposed for the parameterized-writer class is not needed for this member.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "Iceberg table identity ('globgrph', surface) where surface is one of 4; the S3 staging keys are a SECOND identity space, warehouse/snap_ingest/pending/<surface>/, joined to the first by the surface string.",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "surface string is the join key between the S3 prefix space and the Iceberg table space; both are gated by the same 4-entry allow-list on land.",
+      "basis": "measured",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "crosses_spaces=true MEASURED: the surface string addresses both an S3 prefix and an Iceberg table. Unlike the cse case this crossing is DECLARED and gated, which is why declared_mapping is populated rather than null -- the mapping is the allow-list itself.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "failure_mode": {
+      "returns_on_failure": "coerce_rows at :200-203 accumulates per-row errors and fails the batch rather than writing partial rows.",
+      "distinguishable_from_true_negative": "yes",
+      "silent_degrade_paths": [
+        "ingest_pending drains the S3 prefix and MOVES/marks batches as applied at :311; a failure after the append but before the marker would re-apply a batch on the next run",
+        "--dry-run is threaded to ingest_pending at :431, so this module does NOT share PATH B's dry-run gap"
+      ],
+      "basis": "inferred",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "inferred"
+      },
+      "evidence": "Batch failure behaviour READ AT SOURCE :200-203. silent_degrade_paths INFERRED: the re-apply window is a control-flow reading of :307-311 and I did not exercise it -- an exercise would be a write, refused under COX3-AC8.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "Every row measured at source, with the allow-list AST-measured rather than regex-counted. This is the soundest of my four subjects: the bound is ENUMERABLE and gated on both the CLI and programmatic paths. QUALIFIED rather than SOUND only because actual_trigger rests on a declared 132-of-137 unswept floor, and because the S3 re-apply window at :307-311 is read rather than exercised.",
+    "blocking_defects": []
+  }
+}
