@@ -8,6 +8,21 @@
 <issued_at>2026-08-27T21:0xZ</issued_at>
 <status>ACTIVE</status>
 
+<decomp_ref>
+`workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md` — stage-3 decomp for
+`D1_CATVIEWS`, round 1 CERTIFIED. **Cells this TO discharges: `D1-h-r3`, `D1-inv-1`, `D1-inv-2`,
+`D1-inv-4`.**
+
+⛔ **ADDED AFTER `to-decomp-ref-lint` REFUSED THE FIRST COMMIT (`@9ed1182ffb`) FOR CARRYING NO
+`<decomp_ref>`.** The gate runs in **ANNOUNCE** mode, so the commit landed and nothing forced this
+edit. **Complying only where a gate blocks is the exact habit this office was corrected on today** —
+the refusal is the instruction, not the enforcement.
+
+⚠ **`D1-h-r3` IS CARRIED HERE AS A FALSIFIED CELL, NOT A DISCHARGED ONE.** Andrew's ~20:5xZ word
+moved the tree its measurement described. This TO restates it; **`3.0.0_SA_CVO~Z` owns whether the
+restatement needs re-certification.**
+</decomp_ref>
+
 <basis>
 **Andrew-direct ~19:5xZ, verbatim** (quoted at `mdpf_gold_consolidator.py:573-574 @3665049808`):
 *"I do not like that SMAs have a different path with no dollars, that is not right we need to
