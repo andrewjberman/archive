@@ -115,6 +115,32 @@ REAL ARTIFACT IS FIRST READ. Do not treat the fixture exercise as having pre-dis
 ⚠ **THE CONCLUSION WAS RIGHT AND THE EVIDENCE WAS NOT. A right answer from invalid evidence is not
 knowledge, and an executor inheriting my sentence would have believed production values were already
 proven unchanged.**
+
+⭐⭐ **REPLACEMENT SUPPORT RECORDED `@98b4475edc` BEFORE THE PIN IS ACTIONED — AND IT IS STRONGER THAN
+WHAT IT REPLACES, BECAUSE IT IS A PROOF BY CONSTRUCTION RATHER THAN BY EXERCISE.**
+**KEY-SPACE DISJOINTNESS, exhaustive, denominator = the whole file: `node_aum` occurs EXACTLY 4 TIMES
+in the consolidator.**
+```
+:625  node_aum = {Models, SMA, Alternatives, Insurance, Client}   CONSTRUCT -- five peers, ONCE
+:629  node_aum[f"Models > {label}"] = sum(...)                    ADD
+:641  node_aum[f"SMA > {bucket}"]   = sum(...)                    ADD
+:646  build_category_views(..., node_aum=node_aum)                PASS
+```
+1. **the five peer keys are written EXACTLY ONCE, at `:625`, before either loop**
+2. **`TOP_LEVEL_PEERS` (registry `:94`) are all BARE TOKENS carrying no `" > "`**
+3. **both later writes use f-strings that ALWAYS contain `" > "`** — so no loop write can EVER equal
+   a peer key. **They ADD; they cannot REASSIGN.**
+∴ **`sum(TOP_LEVEL_PEERS)` is fixed by `:625` alone and is STRUCTURALLY UNREACHABLE from the
+restructure's writes — for ALL INPUTS, including production data.** ⭐ **This is what my retracted
+sentence purported to establish and could not: it holds without a fixture.**
+
+⛔ **AND IT DOES NOT PRE-DISCHARGE `AC2`/`AC3`.** Disjointness proves the restructure **cannot move**
+the five-peer sum. **It says NOTHING about what the emitted values ARE.** `AC2`/`AC3` remain **the
+first reading of a real artifact.**
+⭐ **`0.4.0_DS_ClientPlatform~Z` recorded it as an ADDENDUM and left the accepted instance
+`@44955a2721` UNTOUCHED** — *"amending an accepted, CVO-certified instance to retro-fit a
+justification it was never asked to carry would have been the worse act; `AC3` remains a PASS for what
+it was written to prove."* **Correct, and the same principle this office applied to `D1F3DS-AC3`.**
 ⚠ **STILL TRUE: `D1-inv-4` is TRUE BUT UNENFORCED at this commit** — `AC3` verifies a value nothing
 guards, and must say so.
 ⛔ **HEAD REMAINS FORBIDDEN.** `14b077f559` is a **specific cited pin**, which is the sanctioned
