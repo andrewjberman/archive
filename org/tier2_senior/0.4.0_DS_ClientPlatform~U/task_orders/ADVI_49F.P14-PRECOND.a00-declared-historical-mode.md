@@ -36,11 +36,30 @@ thing being checked. NOBODY writes a back-filled conversion record, under any fr
   with exactly the two-value vocabulary; the P1.5 re-grade surface and the parity-harness read
   path each shown READING it (cite file:line of the consuming half -- an unread provenance field
   drifts to unpopulated, so the consumers are part of THIS TO's acceptance, not a later one's).
-- **DH-5 proof instance VALID rc=0 positional: ids DH-1..DH-5**, TRUE rc bare, validator
-  invocation + rc recorded IN the instance (D2 lock-in).
+- **DH-6 THE ENTRYPOINT PASS-THROUGH (issuer amendment 2026-08-27 ~19:4xZ on AE~L 76524 + CTO
+  architecture concur 76526 — the flag had no PATH to the ruled vehicle: chain_49f_entrypoint
+  builds a00's argv itself and carried zero mention of the flag at HEAD):** exactly the minimal
+  three-touch form, nothing more — main() argparse gains `--declared-historical` (store_true, same
+  spelling as a00's); `_stage_list` appends it to the a00 stage's argv ONLY; `:450` passes it
+  through. **THE AUTO-DERIVE FORM STAYS BANNED AT EVERY LEVEL** — an entrypoint that derives the
+  flag from the epoch is the auto-fallback one level up where a00 cannot see it; the DRIVER
+  decides, the entrypoint only carries. Exercised both ways: flagless entrypoint invocation
+  byte-preserves a00's argv (the nightly's arm); flagged pre-epoch invocation reaches a00's
+  declared branch end-to-end.
+- **DH-5 proof instance VALID rc=0 positional: ids DH-1..DH-5,DH-6** (widened by the same
+  amendment; disclosed to `3.0.0_SA_CVO` for delta-cert, the standing form), TRUE rc bare,
+  validator invocation + rc recorded IN the instance (D2 lock-in).
+
+**DEPLOY CONDITIONS (the converged 76509+76515 instruction) EXTEND per CTO 76526:** the deploy set
+becomes THE THREE FILES ALONE (a00_dim_account.py, a00_runner.py, chain_49f_entrypoint.py), and the
+both-arms re-fire gains a THIRD arm — the FLAGLESS entrypoint invocation proven behavior-identical
+on deployed bytes (default False -> a00 argv unchanged; the nightly document passes no new
+parameter, so the nightly's safety IS that arm). LF-normalised verify unchanged. The SSM-document
+half stays at `0.7.0_AE_CloudOps~L` and waits until the deployed entrypoint accepts the flag
+(rendering a flag argparse rejects manufactures a vehicle-shaped failure).
 
 <proof_of_spec>
-  <expected_criteria>DH-1,DH-2,DH-3,DH-4,DH-5</expected_criteria>
+  <expected_criteria>DH-1,DH-2,DH-3,DH-4,DH-5,DH-6</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.P14-PRECOND_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
