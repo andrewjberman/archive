@@ -26,7 +26,11 @@ His example — *"accounts that had $6 in them and someone deposits 500k … if 
 ext = led[led["final_class"] == "EXTERNAL"]
 cash_cf = ext.groupby([...])["signed_amount"].sum()
 ```
-It sums **`signed_amount` only.** Its own docstring at `:19` states the defect as the design: *"External CF(t) per account-day = SUM(C_00 signed_amount WHERE final_class == EXTERNAL)."*
+It sums **`signed_amount` only.**
+
+⛔ **CORRECTED 2026-08-27T18:0xZ (c02-CFINPUT first act) — I WROTE THAT THE DOCSTRING "STATES THE DEFECT AS THE DESIGN". IT DOES NOT. IT STATES THE CORRECT DESIGN, AND HAS SINCE THE FILE WAS BORN.** I quoted `:19` as *"External CF(t) per account-day = SUM(C_00 signed_amount WHERE final_class == EXTERNAL)."* and stopped at the line break. **The sentence continues onto `:20-21`:** *"...**+ signed in-kind values on EXTERNAL in-kind legs (valued rows only; unvalued flagged upstream)**."* Measured over the file's entire history — the phrase `signed in-kind values on EXTERNAL in-kind legs` is present in **5 of 5 commits**, from the original `a781ae9b5d` (2026-08-11). **A line-bounded read of a wrapped sentence, which is the same defect shape as a phrase grep returning a false zero across a line break — here it inverted an INTENT instead of hiding a hit.**
+
+>> **THIS CHANGES WHAT DEFECT 1 IS.** Not *"the design was wrong and the code implemented it faithfully"* but *"the design was RIGHT and the code implemented only its first clause."* The module has specified signed in-kind flows since day one and has never done it. **Consequences that actually bind: (i) `c02` consuming the signed field RESTORES this module's own stated spec rather than changing it — the ruled design and the file's original intent agree, independently arrived at three weeks apart; (ii) the `c00 → c01` half was never the only place the intent was written down, so "nobody knew" is not available as an account of how this survived; (iii) CF-4 still binds unchanged — served VALUES move for affected accounts whatever the docstring says, and a correction shipped silently is still indistinguishable from a regression.** <<
 
 **MEASURED in `flow_ledger`:**
 | date | in-kind rows | `signed_amount == 0` | `in_kind_value` POPULATED | `in_kind_unvalued = False` |
