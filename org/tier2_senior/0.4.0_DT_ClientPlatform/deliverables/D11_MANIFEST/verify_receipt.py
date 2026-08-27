@@ -123,11 +123,18 @@ def verify(receipt: dict) -> list:
             bad("input_closure.%s" % name,
                 "PATH CASE ALIAS -- claimed %r but the filesystem holds %s; two spellings of "
                 "one location and every digest agrees across both" % (pin["home"], alias))
-        if pin["blob_presence"] == "in_object_db" and got and subprocess.run(
-                ["git", "cat-file", "-e", got], cwd=WS, capture_output=True).returncode != 0:
-            bad("input_closure.%s" % name,
-                "claims blob_presence=in_object_db but %s is NOT in the object database -- a "
-                "COMPUTED identity, resolvable by nobody" % got[:12])
+        # ⛔ BOTH DIRECTIONS. The first version checked only the over-claim (in_object_db on an
+        # absent object) and my own control caught the asymmetry the moment the tree went clean:
+        # claiming `computed_only` for a blob git DOES hold is also false, and an asymmetric
+        # check is one that reports a field as verified while half its domain is unexamined.
+        if got:
+            present = subprocess.run(["git", "cat-file", "-e", got], cwd=WS,
+                                     capture_output=True).returncode == 0
+            measured = "in_object_db" if present else "computed_only"
+            if pin["blob_presence"] != measured:
+                bad("input_closure.%s" % name,
+                    "claims blob_presence=%s but %s is measurably %s"
+                    % (pin["blob_presence"], got[:12], measured))
         commit = pin["commit"]
         if subprocess.run(["git", "cat-file", "-e", commit + "^{commit}"], cwd=WS,
                           capture_output=True).returncode != 0:
