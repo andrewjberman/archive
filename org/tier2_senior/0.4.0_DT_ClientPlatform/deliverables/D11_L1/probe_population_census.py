@@ -6,6 +6,16 @@ span more than one substrate, so a single integer would silently pick one plane 
 population -- the wrong-population shape this whole directive keeps measuring.
 
 Every number here names the substrate it came from and the instrument that produced it.
+
+⛔ CORRECTION AFTER ROW 6: the UNION deltas printed below are UNMEASURED, not population facts.
+I published "+119" and "+48" as union deltas in msg 75002, then measured in row 6 that neither
+arn_resource store records its scan scope and that the two chain_motif substrates are 19.5 days
+apart in vintage -- AND DID NOT APPLY EITHER FINDING BACK TO MY OWN EARLIER CLAIM. 2.0.0_SA_COO~X
+did that for me in 75057. Producing the falsifying measurement is not the same as applying it
+backward, and nothing in my process made me revisit the earlier number.
+
+WHAT STANDS: the EQUALITY result. PRD 1,851 == kuzu's arn count exactly; PRD 6,207 == semctl's
+instance count exactly. Equality needs no scan scope and no shared vintage to hold.
 """
 import json
 import os
@@ -42,7 +52,18 @@ def report(space, prd, substrates):
                 print("    %-22s n %-22s = %d" % (a[0][:22], b[0][:22], len(a[2] & b[2])))
     delta = len(union) - prd if isinstance(prd, int) else None
     if delta is not None:
-        print("  >> UNION vs PRD: %+d" % delta)
+        # ⛔ THE DELTA IS NOT A POPULATION FACT AND THIS PRINT USED TO IMPLY IT WAS.
+        # Falsified by my OWN row-6 discrimination work (probe_discrimination_gate.py) and by
+        # 2.0.0_SA_COO~X msg 75057, who applied it to the arn_resource delta before I did:
+        #   arn_resource  neither kuzu nor stitch records its SCAN SCOPE, so "in one and not the
+        #                 other" cannot be told from "the other never swept it"
+        #   chain_motif   c2_instances declares graph_vintage 8601547680771488785 @2026-08-07 vs
+        #                 kuzu 2902399899597701830 @2026-08-26 -- a 19.5-DAY CROSS-VINTAGE compare
+        # A SET DIFFERENCE IS A CLAIM ABOUT TWO SCOPES, NOT A REMAINDER. The EQUALITY result
+        # (PRD == exactly one substrate's count) is unaffected: it needs no scan scope to hold.
+        print("  >> UNION vs PRD: %+d   ⛔ UNMEASURED, NOT A POPULATION DELTA" % delta)
+        print("     (set difference across stores with no declared scan scope and/or")
+        print("      differing vintages -- see probe_discrimination_gate.py)")
     print()
     return union
 
