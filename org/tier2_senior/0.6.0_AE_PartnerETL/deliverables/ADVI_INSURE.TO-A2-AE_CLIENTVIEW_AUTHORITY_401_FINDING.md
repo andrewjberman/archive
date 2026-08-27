@@ -88,6 +88,45 @@ State=Active, **24 invocations / 0 errors in the last 6h**. The keepalive is doi
 extends the session server-side is not what is failing. The `bd-49f-auto-login` chain
 (`infra/aws/ec2/bd-49f-auto-login/`) is the component that re-establishes a ClientView session.
 
+## RESUME PROTOCOL — binding on whoever runs this capture next (3.0.0_SA_CVO 76309 + 2.0.0_SA_COO 76310)
+
+⛔ **DO NOT resume by re-running the cohort loop.** Two rules were ruled by `3.0.0_SA_CVO` (76309,
+landed `org/surprise_channel/ADVI_INSURE/INVESTIGATION_v1.md @bc30c64c53`) AFTER this finding was
+filed and BEFORE any byte is captured. They are written here because a rule that lives only in a
+message is not a protection — the message scrolls, the artifact persists.
+
+1. **PROBE FIRST.** When the ClientView mint recovers, capture **ONE** relationship id and read
+   `financialTeam[]` **before spending the cohort**. The bounded capture script defaults to
+   `CAPTURE_LIMIT=3`; **set it to 1 for the probe.** Spending the cohort first is the failure this
+   rule exists to prevent.
+
+2. **AN EMPTY `financialTeam[]` IS A COMPLETE ANSWER AND A REAL FINDING — NOT A FAILED CAPTURE.**
+   It closes the question as a Black Diamond **CONFIGURATION** state; the advisor-basis stamp moves
+   to a vendor-config value and the resulting ask routes to Andrew. Sibling to AC1's
+   refusal-is-complete law. **NO retry, NO widening the surface set, NO quiet absorption** — an empty
+   result must not be re-run until it returns something.
+
+3. **THREE OUTCOMES ARE PRE-REGISTERED, AND EACH IS COMPLETE** (`2.0.0_SA_COO` 76310): an **EMPTY**
+   return, a **REFUSED** return, and a **POPULATED** return are **three different findings**, all
+   scored as complete. None of them is a failed capture, and none licenses a retry.
+
+⚠ **EXPECT EMPTY — AND THAT IS WHY PROBE-FIRST MATTERS.** The population expectation that made a
+populated `financialTeam[]` seem likely rested on **COTTONWOOD** bytes. On 49F, the sibling `teams[]`
+field is affirmatively empty **77 of 77**. **The FIRM is the variable, not the surface.** So the
+single most probable result of this capture is an empty array that CLOSES the question as a Black
+Diamond configuration state — and spending the whole cohort to learn it would be pure egress with no
+additional information.
+
+**Owner of the unblocking act:** the bounded ClientView re-establishment is routed to
+`0.7.0_AE_CloudOps~L` (76305), the owning family's seated member — **not this seat, and not the
+keepalive.** This seat does nothing to the auth chain; it fires the one-relationship probe on
+mint-restored.
+
+**The interlock that makes this the strong form:** because the authority block stopped the capture,
+`0.4.0_DS_ClientPlatform~R`'s both-branch AC1 prep is **pre-registered before any byte exists** — a
+discriminator registered ahead of its data, which is the strongest form a pre-registration can take.
+Do not spend that advantage by capturing broadly and deciding the interpretation afterwards.
+
 ## Status
 
 `INSA2AE-AC1`: **UNCOMPUTABLE-BY-DEPENDENCY**, dependency named — the ClientView authority mint on the
