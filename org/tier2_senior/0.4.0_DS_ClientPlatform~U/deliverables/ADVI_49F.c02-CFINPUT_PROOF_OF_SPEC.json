@@ -1,0 +1,183 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_49F.c02-CFINPUT",
+  "firm": "49F",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform~A/task_orders/ADVI_49F.c02-CFINPUT.twr-engine-consumes-in-kind-value.md",
+    "group": "C",
+    "vintage_commit": "76fd92be30"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~U. Face lives in the historical ~A folder and is re-pointed to this seat by its SEATING-EXECUTED block; instance path moved to ~U by issuer amendment @76fd92be30 (COO 76359 s.3). Sequenced under COO 76133 TO 2 with no new GO; gate ADVI_49F.c01-SIGNFIELD SATISFIED and ACCEPTED COMPLETE (COO 76286).",
+  "controls": {
+    "mutant": {
+      "description": "The c02 mechanism inherits the four-mutant battery built for c01-SIGNFIELD and exercised against this same engine interface: `resign` (re-sign in place, the design CTO 74187 ruled out), `sign` (direction map inverted), `drop` (every in-kind leg undirected), and `c02` (one EXTERNAL cash leg perturbed by a cent -- planted specifically because the c02-plane control stayed green under the other three). Separately, the c02 ACCEPTANCE harness carries its own arms-collapse control: a TESTABILITY GATE requiring the PRE arm to reproduce the registered EMITTED outlier before a row counts as evidence.",
+      "expected": "Every mutant arm exits rc=1 with INDEPENDENT criteria firing, and the testability gate must DEMOTE rows whose two arms rest on the same truth rather than scoring them PASS on numeric proximity.",
+      "observed": "ALL FOUR MUTANTS rc=1, independence demonstrated (resign fires C01-1 alone, sign fires C01-2 alone, drop both, c02 the interface control). THE TESTABILITY GATE FIRED ON MY OWN FIRST RESULT: it demoted 0013289888 and 0057178995 from PASS to NOT-TESTABLE, because neither reproduces its registered outlier on this partition -- both arms already sat near zero, so the check had nothing to discriminate. Reported 8 of 8 TESTABLE rather than the available 9 or 10 of 10. Banked by 2.0.0_SA_COO as round keeper #9.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The engine change is exercised through the REAL CLI at BOTH values of the new grain parameter on the same partition and the same inputs, so the parameter is shown to be live rather than declared; and the acceptance harness's PRE arm is pinned to vintage b56bd2b7f0 by CONTENT with a content-check that REFUSES a baseline already carrying the fix.",
+      "observed": "STABLE and the parameter is LIVE. account grain: 226 of 1,147 ledger rows admitted, abs $4,493,363.55 (in-kind $889,583.10). relationship grain on the identical partition: 141 of 1,147 admitted, abs $3,877,601.75 (in-kind $286,972.44). Both runs emit identical status censuses (OK 6,412 / UNCOMPUTABLE-ZERO-BMV 922 / NO-PRIOR-BALANCE-ACCOUNT-ABSENT 5), so the boundary parameter moves the FLOW SET and nothing else. Baseline content-check exercised: repointed at the post-fix commit the harness exits rc=1 naming the schema version it found.",
+      "status": "STABLE"
+    }
+  },
+  "acceptance": [
+    {
+      "criterion_id": "CF-1",
+      "criterion_verbatim": "CF-1 c02 CONSUMES in_kind_value ON EXTERNAL IC LEGS -- row selection only. Cite the linking method as UNTOUCHED, with the diff showing it. (Re-based by the COO reconciliation block: c02 consumes the NEW SIGNED FIELD via the grain-parameterized filter; in_kind_value keeps its unsigned contract.)",
+      "method": "diff",
+      "invocation": "[method in schema vocabulary: diff; the specific shape is a differential rebuild] Working-tree c02_twr_engine.flows_from_ledger vs the same function at pinned vintage b56bd2b7f0 recovered by CONTENT, on identical inputs; plus the real CLI c02_twr_engine.py --date 2026-03-24/2026-08-24 --canonical-local <mirror> --calendar-local <mirror> at both --flow-boundary values.",
+      "output_evidence": "CONSUMES THE SIGNED FIELD, AND THE LINKING METHOD IS UNTOUCHED. flows_from_ledger now reads in_kind_signed_value on in-kind rows and signed_amount on cash rows; signed_amount is 0.00 on every IC row BY DESIGN, which is the whole of defect 1. The class filter became a FUNCTION OF GRAIN via --flow-boundary {account,relationship}; emitted twr_daily carries flow_boundary on its face and the manifest carries cf_input_census. LINKING METHOD UNTOUCHED, shown by the diff's SHAPE not by assertion: the change set is confined to flows_from_ledger, its two module-level constants (_GRAIN_CLASSES, INTER_ACCOUNT_PROVENANCE, REQUIRED_LEDGER_FIELD), one argparse flag and two stamp lines. daily_returns, link_geometric and the pair/link resolution in c00 are not in the diff at all. A pre-1.2 ledger is REFUSED loudly rather than silently read as signed_amount alone.",
+      "denominator": "2 partitions exercised end-to-end through the CLI; 1,147 and 1,034 ledger rows. 6 files changed across the two commits; the engine diff touches 1 function of the 4 in c02_twr_engine.py.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CF-2",
+      "criterion_verbatim": "CF-2 THE HARNESS RE-READ IS THIS TO's ACCEPTANCE (moved here from c00-FIX's C00-4, never deleted -- it is CRO~A's matched-window harness): the +341% specimen day re-reads ~0%, and SI ties BD in-band.",
+      "method": "live_read",
+      "invocation": "[method in schema vocabulary: live_read; the specific shape is a substituted-specimen re-read under the COO 76359 s.2 / CTO 76357 pre-approved fallback] Attempted first on the NAMED specimen: chain_49f_entrypoint.py --date 2026-03-24 --workdir <scratch>, no --upload (so --dry-run + --local-out on every stage, zero S3 writes), sanctioned by COO 76359 s.1. Then the substituted read on 2026-08-24 via the acceptance harness.",
+      "output_evidence": "SPLIT BY CLAUSE, because the two clauses did not fare the same and reporting a single verdict would hide that. CLAUSE 1 (catastrophic day re-reads to a normal band) IS MET ON A SUBSTITUTED SPECIMEN: account 0032486794 on 2026-08-24 re-reads +69,056.00% -> +0.00%, with seven further accounts collapsing to their pre-registered expectations (8 of 8 TESTABLE). CLAUSE 2 (SI ties BD in-band) IS NOT RUN AT THIS SEAT: it requires a matched-window Black Diamond comparison that belongs to 4.0.0_SA_CRO~A's harness, and the substituted specimen has no BD matched window, so that clause stays bound to the original specimen. THE NAMED SPECIMEN 2026-03-24 IS UNMEASURED-PRE-BACKFILL, NEVER SILENTLY SUBSTITUTED -- and the reason is EXERCISED, not predicted: the local full-chain run ABORTED at stage 1 of 15 with 'REFUSED: no conversion record attests fact_acc 2026-03-24 (scanned 456 records)'. All four c00 inputs are also absent at that date. The eventual P14 pass still owes that day's re-read.",
+      "denominator": "1 of 1 named specimen attempted and unreachable; 1 substituted specimen read; 8 of 8 testable rows in the pre-registered all-ten table; 2 of 2 clauses adjudicated separately.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "SUBSTITUTE ORACLE: the 2026-08-24 +69,056pp specimen carries clause 1 (magnitude collapse to a normal band) under the pre-approved fallback. NO ORACLE AT THIS SEAT FOR CLAUSE 2: 'SI ties BD in-band' needs 4.0.0_SA_CRO~A's matched-window BD comparison, harness-owner role. The named 2026-03-24 specimen is UNMEASURED-PRE-BACKFILL and is owed by the P14-VEHICLE pass. Marked UNVERIFIABLE rather than PASS because a two-clause criterion with one clause unrun is not a pass."
+    },
+    {
+      "criterion_id": "CF-3",
+      "criterion_verbatim": "CF-3 MAGNITUDE IS NOW MEASURED, NOT ASSUMED. The census COUNTS affected accounts; it does not measure per-account TWR error. This TO produces the magnitude distribution across the affected class -- the +341% specimen proves the error CAN be severe, not that it is severe everywhere. Close that gap with numbers.",
+      "method": "diff",
+      "invocation": "[method in schema vocabulary: diff; the specific shape is a pooled PRE-vs-POST sweep] ADVI_49F.c02-CFINPUT_CF3_SWEEP.py, PRE arm pinned to b56bd2b7f0 by CONTENT, POST from the working tree, run on the ruled population after CTO 76329.",
+      "output_evidence": "THE DISTRIBUTION, WITH ITS SHAPE AS THE ANSWER: 38,454 account-days computable, 54 MOVED (0.140%). |delta r_net| q25 0.72pp, q50 6.77pp, q75 99.53pp, q90 346.46pp, q99 41,741.95pp, max 69,056.00pp; moved >1pp 40, >10pp 24, >100pp 11, >1000pp 5. EXTREMELY heavy-tailed -- a median move of 6.77pp under a maximum four orders of magnitude larger, so the class is neither uniformly small nor uniformly severe, and a mean would be meaningless. THE RESIDUE, carried per CTO 76329: excluded code-rule INTERNAL $1,067,868.77 pooled abs against $47,862,070.76 admitted = 2.231%, per-day mean $177,978.13 -- a BOUND on what CF-3b could graduate, not a claim, and it travels to the P1.5 re-grade with its denominator.",
+      "denominator": "6 partitions of 538 fact_trn partitions. 38,454 account-days. THE BOUND IS STRUCTURAL AND STATED: only 6 partitions carry every input a PRE-vs-POST comparison needs -- ref_txn_classification 7 and canonical_positions 7 partitions (from 2026-08-18), dim_boundary and dim_calendar 8 (from 2026-08-11), against flow_ledger 533. The other 532 are UNMEASURED and are NOT extrapolated to. Accepted to this bound by 2.0.0_SA_COO 76341, which records that the bound RESOLVES BY CONSTRUCTION post-P14 and that the FINAL P1.5 re-grade is taken over the full set.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CF-3b",
+      "criterion_verbatim": "CF-3b THE PAIR-SCAN (issuer amendment on CTO ruling 76330 -- NON-GATING): the cross-account pair-scan over code-rule INTERNAL in-kind legs -- same day, same CUSIP, opposite-direction quantity in ANOTHER account's ledger. Rows where the scan ESTABLISHES a counterparty graduate into the admitted set through the EXISTING pair-match provenance. Unestablished rows stay EXCLUDED, refused-BY-REASON in the census, and the P1.5 re-grade report CARRIES the residual's per-day dollar size with its denominator.",
+      "method": "live_read",
+      "invocation": "[method in schema vocabulary: live_read; the specific shape is a cross-account pair-scan with a positive control] ADVI_49F.c02-CFINPUT_CF3B_PAIRSCAN.py over 6 partitions. Direction taken from c00's own in_kind_signed_value so no second direction instrument is invented; ambiguity and self-account matches counted separately and never silently paired.",
+      "output_evidence": "ZERO GRADUATE WHERE THE SCAN WAS PROVEN LIVE, AND THE SPLIT IS THE RESULT. CONTROLLED partitions: 10 legs / $291,789.99 refused -> 0 graduate / $0.00. UNCONTROLLED: 29 legs / $635,524.42 -> NOT EVIDENCE. A pooled '0 of 39, $0 of $927,314.41' was available and would have read as clean coverage; 69% of the refused VALUE sits where the instrument could not be shown live. THE POSITIVE CONTROL IS WHY THE SPLIT EXISTS: the same scan run against legs c00's OWN pair-match stage already matched found them 7 of 7 (2026-08-26) and 75 of 75 (2026-08-25) -- INSTRUMENT LIVE; on 2026-08-21 and 2026-08-20 there were ZERO known pair-matched in-kind legs so the control could not fire, and those two partitions carry 29 of the 39 legs. A uniform 0-of-N is the signature of a broken instrument at least as often as a real absence. ALSO FOUND: `cusip` DOES NOT SURVIVE INTO flow_ledger (absent from c00 out_cols; measured on the emitted 25-column partition), so the ruled scan cannot run against the ledger as emitted -- this measurement worked only via a txn_ref positional-suffix recovery, and needing the workaround is the finding (banked as keeper #12; CTO 76350 names the additive cusip carry as the ruled-preferred production form, named not commissioned).",
+      "denominator": "39 code-rule INTERNAL in-kind legs / $927,314.41 across 6 partitions; of those, 10 legs / $291,789.99 on partitions where the control fired. 82 known pair-matched legs used as the control, 82 of 82 found.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CF-4",
+      "criterion_verbatim": "CF-4 NO SILENT RE-STATEMENT. Served TWR values will CHANGE for affected accounts. That is the point -- but it is a served-semantics change on 1,728 accounts, so it routes P4-class through CTO with per-key never-widen where served keys move. A correction shipped silently is indistinguishable from a regression.",
+      "method": "manual_read_with_citation",
+      "invocation": "Not yet run. The gate is 1.0.0_SA_CTO's, acknowledged as theirs in 76329 note (1): 'route the deploy through this seat when CF-2/CF-3/CF-5 close'.",
+      "output_evidence": "NOT SILENTLY RE-STATED -- the criterion is honored so far by NOT DEPLOYING. c02_twr_engine.py is committed at @cab1f8bff9 and deliberately NOT deployed; comp-pipescript deployed reads STALE for it, which is the CORRECT state under this criterion rather than a defect. No served TWR value has moved. A caveat is pre-registered for whoever verifies AFTER the deploy: c02_twr_engine.py is CRLF in the working tree while c00/c01 are LF, so a post-deploy STALE verdict must be resolved by normalised content compare before it is believed.",
+      "denominator": "0 of 1 deploys taken. 1 gate, at 1.0.0_SA_CTO.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "NAMES THE LATER RUN: the P4 gate read by 1.0.0_SA_CTO with per-key never-widen, followed by the deploy routed through that seat. It cannot be computed at this seat and cannot be computed before CF-2 and CF-3 close, which is the ordering the criterion itself imposes. This instance will be re-filed with CF-4 measured once that gate runs."
+    },
+    {
+      "criterion_id": "CF-5",
+      "criterion_verbatim": "CF-5 proof instance VALID rc=0 positional: ids CF-1,CF-2,CF-3,CF-3b,CF-4,CF-5 (widened from CF-1..CF-5 by this amendment; disclosed to 3.0.0_SA_CVO for delta-cert, the RPS 5->7 form). MEASURED/RULED-class run rows only. Cite the expected-id set the checker ran against -- a bare rc=0 does not establish positional coverage.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c02-CFINPUT_PROOF_OF_SPEC.json CF-1,CF-2,CF-3,CF-3b,CF-4,CF-5 -- the expected-id set CITED here is the widened one from the face @76fd92be30, and the rc is read directly from the process with no pipe.",
+      "output_evidence": "RECORDED AFTER THE RUN. THE ID SET THE CHECKER RAN AGAINST IS CITED ABOVE IN FULL, because the criterion says explicitly that a bare rc=0 does not establish positional coverage -- the checker fails on a missing OR an extra id, so citing the set is what makes the rc mean something. NOTE ON WHAT THIS INSTANCE CLAIMS: it is filed at the CURRENT state, not as a completion claim. CF-4 is UNCOMPUTABLE-BY-CONSTRUCTION and CF-2 is UNVERIFIABLE-BY-INSTRUMENT; the TO remains OPEN and its status has not been flipped. A valid instance is not a complete TO, and this row exists so nobody reads it as one.",
+      "denominator": "6 of 6 criterion ids in the widened set; coverage checked by the validator itself.",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/c02_twr_engine.py",
+      "kind": "script",
+      "commit_or_etag": "commit cab1f8bff9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DELIBERATELY NOT DEPLOYED pending CF-4's P4 gate at 1.0.0_SA_CTO. comp-pipescript deployed reads STALE and that is the correct state under CF-4, not a defect. Exercised locally through the real CLI at both --flow-boundary values with no --upload.",
+      "artifact_covered_by": ["CF-1", "CF-4"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c02-CFINPUT_ACCEPTANCE_ALLTEN.py",
+      "kind": "test",
+      "commit_or_etag": "commit cab1f8bff9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "[artifact shape: harness] Repository artifact, no S3 target. Carries the TESTABILITY GATE that demoted two arms-collapsed rows from PASS to NOT-TESTABLE.",
+      "artifact_covered_by": ["CF-1", "CF-2"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c02-CFINPUT_CF3_SWEEP.py + _CF3_DISTRIBUTION.json",
+      "kind": "doc",
+      "commit_or_etag": "commit c9f215ef47",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "[artifact shape: instrument + measurement] The JSON carries its own input-availability constraint so a later reader cannot mistake 6 partitions for 538.",
+      "artifact_covered_by": ["CF-3"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c02-CFINPUT_CF3B_PAIRSCAN.py + _CF3B_PAIRSCAN.json",
+      "kind": "doc",
+      "commit_or_etag": "commit b49e7135c3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "[artifact shape: instrument + measurement] The JSON carries the controlled/uncontrolled split so the two cannot be pooled back into one number.",
+      "artifact_covered_by": ["CF-3b"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.c02-CFINPUT_A00_ATTESTATION_CENSUS.py + _CHAIN_ABORT_20260324.log",
+      "kind": "doc",
+      "commit_or_etag": "commit c0e25a44aa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "[artifact shape: instrument + raw evidence] The abort log is the unedited chain output; the census re-derives the 27-of-533 attested split from the converter's own records so another seat need not take this seat's number.",
+      "artifact_covered_by": ["CF-2"]
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-pipescript deployed",
+      "invocation": "comp-pipescript deployed c02_twr_engine --pipeline advi",
+      "result": "STALE -- and run deliberately as a NEGATIVE confirmation rather than a check expected to pass. Under CF-4, c02 committed-and-not-deployed is the required state, so STALE is the correct reading. Banked caveat for the post-deploy verifier: c02_twr_engine.py is CRLF while c00/c01 are LF, so a post-deploy STALE must be resolved by normalised content compare before it is believed."
+    },
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"where is the matched-window TWR harness for 49F\"; comp-find \"matched.window\" --limit 12",
+      "result": "MISS, and the tool said so with its denominator (24 hits across 27,327 files; bands SURFACED=1 CONFIG=1 DOC=22). The harness did not resolve by that name. Did NOT take a fuzzy hit -- routed to the c00-FIX record instead, which named the specimen day 2026-03-24 at source."
+    },
+    {
+      "tool": "chain_49f_entrypoint.py (ad-hoc QA form)",
+      "invocation": "python chain_49f_entrypoint.py --date 2026-03-24 --workdir <scratch>   (NO --upload -> --dry-run + --local-out on every stage, zero S3 writes; sanctioned COO 76359 s.1, CTO verified the gating at source)",
+      "result": "ABORTED at stage 1 of 15 -- 'REFUSED: no conversion record attests fact_acc 2026-03-24 (scanned 456 records) -- the tie guard has no denominator'. This is the CF-2 blocker measured by EXECUTION rather than predicted, and it opened the P14-VEHICLE hazard-3 finding (506 of 533 backfill dates would refuse at the same guard)."
+    },
+    {
+      "tool": "commit-gate / safe-commit",
+      "invocation": "bash .tools/commit-gate.sh <files>; bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "PASS on every commit. The gate BLOCKED twice on ruff findings in my own deliverable scripts (a semicolon-joined statement, then two f-strings without placeholders) and both were fixed before the commit landed -- a universal fail-closed gate doing exactly its job."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "The deploy of c02_twr_engine.py.",
+      "reason": "CF-4 routes the served-semantics change P4-class through 1.0.0_SA_CTO. Deploying on this seat's own gate is the silent re-statement CF-4 exists to prevent."
+    },
+    {
+      "item": "The linking method.",
+      "reason": "Not impeached, explicitly fenced by the face, and not in the diff. Row selection only."
+    },
+    {
+      "item": "History re-valuation over the 531 partitions.",
+      "reason": "ADVI_49F.P14-VEHICLE at 0.7.0_AE_CloudOps~L. Nothing in this TO wrote an S3 object; the one full-chain run executed was the local QA form with zero S3 writes."
+    },
+    {
+      "item": "Any change to a00_dim_account / a00_runner's attestation guard, and any back-filled conversion record.",
+      "reason": "The hazard was FOUND here but the remedy is architecture and is now RULED elsewhere (CTO 76378: a declared-historical mode with a measured epoch and an attestation_basis field; back-filled attestations explicitly BANNED as the self-count the guard forbids). Named with numbers, not built."
+    },
+    {
+      "item": "Carrying cusip into flow_ledger (c00 schema 1.2 -> 1.3), and any production CF-3b mechanism.",
+      "reason": "CTO 76350 names the additive carry as the ruled-preferred form IF a production CF-3b is ever cut, and states explicitly that nothing there authorizes a schema act. The whether-to-cut-it question belongs at the round with today's controlled-zero as its sizing input."
+    },
+    {
+      "item": "Anything routed to 4.0.0_SA_CRO~A beyond the single sanctioned cc.",
+      "reason": "The one sanctioned CRO touch fires at harness-verified in the harness-owner role only. CF-2 clause 2 is left OPEN and attributed rather than pursued there."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / INERT -- THE C02 DOCSTRING STATES THE CORRECT DESIGN AND ALWAYS HAS, so defect 1 is a right design whose second clause was never implemented rather than a wrong design faithfully built. My root-cause record said the docstring 'states the defect as the design'; I had quoted line :19 and stopped at the line break, and the sentence continues onto :20-21 with '+ signed in-kind values on EXTERNAL in-kind legs'. Present in 5 OF 5 COMMITS of the file's history from a781ae9b5d (2026-08-11). A line-bounded read of a wrapped sentence -- the same shape as a phrase grep's false zero, except here it inverted an INTENT. Consequence that binds: this change RESTORES the module's own spec rather than altering it, which sharpens CF-4's framing without loosening the gate, since served values move regardless of what the docstring says. Corrected in the deliverable with the original kept beside it.",
+
+    "BLOCKING (now resolved by ruling) -- A CIRCULAR GATE: CF-2's oracle day 2026-03-24 needs a schema-1.2 ledger -> which needs the c00 inputs re-minted -> whose ruled vehicle is P14-VEHICLE's full-chain pass -> whose V14-3 gate waits on c02-CFINPUT completing -> which needs CF-2. Four standing rulings, none individually wrong, jointly closed. Found by measuring the specimen day's input availability BEFORE running the harness rather than after. Surfaced with a proposed break rather than as a halt; CTO 76357 and COO 76359 confirmed the circle and sanctioned the break (a local full-chain QA run with zero S3 writes). The break then failed for a DIFFERENT reason -- the a00 attestation wall -- and the pre-approved specimen-substitution fallback carried CF-2's first clause.",
+
+    "BLOCKING / DISARMED SAME-TURN -- P14-VEHICLE HAZARD 3, AND IT FIRES BEFORE THE OTHER TWO: the ruled full-chain backfill would ABORT at stage 1 of 15 on 506 of 533 dates. a00_runner.py:83-100 requires a meta/conversions record attesting fact_acc for the date; only 32 dates are attested (2026-07-14 .. 2026-08-26), of which 27 intersect the backfill set. EXERCISED on 2026-03-24 (real abort, 46.7s, c00 never ran) and ENUMERATED across all 533 from the converter's own 456 records, with both controls firing: dates the chain demonstrably ran on are attested, the date that aborted is not. Strictly friendlier than the two banked hazards -- a loud refusal on date 1 beats a silent wrong answer on date 531. Routed to 0.7.0_AE_CloudOps~L (owner) cc COO+CTO with the census script committed so their seat can re-derive the split independently; RULED same-turn by CTO 76378 (declared-historical mode, measured epoch, attestation_basis field, back-filled records BANNED). No fix built here.",
+
+    "OBSERVATION / INERT -- I CITED AN ACT I HAD NOT YET PERFORMED. In 76369 to 0.7.0_AE_CloudOps~L I wrote that the census script 'is committed with the CF-3 artifacts'; at that moment it was in a scratch directory, and it rode its own commit rather than the CF-3 one. Self-corrected to that seat within minutes with the exact paths and commit. The class is why it matters: a 'where to find it' claim load-bears on nothing until someone tries the path, so it survives review and wastes the reader's time instead of the author's."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/logs/2026-08-27/session_1755-1830Z_c02_cfinput.md (and session_1606-1755Z_c01_signfield.md for the gating TO). c02 commits: cab1f8bff9 implementation + all-ten acceptance, c9f215ef47 CF-3, b49e7135c3 CF-3b, c0e25a44aa the a00 evidence."
+}
