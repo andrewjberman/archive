@@ -1,0 +1,226 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_49F.P14-STAMP",
+  "firm": "49F",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/task_orders/ADVI_49F.P14-STAMP.canonical-manifest-propagation.md",
+    "group": "A",
+    "vintage_commit": "0b76eeaec2"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~U. GO 2.0.0_SA_COO 76815 ('both GO'd'); the design is CTO ruling 76704 with mechanism amendment 76736(i) and the c02-token amendment 76887(a), and the rulings win on any divergence from the face. Face amended by 2.0.0_SA_COO @0b76eeaec2 -- that vintage is what this instance is scored against, read at the repository rather than taken from the message. Finder of the gap this TO closes: 0.7.0_AE_CloudOps~L 76693 (the 1-of-5 manifest census at campaign date 1).",
+  "controls": {
+    "mutant": {
+      "description": "SEVEN ARMS against the DEPLOYED helper _attestation_basis_from_mirror (byte-identical text in c00/c01/c02 -- one was exercised and the identity is asserted by the LF-normalised deploy compare, not by eye). Two CONTROLS-OF-THE-CONTROL first: a coherent declared record and a coherent attested record must PASS, so a mutant that merely broke the function cannot masquerade as a mutant that was caught. Then five mutants over the two fields that carry the claim: (1) declared-historical-pre-epoch carrying a REAL COUNT -- the self-count / back-filled-attestation shape banned by CTO 76377; (2) converter-attested carrying the -1 SENTINEL; (3) `attested` ABSENT ENTIRELY, which is the exact defect this TO's second commit fixed, seen from the consumer side; (4) `attested` as a STRING; (5) a THIRD attestation_basis value, testing that the vocabulary is closed. Plus the absent-record arm (6) with the whole dim_account directory removed. Separately, PS-5b carries its own two constructed negative controls (a third stage changing must be REJECTED; a non-ruled token on c02 must be REJECTED), and PS-1's AST predicate is control-of-the-controlled against a planted attestation_epoch() call it must FIND.",
+      "expected": "Both coherent records PASS and return the three fields. All five field mutants and the absent-record arm RAISE ValueError rather than proceeding. PS-5b's two constructed negatives are both rejected. PS-1's planted derivation call is found.",
+      "observed": "7 of 7 arms behaved. Coherent declared -> PASSED {basis: declared-historical-pre-epoch, short_read_tie_ran: false, attested: -1}; coherent attested -> PASSED {converter-attested, true, 7340}. Mutants 1-5 all RAISED ValueError naming the record path and the specific incoherence ('declared-historical-pre-epoch with attested=6713 ... a number here is a self-count or a back-filled attestation, both banned (CTO 76377)'; 'converter-attested with attested=-1 ... an attested date carries a real non-negative count, never the sentinel'; 'attested=None, which is not an integer'; 'attested=\\'7340\\', which is not an integer'; \"attestation_basis='probably-fine', outside the closed vocabulary\"). Mutant 6 (record absent) RAISED 'attestation basis unavailable: no a00 record at <path>'. PS-5b NEG CTRLs: third-stage-change REJECTED True, non-ruled-token REJECTED True. PS-1 NEG CTRL: planted attestation_epoch() FOUND True.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The full battery ran TWICE tonight against deployed bytes -- 22:45Z against build 9644276a3a + b5e05eee78, and 23:05Z against build eb99599a50 -- each time re-syncing all 78 objects under _code/ into a clean directory and running real subprocesses. This is NOT a pure same-input pair (the second run is the fixed build), so the stability claim is SCOPED to the fields that existed in both runs.",
+      "observed": "Every field common to both runs reproduced exactly: pre-epoch arm rc=0 / CHAIN OK / declared-historical-pre-epoch + short_read_tie_ran=False on all four tables in both; attested arm rc=0 / CHAIN OK / converter-attested + short_read_tie_ran=True on all four in both, with dim_account's attested=7340 identical across runs; PS-4's three refusals rc=1 with the same named text in both. Wall times differed (pre-epoch 177.7s then 178.4s; attested 226.7s then 163.4s) -- a machine-load property, not an output property, and stated rather than trimmed. What CHANGED between the runs is exactly what the second commit changed: `attested` went from 1 of 4 tables to 4 of 4.",
+      "status": "STABLE"
+    }
+  },
+  "acceptance": [
+    {
+      "criterion_id": "PS-1",
+      "criterion_verbatim": "PS-1 PROPAGATION IMPLEMENTED AS COPY: the three writers read the MIRROR's dim_account record and copy the three fields; a00's --local-out branch + the entrypoint's m token shown in the diff, AND c02's chain stage gains the same m token (CTO ruling 76887 on DS~U 76881, option (a)); NO derivation logic in any writer and NO --declared-historical argv widening (AST or diff evidence -- zero epoch/attestation-computation identifiers added to any writer); a00 dry-run shown writing the mirror record and NO S3 object (the pinned semantic, exercised).",
+      "method": "command",
+      "invocation": "python org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.P14-STAMP_PS1_COPY_NOT_DERIVE.py  (four AST arms over the DEPLOYED bundle staged from s3://opal-data-49financial/_code/), plus a boto3 LastModified census over all 16 gold objects for the two exercised dates with a positive control.",
+      "output_evidence": "A. THE TWO RULED TOKENS ARE ON THE DEPLOYED ENTRYPOINT, read by AST out of _stage_list's returned tuples, not by grep: 15 stages enumerated (denominator printed), 9 carry the mirror token m, and both ruled stages are among them -- a00_dim_account (ruling 76736(i)) and c02_twr_daily (ruling 76887). NEG CTRL: a03_dim_security, which has no mirror token, is correctly NOT reported as carrying one. B. ZERO DERIVATION IDENTIFIERS in c00/c01/c02 by AST walk over Name/Attribute/FunctionDef nodes: none in any of the three. THE SUBSTRING SCAN WOULD HAVE FAILED THIS ARM AND SAID SO LOUDLY -- 13 hits for 'epoch'/'converter' per writer, every one of them prose in the docstrings and comments that EXPLAIN the ban. 0.7.0_AE_CloudOps~L hit exactly this on the entrypoint tonight (their grep found the argparse help text that documents the prohibition and reported it as the violation); I used AST from the start because of their report, and printed the substring count beside the AST result so the difference is visible rather than asserted. CONTROL-OF-THE-CONTROL: the same predicate FINDS a planted attestation_epoch() call. C. NO ARGV WIDENING: exactly 1 of 15 stages carries the dh token and it is a00_dim_account. D. THE READ IS LOCAL, NOT S3: _attestation_basis_from_mirror in all three writers builds a filesystem Path to dimensions/dim_account/date=<D>/manifest.json and its body contains no boto3/s3/get_object/Bucket token -- option (ii) (writers reading a00's manifest from S3) was REJECTED by ruling 76704 for adding same-run read-after-write across a 533-date campaign. THE DRY-RUN SEMANTIC, EXERCISED: both PS-2 and PS-3 chains are dry-runs and both produced the a00 mirror record (the three writers could not have copied from it otherwise). NO S3 OBJECT: the newest LastModified across all 16 gold objects for the two exercised dates is 2026-08-27T20:33:00Z -- BEFORE the 22:45Z and 23:05Z chain runs -- so neither run wrote gold. POSITIVE CONTROL that the instrument can see a write at all: _code/c02_twr_engine.py reads 2026-08-27T23:03:27Z, my deploy minutes earlier, so the unchanged gold timestamps are an absence of writes and not a blind instrument.",
+      "denominator": "15 of 15 entrypoint stages enumerated; 3 of 3 writers AST-walked; 16 of 16 gold objects across 8 partitions (2 dates x 4 tables) timestamp-read; 4 of 4 arms PASS, 3 of 3 negative controls fired.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "PS-2",
+      "criterion_verbatim": "PS-2 PRE-EPOCH ARM EXERCISED: a pre-epoch date run end-to-end shows ALL FOUR manifests (dim_account + the three writers) carrying declared-historical-pre-epoch, short_read_tie_ran=False, attested=-1.",
+      "method": "command",
+      "invocation": "python org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.P14-STAMP_PS_DEPLOYED_BATTERY.py -- full chain, DEPLOYED bytes: python chain_49f_entrypoint.py --date 2026-03-24 --workdir <clean> --declared-historical, run inside a directory holding all 78 objects synced from s3://opal-data-49financial/_code/. No --upload anywhere.",
+      "output_evidence": "rc=0, CHAIN OK date=2026-03-24 wall=178.4s. ALL FOUR MANIFESTS, ALL THREE FIELDS: dimensions/dim_account, canonical/flow_ledger, canonical/nna_canonical, canonical/twr_daily each carry attestation_basis=declared-historical-pre-epoch, short_read_tie_ran=False, attested=-1 -- 4 of 4 on the sentinel, printed as its own denominator line. THIS CRITERION WAS SCORED PASS BY MY OWN HARNESS AN HOUR EARLIER WHEN IT WAS NOT TRUE. The first deployed-bytes run showed basis and tie_ran on all four but attested on dim_account ALONE, because the copy helper carried two of the three ruled fields and my harness asserted the third on dim_account only -- the implementation's shape, not the criterion's. A harness written against what I built instead of against what the face says scores its own blind spot as a PASS; both arms were reachable, both controls fired, the chain ran green, and none of it could see the missing field. Found by reading the criterion beside the emitted manifest. Fixed at the producer (@eb99599a50), redeployed, and re-run: the evidence above is the re-run. Each writer copies from the mirror record a00 wrote in the same run: attestation_basis_source on every manifest names the exact dim_account manifest.json path.",
+      "denominator": "4 of 4 manifests x 3 of 3 ruled fields on 1 pre-epoch date; 1 chain, 15 stages, rc read from the process.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "PS-3",
+      "criterion_verbatim": "PS-3 ATTESTED CONTROL ARM EXERCISED: an at/after-epoch date shows converter-attested end to end with the real attested count -- both arms reachable from different truths.",
+      "method": "command",
+      "invocation": "Same battery, second arm: python chain_49f_entrypoint.py --date 2026-08-24 --workdir <clean>  (NO flag), same deployed bundle, no --upload.",
+      "output_evidence": "rc=0, CHAIN OK date=2026-08-24 wall=163.4s. All four manifests carry converter-attested, short_read_tie_ran=True, attested=7340 -- 4 of 4 carrying the SAME real count, and 7,340 is the converter's own denominator for that date, not a recomputation (dim_account measured it; the writers copied it). THE TWO ARMS ARE REACHABLE FROM DIFFERENT TRUTHS, which is what makes this a control rather than a repetition: 2026-03-24 is pre-epoch and refuses without the flag, 2026-08-24 is post-epoch and refuses the flag's premise; the same code produces opposite values on the two dates with only the date and the flag varied. The arm also proves the -1 sentinel is not a hardcoded constant leaking through: the same field renders -1 on one date and 7340 on the other.",
+      "denominator": "4 of 4 manifests x 3 of 3 ruled fields on 1 attested date; attested=7340 identical across all four tables.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "PS-4",
+      "criterion_verbatim": "PS-4 REFUSAL ARM EXERCISED: an absent/removed a00 record for the date makes each writer REFUSE loudly, naming the missing record -- run it, do not assert it.",
+      "method": "command",
+      "invocation": "Same battery, third arm: the dimensions/dim_account tree is REMOVED from the attested run's mirror, then each writer is invoked directly as a real subprocess against that mirror -- c00_flow_ledger.py / c01_nna_canonical.py / c02_twr_engine.py --date 2026-08-24 --dry-run --local-out <mirror> + each script's own upstream-local flags. Deployed bytes throughout.",
+      "output_evidence": "3 of 3 writers rc=1 AND naming the record: the predicate is (rc != 0) AND ('attestation basis unavailable: no a00 record' in output), not rc alone -- an rc-only check accepts any unrelated crash as a preserved guard, which is how a broken build passes a refusal arm. THE HARNESS ITSELF MIS-FIRED TWICE ON THIS ARM EARLIER IN THE TO AND BOTH MIS-FIRES WERE DISCARDED BEFORE TRUST: once rc=1 for the WRONG REASON (a missing flow_ledger, a different subject entirely), and once rc=0 because c01's dry-run returns before its emit block -- fixed by passing --local-out so the emit path is actually reached. The arm as it now stands exercises the refusal on the path the campaign takes.",
+      "denominator": "3 of 3 writers, 1 removed record, 2 conditions checked per writer (rc and refusal text).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "PS-5",
+      "criterion_verbatim": "PS-5 DEPLOY under the converged conditions (the FIVE touched files alone -- a00_runner, chain_49f_entrypoint, and the three writers; arms PS-2/3/4 re-fired on DEPLOYED bytes fetched from S3, PLUS the flagless-entrypoint invariance arm from the DH-6 precedent with the EXPECTED DELTA SET widened to exactly the TWO ruled stage-token changes (a00's per ruling 76736(i), c02's m per ruling 76887) -- the arm still proves nothing ELSE changed, re-run against the redeployed entrypoint (76887 mechanic 1); LF-normalised verify with basis stated).",
+      "method": "diff",
+      "invocation": ".tools/safe-deploy.sh on each landing (three separate deploys: five files @9644276a3a, then the entrypoint alone @b5e05eee78 per 76887 mechanic 2, then the three writers @eb99599a50), each followed by an INDEPENDENT compare of the deployed bytes against the COMMITTED build input, LF-normalised, with the parent commit as a negative control. PS-5b is the battery's fourth arm: the real _stage_list from the DEPLOYED entrypoint compared against the same function recovered by CONTENT from the pre-STAMP vintage 43a2b1d872.",
+      "output_evidence": "CONTENT HALF, 5 of 5 files: a00_runner.py sha256(LF16) 3a21ca92d14785ac == @9644276a3a; chain_49f_entrypoint.py fc829256f45187bf == @b5e05eee78; c00_flow_ledger.py dca0665181c02de0, c01_nna_canonical.py 4b125c88b3b1046f, c02_twr_engine.py 9d584ce34f0d11a8, all == @eb99599a50. EVERY parent-commit control DIFFERS, so the compare discriminates vintage rather than merely agreeing. NORMALISATION BASIS STATED, and it is not ceremony here: c02_twr_engine.py is the CRLF case -- the S3 object contains CRLF, the git blob does not, so the RAW sha256 compare returns FALSE DIFFERENCE (raw equal = False) while the LF-normalised compare MATCHES. The other four are raw-equal, and I say so rather than leaving 'the trap did not fire' implicit. This is a DIFFERENT SUBJECT from safe-deploy's own comp-pipescript check (working tree vs S3), which is why it is run beside it and not instead of it. ARMS RE-FIRED ON DEPLOYED BYTES: PS-2, PS-3, PS-4 above were all run out of a clean directory holding all 78 objects synced from _code/ -- the bundle the SSM document actually executes, not a hand-picked subset (my first attempt hand-picked and died at a05, which needs ref/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_*.json). PS-5b INVARIANCE: 15 stages compared, exactly 2 changed, and each changed by exactly ['--local-out', '<mirror>'] -- a00_dim_account and c02_twr_daily, the two ruled tokens and nothing else. TWO CONSTRUCTED NEGATIVE CONTROLS BOTH REJECT: planting the mirror token on a third stage (a03) fails the predicate, and planting a NON-ruled token (--declared-historical) on c02 fails it. THE FIRST RUN OF THIS ARM RETURNED FAIL AND THE DEFECT WAS MY PREDICATE, NOT THE CODE: the added-token test was list MEMBERSHIP, and c02's argv already contained the mirror PATH as the value of --canonical-local, so the added path was deduped away and the delta printed as ['--local-out'] alone. A membership test cannot see a second copy of a token already present, and it failed in the direction that UNDER-REPORTS the change. Replaced with a multiset (Counter) diff. I record the false FAIL because a corrected verdict whose first arm is off the record cannot be audited.",
+      "denominator": "5 of 5 deployed objects content-verified with 5 of 5 parent controls differing; 15 of 15 stages compared in the invariance arm; 2 of 2 constructed negatives rejected; 3 deploys, all safe-deploy rc=0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "PS-6",
+      "criterion_verbatim": "PS-6 proof instance VALID rc=0 positional: ids PS-1..PS-6, TRUE rc bare, validator invocation + rc recorded IN the instance.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.P14-STAMP_PROOF_OF_SPEC.json PS-1,PS-2,PS-3,PS-4,PS-5,PS-6   (positional coverage form), and the same command with no positional argument (bare form).",
+      "output_evidence": "BOTH FORMS RUN, both rc=0, and the rcs are read from the process rather than from the tool's prose. POSITIONAL: 'proof-of-spec-check | structural=jsonschema | acceptance rows=6 | violations=0' then 'VALID', shell rc=0 -- the positional form is the one that checks COVERAGE (6 of 6 expected ids present, none missing, none extra), which the bare form explicitly cannot do. BARE: same VALID / rc=0, preceded by the tool's own 'NOTE: no expected_criterion_ids given -- COVERAGE UNCHECKED (row quality only; an omitted criterion is invisible to this run)' -- quoted because it is the reason the bare rc alone would not satisfy this criterion. ALIGNMENT FRAME printed on both: governing TO resolved by declared id across 2144 scanned, dep_stage=EXECUTING, and ANNOUNCE (not ENFORCE) because the governing TO carries no <decomp_ref> -- pre-pipeline work completing under its own spec per CTO ruling 66492, so decomp_ref is correctly absent rather than omitted. TWO DEFECTS IN THIS INSTANCE WERE CAUGHT BEFORE THE VALIDATOR SAW THEM, and both are the same class the validator would have rejected: an INVENTED ROOT KEY ('compiler_tools_note_placeholder') that additionalProperties:false would have refused -- the fourth invented-slot catch in this TO family -- removed before the first run; and every enum value taken from the schema's closed vocabulary rather than written to taste. Re-validated after the PS-6 evidence edit: both forms VALID rc=0 again, so this row describes the instance as filed and not an earlier draft of it.",
+      "denominator": "6 of 6 expected criterion ids present, 6 of 6 rows carrying every required field; 2 of 2 validator forms run.",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/a00_runner.py -> s3://opal-data-49financial/_code/a00_runner.py",
+      "kind": "script",
+      "commit_or_etag": "commit 9644276a3a / deployed LF-normalised sha256(16) 3a21ca92d14785ac",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-deploy gate PASS, then verified against a DIFFERENT subject than the gate's own check: deployed bytes vs the COMMITTED build input, LF-normalised, parent control DIFFERS. Untouched by the two later commits, and re-confirmed at 23:1xZ against @9644276a3a so this row is not inherited from the earlier deploy's report.",
+      "artifact_covered_by": [
+        "PS-1",
+        "PS-2",
+        "PS-3",
+        "PS-5"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py -> s3://opal-data-49financial/_code/chain_49f_entrypoint.py",
+      "kind": "script",
+      "commit_or_etag": "commit b5e05eee78 / deployed LF-normalised sha256(16) fc829256f45187bf",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Deployed ALONE per 76887 mechanic 2 (the ruling's own deploy condition). safe-deploy gate PASS rc=0, S3 LastModified 2026-08-27T22:45:46Z, then the independent LF-normalised compare against @b5e05eee78 with the parent control differing (6d622a6020dd859d).",
+      "artifact_covered_by": [
+        "PS-1",
+        "PS-2",
+        "PS-3",
+        "PS-5"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/c00_flow_ledger.py -> s3://opal-data-49financial/_code/c00_flow_ledger.py",
+      "kind": "script",
+      "commit_or_etag": "commit eb99599a50 / deployed LF-normalised sha256(16) dca0665181c02de0",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-deploy gate PASS rc=0 on all three writers; independent LF-normalised compare against @eb99599a50 MATCHES with the parent control differing. Raw-equal (no CRLF on either side) -- stated because 'the trap did not fire' means nothing unless you say you looked.",
+      "artifact_covered_by": [
+        "PS-1",
+        "PS-2",
+        "PS-3",
+        "PS-4",
+        "PS-5"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/c01_nna_canonical.py -> s3://opal-data-49financial/_code/c01_nna_canonical.py",
+      "kind": "script",
+      "commit_or_etag": "commit eb99599a50 / deployed LF-normalised sha256(16) 4b125c88b3b1046f",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Same deploy and same independent compare; parent control DIFFERS. This is the copy whose deployed helper the seven-arm mutant battery was run against.",
+      "artifact_covered_by": [
+        "PS-1",
+        "PS-2",
+        "PS-3",
+        "PS-4",
+        "PS-5"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/c02_twr_engine.py -> s3://opal-data-49financial/_code/c02_twr_engine.py",
+      "kind": "script",
+      "commit_or_etag": "commit eb99599a50 / deployed LF-normalised sha256(16) 9d584ce34f0d11a8",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Same deploy. THE CRLF CASE: the S3 object carries CRLF and the git blob does not, so the RAW compare returns a false difference and the LF-normalised compare MATCHES. The normalisation is the reason this row reads DEPLOYED-VERIFIED instead of a spurious mismatch.",
+      "artifact_covered_by": [
+        "PS-1",
+        "PS-2",
+        "PS-3",
+        "PS-4",
+        "PS-5"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.P14-STAMP_PS_DEPLOYED_BATTERY.py",
+      "kind": "test",
+      "commit_or_etag": "commit eb99599a50",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "An acceptance harness, not a pipeline script -- it runs from the repo against the deployed bundle and is deliberately not part of the deployed _code/ bundle.",
+      "artifact_covered_by": [
+        "PS-2",
+        "PS-3",
+        "PS-4",
+        "PS-5"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.P14-STAMP_PS1_COPY_NOT_DERIVE.py",
+      "kind": "test",
+      "commit_or_etag": "commit eb99599a50",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Acceptance harness for PS-1's four arms; same reason.",
+      "artifact_covered_by": [
+        "PS-1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.P14-STAMP_PROOF_OF_SPEC.json",
+      "kind": "doc",
+      "commit_or_etag": "this instance",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The proof instance itself; validated by .tools/proof-of-spec-check.py in both forms before commit, rc recorded in PS-6.",
+      "artifact_covered_by": [
+        "PS-6"
+      ]
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-pipescript deployed",
+      "invocation": "run inside safe-deploy for all four deployed files across three deploys",
+      "result": "VERIFY OK on every file, including c02_twr_engine.py -- notable because the known CRLF/LF hazard makes a working-tree-vs-S3 compare report STALE forever on a CRLF file, and it did not here. NOT TREATED AS THE VERDICT: an independent LF-normalised compare against the COMMITTED BUILD INPUT was run beside it with parent-commit negative controls, because the tool's subject (working tree vs S3) is a different claim from build-input identity."
+    },
+    {
+      "tool": "commit-gate / safe-commit / safe-deploy",
+      "invocation": "the standard Rule 13/14/14a lane on both commits and both deploys",
+      "result": "PASS throughout, 1 file then 5 files. Message files authored with the Write tool, NOT python -c: a python -c heredoc IS a shell-parsed region, and earlier tonight a backtick in a commit message was executed away by it -- satisfying rule 14a in letter with a mechanism that violates it in substance. safe-commit's [msg-verify] MATCH len= line confirmed both messages landed byte-intact (2022 and 3222 bytes)."
+    },
+    {
+      "tool": "comp-pulse diff (pre-commit risk reflex)",
+      "invocation": "fired automatically inside safe-commit on chain_49f_entrypoint.py",
+      "result": "[HOLD] with 1 recorded claim against the file, citing org/critical_paths/change_management/20260821T1520Z_advi-49f-canonical-0819-production-backfill.md:19 -- the ledger entry describing the S3-sync-then-run deploy path. Read: it names the invocation form this TO's battery deliberately reproduces (sync the whole _code/ prefix, run THAT copy), which is the reflex pointing at the right thing rather than a blocker."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "dim_asset_classification's NO-MANIFEST gap (the fifth writer in 0.7.0_AE_CloudOps~L's original 1-of-5 census).",
+      "reason": "Fenced by the face's own scope clause s.5 and banked separately at the round by 2.0.0_SA_COO. A fourth writer's plumbing does not ride a campaign-blocking change. The census that opened this thread therefore closes 4-of-4 on the tables the CONSUMERS read, with the fifth fenced-not-swept -- and that distinction is stated rather than allowed to read as 5-of-5."
+    },
+    {
+      "item": "Any re-derivation of the basis at read time (option (c)), and any writer-side S3 read of a00's manifest (option (ii)).",
+      "reason": "Both banned by ruling 76704 -- (c) because the attestation epoch ADVANCES, so a date driven declared-historical today can sit at-or-after a later epoch at read time and a reconstruction misclassifies exactly the dates the stamp exists to mark; (ii) because its breakage lands on seats other than the one it serves and it adds same-run read-after-write on a just-written prefix across 533 dates. PS-1 arms B and D are the evidence that neither is present."
+    },
+    {
+      "item": "Row-level propagation of the three fields.",
+      "reason": "Face s.3: manifest grain suffices, because the consumers state their split beside denominators and the manifest is where denominators live. Row-level stays a00's alone."
+    },
+    {
+      "item": "Any --upload run of the chain.",
+      "reason": "Every arm here is a dry-run with zero S3 writes, verified by the LastModified census in PS-1. The scheduled/campaign fire remains the acceptance for production behaviour; this TO's arms prove the code, not the campaign."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / INERT -- MY OWN BUILD SHIPPED 2 OF THE 3 RULED FIELDS AND MY OWN ARMS SCORED IT 4-of-4. The ruled design s.1 names attestation_basis + short_read_tie_ran + `attested` with its -1 sentinel; the copy helper carried the first two. It survived a full deployed-bytes battery because the harness asserted `attested` on dim_account ONLY and the other two fields on all four tables -- the implementation's shape, not the criterion's. Everything a control is supposed to do, worked: both arms reachable from different truths, both chains green on real deployed bytes, refusal arm firing. None of it could see a field that was never written. The transferable half: A HARNESS WRITTEN AGAINST WHAT I BUILT SCORES ITS OWN BLIND SPOT AS A PASS -- the arm has to be transcribed from the criterion, field by field, before the implementation exists in my head. Caught by reading PS-2's sentence beside the emitted manifest, not by any instrument. Fixed @eb99599a50, redeployed, re-run 4-of-4 on all three fields.",
+    "OBSERVATION / INERT -- PS-5b RETURNED A FALSE FAIL AND THE DEFECT WAS MY PREDICATE. The added-token test was list MEMBERSHIP (`[x for x in new if x not in old]`), and c02's argv already contained the mirror PATH as the value of --canonical-local, so the added path was deduped away and the delta printed as ['--local-out'] alone -- failing in the direction that UNDER-REPORTS the change. A membership test cannot see a second copy of a token already present. Replaced with a multiset diff. Recorded because a corrected verdict whose first arm is off the record cannot be audited -- the same discipline 0.7.0_AE_CloudOps~L applied to their own false FAIL on the entrypoint tonight.",
+    "OBSERVATION / INERT -- THE SUBSTRING-SCAN TRAP, INHERITED RATHER THAN RE-DISCOVERED. PS-1's no-derivation arm would have returned 13 hits per writer for 'epoch'/'converter', every one of them the comments and docstrings that EXPLAIN the ban. 0.7.0_AE_CloudOps~L hit exactly this on the entrypoint an hour earlier and reported their own false FAIL; I read it and wrote the arm as an AST walk from the start, printing the substring count beside the AST result so the gap between the two instruments is visible in the output rather than asserted in prose. A file that documents its own prohibition reads as violating it under any text-local instrument.",
+    "OBSERVATION / INERT -- THE COVERAGE GAP CLOSED LIVE INSTEAD OF AT A CUT. c02 was the only c-stage without the mirror token, so its emit block (gated `if args.local_out or args.upload`) was skipped on every dry-run and the sanctioned QA form was structurally 3-of-4 -- not a failing criterion, an UNDEMONSTRABLE one. I proposed the one-token fix and did NOT take it, because PS-1 named a00's token specifically and a second entrypoint token is a face question; CTO ruled (a) at 76887 and COO amended the face @0b76eeaec2. Worth keeping for the round: the criterion names what the CONSUMERS need demonstrated, and the invocation rises to it -- amending the criterion to match today's invocation would have frozen the blind spot into the standard."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/logs/2026-08-27/ -- P14-STAMP commits: 9644276a3a (the five-file propagation build), b5e05eee78 (c02's mirror token per ruling 76887(a)), eb99599a50 (the third ruled field `attested` + the two harness corrections + this instance's harnesses). Deploys verified against build inputs at each landing."
+}
