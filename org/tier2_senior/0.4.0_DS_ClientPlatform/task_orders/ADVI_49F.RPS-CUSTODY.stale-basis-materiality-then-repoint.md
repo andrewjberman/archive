@@ -85,3 +85,7 @@ Unstarted; the issuing state (staged, GO paired, materiality-first riders) remai
 surface. Re-seats to a DS-class producer-owner seat on Andrew's word (08-27 seat list); if the legacy prefix
 is still the live basis, the staleness has only grown since the 08-19 measurement (27d then; re-read
 at RIDER 1, not assumed here) — which raises RIDER 1's urgency, not its design.
+
+**D2 LOCK-IN RIDER (CVO 76086, additive) on RPS-5:** validated BY RC (the TRUE-rc clause above
+already binds), and the validator invocation + its TRUE rc recorded as evidence IN the instance.
+GO pairs only AFTER `3.0.0_SA_CVO` cert step-zero; the re-seat is the S6 word @1d761ded1f.

@@ -96,6 +96,13 @@ superseded-plan-in-a-live-artifact class DS~U corrected in their own record @69b
   @e8ccd8eb77. The backfill's own writes take the named ad-hoc/backfill boundary (74218); the
   verification fire does NOT.
 
-**SEATING:** `<issued_to>` re-points at re-seat to the P1 DS seat Andrew instantiates (the DS~U
-remediation-author context per the 08-27 seat list); DS~A's lane context is closed. Status remains
-`staged`; GO on re-seat.
+**SEATING — EXECUTED 2026-08-27 ~15:2xZ:** re-pointed to **`0.4.0_DS_ClientPlatform~U`** per
+Andrew's serialed seat word @1d761ded1f (the original `<issued_to>` above is superseded by this
+block; the file stays in the ~A folder as the historical face — `issued_to` here is the truth, file
+location never is). Gated on `ADVI_49F.c01-SIGNFIELD` (the new signed field is this TO's input;
+the c00-FIX gate above is SATISFIED — complete @89204884d7). Status `staged`; GO pairs AFTER
+3.0.0_SA_CVO cert step-zero + spawn confirmation (D2 lock-in, CVO 76086).
+
+**D2 LOCK-IN RIDER (CVO 76086 point 1) on CF-5:** the proof instance is validated BY RC (never an
+output string), and the validator invocation + its TRUE rc are recorded as evidence IN the
+instance.

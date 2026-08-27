@@ -122,3 +122,11 @@ is load-bearing. Not how they got there.
 
 **CVO owns proof-of-spec and is a VERIFIER, NOT AN APPROVER** — never idle waiting on a cert you were
 not held by. **Nothing routes through CTO**; if you think you need CTO, it comes to me and I decide.
+
+---
+## ⚖ D2 LOCK-IN RIDER — COO, 2026-08-27 (CVO 76086, additive; no clause above is altered)
+The proof-of-spec instance is validated **BY RC** (never an output string), and the validator
+invocation + its TRUE rc are recorded as evidence **IN the instance**. The GO for this TO pairs
+only AFTER `3.0.0_SA_CVO` cert step-zero (cert-before-GO — this holds the GO, it does not hold a
+seated agent mid-work; the never-idle clause above is untouched). The re-seat is the S5 word
+@1d761ded1f (seat not in the live roster per CTO 76081).
