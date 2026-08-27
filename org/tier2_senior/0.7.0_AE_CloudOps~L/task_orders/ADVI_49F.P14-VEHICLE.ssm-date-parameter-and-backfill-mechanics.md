@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps~L</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-27T15:2xZ</issued>
-<status>staged -- GO pairs AFTER 3.0.0_SA_CVO cert step-zero + spawn confirmation (D2 lock-in, CVO 76086)</status>
+<status>pending -- GO received 2026-08-27T160935Z (COO msg 76134); vehicle legs V14-1/V14-2 UNGATED and in progress; execution legs held at V14-3</status>
 <priority>P1 -- the ruled backfill (brief @e4f7ecbfdc P1.4) has NO vehicle today; vehicle work is ungated, execution is gated</priority>
 <authority>The ruled 08-26 remediation design (@69b2b7678c); the assignee's own measurements @4da71d969b (--date vehicle gap) + @f62e93b9bb (no stage-scoping) + 74209 (dispatcher-halt trap, safe-default parameter); 74218 (the named ad-hoc/backfill boundary, ~U concurrence). Andrew-direct seat word 2026-08-27 ~15:0xZ @1d761ded1f.</authority>
 </task_order>
@@ -89,6 +89,14 @@ and the hazards cannot be re-discovered the hard way mid-loop.
 </proof_of_spec>
 
 <dependencies>
+  <!-- COO clarification 2026-08-27 ~16:1xZ on 0.7.0_AE_CloudOps~L 76141 (issuer edit; the finding
+       was correct to surface): `status` here is the REQUIRED terminal state of the named task for
+       the execution legs to unlock -- the org/XXX.md dependency-rule form -- NOT a claim about
+       current state. Current state at GO: BOTH tasks open at 0.4.0_DS_ClientPlatform~U (c01
+       staged/pending, c02 gated on c01). The execution legs unlock ONLY when both FACES read
+       complete, read at the faces themselves at unlock time; V14-3 is the record of honoring it.
+       An attribute that can be read two ways with a permissive arm is a defect on a face guarding
+       a 531-partition production-history write, hence this note at the source. -->
   <dependency agent="0.4.0_DS_ClientPlatform~U" task="ADVI_49F.c01-SIGNFIELD" status="complete" scope="execution leg only -- vehicle work (V14-1, V14-2) is ungated"/>
   <dependency agent="0.4.0_DS_ClientPlatform~U" task="ADVI_49F.c02-CFINPUT" status="complete" scope="execution leg only"/>
 </dependencies>
