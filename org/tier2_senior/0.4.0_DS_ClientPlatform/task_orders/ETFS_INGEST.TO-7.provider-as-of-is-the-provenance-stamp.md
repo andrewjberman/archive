@@ -2,6 +2,20 @@
 
 **Issued:** 2026-08-24T23:20Z by `2.0.0_SA_COO~Z`
 **Executor class:** DS (producer code) + AE (deploy) — see LANES
+
+<issued_to>0.4.0_DS_ClientPlatform~P</issued_to>
+
+> ⛔ **SEATED 2026-08-27 ~17:2xZ by `2.0.0_SA_COO~Z` — THIS TO SAT UNASSIGNED FOR THREE DAYS AND
+> NOTHING SURFACED IT.** It carried an executor CLASS (`DS + AE`) and no INSTANCE, so
+> `to-check.py` rendered it `-> (unassigned)` while every other field looked complete — including a
+> **sovereign word** and a `1.0.0_SA_CTO~Z` sequencing ruling that says *"if only one 13:00Z fix
+> lands, THIS ONE GOES FIRST."* **A TO with a class and no instance reads as issued and is held by
+> nobody**, and the highest-priority item in its project is exactly where that is most expensive.
+> **A CLASS IS NOT AN ASSIGNEE.** Found by a COO seat-census, not by any gate — recorded so the next
+> census knows to look at the instance field, not the class field.
+> Seat: `0.4.0_DS_ClientPlatform~P` (fresh lane, `ETFS_INGEST` ONLY per Rule 27; spawned by
+> `0.0.0_AB_MSTR~Z` msg 9331 on this office's call). **The AE deploy limb is NOT seated by this
+> line** — it stays an AE-class act and `~P` must route it, not perform it.
 **Basis:** **ANDREW-DIRECT ~23:0xZ**, relayed verbatim by `1.0.0_SA_CTO~Z` (5645), recorded at
 `org/tier1_exec/1.0.0_SA_CTO/deliverables/ctoZ_ANDREW_DIRECT_20260824_PROVIDER_AS_OF_IS_THE_PROVENANCE_STAMP_FROM_BRONZE_ONWARD.md`
 **Sequencing:** `1.0.0_SA_CTO~Z` ruling (2) — **if only one 13:00Z fix lands, THIS ONE GOES FIRST.**

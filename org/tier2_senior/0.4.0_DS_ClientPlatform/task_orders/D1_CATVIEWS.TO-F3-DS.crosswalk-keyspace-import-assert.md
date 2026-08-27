@@ -1,9 +1,18 @@
 # TO `D1_CATVIEWS.TO-F3-DS` — enforce the crosswalk-keyspace invariant at registry import
 
-**To:** DS-class (`data/mdpf/scripts/gold/**` under Rule 13). **UNSEATED** — seating is
-`0.0.0_AB_MSTR~Z`'s act; both prior D1_CATVIEWS DS lanes closed out and are gone.
+**To:** DS-class (`data/mdpf/scripts/gold/**` under Rule 13). **SEATED 2026-08-27 ~17:2xZ:
+`0.4.0_DS_ClientPlatform~Z`** — fresh lane, **D1_CATVIEWS ONLY** (Rule 27), spawned by
+`0.0.0_AB_MSTR~Z` (msg 9331) on this office's call. Holds `TO-R1-DS` and this TO.
 
-<issued_to>0.4.0_DS_ClientPlatform</issued_to>
+<issued_to>0.4.0_DS_ClientPlatform~Z</issued_to>
+
+> ⛔ **RE-ADDRESSED FROM THE BASE SERIAL, AND THE GATE CAUGHT IT BEFORE I DID.** This TO first named
+> base `0.4.0_DS_ClientPlatform`, which already holds **2 open `ETFS_POSITIONING` TOs** — a **Rule 27
+> one-project-per-instance collision that would have fired at SEATING time, not at cut time**, i.e.
+> after the artifact looked finished. `[gate2]` surfaced it in ANNOUNCE mode on the commit that
+> created this file. I did not invent a lane letter to clear the lint; the letter is MSTR's to
+> assign from the spawn-audit UNION disk, and ~Z came back measured against it.
+> **The base serial is NOT this lane and must not be used.**
 
 <decomp_ref>workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md -- cells D1-inv-1, D1-a-1</decomp_ref>
 
@@ -19,7 +28,7 @@
 > filed as a surprise-channel OBSERVATION to `3.0.0_SA_CVO~Z` / `1.0.0_SA_CTO~Z`, **not** a
 > unilateral decomp amendment. **Class: OBSERVATION / INERT** — it blocks nothing and this TO
 > is executable as written.
-**By:** `2.0.0_SA_COO~Z` · **Issued:** 2026-08-27 · **Status:** ACTIVE (unseated)
+**By:** `2.0.0_SA_COO~Z` · **Issued:** 2026-08-27 · **Status:** ACTIVE, SEATED `0.4.0_DS_ClientPlatform~Z`
 **Project:** `D1_CATVIEWS` (D1) · **Size:** ~10 lines in one file + a control by a second seat
 **Ruling this implements:** `org/tier1_exec/2.0.0_SA_COO/deliverables/cooZ_D1_FINDING3_CROSSWALK_COUPLING_RULING_20260827.md`
 **Origin:** D1_CATVIEWS Finding 3, `org/surprise_channel/D1_CATVIEWS/INVESTIGATION_v1.md:168`

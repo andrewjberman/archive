@@ -3,7 +3,28 @@
 <task_order id="ETFS_INGEST.TO-6" project="ETFS_INGEST">
 <decomp_ref>workflows/atom_decomposition/runs/etfs-ingest/20260824T2010Z/DECOMP.md @fcdf042972 (CERTIFIED) — the DATA half of `INGEST-T5-1` (the finer field), and `INGEST-T3-6` (the gold row's Rule-24 act, a SECOND schema act at a DIFFERENT GRAIN from T2's).</decomp_ref>
 <certification>✅ CERTIFIED, `3.0.0_SA_CVO~Z` @422bdb431b, bound to `@fcdf042972`. Reduced-cohort; premise-oracle verification a SAMPLE not a census.</certification>
-<issued_to>DS-class. Seated: `0.4.0_DS_ClientPlatform~Z` — **who requested this TO rather than starting on a sovereign word that named their cell. That was right.**</issued_to>
+<issued_to>0.4.0_DS_ClientPlatform~P</issued_to>
+
+> ⛔ **RE-ADDRESSED `~Z` -> `~P` 2026-08-27 ~17:2xZ by `2.0.0_SA_COO~Z`. THE LANE LETTER WAS REUSED
+> ACROSS PROJECTS AND THAT CREATED A LATENT RULE 27 COLLISION.** This TO was seated to
+> `0.4.0_DS_ClientPlatform~Z` on 2026-08-24 as an **ETFS_INGEST** lane. On 2026-08-27 `~Z` was
+> respawned as a **D1_CATVIEWS** lane (`0.0.0_AB_MSTR~Z` msg 9331, which scopes `~Z` to *"D1_CATVIEWS
+> ONLY"* and assigns **TO-6 + TO-7 to `~P`**). Until this edit, `~Z` held **two projects** —
+> D1_CATVIEWS (TO-R1-DS, TO-F3-DS) and ETFS_INGEST (this TO). MSTR's assignment and this TO's face
+> disagreed; **the face is now corrected to MSTR's stated assignment. `~P` is the ETFS_INGEST lane.**
+>
+> ⛔ **THE MECHANISM, because it will recur: A LANE LETTER FREE ON *PROCESS* TRUTH CAN STILL BE
+> ENCUMBERED BY AN *OPEN TO*.** The spawn checked liveness (no running process carrying `~Z`) and
+> that check was correct and insufficient — **a dead seat's open TOs do not die with it.** Nothing
+> refuses at spawn time: `[gate2]`'s seating-frame indexes exactly this ("open-TO holdings across
+> seat instances") but it runs on **commit**, so it can only catch the collision when a TO is
+> *written*, never when a lane is *spawned*. **Two different clocks, and the spawn is the earlier
+> one.** Surfaced to `0.0.0_AB_MSTR~Z`; not a criticism of the spawn, which acted on the truth
+> available to it.
+>
+> **THE ORIGINAL SEATING NOTE IS PRESERVED BECAUSE IT RECORDS SOMETHING WORTH KEEPING**, and it is
+> about the *former* occupant, not `~P`: the `~Z` seat *"requested this TO rather than starting on a
+> sovereign word that named their cell. That was right."* `~P` inherits the TO, not that credit.
 <executor_class>DS-class</executor_class>
 <seating_trigger>SEATED. ⛔ **BUT THE TOUCH IS SEQUENCED BY `1.0.0_SA_CTO~Z`, NOT BY ME — see below. DO NOT EDIT `etf_daily_pull.py` UNTIL THEY SEQUENCE IT.**</seating_trigger>
 <placement>**SITE Z** (Rule 26). `data/**` and the etfs-pipeline Lambda are both yours to author (`.owned-paths.yaml:1661`, `POD4_OR_AE`); **AE deploys.**</placement>
