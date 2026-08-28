@@ -46,6 +46,7 @@ OUT = os.path.join(
 # The fixture keys the drill actually reaches, in the order the harness clicks them.
 REL_KEY = 'FIXTURE_HH_C'
 ACCT_KEYS = ['FIXTURE_ACCT_1', 'FIXTURE_ACCT_2']
+ADVISOR_KEY = 'Fixture Advisor'
 
 ENVELOPE_FIELDS = ['contract_version', 'as_of', 'family', 'level', 'si_label',
                    'periods', 'declared_absent_columns', 'window']
@@ -55,6 +56,30 @@ def load(level):
     p = os.path.join(EMISSIONS, 'perfrp_performance_%s.json' % level)
     with open(p, encoding='utf-8') as fh:
         return p, json.load(fh)
+
+
+def load_book():
+    p = os.path.join(EMISSIONS, 'perfrp_book_advisor.json')
+    with open(p, encoding='utf-8') as fh:
+        return p, json.load(fh)
+
+
+def pick_book_row(entries):
+    """The advisor row that exercises the MOST tile states, not the first row.
+
+    All four tiles carry a headline on nearly every advisor, so 'first row' would render
+    four COMPUTED tiles and never reach the not-computed branch -- the same one-branch
+    trap the performance selection avoids. Rank by DISTINCT figure_state count."""
+    best, best_n = None, -1
+    for e in entries:
+        tiles = e.get('tiles') or {}
+        if not any(t.get('headline') for t in tiles.values()):
+            continue
+        states = {f.get('figure_state')
+                  for t in tiles.values() for f in t.values() if isinstance(f, dict)}
+        if len(states) > best_n:
+            best, best_n = e, len(states)
+    return best
 
 
 def pick_by_state(entries, wanted_states):
@@ -142,6 +167,33 @@ def main():
     merged['perfrp/perfrp_performance_account.json'] = build_leaf(
         'account', acct_bindings, acct_path, acct)
 
+    # ---- PRF-b-6, the advisor book leaf (four ruled KPI tiles + the client table) ----
+    # Its as_of is 2026-08-27 / QTD against b-2's 2024-11-07 / SI. THAT DIFFERENCE IS
+    # CARRIED THROUGH DELIBERATELY AND NOT RECONCILED: the two leaves are floored by
+    # different upstreams, and a fixture that quietly aligned them would hide exactly the
+    # cross-leaf as-of mismatch a consumer needs to see.
+    book_path, book = load_book()
+    advisor_row = pick_book_row(book['entries'])
+    if advisor_row is None:
+        sys.exit('ABORT: no advisor row with a headline tile in %s' % book_path)
+    book_env = {k: book[k] for k in ENVELOPE_FIELDS if k in book}
+    bound = dict(advisor_row)
+    bound['_source_key'] = advisor_row['key']
+    bound['key'] = ADVISOR_KEY
+    book_env['entries'] = [bound]
+    book_env['_fixture_provenance'] = {
+        'source_file': os.path.relpath(book_path, ROOT).replace('\\', '/'),
+        'real': 'every tile figure, its figure_state and reason, and the client_table rows',
+        'fixture': 'the advisor join key only; the row names its _source_key',
+        'as_of_note': (
+            'as_of %s / period %s -- DIFFERENT from the performance leaves by '
+            'construction, not an error to align' % (
+                book.get('as_of'), (book.get('window') or {}).get('period'))),
+        'not_a_data_oracle': 'render instrument only.',
+    }
+    merged['perfrp/perfrp_book_advisor.json'] = book_env
+    globals()['_BOOK_REPORT'] = (book_path, advisor_row, book)
+
     with open(OUT, 'w', encoding='utf-8', newline='\n') as fh:
         json.dump(merged, fh, indent=2)
         fh.write('\n')
@@ -161,10 +213,27 @@ def main():
     if acct_missing:
         print('   STATES NOT PRESENT in the account emission: %s' % ', '.join(acct_missing))
     print()
+    bp, brow, bleaf = globals()['_BOOK_REPORT']
+    states = {}
+    for tname, t in (brow.get('tiles') or {}).items():
+        for fname, f in t.items():
+            if isinstance(f, dict):
+                states.setdefault(f.get('figure_state'), 0)
+                states[f.get('figure_state')] += 1
+    print('BOOK leaf %s -- advisors %d, as_of %s, period %s' % (
+        bp.split(os.sep)[-1], len(bleaf['entries']), bleaf.get('as_of'),
+        (bleaf.get('window') or {}).get('period')))
+    print('   %-16s <- %-24s tiles=%d client_table rows=%d' % (
+        ADVISOR_KEY, brow['key'], len(brow.get('tiles') or {}),
+        len(brow.get('client_table') or [])))
+    print('   tile figure_state spread (the reason this row was picked): %s' % (
+        ', '.join('%s=%d' % kv for kv in sorted(states.items()))))
+    print()
     print('ROUTE KEYS ADDED (denominator %d total in file):' % (
         len([k for k in merged if not k.startswith('_')])))
     print('   perfrp/perfrp_performance_relationship.json')
     print('   perfrp/perfrp_performance_account.json')
+    print('   perfrp/perfrp_book_advisor.json')
 
 
 if __name__ == '__main__':
