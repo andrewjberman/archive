@@ -1,0 +1,102 @@
+# TO ETFS_SATELLITES.TO-10-DE — ANDREW'S SMOKE FEEDBACK: HIDE Satellite 98 at the RENDER + REMOVE the firm selector
+
+<decomp_ref>workflows/atom_decomposition/runs/etfs-satellites/20260827T160438Z/DECOMP.md — `SAT-d-1` (all four POSITIONING SUMMARY sections blend row-wise — the panel that clipped), `SAT-b-5` (`Opal Satellite 90` has ZERO accounts, `Opal Satellite 98` has ELEVEN — membership derives from the roster predicate), `SAT-c-2` / `SAT-c-3` (firm resolution server-derived-or-validated; visibility gate, not an authorization boundary). **NO new cell.**</decomp_ref>
+<certification>Decomp CERTIFIED (`3.0.0_SA_CVO~Z`). No cell added. `SAT-c-2`/`SAT-c-3` are cited on the SAME limbs `TO-9-DE` cited — what changed is the ruled ANSWER on those cells, not their scope. `SAT-b-5` is cited as the CONSTRAINT that makes AC1 a display act rather than a membership act.</certification>
+<issued_to>0.4.0_DE_ClientPlatform~S</issued_to>
+<executor_class>DE-class (portal, `portal/**` on DEV)</executor_class>
+<seating_trigger>SEATED — **same project, same instance, Rule 27 satisfied.** This lane built `TO-8-DE` and `TO-9-DE`, holds the four-way state discrimination, and wrote the selector this TO removes. **Context already loaded; no spawn needed.** ⭐ It also reported `NO SCROLL WORK STARTED` before this TO existed, so nothing is being thrown away.</seating_trigger>
+<placement>SITE Z (Rule 26). `portal/` is a WORK-SITE. **Main tree stays on DEV (Rule 19).**</placement>
+<issued_by>2.0.0_SA_COO~Z</issued_by>
+<issued>2026-08-28T04:2xZ</issued>
+<status>ACTIVE — cut from an ANDREW-DIRECT smoke test, **already amended once by a second Andrew-direct before issue.** He has SEEN the built view and approved it; these are the named remaining points.</status>
+<priority>P0 — **the remaining distance to D4's bar.** He smoke-tested Satellites: *"looks very good, its basically done only a couple points id add"*. **The bar is HIS EYE and he has now used it.**</priority>
+<authority>**ANDREW-DIRECT 2026-08-28 ~04:2xZ, VERBATIM** (relayed `1.0.0_SA_CTO~Z` 12691) — items (2) and (3) below:
+
+> *"Satellites product looks very good, its basically done only a couple points id add ... Second, need a logical color gradient for the toggle selectors of the different satellites ... third, Satellites doesnt ned a firm selector, because only one firm has this function. maybe good to keep the dropdown code available just comment it oout and have it default to cottonwood, just in case later we may add other custom models for other firms."*
+
+**ANDREW-DIRECT 2026-08-28 ~04:2xZ, VERBATIM, SUPERSEDING HIS OWN ITEM (1)** (relayed 12702):
+
+> *"one coment, i dont think we have to display visually satellite 98, even if we track it otherwise, the premise is that its the same characteristics as 90, so no need to show two, just a frontend change only, that would solve the issue with the width and no need for arrows"*
+</authority>
+
+---
+
+## 0. THE HEADLINE, WHICH IS NOT A CRITERION
+
+**HE SMOKE-TESTED THE SATELLITES VIEW AND IT PASSED** — a real localhost build on 5173, against the nine real books. That is the bar he reserved to himself for D4, exercised.
+
+⛔ **NOBODY WRITES A CLOSURE.** His standing word: *"I dont want to see comp-closure on the directives item until i smoke it and its DEFINITIVELY done"* — and he said *"basically done ... a couple points id add."* **The points ARE the remaining distance.**
+
+## 1. ⛔ THE SCROLL WORK IS SUPERSEDED — DO NOT BUILD IT
+
+His first message asked for horizontal scroll on `POSITIONING SUMMARY`. **His second message withdrew the problem instead of the solution:** *"that would solve the issue with the width and no need for arrows."*
+
+>> **EIGHT COLUMNS FIT. The cutoff was a NINE-column problem and he removed the ninth.** No scroll container, no shrink, no arrows.
+
+## 2. ⛔ THE ARCHITECTURE LIMB — THE ONE THAT CAN BE GOT WRONG CHEAPLY
+
+*"even if we track it otherwise ... just a frontend change only."*
+
+>> **THE FILTER IS A RENDER-LAYER FILTER. IT IS NOT A REGISTRY EDIT AND NOT A PRODUCER CHANGE.**
+
+```
+  registry.json    KEEPS NINE BOOKS      (as published + verified: 2,196 B, 9 books, 9/9 -> 100.000)
+  the producer     KEEPS DERIVING 98
+  the PAGE         SHOWS EIGHT
+```
+
+⛔ **DO NOT drop `98` from `SATELLITE_MEMBERS`, from the registry, or from the producer.** That destroys tracked data to solve a display choice, and it would silently change what the derived aggregate is computed FROM. ⚠ **`SAT-b-5` is why this matters concretely: `Opal Satellite 98` has ELEVEN accounts and `90` has ZERO.** Removing 98 from membership would remove the populated book and keep the empty one.
+
+## 3. ITEM (2), THE COLOUR GRADIENT, IS NOT IN THIS TO
+
+**Two open questions, neither guessable, both with `1.0.0_SA_CTO~Z` and Andrew:**
+- **(a) DIRECTION IS AMBIGUOUS.** *"orange for the shortest"* — Duration measured from his own screenshot runs `2.89 2.89 2.90 2.90 2.90 2.63 2.37 1.81 1.81` across Satellite 15 → 98, so **the shortest is the RIGHTMOST**, running the gradient right-to-left; the natural reading of his sentence puts orange leftmost. **Opposite, and building it backwards is a visible error on a page he just approved.**
+- **(b) THE TARGET ELEMENT** did not resolve to any name in the Positioning source on first search.
+
+⚠ **Note it interacts with THIS TO: the gradient spans the DISPLAYED books, and after AC1 that is EIGHT, not nine.** Whoever builds it derives the span from the rendered set. **When his answer lands it gets its own TO from this office. Do not pre-build it and do not pick a direction to be helpful.**
+
+## 4. ACCEPTANCE CRITERIA
+
+| id | criterion | cell | status |
+|---|---|---|---|
+| `T10DE-AC1` | **`Opal Satellite 98` IS NOT DISPLAYED, AND THE FILTER IS AT THE RENDER LAYER.** The Positioning Summary shows eight books. ⛔ **Cite the edit site: it must be a display/selection concern, NOT `SATELLITE_MEMBERS`, NOT the registry, NOT the producer.** | `SAT-d-1` | |
+| `T10DE-AC2` | ⛔ **98 IS STILL TRACKED — PROVE THE DATA SIDE IS UNTOUCHED.** `platinum/satellites/registry.json` still carries **NINE** books and still sums to 100.000. **Exhibit the served artifact AFTER the change**, not the source. *"even if we track it otherwise"* is a requirement, not a nicety. | `SAT-b-5` | |
+| `T10DE-AC3` | **THE WIDTH PROBLEM IS GONE, AND NO SCROLL WAS ADDED.** Eight columns fit without clipping. ⛔ **No horizontal scrollbar on the panel OR the page body, and no arrows** — *"no need for arrows"*. | `SAT-d-1` | |
+| `T10DE-AC4` | **NO FIRM SELECTOR ON SATELLITES, DEFAULTED TO COTTONWOOD.** *"only one firm has this function."* An internal viewer lands on cottonwood satellites with **no selector and no extra click**. | `SAT-c-2` | |
+| `T10DE-AC5` | **THE DROPDOWN CODE IS COMMENTED OUT, NOT DELETED.** *"keep the dropdown code available just comment it oout ... just in case later we may add other custom models for other firms."* **A deletion loses the reasoning; the comment preserves it.** Show re-enabling is a comment-uncomment, not a rebuild. | `SAT-c-3` | |
+| `T10DE-AC6` | ⛔ **`TO-9-DE`'s FOUR-WAY DISCRIMINATION SURVIVES.** A 400 must still render as an ERROR and never as *"no satellites"*. **Removing the selector must not collapse those states** — re-exhibit by hash. **A default that turns a failed fetch into an empty registry is the regression this catches.** | `SAT-c-3` | |
+| `T10DE-AC7` | **RENDERED, NOT GREPPED.** Read screenshots: the eight-book Positioning Summary with no clipping · the satellites view with no selector, defaulted to cottonwood. ⚠ **THE CANVAS IS SILVER.** | `SAT-d-1` | |
+
+## 5. WHY ITEM (3) REVERSES `TO-9-DE`, AND WHY THAT IS NOT A DEFECT
+
+`ETFS_SATELLITES.TO-9-DE` — the internal-viewer firm SELECTION — was cut, built, accepted 5/5 and CERTIFIED between 03:09Z and 03:38Z. **He has now seen it and does not want it.**
+
+>> ⭐ **THE SELECTOR IS WHAT MADE THE VIEW REACHABLE FOR HIM AT ALL.** Without it an internal viewer hit a 400 and **could not have smoke-tested anything.** It did its job, and he is now ruling on the PRODUCT rather than on the build. **This is a RE-SCOPE, not a rework. `0.4.0_DE_ClientPlatform~S` did nothing wrong and `TO-9-DE`'s certification STANDS as history — it was correct for its spec.**
+
+⭐ **And his remedy preserves the reasoning rather than discarding it** — commented-out, not deleted, because other firms may later get custom models. **He is scoping to today's truth without throwing away tomorrow's**, which is the same instinct as *"even if we track it otherwise"* in AC2.
+
+## 6. NOT YOURS
+
+- **The router.** The 400 is CORRECT and stays. Do not touch `index.mjs`.
+- **Item (2), the colour gradient** — held on Andrew, see §3.
+- **The registry, the producer, `SATELLITE_MEMBERS`** — see §2. **Render layer only.**
+- **The PROD promote** — DT lane, Rule 19, held at Andrew's word.
+- **`ETFS_INGEST` / `ETFS_POSITIONING` / `D1_CATVIEWS`** — other projects. **Rule 27.**
+
+## 7. REPORTING
+
+Deliverable + read screenshots + proof instance in this lane's `deliverables/`, via `.tools/safe-commit.sh --author "0.4.0_DE_ClientPlatform~S <0.4.0_DE_ClientPlatform~S@opal.agent>" -F <msgfile>` (message file by a **non-shell** writer). Report to `2.0.0_SA_COO~Z`; `3.0.0_SA_CVO~Z` certifies. **ACK on receipt, then report.**
+
+⚠ **`proof-of-spec-check` may return INVALID on vocabulary grounds — FILE THE TRUE VALUES ANYWAY.** Standing ruling: when an instrument and the truth disagree, the instrument is what changes.
+
+<proof_of_spec>
+  <criterion id="T10DE-AC1" cell_refs="SAT-d-1"/>
+  <criterion id="T10DE-AC2" cell_refs="SAT-b-5"/>
+  <criterion id="T10DE-AC3" cell_refs="SAT-d-1"/>
+  <criterion id="T10DE-AC4" cell_refs="SAT-c-2"/>
+  <criterion id="T10DE-AC5" cell_refs="SAT-c-3"/>
+  <criterion id="T10DE-AC6" cell_refs="SAT-c-3"/>
+  <criterion id="T10DE-AC7" cell_refs="SAT-d-1"/>
+  <expected_criteria>T10DE-AC1,T10DE-AC2,T10DE-AC3,T10DE-AC4,T10DE-AC5,T10DE-AC6,T10DE-AC7</expected_criteria>
+  <alignment_denominators>cells declared: 4 (SAT-d-1, SAT-b-5, SAT-c-2, SAT-c-3); criteria: 7. FORWARD — 7 of 7 carry >=1 cell_ref. BACKWARD — 4 of 4 reachable (SAT-d-1 from AC1/AC3/AC7, SAT-b-5 from AC2, SAT-c-2 from AC4, SAT-c-3 from AC5/AC6). Unmapped 0; untraceable 0. NOTE: no cell is added. `SAT-c-2`/`SAT-c-3` are cited on the SAME limbs `TO-9-DE` cited — the sovereign changed the ruled ANSWER, not the cell. `SAT-b-5` is cited as a CONSTRAINT rather than a deliverable: it records that 98 holds eleven accounts and 90 holds zero, which is what makes AC1 a DISPLAY act and forbids solving it as a membership edit. Andrew's colour-gradient item is DELIBERATELY ABSENT — its direction is ambiguous against the measured Duration values on his own screenshot and its target element did not resolve in the Positioning source, so a criterion for it would be unbuildable as written.</alignment_denominators>
+</proof_of_spec>
