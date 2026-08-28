@@ -58,6 +58,12 @@ def load(level):
         return p, json.load(fh)
 
 
+def load_gainloss(level):
+    p = os.path.join(EMISSIONS, 'perfrp_gainloss_%s.json' % level)
+    with open(p, encoding='utf-8') as fh:
+        return p, json.load(fh)
+
+
 def load_book():
     p = os.path.join(EMISSIONS, 'perfrp_book_advisor.json')
     with open(p, encoding='utf-8') as fh:
@@ -192,7 +198,29 @@ def main():
         'not_a_data_oracle': 'render instrument only.',
     }
     merged['perfrp/perfrp_book_advisor.json'] = book_env
+
+    # ---- PRF-b-4, gain/loss. Bound for REACHABILITY: this leaf is what makes the fifth
+    # card visible. Its rows carry NO figure_state (0 of 3,834 / 0 of 6,177, measured), so
+    # the consumer deliberately does NOT bind its figures -- rendering them would mean
+    # inventing a producer disposition per number. The fixture carries a real row anyway so
+    # the SHAPE is on the record beside the absence.
+    gl_path, gl = load_gainloss('relationship')
+    gl_row = gl['entries'][0]
+    gl_env = {k: gl[k] for k in ENVELOPE_FIELDS if k in gl}
+    gl_env['entries'] = [rebind(gl_row, REL_KEY)]
+    gl_env['_fixture_provenance'] = {
+        'source_file': os.path.relpath(gl_path, ROOT).replace(os.sep, '/'),
+        'real': 'every producer field on the row',
+        'fixture': 'the join key only; the row names its _source_key',
+        'figure_state_absent': (
+            'this family carries NO figure_state on any row (0 of %d here) -- the card is '
+            'gated on this leaf being READABLE, and its figures are not bound' % len(gl['entries'])),
+        'not_a_data_oracle': 'render instrument only.',
+    }
+    merged['perfrp/perfrp_gainloss_relationship.json'] = gl_env
+
     globals()['_BOOK_REPORT'] = (book_path, advisor_row, book)
+    globals()['_GL_REPORT'] = (gl_path, gl_row, gl)
 
     with open(OUT, 'w', encoding='utf-8', newline='\n') as fh:
         json.dump(merged, fh, indent=2)
@@ -234,6 +262,14 @@ def main():
     print('   perfrp/perfrp_performance_relationship.json')
     print('   perfrp/perfrp_performance_account.json')
     print('   perfrp/perfrp_book_advisor.json')
+    print('   perfrp/perfrp_gainloss_relationship.json')
+    glp, glr, gll = globals()['_GL_REPORT']
+    print()
+    print('GAINLOSS leaf %s -- entries %d, as_of %s' % (
+        glp.split(os.sep)[-1], len(gll['entries']), gll.get('as_of')))
+    print('   %-16s <- %-24s total_gain_loss=%s  figure_state rows: %d of %d' % (
+        REL_KEY, glr['key'], glr.get('total_gain_loss'),
+        sum(1 for e in gll['entries'] if 'figure_state' in e), len(gll['entries'])))
 
 
 if __name__ == '__main__':
