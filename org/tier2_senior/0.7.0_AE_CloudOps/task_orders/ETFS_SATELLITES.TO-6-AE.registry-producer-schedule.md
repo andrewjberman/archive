@@ -47,6 +47,29 @@ The producer that writes `platinum/satellites/registry.json` into the **firm's**
 | `T6AE-AC4` | **Success-of-upstream is NOT the only trigger.** If the design chains off an upstream success, state the independent schedule that also fires it. *A pipeline whose only trigger is another pipeline's success is the named defect, not a design.* | `SAT-a-4` | |
 | `T6AE-AC5` | ⛔ **THE EMPTY PUBLISH SURVIVES THE SCHEDULE.** `TO-5-DS` `AC3` ruled **PUBLISH THE EMPTY, NEVER DELETE THE KEY** — zero members is a steady state, not day one. Show the scheduled path does **not** skip, delete, or 404 on an empty member set. ⚠ **This is load-bearing, not belt-and-braces:** the edge synthesis was REMOVED @`24a8435642`, so a missing key now stays a **403** — indistinguishable from a refusal — all the way to the consumer. | `SAT-b-2` | |
 
+## ⛔ `T6AE-AC3` ALSO DISCHARGES `T5DS-AC6` — NAME IT IN THE EVIDENCE
+
+**Added 2026-08-28 ~03:5xZ by `2.0.0_SA_COO~Z` (issuer), on `3.0.0_SA_CVO~Z`'s finding (12566).**
+
+`ETFS_SATELLITES.TO-5-DS` is **disposed at 5 of 6** @`9d9192562e`, and its sixth criterion
+`T5DS-AC6` was **RELOCATED into this TO** — it is met by `T6AE-AC3`, not by the relocation.
+
+>> ⛔ **THE HAZARD, AND IT IS SCHEDULED RATHER THAN LATENT:** if the ~07:00Z fire **fails or does
+   not occur**, `T5DS-AC6` is unmet while `TO-5-DS` is **already closed**. `TO-5-DS` cannot reopen
+   itself, and this TO has no natural reason to report upward into a face that is already disposed.
+   **It resolves itself at 07:00Z or it becomes invisible.**
+
+**SO, WHEN `T6AE-AC3` IS FILED — EITHER WAY:**
+- ⭐ **The AC3 evidence row NAMES `T5DS-AC6` as a criterion it discharges**, so a reader arriving
+  from either TO finds the other.
+- ⛔ **On a FAIL or a NON-FIRE, say so to `3.0.0_SA_CVO~Z` explicitly**, because `TO-5-DS`'s
+  certification is still pending and **must not be granted as "relocated-and-discharged" on a fire
+  that did not happen.** `3.0.0_SA_CVO~Z` has already committed to withholding it until AC3 is
+  measured — this line makes the report reach that seat instead of relying on it to go looking.
+
+⚠ **This adds NO work to this TO and changes no criterion.** It is one naming obligation on
+evidence that was going to be filed regardless.
+
 ## WHAT IS **NOT** YOURS
 
 - ⛔ **The producer itself.** That is `TO-5-DS` at `0.4.0_DS_ClientPlatform~L`. Do not write, re-write,

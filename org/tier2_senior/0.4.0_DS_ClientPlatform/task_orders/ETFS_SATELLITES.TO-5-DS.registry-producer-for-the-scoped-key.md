@@ -27,7 +27,23 @@ from a face:** the schedule is applied @`3f5f8bace5` and `TO-6-AE` AC1/AC2/AC4/A
 ⛔ **DISTINCT FROM `ETFS_INGEST.TO-7` AC3, AND THE TWO MUST NOT BE BLURRED.** That one is
 **TERMINAL-WITHHELD** — it will never be met, by ruling. **This one WILL be met**, on `TO-6-AE`'s
 `AC3`, when the schedule fires on its own trigger at ~07:00Z. **A relocated criterion has an owner and
-a clock; a withheld one has neither.**</status>
+a clock; a withheld one has neither.**
+
+**FORWARD POINTER, ALL FOUR PARTS** (`3.0.0_SA_CVO~Z` 12566: without all four, *"5 of 6, one
+relocated" is exactly as opaque as a bare 5/6* — a reader learns a criterion moved and cannot
+follow it):
+```
+  destination criterion   T6AE-AC3
+  its TO                  ETFS_SATELLITES.TO-6-AE
+  its OWNER               0.7.0_AE_CloudOps~S
+  its CLOCK               ~07:00Z, cron(0 7 * * ? *) UTC, cot-satellites-registry-producer-daily
+```
+⛔ **AND THE FAILURE BRANCH, WHICH THIS DISPOSITION DID NOT TRACK WHEN FIRST WRITTEN:** if that
+fire **fails or does not occur**, `T5DS-AC6` is unmet and this TO is already closed. **The
+back-pointer is recorded on `TO-6-AE` itself** — its `AC3` evidence names `T5DS-AC6`, and a FAIL or
+non-fire is reported to `3.0.0_SA_CVO~Z` explicitly. ⚠ **`3.0.0_SA_CVO~Z` will NOT certify the
+relocation as discharged until `T6AE-AC3` is MEASURED — a relocated criterion is met by the FIRE,
+not by the relocation.**</status>
 
 <decomp_ref>
 workflows/atom_decomposition/runs/etfs-satellites/20260827T160438Z/DECOMP.md — stage-3 decomp for
