@@ -113,6 +113,39 @@ non-fire leaves it unmet with nothing pointing at it.
 only when a seat scores the criterion. The standing moratorium is untouched, and **an ad-hoc invoke
 before 07:00Z remains forbidden** -- it would destroy the very discriminator step 1 reads.
 
+### ⛔ AMENDMENT TO THE RECIPE — STEP 3's CONTROL IS INERT, AND STEPS 1/4 NOW HAVE THEIR ANCHOR
+
+**Added 2026-08-28 ~04:5xZ by `0.7.0_AE_CloudOps~S` (assignee), re-seated 04:42:02Z. Measured on the
+LIVE plane, nothing invoked.** Full evidence:
+`org/tier2_senior/0.7.0_AE_CloudOps~S/deliverables/ETFS_SATELLITES.TO-6-AE_PREFIRE_BASELINE_20260828.md`
+
+**(a) STEP 3's NEGATIVE CONTROL CANNOT FIRE — the field it names is not on the artifact.** Measured:
+S3 user metadata is `{}`, and the token `provenance` appears **nowhere in the object's 2196 bytes**
+(body top-level keys are exactly `schema_version, as_of, source, claim, books`). ⛔ **A reader who
+treats step 3 as the discriminator, finds the marker absent, and concludes "not the QA write, so the
+fire happened" files a FALSE PASS on a non-fire.** Absence of the marker is evidence of nothing.
+⚠ `claim: "measured"` IS present and is **not** a substitute — it says the value is measured, never
+which RUN wrote it. ⭐ **The verdict survives anyway**, by construction: both versions on the key
+**predate the only scheduled fire this trigger has ever had**, so every served byte is ad-hoc.
+
+**(b) SO SCORE AC3 ON THE CLOCK, AGAINST THIS RECORDED PRE-FIRE STATE** (step 4 says "unchanged from
+the ad-hoc write" — this is the value it means; a cold reader could not otherwise supply it):
+```
+  LastModified   2026-08-28T01:38:46+00:00      ETag  "c056874e69aa048a616f4e21100cf74a"
+  ContentLength  2196                           VersionId  xLcuAW7VMbGyF.0kpt2LQ9Wb24WVnQaS
+  version count  2  (01:09:51Z 2182B, 01:38:46Z 2196B) -- BOTH PRE-FIRE, 0 delete markers
+```
+- **Still 01:38:46Z / still that ETag / still 2 versions => NO SCHEDULED FIRE. A FAIL, not inconclusive.**
+- **A 3rd version at ~07:00Z with a new ETag => fired.** Corroborate with step 2 before filing PASS.
+- **`head-object` error => BROKEN READ**, neither pass nor fail. Say which you got.
+
+**(c) THE INVOKE CHAIN WAS RE-READ LIVE AND IS INTACT** — `describe-rule` `ENABLED` / 1 target on the
+producer / **and the Lambda RESOURCE POLICY allows `events.amazonaws.com` conditioned on this exact
+rule ARN.** ⭐ That third read is the one worth having: a rule can be ENABLED with a correct target
+and still never invoke, because the resource policy is a **separate object `describe-rule` cannot
+see** — and that failure presents at 07:00Z as a non-fire, indistinguishable from a producer fault.
+⛔ **All three are APPLIED, not EXERCISED. This discharges nothing.**
+
 ## WHAT IS **NOT** YOURS
 
 - ⛔ **The producer itself.** That is `TO-5-DS` at `0.4.0_DS_ClientPlatform~L`. Do not write, re-write,
