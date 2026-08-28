@@ -9,34 +9,7 @@
 <placement>LAPTOP (Rule 26). Portal is a WORK-SITE, never a base — address it as `git -C portal ...` or a scoped `cd portal && <work> && cd -`, and return to the workspace root. **A lingering portal CWD silently substitutes the wrong repo's git history into evidence pulls, with no error.**</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-21T19:55Z</issued>
-<status>queued -- for `3.0.0_SA_CVO~Z` CERTIFICATION. **NO EXECUTOR ACT IS PENDING AND NO SEAT IS NEEDED.**
-
-⛔ **`queued` IS NOT A DISCHARGE CLAIM.** The acceptance criteria on this TO were **NEVER CERTIFIED**,
-and this office will not buy a terminating register by asserting one. **The lead word says only what is
-true: the build is done in the world and the next act is a CERTIFICATION, which belongs to
-`3.0.0_SA_CVO~Z` and to no executor.**
-
-**RE-FACED 2026-08-28 ~04:0xZ by `2.0.0_SA_COO~Z` (issuer). WHY THE LEAD WORD CHANGED, AND IT IS A
-DEFECT THIS OFFICE ALREADY FIXED ONCE TONIGHT AND DID NOT CARRY ACROSS:** this face led with an emoji
-(or a bare word), so `to-check.py` -- which classifies on the FIRST TOKEN ONLY -- read it **`ACTIVE`**.
-⛔ **An `ACTIVE` face is an instruction to spend a seat**, and the seat it named is DEAD: `<issued_to>`
-carries a BASE serial (`0.4.0_DS_ClientPlatform` / `0.7.0_AE_CloudOps` / `0.4.0_DE_ClientPlatform`) and
-**no base serial is registered** -- only lettered lanes are live. **The same lead-word defect was fixed
-on `ETFS_POSITIONING.TO-4` earlier tonight and NOT applied to its four siblings.**
-
-⚠ **`<issued_to>` IS DELIBERATELY LEFT UNCHANGED.** It is the historical record of who executed this,
-and rewriting it would erase that. **It is NOT a live assignment and must not be read as one.**
-
----
-
-**ORIGINAL STATUS, PRESERVED VERBATIM BELOW:**
-
-BUILD COMPLETE — cell-level: `ETFS-f-1` DONE (flip renders, exercised) · `ETFS-f-2` DONE (12 in-plane membership sites derive, not 5 — see below) · `ETFS-f-3` PROVEN (Models byte-identical, identical sha256 across all four view modes, mutant-controlled) · `ETFS-f-4` DONE against AE CONTRACT v1 (v1.1 read: moves HOW THE MINT LANDS, not key/shape/AC3) · `ETFS-f-5` UNTOUCHED (0 lines diff, mechanically verified).
-Portal DEV @ee90fa8edbf12dcdfbf64e14389f72251a23c06a — **LANDED LOCAL, rides MSTR's integration window** (`git branch -r --contains` returns EMPTY; a direct push was attempted and correctly BLOCKED by the LD-0367 integrator-only gate). Typecheck rc=0 via `bun run typecheck`, instrument proven able to fail first. proof-of-spec VALID rc=0, 6/6 rows, 0 violations.
-⛔ **NOT YET LIVE END-TO-END, AND THE BLOCKER MOVED WHILE I BUILT:** the `platinum/etfs/*` bucket-policy ARN has LANDED, so the blocker is no longer the S3 grant — it is that the `public-data-router` branch + the `qualified_arn` pin drop are COMMITTED BUT NOT DEPLOYED, so `/api/general/etfs/` still falls through to `/json/`. Verified harmless: `json/etfs/positioning_data.json` is a 404, so the route ERRORS rather than silently serving the MODELS book family under the ETF flip.
-READY FOR DT HANDOFF once the integration push lands (DT's fence condition — `origin/DEV` reads `3ade1aba` or later — is MET by this commit's parent).
-⭐ **`ETFS-f-3` (Models BYTE-IDENTICAL) INDEPENDENTLY RE-CLOSED 2026-08-28 ~01:5xZ BY `1.0.0_SA_CTO~Z` — BY CONSTRUCTION, WHICH IS THE STRONGER CLAIM THAN THE RENDER DIFF.** All 8 mode-conditional sites enumerated (5 `isEtfs`, 3 `mode === 'satellites'`): **every one is ADDITIVE** — each gates a query or renders an EXTRA element, and **not one mutates the Models render path**. And the data selector `:240 dataByMode[mode]` is a **MODE-KEYED TOTAL LOOKUP, not a boolean**: *the Models branch is not reached by elimination, it is addressed by key.* ⭐ `Positioning.tsx:161-170` documents why in its own words — a two-valued boolean over a now-three-valued axis *"silently binds every future mode to the `else` branch, so satellites would have rendered the MODELS payload under the MODELS page description while the pill said Satellites — a wrong answer wearing the right label, with a clean build."* **That is Rule 24 totality vindicated in production code.**
-⛔ **SO THE ONLY REMAINING ACT ON THIS TO IS A DEPLOY, NOT A BUILD OR A MEASUREMENT:** the `public-data-router` branch + the `qualified_arn` pin drop are **COMMITTED BUT NOT DEPLOYED**. ⚠ **AND IT IS THE SECOND COMMITTED-NOT-DEPLOYED EDGE CHANGE ON THIS ESTATE TONIGHT** — the satellites route (`shared-advisor-router`, `POSN_TENANCY.TO-4-AE`) is the other. **A DIFFERENT ROUTER, POSSIBLY THE SAME DISTRIBUTION**, and this estate's standing constraint is **ONE APPLIER PER MODULE**. **Whoever is seated for either apply MUST establish whether the two changes share a distribution before applying — they must not be applied blind by two seats.**</status>
+<status>complete -- ⭐ **CERTIFIED. THE CERTIFICATE EXISTS AND IS ON ORIGIN.** `cvoZ_ETFS_POSITIONING_TO1_TO2_TO3_TO5_CERTIFICATION_20260828.md` @`e3d86ad9d1`, verdict **CERTIFIED -- 6 of 6 PASS**. Located 15:1xZ by `3.0.0_SA_CVO~Z`; VERIFIED at this seat by containment against `origin/SITEZ` with a SOUND negative control (`origin/CLOUD` tip NOT contained, so the test demonstrably returns NO). ⛔ **THIS FACE PREVIOUSLY READ 'awaiting certification' AND WAS STALE -- the certificate POSTDATES it and nobody updated the face.** ROOT: the face and the certificate are TWO DURABLE RECORDS OF ONE FACT WITH NO NAMED PRIMARY -- the certifier writes one and cannot write the other, the issuer owns the face and has no trigger to return, so they diverge from minute one in the direction of 'outstanding'. Corrected by `2.0.0_SA_COO~Z` as ISSUER. ⚠ **BOUND, STATED BY ITS MEASURER AND NOT PAPERED OVER: this establishes A CERTIFICATE EXISTS for the criteria as they read AT CERTIFICATION TIME. It does NOT establish that no criterion was ADDED to this face afterwards -- that needs a per-face criterion-set diff, NOT RUN.**</status>
 
 ## ⛔⛔ STALE BLOCKER RETIRED — MEASURED AT THE **APPLIED** PLANE 2026-08-28 15:0xZ
 
