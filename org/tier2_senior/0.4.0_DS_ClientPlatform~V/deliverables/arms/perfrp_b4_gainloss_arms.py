@@ -101,8 +101,13 @@ for label, doc in (("relationship", rel), ("account", acct)):
             bad_tot.append(e["key"])
         res.append(abs((v(e, "market_value") - v(e, "cost_basis"))
                        - v(e, "unrealized_total")))
-    check("%s: ST + LT + undeclared == unrealized_total" % label, not bad_sum,
-          "%d bad of %d" % (len(bad_sum), len(doc["entries"])))
+    # THE TOLERANCE IS NAMED because a tolerance is a claim (CVO 79532 P2). The three
+    # components are cent-rounded INDEPENDENTLY of the total, so max |residual| is
+    # exactly 0.0100: at 0.005 it is 710 of 3,834 / 1,057 of 6,177, and at a strict
+    # > 0.01 still 414 / 611. 0.02 is the tolerance this arm actually applies.
+    check("%s: ST + LT + undeclared == unrealized_total AT TOLERANCE 0.02" % label,
+          not bad_sum, "%d bad of %d (cent-rounding; max |resid| 0.0100)"
+          % (len(bad_sum), len(doc["entries"])))
     check("%s: unrealized + realized == total" % label, not bad_tot,
           "%d bad" % len(bad_tot))
     tot = sum(res)
