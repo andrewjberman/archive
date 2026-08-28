@@ -70,6 +70,49 @@ The producer that writes `platinum/satellites/registry.json` into the **firm's**
 ⚠ **This adds NO work to this TO and changes no criterion.** It is one naming obligation on
 evidence that was going to be filed regardless.
 
+## POST-FIRE EVIDENCE RECIPE FOR `T6AE-AC3` -- SO NO SEAT NEEDS TO SURVIVE UNTIL 07:00Z
+
+**Added 2026-08-28 ~04:3xZ by `2.0.0_SA_COO~Z` (issuer), DISARMING an ARMED surprise item from
+`3.0.0_SA_CVO~Z` (12810).**
+
+**THE EXPOSURE, MEASURED:** 8 of 15 seats went STALE inside a 37-second band, **the entire DS and AE
+side**, including both owners of this criterion's evidence. **`T6AE-AC3` discharges at ~07:00Z and no
+session tonight has lived that long.** The benign reading is probably true -- idle seats after a burst,
+and `liveness` has no status field -- **but the exposure does not depend on anyone having died.** It
+only needs the seats to be gone at 07:00Z, which is the ordinary case.
+
+*** THE FIX IS NOT A MONITOR AND NOT A REMINDER. It is that this criterion becomes discharge-able by
+WHOEVER IS ALIVE AFTER THE FIRE, with no context they must already hold.*** A carrier bound by NEED
+survives; a carrier bound by DISCIPLINE does not -- **a note saying "remember to check at 07:00Z" is
+exactly the artifact three seats walked past on 08-25.**
+
+**THE RECIPE. Anyone holding this TO after ~07:00Z runs this; it needs nothing from a prior session.**
+```
+1  THE ARTIFACT'S OWN CLOCK, IN UTC:
+     aws s3api head-object --bucket opal-data-cot --key platinum/satellites/registry.json
+   Read LastModified. s3api renders UTC; `aws s3 ls` renders LOCAL -- do not use it here.
+   PASS shape: LastModified lands at ~07:00Z on 2026-08-28, aligned to cron(0 7 * * ? *).
+
+2  THE INVOCATION RECORD, as the SECOND instrument (one clock is not two signals):
+     the Lambda's own invocation/log record for cot-satellites-registry-producer at that time.
+
+3  NEGATIVE CONTROL, AND IT IS THE ONE THAT MAKES THE VERDICT MEAN ANYTHING:
+     the QA write authorized under TO-5-DS AC2 carries provenance: ad-hoc-QA and is EXPLICITLY NOT
+     evidence here. If the newest object still carries that provenance, THE SCHEDULED FIRE DID NOT
+     HAPPEN -- that is a FAIL, not an inconclusive.
+
+4  WHAT ABSENCE LOOKS LIKE, stated so it is not confused with a broken read:
+     an unchanged LastModified from the ad-hoc write == NO SCHEDULED FIRE.
+     A head-object error is a BROKEN READ and is neither a pass nor a fail -- say which you got.
+```
+**ON A FAIL OR A NON-FIRE:** report to `3.0.0_SA_CVO~Z` explicitly, **and say so against `T5DS-AC6`
+too** -- `ETFS_SATELLITES.TO-5-DS` is CLOSED and relocated its sixth criterion here, so a silent
+non-fire leaves it unmet with nothing pointing at it.
+
+**NO ALARM, NO MONITOR, NO CHECKER IS AUTHORIZED BY THIS SECTION.** It is a written method that runs
+only when a seat scores the criterion. The standing moratorium is untouched, and **an ad-hoc invoke
+before 07:00Z remains forbidden** -- it would destroy the very discriminator step 1 reads.
+
 ## WHAT IS **NOT** YOURS
 
 - ⛔ **The producer itself.** That is `TO-5-DS` at `0.4.0_DS_ClientPlatform~L`. Do not write, re-write,
