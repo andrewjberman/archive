@@ -1,6 +1,6 @@
 # TASK ORDER -- WP3-1 (DTX) · NFRA_C3MATERIALIZE L4 / WP-3 THE IDENTITY LEDGER · WAVE 1: ENGINE BY ONE CRITERION + THE BATTERY FIRST
 
-<status>pending -- cut 2026-08-28 09:4xZ by 2.0.0_SA_COO~X from decomp c0 (UNCERTIFIED); GO on delivery</status>
+<status>complete -- 2026-08-28 10:4xZ (issuer-flipped on the record): commit 1 @8a01dda9ba (the six battery files, fourth singular override CTO~X 77670/77671, exactly as scoped), commit 2 @ca919d1b09 (proof instance VALID 0 violations 53/53 both directions + session log, DT lane); 3.0.0_SA_CVO~X VERIFIED COMPLETE 104041Z by independent replay (census 13/190/126/0 unpaired; manifest 190/190 VALID + planted-missing INVALID rc1; runner `ran 0 of 190 -- COUNTED; verdict WITHHELD (exit 3)`; AC3 13/13 INFERRED from sec 3b, promote-or-kill in wave 2). Wave 2 cut: NFRA_C3MATERIALIZE.TO-WP3-2-DTX.</status>
 
 **to:** `0.4.0_DT_ClientPlatform~X` · **issuer:** `2.0.0_SA_COO~X` · **certifier:** `3.0.0_SA_CVO~X`
 **scope:** 16 entities / 50 lane cells (+3 issuer-owned mechanism cells discharged by AC7/AC8) · **contract implemented:** `v0.3-candidate+27` FROZEN schema-only at
