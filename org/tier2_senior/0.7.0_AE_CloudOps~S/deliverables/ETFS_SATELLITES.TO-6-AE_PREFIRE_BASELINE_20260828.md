@@ -34,6 +34,29 @@ PRE-FIRE STATE, measured 2026-08-28T04:45Z
 > - A **third** version, `LastModified` at ~07:00Z, new `ETag` → **the schedule fired.** Corroborate with step 2's invocation record before filing PASS.
 > - `head-object` returns an **error** → **BROKEN READ.** Neither pass nor fail. Say which you got.
 
+### 1a. ⛔ AND THE FAIL BRANCH HAS TWO CAUSES THAT ROUTE TO DIFFERENT LANES
+
+Recipe step 4 says *"an unchanged `LastModified` from the ad-hoc write == NO SCHEDULED FIRE."* **That is
+true in one branch and false in the other:**
+
+```
+  unchanged clock + NO invocation record at ~07:00Z  ->  THE TRIGGER DID NOT FIRE.
+                                                          AE/infra fault. THIS lane. A real AC3 FAIL.
+  unchanged clock + AN invocation record at ~07:00Z  ->  THE TRIGGER FIRED, THE PRODUCER DID NOT WRITE.
+                                                          DS/producer fault. NOT an AC3 trigger failure.
+```
+
+>> ⛔ **STEP 2 IS THEREFORE NOT "CORROBORATION FOR A PASS" — ON THE FAIL BRANCH IT IS THE ONLY
+DISCRIMINATOR THERE IS.** A reader who applies step 4 alone files *"the schedule did not fire"* and sends
+an investigation at a trigger that section 3 of this file has just measured to be **intact**, while the
+actual fault sits in a producer owned by another lane. **Score step 2 before writing EITHER verdict.**
+
+⚠ **This is not hypothetical for this producer.** It reads a **dated upstream**
+(`blackdiamond/cottonwood/bronze/rebalancer_models/<date>/page_000.json` — the served object's own
+`source` field). The rule's description pins the upstream landing at a measured **06:00:43Z**, giving
+~59m of margin before the 07:00Z fire. **A late or absent upstream on any given day is exactly the
+"fired but did not write" shape**, and it presents at the artifact identically to a dead trigger.
+
 ⚠ **BOUND ON THE VersionId LIMB:** a VersionId is a **lease, not provenance** — under a noncurrent-expiry lifecycle the pre-fire versions age out. Over the hours this criterion is scored, that does not bite; **do not carry this table forward as evidence weeks later.** The `LastModified` + `ETag` limbs are not subject to it.
 
 ---

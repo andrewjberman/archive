@@ -139,6 +139,21 @@ the ad-hoc write" — this is the value it means; a cold reader could not otherw
 - **A 3rd version at ~07:00Z with a new ETag => fired.** Corroborate with step 2 before filing PASS.
 - **`head-object` error => BROKEN READ**, neither pass nor fail. Say which you got.
 
+**(b2) ⛔ "UNCHANGED LastModified == NO SCHEDULED FIRE" IS TRUE IN ONE BRANCH AND FALSE IN THE OTHER,
+AND THE TWO ROUTE TO DIFFERENT LANES.** An unchanged clock has **two** causes:
+```
+  no invocation record at ~07:00Z  ->  THE TRIGGER DID NOT FIRE.  AE/infra fault. This lane.
+  an invocation record at ~07:00Z  ->  THE TRIGGER FIRED AND THE PRODUCER DID NOT WRITE.
+                                       DS/producer fault. NOT this lane, and NOT an AC3 trigger failure.
+```
+>> ⛔ **SO STEP 2 IS NOT "CORROBORATION FOR A PASS" — ON THE FAIL BRANCH IT IS THE ONLY DISCRIMINATOR
+THERE IS.** Reading step 4 alone and filing "the schedule did not fire" on an unchanged clock sends an
+investigation at the trigger — which this addendum's section (c) has just measured to be intact — while
+the actual fault sits in a producer owned by another lane. **Score step 2 BEFORE writing either verdict,
+not only when confirming a pass.** ⚠ Relevant because the producer reads a **dated upstream**
+(`.../rebalancer_models/<date>/page_000.json`; the rule's own description pins the upstream landing at
+~06:00:43Z, ~59m of margin) — a late or absent upstream is exactly the "fired but did not write" shape.
+
 **(c) THE INVOKE CHAIN WAS RE-READ LIVE AND IS INTACT** — `describe-rule` `ENABLED` / 1 target on the
 producer / **and the Lambda RESOURCE POLICY allows `events.amazonaws.com` conditioned on this exact
 rule ARN.** ⭐ That third read is the one worth having: a rule can be ENABLED with a correct target
