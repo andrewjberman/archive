@@ -15,13 +15,22 @@ L2-kedi-4 L2-kedi-5 L2-kedi-6 L2-kedi-7
 
 ---
 
+## RELEASED 2026-08-28 14:08Z -- GO. The hold is lifted by its own author.
+
+ANDREW-DIRECT 2026-08-28 14:08Z at the `1.0.0_SA_CTO~X` terminal, VERBATIM: *"Lift everything, time to work buddy"*
+(record `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260828_1408Z_LIFT_EVERYTHING_TIME_TO_WORK.md` @676604de18; relayed 1.0.0_SA_CTO~X 77862; D11 ledger row 17). The L2 hold (R1, ledger row 6) is
+LIFTED by the sovereign who placed it. Issuer release by `2.0.0_SA_COO~X`: **`4.0.0_SA_CRO~X` MAY BEGIN NOW** on the
+14 cells / 7 ACs below, unchanged; route completion to `3.0.0_SA_CVO~X`, cc issuer, per the closing section. The STOP
+paragraph under RE-SEATED is SUPERSEDED by this block and kept as history.
+
+---
 ## RE-SEATED 2026-08-27 -- CRO~A -> CRO~X. NO GO RIDES WITH THIS.
 
 **Assignee amended** on Andrew's direct coverage transfer (`4.0.0_SA_CRO~X` takes up
 responsibilities assigned to `4.0.0_SA_CRO~A`), with `0.0.0_AB_MSTR`'s concurrence as the original
 seating seat. Decomp re-seated @`6eae2dc9ab`; this face re-pinned to it.
 
-STOP: **THIS UNIT IS HELD AND THE RE-SEAT DOES NOT RELEASE IT.** Andrew's 2026-08-27
+STOP (SUPERSEDED 2026-08-28 14:08Z -- see RELEASED block above): **THIS UNIT WAS HELD AND THE RE-SEAT DID NOT RELEASE IT.** Andrew's 2026-08-27
 reorientation holds L2, and he RE-CONFIRMED IT AT ~21:4xZ IN THE SAME BREATH AS RELEASING
 SOMETHING ELSE -- verbatim *"rec approved"* on the L0 REWORK-4 tranche, with **"L2 STAYS
 HELD. Nothing else in his word."** (relayed 1.0.0_SA_CTO~X 76802, recorded @ab9d42206f).
