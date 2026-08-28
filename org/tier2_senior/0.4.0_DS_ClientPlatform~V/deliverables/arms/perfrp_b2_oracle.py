@@ -46,7 +46,14 @@ def check(name, cond, detail=""):
         FAILS.append(name)
 
 
-dates = trading_days_between("2024-07-08", "2024-11-07")
+_emitted_head = json.load(open(EMIT / "perfrp_performance_account.json", encoding="utf-8"))
+# The window is READ FROM THE PAYLOAD, never typed here. A typed date beside a derived
+# one goes stale the moment the emission moves -- and it did: the return-series start is
+# one trading day after the SI floor (a first return needs a prior-day BMV), so a hard
+# "2024-07-08" start would now compare an 88-day oracle against an 87-day emission and
+# report a defect that is the ARM's, not the product's.
+dates = trading_days_between(_emitted_head["window"]["return_series_start"],
+                             _emitted_head["window"]["window_end"])
 per_acct, per_status, fb = {}, {}, 0
 for d in dates:
     o = S3.get_object(Bucket="opal-data-49financial",
@@ -154,6 +161,23 @@ check("both NOT_COMPUTED reasons present", c.get("NOT_COMPUTED_INPUTS_PRESENT", 
       and c.get("NOT_COMPUTED_INPUTS_ABSENT", 0) > 0, str(c))
 check("no unrecognised upstream status", emitted["window"]["unrecognised_upstream_status"] == {},
       str(emitted["window"]["unrecognised_upstream_status"]))
+
+# REACHABILITY. The first SI emission put expected_trading_days at 88 while the plane's
+# first day cannot carry a return, so max days_present was 87 and COMPUTED was reachable
+# by NOTHING -- 0 of 4,665. Every account read COMPUTED_PARTIAL and the state carried no
+# information. A control set is only sound when both arms can be reached from different
+# truths, so this asserts BOTH are populated, not merely that the enum exists.
+check("COMPUTED is REACHABLE (not an unreachable arm)", c.get("COMPUTED", 0) > 0,
+      "%d accounts at full coverage" % c.get("COMPUTED", 0))
+check("COMPUTED_PARTIAL is also populated (the arm still discriminates)",
+      c.get("COMPUTED_PARTIAL", 0) > 0, "%d accounts" % c.get("COMPUTED_PARTIAL", 0))
+_dp = [e["days_present"] for e in emitted["entries"] if e.get("days_present") is not None]
+check("at least one account reaches expected_trading_days",
+      max(_dp) == emitted["window"]["expected_trading_days"],
+      "max days_present %d vs expected %d" % (max(_dp), emitted["window"]["expected_trading_days"]))
+check("the floor day is declared, not silently dropped",
+      "floor_days_excluded_no_prior_bmv" in emitted["window"],
+      "excluded %s" % emitted["window"].get("floor_days_excluded_no_prior_bmv"))
 
 print("=" * 78)
 print("CENSUS E -- EXTREME DAILY RETURNS (not an arm: a QUALITY OBSERVATION)")
