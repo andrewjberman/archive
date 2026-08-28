@@ -161,6 +161,39 @@ and still never invoke, because the resource policy is a **separate object `desc
 see** — and that failure presents at 07:00Z as a non-fire, indistinguishable from a producer fault.
 ⛔ **All three are APPLIED, not EXERCISED. This discharges nothing.**
 
+**(d) ⛔ THE LAMBDA'S ONLY RECORDED INVOCATION FAILED — SO "A LOG STREAM APPEARED" IS NOT STEP 2.**
+`describe-log-streams` returns **exactly one** stream: an ad-hoc `--dry-run` at 01:39:10Z that ended
+`[ERROR] ... BLOCKED: no roster partition at .../2026-08-28/page_000.json (S3 said AccessDenied).
+REFUSING to walk`. ⛔ **This function has NEVER successfully written the registry** — both object
+versions in (b) are **DS's authorized QA act, a different principal**, so "the producer already wrote
+it once" is NOT available as a positive control. **Read step 2 as "an invocation record AND a
+successful write", never as "a stream exists".**
+
+**THE 01:39Z FAILURE IS BENIGN AND NO PRE-FIRE ACT IS REQUIRED — falsified on the role's own policy**
+(not `comp-iam`, which models `(action)` never `(action,resource)` and fails green):
+```
+  GetObject  opal-data-assets/blackdiamond/cottonwood/bronze/rebalancer_models/*   ALLOW  <- 07:00Z read
+  PutObject  opal-data-cot/platinum/satellites/registry.json                       ALLOW  <- the write
+  ListBucket opal-data-assets                                                      ABSENT <- the cause
+  cross-firm-bucket-deny: scoped to opal-data-bd + opal-data-inf ONLY -- reaches neither bucket here
+```
+⭐ **Missing `ListBucket` makes S3 render a MISSING KEY as `AccessDenied` instead of `404`.** Split
+confirms it: my own credentials get **404** on the same `2026-08-28` key the role got `AccessDenied`
+on. Positive control: the `2026-08-27` partition **exists at `LastModified 2026-08-27T06:00:43Z`** —
+the very upstream landing this rule's description is built on.
+
+>> ⛔ **CONSEQUENCE FOR THE SCORER: the producer's message ASSERTS ABSENCE FROM A DENIAL**, and that is
+sound only because `ListBucket` is missing — invisible in the text. **`AccessDenied` on the roster key
+at 07:00Z means UPSTREAM LATE/ABSENT (an upstream/DS matter), NOT an IAM fault at this lane.** The
+discriminator is `iam get-role-policy`, **measured green at 04:5xZ**. **Do not open an IAM incident at
+`0.7.0_AE_CloudOps` off that log line without re-running it.**
+
+⭐ **AND STEP 2 IS STRONGER THAN THE RECIPE CLAIMS:** the producer logs `INVOKE: argv=[...]
+event_keys=[...]`. The ad-hoc run recorded `event_keys=['dry_run']`; a scheduled fire delivers the
+EventBridge scheduled-event envelope, so **`event_keys` speaks to TRIGGER SOURCE, not just timing.**
+⚠ Expected shape, **NOT measured** — this function has never received a scheduled event. **Read the
+real value at 07:00Z.** If it reads `['dry_run']` again, someone ran a banned ad-hoc.
+
 ## WHAT IS **NOT** YOURS
 
 - ⛔ **The producer itself.** That is `TO-5-DS` at `0.4.0_DS_ClientPlatform~L`. Do not write, re-write,

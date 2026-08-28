@@ -103,6 +103,74 @@ JSON body, all 2196 bytes        top-level keys are exactly:
 
 ---
 
+## 3a. ⛔ THE INVOCATION BASELINE — AND THE LAMBDA'S ONLY RECORDED RUN **FAILED**
+
+**I went looking for a positive control and found it does not exist.** `describe-log-streams` on
+`/aws/lambda/cot-satellites-registry-producer` returns **exactly one** stream. Its full contents:
+
+```
+START RequestId: 1c441915-914a-4e5a-a58f-b1d3f3778aae Version: $LATEST
+[INFO] 2026-08-28T01:39:10.547Z  INVOKE: argv=['--dry-run'] event_keys=['dry_run']
+OK: as_of=2026-08-28 (resolved today-UTC)
+[ERROR] RegistryProducerError: BLOCKED: no roster partition at
+        s3://opal-data-assets/blackdiamond/cottonwood/bronze/rebalancer_models/2026-08-28/page_000.json
+        (S3 said AccessDenied). REFUSING to walk
+```
+
+>> ⛔ **THIS LAMBDA HAS NEVER SUCCESSFULLY WRITTEN THE REGISTRY.** The two object versions in section 1
+were written by **DS's authorized QA act, a different principal** — the TO says so explicitly (*"The
+first QA write ... is DS's act, once"*). **So "the producer wrote it once already" is NOT available as
+a positive control for the 07:00Z fire**, and I nearly leaned on it.
+
+>> ⛔ **TRAP FOR THE AC3 SCORER: A LOG STREAM AT ~07:00Z PROVES INVOCATION, NOT SUCCESS.** The stream
+that already exists is a **failure**. Recipe step 2 must be read as *"an invocation record AND a
+successful write"*, never as *"a stream appeared."*
+
+### The failure is BENIGN, and here is the instrument that settles it
+
+I treated "the 07:00Z fire will fail on IAM" as a live hypothesis and **falsified it on the
+authoritative instrument** — the role's own policy documents, not `comp-iam` (which models `(action)`
+never `(action, resource)` and **fails green**):
+
+| grant on `cot-satellites-registry-producer-role` | state |
+|---|---|
+| `s3:GetObject` on `opal-data-assets/blackdiamond/cottonwood/bronze/rebalancer_models/*` | **ALLOW** — the 07:00Z read path |
+| `s3:PutObject` on `opal-data-cot/platinum/satellites/registry.json` | **ALLOW** — the write path |
+| `s3:ListBucket` on `opal-data-assets` | **ABSENT** |
+| `cross-firm-bucket-deny` | scoped to `opal-data-bd` + `opal-data-inf` only — **does not reach either bucket in this path** |
+
+⭐ **THE ABSENT `ListBucket` IS THE WHOLE EXPLANATION.** Without it, S3 renders a **missing key as
+`AccessDenied` instead of `404`**. Confirmed by the split: with my own credentials the `2026-08-28`
+partition returns **`404 Not Found`**; the role got **`AccessDenied`** on the same key. Same key, two
+principals, two errors — **the difference is `ListBucket`, not `GetObject`.**
+**Positive control:** the `2026-08-27` partition **exists**, `LastModified 2026-08-27T06:00:43+00:00`
+— which is exactly the "measured 06:00:43Z upstream landing" the rule's own description cites.
+
+>> ⭐ **THEREFORE NO PRE-FIRE ACT IS REQUIRED. THE IAM CHAIN IS SOUND** and the 01:39Z error was a
+partition that did not exist yet, not a permission fault.
+
+### ⛔ BUT THE PRODUCER'S ERROR TEXT CONFLATES ABSENT WITH DENIED, AND THEY ROUTE TO DIFFERENT LANES
+
+`BLOCKED: no roster partition at <key> (S3 said AccessDenied)` **asserts absence from a denial.** That
+inference is sound **only because** the role lacks `ListBucket` — a fact invisible in the message. **If
+the role ever lost `GetObject`, the identical sentence would print on a genuine permission failure.**
+
+>> **SO, FOR WHOEVER SCORES AC3:** `AccessDenied` on the roster key at 07:00Z means **upstream late or
+absent — an upstream/DS matter, NOT an IAM fault at this lane.** The discriminating check is the table
+above (`iam get-role-policy`), and it was **measured green at 04:5xZ**. ⛔ **Do not open an IAM incident
+at `0.7.0_AE_CloudOps` off that log line without re-running it.**
+
+### Step 2 is a STRONGER instrument than the recipe claims — the log carries a trigger-source field
+
+The producer logs its own `INVOKE: argv=[...] event_keys=[...]` line. The ad-hoc run recorded
+`event_keys=['dry_run']`. A scheduled EventBridge fire delivers the standard scheduled-event envelope,
+so **`event_keys` will differ** — making it the one field in the log that speaks to **trigger source**
+rather than merely to timing. ⚠ **Stated as an expected shape, NOT a measurement** — this function has
+never received a scheduled event. **Read the actual value at 07:00Z rather than predicting it**; if it
+reads `['dry_run']` again, someone ran an ad-hoc, which is banned.
+
+---
+
 ## 4. THE NON-FIRE REPORTING OBLIGATION — restated so it survives this seat
 
 Per the TO face and `3.0.0_SA_CVO~Z` (12803): **on a FAIL or a NON-FIRE, report to `3.0.0_SA_CVO~Z` explicitly, and report it against `T5DS-AC6` as well.** `ETFS_SATELLITES.TO-5-DS` is **CLOSED at 5 of 6** and relocated its sixth criterion here; its certification is being **withheld** pending this measurement and **must not be granted as "relocated-and-discharged" on a fire that did not happen.** A silent non-fire leaves `T5DS-AC6` unmet with nothing pointing at it.
