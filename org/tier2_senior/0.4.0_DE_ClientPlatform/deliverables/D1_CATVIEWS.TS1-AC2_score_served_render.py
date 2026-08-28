@@ -139,6 +139,13 @@ MEMBER_ID = "opal_fixed_income"
 RENDERS_SCOPE = "cottonwood"
 ABSENT_SCOPE = "inflection"
 
+# The producer vintage carried by the pre-fix control. A FAIL while as_of is STILL
+# this value means the GOLD rung emitted no new values -- a different fault from
+# "the fix did not work", and the two are indistinguishable from the verdict alone.
+# Reported, never refused on: a vintage that has not moved is the ordinary Monday
+# (and post-holiday) state, and refusing on it false-alarms every such morning.
+CONTROL_AS_OF = "2026-08-27"
+
 # The publisher writes the served object at ~13:50Z. Boundary is UTC.
 PUBLISHER_HOUR_UTC = 13
 PUBLISHER_MINUTE_UTC = 50
@@ -494,6 +501,25 @@ def src_edge(scope: str, base_url: str, bearer: Optional[str]) -> Dict[str, Any]
 # SCORING
 # --------------------------------------------------------------------------
 
+def _frontier_note(now: dt.datetime) -> str:
+    """Expected T-1 trading frontier, via the ONE frontier in lib/trading_calendar.
+
+    Defensive by design: a diagnostic hint must never be able to crash a scorer.
+    If the calendar cannot be loaded the note says so rather than guessing.
+    """
+    try:
+        if REPO_ROOT not in sys.path:
+            sys.path.insert(0, REPO_ROOT)
+        from lib.trading_calendar import calendar_source, expected_last_trading_day
+
+        exp = expected_last_trading_day(now.date())
+        return ("expected last trading day is %s (calendar: %s); today is %s"
+                % (exp.isoformat(), calendar_source(), now.strftime("%A")))
+    except Exception as e:  # noqa: BLE001 -- a hint, never a failure path
+        return ("lib.trading_calendar unavailable (%s), so count trading days by "
+                "hand before concluding" % e)
+
+
 def fmt_states(states: Dict[str, str]) -> str:
     counts = {}
     for v in states.values():
@@ -579,6 +605,22 @@ def score(loader, source_label, control, now, out=sys.stdout):
         print("  RESULT: FAIL  (%d finding(s))" % len(findings), file=out)
         for f in findings:
             print("    ERROR: %s" % f, file=out)
+        stalled = [
+            s for s in (RENDERS_SCOPE, ABSENT_SCOPE)
+            if results[s][0]["as_of"] == CONTROL_AS_OF
+        ]
+        if stalled:
+            print("", file=out)
+            print("    WARN: ATTRIBUTION -- as_of is STILL %s at %s (%d of 2 scopes "
+                  "scored). The publisher wrote a fresh object, so the freshness "
+                  "guard correctly stood down, but the PRODUCER VINTAGE HAS NOT "
+                  "MOVED. A FAIL here may be the gold rung emitting no new values "
+                  "rather than the fix failing -- those are different faults with "
+                  "different owners, and the verdict alone cannot separate them."
+                  % (CONTROL_AS_OF, ", ".join(stalled), len(stalled)), file=out)
+            print("    WARN: resolve it on the TRADING CALENDAR before calling "
+                  "anything broken -- %s. Friday IS Monday's answer."
+                  % _frontier_note(now), file=out)
         print("", file=out)
         return 1
 
