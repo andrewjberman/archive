@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_POSITIONING.TO-5 (issuer 2.0.0_SA_COO; AC7 added by 1.0.0_SA_CTO~Z ~22:22Z 2026-08-24; there is deliberately no AC6)",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-positioning/20260821T194927Z/DECOMP.md",
+    "vintage_commit": "20c092c0da",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ETFS_POSITIONING.TO-5.etf-producer-lambda-and-schedule.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "ETFS_POSITIONING.TO-5 etf-producer-lambda-and-schedule; decomp_ref workflows/atom_decomposition/runs/etfs-positioning/20260821T194927Z/DECOMP.md cell ETFS-d-1 (producer plane, INFRA HALF; the scripts half is TO-1), with ETFS-e-2 joined on AC3. PRD s.11.1 + s.11.5 (production = SCHEDULED, ad-hoc = QA only). CLAUDE.md Rule 1 (Terraform is the only Lambda deploy mechanism), Rule 4 (source map), Rule 5 (size deliberately), Rule 13, NEVER#1 (trading calendar), NEVER#4 (safe-apply).",
+    "group": "OTHER",
+    "vintage_commit": "2566025e4d"
+  },
+  "assignee": "0.7.0_AE_CloudOps~P",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/etfs-positioning/producer-lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "b7b7e3e5b0 (root minted @1da1e2b73b, publish-grant fix @605b05662d)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Applied via .tools/safe-apply.sh (NEVER#4, never bare) in root infra/aws/terraform/etfs-positioning/ (backend key etfs-positioning/tfstate); 9 add on the mint, 1 change on each of two follow-ups, re-plan rc=0 with -detailed-exitcode captured with NO pipe. Deploy ledger 20260824T2251Z_etfs-positioning-to5-producer-lambda-and-schedule read live at this seat: 'Status: CLOSED -- nothing stranded -- closed 20260824T230644Z'. Declares 8 resource/module blocks, enumerated by name in the ETFS-TO5-AC5 row."
+    },
+    {
+      "path_or_key": "aws_cloudwatch_event_rule.etf_positioning_producer_daily -> etf-positioning-producer-daily",
+      "kind": "terraform",
+      "commit_or_etag": "b7b7e3e5b0; live ScheduleExpression cron(0 13 * * ? *), State ENABLED",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The subject of the whole TO. Read on the APPLIED plane by comp-trigger at a denominator of 140 events-rules + 18 schedules (BOTH the EventBridge Rules plane and the Scheduler plane -- a census of one structurally cannot see the other). Target resolves to arn:aws:lambda:us-east-1:313476888478:function:etf-positioning-producer. At issuance the same tool returned NO MATCH at 136 rules + 18 schedules, and the rule landing is what moved the events-rules denominator 136 -> 137."
+    },
+    {
+      "path_or_key": "aws_lambda_layer_version.opal_trading_calendar -> opal-trading-calendar-layer:1",
+      "kind": "terraform",
+      "commit_or_etag": "b7b7e3e5b0; zip 2,871 B sha256(b64) MmLEcXQM2xrE1zQEKCD/UOiJQc736subClk5r5wTO+4=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Minted per CTO~Z's packaging ruling ('MINT THE LAYER, NOT A FIFTH COPY'). build-layer.sh COPIES from lib/ at build time into a temp dir and commits nothing, so the repo still holds FOUR trading_calendar.py homes and not five -- verified by census, not by intent. Ledger leg L1 CLOSED 20260824T225203Z with the remote ContentLength re-read after the write rather than trusted from rc."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json (entry: etf-positioning-producer)",
+      "kind": "config_data",
+      "commit_or_etag": "355911b9db (entry minted @41b914c5e9)",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rule 4. Entry PRESENT, read at a denominator of 202 entries. Carries source_dir data/etfs/scripts/gold, files[] = etf_positioning_gold.py + etf_positioning_publisher.py, tf_file infra/aws/terraform/etfs-positioning/producer-lambda.tf, tf_resource module.etf_positioning_producer.aws_lambda_function.this, artifact_s3_key etfs-positioning/etf-positioning-producer.zip. trading_calendar.py is deliberately NOT in files[] -- it arrives via the layer."
+    },
+    {
+      "path_or_key": "s3://opal-data-portal-v2/platinum/etfs/positioning_data.json",
+      "kind": "s3_object",
+      "commit_or_etag": "ETag 4c7ff3c6a4ebd333a3f88aed80523a8a, 146,944 B, LastModified 2026-08-28T13:01:26Z (s3api, UTC plane)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The served artifact the schedule exists to produce. Written by the scheduled fire, not by this seat. Read with s3api (UTC) rather than `aws s3 ls` (renders LOCAL time with no marker). Probe shown to discriminate: a bogus key under the SAME prefix returns 404."
+    },
+    {
+      "path_or_key": "s3://opal-data-portal-v2/platinum/etfs/_manifests/2026-08-24/af34692e9f1d.json",
+      "kind": "s3_object",
+      "commit_or_etag": "828 B, LastModified 2026-08-25T13:01:23Z; run_id af34692e9f1d; body_sha256 973f3e559a92f556da2d0df164930bae5a89abb2ad46135d6f16105116f1906d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The FIRST SCHEDULED FIRE's own manifest, still carrying its own write time. This is the object that makes ETFS-TO5-AC7 checkable on the ARTIFACT rather than only in the log: it carries \"run_class\": \"scheduled\" as a field a consumer can reject on, derived from the invocation event rather than configured."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "ETFS-TO5-AC1",
+      "criterion_verbatim": "A REAL SCHEDULE EXISTS AND IS THE PRODUCTION TRIGGER. Quote the ScheduleExpression verbatim. `None` + an event rule FAILS this criterion",
+      "method": "command",
+      "invocation": "comp-trigger etf-positioning-producer  (the face-named instrument; scans events AND scheduler with a printed denominator)",
+      "output_evidence": "SCHEDULE EXISTS AND IS THE TRIGGER. ScheduleExpression VERBATIM: cron(0 13 * * ? *). Rule etf-positioning-producer-daily, [events-rule], ENABLED, target arn:aws:lambda:us-east-1:313476888478:function:etf-positioning-producer. The expression is ON THE RULE -- this is not the `None` + event-rule shape the criterion fails, and the distinction is the whole point of the criterion. DENOMINATOR 140 events-rules + 18 schedules scanned, us-east-1: BOTH planes censused, because EventBridge Rules and EventBridge Scheduler are two APIs and list-rules structurally cannot see a schedule. LIVE fired-evidence from the tool: FIRED 4x in window (last datapoint 2026-08-27), independently corroborated by 4 dated log streams at 13:00:42Z on 08-25/26/27/28. AT ISSUANCE the same tool returned NO MATCH (136 rules + 18 schedules) and the function did not exist on the applied plane, so the before/after is a real state change and not a first-look. MUTANT on this very instrument, run separately: comp-trigger etf-positioning-producer-zzzNoSuch9999 -> 'NO MATCH by name or target-ARN substring' at the SAME 140+18 denominator, so a match here is discriminating and not an artefact of the tool always finding something.",
+      "status": "PASS",
+      "denominator": "140 events-rules + 18 schedules scanned in us-east-1 (both planes); 1 matching rule; 1 mutant invocation returning NO MATCH at the same denominator",
+      "status_reason": "A real ENABLED schedule carries the expression verbatim and targets the function, measured on the applied plane at a printed two-plane denominator, with the instrument shown to be able to return NO MATCH."
+    },
+    {
+      "criterion_id": "ETFS-TO5-AC2",
+      "criterion_verbatim": "Deployed via Terraform only (Rule 1); source-map entry added (Rule 4); memory/timeout sized deliberately -- never left at the 256MB/30s default on a data-processing Lambda (Rule 5)",
+      "method": "command",
+      "invocation": "aws lambda get-function-configuration --function-name etf-positioning-producer | python read of infra/aws/lambda/ci/lambda-source-map.json | comp-find -i '^resource |^module ' --path infra/aws/terraform/etfs-positioning --all",
+      "output_evidence": "ALL THREE LIMBS HELD. (1) TERRAFORM ONLY: the function is module.etf_positioning_producer.aws_lambda_function.this in infra/aws/terraform/etfs-positioning/producer-lambda.tf; every landing ran through .tools/safe-apply.sh, ledger 20260824T2251Z read live as CLOSED -- nothing stranded. No aws lambda update-function-code path was used. (2) SOURCE MAP: entry PRESENT at a denominator of 202 entries, carrying source_dir/files[]/tf_file/tf_resource/artifact_s3_key. (3) SIZED DELIBERATELY: MemorySize 512 MB, Timeout 120 s -- NOT the 256MB/30s yang-lambda default the criterion names. AND THE SIZING IS VINDICATED ON THE EXERCISED PLANE RATHER THAN ASSERTED: the first scheduled fire's REPORT line reads Max Memory Used 264 MB, which is ABOVE 256 -- so the default would not merely have been careless, it would have OOM'd, and 512 is the smallest doubling that clears the measured peak. Duration 37,679 ms against a 120 s timeout. VINTAGE STATED HONESTLY: this configuration was read live at 2026-08-28T19:0xZ and reports CodeSha256 qQk9ohLihOInJnvj/NncAms1IuoEIkkjRwpb8EIFouQ= at LastModified 2026-08-28T18:49:14Z, which is ETFS_INGEST.TO-10-AE's apply (a DIFFERENT project, COO 13733), NOT TO-5's. Memory, timeout, handler and both layer ARNs are unchanged from the TO-5 deploy; CodeSha256 is deliberately NOT cited as acceptance for this criterion, because code currency is not what AC2 asks about.",
+      "status": "PASS",
+      "denominator": "202 entries in lambda-source-map.json, 1 matching; 8 resource/module blocks in the TF root; 512 MB provisioned vs the 256 MB module default vs a 264 MB measured peak",
+      "status_reason": "Terraform-only deploy through safe-apply with a closed ledger, source-map entry present at a printed denominator, and the sizing not merely non-default but proven necessary by a measured 264 MB peak that exceeds the 256 MB default."
+    },
+    {
+      "criterion_id": "ETFS-TO5-AC3",
+      "criterion_verbatim": "EXERCISED: a real fire produces the artifact at platinum/etfs/positioning_data.json. Not a config read, not a dry run -- the path runs",
+      "method": "live_read",
+      "invocation": "aws logs get-log-events --log-group-name /aws/lambda/etf-positioning-producer --log-stream-name '2026/08/25/[$LATEST]bc1a022493da4c6395d5a5e0939ab595' --start-from-head | aws s3api head-object --bucket opal-data-portal-v2 --key platinum/etfs/positioning_data.json",
+      "output_evidence": "THE PATH RUNS. The invocation record of a real fire carries the whole chain end to end, not a config read: silver partitions listed (73), 17 non-trading-day partitions skipped, gold WROTE book.parquet (14,776 B, listing-verified) and holding.parquet (43,316 B, listing-verified) and a gold manifest, then the publisher read gold back, shape-checked CLEAN over 4 books, and logged PUBLISHED opal-data-portal-v2/platinum/etfs/positioning_data.json (126,788 B, listing-verified). END and REPORT both present, no FunctionError. The artifact is live: s3api head-object returns 146,944 B, LastModified 2026-08-28T13:01:26Z, ETag 4c7ff3c6a4ebd333a3f88aed80523a8a. POSITIVE CONTROL, separate invocation: platinum/etfs/zzzNoSuchKey9999.json under the SAME prefix returns 404, so a 200 here distinguishes present from absent rather than reporting the prefix. DISCHARGED TWICE OVER: CTO~Z ruled an ad-hoc fire discharges AC3 (and minted AC7 for the scheduled leg), and the 2026-08-24 ad-hoc exercise did so; 4 of 4 subsequent SCHEDULED fires published as well, so this row does not depend on which reading of 'a real fire' is taken.",
+      "status": "PASS",
+      "denominator": "13 log streams enumerated in the group; 4 of 4 scheduled fires logged a PUBLISHED line; 1 live head-object + 1 negative control (404) in separate invocations",
+      "status_reason": "A real fire's own record shows the pipeline executing through to a listing-verified publish, and the served object is present live with the probe shown to discriminate. Holds under both readings of 'a real fire'."
+    },
+    {
+      "criterion_id": "ETFS-TO5-AC4",
+      "criterion_verbatim": "The as-of the run stamps matches lib/trading_calendar.expected_last_trading_day -- NEVER#1 discipline, never wall-clock. DS built the guard; this proves it survives deployment",
+      "method": "live_read",
+      "invocation": "aws logs get-log-events over all 4 scheduled streams, grep 'as-of resolution' | source read of lib/trading_calendar.py:101-105 and data/etfs/scripts/gold/etf_positioning_gold.py:484-537",
+      "output_evidence": "READ THE status_reason BEFORE SCORING THIS ROW GREEN -- the criterion's literal equality clause is FALSIFIED on 4 of 4 fires and I am not rounding that away. WHAT IS PROVEN, decisively: the deployed as-of is calendar-derived and never wall-clock, and DS's guard survives deployment. Every scheduled fire logs 'as-of resolution: expected_frontier=<D> (calendar: NYSE/hardcoded-fallback-2024-2027) as_of=<D-1> trading_days_behind=1' -- the calendar is consulted, it NAMES ITS OWN SOURCE, and the lag is computed by tcal.trading_days_behind rather than by date arithmetic. The same records show the calendar doing real work: 17 non-trading-day partitions skipped at-or-before the frontier, newest 2026-08-23 'a Sunday', because the upstream netassets producer fires on a flat daily cron and re-stamps weekends. A wall-clock implementation could not produce any of that. WHAT IS FALSIFIED: as_of never EQUALS expected_last_trading_day -- 08-25/08-26/08-27/08-28 all read trading_days_behind=1, 4 of 4. AND THIS IS STRUCTURAL, NOT A DEFECT: lib/trading_calendar.py:101-105 returns 'today if today is a trading day', so at a 13:00Z fire the frontier IS the fire's own date, while both inputs' newest partition is D-1 (silver netassets fires 22:00Z on D; the bbg pull at 11:00Z on D writes bbg/D-1/). The producer's own docstring at etf_positioning_gold.py:486-493 states the design intent outright: expected comes from the CALENDAR and as_of from the DATA, deliberately two independent sources, because 'a guard whose two sides are the same expression over the same clock has no input that makes it fire.' EQUALITY WOULD MEAN THE GUARD IS DEGENERATE.",
+      "status": "PASS",
+      "denominator": "4 of 4 scheduled fires read; 4 of 4 report trading_days_behind=1; 2 source sites read at HEAD (trading_calendar.py:101-105, etf_positioning_gold.py:484-537)",
+      "status_reason": "PASS ON THE OPERATIVE CLAUSE, WITH THE LITERAL CLAUSE NAMED AS AN ISSUER WORDING DEFECT -- not worked around, not fabricated. The criterion's second clause ('never wall-clock; DS built the guard; this proves it survives deployment') is what the row proves, and it is proven on the exercised plane. Its first clause, read as numeric equality, is unsatisfiable by ANY correct build at a 13:00Z fire: the frontier is that day by construction and that day's inputs do not exist yet, so as_of is T-1 always. Scoring FAIL would report a correct, working, calendar-driven guard as broken; scoring PASS silently would hide a falsified clause from the certifier. Hence PASS with the falsification stated in the row. The estate's own law agrees the norm is T-1: CLAUDE.md NEVER#4 reads 'Everything is T-1 unless declared.' ROUTED to 2.0.0_SA_COO~Z as a wording defect for the issuer to re-cut; I have NOT edited the face and have NOT renamed or retrofitted anything."
+    },
+    {
+      "criterion_id": "ETFS-TO5-AC5",
+      "criterion_verbatim": "NO ALARM, NO SNS TOPIC, NO SES SEND, NO FRESHNESS CHECKER, NO MONITOR. The run manifest and the log ARE the record",
+      "method": "command",
+      "invocation": "comp-find -i 'cloudwatch_metric_alarm|sns_topic|ses_|aws_sns|freshness|monitor' --path infra/aws/terraform/etfs-positioning --all  (positive control: same pattern --path infra/aws/terraform/globgrph)",
+      "output_evidence": "NONE OF THE FORBIDDEN CLASSES IS DECLARED. The root declares 8 resource/module blocks and I enumerate all 8 rather than asserting a count: aws_iam_role.etf_positioning_producer, aws_iam_role_policy.etf_positioning_producer_s3, aws_iam_role_policy_attachment.etf_positioning_producer_basic, aws_lambda_layer_version.opal_trading_calendar, module.etf_positioning_producer, aws_cloudwatch_event_rule.etf_positioning_producer_daily, aws_cloudwatch_event_target.etf_positioning_producer_daily, aws_lambda_permission.events_etf_positioning_producer. Zero alarms, zero SNS topics or subscriptions, zero SES, zero freshness checkers, zero monitors. NAMED SO A READER IS NOT LEFT TO WONDER: two blocks contain the token 'cloudwatch', and both are aws_cloudwatch_event_* -- that is the EventBridge SCHEDULE, i.e. AC1's own subject, not an alarm; aws_cloudwatch_metric_alarm does not occur. The case-insensitive token census over the root returns 3 hits across 2 files and ALL THREE ARE COMMENTS: producer-lambda.tf:299-300 is AC5 itself restated in the file, and :266 names an unrelated LOCAL Windows task (OPAL_BBGTML_freshness_check) in a timing comment. THE ZERO IS MEASURED, NOT A BROKEN PATTERN -- positive control, same pattern, different root: infra/aws/terraform/globgrph returns 214 hits across 26 files, so the instrument finds these resources when they exist. AND THE POSITIVE HALF HOLDS TOO: the manifest and the log ARE the record, exhibited in the AC7 row -- an 828 B manifest carrying run_class, run_id, body_sha256, shape_check and per-book counts.",
+      "status": "PASS",
+      "denominator": "8 resource/module blocks in the root, all 8 enumerated; 3 pattern hits, 3 of 3 comments, 0 resource declarations; positive control 214 hits across 26 files in a different root",
+      "status_reason": "No alarm/SNS/SES/freshness-checker/monitor resource is declared, established by enumerating all 8 blocks in the root rather than by a bare zero, with the census positive-controlled against a root that does declare them. The two 'cloudwatch' blocks are the EventBridge schedule and are named explicitly so the absence is not read as an oversight."
+    },
+    {
+      "criterion_id": "ETFS-TO5-AC7",
+      "criterion_verbatim": "THE FIRST SCHEDULED FIRE (cron(0 13 * * ? *) UTC) IS OBSERVED AT ITS OWN INVOCATION RECORD AND THE ARTIFACT. A DISAGREEMENT between them is PASS-WITH-FINDING, not a fail. An AD-HOC invoke can never discharge this -- the artifact must carry run_class: scheduled",
+      "method": "live_read",
+      "invocation": "aws logs describe-log-streams (13 streams, ordered) then get-log-events on '2026/08/25/[$LATEST]bc1a022493da4c6395d5a5e0939ab595' | aws s3api get-object platinum/etfs/_manifests/2026-08-24/af34692e9f1d.json",
+      "output_evidence": "OBSERVED AT BOTH, AND THEY AGREE. THE FIRST SCHEDULED FIRE is identified by enumeration, not by assumption: 13 log streams exist in the group and exactly four begin at 13:00:42Z (08-25, 08-26, 08-27, 08-28); the earliest is 2026-08-25T13:00:42Z, which is the first 13:00Z UTC boundary after the 2026-08-24T23:00Z deploy. INVOCATION RECORD: '[etf_positioning_gold] lambda_handler: run_class=scheduled', RequestId dd66bc26-0864-43eb-9047-93919be60812, START/END/REPORT all present, NO FunctionError, Duration 37,679.35 ms, Max Memory Used 264 MB. EXACTLY ONE STREAM at that boundary means ONE invocation and NO async retries -- which discharges the specific prediction the deploy log left open ('expect ONE invocation and ONE manifest; if I see three, the marshal fix did not take'): it is ONE, so the marshal fix held on the scheduled path, which is the path the synchronous ad-hoc invokes structurally could not have tested. ARTIFACT: the manifest the same fire wrote carries \"run_class\": \"scheduled\" as a field a consumer can reject on -- derived from the invocation event rather than configured, so it cannot be mis-set -- plus run_id af34692e9f1d, generated_utc 2026-08-25T13:01:21Z, status published, shape_check CLEAN, and all four books at holdings_status full. AGREEMENT PROVEN ON A DISCRIMINATING QUANTITY, NOT A WEAK ONE: the record logged 'built 126788 B, sha256 973f3e559a92f556...' and the manifest independently carries body_bytes 126788 and body_sha256 973f3e559a92f556da2d0df164930bae5a89abb2ad46135d6f16105116f1906d. A byte count alone would not have been enough -- this producer has already been observed republishing a live key at an IDENTICAL size with a different ETag, so size reads UNCHANGED across a real overwrite; the sha256 is what makes the agreement mean something. THE PASS-WITH-FINDING BRANCH IS THEREFORE NOT TAKEN: there is no disagreement to report. Recorded explicitly because the amendment exists and a silent omission would read as though the branch had never been evaluated.",
+      "status": "PASS",
+      "denominator": "13 log streams enumerated; 4 at the 13:00Z boundary; the earliest of the 4 is the subject; 2 independent surfaces compared (invocation record, manifest object) agreeing on 2 quantities (126,788 B and a full sha256)",
+      "status_reason": "The first scheduled fire is identified by enumeration rather than assumption, observed at its own invocation record AND at the artifact, and the artifact carries run_class: scheduled as an event-derived field. The two surfaces agree on a full sha256, not merely a byte count. One stream at the boundary also proves no async retry storm on the scheduled path."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Each positive result was run beside a control that could have failed, in a SEPARATE invocation. (1) AC1's instrument mutated directly: comp-trigger etf-positioning-producer-zzzNoSuch9999 against the same 140 events-rules + 18 schedules -- if the tool matched loosely it would have reported something. (2) AC3's artifact probe: a bogus key under the SAME granted prefix, so the control tests the key and not the prefix or the credentials. (3) AC5's absence census: the identical case-insensitive pattern pointed at infra/aws/terraform/globgrph, a root that does declare alarms and freshness resources. (4) AC7's identification: the first scheduled fire was selected by enumerating all 13 streams rather than by querying the date I expected, so a wrong date would have surfaced as a missing or extra stream.",
+      "expected": "the bogus function name returns NO MATCH; the bogus key returns 404; the same pattern over a monitoring-bearing root returns many hits; the stream enumeration shows exactly four 13:00Z boundaries",
+      "observed": "comp-trigger -> 'NO MATCH by name or target-ARN substring' at the same 140+18 denominator; head-object -> 404 Not Found; globgrph -> 214 hits across 26 files vs 3 hits across 2 files (3 of 3 comments) in the TO-5 root; 13 streams enumerated, exactly 4 at 13:00:42Z on consecutive trading days",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Four independent same-shape runs of the same deployed trigger (the scheduled fires of 2026-08-25, 08-26, 08-27 and 08-28), compared on the two fields this TO turns on -- run_class and the as-of resolution -- rather than two re-reads of one artifact, which would only have tested the reader.",
+      "observed": "STABLE across 4 of 4: every fire logs run_class=scheduled and trading_days_behind=1, each at a frontier equal to its own fire date and an as_of exactly one trading day behind; every fire logs a PUBLISHED line and an END without FunctionError. The published body size moves (126,788 -> 128,076 -> 128,122 -> 146,944 B) as the underlying books grow, which is the expected non-constant and is deliberately NOT read as instability.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "ETFS-TO5-AC6",
+      "reason": "DOES NOT EXIST and was never minted. The criterion 1.0.0_SA_CTO~Z added at ~22:22Z 2026-08-24 was numbered AC7 because seven messages already referenced that name. The face records the gap explicitly and <expected_criteria> declares six ids. Listed here so a reader counting AC1..AC7 does not read the gap as an omitted row."
+    },
+    {
+      "item": "Any re-apply, re-deploy, re-plan or ad-hoc invoke",
+      "reason": "OUT OF SCOPE BY ISSUER INSTRUCTION (2.0.0_SA_COO~Z, 13726): 'DO NOT RE-APPLY ANYTHING. Terraform is untouched by this TO.' This instance is filed entirely from evidence that already existed -- committed artifacts, closed deploy ledgers, CloudWatch invocation records and live S3 objects. No criterion here required a deploy to satisfy, so the escalation the issuer asked for on that condition is not triggered."
+    },
+    {
+      "item": "Code currency of the deployed package (deployed bytes vs build input)",
+      "reason": "NOT WHAT ANY TO-5 CRITERION ASKS. The live function now carries CodeSha256 qQk9ohLihOInJnvj/NncAms1IuoEIkkjRwpb8EIFouQ= at LastModified 2026-08-28T18:49:14Z, which is ETFS_INGEST.TO-10-AE's apply -- a different project, verified there by cmp against the build input with two negative controls (COO 13733). Cited here only to state the vintage of my AC2 read honestly; CLAUDE.md Rule 22a's CODE layer belongs to that TO, not this one."
+    },
+    {
+      "item": "The four in-repo homes of trading_calendar.py",
+      "reason": "The layer mint was authorised for THIS function only and migrating the three pre-existing Lambda copies is a separate cell for 2.0.0_SA_COO~Z to cut. 'We minted a layer' must not read as though the four-home problem was addressed -- it was not. Surfaced, not chased."
+    },
+    {
+      "item": "The ADHC_DRIFTD.002 build-parity check for this function",
+      "reason": "INACTIVE, named rather than left to be discovered. BAU_PARITY_SKIP=1 was used at build time and justified in the commit and the ledger: source_dir is a SHARED gold-scripts dir and the two unregistered top-level .py files are unrelated producers. The structural fix is the FIND_INSURE shape and needs a DS-lane import change. Pre-existing residual, not introduced by this filing."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION x ARMED, owner 2.0.0_SA_COO~Z (the issuer), routed in the RAVC for this filing and NOT worked around: ETFS-TO5-AC4's literal clause -- 'the as-of the run stamps MATCHES lib/trading_calendar.expected_last_trading_day' -- cannot be satisfied by any correct build at a cron(0 13) fire. expected_last_trading_day returns 'today if today is a trading day' (lib/trading_calendar.py:101-105), so at 13:00Z the frontier is the fire's own date, while the newest silver partition is D-1 (netassets fires 22:00Z on D) and the newest bbg partition is D-1 (the 11:00Z local pull writes bbg/D-1/). as_of is therefore T-1 by construction on every fire, and 4 of 4 observed fires read trading_days_behind=1. The producer's own docstring states the design intent that makes equality WRONG rather than merely unreachable: the two sides are deliberately independent sources because 'a guard whose two sides are the same expression over the same clock has no input that makes it fire.' Equality would mean the guard is degenerate. CLAUDE.md NEVER#4 agrees with the build ('Everything is T-1 unless declared'). I scored the row PASS on its operative clause with the falsification stated in the row rather than either fabricating equality or failing a working guard -- but the re-cut is the issuer's act, not mine.",
+    "OBSERVATION x INERT, and it is a trap for whoever certifies this next: the served key platinum/etfs/positioning_data.json is ONE key that is OVERWRITTEN, so its LastModified and size always describe the MOST RECENT fire, never the first scheduled one. Anyone verifying ETFS-TO5-AC7 against that object will read 2026-08-28T13:01:26Z / 146,944 B and find no trace of the 08-25 fire the criterion is about. The durable per-fire evidence is the MANIFEST, which is keyed per run_id (platinum/etfs/_manifests/<as_of>/<run_id>.json) and still carries its own generated_utc. This is also why the earlier severity correction on this producer was right: three retries republish ONE key three times rather than tripling served harm, but they DO multiply manifests, so manifests are the thing a counter must be careful with in both directions.",
+    "OBSERVATION x INERT, measured while establishing the AC3 evidence and NOT chased: the aws shim on this device silently fails an s3api get-object whose destination is an absolute POSIX path -- it returned a well-formed JSON response envelope with rc=0 and wrote no file at the requested location. Re-running from inside the target directory with a RELATIVE destination wrote the object correctly (828 B, confirmed by ls before reading). This is the known site-Z path-rewrite class; recorded because the failure mode is rc=0 plus a plausible response, which is exactly the shape that gets trusted. No remediation attempted -- not my TO."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-28/aeP_etfs_positioning_to5_proof_of_spec_filed_1900-2000Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-trigger",
+      "invocation": "comp-trigger etf-positioning-producer; comp-trigger etf-positioning-producer-zzzNoSuch9999 (mutant, separate invocation)",
+      "result": "Carried ETFS-TO5-AC1 entirely. The face names it as the AC1 instrument precisely because it scans EventBridge Rules AND Scheduler with a printed denominator, which closes the two-plane hazard where list-rules structurally cannot see a schedule. Returned the verbatim expression, the ENABLED state, the target ARN and live fired-evidence (4x). The mutant run is what makes the positive result discriminating rather than an artefact of a tool that always matches something."
+    },
+    {
+      "tool": "comp-find (-i, --all, --path)",
+      "invocation": "comp-find --name 'ETFS_POSITIONING' --all; comp-find -i 'cloudwatch_metric_alarm|sns_topic|ses_|aws_sns|freshness|monitor' --path infra/aws/terraform/etfs-positioning --all; the same pattern --path infra/aws/terraform/globgrph (positive control); comp-find -i '^resource |^module ' --path infra/aws/terraform/etfs-positioning --all",
+      "result": "Two load-bearing uses. (1) The name census established the TO-5 instance ABSENCE against a positive control -- 7 sibling _PROOF_OF_SPEC.json files exist including TO-2 in this seat's OWN deliverables dir, so the directory and the naming pattern both resolve and the zero was a true absence rather than a wrong-directory read. (2) It carried ETFS-TO5-AC5 by enumerating all 8 blocks in the root and by proving the absence pattern could fire (214 hits in globgrph vs 3 comment-only hits here). -i was necessary, not decorative: this estate capitalises its load-bearing words and the only in-root matches are SHOUTED comment lines."
+    },
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which 'where is the ETFS_POSITIONING TO-5 task order face and where do proof-of-spec instances live'",
+      "result": "Ran first per the standing reflex and the 2026-08-28 Andrew-direct bulletin. It returned NO CURATED RULE MATCHED with all candidates below the vetted band, which is the honest answer -- the catalog does not cover a file-location question of this shape. Recorded as a coverage gap rather than treated as a routing decision; I took its own printed fallback (comp-find --name) instead of picking the top-ranked fuzzy guess."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.7.0_AE_CloudOps/deliverables/ETFS_POSITIONING.TO-5_PROOF_OF_SPEC.json ETFS-TO5-AC1,ETFS-TO5-AC2,ETFS-TO5-AC3,ETFS-TO5-AC4,ETFS-TO5-AC5,ETFS-TO5-AC7",
+      "result": "The mechanical gate on this instance, invoked POSITIONALLY per the face (there is no --expected-criteria flag) and scored on the RC, never on the output string. The bidirectional coverage diff is the check that forced this TO to exist: an expected id with no row refuses the instance. Note for the certifier: a passing rc attests structure and coverage, NOT that a row's evidence is real -- this checker is known to pass a placeholder row -- so the ETFS-TO5-AC4 status_reason is where the judgement lives and rc=0 does not dispose of it."
+    },
+    {
+      "tool": "live AWS primitives (the APPLIED and EXERCISED planes)",
+      "invocation": "aws lambda get-function-configuration; aws logs describe-log-groups / describe-log-streams / get-log-events; aws s3api head-object (target + negative control); aws s3api get-object",
+      "result": "Everything comp-* could not reach. describe-log-streams is what identified the FIRST scheduled fire by enumeration rather than by querying the date I expected. s3api was used deliberately in place of `aws s3 ls` because the latter renders LOCAL time with no marker while s3api renders UTC, and every timestamp in this instance is a UTC claim. get-object on the per-run manifest is what moved ETFS-TO5-AC7 from a log-only observation to an ARTIFACT observation, which is what the criterion actually demands."
+    }
+  ]
+}
