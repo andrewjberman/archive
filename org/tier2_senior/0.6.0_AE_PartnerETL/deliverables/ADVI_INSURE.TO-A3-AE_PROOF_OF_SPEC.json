@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_INSURE.TO-A3-AE",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/advi-insure-snapshot-plane/20260825T122500Z/DECOMP.md",
+    "vintage_commit": "80734ba4cf",
+    "to_ref": "org/tier2_senior/0.6.0_AE_PartnerETL/task_orders/ADVI_INSURE.TO-A3-AE.insurance-leg-event-dispatch-and-scheduler.md"
+  },
+  "spec_ref": {
+    "doc": "docs/architecture/ADVI_INSURE_PRD.md",
+    "group": "A",
+    "vintage_commit": "80734ba4cf"
+  },
+  "assignee": "0.6.0_AE_PartnerETL",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "d0f9a8f7e4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Built via the SOURCE-MAP path and deployed by Terraform + safe-apply on a SAVED -target'd plan. Live CodeSha256=JyQp8pROQ0lZFHjQ5NzO4AAaWsVja/MvTmcVrUB9MXw= (CHANGED from D89ozvtWzeQQwwow8iCg2pEyaqhZTtgFbbF/GaYJJPw=), State=Active, LastUpdateStatus=Successful, LastModified=2026-08-28T17:33:01.000+0000. Deployed member read back from the package downloaded post-apply via get-function Code.Location: 20387 bytes, RAW byte-identical AND LF-normalised identical to the build-input source (both stated -- a digest without its normalisation is not an identity on this box). NEVER#6 ledger org/critical_paths/change_management/20260828T1725Z_advi-insure-a3-dispatch-package_deploy_completion.md CLOSED 5/5.",
+      "artifact_covered_by": [
+        "INSA3AE-AC1",
+        "INSA3AE-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/insurance_leg.py",
+      "kind": "script",
+      "commit_or_etag": "d0f9a8f7e4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Same package and same apply. Deployed member 34347 bytes, RAW byte-identical AND LF-normalised identical to source. Carries the run path that did not previously exist (run_insurance_leg) and the pagination limb (fetch_detailsearch_all_pages). Markers counted in the DEPLOYED module: fetch_detailsearch_all_pages x2, run_insurance_leg x1, measured-complete x3, measured-short x2, attested-total-absent x2, MAX_PAGES x3 -- all structurally 0 in the prior deployed artifact version a8RGEOGqhzMJ2qmO88KvHHXonfbyOXME, read as the negative control.",
+      "artifact_covered_by": [
+        "INSA3AE-AC1",
+        "INSA3AE-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.6.0_AE_PartnerETL/deliverables/ADVI_INSURE.TO-A3-AE_dispatch_exercise.py",
+      "kind": "doc",
+      "commit_or_etag": "d0f9a8f7e4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The AC1 exercise harness is EVIDENCE, not a deployable artifact -- it has no deploy surface and is deliberately NOT in the package's source-map files[], so it cannot ship to the Lambda. Committed LOCAL on CLOUD; rides integration.",
+      "artifact_covered_by": [
+        "INSA3AE-AC1"
+      ]
+    },
+    {
+      "path_or_key": "blackdiamond/49financial/bronze/insurance_relationshipaccountdetailsearch/2026-08-28/",
+      "kind": "s3_object",
+      "commit_or_etag": "page0 82136 B / page1 41688 B",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Landed by the ONE bounded human-initiated QA invoke authorised in 2.0.0_SA_COO 78445 (fired 17:43:19Z, returned 17:43:35Z -- BEFORE the 17:45:12Z hold in 78506, disclosed in 78509/78510 and ACCEPTED by 1.0.0_SA_CTO). head-object (s3api, UTC): page0 LastModified 2026-08-28T17:43:25Z with metadata attested-total=77 page-index=0 page-offset=0 rows-on-page=50 rows-cumulative=50; page1 LastModified 2026-08-28T17:43:26Z with attested-total=77 page-index=1 page-offset=50 rows-on-page=27 rows-cumulative=77. QA EVIDENCE ONLY -- it closes no acceptance row.",
+      "artifact_covered_by": [
+        "INSA3AE-AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "INSA3AE-AC1",
+      "criterion_verbatim": "(a) DISPATCH: `lambda_handler` routes `{\"leg\":\"insurance\"}` to the insurance leg's run path and leaves the reporting path byte-identical in behaviour; a bare/unknown event with no `q_start` fails CLOSED with a NAMED reason. Exercised locally on the packaged bytes with THREE arms: `{\"leg\":\"insurance\"}` -> insurance path entered (mocked HTTP, no live call); `{\"q_start\",\"q_end\"}` -> reporting path entered, insurance NOT entered; `{}` -> named refusal, no KeyError. Arms differ on the field under test.",
+      "method": "test_suite",
+      "invocation": "python org/tier2_senior/0.6.0_AE_PartnerETL/deliverables/ADVI_INSURE.TO-A3-AE_dispatch_exercise.py  (rc=0). Arms transcribed from THIS criterion text field by field BEFORE the implementation was consulted. Only the two EXTERNAL boundaries are mocked (lambda_function._request, lambda_function._s3); the dispatch branch, the pagination loop, the completeness verdict and the refusals are the REAL code. DRY_RUN left at its fail-closed default True -- no live call is possible from the harness.",
+      "output_evidence": "5 of 5 arms PASS, quoted verbatim from the run. ARM1 {'leg':'insurance'} -> insurance path entered, reporting NOT entered: 'insurance_entered=True reporting_entered=False pages=2 rows=77 attested=77 completeness=measured-complete bronze_puts=3'. ARM2 {'q_start','q_end'} -> reporting path entered, insurance NOT entered: 'reporting_entered=True insurance_entered=False landed=3 by_feed={\"performance\": 1, \"costbasis\": 1, \"allocation\": 1}'. ARM3 {} -> named refusal, NOT a KeyError: 'RuntimeError, named=True: REPORTING LEG REFUSED -- missing required event key(s): q_start, q_end'. ARM4 {'leg':'bogus'} -> named refusal (unknown leg): \"UNKNOWN LEG 'bogus': this function dispatches on event['leg']\". RED ARM (server attests 77, serves 50) -> 'INSURANCE PULL INCOMPLETE (measured-short): 50 row(s) landed across 2 page(s); vendor-attested total=77 | pages landed anyway=3'. FINAL LINE: 'RESULT: 5 of 5 arms PASS'. CONFIRMED ADDITIONALLY ON THE LIVE PLANE by the QA invoke: the fire's own CloudWatch log carries the BD49F-INSURANCE line and NO BD49F-REPORTING line, so the dispatch discriminates in production bytes and not only under mocks.",
+      "denominator": "5 arms run, 5 passed, 0 failed. The criterion names THREE arms; two were added (ARM4 unknown-leg, and the RED arm) -- supersets of the criterion, never substitutes for it.",
+      "status": "PASS",
+      "status_reason": ""
+    },
+    {
+      "criterion_id": "INSA3AE-AC2",
+      "criterion_verbatim": "(b) DEPLOYED BYTES: package rebuilt via BUILD_MANIFEST, Terraform plan saved and applied via `.tools/safe-apply.sh` (apply counts == plan counts), 0-diff re-plan; the deployed zip re-downloaded and the dispatch resolved via BUILD_MANIFEST (not filename) -- CodeSha256 changed from D89ozvtWzeQQwwow8iCg2pEyaqhZTtgFbbF/GaYJJPw=. Rule-20 graph query recorded BEFORE the change. NEVER#6 ledger opened at deploy-start and CLOSED with every leg proven.",
+      "method": "live_read",
+      "invocation": "bash infra/aws/lambda/ci/build-and-upload.sh opal-assets opal-assets-bd49f-reporting-pull ; .tools/terraform.exe plan -target=module.bd49f_reporting_pull.aws_lambda_function.this -out=<saved plan> ; .tools/safe-apply.sh -chdir=. apply <saved plan> ; .tools/terraform.exe plan -target=<same> ; aws lambda get-function --query Code.Location -> download and read members. Rule-20 BEFORE the change: comp-blast on the function ARN (cloud.blast.what_breaks) and on the source file (trace.blast.what_breaks) per graph-call-manifest.yaml.",
+      "output_evidence": "CodeSha256 CHANGED: live now JyQp8pROQ0lZFHjQ5NzO4AAaWsVja/MvTmcVrUB9MXw=, was D89ozvtWzeQQwwow8iCg2pEyaqhZTtgFbbF/GaYJJPw= -- and it EQUALS the uploaded artifact's content-sha256 metadata, so the running bytes are the built bytes. Saved plan: 'Plan: 0 to add, 1 to change, 0 to destroy' with only s3_object_version (a8RGEOGqhzMJ2qmO88KvHHXonfbyOXME -> IC5y2HSbzkyaL571MXjeThofjQfXcHPs), source_code_hash and last_modified moving; 28 attributes and 4 blocks unchanged, so no env/sizing/schedule/role/trigger rode along -- read from the attribute deltas, not the summary line. Re-plan on the SAME target: 'No changes. Your infrastructure matches the configuration.' DEPLOYED MEMBERS (denominator 6): insurance_leg.py 34347 sha256[:16]=ed2c2c35110ff075, lambda_function.py 20387 sha256[:16]=4eaa66b03ad03684, taxsma_newacc.py 4378, taxsma_registry.py 7581, taxsma_resolver.py 6845, taxsma_seed.py 3970. Rule 22a resolved THROUGH THE BUILD INPUT: every BUILD_MANIFEST.vendored_modules member present, missing NONE. Rule-20 graph read BEFORE the change, with the comp-kuzu provenance header: DB kuzu_nessie_db 27054 nodes/60505 edges, built 2026-08-28T16:13:09Z (age 0.9h), Nessie HEAD current (pin == marker HEAD), graph_nodes last-write 4.3h (< 6h cadence); blast radius 9 downstream nodes all IAM/S3/secret/service-principal and a caller chain of 8 SEMANTIC-ONLY nodes with NO invoker edge -- an independent corroboration, on a different plane, of the census finding that no trigger existed. NEVER#6 ledger 20260828T1725Z_advi-insure-a3-dispatch-package OPENED at deploy-START and CLOSED with all 5 legs proven.",
+      "denominator": "6 declared package members, 6 deployed, 0 missing. 3 BUILD_MANIFEST.vendored_modules declared, 3 present. 5 ledger legs, 5 closed with proof.",
+      "status": "PASS",
+      "status_reason": "One honest qualifier on the 'apply counts == plan counts' clause: the 'Apply complete!' prose line scrolled past my output window and is NOT quoted here. The claim rests on STATE instead -- the 0-diff on-target re-plan plus the live CodeSha256 equalling the exact value the saved plan targeted. That is stronger evidence than the prose line, but it is a different instrument than the criterion's wording names, and it is recorded as such rather than papered over."
+    },
+    {
+      "criterion_id": "INSA3AE-AC3",
+      "criterion_verbatim": "(c) TRIGGER: exactly ONE `aws_scheduler_schedule` targeting `opal-assets-bd49f-reporting-pull` with input `{\"leg\":\"insurance\"}`, `cron(35 11 * * ? *)` UTC, state ENABLED, read back from the LIVE primitive (`aws scheduler get-schedule`), both trigger planes re-censused client-side (Scheduler N of M; events rules for the function = 0 -- the reporting payload gains NO trigger here); the `.tf` comment amended in the same commit.",
+      "method": "live_read",
+      "invocation": "NOT BUILT. Measurement of the not-built state, on three planes: git status --porcelain infra/aws/terraform/opal-assets/bd49f_reporting_pull.tf ; occurrence count of aws_scheduler_schedule in that file ; aws scheduler list-schedules filtered on Target.Arn == the function ARN, with the total printed as the denominator ; aws lambda get-function-configuration --query Environment.Variables.",
+      "output_evidence": "CANCELLED BY SOVEREIGN WORD BEFORE ANY OF IT WAS WRITTEN. Andrew-direct 2026-08-28 ~17:40Z at the CTO terminal, VERBATIM: 'Yeah this would be a pipeline function, not an agent, we would need to build it in the same bd api lambda route that is canonical in data/assets/docs/ or wherver'. Relayed 1.0.0_SA_CTO 78499 and 2.0.0_SA_COO 78506; ruled 1.0.0_SA_CTO 78512 (D2-D3 VERDICTS.jsonl row 14): 'act (c) as designed is CANCELLED', 2.0.0_SA_COO's 78496 IAM ruling MOOT, the CTO plan-gate on the scheduler role WITHDRAWN. The INSURE trigger instead rides the canonical bd-pipeline 49F session chain as its THIRD RUNNER TARGET (bd-49f-session-trigger runner=insurance -> reporting-pull {leg: insurance}, cron(35 4 * * ? *) UTC), which is another lane's wiring. NOT-BUILT VERIFIED ON THREE PLANES: DESIRED -- working-tree diff on the .tf EMPTY and 0 occurrences of aws_scheduler_schedule in it; APPLIED -- schedules whose Target.Arn is opal-assets-bd49f-reporting-pull = [] against a printed denominator of 18 total live schedules, so the zero is a real zero and not an empty page; RUNTIME -- live Environment.Variables carry no INSURANCE_EGRESS. No scheduler IAM role was written or applied. SEPARATELY MEASURED BEFORE THE CANCELLATION, and the reason the seat STOPPED rather than proceeded: the schedule required a NEW IAM role, which the TO's scope_guard places outside this cell. simulate-principal-policy, ONE --resource-arns per call, positive control as a SEPARATE invocation -- ARM1 advi-49f-floor-scheduler-role -> InvokeFunction on this function = implicitDeny; ARM2 POSITIVE CONTROL same role -> its own target advi-49f-gold-dispatch = allowed; ARM3 opal-assets-bd49f-dim-convert-scheduler-role -> this function = implicitDeny. ARM2's 'allowed' is what makes ARM1/ARM3 readable as a real deny rather than a dead tool.",
+      "denominator": "0 of 1 declared schedule built (cancelled before authorship). Live trigger census: 0 of 18 Scheduler entries target this function; 0 EventBridge rules. 3 IAM simulation arms, 1 designed-allow positive control fired as expected.",
+      "status": "N/A-BY-CONSTRUCTION",
+      "status_reason": "SUPERSEDED BY SOVEREIGN WORD, recorded as N/A-BY-CONSTRUCTION because the schema has no 'superseded' value and FAIL would be false. Andrew-direct 2026-08-28 17:40Z and 1.0.0_SA_CTO's ruling 78512 moved the INSURE trigger off this vehicle entirely and onto the canonical bd-pipeline 49F session chain, BEFORE any of this criterion was authored. The criterion's own object -- an aws_scheduler_schedule on opal-assets-bd49f-reporting-pull -- was ruled the WRONG VEHICLE, so satisfying it as written would now BE the defect. This is not a failure and not a deferral. Nothing was written or applied, verified not-built on the DESIRED, APPLIED and RUNTIME planes with printed denominators."
+    },
+    {
+      "criterion_id": "INSA3AE-AC4",
+      "criterion_verbatim": "(d) EXERCISED ON THE SCHEDULED PLANE: the FIRST scheduled fire's own CloudWatch log shows the insurance branch ran; `head-object` on the bronze key at `blackdiamond/49financial/bronze/insurance_*/{pull_date}/` for that fire's pull_date (LastModified within the fire's window, s3api UTC); the reporting branch NOT run in that fire (negative control, from the same log). A manual invoke before the fire is QA evidence and does NOT close this row. PAGE-COMPLETENESS CLAUSE: the scheduled leg's run path MUST PAGE TO THE VENDOR-ATTESTED TOTAL and land EVERY page, with the attested total recorded in the bronze manifest.",
+      "method": "command",
+      "invocation": "QA HALF ONLY. aws lambda invoke --function-name opal-assets-bd49f-reporting-pull --payload '{\"leg\":\"insurance\"}' --log-type Tail  (the exact payload the chain will send). ONE bounded human-initiated invoke, authorised 2.0.0_SA_COO 78445; fired 2026-08-28T17:43:19Z, returned 17:43:35Z. Then head-object (s3api, UTC) on each landed key.",
+      "output_evidence": "SCHEDULED HALF NOT MET -- no scheduled fire has occurred, because the trigger does not exist on any plane yet (see AC3). QA HALF EXERCISED AND IT CLOSES THE PAGE-COMPLETENESS CLAUSE AGAINST THE REAL VENDOR. StatusCode 200, no FunctionError, Duration 12821.63 ms, RequestId e5b6139b-f98e-425f-b5ac-257228bb59fe. THE FIRE'S OWN CloudWatch log, verbatim: 'BD49F-INSURANCE: pull_date=2026-08-28 pages=2 rows=77 attested_total=77 completeness=measured-complete receipt=LANDED (DRY_RUN=False)'. NEGATIVE CONTROL from that same log: NO 'BD49F-REPORTING' line -- the reporting branch did NOT run. THE 2026-08-27 DEFECT IS CLOSED: page0 = 50 rows at offset 0, page1 = 27 rows at offset 50, rows_landed 77 == attested_total 77, verdict measured-complete; the 08-27 pull landed page0 only, 50 of 77. head-object at the ruled 49financial/ grammar: page0 82136 B LastModified 2026-08-28T17:43:25Z, metadata attested-total=77 page-index=0 page-offset=0 page-limit=50 rows-on-page=50 rows-cumulative=50; page1 41688 B LastModified 2026-08-28T17:43:26Z, metadata attested-total=77 page-index=1 page-offset=50 rows-on-page=27 rows-cumulative=77; receipt export 13090 B LastModified 2026-08-28T17:43:36Z ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, retained bronze-only per the issuer ruling and never converted. The attested total is recorded per page in object METADATA, a field a consumer can REJECT on -- not inferred from file existence.",
+      "denominator": "77 rows landed of a vendor-attested 77, across 2 pages of page_limit 50. 3 bronze keys written, 3 verified by head-object. Scheduled fires observed: 0 of 1 required.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "The scheduled half is structurally unreachable from this seat: Andrew-direct 17:40Z moved the trigger to the canonical bd-pipeline 49F session chain, and per 1.0.0_SA_CTO 78512 the acceptance is now the FIRST CHAIN FIRE with runner=insurance (session-trigger's own log showing marker runner=insurance and the invoked target, the reporting-pull's own log, head-object for that pull_date, with the same day's main run NOT entering insurance as the negative control) -- first fire 2026-08-29T04:35Z if the chain wiring lands today. That wiring is an AE_CloudOps-class lane, not this seat's. The QA invoke is recorded here as evidence and is explicitly NOT claimed as closing this row, exactly as the criterion instructs. Timing disclosed without being asked: the invoke PRECEDED the 17:45:12Z hold in 78506 by roughly two minutes and ran under the then-standing 78445 authorisation; disclosed in 78509/78510 and ACCEPTED by 1.0.0_SA_CTO."
+    },
+    {
+      "criterion_id": "INSA3AE-AC5",
+      "criterion_verbatim": "Proof instance VALID rc=0 positional, ids INSA3AE-AC1..AC5, TRUE rc bare, validator invocation + rc recorded IN the instance (D2 lock-in); every arm's output quoted, not summarised.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.6.0_AE_PartnerETL/deliverables/ADVI_INSURE.TO-A3-AE_PROOF_OF_SPEC.json INSA3AE-AC1,INSA3AE-AC2,INSA3AE-AC3,INSA3AE-AC4,INSA3AE-AC5",
+      "output_evidence": "See the compiler_tools[] row whose result begins TRUE_RC= -- the D2 lock-in record, in the interim form 3.0.0_SA_CVO ruled in 76166 because the schema offers no rejectable slot (root and controls are both additionalProperties:false). Every AC1 arm is quoted VERBATIM in the AC1 row above, including the RED arm and the pre-fix control, rather than summarised.",
+      "denominator": "5 criteria declared, 5 present, 0 omitted.",
+      "status": "PASS",
+      "status_reason": ""
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THE RED ARM is the planted-defect control, and it is planted on the load-bearing claim. The central positive claim of this TO is 'the run path pages to the vendor-attested total'. A completeness verdict that were a constant reading measured-complete would satisfy every green arm and be worthless. So the harness serves a mutated vendor -- server attests total=77 but yields only page0's 50 rows, i.e. the exact 2026-08-27 defect -- and asserts the run RAISES with verdict measured-short. PLUS TWO NEGATIVE CONTROLS folded here because the schema admits no separate slot, each reachable from a DIFFERENT truth than the arm it guards. (1) PRE-FIX CONTROL for the fail-closed arm: ARM3's bare-event payload re-run against the HEAD bytes of lambda_function.py extracted with git show (17848 B -- itself a positive control that the extract worked). (2) PRIOR-ARTIFACT CONTROL for the deployed-bytes claim: artifact version a8RGEOGqhzMJ2qmO88KvHHXonfbyOXME downloaded and read member by member.",
+      "expected": "unmutated -> measured-complete and no raise; mutated -> measured-short AND a raise naming the shortfall with its denominator ; pre-fix handler must raise KeyError('q_start') -- the failure mode ARM3 screens for, without which ARM3 could pass against code that never had the defect ; every dispatch and pagination marker must be structurally 0 in the prior package, without which the after-read would not evidence a change.",
+      "observed": "UNMUTATED 'pages=2 rows=77 attested_total=77 completeness=measured-complete'. MUTATED 'INSURANCE PULL INCOMPLETE (measured-short): 50 row(s) landed across 2 page(s); vendor-attested total=77'. FIRED. PRE-FIX CONTROL: KeyError('q_start') -- arm REACHABLE from the old truth. PRIOR-ARTIFACT CONTROL: all five dispatch markers and all five pagination markers 0 in the prior artifact and present in the new, while the four untouched taxsma modules stayed byte-identical across both versions -- proving the build is scope-exact rather than a wholesale replacement. BOTH FIRED AS EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The AC1 harness is deterministic by construction: it serves fixed page fixtures through a replaced _request, so two runs over the same fixtures produce the same five verdicts. Re-run after the reporting-path stub was added to the recorder: 5 of 5 PASS, identical arm text. The LIVE QA invoke is deliberately NOT claimed as deterministic -- it reads a vendor whose cohort and revisions move, which is precisely why the completeness verdict is measured against the server's OWN attested total on each run rather than against a frozen expected count.",
+      "status": "STABLE",
+      "observed": "Two runs of the AC1 harness over the same fixtures produced identical verdicts and identical arm text: 'RESULT: 5 of 5 arms PASS' both times (the second run followed the addition of the reporting-path stub to the recorder, which is what let ARM2 reach the reporting branch at all). The LIVE QA invoke is deliberately NOT claimed as deterministic: it reads a vendor whose cohort and revisions move, which is exactly why the completeness verdict is measured against the server's OWN attested total on each run rather than against a frozen expected count."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "INSA3AE-AC3 -- the aws_scheduler_schedule and its scheduler IAM role",
+      "reason": "CANCELLED by Andrew-direct 2026-08-28 17:40Z and 1.0.0_SA_CTO's ruling 78512 before any of it was authored. Nothing written, nothing applied, verified not-built on the DESIRED, APPLIED and RUNTIME planes with printed denominators. The trigger moves to the canonical bd-pipeline 49F session chain."
+    },
+    {
+      "item": "The bd-pipeline chain wiring (cron bd-49f-insurance-session-daily, _RUNNER_BY_TARGET['insurance'], _PAYLOAD_BY_TARGET, the session-trigger invoke-policy ARN)",
+      "reason": "Ruled an AE_CloudOps-class lane by 1.0.0_SA_CTO 78512 item 5, seat to be named by 2.0.0_SA_COO. NOT this seat's act and not begun. 0.6.0_AE_PartnerETL keeps the reporting-pull side."
+    },
+    {
+      "item": "The .tf comment amendment and INSURANCE_EGRESS on the reporting-pull vehicle",
+      "reason": "Ordered by 1.0.0_SA_CTO 78512 item 3 AFTER this instance's deploy closed. Carried forward as live work on this seat, not claimed here -- an obligation recorded rather than silently absorbed into a closed row."
+    },
+    {
+      "item": "/account-api/* and the insuranceCharacteristics fields (riders, death benefit, cash value)",
+      "reason": "Held by a DIFFERENT project's gate (OPAL_TAXSMA PRD D3) and deferred by ADVI_INSURE PRD s.11 Ruling 6. The mechanical hold in insurance_leg.SURFACE_EGRESS['accountdetailsearch'] is untouched by this TO and still refuses with its reason verbatim at the call site."
+    },
+    {
+      "item": "Silver conversion of any insurance feed",
+      "reason": "0.4.0_DS_ClientPlatform~R's lane (ADVI_INSURE.TO-R1-DS). The receipt feed insurance_insurancerelationshiplist is retained bronze-only and never converted, per the issuer ruling."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION/INERT, and it is the transferable line of this TO -- THE COMPLETENESS SIGNAL WAS ALREADY BEING MEASURED AND THEN DISCARDED. insurance_leg._denominator_for already read the server's `total` and rendered it into a prose string ('a PAGE IS NOT A TOTAL'). The datum was never missing; the CONSUMING half was. The 2026-08-27 short pull was therefore not a blind spot but an unconsumed provenance field, which is the failure mode CLAUDE.md's 'a value must carry its claim' names: an unenforced provenance field drifts to unpopulated, and an unconsumed one drifts to ignored. Fixed by a consuming loop plus a rejectable enum, not by a bigger page limit -- a bigger limit is still a guess at cohort size and goes silently wrong the day the cohort outgrows it.",
+    "OBSERVATION/INERT -- act (a) as written said 'route to insurance_leg's run path' and THAT RUN PATH DID NOT EXIST. The module shipped as surface primitives a human drove by hand, which is exactly why every capture to date was a manual module invocation and therefore QA evidence rather than production. Building run_insurance_leg was inside the TO by necessity; surfaced to the issuer in 78430 and ACCEPTED onto the cell rather than absorbed silently.",
+    "OBSERVATION/INERT, routed to 3.0.0_SA_CVO cc 2.0.0_SA_COO (78480/78481) -- an UNTARGETED terraform plan in infra/aws/terraform/opal-assets reads '0 to add, 3 to change, 0 to destroy'; two of the three are another seat's un-applied changes, one of which MOVES A SERVED PREFIX (emitter AGGREGATE_PREFIX gold/mdpf_revamp/_aggregate_aua/ -> portal/gold/mdpf/_staging/aggregate_aua/). A bare apply by any seat lands all three under that seat's name. Adjudicated by 2.0.0_SA_COO 78489 as the KNOWN X-ii-a staged set (0.7.0_AE_CloudOps @2740e4de8f, 'STAGED-NOT-APPLIED'), held for its own ledger-disciplined atomic window, with targeted-applies-only as the standing rule for that root module until it runs. Handled by applying on a SAVED -target'd plan; both foreign changes remain pending and unapplied, confirmed by the 0-diff on-target re-plan.",
+    "OBSERVATION/INERT -- terraform fmt -check flags 7 PRE-EXISTING unformatted files in infra/aws/terraform/opal-assets including bd49f_reporting_pull.tf. NOT swept: fmt WRITES, and running it would reformat six other seats' files inside my commit. Recorded so the next toucher of that root module is not surprised, and so the omission is deliberate rather than unnoticed.",
+    "OBSERVATION/INERT -- land_insurance_bronze hardcodes to=\"ADVI_INSURE.TO-A1-AE\" into every object's metadata, so objects landed under THIS TO are stamped with the PRIOR one. Cosmetic today, but it is a provenance field that will keep asserting a false owner as the cell moves vehicles. Sibling: the receipt export key ends .json while carrying xlsx bytes (its ContentType is correct). Both are one-line fixes; neither touched, because neither is in this cell.",
+    "RESOLVED BY MEASUREMENT -- the TO and its dispatch message both cited the 2026-07-17 .tf:12-13 grant as covering this producer's insurance egress. Read at source it does not: that grant is scoped to the 49F portfolioreporting API, and the insurance surfaces are /request/api/offline/* and /relationship/request/*. Coverage exists, but from a LATER authority (Andrew-direct 2026-08-25T224848Z plus 2.0.0_SA_COO 71632), mechanically enforced in insurance_leg.SURFACE_EGRESS. Surfaced as a citation correction rather than adjudicated either way in 78430; confirmed RIGHT by 2.0.0_SA_COO 78445. The cadence question it exposed -- whether a sanction for bounded human-initiated pulls extends to a standing unattended daily -- was escalated rather than inferred, and Andrew answered it at 17:40Z by moving the work to a pipeline vehicle entirely. A relay that inherits a citation inherits its scope error too."
+  ],
+  "session_log": "org/tier2_senior/0.6.0_AE_PartnerETL/logs/2026-08-28/session_advi_insure_to_a3_ae_dispatch_and_pagination_1800Z.md",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.6.0_AE_PartnerETL/deliverables/ADVI_INSURE.TO-A3-AE_PROOF_OF_SPEC.json INSA3AE-AC1,INSA3AE-AC2,INSA3AE-AC3,INSA3AE-AC4,INSA3AE-AC5",
+      "result": "TRUE_RC=0 rows=5 violations=0 VALID -- the D2 lock-in record (bare rc, positional ids, recorded IN the instance per 3.0.0_SA_CVO 76166)."
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast arn:aws:lambda:us-east-1:313476888478:function:opal-assets-bd49f-reporting-pull --check-consumers ; comp-blast <same> (full)",
+      "result": "Rule-20 canonical calls cloud.blast.what_breaks + trace.blast.what_breaks, run BEFORE the change. 17 dependents / 9 downstream nodes: 5 IAM_POLICY, 1 IAM_ROLE, 1 S3_BUCKET (opal-data-assets), 1 SECRET (blackdiamond/49f/session), 1 SERVICE_PRINCIPAL. Caller chain = 8 nodes, ALL C2Motif/C3System SEMANTIC nodes -- NO invoker edge, independently corroborating the 'no trigger on any plane' finding from the graph rather than from a re-run of the same census. comp-kuzu provenance header read: kuzu_nessie_db, 27054 nodes/60505 edges, built 2026-08-28T16:13:09Z age 0.9h, Nessie HEAD current, graph_nodes last-write 4.3h. First invocation on the FILE PATH returned NOT-FOUND with its universe printed (27054 nodes) -- a NOT-FOUND is not a 'nothing breaks' clear, and the ARN is the node identity; re-run on the ARN. 33 HOLD claims surfaced and READ at source: all are bd-gold-layer-runner / bd-gold-trigger / EC2-runner subjects, a DIFFERENT Lambda, and they argue FOR scheduling production pipelines rather than against this act."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam service opal-assets-bd49f-reporting-pull ; comp-iam gaps ; aws iam simulate-principal-policy (3 arms, ONE --resource-arns each, positive control as a SEPARATE invocation)",
+      "result": "comp-iam service: 3 operations (secretsmanager:GetSecretValue, s3:PutObject, s3:ListBucket) -- NO new action class introduced by this TO, so no iam.tf change for the package deploy; the WriteAndVerifyInsuranceBronze statement added under TO-A1-AE already grants the landing tree. comp-iam gaps RUN: zero rows name this function, against a POSITIVE CONTROL of 14 missing / 292 deny-present / 0 coverage-unknown / 2 resource-mismatch across 31 services, so the sweep ran and the zero is real. Tool's own DESIRED-plane caveat honoured -- the scheduler-role question was settled on the LIVE plane instead: ARM1 advi-49f-floor-scheduler-role -> InvokeFunction on this function implicitDeny; ARM2 POSITIVE CONTROL same role -> its own target allowed; ARM3 opal-assets-bd49f-dim-convert-scheduler-role -> this function implicitDeny. That measurement is what turned (c) into a STOP-and-surface instead of a silent IAM edit."
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh <lambda_function.py> <insurance_leg.py> <dispatch_exercise.py>",
+      "result": "OK: pre-commit gate clean for 3 of 3 file(s) -- py_compile + ds-precommit + ruff py39, plus 'no unguarded strict-utf8 log reads' on each. Re-run inside safe-commit.sh, same result. The safe-commit risk-reflex additionally surfaced 10 recorded claims on insurance_leg.py against a danger map 7.8h old, denominator 3 files vs 1910 danger nodes; the citation (the TO-A1-AE deploy ledger) was READ at source and supplied the build-input carrier fact that shaped act (b)."
+    },
+    {
+      "tool": "deploy_ledger",
+      "invocation": "python .tools/deploy_ledger.py open --slug advi-insure-a3-dispatch-package ... ; close-leg x5 ; close",
+      "result": "NEVER#6 ledger OPENED at deploy-START 17:25Z with a complete 5-leg manifest and CLOSED with every leg carrying proof: 'CLOSED deploy ledger advi-insure-a3-dispatch-package -- all 5 legs proven; sentinel removed'. Gap found and declared: the tool has no add-leg verb (open / close-leg / close / hold / check / list), so 2.0.0_SA_COO 78445's instruction to land act (c) in the SAME ledger was not mechanically possible; the (b) ledger was closed as terminal rather than held open past its window, and the deviation was reported in 78493 rather than absorbed."
+    },
+    {
+      "tool": "terraform (fmt -check / validate / plan / safe-apply)",
+      "invocation": ".tools/terraform.exe fmt -check ; validate ; plan -target=... -out=<saved> ; .tools/safe-apply.sh -chdir=. apply <saved> ; plan -target=<same>",
+      "result": "fmt -check: 7 PRE-EXISTING unformatted files flagged incl. bd49f_reporting_pull.tf -- NOT swept, because fmt WRITES and would reformat six other seats' files (only -check was ever run, never -diff). validate: Success. Targeted saved plan 0/1/0; safe-apply (HALTGT .001 checkpoint passed) rc=0; on-target re-plan 'No changes'. The UNTARGETED plan read 0/3/0 and is the never-widen catch recorded in surprises."
+    }
+  ]
+}
