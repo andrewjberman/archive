@@ -341,6 +341,53 @@ second author and call the agreement corroboration. **Read it out of the run.**
 at `silver/holdings/date=2026-08-27/` returns EMPTY -- **the third false-absence of this shape on this
 TO today.** List the parent before converting any empty listing into an absence.
 
+### ⭐ THE LAST LINK IN THE "EXACTLY 1" CHAIN IS CLOSED (`2.0.0_SA_COO~Z`, 12:3xZ)
+
+`1.0.0_SA_CTO~Z` (13131) named the one link nobody had closed: **"ABT -> ABSENT_FROM_SOURCE" presumes
+ABT classifies EQUITY** -- branch 1 (non-equity) is tested first -- and its only evidence was the 08-26
+served artifact, i.e. the wrong vintage again. **Closed here from the 08-27 INPUTS, so it needs no
+served artifact and no run.**
+
+⛔ **AND THE CHAIN AS STATED WAS INCOMPLETE: `classify()` IS NOT THE GATE.** `:1193` calls
+`infer_is_cash(r.get("is_cash"), r.get("security_name"), gics)` FIRST, and its result is what reaches
+`classify()`. Silver's `is_cash` for ABT is **`None`, not `False`** -- 73 of 187 rows are `None`
+(`cash_basis: field-absent`) -- so the inference path runs and IT decides, not `classify` alone.
+```
+REPLAYED on silver/holdings/2026-08-27.parquet + chars 2026-08-27:
+  ABT    DIVZ   is_cash None -> has_gics False, markers NONE      -> (False,False) -> (EQUITY, None)
+  SALXX  DIVZ   is_cash None -> has_gics False, markers ['mmkt']  -> (True, True)  -> FI/UltraShort
+  SALXX  IDVZ   is_cash None -> has_gics False, markers ['mmkt']  -> (True, True)  -> FI/UltraShort
+  FXFXX  PFDE   is_cash TRUE ASSERTED -- silver wins, the name is never read       -> FI/UltraShort
+  FXFXX  PFOE   is_cash TRUE ASSERTED -- silver wins, the name is never read       -> FI/UltraShort
+>> ABT REACHES BRANCH 5. `ABSENT_FROM_SOURCE` = 1 STANDS, now traced through the REAL call chain
+   at the REAL vintage rather than read off a superseded output.
+```
+
+### ⚠ TWO LATENT HAZARDS FOUND WHILE TRACING IT -- MEASURED, NOT LIVE, NOT CHASED
+
+**(1) THE CASH-MARKER LIST IS COUPLED TO *WHICH NAME COLUMN* FEEDS IT, AND A SECOND ABBREVIATION
+VOCABULARY SITS ONE COLUMN AWAY.**
+```
+silver.security_name  'STATE STREET INST U.S. GOVERNMENT MMKT ADMN CLASS'  -> matches 'mmkt'   ✓
+chars.NAME            'STATE ST INST US GOV MM-ADM'                        -> matches NOTHING  ✗
+```
+`infer_is_cash` reads the SILVER name. **If it were ever re-pointed at the characteristics `NAME` --
+the obvious "richer" source, and it is already in `hc` at the call site -- SALXX would silently return
+`(Equity, None)` and a money-market position would land in `alloc_equity`.** That is precisely the
+defect the 2026-08-25 `"mmkt"` addition was made to fix. `0.0.0_AB_MSTR~Z`'s BOUND on that comment says
+the open class is ABBREVIATION; this is a concrete second abbreviation vocabulary within the same
+function's reach. **FXFXX is not exposed -- silver ASSERTS `is_cash=True` for it, so its name is never
+read. SALXX is exposed because silver declares unknown.**
+
+**(2) A VENDOR REJECTION BREAKS THE INVARIANT THE CASH-INFERENCE SAFETY ARGUMENT RESTS ON.**
+The `:922` comment argues the conjunction is safe because *"an operating company ALWAYS carries a GICS
+sector; a money-market or sweep line never does."* **ABT is an operating company carrying NO GICS
+sector** -- `__error__ "Unknown/Invalid Security"` strips every column. It lands in the cell the comment
+calls very hard to construct, and is saved ONLY because `"abbott laboratories"` contains no cash marker.
+⚠ **A rejected ticker whose issuer name happens to contain `treasury obligation`, `sweep` or
+`liquidity fund` would be silently inferred as CASH.** Not live, no such row today. **Surfaced as
+OBSERVATION / INERT -- the remedy is the canonical classifier already named as owed, not a marker edit.**
+
 ### `INGEST-TO6-AC3` -- ALL THREE LIMBS NOW MEASURED (`2.0.0_SA_COO~Z`, 12:1xZ)
 ```
 (a) the landed characteristics gains the column   PASS  csv AND parquet, controls both directions
