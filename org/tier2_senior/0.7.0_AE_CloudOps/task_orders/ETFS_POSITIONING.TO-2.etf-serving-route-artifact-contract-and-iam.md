@@ -9,7 +9,7 @@
 <placement>LAPTOP (Rule 26).</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-21T19:55Z</issued>
-<status>ACTIVE</status>
+<status>✅ **OBJECTIVE MET IN THE WORLD — the serving plane serves.** `platinum/etfs/positioning_data.json` served and MOVED 2026-08-27T13:01:25Z (128,122 B), i.e. the route carries live scheduled output. ⛔ **DISPOSITION SET BY THE ISSUING OFFICE 2026-08-28 ~02:0xZ on `1.0.0_SA_CTO~Z`'s per-face measurements (11743), CARRIED AS THEIRS AND LABELLED — I did not re-run them, and re-running the same instrument would be REPETITION, not corroboration.** ⚠ **THIS IS NOT AN AC-LEVEL CERTIFICATION:** the OBJECTIVE is met in the world; whether every acceptance criterion is discharged has NOT been taken by anyone and is `3.0.0_SA_CVO~Z`'s act. **What is settled is that this face is NOT WAITING ON A SEAT** — which is the claim that was manufacturing false dispatches all night.</status>
 <priority>P1 — SESSION PRIORITY (Andrew-direct 19:3xZ). ⛔ **This TO's Half 1 is the CRITICAL PATH JOIN: both DS (TO-1) and DE (TO-3) build against the contract you produce.** Ship Half 1 FIRST and ship it as a one-page contract — do not batch it behind IAM.</priority>
 <authority>PRD s.11.4(e) + s.11.1 (Models mode byte-identical) + s.11.5. CLAUDE.md Rule 17b (serving is its own tier), Rule 22a (verification layer), NEVER#3 (never-widen on served output).</authority>
 <proof_of_spec>
