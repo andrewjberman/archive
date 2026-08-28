@@ -38,6 +38,39 @@ at higher cost. **Whoever holds this after the fire runs the scorer and files; t
 scorer are committed and outlive the session that made them.** ⚠ **DISARMED != REMEDIATED: if nobody is
 seated after 13:30Z the fire is unobserved until someone returns.**</status>
 
+## ⭐⭐ `TP1AE-AC1` DISCHARGES. MEASURED 2026-08-28T13:52:37Z by `2.0.0_SA_COO~Z`.
+
+AC1 requires `category_views` on the SERVED PLANE for **at least one firm**, from a **SCHEDULED** run,
+with **key, bucket, byte size and LastModified recorded**. All four, for **FOUR firms**:
+```
+BUCKET  opal-data-portal-v2   (PLATINUM_BUCKET, mdpf-daily-trigger:172 -- read, not guessed)
+  2026-08-28T13:50:50Z   4339 B   platinum/mdpf/49financial/category-views.json
+  2026-08-28T13:50:50Z   5116 B   platinum/mdpf/cottonwood/category-views.json
+  2026-08-28T13:50:51Z   4442 B   platinum/mdpf/global/category-views.json
+  2026-08-28T13:50:52Z   4331 B   platinum/mdpf/inflection/category-views.json
+```
+**PROVENANCE = SCHEDULED, and it is not inferred from the clock.** ⭐ **THE ARTIFACT NAMES ITS OWN
+WRITER:**
+```
+_provenance.written_by  'opal-assets-mdpf-portal-publisher'      <- the writer, IN the artifact
+_provenance.written_at  '2026-08-28T13:50:49Z'
+as_of                   '2026-08-27'      source_vintages  cottonwood/category-views: '2026-08-27'
+```
+**13:50:50Z matches the six-day scheduled cadence to the second; ad-hoc writes on this prefix land at
+arbitrary times (16:28, 15:42, 19:46).** The timestamp IS the scheduled-vs-adhoc discriminator this TO
+exists to protect, and the `written_by` field makes it a stated claim rather than an inference.
+
+**CONTENT IS REAL, not an empty shell at a plausible size** -- 5 nodes carrying Andrew's own rulings:
+```
+Client  aum 294,905,777.43 · display_l1_axis 'fee_taking'
+Models  aum 186,785,080.61 · 2 children
+SMA     aum 0.0  members_present False, with absent_reason: a TRUE ZERO (Andrew-direct 2026-08-25)
+Insurance  view_plane_excluded True, quoting Andrew-direct 2026-08-24 verbatim
+Alternatives  aum 0.0
+```
+⛔ **THIS DISCHARGES `TP1AE-AC1` ONLY.** AC2-AC6 are separate criteria and no claim is made about
+them here.
+
 ## ⛔⛔⛔ CORRECTION TO THE SECTION BELOW, BY ITS OWN AUTHOR (`2.0.0_SA_COO~Z`, 13:3xZ)
 
 **I wrote below that "`TP1AE-AC1` LIVES HERE" at the 13:30Z gold floor and that AC1 "scores the GOLD
