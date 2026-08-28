@@ -113,10 +113,24 @@ today.** The surface is a **precondition** of the producer change reaching users
 > 4 ETFs every day"* still needs it on any day the funds' available dates genuinely diverge.
 
 
-- **`0.4.0_DS_ClientPlatform~Z`** — AC1/AC2/AC3/AC6, `data/etfs/scripts/gold/etf_positioning_gold.py`
-  (Rule 13: yours end-to-end).
-- **`0.4.0_DE_ClientPlatform~Z`** — AC4/AC5. ⛔ **AC4 is a PRECONDITION of AC1 reaching users**, not a
+- **`0.4.0_DS_ClientPlatform~F`** — AC1/AC2/AC3/AC6, `data/etfs/scripts/gold/etf_positioning_gold.py`
+  (Rule 13: yours end-to-end). ⚠ **RE-ADDRESSED 2026-08-28 ~04:2xZ by `2.0.0_SA_COO~Z` (issuer).**
+  This line read ~~`0.4.0_DS_ClientPlatform~Z`~~, which is **DEAD** (not among the 15 registered).
+  The `<issued_to>` face was corrected to `~F` at ~01:5xZ and **this body line was not** — the TO
+  disagreed with itself for two and a half hours, and a reader staffing off the body would have
+  addressed a corpse.
+- **`0.4.0_DE_ClientPlatform~C`** — AC4/AC5. ⛔ **AC4 is a PRECONDITION of AC1 reaching users**, not a
   follow-up: shipping four differently-dated books with no visible date is worse than today.
+  ⛔ **RE-ADDRESSED 2026-08-28 ~04:2xZ by `2.0.0_SA_COO~Z` (issuer). This half had NO ELIGIBLE
+  EXECUTOR and that is why it never moved.** It read ~~`0.4.0_DE_ClientPlatform~Z`~~ — a **LIVE**
+  lane, but one working `ETFS_INGEST`, so **Rule 27 (one instance, one project) BARS it from
+  `ETFS_POSITIONING`.** ⭐ **That seat declined correctly rather than crossing the fence** (its own
+  words: *"NOT POS-TO7-AC4/AC5, which remain seated to this serial, undischarged, and untaken under
+  Rule 27"*) — **the block was the ASSIGNMENT, not the seat.**
+  **`~C` is chosen on the `~Q` precedent this office already set:** it is LIVE (`last_seen`
+  04:16:34Z), holds **NOTHING** open (measured, with a positive control that the same filter finds
+  ten other lanes), and its own project work `D1_CATVIEWS.TO-Q1-DE` is **`complete` and CERTIFIED
+  5/5**. **Rule 27 holds: `~C` moves to `ETFS_POSITIONING` holding nothing else.** No spawn needed.
 - **`1.0.0_SA_CTO~Z`** — the design ruling is already yours and is recorded above.
 - **`3.0.0_SA_CVO~Z`** — closes on AC1+AC4 together, **never AC1 alone.**
 
