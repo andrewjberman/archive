@@ -31,18 +31,22 @@ render-verified"*, **and nobody had looked at the actual page since the data cha
 
 ## ACCEPTANCE CRITERIA
 
-**AC1 `CATV-TOF1-AC1` — D-1: THE L2 DRILL-DOWN ROWS SHOW DOLLARS.**
+**AC1 `CATV-TOF1-AC1` — ⛔⛔ STRUCK FROM THIS TO 2026-08-28 ~21:4xZ by `2.0.0_SA_COO~Z` (issuer). D-1 IS A DATA DEFECT, NOT RENDER, AND THIS CRITERION WAS UNSATISFIABLE BY ANY CORRECT RENDER CHANGE.** MEASURED: the SERVED object (13:31Z, OLD code) has member keys `['display_name','member_id','served','strategy_id']` — **NO `aum` KEY AT ALL**, all 9 members `None`. `CategoryViewTree.tsx:224` already reads `m.aum !== null && m.aum !== undefined ? formatAUM(m.aum) : '--'` — **it prints a figure whenever one exists.** ⭐ **THE RENDERER IS CORRECT AND THE RELAND DELIVERS D-1 WITH ZERO RENDER CHANGE.** ⚠ **ORIGIN OF THE ERROR, recorded because it is the night's own shape:** the diagnosis ran a sound conservation check on the **QA bodies of the CURRENT code** and concluded render-side — but the page renders the **SERVED object written by the PREVIOUS code.** A correct measurement of the wrong artifact. **D-1 MOVES TO `D1_CATVIEWS.TO-R1-AE`.** ~~D-1: THE L2 DRILL-DOWN ROWS SHOW DOLLARS.~~
 Every L2 member row under `MODELS > PRIMARY` and `MODELS > CUSTOM` that HAS an `aum` renders its
 figure, on every scope. ⛔ **RENDER-SIDE ONLY — DO NOT TOUCH THE PRODUCER.** Diagnosed by
 conservation on the `qa_return_bodies` capture: Custom members sum to `51,899,185.30` and Primary to
 `1,752,025,301.90`, **each an EXACT match to its parent**, so absence AND corruption are both ruled
 out at the source. **Print before/after for both branches.**
 
-**AC2 `CATV-TOF1-AC2` — THE ONE GENUINE NULL STILL RENDERS `--`.**
+**AC2 `CATV-TOF1-AC2` — REFRAMED TO A REGRESSION GUARD (AC1's strike makes this the surviving half). THE ONE GENUINE NULL STILL RENDERS `--` AFTER THE DATA ARRIVES.**
 ⛔ **EXACTLY ONE of the nine is a real `None` (Custom `members[0]`). It MUST keep rendering `--`.**
 A fix that makes all nine show dollars has INVENTED A NUMBER. **Null is not `0.00`** — *"a 0 on a
-money figure is a measurement nobody took."* ⚠ **This criterion is the negative arm of AC1 and the
-two must be scored together**; AC1 alone passes on a build that coalesces nulls to zero.
+money figure is a measurement nobody took."*
+⚠ **CROSS-REFERENCE CORRECTED WITH AC1's STRIKE:** this was written as the negative arm of AC1. **AC1
+is struck, so this now stands ALONE as a REGRESSION guard** — the renderer ALREADY distinguishes absent
+from zero correctly (`:224`), and this criterion proves it STILL does once `TO-R1-AE` delivers the
+`aum` key. ⛔ **Score it AFTER the reland, not before** — before the reland all nine are `None` and it
+passes vacuously on an unchanged renderer.
 
 **AC3 `CATV-TOF1-AC3` — D-3: COLOURS ARE CANONICAL, AND SOURCED, NOT INVENTED.**
 Colours must not be assigned by row index. **Concrete instance: `Fixed Income` currently renders
