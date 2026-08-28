@@ -20,32 +20,91 @@ clock WHILE STILL RETURNING FRESH"*), and **Andrew ~22:1xZ chose the scoped API 
 portal-fetched from a served key.
 </decomp_ref>
 
-<the_write_shape_already_exists>
-⭐⭐ **ADDED 00:0xZ — A BUILD INPUT NOBODY HAD NAMED, MEASURED BY `3.0.0_SA_CVO~Z`. DO NOT INVENT A
-DICT SHAPE.** `satellites_weights.py` **already defines what the producer must WRITE:**
-```
-payload(details, partition_date) -> {schema_version, as_of, source, claim:"measured",
-                                     satellites, constituent_rows, unresolved_count, rows}
-assert_no_baked_verdict(block)   -> REFUSES {state, is_fresh, stale, checked_at, ...}
-read(block, now)                 -> returns the payload WITH VINTAGE COMPUTED AT READ TIME
-```
-⛔ **AN EXECUTOR WHO INVENTS A SHAPE DIVERGES FROM `read()`, which subscripts `as_of` and `rows`
-directly — and may emit a field `assert_no_baked_verdict` REFUSES. THAT FAILURE SURFACES AT READ
-TIME, NOT AT WRITE TIME**, i.e. after the artifact is already published and looks fine.
-⭐ **`claim: "measured"` is emitted AUTOMATICALLY** — so this build satisfies
-**A_VALUE_MUST_CARRY_ITS_CLAIM without anyone adding a field.**
-⭐⭐ **AND `read(block, now)` COMPUTING VINTAGE AT READ TIME *IS* THIS OFFICE'S `SAT-a-4` RULING,
-ALREADY IMPLEMENTED** (*"must resolve the data's own as-of AT READ TIME"*). **The module was built to
-the ruling; the producer only has to call `payload()`.**
+<the_write_shape_is_YOURS_TO_WRITE>
+⛔⛔ **FIFTH AMENDMENT — THIS SECTION PREVIOUSLY TOLD YOU TO CALL `payload()`. THAT WAS FALSE, AND IT
+WAS MY ERROR RATHER THAN A SUPERSESSION.** I wrote *"two shapes, two ends of one contract"* over a
+relationship I never measured. `3.0.0_SA_CVO~Z` retracted their own build input before you reached
+it; **you** measured the structural reason; `1.0.0_SA_CTO~Z` confirmed all three rows.
 
-⚠ **TWO SHAPES, TWO ENDS OF ONE CONTRACT — DO NOT CONFLATE THEM:**
+**THE SETTLED READING — TWO ARTIFACTS, NEVER ONE SHAPE DISPUTED:**
 ```
-payload()      the PRODUCER's WRITE shape -- what goes into the artifact   (satellites_weights.py)
-SatelliteBook  the CONSUMER's READ type   -- what the portal expects        (satelliteSet.ts)
+REGISTRY  platinum/satellites/registry.json   { books: SatelliteBook[], as_of }   <- YOURS
+WEIGHTS   satellites_weights.payload()        TO-1's artifact; "WRITES nothing.
+                                              This module DERIVES; it does not publish."  <- NOT YOURS
 ```
-**Write via `payload()`. Satisfy `SatelliteBook` at the consumer.** ⛔ **My earlier clauses cited
-NEITHER correctly; both are now named.**
-</the_write_shape_already_exists>
+**Why a rename could never have bridged them — your measurement, and it is the load-bearing one:**
+`payload().satellites` is a **LIST OF NAME STRINGS** (`resolve_set()`, `satellites_weights.py:200`,
+surfaced `:331`); `SatelliteBook` requires **OBJECTS with a nested `constituents` array**
+(`satelliteSet.ts:66-70`). `payload()` does carry constituent detail, but **FLAT in `rows`** — one row
+per constituent. ⭐ **So a key-name change produces strings where the ratified contract requires
+objects. The vocabulary argument was mine and it was the weaker one; the structural argument is
+yours and it settles it.**
+
+⭐ **THE REGISTRY PAYLOAD BUILDER DOES NOT EXIST — IT IS YOURS TO WRITE.** Corroborated at this seat
+by a DIFFERENT instrument than CVO's (they read the weights docstring; I searched the registry module
+for a write shape): `satellites_registry.py` resolves — 17408 B, the positive control — and defines
+**no** payload/block function.
+
+⭐⭐ **WHAT TRANSFERS IS THE DESIGN, NOT THE DICT.** `1.0.0_SA_CTO~Z` named this the sharpest row, and
+it is what keeps the build ladder's *"the estate already has it"* from collapsing into *"copy the
+shape"*:
+```
+CALL IT, artifact-agnostic   assert_no_baked_verdict(block)  refuses {state, is_fresh, stale, ...}
+CALL IT, do not reimplement  vintage(as_of, now)             the trading-day frontier
+COPY THE SHAPE OF            read(block, now)                verdict COMPUTED at read, never baked
+```
+**That read-time split IS this office's `SAT-a-4` ruling. Your artifact inherits the RULING; it does
+not inherit the DICT.**
+
+⛔ **BINDING — `1.0.0_SA_CTO~Z` amend6 plus one clause. THE EMPTY IS THE CASE THAT BREAKS:**
+```
+{ books: [], as_of: <the partition date the producer RAN> }   NON-NULL ALWAYS, INCLUDING WHEN EMPTY
+read({as_of: "2026-08-27", rows: []}) -> OK       read({as_of: null, rows: []}) -> RAISES ValueError
+                                                  read({rows: []})              -> RAISES KeyError
+```
+⚠ **DO NOT LIFT `{books: [], as_of: null}`.** It sits in `0.7.0_AE_CloudOps~Y`'s **removed** code and
+is quoted in their proof-of-spec record, and it was correct for a **different case**: *no artifact
+exists at all*, where stamping a time would manufacture a freshness signal for data never published.
+**Yours is PUBLISHED-EMPTY — a pull HAPPENED and found nothing. Zero members is a measurement WITH a
+date, not the absence of one.** That is Andrew's R4 (publish the empty, never delete the key) meeting
+`T5DS-AC3`, and ⛔ **the natural shape to reach for is the one that raises.**
+</the_write_shape_is_YOURS_TO_WRITE>
+<the_code_form_RULED>
+⛔ **`SatelliteBook.code` = THE CANONICAL NAME, VERBATIM** — e.g. `"Opal Satellite 50"`.
+**`1.0.0_SA_CTO~Z`'s ruling**, raised by you and correctly not invented at the executor.
+`displayName` is free to differ and is unconstrained by this.
+```
+1 PROVABLE NON-COLLISION  MODEL_BOOKS UST/ST/INT/LT/ULT + ETF DIVZ/IDVZ/PFDE/PFOE. A 3-5 char
+                          mnemonic CANNOT equal an anchored 3-token form. Positive control passing.
+2 IT IS ALREADY THE KEY   MEMBER_NAMES is a frozenset of exactly these and the predicate matches on
+                          this field. Any other choice mints a SECOND identity space plus a mapping.
+3 NO NEW TABLE            build ladder rung 1/2 -- a code convention is code nobody has to write.
+```
+⭐ **THE NAMED COLLISION HAZARD IS STRUCTURALLY UNREACHABLE, not merely avoided** (`3.0.0_SA_CVO~Z`):
+`bookSet.ts:167` warns of *"the day a satellite code collides with a model-notes key"*, but
+`hasModelKeyNotes` has ONE call site — `PositioningSummary.tsx:1240`, guarded by
+`HEADER_TRIGGER[bookMode] === 'model-notes' && …`, and `HEADER_TRIGGER.satellites = 'none'`
+(`bookSet.ts:171-175`). **The `&&` short-circuits, so a satellite code never reaches it at all —
+regardless of what the code is.**
+
+⚠ **AND THE ONE ARTIFACT THAT COULD HAVE CONTRADICTED THE RULING, MEASURED AT THIS SEAT AND CLEARED —
+recorded so you do not hit it as a false blocker.** A `SAT-` census over the portal returns **3 hits,
+all in one file**, `portal/scripts/satellites-mode-axis-exercise.mjs` (`:205` `SAT_KEYS`, `:249`,
+`:250`), where a satellite code appears as the mnemonic **`SAT-15`** — the opposite form to the one
+ruled:
+```
+after.satelliteSet.satelliteDisplayName('SAT-15', [
+  { code: 'SAT-15', displayName: 'Opal Satellite 15', constituents: [] },
+]) === 'Opal Satellite 15'
+```
+>> ⭐ **IT SUPPLIES BOTH SIDES — the code AND the registry it resolves against — so it asserts the
+   RESOLUTION MECHANISM, not a code FORM. It passes identically with `code: "Opal Satellite 50"` and
+   places NO constraint on the producer.** `SAT_KEYS` is fixture data, not a declared convention. <<
+⛔ **A seat who greps `SAT-15` and stops at the literal concludes the consumer expects short codes and
+that this ruling breaks a committed exercise. That reading is FALSE, and the discriminator is that
+the fixture is SELF-SUPPLYING — a test that defines both sides of a lookup cannot constrain an
+external producer.**
+</the_code_form_RULED>
 
 <what_is_and_is_not_missing>
 ⛔ **READ THIS BEFORE SCOPING ANYTHING. FOUR FRAMINGS WERE WRONG TONIGHT AND THIS IS THE FIFTH,
