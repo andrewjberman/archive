@@ -38,6 +38,42 @@ at higher cost. **Whoever holds this after the fire runs the scorer and files; t
 scorer are committed and outlive the session that made them.** ⚠ **DISARMED != REMEDIATED: if nobody is
 seated after 13:30Z the fire is unobserved until someone returns.**</status>
 
+## ⛔⛔ 13:30Z IS `TP1AE-AC1`'s GATE. IT IS **NOT** WHEN ANDREW'S CARDS APPEAR.
+
+**Found by `1.0.0_SA_CTO~Z` (msg 13141) 2026-08-28 12:3xZ. Recorded here by `2.0.0_SA_COO~Z`, the
+ISSUER OF THIS TO AND THE SEAT THAT MADE THE SAME CONFLATION IN WRITING TO ANDREW.** The mdpf chain is
+**FOUR staged schedules**, not one fire -- all on EventBridge **Scheduler**, all `TZ=UTC` explicitly
+read (a local-time reading here is hours wrong):
+```
+12:52Z  mdpf-feeder-backstop-daily              -> mdpf-feeder-trigger
+13:30Z  mdpf-scheduled-floor                    -> mdpf-gold-lambda            <- TP1AE-AC1 LIVES HERE
+13:40Z  mdpf-accrual-bridge-daily               -> mdpf-accrual-trigger
+13:50Z  opal-assets-mdpf-portal-publisher-daily -> opal-assets-mdpf-portal-publisher   <- THE SERVED WRITE
+```
+**MEASURED, not inferred from the names** -- version history of `platinum/mdpf/cottonwood/aum-metrics.json`
+with a same-prefix control on `global/`: **`13:50:50Z`, TO THE SECOND, SIX CONSECUTIVE DAYS**
+(08-22 through 08-27).
+
+>> ⛔ **`TP1AE-AC1` DISCHARGING AT 13:30Z DOES NOT MEAN THE CARDS ARE VISIBLE.** AC1 scores the GOLD
+   floor. The artifact the page fetches -- `/api/general/mdpf/{firm}/category-views.json` ->
+   `platinum/mdpf/{firm}/category-views.json` -- is written **twenty minutes later, by a DIFFERENT
+   Lambda on a DIFFERENT schedule.**
+>> ⛔ **A LOOK AT 13:35Z SEES NOTHING, AND NOTHING IS WRONG.** That is a wasted sovereign look
+   manufactured by a stage nobody had opened.
+
+⚠ **INSTRUMENT TRAP ON THAT MEASUREMENT, worth more than the number:** `head-object` alone returns the
+LATEST version, which on this key is an **AD-HOC write at 16:28Z** -- it would have said "the prefix is
+written at 16:28." **The version LIST exposes the cadence; the head is ONE SAMPLE of it, and here the
+newest sample is the least representative.** Ad-hoc writes are ROUTINE on this prefix, which is exactly
+why the scheduled-vs-adhoc discriminator this TO protects matters.
+
+⚠ **THE BOUND, STATED BY ITS AUTHOR:** `category-views.json` **does not exist yet**, so its own
+history cannot be read -- only its four siblings at the same prefix, which are unanimous. The claim is
+**the PREFIX is written by the 13:50Z publisher**: a strong same-writer inference, NOT a direct
+measurement of the new key. ⭐ **If the key appears between 13:30 and 13:50 that FALSIFIES this and is
+good news, not a problem.**
+
+
 <decomp_ref>
 workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — stage-3 decomp for
 D1_CATVIEWS, round 1 CERTIFIED. **Cells this TO discharges: D1-inv-2, D1-inv-3, D1-inv-4.**
