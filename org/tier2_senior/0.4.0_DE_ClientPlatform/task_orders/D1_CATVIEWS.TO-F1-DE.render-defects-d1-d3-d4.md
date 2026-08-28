@@ -38,24 +38,29 @@ conservation on the `qa_return_bodies` capture: Custom members sum to `51,899,18
 `1,752,025,301.90`, **each an EXACT match to its parent**, so absence AND corruption are both ruled
 out at the source. **Print before/after for both branches.**
 
-**AC2 `CATV-TOF1-AC2` — REFRAMED TO A REGRESSION GUARD (AC1's strike makes this the surviving half). THE ONE GENUINE NULL STILL RENDERS `--` AFTER THE DATA ARRIVES.**
-⛔ **EXACTLY ONE of the nine is a real `None` (Custom `members[0]`). It MUST keep rendering `--`.**
-A fix that makes all nine show dollars has INVENTED A NUMBER. **Null is not `0.00`** — *"a 0 on a
-money figure is a measurement nobody took."*
-⚠ **CROSS-REFERENCE CORRECTED WITH AC1's STRIKE:** this was written as the negative arm of AC1. **AC1
-is struck, so this now stands ALONE as a REGRESSION guard** — the renderer ALREADY distinguishes absent
-from zero correctly (`:224`), and this criterion proves it STILL does once `TO-R1-AE` delivers the
-`aum` key. ⛔ **Score it AFTER the reland, not before** — before the reland all nine are `None` and it
-passes vacuously on an unchanged renderer.
+**AC2 `CATV-TOF1-AC2` — ⛔⛔ RE-CUT 2026-08-28 ~21:5xZ by `2.0.0_SA_COO~Z` (issuer). MY PREMISE WAS FALSE AT SOURCE AND SATISFYING IT WOULD HAVE BROKEN A SOVEREIGN-RULED BEHAVIOUR.**
+~~The one genuine null must still render `--`; the renderer already does this correctly.~~ **IT DOES NOT, AND THAT IS THE CODE BEING RIGHT.** Found and EXERCISED by `0.4.0_DE_ClientPlatform~Z`:
+```
+  :198  const members = visibleConstituents(row.members ?? [])      <- runs FIRST
+  :135  anyMapped = items.some(aum != null)     TODAY false -> nothing suppressed -> all dash
+  :139  return items.filter(aum != null && aum !== 0)
+        POST-RELAND anyMapped is TRUE (8 of 9 carry values) -> members[0] IS REMOVED, NOT DASHED
+```
+⛔ **`:224`'s dash is only ever reached by members that ALREADY SURVIVED `:198`.** And the deletion is **ANDREW'S OWN OVERRULE** (*"a null is a 0 in this case"*) — so my criterion demanded the lane CHANGE CORRECT CODE to contradict a sovereign ruling. **Eighth criterion of mine today that no correct implementation could satisfy, and the first that would have caused a REGRESSION if met.**
+**AS RE-CUT:** post-reland, **the suppressor behaves per the overrule** — `members[0]` (`aum` null) is **REMOVED** from the rendered list, the remaining **8 render their values**, and **no row displays `0.00` for a null**. ⚠ **Score AFTER the reland**; before it `anyMapped` is false and every row dashes, so this passes vacuously on an unchanged renderer.
+⭐ **AND THE FINDING WAS EXERCISED, NOT ARGUED:** that lane's scorer ARM 3 reads `subject NULL not 0 (overrule) -> ABSENT@G5, expected ABSENT@G5, OK`. **The instrument built two hours ago is what caught my criterion.**
 
-**AC3 `CATV-TOF1-AC3` — D-3: COLOURS ARE CANONICAL, AND SOURCED, NOT INVENTED.**
-Colours must not be assigned by row index. **Concrete instance: `Fixed Income` currently renders
-ORANGE under CUSTOM and must be PURPLE.** ⛔ **THE CANONICAL SOURCE IS COTTONWOOD'S PORTFOLIO
-ANALYTICS PANEL — read that map and REUSE it.** Andrew, verbatim: *"if you are using purple elsewhere
-for fixed income ... then that needs to stay consistent for Opal Fixed Income."*
-⛔ **DO NOT invent a palette. DO NOT hardcode a second copy** — two colour tables is the two-carriers
-divergence class and it WILL drift. **If the existing map is not importable, SAY SO rather than
-duplicating it** — that is a finding, not a failure.
+**AC3 `CATV-TOF1-AC3` — D-3: THE TREE RESOLVES COLOUR THROUGH THE MODEL-COLOUR AUTHORITY.**
+⭐ **RE-CUT 2026-08-28 ~21:5xZ — THE DEFECT IS A BYPASS, NOT A PALETTE CHOICE.** Andrew clarified *"there is a canonical 'Opal Fixed Income' model, it is a portfolio that Cottonwood invests in"*, and `1.0.0_SA_CTO~Z` then DERIVED the colour rather than choosing one:
+```
+  getModelColor('Fixed Income') -> no exact/partial match -> EXTENDED_MODEL_COLORS[hash % 6]
+  stableNameHash('Fixed Income') = 477671664 ; 477671664 % 6 = 0 -> ext-violet #8b5cf6  PURPLE
+  getModelColor consumers: 11 files, incl. the Portfolio Analytics panels Andrew named
+  CategoryViewTree.tsx uses getModelColor: ZERO times
+```
+>> ⛔ **THAT ASYMMETRY IS THE WHOLE DEFECT. Every other panel resolves through the model-colour system; this tree INVENTED A POSITIONAL PALETTE.** Andrew was not misremembering and there was never an inconsistency to adjudicate — **ONE PANEL OPTED OUT.** <<
+**THE FIX IS TO CALL `getModelColor(...)`, NOT TO PICK COLOURS.** ⛔ **Do NOT hardcode `#8b5cf6` — that would be a second carrier of a COMPUTED value and it would drift the moment the palette or the hash changes.** Route the L2 member name through the same authority the other 11 files use; purple falls out, and so does every other row.
+⚠ **AND MY EARLIER RELAY WAS WRONG:** I reported *"there is no purple fixed income in this codebase."* **There is** — computed at runtime by a hash, never written as a literal, **so a source search for a colour definition structurally could not find it.** A correct search, a wrong conclusion.
 
 **AC4 `CATV-TOF1-AC4` — D-4: THE FEE DISCLAIMER IS GONE FROM THE DOM.**
 Not softened, not shrunk, not warn-and-keep. **GONE.** Andrew, verbatim: *"we do not need to make a

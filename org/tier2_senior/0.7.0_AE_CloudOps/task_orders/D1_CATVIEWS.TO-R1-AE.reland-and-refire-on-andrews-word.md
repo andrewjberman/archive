@@ -56,6 +56,7 @@ Floor re-run → publisher → `platinum/mdpf/{scope}/category-views.json` carri
 ⛔ **BOTH LIMBS OR IT IS NOT A PASS** — deleting the `absent_reason` everywhere is a FAIL; it is a
 correct, sovereign-cited statement for the two firms that genuinely have no SMA members.
 **Print the served `LastModified` + byte size + the values, per scope, with the denominator (4).**
+⛔⛔ **AND `mdpf_refresh.py gold`'s OWN VERIFY PASS IS NOT ACCEPTANCE FOR THIS CRITERION.** Measured at source by `0.7.0_AE_CloudOps~Z`: `:104-105` hardcodes `platinum/mdpf/{scope}/aggregate-aua-timeseries.json` — **ONE artifact type of four, NEVER `category-views`** — and `:279-286` scores `as_of` recency AND write-freshness **on timestamps only, never opening a value.** >> **IT WILL PRINT `PASS` FOR ALL FOUR SCOPES WHETHER OR NOT THE SMA FIX REACHED THE SERVED PLANE.** << **That would have been the third false all-clear of the night, and the seat that would have quoted it is the one that found it.** **Acceptance here is the VALUES you read out of `category-views.json` yourself.**
 
 **AC4 `CATV-TOR1-AC4` — NO COLLATERAL MOVEMENT ON THE OTHER THREE ARTIFACT TYPES.**
 `aggregate-aua-timeseries`, `aum-metrics` and `account-distribution` are relanded too. **Show their
