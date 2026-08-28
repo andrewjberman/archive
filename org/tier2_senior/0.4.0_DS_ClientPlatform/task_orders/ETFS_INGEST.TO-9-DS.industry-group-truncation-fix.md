@@ -84,15 +84,35 @@ is INCOMPLETE (23 of 25).**
 
 | id | criterion |
 |---|---|
-| `INGEST-TO9-AC1` | **The served `industry_group` values are COMPLETE GICS names**, verified against an authoritative source — **not against our own prior output.** Print the full observed set with its denominator. |
+| `INGEST-TO9-AC1` | ⛔ **OVERRIDDEN BY ANDREW-DIRECT 18:02Z (`@7d4f4700a6`) — see §7.** The authoritative-source requirement is LIFTED; completions are INFERRED from the truncated text and hard-coded, on his instruction. **REPLACEMENT BAR:** every completion round-trips — `truncate(proposal, 30).rstrip()` EQUALS the observed string byte for byte — and binds 1:1 to an authoritative 4-digit `GICS_INDUSTRY_GROUP` code from the spent call. ⚠ **THE ROUND-TRIP IS NECESSARY AND NOT SUFFICIENT: more than one completion can round-trip to the same 30 chars, so it proves CONSISTENCY WITH the truncation and NEVER that the completion is the right one.** State that limit in the file beside the table, not only in a message. **`industry_group_basis` = INFERRED/RESOLVED, never `observed`.** ~~verified against an authoritative source — not against our own prior output~~ Print the full observed set with its denominator. |
 | `INGEST-TO9-AC2` | ⛔ **THE VALUE STILL CARRIES ITS CLAIM.** If any value is RESOLVED rather than OBSERVED, `industry_group_basis` says so in a field a consumer can reject on. **A derived value served under a measured label is a FAIL.** |
 | `INGEST-TO9-AC3` | ⛔ **EXERCISED ON A SCHEDULED FIRE.** Read the served artifact after a scheduled run; state which run and how you know. **An ad-hoc artifact is never production evidence.** |
 | `INGEST-TO9-AC4` | **NO REGRESSION IN COVERAGE.** `industry_group` key presence stays at its current **189 of 189**, and the basis distribution is printed before and after. ⚠ **A fix that improves values while dropping rows is a FAIL.** |
 | `INGEST-TO9-AC5` | ⛔ **IF (a) IS BUILT: it FAILS LOUD on a prefix matching two members.** Never picks one. **And it is keyed on a closed list, NEVER on string length** — length does not discriminate truncated from complete. |
 
 ## 7. NOT YOURS
-⛔ **THE VENDOR CALL ITSELF** without Andrew's explicit per-use word. ⛔ **Minting the GICS list from
-memory.** ⛔ **Adopting the observed vocabulary** — that is the follow-on this TO must precede.
+
+⛔⛔ **AMENDED BY ANDREW-DIRECT 2026-08-28 ~18:02Z — READ THIS BEFORE THE LIST BELOW.** VERBATIM
+(typo his, preserved): *"I think it can probaably just be inferred from the truncated text and hard
+coded"*. Record `@7d4f4700a6`.
+>> **~~Minting the GICS list from memory.~~ LIFTED BY NAME.** Inferring the completions from the
+   truncated text and hard-coding them is now the INSTRUCTED route. It was a `2.0.0_SA_COO~Z`
+   constraint and **a Tier-1-authored constraint does not survive a direct sovereign instruction to
+   the contrary.** <<
+⚠ **THIS IS A REAFFIRMATION, NOT A FIRST PASS.** §3 records his ~15:0xZ instinct, this seat MEASURED
+it and found the naive form unsafe (only 2 of 7 completions involve "Equipment"), and he restated the
+route AFTER being shown the 7-of-23 split, the 29-char trap and the family-wide cap. **A concern
+raised once and then overruled is a decision.**
+⛔ **WHAT HIS WORD DOES *NOT* LIFT — he did not address it, and a silence is not a lift:**
+`CLAUDE.md`'s *"A VALUE MUST CARRY ITS CLAIM — in a field a consumer can reject on."* He instructed
+WHERE the values come from, not how they are labelled. **`industry_group_basis` reads
+INFERRED/RESOLVED, NEVER `observed`.** That is the difference between *hard-coded and the artifact
+says so* and *hard-coded and the artifact lies*, and it costs nothing.
+
+**STILL NOT YOURS:**
+⛔ **A SECOND VENDOR CALL** without Andrew's explicit per-use word — the ~17:0xZ grant was SINGULAR
+and is SPENT `@4b8dc359ed`. ⛔ **Adopting the observed vocabulary** as the authoritative key — the
+decode keys on the vendor's 4-digit `GICS_INDUSTRY_GROUP` code, never on our observed strings.
 
 <proof_of_spec>
   <criterion id="INGEST-TO9-AC1"/>
