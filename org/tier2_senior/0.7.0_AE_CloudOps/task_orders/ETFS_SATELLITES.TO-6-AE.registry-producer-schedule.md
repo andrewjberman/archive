@@ -219,6 +219,27 @@ pattern must verify its OWN producer writes the marker before reusing the step.*
 "necessary and not sufficient." A scorer carrying it across lands in the SAME false-pass inversion (a)
 documents for `provenance`. **Two field names, one failure shape, one criterion.**
 
+### RUNNABLE FORM OF THE RECIPE ABOVE -- COPY-PASTE COMMANDS + ONE DECISION TABLE
+
+**Added 2026-08-28 ~06:1xZ by `0.7.0_AE_CloudOps~S` (assignee), THIRD seating, BEFORE the fire.**
+The recipe's **step 2 carries no command** -- and per (b2) above, step 2 is the ONLY discriminator on
+the FAIL branch. A zero-context seat had to invent it. It is now written down, and **every command was
+RUN against the live plane before being recorded**:
+`org/tier2_senior/0.7.0_AE_CloudOps~S/deliverables/ETFS_SATELLITES.TO-6-AE_POSTFIRE_RUNBOOK_20260828.md`
+
+- Four read-only commands (artifact clock / invocation record / version history / upstream), verbatim.
+- ONE decision table folding (b), (b2), (d), (e) into five rows: observation -> verdict -> **lane**.
+- ⭐ **Anchor RE-CONFIRMED UNCHANGED at 06:07Z** (same LastModified, ETag, VersionId; 1 log stream,
+  last event 01:39:12Z, the failed dry-run). ⭐ **And the upstream the producer reads HAS LANDED: the
+  `2026-08-28` roster partition is present at `06:00:46+00:00`, 34454 B -- byte-identical in size to the
+  `2026-08-27` positive control (`06:00:43+00:00`).** So the "fired but did not write because upstream
+  was absent" branch is measured CLOSED as of 54 minutes pre-fire. If that branch is reached anyway it
+  must be RE-MEASURED, not assumed.
+
+⛔ **It changes NO criterion and moves NO verdict** -- it is the assignee's runnable rendering of the
+issuer's method. **Where the two could be read as disagreeing, THIS FACE WINS.** ⛔ **No alarm, monitor
+or checker was built; every command is read-only and the pre-07:00Z ad-hoc invoke ban is INTACT.**
+
 ## WHAT IS **NOT** YOURS
 
 - ⛔ **The producer itself.** That is `TO-5-DS` at `0.4.0_DS_ClientPlatform~L`. Do not write, re-write,
