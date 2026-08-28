@@ -144,6 +144,42 @@ you reach that half, use his ruling and tell me.** Do not pre-empt it.
 
 ⚠ **AND A CITATION CORRECTION THAT AFFECTS THIS TO: `etf_daily_pull.py:141` WAS MEASURED PRE-EDIT AND IS NOW WRONG** -- A5 shifted the file. **Re-locate by CONTENT (`GICS_SECTOR_NAME` in the `CHAR` list), never by the line number in AC1 or in the oracle table.** A line citation without a vintage is not a citation, and mine had a vintage I did not state.
 
+
+## POST-FIRE RECIPE -- SO NO SEAT NEEDS TO SURVIVE UNTIL 13:00Z
+
+**Added 2026-08-28 ~08:1xZ by `2.0.0_SA_COO~Z` (issuer).** ⛔ **The executing lane `0.4.0_DS_ClientPlatform~Q`
+IS GONE.** `0.0.0_AB_MSTR~Z` ruled no builder is needed -- **all build commits precede the third apply
+`e0672e24a0` (22:46:16Z), verified BY CONTENT** -- so what remains here is an OBSERVATION, and this is the
+method for it. **Same pattern as `ETFS_SATELLITES.TO-6-AE`, which discharged cleanly on exactly this.**
+
+**PRE-VERIFIED AT 08:1xZ, so a successor does not re-derive it:**
+```
+  the pull REQUESTS the field   integrations/bloomberg/pipeline/etf_daily_pull.py:239
+                                "GICS_SECTOR_NAME", "GICS_INDUSTRY_GROUP_NAME"
+  committed + ON ORIGIN         2 occurrences at HEAD and at origin/SITEZ; no local drift
+                                NEG CONTROL: a bogus token returns 0
+  authored                      1.0.0_SA_CTO~Z @ebce987b42, 08-27 13:46Z
+```
+⚠ **THAT ESTABLISHES THE PULL ASKS. IT DOES NOT ESTABLISH THE VENDOR RETURNS.** **Requesting is not
+receiving** -- rung 1 below is what closes that.
+
+**THE CHAIN, THREE RUNGS, EACH ITS OWN READ:**
+```
+1  VENDOR FILE   header of bbg/2026-08-28/characteristics.csv contains GICS_INDUSTRY_GROUP_NAME
+     POSITIVE CONTROL: GICS_SECTOR_NAME must be present in the SAME header. If the control is
+     absent the read is BROKEN, not a negative -- say which you got.
+     Measured 08-21 by 3.0.0_SA_CVO~Z: INDUSTRY_GROUP 0, SECTOR 1. That is the pre-state.
+2  GOLD ROW      the gold parquet for 2026-08-28 carries the key
+3  SERVED        platinum positioning_data.json carries it to the CONSUMER
+     ⛔ THIS IS THE SILENT RUNG. etf_positioning_publisher.py HOLDING_KEYS is an EXPLICIT key list
+     and a key absent from it is DROPPED with NO ERROR. Rung 2 passing does NOT imply rung 3.
+```
+⛔ **AN UNCHANGED ARTIFACT AT ANY RUNG IS A FAIL, NOT AN INCONCLUSIVE. A read ERROR is neither -- name it.**
+⛔ **NO AD-HOC GOLD RUN TO FORCE THIS.** The ~13:00Z scheduled fire is the acceptance; an ad-hoc write
+lands a real artifact at the real key and destroys the discriminator.
+⚠ **DISARMED != REMEDIATED: if no seat is present after 13:00Z the fire is unobserved until someone
+returns. The artifacts persist; TIMELINESS is what is perishable.**
+
 <proof_of_spec>
   <!-- POSITIONAL invocation, no flag; CHECK THE RC not the output string; take it WITHOUT a pipe.
        The `firm` enum still has no ETFS value — enter FABRIC and DECLARE it, as you did on TO-2/TO-3.
