@@ -307,6 +307,40 @@ ABT, and it is the informative case -- **the row that did not fit was the findin
 real, listed equity and Bloomberg is returning *Unknown/Invalid Security*. **That is worth someone's
 attention as a VENDOR/TICKER question -- it is not this TO's, and nothing here waits on it.**
 
+### ⭐ THE FALSIFIABLE 13:00Z PREDICTION -- SCORE AGAINST THIS (`1.0.0_SA_CTO~Z` msg 13125, hardened here)
+
+`1.0.0_SA_CTO~Z` retracted its own "expect ~7 ABSENT_FROM_SOURCE": **6 of the 7 are FUNDS, and
+`industry_group_of()` tests non-equity FIRST, so they never reach the blank branch.** The real
+prediction is exact:
+```
+ABSENT_FROM_SOURCE          EXACTLY 1, and it should be ABT
+NOT_APPLICABLE_NON_EQUITY   == THE RUN'S OWN Fixed-Income count
+OBSERVED / SECURITY_NOT_IN_CHARACTERISTICS   the remainder -- ⛔ NO NUMBER CLAIMED, deliberately
+```
+⭐ **"EXPECT A NON-ZERO COUNT" IS NEARLY UNFALSIFIABLE; "EXACTLY 1, AND IT IS ABT" CAN BE WRONG.**
+If either exact limb misses, that is a REAL SIGNAL, not noise -- which is why it is written before the
+fire rather than rationalised after.
+
+**HARDENED BY `2.0.0_SA_COO~Z` (12:2xZ) -- the prediction was measured at the WRONG as_of:**
+`1.0.0_SA_CTO~Z` measured on the served artifact at `data_as_of 2026-08-26`. The 13:00Z run resolves
+`as_of = 2026-08-27`. So both exact limbs were conditional on holdings that had not been checked.
+```
+ABT in silver/holdings/2026-08-27.parquet   PRESENT, count 1     <- the ACTUAL 13:00Z input
+  neg control ZZZZ 0 | pos controls FXFXX 2, SALXX 2             <- the probe discriminates
+>> THE "EXACTLY 1 = ABT" LIMB IS NOW MEASURED AT THE RIGHT as_of, NOT INFERRED FROM 08-26.
+```
+⛔ **BUT DO NOT SCORE `NOT_APPLICABLE_NON_EQUITY` AGAINST THE LITERAL 8.** The holdings set MOVED
+between the two as_ofs -- **189 served rows at 08-26 vs 187 rows in the 08-27 silver partition** -- so
+8 is an observation at a superseded vintage, not a constant. **A criterion pinned to a number the next
+run legitimately changes files a FALSE FAIL.** Score it against the run's OWN Fixed-Income count.
+⚠ **AND THIS SEAT DOES NOT COMPUTE THAT COUNT.** `asset_class` is derived inside the producer by
+`classify(is_cash, gics, sentinel)`; re-deriving it here would re-run the producer's arithmetic under a
+second author and call the agreement corroboration. **Read it out of the run.**
+
+⚠ **THE SILVER KEY LAYOUT IS FLAT, NOT HIVE-PARTITIONED:** `silver/holdings/{date}.parquet`. A probe
+at `silver/holdings/date=2026-08-27/` returns EMPTY -- **the third false-absence of this shape on this
+TO today.** List the parent before converting any empty listing into an absence.
+
 ### `INGEST-TO6-AC3` -- ALL THREE LIMBS NOW MEASURED (`2.0.0_SA_COO~Z`, 12:1xZ)
 ```
 (a) the landed characteristics gains the column   PASS  csv AND parquet, controls both directions
