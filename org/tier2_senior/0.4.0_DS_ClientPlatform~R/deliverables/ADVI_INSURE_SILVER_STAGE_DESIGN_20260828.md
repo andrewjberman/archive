@@ -174,6 +174,44 @@ changes are all about *invocation*:
 ⛔ **NOT PROPOSED: a schedule in Terraform, an EventBridge rule, an IAM change, or any deploy act.**
 Those are the AE lane's and they follow the issuer's sequencing. This document is the DS half.
 
+### 7.1 ⛔ THE FIRST-MINT IS A NAMED STEP OF THE BUILD, AND IT IS NOT SAFE TO DO ALONE TODAY
+
+`0.0.0_AB_MSTR` 78411 reports the producer was in the leg-2 deploy ceiling and **SKIPPED as a
+first-mint 404** — *"that first-mint is yours if intended"* (Rule 13: a new shared-home script
+first-mints explicitly). **Measured at the target rather than taken on report:**
+
+```
+target (safe_deploy_core.py PIPELINE_MAP, the CODE -- the header comment lists only bd/inf/cot
+and is stale):  data/assets/scripts/silver  ->  s3://opal-data-mdpf/code/scripts/silver/
+
+  bd49f_insurance_conversion.py   404          <- the mint MSTR is offering
+  raw_json_reader.py              404          <- imported at :113
+  silver_registry.py              404          <- imported at :114
+  build_fact_taxsma_report.py     30,788 B     <- POSITIVE CONTROL, prefix is live
+DENOMINATOR: 20 .py in the repo home, 2 at the deployed prefix.
+```
+
+⛔ **MINTING THE PRODUCER ALONE WOULD DEPLOY A SCRIPT WHOSE TWO `import` LINES CANNOT RESOLVE AT
+THE TARGET** — an object that is present, correct-looking, byte-verifiable against its source, and
+**not runnable**. It would satisfy every check a deploy gate performs and fail on first execution.
+*The mint is not blocked by policy; it is blocked by its own dependencies.*
+
+**THEREFORE — the first-mint is step 0 of the BUILD, not a loose end to close now:**
+
+1. mint `raw_json_reader.py` + `silver_registry.py` **first** (or confirm the stage executes from a
+   checkout/package where they are already present — **which of the two is the real execution
+   substrate is UNMEASURED here and is the AE lane's to state**),
+2. then mint the producer,
+3. then verify by executing it at the target, not by comparing bytes.
+
+⚠ **WHAT I AM DELIBERATELY NOT CONCLUDING FROM `2 of 20`.** It is tempting to read 18 undeployed
+scripts as an 18-wide committed-but-never-deployed gap — the incident class
+`safe_deploy_core.py` names in its own comments. **I have not measured whether these scripts are
+meant to execute from S3 at all**; a home where only 2 of 20 are S3-executed and the rest run from
+a checkout looks *identical* from the prefix. **The measured claim is narrow and it is the only one
+I make: MY producer's two dependencies are absent from MY producer's deploy target.** The wider
+question is real, is not mine, and is named rather than answered.
+
 ---
 
 ## 8. WHAT THIS DESIGN DOES NOT SOLVE — stated so nobody reads it as more than it is
