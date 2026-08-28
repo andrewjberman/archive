@@ -84,6 +84,14 @@ measurement of which rows need a v0.3 carrier.**
 | **WP3-1-AC7** | **FIXTURES ONLY.** Zero reads or writes of any production substrate by anything this wave lands; every record any test admits is minted for the test (WP3-mech-5; the sovereign R1/L2 hold stands). Positive control: name one production key the code COULD have touched and show it did not. | (mechanism, issuer-owned; evidence rides your log) |
 | **WP3-1-AC8** | **NO CONTRACT BYTE.** `git diff --stat d0398b977d <your commit> -- org/standards/isck/*.json org/standards/isck/*.md org/standards/isck/*.py` shows NO member of `+27` changed (WP3-mech-1/7). A defect found in the contract while enumerating is a finding to the issuer for a NEW candidate -- never a workaround in the battery. | (mechanism) |
 
+> **ISSUER RULING on AC3 (2026-08-28 ~10:06Z, R4-DT-3, msg 77608/77609):** AC3's oracle names a property of the
+> FIXTURES ("what an arm EXERCISES") and this wave precedes fixtures -- a SEQUENCING defect in this TO, not a
+> lane defect (DT~X 77605: row 4 FALSE PLUS38_ONLY by text; `opened`/`closed` collide across two carriers by
+> design, sec 3.16). **Wave 1: the 13 `carrier_dependency` cells discharge as `status: NOT_MEASURABLE`,
+> `value: null`, evidence = 77605's confidence table + the row-4 false clean as the negative control that
+> retired the text instrument. Wave 2 re-measures them from the fixtures (a fixture names its `record_type`).**
+> Not decomp-invalidating: the cells and the criterion<->cell mapping are unchanged; only WHEN moves.
+
 **Proof-of-spec:** a `proof-of-spec` instance with `decomp_ref` = this run + bidirectional cell<->criterion
 mapping, denominators printed (50 cells / 8 criteria), `proof-of-spec-check.py` VALID. Delivery = the
 instance + the commit hash to the issuer and to the certifier.
