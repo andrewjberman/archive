@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "carded_by": "0.8.0_AE_CloudComp~Y",
   "subject": {
     "id": "native_cloudedge_direction",
@@ -18,12 +18,24 @@
       "inference_detail": null,
       "materializer_standing": "unknown",
       "composes": [
-        { "id": "kuzu.REL", "note": "the Kuzu relationship-table model; directedness is inherited from it, not implemented per-edge" },
-        { "id": "CloudEdge", "note": "the single REL table carrying every edge in the projection" }
+        {
+          "id": "kuzu.REL",
+          "note": "the Kuzu relationship-table model; directedness is inherited from it, not implemented per-edge"
+        },
+        {
+          "id": "CloudEdge",
+          "note": "the single REL table carrying every edge in the projection"
+        }
       ],
       "invents": [
-        { "id": "cloudedge_direction.closure_semantics", "note": "the declaration that a transitive walk over directed produces/consumes/FLOWS_TO edges constitutes a path -- D2's foundational move" },
-        { "id": "cloudedge_direction.producer_consumer_asymmetry", "note": "modelling produce and consume as opposite-direction edges rather than one relation with a role property" }
+        {
+          "id": "cloudedge_direction.closure_semantics",
+          "note": "the declaration that a transitive walk over directed produces/consumes/FLOWS_TO edges constitutes a path -- D2's foundational move"
+        },
+        {
+          "id": "cloudedge_direction.producer_consumer_asymmetry",
+          "note": "modelling produce and consume as opposite-direction edges rather than one relation with a role property"
+        }
       ],
       "declared_opinions": [
         "DIRECTED-NOT-ROLED: produce and consume are modelled as direction rather than as a role field on a symmetric relation. A consumer cannot ask 'what relation holds between a and b' without also choosing which way to look.",
@@ -76,11 +88,20 @@
     "location": {
       "home": "kuzu_nessie_db::CloudEdge",
       "projection_of": [
-        { "id": "graph_edges", "note": "the Nessie-versioned warehouse table the projection is built from; edges snapshot-id 6557038275462806297 at the pinned vintage" },
-        { "id": "graph_nodes", "note": "supplies the endpoints each directed edge connects; nodes snapshot-id 2902399899597701830" }
+        {
+          "id": "graph_edges",
+          "note": "the Nessie-versioned warehouse table the projection is built from; edges snapshot-id 6557038275462806297 at the pinned vintage"
+        },
+        {
+          "id": "graph_nodes",
+          "note": "supplies the endpoints each directed edge connects; nodes snapshot-id 2902399899597701830"
+        }
       ],
       "co_resident_stores": [
-        { "id": "CloudNode", "note": "the only other table in the projection; holds the endpoints, not the direction" }
+        {
+          "id": "CloudNode",
+          "note": "the only other table in the projection; holds the endpoints, not the direction"
+        }
       ],
       "basis": "measured",
       "basis_by_field": {
@@ -114,6 +135,7 @@
     },
     "key": {
       "identity_space": "The ordered pair (source CloudNode id, destination CloudNode id) together with edge_type. Direction is what makes the pair ORDERED rather than a set, so it is constitutive of edge identity rather than an attribute of it.",
+      "key_expression": null,
       "key_is_stable": "unknown",
       "crosses_spaces": false,
       "declared_mapping": null,
@@ -122,7 +144,8 @@
         "identity_space": "measured",
         "key_is_stable": "absent",
         "crosses_spaces": "measured",
-        "declared_mapping": "measured"
+        "declared_mapping": "measured",
+        "key_expression": "absent"
       },
       "evidence": "The ordered-pair identity is measured: the ARM1/ARM2 control below shows (LAMBDA, S3_BUCKET) and (S3_BUCKET, LAMBDA) are DIFFERENT keys under the same edge_type, which is what it means for direction to be constitutive. crosses_spaces is FALSE and measured: both endpoints are CloudNode ids in one id space, and direction introduces no second space -- this subject is deliberately NOT where the estate's ARN-vs-MS/Git identity gap lives, and saying so keeps that finding attached to the subjects that do carry it. declared_mapping is null because there is no second space to map to, which is the not-applicable case rather than an undeclared mapping. ⛔ key_is_stable is 'unknown' with basis ABSENT: a node id's stability across projection rebuilds determines whether a directed pair is stable, and I did not compare edge endpoints across two builds -- only one projection vintage was available to me. Recording the gap rather than assuming stability from a single read.",
       "owner": "UNOWNED -- node-id stability across rebuilds has no named owner in the sources this lane read."

@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "carded_by": "0.8.0_AE_CloudComp~Y",
   "subject": {
     "id": "infra/aws/lambda/globgrph/incremental_updater/lambda_function.py :: PATH A -- Iceberg/Nessie atomic commit",
@@ -18,14 +18,32 @@
       "inference_detail": null,
       "materializer_standing": "canonical",
       "composes": [
-        { "id": "arn:aws:sqs:us-east-1:313476888478:opal-globgrph-incremental-events", "note": "the event source; ESM 589e1bca-7e54-4b8e-8ede-d0c5d2e53002, State=Enabled, BatchSize=100, MaximumBatchingWindowInSeconds=120" },
-        { "id": "opal-globgrph-cloudtrail-mgmt", "note": "the EventBridge rule that feeds that queue, resolved by reverse lookup on the queue ARN" },
-        { "id": "live AWS describe APIs", "note": "bounded_derive_node (:247) re-reads live state per ARN; 6 service branches implemented -- see coverage" },
-        { "id": "globgrph.graph_nodes", "note": "the target Iceberg table, via a pyiceberg RestCatalog against Nessie's Iceberg REST endpoint (_get_catalog :342)" }
+        {
+          "id": "arn:aws:sqs:us-east-1:313476888478:opal-globgrph-incremental-events",
+          "note": "the event source; ESM 589e1bca-7e54-4b8e-8ede-d0c5d2e53002, State=Enabled, BatchSize=100, MaximumBatchingWindowInSeconds=120"
+        },
+        {
+          "id": "opal-globgrph-cloudtrail-mgmt",
+          "note": "the EventBridge rule that feeds that queue, resolved by reverse lookup on the queue ARN"
+        },
+        {
+          "id": "live AWS describe APIs",
+          "note": "bounded_derive_node (:247) re-reads live state per ARN; 6 service branches implemented -- see coverage"
+        },
+        {
+          "id": "globgrph.graph_nodes",
+          "note": "the target Iceberg table, via a pyiceberg RestCatalog against Nessie's Iceberg REST endpoint (_get_catalog :342)"
+        }
       ],
       "invents": [
-        { "id": "drift_class=LIVE-INCREMENTAL", "note": "stamped on every node this path writes (:272 and each sibling branch). Terraform state is unreachable from the Lambda, so this path cannot compute a real drift class; it declares a marker value instead and defers reconciliation to the nightly full derive (:250-252)" },
-        { "id": "S3 object->bucket grain collapse", "note": ":266 collapses an object ARN to its bucket. A choice, not a read: it prevents the 23,664 phantom per-object S3_BUCKET nodes recorded at :264-265, at the cost of making object-grain events indistinguishable from bucket-grain ones" }
+        {
+          "id": "drift_class=LIVE-INCREMENTAL",
+          "note": "stamped on every node this path writes (:272 and each sibling branch). Terraform state is unreachable from the Lambda, so this path cannot compute a real drift class; it declares a marker value instead and defers reconciliation to the nightly full derive (:250-252)"
+        },
+        {
+          "id": "S3 object->bucket grain collapse",
+          "note": ":266 collapses an object ARN to its bucket. A choice, not a read: it prevents the 23,664 phantom per-object S3_BUCKET nodes recorded at :264-265, at the cost of making object-grain events indistinguishable from bucket-grain ones"
+        }
       ],
       "declared_opinions": [
         "CORRECTNESS IS THE REF-CAS, NOT THE SNAPSHOT PARENT (:505-516). The code carries an explicit ruling that Nessie's branch-ref compare-and-swap is the off-branch guarantee and that Iceberg's parent_snapshot_id is cosmetically null by design. A prior produced.parent==expected assertion was REMOVED because it false-rejected every valid commit and caused the 2026-06-12 silent freeze. This is a declared position about which layer owns correctness, recorded in-code rather than derived.",
@@ -79,9 +97,18 @@
       "home": "iceberg://globgrph.graph_nodes on Nessie branch main, warehouse s3://opal-313476888478-globgrph/warehouse",
       "projection_of": [],
       "co_resident_stores": [
-        { "id": "globgrph.graph_edges", "note": "sibling table in the same namespace and the same Nessie branch. This path NEVER writes it -- the module docstring line :6 says 'graph_nodes / graph_edges', but the only table_id bound in code is graph_nodes (:371, :434). A docstring-level over-statement of this path's own reach, recorded rather than corrected." },
-        { "id": "globgrph.graph_contracts", "note": "same namespace; written only by derive_runner PATH B under an explicit invariant that derive must not touch it. This path never binds it." },
-        { "id": "globgrph.cse", "note": "same namespace; written by the nightly CSE producer chain. This path never binds it -- but it DOES stamp freshness metadata about it via its own PATH B (W3-uuxp)." }
+        {
+          "id": "globgrph.graph_edges",
+          "note": "sibling table in the same namespace and the same Nessie branch. This path NEVER writes it -- the module docstring line :6 says 'graph_nodes / graph_edges', but the only table_id bound in code is graph_nodes (:371, :434). A docstring-level over-statement of this path's own reach, recorded rather than corrected."
+        },
+        {
+          "id": "globgrph.graph_contracts",
+          "note": "same namespace; written only by derive_runner PATH B under an explicit invariant that derive must not touch it. This path never binds it."
+        },
+        {
+          "id": "globgrph.cse",
+          "note": "same namespace; written by the nightly CSE producer chain. This path never binds it -- but it DOES stamp freshness metadata about it via its own PATH B (W3-uuxp)."
+        }
       ],
       "basis": "measured",
       "basis_by_field": {
@@ -116,17 +143,19 @@
     },
     "key": {
       "identity_space": "Two columns used as one match space: `arn` (the AWS ARN) and `node_id` (the short name). _match_filter (:391-405) builds In('arn',[...]) OR In('node_id',[...]) and the overwrite/delete filter matches a row if EITHER column hits.",
+      "key_expression": null,
       "key_is_stable": "stable",
       "crosses_spaces": true,
       "declared_mapping": "delete_keys_from_event (:163-226) RECONSTRUCTS an ARN from a CloudTrail delete event's name fields, per event type, using account from recipientAccountId with fallback 313476888478 (:152) and region hardcoded us-east-1 (:153). That reconstruction IS the declared mapping between the name space and the ARN space.",
-      "basis": "measured",
+      "basis": "inferred",
       "basis_by_field": {
         "identity_space": "measured",
         "key_is_stable": "measured",
         "crosses_spaces": "measured",
-        "declared_mapping": "measured"
+        "declared_mapping": "measured",
+        "key_expression": "absent"
       },
-      "evidence": "crosses_spaces is TRUE and measured, and the code says WHY it must: :148-151 records that CloudTrail delete events carry a NAME rather than always an ARN, and that reconstructing the ARN lets the filter match the exact node on the `arn` column 'rather than only the short name (node_id), avoiding cross-class name-collision over-delete.' So the file itself names the hazard the two-space match creates. key_is_stable='stable' is measured at the level the filter uses: an ARN is stable for a resource's lifetime and node_id is derived from it deterministically at :701 (node.get('arn') or node.get('id')). ⚠ THE STABILITY IS PER-RESOURCE, NOT ACROSS DELETE-RECREATE: an ARN reconstructed at :195 for a Lambda deleted and recreated under the same name is byte-identical, so the two incarnations are one key. Not a defect of this path -- a property of the ARN space -- but it means the key cannot distinguish resurrection from continuity. ⛔ THE REGION LITERAL IS A REAL BOUND ON THE MAPPING: _REGION='us-east-1' at :153 is hardcoded, so a delete event for a resource in any other region reconstructs an ARN that matches no row, and the delete silently no-ops. I did not measure whether any non-us-east-1 resource is in the graph, so I state the mechanism and not a count.",
+      "evidence": "crosses_spaces is TRUE and measured, and the code says WHY it must: :148-151 records that CloudTrail delete events carry a NAME rather than always an ARN, and that reconstructing the ARN lets the filter match the exact node on the `arn` column 'rather than only the short name (node_id), avoiding cross-class name-collision over-delete.' So the file itself names the hazard the two-space match creates. key_is_stable='stable' is measured at the level the filter uses: an ARN is stable for a resource's lifetime and node_id is derived from it deterministically at :701 (node.get('arn') or node.get('id')). ⚠ THE STABILITY IS PER-RESOURCE, NOT ACROSS DELETE-RECREATE: an ARN reconstructed at :195 for a Lambda deleted and recreated under the same name is byte-identical, so the two incarnations are one key. Not a defect of this path -- a property of the ARN space -- but it means the key cannot distinguish resurrection from continuity. ⛔ THE REGION LITERAL IS A REAL BOUND ON THE MAPPING: _REGION='us-east-1' at :153 is hardcoded, so a delete event for a resource in any other region reconstructs an ARN that matches no row, and the delete silently no-ops. I did not measure whether any non-us-east-1 resource is in the graph, so I state the mechanism and not a count. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor.",
       "owner": "0.8.0_AE_CloudComp."
     },
     "failure_mode": {

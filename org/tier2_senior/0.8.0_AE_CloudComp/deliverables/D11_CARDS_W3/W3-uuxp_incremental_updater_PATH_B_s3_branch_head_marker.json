@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "carded_by": "0.8.0_AE_CloudComp~Y",
   "subject": {
     "id": "infra/aws/lambda/globgrph/incremental_updater/lambda_function.py :: PATH B -- S3 branch-head marker",
@@ -18,16 +18,40 @@
       "inference_detail": null,
       "materializer_standing": "canonical",
       "composes": [
-        { "id": "globgrph.graph_nodes", "note": "the only one of the four tables this Lambda actually writes (via its PATH A)" },
-        { "id": "globgrph.graph_edges", "note": "read-only here; snapshot resolved and republished. Written by derive_runner PATH A." },
-        { "id": "globgrph.graph_contracts", "note": "read-only here. Written by derive_runner PATH B under an explicit do-not-touch invariant." },
-        { "id": "globgrph.cse", "note": "read-only here. Written by the nightly CSE producer chain. Its presence in this tuple is the fix for the 2026-07-10 erasure -- see evidence." },
-        { "id": "infra/aws/globgrph/_provenance.py", "note": "vendored into the deployment zip as a task-root module; carries ALL the marker IO. This file carries none." },
-        { "id": "Nessie REST /api/v2/trees/main", "note": "_nessie_main_hash (:553-564) best-effort reads the branch HEAD hash; on failure the marker falls back to graph_nodes' snapshot_id (_provenance.py:223)" }
+        {
+          "id": "globgrph.graph_nodes",
+          "note": "the only one of the four tables this Lambda actually writes (via its PATH A)"
+        },
+        {
+          "id": "globgrph.graph_edges",
+          "note": "read-only here; snapshot resolved and republished. Written by derive_runner PATH A."
+        },
+        {
+          "id": "globgrph.graph_contracts",
+          "note": "read-only here. Written by derive_runner PATH B under an explicit do-not-touch invariant."
+        },
+        {
+          "id": "globgrph.cse",
+          "note": "read-only here. Written by the nightly CSE producer chain. Its presence in this tuple is the fix for the 2026-07-10 erasure -- see evidence."
+        },
+        {
+          "id": "infra/aws/globgrph/_provenance.py",
+          "note": "vendored into the deployment zip as a task-root module; carries ALL the marker IO. This file carries none."
+        },
+        {
+          "id": "Nessie REST /api/v2/trees/main",
+          "note": "_nessie_main_hash (:553-564) best-effort reads the branch HEAD hash; on failure the marker falls back to graph_nodes' snapshot_id (_provenance.py:223)"
+        }
       ],
       "invents": [
-        { "id": "committed_at_iso", "note": "_provenance.py:207 stamps datetime.now(timezone.utc) at STAMP time. This is the marker's own monotonicity key and is NOT any table's write time -- the per-table last_write_iso values are separate and are resolved from each snapshot's timestamp_ms (:217)." },
-        { "id": "writer_id", "note": "the literal 'incremental_updater' at :584. Self-declared attribution: the marker records who claims to have stamped it, and nothing verifies that claim." }
+        {
+          "id": "committed_at_iso",
+          "note": "_provenance.py:207 stamps datetime.now(timezone.utc) at STAMP time. This is the marker's own monotonicity key and is NOT any table's write time -- the per-table last_write_iso values are separate and are resolved from each snapshot's timestamp_ms (:217)."
+        },
+        {
+          "id": "writer_id",
+          "note": "the literal 'incremental_updater' at :584. Self-declared attribution: the marker records who claims to have stamped it, and nothing verifies that claim."
+        }
       ],
       "declared_opinions": [
         "A MARKER FAILURE MUST NEVER FAIL A LANDED COMMIT (:574, and the handler wrapper at :729-732). Correct precedence, and it is a declared position: it means marker staleness and commit failure are deliberately decoupled, so the marker cannot be read as a commit oracle.",
@@ -80,14 +104,32 @@
     "location": {
       "home": "s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json",
       "projection_of": [
-        { "id": "globgrph.graph_nodes", "note": "snapshot_id + metadata_location + last_write_iso projected from the live Iceberg table" },
-        { "id": "globgrph.graph_edges", "note": "same, projected read-only" },
-        { "id": "globgrph.graph_contracts", "note": "same, projected read-only" },
-        { "id": "globgrph.cse", "note": "same, projected read-only" }
+        {
+          "id": "globgrph.graph_nodes",
+          "note": "snapshot_id + metadata_location + last_write_iso projected from the live Iceberg table"
+        },
+        {
+          "id": "globgrph.graph_edges",
+          "note": "same, projected read-only"
+        },
+        {
+          "id": "globgrph.graph_contracts",
+          "note": "same, projected read-only"
+        },
+        {
+          "id": "globgrph.cse",
+          "note": "same, projected read-only"
+        }
       ],
       "co_resident_stores": [
-        { "id": "s3://opal-313476888478-globgrph/warehouse/_branch_head.history/", "note": "HISTORY_PREFIX at _provenance.py:102 -- the archive of superseded markers. MEASURED EMPTY; the prefix does not appear in the bucket's prefix listing at all." },
-        { "id": "s3://opal-313476888478-globgrph/warehouse/cse_producer_markers/", "note": "a DIFFERENT marker family, per-CSE-producer watermarks. Also measured absent. Written by W3-bzgw's path, not this one." }
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/_branch_head.history/",
+          "note": "HISTORY_PREFIX at _provenance.py:102 -- the archive of superseded markers. MEASURED EMPTY; the prefix does not appear in the bucket's prefix listing at all."
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/cse_producer_markers/",
+          "note": "a DIFFERENT marker family, per-CSE-producer watermarks. Also measured absent. Written by W3-bzgw's path, not this one."
+        }
       ],
       "basis": "measured",
       "basis_by_field": {
@@ -122,17 +164,19 @@
     },
     "key": {
       "identity_space": "Two spaces meeting in one object. (1) TABLE NAME -- the string keys of table_metadata, matching Iceberg table names in the globgrph namespace. (2) THE OBJECT KEY ITSELF, a fixed singleton: there is exactly one marker per branch and its name encodes the branch ('main').",
+      "key_expression": null,
       "key_is_stable": "stable",
       "crosses_spaces": true,
       "declared_mapping": "_provenance.py:211 catalog.load_table(('globgrph', name)) -- the table-name string is mapped into the catalog's (namespace, name) identifier space by prefixing the hardcoded namespace 'globgrph'. That prefixing IS the mapping, and it is implicit rather than declared anywhere as a contract.",
-      "basis": "measured",
+      "basis": "inferred",
       "basis_by_field": {
         "identity_space": "measured",
         "key_is_stable": "measured",
         "crosses_spaces": "measured",
-        "declared_mapping": "measured"
+        "declared_mapping": "measured",
+        "key_expression": "absent"
       },
-      "evidence": "key_is_stable='stable' measured on both spaces: MARKER_KEY is a module-level literal (_provenance.py:96) that has not changed between the deployed and source copies (both at :96, inside the byte-identical region), and all four table-name strings from the :585 tuple resolved successfully against the live catalog -- every one appears in the live marker, so none is a name that fails to bind. crosses_spaces is TRUE and measured: the four bare strings in the Lambda's tuple are not catalog identifiers until _provenance.py:211 prefixes them with 'globgrph'. ⛔ THE CONSEQUENCE OF THAT IMPLICIT MAPPING IS A REAL SILENT FAILURE, and it is measured at the line rather than supposed: a table name that does not resolve is caught at :219-220, logged MARKER_TABLE_RESOLVE_FAIL at WARN, and simply OMITTED from the tables dict -- the stamp then proceeds with the remaining tables. So a typo'd or renamed table degrades to an ABSENT ROW, not an error, and an absent row is exactly what the wholesale-replace clobber also produces. Two different causes converge on one indistinguishable symptom.",
+      "evidence": "key_is_stable='stable' measured on both spaces: MARKER_KEY is a module-level literal (_provenance.py:96) that has not changed between the deployed and source copies (both at :96, inside the byte-identical region), and all four table-name strings from the :585 tuple resolved successfully against the live catalog -- every one appears in the live marker, so none is a name that fails to bind. crosses_spaces is TRUE and measured: the four bare strings in the Lambda's tuple are not catalog identifiers until _provenance.py:211 prefixes them with 'globgrph'. ⛔ THE CONSEQUENCE OF THAT IMPLICIT MAPPING IS A REAL SILENT FAILURE, and it is measured at the line rather than supposed: a table name that does not resolve is caught at :219-220, logged MARKER_TABLE_RESOLVE_FAIL at WARN, and simply OMITTED from the tables dict -- the stamp then proceeds with the remaining tables. So a typo'd or renamed table degrades to an ABSENT ROW, not an error, and an absent row is exactly what the wholesale-replace clobber also produces. Two different causes converge on one indistinguishable symptom. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor.",
       "owner": "0.8.0_AE_CloudComp for the tuple; _provenance.py's owner for the namespace prefixing."
     },
     "failure_mode": {

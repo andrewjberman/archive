@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "carded_by": "0.8.0_AE_CloudComp~Y",
   "subject": {
     "id": "d1_bound_live_graph_edge_types",
@@ -18,11 +18,20 @@
       "inference_detail": null,
       "materializer_standing": "not_applicable",
       "composes": [
-        { "id": "CloudEdge", "note": "the single REL table all 53 live edge types share; the eight are a hand-picked subset of its edge_type values" },
-        { "id": "org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml#dynamic_rails.D1_value_grain", "note": "the edge_grain_binding block that names the eight and assigns each a grain" }
+        {
+          "id": "CloudEdge",
+          "note": "the single REL table all 53 live edge types share; the eight are a hand-picked subset of its edge_type values"
+        },
+        {
+          "id": "org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml#dynamic_rails.D1_value_grain",
+          "note": "the edge_grain_binding block that names the eight and assigns each a grain"
+        }
       ],
       "invents": [
-        { "id": "d1_edge_grain_binding", "note": "the assignment of each named edge type to exactly one grain -- field for FLOWS_TO/READS_FIELD/HAS_FIELD/PROP_PASSES, artifact for WRITES/READS/WRITES_S3/READS_S3" }
+        {
+          "id": "d1_edge_grain_binding",
+          "note": "the assignment of each named edge type to exactly one grain -- field for FLOWS_TO/READS_FIELD/HAS_FIELD/PROP_PASSES, artifact for WRITES/READS/WRITES_S3/READS_S3"
+        }
       ],
       "declared_opinions": [
         "ONE GRAIN PER TYPE: each edge type is bound to exactly one grain. FLOWS_TO is called field-grain even though 77 of its 961 edges were declared to carry no dstField -- so the binding describes the type's intent, not every instance.",
@@ -77,10 +86,16 @@
     "location": {
       "home": "org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml#dynamic_rails.D1_value_grain.edge_grain_binding",
       "projection_of": [
-        { "id": "kuzu_nessie_db", "note": "the embedded per-type counts were produced by comp-kuzu queries at counts_as_of 2026-07-23; the SELECTION itself is hand-authored and projects from nothing" }
+        {
+          "id": "kuzu_nessie_db",
+          "note": "the embedded per-type counts were produced by comp-kuzu queries at counts_as_of 2026-07-23; the SELECTION itself is hand-authored and projects from nothing"
+        }
       ],
       "co_resident_stores": [
-        { "id": "infra/system/ontology/SYSTEM_DEFINITIONS.yaml", "note": "registry entry pointing at the D1 block via resolves_via; declares, does not duplicate the binding" }
+        {
+          "id": "infra/system/ontology/SYSTEM_DEFINITIONS.yaml",
+          "note": "registry entry pointing at the D1 block via resolves_via; declares, does not duplicate the binding"
+        }
       ],
       "basis": "measured",
       "basis_by_field": {
@@ -114,17 +129,19 @@
     },
     "key": {
       "identity_space": "edge_type STRING literals, shared between the YAML block and the graph's CloudEdge.edge_type property -- one id space, matched by exact string.",
+      "key_expression": null,
       "key_is_stable": "stable",
       "crosses_spaces": false,
       "declared_mapping": null,
-      "basis": "measured",
+      "basis": "inferred",
       "basis_by_field": {
         "identity_space": "measured",
         "key_is_stable": "measured",
         "crosses_spaces": "measured",
-        "declared_mapping": "measured"
+        "declared_mapping": "measured",
+        "key_expression": "absent"
       },
-      "evidence": "⛔ key_is_stable IS 'stable' AND IT IS MEASURED RATHER THAN ASSUMED, which is the opposite call from my other cards and the reason is specific: all eight names were matched EXACTLY against live edge_type values at the pinned vintage and all eight resolved, so the join between the YAML's strings and the graph's property works today with zero translation. That is a demonstrated match, not an inference from the names looking like names. crosses_spaces is FALSE and measured: both sides are the same edge_type string space, and declared_mapping is null because no second space exists to map to -- the not-applicable case rather than an undeclared mapping. ⚠ THE CONTRAST WITH THIS RAIL'S OTHER KEY IS WORTH RECORDING: D1's EdgeKind values DO cross spaces (ontology 'recompute_guarded' vs live 'recompute/guarded'), carded separately at W2-iarh. Edge TYPE names are clean; edge KIND values are not. Same block, two key spaces, opposite verdicts.",
+      "evidence": "⛔ key_is_stable IS 'stable' AND IT IS MEASURED RATHER THAN ASSUMED, which is the opposite call from my other cards and the reason is specific: all eight names were matched EXACTLY against live edge_type values at the pinned vintage and all eight resolved, so the join between the YAML's strings and the graph's property works today with zero translation. That is a demonstrated match, not an inference from the names looking like names. crosses_spaces is FALSE and measured: both sides are the same edge_type string space, and declared_mapping is null because no second space exists to map to -- the not-applicable case rather than an undeclared mapping. ⚠ THE CONTRAST WITH THIS RAIL'S OTHER KEY IS WORTH RECORDING: D1's EdgeKind values DO cross spaces (ontology 'recompute_guarded' vs live 'recompute/guarded'), carded separately at W2-iarh. Edge TYPE names are clean; edge KIND values are not. Same block, two key spaces, opposite verdicts. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor.",
       "owner": "4.0.0_SA_CRO"
     },
     "failure_mode": {

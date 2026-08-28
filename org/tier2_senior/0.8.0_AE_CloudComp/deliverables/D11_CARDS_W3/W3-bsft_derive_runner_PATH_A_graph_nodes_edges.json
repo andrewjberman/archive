@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "carded_by": "0.8.0_AE_CloudComp~X",
   "subject": {
     "id": "infra/aws/globgrph/derive_runner.py :: PATH A -- graph_nodes + graph_edges",
@@ -136,12 +136,16 @@
     },
     "key": {
       "identity_space": "TABLE identity: the pyiceberg 2-tuple (namespace, table) -- ('globgrph','graph_nodes'), ('globgrph','graph_edges'). ROW identity: node_id (StringType, required=True) for nodes; (src_id, dst_id, edge_type) for edges, all required=True. NOTE the row keys are required=True but NOT unique-constrained -- Iceberg has no uniqueness enforcement; required=True is satisfied by the EMPTY STRING, which is exactly how the A11 defect went silent (see failure_mode).",
+      "key_expression": null,
       "key_is_stable": "stable",
       "crosses_spaces": true,
       "declared_mapping": "NONE -- there is no normalising layer, and this is the finding. The SAME table is addressed THREE ways in this estate: (1) 2-TUPLE ('globgrph','graph_nodes') -- derive_runner.py:281, comp_aws_cli.py:3032; (2) DOTTED 2-PART string 'globgrph.graph_nodes' -- derive_runner.py:1435-1436, catalog.load_table(\"globgrph.graph_nodes\"), i.e. INSIDE THIS VERY FILE, a different rendering from the one at :281; (3) DOTTED 3-PART Trino string 'iceberg.globgrph.graph_nodes' -- .tools/_trino_fed.py:44 and infra/aws/globgrph/fedobs/fedobs_views.sql:34, where 'iceberg' is the Trino CATALOG. All three are CORRECT addressings of one artifact; none is wrong. A join key built on string equality splits one table into up to three rows and announces nothing.",
-      "basis": "measured",
-      "evidence": "derive_runner.py:281, :292, :1435-1436; org/modules/graph/comp_aws_cli.py:3032, :3045; .tools/_trino_fed.py:44, :50; infra/aws/globgrph/fedobs/fedobs_views.sql:9-10, :34; schemas at derive_runner.py:270-292 @ 3b918f21b42366fce14f7c2076f18444cd782931. CORROBORATION, NOT REPETITION: 0.7.0_AE_CloudOps~X (msg 74756) measured this same two-plane split for globgrph.cse by RESOLVING THE BINDING at org/modules/graph/cse_schema.py:595. My instrument differs -- I enumerated the ADDRESSING FORMS of an already-known table across the tree -- and it surfaced a THIRD rendering their subject's evidence did not need: the dotted 2-part form, in the same file as the tuple form.",
-      "owner": "0.8.0_AE_CloudComp"
+      "basis": "inferred",
+      "evidence": "derive_runner.py:281, :292, :1435-1436; org/modules/graph/comp_aws_cli.py:3032, :3045; .tools/_trino_fed.py:44, :50; infra/aws/globgrph/fedobs/fedobs_views.sql:9-10, :34; schemas at derive_runner.py:270-292 @ 3b918f21b42366fce14f7c2076f18444cd782931. CORROBORATION, NOT REPETITION: 0.7.0_AE_CloudOps~X (msg 74756) measured this same two-plane split for globgrph.cse by RESOLVING THE BINDING at org/modules/graph/cse_schema.py:595. My instrument differs -- I enumerated the ADDRESSING FORMS of an already-known table across the tree -- and it surfaced a THIRD rendering their subject's evidence did not need: the dotted 2-part form, in the same file as the tuple form. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor.",
+      "owner": "0.8.0_AE_CloudComp",
+      "basis_by_field": {
+        "key_expression": "absent"
+      }
     },
     "failure_mode": {
       "returns_on_failure": "COMMIT CONFLICT: _overwrite_with_retry retries CommitFailedException and CommitStateUnknownException up to COMMIT_MAX_ATTEMPTS (:58, default 5, env ICEBERG_COMMIT_MAX_ATTEMPTS) with a table RE-LOAD each attempt; on exhaustion it raises and the ECS task fails -- LOUD. CONTRACTS-ENSURE FAILURE: caught at :306-308, prints 'WARN: GRAPH_CONTRACTS_ENSURE_FAIL ...' and the run CONTINUES by design (the nodes/edges write is the declared critical path). EMPTY INPUT: no exception at all -- see silent_degrade_paths.",
