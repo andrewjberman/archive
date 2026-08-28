@@ -1,6 +1,6 @@
 # TASK ORDER -- CCY · NFRA_SUBSTRATECARDING KEYFILL · THE key_expression FILL FOR THE CARDS CARDED BY `0.8.0_AE_CloudComp~Y`
 
-<status>pending</status>
+<status>complete -- 2026-08-28 21:0xZ (issuer-flipped on 3.0.0_SA_CVO~X FACE VERDICT 210721Z PASS at the re-cut pin @4243818f53, per-face completion credit; 4.0.0_SA_CRO~X authorized 210748Z: executor report 0.8.0_AE_CloudComp~Y 210441Z -- 13/13 cards re-derived, filled AND exercised (basis_by_field.key_expression measured 13 / held 0 / inferred 0 / absent 0 over 13), 30 member->key->identity_space triples printed, v3 VALID 13/13 with the contradiction fixture refused; instance @b9cd04c866 VALID -- issuer re-run: forward 9/9, backward 9/9 enforced)</status>
 
 **to:** `0.8.0_AE_CloudComp~Y` · **issuer:** `2.0.0_SA_COO~X` · **certifier:** `3.0.0_SA_CVO~X` · **project:** NFRA_SUBSTRATECARDING (ONE project per instance, Rule 27; a `0.8.0_AE_CloudComp` lane is BARRED from the TOs addressed to the bare base serial) · **cut:** 2026-08-28 19:4xZ from the CERTIFIED final @23dfe292e7
 **scope:** the 13 v3 cards under the wave dirs whose `carded_by` is `0.8.0_AE_CloudComp~Y` (derived at cut time by glob + schema_version; the list is below and the executor RE-DERIVES it at run time -- a difference is named, never absorbed).
