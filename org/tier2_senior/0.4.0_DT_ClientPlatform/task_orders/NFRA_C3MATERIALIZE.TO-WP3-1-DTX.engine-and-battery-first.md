@@ -103,7 +103,7 @@ measurement of which rows need a v0.3 carrier.**
 > every other AC stays at d0398b977d. Supersedes the NOT_MEASURABLE/null form above.
 
 **Proof-of-spec:** a `proof-of-spec` instance with `decomp_ref` = this run + bidirectional cell<->criterion
-mapping, denominators printed (50 cells / 8 criteria), `proof-of-spec-check.py` VALID. Delivery = the
+mapping, denominators printed (**53 cells / 8 criteria** -- 50 executor + 3 issuer-owned mechanism, per `<alignment_denominators>`; the earlier "50" here was a typed number beside the derived one and drifted, CVO~X face finding 10:21Z), `proof-of-spec-check.py` VALID. Delivery = the
 instance + the commit hash to the issuer and to the certifier.
 
 ## BOUNDARIES
