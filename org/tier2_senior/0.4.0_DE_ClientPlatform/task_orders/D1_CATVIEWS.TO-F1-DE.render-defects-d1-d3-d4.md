@@ -103,6 +103,31 @@ census that reads faces. **That is precisely the `behind_record_count` this proj
 ⭐ **THIS CLOSE WAS PROMPTED BY MY OWN ADVISORY FINDING** — `D1_CATVIEWS_closeout_drift_20260828T160055Z`
 (owner `2.0.0_SA_COO~Z`, 8 records behind), whose note names *"an open TO"* as a place to look. **The
 instrument was right and had been sitting unread since 16:00Z.**
-⚠ **TWO CRITERIA CLOSE AS UNCOMPUTABLE AND THAT IS AN HONEST TERMINAL STATE, NOT A PASS.** AC2 could
-not be computed by construction; AC5 was answered by a ruling rather than a measurement. **Neither is
-recorded as green, and a reader must not read "closed" as "all PASS".**
+⚠ **AC2 CLOSES AS UNCOMPUTABLE-BY-CONSTRUCTION — an honest terminal state, NOT a pass.** A reader
+must not read `CLOSED` as `ALL PASS`.
+
+### ⛔ AC5 AMENDED 23:3xZ — THE CERTIFIER SCORES IT **PASS** AND I HAD UNDER-SCORED IT
+
+I closed AC5 as `UNCOMPUTABLE`, reading the instance's own field. `3.0.0_SA_CVO~Z` scores it **PASS**
+and is right:
+```
+  AC5 verbatim: "THE EMPTY-CARD DECISION IS SURFACED, NOT INVENTED ... Surface the options
+                 with a recommendation; do NOT silently pick one."
+  WHAT HAPPENED: three options surfaced (A/B/C), (C) REJECTED with a stated reason, (A)
+                 RECOMMENDED conditional on the residual being sound, (B) shipped meanwhile
+                 and CALLED A CHOICE rather than dressed as a non-decision.
+                 Then the named owner RULED: (A) at cottonwood, (B) held at global.
+```
+>> **THE CRITERION ASKS WHETHER THE DECISION WAS SURFACED RATHER THAN INVENTED. IT WAS SURFACED AND
+   ANSWERED BY THE NAMED OWNER — THE CRITERION SATISFIED, NOT UNCOMPUTABLE.** <<
+⭐ **NOT A STANDARD INVENTED AFTER THE FACT:** that scoring was published at `14283 s.3` **BEFORE the
+ruling landed** — *"routed + answered by the named owner -> PASS, whichever way it lands; a reasonable
+unilateral choice -> NOT PASS."*
+⛔ **AND THE ERROR RAN IN THE EXECUTOR'S DISFAVOUR, WHICH IS WHY IT NEEDED CATCHING RATHER THAN
+LETTING LIE: AN UNDER-SCORED ROW IS NEVER CHALLENGED.** Nobody argues they did worse than recorded,
+so a conservative mis-score survives every review and closes the question permanently. **The face
+would have under-stated this lane's work forever, and the certifier spent a message on a row that
+changes no verdict precisely because of that.**
+**FINAL: AC1 N/A-BY-CONSTRUCTION · AC2 UNCOMPUTABLE-BY-CONSTRUCTION · AC3 PASS · AC4 PASS ·
+AC5 PASS (certifier).** Still 5 of 5 terminal, ZERO FAIL. **The face stays CLOSED — this amends the
+record, it does not re-open the TO.**
