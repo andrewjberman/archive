@@ -105,6 +105,47 @@ check("every client-table row carries a status in the ruled set",
       all(r["status"] in ("new", "lost", "existing") for e in entries for r in e["client_table"]))
 
 print("=" * 78)
+print("ARM 3b -- the client table carries the RULED L2 COLUMNS (PRD s.6.2)")
+print("=" * 78)
+# Transcribed from the PRD's own row and the consumer's PERFRP_CLIENT_COLUMNS, in the
+# PRD's order. CORRECTED AFTER 3.0.0_SA_CVO 79427: the first b-6 emission carried a
+# MEMBERSHIP ROSTER ({relationship_id, status}) whose intersection with this set was
+# ZERO. Nothing about the roster was wrong; it simply was not the ruled table.
+RULED_CLIENT_COLUMNS = ("client", "beginning_market_value", "new_relationship_flows",
+                        "lost_relationship_flows", "net_flows_existing", "net_gain",
+                        "ending_market_value")
+sample = entries[0]["client_table"][0]
+served_cols = set(sample)
+missing_cols = [c for c in RULED_CLIENT_COLUMNS if c not in served_cols]
+check("every ruled L2 column is present", not missing_cols, "missing %s" % missing_cols)
+check("the ruled ORDER is the PRD's (not re-sorted into the emitter's convenience)",
+      [c for c in RULED_CLIENT_COLUMNS if c in served_cols] == list(RULED_CLIENT_COLUMNS))
+print("  beyond the ruled set: %s" % sorted(served_cols - set(RULED_CLIENT_COLUMNS)))
+print("  ^ `status` is KEPT deliberately: it is what SPLITS the three flow columns, so")
+print("    a reader can see which bucket produced which figure. It is additive to the")
+print("    ruled set, not a substitute for it.")
+bad_id, bad_part, nrows = 0, 0, 0
+for e in entries:
+    for r in e["client_table"]:
+        nrows += 1
+        flow = (r["new_relationship_flows"] + r["lost_relationship_flows"]
+                + r["net_flows_existing"])
+        if abs((r["beginning_market_value"] + flow + r["net_gain"])
+               - r["ending_market_value"]) > 0.02:
+            bad_id += 1
+        if sum(1 for c in ("new_relationship_flows", "lost_relationship_flows",
+                           "net_flows_existing") if r[c] != 0) > 1:
+            bad_part += 1
+check("IDENTITY beginning + flows + net_gain == ending", not bad_id,
+      "%d bad of %d rows" % (bad_id, nrows))
+check("the three flow columns are ONE PARTITION (never >1 non-zero on a row)",
+      not bad_part, "%d rows with >1" % bad_part)
+print("  ^ net_gain is the RESIDUAL, derived not read -- which is what makes the row an")
+print("    identity a consumer can check rather than six numbers sitting together.")
+check("client_table row count == the relationship partition union",
+      all(len(e["client_table"]) == e["relationship_partition"]["union"] for e in entries))
+
+print("=" * 78)
 print("ARM 4 -- NON-ADDITIVITY (R-p5) is expressed, not merely asserted in prose")
 print("=" * 78)
 gap = [(e["key"], e["accounts"], e["role_sum_would_be"])
