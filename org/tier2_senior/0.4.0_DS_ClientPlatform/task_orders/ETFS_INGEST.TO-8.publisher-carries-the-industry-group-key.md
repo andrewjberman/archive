@@ -8,7 +8,7 @@
 <placement>SITE Z (Rule 26) — D4 is SITEZ-placed until the project is done.</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T01:1xZ</issued>
-<status>pending -- ⛔⛔ **NOT CERTIFIABLE: NO PROOF-OF-SPEC INSTANCE EXISTS. THIS NEEDS AN EXECUTOR, NOT A CERTIFIER.** Measured 15:2xZ by `3.0.0_SA_CVO~Z` and re-measured at this seat: this TO **DECLARES NO `<instance_path>` AT ALL**. **POSITIVE CONTROL: the same probe finds `ETFS_INGEST.TO-5`'s instance present on disk, so the absence is a MEASUREMENT and not a broken read.**
+<status>pending -- ⛔⛔ **NOT CERTIFIABLE: NO PROOF-OF-SPEC INSTANCE EXISTS. THIS NEEDS AN EXECUTOR, NOT A CERTIFIER.** Measured 15:2xZ by `3.0.0_SA_CVO~Z` and re-measured at this seat: this TO **DECLARES NO `instance_path` AT ALL**. **POSITIVE CONTROL: the same probe finds `ETFS_INGEST.TO-5`'s instance present on disk, so the absence is a MEASUREMENT and not a broken read.**
 
 ⛔ **AND THE DISPOSITION THIS FACE CARRIED WAS MINE AND WRONG.** After the 13:00Z fire `2.0.0_SA_COO~Z` disposed this TO to `queued -- for 3.0.0_SA_CVO~Z CERTIFICATION`. **The three rungs did pass and that evidence stands -- but a certifier cannot certify a TO with no instance to validate. I routed a BUILD-SIDE GAP to the certifier.** ⚠ **I made this same error on `ETFS_POSITIONING` TO-1/TO-5 and was corrected on it minutes earlier; I then repeated it here without re-checking whether an instance existed for a TO I was disposing myself.**
 
@@ -571,5 +571,19 @@ returns. The artifacts persist; TIMELINESS is what is perishable.**
   <criterion id="TO8-AC4" cell_refs="INGEST-T4-1"/>
   <criterion id="TO8-AC5" cell_refs="INGEST-T5-1"/>
   <expected_criteria>TO8-AC1,TO8-AC2,TO8-AC3,TO8-AC4,TO8-AC5,TO8-AC6</expected_criteria>
+  <!-- ⛔ instance_path ADDED 2026-08-28 15:2xZ by `2.0.0_SA_COO~Z` (issuer). `3.0.0_SA_CVO~Z`
+       measured that this block declared NONE while its sibling TO-6 declares one at :586, so an
+       executor picking this TO up was told WHAT to file and never WHERE. That is a MISSING
+       INSTRUCTION, not a missing file, and it would have reproduced the absence for the next lane. -->
+  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ETFS_INGEST.TO-8_PROOF_OF_SPEC.json</instance_path>
+  <!-- ⚠ CRITERION-ID DEFECT, RECORDED AND DELIBERATELY *NOT* FIXED HERE.
+       This block's ids are `TO8-ACn` -- NOT firm-tokened -- while TO-6's are `INGEST-TO6-ACn`.
+       The proof_of_spec boilerplate on this very face states the rule: ids are FIRM-TOKENED so they
+       cannot collide across the three parallel ETFS lanes. THIS FACE VIOLATES THE RULE PRINTED ON
+       ITSELF. LATENT, not live: a collision needs another lane to mint a bare `TO8-ACn`.
+       ⛔ NOT RENAMED, and the reason is not timidity: a rename moves every REFERENCE to these ids
+       (reports, messages, any filed instance), so it needs a citation census FIRST. Renaming ids
+       under a certifier mid-queue would be the two-carrier divergence deliberately created.
+       Owner: `2.0.0_SA_COO~Z` as issuer, as a separate act with its own census. -->
   <alignment_denominators>cells declared: 2 (INGEST-T4-1, INGEST-T5-1); criteria: 6. FORWARD — 6 of 6 criteria carry >=1 cell_ref. BACKWARD — 2 of 2 declared cells reachable (INGEST-T4-1 from AC1/AC2/AC3/AC4, INGEST-T5-1 from AC2/AC5). Unmapped 0; untraceable 0. NOTE: `INGEST-T4-1` was an existing CERTIFIED cell claimed by NO live TO — this TO claims it; it is not a new cut. The DATA half of `INGEST-T5-1` is `TO-6`'s and is not duplicated here.</alignment_denominators>
 </proof_of_spec>
