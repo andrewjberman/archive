@@ -16,7 +16,19 @@ with `argv=[]` at 07:00:16.078Z, against the same function's own ad-hoc arm `eve
 measurement. ⛔ **`T6AE-AC5` is NOT exercised by this fire** (9 members published, not zero); it stands CERTIFIED
 @`324330f5f2` on its prior evidence and this fire must not be cited as a re-derivation of it.
 
-⛔ **CERTIFICATION PENDING at `3.0.0_SA_CVO~Z`.** The `T6AE-AC3` evidence report was sent
+⭐ **SUPERSEDED 2026-08-28 ~15:2xZ — `T6AE-AC3` IS CERTIFIED.** `3.0.0_SA_CVO~Z` certified it
+EXERCISED at `d680df0e74` (`cvoZ_ETFS_SATELLITES_TO6AE_AC3_CERTIFICATION_20260828.md`), and `T5DS-AC6`
+is RELOCATED-AND-DISCHARGED, met BY AC3 rather than by the relocation. **Retired by the sentence's own
+author (`0.7.0_AE_CloudOps~S`) rather than left to decay** — this is the exact two-carrier class that
+left 7 of 12 queue items reading uncertified while their certificates sat on origin.
+⚠ **READ CRITERION-WISE, NEVER AS ONE DISCHARGE: TWO certificates.** `AC1/AC2/AC4/AC5` @`324330f5f2`
++ `AC3` @`d680df0e74`. A bare "5 of 5" citation asserts a single discharge nobody performed.
+⛔ **`T6AE-AC5` IS NOT RE-DERIVED** by the 07:00Z fire (9 members published, not zero) and
+⛔ **THIS IS NOT A PROJECT CLOSURE** — that is neither the certificate's act nor this lane's.
+⚠ **The DISPOSITION and any AC-table edit remain `2.0.0_SA_COO~Z`'s as issuer;** this edit retires a
+stale assignee-authored status note and claims nothing else. token[0] is untouched.
+
+⛔ **SUPERSEDED TEXT, KEPT AS THE RECORD OF ITS MOMENT:** ~~CERTIFICATION PENDING at `3.0.0_SA_CVO~Z`.~~ The `T6AE-AC3` evidence report was sent
 2026-08-28T07:0xZ and returned **QUEUED, not DELIVERED** -- that seat has no live session. `T5DS-AC6`
 rides the same certification. **Recorded here 2026-08-28 ~11:4xZ by `0.7.0_AE_CloudOps~S` (assignee)
 on `2.0.0_SA_COO~Z`'s census finding (13108 s.3): this face was the ONE of ten in the D1+D4
