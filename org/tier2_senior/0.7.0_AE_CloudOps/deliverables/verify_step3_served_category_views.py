@@ -50,16 +50,31 @@ NOT A RATIFIER, AND NOT THE PRIMARY CARRIER. 3.0.0_SA_CVO~Z's `ratify_sma_live.p
 exactly, over BOTH planes and all four scopes, and is proven to refuse the current plane
 (PASS 12 / FAIL 12, 24 assertions). It was armed before this file existed (14220).
 
->> SO THE FOUR RULED SMA ROWS HERE ARE DELIBERATELY REDUNDANT AND THE CVO INSTRUMENT IS
-   NAMED PRIMARY. Two durable checks of one obligation drift from minute one, and the
-   drift is invisible while they agree. If this file and the ratifier ever disagree on
-   those rows, THE RATIFIER IS RIGHT and this file is stale. <<
+>> THE CVO INSTRUMENT IS NAMED PRIMARY. If this file and the ratifier ever disagree on
+   the four ruled rows, THE RATIFIER IS RIGHT and this file is stale. <<
 
-WHAT THIS ADDS THAT THE RATIFIER DOES NOT COVER -- the only reason it exists:
+HOW THE TWO MUST BE REPORTED -- 3.0.0_SA_CVO~Z 14242 s2, and the distinction is exact:
+
+  OUR CRITERIA are both derived from 1.0.0_SA_CTO~Z's ruled acceptance (14213). ONE
+  AUTHOR. So agreement on WHAT to check is REPETITION, not corroboration -- it carries
+  no independent weight, and two instruments agreeing on a wrong criterion is just that
+  criterion twice.
+
+  OUR CODE is independently written -- different fetch paths, different structure. So
+  agreement on the VALUES READ FROM S3 *is* corroboration.
+
+Therefore: run BOTH and report them as TWO NAMED ROWS, never as one "verified" line. The
+criteria's own validation is not that the two agree -- it is that BOTH REFUSE THE
+CURRENT PLANE, which both demonstrably do. Denominators differ and must not be reported
+as matching: the ratifier scores 16 direction rows across BOTH planes; this file scores
+9 assertions on platinum only, plus the L2 leg.
+
+WHAT THIS ADDS THAT THE RATIFIER DOES NOT COVER:
   - the L2 MEMBER `aum` leg (the D-1 half, reclassified DATA-not-RENDER on 2026-08-28).
   - conservation demoted to an UNSCORED control, with the measurement that demotes it.
-Both are OFFERED FOR ABSORPTION into the ratifier. If 3.0.0_SA_CVO~Z takes them, this
-file should be DELETED rather than kept in sync -- one carrier, not two.
+Offered for absorption (14232 s5); 3.0.0_SA_CVO~Z kept both instruments instead and
+ruled they run side by side, so this file STAYS. If that is ever revisited and the legs
+are absorbed, DELETE this file rather than keep it in sync.
 
 Usage:  python verify_step3_served_category_views.py [--json]
 Exit:   0 all assertions PASS · 1 at least one FAIL · 2 INDETERMINATE (unreadable)
