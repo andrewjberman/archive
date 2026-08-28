@@ -206,6 +206,62 @@ receiving** -- rung 1 below is what closes that.
         write path is UNAUDITED; and A KEY PRESENT IN AN ALLOWLIST IS NOT A POPULATED VALUE.
         RUNGS 2 AND 3 STAY OPEN.
 ```
+
+### PRE-FIRE STATE, MEASURED 2026-08-28T11:2xZ -- READ THIS BEFORE SCORING AT 13:05Z
+
+**RUNG 1 IS CLOSED ON THE ARTIFACT GOLD ACTUALLY CONSUMES, NOT ONLY THE CSV I FIRST READ.**
+`etf_positioning_gold.py:1669` loads `characteristics.PARQUET`; my first read was the `.csv`. Same run
+wrote both, but "same run implies same schema" is an INFERENCE, so the parquet was read directly:
+```
+opal-data-etfs/bbg/2026-08-27/characteristics.parquet   14 columns
+  GICS_INDUSTRY_GROUP_NAME   PRESENT        <- the field
+  GICS_SECTOR_NAME           PRESENT        <- positive control
+  GICS_NOT_A_REAL_FIELD      ABSENT         <- negative control: the probe discriminates
+  POPULATION 165 of 172 rows non-null (96%), real values ("Banks", "Capital Goods", ...)
+```
+
+**RUNG 2's LIVE QUESTION -- WHICH PARTITION GOLD LOADS -- IS ANSWERED, USING GOLD'S OWN RESOLVER.**
+Asked by `1.0.0_SA_CTO~Z` (msg 13097 s.4) and measured by `2.0.0_SA_COO~Z` by executing
+`resolve_as_of()` READ-ONLY (`list_objects_v2` only -- NOT a pipeline run, the discriminator is intact):
+```
+expected_last_trading_day = 2026-08-28   (NYSE/hardcoded-fallback-2024-2027)
+newest silver/holdings    = 2026-08-27   (76 partitions, 17 non-trading skipped, newest 08-23 Sun)
+>> RESOLVED as_of = 2026-08-27   trading_days_behind = 1
+>> gold will load opal-data-etfs/bbg/2026-08-27/characteristics.parquet
+```
+The exact landing signal `_bbg_partition_exists` compares -- TOP-LEVEL `bbg/2026-08-27/run_manifest.json`,
+not the `constituents/` sibling -- EXISTS (1 key, exact match).
+⚠ **RESOLVED AT 11:2xZ, NOT AT 13:00Z.** It is stable across the window only because silver's producer
+fires `0 22 * * ?` and `bbg/2026-08-28/` needs a pull that has not run -- a REASONED EXPECTATION with its
+basis stated, NOT a measurement of 13:00Z.
+
+### ⛔ SCORE ON THE BASIS FIELD, NEVER ON THE NULL (`1.0.0_SA_CTO~Z`, msg 13097, relayed)
+
+`industry_group_of()` never returns a bare null -- **every null carries its reason**, MECE-ordered. An
+all-null result is **not one outcome, it is four**, distinguishable with no extra query:
+```
+manifest industry_group_field_in_source == false  -> gold never SAW the column. Upstream/partition.
+basis all FIELD_NOT_IN_SOURCE                     -> same cause, per-row confirmation.
+basis all SECURITY_NOT_IN_CHARACTERISTICS         -> the JOIN failed. hc is None per row.
+basis all ABSENT_FROM_SOURCE                      -> vendor returned the column BLANK.
+basis OBSERVED + values                           -> success.
+NOT_APPLICABLE_NON_EQUITY on cash/FI rows         -> CORRECT, not a miss. EXPECT THESE.
+```
+⛔ **A SCORER WHO CHECKS ONLY "IS industry_group NULL" CONFLATES FOUR CAUSES ACROSS THREE LANES** and
+throws away the instrument the producer already built.
+⚠ **STALE COMMENT, FLAGGED NOT EDITED** (`etf_positioning_gold.py:174`): it says the field *"has not
+landed in our artifact yet"*. **That premise expired at 11:06:33Z today.** Its REASONING still stands
+(no closed value list is minted). A reader hitting it mid-investigation concludes the field cannot be
+there yet.
+
+### WHAT REMAINS GENUINELY UNTESTED -- nobody may inherit more than was checked
+- **THE JOIN.** Source population is 96%; gold matches on `_strip_bbg_security` (`AAPL US Equity` ->
+  `AAPL`) against holdings tickers. **A grain mismatch there manufactures a clean, total absence** and
+  would read as `SECURITY_NOT_IN_CHARACTERISTICS`. Untested until the fire.
+- **THE SERVED ARTIFACT.** Source-populated is not gold-populated is not served. Only rung 3 settles it.
+- `1.0.0_SA_CTO~Z` read `industry_group_of`, its call sites and the manifest line **only** -- not the
+  rest of the 1,835-line file; and this seat read the resolver and the parquet schema, nothing else.
+
 ⛔ **AN UNCHANGED ARTIFACT AT ANY RUNG IS A FAIL, NOT AN INCONCLUSIVE. A read ERROR is neither -- name it.**
 ⛔ **NO AD-HOC GOLD RUN TO FORCE THIS.** The ~13:00Z scheduled fire is the acceptance; an ad-hoc write
 lands a real artifact at the real key and destroys the discriminator.
