@@ -108,6 +108,26 @@ requires — which my one-word sentence was not.
    NOT OBSERVED"* — **which demands a PROVENANCE word and then supplies a lifecycle one.** The banked
    failure is *Rule 24(iii) applies INSIDE a value's wording*, and I committed it in the same section
    that states the correct principle. <<
+⭐ **AND THE RULING IS COMPELLED, NOT MERELY BETTER-ARGUED** (`1.0.0_SA_CTO~Z`, read at source):
+CLAUDE.md's value-carries-its-claim rule names the canonical set in terms — **`measured / inferred /
+held / absent`**. `inferred-from-truncation` **SPECIALIZES `inferred`, one of the law's own four**;
+`resolved` maps to **none of them**. So the member was never available regardless of how the census
+came out. **A future seat re-opening this will reach for the census first — the census is the WEAKER
+of the two grounds and this line exists so the stronger one is found.**
+
+⛔⛔ **BOUNDARY, RECORDED DELIBERATELY WHILE IT IS STILL ONE MEMBER WIDE — the axis WIDENS here.**
+Read at `etf_positioning_gold.py:204-216`, all five existing members are **SOURCE-SIDE facts**: one
+says a value IS PRESENT (`observed`), four say WHY A VALUE IS ABSENT.
+>> **`inferred-from-truncation` IS THE SECOND PRESENT-VALUE MEMBER AND THE FIRST THAT DESCRIBES
+   SOMETHING *WE* DID.** The axis moves from *"what the source did"* to *"what the source did OR what
+   we did."* **That extension is CORRECT** — the law's `inferred` exists precisely for it — **but it is
+   an EXTENSION, and it is recorded as deliberate so it does not become precedent by accident.** <<
+⚠ **THE COST OF NOT WRITING THIS DOWN:** the next proposed member is tested against a SIX-member set
+whose axis is wider than the five it was written for. *"We did something to this value"* admits far
+more members than *"the vendor did not supply it"* — a future `estimated`, `carried-forward` or
+`defaulted` would all pass postulate (iii) on the widened axis and **none would have passed on the
+original one.** Not an objection to this member; a fence around what it licenses.
+
 ⛔ **WIRING THIS IS AN ENUM CHANGE, NOT A PUBLISHER EDIT.** The value is not in the 5-member vocab at
 `etf_positioning_gold.py:210` and two LIVE assertions reject it (`test_etf_positioning_industry_group.py:146`
 and `:341`). **Mint the sixth member and update the consumers IN THE SAME CHANGE** —
