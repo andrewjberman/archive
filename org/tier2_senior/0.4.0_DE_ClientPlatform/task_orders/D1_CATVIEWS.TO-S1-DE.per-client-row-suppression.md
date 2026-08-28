@@ -92,5 +92,6 @@ the **PROD promote** — **Andrew's word, per promote, no standing authorization
   <criterion id="TS1-AC5" cell_refs="D1-h-p1"/>
   <criterion id="TS1-AC6" cell_refs="D1-h-v3"/>
   <expected_criteria>TS1-AC1,TS1-AC2,TS1-AC3,TS1-AC4,TS1-AC5,TS1-AC6</expected_criteria>
+  <instance_path>org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/D1_CATVIEWS.TO-S1-DE_PROOF_OF_SPEC.json</instance_path>
   <alignment_denominators>cells declared: 2 (D1-h-p1, D1-h-v3); criteria: 6. FORWARD — 6 of 6 carry >=1 cell_ref. BACKWARD — 2 of 2 reachable (D1-h-p1 from AC1/AC2/AC4/AC5; D1-h-v3 from AC2/AC3/AC6). Unmapped 0; untraceable 0. NO cell added: `D1-h-p1` already declares the presence predicate at L0 and its oracle is "assert the tile is ABSENT, not empty" — this TO applies that same predicate one and two levels down, on the sovereign's word.</alignment_denominators>
 </proof_of_spec>
