@@ -6,8 +6,41 @@
 **Served key:** `s3://opal-data-portal-v2/platinum/etfs/positioning_data.json` → `/api/general/etfs/positioning_data.json`
 
 > ⚠ **THIS IS A DELTA FILED BESIDE CONTRACT v1, NOT AN EDIT OF IT.** v1 is `0.7.0_AE_CloudOps`'s
-> deliverable and this seat does not write another seat's contract. Routed to
-> `0.7.0_AE_CloudOps` (owner) and `2.0.0_SA_COO~Z` (issuer) for fold-in or rejection.
+> deliverable and this seat does not write another seat's contract.
+>
+> ⛔ **ROUTING CORRECTED 2026-08-28 ~02:5xZ. THIS BLOCK FIRST READ "Routed to `0.7.0_AE_CloudOps`
+> (owner) ... for fold-in or rejection" AND THAT ROUTING CANNOT BE DISCHARGED FROM SITE Z.**
+> `0.7.0_AE_CloudOps~I` refused it and was right; re-measured at source by this seat rather than
+> taken on their word:
+> ```
+> CONTRACT v1 :7            **Owner:** `0.7.0_AE_CloudOps`      <- BASE serial, no lane
+> TO-2 face   :9            <placement>LAPTOP (Rule 26).</placement>
+> this device               org/mcp/inbox/0.7.0_AE_CloudOps/ holds ~D ~I ~P ~S ~Y ~Z -- lanes only
+> ```
+> **I named an OWNER without measuring whether that owner is REACHABLE FROM THIS FABRIC.** A
+> laptop-placed base serial is not addressable from a `~Z` fabric, and no site-Z AE lane can take
+> it: Rule 27 (a second PROJECT on one instance), the `ETFS_INGEST` TO's explicit fence against
+> `ETFS_POSITIONING.TO-2`, and Rule 26 placement each independently forbid it.
+> ⚠ **AND THE PACKAGE-APPLIER RULING DOES NOT REACH IT** -- `2.0.0_SA_COO~Z` 12179 made one seat the
+> single applier of a ZIP; that is an apply authorization and says nothing about owning another
+> project's contract document.
+>
+> ⭐ **DISPOSITION RULED by `2.0.0_SA_COO~Z` (12294), and this is the standing state -- not this
+> seat's routing question, which the ruling supersedes:**
+> ```
+> BLOCKED-BY-PLACEMENT, NOT UNOWNED. FILED, and it RIDES THE NEXT /integrate to the
+> fabric that owns it. NOBODY ON ~Z FOLDS IT IN.
+> ```
+> The issuing office is itself barred from the base-serial row (`0.0.0_AB_MSTR~Z` 11361), and
+> Andrew's standing rule is that site Z does not route work to the main fabric. **So the item is
+> OWNED -- it is simply owned somewhere this fabric is not.**
+>
+> ⛔ **IT IS NOT A GATE ON `ETFS_POSITIONING.TO-7` OR ON D4, and the reason is worth stating:**
+> this document records a shape change **whose shape is already deployed and verified** -- the
+> package is current on all three members and the served bytes match the object. **A contract
+> document lagging its artifact is a RECORD gap, not a BUILD gap.** ⚠ **It becomes urgent the
+> moment someone reads CONTRACT v1 as current**, which is exactly why it is filed with its
+> staleness named rather than left silent.
 
 ---
 
