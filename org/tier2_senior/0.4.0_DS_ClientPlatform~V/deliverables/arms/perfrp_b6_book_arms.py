@@ -111,7 +111,7 @@ print("=" * 78)
 # PRD's order. CORRECTED AFTER 3.0.0_SA_CVO 79427: the first b-6 emission carried a
 # MEMBERSHIP ROSTER ({relationship_id, status}) whose intersection with this set was
 # ZERO. Nothing about the roster was wrong; it simply was not the ruled table.
-RULED_CLIENT_COLUMNS = ("client", "beginning_market_value", "new_relationship_flows",
+RULED_CLIENT_COLUMNS = ("relationship", "beginning_market_value", "new_relationship_flows",
                         "lost_relationship_flows", "net_flows_existing", "net_gain",
                         "ending_market_value")
 sample = entries[0]["client_table"][0]
@@ -124,24 +124,94 @@ print("  beyond the ruled set: %s" % sorted(served_cols - set(RULED_CLIENT_COLUM
 print("  ^ `status` is KEPT deliberately: it is what SPLITS the three flow columns, so")
 print("    a reader can see which bucket produced which figure. It is additive to the")
 print("    ruled set, not a substitute for it.")
-bad_id, bad_part, nrows = 0, 0, 0
+FLOW_COLS = ("new_relationship_flows", "lost_relationship_flows", "net_flows_existing")
+FIG_COLS = ("beginning_market_value", "ending_market_value", "net_gain") + FLOW_COLS
+
+
+def val(row, col):
+    """Every FIGURE column is a {value, figure_state, reason} dict, never a bare number."""
+    return row[col]["value"]
+
+
+bad_id, bad_part, nrows, bare = 0, 0, 0, 0
 for e in entries:
     for r in e["client_table"]:
         nrows += 1
-        flow = (r["new_relationship_flows"] + r["lost_relationship_flows"]
-                + r["net_flows_existing"])
-        if abs((r["beginning_market_value"] + flow + r["net_gain"])
-               - r["ending_market_value"]) > 0.02:
+        for c in FIG_COLS:
+            if not (isinstance(r[c], dict) and "figure_state" in r[c] and "value" in r[c]):
+                bare += 1
+        flow = sum(val(r, c) for c in FLOW_COLS)
+        if abs((val(r, "beginning_market_value") + flow + val(r, "net_gain"))
+               - val(r, "ending_market_value")) > 0.02:
             bad_id += 1
-        if sum(1 for c in ("new_relationship_flows", "lost_relationship_flows",
-                           "net_flows_existing") if r[c] != 0) > 1:
+        if sum(1 for c in FLOW_COLS if val(r, c) != 0) > 1:
             bad_part += 1
+check("every FIGURE column carries state+reason, never a bare number", not bare,
+      "%d bare of %d rows x %d cols" % (bare, nrows, len(FIG_COLS)))
+# The aliasing disclosure rides on the STATUS-DEPENDENT figures and NOT on the as-of
+# reads: beginning/ending MV are not deltas and do not inherit a baseline caveat.
+rel_start_pin_ = w["upstream_pins"]["dimensions/dim_relationship@window_start"]
+if rel_start_pin_.get("aliased_from_requested"):
+    # SUPERSEDED BY CTO 79447 and narrowed accordingly: only the POPULATED flow column
+    # inherits the baseline caveat. This arm asserted all three and would now FAIL a
+    # correct emission -- an arm written before a ruling is a stale arm, not a finding.
+    POP = {"new": "new_relationship_flows", "lost": "lost_relationship_flows",
+           "existing": "net_flows_existing"}
+    off = sum(1 for e in entries for r in e["client_table"]
+              for c in (POP[r["status"]], "net_gain")
+              if r[c]["figure_state"] != "COMPUTED_PARTIAL")
+    on = sum(1 for e in entries for r in e["client_table"]
+             for c in ("beginning_market_value", "ending_market_value")
+             if r[c]["figure_state"] != "COMPUTED")
+    check("the stale-baseline caveat rides on the status-dependent figures", not off,
+          "%d without it" % off)
+    check("...and NOT on the as-of MV reads (they are not deltas)", not on,
+          "%d wrongly downgraded" % on)
 check("IDENTITY beginning + flows + net_gain == ending", not bad_id,
       "%d bad of %d rows" % (bad_id, nrows))
 check("the three flow columns are ONE PARTITION (never >1 non-zero on a row)",
       not bad_part, "%d rows with >1" % bad_part)
 print("  ^ net_gain is the RESIDUAL, derived not read -- which is what makes the row an")
 print("    identity a consumer can check rather than six numbers sitting together.")
+
+# CTO 79447 identity (ii): the SUM over an advisor's client table == that advisor's KPI
+# tile. This is what "reproduce the L3 sums by join (no second computation)" means as a
+# CHECK -- the table and the tiles must be two views of one rollup, not two rollups.
+bad_ii = []
+for e in entries:
+    ct = e["client_table"]
+    end = sum(val(r, "ending_market_value") for r in ct)
+    if abs(end - e["tiles"]["market_value"]["headline"]["value"]) > 0.5:
+        bad_ii.append((e["key"], "market_value"))
+    nf = sum(val(r, c) for r in ct for c in FLOW_COLS)
+    if abs(nf - e["tiles"]["net_flows"]["headline"]["value"]) > 0.5:
+        bad_ii.append((e["key"], "net_flows"))
+    for st, tile_key in (("new", "new"), ("lost", "lost")):
+        if sum(1 for r in ct if r["status"] == st) != e["tiles"]["relationships"][tile_key]["value"]:
+            bad_ii.append((e["key"], "relationships.%s" % st))
+check("CTO identity (ii): column sums == the advisor's KPI tiles", not bad_ii,
+      "%d violations of %d advisors" % (len(bad_ii), len(entries)))
+print("  ^ Market Value <- ending_mv; Net Flows <- columns 3-5; Relationships new/lost")
+print("    <- the status census. Management Fees has NO per-relationship column on PRD")
+print("    row 88 and is deliberately NOT added -- the set is the PRD's, not a wider one.")
+check("the DISPLAY LABEL column is present and populated",
+      all("relationship" in r for e in entries for r in e["client_table"]))
+unl = sum(1 for e in entries for r in e["client_table"]
+          if str(r["relationship"]).startswith("UNLABELLED-RELATIONSHIP:"))
+print("  rows with no spine label: %d of %d (%.2f%%) -- unmapped relationships, named"
+      % (unl, nrows, 100.0 * unl / nrows))
+print("    UNLABELLED-RELATIONSHIP:<id> rather than blanked, so a missing label cannot")
+print("    read as an unnamed client.")
+check("relationship_id rides BESIDE the seven as the join key",
+      all("relationship_id" in r for e in entries for r in e["client_table"]))
+# CTO 79447: only the POPULATED flow column inherits the baseline caveat.
+wrong = sum(1 for e in entries for r in e["client_table"] for c in FLOW_COLS
+            if (r[c]["value"] == 0 and c != {"new": "new_relationship_flows",
+                                             "lost": "lost_relationship_flows",
+                                             "existing": "net_flows_existing"}[r["status"]]
+                and r[c]["figure_state"] != "COMPUTED"))
+check("a STRUCTURAL zero reads COMPUTED, not PARTIAL (CTO 79447)", not wrong,
+      "%d wrongly downgraded" % wrong)
 check("client_table row count == the relationship partition union",
       all(len(e["client_table"]) == e["relationship_partition"]["union"] for e in entries))
 
