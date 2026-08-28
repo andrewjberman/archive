@@ -91,6 +91,14 @@ measurement of which rows need a v0.3 carrier.**
 > `value: null`, evidence = 77605's confidence table + the row-4 false clean as the negative control that
 > retired the text instrument. Wave 2 re-measures them from the fixtures (a fixture names its `record_type`).**
 > Not decomp-invalidating: the cells and the criterion<->cell mapping are unchanged; only WHEN moves.
+>
+> **AMENDED ~10:09Z (CTO~X 77611; issuer amendment to all three seats):** the design's author landed the per-row
+> statement as an ARTIFACT with a stated falsifier -- `WP3_LEDGER_DESIGN.md` sec 3b @55a20db49e (30 insertions /
+> 0 deletions; sec 3 rows untouched, 190 / 126 unchanged). **Wave 1 / AC3: the 13 cells carry `value` = sec 3b's
+> column (V03_CARRIER_REQUIRED rows 2, 4, 5, 6, 7, 13; PLUS38_ONLY rows 1, 3, 8, 9, 10, 11, 12), `status: INFERRED`,
+> evidence = sec 3b @55a20db49e + the 77605 confidence table + the row-4 negative control. Wave 2: promote-or-kill
+> per row from the fixtures; a kill is a finding against sec 3b.** For AC3 ONLY the evidence pin is 55a20db49e;
+> every other AC stays at d0398b977d. Supersedes the NOT_MEASURABLE/null form above.
 
 **Proof-of-spec:** a `proof-of-spec` instance with `decomp_ref` = this run + bidirectional cell<->criterion
 mapping, denominators printed (50 cells / 8 criteria), `proof-of-spec-check.py` VALID. Delivery = the
