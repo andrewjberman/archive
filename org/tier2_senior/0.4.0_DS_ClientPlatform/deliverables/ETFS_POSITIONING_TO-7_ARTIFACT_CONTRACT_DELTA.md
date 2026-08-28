@@ -126,14 +126,39 @@ silver/holdings/2026-08-24.parquet
     DIVZ / IDVZ rows   data_as_of = 2026-08-21     (2 trading days EARLIER)
 ```
 
-Producer BEFORE (`dd75f6bd64`) at that as-of stamped **all four books 2026-08-24** — serving
-08-21 data under an 08-24 date. AFTER (`25f30acc63`) DIVZ/IDVZ read 2026-08-21 and PFDE/PFOE
-are byte-unchanged.
+Producer BEFORE (`dd75f6bd64`) at that as-of stamped **all four books 2026-08-24**. AFTER
+(`25f30acc63`) DIVZ/IDVZ read 2026-08-21 from the rows and PFDE/PFOE are byte-unchanged.
 
-⛔ **Note the defect class this exposes, which the TO frames only as under-reporting:** the
-live artifact also **OVER-CLAIMS**. A book rendering as FULL with a wrong date is invisible to
-an absence check — it looks complete. That is the case `data_as_of_spread` and `as_of_basis`
-exist to make legible.
+> ⛔⛔ **CORRECTED 2026-08-28 ~03:4xZ BY THIS SEAT. THIS SECTION FIRST READ THAT THE PRODUCER
+> "SERVED 08-21 DATA UNDER AN 08-24 DATE" AND THEREFORE **OVER-CLAIMED** PROVENANCE. THAT
+> FRAMING IS INVERTED AND IS WITHDRAWN.**
+> `1.0.0_SA_CTO~Z` (12472) named it; verified at source rather than taken on their word —
+> `ETFS_INGEST.TO-7:127-131, 145-147`:
+> ```
+> SUBSTITUTION   "data_as_of": rec.get("net_assets_as_of")   <- a HOLDINGS row's provenance
+>                                                               taken from a NET-ASSETS field
+> SOURCE A (TS)  "net_assets_as_of": _ts_asof_after(html, ">Net Assets<")   <- the HTML PAGE
+> trueshares 73  date = data_as_of = 2026-08-21   <- WRONG, from the net-assets page
+> filepoint 114  date = data_as_of = 2026-08-24   <- correct, untouched
+> ```
+> >> **`2026-08-21` IS NOT TRUESHARES' HOLDINGS DATE. It is a KNOWN-WRONG value scraped from the
+> net-assets page; the correct value for those 73 rows is `2026-08-24`.** So on that partition the
+> producer's old global stamp was **accidentally right**, and my change propagates the
+> known-wrong upstream value instead. **I assumed the silver column was authoritative because it
+> is the column the criterion names — the criterion says WHERE to read, never that the source is
+> correct.**
+>
+> ⭐ **WHAT THIS DOES NOT CHANGE, AND WHY THE DESIGN STILL STANDS:** AC7's layering is right —
+> provenance is fixed at INGEST (`ETFS_INGEST.TO-7 AC1`), not by gold re-deriving it. Measured on
+> `08-25 / 08-26 / 08-27`: row date == partition date for all four funds, so **on every partition
+> the current view actually reads, this change is a no-op or an improvement.** The 08-24 partition
+> is a historical one, ruled **TERMINAL-WITHHELD / known-wrong-and-recorded** (12472) precisely
+> because rewriting a landed partition to make a criterion pass is editing the evidence.
+>
+> ⚠ **THE HONEST TRADE, WHICH IS THE PART A REVIEWER NEEDS:** the old global stamp **MASKED** an
+> ingest provenance defect; row-sourcing **REMOVES THE MASK**. Gold's date is now exactly as good
+> as ingest's stamp — which is correct layering and is *also* a real change in failure mode.
+> `as_of_basis` exists so a consumer can see WHERE the value came from rather than trusting it.
 
 ---
 
