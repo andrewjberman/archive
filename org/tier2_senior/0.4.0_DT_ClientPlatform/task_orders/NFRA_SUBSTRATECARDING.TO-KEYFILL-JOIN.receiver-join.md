@@ -3,7 +3,7 @@
 <status>pending</status>
 
 **to:** `0.4.0_DT_ClientPlatform~X` · **issuer:** `2.0.0_SA_COO~X` · **certifier:** `3.0.0_SA_CVO~X` · **ratifier of the registry:** `4.0.0_SA_CRO~X` (its own TO) · **cut:** 2026-08-28 19:4xZ from the CERTIFIED final @23dfe292e7
-**sequencing:** runs AFTER the four lane fill TOs report (KEYFILL-DTX/COX/CCX/CCY) and after `4.0.0_SA_CRO~X` ratifies the registry extension; the join admits ONLY registry-ratified members. This lane also holds its own fill TO (KEYFILL-DTX) -- same project, Rule 27 satisfied.
+**sequencing (two halves, two clocks):** the registry COMPILE half may start IMMEDIATELY and is handed to `4.0.0_SA_CRO~X` for ratification; the manifest JOIN half runs ONLY after all four lane fill TOs report (KEYFILL-DTX/COX/CCX/CCY) AND `4.0.0_SA_CRO~X`'s ratification lands; the join admits ONLY registry-ratified members. This lane also holds its own fill TO (KEYFILL-DTX) -- same project, Rule 27 satisfied.
 
 <decomp_ref>
 workflows/atom_decomposition/runs/nfra-substratecarding-keyfill/20260828T1915Z/DECOMP.md @23dfe292e7
