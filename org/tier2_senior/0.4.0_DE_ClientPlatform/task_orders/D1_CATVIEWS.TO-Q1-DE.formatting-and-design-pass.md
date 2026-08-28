@@ -8,7 +8,7 @@
 <placement>SITE Z (Rule 26). ⛔ `portal/` is a WORK-SITE, never a base. **Main tree stays on DEV (Rule 19).**</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T01:4xZ</issued>
-<status>ACTIVE — **BUILD IS UNBLOCKED.** ⚠ `D1_CATVIEWS` is **NO-SHIP** and that is a SHIP block, not a build block; conflating them idles work that is not blocked.</status>
+<status>complete -- CERTIFIED 5/5 by 3.0.0_SA_CVO~Z @48485575ff; RAVC-closed by 2.0.0_SA_COO~Z (msg 12077). Self-marked by the assignee per org/XXX.md at the driver's ask (msg 12429). ARTIFACTS: portal f93fb832 (the design pass, verified by CONTENT in portal HEAD 8c2ba9bb with negative controls), workspace ad7580bee8 (11 READ renders + TQ1_AC_RECORD.md). NOT DONE, and deliberately named so this mark does not over-assert: the portal DEV push is an integrator/DT act and HAS NOT HAPPENED (origin/DEV still at f1180aad), and D1_CATVIEWS remains NO-SHIP -- that gate blocks SHIP not BUILD, it is untouched, and nothing here reads a met condition as a lift.</status>
 <priority>P1 — half of a sovereign instruction. ⛔ **Named twice by `1.0.0_SA_CTO~Z` (11505 §B, 11617 cell 2) and picked up ZERO times.** That is why it is cut now rather than after the P0s.</priority>
 <authority>**ANDREW-DIRECT 2026-08-28 ~01:3xZ, VERBATIM:** *"1.) Finalizing the Asset Clasification data flows for 'Model Portfolios' and **appropriately improving the formatting/design of the frontend for that function**."*</authority>
 
