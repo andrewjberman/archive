@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_SATELLITES.TO-9-DE",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ETFS_SATELLITES.TO-9-DE.internal-viewer-firm-selection.md",
+    "group": "D",
+    "vintage_commit": "c9ba9a15a5"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-satellites/20260827T160438Z/DECOMP.md",
+    "vintage_commit": "e704e760f1",
+    "to_ref": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ETFS_SATELLITES.TO-9-DE.internal-viewer-firm-selection.md"
+  },
+  "assignee": "0.4.0_DE_ClientPlatform~S",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/Positioning/Positioning.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "8c2ba9bb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The selection itself. `useState<string>('')` -- NO default; the firm selector renders in the PageHeader actions slot beside ModeFlip, only when `isSatellites && internal`; the registry query is DISABLED while unselected; the SatelliteNotice axis gains a FIFTH member `firm-unselected`, evaluated BEFORE the loading check. ON ORIGIN: origin/DEV = 8c2ba9bb, is-ancestor YES with a positive control, measured 0331Z. NOT a PROD promote -- that is DT-lane and held. AMENDMENT 2026-08-28T04:2xZ (original text above kept verbatim): 'ON ORIGIN' IS A BRANCH STATE, NOT A DELIVERY, AND THE WORDING INVITED THE MISREAD. Measured at source after 1.0.0_SA_CTO~Z raised it: portal/.github/workflows/ci.yml triggers on push:[DEV] and its ONLY upload is actions/upload-artifact -- no `aws s3 sync`, no CloudFront invalidation. deploy.yml triggers on push:[PROD] and is the ONLY workflow that writes the served bucket. THERE IS NO DEV SITE. So this artifact is on the branch and SERVED NOWHERE; the deployed_state enum COMMITTED-NOT-DEPLOY-SCOPE was already correct and is unchanged."
+    },
+    {
+      "path_or_key": "portal/src/pages/Positioning/shared/modeAccess.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "8c2ba9bb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "`satelliteSelectableFirms()` DERIVES the option set from MODE_FIRM_ALLOWLIST.satellites minus INTERNAL_FIRM_ID, so a firm can never be OFFERED on the picker without being ENTITLED to the mode -- one carrier, and the two cannot drift. `satelliteFirmLabel()` supplies display names and FAILS TOWARD VISIBLE: an unnamed firm renders as its raw id rather than vanishing from the picker."
+    },
+    {
+      "path_or_key": "portal/src/api/endpoints/satelliteRegistry.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "8c2ba9bb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "`getSatelliteRegistry(firmOverride?)` appends `?firm=<slug>` translated through bucketSuffix at the WIRE BOUNDARY. Docstring records why there is no default and why the translation is not optional."
+    },
+    {
+      "path_or_key": "portal/src/api/endpoints/advisor-intelligence.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "8c2ba9bb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EXPORTS bucketSuffix (was module-private). The map is a WIRE-PROTOCOL fact, not an advisor-intelligence fact. Exported rather than copied because two carriers of that mapping is exactly what the 2026-06-22 COT go-live P0 cost. Its home is still wrong for a wire translator and that is surfaced, not relocated."
+    },
+    {
+      "path_or_key": "portal/scripts/ui-smoke.mjs",
+      "kind": "test",
+      "commit_or_etag": "8c2ba9bb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds `--pick <value>` -- selectOption AS AN ORDERED STEP. `--select` fires BEFORE the step list, which is correct for a load-time dropdown and STRUCTURALLY CANNOT reach a control that only exists after a click. ADDITIVE: `--select` untouched, so no existing caller's run is re-ordered."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T9DE-AC1",
+      "criterion_verbatim": "An internal viewer gets an explicit FIRM SELECTION on the satellites surface, and the fetch carries what they picked. NO DEFAULT. NO IMPLICIT FIRM. NO 'first firm in the list'. An internal viewer arriving with nothing selected must see a prompt to select, never data.",
+      "method": "manual_read_with_citation",
+      "invocation": "node scripts/ui-smoke.mjs positioning t9-internal-unselected.png --port 5175 --fixtures fx-populated.json --click Satellites ; and the same with --pick cottonwood",
+      "output_evidence": "UNSELECTED RENDERS A PROMPT AND NO DATA, and the absence of the network call is evidenced AS A BY-PRODUCT rather than asserted: the unselected capture matched 1 OF 2 declared fixtures -- the registry was NEVER REQUESTED, because the query is disabled while `awaitingFirmSelection`. The selected capture matched 2 of 2. THREE DEFAULTS WERE AVAILABLE AND NONE WAS TAKEN: not 'global' (which is in ALL_MDPF_PARTNER_FIRMS and has NO bucket), not the first firm in the list, not a remembered/persisted value. Naming the three not taken is what makes 'no default anywhere' checkable rather than a claim. Disabling the query also means the router's CORRECT 400 is never provoked merely to render a prompt.",
+      "denominator": "Fixtures declared 2, matched 1 (unselected) vs 2 (selected). Candidate defaults available: 3; taken: 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T9DE-AC2",
+      "criterion_verbatim": "THE SELECTED FIRM IS VISIBLE ON SCREEN WHILE THEY LOOK AT IT. 'Which firm am I looking at' must never be answerable only from memory. This is the criterion that makes (a)'s refusal meaningful -- the whole objection to a default was silent mislabelling, and an invisible selection re-creates it. Exhibit it in a read render.",
+      "method": "manual_read_with_citation",
+      "invocation": "node scripts/ui-smoke.mjs positioning t9-internal-selected-cot.png --port 5175 --fixtures fx-populated.json --click Satellites --pick cottonwood",
+      "output_evidence": "READ RENDER: the header carries 'COTTONWOOD CAPITAL ADVISORS' in the selector, beside the mode pills, SIMULTANEOUSLY with the nine books and the holdings table below it -- so the firm identity and the data it labels are on screen together, which is the property the criterion names. A SECOND DISPLAY OF THE SAME FACT WAS DELIBERATELY NOT ADDED: the control IS the carrier, and a second one would be a second carrier of a single choice -- the failure mode this project has spent the night paying for.",
+      "denominator": "Renders in which data is shown to an internal viewer: 1; renders in which the firm is named on screen: 1 of 1.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T9DE-AC3",
+      "criterion_verbatim": "FIRM-SCOPED VIEWERS ARE UNCHANGED. A cottonwood viewer still gets satellites with no selector and no extra click -- their identity already determines their firm. Show the cottonwood path is BYTE-UNCHANGED in behaviour; a regression here trades a staff bug for a client bug.",
+      "method": "manual_read_with_citation",
+      "invocation": "node scripts/ui-smoke.mjs positioning t9-firmscoped-cot.png --port 5175 --fixtures fx-populated.json --firm cottonwood --click Satellites",
+      "output_evidence": "READ RENDER at firmId=cottonwood userType=Advisor: NO selector in the header (mode pills only), the nine books render on the FIRST click into satellites mode with no second interaction, and `satelliteFirm` is undefined so NO ?firm= is sent -- identity determines the bucket server-side. The branch is gated on `internal = isInternal() || isDev()`, the same predicate ModelPortfolios.tsx:335 and AdvisorIntelligence:53 use, so 'internal' has ONE meaning on this codebase rather than a third.",
+      "denominator": "Selector renders for internal viewers: 1 of 1; for firm-scoped viewers: 0 of 1. Clicks to data: 1.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T9DE-AC4",
+      "criterion_verbatim": "THE 400 STILL RENDERS AS AN ERROR, NEVER AS 'no satellites'. T8DE-AC2's four-way discrimination must survive this change -- re-exhibit it. A selection UI that turns an unselected state into an empty-registry render would destroy the property you built the seam to guarantee.",
+      "method": "test_suite",
+      "invocation": "six ui-smoke captures under the TO-9 code (unselected / selected-cot / firm-scoped / empty / failed / as_of-null), then sha256sum across all six",
+      "output_evidence": "THE DISCRIMINATION SURVIVES AND IS NOW FIVE-WAY, DECIDED BY HASH RATHER THAN BY READING SCREENSHOTS: unselected c05fc9fd65e27304 / selected-cot f25e774db7d2b535 / served-empty 6db0b0cf03b83b78 / fetch-failed aee1e0984d455587 / as_of-null aee1e0984d455587 / firm-scoped d186a8d5108520bd. SIX RENDERS, FIVE DISTINCT HASHES, and the SOLE collision is failed==as_of-null, which TO-8-DE designed in deliberately (both are 'could not be loaded'). THE CRITERION IS `unselected != empty` AND IT HOLDS: c05fc9fd != 6db0b0cf. The cheaper implementation -- folding 'unselected' into the existing empty state -- would have destroyed exactly the property TO-8-DE exists to guarantee, so the fifth state is an EXTENSION of the axis rather than a reuse of a member. `firm-unselected` is also evaluated BEFORE the loading check, so an unselected viewer can never fall through to a state implying the server was asked something.",
+      "denominator": "6 renders compared by sha256; 5 distinct; 1 collision, intended and pre-declared.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T9DE-AC5",
+      "criterion_verbatim": "RENDERED, NOT GREPPED -- read screenshots of: internal-unselected, internal-selected-cottonwood, firm-scoped-cottonwood. THE CANVAS IS SILVER; a selector is exactly the kind of new control that arrives ghost-white outside a dark Panel.",
+      "method": "manual_read_with_citation",
+      "invocation": "six ui-smoke captures, each opened and READ; banked at deliverables/deS_ETFS_SATELLITES_TO9_internal_firm_selection_20260828/",
+      "output_evidence": "ALL THREE NAMED STATES READ, plus three more for the AC4 hash set. CANVAS LAW HOLDS ON THE NEW CONTROL, which is the specific risk the criterion names: the selector is DARK text (`text-[hsl(var(--bg-header))]`) on a TRANSPARENT fill with a ring -- no ghost-white background, no light text -- sitting in the header actions slot, which is canvas and not a dark Panel. The notices are dark-on-light-tint (blue for the two non-fault states, red for the failures). Checked by reading the rendered pixels, not by comparing class names to another page's.",
+      "denominator": "3 states required by the criterion, 3 read; 6 captures total, 6 read.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THE FIXTURE SET IS THE MUTANT SET, AND IT MUTATES THE INPUT RATHER THAN THE CODE -- six inputs driving one build, each of which could have collapsed into a neighbour and did not. The load-bearing one is `as_of: null` CARRYING ALL NINE VALID BOOKS: without the raise it is byte-indistinguishable from `populated`, with it byte-identical to a transport failure, so it could have failed in EITHER direction. The second is the pair (unselected, empty): the criterion is that they DIFFER, and the cheap implementation makes them identical -- so the hash compare is a test the cheap version fails. TYPECHECKER CONTROL: exercised earlier this session on this same tsc project -- a planted `const __probe: number = \"not a number\"` produced TS2322 rc=2 and the file was restored byte-identical (diff -q), which is what makes the rc=0 here evidence rather than a possible cached-skip on a project-references build.",
+      "expected": "The assertion must FAIL against the mutated input/code and PASS against the true one. For the render set, a state that cannot be told from its neighbour by hash is an assertion that was never tested.",
+      "observed": "FIRED. Six inputs against one build produced five distinct sha256; the two that could have collapsed did not. unselected c05fc9fd65e27304 != empty 6db0b0cf03b83b78 is the criterion, and the cheap implementation (folding unselected into empty) makes them identical -- so this is a test the cheap version fails. The as_of-null mutant, carrying all nine valid books, again rendered byte-identical to a transport failure rather than to populated.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The six captures were produced by separate invocations of the same instrument against fixed fixtures; the failed/as_of-null pair reproduced byte-identical sha256 across independent runs and the other four reproduced mutually distinct ones. The fixture-match COUNT (1 of 2 vs 2 of 2) is emitted by the instrument itself on every run, so the no-network-call evidence is reproducible rather than a one-off observation.",
+      "observed": "STABLE. Six captures from separate invocations of the same instrument against fixed fixtures; the failed/as_of-null pair reproduced byte-identical sha256 and the other four reproduced mutually distinct ones. The fixture-match count (1 of 2 unselected vs 2 of 2 selected) is emitted by the instrument on every run, so the no-network-call evidence reproduces rather than being a one-off.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The router's 400 on a missing ?firm=",
+      "reason": "RULED CORRECT and explicitly not to be changed (1.0.0_SA_CTO~Z, msg 12353). It refuses to guess whose data to serve when identity does not determine a firm. index.mjs was not touched, and no default was added on the client either -- the client-side default is the same defect one layer up, with the same failure mode: the viewer silently receives SOME firm's data with nothing saying which."
+    },
+    {
+      "item": "Any client-side authorization check",
+      "reason": "SAT-c-3 is explicit that this is a VISIBILITY gate, not an authorization boundary. Entitlement is server-side and already enforced -- measured 2026-08-28, a real 49financial credential got 403 artifact_forbidden on cottonwood's key with a live-bearer positive control. Nothing in the picker is load-bearing for security; it decides what to OFFER, never what to ALLOW."
+    },
+    {
+      "item": "Reusing ALL_MDPF_PARTNER_FIRMS as the option list",
+      "reason": "Module-private to a 2400-line page; importing a page into a page for one constant is the wrong dependency, and the list contains 'global' which has NO bucket and so structurally cannot serve satellites. The selectable set is derived from the entitlement source instead."
+    },
+    {
+      "item": "A live cottonwood end-to-end exercise",
+      "reason": "No cottonwood credential exists on this device, and the self-signed substitute was RULED OUT by 3.0.0_SA_CVO~Z (12277): forging a firm claim to test a firm boundary manufactures the premise the test exists to check. The renders use fixtures and a stubbed session and are labelled as such."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / INERT -- 'Cottonwood Capital Advisors' NOW HAS A FIFTH CARRIER in this codebase (AdvisorIntelligence/index.tsx:26, _partners/cottonwood/constants.ts, _partners/cottonwood/layout.ts:34, ModelPortfolios.tsx:248, and now modeAccess.ts). It was ADDED rather than shared because both alternatives were worse: importing a 2400-line page module for one string, or minting a shared firm-registry this TO has no mandate to own. The MEMBERSHIP cannot drift -- the option ids are derived from MODE_FIRM_ALLOWLIST -- but the DISPLAY NAME can. Firm display names want one home and do not have one. Surfaced, not solved; naming the home is an ownership decision, not a wiring act.",
+    "OBSERVATION / INERT -- bucketSuffix's HOME IS WRONG FOR WHAT IT IS. A wire-protocol translator (portal-canonical firm id -> S3 bucket slug) now lives exported from one page's endpoint module, advisor-intelligence.ts, and is consumed by an unrelated surface. The SINGLE CARRIER was preserved deliberately -- copying it is what the 2026-06-22 COT go-live P0 cost, when bucketSuffix('cottonwood') fell through and built opal-data-COTTONWOOD, rendering Andrew's INTERNAL cottonwood view EMPTY. Relocating it is a naming/ownership decision this TO does not carry, so the smell was surfaced rather than the location invented.",
+    "OBSERVATION -- THE INSTRUMENT COULD NOT REACH THE STATE UNDER TEST, and that is a property of the instrument rather than of the page. ui-smoke's `--select` fires BEFORE the ordered step list, which is correct for a dropdown present at page load and STRUCTURALLY CANNOT drive a control that only exists after a click. `--pick` was added as an ordered step; `--select` was left untouched so no existing caller's run is silently re-ordered. Disclosed because it is a change to a SHARED evidence instrument made by a seat using it to evidence its own work."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-28/laneS_etfs_satellites_to8_consumer_seam_0145-0221Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"does the portal have a firm selector component and which firms does it list\"",
+      "result": "PARTIAL, and reported as such. Returned a NEAR-TIE of three (comp-estate / comp-routes behaviors / comp-transform schema-check) with no clear winner, none of which answers a component-EXISTENCE plus value-SET question. Ran it because the standing bulletin makes it the reflex; it did not fit, so comp-find carried the search instead. A near-tie printed as a near-tie is the tool working."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find -i \"firmSelector|FirmSelector|firm selector|selectedFirm\" --files --all",
+      "result": "PASS and DECISIVE. 168 hits across 27534 files scanned, banded; the two [DEF] rows (ModelPortfolios.tsx, AdvisorIntelligence/index.tsx) are exactly the two existing implementations of the ruled pattern. This is what converted the build from 'write a selector' to Build-Ladder rung 2. The banding did the work -- a flat hit list would have buried two definition lines under 166 mentions."
+    },
+    {
+      "tool": "comp-routes rewrites",
+      "invocation": "comp-routes rewrites | grep -i satellite (during TO-8-DE, carried forward)",
+      "result": "PASS as an informative ZERO -- no satellites rows on the DESIRED plane, corroborating 'route committed but not deployed' from a second angle before the v25 apply landed."
+    }
+  ]
+}

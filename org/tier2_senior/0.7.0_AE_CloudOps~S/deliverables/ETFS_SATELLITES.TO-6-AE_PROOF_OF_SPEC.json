@@ -1,0 +1,183 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_SATELLITES.TO-6-AE",
+  "firm": "COT",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-satellites/20260827T160438Z/DECOMP.md",
+    "vintage_commit": "936b9ae1e9",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ETFS_SATELLITES.TO-6-AE.registry-producer-schedule.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ETFS_SATELLITES.TO-6-AE.registry-producer-schedule.md",
+    "group": "D",
+    "vintage_commit": "2e020e86b1"
+  },
+  "assignee": "0.7.0_AE_CloudOps~S",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/cot-pipeline/satellites-registry-producer.tf",
+      "kind": "terraform",
+      "commit_or_etag": "3f5f8bace5",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply 2026-08-28T01:37Z: 9 added / 0 changed / 0 destroyed; post-apply re-plan 'No changes. Your infrastructure matches the configuration.' A baseline plan taken BEFORE this file existed also read 'No changes.', so the entire apply diff is attributable to this change and to nothing else. Tag cot-pipeline-v0.7.7 (annotated, peels to 3f5f8bace5); the tag is LOCAL because the push leg is the integrator's per LD-0367.",
+      "artifact_covered_by": [
+        "T6AE-AC1",
+        "T6AE-AC2",
+        "T6AE-AC4",
+        "T6AE-AC5"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/cot-pipeline/cot-satellites-registry-producer/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "3f5f8bace5",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Packaged into the deployed zip. Deployed CodeSha256 v+oWGB9WvsS++FzP4QcLWpoBnHOUt2tyszx3cM3Ju60= equals the built zip sha256(b64) -- compared by CONTENT against the build input per Rule 22a CODE layer, never by filename. Passes NO as_of: the producer resolves it (resolve_as_of @675e2ec6e4, verified at that pin against a positive control where the prior pin d4ef07cd10 still reads required=True).",
+      "artifact_covered_by": [
+        "T6AE-AC5"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/cot-pipeline/cot-satellites-registry-producer/build_package.py",
+      "kind": "script",
+      "commit_or_etag": "3f5f8bace5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deterministic pinned packager; --pin REQUIRED with no default. Reads every member via 'git show <pin>:<path>' and makes ZERO S3 calls, so no second carrier of any DS-lane file is created. THE ZIP MIRRORS THE REPO rather than flattening at the root, because data/assets/scripts/gold/satellites_weights.py:54 computes parents[4] to find the repo root.",
+      "artifact_covered_by": [
+        "T6AE-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/cot-pipeline/cot-satellites-registry-producer.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "bfea16181f56bec4bef85ccfe1070b5a9a019c7394b76b72b33c7770cdc9bbad",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "65426 B, built from pin 3f5f8bace5. Uploaded, then DOWNLOADED BACK and sha256-compared: identical (rc=0 is not the oracle). Carries the module-required user metadata content-sha256 (base64) matching the local file's true hash; the first upload omitted it and the plan failed LOUD on the missing key rather than deploying something wrong.",
+      "artifact_covered_by": [
+        "T6AE-AC1",
+        "T6AE-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260828T0135Z_etfs-satellites-to6-ae-registry-producer-schedule_deploy.md",
+      "kind": "doc",
+      "commit_or_etag": "b33601b7ca",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opened at apply start and CLOSED at completion, per NEVER#2. Its header states that CLOSED refers to the DEPLOY and not to the TO, because AC3 is outstanding by design -- a closed deploy record read as a closed TO is a failure this estate has banked.",
+      "artifact_covered_by": [
+        "T6AE-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T6AE-AC1",
+      "criterion_verbatim": "The trigger EXISTS as a SCHEDULE, in Terraform. DESIRED != APPLIED != EXERCISED -- a committed .tf block is DESIRED and nothing more. Cite the resource by file:line @ <commit-ish>. NEVER bare terraform apply -- safe-apply only.",
+      "method": "manual_read_with_citation",
+      "invocation": "git show 3f5f8bace5:infra/aws/terraform/cot-pipeline/satellites-registry-producer.tf | sed -n '236,241p'",
+      "output_evidence": "resource \"aws_cloudwatch_event_rule\" \"cot_satellites_registry_producer_daily\" { name = \"cot-satellites-registry-producer-daily\" ... schedule_expression = \"cron(0 7 * * ? *)\" state = \"ENABLED\" } -- a REAL ScheduleExpression, not an event pattern. Applied through .tools/safe-apply.sh with an audited HALT_ACK=1: the gate surfaced two 6-day-old WITHDRAWN notices addressed to the BASE serial, both read IN FULL first, neither STOP-class, neither related to this stack.",
+      "denominator": "1 of 1 schedule resource declared by this TO",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T6AE-AC2",
+      "criterion_verbatim": "APPLIED -- read back from the live plane, not from the plan. EventBridge Rules and Scheduler are TWO PLANES and list-rules structurally cannot see a Scheduler schedule. Census BOTH APIs and PRINT BOTH DENOMINATORS; name which plane carries this trigger.",
+      "method": "live_read",
+      "invocation": "aws events list-rules and aws scheduler list-schedules, both client-side paginated to NextToken exhaustion (never --query length(), which returns the PAGE count); then aws lambda get-function-configuration and aws events list-targets-by-rule",
+      "output_evidence": "RULES: 139 rule(s), 1 page, NextToken exhausted -- 'satellites' matches 1: cot-satellites-registry-producer-daily, cron(0 7 * * ? *), ENABLED. SCHEDULER: 18 schedule(s), 1 page, NextToken exhausted -- 'satellites' matches 0, correctly empty. THE TRIGGER IS CARRIED BY THE RULES PLANE. The RULES denominator moved 138 -> 139 across the apply, which is a control on the apply's scope as well as a census. POSITIVE CONTROLS on BOTH probes so a 0 is a real 0: rules 'cot-' returns 6, scheduler 'cot-' returns 1. Target wired: CotSatellitesRegistryProducerDaily -> arn:aws:lambda:us-east-1:313476888478:function:cot-satellites-registry-producer. Lambda State Active, python3.11, 192 MB / 60 s.",
+      "denominator": "139 EventBridge Rules and 18 EventBridge Scheduler schedules -- BOTH planes censused, BOTH denominators printed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T6AE-AC4",
+      "criterion_verbatim": "Success-of-upstream is NOT the only trigger. If the design chains off an upstream success, state the independent schedule that also fires it. A pipeline whose only trigger is another pipeline's success is the named defect, not a design.",
+      "method": "live_read",
+      "invocation": "aws events describe-rule --name cot-satellites-registry-producer-daily; plus a read of the applied .tf for any event-pattern or upstream-completion target",
+      "output_evidence": "ScheduleExpression cron(0 7 * * ? *), State ENABLED, EventBusName default; NO EventPattern field, and no success-of-upstream edge exists or is planned. The rule is a wall-clock schedule chained off NOTHING, so AC4 is satisfied BY CONSTRUCTION rather than by mitigation. The 07:00Z figure is DERIVED, not chosen: upstream cot-rebalancer-runner-daily is cron(0 6 * * ? *) UTC and lands at 06:00:43-44Z measured across 38 partitions, giving a 59-minute margin that stays CONSTANT because both clocks are UTC. That is also why an EventBridge RULE was chosen over this stack's aws_scheduler_schedule ET pattern -- the ET pattern exists for a MARKET-CLOSE anchor, and adopting it here would introduce the DST drift it was built to remove.",
+      "denominator": "N/A -- boolean check: the rule either carries a ScheduleExpression independent of upstream, or it does not",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T6AE-AC5",
+      "criterion_verbatim": "THE EMPTY PUBLISH SURVIVES THE SCHEDULE. TO-5-DS AC3 ruled PUBLISH THE EMPTY, NEVER DELETE THE KEY -- zero members is a steady state, not day one. Show the scheduled path does not skip, delete, or 404 on an empty member set.",
+      "method": "manual_read_with_citation",
+      "invocation": "Extract the BUILT artifact and read publish() and lambda_handler on the scheduled path (the deployed bytes, not the working tree)",
+      "output_evidence": "publish() has NO branch on len(books) and NO delete call anywhere; the only S3 write verb in the entire package is put_object. The handler adds no branch either -- it builds argv=[] (appending --dry-run only on an explicit QA event) and calls producer.main(argv). So the scheduled path structurally cannot skip or delete on an empty member set. DISTINCT CASE, stated because conflating them is easy: a missing UPSTREAM partition fails LOUD (RegistryProducerError, rc=1) rather than publishing a manufactured empty -- 'publish the empty' is about a firm with zero MEMBERS, never an absent INPUT (2.0.0_SA_COO~Z ruling 11461). That refusal was exercised in the deployed Lambda: a dry-run invocation raised on the absent 2026-08-28 partition before reaching any write.",
+      "denominator": "1 of 1 write path in the package; 0 delete calls of 0 expected; 0 branches on member count of 0 expected",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Deliberately mutated the ZIP LAYOUT to the flat form the sibling builder uses (every member at the zip root) and attempted the identical import. This is precisely the mutation the packaging decision exists to refuse, so if it passed, the layout reasoning would be untested.",
+      "expected": "The flat layout FAILS at import, because data/assets/scripts/gold/satellites_weights.py:54 computes parents[4] to locate the repo root and a flat layout breaks that arithmetic.",
+      "observed": "FLAT: ModuleNotFoundError: No module named 'lib.trading_calendar'. MIRRORED (subject): imports clean and resolves opal-data-cot / platinum/satellites/registry.json. NOTE ON MECHANISM, stated separately rather than conflated: the deep local test path produced ModuleNotFoundError, whereas at Lambda's shallow /var/task the same arithmetic IndexErrors (only 3 parents exist). The executed control exercised the first; the second is shown by arithmetic and was NOT run.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Built the package twice from the identical pin 3f5f8bace5 and sha256-compared the two zips.",
+      "observed": "run 1 sha256 bfea16181f56bec4bef85ccfe1070b5a9a019c7394b76b72b33c7770cdc9bbad; run 2 byte-identical. Fixed zip-entry timestamps are what make a rebuild from one pin reproducible, which is what lets 'are these the same bytes?' be a real question rather than a hope.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "T6AE-AC3 (EXERCISED -- it FIRED ON ITS OWN SCHEDULE). NO acceptance row is filed for it.",
+      "reason": "The criterion needs a fire on the schedule's own trigger at 07:00Z UTC, which had not occurred at filing time. An UN-FIRED scheduled criterion is not a FAILED one, and the status enum carries no value for 'not yet measurable' -- so filing FAIL would write a false failure into the permanent record, downstream-indistinguishable from a real one (3.0.0_SA_CVO~Z measured 18 FAIL rows across 1,258 acceptance rows estate-wide, at least one already a self-declared false failure). Withholding the row was ratified by 2.0.0_SA_COO~Z (11579 s.5) and by 3.0.0_SA_CVO~Z. The evidence plan and the perishable baseline are recorded in the measurement .md and the deploy ledger. ||| BACK-REFERENCE ADDED 2026-08-28 ~03:5xZ at 3.0.0_SA_CVO~Z's request (msg 12567), because the relocation creates a CROSS-TO DEPENDENCY NEITHER TO's CLOSURE OBSERVES: **T6AE-AC3 IS ALSO THE DISCHARGE OF `T5DS-AC6`** ('the trigger is a SCHEDULE'), which was lifted out of ETFS_SATELLITES.TO-5-DS into this TO because Rule 13 puts PROD triggers in the DT/AE lane. TO-5-DS is DISPOSED at 5 of 6 and CANNOT REOPEN ITSELF; this TO has no face to report upward into. So if the 07:00Z fire fails or does not occur, T5DS-AC6 is unmet while TO-5-DS reads closed, and nothing in either TO's own bookkeeping would show it. FORWARD POINTER, all four parts so it resolves rather than merely gesturing: destination criterion T6AE-AC3 | TO ETFS_SATELLITES.TO-6-AE | owner 0.7.0_AE_CloudOps~S | clock 07:00Z daily, cot-satellites-registry-producer-daily. A reader arriving from EITHER direction now finds the other. ||| SECOND OBLIGATION, added 2026-08-28 ~04:0xZ from the issuer's face amendment @264b2b570a: **ON A FAIL OR A NON-FIRE AT 07:00Z, REPORT IT TO 3.0.0_SA_CVO~Z EXPLICITLY.** TO-5-DS's certification is still pending and MUST NOT be granted as 'relocated-and-discharged' on a fire that did not happen. 3.0.0_SA_CVO~Z has committed to withholding it until AC3 is measured; this obligation makes the report REACH that seat rather than relying on them to go looking. RECORDED HERE RATHER THAN ONLY ON THE TO FACE because it is an obligation on a FUTURE act across a clock this session may not outlive: a successor filing AC3 from this instance must inherit BOTH halves -- name T5DS-AC6 on a pass, and tell 3.0.0_SA_CVO~Z on a fail or non-fire. NOTE THE ASYMMETRY, which is the whole reason (b) exists: a PASS is self-announcing (a new artifact version plus a log line), whereas a NON-FIRE produces NOTHING -- no version, no log, no signal of any kind. The silent outcome is exactly the one that needs a human obligation attached, because no instrument reports it."
+    },
+    {
+      "item": "The FIRST AC3 instrument -- a watch on the artifact's VersionId. Retired unused.",
+      "reason": "UNSOUND, and it announced itself by firing within 90 seconds on ANOTHER seat's write (2026-08-28T01:38:46Z, 2196 B). A VersionId delta answers 'did the key change', not 'did MY SCHEDULE fire', and any seat's ad-hoc run satisfies it. It was caught only because the timestamp was 5h21m before the cron; with a nearer cron another seat's write would have been accepted as this TO's acceptance evidence. Replaced by a watch on this function's OWN CloudWatch log group for its 'OK: wrote s3://' line, which no other seat's producer run can emit."
+    },
+    {
+      "item": "Exercising the PutObject grant end-to-end.",
+      "reason": "Would require a production write to the served key, which is not this TO's act (the QA write is DS's, once) and would muddy the AC3 discriminator. Established instead on the live primitive via simulate-principal-policy -- allowed on both read prefixes and the exact write key, with three isolated negative controls returning implicitDeny, one --resource-arns per call so the multi-ARN false-deny mode could not silently disarm the controls."
+    },
+    {
+      "item": "Any change to the producer (data/assets/scripts/gold/build_satellites_registry.py) and the first QA write.",
+      "reason": "Fenced by the TO: DS lane (ETFS_SATELLITES.TO-5-DS, 0.4.0_DS_ClientPlatform~L). Report, do not repair across a lane boundary. The producer's required --as-of was surfaced as a fork with three coherent options and a stated default; the issuer ruled (A) and DS implemented it, so the authorized (B) shim was never built and no temporary carrier exists."
+    },
+    {
+      "item": "The POSN_TENANCY.TO-4-AE apply hold and the ETFS_SATELLITES PROD promote.",
+      "reason": "Both explicitly HELD by this TO and not lifted by it. The TO-4-AE hold was subsequently lifted by the issuer @0e8aa52d20 and re-seated to 0.7.0_AE_CloudOps~Y -- a different project, so Rule 27 keeps it out of this lane regardless."
+    },
+    {
+      "item": "The etfs-positioning safe-apply (ETFS_INGEST.TO-9-AE) that this seat was recommended for.",
+      "reason": "Declined on Rule 27: ETFS_POSITIONING is a different project. The recommender retracted the recommendation and the issuer affirmed the refusal rather than assigning the work here anyway; it went to a new lane, 0.7.0_AE_CloudOps~I."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION/INERT: without s3:ListBucket, S3 returns 403 AccessDenied rather than 404 NoSuchKey for a missing object -- so at this producer's read surface, 'upstream is late' and 'my read grant is broken' are BYTE-IDENTICAL. Benign today because the grant measures correct. This is the same shape TO-5-DS AC3 records for the SERVING layer, reappearing one rung up, and it is a cost of this seat's OWN no-ListBucket design which the issuer had ratified. Surfaced against own interest rather than quietly fixed, because the absence was explicitly ratified. Filed by 3.0.0_SA_CVO~Z as ETFS_POSITIONING-Z-S12. No action taken.",
+    "OBSERVATION/INERT: deployed shared-advisor-router v24's bytes lack PLATINUM_ADVI_PREFIX and FIRM_BUCKET_MAP although v24 was published about 9 minutes after the v14 commit, and v23 carries a timestamp 16 minutes LATER than v24. Two of three positive controls on that byte-read failed, so the read was DISCARDED rather than used to support a verdict. Not chased; not this TO's surface.",
+    "OBSERVATION: the deploy-ledger resource TABLE lists eight resources while the apply created NINE -- the yang-lambda module row hides both the function and its log group. A rollback driven off the table rather than the apply count would orphan the log group. Self-caught and corrected in the ledger."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~S/deliverables/ETFS_SATELLITES.TO-6-AE_MEASUREMENT_20260828.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"what schedules and runs the gold producer scripts under data/assets/scripts/gold in production\"",
+      "result": "NO CURATED RULE MATCHED. The banner was obeyed rather than picking the top fuzzy hit; it pointed at comp-dispatch, which is what led to the substrate answer."
+    },
+    {
+      "tool": "comp-dispatch",
+      "invocation": "comp-dispatch --list ; comp-dispatch assets",
+      "result": "Known firms are black_diamond and cot only; 'no gold_dispatch.sh for assets'. Established that this producer has NO EC2 dispatch home, which is why a Lambda is the correct substrate rather than a runner entry."
+    },
+    {
+      "tool": "comp-pipescript",
+      "invocation": "comp-pipescript deployed data/assets/scripts/gold/build_dim_model_portfolio.py ; comp-pipescript io data/assets/scripts/gold/build_satellites_registry.py",
+      "result": "deployed: MATCH, Runner mdpf-daily-runner -- established that s3://opal-data-mdpf/code/scripts/assets_gold/ is an EC2 runner's CODE CHANNEL, which is what answered 0.4.0_DS_ClientPlatform~L's first-mint question (no mint needed for a Lambda-packaged producer). io: OUT-OF-GRAPH, answered by AST, and its bucket resolution printed opal-data-cot from a firm heuristic rather than from the source literal -- so the source constants were read directly instead of trusting the rendering."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'etf_positioning_gold' --files ; comp-find 'Platinum summary files must be accessed' --files",
+      "result": "Located the sibling producer's packaging pattern (reused at Build-Ladder rung 2 -- the pattern, not the file) and the router's 401 refusal branch. The tool printed its own denominators on both runs (152 hits / 27477 files; 5 hits / 27494 files)."
+    },
+    {
+      "tool": "comp-routes",
+      "invocation": "comp-routes rewrites ; comp-routes behaviors ; comp-routes edge-versions",
+      "result": "Used for the TO-7-AE AC0 route test rather than for this TO. Its own coverage note -- DESIRED plane only, a pinned stale Lambda@Edge version reads identical -- is exactly why that verdict was grounded on a live get-distribution-config behavior census instead of on the tool's table."
+    }
+  ]
+}

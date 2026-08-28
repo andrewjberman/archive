@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_INGEST.TO-9-AE",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-ingest/20260824T2010Z/DECOMP.md",
+    "vintage_commit": "fcdf042972",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ETFS_INGEST.TO-9-AE.producer-package-apply-for-to6-and-to8.md"
+  },
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ETFS_INGEST.TO-9-AE.producer-package-apply-for-to6-and-to8.md",
+    "group": "OTHER",
+    "vintage_commit": "e6afdb5abc"
+  },
+  "assignee": "0.7.0_AE_CloudOps~I",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/etfs-pipeline/etf-positioning-producer/build_package.py",
+      "kind": "script",
+      "commit_or_etag": "ac7243103f4846fc4e134121311b45a2e5f6e0be",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A BUILD TOOL, not a deployed artifact -- it runs from the working tree and reads members out of git at a pin. Its correctness is evidenced by the artifact it produced, which IS deployed and verified below. Corrected here: its PACKAGE list omitted etf_classifications_dynamodb.py, which etf_positioning_publisher.py:66 imports at module scope.",
+      "artifact_covered_by": [
+        "TO9-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/etfs-positioning/etf-positioning-producer.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "51c7fa50843d0965ad180410da41fee2",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "s3api head-object AFTER the second apply: ContentLength 131900 == built v2 bytes; Metadata.content-sha256 EiCjtNChLCKXRY/yUHrAVh3QXBsGfn2i3qHbsJN7QXI=; VersionId hdlBjB6kFKqfZxQfYYheO1mse.nGH59.; SSE AES256. That metadata key is what modules/yang-lambda/main.tf:39 plans source_code_hash against, so it was read on the primitive rather than assumed from the upload rc. Prior versions .2FAC4L6xOys6F4yBB_5gmVN0KnC8cUR (the 02:04Z package) and VG8a9Mrr6WQJ3Zpe_1gQx0NnwSPjCE_0 (the pre-TO-9 package) are both retained -- measured: the bucket carries one lifecycle rule, abort-incomplete-mpu-7d, and NO noncurrent-version expiration.",
+      "artifact_covered_by": [
+        "TO9-AC1",
+        "TO9-AC2"
+      ]
+    },
+    {
+      "path_or_key": "module.etf_positioning_producer.aws_lambda_function.this (function etf-positioning-producer)",
+      "kind": "terraform",
+      "commit_or_etag": "EiCjtNChLCKXRY/yUHrAVh3QXBsGfn2i3qHbsJN7QXI=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "TWO applies. FINAL live read: CodeSha256 EiCjtNChLCKXRY/yUHrAVh3QXBsGfn2i3qHbsJN7QXI=, LastModified 2026-08-28T02:26:49.000+0000, State Active, python3.11 / 512 MB / 120 s / handler etf_positioning_gold.lambda_handler. Stronger: the LIVE package was re-downloaded after EACH apply and compared byte-for-byte to the artifact built at that pin -- apply 1 sha256 93f016ba7172b526... identical, apply 2 sha256 1220a3b4d0a12c22... identical. And the deployed publisher member now hashes to 23705449d650797f... == git blob @f0e2a05889, and no longer == @39495cf260.",
+      "artifact_covered_by": [
+        "TO9-AC2",
+        "TO9-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260828T0200Z_etfs-ingest-to9-ae-producer-package-to6-to8_deploy.md",
+      "kind": "doc",
+      "commit_or_etag": "40c6b6f9d7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy ledger. OPENED at dd75f6bd64 before the first world-touching act; CLOSED at 40c6b6f9d7 with live-plane completion evidence. A record, not a deployable.",
+      "artifact_covered_by": [
+        "TO9-AC4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "40c6b6f9d7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "cloud-ops Rule 4. Its three vintage fields were STALE -- they recorded the 08-24 deploy and missed an 08-25T18:53:01Z deploy entirely. Advanced across both applies to f0e2a0588976b87c54f4f8205104ac251eac9677 / 2026-08-28T02:26:49Z / EiCjtNChLCKXRY/yUHrAVh3QXBsGfn2i3qHbsJN7QXI=, and CROSS-CHECKED against the live plane: the map's artifact_sha256 now equals the live CodeSha256 exactly. Its _note records that the schema CANNOT express the third package member and that BUILD_MANIFEST.json inside the artifact is the member list of record.",
+      "artifact_covered_by": [
+        "TO9-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TO9-AC1",
+      "criterion_verbatim": "BOTH PRECONDITIONS MEASURED BEFORE THE APPLY. TO-6 and TO-8 both landed -- cite each by file:line @ <commit-ish>, and show the built package's BUILD INPUT carries both changes. Diff the deployed bytes against the BUILD INPUT (source map / manifest), NEVER by filename -- running-bytes-older-than-built passes every naive check.",
+      "method": "diff",
+      "invocation": "git merge-base --is-ancestor 63a68942ae HEAD; git merge-base --is-ancestor 39495cf260 HEAD; (both also against origin/SITEZ) || negative control: git merge-base --is-ancestor 39495cf260 63a68942ae || python verify_ac1.py deployed.zip new.zip  (word-boundary token census INSIDE both zips)",
+      "output_evidence": "GATE: 63a68942ae ANCESTOR-of-HEAD + ON origin/SITEZ (TO-6 AC4/AC6, data/etfs/scripts/gold/etf_positioning_gold.py). 39495cf260 ANCESTOR-of-HEAD + ON origin/SITEZ (TO-8 AC1/AC3, data/etfs/scripts/gold/etf_positioning_publisher.py:66 area). NEGATIVE CONTROL is-ancestor(39495cf260, 63a68942ae) -> FALSE, so the test can fail. CONTENT DIFF inside the zips, DEPLOYED -> BUILT: gold industry_group 0->15, industry_group_basis 0->9, INDUSTRY_GROUP_BASIS_VOCAB 0->2, GICS_INDUSTRY_GROUP_FIELD 0->5, industry_group_of 0->5; publisher industry_group 0->4; HOLDING_KEYS arity 13 -> 14 (TO-8 declares 14). NEGATIVE CONTROL zzz_no_such_token_9999 = 0 in BOTH members of BOTH zips. BUILD INPUT verified independently of the builder's own stdout: each zip member's sha256 re-read FROM THE ZIP and matched to the git blob at pin ac7243103f -- gold 0aca18dc..., publisher 4678abf0..., classifier 8138da03... all MATCH; negative control against the previous deployed pin d50aeb9310 -> MISMATCH.",
+      "denominator": "2 of 2 gating commits measured; 3 of 3 zip code members matched to git blobs; 6 tokens + 1 negative control censused across 2 members in 2 zips (4 member-zip pairs).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TO9-AC2",
+      "criterion_verbatim": "APPLIED via safe-apply, code-only. NEVER bare terraform apply. NEVER aws lambda update-function-code. Show the plan is scoped to what you intend: state added/changed/destroyed, and name what the plan says is UNCHANGED as a did-not-move control.",
+      "method": "command",
+      "invocation": "HALT_ACK=1 .tools/safe-apply.sh -chdir=infra/aws/terraform/etfs-positioning apply -auto-approve -input=false -no-color   [run TWICE: 02:04:15-02:04:50Z at pin ac7243103f, and 02:26:19-02:26:53Z at pin f0e2a05889]",
+      "output_evidence": "BOTH applies: 'Plan: 0 to add, 1 to change, 0 to destroy' -> 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed', each followed by a re-plan reading 'No changes. Your infrastructure matches the configuration.' The single changed resource each time is module.etf_positioning_producer.aws_lambda_function.this, moving only s3_object_version, source_code_hash and last_modified. DID-NOT-MOVE CONTROL, the 8 unchanged managed resources NAMED rather than summarised and identical across both applies: aws_cloudwatch_event_rule.etf_positioning_producer_daily (THE 13:00Z SCHEDULE, untouched by BOTH), aws_cloudwatch_event_target.etf_positioning_producer_daily, aws_lambda_permission.events_etf_positioning_producer, aws_iam_role.etf_positioning_producer, aws_iam_role_policy.etf_positioning_producer_s3, aws_iam_role_policy_attachment.etf_positioning_producer_basic, aws_lambda_layer_version.opal_trading_calendar, module.etf_positioning_producer.aws_cloudwatch_log_group.lambda. No IAM movement in either. aws lambda update-function-code was NOT used at any point.",
+      "denominator": "9 managed resources in this stack's state; 1 changed, 8 unchanged -- on EACH of 2 applies. Plus 28 unchanged attributes and 4 unchanged blocks hidden within the changed resource, confirmed unchanged on the live read at AC3.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TO9-AC3",
+      "criterion_verbatim": "READ BACK FROM THE LIVE PLANE, not the plan. CodeSha256 moved (it must, this is a code deploy) and matches the built artifact. This is the inverse of the control 0.7.0_AE_CloudOps~Z used on its config-only change -- there CodeSha256 had to be IDENTICAL; here it must MOVE. State which you expect BEFORE you read it.",
+      "method": "live_read",
+      "invocation": "aws lambda get-function-configuration --function-name etf-positioning-producer --query '{CodeSha256:CodeSha256,LastModified:LastModified,State:State,Runtime:Runtime,MemorySize:MemorySize,Timeout:Timeout,Handler:Handler}'  THEN  aws lambda get-function --query Code.Location -> curl -> sha256sum + cmp against the built artifact",
+      "output_evidence": "TWO applies, TWO predictions, BOTH recorded before their observation and BOTH held. APPLY 1 -- predicted in msgs 11679/11777 and in the ledger at commit dd75f6bd64: MOVE from pQ76SKsrmmY9RrQi4piSVwEHytutdxCBDQBh5K/XHNY= to k/AWunFytSaEsCs7p0HXCKZP3UntUbtMnA16HRkglIA=, with 'unchanged = FAILURE' named in advance. OBSERVED: exactly that, LastModified 2026-08-28T02:04:47Z. APPLY 2 -- predicted in msgs 11992/11993 BEFORE the build was made, and INDEPENDENTLY pre-recorded by 0.4.0_DS_ClientPlatform~Q in 11939, so the prediction is on the record from a seat OTHER than the applier: MOVE to EiCjtNChLCKXRY/yUHrAVh3QXBsGfn2i3qHbsJN7QXI=. OBSERVED: CodeSha256 EiCjtNChLCKXRY/yUHrAVh3QXBsGfn2i3qHbsJN7QXI=, LastModified 2026-08-28T02:26:49.000+0000, State Active; python3.11 / 512 MB / 120 s / handler UNCHANGED. Second instrument on both: the live package re-downloaded after each apply is byte-identical (cmp) to the artifact built at that pin -- 93f016ba7172b526... and 1220a3b4d0a12c22... respectively.",
+      "denominator": "N/A -- single-function live read, taken twice. Each MOVE is a 2-state comparison against a value recorded before the observation; each content check is 1 artifact compared byte-for-byte (131255 B, then 131900 B).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TO9-AC4",
+      "criterion_verbatim": "LEDGER. Entry opened in org/critical_paths/change_management/ at apply start, closed at completion. A confirmed deploy is NEVER left half-landed -- finish in-session or roll back and escalate loud.",
+      "method": "manual_read_with_citation",
+      "invocation": "git log --format='%h %s' -- org/critical_paths/change_management/20260828T0200Z_etfs-ingest-to9-ae-producer-package-to6-to8_deploy.md",
+      "output_evidence": "TWO ledgers, both opened before their first world-touching act and both CLOSED in-session. (1) 20260828T0200Z_...to6-to8_deploy.md OPENED @dd75f6bd64, CLOSED @40c6b6f9d7, carrying a forward-pointing SUPERSESSION NOTICE written at close time. (2) 20260828T0225Z_...basis-reapply_deploy.md OPENED @aac579ce42, CLOSED this session. The second is a SUCCESSOR ENTRY, NOT a re-open: the first ledger is closed and correct for what it applied, and a closed record is a snapshot of the evidence its author had. Nothing half-landed on either -- both applies rc=0, both re-plans 0-diff, both deployed-byte sets content-verified against their build.",
+      "denominator": "N/A -- boolean check on one ledger file, with both transitions cited by commit.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TO9-AC5",
+      "criterion_verbatim": "DO NOT ASSERT THE SERVED OUTCOME FROM THE DEPLOY. The apply discharges APPLIED, never EXERCISED. Whether the ~13:00Z artifact carries the field is a separate, later measurement against the served positioning_data.json, and it belongs to TO-8 AC2. Report the deploy; do not report condition (ii).",
+      "method": "manual_read_with_citation",
+      "invocation": "Self-audit of every artifact this seat emitted: broker msgs 11679, 11777, 11901; the deploy ledger at dd75f6bd64 and 40c6b6f9d7; the session log; this instance.",
+      "output_evidence": "COMPLIED. Stated POSITIVELY rather than as a silence, because compliance with a PROHIBITION is indistinguishable from never having considered it: this seat did NOT read the served positioning_data.json, did NOT invoke the function (not even a dry run), and asserts NOTHING about condition (ii) or about what the ~13:00Z fire will produce. The ledger carries an explicit AC5 BOUNDARY section saying so, and its CLOSED banner reads 'CLOSED refers to the DEPLOY, not to the TO'. Msg 11901 closes with 'The 13:00Z fire will run these bytes. I am not claiming what it will produce.' The silent-success shape was carried forward rather than suppressed: if the bronze pull did not land GICS_INDUSTRY_GROUP_NAME, the producer emits industry_group_basis: field-not-in-source by design and the run reads GREEN with the column empty -- so the served check must be positive with a denominator. That census is TO-8 AC2's and belongs to 0.4.0_DS_ClientPlatform~Q.",
+      "denominator": "N/A -- prohibition criterion. Compliance is a property of what was NOT claimed, so the denominator is the set of artifacts audited: 6 broker messages (11679, 11777, 11901, 11992, 12056 and the completion report), 2 ledgers at 2 commits each, 1 session log, this instance = 12.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Rebuild the package's extracted /var/task layout with etf_classifications_dynamodb.py REMOVED -- i.e. exactly the package the committed builder would have produced -- and import etf_positioning_publisher at module scope. This is the deploy-breaking state under test, not a synthetic mutation.",
+      "expected": "rc != 0, with ModuleNotFoundError naming etf_classifications_dynamodb raised from etf_positioning_publisher.py line 66 at module scope. If it PASSED, the import test would not be measuring the member that was added.",
+      "observed": "rc=1. Traceback: File '.../extract_minus/etf_positioning_publisher.py', line 66, in <module> / from etf_classifications_dynamodb import ETFClassifier / ModuleNotFoundError: No module named 'etf_classifications_dynamodb'. The un-mutated arm returns rc=0 with 'ETFClassifier bound: True'. Independently reproduced by 0.4.0_DS_ClientPlatform~Q on a DIFFERENT instrument (their own test-suite run, msg 11692) before this seat built anything. RE-RUN IN FULL on the second build rather than inherited: same rc=1, same line-66 ModuleNotFoundError, un-mutated arm rc=0 with 'ETFClassifier bound: True'.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two full builds from an identical pin to two different output paths, compared with cmp and sha256sum -- run SEPARATELY for BOTH deployed pins. build_package.py stamps every zip entry with a FIXED timestamp (1980-01-01) precisely so this is a real question.",
+      "observed": "PIN ac7243103f: run1 == run2 == 93f016ba7172b52684b02b3ba741d708a64fdd49ed51bb4c9c0d7a1d19209480 (131255 B). PIN f0e2a05889: run1 == run2 == 1220a3b4d0a12c2297458ff2507ac0561dd05c1b067e7da2dea1dbb0937b4172 (131900 B). Each digest also equals the DEPLOYED package re-downloaded from AWS after its apply, so determinism holds across the round trip and not only locally.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The served outcome / condition (ii) / any claim about what the ~13:00Z fire produces.",
+      "reason": "TO9-AC5 forbids it in terms. This deploy discharges APPLIED, never EXERCISED. The served census belongs to TO-8 AC2 and to 0.4.0_DS_ClientPlatform~Q, after the ~11:00Z bronze pull and the SCHEDULED fire."
+    },
+    {
+      "item": "RESOLVED (was: industry_group_basis is NOT served by the deployed package).",
+      "reason": "Superseded by a SECOND apply at 02:26:49Z, pin f0e2a05889. HOLDING_KEYS arity 14 -> 15, industry_group_basis added, removed members [] (additive). The exclusion stood for 22 minutes and is recorded rather than deleted, because the first ledger closed while it was true. AUTHORITY EPISODE: 1.0.0_SA_CTO~Z's ruling 11832 was withdrawn by its own author (12001) as the ISSUER's act under Rule 27, then re-taken by 2.0.0_SA_COO~Z (12038: 'I AMEND ETFS_INGEST.TO-8. The basis field STAYS.'). This seat HELD at the gate through that window -- the apply had not started, so the decision was still ahead of the act -- and applied the staged artifact unchanged once the issuer ruled."
+    },
+    {
+      "item": "The producer and publisher SOURCE under data/**.",
+      "reason": "TO-9 section 4: 0.4.0_DS_ClientPlatform~Q's lane. Nothing under data/** was edited. The builder fix was in infra/**, which 2.0.0_SA_COO~Z confirmed in-lane at msg 11698."
+    },
+    {
+      "item": "Two cosmetic defects in build_package.py, left unfixed: the inert ZIP_DEFLATED (writestr honours the ZipInfo's own compress_type, default ZIP_STORED, so every entry is stored), and the in-zip manifest's layers_expected naming mdpf-gold-calendar-deps where the function attaches opal-trading-calendar-layer:1.",
+      "reason": "Both are inert -- stored entries are 131 KB against Lambda's 50 MB zipped / 250 MB unzipped limits, and layers_expected is never read at runtime. Fixing either would have changed the bytes of an already content-verified, GO'd artifact for no functional gain. Filed as OBSERVATION/INERT instead."
+    },
+    {
+      "item": "Re-homing the build path so the committed builder is the one that actually ships.",
+      "reason": "1.0.0_SA_CTO~Z msg 11702 section 3: 'the immediate act is the member fix, and re-homing the whole build path is a separate decision nobody should make at 02:00Z against a clock.' Held as OBSERVATION/INERT on the surprise channel; no gate proposed, moratorium intact."
+    },
+    {
+      "item": "Pushing the annotated tag etfs-positioning-v1.1.0.",
+      "reason": "LD-0367: shared-branch pushes and --follow-tags are the integrator's act, not a seat's. The tag exists locally, annotated, peeling to the build pin ac7243103f. Routed to 0.0.0_AB_MSTR~Z."
+    },
+    {
+      "item": "TO8-AC6's industry_group_observed_members placement (gold manifest vs served artifact).",
+      "reason": "Raised by 0.4.0_DS_ClientPlatform~Q at 02:28:36Z (msg 12082), AFTER the 02:26:49Z apply, and RULED by 2.0.0_SA_COO~Z immediately after: the gold manifest is correct. No further apply follows. NOTE THE COST WAS UNCHANGED BY THE TIMING: had the answer gone the other way it would have needed a publisher edit, a new pin and a further apply -- which would have been true whether or not this seat had already applied. Nothing was lost by the ordering."
+    }
+  ],
+  "surprises": [
+    "The committed builder had NEVER shipped the live artifact -- the deployed zip carried no BUILD_MANIFEST.json, 2020-01-01 entry stamps against the builder's 1980-01-01, DEFLATED compression where the builder emits STORED, and a member the builder does not list. A production Lambda whose serving package had no committed producer. Closed for THIS function only; the general finding stands. Class OBSERVATION, standing INERT, held by 3.0.0_SA_CVO~Z.",
+    "The lambda-source-map entry read FALSE on all three vintage fields -- it recorded the 08-24 deploy and missed an 08-25T18:53:01Z deploy entirely, so last_deployed_commit named a commit whose bytes matched NEITHER live member. comp-closure correctly reported DIVERGENT; the obvious reading of that verdict (the deploy has drifted) was backwards -- the MAP was wrong. Corrected as part of this deploy.",
+    "The source-map SCHEMA cannot express this package's real member set: files[] is joined to a single source_dir, and etf_classifications_dynamodb.py lives in a different tree. Recorded in the entry's _note rather than by writing a path that would not resolve.",
+    "A bare 'git tag -a' records whoever committed last, not what you deployed. The first cut of etfs-positioning-v1.1.0 landed on a peer seat's commit because HEAD moved under this seat in the shared checkout between the commit and the tag. Caught while still local-only and re-pointed at the build pin.",
+    "safe-apply's halt gate is fail-closed on IDENTITY and this session had no serial file, so the first invocation refused with rc=3. Fixed by writing org/mcp/sessions/<session-id>.serial (gitignored) as the gate itself instructs, NOT by overriding -- the refusal text explains that a mis-identified pusher scans another agent's inbox and never its own, so a real STOP addressed to you is invisible.",
+    "The halt gate then surfaced 2 pending messages (msgs 4349/4355, both 6 days old, both WITHDRAWALS from 2.0.0_SA_COO~Z addressed to the BASE serial). Both were read in full before HALT_ACK=1. NOT cited as evidence of not having been halted -- a ~lane agent is structurally unhaltable and a live Monitor drains the inbox the checkpoint reads.",
+    "THE FIRST APPLY WAS STALE 9m31s AFTER IT LANDED. f0e2a05889 (the publisher serving industry_group_basis) was committed at 02:14:18Z against an apply at 02:04:47Z. Found by 0.0.0_AB_MSTR~Z from the CLOCK side, holding the apply time and the commit time when nobody else held both; reached independently by 0.4.0_DS_ClientPlatform~Q from the RULING side. Those are NOT two confirmations of one finding -- neither checks the other. This seat ran the third and decisive instrument, CONTENT, on a THREE-WAY discriminator DS~Q precomputed: the deployed member hashed to the 39495cf260 blob, not to f0e2a05889's, and not to a third unposited state. The general shape -- DS commits after AE applies -- has no gate and recurs on every future publisher commit.",
+    "proof-of-spec-check.py's CELL_ID_RE (:185) cannot see ANY of this decomp's 37 cell ids. GRAMMAR NAMED PRECISELY rather than by symptom, per 3.0.0_SA_CVO~Z ruling 12052 s.1 which SHARPENED my own first characterisation: the non-mechanism branch is [a-z]{1,4}-[a-z]?\\d+, so the MIDDLE segment must be 1-4 characters of PURE LOWERCASE ALPHA. INGEST-T3-6 therefore fails on TWO counts at once -- the uppercase T and the digit 3 -- and a lowercase 't3' would STILL fail, on the digit alone. I had reported only the uppercase count; that was true and incomplete, and the distinction matters because the remedy depends on which constraint is wrong. MEASURED: the tool reported 'decomp id space = 4', those 4 being incidental cross-references to a DIFFERENT decomp, and raised three FABRICATED-CITATION violations against CORRECT citations that literally appear in the file (2, 1 and 1 occurrences; negative control 0). POSITIVE CONTROL: ETFS-d-1, STI-b-4 and INGEST-inv-1 all MATCH, so the regex is live and the misses are real. SECOND GENERATION, and this is the sharpest fact -- 3.0.0_SA_CVO~Z read the checker's own comment at :180-184, which records the SAME class one generation ago: a prior remedy 'encoded wave 3's grammar as if it were the general one', and the present grammar encodes another local convention the same way. A GRAMMAR WRITTEN FROM THE ID STYLE IN FRONT OF YOU IS A CENSUS OF ONE DECOMP. 2.0.0_SA_COO~Z measured the blast radius at 2 of 7 TOs cut tonight, both ETFS_INGEST, 5 clean; 0.4.0_DS_ClientPlatform~Q established the BOUND that must travel with it -- lowercase-tier ids are fully visible, so already-certified instances do NOT need re-auditing -- and bounded their own bound at 6 ids across 2 decomps, leaving the estate-wide denominator UNMEASURED. 1.0.0_SA_CTO~Z 12119 consolidated this with four sibling vocabulary holes as ONE defect: five uncovered members across two files, three hit in one night, evidence the vocabulary was authored against a domain nobody declared. THIS INSTANCE IS FILED UNDER THE INTERIM CONTROL (CTO 12119, COO 12034, CVO 12052): file the true citations, accept the INVALID, never alter evidence to satisfy a grammar -- because the checker validates that refs are well-formed and NEVER that the cell exists, so a doctored id would pass permanently and undetectably.",
+    "SECOND, INDEPENDENT DEFECT in the same tool: it printed INVALID and exited rc=0. A caller reading rc gets VALID. The VERDICT LINE is the oracle; rc is not.",
+    "A ruling's AUTHORITY and its SUBSTANCE are separable, and only the first was ever in question. 1.0.0_SA_CTO~Z withdrew their authority to issue 11832 (adding an AC to a frozen TO is the issuer's act) while explicitly NOT withdrawing the substance, which is CLAUDE.md law and not theirs to withdraw. Two seats read 'an apply is RUNNING' off this seat's 'STARTING NOW' when the halt gate had in fact blocked it at rc=1; correcting that premise converted an expensive-looking emergency into a one-line question, and the hold cost about two minutes against a ~10.5h margin."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-28/to9_ae_producer_package_apply_0138-0215Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"is the deployed Lambda running the same bytes as the package I built, and what is its CodeSha256\"",
+      "result": "Near-tie across comp-aws / comp-closure / comp-estate, printed as a tie rather than a silent ranking. Named comp-closure as the identity + support-closure compiler; that tool was then used for the hardest read of this TO."
+    },
+    {
+      "tool": "comp-closure",
+      "invocation": "comp-closure compile etf-positioning-producer --out <scratch>/pre",
+      "result": "reach=PRESENCE_ONLY standing=CURRENT ambiguity=SINGLE_HOME equivalence=DIVERGENT, eq_deployed_commit=false on 2 of 2 members, note 'live CodeSha256 != artifact_sha256'. This is what exposed the stale source map. LIMIT, stated rather than glossed: it compares only against last_deployed_commit and HEAD, and the deployed package matched NEITHER, so it could report DIVERGENT but could not name the real vintage -- that needed a content sweep across history (deployed member sha256 -> git blob), which no comp-tool performs."
+    },
+    {
+      "tool": "raw aws / find / git, with rail markers",
+      "invocation": "Every raw inspection carried a '# rail-checked: <why no comp-tool fits>' marker per CLAUDE.md Rule 21 and the ANDREW-DIRECT bulletin of 2026-08-28 ~02:0xZ (relayed msg 11847).",
+      "result": "Four capabilities were load-bearing here and no comp-tool provides any of them: enumerating a Lambda package's zip members, reading an S3 object's user metadata (the key modules/yang-lambda/main.tf:39 plans against), enumerating a Lambda LAYER's contents, and resolving a deployed blob to its authoring commit by content. Named as a gap rather than worked around silently."
+    }
+  ]
+}

@@ -9,7 +9,33 @@
 <placement>LAPTOP (Rule 26).</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-21T19:55Z</issued>
-<status>ACTIVE</status>
+<status>complete -- ⭐ **CERTIFIED. THE CERTIFICATE EXISTS AND IS ON ORIGIN.** `cvoZ_ETFS_POSITIONING_TO1_TO2_TO3_TO5_CERTIFICATION_20260828.md` @`e3d86ad9d1`, verdict **CERTIFIED -- 7 PASS + 1 RETIRED-UNREACHABLE**. Located 15:1xZ by `3.0.0_SA_CVO~Z`; VERIFIED at this seat by containment against `origin/SITEZ` with a SOUND negative control (`origin/CLOUD` tip NOT contained, so the test demonstrably returns NO). ⛔ **THIS FACE PREVIOUSLY READ 'awaiting certification' AND WAS STALE -- the certificate POSTDATES it and nobody updated the face.** ROOT: the face and the certificate are TWO DURABLE RECORDS OF ONE FACT WITH NO NAMED PRIMARY -- the certifier writes one and cannot write the other, the issuer owns the face and has no trigger to return, so they diverge from minute one in the direction of 'outstanding'. Corrected by `2.0.0_SA_COO~Z` as ISSUER. ⚠ **BOUND, STATED BY ITS MEASURER AND NOT PAPERED OVER: this establishes A CERTIFICATE EXISTS for the criteria as they read AT CERTIFICATION TIME. It does NOT establish that no criterion was ADDED to this face afterwards -- that needs a per-face criterion-set diff, NOT RUN.**
+
+⚠ **THE ORIGINAL `<status>` CONTENT FOLLOWS, RESTORED VERBATIM.** `2.0.0_SA_COO~Z` replaced it wholesale at @4253643625 instead of appending, destroying evidence on seven faces (142 lines on one of them). Recovered from `4253643625^` and re-attached. **NOTHING BELOW THIS LINE IS NEW; NOTHING ABOVE IT WAS IN THE ORIGINAL.**
+
+queued -- for `3.0.0_SA_CVO~Z` CERTIFICATION. **NO EXECUTOR ACT IS PENDING AND NO SEAT IS NEEDED.**
+
+⛔ **`queued` IS NOT A DISCHARGE CLAIM.** The acceptance criteria on this TO were **NEVER CERTIFIED**,
+and this office will not buy a terminating register by asserting one. **The lead word says only what is
+true: the build is done in the world and the next act is a CERTIFICATION, which belongs to
+`3.0.0_SA_CVO~Z` and to no executor.**
+
+**RE-FACED 2026-08-28 ~04:0xZ by `2.0.0_SA_COO~Z` (issuer). WHY THE LEAD WORD CHANGED, AND IT IS A
+DEFECT THIS OFFICE ALREADY FIXED ONCE TONIGHT AND DID NOT CARRY ACROSS:** this face led with an emoji
+(or a bare word), so `to-check.py` -- which classifies on the FIRST TOKEN ONLY -- read it **`ACTIVE`**.
+⛔ **An `ACTIVE` face is an instruction to spend a seat**, and the seat it named is DEAD: `<issued_to>`
+carries a BASE serial (`0.4.0_DS_ClientPlatform` / `0.7.0_AE_CloudOps` / `0.4.0_DE_ClientPlatform`) and
+**no base serial is registered** -- only lettered lanes are live. **The same lead-word defect was fixed
+on `ETFS_POSITIONING.TO-4` earlier tonight and NOT applied to its four siblings.**
+
+⚠ **`<issued_to>` IS DELIBERATELY LEFT UNCHANGED.** It is the historical record of who executed this,
+and rewriting it would erase that. **It is NOT a live assignment and must not be read as one.**
+
+---
+
+**ORIGINAL STATUS, PRESERVED VERBATIM BELOW:**
+
+✅ **OBJECTIVE MET IN THE WORLD — the serving plane serves.** `platinum/etfs/positioning_data.json` served and MOVED 2026-08-27T13:01:25Z (128,122 B), i.e. the route carries live scheduled output. ⛔ **DISPOSITION SET BY THE ISSUING OFFICE 2026-08-28 ~02:0xZ on `1.0.0_SA_CTO~Z`'s per-face measurements (11743), CARRIED AS THEIRS AND LABELLED — I did not re-run them, and re-running the same instrument would be REPETITION, not corroboration.** ⚠ **THIS IS NOT AN AC-LEVEL CERTIFICATION:** the OBJECTIVE is met in the world; whether every acceptance criterion is discharged has NOT been taken by anyone and is `3.0.0_SA_CVO~Z`'s act. **What is settled is that this face is NOT WAITING ON A SEAT** — which is the claim that was manufacturing false dispatches all night.</status>
 <priority>P1 — SESSION PRIORITY (Andrew-direct 19:3xZ). ⛔ **This TO's Half 1 is the CRITICAL PATH JOIN: both DS (TO-1) and DE (TO-3) build against the contract you produce.** Ship Half 1 FIRST and ship it as a one-page contract — do not batch it behind IAM.</priority>
 <authority>PRD s.11.4(e) + s.11.1 (Models mode byte-identical) + s.11.5. CLAUDE.md Rule 17b (serving is its own tier), Rule 22a (verification layer), NEVER#3 (never-widen on served output).</authority>
 <proof_of_spec>

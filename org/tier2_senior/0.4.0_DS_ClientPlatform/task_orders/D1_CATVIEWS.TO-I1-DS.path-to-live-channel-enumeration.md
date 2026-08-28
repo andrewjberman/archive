@@ -5,7 +5,34 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform~T</issued_to>
 <issued_at>2026-08-26T21:1xZ</issued_at>
-<status>ACTIVE — and ⛔ **THIS TO'S FILED PROOF INSTANCE DOES NOT VALIDATE. DO NOT CLOSE ON IT.**
+<status>complete -- ⭐ **CERTIFIED. THE CERTIFICATE EXISTS AND IS ON ORIGIN.** `cvoZ_D1_CATVIEWS_TO_I1_DS_CERTIFICATION_20260828.md` @`82a54e1775`, verdict **CERTIFIED ON THE MERITS -- 3 PASS + 1 APPLIED-GATED**. Located 15:1xZ by `3.0.0_SA_CVO~Z`; VERIFIED at this seat by containment against `origin/SITEZ` with a SOUND negative control (`origin/CLOUD` tip NOT contained, so the test demonstrably returns NO). ⛔ **THIS FACE PREVIOUSLY READ 'awaiting certification' AND WAS STALE -- the certificate POSTDATES it and nobody updated the face.** ROOT: the face and the certificate are TWO DURABLE RECORDS OF ONE FACT WITH NO NAMED PRIMARY -- the certifier writes one and cannot write the other, the issuer owns the face and has no trigger to return, so they diverge from minute one in the direction of 'outstanding'. Corrected by `2.0.0_SA_COO~Z` as ISSUER. ⚠ **BOUND, STATED BY ITS MEASURER AND NOT PAPERED OVER: this establishes A CERTIFICATE EXISTS for the criteria as they read AT CERTIFICATION TIME. It does NOT establish that no criterion was ADDED to this face afterwards -- that needs a per-face criterion-set diff, NOT RUN.**
+
+⚠ **THE ORIGINAL `<status>` CONTENT FOLLOWS, RESTORED VERBATIM.** `2.0.0_SA_COO~Z` replaced it wholesale at @4253643625 instead of appending, destroying evidence on seven faces (142 lines on one of them). Recovered from `4253643625^` and re-attached. **NOTHING BELOW THIS LINE IS NEW; NOTHING ABOVE IT WAS IN THE ORIGINAL.**
+
+queued -- for `3.0.0_SA_CVO~Z` CERTIFICATION. **THE WORK IS DONE AND NO EXECUTOR ACT IS PENDING.**
+
+**RE-FACED 2026-08-28 ~04:3xZ by `2.0.0_SA_COO~Z` (issuer), on `0.4.0_DS_ClientPlatform~T`'s report (12676).**
+The re-seated lane ASSESSED the deliverable that nobody had read. **ALL FOUR CRITERION VERDICTS STAND:**
+`AC1` PASS (strengthened) - `AC2` PASS - `AC3` PASS - `AC4` **APPLIED-GATED**. Three defects found, all
+in SUPPORTING material, **none overturning a criterion**. Assessment:
+`0.4.0_DS_ClientPlatform~T/deliverables/D1_CATVIEWS.TO-I1-DS_ASSESSMENT_OF_THE_ENUMERATION_DELIVERABLE.md`
+@`123441797b`.
+
+*** IT IS CORROBORATION, NOT REPETITION, AND THAT IS WHY IT COUNTS:*** the predecessor's instrument was
+the DOWNLOADED ZIP; this seat assessed from the **BUILD-INPUT** side (`git show <ref>:build_package.py`
+-> AST `literal_eval` of `PACKAGE`), which **can and did disagree**. Positive AND negative controls on
+every read. **The predecessor's deliverable was NOT edited** -- the assessment is a separate artifact.
+
+**WHAT REMAINS IS A CERTIFICATION, WHICH BELONGS TO `3.0.0_SA_CVO~Z` AND TO NO EXECUTOR.**
+**Per `1.0.0_SA_CTO~Z`'s standing interim control: certify ON THE MERITS WITH THE DEFECT CITED.**
+A certification must read **"3 PASS + 1 APPLIED-GATED, instance INVALID on vocabulary grounds"**, never
+a bare 4/4 and never a FAIL.
+
+**EVERYTHING BELOW STILL BINDS -- the instance is CORRECTLY invalid and must NOT be edited into validity.**
+
+---
+
+**ORIGINAL STATUS, PRESERVED VERBATIM:** ACTIVE — and ⛔ **THIS TO'S FILED PROOF INSTANCE DOES NOT VALIDATE. DO NOT CLOSE ON IT.**
 
 **DISARM RECORDED 2026-08-27 ~19:1xZ by `2.0.0_SA_COO~Z`** (issuer, and the `disarm_owner` named on
 `D1_CATVIEWS-S11`). Surfaced by `0.4.0_DS_ClientPlatform~Z` at close-out; **I re-ran the checker at
@@ -69,10 +96,60 @@ neither `0.4.0_DS_ClientPlatform~Z` nor I assessed it. ⛔ **The evidence ARTIFA
 is a DIFFERENT OBJECT from the FINDING it carries**, and conflating them would be the error this note
 exists to prevent.
 
-**REMEDY IS NOT TAKEN AND IS NOT THIS NOTE.** Re-file, re-seat, or re-record the criteria is a
-seating/issuing decision that follows the D4/residue question already open at `1.0.0_SA_CTO~Z`. **The
-hazard is disarmed — a reader can no longer close this on refusing evidence — and DISARMED ≠
-REMEDIATED.**</status>
+**REMEDY IS NOT TAKEN AND IS NOT THIS NOTE.** The hazard is disarmed — a reader can no longer close
+this on refusing evidence — and DISARMED != REMEDIATED.
+
+⛔ **UPDATED 2026-08-28 ~03:5xZ by `2.0.0_SA_COO~Z` (issuer): THE REMEDY IS NOW HELD BY A NAMED
+RULING, NOT BY AN OPEN QUESTION.** This clause previously said the decision *"follows the D4/residue
+question already open at `1.0.0_SA_CTO~Z`"* — **that question has been answered and a reader chasing
+it would be chasing a closed one.**
+
+`1.0.0_SA_CTO~Z`, msg 12529: **NOBODY EDITS THE SCHEMA TONIGHT.** The vocabulary work — declaring
+each vocabulary's domain and RE-DERIVING its members — happens **after D1+D4**, per Andrew's pace
+instruction. ⭐ **The reasoning is that patching enum values chosen to unblock tonight's filings is
+exactly how the current holes were made**, and it never depended on who owned the file (`org/standards/**`
+is `ANY_EXEC`, measured with both controls — there is no ownership blocker, and its absence lifts
+an OWNERSHIP gate, not the SEQUENCING one).
+
+>> **SO THE INTERIM CONTROL IS THE END STATE FOR TONIGHT, AND IT IS DELIBERATE:** FILE THE TRUE
+   VALUES, ACCEPT THE `INVALID`, and **never alter evidence to satisfy the grammar.** `AC4`'s true
+   terminal status IS `APPLIED-GATED`; the schema cannot express it; **the instance is therefore
+   CORRECTLY invalid and must not be edited into validity.**
+
+⚠ **WHAT THIS DOES NOT SAY:** it does not close this TO, and it does not assess `~T`'s ~12KB
+enumeration deliverable, which **remains unassessed by anyone**. Lane `~T` is DEAD — confirmed
+2026-08-28 03:5xZ against `liveness.json` (`~F`, `~L`, `~Q` present; `~T` absent; last `~T` commit
+`2dd3c9d7ff`, 2026-08-26). `D1-i-1`'s discharge rests on this TO's FACE, not on the
+instance, and that was checked before this note was written.
+
+⛔⛔ **CORRECTED 2026-08-28 ~03:5xZ, SIX MINUTES AFTER I COMMITTED THE OPPOSITE.** The clause here
+read: *"Re-seating to assess it is an issuing decision DEFERRED with the vocabulary work, and it is
+NOT on D1's critical path."* **That is wrong on the part that matters, and `1.0.0_SA_CTO~Z` (12572)
+measured why.**
+
+>> **THE SCHEMA IS NOT THIS TO'S BLOCKER. THE SEAT IS, AND IT IS THE WHOLE BLOCKER.** The interim
+   control already covers the filing — FILE THE TRUE VALUES, ACCEPT THE `INVALID`, and
+   `3.0.0_SA_CVO~Z` certifies **on the merits with the defect cited**, the same disposition run for
+   `TO-6`/`TO-8`'s `cell_refs`. **So the vocabulary hold never touched this item and deferring the
+   re-seat behind it was my error, not a ruling.**
+
+⭐ **AND IT IS THE ONLY ITEM IN D1+D4 IN THIS CONDITION.** Every other open face is executing in a
+live lane, waiting on a clock, or waiting on a disposition. **This one was waiting on a person who
+does not exist.**
+
+⭐ **SEATED 2026-08-28 ~03:53Z by `0.0.0_AB_MSTR~Z`: `0.4.0_DS_ClientPlatform~T` IS LIVE (pid 30236),
+AND `<issued_to>` IS UNCHANGED AND CORRECT.** Rule 27 holds — `~L`, `~Q`, `~F` are live on other
+projects and this is a fourth.
+
+⛔ **MY SEAT ASK WAS FOR A FRESH LETTER `~Y` (msg 12577) AND `0.0.0_AB_MSTR~Z`'s CHOICE IS BETTER.**
+That seat had already re-seated `~T` four minutes before my ask landed. **Re-seating a dead lane on
+ITS OWN TO is CONTINUITY and needs no issuer act; seating `~Y` would have forced a re-address —
+a write that only exists because I picked a new name.** The `~Y` census was sound (0/0/0/absent,
+`~L` positive control) and it answered a question that did not need asking.
+⭐ **It is also this office's OWN prior ruling applied back to it** — *"the letter is cosmetic and a
+measured-clean pre-clearance beats a fresh name"* — and the same pattern that worked for `~L` on
+`ETFS_SATELLITES.TO-5-DS` and `~Q` on `D1_NAMEDISCOVERY`, neither of which needed a re-address.
+**NO `~Y` SPAWN. This TO is not re-addressed and does not need to be.**</status>
 
 <decomp_ref>
 workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — surface (i), cells

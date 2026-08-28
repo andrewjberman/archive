@@ -6,7 +6,207 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~Z</issued_to>
 <issued_at>2026-08-27T22:4xZ</issued_at>
-<status>ACTIVE</status>
+<status>ACTIVE -- **WAITING ON THE ~13:30Z SCHEDULED FIRE. NO BUILD WORK IS OUTSTANDING AND NO SEAT IS
+BLOCKED.** Face written 2026-08-28 ~05:1xZ by `2.0.0_SA_COO~Z` (issuer); it previously read a bare
+`ACTIVE`, which told a reader nothing about what remains or how to finish it.
+
+**MEASURED AT THE COMMITS, not taken from a report** -- `0.7.0_AE_CloudOps~Z` did this work before its
+session ended:
+```
+  19:13Z  b3bb7e760c  the mdpf-gold-lambda RE-CUT deployed at pin 14b077f559
+  21:13Z  ecd8bf438b  MDPF_GOLD_COMMIT corrected to the pin actually deployed  (ledger CLOSED 1c212ec471)
+  21:21Z  e43f37395c  AC5: ViewPlaneError's five-peer refusal EXERCISED on the DEPLOYED bytes
+  22:43Z  29bbc39950  AC4: the PRE-FIRE BASELINE captured -- "because AC4's 'before' is PERISHABLE"
+  22:48Z  c4bb5d628b  AC4: the SCORER for that baseline, SELF-TEST-GATED and exercised
+  00:08Z  89c6409419  AC1: the 13:30Z trigger measured WIRED + ENABLED + PERMITTED, BOTH EventBridge planes
+```
+*** THAT LANE ALREADY SOLVED THE HARD HALF WITHOUT BEING ASKED.*** `AC4` compares BEFORE against AFTER,
+and the "before" **stops existing the moment the fire runs.** It captured the baseline and built a
+scorer to read it. **A successor does not need that seat's context -- it needs to RUN the scorer.**
+
+**WHAT REMAINS: all six criteria score AGAINST THE SERVED ARTIFACT, which does not exist until the
+~13:30Z fire** -- `cron(30 13 * * ? *)` UTC -> `mdpf-gold-lambda`, measured live and ENABLED. **No proof
+instance is filed yet and that is CORRECT, not an omission.**
+
+⛔ **THE STANDING PROHIBITION, RESTATED BECAUSE IT IS THE ONE THING THAT CANNOT BE UNDONE: NO AD-HOC
+`mdpf` GOLD RUN BEFORE 13:30Z.** It writes a REAL artifact at the REAL key and **DESTROYS the
+time-of-day discriminator `AC1` exists to produce.** `AC1` scores on the SCHEDULED fire ONLY.
+
+⚠ **OWNER STATE: `0.7.0_AE_CloudOps~Z` is DEAF (absent from `liveness.json`).** ⛔ **This is NOT a
+respawn ask** -- the fire is hours out and a lane seated now to idle until 13:30Z is the same exposure
+at higher cost. **Whoever holds this after the fire runs the scorer and files; the baseline and the
+scorer are committed and outlive the session that made them.** ⚠ **DISARMED != REMEDIATED: if nobody is
+seated after 13:30Z the fire is unobserved until someone returns.**</status>
+
+## ⛔⛔ {OBSERVATION, ARMED} -> DISARMED SAME-TURN. THE SERVED PLANE STILL CARRIES `Alternatives`, WHICH ANDREW REMOVED FROM L0 ON 08-27.
+
+**Raised by `1.0.0_SA_CTO~Z` (msg 13168) while verifying the 13:50:50Z write. DISARMING OWNER:
+`2.0.0_SA_COO~Z` (issuer). This block IS the disarm. ⛔ DISARMED != REMEDIATED.**
+
+**INDEPENDENTLY VERIFIED on the served cottonwood artifact by `2.0.0_SA_COO~Z`:**
+```
+view_plane.peers     ['Models', 'SMA', 'Alternatives', 'Client']    <- Alternatives IS declared
+view_plane.excluded  ['Insurance']  ONLY
+nodes.Alternatives   {aum 0.0, display_label 'Alternatives', members []}
+CONTROL: Insurance IS in excluded -- the exclusion mechanism WORKS and is in use two keys away.
+```
+`CategoryViewTree.tsx:348` renders `block.view_plane.peers`, and `:45` states a node is deliberately
+**"never silently dropped by a display constant"**. **So the page renders an EMPTY $0 `Alternatives`
+card on all four scopes** -- against that component's own *true-zero -> no card, never an empty one*.
+
+**ANDREW-DIRECT 2026-08-27 ~21:1xZ, VERBATIM (his phrasing is the ruling):**
+> *"We can just get rid of Alternatives at L0, they are differnet things but if its confusing easier
+> to just get rid of it"*
+Record: `org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/ANDREW_DIRECT_20260827_REMOVE_ALTERNATIVES_FROM_L0.md`
+
+### ⛔ THE OWNER WAS NAMED IN THE RECORD ITSELF, AND THE ACT WAS NEVER CUT -- THAT IS MINE
+That record's own table reads:
+```
+registry / VIEW_TREE  Alternatives leaves the declared L0 node set
+                      DS-class -- data/mdpf/scripts/gold/mdpf_category_registry.py. NOT this lane.
+smoke fixture         node + peer entry removed        this lane, this commit
+```
+`0.4.0_DE_ClientPlatform~Z` did its half (`77d1bbce`, the fixture) **and correctly flagged the other
+half as DS-class and not its own.** ⛔ **THE DS-CLASS TO WAS NEVER CUT, AND CUTTING IT IS THE ISSUER'S
+JOB. THAT IS `2.0.0_SA_COO~Z`.** This is not a seam inside nobody's scope -- the scope was named in
+writing and the issuer did not act on it.
+⚠ **AND IT SURVIVED A SMOKE TEST BECAUSE THE SMOKE TEST RAN ON THE FIXTURE, WHICH HAD THE RULING.**
+The half that was fixed is the half the test reads.
+
+### ⛔ THE REMEDY -- CORRECTED. IT IS **NOT** THE INSURANCE PATTERN, AND I SPECIFIED IT WRONG.
+**I first wrote "moves `peers` -> `excluded`, exactly as `Insurance`, display-only, node UNCHANGED".
+That is the WRONG MECHANISM, caught by `1.0.0_SA_CTO~Z` (13174 s.3).** ⚠ **I QUOTED THE CORRECT
+TREATMENT AND THEN SPECIFIED A DIFFERENT ONE, ONE PARAGRAPH LATER, FROM THE SAME TABLE I HAD JUST
+PASTED.** The 08-27 record says:
+```
+registry / VIEW_TREE  "Alternatives LEAVES THE DECLARED L0 NODE SET"
+                      DS-class -- data/mdpf/scripts/gold/mdpf_category_registry.py
+emitted block         view_plane.peers stops carrying it        FOLLOWS the registry
+renderer              NO CHANGE
+smoke fixture         NODE + peer entry removed                 (DE lane, done @77d1bbce)
+```
+>> **TWO EXCLUSIONS, TWO MECHANISMS, BOTH ANDREW'S. DO NOT COLLAPSE THEM.**
+```
+Insurance      STAYS in the node set; DISPLAY-ONLY exclusion; node, members and gold
+               partition share explicitly UNCHANGED.
+Alternatives   LEAVES the declared L0 node set at the REGISTRY. peers stops carrying it as a
+               CONSEQUENCE, not as the act. The node goes too -- the fixture removed node + peer.
+```
+⛔ Still **PRODUCER-SIDE, NOT PORTAL-SIDE** -- a portal filter is precisely the hardcoded display
+constant `CategoryViewTree.tsx:45` forbids. That half of my line was right; the mechanism was not.
+⚠ **DATA COST IS NIL EITHER WAY TODAY** (`Alternatives` is `aum 0.0, members 0` on all four served
+scopes) -- **which is exactly why getting the mechanism right matters here rather than later: nothing
+in the numbers would have caught it.**
+
+### ⭐ SOVEREIGN CONFIRMATION FROM HIS OWN EYE, ~14:0xZ (relayed verbatim by `1.0.0_SA_CTO~Z`, 13174)
+> *"Just checked the dashboard, we actually dont even need Alternatives either. It's really just Models
+> SMAs and Client."*
+
+**L0 = `Models` / `SMA` / `Client`.** ⚠ **He reached this from the RENDERED PAGE, independently, ~7
+minutes after the item was filed and WITHOUT having seen it** -- *"just checked the dashboard"*.
+**The empty $0 card was visible enough to draw sovereign comment on first look: that is the cost of the
+seam, measured. It reached his eye before it reached a fix.**
+⛔ **HIS NEW SENTENCE CONFIRMS THE DECISION, NOT THE TREATMENT.** It must not be read as re-specifying
+the mechanism, nor as widening or narrowing the 08-27 scope. Verbatim relay, not adjudication.
+⛔ **NOT IMPLEMENTED HERE:** DS-class file, no live DS lane, and **NO AD-HOC PRODUCER RUN** -- the
+next scheduled write is 13:50:50Z tomorrow. Surfaced, owner named, remedy specified, sovereign told.
+
+## ⭐⭐ `TP1AE-AC1` DISCHARGES. MEASURED 2026-08-28T13:52:37Z by `2.0.0_SA_COO~Z`.
+
+AC1 requires `category_views` on the SERVED PLANE for **at least one firm**, from a **SCHEDULED** run,
+with **key, bucket, byte size and LastModified recorded**. All four, for **FOUR firms**:
+```
+BUCKET  opal-data-portal-v2   (PLATINUM_BUCKET, mdpf-daily-trigger:172 -- read, not guessed)
+  2026-08-28T13:50:50Z   4339 B   platinum/mdpf/49financial/category-views.json
+  2026-08-28T13:50:50Z   5116 B   platinum/mdpf/cottonwood/category-views.json
+  2026-08-28T13:50:51Z   4442 B   platinum/mdpf/global/category-views.json
+  2026-08-28T13:50:52Z   4331 B   platinum/mdpf/inflection/category-views.json
+```
+**PROVENANCE = SCHEDULED, and it is not inferred from the clock.** ⭐ **THE ARTIFACT NAMES ITS OWN
+WRITER:**
+```
+_provenance.written_by  'opal-assets-mdpf-portal-publisher'      <- the writer, IN the artifact
+_provenance.written_at  '2026-08-28T13:50:49Z'
+as_of                   '2026-08-27'      source_vintages  cottonwood/category-views: '2026-08-27'
+```
+**13:50:50Z matches the six-day scheduled cadence to the second; ad-hoc writes on this prefix land at
+arbitrary times (16:28, 15:42, 19:46).** The timestamp IS the scheduled-vs-adhoc discriminator this TO
+exists to protect, and the `written_by` field makes it a stated claim rather than an inference.
+
+**CONTENT IS REAL, not an empty shell at a plausible size** -- 5 nodes carrying Andrew's own rulings:
+```
+Client  aum 294,905,777.43 · display_l1_axis 'fee_taking'
+Models  aum 186,785,080.61 · 2 children
+SMA     aum 0.0  members_present False, with absent_reason: a TRUE ZERO (Andrew-direct 2026-08-25)
+Insurance  view_plane_excluded True, quoting Andrew-direct 2026-08-24 verbatim
+Alternatives  aum 0.0
+```
+⛔ **THIS DISCHARGES `TP1AE-AC1` ONLY.** AC2-AC6 are separate criteria and no claim is made about
+them here.
+
+## ⛔⛔⛔ CORRECTION TO THE SECTION BELOW, BY ITS OWN AUTHOR (`2.0.0_SA_COO~Z`, 13:3xZ)
+
+**I wrote below that "`TP1AE-AC1` LIVES HERE" at the 13:30Z gold floor and that AC1 "scores the GOLD
+floor". READ AC1'S OWN TEXT (`:262`): *"`category_views` EXISTS ON THE SERVED PLANE for at least one
+firm, emitted by a SCHEDULED producer run."*** ⛔ **AC1 SCORES THE SERVED PLANE, NOT GOLD.**
+```
+so AC1 discharges when platinum/mdpf/{firm}/category-views.json EXISTS
+   -> written by the 13:50:50Z PUBLISHER
+   -> THE SAME CLOCK AS ANDREW'S CARDS, not twenty minutes earlier
+13:30Z mdpf-scheduled-floor is NECESSARY (it produces the input) and NOT SUFFICIENT (it is not
+   the served plane AC1 names).
+```
+⚠ **I HAVE NOW MIS-STATED THIS CLOCK TWICE, IN OPPOSITE DIRECTIONS** -- first conflating 13:30Z with
+Andrew's cards, then separating AC1 from the cards when AC1 rides the SAME write. **Both errors came
+from reasoning about the SCHEDULE instead of reading the CRITERION.** The criterion names an artifact;
+the artifact names its writer; the writer has the clock. That order is the fix.
+
+**MEASURED 13:33:56Z, the AC1 probe itself:**
+```
+platinum/mdpf/**/category-views.json          0 objects     <- correct and EXPECTED at 13:33Z
+POSITIVE CONTROL, same prefix, same probe:    platinum/mdpf/cottonwood/{account-distribution,
+  account-units,aggregate-aua-timeseries,aum-metrics}.json  4 objects
+>> THE PROBE WORKS AND THE ABSENCE IS REAL, not a broken read. Bucket opal-data-portal-v2
+   (PLATINUM_BUCKET, mdpf-daily-trigger:172).
+```
+⭐ **RE-RUN THAT EXACT PROBE AFTER ~13:51Z.** AC1 also requires key, bucket, byte size and
+`LastModified` RECORDED, and that the run be SCHEDULED rather than ad-hoc.
+
+## ⛔⛔ 13:30Z IS `TP1AE-AC1`'s GATE. IT IS **NOT** WHEN ANDREW'S CARDS APPEAR.
+
+**Found by `1.0.0_SA_CTO~Z` (msg 13141) 2026-08-28 12:3xZ. Recorded here by `2.0.0_SA_COO~Z`, the
+ISSUER OF THIS TO AND THE SEAT THAT MADE THE SAME CONFLATION IN WRITING TO ANDREW.** The mdpf chain is
+**FOUR staged schedules**, not one fire -- all on EventBridge **Scheduler**, all `TZ=UTC` explicitly
+read (a local-time reading here is hours wrong):
+```
+12:52Z  mdpf-feeder-backstop-daily              -> mdpf-feeder-trigger
+13:30Z  mdpf-scheduled-floor                    -> mdpf-gold-lambda            <- TP1AE-AC1 LIVES HERE
+13:40Z  mdpf-accrual-bridge-daily               -> mdpf-accrual-trigger
+13:50Z  opal-assets-mdpf-portal-publisher-daily -> opal-assets-mdpf-portal-publisher   <- THE SERVED WRITE
+```
+**MEASURED, not inferred from the names** -- version history of `platinum/mdpf/cottonwood/aum-metrics.json`
+with a same-prefix control on `global/`: **`13:50:50Z`, TO THE SECOND, SIX CONSECUTIVE DAYS**
+(08-22 through 08-27).
+
+>> ⛔ **`TP1AE-AC1` DISCHARGING AT 13:30Z DOES NOT MEAN THE CARDS ARE VISIBLE.** AC1 scores the GOLD
+   floor. The artifact the page fetches -- `/api/general/mdpf/{firm}/category-views.json` ->
+   `platinum/mdpf/{firm}/category-views.json` -- is written **twenty minutes later, by a DIFFERENT
+   Lambda on a DIFFERENT schedule.**
+>> ⛔ **A LOOK AT 13:35Z SEES NOTHING, AND NOTHING IS WRONG.** That is a wasted sovereign look
+   manufactured by a stage nobody had opened.
+
+⚠ **INSTRUMENT TRAP ON THAT MEASUREMENT, worth more than the number:** `head-object` alone returns the
+LATEST version, which on this key is an **AD-HOC write at 16:28Z** -- it would have said "the prefix is
+written at 16:28." **The version LIST exposes the cadence; the head is ONE SAMPLE of it, and here the
+newest sample is the least representative.** Ad-hoc writes are ROUTINE on this prefix, which is exactly
+why the scheduled-vs-adhoc discriminator this TO protects matters.
+
+⚠ **THE BOUND, STATED BY ITS AUTHOR:** `category-views.json` **does not exist yet**, so its own
+history cannot be read -- only its four siblings at the same prefix, which are unanimous. The claim is
+**the PREFIX is written by the 13:50Z publisher**: a strong same-writer inference, NOT a direct
+measurement of the new key. ⭐ **If the key appears between 13:30 and 13:50 that FALSIFIES this and is
+good news, not a problem.**
+
 
 <decomp_ref>
 workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — stage-3 decomp for

@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_SATELLITES.TO-8-DE",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ETFS_SATELLITES.TO-8-DE.consumer-seam-fetch-the-registry.md",
+    "group": "D",
+    "vintage_commit": "416ed6e459"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-satellites/20260827T160438Z/DECOMP.md",
+    "vintage_commit": "e704e760f1",
+    "to_ref": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ETFS_SATELLITES.TO-8-DE.consumer-seam-fetch-the-registry.md"
+  },
+  "assignee": "0.4.0_DE_ClientPlatform~S",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/api/endpoints/satelliteRegistry.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "d04c1599",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW FILE -- the fetch path that did not exist. Reads /api/scoped/satellites/registry.json (the DEDICATED prefix at shared-advisor-router/index.mjs:95, NOT the advisor-intelligence path the wire shape was relayed as). RAISES on a non-object body, on `books` absent-or-not-an-array, and on a null `as_of`, so a malformed payload cannot impersonate a served-empty one. ON ORIGIN: origin/DEV = 8c2ba9bb, is-ancestor = YES with a positive control, measured 0331Z after 0.0.0_AB_MSTR~Z landed the portal DEV push. It read LOCAL for the ~70 minutes before that, and this line was corrected rather than left. AMENDMENT 2026-08-28T04:2xZ (original text above kept verbatim): 'ON ORIGIN' IS A BRANCH STATE, NOT A DELIVERY, AND THE WORDING INVITED THE MISREAD. Measured at source after 1.0.0_SA_CTO~Z raised it: portal/.github/workflows/ci.yml triggers on push:[DEV] and its ONLY upload is actions/upload-artifact -- no `aws s3 sync`, no CloudFront invalidation. deploy.yml triggers on push:[PROD] and is the ONLY workflow that writes the served bucket. THERE IS NO DEV SITE. So this artifact is on the branch and SERVED NOWHERE; the deployed_state enum COMMITTED-NOT-DEPLOY-SCOPE was already correct and is unchanged."
+    },
+    {
+      "path_or_key": "portal/src/pages/Positioning/Positioning.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "d04c1599",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Line 280 passes the FETCHED registry books to satellitesToPositioningShape -- previously called with ONE argument, so the second parameter always fell back to the compile-time SATELLITE_REGISTRY constant, which ships EMPTY on purpose. Adds the SatelliteNotice axis (a single derived value, not a stack of && blocks) so the four states are mutually exclusive by construction."
+    },
+    {
+      "path_or_key": "portal/src/pages/Positioning/shared/satelliteSet.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "d04c1599",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "RETIRES SATELLITE_PENDING_NOTICE. Its text ('the registry has not been published yet') had gone false in both halves: the registry IS published (9 books, as_of 2026-08-27) and a fetch can now FAIL, which that copy would have described as an unpublished registry -- the precise mis-report the seam exists to prevent."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T8DE-AC1",
+      "criterion_verbatim": "The fetched registry reaches the adapter. Positioning.tsx:225 passes it; cite file:line @ <commit-ish>. The MODELS and ETFS paths are BYTE-UNCHANGED -- show the diff touches neither.",
+      "method": "diff",
+      "invocation": "git diff -- src/pages/Positioning/Positioning.tsx | grep '^-' ; node scripts/ui-smoke.mjs positioning <out.png> --port 5175 --fixtures fx-populated.json   (models mode, NO --click)",
+      "output_evidence": "Positioning.tsx:280 @d04c1599 passes `satelliteRegistry?.books ?? []`. DID-NOT-MOVE AT TWO LAYERS WITH DIFFERENT INSTRUMENTS: (1) every removed line in the diff is satellites-only, and the sole appearance of `positioningData` is as an ARGUMENT to the satellites adapter; (2) at the RENDER layer, a models-mode capture matched 1 of 2 fixtures -- the registry was NEVER REQUESTED, because `enabled: isSatellites` gates the query. Layer (2) is the stronger one: a diff shows what I did not type, a render shows what the running code did not do.",
+      "denominator": "Positioning.tsx removed lines: 17, of which satellites-only: 17 of 17. Fixtures declared in the models render: 2; matched: 1.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T8DE-AC2",
+      "criterion_verbatim": "A FETCH FAILURE IS NOT AN EMPTY REGISTRY -- DISTINGUISH THEM AT THE SEAM. Three states must be separable and each must be exhibited: served-empty (a valid 200, renders 'no satellites'), fetch failed (renders an error/unknown state, NEVER 'no satellites'), served-populated.",
+      "method": "manual_read_with_citation",
+      "invocation": "node scripts/ui-smoke.mjs positioning <out>.png --port 5175 --fixtures fx-{populated,empty,failed}.json --click Satellites ; sha256sum on the three PNGs",
+      "output_evidence": "THREE STATES EXHIBITED AND SEPARATED BY HASH, not by my reading of the images: populated cf9e542541dddd2e (9 real books) / empty e02b1764dfb1fd5b (blue 'No satellites to show') / failed 92225d65f302069f (red 'could not be loaded'). MECHANISM: the states are separated AT THE READ SEAM where the difference is still visible -- the fetcher raises, so anything reaching the adapter as [] is a SERVED empty; the render then selects its copy from the QUERY STATUS and never from the emptiness, which cannot tell the two apart.",
+      "denominator": "3 states declared by the criterion, 3 exhibited, 3 distinct sha256.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T8DE-AC3",
+      "criterion_verbatim": "PUBLISH EMPTY, NEVER DELETE -- honoured on the consumer side. An empty books array is a VALID SERVED STATE meaning 'no satellites today', not an error and NOT a reason to fall back to anything. There is no fallback beneath the producer since @24a8435642; do not add one in the client.",
+      "method": "manual_read_with_citation",
+      "invocation": "read of satelliteRegistry.ts and Positioning.tsx @d04c1599",
+      "output_evidence": "No fallback beneath the read. `?? []` at the call site is 'nothing fetched yet' (loading, or the query disabled in another mode), NOT a fallback -- whether an empty set means 'no satellites' or 'the read failed' is decided by the QUERY STATUS. And the axis FAILS TOWARD 'could not load': an UNEXPLAINED absence (settled, not errored, no data) is deliberately read as fetch-failed rather than as an empty registry, because of the two things it could mean only one is safe to assert.",
+      "denominator": "Fallback paths added beneath the producer: 0. Call sites passing a fetched registry: 1 of 1.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T8DE-AC4",
+      "criterion_verbatim": "as_of NON-NULL ALWAYS, including on the empty set -- a null RAISES. The adapter unwraps .books from { books: SatelliteBook[], as_of }; SatelliteBook.code is the CANONICAL NAME verbatim.",
+      "method": "test_suite",
+      "invocation": "node scripts/ui-smoke.mjs positioning t9-asofnull.png --port 5175 --fixtures fx-asofnull.json --click Satellites   (fixture: as_of null, books = the real NINE)",
+      "output_evidence": "THE RAISE FIRES, AND THE TEST DISCRIMINATES IN BOTH DIRECTIONS. The fixture carries a null as_of together with all NINE VALID BOOKS. WITHOUT the raise it is byte-indistinguishable from `populated`; WITH it, byte-IDENTICAL to a transport failure -- sha256 92225d65f302069f == the fetch-failed render, and distinct from both empty and populated. That is the correct answer, because a null as_of and a dead route are both 'could not be loaded'. No code canonicalization is applied to `code` (canonicalizeCodeKeys rewrites LEGACY MODEL codes and would silently rename a satellite).",
+      "denominator": "4 render states compared by sha256; 3 distinct; the 1 collision is failed==asofnull and is the intended one.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T8DE-AC5",
+      "criterion_verbatim": "RENDERED, NOT GREPPED. Verify with a read screenshot (/frontend-dev), not a static check. The canvas is SILVER: light text or ghost-white buttons outside a dark Panel are the #1 recurring portal defect, and a grep cannot see contrast. Show the satellites mode rendering real books.",
+      "method": "manual_read_with_citation",
+      "invocation": "node scripts/ui-smoke.mjs positioning <out>.png --port 5175 --fixtures <fx>.json --click Satellites  (5 captures, each READ)",
+      "output_evidence": "FIVE SCREENSHOTS READ, banked at deliverables/deS_ETFS_SATELLITES_TO8_consumer_seam_20260828/. Satellites mode renders the NINE REAL BOOKS from the served artifact with a treemap of real tickers; Fixed Income 82.63 + Equity 17.37 = GRAND TOTAL 100.00, matching the summary bar 82.6/17.4 for Opal Satellite 15. CANVAS LAW HOLDS: every notice is dark text on a light tint, all content sits inside dark Panels, no light text or ghost-white fill on the silver canvas. INDEPENDENT ARITHMETIC CHECK on a second instrument: each 100%-single-constituent satellite reproduces its model book exactly (15=ST=82.6/17.4, 60=INT=32.8/67.2, 80=LT=12.7/87.3, 90=ULT=8.1/91.9).",
+      "denominator": "5 screenshots captured, 5 read. Books rendered: 9 of 9 in the served registry.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO, AND THEY TEST DIFFERENT THINGS. (1) TYPECHECKER: a deliberate `const __probe: number = \"not a number\"` planted in the NEW file gave TS2322 rc=2; the file was restored and verified byte-identical by `diff -q`, and the clean re-run gave rc=0. Without this the rc=0 is indistinguishable from a cached-skip, which is a live hazard here because `tsc -b` is a project-references build. (2) THE as_of-NULL FIXTURE IS THE STRONGER MUTANT AND IT IS A MUTATION OF THE INPUT, NOT THE CODE: it carries all NINE VALID BOOKS with a null as_of, so it could have failed in EITHER direction -- rendering as `populated` if the raise were absent, or as a failure if present. It renders byte-identical to a transport failure. A test that can only fail one way proves less than one that can fail two.",
+      "expected": "The assertion must FAIL against the mutated input/code and PASS against the true one. For the render set, a state that cannot be told from its neighbour by hash is an assertion that was never tested.",
+      "observed": "FIRED. The planted TS2322 gave rc=2 and named the new file; the restore was verified byte-identical by `diff -q` and the clean re-run gave rc=0. The as_of-null input-mutant rendered sha256 92225d65f302069f -- byte-identical to the fetch-failed render and DISTINCT from populated cf9e542541dddd2e, so it discriminated in both available directions.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The four render states were captured on separate runs of the same instrument against fixed fixtures and compared by sha256; the failed/as_of-null pair reproduced byte-identical hashes across independent invocations, and the other states reproduced distinct ones. The served-artifact comparison is a sha256 equality between the S3 object body and the route response, not a size or status-code inference.",
+      "observed": "STABLE. Four render states captured on separate invocations against fixed fixtures; failed and as_of-null reproduced identical sha256 across independent runs, the others reproduced mutually distinct ones. The served-vs-object comparison is a sha256 equality, not a size or status-code inference.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The scoped satellites ROUTE and its deploy",
+      "reason": "ETFS_SATELLITES.TO-7-AE (0.7.0_AE_CloudOps~S) and POSN_TENANCY.TO-4-AE. Cross-gated deliberately: bundled into one lane you get a route with nothing reading it or a reader with no route, and neither failure announces itself. This TO closes the CONSUMER half of SAT-a-4; the cell is not discharged until the serving half lands."
+    },
+    {
+      "item": "Removing the adapter's default second parameter",
+      "reason": "The ruled seam shape is USE the seam, do not redesign it. Removing a default changes the adapter's contract for every caller -- a contract act, not a seam act. Surfaced as a standing hazard instead (see surprises)."
+    },
+    {
+      "item": "The PROD promote",
+      "reason": "DT lane, Rule 19 / SAT-f-3, and held at Andrew's word. Not this lane's and not a condition of this TO."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / INERT -- THE ADAPTER'S SECOND PARAMETER KEEPS ITS DEFAULT (= SATELLITE_REGISTRY, the empty constant). A NEW call site that omits the registry silently reproduces the EXACT defect this TO fixed, and nothing fails: no compiler error, no runtime error, just a page rendering 'no satellites' while the producer runs correctly. THE FAILURE DIRECTION IS THE BAD ONE -- the omission is TYPED-SILENT and presents as the wrong-but-plausible reading this TO exists to eliminate. INERT because there is exactly one call site today and it is correct; it ARMS when a second appears. The remedy shape (make the parameter required, so omission becomes a COMPILE error) is named and NOT ruled -- it is a contract change spanning every caller, and picking it inside a wiring TO would be widening this lane's scope on its own authority.",
+    "BLOCKING / ARMED, disarmed by owner -- FOUND AS ARM 1 OF THIS SEAT'S OWN AUTH CONTROL, filed by 3.0.0_SA_CVO~Z as Z-S16. An `opal-capital` caller MUST supply ?firm= or the router 400s before resolving a bucket (index.mjs:227-241), while modeAccess.ts:118 puts INTERNAL_FIRM_ID in the satellites allowlist. So Opal staff -- including Andrew, whose smoke test is D4's completion bar -- SEE the Satellites pill and the fetch behind it returns 400. This seam handles it honestly (red 'could not be loaded', never 'no satellites'), so it is a product gap rather than a defect in this fix. Shape ruled by 1.0.0_SA_CTO~Z and remediated under ETFS_SATELLITES.TO-9-DE.",
+    "OBSERVATION -- THE RELAYED WIRE SHAPE WAS WRONG. The route path reached this seat as /api/scoped/advisor-intelligence/platinum/satellites/registry.json. shared-advisor-router/index.mjs:95 declares SATELLITES_PREFIX = '/api/scoped/satellites/', a DEDICATED prefix on a Rule 24(iii) intent-coherence ruling. Building against the relay would have stood up a SECOND ROUTE. Caught by reading the router source before wiring; 0.7.0_AE_CloudOps~S hit the same thing independently from the serving side. The correction is written into the new file's own header, so the next reader cannot repeat it -- a correction in an inbox reaches whoever was on the thread; a correction in the file reaches whoever opens the file."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-28/laneS_etfs_satellites_to8_consumer_seam_0145-0221Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"how do I grep the repo\" (org/XXX.md A.3 mandatory exercise leg)",
+      "result": "PASS -- a forwarder RAN and produced its own banner; 105 of 105 comp-tools resolve bare. Scored on OUTPUT rather than rc, because the rc does not discriminate match from no-match."
+    },
+    {
+      "tool": "comp-routes rewrites",
+      "invocation": "comp-routes rewrites | grep -i satellite",
+      "result": "PASS, and informative as a ZERO: no satellites rows on the DESIRED plane, which corroborated 'route committed but not deployed' from a second angle. The tool was reached because the rail gated a raw grep of the router source; its zero carries its own plane bound, which a raw grep's zero would not have."
+    },
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to ETFS_SATELLITES.TO-8-DE.consumer-seam-fetch-the-registry",
+      "result": "PASS -- session TO_ID set race-free, per-session file rather than the shared .agent_context."
+    }
+  ]
+}

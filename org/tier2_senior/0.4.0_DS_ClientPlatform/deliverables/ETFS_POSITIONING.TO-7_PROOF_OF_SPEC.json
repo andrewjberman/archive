@@ -1,0 +1,167 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "POS-TO7-AC1",
+      "criterion_verbatim": "Each book resolves and renders its OWN latest available holdings, with its own data_as_of. AND THAT DATE IS READ FROM THE ROWS, NEVER DERIVED FROM THE PARTITION NAME.",
+      "denominator": "39 assertions in this suite, 0 FAIL. T6 = 6 assertions over 4 funds x 5 candidate partitions; T1 = 4 assertions.",
+      "invocation": "cd data/etfs/scripts/gold && PYTHONPATH=\"<root>;<root>/infra/aws/lambda/v2_portal/_shared\" python test_etf_positioning_per_fund_asof.py  (T1, T6)",
+      "method": "test_suite",
+      "output_evidence": "T6 exercises load_holdings_per_fund with an INJECTED partition set and reader, so the real walk runs offline: resolved_from={DIVZ:2026-08-21, IDVZ:2026-08-21, PFDE:2026-08-24, PFOE:2026-08-24}; stepped_back=[DIVZ,IDVZ]; keys actually read = ['2026-08-24.parquet','2026-08-21.parquet']. T1 proves the date is ROW-SOURCED: rows stamped 08-21 inside an 08-24 run yield data_as_of=2026-08-21, while a fund whose rows carry the run date still yields the run date (so the assertion is not passing by always returning something earlier).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "POS-TO7-AC2",
+      "criterion_verbatim": "The global selector is UNCHANGED in behaviour for funds that already worked. PFDE/PFOE resolve to exactly what they resolve to today -- prove it, do not assert it.",
+      "denominator": "29 fields compared per book x 4 books x 2 as-ofs = 232 field comparisons; holding fingerprints order-sensitive over ticker + weight + 1D/1M/1Y returns, 169 rows per as-of.",
+      "invocation": "BEFORE captured at HEAD dd75f6bd64 and AFTER captured post-edit, both running the REAL build_tables against CACHED byte-identical real inputs (silver holdings/netassets + bbg characteristics/fund_daily + assembled history) for as_of 2026-08-26 and 2026-08-24; then a field-by-field and holding-fingerprint diff.",
+      "method": "diff",
+      "output_evidence": "as_of=2026-08-26: ALL FOUR books 0 fields moved, holdings fingerprints IDENTICAL. as_of=2026-08-24: PFDE 0 moved / 90 rows IDENTICAL, PFOE 0 moved / 24 rows IDENTICAL; only DIVZ and IDVZ moved (data_as_of 2026-08-24 -> 2026-08-21, prior_date 08-21 -> 08-20), which is the defect being corrected. The only new key anywhere is as_of_basis. Structurally reinforced at T6: the walk STARTS at the global as-of, so a fund with rows there is taken from there on the first candidate and cannot have moved.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "POS-TO7-AC3",
+      "criterion_verbatim": "The artifact carries data_as_of PER BOOK and the contract records that it may differ across books in one payload.",
+      "denominator": "5 assertions in T7; 4 books in the document.",
+      "invocation": "test_etf_positioning_per_fund_asof.py T7 (build_document over a divergent book frame); contract half recorded in org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ETFS_POSITIONING_TO-7_ARTIFACT_CONTRACT_DELTA.md",
+      "method": "test_suite",
+      "output_evidence": "portfolios.DIVZ.data_as_of='2026-08-21' and portfolios.PFDE.data_as_of='2026-08-24' in ONE served document; data_as_of_spread=['2026-08-21','2026-08-24']; shape_check returned 0 problems. The pre-change publisher would have RAISED on this exact input (etf_positioning_publisher.py:403-404 at dd75f6bd64), so the criterion was previously unreachable, not merely unimplemented.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "POS-TO7-AC4",
+      "criterion_verbatim": "A BOOK-LEVEL as-of is DISPLAYED beside each book. The page-level useYangDataAsOf('positioning', ...) is the wrong grain and must not be stretched to carry it.",
+      "denominator": "4 ETF books in the exercised payload, 4 header cells rendered, 4 dates read off the image; 3 DISTINCT vintage states among them (2026-08-24 x2, 2026-08-21 x1, absent x1). 1 rendered exhibit at 1440x900 fullPage, READ by the filing seat.",
+      "invocation": "node scripts/ui-smoke.mjs positioning <out>.png --port 5185 --fixtures ac4_etf_fixture.json --click 'ETFs'   (portal @46f3863e)",
+      "method": "live_read",
+      "output_evidence": "BUILT AT PositioningSummary.tsx:1219, the per-book header row -- the one place every book is on screen at once, which is what 'beside EACH book' requires. Gated by a new mode-total PER_BOOK_AS_OF Record<PositioningMode, boolean> {models:false, etfs:true, satellites:false} in bookSet.ts. RENDERED READ: DIVZ 'August 21, 2026' | IDVZ 'Date unavailable' | PFDE 'August 24, 2026' | PFOE 'August 24, 2026'. That is the render a single global as-of STRUCTURALLY CANNOT produce, which is this TO's whole argument, on screen. WHY THE HOOK WAS NOT REUSED (rung 2 requires the positive form): useYangDataAsOf registers ONE date per YangDataSource into a central singleton via registerYangTimestamp (useDataSource.ts:61-80), keyed here on the single string 'positioning'. Registering a second book's date OVERWRITES the first -- the hook is STRUCTURALLY INCAPABLE of carrying four dates, not merely a poor fit. BUILD LADDER RUNG 2: no new component. src/components/DataAsOf.tsx already existed and already takes a per-instance `date` prop. AND THE CHOICE INSIDE THAT REUSE IS THE LOAD-BEARING PART: DataAsOf, NOT its DataAsOfCompact sibling, BECAUSE Compact returns null on a falsy date. A book with no vintage would then render NOTHING -- visually identical to a book still loading, and one step from a reader assuming it shares its neighbour's date. That is AC6's shape appearing in a sibling component, so the absent case is LABELLED ('Date unavailable') rather than silent. IDVZ in the exhibit is that case. SCOPE BOUND, STATED: the dates in this exhibit come from a FIXTURE. The producer does not emit per-book data_as_of yet (this TO's own AC7 measures gold writing the RUN's as_of, never the row's), so against today's real artifact every ETF book renders 'Date unavailable'. A fixtured render proves THE SURFACE DISPLAYS a per-book date and can NEVER prove THE PRODUCER EMITS one. Those are two claims; only AC3 discharges the second. FILED 2026-08-28 by 0.4.0_DE_ClientPlatform~C (the DE half), into the EXISTING instance at 2.0.0_SA_COO~Z's direction (msg 12900). Code: portal 46f3863e on DEV. BRANCH STATE, NOT SERVED -- there is no DEV site; only the PROD workflow publishes and that promote is DT-lane and held at Andrew's word.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "POS-TO7-AC5",
+      "criterion_verbatim": "ETFS-f-3 holds: Models mode BYTE-IDENTICAL. The isEtfs ? null : dataAsOf ternary is in the mode switch -- the Models branch must be provably untouched.",
+      "denominator": "2 full-page Models-mode renders compared byte-for-byte at ONE base (portal 5a4349a5), plus 1 mutant control. 89082 B each.",
+      "invocation": "node scripts/ui-smoke.mjs positioning <out>.png --port 5185, run once with the change reverted out of the working tree and once with it restored; sha256 compared.",
+      "method": "diff",
+      "output_evidence": "BASE (change out) sha256 73373c176e581bfb / 89082 B; WITH CHANGE sha256 73373c176e581bfb / 89082 B -- BYTE-IDENTICAL. CONTROL RUN FIRST, so the comparison was shown able to fail before its pass was cited: PER_BOOK_AS_OF.models flipped to true gives sha256 1e84042df9f22e4c / 92818 B -- DIFFERS. The instrument therefore detects a change to exactly this surface. BYTE-IDENTITY IS BY CONSTRUCTION, NOT BY CARE: the models arm of the gate emits the existing className string character for character, so the false path is not a re-derivation of today's markup -- it IS today's markup. A total Record was chosen over a boolean ternary precisely so a future mode cannot inherit an arm, which is the defect 7ebe38b0 removed from this page. THE CITED TERNARY WAS NOT USED AS THE SUBJECT. This row is NOT filed off a zero-hit grep for 'isEtfs ? null : dataAsOf'. The DS lane flagged that citation as stale in this same file and was right; 3.0.0_SA_CVO~Z then ruled the criterion VACATED @ff29d0d85c -- its subject was refactored away by an unrelated lane, so an absence check would score as a PASS for a reason unrelated to Models being untouched. Verified against the successor construct instead: REGISTERS_YANG_AS_OF.models === true IS the Models branch. BASE-MOVED CAVEAT, MEASURED: a first pair was captured at portal 8c2ba9bb. 0.4.0_DE_ClientPlatform~S then landed 5a4349a5 into this SHARED checkout (166 lines of Positioning.tsx, 71 of HoldingsTab.tsx, both on the Models render path, plus ui-smoke.mjs itself). Every original render PREDATES that commit (00:26-00:37 vs 00:38:31) so they were unconfounded -- and stale the same instant, because a byte-identical claim is a claim about a diff against a BASE and the base had moved. The figures above are the RE-RUN with both sides at one base. The hash is identical at both bases, so nothing was lost; the re-run is reported rather than the lucky outcome. FILED 2026-08-28 by 0.4.0_DE_ClientPlatform~C (the DE half), into the EXISTING instance at 2.0.0_SA_COO~Z's direction (msg 12900). Code: portal 46f3863e on DEV. BRANCH STATE, NOT SERVED -- there is no DEV site; only the PROD workflow publishes and that promote is DT-lane and held at Andrew's word.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "POS-TO7-AC6",
+      "criterion_verbatim": "NEGATIVE CONTROL: a fund with NO holdings at any date. Show it still renders as a labelled shell with an honest empty as-of -- not omitted, and not silently borrowing another book's date.",
+      "denominator": "T4 = 6 assertions, T8 = 6 assertions (3 of them mutants that must FIRE).",
+      "invocation": "test_etf_positioning_per_fund_asof.py T4 (producer) and T8 (serving edge, with three mutants)",
+      "method": "test_suite",
+      "output_evidence": "T4: with DIVZ/IDVZ absent entirely, 4 books are still emitted; DIVZ holdings_status='book_only', data_as_of NULL, as_of_basis='absent', aum=307436800.0 retained (a shell is not an empty object); PFDE simultaneously reads 2026-08-24, proving no neighbour's date was borrowed; stats.books_with_null_as_of=2. T8: the honest shell passes shape_check with 0 problems and serves JSON null (not the string 'nan'); MUTANT shell-with-a-borrowed-date is REFUSED; MUTANT full-book-with-null-date is REFUSED; MUTANT literal-'nan'-as-date is REFUSED.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "POS-TO7-AC7",
+      "criterion_verbatim": "GOLD READS data_as_of FROM THE SILVER ROWS. The run's as_of is a SELECTION KEY, NEVER A PROVENANCE STAMP. ... as_of_basis propagates too.",
+      "denominator": "Silver measured over 24 partition x fund cells / 976 holding rows across 6 partitions; 2 cells diverge from the partition name (both TrueShares at 2026-08-24). Nulls and multi-valued cells: 0 of 1,297 rows over 9 partitions, with a synthetic positive control proving the detector CAN see both.",
+      "invocation": "resolve_book_as_of() reads the silver data_as_of COLUMN (etf_positioning_gold.py, SILVER_AS_OF_COLUMN); verified by the BEFORE/AFTER real-input diff and by T1/T2/T7.",
+      "method": "diff",
+      "output_evidence": "BEFORE at dd75f6bd64, as_of=2026-08-24: DIVZ/IDVZ stamped data_as_of=2026-08-24 (the RUN's value); AFTER: both read 2026-08-21 FROM THE ROWS. The criterion is WHERE the value is read from, and it is now the silver column rather than the run -- that is discharged. *** CORRECTED 2026-08-28 ~03:4xZ: I FIRST PRESENTED THIS AS THE PRODUCER OVER-CLAIMING PROVENANCE (serving 08-21 data stamped 08-24). THAT READING IS INVERTED AND IS WITHDRAWN. Verified at source (ETFS_INGEST.TO-7:127-131,145-147): the 2026-08-21 on those 73 TrueShares rows is a KNOWN-WRONG value substituted from the NET-ASSETS page ('data_as_of': rec.get('net_assets_as_of')); the correct value is 2026-08-24. So on that historical partition the old global stamp was ACCIDENTALLY RIGHT and row-sourcing propagates the known-wrong upstream value. I assumed the column the criterion NAMES was also AUTHORITATIVE -- the criterion says where to read, never that the source is correct. *** The DESIGN stands: provenance is fixed at INGEST (ETFS_INGEST.TO-7 AC1), not by gold re-deriving it, and 08-24 is ruled TERMINAL-WITHHELD (CTO~Z 12472) rather than rewritten. Measured on 2026-08-25/26/27: row date == partition date for all four funds, so on every partition the current view reads, this is a no-op or an improvement. as_of_basis is emitted per book, reaches the served document (T7), and is counted per declared member with a MECE self-check that CAN fail.",
+      "status": "PASS",
+      "status_reason": "PASS on the criterion as written (gold reads data_as_of FROM THE SILVER ROWS; as_of_basis propagates). NOTED, because it changes the failure mode rather than the verdict: the old global stamp MASKED an ingest provenance defect and row-sourcing REMOVES THE MASK -- gold's date is now exactly as good as ingest's stamp. Correct layering, and a real change a reviewer should see stated."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "commit_or_etag": "25f30acc63",
+      "deploy_evidence": "DESIRED, not APPLIED, and stated as such. This file is member 1 of the etf-positioning-producer Lambda package (infra/aws/lambda/etfs-pipeline/etf-positioning-producer/build_package.py:86-93 PACKAGE list, read at source). The ~13:00Z scheduled fire runs DEPLOYED BYTES, so a commit changes nothing about today's artifact. The apply is AE-lane under Rule 13 and is being coordinated through 2.0.0_SA_COO~Z; this instance makes NO claim that it rides any pre-authorized apply.",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "script",
+      "path_or_key": "data/etfs/scripts/gold/etf_positioning_gold.py"
+    },
+    {
+      "commit_or_etag": "25f30acc63",
+      "deploy_evidence": "Same package, member 2 (same PACKAGE list). THE ATOMICITY IS LOAD-BEARING AND IT WAS VERIFIED, NOT ASSUMED: the gold change alone would make the publisher raise on divergent book dates and platinum would stop publishing. Because both files are members of ONE zip, one apply lands both -- the coupling cannot half-land through this path.",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "script",
+      "path_or_key": "data/etfs/scripts/gold/etf_positioning_publisher.py"
+    },
+    {
+      "commit_or_etag": "25f30acc63",
+      "deploy_evidence": "Offline suite; not a package member and not deployed by design.",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "test",
+      "path_or_key": "data/etfs/scripts/gold/test_etf_positioning_per_fund_asof.py"
+    }
+  ],
+  "assignee": "0.4.0_DS_ClientPlatform~F",
+  "compiler_tools": [
+    {
+      "invocation": "comp-which \"where is the ETF positioning artifact contract that declares the book payload fields\"",
+      "result": "Returned a near-tie (comp-estate --resource / comp-pipescript io) and printed 'TOP SCORES ARE TIED -- THE ORDER IS NOT A RANKING', which is why comp-pipescript was chosen by reading the descriptions rather than taking rank 1.",
+      "tool": "comp-which"
+    },
+    {
+      "invocation": "comp-pipescript io data/etfs/scripts/gold/etf_positioning_gold.py",
+      "result": "OUT-OF-GRAPH: answered from AST derivation, 7 recognized I/O call sites, all 7 UNRESOLVED (dynamic keys). Explicitly disclosed that chain membership and portal consumers are ABSENT from its view -- so the publisher coupling was found by reading source, not inferred from this tool's silence.",
+      "tool": "comp-pipescript"
+    },
+    {
+      "invocation": "comp-find -i 'data_as_of' --files ; comp-find -i 'etf_classifications_dynamodb' --band DEF",
+      "result": "First: 14,873 hits across 27,504 files scanned, DEF band surfaced etf_positioning_publisher.py as the etfs-tree definition site. Second: a MEASURED zero (0 of 27,510 in scope) with the gitignored-corpus caveat printed, which is what established the vendored-module finding as an absence-with-a-denominator rather than a failed lookup.",
+      "tool": "comp-find"
+    },
+    {
+      "invocation": "bash .tools/commit-gate.sh <each of 3 files>",
+      "result": "Clean on 3 of 3 (py_compile + ds-precommit + ruff py39).",
+      "tool": "commit-gate.sh"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "The suite run twice in the same environment and the full stdout byte-compared, WITH a negative control: a planted one-character difference was fed to the same diff to prove it is not blind.",
+      "observed": "Byte-identical across 2 runs (8968 B, 85 lines each), rc=0 both. Negative control: the diff DID report the planted difference, so the identity result is a reading and not a blind pass.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Three planted mutants at the serving edge, each a defect that RENDERS PERFECTLY and would be undetectable downstream: (1) a shell carrying a borrowed data_as_of, (2) a full book with a null data_as_of, (3) the literal string 'nan' as a date. Plus a fourth, structural: an input frame whose funds carry DIVERGENT row dates, which the pre-change publisher raised on.",
+      "expected": "shape_check refuses each of the three; the divergent-input case publishes cleanly where it previously raised.",
+      "observed": "All three refused with their specific messages ('SHELL carrying a NON-NULL data_as_of ... this one was borrowed. AC6 refuses it.'; \"'full' with a NULL data_as_of\"; \"data_as_of is the placeholder string 'nan'\"). The honest shell passes with 0 problems, so the guard is not a blanket refuser. Divergent input publishes with data_as_of_spread=['2026-08-21','2026-08-24'].",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC4 and AC5 (the DE serving half)",
+      "reason": "Explicitly not addressed to this seat -- TO LANES section and 2.0.0_SA_COO~Z msg 11991 s.3 both sequence the DE half behind the producer. THIS INSTANCE IS THEREFORE PARTIAL AND MUST NOT CLOSE THE TO. 3.0.0_SA_CVO~Z closes on AC1+AC4 together, never AC1 alone, per the TO."
+    },
+    {
+      "item": "firm=FABRIC",
+      "reason": "DECLARED, not derived, per the TO's proof_of_spec comment: the checker's firm enum has no ETFS member. ETFS_POSITIONING is a product surface rather than fabric infrastructure, so FABRIC is the least-wrong available value and is entered here as an explicit declaration rather than a claim. Enum ownership is CTO~Z's; neither lane edits a gate."
+    },
+    {
+      "item": "The characteristics / fund_daily / netassets vintage stays on the GLOBAL as-of",
+      "reason": "Deliberate design decision, stated so it is reviewable rather than discovered. Keying reference data per-fund would let ONE security classify two different ways in two books of the same payload. The emitted data_as_of therefore describes THE HOLDINGS specifically -- which is the plane Andrew's complaint is about -- and a stepped-back book carries its own holdings with the run's characteristics vintage."
+    },
+    {
+      "item": "Deployment",
+      "reason": "DESIRED, not APPLIED. The apply is AE-lane (Rule 13) and coordinated through 2.0.0_SA_COO~Z. No ad-hoc gold run was fired; the ~13:00Z scheduled fire remains the acceptance event for deployed behaviour."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-positioning/20260821T194927Z/DECOMP.md",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_POSITIONING.TO-7.per-fund-as-of-all-four-etfs-every-day.md",
+    "vintage_commit": "20c092c0da"
+  },
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "schema_version": "1.0",
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-28/dsF_etfs_positioning_to7_per_fund_asof_0158-0245Z.md",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_POSITIONING.TO-7.per-fund-as-of-all-four-etfs-every-day.md",
+    "group": "OTHER",
+    "vintage_commit": "1b1845a0ec"
+  },
+  "surprises": [
+    "BLOCKING, DISARMED SAME-TURN by fixing it in-lane: etf_positioning_publisher.py:403-404 at dd75f6bd64 raised RuntimeError('books disagree on data_as_of') whenever books carried different dates -- i.e. on exactly what AC1 is specified to produce. Landing the gold change alone would have stopped platinum publishing entirely while reading as a completed producer fix. The file is data/etfs/scripts/gold/*.py = DS by Rule 13, so it was fixed in the same commit rather than routed. Owner named: 0.4.0_DS_ClientPlatform~F. Surfaced to 2.0.0_SA_COO~Z in the ACK before the fix landed.",
+    "OBSERVATION, AND I GOT ITS DIRECTION WRONG BEFORE GETTING IT RIGHT -- recorded in full because the wrong version travelled to five seats. I reported that the live defect is WORSE than the TO frames it: that at as_of=2026-08-24 the producer served 08-21 data STAMPED 08-24, a FULL book OVER-CLAIMING provenance. *** THAT IS INVERTED AND IS WITHDRAWN. *** 1.0.0_SA_CTO~Z (12472) named it and I verified at source rather than accepting it: ETFS_INGEST.TO-7:127-131 records the substitution \"data_as_of\": rec.get(\"net_assets_as_of\") -- a HOLDINGS row's provenance taken from a NET-ASSETS field scraped off the HTML page -- and :145-147 records trueshares 73 rows at 2026-08-21 WRONG vs filepoint 114 at 2026-08-24 correct. The 2026-08-21 is not TrueShares' holdings date at all. ROOT OF MY ERROR: I treated the column the criterion NAMES as also being AUTHORITATIVE. AC7 says WHERE to read the value; it says nothing about the source being correct, and I never asked. The measurement I ran (24 cells / 976 rows) was accurate about WHAT the column holds and wrong about WHAT THAT MEANS -- a right number under a wrong interpretation, which is the harder kind to catch because the number survives every re-check.",
+    "OBSERVATION: test_etf_positioning_upgrade_forward.py could not be imported at HEAD -- etf_classifications_dynamodb is vendored into the Lambda package and is not in the repo tree (comp-find DEF band: 0 hits over 27,510 files scanned). PROVEN pre-existing by running HEAD's own three files in an isolated copy, where they fail identically. Restored for this work by supplying infra/aws/lambda/v2_portal/_shared on PYTHONPATH; no repo change was needed. Flagged because a suite that cannot import is a regression net nobody is holding, and its absence is silent.",
+    "OBSERVATION, method-level and self-reported: 2.0.0_SA_COO~Z warned (11991) that pandas rewrites None to a truthy NaN. The guard was written with pd.isna and is correct. But this seat then asserted in a test that the trap ALWAYS fires (false), and then that the FRAME SHAPE decides it (also false). A 2x2 over access path x companion columns (10 cells, dtype object throughout) shows a CONJUNCTION: iterrows() AND no numeric column; 9 cells give None, 1 gives nan. The real book frame carries numeric columns, so it renders None TODAY -- meaning an `is None` guard would have passed every test here and broken on the next column-set change. That is this TO's own lucky-Tuesday shape one layer down. Both wrong hypotheses named a single visible variable.",
+    "OBSERVATION, arising from that correction and worth more than it: ROW-SOURCING REMOVES A MASK. The old global as_of accidentally concealed an ingest provenance defect on the 08-24 partition; gold's emitted date is now exactly as good as ingest's stamp. That is the correct layering (a value must carry its claim; the fix belongs at the source) AND a real change in failure mode, so it is stated rather than left for someone to discover. as_of_basis exists so a consumer can see where the value came from instead of trusting it."
+  ],
+  "to_id": "ETFS_POSITIONING.TO-7"
+}

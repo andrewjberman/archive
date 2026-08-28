@@ -1,0 +1,171 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_SATELLITES.TO-5-DS",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "docs/architecture/D4_OPAL_SATELLITES_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "25b116f8ac"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-satellites/20260827T160438Z/DECOMP.md",
+    "vintage_commit": "936b9ae1e9",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_SATELLITES.TO-5-DS.registry-producer-for-the-scoped-key.md"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~L",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/build_satellites_registry.py",
+      "kind": "script",
+      "commit_or_etag": "48c6a7700f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The producer. Built @c4a0d33d7f by this lane's predecessor; CORRECTED @d4ef07cd10 by this seat -- it published to the SHARED bucket (opal-data-assets) while the serving path reads the FIRM bucket (opal-data-cot). ASSETS_BUCKET and REGISTRY_BUCKET are now two named planes: bronze roster/detail READS stay on the shared assets plane, the registry WRITE goes to the firm's own bucket. py_compile OK, 0 CRLF, 0 non-ASCII, commit-gate clean (1 of 1 file). FURTHER CORRECTED @48c6a7700f: it emitted constituent weights as FRACTIONS where the ratified consumer contract declares PERCENTAGE (satelliteSet.ts:44/:55, SATELLITE_WEIGHT_SUM_TARGET=100) -- validateSatellite refused all 9 books. Conversion added at this producer's seam (the site satelliteSet.ts:46-50 names in writing), plus a guard enforcing the consumer's own sum invariant so a unit drift fails HERE rather than at the client. TO-1's satellites_weights.py is untouched -- its fraction output is locked by tests asserting 0.25 and 0.42. NOT DEPLOYED to the mdpf shared home, and that is CORRECT: 0.7.0_AE_CloudOps~S measured TO-6-AE's package builder reads the repo via `git show <pin>:<path>` with zero S3 calls, so absent from the runner's code channel is the steady state."
+    },
+    {
+      "path_or_key": "s3://opal-data-cot/platinum/satellites/registry.json",
+      "kind": "s3_object",
+      "commit_or_etag": "c056874e69aa048a616f4e21100cf74a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "THE ARTIFACT, RE-MINTED once on corrected bytes @48c6a7700f under 2.0.0_SA_COO~Z's explicit authorization (msg 11601, re-affirmed 11609): ONE overwrite, same bucket, same key, provenance ad-hoc-QA UNCHANGED. Size 2196, LastModified 2026-08-28T01:38:46+00:00 (UTC, s3api), ETag c056874e69aa048a616f4e21100cf74a, VersionId xLcuAW7VMbGyF.0kpt2LQ9Wb24WVnQaS, SSE AES256. list-object-versions shows exactly 2 versions and 0 delete markers -- 1 current (2196) + 1 noncurrent (2182, the pre-fix bytes) -- which is the discriminating evidence that ONE overwrite occurred and no more. WARN: a VersionId is a LEASE, not provenance; this estate expires noncurrent at 14d, so the pre-fix state's durable evidence is the measurement record, not that noncurrent version. Verified on the SERVED bytes by read-back, never on rc=0."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~L/deliverables/ETFS_SATELLITES.TO-5-DS_MEASUREMENT_20260828.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-SAME-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The measurement record, carrying the per-cell cell_status block for which this schema has no slot (root is additionalProperties:false)."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~L/deliverables/to5ds_producer_evidence.py",
+      "kind": "test",
+      "commit_or_etag": "c4a0d33d7f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC1 producer-ness by AST + AC3 empty-path exercise, with controls. Committed, so every number is RE-DERIVABLE rather than quoted. Re-run by THIS seat post-bucket-fix."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~L/deliverables/to5ds_predicate_probe.py",
+      "kind": "test",
+      "commit_or_etag": "c4a0d33d7f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC4 three-row separation + per-limb ablation, and AC5's 9-of-65 derivation. Re-run by THIS seat."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T5DS-AC1",
+      "criterion_verbatim": "A producer exists that WRITES the artifact -- new code, DS-lane. THE DISCRIMINATOR IS AN ACTUAL WRITE CALL (put_object / upload_* / a file write), present in the AST. CORRECTED CONTROL SET: POSITIVE build_dim_model_portfolio.py, build_dim_taxsma_report.py; NEGATIVE satellites_registry.py and cottonwood_aua.py; SUBJECT build_satellites_registry.py.",
+      "method": "command",
+      "invocation": "python org/tier2_senior/0.4.0_DS_ClientPlatform~L/deliverables/to5ds_producer_evidence.py  (re-run by THIS seat AFTER the bucket fix @d4ef07cd10)",
+      "output_evidence": "SUBJECT build_satellites_registry.py producer=True main=True guard=True, write-capable imports ['boto3','json','pathlib'], write calls ['put_object']. POSITIVE build_dim_model_portfolio.py and build_dim_taxsma_report.py both producer=True with put_object -- 2 of 2 PASS, so the instrument can say YES. NEGATIVE satellites_registry.py (imports [], calls []) and cottonwood_aua.py (imports ['boto3','io','json'], main=True, guard=True, calls []) -- 2 of 2 REFUSE, so it can say NO. cottonwood_aua.py is the load-bearing negative: it wears every producer signal and refuses on the write call.",
+      "denominator": "5 files scored: 1 subject, 2 positive controls, 2 negative controls. 2 of 2 positives PASS; 2 of 2 negatives REFUSE.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T5DS-AC2",
+      "criterion_verbatim": "The artifact EXISTS at the key POSN_TENANCY.TO-4-AE serves -- bucket, key, byte size, LastModified (UTC, s3api) recorded. COMPLETE listing: NextToken shown ABSENT or paginated to exhaustion. --max-items/head are BANNED.",
+      "method": "live_read",
+      "invocation": "aws s3api list-objects-v2 / head-object / list-object-versions on opal-data-cot, plus a get-object read-back scored against the consumer's own SUM invariant (satelliteSet.ts:135 SATELLITE_WEIGHT_SUM_TARGET=100, :136 epsilon 0.01). RE-TAKEN on the corrected bytes after the authorized re-mint.",
+      "output_evidence": "provenance: ad-hoc-QA. BUCKET opal-data-cot | KEY platinum/satellites/registry.json | SIZE 2196 bytes | LastModified 2026-08-28T01:38:46+00:00 (UTC, s3api) | ETag c056874e69aa048a616f4e21100cf74a | VersionId xLcuAW7VMbGyF.0kpt2LQ9Wb24WVnQaS | SSE AES256. Listing COMPLETE: Contents holds exactly 1 entry, IsTruncated absent, NextContinuationToken ABSENT -- no --max-items, no head. TWO instruments agree on size/LastModified/ETag. READ-BACK of the SERVED bytes: 2196 on disk == 2196 ContentLength; as_of '2026-08-27' NON-NULL; claim 'measured'; 9 books, all codes canonical; no baked verdict field; and 9 of 9 books sum to 100.000, i.e. 9 of 9 PASS the consumer's validateSatellite SUM check, 0 of 9 still carry the fraction defect. TWO DEFECTS WERE CAUGHT BY THIS CRITERION, NOT ONE. (1) WRONG BUCKET: the producer published to opal-data-assets while shared-advisor-router resolves the FIRM bucket (:242-246, :101, :358); a delimiter probe shows opal-data-assets has 13 top-level prefixes and platinum/ is NOT among them, so that write would have MINTED A NEW TOP-LEVEL SERVING TIER in a shared bucket on a key carrying no firm segment. Fixed @d4ef07cd10 BEFORE any execution -- measured: opal-data-assets/platinum/satellites/ is empty and head-object 404s, so no wrong-bucket write ever occurred. (2) WRONG UNIT: caught downstream by 0.4.0_DE_ClientPlatform~Z RENDERING the first artifact -- validateSatellite refused all 9 books. Fixed @48c6a7700f and re-minted under authorization. AC1 is structurally blind to BOTH: put_object(Bucket=X) is a write call for every X, and an AST write check sees no units at all.",
+      "denominator": "1 of 1 object under the prefix, complete listing (NextToken ABSENT); 2 of 2 object versions accounted for (1 current + 1 noncurrent, 0 delete markers); 9 of 9 served books scored against the consumer's SUM invariant. Pre-first-mint the prefix returned 0 objects with head-object 404, against a positive control of 1125 objects under platinum/.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T5DS-AC3",
+      "criterion_verbatim": "PUBLISH THE EMPTY, NEVER DELETE THE KEY. A firm with zero members gets a published artifact with an empty member set, never a missing key. The serving layer no longer covers for a deleting producer: a missing key stays a 403, indistinguishable from a refusal, all the way to the consumer.",
+      "method": "command",
+      "invocation": "python org/tier2_senior/0.4.0_DS_ClientPlatform~L/deliverables/to5ds_producer_evidence.py  (AC3 section, re-run by THIS seat post-fix)",
+      "output_evidence": "build_payload([], '2026-08-27') -> keys ['as_of','books','claim','schema_version','source'], books [] (len 0), as_of '2026-08-27' NON-NULL True, claim 'measured'; assert_no_baked_verdict PASSES. BOTH refusal arms fire: build_payload([], None) -> REFUSED ('BLOCKED: refusing to publish with an empty as_of'), and a block with a baked 'state' -> REFUSED by the reused guard. publish() measured over its own source: emptiness branches / deletes = [] -- there is no branch on len(books) and no delete call, which is the point. The served artifact independently carries no baked verdict field (state/is_fresh/stale/status/verdict all absent).",
+      "denominator": "1 empty-path construction exercised + 2 refusal arms fired + 0 emptiness-branches and 0 deletes found in publish()'s source.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T5DS-AC4",
+      "criterion_verbatim": "THE PREDICATE HAS THREE LIMBS AND THE CORPUS EXERCISES ONE. (a) Opal TOKEN -- exercise on the REAL pair, do not build a fixture: 'Core | Satellite 98' beside 'Opal Satellite 98'. (b) LEADING ^ AND TRAILING $ -- construct fixtures, because the corpus has NO natural mutant for either; an anchor with no failing input is an untested anchor. Use drift_report/assert_no_drift as the oracle.",
+      "method": "command",
+      "invocation": "python org/tier2_senior/0.4.0_DS_ClientPlatform~L/deliverables/to5ds_predicate_probe.py  AND  drift_report/assert_no_drift run by THIS seat against the SERVED artifact's book codes at roster-row grain",
+      "output_evidence": "THREE ROWS: REAL 'Core | Satellite 98' admitted=False want=False OK (in roster: True) | SYNTHETIC 'Opal Satellite 50 + 15% cash' admitted=False want=False OK | SYNTHETIC 'Opal Satellite 55' admitted=True want=True OK (not in the declared nine -- a hardcoded list REJECTS it, the derived predicate ADMITS it, which is the only separator between the two implementations). PER-LIMB ABLATION on the 65-row roster, one limb varied at a time: shipped ^Opal Satellite N$ admits 9 (+0); drop token 'Opal' admits 27 (+18, incl. 'Core | Satellite 30/40/50/60', 'Blended Opal / Satellite 50', 'Core / Satellite Equity'); drop leading anchor admits 9 (+0); drop trailing anchor admits 9 (+0). BOTH ANCHORS MEASURE +0 -- no real row tests them, which is why the synthetic REJECT is required and not a shortcut. ORACLE ON THE SERVED ARTIFACT: drift_report -> declared 9, observed_canonical_on_roster 9, roster_row_denominator 9, on_roster_not_declared [], declared_not_on_roster [], ok True; assert_no_drift PASSES. ORACLE CONTROLS FIRE IN BOTH DIRECTIONS: a DROPPED member raises SatelliteRegistryDrift and an ADDED member raises SatelliteRegistryDrift -- an overcount never announces itself, so the adding direction had to be tested too.",
+      "denominator": "65 roster rows, 4 predicate variants (1 shipped + 3 single-limb ablations), 3 named AC4 rows, and 2 oracle mutants (one per difference direction).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T5DS-AC5",
+      "criterion_verbatim": "Blends are EXCLUDED as ALLOCATORS, not as name-misses. The criterion is IS-A vs HOLDS-A and it DOES NOT DRIFT. Expected: 9 of 65, the five named blends and the whole 'Core | Satellite *' family excluded. 'Opal Ultra Short Term' is EXCLUDED -- it is on the roster as a MODEL, and roster membership is not satellite membership.",
+      "method": "command",
+      "invocation": "python org/tier2_senior/0.4.0_DS_ClientPlatform~L/deliverables/to5ds_predicate_probe.py  AND  a live producer run printing the roster envelope's own denominator",
+      "output_evidence": "9 of 65 derived, equal to the declared nine exactly, with BOTH difference directions empty (on_roster_not_declared [] and declared_not_on_roster []). The producer's own live run prints the denominator from the artifact's envelope, never inferred: 'roster pageCount=1 totalResultCount=65 len(pagedResults)=65' then 'derived 9 member(s) of 65 roster row(s)'. 18 'Core | Satellite *' and blend-form rows REJECTED, including all five named blends ('Opal - Cash + Satellite 50', 'Opal Sat 50+ 15% cash', 'Opal UST/ Sat 70', 'Opal UST/Sat 80 33/67', 'Blended Opal / Satellite 50') and the whole 'Core | Satellite *' family incl. the Tax-Free and CA Tax-Free variants. 'Opal Ultra Short Term': on roster TRUE, admitted FALSE.",
+      "denominator": "65 roster rows (pageCount=1, totalResultCount=65, len(pagedResults)=65 -- from the artifact's own envelope); 9 admitted, 56 rejected.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T5DS-AC6",
+      "criterion_verbatim": "The trigger is a SCHEDULE. Success-of-upstream as the only trigger is a defect, and an ad-hoc run is permitted for QA and is NEVER the acceptance -- 'ad-hoc artifacts are never production evidence.' DESIRED != APPLIED != EXERCISED on every claim; no criterion discharged by 'the commit gate passed.'",
+      "method": "live_read",
+      "invocation": "aws events list-rules --output json  AND  aws scheduler list-schedules --output json  (BOTH planes -- list-rules is structurally unable to see an EventBridge Scheduler schedule)",
+      "output_evidence": "NOT DISCHARGED, and RE-MEASURED 2026-08-28T02:4xZ after 0.7.0_AE_CloudOps~S applied TO-6-AE. CURRENT STATE, both planes censused (list-rules is structurally unable to see a Scheduler schedule): PLANE 1 EventBridge Rules 139 total, NextToken ABSENT, 1 MATCHING -- 'cot-satellites-registry-producer-daily', State ENABLED, cron(0 7 * * ? *). PLANE 2 EventBridge Scheduler 18 total, NextToken ABSENT, 0 matching. THE RULE COUNT MOVED 138 -> 139 AND THE +1 IS EXACTLY THIS RULE, which corroborates that the delta is the satellites trigger and not census drift. SO THE TRIGGER IS A SCHEDULE AND IT HAS REACHED APPLIED. IT HAS NOT REACHED EXERCISED: the first fire is 07:00Z and had not occurred at the time of this measurement. AC6's own text forbids discharging on anything less -- 'an ad-hoc run is permitted for QA and is NEVER the acceptance', 'DESIRED != APPLIED != EXERCISED on every claim' -- so APPLIED is not a pass. SUPERSEDES THIS ROW'S EARLIER EVIDENCE, which read 0 of 138 Rules and 0 of 18 Schedules with a positive control of six live gold triggers. That measurement was accurate when taken (~01:2xZ) and is now STALE; it is recorded here rather than overwritten because the pre-apply zero is what made this criterion's FAIL a measurement rather than an assumption.",
+      "denominator": "157 scheduler objects censused across BOTH planes at the re-measure (139 Rules + 18 Schedules), each listing complete with NextToken ABSENT; 1 of 157 references satellites. Prior measurement at ~01:2xZ: 156 objects (138 + 18), 0 of 156 referencing satellites.",
+      "status": "FAIL",
+      "status_reason": "NOT EXERCISED. The remedy was OUT OF THIS LANE and has since been executed by its owner: CLAUDE.md Rule 13 assigns PROD triggers to DT/AE, and 0.7.0_AE_CloudOps~S built and applied ETFS_SATELLITES.TO-6-AE. THE STATE HAS MOVED SINCE THIS INSTANCE WAS FIRST WRITTEN: the trigger now exists and is ENABLED at cron(0 7 * * ? *), so it has reached APPLIED. IT REMAINS FAIL BECAUSE APPLIED IS NOT EXERCISED and this criterion says so explicitly. The first scheduled fire is 07:00Z; only that fire can discharge it, and it discharges AC6 for TO-6-AE, not for this TO. CORRECTING A SENTENCE THIS ROW PREVIOUSLY CARRIED: it read 'THE TRIGGER HAS NOT REACHED DESIRED, let alone APPLIED or EXERCISED.' That was true at ~01:2xZ and is now FALSE -- the trigger is applied. The claim was perishable and it aged; it is corrected here rather than left standing. TO-5-DS remains 5 of 6 and NOT complete."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Controls were run on FOUR independent instruments rather than on the build as a whole, because each criterion rests on a different one and a single mutant would only have tested one. (1) AC1's producer-ness AST scorer: 2 positive controls that must PASS and 2 negatives that must REFUSE, with cottonwood_aua.py chosen as the HARD negative -- it carries boto3, main and the guard and refuses only on the write call, so the set tests the discriminator rather than the easy signal. (2) AC3's refusal arms: as_of=None and a baked 'state' field, each of which must be REFUSED. (3) AC4's per-limb ablation: three single-limb mutants of the predicate, each varied alone so the extra-admit count is attributable to that limb. (4) AC4's drift oracle mutated in BOTH directions -- a dropped member AND an added member -- because an undercount announces itself and an overcount does not. Plus a pre-mint positive control on the S3 instrument itself (1125 objects under platinum/) proving the 0-object read of platinum/satellites/ was a real absence, and an AC6 positive control (6 named live gold triggers) proving that census could see rows.",
+      "expected": "(1) 2 of 2 positives PASS, 2 of 2 negatives REFUSE. (2) both refusal arms raise. (3) the 'Opal' token ablation admits MORE than the shipped form; the two anchor ablations are the open question. (4) both oracle mutants raise SatelliteRegistryDrift. (5) the pre-mint prefix listing returns 0 while the control prefix returns many. (6) the scheduler census returns 0 satellite rows while returning many non-satellite rows.",
+      "observed": "(1) 2 of 2 PASS, 2 of 2 REFUSE. (2) both raised -- 'BLOCKED: refusing to publish with an empty as_of' and SatelliteWeightError. (3) token ablation +18 (EXERCISED); leading anchor +0 and trailing anchor +0 (UNEXERCISED BY THE CORPUS -- reported, not hidden, and it is why the synthetic rows are load-bearing). (4) both mutants raised SatelliteRegistryDrift. (5) pre-mint 0 objects + head-object 404, control 1125 objects. (6) 0 of 138 Rules and 0 of 18 Schedules, control listed 6 real triggers.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The producer was run twice against the same partition: once with --dry-run and once for real. Both derived the same membership from the same roster envelope, and the dry-run's predicted byte count was compared against the size S3 actually reported for the written object.",
+      "observed": "Dry-run: 'roster pageCount=1 totalResultCount=65 len(pagedResults)=65', 'derived 9 member(s) of 65 roster row(s)', 2182 bytes predicted for s3://opal-data-cot/platinum/satellites/registry.json. Real run: identical envelope line, identical 9 of 65, 'wrote ... (2182 bytes, 9 book(s))'. s3api head-object independently reports ContentLength 2182 and the read-back file is 2182 bytes on disk. THREE-WAY AGREEMENT on the byte count across predicted / reported / served. NOT a strong determinism claim across partitions -- one partition, two runs minutes apart; it establishes that the write path does not perturb the derivation, not that the derivation is stable across days.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Building the SCHEDULE that discharges T5DS-AC6",
+      "reason": "CLAUDE.md Rule 13 puts PROD triggers in the DT/AE lane; DS owns commit-to-QA-deploy for data/*/scripts/gold/*.py. This seat MEASURED the absence in both scheduler planes (0 of 138 Rules, 0 of 18 Schedules, with a positive control) and reports AC6 FAIL rather than waiving it, but cannot build the remedy. Naming the owner is the act available to this lane."
+    },
+    {
+      "item": "A second write, an overwrite, or a write to any other firm's bucket",
+      "reason": "The AC2 ruling s.5 authorizes 'one first mint into opal-data-cot, and nothing else.' Exactly one PUT was issued. The ruling also does NOT lift the POSN_TENANCY.TO-4-AE apply hold and does NOT touch the ETFS_SATELLITES PROD promote, both of which this seat left untouched and re-verified as still held before writing."
+    },
+    {
+      "item": "Striking the 'WHY THERE IS NO PREDICATE' argument at satellites_registry.py:15-26",
+      "reason": "1.0.0_SA_CTO~Z ruled in msg 11057 that it must be STRUCK, and ruled the strike belongs in this TO as a clause for 2.0.0_SA_COO~Z to amend. No such clause has been added to the TO. Not done on this seat's own authority -- carried forward as an open surprise item instead."
+    }
+  ],
+  "surprises": [
+    "BLOCKING / DISARMED-BY-FIX -- THE PRODUCER WROTE TO THE WRONG BUCKET. build_satellites_registry.py published to s3://opal-data-assets/platinum/satellites/registry.json; the serving path reads s3://opal-data-cot/... (shared-advisor-router/index.mjs:242-246 resolves the bucket from X-Firm-Id via FIRM_BUCKET_MAP, :101 + :358 rewrite to the key against THAT bucket). Two consequences, the second worse than the first: (a) AC2 would have failed while the producer reported rc=0 and 'OK: wrote'; (b) the key carries NO firm segment ON PURPOSE because the bucket IS the firm boundary, so placing it in the shared bucket expresses that boundary in NEITHER bucket nor prefix. Fixed @d4ef07cd10 by splitting the single ASSETS_BUCKET constant into ASSETS_BUCKET (bronze reads) and REGISTRY_BUCKET (the firm write), which is the estate's existing convention (runners_49f/a00_runner.py:44-45, bd49f_insurance_nav_current.py:93-94). Surfaced to 2.0.0_SA_COO~Z, 3.0.0_SA_CVO~Z and 1.0.0_SA_CTO~Z.",
+    "OBSERVATION / INERT -- AC1's INSTRUMENT IS STRUCTURALLY BLIND TO THE WRITE TARGET, and this is the transferable half of the bucket defect. AC1 establishes producer-ness from an AST write call; put_object(Bucket=X) is a write call for every value of X, so AC1 passed identically before and after the bucket was corrected. An instrument that proves a write HAPPENS cannot see WHERE it lands. 2.0.0_SA_COO~Z's ruling s.4 predicted exactly this failure mode as the reason AC2 must not collapse into AC6 ('the TO loses its only chance to catch a WRONG-KEY producer before the trigger is built') -- the prediction was correct and the hazard was live, not hypothetical.",
+    "OBSERVATION / ARMED-NO-OWNER -- the 'WHY THERE IS NO PREDICATE' argument at satellites_registry.py:15-26 is STILL STANDING at HEAD after 1.0.0_SA_CTO~Z ruled (msg 11057) that it 'must be STRUCK, not left standing'. A deriving producer now ships beside a module arguing derivation is impossible. The argument is refuted by its own file: :26 says the name field is unique per row and therefore carries 'identity, never class information', while :222's oracle matches on that same field and partitions the same 65 rows into 9 and 56 -- value-uniqueness does not imply absence of structure in the values. CTO ruled the strike belongs in this TO as a clause; 2.0.0_SA_COO~Z to amend. Carried forward by this seat, not acted on."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~L/logs/2026-08-27/dsl_etfs_satellites_to5ds_ac2_0100-0130Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"list every object under an S3 prefix in a firm bucket to prove the prefix is empty\"  AND  comp-which \"which bucket and key does the scoped satellites API path read the registry from\"",
+      "result": "RUN, and it is the reason raw s3api is legal on this TO. The first returned a NEAR-TIE across comp-freshness / comp-icedrill / comp-kuzu -- none of which emits the bucket + key + byte-size + LastModified + NextToken tuple AC2 mandates by name. The second returned an explicit 'NO CURATED RULE MATCHED THIS QUESTION -- these are FUZZY GUESSES, not a routing decision' with a top score of 0.51. Both raw calls therefore carry an inline '# rail-checked:' marker naming why no comp-tool fits. The router's honest no-match banner is what made the second call correct rather than lazy."
+    },
+    {
+      "tool": ".tools/aws (s3api, events, scheduler)",
+      "invocation": "s3api list-objects-v2 / head-object / get-object on opal-data-cot; events list-rules; scheduler list-schedules",
+      "result": "RUN via the shim, never bare. s3api was mandatory over 'aws s3 ls' because the latter renders LOCAL time and AC2 requires UTC. Every listing carried its denominator and an explicit NextToken ABSENT; KeyCount was deliberately NOT used as the count, because it is absent when the CLI auto-paginates and .get('KeyCount',0) would read 0 for every prefix -- len(Contents) was used instead. Both scheduler planes were censused separately because list-rules is structurally unable to see an EventBridge Scheduler schedule."
+    },
+    {
+      "tool": ".tools/safe-commit.sh + commit-gate",
+      "invocation": ".tools/safe-commit.sh --author \"0.4.0_DS_ClientPlatform~L <...>\" -F <msgfile written by a non-shell writer> -- data/assets/scripts/gold/build_satellites_registry.py",
+      "result": "PASSED. risk-reflex REFLEX CLEAN (1 file checked against 1351 danger nodes, danger map 25.0h old); commit-gate clean for 1 of 1 file; msg-verify MATCH len=3432. Committed d4ef07cd10. The message file was written with the Write tool, never a heredoc or printf -- F-010 fires at file-BUILD, not only at the commit call."
+    },
+    {
+      "tool": "python .tools/to-check.py --all --assignee",
+      "invocation": "python .tools/to-check.py --all --assignee 0.4.0_DS_ClientPlatform~L",
+      "result": "RUN with --all (load-bearing -- the default view scopes to PRDs <=14d old and hides the longest-stalled TOs). Returned total=1 projects=1 parse_errors=0 scanned=2145 unresolved_serials=0, naming ETFS_SATELLITES.TO-5-DS as this lane's only ACTIVE TO. This lane's TO uses clean <issued_to> notation, so the known SEATED-prose blindness did not bite here -- cross-checked against the base serial, which showed the same TO."
+    },
+    {
+      "tool": "satellites_registry.drift_report / assert_no_drift",
+      "invocation": "drift_report(rows) and assert_no_drift(rows) over the SERVED artifact's book codes, plus a dropped-member and an added-member mutant",
+      "result": "RUN, and it is the oracle AC4 names. First call FAILED on a grain error that was mine: I passed a list of code STRINGS to a function whose signature is Sequence[Mapping[str, object]] and which reads row.get('name') -- AttributeError. Re-run at roster-row grain it returned ok=True with both difference directions empty, and both mutants raised SatelliteRegistryDrift. The failure is worth recording: a grain-mismatched input to a membership oracle raises loudly here, but the same mismatch in a JOIN would have manufactured a silent empty."
+    }
+  ]
+}

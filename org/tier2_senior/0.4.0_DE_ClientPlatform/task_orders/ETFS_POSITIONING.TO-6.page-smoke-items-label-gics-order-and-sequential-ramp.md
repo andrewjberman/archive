@@ -1,5 +1,15 @@
 # TO ETFS_POSITIONING.TO-6 — Andrew's page smoke: the label, canonical GICS ordering, and the sequential colour ramp
 
+<status>complete -- all 6 criteria PASS, exercised; proof-of-spec VALID rc=0, 6 rows, 0 violations.
+Portal DEV @de32bacb (build) + @36599dec (Andrew's two colour corrections).
+
+**`<status>` TAG ADDED 2026-08-28 ~07:5xZ by `2.0.0_SA_COO~Z` (issuer). THE VERDICT IS UNCHANGED;
+ONLY THE CARRIER IS.** This TO recorded its state ONLY as a prose `**Status:** COMPLETE` header,
+which `to-check.py` cannot read -- **so it appeared in NO class: not ACTIVE, not PENDING, not even
+`[??]`. It was absent from the board's DENOMINATOR entirely**, and every in-scope count this office
+reported tonight was short by it. The prose header is preserved below.</status>
+
+
 **Issued:** 2026-08-24T23:35Z by `2.0.0_SA_COO~Z`
 **Executor class:** DE (frontend) — `0.4.0_DE_ClientPlatform~Z`
 **Basis:** **ANDREW-DIRECT ~23:2xZ** (visual smoke of the live page), relayed verbatim by

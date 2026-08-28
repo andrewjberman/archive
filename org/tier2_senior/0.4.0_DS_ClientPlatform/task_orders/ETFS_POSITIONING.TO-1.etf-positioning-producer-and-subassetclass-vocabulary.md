@@ -9,7 +9,37 @@
 <placement>LAPTOP (Rule 26). The apply runs on the device that owns the work — this seat's box. NOTHING here is ferried to site Z, and nothing here applies anything on the terminal box.</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-21T19:55Z</issued>
-<status>ACTIVE</status>
+<status>pending -- ⛔⛔ **NOT AWAITING CERTIFICATION. THIS FACE SAID IT WAS AND THAT IS FALSE.** `3.0.0_SA_CVO~Z` ADJUDICATED this TO @`e3d86ad9d1` and **REFUSED it pending an EXECUTOR ACT**: rc=1 **INVALID -- 3 VIOLATIONS** on the proof-of-spec instance. ⛔ **NO AMOUNT OF CERTIFIER TIME MOVES THIS.** A valid proof-of-spec instance is a BUILD-side act and it is what is missing.
+
+⚠ **AND THE ISSUER TOLD THE CERTIFIER THE OPPOSITE, THREE TIMES.** `2.0.0_SA_COO~Z` wrote *"nothing on this list is blocked on anything but you"* in three separate briefs. **It was false for this TO every time.** `3.0.0_SA_CVO~Z` named the cost precisely: **a seat told it is the sole blocker does not go looking for another owner** -- so this would have sat behind a certifier who cannot move it. ⭐ **This correction is written the moment the author had a trigger to return, which is the whole remedy for the stale-face class measured today (7 of 12 read uncertified while their certificates sat on origin).**
+
+**OWNER: `2.0.0_SA_COO~Z` as issuer, to RE-SEAT or DISPOSE.** No live lane; a seat request is with `0.0.0_AB_MSTR~Z` and Andrew's word governs. ⛔ **NOT a certification item and must not be counted as one.**
+
+⚠ **ORIGINAL `<status>` PRESERVED VERBATIM BELOW -- APPENDED, NOT REPLACED.** (An earlier bulk edit at @4253643625 replaced seven status bodies wholesale and destroyed 21,000 characters; restored @2ee8375f02. Nothing below this line is new.)
+
+queued -- for `3.0.0_SA_CVO~Z` CERTIFICATION. **NO EXECUTOR ACT IS PENDING AND NO SEAT IS NEEDED.**
+
+⛔ **`queued` IS NOT A DISCHARGE CLAIM.** The acceptance criteria on this TO were **NEVER CERTIFIED**,
+and this office will not buy a terminating register by asserting one. **The lead word says only what is
+true: the build is done in the world and the next act is a CERTIFICATION, which belongs to
+`3.0.0_SA_CVO~Z` and to no executor.**
+
+**RE-FACED 2026-08-28 ~04:0xZ by `2.0.0_SA_COO~Z` (issuer). WHY THE LEAD WORD CHANGED, AND IT IS A
+DEFECT THIS OFFICE ALREADY FIXED ONCE TONIGHT AND DID NOT CARRY ACROSS:** this face led with an emoji
+(or a bare word), so `to-check.py` -- which classifies on the FIRST TOKEN ONLY -- read it **`ACTIVE`**.
+⛔ **An `ACTIVE` face is an instruction to spend a seat**, and the seat it named is DEAD: `<issued_to>`
+carries a BASE serial (`0.4.0_DS_ClientPlatform` / `0.7.0_AE_CloudOps` / `0.4.0_DE_ClientPlatform`) and
+**no base serial is registered** -- only lettered lanes are live. **The same lead-word defect was fixed
+on `ETFS_POSITIONING.TO-4` earlier tonight and NOT applied to its four siblings.**
+
+⚠ **`<issued_to>` IS DELIBERATELY LEFT UNCHANGED.** It is the historical record of who executed this,
+and rewriting it would erase that. **It is NOT a live assignment and must not be read as one.**
+
+---
+
+**ORIGINAL STATUS, PRESERVED VERBATIM BELOW:**
+
+✅ **OBJECTIVE MET IN THE WORLD — the producer runs on a schedule.** `gold/book/date=2026-08-26/book.parquet` written 2026-08-27T13:01:22Z; **4 books, 4 FULL, 0 SHELL**, `run_class: scheduled`. ⛔ **DISPOSITION SET BY THE ISSUING OFFICE 2026-08-28 ~02:0xZ on `1.0.0_SA_CTO~Z`'s per-face measurements (11743), CARRIED AS THEIRS AND LABELLED — I did not re-run them, and re-running the same instrument would be REPETITION, not corroboration.** ⚠ **THIS IS NOT AN AC-LEVEL CERTIFICATION:** the OBJECTIVE is met in the world; whether every acceptance criterion is discharged has NOT been taken by anyone and is `3.0.0_SA_CVO~Z`'s act. **What is settled is that this face is NOT WAITING ON A SEAT** — which is the claim that was manufacturing false dispatches all night.</status>
 <cell_status assignee="0.4.0_DS_ClientPlatform" recorded="2026-08-21T21:0xZ" commit="71265d372e" push_state="LOCAL -- 0 remote branches contain it, rides integration">
   <cell id="ETFS-d-2" state="COMPLETE">Vocabulary act delivered. ETFS-TO1-AC6 PASS. An ADOPTION, not a mint -- 12/12 values already in-estate.</cell>
   <cell id="ETFS-d-1" state="CODE-COMPLETE -- 2 criteria open">AC1/AC2/AC3/AC7 PASS (AC2+AC3 EXERCISED, 23/23 assertions, mutants fire). AC4 NOT MET -- lane seam, EventBridge/Lambda TF is a Rule-13 DT/AE PROD-trigger act; routed to the issuer, lane not crossed, no gate manufactured. AC5 UNCOMPUTABLE-BY-CONSTRUCTION -- no SCHEDULED bbg/ landing exists (oracle re-read: 1 date prefix); will be read, never dated off the 08-22 07:00 projection.</cell>

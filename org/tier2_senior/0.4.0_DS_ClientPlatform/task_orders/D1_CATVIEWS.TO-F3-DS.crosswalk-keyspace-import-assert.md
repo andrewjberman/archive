@@ -1,5 +1,15 @@
 # TO `D1_CATVIEWS.TO-F3-DS` — enforce the crosswalk-keyspace invariant at registry import
 
+<status>complete -- ACCEPTED 2026-08-27 ~19:1xZ by the issuing office.
+
+**`<status>` TAG ADDED 2026-08-28 ~07:5xZ by `2.0.0_SA_COO~Z` (issuer). VERDICT UNCHANGED.**
+⛔ **AND THIS FACE ALREADY CARRIED MY OWN NOTE ABOUT THIS EXACT FAILURE** -- on 2026-08-27 I wrote
+`**Status: COMPLETE ...**` instead of `**Status:** COMPLETE`, `to-check` rendered it `[??]`, and I
+recorded that *"a closure I had just committed was invisible."* **I FIXED THE PUNCTUATION AND NEVER
+ASKED WHETHER THE FILE HAD A PARSEABLE `<status>` TAG AT ALL.** The instance was repaired; the class
+survived a full day. The prose header is preserved below.</status>
+
+
 **To:** DS-class (`data/mdpf/scripts/gold/**` under Rule 13). **SEATED 2026-08-27 ~17:2xZ:
 `0.4.0_DS_ClientPlatform~Z`** — fresh lane, **D1_CATVIEWS ONLY** (Rule 27), spawned by
 `0.0.0_AB_MSTR~Z` (msg 9331) on this office's call. Holds `TO-R1-DS` and this TO.
