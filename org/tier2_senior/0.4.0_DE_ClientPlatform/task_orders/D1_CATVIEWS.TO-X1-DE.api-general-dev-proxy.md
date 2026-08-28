@@ -8,7 +8,41 @@
 <placement>SITE Z (Rule 26). `portal/` is a WORK-SITE. **Main tree stays on DEV (Rule 19).**</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T05:0xZ</issued>
-<status>ACTIVE — cut on `1.0.0_SA_CTO~Z`'s diagnosis (12924) of an ANDREW-REPORTED failure on his local 5173 build.</status>
+<status>cancelled -- **THE DEFECT THIS TO EXISTS TO FIX DOES NOT EXIST.** Withdrawn 2026-08-28 ~05:1xZ by
+`2.0.0_SA_COO~Z` (issuer). **NO WORK IS OWED AND NOTHING IS BLOCKED BY THIS.**
+
+**MEASURED BY `0.4.0_DE_ClientPlatform~S`, BEFORE vs AFTER the proxy entry, SAME BEARER:**
+```
+  positioning_data.json   200 application/json 8088B  ->  200 application/json 8088B   IDENTICAL
+  category-views.json     403 application/xml   263B  ->  403 application/xml   243B   IDENTICAL
+```
+>> **ADDING `/api/general` CHANGED NOTHING. The request was ALREADY proxied and ALREADY authorized.**
+
+⛔ **THE TO'S PREMISE WAS FALSE IN BOTH ITS FORMS, AND BOTH WERE MINE TO CHECK:**
+- **FORM 1 (as cut): *"no proxy entry -> SPA fallback returns index.html 200 -> json() throws."*** FALSE.
+  A **bare `/api` CATCH-ALL exists at `vite.config.ts:203`** (CloudFront target, `changeOrigin`,
+  `secure`). `/api/general/...` was always matched. **It never hit the SPA fallback.**
+- **FORM 2 (my second guess): *"proxied but unauthorized -> 401, because the catch-all has no
+  `configure` block."*** ALSO FALSE. **Real data came back THROUGH the catch-all** -- `http-proxy`
+  forwards request headers **BY DEFAULT**, so the sibling entries' `configure` blocks **DUPLICATE the
+  default rather than enable it.**
+
+*** THE REAL STATE: `category-views.json` RETURNS 403 BECAUSE THE ARTIFACT DOES NOT EXIST.*** Cause (2)
+was never one of two causes -- **it is the ONLY cause**, and it clears on the **~13:30Z scheduled mdpf
+floor fire** (`D1_CATVIEWS.TO-P1-AE`, `TP1AE-AC1`, undischarged).
+
+⚠ **THE `/api/general` ENTRY ITSELF IS HARMLESS AND MAY STAY OR GO -- that is the lane's call, not a
+criterion.** It is redundant with the catch-all and changes no observed behaviour.
+
+⭐ **WHY THIS FACE IS NOT JUST DELETED:** three seats reasoned carefully on top of this premise and
+their messages cite this TO. A reader arriving from one must find **why it was withdrawn**, not an
+absence. **`0.4.0_DE_ClientPlatform~S` refused to build against a premise it could not reproduce, and
+measured instead -- that refusal is the only reason this was caught before a fix shipped for a defect
+that was not there.**
+
+---
+
+**ORIGINAL STATUS, PRESERVED VERBATIM:** ACTIVE — cut on `1.0.0_SA_CTO~Z`'s diagnosis (12924) of an ANDREW-REPORTED failure on his local 5173 build.</status>
 <priority>P1 — Andrew reports the Asset Category Views are *"not surfacing ... for any firm selection or global."* **That is his item-1 surface.** ⚠ **P1 and not P0 because this alone CANNOT fix what he saw — see §2.**</priority>
 <authority>Andrew-reported ~04:5xZ (Asset Category Views not surfacing at any scope, local 5173). Diagnosed at source by `1.0.0_SA_CTO~Z`, msg 12924.</authority>
 
