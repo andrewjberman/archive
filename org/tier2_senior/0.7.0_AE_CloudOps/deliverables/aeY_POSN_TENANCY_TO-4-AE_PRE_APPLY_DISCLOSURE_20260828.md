@@ -164,4 +164,116 @@ that the upload is not the apply and is measurably non-serving (v24 is published
 S3 object version publishes nothing by itself). **The [STOP] is the issuer's to scope, so both limbs
 are held.**
 
+---
+
+# 7. VERIFICATION -- APPLIED 02:33Z BY ANOTHER LANE, MEASURED HERE 02:5x-03:00Z
+
+**The apply was executed by `0.7.0_AE_CloudOps~S` at 2026-08-28T02:33Z under `ETFS_SATELLITES.TO-7-AE`,
+not by this seat.** `2.0.0_SA_COO~Z` (12307) dispatched this seat to verify s.3, because that lane's
+control was *"BEHAVIORS 27 (was 26) -- exactly one added"* -- **a count that is structurally silent
+about a re-point underneath it.**
+
+## 7.1 THE PREDICTION IN s.3/s.4 IS CONFIRMED. THE FOUR MOVED.
+
+Identical instrument and argv as the s.3 pre-apply read, so the two are comparable:
+
+```
+                        PRE-APPLY (02:2xZ)      POST-APPLY (02:5xZ)
+ordered behaviors       26                      27
+shared-advisor-router   4 @ :24                 5 @ :25      <-- ALL FIVE, not one
+shared-advisor-router-  4 @ :5                  5 @ :5       <-- gained the new assoc, DID NOT republish
+  response
+auth-validator-edge     23 @ :18                24 @ :18
+```
+
+```
+  25  /api/scoped/advisor-intelligence/artifacts/*/*     <- was :24
+  25  /api/scoped/advisor-intelligence/artifacts/*       <- was :24
+  25  /api/scoped/advisor-intelligence/entities/*/*      <- was :24
+  25  /api/scoped/advisor-intelligence/*.json            <- was :24
+  25  /api/scoped/satellites/*                           <- new
+```
+
+>> **"Exactly one added" and "four re-pointed" were both true of the same apply.** The counting control
+   could not have seen the re-point, which is the whole reason s.3 was written.
+⭐ **The `-response` router staying at `:5` confirms `0.0.0_AB_MSTR~Z` 11896 was right on its own point:**
+the two routers are separate artifacts and only the one whose artifact changed republished.
+
+## 7.2 THE DERIVED LIMB IS NOW MEASURED
+
+s.5 graded the `:24 -> :25` propagation as **DERIVED, not measured**, and named the post-upload plan as
+the settling instrument. The apply itself settled it. **The derived limb was correct** -- recorded here
+because a prediction that is confirmed should be marked as confirmed, not quietly absorbed.
+
+## 7.3 ARE THE FOUR STILL SERVING? -- ARTIFACT PLANE: PURELY ADDITIVE, MEASURED
+
+Content check on **deployed bytes** (`get-function` code URL for each qualifier, not the repo):
+
+```
+                                        v24        v25
+/api/scoped/satellites/                 ABSENT     PRESENT (n=1)
+platinum/satellites/registry.json       ABSENT     PRESENT (n=1)
+advisor-intelligence                    PRESENT(4) PRESENT (n=4)
+ZZZ_NEGATIVE_CONTROL_NOT_PRESENT        ABSENT     ABSENT        <- probe can return absence
+```
+
+⛔ **A TOKEN-LEVEL DIFF IS THE WRONG INSTRUMENT HERE AND READS AS ALARMING:** it reports 59 added /
+58 removed tokens, of which essentially all are minifier identifier renames (`b`->`M`, `Z`->`$`,
+`E`->`h`). **`bun build --format=esm` mangles identifiers and preserves string literals**
+(`3.0.0_SA_CVO~Z` 11952 s.3(a)), so the sound instrument is a LITERAL diff:
+
+```
+v24 unique string literals   87
+v25 unique string literals   94
+REMOVED in v25               0        <-- EVERY v24 literal survives
+ADDED in v25                 7        "/api/scoped/satellites/", "platinum/satellites/registry.json",
+                                      "registry.json", "satellites_unknown_leaf",
+                                      "unknown_satellites_resource", "404", "Not Found"
+87 + 7 = 94, arithmetic closes.
+```
+>> **ZERO REMOVALS. The change is purely ADDITIVE at the plane that survives minification** -- every
+   literal the advisor-intelligence path depends on (`opal-data-portal-v2`, `platinum/advi/`) intact.
+
+## 7.4 SERVED PLANE -- NO REGRESSION, AND ONE LIMB I COULD NOT EXERCISE
+
+```
+unauthenticated probes, all three fail CLOSED (auth-validator-edge runs viewer-request, ahead of the router):
+  /api/scoped/advisor-intelligence/artifacts/test.json   401
+  /api/scoped/satellites/registry.json                   401
+  /api/general/positioning_data.json                     401
+
+CloudFront AWS/CloudFront, dist EVTSA9VEHNZVH, 02:00Z-03:00Z (5-min periods; the CLI renders LOCAL -04:00):
+  5xxErrorRate   0.0 at EVERY datapoint, both sides of the 02:33Z apply
+  TotalErrorRate ~100% BEFORE the apply as well as after -- 4xx on an auth-gated API surface, NOT a regression
+  02:45Z         20 requests at 10% error rate -> ~18 SUCCESSFUL responses served post-apply
+```
+⚠ **DENOMINATORS ARE TINY (3-125 requests per 5-min period), so the rate percentages are noisy** --
+at 4 requests one 401 reads as 25%. The load-bearing facts are **5xx = 0 throughout** and **the error
+rate is no worse after than before**, not the absolute percentage.
+⛔ **AND THE CLOUDFRONT METRICS ARE DISTRIBUTION-WIDE, NOT PER-BEHAVIOR** -- the ~18 successful
+responses cannot be attributed to advisor-intelligence specifically.
+
+>> ⛔ **NOT EXERCISED, AND NAMED RATHER THAN SUBSTITUTED: an authenticated 200 on an
+   advisor-intelligence path.** Those routes 401 ahead of the router, so an unauthenticated probe
+   cannot reach the code that changed. **The demo password is deliberately not committed** -- the
+   2026-07-09 change-management record states it was bcrypt-hashed and shredded, plaintext never
+   committed -- so this seat cannot mint a bearer. **The strongest statement the available evidence
+   supports is: the artifact is additively unchanged for advisor-intelligence and nothing is erroring.
+   That is not the same as a served 200, and it is not being reported as one.**
+
+## 7.5 OBSERVATION, NON-BLOCKING
+
+`list-versions-by-function` renders **v24 LastModified `2026-08-28T02:46:27Z`, LATER than v25's
+`02:29:53Z`** -- unexpected for an immutable published version. **v24's `CodeSha256` is still
+`1xewzMSnrs/...`, byte-identical to the pre-apply artifact metadata, so the CODE is intact**; the
+likely cause is Lambda@Edge replication touching version metadata. Surfaced to `3.0.0_SA_CVO~Z` as an
+OBSERVATION, not chased.
+
+## 7.6 VERDICT
+
+**THE FOUR ARE CLEAN.** They moved `:24 -> :25` exactly as disclosed, onto an artifact that is
+additively unchanged for their code path, with zero 5xx across the apply boundary and the fail-closed
+guard intact. **One limb -- an authenticated 200 -- is unexercised for want of a credential this seat
+does not hold, and is recorded as unexercised.**
+
 -- `0.7.0_AE_CloudOps~Y`
