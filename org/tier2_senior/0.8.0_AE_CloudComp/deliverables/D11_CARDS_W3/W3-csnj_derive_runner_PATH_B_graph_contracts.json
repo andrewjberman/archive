@@ -129,7 +129,7 @@
     },
     "key": {
       "identity_space": "TABLE identity: the pyiceberg 2-tuple ('globgrph','graph_contracts'). ROW identity: contract_id -- and unlike PATH A's row keys this one IS actively used as a key: it drives the already-present skip (:1163), the overwrite id set (:1173), the overwrite_filter In('contract_id', ids) (:1214), and the post-write verify join (:1226-1228).",
-      "key_expression": null,
+      "key_expression": "TABLE key = the pyiceberg 2-tuple (namespace, table_name) as bound LITERALLY in source -- infra/aws/globgrph/derive_runner.py:202 `table_id = (\"globgrph\", \"graph_contracts\")`. COMPUTE: read the literal binding at those lines; no catalog call, no network. PREDICATE: a 2-tuple of non-empty lowercase identifier strings whose [0] is the namespace 'globgrph' and whose [1] is a member of that namespace's declared table list at infra/aws/globgrph/derive_runner.py:416 ('graph_nodes','graph_edges','graph_contracts','cse'). GRAIN: this expression is at the TABLE/part grain -- the grain a manifest consumer joins on. The ROW grain (node_id for nodes; (src_id,dst_id,edge_type) for edges; contract_id for contracts) is a DIFFERENT GRAIN, is carried by identity_space, and is deliberately NOT folded into this one expression (Rule 24 postulate ii, same grain). The row grain is NOT exercised here: reading a real row would require a catalog/S3 call, which this TO forbids.",
       "key_is_stable": "stable",
       "crosses_spaces": true,
       "declared_mapping": "NONE. Same three-rendering class as PATH A and it is not hypothetical here: this table is addressed as a 2-TUPLE at :202/:1154/:1222 and as a DOTTED 3-PART Trino string 'iceberg.globgrph.graph_contracts' by the Trino/fedobs consumers of the globgrph namespace. A string-equality join key on artifact identity splits one table into multiple rows silently. Flagged to 2.0.0_SA_COO~X as a join-key input; the normalisation is not this seat's to build (CCX3-AC8).",
@@ -139,9 +139,9 @@
         "key_is_stable": "measured",
         "crosses_spaces": "measured",
         "declared_mapping": "inferred",
-        "key_expression": "absent"
+        "key_expression": "measured"
       },
-      "evidence": "derive_runner.py:202, :1154, :1163, :1173, :1214, :1222 @ 3b918f21b42366fce14f7c2076f18444cd782931. declared_mapping is basis='inferred' for the Trino rendering SPECIFICALLY: I measured the dotted 3-part form for graph_nodes/graph_edges directly (.tools/_trino_fed.py:44, fedobs_views.sql:34) and am reasoning from the shared namespace to graph_contracts rather than from a line I read for THIS table. The tuple-form renderings ARE measured.",
+      "evidence": "derive_runner.py:202, :1154, :1163, :1173, :1214, :1222 @ 3b918f21b42366fce14f7c2076f18444cd782931. declared_mapping is basis='inferred' for the Trino rendering SPECIFICALLY: I measured the dotted 3-part form for graph_nodes/graph_edges directly (.tools/_trino_fed.py:44, fedobs_views.sql:34) and am reasoning from the shared namespace to graph_contracts rather than from a line I read for THIS table. The tuple-form renderings ARE measured. || KEYFILL @e629f07a6f (0.8.0_AE_CloudComp~X, TO-KEYFILL-CCX): key_expression FILLED and EXERCISED on a real member AT THE TABLE GRAIN. TRIPLE -- member `graph_contracts` (the live table this subject writes) -> key `('globgrph', 'graph_contracts')` -> identity_space `pyiceberg 2-tuple (namespace, table)`. Key VALIDATED against that space's predicate: [0]=='globgrph' and [1] in the four-table namespace list read at infra/aws/globgrph/derive_runner.py:416 this fill. Source lines re-read AT e629f07a6f and they have DRIFTED from this card's originally cited commit where that matters -- the bindings now sit at infra/aws/globgrph/derive_runner.py:202 `table_id = (\"globgrph\", \"graph_contracts\")`. Instrument: source read at HEAD, no catalog call and no network (the TO forbids egress), which is also why the ROW grain is not exercised.",
       "owner": "0.8.0_AE_CloudComp"
     },
     "failure_mode": {
