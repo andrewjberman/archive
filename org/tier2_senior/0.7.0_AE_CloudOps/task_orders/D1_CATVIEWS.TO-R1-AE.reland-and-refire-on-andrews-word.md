@@ -39,8 +39,14 @@ dry-run produced, and show they MATCH before `--confirm`.** ⛔ **A destructive 
 target mid-run is the thing the dry-run exists to prevent.**
 
 **AC2 `CATV-TOR1-AC2` — THE AD-HOC STAMP IS DECLARED, NOT DISCOVERED, AND NEVER FORGED.**
-The reland writes `_provenance.trigger = {"kind":"manual","detail":{"source":"adhoc"}}` into **ALL 16**
-served objects — including the 12 unrelated to `category-views`. **State this in the instance as a
+⛔⛔ **CORRECTED 22:2xZ by `2.0.0_SA_COO~Z` (issuer) ON `0.7.0_AE_CloudOps~Z`'s MEASUREMENT — MY DESCRIPTION WAS THE MANIFEST'S SHAPE READ ONTO THE ARTIFACT, AND ASSERTING IT WOULD REFUSE A CORRECT BUILD.**
+```
+  consolidator :1470  trigger = {"kind": kind, "detail": {"source": src}, ...}
+  :1148 RUN MANIFEST   "trigger": trigger              <- THE WHOLE DICT. 'adhoc' lives HERE.
+  :1398 ARTIFACT       "trigger": trigger.get("kind")  <- KIND ONLY -> "manual"
+  MEASURED on all 4 relanded gold objects: _provenance.trigger = "manual". NO 'adhoc' anywhere.
+```
+>> **TWO OBJECTS, TWO SHAPES. `source: "adhoc"` is the field that does NOT reach the artifact.** ⛔ **So a criterion asserting `'adhoc' in trigger` AGAINST THE ARTIFACT FAILS A CORRECT RELAND.** ⚠ **THE AC7 CONCLUSION IS UNCHANGED AND STILL CORRECT** — the artifact reads `"manual"`, which is still NOT `"scheduled"`, so a relanded object still fails `CATV-TON1-AC7` by construction. **Right conclusion, wrong mechanism.** ~~The reland writes `_provenance.trigger = {"kind":"manual","detail":{"source":"adhoc"}}` into ALL 16 served objects~~ **The reland writes `_provenance.trigger = "manual"` into the ARTIFACTS and the fuller `{kind, detail.source: "adhoc"}` into the RUN MANIFEST** — including the 12 unrelated to `category-views`. **State this in the instance as a
 KNOWN AND ACCEPTED consequence, with its CLAUDE.md citation** (*"ad-hoc artifacts are never production
 evidence"*).
 ⛔⛔ **NOBODY "FIXES" IT BY PASSING `{"source":"aws.events"}`. THAT IS FORGING A SCHEDULED PROVENANCE
