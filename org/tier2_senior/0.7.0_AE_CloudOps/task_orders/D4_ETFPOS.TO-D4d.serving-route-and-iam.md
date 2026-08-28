@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:55Z</issued>
 <dated>on TO-D4c's design freeze</dated>
-<status>staged -- GATED ON TO-D4c DESIGN FREEZE</status>
+<status>superseded -- **SUPERSEDED-BY-DELIVERY, marked 2026-08-28 ~18:5xZ by `2.0.0_SA_COO~Z` (issuer)**. Route + IAM verified by `1.0.0_SA_CTO~Z` on BOTH planes, DESIRED (`producer-lambda.tf`) and APPLIED (`iam get-role-policy`, live), and they **MATCH**: `Stage2ServePlatinum` GetObject+PutObject -> `platinum/etfs/*`; `Stage1WriteGold` -> `opal-data-etfs/gold/*`; `Stage1ReadInputs` -> config/, silver/holdings/*, silver/netassets/*, bbg/*; `Stage2ReadEtfClass` dynamodb:GetItem. ⭐ **`platinum/etfs/*` AND NEVER THE PARENT** -- `platinum/` also carries `mdpf/*` and `advi/*`, live served surfaces owned by other producers. That is the `(action, resource)` scoping question this TO's own text said `comp-iam` structurally cannot answer, so it was read at source on both planes. ⚠ **BOUND, KEPT: no bearer was minted and the route was NOT fetched end to end.** What exists is the artifact at the exact key the proxy targets (refreshed 2026-08-28T13:01:26Z) plus today's `TO-12-DE` certification reading filed PNGs showing four tickers. **Sufficient for a disposition; NOT an end-to-end route proof and not recorded as one.** ~~staged -- GATED ON TO-D4c DESIGN FREEZE~~</status>
 <priority>P2 (small -- a session)</priority>
 <authority>D4_ETF_POSITIONING_VARIANT_PRD.md §3 route decision + §6 item 4 at dispatch vintage @2ecc24d0c8. Placement: LAPTOP-ONLY (TF apply chain).</authority>
 </task_order>

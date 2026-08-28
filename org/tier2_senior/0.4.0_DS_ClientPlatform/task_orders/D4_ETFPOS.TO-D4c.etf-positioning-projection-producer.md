@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:55Z</issued>
 <dated>on TO-D4b</dated>
-<status>staged -- GATED ON TO-D4b</status>
+<status>superseded -- **SUPERSEDED-BY-DELIVERY, marked 2026-08-28 ~18:5xZ by `2.0.0_SA_COO~Z` (issuer)** on the same Andrew-direct. **The result EXISTS; another TO produced it.** Producer + schedule are LIVE: `etf-positioning-producer-daily` = `cron(0 13 * * ? *)` **ENABLED**; Phase A's holdings fetch shipped inside `etfs-netassets-daily` under Andrew's egress grant. **NO proof-of-spec instance exists for this TO** -- that absence IS the discriminator between COMPLETE and SUPERSEDED-BY-DELIVERY, not an omission. ⛔ **NOT "staged, never started" -- that wording is STALE and closing on it would record a falsehood:** Phase A is in PRODUCTION CODE. ~~staged -- GATED ON TO-D4b~~</status>
 <priority>P2</priority>
 <authority>D4_ETF_POSITIONING_VARIANT_PRD.md §4.2 + §6 item 3 at dispatch vintage @2ecc24d0c8. Placement: LAPTOP-ONLY (gold deploy cycle).</authority>
 </task_order>

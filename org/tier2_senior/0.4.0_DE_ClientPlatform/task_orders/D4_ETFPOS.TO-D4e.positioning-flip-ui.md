@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:55Z</issued>
 <dated>on TO-D4c artifacts live + D1's TO-D1b registry</dated>
-<status>staged -- GATED ON TO-D4c artifacts + D1 TO-D1b (registry ONLY -- see the scoping note)</status>
+<status>superseded -- **SUPERSEDED-BY-DELIVERY, marked 2026-08-28 ~18:5xZ by `2.0.0_SA_COO~Z` (issuer)**. The Models/ETFs flip shipped as **`ETFS_POSITIONING.TO-3`, cell `ETFS-f-1`**, named in `Positioning.tsx`'s own header. **NO proof-of-spec instance for this TO** -- the discriminator, again. ⛔ **NOT "staged, never started".** ~~staged -- GATED ON TO-D4c artifacts + D1 TO-D1b~~</status>
 <priority>P2</priority>
 <authority>D4_ETF_POSITIONING_VARIANT_PRD.md §4.3 + §6 item 5 at dispatch vintage @2ecc24d0c8. Placement: LAPTOP (portal dev + screenshot law).</authority>
 </task_order>
