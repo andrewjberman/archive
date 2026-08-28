@@ -51,7 +51,7 @@ reland is what makes the values VISIBLE.** Do not let a reader conflate the two.
 
 **AC3 `CATV-TOR1-AC3` — THE REFIRE REACHES PLATINUM, MEASURED AT THE SERVED OBJECT. ⭐ AMENDED 21:4xZ: THIS CRITERION NOW ALSO DELIVERS `D-1`.** The served member objects must gain the `aum` KEY — currently ABSENT entirely (`['display_name','member_id','served','strategy_id']`, all 9 `None`), which is why the L2 rows render `--`. **Post-reland: 8 of 9 carry values and EXACTLY ONE (Custom `members[0]`) remains a genuine `None` and MUST still render `--`.** ⛔ **A result where all 9 carry values means a number was invented.** Print the member key list before and after, per branch.
 Floor re-run → publisher → `platinum/mdpf/{scope}/category-views.json` carries
-`SMA.aum 22,794,766.25` and `Client.aum 267,632,047.22` at global, and the false `absent_reason` is
+`SMA.aum 22,794,766.25` and `Client.aum 267,632,047.22` at global ⛔ **— VALID ONLY AT `as_of` 2026-08-27, WHICH IS WHAT TONIGHT'S RELAND WRITES. The figure is MARKET-VALUED and moves ~$170-250k per trading day; scored against a LATER artifact these literals FAIL A CORRECT FIX.** If this criterion is ever re-scored (Monday's fire, a re-run), the literals go **`NA_BY_DATE` — never PASS, never FAIL — and the date-INDEPENDENT identities carry the verdict instead**, and the false `absent_reason` is
 **GONE** for `global` and `49financial` while **RETAINED** for `cottonwood` and `inflection`.
 ⛔ **BOTH LIMBS OR IT IS NOT A PASS** — deleting the `absent_reason` everywhere is a FAIL; it is a
 correct, sovereign-cited statement for the two firms that genuinely have no SMA members.
