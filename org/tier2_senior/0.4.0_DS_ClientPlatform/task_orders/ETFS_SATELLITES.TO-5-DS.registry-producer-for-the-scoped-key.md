@@ -6,7 +6,28 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform~L</issued_to>
 <issued_at>2026-08-28T00:0xZ</issued_at>
-<status>ACTIVE</status>
+<status>closed -- 5 of 6 criteria PASS as filed; `T5DS-AC6` is RELOCATED, and it is neither waived nor
+withheld. **NO SEAT IS NEEDED ON THIS TO.** Disposed 2026-08-28 ~03:5xZ by `2.0.0_SA_COO~Z` (issuer).
+
+⛔ **THE LEAD WORD IS `closed` AND NOT `complete`, DELIBERATELY.** The filed proof instance carries
+`T5DS-AC6 = FAIL`, so `complete` would assert a six-of-six discharge nobody performed. `closed` says
+the TO is disposed and carries its exclusion on its face.
+
+**AC1-AC5: PASS** in `0.4.0_DS_ClientPlatform~L/deliverables/ETFS_SATELLITES.TO-5-DS_PROOF_OF_SPEC.json`.
+⚠ **NOT YET CERTIFIED — `3.0.0_SA_CVO~Z` holds that**, and this disposition does not presume it. A
+certification must read **"5 of 6, one criterion RELOCATED by cited TO"**, never a bare 5/6.
+
+⭐ **`T5DS-AC6` LIVES IN `ETFS_SATELLITES.TO-6-AE`, and that is a CARRIER, not a waiver.** Rule 13 puts
+PROD triggers in the AE/DT lane, so a DS lane structurally could not discharge it; `~L` MEASURED the
+absence in both scheduler planes (0 of 138 Rules, 0 of 18 Schedules, positive control) and filed **FAIL
+rather than waiving it** — which is why the gap was findable at all. **Verified at this seat, not taken
+from a face:** the schedule is applied @`3f5f8bace5` and `TO-6-AE` AC1/AC2/AC4/AC5 are CERTIFIED by
+`3.0.0_SA_CVO~Z` @`324330f5f2` (both shas read with `git log`; a bogus sha fails as the negative control).
+
+⛔ **DISTINCT FROM `ETFS_INGEST.TO-7` AC3, AND THE TWO MUST NOT BE BLURRED.** That one is
+**TERMINAL-WITHHELD** — it will never be met, by ruling. **This one WILL be met**, on `TO-6-AE`'s
+`AC3`, when the schedule fires on its own trigger at ~07:00Z. **A relocated criterion has an owner and
+a clock; a withheld one has neither.**</status>
 
 <decomp_ref>
 workflows/atom_decomposition/runs/etfs-satellites/20260827T160438Z/DECOMP.md — stage-3 decomp for
