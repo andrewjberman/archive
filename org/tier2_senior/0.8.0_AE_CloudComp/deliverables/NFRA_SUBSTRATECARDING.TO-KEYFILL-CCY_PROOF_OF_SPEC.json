@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SUBSTRATECARDING.TO-KEYFILL-CCY",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "assignee": "0.8.0_AE_CloudComp~Y",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-substratecarding-keyfill/20260828T1915Z/DECOMP.md",
+    "vintage_commit": "23dfe292e7",
+    "to_ref": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_SUBSTRATECARDING.TO-KEYFILL-CCY.key-expression-fill.md"
+  },
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_SUBSTRATECARDING.TO-KEYFILL-CCY.key-expression-fill.md",
+    "group": "W",
+    "vintage_commit": "028a9e7536"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_W2/ (7 cards), D11_CARDS_W3/ (4), D11_CARDS_W4/ (2)",
+      "kind": "config_data",
+      "commit_or_etag": "5a33399ce8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "13 substrate cards, trust.key row filled. Commit 5a33399ce8 reports '13 files changed, 47 insertions(+), 47 deletions(-)'. Structural tree diff pre(HEAD)->post over all 13 cards: exactly 4 JSON paths moved -- /trust/key/key_expression, /trust/key/basis_by_field/key_expression, /trust/key/basis, /trust/key/evidence -- and ZERO paths outside /trust/key/. Cards are repo artifacts; there is no deploy surface for them.",
+      "artifact_covered_by": ["KF-CCY-AC1", "KF-CCY-AC2", "KF-CCY-AC3", "KF-CCY-AC5"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_SUBSTRATECARDING.TO-KEYFILL-CCY_PROOF_OF_SPEC.json",
+      "kind": "doc",
+      "commit_or_etag": "this instance's own commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This file. Written after the card commit so it can cite it; its own commit hash is stated in the completion message rather than here, because a file cannot contain its own hash.",
+      "artifact_covered_by": ["KF-CCY-AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "KF-CCY-AC1",
+      "criterion_verbatim": "COMPUTABLE, EXERCISED, OWNER-DECLARED (KEYFILL-hpos-1, KEYFILL-hpos-4): every filled card's expression is exercised on >=1 real member with the triple printed and the key validated against the space predicate; the filling seat is the card's carded_by (this lane), so trust.key.owner stays truthful.",
+      "method": "command",
+      "invocation": "python keyfill_ccy.py (the fill+exercise runner; every expression exercised against a LOCAL artifact -- repo files, the local kuzu_nessie_db via comp-kuzu --mode inc, and the local git object DB)",
+      "output_evidence": "30 MEMBER -> KEY -> IDENTITY_SPACE triples printed, covering all 13 cards; 30 of 30 hold their space predicate. Every card has >=1 triple (7 cards have 1, W2-dmua 2, W2-iivv 2, W3-thav 2, W3-uuxp 2, W4-dncq 3, W4-lgbr 5, W2-kwjy 8). Several triples carry their own control rather than a bare assertion: W2-igwg's swapped triple matched 0 live edges (orderedness is the property the row asserts); W3-dljc recomputed identically AND a sibling file in the same commit yielded a different key; W4-dncq ran the derivation in BOTH directions on all 3 real DBs; W4-lgbr round-tripped all 5 members name->path->name; W2-dxxm's literal resolved to 4269 live edges against the rule bank's own declared 4269 at :306. OWNER limb: the partition was re-derived at run time as carded_by == 0.8.0_AE_CloudComp~Y, which IS the filling seat, so trust.key.owner needed no reroute and none was cited.",
+      "denominator": "13 of 13 cards carry >=1 exercised triple; 30 of 30 triples hold their predicate; partition re-derived 13, IDENTICAL to the TO's cut list",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "KF-CCY-AC2",
+      "criterion_verbatim": "BASIS CARRIED, ABSENCE HONEST (KEYFILL-hpos-2, KEYFILL-hpos-3): basis_by_field per the rule above (measured only on a real exercise; held for declared-unexercised; inferred never; null+absent legal and counted); the row basis is the floor; an absence carries its reason.",
+      "method": "schema_validation",
+      "invocation": "jsonschema.Draft202012Validator(org/standards/SUBSTRATE_CARD.v3.schema.json) over the 13 filled cards, plus a derived census of basis_by_field.key_expression and trust.key.basis",
+      "output_evidence": "basis_by_field.key_expression = measured on 13 of 13 -- every one exercised in THIS fill, so no card claims 'held' (none was declared-unexercised) and 'inferred' is used nowhere. The null+absent outcome was LEGAL and available; no card needed it, because every subject yielded a computable expression. trust.key.basis RECOMPUTED as the floor = MIN over basis_by_field (measured>held>inferred>absent): 8 rows inferred->measured, 5 rows stay absent. The 8 rose because the B1 delta pass had lowered them ONLY on the null key_expression and the fill cures exactly that; the 5 stay absent because key_is_stable is still absent on those, and a fill that does not touch the weakest sub-claim must not raise the floor. Verified by the schema's own enforced arm: basis 'measured' requires every basis_by_field entry 'measured', and all 13 validate.",
+      "denominator": "13 of 13 cards; measured=13 / held=0 / inferred=0 / absent=0 on basis_by_field.key_expression; row floor absent=5, measured=8 over 13",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "KF-CCY-AC3",
+      "criterion_verbatim": "v3 VALID (KEYFILL-hpos-5): the validator runs over this lane's filled set; PASS count printed with the denominator 13; the contradiction fixture is refused.",
+      "method": "schema_validation",
+      "invocation": "jsonschema.Draft202012Validator(org/standards/SUBSTRATE_CARD.v3.schema.json @bb01a20272) over the 13 filled cards; then the contradiction fixture through the SAME validator; then the same card unmutated as a positive control",
+      "output_evidence": "PASS 13 of 13 in the working tree, and PASS 13 of 13 again in the clean clone at the run commit. NEGATIVE ARM: the fixture (key_expression null + basis 'measured' + every basis_by_field entry 'measured') was REFUSED with 2 errors, first message \"'measured' should not be valid under {'const': 'measured'}\" -- the arm the v3 schema exists to make unrepresentable. POSITIVE CONTROL ON THE SAME VALIDATOR: the identical card unmutated PASSES, so the refusal is attributable to the planted contradiction and not to the card or the validator wiring. A refusal without that control would not distinguish 'the schema caught the contradiction' from 'the card was invalid anyway'.",
+      "denominator": "13 of 13 PASS (working tree) and 13 of 13 PASS (clean clone); 1 fixture refused; 1 positive control passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "KF-CCY-AC4",
+      "criterion_verbatim": "CENSUS + CLEAN CLONE (KEYFILL-qoos-1, KEYFILL-qoos-2): every count derived by the run and printed with its denominator (filled / absent-with-reason / refused over 13); the validator replays from a clean clone at --run-commit with the extract released on exit (--keep only for a named forensic case).",
+      "method": "command",
+      "invocation": "bash replay_ccy.sh 5a33399ce8 -- git clone --local --no-checkout of the workspace, then checkout of the three card dirs + the v3 schema PINNED AT 5a33399ce8; the validator and the census re-run entirely inside the extract; trap-based release on exit",
+      "output_evidence": "In the clean clone at 5a33399ce8: partition RE-DERIVED independently inside the extract as 13; v3 validation PASS 13 of 13; CENSUS filled 13 | absent-with-reason 0 | refused 0 | denominator 13; basis_by_field.key_expression measured=13 (denominator 13); trust.key.basis absent=5, measured=8 (denominator 13). LF-normalised sha256 of each card printed in the clone and matching the post-fill digests computed in the working tree (git warned 'LF will be replaced by CRLF' on commit, so a RAW sha256 would split across the checkout boundary and a naive byte compare would report a false difference -- the digest is normalised and that normalisation is stated, because a digest without its normalisation is not an identity). EXTRACT RELEASE: 'confirmed gone (/tmp/tmp.iBD2QzcK5D)' -- the release is a measured post-condition, not an assumption that rm succeeded. --keep was not used and no forensic case is named. Every number on this instance is derived by a run and printed with its denominator; none is typed.",
+      "denominator": "clean clone re-derived 13; PASS 13 of 13; filled 13 / absent 0 / refused 0 over denominator 13; extract release confirmed gone",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "KF-CCY-AC5",
+      "criterion_verbatim": "NO EGRESS, PRESERVATION (KEYFILL-qoos-3, KEYFILL-qoos-4): no vendor / PyPI / cloud call; pre-fill card bytes are in git history and the pre-fill digests are cited on the report; the diff pre->post is exactly the key rows.",
+      "method": "diff",
+      "invocation": "structural JSON tree diff of `git show HEAD:<card>` against the post-fill file for all 13 cards; plus a network-token census over the delivered files; plus a complete enumeration of the fill runner's spawn sites",
+      "output_evidence": "PRESERVATION: the union of every changed JSON path across all 13 cards is exactly {/trust/key/key_expression, /trust/key/basis_by_field/key_expression, /trust/key/basis, /trust/key/evidence} -- paths outside /trust/key/: NONE. A structural tree diff was used rather than a line diff because a line diff shows what changed and cannot show that nothing ELSE did. Pre-fill sha256 of all 13 cards cited in the completion message and reproducible from git history at HEAD~1. Writer serialization was proven byte-identical on a 13-of-13 round-trip control BEFORE any write (indent=2, ensure_ascii=False, trailing newline), so the diff cannot carry incidental reformatting; without that control a serializer mismatch would have rewritten all 13 files wholesale. NO EGRESS: 0 new network-use tokens (pip install|requests.|boto3|urllib|urlopen|httpx|curl -|wget) across the 13 delivered files, denominator 13. The runner's COMPLETE spawn census is 4 sites: 1 comp-kuzu (against the LOCAL file infra/aws/globgrph/kuzu_nessie_db, --mode inc = query never rebuild per CLAUDE.md Rule 20) and 3 git (against the local object DB). No aws, no HTTP, no PyPI.",
+      "denominator": "13 of 13 cards diffed structurally; 4 changed paths, 0 outside /trust/key/; 0 new network tokens over 13 files; 4 of 4 spawn sites local",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The contradiction v3 exists to make unrepresentable, planted into a real delivered card and submitted to the SAME Draft 2020-12 validator that produced the 13-of-13 PASS: key_expression set to null while trust.key.basis stays 'measured' and every basis_by_field entry stays 'measured'. Run AFTER the final build, so it certifies the DELIVERED bytes rather than an earlier draft. Paired with a positive control -- the identical card unmutated through the same validator -- because a refusal alone cannot distinguish 'the schema caught the contradiction' from 'this card was invalid for some other reason'.",
+      "expected": "REFUSED by the v3 allOf arm that forbids basis 'measured' beside a null key_expression, AND the unmutated control PASSES.",
+      "observed": "REFUSED with 2 errors; first message: \"'measured' should not be valid under {'const': 'measured'}\". Positive control on the same validator: PASS. The refusal is therefore attributable to the planted contradiction.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The fill runner was executed twice, independently, and the full exercise log (all 30 member->key->identity_space triples with their predicate verdicts) was captured from each run and byte-compared. A negative control was then run on the comparison instrument itself: a planted single-token difference was introduced into a copy of run 1 and the same diff was re-run, to establish that the instrument can SEE a difference when one exists -- a diff that is blind returns 'identical' for a stable run and an unstable one alike.",
+      "observed": "STABLE. Two runs produced byte-identical 169-line exercise logs. The instrument negative control reported the planted difference, so the STABLE verdict is attributable rather than an artifact of a blind comparison. NOTE ON SCOPE: this measures determinism of the KEY EXPRESSIONS and their exercises, which is the property the criteria turn on. The full written payload is NOT byte-stable across runs because the evidence appendix embeds the run's UTC timestamp; that is by design and is stated rather than smoothed over.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The LIVE-TABLE half of W2-qgtd's identity_space (the per-row ratified_at carrying a 16-character Nessie commit hash).",
+      "reason": "Reading it is an in-VPC/cloud act, which this TO forbids ('no vendor / PyPI / cloud call', 'No fetch'). The expression is declared for the DECLARED carrier only and the card says so in its own evidence. In the declared carrier every ratified_at reads PENDING-ANDREW-SIGNOFF, which is the file's own recorded divergence, not a contradiction found here."
+    },
+    {
+      "item": "EXISTENCE in S3 of the two singleton marker objects (W3-bzgw's frontend-coevolution watermark, W3-uuxp's branch-head marker), and BINDING of W3-uuxp's four table names against the live catalog.",
+      "reason": "All are cloud / in-VPC reads, forbidden here. What was exercised is that the expressions COMPUTE the keys from module-level literals, which is what a key expression is for; whether the objects are present is a different question needing a different instrument, and both cards state the gap explicitly rather than letting a computed key imply a verified object."
+    },
+    {
+      "item": "A computable expression for the item-label (P1/P2/P3) and section-anchor (§1-§5) spaces named in W2-iivv's identity_space.",
+      "reason": "Those are SUB-MEMBER citation targets at a finer grain than the corpus member, and nothing in the estate declares a derivation from a member's key to them. Inventing one would have produced a fuller-looking string that erased the card's own crosses_spaces=TRUE finding. The fill covers 1 of the 3 spaces and says so on the card."
+    },
+    {
+      "item": "Any card outside the carded_by == 0.8.0_AE_CloudComp~Y partition; the receiver join; the registry compile/ratification; any schema byte.",
+      "reason": "TO BOUNDARIES. The join is 0.4.0_DT_ClientPlatform~X's TO, the ratification is 4.0.0_SA_CRO~X's, and a schema defect is a finding to the schema owner. The four TOs addressed to the bare base serial 0.8.0_AE_CloudComp were not read onto this instance, per the issuer's bar."
+    },
+    {
+      "item": "SEMANTIC re-verification of the pre-existing card rows (identity_space, key_is_stable, crosses_spaces, declared_mapping) and of the findings they carry.",
+      "reason": "This TO's act is the key_expression fill. Where an exercise incidentally bore on another row it is recorded in the key row's evidence as an observation, not written into that row -- the diff is deliberately confined to /trust/key/ and any row rewrite would have broken AC5."
+    }
+  ],
+  "surprises": [
+    "⛔ A CORRECTION MADE INSIDE THIS FILL, on W3-thav, recorded because the WRONG read was the plausible one and it survived a control. Counting ARN coverage with `count(n.arn)` returned 27054 of 27054 non-null and I concluded the `node.get('arn') or node.get('id')` fallback branch was UNREACHED in the live population. It counts EMPTY STRINGS. Corrected denominator: arn IS NULL = 0, arn = '' = 25197, arn non-empty = 1857. The empty string is FALSY in Python, so the fallback carries 93.1% of the population -- the OPPOSITE conclusion. The wrong number was internally consistent and would have been written onto a delivered card as a measured finding. The discriminating instrument was asking for a member of the supposedly-empty set and reading what came back (arn was ''), not re-running the count.",
+    "⛔ THE B1 DELTA-PASS SENTENCE GOES FALSE ON EVERY CARD THIS FILL RAISES, AND NOTHING WOULD HAVE CAUGHT IT. The migrator appended '|| v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor' to trust.key.evidence. On the 8 rows the fill raises to 'measured' that sentence now sits in the SAME FIELD as the value that falsifies it. No validator reads prose, so a card can be schema-valid and self-contradictory at once. Handled by DISCHARGING it by name in the appended evidence and RETAINING it as the record of the migration. This affects every lane's fill, not just mine -- 72 cards went through the same delta pass. Routed as an OBSERVATION.",
+    "⛔ OBSERVATION (inert): edge_grain_binding carries NINE keys, not eight. `S3Key`, the sole key under the `partition` group, is a NODE type and not an edge_type. A consumer enumerating the block's keys to build a D1-bound edge-type list picks up one literal that can never match an edge, and the miss is silent because a no-match edge_type query returns 0 rows identically to a correct query over an empty set. W2-kwjy's expression now names the 8-key member set explicitly.",
+    "⛔ OBSERVATION (inert): W2-dmua's and W2-qgtd's identity_space PROSE under-describes their own key space, in a direction that breaks a join. W2-dmua's says 'artifact filenames including templated ones ({date}.json ...)' where the actual keys are FULL artifact:s3:// URIs; 3 of the 7 keys are templates and match a SET rather than a member. W2-qgtd's names bare quantities ('advisor_intelligence') where the actual contract_id is '<quantity>-<surface-family>' with the quantity segment HYPHENATED ('advisor-intelligence-nna') -- a consumer joining on the bare underscored name misses on both counts. Recorded in the key rows' evidence; identity_space itself was NOT edited, because AC5 confines the diff to the key rows.",
+    "⚠ OBSERVATION (inert): comp-kuzu is a ~/bin bash forwarder, not a native executable, so a bare subprocess.run from native Windows Python fails WinError 2. Routed through .tools/msys_argv_guard.py msys_safe_run per CLAUDE.md's Git section. Noted because the failure mode is a spawn error rather than a wrong answer, so it is loud -- but a runner that wrapped the spawn in a bare except would have converted it into a silent zero.",
+    "⚠ OBSERVATION (inert): this seat's prompt.md still describes the LD-0119 comp-ferry-test persona (one real-task invocation per tool per ferry cycle, an 8-field lift report). The work actually dispatched to this lane for several sessions has been substrate carding. The prompt is stale against practice; surfaced, not chased, and no prompt byte was touched."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-28/ (written at session close, with a mandatory Compiler Tools section)",
+  "compiler_tools": [
+    {
+      "tool": "comp-kuzu",
+      "invocation": "comp-kuzu --mode inc --json '<Cypher>' -- 8 queries against the LOCAL infra/aws/globgrph/kuzu_nessie_db: the live edge_type census, the 8 D1-bound literals, the HAS_FIELD count, an ordered WRITES_S3 triple plus its reverse-direction control, the arn/node_id coverage denominator, and one member from each branch of the arn-or-node_id derivation.",
+      "result": "Every query returned. --mode inc was used deliberately (QUERY, never rebuild -- CLAUDE.md Rule 20). The tool's own 0-rows banner ('a wrong-pattern query returns 0 identically') is what prompted grounding the arn IS NULL zero with a denominator, which is how the count(n.arn) empty-string error was caught."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'graph_contracts*' / '_provenance.py' / '*_build_manifest.json' / '*substrate_card*' / 'validate_substrate*'; comp-find 'HAS_FIELD' <rule bank>; comp-find 'run-commit' --files; comp-find 'MANIFEST_SUFFIX' / 'def cache_file' / 'CACHE_DIR ='",
+      "result": "Located every artifact whose path the cards cite without a directory (_provenance.py is at infra/aws/globgrph/, NOT under the incremental_updater dir the card's citation implies). The HAS_FIELD census returned a complete 2-hit result over one file (:141, :306) and was NOT headed, per Rule 21. Correctly refused a scratchpad pathspec with git rc=128 rather than returning a false zero -- comp-find is repo-only by ruling, and the refusal is the right behaviour."
+    },
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"which script validates substrate cards against the v3 schema with a clean clone and run-commit\"",
+      "result": "NO CURATED RULE MATCHED -- all candidates below the vetted band, and the tool said so loudly rather than routing to a plausible wrong tool. Correct: no comp-tool covers substrate-card validation; the instrument is jsonschema against org/standards/SUBSTRATE_CARD.v3.schema.json. Taking its top-ranked guess (comp-transform, score 0.50) would have been the error the banner exists to prevent."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": ".tools/safe-commit.sh --author \"0.8.0_AE_CloudComp~Y <...>\" -F <msgfile written by a non-shell writer> -- <the three card dirs>",
+      "result": "Committed 5a33399ce8, 13 files, 47 insertions / 47 deletions, author line correct. risk-reflex REFLEX CLEAN (13 files against 1910 danger nodes, map 11.2h old). ⛔ commit-gate printed 'checked 0 of 13 file(s) -- NOTHING WAS CHECKED' because it reads only .py/.sh/.tf/org/projects/*.json; it is NOT cited as validation for these JSON cards, per its own warning. The validation instrument for this deliverable is the v3 schema validator."
+    },
+    {
+      "tool": ".tools/msys_argv_guard.py",
+      "invocation": "from msys_argv_guard import msys_safe_run -- used for the comp-kuzu spawn from native Windows Python",
+      "result": "Required: comp-kuzu is a bash forwarder and a bare subprocess.run raised WinError 2. The guard routes the spawn through bash and the queries returned correctly."
+    },
+    {
+      "tool": "python .tools/audit-archive-invoker.py (startup A.2)",
+      "invocation": "python .tools/audit-archive-invoker.py",
+      "result": "rc=1, 2 findings -- [COVERAGE/UNCOVERED-AUDIT-LOG] org/to-pos-override-audit.log and [LIVENESS/STALE-BASELINE] baseline 207.5h old. Both are the KNOWN pair named in org/XXX.md as OWNED-UNTIL-rv0057-f001; NOT re-filed, per that note's explicit instruction. snapshot=deferred (this lane is not GOVERNANCE_AUDIT-permitted)."
+    }
+  ]
+}
