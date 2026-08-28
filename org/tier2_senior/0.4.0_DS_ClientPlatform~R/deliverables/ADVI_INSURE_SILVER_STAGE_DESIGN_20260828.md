@@ -91,14 +91,46 @@ unless Andrew explicitly asks."* **A short pull must surface as a STAGE GATE (s.
 An **absent** bronze day is `SKIP: an absent day is ABSENT — no roll-forward, no zero rows.` A holiday
 or a missed fire produces **no partition**, never a zero-row one.
 
-> ⚠ **ONE OPEN QUESTION FOR THE ISSUER.** Idempotence is currently keyed on *the silver key existing*,
-> not on *the bronze content having changed*. If a day's bronze is **re-pulled and corrected** (the
-> 08-27 page-short partition is the live case — a completing `offset50` would make it convertible),
-> the stage will SKIP the day because silver already exists. **Options:** (a) leave it — a corrected
-> bronze is a human-noticed event and `--force` is the human's verb; (b) key the skip on a bronze
-> content digest so a changed bronze re-converts. **(a) is my recommendation** — (b) adds a digest
-> the stage must store and trust, and the failure it prevents is rare and already loud. **Issuer's
-> call; I have not built either.**
+### ⛔ RULED 2026-08-28 by `2.0.0_SA_COO` 78437 (adopting `1.0.0_SA_CTO` 78421 in full) — **(b)**
+
+**I recommended (a) silver-exists. The issuer ruled (b) the bronze content digest, and the reasoning
+is better than mine:** Rule 17 says **silver IS bronze dedup+dtype**, so silver must track bronze
+**CONTENT** — a silver key existing proves only that *something* was converted, never that it was
+converted from *this* bronze. And a value that **carries its claim** (the digest, in the manifest) is
+what lets a reader reject a stale silver. *My (a) reasoned from how rare the failure is; the ruling
+reasoned from what silver IS. The second is the right axis.*
+
+```
+manifest.json (beside data.parquet, the a00_runner:224 convention)
+  {bronze_digest, bronze_key, pull_date, record_count, attested_total}
+  + superseded_bronze_digest   on a re-convert
+
+same digest      -> SKIP        (silver-exists DERIVED from the bronze, not assumed from a key)
+different digest -> RE-CONVERT and supersede in place, prior digest retained
+```
+
+**Digest normalisation, stated because a digest without it is not an identity:** SHA-256 over the
+bronze partition's bytes at the ruled grammar — **every page, in sorted key order, `key + NUL +
+bytes`**. The key is hashed with its bytes so a renamed or re-offset page is a *different* partition;
+the NUL separator is why two pages cannot concatenate into a colliding single page. Computed **after**
+the reader, so **page-short bronze still refuses at the completeness control before any digest is
+taken** — a digest over incomplete bronze is a confident identity for the wrong object.
+
+**BUILT AND EXERCISED** (`--self-test`, 10 arms, PASS): the six decision arms each from a different
+planted truth, plus four normalisation properties (key order invariant; content change, page rename,
+and page-boundary shift each detected).
+
+> ⚠ **ONE FORK THE RULING DID NOT REACH, AND I TOOK THE CONSERVATIVE SIDE.** Three silver partitions
+> already exist and **carry no manifest** — they predate this regime. There is no prior digest to
+> compare, and writing one now would assert that today's bronze produced a parquet I never verified
+> it produced. So the default is **`SKIP-UNVERIFIABLE-NO-MANIFEST` (rc=1, loud)**: not skipped as
+> "unchanged", not rewritten by surprise. `--backfill-manifest` opts into a re-convert so parquet and
+> manifest come from the **same measured bronze**. **Named for the issuer rather than decided
+> quietly** — the alternative (silently rewriting three served partitions on the first stage run) is
+> exactly the kind of surprise an idempotence change should not carry in with it.
+> **Exercised against live S3, dry-run:** all three existing partitions correctly report
+> `SKIP-UNVERIFIABLE`, with three distinct digests (`fd8e879848…`, `672b5677b9…`, `d6d8f2da61…`) and
+> per-feed isolation intact.
 
 ---
 
