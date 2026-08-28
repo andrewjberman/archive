@@ -1,0 +1,225 @@
+{
+ "acceptance": [
+  {
+   "criterion_id": "PRFR2DS-AC0",
+   "criterion_verbatim": "STEP 0 census delivered: 11 leaves x last-emission vintage; the DE-side emptiness NAMED as build-gap or serving-gate with the measured reason; the campaign position pinned (ledger commit + dates complete of 534). No code changed.",
+   "denominator": "11 leaf emitter families, confirmed two ways (11 files on disk AND 11 EMITTERS entries at d_publisher_port.py:150-190); 12 platinum objects; 534 campaign dates.",
+   "invocation": "find . -name 'perfrp_*.json' ; .tools/aws s3api list-objects-v2 --bucket opal-data-portal-v2 --prefix platinum/advi/49financial/ ; git log --all --diff-filter=A -- '*perfrp_*.json' ; python campaign_census.py",
+   "method": "command",
+   "output_evidence": "11 of 11 round-1 leaves UNEMITTED on every plane, on THREE instruments each carrying a positive control: (1) tree find -> exactly 1 perfrp_*.json and it is the DE fixture perfrp_books_l3.json, not an emission; (2) platinum prefix -> 12 objects, 0 perfrp, all LastModified 2026-08-21T15:03-15:04Z which PREDATES the emitters (authored 2026-08-24/25), and _manifests/latest.json contains the substring 'perfrp' 0 times; (3) git log --all --diff-filter=A -> 0 commits across every ref, so a since-deleted emission would still have surfaced. Corroborated on a DIFFERENT KIND of instrument (prose, not filesystem): round 1's close log states 'Nothing is published' and 'my first emission is their start condition'. This is the DESIGNED round-1 end state -- perfrp_emit_core.py:21-25 says it emits LOCALLY and 'has no S3 write path at all'. (b) NAMED SERVING GATE, measured at the CONSUMER: the contract handshake MATCHES (perfrp_contract.py:37 == portal .../perfrp/contract.ts:18, both 'perfrp-contract-0.5.0-skeleton') so it is NOT the gap; PERFRP_AVAILABLE_LEAVES gates 1 of 5 cards (requiresLeaf census: 6 matching lines = 1 interface declaration + 5 card defs; 1 true gain_loss, 4 false); the 4 visible cards are emptied by payload={null} at AdvisorBookView.tsx:868. (c) campaign pinned on the COMMITTED plane: campaign_ledger_commit 7c6aa7cea7, 63 of 534 ARTIFACT-COMPLETE, newest complete 2024-10-03; the working tree read 81 of 534 and is NOT a pinnable vintage. Commit 07727aef87. No code changed, no S3 write, no gold run.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "PRFR2DS-AC1",
+   "criterion_verbatim": "b-2: both performance leaves re-emitted on the corrected twr_daily; inv-6 arms (zero-BMV flag renders; summed-return mutant fails; NaN-not-None regression arm) PASS; the window % reproduces PROD(1+r_net)-1 on a pinned date range. PINS: upstream partition LastModified per table + campaign ledger commit + dates_complete_of_534 in the row AND in the emission manifest.",
+   "denominator": "4,665 accounts / 3,075 relationships; 87 trading days; 321,740 daily r_net observations.",
+   "invocation": "python perfrp_performance_relationship.py --date 2024-11-07 --period SI --out <path> ; python perfrp_performance_account.py --date 2024-11-07 --period SI --out <path> ; python deliverables/arms/perfrp_b2_oracle.py",
+   "method": "command",
+   "output_evidence": "Emitted relationship 3,075 entries / account 4,665 entries at as_of 2024-11-07, period SI, 87 trading days. ORACLE, an INDEPENDENT recomputation importing neither perfrp_emit_core nor perfrp_rollup: recomputed == emitted on ALL 4,070 computable accounts, max|delta| = 0.000e+00, days_present matching throughout. INDEPENDENCE STATED NARROWLY: it re-derives the COMPUTATION by a different code path but reads the SAME S3 substrate, so it can catch a wrong computation, window or linking law and CANNOT corroborate that the bytes are correct -- that rests on the campaign and is AC6's read. inv-6 MUTANT distinguished on 3,947 of 3,947 accounts where the two laws CAN differ (exact inequality); 123 EXCLUDED as non-test-sites because with fewer than two non-zero returns the laws are identical by construction. ZERO-BMV: 647 accounts flagged; 0 NOT_COMPUTED entries carry a value; all 95 zero-valued entries are genuinely flat accounts. NaN-not-None regression PASS. VINTAGE SHOWN DISCRIMINATINGLY: flow_boundary present in all 87 window partitions and ABSENT from the pre-campaign control date=2025-06-02 @2026-08-19T01:13:27Z. ROUND-1 DEFECT REPAIRED: the emitter read ONE partition and passed expected_days=len(series), so a one-day window scored COMPUTED at coverage 1.0 -- both halves wrong in the same direction, hiding each other. A SECOND defect, mine, was then found and fixed: the SI window included the data floor 2024-07-08, which cannot carry a return, making COMPUTED unreachable for all 4,665 accounts; after the return-floor fix the census reads COMPUTED 3,381 / COMPUTED_PARTIAL 689 and a REACHABILITY arm now guards it. Commits e94af643b5, 1fa9d927e0. PINS ON THIS ROW: canonical/twr_daily {max_last_modified_utc 2026-08-28T19:18:17Z, n_partitions_read 87, requested 87, absent []}; canonical_valuation and dim_relationship {1,1,[]}; campaign_ledger_commit 7c6aa7cea7, dates_complete_of_534 = 63 (COMMITTED plane at emission).",
+   "status": "PASS",
+   "status_reason": "QA EVIDENCE, not the AC6 arming emission: the campaign read 63 of 534 on the committed plane at emission time."
+  },
+  {
+   "criterion_id": "PRFR2DS-AC2",
+   "criterion_verbatim": "b-3 on a-3: Sum class MV == level MV; drift(as-of,as-of) == 0; residue named. PINS as AC1.",
+   "denominator": "3,834 relationship keys / 6,179 account keys; 5 asset classes; canonical_positions 103,250 rows.",
+   "invocation": "python perfrp_allocation_relationship.py --date 2026-08-27 --out <path> ; python perfrp_allocation_account.py --date 2026-08-27 --out <path> ; python deliverables/arms/perfrp_b3_allocation_arms.py",
+   "method": "command",
+   "output_evidence": "Sum(class MV) == level MV at max |delta| 0.000000 across EVERY key at BOTH grains (3,834 relationship / 6,179 account keys), and both grains tie to the RAW canonical_positions partition at 1,793,416,380.56 exactly -- a per-key breakdown that lost or invented MV would separate there. drift(x,x) == 0 on every class WITH NEGATIVE CONTROLS: a 1,000 perturbation IS detected, and a class present on one side only reports present_in_both=False and share_delta=None rather than a 0.0 move. RESIDUE NAMED AS TWO STATES AND NEVER FOLDED: UNCLASSIFIED-LOUD (a07 holds the security and declares it unclassified -- a VERDICT) and NO-CLASSIFICATION-ROW (cusip absent -- a COVERAGE GAP); different owners, different remedies, so one bucket would break Rule 24 (iv). NOT renamed to 'To Be Classified': that is BD's SuperClass taxonomy and PRF-a-3's prose, while the live a07 enum is equity/fixed_income/UNCLASSIFIED-LOUD/alternatives/cash -- round 1 surfaced this and renaming would re-introduce the defect that finding closed. ROUND-1 DEFECT REPAIRED: _allocation accepted `level` and never referenced it, so both grains emitted byte-identical firm-wide payloads and AC2 had no level to sum over. MEASURED FINDING: residue is 2.2881% at the newest as-of vs 15.0103% at 2024-11-07, and the SPLIT is the discriminator -- NO-CLASSIFICATION-ROW moves 14.0385% -> 1.3728% while UNCLASSIFIED-LOUD stays flat (0.9719% -> 0.9153%), exactly what a current-state classification table with no vintage store predicts. The 2.2881% reproduces round 1's a-3 census (2.2813%) on a different instrument. Commit 1fa9d927e0. PINS ON THIS ROW: canonical_positions {2026-08-28T12:47:15Z,1,1,[]}; dim_asset_classification {2026-08-28T12:47:11Z,1,1,[]} with vintage_quality read-time-only (contract STRUCTURALLY-ABSENT -- a DDB read with no vintage store, so the stamp pins WHEN it was read, not WHICH data); dim_relationship {2026-08-28T12:46:05Z,1,1,[]}; campaign_ledger_commit 7c6aa7cea7, dates_complete_of_534 = 63.",
+   "status": "PASS",
+   "status_reason": "QA EVIDENCE. Allocation is CURRENT-STATE by contract (ALLOCATION_IS_PERIOD_KEYED = False, 'the as-of mix from the newest partition'), so its as-of is 2026-08-27 and not b-2's 2024-11-07; the 2024-11-07 pair is retained as evidence_* files for the vintage finding."
+  },
+  {
+   "criterion_id": "PRFR2DS-AC3",
+   "criterion_verbatim": "b-7 + b-6: ONE rollup function (comp-find census: 1 definition, every level a caller); inv-3 recompute L2 == Sum L3 == Sum L4 on a pinned as-of; new+lost+existing == relationship count. PINS as AC1.",
+   "denominator": "3,075 relationships / 4,665 accounts (b-7); 146 advisors / 10,076 client rows (b-6); 1,120 multi-child relationships; 158 dim_relationship partitions.",
+   "invocation": "python deliverables/arms/perfrp_b7_inv3_arms.py <before.json> ; python perfrp_book_advisor.py --date 2026-08-27 --period QTD --out <path> ; python deliverables/arms/perfrp_b6_book_arms.py",
+   "method": "command",
+   "output_evidence": "ONE DEFINITION by AST census rather than text (so a comment or docstring mentioning 'def rollup' cannot score as a duplicate): exactly 1 definition at perfrp_rollup.py:155, caller perfrp_emit_core.py. inv-3 MEMBERSHIP recomputed from the SERVED artifacts, not the emitter's memory: covers all 3,075 relationship entries; 4,665 ids and 4,665 DISTINCT (DISJOINT); the id set EQUALS the account grain's 4,665 keys (COVERING); len(ids)==accounts on every relationship, 0 mismatched. b-7 DEFECT FOUND AND FIXED, AND IT WAS LIVE ON SERVED FIGURES: the law aligned children BY LIST POSITION, sound only if every child covers the same dates in the same order -- measured, 675 of 4,665 accounts have series shorter than the window and 147 of 1,120 multi-child relationships mix lengths (worst child set [2,87,87,87,87], 85 days of skew). 85 of 3,075 relationship returns MOVED on the date-alignment fix, one from -0.021349 to -0.095556, a 7.4 percentage-point error with no shape, sign or magnitude tell. The law now REFUSES mixed or differing-length children instead of silently max()-ing, WITH POSITIVE CONTROLS: equal-length undated children still roll up (0.050600), and the date-aligned parent gives 0.1550000000 where positional alignment would give 0.1000000000 on the same fixture. b-6: 146 advisors; four RULED tiles transcribed from the CONSUMER's PERFRP_BOOK_TILES rather than named here; 1,898 figures each carrying figure_state + reason; new+lost+existing == union on 146 of 146, and also new+existing == at_as_of and lost+existing == at_window_start; NON-ADDITIVITY EXPRESSED not asserted (16 of 146 advisors show the gap; firm-wide 15,280 deduped vs 15,589 additive, a 2.0% overstatement avoided); the CLIENT TABLE built to CTO 79447's named 7-column set with the display label derived exactly as d04_clients_tab derives it, every figure a rollup THROUGH THE ONE FUNCTION, identity (i) beginning+flows+net_gain==ending 0 bad of 10,076 rows and identity (ii) column sums == the advisor's KPI tiles 0 violations of 146. Commits eaad3d36ea, fa5a14a9eb, b70cbc5604, 2725844568, 160ab97c36. PINS ON THIS ROW: silver/dim_advisor_fee_role {2026-08-28T07:06:46Z, partition 2026-08-27, rows_total 165428, rows_is_current 5337, floor 2026-07-14}; canonical/flow_ledger read 36 of 41 requested with the 5 absent DECLARED; canonical_valuation and dim_relationship at as-of and window-start with the aliasing DECLARED (window_start requested 2026-07-01 -> read 2026-03-24); campaign_ledger_commit 7c6aa7cea7, dates_complete_of_534 = 63.",
+   "status": "PASS",
+   "status_reason": "QA EVIDENCE. b-6's as-of (2026-08-27, QTD) differs from b-2's BY CONSTRUCTION: jd2 holds 31 partitions spanning 2026-07-14..2026-08-27 and has NONE at or before a 2024 as-of, so b-6 REFUSES a historical as-of rather than aliasing FORWARD (negative control: --date 2024-11-07 exits rc=2 and writes no file). Separately dim_relationship is SPARSE (158 partitions, gaps of 413 and 112 calendar days), so the new/lost baseline aliased 2026-07-01 -> 2026-03-24; that disclosure rides ON the affected figures as COMPUTED_PARTIAL with the drift in days, not only in the pins."
+  },
+  {
+   "criterion_id": "PRFR2DS-AC4",
+   "criterion_verbatim": "b-5: paged per-relationship key; a request without a relationship key REFUSES; page size + hasMoreResults present; the sec-15 column set honoured with absent columns declared. PINS as AC1.",
+   "denominator": "22 measured-sensitive columns, all 22 present upstream; 17 allowlisted served columns vs the PRD's 10 card columns; fact_trn date=2026-08-27.",
+   "invocation": "python deliverables/arms/perfrp_b5_transactions_arms.py",
+   "method": "command",
+   "output_evidence": "Exercised on REAL fact_trn rows (opal-data-assets, schwab/08335338/silver/fact_trn/date=2026-08-27). NO WHOLE-FIRM LEAF EXISTS AND THAT IS THE CRITERION MET: build() REFUSES the family because s.11 #6 rules transactions a per-relationship PAGED resource, so one file containing every transaction would violate the rule AC4 tests. REFUSALS: relationship_id None, '' and '   ' all raise; the parameter is keyword-only with NO default so a caller cannot omit it into 'all'; POSITIVE CONTROL -- a real key returns a page. PAGING, on the case that separates a correct implementation from a plausible one: 20 rows at page_size 10 gives page 0 returned 10 hasMoreResults True, and PAGE 1 RETURNED 10 WITH hasMoreResults FALSE -- a FULL LAST PAGE, where inferring 'more' from a full page would promise rows that do not exist; page past the end returns 0 rows and False; page_size 0/-1/501 (MAX 500) and a negative page all REFUSE. COLUMN SET transcribed FROM THE PRD, not from the allowlist: s.6.2 enumerates TEN card columns plus TWO DECLARED ABSENT (Description [NO-SOURCE-TODAY], Notes [PII-EXCLUDED-PERMANENT, s.15]); all ten are served under their mapped names, both declared-absent are NOT emitted, and transaction_memo (the Notes source) is not served. PII BOUNDARY WITH BOTH CONTROLS: 0 of the 22 measured-sensitive columns appear in any served row; the POSITIVE CONTROL is that ALL 22 are PRESENT UPSTREAM in this partition, so the clean result is evidence rather than an artifact of an empty upstream; the NEGATIVE CONTROL plants mstracct_number into a projected row and sensitive_leak_check FIRES and names it. project_rows REFUSES when an allowlisted column is absent upstream (fails CLOSED). SAMPLE PAGE: rel_82d9a9e443c641, 21 transactions, page 0 at size 100 -> returned 21, total 21, hasMoreResults False, rows carrying exactly the allowlist and no leak. Commit 5344fd7af2. PINS ON THIS ROW: silver/fact_trn {2026-08-28T09:46:27Z, partition 2026-08-27, 1,1,[]}; dimensions/dim_relationship {2026-08-28T12:46:05Z,1,1,[]}; campaign_ledger_commit 7c6aa7cea7, dates_complete_of_534 = 63.",
+   "status": "PASS",
+   "status_reason": "REPORTED, NOT ASSERTED CLEAN: the projection serves 17 columns where the PRD card set is 10. The extra seven (cusip, debit_credit, net_amount, sb_cd, settlmnt_date, tr_cd, tran_srcde) are join keys into the P-2 crosswalk, an identifier and secondary amounts; none is client PII, so AC4's two named axes are met -- but a renderer must SELECT from this payload rather than render what it receives. Surfaced to the issuer for a ruling on trimming vs declaring."
+  },
+  {
+   "criterion_id": "PRFR2DS-AC5",
+   "criterion_verbatim": "b-4, LAST: gain/loss projection ties to a-4's re-read census residual; cost basis DECLARED UNDETERMINED unless named with evidence. PINS as AC1.",
+   "denominator": "5 lot tables; 289,142 + 210,567 unrealized lot rows; 3,834 relationship / 6,177 account entries.",
+   "invocation": "python deliverables/arms/perfrp_a4_lots_census.py ; python perfrp_gainloss_relationship.py --date 2026-08-27 --out <path> ; python perfrp_gainloss_account.py --date 2026-08-27 --out <path> ; python deliverables/arms/perfrp_b4_gainloss_arms.py",
+   "method": "command",
+   "output_evidence": "a-4 CENSUS (b-4's declared input): 5 of 5 lot tables carry partitions -- uln/ult/upn/upt 539 each spanning 2024-07-08..2026-08-27, rld 787 from 2023-07-12. TIE-OUT once the TAX-STATUS SPLIT is respected: my first pass compared EACH table against the full positions MV and read -57.4% and -42.7%, which was THE WRONG GRAIN -- uln~=upn and ult~=upt to the cent and the two PAIRS differ, so a single slice can only reconcile to itself. Corrected: lot grain uln+ult = 1,791,319,939.49 and position grain upn+upt = 1,791,319,939.15 against positions 1,793,416,380.56 -> RESIDUAL -2,096,441.07 (-0.1169%), coverage 99.8831%, reproduced INDEPENDENTLY at both grains; the slices are DISJOINT at the account grain (uln 3,969 / ult 2,208 / IN BOTH 0). COST BASIS NAMED WITH EVIDENCE, NOT BY NAME: eight cost/basis-like columns exist, so a name-based pick was available and worthless; the identity current_market_value - cost_basis == unrealized_gain_loss scores cost_basis_unamortized at 5,026.91 (fact_uln, 289,142 rows) and 61,815.89 (fact_ult, 210,567 rows) against alternatives off by hundreds of millions -- and the runner-up original_cost_basis is IDENTICAL on uln and 9x worse on ult, so a ONE-TABLE census would have picked either with equal confidence. CTO 68440 item 3 DISCHARGED BY MEASUREMENT. b-4 LEAF: 3,834 relationship / 6,177 account entries; MV reproduces the census lots total at both grains (deltas 0.19 and -0.21) and the census RESIDUAL against positions (-2,096,440.88 vs -2,096,441.07); the identity residual REPRODUCES the census figure (leaf 66,843.00 / 66,843.16 vs census 66,842.80, carried by 23 entries at both grains) rather than being asserted to zero; ST+LT+undeclared == unrealized_total and unrealized+realized == total, 0 bad at both grains; the custodian's DECLARED h_t agrees with the DERIVED days_held>365 rule on ALL 289,142 fact_uln rows (79,141 both ways); NEGATIVE CONTROL -- the runner-up column fails the same identity by 672,786,954.88. The AC11 cross-tie guard REFUSED my first emission attempt (entries carried `lots` and no `accounts`, so len(ids) != accounts) and BOTH documents were withheld rather than shipped disagreeing. Commits 0031aa6cae, 0d88e438de. PINS ON THIS ROW: silver/fact_uln {partition 2026-08-27, rows 289142}; silver/fact_ult {2026-08-27, 210567}; silver/fact_rld {2026-08-27, 219}; dimensions/dim_relationship {2026-08-27}; each {1,1,[]}; campaign_ledger_commit 7c6aa7cea7, dates_complete_of_534 = 63.",
+   "status": "PASS",
+   "status_reason": "QA EVIDENCE. The served figure is the CUSTODIAN'S (unrealized_gain_loss and gain_loss_dollars are READ, never recomputed from price x quantity - cost, per CTO 68440), and the ST/LT split uses the custodian's declared flag rather than a derived one."
+  },
+  {
+   "criterion_id": "PRFR2DS-AC6",
+   "criterion_verbatim": "THE ARMING EMISSION (CVO condition ii): ONE emission made AFTER the campaign ledger reads 534 of 534 ARTIFACT-COMPLETE (or whose manifest carries the campaign state), every leaf, manifest carrying {campaign_ledger_commit, dates_complete_of_534 = 534, upstream LastModified per table, CONTRACT_VERSION}; this is the emission ADVI_BDPARITY's arming predicate reads. Until the campaign completes this row is UNCOMPUTABLE pending the campaign (Rule 24 iv), never N/A.",
+   "denominator": "534 campaign dates; 133 ARTIFACT-COMPLETE on the committed plane at the stated timestamp.",
+   "invocation": "python campaign_census.py (both planes) ; git log -1 --format=%H -- org/tier2_senior/0.7.0_AE_CloudOps~L/deliverables/ADVI_49F.P14-VEHICLE_CAMPAIGN_LEDGER.jsonl",
+   "method": "live_read",
+   "output_evidence": "UNCOMPUTABLE PENDING THE CAMPAIGN. The ADVI_49F P14-VEHICLE campaign reads 133 of 534 ARTIFACT-COMPLETE on the COMMITTED plane at campaign_ledger_commit 9141d61291a000439e1f5b1fa76b18eadf63529a, read 2026-08-28T22:40:40Z; the live working tree read 185 of 534 and is NOT a pinnable vintage. Every emission this TO produced is therefore QA EVIDENCE stamped with the campaign state it actually read (7c6aa7cea7, 63 of 534), and NONE is the arming emission. This row becomes computable only after the ledger reads 534 of 534 ARTIFACT-COMPLETE.",
+   "status": "UNCOMPUTABLE",
+   "status_reason": "Pending the campaign, in the criterion's own words. NEVER N/A: the emission is OWED and will be made -- it is not inapplicable."
+  },
+  {
+   "criterion_id": "PRFR2DS-AC7",
+   "criterion_verbatim": "BUILD-ONLY held, shown not asserted: advi-49f-publisher still DISABLED, OPAL_ADVI_PUBLISH_GRANT unset, zero platinum keys written -- read on the live plane at round close (Scheduler state + the platinum prefix listing with a denominator).",
+   "denominator": "12 objects at platinum/advi/49financial/, 0 perfrp; 2 of the 3 AC7 halves still to read at close.",
+   "invocation": ".tools/aws s3api list-objects-v2 --bucket opal-data-portal-v2 --prefix platinum/advi/49financial/",
+   "method": "live_read",
+   "output_evidence": "UNCOMPUTABLE -- NOT DUE UNTIL ROUND CLOSE, in the criterion's own words ('read on the live plane at round close'). AN INTERIM READ IS RECORDED so the close is a DELTA rather than a bare assertion: at 2026-08-28T22:1xZ the platinum prefix holds 12 objects, 0 of them perfrp, newest LastModified 2026-08-21T15:04:19Z -- UNCHANGED from the AC0 baseline taken before any build this round, so the cap demonstrably held mid-round. The Scheduler state of advi-49f-publisher and the OPAL_ADVI_PUBLISH_GRANT variable are the remaining two halves and are read at close. Mechanically reinforced: both deploy-scope modules carry a DEPLOY-SERVE-HELD sentinel, verified against the gate's own SERVE_HELD_RE with a negative control, so a branch-wide push cannot serve them as a side effect of an unrelated integration.",
+   "status": "UNCOMPUTABLE",
+   "status_reason": "Not due until round close. The interim read is evidence the cap held mid-round; it is NOT a discharge of the criterion, which also requires the Scheduler and grant reads."
+  },
+  {
+   "criterion_id": "PRFR2DS-AC8",
+   "criterion_verbatim": "Proof instance VALID rc=0 positional, ids PRFR2DS-AC0..AC8, TRUE rc bare, validator invocation + rc recorded IN the instance; every acceptance row carries its two pins or reads UNCOMPUTABLE.",
+   "denominator": "9 criterion ids expected, 9 carried, 0 missing, 0 extra.",
+   "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform~V/deliverables/ADVI_PERFRP.TO-R2-DS_PROOF_OF_SPEC.json PRFR2DS-AC0,PRFR2DS-AC1,PRFR2DS-AC2,PRFR2DS-AC3,PRFR2DS-AC4,PRFR2DS-AC5,PRFR2DS-AC6,PRFR2DS-AC7,PRFR2DS-AC8",
+   "method": "schema_validation",
+   "output_evidence": "VALIDATOR RUN RECORDED IN THIS INSTANCE, as the criterion requires. INVOCATION: python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform~V/deliverables/ADVI_PERFRP.TO-R2-DS_PROOF_OF_SPEC.json PRFR2DS-AC0,PRFR2DS-AC1,PRFR2DS-AC2,PRFR2DS-AC3,PRFR2DS-AC4,PRFR2DS-AC5,PRFR2DS-AC6,PRFR2DS-AC7,PRFR2DS-AC8 -- TRUE BARE rc=0, VALID, 'acceptance rows=9 | violations=0'. Alignment printed by the same run: forward-1 9/9 criteria carry >=1 cell_ref; forward-2 11/11 distinct cell_refs resolve to a declared decomp id; backward 10/10 declared cells reachable (UNASSERTED, because the TO's <decomp_ref> is undelimited -- the tool says so and I am not quoting it as enforcement). NOTE ON RECURSION, stated rather than hidden: the rc above is from the run immediately BEFORE this sentence was written into the file, and the instance was RE-VALIDATED after writing it -- the post-write run is also rc=0 VALID with 9 rows and 0 violations. A recorded rc that predates its own recording is unavoidable here; what is avoidable is not saying so. All 9 ids were passed comma-separated so COVERAGE is CHECKED, not merely row quality -- an instance valid on every row it carries can still silently OMIT a criterion. Every BUILT row (AC1-AC5) carries its pins inside output_evidence (the schema has no `pins` property, so they ride in the evidence text, which is what the criterion's 'carries its two pins' requires); the only two rows without pins are AC6 and AC7 and both read UNCOMPUTABLE with a reason, the criterion's own stated alternative. TWO EARLIER RUNS ARE PART OF THIS EVIDENCE AND ARE NOT HIDDEN: the first exited rc=2 TOOL-ERROR because my controls were typed as strings where the schema expects objects, and the tool correctly printed 'NOT-A-VERDICT: this is a tool failure (rc=2), not an INVALID instance (rc=1)'; the second exited rc=1 INVALID on 20 schema violations. Neither was reported as a pass.",
+   "status": "PASS"
+  }
+ ],
+ "artifacts_produced": [
+  {
+   "commit_or_etag": "160ab97c36",
+   "deploy_evidence": "DELIBERATELY NOT SERVED under the TO's build-only cap. Carries a DEPLOY-SERVE-HELD sentinel at line 1, verified against the deploy gate's own SERVE_HELD_RE with a negative control (perfrp_contract.py, same directory, does not match). comp-pipescript deployed reads STALE on this file, which is the CORRECT state; CRLF ruled out as the cause via git ls-files --eol = i/lf w/lf. The s3 _code/ copy remains the 2026-08-25 object. Lifting the sentinel needs a SERVE-RELEASE-ACK commit from whoever lifts the cap, not from this lane.",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "kind": "script",
+   "path_or_key": "data/assets/scripts/gold/runners_49f/perfrp_emit_core.py"
+  },
+  {
+   "commit_or_etag": "1129291ced",
+   "deploy_evidence": "The date-aligned rollup law. Same DEPLOY-SERVE-HELD sentinel, same verification with a negative control. Not served, not deployed.",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "kind": "script",
+   "path_or_key": "data/assets/scripts/gold/runners_49f/perfrp_rollup.py"
+  },
+  {
+   "commit_or_etag": "160ab97c36",
+   "deploy_evidence": "Nine leaf emissions plus four NOT-SERVED verification sidecars, all LOCAL build artifacts under org/. perfrp_emit_core has no S3 write path at all, so ZERO S3 keys were written this round; the platinum prefix still holds 12 objects with 0 perfrp, unchanged from the AC0 baseline.",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "kind": "config_data",
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~V/deliverables/emissions/"
+  },
+  {
+   "commit_or_etag": "0031aa6cae",
+   "deploy_evidence": "b-4's declared input (PRF-a-4). Names cost_basis_unamortized with evidence and records the -2,096,441.07 lots-to-positions residual that AC5 ties to.",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "kind": "config_data",
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~V/deliverables/ADVI_PERFRP.PRF-a-4_LOTS_CENSUS.json"
+  },
+  {
+   "commit_or_etag": "160ab97c36",
+   "deploy_evidence": "Eight re-runnable arm and census scripts, each DERIVING the workspace root rather than baking an absolute path. They carry their own positive and negative controls and record, in-file, the arms of mine that were wrong and why.",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "kind": "test",
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~V/deliverables/arms/"
+  }
+ ],
+ "assignee": "0.4.0_DS_ClientPlatform~V",
+ "compiler_tools": [
+  {
+   "invocation": "comp-pipescript io <script> --pipeline advi (perfrp_emit_core.py, perfrp_performance_relationship.py, perfrp_performance_account.py, d_publisher_port.py)",
+   "result": "rc=0 but OUT-OF-GRAPH -- the advi curated DAG does not carry these files, so the answer is a deterministic AST derivation and NOT the curated pipeline graph. 6 UNRESOLVED dynamic targets on the publisher, which are NOT absent I/O.",
+   "tool": "comp-pipescript io"
+  },
+  {
+   "invocation": "comp-pipescript deployed",
+   "result": "70 of 70 objects checked, 69 MATCH, 1 STALE = [advi:gold] perfrp_emit_core.py -- my edit, and the CORRECT state under the build-only cap. Not remediated: running build-and-upload would be a deploy this TO forbids.",
+   "tool": "comp-pipescript deployed"
+  },
+  {
+   "invocation": "comp-pipescript postdeps <script> --firm bd|inf|cot|mdpf",
+   "result": "UNCOVERED on ALL FOUR trees: bd/inf/cot REFUSE rc=2 'unknown script id runners_49f/...', mdpf returns UNCOVERED with its TOOL-02 false-clean guard. Reported as UNCOVERED BY DECLARATION, never as clean.",
+   "tool": "comp-pipescript postdeps"
+  },
+  {
+   "invocation": "comp-validate <script> --artifact <file>",
+   "result": "NO_CONFIG -- no perfrp artifact-id among the 173 configured. UNVALIDATED, never SAFE.",
+   "tool": "comp-validate"
+  },
+  {
+   "invocation": "comp-find PERFRP_AVAILABLE_LEAVES --corpus raw --all ; comp-find PERFRP_CONTRACT_VERSION_BUILT_AGAINST --corpus raw --all",
+   "result": "Both DEF lines located, never headed; the .runtmp/portal-promote-* copies identified as a promote scratch tree rather than counted as a second live definition.",
+   "tool": "comp-find"
+  },
+  {
+   "invocation": "via safe-commit.sh on every commit in the round",
+   "result": "py_compile + ds-precommit + ruff py39 clean on every .py. It self-reported PARTIAL coverage on JSON-carrying commits ('checked 0 of 1 file(s) -- NOTHING WAS CHECKED', 'clean for 4 of 7'), and those words are cited rather than read as a clean gate.",
+   "tool": ".tools/commit-gate.sh"
+  },
+  {
+   "invocation": "see acceptance PRFR2DS-AC8 and validator_run",
+   "result": "Run three times: rc=2 TOOL-ERROR (controls typed as strings -- the tool correctly said NOT-A-VERDICT), then rc=1 INVALID on 20 schema violations, then the run recorded in validator_run. The two failing runs are recorded rather than hidden.",
+   "tool": ".tools/proof-of-spec-check.py"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "Emissions are byte-stable by construction: membership ids sorted at emit, json dumped with sort_keys=True, and write_bytes rather than write_text (the CRLF class round 1 banked, where universal-newline translation put 30,727 carriage returns into a leaf and changed its body_sha256). Re-running an emitter against the same pinned upstream reproduces the same bytes -- which is what made the b-7 before/after diff meaningful: the 85 moved returns are attributable to the alignment fix rather than to run-to-run noise.",
+   "observed": "Re-emissions during the round differed ONLY where a code change intended them to: b-2 re-emitted after the return-floor fix (COMPUTED 0 -> 3,381), b-6 re-emitted three times as the client table was built to the ruled column set. No unexplained byte drift observed.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "FOUR mutant/negative-control families, each built so a check that would otherwise be vacuous can fail. (1) inv-6: perfrp_rollup.summed_returns_MUTANT -- the real wrong law IMPORTED rather than re-typed, so it cannot drift from what it models. (2) ROLLUP ALIGNMENT: a dated parent against what positional alignment would produce on the same children. (3) PII: a planted sensitive column (mstracct_number) in a projected transactions row. (4) COST BASIS: the runner-up column scored against the same identity that named the winner. Every mutant is paired with a POSITIVE CONTROL so an implementation that refused everything could not pass.",
+   "expected": "Each mutant FIRES on the population where the check CAN discriminate, and each positive control PASSES.",
+   "observed": "(1) distinguished on 3,947 of 3,947 accounts where the laws can differ, by EXACT inequality; 123 accounts EXCLUDED as non-test-sites because with fewer than two non-zero returns sum(r) and PROD(1+r)-1 are the SAME NUMBER by construction -- excluded because the laws AGREE there, not because they pass. (2) dated parent 0.1550000000 vs positional 0.1000000000 on one fixture; equal-length undated children still roll up (0.050600). (3) sensitive_leak_check FIRES and names mstracct_number, and all 22 measured-sensitive columns are PRESENT UPSTREAM so the clean result on real rows is evidence rather than an empty upstream. (4) cost_basis_unamortized 5,026.91 vs adjusted_cost_basis_amortized 672,786,954.88 on the same rows.",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "PRFR2DS-AC6 and PRFR2DS-AC7",
+   "reason": "UNCOMPUTABLE by their own criteria (the campaign pending 534/534; round close). Neither is N/A and both are OWED -- they are carried as rows with reasons, not omitted."
+  },
+  {
+   "item": "comp-pipescript postdeps for runners_49f scripts",
+   "reason": "UNCOVERED BY DECLARATION (issuer ruling 78986 item 2): bd/inf/cot REFUSE rc=2 on the script id (universes 35/50/33) and mdpf returns UNCOVERED with its own TOOL-02 false-clean guard. No curated tree carries runners_49f, so the face's mandated --firm bd is structurally unsatisfiable. Never reported as clean."
+  },
+  {
+   "item": "comp-validate on the emitted perfrp leaves",
+   "reason": "NO_CONFIG -- 0 perfrp artifact-ids among the 173 configured, so UNVALIDATED, never SAFE, in the mandate's own words."
+  },
+  {
+   "item": "The account_gains / account_performance / client_performance wrapper trio",
+   "reason": "Held OFF this path by the face (Q-p2, routed as a COO follow-on). Not built, not touched, not measured."
+  },
+  {
+   "item": "Remediation of the twr_daily extreme-return class and the flow_timing EOD/BOD review",
+   "reason": "Upstream and out of lane: twr_daily is 0.7.0_AE_CloudOps~L's artifact and c02_twr_engine is another seat's file. Surfaced with measurements; acceptance-bearing at P1.5 under CVO's clause 5, not remediated here."
+  }
+ ],
+ "decomp_ref": {
+  "doc": "workflows/atom_decomposition/runs/advi-perfrp/20260824T201222Z/DECOMP.md",
+  "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform~V/task_orders/ADVI_PERFRP.TO-R2-DS.b-series-leaves-on-the-corrected-upstream.md",
+  "vintage_commit": "1ce9b2d6bc"
+ },
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "schema_version": "1.0",
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~V/logs/2026-08-28/",
+ "spec_ref": {
+  "doc": "docs/architecture/ADVI_PERFRP_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7864960ed1"
+ },
+ "surprises": [
+  "OBSERVATION x INERT: two of MY OWN claims were falsified by measurement and withdrawn on the record. (1) 'r_net == r_gross, so the served/stored distinction is nominal' -- I sampled two dates and BOTH were fee-free; the 534-partition census found FEE-MANAGEMENT on 121,564 rows, and on the fee-bearing date 2024-07-25 r_net == r_gross on 0 of 3,089 fee-bearing accounts (max |r_net - r_gross| = 0.9672). PRF-inv-6 clause 1 HOLDS BY FACT. (2) '488 of 534 partitions' was a GRAIN error -- that was FEE-ADMIN's spread (476 partitions); FEE-MANAGEMENT sits on 125 of 534, median 0 per partition, concentrated on quarterly billing dates (top 5 = the 7th of Jan/Apr/Jul/Oct, 39.4% of rows).",
+  "OBSERVATION x INERT: 3.0.0_SA_CVO's corroboration of claim (1) was REPETITION, not corroboration -- it re-measured MY two dates and inherited my coverage gap. Retracted by that seat on the record. The lesson runs both ways: CVO later caught my '488' by reading partitions I had NOT cited and arguing from a probability, which is a genuinely independent instrument.",
+  "OBSERVATION x INERT: twr_daily carries extreme daily returns -- 47 of 321,740 observations at |r_net| >= 100%, largest -6578.95. Mechanism measured at source by CVO: a $1 BMV floor plus an EOD convention dividing by BMV alone. Upstream owner; acceptance-bearing at P1.5.",
+  "OBSERVATION x INERT: dim_relationship is SPARSE -- 158 partitions with gaps of 413 and 112 calendar days -- so a Book window starting inside a gap baselines new/lost up to 413 days early. Disclosed ON the affected figures as COMPUTED_PARTIAL with the drift in days, not only in the pins.",
+  "HAZARD x DISARMED: the CLOUD push gate uploads every deploy-scope .py in a push range UNCONDITIONALLY, so a branch-wide push by an integrator would have SERVED this lane's build-only files onto the campaign runner as a side effect of an unrelated integration. Found by 0.0.0_AB_MSTR while holding a window on my dirty file. DISARMED same-day: both files carry DEPLOY-SERVE-HELD, verified against the gate's own regex with a negative control. The distinction it taught -- 'not deployed' is not 'not deployABLE without an act' -- is the keeper.",
+  "OBSERVATION x INERT: the b-6 client_table first emitted as a membership roster whose intersection with the ruled PRD s.6.2 column set was ZERO. Every arm I had written checked the table against ITSELF (length == union, per-status counts) and all passed; a self-consistency arm cannot see a wrong SUBJECT. Found by 3.0.0_SA_CVO via TO-R1-DE's AC6, re-opened by the issuer, rebuilt to CTO 79447's named set."
+ ],
+ "to_id": "ADVI_PERFRP.TO-R2-DS"
+}
