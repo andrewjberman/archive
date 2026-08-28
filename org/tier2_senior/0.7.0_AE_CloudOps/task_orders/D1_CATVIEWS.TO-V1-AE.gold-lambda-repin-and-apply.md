@@ -37,10 +37,28 @@ are not working around the interlock; its condition is met.**
 ⛔ **TWO BOUNDS THAT CAME WITH THE APPROVAL:**
 1. **The blocker sweep was declared NON-EXHAUSTIVE by its own author.** This is "the four known
    blockers are gone", **not** "D1_CATVIEWS is clear." He decided on stated incomplete information.
-2. **This ship fixes TWO defects of THREE.** It repairs the 49financial SMA branch and the `Models`
-   L2 `--` render. It **cannot** move the global Client understatement of **$359,773,356.74** by any
-   amount — that gap is exactly `cottonwood + inflection`, so 49financial cancels identically. **Do
-   not report this deploy as "category-views is now correct."**
+2. **This ship does NOT make the category-views artifact correct.** It repairs the 49financial SMA
+   branch and the `Models` L2 `--` render. A separate defect on the **global** scope is untouched by
+   it. **Do not report this deploy as "category-views is now correct."**
+
+⛔ **BOUND 2 WAS RE-WRITTEN 2026-08-28 ~17:2xZ AND THE ORIGINAL WAS WRONG — READ THIS IF YOU READ THE
+FACE BEFORE THEN.** It said the ship *"cannot move the global Client **understatement** of
+$359,773,356.74 ... global aggregates Client over one firm of three."* **BOTH HALVES ARE RETRACTED**
+(`1.0.0_SA_CTO~Z`, which originated the characterisation and then retracted its own). Measured on the
+served object: `global.Client` carries `"predicate": "unavailable"` and
+`"held_constituents": ["cottonwood"]`. **It never claimed to aggregate** — it declares itself HELD and
+names its holder, exactly as `mdpf_gold_consolidator.py:143-160` specifies (`global` has no
+`CLIENT_L1_RULE` entry because the three firms' rules differ IN KIND; `client_l1_split('global')`
+raises deliberately; it unholds by itself when cottonwood clears). **THE HOLD IS WORKING AS DESIGNED.**
+"Understated" implies the node purports to be a complete total; it does not, so the word was wrong
+even though the arithmetic was real. The ACTUAL global defect is smaller and two-sided: a **residual
+`aum` on a node declared unavailable** (should be `null`), plus a **renderer printing the headline
+unconditionally** beneath a panel saying that figure is unavailable. Neither is touched by this
+deploy, so **the CONCLUSION stands and only the mechanism changed.**
+>> **WHY THIS CORRECTION IS ON THE FACE AND NOT ONLY IN A MESSAGE: a message retraction does not
+   reach a file.** This TO is the durable carrier an executor and a certifier read. Leaving the
+   retracted mechanism here would have it re-derived from my own artifact after everyone had agreed
+   it was false. A correction is only as complete as its last surviving carrier. <<
 
 ## NEVER-LAW, RIDING EVERY CRITERION
 
@@ -187,9 +205,20 @@ else moved the numbers."
 ⛔ **DO NOT FIRE AN AD-HOC GOLD RUN TO BEAT THE CLOCK.** It would destroy the discriminator the
 scheduled run exists to produce — CLAUDE.md's ad-hoc-QA exception does NOT apply here.
 **File the instance with AC7 OPEN and re-file after the fire.** Do not hold the whole TO for it.
-⚠ **AND IT DOES NOT FIX GLOBAL.** After this lands, `global.Client` is STILL understated by
-$359,773,356.74. That is a separate producer defect, owned by `2.0.0_SA_COO~Z`, arithmetically
-untouched by this deploy. Do not report AC7 as "category-views is correct."
+⚠ **AND IT DOES NOT FIX GLOBAL.** After this lands, the `global` scope still carries its own separate
+defect — a **residual `aum` on a Client node the producer has declared `predicate: "unavailable"`,
+`held_constituents: ["cottonwood"]`** — owned by `2.0.0_SA_COO~Z` and untouched by this deploy. Do
+not report AC7 as "category-views is correct."
+⛔ **DO NOT SCORE `global` AGAINST THE OLD FRAMING.** An earlier version of this face called that node
+"understated by $359,773,356.74" and described it as aggregating over one firm of three. **RETRACTED —
+see the correction under BOUND 2.** `global.Client` is HELD BY DESIGN and is not claiming to be a
+total, so there is no "shortfall" to measure. **Record what the field does; do not grade it against a
+number that was never its target.**
+⚠ **CONTROL SET FOR THE POST-DEPLOY DIFF IS `cottonwood` + `inflection` ONLY** — read
+`3.0.0_SA_CVO~Z`'s baseline README **at HEAD** (path
+`org/tier1_exec/3.0.0_SA_CVO/deliverables/cvoZ_D1_PREDEPLOY_BASELINE_20260828/`, vintage
+`@4c4f245316`; the earlier `@bc9d11dd8e` carries a SUPERSEDED control set). Path is the locator,
+hash is the vintage stamp.
 
 ## BARRED AT THIS LANE
 
