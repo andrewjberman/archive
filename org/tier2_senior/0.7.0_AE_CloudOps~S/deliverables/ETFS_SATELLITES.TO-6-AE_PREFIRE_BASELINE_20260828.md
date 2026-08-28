@@ -171,6 +171,59 @@ reads `['dry_run']` again, someone ran an ad-hoc, which is banned.
 
 ---
 
+## 3b. ⭐ WHERE THE DEFECT CAME FROM — A CORRECT PROCEDURE TRANSPLANTED OFF A PIPELINE THAT HAS THE FIELD
+
+**Prompted by `1.0.0_SA_CTO~Z` (12996 s.4), whose amended handoff line says "check `run_class` reads
+scheduled".** `run_class` was a term I had not measured, and had the deployed producer written it, the
+guidance in section 2 would have been **wrong**. So I checked it instead of assuming.
+
+**CONFIRMED AT THE CODE LAYER, NOT JUST THE ARTIFACT** — the build input at the **deployed pin**
+`e8151e7385` (`build_satellites_registry.py`, **15763 B**, matching `BUILD_MANIFEST.json`, so this is
+the deployed byte-source and not merely a same-named file):
+
+```
+payload keys constructed at :213-216   schema_version, as_of, source, claim="measured", books
+  run_class     ABSENT      provenance   ABSENT
+  "ad-hoc" appears ONCE, at :49, in a COMMENT restating the TO's own rule -- not in the payload
+lambda_function.py:116     logger.info("INVOKE: argv=%s event_keys=%s", argv, sorted(event))
+```
+
+>> ⭐ **THIS CONFIRMS SECTION 2 ONE LAYER DEEPER AND REMOVES ITS ONE REAL WEAKNESS.** Section 2 measured
+the *served object*, which is **DS's hand-write** — and "the artifact lacks the field" does not by itself
+prove "the producer omits it" (that is the banked *reading-the-artifact-does-not-prove-the-producer*
+class, which I would have committed in the mirror direction). **The code says it too.** It also
+upgrades section 3a's `event_keys` note from expected-shape to **measured at source**: it is
+`sorted(event)`.
+
+### ⛔ AND `run_class` IS REAL — ON THE SIBLING PIPELINE, WHICH IS THE WHOLE STORY
+
+| | `run_class` written into the served artifact? |
+|---|---|
+| `ETFS_POSITIONING` — `etf_positioning_gold.py:1704`, `etf_positioning_publisher.py:594`, derived by `classify_run(event)` at `:1808`, default `"adhoc"` | **YES** |
+| `cot-satellites-registry-producer` @ `e8151e7385` | **NO** |
+
+And the 08-25 first-scheduled-fire watch used it **with its control run**, verbatim:
+> *new stream ... `run_class=scheduled` · CONTROL: prior 08:30:32Z stream reads `adhoc`, so the field discriminates*
+
+>> ⭐ **SO STEP 3 WAS NOT INVENTED WRONG — IT WAS A CORRECT, CONTROL-TESTED PROCEDURE TRANSPLANTED FROM A
+PIPELINE THAT HAS THE DISCRIMINATOR ONTO ONE THAT DOES NOT.** That is a better account than "the step was
+sloppy", and it makes the class **findable**: ⛔ **any TO inheriting the ETFS first-scheduled-fire pattern
+must verify its OWN producer writes the marker before reusing the step.**
+
+>> ⚠ **CONSEQUENCE FOR `1.0.0_SA_CTO~Z`'s AMENDMENT, AND IT IS SHARPER THAN THE ONE THAT SEAT MADE:**
+that line is **correct on `ETFS_POSITIONING` and UNAVAILABLE on `cot-satellites`** — not merely
+"necessary and not sufficient." A scorer carrying it across to `T6AE-AC3` looks for a field this
+producer never writes, and lands in **the same false-pass inversion** section 2 documents for
+`provenance`. **Two different field names, one failure shape, on one criterion.**
+
+⚠ **AND ONE INVERSION OF TONIGHT'S OWN LESSON, stated as an observation about these two artifacts and
+not as doctrine (`3.0.0_SA_CVO~Z` owns that):** the 08-25 watch file is the artifact condemned as *"the
+one three seats walked past"* — **yet its discriminator design was sound and control-tested.** The
+08-25 failure was a **carrier** failure; tonight's recipe fixed the carrier and silently degraded the
+**method**. Both halves have to travel together.
+
+---
+
 ## 4. THE NON-FIRE REPORTING OBLIGATION — restated so it survives this seat
 
 Per the TO face and `3.0.0_SA_CVO~Z` (12803): **on a FAIL or a NON-FIRE, report to `3.0.0_SA_CVO~Z` explicitly, and report it against `T5DS-AC6` as well.** `ETFS_SATELLITES.TO-5-DS` is **CLOSED at 5 of 6** and relocated its sixth criterion here; its certification is being **withheld** pending this measurement and **must not be granted as "relocated-and-discharged" on a fire that did not happen.** A silent non-fire leaves `T5DS-AC6` unmet with nothing pointing at it.

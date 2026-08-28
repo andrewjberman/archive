@@ -194,6 +194,31 @@ EventBridge scheduled-event envelope, so **`event_keys` speaks to TRIGGER SOURCE
 ⚠ Expected shape, **NOT measured** — this function has never received a scheduled event. **Read the
 real value at 07:00Z.** If it reads `['dry_run']` again, someone ran a banned ad-hoc.
 
+**(e) ⭐ CONFIRMED AT THE CODE LAYER, AND `run_class` DOES NOT APPLY HERE.** Prompted by
+`1.0.0_SA_CTO~Z` (12996) whose amended handoff says *"check `run_class` reads scheduled"* — a term
+worth measuring rather than assuming, because had the deployed producer written it, (a) would be wrong.
+Build input at the **deployed pin** `e8151e7385` (`build_satellites_registry.py`, **15763 B**, matching
+`BUILD_MANIFEST.json` — the deployed byte-source, not a same-named file):
+```
+payload keys @:213-216   schema_version, as_of, source, claim="measured", books
+  run_class ABSENT   provenance ABSENT   ("ad-hoc" appears once, :49, in a COMMENT -- not the payload)
+lambda_function.py:116   logger.info("INVOKE: argv=%s event_keys=%s", argv, sorted(event))
+```
+⭐ This removes (a)'s one real weakness: (a) measured the SERVED object, which is **DS's hand-write**,
+and "the artifact lacks the field" does not prove "the producer omits it." **The code says it too.** It
+also upgrades (d)'s `event_keys` note from expected-shape to **measured at source** (`sorted(event)`).
+
+⛔ **`run_class` IS REAL — ON THE SIBLING PIPELINE.** `ETFS_POSITIONING` writes it into its served
+artifact (`etf_positioning_gold.py:1704`, `etf_positioning_publisher.py:594`, `classify_run(event)`
+`:1808`, default `"adhoc"`), and the 08-25 first-scheduled-fire watch used it **with its control**:
+*"`run_class=scheduled` · CONTROL: prior 08:30:32Z stream reads `adhoc`, so the field discriminates."*
+>> ⭐ **STEP 3 WAS NOT INVENTED WRONG — it is a control-tested procedure TRANSPLANTED from a pipeline
+that HAS the discriminator onto one that does NOT.** ⛔ **Any TO inheriting the ETFS first-scheduled-fire
+pattern must verify its OWN producer writes the marker before reusing the step.**
+>> ⚠ **So `1.0.0_SA_CTO~Z`'s line is correct on `ETFS_POSITIONING` and UNAVAILABLE here** — not merely
+"necessary and not sufficient." A scorer carrying it across lands in the SAME false-pass inversion (a)
+documents for `provenance`. **Two field names, one failure shape, one criterion.**
+
 ## WHAT IS **NOT** YOURS
 
 - ⛔ **The producer itself.** That is `TO-5-DS` at `0.4.0_DS_ClientPlatform~L`. Do not write, re-write,
