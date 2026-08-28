@@ -1,0 +1,221 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_C3MATERIALIZE.TO-WP3b-DTX",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-c3materialize-wp3b/20260828T1419Z/DECOMP.md",
+    "vintage_commit": "73f74a2798",
+    "to_ref": "org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/NFRA_C3MATERIALIZE.TO-WP3b-DTX.first-real-substrate-admission.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/standards/isck/WP3_LEDGER_DESIGN.md",
+    "group": "OTHER",
+    "vintage_commit": "d0398b977d"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform~X",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/standards/isck/ledger/slice.py",
+      "kind": "script",
+      "artifact_covered_by": [
+        "WP3B-AC1",
+        "WP3B-AC2"
+      ],
+      "commit_or_etag": "9f63564a1f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the translator; acceptance is the slice running from a clean extract, not a deploy"
+    },
+    {
+      "path_or_key": "org/standards/isck/ledger/battery/run_slice.py",
+      "kind": "script",
+      "artifact_covered_by": [
+        "WP3B-AC1",
+        "WP3B-AC3",
+        "WP3B-AC4",
+        "WP3B-AC5",
+        "WP3B-AC6"
+      ],
+      "commit_or_etag": "9f63564a1f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the slice runner; it clones itself at --run-commit and releases the extract"
+    },
+    {
+      "path_or_key": "org/standards/isck/ledger/snapshot.py",
+      "kind": "script",
+      "artifact_covered_by": [
+        "WP3B-AC5",
+        "WP3B-AC4"
+      ],
+      "commit_or_etag": "9f63564a1f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "publication via VACUUM INTO plus the retained negative control"
+    },
+    {
+      "path_or_key": "org/standards/isck/receipts/build_slice_receipts.py",
+      "kind": "script",
+      "artifact_covered_by": [
+        "WP3B-AC6"
+      ],
+      "commit_or_etag": "e83bd49f21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "digests computed from the object database, never from the working tree"
+    },
+    {
+      "path_or_key": "org/standards/isck/receipts/vertical_slice_receipt.json",
+      "kind": "config_data",
+      "artifact_covered_by": [
+        "WP3B-AC6"
+      ],
+      "commit_or_etag": "e83bd49f21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "receipt_problem(e83bd49f21, vertical_slice_receipt, rec) returned None"
+    },
+    {
+      "path_or_key": "org/standards/isck/receipts/historical_replay_receipt.json",
+      "kind": "config_data",
+      "artifact_covered_by": [
+        "WP3B-AC6"
+      ],
+      "commit_or_etag": "e83bd49f21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "receipt_problem(e83bd49f21, historical_replay_receipt, rec) returned None"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "WP3B-AC1",
+      "criterion_verbatim": "POPULATION DECLARED, NEVER TYPED: the runner opens the population file at the pin; grain = part; sampling ALL with the rule printed; D11's own deliverables admitted KNOWINGLY and flagged observer=true (count printed); every count line carries its provenance line.",
+      "method": "command",
+      "invocation": "python org/standards/isck/ledger/battery/run_slice.py --run-commit 9f63564a1f",
+      "output_evidence": "COUNTED 42 parts | observers 4 (D11's own deliverables, admitted knowingly and flagged). Both pins printed on every run: preservation copy @057220cca9 and declared manifest @06a5ae751c, with the vintage caveat that the generator REFUSES to re-emit (ratified set d86a59514ec3; the set has since moved to 87528e2a6d89). No count is typed on this face -- each is read from the file by the runner.",
+      "denominator": "42 parts, read from graph_object_manifest.declared.json at the pin; sampling fraction 1.0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP3B-AC2",
+      "criterion_verbatim": "TRANSLATOR: CLAIMS CARRIED, NOTHING FABRICATED: per part the bootstrap pair {mint_receipt, entity} + entity_binding + materializer / materializer_version from generation.materializer; ONE source_frontier; ONE materialization_run; record-type census printed; part.basis maps and never upgrades; a required field the part cannot supply ERRORS the part with the field named (no synthetic default anywhere -- the negative arm greps the translator); byte-identical batches on the same pin (canonical()); no S3/AWS/vendor call.",
+      "method": "command",
+      "invocation": "python org/standards/isck/ledger/battery/run_slice.py --run-commit 9f63564a1f",
+      "output_evidence": "Seven-family census, EACH against its own denominator: mint_receipt/entity/entity_binding 42 emitted of 42; materializer 0 emitted / 28 ERRORED (declaration_gap) / 14 out-of-reach (no_named_materializer) of 42; materializer_version 0 / 14 (parent_materializer_errored_declaration_gap) / 28 of 42; source_frontier 1 of 1; materialization_run 1 of 1 -- every family reconciles against its own denominator. Generation: 42/42 carry a generation OBJECT, 14 have NO NAMED materializer, and of the 28 named, 14 are repo paths whose digest is COMPUTABLE (64-hex sha256 over the bytes at the pin) and 14 are PROSE. semantic_layer + canonical_role are declared ABSENT domain-wide by ruled mapping v0.2 @df73332fb2, so the 28 named parts ERROR rather than default. DETERMINISM: 126 records re-translated at the same pin, BYTE-IDENTICAL via canonical(). NO SYNTHETIC DEFAULTS: FORBIDDEN 0 | schema-const 12 | owner-declared 3.",
+      "denominator": "42 parts across 7 families; denominator 42 for the five per-part families, 1 each for source_frontier and materialization_run",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP3B-AC3",
+      "criterion_verbatim": "ADMISSION THROUGH 2c, REFUSALS ARE THE FINDING: every write via Store.admit (atomic; Rejected writes nothing; head_commit_seq unchanged on refusal); admitted + refused + errored == denominator, printed; every Rejected preserved VERBATIM in the evidence file; the store is SQLite, device-local, private.",
+      "method": "command",
+      "invocation": "python org/standards/isck/ledger/battery/run_slice.py --run-commit 9f63564a1f",
+      "output_evidence": "admitted 42 | refused 0 | errored 0 | translator-errored 0; reconciliation 42 + 0 + 0 + 0 = 42 of 42. Two falsifiers prove refusal is REACHABLE rather than merely absent: one binding pointed at a missing entity -> admitted 41, refused 1, PASS; one binding pointed at a mint_receipt (wrong CLASS) -> admitted 41, refused 1, PASS. Without those arms, '42 admitted, 0 refused' is a number and not evidence.",
+      "denominator": "42 parts admitted; 2 falsifier arms, each required to refuse EXACTLY one part",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP3B-AC4",
+      "criterion_verbatim": "REPLAY AT NAMED ANCHORS: two anchors at least -- as_of frontier F and as_of commit_seq HEAD -- each bound via Store.anchor and printed; replay_expecting claims checked against the recorded state; the sec-2e backfill arm in BOTH directions; the replay set from the PUBLISHED SNAPSHOT opened alone equals an independent load (record-id sets equal; anchor_commit_seq printed by both).",
+      "method": "command",
+      "invocation": "python org/standards/isck/ledger/battery/run_slice.py --run-commit 9f63564a1f",
+      "output_evidence": "Both anchors bind and AGREE: as_of commit_seq 44 -> anchor_commit_seq 44, estate 131; as_of frontier sf:wp3b-06a5ae751c -> anchor_commit_seq 44, estate 131. sec 2e in BOTH directions: (A) a claim that the backfill is inside anchor 44 is REFUSED as L-12-replay-mismatch; (B) after admission it is INCLUDED at anchor 45 and sits at position 0 of 86 event-timed records -- its EVENT-TIME position (2019), not its admission position (newest of 132). POSITION is the assertion, because a backfill appended at the end would also read as included. An unbindable anchor is REFUSED as L-12-replay-frontier. Snapshot opened ALONE: 132 ids @ anchor 45; independent load: 132 ids @ anchor 45; record-id SETS EQUAL -- compared as sets, not counts, because two estates of equal size and equal anchor can differ in membership.",
+      "denominator": "2 anchors + 2 sec-2e directions + 1 unbindable-anchor falsifier + a set comparison over 132 record ids",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP3B-AC5",
+      "criterion_verbatim": "THE SNAPSHOT IS A SURFACE, NOT A COPY: the published artifact is produced by VACUUM INTO or the sqlite backup API -- NEVER a copy or hash of the live WAL-mode main file (the method is printed); ONE surface_version with content_digest over the published bytes under a DECLARED fingerprint_method + normalization_version; the admitting batch's envelope commit_seq bound in the RECEIPT, never a record field; POSITIVE control: the artifact opened ALONE returns exactly N rows with the expected anchor; NEGATIVE control: the naive main-file copy returns fewer rows or fails to open -- retained, and it MUST fail.",
+      "method": "command",
+      "invocation": "python org/standards/isck/ledger/battery/run_slice.py --run-commit 9f63564a1f",
+      "output_evidence": "Published via vacuum_into, 86016 bytes, digest printed beside fingerprint_method sha256-over-published-artifact-bytes and normalization_version v1-vacuum-into-single-file. POSITIVE: rows 132, anchor_commit_seq 45, rows_match true, anchor_match true -> PASS. NEGATIVE (retained deliberately): the naive main-file copy failed to open at all (OperationalError) -> PASS-AS-A-CONTROL. The negative arm PASSING would void the digest, so it is load-bearing rather than decorative. commit_seq binds in the receipt/evidence because surface_version is additionalProperties:false and commit_seq is an ENVELOPE fact, never a record field.",
+      "denominator": "1 published artifact; 2 controls, one of which MUST fail to open",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP3B-AC6",
+      "criterion_verbatim": "CLEAN-CLONE RUN + THE TWO RECEIPTS: the slice runs from a fresh unique clone at --run-commit; never deletes a destination; EXTRACT HYGIENE -- the runner removes its own clone/extract on exit unless an explicit --keep names a forensic case, and prints the path it removed or kept; a second seat's replay reproduces admitted/refused/errored; the evidence is in the shape bundle_identity.py --receipt consumes, run_commit == its own evidence; the RECORDING on v0.3-candidate+27 is the label owner's act.",
+      "method": "test_suite",
+      "invocation": "python org/standards/isck/receipts/build_slice_receipts.py 9f63564a1f",
+      "output_evidence": "Two independent clean extracts of 9f63564a1f, both exit 0, compared over 20 substantive lines with the two per-run-variable lines excluded BY NAME. receipt_problem() at e83bd49f21 returns None for BOTH kinds. Negative controls fire: ab5dc4e62c (predates any receipt) -> 'carries no org/standards/isck/receipts/vertical_slice_receipt.json (a commit that exists is not a certification)'; a label with a different contract_bundle_id -> refused on the mismatch. EXTRACT HYGIENE exercised for real: 'CLONE released ...wp3-battery-<pin>-<rand> (0.96 GB) -- removed: True', where only a directory the run ALLOCATED is a removal candidate and an explicit --clone-dir never is. The registry write is NOT this seat's act and is not claimed here.",
+      "denominator": "2 receipt kinds x (1 positive + 2 negative controls); 2 independent extracts",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP3B-AC7",
+      "criterion_verbatim": "MECHANISM, ON THIS FACE: mech-1 the scoped lane grant; mech-2 NO performance claim -- any throughput sentence must be a printed measurement or absent; mech-3 no bridge cell populated, no fusion; mech-4 the lift cited verbatim, nothing wider; mech-5 the certifier never the author.",
+      "method": "manual_read_with_citation",
+      "invocation": "review of this face against the commit series and the lane rows in .owned-paths.yaml",
+      "output_evidence": "mech-1: every commit in this TO landed under the lane rows for org/standards/isck/ledger/** and org/standards/isck/receipts/**; GIT_COMMIT_AUTHOR_OVERRIDE was not used at any point. mech-2: this face carries NO throughput, latency or volume claim; adequacy at production volume is UNCLAIMED and 2c admission at volume stays unmeasured, per the TO's own boundary. mech-3: no bridge population, no fusion, no L3 cell -- WP-5 waits on this TO and on WP-4. mech-4: the lift is cited verbatim ('Lift everything, time to work buddy', 2026-08-28 14:08Z, record @676604de18) and read no wider; the separate B4 egress word covers B4 alone, and no egress of any kind occurred in this TO. mech-5: this decomp was certified by 3.0.0_SA_CVO~X from the issuer's c0, and every correction that changed the work in this TO came from CVO~X, CTO~X, CRO~X or the issuer rather than from self-review -- the executor measured, the certifier verified.",
+      "denominator": "5 mechanism cells, each answered on this face",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Every green number in this slice is paired with an arm that must go red: refusal reachability (two broken references, each must refuse exactly one part), the replay anchor (an unbindable anchor must be refused), the snapshot (the naive main-file copy must fail to open), the translator (an AST sweep for literals substituting for absent part data), and the digest (a dirty working tree must report that the digest does not describe the code that ran).",
+      "expected": "each arm turns red on the defect it names, and on nothing else; a green run with no reachable refusal is indistinguishable from a ledger that admits anything",
+      "observed": "dangling reference -> 1 refused of 42; wrong-CLASS reference -> 1 refused of 42; unbindable frontier anchor -> refused as L-12-replay-frontier; naive main-file copy -> failed to open (OperationalError), the arm that makes the published digest mean anything; no-synthetic-defaults -> FORBIDDEN 0, after it twice FAILED on this seat's own code and forced a real correction (a run record that declared itself SUCCEEDED at construction); dirty-tree digest -> 'DIGEST DESCRIBES THE CODE THAT RAN: False' naming the two edited files, and True once committed. receipt_problem() additionally refused a pre-receipt commit (ab5dc4e62c) and a mismatched contract_bundle_id, so its None verdict at e83bd49f21 is discriminating rather than default.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two independent clean extracts of the same run commit (9f63564a1f), compared over the substantive output lines; separately, the population translated twice in one run and every record compared through engine.canonical()",
+      "observed": "the two extracts agree on all 20 compared lines; the two per-run-variable lines (the extract's temp path and the AC5 published-artifact byte digest) are excluded BY NAME rather than silently. In-run: 126 records re-translated at the same pin are BYTE-IDENTICAL via canonical().",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the registry write recording these receipts on v0.3-candidate+27",
+      "reason": "the label owner's act (1.0.0_SA_CTO~X); this TO delivers the evidence, not the registry write"
+    },
+    {
+      "item": "values for semantic_layer and canonical_role on the manifest's 28 named materializers",
+      "reason": "ruled mapping v0.2 @df73332fb2 declares both ABSENT domain-wide on three grounds; the values are the materializer OWNERS' to declare under a vocabulary the contract does not yet carry. The 28 parts print ERRORED reason-class declaration_gap rather than any default"
+    },
+    {
+      "item": "adequacy at production volume",
+      "reason": "UNCLAIMED per the TO's boundaries; 2c admission at volume is unmeasured and no throughput sentence appears on this face"
+    },
+    {
+      "item": "a second seat's replay of the two receipts",
+      "reason": "AC6 names it and it is the certifier's act; the two independent extracts delivered here are the executor's half"
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / DISARMED -- graph_object_manifest.declared.json carries the prose 'per-DB, matches each DB' in vintage.measured_utc, a field the manifest types as a timestamp (measured across 42 parts: 36 parse as ISO, 1 is prose, 5 absent). Row 8 REFUSED the slice's own source_frontier on it. Owner: the emitter / the L0 ratification re-read. observed_at is now carried only when it parses; the other 6 are explicit absences, never coerced.",
+    "OBSERVATION / DISARMED -- generation.materializer is typed string|null and carries PROSE in 14 of the 28 named values, so a bundle digest is computable for 14 only. Owner: 1.0.0_SA_CTO~X, routed to the next-vintage emitter item; the 14 print explicit absence with reason materializer_not_a_single_artifact.",
+    "OBSERVATION / DISARMED -- the WP-3 battery and replay runners left ~1.01 GB extracts in %TEMP% after every run; ~25 accumulated in one day (24.8 GB) and the device reached 0.2 GB free of 255, at which point this seat's own AC6 run died on 'No space left on device'. Owner: this seat, named by MSTR ASK 1; the runner now releases the extract it allocated and PROVES the removal.",
+    "OBSERVATION / DISARMED -- on this device a clean extract under the session scratchpad exceeded Windows MAX_PATH (260) and os.path.exists returned FALSE for a file tracked at HEAD: a failed retrieval returning a VALUE indistinguishable from 'the pin does not carry this file'. AC6 now extracts to a short root.",
+    "OBSERVATION / DISARMED -- a `git clone --no-hardlinks` of this repo needs ~6.6 GB of object database and is the wrong instrument for AC6 anyway; `git archive` of the pin is ~1.0 GB and carries no .git, which is what exposed two read-failure defects in the slice."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DT_ClientPlatform/logs/2026-08-28/dtx_wp3b_first_real_substrate_admission.md",
+  "compiler_tools": [
+    {
+      "tool": "run_slice.py",
+      "invocation": "python org/standards/isck/ledger/battery/run_slice.py --run-commit 9f63564a1f",
+      "result": "exit 0; AC1-AC5 all printed with their denominators; the extract released and the removal verified"
+    },
+    {
+      "tool": "run_battery.py",
+      "invocation": "python org/standards/isck/ledger/battery/run_battery.py --run-commit 52ddb4ed86",
+      "result": "ran 188 of 188 -- COUNTED, exit 0; CLONE released 0.96 GB, removed: True"
+    },
+    {
+      "tool": "build_slice_receipts.py",
+      "invocation": "python org/standards/isck/receipts/build_slice_receipts.py 9f63564a1f",
+      "result": "both evidence/receipt pairs written, CR=0 on both, determinism computed across two extracts"
+    },
+    {
+      "tool": "bundle_identity.py",
+      "invocation": "receipt_problem(e83bd49f21, <kind>, derive(e83bd49f21))",
+      "result": "None for both kinds; two negative controls refused"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": ".tools/safe-commit.sh --author \"0.4.0_DT_ClientPlatform~X <...>\" -F <msgfile> -- <paths>",
+      "result": "every commit in this TO landed under the seat's lane rows; no author override used"
+    },
+    {
+      "tool": "git object-database reads",
+      "invocation": "git cat-file blob <commit>:<path> / git archive <pin>",
+      "result": "every digest in the receipts computed from committed bytes, never from the working tree"
+    }
+  ]
+}
