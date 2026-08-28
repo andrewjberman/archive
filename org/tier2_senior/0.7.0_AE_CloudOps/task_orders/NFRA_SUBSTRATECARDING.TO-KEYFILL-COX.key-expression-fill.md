@@ -11,11 +11,11 @@ workflows/atom_decomposition/runs/nfra-substratecarding-keyfill/20260828T1915Z/D
 cells:
 KEYFILL-hpos-1 KEYFILL-hpos-2 KEYFILL-hpos-3 KEYFILL-hpos-4 KEYFILL-hpos-5 KEYFILL-qoos-1 KEYFILL-qoos-2 KEYFILL-qoos-3 KEYFILL-qoos-4
 partition: fill_declaration + evidence cells are owned on FOUR lane faces, each for the cards where carded_by == its lane; this face's partition is carded_by == 0.7.0_AE_CloudOps~X (11 cards). Present on this face, DISCHARGED BY THE ISSUER (not owned here): KEYFILL-lzzf-1 KEYFILL-lzzf-2 KEYFILL-lzzf-3 KEYFILL-ilbd-1 KEYFILL-ilbd-2; mechanism KEYFILL-mech-1 KEYFILL-mech-2 KEYFILL-mech-3 KEYFILL-mech-4 KEYFILL-mech-5. Owned elsewhere: KEYFILL-heaw-1 KEYFILL-heaw-2 (4.0.0_SA_CRO~X); KEYFILL-rcgx-1 KEYFILL-rcgx-2 KEYFILL-rcgx-3 KEYFILL-rcgx-4 (0.4.0_DT_ClientPlatform~X).
-</decomp_ref>
 
 <owned_cells>
 KEYFILL-hpos-1 KEYFILL-hpos-2 KEYFILL-hpos-3 KEYFILL-hpos-4 KEYFILL-hpos-5 KEYFILL-qoos-1 KEYFILL-qoos-2 KEYFILL-qoos-3 KEYFILL-qoos-4
 </owned_cells>
+</decomp_ref>
 
 <proof_of_spec>
   <criteria>

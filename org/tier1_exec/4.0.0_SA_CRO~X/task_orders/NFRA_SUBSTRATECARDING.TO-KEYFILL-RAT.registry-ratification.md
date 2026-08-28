@@ -10,11 +10,11 @@ workflows/atom_decomposition/runs/nfra-substratecarding-keyfill/20260828T1915Z/D
 cells:
 KEYFILL-heaw-1 KEYFILL-heaw-2
 The COMPILE of the extension is `0.4.0_DT_ClientPlatform~X`'s act (TO-KEYFILL-JOIN); this face RATIFIES it. Present, discharged by the issuer: KEYFILL-lzzf-1 KEYFILL-lzzf-2 KEYFILL-lzzf-3 KEYFILL-ilbd-1 KEYFILL-ilbd-2; mechanism KEYFILL-mech-1 KEYFILL-mech-2 KEYFILL-mech-3 KEYFILL-mech-4 KEYFILL-mech-5.
-</decomp_ref>
 
 <owned_cells>
 KEYFILL-heaw-1 KEYFILL-heaw-2
 </owned_cells>
+</decomp_ref>
 
 <proof_of_spec>
   <criteria>
@@ -28,7 +28,7 @@ KEYFILL-heaw-1 KEYFILL-heaw-2
 
 ## THE ACT
 
-Ratify (or refuse, with the failing member named) `0.4.0_DT_ClientPlatform~X`'s compiled extension of card_population_registry.v1.json to waves 2 and 4: every member by path + LF-normalised git_blob_id (a digest without its normalisation is not an identity -- the 82e795810d lesson) + subject_id; candidate_set_digest recomputed; ratified_at_commit recorded. The `key` receiver's admission predicate (receiver_source_populations.key: all_non_blank; basis_allowed measured/held/inferred; required fields incl. trust.key.key_expression) is NOT loosened for the fill: a card whose key_expression stays absent is NOT admitted to the key receiver and its part stays unknown, honestly. Print, per member, ADMITTED / NOT_ADMITTED(<failing field>); a fixture with key_expression null reads NOT_ADMITTED (the negative arm).
+Ratify (or refuse, with the failing member named) `0.4.0_DT_ClientPlatform~X`'s compiled extension of card_population_registry.v1.json to waves 2 and 4: every member by path + LF-normalised git_blob_id (a digest without its normalisation is not an identity -- the 82e795810d lesson) + subject_id; candidate_set_digest recomputed; ratified_at_commit recorded. The `key` receiver's admission predicate (receiver_source_populations.key: all_non_blank; basis_allowed measured/held/inferred; required fields incl. trust.key.key_expression) is NOT loosened for the fill: a card whose key_expression stays absent is NOT admitted to the key receiver and its part stays unknown, honestly. Print, per member, ADMITTED / NOT_ADMITTED(<failing field>); a fixture with key_expression null reads NOT_ADMITTED (the negative arm). **The ratification receipt carries an explicit missing-subject / duplicate-subject disposition for every collision the compile names (CVO~X 205410Z) -- the measured one first: W2-hffm vs W4-c2_instances_json.card.json on a subject file ABSENT at HEAD; ratify neither as a joined part, collapse nothing, infer no bytes.**
 
 ## ACCEPTANCE CRITERIA
 

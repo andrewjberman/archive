@@ -11,11 +11,11 @@ workflows/atom_decomposition/runs/nfra-substratecarding-keyfill/20260828T1915Z/D
 cells:
 KEYFILL-rcgx-1 KEYFILL-rcgx-2 KEYFILL-rcgx-3 KEYFILL-rcgx-4
 compile half (owned by this lane as compiler, ratified by 4.0.0_SA_CRO~X on its face): the registry v1 extension by path + git_blob_id (LF-normalised) + subject_id with a recomputed candidate_set_digest -- the ACT is here, the RATIFICATION is KEYFILL-heaw-1 KEYFILL-heaw-2 on 4.0.0_SA_CRO~X's face. Present, discharged by the issuer: KEYFILL-lzzf-1 KEYFILL-lzzf-2 KEYFILL-lzzf-3 KEYFILL-ilbd-1 KEYFILL-ilbd-2; mechanism KEYFILL-mech-1 KEYFILL-mech-2 KEYFILL-mech-3 KEYFILL-mech-4 KEYFILL-mech-5.
-</decomp_ref>
 
 <owned_cells>
 KEYFILL-rcgx-1 KEYFILL-rcgx-2 KEYFILL-rcgx-3 KEYFILL-rcgx-4
 </owned_cells>
+</decomp_ref>
 
 <proof_of_spec>
   <criteria>
@@ -31,7 +31,7 @@ KEYFILL-rcgx-1 KEYFILL-rcgx-2 KEYFILL-rcgx-3 KEYFILL-rcgx-4
 ## THE ACT
 
 1. COMPILE the registry extension for waves 2 and 4 in the registry's own form (path + LF-normalised git_blob_id + subject_id; candidate_set_digest recomputed and printed before/after) and hand it to `4.0.0_SA_CRO~X` for ratification at a recorded commit -- the population at cut: 0.4.0_DT_ClientPlatform~X 18, 0.7.0_AE_CloudOps~X 11, 0.8.0_AE_CloudComp~X 30, 0.8.0_AE_CloudComp~Y 13 = 72 v3 cards.
-2. After ratification and the lane fills: for every manifest part, JOIN by the registry's MINTED part id (never a name or a path); a part whose registry-admitted card resolves 1:1 and passes the registry's `key` admission predicate (all_non_blank; basis measured/held/inferred; `trust.key.key_expression` required) takes `key.claim_status = declared`, `key.key_expression` from the card, basis + evidence (card path @ its commit) + owner carried, and the mapping digest where a mapping applies; a part with no admitted card, two candidate cards, or a string-name miss stays `unknown` and is PRINTED as such (unjoined / ambiguous / no card) -- nothing is invented.
+2. After ratification and the lane fills: for every manifest part, JOIN by the registry's MINTED part id (never a name or a path); a part whose registry-admitted card resolves 1:1 and passes the registry's `key` admission predicate (all_non_blank; basis measured/held/inferred; `trust.key.key_expression` required) takes `key.claim_status = declared`, `key.key_expression` from the card, basis + evidence (card path @ its commit) + owner carried, and the mapping digest where a mapping applies; a part with no admitted card, two candidate cards, or a string-name miss stays `unknown` and is PRINTED as such (unjoined / ambiguous / no card) -- nothing is invented. **EXPLICIT DISPOSITION REQUIRED (CVO~X 205410Z, on DT~X's DTX finding):** the compile/ratification receipt carries a named missing-subject / duplicate-subject disposition for every collision, starting with the one already measured -- W2-hffm cites org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/c2_instances.json, ABSENT at HEAD after existing only as a 10,329,963-byte untracked file, while 0.8.0_AE_CloudComp~X's W4-c2_instances_json.card.json cards the same subject; the vanished bytes are never inferred, the two cards are never collapsed, and no joined part is minted silently.
 3. Print EMISSION and DECLARATION against the SAME parts denominator, side by side, never summarised: EMISSION = parts carrying all four receivers with a coherent claim_status; DECLARATION = declared / unknown, with the three permanently-unknown-by-construction parts (affinity_matrix, identity_and_succession, similarity_network_fusion) counted INSIDE unknown and NAMED there, never subtracted, never listed as outstanding.
 4. Preserve the pre-fill manifest digest-addressed under D11_MANIFEST/preserved/ BEFORE the pass; validate the re-emitted manifest against L0_GRAPH_SUBSTRATE_MANIFEST.schema.json (every key receiver's required fields present on every part); PASS printed with the parts denominator.
 
