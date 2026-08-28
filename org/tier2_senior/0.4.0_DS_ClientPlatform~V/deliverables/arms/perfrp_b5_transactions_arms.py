@@ -29,6 +29,9 @@ EMIT = ROOT / "org/tier2_senior/0.4.0_DS_ClientPlatform~V/deliverables/emissions
 from perfrp_contract import CONTRACT_VERSION  # noqa: E402
 from perfrp_transactions import (  # noqa: E402
     DEFAULT_PAGE_SIZE,
+    TXN_BUILD_SIDE_ONLY,
+    TXN_CARD_COLUMNS,
+    to_card_rows,
     MAX_PAGE_SIZE,
     TXN_SENSITIVE_MEASURED,
     TXN_SERVED_COLUMNS,
@@ -164,17 +167,26 @@ print("  PRD declared absent: %s" % PRD_DECLARED_ABSENT)
 missing_prd = [p for p, c in PRD_TO_COLUMN.items() if c not in served]
 check("every PRD-enumerated column is served (via its mapped name)", not missing_prd,
       "missing %s" % missing_prd)
-check("the projection carries exactly the allowlist", served == set(TXN_SERVED_COLUMNS),
-      "%d columns" % len(served))
-extra = sorted(served - {PRD_TO_COLUMN[p] for p in PRD_SERVED})
-print("  BEYOND the PRD's 10 card columns, the projection also serves %d: %s"
-      % (len(extra), extra))
-print("  ^ REPORTED, NOT ASSERTED CLEAN: these are join keys (tran_srcde/tr_cd/sb_cd ->")
-print("    the P-2 crosswalk), an identifier (cusip), and secondary amounts")
-print("    (settlmnt_date, net_amount, debit_credit). None is client PII, so the")
-print("    allowlist's SAFETY property is intact -- but the PRD card set is 10 and this")
-print("    serves 17, so a renderer must select, not render everything it receives.")
-print("    Naming it rather than calling AC4 clean on a set I did not compare.")
+check("the BUILD-side projection carries exactly the allowlist",
+      served == set(TXN_SERVED_COLUMNS), "%d columns" % len(served))
+# THE TRIM, ruled by CTO 79452: the SERVED page is the PRD card ten; the seven
+# crosswalk/secondary fields stay BUILD-side. My earlier run REPORTED the 17-vs-10 gap
+# rather than closing it, and the ruling closed it.
+card = to_card_rows(projected)
+card_cols = set(card[0].keys())
+check("the SERVED page carries EXACTLY the PRD card ten", card_cols == set(TXN_CARD_COLUMNS),
+      "%d columns" % len(card_cols))
+check("the card set maps 1:1 onto the PRD's enumerated ten",
+      card_cols == {PRD_TO_COLUMN[p] for p in PRD_SERVED})
+check("the seven build-side fields are ABSENT from the served page",
+      not (card_cols & set(TXN_BUILD_SIDE_ONLY)), str(sorted(TXN_BUILD_SIDE_ONLY)))
+check("...and are still PRESENT build-side (the trim narrows serving, not the build)",
+      set(TXN_BUILD_SIDE_ONLY) <= served)
+try:
+    to_card_rows([{c: 1 for c in TXN_CARD_COLUMNS if c != "price"}])
+    check("to_card_rows REFUSES a row missing a card column", False, "it returned")
+except MissingUpstreamColumn:
+    check("to_card_rows REFUSES a row missing a card column (fails CLOSED)", True)
 for name, reason in PRD_DECLARED_ABSENT.items():
     check("DECLARED ABSENT and NOT emitted: %s (%s)" % (name, reason),
           name.lower() not in {c.lower() for c in served})
@@ -185,6 +197,9 @@ print("=" * 78)
 print("ARM 4 -- the PII boundary holds on REAL rows (allowlist, not denylist)")
 print("=" * 78)
 leaked = sensitive_leak_check(projected)
+card_leaked = sensitive_leak_check(to_card_rows(projected))
+check("no leak on the TRIMMED SERVED page either (re-run per CTO 79452)",
+      not card_leaked, "leaked %s" % card_leaked)
 check("no served row carries any of the %d measured-sensitive columns"
       % len(TXN_SENSITIVE_MEASURED), not leaked, "leaked %s" % leaked)
 present_upstream = [c for c in TXN_SENSITIVE_MEASURED if c in set(trn.columns)]
@@ -216,13 +231,14 @@ trn["_rel"] = [str(a2r.get(str(a)) or "UNMAPPED-RELATIONSHIP:%s" % a)
 counts = trn["_rel"].value_counts()
 target = counts.index[0]
 sub = trn[trn["_rel"] == target]
-rows = project_rows(list(trn.columns), sub.to_dict("records"))
+build_rows = project_rows(list(trn.columns), sub.to_dict("records"))
+rows = to_card_rows(build_rows)   # SERVE the card ten, not the build 17
 page = page_transactions(rows, relationship_id=target, page=0, page_size=DEFAULT_PAGE_SIZE)
 print("  relationship %s has %d transactions on date=%s" % (target, len(rows), asof))
 print("  page 0 @%d -> returned %d, total %d, hasMoreResults %s"
       % (DEFAULT_PAGE_SIZE, page["returned"], page["total"], page["hasMoreResults"]))
-check("the emitted page's rows carry exactly the allowlist",
-      all(set(r.keys()) == set(TXN_SERVED_COLUMNS) for r in page["rows"]))
+check("the emitted page's rows carry exactly the CARD TEN",
+      all(set(r.keys()) == set(TXN_CARD_COLUMNS) for r in page["rows"]))
 check("no leak on the REAL emitted page", not sensitive_leak_check(page["rows"]))
 
 artifact = {
@@ -233,7 +249,8 @@ artifact = {
     "paged": True,
     "page": page,
     "declared_absent_columns": PRD_DECLARED_ABSENT,
-    "served_columns": list(TXN_SERVED_COLUMNS),
+    "served_columns": list(TXN_CARD_COLUMNS),
+    "build_side_only_columns": list(TXN_BUILD_SIDE_ONLY),
     "prd_card_columns": list(PRD_SERVED),
     "window": {"upstream_pins": {"silver/fact_trn": trn_pin,
                                  "dimensions/dim_relationship": rel_pin}},

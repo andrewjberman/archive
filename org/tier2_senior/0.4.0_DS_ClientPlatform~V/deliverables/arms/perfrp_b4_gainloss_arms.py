@@ -28,6 +28,19 @@ S3 = boto3.client("s3")
 FAILS = []
 
 
+# Every gain/loss figure is now a {value, figure_state, reason} dict (COO 79478 re-open).
+FIG_KEYS = ("market_value", "cost_basis", "unrealized_short_term",
+            "unrealized_long_term", "unrealized_term_undeclared", "unrealized_total",
+            "realized", "total_gain_loss")
+
+
+def v(entry, key):
+    """Read a figure's VALUE. The tie-out below is re-run through this so the state
+    fields are shown NOT to have altered the sums (COO 79478's explicit condition)."""
+    f = entry[key]
+    return f["value"] if isinstance(f, dict) else f
+
+
 def check(name, cond, detail=""):
     print("  %-58s %s%s" % (name, "PASS" if cond else "*** FAIL ***",
                             ("  " + detail) if detail else ""))
@@ -46,8 +59,8 @@ print("=" * 78)
 census_lots = census["tie_out"]["combined"]["fact_uln + fact_ult"]
 census_resid = census["tie_out"]["combined"]["fact_uln + fact_ult_residual"]
 pos_mv = census["tie_out"]["canonical_positions"]["market_value"]
-leaf_mv_rel = round(sum(e["market_value"] for e in rel["entries"]), 2)
-leaf_mv_acct = round(sum(e["market_value"] for e in acct["entries"]), 2)
+leaf_mv_rel = round(sum(v(e, "market_value") for e in rel["entries"]), 2)
+leaf_mv_acct = round(sum(v(e, "market_value") for e in acct["entries"]), 2)
 print("  a-4 census: uln+ult %.2f ; positions %.2f ; residual %.2f"
       % (census_lots, pos_mv, census_resid))
 print("  b-4 leaf  : relationship grain %.2f ; account grain %.2f"
@@ -79,13 +92,15 @@ print("  a-4 census identity residual (ROW grain): %.2f" % census_identity)
 for label, doc in (("relationship", rel), ("account", acct)):
     bad_sum, bad_tot, res = [], [], []
     for e in doc["entries"]:
-        parts = (e["unrealized_short_term"] + e["unrealized_long_term"]
-                 + e["unrealized_term_undeclared"])
-        if abs(parts - e["unrealized_total"]) > 0.02:
+        parts = (v(e, "unrealized_short_term") + v(e, "unrealized_long_term")
+                 + v(e, "unrealized_term_undeclared"))
+        if abs(parts - v(e, "unrealized_total")) > 0.02:
             bad_sum.append(e["key"])
-        if abs(e["unrealized_total"] + e["realized"] - e["total_gain_loss"]) > 0.02:
+        if abs(v(e, "unrealized_total") + v(e, "realized")
+               - v(e, "total_gain_loss")) > 0.02:
             bad_tot.append(e["key"])
-        res.append(abs((e["market_value"] - e["cost_basis"]) - e["unrealized_total"]))
+        res.append(abs((v(e, "market_value") - v(e, "cost_basis"))
+                       - v(e, "unrealized_total")))
     check("%s: ST + LT + undeclared == unrealized_total" % label, not bad_sum,
           "%d bad of %d" % (len(bad_sum), len(doc["entries"])))
     check("%s: unrealized + realized == total" % label, not bad_tot,
@@ -120,7 +135,7 @@ print("  ^ two independent determinations of the same fact: the custodian's flag
 print("    the statutory one-year rule. The leaf serves the DECLARED one (it is the")
 print("    custodian's characterisation, per CTO 68440); the derived rule is the")
 print("    control that shows the declared flag is not arbitrary.")
-undecl = sum(e["unrealized_term_undeclared"] for e in rel["entries"])
+undecl = sum(v(e, "unrealized_term_undeclared") for e in rel["entries"])
 check("term-undeclared bucket exists and is NOT folded into ST or LT",
       all("unrealized_term_undeclared" in e for e in rel["entries"]),
       "total $%.2f" % undecl)
@@ -129,6 +144,22 @@ print("=" * 78)
 print("ARM 4 -- the served figure is the CUSTODIAN'S, not a re-derivation")
 print("=" * 78)
 print("  provenance: %s" % w["served_figure_provenance"])
+# COO 79478: every figure carries its claim, as b-2/b-3/b-6 do.
+bare = sum(1 for doc in (rel, acct) for e in doc["entries"] for k in FIG_KEYS
+           if not (isinstance(e[k], dict) and "figure_state" in e[k] and "value" in e[k]))
+total_figs = sum(len(doc["entries"]) for doc in (rel, acct)) * len(FIG_KEYS)
+check("EVERY gain/loss figure carries figure_state + reason", not bare,
+      "%d bare of %d figures" % (bare, total_figs))
+check("the state vocabulary matches b-2/b-6",
+      {e[k]["figure_state"] for doc in (rel, acct) for e in doc["entries"] for k in FIG_KEYS}
+      <= {"COMPUTED", "COMPUTED_PARTIAL", "NOT_COMPUTED_INPUTS_PRESENT",
+          "NOT_COMPUTED_INPUTS_ABSENT"},
+      str(sorted({e[k]["figure_state"] for doc in (rel, acct) for e in doc["entries"]
+                  for k in FIG_KEYS})))
+check("the custodian's provenance rides ON the realized figure",
+      all("custodian-reported" in (e["realized"]["reason"] or "") for e in rel["entries"]))
+check("the a-4 residual disclosure rides ON the aggregate figures",
+      all("99.8831%" in (e["unrealized_total"]["reason"] or "") for e in rel["entries"]))
 check("cost_basis_column is the one a-4 NAMED", w["cost_basis_column"] == "cost_basis_unamortized",
       w["cost_basis_column"])
 check("the leaf records WHY that column (not just which)", "NAMED BY MEASUREMENT" in w["cost_basis_basis"])
