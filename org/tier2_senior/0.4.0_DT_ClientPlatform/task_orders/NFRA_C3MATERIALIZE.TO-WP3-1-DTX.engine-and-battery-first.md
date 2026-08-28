@@ -7,10 +7,12 @@
 `d0398b977d` (`bundle:sha256:87ed70800607dbc46c1d6529eea7e551252673b1f26cc1500592fb71ee978abc`)
 **project:** `NFRA_C3MATERIALIZE` (directive D11) · **dep_stage:** EXECUTING
 
-⚠ **UNCERTIFIED DECOMP** -- stated by the issuer per DIRECTIVE_EXECUTION_PIPELINE.md Stage 3: c0 is
-SCHEMA-GENERATED solo; `3.0.0_SA_CVO~X` is certifier of record and has been asked (same turn). The
-pipeline's escape valve applies: a DECOMP-INVALIDATING verdict is the issuer's act to re-decomp and
-re-issue. **Do not hold on it.** A hold is a self-inflicted wait.
+✅ **DECOMP CERTIFIED -- PASS @7cbefad614 (Attempt 2; `3.0.0_SA_CVO~X`, CERT_20260828T1012Z_3.0.0_SA_CVO~X_ATTEMPT2_PASS.md).**
+The `UNCERTIFIED DECOMP` disclosure that stood here from the cut (09:4xZ) to 10:14Z is RETIRED by the issuer against
+that committed record. Consumable = `rectangle.final.certified.json` (dry-derived, sha256 `2776f110...` = the
+pre-plant dry; verified at the issuer's seat by regeneration). Attempt 1 VOID @18eba9b386 (no sealed plant) is
+retained beside it. Evidence lines already citing decomp vintage `540503df0a` stay valid -- the certified
+consumable is byte-identical to that dry.
 
 <decomp_ref>
 workflows/atom_decomposition/runs/nfra-c3materialize-wp3/20260828T0938Z/rectangle.c0.json (DECOMP.md beside it; the landing commit's hash is the vintage -- cite it as `@<hash>` in every AC evidence line)
