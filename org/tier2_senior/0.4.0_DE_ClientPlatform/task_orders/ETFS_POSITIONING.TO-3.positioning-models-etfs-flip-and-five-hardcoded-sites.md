@@ -37,6 +37,51 @@ Portal DEV @ee90fa8edbf12dcdfbf64e14389f72251a23c06a — **LANDED LOCAL, rides M
 READY FOR DT HANDOFF once the integration push lands (DT's fence condition — `origin/DEV` reads `3ade1aba` or later — is MET by this commit's parent).
 ⭐ **`ETFS-f-3` (Models BYTE-IDENTICAL) INDEPENDENTLY RE-CLOSED 2026-08-28 ~01:5xZ BY `1.0.0_SA_CTO~Z` — BY CONSTRUCTION, WHICH IS THE STRONGER CLAIM THAN THE RENDER DIFF.** All 8 mode-conditional sites enumerated (5 `isEtfs`, 3 `mode === 'satellites'`): **every one is ADDITIVE** — each gates a query or renders an EXTRA element, and **not one mutates the Models render path**. And the data selector `:240 dataByMode[mode]` is a **MODE-KEYED TOTAL LOOKUP, not a boolean**: *the Models branch is not reached by elimination, it is addressed by key.* ⭐ `Positioning.tsx:161-170` documents why in its own words — a two-valued boolean over a now-three-valued axis *"silently binds every future mode to the `else` branch, so satellites would have rendered the MODELS payload under the MODELS page description while the pill said Satellites — a wrong answer wearing the right label, with a clean build."* **That is Rule 24 totality vindicated in production code.**
 ⛔ **SO THE ONLY REMAINING ACT ON THIS TO IS A DEPLOY, NOT A BUILD OR A MEASUREMENT:** the `public-data-router` branch + the `qualified_arn` pin drop are **COMMITTED BUT NOT DEPLOYED**. ⚠ **AND IT IS THE SECOND COMMITTED-NOT-DEPLOYED EDGE CHANGE ON THIS ESTATE TONIGHT** — the satellites route (`shared-advisor-router`, `POSN_TENANCY.TO-4-AE`) is the other. **A DIFFERENT ROUTER, POSSIBLY THE SAME DISTRIBUTION**, and this estate's standing constraint is **ONE APPLIER PER MODULE**. **Whoever is seated for either apply MUST establish whether the two changes share a distribution before applying — they must not be applied blind by two seats.**</status>
+
+## ⛔⛔ STALE BLOCKER RETIRED — MEASURED AT THE **APPLIED** PLANE 2026-08-28 15:0xZ
+
+**Measured by `3.0.0_SA_CVO~Z` (msg 13264) on the DEPLOYED edge artifact, not the desired plane.
+Recorded here by `2.0.0_SA_COO~Z` (the COO office issued this TO, so the face is this office's to
+correct). `3.0.0_SA_CVO~Z` deliberately did NOT edit it.**
+
+```
+THIS FACE SAID           a router/deploy blocker was outstanding
+MEASURED 15:0xZ          distribution EVTSA9VEHNZVH, Status Deployed, 27 behaviors
+  /api/scoped/satellites/*  IS behavior #27; shared-advisor-router pinned :25, NOT :24
+  public-data-router:7 DEPLOYED BYTES (pin resolved BY CONTENT -- downloaded + unzipped,
+  never inferred from a version number, per Rule 22a):
+      else if (b.uri.startsWith("/api/general/etfs/")) -> "/platinum/etfs/"
+      else if (b.uri.startsWith("/api/general/"))      -> "/json/"
+  >> THE etfs BRANCH IS ORDERED BEFORE THE CATCH-ALL, so the described fall-through CANNOT occur.
+  CONTROLS: etfs 3 / json-tiered 3 / general 10 POSITIVE; satellites 0 / positioning 0 NEGATIVE
+            -- the probe DISCRIMINATES; it is not matching everything.
+  qualified_arn pin drop: all five routers read DYNAMIC qualified_arn [OK].
+```
+⭐ **THE ONE-APPLIER HAZARD THIS FACE RAISED IS MOOT:** `list-distributions` returns **EXACTLY ONE**
+distribution, so the two router changes necessarily shared it. **The hazard was real when written and
+is now settled by measurement.**
+
+⚠ **DIRECTION, STATED: THIS FACE WAS *PESSIMISTIC*, WHICH IS THE SAFE DIRECTION.** It over-stated a
+blocker rather than under-stating one, **and a pessimistic face announces itself the moment anyone
+measures.** It was TRUE WHEN WRITTEN. ⛔ **The general fault is not this face's author: a `<status>`
+block is a SNAPSHOT WITH NO FORWARD REFERENCE TO ITS OWN SUPERSESSION.** Two of them were read as live
+state inside one hour today.
+
+⛔ **THE RUNG REACHED IS *APPLIED*, NOT *EXERCISED*.** Deployed bytes and live distribution config were
+read; **no authenticated request was issued through the route.** `auth-validator-edge:18` sits on both
+behaviors, so an unauthenticated curl would 401 and produce a FALSE NEGATIVE. **"A real user is served"
+remains unexercised by this measurement.**
+
+⚠ **INSTRUMENT TRAP FOUND WHILE MEASURING, RECORDED BECAUSE IT WILL BITE THE NEXT PIN RESOLUTION:**
+```
+public-data-router     v7  2026-08-21T21:03:51   v6  2026-08-21T21:20:23
+shared-advisor-router  v25 2026-08-28T02:29:53   v24 2026-08-28T02:46:27
+```
+**On BOTH routers the LOWER-numbered version is NEWER by wall clock.** ⛔ **"version number ascending ==
+chronological" is FALSE on this estate, twice, on two different functions.** Cause NOT diagnosed and
+none claimed. **Resolve a pin BY CONTENT, never by comparing version numbers.**
+
+
 <priority>P1 — SESSION PRIORITY (Andrew-direct 19:3xZ). ⛔ **This is the surface Andrew SEES. PRD s.11.1's DONE is a rendered page, not an artifact.**</priority>
 <authority>PRD s.11.1 (the DONE — the flip, the four funds, Models byte-identical) + s.5 + s.11.4(f). Rule 19: portal main worktree stays on `DEV`, always.</authority>
 <proof_of_spec>

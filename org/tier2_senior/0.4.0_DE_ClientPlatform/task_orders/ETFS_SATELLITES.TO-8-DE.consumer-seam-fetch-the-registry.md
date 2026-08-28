@@ -9,6 +9,51 @@
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T01:4xZ</issued>
 <status>complete — SELF-MARKED by the assignee `0.4.0_DE_ClientPlatform~S` 2026-08-28T02:2xZ per `org/XXX.md` ("`complete` = done (self-marked)"). **5 of 5 AC met.** Portal `d04c1599` on DEV; deliverable + 5 read renders + the served registry banked at `509f458cde` (`deliverables/deS_ETFS_SATELLITES_TO8_consumer_seam_20260828/`). **PUSH STATE: both LOCAL** — `origin/DEV = f1180aad`, `origin/SITEZ = c65ed351a7`, read by `ls-remote` + `is-ancestor` with a positive control; push is the integrator's act. ⚠ **`complete` ≠ SHIPPED:** the route is committed but NOT DEPLOYED (router pinned v24; 0 of 26 behaviors mention satellites), so against the live plane this seam correctly renders **fetch-failed** today. The deploy is `POSN_TENANCY.TO-4-AE`, currently under `2.0.0_SA_COO~Z`'s 11910 `[STOP]` — **not this lane's, and not a condition of this TO.** Awaiting `3.0.0_SA_CVO~Z` certification.</status>
+
+## ⛔⛔ STALE BLOCKER RETIRED — MEASURED AT THE **APPLIED** PLANE 2026-08-28 15:0xZ
+
+**Measured by `3.0.0_SA_CVO~Z` (msg 13264) on the DEPLOYED edge artifact, not the desired plane.
+Recorded here by `2.0.0_SA_COO~Z` (the COO office issued this TO, so the face is this office's to
+correct). `3.0.0_SA_CVO~Z` deliberately did NOT edit it.**
+
+```
+THIS FACE SAID           a router/deploy blocker was outstanding
+MEASURED 15:0xZ          distribution EVTSA9VEHNZVH, Status Deployed, 27 behaviors
+  /api/scoped/satellites/*  IS behavior #27; shared-advisor-router pinned :25, NOT :24
+  public-data-router:7 DEPLOYED BYTES (pin resolved BY CONTENT -- downloaded + unzipped,
+  never inferred from a version number, per Rule 22a):
+      else if (b.uri.startsWith("/api/general/etfs/")) -> "/platinum/etfs/"
+      else if (b.uri.startsWith("/api/general/"))      -> "/json/"
+  >> THE etfs BRANCH IS ORDERED BEFORE THE CATCH-ALL, so the described fall-through CANNOT occur.
+  CONTROLS: etfs 3 / json-tiered 3 / general 10 POSITIVE; satellites 0 / positioning 0 NEGATIVE
+            -- the probe DISCRIMINATES; it is not matching everything.
+  qualified_arn pin drop: all five routers read DYNAMIC qualified_arn [OK].
+```
+⭐ **THE ONE-APPLIER HAZARD THIS FACE RAISED IS MOOT:** `list-distributions` returns **EXACTLY ONE**
+distribution, so the two router changes necessarily shared it. **The hazard was real when written and
+is now settled by measurement.**
+
+⚠ **DIRECTION, STATED: THIS FACE WAS *PESSIMISTIC*, WHICH IS THE SAFE DIRECTION.** It over-stated a
+blocker rather than under-stating one, **and a pessimistic face announces itself the moment anyone
+measures.** It was TRUE WHEN WRITTEN. ⛔ **The general fault is not this face's author: a `<status>`
+block is a SNAPSHOT WITH NO FORWARD REFERENCE TO ITS OWN SUPERSESSION.** Two of them were read as live
+state inside one hour today.
+
+⛔ **THE RUNG REACHED IS *APPLIED*, NOT *EXERCISED*.** Deployed bytes and live distribution config were
+read; **no authenticated request was issued through the route.** `auth-validator-edge:18` sits on both
+behaviors, so an unauthenticated curl would 401 and produce a FALSE NEGATIVE. **"A real user is served"
+remains unexercised by this measurement.**
+
+⚠ **INSTRUMENT TRAP FOUND WHILE MEASURING, RECORDED BECAUSE IT WILL BITE THE NEXT PIN RESOLUTION:**
+```
+public-data-router     v7  2026-08-21T21:03:51   v6  2026-08-21T21:20:23
+shared-advisor-router  v25 2026-08-28T02:29:53   v24 2026-08-28T02:46:27
+```
+**On BOTH routers the LOWER-numbered version is NEWER by wall clock.** ⛔ **"version number ascending ==
+chronological" is FALSE on this estate, twice, on two different functions.** Cause NOT diagnosed and
+none claimed. **Resolve a pin BY CONTENT, never by comparing version numbers.**
+
+
 <priority>⛔ **P0 — with `TO-7-AE`, the END-TO-END BLOCKER on Andrew's item 2.**</priority>
 <authority>**ANDREW-DIRECT 2026-08-28 ~01:3xZ:** *"End to end full 'Satellites' view mode on 'Positioning' page, including all backend and api work"*. Shape ruled by `1.0.0_SA_CTO~Z` (11617). Wire shape from the binding-now table, `ctoZ_SAT_TO2_PROMOTION_AND_VACUOUS_CORPUS_20260827.md`.</authority>
 
