@@ -58,7 +58,19 @@ LEDGER = HERE / "ADVI_49F.P14-VEHICLE_CAMPAIGN_LEDGER.jsonl"
 REDERIVE = HERE / "ADVI_49F.P14-VEHICLE_A00_ATTESTATION_REDERIVATION.py"
 
 GOLD_BUCKET = "opal-data-49financial"
-INSTANCE_ID = "i-0fa1846f04ed7e337"          # bd-49f-auto-login
+# THE HOST, re-pointed 2026-08-28 00:3xZ per 1.0.0_SA_CTO ruling 77108 / 2.0.0_SA_COO 77114,
+# after the date-1 send was REFUSED rc=2 on AccessDenied. The constant below previously read
+# "i-0fa1846f04ed7e337  # bd-49f-auto-login" -- and the comment was TRUE: that id really is the
+# BD auto-login box. It was correct about what it NAMED and wrong about what it should have
+# named, which is why no review of this line ever caught it ("a name is not an identity").
+# i-01003b035d2988dfb = bd-gold-layer-runner, profile bd-exporter-profile -> bd-exporter-ec2-role,
+# which carries the grant via inline policy advi-49f-chain-access (GetObject+PutObject on
+# gold/advi/*, GetObject on _code/*, ListBucket on the bucket). Citation: the P2D-4 host ruling at
+# infra/aws/terraform/opal-assets/advi_49f_floor.tf:52. It is the host the 12:45Z production floor
+# has dispatched THIS SAME document to daily for 8 days, so the vehicle inherits a proven identity
+# rather than acquiring a new one. NO IAM CHANGE: widening bd-49f-auto-login-role to the firm
+# bucket is refused outright (firm-separation), and the runner needs nothing added.
+INSTANCE_ID = "i-01003b035d2988dfb"          # bd-gold-layer-runner (P2D-4 host ruling)
 SSM_DOCUMENT = "advi-49f-chain-dispatch"     # DocumentVersion 3 -- Date + DeclaredHistorical
 NIGHTLY_SCHEDULE = "advi-49f-gold-floor"
 
@@ -234,12 +246,18 @@ def ssm_online():
     return bool(inf) and inf[0].get("PingStatus") == "Online"
 
 
+# Did THIS driver start the host? The halt is conditional on it (see halt_host).
+_DRIVER_STARTED_HOST = False
+
+
 def ensure_host_running(timeout=600):
     """Idempotent. A dispatcher halt mid-campaign lands here and is handled, not failed."""
+    global _DRIVER_STARTED_HOST
     st = host_state()
     if st == "stopped":
         print(f"  host {INSTANCE_ID} is stopped (expected after a dispatcher halt) -- starting")
         ec2.start_instances(InstanceIds=[INSTANCE_ID])
+        _DRIVER_STARTED_HOST = True
     elif st not in ("running", "pending"):
         raise RuntimeError(f"host in state {st!r} -- not startable by this driver")
     deadline = time.time() + timeout
@@ -252,9 +270,30 @@ def ensure_host_running(timeout=600):
 
 
 def halt_host():
+    """Halt ONLY a host this driver started -- leave a host we found running alone.
+
+    RE-SCOPED 2026-08-28 with the re-point, and it is a consequence of the re-point rather than
+    a separate idea. The old target (bd-49f-auto-login) was a single-purpose box, so an
+    unconditional stop was merely rude. THE NEW TARGET IS SHARED: bd-exporter-ec2-role carries
+    schwab, opal-data-bd, opal-data-inf, opal-data-assets and the platinum publisher, so
+    bd-gold-layer-runner is a box other pipelines run on. Stopping a host we did not start could
+    kill another lane's in-flight run, and this driver cannot see those runs.
+
+    This is 1.0.0_SA_CTO 77108 item 3(b)'s own principle -- "sent as true ONLY when the driver
+    started it" -- applied to the STOP as well as to StartedByDispatcher. The ruling states it for
+    the parameter; the same asymmetry exists on the stop, and the stop is the destructive half.
+
+    StartedByDispatcher itself stays OMITTED on every send (defaults false). Sending true would
+    self-halt the box after EVERY date -- the dispatcher-halt trap the TO forbids (74209) -- so
+    the driver owns the lifecycle explicitly here instead of delegating it to the document.
+    """
+    if not _DRIVER_STARTED_HOST:
+        print(f"  host {INSTANCE_ID} was ALREADY RUNNING when this driver arrived -- NOT halting")
+        print("  (shared gold-layer runner; another lane may be mid-run and this driver cannot see it)")
+        return
     st = host_state()
     if st == "running":
-        print(f"  halting host {INSTANCE_ID} (the driver halts it ITSELF, once, at the end)")
+        print(f"  halting host {INSTANCE_ID} (this driver started it, so this driver halts it)")
         ec2.stop_instances(InstanceIds=[INSTANCE_ID])
     else:
         print(f"  host already {st}; nothing to halt")
