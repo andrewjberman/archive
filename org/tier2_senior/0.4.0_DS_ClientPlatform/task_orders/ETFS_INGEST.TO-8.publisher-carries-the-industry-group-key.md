@@ -8,7 +8,17 @@
 <placement>SITE Z (Rule 26) — D4 is SITEZ-placed until the project is done.</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T01:1xZ</issued>
-<status>queued -- for `3.0.0_SA_CVO~Z` CERTIFICATION. **THE 13:00Z EXERCISE GATE IS DISCHARGED, ALL THREE RUNGS PASS, AND THE FALSIFIABLE PREDICTION HELD ON BOTH EXACT LIMBS** (`ABSENT_FROM_SOURCE` = 1 = ABT; `NOT_APPLICABLE_NON_EQUITY` = 8 = the run's own FI count). Served `industry_group` KEY PRESENT 189 of 189 against a measured baseline of 0; gold parquet read directly with a negative control; `TO8-AC4` no-regression 189 of 189 identical against the pre-fire copy, all 11 sectors matching. Evidence and method are on this face. **NO EXECUTOR ACT IS PENDING AND NO DS LANE IS NEEDED.** ⚠ First token is deliberately `queued` and NOT `complete`: this seat measured the EXERCISE, not the SOURCE/DATA-class criteria the dead lane discharged, so `queued` keeps the row VISIBLE on the register -- the over-pessimistic direction announces itself and the over-optimistic one cannot.</status>
+<status>pending -- ⛔⛔ **NOT CERTIFIABLE: NO PROOF-OF-SPEC INSTANCE EXISTS. THIS NEEDS AN EXECUTOR, NOT A CERTIFIER.** Measured 15:2xZ by `3.0.0_SA_CVO~Z` and re-measured at this seat: this TO **DECLARES NO `<instance_path>` AT ALL**. **POSITIVE CONTROL: the same probe finds `ETFS_INGEST.TO-5`'s instance present on disk, so the absence is a MEASUREMENT and not a broken read.**
+
+⛔ **AND THE DISPOSITION THIS FACE CARRIED WAS MINE AND WRONG.** After the 13:00Z fire `2.0.0_SA_COO~Z` disposed this TO to `queued -- for 3.0.0_SA_CVO~Z CERTIFICATION`. **The three rungs did pass and that evidence stands -- but a certifier cannot certify a TO with no instance to validate. I routed a BUILD-SIDE GAP to the certifier.** ⚠ **I made this same error on `ETFS_POSITIONING` TO-1/TO-5 and was corrected on it minutes earlier; I then repeated it here without re-checking whether an instance existed for a TO I was disposing myself.**
+
+⭐ **WHAT SURVIVES UNCHANGED:** all three rungs PASS on the 13:00Z SCHEDULED fire, the falsifiable prediction held on both exact limbs (`ABSENT_FROM_SOURCE`=1=ABT; `NOT_APPLICABLE_NON_EQUITY`=8= the run's own FI count), and every measurement on this face is intact. **What is missing is the INSTANCE that records it in the form a certifier can reject on** -- and per CLAUDE.md a value must carry its claim in a field a consumer can reject on. **The evidence exists; its machine-readable carrier does not.**
+
+**OWNER: an EXECUTOR to file the instance. No live DS lane; seat request with `0.0.0_AB_MSTR~Z`, Andrew's word governs.** ⛔ **NOT a certification item; must not be counted as one.**
+
+⚠ **ORIGINAL `<status>` PRESERVED VERBATIM BELOW -- APPENDED, NOT REPLACED.**
+
+queued -- for `3.0.0_SA_CVO~Z` CERTIFICATION. **THE 13:00Z EXERCISE GATE IS DISCHARGED, ALL THREE RUNGS PASS, AND THE FALSIFIABLE PREDICTION HELD ON BOTH EXACT LIMBS** (`ABSENT_FROM_SOURCE` = 1 = ABT; `NOT_APPLICABLE_NON_EQUITY` = 8 = the run's own FI count). Served `industry_group` KEY PRESENT 189 of 189 against a measured baseline of 0; gold parquet read directly with a negative control; `TO8-AC4` no-regression 189 of 189 identical against the pre-fire copy, all 11 sectors matching. Evidence and method are on this face. **NO EXECUTOR ACT IS PENDING AND NO DS LANE IS NEEDED.** ⚠ First token is deliberately `queued` and NOT `complete`: this seat measured the EXERCISE, not the SOURCE/DATA-class criteria the dead lane discharged, so `queued` keeps the row VISIBLE on the register -- the over-pessimistic direction announces itself and the over-optimistic one cannot.</status>
 
 ## ⛔⛔ THE OBSERVED `industry_group` MEMBER SET IS VENDOR-TRUNCATED AT 30 CHARS AND IS **NOT ADOPTION-READY**
 
