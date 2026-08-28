@@ -37,6 +37,17 @@ engine_choice            WP3-ajtr-1 WP3-ajtr-2 WP3-ajtr-3 WP3-ajtr-4
 battery_manifest         WP3-ljww-1 WP3-ljww-2 WP3-ljww-3 WP3-ljww-4
 clean_clone_runner       WP3-pntm-1 WP3-pntm-2 WP3-pntm-4   (pntm-3 `exercised` is WAVE 2: it needs code)
 issuer-owned mechanism   WP3-mech-1 WP3-mech-5 WP3-mech-7   (discharged by THIS TO's AC7/AC8 evidence; owner stays the issuer)
+
+<owned_cells>
+WP3-njzv-1 WP3-njzv-2 WP3-njzv-3 WP3-adtv-1 WP3-adtv-2 WP3-adtv-3 WP3-fyhc-1 WP3-fyhc-2 WP3-fyhc-3
+WP3-dlnv-1 WP3-dlnv-2 WP3-dlnv-3 WP3-smto-1 WP3-smto-2 WP3-smto-3 WP3-wouj-1 WP3-wouj-2 WP3-wouj-3
+WP3-ahtf-1 WP3-ahtf-2 WP3-ahtf-3 WP3-uaew-1 WP3-uaew-2 WP3-uaew-3 WP3-kano-1 WP3-kano-2 WP3-kano-3
+WP3-uzkn-1 WP3-uzkn-2 WP3-uzkn-3 WP3-cshq-1 WP3-cshq-2 WP3-cshq-3 WP3-pzfg-1 WP3-pzfg-2 WP3-pzfg-3
+WP3-oqse-1 WP3-oqse-2 WP3-oqse-3
+WP3-ajtr-1 WP3-ajtr-2 WP3-ajtr-3 WP3-ajtr-4 WP3-ljww-1 WP3-ljww-2 WP3-ljww-3 WP3-ljww-4
+WP3-pntm-1 WP3-pntm-2 WP3-pntm-4
+WP3-mech-1 WP3-mech-5 WP3-mech-7
+</owned_cells>
 </decomp_ref>
 
 <proof_of_spec>
