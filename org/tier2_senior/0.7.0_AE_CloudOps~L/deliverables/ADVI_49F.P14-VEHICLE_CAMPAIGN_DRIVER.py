@@ -175,12 +175,41 @@ def verify_artifacts(date, expected_basis, since):
             "last_modified": lm.strftime("%Y-%m-%dT%H:%M:%SZ") if lm else None,
             "attestation_basis": basis,
             "fresh_since_send": fresh,
+            # RECORDED, NOT GATED (0.4.0_DS_ClientPlatform~U 77045 items 1-2). SG-2 moved
+            # flow_ledger to schema_version 1.3, where the FC code-rule INTERNAL legs carry a
+            # recovered direction that a pre-1.3 partition left at 0.00. So the 533 partitions are
+            # stale in TWO ways and one re-drive repairs both -- but a partition that comes back
+            # carrying attestation_basis with a pre-1.3 ledger is HALF-REPAIRED, and that is
+            # invisible unless the version is on the row. Banked in evidence so the ledger can be
+            # queried for it after the fact.
+            # NOT a completeness predicate: this driver does not pin or diff the version. A version
+            # it has never seen is data, not drift, and turning it into a problem would manufacture
+            # a gate on a 533-date pass that nobody asked for.
+            # MEASURED, not assumed: date 1 (2024-07-08) reads schema_version '1.0' today -- older
+            # than the '1.2' the 77045 note describes, so the pre-state is not uniform across the set.
+            "schema_version": man.get("schema_version", "<ABSENT>"),
         }
-        # `attested` is a SENTINEL (-1) under the declared branch, not a magnitude. Guard, never sum.
+        # `attested` is a SENTINEL (-1) under the declared branch, not a magnitude. Guard, never
+        # sum -- and guard BOTH DIRECTIONS. The one-directional form shipped here caught only
+        # "sentinel on the attested branch"; the arm it could not see is a DECLARED date coming
+        # back with a real count, i.e. a00 took the converter branch while this driver drove the
+        # declared one. That is the arm that runs 506 of 533 times, and a guard whose failing half
+        # is the rare one is a control set with only one reachable arm.
+        # Field grain: 0.4.0_DS_ClientPlatform~U 76987 -- `attested` now travels to ALL FOUR
+        # tables (@eb99599a50), where it previously reached dim_account alone; so its ABSENCE on a
+        # stamped dataset is now itself a defect, not the normal case.
         if "attested" in man:
             evidence[ds]["attested"] = man["attested"]
             if man["attested"] == -1 and basis != BASIS_DECLARED:
                 problems.append(f"{ds}: attested==-1 sentinel but basis is {basis!r}")
+            elif man["attested"] != -1 and basis == BASIS_DECLARED:
+                problems.append(
+                    f"{ds}: basis is {BASIS_DECLARED!r} but attested=={man['attested']!r}, "
+                    "not the -1 sentinel -- a00 branch disagreement")
+        elif basis != "<ABSENT>":
+            problems.append(
+                f"{ds}: attestation_basis {basis!r} present but `attested` ABSENT -- the "
+                "P14-STAMP four-table propagation regressed for this dataset")
         if not fresh:
             problems.append(f"{ds}: NOT freshly written (LastModified {lm} <= send {since})")
         if basis == "<ABSENT>":
