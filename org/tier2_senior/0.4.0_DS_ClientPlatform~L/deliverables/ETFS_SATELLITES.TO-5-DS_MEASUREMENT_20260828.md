@@ -398,3 +398,54 @@ present in `__doc__`**, and `:338-339` assert `REGISTRY_CLAIM == "held"` / `!= "
 it is a TO-2 decision with a test to move, not a tidy-up** — surfaced to `1.0.0_SA_CTO~Z`, not acted on.
 
 **TO-2's suite re-run after the edit: 29 passed.**
+
+## 12. AC6 RE-MEASURED 02:4xZ — THE TRIGGER NOW EXISTS, AND §5's EVIDENCE IS SUPERSEDED
+
+⛔ **§5 of this record carried a sentence that is now FALSE and I am correcting it rather than leaving
+it standing:** *"THE TRIGGER HAS NOT REACHED DESIRED, let alone APPLIED or EXERCISED."* True at
+~01:2xZ. **False now.**
+
+`0.7.0_AE_CloudOps~S` applied `ETFS_SATELLITES.TO-6-AE` at 02:45:45Z. Re-censused, both planes:
+
+```
+PLANE 1  EventBridge Rules      139 total, NextToken ABSENT,  1 MATCHING
+         cot-satellites-registry-producer-daily   State ENABLED   cron(0 7 * * ? *)
+PLANE 2  EventBridge Scheduler   18 total, NextToken ABSENT,  0 matching
+```
+
+⭐ **THE RULE COUNT MOVED 138 -> 139 AND THE +1 IS EXACTLY THIS RULE.** That is what separates "a new
+trigger appeared" from "my census drifted" — the delta is attributable, not merely consistent.
+
+**AC6 IS STILL FAIL, AND THE REASON IS NOW A DIFFERENT ONE.** It has reached **APPLIED**; it has not
+reached **EXERCISED**. The first fire is 07:00Z. The criterion's own text forecloses discharging on
+less — *"an ad-hoc run is permitted for QA and is NEVER the acceptance"*, *"DESIRED != APPLIED !=
+EXERCISED on every claim"* — and that fire discharges AC6 **for TO-6-AE**, not for this TO.
+
+⚠ **The superseded measurement is KEPT, not overwritten.** The pre-apply zero (0 of 138 Rules, 0 of 18
+Schedules, against a positive control of six live gold triggers) is what made this criterion's FAIL a
+**measurement** rather than an assumption. Deleting it would retire the evidence and leave only the
+verdict.
+
+⭐ **AND THE GENERAL FORM, since this is the second time tonight one of my own recorded claims aged
+under me** (the first was writing "LOCAL" as a push state before measuring it): **a criterion's status
+can be stable while its REASON silently changes underneath.** AC6 read FAIL before and reads FAIL now,
+so nothing in a status-only view would have flagged this — the verdict was never wrong, and the
+sentence justifying it became wrong. **A status that survives is not evidence its basis did.**
+
+### Related, and it is what made the re-measure worth running at all
+
+The apply that moved AC6 is the same apply that carried the **regression vector** this seat found and
+reported at 02:3xZ: TO-6-AE's package was pinned at `3f5f8bace5`, which **predates** the unit fix, so
+the packaged producer emitted FRACTIONS. A 07:00Z fire on that package would have overwritten the
+corrected artifact with the defect the consumer refuses **and greened AC6 over it**. `0.7.0_AE_CloudOps~S`
+re-pinned and redeployed at 02:45:45Z, verifying on the **live** bytes:
+
+```
+DEPLOYED NOW     15763 B   SUMTGT=5  x100=1  GUARD=4  REFUSE=1   pin e8151e7385
+DEPLOYED BEFORE  13182 B   SUMTGT=0  x100=0  GUARD=0  REFUSE=0   pin 3f5f8bace5
+```
+
+⭐ **Their verification is a rung above the one this seat supplied:** I exercised the 4-token predicate
+against **git blobs**; they ran it against the **live `lambda get-function` package**, each carrying its
+own in-zip BUILD_MANIFEST pin. Source-plane vs deployed-plane, and the deployed plane is the one the
+claim is about.
