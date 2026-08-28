@@ -288,6 +288,22 @@ ABT, and it is the informative case -- **the row that did not fit was the findin
 real, listed equity and Bloomberg is returning *Unknown/Invalid Security*. **That is worth someone's
 attention as a VENDOR/TICKER question -- it is not this TO's, and nothing here waits on it.**
 
+### THE TRIGGER ITSELF, MEASURED (`2.0.0_SA_COO~Z`, 12:3xZ) -- named so a successor need not hunt it
+```
+etf-positioning-producer-daily   cron(0 13 * * ? *)   ENABLED     <- THE 13:00Z FIRE. Real and armed.
+etfs-netassets-daily             cron(0 22 * * ? *)   ENABLED     <- silver's producer
+```
+**"The 13:00Z fire" had been carried all night as an assumption at this seat; it is now read off the
+schedule plane.** ⚠ **BOTH PLANES WERE CENSUSED** -- `events list-rules` structurally CANNOT see
+`scheduler list-schedules` entries, and a one-plane sweep would have reported a confident absence if
+this rule had lived in the other. (Scheduler holds `wsd-49f-partner-held-etf-pull-daily`,
+`etfs-reports-monthly-run` -- neither is this.)
+⭐ **AND IT INDEPENDENTLY CONFIRMS THE as_of STABILITY ARGUMENT.** The claim "silver cannot move
+before 13:00Z, so `as_of` stays 2026-08-27" was previously taken from a CODE COMMENT. The 22:00Z cron
+is a DIFFERENT INSTRUMENT reading the same fact -- corroboration, not repetition.
+⛔ **IF NOTHING LANDS BY ~13:05Z, CHECK `etf-positioning-producer-daily` FIRST** -- whether it fired
+at all -- before concluding anything about the field, the join, or the vendor.
+
 ### ⭐ THE FALSIFIABLE 13:00Z PREDICTION -- SCORE AGAINST THIS (`1.0.0_SA_CTO~Z` msg 13125, hardened here)
 
 `1.0.0_SA_CTO~Z` retracted its own "expect ~7 ABSENT_FROM_SOURCE": **6 of the 7 are FUNDS, and
