@@ -21,7 +21,9 @@
       "commit_or_etag": "0a2855cbe8",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "The authorized one-line fix at :62 -- BUN derived via ${BUN:-$(command -v bun)} with a loud refusal, replacing an absolute path into ONE device's home that made the tool unrunnable on the device Andrew placed the work on. Both refusal arms exercised. Scoped authorization from 2.0.0_SA_COO~Z msg 12019; NOT a sweep (LD-0405 'surface, don't chase' intact).",
-      "artifact_covered_by": ["T7AE-AC0b"]
+      "artifact_covered_by": [
+        "T7AE-AC0b"
+      ]
     },
     {
       "path_or_key": "s3://opal-313476888478-lambda-artifacts/portal-auth/shared-advisor-router.zip",
@@ -29,7 +31,10 @@
       "commit_or_etag": "qrL3PFqRnq5RUyQ4SDJvZQWDreLnl7rmNWZ25IF8cx0=",
       "deployed_state": "DEPLOYED-VERIFIED",
       "deploy_evidence": "2108 B, LastModified 2026-08-28T02:25:36Z. Rebuilt from router source @40697fe79d (0.7.0_AE_CloudOps~Y's, untouched by this lane). Previous artifact was content-sha256 1xewzMSnrs/... dated 2026-08-21, SIX DAYS older than the satellites branch. Terraform deploys this ARTIFACT, not index.mjs, which is why a source commit alone never reached the edge.",
-      "artifact_covered_by": ["T7AE-AC0b", "T7AE-AC3"]
+      "artifact_covered_by": [
+        "T7AE-AC0b",
+        "T7AE-AC3"
+      ]
     },
     {
       "path_or_key": "aws_lambda_function.shared_advisor_router[0] -> shared-advisor-router:25",
@@ -37,15 +42,22 @@
       "commit_or_etag": "portal-auth-v1.24.0",
       "deployed_state": "DEPLOYED-VERIFIED",
       "deploy_evidence": "Published 2026-08-28T02:29:53Z, CodeSize 2108 (v24 was 1998). Applied via safe-apply: 0 added, 2 changed, 0 destroyed; post-apply re-plan 'No changes.' Distribution EVTSA9VEHNZVH Status 'Deployed' -- confirmed rather than assumed, since a CloudFront update is not instant.",
-      "artifact_covered_by": ["T7AE-AC1", "T7AE-AC3", "T7AE-AC4", "T7AE-AC5"]
+      "artifact_covered_by": [
+        "T7AE-AC1",
+        "T7AE-AC3",
+        "T7AE-AC4",
+        "T7AE-AC5"
+      ]
     },
     {
       "path_or_key": "org/critical_paths/change_management/20260828T0228Z_etfs-satellites-to7-ae-scoped-route-portal-auth_deploy.md",
       "kind": "doc",
       "commit_or_etag": "40781748c1",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Opened at apply start, CLOSED at completion. Header states CLOSED refers to the DEPLOY and not the TO, because AC3's authenticated half is outstanding.",
-      "artifact_covered_by": ["T7AE-AC3"]
+      "deploy_evidence": "Opened at apply start, CLOSED at completion. Its header states that CLOSED refers to the DEPLOY and not the TO. NOTE: that header was written while AC3's authenticated half was still outstanding; it has since been discharged by 0.4.0_DE_ClientPlatform~S @80f42be356, and the ledger carries an amendment saying so rather than being silently edited.",
+      "artifact_covered_by": [
+        "T7AE-AC3"
+      ]
     }
   ],
   "acceptance": [
@@ -86,6 +98,15 @@
       "status": "PASS"
     },
     {
+      "criterion_id": "T7AE-AC3",
+      "criterion_verbatim": "APPLIED and EXERCISED, not just declared. safe-apply (never bare); read back from the live plane; then actually call the route and show the served bytes match the object at the key (size/ETag). DESIRED != APPLIED != EXERCISED.",
+      "method": "live_read",
+      "invocation": "APPLIED half (this seat): .tools/safe-apply.sh -chdir=infra/aws/terraform/portal-auth; aws lambda list-versions-by-function; aws cloudfront get-distribution-config. EXERCISED half (0.4.0_DE_ClientPlatform~S, msg 12209 @80f42be356): POST /auth/login with the COMMITTED internal_admin demo cred, then GET /api/scoped/satellites/registry.json with the bearer, across four arms.",
+      "output_evidence": "APPLIED: 0 added / 2 changed / 0 destroyed; re-plan 'No changes.'; shared-advisor-router:25 published 2026-08-28T02:29:53Z; behaviors 27 (was 26); /api/scoped/satellites/* wired origin-request to :25; distribution Status 'Deployed'. The DEPLOYED v25 bytes carry all four satellites literals with v24 ABSENT on every one (control fires). EXERCISED -- MEASURED BY 0.4.0_DE_ClientPlatform~S, CREDITED TO THEM, NOT RE-RUN HERE (re-running the same command would be repetition, not corroboration): s3 opal-data-cot/platinum/satellites/registry.json 2196 B sha256 0989650ab6a7541d...; served GET /api/scoped/satellites/registry.json?firm=cot 2196 B sha256 0989650ab6a7541d... -- IDENTICAL BYTES, as_of 2026-08-27, books 9. FOUR-ARM CONTROL: (1) real bearer, no ?firm= -> 400 text/plain 47 B; (2) real bearer + ?firm=cot -> 200 application/json 2196 B; (3) NO auth -> 401 json 51 B; (4) BOGUS bearer -> 401 json 36 B. Arm 4 is the load-bearing one: a syntactically valid bearer with a corrupted signature returns a DIFFERENT body (36 B vs 51 B), which shows the signature is VERIFIED rather than merely PRESENT -- arms 2-vs-3 alone would only show that something checks a header exists.",
+      "denominator": "2196 of 2196 bytes identical between the S3 object and the served response (sha256 match, not a size match); 4 of 4 auth arms exercised, each returning a distinguishable response",
+      "status": "PASS"
+    },
+    {
       "criterion_id": "T7AE-AC4",
       "criterion_verbatim": "THE EMPTY SET IS A VALID 200, NOT AN ERROR. And a MISSING key must NOT be synthesised into an empty set -- the edge synthesis was REMOVED @24a8435642 precisely because it converted both 403 and 404 into 200 {books: []}, reporting a refusal as 'this firm has no satellites'. Do not re-create it.",
       "method": "manual_read_with_citation",
@@ -119,8 +140,8 @@
   },
   "declared_exclusions": [
     {
-      "item": "T7AE-AC3 -- APPLIED is verified; the EXERCISED-AUTHENTICATED half is NOT. No acceptance row is filed.",
-      "reason": "SPLIT, and the enum cannot express a half. APPLIED IS FULLY VERIFIED: v25 published 02:29:53Z with the satellites literals PRESENT in the DEPLOYED bytes (v24 ABSENT -- control fires on all four); behavior added and wired origin-request to :25; 0 added/2 changed/0 destroyed; re-plan 'No changes.'; distribution Status 'Deployed'. EXERCISED IS PARTIAL: the live route returns 401/application-json/51B, byte-for-byte the shape of a known-good scoped route, while a path with NO behavior returns 403/application-xml/111B -- so the behavior is demonstrably live and reaching auth-validator-edge, discriminated in BOTH directions. WHAT IS NOT SHOWN: an AUTHENTICATED fetch proving the rewrite serves platinum/satellites/registry.json from opal-data-cot with served bytes matching the object (2196 B, ETag c056874e69aa048a616f4e21100cf74a). A 401 proves the route reaches the auth gate and says NOTHING about what the rewrite does after it. BLOCKED ON a bearer: the committed exercise pattern takes TEST_EMAIL/TEST_PASSWORD from the environment (correctly uncommitted) and none is set here; I did not go looking for login material in Secrets Manager. ROUTED by 2.0.0_SA_COO~Z (msg 12162) to 0.4.0_DE_ClientPlatform~S, whose TO-8-DE consumer seam calls this route with a real session and produces the authenticated evidence as a by-product. 2.0.0_SA_COO~Z: 'Do not report TO-7-AE complete until AC3's authenticated half lands.' This instance accordingly does NOT claim completion."
+      "item": "T7AE-AC3's EXERCISED half was measured by another seat, not by this one.",
+      "reason": "The authenticated fetch needed a bearer this seat does not hold. 2.0.0_SA_COO~Z (12162) routed it to 0.4.0_DE_ClientPlatform~S, whose consumer seam calls the route with a real session. They discharged it @80f42be356 using a COMMITTED internal_admin demo credential via POST /auth/login -- no Secrets Manager and no signing key were needed, so declining to hunt for credential material cost nothing. The AC3 row above is filed on THEIR measurement, explicitly credited; this seat did not re-run it, because re-running a peer's command is repetition rather than corroboration."
     },
     {
       "item": "A second device-portability defect in build-nodejs-lambda.sh -- SURFACED, NOT FIXED.",
@@ -140,6 +161,7 @@
     }
   ],
   "surprises": [
+    "BLOCKING/ARMED, raised by 0.4.0_DE_ClientPlatform~S (12209) and carried as THEIRS, not re-derived here: an 'opal-capital' (internal) caller must supply ?firm= or the router 400s before resolving a bucket (index.mjs:227-241), while modeAccess.ts:118 places INTERNAL_FIRM_ID in the satellites allowlist -- so Opal staff SEE the Satellites pill and the fetch behind it returns 400. Their seam fails honestly (red 'could not be loaded', never 'no satellites'), but internal viewers cannot reach the data and Andrew's item 2 is an end-to-end Satellites view. The remedy fork spans the router (POSN_TENANCY, 0.7.0_AE_CloudOps~Y) and the mode allowlist (TO-8-DE), so it is not this lane's to pick. NOTE THEIR OWN BOUND, PRESERVED: the COTTONWOOD path is INFERRED FROM SOURCE ONLY (FIRM_BUCKET_MAP['cottonwood']='opal-data-cot') and NOT exercised -- no cottonwood credential exists on this device. Nobody should read the opal-capital 400 as evidence about the cottonwood path, in either direction.",
     "OBSERVATION/INERT: build-nodejs-lambda.sh's to_native_path does not handle the /cygdrive/c mount flavour, so the script is unrunnable on site Z by its documented invocation even after the :62 fix. Surfaced, not fixed -- outside the scoped authorization. One line to the channel; work continued.",
     "OBSERVATION: the deployed edge bundles are minified by bun build --format=esm, so IDENTIFIERS are mangled and only STRING LITERALS survive. A deployed-bundle probe must use literals only or it returns a false absence. This is a property of the TOOLCHAIN and applies to all five edge functions, not just this one. My own first probe used two identifiers as positive controls, failed 2 of 3, and I discarded a working instrument before diagnosing it.",
     "OBSERVATION: lambda-source-map.json's last_deployed_commit/last_deployed_at were NOT updated by the build script (it updates artifact_sha256 only). That is arguably correct -- the artifact is uploaded, not deployed -- but after this apply those fields now understate the deployed vintage until record-terraform-deploy.sh runs. Noted, not acted on."
