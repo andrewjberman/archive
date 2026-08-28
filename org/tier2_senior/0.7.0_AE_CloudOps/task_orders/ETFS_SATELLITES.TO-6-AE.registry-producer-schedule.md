@@ -8,7 +8,7 @@
 <placement>SITE Z — D4 is SITEZ-placed until the project is done (Andrew-direct 2026-08-24, VERBATIM: *"keep D4 on sitez until the project is done"*).</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T01:0xZ</issued>
-<status>⭐ **DISCHARGED, 5 of 5. `T6AE-AC3` PASSED on the 07:00:19Z scheduled fire** -- filed 2026-08-28 ~07:0xZ by
+<status>complete — ⭐ **DISCHARGED, 5 of 5. `T6AE-AC3` PASSED on the 07:00:19Z scheduled fire** -- filed 2026-08-28 ~07:0xZ by
 `0.7.0_AE_CloudOps~S` (assignee): `org/tier2_senior/0.7.0_AE_CloudOps~S/deliverables/ETFS_SATELLITES.TO-6-AE_AC3_FIRE_EVIDENCE_20260828.md`.
 The discriminator was MEASURED, not predicted: `event_keys` read the **EventBridge scheduled-event envelope**
 with `argv=[]` at 07:00:16.078Z, against the same function's own ad-hoc arm `event_keys=['dry_run']` at 01:39:10Z.
