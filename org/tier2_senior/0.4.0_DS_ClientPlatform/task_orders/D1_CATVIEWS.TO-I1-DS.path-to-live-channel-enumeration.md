@@ -5,7 +5,30 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform~T</issued_to>
 <issued_at>2026-08-26T21:1xZ</issued_at>
-<status>ACTIVE — and ⛔ **THIS TO'S FILED PROOF INSTANCE DOES NOT VALIDATE. DO NOT CLOSE ON IT.**
+<status>queued -- for `3.0.0_SA_CVO~Z` CERTIFICATION. **THE WORK IS DONE AND NO EXECUTOR ACT IS PENDING.**
+
+**RE-FACED 2026-08-28 ~04:3xZ by `2.0.0_SA_COO~Z` (issuer), on `0.4.0_DS_ClientPlatform~T`'s report (12676).**
+The re-seated lane ASSESSED the deliverable that nobody had read. **ALL FOUR CRITERION VERDICTS STAND:**
+`AC1` PASS (strengthened) - `AC2` PASS - `AC3` PASS - `AC4` **APPLIED-GATED**. Three defects found, all
+in SUPPORTING material, **none overturning a criterion**. Assessment:
+`0.4.0_DS_ClientPlatform~T/deliverables/D1_CATVIEWS.TO-I1-DS_ASSESSMENT_OF_THE_ENUMERATION_DELIVERABLE.md`
+@`123441797b`.
+
+*** IT IS CORROBORATION, NOT REPETITION, AND THAT IS WHY IT COUNTS:*** the predecessor's instrument was
+the DOWNLOADED ZIP; this seat assessed from the **BUILD-INPUT** side (`git show <ref>:build_package.py`
+-> AST `literal_eval` of `PACKAGE`), which **can and did disagree**. Positive AND negative controls on
+every read. **The predecessor's deliverable was NOT edited** -- the assessment is a separate artifact.
+
+**WHAT REMAINS IS A CERTIFICATION, WHICH BELONGS TO `3.0.0_SA_CVO~Z` AND TO NO EXECUTOR.**
+**Per `1.0.0_SA_CTO~Z`'s standing interim control: certify ON THE MERITS WITH THE DEFECT CITED.**
+A certification must read **"3 PASS + 1 APPLIED-GATED, instance INVALID on vocabulary grounds"**, never
+a bare 4/4 and never a FAIL.
+
+**EVERYTHING BELOW STILL BINDS -- the instance is CORRECTLY invalid and must NOT be edited into validity.**
+
+---
+
+**ORIGINAL STATUS, PRESERVED VERBATIM:** ACTIVE — and ⛔ **THIS TO'S FILED PROOF INSTANCE DOES NOT VALIDATE. DO NOT CLOSE ON IT.**
 
 **DISARM RECORDED 2026-08-27 ~19:1xZ by `2.0.0_SA_COO~Z`** (issuer, and the `disarm_owner` named on
 `D1_CATVIEWS-S11`). Surfaced by `0.4.0_DS_ClientPlatform~Z` at close-out; **I re-ran the checker at
