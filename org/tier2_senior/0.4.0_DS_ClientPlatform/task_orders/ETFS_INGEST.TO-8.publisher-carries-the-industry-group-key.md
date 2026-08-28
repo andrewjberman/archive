@@ -29,6 +29,30 @@ MEASURED on bbg/2026-08-27/characteristics.PARQUET by 2.0.0_SA_COO~Z -- a DIFFER
 CONTROL: GICS_SECTOR_NAME max length 22 on the same rows -- entirely BELOW the cap, so the truncation
 is invisible there. Consistent with a per-field limit; NOT proof of one.
 ```
+⛔⛔ **SECOND, INDEPENDENT REASON NOT TO ADOPT -- ADDED 15:0xZ from `1.0.0_SA_CTO~Z` (13255) and
+`3.0.0_SA_CVO~Z` (13251). EITHER ONE ALONE IS SUFFICIENT.**
+```
+REASON 1 (already recorded)  the observed values are TRUNCATED
+REASON 2 (new)               the observed set is INCOMPLETE -- 23 distinct values against a CLOSED
+                             PUBLISHED GICS SET OF 25. A table built from today's data rests on a
+                             PARTIAL DENOMINATOR, and 2 members have never been seen.
+```
+⛔ **AND THE REPAIR-AFTER-THE-FACT OPTION HAS A HAZARD THAT KILLS ITS NAIVE FORM: LENGTH CANNOT
+IDENTIFY WHAT NEEDS REPAIRING.**
+```
+'Household & Personal Products'   29 chars   COMPLETE -- that IS the full GICS name
+'Consumer Staples Distribution'   29 chars   TRUNCATED from "... & Retail" (37)
+```
+>> **TWO VALUES, IDENTICAL LENGTH, OPPOSITE STATES.** Keyed on `len >= 29` a repair CORRUPTS a correct
+   value; keyed on `len == 30` it MISSES this one. **THE REPAIR FUNCTION CANNOT DETECT ITS OWN INPUT
+   SET.** ⭐ Same shape as the `ContentLength 2196 -> 2196` near-miss: **a length is not a
+   discriminator for a content question.**
+⚠ **AND THE SOVEREIGN'S STATED PREMISE FOR THAT OPTION IS FACTUALLY WRONG** -- *"the ones truncated
+seem to mostly be equipment"*: measured, only **2 of 7** involve "Equipment"; the other five complete
+five different ways (`...ices`, `...es`, `...ution & Retail`, `... & Life Sciences`, `... & Retail`).
+⛔ **A repaired value would also be DERIVED, not OBSERVED** -- it needs its own `industry_group_basis`
+member saying RESOLVED rather than OBSERVED, or it serves a derived value under a measured label.
+
 ⭐ **THE PIPELINE IS CORRECT AND THIS IS NOT A REGRESSION.** Bloomberg emitted the value truncated;
 the passthrough passed it through faithfully, which is exactly what the ruling specified (no default,
 no fallback). Every rung behaved correctly and the artifact is faithful to its source.
