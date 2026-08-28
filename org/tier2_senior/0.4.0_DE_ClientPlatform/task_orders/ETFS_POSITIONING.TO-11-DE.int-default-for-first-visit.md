@@ -8,7 +8,24 @@
 <placement>SITE Z (Rule 26). `portal/` is a WORK-SITE. **Main tree stays on DEV (Rule 19).**</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T04:3xZ</issued>
-<status>complete -- ⭐ **CERTIFIED. THE CERTIFICATE EXISTS AND IS ON ORIGIN.** `cvoZ_ETFS_POSITIONING_TO7_TO11DE_CERTIFICATION_20260828.md` @`37a69dcdf7`, verdict **CERTIFIED -- 6 of 6**. Located 15:1xZ by `3.0.0_SA_CVO~Z`; VERIFIED at this seat by containment against `origin/SITEZ` with a SOUND negative control (`origin/CLOUD` tip NOT contained, so the test demonstrably returns NO). ⛔ **THIS FACE PREVIOUSLY READ 'awaiting certification' AND WAS STALE -- the certificate POSTDATES it and nobody updated the face.** ROOT: the face and the certificate are TWO DURABLE RECORDS OF ONE FACT WITH NO NAMED PRIMARY -- the certifier writes one and cannot write the other, the issuer owns the face and has no trigger to return, so they diverge from minute one in the direction of 'outstanding'. Corrected by `2.0.0_SA_COO~Z` as ISSUER. ⚠ **BOUND, STATED BY ITS MEASURER AND NOT PAPERED OVER: this establishes A CERTIFICATE EXISTS for the criteria as they read AT CERTIFICATION TIME. It does NOT establish that no criterion was ADDED to this face afterwards -- that needs a per-face criterion-set diff, NOT RUN.**</status>
+<status>complete -- ⭐ **CERTIFIED. THE CERTIFICATE EXISTS AND IS ON ORIGIN.** `cvoZ_ETFS_POSITIONING_TO7_TO11DE_CERTIFICATION_20260828.md` @`37a69dcdf7`, verdict **CERTIFIED -- 6 of 6**. Located 15:1xZ by `3.0.0_SA_CVO~Z`; VERIFIED at this seat by containment against `origin/SITEZ` with a SOUND negative control (`origin/CLOUD` tip NOT contained, so the test demonstrably returns NO). ⛔ **THIS FACE PREVIOUSLY READ 'awaiting certification' AND WAS STALE -- the certificate POSTDATES it and nobody updated the face.** ROOT: the face and the certificate are TWO DURABLE RECORDS OF ONE FACT WITH NO NAMED PRIMARY -- the certifier writes one and cannot write the other, the issuer owns the face and has no trigger to return, so they diverge from minute one in the direction of 'outstanding'. Corrected by `2.0.0_SA_COO~Z` as ISSUER. ⚠ **BOUND, STATED BY ITS MEASURER AND NOT PAPERED OVER: this establishes A CERTIFICATE EXISTS for the criteria as they read AT CERTIFICATION TIME. It does NOT establish that no criterion was ADDED to this face afterwards -- that needs a per-face criterion-set diff, NOT RUN.**
+
+⚠ **THE ORIGINAL `<status>` CONTENT FOLLOWS, RESTORED VERBATIM.** `2.0.0_SA_COO~Z` replaced it wholesale at @4253643625 instead of appending, destroying evidence on seven faces (142 lines on one of them). Recovered from `4253643625^` and re-attached. **NOTHING BELOW THIS LINE IS NEW; NOTHING ABOVE IT WAS IN THE ORIGINAL.**
+
+queued -- for `3.0.0_SA_CVO~Z` CERTIFICATION. **6 of 6 PASS, INSTANCE VALID. NO EXECUTOR ACT IS PENDING.**
+
+**RE-FACED 2026-08-28 ~05:1xZ by `2.0.0_SA_COO~Z` (issuer).** Verified AT THE INSTANCE rather than from the
+lane's report: `ETFS_POSITIONING.TO-11-DE_PROOF_OF_SPEC.json` -- every row PASS.
+
+**ANDREW'S FOURTH ITEM -- the `INT` first-visit default -- IS BUILT.** All three named implementation traps held: `MODEL_BOOKS` order unchanged, the carries-rows condition preserved, and the Layer-2 short-circuit handled. **`AC1` required a CLEARED profile and the report to STATE the profile state** -- a warm browser cannot discriminate in either direction, and a false PASS would have closed the item silently.
+
+**The next act is a CERTIFICATION, which belongs to `3.0.0_SA_CVO~Z` and to no executor.**
+*** `queued` IS NOT A DISCHARGE CLAIM*** -- this office does not certify its own TOs, and a terminating
+register bought by asserting one is worth less than an honest open row.
+
+---
+
+**ORIGINAL STATUS, PRESERVED VERBATIM:** ACTIVE — cut from an ANDREW-DIRECT with his scope FORK already answered. **Nothing about this TO is waiting on him.**</status>
 <priority>P1 — a sovereign add-on to the Positioning page, small and well-specified. **Below `ETFS_SATELLITES.TO-10-DE`, which is the D4 smoke-test distance.**</priority>
 <authority>**ANDREW-DIRECT 2026-08-28 ~04:2xZ, VERBATIM** (relayed `1.0.0_SA_CTO~Z` 12753):
 
