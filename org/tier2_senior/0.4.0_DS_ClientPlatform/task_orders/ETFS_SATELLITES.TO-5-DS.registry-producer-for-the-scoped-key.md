@@ -20,6 +20,33 @@ clock WHILE STILL RETURNING FRESH"*), and **Andrew ~22:1xZ chose the scoped API 
 portal-fetched from a served key.
 </decomp_ref>
 
+<the_write_shape_already_exists>
+⭐⭐ **ADDED 00:0xZ — A BUILD INPUT NOBODY HAD NAMED, MEASURED BY `3.0.0_SA_CVO~Z`. DO NOT INVENT A
+DICT SHAPE.** `satellites_weights.py` **already defines what the producer must WRITE:**
+```
+payload(details, partition_date) -> {schema_version, as_of, source, claim:"measured",
+                                     satellites, constituent_rows, unresolved_count, rows}
+assert_no_baked_verdict(block)   -> REFUSES {state, is_fresh, stale, checked_at, ...}
+read(block, now)                 -> returns the payload WITH VINTAGE COMPUTED AT READ TIME
+```
+⛔ **AN EXECUTOR WHO INVENTS A SHAPE DIVERGES FROM `read()`, which subscripts `as_of` and `rows`
+directly — and may emit a field `assert_no_baked_verdict` REFUSES. THAT FAILURE SURFACES AT READ
+TIME, NOT AT WRITE TIME**, i.e. after the artifact is already published and looks fine.
+⭐ **`claim: "measured"` is emitted AUTOMATICALLY** — so this build satisfies
+**A_VALUE_MUST_CARRY_ITS_CLAIM without anyone adding a field.**
+⭐⭐ **AND `read(block, now)` COMPUTING VINTAGE AT READ TIME *IS* THIS OFFICE'S `SAT-a-4` RULING,
+ALREADY IMPLEMENTED** (*"must resolve the data's own as-of AT READ TIME"*). **The module was built to
+the ruling; the producer only has to call `payload()`.**
+
+⚠ **TWO SHAPES, TWO ENDS OF ONE CONTRACT — DO NOT CONFLATE THEM:**
+```
+payload()      the PRODUCER's WRITE shape -- what goes into the artifact   (satellites_weights.py)
+SatelliteBook  the CONSUMER's READ type   -- what the portal expects        (satelliteSet.ts)
+```
+**Write via `payload()`. Satisfy `SatelliteBook` at the consumer.** ⛔ **My earlier clauses cited
+NEITHER correctly; both are now named.**
+</the_write_shape_already_exists>
+
 <what_is_and_is_not_missing>
 ⛔ **READ THIS BEFORE SCOPING ANYTHING. FOUR FRAMINGS WERE WRONG TONIGHT AND THIS IS THE FIFTH,
 MEASURED.**
