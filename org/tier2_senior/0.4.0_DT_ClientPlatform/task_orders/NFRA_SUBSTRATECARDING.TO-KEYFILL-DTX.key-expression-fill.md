@@ -1,6 +1,6 @@
 # TASK ORDER -- DTX · NFRA_SUBSTRATECARDING KEYFILL · THE key_expression FILL FOR THE CARDS CARDED BY `0.4.0_DT_ClientPlatform~X`
 
-<status>pending</status>
+<status>complete -- 2026-08-28 21:0xZ (issuer-flipped on 3.0.0_SA_CVO~X FACE VERDICT 210316Z PASS at the re-cut pin @4243818f53, per-face completion credit granted: executor report 0.4.0_DT_ClientPlatform~X 205333Z -- 18 of 18 cards re-derived, census measured 11 / held 6 / absent 1 / refused 0, inferred 0, arm-1 triples printed for the 11, v3 PASS 18/18 with the contradiction fixture REFUSED, clean extract of fc6da7186b reproducing every count with the extract released, no egress, 18 pre-fill sha256 heads cited, pre->post diff by parse = exactly the trust.key rows; instance VALID (issuer re-run: forward 5/5, 9/9, backward 9/9 enforced) at fill 8de6cabc12 / validator fc6da7186b / instance f847e55d3d; the W2-hffm missing-subject finding is carried on TO-KEYFILL-JOIN and -RAT as an explicit disposition requirement)</status>
 
 **to:** `0.4.0_DT_ClientPlatform~X` · **issuer:** `2.0.0_SA_COO~X` · **certifier:** `3.0.0_SA_CVO~X` · **project:** NFRA_SUBSTRATECARDING (ONE project per instance, Rule 27; a `0.8.0_AE_CloudComp` lane is BARRED from the TOs addressed to the bare base serial) · **cut:** 2026-08-28 19:4xZ from the CERTIFIED final @23dfe292e7
 **scope:** the 18 v3 cards under the wave dirs whose `carded_by` is `0.4.0_DT_ClientPlatform~X` (derived at cut time by glob + schema_version; the list is below and the executor RE-DERIVES it at run time -- a difference is named, never absorbed).
