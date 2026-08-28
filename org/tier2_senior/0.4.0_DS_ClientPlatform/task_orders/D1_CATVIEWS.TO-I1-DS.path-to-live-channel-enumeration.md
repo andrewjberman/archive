@@ -92,9 +92,37 @@ an OWNERSHIP gate, not the SEQUENCING one).
 ⚠ **WHAT THIS DOES NOT SAY:** it does not close this TO, and it does not assess `~T`'s ~12KB
 enumeration deliverable, which **remains unassessed by anyone**. Lane `~T` is DEAD — confirmed
 2026-08-28 03:5xZ against `liveness.json` (`~F`, `~L`, `~Q` present; `~T` absent; last `~T` commit
-`2dd3c9d7ff`, 2026-08-26). **Re-seating to assess it is an issuing decision deferred with the
-vocabulary work, and it is NOT on D1's critical path to Andrew's bar** — `D1-i-1`'s discharge rests
-on this TO's FACE, not on the instance, and that was checked before this note was written.**</status>
+`2dd3c9d7ff`, 2026-08-26). `D1-i-1`'s discharge rests on this TO's FACE, not on the
+instance, and that was checked before this note was written.
+
+⛔⛔ **CORRECTED 2026-08-28 ~03:5xZ, SIX MINUTES AFTER I COMMITTED THE OPPOSITE.** The clause here
+read: *"Re-seating to assess it is an issuing decision DEFERRED with the vocabulary work, and it is
+NOT on D1's critical path."* **That is wrong on the part that matters, and `1.0.0_SA_CTO~Z` (12572)
+measured why.**
+
+>> **THE SCHEMA IS NOT THIS TO'S BLOCKER. THE SEAT IS, AND IT IS THE WHOLE BLOCKER.** The interim
+   control already covers the filing — FILE THE TRUE VALUES, ACCEPT THE `INVALID`, and
+   `3.0.0_SA_CVO~Z` certifies **on the merits with the defect cited**, the same disposition run for
+   `TO-6`/`TO-8`'s `cell_refs`. **So the vocabulary hold never touched this item and deferring the
+   re-seat behind it was my error, not a ruling.**
+
+⭐ **AND IT IS THE ONLY ITEM IN D1+D4 IN THIS CONDITION.** Every other open face is executing in a
+live lane, waiting on a clock, or waiting on a disposition. **This one was waiting on a person who
+does not exist.**
+
+⭐ **SEATED 2026-08-28 ~03:53Z by `0.0.0_AB_MSTR~Z`: `0.4.0_DS_ClientPlatform~T` IS LIVE (pid 30236),
+AND `<issued_to>` IS UNCHANGED AND CORRECT.** Rule 27 holds — `~L`, `~Q`, `~F` are live on other
+projects and this is a fourth.
+
+⛔ **MY SEAT ASK WAS FOR A FRESH LETTER `~Y` (msg 12577) AND `0.0.0_AB_MSTR~Z`'s CHOICE IS BETTER.**
+That seat had already re-seated `~T` four minutes before my ask landed. **Re-seating a dead lane on
+ITS OWN TO is CONTINUITY and needs no issuer act; seating `~Y` would have forced a re-address —
+a write that only exists because I picked a new name.** The `~Y` census was sound (0/0/0/absent,
+`~L` positive control) and it answered a question that did not need asking.
+⭐ **It is also this office's OWN prior ruling applied back to it** — *"the letter is cosmetic and a
+measured-clean pre-clearance beats a fresh name"* — and the same pattern that worked for `~L` on
+`ETFS_SATELLITES.TO-5-DS` and `~Q` on `D1_NAMEDISCOVERY`, neither of which needed a re-address.
+**NO `~Y` SPAWN. This TO is not re-addressed and does not need to be.**</status>
 
 <decomp_ref>
 workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — surface (i), cells
