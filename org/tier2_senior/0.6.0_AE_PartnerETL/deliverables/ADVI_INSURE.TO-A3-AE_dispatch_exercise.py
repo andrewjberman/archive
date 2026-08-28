@@ -32,6 +32,12 @@ LAMBDA_DIR = os.path.join(
     "infra", "aws", "lambda", "opal-assets", "opal-assets-bd49f-reporting-pull")
 sys.path.insert(0, os.path.abspath(LAMBDA_DIR))
 
+# The leg's own egress switch defaults OFF in code (fail-closed) and is set ON by Terraform in the
+# deployed env. Set it here BEFORE the import, because the module reads it at import time -- the
+# green arms below exercise the ENABLED leg, and RED ARM 2 puts it back OFF to prove the switch
+# actually refuses rather than merely existing.
+os.environ["INSURANCE_EGRESS"] = "1"
+
 import lambda_function as veh  # noqa: E402
 import insurance_leg  # noqa: E402
 
@@ -191,6 +197,33 @@ def red_arm_short_pull():
            "*** CONTROL DID NOT FIRE -- a short pull returned success ***")
 
 
+def red_arm_egress_switch_off():
+    """RED ARM 2 -- the leg's own egress switch, exercised from the OFF truth.
+
+    A switch that is never tested in its refusing state is a description. This flips
+    insurance_leg.INSURANCE_EGRESS to False (the code default; Terraform sets it ON in the deployed
+    env) and asserts the leg refuses with a NAMED reason and opens ZERO sockets -- including the
+    token mint, which reaches veh._request directly rather than through call_surface and would
+    otherwise be an open path behind a closed gate."""
+    rec = install(COMPLETE_PAGES)
+    saved = insurance_leg.INSURANCE_EGRESS
+    insurance_leg.INSURANCE_EGRESS = False
+    try:
+        veh.lambda_handler({"leg": "insurance", "pull_date": "2026-08-28"}, None)
+    except RuntimeError as e:
+        msg = str(e)
+        named = "INSURANCE EGRESS DISABLED" in msg
+        record("RED ARM 2: INSURANCE_EGRESS off -> named refusal, ZERO vendor calls",
+               named and len(rec.http) == 0,
+               "%s | http calls made=%d (must be 0, incl. the token mint) | bronze puts=%d"
+               % (msg.split(".")[0], len(rec.http), len(rec.puts)))
+        return
+    finally:
+        insurance_leg.INSURANCE_EGRESS = saved
+    record("RED ARM 2: INSURANCE_EGRESS off -> named refusal, ZERO vendor calls", False,
+           "*** SWITCH DID NOT FIRE -- the leg ran with egress disabled ***")
+
+
 def main():
     print("=" * 78)
     print("ADVI_INSURE.TO-A3-AE / INSA3AE-AC1 -- act (a) dispatch exercise")
@@ -202,6 +235,7 @@ def main():
     arm3_bare()
     arm4_unknown_leg()
     red_arm_short_pull()
+    red_arm_egress_switch_off()
     print("=" * 78)
     passed = sum(1 for _, p, _ in RESULTS if p)
     print("RESULT: %d of %d arms PASS" % (passed, len(RESULTS)))
