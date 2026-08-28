@@ -44,6 +44,33 @@ The original placement line read: *"`data/**` and the etfs-pipeline Lambda are b
 <issued>2026-08-24T21:5xZ</issued>
 <status>queued -- for `3.0.0_SA_CVO~Z` CERTIFICATION. **THE 13:00Z EXERCISE GATE IS DISCHARGED, ALL THREE RUNGS PASS, AND THE FALSIFIABLE PREDICTION HELD ON BOTH EXACT LIMBS** (`ABSENT_FROM_SOURCE` = 1 = ABT; `NOT_APPLICABLE_NON_EQUITY` = 8 = the run's own FI count). Served `industry_group` KEY PRESENT 189 of 189 against a measured baseline of 0; gold parquet read directly with a negative control; `TO8-AC4` no-regression 189 of 189 identical against the pre-fire copy, all 11 sectors matching. Evidence and method are on this face. **NO EXECUTOR ACT IS PENDING AND NO DS LANE IS NEEDED.** ⚠ First token is deliberately `queued` and NOT `complete`: this seat measured the EXERCISE, not the SOURCE/DATA-class criteria the dead lane discharged, so `queued` keeps the row VISIBLE on the register -- the over-pessimistic direction announces itself and the over-optimistic one cannot.</status>
 
+## ⛔⛔ THE OBSERVED `industry_group` MEMBER SET IS VENDOR-TRUNCATED AT 30 CHARS AND IS **NOT ADOPTION-READY**
+
+**DISARM of a surprise-channel {OBSERVATION, ARMED} raised by `1.0.0_SA_CTO~Z` (msg 13156), which
+named `2.0.0_SA_COO~Z` as disarming owner. This line IS the disarm, written same-turn.**
+
+`etf_positioning_gold.py:173-180` deliberately mints **no closed value list**, and says the manifest
+will print the OBSERVED member set *"so a vocabulary can be ADOPTED FROM MEASUREMENT on a later TO."*
+⛔ **THAT MEASUREMENT NOW EXISTS AND IT IS CONTAMINATED. DO NOT ADOPT A VOCABULARY FROM TODAY'S
+OBSERVED SET.** It would enshrine `'Technology Hardware & Equipmen'` as a ratified member name.
+
+```
+MEASURED on bbg/2026-08-27/characteristics.PARQUET by 2.0.0_SA_COO~Z -- a DIFFERENT FILE from the
+.csv 1.0.0_SA_CTO~Z read, same run, so this is corroboration and not repetition:
+  165 non-blank · MAX LENGTH 30 · 51 rows AT the cap · nothing above it
+  'Commercial & Professional Serv'  'Consumer Discretionary Distrib'  'Health Care Equipment & Servic'
+  'Pharmaceuticals, Biotechnology'  'Semiconductors & Semiconductor'  'Technology Hardware & Equipmen'
+CONTROL: GICS_SECTOR_NAME max length 22 on the same rows -- entirely BELOW the cap, so the truncation
+is invisible there. Consistent with a per-field limit; NOT proof of one.
+```
+⭐ **THE PIPELINE IS CORRECT AND THIS IS NOT A REGRESSION.** Bloomberg emitted the value truncated;
+the passthrough passed it through faithfully, which is exactly what the ruling specified (no default,
+no fallback). Every rung behaved correctly and the artifact is faithful to its source.
+⚠ **The rendered page will show truncated labels until this is addressed.** ⛔ **NOT CHASED HERE:** a
+field-width override or an alternate Bloomberg field is a VENDOR-API act in the INGEST lane, and
+CLAUDE.md forbids a vendor call without Andrew's explicit per-use word. **Surfaced, disarmed, not
+implemented.**
+
 ## ⭐⭐ THE 13:00Z FIRE LANDED. ALL THREE RUNGS PASS. MEASURED 2026-08-28 13:1xZ by `2.0.0_SA_COO~Z`.
 
 ```
