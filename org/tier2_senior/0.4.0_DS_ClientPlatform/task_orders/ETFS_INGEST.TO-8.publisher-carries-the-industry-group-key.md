@@ -8,7 +8,37 @@
 <placement>SITE Z (Rule 26) — D4 is SITEZ-placed until the project is done.</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T01:1xZ</issued>
-<status>ACTIVE — GATED ON `TO-6` by data dependency (the gold row must carry the key before the publisher can read it). **Not gated on a decision.**</status>
+<status>waiting -- on a CLOCK, not on a BUILDER. **NO BUILD REMAINS AND NO DS LANE IS NEEDED.**
+
+**RE-FACED 2026-08-28 ~04:4xZ by `2.0.0_SA_COO~Z` (issuer), after MY OWN escalation read THIS FACE and
+got it wrong.** I escalated that the ~11:00Z -> ~13:00Z chain *"needs a LANE THAT BUILDS"*.
+**`0.0.0_AB_MSTR~Z` measured the ARTIFACT and the build was already landed and DEPLOYED.**
+```
+  21:28:57Z  63a68942ae  ~Q  TO-6 AC4/AC6 -- industry-group axis + basis enum
+  21:35:43Z  39495cf260  ~Q  TO-8 AC1/AC3/AC4 -- publisher carries industry_group
+  22:14:18Z  f0e2a05889  ~Q  TO-8 RULED -- serve industry_group_basis WITH the value
+  ---------------------------------------------------------------------------------
+  22:46:16Z  e0672e24a0  0.7.0_AE_CloudOps~I  THIRD APPLY CLOSED, package CURRENT on every member
+```
+**VERIFIED AT THIS SEAT, not taken on report:** all three build commits are ANCESTORS of the apply
+commit (`merge-base --is-ancestor`), with a later commit failing the same test as the negative control.
+
+⛔ **THE FACE WAS THE DEFECT AND I TREATED IT AS EVIDENCE.** This office has corrected the
+stale-ACTIVE-face class four times tonight and then convicted a chain off one. **Measure the ARTIFACT,
+not the face** -- it would have been the fifth spawn-onto-finished-work of the night, and
+`0.0.0_AB_MSTR~Z`'s pre-flight limb is what stopped it.
+
+**WHAT IS ACTUALLY OUTSTANDING -- ACCEPTANCE RUNGS, NOT WORK:**
+- **~11:00Z** the vendor pull lands `GICS_INDUSTRY_GROUP_NAME`
+- **~13:00Z** the scheduled gold fire carries it to the SERVED artifact
+
+⚠ **NOT CLAIMED: that this TO is DISCHARGED.** Its ACs may reach rungs a deploy does not, **the ~11:00Z
+landing and the ~13:00Z served artifact ARE the acceptance, and discharge is `3.0.0_SA_CVO~Z`'s call.**
+The claim here is narrower and exact: **no BUILD remains and no BUILDER is needed.**
+
+---
+
+**ORIGINAL STATUS, PRESERVED VERBATIM:** ACTIVE — GATED ON `TO-6` by data dependency (the gold row must carry the key before the publisher can read it). **Not gated on a decision.**</status>
 <priority>P1 — with `TO-6` it completes the producer half of Andrew's promote condition (ii). ⚠ **Both must land before the ~13:00Z gold fire** or the field does not reach platinum today.</priority>
 <authority>Andrew-direct 2026-08-24 ~22:12Z (GICS is the served sub-category vocabulary) · his promote condition (ii), VERBATIM: *"and it displays properly on DEV build with GICS replaced for sub-categories on frontend"* · `1.0.0_SA_CTO~Z`'s Rule-24 ruling (msg 11384): **a NEW PARALLEL FIELD, never a swap into `sub_asset_class`**.</authority>
 

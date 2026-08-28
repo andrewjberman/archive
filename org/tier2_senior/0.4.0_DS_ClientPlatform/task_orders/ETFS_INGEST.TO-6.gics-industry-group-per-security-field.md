@@ -42,7 +42,37 @@ The original placement line read: *"`data/**` and the etfs-pipeline Lambda are b
 ⚠ **GENERALISE BEFORE THE NEXT TO:** a placement block must name **the lane of the FILE THE TO DIRECTS**, not the lane of the project's usual paths. This TO's subject sits outside its project's normal tree, and the placement line was written from the project, not from the file.</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-24T21:5xZ</issued>
-<status>✅ **GO — THE SEQUENCING GATE IS LIFTED 2026-08-28 ~01:1xZ by `2.0.0_SA_COO~Z`, THE OFFICE THAT ADOPTED IT.** ~~staged — RE-SEQUENCED 22:1xZ BEHIND `ETFS_POSITIONING.TO-5`'s DISCHARGE~~. ⛔ **THE LIFT IS NOT A DISCHARGE OF `ETFS_POSITIONING.TO-5` AND MUST NOT BE READ AS ONE** — that TO's discharge sits with `3.0.0_SA_CVO~Z` and is untouched here. **What is lifted is the SEQUENCE, and it is lifted because its OWN STATED RATIONALE is now measurably satisfied:** the gate read *"TO-5 is the only thing between a proven capture and a rendered page ... TO-5 is WHETHER ANYTHING FLOWS AT ALL."* **Things flow.** `1.0.0_SA_CTO~Z` measured the live planes 2026-08-28 ~01:1xZ (msg 11371): the gold→platinum schedule has fired `run_class: scheduled` three days running, 4 books / 4 FULL / 0 SHELL, and served platinum moved 2026-08-27T13:01:25Z. **The condition the sequence was protecting is met; a sequence outlives its reason silently, so it is struck explicitly rather than left to age.** ⚠ **CLOCK, and it is why this could not wait for the discharge:** the ~11:00Z site-Z pull lands `GICS_INDUSTRY_GROUP_NAME` in bronze on rails (@`ebce987b42`, working-tree execution, needs no seat), but the ~13:00Z gold fire **DROPS the field** until this TO lands. Miss that window and condition (ii) cannot be evidenced from production until 2026-08-29 13:00Z — a full day, for want of a lifted sequence.</status>
+<status>waiting -- on a CLOCK, not on a BUILDER. **NO BUILD REMAINS AND NO DS LANE IS NEEDED.**
+
+**RE-FACED 2026-08-28 ~04:4xZ by `2.0.0_SA_COO~Z` (issuer), after MY OWN escalation read THIS FACE and
+got it wrong.** I escalated that the ~11:00Z -> ~13:00Z chain *"needs a LANE THAT BUILDS"*.
+**`0.0.0_AB_MSTR~Z` measured the ARTIFACT and the build was already landed and DEPLOYED.**
+```
+  21:28:57Z  63a68942ae  ~Q  TO-6 AC4/AC6 -- industry-group axis + basis enum
+  21:35:43Z  39495cf260  ~Q  TO-8 AC1/AC3/AC4 -- publisher carries industry_group
+  22:14:18Z  f0e2a05889  ~Q  TO-8 RULED -- serve industry_group_basis WITH the value
+  ---------------------------------------------------------------------------------
+  22:46:16Z  e0672e24a0  0.7.0_AE_CloudOps~I  THIRD APPLY CLOSED, package CURRENT on every member
+```
+**VERIFIED AT THIS SEAT, not taken on report:** all three build commits are ANCESTORS of the apply
+commit (`merge-base --is-ancestor`), with a later commit failing the same test as the negative control.
+
+⛔ **THE FACE WAS THE DEFECT AND I TREATED IT AS EVIDENCE.** This office has corrected the
+stale-ACTIVE-face class four times tonight and then convicted a chain off one. **Measure the ARTIFACT,
+not the face** -- it would have been the fifth spawn-onto-finished-work of the night, and
+`0.0.0_AB_MSTR~Z`'s pre-flight limb is what stopped it.
+
+**WHAT IS ACTUALLY OUTSTANDING -- ACCEPTANCE RUNGS, NOT WORK:**
+- **~11:00Z** the vendor pull lands `GICS_INDUSTRY_GROUP_NAME`
+- **~13:00Z** the scheduled gold fire carries it to the SERVED artifact
+
+⚠ **NOT CLAIMED: that this TO is DISCHARGED.** Its ACs may reach rungs a deploy does not, **the ~11:00Z
+landing and the ~13:00Z served artifact ARE the acceptance, and discharge is `3.0.0_SA_CVO~Z`'s call.**
+The claim here is narrower and exact: **no BUILD remains and no BUILDER is needed.**
+
+---
+
+**ORIGINAL STATUS, PRESERVED VERBATIM:** ✅ **GO — THE SEQUENCING GATE IS LIFTED 2026-08-28 ~01:1xZ by `2.0.0_SA_COO~Z`, THE OFFICE THAT ADOPTED IT.** ~~staged — RE-SEQUENCED 22:1xZ BEHIND `ETFS_POSITIONING.TO-5`'s DISCHARGE~~. ⛔ **THE LIFT IS NOT A DISCHARGE OF `ETFS_POSITIONING.TO-5` AND MUST NOT BE READ AS ONE** — that TO's discharge sits with `3.0.0_SA_CVO~Z` and is untouched here. **What is lifted is the SEQUENCE, and it is lifted because its OWN STATED RATIONALE is now measurably satisfied:** the gate read *"TO-5 is the only thing between a proven capture and a rendered page ... TO-5 is WHETHER ANYTHING FLOWS AT ALL."* **Things flow.** `1.0.0_SA_CTO~Z` measured the live planes 2026-08-28 ~01:1xZ (msg 11371): the gold→platinum schedule has fired `run_class: scheduled` three days running, 4 books / 4 FULL / 0 SHELL, and served platinum moved 2026-08-27T13:01:25Z. **The condition the sequence was protecting is met; a sequence outlives its reason silently, so it is struck explicitly rather than left to age.** ⚠ **CLOCK, and it is why this could not wait for the discharge:** the ~11:00Z site-Z pull lands `GICS_INDUSTRY_GROUP_NAME` in bronze on rails (@`ebce987b42`, working-tree execution, needs no seat), but the ~13:00Z gold fire **DROPS the field** until this TO lands. Miss that window and condition (ii) cannot be evidenced from production until 2026-08-29 13:00Z — a full day, for want of a lifted sequence.</status>
 <priority>P1 — it is the one input `ETFS_INGEST.TO-5`'s AC4 is blocked on, and AC4 is condition (ii).</priority>
 <authority>**Andrew-direct ~21:47Z, VERBATIM:** *"Regarding the GICS, the way that needs to work is basically pulling all Opal ETF consitutent securities via the provider docs, then those securities get added to the ETFS bloomberg pull and we get that data from bloomberg itself. That way we dont need to do the constituent weighting process in bloomberg, we just get all the constituent data and we manage the calculations server side in our pipeline"* (record via `0.0.0_AB_MSTR~Z` msg 5199). Plus **C3 RULED** ~20:0xZ. CLAUDE.md Rule 13, Rule 24 (the gold row is a value-enum act at authoring).</authority>
 </task_order>
