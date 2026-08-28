@@ -335,6 +335,43 @@ direct.**
 Naming the writer makes a twenty-minute gap self-evident. ⛔ **A PIPELINE'S STAGE COUNT IS NOT
 INFERABLE FROM ITS SIBLING'S** -- census it, do not carry it over.
 
+### ⭐ THE PRE-FIRE BASELINE AT THE SERVED KEY, AND THE EXACT RUNG-3 TEST (`2.0.0_SA_COO~Z`, 12:5xZ)
+
+⚠ **THE BUCKET IS `opal-data-portal-v2`, NOT `opal-data-assets`.** My first probe guessed the latter
+and returned **404** -- which at 13:05Z would have read as *"the publisher did not write"*. **FOURTH
+false-absence of this shape on this TO today.** Source of truth: `etf_positioning_publisher.py:8`
+`s3://opal-data-portal-v2/platinum/etfs/positioning_data.json`.
+```
+BASELINE, read 12:5xZ:  LastModified 2026-08-27T13:01:25Z · 128122 B · data_as_of 2026-08-26
+  189 holdings across DIVZ / IDVZ / PFDE / PFOE
+  'industry_group'        KEY PRESENT on   0 of 189
+  'industry_group_basis'  KEY PRESENT on   0 of 189
+  ABT in DIVZ: asset_class 'Equity', sub_asset_class None
+```
+⛔ **`.get()` CANNOT TELL "KEY ABSENT" FROM "KEY PRESENT, VALUE NULL" -- BOTH RETURN None.** The
+earlier reading *"industry_group: None x 189"* was `.get()`-based and conflated the two. Today the key
+is **absent entirely**. ⭐ **SO THE RUNG-3 TEST IS KEY-PRESENCE 0 -> N, NOT "the value became
+non-null"** -- and after the fire a PARTIAL success (key present, some values null with a basis) would
+read identically to TOTAL failure under `.get()`. **Test `"industry_group" in h`, not `h.get(...)`.**
+
+**THE EMITTERS ARE MEASURED, and they are not `HOLDING_KEYS`:** that tuple is the VALIDATOR (15 keys,
+both present). The writes are `:381 "industry_group": _n(h["industry_group"])` and
+`:393 "industry_group_basis": _n(h["industry_group_basis"])`. ⚠ **SUBSCRIPT, NOT `.get()`** -- a gold
+row missing the column makes the publisher RAISE rather than quietly omit. Fails loud.
+
+### THE POST-FIRE READ IS THREE-WAY, NOT PASS/FAIL
+```
+1  LastModified advances to ~13:01:2xZ  AND  key present on N holdings   -> PASS. Score the BASIS.
+2  LastModified advances  BUT  key absent on all rows                    -> the emitter did not run;
+                                                                            deployed bytes != source.
+3  LastModified DOES NOT advance (still 08-27T13:01:25Z)                 -> the run did not complete.
+                                                                            Check etf-positioning-producer-daily
+                                                                            fired at all; a KeyError at :381
+                                                                            is one candidate cause.
+```
+⛔ **DO NOT COLLAPSE 2 AND 3.** "No industry_group at the served key" is true of both and they have
+different owners and different remedies.
+
 ### THE COMPLETE PRE-FIRE TIMELINE
 ```
 13:00:00Z  etf-positioning-producer-daily fires     ENABLED, cron(0 13), Rules plane
