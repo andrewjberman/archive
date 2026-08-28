@@ -68,7 +68,8 @@ B  PREFIX-RESOLVE against the canonical 25 GICS industry groups. Free, no vendor
      DENOMINATOR.
 ```
 ⛔ **A REPAIRED VALUE IS *DERIVED*, NOT *OBSERVED*** — it needs its own `industry_group_basis` member
-reading `RESOLVED`, or the estate serves a derived value under a measured label.
+reading ~~`RESOLVED`~~ **`inferred-from-truncation`** (RULED 18:2xZ — see the s4 amendment), or the
+estate serves a derived value under a measured label.
 
 ## 5. ⛔⛔ SEQUENCING — LOAD-BEARING, AND IT BINDS A DIFFERENT TO
 
@@ -85,10 +86,34 @@ is INCOMPLETE (23 of 25).**
 | id | criterion |
 |---|---|
 | `INGEST-TO9-AC1` | ⛔ **OVERRIDDEN BY ANDREW-DIRECT 18:02Z (`@7d4f4700a6`) — see §7.** The authoritative-source requirement is LIFTED; completions are INFERRED from the truncated text and hard-coded, on his instruction. **REPLACEMENT BAR:** every completion round-trips — `truncate(proposal, 30).rstrip()` EQUALS the observed string byte for byte — and binds 1:1 to an authoritative 4-digit `GICS_INDUSTRY_GROUP` code from the spent call. ⚠ **THE ROUND-TRIP IS NECESSARY AND NOT SUFFICIENT: more than one completion can round-trip to the same 30 chars, so it proves CONSISTENCY WITH the truncation and NEVER that the completion is the right one.** State that limit in the file beside the table, not only in a message. **`industry_group_basis` = INFERRED/RESOLVED, never `observed`.** ~~verified against an authoritative source — not against our own prior output~~ Print the full observed set with its denominator. |
-| `INGEST-TO9-AC2` | ⛔ **THE VALUE STILL CARRIES ITS CLAIM.** If any value is RESOLVED rather than OBSERVED, `industry_group_basis` says so in a field a consumer can reject on. **A derived value served under a measured label is a FAIL.** |
+| `INGEST-TO9-AC2` | ⛔ **THE VALUE STILL CARRIES ITS CLAIM.** If any value is **`inferred-from-truncation`** rather than OBSERVED, `industry_group_basis` says so in a field a consumer can reject on. **A derived value served under a measured label is a FAIL.** |
 | `INGEST-TO9-AC3` | ⛔ **EXERCISED ON A SCHEDULED FIRE.** Read the served artifact after a scheduled run; state which run and how you know. **An ad-hoc artifact is never production evidence.** |
 | `INGEST-TO9-AC4` | **NO REGRESSION IN COVERAGE.** `industry_group` key presence stays at its current **189 of 189**, and the basis distribution is printed before and after. ⚠ **A fix that improves values while dropping rows is a FAIL.** |
 | `INGEST-TO9-AC5` | ⛔ **IF (a) IS BUILT: it FAILS LOUD on a prefix matching two members.** Never picks one. **And it is keyed on a closed list, NEVER on string length** — length does not discriminate truncated from complete. |
+
+## 4a. ⛔ VOCABULARY MEMBER — RULED 2026-08-28 ~18:2xZ, AND `RESOLVED` WAS MY ERROR
+
+**s4 named the member `RESOLVED`. STRUCK.** The ruled spelling is **`inferred-from-truncation`**,
+proposed by `0.4.0_DS_ClientPlatform~Q` with the four-postulate record and word-boundary census Rule 24
+requires — which my one-word sentence was not.
+```
+  POSTULATE (iii) INTENT COHERENCE — the axis is PROVENANCE, "how did this value come to be"
+    inferred-from-truncation   names an ORIGIN and a MECHANISM      ON AXIS
+    resolved                   names a STATE something reached      LIFECYCLE — OFF AXIS
+  CENSUS (corpus default, denominator 27,844 files)
+    inferred-from-truncation      3 hits   COLLISION-FREE
+    resolved                 33,401 hits   CATASTROPHICALLY overloaded — unscopeable by census
+```
+>> ⭐ **THIS SECTION'S OWN SENTENCE SETTLES IT AGAINST ITSELF:** s4 says *"A REPAIRED VALUE IS DERIVED,
+   NOT OBSERVED"* — **which demands a PROVENANCE word and then supplies a lifecycle one.** The banked
+   failure is *Rule 24(iii) applies INSIDE a value's wording*, and I committed it in the same section
+   that states the correct principle. <<
+⛔ **WIRING THIS IS AN ENUM CHANGE, NOT A PUBLISHER EDIT.** The value is not in the 5-member vocab at
+`etf_positioning_gold.py:210` and two LIVE assertions reject it (`test_etf_positioning_industry_group.py:146`
+and `:341`). **Mint the sixth member and update the consumers IN THE SAME CHANGE** —
+`portal-proxy.ts`, `etfAdapter.ts`, `HoldingsTab.tsx`, the gold test — because a member landing on one
+side of that seam is dropped by the adapter, the page looks untouched, and **both halves pass their
+own checks.**
 
 ## 7. NOT YOURS
 
@@ -106,7 +131,7 @@ raised once and then overruled is a decision.**
 ⛔ **WHAT HIS WORD DOES *NOT* LIFT — he did not address it, and a silence is not a lift:**
 `CLAUDE.md`'s *"A VALUE MUST CARRY ITS CLAIM — in a field a consumer can reject on."* He instructed
 WHERE the values come from, not how they are labelled. **`industry_group_basis` reads
-INFERRED/RESOLVED, NEVER `observed`.** That is the difference between *hard-coded and the artifact
+**`inferred-from-truncation`**, NEVER `observed`.** That is the difference between *hard-coded and the artifact
 says so* and *hard-coded and the artifact lies*, and it costs nothing.
 
 **STILL NOT YOURS:**
