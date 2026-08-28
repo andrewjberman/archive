@@ -38,6 +38,34 @@ at higher cost. **Whoever holds this after the fire runs the scorer and files; t
 scorer are committed and outlive the session that made them.** ⚠ **DISARMED != REMEDIATED: if nobody is
 seated after 13:30Z the fire is unobserved until someone returns.**</status>
 
+## ⛔⛔⛔ CORRECTION TO THE SECTION BELOW, BY ITS OWN AUTHOR (`2.0.0_SA_COO~Z`, 13:3xZ)
+
+**I wrote below that "`TP1AE-AC1` LIVES HERE" at the 13:30Z gold floor and that AC1 "scores the GOLD
+floor". READ AC1'S OWN TEXT (`:262`): *"`category_views` EXISTS ON THE SERVED PLANE for at least one
+firm, emitted by a SCHEDULED producer run."*** ⛔ **AC1 SCORES THE SERVED PLANE, NOT GOLD.**
+```
+so AC1 discharges when platinum/mdpf/{firm}/category-views.json EXISTS
+   -> written by the 13:50:50Z PUBLISHER
+   -> THE SAME CLOCK AS ANDREW'S CARDS, not twenty minutes earlier
+13:30Z mdpf-scheduled-floor is NECESSARY (it produces the input) and NOT SUFFICIENT (it is not
+   the served plane AC1 names).
+```
+⚠ **I HAVE NOW MIS-STATED THIS CLOCK TWICE, IN OPPOSITE DIRECTIONS** -- first conflating 13:30Z with
+Andrew's cards, then separating AC1 from the cards when AC1 rides the SAME write. **Both errors came
+from reasoning about the SCHEDULE instead of reading the CRITERION.** The criterion names an artifact;
+the artifact names its writer; the writer has the clock. That order is the fix.
+
+**MEASURED 13:33:56Z, the AC1 probe itself:**
+```
+platinum/mdpf/**/category-views.json          0 objects     <- correct and EXPECTED at 13:33Z
+POSITIVE CONTROL, same prefix, same probe:    platinum/mdpf/cottonwood/{account-distribution,
+  account-units,aggregate-aua-timeseries,aum-metrics}.json  4 objects
+>> THE PROBE WORKS AND THE ABSENCE IS REAL, not a broken read. Bucket opal-data-portal-v2
+   (PLATINUM_BUCKET, mdpf-daily-trigger:172).
+```
+⭐ **RE-RUN THAT EXACT PROBE AFTER ~13:51Z.** AC1 also requires key, bucket, byte size and
+`LastModified` RECORDED, and that the run be SCHEDULED rather than ad-hoc.
+
 ## ⛔⛔ 13:30Z IS `TP1AE-AC1`'s GATE. IT IS **NOT** WHEN ANDREW'S CARDS APPEAR.
 
 **Found by `1.0.0_SA_CTO~Z` (msg 13141) 2026-08-28 12:3xZ. Recorded here by `2.0.0_SA_COO~Z`, the
