@@ -15,7 +15,9 @@ retained beside it. Evidence lines already citing decomp vintage `540503df0a` st
 consumable is byte-identical to that dry.
 
 <decomp_ref>
-workflows/atom_decomposition/runs/nfra-c3materialize-wp3/20260828T0938Z/rectangle.c0.json (DECOMP.md beside it; the landing commit's hash is the vintage -- cite it as `@<hash>` in every AC evidence line)
+workflows/atom_decomposition/runs/nfra-c3materialize-wp3/20260828T0938Z/DECOMP.md
+rectangle: workflows/atom_decomposition/runs/nfra-c3materialize-wp3/20260828T0938Z/rectangle.final.certified.json -- the certified dry, byte-identical to rectangle.c0.json @540503df0a; that hash is the vintage, cite it as @540503df0a in every AC evidence line
+(R4-DT-6: the doc path is a BARE path on its own line -- proof-of-spec-check.py extracts it with \S+DECOMP\.md, and a parenthetical citation yields '(DECOMP.md', which resolves to nothing)
 
 cells (53 of 168 -- 50 lane + 3 issuer-owned mechanism):
 serial_uniqueness        WP3-njzv-1 WP3-njzv-2 WP3-njzv-3
