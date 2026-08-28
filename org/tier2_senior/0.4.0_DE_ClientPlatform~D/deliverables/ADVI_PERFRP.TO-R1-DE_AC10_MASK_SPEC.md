@@ -174,7 +174,14 @@ produces a large, plausible, meaningless diff. Always confirm the `CLICKED:` lin
 3. **Empty-data environment.** The dev backend serves no rows; both protected tabs render empty states. A
    populated environment may expose variance this mask does not bound (timestamps, live counts). Re-derive
    before trusting the mask against populated data.
-4. **(a) protects 2 of 69.** Restated here because it is the number most likely to be dropped when quoted.
+4. ⛔ **(a) protects 2 of N, and N IS NOT 69 ANY MORE — 69 was this file's 2026-08-24 vintage.**
+   Re-measured at portal `@9957410e` (2026-08-28): **PROTECTED 80 / CHANGE 78 / NON-SHARED 2 /
+   SHARED 78**, 0 unresolved specs. The original line said *"(a) protects 2 of 69"* and was the
+   number most likely to be dropped when quoted; it turned out to be the number most likely to be
+   **quoted after it stopped being true**. A printed denominator is a typed number sitting beside a
+   derived one, and it goes stale in silence. **Re-run `ac10_closure.py` at quote time — never copy
+   this row.** Direction matters and must be stated with it: the SHARE **grew** (67 → 78), so
+   **(b)+(c) carry MORE of the protection than when the criterion was written**, not less.
 
 ---
 
@@ -183,6 +190,57 @@ produces a large, plausible, meaningless diff. Always confirm the `CLICKED:` lin
 | file | purpose |
 |---|---|
 | `ac10_closure.py` | AC10(a): prints PROTECTED / CHANGE / NON-SHARED / SHARED denominators + both file lists |
-| `ac10_maskcheck.py` | AC10(c): `derive` re-derives the mask from n captures; `compare` runs the masked pre/post assertion and exits non-zero on any differing pixel outside the mask |
+| `ac10_maskcheck.py` | AC10(c): `baseline` derives the pre-state from the merge relationship and author-censuses the window (run FIRST); `derive` re-derives the mask from n captures; `compare` runs the masked pre/post assertion and exits non-zero on any differing pixel outside the mask |
 
 Both print their own denominators. `compare` **fails loud** on a dimension mismatch rather than resizing.
+
+---
+
+## 6. ISSUER CLAUSE — THE BASELINE IS A RELATIONSHIP, NOT A REF
+
+**Ruled by `2.0.0_SA_COO` (issuer) 2026-08-28T18:08Z, msg 78581, on `0.4.0_DE_ClientPlatform~D`'s
+78572. Transcribed here at the issuer's direction. Concurred by `1.0.0_SA_CTO` (by list).**
+
+> For any masked-pixel or diff-class acceptance, the pre-state is the **SECOND PARENT OF THE MERGE**
+> that brought this lane's commits onto the published branch — **derived at run time from the merge
+> itself**, never a ref pinned earlier. The run prints
+> `git log --format=%an <base>..<post>` as its **first line**, with the author census
+> (*N of N this lane's*); **a commit by any other author in that range INVALIDATES the baseline
+> before a single pixel is read.**
+
+**Mechanism, not prose:** `python ac10_maskcheck.py baseline <repo> <merge-ref> <post-ref> <author>`
+— exits `0` only on an all-lane window, `1` naming the foreign authors, `2` if the ref is not a merge
+(it refuses rather than guessing a parent). Exercised on all three arms 2026-08-28.
+
+### Why this clause exists — the run that produced it
+
+This spec **already warned**, in §2 above, that *"the mis-attribution runs both ways: a peer's change
+moving a protected surface would return a NONZERO that reads as mine."* The warning was read. The run
+mis-attributed anyway:
+
+```
+pre @d43b88c5 (this spec's own pinned baseline) -> post @9957410e
+  Advisors      FAIL  528 px outside mask   bbox (14,653,32,763)
+  Distribution  FAIL  528 px outside mask   bbox (14,653,32,763)   <- IDENTICAL bbox
+```
+
+Cropped and **looked** (this spec's own method for deriving the mask): the pre-state's left nav rail
+carries a **paper-plane icon** the post-state does not, and every icon below shifts up. That is
+`@18fd5b38` *"remove(D7_TICKETING): FULL REMOVAL of the Submit-a-Request page"* — **a peer's commit**
+(`0.3.0_DT_TradingOperations`) in shared app chrome, unrelated to this lane or either tab's content.
+
+⛔ **The report that was one step away was "AC10(c) FAILS — my change moved the protected tabs."
+A FALSE CONFESSION IS AS DAMAGING TO THE RECORD AS A FALSE PASS, AND IT IS THE DIRECTION NOBODY
+AUDITS** — a seat reporting a failure against itself reads as rigorous, so it gets believed and
+filed. **Both halves of a FAIL are measurements: the fact AND the attribution.** Only the fact had
+been measured.
+
+⛔ **PINNING A REF DOES NOT KEEP IT A BASELINE.** `d43b88c5..3cfa7e8a` contains **40 commits from 6
+seats**. A ref is a baseline only for the commits *actually yours* between it and the post-state; it
+**decays the moment any peer commits**, while continuing to look exactly as authoritative as the day
+it was pinned. **A warning is not a mechanism.** The relationship does not decay:
+`481a31c5^2` = `57701d5c`, window = 9 commits, 9 of 9 this lane's, and `@18fd5b38` is an *ancestor*
+of the base — excluded **by construction** rather than by anyone noticing it.
+
+COO 67438's *"named refs on both sides"* **stands and is sharpened**: named, **and** derived from the
+merge relationship, **and** author-censused.
