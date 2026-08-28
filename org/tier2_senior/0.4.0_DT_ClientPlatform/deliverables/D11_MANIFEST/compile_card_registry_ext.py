@@ -121,6 +121,8 @@ def main():
     ap.add_argument("--pin", help="the ONE settled authority commit; everything is computed at it")
     ap.add_argument("--apply", action="store_true", help="write the registry (settle guard must pass)")
     ap.add_argument("--draft", action="store_true", help="diagnostic only; never writes the registry")
+    ap.add_argument("--settled-receipt", default=None,
+                    help="path to the post-COX v3.1 SETTLED revalidation receipt; required to apply")
     args = ap.parse_args()
 
     unsettled = refuse_unless_settled()
@@ -130,6 +132,29 @@ def main():
         print("A registry compiled while lanes are filling pins bytes those lanes are still editing,")
         print("and the JOIN admits only registry-ratified members (4.0.0_SA_CRO~X 210720Z).")
         return 2
+    # SECOND GATE (4.0.0_SA_CRO~X 215702Z): the settle guard is necessary and NOT sufficient. Every
+    # face reading complete says the lanes STOPPED MOVING; it does not say the tree they stopped at
+    # was revalidated. The canonical compile additionally requires the post-COX v3.1 SETTLED
+    # revalidation receipt, and this tool will not infer its existence.
+    #
+    # THIS GATE WAS DEAD CODE ON ITS FIRST WRITE. The argparse flag landed and the body did not, so
+    # the tool ADVERTISED a control it did not have -- and the settle guard fires first, which hid
+    # it: exercising the pair end-to-end could never reach this line. It was only caught by stubbing
+    # the first guard out and running the second alone. A guard behind another guard is unexercised
+    # by construction.
+    if args.apply:
+        r = args.settled_receipt
+        if not r:
+            print("REFUSING to apply: no --settled-receipt named. The post-COX v3.1 settled")
+            print("revalidation receipt is a precondition of the canonical compile; a compile that")
+            print("assumes it exists is asserting someone else's act.")
+            return 2
+        if not (os.path.exists(os.path.join(ROOT, r)) or os.path.exists(r)):
+            print("REFUSING to apply: --settled-receipt %r does not exist. A named-but-absent" % r)
+            print("receipt is not weaker evidence than an unnamed one -- it is a false citation.")
+            return 2
+        print("   settled receipt: %s (present)" % r)
+
     if not args.pin:
         print("\nREFUSING: --pin is required. A compile with no named authority commit cannot say")
         print("what its blob ids are ids OF, and mixed-pin digesting is refused by the ruling.")
