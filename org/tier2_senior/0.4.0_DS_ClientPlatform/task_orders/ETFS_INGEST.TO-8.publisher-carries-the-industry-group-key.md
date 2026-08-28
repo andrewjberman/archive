@@ -1,0 +1,96 @@
+# TO ETFS_INGEST.TO-8 — the PUBLISHER carries `GICS_INDUSTRY_GROUP_NAME` to platinum (`INGEST-T4-1`, the rung `TO-6` stops one short of)
+
+<decomp_ref>workflows/atom_decomposition/runs/etfs-ingest/20260824T2010Z/DECOMP.md @fcdf042972 (CERTIFIED) — `INGEST-T4-1` (the publisher + the served key `platinum/etfs/positioning_data.json`) and the SERVED half of `INGEST-T5-1` (condition (ii)).</decomp_ref>
+<certification>Rides the SAME certified decomp as `TO-6` (`3.0.0_SA_CVO~Z` @422bdb431b, bound to @fcdf042972). ⛔ **NO new cell is added** — `INGEST-T4-1` is an existing certified cell that no live TO claimed. Cut as a SEPARATE TO rather than as a `TO-6` amendment **precisely so `TO-6`'s certification is not disturbed** under a live clock.</certification>
+<issued_to>0.4.0_DS_ClientPlatform~Q</issued_to>
+<executor_class>DS-class</executor_class>
+<seating_trigger>SEATED — same lane, same project, same context as `ETFS_INGEST.TO-6`. **Rule 27 is satisfied: one instance, one project.** Take `TO-6` first; this TO is the rung immediately after it.</seating_trigger>
+<placement>SITE Z (Rule 26) — D4 is SITEZ-placed until the project is done.</placement>
+<issued_by>2.0.0_SA_COO~Z</issued_by>
+<issued>2026-08-28T01:1xZ</issued>
+<status>ACTIVE — GATED ON `TO-6` by data dependency (the gold row must carry the key before the publisher can read it). **Not gated on a decision.**</status>
+<priority>P1 — with `TO-6` it completes the producer half of Andrew's promote condition (ii). ⚠ **Both must land before the ~13:00Z gold fire** or the field does not reach platinum today.</priority>
+<authority>Andrew-direct 2026-08-24 ~22:12Z (GICS is the served sub-category vocabulary) · his promote condition (ii), VERBATIM: *"and it displays properly on DEV build with GICS replaced for sub-categories on frontend"* · `1.0.0_SA_CTO~Z`'s Rule-24 ruling (msg 11384): **a NEW PARALLEL FIELD, never a swap into `sub_asset_class`**.</authority>
+
+---
+
+## WHY THIS TO EXISTS — a measured one-rung gap
+
+`1.0.0_SA_CTO~Z` measured seven rungs between the vendor pull and the rendered page (msg 11384) and
+found the field absent on every plane. `TO-6` covers the pull and the gold row. **It stops there.**
+
+```
+MEASURED at @9ace0b75b9, on TO-6's own file:
+  grep -ci "publisher|HOLDING_KEYS"  ->  0     <- the publisher rung is NOT in TO-6
+  grep -ci "gold"                    ->  5     <- POSITIVE CONTROL: the instrument sees what is there
+```
+
+⛔ **The gold row carrying the key is necessary and NOT sufficient.** `etf_positioning_publisher.py:230`
+`HOLDING_KEYS` is an explicit key list; a key absent from it is dropped on the way to platinum **with no
+error**. Without this TO, `TO-6` lands, the gold parquet carries the field, and the served artifact
+still does not — a green build with an invisible loss.
+
+## OBJECTIVE
+
+Carry `GICS_INDUSTRY_GROUP_NAME` from the gold row through the publisher onto every holding row of
+`s3://opal-data-portal-v2/platinum/etfs/positioning_data.json`, **as a NEW KEY ALONGSIDE
+`sub_asset_class`.**
+
+## ⛔ THE SHAPE IS RULED — DO NOT SWAP
+
+`1.0.0_SA_CTO~Z` ruled against re-pointing `sub_asset_class` to the finer value. **Two independent
+grounds; either alone is sufficient:**
+
+1. **Rule 24 (i) MECE / (ii) SAME GRAIN / (iii) INTENT COHERENCE.** GICS industry groups classify
+   **equities**. The four books also carry a money-market security, a canonical cash line, a
+   synthesized residual row and a fixed-income sleeve. A swap sends every non-equity row to null and
+   strands `Cash & Cash Equivalents` and `Ultra Short Duration` at a **different level of the same
+   hierarchy inside the same field.**
+2. **`sub_asset_class` is a byte-verified ratified consumer contract.** `etf_positioning_gold.py:141-147`
+   warns in source that a near-miss **does not fail loudly**: it misses `SUB_ASSET_CLASS_ORDER`, drops
+   to the unmapped bucket and renders at the bottom of the panel — **presenting as a SORT BUG on the
+   client's surface rather than a producer defect. It ships GREEN.**
+
+⭐ Consistent with what is already ruled: sub-category renders as **recessive text beside** the coloured
+sector (`ETFS_INGEST.TO-5` AC6, option (b), COMPLETE). **Recessive text beside a coloured value IS a
+parallel field**; a replacement would have required a colour act that TO-5 already ruled out.
+
+## ACCEPTANCE CRITERIA
+
+| id | criterion | cell | status |
+|---|---|---|---|
+| `TO8-AC1` | **`HOLDING_KEYS` carries the new key** — `etf_positioning_publisher.py:230`, cited `file:line @ <commit-ish>`. ⛔ **ADDITIVE: `sub_asset_class` remains present, unchanged, and at its existing grain.** Show the key list before and after. | `INGEST-T4-1` | |
+| `TO8-AC2` | ⛔ **THE SERVED ARTIFACT CARRIES IT, WITH A PRINTED DENOMINATOR.** Census **every** holding row of the served `positioning_data.json` — the current denominator is **189 rows / 4 portfolios** and must be re-derived, not copied. Report: rows carrying a non-null industry group, rows null, and **the denominator**. ⛔ **A coverage number without its denominator is not a result.** | `INGEST-T4-1` `INGEST-T5-1` | |
+| `TO8-AC3` | ⛔ **NULLS ARE EXPECTED AND MUST BE EXPLICIT, NOT INHERITED.** The non-equity rows (cash, the money-market security, the synthesized residual, the fixed-income sleeve) have **no** industry group **by construction**. State their treatment. ⛔ **WHAT IS PROHIBITED IS A NULL QUIETLY BECOMING A SECTOR** — the same prohibition `TO-6`'s `AC6` carries at the aggregate grain, restated here at the row grain because the two fail independently. | `INGEST-T4-1` | |
+| `TO8-AC4` | **NO CONSUMER REGRESSION.** `sub_asset_class` values on the served artifact are **byte-identical** to their pre-change values for every row. ⚠ **The positive control matters more than the diff:** show the 11 sector values and the 2 non-equity values still resolve in `SUB_ASSET_CLASS_ORDER` — *an absence check cannot tell a fix from a refactor.* | `INGEST-T4-1` | |
+| `TO8-AC5` | **PROVENANCE ON THE RUN.** State whether the evidence comes from a **scheduled** fire or an **ad-hoc QA** run, in a field a certifier can reject on. ⛔ **An ad-hoc artifact is never production evidence** (CLAUDE.md §5). A QA run is legal here and is legal ONLY if it says so. | `INGEST-T5-1` | |
+
+## NOT YOURS
+
+- ⛔ **The FRONTEND.** Rung 7 is `0.4.0_DE_ClientPlatform~Z`'s. This TO makes the field **available**; it
+  does not render it. **Do not touch `portal/`.**
+- ⛔ **`ETFS_INGEST.TO-7`** — `0.4.0_DS_ClientPlatform~P`'s, not re-addressed.
+- ⛔ **`ETFS_POSITIONING.TO-5`'s discharge** — sits with `3.0.0_SA_CVO~Z`. TO-6's lifted sequence is
+  **not** a discharge and must not be cited as one.
+
+## STANDING
+
+⛔ **No ad-hoc `mdpf` gold run before 2026-08-28 13:30Z** (destroys `D1_CATVIEWS.TO-P1-AE` AC1's
+discriminator — different pipeline, same box). · `data/*/scripts/gold/*.py` is the DS lane's own
+commit→QA-deploy path (Rule 13). · Every `.py` edit passes `.tools/commit-gate.sh`.
+
+## REPORTING
+
+Deliverable + proof instance in this lane's `deliverables/`, via `.tools/safe-commit.sh --author
+"0.4.0_DS_ClientPlatform~Q <0.4.0_DS_ClientPlatform~Q@opal.agent>" -F <msgfile>` (message file written
+by a **non-shell** writer). Report to `2.0.0_SA_COO~Z`; `3.0.0_SA_CVO~Z` certifies. **ACK on receipt.**
+
+<proof_of_spec>
+  <criterion id="TO8-AC1" cell_refs="INGEST-T4-1"/>
+  <criterion id="TO8-AC2" cell_refs="INGEST-T4-1,INGEST-T5-1"/>
+  <criterion id="TO8-AC3" cell_refs="INGEST-T4-1"/>
+  <criterion id="TO8-AC4" cell_refs="INGEST-T4-1"/>
+  <criterion id="TO8-AC5" cell_refs="INGEST-T5-1"/>
+  <expected_criteria>TO8-AC1,TO8-AC2,TO8-AC3,TO8-AC4,TO8-AC5</expected_criteria>
+  <alignment_denominators>cells declared: 2 (INGEST-T4-1, INGEST-T5-1); criteria: 5. FORWARD — 5 of 5 criteria carry >=1 cell_ref. BACKWARD — 2 of 2 declared cells reachable (INGEST-T4-1 from AC1/AC2/AC3/AC4, INGEST-T5-1 from AC2/AC5). Unmapped 0; untraceable 0. NOTE: `INGEST-T4-1` was an existing CERTIFIED cell claimed by NO live TO — this TO claims it; it is not a new cut. The DATA half of `INGEST-T5-1` is `TO-6`'s and is not duplicated here.</alignment_denominators>
+</proof_of_spec>
