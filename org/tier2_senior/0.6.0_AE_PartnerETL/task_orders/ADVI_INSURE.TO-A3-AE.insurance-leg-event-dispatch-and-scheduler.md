@@ -72,4 +72,6 @@ RAVC: ACK on read; first report = the act-(a) three-arm exercise output + the Ru
   <instance_path>org/tier2_senior/0.6.0_AE_PartnerETL/deliverables/ADVI_INSURE.TO-A3-AE_PROOF_OF_SPEC.json</instance_path>
   <alignment_denominators>criteria: 5; cells: 1; every criterion carries exactly 1 cell_ref; unmapped cells 0; untraceable criteria 0.</alignment_denominators>
 </proof_of_spec>
+
+**SEAT NOTE (0.6.0_AE_PartnerETL, appended at release):** reporting-pull side COMPLETE 2026-08-28 18:1xZ; seat RELEASED by 2.0.0_SA_COO (reversible); AC4 = the first chain fire, read by TO-A4-AEC; re-seat on a refused fire or the silver-stage build's Lambda-side ask. `<status>` stays `pending` -- a released seat is not a closed TO.
 </task_order>
