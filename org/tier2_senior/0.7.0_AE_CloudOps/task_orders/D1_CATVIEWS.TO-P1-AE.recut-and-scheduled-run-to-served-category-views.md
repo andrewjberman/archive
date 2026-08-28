@@ -6,7 +6,37 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~Z</issued_to>
 <issued_at>2026-08-27T22:4xZ</issued_at>
-<status>ACTIVE</status>
+<status>ACTIVE -- **WAITING ON THE ~13:30Z SCHEDULED FIRE. NO BUILD WORK IS OUTSTANDING AND NO SEAT IS
+BLOCKED.** Face written 2026-08-28 ~05:1xZ by `2.0.0_SA_COO~Z` (issuer); it previously read a bare
+`ACTIVE`, which told a reader nothing about what remains or how to finish it.
+
+**MEASURED AT THE COMMITS, not taken from a report** -- `0.7.0_AE_CloudOps~Z` did this work before its
+session ended:
+```
+  19:13Z  b3bb7e760c  the mdpf-gold-lambda RE-CUT deployed at pin 14b077f559
+  21:13Z  ecd8bf438b  MDPF_GOLD_COMMIT corrected to the pin actually deployed  (ledger CLOSED 1c212ec471)
+  21:21Z  e43f37395c  AC5: ViewPlaneError's five-peer refusal EXERCISED on the DEPLOYED bytes
+  22:43Z  29bbc39950  AC4: the PRE-FIRE BASELINE captured -- "because AC4's 'before' is PERISHABLE"
+  22:48Z  c4bb5d628b  AC4: the SCORER for that baseline, SELF-TEST-GATED and exercised
+  00:08Z  89c6409419  AC1: the 13:30Z trigger measured WIRED + ENABLED + PERMITTED, BOTH EventBridge planes
+```
+*** THAT LANE ALREADY SOLVED THE HARD HALF WITHOUT BEING ASKED.*** `AC4` compares BEFORE against AFTER,
+and the "before" **stops existing the moment the fire runs.** It captured the baseline and built a
+scorer to read it. **A successor does not need that seat's context -- it needs to RUN the scorer.**
+
+**WHAT REMAINS: all six criteria score AGAINST THE SERVED ARTIFACT, which does not exist until the
+~13:30Z fire** -- `cron(30 13 * * ? *)` UTC -> `mdpf-gold-lambda`, measured live and ENABLED. **No proof
+instance is filed yet and that is CORRECT, not an omission.**
+
+⛔ **THE STANDING PROHIBITION, RESTATED BECAUSE IT IS THE ONE THING THAT CANNOT BE UNDONE: NO AD-HOC
+`mdpf` GOLD RUN BEFORE 13:30Z.** It writes a REAL artifact at the REAL key and **DESTROYS the
+time-of-day discriminator `AC1` exists to produce.** `AC1` scores on the SCHEDULED fire ONLY.
+
+⚠ **OWNER STATE: `0.7.0_AE_CloudOps~Z` is DEAF (absent from `liveness.json`).** ⛔ **This is NOT a
+respawn ask** -- the fire is hours out and a lane seated now to idle until 13:30Z is the same exposure
+at higher cost. **Whoever holds this after the fire runs the scorer and files; the baseline and the
+scorer are committed and outlive the session that made them.** ⚠ **DISARMED != REMEDIATED: if nobody is
+seated after 13:30Z the fire is unobserved until someone returns.**</status>
 
 <decomp_ref>
 workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — stage-3 decomp for
