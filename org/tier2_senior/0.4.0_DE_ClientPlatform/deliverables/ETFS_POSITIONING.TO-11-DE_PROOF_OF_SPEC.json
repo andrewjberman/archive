@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_POSITIONING.TO-11-DE",
+  "assignee": "0.4.0_DE_ClientPlatform~C",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ETFS_POSITIONING.TO-11-DE.int-default-for-first-visit.md",
+    "group": "OTHER",
+    "vintage_commit": "3aba82db3f"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-positioning/20260821T194927Z/DECOMP.md",
+    "to_ref": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ETFS_POSITIONING.TO-11-DE.int-default-for-first-visit.md",
+    "vintage_commit": "20c092c0da"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/Positioning/shared/bookSet.ts + portal/src/pages/Positioning/tabs/HoldingsTab.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "2858e7f5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BRANCH STATE, NOT SERVED, and stated as such per 0.0.0_AB_MSTR~Z's reporting rule (msg 12682). Measured at source: ci.yml is the ONLY workflow triggering on a DEV push and has ZERO publish verbs (its lone upload is actions/upload-artifact, a CI artifact); deploy.yml alone does aws s3 sync + a CloudFront invalidation and triggers on PROD only. THERE IS NO DEV SITE. A viewer reaches this only by a LOCAL RUN or a PROD promote, which is DT-lane and held at Andrew's word."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "invocation": "comp-which \"where is the portal Positioning page mode switch that chooses ETFs vs Models and passes dataAsOf\"",
+      "result": "Returned a 3-way near-tie and printed 'TOP SCORES ARE TIED -- THE ORDER IS NOT A RANKING', then pointed at comp-find directly. Followed that: comp-find located the surface. Recorded because the rail's own tie-warning is what stopped a wrong pick.",
+      "tool": "comp-which"
+    },
+    {
+      "invocation": "comp-find 'isEtfs ? null : dataAsOf'  /  comp-find 'isEtfs' -i --files",
+      "result": "0 hits across 27546 files for the ternary; 22 hits for 'isEtfs' as the positive control, so the zero is a REAL absence and not a broken matcher. This is what surfaced the VACATED criterion on the sibling TO (TO-7 AC5).",
+      "tool": "comp-find"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "PREFERRED_DEFAULT_BOOK temporarily pointed at 'IDVZ', a book the exercise fixture declares holdings_status 'book_only' (a SHELL), then the page rendered in ETFs mode. This mutates the criterion's own subject: if the carries-rows gate is absent or ineffective, the page MUST land on the shell.",
+      "expected": "The page refuses the shell preference and lands on DIVZ, the first book carrying rows. A missing gate would instead open on IDVZ's 'Book-level metrics only' state.",
+      "observed": "Landed on DIVZ (selector active), NOT IDVZ. The gate fired. Reverted immediately; PREFERRED_DEFAULT_BOOK reads 'INT' at the filed commit 2858e7f5. A SECOND MUTANT was run on the sibling TO-7 AC5 surface in the same session: PER_BOOK_AS_OF.models flipped false->true changed the Models render (sha 73373c176e581bfb -> 1e84042df9f22e4c), proving the byte-comparison used there is not blind.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The AC1 cleared-profile render was taken more than once across the session against the same base, and the AC5-of-TO7 Models render was captured three times (BEFORE, AFTER, post-revert) and sha256-compared.",
+      "observed": "Models render sha256 73373c176e581bfb reproduced on all three captures and again at a DIFFERENT base commit (8c2ba9bb and 5a4349a5), 89082 B each. BOUND, STATED: ui-smoke mints a fresh browser profile per run, so runs are independent by construction; but a render from a SHARED checkout also carries whatever any lane has uncommitted at that instant, which is why the AC4 exhibit is qualified in surprises rather than claimed as a picture of HEAD.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Andrew's own browser as evidence",
+      "reason": "He has been on this page all evening, so his storage is the least likely to be empty in the fabric. Whatever he sees first is the WEAKEST available evidence about this change, in both directions. Not a defect if he sees UST."
+    },
+    {
+      "item": "The INT-is-a-shell case in MODELS mode",
+      "reason": "Structurally unreachable, not skipped: in Models mode bookStatus is {} (the ETF query is enabled:isEtfs, so etfRaw is null and etfHoldingsStatusByCode returns {} at portal-proxy.ts:1305), so every book reads as carrying rows and the gate can never fire there. The gate is exercised in ETFs mode instead -- see controls."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION, INERT, filed not chased: a render taken from this SHARED checkout carries whatever any lane has uncommitted at that instant. Measured mtimes -- AC1 00:53:12 and AC2 00:53:48 are clean; 0.4.0_DE_ClientPlatform~S wrote PositioningSummary.tsx at 00:53:56; AC4 was rendered 00:54:37 and therefore SHOWS ANOTHER LANE'S IN-FLIGHT WORK in its summary panel. The AC4 CLAIM is unaffected -- its subject is the selector in HoldingsTab, which that lane did not touch -- but the PNG must not be read as a picture of HEAD. Their work has since landed at 1c5cdbe5; nothing was lost. I did not stash a live peer's work to get a cleaner frame.",
+    "OBSERVATION, INERT: three projects are now converging on one page tree (ETFS_POSITIONING TO-7 + TO-11 here, ETFS_SATELLITES TO-10-DE at ~S, and Andrew's item-4 origin). Rule 27 separates the PROJECTS and does not separate the FILES. Pathspec-scoped commits are the only thing keeping authorship straight -- committing all modified files would have landed a peer's diff under this seat's author line."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-28/laneC_d1_catviews_toq1_design_pass_0150-0230Z.md",
+  "acceptance": [
+    {
+      "criterion_id": "T11DE-AC1",
+      "criterion_verbatim": "A FIRST-VISIT VIEWER WITH NO STORED SELECTION LANDS ON INT. Verified on a CLEARED profile (or a fresh/private one), and the report STATES the profile state.",
+      "denominator": "1 cleared-profile render at 1440x900 fullPage, READ; 5 model books in the selector.",
+      "invocation": "node scripts/ui-smoke.mjs positioning <out>.png --port 5185   (portal @2858e7f5)",
+      "method": "live_read",
+      "output_evidence": "PROFILE STATE: CLEARED -- ui-smoke launches with no userDataDir and no storageState, so localStorage is empty by construction. RENDERED READ: the Portfolio Composition selector shows INT active (green). The pre-change baseline render at the same width and the same cleared state shows UST active (orange), so the two are DISCRIMINATING rather than merely consistent. PROFILE-STATE CONTROL: AC1 therefore ran on a CLEARED profile, which is the only state in which this change is observable at all. 3.0.0_SA_CVO~Z named the mirror hazard (msg 12762): a viewer whose storage already holds INT sees INT whether or not the fix landed, and that FALSE PASS is silent. A warm browser cannot fail this test, so it cannot pass it either.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T11DE-AC2",
+      "criterion_verbatim": "A RETURNING VIEWER'S REMEMBERED CHOICE IS UNCHANGED. Set a book, reload, get that book. Layer 1 is byte-untouched. His 2026-08-24 remembered-choice ruling is not reversed by this TO and must be exhibited as still holding.",
+      "denominator": "1 render after a 3-step interaction (select LT, leave Models, return), READ.",
+      "invocation": "node scripts/ui-smoke.mjs positioning <out>.png --port 5185 --click 'LT' --click 'ETFs' --click 'Models'",
+      "method": "live_read",
+      "output_evidence": "RENDERED READ: the selector shows LT active, NOT INT -- the remembered choice wins over the new default. The mode flip is what re-derives the default (selectionKey changes, setSelectedPortfolio(defaultBook()) runs), so this exercises Layer 1 without needing a page reload. LAYER 1 IS BYTE-UNTOUCHED: the diff adds a comment above it and changes no character of the `if (remembered && bookStatus[remembered] !== 'book_only') return remembered` line. Andrew's 2026-08-24 ruling is not reversed; his INT ruling is scoped 'new users first visit onluy' and this is the other branch of his own fork.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T11DE-AC3",
+      "criterion_verbatim": "MODEL_BOOKS ORDER IS UNCHANGED. bookSet.ts:78 still reads ['UST','ST','INT','LT','ULT']. Show the array is byte-identical.",
+      "denominator": "1 line, sha256 compared before and after, plus a write-time assertion in the patch script.",
+      "invocation": "sed -n '/export const MODEL_BOOKS/p' bookSet.ts | sha256sum",
+      "method": "diff",
+      "output_evidence": "sha256 of the MODEL_BOOKS line: e472015d09b56fc1 BEFORE and e472015d09b56fc1 AFTER -- byte-identical, re-checked after every exercise including the AC4 mutant. The patch script additionally ASSERTS the literal line is present at write time and aborts otherwise, so a reorder could not have been committed silently. WHY IT MATTERS: the order is an INDEX CONTRACT -- customBlend builds each row's values by mapping over the resolved set in that order, so a reorder misaligns every blended cell while columns still sum to something plausible. The failure would be SILENT.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T11DE-AC4",
+      "criterion_verbatim": "THE CARRIES-ROWS CONDITION SURVIVES. If INT holds no rows in a given mode, the viewer must NOT land on an empty book. Name what happens in that case.",
+      "denominator": "1 exercised render with the preference pointed at a declared shell; 4 ETF books, 1 of them a shell.",
+      "invocation": "PREFERRED_DEFAULT_BOOK temporarily = 'IDVZ' (fixture holdings_status 'book_only'), then ui-smoke --fixtures ... --click 'ETFs'",
+      "method": "live_read",
+      "output_evidence": "WHAT HAPPENS, NAMED: the preference is gated on the same carriesRows predicate the existing rule uses, so a shell preference is REFUSED and control falls through to books.find(carriesRows), then books[0]. EXERCISED, not argued: with the preference pointed at IDVZ (a declared shell) the page landed on DIVZ, the first book carrying rows. Without the gate it would have opened on the shell's 'Book-level metrics only' state. Reverted immediately; the filed commit reads 'INT'. SECOND GUARD: books.includes(PREFERRED_DEFAULT_BOOK) scopes the preference to families that HAVE the book -- ETF and satellite sets do not contain INT and fall through untouched, so this is data-driven rather than mode-driven and no future mode can inherit it.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T11DE-AC5",
+      "criterion_verbatim": "MODELS-MODE PAYLOAD IS BYTE-IDENTICAL. ETFS-f-3's own oracle -- byte-diff Models-mode payload pre/post. This TO changes which book is PRE-SELECTED, not what is served.",
+      "denominator": "Diff scanned for 8 fetch-plane tokens across both changed files; 0 occurrences.",
+      "invocation": "git diff -U0 -- src/pages/Positioning/ | grep -icE 'fetch|axios|useQuery|queryKey|queryFn|url|apiRequest|endpoint'",
+      "method": "diff",
+      "output_evidence": "ZERO fetch-plane tokens in the diff, so no request, query key, query function or URL changed and the SERVED PAYLOAD CANNOT HAVE MOVED. That is ETFS-f-3's own oracle -- byte-diff the PAYLOAD -- and deliberately not a wider reading of the cell: 2.0.0_SA_COO~Z noted (msg 12797 s.4) that citing f-3 on 'the render must not change' would have made this TO barred by its own decomp, since changing the pre-selected book IS a render change and is exactly what Andrew asked for. The cell constrains what is SERVED.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T11DE-AC6",
+      "criterion_verbatim": "RENDERED, NOT GREPPED. Read screenshots: a cleared-profile first visit landing on INT, and a returning profile keeping its remembered book. THE CANVAS IS SILVER.",
+      "denominator": "3 full-page renders at 1440x900, all READ by the filing seat, none merely captured.",
+      "invocation": "scripts/ui-smoke.mjs, three runs (AC1 cleared, AC2 returning, AC4 shell-refusal)",
+      "method": "live_read",
+      "output_evidence": "All three exhibits were READ, not just saved. SILVER-CANVAS observation from the images: the canvas resolves rgb(195,202,218) and carries only dark text (page title, description, the MODELS/ETFS/SATELLITES pill group); every element this change affects sits inside a dark Panel, so the diff cannot introduce the light-on-silver defect class. No light text and no ghost-white control renders outside a dark Panel in any exhibit.",
+      "status": "PASS"
+    }
+  ]
+}
