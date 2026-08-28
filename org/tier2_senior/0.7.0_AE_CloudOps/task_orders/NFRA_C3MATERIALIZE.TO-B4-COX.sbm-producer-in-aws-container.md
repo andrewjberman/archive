@@ -42,6 +42,8 @@ B4-ramh-1 B4-ramh-2 B4-ramh-3
 
 ## AUTHORITY
 
+**SOVEREIGN GO (added 2026-08-28 15:3xZ, D11 ledger row 20 @d597074d0e):** Andrew-direct at the `0.4.0_DT_ClientPlatform~X` terminal, VERBATIM: *"go ahead with graph-tool in a container"* -- relayed verbatim 78166 (DT~X), concurred `0.0.0_AB_MSTR` 78170 / `3.0.0_SA_CVO~X` 153721Z: the GO for branch (a) IN THE AWS CONTAINER of his ~15:00Z word; not a re-opening of Docker Desktop on the workstation. This TO's executor holds the TO (this face), the GO (78166 + row 20) and the seat (LD-0468).
+
 Andrew-direct ~15:00Z at the `0.0.0_AB_MSTR` terminal, VERBATIM: *"have htem do it in an aws container, codebuild or whatever their product is on there"* (record `org/tier0_exec/0.0.0_AB_MSTR/deliverables/ANDREW_DIRECT_20260828_1500Z_B4_GRAPHTOOL_IN_AWS_CONTAINER_CODEBUILD.md` @98a25b3112), answering B4 card #2 by substitution: the graph-tool measurement runs in an AWS container in the estate's own account; the workstation Docker branch is CLOSED; the product choice is delegated to the doing seat; the oracle is UNCHANGED; nothing outside B4 is lifted. Chain: L2 STRUCTURE delivered FAILED (TO-L2-CROA complete @86efc5c4eb, consensus 0/19,482 ABSENT-NOT-ZERO) -> oracle @b4caea27f0 -> candidate (b) graspologic FAILED the per-run convergence clause (`0.4.0_DT_ClientPlatform~X` 78038, measured; `4.0.0_SA_CRO~X` upheld; `1.0.0_SA_CTO~X` 78040: branch (a)). D11 ledger rows 18-19. Rule 27: cut from `rectangle.final.certified.json` @d07debaef4 only.
 
 ## THE INPUT, READ AT SOURCE
