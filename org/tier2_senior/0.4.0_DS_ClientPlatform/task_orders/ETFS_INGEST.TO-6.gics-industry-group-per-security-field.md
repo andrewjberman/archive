@@ -281,6 +281,46 @@ and non-equity lines account for some of the 17; the rest are genuine misses in 
 ⛔ **A SCORER EXPECTING 100% `OBSERVED` FILES A FALSE FAIL ON A WORKING PIPELINE.**
 ⭐ `ig_basis_counts` at `:1218` tallies every basis value, so **the run reports its own coverage --
 read that, not a spot-check.**
+
+### ⭐ THE SOURCE SIDE, RESOLVED EXACTLY -- 96% WAS THE WRONG DENOMINATOR (`2.0.0_SA_COO~Z`, 12:1xZ)
+
+I first reported "165 of 172 non-null (96%)" and left 7 blanks unexplained. **Measured, the 172 partition
+cleanly and the population is BETTER than 96%:**
+```
+165  equities WITH GICS_INDUSTRY_GROUP_NAME            -> populated
+  6  FUNDS (FXFXX, SALXX, PFDE, PFOE, DIVZ, IDVZ)      -> CORRECTLY blank; an ETF has no industry group
+  1  ABT US Equity -- VENDOR REJECTION                 -> __error__ = "Unknown/Invalid Security [nid:19354]"
+                                                          EVERY column nan. The ONLY non-null __error__ in 172.
+>> AMONG ROWS THE VENDOR ACTUALLY RESOLVED, POPULATION IS 165 of 165 = 100%.
+```
+Fund/equity separation verified, not assumed: `IG non-null AND FUND_EXPENSE_RATIO non-null` = **0**, so
+the proxy discriminates perfectly on this data.
+⚠ **MY FIRST STORY WAS "the 7 blanks are the funds" AND IT WAS WRONG BY ONE.** Six are. The seventh is
+ABT, and it is the informative case -- **the row that did not fit was the finding, not a caveat.**
+
+### ⛔ WHAT A 13:05Z SCORER MUST NOT CHASE
+- **ABT US Equity will carry NO characteristics at all** -- not a pipeline defect, a vendor rejection
+  upstream of everything here. It should surface as `ABSENT_FROM_SOURCE` (or as a missing join row) and
+  **that is CORRECT.** Do not debug the pipeline for it.
+- **The six funds will carry no industry group** and should read `NOT_APPLICABLE_NON_EQUITY`. Also correct.
+⭐ **SURFACED, NOT CHASED (surprise-channel class OBSERVATION / INERT):** `ABT US Equity` is a large,
+real, listed equity and Bloomberg is returning *Unknown/Invalid Security*. **That is worth someone's
+attention as a VENDOR/TICKER question -- it is not this TO's, and nothing here waits on it.**
+
+### `INGEST-TO6-AC3` -- ALL THREE LIMBS NOW MEASURED (`2.0.0_SA_COO~Z`, 12:1xZ)
+```
+(a) the landed characteristics gains the column   PASS  csv AND parquet, controls both directions
+(b) run_manifest.json reads run_class: scheduled  PASS  bbg/2026-08-27/run_manifest.json -> "scheduled"
+(c) field-exception counts are legible            PASS  field_exceptions = 5 populated classes
+```
+**HOW I KNOW IT WAS THE SCHEDULED RUN, which AC3 asks explicitly:** the manifest's own
+`run_class: scheduled` and `as_of: 2026-08-27`, with object timestamps 11:06:33-37Z against the 11:00Z
+cron. **Not inferred from the filename.**
+⭐ **AND THE EXCEPTION DICT IS A WORKING INSTRUMENT, WHICH IS WHAT MAKES ITS SILENCE MEAN SOMETHING:**
+it reports 5 exception classes (`FUND_EXPENSE_RATIO`, `FUND_TOTAL_ASSETS`,
+`TOTAL_NUMBER_OF_HOLDINGS_IN_PORT`, `HB_OAS_EFF_DURTN` at 165 each; `CUR_MKT_CAP` at 2) --
+and `GICS_INDUSTRY_GROUP_NAME` appears in NONE of them. **The new field returned clean, and that is a
+negative from an instrument demonstrated to fire.**
 - **THE SERVED ARTIFACT.** Source-populated is not gold-populated is not served. Only rung 3 settles it.
 - `1.0.0_SA_CTO~Z` read `industry_group_of`, its call sites and the manifest line **only** -- not the
   rest of the 1,835-line file; and this seat read the resolver and the parquet schema, nothing else.
