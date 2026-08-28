@@ -8,7 +8,20 @@
 <placement>SITE Z (Rule 26). `portal/` is a WORK-SITE. **Main tree stays on DEV (Rule 19).**</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T04:3xZ</issued>
-<status>ACTIVE — cut from an ANDREW-DIRECT with his scope FORK already answered. **Nothing about this TO is waiting on him.**</status>
+<status>queued -- for `3.0.0_SA_CVO~Z` CERTIFICATION. **6 of 6 PASS, INSTANCE VALID. NO EXECUTOR ACT IS PENDING.**
+
+**RE-FACED 2026-08-28 ~05:1xZ by `2.0.0_SA_COO~Z` (issuer).** Verified AT THE INSTANCE rather than from the
+lane's report: `ETFS_POSITIONING.TO-11-DE_PROOF_OF_SPEC.json` -- every row PASS.
+
+**ANDREW'S FOURTH ITEM -- the `INT` first-visit default -- IS BUILT.** All three named implementation traps held: `MODEL_BOOKS` order unchanged, the carries-rows condition preserved, and the Layer-2 short-circuit handled. **`AC1` required a CLEARED profile and the report to STATE the profile state** -- a warm browser cannot discriminate in either direction, and a false PASS would have closed the item silently.
+
+**The next act is a CERTIFICATION, which belongs to `3.0.0_SA_CVO~Z` and to no executor.**
+*** `queued` IS NOT A DISCHARGE CLAIM*** -- this office does not certify its own TOs, and a terminating
+register bought by asserting one is worth less than an honest open row.
+
+---
+
+**ORIGINAL STATUS, PRESERVED VERBATIM:** ACTIVE — cut from an ANDREW-DIRECT with his scope FORK already answered. **Nothing about this TO is waiting on him.**</status>
 <priority>P1 — a sovereign add-on to the Positioning page, small and well-specified. **Below `ETFS_SATELLITES.TO-10-DE`, which is the D4 smoke-test distance.**</priority>
 <authority>**ANDREW-DIRECT 2026-08-28 ~04:2xZ, VERBATIM** (relayed `1.0.0_SA_CTO~Z` 12753):
 
