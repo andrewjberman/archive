@@ -70,21 +70,42 @@ def load_book():
         return p, json.load(fh)
 
 
+def pseudonymise_row(row, i):
+    """Replace the client-identifying fields of one client_table row, keeping every FIGURE.
+
+    Deliberately NOT a hash of the real name: a stable hash is a pseudonym that still
+    distinguishes real clients, and anything that survives as a per-client identifier is a
+    re-identification handle once joined against another artifact. An index is not.
+    """
+    new = dict(row)
+    label = 'Fixture Household %s' % chr(ord('A') + (i % 26))
+    new['relationship'] = label
+    new['client'] = label
+    new['relationship_id'] = 'FIXTURE_REL_%d' % (i + 1)
+    return new
+
+
 def pick_book_row(entries):
     """The advisor row that exercises the MOST tile states, not the first row.
 
     All four tiles carry a headline on nearly every advisor, so 'first row' would render
     four COMPUTED tiles and never reach the not-computed branch -- the same one-branch
     trap the performance selection avoids. Rank by DISTINCT figure_state count."""
-    best, best_n = None, -1
+    best, best_key = None, (-1, -1)
     for e in entries:
         tiles = e.get('tiles') or {}
         if not any(t.get('headline') for t in tiles.values()):
             continue
         states = {f.get('figure_state')
                   for t in tiles.values() for f in t.values() if isinstance(f, dict)}
-        if len(states) > best_n:
-            best, best_n = e, len(states)
+        # PRIMARY: distinct tile states (the branch coverage this exists for).
+        # TIE-BREAK: client_table size -- with the ruled columns now emitted, a one-row
+        # table renders the header and proves almost nothing about the ROWS. The tie-break
+        # is secondary on purpose: coverage of the state vocabulary still outranks a
+        # prettier table.
+        key = (len(states), len(e.get('client_table') or []))
+        if key > best_key:
+            best, best_key = e, key
     return best
 
 
@@ -186,6 +207,15 @@ def main():
     bound = dict(advisor_row)
     bound['_source_key'] = advisor_row['key']
     bound['key'] = ADVISOR_KEY
+    # ⛔ PII GATE -- THE ONLY PLACE REAL CLIENT NAMES COULD ENTER THE PORTAL REPO.
+    # b-6's client_table re-emission carries `relationship` = a REAL display label (person,
+    # trust or entity); 3,362 distinct values in the leaf, measured. The FIGURES stay real
+    # because the fixture exists to prove they render; the NAMES are replaced. This is not a
+    # nicety: the fixture is committed to the portal repo, which is a different exposure from
+    # the pipeline tree the leaf lives in, and a name is not recoverable once pushed.
+    bound['client_table'] = [
+        pseudonymise_row(r, i) for i, r in enumerate(bound.get('client_table') or [])
+    ]
     book_env['entries'] = [bound]
     book_env['_fixture_provenance'] = {
         'source_file': os.path.relpath(book_path, ROOT).replace('\\', '/'),
@@ -199,28 +229,34 @@ def main():
     }
     merged['perfrp/perfrp_book_advisor.json'] = book_env
 
-    # ---- PRF-b-4, gain/loss. Bound for REACHABILITY: this leaf is what makes the fifth
-    # card visible. Its rows carry NO figure_state (0 of 3,834 / 0 of 6,177, measured), so
-    # the consumer deliberately does NOT bind its figures -- rendering them would mean
-    # inventing a producer disposition per number. The fixture carries a real row anyway so
-    # the SHAPE is on the record beside the absence.
-    gl_path, gl = load_gainloss('relationship')
-    gl_row = gl['entries'][0]
-    gl_env = {k: gl[k] for k in ENVELOPE_FIELDS if k in gl}
-    gl_env['entries'] = [rebind(gl_row, REL_KEY)]
-    gl_env['_fixture_provenance'] = {
-        'source_file': os.path.relpath(gl_path, ROOT).replace(os.sep, '/'),
-        'real': 'every producer field on the row',
-        'fixture': 'the join key only; the row names its _source_key',
-        'figure_state_absent': (
-            'this family carries NO figure_state on any row (0 of %d here) -- the card is '
-            'gated on this leaf being READABLE, and its figures are not bound' % len(gl['entries'])),
-        'not_a_data_oracle': 'render instrument only.',
-    }
-    merged['perfrp/perfrp_gainloss_relationship.json'] = gl_env
+    # ---- PRF-b-4, gain/loss, BOTH grains. The first emission carried bare numbers and this
+    # lane refused to bind them; the re-emission @c118a8e4d7 carries {value, figure_state,
+    # reason} on every figure, so the card's figures bind now. The bare-figure count is
+    # RE-COUNTED here rather than trusted, and the builder REFUSES if any figure is bare --
+    # the fixture must not be the thing that reintroduces an unclaimed value.
+    gl_reports = []
+    for lvl, keys in (('relationship', [REL_KEY]), ('account', ACCT_KEYS)):
+        gl_path, gl = load_gainloss(lvl)
+        bare = sum(
+            1 for e in gl['entries'] for v in e.values()
+            if isinstance(v, dict) and 'figure_state' not in v)
+        if bare:
+            sys.exit('ABORT: %s carries %d bare figure(s) -- refusing to bind' % (gl_path, bare))
+        rows = gl['entries'][:len(keys)]
+        gl_env = {k: gl[k] for k in ENVELOPE_FIELDS if k in gl}
+        gl_env['entries'] = [rebind(r, k) for k, r in zip(keys, rows)]
+        gl_env['_fixture_provenance'] = {
+            'source_file': os.path.relpath(gl_path, ROOT).replace(os.sep, '/'),
+            'real': 'every producer field including figure_state and reason on every figure',
+            'fixture': 'the join key only; each row names its _source_key',
+            'bare_figures': '0 of %d rows carry a bare figure (re-counted at build time)' % len(gl['entries']),
+            'not_a_data_oracle': 'render instrument only.',
+        }
+        merged['perfrp/perfrp_gainloss_%s.json' % lvl] = gl_env
+        gl_reports.append((gl_path, gl, rows, keys))
 
     globals()['_BOOK_REPORT'] = (book_path, advisor_row, book)
-    globals()['_GL_REPORT'] = (gl_path, gl_row, gl)
+    globals()['_GL_REPORT'] = gl_reports
 
     with open(OUT, 'w', encoding='utf-8', newline='\n') as fh:
         json.dump(merged, fh, indent=2)
@@ -263,13 +299,23 @@ def main():
     print('   perfrp/perfrp_performance_account.json')
     print('   perfrp/perfrp_book_advisor.json')
     print('   perfrp/perfrp_gainloss_relationship.json')
-    glp, glr, gll = globals()['_GL_REPORT']
+    print('   perfrp/perfrp_gainloss_account.json')
     print()
-    print('GAINLOSS leaf %s -- entries %d, as_of %s' % (
-        glp.split(os.sep)[-1], len(gll['entries']), gll.get('as_of')))
-    print('   %-16s <- %-24s total_gain_loss=%s  figure_state rows: %d of %d' % (
-        REL_KEY, glr['key'], glr.get('total_gain_loss'),
-        sum(1 for e in gll['entries'] if 'figure_state' in e), len(gll['entries'])))
+    for glp, gll, rows, keys in globals()['_GL_REPORT']:
+        figs = sum(1 for e in gll['entries'] for v in e.values() if isinstance(v, dict))
+        print('GAINLOSS %s -- entries %d, figures %d, bare 0, as_of %s' % (
+            glp.split(os.sep)[-1], len(gll['entries']), figs, gll.get('as_of')))
+        for k, r in zip(keys, rows):
+            tgl = (r.get('total_gain_loss') or {})
+            print('   %-16s <- %-24s total_gain_loss=%s (%s)' % (
+                k, r['key'], tgl.get('value'), tgl.get('figure_state')))
+    ct = bound.get('client_table') or []
+    print()
+    print('CLIENT TABLE (b-6) -- %d row(s) bound, ALL display labels PSEUDONYMISED' % len(ct))
+    for r in ct[:3]:
+        print('   %-22s status=%-9s ending_mv=%s' % (
+            r.get('relationship'), r.get('status'),
+            (r.get('ending_market_value') or {}).get('value')))
 
 
 if __name__ == '__main__':
