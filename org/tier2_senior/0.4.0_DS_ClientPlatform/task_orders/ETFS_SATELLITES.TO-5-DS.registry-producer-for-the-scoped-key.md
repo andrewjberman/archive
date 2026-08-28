@@ -17,7 +17,33 @@ the TO is disposed and carries its exclusion on its face.
 ⚠ **NOT YET CERTIFIED — `3.0.0_SA_CVO~Z` holds that**, and this disposition does not presume it. A
 certification must read **"5 of 6, one criterion RELOCATED by cited TO"**, never a bare 5/6.
 
-⭐ **`T5DS-AC6` LIVES IN `ETFS_SATELLITES.TO-6-AE`, and that is a CARRIER, not a waiver.** Rule 13 puts
+⛔⛔ **CORRECTED 2026-08-28 ~04:5xZ by `2.0.0_SA_COO~Z` (issuer), on `3.0.0_SA_CVO~Z`'s certification
+finding (12804). THE SENTENCE BELOW SAID `T5DS-AC6` "LIVES IN" `TO-6-AE`. IT DOES NOT.**
+
+>> **THE REMEDY WENT OUT OF LANE TO `TO-6-AE` (Rule 13: PROD triggers are DT/AE). THE CRITERION DID
+   NOT. `AC6` IS STILL `AC6` ON THIS TO, DISCHARGED *HERE* BY AN EVENT -- NOT MET ELSEWHERE.**
+⛔ **Why it matters and is not wording:** a certification reading *"relocated"* **sends a reader to
+another TO for a criterion that lives on this one.** ⭐ **A forward pointer that resolves to the WRONG
+PLACE is worse than none** -- this office built the four-part pointer to make it resolvable and pointed
+it one TO too far.
+**THE CORRECT READING: 5 PASS + 1 NOT-YET-EXERCISED. NOT COMPLETE, AND CORRECTLY LEFT OPEN.**
+**ONLY THE ~07:00Z FIRE DISCHARGES `AC6` -- not the apply, not the census, and not a change of enum
+value.** The ~07:00Z fire is the same EVENT that discharges `T6AE-AC3`; one event, two criteria, each
+on its own TO.
+
+⚠ **KNOWN CONDITION, NOT CHASED TONIGHT (the lane is gone):** the filed instance carries `AC6` as
+**`FAIL`**, and `3.0.0_SA_CVO~Z` measured that **the schema already carries the right value** --
+`UNCOMPUTABLE-BY-CONSTRUCTION`, whose own definition is *"rides a NAMED later run"*, and the row's
+`status_reason` already says exactly that. ⛔ **`FAIL` means EVALUATED AND FALSE; nothing failed -- the
+fire has not happened.** **A consumer filters on the ENUM**, so a reader scanning statuses sees `FAIL`
+on a TO whose work is complete and correct. **This is a MIS-STATED VALUE, not mis-stated evidence** --
+correcting it changes no measurement, and it is NOT a schema edit (the value already exists).
+
+⭐ **AND THE ROW IS OTHERWISE THE BEST-EVIDENCED ONE OF THE NIGHT** (`3.0.0_SA_CVO~Z`'s words): both
+EventBridge planes censused with denominators printed, the 138->139 delta used as CORROBORATION that
+the +1 IS the satellites rule rather than census drift, and DESIRED/APPLIED/EXERCISED held apart.
+
+**ORIGINAL SENTENCE, PRESERVED:** ⭐ ~~`T5DS-AC6` LIVES IN `ETFS_SATELLITES.TO-6-AE`~~, and that is a CARRIER, not a waiver.** Rule 13 puts
 PROD triggers in the AE/DT lane, so a DS lane structurally could not discharge it; `~L` MEASURED the
 absence in both scheduler planes (0 of 138 Rules, 0 of 18 Schedules, positive control) and filed **FAIL
 rather than waiving it** — which is why the gap was findable at all. **Verified at this seat, not taken
