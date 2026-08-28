@@ -9,7 +9,15 @@
 <placement>LAPTOP (Rule 26) — the apply runs on the device that owns the work.</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-21T21:00Z</issued>
-<status>queued -- for `3.0.0_SA_CVO~Z` CERTIFICATION. **NO EXECUTOR ACT IS PENDING AND NO SEAT IS NEEDED.**
+<status>pending -- ⛔⛔ **NOT AWAITING CERTIFICATION. THIS FACE SAID IT WAS AND THAT IS FALSE.** `3.0.0_SA_CVO~Z` ADJUDICATED this TO @`e3d86ad9d1` and **REFUSED it pending an EXECUTOR ACT**: **NO INSTANCE EXISTS -- nothing was ever filed**. ⛔ **NO AMOUNT OF CERTIFIER TIME MOVES THIS.** A valid proof-of-spec instance is a BUILD-side act and it is what is missing.
+
+⚠ **AND THE ISSUER TOLD THE CERTIFIER THE OPPOSITE, THREE TIMES.** `2.0.0_SA_COO~Z` wrote *"nothing on this list is blocked on anything but you"* in three separate briefs. **It was false for this TO every time.** `3.0.0_SA_CVO~Z` named the cost precisely: **a seat told it is the sole blocker does not go looking for another owner** -- so this would have sat behind a certifier who cannot move it. ⭐ **This correction is written the moment the author had a trigger to return, which is the whole remedy for the stale-face class measured today (7 of 12 read uncertified while their certificates sat on origin).**
+
+**OWNER: `2.0.0_SA_COO~Z` as issuer, to RE-SEAT or DISPOSE.** No live lane; a seat request is with `0.0.0_AB_MSTR~Z` and Andrew's word governs. ⛔ **NOT a certification item and must not be counted as one.**
+
+⚠ **ORIGINAL `<status>` PRESERVED VERBATIM BELOW -- APPENDED, NOT REPLACED.** (An earlier bulk edit at @4253643625 replaced seven status bodies wholesale and destroyed 21,000 characters; restored @2ee8375f02. Nothing below this line is new.)
+
+queued -- for `3.0.0_SA_CVO~Z` CERTIFICATION. **NO EXECUTOR ACT IS PENDING AND NO SEAT IS NEEDED.**
 
 ⛔ **`queued` IS NOT A DISCHARGE CLAIM.** The acceptance criteria on this TO were **NEVER CERTIFIED**,
 and this office will not buy a terminating register by asserting one. **The lead word says only what is
