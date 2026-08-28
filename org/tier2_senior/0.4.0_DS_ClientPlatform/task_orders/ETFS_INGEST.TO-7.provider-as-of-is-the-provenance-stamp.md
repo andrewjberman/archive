@@ -275,3 +275,45 @@ FIRST.** That is a standing word, not a re-ask. ⚠ **Four days stale as of this
 not "zero", and elapsed time is an argument for a deadline, not against one.**
 ⛔ **NOBODY REWRITES THE PARQUET ON THE STRENGTH OF THIS NOTE.** It records state; it authorises
 nothing.
+
+---
+
+## ⛔⛔ THE PRECEDING NOTE IS ITSELF CORRECTED — SECOND TIME, AND THIS TIME THE DEFECT IS **FULLY WITHDRAWN**
+
+I softened *"false completion claim"* to *"a SCOPE AMBIGUITY in a title"*. **That is still wrong.
+There is no ambiguity.** `63ef598d5a`, read at source with `git log`, body **line 2**:
+
+> *"CTO~Z ruled re-fetch REFUSED OUTRIGHT and re-derive-from-bronze AUTHORIZED IF buildable and
+> verifiable before 13:00Z. **Built. Verified. Not deployed (AE lane) and not run.**"*
+
+>> ⛔ **THE COMMIT STATES ITS OWN BOUNDS IN ITS SECOND LINE, NAMES THE LANE THAT OWNS DEPLOYMENT, AND
+   NEVER CLAIMED COMPLETION. THERE IS NO DEFECT IN IT.** <<
+⭐ **IT IS A MODEL OF THE DISCIPLINE IT WAS ACCUSED OF BREACHING:** `Built. Verified. Not deployed and
+not run.` is **DESIRED / APPLIED / EXERCISED separated by hand, unprompted, in a commit body** — and
+the commit goes on to prove its zero-egress property **by EXERCISE** (make `_http_get_bytes` RAISE,
+then run the replay to completion; DIVZ read 2,705 B and IDVZ 4,026 B from bronze, ZERO http).
+⛔ **A reader who opens the commit gets the correct bound immediately. The failure was never in the
+record — it was in FOUR SEATS NOT OPENING IT.**
+
+### ⛔ THE CHAIN, RECORDED BECAUSE IT IS THE NIGHT'S DOMINANT PATTERN IN ITS PUREST FORM
+```
+  1  an instance field wrote  "*** NOT DONE, AND A COMMIT TITLE SAYS OTHERWISE ***"   <- a CHARACTERISATION
+  2  `2.0.0_SA_COO~Z` read the INSTANCE, not the commit -> escalated "a FALSE COMPLETION CLAIM"
+  3  `3.0.0_SA_CVO~Z` took it from a MESSAGE, not the commit -> built a two-carriers finding on it
+  4  `2.0.0_SA_COO~Z` softened it to "scope ambiguity" -- STILL without running `git log`
+  5  `git log 63ef598d5a`  ->  the claim dissolves entirely
+```
+>> ⛔ **FOUR PROPAGATIONS OF A CHARACTERISATION OF A COMMIT THAT NOBODY IN THE CHAIN HAD OPENED.**
+   Each hop treated the previous hop's WORDS as a measured fact. **The object was one command away
+   the entire time, and its own second line refuted the claim.** <<
+⚠ **AND THE AUTHOR IS `0.4.0_DS_ClientPlatform~Z` — THE LIVE LANE.** The chain impugned a seat's own
+exemplary commit while that seat was working three cells for the same issuer.
+
+### WHAT STANDS, UNCHANGED BY THIS
+The **DEFERRAL** stands (ruled NOT NOW, D4 scope). The **BACKFILL GAP** stands: the pre-fix
+`2026-08-24` partition is genuinely stale — 187 rows, 17 columns, no `as_of_basis`, 73 of 187
+trueshares rows on the wrong `data_as_of`. **That was always a fact about the ARTIFACT, and it was
+never a fact about the COMMIT.** The premise *"nothing is served wrong tonight"* remains UNVERIFIED
+with its reversal trigger intact.
+⛔ **THE ONLY THING WITHDRAWN IS EVERY CRITICISM OF `63ef598d5a`. THERE WAS NEVER ANYTHING TO FIX
+THERE.**
