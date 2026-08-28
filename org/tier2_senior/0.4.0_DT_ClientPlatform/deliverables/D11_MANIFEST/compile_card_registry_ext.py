@@ -116,6 +116,30 @@ def candidates_at(pin):
     return sorted(keep)
 
 
+def gate_check(apply, settled_receipt, unsettled):
+    """The two preconditions, as a PURE function returning (code, message). No side effect.
+
+    ⛔ THIS EXISTS BECAUSE MY OWN TEST OF THE SECOND GATE WROTE THE REGISTRY. To exercise the gate's
+    ALLOW arm I called main() with --apply, the first guard stubbed and a real receipt path -- and
+    allowing passage MEANS THE GUARDED ACTION RUNS. The compile executed and overwrote
+    card_population_registry.v1.json in the working tree, the one file every ruling said must stay
+    untouched. It was never committed and was restored byte-identical (LF-normalised) the moment I
+    saw it dirty, but the claim "the registry is untouched" was false while it stood.
+
+    A POSITIVE CONTROL ON A GATE CANNOT BE THE GUARDED ACTION ITSELF. Test the DECISION here, where
+    passing returns 0 and writes nothing; never by letting the write happen and checking it did.
+    """
+    if not apply:
+        return 0, "not applying"
+    if unsettled:
+        return 2, "fill face(s) not issuer-COMPLETE: %s" % ", ".join(n for n, _s in unsettled)
+    if not settled_receipt:
+        return 2, "no --settled-receipt named"
+    if not (os.path.exists(os.path.join(ROOT, settled_receipt)) or os.path.exists(settled_receipt)):
+        return 2, "--settled-receipt %r does not exist" % settled_receipt
+    return 0, "both gates satisfied"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pin", help="the ONE settled authority commit; everything is computed at it")
@@ -126,34 +150,18 @@ def main():
     args = ap.parse_args()
 
     unsettled = refuse_unless_settled()
-    if unsettled and args.apply:
-        print("\nREFUSING to apply: %d fill face(s) are not issuer-COMPLETE -- %s"
-              % (len(unsettled), ", ".join(n for n, _ in unsettled)))
-        print("A registry compiled while lanes are filling pins bytes those lanes are still editing,")
+    # ONE decision path. main() does not re-implement the rule; it asks gate_check, which is the
+    # same function the arms exercise. Two copies of one rule drift, and the copy under test is
+    # never the copy that runs.
+    code, why = gate_check(args.apply, args.settled_receipt, unsettled)
+    if code:
+        print("")
+        print("REFUSING to apply: %s" % why)
+        print("A registry compiled before both preconditions hold pins bytes that may still move,")
         print("and the JOIN admits only registry-ratified members (4.0.0_SA_CRO~X 210720Z).")
-        return 2
-    # SECOND GATE (4.0.0_SA_CRO~X 215702Z): the settle guard is necessary and NOT sufficient. Every
-    # face reading complete says the lanes STOPPED MOVING; it does not say the tree they stopped at
-    # was revalidated. The canonical compile additionally requires the post-COX v3.1 SETTLED
-    # revalidation receipt, and this tool will not infer its existence.
-    #
-    # THIS GATE WAS DEAD CODE ON ITS FIRST WRITE. The argparse flag landed and the body did not, so
-    # the tool ADVERTISED a control it did not have -- and the settle guard fires first, which hid
-    # it: exercising the pair end-to-end could never reach this line. It was only caught by stubbing
-    # the first guard out and running the second alone. A guard behind another guard is unexercised
-    # by construction.
+        return code
     if args.apply:
-        r = args.settled_receipt
-        if not r:
-            print("REFUSING to apply: no --settled-receipt named. The post-COX v3.1 settled")
-            print("revalidation receipt is a precondition of the canonical compile; a compile that")
-            print("assumes it exists is asserting someone else's act.")
-            return 2
-        if not (os.path.exists(os.path.join(ROOT, r)) or os.path.exists(r)):
-            print("REFUSING to apply: --settled-receipt %r does not exist. A named-but-absent" % r)
-            print("receipt is not weaker evidence than an unnamed one -- it is a false citation.")
-            return 2
-        print("   settled receipt: %s (present)" % r)
+        print("   gates: %s" % why)
 
     if not args.pin:
         print("\nREFUSING: --pin is required. A compile with no named authority commit cannot say")
