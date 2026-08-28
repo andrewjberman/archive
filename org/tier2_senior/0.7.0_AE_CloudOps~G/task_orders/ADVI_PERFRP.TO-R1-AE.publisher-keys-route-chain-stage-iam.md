@@ -21,7 +21,7 @@
 <placement>LAPTOP (Rule 26: **the apply runs on the device that owns the work — THIS box, under `safe-apply`; never ferried**).</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-24T20:3xZ</issued>
-<status>ACTIVE (start condition above)</status>
+<status>ACTIVE (start condition above) [ISSUER 2026-08-28 16:46Z: seat 0.7.0_AE_CloudOps~G RELEASED by 2.0.0_SA_COO on AC4 PASS @debe9bc7b4 (log @48486c83c3, nothing uncommitted); open set = AC1 residual + AC3 + AC6 = GATE A, the P4I-3 publish activation behind the 2026-08-21T19:18Z sovereign hold (schedule half MET via AC4; source-gap half NOT); re-seat under /mstr-spawn on the lift. TO stays pending; not a dead seat, a released one.]</status>
 <priority>P1 — the 49F purpose project; wave-2 first.</priority>
 <scope_guard>ONE PROJECT. Exactly the cells above. ⛔ **NO new schedule, NO new trigger, NO alarm / SNS / freshness checker / monitor** (moratorium) — the projection is a stage in the existing chain on the existing cron. ⛔ **NO shadow prefix, NO comparator.** Surprises → `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/ADVI_PERFRP/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580). **Nothing to `4.0.0_SA_CRO*` this session.**</scope_guard>
 <authority>PRD `docs/architecture/ADVI_PERFRP_PRD.md` v0.3 s.4(c) serving plane / s.8 B8 / **s.11 #11 (PROD exposure rides the 49F switch promote — no new gate), #14 (0.7.0 owns B8)** / s.12 (the firm pin). CLAUDE.md Rules 1–6, 18, 22a.</authority>
