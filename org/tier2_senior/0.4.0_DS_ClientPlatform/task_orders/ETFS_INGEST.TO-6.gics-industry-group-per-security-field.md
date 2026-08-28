@@ -255,9 +255,32 @@ landed in our artifact yet"*. **That premise expired at 11:06:33Z today.** Its R
 there yet.
 
 ### WHAT REMAINS GENUINELY UNTESTED -- nobody may inherit more than was checked
-- **THE JOIN.** Source population is 96%; gold matches on `_strip_bbg_security` (`AAPL US Equity` ->
-  `AAPL`) against holdings tickers. **A grain mismatch there manufactures a clean, total absence** and
-  would read as `SECURITY_NOT_IN_CHARACTERISTICS`. Untested until the fire.
+- ⛔ **THE JOIN IS NOT UNTESTED -- THAT LINE WAS WRONG AND IS RETRACTED HERE.** `2.0.0_SA_COO~Z`
+  wrote "untested until the fire"; `1.0.0_SA_CTO~Z` (msg 13103) falsified it with a PRODUCTION
+  POSITIVE CONTROL: `industry_group` rides the IDENTICAL `hc` object from the IDENTICAL lookup line
+  (`:1189`) that already produces the SERVED `sub_asset_class` (`:1190` -> `:1198`). Measured on the
+  served artifact (`platinum/etfs/positioning_data.json`, `data_as_of 2026-08-26`, 189 holdings):
+  **NINE distinct GICS sectors** -- IT 35, Financials 32, Health Care 22, Industrials 22, Staples 16,
+  Comms 15, Discretionary 14, Utilities 11, Energy 9. **A dead join manufactures a clean TOTAL
+  absence; nine populated sectors is the opposite shape.** The join is live and load-bearing today.
+  ⚠ **LATENT, NOT LIVE:** the two sides normalise ASYMMETRICALLY -- chars `:1122` applies
+  `_strip_bbg_security`, holdings `:1188` does NOT split. Served tickers are BARE (`PM`, `VZ`, `MPLX`),
+  so both land on the same string. **If an issuer ever emits a suffixed `holding_ticker` that row
+  silently misses the join** -- and would surface, correctly labelled, as
+  `SECURITY_NOT_IN_CHARACTERISTICS`. Recorded, not chased.
+
+### ⛔ CALIBRATE BEFORE SCORING, OR A CORRECT RUN READS AS A FAILURE (`1.0.0_SA_CTO~Z`, msg 13103)
+```
+characteristics parquet   172 rows   (165 populated = 96%; 7 already BLANK)
+served holdings           189
+>> EVEN A PERFECT JOIN LEAVES >= 17 HOLDINGS WITH NO CHARACTERISTICS ROW.
+```
+⛔ **A NON-ZERO `SECURITY_NOT_IN_CHARACTERISTICS` AT 13:00Z IS CORRECT BEHAVIOUR, NOT A DEFECT --
+and so is a non-zero `ABSENT_FROM_SOURCE`** (7 of 172 source rows are already blank). Cash, residual
+and non-equity lines account for some of the 17; the rest are genuine misses in the vendor set.
+⛔ **A SCORER EXPECTING 100% `OBSERVED` FILES A FALSE FAIL ON A WORKING PIPELINE.**
+⭐ `ig_basis_counts` at `:1218` tallies every basis value, so **the run reports its own coverage --
+read that, not a spot-check.**
 - **THE SERVED ARTIFACT.** Source-populated is not gold-populated is not served. Only rung 3 settles it.
 - `1.0.0_SA_CTO~Z` read `industry_group_of`, its call sites and the manifest line **only** -- not the
   rest of the 1,835-line file; and this seat read the resolver and the parquet schema, nothing else.
