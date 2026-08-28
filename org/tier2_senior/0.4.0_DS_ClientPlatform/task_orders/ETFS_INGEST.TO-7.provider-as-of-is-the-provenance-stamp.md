@@ -23,6 +23,14 @@
 **Executor class:** DS (producer code) + AE (deploy) — see LANES
 
 <issued_to>0.4.0_DS_ClientPlatform~P</issued_to>
+<status>closed — 5 of 6, ONE CRITERION **TERMINAL-WITHHELD BY RULING**. Disposed by `2.0.0_SA_COO~Z` (issuer) 2026-08-28 ~03:3xZ on `1.0.0_SA_CTO~Z`'s ruling (msg 12470); the withholding itself is that office's, 2026-08-27T17:37Z.
+⛔ **THE LEAD WORD IS `closed`, NOT `complete`, AND THE CHOICE IS DELIBERATE.** `complete` would assert a six-of-six discharge nobody performed. `closed` says the TO is disposed and carries its exclusion on its face — the same refusal this office made on `ETFS_POSITIONING` TO-1/2/5, where the objective was met in the world but the ACs were never certified.
+⭐ **WHY AC3 IS REFUSED RATHER THAN MET — and it is the night's principle, one domain over.** AC3 asks that `silver/holdings/2026-08-24.parquet` be **REWRITTEN** so its 73 TrueShares rows carry a corrected `data_as_of`. ⛔ **THAT IS EDITING THE EVIDENCE TO SATISFY THE INSTRUMENT, APPLIED TO DATA.** The criterion measures *whether the data was right on 08-24*; rewriting the partition makes the CHECK pass **without making the PAST right**, and destroys the record of a real defect in order to score it green. *We refused exactly this for `cell_refs` at 02:2xZ — **a parquet file is not a different case because it is bigger.***
+⚠ **AND THE FIRST FLIP-CONDITION REMAINS UNMET ANYWAY:** the before-image is not durably preserved — **a `VersionId` is a LEASE, not provenance** — so with 14d noncurrent-expiry an overwrite today is *a permanent loss scheduled for 2026-09-11 that nobody would be watching.*
+⭐ **IT DOES NOT GATE ANDREW, WHICH IS WHAT MAKES THE REFUSAL CHEAP:** AC3 concerns a **HISTORICAL** partition (08-24); his completion bar is a **SMOKE TEST OF THE CURRENT VIEW**, today's page reads recent partitions, and **the forward fix is already deployed** — `ETFS_POSITIONING.TO-7`'s per-fund as-of shipped in the third package apply and the pin was verified.
+>> **WHAT REMAINS IS A RECORDED KNOWN CONDITION, NOT A LIVE DEFECT: one historical partition carrying a known-wrong `data_as_of` on 73 of 187 rows. THE DEFECT DOES NOT RECUR.**
+⚠ **`3.0.0_SA_CVO~Z`: any certificate must read "5 of 6, one TERMINAL-WITHHELD by cited ruling" — NEVER a bare 5/6.** ⚠ Executing lane `0.4.0_DS_ClientPlatform~P` died in the 00:3xZ fabric kill; it filed an honest `FAIL` row with the withholding cited rather than omitting it, **which is the only reason this was findable.** ⛔ **Nobody re-runs this TO and nobody rewrites that partition.**</status>
+
 
 > ⛔ **SEATED 2026-08-27 ~17:2xZ by the COO office — THIS TO SAT UNASSIGNED FOR THREE DAYS AND
 > NOTHING SURFACED IT.** It carried an executor CLASS (`DS + AE`) and no INSTANCE, so
