@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_SATELLITES.TO-10-DE",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ETFS_SATELLITES.TO-10-DE.hide-satellite-98-and-remove-firm-selector.md",
+    "group": "D",
+    "vintage_commit": "8c863d5f22"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-satellites/20260827T160438Z/DECOMP.md",
+    "vintage_commit": "e704e760f1",
+    "to_ref": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ETFS_SATELLITES.TO-10-DE.hide-satellite-98-and-remove-firm-selector.md"
+  },
+  "assignee": "0.4.0_DE_ClientPlatform~S",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/Positioning/Positioning.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "5a4349a5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "SATELLITES_HIDDEN_FROM_DISPLAY declared in the PAGE COMPONENT and applied between the served registry and the adapter; the firm selector and every dependency it needs commented with TO-10-DE AC5 markers; the default derived as selectableFirms[0] ?? COTTONWOOD_FIRM_ID. BRANCH STATE, NOT A DELIVERY: pushing origin/DEV publishes nothing (ci.yml on DEV only uploads a CI artifact; deploy.yml on PROD is the sole writer of the served bucket), so this is on the branch and served nowhere."
+    },
+    {
+      "path_or_key": "portal/src/pages/Positioning/tabs/HoldingsTab.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "5a4349a5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bookColorRamp() interpolates BETWEEN the existing five palette stops, replacing BOOK_COLOR_CYCLE[i % len] which REPEATED past five books. GATED: indexing is kept while the palette can give every book its own stop, so models (n=5) and etfs (n=4) are byte-unchanged. Same branch-state caveat as above."
+    },
+    {
+      "path_or_key": "portal/scripts/ui-smoke.mjs",
+      "kind": "test",
+      "commit_or_etag": "5a4349a5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds --width <px>, default 1440 UNCHANGED so existing captures stay byte-comparable. Added because AC3 is a criterion ABOUT viewport width, and an instrument pinned to one width reports that width's clipping as a property of the page."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T10DE-AC1",
+      "criterion_verbatim": "Opal Satellite 98 IS NOT DISPLAYED, AND THE FILTER IS AT THE RENDER LAYER. The Positioning Summary shows eight books. Cite the edit site: it must be a display/selection concern, NOT SATELLITE_MEMBERS, NOT the registry, NOT the producer.",
+      "method": "manual_read_with_citation",
+      "invocation": "read renders at 1440/1600/1920 + citation of the edit site in Positioning.tsx @5a4349a5",
+      "output_evidence": "SATELLITES_HIDDEN_FROM_DISPLAY is a module constant in the PAGE COMPONENT, applied between the served registry and the adapter (displayedSatelliteBooks). Eight books render: 15 30 40 50 60 70 80 90. It lives there precisely so it cannot be mistaken for a membership edit. SAT-b-5 makes the tempting mistake's DIRECTION concrete: 98 has ELEVEN accounts and 90 has ZERO, so 'same characteristics, drop one' is true of the DISPLAY and false of the DATA -- a membership fix would have deleted the POPULATED book and kept the empty one.",
+      "denominator": "registry books 9; displayed 8; hidden 1 of 9.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T10DE-AC2",
+      "criterion_verbatim": "98 IS STILL TRACKED -- PROVE THE DATA SIDE IS UNTOUCHED. platinum/satellites/registry.json still carries NINE books and still sums to 100.000. Exhibit the served artifact AFTER the change, not the source.",
+      "method": "live_read",
+      "invocation": "aws s3api get-object --bucket opal-data-cot --key platinum/satellites/registry.json (run AFTER the edit)",
+      "output_evidence": "books served 9 | as_of 2026-08-27 | books NOT summing to 100 within 0.01: 0 of 9 | 'Opal Satellite 98' still present: TRUE | sha256 0989650ab6a7541d... UNCHANGED from the pre-edit read. Body banked verbatim as registry_served_AFTER_the_change.json. RE-READ rather than cited: the criterion asks about the state AFTER the change, and quoting the earlier measurement answers a different question.",
+      "denominator": "9 of 9 books present; 0 of 9 fail the sum check.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T10DE-AC3",
+      "criterion_verbatim": "THE WIDTH PROBLEM IS GONE, AND NO SCROLL WAS ADDED. Eight columns fit without clipping. No horizontal scrollbar on the panel OR the page body, and no arrows.",
+      "method": "manual_read_with_citation",
+      "invocation": "node scripts/ui-smoke.mjs positioning <out>.png --width {1440,1600,1920} --fixtures fx-populated.json --click Satellites",
+      "output_evidence": "MEASURED AT THREE WIDTHS: 1440 -> 8 columns CLIP (8th column and labels cut); 1600 -> all 8 labels present, 8th bar's VALUE labels still clip ('8.1', '91.9'); 1920 -> FITS CLEAN, no scrollbar, no arrows. Removing the ninth column HELPED and did not solve it below ~1920. NO SCROLL WAS ADDED: Andrew withdrew it explicitly ('no need for arrows'), and building it anyway would substitute a lane's judgement for his ruling on a page he had just approved. The NEGATIVE half of the criterion (no scroll, no arrows) is therefore MET; the POSITIVE half has no truth value without a named width.",
+      "denominator": "3 viewport widths measured; fits at 1 of 3.",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "THE CRITERION NAMES NO VIEWPORT WIDTH, and whether eight columns fit is a function of width -- so it has no truth value as written. Ruled by the issuer (2.0.0_SA_COO~Z) as their own criterion defect rather than a failure of the work, amended @8c863d5f22; the acceptance viewport is with Andrew. NOT a FAIL: it has not failed, it cannot currently be evaluated at the width the criterion omits."
+    },
+    {
+      "criterion_id": "T10DE-AC4",
+      "criterion_verbatim": "NO FIRM SELECTOR ON SATELLITES, DEFAULTED TO COTTONWOOD. An internal viewer lands on cottonwood satellites with no selector and no extra click.",
+      "method": "manual_read_with_citation",
+      "invocation": "node scripts/ui-smoke.mjs positioning t10-populated.png --port 5175 --fixtures fx-populated.json --click Satellites (internal identity: firmId=opal-capital userType=Dev)",
+      "output_evidence": "Header carries ONLY the mode pills -- no selector. The internal viewer reaches the data on the FIRST click into satellites mode; the registry fixture matched on that run, so the fetch fired without any selection step. The default is DERIVED (selectableFirms[0] ?? COTTONWOOD_FIRM_ID) rather than a typed literal, so a firm added to MODE_FIRM_ALLOWLIST moves it instead of being silently ignored.",
+      "denominator": "selector renders: 0 of 1 internal captures; clicks to data: 1.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T10DE-AC5",
+      "criterion_verbatim": "THE DROPDOWN CODE IS COMMENTED OUT, NOT DELETED. Show re-enabling is a comment-uncomment, not a rebuild.",
+      "method": "manual_read_with_citation",
+      "invocation": "read of Positioning.tsx @5a4349a5",
+      "output_evidence": "The selector JSX and EVERY dependency it needs are commented with a TO-10-DE AC5 marker: the PageSurfaceControl import, the satelliteFirmLabel import, awaitingFirmSelection, the query's enabled clause, and the firm-unselected notice member across type + copy + style. NOTHING WAS REBUILT AWAY: satelliteSelectableFirms() and satelliteFirmLabel() are still exported and still derive from MODE_FIRM_ALLOWLIST, so the thing that comes back is the thing that worked. Five separate markers rather than one block because the dependencies are NOT contiguous, and an uncomment that misses one does not compile.",
+      "denominator": "commented sites carrying the AC5 marker: 5; deleted lines of selector logic: 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T10DE-AC6",
+      "criterion_verbatim": "TO-9-DE's FOUR-WAY DISCRIMINATION SURVIVES. A 400 must still render as an ERROR and never as 'no satellites'. Re-exhibit by hash.",
+      "method": "test_suite",
+      "invocation": "four ui-smoke captures (populated/empty/failed/as_of-null) under the TO-10 build, then sha256sum",
+      "output_evidence": "populated dbfeb0c1e701c6ee / empty e02b1764dfb1fd5b / failed 92225d65f302069f / as_of-null 92225d65f302069f. THREE DISTINCT ACROSS FOUR, and the sole collision is the one TO-8-DE designed in (both are 'could not be loaded'). AND A CONTROL THAT FELL OUT RATHER THAN BEING CONSTRUCTED: the empty and failed hashes returned EXACTLY to their TO-8-DE values, so removing the selector restored the pre-TO-9-DE render for those states byte-for-byte. No default turned a failed fetch into an empty registry.",
+      "denominator": "4 renders compared by sha256; 3 distinct; 1 collision, intended and pre-declared.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T10DE-AC7",
+      "criterion_verbatim": "RENDERED, NOT GREPPED. Read screenshots: the eight-book Positioning Summary with no clipping; the satellites view with no selector, defaulted to cottonwood. THE CANVAS IS SILVER.",
+      "method": "manual_read_with_citation",
+      "invocation": "six ui-smoke captures, each opened and READ; banked in this deliverable directory",
+      "output_evidence": "Six screenshots read: four states at 1440 plus 1600 and 1920 for AC3. Canvas law holds -- notices are dark text on a light tint, all content sits inside dark Panels, and the header actions slot now carries only the mode pills. The one new control this TO could have got wrong was REMOVED rather than added. ui-smoke uses a fresh headless profile per run, so stored state is cold by construction and no capture can inherit a warm browser's selection.",
+      "denominator": "6 captures, 6 read.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T10DE-AC8",
+      "criterion_verbatim": "THE GRADIENT RUNS ORANGE -> YELLOW -> GREEN -> BLUE -> RED, LEFT TO RIGHT, ORANGE ON Satellite 15. Do NOT derive the direction from the Duration values.",
+      "method": "manual_read_with_citation",
+      "invocation": "read render of the PORTFOLIO COMPOSITION chip row at 1920",
+      "output_evidence": "Orange on Satellite 15 (leftmost) through red on Satellite 90 (rightmost). DIRECTION WAS NOT DERIVED FROM DURATION: that column falls left-to-right (2.89 ... 1.81) and reads as 'shortest is rightmost', which would invert the gradient. Andrew's stated reason is that the falling value is a MISNOMER -- equity weight rises rightward and equity has no duration, so the blended average falls because the fixed-income sleeve shrinks. The inference was available, was made by another seat, and was wrong.",
+      "denominator": "8 chips; first = orange stop, last = red stop.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T10DE-AC9",
+      "criterion_verbatim": "EVERY DISPLAYED BOOK GETS ITS OWN COLOUR -- INTERPOLATE, DO NOT CYCLE. THE SPAN IS THE SET AC1 LEAVES RENDERED -- EIGHT books, not nine.",
+      "method": "test_suite",
+      "invocation": "bookColorRamp(n) evaluated against the pre-change BOOK_COLOR_CYCLE[i % len] for every mode's actual book count",
+      "output_evidence": "satellites n=8 -> 8 DISTINCT colours (old cycling gave 5 of 8 -- it repeated). AND THE DID-NOT-MOVE CONTROL, ARITHMETIC RATHER THAN VISUAL: models n=5 ramp == old cycling IDENTICAL; etfs n=4 ramp == old cycling IDENTICAL. Interpolating unconditionally would have SILENTLY RECOLOURED ETF MODE, because 4 books against 5 stops is exactly where indexing and interpolation disagree (indexing gives orange/amber/green/blue; interpolation would give orange/blend/blend/RED). The ramp is derived from books.length at the call site, so the span is the DISPLAYED set and AC1's filter feeds it.",
+      "denominator": "3 modes checked; 2 byte-unchanged; satellites 8 of 8 distinct.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THE MUTANTS ARE INPUTS AND COUNTS, NOT PLANTED DEFECTS. (1) The four render fixtures: three distinct hashes across four states, and the pair that collides is the pair TO-8-DE designed to collide. (2) The colour ramp evaluated at every mode's ACTUAL book count -- the interesting case is etfs n=4, where the naive fix and the gated fix DISAGREE, so 'models and etfs unchanged' is a result rather than an assumption. (3) The typechecker was exercised earlier this session on this same tsc project (planted TS2322 -> rc=2, restored byte-identical), which is what makes rc=0 evidence rather than a possible cached skip on a project-references build.",
+      "expected": "Each mutated input must produce a DIFFERENT observable where the code distinguishes it, and an IDENTICAL one where the code must not.",
+      "observed": "FIRED IN BOTH DIRECTIONS. Distinguished: satellites 8 -> 8 distinct colours against 5 repeats before; populated/empty/failed all distinct. Deliberately identical: models and etfs ramps byte-equal to the old cycling; empty and failed hashes byte-equal to their TO-8-DE values, which is the pre-TO-9 render restored.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Six captures from separate invocations of one instrument against fixed fixtures, compared by sha256; the ramp compared by recomputation against the pre-change expression rather than by eye.",
+      "observed": "STABLE. The failed/as_of-null pair reproduced byte-identical hashes; the other states reproduced mutually distinct ones; the ramp comparison is pure arithmetic over fixed inputs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A narrower-viewport fix for AC3",
+      "reason": "Andrew withdrew the scroll explicitly ('no need for arrows'); his named alternative was shrinking text/bars. The issuer ruled no narrower-viewport fix on this lane's own judgement, and the acceptance viewport is with Andrew."
+    },
+    {
+      "item": "Any change to SATELLITE_MEMBERS, the registry or the producer",
+      "reason": "Render-layer only, by the TO's section 2. AC2 exhibits the served artifact unchanged. SAT-b-5: 98 holds eleven accounts and 90 holds zero, so a membership edit would delete the populated book and keep the empty one."
+    },
+    {
+      "item": "Deleting the firm selector",
+      "reason": "Andrew asked for it commented and not deleted, so other firms' custom models can re-enable it later. AC5 keeps re-enabling to an uncomment."
+    },
+    {
+      "item": "Interpolating the chip ramp unconditionally",
+      "reason": "It would silently recolour ETF mode (n=4 against 5 stops is where indexing and interpolation disagree). Those chips are not this TO's to move."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / ARMED at the product level, not a defect in this build -- AC3's width problem is NOT fully solved by removing the ninth column. Measured: 1440 clips, 1600 clips the 8th bar's value labels, 1920 fits. Andrew's premise ('that would solve the issue with the width') holds at wide viewports and not at common laptop ones. Surfaced to the issuer, who amended the criterion; no remedy attempted on this lane's judgement.",
+    "OBSERVATION / INERT -- one eslint WARNING is left unsuppressed by choice: setSelectedFirmId is unused because only the commented selector calls it. Renaming it _setSelectedFirmId would silence the warning and BREAK the uncomment-only property AC5 requires. The warning is the cheaper of the two and is better visible than hidden; it clears itself the moment the selector is re-enabled.",
+    "OBSERVATION / INERT -- the instrument could not evaluate its own criterion. ui-smoke was pinned to a 1440 viewport, so a criterion of the form 'N columns fit' would have been answered with the clipping of one arbitrary width reported as a property of the page. --width was added (default unchanged) rather than reporting a width-dependent result as width-independent."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-28/laneS_etfs_satellites_to8_consumer_seam_0145-0221Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"does the portal have a firm selector component and which firms does it list\" (carried from TO-9-DE, same surface)",
+      "result": "PARTIAL and reported as such -- a near-tie of three, none fitting a component-existence plus value-set question. comp-find carried the search instead."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find -i \"firmSelector|FirmSelector|firm selector|selectedFirm\" --files --all",
+      "result": "PASS -- 168 hits across 27534 files, banded; the two [DEF] rows were the two existing implementations. That is what made TO-9-DE's selector a rung-2 reuse, and this TO retires it."
+    },
+    {
+      "tool": "none for the 98 filter or the colour ramp",
+      "invocation": "n/a",
+      "result": "NOT RUN, and stated rather than left blank. Both edits are inside files this lane authored hours earlier and already held in context. A search tool answers 'where is it', and there was no such question -- the risk on this TO was choosing the WRONG LAYER, which is a reading question the TO itself answered."
+    }
+  ]
+}
