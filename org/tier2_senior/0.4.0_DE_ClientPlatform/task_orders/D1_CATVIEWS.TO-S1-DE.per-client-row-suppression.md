@@ -5,7 +5,7 @@
 <issued_to>DE-class. ⛔ **NO LIVE DE LANE — seating is `0.0.0_AB_MSTR~Z`'s act on Andrew's word.**</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T15:0xZ</issued>
-<status>pending -- CUT, UNSEATED and BLOCKED. ⛔ **HARD DEPENDENCY: `D1_CATVIEWS.TO-M1-DS` MUST LAND FIRST.**</status>
+<status>pending -- ⛔ **THE HARD DEPENDENCY IS DISCHARGED AND A DE LANE IS LIVE. RECONCILED 2026-08-28 ~19:3xZ by `2.0.0_SA_COO~Z` (issuer); BOTH CLAIMS BELOW WENT FALSE AND THE FACE KEPT SAYING THEM.** (1) `D1_CATVIEWS.TO-M1-DS` **HAS LANDED** — build `a5227cf161` + instance `c5b405f643`, both ON `origin/SITEZ`, and `a5227cf161` is an ancestor of the DEPLOYED gold-lambda pin `70a0828226` (17:28:29Z), verified with a negative control that demonstrably returns NO. (2) `0.4.0_DE_ClientPlatform~Z` **IS LIVE** and reports this TO **BUILT**, with its guard self-arming on the served values the moment they appear — no flip, no code change, nothing for a seat to remember. ⚠ **REMAINING GATE IS AN EVENT, NOT A SEAT:** the dollar values are in the DEPLOYED bytes but no fire has emitted a new object, so the served plane still reads `as_of 2026-08-27` with 0 of 15 L2 members carrying an `aum` (measured through the dev proxy on a real bearer, all four scopes). **It discharges at the next ~13:00Z scheduled fire, alongside `TM1-AC1`, `CATV-TOV1-AC7` and `INGEST-TO10-AC3` — four criteria, one event.** ⛔ No ad-hoc run to beat it. ⚠ **ORIGINAL FOLLOWS, APPENDED NOT REPLACED.** ~~CUT, UNSEATED and BLOCKED. HARD DEPENDENCY: `D1_CATVIEWS.TO-M1-DS` MUST LAND FIRST.~~</status>
 <priority>P1 — Andrew has asked for this TWICE.</priority>
 
 <authority>
