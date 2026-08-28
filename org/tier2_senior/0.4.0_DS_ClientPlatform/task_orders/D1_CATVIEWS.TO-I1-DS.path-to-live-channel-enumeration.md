@@ -69,10 +69,32 @@ neither `0.4.0_DS_ClientPlatform~Z` nor I assessed it. ⛔ **The evidence ARTIFA
 is a DIFFERENT OBJECT from the FINDING it carries**, and conflating them would be the error this note
 exists to prevent.
 
-**REMEDY IS NOT TAKEN AND IS NOT THIS NOTE.** Re-file, re-seat, or re-record the criteria is a
-seating/issuing decision that follows the D4/residue question already open at `1.0.0_SA_CTO~Z`. **The
-hazard is disarmed — a reader can no longer close this on refusing evidence — and DISARMED ≠
-REMEDIATED.**</status>
+**REMEDY IS NOT TAKEN AND IS NOT THIS NOTE.** The hazard is disarmed — a reader can no longer close
+this on refusing evidence — and DISARMED != REMEDIATED.
+
+⛔ **UPDATED 2026-08-28 ~03:5xZ by `2.0.0_SA_COO~Z` (issuer): THE REMEDY IS NOW HELD BY A NAMED
+RULING, NOT BY AN OPEN QUESTION.** This clause previously said the decision *"follows the D4/residue
+question already open at `1.0.0_SA_CTO~Z`"* — **that question has been answered and a reader chasing
+it would be chasing a closed one.**
+
+`1.0.0_SA_CTO~Z`, msg 12529: **NOBODY EDITS THE SCHEMA TONIGHT.** The vocabulary work — declaring
+each vocabulary's domain and RE-DERIVING its members — happens **after D1+D4**, per Andrew's pace
+instruction. ⭐ **The reasoning is that patching enum values chosen to unblock tonight's filings is
+exactly how the current holes were made**, and it never depended on who owned the file (`org/standards/**`
+is `ANY_EXEC`, measured with both controls — there is no ownership blocker, and its absence lifts
+an OWNERSHIP gate, not the SEQUENCING one).
+
+>> **SO THE INTERIM CONTROL IS THE END STATE FOR TONIGHT, AND IT IS DELIBERATE:** FILE THE TRUE
+   VALUES, ACCEPT THE `INVALID`, and **never alter evidence to satisfy the grammar.** `AC4`'s true
+   terminal status IS `APPLIED-GATED`; the schema cannot express it; **the instance is therefore
+   CORRECTLY invalid and must not be edited into validity.**
+
+⚠ **WHAT THIS DOES NOT SAY:** it does not close this TO, and it does not assess `~T`'s ~12KB
+enumeration deliverable, which **remains unassessed by anyone**. Lane `~T` is DEAD — confirmed
+2026-08-28 03:5xZ against `liveness.json` (`~F`, `~L`, `~Q` present; `~T` absent; last `~T` commit
+`2dd3c9d7ff`, 2026-08-26). **Re-seating to assess it is an issuing decision deferred with the
+vocabulary work, and it is NOT on D1's critical path to Andrew's bar** — `D1-i-1`'s discharge rests
+on this TO's FACE, not on the instance, and that was checked before this note was written.**</status>
 
 <decomp_ref>
 workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — surface (i), cells
