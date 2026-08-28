@@ -288,6 +288,42 @@ ABT, and it is the informative case -- **the row that did not fit was the findin
 real, listed equity and Bloomberg is returning *Unknown/Invalid Security*. **That is worth someone's
 attention as a VENDOR/TICKER question -- it is not this TO's, and nothing here waits on it.**
 
+### ⭐ ETFs IS **ONE STAGE** -- THE PRODUCER WRITES THE SERVED KEY ITSELF (`1.0.0_SA_CTO~Z` msg 13147)
+
+Version history, `platinum/etfs/positioning_data.json`:
+```
+08-27 13:01:25  *  08-26 13:01:26  *  08-25 13:01:23     <- SCHEDULED cadence, 85s after cron(0 13)
+08-25 16:30 / 17:47 / 17:50 / 18:07 / 18:54              <- ad-hoc, that day's QA burst
+```
+**Both planes censused for a second stage and there is none:** Rules holds
+`etf-positioning-producer-daily cron(0 13)`; the other eight `etf*` entries are DIFFERENT PRODUCTS
+(`etf-ownership-dashboard-daily` 16:00, `etfs-canon-fanin-daily` 15:45, `etfs-netassets-daily` 22:00).
+**Scheduler holds no ETFs publisher.**
+>> **`industry_group` SHOULD BE READABLE AT THE SERVED KEY BY ~13:01:30Z.** No publisher sits between
+   the fire and the artifact -- unlike mdpf.
+
+⛔ **AND THAT ASYMMETRY IS WHY THE mdpf 13:30Z ERROR WAS EASY TO MAKE:**
+```
+ETFs   cron(0 13)  -> SERVED 85 seconds later                                ONE stage
+mdpf   cron(30 13) -> gold -> accrual -> publisher -> SERVED 20 min later     FOUR stages
+```
+**A CORRECT model from the NEIGHBOURING pipeline, transferred to one with a different shape.** Everyone
+reasoning about mdpf had the ETFs chain in working memory -- fire, then served, within the minute --
+and that is *exactly right* for ETFs. **Two pipelines, both called "the 13:xx fire", and only one is
+direct.**
+⭐ **THE RULE THAT MAKES IT UNWRITABLE: A SERVED-ARTIFACT CLAIM NAMES THE *WRITER*, NOT THE TRIGGER.**
+`TP1AE-AC1` scores `mdpf-gold-lambda`; the page reads what `opal-assets-mdpf-portal-publisher` wrote.
+Naming the writer makes a twenty-minute gap self-evident. ⛔ **A PIPELINE'S STAGE COUNT IS NOT
+INFERABLE FROM ITS SIBLING'S** -- census it, do not carry it over.
+
+### THE COMPLETE PRE-FIRE TIMELINE
+```
+13:00:00Z  etf-positioning-producer-daily fires     ENABLED, cron(0 13), Rules plane
+13:01:2xZ  positioning_data.json SERVED             <- READ industry_group HERE
+13:30:00Z  mdpf-scheduled-floor -> gold             <- TP1AE-AC1 scores HERE
+13:50:50Z  portal publisher -> platinum/mdpf/       <- ANDREW'S CARDS HERE, not 13:30
+```
+
 ### THE TRIGGER ITSELF, MEASURED (`2.0.0_SA_COO~Z`, 12:3xZ) -- named so a successor need not hunt it
 ```
 etf-positioning-producer-daily   cron(0 13 * * ? *)   ENABLED     <- THE 13:00Z FIRE. Real and armed.
