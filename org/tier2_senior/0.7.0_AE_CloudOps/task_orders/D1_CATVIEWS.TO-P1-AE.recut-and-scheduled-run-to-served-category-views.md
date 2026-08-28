@@ -38,6 +38,50 @@ at higher cost. **Whoever holds this after the fire runs the scorer and files; t
 scorer are committed and outlive the session that made them.** ⚠ **DISARMED != REMEDIATED: if nobody is
 seated after 13:30Z the fire is unobserved until someone returns.**</status>
 
+## ⛔⛔ {OBSERVATION, ARMED} -> DISARMED SAME-TURN. THE SERVED PLANE STILL CARRIES `Alternatives`, WHICH ANDREW REMOVED FROM L0 ON 08-27.
+
+**Raised by `1.0.0_SA_CTO~Z` (msg 13168) while verifying the 13:50:50Z write. DISARMING OWNER:
+`2.0.0_SA_COO~Z` (issuer). This block IS the disarm. ⛔ DISARMED != REMEDIATED.**
+
+**INDEPENDENTLY VERIFIED on the served cottonwood artifact by `2.0.0_SA_COO~Z`:**
+```
+view_plane.peers     ['Models', 'SMA', 'Alternatives', 'Client']    <- Alternatives IS declared
+view_plane.excluded  ['Insurance']  ONLY
+nodes.Alternatives   {aum 0.0, display_label 'Alternatives', members []}
+CONTROL: Insurance IS in excluded -- the exclusion mechanism WORKS and is in use two keys away.
+```
+`CategoryViewTree.tsx:348` renders `block.view_plane.peers`, and `:45` states a node is deliberately
+**"never silently dropped by a display constant"**. **So the page renders an EMPTY $0 `Alternatives`
+card on all four scopes** -- against that component's own *true-zero -> no card, never an empty one*.
+
+**ANDREW-DIRECT 2026-08-27 ~21:1xZ, VERBATIM (his phrasing is the ruling):**
+> *"We can just get rid of Alternatives at L0, they are differnet things but if its confusing easier
+> to just get rid of it"*
+Record: `org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/ANDREW_DIRECT_20260827_REMOVE_ALTERNATIVES_FROM_L0.md`
+
+### ⛔ THE OWNER WAS NAMED IN THE RECORD ITSELF, AND THE ACT WAS NEVER CUT -- THAT IS MINE
+That record's own table reads:
+```
+registry / VIEW_TREE  Alternatives leaves the declared L0 node set
+                      DS-class -- data/mdpf/scripts/gold/mdpf_category_registry.py. NOT this lane.
+smoke fixture         node + peer entry removed        this lane, this commit
+```
+`0.4.0_DE_ClientPlatform~Z` did its half (`77d1bbce`, the fixture) **and correctly flagged the other
+half as DS-class and not its own.** ⛔ **THE DS-CLASS TO WAS NEVER CUT, AND CUTTING IT IS THE ISSUER'S
+JOB. THAT IS `2.0.0_SA_COO~Z`.** This is not a seam inside nobody's scope -- the scope was named in
+writing and the issuer did not act on it.
+⚠ **AND IT SURVIVED A SMOKE TEST BECAUSE THE SMOKE TEST RAN ON THE FIXTURE, WHICH HAD THE RULING.**
+The half that was fixed is the half the test reads.
+
+### THE REMEDY, SPECIFIED BUT NOT IMPLEMENTED
+`Alternatives` moves from `view_plane.peers` to `view_plane.excluded` **with his 08-27 words quoted**,
+**exactly as `Insurance` already is** -- display-only exclusion, node and members and gold partition
+share UNCHANGED. ⛔ **PRODUCER-SIDE, NOT PORTAL-SIDE:** a portal filter is precisely the hardcoded
+display constant `:45` forbids, and it is the same data-vs-render distinction got RIGHT for Satellite
+98 and for Insurance. **The data keeps the node; the view drops it.**
+⛔ **NOT IMPLEMENTED HERE:** DS-class file, no live DS lane, and **NO AD-HOC PRODUCER RUN** -- the
+next scheduled write is 13:50:50Z tomorrow. Surfaced, owner named, remedy specified, sovereign told.
+
 ## ⭐⭐ `TP1AE-AC1` DISCHARGES. MEASURED 2026-08-28T13:52:37Z by `2.0.0_SA_COO~Z`.
 
 AC1 requires `category_views` on the SERVED PLANE for **at least one firm**, from a **SCHEDULED** run,
