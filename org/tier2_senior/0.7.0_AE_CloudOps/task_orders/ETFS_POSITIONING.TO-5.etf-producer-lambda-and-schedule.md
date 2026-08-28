@@ -9,7 +9,29 @@
 <placement>LAPTOP (Rule 26) — the apply runs on the device that owns the work.</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-21T21:00Z</issued>
-<status>✅ **OBJECTIVE MET IN THE WORLD — THE SCHEDULE FIRED.** `cron(0 13 * * ? *)` UTC has fired `run_class: scheduled` on 2026-08-25, 08-26 and 08-27; the newest manifest carries `run_class: scheduled` / `producer: etf_positioning_gold` / `books_full 4` / `books_shell 0`, and served platinum moved 2026-08-27T13:01:25Z. ⛔ **THE FACE PREVIOUSLY READ "ACTIVE — THE CRITICAL PATH ... NOTHING GATES THIS NOW" AND THAT WAS THREE DAYS STALE** — it was the carrier that let *"GOLD HAS NEVER RUN"* be relayed by two seats on 2026-08-28 about a plane that had been running since 08-25. Disposition set by the issuing office 2026-08-28 ~02:0xZ on `1.0.0_SA_CTO~Z`'s measurement (11371/11743), **carried as THEIRS and labelled — not re-run, because re-running the same instrument is repetition, not corroboration.** ⚠ **NOT an AC-level certification** (`3.0.0_SA_CVO~Z`'s act); what is settled is that **this face is NOT WAITING ON A SEAT**.</status>
+<status>queued -- for `3.0.0_SA_CVO~Z` CERTIFICATION. **NO EXECUTOR ACT IS PENDING AND NO SEAT IS NEEDED.**
+
+⛔ **`queued` IS NOT A DISCHARGE CLAIM.** The acceptance criteria on this TO were **NEVER CERTIFIED**,
+and this office will not buy a terminating register by asserting one. **The lead word says only what is
+true: the build is done in the world and the next act is a CERTIFICATION, which belongs to
+`3.0.0_SA_CVO~Z` and to no executor.**
+
+**RE-FACED 2026-08-28 ~04:0xZ by `2.0.0_SA_COO~Z` (issuer). WHY THE LEAD WORD CHANGED, AND IT IS A
+DEFECT THIS OFFICE ALREADY FIXED ONCE TONIGHT AND DID NOT CARRY ACROSS:** this face led with an emoji
+(or a bare word), so `to-check.py` -- which classifies on the FIRST TOKEN ONLY -- read it **`ACTIVE`**.
+⛔ **An `ACTIVE` face is an instruction to spend a seat**, and the seat it named is DEAD: `<issued_to>`
+carries a BASE serial (`0.4.0_DS_ClientPlatform` / `0.7.0_AE_CloudOps` / `0.4.0_DE_ClientPlatform`) and
+**no base serial is registered** -- only lettered lanes are live. **The same lead-word defect was fixed
+on `ETFS_POSITIONING.TO-4` earlier tonight and NOT applied to its four siblings.**
+
+⚠ **`<issued_to>` IS DELIBERATELY LEFT UNCHANGED.** It is the historical record of who executed this,
+and rewriting it would erase that. **It is NOT a live assignment and must not be read as one.**
+
+---
+
+**ORIGINAL STATUS, PRESERVED VERBATIM BELOW:**
+
+✅ **OBJECTIVE MET IN THE WORLD — THE SCHEDULE FIRED.** `cron(0 13 * * ? *)` UTC has fired `run_class: scheduled` on 2026-08-25, 08-26 and 08-27; the newest manifest carries `run_class: scheduled` / `producer: etf_positioning_gold` / `books_full 4` / `books_shell 0`, and served platinum moved 2026-08-27T13:01:25Z. ⛔ **THE FACE PREVIOUSLY READ "ACTIVE — THE CRITICAL PATH ... NOTHING GATES THIS NOW" AND THAT WAS THREE DAYS STALE** — it was the carrier that let *"GOLD HAS NEVER RUN"* be relayed by two seats on 2026-08-28 about a plane that had been running since 08-25. Disposition set by the issuing office 2026-08-28 ~02:0xZ on `1.0.0_SA_CTO~Z`'s measurement (11371/11743), **carried as THEIRS and labelled — not re-run, because re-running the same instrument is repetition, not corroboration.** ⚠ **NOT an AC-level certification** (`3.0.0_SA_CVO~Z`'s act); what is settled is that **this face is NOT WAITING ON A SEAT**.</status>
 <priority>P1 — ⛔ **ON THE CRITICAL PATH TO ANDREW'S DONE.** PRD s.11.1: ETF mode renders *"from **SCHEDULED** production artifacts."* **The schedule is IN the definition of done, not an operational follow-up.**</priority>
 <authority>PRD s.11.1 + s.11.5 (production = SCHEDULED, ad-hoc = QA only). CLAUDE.md Rule 13 (infra/PROD triggers are the AE/DT lane), Rule 1 (Terraform is the only Lambda deploy mechanism), Rule 4 (source map), Rule 5 (size deliberately), NEVER#4 (`safe-apply`, never bare).</authority>
 </task_order>
