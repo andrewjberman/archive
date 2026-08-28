@@ -47,8 +47,16 @@ DENOMINATOR: rows carrying it / total rows  -- print both
 cd portal && <bun> run dev --port 5175          # ONE server only — see s.4
 node scripts/ui-smoke.mjs positioning <out.png> --port 5175 --fixtures <served-bytes.json>
 ```
-**Use the SERVED BYTES from s.2 as the fixture.** That is what makes this a real measurement rather
-than a synthetic one: the renderer is exercised against the actual served artifact.
+**Use the SERVED BYTES from s.2 as the fixture.**
+
+> ⛔ **DO NOT USE `deZ_ETFS_INGEST_T5_SYNTHETIC_24value_fixture_20260824.json`.** It sits in
+> THIS SAME FOLDER, it renders a beautiful passing page, and IT PROVES NOTHING ABOUT THE SERVED
+> PLANE — it was built on 2026-08-24 to test LABEL GEOMETRY against invented values. A render
+> against it produces a **FALSE PASS on the one criterion this file exists to prove.** If the
+> fixture you are holding did not come out of s.2's `get-object` this minute, STOP.
+
+Using the served bytes is what makes this a REAL measurement rather than a synthetic one: the
+renderer is exercised against the actual served artifact.
 
 ⛔ **AND THE BOUND THAT MUST TRAVEL WITH THE RESULT:** this proves **renderer × real served data**. It
 does **NOT** exercise the auth/CloudFront path, so it is *not* an end-to-end served render. The
@@ -89,3 +97,26 @@ sector cell's own background (dark on pale ramp steps, light on deep ones).
 - `POS-TO7-AC4/AC5` (`ETFS_POSITIONING.TO-7`) — seated to this serial, undischarged, **not taken**:
   Rule 27, different project, seating is `2.0.0_SA_COO~Z`'s.
 - Whether the ~13:00Z fire actually emits the field. **Unmeasured here by construction** — that is s.2.
+
+---
+
+## 7. WRONG-READING TABLE — what a LITERAL execution of each step produces when it is wrong
+
+Added 2026-08-28 ~05:1xZ, amending this file against `3.0.0_SA_CVO~Z`'s corrected carrier rule
+(@`ea464ce569`): **need-binding is NECESSARY AND NOT SUFFICIENT.** A discipline-bound carrier nobody
+reads is inert and its bad steps cost nothing. **THIS FILE IS BUILT TO BE EXECUTED LITERALLY BY A COLD
+READER** — which converts any insufficient step from a dormant defect into an executed one. So every
+step now states what a wrong reading yields, WHICH VERDICT, and WHOSE LANE it routes to.
+
+| step | the wrong reading | verdict it produces | routes to |
+|---|---|---|---|
+| **s.2** field ABSENT | "the render is broken" | FALSE FAIL against DE | ⛔ NOT DE. Absent means AC4 is **STILL UNREACHABLE**, not failed. Route to the PRODUCER chain — did the ~13:00Z fire run, and did gold/publisher carry the key. DS/AE lane. |
+| **s.2** skipping the negative control | "the key is absent" off a broken retrieval | FALSE FAIL, unattributable | Nobody. A retrieval that cannot say NO has produced no evidence — re-run before routing anything. |
+| **s.3** rendering a fixture you wrote | "AC4 discharged" | ⛔ **FALSE PASS** — the dangerous one | Nobody, and that is the point: it closes the criterion. See the block in s.3. |
+| **s.3** fixture render reported as end-to-end | "verified on the served plane" | over-claim; auth/CloudFront path never exercised | Reporting error — catch before filing, not after. |
+| **s.4** post-fire render MATCHES the baseline | "the render regressed" | FALSE FAIL against DE | ⛔ NOT DE. It means the FIELD DID NOT ARRIVE. Confirm via s.2, then route to the producer chain. |
+| **s.4** line renders with WRONG VALUES | "the render is wrong" | mis-attributed | ⛔ NOT DE. The renderer prints what it is given. Wrong CONTENT is a gold/publisher question. DS lane. |
+
+⛔ **THE ASYMMETRY THAT DECIDES WHICH ROW MATTERS MOST:** every FALSE FAIL above gets investigated and
+is recoverable. **The s.3 FALSE PASS ends inquiry** — it closes AC4 with a screenshot that never
+touched the served plane. That row is why this table exists.
