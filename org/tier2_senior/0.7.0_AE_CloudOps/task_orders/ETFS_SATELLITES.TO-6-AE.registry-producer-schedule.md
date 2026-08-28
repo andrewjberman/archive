@@ -16,6 +16,20 @@ with `argv=[]` at 07:00:16.078Z, against the same function's own ad-hoc arm `eve
 measurement. ⛔ **`T6AE-AC5` is NOT exercised by this fire** (9 members published, not zero); it stands CERTIFIED
 @`324330f5f2` on its prior evidence and this fire must not be cited as a re-derivation of it.
 
+⛔ **CERTIFICATION PENDING at `3.0.0_SA_CVO~Z`.** The `T6AE-AC3` evidence report was sent
+2026-08-28T07:0xZ and returned **QUEUED, not DELIVERED** -- that seat has no live session. `T5DS-AC6`
+rides the same certification. **Recorded here 2026-08-28 ~11:4xZ by `0.7.0_AE_CloudOps~S` (assignee)
+on `2.0.0_SA_COO~Z`'s census finding (13108 s.3): this face was the ONE of ten in the D1+D4
+certification backlog whose pending-cert fact was on NO artifact at all** -- it lived only in a broker
+message and in this seat's liveness summary, both perishable. A census reading the faces returned 9
+against a true 10, and the invisible one was this. ⚠ **The work is DONE; only the
+certification is outstanding, and no seat is blocked on it.**
+
+⚠ **The `complete` disposition above is DELIBERATELY UNCHANGED.** Whether `complete` is right
+while certification is pending is a TAXONOMY question, `1.0.0_SA_CTO~Z`'s office, and `2.0.0_SA_COO~Z`
+declined to adjudicate it across nine faces (13108). **This edit adds the missing FACT and moves no
+disposition** -- token[0] stays a bare classifier word, per the same message's own rule.
+
 **The text below is the PRE-FIRE state, kept rather than rewritten -- it was true when written and it is the
 record of that moment.**
 
