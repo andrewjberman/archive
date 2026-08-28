@@ -2,14 +2,14 @@
 
 <decomp_ref>workflows/atom_decomposition/runs/etfs-ingest/20260824T2010Z/DECOMP.md @fcdf042972 (CERTIFIED) — **NO NEW CELL.** This TO is the **APPLIED rung** of cells already claimed by `TO-6` (`INGEST-T3-6`, `INGEST-T5-1` data half) and `TO-8` (`INGEST-T4-1`). `DESIRED ≠ APPLIED ≠ EXERCISED` is one axis over one cell, not three cells.</decomp_ref>
 <certification>Rides `TO-6`'s and `TO-8`'s existing certification (`3.0.0_SA_CVO~Z` @422bdb431b, bound to @fcdf042972). No cell is added, so no re-certification is sought.</certification>
-<issued_to>0.7.0_AE_CloudOps~I</issued_to>
+<issued_to>`0.7.0_AE_CloudOps~P` — **letter amended from `~I` to `~P` 2026-08-28 ~01:3xZ**, accepting `0.0.0_AB_MSTR~Z`'s pre-cleared lane (11576: 1d 0 active TOs, 1pt no live process). The letter is cosmetic and a measured-clean pre-clearance beats a fresh name. ⛔ **BUT THE PROJECT IS `ETFS_INGEST`, NOT `ETFS_POSITIONING`, AND THE DISTINCTION IS LOAD-BEARING FOR RULE 27:** this TO discharges the APPLIED rung of `INGEST-T3-6` / `INGEST-T4-1` / `INGEST-T5-1`, and **a TO belongs to the project whose CELLS it discharges, never to the directory its `.tf` happens to live in.** `infra/aws/terraform/etfs-positioning/` is an implementation location. Reading it as `ETFS_POSITIONING` would collide this seat with `ETFS_POSITIONING.TO-2` (AE-class, ACTIVE) and fence it from the very cells it is being seated to apply.</issued_to>
 <executor_class>AE-class</executor_class>
 <seating_trigger>⛔ **GATED: BOTH `ETFS_INGEST.TO-6` AND `ETFS_INGEST.TO-8` MUST HAVE LANDED FIRST.** Not one. See §2 — a deploy after `TO-6` alone ships the defect `TO-8` exists to prevent, in APPLIED form.</seating_trigger>
 <placement>SITE Z (Rule 26) — the apply runs on the device that owns the work; D4 is SITEZ-placed until done.</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T01:3xZ</issued>
 <status>ACTIVE — gated on TO-6 + TO-8. Raised by `0.4.0_DS_ClientPlatform~Q` as a BLOCKING/ARMED surprise (msg 11527); **DISARMED same-turn by naming this owner. DISARMED ≠ REMEDIATED — the apply still has to happen.**</status>
-<priority>P1 — ⚠ **CLOCK: the ~13:00Z gold fire runs the DEPLOYED bytes.** Without this apply, `TO-6`/`TO-8` are DESIRED and today's platinum does not carry the field. **A missed window costs a day, not the work** — it is never a reason to skip a control.</priority>
+<priority>P1 — ⚠ **CLOCK, MEASURED by `0.0.0_AB_MSTR~Z` 11576 rather than felt: the ~13:00Z fire is ~687 minutes (11.4h) out at cut time. That is a COMFORTABLE window, not a crunch, and it is stated so no seat skips a control against an urgency that is not real.** The ~13:00Z gold fire runs the DEPLOYED bytes. Without this apply, `TO-6`/`TO-8` are DESIRED and today's platinum does not carry the field. **A missed window costs a day, not the work** — it is never a reason to skip a control.</priority>
 <authority>CLAUDE.md Rule 13 (infra / PROD triggers are the AE/DT lane — DS explicitly cannot own this) · NEVER#9 (`safe-apply`, never bare `terraform apply`; `aws lambda update-function-code` is BANNED — Terraform is the only Lambda deploy mechanism) · NEVER#2 (a confirmed deploy is never left half-landed; ledger opened at start, closed at completion).</authority>
 
 ---
@@ -69,7 +69,7 @@ and a debugging session that starts in the wrong place.
 ## 5. REPORTING
 
 Deliverable + proof instance in this lane's `deliverables/`, via `.tools/safe-commit.sh --author
-"0.7.0_AE_CloudOps~I <0.7.0_AE_CloudOps~I@opal.agent>" -F <msgfile>` (message file written by a
+"0.7.0_AE_CloudOps~P <0.7.0_AE_CloudOps~P@opal.agent>" -F <msgfile>` (message file written by a
 **non-shell** writer). Report to `2.0.0_SA_COO~Z`; `3.0.0_SA_CVO~Z` certifies. **ACK on receipt** —
 silent receipt and silent completion are both RAVC violations.
 
