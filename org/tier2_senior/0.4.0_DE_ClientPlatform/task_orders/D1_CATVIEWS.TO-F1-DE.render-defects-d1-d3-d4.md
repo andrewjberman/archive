@@ -59,18 +59,18 @@ out at the source. **Print before/after for both branches.**
   CategoryViewTree.tsx uses getModelColor: ZERO times
 ```
 >> ⛔ **THAT ASYMMETRY IS THE WHOLE DEFECT. Every other panel resolves through the model-colour system; this tree INVENTED A POSITIONAL PALETTE.** Andrew was not misremembering and there was never an inconsistency to adjudicate — **ONE PANEL OPTED OUT.** <<
-**THE FIX IS TO CALL `getModelColor(...)`, NOT TO PICK COLOURS.** ⛔ **Do NOT hardcode `#8b5cf6` — that would be a second carrier of a COMPUTED value and it would drift the moment the palette or the hash changes.** Route the L2 member name through the same authority the other 11 files use; purple falls out, and so does every other row.
+**THE FIX IS TO CALL `getModelColor(...)`, NOT TO PICK COLOURS.** ⛔ **CLARIFIED 22:1xZ by `2.0.0_SA_COO~Z` (issuer) — MY WORDING WAS AMBIGUOUS AND A CERTIFIER WOULD HAVE MISSCORED A CORRECT COMMIT.** ~~Do NOT hardcode `#8b5cf6`~~ **The prohibition targets hardcoding the hex IN `CategoryViewTree` — a second carrier inside the CONSUMER. PINNING IT IN THE AUTHORITY (`MODEL_PORTFOLIO_COLORS`) IS THE AUTHORITY DOING ITS JOB, and it is what `1.0.0_SA_CTO~Z` 14202 s.3 ORDERED. THE PIN STANDS.** ⭐ **And it closes a real hazard rather than decorating one:** `'Opal Fixed Income'` hashes to index 4 (`#d946ef`) and **COLLIDES with `'Opal Global All Equity Total Return'` in the SAME Custom card** — so the day the producer emits the fuller name, a canonical model silently repaints INTO a collision. ⭐ **CONTROL, run on the SHIPPED function via `bun`, 40-name corpus: SUBJECT `#8b5cf6` -> `#8b5cf6` IDENTICAL (a PIN, not a repaint); 3 of 40 moved, all intended; ZERO currently-served rows change colour.** Scored the whole corpus because a new key WIDENS the partial-match direction — **the direction that ADDS matches never announces itself.** Route the L2 member name through the same authority the other 11 files use; purple falls out, and so does every other row.
 ⚠ **AND MY EARLIER RELAY WAS WRONG:** I reported *"there is no purple fixed income in this codebase."* **There is** — computed at runtime by a hash, never written as a literal, **so a source search for a colour definition structurally could not find it.** A correct search, a wrong conclusion.
 
 **AC4 `CATV-TOF1-AC4` — D-4: THE FEE DISCLAIMER IS GONE FROM THE DOM.**
 Not softened, not shrunk, not warn-and-keep. **GONE.** Andrew, verbatim: *"we do not need to make a
 big stink about fees in a big fucking disclaimer on Client, that should not be there at all."*
 
-**AC5 `CATV-TOF1-AC5` — THE EMPTY-CARD DECISION IS SURFACED, NOT INVENTED.**
-⛔ On at least one scope the Client card contains **NOTHING BUT** the fee box, so AC4 renders it
-**EMPTY**. **An empty titled card is its own defect.** **Surface the options to `2.0.0_SA_COO~Z` and
-`1.0.0_SA_CTO~Z` with a recommendation; do NOT silently pick one.** ⚠ **A PASS here is "the decision
-was routed and answered", never "I chose something reasonable."**
+**AC5 `CATV-TOF1-AC5` — ✅ DISCHARGED 22:1xZ. THE DECISION WAS ROUTED AND IS ANSWERED: (B) STANDS AS SHIPPED — THE HEADLINE STAYS SUPPRESSED ON A HELD NODE.**
+`0.4.0_DE_ClientPlatform~Z` measured **EXACTLY 2 of 4** scopes go empty (`global`, `cottonwood`), not *"at least one"* as I wrote, and shipped (B) while recommending (A) **conditional on the issuer confirming the held-node figure is trustworthy.**
+⛔ **IT IS NOT, AND MY OWN EARLIER MEASUREMENT IS THE GROUND:** *"`aum: 290426813.47` — A HELD NODE SHOULD CARRY `aum: null`. The residual happens to equal 49financial's Client."* **The figure on a `predicate: unavailable` node is a RESIDUAL, not a measured Client total.** Restoring it would put a number of known-bad provenance on an advisor-facing card — **the data-hygiene defect I named, rendered.**
+⭐ **(A)'s premise was sound and I am rejecting it on a DIFFERENT ground than it addressed:** the headline gate's stated rationale WAS the contradiction with the box, and that rationale IS gone with the box. **The suppression now stands on provenance, not on contradiction.** ⛔ **(C) correctly rejected — hiding ~$290M of Client from an advisor is worse than either.**
+**FOLLOW-ON, PRODUCER-SIDE, NOT THIS TO:** a held node should emit `aum: null` rather than a residual. **Then (A) becomes correct by construction** and the headline can return. Carried as an open item.
 
 ## BARRED / REPORTING
 
