@@ -31,6 +31,54 @@ WS = subprocess.run(["git", "rev-parse", "--show-toplevel"],
                     capture_output=True, text=True, check=True).stdout.strip()
 HERE = os.path.join(WS, "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST")
 
+# ---- NO-DEBRIS: SUPPRESSION FIRST, THEN THE BASELINE, BOTH BEFORE ANY LOCAL LOAD -------------
+# WARN: THE PREVIOUS NO-DEBRIS ARM WAS SELF-BLIND AND I WROTE IT. Its baseline was taken at the
+# arm itself, ~440 lines below -- AFTER the `_load()` calls had already written __pycache__ into
+# HERE. So the "pre" listing ALREADY CONTAINED THE DEBRIS THE HARNESS ITSELF CREATED, and the arm
+# reported NO-DEBRIS PASS while an external clean-worktree boundary measured the directory going
+# 17 -> 18 entries. A control that cannot return the failing verdict for the one artifact it is
+# MOST LIKELY TO PRODUCE is not a weak control, it is a decoration: its PASS and a genuinely clean
+# tree are the same output. Found by 4.0.0_SA_CRO~X from outside the process, which is the only
+# vantage that could see it.
+# AND THE REASON IT HID: lines 42-43 DO NOT LOOK LIKE IMPORTS. They are `_load(...)` calls --
+# dynamic imports with no `import` keyword -- so a reader, a linter, or a "move the baseline above
+# the imports" reflex all skip them. 2.0.0_SA_COO~X's first probe grepped lines 40-50 for
+# import/from and returned EMPTY, and nearly reported that as evidence against the defect.
+# THE FIX IS SUPPRESSION, NOT CLEANUP: bytecode is never written, so there is nothing to remove
+# and no window in which a reaper could touch the shared tree. The baseline is captured on the
+# line after, so it is upstream of every local load.
+sys.dont_write_bytecode = True
+_PRE_LISTING = set(os.listdir(HERE))
+
+
+def _pair_state(where=None):
+    """git hash-object for each pair member, or None where the member is absent.
+
+    WARN: THE PAIR ARMS USED TO ASSERT THE TWO PRESERVED IDS AS LITERALS, AND THAT MADE THEM
+    UNRUNNABLE IN THE ONE ENVIRONMENT THE VERDICT ASKS FOR. The pair is a WORKING-TREE pair --
+    the manifest is tracked-modified and the receipt was never stored -- so a CLEAN DETACHED
+    CHECKOUT has a different manifest and NO receipt at all, and both arms failed there by
+    construction. A control that can only pass in one tree is measuring the tree, not the run.
+    The claim that matters is NOT "these bytes are the preserved bytes" (the commit gate and the
+    external evidence already say that) but "THIS RUN CHANGED NOTHING", so the baseline is taken
+    at process start like the listing baseline, and absence is a legal baseline value.
+    """
+    out = {}
+    for _n in ("graph_object_manifest.json", "graph_object_manifest.receipt.json"):
+        _p = os.path.join(where or HERE, _n)
+        out[_n] = (subprocess.run(["git", "hash-object", _p], cwd=WS,
+                                  capture_output=True, text=True).stdout.strip()
+                   if os.path.exists(_p) else None)
+    return out
+
+
+_PRE_PAIR = _pair_state()
+
+
+def _listing_delta(before, where=None):
+    """Entries added to `where` since `before`. The comparison the no-debris arm scores."""
+    return set(os.listdir(where or HERE)) - before
+
 
 def _load(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
@@ -480,7 +528,9 @@ print("  R4-4. LOGICAL-FINAL-HOME PREWRITE VALIDATION -- the would-be bytes, no 
 # then derived from the staging name and failed its own pattern BY CONSTRUCTION -- a gate that
 # could only ever refuse, which is indistinguishable from a gate that works until you ask it to
 # pass something.
-_pre_listing = set(os.listdir(HERE))
+# (the no-debris baseline is NOT taken here -- it is `_PRE_LISTING`, captured pre-load at line 45.
+# Taking it at the point of use was the self-blindness: by here, the harness's own bytecode was
+# already on disk and inside the "before" set.)
 _r44 = l0.build_receipt(ART, SNAP, reg=l0.load_registry())
 _r44_home = os.path.join(WS, _r44["exact_home"])
 check("   the receipt is built against the LOGICAL FINAL home, not a staging path",
@@ -526,17 +576,56 @@ check("   the emitter REFUSES TO WRITE when that gate finds anything",
       "a gate whose failure does not stop the write is a log line")
 # no-debris / no-pair-touch: the whole control run above built receipts, ran the CLI many times,
 # and wrote temp files. NOTHING of that may remain here, and the preserved pair must be untouched.
-_post_listing = set(os.listdir(HERE))
-check("   NO DEBRIS: the control run added no files to the deliverables directory",
-      _post_listing == _pre_listing,
-      "added: %s" % sorted(_post_listing - _pre_listing))
-_PAIR = {"graph_object_manifest.json": "db684f932995d519a9087725b2d2539d249ea533",
-         "graph_object_manifest.receipt.json": "3da49495aa16c5f92563c9c955bbd888d4f85072"}
-for _name, _want in _PAIR.items():
-    _got = subprocess.run(["git", "hash-object", os.path.join(HERE, _name)], cwd=WS,
-                          capture_output=True, text=True).stdout.strip()
-    check("   NO PAIR TOUCH: %s still hashes to its preserved id" % _name,
-          _got == _want, "want %s got %s" % (_want[:12], _got[:12]))
+_added = _listing_delta(_PRE_LISTING)
+check("   NO DEBRIS: the run added nothing to the deliverables directory (baseline taken "
+      "PRE-LOAD, line 45)",
+      not _added,
+      "added: %s -- baseline is upstream of every local _load(), so the harness's own "
+      "bytecode is INSIDE this arm's reach" % sorted(_added))
+check("   and bytecode writing is SUPPRESSED, not cleaned up afterward",
+      sys.dont_write_bytecode is True,
+      "suppression leaves nothing to remove and no window in which a reaper touches the tree")
+# POSITIVE CONTROL: the arm must be able to go RED on exactly the artifact that fooled it.
+# Run against a TEMP directory, never HERE -- proving the comparison can fail must not require
+# writing into the protected deliverables tree.
+_probe_dir = tempfile.mkdtemp(prefix="nodebris_")
+try:
+    _probe_before = set(os.listdir(_probe_dir))
+    os.mkdir(os.path.join(_probe_dir, "__pycache__"))
+    with open(os.path.join(_probe_dir, "__pycache__", "x.cpython-312.pyc"), "wb") as _pf:
+        _pf.write(b"\x00")
+    _probe_added = _listing_delta(_probe_before, _probe_dir)
+    check("   POSITIVE CONTROL: the SAME comparison goes RED on a planted __pycache__",
+          _probe_added == {"__pycache__"},
+          "an arm that passes both with and without the debris is where this started")
+finally:
+    for _root, _dirs, _files in os.walk(_probe_dir, topdown=False):
+        for _n in _files:
+            os.remove(os.path.join(_root, _n))
+        for _n in _dirs:
+            os.rmdir(os.path.join(_root, _n))
+    os.rmdir(_probe_dir)
+_POST_PAIR = _pair_state()
+for _name in sorted(_PRE_PAIR):
+    _b, _a = _PRE_PAIR[_name], _POST_PAIR[_name]
+    check("   NO PAIR TOUCH: %s unchanged across the run" % _name, _b == _a,
+          "start=%s end=%s" % ((_b or "ABSENT")[:12], (_a or "ABSENT")[:12]))
+# AND, WHERE THE PRESERVED PAIR IS ACTUALLY PRESENT, pin it to the ordered ids. This arm is
+# environment-declared rather than environment-blind: in a clean detached checkout the receipt
+# half does not exist, and saying so out loud beats a literal comparison that fails there for a
+# reason unrelated to anything the run did.
+_ORDERED = {"graph_object_manifest.json": "db684f932995d519a9087725b2d2539d249ea533",
+            "graph_object_manifest.receipt.json": "3da49495aa16c5f92563c9c955bbd888d4f85072"}
+_present = {k: v for k, v in _PRE_PAIR.items() if v is not None}
+if _present == _ORDERED:
+    check("   PAIR IDENTITY: both members match the ordered preserved ids (shared tree)", True,
+          "db684f932995 / 3da49495aa16")
+else:
+    print("  %-58s %s" % ("   PAIR IDENTITY: not the preserved-pair tree -- DECLARED, not assumed",
+                          "N/A"))
+    for _k in sorted(_PRE_PAIR):
+        print("      %-38s %s" % (_k, (_PRE_PAIR[_k] or "ABSENT (untracked half absent in a "
+                                       "clean checkout)")[:60]))
 
 print()
 print("=" * 84)

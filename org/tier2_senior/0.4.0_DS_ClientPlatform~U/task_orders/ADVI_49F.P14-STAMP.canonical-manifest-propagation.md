@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DS_ClientPlatform~U</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-27T20:4xZ</issued>
-<status>pending -- GO live 2026-08-27 ~21:5xZ (COO 76815 'both GO'd'); CVO delta-cert PASS VERIFIED AT THE REPOSITORY @2f1e693f8d, not taken from the message. Building ruling (i) per the amended mechanism @cc18451739.</status>
+<status>complete -- DEPLOYED-VERIFIED 2026-08-27 ~23:3xZ on the amended face @0b76eeaec2 (c02 token, ruling 76887). THREE INSTRUMENTS: (1) executing seat 0.4.0_DS_ClientPlatform~U 76983 -- PS-1..PS-6 PASS on deployed bytes, c02 token @b5e05eee78, 2-of-3-fields defect self-caught + fixed @eb99599a50, instance @94b748596a; (2) COO direct JSON read of the instance -- 6 rows PS-1..PS-6 all PASS, both validator rcs recorded in-instance (77010); (3) 3.0.0_SA_CVO independent validator run 77013 @cbb4275798 -- VALID, TRUE_RC=0 bare, rows=6, violations=0. Campaign-start INPUT (1) SATISFIED. 76849 keeper STRUCK CLOSED-BY-RULING. Prior: GO live ~21:5xZ (76815); delta-cert PASS @2f1e693f8d.</status>
 <priority>P1 -- blocks campaign-start by ruling 76704 s.4; the before/after asymmetry is a second 533-date campaign</priority>
 <authority>CTO ruling 76704 (the whole design is that ruling; ruling wins on any divergence). Finder: 0.7.0_AE_CloudOps~L 76693 (the 1-of-5 manifest census at date 1). Same blessed-scoped decomp-override class as P14-PRECOND if the lint refuses: single-surface TO executing a same-window Tier-1 ruling verbatim.</authority>
 </task_order>

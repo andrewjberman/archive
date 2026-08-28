@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "carded_by": "0.7.0_AE_CloudOps~X",
   "subject": {
     "id": "resource_summaries",
@@ -144,6 +144,7 @@
     },
     "key": {
       "identity_space": "AWS ARN, plus an integer summary_version per arn (the append-only version axis)",
+      "key_expression": null,
       "key_is_stable": "stable",
       "crosses_spaces": false,
       "declared_mapping": null,
@@ -152,7 +153,8 @@
         "identity_space": "measured",
         "key_is_stable": "inferred",
         "crosses_spaces": "measured",
-        "declared_mapping": "measured"
+        "declared_mapping": "measured",
+        "key_expression": "absent"
       },
       "evidence": "identity_space MEASURED at source (ARN-keyed, MAX(summary_version) resolution, resource_summaries_store.py header :12-14). crosses_spaces=false MEASURED and it is a FINDING rather than a clean bill, in the same shape as the corpus it persists: an ARN carries no MS or Git identity, so those resources are ABSENT FROM THE UNIVERSE rather than poorly keyed. key_is_stable is INFERRED, and the distinction matters here: an ARN is stable in the schema's sense, but I did not read a single row, so I am reasoning about the DECLARED key rather than verifying the key the table actually carries. ⛔ AND THE COMPOUND KEY IS THE INTERESTING HALF: identity is (arn, summary_version), so a reader who resolves MAX gets the latest row and a reader who does not gets an arbitrary vintage -- the correctness of every read depends on a convention held in the writer's docstring, not in the table. declared_mapping=null after a hunt across the store module's schema construction, comp_similar.py, summary_corpus.py and the live table's own metadata prefix.",
       "owner": "0.8.0_AE_CloudComp"

@@ -235,6 +235,52 @@ and the hazards cannot be re-discovered the hard way mid-loop.
   `ADVI_49F.P14-VEHICLE_APPLIED_ENTRYPOINT_VERIFY.py`, rc=0 read bare.
   LIMIT STATED: this verifies what the deployed bytes DO. It does NOT claim they match a committed
   source vintage -- that identity is the DS lane's deploy leg (COO 76863 confirmed the division).
+- ⛔ **SUBSTRATE CARD ROW 6 -- KEY/IDENTITY SPACE. THE HOST, NAMED, because it was the one thing
+  never carded and it refused date 1 on the first live send** (added 2026-08-28 ~00:3xZ by
+  0.7.0_AE_CloudOps~L per `1.0.0_SA_CTO` 77108 item 5 + `2.0.0_SA_COO` 77114 item 4(ii);
+  `3.0.0_SA_CVO` delta-certs in the standing form):
+
+  | field | value |
+  |---|---|
+  | HOST | `i-01003b035d2988dfb` = **bd-gold-layer-runner** (P2D-4 host ruling, `infra/aws/terraform/opal-assets/advi_49f_floor.tf:52`) |
+  | ROLE | `bd-exporter-ec2-role` via `bd-exporter-profile`; grant is inline policy **advi-49f-chain-access** |
+  | GRANT | `s3:GetObject`+`s3:PutObject` on `opal-data-49financial/gold/advi/*`; `s3:GetObject` on `_code/*`; `s3:ListBucket` on the bucket |
+  | DOCUMENT | `advi-49f-chain-dispatch` DocumentVersion 3 |
+  | OWNER | the host + role are the 49F floor's, NOT this TO's -- this vehicle BORROWS a proven identity and must never widen it |
+
+  **WHAT THIS ROW COST BEFORE IT EXISTED:** the driver's `INSTANCE_ID` read
+  `i-0fa1846f04ed7e337  # bd-49f-auto-login` -- and **the comment was TRUE**. That id really is
+  the BD auto-login box; the constant was correct about what it NAMED and wrong about what it
+  should have NAMED, so every reading of the line confirmed it. Date 1 refused rc=2 on
+  `s3:ListBucket` AccessDenied: the login box's role is firm-separated least-privilege and has
+  never held `opal-data-49financial` (`infra/aws/terraform/bd-49f-auto-login/iam.tf:8-11`), so
+  the `aws s3 sync` of `_code/` returned nothing and `chain_49f_entrypoint.py` was not on the box.
+  ⛔ **THE FIX IS THE RE-POINT AND NOTHING ELSE. NO IAM CHANGE ANYWHERE** -- widening the login
+  box to a firm bucket is refused outright, and the runner needs nothing added. A seat that
+  "fixes" an AccessDenied by granting the denied permission would have handed a session-login box
+  permanent read/write on the whole 49F data estate.
+  ⛔ **EVERY EARLIER PROBE MEASURED THE DOCUMENT; NONE MEASURED THE HOST.** V14-1 (get-document)
+  and V14-2 (halt trap) are both sound about the DOCUMENT and both were exercised against the
+  WRONG BOX. A document-plane instrument cannot see an identity-plane defect, and the two planes
+  were never distinguished until a live send crossed both.
+  ✅ **V14-2 RE-EXERCISED AND RESTORED 2026-08-28 00:42:50-00:47Z on `i-01003b035d2988dfb`**, in
+  the order `2.0.0_SA_COO` 77146 sequenced (date-1 oracle read -> V14-2 -> then (e), so (e) is
+  FINAL and not provisional). rc=0 read bare. SUBJECT CONTROL first, because the whole defect was
+  a wrong subject: `describe-instances` returns `Name=bd-gold-layer-runner` before any send.
+  Two consecutive sends with `StartedByDispatcher` OMITTED -- Success rc=0 at 121.2s and 105.6s --
+  and the host read `running` from **ec2 instance state, never from send rc**, across all THREE
+  reads (before / after 1 / after 2; denominator printed). CONDITIONAL-HALT ARM, new with the
+  re-point: `_DRIVER_STARTED_HOST=False`, so `halt_host()` REFUSED to stop the shared runner and
+  it read `running` afterwards. The old V14-2 evidence is superseded, not deleted.
+  ⚠ **CONSEQUENCE OF THE RE-POINT, not a separate finding: the new host is SHARED.**
+  `bd-exporter-ec2-role` also carries schwab, `opal-data-bd`, `opal-data-inf`, `opal-data-assets`
+  and the platinum publisher, so other lanes run on this box. The driver's `halt_host()` is now
+  CONDITIONAL -- it halts only a host it started itself, and leaves a host found running alone,
+  because stopping it could kill another lane's in-flight run that this driver cannot see. That
+  is CTO 77108 item 3(b)'s own "only when the driver started it" applied to the STOP, which is the
+  destructive half. `StartedByDispatcher` stays OMITTED on every send: sending it true would
+  self-halt after EVERY date, which is the 74209 dispatcher-halt trap this TO already forbids.
+
 - **V14-5 ACCEPTANCE RE-READS GREEN (joint with 0.4.0_DS_ClientPlatform~U):** the all-ten table
   @4a1fd3e09b + the NNA delta table @e8ccd8eb77 re-read against the backfilled history.
   0.4.0_DS_ClientPlatform~U validates; this seat produces.

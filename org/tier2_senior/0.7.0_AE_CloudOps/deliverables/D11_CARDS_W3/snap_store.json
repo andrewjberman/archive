@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "carded_by": "0.7.0_AE_CloudOps~X",
   "subject": {
     "id": "infra/aws/globgrph/snap_store.py",
@@ -128,17 +128,19 @@
     },
     "key": {
       "identity_space": "Iceberg table identity ('globgrph', surface) where surface is one of 4; the S3 staging keys are a SECOND identity space, warehouse/snap_ingest/pending/<surface>/, joined to the first by the surface string.",
+      "key_expression": null,
       "key_is_stable": "stable",
       "crosses_spaces": true,
       "declared_mapping": "surface string is the join key between the S3 prefix space and the Iceberg table space; both are gated by the same 4-entry allow-list on land.",
-      "basis": "measured",
+      "basis": "inferred",
       "basis_by_field": {
         "identity_space": "measured",
         "key_is_stable": "measured",
         "crosses_spaces": "measured",
-        "declared_mapping": "measured"
+        "declared_mapping": "measured",
+        "key_expression": "absent"
       },
-      "evidence": "crosses_spaces=true MEASURED: the surface string addresses both an S3 prefix and an Iceberg table. Unlike the cse case this crossing is DECLARED and gated, which is why declared_mapping is populated rather than null -- the mapping is the allow-list itself.",
+      "evidence": "crosses_spaces=true MEASURED: the surface string addresses both an S3 prefix and an Iceberg table. Unlike the cse case this crossing is DECLARED and gated, which is why declared_mapping is populated rather than null -- the mapping is the allow-list itself. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor.",
       "owner": "0.7.0_AE_CloudOps"
     },
     "failure_mode": {

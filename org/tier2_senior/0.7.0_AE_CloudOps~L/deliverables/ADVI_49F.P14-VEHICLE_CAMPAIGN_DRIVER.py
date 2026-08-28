@@ -58,7 +58,19 @@ LEDGER = HERE / "ADVI_49F.P14-VEHICLE_CAMPAIGN_LEDGER.jsonl"
 REDERIVE = HERE / "ADVI_49F.P14-VEHICLE_A00_ATTESTATION_REDERIVATION.py"
 
 GOLD_BUCKET = "opal-data-49financial"
-INSTANCE_ID = "i-0fa1846f04ed7e337"          # bd-49f-auto-login
+# THE HOST, re-pointed 2026-08-28 00:3xZ per 1.0.0_SA_CTO ruling 77108 / 2.0.0_SA_COO 77114,
+# after the date-1 send was REFUSED rc=2 on AccessDenied. The constant below previously read
+# "i-0fa1846f04ed7e337  # bd-49f-auto-login" -- and the comment was TRUE: that id really is the
+# BD auto-login box. It was correct about what it NAMED and wrong about what it should have
+# named, which is why no review of this line ever caught it ("a name is not an identity").
+# i-01003b035d2988dfb = bd-gold-layer-runner, profile bd-exporter-profile -> bd-exporter-ec2-role,
+# which carries the grant via inline policy advi-49f-chain-access (GetObject+PutObject on
+# gold/advi/*, GetObject on _code/*, ListBucket on the bucket). Citation: the P2D-4 host ruling at
+# infra/aws/terraform/opal-assets/advi_49f_floor.tf:52. It is the host the 12:45Z production floor
+# has dispatched THIS SAME document to daily for 8 days, so the vehicle inherits a proven identity
+# rather than acquiring a new one. NO IAM CHANGE: widening bd-49f-auto-login-role to the firm
+# bucket is refused outright (firm-separation), and the runner needs nothing added.
+INSTANCE_ID = "i-01003b035d2988dfb"          # bd-gold-layer-runner (P2D-4 host ruling)
 SSM_DOCUMENT = "advi-49f-chain-dispatch"     # DocumentVersion 3 -- Date + DeclaredHistorical
 NIGHTLY_SCHEDULE = "advi-49f-gold-floor"
 
@@ -175,12 +187,41 @@ def verify_artifacts(date, expected_basis, since):
             "last_modified": lm.strftime("%Y-%m-%dT%H:%M:%SZ") if lm else None,
             "attestation_basis": basis,
             "fresh_since_send": fresh,
+            # RECORDED, NOT GATED (0.4.0_DS_ClientPlatform~U 77045 items 1-2). SG-2 moved
+            # flow_ledger to schema_version 1.3, where the FC code-rule INTERNAL legs carry a
+            # recovered direction that a pre-1.3 partition left at 0.00. So the 533 partitions are
+            # stale in TWO ways and one re-drive repairs both -- but a partition that comes back
+            # carrying attestation_basis with a pre-1.3 ledger is HALF-REPAIRED, and that is
+            # invisible unless the version is on the row. Banked in evidence so the ledger can be
+            # queried for it after the fact.
+            # NOT a completeness predicate: this driver does not pin or diff the version. A version
+            # it has never seen is data, not drift, and turning it into a problem would manufacture
+            # a gate on a 533-date pass that nobody asked for.
+            # MEASURED, not assumed: date 1 (2024-07-08) reads schema_version '1.0' today -- older
+            # than the '1.2' the 77045 note describes, so the pre-state is not uniform across the set.
+            "schema_version": man.get("schema_version", "<ABSENT>"),
         }
-        # `attested` is a SENTINEL (-1) under the declared branch, not a magnitude. Guard, never sum.
+        # `attested` is a SENTINEL (-1) under the declared branch, not a magnitude. Guard, never
+        # sum -- and guard BOTH DIRECTIONS. The one-directional form shipped here caught only
+        # "sentinel on the attested branch"; the arm it could not see is a DECLARED date coming
+        # back with a real count, i.e. a00 took the converter branch while this driver drove the
+        # declared one. That is the arm that runs 506 of 533 times, and a guard whose failing half
+        # is the rare one is a control set with only one reachable arm.
+        # Field grain: 0.4.0_DS_ClientPlatform~U 76987 -- `attested` now travels to ALL FOUR
+        # tables (@eb99599a50), where it previously reached dim_account alone; so its ABSENCE on a
+        # stamped dataset is now itself a defect, not the normal case.
         if "attested" in man:
             evidence[ds]["attested"] = man["attested"]
             if man["attested"] == -1 and basis != BASIS_DECLARED:
                 problems.append(f"{ds}: attested==-1 sentinel but basis is {basis!r}")
+            elif man["attested"] != -1 and basis == BASIS_DECLARED:
+                problems.append(
+                    f"{ds}: basis is {BASIS_DECLARED!r} but attested=={man['attested']!r}, "
+                    "not the -1 sentinel -- a00 branch disagreement")
+        elif basis != "<ABSENT>":
+            problems.append(
+                f"{ds}: attestation_basis {basis!r} present but `attested` ABSENT -- the "
+                "P14-STAMP four-table propagation regressed for this dataset")
         if not fresh:
             problems.append(f"{ds}: NOT freshly written (LastModified {lm} <= send {since})")
         if basis == "<ABSENT>":
@@ -189,6 +230,51 @@ def verify_artifacts(date, expected_basis, since):
             problems.append(f"{ds}: attestation_basis {basis!r} OUTSIDE the closed vocabulary")
         elif basis != expected_basis:
             problems.append(f"{ds}: basis {basis!r} != driven branch {expected_basis!r}")
+
+    # ---- THE BOUNDARY INVARIANT (0.4.0_DS_ClientPlatform~U 77123, adopted 2026-08-28 ~00:4xZ)
+    # BASELINE-FREE and read from the artifact c02 already writes, which is why it can run on
+    # every campaign date with no prior vintage to compare against.
+    #
+    # HISTORY WORTH KEEPING: 77045 first handed this seat a DIFFERENT signal -- "a re-driven
+    # twr_daily must not move". That one was RETRACTED by its own author at 77097 after this
+    # seat's date-1 measurement showed the pre-state was not uniform: 526 of 533 served ledgers
+    # are schema 1.0, so a re-driven twr_daily SHOULD differ on nearly every date, and the
+    # retracted rule would have stopped the campaign on essentially all of them. The replacement
+    # is strictly better because its two failure modes are DISTINGUISHABLE.
+    #
+    # ONLY ONE ARM IS A HARD PROBLEM, deliberately. c02 admits INTERNAL rows only under
+    # {pair-match, text-counterpart}, so `code-rule` reaching the ADMISSION vocabulary is
+    # structurally impossible unless the filter itself changed -- that is a real boundary
+    # crossing and it stops the date. The other fields are RECORDED as evidence and never gated:
+    # the ('INTERNAL','code-rule') bucket is legitimately ABSENT on a date that simply has no
+    # such rows, and gating on its presence would false-stop those dates. Same reasoning as the
+    # schema_version decision -- record what a reader may want, gate only what cannot be innocent.
+    #
+    # NOT IMPLEMENTED, and the reason is measured rather than assumed: 77123's third signal
+    # ("the unsigned residue must EQUAL that date's TR code-rule INTERNAL count") needs the TR
+    # population, and the twr_daily manifest does not publish it -- cf_input_census carries no
+    # TR field under any spelling probed on date 1. It is baseline-free in principle and not
+    # computable from this artifact, so it is named here rather than written as a check that
+    # cannot run. Reported back to its author.
+    tw = evidence.get("canonical/twr_daily")
+    if tw is not None and tw.get("manifest") != "ABSENT":
+        man_tw, _ = read_manifest("canonical/twr_daily", date)
+        cen = (man_tw or {}).get("cf_input_census") or {}
+        prov = [str(x) for x in (cen.get("inter_account_provenance") or [])]
+        tw["cf_input_census"] = {
+            "inter_account_provenance": prov,
+            "rows_total": cen.get("rows_total"),
+            "rows_admitted": cen.get("rows_admitted"),
+            "admitted_abs_value": cen.get("admitted_abs_value"),
+            "excluded_by_reason": cen.get("excluded_by_reason"),
+            "in_scope_class_but_no_counterparty": cen.get("in_scope_class_but_no_counterparty"),
+        }
+        if "code-rule" in prov:
+            problems.append(
+                "canonical/twr_daily: provenance 'code-rule' appears in the ADMISSION vocabulary "
+                f"{prov!r} -- the proven-closed INTERNAL boundary was CROSSED. STOP AND REPORT; "
+                "this is not a diff to reconcile (0.4.0_DS_ClientPlatform~U 77123 signal 1).")
+
     return (not problems), evidence, problems
 
 
@@ -205,12 +291,18 @@ def ssm_online():
     return bool(inf) and inf[0].get("PingStatus") == "Online"
 
 
+# Did THIS driver start the host? The halt is conditional on it (see halt_host).
+_DRIVER_STARTED_HOST = False
+
+
 def ensure_host_running(timeout=600):
     """Idempotent. A dispatcher halt mid-campaign lands here and is handled, not failed."""
+    global _DRIVER_STARTED_HOST
     st = host_state()
     if st == "stopped":
         print(f"  host {INSTANCE_ID} is stopped (expected after a dispatcher halt) -- starting")
         ec2.start_instances(InstanceIds=[INSTANCE_ID])
+        _DRIVER_STARTED_HOST = True
     elif st not in ("running", "pending"):
         raise RuntimeError(f"host in state {st!r} -- not startable by this driver")
     deadline = time.time() + timeout
@@ -223,9 +315,30 @@ def ensure_host_running(timeout=600):
 
 
 def halt_host():
+    """Halt ONLY a host this driver started -- leave a host we found running alone.
+
+    RE-SCOPED 2026-08-28 with the re-point, and it is a consequence of the re-point rather than
+    a separate idea. The old target (bd-49f-auto-login) was a single-purpose box, so an
+    unconditional stop was merely rude. THE NEW TARGET IS SHARED: bd-exporter-ec2-role carries
+    schwab, opal-data-bd, opal-data-inf, opal-data-assets and the platinum publisher, so
+    bd-gold-layer-runner is a box other pipelines run on. Stopping a host we did not start could
+    kill another lane's in-flight run, and this driver cannot see those runs.
+
+    This is 1.0.0_SA_CTO 77108 item 3(b)'s own principle -- "sent as true ONLY when the driver
+    started it" -- applied to the STOP as well as to StartedByDispatcher. The ruling states it for
+    the parameter; the same asymmetry exists on the stop, and the stop is the destructive half.
+
+    StartedByDispatcher itself stays OMITTED on every send (defaults false). Sending true would
+    self-halt the box after EVERY date -- the dispatcher-halt trap the TO forbids (74209) -- so
+    the driver owns the lifecycle explicitly here instead of delegating it to the document.
+    """
+    if not _DRIVER_STARTED_HOST:
+        print(f"  host {INSTANCE_ID} was ALREADY RUNNING when this driver arrived -- NOT halting")
+        print("  (shared gold-layer runner; another lane may be mid-run and this driver cannot see it)")
+        return
     st = host_state()
     if st == "running":
-        print(f"  halting host {INSTANCE_ID} (the driver halts it ITSELF, once, at the end)")
+        print(f"  halting host {INSTANCE_ID} (this driver started it, so this driver halts it)")
         ec2.stop_instances(InstanceIds=[INSTANCE_ID])
     else:
         print(f"  host already {st}; nothing to halt")

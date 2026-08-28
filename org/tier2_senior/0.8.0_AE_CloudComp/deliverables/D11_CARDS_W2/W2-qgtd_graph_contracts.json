@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "carded_by": "0.8.0_AE_CloudComp~Y",
   "subject": {
     "id": "graph_contracts",
@@ -18,16 +18,40 @@
       "inference_detail": null,
       "materializer_standing": "historical_in_use",
       "composes": [
-        { "id": "cse_schema.CSE_TABLE", "note": "the CSE contract SoT; graph_contracts is that contract flattened into hoisted query dims plus fidelity JSON blocks" },
-        { "id": "globgrph", "note": "the shared Iceberg namespace and catalog, same as the C1 graph tables (cse_store.py:85)" },
-        { "id": "warehouse/_branch_head.main.json", "note": "the single marker HEAD tracking four tables, shared with graph_nodes, graph_edges and cse (cse_store.py:88-91)" },
-        { "id": "org/tier1_exec/3.0.0_SA_CVO/contracts/graph_contracts.yaml", "note": "the declarative authoring source the table's rows are loaded from" }
+        {
+          "id": "cse_schema.CSE_TABLE",
+          "note": "the CSE contract SoT; graph_contracts is that contract flattened into hoisted query dims plus fidelity JSON blocks"
+        },
+        {
+          "id": "globgrph",
+          "note": "the shared Iceberg namespace and catalog, same as the C1 graph tables (cse_store.py:85)"
+        },
+        {
+          "id": "warehouse/_branch_head.main.json",
+          "note": "the single marker HEAD tracking four tables, shared with graph_nodes, graph_edges and cse (cse_store.py:88-91)"
+        },
+        {
+          "id": "org/tier1_exec/3.0.0_SA_CVO/contracts/graph_contracts.yaml",
+          "note": "the declarative authoring source the table's rows are loaded from"
+        }
       ],
       "invents": [
-        { "id": "graph_contracts.two_seat_authoring_split", "note": "CVO authors row content declaratively in YAML; an AE seat loads it in-VPC. Neither seat can complete a row alone." },
-        { "id": "graph_contracts.tiered_ratification", "note": "SEV1 rows require ratified_by [Andrew]; SEV2 rows co-signable by [CTO, COO]" },
-        { "id": "graph_contracts.authored_not_self_ratified", "note": "a row exists in the source before it is a sanctioning edit; the existence-in-window check keys on a real commit hash" },
-        { "id": "graph_contracts.ratified_at_loader_stamp", "note": "a Nessie commit hash written into the live table at load time and never written back to the source" }
+        {
+          "id": "graph_contracts.two_seat_authoring_split",
+          "note": "CVO authors row content declaratively in YAML; an AE seat loads it in-VPC. Neither seat can complete a row alone."
+        },
+        {
+          "id": "graph_contracts.tiered_ratification",
+          "note": "SEV1 rows require ratified_by [Andrew]; SEV2 rows co-signable by [CTO, COO]"
+        },
+        {
+          "id": "graph_contracts.authored_not_self_ratified",
+          "note": "a row exists in the source before it is a sanctioning edit; the existence-in-window check keys on a real commit hash"
+        },
+        {
+          "id": "graph_contracts.ratified_at_loader_stamp",
+          "note": "a Nessie commit hash written into the live table at load time and never written back to the source"
+        }
       ],
       "declared_opinions": [
         "TIERED RATIFICATION: which row is SEV1 (benchmark / headline / advisor_intelligence) versus SEV2 (peers / aum) is a declared judgement, not a derived property.",
@@ -81,13 +105,28 @@
     "location": {
       "home": "globgrph.graph_contracts",
       "projection_of": [
-        { "id": "org/tier1_exec/3.0.0_SA_CVO/contracts/graph_contracts.yaml", "note": "the declarative authoring source; rows are loaded from here in-VPC" },
-        { "id": "cse_schema.CSE_TABLE", "note": "the CSE contract flattened into hoisted query dims plus fidelity JSON blocks" }
+        {
+          "id": "org/tier1_exec/3.0.0_SA_CVO/contracts/graph_contracts.yaml",
+          "note": "the declarative authoring source; rows are loaded from here in-VPC"
+        },
+        {
+          "id": "cse_schema.CSE_TABLE",
+          "note": "the CSE contract flattened into hoisted query dims plus fidelity JSON blocks"
+        }
       ],
       "co_resident_stores": [
-        { "id": "graph_nodes", "note": "shares the single marker HEAD warehouse/_branch_head.main.json; distinct table, one freshness marker" },
-        { "id": "graph_edges", "note": "shares the same marker HEAD" },
-        { "id": "cse", "note": "shares the same marker HEAD; the C0 cse log" }
+        {
+          "id": "graph_nodes",
+          "note": "shares the single marker HEAD warehouse/_branch_head.main.json; distinct table, one freshness marker"
+        },
+        {
+          "id": "graph_edges",
+          "note": "shares the same marker HEAD"
+        },
+        {
+          "id": "cse",
+          "note": "shares the same marker HEAD; the C0 cse log"
+        }
       ],
       "basis": "measured",
       "basis_by_field": {
@@ -123,6 +162,7 @@
     },
     "key": {
       "identity_space": "Contracted-quantity names (benchmark, headline, advisor_intelligence, peers, aum) in the YAML, carried into the table as row keys; plus a per-row ratified_at carrying a 16-character Nessie commit hash in the live table.",
+      "key_expression": null,
       "key_is_stable": "unknown",
       "crosses_spaces": true,
       "declared_mapping": "PARTIALLY DECLARED, and the declaration is a WARNING rather than a mapping. The source states explicitly that its own ratified_at values are a stale proxy for the table's, names the divergence in detail (as of 2026-07-09 benchmark, peers and aum were LIVE + RATIFIED with real 16-char hashes while the file still read PENDING-*-SIGNOFF), and instructs readers to ground on the table. So the estate DECLARES that the two carriers disagree on this field -- but nothing lets a reader of the YAML derive the table's value. The quantity NAMES appear stable across both carriers; I did not verify that by reading the table.",
@@ -131,7 +171,8 @@
         "identity_space": "measured",
         "key_is_stable": "absent",
         "crosses_spaces": "measured",
-        "declared_mapping": "measured"
+        "declared_mapping": "measured",
+        "key_expression": "absent"
       },
       "evidence": "Divergence declaration read verbatim at graph_contracts.yaml:4-15 @a2a0a8c2f2. ⛔ key_is_stable is 'unknown' with basis ABSENT, deliberately: stability is a claim about behaviour over time, and a single-vintage read of one of two carriers cannot establish it -- I found no declared key grammar and no rename history, and I cannot read the carrier that would settle it. Recording 'unknown' rather than inferring 'stable' from the names merely looking like names, which is the inference this project exists to refuse. ⚠ A HIGH-VALUE FINDING SITS IN THIS ROW AND IT IS THE FILE'S OWN: it records that a prior CVO bound TO-3 status to the stale proxy on 2026-07-09 and re-authored 5 rows that already existed, calling it 'the fourth application of the session through-line: partial-signal-read-as-whole'. That is a MEASURED PRIOR MISUSE of exactly the cross-carrier gap this row describes, disclosed by the artifact against itself.",
       "owner": "3.0.0_SA_CVO -- the file names the divergence; the remedy (a loader that stamps back) sits with the in-VPC write path, unowned in the sources read."

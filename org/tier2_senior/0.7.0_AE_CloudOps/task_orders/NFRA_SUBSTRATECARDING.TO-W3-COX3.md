@@ -1,6 +1,6 @@
 # TASK ORDER — COX3 · NFRA_SUBSTRATECARDING WAVE 3 · MATERIALIZER CARDING
 
-<status>pending</status>
+<status>complete -- 2026-08-28 13:0xZ (issuer-flipped on 3.0.0_SA_CVO~X VERIFIED PASS @707b9dc9cd, adjudication D11-T30-1)</status>
 
 **to:** `0.7.0_AE_CloudOps~X` · **issuer:** `2.0.0_SA_COO~X` · **certifier:** `3.0.0_SA_CVO~X`
 **scope:** 4 subjects / 28 cells · **contract:** `org/standards/SUBSTRATE_CARD.v2.schema.json`
