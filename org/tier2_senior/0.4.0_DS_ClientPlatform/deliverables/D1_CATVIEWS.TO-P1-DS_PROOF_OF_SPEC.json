@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D1_CATVIEWS.TO-P1-DS.increment2-producer-plane",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "docs/architecture/D1_ASSET_CATEGORY_VIEWS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5d356cc426"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~Z",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/d1-catviews-fullproduct/20260828T2245Z/DECOMP-INCREMENT-2.md",
+    "vintage_commit": "b7921ff493",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/D1_CATVIEWS.TO-P1-DS.increment2-producer-plane.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_gold_consolidator.py",
+      "kind": "script",
+      "commit_or_etag": "7f06a2ee40",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "CATV2-TOP1-AC1",
+        "CATV2-TOP1-AC2",
+        "CATV2-TOP1-AC3"
+      ],
+      "deploy_evidence": "member_aum={**models_member_aum, **sma_member_aum} at the build_category_views call, plus the TM1-AC5 coverage denominator now printed PER FAMILY rather than for Models alone. DEPLOY IS NOT THIS LANE'S ACT -- the gold lambda ships via infra/aws/lambda/mdpf-pipeline/mdpf-gold-lambda/build_package.py, which is AE-class. STATE: DESIRED, not APPLIED. It reaches the served plane at Monday 2026-08-31's ~13:30Z scheduled fire, which writes a NEW dated key; no reland is required or authorised."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_category_registry.py",
+      "kind": "script",
+      "commit_or_etag": "938667e5ab",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "CATV2-TOP1-AC3",
+        "CATV2-TOP1-AC4"
+      ],
+      "deploy_evidence": "Docstring correction only, behaviour identical: the client_predicate contract documented three BARE keys while the consumer reads two by VIEW PATH (:1051) and only `unflagged` bare (:1053). Wrong for 2 of 3. No emitted value changed; the CATV2-b-1 harness was re-run after the edit and read INSTRUMENT SOUND True."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CATV2-TOP1-AC1",
+      "criterion_verbatim": "L2 MEMBER `aum` IS EMITTED IN BOTH DIRECTIONS. `member_aum={**models_member_aum, **sma_member_aum}` at the `build_category_views` call.",
+      "method": "test_suite",
+      "invocation": "scratchpad exercise_catv2_b1.py -- _shape_category_views() over a synthetic self-consistent ts_doc (arbitrary amounts, deliberately NOT production figures, so no market-valued literal enters the criterion); assertions read the emitted object at its REAL path nodes[L0].children[label].members",
+      "output_evidence": "AFTER/SMA: P1a measured->NUMERIC PASS, P1b unmeasured->NULL PASS, P2 children-sum-to-L1-bucket PASS. AFTER/Models (regression guard on the family the change did not touch): PASS/PASS/PASS. The tri-state law is scored on MEASUREMENT, both directions -- an all-numeric build fails P1b exactly as an all-null build fails P1a. Worked example at the fixture: divz 100.0 and pfoe 50.0 carry numeric aum, ETF bucket 150.0, while idvz/pfde/muni/tax correctly emit null because this scope measured no by_model entry for them.",
+      "denominator": "6 registered SMA L2 members (4 ETF Strategies + 2 ALT Strategies) and 9 Models L2 members = 15 registered L2 members; 4 served scopes.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CATV2-TOP1-AC2",
+      "criterion_verbatim": "THE FIX MOVES NO NODE TOTAL. Keys disjoint BY CONSTRUCTION (`view_path` L0 is Models XOR SMA); intersection MEASURED EMPTY.",
+      "method": "test_suite",
+      "invocation": "registry.members_for() enumeration of both families into sets, intersection taken; plus P2/P3 reconciliation arms in exercise_catv2_b1.py comparing every L1 bucket to the sum of its emitted L2 children",
+      "output_evidence": "Models member_ids (9) and SMA member_ids (6) INTERSECTION EMPTY -- printed, not asserted. The L1 buckets already carried these dollars, so the merge populates member rows beneath unchanged parents; P2 confirms children reconcile to their L1 parent to the cent on both families, and P3 confirms the Models family is unmoved. ALT Strategies remains 0.0 with muni/tax null: CORRECT today, unmeasured rather than mis-emitted.",
+      "denominator": "15 registered L2 members (9 Models + 6 SMA); intersection size 0 of 15.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CATV2-TOP1-AC3",
+      "criterion_verbatim": "AC-DERIVATION: the code path producing `Client - Opal Supervised` reads NEITHER supervised_split.json / D_05.supervised_split.py NOR any account_supervised flag. POSITIVE CONTROL MANDATORY.",
+      "method": "command",
+      "invocation": "grep -c 'supervised_split|account_supervised|D_05' over data/mdpf/scripts/gold/mdpf_gold_consolidator.py and data/mdpf/scripts/gold/mdpf_category_registry.py; positive control the same probe over data/cot/scripts/gold/D_05.supervised_split.py",
+      "output_evidence": "producer path: mdpf_gold_consolidator.py 0 hits, mdpf_category_registry.py 0 hits. POSITIVE CONTROL: data/cot/scripts/gold/D_05.supervised_split.py 10 hits -- the probe demonstrably fires, so the zero is an ABSENCE and not a broken search. A VALUE-based criterion is structurally blind here (decomp s.3.3): Opal-Supervised and Firm-Supervised are both a plausible dollar amount in the same slot under the same parent, so only the DERIVATION discriminates. The positive control is not ceremony -- this session produced four broken greps that each returned a clean zero.",
+      "denominator": "2 producer files probed, 2 returning zero; 1 positive-control file returning 10.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CATV2-TOP1-AC4",
+      "criterion_verbatim": "AC-NON-FLATTENING: no node/label/axis named Supervised without its perspective word; no axis on which a consumer can SUM the two lenses.",
+      "method": "manual_read_with_citation",
+      "invocation": "token census of quoted Supervised/Unsupervised strings across mdpf_category_registry.py and mdpf_gold_consolidator.py, then each hit resolved to code-literal vs comment-prose by reading the line",
+      "output_evidence": "VIEW_NODE_AXIS (:119-120) and NODE_DISPLAY_LABEL (:136-137) are perspective-qualified throughout -- 'Client > Opal Supervised' / 'Client > Opal Unsupervised' and 'Client - Opal Supervised' / 'Client - Opal Unsupervised'. No bare Supervised node, label or axis. SELF-CORRECTION CAUGHT BEFORE REPORTING: the first census flagged :128 as a bare \"Supervised\" LABEL; reading the line shows it is COMMENT TEXT -- the paragraph documenting the two-referent hazard itself. The probe conflated comment prose with code literals, and a census that cannot tell prose from a literal would have manufactured a violation. SCOPE STATED HONESTLY: this is the LABEL surface only. (c) binds the schema and the renderer too; the RENDER limb is not this lane's and is not claimed here.",
+      "denominator": "18 quoted Supervised/Unsupervised occurrences across 2 files; 0 bare code literals after prose/literal resolution.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CATV2-TOP1-AC5",
+      "criterion_verbatim": "A HELD NODE EMITS `aum: null`, NOT A RESIDUAL. A node whose predicate is `unavailable` must carry `aum: null`.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- the criterion was withdrawn by its issuer before any implementation was committed. Recorded here rather than omitted because the face still declares it in expected_criteria (denominator 5).",
+      "output_evidence": "STRUCK 2026-08-28 ~23:0xZ by 2.0.0_SA_COO~Z (issuer) at commit f288b9c3b8, after this lane refused it on three grounds and measured each. WHAT ACTUALLY HAPPENED, recorded because the face's summary says it was struck 'before it was ever built' and that is not quite right: this lane BUILT and EXERCISED it while the strike was in flight, then REVERTED rather than committed (git checkout HEAD -- <file>; git status --porcelain EMPTY; AC5 marker count 0; the 938667e5ab docstring fix retained). Nothing from the struck criterion is on the branch. THE GROUNDS: (a) plane asserts would break -- MINE AND FALSE, retracted at source (:1101-1105 sum node_aum, the INPUT dict, never the emitted node) and then DISPROVEN EMPIRICALLY by the build itself (gold_plane and view_plane IDENTICAL pre vs post); (b) `aum: null` on a member row MEANS 'not measured at this vintage', and Client.aum is `non_model - sma_aum`, real arithmetic -- what is held is the SPLIT, not the TOTAL; (c) held-ness is already carried in predicate/predicate_reason/children; (d) 0.4.0_DE_ClientPlatform~Z's fold ground, the strongest and not this lane's. A FIFTH consequence none of us priced was found by 0.4.0_DE_ClientPlatform~Z after the strike: `aum: null` would have made presentAum return null, dropped Client from `rendered` entirely (grid 3 columns to 2) and tripped D1-inv-4 into a permanent console.error on every render.",
+      "denominator": "1 of 5 declared criteria withdrawn; 4 of 5 scored PASS.",
+      "status": "N/A-BY-CONSTRUCTION",
+      "status_reason": "Criterion STRUCK by the issuer (2.0.0_SA_COO~Z) at f288b9c3b8 before any implementation was committed. It is unscoreable by construction: there is no artifact to score because the criterion was withdrawn as wrong, not because evidence is missing or an event is pending. Re-scoring it would require re-implementing a criterion three seats agreed is incorrect."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "NEGATIVE CONTROL on the AC1/AC2 harness, using the REAL PRE-FIX BYTES rather than a shim: the prior mdpf_category_registry is loaded via `git show <baseline>:<path>` into its own module and driven through the SAME fixture with member_aum = models_member_aum only (the pre-fix map). If the control does not FAIL, the harness cannot distinguish a fixed build from an unfixed one.",
+      "expected": "pre-fix arm FAILS P1a (measured members emitting null) and FAILS P2 (children summing 0 against a funded bucket)",
+      "observed": "P1a FAIL measured-but-null=[('ETF Strategies','divz'), ('ETF Strategies','pfoe')]; P2 FAIL mismatch=[('ETF Strategies', 0, 150.0)]. The control discriminates. THE FIRST VERSION OF THIS HARNESS WAS VACUOUS AND THIS CONTROL IS WHAT CAUGHT IT: both arms passed because the walker guessed the emitted shape (`view_path` keys that do not exist) and matched NOTHING, so every assertion ran over empty sets. A harness that matches nothing scores identically to a perfect fix. The proposition was also wrong -- 'no null child under a funded bucket' is FALSE-BY-DESIGN, since idvz/pfde have no by_model entry and MUST emit null. The object was then read rather than assumed, and the law re-keyed on MEASUREMENT in both directions.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Both harnesses re-run after each subsequent edit to the same modules (the 938667e5ab docstring correction, and again after the CATV2-d-1 work on the shared files), with identical fixtures and no random or clock-dependent input. No market-valued literal appears in any assertion, so the criteria score identically at any as_of.",
+      "observed": "CATV2-b-1 harness: INSTRUMENT SOUND True on every re-run. data/mdpf/scripts/gold/tests/recon_predicate_control.py rc=0, every arm holding at every magnitude. commit-gate.sh rc=0 on every commit in this face.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "CATV2-a-2",
+      "reason": "Framing statement (the D-4 box thread), not a buildable cell -- it carries no criterion by the decomp's own declaration."
+    },
+    {
+      "item": "CATV2-c-*",
+      "reason": "Item 3 is AE-plane upstream plus a sovereign mapping ruling. A criterion on a gated cell is a criterion that cannot be scored."
+    },
+    {
+      "item": "CATV2-a-3 (cottonwood three-value split)",
+      "reason": "Pre-committed but NOT scoreable while the WSE_COTMDL STOP holds. NOTE: the TO's <owned_cells> claims this cell and no criterion discharges it -- surfaced to 2.0.0_SA_COO~Z as a FACE structural gap, not papered over by attaching a false cell_ref here."
+    },
+    {
+      "item": "AC4 RENDER limb",
+      "reason": "AC4 is scoped to the LABEL surface only. Andrew's (c) binds the schema and the renderer too; the RENDER limb belongs to 0.4.0_DE_ClientPlatform~Z and is not claimed by this instance."
+    },
+    {
+      "item": "THE SERVED PLANE",
+      "reason": "Not scored anywhere in this instance. Every criterion is producer-side and exercised in-process. These changes reach platinum only at Monday 2026-08-31's ~13:30Z scheduled fire, which writes a NEW dated key. No reland is authorised -- Andrew's 'yes reland once all fixes are in' was scoped to increment 1 and does not carry forward."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION, surfaced 14079/14251, became the seated cell CATV2-b-1: the SMA L2 nulls were not a missing render but the artifact DISCLAIMING a measurement it had already made -- `aum: null` MEANS 'not measured at this vintage' by the producer's own declared contract, and that was FALSE for members whose dollars the same function computed into the L1 buckets.",
+    "OBSERVATION, surfaced 14079 s.2, NOT remediated: `sma_members_present = sma_aum > 0.0` infers a MEMBERSHIP fact from a DOLLAR sum. Zero dollars is predicted equally by 'no SMA members' and 'members holding $0.00'; the registry is firm-agnostic (members_for takes no firm argument) so it cannot close this, but the by_model census CAN -- whether any key resolved to an SMA-L0 member at all, independent of value. DELTA=0 at every scope today. Surfaced, not chased.",
+    "OBSERVATION, surfaced 14663, became cell CATV2-d-1 and is fixed at 60c31cf495/4357367333: the emitted `scope_note` and `scope_set` were both stale served fields -- global's own object asserted that global carries no category-views object, while holding five populated nodes.",
+    "CARRIED, NOT CLOSED (3.0.0_SA_CVO~Z, 14671): no criterion in this increment scored PROSE, so a served sentence is unscored surface across the product. This instance does not close it, and the blind spot is this lane's as much as the certifier's -- this seat authored the fields AND the pre-staged scorer, and that scorer does not score them either."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-28/",
+  "compiler_tools": [
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <changed .py> -- run before every commit in this face",
+      "result": "rc=0 on all: 7f06a2ee40 (1 file), 938667e5ab (1 file), 60c31cf495 and 4357367333 (2 files each). 'All checks passed'."
+    },
+    {
+      "tool": ".tools/safe-commit.sh (risk-reflex + msg-verify)",
+      "invocation": "bash .tools/safe-commit.sh --author '0.4.0_DS_ClientPlatform~Z <...>' -F <msgfile> -- <paths>",
+      "result": "risk-reflex REFLEX CLEAN -- a MEASURED result, 1 file checked against 1417 danger node(s), not a default. msg-verify MATCH on every commit."
+    },
+    {
+      "tool": "data/mdpf/scripts/gold/tests/recon_predicate_control.py",
+      "invocation": "python data/mdpf/scripts/gold/tests/recon_predicate_control.py",
+      "result": "rc=0 -- every arm holds at every magnitude against the post-repair matrix."
+    },
+    {
+      "tool": "scratch harness exercise_catv2_b1.py (AC1/AC2)",
+      "invocation": "python <scratchpad>/exercise_catv2_b1.py -- fixed arm + Models regression guard + negative control on real pre-fix bytes",
+      "result": "INSTRUMENT SOUND (two-sided) True. Control FAILS P1a and P2 as required; first version was VACUOUS and the control caught it."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "Run against this instance; first run rc=1 with 8 violations (declared_exclusions/compiler_tools shapes, mutant status enum, and one alignment gap in the FACE). Repaired here and re-run -- the instrument demonstrably refuses, so a VALID verdict on it is not a default."
+    }
+  ]
+}
