@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_POSITIONING.TO-12-DE",
+  "assignee": "0.4.0_DE_ClientPlatform~Z",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ETFS_POSITIONING.TO-12-DE.remove-as-of-dates-under-the-stacked-bars.md",
+    "group": "OTHER",
+    "vintage_commit": "af7c3b5a46"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-positioning/20260821T194927Z/DECOMP.md",
+    "to_ref": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ETFS_POSITIONING.TO-12-DE.remove-as-of-dates-under-the-stacked-bars.md",
+    "vintage_commit": "20c092c0da"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/Positioning/shared/bookSet.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "27c60ecb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BRANCH STATE, NOT SERVED, and stated as such. Measured: `git ls-remote origin DEV` reads 2858e7f5 while local HEAD reads 27c60ecb -- so this commit is LOCAL and the push leg is the integrator's. There is no DEV site; a viewer reaches this by a LOCAL RUN or a PROD promote, and the promote is Andrew's word per promote (TO section 5, NOT YOURS)."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "Grep (native)",
+      "invocation": "grep -rn 'DataAsOf|dataAsOf|as_of|asOf' src/pages/Positioning/  then  grep -rn 'PER_BOOK_AS_OF' src/",
+      "result": "Located the single render site. DENOMINATOR PRINTED: exactly 1 DataAsOf usage in PositioningSummary.tsx (line 1304) and 4 PER_BOOK_AS_OF references estate-wide (1 definition at bookSet.ts:347, 1 import, 2 uses). That 1-of-1 is what licensed a one-value change rather than a hunt -- with more than one date render site, a flag flip would have been a partial fix that looked total."
+    },
+    {
+      "tool": "grep (census, post-change)",
+      "invocation": "grep -n '^  etfs:' src/pages/Positioning/shared/bookSet.ts",
+      "result": "9 hits. THIS IS THE CONTROL THAT CAUGHT A NEAR-MISS: line 155 is ALSO `  etfs: true,` in a DIFFERENT Record. A replace_all on that literal would have silently flipped an unrelated capability. Caught when a scripted revert asserted count==1 and got count==2; the revert was done via `git checkout --` from the commit instead of a text substitution. Banked as an instance of the global-substitution-eats-its-neighbour class."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TO12-AC1",
+      "criterion_verbatim": "The as-of dates no longer render under the stacked bars. READ A SCREENSHOT -- a class-name grep does not establish what a page draws. Both before and after, both READ by the executing agent.",
+      "denominator": "4 of 4 ETF books (DIVZ, IDVZ, PFDE, PFOE). 2 screenshots at 1280x720, BOTH READ by this agent, not merely captured.",
+      "invocation": "playwright: login michael@opalinvest.com -> SPA-click /positioning -> ETFS mode -> screenshot. BEFORE captured by temporarily restoring `etfs: true` in the working tree; AFTER by `git checkout --` back to the committed 27c60ecb state.",
+      "method": "live_read",
+      "output_evidence": "BEFORE (deliverables/ETFS_POSITIONING.TO-12-DE_evidence/AC1_BEFORE_etfs_dates_present.png): 'August 27, 2026' renders at y=468 under each of the four tickers -- 4 of 4. AFTER (AC1_AFTER_etfs_dates_removed.png): that line is absent; the tickers at y=451 are the last element in the header cell. Corroborated by a SECOND, INDEPENDENT instrument so the read is not the only evidence: a DOM innerText count scoped to the region between 'ASSET CLASSES' and 'PORTFOLIO COMPOSITION' returned 4 occurrences of 'August 27, 2026' before and 0 after. SECOND INSTRUMENT (recorded here because the schema's controls object admits only mutant+determinism): AC1 is scored by two instruments that fail differently -- a READ screenshot (sees what is drawn, blind to DOM structure) and a region-scoped DOM innerText count (sees text, blind to visibility). A date hidden by CSS would pass the count and fail the read; a date drawn into a canvas would pass the read and fail the count. Both agree: 4 before, 0 after.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TO12-AC2",
+      "criterion_verbatim": "THE DATA IS UNCHANGED. The served positioning_data.json still carries the per-fund as-of. Show the served artifact before and after; the diff on that field is EMPTY. A render change that alters the payload has exceeded this TO.",
+      "denominator": "4 of 4 books carry a per-fund as-of on the served artifact.",
+      "invocation": "authenticated GET /api/general/etfs/positioning_data.json, recursive key-walk for /as_of|data_date/i",
+      "method": "live_read",
+      "output_evidence": "SERVED, READ AFTER the change: .portfolios.DIVZ.data_as_of='2026-08-27' (as_of_basis='row-sourced'), and identically for IDVZ, PFDE, PFOE; plus top-level .data_as_of, .data_date and .data_as_of_spread=['2026-08-27']. DIFF ON THAT FIELD IS EMPTY. NOTE ON HOW THIS IS KNOWN, because it is a stronger claim than a two-sided read would be: the diff is empty BY CONSTRUCTION, not by comparison -- the change is one boolean in portal render code, and no portal code path writes this artifact (it is emitted by the daily producer to s3://opal-data-portal-v2/platinum/etfs/). A render flag is structurally incapable of moving a served payload. The read above confirms the field is present and populated; it is not offered as a before/after pair, because I did not capture a pre-change fetch and I will not present one read as two.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TO12-AC3",
+      "criterion_verbatim": "NO OTHER ELEMENT MOVED. The stacked bars, their values and their labels render as before. He named ONE element; a layout reflow that changes others is a widened scope.",
+      "denominator": "Every element in the Positioning Summary panel, compared position-by-position across the AC1 screenshot pair.",
+      "method": "live_read",
+      "output_evidence": "THE NAMED SET IS UNMOVED: bars (y=232-408), the eight percentage labels (0.81/99.19, 1.44/98.56, 0.36/99.63, 2.33/97.69) and the four ticker labels (y=451) are at IDENTICAL coordinates in both frames. STATED PLAINLY RATHER THAN CLAIMED AWAY: everything BELOW the removed line shifts UP by exactly its height, 14px -- EXPAND DETAILS 520->506, the panel footer 570->556, the PORTFOLIO COMPOSITION panel 647->633. That is the arithmetic of removing an element from normal flow, and it is what 'take it off the page' necessarily means; there is no way to delete a line and leave the content below it where it was. I am recording it because AC3's words are 'no other element moved' and a reader deserves the distinction between the named set (unmoved) and the reflow (unavoidable), rather than a bare PASS that quietly redefines the criterion.",
+      "status": "PASS",
+      "invocation": "playwright screenshot pair compared position-by-position: .playwright-mcp/page-2026-08-28T15-47-26-306Z.png (BEFORE) vs page-2026-08-28T15-48-04-168Z.png (AFTER), filed as deliverables/ETFS_POSITIONING.TO-12-DE_evidence/AC1_{BEFORE,AFTER}_*.png",
+      "status_reason": "PASS on the criterion's named set (bars, values, labels -- all at identical coordinates). The 14px upward reflow of everything BELOW the removed line is disclosed in output_evidence rather than concealed: it is the arithmetic of deleting an element from normal flow, not a second change."
+    },
+    {
+      "criterion_id": "TO12-AC4",
+      "criterion_verbatim": "ETFS_POSITIONING.TO-7 IS NOT REGRESSED. It is CERTIFIED 7/7 @37a69dcdf7 on producer behaviour. State explicitly that no producer/AC-bearing behaviour changed.",
+      "denominator": "1 file, 1 semantic value changed; 0 producer files touched.",
+      "method": "diff",
+      "output_evidence": "STATED EXPLICITLY: no producer behaviour changed. The entire diff is portal/src/pages/Positioning/shared/bookSet.ts -- one Record value (PER_BOOK_AS_OF.etfs true->false) plus a docblock. No file under data/*/scripts/, no Lambda, no Terraform, no S3 write path is in the diff. TO-7's certification is on PRODUCER behaviour (per-book as-of EMISSION), and AC2 above shows that emission still serving at 2026-08-27 for 4 of 4 books. The DISPLAY half of TO-7 (its AC4/AC5, @46f3863e) is what this TO deliberately reverses on Andrew's word -- that is the TO's purpose, not a regression, and TO-7's producer criteria are untouched.",
+      "status": "PASS",
+      "invocation": "git show --stat 27c60ecb  +  git diff 2858e7f5..27c60ecb --name-only"
+    },
+    {
+      "criterion_id": "TO12-AC5",
+      "criterion_verbatim": "TYPESCRIPT CLEAN -- tsc -b, zero errors. commit-gate reads .py/.sh/.tf and prints 'checked 0 of N files' on a frontend diff; that line is NOT evidence of a clean gate.",
+      "denominator": "Full project reference graph via tsc -b (NOT bare tsc --noEmit, which compiles an empty file set here).",
+      "invocation": "bun run typecheck  (= tsc -b --noEmit)",
+      "method": "command",
+      "output_evidence": "rc=0, zero errors. AND THE INSTRUMENT WAS PROVEN ABLE TO FAIL FIRST, because a first clean pass in a new session is not self-certifying: planted `etfs: 'MUTANT_NOT_A_BOOLEAN'` -> rc=2, 'src/pages/Positioning/shared/bookSet.ts(372,3): error TS2322: Type string is not assignable to type boolean' -- on the EXACT line this diff edits, so the control covers this change's own subject rather than merely the toolchain. Reverted, re-ran, rc=0. SEPARATELY, AS THE TO REQUIRES: commit-gate printed 'WARN: commit-gate checked 0 of 1 file(s) -- NOTHING WAS CHECKED' on this diff and that line is NOT cited as validation.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "PER_BOOK_AS_OF.etfs set to a string literal ('MUTANT_NOT_A_BOOLEAN') and the typecheck re-run. This mutates the criterion's own subject -- the exact Record value this TO changes -- rather than an unrelated file, so a pass proves the instrument sees THIS line.",
+      "expected": "tsc -b fails with a type error naming bookSet.ts and the PER_BOOK_AS_OF line.",
+      "observed": "rc=2, TS2322 at bookSet.ts(372,3). The typecheck can fail and does so on this surface. Reverted immediately; the filed commit 27c60ecb reads `etfs: false`.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 re-rendered twice from the same committed state (15:39:26Z and 15:48:04Z), across an intervening session-token expiry and a full re-login, and compared. AC5 typecheck run three times on the same input (clean, mutant, clean).",
+      "observed": "STABLE. Both AC1 renders show the identical stacked-bars header row with zero date lines and identical bar/percentage/label geometry; the re-login changed nothing. The two clean typecheck runs both returned rc=0 and the mutant run between them returned rc=2, so the instrument is stable in BOTH directions rather than merely repeatable in the passing one.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The PROD promote",
+      "reason": "TO section 5, NOT YOURS -- Andrew's word, per promote, no standing authorization. Not attempted."
+    },
+    {
+      "item": "The push of 27c60ecb to origin/DEV",
+      "reason": "Integration window is the integrator's leg (LD-0367). Push state is MEASURED and stated, not defaulted: LOCAL @27c60ecb, origin/DEV @2858e7f5 by `git ls-remote origin DEV`."
+    },
+    {
+      "item": "Any producer-side as-of change",
+      "reason": "TO section 3 scope bound and section 5. The data is deliberately KEPT -- Andrew's own reason ('timestamps are listed elsewhere') presupposes it still exists."
+    },
+    {
+      "item": "Deleting the PER_BOOK_AS_OF Record rather than flipping it",
+      "reason": "Judgement call, disclosed rather than silent. The display landed the same day (@46f3863e, 04:41Z) and is off ~11h later; a flag flip is ONE VALUE from per-mode restoration, a deletion makes the return trip a rebuild. The mechanism is now INERT (all three modes false), not absent. If the issuer prefers the render arm deleted outright, that is a one-line follow-up and I am not arguing against it."
+    }
+  ],
+  "surprises": [
+    "BLOCKING-CLASS, ROUTED TO THE ISSUER 2.0.0_SA_COO~Z (cc 3.0.0_SA_CVO~Z) -- NOT CHASED, NOT WORKED AROUND: THIS INSTANCE CANNOT BE MADE VALID BY THE EXECUTOR, AND THE ONE ACT THAT WOULD MAKE IT PASS IS THE ACT THE CHECKER EXISTS TO REFUSE. proof-of-spec-check.py enters alignment ENFORCE mode on the mere PRESENCE of a <decomp_ref> element in the TO ('alignment: ENFORCE (TO carries <decomp_ref>)'). TO-12-DE carries one -- whose TEXT says the opposite: 'NO CELL ADDED AND NONE CLAIMED', reasoning that this is a render-layer removal on an already-certified surface. Its five <criterion> elements therefore carry no cell_refs attribute, and the checker then refuses all five: 'carries NO cell_refs -- REFUSED, never retrofitted: a derived cell_ref makes alignment LOOK satisfied while being FALSE.' THE TRIGGER IS THE TAG, THE DISCLAIMER IS THE PROSE INSIDE IT, AND THE CHECKER READS THE TAG. I did not invent cell_refs to clear this -- fabricating five is precisely the defect both the TO and the checker name, and it would have produced a VALID-reading instance that lies. REMEDY IS THE ISSUER'S, and there are two, neither mine to pick: (a) the TO drops its <decomp_ref> element entirely so alignment is not enforced -- its content is a disclaimer, not a citation; or (b) the issuer names the decomp cells these five criteria actually map to. WHAT IS AND IS NOT AFFECTED: the five acceptance rows are each independently measured and PASS on their own evidence; this refusal is about the criterion-to-cell MAPPING layer, not about whether the work was done or verified. The checker itself warns that its alignment figures 'are identical to what a VALID instance prints', so I am not quoting them as comfort. VERDICT AS IT STANDS: INVALID (rc=1), stated plainly rather than filed as PASS with a footnote.",
+    "OBSERVATION, INERT, filed not chased -- routed to 3.0.0_SA_CVO~Z: the docblock that carries the per-mode ARGUMENT for PER_BOOK_AS_OF is STRANDED ~25 lines above its own const, detached from it by PREFERRED_DEFAULT_BOOK and that const's own docblock having been inserted between them. Pre-existing, NOT caused by this edit and NOT repaired by it -- a doc move would bury a one-value change in a diff Andrew is waiting on. Noted in the new docblock so the next reader is not misled about which comment governs which const.",
+    "OBSERVATION, INERT: the ETF artifact keys the per-book vintage as `data_as_of`, while the component reads `positioningData?.portfolios?.[code]?.as_of_date`; etfAdapter.ts:137 bridges the two (`as_of_date: book.data_as_of ?? null`). The bridge works -- the dates DID render before this change, which is the positive control on it. Recorded only because a future reader grepping the artifact key will not find the component's key, and that looks like a defect when it is an adapter.",
+    "OBSERVATION, INERT: safe-commit's own refusal text warns that grepping its stdout for a success marker returns PASS on a FAILED commit, so the commit was confirmed by asking the REPOSITORY -- git log -1 --format='%h~%an~%cn~%s' 27c60ecb returned the commit with author AND committer both 0.4.0_DE_ClientPlatform~Z; negative control on a bogus hash (deadbeef1234) returned 'fatal: ambiguous argument', proving the query can fail. Recorded as a surprise rather than a control because the schema's controls object is closed to {mutant, determinism}.",
+    "OBSERVATION, INERT, and it is a defect in MY first draft rather than in the estate: I built this instance by copying a sibling proof-of-spec's SHAPE instead of reading org/standards/PROOF_OF_SPEC.schema.json, and shipped 19 schema violations -- 'result' where the contract says 'status', two invented method values, two invented control keys, and prose in a field the checker resolves as a PATH. The sibling was itself valid; what I copied was a rendering of the contract, not the contract. proof-of-spec-check.py caught every one. An instance is not validated by resembling a valid instance.",
+    "CONTEXT FOR THE ABOVE, so the issuer can see it is structural and not one bad cut: THE PROJECT DECOMP RESOLVES; ZERO CELLS ARE CLAIMED, AND THAT IS THE TO'S OWN POSITION. TO-12-DE's proof_of_spec block carries five <criterion> elements with NO cell_refs attribute on any of them, and its decomp_ref says why: this is a render-layer REMOVAL on a surface ETFS_POSITIONING.TO-7 already built and certified 7/7 @37a69dcdf7, cut on a direct sovereign request. The doc is cited so the citation RESOLVES and the cell-ref check has a real corpus to run against; inventing a cell to fill the field would be exactly the fabricated-cell-ref defect the TO names. My first draft put that prose IN the doc field and the checker correctly refused it as an unresolvable citation."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-28/laneZ_to12de_dates_off_stacked_bars_1530-1600Z.md"
+}
