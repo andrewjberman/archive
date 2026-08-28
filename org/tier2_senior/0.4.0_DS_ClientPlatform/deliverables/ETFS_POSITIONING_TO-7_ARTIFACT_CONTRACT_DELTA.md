@@ -79,6 +79,31 @@ removed, because it fired on exactly the output AC1 specifies.
 Rule 24 record (four postulates, declared domain, uncovered-member hunt) is inline at the
 `AS_OF_BASIS_VOCAB` definition in `etf_positioning_gold.py` @`25f30acc63`.
 
+### ⛔ WHAT `as_of_basis` CANNOT TELL YOU — read this before using it as a check
+
+**It is BLIND TO CORRECTNESS BY CONSTRUCTION.** `resolve_book_as_of` returns `row-sourced` for
+**any** single distinct value in the column — **including a single WRONG one**. A book carrying a
+mis-stamped provider date emits `as_of_basis = "row-sourced"`, which reads as the healthy member.
+
+```
+the field answers      "did gold READ this from the rows, or invent it?"
+it does NOT answer     "are the rows RIGHT?"
+```
+
+>> **Its informative members are the three NON-healthy ones** (`absent`, `row-null`,
+`row-sourced-multi`). `row-sourced` means only that the read happened as designed.
+
+⚠ **`data_as_of_spread` is a PROMPT, NOT A VERDICT** either. Books legitimately diverge under
+per-fund as-of — that is the point of TO-7 — so a spread means *look*, never *defect*.
+
+⛔ **NOTHING IN THIS ARTIFACT CAN DISTINGUISH A CORRECT ROW-LEVEL DATE FROM A WRONG ONE.** That
+discriminator lives at INGEST, against the provider's own sheet (`ETFS_INGEST.TO-7 AC1`). **An
+artifact cannot certify its own upstream**, and a consumer that reads `row-sourced` as assurance
+has made exactly the substitution this delta's own §5 records its author making one layer down.
+*(Added 2026-08-28 ~03:5xZ after `0.7.0_AE_CloudOps~I` reasonably read the field as the
+discriminator for a post-fire wrong date. The field could not carry that, and the misreading was
+invited by this document not saying so.)*
+
 ---
 
 ## 3. THE RULE A CONSUMER MUST NOT BREAK (AC6)
@@ -172,9 +197,39 @@ Producer BEFORE (`dd75f6bd64`) at that as-of stamped **all four books 2026-08-24
   not be stretched to carry it — that is **TO-7 AC4**, `0.4.0_DE_ClientPlatform`'s work, and it
   is a **precondition of this delta reaching users**: four differently-dated books with no
   visible date is worse than today.
-- **`as_of_basis` is additive.** An allowlist consumer that does not know the key drops it with
-  no error — the same enumerated-allowlist behaviour recorded at `BOOK_KEYS` and
-  `etfAdapter.ts:77`. It is in `BOOK_KEYS` here; the adapter rung is DE's.
+- ⛔ **MEASURED, NOT INFERRED — AND THE ANSWER IS THAT BOTH NEW FIELDS DIE AT THE ADAPTER.**
+  This bullet previously said only that an allowlist consumer *would* drop an unknown key and
+  that "the adapter rung is DE's". **That was a caveat where a measurement was cheap.** Read at
+  `portal/` @`8c2ba9bb` (branch `DEV`, **0 commits behind `origin/DEV`** — current, checked
+  because this device has a banked history of a stale portal submodule):
+
+  ```
+  etfAdapter.ts:125-141   the BOOK object is built FIELD-BY-FIELD, not spread:
+      name · allocation · delta · num_holdings · holdings
+      as_of_date: book.data_as_of ?? null        <- data_as_of DOES survive, renamed
+      prior_date · management · characteristics
+    >> `as_of_basis` is NOT among them.                          SILENTLY DROPPED
+  etfAdapter.ts:152-159   the TOP-LEVEL return maps:
+      generated_at · data_as_of · data_date · note · portfolios · current_holdings
+    >> `data_as_of_spread` is NOT among them.                    SILENTLY DROPPED
+  ```
+
+  >> ⭐ **THE TWO PLANES DIVERGE AND THE DISTINCTION IS LOAD-BEARING:**
+  > | plane | `data_as_of` per book | `as_of_basis` | `data_as_of_spread` |
+  > |---|---|---|---|
+  > | **served JSON** (platinum) | present | **present** | **present** |
+  > | **rendered page** (through the adapter) | present, as `as_of_date` | **ABSENT** | **ABSENT** |
+  >
+  > **So a census that reads the SERVED ARTIFACT has both fields; anything reading through the
+  > portal adapter has neither.** Nobody should promise a page-level consumer a field the adapter
+  > never passes.
+
+  ⛔ **This is the producer-emits / adapter-drops hazard this file's own `BOOK_KEYS` comment
+  records** (the 2026-08-25 incident where five return windows were dropped silently, both halves
+  passing their own checks). **`ETFS_POSITIONING.TO-7 AC4` therefore requires an adapter change,
+  not only a render change** — the field cannot be displayed beside a book until the adapter
+  carries it. **That rung is `0.4.0_DE_ClientPlatform`'s and this seat did not touch it**; the
+  measurement is supplied so AC4 is scoped from a fact rather than discovered mid-build.
 
 ---
 
