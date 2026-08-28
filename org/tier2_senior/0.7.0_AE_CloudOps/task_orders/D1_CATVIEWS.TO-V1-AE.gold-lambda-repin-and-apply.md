@@ -2,7 +2,7 @@
 
 <task_order id="D1_CATVIEWS.TO-V1-AE" project="D1_CATVIEWS">
 <id>D1_CATVIEWS.TO-V1-AE.gold-lambda-repin-and-apply</id>
-<decomp_ref>workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — `D1-i-2` (**THE LAMBDA RE-PIN + TF APPLY**, AE-CLASS by the cell's own words, "NOT the DS lane's"), with `D1-inv-5` riding every criterion (**COMMITTING IS NOT EXECUTING, and `safe-deploy` to the code channel is not either**). **NO new cell** — this TO executes `D1-i-2` as written.</decomp_ref>
+<decomp_ref>workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — `D1-i-2` (**THE LAMBDA RE-PIN + TF APPLY**, AE-CLASS by the cell's own words, "NOT the DS lane's"), with `D1-inv-5` riding every criterion (**COMMITTING IS NOT EXECUTING, and `safe-deploy` to the code channel is not either**). **NO new cell** — this TO executes `D1-i-2` as written. <owned_cells>D1-i-2, D1-inv-5</owned_cells></decomp_ref>
 <issued_to>`0.7.0_AE_CloudOps~Z` — seated 2026-08-28T17:09:54Z by `2.0.0_SA_COO~Z` under @b3f9f207da. Rule 27: this lane already holds `D1_CATVIEWS.TO-P1-AE`, SAME project, so this is continuity and not a collision.</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T17:1xZ</issued>
@@ -10,13 +10,13 @@
 </task_order>
 
 <proof_of_spec>
-  <criterion id="CATV-TOV1-AC1"/>
-  <criterion id="CATV-TOV1-AC2"/>
-  <criterion id="CATV-TOV1-AC3"/>
-  <criterion id="CATV-TOV1-AC4"/>
-  <criterion id="CATV-TOV1-AC5"/>
-  <criterion id="CATV-TOV1-AC6"/>
-  <criterion id="CATV-TOV1-AC7"/>
+  <criterion id="CATV-TOV1-AC1" cell_refs="D1-i-2"/>
+  <criterion id="CATV-TOV1-AC2" cell_refs="D1-i-2"/>
+  <criterion id="CATV-TOV1-AC3" cell_refs="D1-i-2, D1-inv-5"/>
+  <criterion id="CATV-TOV1-AC4" cell_refs="D1-i-2"/>
+  <criterion id="CATV-TOV1-AC5" cell_refs="D1-i-2"/>
+  <criterion id="CATV-TOV1-AC6" cell_refs="D1-i-2"/>
+  <criterion id="CATV-TOV1-AC7" cell_refs="D1-i-2, D1-inv-5"/>
   <expected_criteria>CATV-TOV1-AC1,CATV-TOV1-AC2,CATV-TOV1-AC3,CATV-TOV1-AC4,CATV-TOV1-AC5,CATV-TOV1-AC6,CATV-TOV1-AC7</expected_criteria>
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D1_CATVIEWS.TO-V1-AE_PROOF_OF_SPEC.json</instance_path>
   <alignment_denominators>criteria: 7, all FIRM-TOKENED (`CATV-TOV1-ACn`) at cut time — the id-tokening defect measured on `ETFS_INGEST.TO-8` is avoided by construction. Cells cited: `D1-i-2` (all seven) and `D1-inv-5` (AC3, AC7). **AC7 is EVENT-GATED on a scheduled fire and CANNOT close on the first filing** — file with AC7 OPEN and re-file after the fire; a 6-of-7 instance is the expected first state, not a failure.</alignment_denominators>
@@ -98,8 +98,17 @@ against. **The breadth below is INHERENT to the act Andrew approved, not a choic
 ⭐ The **1,211** is `mdpf_category_registry.py` being BORN — it was created `@be05d938af` (2026-08-19),
 **after** the current pin `bf74d031c1` (2026-08-10). At the current pin it does not exist, which is
 exactly why a bare build refuses. **Shipping it is the POINT of the advance, not a side effect.**
->> **SO THE HONEST DRIFT FIGURE IS THE OTHER SIX: 1,381 lines across 6 modules that have moved in 18
-   days and ride along with the two approved fixes. THAT is the number the ledger entry carries.** <<
+>> **SO THE HONEST DRIFT FIGURE IS EVERYTHING BUT THE NEW MODULE — and the number below was CORRECTED
+   BY THE EXECUTING SEAT, `0.7.0_AE_CloudOps~Z`, at apply time.** <<
+⛔ **CORRECTED 2026-08-28 ~17:4xZ.** This section said **7 files / 2,521 / 71**, and drift of **1,381
+across 6 modules**. Measured over the **22 DECLARED PACKAGE MEMBERS** rather than the seven `.py`
+modules: **8 files / 2,551 insertions / 82 deletions**, so **drift is 1,340 lines across 7 members**.
+The delta is exactly `data/mdpf/config/partner_roster.json` (+30 / -11) and it reconciles to the cent:
+2551−2521 = 30, 82−71 = 11, and 2551−1211 (the new registry module) = 1340.
+>> **THE MISSED MEMBER IS A *CONFIG* FILE, AND THAT IS THE REUSABLE PART: I counted the `.py` modules
+   and called it the package. A CONFIG MEMBER ALSO SHIPS IN THE SAME ZIP** — so "which files change"
+   and "which files ship" are different questions over a member list, and I answered the second with
+   the first. **AC5's ledger entry carries the corrected figure**; this face now agrees with it. <<
 ⚠ **NOT ASSERTED: that any of those 1,381 lines is harmful.** Nobody has reviewed them and no defect
 is implied. The point is narrower and it matters: *"the ship fixes the SMA branch and the L2 values"*
 is TRUE AND INCOMPLETE as a description of what lands, and a ledger entry written that way would
