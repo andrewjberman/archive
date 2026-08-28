@@ -21,7 +21,7 @@
 <placement>LAPTOP (Rule 26: **the apply runs on the device that owns the work — THIS box, under `safe-apply`; never ferried**).</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-24T20:3xZ</issued>
-<status>ACTIVE (start condition above)</status>
+<status>ACTIVE (start condition above) [ISSUER 2026-08-28 16:46Z: seat 0.7.0_AE_CloudOps~G RELEASED by 2.0.0_SA_COO on AC4 PASS @debe9bc7b4 (log @48486c83c3, nothing uncommitted); open set = AC1 residual + AC3 + AC6 = GATE A, the P4I-3 publish activation behind the 2026-08-21T19:18Z sovereign hold (schedule half MET via AC4; source-gap half NOT); re-seat under /mstr-spawn on the lift. TO stays pending; not a dead seat, a released one.]</status>
 <priority>P1 — the 49F purpose project; wave-2 first.</priority>
 <scope_guard>ONE PROJECT. Exactly the cells above. ⛔ **NO new schedule, NO new trigger, NO alarm / SNS / freshness checker / monitor** (moratorium) — the projection is a stage in the existing chain on the existing cron. ⛔ **NO shadow prefix, NO comparator.** Surprises → `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/ADVI_PERFRP/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580). **Nothing to `4.0.0_SA_CRO*` this session.**</scope_guard>
 <authority>PRD `docs/architecture/ADVI_PERFRP_PRD.md` v0.3 s.4(c) serving plane / s.8 B8 / **s.11 #11 (PROD exposure rides the 49F switch promote — no new gate), #14 (0.7.0 owns B8)** / s.12 (the firm pin). CLAUDE.md Rules 1–6, 18, 22a.</authority>
@@ -37,6 +37,26 @@
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps~G/deliverables/ADVI_PERFRP.TO-R1-AE_PROOF_OF_SPEC.json</instance_path>
   <alignment_denominators>cells: 5 (c-1, c-2, c-3, inv-4, inv-5); criteria: 6; every criterion ≥1 cell_ref; every cell reachable (c-1 AC1/AC2 · c-2 AC3 · c-3 AC4/AC6 · inv-4 AC1 · inv-5 AC5). Unmapped 0; untraceable 0.</alignment_denominators>
 </proof_of_spec>
+<!-- EXECUTOR-WRITTEN, NOT AN ISSUER FIELD. The TO's "Status + reporting" section asks this seat for
+     cell-level status; <status>, <issued_to> and every criterion above are the issuer's and are
+     UNTOUCHED. Added 2026-08-28 by `0.7.0_AE_CloudOps~G` (re-seat, COO 78244) on CTO 78266 item 2:
+     "state it that way on the face so the next successor does not inherit `0.7.0_AE_CloudOps~K`'s
+     one-gate synthesis." Cell ids live OUTSIDE <decomp_ref> deliberately -- that element is the
+     harvested one (see the ISSUER FIX comment above) and this block must not widen its claim set;
+     proof-of-spec-check.py re-run after this edit as the control, VALID rc=0, 5/5 cells reachable,
+     violations=0, unchanged from before it. -->
+<cell_status cell="PRF-c-1" state="PARTIAL">Emitters wired; AC1's D5 no-write residual needs a live publish. GATE A.</cell_status>
+<cell_status cell="PRF-c-2" state="BLOCKED">AC3. The EXERCISED half needs a PUBLISHED leaf to fetch; 0 of 11 served. GATE A.</cell_status>
+<cell_status cell="PRF-c-3" state="DELIVERED">AC4 PASS 2026-08-28 @debe9bc7b4 -- two SCHEDULED 12:45Z fires (08-27, 08-28) carried the stage after c04_validation to CHAIN OK; a third real fire on stage-free bytes did not; fail-closed re-exercised 6/6 at the DEPLOYED vintage fc829256f45187bf. Zero new schedules/rules, both planes. AC6's deploy clauses remain GATE A.</cell_status>
+<cell_status cell="PRF-inv-4" state="PARTIAL">IAM half closed with AC2 (PASS, 2026-08-25). Shares AC1's publish residual. GATE A.</cell_status>
+<cell_status cell="PRF-inv-5" state="DELIVERED">AC5 PASS 2026-08-24, firm pin at IAM, read-only.</cell_status>
+<!-- OPEN SET AS OF 2026-08-28: exactly GATE A -- AC1 residual + AC3 + AC6 -- and it is ONE act, the
+     P4I-3 publish activation, held by Andrew-direct 2026-08-21T19:18Z (49F flip waits on BOTH source
+     gaps AND schedule) and the ~08:5xZ DATA half. No lift inferred, none asked for.
+     ⛔ `0.7.0_AE_CloudOps~K`'s 72788 "3 open criteria collapse to ONE gate" is CORRECT TODAY and was
+     NOT correct when written on 2026-08-26: it was asserted 19 hours before the first scheduled fire
+     that could carry the AC4 stage, and AC4 never gated on a publish. Read alone it hands a successor
+     a FULLY-BLOCKED verdict on a lane that had an unblocked read available. Dated, not deleted. -->
 </task_order>
 
 ## ⛔ SPEC-AT-PICKUP — YOUR FIRST ACT
