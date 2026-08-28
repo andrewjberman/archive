@@ -1,7 +1,7 @@
 # TO D1_CATVIEWS.TO-S1-DE — PER-CLIENT ROW SUPPRESSION AT L1/L2 (RENDER-SIDE)
 
 <id>D1_CATVIEWS.TO-S1-DE.per-client-row-suppression</id>
-<decomp_ref>`workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md` — `D1-h-p1` (**L0 presence predicate**: *"the node's served AUM at the firm's as-of > 0 … drive the block with one node at 0 and assert the tile is ABSENT, not empty"*) extended to L1/L2, and `D1-h-v3` (L2 drill). **NO new cell** — this is `D1-h-p1`'s predicate applied one and two levels down.</decomp_ref>
+<decomp_ref>workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — `D1-h-p1` (**L0 presence predicate**: *"the node's served AUM at the firm's as-of > 0 … drive the block with one node at 0 and assert the tile is ABSENT, not empty"*) extended to L1/L2, and `D1-h-v3` (L2 drill). **NO new cell** — this is `D1-h-p1`'s predicate applied one and two levels down.</decomp_ref>
 <issued_to>DE-class. ⛔ **NO LIVE DE LANE — seating is `0.0.0_AB_MSTR~Z`'s act on Andrew's word.**</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T15:0xZ</issued>
