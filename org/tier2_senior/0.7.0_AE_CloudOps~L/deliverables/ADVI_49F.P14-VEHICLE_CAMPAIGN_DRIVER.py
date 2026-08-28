@@ -230,6 +230,51 @@ def verify_artifacts(date, expected_basis, since):
             problems.append(f"{ds}: attestation_basis {basis!r} OUTSIDE the closed vocabulary")
         elif basis != expected_basis:
             problems.append(f"{ds}: basis {basis!r} != driven branch {expected_basis!r}")
+
+    # ---- THE BOUNDARY INVARIANT (0.4.0_DS_ClientPlatform~U 77123, adopted 2026-08-28 ~00:4xZ)
+    # BASELINE-FREE and read from the artifact c02 already writes, which is why it can run on
+    # every campaign date with no prior vintage to compare against.
+    #
+    # HISTORY WORTH KEEPING: 77045 first handed this seat a DIFFERENT signal -- "a re-driven
+    # twr_daily must not move". That one was RETRACTED by its own author at 77097 after this
+    # seat's date-1 measurement showed the pre-state was not uniform: 526 of 533 served ledgers
+    # are schema 1.0, so a re-driven twr_daily SHOULD differ on nearly every date, and the
+    # retracted rule would have stopped the campaign on essentially all of them. The replacement
+    # is strictly better because its two failure modes are DISTINGUISHABLE.
+    #
+    # ONLY ONE ARM IS A HARD PROBLEM, deliberately. c02 admits INTERNAL rows only under
+    # {pair-match, text-counterpart}, so `code-rule` reaching the ADMISSION vocabulary is
+    # structurally impossible unless the filter itself changed -- that is a real boundary
+    # crossing and it stops the date. The other fields are RECORDED as evidence and never gated:
+    # the ('INTERNAL','code-rule') bucket is legitimately ABSENT on a date that simply has no
+    # such rows, and gating on its presence would false-stop those dates. Same reasoning as the
+    # schema_version decision -- record what a reader may want, gate only what cannot be innocent.
+    #
+    # NOT IMPLEMENTED, and the reason is measured rather than assumed: 77123's third signal
+    # ("the unsigned residue must EQUAL that date's TR code-rule INTERNAL count") needs the TR
+    # population, and the twr_daily manifest does not publish it -- cf_input_census carries no
+    # TR field under any spelling probed on date 1. It is baseline-free in principle and not
+    # computable from this artifact, so it is named here rather than written as a check that
+    # cannot run. Reported back to its author.
+    tw = evidence.get("canonical/twr_daily")
+    if tw is not None and tw.get("manifest") != "ABSENT":
+        man_tw, _ = read_manifest("canonical/twr_daily", date)
+        cen = (man_tw or {}).get("cf_input_census") or {}
+        prov = [str(x) for x in (cen.get("inter_account_provenance") or [])]
+        tw["cf_input_census"] = {
+            "inter_account_provenance": prov,
+            "rows_total": cen.get("rows_total"),
+            "rows_admitted": cen.get("rows_admitted"),
+            "admitted_abs_value": cen.get("admitted_abs_value"),
+            "excluded_by_reason": cen.get("excluded_by_reason"),
+            "in_scope_class_but_no_counterparty": cen.get("in_scope_class_but_no_counterparty"),
+        }
+        if "code-rule" in prov:
+            problems.append(
+                "canonical/twr_daily: provenance 'code-rule' appears in the ADMISSION vocabulary "
+                f"{prov!r} -- the proven-closed INTERNAL boundary was CROSSED. STOP AND REPORT; "
+                "this is not a diff to reconcile (0.4.0_DS_ClientPlatform~U 77123 signal 1).")
+
     return (not problems), evidence, problems
 
 

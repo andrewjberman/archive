@@ -261,9 +261,17 @@ and the hazards cannot be re-discovered the hard way mid-loop.
   permanent read/write on the whole 49F data estate.
   ⛔ **EVERY EARLIER PROBE MEASURED THE DOCUMENT; NONE MEASURED THE HOST.** V14-1 (get-document)
   and V14-2 (halt trap) are both sound about the DOCUMENT and both were exercised against the
-  WRONG BOX -- **V14-2 must be re-exercised on `i-01003b035d2988dfb` before it can be read as
-  acceptance evidence.** A document-plane instrument cannot see an identity-plane defect, and
-  the two planes were never distinguished until a live send crossed both.
+  WRONG BOX. A document-plane instrument cannot see an identity-plane defect, and the two planes
+  were never distinguished until a live send crossed both.
+  ✅ **V14-2 RE-EXERCISED AND RESTORED 2026-08-28 00:42:50-00:47Z on `i-01003b035d2988dfb`**, in
+  the order `2.0.0_SA_COO` 77146 sequenced (date-1 oracle read -> V14-2 -> then (e), so (e) is
+  FINAL and not provisional). rc=0 read bare. SUBJECT CONTROL first, because the whole defect was
+  a wrong subject: `describe-instances` returns `Name=bd-gold-layer-runner` before any send.
+  Two consecutive sends with `StartedByDispatcher` OMITTED -- Success rc=0 at 121.2s and 105.6s --
+  and the host read `running` from **ec2 instance state, never from send rc**, across all THREE
+  reads (before / after 1 / after 2; denominator printed). CONDITIONAL-HALT ARM, new with the
+  re-point: `_DRIVER_STARTED_HOST=False`, so `halt_host()` REFUSED to stop the shared runner and
+  it read `running` afterwards. The old V14-2 evidence is superseded, not deleted.
   ⚠ **CONSEQUENCE OF THE RE-POINT, not a separate finding: the new host is SHARED.**
   `bd-exporter-ec2-role` also carries schwab, `opal-data-bd`, `opal-data-inf`, `opal-data-assets`
   and the platinum publisher, so other lanes run on this box. The driver's `halt_host()` is now
