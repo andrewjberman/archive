@@ -8,37 +8,57 @@
 <placement>SITE Z (Rule 26) — D4 is SITEZ-placed until the project is done.</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T01:1xZ</issued>
-<status>waiting -- on a CLOCK, not on a BUILDER. **NO BUILD REMAINS AND NO DS LANE IS NEEDED.**
+<status>queued -- for `3.0.0_SA_CVO~Z` CERTIFICATION. **THE 13:00Z EXERCISE GATE IS DISCHARGED, ALL THREE RUNGS PASS, AND THE FALSIFIABLE PREDICTION HELD ON BOTH EXACT LIMBS** (`ABSENT_FROM_SOURCE` = 1 = ABT; `NOT_APPLICABLE_NON_EQUITY` = 8 = the run's own FI count). Served `industry_group` KEY PRESENT 189 of 189 against a measured baseline of 0; gold parquet read directly with a negative control; `TO8-AC4` no-regression 189 of 189 identical against the pre-fire copy, all 11 sectors matching. Evidence and method are on this face. **NO EXECUTOR ACT IS PENDING AND NO DS LANE IS NEEDED.** ⚠ First token is deliberately `queued` and NOT `complete`: this seat measured the EXERCISE, not the SOURCE/DATA-class criteria the dead lane discharged, so `queued` keeps the row VISIBLE on the register -- the over-pessimistic direction announces itself and the over-optimistic one cannot.</status>
 
-**RE-FACED 2026-08-28 ~04:4xZ by `2.0.0_SA_COO~Z` (issuer), after MY OWN escalation read THIS FACE and
-got it wrong.** I escalated that the ~11:00Z -> ~13:00Z chain *"needs a LANE THAT BUILDS"*.
-**`0.0.0_AB_MSTR~Z` measured the ARTIFACT and the build was already landed and DEPLOYED.**
+## ⭐⭐ THE 13:00Z FIRE LANDED. ALL THREE RUNGS PASS. MEASURED 2026-08-28 13:1xZ by `2.0.0_SA_COO~Z`.
+
 ```
-  21:28:57Z  63a68942ae  ~Q  TO-6 AC4/AC6 -- industry-group axis + basis enum
-  21:35:43Z  39495cf260  ~Q  TO-8 AC1/AC3/AC4 -- publisher carries industry_group
-  22:14:18Z  f0e2a05889  ~Q  TO-8 RULED -- serve industry_group_basis WITH the value
-  ---------------------------------------------------------------------------------
-  22:46:16Z  e0672e24a0  0.7.0_AE_CloudOps~I  THIRD APPLY CLOSED, package CURRENT on every member
+TRIGGER   etf-positioning-producer-daily cron(0 13) ENABLED
+GOLD      gold/holding/date=2026-08-27/holding.parquet   written 2026-08-28T13:01:23Z
+SERVED    platinum/etfs/positioning_data.json            written 2026-08-28T13:01:26Z
+          128122 B -> 146944 B      data_as_of 2026-08-27   <- the as_of predicted from gold's OWN resolver
 ```
-**VERIFIED AT THIS SEAT, not taken on report:** all three build commits are ANCESTORS of the apply
-commit (`merge-base --is-ancestor`), with a later commit failing the same test as the negative control.
 
-⛔ **THE FACE WAS THE DEFECT AND I TREATED IT AS EVIDENCE.** This office has corrected the
-stale-ACTIVE-face class four times tonight and then convicted a chain off one. **Measure the ARTIFACT,
-not the face** -- it would have been the fifth spawn-onto-finished-work of the night, and
-`0.0.0_AB_MSTR~Z`'s pre-flight limb is what stopped it.
+**RUNG 1 -- VENDOR RETURNS IT.** `bbg/2026-08-27/characteristics.parquet`, 14 cols, field present,
+`GICS_SECTOR_NAME` control present, bogus-token control absent. 165 of 165 RESOLVED rows populated.
+**RUNG 2 -- GOLD CARRIES IT.** Read on the gold parquet ITSELF, not inferred from the served artifact:
+189 rows, `industry_group` and `industry_group_basis` columns PRESENT, negative control
+`industry_group_bogus` ABSENT (the probe discriminates).
+**RUNG 3 -- SERVED CARRIES IT TO THE CONSUMER.** ⛔ Scored as **KEY PRESENCE**, not `.get()`:
+```
+industry_group        KEY PRESENT on 189 of 189      (BASELINE 0 of 189)
+industry_group_basis  KEY PRESENT on 189 of 189      (BASELINE 0 of 189)
+```
 
-**WHAT IS ACTUALLY OUTSTANDING -- ACCEPTANCE RUNGS, NOT WORK:**
-- **~11:00Z** the vendor pull lands `GICS_INDUSTRY_GROUP_NAME`
-- **~13:00Z** the scheduled gold fire carries it to the SERVED artifact
+### ⭐ THE FALSIFIABLE PREDICTION HELD ON BOTH EXACT LIMBS
+```
+PREDICTED  ABSENT_FROM_SOURCE == 1, and it is ABT      MEASURED  1, and it is ABT in DIVZ      ✓
+PREDICTED  NOT_APPLICABLE_NON_EQUITY == the run's OWN FI count
+                                                       MEASURED  8, and the run's FI count is 8  ✓
+NOT PREDICTED (deliberately): the observed / not-in-characteristics split.
+BASIS, gold AND served, IDENTICAL: observed 180 | not-applicable-non-equity 8 | absent-from-source 1
+ASSET CLASS: Equity 181 | Fixed Income 8.   180 + 8 + 1 = 189, complete and MECE.
+```
+⚠ **THE `8` COINCIDED WITH THE LITERAL I REFUSED TO PIN TO, AND THE REFUSAL WAS STILL RIGHT.** It was
+scored against the RUN'S OWN Fixed-Income count, not against the 08-26 observation that happened to
+equal it. A criterion that reads the run cannot false-FAIL when holdings move; one pinned to `8` can.
 
-⚠ **NOT CLAIMED: that this TO is DISCHARGED.** Its ACs may reach rungs a deploy does not, **the ~11:00Z
-landing and the ~13:00Z served artifact ARE the acceptance, and discharge is `3.0.0_SA_CVO~Z`'s call.**
-The claim here is narrower and exact: **no BUILD remains and no BUILDER is needed.**
+### `TO8-AC4` -- NO CONSUMER REGRESSION, MEASURED AGAINST THE PRE-FIRE COPY
+Captured before the fire precisely so this could be a DIFF and not a recollection:
+```
+sub_asset_class IDENTICAL on 189 of 189 (book,ticker) pairs
+holdings added 0 · dropped 0 · intersection COMPLETE  -> no cross-vintage caveat applies
+POSITIVE CONTROL, the 11 sectors AC4 names: all 11 present both sides, EVERY count identical
+  Info Tech 35 · Financials 32 · Health Care 22 · Industrials 22 · Staples 16 · Comms 15
+  Discretionary 14 · Utilities 11 · Energy 9 · Materials 4 · Ultra Short Duration 8
+```
 
----
+### ⚠ WHAT THIS SEAT DID **NOT** SCORE
+`TO6-AC1/AC2/AC4/AC5` are SOURCE- and DATA-class criteria discharged by the executing lane BEFORE it
+died; this seat measured the **EXERCISE**, which is what the clock gated. **No claim of "6 of 6" is
+made here** -- that would assert a discharge nobody performed. ⚠ Served rows are 189 while the 08-27
+silver partition holds 187; the producer synthesizes residual/cash rows. **Noted, not chased.**
 
-**ORIGINAL STATUS, PRESERVED VERBATIM:** ACTIVE — GATED ON `TO-6` by data dependency (the gold row must carry the key before the publisher can read it). **Not gated on a decision.**</status>
 <priority>P1 — with `TO-6` it completes the producer half of Andrew's promote condition (ii). ⚠ **Both must land before the ~13:00Z gold fire** or the field does not reach platinum today.</priority>
 <authority>Andrew-direct 2026-08-24 ~22:12Z (GICS is the served sub-category vocabulary) · his promote condition (ii), VERBATIM: *"and it displays properly on DEV build with GICS replaced for sub-categories on frontend"* · `1.0.0_SA_CTO~Z`'s Rule-24 ruling (msg 11384): **a NEW PARALLEL FIELD, never a swap into `sub_asset_class`**.</authority>
 
