@@ -70,8 +70,26 @@ instance** (`PROOF_OF_SPEC.schema.json` is `additionalProperties:false`).
   issuer (`2.0.0_SA_COO~Z`), **and KEEP WORKING.**
 · ⛔ **No new alert/alarm/monitor** — standing moratorium. **No shadow pipeline, no duplicate output
   path** — Andrew complete veto.
-· ⚠ **`POSN_TENANCY.TO-4-AE` IS BUILT AND ITS APPLY IS HELD ON THIS ARTIFACT.** ⛔ **Do NOT design the
-  served shape — it is `TO-4-AE`'s and it is already built.** This TO writes what that contract reads.
+· ⚠ **`POSN_TENANCY.TO-4-AE` IS BUILT AND ITS APPLY IS HELD ON THIS ARTIFACT.**
+· ⛔⛔ **CORRECTED 00:0xZ — THIRD STALENESS, AND THIS ONE WOULD HAVE SENT YOU TO THE WRONG FILE.**
+  ~~Do NOT design the served shape — it is `TO-4-AE`'s and it is already built.~~
+  **FALSE. `0.7.0_AE_CloudOps~Y`'s path DEFINES NO SUCCESS-PAYLOAD SHAPE.** Read at source: the only
+  object their handler constructs is the pre-existing **error envelope**
+  (`{error, uri, firmId, status, request_id}`). **Since `@24a8435642` a successful registry read
+  PASSES THROUGH UNTOUCHED** — a side effect of the arm-3 fix, which they reported as one:
+  ***"my path now takes no position on the shape."***
+  >> ⛔ **HAD YOU FOLLOWED MY CLAUSE YOU WOULD HAVE GONE LOOKING IN `TO-4-AE` FOR A CONTRACT THAT IS
+     NOT THERE, AND THE SHAPE WOULD HAVE BEEN DEFINED BY NOBODY.** <<
+  ⭐ **THE SHAPE IS `SatelliteBook` IN `portal/src/pages/Positioning/shared/satelliteSet.ts`** — the
+  CONSUMER's declared type. This office's own `SAT-a-4` ruling says it verbatim: ***"The shape above
+  IS the contract that read must satisfy."*** **Write to THAT type.**
+· ⛔ **STRUCTURAL NOTE FOR THIS TO AND THE NEXT ONE — THREE STALENESSES IN TEN MINUTES, ONE
+  MECHANISM:** I cited **other lanes' live implementations** as facts inside criteria, and each aged
+  the moment they committed. ⭐ **A criterion that quotes another lane's current code INHERITS THAT
+  LANE'S VELOCITY.** **Cite the REQUIREMENT and its DURABLE CARRIER — a declared type, a ruled
+  invariant, a sovereign word — never a sentence about what someone's handler does today.**
+  ⚠ **`0.7.0_AE_CloudOps~Y` swept every remaining clause about their work and verified the rest
+  (`:28-29`, `AC2`, `AC3` as amended) ACCURATE — so this sweep is bounded, not open.**
 · **No gate gets loosened, waived or expected-green'd.** A criterion that fires is right.
 </standing>
 
