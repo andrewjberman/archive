@@ -2,7 +2,7 @@ TODAY SPRINT
 
 * Satellites is live for Cottonwood on the Positioning page: promoted to production overnight, smoke-tested on the real books, and now serving.
 
-* Asset-Category Views is done on site Z aside from some drilldown values and frontend polish; the categorization goes live tonight.
+* Asset-Category Views is live on the Model Portfolios page: Models $1.80B and SMAs $22.79M broken down by category with drilldowns; drilldown values and frontend polish remain.
 
 * ETFs on the Positioning page now carry a sub-sector classification, so the view reads by industry group and not only by ticker.
 
@@ -28,7 +28,7 @@ PROJECTS
 
 * Item 1 - Model Portfolios: Asset-Category Views
 
-  Done on site Z aside from some drilldown values and frontend polish. Asset categorization goes live tonight; the demo follows the polish pass.
+  Live. Models $1.80B and SMAs $22.79M render by asset category with drilldowns on the Model Portfolios page, as of the 27th's data. Drilldown values and frontend polish remain; the demo follows the polish pass.
 
 * Item 2 - Advisor Intelligence
 
@@ -77,8 +77,8 @@ PROCESS
   Status: Dashboard live; search rail live with its kill switch; timetable live.
 
 * Item 1 - Model Portfolios: Asset-Category Views
-  **Timeline: Tonight.**
-  Status: Categorization goes live tonight; drilldown values and frontend polish remain.
+  **Timeline: Live.**
+  Status: Categorization live on Model Portfolios; drilldown values and frontend polish remain.
 
 * Item 2 - Advisor Intelligence
   **Timeline: This week.**
