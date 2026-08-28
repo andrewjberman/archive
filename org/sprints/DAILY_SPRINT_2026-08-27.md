@@ -30,7 +30,7 @@ PROJECTS
 
 * Item 2 - Advisor Intelligence
 
-  The big day. I locked in verification tightening before the flood and then released five teams on it. They found the root cause of the zero-return breaks (in-kind transfers reading as nothing), shipped and verified all three fixes on live code, and proved 49 Financial's returns now sign to the cent. Every published number now carries its own attestation. The 533-day history rebuild is staged with checkpointing and a hard refusal on unstamped data; one input of three is done, the signing build is the last piece before it runs.
+  The big day. I locked in verification tightening before the flood and then released five teams on it. They found the root cause of the zero-return breaks (in-kind transfers reading as nothing), shipped and verified all three fixes on live code, and proved 49 Financial's returns now sign to the cent. Every published number now carries its own attestation. The signing build closed tonight: 11,152 transaction legs signed exactly, recovering $19.6M that had read as zero, with the served returns proven untouched. The 533-day history rebuild is staged with checkpointing and a hard refusal on unstamped data; two inputs of three are done, the first-day re-run is the last piece before it runs.
 
 * Item 3 - Account-Level Model Overlay
 
@@ -80,7 +80,7 @@ PROCESS
 
 * Item 2 - Advisor Intelligence
   **Timeline: This week.**
-  Status: Three fixes live and verified; history rebuild staged. Signing build is the last input before it runs.
+  Status: Three fixes live and verified; signing build closed; history rebuild staged. The first-day re-run is the last input before it runs.
 
 * Item 3 - Account-Level Model Overlay
   **Timeline: This week.**
