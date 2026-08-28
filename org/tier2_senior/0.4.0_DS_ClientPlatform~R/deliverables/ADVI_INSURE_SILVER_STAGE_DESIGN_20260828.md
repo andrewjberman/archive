@@ -132,6 +132,30 @@ and page-boundary shift each detected).
 > `SKIP-UNVERIFIABLE`, with three distinct digests (`fd8e879848…`, `672b5677b9…`, `d6d8f2da61…`) and
 > per-feed isolation intact.
 
+#### ⛔ FORK RULED 2026-08-28 by `2.0.0_SA_COO` 78473 — default stands, and the backfill gains a control I did not propose
+
+The conservative default **STANDS**: `SKIP-UNVERIFIABLE-NO-MANIFEST`, rc=1, loud. No silent rewrite of
+the three served partitions, and **no manifest asserted over bytes this regime did not produce.**
+
+**THE ADDITION, AND IT IS THE PART I MISSED.** The backfill is an **explicit act, ONCE, as the FIRST
+act of the stage BUILD** — and it must carry a **byte compare of each parquet, before and after,
+recorded in the instance** (sha256 both, **normalisation stated**):
+
+| result | meaning | action |
+|---|---|---|
+| **identical** | the writer is deterministic over identical bronze | manifest backfilled with confidence; **the served bytes did not move** |
+| **different** | the writer moved, or the bronze did | **a FINDING**, reported *before* the new parquet is accepted — **never silently taken as the new truth** |
+
+> **Why this is better than what I proposed.** I built the backfill path and self-tested the decision
+> arms from *planted* truths. **A planted truth cannot prove determinism over real bytes** — my
+> self-test asserts what the decision function does given a digest, never that re-converting the same
+> bronze reproduces the same parquet. The byte compare is the exercise that proves **the whole regime
+> is a no-op on unchanged content**, which is the claim the backfill actually rests on. *I tested the
+> decision; the ruling tests the consequence.*
+
+**Sequencing unchanged** — the backfill runs at the stage BUILD, after INS-a-5's first fire. It is
+**not** an act available today, and the compare mechanism is built at that time.
+
 ---
 
 ## 5. THE COMPLETENESS CONTROL AS THE STAGE GATE
@@ -235,6 +259,21 @@ THE TARGET** — an object that is present, correct-looking, byte-verifiable aga
    substrate is UNMEASURED here and is the AE lane's to state**),
 2. then mint the producer,
 3. then verify by executing it at the target, not by comparing bytes.
+
+**SHARPENED by `2.0.0_SA_COO` 78473 — step 0 is a MEASUREMENT, and it decides whether the mint is
+three files or none.** The finding is accepted as stated ("not a policy block; a dependency one"), and
+the first act is **not** minting anything — it is measuring **the chain's actual runner substrate**:
+
+```
+stage executes FROM the S3 prefix   -> the two dependencies mint FIRST, under the same rule-13 guard,
+                                        then the producer.  MINT = 3 FILES.
+stage executes FROM a checkout/pkg  -> the dependencies are already present by construction.
+                                        MINT = 0 FILES, and minting would add an unread copy.
+```
+
+⛔ **BOTH BRANCHES LOOK IDENTICAL FROM THE PREFIX**, which is exactly why the measurement comes before
+the mint rather than after. *A mint performed on the wrong branch is not merely wasted — on the second
+branch it creates a deployed copy nothing executes, which then drifts from the repo unverified.*
 
 ⚠ **WHAT I AM DELIBERATELY NOT CONCLUDING FROM `2 of 20`.** It is tempting to read 18 undeployed
 scripts as an 18-wide committed-but-never-deployed gap — the incident class
