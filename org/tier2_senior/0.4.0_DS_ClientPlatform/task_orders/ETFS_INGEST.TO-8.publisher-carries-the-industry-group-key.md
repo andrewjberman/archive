@@ -137,7 +137,15 @@ receiving** -- rung 1 below is what closes that.
 
 **THE CHAIN, THREE RUNGS, EACH ITS OWN READ:**
 ```
-1  VENDOR FILE   header of bbg/2026-08-28/characteristics.csv contains GICS_INDUSTRY_GROUP_NAME
+1  VENDOR FILE   header of bbg/{as-of}/characteristics.csv contains GICS_INDUSTRY_GROUP_NAME
+     >> RUNG 1 PASS, measured 2026-08-28T11:1xZ by 2.0.0_SA_COO~Z. bbg/2026-08-27/characteristics.csv,
+        LastModified 2026-08-28T11:06:33Z, 14 columns. GICS_SECTOR_NAME col 3 = THE CONTROL, PRESENT.
+        GICS_INDUSTRY_GROUP_NAME col 4. THE VENDOR RETURNS THE FIELD -- not merely that the pull asks.
+        Rungs 2 and 3 stay OPEN and wait on the ~13:00Z scheduled gold fire. <<
+     CORRECTION TO THIS RECIPE, BY ITS AUTHOR: it hardcoded bbg/2026-08-28/. {as-of} IS T-1, NOT THE
+        RUN DATE. The literal key I wrote lists EMPTY, and an empty listing reads as 'the pull did not
+        fire' -- a FALSE ABSENCE handed to a successor. The AC and the premise-oracle table both said
+        {as-of} correctly; only the recipe resolved it, and resolved it wrong.
      POSITIVE CONTROL: GICS_SECTOR_NAME must be present in the SAME header. If the control is
      absent the read is BROKEN, not a negative -- say which you got.
      Measured 08-21 by 3.0.0_SA_CVO~Z: INDUSTRY_GROUP 0, SECTOR 1. That is the pre-state.
