@@ -6,7 +6,7 @@
 <issued_to>`0.4.0_DE_ClientPlatform~Z` — seated 2026-08-28 ~21:30Z by `2.0.0_SA_COO~Z`. Rule 27: D1_CATVIEWS only; it is the lane that built the category-views render.</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T21:4xZ</issued>
-<status>pending -- CUT AND SEATED. Andrew singular-priority directive; these three gate the promote.</status>
+<status>CLOSED 2026-08-28 ~23:2xZ by `2.0.0_SA_COO~Z` (issuer). ALL FIVE CRITERIA TERMINAL, ZERO FAIL, measured at the instance -- AC1 N/A-BY-CONSTRUCTION (struck: D-1 was DATA), AC2 UNCOMPUTABLE-BY-CONSTRUCTION, AC3 PASS, AC4 PASS, AC5 UNCOMPUTABLE (discharged by ruling (B), suppression stands on provenance). World-done: AC3+AC4 shipped and are LIVE IN PROD @`1b91b197` (tag portal-v2.1.171), verified at the PROD edge with a real bearer and on the rendered page. DO NOT SEAT. DO NOT RE-EXECUTE -- re-running an accepted round is a REWIND (NEVER#2).</status>
 </task_order>
 
 <proof_of_spec>
@@ -79,3 +79,30 @@ big stink about fees in a big fucking disclaimer on Client, that should not be t
 ⚠ **Verify on the RENDERED PAGE, not on `tsc`** — green compile plus a shipped-log is exactly the
 evidence class that produced the ruling this TO reverses.
 Off-task findings: one line to the surprise channel, keep working. RAVC to `2.0.0_SA_COO~Z` once.
+
+---
+
+## CLOSED 2026-08-28 ~23:2xZ BY `2.0.0_SA_COO~Z` (issuer) — MEASURED AT THE INSTANCE, NOT RECALLED
+
+```
+  CATV-TOF1-AC1   N/A-BY-CONSTRUCTION      struck -- D-1 was a DATA defect, not render
+  CATV-TOF1-AC2   UNCOMPUTABLE-BY-CONSTRUCTION
+  CATV-TOF1-AC3   PASS                     the tree resolves colour through getModelColor
+  CATV-TOF1-AC4   PASS                     the fee disclaimer is GONE from the DOM
+  CATV-TOF1-AC5   UNCOMPUTABLE             discharged by ruling (B); suppression on PROVENANCE
+  -> 5 of 5 terminal. ZERO FAIL. DENOMINATOR 5, and it matches <expected_criteria>.
+```
+**WORLD-DONE, AND THAT IS THE LIMB THAT CLOSES A FACE — NOT THE VERDICT TABLE.** AC3 and AC4 are
+LIVE IN PROD @`1b91b197` (tag `portal-v2.1.171`), verified at the PROD edge with a real bearer and
+on the rendered page, across 4 of 4 scopes.
+
+⛔ **WHY THIS FACE STAYED OPEN LONG AFTER ITS WORK SHIPPED: CLOSING IS THE ISSUER'S ACT AND NOTHING
+DOES IT AUTOMATICALLY.** A face outlives its work indefinitely, reading `pending` while the code is
+in production — and `[ACTIVE]`/`pending` is indistinguishable from genuinely-unfinished work in every
+census that reads faces. **That is precisely the `behind_record_count` this project carries.**
+⭐ **THIS CLOSE WAS PROMPTED BY MY OWN ADVISORY FINDING** — `D1_CATVIEWS_closeout_drift_20260828T160055Z`
+(owner `2.0.0_SA_COO~Z`, 8 records behind), whose note names *"an open TO"* as a place to look. **The
+instrument was right and had been sitting unread since 16:00Z.**
+⚠ **TWO CRITERIA CLOSE AS UNCOMPUTABLE AND THAT IS AN HONEST TERMINAL STATE, NOT A PASS.** AC2 could
+not be computed by construction; AC5 was answered by a ruling rather than a measurement. **Neither is
+recorded as green, and a reader must not read "closed" as "all PASS".**
