@@ -42,7 +42,17 @@ import sys
 
 LANE = "0.7.0_AE_CloudOps~X"
 CARD_ROOT = pathlib.Path("org/tier2_senior/0.7.0_AE_CloudOps/deliverables")
-WAVE_GLOB = "D11_CARDS_*/*.json"
+FABRIC_ROOT = pathlib.Path("org/tier2_senior")
+
+# THE PATTERN THAT WAS WRONG, kept named because the issuer found the same class in two
+# other sweeps: "D11_CARDS_*" requires the underscore, so it can never match the
+# un-suffixed "D11_CARDS/" directory. All 8 wave-1 v1-freeze cards live there, TWO of
+# them carded_by this lane, one level from the cards being filled. The first census
+# reported 73 files / 1 exclusion; the true population is 81 under 10 roots. Nothing in
+# that run could report it -- the denominator printed was the denominator of a sweep
+# that could not see them, so it reconciled perfectly with itself. `assert_glob_sees_bare_stem`
+# below is the arm that now fails the run rather than trusting the pattern.
+WAVE_GLOB = "D11_CARDS*/*.json"          # matches BOTH D11_CARDS/ and D11_CARDS_W*/
 V3_SCHEMA = pathlib.Path("org/standards/SUBSTRATE_CARD.v3.schema.json")
 
 # strongest -> weakest. 'held' outranks 'inferred': a named authority DID measure it, just not here.
@@ -324,11 +334,73 @@ PLAN = {
 
 
 # --------------------------------------------------------------------------------------
+def assert_glob_sees_bare_stem():
+    """REFUSE if the card glob cannot match the un-suffixed stem directory.
+
+    This is the falsifier for the defect this tool shipped with. It does not ask whether
+    the sweep found anything -- a sweep that finds nothing still prints a tidy zero. It
+    asks whether the PATTERN is capable of matching a directory named exactly
+    'D11_CARDS', by testing it against that literal name. Scope and pattern are
+    independent axes and this file checked only the first.
+    """
+    import fnmatch
+    dir_pat = WAVE_GLOB.split("/")[0]
+    if not fnmatch.fnmatch("D11_CARDS", dir_pat):
+        raise Refused(
+            f"REFUSED: card glob {WAVE_GLOB!r} cannot match the bare stem directory "
+            "'D11_CARDS'. That is the exact defect this tool shipped with: the "
+            "un-suffixed directory holds the wave-1 v1-freeze cards and a census run "
+            "under such a pattern reconciles with itself while missing them.")
+    if not fnmatch.fnmatch("D11_CARDS_W2", dir_pat):
+        raise Refused(f"REFUSED: card glob {WAVE_GLOB!r} no longer matches a wave dir.")
+
+
+def census():
+    """The FULL population under every card root, printed with its denominators.
+
+    Separated from the lane's re-derivation on purpose: the fill is scoped to this
+    lane's v3 cards, but the SWEEP must be able to see everything, or its denominator
+    is a number about the pattern rather than about the estate.
+    """
+    roots = sorted(p for p in FABRIC_ROOT.rglob("D11_CARDS*") if p.is_dir())
+    files = [q for r in roots for q in sorted(r.rglob("*.json"))]
+    v3 = v1 = other = 0
+    mine_v3, mine_v1, manifests = [], [], []
+    for p in files:
+        d = json.loads(io.open(p, encoding="utf-8").read())
+        sv = str(d.get("schema_version", ""))
+        mine = d.get("carded_by") == LANE
+        if sv.startswith("3"):
+            v3 += 1
+            if mine:
+                mine_v3.append(p)
+        elif sv == "1":
+            v1 += 1
+            if mine:
+                mine_v1.append(p)
+        else:
+            other += 1
+            manifests.append(p)
+    print(f"  card roots            : {len(roots)}")
+    print(f"  total JSON under them : {len(files)}")
+    print(f"  v3 cards              : {v3}")
+    print(f"  v1-freeze cards       : {v1}  (schema_version '1'; refused by design, not by failure)")
+    print(f"  no schema_version     : {other}  {[p.name for p in manifests]}")
+    print(f"  CHECK {v3} + {v1} + {other} = {v3 + v1 + other} of {len(files)}")
+    print(f"  carded_by {LANE}: v3 {len(mine_v3)} | v1 {len(mine_v1)} | ALL {len(mine_v3) + len(mine_v1)}")
+    if mine_v1:
+        print(f"    v1-freeze of this lane, OUT OF SCOPE by schema_version: "
+              f"{[p.as_posix() for p in mine_v1]}")
+    return mine_v3
+
+
 def rederive_cards():
+    """This lane's V3 cards. Scoped by carded_by AND schema_version, because the widened
+    glob now also sees this lane's 2 v1-freeze cards and the face's scope is v3 only."""
     found = []
     for p in sorted(CARD_ROOT.rglob(WAVE_GLOB)):
         d = json.loads(io.open(p, encoding="utf-8").read())
-        if d.get("carded_by") == LANE:
+        if d.get("carded_by") == LANE and str(d.get("schema_version", "")).startswith("3"):
             found.append(p)
     return found
 
@@ -348,8 +420,13 @@ def main() -> int:
     print("=== FALSIFIER (gates every run; a failure REFUSES the tool) ===")
     if not self_test():
         raise Refused("REFUSED: the floor falsifier failed. Nothing read, nothing written.")
+    assert_glob_sees_bare_stem()
+    print("  GLOB arm: the card pattern matches both the bare stem and a wave dir -> PASS")
     if args.self_test:
         return 0
+
+    print("\n=== CENSUS: the FULL population under every card root ===")
+    census()
 
     import jsonschema
     schema = json.loads(io.open(V3_SCHEMA, encoding="utf-8").read())
@@ -391,7 +468,7 @@ def main() -> int:
         results[p.name] = ("measured", (member, shown, space_name))
 
     print("\n=== FILL + FLOOR ===")
-    census = {"measured": 0, "held": 0, "absent": 0}
+    fill_counts = {"measured": 0, "held": 0, "absent": 0}
     floors = {}
     written = []
     for p in cards:
@@ -407,7 +484,7 @@ def main() -> int:
         key["basis_by_field"] = bbf
         key["basis"] = key_row_floor(key)
 
-        census[basis] += 1
+        fill_counts[basis] += 1
         floors[p.name] = (before, key["basis"])
 
         ev = key.get("evidence", "")
@@ -450,11 +527,11 @@ def main() -> int:
         raise Refused("REFUSED: the contradiction fixture VALIDATED. The negative arm is dead.")
 
     print("\n=== CENSUS (denominator 11, re-derived) ===")
-    print(f"  filled + exercised (measured) : {census['measured']}")
-    print(f"  filled, declared-unexercised (held) : {census['held']}")
-    print(f"  null + absent : {census['absent']}")
+    print(f"  filled + exercised (measured) : {fill_counts['measured']}")
+    print(f"  filled, declared-unexercised (held) : {fill_counts['held']}")
+    print(f"  null + absent : {fill_counts['absent']}")
     print("  inferred key_expression : 0 (PROHIBITED by the face)")
-    print(f"  TOTAL {sum(census.values())} of {len(cards)}")
+    print(f"  TOTAL {sum(fill_counts.values())} of {len(cards)}")
     rose = sum(1 for b, a in floors.values() if BASIS_RANK[a] > BASIS_RANK[b])
     print(f"  row floors that ROSE: {rose} of {len(cards)}")
 
