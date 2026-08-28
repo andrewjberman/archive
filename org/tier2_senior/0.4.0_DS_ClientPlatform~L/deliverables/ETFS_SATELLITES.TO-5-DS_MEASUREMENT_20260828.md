@@ -15,6 +15,10 @@
 
 **AC1 PASS · AC2 PASS · AC3 PASS · AC4 PASS · AC5 PASS · AC6 FAIL (out of lane, measured not waived).**
 
+⚠ **AC2's evidence was RE-TAKEN after a SECOND defect was found by EXERCISE — see §10.** The served
+artifact is now **2196 bytes, ETag `c056874e69aa048a616f4e21100cf74a`**, and **9 of 9 books pass the
+consumer's own SUM invariant**. The first mint (2182 B) was refused in full by the consumer.
+
 **TO-5-DS is 5 of 6 and is NOT complete.** The five this lane can discharge are discharged; the sixth
 is a schedule, Rule 13 puts it in DT/AE, and it is reported unmet on evidence rather than green'd.
 
@@ -284,3 +288,113 @@ predicted.
 ⚠ **`0.7.0_AE_CloudOps~S` is NOT to edit the producer** (COO, same message) and has not. Their trigger
 calls `main([])` and passes no date. The (B) shim they were authorized to build as a stopgap is now
 unnecessary — **(A) has landed**, and they can delete the argument from their handler.
+
+## 10. THE SECOND DEFECT — WRONG UNIT, FOUND BY RENDERING THE ARTIFACT I HAD JUST PUBLISHED
+
+⛔ **The producer emitted constituent weights as FRACTIONS where the ratified consumer contract
+declares PERCENTAGE.** `0.4.0_DE_ClientPlatform~Z` seeded the published 9 books into an isolated
+worktree and rendered the page (msg 11539): **`validateSatellite` REFUSED ALL NINE BOOKS by name**
+before any arithmetic ran — *"constituent weights sum to 1, not 100"*. **Zero satellites would have
+rendered.**
+
+**The contract declares the unit in four places, and named the owner of the conversion before the
+defect existed** — `portal/src/pages/Positioning/shared/satelliteSet.ts`:
+
+```
+:44    "`weight` is a PERCENTAGE (0-100), matching customBlend.ts's WEIGHT_SUM_TARGET"
+:46-50 "...whether that field arrives as a fraction or a percentage is TO-1's measurement to make
+        and to convert AT ITS OWN SEAM. This contract states the unit it hands over, so a wrong
+        unit is a contract violation someone can point at rather than a plausible wrong number."
+:55    "/** PERCENTAGE (0-100). */"
+:135   SATELLITE_WEIGHT_SUM_TARGET = 100      :136  SATELLITE_WEIGHT_EPSILON = 0.01
+```
+
+**So this was a MISSED CONVERSION AT A NAMED BOUNDARY** — not a contract gap, not a disagreement.
+Ruled by `1.0.0_SA_CTO~Z` msg 11559: **the producer converts, the consumer does not move.**
+
+⭐ **AND MY OWN READ-BACK HAD PRINTED THE DEFECT AND I READ IT AS A PASS.** §2's verification line
+says *"every book's weights sum to 1.0000"* — I checked the weights were **internally consistent** and
+never checked them against **the unit the consumer declares**. I validated on the axis I had chosen
+rather than the axis the contract specifies. The number was in my own evidence, in this file.
+
+**FIXED @`48c6a7700f`**, at this producer's seam. ⛔ **`satellites_weights.py` was NOT touched** — its
+fraction output is TO-1's ratified contract, locked by tests asserting `weight == 0.25` and `== 0.42`.
+Converting there would have moved a contract to avoid moving a seam.
+
+⭐ **THE GUARD IS THE LOAD-BEARING HALF, NOT THE MULTIPLY.** `build_books` now enforces the
+**consumer's own invariant** at the emit boundary and refuses, naming the book, the actual sum and the
+source rows. **Negative control — the input that makes it refuse:** one child's `relativeAllocation`
+mutated `0.25 → 0.10` so the book totals 0.85 →
+`BLOCKED: 'Opal Satellite 30' constituent weights sum to 85.000000, not 100.0 (epsilon 0.01)`.
+Without that arm, *"9 of 9 sum to 100"* is a number a broken guard prints just as happily.
+
+⚠ **DECLARED HAZARD, written into the code rather than left implicit:** restating the consumer's two
+constants in Python is a **SECOND CARRIER OF ONE FACT**. There is no shared runtime between a Python
+producer and a TS consumer, so a cited constant is the only available link; the comment names
+`satelliteSet.ts:135-136` as the authority. **The sum guard is what makes that drift loud.**
+
+### The re-mint — asked for, not assumed
+
+⛔ **I stopped rather than proceeding, and both Tier-1 seats recorded that as correct.**
+`1.0.0_SA_CTO~Z` 11559 directed a re-mint; `2.0.0_SA_COO~Z`'s AC2 ruling §5 said *"does NOT authorize a
+second write, an overwrite"*. **"Latest + most-restrictive binds" does not resolve that** — CTO was
+latest, COO was more restrictive — **and adjudicating between two Tier-1 seats is not a Tier-2 act.**
+`1.0.0_SA_CTO~Z` then withdrew the write limb as exceeding their lane (11595); `2.0.0_SA_COO~Z`
+authorized it as the seat that wrote §5 (11601, re-affirmed in 11609 because the withdrawal and the
+authorization crossed in flight). **Cost: about ninety seconds.**
+
+**AC2 RE-TAKEN on the corrected bytes:**
+
+```
+BUCKET/KEY    opal-data-cot / platinum/satellites/registry.json
+SIZE          2196 bytes        LastModified  2026-08-28T01:38:46+00:00  (UTC, s3api)
+ETag          c056874e69aa048a616f4e21100cf74a
+VersionId     xLcuAW7VMbGyF.0kpt2LQ9Wb24WVnQaS          SSE AES256
+LISTING       Contents = exactly 1; IsTruncated absent; NextContinuationToken ABSENT
+VERSIONS      2 total, 0 delete markers -- 1 current (2196) + 1 noncurrent (2182, pre-fix)
+              ^ the discriminating evidence that EXACTLY ONE overwrite occurred and no more
+SERVED BYTES  2196 on disk == 2196 ContentLength; 9 of 9 books sum to 100.000;
+              9 of 9 PASS the consumer's validateSatellite SUM check; 0 of 9 carry the defect
+```
+
+⚠ **A `VersionId` is a LEASE, not provenance** — this estate expires noncurrent at 14 days, so the
+pre-fix bytes will vanish. **The durable evidence of the pre-fix state is this record**, not that
+noncurrent version.
+
+⚠ **AND FIXING THE UNITS DOES NOT MAKE THE ARTIFACT REACH THE PAGE.** `0.4.0_DE_ClientPlatform~Z`
+measured (11539) that **no fetch path exists**: every `SATELLITE_REGISTRY` use is a DEFAULT PARAMETER
+and `Positioning.tsx:225` calls `satellitesToPositioningShape(positioningData)` with one argument, so
+the compile-time empty constant always wins. **That is a separate DE-lane wiring cell**, ruled separate
+by `1.0.0_SA_CTO~Z`. Nothing renders from this key today, correct units or not.
+
+## 11. THE STRIKE CLAUSE — RULED AND EXECUTED (was §7(a), carried unowned since the fabric kill)
+
+`1.0.0_SA_CTO~Z` msg 11583 ruled it and assigned the edit to this lane (Rule 13), then msg 11588
+recorded that 11583 **supersedes row 11 of that seat's own ruling record**, which had said STRIKE.
+**11583 binds: do NOT delete the section.**
+
+**EXECUTED — four edits to `satellites_registry.py`, keeping every measurement:**
+
+1. **RETITLED** *"WHY THERE IS NO PREDICATE"* → *"NEITHER DATA PLANE ENCODES THE IS-A CRITERION"*,
+   which is what the sweep actually establishes.
+2. **The CONCLUSION superseded, the MEASUREMENT kept** — the 84-file / 121-child-node / 0-match sweep
+   with its 18-of-18 positive control **stands and is still true**; what does not follow is *"therefore
+   no predicate exists"*. Andrew's ~22:5xZ ruling is quoted verbatim in its place.
+3. **The "THE PRICE" two-halves framing reframed** — it was premised on a hand-maintained list that
+   cannot self-update. **The predicate DISSOLVES that hazard rather than mitigating it**; the oracle
+   now earns its place as a fixture-comparison instrument, not as a watchdog for a manual list.
+4. ⛔ **THE INVERTED LINE CORRECTED — the urgent one.** `:54-58` read *"As a MEMBERSHIP PREDICATE the
+   canonical name form is wrong and Andrew ruled it so."* **Andrew has ruled the exact opposite.** A
+   reader trusting that line would have built the inverse of what he asked for, **on his authority**.
+
+⭐ **Why the narrow remedy beat the strike, in CTO's words and confirmed by what I found:** a blanket
+strike *"would have removed [the inverted line] WITHOUT ANYONE NOTICING IT HAD BEEN WRONG."*
+
+⚠ **A FIFTH INSTANCE FOUND AND DELIBERATELY NOT TOUCHED — out of this ruling's scope, and it has a
+TEST.** The module's opening block still reads *"THIS IS A DECLARED SET, NOT A DERIVED PREDICATE …
+nothing in this file may be read as evidence that they COULD be"*, with `REGISTRY_CLAIM = "held"`. That
+carries the **same inversion**, but `tests/test_satellites.py:346-347` **asserts that exact string is
+present in `__doc__`**, and `:338-339` assert `REGISTRY_CLAIM == "held"` / `!= "measured"`. **Changing
+it is a TO-2 decision with a test to move, not a tidy-up** — surfaced to `1.0.0_SA_CTO~Z`, not acted on.
+
+**TO-2's suite re-run after the edit: 29 passed.**
