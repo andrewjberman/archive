@@ -216,11 +216,10 @@
       "criterion_id": "WP3-2-AC8",
       "criterion_verbatim": "THE RECEIPT, ONLY THROUGH THE CARRIER. wp3_certification_receipt recorded on the frozen +27 label via bundle_identity.py --receipt, with the validator's REFUSALS exercised.",
       "method": "command",
-      "invocation": "python org/standards/isck/bundle_identity.py <label> --receipt wp3_certification_receipt --value <receipt commit>   [NOT RUN]",
-      "output_evidence": "NOT RUN, deliberately. receipt_problem binds the run: derive(run_commit).contract_bundle_id must EQUAL the frozen label's. MEASURED: derive(7a44b65f50~1) = bundle:sha256:87ed70800607 dbc46c1d (the frozen +27); derive(7a44b65f50) = bundle:sha256:103cfd6cab178fac0719; members differing d0398b977d -> 7a44b65f50 = 1 of 14 (ISCK_CONTRACT.md); members differing 7a44b65f50 -> HEAD = 0 of 14. The FREEZE COMMIT wrote its freeze entry into ISCK_CONTRACT.md, which is a bundle MEMBER, so no post-freeze commit derives the frozen bundle -- and the ledger code exists only post-freeze. No satisfiable run_commit exists. A receipt slot is set ONCE (R3-CRO-31), so firing --receipt against a precondition already measured as unsatisfiable is a risk, not a control. Routed BLOCKING (77766) to the tool/design owner.",
-      "denominator": "0 of 4 designed refusals exercised -- blocked upstream of all four",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "AC8's precondition is unsatisfiable by construction: the freeze commit changed a bundle member, so no commit carrying ledger code derives the frozen bundle. Routed BLOCKING to the owner rather than worked around; the four designed refusals are exercisable the moment it is unblocked."
+      "invocation": "bundle_identity.py d0398b977d --receipt wp3_certification_receipt --value eb15d30b6b [fired at 1.0.0_SA_CTO~X under the exec lane; registry commit a8982310d8]",
+      "output_evidence": "The carrier's own acceptance line: RECEIPT wp3_certification_receipt = 'eb15d30b6b3eaf9d79392bed1f6b73ba1daeabe2' on v0.3-candidate+27 (bundle:sha256:87ed708006...); bundle id unchanged. Committed @a8982310d8 (read from the object DB: 2 files, +12/-1; the +27 receipts sub-record carries value eb15d30b6b, bundle 87ed7080, recorded_at 12:40:17Z; 0 of 14 members differ pin -> registry commit; negative control on a bogus hash fires). THE FOUR DESIGNED REFUSALS, each a committed control receipt naming ITS OWN defect and writing nothing, with BUNDLE_LABELS.json byte-identical throughout: fa55596889 wrong kind; 24ecc6cbb1 another bundle; ddc4383893 result FAIL; ea754b7e44 manifest_digest mismatch. TWO DEFECTS OF MINE WERE CAUGHT BEFORE ACCEPTANCE, both by instruments other than the one I was watching: the carrier's own evidence-digest check refused a CRLF/LF tree-vs-blob split (I hashed the tree, it hashes the blob); and 3.0.0_SA_CVO~X, reading the receipt AGAINST its evidence rather than against the validator, found run_commit had drifted with HEAD to c557006b0b while the evidence named d11c341f79 in three places -- the bundle binding could not see it because both commits derive the identical bundle. Corrected @eb15d30b6b; the tool gained the evidence-witness limb @0430c4617d; the prematurely accepted e8d3326bd5 was discarded UNCOMMITTED, so nothing wrong ever became a registry fact and the one-shot slot stayed free.",
+      "denominator": "4 of 4 designed refusals exercised; 1 registry commit; 0 of 14 members moved",
+      "status": "PASS"
     },
     {
       "criterion_id": "WP3-2-AC9",
@@ -247,10 +246,6 @@
   },
   "declared_exclusions": [
     {
-      "item": "AC8's wp3_certification_receipt",
-      "reason": "precondition unsatisfiable by construction -- the freeze commit changed a bundle member. Routed BLOCKING (77766) rather than worked around by naming a pre-freeze run_commit the battery could not have run at."
-    },
-    {
       "item": "an arm for STRICT's CLASS half",
       "reason": "the pinned battery names none. The rule is implemented and controlled in-commit at 94c7a674ba, and the design owner has landed the arm at HEAD for the NEXT pin. Issuer-ruled 111357Z; N stays 188 for this wave."
     },
@@ -266,7 +261,9 @@
     "The runner deleted its own clone destination before checking whether it existed, making the advertised fresh-dir refusal unreachable; my first repair would have deleted a verifier-supplied directory (3.0.0_SA_CVO~X 115527Z; repaired at 91f38fb966).",
     "Sec 2d's STRICT has a CLASS half no row-2 arm can express -- MECE over values is not MECE over conditional coverage (77720).",
     "L-13-consequence-unresolved cannot be attributed to row 13: sec 2d and sec 3 row 13 state the same rule and the resolver necessarily runs first.",
-    "The freeze commit wrote its own freeze entry into ISCK_CONTRACT.md, a bundle member, so no post-freeze commit derives the frozen bundle (77766)."
+    "The freeze commit wrote its own freeze entry into ISCK_CONTRACT.md, a bundle member, so no post-freeze commit derived the frozen bundle and AC8's receipt was unobtainable (77766). Fixed by the design owner @bd4bea5b2a.",
+    "receipt_problem bound run_commit to the BUNDLE rather than to the RUN, so my receipt named a commit the battery had never run at and passed the check anyway -- two commits sharing a bundle are indistinguishable to it. Found by 3.0.0_SA_CVO~X reading the receipt against its evidence; tool limb added @0430c4617d (77808).",
+    "bundle_identity.py's bare derive -- a read -- WRITES BUNDLE_IDENTITY.json's six derivation-commit fields; every seat deriving a bundle today silently rewrote the record-at-the-pin in the working tree (77790)."
   ],
   "session_log": "org/tier2_senior/0.4.0_DT_ClientPlatform/logs/2026-08-28/dtx_wp3_wave2_ledger_code_1044-1215Z.md",
   "compiler_tools": [
