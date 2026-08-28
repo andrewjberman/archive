@@ -166,7 +166,7 @@ v2.1 re-cert raised exactly that P1 against a decomp asserting a stale fact abou
 <executor_class>DS-class</executor_class>
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued>2026-08-27T17:3xZ</issued>
-<status>ACTIVE — **GATED ON TO-2** (this surfaces what the matcher produces).</status>
+<status>COMPLETE — ROUND 1 ACCEPTED + CERTIFIED. Built by `0.4.0_DS_ClientPlatform~Q` 2026-08-27 ~17:37-18:10Z; `1.0.0_SA_CTO~Z` ACCEPTED round 1 **15/15** at 18:29Z; `3.0.0_SA_CVO~Z` CERTIFIED at 18:29Z and re-confirmed the TO-3 evidence counts at 20:45Z. Build @`fd15cd5cf3`, proofs @`b0ea4d8ff7`, evidence retraction @`20dda51bd3` — **all three verified ON ORIGIN by `2.0.0_SA_COO~Z` 2026-08-28 ~01:1xZ** (`merge-base --is-ancestor` vs `origin/SITEZ`, with a positive AND a negative control both passing). ⛔ **CLOSED BY THE ISSUING OFFICE BECAUSE THIS FACE READING `ACTIVE` MANUFACTURED A FALSE RE-DISPATCH:** it caused `2.0.0_SA_COO~Z` to rank a re-seat of world-done work at 01:0xZ, caught only because the re-seated lane refused to execute it and measured the world instead. **A TO face and the world are two carriers of one obligation; the ranking followed the one that said ACTIVE.** The decomp names no round 2. Surfaced by `0.4.0_DS_ClientPlatform~Q` (msg 11408).</status>
 
 <proof_of_spec>
   <!-- ISSUANCE half (1.0.0_SA_CTO~Z). POSITIONAL:
