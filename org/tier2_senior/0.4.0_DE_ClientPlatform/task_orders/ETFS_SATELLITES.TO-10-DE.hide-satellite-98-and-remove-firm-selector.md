@@ -8,7 +8,13 @@
 <placement>SITE Z (Rule 26). `portal/` is a WORK-SITE. **Main tree stays on DEV (Rule 19).**</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T04:2xZ</issued>
-<status>ACTIVE — cut from an ANDREW-DIRECT smoke test, **already amended once by a second Andrew-direct before issue.** He has SEEN the built view and approved it; these are the named remaining points.</status>
+<status>ACTIVE -- **8 of 9 CRITERIA MET @`5a4349a5`** (portal, DEV). Delivered by `0.4.0_DE_ClientPlatform~S` ~04:3xZ, about ten minutes after issue.
+
+**THE ONLY OPEN CRITERION IS `T10DE-AC3`, AND IT IS PENDING A SOVEREIGN CALL, NOT PENDING WORK.** It is width-dependent and this office never named a viewport -- see AC3's row. **No lane is blocked and no seat is needed.** Certification of the other eight is `3.0.0_SA_CVO~Z`'s and does not wait on AC3.
+
+*** AC2 WAS RE-READ AFTER THE EDIT RATHER THAN CITED FROM BEFORE IT*** -- 9 books served, `Opal Satellite 98` still present, registry sha256 UNCHANGED. **The criterion is about the state AFTER the change, and quoting a prior read answers a different question.**
+
+ORIGINAL: ACTIVE — cut from an ANDREW-DIRECT smoke test, **already amended once by a second Andrew-direct before issue.** He has SEEN the built view and approved it; these are the named remaining points.</status>
 <priority>P0 — **the remaining distance to D4's bar.** He smoke-tested Satellites: *"looks very good, its basically done only a couple points id add"*. **The bar is HIS EYE and he has now used it.**</priority>
 <authority>**ANDREW-DIRECT 2026-08-28 ~04:2xZ, VERBATIM** (relayed `1.0.0_SA_CTO~Z` 12691) — items (2) and (3) below:
 
@@ -75,7 +81,7 @@ His first message asked for horizontal scroll on `POSITIONING SUMMARY`. **His se
 |---|---|---|---|
 | `T10DE-AC1` | **`Opal Satellite 98` IS NOT DISPLAYED, AND THE FILTER IS AT THE RENDER LAYER.** The Positioning Summary shows eight books. ⛔ **Cite the edit site: it must be a display/selection concern, NOT `SATELLITE_MEMBERS`, NOT the registry, NOT the producer.** | `SAT-d-1` | |
 | `T10DE-AC2` | ⛔ **98 IS STILL TRACKED — PROVE THE DATA SIDE IS UNTOUCHED.** `platinum/satellites/registry.json` still carries **NINE** books and still sums to 100.000. **Exhibit the served artifact AFTER the change**, not the source. *"even if we track it otherwise"* is a requirement, not a nicety. | `SAT-b-5` | |
-| `T10DE-AC3` | **THE WIDTH PROBLEM IS GONE, AND NO SCROLL WAS ADDED.** Eight columns fit without clipping. ⛔ **No horizontal scrollbar on the panel OR the page body, and no arrows** — *"no need for arrows"*. | `SAT-d-1` | |
+| `T10DE-AC3` | **THE WIDTH PROBLEM IS GONE, AND NO SCROLL WAS ADDED.** No horizontal scrollbar on the panel OR the page body, and no arrows -- *"no need for arrows"*. **AMENDED ~04:4xZ by `2.0.0_SA_COO~Z` (issuer): THIS CRITERION AS FIRST WRITTEN WAS UNSCOREABLE AND THAT IS MY DEFECT.** It said *"eight columns fit without clipping"* and **NAMED NO VIEWPORT WIDTH**, so its truth value depends on an unstated parameter. `0.4.0_DE_ClientPlatform~S` measured rather than guessed: `1440px` 8 columns CLIP - `1600px` labels present but the 8th bar's VALUE labels clip - `1920px` FITS CLEAN. **Removing the ninth column HELPED and did not solve it below ~1920.** >> **THE ACCEPTANCE VIEWPORT IS A SOVEREIGN CALL AND IS WITH ANDREW.** His premise -- *"that would solve the issue with the width"* -- holds at wide viewports and not at common laptop ones, and his own width is unknown. **UNTIL HE ANSWERS THIS CRITERION IS NOT SCOREABLE AND MUST NOT BE MARKED MET OR FAILED.** - **DO NOT add a scroll to close it:** he withdrew that explicitly, and building it anyway substitutes a lane's judgement for his ruling on a page he had just approved. `0.4.0_DE_ClientPlatform~S` declining to do so was correct. | `SAT-d-1` | **PENDING SOVEREIGN -- viewport unnamed** |
 | `T10DE-AC4` | **NO FIRM SELECTOR ON SATELLITES, DEFAULTED TO COTTONWOOD.** *"only one firm has this function."* An internal viewer lands on cottonwood satellites with **no selector and no extra click**. | `SAT-c-2` | |
 | `T10DE-AC5` | **THE DROPDOWN CODE IS COMMENTED OUT, NOT DELETED.** *"keep the dropdown code available just comment it oout ... just in case later we may add other custom models for other firms."* **A deletion loses the reasoning; the comment preserves it.** Show re-enabling is a comment-uncomment, not a rebuild. | `SAT-c-3` | |
 | `T10DE-AC6` | ⛔ **`TO-9-DE`'s FOUR-WAY DISCRIMINATION SURVIVES.** A 400 must still render as an ERROR and never as *"no satellites"*. **Removing the selector must not collapse those states** — re-exhibit by hash. **A default that turns a failed fetch into an empty registry is the regression this catches.** | `SAT-c-3` | |
