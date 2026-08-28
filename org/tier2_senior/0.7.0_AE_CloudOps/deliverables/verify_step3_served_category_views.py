@@ -97,7 +97,25 @@ SERVE_BUCKET = "opal-data-portal-v2"
 SERVE_ROOT = "platinum/mdpf"
 ARTIFACT = "category-views"
 
-SMA_EXPECTED = 22794766.25
+# --- THE LITERAL IS DATE-SCOPED. IT IS NOT A CONSTANT. -----------------------
+# 0.4.0_DS_ClientPlatform~Z measured (13879/13880/13881) that 22,794,766.25 is
+# MARKET-VALUED -- opal_div_sma 18,783,379.81 + opal_growth_sma 4,011,386.44 --
+# and moves ~$170k-$250k PER TRADING DAY across a 455-date series. Applying the
+# literal to a later artifact returns FAIL ON A CORRECT FIX.
+#
+# This file asserted it UNCONDITIONALLY in its first two commits: it would have
+# failed a perfect build at any as_of other than 2026-08-27. Caught by
+# 3.0.0_SA_CVO~Z (14264) finding the same defect in its own ratifier and checking
+# the other two instruments rather than only fixing its own.
+#
+# TWO TRACKS, and the split is the whole remedy:
+#   STRUCTURAL  propositions that hold at EVERY as_of. Always scored. This is the
+#               track that survives Monday's scheduled fire.
+#   LITERAL     exact figures, scored ONLY at LITERAL_AS_OF. At any other date the
+#               verdict is NA_BY_DATE -- a THIRD state, never PASS, never FAIL.
+#               An instrument that cannot check something must say so, not guess.
+LITERAL_AS_OF = "2026-08-27"
+SMA_LITERAL = 22794766.25                # global + 49financial at LITERAL_AS_OF
 CLIENT_PRE_FIX_TOTAL = 290426813.47      # global Client.aum BEFORE the extraction
 CENT = 0.005                             # half a cent; raw values are always printed
 
@@ -130,9 +148,18 @@ def _eq(actual, expected) -> bool:
 def check() -> "tuple[int, list, list, list]":
     rows, indeterminate, controls = [], [], []
 
-    def rec(scope, name, ok, detail):
-        rows.append({"scope": scope, "assertion": name,
+    def rec(scope, name, ok, detail, track="STRUCTURAL"):
+        rows.append({"scope": scope, "assertion": name, "track": track,
                      "verdict": "PASS" if ok else "FAIL", "detail": detail})
+
+    def rec_na(scope, name, as_of, track="LITERAL"):
+        """NA_BY_DATE -- never PASS, never FAIL. The literal is market-valued and
+        is only meaningful at LITERAL_AS_OF; at any other as_of this instrument
+        cannot check it, and saying so is the correct output."""
+        rows.append({"scope": scope, "assertion": name, "track": track,
+                     "verdict": "NA_BY_DATE",
+                     "detail": f"artifact as_of={as_of!r} != LITERAL_AS_OF "
+                               f"{LITERAL_AS_OF!r}; market-valued figure, not scored"})
 
     bodies = {}
     for scope in SMA_BEARING + SMA_TRUE_ZERO:
@@ -145,18 +172,33 @@ def check() -> "tuple[int, list, list, list]":
     for scope in SMA_BEARING:
         if scope not in bodies:
             continue
+        as_of = bodies[scope].get("as_of")
         sma = _node(bodies[scope], "SMA")
         aum, reason = sma.get("aum"), sma.get("absent_reason")
-        rec(scope, "SMA.aum == 22,794,766.25", _eq(aum, SMA_EXPECTED), f"aum={aum!r}")
+        # STRUCTURAL -- true at EVERY as_of, and the track that verifies Monday's
+        # scheduled fire. "The dollars are there at all" is the proposition; the
+        # exact figure is a separate, date-scoped claim.
+        rec(scope, "SMA.aum > 0 (dollars extracted)",
+            isinstance(aum, (int, float)) and float(aum) > 0, f"aum={aum!r}")
         rec(scope, "SMA.absent_reason ABSENT", reason in (None, ""),
             f"absent_reason={'ABSENT' if reason in (None, '') else repr(reason)[:70]}")
+        # LITERAL -- only meaningful at LITERAL_AS_OF.
+        if as_of == LITERAL_AS_OF:
+            rec(scope, "SMA.aum == 22,794,766.25 (literal)", _eq(aum, SMA_LITERAL),
+                f"aum={aum!r} as_of={as_of}", track="LITERAL")
+        else:
+            rec_na(scope, "SMA.aum == 22,794,766.25 (literal)", as_of)
 
     for scope in SMA_TRUE_ZERO:
         if scope not in bodies:
             continue
         sma = _node(bodies[scope], "SMA")
         aum, reason = sma.get("aum"), sma.get("absent_reason")
-        rec(scope, "SMA.aum == 0.00", _eq(aum, 0.0), f"aum={aum!r}")
+        # DIRECTION B is STRUCTURAL at every date and needs no literal: a true zero
+        # is zero on Monday too. It passes TODAY, which is exactly why it is easy to
+        # forget it must KEEP passing -- a reland that wrongly populated SMA here
+        # would be invisible to any check that only hunts for the new dollars.
+        rec(scope, "SMA.aum == 0.00 (true zero holds)", _eq(aum, 0.0), f"aum={aum!r}")
         # A TRUE ZERO must SAY it is one. Andrew ruled SMAs are 49F-only; these scopes
         # carrying 0.00 WITHOUT the explanation would be indistinguishable from the
         # pre-fix unreachable-branch artifact this whole fix exists to remove.
@@ -176,23 +218,31 @@ def check() -> "tuple[int, list, list, list]":
     # be -- a CONSERVATION GUARD on a non-degenerate value, paired with criteria that
     # actually discriminate started-from-finished. Those are the SMA.aum and
     # absent_reason reads above, which is where the verdict comes from.
+    # The conservation TARGET is itself date-scoped -- 290,426,813.47 is global's
+    # pre-extraction Client total at 2026-08-27, and it moves with the market like
+    # the SMA figure does. Same two-track treatment.
     if "global" in bodies:
+        as_of = bodies["global"].get("as_of")
         c_aum = _node(bodies["global"], "Client").get("aum")
         s_aum = _node(bodies["global"], "SMA").get("aum")
-        if isinstance(c_aum, (int, float)) and isinstance(s_aum, (int, float)):
+        name = "CONSERVATION Client.aum + SMA.aum == 290,426,813.47"
+        if as_of != LITERAL_AS_OF:
+            controls.append({"scope": "global", "assertion": name,
+                             "verdict": "NA_BY_DATE",
+                             "detail": f"artifact as_of={as_of!r} != {LITERAL_AS_OF!r}; "
+                                       f"the target is that day's own pre-extraction "
+                                       f"Client total, not a fixed number"})
+        elif isinstance(c_aum, (int, float)) and isinstance(s_aum, (int, float)):
             total = float(c_aum) + float(s_aum)
             controls.append({
-                "scope": "global",
-                "assertion": "CONSERVATION Client.aum + SMA.aum == 290,426,813.47",
+                "scope": "global", "assertion": name,
                 "verdict": "PASS" if abs(total - CLIENT_PRE_FIX_TOTAL) < CENT else "FAIL",
                 "detail": f"{c_aum} + {s_aum} = {total:.2f} (expected "
                           f"{CLIENT_PRE_FIX_TOTAL:.2f}, delta "
                           f"{total - CLIENT_PRE_FIX_TOTAL:+.2f})"})
         else:
             controls.append({
-                "scope": "global",
-                "assertion": "CONSERVATION Client.aum + SMA.aum == 290,426,813.47",
-                "verdict": "FAIL",
+                "scope": "global", "assertion": name, "verdict": "FAIL",
                 "detail": f"non-numeric: Client.aum={c_aum!r} SMA.aum={s_aum!r}"})
 
     # L2 MEMBER DOLLARS (the D-1 half, reclassified DATA not RENDER tonight). Reported
@@ -213,6 +263,8 @@ def check() -> "tuple[int, list, list, list]":
             f"{len(with_aum)} of {len(members)} L2 member(s) carry a non-null aum "
             f"(wide sweep; 14212's 8-of-9 is a narrower set)")
 
+    # NA_BY_DATE is EXCLUDED from the verdict in both directions -- it is not a
+    # silent pass and not a failure. Only PASS/FAIL rows move rc.
     fails = [r for r in rows if r["verdict"] == "FAIL"]
     if indeterminate:
         return 2, rows, indeterminate, controls
@@ -233,7 +285,8 @@ def main() -> int:
     print(f"\n== STEP-3 ACCEPTANCE: served {ARTIFACT} BODIES "
           f"(s3://{SERVE_BUCKET}/{SERVE_ROOT}/*/{ARTIFACT}.json) ==")
     for r in rows:
-        print(f"  [{r['verdict']}] {r['scope']:<12} {r['assertion']:<52} {r['detail']}")
+        print(f"  [{r['verdict']:<10}] {r.get('track', 'STRUCTURAL'):<10} "
+              f"{r['scope']:<12} {r['assertion']:<44} {r['detail']}")
     if indeterminate:
         print("\n  INDETERMINATE -- object(s) unreadable. This is NOT a FAIL and NOT a")
         print("  PASS: an instrument that never read the object cannot have a verdict.")
@@ -246,8 +299,15 @@ def main() -> int:
             print(f"  [{c['verdict']}] {c['scope']:<12} {c['assertion']:<52} {c['detail']}")
 
     n_pass = sum(1 for r in rows if r["verdict"] == "PASS")
-    print(f"\n  SCORED {n_pass} PASS / {len(rows) - n_pass} FAIL over {len(rows)} "
-          f"assertion(s); {len(indeterminate)} scope(s) INDETERMINATE")
+    n_fail = sum(1 for r in rows if r["verdict"] == "FAIL")
+    n_na = sum(1 for r in rows if r["verdict"] == "NA_BY_DATE")
+    print(f"\n  SCORED {n_pass} PASS / {n_fail} FAIL over {n_pass + n_fail} "
+          f"assertion(s); {n_na} NA_BY_DATE (not scored, either direction); "
+          f"{len(indeterminate)} scope(s) INDETERMINATE")
+    if n_na:
+        print(f"  NA_BY_DATE means the artifact's as_of is not {LITERAL_AS_OF} and the "
+              f"market-valued literal cannot be checked -- the STRUCTURAL rows above "
+              f"still carry the verdict.")
     print(f"  VERDICT: {['ACCEPT', 'REFUSE', 'INDETERMINATE'][rc]}")
     print("  NOTE: this is the EXECUTOR's check. Ratification is 3.0.0_SA_CVO~Z's, on "
           "its own instrument.")
