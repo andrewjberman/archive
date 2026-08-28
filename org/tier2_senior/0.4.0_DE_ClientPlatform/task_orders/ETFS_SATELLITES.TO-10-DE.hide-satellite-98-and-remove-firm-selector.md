@@ -8,15 +8,7 @@
 <placement>SITE Z (Rule 26). `portal/` is a WORK-SITE. **Main tree stays on DEV (Rule 19).**</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T04:2xZ</issued>
-<status>ACTIVE -- **`T10DE-AC3` IS NOW RULED AND SCOREABLE.** Andrew chose *"shrink the text and bars"* (~04:5xZ) and `1.0.0_SA_CTO~Z` named the acceptance width **`1440px`**. **The free variable is closed; the criterion can be scored.** 8 of 9 met @`5a4349a5`; AC3 is the only open one and it is WORK now, not a pending decision.
-
-ORIGINAL: ACTIVE -- **8 of 9 CRITERIA MET @`5a4349a5`** (portal, DEV). Delivered by `0.4.0_DE_ClientPlatform~S` ~04:3xZ, about ten minutes after issue.
-
-**THE ONLY OPEN CRITERION IS `T10DE-AC3`, AND IT IS PENDING A SOVEREIGN CALL, NOT PENDING WORK.** It is width-dependent and this office never named a viewport -- see AC3's row. **No lane is blocked and no seat is needed.** Certification of the other eight is `3.0.0_SA_CVO~Z`'s and does not wait on AC3.
-
-*** AC2 WAS RE-READ AFTER THE EDIT RATHER THAN CITED FROM BEFORE IT*** -- 9 books served, `Opal Satellite 98` still present, registry sha256 UNCHANGED. **The criterion is about the state AFTER the change, and quoting a prior read answers a different question.**
-
-ORIGINAL: ACTIVE — cut from an ANDREW-DIRECT smoke test, **already amended once by a second Andrew-direct before issue.** He has SEEN the built view and approved it; these are the named remaining points.</status>
+<status>complete -- SELF-MARKED by `0.4.0_DE_ClientPlatform~S` 2026-08-28T05:1xZ per `org/XXX.md`:725. **9 of 9 AC met; CERTIFIED by `3.0.0_SA_CVO~Z` @`a36b6c009f`** (superseding their 8-of-9 certificate, which is retained verbatim under a supersession banner). Portal `5a4349a5` + `1c5cdbe5`; deliverable, 8 read renders and the proof-of-spec instance at `dbff949ded` / `3ad3fecbdf` / `506e889a87` / `88e9135d68` (instance VALID, 9 rows, 0 violations, coverage step-zero clean). AC3 passed only after `1.0.0_SA_CTO~Z` NAMED THE ACCEPTANCE WIDTH (1440px) the criterion had been missing -- it was `UNCOMPUTABLE`, not failed, until then. ⚠ **`complete` != SHIPPED and != SMOKE-TESTED:** renders use FIXTURES and a STUBBED session, and `origin/DEV` publishes nothing (ci.yml on DEV uploads a CI artifact; deploy.yml on PROD is the sole writer of the served bucket), so this is served nowhere Andrew can open. His localhost build remains the only route.</status>
 <priority>P0 — **the remaining distance to D4's bar.** He smoke-tested Satellites: *"looks very good, its basically done only a couple points id add"*. **The bar is HIS EYE and he has now used it.**</priority>
 <authority>**ANDREW-DIRECT 2026-08-28 ~04:2xZ, VERBATIM** (relayed `1.0.0_SA_CTO~Z` 12691) — items (2) and (3) below:
 
