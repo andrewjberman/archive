@@ -45,6 +45,44 @@ prevent — except APPLIED, and therefore harder to see.** ⚠ **If both cannot 
 DEPLOY WAITS.** A missed window costs one day; a half-deployed package costs a wrong served artifact
 and a debugging session that starts in the wrong place.
 
+## 2b. ⛔ AUTHORIZATION WIDENED 2026-08-28 ~02:4xZ — THE DEPLOY UNIT IS THE **PACKAGE**, NOT A PROJECT
+
+**Issuer ruling, msg 12179.** `0.7.0_AE_CloudOps~I` measured a THIRD race by CONTENT and **correctly
+refused to apply it**, because this TO as originally written authorized the package carrying `TO-6` and
+`TO-8` — and `25f30acc63` is **`ETFS_POSITIONING.TO-7`, a different project.** ⭐ **Refusing to ship
+another project's work on an authorization that did not name it was right. The authorization is widened
+here rather than stretched.**
+
+> ⭐ **THE DEPLOY UNIT IS THE PACKAGE `etf-positioning-producer`. IT SPANS `ETFS_INGEST` AND
+> `ETFS_POSITIONING`. `0.7.0_AE_CloudOps~I` IS ITS SINGLE APPLIER, ACROSS BOTH.**
+
+⛔ **RULE 27 CANNOT BE SATISFIED BY SPLITTING THIS.** `build_package.py:67-70` puts
+`etf_positioning_gold.py` and `etf_positioning_publisher.py` in **ONE ARTIFACT**, and `25f30acc63`
+moves **both members in one commit**. **One artifact cannot be applied per-project — splitting the
+applier by project would mean shipping half a file, which is not a thing.** The artifact makes
+independence **inexpressible**, so the module is the referent. *Same resolution given for
+`infra/aws/terraform/portal-auth/`.*
+
+**MEASURED, from the live zip vs `origin/SITEZ`:**
+```
+etf_positioning_gold.py         deployed 0aca18dc7de7a825  origin b9e4940f4de98932  STALE
+etf_positioning_publisher.py    deployed 23705449d650797f  origin 62200af215926aa4  STALE
+etf_classifications_dynamodb.py deployed 8138da0300ea83c3  origin 8138da0300ea83c3  CURRENT
+```
+
+**BINDING ON EVERY APPLY OF THIS PACKAGE FROM NOW ON:**
+- ⛔ **PRE-APPLY DISCLOSURE NAMING EVERY PROJECT WHOSE CODE SHIPS**, derived **BY CONTENT** (deployed
+  member sha vs `origin/SITEZ`), written into the ledger: *"this apply also ships `<project>.<TO>`
+  @`<commit>`."* ⭐ **This is `1.0.0_SA_CTO~Z`'s `portal-auth` disclosure discipline, which that seat
+  said "stands on its own merits" even after the coupling THERE was disproven — and here is the same
+  shape ONE HOUR LATER on a coupling that is MEASURED. The discipline was right before it had an
+  instance.**
+- ⛔ **THE LANES WHOSE CODE SHIPS ARE TOLD, NOT ASKED** — their acceptance must be ready to run against
+  the apply. ⚠ **And "it deployed" is never a lane's criterion passing** (`AC5`).
+- ⚠ **A commit touching a package member is DESIRED, never APPLIED, and can land inside another lane's
+  open deploy window without either seat seeing the other.** That is a property of the shared package,
+  not a mistake by the committing lane.
+
 ## 3. ACCEPTANCE CRITERIA
 
 | id | criterion | cell | status |
