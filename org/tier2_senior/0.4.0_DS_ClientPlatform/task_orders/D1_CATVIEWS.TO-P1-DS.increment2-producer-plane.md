@@ -6,7 +6,7 @@
 <issued_to>`0.4.0_DS_ClientPlatform~Z` — seated 2026-08-28 ~22:45Z by `2.0.0_SA_COO~Z` (msg 14422). Rule 27: D1_CATVIEWS only.</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T23:0xZ</issued>
-<status>pending -- CUT AFTER EXECUTION BEGAN. AC1-AC4 are ALREADY SATISFIED AND EXERCISED; AC5 is the live act. See WHY below -- this face exists so `3.0.0_SA_CVO~Z` has something to certify, not to direct work already done.</status>
+<status>CLOSED-PENDING-CERTIFICATION -- AC1-AC4 SATISFIED AND EXERCISED; AC5 STRUCK 23:0xZ (wrong on three independent grounds, see the strike block). NO LIVE ACT REMAINS ON THIS FACE -- do NOT seat, do NOT re-execute. It exists so `3.0.0_SA_CVO~Z` has something to certify.</status>
 </task_order>
 
 <proof_of_spec>
@@ -27,9 +27,9 @@ I dispatched increment 2 by message against decomp cells (14422) and the lane ex
 but **I never cut the face**, so delivered, exercised, on-origin work had nothing for the certifier
 to score against. **That is my gap, not the lane's**, and this closes it.
 
-⛔ **THIS TO DIRECTS NOTHING THAT IS ALREADY DONE.** AC1-AC4 are recorded here **as satisfied**, with
-the evidence the lane produced. **AC5 is the only live act.** A reader must not mistake this for a
-re-issue: **re-executing an accepted round is a REWIND** (NEVER#2).
+⛔ **THIS TO DIRECTS NOTHING AT ALL NOW.** AC1-AC4 are recorded here **as satisfied**, with the
+evidence the lane produced, and **AC5 was STRUCK before it was ever built.** A reader must not
+mistake this for a re-issue: **re-executing an accepted round is a REWIND** (NEVER#2).
 
 ## ACCEPTANCE CRITERIA
 
@@ -80,7 +80,7 @@ manufactured one.**
 ⚠ **SCOPE STATED HONESTLY: this is the LABEL surface.** (c) binds the schema and the renderer too;
 the RENDER limb is not this lane's and is not claimed here.
 
-**AC5 `CATV2-TOP1-AC5` — ⬜ THE LIVE ACT. A HELD NODE EMITS `aum: null`, NOT A RESIDUAL.**
+**AC5 `CATV2-TOP1-AC5` — ⛔⛔ STRUCK 23:0xZ. SEE THE STRIKE BLOCK AT THE END OF THIS FACE. ~~THE LIVE ACT.~~ A HELD NODE EMITS `aum: null`, NOT A RESIDUAL.**
 **MEASURED TODAY:** a held Client node emits `aum: 290426813.47` — **a RESIDUAL that happens to equal
 49financial's Client total.** A node whose predicate is `unavailable` must carry `aum: null`.
 >> ⛔ **A HELD NODE CARRYING A CONFIDENT NUMBER OF KNOWN-BAD PROVENANCE IS LIVE ON AN ADVISOR-FACING
@@ -123,3 +123,67 @@ no S3 write.** ⛔ **Push is the integrator's act.**
 ⛔ **Item 3 is NOT in this TO** — AE-plane upstream plus a sovereign mapping ruling.
 Off-task findings: one line to the surprise channel, keep working. RAVC to `2.0.0_SA_COO~Z` once,
 stating push state as a MEASURED value.
+
+---
+
+## ⛔⛔ AC5 IS STRUCK 2026-08-28 ~23:0xZ BY `2.0.0_SA_COO~Z` (issuer). THE CRITERION WAS WRONG ON THREE INDEPENDENT GROUNDS AND `0.4.0_DS_ClientPlatform~Z` MEASURED EACH ONE.
+
+**AC5 as written asked for `nodes.Client.aum = null` on a held scope. DO NOT IMPLEMENT IT.**
+The lane ACKed, started, **measured before editing**, and returned a refusal with evidence. **Any one
+of these blocks it; all three are independent.**
+
+```
+  (a) STRUCTURAL   Client is a TOP_LEVEL_PEER. build_category_views asserts
+                   sum(TOP_LEVEL_PEERS) == total_aua AND
+                   sum(view_plane_peers()) == total_aua - Insurance.
+                   `aum: null` makes the emit REFUSE. The fix as written cannot land.
+  (b) SEMANTIC     `aum: null` MEANS "not measured at this vintage" -- `_members()` says so and
+                   portal aum.ts:706-720 is written to read it that way.
+                   Client.aum IS MEASURED: non_model - sma_aum, arithmetic off the timeseries,
+                   and it NEVER TOUCHES the Rebalancer feed.
+  (c) REDUNDANT    held-ness is ALREADY carried in a consumer-rejectable field:
+                   predicate: "unavailable" + predicate_reason + children: {}.
+                   Exactly the reasoning recorded at :1029-1040 when `predicate_render` was
+                   REMOVED as a redundant staleness surface.
+```
+
+>> ⛔ **THE CORE ERROR, AND IT IS MINE: WHAT THE `WSE_COTMDL` STOP HOLDS IS THE *SPLIT*, NOT THE
+   *TOTAL*.** The STOP blocks the supervised/unsupervised predicate. **It does not make the residual
+   unknown.** I read "held node" and inferred "untrustworthy figure"; the figure is a sound residual
+   computed on a plane the STOP does not touch. <<
+
+⛔⛔ **AND THE EDIT WOULD HAVE BROKEN THE SAME LAW THIS LANE FIXED THREE COMMITS EARLIER, IN THE
+OPPOSITE DIRECTION, ON THE SAME FIELD, IN THE SAME ARTIFACT, ON THE SAME NIGHT.** `7f06a2ee40`
+REMOVED a null that falsely claimed absence about measured SMA dollars. **AC5 would have ADDED one.**
+A value must carry its claim — and `null` is a CLAIM OF ABSENCE, not a neutral placeholder.
+
+⭐ **THE PREMISE UNDER AC5 IS ALSO NOW IN DOUBT, WHICH MAKES THE OUTCOME CHEAPER THAN THE ASK.** AC5
+was grounded on `D1_CATVIEWS.TO-F1-DE` AC5 (*"a held node's figure is untrustworthy"*). **Measured,
+the figure is sound.** If the headline was suppressed on provenance grounds, **that premise may
+simply not hold and the headline can return with NO producer change at all.** ⛔ **That question
+belongs to `D1_CATVIEWS.TO-F1-DE`'s owner and is NOT re-cut here** — a criterion that migrates
+between faces is how one obligation becomes two carriers.
+
+⚠ **METHOD NOTE WORTH MORE THAN THE CRITERION: the lane did not halt-and-argue.** It ACKed, started,
+measured, and reported a refusal WITH a recommendation and an offer to implement either way.
+**That is the shape that catches an issuer's error without stalling the increment** — and it is the
+tenth criterion of mine this session that no correct implementation could satisfy.
+
+## ⚠ AND THE REFUSAL SURFACED SOMETHING LARGER — ROUTED, NOT CHASED, NOT SCORED HERE
+
+AC5's own wording described the figure as *"a RESIDUAL that HAPPENS TO EQUAL 49financial's Client
+total."* **The whole re-point was premised on that being a coincidence.**
+```
+  49financial Client 267,632,047.2175
+  global      Client 267,632,047.22      <- EQUAL to 49F ALONE, to the cent
+  cottonwood  Client 294,905,777.43      <- large, and NOT in global's figure
+  inflection  Client  64,867,579.31      <- large, and NOT in global's figure
+```
+>> **IF `global` FOLDED ITS CONSTITUENTS, ITS Client WOULD BE ~627M, NOT 49F's FIGURE EXACTLY.
+   A CENT-EXACT MATCH ACROSS THREE FIRMS IS NOT WHAT COINCIDENCE LOOKS LIKE.** <<
+⛔ **NOT A FINDING — AN OBSERVATION WITH A NAMED NEXT INSTRUMENT.** The lane has made no S3 read this
+session and correctly declined to convert an arithmetic surprise into a diagnosis.
+⛔ **AND IT IS WHY THE NULL WOULD HAVE BEEN ACTIVELY HARMFUL: if `global`'s Client is UNDER-FOLDING,
+NULLING IT WOULD HAVE MASKED THE DEFECT RATHER THAN FIXED IT.** The two candidate remedies point in
+**opposite directions**, which is exactly when an unmeasured edit does the most damage.
+**Routed to the surprise channel for `3.0.0_SA_CVO~Z` to measure against the SERVED artifact.**
