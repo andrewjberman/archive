@@ -233,3 +233,45 @@ proceeding; the no-op hazard in §2 is discharged and AC2 is a confirmation rath
 *"from bronze ingestion onward"*; the serving end already implements the separation he asked for
 (`generated_at` vs `data_as_of`, censused by CTO~Z, confirmed under an actual republish by DE~Z's
 2,384-leaf diff). **The gap is exactly here and nowhere else.**
+
+---
+
+## AC3 STATUS RECORDED 2026-08-29 ~00:0xZ BY `2.0.0_SA_COO~Z` (COO) — **DEFERRED-BY-SCOPE**, AND A CORRECTION TO MY OWN CHARACTERISATION
+
+**RULING, `1.0.0_SA_CTO~Z` 2026-08-28 23:34Z: NOT NOW.** Not declined on merit — **D4 scope, while
+Andrew's stated singular priority for the session is D1.** No lane seated; `0.4.0_DS_ClientPlatform~P`
+(the recorded assignee) is DEAD, and `0.4.0_DS_ClientPlatform~Z` cannot take it under Rule 27.
+
+### ⛔ MY OWN WORDING WAS TOO STRONG AND I AM CORRECTING IT HERE, NOT QUIETLY
+I described this as **"a false completion claim"** and **"a record claiming completion over work that
+did not happen."** **Read at the evidence, that overstates it.**
+```
+  COMMIT 63ef598d5a  "feat(ETFS_INGEST.TO-7 AC3): RE-DERIVE FROM BRONZE"
+  WHAT IT LANDED     the re-derive MECHANISM -- and the mechanism WORKS
+  WHAT IT DID NOT    the BACKFILL of the pre-fix 2026-08-24 partition
+  => DESIRED != APPLIED. A SCOPE AMBIGUITY IN A TITLE, NOT A FABRICATION.
+```
+>> **THE TITLE READS AS IF AC3 WERE DISCHARGED. THE CODE IT NAMES IS REAL AND CORRECT.** Calling that
+   a "false completion claim" impugns a commit that did what it says at the level it operated on.
+   **The defect is that a reader infers the BACKFILL from a title about the MECHANISM.** <<
+
+### ⭐ AND THE CONTRAST PROVES THE PRODUCER FIX WORKS GOING FORWARD
+```
+  2026-08-24 partition (PRE-fix)   187 rows, 17 cols, NO as_of_basis;
+                                   trueshares 73/187 carry data_as_of 2026-08-21 (WRONG)
+                                   filepoint 114/187 carry 2026-08-24 (correct, untouched)
+                                   LastModified STILL 2026-08-24T22:00:17Z -- never rewritten
+  2026-08-25 and 08-26 (POST-fix)  27 columns, as_of_basis PRESENT, per-source as-ofs CORRECT
+```
+>> **ONLY THE PRE-FIX PARTITION IS STALE. THE FORWARD PATH IS FIXED AND EXERCISED ON TWO
+   SUBSEQUENT DAYS.** That is what bounds the harm and it is why deferring is defensible. <<
+
+### ⚠ THE DEFERRAL'S PREMISE IS UNVERIFIED AND CARRIES ITS OWN REVERSAL TRIGGER
+The ruling rests on *"nothing is served wrong tonight because of it."* **Nobody has traced
+silver -> gold -> platinum on this path.** `1.0.0_SA_CTO~Z`, verbatim: *"if those 73 rows reach a
+SERVED object, say so and I reverse this immediately."*
+⛔ **STANDING: WHOEVER NEXT TOUCHES THE `ETFS_INGEST` SILVER->SERVED PATH TRACES THOSE 73 ROWS
+FIRST.** That is a standing word, not a re-ask. ⚠ **Four days stale as of this note — "bounded" is
+not "zero", and elapsed time is an argument for a deadline, not against one.**
+⛔ **NOBODY REWRITES THE PARQUET ON THE STRENGTH OF THIS NOTE.** It records state; it authorises
+nothing.
