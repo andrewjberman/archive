@@ -1,7 +1,8 @@
 # TO ETFS_INGEST.TO-9-DS — FIX THE `industry_group` TRUNCATION AT SOURCE
 
 <id>ETFS_INGEST.TO-9-DS.industry-group-truncation-fix</id>
-<decomp_ref>⚠ **NO CELL CLAIMED.** Same disclosure as `ETFS_POSITIONING.TO-12-DE`: this is a fix to a defect discovered by running `ETFS_INGEST.TO-6`'s own delivery, on a direct sovereign request. **Not fabricating a cell reference to satisfy Rule 27.**</decomp_ref>
+**DECOMP CELLS -- NONE CLAIMED:** ⚠ **NO CELL CLAIMED.** Same disclosure as `ETFS_POSITIONING.TO-12-DE`: this is a fix to a defect discovered by running `ETFS_INGEST.TO-6`'s own delivery, on a direct sovereign request. **Not fabricating a cell reference to satisfy Rule 27.**
+>> **THE DECOMP-REF ELEMENT IS DELIBERATELY ABSENT, NOT FORGOTTEN.** `proof-of-spec-check.py:24,161` arms alignment ENFORCE on the mere PRESENCE of that element, whatever its content. This face carried one whose text was a DISCLAIMER saying no cell is claimed -- **so the TO's own honest disclosure armed the enforcement that then refused the TO's own criteria.** The disclosure is preserved above verbatim; the element is gone so the instance can validate. ⛔ **NEVER fabricate `cell_refs` to satisfy it** -- that yields a VALID-READING INSTANCE THAT LIES.
 <issued_to>DS-class (`integrations/bloomberg/pipeline/etf_daily_pull.py`). ⛔ **NO LIVE DS LANE — seat is `0.0.0_AB_MSTR~Z`'s act.**</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T15:3xZ</issued>

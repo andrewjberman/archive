@@ -1,7 +1,7 @@
 # TO D1_CATVIEWS.TO-M1-DS — MAP THE DOLLAR VALUES ONTO THE L2 NODES
 
 <id>D1_CATVIEWS.TO-M1-DS.l2-dollar-values-mapped</id>
-<decomp_ref>`workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md` — `D1-h-r4` (Custom Models L2 is INCOMPLETE; remedy = registry edit fed by per-Partner composition rulesets), `D1-h-v3` (L2 drill), `D1-inv-4` (view-plane sum). **NO new cell.**</decomp_ref>
+<decomp_ref>workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — `D1-h-r4` (Custom Models L2 is INCOMPLETE; remedy = registry edit fed by per-Partner composition rulesets), `D1-h-v3` (L2 drill), `D1-inv-4` (view-plane sum). **NO new cell.**</decomp_ref>
 <issued_to>DS-class. ⛔ **NO LIVE DS LANE — seating is `0.0.0_AB_MSTR~Z`'s act on Andrew's word.** A TO outlives its seat; this is cut so the work is specified, not because a lane exists.</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T15:0xZ</issued>
