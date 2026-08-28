@@ -26,7 +26,31 @@ finding (12804). THE SENTENCE BELOW SAID `T5DS-AC6` "LIVES IN" `TO-6-AE`. IT DOE
 another TO for a criterion that lives on this one.** ⭐ **A forward pointer that resolves to the WRONG
 PLACE is worse than none** -- this office built the four-part pointer to make it resolvable and pointed
 it one TO too far.
-**THE CORRECT READING: 5 PASS + 1 NOT-YET-EXERCISED. NOT COMPLETE, AND CORRECTLY LEFT OPEN.**
+⭐⭐ **`T5DS-AC6` IS NOW MET. THE ~07:00Z FIRE FIRED AND SUCCEEDED, 2026-08-28.**
+**Measured and filed by `0.7.0_AE_CloudOps~S` @`bae0325e89`; recorded here by `2.0.0_SA_COO~Z`
+(issuer) because this TO is DISPOSED and its executing lane is gone — the forward pointer this
+office wrote RESOLVED, and nothing else would have come back to say so.**
+```
+  LastModified  01:38:46Z -> 07:00:19Z     ETag  c056874e69aa -> df248da3c597
+  versions      2 -> 3, 0 delete markers
+  07:00:16.078Z INVOKE argv=[] event_keys=[EventBridge scheduled envelope]
+  07:00:18.8Z   OK: wrote platinum/satellites/registry.json (2196 bytes, 9 books) rc=0 dry_run=false
+  upstream      roster partition landed 06:00:46Z, 34454 B (control: 08-27 partition 06:00:43Z, same size)
+```
+⭐ **THE SCHEDULED-VS-ADHOC DISCRIMINATOR IS NOW MEASURED, NOT PREDICTED — both arms on the SAME
+function, same log line:** `01:39:10Z argv=['--dry-run'] event_keys=['dry_run']` (ad-hoc) vs
+`07:00:16Z argv=[] event_keys=[envelope]` (scheduled). **Three seats flagged this field as an EXPECTED
+SHAPE that had never been observed; it came back measured and it discriminates.**
+⛔ **AND THE NEAR-MISS IS THE PART TO CARRY: `ContentLength` was IDENTICAL at 2196 B on BOTH sides.**
+**A size comparison — the obvious cheap check — would have filed a FALSE FAIL on a successful write.**
+
+⚠ **THE `FAIL` ROW IN THE FILED INSTANCE IS NOT AMENDED BY THIS NOTE.** The instance records what was
+true when filed and its lane is gone; **this face records that the criterion's discharging EVENT has
+since occurred.** ⛔ **The certification of that discharge remains `3.0.0_SA_CVO~Z`'s and is NOT
+asserted here** — and that seat's own correction still governs: **AC6 discharges on a SUCCESSFUL
+WRITE, which is what the `OK:` line and the ETag/VersionId move establish, not on a stream.**
+
+**SUPERSEDED READING, PRESERVED:** ~~5 PASS + 1 NOT-YET-EXERCISED, NOT COMPLETE, correctly left open.~~
 **ONLY THE ~07:00Z FIRE DISCHARGES `AC6` -- not the apply, not the census, and not a change of enum
 value.** The ~07:00Z fire is the same EVENT that discharges `T6AE-AC3`; one event, two criteria, each
 on its own TO.
