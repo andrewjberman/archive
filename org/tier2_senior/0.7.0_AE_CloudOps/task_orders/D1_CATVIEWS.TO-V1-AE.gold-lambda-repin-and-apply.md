@@ -159,7 +159,16 @@ prevent. Comment-only; do not change the `--pin` default as a side effect of thi
 default is a separate decision with its own reasoning — surface a rec, do not take it silently).
 
 **AC7 `CATV-TOV1-AC7` — EXERCISED: THE FIRST SCHEDULED FIRE AFTER THE APPLY.** `cell_refs: D1-i-2, D1-inv-5`
-⚠ **EVENT-GATED AND CANNOT CLOSE TODAY** — the gold floor fires ~13:00/13:30Z.
+⚠ **EVENT-GATED AND CANNOT CLOSE TODAY.**
+⛔ **CLOCK CORRECTION, and the defect was the ISSUER'S — caught by `0.7.0_AE_CloudOps~Z` on receipt.**
+This criterion first read *"the gold floor fires ~13:00/13:30Z"*, phrased as though that fire were
+AHEAD. **It is not: this TO was cut at ~17:1xZ, so today's fire is ~4h PAST.** The acceptance event is
+**THE NEXT SCHEDULED FIRE AFTER THE APPLY LANDS**, which is tomorrow's — and that is true regardless,
+because AC7 is the SERVED rung and no apply had landed when today's fire ran.
+>> **WHY THE CORRECTION IS WORTH A RE-COMMIT ANYWAY:** the act does not change, but a later reader —
+   a certifier deciding whether a same-day close was ever available — would compute the wrong wait
+   from the original phrasing and could score an OPEN AC7 as a slip. **A stale clock on a durable face
+   misleads everyone downstream of it, not just the executor who caught it.** <<
 **AC3 IS THE PACKAGE RUNG; AC7 IS THE SERVED RUNG, AND THEY ARE DIFFERENT CLAIMS.** Passing AC3
 establishes that the running bytes carry the fix — it does NOT establish that the served artifact is
 corrected. On the first scheduled fire after this apply, read
