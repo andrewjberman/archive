@@ -15,10 +15,15 @@ erase the record of WHY the floor was ever taken down, which is the one thing a 
 to evaluate the restoration. The marker is appended in the SAME field, so the claim and its
 discharge cannot be separated by a later reader looking at only one of them.
 
-⛔ THE SCALAR IS NOT TOUCHED HERE. trust.key.basis edits are HELD at every lane (issuer 213704Z act
-(1), 4.0.0_SA_CRO~X 214157Z) pending the confirmed floor predicate, and this seat's replay under
-that predicate reports 4 of 18 rather than the 15 on the boundary sheet (79308). The structural diff
-of this addendum is confined to /trust/key/evidence and nothing else.
+⛔ THE SCALAR IS A SECOND, GATED PASS -- and this paragraph used to say the scalar was never touched
+here, which the --scalar mode then made FALSE. That is the same class as the cards' own delta prose:
+a sentence true when written, outlived by the change that followed it. Correcting it in the same
+breath as the cards seemed the only honest option.
+
+The prose pass runs by default. `--scalar` additionally re-derives trust.key.basis, and only ran
+after the hold lifted (issuer 213704Z act (1) -> schema owner confirmation 214056Z -> 4.0.0_SA_CRO~X
+215300Z, bound denominator 4/18 understating, 14/18 correct, 0/18 unbased, cards named). The floor is
+DERIVED by true_floor(), never typed.
 
 THE WRITER IS PROVED BEFORE IT WRITES. `round_trip_proof()` reads every card and re-serialises it
 UNCHANGED; if a single byte differs the run refuses. That is what makes the post-diff attributable
@@ -36,6 +41,28 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", "..", ".."))
 LANE = "0.4.0_DT_ClientPlatform~X"
 MARKER = "DISCHARGED-KEYFILL-DTX"
 LIVE_TOKEN = "key_expression ABSENT on this card"
+SCALAR_MARKER = "SCALAR-REDERIVED-KEYFILL-DTX"
+RANK = {"absent": 0, "inferred": 1, "held": 2, "measured": 3}
+SUB_CLAIMS = ("identity_space", "key_is_stable", "crosses_spaces", "key_expression")
+
+
+def true_floor(key):
+    """The CONFIRMED floor predicate (issuer 213704Z, schema owner 214056Z): MIN over ALL sub-claims
+    PRESENT in the row, where a sub-claim carrying a VALUE but no declared basis_by_field entry
+    enters at 'inferred' -- a value without its claim may not be counted measured or held, and is
+    not absent because the value is there.
+
+    DERIVED, NEVER TYPED. The declared-only reading would let a card RAISE its floor by leaving a
+    sub-claim's basis undeclared, which is the drift basis_by_field exists to stop.
+    """
+    bbf = key.get("basis_by_field") or {}
+    present = [s for s in SUB_CLAIMS if key.get(s) is not None]
+    if not present:
+        return None, []
+    bases = [(s, bbf.get(s, "inferred")) for s in present]
+    floor = min((b for _s, b in bases), key=lambda v: RANK.get(v, 9))
+    undeclared = [s for s, _b in bases if s not in bbf]
+    return floor, undeclared
 
 
 def serialise(obj):
@@ -62,6 +89,40 @@ def round_trip_proof(rows):
     for f in bad[:5]:
         print("   NOT IDENTICAL %s" % os.path.basename(f))
     return not bad
+
+
+def scalar_pass(rows, apply):
+    """Act (4): restore trust.key.basis to its true floor on the cards the migrator lowered."""
+    changed, at_floor, unbased = [], 0, 0
+    for f, raw, d in rows:
+        key = d.get("trust", {}).get("key", {})
+        floor, undeclared = true_floor(key)
+        unbased += len(undeclared)
+        cur = key.get("basis")
+        if floor is None or cur == floor:
+            at_floor += 1
+            continue
+        key["basis"] = floor
+        key["evidence"] = (key.get("evidence") or "") + (
+            " || %s 2026-08-28: trust.key.basis RE-DERIVED %s -> %s as MIN over the sub-claims "
+            "present in this row (an undeclared one would enter at 'inferred'; this row has %d). "
+            "Mechanical, never typed. The lowering it reverses is the migrator's, recorded above and "
+            "retained." % (SCALAR_MARKER, cur, floor, len(undeclared)))
+        post = serialise(d).encode("utf-8")
+        changed.append((f, cur, floor, hashlib.sha256(raw).hexdigest(),
+                        hashlib.sha256(post).hexdigest()))
+        if apply:
+            with open(f, "wb") as fh:
+                fh.write(post)
+    print()
+    print("SCALAR RE-DERIVATION (act 4), denominator %d" % len(rows))
+    print("   understated and corrected : %d" % len(changed))
+    print("   already at the true floor : %d" % at_floor)
+    print("   unbased sub-claims        : %d" % unbased)
+    for f, cur, floor, a, b in changed:
+        print("   %-10s %-9s -> %-9s   %s -> %s"
+              % (os.path.basename(f).split("__")[0][-9:], cur, floor, a[:16], b[:16]))
+    return changed
 
 
 def main():
@@ -112,7 +173,13 @@ def main():
     print()
     print("CENSUS: lane cards %d | live discharged %d | already %d | untouched %d"
           % (len(rows), len(changed), already, len(rows) - len(changed) - already))
-    print("STRUCTURAL DIFF confined to: /trust/key/evidence  (no scalar, no other field)")
+    if "--scalar" in sys.argv:
+        # re-read so the scalar pass sees the prose edit already on disk
+        scalar_pass(cards(), apply)
+        print()
+        print("STRUCTURAL DIFF confined to: /trust/key/evidence and /trust/key/basis")
+    else:
+        print("STRUCTURAL DIFF confined to: /trust/key/evidence  (no scalar, no other field)")
     print("mode: %s" % ("APPLIED" if apply else "DRY RUN (pass --apply)"))
     return 0
 
