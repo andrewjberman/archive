@@ -51,10 +51,12 @@ names its holder, exactly as `mdpf_gold_consolidator.py:143-160` specifies (`glo
 `CLIENT_L1_RULE` entry because the three firms' rules differ IN KIND; `client_l1_split('global')`
 raises deliberately; it unholds by itself when cottonwood clears). **THE HOLD IS WORKING AS DESIGNED.**
 "Understated" implies the node purports to be a complete total; it does not, so the word was wrong
-even though the arithmetic was real. The ACTUAL global defect is smaller and two-sided: a **residual
-`aum` on a node declared unavailable** (should be `null`), plus a **renderer printing the headline
-unconditionally** beneath a panel saying that figure is unavailable. Neither is touched by this
-deploy, so **the CONCLUSION stands and only the mechanism changed.**
+even though the arithmetic was real. The ACTUAL global defect is smaller and two-sided: a **renderer printing the headline
+unconditionally** beneath a panel saying that figure is unavailable. ⛔ **A SECOND CORRECTION, 17:3xZ:**
+this line briefly also said the `aum` was a residual that *"should be `null`"* — **RETRACTED at
+source.** `mdpf_gold_consolidator.py:590/:669/:679` computes it from **global's OWN `non_model_aua`**;
+the hold is on the L1 SPLIT (`:748`), not the L0 total. **The `aum` is the part that is RIGHT.**
+Neither issue is touched by this deploy, so **the CONCLUSION stands and only the mechanism changed.**
 >> **WHY THIS CORRECTION IS ON THE FACE AND NOT ONLY IN A MESSAGE: a message retraction does not
    reach a file.** This TO is the durable carrier an executor and a certifier read. Leaving the
    retracted mechanism here would have it re-derived from my own artifact after everyone had agreed
@@ -206,9 +208,16 @@ else moved the numbers."
 scheduled run exists to produce — CLAUDE.md's ad-hoc-QA exception does NOT apply here.
 **File the instance with AC7 OPEN and re-file after the fire.** Do not hold the whole TO for it.
 ⚠ **AND IT DOES NOT FIX GLOBAL.** After this lands, the `global` scope still carries its own separate
-defect — a **residual `aum` on a Client node the producer has declared `predicate: "unavailable"`,
-`held_constituents: ["cottonwood"]`** — owned by `2.0.0_SA_COO~Z` and untouched by this deploy. Do
+defect — an **ungated renderer headline** on a Client node the producer declared
+`predicate: "unavailable"`, `held_constituents: ["cottonwood"]` — untouched by this deploy. Do
 not report AC7 as "category-views is correct."
+⚠ **DO NOT EXPECT THAT NODE'S `aum` TO BE NULL OR TO MOVE, AND DO NOT SCORE IT.** Read at source
+17:3xZ (`mdpf_gold_consolidator.py:590/:669/:679`): the consolidator computes it correctly from
+global's own `ts_doc`; the hold is on the L1 SPLIT (`:748`), not the total — which is why `children`
+is `{}` while the figure stands. **The defect is UPSTREAM**: `3.0.0_SA_CVO~Z` measured that global's
+`non_model_aua` equals 49financial's to the cent while `global.Models` correctly sums all three in
+the SAME object. **This deploy does not touch it, and its value after the fire is not evidence of
+anything. RECORD IT, UNSCORED.**
 ⛔ **DO NOT SCORE `global` AGAINST THE OLD FRAMING.** An earlier version of this face called that node
 "understated by $359,773,356.74" and described it as aggregating over one firm of three. **RETRACTED —
 see the correction under BOUND 2.** `global.Client` is HELD BY DESIGN and is not claiming to be a
