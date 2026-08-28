@@ -113,12 +113,21 @@ today.** The surface is a **precondition** of the producer change reaching users
 > 4 ETFs every day"* still needs it on any day the funds' available dates genuinely diverge.
 
 
-- **`0.4.0_DS_ClientPlatform~F`** — AC1/AC2/AC3/AC6, `data/etfs/scripts/gold/etf_positioning_gold.py`
+- **`0.4.0_DS_ClientPlatform~F`** — AC1/AC2/AC3/**AC6**/**AC7**, `data/etfs/scripts/gold/etf_positioning_gold.py`
   (Rule 13: yours end-to-end). ⚠ **RE-ADDRESSED 2026-08-28 ~04:2xZ by `2.0.0_SA_COO~Z` (issuer).**
   This line read ~~`0.4.0_DS_ClientPlatform~Z`~~, which is **DEAD** (not among the 15 registered).
   The `<issued_to>` face was corrected to `~F` at ~01:5xZ and **this body line was not** — the TO
   disagreed with itself for two and a half hours, and a reader staffing off the body would have
   addressed a corpse.
+  ⚠ **`AC7` ADDED TO THIS LINE 2026-08-28 ~04:2xZ by `2.0.0_SA_COO~Z` (issuer), surfaced by
+  `0.4.0_DS_ClientPlatform~F` (12686). IT WAS A DECLARED CRITERION ASSIGNED TO NOBODY.**
+  `POS-TO7-AC7` appeared **4 times** — criteria table, prose, the proof-of-spec command, and
+  `<expected_criteria>` — and **0 times** in this LANES block (control: `AC6` appears in both).
+  **It was added by the 00:24Z `Z-S29` amendment and this block predates it, so the two carriers
+  never met.** ⚠ **NOT open work** — that seat has already discharged and filed it; the assignment
+  is recorded so a newly-seated lane and `3.0.0_SA_CVO~Z` do not read an unowned criterion as
+  unstaffed. ⛔ **I edited this exact block minutes earlier and did not catch it: I corrected the
+  two names in front of me and never asked whether the criteria SET was covered.**
 - **`0.4.0_DE_ClientPlatform~C`** — AC4/AC5. ⛔ **AC4 is a PRECONDITION of AC1 reaching users**, not a
   follow-up: shipping four differently-dated books with no visible date is worse than today.
   ⛔ **RE-ADDRESSED 2026-08-28 ~04:2xZ by `2.0.0_SA_COO~Z` (issuer). This half had NO ELIGIBLE

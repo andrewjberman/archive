@@ -47,13 +47,27 @@ His first message asked for horizontal scroll on `POSITIONING SUMMARY`. **His se
 
 ⛔ **DO NOT drop `98` from `SATELLITE_MEMBERS`, from the registry, or from the producer.** That destroys tracked data to solve a display choice, and it would silently change what the derived aggregate is computed FROM. ⚠ **`SAT-b-5` is why this matters concretely: `Opal Satellite 98` has ELEVEN accounts and `90` has ZERO.** Removing 98 from membership would remove the populated book and keep the empty one.
 
-## 3. ITEM (2), THE COLOUR GRADIENT, IS NOT IN THIS TO
+## 3. ITEM (2), THE COLOUR GRADIENT -- **BOTH QUESTIONS ANSWERED; IT IS NOW IN THIS TO (AC8/AC9)**
 
-**Two open questions, neither guessable, both with `1.0.0_SA_CTO~Z` and Andrew:**
-- **(a) DIRECTION IS AMBIGUOUS.** *"orange for the shortest"* — Duration measured from his own screenshot runs `2.89 2.89 2.90 2.90 2.90 2.63 2.37 1.81 1.81` across Satellite 15 → 98, so **the shortest is the RIGHTMOST**, running the gradient right-to-left; the natural reading of his sentence puts orange leftmost. **Opposite, and building it backwards is a visible error on a page he just approved.**
-- **(b) THE TARGET ELEMENT** did not resolve to any name in the Positioning source on first search.
+**AMENDED 2026-08-28 ~04:2xZ by `2.0.0_SA_COO~Z` (issuer).** This section previously held item (2) OUT on two open questions. **Both are closed, so it lands HERE rather than in a second TO** -- a separate carrier over the same component is the two-carrier class, and worse, **`AC1` DETERMINES this item's span.**
 
-⚠ **Note it interacts with THIS TO: the gradient spans the DISPLAYED books, and after AC1 that is EIGHT, not nine.** Whoever builds it derives the span from the rendered set. **When his answer lands it gets its own TO from this office. Do not pre-build it and do not pick a direction to be helpful.**
+**(a) DIRECTION -- ANDREW-DIRECT ~04:2xZ, VERBATIM:**
+
+> *"orange on satellite 15, leftmost, the reason is just that equity is becoming higher weighted as we go to the right which does not have duration, therefore it seems like duration is getting smaller but its actually a misnomer"*
+
+**BUILD ANSWER: ORANGE ON SATELLITE 15 (LEFTMOST), RUNNING LEFT TO RIGHT.**
+
+*** HIS REASON IS WORTH MORE THAN THE ANSWER AND IT CORRECTS A MEASUREMENT.*** `1.0.0_SA_CTO~Z` read the Duration row off the screenshot (`2.89 ... 1.81`) and inferred *shortest = rightmost*, which would have run the gradient BACKWARDS. **The number was read correctly and meant something different: equity weight RISES rightward (17.4% -> 91.9%) and equity has NO duration, so the blended average falls because the FIXED-INCOME SLEEVE SHRINKS, not because anything got shorter.** No amount of re-measuring that column would have produced this. **Asking instead of guessing is what caught it.**
+
+**(b) THE ELEMENT** -- identified by `0.4.0_DE_ClientPlatform~Z` (12709) from its own rendered captures, **handed over WITHOUT taking the build** (`ETFS_SATELLITES` is not that lane's project):
+```
+  HoldingsTab.tsx:969-980   the BOOK-CHIP ROW in the PORTFOLIO COMPOSITION panel header
+                            displayPortfolios.map(p => button style backgroundColor:
+                              isActive ? p.color : transparent
+  HoldingsTab.tsx:66        color: BOOK_COLOR_CYCLE[i % BOOK_COLOR_CYCLE.length]  <- in portfoliosFor
+```
+*** THE PALETTE ANDREW DESCRIBES ALREADY EXISTS, IN HIS EXACT ORDER -- orange/amber/green/blue/red. THE DEFECT IS THAT IT IS A 5-CYCLE.*** With more than five books the colours REPEAT. **He is asking for INTERPOLATION ACROSS the existing stops, not for a new palette.**
+**An earlier search missed it because the constant is named neither `chip` nor `selector` nor `BOOK_COLORS` -- it is `BOOK_COLOR_CYCLE`, and it lives in `HoldingsTab.tsx`, not `bookSet.ts`.**
 
 ## 4. ACCEPTANCE CRITERIA
 
@@ -66,6 +80,8 @@ His first message asked for horizontal scroll on `POSITIONING SUMMARY`. **His se
 | `T10DE-AC5` | **THE DROPDOWN CODE IS COMMENTED OUT, NOT DELETED.** *"keep the dropdown code available just comment it oout ... just in case later we may add other custom models for other firms."* **A deletion loses the reasoning; the comment preserves it.** Show re-enabling is a comment-uncomment, not a rebuild. | `SAT-c-3` | |
 | `T10DE-AC6` | ⛔ **`TO-9-DE`'s FOUR-WAY DISCRIMINATION SURVIVES.** A 400 must still render as an ERROR and never as *"no satellites"*. **Removing the selector must not collapse those states** — re-exhibit by hash. **A default that turns a failed fetch into an empty registry is the regression this catches.** | `SAT-c-3` | |
 | `T10DE-AC7` | **RENDERED, NOT GREPPED.** Read screenshots: the eight-book Positioning Summary with no clipping · the satellites view with no selector, defaulted to cottonwood. ⚠ **THE CANVAS IS SILVER.** | `SAT-d-1` | |
+| `T10DE-AC8` | **THE GRADIENT RUNS ORANGE -> YELLOW -> GREEN -> BLUE -> RED, LEFT TO RIGHT, ORANGE ON `Satellite 15`.** Andrew-direct, and his reason is recorded in s.3: the falling Duration column is a MISNOMER. **Do NOT derive the direction from the Duration values** -- that inference was made and was wrong. | `SAT-d-2` | |
+| `T10DE-AC9` | **EVERY DISPLAYED BOOK GETS ITS OWN COLOUR -- INTERPOLATE, DO NOT CYCLE.** `BOOK_COLOR_CYCLE[i % len]` at `HoldingsTab.tsx:66` REPEATS once the book count exceeds the palette length. **The palette already carries his exact five stops; blend BETWEEN them across the displayed set.** *** THE SPAN IS THE SET `AC1` LEAVES RENDERED -- EIGHT books, not nine.*** Exhibit each chip distinct in a read render. | `SAT-d-2` | |
 
 ## 5. WHY ITEM (3) REVERSES `TO-9-DE`, AND WHY THAT IS NOT A DEFECT
 
@@ -97,6 +113,8 @@ Deliverable + read screenshots + proof instance in this lane's `deliverables/`, 
   <criterion id="T10DE-AC5" cell_refs="SAT-c-3"/>
   <criterion id="T10DE-AC6" cell_refs="SAT-c-3"/>
   <criterion id="T10DE-AC7" cell_refs="SAT-d-1"/>
-  <expected_criteria>T10DE-AC1,T10DE-AC2,T10DE-AC3,T10DE-AC4,T10DE-AC5,T10DE-AC6,T10DE-AC7</expected_criteria>
-  <alignment_denominators>cells declared: 4 (SAT-d-1, SAT-b-5, SAT-c-2, SAT-c-3); criteria: 7. FORWARD — 7 of 7 carry >=1 cell_ref. BACKWARD — 4 of 4 reachable (SAT-d-1 from AC1/AC3/AC7, SAT-b-5 from AC2, SAT-c-2 from AC4, SAT-c-3 from AC5/AC6). Unmapped 0; untraceable 0. NOTE: no cell is added. `SAT-c-2`/`SAT-c-3` are cited on the SAME limbs `TO-9-DE` cited — the sovereign changed the ruled ANSWER, not the cell. `SAT-b-5` is cited as a CONSTRAINT rather than a deliverable: it records that 98 holds eleven accounts and 90 holds zero, which is what makes AC1 a DISPLAY act and forbids solving it as a membership edit. Andrew's colour-gradient item is DELIBERATELY ABSENT — its direction is ambiguous against the measured Duration values on his own screenshot and its target element did not resolve in the Positioning source, so a criterion for it would be unbuildable as written.</alignment_denominators>
+  <criterion id="T10DE-AC8" cell_refs="SAT-d-2"/>
+  <criterion id="T10DE-AC9" cell_refs="SAT-d-2"/>
+  <expected_criteria>T10DE-AC1,T10DE-AC2,T10DE-AC3,T10DE-AC4,T10DE-AC5,T10DE-AC6,T10DE-AC7,T10DE-AC8,T10DE-AC9</expected_criteria>
+  <alignment_denominators>cells declared: 5 (SAT-d-1, SAT-b-5, SAT-c-2, SAT-c-3, SAT-d-2); criteria: 9. FORWARD -- 9 of 9 carry >=1 cell_ref. BACKWARD -- 5 of 5 reachable (SAT-d-1 from AC1/AC3/AC7, SAT-b-5 from AC2, SAT-c-2 from AC4, SAT-c-3 from AC5/AC6, SAT-d-2 from AC8/AC9). Unmapped 0; untraceable 0. NOTE: no cell is added. SAT-c-2/SAT-c-3 are cited on the SAME limbs TO-9-DE cited -- the sovereign changed the ruled ANSWER, not the cell. SAT-b-5 is cited as a CONSTRAINT rather than a deliverable: it records that 98 holds eleven accounts and 90 holds zero, which is what makes AC1 a DISPLAY act and forbids solving it as a membership edit. AMENDED ~04:2xZ: AC8/AC9 carry Andrew's colour gradient, which this TO originally held OUT pending two open questions -- both are now answered (direction by Andrew-direct, element by 0.4.0_DE_ClientPlatform~Z 12709). They land HERE rather than in a second TO because AC1 DETERMINES their span: a separate carrier over the same component would race, and the loser ships a nine-stop gradient over an eight-book row.</alignment_denominators>
 </proof_of_spec>
