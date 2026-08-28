@@ -73,12 +73,41 @@ writing and the issuer did not act on it.
 ⚠ **AND IT SURVIVED A SMOKE TEST BECAUSE THE SMOKE TEST RAN ON THE FIXTURE, WHICH HAD THE RULING.**
 The half that was fixed is the half the test reads.
 
-### THE REMEDY, SPECIFIED BUT NOT IMPLEMENTED
-`Alternatives` moves from `view_plane.peers` to `view_plane.excluded` **with his 08-27 words quoted**,
-**exactly as `Insurance` already is** -- display-only exclusion, node and members and gold partition
-share UNCHANGED. ⛔ **PRODUCER-SIDE, NOT PORTAL-SIDE:** a portal filter is precisely the hardcoded
-display constant `:45` forbids, and it is the same data-vs-render distinction got RIGHT for Satellite
-98 and for Insurance. **The data keeps the node; the view drops it.**
+### ⛔ THE REMEDY -- CORRECTED. IT IS **NOT** THE INSURANCE PATTERN, AND I SPECIFIED IT WRONG.
+**I first wrote "moves `peers` -> `excluded`, exactly as `Insurance`, display-only, node UNCHANGED".
+That is the WRONG MECHANISM, caught by `1.0.0_SA_CTO~Z` (13174 s.3).** ⚠ **I QUOTED THE CORRECT
+TREATMENT AND THEN SPECIFIED A DIFFERENT ONE, ONE PARAGRAPH LATER, FROM THE SAME TABLE I HAD JUST
+PASTED.** The 08-27 record says:
+```
+registry / VIEW_TREE  "Alternatives LEAVES THE DECLARED L0 NODE SET"
+                      DS-class -- data/mdpf/scripts/gold/mdpf_category_registry.py
+emitted block         view_plane.peers stops carrying it        FOLLOWS the registry
+renderer              NO CHANGE
+smoke fixture         NODE + peer entry removed                 (DE lane, done @77d1bbce)
+```
+>> **TWO EXCLUSIONS, TWO MECHANISMS, BOTH ANDREW'S. DO NOT COLLAPSE THEM.**
+```
+Insurance      STAYS in the node set; DISPLAY-ONLY exclusion; node, members and gold
+               partition share explicitly UNCHANGED.
+Alternatives   LEAVES the declared L0 node set at the REGISTRY. peers stops carrying it as a
+               CONSEQUENCE, not as the act. The node goes too -- the fixture removed node + peer.
+```
+⛔ Still **PRODUCER-SIDE, NOT PORTAL-SIDE** -- a portal filter is precisely the hardcoded display
+constant `CategoryViewTree.tsx:45` forbids. That half of my line was right; the mechanism was not.
+⚠ **DATA COST IS NIL EITHER WAY TODAY** (`Alternatives` is `aum 0.0, members 0` on all four served
+scopes) -- **which is exactly why getting the mechanism right matters here rather than later: nothing
+in the numbers would have caught it.**
+
+### ⭐ SOVEREIGN CONFIRMATION FROM HIS OWN EYE, ~14:0xZ (relayed verbatim by `1.0.0_SA_CTO~Z`, 13174)
+> *"Just checked the dashboard, we actually dont even need Alternatives either. It's really just Models
+> SMAs and Client."*
+
+**L0 = `Models` / `SMA` / `Client`.** ⚠ **He reached this from the RENDERED PAGE, independently, ~7
+minutes after the item was filed and WITHOUT having seen it** -- *"just checked the dashboard"*.
+**The empty $0 card was visible enough to draw sovereign comment on first look: that is the cost of the
+seam, measured. It reached his eye before it reached a fix.**
+⛔ **HIS NEW SENTENCE CONFIRMS THE DECISION, NOT THE TREATMENT.** It must not be read as re-specifying
+the mechanism, nor as widening or narrowing the 08-27 scope. Verbatim relay, not adjudication.
 ⛔ **NOT IMPLEMENTED HERE:** DS-class file, no live DS lane, and **NO AD-HOC PRODUCER RUN** -- the
 next scheduled write is 13:50:50Z tomorrow. Surfaced, owner named, remedy specified, sovereign told.
 
