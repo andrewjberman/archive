@@ -139,15 +139,28 @@ curl -s -o pkg.zip "$URL" && unzip -o -q pkg.zip mdpf_gold_consolidator.py
 grep -c '_l0_of' mdpf_gold_consolidator.py                     # EXPECT >= 3   (pre-deploy: 0)
 grep -n '_l0_of(member.view_path)' mdpf_gold_consolidator.py   # EXPECT 2 hits, Models and SMA
 
-# C. NEGATIVE ASSERTION -- the defect is GONE
-grep -n 'member.view_path == "SMA"' mdpf_gold_consolidator.py  # EXPECT 0 hits (pre-deploy: :591)
+# C. ** STRUCK 2026-08-28 ~17:4xZ -- THIS ARM WAS UNSATISFIABLE BY ANY CORRECT BUILD. **
+#    It read: grep -c 'member.view_path == "SMA"'  # EXPECT 0
+#    The DEPLOYED file returns 1 -- and so does the FIXED SOURCE AT THE PIN. The string survives
+#    at :547 in a COMMENT documenting the defect that was removed ("was :611 ... EXACT -- brittle").
+#    A grep cannot tell code from a comment. DO NOT edit that comment to make this pass:
+#    that is fabricating compliance. The arm never discriminated; it is struck, not failed.
 
 # D. POSITIVE CONTROL -- makes B and C mean anything
 git show 70a0828226:data/mdpf/scripts/gold/mdpf_gold_consolidator.py > <scratchpad>/fixed_src.py
 grep -c '_l0_of' <scratchpad>/fixed_src.py                     # MUST return 3
 ```
 
->> **D IS THE ARM THAT GETS SKIPPED AND IT IS THE ONE THAT MAKES B AND C MEAN ANYTHING.** Without it,
+```bash
+# ⭐ E. THE PRIMARY CRITERION, and it is stronger than every grep arm combined:
+cmp <extracted>/mdpf_gold_consolidator.py <(git show 70a0828226:data/mdpf/scripts/gold/mdpf_gold_consolidator.py)
+#    -> IDENTICAL.  MEASURED 2026-08-28 ~17:4xZ by 2.0.0_SA_COO~Z: **IT IS IDENTICAL.**
+```
+⭐ **BYTE-IDENTITY AGAINST THE BUILD INPUT *IS* WHAT RULE 22a ASKS FOR** — deployed bytes diffed
+against the build input, with no pattern standing between the question and the answer. **Score AC3 on
+E.** B and D remain as supporting evidence; C is struck.
+
+>> **D IS THE ARM THAT MAKES B MEAN ANYTHING.** Without it,
    "0 hits" at C is equally consistent with a repaired file and a mistyped grep. This estate produced
    four broken-accessor zeros in one day and every one looked like a clean pass. <<
 ⛔ **A CHANGED `CodeSha256` OR AN ADVANCED `LastModified` IS NOT ACCEPTANCE.** Both are true of ANY
