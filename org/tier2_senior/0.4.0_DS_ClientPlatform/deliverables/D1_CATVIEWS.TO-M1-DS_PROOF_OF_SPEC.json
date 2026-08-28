@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D1_CATVIEWS.TO-M1-DS.l2-dollar-values-mapped",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "docs/architecture/D1_ASSET_CATEGORY_VIEWS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5d356cc426"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~Z",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md",
+    "vintage_commit": "2ce1e1b8d5",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/D1_CATVIEWS.TO-M1-DS.l2-dollar-values-mapped.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_gold_consolidator.py",
+      "kind": "script",
+      "commit_or_etag": "a5227cf161",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["TM1-AC1", "TM1-AC2", "TM1-AC4", "TM1-AC5"],
+      "deploy_evidence": "`models_member_aum` accumulated in the existing per-model loop (ACCUMULATE, never assign -- two crosswalk ids can map to one registry member and an assignment would keep the last and lose the other); passed to build_category_views as `member_aum`; a per-bucket L1-vs-L2 reconciliation REFUSAL; and the TM1-AC5 coverage denominator logged per scope. DEPLOY IS NOT THIS LANE'S ACT -- the gold lambda ships via infra/aws/lambda/mdpf-pipeline/mdpf-gold-lambda/build_package.py, which is AE-class. STATE: DESIRED, not APPLIED."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_category_registry.py",
+      "kind": "script",
+      "commit_or_etag": "a5227cf161",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["TM1-AC1", "TM1-AC3", "TM1-AC4"],
+      "deploy_evidence": "`build_category_views(member_aum=...)` added; `_members()` now emits `aum` per member -- the float when this scope measured it, None when it did not. NO NEW KEY WAS MINTED beyond `aum` itself, which the consumer already declares (portal/src/api/endpoints/aum.ts:706-720, `aum?: number | null`). Membership is UNCHANGED and cannot be changed by this dict: `_members()` iterates `members_for()` and looks the id up, so a stray key in member_aum is INERT, never a silent registration (D1-inv-1 preserved)."
+    },
+    {
+      "path_or_key": "s3://opal-data-assets/portal/gold/mdpf/{scope}/category-views/{as_of}.json",
+      "kind": "s3_object",
+      "commit_or_etag": "PRE-CHANGE BASELINE, read this session by s3api",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "artifact_covered_by": ["TM1-AC1"],
+      "deploy_evidence": "BASELINE (pre-change, the artifact Andrew is looking at), s3api, UTC: 49financial/category-views/2026-08-27.json 4520 B LastModified 2026-08-28T13:31:13Z; cottonwood 5298 B; inflection 4513 B; global 4628 B -- all four 2026-08-28T13:31:13Z, all four `_provenance.trigger=\"scheduled\"`. Every `members[]` entry in all four carries NO `aum` key. THE POST-CHANGE OBJECT DOES NOT EXIST YET and this instance does not pretend otherwise -- see TM1-AC1 status."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TM1-AC1",
+      "criterion_verbatim": "EVERY L2 node under `Models` carries a dollar value on the SERVED artifact, for at least one firm. Print key, bucket, byte size and `LastModified` (UTC, `s3api`). From a SCHEDULED run -- an ad-hoc artifact is never production evidence.",
+      "method": "live_read",
+      "invocation": "s3api list-objects-v2 + get-object on portal/gold/mdpf/{49financial,cottonwood,inflection,global}/category-views/2026-08-27.json (bucket opal-data-assets); then _shape_category_views() re-run at a5227cf161 over those same cached gold timeseries inputs",
+      "output_evidence": "THE BUILD HALF IS DONE AND EXERCISED; THE SERVED HALF DOES NOT EXIST YET AND I AM NOT ROUNDING IT UP. Exercised over real cached gold inputs, the emitted block gives 8 of 9 Models L2 nodes a dollar value at >=1 scope. Per member, per scope (49F / cot / inf / global): opal_ultra_short_term 44,408,789.04 / 18,567,968.82 / 965,130.43 / 63,941,888.29 | opal_short_term 109,764,843.04 / 18,502,383.19 / 6,724,516.13 / 134,991,742.36 | opal_intermediate 299,431,064.86 / 80,567,525.55 / 77,068,626.30 / 457,067,216.71 | opal_long_term_conservative 810,341,204.95 / 59,649,981.25 / 14,268,156.67 / 884,259,342.87 | opal_long_term_aggressive 208,377,439.16 / 1,071,618.24 / 2,316,054.27 / 211,765,111.67 | opal_fixed_income null / 8,425,603.56 / null / 8,425,603.56 | opal_blend_5050_int_ltc null / null / 36,174,555.33 / 36,174,555.33 | opal_blend_5050_st_int null / null / 7,299,026.41 / 7,299,026.41 | opal_global_all_equity_total_return null at all four. CROSS-CHECK ON THE SOVEREIGN'S OWN SCREEN: cottonwood Primary 178,359,477.05 and Custom 8,425,603.56 are exactly the $178.36M and $8.43M in the screenshots 1.0.0_SA_CTO~Z read at 13190, so the scope being measured is the scope he is looking at.",
+      "denominator": "9 Models L2 nodes (5 Primary + 4 Custom) x 4 scopes = 36 cells; 26 MEASURED, 10 null. 8 of 9 nodes carry a value at >=1 scope. 4 of 4 served baseline objects read by s3api.",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "THE CRITERION NAMES THE SERVED ARTIFACT FROM A SCHEDULED RUN AND THAT OBJECT WILL NOT EXIST UNTIL THE NEXT FIRE. The producer writes once daily; today's fire already ran at 13:31:13Z, before this commit. An ad-hoc run is explicitly forbidden by the TO and would in any case not be production evidence. LIFTING EVENT: the next scheduled mdpf-gold fire (~13:31Z, 2026-08-29) AFTER 0.7.0_AE_CloudOps ships the gold-lambda package containing a5227cf161 -- BOTH are required and the deploy is not this lane's act. UNCOMPUTABLE, not FAIL: nothing measured contradicts the criterion; the instrument's subject does not exist yet."
+    },
+    {
+      "criterion_id": "TM1-AC2",
+      "criterion_verbatim": "THE SUM INVARIANT HOLDS AND IS PRINTED, BOTH PLANES. `D1-inv-4`: the L2 children sum to their L1 parent, and the rendered L0 set sums to `total_aua - Insurance`. Recompute both from the served block; assert both; print both. A mapping that produces values which do not reconcile is worse than `--`.",
+      "method": "command",
+      "invocation": "recompute both planes from the emitted block at a5227cf161, 4 scopes, tolerance 0.01",
+      "output_evidence": "BOTH PLANES HOLD AT 4 OF 4 SCOPES, PRINTED. L2->L1: 49financial Primary 1,472,323,341.05 == 1,472,323,341.05, Custom 0.00 == 0.00; cottonwood Primary 178,359,477.05 == 178,359,477.05, Custom 8,425,603.56 == 8,425,603.56; inflection Primary 101,342,483.80 == 101,342,483.80, Custom 43,473,581.74 == 43,473,581.74; global Primary 1,752,025,301.90 == 1,752,025,301.90, Custom 51,899,185.30 == 51,899,185.30. L1->L0 Models: 1,472,323,341.05 / 186,785,080.61 / 144,816,065.54 / 1,803,924,487.20, each == its parent. VIEW PLANE sum(peers) == total_aua - Insurance: 1,762,750,154.52 / 481,690,858.04 / 209,683,644.85 / 2,094,351,300.67, 4 of 4 HOLD. AND THE ASSERTION IS NOT VACUOUS: the L1 figure and the L2 sum are read by DIFFERENT paths and were deliberately NOT collapsed -- L1 indexes by_model on the registry member_id, L2 resolves through resolve_any() which also spans the crosswalk id family. Deriving L1 from the member dict would have made this criterion compare an expression to itself.",
+      "denominator": "4 scopes x (2 L2->L1 buckets + 1 L1->L0 + 1 view plane) = 16 assertions; 16 HOLD, 0 fail.",
+      "status": "PASS",
+      "status_reason": "PLANE NAMED RATHER THAN LEFT AMBIGUOUS: recomputed from the block emitted by the COMMITTED producer over the REAL cached gold inputs for 2026-08-27 -- the EXERCISED plane, not the SERVED plane. The served-block restatement rides the same fire named in TM1-AC1. Marked PASS and not UNCOMPUTABLE because the arithmetic itself was measured on real data through the real function; only its restatement on tomorrow's bytes is outstanding."
+    },
+    {
+      "criterion_id": "TM1-AC3",
+      "criterion_verbatim": "THE `D1-h-r4` GAP IS DISCLOSED, NEVER PADDED. Registry Custom = 3 members, all `served=False`; his own example \"Opal Fixed Income\" was 0 hits at decomp time. If a model he named is still absent, the panel DISCLOSES it. Do not invent a row to make the set look complete.",
+      "method": "live_read",
+      "invocation": "resolve every registry Models member against each scope's served by_model; no row added, no value substituted",
+      "output_evidence": "NO ROW WAS INVENTED AND NO ABSENCE WAS PADDED. TWO CORRECTIONS TO THE CRITERION'S OWN PREMISE, BOTH IN THE DIRECTION THAT MAKES THE ESTATE LOOK BETTER, WHICH IS WHY THEY NEED SAYING RATHER THAN QUIETLY BENEFITING FROM: (1) registry Custom is 4 members, not 3 -- opal_global_all_equity_total_return, opal_blend_5050_int_ltc, opal_blend_5050_st_int, opal_fixed_income; (2) \"Opal Fixed Income\", 0 hits at decomp time, IS NOW PRESENT -- opal_fixed_income resolves at cottonwood with 8,425,603.56 and at global with 8,425,603.56. THE MODEL HE NAMED IS NO LONGER THE ABSENT ONE. The still-absent member is opal_global_all_equity_total_return, which resolves in NO scope's by_model and is emitted as `aum: null` at all four -- present as a registered row, disclosed as carrying no measurement, never as 0.0.",
+      "denominator": "4 registry Custom members checked against 4 scopes = 16 cells; 4 MEASURED (fixed_income x2, blend_int_ltc x2... enumerated: cot fixed_income, global fixed_income, inf blend_5050_int_ltc, global blend_5050_int_ltc, inf blend_5050_st_int, global blend_5050_st_int = 6 MEASURED), 10 absent. 1 of 4 Custom members absent at EVERY scope.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TM1-AC4",
+      "criterion_verbatim": "NO VALUE IS INFERRED. Every L2 dollar figure is traceable to a producer-side source, cited `file:line @ <commit-ish>`. A derived-by-the-portal number is out of scope and forbidden -- the value belongs in the artifact.",
+      "method": "manual_read_with_citation",
+      "invocation": "read the emit path at source, a5227cf161",
+      "output_evidence": "EVERY EMITTED FIGURE IS A KEPT VALUE, NOT A DERIVED ONE. Provenance chain, cited at vintage: the value is `_last(entry['model_value'])` from the scope's own aggregate-aua-timeseries by_model (mdpf_gold_consolidator.py:585 @a5227cf161); its member identity comes from `registry.resolve_any(key)` (:588) and from nothing else -- never from display_name; it is accumulated into `models_member_aum` (:600-601) and passed as `member_aum` (:698); it is written out by `_members()` (mdpf_category_registry.py:918-923 @a5227cf161) which looks the id up and neither computes nor apportions. NO WEIGHTING, NO SPLIT, NO APPORTIONMENT ANYWHERE -- the arithmetic that would have been needed to invent per-member values is the exact defect 0.4.0_DE_ClientPlatform~Z's 2026-08-27 postmortem records ('my generic weight function was sound arithmetic about a world that does not exist'), and it is absent here by construction because the member grain already existed upstream. AND THE PORTAL DERIVES NOTHING: the number is in the artifact, which is what the criterion requires.",
+      "denominator": "3 emit sites read at source (accumulate, pass, write); 0 derive/apportion/weight operations present.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TM1-AC5",
+      "criterion_verbatim": "STATE WHAT IS STILL UNMAPPED, IF ANYTHING, AS A COUNT WITH ITS DENOMINATOR. \"All mapped\" requires the denominator printed. An unmapped node that renders `--` after this TO is a FAIL unless it is named and its reason stated.",
+      "method": "command",
+      "invocation": "the producer's own per-scope coverage log line, mdpf_gold_consolidator.py:672-681 @a5227cf161",
+      "output_evidence": "COUNT WITH DENOMINATOR, EMITTED BY THE PRODUCER ITSELF ON EVERY RUN, NOT ONLY IN THIS REPORT: 49financial 5/9 MEASURED, unmapped [opal_blend_5050_int_ltc, opal_blend_5050_st_int, opal_fixed_income, opal_global_all_equity_total_return]; cottonwood 6/9, unmapped [opal_blend_5050_int_ltc, opal_blend_5050_st_int, opal_global_all_equity_total_return]; inflection 7/9, unmapped [opal_fixed_income, opal_global_all_equity_total_return]; global 8/9, unmapped [opal_global_all_equity_total_return]. THE REASON, STATED: an unmapped member is one this scope's by_model carries no entry for -- the firm has no accounts in that model at this vintage. IT IS EMITTED AS null AND NEVER AS 0.0, because the TO's own trap holds that a 0 asserted for an unmapped node is a false frame on a money figure. TWO L2 NODES WILL STILL RENDER `--` AFTER THIS TO AND BOTH ARE NAMED, NOT HIDDEN: (a) the unmapped Models members above, which render `--` until the renderer applies Andrew's 'a null is a 0 in this case, if only practically' -- a DE-class act on the null this producer now supplies, and the producer-side distinction he also required is preserved precisely BY not encoding it here; (b) all 6 SMA members at all 4 scopes, deliberately not priced -- see declared_exclusions.",
+      "denominator": "9 Models L2 members x 4 scopes = 36 cells; 26 MEASURED, 10 unmapped, every unmapped one enumerated by member_id above.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THREE controls, because the two claims this TO makes fail in different directions. (1) DELTA -- does this edit move any pre-existing served value? Run against HEAD-UNMODIFIED output (`git show HEAD:` for both modules into a separate import path), NOT against the served artifact, so exactly one variable differs. (2) NEGATIVE CONTROL ON THAT COMPARISON -- perturb one L1 node by +$0.01 and confirm the comparison can detect it, so a clean delta is a measurement and not an inert instrument. (3) REFUSE FIXTURE for the new L1/L2 reconciliation guard -- NAME THE INPUT THAT MAKES IT REFUSE: inject a crosswalk alias for a Models model (`opal_fixed_income_smartx` -> `opal_fixed_income`), which is the exact live shape 49financial already uses for its SMAs (`opal_div_sma` -> `divz`), and confirm the guard refuses; then confirm it emits again once the fixture is removed.",
+      "expected": "(1) 0 pre-existing fields moved at 4 of 4 scopes. (2) the +$0.01 perturbation IS detected. (3) the unmodified input EMITS, the aliased input REFUSES naming the delta, the restored input EMITS.",
+      "observed": "(1) 0 MOVED, 4 of 4 scopes IDENTICAL. AND THE CONTROL EARNED ITS KEEP: comparing against the SERVED artifact instead reported `global` as MOVED (Models.aum 1803924487.2 vs 1803924487.1999998). HEAD-unmodified reproduces ...1999998 WITHOUT this edit, so that residual is a HEAD-vs-DEPLOYED difference and is NOT attributable to this change -- a wrong control would have had me either chasing my own edit or, worse, waving it off. THE RESIDUAL IS SURFACED, NOT ADOPTED: I have not established why deployed differs from HEAD and make no claim about it. (2) DETECTED -- True. (3) FIRED AS EXPECTED: unmodified emits Custom 8,425,603.56; aliased input raises ViewPlaneError 'Models > Custom L1 carries 0 but its L2 members sum to 8425603.56 (delta -8425603.56)'; fixture removed, emits 8,425,603.56 again. The guard is demonstrably able to BOTH refuse and pass, so neither verdict is structural.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "_shape_category_views re-run over the same four cached gold timeseries inputs within one session; the function reads only its arguments and the in-process registry (no clock, no S3, no randomness on this path).",
+      "observed": "Byte-identical JSON across repeated invocations at 4 of 4 scopes -- the delta comparison, the AC1/AC2 exhibit and the AC5 coverage run each re-invoked it and produced the same values. NOT CLAIMED: determinism ACROSS vintages, which is a different question and is exactly what the pre-existing HEAD-vs-deployed float-tail residual above shows is not free.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "SMA member amounts -- all 6 SMA members, all 4 scopes, emitted as `aum: null`",
+      "reason": "DELIBERATE AND SCOPED BY CONSTRUCTION, not an oversight: `member_aum` is built only inside the `startswith(\"Models\")` branch. The :592 equality branch is UNREACHABLE against the suffixed view_paths the registry now builds, so `sma_aum` is 0.00 at every firm and the SMA card is dropped by the renderer. Pricing SMA L2 now would hang $22,794,766.25 of children under a parent reading $0.00 -- a VISIBLE arithmetic contradiction on a client-facing surface, and worse than the `--` it replaced. Surfaced as msg 13332; CUT by 2.0.0_SA_COO~Z as D1_CATVIEWS.TO-N1-DS @4174052d92, seated at this lane. Owner: 0.4.0_DS_ClientPlatform~Z, under that TO and not this one."
+    },
+    {
+      "item": "The renderer's null -> $0.00 display rule",
+      "reason": "DE-class, and the split is the sovereign's own. Andrew ruled BOTH halves: the render never tells a client which ('a null is a 0 in this case, if only practically, think about the end user'), AND the producer-side distinction must be kept ('UNMAPPED IS NOT ZERO ... a value of 0 asserted for an unmapped node is a false frame on a money figure'). Those two are only simultaneously satisfiable if the producer emits null and the RENDERER displays it as a zero. Encoding 0.0 here would satisfy the first by destroying the second. portal/src/components/CategoryViewTree.tsx:191-196 currently draws '--' for null. Owner: 0.4.0_DE_ClientPlatform~Z."
+    },
+    {
+      "item": "Deploying the gold lambda package that carries a5227cf161",
+      "reason": "AE-class. infra/aws/lambda/mdpf-pipeline/mdpf-gold-lambda/build_package.py is not a DS surface (CLAUDE.md Rule 13), and `aws lambda update-function-code` is Terraform-only. Until it ships, this change is DESIRED and not APPLIED, and TM1-AC1 stays UNCOMPUTABLE. Owner: 0.7.0_AE_CloudOps."
+    },
+    {
+      "item": "TO-S1-DE, the per-client row suppression",
+      "reason": "Named NOT YOURS by the TO and BLOCKED on this one. Not touched."
+    }
+  ],
+  "surprises": [
+    "BLOCKING / ARMED -> DISARMED same-turn, owner 0.4.0_DS_ClientPlatform~Z: mdpf_gold_consolidator.py:592's `elif member.view_path == \"SMA\"` is UNREACHABLE, so 49financial serves the sentence '49financial has NO SMA category members ... A TRUE ZERO' while holding $22,794,766.25 of SMA, and Client is overstated by exactly that. The false sentence CITES ANDREW. Raised as msg 13332 to 3.0.0_SA_CVO~Z cc 2.0.0_SA_COO~Z + 1.0.0_SA_CTO~Z within minutes of finding it, surfaced and NOT acted on; independently source-confirmed by both 1.0.0_SA_CTO~Z (13337) and 3.0.0_SA_CVO~Z (13341, with a 0-occurrence negative control on bare `view_path = \"SMA\"` against a 47-occurrence positive control); CUT as D1_CATVIEWS.TO-N1-DS @4174052d92. NOT REMEDIATED -- the false sentence is being served right now.",
+    "OBSERVATION / INERT: TM1-AC3's premise is stale in the estate's favour and I am recording it rather than quietly benefiting from it. The criterion says 'Registry Custom = 3 members' (it is 4) and that 'Opal Fixed Income' was 0 hits (it now resolves at cottonwood and global for 8,425,603.56). A criterion written against a measured absence goes stale the moment the absence ends, and nothing re-reads it. The still-absent member is opal_global_all_equity_total_return.",
+    "OBSERVATION / INERT: the served `global` category-views object differs from what HEAD produces in a float tail (Models.aum 1803924487.2 vs 1803924487.1999998, ~2e-7 on $1.8B). HEAD reproduces the difference WITHOUT this edit, so deployed != HEAD on this path. Filed, not chased, and NOT explained -- I did not establish whether the cause is a code vintage, a rounding step in the emit path, or something else. Owner: unassigned; 0.7.0_AE_CloudOps owns the deployed package.",
+    "OBSERVATION / INERT: `2.0.0_SA_COO~Z`'s TO-N1-DS face sequences TO-N1-DS BEFORE TO-M1-DS completes, on the reasoning that a dropped SMA card would hide L2 rows TO-M1-DS cannot then verify, and explicitly invited falsification. FALSIFIED BY MEASUREMENT, not by opinion: Models L0 renders at 4 of 4 scopes (aum > 0, so presentAum() is non-null and the flatMap keeps the card), and TO-M1-DS prices 0 SMA members at 4 of 4 scopes. TO-M1-DS has nothing behind the dropped card. Returned to the issuer; the ordering is released on the issuer's own terms."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~Z/logs/2026-08-28/",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'D1_CATVIEWS' --files ; comp-find 'mdpf_category_registry' --files --all ; comp-find '\\baum_basis\\b' --all ; comp-find '\\w+_basis\\b' --all -i",
+      "result": "RUN, and the `aum_basis` census CHANGED THE DESIGN. I was about to mint an `aum_basis` claim field; the census returned it ALREADY IN USE in data/etf_dashboards/_stage_bbg_testpull/ meaning 'which Bloomberg field the AUM came from' (FUND_TOTAL_ASSETS vs CUR_MKT_CAP), a DIFFERENT domain and a DIFFERENT intent. Minting it here would have bridged two vocabularies on one token. Combined with the consumer already declaring `aum?: number | null`, the correct answer turned out to be NO NEW FIELD AT ALL -- so the census retired a schema act and its Rule 24 record rather than validating one."
+    },
+    {
+      "tool": "comp-pipescript io",
+      "invocation": "comp-pipescript io data/mdpf/scripts/gold/mdpf_gold_consolidator.py --pipeline mdpf ; comp-pipescript io data/mdpf/scripts/gold/mdpf_category_registry.py --pipeline mdpf",
+      "result": "RUN for both edited gold scripts (--pipeline supplied; flagless is rc=2 REFUSED). Both WARN 'READS/WRITES none detected'. Recorded as the TOOL'S BLIND SPOT, not a finding: the consolidator builds S3 keys dynamically via _key()/ASSETS_BUCKET and the registry is a pure in-process module with no I/O. The real write path was read manually at mdpf_gold_consolidator.py:837 and confirmed against live s3api listings."
+    },
+    {
+      "tool": "comp-estate",
+      "invocation": "comp-estate --resource 'category-views'",
+      "result": "RAN, returned 'no chain references category-views'. A TRUE NEGATIVE recorded rather than dropped: this artifact type is not registered in the estate chain map, so the tool cannot route it. The S3 location was instead established by direct s3api listing under portal/gold/mdpf/{scope}/."
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <both edited scripts>",
+      "result": "PASS -- 'pre-commit gate clean for 2 of 2 file(s)', py_compile + ds-precommit + ruff py39. Re-run inside safe-commit.sh with the risk reflex CLEAN against 1417 danger nodes (denominator printed by the tool)."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author '0.4.0_DS_ClientPlatform~Z <...>' -F <msgfile written by the Write tool, not a shell heredoc> -- <2 paths>",
+      "result": "PASS, commit a5227cf161, msg-verify MATCH len=4551."
+    },
+    {
+      "tool": "comp-validate",
+      "invocation": "NOT RUN, and the reason is the criterion it would have answered.",
+      "result": "comp-validate <script> --artifact <file> is the DS minimum BEFORE SIGNALING AE. No AE signal is being sent: the post-change artifact does not exist (TM1-AC1 UNCOMPUTABLE) and the deploy is a separate AE-owned act on its own clock. Running it against the PRE-change served artifact would validate the very bytes this change alters and would produce a pass that means nothing. It is owed at the point the deploy is signalled, not here."
+    }
+  ]
+}
