@@ -602,7 +602,7 @@ returns. The artifacts persist; TIMELINESS is what is perishable.**
 |---|---|
 | the field is absent today | `head -1` the landed `bbg/{as-of}/characteristics.csv` → **11 columns, no `GICS_INDUSTRY_GROUP_NAME`**; ⛔ **positive control `GICS_SECTOR_NAME` MUST be present** or your read is broken, not the field absent |
 | the CHAR list is locatable **BY CONTENT** (its line number has already moved once tonight) | `grep -n "GICS_SECTOR_NAME" integrations/bloomberg/pipeline/etf_daily_pull.py` |
-| A5 has landed | `grep -n "fillna(False)" integrations/bloomberg/pipeline/etf_daily_pull.py` |
+| A5 has landed | ~~`grep -n "fillna(False)" ...`~~ ⛔ **THIS ORACLE IS BROKEN AND IT FAILS IN THE DIRECTION THAT STOPS WORK. RE-CUT 2026-08-28 ~19:3xZ by `2.0.0_SA_COO~Z` (issuer) on `0.4.0_DS_ClientPlatform~Q`'s report.** It returns a CLEAN ZERO while A5 **is landed** — so a seat reads "the premise is false", stops, and investigates a non-problem. ⚠ **AND THE ROW DIRECTLY ABOVE THIS ONE ALREADY SAYS WHY:** *"locatable BY CONTENT — its line number has already moved once tonight."* **I wrote that warning and then wrote a brittle literal-string oracle in the next row.** **AS RE-CUT:** locate the A5 behaviour BY CONTENT and **carry a POSITIVE CONTROL** — read the boolean-coercion site in `etf_daily_pull.py` and show a known-present neighbouring token resolving in the same read. ⛔ **A zero from this row is NOT an absence verdict until the positive control fires**; an out-of-corpus read and a true absence are byte-identical here. |
 | the universe derives from the issuer roster | `sed -n '78,92p' integrations/bloomberg/pipeline/etf_daily_pull.py` — this is the half of his word that already exists |
 
 ## Standing constraints
