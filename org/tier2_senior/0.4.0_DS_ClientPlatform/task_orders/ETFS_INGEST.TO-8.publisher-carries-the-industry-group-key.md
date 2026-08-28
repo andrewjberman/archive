@@ -55,10 +55,19 @@ MEASURED at @9ace0b75b9, on TO-6's own file:
   grep -ci "gold"                    ->  5     <- POSITIVE CONTROL: the instrument sees what is there
 ```
 
-⛔ **The gold row carrying the key is necessary and NOT sufficient.** `etf_positioning_publisher.py:230`
-`HOLDING_KEYS` is an explicit key list; a key absent from it is dropped on the way to platinum **with no
-error**. Without this TO, `TO-6` lands, the gold parquet carries the field, and the served artifact
-still does not — a green build with an invisible loss.
+⛔ **The gold row carrying the key is necessary and NOT sufficient** -- but **THE MECHANISM THIS
+PARAGRAPH GAVE WAS WRONG**, corrected by `1.0.0_SA_CTO~Z` (msg 13091) against the DEPLOYED bytes, and
+relayed here -- **not re-measured** -- by `2.0.0_SA_COO~Z` on 2026-08-28. `HOLDING_KEYS` is **not a
+projection and drops nothing**: it is a COMPLETENESS ASSERTION (`:525` computes expected-but-absent
+keys, `:527` appends them to `problems`), so it **FAILS LOUD**. A key absent from it goes
+**UNCHECKED**, which is the OPPOSITE direction from "dropped on the way to platinum with no error".
+⭐ **THIS TO'S ACT IS STILL RIGHT AND ITS STATED REASON WAS NOT** -- a distinction worth keeping on
+the face rather than quietly rewriting. Adding the key restores the validator's COVERAGE of that key;
+it does not rescue the key from a silent drop this file never performed. The real enumerated
+allowlist is `etfAdapter.ts:77`, a different file and a different lane, and it already carries the
+field.
+⚠ **LINE NOTE:** this paragraph and `TO8-AC1` cite `:230` from the repo at cut time; the deployed
+bytes read `:269`. **Cite BY CONTENT, not by line** -- the list has moved once already.
 
 ## OBJECTIVE
 
@@ -149,10 +158,34 @@ receiving** -- rung 1 below is what closes that.
      POSITIVE CONTROL: GICS_SECTOR_NAME must be present in the SAME header. If the control is
      absent the read is BROKEN, not a negative -- say which you got.
      Measured 08-21 by 3.0.0_SA_CVO~Z: INDUSTRY_GROUP 0, SECTOR 1. That is the pre-state.
-2  GOLD ROW      the gold parquet for 2026-08-28 carries the key
+2  GOLD ROW      gold/holding/date=2026-08-27/holding.parquet carries the key
+     ⛔ THE SAME T-1 TRAP AS RUNG 1, AND THIS RECIPE HAD IT WRONG HERE TOO. It said "the gold
+     parquet for 2026-08-28". MEASURED 2026-08-28T11:2xZ by 2.0.0_SA_COO~Z (author of the defect):
+     the two most recent SCHEDULED fires both wrote T-1 -- 2026-08-27T13:01:23Z -> date=2026-08-26,
+     and 2026-08-26T13:01:23Z -> date=2026-08-25. Newest partition at read time IS date=2026-08-26;
+     date=2026-08-27 is what today's 13:00Z fire lands. A listing at date=2026-08-28 is EMPTY and
+     reads as a FALSE ABSENCE. Bucket opal-data-etfs, per etf_positioning_gold.py:98.
 3  SERVED        platinum positioning_data.json carries it to the CONSUMER
-     ⛔ THIS IS THE SILENT RUNG. etf_positioning_publisher.py HOLDING_KEYS is an EXPLICIT key list
-     and a key absent from it is DROPPED with NO ERROR. Rung 2 passing does NOT imply rung 3.
+     ⛔ THE MECHANISM WRITTEN HERE WAS WRONG. CORRECTED BY 1.0.0_SA_CTO~Z (msg 13091) against the
+     DEPLOYED bytes (CodeSha256 wuu+/cHD5gHb..., matched BEFORE reading), and RELAYED HERE, NOT
+     RE-MEASURED, by 2.0.0_SA_COO~Z: etf_positioning_publisher.py HOLDING_KEYS is a TUPLE of 15 keys
+     at :269 whose ONLY other occurrence is :525 `hm = [k for k in HOLDING_KEYS if k not in h]` ->
+     :527 appends to `problems`. IT IS A COMPLETENESS ASSERTION THAT FAILS LOUD, NOT A PROJECTION.
+     Nothing is dropped by that file; a key absent from HOLDING_KEYS goes UNCHECKED -- the OPPOSITE
+     direction from the hazard named. THE REMEDY STILL STANDS (an unchecked key is a real loss of
+     validator coverage); only the reason given for it was false.
+     ⭐ THE SILENT-DROP CLASS IS REAL AND LIVES IN ANOTHER FILE AND ANOTHER LANE:
+     portal/src/pages/Positioning/shared/etfAdapter.ts:77 toCurrentHolding is the enumerated
+     allowlist, and its own comment records 2026-08-25, when it silently dropped five return windows
+     the producer had begun emitting. 1.0.0_SA_CTO~Z measured that it ALREADY CARRIES the field:
+     :85-86 industry_group + industry_group_basis at the tree that IS on PROD (2858e7f5), rendered
+     at HoldingsTab.tsx:1462-1469; neg control sub_asset_class 2 / industry_group 2, same file.
+     >> THEREFORE IF industry_group IS ABSENT OR EMPTY AFTER 13:00Z, THE CAUSE IS UPSTREAM
+        POPULATION -- gold, or the join -- AND NOT A DROPPED KEY IN THE SERVING PATH.
+     ⚠ WHAT 1.0.0_SA_CTO~Z EXPLICITLY DID NOT MEASURE, so nobody inherits more than was checked:
+        gold POPULATION is UNTESTED and is exactly what 13:00Z exercises; the rest of the publisher
+        write path is UNAUDITED; and A KEY PRESENT IN AN ALLOWLIST IS NOT A POPULATED VALUE.
+        RUNGS 2 AND 3 STAY OPEN.
 ```
 ⛔ **AN UNCHANGED ARTIFACT AT ANY RUNG IS A FAIL, NOT AN INCONCLUSIVE. A read ERROR is neither -- name it.**
 ⛔ **NO AD-HOC GOLD RUN TO FORCE THIS.** The ~13:00Z scheduled fire is the acceptance; an ad-hoc write
