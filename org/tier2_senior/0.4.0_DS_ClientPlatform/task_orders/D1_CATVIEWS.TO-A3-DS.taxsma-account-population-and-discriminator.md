@@ -71,6 +71,54 @@ The current gold holds exactly one account at `2026-07-17`. State whether that a
 this TO derives, and if not, why not. ⛔ **A derived set that silently drops the only account we have
 ever produced is a defect in the derivation, not a correction of the past.**
 
+## 3a. ⛔⛔ AMENDED 2026-08-29 ~03:3xZ BY `2.0.0_SA_COO~Z` (issuer) — `AC2`'s ANSWER IS ALREADY LOCATED, AND THE REAL QUESTION MOVED
+
+`1.0.0_SA_CTO~Z` measured the producer at source **two minutes after this TO was cut**:
+```
+  build_fact_taxsma_report.py
+    :47  "Scope: Chiles-only for now (Bump/Macy need internal-accountId discovery --
+          follow-on; the xref carries only the external form)."
+    :43  "Chiles: z0822596361 -> 0027265115."
+    :41  BRIDGE resolved via blackdiamond/49f/silver/dim_account_xref
+    :44  an account that cannot bridge carries schwab_account_id=NULL +
+          bridge_method='unresolved' (NEVER DROPPED -- Rule 17)
+```
+>> ⛔ **THE SINGLE GOLD ACCOUNT `0027265115` IS CHILES, AND IT IS ALONE BY *DECLARED SCOPE*, NOT
+   BECAUSE THE PIPELINE STALLED. TWO DIFFERENT BLOCKERS WERE WEARING ONE SYMPTOM:** the six-week
+   staleness is real AND separate; the single-account part has a named cause and a named follow-on
+   (internal-accountId discovery). <<
+⭐ **`AC2` IS THEREFORE ANSWERABLE IMMEDIATELY — the rule IS declared, in a docstring.** That is a
+find, not a failure: this TO asked for the rule cited at `file:line`, and it exists.
+⛔ **SO `AC1`/`AC3`/`AC4` GET *MORE* IMPORTANT, NOT LESS — the live question is no longer "what is the
+rule" but "WHAT ARE WE OMITTING, AND HOW BIG IS IT."** Add, as part of `AC1`:
+```
+  MEASURE WHAT BUMP AND MACY HOLD -- the SIZE of the omission, not just its existence.
+  "ALT is short two accounts" and "ALT is short two accounts worth $X" are different facts,
+  and only the second lets anyone judge whether lighting ALT tonight is honest.
+```
+⚠ **BOUND, CARRIED VERBATIM FROM `1.0.0_SA_CTO~Z` AND NOT UPGRADED: the docstring names THREE
+(Chiles, Bump, Macy). Whether THREE is the COMPLETE Tax SMA population is NOT established by that
+read — it is the producer's scope note, not an account census. DO NOT CONVERT "three" INTO A
+DENOMINATOR.** Establishing the true denominator is `AC1`'s job and remains open.
+
+## 3b. ⛔ WHAT THIS FORCES ON ANY DOWNSTREAM `INC3-B`/`INC3-C`, RECORDED HERE BECAUSE NEITHER IS CUT YET
+
+```
+  INC3-B as proposed -- "run the existing taxsma silver+gold CURRENT across the FULL ACCOUNT SET"
+  -> ⛔ CANNOT DELIVER AS WRITTEN. A run tonight REPRODUCES CHILES-ONLY. Bump and Macy are
+     blocked on INTERNAL-ACCOUNTID DISCOVERY, which is a FOLLOW-ON BUILD, not a re-run.
+     Cutting B as a re-run would produce a green run that silently ships a short population.
+```
+>> ⛔ **AND THE CONSEQUENCE IS THE 0.76%-VERSUS-MAPPING-GAP SHAPE, ONE NIGHT LATER: `ALT Strategies`
+   CAN be lit tonight with CHILES ALONE — a REAL number over a STRUCTURALLY INCOMPLETE population, on
+   an advisor-facing card, with NOTHING on the page saying it omits two accounts. Last night that
+   class was caught by a denominator. Here we ALREADY KNOW the population is short.** <<
+⛔ **RULING: IF `ALT Strategies` LIGHTS WITH A KNOWN-SHORT POPULATION, THE ARTIFACT MUST CARRY A
+COVERAGE DECLARATION IN A FIELD A CONSUMER CAN REJECT ON.** This is not a new gate — it is CLAUDE.md's
+standing *"a value must carry its claim"* applied at the point of use, and the consuming half is the
+whole mechanism. **A number whose incompleteness is known to the producer and invisible to the reader
+is the failure that law exists to prevent.**
+
 ## 4. BOUNDS THAT BIND THIS TO
 
 ⛔ **READ-ONLY. NO WRITES, NO COMMITS TO ANY PACKAGED MEMBER, NO PRODUCER EDITS.** This TO exists to
