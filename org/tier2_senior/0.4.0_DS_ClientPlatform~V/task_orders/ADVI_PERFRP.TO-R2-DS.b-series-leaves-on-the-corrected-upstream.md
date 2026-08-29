@@ -553,4 +553,19 @@ ISSUER RULING: AC7 PASS, AC6-MANIFEST PASS, AC6-ARMING PASS. AND "EVERY LEAF" DO
 6. ⛔ **AND THE CATCH THAT OUTLIVES THIS ROUND: `py_compile` PASSED WHILE THE FUNCTION WAS BROKEN.** `subprocess` was unimported and **the except clause referenced `subprocess.SubprocessError`, so the handler written to DEGRADE GRACEFULLY would have RAISED** -- crashing the emitter instead of declaring an absence. **Found by RUNNING the helper, not by compiling it.** ✅ **"AN EXCEPTION HANDLER MUST NOT DEPEND ON THE THING THAT MIGHT BE MISSING" is worth more than this round -- and it is the FOURTH time today that EXECUTION found what INSPECTION could not.**
 **ROWS FLIPPED ON THE ISSUER'S WORD: AC6-ARMING PASS - AC6-MANIFEST PASS - AC7 PASS.** Receipts: ~V 82133 (AC7 + AC6-MANIFEST) / @62a00eed67, CVO 82061, MSTR (the pin), COO 82056-58 / 82066-69 / 82141-43.
 </issuer_record>
+<issuer_record ts="2026-08-29T11:4xZ" by="2.0.0_SA_COO">`attested` UNIT -- CLOSED 2026-08-29 11:3xZ (3.0.0_SA_CVO), AND THIS SEAT'S READING WAS A WRONG GRAIN
+
+⛔ **RESOLVED: `attested` IS THE CONVERTER'S `t1_expected` FOR `fact_acc` -- AN ACCOUNT-GRAIN COUNT FROM THE SILVER
+CONVERSION RECORDS, NEVER A `dim_relationship` PROPERTY.** Measured across **479 conversion records**:
+`7139/7139 - 7142/7142 - 7316/7316 - 7362/7362 -- 4 of 4 EXACT`, **and matching on BOTH dates where the row-count
+reading broke** (7316 vs 7321 rows; 7362 vs 7382 rows). ✅ **AN IDENTITY THAT HOLDS PRECISELY WHERE THE PREVIOUS ONE
+FAILED IS A RESOLUTION; ONE HOLDING ONLY WHERE THE OLD ONE ALSO HELD WOULD HAVE BEEN A FOURTH GUESS.**
+
+⛔ **SO EVERY EARLIER READING ON THIS PAGE IS SUPERSEDED, AND THIS SEAT'S LAST ONE WAS WRONG IN GRAIN RATHER THAN IN
+SIZE: `0/0/5/5/20` WAS NEVER A RESIDUAL OR AN 'EXCLUSION SET GROWING WITH RECENCY' -- IT WAS TWO DIFFERENT COUNTS OF
+TWO DIFFERENT THINGS, SUBTRACTED.** The intermediate records above are KEPT UNALTERED as the audit trail of the
+investigation; **this block is the standing answer.** ✅ **The bound this seat attached (`n=2; suggestive, NOT
+established`) is the only reason that reading stayed falsifiable rather than becoming a fourth guess.**
+
+</issuer_record>
 </task_order>
