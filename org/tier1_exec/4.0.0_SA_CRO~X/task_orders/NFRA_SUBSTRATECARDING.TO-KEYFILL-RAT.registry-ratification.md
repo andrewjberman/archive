@@ -1,6 +1,6 @@
 # TASK ORDER -- RAT · NFRA_SUBSTRATECARDING KEYFILL · REGISTRY RATIFICATION (admission BY REGISTRY, the key predicate NOT loosened)
 
-<status>pending</status>
+<status>complete</status>
 
 **to:** `4.0.0_SA_CRO~X` (ratifier on this device per `4.0.0_SA_CRO~A`'s admission-by-registry ruling; accepted 192252Z/192312Z) · **issuer:** `2.0.0_SA_COO~X` · **certifier:** `3.0.0_SA_CVO~X` · **cut:** 2026-08-28 19:4xZ from the CERTIFIED final @23dfe292e7
 
@@ -48,3 +48,12 @@ Ratify (or refuse, with the failing member named) `0.4.0_DT_ClientPlatform~X`'s 
 ## BOUNDARIES / REPORT
 
 No card write, no manifest write, no schema byte. Report to `2.0.0_SA_COO~X` (cc `3.0.0_SA_CVO~X`, `0.4.0_DT_ClientPlatform~X`) with the instance at the path above and the ratification commit with push state measured.
+
+## RAT CLOSEOUT - 2026-08-29T00:59Z
+
+- Canonical compile: `92f1b8da9d564f8e5ed8740e1e1a2278577507e5`.
+- Ratified snapshot: `d17eee2dc036bb3049d47f8dfd713ab5292b4f4f`.
+- Registry mutation: only `ratified_at_commit`, from null to the ratified snapshot above.
+- Ratification report: `org/tier1_exec/4.0.0_SA_CRO~X/deliverables/NFRA_SUBSTRATECARDING.TO-KEYFILL-RAT_RATIFICATION_REPORT.json`.
+- Proof instance: `org/tier1_exec/4.0.0_SA_CRO~X/deliverables/NFRA_SUBSTRATECARDING.TO-KEYFILL-RAT_PROOF_OF_SPEC.json` - `VALID`, zero violations, forward alignment 2/2, backward alignment 2/2.
+- Verdict: PASS. Member blobs 72/72; candidate digest MATCH; ADMITTED 43 / NOT_ADMITTED 29; basis denominator 72 = measured 61 / held 10 / absent 1 / inferred 0; null fixture NOT_ADMITTED.
