@@ -41,9 +41,11 @@
       "invocation": "aws s3api get-object blackdiamond/49f/_ops/taxsma_roster.json (VersionId lNH3od2BprexiXQDjAxntCJjcNB_MK5t, LastModified 2026-08-27T22:48:18Z, ContentLength 3615); enumerated in inc3a_taxsma_population_measure.py",
       "output_evidence": "FIVE enrolled accounts, all five printed with status and resolution tier: 0027265115 Chiles active/xref bd 22596361; 0035940058 Bump pending_resolution; 0091939812 Macy pending_resolution; 0084073310 Nixon active/tier-3 bd 22659431; 0076459710 Tracey active/tier-3 bd 23221671. ACTIVE (what discover_accounts pulls) = 3 of 5. PENDING (deliberately excluded) = 2 of 5. ACTUALLY PULLED TO BRONZE = 1 of 5 (Chiles, one pull date 2026-07-17). IN GOLD = 1 of 5. So 'ALT covers N of 5' is 1 today, 3 after a bronze pull, 5 only after tier-3 runs on Bump/Macy.",
       "denominator": "5 roster entries = accounts CONSIDERED (not accounts matched). Corroborates Andrew-direct 'there are 5 accounts' via an INDEPENDENT instrument, so the population is `held` AND `measured`, not `held` alone.",
-      "status": "PARTIAL",
-      "partial_reason": "The ENUMERATION limb PASSES. The AMENDED limb -- the dollar SIZE of the omission -- is BLOCKED and no number is reported. fact_bd_allocation date=2026-08-18 (30577 rows, 6136 distinct account_number) contains NONE of the five on a whole-frame scan of all 96 columns; control: the identical scan finds 27265115 in dim_account_xref, so the scan discriminates. Bump and Macy additionally hold NO bd_internal_id, so they are not merely absent from BD-keyed feeds, they are UNKEYABLE into them. Sizing the omission requires a BD reporting pull = vendor egress = Andrew's per-use word. NOT taken.",
-      "negative_result_control": "First pass returned a FALSE zero for all five because this seat zero-padded to 10 digits while BD carries Chiles as 27265115 unpadded. Caught by the Chiles positive control failing, re-keyed on the unpadded form, and the zero PERSISTED. A grain-mismatched join key manufactures absence; the control is what separated the two."
+      "status": "PASS",
+      "amended_limb_resolution": "MEASURED, via a route this seat did not find first: 1.0.0_SA_CTO~Z (15898) located all five in schwab/08335338 (0833) dim_balance, pulled daily, no egress. INDEPENDENTLY RE-MEASURED HERE at schwab/08335338/silver/dim_balance/date=2026-08-27 (note SILVER -- 15898 named no layer and gold/dimensions/ does not carry it): 5 of 5 present, TOTAL net_mv_plus_cash 6,445,461.07, matching 15898 to the cent. Per account: Chiles 998,269.00, Bump 2,341,597.81, Macy 894,377.19, Nixon 961,330.90, Tracey 1,249,886.17. Frames 0833 7362 rows / 7362 distinct account_id and 0824 7282 / 7282, positive-controlled independently, key form identical 10-digit zero-padded both sides, so the 0824 zero (0 of 5) is a real absence.",
+      "measure_decomposition": "Two identities hold EXACTLY on 5 of 5: net_mv_positions = mkt_value_long + mkt_value_short, and net_mv_plus_cash = net_mv_positions + cash_balance_settled_only. The strategy is 'Opal Tax SMA 200/145' and the books ARE long/short -- measured 1.43-1.49x long and 0.43-0.49x short, to net. mkt_value_long is GROSS LONG and overstates by 2,926,110.90 (45%) while looking like the obvious market-value column. net_mv_plus_cash and net_mv_positions both net the short book and differ only by settled cash.",
+      "prior_blocked_state_and_why_it_was_wrong": "This criterion was first filed PARTIAL with the omission size BLOCKED, on the grounds that fact_bd_allocation date=2026-08-18 (30577 rows, 6136 distinct account_number) contains none of the five on a whole-frame scan of all 96 columns. That measurement was CORRECT and the CONCLUSION DRAWN FROM IT WAS TOO WIDE: fact_bd_allocation is 0824-scoped and the Tax SMA accounts are 0833. A real absence in one frame was read as unavailability in the estate. The TO's own title -- 'the Tax SMA account population at Schwab 0824' -- carried the same wrong frame, and this seat inherited it instead of testing it. dim_account_xref carries an in_0833_universe column that flags Chiles True, so the discriminator was in an artifact already open on this desk.",
+      "negative_result_control": "An earlier pass returned a FALSE zero for all five because this seat zero-padded to 10 digits while BD carries Chiles as 27265115 unpadded. Caught by the Chiles positive control failing, re-keyed on the unpadded form, and the zero PERSISTED -- so the padding bug and the wrong-frame error were two separate faults stacked on one number, and only the first was caught by the control that was in place."
     },
     {
       "criterion_id": "INC3A-AC2",
@@ -80,7 +82,7 @@
     "criteria_scored": 4,
     "forward": "4 of 4 criteria carry cell_ref INC3-A",
     "backward": "1 of 1 cell reachable",
-    "status_tally": "3 PASS, 1 PARTIAL (INC3A-AC1 enumeration limb PASS, amended dollar-size limb BLOCKED on vendor egress)"
+    "status_tally": "4 PASS. INC3A-AC1 was first filed PARTIAL with its amended limb blocked on vendor egress; the block was dissolved by 15898's 0833 route and the limb is now measured and independently reproduced."
   },
   "findings_beyond_acceptance": [
     {
@@ -122,6 +124,22 @@
       "owner": "0.4.0_DS_ClientPlatform~Z",
       "finding": "'A run tonight reproduces Chiles-only' (15849, 15853) is PLANE-DEPENDENT and neither TO names the stage. A silver+gold re-run over the EXISTING bronze reproduces Chiles-only and the claim is correct there. A fresh BRONZE PULL reads the roster and yields THREE accounts. Bronze today: 1 bdId (22596361), one pull date 2026-07-17, all three feeds.",
       "remedy": "DISARMED by naming the stage: INC3-B must state which stage it re-runs, because the two readings differ by 1 vs 3 accounts."
+    },
+    {
+      "id": "INC3A-F6",
+      "class": "BLOCKING",
+      "standing": "ARMED",
+      "owner": "whoever cuts the 0833 producer step",
+      "finding": "THE RE-CUT IN 15898 SAYS 'summing the 5 ROSTER accounts out of the 0833 daily feed'. A producer that reads the roster through the declared membership rule gets THREE, not five: taxsma_registry.py:144 list_active() filters status == 'active', and Bump and Macy are pending_resolution. The status field encodes BD-BRIDGE state -- whether an account has a resolved bd_internal_id for the reporting API -- and the 0833 route never asks that question, because 0833 dim_balance is keyed by SCHWAB account number directly.",
+      "remedy": "The 0833 producer must read ALL FIVE ENROLLED ENTRIES (roster['accounts']), NOT list_active(). Using the existing helper is the natural move and it silently drops 3,235,974.99 of the 6,445,461.07 -- Bump 2,341,597.81 + Macy 894,377.19 -- while every identity still reconciles and the card still renders. The membership rule is correct for the pipeline it was written for and WRONG for this route; that is a property of the route, not a defect in the rule."
+    },
+    {
+      "id": "INC3A-F7",
+      "class": "OBSERVATION",
+      "standing": "ARMED",
+      "owner": "whoever cuts the 0833 producer step",
+      "finding": "mkt_value_long is the wrong measure and is the one a reader reaches for. These are 200/145 long/short books: measured 1.43-1.49x long and 0.43-0.49x short, to net. Gross long totals 9,371,571.97 against a net of 6,448,508.59 -- a 45% overstatement (2,926,110.90) on an advisor-facing figure, in the flattering direction, from a column whose name reads as 'market value'.",
+      "remedy": "Use net_mv_plus_cash (custodian total-account, reconciles to the sheet at +1.5%). net_mv_positions is equally defensible -- both net the short book and differ only by settled cash on 2 of 5. The decision that matters is not between those two."
     }
   ],
   "author": "0.4.0_DS_ClientPlatform~Z",
