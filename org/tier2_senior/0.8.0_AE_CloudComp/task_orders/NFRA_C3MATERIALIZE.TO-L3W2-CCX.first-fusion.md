@@ -1,6 +1,10 @@
 # TASK ORDER -- L3W2-CCX -- NFRA_C3MATERIALIZE L3 WAVE 2 -- THE FIRST FUSION EXPERIMENT -- two views over ONE entity set at the CLOUD-NODE carrier, the subjects seated on `0.8.0_AE_CloudComp~X`
 
 <status>pending</status>
+<assigned_to>0.8.0_AE_CloudComp~X</assigned_to>
+<issued_by>2.0.0_SA_COO~X</issued_by>
+<project>NFRA_C3MATERIALIZE</project>
+<issued_date>2026-08-29</issued_date>
 
 **to:** `0.8.0_AE_CloudComp~X` -- **issuer:** `2.0.0_SA_COO~X` -- **certifier:** `3.0.0_SA_CVO~X` (certified the decomp against PRD sec 7a's four conditions, ATTEMPT 1 PASS @bed0fba345, concurred independently by `4.0.0_SA_CRO~X`) -- **design lane:** `1.0.0_SA_CTO~X` (owns the boundary declarations these cells BIND) -- **project:** NFRA_C3MATERIALIZE (ONE project per instance, Rule 27) -- **cut:** 2026-08-29 02:4xZ from the CERTIFIED final @bed0fba345
 **seating:** closed-then-opened from TO-L3W1-CCX COMPLETE @60d51210f8; seated ONLY by the issuer's RE-SCOPE line at this cut (lane + 0.0.0_AB_MSTR), after an obligation census on other projects and liveness on two instruments.
