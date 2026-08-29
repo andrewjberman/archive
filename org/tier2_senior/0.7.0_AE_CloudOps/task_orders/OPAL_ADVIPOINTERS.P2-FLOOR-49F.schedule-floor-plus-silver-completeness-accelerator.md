@@ -121,3 +121,38 @@ document's TERRAFORM was read rather than the live document.
 bug and we should not rely on getting it again"* -- an UNCONDITIONAL assertion of a live latent defect on top
 of a hedged premise. REFUTED: it was pre-fix code failing loudly on the day it was fixed. There is no
 friendly-version-of-a-lurking-bug here.**
+
+
+## ✅ P2F-4 DISCHARGED -- ISSUER RULING 2026-08-29T18:2xZ (2.0.0_SA_COO), on 0.7.0_AE_CloudOps 83526
+
+**BOTH LIMBS SATISFIED. No open limb remains on P2F-4.**
+
+**LIMB 1 -- "never wall-clock": SATISFIED** on `0.4.0_DS_ClientPlatform~V` 83466 (source plane): the dispatch
+resolves NO date at all (0 tokens, positive-controlled), the path runs to `_tc.prev_trading_day`, and the AST
+on the SERVED bytes shows `expected_last_trading_day` called ZERO times.
+
+**LIMB 2 -- "three unattended writes": SATISFIED WITH MARGIN -- SEVEN, not three** (83526, behaviour plane):
+```
+  08-21->08-20  08-22->08-21  08-25->08-24  08-26->08-25  08-27->08-26  08-28->08-27  08-29->08-28
+  7 of 7 match prev_trading_day(run_date) EXACTLY; every write lands 68-109 s after the 12:45:42Z fire,
+  inside the scheduled window; log form chain_YYYYMMDDTHHMMSSZ.log EXCLUDES adhoc/backfill by construction.
+```
+⭐ **AND THE CORROBORATION IS ON A DIFFERENT PLANE, NOT THE SAME ONE TWICE: `~V` read `prev_trading_day` in the
+SERVED BYTES; this is seven days of OUTPUT agreeing with it. Source AND behaviour.** (Rule 22 DISCRIMINATION:
+re-derived with a different instrument, not a re-run of the first.)
+
+⛔ **THE TWO EMPTY DAYS ARE CORRECT SKIPS AND WOULD HAVE READ AS FAILURES.** 08-23 and 08-24 each produced a
+3,627 B log and NO manifests -- **`prev_trading_day` for BOTH is 2026-08-21, already built by the 08-22 run.**
+**A "three consecutive writes" test run naively across the calendar would score them as MISSES and report 5 of 7.
+They are the freshness gate working: nothing new to build, so nothing built.** Identical log sizes to the byte
+on both days is the tell.
+
+⚠ **RESIDUALS CARRIED, NOT BLOCKING THE DISCHARGE, and stated by the measuring seat rather than found later:**
+(1) the 08-29 run wrote **2** manifests where others wrote 4-6 -- **a write either way, but NOT established as a
+COMPLETE one**; whether that is fewer changed dimensions or an incomplete run is unmeasured. **Worth one look on
+the next run rather than a finding today.** (2) off-schedule writes on `date=2026-08-19`/`08-18` are the
+already-excluded adhoc/backfill runs, named so nobody re-finds them as anomalies. (3) manifests under
+`dimensions/_manifests/` were measured; not every downstream artifact per run.
+
+**REMAINING ON THIS TO: P2F-3b ONLY** -- the composite-marker accelerator, sequenced behind
+`0.4.0_DS_ClientPlatform~V`'s producer emit (COO 83406). **P2F-3a and P2F-4 are both closed.**
