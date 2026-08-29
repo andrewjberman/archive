@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D1_CATVIEWS.TO-S1-DE",
+  "assignee": "0.4.0_DE_ClientPlatform~Z",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/D1_CATVIEWS.TO-S1-DE.per-client-row-suppression.md",
+    "group": "OTHER",
+    "vintage_commit": "967489bcc9"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md",
+    "to_ref": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/D1_CATVIEWS.TO-S1-DE.per-client-row-suppression.md",
+    "vintage_commit": "2ce1e1b8d5"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/components/CategoryViewTree.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "192b0865",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The build commit is 192b0865 (L1/L2 presence suppression). It is LIVE IN PRODUCTION: promoted in portal-v2.1.171 @1b91b197, live entry chunk index-BMmU0cpj.js read directly from https://opalinvest.dev/ by this seat at 22:4xZ and again at 23:13Z. Every criterion below scored PASS was scored against that served bundle or the served artifact behind it, not against the branch."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "D1_CATVIEWS.TS1-AC2_score_served_render.py (this lane's, self-test-gated)",
+      "invocation": "--self-test (rc=0) first, then --from-edge https://opalinvest.dev with a real RS256 bearer supplied via PORTAL_BEARER (env, not argv -- keeps a live credential out of process lists)",
+      "result": "PASS both directions with the GATE NAMED. The self-test arm is what makes the score meaningful: it fails on the pre-fix control, passes on a fixed object, and names the gate on every wrong-cause mutant, so an absence at G0-G4 cannot be scored as the criterion being met."
+    },
+    {
+      "tool": "ui-smoke.mjs (the /frontend-dev instrument)",
+      "invocation": "portfolios --origin https://opalinvest.dev --token @<minted jwt> [--select <scope>] x4 scopes",
+      "result": "4 of 4 served scopes rendered against PRODUCTION with a real bearer and READ. A default-stub render is the FAILURE state for this instrument; these were not stubs -- the pages carry $2.09B total AUA, 8,265 holdings and the real per-firm bases, values only the authenticated route returns."
+    },
+    {
+      "tool": "bun run typecheck",
+      "invocation": "bun run typecheck (= tsc -b --noEmit), plus a deliberate mutant to prove failability",
+      "result": "rc=0. PROVEN FAILABLE on this same file in this session: an injected type error returned rc=2 TS2322 at the exact line and the restore returned rc=0 with the file byte-identical. A clean pass from an instrument never shown to fail is worth nothing -- portal/CLAUDE.md records that the BARE tsc --noEmit form returns rc=0 on deliberately broken code here."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TS1-AC1",
+      "criterion_verbatim": "NULL AND ZERO BOTH SUPPRESS. A named L1/L2 constituent with null OR zero AUM is not there: no card, no row, no badge, no `unavailable` treatment, no explanatory text. `predicate === 'unavailable'` MUST NOT be routed to for this -- `PredicateUnavailable` renders 'Fee split unavailable at this scope' and that sentence must never reach a reader whose only 'defect' is not owning the product.",
+      "denominator": "4 of 4 served scopes rendered on PRODUCTION and read. Suppression observed at 3 distinct sites across those scopes.",
+      "invocation": "Rendered https://opalinvest.dev/portfolios at global, 49financial, cottonwood and inflection with a real bearer; read each PNG. Cross-checked the predicate against `visibleConstituents` (CategoryViewTree.tsx:135-139) at source.",
+      "method": "live_read",
+      "output_evidence": "SUPPRESSION OBSERVED, both value-kinds: 49financial `Client - Opal Unsupervised` (0.00) is ABSENT beside a valued sibling; inflection `Client - Opal Supervised` (0.00) is ABSENT, the mirror case; ALT Strategies (0.00) is ABSENT from the 49financial SMAs card. No badge, no row, no explanatory text accompanies any of them. AND THE PROHIBITED SENTENCE IS GONE FROM THE PRODUCT ENTIRELY: `PredicateUnavailable` and its render site were DELETED under D-4 (Andrew-direct) and the amber 'Fee split unavailable' panel does not appear at any of the four scopes -- so the criterion's stated failure mode is now unreachable by construction, not merely unrouted. NOTE ON ONE ADJACENT STRING, so it is not mistaken for the prohibited one: an unavailable node with no children renders 'This block carries no L1 breakdown for this node.' That is an observation about the NODE having no L1 layer at all, not an explanation attached to a SUPPRESSED CONSTITUENT, and it names no product a reader does not own.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TS1-AC2",
+      "criterion_verbatim": "HIS WORKED CASE IS THE ACCEPTANCE TEST, BOTH DIRECTIONS. `Opal Fixed Income` RENDERS for Cottonwood and IS ABSENT for Inflection under `Custom Models`. Exhibit BOTH -- an absence with no positive control proves nothing.",
+      "denominator": "2 of 2 required directions, scored at the live PROD edge. Member states printed with denominators per scope (cottonwood NULL 3 of 4 / VALUE 1 of 4; inflection NULL 2 of 4 / VALUE 2 of 4).",
+      "invocation": "org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/D1_CATVIEWS.TS1-AC2_score_served_render.py --from-edge https://opalinvest.dev, real bearer, after `--self-test` returned rc=0.",
+      "method": "command",
+      "output_evidence": "RESULT: PASS -- both directions satisfied, absence ON-RULE at G5. cottonwood: Opal Fixed Income state=VALUE -> 'RENDERS at gate G5'. inflection: state=NULL -> 'ABSENT at gate G5 ... suppressed by the L2 sibling guard while 2 of 4 siblings carry a mapped value -- this is Andrew's rule firing'. Vintage inside the bytes: written_at 2026-08-28T22:17:55Z / 22:17:56Z by opal-assets-mdpf-portal-publisher -- the reland's publish, so the freshness guard passed rather than being bypassed. THE ABSENCE IS PROVEN BY NAMING ITS GATE, not by the row not being there: five other gates (G0 node missing, G1 predicate, G2 L1 sibling guard, G3 no rows, G4 canL2) could each have produced an identical-looking absence for a reason that has nothing to do with Andrew's rule, and the instrument reports those as FAIL.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TS1-AC3",
+      "criterion_verbatim": "A RENDERED BEFORE AND AFTER, both READ by the executing agent. The canvas is SILVER -- light text or ghost-white controls outside a dark Panel is the #1 recurring portal defect. Check it by looking, not by a class-name grep.",
+      "denominator": "AFTER: 4 of 4 served scopes rendered on PRODUCTION and read. BEFORE on the same plane: 0.",
+      "invocation": "AFTER exists and is cited under TS1-AC1/TS1-AC4. No matched BEFORE was captured on the served plane.",
+      "method": "live_read",
+      "output_evidence": "AFTER, READ, 4 of 4 scopes on PRODUCTION -- and the colour-law half of this criterion IS discharged by them: every surface of the Asset Category Views panel renders inside a dark Panel (navy), no light text or ghost-white control appears on the silver canvas at any scope, checked by looking at the PNGs rather than by a class-name grep. WHAT IS MISSING IS THE BEFORE, and only on this plane: the pre-suppression renders this lane holds were taken against the FIXTURE proxy, which is a different plane from the served artifact, and the served plane's pre-fix state is now unreachable -- the reland overwrote it. A fixture BEFORE paired with a PROD AFTER is not a before/after; it is two planes, and presenting it as one is the exact conflation this estate spent 2026-08-28 correcting.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "NOT a failure and NOT a pass. The AFTER half and the entire colour-law half are discharged and cited above; the BEFORE half is unrecoverable because the served pre-fix object was overwritten by the reland, and this lane holds no served-plane capture of it. I will not pair a fixture BEFORE with a PROD AFTER to manufacture a green -- the criterion says 'a rendered before and after', and two planes do not make one comparison. If the issuer holds a served-plane pre-fix capture (3.0.0_SA_CVO~Z banked pre-promote BUNDLE bytes at 459fac54e1, but that is bytes, not a render), this flips on inspection rather than on new work."
+    },
+    {
+      "criterion_id": "TS1-AC4",
+      "criterion_verbatim": "NO L0 REGRESSION. L0 zero-suppression already works (`D1-h-p1`, measured on his screenshots: no `Alternatives` card, no `SMA` card). Show the L0 set is unchanged -- `Models` / `Client` for cottonwood. This TO extends a live mechanism; it must not re-implement or displace it.",
+      "denominator": "The criterion names cottonwood explicitly; scored there, and corroborated at the other 3 of 4 scopes.",
+      "invocation": "Rendered https://opalinvest.dev/portfolios --select cottonwood with a real bearer at 23:14Z and read the PNG.",
+      "method": "live_read",
+      "output_evidence": "COTTONWOOD RENDERS EXACTLY `Models` AND `Client` -- the L0 set the criterion names, unchanged. Models $186.79M (Custom $8.43M + Primary $178.36M); Client present. NO `SMA` card and NO `Alternatives` card, and the grid falls to 2 columns accordingly. The SMA absence is `presentAum` (D1-h-p1) still doing its job at L0 on a true zero -- so the live mechanism is EXTENDED, not displaced. Corroborated elsewhere: inflection also draws no SMA card (SMA 0.00), while global and 49financial DO draw one at $22.79M -- the same predicate producing both outcomes across four scopes is stronger than the single-scope check the criterion asked for.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TS1-AC5",
+      "criterion_verbatim": "THE SUM-PRESERVING CHECK IS INTERNAL QA ONLY. Suppressing a true zero is sum-preserving; suppressing an unknown is not. If a parent stops reconciling after suppression, something non-zero was suppressed. This NEVER becomes a client-facing banner -- it is a pipeline signal, invisible to the reader.",
+      "denominator": "1 invariant (D1-inv-4), read at source; its client-facing invisibility confirmed across 4 of 4 rendered PROD scopes.",
+      "invocation": "Read the invariant at source (CategoryViewTree.tsx, `displayedTotal` / `expected` / `sumCloses` and the useEffect that consumes them); then inspected all four rendered PROD pages for any reconciliation banner.",
+      "method": "manual_read_with_citation",
+      "output_evidence": "THE CHECK EXISTS AND IS CONSOLE-ONLY. It computes `displayedTotal` from the RENDERED set and compares against `total_aua - insurance_excluded`, and on a breach emits console.error('[CategoryViewTree] D1-inv-4 VIEW-PLANE SUM DOES NOT CLOSE ...') -- error, not warn, so it is not filtered out of the engineer plane. THERE IS NO RENDER PATH FOR IT: no JSX consumes `sumCloses`, and no reconciliation banner, sum line or 'closes/does not close' text appears at any of the four scopes I read on PRODUCTION. An earlier cut DID print this on the page ('VIEW-PLANE CHECK Displayed L0 total $2.09B vs total AUA minus Insurance $2.09B -- closes'); that is the exact form this criterion forbids and it is gone.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TS1-AC6",
+      "criterion_verbatim": "TYPESCRIPT CLEAN -- `tsc -b`, zero errors. `commit-gate` reads `.py`/`.sh`/`.tf` and will print 'checked 0 of N files' on a frontend diff; that line is NOT evidence of a clean gate.",
+      "denominator": "1 typecheck of the full project graph, run at the current head of this lane's work.",
+      "invocation": "bun run typecheck (= tsc -b --noEmit) -- the correct form. NEVER bare `tsc --noEmit`, which compiles an empty file set here and returns rc=0 on deliberately broken code.",
+      "method": "command",
+      "output_evidence": "rc=0, zero errors. AND THE INSTRUMENT IS PROVEN FAILABLE rather than assumed: an injected mutant in this same file returned rc=2 with `src/components/CategoryViewTree.tsx(610,7): error TS2322: Type 'string' is not assignable to type 'number'`, and the restore returned rc=0 with the file byte-identical at 33750 bytes on both sides. AND THE CRITERION'S OWN WARNING WAS OBSERVED: commit-gate printed 'checked 0 of N file(s) -- NOTHING WAS CHECKED' on every frontend commit this lane made tonight, and it is NOT cited as validation anywhere in this instance.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO controls, on the two instruments that carry the verdicts. (1) THE SCORER: `--self-test` runs a negative arm (the real pre-fix bytes @bc9d11dd8e), a positive arm (a synthetic fixed object), and FIVE WRONG-CAUSE MUTANTS that each make the subject absent for a reason unrelated to Andrew's rule. It exists because an 'is it absent?' check that does not say WHICH GATE fired scores the feature being DELETED as the criterion being MET -- the absence half looks identical. (2) THE TYPECHECK: a deliberate type error injected into the file under test.",
+      "expected": "(1) self-test rc=0 with the pre-fix control FAILING, the fixed object PASSING, and every wrong-cause mutant reported ABSENT at its own gate (G1/G2/G5) rather than scored as a pass. (2) typecheck rc!=0 naming the injected line, then rc=0 after restore with the file byte-identical.",
+      "observed": "(1) FIRED AS EXPECTED: `subject NULL not 0 (overrule) -> ABSENT@G5 expected ABSENT@G5 OK`; `predicate=unavailable at L0 -> ABSENT@G1 OK`; `subject dropped from registry -> ABSENT@G2 OK`; `L1 'Custom' row suppressed -> ABSENT@G2 OK`; `subject NEGATIVE (money, stays) -> RENDERS@G5 OK`. The freshness guard also both fired and stood down on the same bytes, discriminating by vintage rather than always refusing. (2) FIRED AS EXPECTED: rc=2 TS2322 at the exact line; restore rc=0, 33750 bytes both sides.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The scorer's verdict is a pure function of the served bytes plus the ported predicate, and the port is sha256-pinned to the primary (CategoryViewTree.tsx:135-139) so a drifted primary makes the tool REFUSE rather than score against a stale copy. The renders were repeated: global and inflection were each rendered more than once in this session, and the earlier pair was re-run from the COMMITTED state against a freshly restarted server.",
+      "observed": "STABLE on the subject. Repeated renders reproduced identical values, colours, ordering and layout. A sha256 of the PNG pairs DIFFERS and is recorded here as a REJECTED ORACLE, not a failure: the captures are full-page and the analytics panel above the subject carries its own dynamic content, so a whole-page byte hash answers 'are these bytes identical', not 'does this component draw the same thing'. Reporting that DIFFERS as a determinism failure would have been a wrong-instrument verdict on a correct render.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any producer-side change",
+      "reason": "This TO is RENDER-SIDE by its own title. The L2 dollar values it depends on are `D1_CATVIEWS.TO-M1-DS`'s (build a5227cf161), and the suppression guard self-arms on them with no code change. No producer file was touched by this lane."
+    },
+    {
+      "item": "Re-implementing or replacing the L0 presence predicate",
+      "reason": "TS1-AC4 forbids it in terms -- 'This TO extends a live mechanism; it must not re-implement or displace it.' `presentAum` (D1-h-p1) is untouched, and its continued operation at L0 is the evidence cited under TS1-AC4."
+    },
+    {
+      "item": "A served-plane BEFORE render for TS1-AC3",
+      "reason": "Not achievable: the served pre-fix object was overwritten by the reland, and pairing a fixture BEFORE with a PROD AFTER would be two planes presented as one comparison. Recorded as UNVERIFIABLE-BY-INSTRUMENT with its reason rather than manufactured."
+    },
+    {
+      "item": "Closing this TO's face",
+      "reason": "Closing is the ISSUER's act (2.0.0_SA_COO~Z, stated at 14709 s.1: 'nothing closes a face automatically; closing is the ISSUER'S act'). This instance supplies the measurement; it does not close anything."
+    }
+  ],
+  "surprises": [
+    "THIS TO HAD NO PROOF-OF-SPEC INSTANCE AND NO DECLARED `instance_path`, while its build has been LIVE IN PRODUCTION since the v2.1.171 promote. Found while reading the face after 2.0.0_SA_COO~Z 14709 s.2 flagged the same class on `D1_CATVIEWS.TO-R1-AE`. POSITIVE CONTROL, because I have seen a false ABSENT on this exact kind of check: 18 other `*_PROOF_OF_SPEC.json` files exist in this same directory, so the probe and the path are fine and the absence is real. Filed rather than reported, since the absence was the whole defect.",
+    "THE FACE'S REMAINING GATE IS DISCHARGED AND THE FACE DOES NOT KNOW IT. Its status block says TS1-AC2 'discharges at the next ~13:50Z fire' of the portal publisher. The RELAND's publisher wrote at 2026-08-28T22:17:55Z -- an off-schedule write that satisfies the same condition -- and TS1-AC2 now scores PASS at the live edge. The gate was event-shaped, the event happened by a different route than the one named, and nothing re-scored it. Same shape as the T5DS-AC6 stale-by-clock item 2.0.0_SA_COO~Z found this evening.",
+    "class OBSERVATION, standing ARMED, disarm owner 1.0.0_SA_CTO~Z (accepted, 14202 s.3 class). `IDVZ` and `PFDE` both resolve to #f43f5e (ext-rose) inside the SAME `SMA > ETF Strategies` card via the deterministic-hash fallback. Invisible today only because both carry 0.00 and this TO's own suppressor removes them -- so THE MECHANISM THIS TO IMPLEMENTS IS WHAT HIDES THE COLLISION, and the SMA reland is what puts values into that subtree."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-28/laneZ_prod_pixel_verification_2235-2300Z.md"
+}

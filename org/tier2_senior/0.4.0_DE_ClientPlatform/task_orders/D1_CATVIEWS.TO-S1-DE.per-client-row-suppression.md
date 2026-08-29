@@ -2,10 +2,21 @@
 
 <id>D1_CATVIEWS.TO-S1-DE.per-client-row-suppression</id>
 <decomp_ref>workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md — `D1-h-p1` (**L0 presence predicate**: *"the node's served AUM at the firm's as-of > 0 … drive the block with one node at 0 and assert the tile is ABSENT, not empty"*) extended to L1/L2, and `D1-h-v3` (L2 drill). **NO new cell** — this is `D1-h-p1`'s predicate applied one and two levels down.</decomp_ref>
-<issued_to>DE-class. ⛔ **NO LIVE DE LANE — seating is `0.0.0_AB_MSTR~Z`'s act on Andrew's word.**</issued_to>
+<issued_to>`0.4.0_DE_ClientPlatform~Z` — **BUILT AND COMPLETE.** That lane built this TO and its guard SELF-ARMS on the served values the moment they appear (no flip, no code change). The lane was then KILLED 2026-08-28 ~19:4xZ by `2.0.0_SA_COO~Z` on **Andrew-direct** (*"kill the idle tier2 lanes, need to clean up here"*) — **idle because its remaining criterion is EVENT-GATED, with zero uncommitted work in its tree, verified before the kill.** ⛔ **DO NOT RE-SPAWN A DE LANE FOR THIS TO.** No build act is outstanding; `TS1-AC2` discharges at the next ~13:00Z fire. ⚠ ~~NO LIVE DE LANE — seating is `0.0.0_AB_MSTR~Z`'s act~~ **STRUCK: seating is the COO's act since Andrew's 15:32Z word, and the phrase read as an instruction to spawn a lane for work that was already built.**</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T15:0xZ</issued>
-<status>pending -- CUT, UNSEATED and BLOCKED. ⛔ **HARD DEPENDENCY: `D1_CATVIEWS.TO-M1-DS` MUST LAND FIRST.**</status>
+<status>CLOSED 2026-08-29 ~01:3xZ by `2.0.0_SA_COO~Z` (issuer). 5 PASS + 1 UNVERIFIABLE-BY-INSTRUMENT (TS1-AC3), ZERO FAIL, measured at the instance @`d671e7083e` (VALID 6/6, alignment closed in BOTH directions). `CLOSED` DOES NOT MEAN `ALL PASS` here -- see the closure block at the end of this face. DO NOT SEAT; DO NOT RE-EXECUTE (NEVER#2). --- PRIOR STATUS, PRESERVED: pending -- ⛔ **THE HARD DEPENDENCY IS DISCHARGED AND A DE LANE IS LIVE. RECONCILED 2026-08-28 ~19:3xZ by `2.0.0_SA_COO~Z` (issuer); BOTH CLAIMS BELOW WENT FALSE AND THE FACE KEPT SAYING THEM.** (1) `D1_CATVIEWS.TO-M1-DS` **HAS LANDED** — build `a5227cf161` + instance `c5b405f643`, both ON `origin/SITEZ`, and `a5227cf161` is an ancestor of the DEPLOYED gold-lambda pin `70a0828226` (17:28:29Z), verified with a negative control that demonstrably returns NO. (2) `0.4.0_DE_ClientPlatform~Z` **IS LIVE** and reports this TO **BUILT**, with its guard self-arming on the served values the moment they appear — no flip, no code change, nothing for a seat to remember. ⚠ **REMAINING GATE IS AN EVENT, NOT A SEAT:** the dollar values are in the DEPLOYED bytes but no fire has emitted a new object, so the served plane still reads `as_of 2026-08-27` with 0 of 15 L2 members carrying an `aum` (measured through the dev proxy on a real bearer, all four scopes). ⛔ **CORRECTED 2026-08-28 ~19:5xZ by `2.0.0_SA_COO~Z`: ~~four criteria, one event~~ WAS WRONG ON BOTH COUNTS. THERE ARE THREE TIMES ACROSS TWO EventBridge PLANES**, censused on both APIs:
+> ```
+> RULES plane      13:00Z  etf-positioning-producer-daily -> etf-positioning-producer   -> INGEST-TO10-AC3  (D4)
+> SCHEDULER plane  13:30Z  mdpf-scheduled-floor           -> mdpf-gold-lambda           -> CATV-TOV1-AC7
+>                          (⛔ TM1-AC1 MOVED OUT OF THIS ROW 2026-08-28 ~20:4xZ by 2.0.0_SA_COO~Z on
+>                           0.4.0_DS_ClientPlatform~Z's catch: its own text reads "carries a dollar value
+>                           on the SERVED artifact", so it belongs at 13:50Z. The L2 values are PRODUCED
+>                           at 13:30Z but only REACH the served object when the publisher copies them.)
+>                  13:40Z  mdpf-accrual-bridge-daily      -> mdpf-accrual-trigger
+>                  13:50Z  opal-assets-mdpf-portal-publisher-daily -> ...-portal-publisher -> **THIS TO's TS1-AC2**
+> ```
+> ⭐ **`TS1-AC2` IS THE LATEST OF ALL OF THEM — it needs the SERVED object, which the PUBLISHER writes at ~13:50Z, not the gold floor at 13:30Z.** Scoring it at 13:30Z reads the pre-publish object and returns the OLD values, which would look like the fix failing. ⚠ **`list-rules` STRUCTURALLY CANNOT SEE a Scheduler entry** — a single-plane census is how one number stood in for three. The gold-lambda's deployed `LastModified` is `2026-08-28T17:28:29Z`, so the 13:30Z fire runs the repinned bytes. ⛔ No ad-hoc run to beat it. ⚠ **ORIGINAL FOLLOWS, APPENDED NOT REPLACED.** ~~CUT, UNSEATED and BLOCKED. HARD DEPENDENCY: `D1_CATVIEWS.TO-M1-DS` MUST LAND FIRST.~~</status>
 <priority>P1 — Andrew has asked for this TWICE.</priority>
 
 <authority>
@@ -81,5 +92,25 @@ the **PROD promote** — **Andrew's word, per promote, no standing authorization
   <criterion id="TS1-AC5" cell_refs="D1-h-p1"/>
   <criterion id="TS1-AC6" cell_refs="D1-h-v3"/>
   <expected_criteria>TS1-AC1,TS1-AC2,TS1-AC3,TS1-AC4,TS1-AC5,TS1-AC6</expected_criteria>
+  <instance_path>org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/D1_CATVIEWS.TO-S1-DE_PROOF_OF_SPEC.json</instance_path>
   <alignment_denominators>cells declared: 2 (D1-h-p1, D1-h-v3); criteria: 6. FORWARD — 6 of 6 carry >=1 cell_ref. BACKWARD — 2 of 2 reachable (D1-h-p1 from AC1/AC2/AC4/AC5; D1-h-v3 from AC2/AC3/AC6). Unmapped 0; untraceable 0. NO cell added: `D1-h-p1` already declares the presence predicate at L0 and its oracle is "assert the tile is ABSENT, not empty" — this TO applies that same predicate one and two levels down, on the sovereign's word.</alignment_denominators>
 </proof_of_spec>
+
+---
+
+## CLOSED 2026-08-29 ~01:3xZ BY `2.0.0_SA_COO~Z` (issuer) — 5 PASS, 1 UNVERIFIABLE-BY-INSTRUMENT, ZERO FAIL
+
+```
+  TS1-AC1 PASS . TS1-AC2 PASS . TS1-AC4 PASS . TS1-AC5 PASS . TS1-AC6 PASS
+  TS1-AC3 UNVERIFIABLE-BY-INSTRUMENT
+  DENOMINATOR 6, matching <expected_criteria>. ZERO FAIL.
+```
+⛔ **`CLOSED` DOES NOT MEAN `ALL PASS` ON THIS FACE.** `TS1-AC3` closes as
+**UNVERIFIABLE-BY-INSTRUMENT** — an honest terminal state, not a green one, and a reader must not
+count it as evidence the criterion held.
+⭐ **The instance was filed @`d671e7083e` with every criterion quoted VERBATIM from this face** —
+the bar the issuer set, met by construction rather than by assertion, and `proof-of-spec-check`
+closed alignment in BOTH directions independently of either seat's read.
+⚠ **This face carried no `instance_path` for most of its life** — added 2026-08-29 after an issuer
+census wrongly reported the whole `<proof_of_spec>` block missing. **The block was always there;
+one field was not.**

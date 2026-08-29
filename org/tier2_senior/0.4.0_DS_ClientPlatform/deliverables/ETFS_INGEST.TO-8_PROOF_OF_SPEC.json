@@ -1,0 +1,215 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_INGEST.TO-8",
+  "firm": "FABRIC",
+  "phase": "P4-PUBLISHERS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_INGEST.TO-8.publisher-carries-the-industry-group-key.md",
+    "group": "D",
+    "vintage_commit": "07b57eab69"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-ingest/20260824T2010Z/DECOMP.md",
+    "vintage_commit": "fcdf042972",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_INGEST.TO-8.publisher-carries-the-industry-group-key.md"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~Q",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/gold/etf_positioning_publisher.py",
+      "kind": "script",
+      "commit_or_etag": "39495cf260 (AC1) + f0e2a05889 (AC6)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "TO8-AC1",
+        "TO8-AC2",
+        "TO8-AC3",
+        "TO8-AC4",
+        "TO8-AC6"
+      ],
+      "deploy_evidence": "*** THIS TO HAS TWO BUILD COMMITS, NOT ONE, AND CITING ONLY THE FIRST WOULD UNDER-DESCRIBE THE DEPLOYED ARTIFACT. *** 39495cf260 (2026-08-28T01:35Z) added the industry_group key; f0e2a05889 (2026-08-28T02:14Z) added industry_group_basis under the AC6 issuer amendment. BOTH ON ORIGIN (is-ancestor rc=0, all-zero-sha negative control says no). BOTH PRECEDE the 02:26:49Z safe-apply by 0.7.0_AE_CloudOps~I -- f0e2a05889 by 12 minutes -- so the deployed package contained both, which is corroborated INDEPENDENTLY by the served artifact carrying BOTH keys on 189 of 189 rows against a measured baseline of 0. VINTAGE QUALIFIER: etf-positioning-producer has SINCE been re-applied at 2026-08-28T18:49:14Z (TO-10-AE, the TO-9-DS ETFClassifier fold). Every criterion below is scored on the IMMUTABLE 13:01:26Z served object, never on the function's current bytes."
+    },
+    {
+      "path_or_key": "s3://opal-data-portal-v2/platinum/etfs/positioning_data.json",
+      "kind": "s3_object",
+      "commit_or_etag": "VersionId 5UfK2PDL0XlQCzoIjoFGivz3WqPp_h86, ETag 4c7ff3c6a4ebd333a3f88aed80523a8a, LastModified 2026-08-28T13:01:26+00:00, 146944 B",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "TO8-AC2",
+        "TO8-AC3",
+        "TO8-AC4",
+        "TO8-AC5",
+        "TO8-AC6"
+      ],
+      "deploy_evidence": "THE SERVED ARTIFACT ITSELF -- the only rung that settles this TO. Written by the 13:01Z SCHEDULED gold fire. Downloaded by this seat and verified 146944 bytes on disk against the head-object ContentLength BEFORE parsing, so a truncated download could not masquerade as a short census."
+    },
+    {
+      "path_or_key": "s3://opal-data-portal-v2/platinum/etfs/positioning_data.json (NONCURRENT VERSION -- the pre-fire baseline)",
+      "kind": "s3_object",
+      "commit_or_etag": "VersionId WeQkbjugScNvAsjDfobQ9oebjnbKPPhz, LastModified 2026-08-27T13:01:25+00:00, 128122 B",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "TO8-AC2",
+        "TO8-AC4",
+        "TO8-AC6"
+      ],
+      "deploy_evidence": "THE PRE-CHANGE SERVED ARTIFACT, retrieved from S3 OBJECT VERSIONING rather than from any seat's local capture. This is what makes AC4 a DIFF and AC2's baseline a MEASUREMENT rather than a recollection. *** DURABILITY QUALIFIER, STATED BECAUSE IT IS NOT PERMANENT: a VersionId is a LEASE, not provenance. Where noncurrent-expiry is configured these bytes die on that clock, so this baseline is re-derivable NOW and may not be later. Anyone re-checking AC4 after that window must use the figures recorded here rather than expecting the object to still resolve.*"
+    },
+    {
+      "path_or_key": "s3://opal-data-etfs/gold/_manifests/2026-08-27/e2fd04553188.json",
+      "kind": "s3_object",
+      "commit_or_etag": "LastModified 2026-08-28T13:01:23+00:00, 3031 B",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "TO8-AC5"
+      ],
+      "deploy_evidence": "The gold run manifest carrying run_class and run_id -- the run's OWN self-description, which is what makes AC5's scheduled-vs-adhoc claim rejectable rather than asserted."
+    },
+    {
+      "path_or_key": "s3://opal-data-etfs/gold/holding/date=2026-08-27/holding.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "LastModified 2026-08-28T13:01:23+00:00, 45692 B",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "TO8-AC3",
+        "TO8-AC6"
+      ],
+      "deploy_evidence": "The gold input to the publisher, read DIRECTLY as parquet. Used here as the cross-plane coherence check: if gold and served disagreed about the basis distribution, the publisher would be transforming what it was asked to pass through."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TO8-AC1",
+      "criterion_verbatim": "HOLDING_KEYS carries the new key -- etf_positioning_publisher.py:230, cited file:line @ <commit-ish>. ADDITIVE: sub_asset_class remains present, unchanged, and at its existing grain. Show the key list before and after.",
+      "method": "diff",
+      "invocation": "git show 39495cf260^:data/etfs/scripts/gold/etf_positioning_publisher.py (BEFORE) ; git show 39495cf260:... (AFTER) ; awk over the HOLDING_KEYS block ; grep -n for every industry_group occurrence",
+      "output_evidence": "BEFORE (@39495cf260^), 13 members: ticker, name, asset_class, sub_asset_class, weight, fee, aum, yield, duration, credit, beta, active, returns. AFTER (@39495cf260), 14 members -- industry_group INSERTED IMMEDIATELY AFTER sub_asset_class, everything else byte-identical and in the same order. ADDITIVE CONFIRMED ON BOTH PLANES: sub_asset_class is present in both lists at the same position, and on the served artifact it is present on 189 of 189 rows with values byte-identical to pre-change (AC4). *** LINE-CITATION CORRECTED RATHER THAN COPIED: the criterion cites :230 and the face's own line note warns the list has already moved once. LOCATED BY CONTENT -- at @39495cf260 HOLDING_KEYS is at :243, and at HEAD it is at :315. The criterion's :230 is stale at every commit I read, which is exactly why the face says cite by content.* ONE-KEY DISCIPLINE, MEASURED ON THE SERVED CONTRACT RATHER THAN ASSERTED FROM THE DIFF: the served row key set went from 13 keys to 15 across the fire, ADDED = exactly ['industry_group','industry_group_basis'], REMOVED = none. Two keys, not one, and that is CORRECT rather than a widening: industry_group is this criterion's, and industry_group_basis is the ISSUER AMENDMENT at TO8-AC6 (msg 12038, landed @f0e2a05889). No third key rode along.",
+      "denominator": "2 commits diffed (before/after); 13 -> 14 key-list members enumerated in full, not sampled; 12 industry_group occurrences censused across the publisher at HEAD; served row key set compared over all 189 rows (13 pre, 15 post, 2 added, 0 removed)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TO8-AC2",
+      "criterion_verbatim": "THE SERVED ARTIFACT CARRIES IT, WITH A PRINTED DENOMINATOR. Census every holding row of the served positioning_data.json -- the current denominator is 189 rows / 4 portfolios and must be re-derived, not copied. Report: rows carrying a non-null industry group, rows null, and the denominator. A coverage number without its denominator is not a result.",
+      "method": "live_read",
+      "invocation": "aws s3api head-object + get-object platinum/etfs/positioning_data.json ; python walk of the full document structure, counting KEY PRESENCE (`field in row`) rather than .get()",
+      "output_evidence": "*** THE DENOMINATOR WAS RE-DERIVED, NOT COPIED, EXACTLY AS THE CRITERION DEMANDS. *** I did not assume 189: I walked the document and enumerated the holding containers, which returned DIVZ 30 + IDVZ 45 + PFDE 90 + PFOE 24 = 189 rows across 4 portfolios. The 189/4 in the criterion is thereby CONFIRMED by an independent derivation rather than restated. CENSUS, scored as KEY PRESENCE and not .get() (a .get() census cannot distinguish an absent key from a null value, and this TO's whole subject is the difference): industry_group KEY PRESENT on 189 of 189; NON-NULL 180; NULL 9. BASELINE FROM THE PRE-FIRE VERSION (VersionId WeQkbjug...): industry_group KEY PRESENT on 0 of 189 -- so the probe is demonstrated able to return zero on this exact document shape, and the 189 is not an artifact of a matcher that matches anything. NEGATIVE CONTROL: a fabricated key industry_group_bogus_zzz9999 is KEY PRESENT on 0 of 189. CROSS-PLANE COHERENCE: the gold parquet independently reads 180 non-null of 189, identical to served, so the publisher passed the field through without transforming coverage. 180 + 9 = 189 reconciles exactly, and the 9 nulls reconcile to the basis counts at AC3.",
+      "denominator": "189 holding rows across 4 portfolios, re-derived by structural walk (30/45/90/24); 189 rows censused for key presence on 3 fields including 1 fabricated negative control; 1 pre-fire baseline of 189 rows; 189 gold parquet rows as the cross-plane check",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TO8-AC3",
+      "criterion_verbatim": "NULLS ARE EXPECTED AND MUST BE EXPLICIT, NOT INHERITED. The non-equity rows (cash, the money-market security, the synthesized residual, the fixed-income sleeve) have no industry group by construction. State their treatment. WHAT IS PROHIBITED IS A NULL QUIETLY BECOMING A SECTOR -- the same prohibition TO-6's AC6 carries at the aggregate grain, restated here at the row grain because the two fail independently.",
+      "method": "live_read",
+      "invocation": "python enumeration of every row whose industry_group is null, printing ticker/name/basis/asset_class ; cross-tab asset_class x industry_group_basis over all 189 rows",
+      "output_evidence": "ALL 9 NULL ROWS ENUMERATED INDIVIDUALLY -- not counted, LISTED -- and EVERY ONE CARRIES AN EXPLICIT BASIS. 8 rows basis=not-applicable-non-equity: SALXX (DIVZ, IDVZ -- the State Street money-market security), FXFXX (PFDE, PFOE -- First American Treasury Obligations), and CASH (all four books -- the canonical cash line). 1 row basis=absent-from-source: ABT (Abbott Laboratories, DIVZ), an EQUITY that Bloomberg rejected. *** THE TREATMENT IS THEREFORE STATED PER ROW AND THE TWO NULL CAUSES ARE DISTINGUISHABLE ON THE SERVED PLANE, which is the whole point: a consumer meeting a null can tell 'this is a cash row and never had a group' from 'this is an equity the vendor failed on'. Without the basis those nine rows would be one undifferentiated absence.* THE PROHIBITION IS MEASURED, NOT ASSERTED: the cross-tab over all 189 rows returns exactly three cells -- (Equity, observed) 180, (Fixed Income, not-applicable-non-equity) 8, (Equity, absent-from-source) 1. NO ROW HAS A NULL BASIS, and NO NULL-industry_group ROW CARRIES A SECTOR VALUE. The complementary check at the aggregate grain is at TO-6 AC6 (0 null/Other buckets across 4 books); the two are scored separately because, as the criterion says, they fail independently. QUALIFIER ON MY OWN COVERAGE, STATED: the criterion names FOUR non-equity classes including 'the synthesized residual'. The manifest reports synthesized_residual_rows = 2, and those rows are the CASH line in the two books lacking an issuer cash row -- i.e. the residual is served UNDER the CASH ticker and is not separately labelled on the served plane. It is covered by the same not-applicable-non-equity basis, so no row is unclassified; but a reader cannot pick the synthesized rows out of the served artifact alone. Noted, not chased.",
+      "denominator": "189 rows cross-tabbed on asset_class x industry_group_basis (3 non-empty cells, exhaustive); 9 null rows enumerated individually; 4 named non-equity classes checked against the served set; 2 synthesized residual rows per the run manifest",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TO8-AC4",
+      "criterion_verbatim": "NO CONSUMER REGRESSION. sub_asset_class values on the served artifact are byte-identical to their pre-change values for every row. The positive control matters more than the diff: show the 11 sector values and the 2 non-equity values still resolve in SUB_ASSET_CLASS_ORDER -- an absence check cannot tell a fix from a refactor.",
+      "method": "diff",
+      "invocation": "aws s3api get-object --version-id WeQkbjugScNvAsjDfobQ9oebjnbKPPhz (pre-fire) ; python join on (book,ticker) ; per-value count comparison both sides",
+      "output_evidence": "sub_asset_class IDENTICAL on 189 of 189 (book,ticker) pairs. Holdings ADDED 0, DROPPED 0, intersection COMPLETE at 189 -- so the comparison covers the entire served set with no unmatched remainder. POSITIVE CONTROL, which the criterion rightly weights above the diff: all 12 distinct values are present on BOTH sides with EVERY count identical -- Information Technology 35, Financials 32, Health Care 22, Industrials 22, Consumer Staples 16, Communication Services 15, Consumer Discretionary 14, Utilities 11, Energy 9, Ultra Short Duration 8, Materials 4, and 1 null. So this is not an absence check that a refactor would also pass: the 11 sectors and the non-equity value are each shown PRESENT and UNMOVED, value by value. *** THE CRITERION SAYS '2 non-equity values' AND THE SERVED SET CARRIES ONLY ONE. MEASURED AND NOT SMOOTHED OVER: 'Ultra Short Duration' is present at 8; 'Cash & Cash Equivalents' does NOT appear as a served sub_asset_class value at all -- all four CASH rows carry 'Ultra Short Duration'. This is UNCHANGED ACROSS THE FIRE (identical on both sides), so it is NOT a regression and NOT caused by this TO; the vocabulary is size 13 per the manifest while the served set exercises 12. Recorded because a criterion whose stated premise does not match the artifact should be corrected on the face rather than quietly scored as met.* THE OTHER NULL IS ABT, and it is null on BOTH sides -- pre-fire sub_asset_class null, post-fire sub_asset_class null; only its basis moved from key-absent to 'absent-from-source'. *** INSTRUMENT QUALIFIER, BECAUSE THIS IS THE ONE PLACE MY INSTRUMENT COULD BE MISTAKEN FOR CORROBORATION AND IS NOT: 2.0.0_SA_COO~Z ran this comparison against a LOCAL pre-fire copy captured before 13:00Z. I ran it against the S3 NONCURRENT VERSION. That is a different RETRIEVAL PATH over the SAME UNDERLYING OBJECT -- it independently confirms the baseline capture was faithful, but it does NOT independently confirm the CHOICE of baseline. Two seats agreeing here is one rung measured twice, and I state that rather than presenting it as triangulation.* CROSS-VINTAGE QUALIFIER: the baseline is data_as_of 2026-08-26 and the current is 2026-08-27, so this compares two different trading days. Because 0 holdings were added or dropped the (book,ticker) grain is fully matched and the caveat does not bite on sub_asset_class; weights DID move as expected across vintages (e.g. ABT 0.0241 -> 0.0236) and are not part of this criterion.",
+      "denominator": "189 of 189 (book,ticker) pairs joined; 0 added, 0 dropped; 12 distinct sub_asset_class values compared count-for-count on both sides; 2 served-row key sets compared (13 pre vs 15 post)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TO8-AC5",
+      "criterion_verbatim": "PROVENANCE ON THE RUN. State whether the evidence comes from a scheduled fire or an ad-hoc QA run, in a field a certifier can reject on. An ad-hoc artifact is never production evidence (CLAUDE.md section 5). A QA run is legal here and is legal ONLY if it says so.",
+      "method": "live_read",
+      "invocation": "s3api get-object gold/_manifests/2026-08-27/e2fd04553188.json ; s3api get-object bbg/2026-08-27/run_manifest.json ; s3api head-object on the served key",
+      "output_evidence": "SCHEDULED. Stated here in a field a certifier can reject on, and grounded on the RUN'S OWN SELF-DESCRIPTION at two independent stages rather than on this seat's assertion. GOLD STAGE: gold/_manifests/2026-08-27/e2fd04553188.json reads run_class = 'scheduled', run_id = 'e2fd04553188', stage = 'gold', producer = 'etf_positioning_gold', generated_utc = 2026-08-28T13:00:45Z, publish = true, trading_days_behind = 1. BRONZE STAGE: bbg/2026-08-27/run_manifest.json reads run_class = 'scheduled', as_of = '2026-08-27'. CLOCK CORROBORATION, independent of the self-labels: the bronze objects carry LastModified 11:06:33-37Z against the 11:00Z cron, the gold holding parquet 13:01:23Z and the served JSON 13:01:26Z against the 13:00Z cron -- a 3-second producer-to-publisher gap consistent with one continuous scheduled invocation, not two ad-hoc acts. *** NO AD-HOC RUN WAS FIRED BY THIS SEAT OR ITS PREDECESSOR, and that is the substantive half of this criterion rather than a formality: the TO states that an ad-hoc write lands a real artifact at the real key and DESTROYS the discriminator. The predecessor recorded declining to fire one for exactly this reason and ended its session with the criteria open instead; this seat inherited the intact discriminator and spent it on a measurement.* trading_days_behind = 1 with as_of 2026-08-27 on a 2026-08-28 run is the expected T-1 frontier, so the freshness is not a stale-pipeline artifact.",
+      "denominator": "2 stage manifests read (bronze + gold), each carrying its own run_class field; 1 run_id; 4 object clocks compared against 2 cron boundaries; 1 trading-day frontier check",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TO8-AC6",
+      "criterion_verbatim": "THE VALUE CARRIES ITS CLAIM -- industry_group_basis IS REQUIRED ON THE SERVED ROW. ADDED BY ISSUER AMENDMENT 2026-08-28 ~02:2xZ (msg 12038). The BASIS enum is CLOSED -- observed, not-applicable-non-equity, field-not-in-source, security-not-in-characteristics, absent-from-source. NO CLOSED VALUE LIST IS MINTED FOR THE GROUP NAMES THEMSELVES -- emit industry_group_observed_members IN THE GOLD RUN MANIFEST, NOT on the served row.",
+      "method": "live_read",
+      "invocation": "python key-presence census of industry_group_basis over all 189 served rows ; value distribution ; gold parquet comparison ; served-row scan for industry_group_observed_members ; gold manifest read",
+      "output_evidence": "PRESENT AND POPULATED ON EVERY ROW: industry_group_basis KEY PRESENT on 189 of 189, NON-NULL on 189 of 189 -- no row carries a value without its claim, and no row carries the claim as an empty string. BASELINE: KEY PRESENT on 0 of 189 pre-fire, so the probe discriminates. OBSERVED MEMBERS ARE A SUBSET OF THE CLOSED ENUM, checked rather than assumed: the served distribution is observed 180, not-applicable-non-equity 8, absent-from-source 1 -- three of the five declared members, with NO value outside the enum. The two unobserved members (field-not-in-source, security-not-in-characteristics) are printed AT ZERO in the gold manifest's industry_group_basis_counts, which is what makes the enum's coverage claim MECE rather than merely tidy -- a member that only appears when it fires is indistinguishable from a member nobody implemented. GOLD AND SERVED ARE IDENTICAL on all three populated members (180/8/1 both planes), so the publisher passes the basis through rather than re-deriving it -- two expressions that could drift are in fact one. *** THE PLANE RULING IS OBEYED AND I VERIFIED BOTH HALVES, NOT JUST THE EASY ONE: industry_group_observed_members is PRESENT in the gold run manifest (23 members) and ABSENT from every served row -- I scanned all 189 served rows for the key and found 0. A run-level member list riding on every row inside a row-shaped served document would have been the Rule 24(ii) grain error the amendment names, and it is not there.* THE SERVED MEMBER SET AGREES WITH THE MANIFEST at 23 distinct values, measured independently on the two files. NO CLOSED VALUE LIST FOR THE GROUP NAMES IS MINTED ANYWHERE -- and the surprises section records why adopting one from today's set would be wrong.",
+      "denominator": "189 rows censused for key presence and non-null; 5 declared enum members checked, 3 observed / 2 printed at zero; 0 out-of-enum values; 189 gold rows compared on the same distribution; 189 served rows scanned for industry_group_observed_members (0 hits); 23 distinct members on each of 2 planes",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "*** NO MUTANT WAS RUN BY THIS SEAT. This instance is a FILING act over evidence that already exists (2.0.0_SA_COO~Z msg 13720), and a re-execute of accepted work is a REWIND under CLAUDE.md NEVER-2. *** The mutant that exists is the predecessor's and is CITED, NOT RE-RUN: MUTANT M3 feeds the publisher a NaN-bearing frame -- the exact state if the gold-side _is_blank fix were reverted -- and asserts the served rows still read null, paired with two controls because a guard that nulls EVERYTHING would also pass M3. I make no claim about its current rc.",
+      "expected": "This seat's controls are the pre-fire BASELINE and per-criterion negative controls, each chosen so the probe can return the failing value: the noncurrent S3 version as a real zero-state for both new keys, a fabricated key name in the served census, the all-zero sha in every push-state read, and the gold parquet as a cross-plane check on distributions the publisher could have transformed.",
+      "observed": "EVERY CONTROL RETURNED THE DISCRIMINATING VALUE. The baseline reads industry_group and industry_group_basis KEY PRESENT on 0 of 189 while the current reads 189 of 189 -- the strongest available discriminator, because the artifact changed in exactly the way the code predicts and in no other way (2 keys added, 0 removed, 189 sub_asset_class values unmoved). The fabricated key returned 0 of 189. The all-zero sha is not an ancestor. Gold and served agreed on the basis distribution, so a publisher-side transformation would have shown up as a disagreement and did not. *** ONE HYPOTHESIS OF MINE WAS RAISED AND KILLED BY MEASUREMENT, recorded because it bore directly on this criterion set: seeing HOLDING_KEYS at 14 members without industry_group_basis @39495cf260, I suspected AC6's provenance field was served but NOT covered by the publisher's completeness assertion at :444 -- precisely the 'unenforced provenance field drifts to unpopulated' hazard AC6 itself quotes. FALSE. @f0e2a05889 already carries the 15-member list and PRECEDES the apply by 12 minutes, so the 14-member state lived 39 minutes in the tree and never shipped. I did not file it as a finding.*",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Both served measurements are read-only s3api GETs against EXPLICIT, IMMUTABLE VersionIds (5UfK2PDL0XlQCzoIjoFGivz3WqPp_h86 current, WeQkbjugScNvAsjDfobQ9oebjnbKPPhz pre-fire) rather than against the mutable key -- so a later fire cannot silently change what this instance measured, and a re-check resolves the same bytes. Byte counts were verified against head-object ContentLength before parsing. Source citations are `git show <commit>:<path>`, pinned to a commit rather than the working tree.",
+      "status": "STABLE",
+      "observed": "Re-running the census over the pinned VersionIds returns identical counts. *** TWO INSTABILITIES ARE NAMED RATHER THAN LEFT IMPLICIT. (1) The mutable key platinum/etfs/positioning_data.json WILL move on the next 13:00Z fire; anyone re-deriving these numbers from the bare key on a later day gets a different as_of and should expect different weights. (2) The pre-fire baseline is a NONCURRENT VERSION and a VersionId is a LEASE -- under noncurrent-expiry those bytes eventually die, at which point AC4 is no longer re-derivable from S3 and the figures recorded here become the record. Both are properties of the substrate, not of the measurement.*"
+    }
+  },
+  "surprises": [
+    "*** THE ALIGNMENT DEFECT ROUTED TO ME WAS ALREADY FIXED BY THE TIME I MEASURED IT. I AM RECORDING THE MEASUREMENT, NOT THE BRIEF. *** 2.0.0_SA_COO~Z msg 13731 (2026-08-28T19:08:54Z) said every ETFS_INGEST instance would read INVALID on alignment because CELL_ID_RE requires a LOWERCASE surface segment and this project's INGEST-T4-1 / INGEST-T5-1 are uppercase. I filed anyway as instructed. The instrument says otherwise: THIS INSTANCE VALIDATES rc=0 VALID, violations=0, alignment FULLY CLOSED (forward-1 6/6, forward-2 2/2, backward 2/2, decomp id space 40). *** CAUSE: 1.0.0_SA_CTO~Z landed the fix at 2026-08-28T19:16:16Z (@87c5761e9e), EIGHT MINUTES AFTER the brief was written and while I was measuring -- the 'widen the regex' option taken NARROWLY as a PREFIX-ANCHORED branch, with the shape-general alternative recorded as built and rejected by its own control (572 NEW-ONLY tokens vs 36, the 36 all real INGEST ids).* >> VINTAGE QUALIFIER, LOAD-BEARING: @87c5761e9e IS LOCAL, NOT ON ORIGIN (is-ancestor of origin/SITEZ says NO; positive control says YES for pushed siblings). THE VALID VERDICT HOLDS AT LOCAL HEAD AND WILL NOT REPRODUCE FOR A SEAT VALIDATING AGAINST origin/SITEZ OR ON THE OTHER FABRIC UNTIL THE INTEGRATOR PUSHES. A reader who re-runs this and gets INVALID has found an unpushed checker, not a defect in this instance. << NOTHING WAS FABRICATED TO REACH VALID: no cell renamed, no cell_ref retrofitted; the alignment fields are exactly what I would have filed under the INVALID expectation. The rename-vs-widen adjudication 2.0.0_SA_COO~Z routed is DISCHARGED by that commit; reported back to both seats.",
+    "*** THIS FACE'S CRITERION IDS VIOLATE THE FIRM-TOKENING RULE PRINTED ON THE FACE ITSELF, AND I USED THEM UNCHANGED ON PURPOSE. *** The ids here are TO8-ACn, bare, while sibling TO-6's are INGEST-TO6-ACn. 2.0.0_SA_COO~Z recorded this on the face as a DEFECT DELIBERATELY NOT FIXED, because a rename moves every REFERENCE to these ids (reports, messages, any filed instance) and so needs a citation census first. I matched <expected_criteria> VERBATIM rather than 'correcting' the ids in my own instance -- an instance that silently used the firm-tokened form would have failed the expected-criteria comparison AND created the two-carrier divergence the deferral exists to avoid. LATENT, not live: a collision needs another lane to mint a bare TO8-ACn. Owner: 2.0.0_SA_COO~Z as issuer.",
+    "*** TO8-AC4 NAMES '2 non-equity values' AND THE SERVED ARTIFACT CARRIES ONLY ONE. *** 'Ultra Short Duration' is present at 8 rows; 'Cash & Cash Equivalents' does not appear as a served sub_asset_class value at all -- all four canonical CASH rows carry 'Ultra Short Duration'. The manifest reports sub_asset_class_vocab_size = 13 while the served set exercises 12. This is IDENTICAL PRE- AND POST-FIRE, so it is not a regression and not caused by this TO, and I scored AC4 PASS on the values that exist rather than failing it on a premise mismatch. But the criterion's positive control as written cannot be executed exactly as specified, and a certifier reading 'the 2 non-equity values' against this artifact will find one. Surfaced for 2.0.0_SA_COO~Z as issuer; not chased, and NOT silently reworded in my scoring.",
+    "*** THE SYNTHESIZED RESIDUAL IS NOT SEPARATELY IDENTIFIABLE ON THE SERVED PLANE. *** TO8-AC3 names four non-equity classes including 'the synthesized residual'. The gold manifest reports synthesized_residual_rows = 2, but those rows are served under the CASH ticker and carry the same not-applicable-non-equity basis as the genuine issuer cash lines. NO ROW IS UNCLASSIFIED, so AC3 passes -- but a consumer cannot distinguish a synthesized NAV-residual row from a real issuer cash line using the served artifact alone. OBSERVATION, INERT: nothing breaks today and the basis axis is provenance-for-industry-group, not provenance-for-the-row, so widening it here would be a Rule 24(iii) intent violation. Surfaced for 2.0.0_SA_COO~Z rather than fixed.",
+    "*** THE OBSERVED industry_group MEMBER SET IS VENDOR-TRUNCATED AT 30 CHARS -- RE-MEASURED ON THE SERVED PLANE, WHICH IS A THIRD FILE. *** 1.0.0_SA_CTO~Z read the .csv and 2.0.0_SA_COO~Z read the .parquet; this seat measured the SERVED JSON, so this is corroboration on a new plane rather than repetition. 23 distinct values, MAX LENGTH EXACTLY 30, 6 values sitting AT the cap ('Technology Hardware & Equipmen', 'Pharmaceuticals, Biotechnology', 'Semiconductors & Semiconductor', 'Health Care Equipment & Servic', 'Commercial & Professional Serv', 'Consumer Discretionary Distrib'). THE RENDERED PAGE WILL SHOW THESE TRUNCATED LABELS. Already disarmed by 2.0.0_SA_COO~Z on the face; adoption is ruled against on two independent grounds (truncation, and 23 distinct against a closed published GICS set of 25). NOT CHASED -- a field-width override or alternate Bloomberg field is a VENDOR-API act needing Andrew's explicit per-use word.",
+    "*** I FILED firm=FABRIC AS A DECLARED GATE DEFECT AND THE GATE OWNER RULED IT IS NOT ONE. CORRECTED HERE RATHER THAN LEFT STANDING. *** I originally recorded a Rule 24(i) coverage failure in the schema and argued that five instances carrying the identical declaration meant the GATE should move. 1.0.0_SA_CTO~Z RULED OTHERWISE (msg 13799), reading the schema at source: firm is OPTIONAL and additive, ratified with TIGHTENING J1 @42317a4aab, its description requiring the firm be 'STATED EXACTLY instead of derived from to_id grammar'. *** FABRIC WAS RATIFIED FOR EXACTLY THIS CASE -- ETFS_INGEST is not client-firm-scoped -- so FABRIC is the CORRECT value and five uses are five correct uses.* THE RULING ALSO CORRECTED THE COUNT MY ARGUMENT RESTED ON: the five declared_exclusions are NOT identical (TO-2 'no code written'; TO-4/TO-7 'NO APPLY, NO DEPLOY'; TO-6/TO-8 'NOTHING WAS REBUILT'). The only repeated thing is the firm FIELD -- an enum value, not an exclusion -- so I had counted a different object than the argument required. NO GATE CHANGE IS OWED OR ASKED. The principle stands and was explicitly kept; it just needs the repeated thing to BE a workaround first. What survives unchanged: routing this to the gate owner rather than editing the gate was correct regardless of the answer."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "aws s3api (via the .tools/aws shim)",
+      "invocation": "head-object ; get-object (current and --version-id) ; list-object-versions on platinum/etfs/positioning_data.json ; list-objects-v2 on opal-data-etfs",
+      "result": "PASS. list-object-versions is what made AC4 a DIFF rather than a recollection -- it surfaced the pre-fire object (WeQkbjug..., 128122 B, 2026-08-27T13:01:25Z) directly from the substrate. s3api used rather than `aws s3 ls` deliberately: s3api renders UTC, `s3 ls` renders LOCAL, and every timestamp here is scored against a cron boundary. Downloads verified by byte count against ContentLength BEFORE parsing, so a short read could not present as a short census."
+    },
+    {
+      "tool": "git merge-base --is-ancestor + git show",
+      "invocation": "is-ancestor of origin/SITEZ for 39495cf260 and f0e2a05889 ; git show <commit>^:<path> and <commit>:<path> for the before/after key lists",
+      "result": "PASS. Both build commits ON ORIGIN. NEGATIVE CONTROL: the all-zero sha is NOT an ancestor, so the instrument can say no; POSITIVE CONTROL: known-pushed siblings say yes. The before-image came from `git show <commit>^:<path>` rather than from a remembered key list."
+    },
+    {
+      "tool": "python + pandas/pyarrow",
+      "invocation": "structural walk + key-presence census of positioning_data.json (current and pre-fire), (book,ticker) join, per-value count comparison, cross-tab, gold parquet census",
+      "result": "PASS. Key presence scored with `field in row`, never .get() -- the two are indistinguishable on a null value and this TO's subject is exactly that distinction. Every count printed beside its denominator. No `head` on any census: the 9 null rows and all 12 sub_asset_class values are enumerated in full, because an early stop and a true absence read identically."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> <to_face> -- POSITIONAL, no flag, rc captured WITHOUT a pipe",
+      "result": "PASS -- rc=0 VALID, violations=0, acceptance rows=6, alignment ENFORCE and fully closed (6/6, 2/2, 2/2 against a 40-id decomp space). Invoked POSITIONALLY, scored on the RC not the output string, rc captured WITHOUT a pipe. *** ARGUMENT TRAP RECORDED RATHER THAN QUIETLY FIXED: my first invocation passed the TO FACE as argv[2], which is the WRONG ARGUMENT. coverage_check():149-151 reads argv[2] as a criterion-id LIST (a file of one id per line, or comma-separated), so the TO markdown made all 464 of its LINES 'expected criteria' and produced ~470 violations that my own call manufactured. The correct argv[2] is the face's <expected_criteria> value. The alignment layer was UNAFFECTED throughout because it resolves the governing TO from decomp_ref.to_ref INSIDE the instance, not from argv -- which is why its figures were identical across both runs, and is also a warning: a wrong argv[2] does not disturb the numbers a reader is most tempted to quote.* rc=0 evidences SHAPE, never row quality -- this gate is known to pass a placeholder row. Row quality is evidenced by the measurements in acceptance[], each with its denominator and negative control."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "--author '0.4.0_DS_ClientPlatform~Q <0.4.0_DS_ClientPlatform~Q@opal.agent>' -F <msgfile written by the Write tool, NOT a shell heredoc> -- <paths>",
+      "result": "See the session log for rc and hash. -F with a non-shell-authored message file per Rule 14a."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "NOTHING WAS REBUILT, RE-RUN, OR RE-DEPLOYED",
+      "reason": "2.0.0_SA_COO~Z msg 13720: the build is done and exercised; this is a FILING act over existing evidence. A re-execute of accepted work is a REWIND (CLAUDE.md NEVER-2). NO AD-HOC GOLD RUN was fired -- the TO states an ad-hoc write lands a real artifact at the real key and destroys the discriminator the scheduled fire exists to produce."
+    },
+    {
+      "item": "firm is entered as FABRIC -- and this is the CORRECT value, not a declared workaround",
+      "reason": "RULED by 1.0.0_SA_CTO~Z as gate owner (msg 13799): firm is OPTIONAL and additive, ratified with TIGHTENING J1 @42317a4aab, and FABRIC was ratified for precisely this case -- ETFS_INGEST is not client-firm-scoped. This entry originally claimed a Rule 24(i) coverage failure in the schema; that claim was WRONG and is retracted here. No gate change is owed. Retained only so a reader who expects a firm token on an ETFS instance finds the reason stated rather than inferring an omission."
+    },
+    {
+      "item": "CRITERION IDS ARE USED IN THE FACE'S BARE TO8-ACn FORM, NOT FIRM-TOKENED",
+      "reason": "Matching <expected_criteria> verbatim. The id defect is recorded ON THE FACE as deliberately deferred by 2.0.0_SA_COO~Z pending a citation census; an executor 'correcting' it inside its own instance would break the expected-criteria comparison and create a two-carrier divergence."
+    },
+    {
+      "item": "NO CELL WAS RENAMED AND NO cell_ref WAS RETROFITTED",
+      "reason": "2.0.0_SA_COO~Z msg 13731 forbids it; adjudication is 1.0.0_SA_CTO~Z's. A rename would invalidate the CERTIFIED decomp @fcdf042972 and every citation across ~10 TOs."
+    },
+    {
+      "item": "NO DEPLOY, NO APPLY, NO TERRAFORM",
+      "reason": "Rule 13: DS authors producer code, AE deploys. The applies were 0.7.0_AE_CloudOps~I's (02:26:49Z, and 18:49:14Z for TO-10-AE). Filing an instance does not touch a deployed surface, so no change_management ledger entry is opened."
+    },
+    {
+      "item": "THE FRONTEND IS NOT TOUCHED",
+      "reason": "Rung 7 is 0.4.0_DE_ClientPlatform~Z's TO. This TO makes the field AVAILABLE on platinum; it does not render it. portal/ was not opened."
+    },
+    {
+      "item": "industry_group_observed_members IS NOT ADDED TO THE SERVED ROW",
+      "reason": "Ruled by issuer amendment (msg 12089): it is a RUN-LEVEL emission belonging in the gold manifest, and putting it on the served key would be a Rule 24(ii) grain error plus a widening of a client-facing contract for an internal purpose. Verified ABSENT from all 189 served rows and PRESENT in the manifest."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-28/"
+}

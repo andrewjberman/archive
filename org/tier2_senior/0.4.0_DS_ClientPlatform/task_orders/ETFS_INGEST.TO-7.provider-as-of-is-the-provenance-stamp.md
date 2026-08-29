@@ -233,3 +233,163 @@ proceeding; the no-op hazard in §2 is discharged and AC2 is a confirmation rath
 *"from bronze ingestion onward"*; the serving end already implements the separation he asked for
 (`generated_at` vs `data_as_of`, censused by CTO~Z, confirmed under an actual republish by DE~Z's
 2,384-leaf diff). **The gap is exactly here and nowhere else.**
+
+---
+
+## AC3 STATUS RECORDED 2026-08-29 ~00:0xZ BY `2.0.0_SA_COO~Z` (COO) — **DEFERRED-BY-SCOPE**, AND A CORRECTION TO MY OWN CHARACTERISATION
+
+**RULING, `1.0.0_SA_CTO~Z` 2026-08-28 23:34Z: NOT NOW.** Not declined on merit — **D4 scope, while
+Andrew's stated singular priority for the session is D1.** No lane seated; `0.4.0_DS_ClientPlatform~P`
+(the recorded assignee) is DEAD, and `0.4.0_DS_ClientPlatform~Z` cannot take it under Rule 27.
+
+### ⛔ MY OWN WORDING WAS TOO STRONG AND I AM CORRECTING IT HERE, NOT QUIETLY
+I described this as **"a false completion claim"** and **"a record claiming completion over work that
+did not happen."** **Read at the evidence, that overstates it.**
+```
+  COMMIT 63ef598d5a  "feat(ETFS_INGEST.TO-7 AC3): RE-DERIVE FROM BRONZE"
+  WHAT IT LANDED     the re-derive MECHANISM -- and the mechanism WORKS
+  WHAT IT DID NOT    the BACKFILL of the pre-fix 2026-08-24 partition
+  => DESIRED != APPLIED. A SCOPE AMBIGUITY IN A TITLE, NOT A FABRICATION.
+```
+>> **THE TITLE READS AS IF AC3 WERE DISCHARGED. THE CODE IT NAMES IS REAL AND CORRECT.** Calling that
+   a "false completion claim" impugns a commit that did what it says at the level it operated on.
+   **The defect is that a reader infers the BACKFILL from a title about the MECHANISM.** <<
+
+### ⭐ AND THE CONTRAST PROVES THE PRODUCER FIX WORKS GOING FORWARD
+```
+  2026-08-24 partition (PRE-fix)   187 rows, 17 cols, NO as_of_basis;
+                                   trueshares 73/187 carry data_as_of 2026-08-21 (WRONG)
+                                   filepoint 114/187 carry 2026-08-24 (correct, untouched)
+                                   LastModified STILL 2026-08-24T22:00:17Z -- never rewritten
+  2026-08-25 and 08-26 (POST-fix)  27 columns, as_of_basis PRESENT, per-source as-ofs CORRECT
+```
+>> **ONLY THE PRE-FIX PARTITION IS STALE. THE FORWARD PATH IS FIXED AND EXERCISED ON TWO
+   SUBSEQUENT DAYS.** That is what bounds the harm and it is why deferring is defensible. <<
+
+### ⚠ THE DEFERRAL'S PREMISE IS UNVERIFIED AND CARRIES ITS OWN REVERSAL TRIGGER
+The ruling rests on *"nothing is served wrong tonight because of it."* **Nobody has traced
+silver -> gold -> platinum on this path.** `1.0.0_SA_CTO~Z`, verbatim: *"if those 73 rows reach a
+SERVED object, say so and I reverse this immediately."*
+⛔ **STANDING: WHOEVER NEXT TOUCHES THE `ETFS_INGEST` SILVER->SERVED PATH TRACES THOSE 73 ROWS
+FIRST.** That is a standing word, not a re-ask. ⚠ **Four days stale as of this note — "bounded" is
+not "zero", and elapsed time is an argument for a deadline, not against one.**
+⛔ **NOBODY REWRITES THE PARQUET ON THE STRENGTH OF THIS NOTE.** It records state; it authorises
+nothing.
+
+---
+
+## ⛔⛔ THE PRECEDING NOTE IS ITSELF CORRECTED — SECOND TIME, AND THIS TIME THE DEFECT IS **FULLY WITHDRAWN**
+
+I softened *"false completion claim"* to *"a SCOPE AMBIGUITY in a title"*. **That is still wrong.
+There is no ambiguity.** `63ef598d5a`, read at source with `git log`, body **line 2**:
+
+> *"CTO~Z ruled re-fetch REFUSED OUTRIGHT and re-derive-from-bronze AUTHORIZED IF buildable and
+> verifiable before 13:00Z. **Built. Verified. Not deployed (AE lane) and not run.**"*
+
+>> ⛔ **THE COMMIT STATES ITS OWN BOUNDS IN ITS SECOND LINE, NAMES THE LANE THAT OWNS DEPLOYMENT, AND
+   NEVER CLAIMED COMPLETION. THERE IS NO DEFECT IN IT.** <<
+⭐ **IT IS A MODEL OF THE DISCIPLINE IT WAS ACCUSED OF BREACHING:** `Built. Verified. Not deployed and
+not run.` is **DESIRED / APPLIED / EXERCISED separated by hand, unprompted, in a commit body** — and
+the commit goes on to prove its zero-egress property **by EXERCISE** (make `_http_get_bytes` RAISE,
+then run the replay to completion; DIVZ read 2,705 B and IDVZ 4,026 B from bronze, ZERO http).
+⛔ **A reader who opens the commit gets the correct bound immediately. The failure was never in the
+record — it was in FOUR SEATS NOT OPENING IT.**
+
+### ⛔ THE CHAIN, RECORDED BECAUSE IT IS THE NIGHT'S DOMINANT PATTERN IN ITS PUREST FORM
+```
+  1  an instance field wrote  "*** NOT DONE, AND A COMMIT TITLE SAYS OTHERWISE ***"   <- a CHARACTERISATION
+  2  `2.0.0_SA_COO~Z` read the INSTANCE, not the commit -> escalated "a FALSE COMPLETION CLAIM"
+  3  `3.0.0_SA_CVO~Z` took it from a MESSAGE, not the commit -> built a two-carriers finding on it
+  4  `2.0.0_SA_COO~Z` softened it to "scope ambiguity" -- STILL without running `git log`
+  5  `git log 63ef598d5a`  ->  the claim dissolves entirely
+```
+>> ⛔ **FOUR PROPAGATIONS OF A CHARACTERISATION OF A COMMIT THAT NOBODY IN THE CHAIN HAD OPENED.**
+   Each hop treated the previous hop's WORDS as a measured fact. **The object was one command away
+   the entire time, and its own second line refuted the claim.** <<
+⚠ **AND THE AUTHOR IS `0.4.0_DS_ClientPlatform~Z` — THE LIVE LANE.** The chain impugned a seat's own
+exemplary commit while that seat was working three cells for the same issuer.
+
+### WHAT STANDS, UNCHANGED BY THIS
+The **DEFERRAL** stands (ruled NOT NOW, D4 scope). The **BACKFILL GAP** stands: the pre-fix
+`2026-08-24` partition is genuinely stale — 187 rows, 17 columns, no `as_of_basis`, 73 of 187
+trueshares rows on the wrong `data_as_of`. **That was always a fact about the ARTIFACT, and it was
+never a fact about the COMMIT.** The premise *"nothing is served wrong tonight"* remains UNVERIFIED
+with its reversal trigger intact.
+⛔ **THE ONLY THING WITHDRAWN IS EVERY CRITICISM OF `63ef598d5a`. THERE WAS NEVER ANYTHING TO FIX
+THERE.**
+
+---
+
+## SIZING CORRECTED 2026-08-29 ~00:1xZ — THE REMAINING ACT IS **ONE GATED EXECUTION**, NOT A BUILD
+
+`1.0.0_SA_CTO~Z` corrected its own deferral sizing; `0.7.0_AE_CloudOps~Z` supplied the measurement by
+**re-reading its own three-day-old claim rather than quoting it**:
+```
+  etfs-netassets-daily
+    CodeSha256    6RFz1jbzLMXXoWOmEkjIe3JoEZAf7EaHpQ4CsZXzuK8=
+    LastModified  2026-08-25T00:09:54Z   UNCHANGED -- nobody has redeployed since
+  EXTRACTED PACKAGE token counts:  from_bronze 1 . replay 7 . _v_ts_Date 5
+  NEGATIVE CONTROL: a bogus token -> 0   <- the matcher CAN return zero
+```
+>> **THE BRONZE RE-DERIVE PATH IS ALREADY LIVE IN THE RUNNING BYTES. Whoever picks this up runs it;
+   nobody builds it, nobody deploys it, no lane needs seating to produce the vehicle.** <<
+
+**THE DEFERRAL STANDS AND ITS REASON IS UNCHANGED — D4 scope against Andrew's singular D1 priority,
+and a gated run is still a run.** What changes is only the SIZE: *"deferred, and it is a build"* was
+wrong; ***"deferred, and it is ONE GATED EXECUTION"*** is right, and materially cheaper to pick up.
+
+⛔⛔ **AND ONE THING IN THAT SAME MESSAGE IS *NOT* CARRIED HERE, BECAUSE IT WAS WITHDRAWN 20 MINUTES
+EARLIER:** the note that *"a commit title still asserts DONE over a parquet that was never written."*
+>> **THAT CLAIM IS FULLY WITHDRAWN @`e432cbdb7e`. `63ef598d5a`'s body, SECOND LINE, reads: *"Built.
+   Verified. Not deployed (AE lane) and not run."* IT NEVER ASSERTED DONE.** <<
+⛔ **NOBODY RE-STATES IT. It has now been withdrawn once and restated once after the withdrawal** —
+which is exactly how a retracted claim survives: **the withdrawal reaches one carrier and the claim
+keeps travelling on the others.** ⚠ **The ARTIFACT gap is real and unchanged** (the `2026-08-24`
+partition, `LastModified 2026-08-24T22:00:17Z`, 73 of 187 rows on the wrong `data_as_of`). **The
+CRITICISM OF THE COMMIT is not, and the two must never be re-merged into one sentence.**
+
+---
+
+## THREAD CLOSED 2026-08-29 ~00:2xZ — FINAL STATE, WITH A DENOMINATOR, AND NO FURTHER ITERATION
+
+**INDEPENDENT CONFIRMATION WITH A FULL DENOMINATOR** — `0.7.0_AE_CloudOps~Z` opened the commit itself
+and then swept the family:
+```
+  git log -1 63ef598d5a
+    TITLE   "feat(ETFS_INGEST.TO-7 AC3): RE-DERIVE FROM BRONZE -- Rule 17a's promise cashed..."
+    LINE 2  "Built. Verified. Not deployed (AE lane) and not run."
+  SWEEP: every ETFS_INGEST / TO-7 commit since 2026-08-20
+    -> NO COMMIT ASSERTS DONE OVER THAT PARTITION.  ZERO, over the whole family.
+```
+>> ⭐ **THAT IS STRONGER THAN THE WITHDRAWAL IT CONFIRMS.** The withdrawal said *"this commit is
+   fine."* The sweep says **"no commit in the family ever made the claim"** — a census with a
+   denominator, not an exoneration of one object. <<
+
+**RESTATEMENT COUNT CORRECTED: TWO, NOT ONE. THE CHAIN REACHED FIVE HOPS, NOT FOUR.**
+```
+  1  an instance FIELD wrote the characterisation
+  2  2.0.0_SA_COO~Z escalated it        (read the instance, not the commit)
+  3  3.0.0_SA_CVO~Z built a finding     (read a message, not the commit)
+  4  2.0.0_SA_COO~Z "softened" it       (a CORRECTION, still without git log)
+  5  1.0.0_SA_CTO~Z restated it         (after the withdrawal)
+  6  0.7.0_AE_CloudOps~Z echoed it      (self-reported; "one command away, and I was already in
+                                         the filesystem")
+```
+⛔ **I COUNTED ONE RESTATEMENT AND THERE WERE TWO. UNDERCOUNTING A PROPAGATION MAKES IT LOOK MORE
+CONTAINED THAN IT IS** — and I was the seat asserting the count while naming the mechanism.
+⭐ **Every hop after the first was a seat trying to be careful.** Two were explicitly corrections.
+**Nobody in this chain was careless; the object was one command away the entire time and six hops
+went past it.**
+
+### ⛔ THREAD CLOSED. NO FURTHER ITERATION ON THIS FILE.
+The correction thread has now cost more attention than the item it concerns, against a standing arm
+that reads *"no distractions, pure execution."* **Marginal value is spent.**
+```
+  WITHDRAWN, TOTAL, CONFIRMED BY CENSUS   every criticism of 63ef598d5a
+  STANDS                                  the ARTIFACT gap (08-24 partition, 73/187 wrong
+                                          data_as_of, no as_of_basis) -- DEFERRED-BY-SCOPE,
+                                          sized as ONE GATED EXECUTION, premise UNVERIFIED
+                                          with CTO's reversal trigger intact
+```
+⛔ **STATE THE ARTIFACT GAP WITHOUT REFERENCE TO THE COMMIT, ALWAYS. One sentence containing both is
+how the withdrawn half rides the true half back into circulation.**

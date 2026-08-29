@@ -1,0 +1,225 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_INGEST.TO-9-DS",
+  "firm": "FABRIC",
+  "phase": "P4-PUBLISHERS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_INGEST.TO-9-DS.industry-group-truncation-fix.md",
+    "group": "D",
+    "vintage_commit": "3b9928d23b"
+  },
+  "decomp_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_INGEST.TO-9-DS.industry-group-truncation-fix.md",
+    "vintage_commit": "3b9928d23b",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_INGEST.TO-9-DS.industry-group-truncation-fix.md"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~Q (AC1/AC2/AC5 and the before-image, CERTIFIED @364656f444) ; 0.4.0_DS_ClientPlatform~M (AC3/AC4 re-scored 2026-08-29 post the 13:00Z scheduled fire)",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py",
+      "kind": "script",
+      "commit_or_etag": "b0e1f33471 (+ 5af6ef6ff6 folding the standalone module in)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "INGEST-TO9-AC1",
+        "INGEST-TO9-AC2",
+        "INGEST-TO9-AC5"
+      ],
+      "deploy_evidence": "THE DECODE'S HOME, and the home is itself the Andrew-direct: ~17:33Z *we can handle it in the ETFClassifier function ... as a centralized source for this kind of beautification of strings*, ~18:24Z *as long as it is properly managed within ETFClassifier, it is done*. The standalone gics_industry_group_decode.py was DELETED at 5af6ef6ff6 (-190 lines) rather than merely imported, which is what makes the fold real. THREE COPIES VERIFIED BYTE-IDENTICAL BY CONTENT, not by filename: sha256 c677e8a5f6996555... for _shared/, yang-generate-positioning/ and yang-generate-holdings-attribution/, and `cmp -s` returns IDENTICAL for both pairs. NEGATIVE CONTROL: the same `cmp` against etf_positioning_publisher.py says DIFFERS, so the instrument can distinguish. Ships in the etf-positioning-producer package; APPLIED 2026-08-28T18:49:14Z by 0.7.0_AE_CloudOps~I under TO-10-AE (read on the live function at this seat: etf-positioning-producer LastModified 2026-08-28T18:49:14+00:00)."
+    },
+    {
+      "path_or_key": "data/etfs/scripts/gold/etf_positioning_gold.py",
+      "kind": "script",
+      "commit_or_etag": "09408b19e5",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "INGEST-TO9-AC2"
+      ],
+      "deploy_evidence": "Mints the SIXTH industry_group_basis member. Ships in the same package, applied 18:49:14Z."
+    },
+    {
+      "path_or_key": "data/etfs/scripts/gold/etf_positioning_publisher.py",
+      "kind": "script",
+      "commit_or_etag": "09408b19e5 then 5af6ef6ff6",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "INGEST-TO9-AC2",
+        "INGEST-TO9-AC4"
+      ],
+      "deploy_evidence": "Wires the decode at the serving tier via `from etf_classifications_dynamodb import resolve as _resolve_industry_group` (:79) and `_industry_group()` (:258-288). Applied 18:49:14Z. *** THE APPLY POSTDATES THE LAST SCHEDULED FIRE (13:01:26Z), WHICH IS THE WHOLE REASON AC3 AND AC4 ARE NOT YET SCORABLE -- see their rows. This is a STATE fact, not a defect.*"
+    },
+    {
+      "path_or_key": "data/etfs/scripts/gold/test_etf_positioning_industry_group.py",
+      "kind": "test",
+      "commit_or_etag": "09408b19e5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "INGEST-TO9-AC1",
+        "INGEST-TO9-AC2",
+        "INGEST-TO9-AC5"
+      ],
+      "deploy_evidence": "A test file; needs no deploy. RE-RUN AT THIS SEAT rather than cited from a commit message: 50 assertions, 50 PASS, 0 FAIL, rc=0."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/etfs-pipeline/etf-positioning-producer/build_package.py",
+      "kind": "script",
+      "commit_or_etag": "0694d2ddac then b0e1f33471",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "INGEST-TO9-AC2"
+      ],
+      "deploy_evidence": "Adds the decode module to the producer package. Its own commit subject records the failure mode it closes: without the package entry the wiring lands a HALF-LANDED RUN rather than a cold-start failure -- i.e. it would have failed in the direction that still produces output."
+    },
+    {
+      "path_or_key": "s3://opal-data-portal-v2/platinum/etfs/positioning_data.json",
+      "kind": "s3_object",
+      "commit_or_etag": "VersionId 5UfK2PDL0XlQCzoIjoFGivz3WqPp_h86, LastModified 2026-08-28T13:01:26+00:00, 146944 B",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "INGEST-TO9-AC3",
+        "INGEST-TO9-AC4"
+      ],
+      "deploy_evidence": "THE PRE-DECODE SERVED ARTIFACT -- the BEFORE image for AC4, and the artifact whose truncated values are the reason this TO exists. Written by the 13:01Z scheduled fire, which PRECEDES the 18:49:14Z apply, so it carries the vendor strings undecoded. Censused at this seat: 189 rows, 23 distinct industry_group values, max length exactly 30."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "INGEST-TO9-AC1",
+      "criterion_verbatim": "OVERRIDDEN BY ANDREW-DIRECT 18:02Z (@7d4f4700a6). The authoritative-source requirement is LIFTED; completions are INFERRED from the truncated text and hard-coded, on his instruction. REPLACEMENT BAR: every completion round-trips -- truncate(proposal, 30).rstrip() EQUALS the observed string byte for byte -- and binds 1:1 to an authoritative 4-digit GICS_INDUSTRY_GROUP code from the spent call. THE ROUND-TRIP IS NECESSARY AND NOT SUFFICIENT: more than one completion can round-trip to the same 30 chars, so it proves CONSISTENCY WITH the truncation and NEVER that the completion is the right one. State that limit in the file beside the table, not only in a message. industry_group_basis = INFERRED/RESOLVED, never observed. Print the full observed set with its denominator.",
+      "method": "test_suite",
+      "invocation": "python -c 'import etf_classifications_dynamodb as m; m.self_test(verbose=True)' ; python data/etfs/scripts/gold/test_etf_positioning_industry_group.py ; independent resolve() sweep over the 23 distinct values censused from the served artifact",
+      "output_evidence": "ROUND-TRIP EXERCISED AT THIS SEAT, NOT CITED: self_test returns passed=7 failed=0 refused=5 accepted=0. All 7 completions satisfy vendor_cap(full) == the vendor string byte for byte against VENDOR_OBSERVED_20260828, e.g. 'Commercial & Professional Services' -> 'Commercial & Professional Serv'. 1:1 CODE BINDING: INFERRED_GROUP_NAMES is keyed by the authoritative 4-digit code (2020, 2550, 3010, 3510, 3520, 4520, 4530) and the derived TRUNCATED_TO_CODE map is BUILT, not typed, so it cannot drift out of step with the names it indexes. THE NECESSARY-NOT-SUFFICIENT LIMIT IS STATED IN THE FILE BESIDE THE TABLE, as the criterion demands and not only in a message: :232-234 warns the round-trip is VACUOUS for the at-cap asserted-complete entry (the cap of an under-cap string is the string itself, so the test compares a value to itself) and quarantines it in a SEPARATE map for exactly that reason; :345-346 prints 'a green run proves CONSISTENCY WITH the truncation, NOT correctness of the name' on every run. *** THE FULL OBSERVED SET WITH ITS DENOMINATOR, RE-DERIVED BY THIS SEAT FROM THE SERVED ARTIFACT RATHER THAN COPIED FROM THE MODULE: 23 distinct industry_group values over a denominator of 189 holding rows; 8 sit AT or ONE BELOW the 30-char cap. DECODE COVERAGE AGAINST THAT INDEPENDENTLY-DERIVED SET IS EXACT: 8 of 8 covered, SERVED-BUT-UNCOVERED = NONE, COVERED-BUT-UNSERVED = NONE. That two-directional zero is the result -- a table built from a different reading of the same run matches the set I censused, with no member on either side that the other lacks.* BASIS IS INFERRED, NEVER observed: BASIS_INFERRED = 'inferred-from-truncation'; a sweep of all 23 values found derived-but-labelled-observed = NONE.",
+      "denominator": "7 completions round-tripped (7 PASS / 0 FAIL) + 5 negative controls (5 REFUSED / 0 ACCEPTED); 50 assertions in the committed suite, 50 PASS rc=0; 23 distinct served values over 189 rows; 8 at-or-near-cap values checked in BOTH directions against a decode table of 8",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO9-AC2",
+      "criterion_verbatim": "THE VALUE STILL CARRIES ITS CLAIM. If any value is inferred-from-truncation rather than OBSERVED, industry_group_basis says so in a field a consumer can reject on. A derived value served under a measured label is a FAIL.",
+      "method": "test_suite",
+      "invocation": "resolve() sweep over all 23 served values checking (name changed) => (basis == BASIS_INFERRED) ; read of the four-branch resolution order at source ; the committed 50-assertion suite",
+      "output_evidence": "NO DERIVED VALUE IS SERVED UNDER A MEASURED LABEL. Swept all 23 distinct served values through resolve(): 7 are CHANGED and every one of the 7 returns basis 'inferred-from-truncation'; 16 pass through unchanged and return 'observed'. The set of (changed AND labelled observed) is EMPTY. THE MECHANISM MAKES THE MISLABEL UNREACHABLE RATHER THAN MERELY ABSENT TODAY: resolve() returns the (name, basis) PAIR from a single branch -- :286 returns the inferred name WITH BASIS_INFERRED, :291 returns the vendor string WITH BASIS_OBSERVED -- so the label cannot be computed independently of the value and drift apart. Its docstring states the discipline in terms: 'every branch answers under its OWN label (never the caller's)'. *** THE SIXTH VOCAB MEMBER'S SPELLING IS THE RULED ONE, AND THE RULING WENT AGAINST THE FACE'S OWN FIRST DRAFT: BASIS_INFERRED == 'inferred-from-truncation'. The face s4 originally named it RESOLVED and STRUCK it -- 'resolved' names a STATE something reached (lifecycle) where the axis is PROVENANCE, and CLAUDE.md's value-carries-its-claim rule names measured/inferred/held/absent, so 'inferred-from-truncation' SPECIALIZES one of the law's own four and 'resolved' maps to none of them.* The committed suite's final assertion is exactly this closure: 'every basis the decode can emit is a DECLARED member of the six-member vocab -- denominator: 6 decode cases against a 6-member vocab', PASS. WARN: QUALIFIER: the two DEPLOYED-plane consequences of this row are not yet observable on the served artifact -- see AC3.",
+      "denominator": "23 distinct served values swept; 7 changed / 16 unchanged; 0 derived-but-labelled-observed; 4 resolution branches read at source, each returning value and label as one pair; 6 decode cases against a 6-member vocab; 50 committed assertions PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO9-AC3",
+      "criterion_verbatim": "EXERCISED ON A SCHEDULED FIRE. Read the served artifact after a scheduled run; state which run and how you know. An ad-hoc artifact is never production evidence.",
+      "method": "live_read",
+      "invocation": "PLANE RESOLVED FIRST, at source: grep for every consumer of etf_classifications_dynamodb across the repo (positive-controlled against the gold module's own import list). THEN: s3api head-object + versioned get-object on platinum/etfs/positioning_data.json ; s3api get-object on BOTH stage manifests for the 2026-08-28 partition ; lambda get-function-configuration on etf-positioning-producer ; events describe-rule + list-targets-by-rule on etf-positioning-producer-daily ; sha256 of the served body vs the publisher manifest's recorded body_sha256, with the immediately-prior served version as the negative control ; full census of served industry_group values BEFORE and AFTER.",
+      "output_evidence": "*** THE CRITERION IS DISCHARGED ON THE SERVING PLANE, AND WHICH PLANE IT IS WAS ITSELF A FINDING. *** The re-address instructed 'score against gold/holding/date=2026-08-28'. THAT PLANE CANNOT DISCHARGE THIS CRITERION AND SCORING IT THERE PRODUCES A FALSE NEGATIVE. SOURCE-CONFIRMED: the decode is imported ONLY by etf_positioning_publisher.py:79 ('from etf_classifications_dynamodb import resolve as _resolve_industry_group') and applied in _industry_group() :258-288; etf_positioning_gold.py contains ZERO occurrences of that module name (positive control: the same grep enumerates the gold module's 14 real imports, so the zero is an absence and not a broken matcher). The publisher's own comment states the design in terms: 'Serving-tier by design: gold keeps the vendor's own faithful string, and the repair is a DISPLAY act.' A THIRD, INDEPENDENT CARRIER agrees without being consulted: the gold run's own manifest stat block reports industry_group_basis_counts.inferred-from-truncation = 0 at stage gold. SO SIX AT-CAP VALUES IN THE GOLD PARQUET ARE THE DESIGNED AND CORRECT STATE, NOT A REGRESSION -- measured identically at 6 of 23 in BOTH the 2026-08-27 and 2026-08-28 gold partitions. *** WHICH RUN: *** gold run_id 0f277195f2d7 (generated_utc 2026-08-29T13:00:44Z, wrote gold/holding/date=2026-08-28/holding.parquet at 13:01:22Z) and platinum run_id 027f2d7f9fc7 (generated_utc 13:01:21Z, wrote platinum/etfs/positioning_data.json at 13:01:25Z). Exactly ONE manifest exists in each stage's 2026-08-28 partition (full listing, counted client-side), so no ad-hoc run wrote into this partition alongside the scheduled one. *** HOW I KNOW IT WAS SCHEDULED -- DIRECT EVIDENCE, ONE SIGNAL, NOT COUNTED TWICE: *** both manifests carry run_class 'scheduled'. THESE ARE NOT TWO WITNESSES: etf_positioning_gold.py:1829 classifies the run ONCE in lambda_handler and threads the SAME value into both stages ('Classifying per-stage would let the two disagree about a single invocation'), so gold-agrees-with-platinum is REPETITION. What makes the single signal sound is its FAILURE DIRECTION, read at classify_run() :1649-1658: it returns 'scheduled' ONLY on event.get('source') == 'aws.events' and returns 'adhoc' for every other shape BY CONSTRUCTION -- the author's own comment says an unrecognised shape claiming 'scheduled' would be 'the lying direction'. A false 'scheduled' is therefore not reachable from an unclassified caller; only a genuine EventBridge delivery produces it. *** INDEPENDENT CORROBORATION ON A DIFFERENT PLANE (not a re-read of the manifest): *** EventBridge RULES plane -- etf-positioning-producer-daily, ScheduleExpression cron(0 13 * * ? *), State ENABLED, one target, the etf-positioning-producer function ARN. And the served key's own write history: 20 versions, of which the last FOUR consecutive days (08-26 Wed, 08-27 Thu, 08-28 Fri, 08-29 Sat) are each a single write at 13:01Z and nothing else -- the 15 scattered off-cadence writes all predate 2026-08-26 and belong to the build window. *** THE ARTIFACT READ IS THE ONE THAT RUN WROTE, NOT MERELY ONE WRITTEN LATER: *** sha256 of the served body = 80c128dcf08b3855a8ee38e8b288f9c36778313339fe3a116c4f1fb47cecd3f2, BYTE-EQUAL to the publisher manifest's recorded body_sha256, and body_bytes 148372 == ContentLength 148372. NEGATIVE CONTROL FIRED: the immediately-prior served version (2026-08-28T13:01:26Z, 146944 B) hashes 600171da660c25ea... which does NOT match, so the comparison discriminates. *** THE DEPLOYED BYTES PREDATE THE FIRE AND HAVE NOT MOVED SINCE: *** etf-positioning-producer LastModified 2026-08-28T18:49:14Z, CodeSha256 qQk9ohLihOInJnvj/NncAms1IuoEIkkjRwpb8EIFouQ= -- the same sha ETFS_INGEST.TO-10-AE recorded immediately after its apply (its recorded move was wuu+... -> qQk9...), so no redeploy intervened between the apply and this fire. Apply 2026-08-28T18:49:14Z < fire 2026-08-29T13:00:44Z. *** THE DISCRIMINATOR 0.4.0_DS_ClientPlatform~Q PRE-REGISTERED, SCORED: *** their prediction was '7 of 23 distinct values change to their full names and carry basis inferred-from-truncation'. MEASURED ON THE SERVED PLANE: EXACTLY 7 of 23 distinct values changed, all 7 carrying inferred-from-truncation, 16 of 23 unchanged and still 'observed'. Values at exactly 30 chars went 6 of 23 -> 0 of 23; max value length 30 -> 46. The prediction was stated before the event and it held on the plane the decode runs on.",
+      "denominator": "2 planes resolved at source (1 of 2 imports the decode; gold module occurrences = 0, positive control = its 14 real imports) ; 23 distinct served industry_group values censused BEFORE and AFTER, 7 changed / 16 unchanged ; at-cap values 6 of 23 -> 0 of 23 ; 2 gold partitions censused at 6 of 23 each ; 1 gold manifest and 1 platinum manifest in the 2026-08-28 partition (full listings, counted client-side) ; 20 served-key versions enumerated, 4 consecutive daily 13:01Z writes ; 1 sha256 match + 1 negative control fired ; 1 EventBridge rule ENABLED with 1 target",
+      "status": "PASS",
+      "status_reason": "Every clause of the criterion is met on the plane the decode actually executes on. 'EXERCISED ON A SCHEDULED FIRE' -- run_class 'scheduled', which classify_run() can only return from an aws.events delivery and which defaults to 'adhoc' otherwise, corroborated on the independent EventBridge RULES plane and by the served key's 13:01Z daily cadence. 'Read the served artifact after a scheduled run' -- the served bytes hash byte-equal to that run's own recorded body_sha256, with the prior vintage as a fired negative control. 'An ad-hoc artifact is never production evidence' -- no ad-hoc run was fired by this seat and exactly one manifest exists per stage in the partition. *** RECORDED BECAUSE IT IS THE PART THAT COULD HAVE GONE WRONG: the issuer's re-address named gold/holding/date=2026-08-28 as the scoring plane. Scored there, this criterion reads NO CHANGE (6 at-cap values in both the 08-27 and 08-28 partitions) and would have been recorded FAIL against a fix that works exactly as designed. 2.0.0_SA_COO~Z msg 16760 withdrew the path before this row was written, VERBATIM: 'That named a PLANE I ASSUMED. I did not read where the decode executes... The criterion TEXT governs.' The plane was never settled by anyone until it was read at source here."
+    },
+    {
+      "criterion_id": "INGEST-TO9-AC4",
+      "criterion_verbatim": "NO REGRESSION IN COVERAGE. industry_group key presence stays at its current 189 of 189, and the basis distribution is printed before and after. A fix that improves values while dropping rows is a FAIL.",
+      "method": "live_read",
+      "invocation": "Versioned S3 reads of platinum/etfs/positioning_data.json -- the AFTER image at LATEST (2026-08-29T13:01:25Z) and the BEFORE image at the immediately-prior VersionId (2026-08-28T13:01:26Z, the last scheduled fire preceding the 18:49:14Z apply) -- each walked structurally portfolios -> holdings, counting KEY PRESENCE (the key in the object) separately from non-null, plus a per-value BEFORE->AFTER row-count map over all 23 values.",
+      "output_evidence": "BOTH IMAGES RE-DERIVED FROM THE ACTUAL BYTES AT THIS SEAT, not carried over from the recorded before-image, so the comparison is two measurements rather than one measurement and one citation. BEFORE (VersionId at 2026-08-28T13:01:26Z, 146944 B, data_as_of 2026-08-27): structural walk DIVZ 30 + IDVZ 45 + PFDE 90 + PFOE 24 = 189. industry_group KEY PRESENT 189 of 189; industry_group_basis KEY PRESENT 189 of 189. BASIS: observed 180 | not-applicable-non-equity 8 | absent-from-source 1 = 189. 23 distinct values, 6 at exactly 30 chars, max len 30. AFTER (LATEST at 2026-08-29T13:01:25Z, 148372 B, data_as_of 2026-08-28): identical structural walk 30 + 45 + 90 + 24 = 189. industry_group KEY PRESENT 189 of 189; industry_group_basis KEY PRESENT 189 of 189. BASIS: observed 121 | inferred-from-truncation 59 | not-applicable-non-equity 8 | absent-from-source 1 = 189. 23 distinct values, 0 at 30 chars, max len 46. DELTA: key presence 189 of 189 -> 189 of 189 UNCHANGED. observed -59, inferred-from-truncation +59, not-applicable-non-equity +0, absent-from-source +0, total 189 -> 189. NO ROW WAS DROPPED, MOVED BETWEEN BOOKS, OR LOST A KEY. ROW-LEVEL, NOT JUST TOTALS: the per-value map shows all 7 changed labels preserve their row counts EXACTLY -- 1->1, 7->7, 1->1, 8->8, 14->14, 15->15, 13->13 (sum 59) -- and the 16 unchanged labels are identical row-for-row. Non-null industry_group is 180 of 189 in both images; the 9 nulls are the same 8 not-applicable-non-equity + 1 absent-from-source rows, which the decode returns untouched with their gold basis by construction (_industry_group returns early on a null raw value). *** THE 29-CHAR TRAP THE TO'S OWN section 3 SAID LENGTH COULD NOT SOLVE, MEASURED ON THE SERVED PLANE: *** the two 29-char values moved in OPPOSITE and CORRECT directions. 'Consumer Staples Distribution' (29 chars, genuinely truncated) -> 'Consumer Staples Distribution & Retail', 1 row, basis inferred-from-truncation. 'Household & Personal Products' (29 chars, the COMPLETE GICS name) -> UNTOUCHED, 4 rows, basis still observed. A length-keyed repair corrupts one or misses the other; the closed-list keying discriminated them. This also explains why 7 labels decoded while only 6 sat at the 30-char cap: the seventh was the 29-char one. *** DEPARTURE FROM THE PRE-REGISTERED PREDICTION -- SURFACED, AND IT IS A UNIT ERROR IN THE PREDICTION, NOT A SIGNAL FROM THE WORLD. *** 0.4.0_DS_ClientPlatform~Q predicted 'observed 173 | inferred-from-truncation 7'. MEASURED: observed 121 | inferred-from-truncation 59. They wrote the LABEL count (7) into a ROW-count slot whose denominator is 189. The correct row figure was already in the estate before the prediction was made and in the very module under test: _industry_group's docstring reads 'radius 59 of 189 rows, 7 labels, DISPLAY TEXT ONLY', and the TO's own section 7 co-sign line carries the same '59 of 189 rows, 7 labels'. Their OTHER prediction, the one stated per-VALUE (AC3's '7 of 23 distinct values'), was exactly right. So the model was correct and only the unit slipped. THIS DEPARTURE DOES NOT BEAR ON THE CRITERION: AC4 asks for key presence held at 189 of 189, the distribution printed before and after, and no rows dropped. All three are met. Recording it because ~Q wrote 'A departure from that is the signal', and a departure that is silently absorbed is how a pre-registered prediction stops being a control.",
+      "denominator": "2 served images (VersionId-addressed) x 189 rows x 2 fields censused for KEY PRESENCE ; 4 books structurally walked in each image (30 + 45 + 90 + 24 = 189, both) ; 4 basis members over 189 rows in each image, each totalling 189 ; 23 distinct values mapped BEFORE->AFTER, 7 changed with row counts preserved 1:1 and 16 unchanged ; 2 values at 29 chars tested for opposite treatment, 2 of 2 correct",
+      "status": "PASS",
+      "status_reason": "All three clauses met and measured, both images read from bytes at this seat. Key presence 189 of 189 BEFORE and AFTER on both industry_group and industry_group_basis. The basis distribution is printed for both images with its denominator. Nothing was dropped: the structural walk is identical book-by-book, every changed label preserves its exact row count, and the total holds at 189. The direction the criterion fears -- values improve while rows disappear -- is the one thing that measurably did not happen: 59 rows changed LABEL and 0 rows changed EXISTENCE. SCOPED HONESTLY: this is scored on platinum/etfs/positioning_data.json, the plane the decode runs on and the plane the recorded before-image was taken from. On the gold plane, key presence and the basis distribution are ALSO unchanged (189 rows, observed 180 | not-applicable-non-equity 8 | absent-from-source 1, identical in the 08-27 and 08-28 partitions) -- so AC4 holds on BOTH planes and the plane choice does not change this verdict, unlike AC3 where it inverts it."
+    },
+    {
+      "criterion_id": "INGEST-TO9-AC5",
+      "criterion_verbatim": "IF (a) IS BUILT: it FAILS LOUD on a prefix matching two members. Never picks one. And it is keyed on a closed list, NEVER on string length -- length does not discriminate truncated from complete.",
+      "method": "test_suite",
+      "invocation": "planted-collision exercise reproducing the module's TRUNCATED_TO_CODE build with two names sharing a 30-char prefix ; negative control on the real table ; source read of resolve() ; the two 29-char values resolved side by side",
+      "output_evidence": "*** LIMB 1 -- FAILS LOUD, EXERCISED RATHER THAN READ. *** I planted two entries whose names cap to the SAME 30 chars ('Technology Hardware & Equipment' and 'Technology Hardware & Equipment Ltd') and reproduced the module's own map-build: it RAISED -- 'GICS decode: truncated string 'Technology Hardware & Equipmen' maps to BOTH 4520 and 9998'. It never picked one, and because the build runs at MODULE IMPORT (:242-251) the failure takes the whole run rather than silently mis-labelling a row. NEGATIVE CONTROL: the same build over the REAL table completes without raising (collision-free = True), so the guard is not raising on everything and its silence on the shipped table is informative. The message also states the correct remedy -- 'resolve by CODE only' -- rather than only refusing. *** LIMB 2 -- KEYED ON A CLOSED LIST, NOT ON LENGTH. *** resolve() contains NO length logic: `len(` does not appear in its body, and resolution proceeds by DICT MEMBERSHIP against the closed maps INFERRED_GROUP_NAMES / ASSERTED_COMPLETE_AT_CAP / TRUNCATED_TO_CODE. WARN: AN AUTOMATED PROBE OF MINE REPORTED '>= or <= present in resolve(): True' AND THAT READING IS WRONG -- the only such token is inside the DOCSTRING prose ('len <= CAP-2 cannot be a truncation artifact'), not in the executed branches. Stated rather than quoted, because a source-text probe that cannot separate docstring from logic would have manufactured exactly the finding this criterion forbids. *** THE DEMONSTRATION THAT LENGTH COULD NOT WORK, on the estate's own banked pair: 'Household & Personal Products' (29 chars) resolves UNCHANGED with basis observed, and 'Consumer Staples Distribution' (29 chars) resolves to 'Consumer Staples Distribution & Retail' with basis inferred-from-truncation. IDENTICAL LENGTH, OPPOSITE OUTCOMES, decided purely by table membership -- a repair keyed on len >= 29 would corrupt the first and one keyed on len == 30 would miss the second.*",
+      "denominator": "1 planted collision (RAISED) + 1 negative control on the real 7-entry table (no raise); resolve() body read in full for length logic, 0 occurrences of len(; 3 closed maps totalling 8 entries; 2 same-length opposite-outcome values demonstrated",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO CONTROL FAMILIES, BOTH EXERCISED AT THIS SEAT RATHER THAN CITED. (1) The module's own five NEGATIVE CONTROLS -- mutant completions the round-trip MUST refuse: '&' spelled out inside the first 30 chars; the INDUSTRY name in the GROUP's slot; a real GICS name from the WRONG LEVEL; one comma dropped at position 16; a value diverging at char 29, INSIDE the cap. (2) A PLANTED COLLISION I built for AC5, reproducing the module's map-build with two names sharing a 30-char prefix, plus a negative control running the same build over the real table.",
+      "expected": "The five mutants must be REFUSED and the seven real completions ACCEPTED; the planted collision must RAISE and the real table must NOT. A round-trip that accepts a mutant proves nothing, and a collision guard that raises on everything is not a guard.",
+      "observed": "ALL CONTROLS FIRED CORRECTLY: completions 7 PASS / 0 FAIL, negative controls 5 REFUSED / 0 ACCEPTED, planted collision RAISED naming both codes, real table collision-free. The committed suite is 50 assertions, 50 PASS, rc=0, re-run here. *** THE CONTROL SET'S OWN LIMIT, RECORDED BECAUSE IT IS THE POINT OF THIS TO: every one of these controls tests CONSISTENCY WITH THE TRUNCATION, and NONE of them can establish that a completion is the CORRECT name. The module prints that reminder on every run and quarantines the one entry whose round-trip is VACUOUS (the at-cap asserted-complete value, where the test compares a value to itself). A reader who takes 7 PASS / 5 REFUSED as evidence the names are right has read the control as validating the REFERENT when it validates the INSTRUMENT.*",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The decode is STDLIB-ONLY, ASCII-only, no I/O, no network, no clock, no DynamoDB -- resolve() is a pure function of (observed, code) over three frozen dicts, so every exercise here is reproducible on any machine and any day. The served BEFORE image is a read-only s3api GET pinned to an explicit immutable VersionId (5UfK2PDL0XlQCzoIjoFGivz3WqPp_h86). Byte-identity across the three copies is `cmp` plus sha256, not a filename comparison.",
+      "status": "STABLE",
+      "observed": "Repeated runs of self_test and of the 23-value resolve() sweep return identical output. *** THE ONE THING THAT WILL CHANGE, AND IT IS THE INTENDED SIGNAL RATHER THAN DRIFT: the served artifact at the mutable key WILL move at the 2026-08-29 ~13:00Z fire, and when it does AC3 and AC4 become computable and 7 of 23 values are predicted to change. A later reader finding different served numbers has found the fire, not an inconsistency -- which is why the before-image here is pinned to a VersionId and the after is stated as a prediction.*"
+    }
+  },
+  "surprises": [
+    "*** THIS TO'S FACE SPENT OVER TWO HOURS ASSERTING A BLOCK ANDREW HAD ALREADY LIFTED, AND I FOUND IT WHILE FILING SOMETHING ELSE. *** The `<status>` read 'BLOCKED ON A SOVEREIGN VENDOR-CALL WORD' and 'NO LIVE DS LANE' when the per-use Bloomberg grant had been given at ~17:0xZ ('all recs approved'), the build was closed by Andrew at ~18:24Z, the ledger was CLOSED @c5ef160e7e, the package was APPLIED 18:49:14Z, and three DS lanes were live. A D4 close-out reading that face at face value would have recorded a FALSEHOOD ABOUT WORK ANDREW PERSONALLY CLOSED -- the identical class as the 'STAGED, never started' register line 2.0.0_SA_COO~Z corrected at f91b759200. Reported to the issuer; CORRECTED BY 2.0.0_SA_COO~Z at ~19:3xZ, and correctly NOT by this seat: the face is the issuer's surface. WARN: THE DIRECTION IS THE PATTERN WORTH KEEPING: the issuer counted this as the sixth stale face today and every one was stale toward UNDER-reporting -- a fabric whose records drift pessimistic manufactures work that is already done, which is exactly how a seat was nearly spawned to rebuild TO-6/TO-8.",
+    "*** AC3 AND AC4 ARE FILED NON-PASS ON PURPOSE, AND THE CHOICE OF *WHICH* NON-PASS IS THE SUBSTANCE. *** Both are gated on a scheduled fire that post-dates the 18:49:14Z apply; none has run. I filed UNCOMPUTABLE with a status_reason rather than FAIL (which would assert a measurement that was never taken and would join the 18 false-failure rows the estate already carries) and rather than N/A-BY-CONSTRUCTION (which would assert the criterion does not apply -- false, and it would hide a live obligation behind a tidy label). *** AND THE PROCEDURAL LESSON IS THE PREDECESSOR'S, INVERTED: that lane withheld the ENTIRE TO-6/TO-8 instances for exactly this reason and was right about the row and wrong about the unit. Withholding the instance left the TO uncertifiable for hours and nearly triggered a rebuild. Withholding ONE ROW leaves the other rows scorable and puts the gap in a field a certifier can reject on.* Both rows carry a falsifiable prediction of the after-state so the re-score is a comparison, not a new judgement.",
+    "*** A PROBE OF MINE RETURNED A TRUE-LOOKING FALSE POSITIVE AND I AM RECORDING IT RATHER THAN THE CLEAN VERSION. *** Testing AC5's 'never keyed on string length', I searched resolve()'s source text for '>=' and '<=' and got True -- which reads as a length comparison in the logic and would have been a finding AGAINST the build. It is docstring prose ('len <= CAP-2 cannot be a truncation artifact'). A source-text probe that cannot separate documentation from executed code is the same class as writing a matcher against a format never read, and here it failed toward MANUFACTURING a defect rather than missing one. The operative measurement is that `len(` does not occur in the function body at all.",
+    "*** THE DECODE'S COVERAGE MATCHED MY INDEPENDENTLY-DERIVED SERVED SET EXACTLY IN BOTH DIRECTIONS, AND THAT IS A STRONGER RESULT THAN EITHER DIRECTION ALONE. *** I censused the served artifact myself and found 8 values at or one below the 30-char cap; the decode table covers 8; SERVED-BUT-UNCOVERED = NONE and COVERED-BUT-UNSERVED = NONE. A one-directional check would have missed a table entry for a group that never appears (dead weight, and a hint the table was built from a different run) or a served value with no entry (a silent passthrough of a truncated label). Both zeros together are what make the table's provenance credible.",
+    "AN OBSERVATION, NOT CHASED: the ASSERTED_COMPLETE_AT_CAP map has exactly ONE member ('Household & Personal Products', 3030) and its completeness rests on an ASSERTION rather than on any control -- the module says so itself, and quarantines it precisely because its round-trip is vacuous. It is correct today. But it is a one-member map holding the only value in the system whose truth is not instrument-backed, and a second entry added to it later would inherit that property silently. Surfaced for 2.0.0_SA_COO~Z as issuer; no action taken and none recommended tonight.",
+    "*** THE INSTRUCTION NAMED A PLANE ON WHICH THE CRITERION CANNOT DISCHARGE, AND SCORING IT THERE WOULD HAVE FAILED A WORKING FIX. *** The re-address said 'Score AC3/AC4 against gold/holding/date=2026-08-28'. The decode is imported only by etf_positioning_publisher.py:79 and applied at the SERVING tier; the gold parquet keeps the vendor's faithful 30-char string BY DESIGN and reads 6 at-cap values in both the 08-27 and 08-28 partitions. AC3 scored on gold = NO CHANGE = FAIL against a fix that works exactly as specified. Surfaced to 2.0.0_SA_COO~Z BEFORE measuring rather than reported afterwards as a clean no-change; the issuer withdrew the path in msg 16760 ('That named a PLANE I ASSUMED. I did not read where the decode executes'). CLASS, and it is the transferable half: the issuer's post-fire note recorded SIX at-cap values against a pre-registered prediction of SEVEN decodes and did not read the mismatch as a plane error -- a wrong-plane read does not announce itself, it just quietly disagrees with the prediction by a small number. OBSERVATION / DISARMED -- the plane is now read at source and recorded in both rows; nothing is outstanding.",
+    "OBSERVATION, ROUTED NOT CHASED: the 6 at-cap values persisting in gold are correct-by-design, but they mean the manifest's industry_group_observed_members list -- the very vocabulary section 5 of the TO says a future TO should ADOPT from measurement -- is published from the GOLD stage and therefore still carries the TRUNCATED member names ('Technology Hardware & Equipmen', 'Consumer Staples Distribution', and 4 more; 23 members, 7 of them truncated). The TO's own sequencing clause says 'FIX THE TRUNCATION FIRST. ADOPT THE VOCABULARY SECOND', and the truncation is now fixed one layer ABOVE the surface that publishes the member list. A future adopter reading industry_group_observed_members would adopt truncated strings and it would look measured. NOT THIS FACE'S WORK and NOT ACTED ON -- surfaced to 3.0.0_SA_CVO~Z per the surprise channel, cc 2.0.0_SA_COO~Z. INERT: nothing consumes that list today."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python (module exercise)",
+      "invocation": "import etf_classifications_dynamodb ; self_test(verbose=True) ; resolve() sweep over the 23 served values ; planted-collision reproduction of the TRUNCATED_TO_CODE build",
+      "result": "PASS. self_test 7 PASS / 0 FAIL, 5 REFUSED / 0 ACCEPTED. Planted collision RAISED; real table collision-free. Exercised rather than read: the criterion asks whether the guard FAILS LOUD, and reading a raise statement establishes that it exists, never that it fires."
+    },
+    {
+      "tool": "test_etf_positioning_industry_group.py",
+      "invocation": "python data/etfs/scripts/gold/test_etf_positioning_industry_group.py",
+      "result": "PASS. 50 assertions, 50 PASS, 0 FAIL, rc=0. RE-RUN AT THIS SEAT rather than cited from the commit message -- a commit subject claiming a suite ran is a claim about an ACT, not about an ARTIFACT, and this TO's own project has banked two commits whose subjects claimed criteria the tree could not corroborate."
+    },
+    {
+      "tool": "cmp + sha256sum",
+      "invocation": "cmp -s and sha256sum across the three etf_classifications_dynamodb.py copies, plus a cmp against an unrelated file as a control",
+      "result": "PASS. All three byte-identical (sha256 c677e8a5f6996555...). NEGATIVE CONTROL: cmp against etf_positioning_publisher.py returns DIFFERS, so the instrument can distinguish. Compared BY CONTENT, never by filename or by path."
+    },
+    {
+      "tool": "aws lambda list-functions + s3api (via the .tools/aws shim)",
+      "invocation": "list-functions filtered to etf-positioning ; head-object and get-object --version-id on the served key",
+      "result": "PASS. Established the ordering that AC3 and AC4 turn on: deployed 2026-08-28T18:49:14Z vs served 2026-08-28T13:01:26Z. s3api rather than `aws s3 ls` because s3api renders UTC and the whole finding is a clock comparison."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> 'INGEST-TO9-AC1,...,INGEST-TO9-AC5' -- POSITIONAL, rc captured WITHOUT a pipe",
+      "result": "See the session log for the recorded rc. argv[2] is the criterion-id LIST from the face's <expected_criteria>, NOT the TO face path -- passing the face makes every markdown line an expected criterion and manufactures hundreds of violations while leaving the alignment figures looking perfect. This face carries NO <decomp_ref>, so alignment is ANNOUNCE rather than ENFORCE and this instance carries no decomp_ref object by design."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "--author '0.4.0_DS_ClientPlatform~Q <0.4.0_DS_ClientPlatform~Q@opal.agent>' -F <msgfile written by the Write tool, NOT a shell heredoc> --",
+      "result": "See the session log for rc and hash. -F with a non-shell-authored message file per Rule 14a."
+    },
+    {
+      "tool": "python + boto3 (two-plane live read) ; .tools/aws s3api / lambda / events",
+      "invocation": "versioned get-object on platinum/etfs/positioning_data.json (LATEST and prior VersionId) ; get-object on both stage manifests ; read_parquet over gold/holding/date=2026-08-27 and =2026-08-28 ; lambda get-function-configuration ; events describe-rule + list-targets-by-rule ; hashlib.sha256 over the served body vs the manifest's body_sha256",
+      "result": "PASS. AC3 and AC4 both discharge on the serving plane. NOTED AS AN INSTRUMENT FAILURE I CAUGHT AND FIXED RATHER THAN A CLEAN RUN: the first version of the walk guessed the served doc's container key as 'books'/'funds' when it is 'portfolios'. It returned 0 rows, 0 distinct values and a basis distribution of {} -- a shape that reads exactly like a catastrophic regression and would have been the loudest possible false FAIL. It was caught because the doc's own top-level key list was printed beside the result and disagreed with the walk. The container key is now READ from the document, not assumed."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ETFS_INGEST.TO-9-DS_PROOF_OF_SPEC.json INGEST-TO9-AC1,INGEST-TO9-AC2,INGEST-TO9-AC3,INGEST-TO9-AC4,INGEST-TO9-AC5",
+      "result": "VALID, 5 acceptance rows, 0 violations, coverage checked against the TO's own criterion set. STATED AS A FLOOR, NOT AS ACCEPTANCE: this gate scores STRUCTURE. It cannot read whether a row was measured on the right plane, and it returned the same VALID on the prior instance when AC3/AC4 were UNCOMPUTABLE. It is evidence the file is well-formed and evidence of nothing else."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "NOTHING WAS REBUILT AND THE BUILD WAS NOT RE-OPENED",
+      "reason": "Andrew closed this build himself at ~18:24Z: 'as long as it is properly managed within ETFClassifier, it is done. i dont need to thrash with the fabric about it any further.' 2.0.0_SA_COO~Z msg 13720 additionally forbids re-opening the member, the completions, the radius or the naming. This instance is a RECORDS act over that completed work; every measurement is a read or a pure-function exercise."
+    },
+    {
+      "item": "NO AD-HOC GOLD RUN WAS FIRED TO CLOSE AC3/AC4",
+      "reason": "An ad-hoc write lands a real artifact at the real production key and would DESTROY the discriminator the scheduled fire exists to produce; CLAUDE.md section 5 makes an ad-hoc artifact non-evidence for a criterion that names a scheduled run. Naming the evidence the wait protects is what makes the wait legitimate rather than a coast-failure."
+    },
+    {
+      "item": "THE FACE <status> WAS NOT EDITED BY THIS SEAT",
+      "reason": "The TO face is the ISSUER's surface. This seat reported the stale block; 2.0.0_SA_COO~Z corrected it at ~19:3xZ and confirmed in msg 13803 s.1 that the correction was theirs and that not taking it was right."
+    },
+    {
+      "item": "decomp_ref POINTS AT THE TO ITSELF, not at any decomposition -- the precedented form for a declared-no-decomp TO",
+      "reason": "STATED BECAUSE IT WOULD OTHERWISE LOOK LIKE A CLAIM I DID NOT MAKE. The face carries no <decomp_ref> element AND no <task_order id=...> element (both measured: 0 occurrences). The missing id is a FACE DEFECT: the checker scanned 2168 TO files, found none declaring id='ETFS_INGEST.TO-9-DS', and reported 'governing TO UNRESOLVED ... UNKNOWN is not PASS'. Its prescribed remedy is 'state the TO with decomp_ref.to_ref' -- but the schema then requires doc and vintage_commit, so a to_ref-only object is REJECTED. *** THAT SHAPE -- not required, but INVALID IF PARTIAL -- caught this filing, and 3.0.0_SA_CVO~Z named it as a checker defect rather than an executor one (msg 13823), since there is no honest fabrication available for a TO that has no decomp.* THE REMEDY IS THE ESTATE'S OWN PRECEDENT, adopted here rather than invented: MDPF_GLOBAL.TO-ACCEPT-0826, also a declared-no-decomp TO, sets doc AND to_ref to THE TO'S OWN PATH with a real vintage. doc = this TO's face @3b9928d23b, which is where its five criterion ids are actually minted; the commit and the path both resolve at that vintage (negative control: a bogus path at the same commit returns 'does not exist'). *** I FIRST POINTED doc AT THE etfs-ingest DECOMP @fcdf042972 AND CHANGED IT, because that would have asserted this TO rides a decomposition its own face explicitly declines ('No cell claimed'). The precedented form claims strictly less and is true; the first form was convenient and over-claimed.* WHAT NEITHER FORM DOES: flip alignment to ENFORCE. That discriminator is read off the FACE, so the checker still correctly reports ANNOUNCE. An instance cannot launder its own alignment posture by declaring a decomp_ref. THE STRUCTURAL FIX IS THE ISSUER'S -- adding <task_order id='ETFS_INGEST.TO-9-DS'> to the face -- after which this object is unnecessary. Surfaced to 2.0.0_SA_COO~Z; not taken here, because the face is the issuer's surface, the same boundary that kept this seat off the stale <status> line."
+    },
+    {
+      "item": "NO DEPLOY, NO APPLY, NO TERRAFORM, NO PACKAGE BUILD",
+      "reason": "Rule 13: DS authors producer code, AE deploys. The 18:49:14Z apply was 0.7.0_AE_CloudOps~I's under TO-10-AE. Filing an instance touches no deployed surface, so no change_management ledger entry is opened."
+    },
+    {
+      "item": "THE VENDOR FIELD-WIDTH QUESTION IS NOT RE-OPENED",
+      "reason": "Whether Bloomberg can be asked for an untruncated field is a VENDOR-API act requiring Andrew's explicit per-use word. His 18:02Z direction was to INFER the completions and hard-code them, which is what shipped; re-litigating the source would be re-opening a settled sovereign call."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-28/"
+}

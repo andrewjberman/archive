@@ -53,6 +53,10 @@ PREFIX = "portal/gold/mdpf/"
 FIELDS = ("non_model_aua", "non_model_assets_detail", "inflection_non_model_aua")
 
 
+# The DEPLOY plane. Not data, therefore not governed by D1-inv-3 -- see the
+# scope correction in the LEG3 body. gold-lambda.tf:116 is the authority.
+DEPLOY_PLANE_PREFIX = "portal/gold/mdpf/_code/"
+
 def aws(args: list, capture_to: str | None = None) -> tuple[int, str]:
     """Run the .tools/aws shim from the repo root.
 
@@ -119,18 +123,35 @@ def score(base: dict, live_docs: dict, live_keys: dict) -> tuple[list, list, lis
 
     prior = {k["K"]: k for k in json.load(open(MANIFEST))["keys"]}
     new_keys = []
+    deploy_plane = []
     for k, meta in sorted(live_keys.items()):
         if k not in prior:
             new_keys.append(k)                      # EXPECTED, not a failure
         else:
-            if meta["ETag"] != prior[k]["E"] or meta["Size"] != prior[k]["S"]:
+            moved = meta["ETag"] != prior[k]["E"] or meta["Size"] != prior[k]["S"]
+            if moved and k.startswith(DEPLOY_PLANE_PREFIX):
+                # SCOPE CORRECTION 2026-08-29, and it is a NARROWING so it is stated
+                # loudly. D1-inv-3 forbids REWRITING A SETTLED DATED DATA KEY. This
+                # prefix is not data: gold-lambda.tf:116 declares
+                # portal/gold/mdpf/_code/mdpf-gold-lambda.zip as the lambda's own
+                # s3_key, so REWRITING IT *IS* THE DEPLOY MECHANISM, mandated by
+                # terraform. My first run REFUSED on it (804455 -> 834732, my own
+                # rebuilds #2/#3) -- a TRUE observation scored against the WRONG
+                # invariant.
+                # >> IT IS EXCLUDED FROM *FAILURE* AND STILL PRINTED. A key that
+                #    silently disappears from a checker is how the next mis-scope
+                #    hides. And DELETION of this key is still a failure below,
+                #    because a deploy artifact vanishing breaks the function.
+                deploy_plane.append(
+                    f"{k}  ({prior[k]['S']} -> {meta['Size']})")
+            elif moved:
                 failures.append(
                     f"LEG3 {k}: EXISTING KEY REWRITTEN -- ETag/Size moved "
                     f"({prior[k]['S']} -> {meta['Size']})")
     for k in prior:
         if k not in live_keys:
             failures.append(f"LEG3 {k}: EXISTING KEY DELETED")
-    return failures, new_keys, checked
+    return failures, new_keys, checked, deploy_plane
 
 
 def self_test(base: dict) -> int:
@@ -157,7 +178,7 @@ def self_test(base: dict) -> int:
     clean["entries"][key]["fields"] = {}                    # nothing to compare
     clean["entries"][key]["whole_file_sha256"] = hashlib.sha256(
         live_raw[key]).hexdigest()
-    ctl, _, _ = score(clean, live_raw, prior)
+    ctl, _, _, _ = score(clean, live_raw, prior)
     ctl_leg2 = [f for f in ctl if "LEG2" in f]
 
     # MUTANT ARM -- one field hash corrupted; LEG2 must fire.
@@ -166,7 +187,7 @@ def self_test(base: dict) -> int:
     mutated["entries"][key]["whole_file_sha256"] = hashlib.sha256(
         live_raw[key]).hexdigest()
     one = {"entries": {key: mutated["entries"][key]}}
-    fails, _, _ = score(one, live_raw, prior)
+    fails, _, _, _ = score(one, live_raw, prior)
     mut_leg2 = [f for f in fails if "LEG2" in f]
 
     print(f"  subject      {key}")
@@ -208,7 +229,7 @@ def main() -> int:
         else:
             print(f"  WARN: listing failed rc={rc} -- LEG3 SKIPPED, not passed")
 
-    fails, new_keys, checked = score(base, live_docs, live_keys)
+    fails, new_keys, checked, deploy_plane = score(base, live_docs, live_keys)
     print(f"BASELINE captured {base['captured_at_utc']} by {base['captured_by']}")
     print(f"LEG1/LEG2 checked {len(checked)} of {len(base['entries'])} baselined artifacts")
     print(f"LEG3 live keys {len(live_keys)} vs baseline manifest denominator "
@@ -216,6 +237,13 @@ def main() -> int:
     print(f"NEW keys since baseline (EXPECTED, not failures): {len(new_keys)}")
     for k in new_keys[:12]:
         print(f"    NEW  {k}")
+    if len(new_keys) > 12:
+        print(f"    ... and {len(new_keys) - 12} more (printed count is the denominator above)")
+    if deploy_plane:
+        print(f"DEPLOY-PLANE keys rewritten (EXCLUDED from D1-inv-3 BY SCOPE, "
+              f"NOT a pass -- see LEG3 note): {len(deploy_plane)}")
+        for d in deploy_plane:
+            print(f"    DEPLOY  {d}")
     print()
     if fails:
         print(f"AC4 REFUSED -- {len(fails)} finding(s):")

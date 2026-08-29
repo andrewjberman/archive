@@ -9,7 +9,7 @@
 <placement>LAPTOP (Rule 26). The apply runs on the device that owns the work — this seat's box. NOTHING here is ferried to site Z, and nothing here applies anything on the terminal box.</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-21T19:55Z</issued>
-<status>pending -- ⛔⛔ **NOT AWAITING CERTIFICATION. THIS FACE SAID IT WAS AND THAT IS FALSE.** `3.0.0_SA_CVO~Z` ADJUDICATED this TO @`e3d86ad9d1` and **REFUSED it pending an EXECUTOR ACT**: rc=1 **INVALID -- 3 VIOLATIONS** on the proof-of-spec instance. ⛔ **NO AMOUNT OF CERTIFIER TIME MOVES THIS.** A valid proof-of-spec instance is a BUILD-side act and it is what is missing.
+<status>CLOSED 2026-08-29 ~01:4xZ by `2.0.0_SA_COO~Z` (issuer). 8 of 8 PASS, measured at the instance. WORLD-DONE: artifacts committed and ON ORIGIN (`71265d372e`, is-ancestor vs fetched origin/SITEZ, negative control discriminates). DO NOT SEAT; DO NOT RE-EXECUTE (NEVER#2). --- PRIOR STATUS, PRESERVED: AWAITING CERTIFICATION -- **THE EXECUTOR ACT IS DISCHARGED. UPDATED 2026-08-28 ~19:2xZ by `2.0.0_SA_COO~Z` (issuer) under Andrew's *"completely wrap up D4"*.** The proof-of-spec instance is FILED by `0.4.0_DS_ClientPlatform~P` and reads rc=0 VALID **8 of 8**, 0 violations @`de3c5125d2` (**LOCAL** at filing -- push is the integrator's act). The prior refusal was **rc=1 INVALID -- 3 violations**; that run is now the POSITIVE CONTROL proving the instrument can fail on exactly these ids. Re-run against the COMMITTED BLOB (`git show de3c5125d2:<path>`, 30,522 B), not a working tree, with a control proving the `git show` itself can fail. ⭐ **`ETFS-TO1-AC9`'s drift half had NO MECHANISM AT ALL** -- what existed was a comment saying the tables mirror the frontend, and nothing comparing them. The executor BUILT the control (@`1f7e753080`, 20/20, 5 mutants incl. a reordered-membership one) rather than filing a FAIL or a fabricated PASS, and it PARSES the TypeScript instead of holding a copy -- **a transcription would have been a THIRD carrier of the same drift and would have agreed with itself forever.** RATIFIED as in-scope by the issuer: AC9 binds *"drift must be DETECTABLE, not merely unlikely."* ⚠ **`ETFS-TO1-AC8` CARRIES A LATENT ISSUER DEFECT, MEASURED AND NOT YET RE-CUT:** the invariant names `cash + fixed_income + equity`, but the served object carries a FOURTH bucket `hedge`. Measured at `etf_positioning_gold.py:1521` it is a **HARDCODED `0.0` literal**, unreachable from any input -- so the PASS is sound and **the trap arms on a future CODE EDIT, never on a future dataset**. The tell is `:1518`'s own comment (*"turned a correct constant into a false one. It is a real sum now."*) -- `alloc_fixed_income` and `alloc_equity` already made that trip. The durable fix is an invariant over ALL buckets; that is the issuer's, not a re-file. ⛔ **THE LINE BELOW SAYING "NOT AWAITING CERTIFICATION" WAS TRUE WHEN WRITTEN AND IS NOW SUPERSEDED** -- `3.0.0_SA_CVO~Z` refused this TO pending an EXECUTOR act, and that act now exists. ⛔ Nothing here stamps `ETFS_POSITIONING` or D4 closed; Andrew ruled "D4 is done" a READ, not a close order. ⚠ **ORIGINAL STATUS FOLLOWS, APPENDED AND NOT REPLACED** (a bulk edit at @4253643625 once replaced seven status bodies wholesale and destroyed 21,000 characters; nothing below this line is new). ~~pending~~ -- ⛔⛔ **NOT AWAITING CERTIFICATION. THIS FACE SAID IT WAS AND THAT IS FALSE.** `3.0.0_SA_CVO~Z` ADJUDICATED this TO @`e3d86ad9d1` and **REFUSED it pending an EXECUTOR ACT**: rc=1 **INVALID -- 3 VIOLATIONS** on the proof-of-spec instance. ⛔ **NO AMOUNT OF CERTIFIER TIME MOVES THIS.** A valid proof-of-spec instance is a BUILD-side act and it is what is missing.
 
 ⚠ **AND THE ISSUER TOLD THE CERTIFIER THE OPPOSITE, THREE TIMES.** `2.0.0_SA_COO~Z` wrote *"nothing on this list is blocked on anything but you"* in three separate briefs. **It was false for this TO every time.** `3.0.0_SA_CVO~Z` named the cost precisely: **a seat told it is the sole blocker does not go looking for another owner** -- so this would have sat behind a certifier who cannot move it. ⭐ **This correction is written the moment the author had a trigger to return, which is the whole remedy for the stale-face class measured today (7 of 12 read uncertified while their certificates sat on origin).**
 
@@ -455,3 +455,26 @@ again — **the exact defect this criterion exists to close, re-armed by its own
 >> definition.** Drift must be DETECTABLE, not merely unlikely — mechanism is the executor's call
 >> (a test reconciling the two row sets is the obvious one); **what is binding is that a silent
 >> divergence is not acceptable, because "we copied it carefully" is care, not a control.** <<
+
+---
+
+## CLOSED 2026-08-29 ~01:4xZ BY `2.0.0_SA_COO~Z` (issuer) — 8 OF 8 PASS, WORLD-DONE
+
+```
+  instance   8 of 8 criteria PASS. ZERO FAIL, ZERO UNCOMPUTABLE.
+  artifact   71265d372e  ON ORIGIN (is-ancestor vs fetched origin/SITEZ)
+  control    a portal-only hash is NOT contained -> the probe discriminates
+```
+**CLOSED ON THE ARTIFACT, NOT ON THE FACE**, per `1d-ii`. This face read `[ACTIVE]` for **8 days**
+over work that was accepted and on origin.
+
+⚠ **AND THE CLOSURE ALMOST WENT TO THE WRONG FILE.** A first pass resolved `ETFS_POSITIONING.TO-1`
+by PREFIX and matched **`ETFS_POSITIONING.TO-11-DE`** — `TO-1` is a prefix of `TO-10`, `TO-11`,
+`TO-12`. It read that face's status, found it terminal, and SKIPPED (so nothing was written to the
+wrong file), **but the verdict it reported was about a different task order entirely.**
+>> ⛔ **A TO ID IS NOT A SAFE PREFIX. `TO-1.` with the separator is the identifier; `TO-1` alone is a
+   family.** The near-miss surfaced only because the census still showed the face ACTIVE after the
+   script claimed it was terminal — **an instrument disagreement, which is the signal.** <<
+⚠ **PRIOR STATUS PRESERVED INLINE, DELIBERATELY.** A note on a sibling face records that a previous
+`2.0.0_SA_COO~Z` replaced status blocks WHOLESALE at `@4253643625`, destroying evidence on SEVEN
+faces (142 lines on one). **Every closure in this batch appends and preserves; none replaces.**

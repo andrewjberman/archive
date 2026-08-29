@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D1_CATVIEWS.TO-R1-AE",
+  "firm": "MDPF",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/D1_CATVIEWS.TO-R1-AE.reland-and-refire-on-andrews-word.md",
+    "group": "OTHER",
+    "vintage_commit": "98c2c790fb"
+  },
+  "assignee": "0.7.0_AE_CloudOps~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-assets/portal/gold/mdpf/{scope}/{type}/{date}.json",
+      "kind": "s3_object",
+      "commit_or_etag": "16 dated gold keys DELETED then REBUILT by the floor at 22:17:37Z; run manifest portal/gold/mdpf/_manifests/2026-08-27/20260828T221739Z.json, conflicts=0",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "mdpf-gold-lambda returned {\"status\":\"green\",\"errors\":[],\"a4_objects_built\":16}. Gold category-views objects LastModified 2026-08-28T22:17:40Z, read directly.",
+      "artifact_covered_by": [
+        "CATV-TOR1-AC1",
+        "CATV-TOR1-AC2",
+        "CATV-TOR1-AC4"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-portal-v2/platinum/mdpf/{scope}/category-views.json",
+      "kind": "s3_object",
+      "commit_or_etag": "written_at 2026-08-28T22:17:55-57Z inside the bodies; as_of 2026-08-27",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "opal-assets-mdpf-portal-publisher returned published=18 unchanged=0 failed=[] missing_pairs=[]. All four served bodies read independently, not taken from the publisher's return.",
+      "artifact_covered_by": [
+        "CATV-TOR1-AC3",
+        "CATV-TOR1-AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260828T2215Z_d1-catviews-reland-and-refire-sma-live_deploy.md",
+      "kind": "doc",
+      "commit_or_etag": "opened 0b08925e00 (BEFORE the delete), closed fe0e49f793",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER#6 ledger. Opened before the reserved act and closed on a measured acceptance, not on rc=0.",
+      "artifact_covered_by": [
+        "CATV-TOR1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CATV-TOR1-AC1",
+      "criterion_verbatim": "THE DELETE EXECUTES THE PRE-READ LIST, NOT A DISCOVERED ONE. Run against the already-enumerated 16 keys (4 each of aggregate-aua-timeseries, aum-metrics, account-distribution, category-views). Print the list you are about to delete and the list the dry-run produced, and show they MATCH before --confirm. A destructive act discovering its own target mid-run is the thing the dry-run exists to prevent.",
+      "method": "diff",
+      "invocation": "python .claude/skills/mdpf-refresh/mdpf_refresh.py --reland  (bare dry-run, re-run IMMEDIATELY before --confirm) ; grep -oE 'portal/gold/mdpf/[^ ]+\\.json' | sort > live_16.txt ; diff -u authorized_16.txt live_16.txt",
+      "output_evidence": "MANIFEST LIMB: the tool resolved portal/gold/mdpf/_manifests/2026-08-27/20260828T211849Z.json -- byte-identical to the manifest Andrew's word names in 14134. KEY-SET LIMB: authorized 16, live 16, `diff -u` returned IDENTICAL, zero added, zero removed. Then --confirm deleted exactly those 16, and the deletion log lists the same 16 keys. WHY THIS CONTROL EXISTS: mdpf_refresh.py:205 latest_run_manifest() resolves the delete set AT CALL TIME via max(LastModified), while the sovereign word names a FROZEN enumeration -- two different objects sharing one name, which is why 'they agreed an hour ago' is not a control on a reserved-category delete.",
+      "denominator": "16 authorized keys vs 16 live-enumerated keys, compared mechanically by diff (not eyeballed); 1 manifest key compared exactly.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CATV-TOR1-AC2",
+      "criterion_verbatim": "THE AD-HOC STAMP IS DECLARED, NOT DISCOVERED, AND NEVER FORGED. [Face CORRECTED 22:2xZ by 2.0.0_SA_COO~Z on this seat's measurement:] The reland writes _provenance.trigger = \"manual\" into the ARTIFACTS and the fuller {kind, detail.source: \"adhoc\"} into the RUN MANIFEST -- including the 12 unrelated to category-views. State this in the instance as a KNOWN AND ACCEPTED consequence, with its CLAUDE.md citation (\"ad-hoc artifacts are never production evidence\"). NOBODY FIXES IT BY PASSING {\"source\":\"aws.events\"}.",
+      "method": "live_read",
+      "invocation": "s3 get_object on portal/gold/mdpf/{scope}/category-views/2026-08-27.json for all 4 scopes, read _provenance ; plus source read of data/mdpf/scripts/gold/mdpf_gold_consolidator.py :1148 and :1398",
+      "output_evidence": "ALL FOUR relanded gold objects carry _provenance.trigger = 'manual'. Full block (global): {artifact_type, config_hashes, data_as_of 2026-08-27, process_time 2026-08-28T22:17:07Z, producer 'mdpf-gold-lambda (mdpf_gold_consolidator)', scope, source_vintage_age_hours null, trigger 'manual'}. NO 'adhoc' anywhere in the artifact and NO 'aws.events' anywhere -- nothing forged. AT SOURCE: :1470 builds trigger = {'kind': kind, 'detail': {'source': src}}; :1148 writes the WHOLE DICT to the run manifest (where 'adhoc' lives); :1398 writes trigger.get('kind') to the ARTIFACT. TWO OBJECTS, TWO SHAPES. The pre-correction face described the manifest's shape and asserting it against the artifact would have REFUSED A CORRECT RELAND. ACCEPTED CONSEQUENCE, declared: all 16 relanded objects -- including the 12 unrelated to category-views -- are now ad-hoc-provenance artifacts, and CLAUDE.md is verbatim that 'ad-hoc artifacts are never production evidence'. AC7 IS THEREFORE STILL FAILED BY CONSTRUCTION and Monday's scheduled fire is what discharges it; 'manual' is not 'scheduled', so the conclusion is unchanged even though the mechanism was wrong.",
+      "denominator": "4 of 4 relanded category-views gold objects read; 2 source lines read at the writer; 0 occurrences of 'adhoc' and 0 of 'aws.events' in the artifacts.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CATV-TOR1-AC3",
+      "criterion_verbatim": "THE REFIRE REACHES PLATINUM, MEASURED AT THE SERVED OBJECT. AMENDED 21:4xZ: THIS CRITERION NOW ALSO DELIVERS D-1. The served member objects must gain the aum KEY -- currently ABSENT entirely, which is why the L2 rows render --. Post-reland: 8 of 9 carry values and EXACTLY ONE (Custom members[0]) remains a genuine None and MUST still render --. A result where all 9 carry values means a number was invented. Floor re-run -> publisher -> platinum/mdpf/{scope}/category-views.json carries SMA.aum 22,794,766.25 and Client.aum 267,632,047.22 at global -- VALID ONLY AT as_of 2026-08-27.",
+      "method": "live_read",
+      "invocation": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/verify_step3_served_category_views.py > out.txt 2>&1 ; rc=$? (UN-PIPED per the 14315 binding form) ; plus a per-branch member census on platinum/mdpf/global/category-views.json",
+      "output_evidence": "VERDICT ACCEPT, rc 0, captured un-piped; verdict and rc AGREE. SCORED 11 PASS / 0 FAIL over 11 assertions, 0 NA_BY_DATE, 0 INDETERMINATE. global SMA.aum 22794766.25, absent_reason ABSENT, Client.aum 267632047.22; 49financial SMA.aum 22794766.252499998, absent_reason ABSENT; cottonwood and inflection SMA.aum 0.0 with absent_reason PRESENT (Direction B held -- a global-only fix would pass a one-sided sweep and is excluded by scoring both directions). Body as_of 2026-08-27 on all four, read from the BYTES because platinum keys are UNDATED and a stale object sits at the same key. D-1 LIMB, per-branch at global: Models>Primary 5 of 5 carry aum; Models>Custom 3 of 4; MODELS TOTAL 8 of 9, and the single remaining null is 'Opal Global All Equity Total Return' -- a GENUINE None that must still render --. The aum KEY is now present on every member (it was absent from the key set entirely pre-reland). NOT ALL 9 carry values, so no number was invented.",
+      "denominator": "4 of 4 scopes read at the served body; 11 scored assertions; 15 L2 members across 4 branches censused, of which the 9 Models members are the criterion's set.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CATV-TOR1-AC4",
+      "criterion_verbatim": "NO COLLATERAL MOVEMENT ON THE OTHER THREE ARTIFACT TYPES. aggregate-aua-timeseries, aum-metrics and account-distribution are relanded too. Show their business content is UNCHANGED -- same values, only provenance moved. This is the criterion that catches a reland doing more than intended, and 12 of the 16 keys have nothing to do with this product.",
+      "method": "diff",
+      "invocation": "s3 list_object_versions on each of platinum/mdpf/{4 scopes}/{3 types}.json ; fetch the CURRENT version and the newest version with LastModified < 22:10Z (i.e. the body current immediately before the reland) ; flatten both to leaf paths and compare, excluding _provenance and the process-time field names {last_updated, generated_at, written_at, process_time}",
+      "output_evidence": "0 CHANGED BUSINESS LEAF PATHS ACROSS 62,066 COMPARED, over 12 objects. Per object: 49financial aggregate-aua-timeseries 12386/0, aum-metrics 113/0, account-distribution 463/0; inflection 12453/0, 145/0, 615/0; cottonwood 12935/0, 158/0, 577/0; global 21348/0, 173/0, 700/0. POSITIVE CONTROL that the comparator can SEE movement: with process-time fields INCLUDED, 11 of 12 objects differ, and the differing leaves are exactly the timestamps -- e.g. global/aum-metrics 2 of 175 leaves changed (.last_updated 13:31:10 -> 22:17:37, .non_model_assets_detail.meta.generated_at 13:31:09 -> 22:17:36) and 49financial/aggregate-aua-timeseries 1 of 12387 (.meta.generated_at). _provenance.written_at also moved on every object. So the zero is a real zero, not a comparator that cannot fail. THE INSTRUMENT WAS AVAILABLE ONLY BECAUSE opal-data-portal-v2 HAS VERSIONING ENABLED -- the pre-reland bodies were overwritten at 22:17 and would otherwise have been unrecoverable.",
+      "denominator": "12 objects (4 scopes x 3 non-category-views artifact types); 62,066 business leaf paths compared; 2 prior-version bodies additionally inspected leaf-by-leaf to characterise the excluded fields.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "NO MUTANT PLANTED, AND PLANTING ONE WOULD HAVE BEEN WRONG: the subject is a client-facing served plane and the act is a reserved-category S3 DELETE, so a synthetic bad value would have meant writing known-bad data into production. The estate supplied better natural controls, and each criterion carries one. AC1: the authorized-vs-live enumeration diff, which had a real chance of differing because the tool resolves its target set at call time. AC3: the instrument was negative-controlled against the PRE-RELAND plane earlier the same session and REFUSED it (4 PASS / 7 FAIL, two-sided), so its later ACCEPT is informative; and it was separately proven not to fail a correct LATER build (CONTROL B, test_verify_step3_date_gate.py, a stubbed 2026-08-31 artifact -> rc 0 with the market-valued literals NA_BY_DATE). AC4: the same comparator run WITHOUT the process-time exclusion returns 11 of 12 DIFFERING, which proves it can see change. FULL NEGATIVE-CONTROL LIST: AC3 instrument vs the pre-reland plane: REFUSE, rc=1, 4 PASS / 7 FAIL, 0 INDETERMINATE (all 8 objects readable, so the refusal is on VALUES and not on retrieval). | AC3 instrument vs a stubbed CORRECT 2026-08-31 build: ACCEPT, rc=0, both literal rows NA_BY_DATE, all 9 structural rows PASS -- guarding the mirror failure mode, an instrument that cannot ACCEPT a good build. | AC4 comparator with process-time fields INCLUDED: 11 of 12 objects differ -- the comparator is not blind. | AC1 dry-run is read-only, verified at source (mdpf_refresh.py :322-326 lists and returns before any delete) BEFORE it was run.",
+      "planted": false,
+      "detected": null,
+      "expected": "If the reland had NOT worked, the AC3 instrument must REFUSE. Expected in the unfixed world: global and 49financial SMA.aum == 0.0 with a present absent_reason, and 0 of 9 Models members carrying aum. Expected in the fixed world: SMA.aum > 0, absent_reason ABSENT, 8 of 9 members carrying aum with exactly one genuine null. For AC4 the comparator must be able to SEE movement at all, so with process-time fields INCLUDED it must report differences.",
+      "observed": "AC3 instrument against the PRE-RELAND plane: REFUSE, rc=1, 4 PASS / 7 FAIL, 0 INDETERMINATE -- all 8 objects readable, so it refused on VALUES not on retrieval. Against a stubbed CORRECT 2026-08-31 build: ACCEPT, rc=0, literals NA_BY_DATE, 9 of 9 structural rows PASS -- it does not fail a correct later build either. Against the POST-RELAND plane: ACCEPT, rc=0, 11 PASS / 0 FAIL. AC4 comparator with process-time INCLUDED: 11 of 12 objects differ (timestamps only, characterised leaf-by-leaf); with them EXCLUDED: 0 of 62,066 business leaf paths differ. AC1 dry-run verified read-only at source (:322-326) BEFORE being trusted.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The AC3 instrument was run TWICE against the same post-reland plane -- once ad hoc and once in the 14315-binding un-piped form (redirect to file, rc captured on the very next token). AC4's comparator is a pure function of two immutable S3 object VERSIONS (VersionId-pinned), so re-running it reads the same bytes by construction.",
+      "observed": "Both AC3 runs returned VERDICT ACCEPT with 11 PASS / 0 FAIL and rc 0; verdict and rc AGREE in both. AC4 re-read is version-pinned and therefore stable by construction. NOT CLAIMED: the RELAND ITSELF is not re-runnable and was not re-run -- it is a one-way reserved act, so determinism is asserted for the MEASUREMENTS, never for the act.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The publisher's own all_present / completeness output was NOT used as evidence for any criterion, and neither was mdpf_refresh's VERIFY block.",
+      "reason": "1.0.0_SA_CTO~Z ruled (14212) that citing mdpf_refresh's VERIFY as evidence the SMA figure landed is itself a defect: :104-105 reads ONE artifact type (aggregate-aua-timeseries), hardcoded, and :279-283 scores as_of recency and write recency only, never a value. It printed PASS x4 on this run; that is recorded as a fact about the tool and is not cited as acceptance. Separately, the publisher still reports unexpected_pairs for all four category-views pairs because the CATVP-c enumeration fix is committed (84fda0fd04) and deliberately NOT APPLIED per 14197."
+    },
+    {
+      "item": "Object LastModified was NOT used as a freshness signal anywhere in this instance.",
+      "reason": "2.0.0_SA_COO~Z measured (14298) that the served objects' LastModified had already advanced 13:50:51Z -> 21:19:23Z earlier the same evening from an ad-hoc QA publisher leg, WITH PRE-FIX CONTENT. A freshness read would have scored the wrong event in both directions. Vintage is taken from the body's own as_of throughout."
+    },
+    {
+      "item": "The conservation identity (Client.aum + SMA.aum == 290,426,813.47) is PRINTED BUT NOT SCORED.",
+      "reason": "Measured to pass on the UN-RELANDED plane (290,426,813.47 + 0.00) with nothing done -- the fix REALLOCATES between two siblings, so a criterion on their SUM is invariant across the exact change it exists to accept. Same defect 2.0.0_SA_COO~Z measured on PRD AC4. Retained as a conservation guard on a non-degenerate value (a wrong-amount fix still fails it), never as a discriminator."
+    },
+    {
+      "item": "AC7 (scheduled-fire provenance) is not scored here and is NOT claimed.",
+      "reason": "Out of scope for this TO and unreachable by construction from an ad-hoc reland: the artifacts read trigger 'manual', not 'scheduled'. Monday 2026-08-31's scheduled fire is what discharges it."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION, DISARMED SAME-TURN, owner 0.7.0_AE_CloudOps~Z: the reland's delete set is resolved AT CALL TIME (mdpf_refresh.py:205, max LastModified) while Andrew's word names a FROZEN enumeration from a specific dry-run. Two objects, one name. Surfaced BEFORE firing and disarmed by making the re-enumerate-and-diff a pre-fire control, which 2.0.0_SA_COO~Z then adopted as a condition of the GO.",
+    "OBSERVATION, INERT: the 16 authorized keys are MIXED-DATE -- 13 at 2026-08-27 and 3 at 2026-08-28 (account-distribution at 49financial, inflection, global). Several records describe this act as re-landing 'the 08-27 objects'. The authorization is BY ENUMERATION so the act is unaffected, but a later reader reconstructing the touched set from the prose rather than the manifest would get 13.",
+    "OBSERVATION, DISARMED: reland() DELETES ONLY (:331-333); the rebuild is the separate gold run. So between the two steps the 16 gold keys DO NOT EXIST -- gold is ABSENT, not wrong, and any cross-plane read there is INDETERMINATE by construction. Disarmed by broadcasting WINDOW OPEN / WINDOW CLOSED as the owner of the state, and by chaining the two steps with no report between them (window measured at ~40 seconds).",
+    "BLOCKING-CLASS, DISARMED SAME-TURN, AND IT WAS IN MY OWN INSTRUMENT: the AC3 scorer asserted the market-valued literal 22,794,766.25 UNCONDITIONALLY in its first two commits. Demonstrated against my own pre-fix commit b924645c54 that a CORRECT 2026-08-31 build returns 2 FAILs, rc=1 -- it would have refused a correct fix. Caught by 3.0.0_SA_CVO~Z (14264), who found it in their own ratifier and then CHECKED THE OTHER TWO INSTRUMENTS rather than only fixing theirs. Fixed a4e16bc65f with a two-track split and a committed Control B.",
+    "OBSERVATION, INERT, owner unassigned: the reland stamps ad-hoc provenance on all 16 objects including the 12 unrelated to this product, and ADHOC_SOURCE hardcodes run_class 'adhoc-qa' although this was a sovereign-authorized production data repair. The A6 manifest therefore labels a production act as QA. Not a defect in tonight's act and not chased."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-28/session_close_2132-2240Z.md",
+  "compiler_tools": [
+    {
+      "tool": "none-applicable",
+      "invocation": "n/a",
+      "result": "NO COMPILER TOOL WAS RUN FOR THIS TO, and naming one would be padding. Every criterion is answered on a LIVE plane -- S3 object bodies and versions, Lambda returns, a gold run manifest -- plus three source reads (mdpf_refresh.py, mdpf_gold_consolidator.py, the publisher). The comp-rail covers repo search and estate structure; it has no instrument for 'what does the served body say', which is what all four criteria turn on. The AE role minimum (comp-blast before infra change) does not bind: this TO changed no infrastructure, applied no terraform and rebuilt no package -- it deleted and re-landed data through an existing tool."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/d1-catviews-fullproduct/20260828T2130Z/DECOMP.md",
+    "vintage_commit": "42ea71d3de",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/D1_CATVIEWS.TO-R1-AE.reland-and-refire-on-andrews-word.md"
+  }
+}

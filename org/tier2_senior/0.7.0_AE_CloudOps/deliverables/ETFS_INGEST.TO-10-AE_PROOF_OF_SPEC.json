@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_INGEST.TO-10-AE",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-ingest/20260824T2010Z/DECOMP.md",
+    "vintage_commit": "fcdf042972",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ETFS_INGEST.TO-10-AE.producer-apply-for-the-etfclassifier-fold.md"
+  },
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ETFS_INGEST.TO-10-AE.producer-apply-for-the-etfclassifier-fold.md",
+    "group": "OTHER",
+    "vintage_commit": "b066be7a92"
+  },
+  "assignee": "0.7.0_AE_CloudOps~M",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/etfs-positioning/etf-positioning-producer.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "26c1fab1c30ab90038a8ec1796e47561",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "s3api head-object AFTER the upload, read on the primitive rather than inferred from the put's rc=0: ContentLength 162733 == the built bytes; Metadata.content-sha256 qQk9ohLihOInJnvj/NncAms1IuoEIkkjRwpb8EIFouQ=; VersionId 7r5NQeGQE9Nj.2G9ARqpZMBfEfIwfiii. That metadata key is what modules/yang-lambda/main.tf plans source_code_hash against. The PRIOR version hJpn.bewspw6DHf8Suot920st5dxfAhN (150342 B, content-sha256 wuu+/cHD5g...) was captured BEFORE the overwrite as the rollback handle; its content-sha256 equalled the then-live CodeSha256, which is how the baseline was established as clean rather than assumed.",
+      "artifact_covered_by": [
+        "INGEST-TO10-AC1",
+        "INGEST-TO10-AC2"
+      ]
+    },
+    {
+      "path_or_key": "module.etf_positioning_producer.aws_lambda_function.this (function etf-positioning-producer)",
+      "kind": "terraform",
+      "commit_or_etag": "qQk9ohLihOInJnvj/NncAms1IuoEIkkjRwpb8EIFouQ=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Live read AFTER the apply: CodeSha256 qQk9ohLihOInJnvj/NncAms1IuoEIkkjRwpb8EIFouQ=, LastModified 2026-08-28T18:49:14.000+0000, State Active, python3.11 / 512 MB / 120 s / handler etf_positioning_gold.lambda_handler. STRONGER, AND IT IS THE ONE CITED: the live package was re-downloaded from Code.Location after the apply and is byte-identical (cmp) to the artifact built at pin b066be7a92, sha256 a9093da212e284e227267be3fcd9dc026b3522ea04224923470a5bf04205a2e4.",
+      "artifact_covered_by": [
+        "INGEST-TO10-AC1",
+        "INGEST-TO10-AC2",
+        "INGEST-TO10-AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260828T1845Z_etfs-ingest-to10-ae-producer-package-etfclassifier-fold_deploy.md",
+      "kind": "doc",
+      "commit_or_etag": "355911b9db",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy ledger. OPENED at 16db6d3529 before the first world-touching act (the S3 upload); CLOSED at 355911b9db with live-plane completion evidence. The close-edit and its commit were separated and the file was re-read for the CLOSED banner between them -- the TO named a trap where a `;` chain let an aborted edit commit the PRE-EDIT state and report success.",
+      "artifact_covered_by": [
+        "INGEST-TO10-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "355911b9db",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "cloud-ops Rule 4. functions[\"etf-positioning-producer\"] vintage fields advanced 25f30acc63 / wuu+... / 02:43:57Z -> b066be7a922a9754ae7f4d278882536a009cbbea / qQk9... / 18:49:14Z. A JSON round-trip was verified BYTE-CLEAN in scratch before the edit, so the write could not silently reformat the other 197 entries; the resulting diff is exactly 3 changed lines (git diff --numstat: 3 3).",
+      "artifact_covered_by": [
+        "INGEST-TO10-AC2"
+      ]
+    },
+    {
+      "path_or_key": "git tag etfs-positioning-v1.4.0",
+      "kind": "doc",
+      "commit_or_etag": "b066be7a922a9754ae7f4d278882536a009cbbea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Annotated, cut ON THE PIN EXPLICITLY and verified to peel there (git rev-list -n1 -> b066be7a92 == the pin, != HEAD). HEAD moved TWICE under this session while the work was in flight (a2e2bc07b0 -> a951b1bd21 -> f91b7592) so a bare `git tag -a` would have recorded a peer's commit. The version number was read from `git tag -l | sort -V` rather than assumed: v1.3.0 was ALREADY TAKEN by the 02:43:57Z apply. LOCAL ONLY -- pushing is the integrator's act.",
+      "artifact_covered_by": [
+        "INGEST-TO10-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "INGEST-TO10-AC1",
+      "criterion_verbatim": "THE DEPLOYED BYTES CARRY THE DECODE. Pull the deployed package, extract the classifier module, and show the decode is present. Prefer `cmp` against the source at the applied commit -- byte-identity against the BUILD INPUT is Rule 22a's actual ask and needs no pattern. A changed `CodeSha256` or an advanced `LastModified` is NOT acceptance.",
+      "method": "diff",
+      "invocation": "aws lambda get-function --query Code.Location | curl -o deployed.zip ; unzip ; for each member: git show b066be7a92:<repo_path> | cmp - <member> ; negative controls: same cmp against git show 25f30acc63:<repo_path> for BOTH the classifier and the publisher",
+      "output_evidence": "The live package re-downloaded from Code.Location AFTER the apply is byte-identical (cmp) to the artifact built at the pin, sha256 a9093da212e284e227267be3fcd9dc026b3522ea04224923470a5bf04205a2e4. Per member vs `git show b066be7a92:<path>`: etf_positioning_gold.py IDENTICAL, etf_positioning_publisher.py IDENTICAL, etf_classifications_dynamodb.py IDENTICAL. The DEPLOYED in-zip BUILD_MANIFEST.json names source_vintage.commit = b066be7a922a9754ae7f4d278882536a009cbbea, so the artifact's own provenance record agrees with the external comparison rather than merely failing to contradict it. NEGATIVE CONTROLS, both fired: deployed classifier vs 25f30acc63's -> DIFFERS; deployed publisher vs 25f30acc63's -> DIFFERS. The PRE-state was established the same way and is what makes this discriminating: before the apply the deployed classifier hashed 8138da0300ea83c3... == git show 25f30acc63:<path>, i.e. the PRE-fold vintage, with `def resolve` present at :262 in the pin and ABSENT from the deployed member. CodeSha256 moved (wuu+... -> qQk9...) and LastModified advanced (02:43:57Z -> 18:49:14Z); NEITHER is cited as acceptance, per the criterion's own bar.",
+      "denominator": "3 of 3 zip code members cmp'd against the git blob at the pin; 2 independent negative controls; 1 in-zip manifest provenance read; PRE-state measured on 1 of 1 deployed classifier member.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO10-AC2",
+      "criterion_verbatim": "DEPLOYED VIA `safe-apply`, LEDGER OPENED AND CLOSED. Plan reviewed before apply; added/changed/destroyed recorded. A `plan` 0-diff is not evidence for AC1.",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/etfs-positioning plan -out=tfplan.to10ae ; HALT_ACK=1 .tools/safe-apply.sh -chdir=... apply tfplan.to10ae ; terraform plan -detailed-exitcode ; terraform state list",
+      "output_evidence": "PLAN REVIEWED FIRST and applied AS A SAVED PLAN FILE, so what landed is exactly what was read: `Plan: 0 to add, 1 to change, 0 to destroy`, the only moving resource module.etf_positioning_producer.aws_lambda_function.this (s3_object_version hJpn.bewspw6DHf8Suot920st5dxfAhN -> 7r5NQeGQE9Nj.2G9ARqpZMBfEfIwfiii, source_code_hash wuu+... -> qQk9..., last_modified -> known after apply). APPLY via .tools/safe-apply.sh at 18:49:14Z -> `Apply complete! Resources: 0 added, 1 changed, 0 destroyed`. Bare `terraform apply` not used (NEVER). RE-PLAN clean and scored on `-detailed-exitcode` rc=0 rather than on the sentence 'No changes.', because the sentence is not a discriminating oracle. LEDGER opened 16db6d3529 BEFORE the S3 upload (the first world-touching act) and closed 355911b9db. DID-NOT-MOVE denominator: 9 of the 10 resources in `terraform state list`, and the one that matters is named explicitly -- aws_cloudwatch_event_rule.etf_positioning_producer_daily reads cron(0 13 * * ? *) / ENABLED on the live primitive AFTER the apply. HALT-GATE: it blocked on 2 routine pending messages (msg 4349, 4355, both 7d old, both COO withdrawals of unrelated D7_TICKETING apply TOs, neither STOP-class); both were READ IN FULL and acked before HALT_ACK=1. The gate's PASS is not cited as evidence of anything (ADHC_HALTGT: a live Monitor drains the inbox before the gate reads it).",
+      "denominator": "10 of 10 state resources accounted for (1 changed + 9 unchanged); 1 plan reviewed, 1 apply, 1 re-plan; 2 of 2 halt-gate messages read.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO10-AC3",
+      "criterion_verbatim": "EXERCISED: the first SCHEDULED fire after the apply. EVENT-GATED -- CANNOT CLOSE TODAY. On the first scheduled fire after this apply, the served artifact must show the 7 completed labels, with `industry_group_basis` reading `inferred-from-truncation` on the changed rows and `observed` retained on rows the decode returned unchanged. NO AD-HOC RUN TO BEAT THE CLOCK.",
+      "method": "live_read",
+      "invocation": "s3api head-object + get-object --version-id bpgnYq4ir2yrM5cnWgJ35DzmnqalquU5 on s3://opal-data-portal-v2/platinum/etfs/positioning_data.json (the POST-fire served object); the same on the prior version 5UfK2PDL0XlQCzoIjoFGivz3WqPp_h86 (the PRE-fire served object, == the AC4 pre-state) for a row-level diff keyed on (portfolio,ticker); logs get-log-events on the producer's 2026-08-29 stream for the invocation class; logs describe-log-streams (unpaginated, counted client-side) for the invocation census.",
+      "output_evidence": "SCORED BY 0.7.0_AE_CloudOps~M, 2026-08-29, on the re-address by 2.0.0_SA_COO~Z after the event gate discharged. PRIOR STATUS was UNCOMPUTABLE-BY-CONSTRUCTION, filed 2026-08-28 by 0.7.0_AE_CloudOps~I (session log org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-28/to10_ae_producer_apply_etfclassifier_fold_1835-1905Z.md), whose lane ended before the gating event. That instrument was always trivial and only the input was absent, which is exactly what then happened. AC1 and AC2 were NOT re-opened by this seat.\n\nSCORED ON WHAT THE ARTIFACT DID, not against the 59-of-189 prediction (the TO bars grading it against that figure; it is reported below only because it is the same number, which is a corroboration and was not a bar to clear).\n\nTHE FIRE WAS THE SCHEDULED ONE, AND THAT IS MEASURED RATHER THAN ASSUMED. The producer's own first log line reads `[etf_positioning_gold] lambda_handler: run_class=scheduled` (RequestId 497b6400-2342-485d-9936-4a67aa35b60a, 2026-08-29T13:00:44.957Z). INVOCATION CENSUS over the full log group (14 streams returned, nextToken absent, counted client-side rather than from a page): streams starting strictly between the apply (2026-08-28T18:49:14Z) and the fire = 0, so this fire IS the FIRST invocation after the apply; streams on 2026-08-29 = 1, so no ad-hoc run was interleaved. The TO's bar on beating the clock was therefore honoured by the world, not merely by this seat's restraint.\n\nGRAIN -- THE BYTES CENSUSED ARE THE BYTES THE PRODUCER EMITTED. The publisher logged `built 148372 B, sha256 80c128dcf08b3855...`; the object downloaded from S3 is 148372 B and hashes 80c128dcf08b3855a8ee38e8b288f9c36778313339fe3a116c4f1fb47cecd3f2. Local file size was checked against ContentLength before parsing (148372 == 148372), so the shim class where a get returns rc=0 and writes nothing is excluded rather than assumed away.\n\nTHE CRITERION, TERM BY TERM. Row denominator 189 (30 DIVZ + 45 IDVZ + 90 PFDE + 24 PFOE); data_date advanced 2026-08-27 -> 2026-08-28, generated_at 2026-08-29T13:01:21Z.\n(a) THE 7 COMPLETED LABELS -- exactly 7 distinct label transitions, all completions of a Bloomberg-capped string, over 59 rows: 'Semiconductors & Semiconductor' -> '... Equipment' (15 rows); 'Pharmaceuticals, Biotechnology' -> '... & Life Sciences' (14); 'Technology Hardware & Equipmen' -> '... Equipment' (13); 'Health Care Equipment & Servic' -> '... Services' (8); 'Consumer Discretionary Distrib' -> '... Distribution & Retail' (7); 'Consumer Staples Distribution' -> '... & Retail' (1); 'Commercial & Professional Serv' -> '... Services' (1).\n(b) BASIS ON THE CHANGED ROWS -- 59 of 59 read `inferred-from-truncation`. No exceptions.\n(c) BASIS RETAINED WHERE THE DECODE RETURNED UNCHANGED -- of the 130 unchanged rows, 121 retain `observed`, 8 `not-applicable-non-equity`, 1 `absent-from-source`. The full transition map over all 189 rows has exactly four entries and no others: observed->observed 121, observed->inferred-from-truncation 59, not-applicable-non-equity->itself 8, absent-from-source->itself 1. 121+59+8+1 = 189.\n(d) THE TRUNCATION IS GONE FROM THE SERVED PLANE -- 0 values sit at 30 chars (Bloomberg's cap) post-fire, against 6 pre-fire; max value length 30 -> 46.\n\nDISCRIMINATION -- the evidence would differ if the claim were false. Had the deployed bytes not carried the decode, the served artifact would still show 6 values at exactly 30 chars and a basis census of observed=180, which is precisely the PRE-fire reading and is what the prior served version actually shows. The two states are not confusable.\n\nIN-DATA NEGATIVE CONTROL, NOT PLANTED -- 'Household & Personal Products' is 29 chars and is a COMPLETE GICS name, not a truncation. The decode left it untouched and it retained `observed`. So the decode is shown not to over-fire on a short-but-complete label, which a 59-row count alone could not establish.\n\nPLANE NOTE, because the issuer's located evidence reads as a negative and is not one. The issuer measured 6 values at exactly 30 chars with max length 30 and called it 'the POST-FIRE artifact'. That is the GOLD parquet, gold/holding/date=2026-08-28/holding.parquet, which this seat re-read (45630 B, 189 rows, max length 30, the same 6 values at 30 chars) and which is CORRECT: the decode is publisher-side, at platinum-write time -- etf_positioning_publisher.py _industry_group, read at the applied pin b066be7a92. Gold is upstream of it and legitimately still carries Bloomberg's capped strings. AC3's instrument is the platinum served object, and on that plane the truncation is gone.",
+      "denominator": "1 of 1 scheduled fires observed (was 0 of 1). 189 of 189 served rows censused on BOTH the post-fire and pre-fire versions; 189 of 189 rows joined on (portfolio,ticker) with 0 unmatched on either side. 7 of 7 label transitions enumerated. 14 of 14 log streams in the group enumerated for the invocation census. 1 of 1 producer invocations on 2026-08-29 read in full.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO10-AC4",
+      "criterion_verbatim": "NO REGRESSION. `industry_group` key present on the same row count before and after; 0 rows lose a value; 0 rows gain or lose the key. The pre-state to compare against is in that seat's completion report.",
+      "method": "test_suite",
+      "invocation": "s3api get-object platinum/etfs/positioning_data.json (PRE-state) ; then drive the DEPLOYED etf_classifications_dynamodb.resolve() over all 189 served rows through the publisher's own _industry_group branch logic (code=None -- the current production path)",
+      "output_evidence": "PRE-STATE, measured on the served artifact rather than taken from the report: platinum/etfs/positioning_data.json, 146944 B, LastModified 2026-08-28T13:01:26Z, data_date 2026-08-27. ROW DENOMINATOR 189; rows carrying the industry_group key 189 of 189; non-null 180; basis observed 180 / not-applicable-non-equity 8 / absent-from-source 1; 23 distinct values. DRIVING THE DEPLOYED MODULE OVER ALL 189: rows in / out 189 / 189; rows missing either key 0; rows that lose a value 0; non-null before/after 180 / 180; rows changed 59 across 7 distinct labels. The key-preservation result is also STRUCTURAL and was read at source rather than only measured: all three return statements of _industry_group (publisher :276-288, read from the DEPLOYED bytes) emit both keys, and a null raw value returns untouched with its gold basis.\n\nRE-SCORED ON THE POST-FIRE PLANE BY 0.7.0_AE_CloudOps~M, 2026-08-29. The original PASS above drove the deployed module over the served rows; this is the same criterion measured on the real served before/after pair, which is the stronger instrument and was not available then. Pre-fire served version 5UfK2PDL0XlQCzoIjoFGivz3WqPp_h86 (146944 B, 2026-08-28T13:01:26Z) vs post-fire bpgnYq4ir2yrM5cnWgJ35DzmnqalquU5 (148372 B, 2026-08-29T13:01:25Z), joined on (portfolio,ticker): rows 189/189, unmatched 0 on either side, rows gaining the industry_group key 0, rows losing it 0, rows losing a value (non-null -> null) 0, non-null 180 before and 180 after. AC4 HOLDS ON THE SERVED PLANE. Note the artifact GREW 146944 -> 148372 B, which is the expected direction when 59 rows take longer labels -- a shrink would have been the signal to look.",
+      "denominator": "189 of 189 served rows exercised; 3 of 3 return branches of _industry_group read at source. POST-FIRE RE-SCORE: 189 of 189 served rows on each of the two versions, joined 189/189 with 0 unmatched either side.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Take the DEPLOYED /var/task layout exactly as downloaded from AWS and swap ONLY etf_classifications_dynamodb.py back to the PRE-fold blob (git show 25f30acc63:...), then execute the publisher's own module-scope import statement, `from etf_classifications_dynamodb import resolve`. This is not a synthetic mutation: it is the state the estate was actually in before this apply, and it is the half-landed failure this deploy exists to prevent.",
+      "expected": "rc != 0 with an ImportError naming `resolve`. If it PASSED, the AC1 comparison would not be measuring the member the fold changed, and a package built from the wrong input could score green.",
+      "observed": "rc=1. `ImportError: cannot import name 'resolve' from 'etf_classifications_dynamodb'`. The UN-MUTATED arm -- the actual deployed bytes -- returns rc=0 with resolve bound. NOTE THE FAILURE MODE IS ImportError, NOT ModuleNotFoundError: the fold moved the decode INTO an already-shipped module, so the module resolves and only the NAME is missing. TO-9-AE's mutant produced ModuleNotFoundError from a missing member; a control inherited from that TO would have looked for the wrong exception and passed vacuously.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two full builds from the identical pin to two different output paths, compared with cmp and sha256sum, then both compared to the package re-downloaded from AWS after the apply. build_package.py stamps every zip entry with a FIXED 1980-01-01 timestamp precisely so this is a real question.",
+      "observed": "PIN b066be7a92: run1 == run2 == a9093da212e284e227267be3fcd9dc026b3522ea04224923470a5bf04205a2e4 (162733 B). Both also equal the DEPLOYED package re-downloaded from Code.Location, so determinism holds across the AWS round trip and not only locally.",
+      "status": "STABLE"
+    }
+  },
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"is the deployed etf-positioning-producer Lambda running the same bytes as the source at HEAD, and what commit was it built from\"",
+      "result": "Returned a printed 3-way near-tie (comp-aws / comp-estate / comp-iam) and explicitly labelled it NOT a ranking. It did NOT surface comp-closure this time, though comp-closure is the tool for exactly this question and TO-9-AE's run of the same question did surface it. Used comp-closure anyway on the strength of that prior routing. GAP, not a failure: the router's score is token overlap, so re-wording one question moved the right tool off the list."
+    },
+    {
+      "tool": "comp-closure",
+      "invocation": "comp-closure compile etf-positioning-producer --out <scratch>",
+      "result": "equivalence=DIVERGENT, reach=PRESENCE_ONLY, standing=CURRENT, ambiguity=SINGLE_HOME, members compared=2. It confirmed live CodeSha256 == artifact_sha256 (no undeployed artifact pending, so no half-state was inherited) and named last_deployed_commit 25f30acc63 -- which the content comparison then independently corroborated. It labels its own bound honestly: PRESENCE_ONLY BY CONSTRUCTION, no executing read taken. LIMIT: it compares 2 members, not the package's 3 -- the classifier lives in a different tree and the source map's files[] cannot express it, so the member that this whole TO is about is the one comp-closure cannot see. The in-zip BUILD_MANIFEST is the member list of record."
+    },
+    {
+      "tool": "commit-gate (via safe-commit.sh)",
+      "invocation": "automatic on both commits",
+      "result": "WARN both times: 'checked 0 of 1' and 'checked 0 of 2 file(s) -- NOTHING WAS CHECKED'. Correct and correctly loud -- the gate reads .py/.sh/.tf/org/projects/*.json and this TO committed only .md and a ci/*.json. Recorded rather than omitted precisely because a clean-looking gate line here would be evidence of nothing. The risk-reflex DID fire substantively on lambda-source-map.json (13 recorded claims, citation read)."
+    },
+    {
+      "tool": "none -- raw aws + python, and stating why rather than leaving the section thin",
+      "invocation": "aws s3api head-object/get-object/list-object-versions, aws logs describe-log-streams/get-log-events, aws events describe-rule/list-targets-by-rule; census in python over the parsed JSON",
+      "result": "NO COMP-TOOL FITS THIS ACT AND THAT IS THE HONEST ANSWER, NOT AN OMISSION. AC3 is a census of field VALUES inside one served JSON object against its own prior version; the comp-* set is connection- and code-shaped (comp-closure compares deployed bytes to a build input, comp-iam models grants, comp-pipescript audits columns) and none of them reads a served artifact's value distribution. comp-validate was considered and NOT run: its config is keyed to gold-script artifacts, and per its protocol a NO_CONFIG verdict is UNVALIDATED, never a pass -- running it here would have produced a clean-looking line that certified nothing. INSTRUMENT TRAP MET AND RECORDED: `logs describe-log-streams` reported lastEventTimestamp 13:00:47Z for the 08-29 stream while the stream's own events run to 13:01:24Z, which manufactured an apparent 5-second run against 43 seconds on prior days. That field is best-effort and lags; get-log-events is the sound read. The false anomaly was resolved by reading the events, not by re-running the same command."
+    }
+  ],
+  "surprises": [
+    "\u26d4 RESOLVED 2026-08-28T19:2xZ -- READ THIS FIRST, THE REST OF THIS ENTRY IS NOW HISTORY: this instance MEASURES `VALID`, violations=0, alignment-forward-2 2/2, decomp id space 4 -> 40. `1.0.0_SA_CTO~Z` shipped the third branch at `87c5761e9e` (19:16:16Z) and the standard `org/standards/DECOMP_CELL_ID_CONVENTION.md` at `d4da9da939` (19:17:20Z). Re-run at this seat against the tree as it stands, not taken from the commit message; the positive control holds too -- `ETFS_INGEST.TO-9-AE` and `ETFS_INGEST.TO-6` both now read VALID, which is what makes the fix general rather than tailored to the file that surfaced it. SO NO CERTIFIER CAVEAT IS NEEDED ON THIS INSTANCE: 3.0.0_SA_CVO~Z's revised alignment wording was written for a state that no longer exists. The shipped regex `INGEST-(?:T\\d|CONV|INV)-\\d+` enumerates the groups, so it excludes `INGEST-ZZ-99` BY CONSTRUCTION -- that token is the decomp's own declared negative control, and a branch admitting it would have retired another instrument's discriminator as a side effect. The entry below is left standing UNEDITED because it was true when written and is the record of that moment. || THIS INSTANCE READS `INVALID` AND THE CAUSE IS UPSTREAM OF IT -- stated here rather than left for the reader to discover. proof-of-spec-check reports 3 violations, all ONE root cause: its CELL_ID_RE is `\\b[A-Z][A-Z0-9]*-(?:m-[a-z0-9_]+|[a-z]{1,4}-[a-z]?\\d+)\\b`, which requires a LOWERCASE segment, so `INGEST-T3-6` and `INGEST-T5-1` do not match and read as non-existent cells; the same non-match makes the whole <owned_cells> content read as `non-id text`. MEASURED, and it inverts the obvious reading: across 31 DECOMP.md files in workflows/atom_decomposition/runs, 30 use the checker-visible lowercase form and etfs-ingest is the SOLE outlier (29 uppercase INGEST-T* ids, of which the checker sees ZERO -- the `id space = 4` it prints is the incidental ETFS-d-*/ETFS-e-* family, a different naming family that happens to appear in the same file). SO THE DECOMP IS THE OUTLIER, NOT THE REGEX. I had it backwards until I ran the denominator. CONTROL: the already-filed ETFS_INGEST.TO-9-AE instance fails identically (3 alignment violations, same class), so this is PRE-EXISTING and systemic to the project, not introduced by this TO. CONSEQUENCE: every proof-of-spec instance for ETFS_INGEST is INVALID on alignment regardless of row quality. NOT ADJUDICATED HERE -- whether the remedy is renaming 29 cells in the decomp or widening the regex is the decomp author's / CVO's call, and the two have very different blast radii. Surfaced to 2.0.0_SA_COO~Z and 3.0.0_SA_CVO~Z. Row quality itself is clean: the one violation that WAS mine (a missing status_reason on the event-gated AC3) is fixed, taking violations 4 -> 3. || AMENDED 2026-08-28T19:1xZ -- 1.0.0_SA_CTO~Z RULED it (msg 13736) and the disposition above is SUPERSEDED: NEITHER rename NOR widen -- ADD A NARROW THIRD BRANCH for the INGEST-T<n>-<n> shape, shipped with a control showing zero non-id matches across the corpus plus a positive control that it now sees the 29 ids. Rename REJECTED (invalidates a CERTIFIED decomp @fcdf042972 and ~10 TOs' citations); widen REJECTED AS FRAMED (relaxation is what the residue check exists to catch). Placement is 2.0.0_SA_COO~Z's; not this seat's to take unilaterally. AND THE RULING CORRECTS MY FRAMING, which I am recording rather than quietly restating: I wrote 'THE DECOMP IS THE OUTLIER, NOT THE REGEX'. Verified at source, .tools/proof-of-spec-check.py:180-191, the regex is an ENUMERATED SET of shapes validated against exactly TWO decomps (etfs-positioning -> 23 ids, d1-catviews -> 28) -- so the etfs-ingest form was never in the validation sample rather than being a deviation from a declared rule, and my 30-of-31 census measures a HABIT, not conformance (2.0.0_SA_COO~Z's point, adopted by the ruling: you cannot adjudicate conformance to a rule nobody can read). THIS IS THE SECOND INSTANCE OF THE CLASS, NOT THE FIRST: the same comment block records wave 4's '-m-' mechanism form going invisible the same way -- '5 real ids invisible, and the violations they produced were worded AGAINST THE ISSUER (75278)' -- and the remedy taken then was also a narrow added branch. The recurring cost is MISATTRIBUTION: these violations read as though an executor got cell_refs wrong. AND THE CONVENTION IS DECLARED IN THE WRONG PLACE -- that comment block is a complete statement of the enumerated shapes and why each is narrow, but it lives in the enforcer instead of org/standards/, so only the tool that enforces it can read it.",
+    "The halt gate BLOCKED this lane seat on messages sitting in the BASE inbox (org/mcp/inbox/0.7.0_AE_CloudOps/), while docs/architecture/ADHC_HALTGT.md records that 'a ~lane agent is unhaltable regardless'. The gate behaved BETTER than its own documentation predicts. Not chased -- one line to the surprise channel; class OBSERVATION, standing INERT. Worth someone's read because the doc is what a seat consults when deciding whether to trust a HALTGT pass, and it currently understates the gate.",
+    "etfs-positioning-v1.3.0 already existed, cut by the 02:43:57Z apply -- a THIRD apply on this package that this seat's own TO-9-AE log does not record (that log ends at the second, 02:26:49Z). Caught only because cloud-ops pre-flight step 1 says list the tags rather than assume the next number. Class OBSERVATION, standing INERT."
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any claim about what the next scheduled fire produces, and any grading of it against the 59-of-189 figure.",
+      "reason": "PARTIALLY DISCHARGED 2026-08-29 by 0.7.0_AE_CloudOps~M -- the fire has now happened, so the first half is no longer an exclusion but the scored AC3. THE SECOND HALF STANDS AND WAS HONOURED: AC3 was scored on what the artifact DID, not graded against the prediction. That the observed count is also 59 over the same 7 labels is reported as a corroboration from a third independent instrument (a served before/after diff, versus the issuing seat's pre-deploy simulation and the ~I lane's drive of the deployed module) and was expressly not a bar the fire had to clear. Had it come back 61 over 7 labels, AC3 would still have passed."
+    },
+    {
+      "item": "The NEVER#1 co-sign, the vocabulary member, the 7 completions and the 59-of-189 radius.",
+      "reason": "RULED and SOVEREIGN-RATIFIED; the TO states they are decided and must not be re-opened, and Andrew stopped the traffic on this axis at 18:24Z. This TO is the DELIVERY of a decided thing. Nothing here re-adjudicates any of it."
+    },
+    {
+      "item": "The producer and publisher SOURCE under data/**, and the classifier under infra/aws/lambda/v2_portal/_shared/.",
+      "reason": "0.4.0_DS_ClientPlatform~Q's lane. Nothing was edited in any of them -- this TO is an APPLIED rung only. The builder's PACKAGE list already carried the fold when this seat arrived (committed by that lane at 5af6ef6ff6 / b0e1f33471), so no builder change was needed either."
+    },
+    {
+      "item": "Pushing the annotated tag etfs-positioning-v1.4.0, and the two commits 16db6d3529 / 355911b9db.",
+      "reason": "LD-0367: shared-branch pushes and --follow-tags are the integrator's act, not a seat's. Routed to 0.0.0_AB_MSTR~Z. NOTE the earlier tags v1.1.0 and v1.2.0 were reported outstanding by this seat's TO-9-AE log and are now ON ORIGIN per 0.0.0_AB_MSTR~Z msg 13714."
+    },
+    {
+      "item": "Rollback.",
+      "reason": "Not needed and not run. Stated as AVAILABLE, not as exercised: prior artifact VersionId hJpn.bewspw6DHf8Suot920st5dxfAhN plus the previous package on disk at this seat (sha256 c2ebbefd...). Recorded so a later reader does not mistake an untested path for a tested one."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-29/to10_ae_ac3_scored_on_the_scheduled_fire.md"
+}
