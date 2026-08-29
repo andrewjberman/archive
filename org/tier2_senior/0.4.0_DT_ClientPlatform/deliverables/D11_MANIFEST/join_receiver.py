@@ -41,6 +41,40 @@ def load(p):
         return json.load(fh)
 
 
+def index_members(members):
+    """subject_id -> LIST of members. A MULTIMAP, NOT A DICT.
+
+    `{m["subject_id"]: m for m in members}` COLLAPSES duplicate subject_ids silently, so the hit
+    count below could never exceed 1 and the AMBIGUOUS branch was UNREACHABLE BY CONSTRUCTION
+    (4.0.0_SA_CRO~X 012112Z, at this line). The 0 it printed was not a measurement of the
+    population -- it was a property of the data structure, and it would have read 0 on a registry
+    that DID carry duplicates.
+
+    I reported that zero as "the rule was not exercised on this population". That was too kind to
+    myself: the rule could not be exercised on ANY population, and the difference between those two
+    statements is the whole finding.
+    """
+    idx = {}
+    for m in members:
+        idx.setdefault(m["subject_id"], []).append(m)
+    return idx
+
+
+def classify(parts, idx):
+    """The ONE classifier. The mutant arm below runs THROUGH THIS, not beside it -- a control that
+    re-implements the logic it is testing proves only that I can write the bug twice."""
+    joined, unjoined, ambiguous = [], [], []
+    for p in parts:
+        hits = idx.get(p.get("id"), [])
+        if len(hits) == 1:
+            joined.append((p, hits[0]))
+        elif len(hits) > 1:
+            ambiguous.append((p, hits))
+        else:
+            unjoined.append(p)
+    return joined, unjoined, ambiguous
+
+
 def main():
     reg = load(REGISTRY)
     man = load(MANIFEST)
@@ -50,7 +84,7 @@ def main():
         print("registry-RATIFIED members, and an unratified registry cannot supply them.")
         return 2
     members = reg["extension_population"]["members"]
-    subs = {m["subject_id"]: m for m in members}
+    subs = index_members(members)
     parts = man["parts"]
     den = len(parts)
 
@@ -60,22 +94,23 @@ def main():
     print("   manifest parts     : %d   <- THE denominator; every count below is against it" % den)
     print()
 
-    joined, unjoined, ambiguous = [], [], []
-    for p in parts:
-        pid = p.get("id")
-        hits = [m for s, m in subs.items() if s == pid]
-        if len(hits) == 1:
-            joined.append((p, hits[0]))
-        elif len(hits) > 1:
-            ambiguous.append((p, hits))
-        else:
-            unjoined.append(p)
+    joined, unjoined, ambiguous = classify(parts, subs)
 
+    dup_subjects = {s: v for s, v in subs.items() if len(v) > 1}
+    print("   registry subject_ids carrying >1 member: %d  (the AMBIGUOUS branch's fuel)"
+          % len(dup_subjects))
+    print()
     print("=== AC1: per-part join line, admission strictly by the ratified registry ===")
     for p, m in joined:
         print("   JOINED     %-52s -> card %s" % (p["id"][:52], os.path.basename(m["path"])[:34]))
     for p, hits in ambiguous:
-        print("   AMBIGUOUS  %-52s -> %d members, NOT picked" % (p["id"][:52], len(hits)))
+        # UNKNOWN, and BOTH CANDIDATES PRINTED -- the face requires the candidates to survive the
+        # ambiguity. A count alone would discard the very thing a reader needs to resolve it.
+        print("   AMBIGUOUS  %-52s -> %d candidates, NOT picked between, part left UNKNOWN"
+              % (p["id"][:52], len(hits)))
+        for h in hits:
+            print("                 candidate: %s  blob %s"
+                  % (h.get("path"), str(h.get("git_blob_id"))[:12]))
     for p in unjoined:
         print("   UNJOINED   %-52s -> no exact subject_id in the ratified registry" % str(p.get("id"))[:52])
 
@@ -177,12 +212,51 @@ def main():
     except ImportError:
         print("   L0 VALIDATION: NOT EXERCISABLE -- jsonschema unavailable; not the same as a PASS")
 
+    # -- THE TWO-CANDIDATE MUTANT, WITH ITS SINGLE-CANDIDATE POSITIVE CONTROL --------------------
+    # Required by 4.0.0_SA_CRO~X 012112Z / issuer 80151 / 80153: a zero on a branch nobody can reach
+    # is not evidence. The two arms differ in ONE fact -- whether a second member shares the
+    # subject_id -- and they run through the SAME index_members() and classify() as the live join.
+    # A control that re-implements the logic it is testing proves only that I can write the bug
+    # twice; a hand-computed len() would have "passed" against the dict too.
+    #
+    # THE INJECTION IS INTO A COPY OF THE MEMBER LIST, NEVER THE REGISTRY. The ratified bytes are
+    # out of the repair boundary and are not touched; `mutant_members` is a new list.
+    mutant_fired = None
+    if joined:
+        victim = joined[0][0]
+        vid = victim.get("id")
+        mutant_members = list(members) + [{"path": "MUTANT/second_card_same_subject.json",
+                                           "git_blob_id": "0" * 40, "subject_id": vid}]
+        m_joined, m_unjoined, m_ambiguous = classify(parts, index_members(mutant_members))
+        m_hits = dict((p["id"], h) for p, h in m_ambiguous).get(vid, [])
+        mutant_fired = any(p["id"] == vid for p, _h in m_ambiguous)
+        print()
+        print("=== THE AMBIGUOUS BRANCH: mutant + positive control, one fact apart ===")
+        print("   subject under both arms : %s" % str(vid)[:60])
+        print("   CONTROL  real registry     -> %d candidate  -> JOINED     (card %s)"
+              % (len(subs.get(vid, [])), os.path.basename(joined[0][1]["path"])[:34]))
+        print("   MUTANT   +1 same subject_id-> %d candidates -> %s"
+              % (len(m_hits) or len(subs.get(vid, [])) + 1,
+                 "AMBIGUOUS" if mutant_fired else "NOT AMBIGUOUS  <- BRANCH STILL DEAD"))
+        for h in m_hits:
+            print("                candidate printed, not picked: %s" % h.get("path"))
+        print("   the two arms differ in ONE fact and land in DIFFERENT states, so the branch is")
+        print("   REACHABLE and the live 0 above is a MEASUREMENT of the population, not an")
+        print("   artifact of the index. Population unchanged under the mutant elsewhere: %s"
+              % (len(m_joined) == len(joined) - 1 and len(m_unjoined) == len(unjoined)))
+
     print()
     print("=== RECONCILIATION ===")
     print("   joined %d + unjoined %d + ambiguous %d = %d of %d  %s"
           % (len(joined), len(unjoined), len(ambiguous),
              len(joined) + len(unjoined) + len(ambiguous), den,
              "OK" if len(joined) + len(unjoined) + len(ambiguous) == den else "DOES NOT RECONCILE"))
+    # THE CONTROL IS A REFUSAL ARM, NOT A PRINT. A mutant that reports "branch dead" and still
+    # exits 0 is a description of a control (the declared-but-unrun falsifier class, named by the
+    # issuer at 80151). If AMBIGUOUS cannot be made to fire, this run is not evidence of anything.
+    if mutant_fired is False:
+        print("   REFUSING: the two-candidate mutant did not reach AMBIGUOUS.")
+        return 1
     return 0 if len(joined) + len(unjoined) + len(ambiguous) == den else 1
 
 
