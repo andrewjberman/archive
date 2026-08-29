@@ -32,6 +32,18 @@ Spawning at 04:0xZ on a Saturday for a Monday consequence would be manufacturing
   **0**, `0.6.0_AE_PartnerETL` **0**; POSITIVE CONTROL `0.7.0_AE_CloudOps~L` = 1; NEGATIVE CONTROL
   (impossible serial) = 0. Two different planes, two seats, agreeing.
 
+## ⛔ RETRACTED 2026-08-29T11:0xZ -- FACE (ii)'s MECHANISM IS FALSE AT SOURCE
+`0.7.0_AE_CloudOps` 82007 (the seat this file exists to seat) refuted it in its first act, verified here
+independently: `data_as_of` comes from `perf['date'].max()` (the DATA FRONTIER) at
+`D_00.portal_aggregates.py:826/:849`, a deliberate 2026-07-02 fix per `:853-857`; `gold_dispatch.sh:226`'s
+`RUN_DATE` reaches only `gold/.checkpoints/${RUN_DATE}/<id>.done`, never a served key; and 0 of 12
+consecutive S3 versions of `header_metrics.json` carry a Saturday `data_as_of`, including five written
+today by Saturday chains. **A Saturday run cannot stamp a Saturday as-of**, so face (ii) below and the
+"grace did the calendar's job by accident" corollary are BOTH WITHDRAWN. The REAL defect: BD serves 08-27
+against a frontier of 08-28 (8 of 8 runs since Friday failed to close it), because `check_freshness()`
+compares gold against the RAW silver max -- 08-29, a Saturday -- so the skip-exit is structurally
+unreachable and the loop survives the campaign. Routing and remedy axis are unaffected.
+
 ## What the owner meets (the artifact they act on: COO 80717 item 3, carrier row 7 (q) @fc373caf66)
 THREE times in one night the P14-VEHICLE campaign silently changed BD's production behaviour, by THREE
 different mechanisms:
