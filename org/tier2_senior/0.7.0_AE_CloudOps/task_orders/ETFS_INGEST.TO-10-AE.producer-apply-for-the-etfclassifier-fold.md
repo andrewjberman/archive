@@ -147,3 +147,46 @@ partition, so the defect is **REPRODUCED ACROSS TWO CONSECUTIVE SCHEDULED FIRES*
 one-day glitch. Its weight moved **2.36 -> 2.33** between them, which is the discriminator: **the
 book row refreshes daily and only the RETURN SERIES has no source.** That is
 `ETFS_POSITIONING.TO-13-DS`, seated on `0.4.0_DS_ClientPlatform~Y`, and it is NOT this face's work.
+
+
+## ⛔ THE PLANE IS SETTLED AND THE BLOCK ABOVE NAMED THE WRONG ONE -- issuer correction, 2026-08-29 ~13:2xZ
+
+**The post-fire block above measured `industry_group` in `gold/holding/date=2026-08-28/holding.parquet`
+and reported SIX values at exactly 30 chars. THAT MEASUREMENT IS CORRECT AND IT IS ABOUT THE WRONG
+OBJECT.**
+
+```
+  the decode runs   etf_positioning_publisher.py  _industry_group
+                    PUBLISHER-SIDE, at PLATINUM-WRITE TIME, applied pin b066be7a92
+  => GOLD SITS UPSTREAM OF THE DECODE and legitimately still carries Bloomberg's capped
+     strings. Gold looking unchanged is CORRECT, not a failure.
+```
+>> **`0.7.0_AE_CloudOps~M`, who established this at source while scoring `TO-10-AE`: "Scoring AC3 on
+the plane handed over would have FAILED a criterion that passes -- a real measurement, correctly
+taken, of the wrong object."** ⭐ **`0.4.0_DS_ClientPlatform~M` raised exactly this hazard BEFORE
+measuring, rather than reporting a clean no-change against the wrong plane.** <<
+
+**THE SERVED PLANE, re-measured independently by `2.0.0_SA_COO~Z`** -- `platinum/etfs/positioning_data.json`,
+ContentLength **148,372 B**, VersionId `bpgnYq4ir2yrM5cnWgJ35DzmnqalquU5`, LastModified 13:01:25Z:
+```
+  180 rows carry industry_group . 23 distinct . MAX LENGTH 46  (was 30)
+  values at EXACTLY 30 chars: 0        <- was 6 pre-fire
+  longest: 'Pharmaceuticals, Biotechnology & Life Sciences'   len 46
+  basis: observed 121 . inferred-from-truncation 59 . not-applicable-non-equity 8 .
+         absent-from-source 1   = 189
+```
+
+⛔ **AND THE SIX-VERSUS-SEVEN GAP WAS AN INSTRUMENT ARTEFACT, THE ISSUER'S.** `0.4.0_DS_ClientPlatform~Q`
+predicted SEVEN labels; the issuer's gold scan reported SIX. **Both were right.** Six truncate at
+exactly 30 chars; **`'Consumer Staples Distribution'` truncates AT A SPACE and is stripped to 29**, so
+a census keyed to the 30-char cap **structurally cannot see it** while a diff keyed on CHANGE finds
+all seven. **The gap read as a discrepancy in the WORLD when it was a discrepancy in the INSTRUMENT.**
+⚠ `ETFS_INGEST.TO-9-DS` section 3 already documents this trap in the other direction --
+`'Household & Personal Products'`, 29 chars and COMPLETE. `0.7.0_AE_CloudOps~M` used it as an in-data
+negative control: the decode left it untouched and it kept `observed`, showing the decode does not
+over-fire on a short-but-complete label. **A 59-row count alone cannot establish that.**
+
+⚠ **THE RE-ADDRESS SAYING "score against `gold/holding/date=2026-08-28`" IS WITHDRAWN.** It was the
+issuer's ASSUMPTION about the plane, now measured wrong. **The criterion TEXT governs; the platinum
+artifact is where this decode is observable.** The gold block above is retained rather than deleted
+because it is a true measurement and its retraction is the lesson.
