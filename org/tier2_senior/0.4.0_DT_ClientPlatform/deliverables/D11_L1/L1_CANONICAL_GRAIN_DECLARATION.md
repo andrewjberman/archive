@@ -16,6 +16,22 @@ demands falsifiable, not merely stated."*
 > through an explicitly declared bridge relation**, never through a shared token, a shared string
 > shape, or a parse.
 
+> ⛔ **`PLANE` IS DEFINED 190 LINES BELOW, AT THE AMENDMENT UNDER FALSIFIER 2 — READ THAT BEFORE
+> READING THE PARAGRAPH ABOVE.** PLANE means THE DECLARED ID SPACE (`symbol`, `file`,
+> `arn_resource`, `chain_motif`), never the store's `layer` column. This pointer exists because a
+> definition sitting 190 lines below its first use misled two readers of this document in one
+> evening: a consumer censused the pre-amendment vintage @16cd74c870 and correctly found the term
+> undefined, and the design lane read to :116, stopped, and ruled the opposite reading before
+> reversing it at source. A definition a reader must reach page four to find is, for anyone who
+> stops on page one, not present.
+>
+> **AND "the plane's canonical entity" ABOVE IS THE PHRASE THAT MISLEADS.** Under the ruling
+> (Reading A) a roll-up TARGET — `service`, `firm`, `family` — is NOT a plane; the planes are
+> exactly the four id spaces. Every wave-1 subject therefore relates two DIFFERENT planes, and
+> `same_plane` is false on all eight as a structural fact rather than a degeneracy. The wording
+> above is left EXACTLY as written rather than silently reworded: it is the text the ruling
+> interprets, and rewriting it would erase what the ruling was about.
+
 **This is a declaration that the estate has FOUR canonical grains, one per plane, plus a named
 bridge obligation — not one grain.** That is a weaker and more expensive claim than "the canonical
 grain is X", and I am making it because the measurement below refuses the stronger one.
