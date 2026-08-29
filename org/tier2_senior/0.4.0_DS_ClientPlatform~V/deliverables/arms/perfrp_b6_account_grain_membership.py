@@ -97,10 +97,23 @@ print("  ratio new/gained: %.2fx -- an account cannot join more than one book, s
       % (rel_new / max(gained, 1)))
 print("  ratio above 1 is relationship_id REASSIGNMENT, not client movement.")
 bv = leaf["window"]["basis_version_change"]
-check("the leaf DISCLOSES the version change that inflates the relationship grain",
-      bv["versions_differ"] is True and bool(bv["warning"]),
-      "spine %s -> %s" % (bv["window_start_schema_version"],
-                          bv["as_of_schema_version"]))
+# REPOINTED 2026-08-29 -- 2.0.0_SA_COO 81723 as amended by 81738, 1.0.0_SA_CTO 81730,
+# form from 3.0.0_SA_CVO 81733. The old form asserted `versions_differ is True and
+# bool(warning)`: a WORLD-STATE that inverted the moment the campaign corrected the
+# spine, so the arm FAILED on a healthy artifact. What this arm exists to check is that
+# a reader can tell client MOVEMENT from relationship_id REASSIGNMENT -- and that
+# disclosure is now FIELDS, which survive the versions agreeing.
+rk = bv.get("rekey_comparison") or {}
+_sub = rk.get("subject") or {}
+check("the leaf DISCLOSES the re-key basis AS FIELDS, whatever the version state",
+      _sub.get("basis") == "derived" and bool(_sub.get("start_partition"))
+      and bool(_sub.get("end_partition")),
+      "versions_differ=%s  rate=%s of %s" % (bv["versions_differ"],
+                                             _sub.get("rekeyed_accounts"),
+                                             _sub.get("shared_accounts")))
+check("the derived re-key rate is COMPUTED, so the ratio above has a stated basis",
+      _sub.get("rate_state") == "COMPUTED" and _sub.get("rate") is not None,
+      "rate_state=%s" % _sub.get("rate_state"))
 check("the ACCOUNT grain reads NO spine relationship_id (immune by construction)",
       "relationship_id" not in set(s_df.columns) | set(e_df.columns),
       "jd2 columns carry account_id, not rel_ keys")

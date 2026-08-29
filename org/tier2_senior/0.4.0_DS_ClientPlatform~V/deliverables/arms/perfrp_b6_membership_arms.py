@@ -375,15 +375,153 @@ control("the sibling flipped true while the block stays omitted",
         omission_is_explained, _flip)
 
 bv = EVID["window"]["basis_version_change"]
-check("the evidence leaf DISCLOSES the producer confound on its face",
-      bv["versions_differ"] is True and bv["warning"] and "21.6" in bv["warning"],
-      "spine %s -> %s" % (bv["window_start_schema_version"],
-                          bv["as_of_schema_version"]))
+# ---------------------------------------------------------------- REPOINTED 2026-08-29
+# RULED 2.0.0_SA_COO 81723 as AMENDED by 81738, concurred 1.0.0_SA_CTO 81730, form from
+# 3.0.0_SA_CVO 81733.
+#
+# WHAT WAS WRONG, and it is worse than "the arm went stale": the old form asserted
+#     versions_differ is True AND warning AND "21.6" in warning
+# which is a WORLD-STATE, and the fix INVERTED ITS POLARITY. On a correct post-rewrite
+# artifact all three go False, so the arm FAILED on health; on the artifact 80410
+# forbids -- one still emitting the stale literal -- it PASSED. IT ENCODED THE DEFECT AS
+# THE ACCEPTANCE CRITERION. Measured: it failed against the corrected upstream while the
+# producer was right.
+#
+# THE CONTRACT, NOT THE WORLD. An acceptance arm for a producer asserts what the PRODUCER
+# GUARANTEES, not what the world happened to contain the day the arm was written. The
+# guarantee is that the comparison is DISCLOSED AS FIELDS whatever the version state --
+# `rekey_comparison` emits unconditionally precisely because `warning` is None exactly
+# when the versions AGREE, which is the state (R) is finally read in.
+rk = bv.get("rekey_comparison")
+
+
+def _discloses(b):
+    r = b.get("rekey_comparison")
+    return (isinstance(r, dict) and isinstance(r.get("subject"), dict)
+            and isinstance(r.get("control"), dict))
+
+
+check("the leaf DISCLOSES the re-key comparison AS FIELDS, whatever the version state",
+      _discloses(bv),
+      "versions_differ=%s warning_present=%s"
+      % (bv["versions_differ"], bv["warning"] is not None))
+control("rekey_comparison removed -- the disclosure goes silent",
+        _discloses, {k: v for k, v in bv.items() if k != "rekey_comparison"})
+
+sub = (rk or {}).get("subject", {})
+check("the derived SUBJECT carries its provenance and both sides WITH their pins",
+      sub.get("basis") == "derived" and bool(sub.get("start_partition"))
+      and bool(sub.get("end_partition")) and isinstance(sub.get("start_pin"), dict)
+      and isinstance(sub.get("end_pin"), dict))
+
+
+def _rate_recomputes(s):
+    try:
+        if s.get("rate_state") != "COMPUTED":
+            return False
+        return abs(s["rate"] - s["rekeyed_accounts"] / s["shared_accounts"]) < 1e-8
+    except (KeyError, TypeError, ZeroDivisionError):
+        return False
+
+
+check("the derived rate RECOMPUTES from its own numerator and denominator",
+      _rate_recomputes(sub),
+      "%s of %s" % (sub.get("rekeyed_accounts"), sub.get("shared_accounts")))
+control("the rate detached from its own numerator/denominator",
+        _rate_recomputes, dict(sub, rate=(sub.get("rate") or 0.0) + 0.05))
+
+# THE ARM FOR THE DEFECT THAT ACTUALLY OCCURRED. The pre-fix warning claimed
+# "2026-07-15 -> 2026-08-18" while the leaf's own pins read 2026-07-14 -> 2026-08-27:
+# it named a comparison THE EMISSION NEVER MADE. Nothing checked that, which is why the
+# ratified S_R binding could parse the prose and bind to partitions the leaf never read.
+_UP = EVID["window"]["upstream_pins"]
+
+
+def _sides_are_the_pins(s):
+    return (s.get("start_partition")
+            == _UP["dimensions/dim_relationship@window_start"]["partition_date"]
+            and s.get("end_partition")
+            == _UP["dimensions/dim_relationship@as_of"]["partition_date"])
+
+
+check("the subject's two sides ARE the partitions the emission actually read",
+      _sides_are_the_pins(sub),
+      "%s -> %s" % (sub.get("start_partition"), sub.get("end_partition")))
+control("the subject's start side detached from the pin it was read from",
+        _sides_are_the_pins, dict(sub, start_partition="1999-01-01"))
+
+ctl = (rk or {}).get("control", {})
+
+
+def _control_disowns(c):
+    return (c.get("basis") == "measured" and bool(c.get("measured_at"))
+            and c.get("partitions") is None and c.get("partitions_recorded") is False
+            and bool(c.get("reason_partitions_absent")))
+
+
+check("the DECLARED control disowns this emission and STATES ITS OWN LIMIT",
+      _control_disowns(ctl),
+      "measured_at=%s partitions_recorded=%s"
+      % (ctl.get("measured_at"), ctl.get("partitions_recorded")))
+control("the control claims recorded partitions it does not have",
+        _control_disowns, dict(ctl, partitions_recorded=True))
+
+
+# STATE COHERENCE (3.0.0_SA_CVO 81733, Rule 24 postulate (iv)): key the arm to the
+# RELATION between the fields, never to a constant. Flipping the old `True` to `False`
+# would have re-created the same defect facing the other way and broken again the first
+# time a window legitimately spans two versions. These pass in BOTH worlds and still
+# fail if the producer ever disagrees with itself.
+def _versions_coherent(b):
+    return b["versions_differ"] == (b["window_start_schema_version"]
+                                    != b["as_of_schema_version"])
+
+
+def _warning_coherent(b):
+    return (b["warning"] is not None) == b["versions_differ"]
+
+
+check("STATE COHERENCE: versions_differ agrees with the two version fields",
+      _versions_coherent(bv),
+      "%s vs %s -> %s" % (bv["window_start_schema_version"],
+                          bv["as_of_schema_version"], bv["versions_differ"]))
+control("versions_differ flipped against its own version fields",
+        _versions_coherent, dict(bv, versions_differ=not bv["versions_differ"]))
+check("STATE COHERENCE: the warning is present exactly when the versions differ",
+      _warning_coherent(bv))
+control("a warning present while the versions agree",
+        _warning_coherent, dict(bv, warning="a stale sentence"))
+
+# SECONDARY -- A REGRESSION GUARD ON ONE KNOWN STRING, AND NEVER COVERAGE OF 80410.
+# 1.0.0_SA_CTO 81730 / 2.0.0_SA_COO 81738: an absence-of-one-token arm PASSES on a
+# producer that hardcodes 21.7, or 1,542, or any other typed figure -- the same defect
+# wearing a different literal. 80410 ruled DERIVE-OR-DECLARE, not "that string is gone".
+# The DERIVATION arms above are what test the ruling; this one only guards the regression.
+check("[regression guard, NOT coverage of 80410] the retired literal is absent",
+      "21.6" not in (bv["warning"] or ""))
+
 check("the ruled leaf reads ONE producer (no confound to disclose)",
       RULED["window"]["basis_version_change"]["versions_differ"] is False)
+
 lb = EVID["window"]["label_basis"]
-check("the evidence leaf declares its start vintage supplies NO labels",
-      lb["window_start_supplies_labels"] is False and lb["reason_if_absent"])
+# REPOINTED, SAME FAULT, AND THIS ONE WAS NOT IN MY OWN FILING (81714 named two arms;
+# running them found three). The old form asserted `window_start_supplies_labels is
+# False` -- true ONLY in the pre-rewrite world. (S_L) is now TRUE, so the arm failed
+# BECAUSE THE CAMPAIGN WORKED. It keys on label_basis rather than on versions_differ,
+# which is exactly why a census scoped to the tokens I already knew about missed it.
+# The contract: the leaf DECLARES the capability either way, and NAMES A REASON when it
+# is absent -- never that the answer is a particular one.
+def _label_declared(b):
+    return (isinstance(b.get("window_start_supplies_labels"), bool)
+            and (b["window_start_supplies_labels"] or bool(b.get("reason_if_absent"))))
+
+
+check("the leaf DECLARES its start-vintage label capability, with a reason when absent",
+      _label_declared(lb),
+      "supplies_labels=%s" % lb.get("window_start_supplies_labels"))
+control("label capability absent AND unexplained",
+        _label_declared, dict(lb, window_start_supplies_labels=False,
+                              reason_if_absent=None))
 
 print()
 print("=" * 78)
