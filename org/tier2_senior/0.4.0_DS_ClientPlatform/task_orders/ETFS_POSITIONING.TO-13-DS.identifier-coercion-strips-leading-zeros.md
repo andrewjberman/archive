@@ -6,7 +6,7 @@
 ⭐ **THE CELLS ARE REAL AND THEY ARE EXACT.** `ETFS-a-1` IS `silver/holdings/{date}.parquet` — *"the WEIGHTS, already ours"*, DS-class — **which is the very artifact carrying `cusip=2824100`.** `ETFS-a-5` is `bbg/{date}/`, the L1 landing prefix whose `history_topup` lost the ABT row. `ETFS-d-1` is the producer, *"BUILT against the bbg/{date}/ CONTRACT"* (DECOMP §3.1), which is what emits the served gold. **A cell names an OPERATIVE SURFACE, not a date — an eight-day-old decomp covers a defect found today whenever the defect lives on a surface it enumerated.** That is what I got wrong, and it is the general form.
 ⚠ **A DECOMP-REF ARMS ALIGNMENT ENFORCE in `proof-of-spec-check.py:24,161`. THAT IS CORRECT HERE AND IS WHY `ETFS_INGEST.TO-9-DS` IS NOT A PRECEDENT FOR THIS FACE:** that TO had genuinely no cell, so its element was absent by necessity and its enforcement would have been vacuous. **This face has three real cells, so enforcement is a feature.** ⛔ **NEVER fabricate `cell_refs` to satisfy the gate — that yields a VALID-READING INSTANCE THAT LIES. The remedy for a missing cell is to SURFACE the pipeline gap, never to invent a reference or to reach for the override.**
 
-<issued_to>(unassigned -- UNSEATED BY DESIGN AT CUT TIME; see section 0 for the seating note and why no serial belongs in this field yet)</issued_to>
+<issued_to>`0.4.0_DS_ClientPlatform~Y`</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-29T12:4xZ</issued>
 <status>**PENDING — CUT WITH THE DEFECT FULLY CHARACTERIZED AND ONE LINK DELIBERATELY UNEXERCISED.** The finding, the mechanism, the blast radius and both rival explanations are all MEASURED and recorded in `org/projects/ETFS_POSITIONING.json` `blocking` (the NAMED PRIMARY CARRIER; commits `9ebcd31a3a`, `6bac9a3680`, `dc57db85c5`, `0d5f5a8e2e`). ⛔ **WHAT IS NOT MEASURED AND MUST NOT BE MEASURED BY THIS FACE: `/sedol/2824100` has NOT been run against Bloomberg. That is a VENDOR CALL and needs Andrew's explicit per-use word, which nobody has asked for and which this TO does NOT request — the scheduled pull exercises it for free.** So "the sedol query returns nothing for ABT" is **STRONGLY EVIDENCED AND UNEXERCISED**, and is deliberately NOT called a root cause under Rule 22. ⚠ **A SEAT PICKING THIS UP MUST NOT UPGRADE THAT LANGUAGE WITHOUT EITHER THE SOVEREIGN WORD OR A SCHEDULED-RUN OBSERVATION.**</status>
@@ -25,10 +25,27 @@ under Rule 27**, and handed it to whoever holds `ETFS_POSITIONING`. This face is
 landing. **Neither of those lanes carries this further.**
 </authority>
 
-## 0. SEATING -- UNSEATED BY DESIGN, AND THE `issued_to` FIELD IS DELIBERATELY SERIAL-FREE
+## 0. SEATING -- SEATED 2026-08-29 ~12:5xZ ON `0.4.0_DS_ClientPlatform~Y`
 
-⛔ **THIS FACE IS UNSEATED AT CUT TIME, 2026-08-29 ~12:4xZ. That is not an oversight.** Every
-existing Tier-2 lane is Rule-27 encumbered:
+✅ **SEATED 2026-08-29 ~12:5xZ ON `0.4.0_DS_ClientPlatform~Y` by `2.0.0_SA_COO~Z`** (issuer; COO spawn/seat authority per Andrew 2026-08-28 15:32Z). **PRE-FLIGHT, ALL FIVE GATES, EACH WITH ITS DENOMINATOR OR CONTROL:**
+
+```
+  1pt process truth   8 claude.exe live, ALL ~Z base lanes -- no ~Y process
+                      (and no ~Q, no ~I: independent corroboration that both are DEAD)
+  1a  broker          ~Y reads NOT REGISTERED   (control: ~Z present in the same dump)
+  1b  marker scan     0 hit(s) for ~Y           (POSITIVE CONTROL: ~Z = 1 hit, so not blind)
+  1c  concurrency     7 of 16 spawn-marker windows
+  1d  encumbrance     0 open TOs . 0 surprise_channel ownership rows . 0 project/mission
+                      owner rows . 0 mentions anywhere in org/ outside inboxes
+```
+
+⭐ **1d WAS NOT A FORMALITY — IT REFUSED THE FIRST TWO CANDIDATES.** `~R` holds `ADVI_INSURE.TO-R1-DS` (PENDING, 4d) and `~S` holds one too: **both would have been Rule 27 collisions on a letter that is free on every process-plane instrument.** `~V` was clean on obligations but is NAMED IN AN OPEN CARD AT ANDREW (its `FACE_FLIP_CHECK_SPEC_20260826.md`), so it was passed over for conflation risk rather than for encumbrance — a weaker reason, recorded as such.
+
+⚠ **THIS WORK IS FIRE-INDEPENDENT.** Unlike the two `ETFS_INGEST` faces it does **not** wait on the 13:00Z `etf-positioning-producer-daily` run — the defect is already measured and the fix is in code. It was seated ahead of them for exactly that reason.
+
+⛔ **HISTORICAL, KEPT BECAUSE IT IS THE LESSON, NOT THE STATE — THE FIELD IS SERIAL-FREE WHEN UNSEATED, AND MINE WAS NOT.** The seating note originally lived inside `<issued_to>`; `to-check` renders the FIRST serial-shaped token it finds there, so the face rendered **`-> SA_COO~Z`** — the issuer, as executor. **A face that renders the COO as its own assignee is a lane violation on its face, and it is WORSE than one rendering `(unassigned)`**, because `(unassigned)` announces itself and a plausible-but-wrong serial does not. Same class as `ETFS_INGEST.TO-7` carrying an executor CLASS and no instance for three days while every other field looked complete. **Prose about seats goes in a SECTION; only the assignee goes in the field.**
+
+⛔ **THE LANES THAT COULD NOT TAKE THIS, measured at seating time:**
 
 ```
   0.4.0_DS_ClientPlatform~Z   holds D1_CATVIEWS TO-M1-DS + TO-N1-DS      LIVE, encumbered
@@ -37,14 +54,7 @@ existing Tier-2 lane is Rule-27 encumbered:
   0.7.0_AE_CloudOps~I         holds ETFS_INGEST.TO-10-AE                 DEAD (INFERRED), encumbered
 ```
 
-**One instance is one project, so this face needs a FRESH DS-class lane.** The issuer
-(`2.0.0_SA_COO~Z`) holds spawn/seat authority per Andrew 2026-08-28 15:32Z and is batching one
-seating pass at ~13:0xZ covering this face plus the two ETFS_INGEST faces, rather than running three
-pre-flights separately.
-
-⚠ **THIS WORK IS FIRE-INDEPENDENT.** Unlike the two ETFS_INGEST faces it does **not** wait on the
-13:00Z `etf-positioning-producer-daily` run — the defect is already measured and the fix is in code.
-It is unseated for batching, not because anything gates it.
+**One instance is one project, which is why a fresh lane was required rather than a reuse.** The two `ETFS_INGEST` faces are seated separately AFTER the 13:00Z fire, because their criteria need a post-fire artifact to score and seating them earlier would seat on a read that does not exist yet.
 
 ⛔ **AND THE FIELD IS SERIAL-FREE ON PURPOSE — THE FIRST VERSION OF IT WAS NOT, AND THAT WAS A
 DEFECT THE ISSUER CAUGHT ON ITS OWN FACE.** The seating note originally lived inside `<issued_to>`;
