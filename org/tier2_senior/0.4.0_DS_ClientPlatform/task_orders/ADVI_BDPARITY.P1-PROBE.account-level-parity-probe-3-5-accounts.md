@@ -1,6 +1,6 @@
 # TO ADVI_BDPARITY.P1-PROBE — the Black Diamond parity probe: 3-5 accounts, hand-checked vs the new chain (plan §7 P1)
 
-<task_order id="ADVI_BDPARITY.P1-PROBE" project="OPAL_ADVIPOINTERS">
+<task_order id="ADVI_BDPARITY.P1-PROBE" project="ADVI_BDPARITY">
 <issued_to>0.4.0_DS_ClientPlatform~C (base — activates at your THU 08-20 morning respawn, AFTER the B1 proof-READ; CRO holds the GIPS/methodology contract, consulted same-hour; AE consulted on the pull lane) [RE-ADDRESSED 2026-08-29T16:0xZ by the issuer 2.0.0_SA_COO: DS limb moves base -> 0.4.0_DS_ClientPlatform~C. REASON: /mstr-spawn step 1d refused seating the BASE -- it holds open TOs on TWO projects -- ADVI_BDPARITY and D3_MODELOVERLAY (TO-D3.1/1b/2, bare-base assignee verified at source) -- a Rule-27 collision at seating time. [CORRECTED same turn: my first note said THREE and named ADVI_COTSNP. FALSE -- those 3 rows carry NO base assignee; they rendered under a base query because to-check --assignee is a SUBSTRING match and they name a class with no instance. The refusal stands on the D3 rows alone.] ~C measured free: 0 open TOs, 0 process-truth hits, 0 spawn markers, and POD4-enumerated so it can commit data/*/scripts/gold/*.py. Remedy named by CTO ledger row 10. Nothing else on these faces changes.]</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T15:40Z</issued>
