@@ -241,3 +241,49 @@ a regression.
   <expected_criteria>POS-TO13-AC1,POS-TO13-AC2,POS-TO13-AC3,POS-TO13-AC4</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ETFS_POSITIONING.TO-13-DS_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
+
+
+## ⛔ COMPLETION LANGUAGE IS BOUNDED -- THE REPAIR CLOSES ~90% OF THE CLASS, NOT THE CLASS
+
+**Added by the issuer 2026-08-29 ~13:2xZ, BEFORE the face can be closed, because the natural
+completion sentence -- "the identifier-coercion defect is fixed" -- would be an over-claim and
+nobody would notice.**
+
+`0.4.0_DS_ClientPlatform~Y` built the gate with a SEDOL refusal ahead of the CUSIP repair and
+exhibited five values that prove it necessary (`BBB0135 BBB0168 BBB0317 BBB0481 BBB0630` -- valid
+SEDOLs whose zero-padding ALSO passes CUSIP mod-10, so a check-digit-only gate would silently
+rewrite a real SEDOL into a CUSIP). `3.0.0_SA_CVO~Z` REPRODUCED that on an independently written
+implementation of both checksums -- **not by running the gate, which would be repetition rather than
+corroboration under Rule 22** -- and agreed 8 of 8.
+
+⭐ **THE PRECEDENCE IS THE LOAD-BEARING PART, not the two checksums.** For ABT/ICT/MER the two
+checksums are OPPOSITE-VALUED, so either alone would have sufficed TODAY. On the BBB rows they do
+NOT disagree -- both say valid -- **so nothing but the ORDERING (SEDOL-valid REFUSES, ahead of
+CUSIP-valid REPAIRING) saves them.** "It works on today's data" was the wrong safety argument and
+was correctly not made.
+
+```
+  THE QUANTIFIED RESIDUAL (3.0.0_SA_CVO~Z):
+    a doubly-stripped CUSIP is 7 all-digit chars; SEDOL validity turns on the 7th char matching
+    a weighted sum of the first six, so a random such value is SEDOL-valid ~1 time in 10.
+    Vowel exclusion does not help -- an all-digit value has no vowels to exclude.
+  => ROUGHLY 1 IN 10 FUTURE DOUBLY-STRIPPED CUSIPS WILL BE SEDOL-VALID, BE REFUSED REPAIR, AND
+     SILENTLY RETAIN THE ABT FAILURE -- invisible by EXACTLY the mechanism that made ABT invisible.
+  ABT ITSELF IS NOT LUCKY: `2824100` is SEDOL-INVALID, so this instance is unambiguous.
+```
+
+✅ **THIS DOES NOT ARGUE AGAINST SHIPPING AND IS NOT A BLOCKER.** The refusal leaves such a value
+exactly as today's code leaves it: **the fix is strictly better everywhere and worse nowhere.**
+⛔ **IT ARGUES AGAINST ONE THING ONLY -- DESCRIBING THE REPAIR AS CLOSING THE CLASS.** When this face
+is closed, the completion sentence must say it repairs the UNAMBIGUOUS cases and name the residual.
+**A face that closes on "fixed" hands the next reader a solved problem that is ~90% solved.**
+
+⚠ **AND THE POLICY IS A POLICY, NOT A FACT:** *"a value that is a well-formed SEDOL is never a
+damaged CUSIP"* is a choice about which error to prefer, and it prefers the safe one. Say it that
+way rather than as a property of identifiers.
+
+⭐ **THE ONLY COMPLETE FIX REMAINS UPSTREAM COERCION -- WHICH IS WHAT SECTION 5 ALREADY SCOPES.** A
+downstream repair operating on a value whose information is already destroyed can only ever be a
+heuristic; RTX (`7.55E+105`, unreconstructible) is the destructive limit case and the ~10% is the
+same loss in a milder form. **Nothing further to do now -- named so the residual is not rediscovered
+later as a surprise.**
