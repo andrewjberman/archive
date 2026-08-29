@@ -126,11 +126,21 @@ this column.**
    `r_net - r_gross == (cf_gross - cf_net)/bmv` proves is exactly a fee-management flow day
    (11,705/11,705, max residual 4.4e-16; negative control: 214,930/214,930 non-fee days have
    `r_net == r_gross` exactly). It is a fee-EVENT count, not a fee-magnitude measure.
-4. **The gross leg's meaning is an OPEN OBSERVATION filed this session** (msg 83549/83550/83551):
-   our `r_gross` is arithmetically LOWER than `r_net` by the fee rate on every fee day, where
-   gross-of-fee would be higher. **If that resolves against the current sign, C2's "compare gross
-   first" test is inverted and the C2 cohort picks above stay valid while the C2 TEST does not.**
-   The candidates are unaffected; the classifier is not.
+4. ⛔ **RESOLVED 2026-08-29 ~21:0xZ, AND IT RESOLVED AGAINST THE CURRENT SIGN. THIS CLAUSE WAS A
+   CONDITIONAL WHEN WRITTEN AND IS NOW A FACT.** I filed the gross leg as an OPEN OBSERVATION
+   (msg 83549-51): our `r_gross` is arithmetically LOWER than `r_net` by the fee rate on every fee
+   day, where gross-of-fee must be higher. **`2.0.0_SA_COO` has since ruled outcome (a) CODE WRONG**
+   on `ADVI_49F.c02-GROSSLEG`, against a RATIFIED spec rather than a reading:
+   `SPEC_49F_GROUP_C_TWR_ENGINE_20260811.md:34` @`bfaa0a6e6e`, row `C_02`, verbatim
+   *"gross adds back FEE-MANAGEMENT (VERIFIED family: MGFEE/TPFEE/SMFEE)"*. My own bound at filing
+   ("I have NOT established intent") is discharged by that citation.
+   ⛔ **CONSEQUENCE FOR THIS FILE, STATED SO NOBODY BUILDS A C2 TEST ON IT: the C2 cohort picks
+   below stay valid, and the C2 TEST DOES NOT.** Prereg C2's classifier is *"compare gross-of-fee
+   FIRST"*, and the gross leg is inverted across the whole 534-date history. **The fix does not
+   retro-correct the data** -- COO's ruling explicitly authorizes NO re-emission and NO backfill, so
+   **a C2 parity cell computed against today's stored `r_gross` would be inverted before it was
+   classified.** C2 waits on a corrected leg reaching the history; `r_net` (the SERVED leg) is
+   untouched and correct, so every other cohort and every net-of-fee comparison is unaffected.
 5. **Nothing here has been compared to BD.** No BD value appears in this file because no BD pull has
    been made.
 
