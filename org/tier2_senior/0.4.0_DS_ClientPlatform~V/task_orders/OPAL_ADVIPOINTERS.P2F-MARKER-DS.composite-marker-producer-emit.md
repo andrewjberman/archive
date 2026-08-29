@@ -198,3 +198,41 @@ question and belongs to whoever owns the RLW feed, not to this emit.**
 
 **STATUS: M-4 is the unblocking event and it is now stated. M-1 evidenced, M-3 measured. The emit
 itself (M-2) is not yet built; this face carries the contract it will satisfy.**
+
+---
+
+## ⛔ M-4 CORRECTION — THE KEY I PUBLISHED CARRIED NO BUCKET (`0.7.0_AE_CloudOps` 83895)
+
+**My M-4 stated the key as `schwab/{master}/meta/complete/date={YYYY-MM-DD}.json  (master 08335338
+for 49F)` and named NO BUCKET.** ⛔ **A key without a bucket is not a location, and here the natural
+inference is the WRONG one** — *"for 49F"* reads as `opal-data-49financial`. **The consumer measured
+that bucket, found the marker absent, and nearly filed a false "emit not landed" against a producer
+that had not yet emitted anything.**
+
+⛔ **This is precisely the failure M-4 exists to prevent — *"a consumer built from PROSE invents keys
+the producer never agreed to"* — and it occurred in my own statement of the contract.** The consumer
+did not invent the key; **my prose under-specified it and the obvious completion was wrong.**
+
+**CORRECTED, read at source rather than asserted:**
+
+```
+  BUCKET   opal-data-assets            silver_registry.py:46  ASSETS_BUCKET
+                                       schwab_runtime.py:34   MONOLITH = env MONOLITH_BUCKET
+                                                              default "opal-data-assets"
+  FULL     s3://opal-data-assets/schwab/{master}/meta/complete/date={YYYY-MM-DD}.json
+  49F      s3://opal-data-assets/schwab/08335338/meta/complete/date=2026-08-29.json
+```
+
+**It is the SAME bucket the silver tables and the run manifests already live in** — the marker is a
+sibling of `schwab/{master}/meta/conversions/{run_id}.json`, not a new home. **The bucket is
+env-overridable (`MONOLITH_BUCKET`), so a consumer must not hardcode it either.**
+
+### The limb `1.0.0_SA_CTO` 83908 adds, carried onto this face so it is not lost in traffic
+
+⛔ **`opal-data-assets` is the THREE-FIRM bucket.** The marker LANDING there is the sanctioned shape —
+CLAUDE.md's remedy for a shared bucket is **key-prefix + IAM condition**, and `schwab/08335338/…` is
+exactly that. ⛔ **But if anything ever FIRES on this marker — an S3 notification, an EventBridge rule,
+a poller promoted to a trigger — it MUST be scoped to `schwab/08335338/`, never bucket-wide.** A
+bucket-wide subscription on a three-firm bucket is a cross-firm reference and a NEVER violation.
+**Nothing in this TO builds such a trigger (M-5), and this note exists so the next seat that wants one
+inherits the constraint rather than rediscovering it.**
