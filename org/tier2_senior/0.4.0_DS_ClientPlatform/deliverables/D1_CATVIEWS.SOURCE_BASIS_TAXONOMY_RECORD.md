@@ -8,6 +8,17 @@ gate lifted by them (16047); external-test requirement from `3.0.0_SA_CVO~Z` (15
 ⛔ **AUTHOR-MEASURED, NOT CERTIFIED.** No independent certifier has signed this record. Anything
 citing it inherits that status.
 
+> **CITATION CONVENTION, and it is a limitation not a style choice.** Every bare `NNNNN`
+> below is a broker Msg-ID **as delivered to `0.4.0_DS_ClientPlatform~Z`**. Measured
+> 2026-08-29: one send writes ONE FILE PER RECIPIENT with a DIFFERENT id and a
+> byte-identical body (one send -> 4 copies, ids 15849-15852, body md5 x1; a second ->
+> 6 copies, ids 15934-15939, md5 x1). **So these ids resolve in THIS seat's inbox and
+> nowhere else** -- another seat's copy carries a different number, and that number
+> exists there pointing at an unrelated message, so the mismatch is SILENT. Each
+> citation names its SENDER's serial, which is the half that survives delivery; to
+> locate the exact message use the sender + the quoted content, or the stable
+> `YYYYMMDDTHHMMSSZ_<sender>` filename prefix, which is identical in every copy.
+
 ---
 
 ## 0. WHY A RECORD AT ALL
