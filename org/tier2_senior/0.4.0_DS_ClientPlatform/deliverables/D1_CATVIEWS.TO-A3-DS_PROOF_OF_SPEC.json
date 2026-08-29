@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D1_CATVIEWS.TO-A3-DS.taxsma-account-population-and-discriminator",
+  "firm": "MDPF",
+  "phase": "MEASURE-READONLY",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/D1_CATVIEWS.TO-A3-DS.taxsma-account-population-and-discriminator.md",
+    "group": "OTHER",
+    "vintage_commit": "c024f32e9f"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~Z",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/D1_CATVIEWS_INC3/20260829T032000Z/run.json",
+    "cell": "INC3-A",
+    "vintage_commit": "b030d313ec",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/D1_CATVIEWS.TO-A3-DS.taxsma-account-population-and-discriminator.md",
+    "run_class_disclosure": "RUN_CLASS FOCUSED, AUTHOR-MEASURED NOT CERTIFIED. The Rule 14(a)-(e) rectangle and sealed-mutant certification were OMITTED by 1.0.0_SA_CTO~Z with the boundary declared in-file. THIS INSTANCE INHERITS AUTHOR-MEASURED STATUS and anything citing it must say so."
+  },
+  "bounds_honoured": [
+    "READ-ONLY. Zero S3 writes. Zero producer edits. Zero commits to any of the 22 packaged members.",
+    "NO vendor API call. The account-api tier-3 sweep that would resolve Bump/Macy was NOT invoked -- it needs Andrew's per-use egress word (availability is not authorization).",
+    "NO ad-hoc invoke of opal-assets-bd49f-reporting-pull (that call egresses to the BD reporting API).",
+    "muni left out of every criterion: Andrew-direct, muni does not exist yet and ALT == tax + muni is a WRONG assertion.",
+    "CLIENT_L1_HELD not touched. No monitor, alarm or shadow pipeline built."
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/inc3a_taxsma_population_measure.py",
+      "kind": "measurement_harness",
+      "commit_or_etag": "PENDING-COMMIT-THIS-TURN",
+      "deployed_state": "NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["INC3A-AC1", "INC3A-AC3", "INC3A-AC4"],
+      "deploy_evidence": "Re-runnable measurement, read-only. Reads the roster JSON and two silver parquets already fetched to scratchpad; makes no S3 write and no vendor call."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "INC3A-AC1",
+      "criterion_verbatim": "THE ACCOUNT SET, ENUMERATED, WITH ITS DENOMINATOR. Print the Tax SMA account set at Schwab 0824 and the denominator it was drawn from (accounts considered, not just accounts matched). AMENDED: MEASURE WHAT BUMP AND MACY HOLD -- the SIZE of the omission, not just its existence.",
+      "method": "artifact_read",
+      "invocation": "aws s3api get-object blackdiamond/49f/_ops/taxsma_roster.json (VersionId lNH3od2BprexiXQDjAxntCJjcNB_MK5t, LastModified 2026-08-27T22:48:18Z, ContentLength 3615); enumerated in inc3a_taxsma_population_measure.py",
+      "output_evidence": "FIVE enrolled accounts, all five printed with status and resolution tier: 0027265115 Chiles active/xref bd 22596361; 0035940058 Bump pending_resolution; 0091939812 Macy pending_resolution; 0084073310 Nixon active/tier-3 bd 22659431; 0076459710 Tracey active/tier-3 bd 23221671. ACTIVE (what discover_accounts pulls) = 3 of 5. PENDING (deliberately excluded) = 2 of 5. ACTUALLY PULLED TO BRONZE = 1 of 5 (Chiles, one pull date 2026-07-17). IN GOLD = 1 of 5. So 'ALT covers N of 5' is 1 today, 3 after a bronze pull, 5 only after tier-3 runs on Bump/Macy.",
+      "denominator": "5 roster entries = accounts CONSIDERED (not accounts matched). Corroborates Andrew-direct 'there are 5 accounts' via an INDEPENDENT instrument, so the population is `held` AND `measured`, not `held` alone.",
+      "status": "PARTIAL",
+      "partial_reason": "The ENUMERATION limb PASSES. The AMENDED limb -- the dollar SIZE of the omission -- is BLOCKED and no number is reported. fact_bd_allocation date=2026-08-18 (30577 rows, 6136 distinct account_number) contains NONE of the five on a whole-frame scan of all 96 columns; control: the identical scan finds 27265115 in dim_account_xref, so the scan discriminates. Bump and Macy additionally hold NO bd_internal_id, so they are not merely absent from BD-keyed feeds, they are UNKEYABLE into them. Sizing the omission requires a BD reporting pull = vendor egress = Andrew's per-use word. NOT taken.",
+      "negative_result_control": "First pass returned a FALSE zero for all five because this seat zero-padded to 10 digits while BD carries Chiles as 27265115 unpadded. Caught by the Chiles positive control failing, re-keyed on the unpadded form, and the zero PERSISTED. A grain-mismatched join key manufactures absence; the control is what separated the two."
+    },
+    {
+      "criterion_id": "INC3A-AC2",
+      "criterion_verbatim": "THE MEMBERSHIP RULE, DECLARED AND CITED AT file:line @ <commit-ish>. State the rule that DEFINES membership, quoting the code that implements it. NOT a name match. NOT an inference from an account appearing in the stale gold object. If the rule turns out to be implicit rather than declared anywhere, say that.",
+      "method": "source_read",
+      "invocation": "read at HEAD 51a1fe01f0; blob vintage 7d97a8bed2 for both cited lambda modules",
+      "output_evidence": "THE RULE IS DECLARED IN CODE, AND IT IS NOT THE DOCSTRING. taxsma_registry.py:144-149 @7d97a8bed2 -- `list_active()` returns `[a for a in roster['accounts'] if a.get('status') == 'active']`, docstring 'The accounts the daily ETL pulls -- status == active only ... A pending_resolution account is DELIBERATELY excluded'. lambda_function.py:252-273 @7d97a8bed2 -- `discover_accounts()`, 'the roster (blackdiamond/49f/_ops/taxsma_roster.json) is the SINGLE source of truth for which accounts the ETL pulls'; raises on 0 active rather than pulling an empty roster. Membership is therefore ENROLLMENT + status=='active', carried in a field a consumer can reject on, backed by an S3-versioned control artifact outside the layer grammar.",
+      "denominator": "3 candidate carriers examined (producer docstring, registry code, roster artifact); 1 is the operative rule, 2 are descriptions.",
+      "status": "PASS",
+      "plane_correction": "1.0.0_SA_CTO~Z (15849), 2.0.0_SA_COO~Z (15853) and the TO amendment s.3a all located this rule in build_fact_taxsma_report.py:47's 'Scope: Chiles-only for now' docstring. THAT IS A SCOPE NOTE DATED 2026-07-17 AND IT IS STALE -- the roster gained two more ACTIVE accounts on 2026-08-27. The SAME docstring's next sentence is the operative one: 'This module processes every account present in the bronze partition; today that is Chiles alone.' The silver producer applies NO membership filter whatsoever. A docstring is not a discriminator."
+    },
+    {
+      "criterion_id": "INC3A-AC3",
+      "criterion_verbatim": "A NEGATIVE CONTROL ON THE DISCRIMINATOR. Name an account the rule EXCLUDES and show it excluded. A rule that has never been observed refusing anything has not been shown to discriminate, and the single stale account (0027265115) is not evidence of a working filter.",
+      "method": "test_suite",
+      "invocation": "inc3a_taxsma_population_measure.py, three independent exclusion arms",
+      "output_evidence": "CONTROL 1 (not enrolled): 5374 of 5375 distinct schwab_account_ids in dim_account_xref date=2026-08-27 are absent from the roster and are therefore never pulled; NAMED EXEMPLAR 0010048935 -- present in the 49F xref, absent from the roster, excluded. CONTROL 2 (enrolled but status-gated): 0035940058 Bump and 0091939812 Macy are ENROLLED and still EXCLUDED -- list_active() returns 3 of 5, an OBSERVED refusal of two specific named accounts, not a hypothetical one. CONTROL 3 (key-shape gate): normalize_schwab raises ValueError on '27265115x' and on 'last4-5115', so a fuzzy or last-4 input cannot become a key. Additionally taxsma_registry.py:81-84 REFUSES status=active without a resolved bd_internal_id -- the rule refuses its own enrollment act, not only its read.",
+      "denominator": "5375 distinct xref accounts as the exclusion universe; 5 enrolled; 3 admitted; 2 enrolled-and-refused; 2 malformed inputs refused.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INC3A-AC4",
+      "criterion_verbatim": "RECONCILE AGAINST THE ONE KNOWN-GOOD NUMBER. The current gold holds exactly one account at 2026-07-17. State whether that account is IN the set this TO derives, and if not, why not. A derived set that silently drops the only account we have ever produced is a defect in the derivation, not a correction of the past.",
+      "method": "artifact_read",
+      "invocation": "gold census: aws s3api list-objects-v2 blackdiamond/49f/gold/dim_taxsma_report/ -> 1 object, account=0027265115/date=2026-07-17/data.parquet, 31900 bytes, LastModified 2026-07-18T01:50:28Z; membership test in the harness",
+      "output_evidence": "0027265115 IS in the derived set, with status=active, resolution_tier=xref, bd_internal_id=22596361. The derivation does not drop it. It is 1 of the 3 active and 1 of the 5 enrolled. RECONCILES.",
+      "denominator": "1 gold account= partition of 1 gold object; 5 roster entries.",
+      "status": "PASS",
+      "instrument_warning_adopted": "3.0.0_SA_CVO~Z 15875 is correct that the gold partition count CANNOT serve as the coverage denominator (bare groupby drops NULL keys). This criterion therefore reads the gold ONLY to establish WHICH account exists, never HOW MANY should. The denominator comes from the roster."
+    }
+  ],
+  "alignment": {
+    "criteria_declared": 4,
+    "criteria_scored": 4,
+    "forward": "4 of 4 criteria carry cell_ref INC3-A",
+    "backward": "1 of 1 cell reachable",
+    "status_tally": "3 PASS, 1 PARTIAL (INC3A-AC1 enumeration limb PASS, amended dollar-size limb BLOCKED on vendor egress)"
+  },
+  "findings_beyond_acceptance": [
+    {
+      "id": "INC3A-F1",
+      "class": "BLOCKING",
+      "standing": "ARMED",
+      "owner": "2.0.0_SA_COO~Z (re-cut) / 1.0.0_SA_CTO~Z (instrument ruling)",
+      "finding": "THE RE-CUT AC1 NAMES AN INSTRUMENT THAT UNDER-REPORTS. 15877 s.4 and 15863 s.3 direct that progress be measured as 'which of the 5 resolve through dim_account_xref'. MEASURED against date=2026-08-27 (6201 rows, 5375 distinct schwab ids): xref-resolved 1 of 5, roster-active 3 of 5. Nixon (0084073310) and Tracey (0076459710) are ACTIVE with resolved bd_internal_ids and are ABSENT FROM THE XREF BY EVERY ID FORM, because they resolved TIER-3 (account-api) and tier-3 results land in the ROSTER -- the xref is the tier-1 surface only. Their own roster notes state this verbatim. A seat following that instruction publishes '1 of 5' WITH A PRINTED DENOMINATOR and marks two fully-resolved active accounts unresolved.",
+      "remedy": "The progress meter is the roster's `status` field, not dim_account_xref. Same shape as 15875's own warning, one rung further out."
+    },
+    {
+      "id": "INC3A-F2",
+      "class": "BLOCKING",
+      "standing": "ARMED",
+      "owner": "DT/AE lane (infra) -- NOT DS",
+      "finding": "opal-assets-bd49f-reporting-pull HAS NO TRIGGER ON EITHER SCHEDULING PLANE. EventBridge Rules targeting it: RuleNames [] (control: 140 rules exist estate-wide, so the plane is reachable). EventBridge Scheduler: 0 of 18 schedules target it (control: the same API returns cron(5 7 * * ? *) ENABLED for opal-assets-bd49f-dim-convert-daily). Both planes censused separately with printed denominators because list-rules structurally cannot see a Scheduler schedule. The six-week gap is NOT a stalled schedule -- there has never been one. Trading-day frontier resolved per NEVER-rule: lib/trading_calendar.trading_days_between(2026-07-17, 2026-08-28) = 31 sessions inclusive, i.e. 30 trading days since the only pull.",
+      "remedy": "CLAUDE.md: production pipelines MUST be scheduled; ad-hoc artifacts are never production evidence. Lighting ALT tonight off an ad-hoc invoke ships an advisor-facing card whose input never refreshes. The schedule is an infra act."
+    },
+    {
+      "id": "INC3A-F3",
+      "class": "OBSERVATION",
+      "standing": "ARMED",
+      "owner": "whoever cuts INC3-B",
+      "finding": "BUMP AND MACY ARE NOT BLOCKED ON AN UNBUILT MECHANISM. 15849 called internal-accountId discovery 'a FOLLOW-ON BUILD, not a re-run'. The tier-3 account-api path is BUILT and was EXERCISED on 2026-08-27 by this seat under Andrew's explicit account-api egress word, resolving Nixon and Tracey by EXACT full-accountNumber match, 1 of 1, over 4686 relationships / 9830 accounts, with Chiles 0027265115 -> 22596361 as a positive control that PASSED in the same sweep (roster note, verbatim). Bump and Macy were never re-attempted; their notes are the un-updated 2026-07-21 seed text still saying the egress word is needed.",
+      "remedy": "5 of 5 is a RE-RUN OF A PROVEN SWEEP, not a build. It needs exactly one thing: Andrew's per-use account-api egress word. NOT taken by this seat."
+    },
+    {
+      "id": "INC3A-F4",
+      "class": "OBSERVATION",
+      "standing": "ARMED",
+      "owner": "whoever cuts INC3-B",
+      "finding": "3.0.0_SA_CVO~Z's bare-groupby dropna hazard (15875) is REAL and currently LATENT, and this measurement supplies the bound they asked for: NO account currently sits NULL -- silver holds 1 account, gold 1 partition, no NULL keys. On the NORMAL path it is structurally unreachable, because taxsma_registry.py:81-84 REFUSES status=active without a resolved bd_internal_id, so an unbridgeable account never reaches discover_accounts(). IT RE-ARMS AT lambda_function.py:315 -- `accounts = event.get('accounts') or discover_accounts()`. An ad-hoc invoke passing an explicit accounts list BYPASSES the roster gate entirely, which is exactly how INC3-B would most naturally be run.",
+      "remedy": "Not retired -- one convenience parameter away. If INC3-B invokes with an explicit accounts list, the dropna=False fix at :142/:252/:289 becomes load-bearing before the run, not after."
+    },
+    {
+      "id": "INC3A-F5",
+      "class": "OBSERVATION",
+      "standing": "DISARMED",
+      "owner": "0.4.0_DS_ClientPlatform~Z",
+      "finding": "'A run tonight reproduces Chiles-only' (15849, 15853) is PLANE-DEPENDENT and neither TO names the stage. A silver+gold re-run over the EXISTING bronze reproduces Chiles-only and the claim is correct there. A fresh BRONZE PULL reads the roster and yields THREE accounts. Bronze today: 1 bdId (22596361), one pull date 2026-07-17, all three feeds.",
+      "remedy": "DISARMED by naming the stage: INC3-B must state which stage it re-runs, because the two readings differ by 1 vs 3 accounts."
+    }
+  ],
+  "author": "0.4.0_DS_ClientPlatform~Z",
+  "authored_at": "2026-08-29T03:5xZ",
+  "measured_at_commit": "51a1fe01f0"
+}
