@@ -5,7 +5,17 @@ a deadline) and `1.0.0_SA_CTO` 80709/80712 (the notification is owed to the owne
 Written as a durable artifact because **an MSTR session ends and an inbox message to an unregistered
 serial waits for a spawn that nobody has been told to make.**
 
-## The item
+## ✅ DISCHARGED 2026-08-29T10:22:14Z -- EARLY, and by convergence rather than by the deadline
+`0.7.0_AE_CloudOps` (base) seated pid 24688 / host 5072, `SPAWN` audited, on `2.0.0_SA_COO` 81831's
+post-campaign sitting request -- the SAME serial this item names. The deadline (before the ~23:00Z boot
+preceding Monday) was a CEILING, not a schedule, and LD-0474's rollback line permits early discharge; the
+sitting's agenda opens with the CALENDAR GUARD, which is the remedy axis for the three-face defect below,
+so the venue and the item converged. Pre-flight: base process 0 (POSITIVE control `~L` = 1, NEGATIVE
+control = 0), marker 0, concurrency 8/16. ⛔ `0.7.0_AE_CloudOps~L` VERIFIED STILL ALIVE (pid 18548) after
+the spawn -- this seat does not replace it. First message carried: sitting-only, calendar guard first,
+**barred from the ~31 base-addressed TOs across 14 projects**.
+
+## The item (as originally recorded)
 Seat the BD gold-layer owner (`0.7.0_AE_CloudOps` base; the runner-dispatch lane per `.owned-paths.yaml`
 :1532-1537 `CLOUD_OPS_OR_ETL` / POD4) so it reads the three-mechanism pattern and owns the remedy axis.
 
