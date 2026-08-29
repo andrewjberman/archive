@@ -136,6 +136,77 @@ print("  labelled from the start vintage, and a schema-1.0 vintage has no label 
 
 print()
 print("=" * 78)
+print("2.0.0_SA_COO 80318 item 3 -- THE ARM READS THE PARTITION, NOT THE LEAF'S CLAIM")
+print("=" * 78)
+# The obvious field to read is window.label_basis.window_start_supplies_labels -- and
+# that is the EMITTER'S OWN ASSERTION about the vintage, written by the same code this
+# arm checks. Reading it would have the artifact under investigation describing itself,
+# and it would pass identically whether the vintage truly lacks the columns or the
+# emitter merely believes so. So the CAUSE is read from the pinned PARTITION's actual
+# column set, and the leaf's field is a CROSS-CHECK that must AGREE. A disagreement is
+# the FINDING, never a tolerance.
+for nm, fn in (("ruled", "perfrp_book_advisor.json"),
+               ("evidence", "perfrp_book_advisor_floor_aligned.json")):
+    _L = json.load(open(EM / fn, encoding="utf-8"))
+    _sd = _L["window"]["upstream_pins"][
+        "dimensions/dim_relationship@window_start"]["partition_date"]
+    _, _cap_partition = label_ids(spine(_sd))       # the PARTITION, read directly
+    _cap_claimed = _L["window"]["label_basis"]["window_start_supplies_labels"]
+    check("[%s] partition columns AGREE with the leaf's own label_basis claim" % nm,
+          _cap_partition == _cap_claimed,
+          "partition@%s says %s ; leaf claims %s" % (_sd, _cap_partition, _cap_claimed))
+
+print()
+print("=" * 78)
+print("3.0.0_SA_CVO 80323's 19 -- LABEL-CAPABLE-ELSEWHERE, AND THE GRAIN THEY LIVE AT")
+print("=" * 78)
+# CVO measured, artifact-only, that the 248's keys appear on the RULED leaf 19 times and
+# all 19 are LABELLED there -- so the class is NOT homogeneous on that instrument, and
+# two readings were open which the leaves alone cannot separate:
+#   (a) they were labelled from the RULED leaf's OWN start vintage (2026-03-24, schema
+#       2.0, label-capable) -- a source this leaf's schema-1.0 start does not have; or
+#   (b) the AS-OF vintage carries labels for them, in which case the END-preferred
+#       lookup missed a label its own emitter published -- a DEFECT, not a vintage
+#       property.
+# The discriminating read is on the SPINE, which is this seat's plane, and it is below.
+_ruled = json.load(open(EM / "perfrp_book_advisor.json", encoding="utf-8"))
+_r_rows = [r for e in _ruled["entries"] for r in e["client_table"]]
+_r_lab_rows = [r for r in _r_rows
+               if not str(r["relationship_id"]).startswith("UNMAPPED-RELATIONSHIP:")
+               and not str(r["relationship"]).startswith("UNLABELLED-RELATIONSHIP:")]
+_r_lab_keys = {r["relationship_id"] for r in _r_lab_rows}
+_unl_keys = {r["relationship_id"] for r in unl}
+_elsewhere = _unl_keys & _r_lab_keys
+_appearances = [r for r in _r_lab_rows if r["relationship_id"] in _elsewhere]
+print("  GRAIN, stated because the two seats' numbers differ ONLY by it:")
+print("     evidence leaf unlabelled-lost  ROWS %d  /  DISTINCT KEYS %d" % (len(unl),
+                                                                           len(_unl_keys)))
+print("     of those keys, labelled on the ruled leaf: DISTINCT %d  /  ROW "
+      "APPEARANCES %d" % (len(_elsewhere), len(_appearances)))
+print("     3.0.0_SA_CVO's 248 and 19 are ROW counts; these keys number %d and %d."
+      % (len(_unl_keys), len(_elsewhere)))
+_ruled_sd = _ruled["window"]["upstream_pins"][
+    "dimensions/dim_relationship@window_start"]["partition_date"]
+_ruled_start_ids, _ = label_ids(spine(_ruled_sd))
+check("THE DISCRIMINATOR: none of them is labelled in the AS-OF vintage",
+      not [k for k in _elsewhere if k in e_ids],
+      "%d of %d labelled at as-of" % (len([k for k in _elsewhere if k in e_ids]),
+                                      len(_elsewhere)))
+check("...and ALL of them are labelled in the RULED leaf's own start vintage %s"
+      % _ruled_sd,
+      bool(_elsewhere) and all(k in _ruled_start_ids for k in _elsewhere),
+      "%d of %d" % (len([k for k in _elsewhere if k in _ruled_start_ids]),
+                    len(_elsewhere)))
+print("  => READING (a) HOLDS. They are labelled on the ruled leaf because THAT leaf")
+print("     pins a label-capable start vintage; this leaf does not. Not an emitter")
+print("     defect, and the 'absent from as-of' clause holds for the whole class.")
+print("  ^ these rows ARE label-capable-elsewhere, and they are still")
+print("    LABEL_VINTAGE_NOT_CAPABLE *for this leaf's window*, because the member is a")
+print("    property of THE PINNED VINTAGES, not of the key. The census prints them")
+print("    separately so they never read as ordinary members of the class.")
+
+print()
+print("=" * 78)
 print("THE PRODUCER DEFECT CVO NAMED, CONFIRMED AND NOT ARGUED WITH")
 print("=" * 78)
 sample = unl[0] if unl else {}
