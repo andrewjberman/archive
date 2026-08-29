@@ -64,5 +64,6 @@ reorder. **Read it; do not rearrange it.**
   <criterion id="TM1-AC4" cell_refs="D1-h-v3"/>
   <criterion id="TM1-AC5" cell_refs="D1-h-r4"/>
   <expected_criteria>TM1-AC1,TM1-AC2,TM1-AC3,TM1-AC4,TM1-AC5</expected_criteria>
+  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/D1_CATVIEWS.TO-M1-DS_PROOF_OF_SPEC.json</instance_path>
   <alignment_denominators>cells declared: 3 (D1-h-r4, D1-h-v3, D1-inv-4); criteria: 5. FORWARD — 5 of 5 carry >=1 cell_ref. BACKWARD — 3 of 3 reachable (D1-h-v3 from AC1+AC4; D1-inv-4 from AC2; D1-h-r4 from AC3+AC5). Unmapped 0; untraceable 0. NO cell added — this is the value-mapping half of a surface the decomp already declares.</alignment_denominators>
 </proof_of_spec>
