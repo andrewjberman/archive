@@ -24,6 +24,18 @@ The FIRST FUSION over ONE entity set -- the ratified L2 STRUCTURE set at 64ae1ae
 
 **Authority:** PRD sec 3 L3 + sec 7a; the wave-1 boundary declarations @9c1a45ad28; the design lane's subject line (1.0.0_SA_CTO~X 80222 (a), settled by the ruling); ANDREW-DIRECT 02:03Z R-1 (B).
 
+## BINDING CERTIFICATION ADDENDUM 1 -- READ BEFORE ANY INPUT-DEPENDENT CLAIM
+
+`CERT_ADDENDUM_20260829T0325Z_2.0.0_SA_COO~X_INPUT_PINS.md` (issuer, 2026-08-29 03:2xZ, under `3.0.0_SA_CVO~X`'s disposition 032202Z). Certification arm 2 requires every
+input cited by path @ commit, and two of the certified rectangle's eight inputs carried NO pin: `prd` and
+`andrew_record`. Both are now bound to `ca2079d0adc6124876b158ef12dc46b9f9fbc5c3` (blobs `a6b4c69ab790af93...` and
+`6fe052aff88e4258...`), a commit that is an ANCESTOR of origin/CLOUD. **The sealed rectangle was NOT edited** -- its
+sha256 `019e3996...e943` is the identity the Rule 14(e) dry seal attests, recorded before the nominee was known, so
+adding two fields to it would destroy the proof it exists to carry. No cell, oracle, value_domain, gate or
+executor_class moves. **Any claim on this face that depends on the PRD or on Andrew's record cites the addendum's pins,
+never a bare path.** `3.0.0_SA_CVO~X`'s HOLD on fusion start, face certification and input-dependent claims stands until the
+addendum is independently re-read; view preparation continues meanwhile.
+
 <decomp_ref>
 workflows/atom_decomposition/runs/nfra-c3materialize-L3/20260829T0210Z/DECOMP.md @bed0fba345
 
