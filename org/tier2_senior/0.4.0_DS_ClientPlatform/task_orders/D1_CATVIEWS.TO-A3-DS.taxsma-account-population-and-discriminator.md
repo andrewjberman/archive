@@ -119,6 +119,49 @@ standing *"a value must carry its claim"* applied at the point of use, and the c
 whole mechanism. **A number whose incompleteness is known to the producer and invisible to the reader
 is the failure that law exists to prevent.**
 
+## 3c. ⛔⛔ SOVEREIGN RULING — THE POPULATION IS **FIVE**, AND ALL FIVE ARE ATTAINABLE
+
+> **Andrew, 2026-08-29 ~03:3xZ, VERBATIM (relayed same-turn by `1.0.0_SA_CTO~Z`, msg 15862):**
+> ***"There are 5 accounts and we definitely can get all of them."***
+
+```
+  POPULATION           = 5   ANDREW-DIRECT, SOVEREIGN. This IS the denominator.
+  producer docstring   = 3   (Chiles + Bump/Macy as follow-on)   -> INCOMPLETE
+  gold artifact today  = 1   (Chiles, 0027265115)
+  ATTAINABLE           = ALL FIVE.
+```
+>> ⛔ **THIS OVERTURNS §3a/§3b's LIKELY LANDING. The identity bridge is SOLVABLE, not a hard blocker.
+   "Chiles-only tonight plus a coverage label" is NO LONGER THE EXPECTED OUTCOME — SOLVE THE
+   BRIDGE.** <<
+⭐ **AND THE BOUND IS WHAT MADE THIS LAND CLEANLY. §3a said *"the docstring names THREE ... DO NOT
+CONVERT 'three' INTO A DENOMINATOR."* Andrew supplied FIVE. Had 3 been published as the denominator,
+the whole item would have been sized against a number the sovereign knows is wrong — and every
+downstream check would have AGREED with it, because they would all inherit the same wrong frame.**
+
+**`AC1` IS RE-CUT BY THIS RULING — the discriminator moved:**
+```
+  NOT   "measure the population"  -- it is RULED at 5.
+  NOW   ENUMERATE THE 5, and measure WHICH RESOLVE through
+        blackdiamond/49f/silver/dim_account_xref TODAY and which do not.
+        PRINT: RESOLVED / UNRESOLVED of 5.
+```
+⭐ **THE INSTRUMENT ALREADY EXISTS AND IT IS THE PRODUCER'S OWN RULE-17 BEHAVIOUR:** `:44` — an
+account that cannot bridge carries `schwab_account_id=NULL` + `bridge_method='unresolved'` and is
+**NEVER DROPPED**. **So unresolved accounts are VISIBLE, not silent — that is the progress meter
+toward 5 of 5, and it needs nothing built.**
+⭐ **AND THE GOLD NEEDS NO CHANGE TO HANDLE FIVE:** it already GROUPS BY `schwab_account_id`. **It
+needs five BRIDGED INPUTS, not new code.** The real work is the XREF.
+
+⛔ **THE ACCEPTANCE DENOMINATOR IS NOW 5, AND A `> 0` CRITERION IS BANNED:**
+```
+  REQUIRED   "ALT Strategies covers 5 of 5 Tax SMA accounts"
+  BANNED     "ALT aum > 0"  -- a ONE-account ALT and a FIVE-account ALT BOTH satisfy it,
+             and only one is the deliverable. A criterion both outcomes pass is not a criterion.
+```
+⛔ **THE §3b COVERAGE DECLARATION IS DEMOTED TO A FALLBACK, NOT THE PLAN.** It applies ONLY if the
+bridge genuinely resists — **and if it does, that returns to ANDREW as a fork. It does not get
+decided by whichever seat hits it first at 04:00Z.**
+
 ## 4. BOUNDS THAT BIND THIS TO
 
 ⛔ **READ-ONLY. NO WRITES, NO COMMITS TO ANY PACKAGED MEMBER, NO PRODUCER EDITS.** This TO exists to
