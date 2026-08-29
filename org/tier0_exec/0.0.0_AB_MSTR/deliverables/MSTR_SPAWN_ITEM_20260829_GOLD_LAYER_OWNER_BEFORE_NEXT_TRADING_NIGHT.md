@@ -29,8 +29,20 @@ different mechanisms:
 2. ~01:06Z -- a chain that DID run took `RUN_DATE` from the wall clock (`gold_dispatch.sh:226`, no skip at
    `:223`) and would have overwritten Friday 08-28's served gold with a Saturday as-of; stopped only by its
    own armed `shutdown -h +2`.
-3. ~04:00Z -- the campaign holds the host UP, so `StartInstances` is a NO-OP, no boot occurs, and the
-   boot-unit-driven nightly never starts.
+3. ~04:00Z -- **CORRECTED 04:1xZ, and the correction makes this face WORSE for the owner, not better**
+   (`1.0.0_SA_CTO` 80740 on `0.7.0_AE_CloudOps~L`'s self-refutation). The boot limb held as predicted
+   (LaunchTime unchanged 03:16:52Z, no 04:0xZ boot, the trigger a no-op) -- but a FULL CHAIN HAS BEEN
+   RUNNING SINCE 03:17:06Z, started by the boot the campaign's own halt-#5 restart caused. So BD is not
+   missing a chain; **it is missing the 04:00 SCHEDULE SLOT while a chain runs anyway** -- on the
+   campaign's clock rather than the schedule's, caused by a campaign restart rather than by the trigger,
+   with a wall-clock `RUN_DATE` of Saturday either way, and cut at ~05:1xZ by its own armed
+   `shutdown -h +2` (the grace doing the calendar's job by accident for the SECOND time tonight).
+   **The owner's instruments will show a chain that ran, at a time nobody scheduled, for a date that
+   should not be built** -- which is harder to notice than a plain missing run.
+   *(The superseded reading, kept so a reader can see what moved: "the campaign holds the host UP, so
+   StartInstances is a no-op, no boot occurs, and the nightly never starts." True of the TRIGGER, false
+   as a statement about the OUTCOME -- the error class ~L named against itself: reasoning about the
+   trigger and asserting about the outcome.)*
 
 **All three are ONE defect: a scheduled production run whose only trigger is "power the box on" -- no
 dispatch, no calendar guard, no verification that the run happened.** Remedy axis (CTO's, not a patch on
