@@ -64,3 +64,21 @@ Phase 2: commit before apply (Deployment Rule 2). Phase 3: plan 0-diff after app
 ## Reporting
 COO (cc CTO, DS~A, MSTR) at plan-drafted, at applied, and after each unattended cycle (one line each).
 Surprise channel: one banked line to COO. Session log with Compiler Tools section = deliverable.
+
+
+## EXECUTING LANES ON THIS TO'S CELLS -- issuer record, 2026-08-29T18:0xZ (2.0.0_SA_COO)
+
+⛔ **WRITTEN BECAUSE THE ALLOCATIONS BELOW WERE MADE BY MESSAGE AND APPEAR ON NO FACE ANYWHERE.**
+`to-check --all --assignee 0.4.0_DS_ClientPlatform~V` returned ZERO rows while that lane was doing this
+work -- **not misattributed, ABSENT.** A face-reading census cannot see a cell allocated to a lane other
+than the TO's owner, because there is nowhere for it to be recorded. Surfaced by `1.0.0_SA_CTO` 83447 as
+a property of its own instrument; this is the instance.
+
+| cell | executing lane | allocated | state |
+|---|---|---|---|
+| **P2F-4 wall-clock date read** on `advi-49f-gold-dispatch` | `0.4.0_DS_ClientPlatform~V` | COO 83394 | READ-ONLY, first. **CONFIRM-OR-REFUTE, not confirm.** Do NOT fix if found. |
+| **composite `_SILVER_COMPLETE.json` emit** (P2F-3b route (a)) | `0.4.0_DS_ClientPlatform~V` | COO 83406 | BUILD, sequenced AFTER the read. Marker carries a **DECLARED** table list, never one derived from a listing. |
+
+**TO OWNER REMAINS `0.7.0_AE_CloudOps`** -- these are cells executed by a DS lane, not a re-address of the TO.
+**Rule 27 holds: both cells are `OPAL_ADVIPOINTERS`, so `~V` remains a one-project instance.**
+⛔ **P2F-3b's TF rows stay with `0.7.0_AE_CloudOps` and are NOT started until the marker emit lands.**

@@ -73,9 +73,18 @@ Q2 ruled **QTD / YTD / 1Y / SI**. `lambda_function.py` `body_performance_period`
 `dateRanges` = Custom(q_start,q_end) + the two trailing full CALENDAR YEARS (`_calendar_year_ranges`) + SinceInception.
   - QTD  OBTAINABLE (parameterise q_start to the quarter start)
   - SI   OBTAINABLE, but see A3
-  - YTD  **ABSENT**
-  - 1Y   **ABSENT** -- a trailing full calendar year is NOT a trailing twelve months
+  - YTD  **AT RISK, LOW** -- type ATTESTED in BD's vocabulary, UNVERIFIED on this endpoint;
+         two fallbacks exist (a Jan-1 Custom range, or the Dashboard plane)
+  - 1Y   **NOT AT RISK** -- obtainable as a Custom with computed dates; NO new type needed.
+         (A trailing full calendar year is not a trailing twelve months, but that is a
+          statement about the CURRENT builder, not about obtainability.)
 Closing it is a code change to the pull vehicle (add a YearToDate range + a trailing-12m Custom).
+⛔ **CORRECTED 17:5xZ, WITHIN MINUTES OF WRITING IT, on `1.0.0_SA_CTO` 83444's net table: MY FIRST
+VERSION OF THIS AMENDMENT SAID YTD AND 1Y WERE BOTH "ABSENT" AND THAT WAS TOO STRONG.**
+**NO PERIOD IS ESTABLISHED AS UNOBTAINABLE, and nothing here justifies reducing Andrew's ruled set.**
+What is true: the CURRENT builder does not emit them. What is NOT true: that they cannot be had.
+The remaining unknown is one spec read or the `performancePeriod` HAR -- **no vendor call** -- and that
+capture was NOT found in the puller's own directory.
 **1.0.0_SA_CTO 83444 upgraded the YTD half from GUESS to ATTESTED:** `"YearToDate"` is a real BD dateRange type,
 captured in Andrew's own 2026-08-20 HAR. **BOUND, and it is the load-bearing half:** it is attested on
 `/advisor/api/v1/Dashboard/data` with a SINGULAR `dateRange` object, while this TO needs it on
