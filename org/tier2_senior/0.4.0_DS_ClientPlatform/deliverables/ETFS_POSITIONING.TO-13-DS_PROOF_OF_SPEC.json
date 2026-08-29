@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_POSITIONING.TO-13-DS",
+  "firm": "FABRIC",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_POSITIONING.TO-13-DS.identifier-coercion-strips-leading-zeros.md",
+    "group": "D",
+    "vintage_commit": "ae15ca3a17"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-positioning/20260821T194927Z/DECOMP.md",
+    "vintage_commit": "20c092c0da",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_POSITIONING.TO-13-DS.identifier-coercion-strips-leading-zeros.md"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~Y",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/etfs-pipeline/etfs-netassets-daily/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "353c4b5a00",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "COMMITTED LOCAL ONLY, NOT DEPLOYED, AND THE DEPLOY IS OUT OF THIS LANE. Push state MEASURED via ls-remote: local HEAD 353c4b5a00e73f079ed1f23e021bbf69b6c06fc3, origin/SITEZ e998abbfa62e7ce733d825daa0fccf250ef32055; `git branch -r --contains 353c4b5a00` returns EMPTY, so the commit is LOCAL (push is the integrator's per LD-0367). Lambda code deploy is Terraform-only (CLAUDE.md NEVER: never `aws lambda update-function-code`) and infra is a DT/AE lane (Rule 13), so 0.4.0_DS_ClientPlatform~Y cannot deploy this and did not attempt to. SEPARATELY MEASURED AND WORTH THE NEXT DEPLOYER'S ATTENTION: the deployed function is ALREADY BEHIND the repo independently of this change -- deployed CodeSha256 6RFz1jbzLMXXoWOmEkjIe3JoEZAf7EaHpQ4CsZXzuK8= LastModified 2026-08-25T00:09:54Z, deployed lambda_function.py 69897 bytes vs repo 72296 bytes before my edit. The pending delta is the Z-S31 RunDateFabricationGuard (a CTO~Z ruling), NOT mine; a deploy of this fix carries it. Divergence confirmed real, not a line-ending artifact: CR count 0 in BOTH files, so the CRLF-vs-LF false-divergence class is excluded.",
+      "artifact_covered_by": [
+        "POS-TO13-AC1",
+        "POS-TO13-AC2",
+        "POS-TO13-AC3",
+        "POS-TO13-AC4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/etfs-pipeline/etfs-netassets-daily/test_to13_cusip_repair.py",
+      "kind": "test",
+      "commit_or_etag": "353c4b5a00",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file, not deployed by design. Runs in-repo: `python test_to13_cusip_repair.py` rc=0. Exercises both refuse directions and exhibits the SEDOL/CUSIP collision set that makes the ordering load-bearing.",
+      "artifact_covered_by": [
+        "POS-TO13-AC1",
+        "POS-TO13-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "POS-TO13-AC1",
+      "criterion_verbatim": "THE STORED IDENTIFIER IS REPAIRED AT SOURCE. silver/holdings/{next}.parquet carries ABT with a 9-character cusip (002824100). Score by reading the row, not the writer's log. Print the length histogram with its denominator -- the whole-partition shape is the control, and the 7-char bucket must drop from 3 rows to 2 (ICT and MER, which are correct and must SURVIVE).",
+      "method": "test_suite",
+      "invocation": "python infra/aws/lambda/etfs-pipeline/etfs-netassets-daily/test_to13_cusip_repair.py ; plus an end-to-end replay of the repair over the raw vendor bytes at s3://opal-data-assets/trueshares/{DIVZ,IDVZ}/bronze/holdings/20260828/*.csv",
+      "output_evidence": "NOT SCORED ON THE ARTIFACT THE CRITERION NAMES. The criterion says 'score by reading the row, not the writer's log', and no post-fix silver/holdings partition exists because the fix is not deployed. What IS established, in exercise: replaying the committed repair over the real vendor bytes (denominator 73 rows, DIVZ+IDVZ 08-28) moves the cusip length histogram from {7:3, 8:4, 9:66} to {7:2, 9:71}; the 7-char bucket drops 3 -> 2 with the survivors enumerated as ICT 6455819 and MER B247XZ6 exactly as required; ABT 2824100 -> 002824100 with basis zero-pad-restored and id_kind unclassified -> cusip; 5 rows of 73 changed, 68 verbatim. Unit assertions: 'ABT 2824100 -> 002824100' PASS, 'ABT repaired classifies as cusip' PASS.",
+      "denominator": "73 bronze rows (DIVZ+IDVZ, 2026-08-28); 187 rows in the live silver partition read as the before-image",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "THE ARTIFACT DOES NOT EXIST YET AND CANNOT BE MADE FROM THIS SEAT. AC1 names silver/holdings/{next}.parquet and forbids scoring the writer's log; producing that partition requires the fix DEPLOYED, and Lambda deploy is Terraform-only and a DT/AE lane act (Rule 13). The in-exercise evidence above predicts the required shape but is exactly the 'writer's log' class the criterion excludes, so marking this PASS would be the placeholder-row failure the TO's proof_of_spec comment warns about ('rc=0 means the CONTRACT is well-formed, NOT that the work happened'). Re-score by reading the row after deploy."
+    },
+    {
+      "criterion_id": "POS-TO13-AC2",
+      "criterion_verbatim": "ICT AND MER ARE NOT COLLATERAL DAMAGE. Both still resolve and both still carry non-null returns after the change. This criterion exists because the obvious fix breaks them; a change that repairs ABT and silently drops a Philippine holding has traded one blank row for another.",
+      "method": "test_suite",
+      "invocation": "python infra/aws/lambda/etfs-pipeline/etfs-netassets-daily/test_to13_cusip_repair.py ; plus exercising etf_daily_pull.py bbg_security on delivered vs repaired identifiers",
+      "output_evidence": "THE 'STILL RESOLVE' HALF IS ESTABLISHED AT THE QUERY PLANE; THE 'NON-NULL RETURNS' HALF IS NOT AND NEEDS THE FIRE. Router exercised at source (not read): ICT /sedol/6455819 -> /sedol/6455819 IDENTICAL, MER /sedol/B247XZ6 -> /sedol/B247XZ6 IDENTICAL. Exactly ONE query in the estate changes -- ABT /sedol/2824100 -> /cusip/002824100 -- and the four 8-char rows AEP/AIG/ATO/BP emit byte-identical strings before and after. Storage plane: both survive as the enumerated 7-char residue. AND AC2 IS SATISFIED BY CONSTRUCTION, NOT BY LUCK: the repair refuses any value that is a well-formed SEDOL BEFORE testing the CUSIP padding, and the test exhibits five valid SEDOLs (BBB0135 BBB0168 BBB0317 BBB0481 BBB0630) whose zero-padding ALSO satisfies CUSIP mod-10 -- the mutant control confirms all five are corrupted into fake CUSIPs when that limb is removed.",
+      "denominator": "3 rows in the 7-char bucket (the whole bucket, enumerated); 8 identifiers exercised through the router; 5 exhibited collision values",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "PARTIALLY ESTABLISHED, DELIBERATELY NOT CALLED PASS. The criterion has two limbs and only one is scorable now. 'Both still resolve' is measured at the query plane by exercising the real router. 'Both still carry non-null returns after the change' names a post-change served artifact that does not exist until the fix is deployed and a run fires. Reporting PASS on the strength of the resolvable limb would let the unmeasured limb inherit the verdict. Re-score after deploy."
+    },
+    {
+      "criterion_id": "POS-TO13-AC3",
+      "criterion_verbatim": "THE SERVED ARTIFACT CARRIES ABT'S RETURNS. In a gold/holding/date={d}/holding.parquet produced by a SCHEDULED fire after the fix lands, ABT carries 8 of 8 non-null return windows. Report the 0-of-8 population with its denominator, which should then be the four CASH rows plus 2602335D -- five, not six.",
+      "method": "live_read",
+      "invocation": "aws s3api get-object --bucket opal-data-etfs --key gold/holding/date=2026-08-27/holding.parquet (the BEFORE-image only)",
+      "output_evidence": "BEFORE-IMAGE ONLY, INDEPENDENTLY RE-MEASURED AND IT REPRODUCES THE FACE EXACTLY: 189 rows, non-null return-window count is bimodal with nothing partial -- 183 rows at 8 of 8 and 6 rows at 0 of 8. The 0-of-8 population enumerated: ABT (DIVZ, w=2.36, is_cash=False, price=114.1), CASH x4 (DIVZ/IDVZ/PFDE/PFOE), and 2602335D TPG Inc (PFDE, w=0.00, price=0.0). No AFTER-image exists.",
+      "denominator": "189 rows in gold/holding/date=2026-08-27/holding.parquet",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "REQUIRES A SCHEDULED FIRE AFTER A DEPLOY THAT HAS NOT HAPPENED. Two independent blockers: the fix is committed but not deployed (Terraform-only, DT/AE lane), and AC4 additionally requires the exercising run to be SCHEDULED rather than ad-hoc. Only the before-image is readable today. NOTE FOR THE RE-SCORER: 2602335D must remain null and is explicitly out of scope per the criterion -- the expected 0-of-8 population is FIVE, not six, and a run that also 'fixes' TPG has gone outside the TO."
+    },
+    {
+      "criterion_id": "POS-TO13-AC4",
+      "criterion_verbatim": "THE FIX IS EXERCISED BY A SCHEDULED RUN, NOT AN AD-HOC ONE. An ad-hoc QA run is legitimate for testing (CLAUDE.md permits it) but is not the acceptance. Name the scheduled fire by DATE.",
+      "method": "live_read",
+      "invocation": "not run -- no scheduled fire can have exercised a fix that is not deployed",
+      "output_evidence": "NO SCHEDULED FIRE HAS EXERCISED THIS FIX. There is no date to name. The fix was committed 2026-08-29 at 353c4b5a00 and remains undeployed as of this filing.",
+      "denominator": "0 scheduled fires post-deploy (deploy count: 0)",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "STRUCTURALLY BLOCKED UNTIL DEPLOY, AND THEN TIME-GATED. The criterion cannot be satisfied by anything this seat can do: it requires a scheduled run, deploy is out of lane, and the TO further warns 'DO NOT SCORE AC1-AC4 AGAINST A WEEKEND FIRE WITHOUT RESOLVING THE TRADING CALENDAR FIRST'. Today is Saturday 2026-08-29; etf_positioning_gold.py:497 and :1672 anchor on tcal.expected_last_trading_day(now), a DIFFERENT mechanism from the MDPF content-derived derive_as_of(), and an MDPF frontier result must not be carried across that boundary. AFTER == BEFORE on a non-advancing day is the EXPECTED outcome, not a regression."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Remove the _sedol_check_digit_ok refusal limb from _repair_numeric_coerced_cusip, leaving a CUSIP-check-digit-ONLY gate -- the 'obvious fix' AC2 exists to forbid. Applied to a scratch copy of the module, never to the repo file.",
+      "expected": "The five exhibited collision values (valid SEDOLs whose zero-padding also satisfies CUSIP mod-10) stop being refused and are rewritten into 9-char pseudo-CUSIPs; the suite fails.",
+      "observed": "FIRED. All five flipped to zero-pad-restored -- BBB0135 -> 00BBB0135, BBB0168 -> 00BBB0168, BBB0317 -> 00BBB0317, BBB0481 -> 00BBB0481, BBB0630 -> 00BBB0630 -- and the suite exited rc=1 with FAILED: 5 (clean run rc=0). THE DISCRIMINATING DETAIL, recorded because it is the whole reason the collision rows are in the test: ICT AND MER STILL PASSED UNDER THE MUTANT. For those two the checksums are opposite-valued, so the CUSIP limb alone already refuses them -- a test that checked only the live 7-char bucket would have scored this mutant GREEN. The ordering is invisible on today's data and only the collision set exposes it.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs of test_to13_cusip_repair.py, stdout+stderr captured to separate files and compared byte-for-byte with diff and sha256sum.",
+      "observed": "STABLE. Both runs rc=0, 4049 bytes each, diff empty, sha256 identical on both captures (fc92366a943e8674ec8d6e9fcd9e7410516ac823a7a321595d477fde5c92bc8c). The collision search is an ordered deterministic scan, so the exhibited BBB set is reproducible rather than incidental.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "integrations/bloomberg/pipeline/etf_daily_pull.py -- the len==8 single-zero pad in bbg_security:96-102",
+      "reason": "Section 5 of the TO says LEAVE IT and it is untouched. It is correct for all four of its live cases and becomes a no-op rather than dead-wrong once the repair lands upstream of it: a value repaired at silver reaches the router as 9-char and takes the len==9 limb to a byte-identical query string, verified by exercising the router on both forms. Removing it is a separate decision with its own evidence."
+    },
+    {
+      "item": "RTX / the scientific-notation identifier class (cusip 7.55E+105)",
+      "reason": "Out of scope and deliberately untouched. Same vendor coercion class, different mechanism: the sheet read the E in 75513E101 as an exponent and rounded the mantissa, so the identifier is destroyed rather than shortened and no padding reconstructs it. Filed to the surprise channel (msg 16748), adjudicated OBSERVATION/INERT by 3.0.0_SA_CVO~Z (16754). The check-digit gate leaves it verbatim by construction."
+    },
+    {
+      "item": "2602335D (TPG Inc, PFDE, w=0.00, price 0.0)",
+      "reason": "AC3 explicitly fences it: a zero-weight CVR whose Bloomberg ticker is numeric, which per the docstring's RBGLD note has no PX_LAST so no history can accrue. It must stay null and is stated as such."
+    },
+    {
+      "item": "/sedol/2824100 against Bloomberg",
+      "reason": "A VENDOR CALL requiring Andrew's explicit per-use word, which nobody has asked for and which this TO does not request. It remains UNEXERCISED and no language about it has been upgraded; 'the sedol query returns nothing for ABT' stays STRONGLY EVIDENCED AND UNEXERCISED, not a root cause under Rule 22."
+    },
+    {
+      "item": "Whether RTX's stored value differs on other dates, and whether PFDE/PFOE carry the same coercion class",
+      "reason": "Bounds this seat stated in its own surprise filing and which 3.0.0_SA_CVO~Z explicitly declined to round off. Unowned, unarmed, and nobody is chasing them."
+    }
+  ],
+  "surprises": [
+    "CLASS: OBSERVATION  STANDING: INERT  SUMMARY: A SECOND vendor identifier-coercion instance, RTX, by a different mechanism and irrecoverable at source: cusip arrives as 7.55E+105 because the TrueShares sheet read the E in Raytheon's 75513E101 as a scientific-notation exponent and rounded the mantissa to three significant digits. 3.3% of DIVZ -- a LARGER position than ABT's 2.36%.  FILED: msg 16748 to 3.0.0_SA_CVO~Z, cc 2.0.0_SA_COO~Z (16749)  ADJUDICATION: msg 16754 by 3.0.0_SA_CVO~Z: OBSERVATION/INERT CONFIRMED. The one limb this seat left unmeasured -- by what path RTX resolves, and whether it is a latent ABT riding a frozen backfill -- was closed by measurement: RTX is fetched LIVE on all four dates ABT is missing (history_topup rows on 08-25/26/27/28 where ABT has none), despite its backfill being frozen at 08-24 exactly like ABT's. Not a latent ABT.  RESOLUTION OF THE OPEN LIMB: The path itself is now read at source by this seat: bbg_security gates the whole identifier branch on c.isalnum(), and '7.55E+105'.isalnum() is False (dot and plus), so RTX never reaches an identifier limb and falls through to the ticker query 'RTX US Equity'.  WHY IT BEARS ON THIS TO: The INVERSION: RTX's GROSS corruption is unusable on its face, breaks isalnum, and gets routed around, so it is FINE; ABT's PLAUSIBLE corruption passed isalnum and the length test, was queried as a legitimate SEDOL, and failed SILENTLY. The more-damaged identifier was the safer one. Consequence for the design, and the reason the fix is not gated on plausibility: a repair gated on 'does this look like a valid identifier' protects the RTX class and MISSES the ABT class by construction.",
+    "CLASS: OBSERVATION  STANDING: INERT  SUMMARY: The deployed etfs-netassets-daily is behind the repo independently of this change. Deployed lambda_function.py is 69897 bytes (CodeSha256 6RFz1jbzLMXXoWOmEkjIe3JoEZAf7EaHpQ4CsZXzuK8=, LastModified 2026-08-25T00:09:54Z); the repo file was 72296 bytes BEFORE my edit. The pending delta is the Z-S31 RunDateFabricationGuard from a CTO~Z ruling, authored by another seat.  FILED: recorded here and in the deploy handoff rather than as a separate channel item -- it is not a defect, it is an undeployed commit, and it is named so the next deployer knows this fix does not ship alone  CONTROL: Divergence confirmed REAL, not the CRLF-vs-LF false-divergence class: CR count is 0 in BOTH the deployed and repo files, so a normalized compare gives the same answer as the raw one."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-29/ (this seat's first session; log written at session close)",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"where is silver/holdings parquet written from bloomberg etf constituents\"",
+      "result": "Returned a near-tie (comp-estate / comp-pipescript, score 1.50 each) and explicitly declined to rank them. Useful as a router but it did NOT locate the writer; the tie sent me to comp-find, which did."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'constituents_issuer_fill' --all ; comp-find 'silver/holdings' --all ; comp-find 'cusip' --files",
+      "result": "DECISIVE and it corrected a wrong hypothesis. 13 hits across 27949 files located etf_constituents_pull.py:231, which I had assumed was the silver PRODUCER; reading it showed leg_2_issuer_fill READS silver/holdings, i.e. it is downstream. That redirected the search to the actual writer, the etfs-netassets-daily Lambda. --all used throughout; no census was headed."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <lambda_function.py> <test_to13_cusip_repair.py>",
+      "result": "rc=0, 'pre-commit gate clean for 2 of 2 file(s)'. On the first run it flagged one non-ASCII line (U+26D4) that I had introduced myself; it is WARN-only and does not block, and I fixed it anyway because CLAUDE.md's rule is the imperative and the gate is only its partial enforcement."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.4.0_DS_ClientPlatform~Y <...>\" -F <msgfile> -- <2 paths>",
+      "result": "rc=0, commit 353c4b5a00. Risk-reflex REFLEX CLEAN, described as measured: 2 files checked against 1417 danger nodes, danger map 25.1h old. msg-verify MATCH len=7493. Message file written by the Write tool, not a shell heredoc, and at a session-unique scratchpad path rather than a generic /tmp name."
+    }
+  ]
+}
