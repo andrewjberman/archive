@@ -269,17 +269,55 @@ for nm, L in (("ruled", RULED), ("evidence", EVID)):
 # branch carrying it, or a row on the ABSENT branch carrying one of the three ruled
 # values, is a FAIL -- not a curiosity. This is the predicate that keeps the enum MECE
 # (postulate (i)); without it the fourth member is an unfalsifiable addition.
+# 1.0.0_SA_CTO 80220 -- THE PATH, SPELLED IN FULL, AND AN EXISTENCE ASSERTION BEFORE
+# THE COMPARISON. 80187 wrote the predicate as the FIELD NAME
+# `membership_computable`; the field is NESTED at
+# entries[].relationship_partition.membership_computable. 2.0.0_SA_COO read it at ENTRY
+# level, got None on 146 of 146, and a None-vs-False comparison scores CLEAN on every
+# row -- a wrong-level read wearing the shape of a pass, on BOTH branches. So the arm
+# asserts the path RESOLVES on every entry (denominator printed) BEFORE it compares: a
+# missing path is a FAIL of the arm, never a pass of the rule.
+PATH = "entries[].relationship_partition.membership_computable"
+
+
+def path_resolves(leaf):
+    return all(isinstance(e.get("relationship_partition", {})
+                          .get("membership_computable"), bool)
+               for e in leaf["entries"])
+
+
 def branch_vocabulary(leaf):
-    computable = leaf["window"]["membership_basis"]["computable"]
-    allowed = set(COMPUTABLE) if computable else {ABSENT_STATUS}
-    return not [1 for r in rows_of(leaf) if r["status"] not in allowed]
+    """Per-ENTRY, off the nested path -- never off the window-level summary."""
+    if not path_resolves(leaf):
+        return False                    # a missing path FAILS; it never passes.
+    for e in leaf["entries"]:
+        computable = e["relationship_partition"]["membership_computable"]
+        allowed = set(COMPUTABLE) if computable else {ABSENT_STATUS}
+        if [1 for r in e["client_table"] if r["status"] not in allowed]:
+            return False
+    return True
 
 
 for nm, L in (("ruled/absent", RULED), ("evidence/computable", EVID)):
+    check("[%s] the nested PATH resolves on every entry (existence FIRST)" % nm,
+          path_resolves(L), "%s -- %d of %d entries"
+          % (PATH, sum(1 for e in L["entries"]
+                       if isinstance(e.get("relationship_partition", {})
+                                     .get("membership_computable"), bool)),
+             len(L["entries"])))
     check("[%s] status vocabulary matches the BRANCH, never crosses" % nm,
-          branch_vocabulary(L),
-          "computable=%s, %d rows" % (L["window"]["membership_basis"]["computable"],
-                                      len(rows_of(L))))
+          branch_vocabulary(L), "%d rows" % len(rows_of(L)))
+
+# THE WRONG-LEVEL READ, SHIPPED AS ITS OWN NEGATIVE CONTROL (2.0.0_SA_COO 80210 item 1).
+# This is the exact error that was made: read the field at ENTRY level, where it does
+# not exist. It must FAIL the existence assertion -- if it passes, the arm cannot
+# distinguish a resolved path from an absent one and is not an arm.
+_wrong = copy.deepcopy(RULED)
+for _e in _wrong["entries"]:
+    _e["membership_computable"] = _e["relationship_partition"].pop(
+        "membership_computable")            # move it UP a level: the wrong-level read
+control("the field read one level too high (None x%d)" % len(_wrong["entries"]),
+        path_resolves, _wrong)
 
 # NEGATIVE CONTROL, planted BOTH ways -- a control that can only fire in one direction
 # would leave the other half of the predicate unexercised.
