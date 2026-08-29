@@ -1,0 +1,86 @@
+
+==============================================================================
+LEG 1 -- FEE-MANAGEMENT signed_amount SIGN, with a mixed-sign CONTROL
+==============================================================================
+The whole `cf_gross > cf_net` result hangs on this sign. If FEE-MANAGEMENT
+signed_amount were POSITIVE, `cf_net - fee_cf` would be the correct build and
+outcome (c) would be live.
+  date=2024-07-08  rows= 10,869  FEE-MGMT= 5,871  NEG  5,871 / POS   0 / ZERO   0   signed sum   -2,987,666.75
+  date=2024-09-10  rows=    739  FEE-MGMT=     0  NEG      0 / POS   0 / ZERO   0   signed sum            0.00
+  date=2024-11-12  rows=    709  FEE-MGMT=     0  NEG      0 / POS   0 / ZERO   0   signed sum            0.00
+  date=2025-01-17  rows=  6,058  FEE-MGMT=     0  NEG      0 / POS   0 / ZERO   0   signed sum            0.00
+  date=2025-03-25  rows=  8,872  FEE-MGMT=     0  NEG      0 / POS   0 / ZERO   0   signed sum            0.00
+  date=2025-05-29  rows=    892  FEE-MGMT=     0  NEG      0 / POS   0 / ZERO   0   signed sum            0.00
+  date=2025-08-04  rows=  4,787  FEE-MGMT=     1  NEG      1 / POS   0 / ZERO   0   signed sum         -810.35
+  date=2025-10-07  rows= 10,452  FEE-MGMT=     0  NEG      0 / POS   0 / ZERO   0   signed sum            0.00
+  date=2025-12-10  rows= 15,260  FEE-MGMT=   287  NEG    287 / POS   0 / ZERO   0   signed sum      -98,123.28
+  date=2026-02-17  rows=  3,462  FEE-MGMT=    14  NEG     14 / POS   0 / ZERO   0   signed sum       -1,153.35
+  date=2026-04-22  rows=  1,721  FEE-MGMT=     0  NEG      0 / POS   0 / ZERO   0   signed sum            0.00
+  date=2026-06-26  rows=  1,855  FEE-MGMT=     0  NEG      0 / POS   0 / ZERO   0   signed sum            0.00
+  date=2026-08-26  rows=    813  FEE-MGMT=     0  NEG      0 / POS   0 / ZERO   0   signed sum            0.00
+  date=2026-08-27  rows=    559  FEE-MGMT=     0  NEG      0 / POS   0 / ZERO   0   signed sum            0.00
+  date=2026-08-28  rows=  4,468  FEE-MGMT=    43  NEG     43 / POS   0 / ZERO   0   signed sum       -9,109.05
+
+  TOTAL ledger rows read              : 71,516 across 15 partitions
+  FEE-MANAGEMENT rows                 : 6,216 (present on 5 of 15 partitions)
+    signed_amount NEGATIVE            : 6,216 of 6,216
+    signed_amount POSITIVE            : 0 of 6,216
+    signed_amount ZERO                : 0 of 6,216
+  CONTROL -- non-FEE-MANAGEMENT rows  : 65,300 (NEG 13,660 / POS 29,460 / ZERO 22,180)
+    -> the same column, same reader, reads BOTH signs on the control population,
+       so an all-negative fee read is a property of the FEE CLASS, not the instrument.
+
+==============================================================================
+LEG 2 -- STORED twr_daily: SIGNED gap r_gross - r_net, fee-day vs non-fee-day
+==============================================================================
+  date=2024-07-08  rows= 4,074  OK=     0  NOT-EVALUABLE-BY-SCHEMA (absent: bmv,emv,cf_net,cf_gross)  status={'REFUSED-NO-BMV': 4074}
+  date=2024-09-10  rows= 4,297  OK= 3,710  fee-days=    0  non-fee= 3,710 | non-fee EXACT-EQ 3,710
+  date=2024-11-12  rows= 4,589  OK= 3,914  fee-days=    0  non-fee= 3,914 | non-fee EXACT-EQ 3,914
+  date=2025-01-17  rows= 4,839  OK= 4,112  fee-days=    0  non-fee= 4,112 | non-fee EXACT-EQ 4,112
+  date=2025-03-25  rows= 5,122  OK= 4,351  fee-days=    0  non-fee= 4,351 | non-fee EXACT-EQ 4,351
+  date=2025-05-29  rows= 5,297  OK= 4,581  fee-days=    0  non-fee= 4,581 | non-fee EXACT-EQ 4,581
+  date=2025-08-04  rows= 5,582  OK= 4,807  fee-days=    0  non-fee= 4,807 | non-fee EXACT-EQ 4,807
+  date=2025-10-07  rows= 5,886  OK= 5,038  fee-days=    0  non-fee= 5,038 | non-fee EXACT-EQ 5,038
+  date=2025-12-10  rows= 6,181  OK= 5,335  fee-days=  148  non-fee= 5,187 | SIGNED gap min -0.010649 med -0.001279 max -0.000001 | NEG 148/POS 0/ZERO 0 | resid 2.3e-16 | non-fee EXACT-EQ 5,187
+  date=2026-02-17  rows= 6,532  OK= 5,651  fee-days=   14  non-fee= 5,637 | SIGNED gap min -0.001002 med -0.000834 max -0.000695 | NEG 14/POS 0/ZERO 0 | resid 1.5e-16 | non-fee EXACT-EQ 5,637
+  date=2026-04-22  rows= 6,848  OK= 5,954  fee-days=    0  non-fee= 5,954 | non-fee EXACT-EQ 5,954
+  date=2026-06-26  rows= 7,062  OK= 6,157  fee-days=    0  non-fee= 6,157 | non-fee EXACT-EQ 6,157
+  date=2026-08-26  rows= 7,348  OK= 6,427  fee-days=    0  non-fee= 6,427 | non-fee EXACT-EQ 6,427
+  date=2026-08-27  rows= 7,361  OK= 6,430  fee-days=    0  non-fee= 6,430 | non-fee EXACT-EQ 6,430
+  date=2026-08-28  rows= 7,370  OK= 6,436  fee-days=   43  non-fee= 6,393 | SIGNED gap min -0.006046 med -0.001015 max -0.000545 | NEG 43/POS 0/ZERO 0 | resid 1.6e-16 | non-fee EXACT-EQ 6,393
+
+==============================================================================
+TOTALS -- 14 of 15 partitions EVALUABLE
+==============================================================================
+  NOT-EVALUABLE-BY-SCHEMA (1): 2024-07-08 (OK=0)
+    -> each carries ZERO OK rows, so c02 never wrote the cf/bmv/emv columns there.
+       A partition that could not be asked is NOT a partition that answered NO.
+  OK account-days evaluated                    : 72,903
+  fee-days (cf_gross != cf_net)                : 205
+    addback (cf_gross - cf_net) NEGATIVE       : 0 of 205
+  SIGNED gap NEGATIVE  (r_gross < r_net)       : 205 of 205
+  SIGNED gap POSITIVE  (r_gross > r_net)       : 0 of 205
+  SIGNED gap ZERO                              : 0 of 205
+  NEGATIVE CONTROL non-fee-day exact equality  : 72,698 of 72,698
+  identity gap == -(cf_gross-cf_net)/bmv, max resid : 2.296e-16
+
+==============================================================================
+THE MOST NEGATIVE STORED ACCOUNT-DAY -- hand-checkable in six numbers
+==============================================================================
+    date         = 2025-12-10
+    account_id   = 0062640151
+    bmv          = 4348.72
+    emv          = 4302.41
+    cf_net       = 0.0
+    cf_gross     = 46.31
+    r_net        = -0.01064911054287243
+    r_gross      = -0.021298221085744973
+    gap          = -0.010649110542872542
+
+    addback (cf_gross - cf_net) = +46.31     fee_cf = -46.31
+    r_net             (emv - cf_net)/bmv - 1            = -0.01064911
+    r_gross AS STORED (emv - cf_gross)/bmv - 1          = -0.02129822
+    r_gross SIBLING   (emv - cf_net + addback)/bmv - 1  = +0.00000000
+
+    STORED  gap = -0.01064911   (= -addback/bmv -- the fee removed a SECOND time)
+    SIBLING gap = +0.01064911   (= +addback/bmv -- the sec8 add-back identity)
