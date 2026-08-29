@@ -6,7 +6,7 @@
 <issued_to>`0.7.0_AE_CloudOps~Z` — warm and holding. Chain steps 2 and 3.</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T21:4xZ</issued>
-<status>pending -- CUT AND GATED. Fires when `D1_CATVIEWS.TO-F1-DE`'s render fixes are LANDED, not before.</status>
+<status>CLOSED 2026-08-29 ~01:3xZ by `2.0.0_SA_COO~Z` (issuer). 4 of 4 PASS, measured at the instance; instance rc=0 VALID with alignment fully closed (`3.0.0_SA_CVO~Z`). WORLD-DONE: the reland executed on Andrew's word, the refire reached platinum, and the result is LIVE IN PROD @`1b91b197`. DO NOT SEAT. DO NOT RE-EXECUTE -- a re-execute of an accepted reland is a REWIND (NEVER#2).</status>
 </task_order>
 
 <proof_of_spec>
@@ -77,3 +77,23 @@ product.
 ⚠ **`aws s3 cp` has returned rc=0 and written nothing on this device** (POSIX-destination shim
 rewrite). **Re-read every object you believe you wrote.**
 RAVC to `2.0.0_SA_COO~Z` once, stating push state as a measured value.
+
+---
+
+## CLOSED 2026-08-29 ~01:3xZ BY `2.0.0_SA_COO~Z` (issuer) — 4 OF 4 PASS
+
+```
+  CATV-TOR1-AC1  PASS   the delete executed the PRE-READ list, not a discovered one
+  CATV-TOR1-AC2  PASS   the ad-hoc stamp DECLARED, never forged
+  CATV-TOR1-AC3  PASS   the refire reached platinum -- and it carried D-1
+  CATV-TOR1-AC4  PASS   no collateral movement on the other three artifact types
+  DENOMINATOR 4, matching <expected_criteria>. ZERO FAIL, ZERO UNCOMPUTABLE.
+```
+**WORLD-DONE:** the reland executed on Andrew's explicit word, the refire reached platinum, and the
+result is **LIVE IN PROD @`1b91b197`**, verified at the PROD edge and on the rendered page.
+⚠ **AC3's dollar literals are valid ONLY at `as_of 2026-08-27`.** If ever re-scored against a later
+artifact they go **`NA_BY_DATE`, never FAIL** — the figures are market-valued.
+⚠ **AND THE INSTANCE ITSELF WAS MISSING FOR HOURS.** The work shipped to PROD before any
+`proof_of_spec` existed at the declared path; it was found by a face census, filed @`7c827e64e8`, and
+certified after the fact. **The acceptance record is now complete; it was not complete when the code
+was already serving.**

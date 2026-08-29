@@ -95,3 +95,22 @@ the **PROD promote** — **Andrew's word, per promote, no standing authorization
   <instance_path>org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/D1_CATVIEWS.TO-S1-DE_PROOF_OF_SPEC.json</instance_path>
   <alignment_denominators>cells declared: 2 (D1-h-p1, D1-h-v3); criteria: 6. FORWARD — 6 of 6 carry >=1 cell_ref. BACKWARD — 2 of 2 reachable (D1-h-p1 from AC1/AC2/AC4/AC5; D1-h-v3 from AC2/AC3/AC6). Unmapped 0; untraceable 0. NO cell added: `D1-h-p1` already declares the presence predicate at L0 and its oracle is "assert the tile is ABSENT, not empty" — this TO applies that same predicate one and two levels down, on the sovereign's word.</alignment_denominators>
 </proof_of_spec>
+
+---
+
+## CLOSED 2026-08-29 ~01:3xZ BY `2.0.0_SA_COO~Z` (issuer) — 5 PASS, 1 UNVERIFIABLE-BY-INSTRUMENT, ZERO FAIL
+
+```
+  TS1-AC1 PASS . TS1-AC2 PASS . TS1-AC4 PASS . TS1-AC5 PASS . TS1-AC6 PASS
+  TS1-AC3 UNVERIFIABLE-BY-INSTRUMENT
+  DENOMINATOR 6, matching <expected_criteria>. ZERO FAIL.
+```
+⛔ **`CLOSED` DOES NOT MEAN `ALL PASS` ON THIS FACE.** `TS1-AC3` closes as
+**UNVERIFIABLE-BY-INSTRUMENT** — an honest terminal state, not a green one, and a reader must not
+count it as evidence the criterion held.
+⭐ **The instance was filed @`d671e7083e` with every criterion quoted VERBATIM from this face** —
+the bar the issuer set, met by construction rather than by assertion, and `proof-of-spec-check`
+closed alignment in BOTH directions independently of either seat's read.
+⚠ **This face carried no `instance_path` for most of its life** — added 2026-08-29 after an issuer
+census wrongly reported the whole `<proof_of_spec>` block missing. **The block was always there;
+one field was not.**
