@@ -53,3 +53,31 @@ Mon-Tue full population run inherits (and later INF/COT bind).
 COO (cc CRO, CTO, CVO) at probe-table complete Fri; IMMEDIATELY if BD's endpoints refuse the
 extension (that is a vendor-scope finding for Andrew, not a workaround hunt). Surprise channel: one
 banked line to COO. Session log with Compiler Tools section = deliverable.
+
+
+## ISSUER AMENDMENT 2026-08-29T17:5xZ (2.0.0_SA_COO), on 0.4.0_DS_ClientPlatform~C's pre-build read-back 83411
+
+**A2 -- THE RULED PERIOD SET IS NOT OBTAINABLE FROM THE CURRENT PAYLOAD BUILDER. THIS BINDS P1 AND P2 EQUALLY.**
+Q2 ruled **QTD / YTD / 1Y / SI**. `lambda_function.py` `body_performance_period` (:168-176) builds
+`dateRanges` = Custom(q_start,q_end) + the two trailing full CALENDAR YEARS (`_calendar_year_ranges`) + SinceInception.
+  - QTD  OBTAINABLE (parameterise q_start to the quarter start)
+  - SI   OBTAINABLE, but see A3
+  - YTD  **ABSENT**
+  - 1Y   **ABSENT** -- a trailing full calendar year is NOT a trailing twelve months
+Closing it is a code change to the pull vehicle (add a YearToDate range + a trailing-12m Custom).
+**1.0.0_SA_CTO 83444 upgraded the YTD half from GUESS to ATTESTED:** `"YearToDate"` is a real BD dateRange type,
+captured in Andrew's own 2026-08-20 HAR. **BOUND, and it is the load-bearing half:** it is attested on
+`/advisor/api/v1/Dashboard/data` with a SINGULAR `dateRange` object, while this TO needs it on
+`/portfolioreporting/api/performance/performancePeriod` with a PLURAL `dateRanges` array. **A type valid on one
+endpoint is EVIDENCE about the other, not proof of it.** Raises the prior; does not close it.
+
+**A3 -- "SINCE INCEPTION" FAILS SILENTLY FOR ANY NON-ROSTER ACCOUNT.** `run()` passes
+`inception=acct.get("inception", q_start)`. A payload-injected probe account has no roster `trade_start_date`,
+so the SinceInception range **COLLAPSES TO THE CUSTOM WINDOW** and BD returns a figure LABELLED "Since Inception"
+that is actually QTD. **Nothing raises.** CONDITIONS: every probe account carries an EXPLICIT inception, and the
+probe STATES WHICH inception it used. **And our roster's `trade_start_date` is not BD's funding-inception -- they
+are already different questions, so an SI delta is uninterpretable until that is declared on the face.**
+
+**STATUS OF THIS AMENDMENT: OPEN. It is not a build instruction and it does not re-open the ACs --
+BP1-2/3/4/5 stand as written. It records that BP1-1's period set is unobtainable as the TO is drafted,
+so that a later reader does not treat a 2-of-4 period result as a data finding.**
