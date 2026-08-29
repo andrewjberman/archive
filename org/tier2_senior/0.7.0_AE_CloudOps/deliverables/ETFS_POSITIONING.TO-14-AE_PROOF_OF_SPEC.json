@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_POSITIONING.TO-14-AE",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/etfs-positioning/20260821T194927Z/DECOMP.md",
+    "vintage_commit": "20c092c0da",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ETFS_POSITIONING.TO-14-AE.identifier-repair-apply.md"
+  },
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ETFS_POSITIONING.TO-14-AE.identifier-repair-apply.md",
+    "group": "OTHER",
+    "vintage_commit": "2bd693a7f8"
+  },
+  "assignee": "0.7.0_AE_CloudOps~N",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/etfs-netassets/etfs-netassets-daily.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "rznYiHb5PiktdT/V7Ayls0djByQdvuJ9nQeVQsIS2gI=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Built by infra/aws/lambda/ci/build-and-upload.sh etfs-netassets etfs-netassets-daily from a working tree verified byte-identical to 353c4b5a00 AND HEAD for both packaged members immediately before the build (lambda_function.py sha256 bf97ef797de446cc..., 81137 B; landing_guard.py a715b04be3145ca3..., 5998 B). Read on the primitive AFTER the put rather than inferred from rc=0: s3api head-object gives VersionId Mqg_VkI.OVFxOOvuxCjtr_dA5cPzHVyR, ContentLength 30663, LastModified 2026-08-29T14:13:18Z, Metadata.content-sha256 rznYiHb5PiktdT/V7Ayls0djByQdvuJ9nQeVQsIS2gI= -- that metadata key is what modules/yang-lambda/main.tf:39 plans source_code_hash against. The PRIOR version fQfKWwqEXrtbA78a.ogpqt6l6asKzvLN (26316 B, content-sha256 6RFz1jbzLMXXoWOmEkjIe3JoEZAf7EaHpQ4CsZXzuK8=) was captured BEFORE the overwrite as the rollback handle, and its content-sha256 equalled the then-live CodeSha256, which is how the baseline was established as clean rather than assumed. Rollback durability MEASURED not assumed: get-bucket-versioning Status=Enabled and get-bucket-lifecycle-configuration carries ONLY abort-incomplete-mpu-7d -- NO noncurrent-version-expiration rule exists, so the rollback version is durable rather than a 14-day lease.",
+      "artifact_covered_by": [
+        "POS-TO14-AC1",
+        "POS-TO14-AC2"
+      ]
+    },
+    {
+      "path_or_key": "module.etfs_netassets_daily.aws_lambda_function.this (function etfs-netassets-daily)",
+      "kind": "terraform",
+      "commit_or_etag": "rznYiHb5PiktdT/V7Ayls0djByQdvuJ9nQeVQsIS2gI=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Live read AFTER the apply: CodeSha256 rznYiHb5PiktdT/V7Ayls0djByQdvuJ9nQeVQsIS2gI=, CodeSize 30663, LastModified 2026-08-29T14:17:24.000+0000. STRONGER, AND IT IS THE ONE CITED: the live package was re-downloaded from Code.Location after the apply and its lambda_function.py member is byte-identical to `git show HEAD:<path>` and to `git show 353c4b5a00:<path>`, sha256 bf97ef797de446cc25915ce23ab81103de469f6e7c74fa824cedb22e7e46a0b7. Members [lambda_function.py, landing_guard.py]; landing_guard.py unchanged from the prior deploy.",
+      "artifact_covered_by": [
+        "POS-TO14-AC1",
+        "POS-TO14-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260829T1410Z_etfs-positioning-to14-identifier-repair-apply_deploy_completion.md + org/critical_paths/.open_deploys/etfs-positioning-to14-identifier-repair-apply.json",
+      "kind": "doc",
+      "commit_or_etag": "71b69bd1f9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy ledger opened via .tools/deploy_ledger.py at 2026-08-29T14:10Z -- BEFORE the first world-touching act (the S3 upload at 14:13:18Z) -- with 5 declared legs and a gate-visible .open_deploys sentinel rather than a hand-authored markdown that NEVER#6's PRIMARY scan cannot see. L1/L2/L3 CLOSED with proof; L4/L5 remain OPEN BY DESIGN as the event-gated acceptance legs.",
+      "artifact_covered_by": [
+        "POS-TO14-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "POS-TO14-AC1",
+      "criterion_verbatim": "DEPLOYED VIA `safe-apply`, LEDGER OPENED AND CLOSED. Never bare `terraform apply`; never `aws lambda update-function-code`. Plan reviewed BEFORE apply; added/changed/destroyed recorded. Ledger entry in `org/critical_paths/change_management/` opened at start and closed at completion. A `plan` 0-diff is not evidence for AC2.",
+      "method": "live_read",
+      "invocation": "python .tools/deploy_ledger.py open --slug etfs-positioning-to14-identifier-repair-apply (14:10Z) ; terraform plan (reviewed in full) ; HALT_ACK=1 .tools/safe-apply.sh -chdir=infra/aws/terraform/etfs-netassets apply -auto-approve ; terraform plan (0-diff)",
+      "denominator": "1 of 1 resource in the plan changed; 4 of 4 named prohibitions honoured (no bare terraform apply, no aws lambda update-function-code, plan reviewed pre-apply, ledger opened pre-act); 2 of 2 halt-gate messages read in full before ack",
+      "status": "PASS",
+      "output_evidence": "APPLIED THROUGH .tools/safe-apply.sh. NEVER#9 honoured on BOTH limbs: no bare `terraform apply` at any point, and `aws lambda update-function-code` never invoked -- the code moved by S3 artifact + terraform only. PLAN REVIEWED BEFORE APPLY AND RECORDED: `Plan: 0 to add, 1 to change, 0 to destroy` -- one in-place update of module.etfs_netassets_daily.aws_lambda_function.this touching ONLY s3_object_version (fQfKWwqEXrtbA78a.ogpqt6l6asKzvLN -> Mqg_VkI.OVFxOOvuxCjtr_dA5cPzHVyR) and source_code_hash (6RFz1jbz... -> rznYiHb5...), with 28 attributes and 4 blocks unchanged: no IAM, no schedule, no alarm drift. THAT PLAN IS ALSO THE TO SECTION-2 STOP TEST DISCHARGED -- it showed NOTHING beyond the two named commits, so no third seat's work was pending and the radius is as measured. HALT-GATE FIRED AND BLOCKED on 2 pending messages; BOTH READ IN FULL before HALT_ACK=1 (msg-ids 4349 and 4355, both 2026-08-21, both 2.0.0_SA_COO~Z, both WITHDRAWALS of D7_TICKETING apply TOs stating in terms 'nothing to approve, decline or hand back; neither is a gate'); neither STOP-class, neither touching ETFS or opal-data-etfs; ACKED ON CONTENT, NOT ON AGE. No HALTGT pass is cited as evidence of anything. APPLY RESULT: 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' RE-PLAN: 'No changes. Your infrastructure matches the configuration.' ---- ONE HALF OF THIS CRITERION IS MET IN SUBSTANCE AND NOT ON ITS LITERAL WORDING, AND I AM NOT ROUNDING IT: the criterion says the ledger is 'opened at start and closed at completion'. It IS opened (14:10Z, before the first world-touching act) and its three DEPLOY legs L1/L2/L3 ARE closed with proof. THE ENTRY ITSELF IS STILL OPEN, because I deliberately put the two event-gated ACCEPTANCE legs (L4 = AC3's scheduled fire, L5 = AC4's served plane) into the same ledger rather than closing a deploy record while its own acceptance was unmeasured. If 'completion' means the apply, this is complete. If 'completion' means the entry reads CLOSED, it is not, and it closes when L4 and L5 close -- a named condition, not an open-ended one. Flagged rather than smoothed so the validator can disagree with my structuring choice and score this FAIL if the literal reading governs."
+    },
+    {
+      "criterion_id": "POS-TO14-AC2",
+      "criterion_verbatim": "THE DEPLOYED BYTES CARRY THE REPAIR. Diff deployed bytes against the BUILD INPUT (source-map / manifest), never by filename (Rule 22a). Record the new CodeSha256 and show it differs from 6RFz1jbz.... Name the Z-S31 guard as also present -- the radius must be reported, not discovered later.",
+      "method": "diff",
+      "invocation": "aws lambda get-function --query Code.Location | curl -o deployed.zip ; python zipfile read member ; sha256 vs `git show HEAD:<path>` and `git show 353c4b5a00:<path>` ; negative controls vs `git show 63ef598d5a:<path>` and `git show e692db801c:<path>` ; ast.parse over the DEPLOYED source for class/def names",
+      "denominator": "2 of 2 zip members accounted for; 1 of 1 changed member diffed against the build input; 6 of 6 candidate vintages content-tested (1 match, 5 differ); 4 of 4 named symbols found by AST; 3 of 3 negative controls returned zero/False",
+      "status": "PASS",
+      "output_evidence": "NEW CodeSha256 rznYiHb5PiktdT/V7Ayls0djByQdvuJ9nQeVQsIS2gI=, DIFFERING from 6RFz1jbzLMXXoWOmEkjIe3JoEZAf7EaHpQ4CsZXzuK8= as the criterion asks. ONE HASH END TO END: built rznYiHb5 -> uploaded rznYiHb5 (read back by head-object) -> live CodeSha256 rznYiHb5 -> re-downloaded from the function. DIFFED AGAINST THE BUILD INPUT, NEVER BY FILENAME: the deployed lambda_function.py member is 81137 B, sha256 bf97ef797de446cc25915ce23ab81103de469f6e7c74fa824cedb22e7e46a0b7, IDENTICAL to `git show HEAD:` and `git show 353c4b5a00:`. NEGATIVE CONTROLS, BOTH FIRED: vs the PRIOR DEPLOYED vintage 63ef598d5a -> DIFFERS (6372fcbd3ec82ef2); vs e692db801c alone -> DIFFERS (eac8b18c24fc2929). CRLF CONTROL: CR count 0 in the deployed member, so this is not the false-divergence class a raw byte-compare invents. THE RADIUS, REPORTED AND NOT DISCOVERED LATER: ast.parse over the DEPLOYED source finds class RunDateFabricationGuard = True -- the Z-S31 guard from e692db801c (authored by 0.4.0_DS_ClientPlatform~Z under a 1.0.0_SA_CTO~Z ruling, unrelated to identifiers) IS PRESENT AND SHIPPED IN THIS ACT -- alongside the repair's _repair_numeric_coerced_cusip, _sedol_check_digit_ok and _cusip_check_digit_ok, all True. Claim fields present in the deployed bytes: cusip_as_delivered x4, cusip_basis x4, 'zero-pad-restored' x3, 'as-delivered' x4. NEGATIVE CONTROLS ON THE MATCHER ITSELF: zzz_no_such_token_9999 = 0, RunDateFabricationGuardXYZ = 0, AST 'no_such_function_9999' = False -- the instrument can return zero. THE PRE-STATE WAS RESOLVED BY CONTENT, NOT BY ANCESTRY OR RECOLLECTION: before the act the deployed member's sha256 was tested against SIX candidate vintages and matched 63ef598d5a exactly with the other five differing. A SIZE LADDER CORROBORATED IT INDEPENDENTLY AND EXPLAINS THE ORIGINAL MISS: 63ef598d5a is 69,897 B, committed 2026-08-25T00:06:15Z; the deploy ran 2026-08-25T00:09:54Z; e692db801c (the Z-S31 guard) was committed 2026-08-25T00:16:53Z -- SIX MINUTES AND FIFTY-NINE SECONDS AFTER THE DEPLOY. The guard was stranded by a timing miss, not by a decision. Separately and by a DIFFERENT INSTRUMENT, lambda-source-map.json recorded last_deployed_commit 63ef598d5ac67d065cfe06055dffa766ead4e6d6, agreeing with the content read rather than re-running it. The 0-diff re-plan is recorded under AC1 and is deliberately NOT offered here, per this criterion's own prohibition."
+    },
+    {
+      "criterion_id": "POS-TO14-AC3",
+      "criterion_verbatim": "EXERCISED ON A SCHEDULED FIRE, NAMED BY DATE. An ad-hoc QA run is legitimate for testing and is NOT the acceptance. DO NOT SCORE AGAINST A WEEKEND FIRE WITHOUT RESOLVING THE TRADING CALENDAR.",
+      "method": "live_read",
+      "invocation": "PENDING: read silver/holdings/2026-08-29.parquet in s3://opal-data-etfs after the scheduled etfs-netassets-daily fire, cron(0 22 * * ? *), 2026-08-29T22:00Z",
+      "denominator": "0 of 1 scheduled fires on the deployed bytes have occurred as of filing (apply landed 14:17:24Z; next and first scheduled fire 22:00:00Z)",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "RIDES A NAMED LATER RUN: the scheduled etfs-netassets-daily fire at 2026-08-29T22:00Z, cron(0 22 * * ? *), whose artifact is silver/holdings/2026-08-29.parquet. This is the expected first state, not a failure -- the TO's own alignment_denominators says a 2-of-4 instance is expected. NO AD-HOC RUN WAS FIRED, AND THE REASON IS NAMED RATHER THAN LEFT AS A COAST-FAILURE: an ad-hoc FETCHING run performs TrueShares issuer HTTP, and the standing egress approval baked into netassets-lambda.tf is scoped verbatim to a 'STANDING DAILY cadence' -- an extra pull widens Andrew's word, which this seat may not adjudicate (relay, never adjudicate wider OR narrower). The only zero-egress route, ETFS_REPLAY_FROM_BRONZE=1 against a past date, WRITES silver/holdings/{that date}.parquet and would OVERWRITE a served past-date artifact. Both ad-hoc routes cost more than they buy and the scheduled fire is free, which is the TO's own framing.",
+      "output_evidence": "NOT YET SCORED. Recorded so the closing seat has the frame: THE THING DEPLOYED IS etfs-netassets-daily, whose schedule is cron(0 22 * * ? *) and which fires EVERY day including weekends, so tonight's 22:00Z fire IS a scheduled fire on the deployed bytes and is a legitimate AC3 exercise even though today is a Saturday. EXPECT in silver/holdings/2026-08-29.parquet: the ABT row carrying cusip 002824100 with cusip_basis 'zero-pad-restored' and cusip_as_delivered '2824100'; ICT 6455819 and MER B247XZ6 both carrying cusip_basis 'as-delivered' with their values unchanged. THE STRONGEST EXERCISE AVAILABLE WITHOUT EGRESS OR A SERVED-PLANE WRITE WAS RUN AND IS RECORDED UNDER controls.mutant: the committed test_to13_cusip_repair.py was executed against the DEPLOYED BYTES THEMSELVES (module sha256 bf97ef797de446cc..., the exact member downloaded from the live function), rc=0 captured before any pipe, every assertion passing -- ABT 2824100 -> ('002824100','zero-pad-restored'), ICT -> ('6455819','as-delivered'), MER -> ('B247XZ6','as-delivered'), the four 8-char repairs, and the out-of-scope values passing through verbatim. That is evidence the deployed artifact BEHAVES correctly and it materially de-risks the 22:00Z fire; it is explicitly NOT offered as AC3, which asks for a scheduled fire and gets one tonight."
+    },
+    {
+      "criterion_id": "POS-TO14-AC4",
+      "criterion_verbatim": "ABT CARRIES RETURNS ON THE SERVED PLANE, AND NOTHING ELSE MOVED. In a gold/holding/date={d}/holding.parquet from a scheduled fire after the apply, ABT carries 8 of 8 non-null return windows. Report the 0-of-8 population WITH ITS DENOMINATOR -- it should be the four CASH rows plus 2602335D, five of 189, not six. 2602335D is OUT OF SCOPE and must NOT be fixed here. AND ICT AND MER MUST SURVIVE.",
+      "method": "live_read",
+      "invocation": "PENDING: read gold/holding/date=2026-08-31/holding.parquet in s3://opal-data-etfs after the scheduled etf-positioning-producer fire, cron(0 13 * * ? *), 2026-09-01T13:00Z",
+      "denominator": "BASELINE MEASURED AT 189 rows: 6 of 189 carry 0 of 8 return windows pre-apply; 183 of 189 carry 8 of 8. AC4 closes when that 6 becomes 5 of 189.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "RIDES A NAMED LATER RUN: the scheduled etf-positioning-producer fire at 2026-09-01T13:00Z, cron(0 13 * * ? *), writing gold/holding/date=2026-08-31/holding.parquet. THE TRADING CALENDAR IS RESOLVED HERE AND IT RE-DATES THIS CRITERION BY THREE DAYS FROM THE NAIVE READING -- this is the single most important line in this filing for whoever closes it. TWO PRODUCERS, TWO SCHEDULES, AND ONLY ONE OF THEM WAS DEPLOYED: etfs-netassets-daily (deployed today) fires cron(0 22 * * ? *) EVERY day including weekends and writes silver/holdings/{D}.parquet; etf-positioning-producer (NOT deployed today, unchanged at CodeSha256 qQk9ohLihOInJnvj/NncAms1IuoEIkkjRwpb8EIFouQ=) fires cron(0 13 * * ? *) and writes gold/holding/date={as_of}/. THE GOLD PRODUCER REFUSES WEEKEND SILVER, at source: etf_positioning_gold.py:501-509 -- 'THE PARTITION MUST BE A TRADING DAY, not merely at-or-before the frontier ... the upstream netassets producer fires on a FLAT DAILY cron so it writes SATURDAY AND SUNDAY partitions that re-stamp Friday's closing data. Selecting one as the as-of would key a trading-day artifact to a non-trading day.' CONFIRMED EMPIRICALLY ON BOTH PLANES rather than only read: silver HAS 2026-08-22 and 2026-08-23 partitions, and gold has NO date=2026-08-22 or date=2026-08-23 -- it jumps 08-21 (Fri) straight to 08-24 (Mon). CONFIRMED ON THE CANONICAL CALENDAR: lib/trading_calendar.py, source 'NYSE/hardcoded-fallback-2024-2027', is_trading_day False for 2026-08-29 (Sat) and 2026-08-30 (Sun), True for 2026-08-31 (Mon). CONSEQUENCE: tonight's 22:00Z fire writes a SATURDAY silver partition the gold producer will skip forever, and Sunday's likewise; THE FIRST REPAIRED TRADING-DAY SILVER IS silver/holdings/2026-08-31.parquet, written Monday 2026-08-31T22:00Z. The gold as-of ALSO requires a bbg/{date}/ landing, measured to land ~11:06Z on D+1 (bbg/2026-08-28/ landed 2026-08-29T11:06:35Z, which is why today's 13:00Z fire could emit date=2026-08-28). THEREFORE the first gold fire that can carry repaired ABT is 2026-09-01T13:00Z. MONDAY 2026-08-31's OWN 13:00Z FIRE WILL STEP BACK AND RE-EMIT date=2026-08-28 FROM PRE-REPAIR SILVER, AND THAT IS CORRECT BEHAVIOUR, NOT A REGRESSION -- a seat scoring AC4 on Monday afternoon will see ABT still null and must not read it as this deploy having failed.",
+      "output_evidence": "NOT YET SCORED. THE BASELINE IS MEASURED AND RECORDED SO THE CLOSING SEAT SCORES A DELTA RATHER THAN A MEMORY. On gold/holding/date=2026-08-28/holding.parquet (written 2026-08-29T13:01:22Z, the last PRE-APPLY scheduled fire), DENOMINATOR 189 rows: the 0-of-8 population is SIX -- ABT (cusip 2824100, book DIVZ, weight 2.33, price 111.59), four CASH rows (DIVZ, IDVZ, PFDE, PFOE), and 2602335D (TPG Inc, book PFDE, weight 0.00, price 0.0); the other 183 rows carry 8 of 8. ICT (6455819, IDVZ, price 881.0) and MER (B247XZ6, IDVZ, price 470.0) BOTH carry 8 of 8 today and must still do so after. AC4 therefore closes when SIX becomes FIVE, with ABT at 8-of-8 and ICT/MER unmoved. Note the TO quotes ABT at 2.36% of DIVZ and I measure 2.33 on the 08-28 partition -- weight moves daily and the two are the same holding on different dates, not a discrepancy. ONE READING NOTE THE TO ITSELF FLAGS AND WHICH IS EASY TO CONFLATE WITH THE ABOVE: the TO's AC3 warning that 'AFTER == BEFORE would be the DEFECT, not the expected weekend outcome' is about the GOLD producer's AS-OF ADVANCING on a weekend fire, which it does and which I confirm (Saturday 08-29's fire advanced the as-of to Friday 08-28). That is a DIFFERENT question from when the REPAIR reaches gold, which is governed by the trading-day filter above. Both statements are true simultaneously."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "PLANTED MUTANT ON THE DEPLOYED BYTES, not on the repo copy: take the lambda_function.py member exactly as downloaded from the live function (sha256 bf97ef797de446cc...) and disarm the SEDOL limb by making _sedol_check_digit_ok return False unconditionally, then re-run the committed test_to13_cusip_repair.py against it. This tests the TEST -- an acceptance run that cannot fail is not evidence. The unmutated run of the same suite against the same deployed bytes is the positive control and returned rc=0 with every assertion passing.",
+      "expected": "rc non-zero. The SEDOL limb is what stops a genuine SEDOL being rewritten into a CUSIP, so disarming it must be detected by a suite that claims to prove the limb load-bearing.",
+      "observed": "FIRED. rc=1, captured before any pipe. It also located exactly which assertion carries the SEDOL limb's weight: section 5, the constructed-collision exhibit, reported 'no collision found; this section is vacuous and must not be read as a pass' -- the suite refuses to pass vacuously when the limb it probes is gone. FINDING WORTH CARRYING, AND IT REFINES THE TO'S OWN SECTION-1 TABLE: sections 1-4 and 6 STILL PASSED under the mutant, INCLUDING 'ICT 6455819 untouched' and 'MER B247XZ6 untouched'. The TO's table reads as though the SEDOL limb is what protects ICT and MER. It is not -- both are refused by the CUSIP limb independently, because neither one's zero-padding satisfies the CUSIP check digit, so both survive with the SEDOL check fully disarmed. The SEDOL limb protects the CLASS of future collisions: values that are valid SEDOLs AND whose padding passes the CUSIP check, which the suite has to CONSTRUCT (BBB0135, BBB0168, BBB0317, BBB0481, BBB0630) because no live holding is one today. So the live data cannot exercise the SEDOL limb at all and only the constructed exhibit can. Reported because a reader of the TO's table would reasonably conclude that watching ICT and MER is sufficient regression cover for the SEDOL limb, and it is not.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs compared on BOTH instruments that carry this filing's claims: (1) the deployed package was independently re-downloaded from Code.Location a second time and its lambda_function.py member re-hashed; (2) the acceptance suite was re-run against the extracted deployed bytes and the two stdout captures compared with cmp.",
+      "observed": "STABLE on both. (1) run1 member sha256 bf97ef797de446cc25915ce23ab81103de469f6e7c74fa824cedb22e7e46a0b7, run2 identical. (2) run2 rc=0 and the two stdout captures are BYTE-IDENTICAL under cmp -- which also establishes that the suite's section-6 sampling ('325 of 400 sampled values are refusable') is seeded rather than random, so that figure is reproducible and not a per-run coincidence.",
+      "status": "STABLE"
+    }
+  },
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"did the deployed etfs-netassets-daily lambda get the cusip repair, and what is the blast radius of the etfs-netassets terraform\"",
+      "result": "Returned a printed 3-way near-tie (comp-aws / comp-estate / comp-pipescript deployed), explicitly labelled NOT a ranking. None of the three answers the byte-currency question, which is Rule 22a's CODE layer and is the assignee's own read; that was done directly against the package downloaded from the live function."
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast etfs-netassets-daily",
+      "result": "PROCESS GAP, SELF-REPORTED RATHER THAN PRESENTED AS COMPLIANCE. CLAUDE.md's AE minimum names comp-blast on infra BEFORE changes. I read the terraform plan's full radius before applying -- 0 add / 1 change / 0 destroy, code attributes only, no IAM or schedule or alarm movement -- but I did NOT invoke comp-blast until AFTER the apply, and it then exceeded its 120s budget and was still running at filing, so it returned no output I can quote. The plan is the stronger instrument for THIS change (it reads actual state and enumerates every attribute that moves, where comp-blast reads the graph), so I do not believe the ordering changed the outcome; but the rule says before, I did it after, and a run that starts after the decision cannot have informed it. Recording the gap rather than the intent."
+    },
+    {
+      "tool": "deploy_ledger.py / proof-of-spec-check.py",
+      "invocation": "python .tools/deploy_ledger.py open|close-leg ; python .tools/proof-of-spec-check.py <instance> POS-TO14-AC1,POS-TO14-AC2,POS-TO14-AC3,POS-TO14-AC4",
+      "result": "Ledger opened before the first world-touching act with a gate-visible sentinel; L1/L2/L3 closed with proof. The proof-of-spec checker's FIRST run on this instance returned INVALID with 23 violations because I had modelled the instance on a sibling deliverable instead of reading org/standards/PROOF_OF_SPEC.schema.json -- wrong field names (verdict for status), missing required fields (denominator, status, controls.determinism) and extra fields the schema forbids. Caught by running the checker rather than by review, and the verdict string was the oracle: the run also printed clean alignment figures (4/4 forward-1, 2/2 forward-2, 2/2 backward) beside its own WARN that those figures are identical to a valid instance's and are NOT evidence of validity."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any claim that this repair CLOSES the numeric-coercion class.",
+      "reason": "The TO states in terms that it does not: roughly 1 in 10 future doubly-stripped CUSIPs will be SEDOL-valid, be refused repair, and silently retain the ABT failure -- invisible by exactly the mechanism that made ABT invisible. Safe direction, better everywhere and worse nowhere, but the face does not close on the word 'fixed'. My mutant control SHARPENS this rather than softening it: the live data contains no SEDOL/CUSIP collision at all, so the residual class is currently unexercised by any real holding and no live-data regression test can cover it."
+    },
+    {
+      "item": "Any repair of 2602335D (TPG Inc) or of RTX's destroyed identifier.",
+      "reason": "2602335D is ruled OUT OF SCOPE by AC4 in terms -- a zero-weight CVR with no PX_LAST, so no history can accrue and it stays null BY DESIGN; it is one of the five rows that must REMAIN at 0-of-8. RTX (7.55E+105) is the same vendor class by a different mechanism: the sheet read the E as a scientific-notation exponent and rounded the mantissa, so the identifier is DESTROYED rather than shortened and no padding reconstructs it. Both pass through verbatim and the DEPLOYED bytes were confirmed to do so."
+    },
+    {
+      "item": "Any exercise of /sedol/2824100 against a vendor.",
+      "reason": "The TO names it UNEXERCISED and requiring Andrew's per-use word; none is requested and I have not upgraded that language. The repair uses a LOCAL check-digit computation, not a vendor lookup, so nothing in this filing depended on it."
+    },
+    {
+      "item": "Any statement about whether other seats' pending work should ship, including the 2 portal AC5 commits.",
+      "reason": "Out of lane and out of this face's radius. The terraform plan confirmed this deploy carries exactly the two named commits and nothing else, which is the only claim about other seats' work this face is entitled to make."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / INERT -- surfaced, not chased. build-and-upload.sh printed: 'ADVISORY (not enforced -- no BUILD_MANIFEST.json, so layer_dependencies are undeclared and a layer import is indistinguishable from a missing module): ? requests (imported by lambda_function.py)'. PRE-EXISTING and NOT introduced by this act -- the prior deployed artifact had no BUILD_MANIFEST.json either -- and `requests` is genuinely supplied by the pinned layer pandas-pyarrow-requests-layer:1, so the package is sound. Naming it so it is not read as dropped; it belongs to the etfs-netassets producer's own lane, not to this face.",
+    "OBSERVATION / INERT -- addressed to 2.0.0_SA_COO~Z, who authored both. Messages 4349 and 4355 have sat unread at the TOP LEVEL of inbox/0.7.0_AE_CloudOps/ since 2026-08-21 and will keep firing the HALT gate on every future apply by any lane of this base seat, costing each one a full read. Both are withdrawals carrying no obligation, so this is friction, not risk. I did NOT move them to read/: they are addressed to the BASE serial and consuming another seat's inbox is not a lane's call."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-29/to14_ae_identifier_repair_apply.md"
+}
