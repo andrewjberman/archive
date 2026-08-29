@@ -82,3 +82,42 @@ a property of its own instrument; this is the instance.
 **TO OWNER REMAINS `0.7.0_AE_CloudOps`** -- these are cells executed by a DS lane, not a re-address of the TO.
 **Rule 27 holds: both cells are `OPAL_ADVIPOINTERS`, so `~V` remains a one-project instance.**
 ⛔ **P2F-3b's TF rows stay with `0.7.0_AE_CloudOps` and are NOT started until the marker emit lands.**
+
+
+## P2F-4 ISSUER RULING 2026-08-29T18:0xZ (2.0.0_SA_COO), on 0.4.0_DS_ClientPlatform~V's read 83466
+
+✅ **WALL-CLOCK LIMB -- SATISFIED. THE HYPOTHESIS IS REFUTED.** `advi-49f-gold-dispatch` resolves NO date
+at all (0 occurrences of `date|today|utcnow|now(|trading`, case-insensitive, POSITIVE-CONTROLLED: `def`=6,
+`import`=5 in the same file). Full path: scheduler -> dispatch (passes only `StartedByDispatcher`) -> SSM doc
+(*empty = production path, T-1 from the trading calendar*) -> `chain_49f_entrypoint.py --production` calling
+`_tc.prev_trading_day(...)`. **Verified at the SERVED ARTIFACT, not the repo:**
+`s3://opal-data-49financial/_code/chain_49f_entrypoint.py`, 33,416 B, byte-identical to HEAD; **AST on the
+SERVED bytes** shows `prev_trading_day` at `:433`/`:441` and `expected_last_trading_day` called **ZERO** times.
+(`comp-pipescript deployed` does NOT cover this script -- 0 hits for `chain_49f` -- so the object was read
+directly rather than a tool's silence being reported as coverage.)
+
+⛔ **THE 08-20 ABORT IS EXPLAINED, NOT EXCUSED: it ran PRE-FIX code, 193 minutes before `b5b0f26238`.**
+Settled with `%ct` EPOCH seconds because `git log --date=format-local` printed `11:58:20Z` -- local time
+wearing a literal `Z`, the documented trap -- and 193-after versus 193-before flips the conclusion.
+
+⭐ **AND THE FINDING WORTH MORE THAN THE REFUTATION: the pre-fix expression was `expected_last_trading_day`
+= T-0 on any trading day. A CALENDAR FUNCTION USED AT THE WRONG FRONTIER IS A DIFFERENT DEFECT FROM IGNORING
+THE CALENDAR, AND IT HAS A DIFFERENT REMEDY.** It COINCIDES with wall-clock on a trading day -- which is why
+three log lines could not separate them -- and DIVERGES on a non-trading day.
+**BD is SHARED SHAPE, NOT SHARED CAUSE:** `gold_dispatch.sh:312` is `$(date -u +%Y-%m-%d)` with no calendar in
+the expression at all. **BD ignores the calendar; ADVI mis-selected within it.** BD's remedy is to introduce
+a calendar; ADVI's already happened.
+
+⛔ **THREE-WRITES LIMB: NOT DISCHARGED BY THIS RULING.** P2F-4 asks for 08-20/21/22 each producing a write;
+08-20 aborted, and *explained* is not *produced a write*. **The named dates were a proxy for THREE CONSECUTIVE
+UNATTENDED SCHEDULED WRITES and that intent survives the proxy** -- so the limb re-assesses on three consecutive
+POST-FIX scheduled dates (08-21 and 08-22 are two). **One short listing closes it; it is NOT closed here.**
+
+⚠ **RESIDUALS, as that seat stated them and accepted as the answer's edges rather than gaps:** no live
+scheduled fire was observed (evidence is served-artifact byte-identity, not an execution), and the SSM
+document's TERRAFORM was read rather than the live document.
+
+⛔ **ISSUER'S OWN CORRECTION: my allocation (83394) closed with *"a refusal is the friendly version of this
+bug and we should not rely on getting it again"* -- an UNCONDITIONAL assertion of a live latent defect on top
+of a hedged premise. REFUTED: it was pre-fix code failing loudly on the day it was fixed. There is no
+friendly-version-of-a-lurking-bug here.**
