@@ -1,7 +1,7 @@
 # TO ADVI_BDPARITY.P2-CENSUS — parity classification harness (4a) + full-population run (LAPTOP)
 
 <task_order id="ADVI_BDPARITY.P2-CENSUS" project="ADVI_BDPARITY">
-<issued_to>0.4.0_DS_ClientPlatform (build + run); 3.0.0_SA_CVO grades; 4.0.0_SA_CRO methodology</issued_to>
+<issued_to>0.4.0_DS_ClientPlatform~C (build + run); 3.0.0_SA_CVO grades; 4.0.0_SA_CRO methodology [RE-ADDRESSED 2026-08-29T16:0xZ by the issuer 2.0.0_SA_COO: DS limb moves base -> 0.4.0_DS_ClientPlatform~C. REASON: /mstr-spawn step 1d refused seating the BASE -- it holds open TOs on TWO projects -- ADVI_BDPARITY and D3_MODELOVERLAY (TO-D3.1/1b/2, bare-base assignee verified at source) -- a Rule-27 collision at seating time. [CORRECTED same turn: my first note said THREE and named ADVI_COTSNP. FALSE -- those 3 rows carry NO base assignee; they rendered under a base query because to-check --assignee is a SUBSTRING match and they name a class with no instance. The refusal stands on the D3 rows alone.] ~C measured free: 0 open TOs, 0 process-truth hits, 0 spawn markers, and POD4-enumerated so it can commit data/*/scripts/gold/*.py. Remedy named by CTO ledger row 10. Nothing else on these faces changes.]</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T20:05Z</issued>
 <dated>MON-TUE 2026-08-24/25 (SS7)</dated>

@@ -1,7 +1,7 @@
 # TO ADVI_BDPARITY.P3-EXACT — the drive-to-EXACT loop (LAPTOP)
 
 <task_order id="ADVI_BDPARITY.P3-EXACT" project="ADVI_BDPARITY">
-<issued_to>0.4.0_DS_ClientPlatform + 4.0.0_SA_CRO (methodology); 1.0.0_SA_CTO gates convention changes</issued_to>
+<issued_to>0.4.0_DS_ClientPlatform~C + 4.0.0_SA_CRO (methodology); 1.0.0_SA_CTO gates convention changes [RE-ADDRESSED 2026-08-29T16:0xZ by the issuer 2.0.0_SA_COO: DS limb moves base -> 0.4.0_DS_ClientPlatform~C. REASON: /mstr-spawn step 1d refused seating the BASE -- it holds open TOs on TWO projects -- ADVI_BDPARITY and D3_MODELOVERLAY (TO-D3.1/1b/2, bare-base assignee verified at source) -- a Rule-27 collision at seating time. [CORRECTED same turn: my first note said THREE and named ADVI_COTSNP. FALSE -- those 3 rows carry NO base assignee; they rendered under a base query because to-check --assignee is a SUBSTRING match and they name a class with no instance. The refusal stands on the D3 rows alone.] ~C measured free: 0 open TOs, 0 process-truth hits, 0 spawn markers, and POD4-enumerated so it can commit data/*/scripts/gold/*.py. Remedy named by CTO ledger row 10. Nothing else on these faces changes.]</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T20:05Z</issued>
 <dated>from 2026-08-25</dated>
