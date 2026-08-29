@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps~L</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-27T15:2xZ</issued>
-<status>pending -- GO received 2026-08-27T160935Z (COO msg 76134); vehicle legs V14-1/V14-2 UNGATED and in progress; execution legs held at V14-3</status>
+<status>complete -- 534 of 534 dates ARTIFACT-COMPLETE, campaign ledger pin 9dd522c50d, final row 2026-08-27T09:59:16Z; zero unsuperseded; three-bucket reconciliation 0 unexplained on BOTH planes. Flipped by the issuer 2026-08-29T14:4xZ on evidence read at this seat (send-plane half independently corroborated here: 587 unique, same 7 ids, same 1 remainder, 0 post-pin, 0 unexplained) AND 3.0.0_SA_CVO acceptance at the same pin; register drift surfaced by 1.0.0_SA_CTO 82878. GO was 2026-08-27T160935Z (COO msg 76134).</status>
 <priority>P1 -- the ruled backfill (brief @e4f7ecbfdc P1.4) has NO vehicle today; vehicle work is ungated, execution is gated</priority>
 <authority>The ruled 08-26 remediation design (@69b2b7678c); the assignee's own measurements @4da71d969b (--date vehicle gap) + @f62e93b9bb (no stage-scoping) + 74209 (dispatcher-halt trap, safe-default parameter); 74218 (the named ad-hoc/backfill boundary, ~U concurrence). Andrew-direct seat word 2026-08-27 ~15:0xZ @1d761ded1f.</authority>
 </task_order>

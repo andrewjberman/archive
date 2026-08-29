@@ -1,0 +1,202 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_C3MATERIALIZE.TO-L3W2-CCY",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "assignee": "0.8.0_AE_CloudComp~Y",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-c3materialize-L3/20260829T0210Z/DECOMP.md",
+    "vintage_commit": "bed0fba345",
+    "to_ref": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_C3MATERIALIZE.TO-L3W2-CCY.first-fusion.md"
+  },
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_C3MATERIALIZE.TO-L3W2-CCY.first-fusion.md",
+    "group": "W",
+    "vintage_commit": "2961a22d4f5f2a41e8cc3e0f04c3955a55a5e806"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_L3W2_VIEW2/VIEW2_motif_membership.json",
+      "kind": "config_data",
+      "commit_or_etag": "a32948169c0b389d47515ba71ef74c557d7dfade",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "VIEW 2 prep: 6 rows, all WRITTEN, plus the L3-C03 disposition field. A new D11-owned artifact; no producing store written and none re-run (CVO condition 1).",
+      "artifact_covered_by": [
+        "L3W2-CCY-AC1",
+        "L3W2-CCY-AC2",
+        "L3W2-CCY-AC3",
+        "L3W2-CCY-AC4",
+        "L3W2-CCY-AC5",
+        "L3W2-CCY-AC6",
+        "L3W2-CCY-AC7",
+        "L3W2-CCY-AC9"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_L3W2_VIEW2/MEMBERSHIP_540_L3C03.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "a32948169c0b389d47515ba71ef74c557d7dfade",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The L3-C03 mechanism: a required-field schema that REFUSES any record omitting the 540 disposition, pinning denominator as const 540 and disposition to the rectangle's own domain.",
+      "artifact_covered_by": [
+        "L3W2-CCY-AC7",
+        "L3W2-CCY-AC8",
+        "L3W2-CCY-AC9",
+        "L3W2-CCY-AC10"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "L3W2-CCY-AC1",
+      "criterion_verbatim": "POPULATION BOUND TO THE RATIFIED SET: the entity set IS the ratified L2 STRUCTURE set at 64ae1ae879's bytes -- read it there, print its denominator, and state how this view's ids ALIGN to it (a parse is not an alignment). Ids that do not align are ABSENT for this view, never dropped. Print |aligned| / |population| with the denominator the population's, not the view's.",
+      "method": "command",
+      "invocation": "git show 64ae1ae879:<L2_VIEW_ARTIFACTS.json> read THROUGH the pin; exact-string join of the view's member ids against entity_set.entities[].entity_id",
+      "output_evidence": "Population read AT the pin rather than from a working copy: 19,482 entity ids, 19,482 distinct, equal to the artifact's own declared denominator -- so the id list and the declaration agree and neither is assumed. ALIGNMENT IS EXACT STRING on both sides: no parse, no normalisation, no prefix stripping, because the oracle states a parse is not an alignment. |aligned| = 4,147 of |population| = 19,482 (21.29 percent), and THE DENOMINATOR IS THE POPULATION'S as required -- the view's own 4,215 raw members is the wrong denominator and is deliberately not used. 68 view members do NOT align; they are carried ABSENT for this view rather than dropped, because the fusion is over the UNION and never the intersection.",
+      "denominator": "4,147 aligned of 19,482 population; 68 view members outside the population carried ABSENT; 4,215 raw view members (NOT the denominator)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "L3W2-CCY-AC2",
+      "criterion_verbatim": "FEATURES DERIVED, NOT INHERITED: the exact computation from the PINNED source to a pairwise affinity, runnable by a reader; for a registry-derived view, name the shards, the rows read, and the membership-to-affinity rule with its COVER semantics. No producing store is written or re-run.",
+      "method": "command",
+      "invocation": "Direct read of CONTAINS edges whose source is a C2Motif node in the store the registry shards declare; group by target to a family set; Jaccard over family sets",
+      "output_evidence": "Stated so a reader can run it: the shards at @8ff31fa1c8 name the membership relation and its declaring store; 5,110 membership edges read over 4,215 distinct members and 19 families; affinity of a pair is |F(i) intersect F(j)| / |F(i) union F(j)|. COVER SEMANTICS ARE EXPLICIT AND LOAD-BEARING: a member in two families contributes to BOTH and is never penalised (ANDREW-DIRECT 02:03Z R-2), and the family axis stays TWO CATALOGUES (13 structural archetypes + 6 defect motifs, intersection 0) -- the rule never flattens them into one 19-valued enum, which would compare an archetype to a defect. NO PRODUCING STORE WAS WRITTEN AND NONE WAS RE-RUN: the edges are read as they stand. Positive control that the rule is neither saturated nor vacuous -- both extremes occur: 1,702,992 pairs at 1.0 and 6,487,694 at 0.0.",
+      "denominator": "5,110 edges over 4,215 members and 19 families; 48 distinct family-set signatures among the 4,147 measured entities",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "L3W2-CCY-AC3",
+      "criterion_verbatim": "COVERAGE: MEASURED vs ABSENT, WITH THE DENOMINATOR. Per ENTITY: MEASURED or ABSENT, with both counts and the population denominator. ABSENT is a first-class value carried into the fusion, not a zero. Print the split; a view with 0 ABSENT must say why.",
+      "method": "command",
+      "invocation": "Set membership of each of the 19,482 population entity_ids in the derived membership map",
+      "output_evidence": "MEASURED 4,147 | ABSENT 15,335 | denominator 19,482. ABSENT is carried as ABSENT and explicitly NOT as an affinity of 0 -- a 0 asserts measured low affinity, an ABSENT asserts no evidence, and the artifact states that collapsing them is the failure PRD sec 3 L3 names. The 78.7 percent ABSENT is a PROPERTY of this view (motif membership is declared for a minority of the cloud population), not a defect. This view does not have 0 ABSENT, so the oracle's must-explain branch does not apply; the split is non-degenerate in both cells, which is itself the control that the classifier assigns both values.",
+      "denominator": "4,147 MEASURED + 15,335 ABSENT = 19,482",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "L3W2-CCY-AC4",
+      "criterion_verbatim": "DISCRIMINATION GATE EARNED ON THIS VIEW: TYPED PASS | FAIL | NOT_RUN. A view enters the fusion only on its OWN gate run over THIS population: at least two distinct affinity values with neither all-pairs-equal nor a single value, stated with the value census and could-have-differed. VIEW 2 HAS NO L2 GATE -- citing its parent bridge's certification is the L2 gate BORROWED, not earned, and is a refusal.",
+      "method": "command",
+      "invocation": "Exact value census of the affinity rule over all measured pairs, computed by grouping the measured entities into distinct family-set signatures and weighting each signature pair by its cardinality product -- exact, not sampled",
+      "output_evidence": "GATE = PASS, run on THIS view over THIS population. 16 DISTINCT affinity values over 8,596,731 measured pairs, from 48 distinct family-set signatures; census led by 0.0 (6,487,694), 1.0 (1,702,992), 0.333333 (169,501), 0.5 (159,881). all-pairs-equal FALSE; single-value FALSE. COULD-HAVE-DIFFERED with the failing state named and reachable: had every measured entity carried an identical family set there would be one signature, one value, and this row would read FAIL. THE GATE IS EARNED, NOT BORROWED -- it does not cite, inherit or rest on the certification of the bridge registry @8ff31fa1c8 that this view is derived from, and that registry is THIS LANE'S OWN prior work, which is precisely why the temptation to inherit it is named explicitly on the artifact rather than merely avoided. The registry is cited as the SOURCE of the membership relation, never as evidence that this view discriminates.",
+      "denominator": "16 distinct values over 8,596,731 measured pairs; 48 signatures over 4,147 measured entities",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "L3W2-CCY-AC5",
+      "criterion_verbatim": "FIRM BASELINE RE-MEASURED (sec 6.3 INPUT, not its discharge): measure this view's firm-separation baseline over THIS population, print it with its denominator, and state that the PRD's 0.989 / 0.974 were measured on DIFFERENT single views and are not the comparison.",
+      "method": "command",
+      "invocation": "The SHARED 1,941-entity cohort CONSUMED through its pin (git show 9f8a1f13e6:<firm_cohort_shared.json>), its digest verified against the publisher's announced sha256 before use; pairs scored by this view's own Jaccard rule. NO SECOND PARSE was run at this seat.",
+      "output_evidence": "MEASURED ON THE SHARED COHORT, consumed and not re-derived, per 1.0.0_SA_CTO~X 80564 item (2) and 3.0.0_SA_CVO~X's bind. Cohort 1,941 (sha256 ad361014a7da8850 verified at the pin before use); view-2 MEASURED within the cohort 1,820, view-2 ABSENT within the cohort 121; ABSENT outside 6.3's denominator 17,541. WITHIN-FIRM 805,717 pairs mean 0.466470; CROSS-FIRM 849,573 pairs mean 0.432832; SEPARATION +0.033638; ratio within/cross 1.078; pair frame 1,655,290. firm_label_basis = INFERRED with the parse named, as ruled. THE HAZARD THE RULING NAMED IS MEASURED HERE, NOT HYPOTHETICAL, AND IT IS THE MOST USEFUL THING THIS ROW CARRIES: this lane HAD already run its own independent parse before the ruling landed, and the two differ -- 1,819 measured entities vs 1,820, mdpf 26 vs 27, cross-firm mean 0.433747 vs 0.432832. One entity of divergence would have made the two views' baselines two different cohorts and 6.3 a comparison of unlike things, which is exactly what the ruling forbade. The self-parse figures are recorded on the artifact as the SUPERSEDED reading and are not the baseline. The PRD's 0.989 / 0.974 were measured on DIFFERENT single views over a different population and are NOT the bar; this row SUPPLIES one of the two baselines 6.3 needs and discharges nothing. The separation is small and positive and is reported as measured WITHOUT being interpreted as pass or fail -- for scale, view 1 reports 0.167169 with ratio 6.429 over the same cohort, and that difference is a fact about the two views rather than a verdict on either.",
+      "denominator": "cohort 1,941 (shared, consumed); view-2 measured in cohort 1,820; view-2 absent in cohort 121; absent outside 6.3 denominator 17,541; 805,717 within and 849,573 cross pairs; pair frame 1,655,290",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "L3W2-CCY-AC6",
+      "criterion_verbatim": "PROVENANCE PINNED: source pin + sha256 of the bytes actually read + the instrument, in fields a consumer can reject on. A pin that names a commit whose blob differs from the bytes read is a refusal. Untracked or gitignored sources carry a CONTENT digest and say so -- a commit cannot pin what git does not track.",
+      "method": "manual_read_with_citation",
+      "invocation": "git show for tracked inputs (so pin and bytes cannot disagree by construction); sha256 over the exact bytes loaded for the untracked one; git ls-files --error-unmatch to establish tracked state rather than assume it",
+      "output_evidence": "4 inputs, each carrying its binding as a STATED field rather than an assumption. The population was read THROUGH its pin (git show 64ae1ae879:<path>), so its pin and its bytes cannot disagree; sha256 of those exact bytes is carried. THE MEMBERSHIP SOURCE IS GITIGNORED AND UNTRACKED -- measured, not assumed: git ls-files --error-unmatch returns rc!=0 and infra/aws/globgrph/.gitignore:7 names it -- so its commit field is deliberately NULL and its CONTENT DIGEST is the pin. Filling that field with a repo hash would name the repo and not the file, which is a citation without a vintage for the thing actually read. The registry @8ff31fa1c8 and the boundary declarations @9c1a45ad28 are commit-pinned. The row names the class it answers: the wave-1 row schema's own provenance defect (@e4301b85f7 -> @587a4e18f7), where a v2 enum sat beside a provenance claiming v1.",
+      "denominator": "4 pinned inputs; 4 of 4 state whether the pin binds the content; 1 of 4 cannot be commit-pinned and says so",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "L3W2-CCY-AC7",
+      "criterion_verbatim": "IMPLEMENTATION: how the declaration is MECHANISED in this wave's artifact -- a field, a computed statistic, a census -- named by path and field, not described. A declaration honoured in prose is the unenforced-field class this project measured.",
+      "method": "schema_validation",
+      "invocation": "A required-field JSON schema authored at D11_L3W2_VIEW2/MEMBERSHIP_540_L3C03.schema.json, applied to the view artifact",
+      "output_evidence": "NAMED BY PATH AND FIELD, not described: the field is membership_540_disposition on org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_L3W2_VIEW2/VIEW2_motif_membership.json, and the mechanism enforcing it is MEMBERSHIP_540_L3C03.schema.json in the same directory. The schema makes the field REQUIRED, pins denominator as const 540, and constrains disposition to the rectangle's own domain [preserved, merged_away, split, UNMEASURED]. This answers the unenforced-field class by construction: the declaration is not honoured in prose, it is a field a consumer rejects on -- and this lane's own artifact submits to that same mechanism rather than exempting itself.",
+      "denominator": "1 required field, 1 schema, 3 constrained sub-fields (disposition domain, denominator const, basis domain)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "L3W2-CCY-AC8",
+      "criterion_verbatim": "THE CONTROL THAT MUST FIRE: for L3-C03 a record with the disposition field REMOVED that must be REFUSED. Both arms reachable from different truths -- a control that cannot fail proves nothing.",
+      "method": "schema_validation",
+      "invocation": "Three mutations of the REAL delivered artifact through the same validator that admitted it, plus the unmutated artifact as the positive control",
+      "output_evidence": "THE REQUIRED CONTROL FIRED: the record with membership_540_disposition REMOVED is REFUSED, with the error naming the missing property. TWO FURTHER ARMS were run, because one refusal only tests one way of being wrong: an OFF-DOMAIN disposition ('no_change' -- deliberately the exact value the declaration forbids, since a run that cannot state the cohort must not report no change) is REFUSED; a WRONG DENOMINATOR (539) is REFUSED. POSITIVE CONTROL: the unmutated delivered artifact PASSES, so all three refusals are attributable to the mutations and not to the artifact. Both arms are reachable from different truths, and the accepting arm is the artifact actually delivered rather than a synthetic fixture.",
+      "denominator": "3 mutations, 3 REFUSED; 1 positive control, PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "L3W2-CCY-AC9",
+      "criterion_verbatim": "DENOMINATOR PRINTED: the count beside what it is a count of, in the artifact and not only in the report.",
+      "method": "schema_validation",
+      "invocation": "Inspection of the delivered artifact's own fields",
+      "output_evidence": "540 is carried IN THE ARTIFACT as membership_540_disposition.denominator, pinned by the schema as a const so it cannot drift. Every other count is printed beside what it counts, and the firm figures are the DELIVERED SHARED-COHORT ones: population 19,482; aligned 4,147; ABSENT 15,335; unaligned-and-carried-ABSENT 68; 5,110 membership edges over 4,215 members and 19 families; measured-pair domain 8,596,731; 16 distinct affinity values; 48 signatures; shared cohort 1,941 with view-2 MEASURED 1,820 and view-2 ABSENT 121; 805,717 within-firm and 849,573 cross-firm pairs; pair frame 1,655,290 = C(1820,2). CORRECTED HERE: this row previously listed 1,819 / 805,691 / 847,780 -- the SUPERSEDED self-parse figures. AC5 had been moved to the shared cohort and AC9 had not, so one criterion carried the superseded numbers while its sibling carried the delivered ones. That is the same 'fixed one carrier, missed its sibling' class this lane logged twice earlier in the session, and it is the reason the sweep must be over ALL carriers of a number rather than the one being edited. The self-parse figures remain named as SUPERSEDED in AC5 and the surprises, where they describe the divergence rather than assert a count.",
+      "denominator": "540 as a schema const in the artifact; shared cohort 1,941 with 1,820 measured and 121 absent; 805,717 within and 849,573 cross pairs; pair frame 1,655,290; 12 further counts each printed beside their subject",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "L3W2-CCY-AC10",
+      "criterion_verbatim": "REFUSAL ON ABSENCE (an absent input is never a pass): what the consumer DOES when the field is missing -- and it must be a refusal, not a default. State the exit code / the rejected record / the unadmitted artifact. 'The field is expected' is not a mechanism; the consuming half IS the mechanism.",
+      "method": "schema_validation",
+      "invocation": "jsonschema.Draft202012Validator(MEMBERSHIP_540_L3C03.schema.json).iter_errors(record)",
+      "output_evidence": "THE CONSUMING HALF IS DELIVERED, not promised. The consumer is the validator above; the ACT on absence is that iter_errors returns a non-empty error list and the record is REJECTED -- exercised rather than asserted, the stripped record returning exactly 1 error naming the missing property. A record failing this validator is NOT ADMITTED, and per the declaration that is a refusal to credit the run's membership claims rather than a reading of 'no change'. This lane's own artifact submits to the same mechanism and passes it: the disposition is UNMEASURED with its reason, which is a stated value inside the domain, not an omission dressed as compliance.",
+      "denominator": "1 validator, 1 rejected record with 1 error, 1 admitted record",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three mutations of the REAL delivered artifact through the same validator that admitted it: the 540 disposition field REMOVED; an OFF-DOMAIN disposition ('no_change', the exact value the declaration forbids); a WRONG denominator (539). Paired with the unmutated artifact as a positive control, because a refusal alone cannot distinguish 'the schema caught the mutation' from 'the artifact was invalid anyway'.",
+      "expected": "All three REFUSED; the unmutated artifact PASSES.",
+      "observed": "Field removed: REFUSED (1 error, naming the missing property). Off-domain disposition: REFUSED (1). Wrong denominator: REFUSED (1). Positive control on the unmutated artifact: PASS. The refusals are attributable to the mutations.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The builder reads only pinned or content-digested inputs (the population through its commit pin, the membership store at a fixed sha256, two commit-pinned declarations) and derives every count in one pass; the artifact carries no run timestamp, so a re-run is byte-comparable.",
+      "observed": "STABLE BY CONSTRUCTION OF THE INPUTS, and NOT claimed beyond that: this control was NOT exercised as a second run on this face, and the weaker honest claim is what is recorded. The individual counts carry their own controls instead -- the alignment's positive and negative joins, the value census's two reachable extremes, and the firm measure's two non-empty disjoint pair sets.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any re-derivation of the 540 cohort's per-member identities.",
+      "reason": "NOT DERIVABLE from the sources this face pins, and measured so rather than assumed: the 540 is a C3System-domain cohort from the PRD's census (1,255 C3System nodes, 4,857 members with a system, of which 2,383 multi-system split 1,843 MECHANICAL / 540 LOAD-BEARING), while the pinned membership store carries 4 C3System nodes and the AB materialize store carries 3. Two quantities I CAN derive -- 14 members carrying families from both catalogues, and 614 with more than one family in-population -- are DIFFERENT QUANTITIES, and substituting either under the cohort's name would be the exact substitution this project refuses. The disposition is therefore UNMEASURED with its reason, a value the domain admits."
+    },
+    {
+      "item": "Any claim that PRD sec 6.1, 6.2 or 6.5 is PASSED, and any claim that 6.3 is DISCHARGED.",
+      "reason": "The face states that a completion claim naming 6.1/6.2/6.5 is FALSE. 6.3 is SUPPLIED by this face's firm baseline, not discharged -- it runs when both per-view baselines and the fused output exist. 6.4 is discharged wave-wide by three gate runs, of which this face contributes exactly one."
+    },
+    {
+      "item": "The fusion itself, view 1's gate re-statement, and the fused output's third gate.",
+      "reason": "Not this face's cells. This face supplies view 2's earned gate, which is what releases the wave's cells gated after-view-gates."
+    },
+    {
+      "item": "Any producing-store write or RE-RUN, any L4 act, the FILE-carrier fusion, and any part-id minting.",
+      "reason": "CVO condition 1 and the face's boundaries. Every read was read-only; the BEHAVIOR named gap is carried, not worked around."
+    }
+  ],
+  "surprises": [
+    "TWO INDEPENDENT FIRM PARSES DIFFERED BY ONE ENTITY, AND THE RULING THAT FORBADE THE SECOND PARSE IS VINDICATED BY MY OWN DATA. Before 1.0.0_SA_CTO~X 80564 landed I had already measured this view's firm baseline with my own word-boundary parse: 1,819 measured entities, mdpf 26, cross-firm mean 0.433747. The SHARED cohort published by 0.7.0_AE_CloudOps~X gives 1,820, mdpf 27, cross-firm mean 0.432832 over the same view. ONE ENTITY. The ruling's stated reason -- a second parse could differ by one token and the comparison would then be two cohorts -- is not a cautionary framing, it is what happened, and it would have made PRD sec 6.3 a comparison of unlike things while every number on both sides looked correct. The delivered row consumes the shared cohort; the self-parse is recorded as superseded.",
+    "THE 540's PER-MEMBER IDENTITIES ARE NOT DERIVABLE FROM THIS FACE'S PINNED SOURCES, and the honest consequence is an UNMEASURED disposition rather than a substituted number. The PRD's cohort rests on a census of 1,255 C3System nodes and 4,857 members-with-a-system; the store this face pins carries 4 C3System nodes and the AB materialize store carries 3. I can derive 14 members spanning both motif catalogues, or 614 with more than one family in-population -- neither IS the 540, and either one wearing the cohort's name would be a different quantity passing as the declared one. Routed as an observation: if the wave-2 fusion is expected to state a per-member disposition, the cohort's member list needs a pinned carrier that this face does not name.",
+    "THE VIEW THIS FACE PREPARES IS 78.7 PERCENT ABSENT OVER THE RATIFIED POPULATION (15,335 of 19,482), and that is worth stating loudly BEFORE the fusion consumes it: motif membership is declared for a minority of the cloud population, so the fused result's coverage will be dominated by view 1 wherever view 2 is ABSENT. This is exactly why ABSENT must not collapse to 0 -- a 0 would assert measured low affinity across four-fifths of the population, and the fusion would return a full matrix either way.",
+    "THE FIRM SEPARATION ON THIS VIEW IS SMALL: +0.033638 on the SHARED cohort (within 0.466470 over 805,717 pairs vs cross 0.432832 over 849,573; pair frame 1,655,290 = C(1820,2)). Reported as measured and NOT interpreted here, because 6.3's threshold is the design lane's. Recorded because a reader meeting the PRD's 0.989 / 0.974 alongside it could take this for a regression, and it is not the same measurement -- different views, different population, different denominator. For scale, view 1 reports 0.167169 with ratio 6.429 over the same cohort; the difference is a fact about the two views, not a verdict on either. FOUND BY MY OWN RESIDUAL SWEEP, NOT BY THE CERTIFIER: this entry previously carried the SUPERSEDED self-parse figures (0.032738 / 805,691 / 847,780) as though they were the measurement. The certifier named THREE proof carriers to repair (AC9, commit_or_etag, spec_ref); this was a FOURTH, and it was asserting a count rather than describing the divergence -- the distinction that decides whether a superseded number may stay. A NAMED DEFECT IS A SAMPLE, NOT A CENSUS, applied forward for the second time in this session: the sweep must cover every carrier of a number, not the ones a reviewer happened to open.",
+    "INSTRUMENT NOTE ON THE ALIGNMENT: 68 of the view's 4,215 members do not appear in the ratified population and are carried ABSENT. They are neither dropped nor evidence of a defect on either side -- the population is edge-incident-and-non-semctl by its own definition, so a member outside it is expected. Naming the number rather than silently intersecting is what keeps the fusion over the UNION."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-29/ (written at session close, with a mandatory Compiler Tools section)",
+  "compiler_tools": [
+    {
+      "tool": "git show (pinned read)",
+      "invocation": "git show 64ae1ae879:org/tier1_exec/4.0.0_SA_CRO~A/deliverables/NFRA_C3MATERIALIZE.TO-L2-CROA/L2_VIEW_ARTIFACTS.json",
+      "result": "The population was read THROUGH its pin rather than from the working tree, so its pin and its bytes cannot disagree by construction -- the provenance class this wave's own AC6 exists to refuse."
+    },
+    {
+      "tool": "jsonschema (Draft 2020-12)",
+      "invocation": "Validation of the delivered artifact against MEMBERSHIP_540_L3C03.schema.json, plus three planted mutants and a positive control",
+      "result": "Artifact PASS; all three mutants REFUSED; positive control PASS."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find '540' docs/architecture/NFRA_C3MATERIALIZE_PRD.md",
+      "result": "9 hits over 1 file, a complete census and not headed. Located the cohort's ACTUAL definition at :391 (540 LOAD-BEARING of 2,383 multi-system members) instead of guessing which of my own derived numbers was meant. This is the read that prevented substituting 14 or 614 for the 540."
+    },
+    {
+      "tool": "git ls-files --error-unmatch",
+      "invocation": "on infra/aws/globgrph/stitch_graph.json",
+      "result": "rc!=0 -- the membership source is UNTRACKED (gitignored). That measurement is why the provenance row carries a content digest and a NULL commit rather than a repo hash."
+    }
+  ]
+}

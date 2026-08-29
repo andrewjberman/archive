@@ -133,7 +133,7 @@
       "owner": "UNOWNED -- last substantive author 0.7.0_AE_CloudOps (a84de54a5a, 2026-06-12, the TO-F1 provenance work); no standing owner."
     }
   },
-  "schema_version": 3,
+  "schema_version": 3.1,
   "subject": {
     "declared_domain": "NFRA_GLOBGRPH P2-STITCH step 3 -- materializes a local Kuzu DB (tables CloudNode + CloudEdge) from the step-2 UNIONED cross-layer graph: the AWS layer, the portal/pipeline layer, and the inter-system stitch edges between them",
     "id": "infra/aws/globgrph/kuzu_stitch_load.py",
@@ -179,19 +179,19 @@
       ]
     },
     "key": {
-      "basis": "inferred",
+      "basis": "held",
       "basis_by_field": {
         "crosses_spaces": "measured",
         "declared_mapping": "measured",
         "identity_space": "measured",
         "key_is_stable": "measured",
-        "key_expression": "absent"
+        "key_expression": "held"
       },
       "crosses_spaces": true,
       "declared_mapping": "infra/aws/globgrph/kuzu_stitch_load.py:33-34 (_key), as CODE rather than as a declared contract; kuzu_nessie_load.py uses the same node_id PK so the two join without a rename",
-      "evidence": "identity_space measured at :70-71 -- `node_id STRING PRIMARY KEY` -- and populated at :33-34 by _key(), which is arn-if-present ELSE id. THIS IS A DELIBERATELY MIXED IDENTITY SPACE: AWS nodes key on ARN, portal nodes key on their path/name, and BOTH live in the `node_id` column with the ARN also duplicated into a separate `arn` column when present. The docstring at :8-10 states the intent -- the two layers join on shared ARN-keyed nodes. key_is_stable=unstable IS THE MEASURED VALUE AND IT IS NOT THE ARN'S FAULT: the portal half of the space keys on a path/name, so a file rename or move mints a NEW node_id and the predecessor is unlinked with no forwarding. The AWS half is stable; the column as a whole is only as stable as its weakest member, and a single enum over a mixed unit must report the floor. crosses_spaces=true: node_id is joinable to kuzu_nessie_db, which uses the SAME node_id PK and the same layer/drift_class/source columns (measured live via CALL TABLE_INFO) -- so unlike the sibling subject, this DB's key DOES line up with the successor without a rename. declared_mapping is the arn-else-id rule itself at :33-34: it is expressed as three lines of code, not as a declared contract, so a consumer must read the loader to know how to join. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor.",
+      "evidence": "identity_space measured at :70-71 -- `node_id STRING PRIMARY KEY` -- and populated at :33-34 by _key(), which is arn-if-present ELSE id. THIS IS A DELIBERATELY MIXED IDENTITY SPACE: AWS nodes key on ARN, portal nodes key on their path/name, and BOTH live in the `node_id` column with the ARN also duplicated into a separate `arn` column when present. The docstring at :8-10 states the intent -- the two layers join on shared ARN-keyed nodes. key_is_stable=unstable IS THE MEASURED VALUE AND IT IS NOT THE ARN'S FAULT: the portal half of the space keys on a path/name, so a file rename or move mints a NEW node_id and the predecessor is unlinked with no forwarding. The AWS half is stable; the column as a whole is only as stable as its weakest member, and a single enum over a mixed unit must report the floor. crosses_spaces=true: node_id is joinable to kuzu_nessie_db, which uses the SAME node_id PK and the same layer/drift_class/source columns (measured live via CALL TABLE_INFO) -- so unlike the sibling subject, this DB's key DOES line up with the successor without a rename. declared_mapping is the arn-else-id rule itself at :33-34: it is expressed as three lines of code, not as a declared contract, so a consumer must read the loader to know how to join. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor.  || KEY_EXPRESSION NOT EXERCISED IN THE KEYFILL: the stitch loader was NOT RUN and its output was not opened; same boundary as its sibling -- a source citation is not an exercise || DISCHARGED-KEYFILL-DTX 2026-08-28: the sentence above is DISCHARGED, retained for provenance. key_expression is no longer ABSENT on this card -- TO-KEYFILL-DTX declared it and recorded basis_by_field.key_expression=held at commit 8de6cabc12, so the condition that justified lowering the row basis no longer holds. The scalar itself is NOT changed here: trust.key.basis edits are held at every lane pending the confirmed floor predicate (issuer 213704Z), under which this lane replays 4 of 18. || SCALAR-REDERIVED-KEYFILL-DTX 2026-08-28: trust.key.basis RE-DERIVED inferred -> held as MIN over the sub-claims present in this row (an undeclared one would enter at 'inferred'; this row has 0). Mechanical, never typed. The lowering it reverses is the migrator's, recorded above and retained.",
       "identity_space": "node_id -- arn-if-present else the node's id (path/name for portal nodes); one column, two id spaces, no type discriminator",
-      "key_expression": null,
+      "key_expression": "a member is a node the stitch loader writes; key = node_id, the arn when present and otherwise the node's own id (path/name for portal nodes) -- ONE column carrying TWO id spaces with no type discriminator",
       "key_is_stable": "unstable",
       "owner": "UNOWNED -- the id-space mixing is by design and has no owner for a declared mapping."
     }

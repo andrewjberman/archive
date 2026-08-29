@@ -23,6 +23,10 @@
      control (same command, ~J -> total=1, so the zero is measured and not a matcher artifact). -->
 <issued_by>2.0.0_SA_COO</issued_by>
 <status>pending</status>
+<!-- seat RELEASED 2026-08-28 17:4xZ by 2.0.0_SA_COO (78492, reversible); open set gated on INS-a-5's
+     first fire; re-seat on that fire or Andrew's word. AC1/AC5/AC6 PASS, AC2/AC3 APPLIED-GATED,
+     AC4 SHUT. Status stays `pending` deliberately -- a released seat is not a closed TO. -->
+
 <priority>P0 -- Andrew-direct 2026-08-25 ~12:0xZ named this project as one of two waiting on the decomp seat. PRD v0.2 approved by him ~18:3xZ 08-24; the project has been unblocked and unseated since.</priority>
 <date>2026-08-25</date>
 <references>

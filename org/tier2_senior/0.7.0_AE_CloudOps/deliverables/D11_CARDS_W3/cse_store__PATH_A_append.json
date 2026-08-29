@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 3.1,
   "carded_by": "0.7.0_AE_CloudOps~X",
   "subject": {
     "id": "infra/aws/globgrph/cse_store.py#PATH_A_append",
@@ -118,19 +118,19 @@
     },
     "key": {
       "identity_space": "Iceberg table identity (namespace, table) = ('globgrph', args.table). ⛔ THE SAME LOGICAL TABLE CARRIES TWO REPRESENTATIONS IN THE ESTATE: this plane addresses it as the TUPLE ('globgrph','cse') at :326, while fedobs/fedobs_observe.py:48 addresses it as the dotted string 'iceberg.globgrph.cse'. Both are CORRECT -- pyiceberg takes a tuple, Trino takes catalog.schema.table -- so it is a PLANE difference, not naming drift.",
-      "key_expression": null,
+      "key_expression": "key(t) = (NAMESPACE, table) = ('globgrph', args.table), defaulting to CSE_TABLE -- the tuple built at cse_store.py's ensure_cse_table (`table_id = (NAMESPACE, table)`) from NAMESPACE ':85' and CSE_TABLE ':86' (sourced from cse_schema, not a local literal). The SAME logical table is addressed as the dotted string 'iceberg.globgrph.cse' by fedobs_observe.py:48 -- a PLANE difference (pyiceberg takes a tuple, Trino takes catalog.schema.table), so a consumer joining across the two planes must apply the declared mapping rather than string equality.",
       "key_is_stable": "stable",
       "crosses_spaces": true,
       "declared_mapping": "('globgrph','cse') == 'iceberg.globgrph.cse'. A (file,artifact) join keyed on string equality splits this one artifact into two rows and neither failure announces itself.",
-      "basis": "inferred",
+      "basis": "measured",
       "basis_by_field": {
         "identity_space": "measured",
         "key_is_stable": "measured",
         "crosses_spaces": "measured",
         "declared_mapping": "measured",
-        "key_expression": "absent"
+        "key_expression": "measured"
       },
-      "evidence": "crosses_spaces=true MEASURED at both sites. Finding originated by 0.8.0_AE_CloudComp~X (74751); I corroborated it with a DIFFERENT instrument -- resolving the binding chain to cse_schema.py:595 -- rather than by re-running theirs, per Rule 22's repetition clause. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor.",
+      "evidence": "crosses_spaces=true MEASURED at both sites. Finding originated by 0.8.0_AE_CloudComp~X (74751); I corroborated it with a DIFFERENT instrument -- resolving the binding chain to cse_schema.py:595 -- rather than by re-running theirs, per Rule 22's repetition clause. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor. || DISCHARGED by exercise in the KEYFILL-COX fill: exercised on a real member -- cse_store.py default table -> ('globgrph', 'cse') in Iceberg table identity (namespace, table). Row floor recomputed inferred -> measured.",
       "owner": "1.0.0_SA_CTO (contract SoT); 0.7.0_AE_CloudOps (the join-key consequence)"
     },
     "failure_mode": {

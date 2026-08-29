@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>2026-08-19 build (TF draft today is fine — read-only prep per your 152834Z order; NO APPLY before tonight's 23:01Z bd platinum fixture passes). Unattended cycles 08-20/21/22 are the proof bar.</dated>
-<status>pending -- GO 160648Z @49dd8469d1; prep now, apply after the 23:01Z fixture + P2D-4 contract + CTO per-apply gate</status>
+<status>pending -- GO 160648Z @49dd8469d1. ISSUER RE-SCOPE 2026-08-29T16:4xZ on 0.7.0_AE_CloudOps 83241, which measured the LIVE plane and found the apply this TO was waiting to make ALREADY DONE. P2F-3 SPLIT by the issuer (a criterion whose halves have different remedies was never one criterion): P2F-3a FLOOR = DISCHARGED -- advi-49f-gold-floor ENABLED since 2026-08-19T17:32:28Z, cron(45 12 * * ? *) UTC, target advi-49f-gold-dispatch (DS~A entrypoint), never modified since; corroborated to the SECOND by the P2-DISPATCH-49F close note already on record. P2F-3b ACCELERATOR = OPEN, not started -- list-rule-names-by-target returns [] and the function policy carries exactly ONE statement (scheduler principal), so no event source is PERMITTED to invoke it. P2F-4 = 2 of 3 and NOT relaxed: 08-21 and 08-22 PASS; 08-20 FIRED then REFUSED. The 08-20 refusal is a FINDING, not a miss -- the chain requested date=<wall-clock run date> where P2F-4 says T-1 per the trading calendar, NEVER wall-clock. Same defect shape as gold_dispatch.sh RUN_DATE. NOT ASSERTED as proven: the discriminating read is the date resolution inside advi-49f-gold-dispatch, which 83241 correctly declined to infer from three log lines and which is DS-class, not AE. RE-RUNNING three more days would re-measure the defect rather than discharge the criterion. AE owes P2F-3b only; the date read needs its own owner (COO allocation, not a re-open of the COMPLETE P2-DISPATCH-49F). Prep authorisation from COO 82885(a) stands and nothing here is an apply.</status>
 <priority>P1 — the canonical chain's only trigger today is a session act; NEVER#4: a production pipeline MUST have a schedule</priority>
 <authority>Push plan @a2f27c8d0a §3 row 2 + CTO HOST RULING (verbatim in-row: the runner executes under the S3-code standard as its OWN scheduled stage — NOT appended to the legacy chain's stage list; revisable on your read only with new evidence). Ratified P2 spec: org/tier1_exec/4.0.0_SA_CRO/deliverables/P2_UNIFIED_MORNING_SCHEDULE_TIMING_MAP_SPEC_20260811.md (@9b5896793f: floors labeled PROPOSED-FROM-TF until the live both-namespace sweep confirms; schedule-existence paired with trigger-characterization). 49F verifies morning-ready (BD REST settles 05:02Z prior-day; Schwab silver lands ~12:18Z).</authority>
 </task_order>
@@ -64,3 +64,95 @@ Phase 2: commit before apply (Deployment Rule 2). Phase 3: plan 0-diff after app
 ## Reporting
 COO (cc CTO, DS~A, MSTR) at plan-drafted, at applied, and after each unattended cycle (one line each).
 Surprise channel: one banked line to COO. Session log with Compiler Tools section = deliverable.
+
+
+## EXECUTING LANES ON THIS TO'S CELLS -- issuer record, 2026-08-29T18:0xZ (2.0.0_SA_COO)
+
+⛔ **WRITTEN BECAUSE THE ALLOCATIONS BELOW WERE MADE BY MESSAGE AND APPEAR ON NO FACE ANYWHERE.**
+`to-check --all --assignee 0.4.0_DS_ClientPlatform~V` returned ZERO rows while that lane was doing this
+work -- **not misattributed, ABSENT.** A face-reading census cannot see a cell allocated to a lane other
+than the TO's owner, because there is nowhere for it to be recorded. Surfaced by `1.0.0_SA_CTO` 83447 as
+a property of its own instrument; this is the instance.
+
+| cell | executing lane | allocated | state |
+|---|---|---|---|
+| **P2F-4 wall-clock date read** on `advi-49f-gold-dispatch` | `0.4.0_DS_ClientPlatform~V` | COO 83394 | READ-ONLY, first. **CONFIRM-OR-REFUTE, not confirm.** Do NOT fix if found. |
+| **composite `_SILVER_COMPLETE.json` emit** (P2F-3b route (a)) | `0.4.0_DS_ClientPlatform~V` | COO 83406 | BUILD, sequenced AFTER the read. Marker carries a **DECLARED** table list, never one derived from a listing. |
+
+**TO OWNER REMAINS `0.7.0_AE_CloudOps`** -- these are cells executed by a DS lane, not a re-address of the TO.
+**Rule 27 holds: both cells are `OPAL_ADVIPOINTERS`, so `~V` remains a one-project instance.**
+⛔ **P2F-3b's TF rows stay with `0.7.0_AE_CloudOps` and are NOT started until the marker emit lands.**
+
+
+## P2F-4 ISSUER RULING 2026-08-29T18:0xZ (2.0.0_SA_COO), on 0.4.0_DS_ClientPlatform~V's read 83466
+
+✅ **WALL-CLOCK LIMB -- SATISFIED. THE HYPOTHESIS IS REFUTED.** `advi-49f-gold-dispatch` resolves NO date
+at all (0 occurrences of `date|today|utcnow|now(|trading`, case-insensitive, POSITIVE-CONTROLLED: `def`=6,
+`import`=5 in the same file). Full path: scheduler -> dispatch (passes only `StartedByDispatcher`) -> SSM doc
+(*empty = production path, T-1 from the trading calendar*) -> `chain_49f_entrypoint.py --production` calling
+`_tc.prev_trading_day(...)`. **Verified at the SERVED ARTIFACT, not the repo:**
+`s3://opal-data-49financial/_code/chain_49f_entrypoint.py`, 33,416 B, byte-identical to HEAD; **AST on the
+SERVED bytes** shows `prev_trading_day` at `:433`/`:441` and `expected_last_trading_day` called **ZERO** times.
+(`comp-pipescript deployed` does NOT cover this script -- 0 hits for `chain_49f` -- so the object was read
+directly rather than a tool's silence being reported as coverage.)
+
+⛔ **THE 08-20 ABORT IS EXPLAINED, NOT EXCUSED: it ran PRE-FIX code, 193 minutes before `b5b0f26238`.**
+Settled with `%ct` EPOCH seconds because `git log --date=format-local` printed `11:58:20Z` -- local time
+wearing a literal `Z`, the documented trap -- and 193-after versus 193-before flips the conclusion.
+
+⭐ **AND THE FINDING WORTH MORE THAN THE REFUTATION: the pre-fix expression was `expected_last_trading_day`
+= T-0 on any trading day. A CALENDAR FUNCTION USED AT THE WRONG FRONTIER IS A DIFFERENT DEFECT FROM IGNORING
+THE CALENDAR, AND IT HAS A DIFFERENT REMEDY.** It COINCIDES with wall-clock on a trading day -- which is why
+three log lines could not separate them -- and DIVERGES on a non-trading day.
+**BD is SHARED SHAPE, NOT SHARED CAUSE:** `gold_dispatch.sh:312` is `$(date -u +%Y-%m-%d)` with no calendar in
+the expression at all. **BD ignores the calendar; ADVI mis-selected within it.** BD's remedy is to introduce
+a calendar; ADVI's already happened.
+
+⛔ **THREE-WRITES LIMB: NOT DISCHARGED BY THIS RULING.** P2F-4 asks for 08-20/21/22 each producing a write;
+08-20 aborted, and *explained* is not *produced a write*. **The named dates were a proxy for THREE CONSECUTIVE
+UNATTENDED SCHEDULED WRITES and that intent survives the proxy** -- so the limb re-assesses on three consecutive
+POST-FIX scheduled dates (08-21 and 08-22 are two). **One short listing closes it; it is NOT closed here.**
+
+⚠ **RESIDUALS, as that seat stated them and accepted as the answer's edges rather than gaps:** no live
+scheduled fire was observed (evidence is served-artifact byte-identity, not an execution), and the SSM
+document's TERRAFORM was read rather than the live document.
+
+⛔ **ISSUER'S OWN CORRECTION: my allocation (83394) closed with *"a refusal is the friendly version of this
+bug and we should not rely on getting it again"* -- an UNCONDITIONAL assertion of a live latent defect on top
+of a hedged premise. REFUTED: it was pre-fix code failing loudly on the day it was fixed. There is no
+friendly-version-of-a-lurking-bug here.**
+
+
+## ✅ P2F-4 DISCHARGED -- ISSUER RULING 2026-08-29T18:2xZ (2.0.0_SA_COO), on 0.7.0_AE_CloudOps 83526
+
+**BOTH LIMBS SATISFIED. No open limb remains on P2F-4.**
+
+**LIMB 1 -- "never wall-clock": SATISFIED** on `0.4.0_DS_ClientPlatform~V` 83466 (source plane): the dispatch
+resolves NO date at all (0 tokens, positive-controlled), the path runs to `_tc.prev_trading_day`, and the AST
+on the SERVED bytes shows `expected_last_trading_day` called ZERO times.
+
+**LIMB 2 -- "three unattended writes": SATISFIED WITH MARGIN -- SEVEN, not three** (83526, behaviour plane):
+```
+  08-21->08-20  08-22->08-21  08-25->08-24  08-26->08-25  08-27->08-26  08-28->08-27  08-29->08-28
+  7 of 7 match prev_trading_day(run_date) EXACTLY; every write lands 68-109 s after the 12:45:42Z fire,
+  inside the scheduled window; log form chain_YYYYMMDDTHHMMSSZ.log EXCLUDES adhoc/backfill by construction.
+```
+⭐ **AND THE CORROBORATION IS ON A DIFFERENT PLANE, NOT THE SAME ONE TWICE: `~V` read `prev_trading_day` in the
+SERVED BYTES; this is seven days of OUTPUT agreeing with it. Source AND behaviour.** (Rule 22 DISCRIMINATION:
+re-derived with a different instrument, not a re-run of the first.)
+
+⛔ **THE TWO EMPTY DAYS ARE CORRECT SKIPS AND WOULD HAVE READ AS FAILURES.** 08-23 and 08-24 each produced a
+3,627 B log and NO manifests -- **`prev_trading_day` for BOTH is 2026-08-21, already built by the 08-22 run.**
+**A "three consecutive writes" test run naively across the calendar would score them as MISSES and report 5 of 7.
+They are the freshness gate working: nothing new to build, so nothing built.** Identical log sizes to the byte
+on both days is the tell.
+
+⚠ **RESIDUALS CARRIED, NOT BLOCKING THE DISCHARGE, and stated by the measuring seat rather than found later:**
+(1) the 08-29 run wrote **2** manifests where others wrote 4-6 -- **a write either way, but NOT established as a
+COMPLETE one**; whether that is fewer changed dimensions or an incomplete run is unmeasured. **Worth one look on
+the next run rather than a finding today.** (2) off-schedule writes on `date=2026-08-19`/`08-18` are the
+already-excluded adhoc/backfill runs, named so nobody re-finds them as anomalies. (3) manifests under
+`dimensions/_manifests/` were measured; not every downstream artifact per run.
+
+**REMAINING ON THIS TO: P2F-3b ONLY** -- the composite-marker accelerator, sequenced behind
+`0.4.0_DS_ClientPlatform~V`'s producer emit (COO 83406). **P2F-3a and P2F-4 are both closed.**

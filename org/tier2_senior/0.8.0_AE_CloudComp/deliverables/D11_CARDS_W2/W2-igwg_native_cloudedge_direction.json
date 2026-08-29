@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 3.1,
   "carded_by": "0.8.0_AE_CloudComp~Y",
   "subject": {
     "id": "native_cloudedge_direction",
@@ -135,7 +135,7 @@
     },
     "key": {
       "identity_space": "The ordered pair (source CloudNode id, destination CloudNode id) together with edge_type. Direction is what makes the pair ORDERED rather than a set, so it is constitutive of edge identity rather than an attribute of it.",
-      "key_expression": null,
+      "key_expression": "The ORDERED TRIPLE projected straight off the edge row: (source CloudNode.node_id, CloudEdge.edge_type, destination CloudNode.node_id) -- in the graph's own dialect `MATCH (a:CloudNode)-[e:CloudEdge]->(b:CloudNode) RETURN a.node_id, e.edge_type, b.node_id`. Three column reads; NO serialization grammar is given because none is declared anywhere in the estate, and inventing a delimiter here would invent a key space rather than describe one. The tuple is ORDERED, not a set: exchanging the first and third members yields a DIFFERENT key, which is precisely what makes direction constitutive of edge identity rather than an attribute of it.",
       "key_is_stable": "unknown",
       "crosses_spaces": false,
       "declared_mapping": null,
@@ -145,9 +145,9 @@
         "key_is_stable": "absent",
         "crosses_spaces": "measured",
         "declared_mapping": "measured",
-        "key_expression": "absent"
+        "key_expression": "measured"
       },
-      "evidence": "The ordered-pair identity is measured: the ARM1/ARM2 control below shows (LAMBDA, S3_BUCKET) and (S3_BUCKET, LAMBDA) are DIFFERENT keys under the same edge_type, which is what it means for direction to be constitutive. crosses_spaces is FALSE and measured: both endpoints are CloudNode ids in one id space, and direction introduces no second space -- this subject is deliberately NOT where the estate's ARN-vs-MS/Git identity gap lives, and saying so keeps that finding attached to the subjects that do carry it. declared_mapping is null because there is no second space to map to, which is the not-applicable case rather than an undeclared mapping. ⛔ key_is_stable is 'unknown' with basis ABSENT: a node id's stability across projection rebuilds determines whether a directed pair is stable, and I did not compare edge endpoints across two builds -- only one projection vintage was available to me. Recording the gap rather than assuming stability from a single read.",
+      "evidence": "The ordered-pair identity is measured: the ARM1/ARM2 control below shows (LAMBDA, S3_BUCKET) and (S3_BUCKET, LAMBDA) are DIFFERENT keys under the same edge_type, which is what it means for direction to be constitutive. crosses_spaces is FALSE and measured: both endpoints are CloudNode ids in one id space, and direction introduces no second space -- this subject is deliberately NOT where the estate's ARN-vs-MS/Git identity gap lives, and saying so keeps that finding attached to the subjects that do carry it. declared_mapping is null because there is no second space to map to, which is the not-applicable case rather than an undeclared mapping. ⛔ key_is_stable is 'unknown' with basis ABSENT: a node id's stability across projection rebuilds determines whether a directed pair is stable, and I did not compare edge endpoints across two builds -- only one projection vintage was available to me. Recording the gap rather than assuming stability from a single read.\n\nKEY EXPRESSION FILLED + EXERCISED 2026-08-28T20:40:53Z by 0.8.0_AE_CloudComp~Y against the live graph. MEMBER -> KEY -> SPACE: the WRITES_S3 edge from `arn:aws:lambda:us-east-1:313476888478:function:bd-49f-session-trigger` to `opal-data-bd/blackdiamond/49f/session-trigger-mode.json` -> the ordered triple (`arn:aws:lambda:us-east-1:313476888478:function:bd-49f-session-trigger`, `WRITES_S3`, `opal-data-bd/blackdiamond/49f/session-trigger-mode.json`) -> the ordered (src node_id, edge_type, dst node_id) space. ⭐ THE PREDICATE HERE IS ORDEREDNESS, SO THE EXERCISE CARRIES ITS OWN NEGATIVE CONTROL: the swapped triple (`opal-data-bd/blackdiamond/49f/session-trigger-mode.json`, `WRITES_S3`, `arn:aws:lambda:us-east-1:313476888478:function:bd-49f-session-trigger`) is a different key and matched 0 live edges. A control that could not distinguish the two would not have tested the one property this row asserts.",
       "owner": "UNOWNED -- node-id stability across rebuilds has no named owner in the sources this lane read."
     },
     "failure_mode": {

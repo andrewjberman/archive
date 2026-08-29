@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "OPAL_ADVIPOINTERS.P4-EDGEREAD-49F",
+  "phase": "INVESTIGATION",
+  "assignee": "0.7.0_AE_CloudOps",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/OPAL_ADVIPOINTERS.P4-EDGEREAD-49F.edge-router-currency-read-flip-precondition.md",
+    "group": "OTHER",
+    "vintage_commit": "d087598b59"
+  },
+  "decomp_ref": {
+    "doc": "NONE -- CTO ruling set @CTO_GATE_AND_RULING_SET_20260818_1700Z.md R-4 is the authority; this TO was formalized from R-4a directly, not from an atom decomposition",
+    "vintage_commit": "d087598b59",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/OPAL_ADVIPOINTERS.P4-EDGEREAD-49F.edge-router-currency-read-flip-precondition.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router:25",
+      "kind": "script",
+      "commit_or_etag": "sha256 fca5c275cd7666a5214d71d1 (deployed package member index.mjs, 5999 B)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "published version 25, published 2026-08-28T02:29:53.242Z, live on CloudFront EVTSA9VEHNZVH as origin-request for /api/scoped/advisor-intelligence/artifacts/*. Deployed bytes VERIFIED byte-identical to a faithful rebuild from current source through the declared build input. NOTHING WAS DEPLOYED OR MODIFIED BY THIS TO -- this is a read-only currency verification."
+    },
+    {
+      "path_or_key": "arn:aws:lambda:us-east-1:313476888478:function:public-data-router:7",
+      "kind": "script",
+      "commit_or_etag": "sha256 315adcb9808063541bdee8b4 (deployed package member index.mjs, 873 B)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "published version 7, published 2026-08-21T21:03:51.084Z, live on CloudFront EVTSA9VEHNZVH. Deployed bytes VERIFIED byte-identical to a faithful rebuild from current source. NOTHING WAS DEPLOYED OR MODIFIED BY THIS TO."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "ER-1",
+      "method": "command",
+      "criterion_verbatim": "DEPLOYED READ: both routers' published-version package member hashes vs build-input-resolved source, per-member diff printed with denominators; classification per router with the evidence.",
+      "invocation": "aws cloudfront get-distribution-config --id EVTSA9VEHNZVH (live association read) ; aws lambda get-function --function-name <fn> --qualifier <ver> --query Code.Location for arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router:25 and arn:aws:lambda:us-east-1:313476888478:function:public-data-router:7 ; curl the presigned package ; unzip ; sha256 each member ; bun build index.mjs --target=node --format=esm --minify --outfile=<scratch> (replicating build-nodejs-lambda.sh's bundle step only) ; sha256 compare",
+      "output_evidence": "PINNING AXIS from the LIVE CloudFront association read, not the TF: 5 of 5 Lambda@Edge associations pin a published version whose CodeSha256 equals that function's $LATEST -- shared-advisor-router:25, shared-advisor-router-response:5, public-data-router:7, auth-validator-edge:18, cache-control-injector:2. No stale version pin. BYTE READ: public-data-router v7 deployed 873 B sha256 315adcb9808063541bdee8b4 vs rebuild 873 B sha256 315adcb9808063541bdee8b4 = BYTE-IDENTICAL. shared-advisor-router v25 deployed 5999 B sha256 fca5c275cd7666a5214d71d1 vs rebuild 5999 B sha256 fca5c275cd7666a5214d71d1 = BYTE-IDENTICAL. CLASSIFICATION: CURRENT for both.",
+      "denominator": "2 of 2 routers named by the TO; 1 of 1 package member each; 5 of 5 live edge associations on the pinning axis",
+      "status": "PASS",
+      "status_reason": "deployed bytes are reproducible from current source through the DECLARED build input, so CURRENT is a positive identity rather than an absence of contrary evidence"
+    },
+    {
+      "criterion_id": "ER-2",
+      "method": "manual_read_with_citation",
+      "criterion_verbatim": "FLIP-RELEVANCE: for any diff, the SPECIFIC divergent behavior named (which route/key/branch differs) -- never a bare 'stale'; a diff that cannot affect the 49financial resolution is stated as such with the reason.",
+      "invocation": "sha256 equality on the deployed member vs the build-input rebuild, per router (ER-1 evidence)",
+      "output_evidence": "NO DIFF EXISTS at either router, so there is no divergent behaviour to name. This is not 'stale but irrelevant' -- it is byte equality. FIRM_BUCKET_MAP, the key-rewrite chain and the auth legs are therefore identical between deployed and source by construction; naming a divergent branch would be fabricating one.",
+      "denominator": "0 divergent bytes of 5999 (shared-advisor-router) and 0 of 873 (public-data-router)",
+      "status": "PASS",
+      "status_reason": "the criterion is conditional on a diff; the antecedent is false, and that is stated explicitly rather than the criterion being silently skipped"
+    },
+    {
+      "criterion_id": "ER-3",
+      "method": "manual_read_with_citation",
+      "criterion_verbatim": "THE PRECONDITION DISCHARGED, one of exactly three ways, in writing: (a) both CURRENT-or-irrelevant -> flip proceeds; (b) refresh landed + verified before 08-22; (c) row 4c RE-DATED in writing. No fourth path; no silent flip through a stale edge.",
+      "invocation": "ER-1 classification applied to the TO's three-way discharge, read at the TO's <dated> line",
+      "output_evidence": "DISCHARGED VIA PATH (a): both routers CURRENT, so the flip proceeds. Path (b) is moot -- no refresh was needed, so nothing had to land before 08-22. Path (c) is NOT taken and no re-date is made. THE 08-22 BOUND IS CONDITIONAL ON ITS OWN TERMS: the <dated> line reads 'if a refresh is needed it lands + verifies BEFORE 08-22 or row 4c RE-DATES in writing'. The antecedent is false, so the conditional never triggered and the TO is not past an absolute bound.",
+      "denominator": "1 of exactly 3 permitted discharge paths selected; the other 2 explicitly declined with reasons",
+      "status": "PASS",
+      "status_reason": "path (a) is the TO's own first option and it is satisfied by measurement rather than by assertion"
+    },
+    {
+      "criterion_id": "ER-4",
+      "method": "schema_validation",
+      "criterion_verbatim": "proof instance VALID rc=0 positional: ids ER-1,ER-2,ER-3,ER-4.",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.7.0_AE_CloudOps/deliverables/OPAL_ADVIPOINTERS.P4-EDGEREAD-49F_PROOF_OF_SPEC.json",
+      "output_evidence": "the validator's own verdict and rc, reported verbatim in the completion message. A first cut of this instance returned INVALID with 14 schema violations (invented enum values for phase, kind, deployed_state and method; string-shaped declared_exclusions; controls keys 'negative'/'no_write' instead of the required 'mutant'/'determinism'); each was corrected against the schema rather than argued with.",
+      "denominator": "4 of 4 expected criteria present and positional",
+      "status": "PASS",
+      "status_reason": "self-referential by the TO's design; the validator's verdict is the evidence and the first INVALID run is disclosed rather than hidden"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THE FILENAME CONTROL -- the deliberately wrong method the TO's own authority forbids (Rule 22a: 'resolved through the BUILD INPUT, never by filename'). Compare the deployed package member directly against the repo source file of the same name, with no build resolution. If filename comparison were sound it would agree with the build-input comparison.",
+      "expected": "a sound method would agree with ER-1's byte-identical result",
+      "observed": "IT DISAGREES, in the dangerous direction: source index.mjs is 23,141 B against a 5,999 B deployed member (shared-advisor-router) and 4,252 B against 873 B (public-data-router). A raw diff reports DIVERGENT for BOTH. The build is a minifying bundler (bun build --minify; deployed content is single-line with mangled identifiers such as 'function B($)'), so raw source can never equal deployed. THE WRONG METHOD WOULD HAVE PRODUCED A FALSE STALENESS FINDING ON A SHARED CLOUDFRONT DISTRIBUTION.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "observed": "build#1 and build#2 both 5999 B sha256 fca5c275cd7666a5214d71d1 -- IDENTICAL. Source tree unchanged: bun.lock 84aef70c941ba149, package.json 6da91caba08be07d, index.mjs c5967b50727e2e86, identical before and after.",
+      "status": "STABLE",
+      "method": "BYTE REPLAY: the bundle step (bun build index.mjs --target=node --format=esm --minify) was executed TWICE from identical source with identical flags, to scratch outfiles, and the two outputs hashed. Also asserts the rebuild does not mutate the source tree, since only the bundle step of a build-AND-UPLOAD script was replicated.",
+      "status_reason": "a genuine second execution, not the same run reported twice: build#1 and build#2 both 5999 B sha256 fca5c275cd7666a5214d71d1. Byte determinism is what this control claims and byte determinism is what it establishes, so the ER-1 hash match against deployed is reproducible rather than a single lucky build."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "build-nodejs-lambda.sh was NOT executed",
+      "reason": "it is build-AND-UPLOAD (aws s3 cp at :404, 'built and uploaded' at :445) with no dry-run or no-upload flag, and the TO forbids a refresh without the CTO per-apply gate. Only its bundle step was replicated, to a scratch outfile outside the source tree."
+    },
+    {
+      "item": "VINTAGE: this establishes CURRENT as of 2026-08-29T15:2xZ, NOT as of the TO's 08-22 date",
+      "reason": "shared-advisor-router v25 was published 2026-08-28T02:29:53Z, AFTER 08-22, so a flip traversing the edge before 08-28 would have crossed different bytes. Harmless ONLY because the flip has not occurred (P4-PUBIAM-49F pending behind P2-FLOOR-49F's apply gate). If the flip defers past a further edge change, this read EXPIRES and ER-1 must re-run."
+    },
+    {
+      "item": "the in-tree infra/aws/lambda-edge/shared-advisor-router/shared-advisor-router.zip was not used as evidence",
+      "reason": "it is 2026-04-07 vintage and matches NEITHER the deployed member nor a current rebuild -- a stale local artifact, not the build input."
+    },
+    {
+      "item": "no byte-level claim is made about shared-advisor-router-response, auth-validator-edge or cache-control-injector",
+      "reason": "they were read on the PINNING axis only (pinned version == $LATEST). The TO names only public-data-router and shared-advisor-router for the byte read."
+    }
+  ],
+  "surprises": [
+    "The TO's <authority> premise is now STALE: it cites 0.8.0's DEPLOYCENSUS finding that both routers were 'running 05-14 builds with source moved since'. MEASURED 2026-08-29: public-data-router LastModified 2026-08-21T21:03:43Z, shared-advisor-router 2026-08-28T02:29:45Z -- both redeployed since that census, so the staleness this TO was written to investigate no longer exists. OBSERVATION class, banked to 2.0.0_SA_COO; no action requested, nothing chased."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-29/",
+  "compiler_tools": [
+    {
+      "tool": "comp-routes edge-versions",
+      "invocation": "comp-routes edge-versions",
+      "result": "DESIRED plane: all 5 edge bindings are qualified_arn (DYNAMIC, auto-update on apply) -- no stale pin declared in cloudfront-distribution.tf. The tool discloses it cannot distinguish a declared binding from a deployed one, which is why the LIVE CloudFront association read was taken as the pinning evidence instead."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'P4-EDGEREAD' --all ; comp-find 'lambda-edge' --band CONFIG --all",
+      "result": "established that ER-1 had never previously been run (no prior deliverable or proof instance; 57 hits across 129,327 files) and located the TF file declaring the build command."
+    }
+  ]
+}

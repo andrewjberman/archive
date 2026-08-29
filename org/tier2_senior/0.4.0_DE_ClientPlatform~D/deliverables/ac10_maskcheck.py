@@ -33,6 +33,7 @@ before trusting `compare`.
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
 from itertools import combinations
 
@@ -159,6 +160,61 @@ def cmd_compare(pre_path, post_path, tag):
     return 1
 
 
+def _git(repo, *a):
+    return subprocess.check_output(['git', '-C', repo] + list(a)).decode().strip()
+
+
+def cmd_baseline(repo, merge_ref, post_ref, author):
+    """THE BASELINE IS A RELATIONSHIP, NOT A REF (2.0.0_SA_COO ruling 78581).
+
+    Derives the pre-state as the SECOND PARENT of the merge that brought this
+    lane's commits onto the published branch, then AUTHOR-CENSUSES the window.
+    A commit by any other author INVALIDATES the baseline BEFORE a pixel is read.
+
+    ⛔ WHY THIS IS CODE AND NOT A PARAGRAPH: this file's section 2 already WARNED,
+    in writing, that "a peer's change moving a protected surface would return a
+    NONZERO that reads as mine." The warning was READ and the run still
+    mis-attributed -- pre @d43b88c5 -> post @9957410e returned 528 differing px on
+    both tabs, which was @18fd5b38 (0.3.0_DT_TradingOperations removing the
+    Submit-a-Request nav item), a PEER's commit in shared chrome. The honest-looking
+    report was "AC10(c) FAILS, my change moved the protected tabs" -- A FALSE
+    CONFESSION, which is as damaging as a false pass and is the direction nobody
+    audits. A WARNING IS NOT A MECHANISM. The census is.
+
+    A pinned ref DECAYS as a baseline the moment any peer commits between it and the
+    post-state, while continuing to look exactly as authoritative as the day it was
+    pinned (d43b88c5..3cfa7e8a: 40 commits, 6 seats). A relationship does not decay.
+    """
+    try:
+        base = _git(repo, 'rev-parse', '%s^2' % merge_ref)
+    except subprocess.CalledProcessError:
+        print("NO SECOND PARENT on %r -- it is not a merge commit. The baseline is "
+              "the merge that brought this lane's work onto the published branch; "
+              "refusing to guess one." % merge_ref)
+        return 2
+    rng = '%s..%s' % (base, post_ref)
+    authors = [ln for ln in _git(repo, 'log', '--format=%an', rng).splitlines() if ln]
+    foreign = sorted({a for a in authors if a != author})
+    print("=== AC10 baseline (relationship-derived) ===")
+    print("  merge          : %s" % merge_ref)
+    print("  base = merge^2 : %s" % base)
+    print("  post           : %s" % post_ref)
+    print("  window         : %s" % rng)
+    print("  AUTHOR CENSUS  : %d commit(s), %d by %s" %
+          (len(authors), authors.count(author), author))
+    if not authors:
+        print("  EMPTY WINDOW -- nothing of this lane's is under test. REFUSING.")
+        return 2
+    if foreign:
+        print("  FOREIGN AUTHORS IN WINDOW: %s" % ', '.join(foreign))
+        print("  BASELINE INVALID -- a pixel result over this window cannot be "
+              "attributed to this lane. Do NOT read the compare. REFUSING.")
+        return 1
+    print("  BASELINE VALID -- %d of %d this lane's; safe to attribute."
+          % (len(authors), len(authors)))
+    return 0
+
+
 def main():
     args = sys.argv[1:]
     if not args:
@@ -168,6 +224,8 @@ def main():
         return cmd_derive(args[1], args[2], int(args[3]))
     if args[0] == "compare" and len(args) == 4:
         return cmd_compare(args[1], args[2], args[3])
+    if args[0] == "baseline" and len(args) == 5:
+        return cmd_baseline(args[1], args[2], args[3], args[4])
     print(__doc__)
     return 2
 

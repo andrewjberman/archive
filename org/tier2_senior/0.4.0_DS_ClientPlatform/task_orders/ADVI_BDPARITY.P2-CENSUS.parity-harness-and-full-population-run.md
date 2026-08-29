@@ -1,7 +1,7 @@
 # TO ADVI_BDPARITY.P2-CENSUS — parity classification harness (4a) + full-population run (LAPTOP)
 
 <task_order id="ADVI_BDPARITY.P2-CENSUS" project="ADVI_BDPARITY">
-<issued_to>0.4.0_DS_ClientPlatform (build + run); 3.0.0_SA_CVO grades; 4.0.0_SA_CRO methodology</issued_to>
+<issued_to>0.4.0_DS_ClientPlatform~C (build + run); 3.0.0_SA_CVO grades; 4.0.0_SA_CRO methodology [RE-ADDRESSED 2026-08-29T16:0xZ by the issuer 2.0.0_SA_COO: DS limb moves base -> 0.4.0_DS_ClientPlatform~C. REASON: /mstr-spawn step 1d refused seating the BASE -- it holds open TOs on TWO projects -- ADVI_BDPARITY and D3_MODELOVERLAY (TO-D3.1/1b/2, bare-base assignee verified at source) -- a Rule-27 collision at seating time. [CORRECTED same turn: my first note said THREE and named ADVI_COTSNP. FALSE -- those 3 rows carry NO base assignee; they rendered under a base query because to-check --assignee is a SUBSTRING match and they name a class with no instance. The refusal stands on the D3 rows alone.] ~C measured free: 0 open TOs, 0 process-truth hits, 0 spawn markers, and POD4-enumerated so it can commit data/*/scripts/gold/*.py. Remedy named by CTO ledger row 10. Nothing else on these faces changes.]</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T20:05Z</issued>
 <dated>MON-TUE 2026-08-24/25 (SS7)</dated>
@@ -64,3 +64,40 @@ w/ Compiler Tools section = deliverable.
    (with subclasses per CTO's record). Q1 is CLOSED — build to it, not around it.
 2. **COMPARISON PERIODS RULED: QTD / YTD / 1Y / SI.** That is the census spec; do not substitute a
    different period set.
+
+
+## ISSUER AMENDMENT 2026-08-29T17:5xZ (2.0.0_SA_COO), on 0.4.0_DS_ClientPlatform~C's pre-build read-back 83411
+
+**A2 -- THE RULED PERIOD SET IS NOT OBTAINABLE FROM THE CURRENT PAYLOAD BUILDER. THIS BINDS P1 AND P2 EQUALLY.**
+Q2 ruled **QTD / YTD / 1Y / SI**. `lambda_function.py` `body_performance_period` (:168-176) builds
+`dateRanges` = Custom(q_start,q_end) + the two trailing full CALENDAR YEARS (`_calendar_year_ranges`) + SinceInception.
+  - QTD  OBTAINABLE (parameterise q_start to the quarter start)
+  - SI   OBTAINABLE, but see A3
+  - YTD  **AT RISK, LOW** -- type ATTESTED in BD's vocabulary, UNVERIFIED on this endpoint;
+         two fallbacks exist (a Jan-1 Custom range, or the Dashboard plane)
+  - 1Y   **NOT AT RISK** -- obtainable as a Custom with computed dates; NO new type needed.
+         (A trailing full calendar year is not a trailing twelve months, but that is a
+          statement about the CURRENT builder, not about obtainability.)
+Closing it is a code change to the pull vehicle (add a YearToDate range + a trailing-12m Custom).
+⛔ **CORRECTED 17:5xZ, WITHIN MINUTES OF WRITING IT, on `1.0.0_SA_CTO` 83444's net table: MY FIRST
+VERSION OF THIS AMENDMENT SAID YTD AND 1Y WERE BOTH "ABSENT" AND THAT WAS TOO STRONG.**
+**NO PERIOD IS ESTABLISHED AS UNOBTAINABLE, and nothing here justifies reducing Andrew's ruled set.**
+What is true: the CURRENT builder does not emit them. What is NOT true: that they cannot be had.
+The remaining unknown is one spec read or the `performancePeriod` HAR -- **no vendor call** -- and that
+capture was NOT found in the puller's own directory.
+**1.0.0_SA_CTO 83444 upgraded the YTD half from GUESS to ATTESTED:** `"YearToDate"` is a real BD dateRange type,
+captured in Andrew's own 2026-08-20 HAR. **BOUND, and it is the load-bearing half:** it is attested on
+`/advisor/api/v1/Dashboard/data` with a SINGULAR `dateRange` object, while this TO needs it on
+`/portfolioreporting/api/performance/performancePeriod` with a PLURAL `dateRanges` array. **A type valid on one
+endpoint is EVIDENCE about the other, not proof of it.** Raises the prior; does not close it.
+
+**A3 -- "SINCE INCEPTION" FAILS SILENTLY FOR ANY NON-ROSTER ACCOUNT.** `run()` passes
+`inception=acct.get("inception", q_start)`. A payload-injected probe account has no roster `trade_start_date`,
+so the SinceInception range **COLLAPSES TO THE CUSTOM WINDOW** and BD returns a figure LABELLED "Since Inception"
+that is actually QTD. **Nothing raises.** CONDITIONS: every probe account carries an EXPLICIT inception, and the
+probe STATES WHICH inception it used. **And our roster's `trade_start_date` is not BD's funding-inception -- they
+are already different questions, so an SI delta is uninterpretable until that is declared on the face.**
+
+**STATUS OF THIS AMENDMENT: OPEN. It is not a build instruction and it does not re-open the ACs --
+BP1-2/3/4/5 stand as written. It records that BP1-1's period set is unobtainable as the TO is drafted,
+so that a later reader does not treat a 2-of-4 period result as a data finding.**

@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_INSURE.TO-A4-AEC",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.7.0_AE_CloudOps~K",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/advi-insure-snapshot-plane/20260825T122500Z/DECOMP.md",
+    "vintage_commit": "6a634f2f6f",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~K/task_orders/ADVI_INSURE.TO-A4-AEC.insurance-runner-target-on-the-49f-session-chain.md"
+  },
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~K/task_orders/ADVI_INSURE.TO-A4-AEC.insurance-runner-target-on-the-49f-session-chain.md",
+    "group": "A",
+    "vintage_commit": "6a634f2f6f"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/bd-pipeline/bd-49f-session-trigger/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "a57461f1914ac36e4a9594ca8e2bac66dc096669",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Live CodeSha256 on bd-49f-session-trigger = YZ3FHmwtWwag53zlm6XwbyNq8331A0TZpygqatswIJs=, byte-identical to the sha256 build-and-upload.sh printed for the artifact it uploaded (7104 B, 'write VERIFIED: size=7104, sha256 metadata match'). LastModified 2026-08-28T18:43:27.000+0000. Deployed bytes resolved to the BUILD INPUT through lambda-source-map.json, never by filename (Rule 22a CODE layer)."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/bd-pipeline/bd-49f-session-chain.tf",
+      "kind": "terraform",
+      "commit_or_etag": "f526a00753e9d7804d1d8585494b64b68be34aa5",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply of the SAVED -target'd plan file after 1.0.0_SA_CTO GO 78677: 'Apply complete! Resources: 3 added, 2 changed, 0 destroyed.' On-target re-plan AND untargeted bd-pipeline re-plan both 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "path_or_key": "aws_cloudwatch_event_rule.bd-49f-insurance-session-daily",
+      "kind": "schedule",
+      "commit_or_etag": "f526a00753e9d7804d1d8585494b64b68be34aa5",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws events describe-rule: ScheduleExpression cron(35 4 * * ? *), State ENABLED, Arn arn:aws:events:us-east-1:313476888478:rule/bd-49f-insurance-session-daily. list-targets-by-rule: Id Bd49fInsuranceSessionTrigger -> function bd-49f-session-trigger, Input {\"mode\":\"session-refresh\",\"runner\":\"insurance\"}."
+    },
+    {
+      "path_or_key": "aws_iam_role_policy.bd-49f-session-trigger-policy (InvokeRunner statement)",
+      "kind": "iam",
+      "commit_or_etag": "f526a00753e9d7804d1d8585494b64b68be34aa5",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Live simulate-principal-policy: bd-49f-session-trigger-role lambda:InvokeFunction on arn:aws:lambda:us-east-1:313476888478:function:opal-assets-bd49f-reporting-pull = allowed. The statement's Sid/Effect/Action were unchanged in the plan; only the Resource list moved 2 -> 3 ARNs."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260828T1840Z_advi-insure-a4aec-chain-wiring_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "19c0f0c53b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER#6 ledger OPENED at deploy-START 18:40Z with 5 legs declared, CLOSED with every leg carrying its proof: 'OK: CLOSED deploy ledger advi-insure-a4aec-chain-wiring -- all 5 legs proven; sentinel removed'."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "INSA4AEC-AC1",
+      "criterion_verbatim": "(a) built + exercised: three arms (insurance -> reporting-pull + payload; main -> runner + EMPTY; bogus -> refusal), main/fees payload invariant asserted; source map verified before build; deployed members via the manifest.",
+      "method": "test_suite",
+      "invocation": "WS=/cygdrive/c/Users/AndrewBerman/Desktop/ajb_workspace python scratchpad/exercise_a_three_arms.py  (arms transcribed from this criterion field-by-field BEFORE reading the implementation's shape)",
+      "output_evidence": "ARM 1 insurance: FunctionName='opal-assets-bd49f-reporting-pull', Payload=b'{\"leg\": \"insurance\"}', InvocationType='Event' [4/4 OK]. ARM 2 main: FunctionName='bd-49f-runner', kwargs=['FunctionName','InvocationType'] -- no Payload key at all [3/3 OK]. ARM 2b fees: FunctionName='bd-49f-fees-runner', no Payload key [2/2 OK]. ARM 3 bogus: invokes=0, statusCode=409, reason=\"marker runner ambiguous: 'bogus'\" [3/3 OK]. RED ARM: planted {'leg':'PLANTED'} for main -> ARM 2's assertion FAILS (correct) [1/1 OK]. 'RESULT: PASS -- 14/14 checks green across 4 arms + 1 RED arm', rc=0. Source map read BEFORE build. build-and-upload.sh: 'OK: import-closure -- 1 packaged .py file(s)', 'SHA256: YZ3FHmwtWwag53zlm6XwbyNq8331A0TZpygqatswIJs=', 'write VERIFIED: size=7104, sha256 metadata match'.",
+      "denominator": "14 checks across 4 arms + 1 RED arm; 14/14 PASS, 0 FAIL. Payload map covers 1 of 3 targets (insurance); the other 2 (main, fees) assert the ABSENCE of the Payload kwarg.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INSA4AEC-AC2",
+      "criterion_verbatim": "(b) landed: safe-apply on the SAVED -target'd plan after 1.0.0_SA_CTO's GO on the diff; apply counts == plan counts; 0-diff re-plan; the rule, its target, its input and the env var read back LIVE (`aws events describe-rule` / `list-targets-by-rule`; `get-function-configuration`); NEVER#6 ledger opened at deploy-start and CLOSED with every leg proven.",
+      "method": "live_read",
+      "invocation": "HALT_ACK=1 bash .tools/safe-apply.sh apply -no-color -input=false <SAVED a4aec.tfplan>  ; then terraform plan (on-target and untargeted) ; then aws events describe-rule / list-targets-by-rule / aws lambda get-function-configuration",
+      "output_evidence": "GO from 1.0.0_SA_CTO msg 78677 on the printed diff. Apply's OWN line: 'Apply complete! Resources: 3 added, 2 changed, 0 destroyed.' == plan 'Plan: 3 to add, 2 to change, 0 to destroy.' EXACTLY. On-target re-plan: 'No changes. Your infrastructure matches the configuration.' UNTARGETED bd-pipeline re-plan: 'No changes.' too (no foreign change pending, CTO 78677 item 2 discharged). describe-rule: cron(35 4 * * ? *), ENABLED. list-targets-by-rule: Input {\"mode\":\"session-refresh\",\"runner\":\"insurance\"} -> bd-49f-session-trigger. get-function-configuration: INSURANCE_RUNNER_FUNCTION_NAME=opal-assets-bd49f-reporting-pull present with all 7 prior vars intact, CodeSha256 YZ3FHmwt..., LastModified 2026-08-28T18:43:27.000+0000. Ledger CLOSED all 5 legs proven.",
+      "denominator": "5 plan targets, all 5 resolved; 3 added + 2 changed + 0 destroyed = 5 resources, matching the plan 5/5; ledger 5 of 5 legs closed with proof; 8 env vars live (1 new + 7 pre-existing unchanged).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INSA4AEC-AC3",
+      "criterion_verbatim": "(c) IAM: the three-arm live acceptance above, quoted; comp-iam gaps output quoted.",
+      "method": "live_read",
+      "invocation": "aws iam simulate-principal-policy --policy-source-arn <role> --action-names lambda:InvokeFunction --resource-arns <ONE arn>  -- run FIVE times as SEPARATE invocations, one --resource-arns each; then comp-iam gaps",
+      "output_evidence": "ARM 1 bd-49f-session-trigger-role -> opal-assets-bd49f-reporting-pull: Decision 'allowed'. ARM 2 (positive control, separate invocation) same role -> bd-49f-runner: 'allowed'. ARM 2b same role -> bd-49f-fees-runner: 'allowed' (nothing lost). ARM 3 (RESOURCE-axis fence) same role -> advi-49f-gold-dispatch: 'implicitDeny'. ARM 4 (PRINCIPAL-axis fence) bd-49f-keepalive-role -> opal-assets-bd49f-reporting-pull: 'implicitDeny'. comp-iam gaps: 14 action-plane missing-permission findings estate-wide, ZERO naming bd-49f-session-trigger or opal-assets-bd49f-reporting-pull (grep -c = 0); the visible ones are DS-lane data/black_diamond/scripts/** and other seats' EC2 code. comp-iam service bd-49f-session-trigger still reports lambda:InvokeFunction at lambda_function.py:211 as UNRESOLVABLE-RESOURCE.",
+      "denominator": "5 arms, 5 separate invocations, 1 --resource-arns each (the 2+-ARN false-deny trap avoided); 3 expected-allow all allowed, 2 expected-deny both implicitDeny; comp-iam gaps 14 findings, 0 of 14 name this TO's subjects.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INSA4AEC-AC4",
+      "criterion_verbatim": "(d) the FIRST chain fire with runner=insurance, read from BOTH Lambdas' own logs + head-object per page + the same-day main run as the negative control. Closes only on a SCHEDULED fire.",
+      "method": "live_read",
+      "invocation": "aws logs filter-log-events --log-group-name /aws/lambda/bd-49f-session-trigger --start-time <04:25Z> (ALL events, no --filter-pattern); aws logs filter-log-events --log-group-name /aws/lambda/opal-assets-bd49f-reporting-pull --start-time <04:34Z> (ALL events, no --filter-pattern -- the NO-BD49F-REPORTING arm is an ABSENCE and a pattern filter cannot evidence one); aws s3api list-objects-v2 --bucket opal-data-assets --prefix blackdiamond/49financial/bronze/ (client-side date filter across EVERY insurance_* family, not just the two expected); aws s3api head-object per landed key (UTC, Metadata map read); NEGATIVE CONTROL aws logs filter-log-events on the same trigger log for 00:00Z and on /aws/lambda/bd-49f-runner 00:00-01:30Z with a positive control for the token; CONTAMINATION aws s3api list-objects-v2 --bucket opal-data-bd --prefix blackdiamond/49f/bronze/reporting_. Read at 04:51-05:10Z by 0.7.0_AE_CloudOps~K (re-seat), against the read plan pre-registered in broker 78834 + addendum 79410 BEFORE the fire.",
+      "output_evidence": "ARM 1 -- bd-49f-session-trigger's OWN log, RequestId fd8feb2d-913a-458c-b1fe-8f5c87012bd8, quoted verbatim: 'bd-49f-session-trigger invoked 2026-08-29T04:35:05.217227+00:00 mode=session-refresh instance=i-0fa1846f04ed7e337' / 'Mode marker written: s3://opal-data-bd/blackdiamond/49f/session-trigger-mode.json mode=skip-live-direct-invoke runner=insurance' / 'Lever A: cookie POSITIVE-live (probe positive (captured_at=2026-08-27T18:27:35.463Z)) -> SKIP mint, direct-invoke opal-assets-bd49f-reporting-pull (target=insurance)' / 'Invoked opal-assets-bd49f-reporting-pull (async, target=insurance, payload={\"leg\": \"insurance\"}) status=202'. Duration 649.26 ms. THE PAYLOAD IS THE DISCRIMINATOR, not the invoke: a fire reaching the right function with an EMPTY payload would run the reporting branch and still read as success at the trigger. Payload present and non-empty. ARM 2 -- opal-assets-bd49f-reporting-pull's OWN log, RequestId 325f3836-0292-418e-96f5-4cbb58a26501, quoted verbatim: 'BD49F-INSURANCE: pull_date=2026-08-29 pages=2 rows=77 attested_total=77 completeness=measured-complete receipt=LANDED (DRY_RUN=False)' at 2026-08-29T04:35:19.347Z. Duration 12741.01 ms. NO BD49F-REPORTING line -- and that absence is measured over the COMPLETE 5-event set of the RequestId (INIT_START, START, BD49F-INSURANCE, END, REPORT), pulled with NO filter pattern, so it is an enumerated absence and not a grep that missed. ARM 3 -- s3api, UTC, bucket opal-data-assets: 3 keys landed under pull_date 2026-08-29, matching the addendum-79410 denominator of 3 (page0 + page1 + receipt export), NOT 2. (i) blackdiamond/49financial/bronze/insurance_relationshipaccountdetailsearch/2026-08-29/insurance_relationshipaccountdetailsearch_page0.json 82,136 B LastModified 2026-08-29T04:35:08Z, Metadata attested-total=77 page-index=0 page-offset=0 page-limit=50 rows-on-page=50 rows-cumulative=50 pull-asof=2026-08-29 to=ADVI_INSURE.TO-A3-AE; (ii) .../insurance_relationshipaccountdetailsearch_page1.json 41,688 B LastModified 2026-08-29T04:35:09Z, Metadata attested-total=77 page-index=1 page-offset=50 page-limit=50 rows-on-page=27 rows-cumulative=77; (iii) blackdiamond/49financial/bronze/insurance_insurancerelationshiplist_export/2026-08-29/insurance_insurancerelationshiplist_export_exportResultID-283068.xlsx 13,090 B LastModified 2026-08-29T04:35:20Z ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.sheet -- the RETAINED bronze-only job receipt, EXPECTED per the issuer's ~17:0xZ ruling and explicitly NOT a CONTAMINATED signal. All LastModified inside the fire's own window (04:35:05-04:35:20Z). Zero parquet under the bronze tree (Rule 17a). ADDED ARM (79410) -- COMPLETENESS RECOMPUTED, NOT READ: this seat SUMMED rows-on-page off the object metadata itself (50 + 27 = 77) and compared it to the run's OWN served attested-total (77) -> computed verdict COMPLETE. The Lambda's own token reads completeness=measured-complete. THE TWO AGREE. page-index 0,1 contiguous at offsets 0,50 under limit 50, rows-cumulative 50->77 consistent: no gap, no missing object, no partial write. The comparison was made against THIS FIRE's served attested_total, never against the hardcoded 08-28 value of 77 (79410 item 2). rows=77 with pages=2 is neither of the two 50-shaped failures 79410 separated in advance: not the 2026-08-27 pagination regression (50 of 77, pages=1) and not the mutant counting regression (50 across pages=2). ARM 4 -- NEGATIVE CONTROL, two limbs. (a) The same day's 00:00Z main run from the trigger's own log, RequestId cce8282e-0e03-48a6-be53-193689105077: 'Mode marker written: ... runner=main' / 'Lever A: ... direct-invoke bd-49f-runner (target=main)' / 'Invoked bd-49f-runner (async, target=main, payload=EMPTY) status=202'. Three-way separation from the 04:35Z fire -- different marker (main vs insurance), different target FUNCTION (bd-49f-runner vs opal-assets-bd49f-reporting-pull), different payload (EMPTY vs {\"leg\": \"insurance\"}). The main run's payload=EMPTY is the live demonstration that ARM 1's payload discriminator can actually fire. (b) The main run's OWN runner log /aws/lambda/bd-49f-runner 00:00-01:30Z: 0 insurance tokens across 40 events, with a POSITIVE CONTROL proving the instrument can see the token (same case-insensitive match = 1 hit in the 04:35Z fire's log). A controlled absence, not an empty read. Corroborating: the reporting-pull log group holds 0 events in 00:00-00:30Z -- the main chain never invokes that function at all. CONTAMINATION CLEARED per the 78879 definition: the REPORTING prefix blackdiamond/49f/bronze/reporting_* gained 0 objects dated 2026-08-29, and the fire's complete trigger event set shows exactly ONE invoke, to the reporting-pull, with no chain runner invoked. FRESHNESS DISCRIMINATION (run beyond the plan, and recorded because it would otherwise sit unexplained under a PASS): the two detail pages are BYTE-IDENTICAL to the 2026-08-28 QA run (ETags f67b3d9bd2fead04ec0be79bf50d54e8 and 1ebf05afe83b14ac28dd0fc777cfa3e8 on both dates). That is NOT a stale re-serve: the receipt export carries a NEW vendor job identity, exportResultID-283068 with ETag c2ad1d91e524997b4876455299f1f9ba, against 08-28's exportResultID-283012 / 8c053c98d3ac8cfc48ad0a04d9264541 -- so the vendor ran a fresh export today and the identical detail bytes are an unchanged slowly-changing dataset. The objects were freshly PUT (LastModified inside the fire window, under the 2026-08-29 partition).",
+      "denominator": "1 of 1 scheduled fires observed -- the FIRST fire of bd-49f-insurance-session-daily, cron(35 4 * * ? *) UTC, at 2026-08-29T04:35:05Z; no manual invoke was run, before or after. Bronze: 3 of 3 expected keys present, swept across ALL FOUR insurance_* families that exist under blackdiamond/49financial/bronze/ (relationshipaccountdetailsearch, insurancerelationshiplist, insurancerelationshiplist_export, relationshipdetail) for pull_date 2026-08-29 -- the other two families correctly gained nothing. Rows: 77 of a served attested_total of 77 (recomputed 50+27 off object metadata). Absence arms: NO-BD49F-REPORTING measured over the complete 5-event set of the fire's RequestId; main-run control 0 insurance tokens of 40 events with a positive control at 1; reporting-prefix contamination 0 objects dated 2026-08-29.",
+      "status": "PASS",
+      "status_reason": "CLOSED ON THE SCHEDULED PLANE. This row was authored UNCOMPUTABLE on 2026-08-28T19:1xZ because the fire was in the future; the named later run that moves it -- the 2026-08-29T04:35Z scheduled fire -- has now occurred and been read, so the member moves UNCOMPUTABLE -> PASS exactly as 3.0.0_SA_CVO cert 78640 anticipated. Read by 0.7.0_AE_CloudOps~K, a RE-SEAT: the predecessor died across the fire (broker LIVE PID 32036 at 04:15Z, NOT REGISTERED at 04:39Z). The criteria were NOT composed after seeing the result -- they were pre-registered in broker 78834 (19:29:26Z) and addendum 79410 (22:16:01Z), both BEFORE the fire, and this seat read BOTH before opening any artifact. SCOPE OF THE CLAIM: this is the EXECUTOR read only. 3.0.0_SA_CVO owes the independent certifying read and this seat neither waited on it nor read for it. No agreement with that read is claimed as corroboration -- same subject, same substrate, largely the same instruments is REPETITION, not corroboration (CLAUDE.md Rule 22). LIMIT, restated from 79410 rather than quietly dropped now that the numbers are green: the BD49F-INSURANCE log line and the object metadata are TWO CARRIERS OF ONE SELF-REPORT, both written by the same process, not two instruments. The recompute genuinely catches a verdict-logic defect (the mutant class: pages right, verdict wrong) and a partial write (objects missing from the set). It does NOT catch a vendor-side or fetch-side undercount, because attested-total is itself vendor-served and stamped by the same code. CVO's P1 (marker object by version) and P2 (CloudWatch metrics) sit on planes this seat's read does not touch."
+    },
+    {
+      "criterion_id": "INSA4AEC-AC5",
+      "criterion_verbatim": "Proof instance VALID rc=0 positional, ids INSA4AEC-AC1..AC5, TRUE rc bare, validator invocation + rc recorded IN the instance (D2 lock-in); every arm's output quoted.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/ADVI_INSURE.TO-A4-AEC_PROOF_OF_SPEC.json INSA4AEC-AC1,INSA4AEC-AC2,INSA4AEC-AC3,INSA4AEC-AC4,INSA4AEC-AC5   (positional instance + positional expected-id list, so COVERAGE is CHECKED rather than the checker's default 'COVERAGE UNCHECKED' note; bare rc read from $?)",
+      "output_evidence": "D2 LOCK-IN, recorded after the run, not predicted: bare rc=0, verdict VALID. First run of this instance was INVALID rc=1 with 2 violations -- \"schema: <root>: Additional properties are not allowed ('validator_result' was unexpected)\" and \"acceptance[INSA4AEC-AC4]: status=UNCOMPUTABLE REQUIRES status_reason\" -- both fixed (the validator block moved into this row because the root schema is closed; AC4 gained its status_reason) and the file re-validated, so the recorded rc describes the file as it now stands. Coverage line on the passing run: expected ids INSA4AEC-AC1..AC5 all present. Alignment printed by the same run: 5/5 criteria carry >=1 cell_ref; 1/1 distinct cell_ref resolves in the decomp id space of 24 cells; 1/1 declared cell reachable from >=1 criterion. Every arm's output is quoted verbatim in the AC1/AC2/AC3 rows above. RE-LOCKED 2026-08-29T05:1xZ by 0.7.0_AE_CloudOps~K after the AC4 row moved UNCOMPUTABLE -> PASS on the 2026-08-29T04:35Z scheduled fire. A recorded rc describes the file it was run against, so editing AC4 INVALIDATED the rc recorded above and it was re-earned rather than inherited. Re-run, verbatim: 'python .tools/proof-of-spec-check.py org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/ADVI_INSURE.TO-A4-AEC_PROOF_OF_SPEC.json INSA4AEC-AC1,INSA4AEC-AC2,INSA4AEC-AC3,INSA4AEC-AC4,INSA4AEC-AC5' -> 'proof-of-spec-check | structural=jsonschema | acceptance rows=5 | violations=0' ... 'VALID -- alignment-backward UNASSERTED (undelimited <decomp_ref>...)', bare rc=0 read from $?. Alignment on this run: 5/5 criteria carry >=1 cell_ref; 1/1 distinct cell_ref resolves in the decomp id space of 24 cells; 1/1 declared cell reachable from >=1 criterion. Coverage CHECKED: the 5 expected ids were passed positionally, so this is not the checker's default 'COVERAGE UNCHECKED' note. The declared_exclusions list went 5 -> 4 entries in the same edit: the 'INSA4AEC-AC4 -- the first scheduled chain fire' exclusion was RETIRED, because a criterion that has now been computed is no longer an exclusion and leaving it would be a second, contradicting carrier of AC4's state.",
+      "denominator": "5 criterion ids declared by the TO, 5 present in this instance, 0 missing, 0 extra.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "RED ARM in the act-(a) exercise: plant _PAYLOAD_BY_TARGET['main'] = {'leg':'PLANTED'} and re-drive the runner-run leg for target=main. This mutates the exact invariant ARM 2 asserts -- that main is invoked with NO Payload kwarg. ARM 2 asserts an ABSENCE, which is the shape that passes when it is inert, so the mutation is what proves the arm is reachable from a failing state rather than vacuously green.",
+      "expected": "ARM 2's NO-payload assertion FAILS under the planted defect (the invoke kwargs gain a 'Payload' key)",
+      "observed": "planted-run kwargs=['FunctionName','InvocationType','Payload'] -- 'RED.invariant-is-reachable -- ARM 2's assertion FAILS (correct) under the planted defect'. _PAYLOAD_BY_TARGET restored to {'insurance': {'leg': 'insurance'}} and verified after the arm.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The terraform plan was cut, saved, and then re-cut after the CVO P2-i/P2-ii edits; the apply consumed the SAVED plan file rather than a fresh plan, so the applied change is the reviewed one by construction. Post-apply, the plan was run twice over different scopes (on-target and untargeted) as two same-input reads of the same converged state.",
+      "observed": "Both post-apply plans returned 'No changes. Your infrastructure matches the configuration.' Apply counts equalled plan counts exactly (3/2/0). The three-arm exercise was run to completion twice across the edit cycle with the same 14/14 result.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The reporting-pull Lambda's own code and environment (INSURANCE_EGRESS, insurance_leg.py)",
+      "reason": "Owned by 0.6.0_AE_PartnerETL under ADVI_INSURE.TO-A3-AE (c'), deployed 18:09:29Z under its own NEVER#6 ledger. This TO is the CHAIN-WIRING half only and does not edit that function; its live state was READ here, never written."
+    },
+    {
+      "item": "bd-49f-runner and bd-49f-fees-runner behaviour",
+      "reason": "Explicitly untouched by scope_guard -- bd-49f-runner is firm-bound to opal-data-bd. Their invocation path is asserted UNCHANGED by the main/fees arms rather than modified."
+    },
+    {
+      "item": "Any alarm, SNS topic, monitor or twin on the new schedule",
+      "reason": "Standing moratorium (INS-inv-5); a cron is a trigger, not an alarm. None was created."
+    },
+    {
+      "item": "The record-terraform-deploy.sh bun/MSYS source-map defect found during this deploy",
+      "reason": "Out of this TO's lane. Surfaced to 3.0.0_SA_CVO cc 2.0.0_SA_COO as a surprise-channel line and NOT patched; only this TO's own function entry was corrected by hand so the Rule-4 record is true."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION (INERT): record-terraform-deploy.sh's source-map write SILENTLY NO-OPS on this device and still commits. JSON_TOOL is chosen by testing an absolute path first (:182 -x /c/Users/AndrewBerman/.bun/bin/bun), so the bun/JS branch runs; inside it deriveContentCommit shells `git -C \"/cygdrive/c/...\"` and bun is a native Windows binary, so the call THROWS (exercised directly: 'Command failed: git -C \"/cygdrive/c/...\" log -1'). Result: a commit titled 'ci: record deploy' lands while the record it claims was not written. Same MSYS-argument class CLAUDE.md already names for Python/PowerShell callers; bun is a third caller not covered. Surfaced, not chased.",
+    "OBSERVATION (INERT): the tool's own docstring (:5, :24) describes the PRE-ADHC_DRIFTD.001 behaviour ('sets last_deployed_commit = current git HEAD'), which the code at :200-268 no longer does. Reading the docstring alone would have produced a false hazard report about sibling provenance; reading the code corrected it. Two carriers, one stale.",
+    "OBSERVATION (INERT): infra/aws/terraform/bd-pipeline/bd-49f-session-chain.tf did NOT pass `terraform fmt -check` at HEAD before this TO touched it (rc=3 measured on a pristine HEAD copy); 6 lines of pre-existing drift were normalised by this work. Disclosed in the commit rather than presented as this TO's change.",
+    "ATTRIBUTION DISCLOSURE (INERT): commit 17db393744, produced by record-terraform-deploy.sh under this seat's author line, also carries opal-assets-bd49f-reporting-pull's artifact_sha256 -> 0XJf+G2pB..., which is 0.6.0_AE_PartnerETL's 18:09:29Z build. That seat's own commit 52ffb6c8a3 did not include the source map, so the value sat uncommitted in the shared tree and was swept in. The VALUE is true (verified against the live CodeSha256); only the authorship is wrong. Not reverted -- reverting would strand a correct value. That seat was told directly.",
+    "OBSERVATION (INERT): tag bd-v2.56.0 points at 5d9531729b (a 2.0.0_SA_COO~X commit that was branch HEAD when the tag was cut) rather than at this seat's deploy commit, because the shared worktree advanced between commit and tag. All four of this deploy's commits are CONTAINED in the tagged commit (merge-base --is-ancestor TRUE for each), so the tag validly marks a state including the whole deploy; it is less precise than the bd-v2.43.0 precedent. The tag is unpushed (0 on origin). Re-pointing needs `git tag -d`, a guarded destructive op that was DENIED at this seat and correctly not forced -- left for the integrator to re-point if the precedent is preferred.",
+    "OBSERVATION (INERT, 2026-08-29T05:0xZ, 0.7.0_AE_CloudOps~K reading the 04:35Z fire): the insurance receipt export's KEY EXTENSION changed from .json (2026-08-25 exportResultID-282394/282397, 2026-08-28 exportResultID-283012) to .xlsx (2026-08-29 exportResultID-283068), across the reporting-pull's 2026-08-28T18:09:29Z function update. The object's ContentType was ALREADY application/vnd.openxmlformats-officedocument.spreadsheetml.sheet on 08-28 under a .json name, so this is a NAME-catches-up-to-CONTENT correction (TO-A3-AE (c') names 'export key extension from content type' as one of its two provenance one-liners), not a format change. VERIFIED HARMLESS DOWNSTREAM before classifying it INERT: data/assets/scripts/silver/bd49f_insurance_conversion.py selects by PREFIX (_list paginates the whole bronze/<feed>/<date>/ prefix with no suffix filter) and read_export parses the BYTES via pd.read_excel(io.BytesIO(blob), engine='openpyxl') -- content-based, not extension-based -- so the renamed object is neither dropped nor mis-parsed. Residual is documentation only: that file's header comment (:34) still reads 'Measured live 2026-08-25 (6 bronze objects, all .json by suffix, zero parquet' , which is now stale by one object. Owner: 0.6.0_AE_PartnerETL (the leg) / DS lane (the comment). NO ACT TAKEN AT THIS SEAT -- surfaced, not chased."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~K/logs/2026-08-28/advi_insure_to_a4aec_chain_wiring_1755-1915Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast bd-49f-session-trigger  (Rule-20 dependency-graph QUERY, never a rebuild)",
+      "result": "Provenance header read: kuzu_nessie_db, 27054 nodes / 58251 edges, Nessie HEAD current (pin == marker HEAD), built 2026-08-28T18:08:30Z age 0.0h. Blast radius returned LAMBDA bd-49f-runner + bd-49f-fees-runner and NOT opal-assets-bd49f-reporting-pull -- the graph agreeing this is a NEW edge. Also surfaced a [HOLD] on the .tf which was READ, not skipped: the 20260702T1835Z modemarker-getobject ledger, status CLOSED with all 5 legs proven, i.e. not an active hold."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam service bd-49f-session-trigger (before write) ; comp-iam gaps (after the iam edit)",
+      "result": "BEFORE: 9 calls across 9 statements -- 2 GRANTED, 2 GRANTED-BROAD, 5 UNRESOLVABLE-RESOURCE, with lambda:InvokeFunction at lambda_function.py:211 among the unresolvable. Stated as a FLOOR: comp-iam models (action) not (action,resource), so it structurally cannot confirm or falsify the new ARN grant -- necessary, not sufficient. AFTER: comp-iam gaps returns 14 action-plane findings estate-wide, 0 of which name this TO's subjects. The live simulate arms in AC3 are the load-bearing evidence."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": ".tools/commit-gate.sh infra/aws/lambda/bd-pipeline/bd-49f-session-trigger/lambda_function.py",
+      "result": "'All checks passed!' / 'OK: pre-commit gate clean for 1 of 1 file(s)' (py_compile + ds-precommit + ruff py39)."
+    },
+    {
+      "tool": "terraform fmt / validate",
+      "invocation": "terraform fmt -check bd-49f-session-chain.tf (NEVER -diff, which writes) ; terraform validate",
+      "result": "fmt -check rc=0 after the edits; validate 'Success! The configuration is valid.' Formatting was resolved by formatting a COPY in scratchpad and diffing it back, so `fmt` never wrote to the tracked file unreviewed; the change was proven whitespace-only by an empty `diff -w`."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": ".tools/deploy_ledger.py open --slug advi-insure-a4aec-chain-wiring ... (at deploy-START) ; close-leg x5 ; close",
+      "result": "OPENED 18:40Z with 5 legs declared before any apply; 'OK: CLOSED deploy ledger advi-insure-a4aec-chain-wiring -- all 5 legs proven; sentinel removed'."
+    },
+    {
+      "tool": "build-and-upload.sh",
+      "invocation": "bash infra/aws/lambda/ci/build-and-upload.sh bd-pipeline bd-49f-session-trigger",
+      "result": "'OK: import-closure -- 1 packaged .py file(s), every top-level import satisfied'; SHA256 YZ3FHmwtWwag53zlm6XwbyNq8331A0TZpygqatswIJs=; size 7104; 'write VERIFIED: size=7104, sha256 metadata match'. Source map was read BEFORE the build (Rule 4)."
+    }
+  ]
+}

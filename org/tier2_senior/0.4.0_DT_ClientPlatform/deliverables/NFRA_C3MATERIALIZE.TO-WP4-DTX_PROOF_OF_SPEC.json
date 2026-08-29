@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_C3MATERIALIZE.TO-WP4-DTX",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-c3materialize-wp4/20260828T1442Z/DECOMP.md",
+    "vintage_commit": "8057c94e7a",
+    "to_ref": "org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/NFRA_C3MATERIALIZE.TO-WP4-DTX.resolver-repair.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/standards/isck/WP3_LEDGER_DESIGN.md",
+    "group": "OTHER",
+    "vintage_commit": "d0398b977d"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform~X",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/modules/graph/nerves_resolve.py",
+      "kind": "script",
+      "artifact_covered_by": [
+        "WP4-AC1",
+        "WP4-AC2",
+        "WP4-AC3",
+        "WP4-AC4"
+      ],
+      "commit_or_etag": "a3c34f019f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the keystone resolver; acceptance is the battery, not a deploy"
+    },
+    {
+      "path_or_key": "org/modules/graph/tests/nerves_resolve_battery/run_battery.py",
+      "kind": "test",
+      "artifact_covered_by": [
+        "WP4-AC5"
+      ],
+      "commit_or_etag": "a3c34f019f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "27 arms, 6 mutations, runs from a fresh extract at --run-commit"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "WP4-AC1",
+      "criterion_verbatim": "THE FIVE-STATE RESULT CONTRACT: every resolution returns exactly one of RESOLVED / AMBIGUOUS / GENUINELY_UNADDRESSED / SUBSTRATE_UNAVAILABLE / NOT_APPLICABLE, enforced by the result type; SUBSTRATE_UNAVAILABLE names the tier and the exception class and is NEVER byte-identical to GENUINELY_UNADDRESSED (the arm: remove one tier's substrate, the same ref flips state); every result carries per-tier source vintage, fabric, evidence refs, PLURAL candidates, the confidence band (kept, orthogonal), and the resolver version; AMBIGUOUS returns ALL candidates with per-candidate evidence and never picks one; NOT_APPLICABLE is the wrong-fabric answer with the fabric named.",
+      "method": "test_suite",
+      "invocation": "python org/modules/graph/tests/nerves_resolve_battery/run_battery.py",
+      "output_evidence": "All five states reachable and arm-proved. THE DEFECT, as an arm, on the case where the old contract could hide -- BOTH sides return ZERO candidates: ref 'zzz_not_a_thing_anywhere_xyz' reads GENUINELY_UNADDRESSED with every tier alive and SUBSTRATE_UNAVAILABLE with the substrate stripped; byte_identical=False. substrate_arm() runs it non-destructively (points _WS at an empty temp dir, restores it) and clears the lru_caches on both sides, without which the arm would pass by REMEMBERING the answer computed while the substrate was alive. State is enforced in __post_init__ (a sixth value raises). Every result carries tiers with vintage, fabric, plural candidates each with evidence, confidence (kept, orthogonal) and resolver_version (the file's own sha256).",
+      "denominator": "5 states, each with >=1 arm; 27 battery arms total; 6 mutations, all caught",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP4-AC2",
+      "criterion_verbatim": "SPINE RE-POINTED AT THE LEDGER'S MINTED SERIALS, READ-ONLY: a resolved ref returns the canonical ent: serial via the derived read model beside the legacy node_ids (an alias serial yields the canonical, not itself); candidate-only serials are never reported canonical; the resolver READS the ledger and never admits, writes or mints (the negative arm greps the resolver for Store.admit / any write: zero); a ref that PARSES as a record id is resolved STRICT against the ledger and never basename-fuzzed (a parsed-but-absent id -> GENUINELY_UNADDRESSED with policy STRICT named); bundle_identity.py --check MATCH before and after.",
+      "method": "test_suite",
+      "invocation": "python org/modules/graph/tests/nerves_resolve_battery/run_battery.py",
+      "output_evidence": "ent:alias-old -> ent:canonical-one (canonicalized_as, followed transitively with a seen-set so a cycle cannot hang the keystone); ent:canonical-one -> itself; ent:cand-a -> ITSELF, because candidate_equivalence is a PROPOSAL and following it would report a guess as an identity -- the exclusion is by ENUMERATION of what canonicalises, so a relation_type added later is non-canonicalising until someone decides otherwise. A resolved FILE ref carries its serial beside the node_id via serial_for_native_key() over ACTIVE bindings only. no_ledger_writes() is an AST sweep (not a grep -- a grep matches the word in the comment explaining the rule): 0 write calls. ent:no-such-entity-anywhere -> GENUINELY_UNADDRESSED, policy STRICT, node_ids empty. BUNDLE: see the declared exclusion -- contract_bundle_id is byte-identical before and after; the tool's own --check reports STALE for a reason that is not this change.",
+      "denominator": "6 AC2 arms; 4 entities and 2 relations in the fixture ledger; 0 write calls over the whole module",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP4-AC3",
+      "criterion_verbatim": "SUBSTRATE LIVENESS AND VINTAGE: each composed tier reports AVAILABLE / UNAVAILABLE(reason) per call; the broad excepts are replaced by typed capture (grep for except Exception: / bare except: returning None or {} in the resolver: zero remaining); each tier's substrate vintage is on the result so staleness is readable; a resolution with one tier UNAVAILABLE is never reported as a clean miss.",
+      "method": "test_suite",
+      "invocation": "python org/modules/graph/tests/nerves_resolve_battery/run_battery.py",
+      "output_evidence": "Broad handlers in CODE: 0 (was 3, re-derived from the pin at 75/88/132 -- the TO's face says :77, which is off by two; the COUNT of 3 is right). Total except handlers 7, ALL typed. Measured with an AST, not a grep: a grep still returns 1 because the phrase survives in a comment explaining the old behaviour, and a control a comment can flip is not a control. Six tiers now (five composed + the ledger), each with a DISTINCT name -- graph_index is a VIEW of trace_graph and inherits its liveness but reports under its own name, since as 'trace_graph' twice the list would read as four tiers and a duplicate. VINTAGE EARNED ITSELF IMMEDIATELY: the trace-graph cache on this device reads 2026-08-06T22:49:11Z, 22 days stale; W4-nerves_resolve.card.json v3 says 'staleness is silent' and it is now on every result.",
+      "denominator": "6 tiers, 5 composed as the TO's face states (re-derived as len(), not typed); 7 except handlers",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP4-AC4",
+      "criterion_verbatim": "CONTINUITY TESTS: file rename keeps the canonical serial (node_id may change, serial does not); a graph-index / Kuzu rebuild keeps serials; the same ref at the same substrate vintages reproduces a byte-identical result; a cross-fabric ref is NOT_APPLICABLE with the fabric named, never resolved by coincidence of name; two serials minted for one subject resolve to ONE canonical via the identity_relation fold.",
+      "method": "test_suite",
+      "invocation": "python org/modules/graph/tests/nerves_resolve_battery/run_battery.py",
+      "output_evidence": "RENAME performed, not simulated: one entity with its OLD path binding CLOSED (with its closing binding_event) and its NEW path binding OPEN. The new path yields the serial, the closed path yields nothing, and the node_id remains a path -- the serial travels BESIDE it. My first cut of this arm merely cleared a cache and compared a serial to itself; it would have passed against a resolver with no concept of binding at all, and the closed_bindings_answer_too mutation is what now holds it honest. REBUILD: every memoised index dropped, serials unmoved. DETERMINISM: two runs at the same vintages produce byte-identical as_dict(). CROSS-FABRIC: SITEZ::CLAUDE.md -> NOT_APPLICABLE naming SITEZ, although CLAUDE.md exists here -- that is the coincidence-of-name clause. TWO SERIALS -> ONE CANONICAL via the fold.",
+      "denominator": "5 continuity arms; the fixture holds 5 entities, 2 identity_relations, 2 bindings, 1 binding_event",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP4-AC5",
+      "criterion_verbatim": "COMPATIBILITY + BATTERY FROM A CLEAN CLONE, NO EGRESS: resolve / resolve_many keep their call shape and the new fields are ADDITIVE -- every existing _self_test() case still passes and the consumer census is re-counted and every caller exercised or named; the self-test is extended (one case per new state and per continuity test) and never weakened; the battery has reject + accept arms per state and per continuity test, each independently load-bearing (mutation-proved one rule at a time), the denominator printed by counting ids; runs from a fresh unique clone at --run-commit with run_battery.py exit semantics; no PyPI / vendor / cloud call anywhere.",
+      "method": "test_suite",
+      "invocation": "python org/modules/graph/tests/nerves_resolve_battery/run_battery.py --run-commit a3c34f019f",
+      "output_evidence": "IN-REPO: 27 of 27, exit 0, denominator = len(ARMS) counted not typed; all 6 mutations caught, each by a NAMED arm. FROM A CLEAN EXTRACT of a3c34f019f: 20 passed, 0 failed, 7 NOT_EXERCISABLE, exit 3, extract released (0.97 GB, removed: True). Exit 3 is the honest answer, not a failure: .comp-graph/graph.json is GITIGNORED and a git-archive extract carries no .git, so the graph-dependent and index-dependent arms have no substrate there. CONSUMER CENSUS re-counted: 96 files name the module, 16 of them .py, 3 are real CALLERS (cli.py, nerves_accrete.py, nerves_lexical.py; 5 call sites), and resolve_many has ZERO external callers. The c0 face said 12 files incl. census_finalize.py x2; measured, one of those is a gitignored build copy and the other is a DOCUMENTER (the module name appears in a string, not a call). All three real callers exercised through the code path each actually uses, including cli.py's function-local deferred import on the NOT-FOUND path. SELF-TEST 11 of 11, exit 0 (baseline at the pin was 9 of 10). NO EGRESS: AST arm over the delivered files for requests/boto3/urllib/httpx/pip/socket -- zero.",
+      "denominator": "27 arms in-repo / 20 exercisable from a bare extract; 3 callers, 5 call sites, denominator 96 files naming the module",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP4-AC6",
+      "criterion_verbatim": "MECHANISM, ON THIS FACE: mech-1 the scoped lane grant; mech-2 the consumer census before the first commit (printed, never a guess); mech-3 NOT WP-5 -- no bridge cell populated; mech-4 certifier never the author; mech-5 the lift cited verbatim, nothing wider.",
+      "method": "manual_read_with_citation",
+      "invocation": "review of this face against the commit series and .owned-paths.yaml",
+      "output_evidence": "mech-1: the scoped row is .owned-paths.yaml:180 -- ANY_EXEC + 0.4.0_DT_ClientPlatform~X on org/modules/graph/nerves_resolve.py (exact file) and org/modules/graph/tests/nerves_resolve_battery/** for this TO's life, grantor 1.0.0_SA_CTO~X @adb1a27130. It had already landed, so the first commit was NOT refused; the TO anticipated a refusal as the exercise and that exercise did not occur -- stated rather than claimed. No GIT_COMMIT_AUTHOR_OVERRIDE at any point. mech-2: the census was run BEFORE the first commit and is printed with its denominator (96 / 16 / 3 / 0), and it CORRECTED the c0 face. mech-3: no bridge cell populated, no fusion, no WP-5 surface touched. mech-4: this decomp was certified by 3.0.0_SA_CVO~X from the issuer's c0; the executor measures, the certifier verifies. mech-5: the lift is cited verbatim ('Lift everything, time to work buddy', 2026-08-28 14:08Z, @676604de18) and read no wider -- no egress of any kind occurred in this TO.",
+      "denominator": "5 mechanism cells, each answered on this face",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Six rules of the repair disabled ONE AT A TIME against the full battery, printing WHICH arms turn rather than how many: candidate_equivalence_canonicalises, closed_bindings_answer_too, consult_all_tiers, no_fabric_qualifier, no_strict_record_ids, state_not_enforced. They patch the LOADED MODULE, never the file -- a harness that edits the subject can leave it edited, and the subject is a keystone every NERVES layer imports.",
+      "expected": "each mutation turns at least one arm, and the arms it turns are the ones naming that rule",
+      "observed": "ALL SIX CAUGHT in-repo, each by a named arm. AND THE PROOF EARNED ITSELF ON ITS FIRST RUN: consult_all_tiers came back NOT CAUGHT -- the rule I had just added to stop a dead ledger reporting every genuine miss as SUBSTRATE_UNAVAILABLE, and NOTHING tested it, because this battery's own fixture sets $NERVES_LEDGER and therefore makes every tier ALIVE. A rule that only matters when a tier is DEAD cannot be tested by a fixture in which nothing is dead; reverting it would have left 26 of 26 green while every genuine miss in the estate became a false alarm. The guard arm now removes the ledger and asks about a FILENAME.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the same ref resolved twice with every memoised index dropped between runs, compared as canonical JSON; and the battery re-run in-repo and from a clean extract",
+      "observed": "byte-identical as_dict() across two runs at the same substrate vintages (R-AC4-same-ref-same-vintages-is-byte-identical). The in-repo and clean-extract runs differ ONLY in which arms were exercisable, and that difference is reported as NOT_EXERCISABLE with the missing tier named, never as a pass or a fail.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "bundle_identity.py --check reporting MATCH before and after",
+      "reason": "It reports STALE BOTH before and after, and not because of this change. --check compares the WHOLE derivation record including derived_at_commit / validator_commit / schema_commit, all of which move with HEAD, so it reads STALE whenever BUNDLE_IDENTITY.json was written at an earlier commit. MEASURED: contract_bundle_id is byte-identical (bundle:sha256:87ed7080...) before and after, the candidate_id is unchanged, and 0 members differ. The substantive invariant AC2 is protecting -- the contract does not move -- HOLDS; the tool's verdict is about provenance pointers, not about the bundle. Regenerating BUNDLE_IDENTITY.json is the label owner's act, not this TO's."
+    },
+    {
+      "item": "changing nerves_lexical.py's own ambiguity threshold",
+      "reason": "nerves_lexical.py:143 computes ambiguity itself as len(node_ids) > 2, while the resolver now states AMBIGUOUS at > 1. The caller's threshold predates the contract and disagrees with it by one. It is NAMED here for the module owner; the TO's subject is nerves_resolve.py and the lane grant is an EXACT-FILE row, so editing a caller would be both out of subject and out of lane."
+    },
+    {
+      "item": "a persistent production ledger for the resolver to read",
+      "reason": "The ledger substrate is a published snapshot named by $NERVES_LEDGER, normally unset. That is deliberate: an unset variable reports UNAVAILABLE with that as the reason, so 'no ledger configured here' and 'the ledger is empty' stay different answers. Siting a production snapshot is WP-5's business, not this TO's."
+    },
+    {
+      "item": "the 7 arms that a bare git-archive extract cannot exercise",
+      "reason": ".comp-graph/graph.json is gitignored and an archive extract carries no .git, so the trace-graph and tracked-index tiers have no substrate there. Those arms report NOT_EXERCISABLE (exit 3) rather than passing or failing, and the mutation proof is SUPPRESSED whenever anything was skipped -- a proof run against whichever arms happened to be exercisable would measure a subset and report it as the whole."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / DISARMED -- nerves_resolve's own _self_test was ALREADY RED at the TO's pin, 9 of 10, and not because of this repair: gap1 asserted that `comp-surface-check` resolves, and that tool was DELETED at 1a962886be on 2026-08-06 when it was retired (CLAUDE.md rule 20 says so in words). The case had been measuring an estate that no longer exists for 22 days. RE-POINTED at comp-aws, a live bash shim, so it still tests the property it was written for; the retirement became its own case, which is only expressible under the new contract.",
+    "OBSERVATION / DISARMED -- the trace-graph cache on this device is 22 days old (2026-08-06T22:49:11Z). Every resolution that consults it was answering from that vintage and could not say so; the vintage is now on every result. Owner: the graph module's builder, not this TO.",
+    "OBSERVATION / DISARMED -- the TO's face cites the broad excepts at ':77 and two siblings'; measured at the pin they are at 75, 88 and 132. The COUNT of 3 is correct and the repair is unaffected; recorded because a line citation that is off by two is still a citation somebody may try to follow.",
+    "OBSERVATION / DISARMED -- resolve_many() has ZERO external callers anywhere in the repo; its only invocation is the module's own self-test. Its compatibility surface is therefore the self-test alone, which is worth knowing before anyone treats it as a load-bearing public API.",
+    "OBSERVATION / DISARMED -- the c0 consumer census (12 files, incl. census_finalize.py x2) counts as consumers one gitignored build copy and one file that merely DESCRIBES the deferred import in a string. Re-measured: 96 files name the module, 16 .py, 3 real callers, 5 call sites."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DT_ClientPlatform/logs/2026-08-28/dtx_wp4_resolver_repair.md",
+  "compiler_tools": [
+    {
+      "tool": "nerves_resolve battery",
+      "invocation": "python org/modules/graph/tests/nerves_resolve_battery/run_battery.py",
+      "result": "27 of 27 in-repo, exit 0; 6 mutations all caught by named arms"
+    },
+    {
+      "tool": "nerves_resolve battery (clean extract)",
+      "invocation": "python org/modules/graph/tests/nerves_resolve_battery/run_battery.py --run-commit a3c34f019f",
+      "result": "20 passed / 0 failed / 7 NOT EXERCISABLE, exit 3; extract released 0.97 GB, removed: True"
+    },
+    {
+      "tool": "nerves_resolve --self-test",
+      "invocation": "python org/modules/graph/nerves_resolve.py --self-test",
+      "result": "11 of 11, exit 0 (baseline at the pin: 9 of 10)"
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find nerves_resolve --files --all",
+      "result": "96 files name the module; 16 .py; 3 real callers"
+    },
+    {
+      "tool": "python ast",
+      "invocation": "ast.walk over ExceptHandler / Call nodes in the resolver",
+      "result": "0 broad handlers, 7 all typed; 0 ledger write calls"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 3.1,
   "carded_by": "0.8.0_AE_CloudComp~Y",
   "subject": {
     "id": ".comp-graph/platinum.CACHE_SET",
@@ -143,19 +143,19 @@
     },
     "key": {
       "identity_space": "A LOGICAL NAME ('platinum.routing', 'platinum.dag.bd'), mapped deterministically onto a filesystem path by cache_file() at :229-231 as CACHE_DIR / f'{name}.cache'.",
-      "key_expression": null,
+      "key_expression": "`cache_file(name) = CACHE_DIR / f'{name}.cache'` (org/modules/graph/graph_cache.py:229, with `CACHE_DIR = WORKSPACE / '.comp-graph'` at :44). This row's identity_space is the LOGICAL NAME, so the consumer-facing derivation is the INVERSE: a cache member's key is its basename with the `.cache` suffix removed (`.comp-graph/platinum.routing.cache` -> `platinum.routing`). Either direction is pure string work and callers deal exclusively in logical names. ⚠ THE MAPPING IS TOTAL AND UNGUARDED -- cache_file() constructs a path for ANY string -- so the expression is a faithful description of the derivation and NOT a validator of the name space; what keeps the key space safe is the call sites, which this expression does not enumerate.",
       "key_is_stable": "stable",
       "crosses_spaces": true,
       "declared_mapping": "cache_file(name) -> CACHE_DIR / f'{name}.cache' (graph_cache.py:229-231). That single expression IS the declared mapping between the logical-name space and the filesystem-path space, and it is the only place the translation occurs.",
-      "basis": "inferred",
+      "basis": "measured",
       "basis_by_field": {
         "identity_space": "measured",
         "key_is_stable": "measured",
         "crosses_spaces": "measured",
         "declared_mapping": "measured",
-        "key_expression": "absent"
+        "key_expression": "measured"
       },
-      "evidence": "key_is_stable='stable' measured on both halves: the two literal names are fixed strings at :66 and :87, and the three interpolated names draw from a three-value alias set with a default, so the key cannot vary with input. All five names resolved to real files, so none is a name that fails to bind. crosses_spaces=TRUE and measured: the logical name is not a path until :231 appends the .cache suffix under CACHE_DIR, and callers deal exclusively in logical names. ⛔ THE MAPPING IS TOTAL AND UNGUARDED, WHICH IS A REAL PROPERTY RATHER THAN A COMPLAINT: cache_file() will happily construct a path for ANY string, so the safety of this key space rests entirely on the five call sites and on :146's alias normalisation -- not on anything cache_file() itself checks. A future call site passing an unnormalised token would silently mint a sixth cache, and nothing in this module would object. That is the mechanism by which this family's enumerability could be lost, and it is one line away. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor.",
+      "evidence": "key_is_stable='stable' measured on both halves: the two literal names are fixed strings at :66 and :87, and the three interpolated names draw from a three-value alias set with a default, so the key cannot vary with input. All five names resolved to real files, so none is a name that fails to bind. crosses_spaces=TRUE and measured: the logical name is not a path until :231 appends the .cache suffix under CACHE_DIR, and callers deal exclusively in logical names. ⛔ THE MAPPING IS TOTAL AND UNGUARDED, WHICH IS A REAL PROPERTY RATHER THAN A COMPLAINT: cache_file() will happily construct a path for ANY string, so the safety of this key space rests entirely on the five call sites and on :146's alias normalisation -- not on anything cache_file() itself checks. A future call site passing an unnormalised token would silently mint a sixth cache, and nothing in this module would object. That is the mechanism by which this family's enumerability could be lost, and it is one line away. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor.\n\n⛔ THE `|| v3 delta pass:` SENTENCE ABOVE IS NOW DISCHARGED AND IS RETAINED ONLY AS THE RECORD OF THE MIGRATION: it states key_expression is ABSENT and that the row basis was lowered from measured to the floor. Both were true at the B1 delta pass @bb01a20272 and neither is true now -- the expression below is declared and exercised, and the floor recomputes to 'measured'. Read THIS paragraph as the live one.\n\nKEY EXPRESSION FILLED + EXERCISED 2026-08-28T20:40:53Z by 0.8.0_AE_CloudComp~Y on all 5 real members. MEMBER -> KEY -> SPACE: `.comp-graph/platinum.dag.bd.cache` -> `platinum.dag.bd`; `.comp-graph/platinum.dag.cot.cache` -> `platinum.dag.cot`; `.comp-graph/platinum.dag.inf.cache` -> `platinum.dag.inf`; `.comp-graph/platinum.dataflows.cache` -> `platinum.dataflows`; `.comp-graph/platinum.routing.cache` -> `platinum.routing`. Predicate: each basename-minus-suffix key ROUND-TRIPS back through cache_file() to the exact path it came from -- 5 of 5. The round trip is the discriminating form: checking only that the suffix strips would pass on a name the forward derivation could not reproduce. Function and CACHE_DIR re-read at source this fill (:229, :44).",
       "owner": "0.8.0_AE_CloudComp."
     },
     "failure_mode": {

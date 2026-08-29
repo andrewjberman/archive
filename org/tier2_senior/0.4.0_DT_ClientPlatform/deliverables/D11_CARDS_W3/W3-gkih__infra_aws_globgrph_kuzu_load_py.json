@@ -137,7 +137,7 @@
       "owner": "UNOWNED -- no seat owns the remedy for this module's superseded standing. Last two authors are 0.8.0_AE_CloudComp~C (cbbe75134c, 2026-07-25) and 0.7.0_AE_CloudOps (a84de54a5a, 2026-06-12); neither is a standing owner and neither authored the supersession."
     }
   },
-  "schema_version": 3,
+  "schema_version": 3.1,
   "subject": {
     "declared_domain": "materializes a local Kuzu graph DB of AWS cloud shape (tables CloudNode + CloudEdge) from a GLOBGRPH snapshot tarball in S3 -- the snapshot-tarball loader, one of three Kuzu loaders sharing this directory",
     "id": "infra/aws/globgrph/kuzu_load.py",
@@ -181,19 +181,19 @@
       ]
     },
     "key": {
-      "basis": "inferred",
+      "basis": "held",
       "basis_by_field": {
         "crosses_spaces": "measured",
         "declared_mapping": "measured",
         "identity_space": "measured",
         "key_is_stable": "measured",
-        "key_expression": "absent"
+        "key_expression": "held"
       },
       "crosses_spaces": true,
       "declared_mapping": null,
-      "evidence": "identity_space measured at :142-144 -- `arn STRING` is the declared PRIMARY KEY and the raw ARN string is used verbatim as the key (:104-110). key_is_stable=stable: an ARN survives ordinary change to the resource it names. crosses_spaces=true WITH A MEASURED HAZARD: the same column also admits NON-ARN synthetic strings -- :38-40 classifies `event-source::` prefixed keys, and stub ids are whatever the edge carried -- with no type discriminator column, so a join across id spaces silently mixes ARN and non-ARN members and nothing in the schema can reject that. declared_mapping=None is the finding, not a gap in my reading: the successor DB keys on `node_id`, not `arn` (measured live via CALL TABLE_INFO), so joining kuzu_db to kuzu_nessie_db requires a hand-written column rename that exists NOWHERE as a declared mapping -- it survives only as prose warnings in four sibling tools. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor.",
+      "evidence": "identity_space measured at :142-144 -- `arn STRING` is the declared PRIMARY KEY and the raw ARN string is used verbatim as the key (:104-110). key_is_stable=stable: an ARN survives ordinary change to the resource it names. crosses_spaces=true WITH A MEASURED HAZARD: the same column also admits NON-ARN synthetic strings -- :38-40 classifies `event-source::` prefixed keys, and stub ids are whatever the edge carried -- with no type discriminator column, so a join across id spaces silently mixes ARN and non-ARN members and nothing in the schema can reject that. declared_mapping=None is the finding, not a gap in my reading: the successor DB keys on `node_id`, not `arn` (measured live via CALL TABLE_INFO), so joining kuzu_db to kuzu_nessie_db requires a hand-written column rename that exists NOWHERE as a declared mapping -- it survives only as prose warnings in four sibling tools. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor.  || KEY_EXPRESSION NOT EXERCISED IN THE KEYFILL: the loader was NOT RUN in this fill and its output table was not opened, so no real member was keyed here. Reading the assignment at source STATES the expression; it does not exercise it, and calling a source citation 'measured' is exactly the overstatement this fill's basis rule exists to prevent || DISCHARGED-KEYFILL-DTX 2026-08-28: the sentence above is DISCHARGED, retained for provenance. key_expression is no longer ABSENT on this card -- TO-KEYFILL-DTX declared it and recorded basis_by_field.key_expression=held at commit 8de6cabc12, so the condition that justified lowering the row basis no longer holds. The scalar itself is NOT changed here: trust.key.basis edits are held at every lane pending the confirmed floor predicate (issuer 213704Z), under which this lane replays 4 of 18. || SCALAR-REDERIVED-KEYFILL-DTX 2026-08-28: trust.key.basis RE-DERIVED inferred -> held as MIN over the sub-claims present in this row (an undeclared one would enter at 'inferred'; this row has 0). Mechanical, never typed. The lowering it reverses is the migrator's, recorded above and retained.",
       "identity_space": "AWS ARN string, used verbatim as the CloudNode PRIMARY KEY",
-      "key_expression": null,
+      "key_expression": "a member is a CloudNode the loader writes; key = the AWS ARN string, used verbatim as the CloudNode PRIMARY KEY (kuzu_load.py assigns it from the node's `arn` field)",
       "key_is_stable": "stable",
       "owner": "UNOWNED -- the missing cross-space mapping has no owner; it is the estate's most-repeated defect class and is unowned here specifically."
     }

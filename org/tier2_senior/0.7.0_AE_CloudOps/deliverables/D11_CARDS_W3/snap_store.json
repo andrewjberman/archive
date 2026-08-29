@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 3.1,
   "carded_by": "0.7.0_AE_CloudOps~X",
   "subject": {
     "id": "infra/aws/globgrph/snap_store.py",
@@ -128,19 +128,19 @@
     },
     "key": {
       "identity_space": "Iceberg table identity ('globgrph', surface) where surface is one of 4; the S3 staging keys are a SECOND identity space, warehouse/snap_ingest/pending/<surface>/, joined to the first by the surface string.",
-      "key_expression": null,
+      "key_expression": "key(t) = (NAMESPACE, surface) where surface is one of the four keys of the SURFACES registry (snap_store.py ':79', gated by --surface choices=sorted(SURFACES) at ':415'): ms_heat_snap, code_heat_snap, fedobs_coverage_snap, fedobs_coevolution_snap. The SAME surface string is the join key into the second identity space, the S3 staging prefix warehouse/snap_ingest/pending/<surface>/.",
       "key_is_stable": "stable",
       "crosses_spaces": true,
       "declared_mapping": "surface string is the join key between the S3 prefix space and the Iceberg table space; both are gated by the same 4-entry allow-list on land.",
-      "basis": "inferred",
+      "basis": "measured",
       "basis_by_field": {
         "identity_space": "measured",
         "key_is_stable": "measured",
         "crosses_spaces": "measured",
         "declared_mapping": "measured",
-        "key_expression": "absent"
+        "key_expression": "measured"
       },
-      "evidence": "crosses_spaces=true MEASURED: the surface string addresses both an S3 prefix and an Iceberg table. Unlike the cse case this crossing is DECLARED and gated, which is why declared_mapping is populated rather than null -- the mapping is the allow-list itself. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor.",
+      "evidence": "crosses_spaces=true MEASURED: the surface string addresses both an S3 prefix and an Iceberg table. Unlike the cse case this crossing is DECLARED and gated, which is why declared_mapping is populated rather than null -- the mapping is the allow-list itself. || v3 delta pass: key_expression ABSENT on this card (not yet declared by the carding lane); row basis lowered from measured to the floor. || DISCHARGED by exercise in the KEYFILL-COX fill: exercised on a real member -- SURFACES['code_heat_snap'] -> ('globgrph', 'code_heat_snap') in Iceberg table identity (namespace, surface). Row floor recomputed inferred -> measured.",
       "owner": "0.7.0_AE_CloudOps"
     },
     "failure_mode": {

@@ -1,0 +1,175 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SUBSTRATECARDING.TO-KEYFILL-DTX",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-substratecarding-keyfill/20260828T1915Z/DECOMP.md",
+    "vintage_commit": "23dfe292e7",
+    "to_ref": "org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/NFRA_SUBSTRATECARDING.TO-KEYFILL-DTX.key-expression-fill.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/standards/SUBSTRATE_CARD.v3.schema.json",
+    "group": "OTHER",
+    "vintage_commit": "bb01a20272"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform~X",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_KEYFILL/fill_key_expression.py",
+      "kind": "script",
+      "artifact_covered_by": [
+        "KF-DTX-AC1",
+        "KF-DTX-AC2"
+      ],
+      "commit_or_etag": "8de6cabc12",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the fill; acceptance is the validator over the filled set, not a deploy"
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_KEYFILL/validate_keyfill.py",
+      "kind": "test",
+      "artifact_covered_by": [
+        "KF-DTX-AC3",
+        "KF-DTX-AC4"
+      ],
+      "commit_or_etag": "fc6da7186b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "v3 validation + the contradiction fixture + the clean-clone replay"
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_W2",
+      "kind": "config_data",
+      "artifact_covered_by": [
+        "KF-DTX-AC1",
+        "KF-DTX-AC5"
+      ],
+      "commit_or_etag": "8de6cabc12",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "16 of this lane's 18 filled cards"
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_W3",
+      "kind": "config_data",
+      "artifact_covered_by": [
+        "KF-DTX-AC1",
+        "KF-DTX-AC5"
+      ],
+      "commit_or_etag": "8de6cabc12",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the remaining 2 of this lane's 18 filled cards"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "KF-DTX-AC1",
+      "criterion_verbatim": "COMPUTABLE, EXERCISED, OWNER-DECLARED: every filled card's expression is exercised on >=1 real member with the triple printed and the key validated against the space predicate; the filling seat is the card's carded_by (this lane), so trust.key.owner stays truthful.",
+      "method": "command",
+      "invocation": "python org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_KEYFILL/fill_key_expression.py",
+      "output_evidence": "11 expressions EXERCISED on a real member, each printing member -> key -> space and validated against a NAMED predicate: motif:silent-display-fork and motif:a-store ($.nodes[0].node_id); 49financial ($.firms[0].firm_id); gold:A_00.accounts_dimension (first key of the $.nodes MAPPING); event_rule:inf-gold-incremental-daily (first $.entries[*].resource_id, ^[a-z_]+:[^ ]+$); sysi:compute-orchestration:d0365a15beb8; Estate (first key under $.terms); .tools/comp-heat and two repo-relative paths that resolve on disk; file:.tools/deploy_ledger.py. The filling seat IS carded_by for all 18 (re-derived by that field), so no owner was touched -- the semantic diff confirms trust.key.owner did not change anywhere.",
+      "denominator": "18 cards re-derived at run time by glob + schema_version + carded_by; 11 exercised",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "KF-DTX-AC2",
+      "criterion_verbatim": "BASIS CARRIED, ABSENCE HONEST: basis_by_field per the rule above (measured only on a real exercise; held for declared-unexercised; inferred never; null+absent legal and counted); the row basis is the floor; an absence carries its reason.",
+      "method": "command",
+      "invocation": "python org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_KEYFILL/validate_keyfill.py",
+      "output_evidence": "basis census over the filled set: {measured 11, held 6, absent 1} = 18. INFERRED: 0 -- which is what all 18 rows carried BEFORE the fill, and replacing it with something a consumer can check is the point. measured is claimed ONLY where the expression was exercised here. The 6 held each carry their unexercised reason; the 1 absent carries its reason. THE REASONS LIVE IN `evidence`, THE SLOT THE CONTRACT HAS: my first apply invented key_expression_unexercised_reason / key_expression_absent_reason, and v3's trust.key is additionalProperties:false, so 7 of 18 cards went INVALID -- caught by AC3's own validator. A value needs a whole PATH, not a slot I wish existed. PRECISION on the census: the single absent card (W2-yjky) was ALREADY compliant before this fill (null expression, basis absent, basis_by_field absent); I added only the reason, which is why key_expression itself changed in 17 not 18.",
+      "denominator": "18 cards; 3 basis values used; inferred prohibited and measured 0 times",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "KF-DTX-AC3",
+      "criterion_verbatim": "v3 VALID: the validator runs over this lane's filled set; PASS count printed with the denominator 18; the contradiction fixture is refused.",
+      "method": "test_suite",
+      "invocation": "python org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_KEYFILL/validate_keyfill.py",
+      "output_evidence": "AC3 v3 validation: PASS 18 of 18 against org/standards/SUBSTRATE_CARD.v3.schema.json. THE CONTRADICTION FIXTURE -- a key row reading basis 'measured' while its key_expression is NULL, the shape v3's own text says it exists to make unrepresentable -- is constructed from a real card and fed to the SAME validator: REFUSED. Without that arm the 18 passes would show the cards are well-formed, not that the rule they are evidence for is enforced. The validator also refuses to pass on an empty population, because '0 valid of 0' satisfies any reconciliation -- the first run of the fill script exited 0 having found ZERO cards for exactly that reason.",
+      "denominator": "18 cards validated; 1 contradiction fixture required to fail",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "KF-DTX-AC4",
+      "criterion_verbatim": "CENSUS + CLEAN CLONE: every count derived by the run and printed with its denominator (filled / absent-with-reason / refused over 18); the validator replays from a clean clone at --run-commit with the extract released on exit (--keep only for a named forensic case).",
+      "method": "test_suite",
+      "invocation": "python org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_KEYFILL/validate_keyfill.py --run-commit fc6da7186b",
+      "output_evidence": "CENSUS, every count derived by the run: filled(measured) 11 | held 6 | absent 1 | refused 0, RECONCILIATION 11+6+1+0 = 18 of 18. CLEAN CLONE of fc6da7186b: cards re-derived 18 of 18 expected, AC3 PASS 18 of 18, basis census identical, contradiction REFUSED, VERDICT PASS, exit 0 -- then 'CLONE released ...wp3-battery-fc6da7186b-15als4r3 (0.97 GB) -- removed: True'. THE 72-CARD CENSUS AND ITS SINGLE EXCLUSION (certification arm 3): 18 + 11 + 13 + 30 = 72 v3 cards across the four lanes; the ONE excluded file is org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_W4/W4-FILE.cells.json, which is NOT a card -- it is a cell manifest (to_id / decomp_ref / cell_total) that happens to live in a wave directory.",
+      "denominator": "18 this lane / 72 v3 cards fabric-wide / 1 excluded non-card, each counted not typed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "KF-DTX-AC5",
+      "criterion_verbatim": "NO EGRESS, PRESERVATION: no vendor / PyPI / cloud call; pre-fill card bytes are in git history and the pre-fill digests are cited on the report; the diff pre->post is exactly the key rows.",
+      "method": "diff",
+      "invocation": "git show HEAD:<card> compared to the working tree, parsed",
+      "output_evidence": "NO EGRESS: the fill reads only repo files and the local filesystem; no vendor, PyPI or cloud call anywhere in it. PRE-FILL PRESERVATION: every card's pre-fill bytes are in git history at the parent of 8de6cabc12, and the 18 pre-fill sha256 heads are cited on the report (bc29db83e3433c2a, 6bd11c42cfbdea38, 6cb720314e8337bb, 8a16955fba0a3b40, 7cfe6b230389984b, 6d5a91c9bc8797bf, efce0c0abd5f8e6a, f83e3c0ffaafcb75, 508a95573c246f5e, a288aeb525531ddf, 2f5c87410bed06e0, 9b7c564158598c1d, 300e3667b98119d0, 1223821172cfc73e, 3d8b5ddac351872e, 0d5a9ea8eb4e9914, df93d76b5bc5401e, ab2dbf12057852f8). DIFF: compared by PARSE, not by line -- a line diff reports `}` becoming `},` as a change to `owner`, and did. The JSON paths whose VALUE changed are trust.key.key_expression (17), trust.key.basis_by_field.key_expression (17), trust.key.evidence (7). ALL under trust.key; nothing else in any card moved.",
+      "denominator": "18 cards; 3 changed JSON paths, all under trust.key; 18 pre-fill digests cited",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The validator's own arm: construct the contradiction v3 forbids (basis 'measured' with a NULL key_expression) from a real filled card and feed it to the same validator that passed the 18.",
+      "expected": "the schema refuses it; if it accepts, the 18 passes are not evidence for the rule",
+      "observed": "REFUSED ('measured' was expected). And three further defects were caught by PRINTING the exercised triples rather than trusting the pass: a source read that found nothing returned the string '(pattern not found)', which is non-empty and therefore SATISFIED the p_nonempty predicate -- a failed retrieval returning a value that passes; two loader scripts were being called 'measured' on the strength of a line of source, which is a CITATION not an exercise (both demoted to held); and the risk-edge key is 'file:.tools/deploy_ledger.py', not the bare repo-relative path its space declares, which my predicate was too weak to notice. My first reachability probe also chose the WRONG member collection -- $.edges[*] over $.nodes[*] for the motif cards, because edges outnumber nodes 36 to 7 while the declared space is motif node_ids.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the validator run in-repo and again from a clean extract of the same commit, comparing every printed count",
+      "observed": "identical in both: 18 of 18 re-derived, AC3 PASS 18 of 18, basis census {absent 1, held 6, measured 11}, contradiction REFUSED, VERDICT PASS. The clean extract was released on exit (0.97 GB, removed: True).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the 7 cards whose key_expression is held or absent rather than measured",
+      "reason": "measured is claimable only on a real exercise in THIS fill. Two S3/Iceberg tables and one local kuzu projection were not opened; two loader scripts were not run and their output tables not read; one subject is absent from this device; one was never observed at all. Each carries its reason in trust.key.evidence rather than a stronger basis."
+    },
+    {
+      "item": "raising any row-level trust.key.basis",
+      "reason": "the row basis is the floor and this fill does not touch it. The fill's scope is the key_expression field and its per-field basis; re-basing a whole row on the strength of one exercised field would overstate the other sub-claims in that row."
+    },
+    {
+      "item": "the other three lanes' 54 cards",
+      "reason": "this face's partition is carded_by == 0.4.0_DT_ClientPlatform~X; the fill of the remaining cards is owned on the CloudOps~X, CloudComp~X and CloudComp~Y faces."
+    },
+    {
+      "item": "the JOIN of the filled cards to the registry",
+      "reason": "TO-KEYFILL-JOIN, a separate face at this seat, which runs after the four fills report and the ratification lands."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / DISARMED -- W2-hffm's subject org/tier1_exec/3.0.0_SA_CVO/deliverables/kimi_subdivision_harness/c2_instances.json is ABSENT from this device and is not at that path at HEAD. The card recorded it UNTRACKED-and-not-gitignored at 10,329,963 bytes, so an untracked file that disappears leaves NO git evidence it was ever there. Filled as held with that reason. Routed to the design lane and to the JOIN.",
+    "OBSERVATION / DISARMED -- 0.8.0_AE_CloudComp~X holds a card on that SAME subject (D11_CARDS_W4/W4-c2_instances_json.card.json). Two lanes carded one subject, which the JOIN needs to know before it joins by registry-minted part id.",
+    "OBSERVATION / DISARMED -- the 72-card census has exactly ONE exclusion and it is not a card at all: W4-FILE.cells.json is a cell manifest sitting in a wave directory. Named with its reason per certification arm 3.",
+    "OBSERVATION / DISARMED -- searching for that absent subject, a substring grep matched ANOTHER LANE'S CARD (W4-c2_instances_json.card.json) and briefly read as 'the subject is tracked at HEAD'. The card about a thing is not the thing; the exact-path check is what separated them."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DT_ClientPlatform/logs/2026-08-28/dtx_keyfill_key_expression.md",
+  "compiler_tools": [
+    {
+      "tool": "fill_key_expression.py",
+      "invocation": "python org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_KEYFILL/fill_key_expression.py --apply",
+      "result": "11 measured / 6 held / 1 absent / 0 refused = 18 of 18"
+    },
+    {
+      "tool": "validate_keyfill.py",
+      "invocation": "python org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_KEYFILL/validate_keyfill.py",
+      "result": "AC3 PASS 18 of 18; contradiction fixture REFUSED; VERDICT PASS, exit 0"
+    },
+    {
+      "tool": "validate_keyfill.py (clean extract)",
+      "invocation": "python org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_CARDS_KEYFILL/validate_keyfill.py --run-commit fc6da7186b",
+      "result": "identical counts from a fresh extract; extract released 0.97 GB, removed: True"
+    },
+    {
+      "tool": "jsonschema",
+      "invocation": "Draft202012Validator over SUBSTRATE_CARD.v3.schema.json",
+      "result": "18 valid; the invented-field error that made 7 invalid was caught here"
+    },
+    {
+      "tool": "git show + parsed diff",
+      "invocation": "git show HEAD:<card> vs the working tree, compared as JSON",
+      "result": "3 changed paths, all under trust.key"
+    }
+  ]
+}
