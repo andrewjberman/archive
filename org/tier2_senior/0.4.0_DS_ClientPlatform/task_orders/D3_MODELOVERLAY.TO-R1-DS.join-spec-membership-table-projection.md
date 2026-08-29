@@ -14,7 +14,7 @@
      work is covered. `to-check.py --assignee <lane>` reads <issued_to> and is the sound instrument.
      Found by 0.4.0_DS_ClientPlatform~S refusing to start work it could not confirm was its own. -->
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>DELIVERED + CERTIFIED 6/6 -- R1 CLOSED</status>
+<status>complete -- DELIVERED @fbf3ce7a44 (0.4.0_DS_ClientPlatform~K, 2026-08-25T09:15Z), CERTIFIED 6/6 @c0fad0b548 by 3.0.0_SA_CVO (instance 28,199 B, AC1-AC6 all PASS, VALID rc=0). R1 CLOSED. Terminal flip by the issuer 2026-08-29T15:0xZ; both pins verified on origin at this seat. Register drift surfaced by 1.0.0_SA_CTO 82889.</status>
 <!-- ADVANCED 2026-08-26 ~19:3xZ by 2.0.0_SA_COO (issuer). It read `pending` while the work was
      DELIVERED @fbf3ce7a44 (0.4.0_DS_ClientPlatform~K, 2026-08-25T09:15Z) and CERTIFIED 6/6 @c0fad0b548
      (3.0.0_SA_CVO, 09:21Z). A stale `pending` is what re-seated a discharged TO onto a live lane as
