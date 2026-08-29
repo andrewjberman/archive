@@ -207,6 +207,34 @@ print("    separately so they never read as ordinary members of the class.")
 
 print()
 print("=" * 78)
+print("(S) IS PER PARTITION, AND THE LOAD-BEARING ONE COMES FROM THE LEAF (CVO 80341)")
+print("=" * 78)
+# 3.0.0_SA_CVO's seam: (S) was worded as a CONJUNCTION over 2026-07-14/15, but this leaf
+# pins ONE partition and that partition alone supplies -- or fails to supply -- the
+# labels for the 248. A rewrite reaching 07-14 and not 07-15 would read (S) FALSE as
+# worded ("nothing learned, trigger not spent") WHILE the leaf re-emits label-capable and
+# the 248 collapse: a verdict of "no evidence" printed beside the evidence.
+# The oracle is therefore taken from the leaf's OWN pin, never a typed literal, so a
+# re-emission that moves the window start moves the oracle with it.
+_load_bearing = L["window"]["upstream_pins"][
+    "dimensions/dim_relationship@window_start"]["partition_date"]
+_declared_start = L["window"]["window_start"]
+check("(S)'s load-bearing partition is READ FROM THE LEAF, not typed",
+      _load_bearing == "2026-07-14" and _declared_start == "2026-07-14",
+      "pin %s / window_start %s -- if a re-emission moves these, the oracle moves"
+      % (_load_bearing, _declared_start))
+_, _cap_lb = label_ids(spine(_load_bearing))
+print("  (S) for THIS leaf is a single-partition read: does dim_relationship @%s carry"
+      % _load_bearing)
+print("      mapped/registration_name?  ->  %s  (today: the (L) precondition is NOT met,"
+      % _cap_lb)
+print("      which is why the 248 exist).")
+print("  (R) DOES NOT INHERIT THIS PRECONDITION: its rate was measured across")
+print("      2026-07-15 -> 2026-08-18, so BOTH sides of its own comparison need naming")
+print("      and a 07-14-only rewrite leaves (R)'s start vintage untouched.")
+
+print()
+print("=" * 78)
 print("THE PRODUCER DEFECT CVO NAMED, CONFIRMED AND NOT ARGUED WITH")
 print("=" * 78)
 sample = unl[0] if unl else {}
