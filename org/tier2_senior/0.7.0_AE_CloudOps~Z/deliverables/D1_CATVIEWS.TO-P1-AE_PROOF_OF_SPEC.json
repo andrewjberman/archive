@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D1_CATVIEWS.TO-P1-AE",
+  "firm": "MDPF",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/D1_CATVIEWS.TO-P1-AE.recut-and-scheduled-run-to-served-category-views.md",
+    "group": "OTHER",
+    "vintage_commit": "4631f999fe"
+  },
+  "assignee": "0.7.0_AE_CloudOps~Z",
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md",
+    "vintage_commit": "2ce1e1b8d5",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/D1_CATVIEWS.TO-P1-AE.recut-and-scheduled-run-to-served-category-views.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~Z/deliverables/D1_CATVIEWS.TP1AE-AC2_AC3_score_served_invariants.py",
+      "kind": "script",
+      "commit_or_etag": "258d675fb7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "commit-gate clean 1/1; --self-test PASS in both arms",
+      "artifact_covered_by": [
+        "TP1AE-AC2",
+        "TP1AE-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~Z/deliverables/D1_CATVIEWS.TP1AE-AC4_score_against_baseline.py",
+      "kind": "script",
+      "commit_or_etag": "cf1d02c785",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "commit-gate clean; --self-test PASS control 0 findings / mutant 3",
+      "artifact_covered_by": [
+        "TP1AE-AC4"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-portal-v2/platinum/mdpf/{scope}/category-views.json",
+      "kind": "s3_object",
+      "commit_or_etag": "publisher run_id 20260829T135046Z-0ae2ff1b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "s3api LastModified 2026-08-29T13:50:50Z to 13:50:51Z across 4 scopes",
+      "artifact_covered_by": [
+        "TP1AE-AC1",
+        "TP1AE-AC2",
+        "TP1AE-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TP1AE-AC1",
+      "criterion_verbatim": "category_views EXISTS ON THE SERVED PLANE for at least one firm, emitted by a SCHEDULED producer run. Key, bucket, byte size and LastModified (UTC, s3api) recorded. An ad-hoc run is PERMITTED FOR QA and is NEVER the acceptance.",
+      "method": "live_read",
+      "invocation": "aws s3api list-objects-v2 and get-object on platinum/mdpf/{scope}/category-views.json",
+      "output_evidence": "DISCHARGED BY 2.0.0_SA_COO~Z 2026-08-28T13:52:37Z (face lines 114-144). RE-CONFIRMED at this seat on today's scheduled fire: 4 of 4 scopes present, LastModified 2026-08-29T13:50:50-51Z UTC read via s3api, sizes global 4323 B / 49financial 4357 B / inflection 4539 B / cottonwood 4543 B. Publisher manifest 20260829T135046Z-0ae2ff1b. SCHEDULED-path discrimination is POSITIVE, not by absence: trigger.source is empty on this run while this seat's ad-hoc runs carry source=adhoc with run_class=adhoc-qa, so the artifact identifies its own plane.",
+      "denominator": "4 of 4 scopes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TP1AE-AC2",
+      "criterion_verbatim": "D1-inv-2 holds ON THE SERVED ARTIFACT -- five gold-plane peers sum to total_aua, per firm, denominator printed, measured on the fetched bytes.",
+      "method": "command",
+      "invocation": "python D1_CATVIEWS.TP1AE-AC2_AC3_score_served_invariants.py",
+      "output_evidence": "4/4 PASS, every delta +0.00. global 2094351300.67 / 49financial 1762750154.52 / inflection 209683644.85 / cottonwood 479238984.97. Peers Alternatives, Client, Insurance, Models, SMA -- 5 of 5 carry aum in every scope. Self-test gated: a mutant body whose peers do not sum is REFUSED.",
+      "denominator": "4 scopes, 5 peers each",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TP1AE-AC3",
+      "criterion_verbatim": "D1-inv-4 holds on the served output -- L0 values sum to total_aua minus Insurance, and every L1 set sums to its L0 parent, with member counts exhibited. An L1 set that sums because it is EMPTY is not a pass. Report that the invariant is UNENFORCED.",
+      "method": "command",
+      "invocation": "python D1_CATVIEWS.TP1AE-AC2_AC3_score_served_invariants.py",
+      "output_evidence": "16/16 PASS across 4 scopes with member counts exhibited on every row. EIGHT VACUOUS L1 sets (Alternatives and Insurance in all 4 scopes) EXCLUDED from the tally rather than counted -- folded in, AC3 would have read 24/24 and four of those would have been arithmetic about nothing. D1-inv-4 is REPORTED UNENFORCED in the producer (no guard; measured by 0.4.0_DS_ClientPlatform~Z): a passing VALUE behind NO GUARD is a different state from a guarded one, and this instrument observes without converting observation into enforcement.",
+      "denominator": "16 scored assertions plus 8 vacuous excluded",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TP1AE-AC4",
+      "criterion_verbatim": "D1-inv-3 byte-unchanged -- legacy non_model fields identical before/after, by hash or ETag, not by inspection.",
+      "method": "command",
+      "invocation": "python D1_CATVIEWS.TP1AE-AC4_score_against_baseline.py",
+      "output_evidence": "rc=0 CAPTURED UN-PIPED. LEG1/LEG2: 5 of 5 baselined artifacts byte-unchanged, non_model field hashes identical. LEG3: 323 live keys vs a 292 baseline denominator, 31 NEW keys correctly classified EXPECTED rather than violations. THE FIRST RUN REFUSED on portal/gold/mdpf/_code/mdpf-gold-lambda.zip (804455 -> 834732) -- this seat's own rebuilds #2 and #3; a TRUE observation scored against the WRONG invariant, since gold-lambda.tf:116 declares that key as the lambda s3_key so rewriting it IS the deploy mechanism. Narrowed to exclude the DEPLOY plane from REWRITE failures ONLY: deletion of that key still fails, and the key is still PRINTED under its own heading so it cannot silently vanish. The self-test still PASSES both arms after the narrowing.",
+      "denominator": "5 baselined artifacts, 323 live keys vs 292 baseline",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TP1AE-AC5",
+      "criterion_verbatim": "The ViewPlaneError path EXERCISED at least once AGAINST A REAL MISMATCH and shown to refuse. Its FIRST real exercise must not be a client-facing producer run.",
+      "method": "manual_read_with_citation",
+      "invocation": "see org/tier2_senior/0.7.0_AE_CloudOps~Z/deliverables/D1_CATVIEWS.TP1AE-AC5_MEASUREMENT_20260828.md",
+      "output_evidence": "MEASURED @e43f37395c 2026-08-28T01:22Z: the five-peer refusal exercised on the DEPLOYED bytes, 4 of 4 arms. The measurement records that the author's FIRST DRAFT scored two passes on the WRONG PREDICATE and was corrected -- so the path refuses, and it was shown to refuse for the right reason rather than coincidentally.",
+      "denominator": "4 arms",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TP1AE-AC6",
+      "criterion_verbatim": "DESIRED != APPLIED != EXERCISED on every claim, and the re-cut pin is cited by CONTENT (git show pin:file plus a negative control), never by merge-base --is-ancestor. No .tf cited as evidence of force.",
+      "method": "diff",
+      "invocation": "git show 14b077f559e315ca8c6bca262e281ed8af8d8154:<path> compared against the same path at <pin>^",
+      "output_evidence": "PIN 14b077f559e315ca8c6bca262e281ed8af8d8154 -- the mdpf-gold-lambda RE-CUT, named at face line 16. mdpf_category_registry.py 62559 B sha256 0815c964ca84902b at the pin vs 60672 B sha256 1f250a9da534984b at the parent -- DIFFERS. mdpf_gold_consolidator.py 73709 B sha256 f56552dfa67f14b8 vs 72956 B sha256 645a596038417371 -- DIFFERS. Both negative controls fire, so the pin is distinguishable BY CONTENT. merge-base --is-ancestor was NOT USED: measured on this fabric today, a commit that was NOT an ancestor of PROD had CONTENT that WAS in PROD, so ancestry cannot separate absent from landed-by-another-route. DESIRED (source at the pin) is distinguished from APPLIED (MDPF_GOLD_COMMIT corrected @ecd8bf438b with ledger CLOSED 1c212ec471, then repinned twice more by this seat to 9dcc87dd5bbd and 73c2dea263, each verified 22-of-22 against source on the DOWNLOADED package) and from EXERCISED (the 13:50Z SCHEDULED fire, manifest 20260829T135046Z-0ae2ff1b). NO .tf is cited as evidence of force anywhere in this face; gold-lambda.tf appears only as the DECLARATION of which key is the deploy artifact, which is intent and not applied state.",
+      "denominator": "2 files, 2 negative controls",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "BOTH scorers are self-test gated and each was exercised in TWO arms. AC2/AC3: a hand-built body whose peers do not sum and whose L1 child disagrees with its parent. AC4: one baselined field hash mutated in memory. The AC4 deploy-plane scope narrowing was RE-PROVED against the same arms after the change, because a scope edit to a checker is exactly where it must be shown it can still fail.",
+      "expected": "Each control arm passes silently and each mutant arm REFUSES. AC2/AC3 mutant must refuse on BOTH criteria and the vacuous detector must find the childless node; AC4 mutant must produce >=1 LEG2 finding where the control produces 0.",
+      "observed": "AC2/AC3 -- control AC2 pass=True and AC3 all-pass=True; mutant AC2 refuses=True and AC3 refuses=True; vacuous detector found 1 childless node. AC4 -- control arm 0 findings, mutant arm 3 findings, and the same result after the narrowing.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Re-ran both scorers against the same served artifacts and the same committed baseline. AC6 re-resolved the pin by content twice. The AC2/AC3 tolerance (0.005) is DECLARED in the source rather than chosen after seeing the numbers.",
+      "observed": "Identical output across runs: AC2 4/4, AC3 16/16 with 8 vacuous excluded, AC4 rc=0 with 5 of 5 baselined artifacts unchanged and 31 new keys, AC6 both negative controls firing. No float instability at the declared tolerance; every scored delta is +0.00.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Values inside newly written dated keys",
+      "reason": "AC4 scores BYTE-UNCHANGED on baselined artifacts and classifies NEW keys as expected. It says nothing about whether values in a newly written key are correct; that is AC2/AC3's plane, and they score the SERVED bodies rather than every new gold key."
+    },
+    {
+      "item": "portal/gold/mdpf/_code/ excluded from D1-inv-3 REWRITE failures",
+      "reason": "gold-lambda.tf:116 declares that key as the lambda s3_key, so rewriting it IS the deploy mechanism and it is not a settled dated DATA key. Excluded from REWRITE failures only: deletion still fails, and the key is still printed."
+    },
+    {
+      "item": "Enforcement of D1-inv-4",
+      "reason": "This face OBSERVES the invariant on the served artifact. It does not add a producer-side guard, and AC3 explicitly requires the unenforced state be REPORTED rather than silently passed."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION, DISARMED SAME-TURN, owner 0.7.0_AE_CloudOps~Z: THE SERVED PLANE NOW CARRIES TWO as_of DATES AT ONCE -- global, 49financial and inflection at 2026-08-27 and cottonwood at 2026-08-28, all four written by the same 13:50Z publisher run seconds apart. This is the per-scope content-derived as_of reaching the CLIENT-FACING plane for the first time. It is NOT a defect against AC2 or AC3: both invariants are WITHIN a scope and hold in all four. Surfaced because a reader comparing cottonwood to global is comparing different days and nothing in the bodies makes that visually obvious.",
+    "OBSERVATION, DISARMED SAME-TURN, owner 0.7.0_AE_CloudOps~Z: the 13:30Z scheduled FLOOR fire REFUSED TO EMIT global -- CROSS-AXIS COHERENCE GATE FAILED (global), five members with model_value None but account_count greater than zero at 2026-08-28. That is a gate WORKING: cottonwood advanced alone, global aggregates its constituents, and it refused rather than serve an incoherent global. Root cause read at source by 0.4.0_DS_ClientPlatform~Z at consolidator :2392-2399, a date-conditional constituency that switches global from a two-firm to a three-firm sum the moment cottonwood is covered."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-29/reland_complete_and_relayed_authorisation_refused_0300-0405Z.md",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "on both new scorers before commit",
+      "result": "PASS -- clean 1 of 1 each"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "check, close-leg and close across catvp-c-publisher-derived-type-axis and d1-catviews-second-reland-tonight",
+      "result": "PASS -- both CLOSED on proof, sentinels removed, and the removals committed so they cannot resurrect on another checkout"
+    },
+    {
+      "tool": "mdpf-gold-packaged-check.py",
+      "invocation": "on every producer commit since the deployed pin",
+      "result": "PASS -- authored this session after the 22-member rule was measured to cover only 11 of its 22 members"
+    },
+    {
+      "tool": "safe-apply.sh",
+      "invocation": "three applies: two lambda repins plus the MDPF_GOLD_COMMIT provenance stamp",
+      "result": "PASS -- 0 destroyed on each, 0-diff targeted replan after each"
+    }
+  ]
+}
