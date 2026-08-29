@@ -31,6 +31,12 @@ RULED = json.load(open(EM / "perfrp_book_advisor.json", encoding="utf-8"))
 EVID = json.load(open(EM / "perfrp_book_advisor_floor_aligned.json", encoding="utf-8"))
 FAILS = []
 ABSENT = "NOT_COMPUTED_INPUTS_ABSENT"
+# The client-table status vocabulary. The fourth member was ruled at 1.0.0_SA_CTO 80187
+# and RENAMED at 80196 from UNMEASURABLE to this token, because COO 79841 had already
+# put the same token on the same rows' new/lost FIGURES for the same cause: two words
+# for one cause on one row reads as two different things having happened.
+ABSENT_STATUS = "NOT_COMPUTED_INPUTS_ABSENT"
+COMPUTABLE = ("new", "lost", "existing")
 
 
 def check(name, cond, detail=""):
@@ -256,7 +262,34 @@ for nm, L in (("ruled", RULED), ("evidence", EVID)):
           "0 of %d" % sum(len(t) for e in ent for t in e["tiles"].values()))
     st = {r["status"] for r in rows_of(L)}
     check("[%s] every row status is in the ruled vocabulary" % nm,
-          st <= {"new", "lost", "existing", "unknown"}, str(sorted(st)))
+          st <= set(COMPUTABLE) | {ABSENT_STATUS}, str(sorted(st)))
+
+# 1.0.0_SA_CTO 80187 item 3 -- THE ARM THAT MAKES THE FOURTH MEMBER REJECTABLE.
+# The member is reachable IFF membership_computable is False. A row on the COMPUTABLE
+# branch carrying it, or a row on the ABSENT branch carrying one of the three ruled
+# values, is a FAIL -- not a curiosity. This is the predicate that keeps the enum MECE
+# (postulate (i)); without it the fourth member is an unfalsifiable addition.
+def branch_vocabulary(leaf):
+    computable = leaf["window"]["membership_basis"]["computable"]
+    allowed = set(COMPUTABLE) if computable else {ABSENT_STATUS}
+    return not [1 for r in rows_of(leaf) if r["status"] not in allowed]
+
+
+for nm, L in (("ruled/absent", RULED), ("evidence/computable", EVID)):
+    check("[%s] status vocabulary matches the BRANCH, never crosses" % nm,
+          branch_vocabulary(L),
+          "computable=%s, %d rows" % (L["window"]["membership_basis"]["computable"],
+                                      len(rows_of(L))))
+
+# NEGATIVE CONTROL, planted BOTH ways -- a control that can only fire in one direction
+# would leave the other half of the predicate unexercised.
+import copy as _copy                                                    # noqa: E402
+_x = _copy.deepcopy(RULED)
+_x["entries"][0]["client_table"][0]["status"] = "existing"
+control("a ruled value planted on the ABSENT branch", branch_vocabulary, _x)
+_y = _copy.deepcopy(EVID)
+_y["entries"][0]["client_table"][0]["status"] = ABSENT_STATUS
+control("the absent member planted on the COMPUTABLE branch", branch_vocabulary, _y)
 
 bv = EVID["window"]["basis_version_change"]
 check("the evidence leaf DISCLOSES the producer confound on its face",
