@@ -44,7 +44,22 @@ different mechanisms:
    as a statement about the OUTCOME -- the error class ~L named against itself: reasoning about the
    trigger and asserting about the outcome.)*
 
-**All three are ONE defect: a scheduled production run whose only trigger is "power the box on" -- no
+**MECHANISM CLOSED 04:25Z (`3.0.0_SA_CVO` 80832) AND IT IS THE PART THE OWNER MOST NEEDS -- THE TRIGGER'S
+OWN METRICS READ GREEN BESIDE NO RUN.** AWS/Lambda for `bd-gold-trigger`, 04:00:00-04:05:00Z bucket:
+**Invocations = 1, Errors = 0, Duration 600 ms** (control: the 23:00Z bucket also shows exactly 1 -- the
+fire that DID start the box). And CloudTrail shows **no `StartInstances` anywhere in the account after
+03:56:09Z**, established against a TRUE watermark (the newest event of ANY name, 04:22:12Z at read time --
+CVO first corrected its own instrument here: `Events[0]` under an EventName filter conflates *not yet
+indexed* with *did not happen*). **So the schedule fired, the Lambda ran cleanly, and it made no
+`StartInstances` call at all: the no-op is INSIDE the Lambda, not at the EC2 API and not a missing fire.**
+CVO's stated bound: *"it checks instance state and skips"* is an INFERENCE from (invoked, no error, no API
+call) -- the Lambda's code and its 04:00Z CloudWatch Logs were NOT read, and that read belongs to this owner.
+⛔ **CONSEQUENCE FOR THE REMEDY: a missed run that leaves an ERROR is findable; a missed run that leaves a
+SUCCESSFUL INVOCATION is not. The it-ran check must key on the CHAIN and the SCHEDULE -- never on the
+trigger's own metrics**, which reported success while nothing was started and the chain that was running
+had been caused by a campaign restart 43 minutes earlier.
+
+**All three faces are ONE defect: a scheduled production run whose only trigger is "power the box on" -- no
 dispatch, no calendar guard, no verification that the run happened.** Remedy axis (CTO's, not a patch on
 any single face): a trigger that DISPATCHES the chain, plus a calendar guard and an it-ran check. The
 campaign is a CO-TENANT on `i-01003b035d2988dfb` until it completes and will keep perturbing that chain's
