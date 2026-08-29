@@ -162,6 +162,46 @@ needs five BRIDGED INPUTS, not new code.** The real work is the XREF.
 bridge genuinely resists — **and if it does, that returns to ANDREW as a fork. It does not get
 decided by whichever seat hits it first at 04:00Z.**
 
+## 3d. ⛔⛔ WHERE THE `5 of 5` DENOMINATOR MAY BE READ — AND THE OBVIOUS INSTRUMENT IS THE BLIND ONE
+
+`3.0.0_SA_CVO~Z` measured the collection rung (msg 15874) and it changes where this TO may read:
+```
+  XREF  build_schwab_bd_account_xref.py:44   unbridged -> schwab_account_id=NULL +
+        bridge_method='unresolved', NEVER DROPPED (Rule 17).  UNRESOLVED ARE VISIBLE HERE.
+  GOLD  build_dim_taxsma_report.py :142 / :252 / :289
+        THREE BARE `groupby("schwab_account_id")` calls. NO `dropna=` anywhere.
+        MEASURED on the installed pandas 3.0.3, that exact call shape:
+          5 rows (2 real ids, 3 NULL) -> bare groupby = 2 groups, 2 rows. 3 SILENTLY DROPPED.
+          dropna=False                -> 3 groups, 5 rows survive.
+```
+>> ⛔ **RULE 17's "NEVER DROPPED" HOLDS AT THE RUNG IT WAS WRITTEN FOR AND IS UNDONE ONE RUNG LATER
+   BY A LIBRARY DEFAULT. The xref PRESERVES the unresolved accounts; the gold DELETES them.** <<
+```
+  AT THE GOLD ARTIFACT:
+    "2 bridged, 3 unresolved"  -> 2 account= partitions
+    "the population is 2"      -> 2 account= partitions
+  BYTE-IDENTICAL. AN ABSENCE AND A TRUE-SMALL-POPULATION READ THE SAME.
+```
+⛔⛔ **AND THE NATURAL WAY TO ANSWER *"how many accounts does ALT cover?"* IS THE BLIND ONE:** counting
+`account={schwab_account_id}/` partitions, or reading `:289`'s `by_acct`. **Both equal the RESOLVED
+count and can NEVER reveal the shortfall.** A seat measuring coverage at the deliverable would report
+**`2 of 2 = 100%` while three accounts are missing — WITH A DENOMINATOR PRINTED, which is exactly what
+would make it convincing.**
+>> ✅ **THEREFORE, BINDING ON `AC1` AND `AC4`: THE DENOMINATOR COMES FROM THE XREF, OR FROM ANDREW'S
+   RULED 5. NEVER FROM THE GOLD PARTITIONS AND NEVER FROM `by_acct`.** The xref is not the *better*
+   instrument here — **it is the ONLY one. No substitute exists.** <<
+
+⚠ **PROVENANCE, PER *A VALUE MUST CARRY ITS CLAIM*: the `5` is ANDREW-RULED, therefore `held`, NOT
+`measured`.** The instance must stamp it that way. **A sovereign ruling is excellent authority and it
+is still not a measurement** — if the xref enumerates a different number, that is a FINDING to route
+back to Andrew, **not a discrepancy to quietly reconcile toward either value.**
+
+⚠ **A CHEAP FIX EXISTS AND IS DELIBERATELY NOT TAKEN TONIGHT:** `dropna=False` at `:142`/`:252`/`:289`
+would make unresolved accounts visible at gold too. **`build_dim_taxsma_report.py` is NOT a packaged
+member, so it carries no rebuild obligation — but it IS an `INC3-B` input, and changing collection
+semantics mid-item is how a measurement stops comparing to its own baseline.** SURFACED, NOT CHASED;
+owned by whoever cuts `INC3-B`. **Not this TO's act.**
+
 ## 4. BOUNDS THAT BIND THIS TO
 
 ⛔ **READ-ONLY. NO WRITES, NO COMMITS TO ANY PACKAGED MEMBER, NO PRODUCER EDITS.** This TO exists to
