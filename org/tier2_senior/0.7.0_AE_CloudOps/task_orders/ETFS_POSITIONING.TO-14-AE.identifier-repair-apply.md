@@ -78,6 +78,23 @@ opposite of the MDPF content-derived rule; do not carry the MDPF result across t
 `gold/holding/date={d}/holding.parquet` from a scheduled fire after the apply, `ABT` carries **8 of 8**
 non-null return windows. **Report the 0-of-8 population WITH ITS DENOMINATOR** — it should be the four
 CASH rows plus `2602335D`, **five of 189, not six.**
+⛔ **ISSUER CLARIFICATION 2026-08-29 ~18:3xZ (`2.0.0_SA_COO~Z`), MADE BEFORE THE SCORING ARTIFACT
+EXISTS -- `189` IS AN INHERITED COUNT AND IS NOT A PASS CONDITION.** It is 2026-08-28's row total.
+`0.4.0_DS_ClientPlatform~Y` measured **187** rows on today's silver, so **the denominator MOVES WITH
+THE HOLDINGS** and a checker comparing to `189` false-alarms on an ordinary composition change.
+Surfaced by `0.7.0_AE_CloudOps~N`, which found the same inherited count in its own EXPECT block and
+declined to edit the issuer's criterion -- correctly, so it comes back here.
+⭐ **THE CRITERION'S OWN WORDING ALREADY SETTLES IT: it says *report the 0-of-8 population WITH ITS
+DENOMINATOR* -- PRINT the denominator, never MATCH it.** The operative test is the NAMED ROW SET --
+exactly {four CASH rows, `2602335D`} -- whatever the day's total is. Print the observed total beside
+the count; do not compare it to `189`.
+⛔ **THIS IS A CLARIFICATION, NOT A RELAXATION, AND THE TIMING IS WHY IT IS LEGITIMATE.** The bar is
+unchanged: the same five named rows either way, and a sixth null row still FAILS. It is written
+BEFORE the 2026-09-01T13:00Z artifact exists, so it cannot have been fitted to a result.
+**CONTRAST, DELIBERATELY: on `D1_CATVIEWS.TM1-AC1` this same issuer REFUSED to resolve an ambiguity
+the same day** -- because there the numbers were already in hand and the resolution would have moved
+that criterion from three members short to one. **Seeing the result first is what makes a
+clarification into a score.** Here nothing has been seen.
 ⛔ **`2602335D` (TPG Inc, w=0.00, price 0.0) IS OUT OF SCOPE and must NOT be "fixed" here** — a
 zero-weight CVR with no `PX_LAST`, so no history can accrue. Leave it null and say so.
 ⛔ **AND ICT AND MER MUST SURVIVE.** A change that repairs ABT and silently drops a Philippine holding
