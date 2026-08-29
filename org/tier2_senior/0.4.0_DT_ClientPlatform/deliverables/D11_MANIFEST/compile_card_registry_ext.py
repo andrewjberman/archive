@@ -38,6 +38,36 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", "..", ".."))
 REGISTRY = os.path.join(HERE, "card_population_registry.v1.json")
+REGISTRY_REL = ("org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/"
+                "card_population_registry.v1.json")
+def last_ratified_commit():
+    """DERIVE the last RATIFIED registry commit; never type it.
+
+    "Ratified" is exactly `ratified_at_commit is not null`, so walk this file's own history newest
+    first and take the first version that carries one. I first hardcoded a hash here, padding a
+    12-char prefix I had printed earlier into a 40-char string -- an INVENTED value that resolved to
+    nothing and failed closed. It was only reachable after an --apply, because the compiler nulls
+    ratified_at_commit by design, so the file stops naming its own ratified pin the moment it is
+    written.
+    """
+    out = subprocess.check_output(["git", "log", "--format=%H", "--", REGISTRY_REL], cwd=ROOT)
+    for h in out.decode().split():
+        try:
+            blob = subprocess.check_output(["git", "show", "%s:%s" % (h, REGISTRY_REL)],
+                                           cwd=ROOT, stderr=subprocess.DEVNULL)
+        except subprocess.CalledProcessError:
+            continue
+        try:
+            if json.loads(blob).get("ratified_at_commit"):
+                return h
+        except ValueError:
+            continue
+    raise SystemExit("REFUSING: no ratified registry found in this file's history")
+
+
+def io_read(p):
+    with open(p, encoding="utf-8") as fh:
+        return fh.read()
 FILL_FACES = [
     "org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/NFRA_SUBSTRATECARDING.TO-KEYFILL-DTX.key-expression-fill.md",
     "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_SUBSTRATECARDING.TO-KEYFILL-COX.key-expression-fill.md",
@@ -171,9 +201,23 @@ def main():
 
     pin = subprocess.check_output(["git", "rev-parse", "--verify", "%s^{commit}" % args.pin],
                                   cwd=ROOT).decode().strip()
-    with open(REGISTRY, encoding="utf-8") as fh:
-        reg = json.load(fh)
+    # THE INHERITED SET COMES FROM THE LAST RATIFIED REGISTRY IN GIT, NEVER FROM THE FILE ON DISK.
+    #
+    # ⛔ THE COMPILE WAS NOT IDEMPOTENT. Reading the working copy meant that after one --apply the
+    # "inherited" set was the 72 I had just written, so a second run added the wave-2/wave-4
+    # candidates AGAIN: 72 + 59 = 131 members and a different digest. A compiler whose output
+    # depends on how many times it has run cannot be re-run to answer a refusal -- which is exactly
+    # what was asked of it.
+    #
+    # The ratified registry is named by the artifact itself (ratified_at_commit) and is immutable in
+    # git, so the inherited set is now the same on every run regardless of the file's current state.
+    reg_disk = json.loads(io_read(REGISTRY))
+    ratified_pin = reg_disk.get("ratified_at_commit") or last_ratified_commit()
+    reg = json.loads(subprocess.check_output(
+        ["git", "show", "%s:%s" % (ratified_pin, REGISTRY_REL)], cwd=ROOT).decode("utf-8"))
     inherited = reg["extension_population"]["members"]
+    print("   inherited set read from the RATIFIED registry @%s (not the file on disk)"
+          % ratified_pin[:12])
 
     # 1. the inherited W3 pins, RECOMPUTED at the pin -- never carried forward
     stale, recomputed, missing = 0, [], []
@@ -252,7 +296,17 @@ def main():
             s3_uri.append(mm)
         elif not PATHLIKE.match(sid):
             not_a_path.append(mm)
-        elif blob_at(pin, sid) is None and not os.path.exists(os.path.join(ROOT, sid)):
+        elif blob_at(pin, sid) is None:
+            # PIN ONLY. This line used to read `... and not os.path.exists(ROOT/sid)` -- a LIVE TREE
+            # fallback inside a PINNED compile, which counted five subjects PRESENT that do not
+            # exist at the pin at all (4.0.0_SA_CRO~X REFUSED ddbba3f141 on it): .comp-graph/
+            # graph.json, which is GITIGNORED and therefore in no commit ever, plus four W4
+            # subjects. It made the registry say 21 present / 16 absent where the pin says
+            # 16 / 21.
+            #
+            # I NAMED THIS EXACT HAZARD IN candidates_at() -- "listing from disk would mix an
+            # unpinned view into a pinned compile" -- and then committed it in the classifier eight
+            # lines later. Knowing the class is not the same as auditing every read for it.
             absent_subj.append(mm)
         else:
             present.append(mm)
