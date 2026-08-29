@@ -31,6 +31,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -214,6 +215,56 @@ def main():
             continue
         added.append({"git_blob_id": b, "path": rel, "subject_id": s})
 
+    # -- SUBJECT DISPOSITION (issuer relay 000211Z: "missing-/duplicate-subject disposition per
+    # collision on the receipt, W2-hffm vs W4-c2_instances_json first") -----------------------
+    #
+    # THREE DISTINCT CONDITIONS, and collapsing them is how a registry invents an identity:
+    #   exact       two members with the SAME subject_id string -- a real duplicate
+    #   name-miss   two members whose subject_ids differ AS STRINGS but end in the same basename,
+    #               e.g. ".../kimi_subdivision_harness/c2_instances.json" (this seat, W2-hffm) and
+    #               "c2_instances.json" (CloudComp~X, W4-c2_instances_json). One artifact, two id
+    #               forms, two cards, two owners.
+    #   absent      the subject does not exist at the pin at all.
+    #
+    # NONE OF THEM IS MERGED HERE. The ruling is join only by registry-minted part id and leave
+    # string-name misses UNJOINED: unifying two id forms on a basename would be the compiler
+    # deciding an identity question that belongs to the ratifier. Both cards stay distinct members
+    # and the relationship is RECORDED so a later consumer joining on subject_id is not surprised
+    # by two rows for one artifact.
+    import collections as _c
+    exact = {s: n for s, n in _c.Counter(m["subject_id"] for m in
+                                         recomputed + added).items() if n > 1}
+    by_base = _c.defaultdict(list)
+    for mm in recomputed + added:
+        by_base[os.path.basename(mm["subject_id"] or "")].append(mm)
+    name_miss = {b: v for b, v in by_base.items()
+                 if len(v) > 1 and len({x["subject_id"] for x in v}) > 1}
+    # A SUBJECT THAT IS NOT A PATH IS NOT A MISSING PATH. My first cut of this check called 46
+    # subjects "absent at pin"; 32 of them were never paths at all -- a projection name
+    # ("kuzu_nessie_db"), a tool name ("comp-heat"), an S3 URI. Testing a name for file existence
+    # and reporting the failure as absence is the same conflation this whole round keeps finding.
+    # Classified, not collapsed: not-a-path, s3-uri, present, absent.
+    PATHLIKE = re.compile(r"^[A-Za-z0-9_.][A-Za-z0-9_./-]*\.[A-Za-z0-9]{1,6}$")
+    not_a_path, s3_uri, present, absent_subj = [], [], [], []
+    for mm in recomputed + added:
+        sid = mm["subject_id"] or ""
+        if sid.startswith("s3://"):
+            s3_uri.append(mm)
+        elif not PATHLIKE.match(sid):
+            not_a_path.append(mm)
+        elif blob_at(pin, sid) is None and not os.path.exists(os.path.join(ROOT, sid)):
+            absent_subj.append(mm)
+        else:
+            present.append(mm)
+    print("   SUBJECT DISPOSITION, denominator %d: exact duplicates %d | name-misses %d"
+          % (len(recomputed + added), len(exact), len(name_miss)))
+    print("      subject shape: present %d | ABSENT at pin %d | not a path (a name) %d | s3 uri %d"
+          % (len(present), len(absent_subj), len(not_a_path), len(s3_uri)))
+    for b, v in sorted(name_miss.items()):
+        print("      name-miss on %r -- NOT merged, both members retained:" % b)
+        for x in v:
+            print("         %s" % x["subject_id"])
+
     members = sorted(recomputed + added, key=lambda m: m["path"])
 
     # -- THE BINDING RAT RULE (4.0.0_SA_CRO~X 211251Z) -------------------------------------------
@@ -270,6 +321,16 @@ def main():
     out["ratified_at_commit"] = None          # the RATIFIER sets this; the compiler never does
     out["compiled_at_commit"] = pin
     out["discovery_globs"] = sorted(set(reg.get("discovery_globs", []) + WAVE_GLOBS))
+    out_disposition = {"exact_duplicate_subject_ids": sorted(exact),
+                       "name_misses_not_merged": {b: sorted(x["subject_id"] for x in v)
+                                                 for b, v in name_miss.items()},
+                       "subjects_absent_at_pin": sorted(x["subject_id"] for x in absent_subj),
+                       "subjects_not_a_path": len(not_a_path),
+                       "subjects_present_at_pin": len(present),
+                       "subjects_s3_uri": len(s3_uri),
+                       "note": ("a subject that is not a path is NOT a missing path; the four "
+                                "shapes are counted separately and never collapsed")}
+    out["subject_disposition"] = out_disposition
     out["compile_note"] = (
         "Inherited W3 pins were RECOMPUTED at compiled_at_commit, not carried forward: measured "
         "%d of %d stale against the previous registry (ratified_at_commit %s). The staleness "
