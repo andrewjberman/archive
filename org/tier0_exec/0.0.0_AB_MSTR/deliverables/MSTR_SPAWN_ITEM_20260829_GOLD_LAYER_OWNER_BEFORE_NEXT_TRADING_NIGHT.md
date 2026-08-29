@@ -116,3 +116,31 @@ has live executable work, not when someone is anxious about it.*
 and any base-addressed TOs), `--say` pointing at COO 80717 + carrier row 7 (q). Then delete-or-close this
 file. If a successor MSTR reads this AFTER the deadline has passed, the item is LATE, not moot: the pattern
 stands until the remedy lands.
+
+## FOURTH SEAT ITEM (added 10:4xZ from `2.0.0_SA_COO` 81908 -- a routing problem, ruled by MSTR)
+
+**(4) `0.4.0_DS_ClientPlatform` (BASE) -- the 2026-08-11..08-17 flow_ledger gap. NO DATE DEADLINE.**
+Trigger: the issuer cutting a TO for the gap investigation, OR Andrew's word -- whichever comes first.
+NOT seated at ruling time: the gap is five trading days two and a half weeks old, nothing about the
+weekend makes it more actionable than Monday, and the base carries ~31 TOs across 14 projects a fresh
+instance would read onto itself. ⛔ NOT `0.4.0_DS_ClientPlatform~V` either, though it is live -- it holds
+TO-R2-DS, and routing this there is a Rule-27 collision.
+
+**WHY THIS OWNER, on an instrument independent of the registry:** git authorship of the PRODUCER
+`data/assets/scripts/gold/runners_49f/c00_flow_ledger.py` is **7 of 7 DS_ClientPlatform** (`~U` 4, base 2,
+`~A` 1); the whole `runners_49f/` tree over its last 30 commits is **27 of 30 DS**. That agrees with
+`2.0.0_SA_COO`'s registry + Rule-13 read from a different direction.
+
+**THE ROUTING DEFECT THAT PRODUCED THIS ITEM, recorded because it is the reusable part:** three seats
+(`2.0.0_SA_COO`, `0.7.0_AE_CloudOps~L`, `3.0.0_SA_CVO`) passed the item to *"the ADVI data owner"* -- a
+ROLE with **no serial behind it**, measured across 100 `ADVI_*` project files. CVO correctly declined to
+guess one and handed it back. **A recipient that is not a serial is a value with no consumer, one level up,
+in our own routing.**
+
+**THE FINDING (qualifies a completion claim):** `534/534 COMPLETE` is TRUE **and its denominator is derived
+from `flow_dates`, i.e. from the very data whose gaps it would have to reveal.** The five days were never
+in the flow set -- never driven, never skipped, never halted, absent from the denominator; no campaign
+instrument could have surfaced them. Three independent planes put a boundary at **2026-08-10**: object
+existence (404 x5, with 08-10 at 41,587 B against 08-18's 308,790 B -- 7.4x at the boundary), the pinned
+flow set (08-10 then a jump to 08-18), and `dim_relationship`'s mapping source frozen at
+`source_as_of=2026-08-10` on both 08-18 and 08-27 while the unmapped self-family tail grows 119 -> 180.
