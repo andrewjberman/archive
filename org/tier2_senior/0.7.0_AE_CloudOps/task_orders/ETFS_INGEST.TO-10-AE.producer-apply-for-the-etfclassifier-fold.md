@@ -3,7 +3,7 @@
 <task_order id="ETFS_INGEST.TO-10-AE" project="ETFS_INGEST">
 <id>ETFS_INGEST.TO-10-AE.producer-apply-for-the-etfclassifier-fold</id>
 <decomp_ref>workflows/atom_decomposition/runs/etfs-ingest/20260824T2010Z/DECOMP.md @fcdf042972 (CERTIFIED) — **NO NEW CELL.** This TO is the **APPLIED rung** of `INGEST-T3-6` and `INGEST-T5-1`, the same cells `ETFS_INGEST.TO-9-AE` served for the TO-6/TO-8 change. <owned_cells>INGEST-T3-6, INGEST-T5-1</owned_cells></decomp_ref>
-<issued_to>`0.7.0_AE_CloudOps~I` — seated 2026-08-28T18:34:42Z by `2.0.0_SA_COO~Z`. Rule 27: 0 open TOs at that lane, and it is the lane that ran `TO-9-AE`, the same project's previous apply. Continuity, not a collision. ** SEATING NOTE, measured 2026-08-29 ~10:0xZ by `2.0.0_SA_COO~Z` (issuer): THE NAMED LANE IS DEAD (INFERRED) ON TWO INDEPENDENT SIGNALS -- no `kind:work` telemetry row for ~14h AND absent from `org/mcp/liveness.json` entirely. DO NOT DISPATCH TO IT. ** A `<issued_to>` naming a dead lane over OUTSTANDING work is an INSTRUCTION TO SPAWN -- correct here, and PREMATURE: this face waits on the 13:00Z `etf-positioning-producer-daily` fire (ENABLED, re-verified 09:53Z), and seating before it would seat on a read that does not exist yet. ** PLAN: at ~13:0xZ, seat a FRESH lane of this class and re-address this face. Rule 27 blocks reusing the live lanes -- `0.4.0_DS_ClientPlatform~Z` and `0.7.0_AE_CloudOps~Z` each already hold D1_CATVIEWS work, and one instance is one project. `2.0.0_SA_COO~Z` holds spawn/seat authority (Andrew 2026-08-28 15:32Z). ** NOTHING IS OWED BY ANY SEAT BEFORE THE FIRE. **</issued_to>
+<issued_to>`0.7.0_AE_CloudOps~M`</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-28T18:3xZ</issued>
 <status>pending -- CUT AND SEATED. Time-boxed by a scheduled fire, not by a sovereign word.</status>
@@ -80,3 +80,70 @@ gain or lose the key.** The pre-state to compare against is in that seat's compl
 thing, not further adjudication of it. **Do not re-open the member, the completions, or the radius.**
 RAVC to `2.0.0_SA_COO~Z`, **once**. Push is the integrator's act. Off-task findings: one line to the
 surprise channel, and keep working.
+
+
+## SEATING -- RE-ADDRESSED 2026-08-29 ~13:0xZ TO `0.7.0_AE_CloudOps~M`
+
+⛔ **THE PRIOR LANE WAS DEAD AND THE FACE SAID SO; THE EVENT IT WAITED ON HAS NOW HAPPENED, SO THE
+SEAT IS CORRECT NOW AND WOULD HAVE BEEN PREMATURE BEFORE.** The face's own plan was *"at ~13:0xZ,
+seat a FRESH lane of this class and re-address this face"*. This is that act, by `2.0.0_SA_COO~Z`
+(issuer; COO spawn/seat authority per Andrew 2026-08-28 15:32Z).
+
+```
+  1pt process truth   9 claude.exe live -- 0.7.0_AE_CloudOps~M proc=0
+                      POSITIVE CONTROL 0.4.0_DS_ClientPlatform~Y (seated 12:5xZ) proc=1 -> not blind
+  1b  marker scan     0 hit(s)   (same control: ~Y = 1 hit)
+  1c  concurrency     8 of 16 spawn-marker windows
+  1d  encumbrance     0 open TOs . 0 project/mission owner rows . channel hits are `surfaced_by`
+                      ONLY -- AUTHORSHIP, NOT OWNERSHIP, and only ownership is an obligation
+  1d-ii artifact      the proof-of-spec INSTANCE is PRESENT and its event-gated criteria were
+                      UNSCORABLE until this fire. NOT a stale face over finished work.
+```
+
+⚠ **`<issued_to>` NOW CARRIES THE SERIAL AND NOTHING ELSE.** `to-check` renders the FIRST
+serial-shaped token in that field, so prose containing serials makes a face render against the wrong
+seat. The prior field's text is preserved in git history; the seating narrative lives here.
+
+
+## POST-FIRE EVIDENCE, MEASURED BY THE ISSUER 2026-08-29 ~13:0xZ -- LOCATED, NOT ADJUDICATED
+
+The **Saturday 2026-08-29 13:00Z** `etf-positioning-producer-daily` fire RAN AND ADVANCED THE
+FRONTIER. This face's event gate is DISCHARGED: there is now a post-fire served artifact to score.
+
+```
+  gold/holding/date=2026-08-28/holding.parquet   45,630 B   LastModified 2026-08-29T13:01:22Z
+  gold/_manifests/2026-08-28/0f277195f2d7.json    3,068 B   same stamp -- THE RUN COMPLETED
+  189 rows . 169 distinct ticker . 183 rows at 8-of-8 return windows . 6 rows at 0-of-8
+```
+
+⛔ **AND THE WEEKEND PREDICTION IN THIS FACE'S OWN HISTORY WAS WRONG FOR THIS PIPELINE — READ THIS
+BEFORE SCORING.** An earlier amendment warned that *"a correct Saturday run may write NOTHING because
+the trading-day frontier has not moved"* and that **`AFTER == BEFORE` is the expected weekend
+outcome**. That is the **MDPF** mechanism — a CONTENT-derived `as_of` (`derive_as_of()`,
+`mdpf_gold_consolidator.py:1106`). **ETF positioning is CALENDAR-anchored**:
+`etf_positioning_gold.py:497` and `:1672` use `tcal.expected_last_trading_day(now)`, which for
+Saturday 2026-08-29 is **2026-08-28** — and `bbg/2026-08-28/` existed as input. **So it advanced, as
+predicted before the fire.** `3.0.0_SA_CVO~Z` fenced their MDPF frontier result at exactly this
+pipeline boundary (msg 16732) before anyone carried it across. **AFTER == BEFORE WOULD HAVE BEEN THE
+DEFECT HERE, NOT THE EXPECTED OUTCOME.**
+
+⚠ **THE MEASUREMENTS BELOW ARE EVIDENCE LOCATED FOR THE SEAT, NOT A VERDICT ON ANY CRITERION. THE
+ISSUER HAS NOT READ THIS FACE'S AC TEXT IN FULL AND IS NOT SCORING IT.** In particular Andrew
+narrowed the delivered scope at 2026-08-28 18:24Z, VERBATIM: *"the subsector name is not that
+important, as long as it is properly managed within ETFClassifier, it is done."* **Whether a served
+30-char string is in or out of the accepted scope is the executor's reading, not the issuer's.**
+
+```
+  industry_group in the POST-FIRE artifact: 23 distinct values over 180 non-null of 189 rows
+  SIX sit at EXACTLY 30 chars (Bloomberg's cap), max len over all values = 30:
+    'Commercial & Professional Serv'   'Consumer Discretionary Distrib'
+    'Health Care Equipment & Servic'   'Pharmaceuticals, Biotechnology'
+    'Semiconductors & Semiconductor'   'Technology Hardware & Equipmen'
+```
+
+⭐ **AND AN UNRELATED FINDING IN THE SAME ARTIFACT, ROUTED ELSEWHERE — DO NOT CHASE IT FROM THIS
+FACE.** `ABT` (Abbott, DIVZ) carries **0 of 8** return windows in BOTH the 08-27 and the 08-28
+partition, so the defect is **REPRODUCED ACROSS TWO CONSECUTIVE SCHEDULED FIRES** rather than a
+one-day glitch. Its weight moved **2.36 -> 2.33** between them, which is the discriminator: **the
+book row refreshes daily and only the RETURN SERIES has no source.** That is
+`ETFS_POSITIONING.TO-13-DS`, seated on `0.4.0_DS_ClientPlatform~Y`, and it is NOT this face's work.
