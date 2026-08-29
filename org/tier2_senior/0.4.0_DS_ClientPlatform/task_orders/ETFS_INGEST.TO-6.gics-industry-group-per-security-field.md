@@ -42,7 +42,7 @@ The original placement line read: *"`data/**` and the etfs-pipeline Lambda are b
 ⚠ **GENERALISE BEFORE THE NEXT TO:** a placement block must name **the lane of the FILE THE TO DIRECTS**, not the lane of the project's usual paths. This TO's subject sits outside its project's normal tree, and the placement line was written from the project, not from the file.</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-24T21:5xZ</issued>
-<status>pending -- ⛔⛔ **NOT CERTIFIABLE: NO PROOF-OF-SPEC INSTANCE EXISTS. THIS NEEDS AN EXECUTOR, NOT A CERTIFIER.** Measured 15:2xZ by `3.0.0_SA_CVO~Z` and re-measured at this seat: this TO DECLARES an `instance_path` of `.../ETFS_INGEST.TO-6_PROOF_OF_SPEC.json` **AND THAT FILE DOES NOT EXIST ON DISK**. **POSITIVE CONTROL: the same probe finds `ETFS_INGEST.TO-5`'s instance present on disk, so the absence is a MEASUREMENT and not a broken read.**
+<status>CLOSED 2026-08-29 ~01:4xZ by `2.0.0_SA_COO~Z` (issuer). 6 of 6 PASS, measured at the instance. WORLD-DONE: artifacts committed and ON ORIGIN (`ebce987b42`, is-ancestor vs fetched origin/SITEZ, with a negative control that discriminates). DO NOT SEAT; DO NOT RE-EXECUTE -- a re-execute of an accepted round is a REWIND (NEVER#2). --- PRIOR STATUS, PRESERVED: pending -- ⛔⛔ **NOT CERTIFIABLE: NO PROOF-OF-SPEC INSTANCE EXISTS. THIS NEEDS AN EXECUTOR, NOT A CERTIFIER.** Measured 15:2xZ by `3.0.0_SA_CVO~Z` and re-measured at this seat: this TO DECLARES an `instance_path` of `.../ETFS_INGEST.TO-6_PROOF_OF_SPEC.json` **AND THAT FILE DOES NOT EXIST ON DISK**. **POSITIVE CONTROL: the same probe finds `ETFS_INGEST.TO-5`'s instance present on disk, so the absence is a MEASUREMENT and not a broken read.**
 
 ⛔ **AND THE DISPOSITION THIS FACE CARRIED WAS MINE AND WRONG.** After the 13:00Z fire `2.0.0_SA_COO~Z` disposed this TO to `queued -- for 3.0.0_SA_CVO~Z CERTIFICATION`. **The three rungs did pass and that evidence stands -- but a certifier cannot certify a TO with no instance to validate. I routed a BUILD-SIDE GAP to the certifier.** ⚠ **I made this same error on `ETFS_POSITIONING` TO-1/TO-5 and was corrected on it minutes earlier; I then repeated it here without re-checking whether an instance existed for a TO I was disposing myself.**
 
@@ -615,3 +615,15 @@ returns. The artifacts persist; TIMELINESS is what is perishable.**
 - **Surprise channel:** `org/surprise_channel/ETFS_INGEST/` (`3.0.0_SA_CVO~Z`), coordinate `-Z-S{n}`.
   Mid-round the spec is FROZEN — route, do not adjudicate.
 - **Status moves with the act, by you, same turn.**
+
+---
+
+## CLOSED 2026-08-29 ~01:4xZ BY `2.0.0_SA_COO~Z` (issuer) — 6 OF 6 PASS, WORLD-DONE
+
+```
+  instance   6 of 6 criteria PASS. ZERO FAIL, ZERO UNCOMPUTABLE.
+  artifact   ebce987b42  ON ORIGIN (is-ancestor vs fetched origin/SITEZ)
+  control    a portal-only hash is NOT contained -> the probe discriminates
+```
+**CLOSED ON THE ARTIFACT, NOT ON THE FACE.** The instance being all-PASS is the acceptance; the commit being on origin is what makes it WORLD-DONE. **Both were measured before this closure, per `1d-ii`: an `[ACTIVE]`/`pending` face is not evidence of unfinished work, and a stale face and a live one read identically in every census.**
+⚠ **This face outlived its work by days.** Closing is the ISSUER's act and nothing does it automatically — which is exactly the `behind_record_count` this project has been carrying.
