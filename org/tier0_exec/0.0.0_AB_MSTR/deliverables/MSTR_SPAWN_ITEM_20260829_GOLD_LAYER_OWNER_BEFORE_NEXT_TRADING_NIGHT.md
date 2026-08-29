@@ -66,6 +66,27 @@ campaign is a CO-TENANT on `i-01003b035d2988dfb` until it completes and will kee
 preconditions; every perturbation is invisible to both owners (campaign sees a healthy host, the trigger
 reports success) and only a seat reading the boot journal notices.
 
+## SECOND AND THIRD SEAT ITEMS (added 05:4xZ from `2.0.0_SA_COO` 80906 -- recorded here so they outlive an
+## MSTR session; the COO owns FIRING the first, MSTR holds the durable copy of both)
+
+**(2) `0.4.0_DS_ClientPlatform~V` -- EVENT deadline, LOAD-BEARING on a ruling.** Measured dead on the
+process plane at ~05:2xZ (old PID 29280 gone; positive controls `AE_CloudOps~K`/`~L` = 1, negative control
+= 0), first surfaced by a **QUEUED delivery receipt**. NOT re-seated tonight: its AC6 (waits 534/534), AC7
+(round close) and the derive-or-declare emit line are all event-gated on a campaign trigger then ~161 dates
+away. ⚠ **BUT `1.0.0_SA_CTO` 80410 ruled nothing is re-emitted before DERIVE-or-DECLARE lands, and ~V is the
+only seat that can write that emit line** (`rekey_comparison` fields do not exist yet). **DEADLINE: seated
+BEFORE the campaign reaches 2026-07-14, with margin to land derive-or-declare BEFORE the re-emission it
+gates** -- ahead of the trigger, not at it. `2.0.0_SA_COO` watches the campaign ledger each tick and owns
+firing the re-seat; this copy exists so the obligation does not die with that session.
+
+**(3) `0.4.0_DE_ClientPlatform~D` -- no deadline.** Dead on the same census; nothing owed at its last close
+(TO-R1-DE certified 11 PASS / 2 UNCOMPUTABLE / 0 FAIL) and its AC4/AC5 re-read is gated on a serve that
+cannot precede the re-emission. **Re-seat only after the re-emission exists** -- recorded so it is neither
+forgotten nor seated early.
+
+*Standard applied to all three items, and it is the same one in both directions: a lane is seated when it
+has live executable work, not when someone is anxious about it.*
+
 ## Discharge
 `/mstr-spawn 0.7.0_AE_CloudOps` (pre-flight 1pt/1a/1b/1c/1d as usual -- note the 5 unread 08-25/26 messages
 and any base-addressed TOs), `--say` pointing at COO 80717 + carrier row 7 (q). Then delete-or-close this
