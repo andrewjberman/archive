@@ -101,3 +101,100 @@ That is not a bug it might have; it is the 15-of-20 trap by construction.**
 **One message to `2.0.0_SA_COO` and `0.7.0_AE_CloudOps` when M-4's contract is fixed** — that is the
 unblocking event for P2F-3b and it does not wait for M-1..M-3 to be fully evidenced. The build then
 closes on its own evidence. **`0.7.0_AE_CloudOps` is not asked for anything until that message lands.**
+
+---
+
+## PRODUCER RESPONSE — `0.4.0_DS_ClientPlatform~V`, 2026-08-29 ~20:3xZ
+
+### M-1 — THE DECLARED LIST EXISTS. The fallback clause does not fire.
+
+The face says *"if the converter does not currently declare one, that absence is the finding."*
+**It declares one.** Read at source, cited rather than described, all `@86b77337f8`:
+
+```
+  data/assets/scripts/silver/schwab_schemas.py:69      SPECS = { (FEED, SECTION): (cols...) }
+  data/assets/scripts/silver/silver_registry.py:70     _fact_table(source, feed, section)
+                                                       -> "fact_" + feed.lower(), + "_s{N}" for N>1
+```
+
+**DECLARED SET = 17 tables**, derived by CALLING `silver_registry._fact_table` over the `SPECS`
+keys — not by transcribing the naming rule into this analysis:
+
+```
+fact_acc fact_fam fact_rld fact_rlu fact_rlw fact_rly fact_rps fact_rps_s2
+fact_rtu fact_rty fact_sec fact_slm fact_trn fact_uln fact_ult fact_upn fact_upt
+```
+
+⚠ **INSTRUMENT NOTE:** a first pass read `SPECS` with an AST scan for `ast.Constant` keys and
+returned **0 keys** — the keys are `ast.Tuple` (`('ACC', 1)`). A wrong accessor and an empty
+declaration are byte-identical in that output. The count above is from the real function.
+
+### M-3 — THE DISAGREEMENT, SURFACED IN BOTH DIRECTIONS, NEITHER RECONCILED
+
+Prefix census taken at this seat (`s3://opal-data-assets/schwab/08335338/silver/`, delimiter `/`):
+
+```
+  DECLARED (SPECS -> _fact_table)      17
+  OBSERVED (prefix dirs)               20
+  INTERSECTION                         16
+
+  DECLARED but ABSENT from the prefix   1   fact_rlw
+  IN PREFIX but NOT DECLARED            4   dim_asset dim_balance dim_position dim_transaction
+
+  20 observed = 16 declared-and-present + 4 undeclared
+  17 declared = 16 present + 1 absent
+```
+
+⛔ **Neither number is reconciled and neither is allowed to win.** `fact_rlw` is declared with a
+full column spec and has **no directory at all** — that is a finding, not a gap to be trimmed away.
+The four `dim_*` are in the prefix and are **not** this converter's declarations.
+
+⭐ **THIS NAMES THE MEMBERS OF THE 15-of-20 TRAP RATHER THAN RESTATING IT.** A completeness
+predicate over *"all tables in the prefix"* waits on **4 dirs this converter never writes** — it
+cannot fire, exactly as `0.7.0_AE_CloudOps` predicted. And a predicate over the DECLARED set alone
+would wait forever on `fact_rlw`. **Both naive readings are unreachable, for different reasons.**
+
+### M-4 — THE CONSUMER CONTRACT. Build `P2F-3b` against this; do not read the producer's source.
+
+**BUILD-LADDER NOTE:** the estate already emits a producer-written, read-back-verified manifest —
+`conversion_manifest.build_manifest` + `write_manifest_verified`, called at
+`schwab_runtime.py:76-78` (event lane) and `:156-163` (sweep). It is keyed
+`schwab/{master}/meta/conversions/{run_id}.json` — **by RUN, not by DATE**, so a consumer asking
+*"is date D complete?"* must enumerate and infer, which is the inference this ruling removes.
+**The marker is a DATE-KEYED sibling emitted from that same completion path — not a new mechanism.**
+
+```
+KEY        s3://opal-data-assets/schwab/{master}/meta/complete/date={YYYY-MM-DD}.json
+           master = 08335338 for 49F. One object per (master, date). Overwrite-in-place on re-run.
+
+PAYLOAD    {
+             "schema": "opal.silver.complete/v1",
+             "master": "08335338",
+             "date": "YYYY-MM-DD",
+             "declared_tables": [ ...17 sorted names... ],   # from SPECS, never a listing
+             "declared_source": "schwab_schemas.SPECS @ <commit>",
+             "written_tables":  [ ...names written THIS run for THIS date... ],
+             "disagreement": {                                # M-3, always present
+               "declared_not_written": [...],
+               "written_not_declared": [...]
+             },
+             "run_id": "<the conversion_manifest run_id>",
+             "emitted_at": "<UTC ISO8601>"
+           }
+
+ORDERING   Written STRICTLY AFTER every silver table write for that date completes, in the same
+           completion path as write_manifest_verified and after it. The marker's existence is the
+           assertion; a partial run MUST NOT emit one.
+
+CONSUMER   Match the KEY. Do NOT count objects, do NOT list the table prefix.
+           `declared_tables == written_tables` (as sets) is the completeness predicate.
+           A non-empty `disagreement` is a FINDING to surface, never a reason to fall back to a listing.
+```
+
+⛔ **`declared_not_written` will contain `fact_rlw` on every date until that spec is resolved.**
+Stated here so the consumer is not surprised by a permanently non-empty disagreement block, and so
+nobody "fixes" it by dropping `fact_rlw` from the declaration — **which member is wrong is an open
+question and belongs to whoever owns the RLW feed, not to this emit.**
+
+**STATUS: M-4 is the unblocking event and it is now stated. M-1 evidenced, M-3 measured. The emit
+itself (M-2) is not yet built; this face carries the contract it will satisfy.**
