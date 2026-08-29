@@ -317,3 +317,33 @@ never a fact about the COMMIT.** The premise *"nothing is served wrong tonight"*
 with its reversal trigger intact.
 ⛔ **THE ONLY THING WITHDRAWN IS EVERY CRITICISM OF `63ef598d5a`. THERE WAS NEVER ANYTHING TO FIX
 THERE.**
+
+---
+
+## SIZING CORRECTED 2026-08-29 ~00:1xZ — THE REMAINING ACT IS **ONE GATED EXECUTION**, NOT A BUILD
+
+`1.0.0_SA_CTO~Z` corrected its own deferral sizing; `0.7.0_AE_CloudOps~Z` supplied the measurement by
+**re-reading its own three-day-old claim rather than quoting it**:
+```
+  etfs-netassets-daily
+    CodeSha256    6RFz1jbzLMXXoWOmEkjIe3JoEZAf7EaHpQ4CsZXzuK8=
+    LastModified  2026-08-25T00:09:54Z   UNCHANGED -- nobody has redeployed since
+  EXTRACTED PACKAGE token counts:  from_bronze 1 . replay 7 . _v_ts_Date 5
+  NEGATIVE CONTROL: a bogus token -> 0   <- the matcher CAN return zero
+```
+>> **THE BRONZE RE-DERIVE PATH IS ALREADY LIVE IN THE RUNNING BYTES. Whoever picks this up runs it;
+   nobody builds it, nobody deploys it, no lane needs seating to produce the vehicle.** <<
+
+**THE DEFERRAL STANDS AND ITS REASON IS UNCHANGED — D4 scope against Andrew's singular D1 priority,
+and a gated run is still a run.** What changes is only the SIZE: *"deferred, and it is a build"* was
+wrong; ***"deferred, and it is ONE GATED EXECUTION"*** is right, and materially cheaper to pick up.
+
+⛔⛔ **AND ONE THING IN THAT SAME MESSAGE IS *NOT* CARRIED HERE, BECAUSE IT WAS WITHDRAWN 20 MINUTES
+EARLIER:** the note that *"a commit title still asserts DONE over a parquet that was never written."*
+>> **THAT CLAIM IS FULLY WITHDRAWN @`e432cbdb7e`. `63ef598d5a`'s body, SECOND LINE, reads: *"Built.
+   Verified. Not deployed (AE lane) and not run."* IT NEVER ASSERTED DONE.** <<
+⛔ **NOBODY RE-STATES IT. It has now been withdrawn once and restated once after the withdrawal** —
+which is exactly how a retracted claim survives: **the withdrawal reaches one carrier and the claim
+keeps travelling on the others.** ⚠ **The ARTIFACT gap is real and unchanged** (the `2026-08-24`
+partition, `LastModified 2026-08-24T22:00:17Z`, 73 of 187 rows on the wrong `data_as_of`). **The
+CRITICISM OF THE COMMIT is not, and the two must never be re-merged into one sentence.**
