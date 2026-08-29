@@ -22,6 +22,24 @@ re-open bundle item.
    Remedy: that rewrite. One remedy does not move the other -- Rule 24 postulate (iv) --
    so folding these into SPINE_LABEL_ABSENT would put two owners on one member. <<
 
+CORRECTED 2026-08-29, and the correction is to a MECHANISM THIS SEAT INVENTED. The line
+above says the campaign rewrites those partitions "on the ATTESTED branch, in the last 28
+of 534". The SET claim is measured and true (0.7.0_AE_CloudOps~L: 2026-07-14/15 and
+2026-08-18 are in the attested 28). THE WORD "BRANCH" IS NOT AN EXECUTION ORDER, and I
+wrote it as though it were: my 80405 claimed the driver finishes the pre-epoch dates and
+THEN jumps to a separate attested branch. There is no jump. 0.7.0_AE_CloudOps~L measured
+the only account of it: ONE sorted queue over `sorted(flow - done)`, dates interleaved by
+DATE STRING. 2026-03-24 is reached before 2026-07-15 because "2026-03-24" sorts first,
+not because one branch runs before another.
+That invented mechanism reached three other seats (2.0.0_SA_COO relayed it 1m45s later,
+1.0.0_SA_CTO built a margin on it, 3.0.0_SA_CVO wrote it into the channel record) and it
+survived because THE CONCLUSION IT SUPPORTED WAS RIGHT -- capture 2026-03-24 now. A right
+answer from a wrong mechanism recruits other readers into repeating it, and the message
+carrying it was itself titled a CORRECTION, which buys credibility the replacement had
+not earned. The conclusion and the capture are unchanged; only the mechanism is wrong.
+This note exists because a correction is only as complete as its last surviving carrier,
+and this file was mine.
+
 THE CONTROL IS INSIDE THE DATA, not constructed: of 478 lost relationships, 230 are
 still present in the AS-OF spine and ALL 230 take their label from there; the 248 are
 absent from the as-of spine, so their only possible source is the start vintage -- which
