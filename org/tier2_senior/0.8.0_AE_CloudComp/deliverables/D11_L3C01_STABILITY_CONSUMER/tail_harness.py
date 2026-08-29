@@ -332,6 +332,15 @@ def main():
         artifact('HELD-UNEXERCISED', dict(B1D_RHO, spread=0.100407), B1D_J,
                  run_id='run-1', rho=D_RHO, j=D_J), 2, 'FORM_DEFECT')
 
+    # ---- L3-C01's OWN falsifier, both arms (face AC2: reachable from different truths) ----
+    arm('K1', 'L3-C01: the permuted control does NOT drop -> NO artifact is admitted on it',
+        artifact('HELD-UNEXERCISED', battery(hi, RHO), battery(CLEAN_J, J), run_id='run-1'),
+        2, '')
+
+    arm('K2', 'L3-C01 THE OTHER TRUTH: the control DROPS below both floors -> admitted',
+        artifact('HELD-UNEXERCISED', battery(CLEAN_RHO, RHO), battery(CLEAN_J, J),
+                 run_id='run-1'), 0, '')
+
     # ---- Addendum 1e @77c8d4e74c, each item as its own arm ----
     b = dict(B1D_RHO, precision_decimals=6, null=-0.016284 + 2e-6)
     arm('E1', '1e(1): |null - mean(draws)| > 10^-p at the DECLARED p',
