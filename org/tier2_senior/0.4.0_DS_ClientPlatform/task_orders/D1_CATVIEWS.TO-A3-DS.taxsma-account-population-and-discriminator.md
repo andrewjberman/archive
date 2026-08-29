@@ -219,6 +219,60 @@ member, so it carries no rebuild obligation — but it IS an `INC3-B` input, and
 semantics mid-item is how a measurement stops comparing to its own baseline.** SURFACED, NOT CHASED;
 owned by whoever cuts `INC3-B`. **Not this TO's act.**
 
+## 3e. ⛔⛔ EXECUTED — AND IT CORRECTS §3d's BINDING INSTRUMENT. THE DISCRIMINATOR IS A **ROSTER**, NOT THE XREF AND NOT THE DOCSTRING
+
+`0.4.0_DS_ClientPlatform~Z` executed `INC3-A` READ-ONLY (msg 15902). Zero S3 writes, no vendor egress.
+
+**`AC2` ANSWERED — ONE PLANE OVER FROM WHERE *THREE SEATS* PLACED IT:**
+```
+  taxsma_registry.py:144      list_active() -> [a for a in accounts if a["status"]=="active"]
+  lambda_function.py:252-273  discover_accounts() -- the roster is "the SINGLE source of truth
+                              for which accounts the ETL pulls"; RAISES on 0 active
+  ARTIFACT  s3://opal-data-assets/blackdiamond/49f/_ops/taxsma_roster.json
+            VersionId lNH3od2BprexiXQDjAxntCJjcNB_MK5t, LastModified 2026-08-27T22:48:18Z
+```
+>> ⛔ **THE `:47` DOCSTRING IS A SCOPE NOTE FROM 2026-07-17 AND IT IS STALE. Its very next sentence is
+   the one that governs: *"This module processes EVERY ACCOUNT PRESENT IN THE BRONZE PARTITION."* THE
+   PRODUCER APPLIES NO MEMBERSHIP FILTER AT ALL** — the population is decided UPSTREAM by the roster.
+   **A DOCSTRING IS NOT A DISCRIMINATOR; `status` IS, AND IT IS A FIELD A CONSUMER CAN REJECT ON.** <<
+
+**THE ROSTER, ENUMERATED — DENOMINATOR 5:**
+```
+  0027265115  Chiles                   active              bd 22596361  xref
+  0035940058  Bump                     pending_resolution  -            -
+  0091939812  Macy                     pending_resolution  -            -
+  0084073310  Nixon, Matthew & Malita  active              bd 22659431  tier-3
+  0076459710  Tracey, Shawn            active              bd 23221671  tier-3
+```
+⭐ **ANDREW SAID FIVE; THE ROSTER INDEPENDENTLY CARRIES FIVE. TWO INSTRUMENTS, ONE NUMBER — so the
+population is no longer merely `held`, it is `held` AND corroborated `measured`.**
+
+⛔⛔ **AND §3d's BINDING INSTRUMENT WAS WRONG. MEASURED, NOT ARGUED:**
+```
+  xref-resolved  1 of 5   (Chiles only)
+  roster-active  3 of 5   (Chiles, Nixon, Tracey)
+  Nixon and Tracey are ACTIVE, carry RESOLVED bd_internal_ids, and are ABSENT FROM THE XREF.
+```
+>> ⛔ **I RULED THE XREF WAS "NOT THE BETTER INSTRUMENT — THE ONLY ONE." IT UNDER-REPORTS BY TWO.**
+   `3.0.0_SA_CVO~Z` proved GOLD was blind and I moved straight from *"gold is blind"* to
+   *"therefore the xref"* **without testing the xref.** **ELIMINATING ONE BAD INSTRUMENT DOES NOT
+   VALIDATE THE NEXT ONE YOU NAME** — and the xref is a BD-IDENTITY BRIDGE, not a membership roster,
+   so it answers a different question and was never the discriminator. <<
+```
+  CORRECTED AND BINDING ON AC1/AC4:
+    THE DISCRIMINATOR  = taxsma_roster.json `status == "active"`  (the ETL's own source of truth)
+    THE DENOMINATOR    = the roster's full enrolment (5), corroborated by Andrew's ruling
+    THE XREF           = evidence about BD-IDENTITY RESOLUTION ONLY. It is NOT a coverage meter
+                         and must never be quoted as one.
+    GOLD PARTITIONS / by_acct  = still BARRED (§3d) -- blind by NULL-key drop.
+```
+⚠ **SEPARATE FINDING, SURFACED NOT CHASED: the taxsma pull lambda has NO SCHEDULE ON EITHER
+EventBridge PLANE.** That is a real gap and it is not this TO's act.
+⚠ **AND IT COMPOSES WITH `1.0.0_SA_CTO~Z`'s 0833 RE-SCOPE:** the roster route reaches **3 of 5**
+today (Bump and Macy sit at `pending_resolution`), while **all 5 carry balances in 0833
+`dim_balance`** — which is precisely why the 0833 question is at Andrew. **Neither route is chosen
+here.**
+
 ## 4. BOUNDS THAT BIND THIS TO
 
 ⛔ **READ-ONLY. NO WRITES, NO COMMITS TO ANY PACKAGED MEMBER, NO PRODUCER EDITS.** This TO exists to
