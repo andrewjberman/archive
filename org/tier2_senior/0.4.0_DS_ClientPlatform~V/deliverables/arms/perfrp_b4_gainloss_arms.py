@@ -112,14 +112,27 @@ for label, doc in (("relationship", rel), ("account", acct)):
           "%d bad" % len(bad_tot))
     tot = sum(res)
     carriers = sum(1 for r in res if r > 0.02)
-    check("%s: identity residual REPRODUCES the a-4 census figure" % label,
-          abs(tot - census_identity) <= 1.0,
-          "leaf %.2f vs census %.2f (delta %.2f) in %d of %d entries"
-          % (tot, census_identity, tot - census_identity, carriers, len(doc["entries"])))
+    # THE BOUND IS THE ROUNDING, NOT A DOLLAR. This arm asserted |delta| <= 1.00 and
+    # FAILED at 7.08 / 10.59 the moment (A)(iii) landed -- correctly reporting a change
+    # it was wrong to call a defect. unrealized_total is now the sum of the PUBLISHED
+    # (rounded) components rather than a rounding of the unpublished sum, so each
+    # entry's total may move by up to a cent and the aggregate residual moves with it.
+    # The honest ceiling is therefore 0.01 x entries, and the measured delta sits far
+    # inside it: 7.08 of 38.34 (0.19 cents per entry) at relationship grain and 10.59
+    # of 61.77 (0.17) at account grain. A fixed dollar tolerance was an exactness the
+    # emission no longer claims -- and asserting it would force the components identity
+    # back off, which is the identity a consumer can actually check on the rendered card.
+    bound = 0.01 * len(doc["entries"])
+    check("%s: identity residual reproduces a-4 WITHIN THE ROUNDING BOUND" % label,
+          abs(tot - census_identity) <= bound,
+          "leaf %.2f vs census %.2f (delta %.2f, bound %.2f = 0.01 x %d entries) "
+          "in %d carrying entries"
+          % (tot, census_identity, tot - census_identity, bound,
+             len(doc["entries"]), carriers))
 print("  ^ the leaf propagates the census's KNOWN amortization inexactness and adds")
-print("    none of its own: 23 entries carry it at both grains, and the totals agree")
-print("    to under a dollar. Asserting zero here would have been asserting against a")
-print("    number a-4 had already measured.")
+print("    only per-entry cent rounding: the delta is under two tenths of a cent per")
+print("    entry at both grains. Asserting zero here would have been asserting against")
+print("    a number a-4 had already measured.")
 
 print("=" * 78)
 print("ARM 3 -- the ST/LT split is the CUSTODIAN'S, corroborated independently")

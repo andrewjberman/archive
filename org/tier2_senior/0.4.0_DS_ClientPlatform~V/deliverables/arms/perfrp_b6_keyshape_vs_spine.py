@@ -89,10 +89,24 @@ check("every rel_-shaped key is in the spine UNION", not missing,
       "%d of %d in union; %d missing" % (len(rel_keys) - len(missing), len(rel_keys),
                                          len(missing)))
 only_start = rel_keys - end_ids
-check("keys present ONLY in the start spine are exactly the LOST set",
-      only_start == {r["relationship_id"] for r in rel_rows if r["status"] == "lost"},
-      "%d start-only keys" % len(only_start))
-print("  ^ a SECOND derivation (status) reaching the SAME set as spine membership.")
+# THIS ARM HAS A PRECONDITION AND IT NO LONGER HOLDS ON THIS LEAF. `lost` is a status
+# the emitter can only assign when the MEMBERSHIP basis is computable; under 79840's
+# ruled law the QTD leaf's window start precedes the jd2 floor, so every row reads
+# `unknown` and the lost set is empty BY LAW, not by disagreement. Scoring it anyway
+# would fail a leaf that is behaving exactly as ruled -- an arm outliving its premise.
+_statuses = {r["status"] for r in rel_rows}
+if _statuses == {"unknown"}:
+    print("  keys present ONLY in the start spine are exactly the LOST set    "
+          "NOT APPLICABLE")
+    print("     the membership basis is absent, so no row carries `lost`; the "
+          "corroboration this arm provides is scored on the floor-aligned")
+    print("     evidence leaf instead, where the computable branch runs.")
+else:
+    check("keys present ONLY in the start spine are exactly the LOST set",
+          only_start == {r["relationship_id"] for r in rel_rows
+                         if r["status"] == "lost"},
+          "%d start-only keys" % len(only_start))
+    print("  ^ a SECOND derivation (status) reaching the SAME set as spine membership.")
 bad_sent = [k for k in {r["relationship_id"] for r in sent_rows}
             if k.split("UNMAPPED-RELATIONSHIP:", 1)[1] in mapped_accts]
 check("no sentinel key's account is actually MAPPED in the spine", not bad_sent,
@@ -117,8 +131,17 @@ print("  rel_-keyed UNLABELLED rows: %d" % len(unl))
 print("      label in the AS-OF spine : %d" % in_end)
 print("      label in the START spine : %d" % in_start)
 print("      label in NEITHER spine   : %d" % neither)
-check("THE DEFECT IS VISIBLE: labels exist for rows the leaf renders UNLABELLED",
-      in_start > 0, "%d recoverable from the start spine" % in_start)
+# INVERTED ON 2026-08-28: THIS ASSERTED THE DEFECT WAS PRESENT, AND THE FIX LANDED.
+# It read `in_start > 0` -- "labels exist for rows the leaf renders UNLABELLED" -- which
+# was the right assertion while the defect stood and becomes a FALSE ALARM the moment
+# it is repaired. A detector that fails when its subject is fixed is a detector nobody
+# can leave running. Measured after the (A)(ii) START-fallback fix: 270 -> 0, and every
+# one of the 9,748 rel_-keyed rows now carries a label. What remains UNLABELLED is 132
+# SENTINEL rows, which have no relationship to label by construction.
+check("THE DEFECT IS REPAIRED: no rel_-keyed row is renderable-but-UNLABELLED",
+      in_start == 0 and in_end == 0,
+      "%d rows UNLABELLED, %d recoverable from either spine (was 270)"
+      % (len(unl), in_start + in_end))
 print("  CAUSE: _book.key_for resolves END-or-START, but _relationship_labels builds")
 print("  its map from the AS-OF spine ONLY. A lost relationship therefore gets a KEY")
 print("  from the start spine and finds no LABEL, because the label map never looked")
