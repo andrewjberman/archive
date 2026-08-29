@@ -2,12 +2,12 @@
 
 <status>pending</status>
 
-**to:** `0.8.0_AE_CloudComp~X` -- **issuer:** `2.0.0_SA_COO~X` -- **certifier:** `3.0.0_SA_CVO~X` (certified the decomp against PRD sec 7a's four conditions, attempt 1 PASS @a0adeafd90) -- **design lane:** `1.0.0_SA_CTO~X` (declares L3-C01/C03/C04/L4-C02 at the wave-1 boundary on these measurements) -- **project:** NFRA_C3MATERIALIZE (ONE project per instance, Rule 27) -- **cut:** 2026-08-28 23:4xZ from the CERTIFIED final @a0adeafd90
+**to:** `0.8.0_AE_CloudComp~X` -- **issuer:** `2.0.0_SA_COO~X` -- **certifier:** `3.0.0_SA_CVO~X` (certified the decomp against PRD sec 7a's four conditions, attempt 1 PASS @f430acc99f) -- **design lane:** `1.0.0_SA_CTO~X` (declares L3-C01/C03/C04/L4-C02 at the wave-1 boundary on these measurements) -- **project:** NFRA_C3MATERIALIZE (ONE project per instance, Rule 27) -- **cut:** 2026-08-28 23:4xZ from the CERTIFIED final @f430acc99f
 **seating:** seated by the issuer's RE-SCOPE line at this cut (closed-then-opened from TO-KEYFILL-CCX COMPLETE @7d0d7a5179; no v3.1 residual, CTO~X 79489).
 **scope:** 2 bridge subjects x 8 declaration rows + the VIEW_PAIR plane = 18 cells. NOT the fusion (wave 2). Wave 1 discharges NO PRD sec-6 falsification test outright; a report naming one as PASSED is false.
 
 <decomp_ref>
-workflows/atom_decomposition/runs/nfra-c3materialize-L3/20260828T2240Z/DECOMP.md @a0adeafd90
+workflows/atom_decomposition/runs/nfra-c3materialize-L3/20260828T2240Z/DECOMP.md @f430acc99f
 
 cells:
 L3W1-pdfl-1 L3W1-pdfl-2 L3W1-pdfl-3 L3W1-pdfl-4 L3W1-pdfl-5 L3W1-pdfl-6 L3W1-pdfl-7 L3W1-pdfl-8 L3W1-jciv-1 L3W1-jciv-2 L3W1-jciv-3 L3W1-jciv-4 L3W1-jciv-5 L3W1-jciv-6 L3W1-jciv-7 L3W1-jciv-8 L3W1-buvb-1 L3W1-buvb-2
@@ -38,8 +38,8 @@ L3W1-pdfl-1 L3W1-pdfl-2 L3W1-pdfl-3 L3W1-pdfl-4 L3W1-pdfl-5 L3W1-pdfl-6 L3W1-pdf
 
 | subject | kind | measured shape (carried from the held rectangle; a FLOOR, re-measure) | declared by a store | cells (rows 1-8) |
 |---|---|---|---|---|
-| `symbol_to_file` | ROLLUP_WITHIN_PLANE | 10,265 children -> 284 parents; fan-in max 1,290 / mean 36.14 | NO -- 0 of 16,811 portal edges target a Module | L3W1-pdfl-1 L3W1-pdfl-2 L3W1-pdfl-3 L3W1-pdfl-4 L3W1-pdfl-5 L3W1-pdfl-6 L3W1-pdfl-7 L3W1-pdfl-8 |
-| `motif_to_portalsym` | BRIDGE_CROSS_PLANE | 1,402 CONTAINS edges to portal-symbol-shaped endpoints; coverage ~10 percent | YES -- infra/aws/globgrph/stitch_graph.json declares CONTAINS x12,352 across 57 edge types | L3W1-jciv-1 L3W1-jciv-2 L3W1-jciv-3 L3W1-jciv-4 L3W1-jciv-5 L3W1-jciv-6 L3W1-jciv-7 L3W1-jciv-8 |
+| `symbol_to_file` | ROLLUP_CONTAINMENT | 10,265 children -> 284 parents; fan-in max 1,290 / mean 36.14 | NO -- 0 of 16,811 portal edges target a Module | L3W1-pdfl-1 L3W1-pdfl-2 L3W1-pdfl-3 L3W1-pdfl-4 L3W1-pdfl-5 L3W1-pdfl-6 L3W1-pdfl-7 L3W1-pdfl-8 |
+| `motif_to_portalsym` | BRIDGE_CROSS_PLANE | 1,402 CONTAINS edges to portal-symbol-shaped endpoints; coverage ~10 percent | YES -- infra/aws/globgrph/stitch_graph.json declares CONTAINS; counts DERIVED AT BUILD (see stitch_census_at_build): 43633 edges, 58 distinct non-null edge_type values, CONTAINS x12352 | L3W1-jciv-1 L3W1-jciv-2 L3W1-jciv-3 L3W1-jciv-4 L3W1-jciv-5 L3W1-jciv-6 L3W1-jciv-7 L3W1-jciv-8 |
 
 ## SEQUENCE GATES (carried verbatim from the certified rectangle; a gated cell may be PREPARED, its value is written only after the gate's receipt is cited in the evidence)
 

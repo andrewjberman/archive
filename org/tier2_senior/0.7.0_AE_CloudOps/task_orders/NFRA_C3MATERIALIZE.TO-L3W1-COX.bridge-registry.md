@@ -2,12 +2,12 @@
 
 <status>pending</status>
 
-**to:** `0.7.0_AE_CloudOps~X` -- **issuer:** `2.0.0_SA_COO~X` -- **certifier:** `3.0.0_SA_CVO~X` (certified the decomp against PRD sec 7a's four conditions, attempt 1 PASS @a0adeafd90) -- **design lane:** `1.0.0_SA_CTO~X` (declares L3-C01/C03/C04/L4-C02 at the wave-1 boundary on these measurements) -- **project:** NFRA_C3MATERIALIZE (ONE project per instance, Rule 27) -- **cut:** 2026-08-28 23:4xZ from the CERTIFIED final @a0adeafd90
+**to:** `0.7.0_AE_CloudOps~X` -- **issuer:** `2.0.0_SA_COO~X` -- **certifier:** `3.0.0_SA_CVO~X` (certified the decomp against PRD sec 7a's four conditions, attempt 1 PASS @f430acc99f) -- **design lane:** `1.0.0_SA_CTO~X` (declares L3-C01/C03/C04/L4-C02 at the wave-1 boundary on these measurements) -- **project:** NFRA_C3MATERIALIZE (ONE project per instance, Rule 27) -- **cut:** 2026-08-28 23:4xZ from the CERTIFIED final @f430acc99f
 **seating:** CUT NOW, EXECUTABLE ONLY AFTER this seat's v3.1 --apply commit on its 11 KEYFILL cards lands AND the issuer's second RE-SCOPE line arrives (closed-then-opened from NFRA_SUBSTRATECARDING; every cell of this face carries sequence_gate after-TO-KEYFILL-COX-flip / after-v3.1-restamp-receipt).
 **scope:** 3 bridge subjects x 8 declaration rows = 24 cells. NOT the fusion (wave 2). Wave 1 discharges NO PRD sec-6 falsification test outright; a report naming one as PASSED is false.
 
 <decomp_ref>
-workflows/atom_decomposition/runs/nfra-c3materialize-L3/20260828T2240Z/DECOMP.md @a0adeafd90
+workflows/atom_decomposition/runs/nfra-c3materialize-L3/20260828T2240Z/DECOMP.md @f430acc99f
 
 cells:
 L3W1-jkcf-1 L3W1-jkcf-2 L3W1-jkcf-3 L3W1-jkcf-4 L3W1-jkcf-5 L3W1-jkcf-6 L3W1-jkcf-7 L3W1-jkcf-8 L3W1-jriu-1 L3W1-jriu-2 L3W1-jriu-3 L3W1-jriu-4 L3W1-jriu-5 L3W1-jriu-6 L3W1-jriu-7 L3W1-jriu-8 L3W1-mioe-1 L3W1-mioe-2 L3W1-mioe-3 L3W1-mioe-4 L3W1-mioe-5 L3W1-mioe-6 L3W1-mioe-7 L3W1-mioe-8
@@ -37,7 +37,7 @@ L3W1-jkcf-1 L3W1-jkcf-2 L3W1-jkcf-3 L3W1-jkcf-4 L3W1-jkcf-5 L3W1-jkcf-6 L3W1-jkc
 
 | subject | kind | measured shape (carried from the held rectangle; a FLOOR, re-measure) | declared by a store | cells (rows 1-8) |
 |---|---|---|---|---|
-| `arn_to_service` | ROLLUP_WITHIN_PLANE | 1,851 children -> 22 parents; fan-in max 678 / mean 84.14 | NO -- parsed from the ARN string | L3W1-jkcf-1 L3W1-jkcf-2 L3W1-jkcf-3 L3W1-jkcf-4 L3W1-jkcf-5 L3W1-jkcf-6 L3W1-jkcf-7 L3W1-jkcf-8 |
+| `arn_to_service` | ROLLUP_CONTAINMENT | 1,851 children -> 22 parents; fan-in max 678 / mean 84.14 | NO -- parsed from the ARN string | L3W1-jkcf-1 L3W1-jkcf-2 L3W1-jkcf-3 L3W1-jkcf-4 L3W1-jkcf-5 L3W1-jkcf-6 L3W1-jkcf-7 L3W1-jkcf-8 |
 | `motif_to_arn` | BRIDGE_CROSS_PLANE | 1,492 CONTAINS edges; ARN children 1,101 of 1,851 = 59.5 percent | YES -- stitch_graph.json. AT LEAST 40 percent of arn_resource has NO declared parent of any type | L3W1-jriu-1 L3W1-jriu-2 L3W1-jriu-3 L3W1-jriu-4 L3W1-jriu-5 L3W1-jriu-6 L3W1-jriu-7 L3W1-jriu-8 |
 | `motif_to_path` | BRIDGE_CROSS_PLANE | 456+ CONTAINS edges -- the '+' is the CVO's own floor, not a count | YES -- stitch_graph.json | L3W1-mioe-1 L3W1-mioe-2 L3W1-mioe-3 L3W1-mioe-4 L3W1-mioe-5 L3W1-mioe-6 L3W1-mioe-7 L3W1-mioe-8 |
 

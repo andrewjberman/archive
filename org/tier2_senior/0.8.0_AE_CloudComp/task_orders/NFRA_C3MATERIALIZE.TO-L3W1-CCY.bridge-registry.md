@@ -2,12 +2,12 @@
 
 <status>pending</status>
 
-**to:** `0.8.0_AE_CloudComp~Y` -- **issuer:** `2.0.0_SA_COO~X` -- **certifier:** `3.0.0_SA_CVO~X` (certified the decomp against PRD sec 7a's four conditions, attempt 1 PASS @a0adeafd90) -- **design lane:** `1.0.0_SA_CTO~X` (declares L3-C01/C03/C04/L4-C02 at the wave-1 boundary on these measurements) -- **project:** NFRA_C3MATERIALIZE (ONE project per instance, Rule 27) -- **cut:** 2026-08-28 23:4xZ from the CERTIFIED final @a0adeafd90
+**to:** `0.8.0_AE_CloudComp~Y` -- **issuer:** `2.0.0_SA_COO~X` -- **certifier:** `3.0.0_SA_CVO~X` (certified the decomp against PRD sec 7a's four conditions, attempt 1 PASS @f430acc99f) -- **design lane:** `1.0.0_SA_CTO~X` (declares L3-C01/C03/C04/L4-C02 at the wave-1 boundary on these measurements) -- **project:** NFRA_C3MATERIALIZE (ONE project per instance, Rule 27) -- **cut:** 2026-08-28 23:4xZ from the CERTIFIED final @f430acc99f
 **seating:** seated by the issuer's RE-SCOPE line at this cut (closed-then-opened from TO-KEYFILL-CCY COMPLETE @c9d5c09395; no v3.1 residual, CTO~X 79489).
 **scope:** 3 bridge subjects x 8 declaration rows = 24 cells. NOT the fusion (wave 2). Wave 1 discharges NO PRD sec-6 falsification test outright; a report naming one as PASSED is false.
 
 <decomp_ref>
-workflows/atom_decomposition/runs/nfra-c3materialize-L3/20260828T2240Z/DECOMP.md @a0adeafd90
+workflows/atom_decomposition/runs/nfra-c3materialize-L3/20260828T2240Z/DECOMP.md @f430acc99f
 
 cells:
 L3W1-ncyj-1 L3W1-ncyj-2 L3W1-ncyj-3 L3W1-ncyj-4 L3W1-ncyj-5 L3W1-ncyj-6 L3W1-ncyj-7 L3W1-ncyj-8 L3W1-ypbj-1 L3W1-ypbj-2 L3W1-ypbj-3 L3W1-ypbj-4 L3W1-ypbj-5 L3W1-ypbj-6 L3W1-ypbj-7 L3W1-ypbj-8 L3W1-nuow-1 L3W1-nuow-2 L3W1-nuow-3 L3W1-nuow-4 L3W1-nuow-5 L3W1-nuow-6 L3W1-nuow-7 L3W1-nuow-8
@@ -37,8 +37,8 @@ L3W1-ncyj-1 L3W1-ncyj-2 L3W1-ncyj-3 L3W1-ncyj-4 L3W1-ncyj-5 L3W1-ncyj-6 L3W1-ncy
 
 | subject | kind | measured shape (carried from the held rectangle; a FLOOR, re-measure) | declared by a store | cells (rows 1-8) |
 |---|---|---|---|---|
-| `motif_instance_to_family` | ROLLUP_WITHIN_PLANE | 6,207 children -> 13 parents; fan-in max 1,649 / mean 477.46 | PARTIALLY -- the 19 family ids exist as nodes | L3W1-ncyj-1 L3W1-ncyj-2 L3W1-ncyj-3 L3W1-ncyj-4 L3W1-ncyj-5 L3W1-ncyj-6 L3W1-ncyj-7 L3W1-ncyj-8 |
-| `pipesym_to_firm` | ROLLUP_WITHIN_PLANE | 1,337 children -> 3 parents; fan-in max 724 / mean 445.67 | NO -- parsed from the id prefix | L3W1-ypbj-1 L3W1-ypbj-2 L3W1-ypbj-3 L3W1-ypbj-4 L3W1-ypbj-5 L3W1-ypbj-6 L3W1-ypbj-7 L3W1-ypbj-8 |
+| `motif_instance_to_family` | ROLLUP_CONTAINMENT | 6,207 children -> 13 parents; fan-in max 1,649 / mean 477.46 | PARTIALLY -- the 19 family ids exist as nodes | L3W1-ncyj-1 L3W1-ncyj-2 L3W1-ncyj-3 L3W1-ncyj-4 L3W1-ncyj-5 L3W1-ncyj-6 L3W1-ncyj-7 L3W1-ncyj-8 |
+| `pipesym_to_firm` | ROLLUP_CONTAINMENT | 1,337 children -> 3 parents; fan-in max 724 / mean 445.67 | NO -- parsed from the id prefix | L3W1-ypbj-1 L3W1-ypbj-2 L3W1-ypbj-3 L3W1-ypbj-4 L3W1-ypbj-5 L3W1-ypbj-6 L3W1-ypbj-7 L3W1-ypbj-8 |
 | `motif_to_pipeline` | BRIDGE_CROSS_PLANE | 1,554 CONTAINS edges; pipeline children 1,291 of 1,337 = 96.6 percent | YES -- stitch_graph.json | L3W1-nuow-1 L3W1-nuow-2 L3W1-nuow-3 L3W1-nuow-4 L3W1-nuow-5 L3W1-nuow-6 L3W1-nuow-7 L3W1-nuow-8 |
 
 ## SEQUENCE GATES (carried verbatim from the certified rectangle; a gated cell may be PREPARED, its value is written only after the gate's receipt is cited in the evidence)
