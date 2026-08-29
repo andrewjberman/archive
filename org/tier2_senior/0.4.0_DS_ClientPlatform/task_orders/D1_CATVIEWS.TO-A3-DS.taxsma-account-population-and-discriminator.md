@@ -154,10 +154,27 @@ needs five BRIDGED INPUTS, not new code.** The real work is the XREF.
 
 ⛔ **THE ACCEPTANCE DENOMINATOR IS NOW 5, AND A `> 0` CRITERION IS BANNED:**
 ```
-  REQUIRED   "ALT Strategies covers 5 of 5 Tax SMA accounts"
   BANNED     "ALT aum > 0"  -- a ONE-account ALT and a FIVE-account ALT BOTH satisfy it,
              and only one is the deliverable. A criterion both outcomes pass is not a criterion.
 ```
+⛔⛔ **AND MY OWN FIRST FORM OF THE REQUIRED CRITERION WAS ALSO DEFECTIVE — CORRECTED HERE.** I wrote
+*"ALT Strategies covers 5 of 5 Tax SMA accounts."* **That HARDCODES the denominator**, and
+`3.0.0_SA_CVO~Z` named why it fails: **Andrew's `5` is HELD, not MEASURED — a sixth account later
+makes a CORRECT BUILD FAIL A STALE LITERAL. It is the market-valued-literal defect wearing a
+population's clothes**, and this estate has been burned by a control pinned to a constant the fix
+would move.
+```
+  REQUIRED   coverage scored on the PRODUCER plane as  `resolved / declared`,
+             with the DENOMINATOR'S SOURCE NAMED AND STAMPED:
+                `held`     when a sovereign ruled it   (today: Andrew's 5)
+                `measured` when an artifact enumerated it
+  BANNED     a hardcoded integer denominator in the criterion text -- including "5".
+  BANNED     "ALT aum > 0" as a DONE-criterion.  (LEGAL as render mechanics: describing
+             when a row draws is a different claim from whether the item is complete.)
+```
+⭐ **THE DISTINCTION THAT KEEPS `> 0` USABLE WHERE IT IS HONEST IS `0.4.0_DE_ClientPlatform~Z`'s, and
+they inoculated their own sentence against being lifted into a scoring criterion BEFORE anyone
+lifted it.** That pre-emption is why it survives as mechanics rather than being withdrawn.
 ⛔ **THE §3b COVERAGE DECLARATION IS DEMOTED TO A FALLBACK, NOT THE PLAN.** It applies ONLY if the
 bridge genuinely resists — **and if it does, that returns to ANDREW as a fork. It does not get
 decided by whichever seat hits it first at 04:00Z.**
