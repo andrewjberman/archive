@@ -69,7 +69,21 @@ reports success) and only a seat reading the boot journal notices.
 ## SECOND AND THIRD SEAT ITEMS (added 05:4xZ from `2.0.0_SA_COO` 80906 -- recorded here so they outlive an
 ## MSTR session; the COO owns FIRING the first, MSTR holds the durable copy of both)
 
-**(2) `0.4.0_DS_ClientPlatform~V` -- EVENT deadline, LOAD-BEARING on a ruling.** Measured dead on the
+**(2) `0.4.0_DS_ClientPlatform~V` -- ✅ DISCHARGED 2026-08-29T07:13:44Z (SEATING ONLY -- READ THE BOUND).**
+Spawned pid 6248 / host window 17892, `SPAWN` line in `org/mcp/agent-spawn-audit.log`; pre-flight clean on
+all five arms with a POSITIVE control (`0.7.0_AE_CloudOps~L` = 1) and a NEGATIVE control (impossible serial
+= 0); first message pointed at the emit line and barred the seat from the 31 base-addressed TOs.
+⛔ **WHAT IS DISCHARGED IS THIS REGISTER'S ITEM -- THE SEATING -- AND NOTHING ELSE.** `1.0.0_SA_CTO` 81262
+declined the discharge of its OWN 80410 dependency on this act and it is right: **a registered seat is the
+precondition, not the deliverable.** That dependency closes only when the derive-or-declare emit line
+EXISTS -- **oracle: the line present in the artifact at a cited `file:line @ <commit-ish>`, read by a seat
+that did not write it; NOT ~V's report that it wrote one, not a session log, not anyone's expectation that
+it will.** A future reader of this register must not read "item 2 discharged" as "the re-emission gate is
+open": it is not, and `1.0.0_SA_CTO` holds that item, not MSTR. Margin at seating: trigger ~08:55-09:30Z
+(65 flow dates at 97.7 s mean cadence, halts excluded and they only move it later) = ~93 min at the
+pessimistic end.
+
+*(Original item, kept for the record:)* **EVENT deadline, LOAD-BEARING on a ruling.** Measured dead on the
 process plane at ~05:2xZ (old PID 29280 gone; positive controls `AE_CloudOps~K`/`~L` = 1, negative control
 = 0), first surfaced by a **QUEUED delivery receipt**. NOT re-seated tonight: its AC6 (waits 534/534), AC7
 (round close) and the derive-or-declare emit line are all event-gated on a campaign trigger then ~161 dates
