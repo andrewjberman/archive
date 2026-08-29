@@ -329,6 +329,51 @@ _y = _copy.deepcopy(EVID)
 _y["entries"][0]["client_table"][0]["status"] = ABSENT_STATUS
 control("the absent member planted on the COMPUTABLE branch", branch_vocabulary, _y)
 
+# 2.0.0_SA_COO 80252 item 2 -- THE OMISSION'S SAFETY CONDITION, AS AN ARM.
+# account_grain_membership is OMITTED (not nulled) from the ruled leaf, because a key
+# carrying null is still a key and 79869 froze that leaf's shape. But an omission is
+# invisible to every presence instrument, so it is safe ONLY BECAUSE a sibling tells the
+# reader why the block is missing: window.membership_basis.computable, present and
+# reading false. I wrote that condition as a SENTENCE in 80248; a condition that lives
+# only in prose is a protection that exists only as a description, and the next emitter
+# to drop the sibling converts a safe omission into a silent one with nothing failing.
+# PATHS SPELLED IN FULL, EXISTENCE BEFORE COMPARISON (1.0.0_SA_CTO 80220 discipline).
+BLOCK_PATH = "window.account_grain_membership"
+SIBLING_PATH = "window.membership_basis.computable"
+
+
+def omission_is_explained(leaf):
+    w = leaf.get("window", {})
+    sibling = w.get("membership_basis", {}).get("computable")
+    if not isinstance(sibling, bool):
+        return False            # the sibling must RESOLVE before it can explain anything
+    present = "account_grain_membership" in w
+    # The block is present IFF the basis is computable; when it is absent the sibling
+    # must be there AND read false, which is what makes the absence readable.
+    return present == sibling
+
+
+for nm, L in (("ruled/absent", RULED), ("evidence/computable", EVID)):
+    w = L["window"]
+    check("[%s] %s resolves, and gates %s" % (nm, SIBLING_PATH, BLOCK_PATH),
+          omission_is_explained(L),
+          "sibling=%r, block present=%s"
+          % (w["membership_basis"]["computable"],
+             "account_grain_membership" in w))
+
+# NEGATIVE CONTROL, and it is the exact future failure COO named: drop the sibling and
+# the omission becomes SILENT. The arm must fail; if it passes, the omission was never
+# protected by anything.
+_nosib = copy.deepcopy(RULED)
+del _nosib["window"]["membership_basis"]["computable"]
+control("the sibling REMOVED -- the omission goes silent", omission_is_explained, _nosib)
+# And the other direction: the sibling left in place but flipped, so a present block
+# would no longer be explained by it.
+_flip = copy.deepcopy(RULED)
+_flip["window"]["membership_basis"]["computable"] = True
+control("the sibling flipped true while the block stays omitted",
+        omission_is_explained, _flip)
+
 bv = EVID["window"]["basis_version_change"]
 check("the evidence leaf DISCLOSES the producer confound on its face",
       bv["versions_differ"] is True and bv["warning"] and "21.6" in bv["warning"],
