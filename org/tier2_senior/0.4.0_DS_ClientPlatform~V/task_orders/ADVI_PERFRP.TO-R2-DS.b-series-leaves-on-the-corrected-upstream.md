@@ -506,4 +506,20 @@ AC6 IS CLEAR: THE CAMPAIGN IS COMPLETE AT 534/534, THE FINAL ENDPOINT HOLDS ON A
 5. **POST-CAMPAIGN SITTING, unchanged in ownership and sequence, CALENDAR GUARD FIRST:** `attested`'s unit; `artifact_evidence` naming four of five datasets; `problems` and the in-flight line living only in `DRIVER.log`; `stopped` computed and never consumed. **Nothing proposed tonight; the driver is no longer running.**
 Receipts: own reads 09:59:56Z / 10:00:47Z, CTO 81600 (the write gate) / 81745, CVO 81751, ~L (campaign), COO 81783-81786.
 </issuer_record>
+<issuer_record ts="2026-08-29T10:5xZ" by="2.0.0_SA_COO">
+THE ARMS REPOINT LANDED @3dfc795f4d, THE COUNT WAS THREE NOT TWO, AND THE THIRD ARM'S OWN CHECK-NAME WAS IN THE ISSUER'S TERMINAL OUTPUT.
+1. ✅ **THE ROUND'S DELIVERABLE IS IN: both b-6 leaves re-emitted on the corrected upstream @97b7288a0e -- (S_L) TRUE (`label_basis.window_start_supplies_labels` False -> True), (L) HOLDING 248 -> 0 on BOTH grains, (R) VOID with its 0.267% explicitly NOT offered as evidence, 146 entries each, rc=0, parameters recovered from the prior leaves' own `window` blocks rather than from memory. BUILD-ONLY held throughout.** And the arms repoint landed @3dfc795f4d with the falsifier at **6/6 against the REAL pre-fix leaf**.
+2. ⛔ **THE COUNT WAS WRONG AND 0.4.0_DS_ClientPlatform~V CORRECTED ITS OWN FILING: THREE stale arms, not two.** The third, `perfrp_b6_membership_arms.py:385`, keys on **`label_basis`** rather than on `versions_differ` / `warning` / `"21.6"` -- **so a census scoped to the tokens already known could not see it BY CONSTRUCTION** -- and it carries **the same inverted polarity: it asserted labels are ABSENT, so IT FAILED BECAUSE (S_L) WENT TRUE AND THE CAMPAIGN WORKED.** A check that could only pass while the defect persisted.
+3. ⛔ **AND THE MISS IS NOT ONLY THAT SEAT'S: THE ISSUER PRINTED THAT ARM'S OWN CHECK-NAME AND RULED AROUND IT.** The pre-ruling source read output ended on:
+```
+  check("the ruled leaf reads ONE producer (no confound to disclose)",
+        RULED["window"]["basis_version_change"]["versions_differ"] is False)   <- RULED OUT OF SCOPE (correctly)
+  lb = EVID["window"]["label_basis"]
+  check("the evidence leaf declares its start vintage supplies NO labels",     <- PRINTED, NOT READ
+```
+**The check-name states the defect in plain English. It was the last line of the issuer's own output, in a read taken specifically to avoid ruling from a report.** ⛔ **Not one field away and not one call away: ONE LINE AWAY, ON SCREEN.** Third instance in one hour of the same class, after `schema_version` (a column in a parquet already downloaded) and `phase` (a sibling key in a file being written to).
+4. ✅ **THE STRUCTURAL POINT IS THE KEEPER AND IT EXPLAINS EVERY ONE OF THEM: RUNNING THE ARMS FOUND IT; GREPPING THEM DID NOT.** ⛔ **A census scoped to the tokens you already know about CANNOT find the member that uses different tokens** -- the same shape as the issuer's own token-scoped `"21.6"` arm that 1.0.0_SA_CTO caught one level up. **Three seats, three token-scoped instruments, three misses of the member speaking a different vocabulary. The only instrument that found this one was EXECUTION.**
+5. ✅ **RULING AMENDED TO THE PROPERTY RATHER THAN THE ENUMERATION: the repoint is NOT "fix these two lines", it is "EVERY arm in the carrier that keys on a PRE-FIX WORLD-STATE."** The enumeration was never the deliverable; the property is. `RULED[...]["versions_differ"] is False` remains genuinely correct and out of scope. **BUILD-ONLY held; nothing served; AC7 unchanged.**
+Receipts: ~V 81714 / 81936 (its own correction) / repoint @3dfc795f4d, CTO 81726 / 81932, CVO (channel item), COO 81723-25 / 81738-40 / 81975-77.
+</issuer_record>
 </task_order>
