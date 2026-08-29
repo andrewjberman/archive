@@ -40,6 +40,35 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", "..", ".."))
 REGISTRY = os.path.join(HERE, "card_population_registry.v1.json")
 REGISTRY_REL = ("org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/D11_MANIFEST/"
                 "card_population_registry.v1.json")
+SCHEMA = os.path.join(HERE, "CARD_POPULATION_REGISTRY.v1.schema.json")
+RECEIPT = os.path.join(HERE, "card_population_registry.v1.compile_receipt.json")
+
+
+def validate_root(obj):
+    """REFUSE before writing if the registry root is not v1-valid. Returns (ok, problems).
+
+    ⛔ THIS ARM EXISTS BECAUSE I EMITTED THREE FIELDS THE CONTRACT FORBIDS -- compile_note,
+    compiled_at_commit, subject_disposition -- into a root whose schema is additionalProperties:
+    false, and only the ratifier's simulation caught it. It is the SECOND time in one session that I
+    invented fields a frozen contract does not have; the first was on the cards, caught by their
+    validator. A value needs a whole PATH, not a slot I wish existed -- and the evidence was real,
+    so it moves to a sibling carrier rather than the schema moving for it.
+    """
+    problems = []
+    try:
+        import jsonschema
+        with open(SCHEMA, encoding="utf-8") as fh:
+            jsonschema.Draft202012Validator(json.load(fh)).validate(obj)
+    except ImportError:
+        problems.append("jsonschema unavailable -- cannot validate; refusing rather than guessing")
+    except Exception as exc:                                          # noqa: BLE001
+        problems.append(str(exc).splitlines()[0][:160])
+    with open(SCHEMA, encoding="utf-8") as fh:
+        allowed = set((json.load(fh).get("properties") or {}).keys())
+    forbidden = sorted(set(obj) - allowed)
+    if forbidden:
+        problems.append("forbidden root key(s): %s" % ", ".join(forbidden))
+    return (not problems), problems
 def last_ratified_commit():
     """DERIVE the last RATIFIED registry commit; never type it.
 
@@ -373,7 +402,7 @@ def main():
     out["extension_population"] = {"members": members}
     out["candidate_set_digest"] = digest
     out["ratified_at_commit"] = None          # the RATIFIER sets this; the compiler never does
-    out["compiled_at_commit"] = pin
+    compiled_at = pin
     out["discovery_globs"] = sorted(set(reg.get("discovery_globs", []) + WAVE_GLOBS))
     out_disposition = {"exact_duplicate_subject_ids": sorted(exact),
                        "name_misses_not_merged": {b: sorted(x["subject_id"] for x in v)
@@ -384,22 +413,55 @@ def main():
                        "subjects_s3_uri": len(s3_uri),
                        "note": ("a subject that is not a path is NOT a missing path; the four "
                                 "shapes are counted separately and never collapsed")}
-    out["subject_disposition"] = out_disposition
-    out["compile_note"] = (
-        "Inherited W3 pins were RECOMPUTED at compiled_at_commit, not carried forward: measured "
-        "%d of %d stale against the previous registry (ratified_at_commit %s). The staleness "
-        "PREDATES the keyfill round -- at the commit before this seat's first keyfill commit, 13 of "
-        "13 were already stale -- and the round moved 9 of them again while three lanes filled "
-        "concurrently. Every blob id and the digest are computed at ONE pin; path-only fallback, "
-        "silent stale carry-forward and mixed-pin digesting are refused (4.0.0_SA_CRO~X 210720Z). "
-        "EXCLUDED as not-a-card: %s."
-        % (stale, len(recomputed), (reg.get("ratified_at_commit") or "?")[:12],
-           "; ".join(r for r, _w in excluded) or "none"))
+    receipt_payload = dict(out_disposition)
+    compile_note = (
+        "Inherited W3 pins were RECOMPUTED at the compile pin, not carried forward: measured "
+        "%d of %d stale against the previous registry. The staleness PREDATES the keyfill round -- "
+        "at the commit before this seat's first keyfill commit, 13 of 13 were already stale -- and "
+        "the round moved 9 of them again while three lanes filled concurrently. Every blob id and "
+        "the digest are computed at ONE pin; path-only fallback, silent stale carry-forward and "
+        "mixed-pin digesting are refused (4.0.0_SA_CRO~X 210720Z). EXCLUDED as not-a-card: %s."
+        % (stale, len(recomputed), "; ".join(r for r, _w in excluded) or "none"))
+
+    # THE ROOT MUST BE v1-VALID BEFORE A BYTE IS WRITTEN, with ratified_at_commit simulated exactly
+    # as the ratifier will set it -- validating the object we ship, not a convenient variant.
+    probe = dict(out)
+    probe["ratified_at_commit"] = pin
+    ok_root, problems = validate_root(probe)
+    print("   v1 ROOT VALIDATION (ratified_at_commit simulated): %s" % ("PASS" if ok_root else "FAIL"))
+    for pr in problems:
+        print("      %s" % pr)
+    if not ok_root:
+        print("   REFUSING to write: the registry root is not v1-valid. The compile evidence")
+        print("   belongs in the sibling receipt, never in the registry root.")
+        return 1
 
     if args.apply and not unsettled:
         with open(REGISTRY, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(out, fh, indent=2, sort_keys=True)
             fh.write("\n")
+        # THE SIBLING RECEIPT, DIGEST-LINKED. Written in the SAME branch as the registry so the
+        # two cannot diverge: a registry without its receipt loses the disposition evidence
+        # entirely, and my first attempt at this block silently did not land -- caught by looking
+        # for the file rather than trusting the edit.
+        with open(REGISTRY, "rb") as _fh:
+            reg_sha = hashlib.sha256(_fh.read()).hexdigest()
+        receipt = {"kind": "card_population_registry.v1.compile_receipt",
+                   "registry_path": REGISTRY_REL,
+                   "registry_sha256": "sha256:" + reg_sha,
+                   "candidate_set_digest": out["candidate_set_digest"],
+                   "compiled_at_commit": compiled_at,
+                   "compile_note": compile_note,
+                   "subject_disposition": receipt_payload,
+                   "why_here": ("the v1 registry root is additionalProperties:false and admits "
+                                "none of these fields; the evidence is required, so it lives in "
+                                "this digest-linked sibling rather than the schema moving for it "
+                                "(issuer ruling 003941Z)")}
+        with open(RECEIPT, "w", encoding="utf-8", newline="\n") as _fh:
+            json.dump(receipt, _fh, indent=2, sort_keys=True)
+            _fh.write("\n")
+        print("   compile receipt -> %s (registry sha256 %s)"
+              % (os.path.basename(RECEIPT), reg_sha[:16]))
         print("   APPLIED to %s (ratified_at_commit left NULL for the ratifier)"
               % os.path.relpath(REGISTRY, ROOT).replace("\\", "/"))
     else:
