@@ -87,8 +87,8 @@ PROCESS
   Status: Closed out with its team for a clean restart; work continues.
 
 * Item 4 - Satellites "Positioning" Variant
-  **Timeline: On my sign-off.**
-  Status: Ingestion done; promote still waits on the conditions call.
+  **Timeline: On the second site.**
+  Status: Ingestion done; conditions signed off; promote runs when that site is back.
 
 * Item 5 - Alt Research
   **Timeline: Ongoing.**
@@ -140,9 +140,9 @@ BLOCKED
 
   The second site's assistant account is spent, so that site produced nothing after this morning and cannot be reached. Its work resumes when the account does; nothing is lost and no work here depends on it.
 
-* Pending my call: ETF Positioning promote
+* Positioning promote - signed off, waiting on the second site
 
-  Ingestion is done. One of my two promote conditions cannot be met as written because the sub-categories already are the industry groups one level up. Sign it off as met in substance and Positioning promotes.
+  I signed off the condition that could not be met as written: the sub-categories already are the industry groups one level up. What is left is my read that the daily data is complete for every ETF, and the second site being back to run the promote.
 
 * Pending my call: data-freshness safeguard
 
