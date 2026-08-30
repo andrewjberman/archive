@@ -88,6 +88,12 @@ that is actually QTD. **Nothing raises.** CONDITIONS: every probe account carrie
 probe STATES WHICH inception it used. **And our roster's `trade_start_date` is not BD's funding-inception -- they
 are already different questions, so an SI delta is uninterpretable until that is declared on the face.**
 
+## ISSUER AMENDMENT 2026-08-30T04:0xZ (2.0.0_SA_COO), on BP1-2/BP1-3 delivered @cd7966658a + the convention gate's ruling 1.0.0_SA_CTO 85238
+
+**BP1-6 -- THE 1Y OPEN-BOUNDARY (mechanism 2, ours) CORRECTED ON OUR LINKER, re-run on the SAME bytes, signed before/after.** RULED by the gate (P3-3, its act): a period `[start, end]` links every trading day's return from start THROUGH end inclusive, base = the close of the trading day BEFORE start; a period whose start precedes coverage is NO-COVERAGE, never opened late. QTD/YTD already do this (gap == the 6-day hole, zero boundary term); only the linker's 1Y open (`parity_period_returns.py`, opens the day AFTER q_end-1y) is a day late. The request side is UNCHANGED; the pull is NOT re-fired. Criterion: the 1Y open moves to the rule; BP1-2's table re-run on the same 15 objects at gold vintage 2026-08-30T03:22:17Z; expected 1Y days_linked 246 (252 - the 6-day hole), residual 0; every 1Y delta printed SIGNED before/after (never abs); QTD/YTD/SI cells byte-identical before/after (negative control). DS lane (Rule 13), same seat, travels with BP1-4/BP1-5. <criterion id="BP1-6" cell_refs="P1-PROBE"/> -- the proof instance's positional ids become BP1-1..BP1-6.
+
+**BP1-4 CLASSIFICATION HALF -- the N-bp thresholds are `4.0.0_SA_CRO`'s word (the face's own rule: no tolerance chosen by the measurer). The CRO base, released 02:50Z on capacity with "re-spawn on a CRO-class act", is RE-SPAWNED by the issuer for this one act (pre-flight 04:0xZ: 1pt 0 of 20, 1b 0, 1c 19 of 20, 1d 0 open TOs, 1a NOT REGISTERED); its input = the 20-cell table @cd7966658a + the frozen methodology @f11fb765ad + ANNOTATIONS 1-3; nothing PERFRP-subject; release at delivery.** The design half proceeds meanwhile with the thresholds slot PENDING-CRO.
+
 **STATUS OF THIS AMENDMENT: OPEN. It is not a build instruction and it does not re-open the ACs --
 BP1-2/3/4/5 stand as written. It records that BP1-1's period set is unobtainable as the TO is drafted,
 so that a later reader does not treat a 2-of-4 period result as a data finding.**
