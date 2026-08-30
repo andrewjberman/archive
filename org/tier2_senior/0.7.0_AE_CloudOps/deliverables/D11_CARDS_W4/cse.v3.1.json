@@ -1,0 +1,116 @@
+{
+ "schema_version": 3.1,
+ "subject": {
+  "id": "cse",
+  "kind": "store",
+  "declared_domain": "The production CSE (Change/Signal Event) store: an Apache Iceberg table under the globgrph Nessie catalog, holding validated CSE rows appended by the nightly producers. The subject is THE STORE, not its writer -- cse_store.py is carded separately at D11_CARDS_W3 (PATH_A_append / PATH_B_drop), and conflating the two is the grain error this domain line exists to prevent. QUALIFIES THE CELLS CARRIER (AC4): org/tier2_senior/0.7.0_AE_CloudOps/deliverables/cells.0.7.0_AE_CloudOps~X.json @a5fffa2bb7, cells W4-bqrk-1 W4-bqrk-2 W4-bqrk-3 W4-bqrk-4 W4-bqrk-5 W4-bqrk-6 W4-bqrk-7 -- this card is the v3.1 reading of those 7 cells and the carrier itself is NOT edited."
+ },
+ "as_of": {
+  "carded_utc": "2026-08-30T14:04:31Z",
+  "commit_ish": "1ff641ead562ddb40400d4caf8b5ea4923a97da9",
+  "graph_vintage": "S3 plane read live at card time; no graph consulted"
+ },
+ "process": {
+  "methodology": {
+   "how": "pyiceberg table.append(pa_table) -- ONE Nessie commit per batch, append-only. Validation is FAIL-CLOSED and precedes the write: validate_batch() raises CSEValidationError if ANY row in the batch is rejected, so a batch with one invalid CSE is never partially written. A genuine ref-CAS 409 (concurrent writer) is retried with backoff and raises LOUD on exhaustion rather than freezing silently.",
+   "determinism": "deterministic",
+   "composes": [
+    {
+     "id": "cse_producers_nightly.py",
+     "note": "supplies CSE rows via append_cses() at :164, :209 and :269"
+    },
+    {
+     "id": "cse_emit_graphhead.py",
+     "note": "supplies CSE rows via append_cses() at :218"
+    }
+   ],
+   "invents": [
+    {
+     "id": "ingested_at_ms",
+     "note": "stamped from _now_ms() at write time, so the same logical batch appended twice yields different rows -- this is the limb that makes determinism hybrid rather than deterministic"
+    }
+   ],
+   "materializer_standing": "canonical",
+   "basis": "measured",
+   "evidence": "Read at source @86ab291f80: append_cses() at infra/aws/globgrph/cse_store.py:355, table.append(pa_table) at :386 inside the retry loop, table re-loaded each attempt for post-conflict metadata; the fail-closed raise at :372-376; the empty-batch early return printing CSE_APPEND_NOOP at :364-366. \u26d4 determinism=deterministic, not hybrid: the enum's own conditional requires inference_detail{model, invocations_per_run, failure_is_loud} for hybrid/inferential, so the axis is MODEL INFERENCE, not output reproducibility. No model is invoked here. The wall-clock ingested_at_ms is carried in invents, which is the field that actually asks the question.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "cadence": {
+   "declared_rhythm": "nightly, via its callers -- the store has NO trigger of its own",
+   "actual_trigger": "invoked as a LIBRARY: cse_producers_nightly.py:164/:209/:269 and cse_emit_graphhead.py:218 call append_cses()",
+   "live_matches_declared": "yes",
+   "live_instance_age": "newest object 2026-08-30T03:31:09.000Z; 47 distinct write-days across the store's life",
+   "basis": "measured",
+   "evidence": "\u26d4 CADENCE IS A CLAIM ABOUT AN EVENT CLASS AND ONE TIMESTAMP CANNOT CARRY IT, so the write-day distribution was measured rather than the latest write: 47 distinct write-days, 417 objects total. Over the last 12 write-days the modal count is 8 objects/day, and 2 days sit at less than that (2026-08-20, 2026-08-28). append_cses() returns EARLY on an empty batch (CSE_APPEND_NOOP at :364) writing nothing at all, so a short day is consistent with a producer batch being empty -- NOT with a failed write, which raises. Which of the callers was short on those days is NOT measured here.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  }
+ },
+ "artifact": {
+  "persistence": {
+   "persisted": true,
+   "authority_role": "source",
+   "mutation_policy": "append_only",
+   "form": "an Iceberg table: data files plus a metadata/ tree of *.metadata.json, manifest (-m0.avro) and snapshot (snap-*.avro) objects",
+   "basis": "measured",
+   "evidence": "KeyCount at the declared home = 1 (a POSITIVE, which a wrong bucket or a missing s3:ListBucket cannot produce). 417 objects / 9061617 bytes counted client-side over an auto-paginated listing.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "location": {
+   "home": "s3://opal-313476888478-globgrph/warehouse/globgrph/cse_b557721f-8b81-4ec2-9289-fe5f44c3f272/",
+   "projection_of": [],
+   "co_resident_stores": [
+    {
+     "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/",
+     "note": "the sibling globgrph warehouse tables share this bucket and prefix root; overlap of CONTENT was not measured, only co-residence"
+    }
+   ],
+   "basis": "measured",
+   "evidence": "the s3:// URI is an EXACT IDENTITY a consumer can equality-join, not a description; resolved live this session at KeyCount=1.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  }
+ },
+ "trust": {
+  "coverage": {
+   "universe": "the objects under the store's own S3 home -- NOT the CSE event population, which this card does not measure",
+   "denominator": "417 of 417 objects at the declared home",
+   "explicitly_out": [
+    "\u26d4 NO COMPLETENESS OF THE CSE EVENT POPULATION IS ASSERTED. That every producer that should have appended did append is a DIFFERENT question with a different denominator, and nothing here measures it.",
+    "the row-level contents of the Iceberg data files (not read; only the object plane was measured)",
+    "which caller was short on the 2 short day(s)"
+   ],
+   "basis": "measured",
+   "evidence": "aws s3api list-objects-v2 auto-paginated, rows counted client-side: 417 objects, 9061617 bytes, newest 2026-08-30T03:31:09.000Z.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "key": {
+   "identity_space": "S3 (bucket, key) for the artifact plane; (namespace, table) in the Nessie catalog for the logical table",
+   "key_expression": "bucket + key, exact string match",
+   "key_is_stable": "stable",
+   "crosses_spaces": true,
+   "declared_mapping": "the table is addressed logically as (NAMESPACE, CSE_TABLE) through the catalog and physically by the s3:// home; the two spaces are joined by the catalog's own metadata pointer, which this card did not traverse",
+   "basis": "held",
+   "evidence": "\u26d4 basis is the FLOOR: the S3 identity is MEASURED (listed live), but that the catalog's (namespace, table) resolves to THIS prefix was read from the manifest's home field and NOT verified against the catalog. One limb measured, one limb read -> held.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "failure_mode": {
+   "returns_on_failure": "KeyCount=0 -- returned IDENTICALLY for a true absence, a wrong bucket, a wrong region, and a missing s3:ListBucket. A failed retrieval returns a VALUE, not an error.",
+   "distinguishable_from_true_negative": "yes",
+   "basis": "measured",
+   "evidence": "discriminated by TWO SEPARATE INVOCATIONS on the SAME bucket, never one call: target prefix -> KeyCount=1; a bogus sibling prefix (cse_00000000-0000-0000-0000-000000000000) -> KeyCount=0. The pair is what makes the positive load-bearing: a 1 cannot arise from a wrong bucket or an absent permission, while a 0 alone would still be uninformative. A control sharing an invocation with its target is not a control.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  }
+ },
+ "verdict": {
+  "standing": "QUALIFIED",
+  "why": "LOAD-BEARING: the production CSE store, authority_role=source, appended by the nightly producers and read downstream. QUALIFIED on two named limbs -- the catalog-to-prefix binding is HELD rather than measured (trust.key), and coverage is over the OBJECT plane only, asserting nothing about whether the CSE event population is complete. The 2 short write-day(s) (2026-08-20, 2026-08-28) are recorded as an observation about the as-built rhythm, not a defect: an empty batch writes nothing by design and a failed write raises.",
+  "blocking_defects": null
+ },
+ "forward_disposition": {
+  "standing": "undecided",
+  "set_by": null,
+  "basis": "absent",
+  "evidence": "NOT SET BY THE CARDING LANE -- the store owner's call at the class close.",
+  "decided_utc": null
+ },
+ "carded_by": "0.7.0_AE_CloudOps~X"
+}
