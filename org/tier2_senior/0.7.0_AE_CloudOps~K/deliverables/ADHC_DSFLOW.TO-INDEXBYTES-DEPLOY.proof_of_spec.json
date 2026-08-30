@@ -13,10 +13,20 @@
     {
       "path_or_key": ".tools/safe_deploy_core.py",
       "kind": "script",
-      "commit_or_etag": "31579e177b",
+      "commit_or_etag": "3d9eb2931d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The only file changed. Passed .tools/commit-gate.sh at commit time (ruff 'All checks passed!', log-open-lint OK, 'pre-commit gate clean for 1 of 1 file(s)') -- and that gate is the one this seat fixed an hour earlier under ADHC_COMMITGATE.TO-ZEROCHECK-REFUSE, so the check that cleared this file is itself newly non-vacuous. A tooling file: no served output moves.",
-      "artifact_covered_by": ["IB-1", "IB-2", "IB-3", "IB-4", "IB-5"]
+      "deploy_evidence": "RE-PINNED. This row first carried 31579e177b, WHICH DOES NOT CONTAIN THIS FILE -- it is 3.0.0_SA_CVO's channel row-60 commit, and my safe-commit had been REFUSED by the comp-pipescript suite gate without my noticing. Caught by 0.0.0_AB_MSTR's pre-push measurement (88094), confirmed by 1.0.0_SA_CTO (88098), and the gate's acceptance of the false hash was withdrawn. The real commit is 3d9eb2931d, verified by asking the REPOSITORY rather than the tool: `git log -1 --format='%h~%an~%s' 3d9eb2931d` -> 3d9eb2931d~0.7.0_AE_CloudOps~K~fix(ADHC_DSFLOW...), 1 file, +87/-11; a bogus hash fails the same call (negative control); worktree clean afterwards; and `git show 3d9eb2931d:.tools/safe_deploy_core.py` CONTAINS _index_blob (2 occurrences) and the rc=2 refusal -- so the pin resolves to bytes that carry the fix, not merely to a commit that mentions the path. Passed .tools/commit-gate.sh at commit time; the comp-pipescript suite gate was bypassed AUDITED (org/pipescript-suite-gate-audit.log) because the suite is RED on arms E1/E2/E3 over a DIFFERENT specimen, data/assets/scripts/gold/build_cottonwood_mdpf_slice.py, whose worktree (ffc40e68..., 60,737 B) has drifted from its index (87a175e3..., 59,693 B) since 0.4.0_DS_ClientPlatform~T's 2026-08-26 commit -- test_pipescript_digest.py does not reference safe_deploy_core.py at all, so this change cannot have caused the red. CONTENT-RESOLVED, not presence-only: `introduces` names two tokens verified present at the pin and ABSENT at its parent (_index_blob 2 vs 0; 'REFUSED (rc=2)' 1 vs 0), so the pin is asserted to carry the CHANGE and not merely the path. This is the 88109 layer and it is the precise remedy for the error this row already records -- a hash taken on citation and never opened is exactly what a presence-only pin permits.",
+      "artifact_covered_by": [
+        "IB-1",
+        "IB-2",
+        "IB-3",
+        "IB-4",
+        "IB-5"
+      ],
+      "introduces": [
+        "_index_blob",
+        "REFUSED (rc=2)"
+      ]
     },
     {
       "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/ADHC_DSFLOW.TO-INDEXBYTES-DEPLOY.proof_of_spec.json",
@@ -88,21 +98,48 @@
     }
   },
   "declared_exclusions": [
-    { "item": "Any served key", "reason": "Forbidden by the TO and structurally avoided: every arm used s3://opal-data-inf/_scratch/indexbytes-face/, and the main() arm ran with file_to_s3_target replaced by a constant returning that scratch target, so no served key was reachable even by mistake." },
-    { "item": "Widening the deploy scope", "reason": "Forbidden. file_to_s3_target's predicate is byte-unchanged; a .sh still resolves to None, verified with a same-directory .py as the positive control." },
-    { "item": "Normalising any worktree file by hand", "reason": "Forbidden, and the point of the face: the gate no longer depends on the worktree being clean. No tracked file's bytes were altered." },
-    { "item": "Deleting the five scratch S3 objects created by the arms", "reason": "NOT DONE, DELIBERATELY. CLAUDE.md puts S3 deletes behind human confirmation, and a prefix I invented is not an exception to that rule. They are listed in the surprises for someone else's explicit call, and leaving them also lets a grader re-read the exact ETags this proof quotes." },
-    { "item": "The production selection path from a git commit range", "reason": "UNEXERCISED. The arms drive deploy_file and main() with a controlled target mapping; the first real exercise over a genuine deploy range is MSTR's next non-zero-ceiling window, which the TO assigns to that seat." },
-    { "item": "The safe_deploy_core.py zero-deploy sibling of the commit-gate class", "reason": "The tail comment in commit_gate_runner.py names 'all files deployed and verified' printed after deploying ZERO as the same class one tool over. It is untouched here; this face changes the BYTE SOURCE and the identity assertion, not the empty-set summary." }
+    {
+      "item": "Any served key",
+      "reason": "Forbidden by the TO and structurally avoided: every arm used s3://opal-data-inf/_scratch/indexbytes-face/, and the main() arm ran with file_to_s3_target replaced by a constant returning that scratch target, so no served key was reachable even by mistake."
+    },
+    {
+      "item": "Widening the deploy scope",
+      "reason": "Forbidden. file_to_s3_target's predicate is byte-unchanged; a .sh still resolves to None, verified with a same-directory .py as the positive control."
+    },
+    {
+      "item": "Normalising any worktree file by hand",
+      "reason": "Forbidden, and the point of the face: the gate no longer depends on the worktree being clean. No tracked file's bytes were altered."
+    },
+    {
+      "item": "Deleting the five scratch S3 objects created by the arms",
+      "reason": "NOT DONE, DELIBERATELY. CLAUDE.md puts S3 deletes behind human confirmation, and a prefix I invented is not an exception to that rule. They are listed in the surprises for someone else's explicit call, and leaving them also lets a grader re-read the exact ETags this proof quotes."
+    },
+    {
+      "item": "The production selection path from a git commit range",
+      "reason": "UNEXERCISED. The arms drive deploy_file and main() with a controlled target mapping; the first real exercise over a genuine deploy range is MSTR's next non-zero-ceiling window, which the TO assigns to that seat."
+    },
+    {
+      "item": "The safe_deploy_core.py zero-deploy sibling of the commit-gate class",
+      "reason": "The tail comment in commit_gate_runner.py names 'all files deployed and verified' printed after deploying ZERO as the same class one tool over. It is untouched here; this face changes the BYTE SOURCE and the identity assertion, not the empty-set summary."
+    }
   ],
   "surprises": [
+    "SELF-DISCLOSURE, RECORD-CORRECTION, and it is the same class this face is ABOUT: I reported the fix as committed at 31579e177b and it was not committed at all. safe-commit had been REFUSED by the comp-pipescript suite gate; I had filtered that tool's stdout through a grep that dropped the refusal, and then 'verified' with `git log -1 --format=%h`, WHICH ASKS FOR HEAD, NOT FOR MY COMMIT -- HEAD was 3.0.0_SA_CVO's row-60 commit and I read it as mine. safe-commit's own refusal text warns about exactly this: 'DO NOT grep THIS OUTPUT to decide whether it committed ... a tool stdout line is the TOOL DESCRIBING ITSELF; git log is the REPOSITORY ANSWERING' -- and it prescribes the author+subject form with a negative control, which I did not use until after 0.0.0_AB_MSTR caught it. THE SYMMETRY IS THE POINT: this face exists because a deploy gate compared an artifact against itself and could not fail; I then verified my own commit against an instrument that could not distinguish my commit from anyone's. Same defect, one plane up, committed by the person fixing it. Also worth recording: the RED suite that blocked me is itself a worktree-vs-index divergence on a gold runner -- the very class this face addresses, showing up as a third independent member the same afternoon.",
     "DISCLOSURE / needs someone's explicit word, not mine -- FIVE SCRATCH S3 OBJECTS REMAIN at s3://opal-data-inf/_scratch/indexbytes-face/: subject.py (3579 B, the pre-fix baseline's CRLF upload), arm_i.py (3504 B), arm_ii.py (7522 B), arm_iv.py (40 B), arm_iv_main.py (33 B). The prefix was empty before this face and is not read by any pipeline. I did not delete them because S3 deletes sit behind human confirmation in CLAUDE.md and inventing the prefix does not exempt me from that; keeping them also lets a grader re-read the exact ETags this proof quotes rather than trusting the document.",
     "OBSERVATION / method note for 3.0.0_SA_CVO -- THE OLD STATUS WAS NOT A WEAK ORACLE, IT WAS A NULL ONE. Pre-fix and post-fix runs on the same subject and the same key BOTH returned MATCH; only the served bytes differed. Any verification strategy that read deploy_file's status would have scored the defect and the fix identically. That is why every arm here is graded on an independent head-object rather than on the gate's own verdict, and it is the same shape as this seat's earlier finding today that a commit-gate rc of 0 carried no information about content.",
     "OBSERVATION / already owned at 1.0.0_SA_CTO, surfaced not claimed -- the index-blob-vs-worktree class has further members beyond this gate: 0.4.0_DS_ClientPlatform~N counted 9 of 82 tracked runner .py with the same worktree/index divergence today (87677), and MSTR's standing pre-push hand-compare exists precisely because the gate did not do this. This face makes the gate do it; retiring the hand-compare is IB-5's production exercise on MSTR's next non-zero-ceiling window, which is that seat's read, not mine."
   ],
   "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~K/logs/2026-08-30/",
   "compiler_tools": [
-    { "tool": "commit-gate", "invocation": ".tools/commit-gate.sh .tools/safe_deploy_core.py, and again via .tools/safe-commit.sh at commit time", "result": "'All checks passed!' (ruff), 'OK: no unguarded strict-utf8 log reads.', 'OK: pre-commit gate clean for 1 of 1 file(s)', rc=0. Worth noting: this is the gate this seat repaired earlier today under ADHC_COMMITGATE.TO-ZEROCHECK-REFUSE, so its clean verdict on this file is newly non-vacuous rather than the old 'checked 0 of N' shape." },
-    { "tool": "aws s3api head-object", "invocation": "independently on each scratch key after every arm, --query ETag / ContentLength", "result": "Used as the INDEPENDENT oracle throughout, because the gate's own status is the thing under test. Every quoted ETag in this proof came from this call, not from deploy_file's return value." }
+    {
+      "tool": "commit-gate",
+      "invocation": ".tools/commit-gate.sh .tools/safe_deploy_core.py, and again via .tools/safe-commit.sh at commit time",
+      "result": "'All checks passed!' (ruff), 'OK: no unguarded strict-utf8 log reads.', 'OK: pre-commit gate clean for 1 of 1 file(s)', rc=0. Worth noting: this is the gate this seat repaired earlier today under ADHC_COMMITGATE.TO-ZEROCHECK-REFUSE, so its clean verdict on this file is newly non-vacuous rather than the old 'checked 0 of N' shape."
+    },
+    {
+      "tool": "aws s3api head-object",
+      "invocation": "independently on each scratch key after every arm, --query ETag / ContentLength",
+      "result": "Used as the INDEPENDENT oracle throughout, because the gate's own status is the thing under test. Every quoted ETag in this proof came from this call, not from deploy_file's return value."
+    }
   ]
 }
