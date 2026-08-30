@@ -76,7 +76,13 @@ THREE_PLANE_NOTE = (
 
 BUCKET = "opal-313476888478-globgrph"
 HOMES = {"cse": "warehouse/globgrph/cse_b557721f-8b81-4ec2-9289-fe5f44c3f272/",
-         "code_heat_snap": "warehouse/globgrph/code_heat_snap_8b0bca7a-9078-4b8e-8868-ef04062d9952/"}
+         "code_heat_snap": "warehouse/globgrph/code_heat_snap_8b0bca7a-9078-4b8e-8868-ef04062d9952/",
+         # ⛔ COPIED FROM THE CARRIER, NEVER TYPED FROM A DISPLAY. The first attempt at
+         # this one reconstructed the UUID tail from a print truncated at 110 chars, got
+         # the LAST CHARACTER wrong (...2295 for ...2299), and KeyCount returned 0 --
+         # which reads exactly like an absent table. A wrong prefix and a true absence
+         # are the same zero.
+         "fedobs_coevolution_snap": "warehouse/globgrph/fedobs_coevolution_snap_499558ba-0181-42ab-a008-93a518692299/"}
 BOGUS = "warehouse/globgrph/cse_00000000-0000-0000-0000-000000000000/"
 
 
@@ -703,7 +709,263 @@ def card_code_heat_snap():
     }
 
 
-BUILDERS = {"cse": card_cse, "code_heat_snap": card_code_heat_snap}
+def card_fedobs_coevolution_snap():
+    home = HOMES["fedobs_coevolution_snap"]
+    kc = key_count(home)
+    cen = object_census(home)
+    zc = zero_class_probes(home)
+    wrong_prefix = probe("s3api", "list-objects-v2", "--bucket", BUCKET, "--prefix",
+                         home[:-2] + "5/", "--max-keys", "1", "--query", "KeyCount",
+                         "--output", "text")
+    cells = carrier_cells(GROUPS["fedobs_coevolution_snap"])
+    writer, producer = "infra/aws/globgrph/snap_store.py", "infra/aws/globgrph/emit_fedobs_snap.py"
+    wpin, ppin = git_pin(writer), git_pin(producer)
+    newest = datetime.strptime(cen["newest_utc"][:19], "%Y-%m-%dT%H:%M:%S").replace(
+        tzinfo=timezone.utc)
+    age = (datetime.now(timezone.utc) - newest).days
+
+    return {
+        "schema_version": 3.1,
+        "subject": {
+            "id": "fedobs_coevolution_snap",
+            "kind": "store",
+            "declared_domain": (
+                "The fedobs co-evolution SNAPSHOT store: one registered SURFACE of snap_store.py, "
+                "holding (subject_a, subject_b, co_sessions, producers_json, sessions_json) rows "
+                "staged as .jsonl and ingested. ⛔ THE SUBJECT IS THIS TABLE AND NOT THE FEDOBS "
+                "OBSERVE PLANE -- a nightly ECS producer writes "
+                "warehouse/fedobs_signals/observations/fedobs_observations.json, which is a "
+                "DIFFERENT artifact that this card does not describe, and conflating them is the "
+                "error the cadence row below exists to prevent. "
+                "QUALIFIES THE CELLS CARRIER (AC4): %s @%s, cells %s -- the carrier is NOT edited."
+                % (CARRIER, CARRIER_PIN, " ".join(c["cell_id"] for c in cells))),
+        },
+        "as_of": {
+            "carded_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "commit_ish": subprocess.run(["git", "rev-parse", "HEAD"],
+                                         capture_output=True, text=True).stdout.strip(),
+            "graph_vintage": "S3 object plane, S3 staging plane, EventBridge, CloudWatch metrics "
+                             "and ECS task logs all read live at card time",
+        },
+        "process": {
+            "methodology": {
+                "how": ("Iceberg append via snap_store.py append_rows(): staged .jsonl batches "
+                        "are read from warehouse/snap_ingest/pending/fedobs_coevolution_snap/, "
+                        "coerced against the surface's typed payload schema at snap_store.py:128, "
+                        "appended in one Nessie commit, then MOVED to done/. Fail-closed: a batch "
+                        "with invalid rows is rejected LOUD and left in pending/."),
+                "determinism": "deterministic",
+                "composes": [
+                    {"id": producer + " @" + ppin[:10],
+                     "note": "declares the coevolution -> fedobs_coevolution_snap mapping at :18 "
+                             "and :50; the staged-batch producer for this surface"},
+                    {"id": "warehouse/snap_ingest/pending/fedobs_coevolution_snap/*.jsonl",
+                     "note": "the handoff artifact; the only measured input to this table"},
+                    {"id": writer,
+                     "note": "the ONE writer for all snap surfaces; this surface's typed payload "
+                             "is declared at :128-135"}],
+                "invents": [],
+                "materializer_standing": "historical_in_use",
+                "basis": "measured",
+                "evidence": ("Read at source with line numbers from grep -n AT THE PIN: %s @%s "
+                             "surface definition :128-135; %s @%s declares the mapping at :18 and "
+                             ":50. materializer_standing is `historical_in_use` rather than "
+                             "`canonical`: the surface is real and was written, but the cadence "
+                             "row records it as a PARKED single-build vintage, which is not the "
+                             "same as current authority."
+                             % (writer, wpin[:10], producer, ppin[:10])),
+                "owner": LANE,
+            },
+            "cadence": {
+                "declared_rhythm": ("nightly 04:30Z EventBridge, per infra/system/04_federated.md "
+                                    "-- an attribution this card MEASURES AND DOES NOT INHERIT"),
+                "actual_trigger": ("the stage-then-ingest leg for THIS surface, which last ran "
+                                   "2026-07-17; the nightly rule that exists feeds a DIFFERENT "
+                                   "artifact"),
+                "live_matches_declared": "no",
+                "live_instance_age": ("%d days: sole write-day %s, newest object %s"
+                                      % (age, sorted(cen["per_day_tail"])[0], cen["newest_utc"])),
+                "basis": "measured",
+                "basis_by_field": {"declared_rhythm": "measured",
+                                   "actual_trigger": "measured",
+                                   "live_matches_declared": "measured",
+                                   "live_instance_age": "measured"},
+                "evidence": (
+                    "⛔ THE DECLARED ATTRIBUTION IS MEASURABLY WRONG FOR THIS ARTIFACT, and the "
+                    "card records the split rather than repeating the doc. MEASURED: the rule "
+                    "opal-globgrph-fedobs-producer-nightly is ENABLED at cron(30 4 * * ? *) "
+                    "targeting ECS cluster opal-globgrph; CloudWatch AWS/Events Invocations = 1.0 "
+                    "on each of the last 8 days; its newest task log stream is "
+                    "2026-08-30T04:31:10Z and that run SUCCEEDS, emitting 'OK: SIGNAL "
+                    "coevolution rows=31852' and 'OK: FEDOBS_OBSERVE_COMPLETE'. But it writes "
+                    "warehouse/fedobs_signals/observations/fedobs_observations.json (written "
+                    "today, 46,856,449 bytes) and mentions 'snap' ZERO times. THIS table's own "
+                    "leg is the stage-then-ingest one: pending/ KeyCount=0; done/ holds exactly "
+                    "ONE batch, 20260717T173239Z.jsonl, 682,586 bytes, ingested "
+                    "2026-07-17T17:43:22Z -- one second after the table's sole write, which is "
+                    "the join tying the planes together. So DESIRED, APPLIED and EXERCISED come "
+                    "apart here: the trigger that exists is applied and exercised DAILY, and "
+                    "this surface's output has not moved in %d days. "
+                    "HELD, not measured by this seat: 3.0.0_SA_CVO~X reconciled this to "
+                    "GRAPHFEED_TO7_SNAP_FAMILY_PARK_RECORD_20260811 -- the snap family is a "
+                    "DOCUMENTED single-build-vintage PARKED surface, so the gap is recorded, not "
+                    "novel. I have not read that record at source; it is cited as a named "
+                    "authority and the live_matches_declared `no` above stands on my own "
+                    "measurements, not on it." % age),
+                "owner": LANE,
+            },
+        },
+        "artifact": {
+            "persistence": {
+                "persisted": True,
+                "authority_role": "projection",
+                "mutation_policy": "append_only",
+                "form": "an Iceberg table: data files plus a metadata/ tree",
+                "basis": "measured",
+                "evidence": ("KeyCount at the declared home = %d (a POSITIVE, which a wrong "
+                             "bucket or a missing s3:ListBucket cannot produce); %d objects / "
+                             "%d bytes counted client-side over an auto-paginated listing. "
+                             "authority_role is `projection`: the rows are a projection of the "
+                             "staged batch, which is itself derived from the fedobs observe "
+                             "plane; nothing measured here makes this table authoritative for "
+                             "co-evolution." % (kc, cen["objects"], cen["bytes"])),
+                "owner": LANE,
+            },
+            "location": {
+                "home": "s3://%s/%s" % (BUCKET, home),
+                "projection_of": [
+                    {"id": "s3://%s/warehouse/snap_ingest/done/fedobs_coevolution_snap/"
+                           "20260717T173239Z.jsonl" % BUCKET,
+                     "note": "the single staged batch this table was ingested from; 682,586 "
+                             "bytes, ingested 2026-07-17T17:43:22Z"}],
+                "co_resident_stores": [
+                    {"id": "s3://%s/warehouse/globgrph/" % BUCKET,
+                     "note": "sibling snap surfaces share this bucket and prefix root; CONTENT "
+                             "overlap not measured, only co-residence"},
+                    {"id": "s3://%s/warehouse/fedobs_signals/observations/"
+                           "fedobs_observations.json" % BUCKET,
+                     "note": "the OBSERVE plane -- a DIFFERENT artifact carrying overlapping "
+                             "subject matter, written daily (today 46,856,449 bytes, 31,852 "
+                             "coevolution rows). Named because a duplicate-store census that "
+                             "missed it would understate the estate, and because the declared "
+                             "nightly cadence belongs to THIS artifact and not to the table"}],
+                "basis": "measured",
+                "evidence": ("the s3:// URIs are EXACT IDENTITIES a consumer can equality-join; "
+                             "the home resolved live at KeyCount=%d, and the observe-plane object "
+                             "and staged batch were both listed live." % kc),
+                "owner": LANE,
+            },
+        },
+        "trust": {
+            "coverage": {
+                "universe": ("objects under the store's own S3 home -- NOT the co-evolution pair "
+                             "population, and NOT the observe plane"),
+                "denominator": ("%d of %d objects at the declared home"
+                                % (cen["objects"], cen["objects"])),
+                "explicitly_out": [
+                    "NO COMPLETENESS OF THE CO-EVOLUTION PAIR POPULATION IS ASSERTED. The observe "
+                    "plane reported 31,852 coevolution rows today against this table's single "
+                    "July batch; comparing those two numbers is a DIFFERENT question with a "
+                    "different denominator and nothing here measures it.",
+                    "the row-level contents of the Iceberg data files (object plane only)",
+                    "WHY the stage-then-ingest leg stopped -- unmeasured",
+                    "whether any consumer still READS this store, and whether a stale read is "
+                    "material to it -- unmeasured here",
+                ],
+                "basis": "measured",
+                "evidence": ("aws s3api list-objects-v2 auto-paginated, counted client-side: %d "
+                             "objects, %d bytes, %d distinct write-day(s), newest %s."
+                             % (cen["objects"], cen["bytes"], cen["distinct_write_days"],
+                                cen["newest_utc"])),
+                "owner": LANE,
+            },
+            "key": {
+                "identity_space": ("S3 (bucket, key) for the artifact plane; (namespace, table) "
+                                   "in the Nessie catalog for the logical table"),
+                "key_expression": "bucket + key, exact string match",
+                "key_is_stable": "stable",
+                "crosses_spaces": True,
+                "declared_mapping": ("(subject_a, subject_b) is the row-level pair key per the "
+                                     "surface payload at snap_store.py:128-135; that join was not "
+                                     "exercised by this card"),
+                "basis": "held",
+                "evidence": ("basis is the FLOOR: the S3 identity is MEASURED, but the catalog's "
+                             "(namespace, table) -> prefix binding was read from the manifest and "
+                             "NOT verified against the catalog, and the pair key was not "
+                             "exercised. Measured limb plus read limbs -> held."),
+                "owner": LANE,
+            },
+            "failure_mode": {
+                "returns_on_failure": ("A true absence returns KeyCount=0 at rc=0 -- a failed "
+                                       "retrieval returns a VALUE, not an error. MEASURED: a "
+                                       "wrong BUCKET does NOT do this (rc=255, NoSuchBucket) and "
+                                       "a wrong REGION does NOT either (rc=0, the CORRECT "
+                                       "KeyCount). ⛔ A WRONG PREFIX DOES: a one-character error "
+                                       "in the table's UUID returns KeyCount=0, identical to an "
+                                       "absent table. A missing s3:ListBucket remains "
+                                       "unexercised."),
+                "distinguishable_from_true_negative": "no",
+                "basis": "inferred",
+                "basis_by_field": {
+                    "returns_on_failure": "measured",
+                    "distinguishable_from_true_negative": "inferred"},
+                "evidence": (
+                    "FOUR READ-ONLY PROBES, each a SEPARATE invocation, rc read UNPIPED: true "
+                    "absence -> rc=%d %r; wrong bucket -> rc=%d %r; wrong region -> rc=%d %r; "
+                    "WRONG PREFIX (this table's UUID with its last character changed from 9 to "
+                    "5) -> rc=%d %r. Target existence, separately: KeyCount=%d. "
+                    "⛔ THE WRONG-PREFIX CLASS IS MEASURED HERE BECAUSE THIS SEAT HIT IT ON THIS "
+                    "SUBJECT: the home was first reconstructed from a print truncated at 110 "
+                    "characters, the UUID tail was one character wrong, and KeyCount returned 0 "
+                    "-- which would have been published as an ABSENT TABLE against an enabled "
+                    "nightly schedule. It was caught by re-reading the home from the carrier "
+                    "instead of the display. AMONG THE FOUR EXERCISED CLASSES, a zero is "
+                    "produced by a true absence AND by a wrong prefix, so a zero here is NOT "
+                    "diagnostic; the scope is load-bearing and the fifth class (missing "
+                    "s3:ListBucket) remains unexercised. distinguishable is `no`, and the row "
+                    "floors to `inferred`."
+                    % (zc["true_absence"][0], zc["true_absence"][1],
+                       zc["wrong_bucket"][0], zc["wrong_bucket"][1],
+                       zc["wrong_region"][0], zc["wrong_region"][1],
+                       wrong_prefix[0], wrong_prefix[1], kc)),
+                "owner": LANE,
+            },
+        },
+        "verdict": {
+            "standing": "QUALIFIED",
+            "why": ("The store RESOLVES and holds real bytes from exactly one staged batch, and "
+                    "it is %d days cold. ⛔ ITS DECLARED CADENCE BELONGS TO A DIFFERENT ARTIFACT: "
+                    "the nightly rule is ENABLED, fires daily and succeeds, but writes the "
+                    "fedobs OBSERVE plane, not this table -- so live_matches_declared is `no`, "
+                    "measured on four instruments (EventBridge state, CloudWatch Invocations, "
+                    "the ECS task log, and the two artifacts' own object planes). QUALIFIED on "
+                    "the limbs ENUMERATED below and deliberately NOT counted, so that adding a "
+                    "limb cannot desynchronise a cardinal: authority_role is `projection`; the "
+                    "catalog-to-prefix binding and the pair key are HELD rather than measured; "
+                    "coverage spans the OBJECT plane only; a zero at this prefix is NOT "
+                    "diagnostic, since a wrong prefix produces one as readily as an absence; "
+                    "WHY the ingest leg stopped is UNMEASURED; and whether a consumer reads this "
+                    "store, or is harmed by a stale read, is UNMEASURED here. THIS CARD DOES NOT "
+                    "CLASSIFY THE GAP AS A DEFECT: 3.0.0_SA_CVO~X reconciled it to a documented "
+                    "PARKED snap family, which this seat has not read at source and therefore "
+                    "carries as held. Naming the split is the carder's job; deciding it is the "
+                    "owner's." % age),
+            "blocking_defects": None,
+        },
+        "forward_disposition": {
+            "standing": "undecided",
+            "set_by": None,
+            "basis": "absent",
+            "evidence": ("NOT SET BY THE CARDING LANE -- the store owner's call at the class "
+                         "close, and this surface is recorded as parked by a named record."),
+            "decided_utc": None,
+        },
+        "carded_by": LANE,
+    }
+
+
+BUILDERS = {"cse": card_cse, "code_heat_snap": card_code_heat_snap,
+            "fedobs_coevolution_snap": card_fedobs_coevolution_snap}
 
 
 def main():
