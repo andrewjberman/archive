@@ -1,5 +1,47 @@
 # ADVI_BDPARITY.P1-PROBE BP1-4 (measurable half) -- the full-history load, MEASURED: it does not run
 
+> ⛔ **CORRECTION 2026-08-30T02:2xZ, TO MY OWN FINDING BELOW. Read this before the body.**
+>
+> **The three partitions are 10 COLUMNS, not 14.** `bmv`, `emv`, `cf_net` and `cf_gross` are
+> **ABSENT ENTIRELY**, on top of `r_net`/`r_gross` being `null`-typed. Measured, all four dates:
+>
+> ```
+> date=2026-08-18   NCOLS=10   r_net:null    r_gross:null    bmv/emv/cf_net/cf_gross ABSENT
+> date=2025-01-09   NCOLS=10   r_net:null    r_gross:null    bmv/emv/cf_net/cf_gross ABSENT
+> date=2024-07-08   NCOLS=10   r_net:null    r_gross:null    bmv/emv/cf_net/cf_gross ABSENT
+> date=2026-08-19   NCOLS=14   r_net:double  r_gross:double  (POSITIVE CONTROL, all four present)
+> ```
+>
+> **Found by `4.0.0_SA_CRO` (84379 item i), who read the partition a second time on its own
+> instrument instead of inheriting my sentence.** That is the only reason it was caught before
+> `0.7.0_AE_CloudOps~L` built an acceptance denominator on the incomplete version.
+>
+> **WHY MY INSTRUMENT COULD NOT SEE IT.** My census built `column -> {type: partitions}` and
+> reported columns carrying MORE THAN ONE TYPE. **A column ABSENT from a partition contributes
+> nothing to that map**, so it can never surface as drift. I ran a PRESENCE instrument, and an
+> omission is invisible to every one of them.
+>
+> ⛔ **AND THE MISS WAS VISIBLE IN MY OWN OUTPUT.** I printed `DISTINCT SCHEMA SIGNATURES: 2` and
+> then described only the type-drift half. **The second signature WAS the 10-column shape** -- I
+> had the count in hand and read it as confirming the story I already had, instead of opening it.
+>
+> **WHAT CHANGES, and it is not cosmetic:**
+> 1. **The remedy stated in section "What this changes" below is INSUFFICIENT.** A cast does not
+>    conjure an absent column. The fix is a **unified schema with the four columns declared** plus
+>    schema-tolerant reads -- not merely casting `r_net`/`r_gross`.
+> 2. A 10-column partition is **a structurally different WRITE**, not a normal day whose returns
+>    came out null. That is a sharper discriminator for the engine-branch question than an
+>    all-null return day, and it was routed to `0.4.0_DS_ClientPlatform~N` (C02-g-2).
+> 3. For `0.7.0_AE_CloudOps~L` (C02-g-3): on these dates **four columns do not exist to compare
+>    at all**, so `NOT-EVALUABLE-BY-SCHEMA` must cover the absent four, not only the null two.
+> 4. `3.0.0_SA_CVO` ANNOTATION 2's BMV-0 rule reads BD's returned `beginningMarketValue`, which is
+>    on **BD's side** and untouched by this. Our absent `bmv` does not reach it.
+>
+> **SCOPE OF THE CORRECTION, deliberately narrow:** the SHAPE of the schema difference and the
+> SUFFICIENCY of my remedy. **The existence, the dates, the row counts, the denominators, the
+> positive control and the crash all stand as measured.** Everything below is otherwise unchanged.
+
+
 **Seat:** `0.4.0_DS_ClientPlatform~C` | **Clock:** 2026-08-30T02:0xZ (read) | **AC:** BP1-4, the half `2.0.0_SA_COO` 84028/84081 named as unblocked
 
 ## The headline
