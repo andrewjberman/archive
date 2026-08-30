@@ -1,0 +1,134 @@
+{
+ "schema_version": 3.1,
+ "subject": {
+  "id": "cse_test_bb57a916",
+  "kind": "store",
+  "declared_domain": "An ISOLATED TEST-HARNESS Iceberg table in the globgrph Nessie namespace holding CSE (Change/Signal Event) rows partitioned by (source, event_date), written by THREE separate appends inside one 11-minute session and never again. \u26d4 THE SUBJECT IS THE TABLE AT THIS EXACT S3 HOME (uuid bb57a916-76de-454d-a71e-932dc173620e). It is NOT the production `cse` store and it is NOT its same-named sibling cse_test_24458e6c, which is a DIFFERENT table carrying the SAME table name `cse_test` and is distinguished only by uuid. QUALIFIES THE CELLS CARRIER (AC4): org/tier2_senior/0.7.0_AE_CloudOps/deliverables/cells.0.7.0_AE_CloudOps~X.json @a5fffa2bb7, cells W4-dlqq-1 W4-dlqq-2 W4-dlqq-3 W4-dlqq-4 W4-dlqq-5 W4-dlqq-6 W4-dlqq-7 -- the carrier is NOT edited."
+ },
+ "as_of": {
+  "carded_utc": "2026-08-30T21:06:36Z",
+  "commit_ish": "ff645d8de1edad1c723e452dbdacba4a68cfac1b",
+  "graph_vintage": "S3 object plane read live at card time for this home AND for the same-named sibling used as the discrimination control; no graph consulted"
+ },
+ "process": {
+  "methodology": {
+   "how": "Iceberg create_table plus THREE appends through cse_store.py's unconstrained --table override: ensure_cse_table() creates globgrph.<table> with cse_iceberg_schema() partitioned by (source, event_date), and each append writes one Nessie commit. \u26d4 THE INVOCATIONS THAT DID THIS WERE NOT FOUND AND ARE NOT CLAIMED.",
+   "determinism": "deterministic",
+   "composes": [
+    {
+     "id": "infra/aws/globgrph/cse_store.py @86ab291f80",
+     "note": "the code path that can create and append to this table: --table at :581 carries no choices= so it accepts any name in the namespace; ensure_cse_table() at :321, catalog.create_table at :338; the docstring at :325 invites exactly this -- 'pass a scratch name (e.g. cse_test) for an ISOLATED test harness'"
+    }
+   ],
+   "invents": [],
+   "materializer_standing": "historical_in_use",
+   "basis": "inferred",
+   "basis_by_field": {
+    "how": "inferred",
+    "composes": "inferred",
+    "determinism": "inferred",
+    "materializer_standing": "measured"
+   },
+   "evidence": "\u26d4 THE ROW IS `inferred` AND THE SENTENCE MUST NOT OUTRUN IT. generation.materializer is null in the manifest and NO code names this table; the invocations were not found and none is claimed. The MEASURED facts sit UNDER that floor and do not raise it: the layout matches cse_store.py's declared partition spec -- 3 data objects under source=doc/ and source=git/ across 2 event_date partitions (2026-07-07..2026-07-08), which is the (source, event_date) spec ensure_cse_table() applies at infra/aws/globgrph/cse_store.py:321/338 @86ab291f80. A structural match to a writer's partition spec identifies the writer CLASS, never the run. materializer_standing is `historical_in_use` (MEASURED): 3 snapshots and 3 distinct write-commit uuids exist here, so the writer ran and has not run again.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "cadence": {
+   "declared_rhythm": "NONE DECLARED -- generation.trigger is null in the manifest",
+   "actual_trigger": "none found; and the write history is a SESSION, not a schedule -- three appends inside 11 minutes, then nothing",
+   "live_matches_declared": "not_applicable",
+   "live_instance_age": "13 objects written between 2026-07-08T01:26:22.000Z and 2026-07-08T01:37:22.000Z -- a 660-second span on 1 distinct write-day across 3 appends; 53 days stale at carding",
+   "basis": "absent",
+   "basis_by_field": {
+    "declared_rhythm": "absent",
+    "actual_trigger": "measured",
+    "live_instance_age": "measured",
+    "live_matches_declared": "absent"
+   },
+   "evidence": "\u26d4 TWO DIFFERENT CLAIMS LIVE IN THIS ROW AND THEY DO NOT SHARE A BASIS, SO THE ROW BASIS IS THE FLOOR OF ITS FIELDS -- `absent` -- WEAKER THAN ITS STRONGEST FIELD ON PURPOSE. (1) `declared_rhythm` floors to `absent`: generation.trigger is an UNPOPULATED field, and an unpopulated field is not a measured negative. (2) `actual_trigger` is MEASURED and the discriminator is the Iceberg metadata tree, not the timestamps: 3 snapshot objects and 3 distinct write-commit uuids (04bf57a5-212f-4dde-b918-0bcbe175c32f, 46a8256d-e6ce-4ced-ad4f-c12269a08a12, a89e1c24-5a84-4d46-9dde-1dccd9358982) across 13 objects, so this table was written by THREE appends, not one. \u26d4 SCOPED TO THE SURVIVING SET AND NOT BEYOND IT -- snapshot expiry and overwrite both converge on fewer surviving snapshots, so 'exactly three writes ever' would need the metadata log's snapshot HISTORY rather than its current head, and that is UNMEASURED. Three appends inside 11 minutes followed by 53 days of silence is a SESSION that ended, which is a different shape from a cadence that failed, and neither becomes the other by ageing. \u26d4 WHY the session happened, and whether anyone intended it to repeat, is UNMEASURED.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  }
+ },
+ "artifact": {
+  "persistence": {
+   "persisted": true,
+   "authority_role": "source",
+   "mutation_policy": "append_only",
+   "form": "an Iceberg table: 3 data parquet under data/source=doc/ and data/source=git/ plus a 10-object metadata/ tree (4 *.metadata.json, 3 -m0.avro manifests, 3 snap-*.avro snapshots)",
+   "basis": "measured",
+   "evidence": "KeyCount at the declared home = 1, a POSITIVE, which a wrong bucket or a missing s3:ListBucket cannot produce. Controls as SEPARATE invocations: POSITIVE prefix 'warehouse/' -> 1; NEGATIVE prefix 'warehouse/globgrph/zzz_no_such_prefix_99999/' -> 0. Both fired. Segment split counted client-side: {'data': 3, 'metadata': 10}. \u26d4 NOTE THE INVERTED RATIO against this table's same-named sibling -- 10 metadata objects to 3 data objects here, because three appends each leave a metadata.json, a manifest and a snapshot. `mutation_policy` is `append_only`; DROPPABILITY IS A LIFECYCLE FACT RECORDED HERE, NOT AN ENUM VALUE: ensure_cse_table() is ENSURE-ONLY and never overwrites or repartitions (infra/aws/globgrph/cse_store.py:321-325 @86ab291f80), while --drop at :579 explicitly permits dropping a SCRATCH table and 'refuses the real log'. This table is on the permitted side of that guard; whether it SHOULD be dropped is the owner's call and is not set here.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "location": {
+   "home": "s3://opal-313476888478-globgrph/warehouse/globgrph/cse_test_bb57a916-76de-454d-a71e-932dc173620e/",
+   "projection_of": [],
+   "co_resident_stores": [
+    {
+     "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/cse_test_24458e6c-667c-4e85-ba44-33751795e182/",
+     "note": "\u26d4 THE SAME-NAMED SIBLING and the subject of card 5 of this face. Shares the table name `cse_test`; differs only in uuid. MEASURED disjoint from this home: 57 objects / 810513 bytes there against 13 / 82121 here, key-set intersection 0."
+    },
+    {
+     "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/",
+     "note": "the globgrph warehouse prefix root, shared with every sibling table; overlap of CONTENT was not measured, only of PREFIX"
+    }
+   ],
+   "basis": "measured",
+   "evidence": "the s3:// URI is an EXACT IDENTITY a consumer can equality-join, not a description. \u26d4 COPIED BYTE-FOR-BYTE from the cells carrier's own cell W4-dlqq-4 and never retyped from a display. Existence at this exact key was MEASURED: KeyCount=1. The wrong-prefix probe mutates this home's own uuid tail and returns rc=0 out='0', confirming a near-miss on this key is indistinguishable from absence by KeyCount alone.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  }
+ },
+ "trust": {
+  "coverage": {
+   "universe": "the objects under THIS table's own S3 home -- not the CSE event population, not the production cse store, and not the same-named sibling cse_test_24458e6c",
+   "denominator": "13 of 13 objects at the declared home",
+   "explicitly_out": [
+    "s3://opal-313476888478-globgrph/warehouse/globgrph/cse_test_24458e6c-667c-4e85-ba44-33751795e182/ -- the same-named sibling, a SEPARATE subject carded as card 5 of this face, 57 objects, measured here ONLY as the discrimination control",
+    "row-level content -- no row was read. Whether these rows duplicate the production cse store's is UNMEASURED, so authority_role=`source` describes this table holding its own rows, not a claim they are unique",
+    "the Nessie catalog plane -- not reachable from this seat; see the key row"
+   ],
+   "basis": "measured",
+   "evidence": "aws s3api list-objects-v2 auto-paginated, rows counted CLIENT-SIDE -- never --query length(), which returns the PAGE count, and never --no-paginate. 13 objects, 82121 bytes, segments {'data': 3, 'metadata': 10}. The denominator certifies the SWEEP of this prefix, not the correctness of the prefix; the prefix is certified separately by the copied-home evidence in the location row.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "key": {
+   "identity_space": "S3 (bucket, key) on the artifact plane; (namespace, table) = (globgrph, cse_test) on the Nessie catalog plane",
+   "key_expression": "bucket + key, exact string match",
+   "key_is_stable": "stable",
+   "crosses_spaces": true,
+   "declared_mapping": "the catalog key (globgrph, `cse_test`) does NOT uniquely address this home -- two homes carry that table name",
+   "basis": "inferred",
+   "basis_by_field": {
+    "identity_space": "measured",
+    "key_expression": "measured",
+    "key_is_stable": "measured",
+    "crosses_spaces": "measured",
+    "declared_mapping": "inferred"
+   },
+   "evidence": "\u26d4 THE SAME UNRESOLVED IDENTITY QUESTION CARD 5 CARRIES, AND IT IS `inferred` FROM THIS SIDE TOO. MEASURED: two S3 homes exist under warehouse/globgrph/ whose table-name component is identically `cse_test`, differing only in uuid -- this one (bb57a916, written 2026-07-08) and card 5's (24458e6c, written 2026-07-08). Key sets disjoint. INFERRED: pyiceberg/Nessie assigns a NEW uuid-suffixed location per create_table and a namespace admits one table per name, so at most ONE of these homes is reachable by the catalog key and the other is an ORPHANED physical location. \u26d4 UNMEASURED, AND IT IS THE DECIDING FACT: which home the catalog resolves to today. The Nessie catalog is not reachable from this seat, so this card CANNOT say which of the two is live and does not guess -- and it does NOT inherit card 5's reading, which is the same non-answer reached independently rather than a second vote. \u26d4 ONE ORDERING FACT THIS SIDE ADDS, MEASURED: this home's writes (01:26:22) PRECEDE the sibling's (15:51:14) on the same day. That constrains WHICH would be the orphan under the create->drop->create reading -- an earlier location is the one a later create would strand -- but it does NOT settle it, because nothing measured here excludes the reverse order of catalog registration. Settling it needs one catalog.load_table((globgrph, 'cse_test')) read of its metadata location. NAMING the state is the carder's job; DECIDING it is the owner's.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "failure_mode": {
+   "returns_on_failure": "A true absence returns KeyCount=0 at rc=0 -- a failed retrieval returns a VALUE, not an error. And at THIS subject a wrong home does not even return 0: the same-named sibling returns a populated census",
+   "distinguishable_from_true_negative": "no",
+   "basis": "inferred",
+   "basis_by_field": {
+    "returns_on_failure": "measured",
+    "distinguishable_from_true_negative": "inferred"
+   },
+   "evidence": "FOUR read-only probe classes, each a SEPARATE invocation, rc read UNPIPED. MEASURED: (1) true absence -> rc=0 out='0'; (2) wrong bucket -> rc=255 out='An error occurred (NoSuchBucket) when calling the ListObject', an ERROR not a zero; (3) wrong region -> rc=0 out='1'; (4) near-miss prefix, this home's own uuid tail mutated -> rc=0 out='0'. So a zero is produced by absence and by a wrong prefix, and NOT by a wrong bucket. \u26d4 THE FIFTH CLASS -- a missing s3:ListBucket -- WAS NOT EXERCISED and may also return a zero; that unexercised class is the SOLE ground on which distinguishable_from_true_negative is `no` at basis `inferred`. \u26d4 AND AT THIS SUBJECT THE SHARPEST FAILURE IS NOT A ZERO: because the same-named sibling home is real and populated, a home confused between the two returns a healthy KeyCount=1 and a full census while the card describes the wrong table. That class is caught structurally by refuse_sibling_confusion() at build time, which RAISED nothing here because the two censuses differ on every axis measured (see the location row).",
+   "owner": "0.7.0_AE_CloudOps~X"
+  }
+ },
+ "verdict": {
+  "standing": "QUALIFIED",
+  "why": "NOT LOAD-BEARING on the evidence gathered here: an isolated test-harness table written by 3 appends inside 11 minutes on 2026-07-08 and never touched again, 53 days stale at carding. It is carded because it EXISTS in the manifest and occupies a real S3 home, not because anything was shown to read it. QUALIFIED, and these are the qualifications: the materializer is `inferred` -- the invocations were never found and the partition-spec match identifies a writer CLASS, not a run; the `key` row carries an UNRESOLVED identity question, since two homes share the table name `cse_test` and this seat cannot reach the Nessie catalog to say which one it addresses, so one of the two may be an orphaned location and this card does not claim which; coverage spans the OBJECT plane only and NO row was read; and whether any consumer reads this table is UNMEASURED. \u26d4 THIS CARD DOES NOT CLASSIFY THE TABLE AS DEBT AND DOES NOT PROPOSE DROPPING IT: --drop permits it, but a permission is not a recommendation. Naming the state is the carder's job; deciding it is the owner's.",
+  "blocking_defects": null
+ },
+ "forward_disposition": {
+  "standing": "undecided",
+  "set_by": null,
+  "basis": "absent",
+  "evidence": "NOT SET BY THE CARDING LANE -- the store owner's call at the class close. The key row's unresolved catalog question is an input that owner will want settled first, and it is shared with card 5.",
+  "decided_utc": null
+ },
+ "carded_by": "0.7.0_AE_CloudOps~X"
+}
