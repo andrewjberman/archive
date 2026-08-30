@@ -52,7 +52,7 @@ def artifact_identity(path):
                            capture_output=True, text=True).stdout.strip()
     if dirty:
         return "PENDING-THIS-COMMIT", "worktree differs from HEAD; the next commit carries it"
-    last = subprocess.run(["git", "log", "-1", "--format=%h", "--", path],
+    last = subprocess.run(["git", "log", "-1", "--format=%H", "--", path],
                           capture_output=True, text=True).stdout.strip()
     if not last:
         raise ValueError("cannot derive an identity for %s: clean but no commit touches it"
