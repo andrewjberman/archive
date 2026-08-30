@@ -200,7 +200,13 @@ def main() -> int:
         else:
             shape_state = "PRESENT-AND-POPULATED"
         shape_census[shape_state] = shape_census.get(shape_state, 0) + 1
-        if shape_state != "PRESENT-AND-POPULATED":
+        # ⛔ ENUMERATE ONLY THE **ABSENT** PARTITIONS. My first version listed everything that
+        # was not PRESENT-AND-POPULATED -- and since PRESENT-AS-NaN is the NORM (532 of 535,
+        # measured), that "exception list" enumerated all 535 partitions in ~85 KB. A list
+        # that names every member is not naming exceptions; it is a second, worse copy of the
+        # per-partition axis. The SHAPE_CENSUS counts carry the NaN population, and
+        # PER_PARTITION carries the detail; this list is for the genuinely rare shape.
+        if absent:
             schema_10.append({"date": d, "shape_state": shape_state,
                               "absent_columns": absent,
                               "rows_with_a_NaN_operand": nan_rows,
@@ -329,7 +335,7 @@ def main() -> int:
     print("SHAPE CENSUS (three states, denominator = partitions evaluated):")
     for k in ("PRESENT-AND-POPULATED", "PRESENT-AS-NaN", "ABSENT"):
         print(f"       {k:24s} {shape_census.get(k, 0)} of {len(dates)}")
-    print(f"NOT-EVALUABLE-BY-SCHEMA / mixed partitions listed: {len(schema_10)}")
+    print(f"ABSENT-COLUMN partitions listed below: {len(schema_10)} (the PRESENT-AS-NaN population is in SHAPE CENSUS, not enumerated)")
     for s in schema_10:
         print(f"       {s['date']}  absent={s['absent_columns']}  rows={s['rows']}  "
               f"status={s['status_census']}")
