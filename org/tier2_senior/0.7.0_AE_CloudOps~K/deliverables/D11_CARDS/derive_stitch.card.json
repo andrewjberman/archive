@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "subject": {
+    "id": "infra/aws/globgrph/derive_stitch.py",
+    "kind": "script",
+    "declared_domain": "NFRA_GLOBGRPH P2-STITCH step-2: unions the portal/pipeline subgraph (step-1 extract_portal_stitch) with the comp-aws AWS-resource layer (the nightly snapshot) and DERIVES the inter-system STITCH edges that join them, resolving portal name/path identities to AWS ARNs so both layers meet on one ARN-keyed node. Writes stitch_graph.json -- view 2's source in NFRA_C3MATERIALIZE."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-30T02:48:00Z",
+    "commit_ish": "5da9e7fffc",
+    "graph_vintage": "Reads the AWS layer at RUN time from s3://opal-313476888478-globgrph/snapshots/latest.txt, which resolved this session to snapshots/20260830/graph-20260830.tar.gz (LastModified 2026-08-30T02:11:49Z, 1,638,952 B). The subject FILE itself last changed at 393a8b723e (2026-07-07); the vintage that governs its OUTPUT is the snapshot pointer, not the file."
+  },
+  "process": {
+    "methodology": {
+      "how": "load_aws_layer() pulls the pointer snapshots/latest.txt, fetches the named tarball and json-loads member[0] into the AWS graph dict. _index_aws() builds name->arn indices for LAMBDA and S3_BUCKET plus the AWS node-key set. build_stitched_graph() then unions three node/edge sources (AWS snapshot, extract_portal_stitch, trace_graph.build_graph) and walks the comp-trace edges emitting five inter-layer edge types: ROUTES_TO, WRITES, READS, DERIVES_FROM, STORED_IN. Edges are deduped on (source,target,edge_type); a wildcard- and transient-exempt 0-dangling check runs; run_grain_sentinel() gates emission and main() REFUSES to write on a grain violation (rc=2).",
+      "determinism": "hybrid",
+      "inference_detail": {
+        "model": null,
+        "invocations_per_run": null,
+        "stages_inferential": [
+          "LAMBDA identity resolution (lam(), derive_stitch.py:113-129): on a name miss it RETRIES with name.replace('_','-') and then 'opal-'+hyphenated to bridge documented code-vs-live naming drift. A normalized candidate matching a DIFFERENT real Lambda is recorded in stats['lam_matched'] and is indistinguishable from a true match. No LLM is involved -- the inference is heuristic string normalization.",
+          "STORED_IN placement (:161-169): a firm-relative key does not carry its firm, so the loop emits one edge to EVERY present firm bucket -- a possibility asserted in the grammar of a fact."
+        ],
+        "stages_deterministic": [
+          "the three-way node/edge union and the (source,target,edge_type) dedup (:88-105, :171-173)",
+          "the wildcard- and transient-exempt 0-dangling check (:174-179, _wild :215-221, _known_transient :207-211)",
+          "the grain sentinel gate and refuse-to-emit on violation (:243-248)"
+        ],
+        "failure_is_loud": false
+      },
+      "composes": [
+        "the comp-aws nightly AWS-resource snapshot (S3 tarball, ARN-keyed)",
+        "extract_portal_stitch.build_portal_stitch_graph(ws) -- the portal/pipeline subgraph (path/name-keyed)",
+        "org.modules.graph.trace_graph.build_graph(ws) -- the repo trace graph, the source of the cross-layer relationships",
+        "org.modules.graph.grain_sentinel.run_grain_sentinel + org/modules/graph/grain_baseline.json"
+      ],
+      "invents": [
+        "STORED_IN edges as a FAN-OUT: one edge per present firm bucket per firm-relative key, so the edge asserts a POSSIBILITY and reads as a FACT. With 5 buckets in FIRM_DATA_BUCKETS, at most one such edge per key can be true, and a consumer reading STORED_IN as 'this key lives in this bucket' is wrong for the rest.",
+        "LAMBDA matches recovered by name normalization ('_'->'-', 'opal-' prefix), counted as matched with no marker separating a normalized match from an exact one"
+      ],
+      "basis": "measured",
+      "evidence": "Read in full at infra/aws/globgrph/derive_stitch.py:1-267 @5da9e7fffc (file last changed @393a8b723e). Union at :88-105; lam() normalization at :113-129; STORED_IN fan-out loop at :163-169; dedup + dangling at :171-179; grain gate + write at :243-252.",
+      "owner": "0.7.0_AE_CloudOps (AE class owns infra/aws/globgrph per .owned-paths.yaml:340); file creator 0.7.0_AE_CloudOps~B"
+    },
+    "cadence": {
+      "declared_rhythm": "Nightly at 03:00 UTC. infra/aws/terraform/globgrph/stitch-produce.tf:225-232 declares EventBridge rule opal-stitch-produce-nightly, cron(0 3 * * ? *), targeting CodeBuild project opal-stitch-produce, which runs 'python3 infra/aws/globgrph/derive_stitch.py --out /tmp/stitch_graph.json' (:159). The comment at :198 sequences it AFTER the 02:00Z derive_runner_nightly snapshot so it reads the fresh grain-complete one. A second, push-triggered path also exists (.github/workflows/stitch-source-push.yml:32; .tools/git-hooks/stitch-refresh-post-commit.sh:23).",
+      "actual_trigger": "The scheduled leg fires and FAILS. EventBridge rule reads State=ENABLED with the declared cron and the CodeBuild target attached (APPLIED, measured). CodeBuild opal-stitch-produce has 56 builds ever; of the 20 most recent, 20 of 20 FAILED, each with initiator=rule/opal-stitch-produce-nightly, one per night from 2026-08-10T03:00:12Z through 2026-08-29T03:00:12Z. ZERO succeeded in that window. The artifact is nevertheless CURRENT, so a DIFFERENT path is producing it -- one of the push-triggered legs or a hand run. Which one is NOT MEASURED and is not asserted here.",
+      "live_matches_declared": "no",
+      "basis": "measured",
+      "evidence": "aws events describe-rule opal-stitch-produce-nightly -> {State: ENABLED, ScheduleExpression: cron(0 3 * * ? *)}; list-targets-by-rule -> arn:aws:codebuild:us-east-1:313476888478:project/opal-stitch-produce. aws codebuild list-builds-for-project opal-stitch-produce -> length 56; batch-get-builds over the 20 newest -> 20 FAILED / 0 SUCCEEDED, all initiator rule/opal-stitch-produce-nightly, startTime 2026-08-10..2026-08-29 at 03:00:12Z. Newest failing id opal-stitch-produce:790670ca-2559-4728-978e-fc55c2206499. DISCRIMINATOR that stopped the wrong conclusion: s3api head-object stitch/stitch_graph.json -> 2026-08-30T02:38:14Z (39,501,360 B) and stitch/stitch_marker.json -> 02:38:21Z (334 B), i.e. ~7 minutes before this read, with snapshots/latest.txt (02:11:50Z) as a resolving positive control. NOT measured: the CodeBuild failure phase/reason, and the identity of the masking producer.",
+      "owner": "0.7.0_AE_CloudOps base (AE lane owns infra/aws/terraform/globgrph). Surfaced as OBSERVATION/ARMED to 3.0.0_SA_CVO~X cc 2.0.0_SA_COO~X + 2.0.0_SA_COO, msg 84713/84714/84715, disarm candidate named there and NOT taken at this seat (Rule 27)."
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "source",
+      "mutation_policy": "replaceable",
+      "form": "A single JSON document {classes_data, edges, meta} in comp_aws_cli shape. Locally main() writes --out (default infra/aws/globgrph/stitch_graph.json, json.dumps indent=2, utf-8). In the CodeBuild leg it is written to s3://opal-313476888478-globgrph/stitch/stitch_graph.json ARTIFACT-FIRST, then stitch/stitch_marker.json LAST as the atomic commit point carrying artifact_sha256 (stitch-produce.tf:21-24, 34-35).",
+      "basis": "measured",
+      "evidence": "Write path derive_stitch.py:250-252 (Path(args.out).write_text(json.dumps(out, indent=2))); keys and the artifact-first/marker-last ordering at infra/aws/terraform/globgrph/stitch-produce.tf:21-24 and :34-35. Ordering CONFIRMED live: artifact 02:38:14Z precedes marker 02:38:21Z by 7 s. 'source' rather than 'projection' because downstream (comp-debt ensure_fresh, the step-3 Kuzu load) treats this document as the authority for cross-layer edges that exist nowhere else -- the STITCH edges are derived HERE and not read from any upstream.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "location": {
+      "home": "s3://opal-313476888478-globgrph/stitch/stitch_graph.json (+ stitch/stitch_marker.json). Local default infra/aws/globgrph/stitch_graph.json when run from a workstation.",
+      "projection_of": [
+        "the comp-aws nightly AWS snapshot (s3://opal-313476888478-globgrph/snapshots/latest.txt -> snapshots/<date>/graph-<date>.tar.gz)",
+        "the portal/pipeline subgraph produced by extract_portal_stitch.py from the working tree",
+        "org.modules.graph.trace_graph.build_graph(ws) over the repo"
+      ],
+      "co_resident_stores": [
+        "snapshots/ (the AWS-layer input) shares the bucket opal-313476888478-globgrph with the stitch/ output, so an IAM or lifecycle change scoped to the bucket touches BOTH the input and the output of this producer"
+      ],
+      "basis": "measured",
+      "evidence": "Bucket/key locals at infra/aws/terraform/globgrph/stitch-produce.tf:32-35; the produce role's write grant is scope-exact to those two keys at :114-120. Local default at derive_stitch.py:222. Both S3 keys head-object'd this session (see cadence evidence). SNAPSHOT_BUCKET constant at derive_stitch.py:51.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every node and edge in the union of three graphs, plus the five derived inter-layer edge types. Node universe = AWS snapshot nodes (ARN-keyed) UNION portal/pipeline nodes (path/name-keyed). Edge universe = AWS edges + portal edges + derived STITCH edges, deduped on (source,target,edge_type).",
+      "denominator": "The producer PRINTS its own denominators every run and carries them in meta.stitch_stats: total_nodes, total_edges, genuine_dangling, and per-type routes_to / writes / reads / derives_from / stored_in, plus lam_matched and lam_unmatched. It does NOT carry the denominator that would size its own inference: stored_in is a COUNT OF EMITTED EDGES, not a count of keys, so the fan-out multiplies it by the number of present firm buckets and no field records that multiplier. A reader taking stored_in as 'number of keys placed' overcounts by up to 5x.",
+      "explicitly_out": [
+        "Lambdas whose trace name resolves to no AWS name even after normalization -- carried as _unmatched_lambdas and counted in lam_unmatched, i.e. DISCLOSED rather than silently dropped",
+        "Dangling edges whose endpoint is a wildcard/pseudo-principal (_wild: non-arn ids starting with *, event-source::, external-endpoint::, service-principal::, external-principal::, wildcard:, or containing * or ::) -- exempted from the 0-dangling check by design",
+        "ECS cluster/task endpoints (_known_transient: ':ecs:' in the id) -- exempted pending a WAVE-4-inclusive nightly derive, per CTO ruling 184757Z",
+        "S3 keys NOT under platinum/|gold/|silver/|bronze/ -- they receive no STORED_IN edge at all",
+        "firm buckets absent from the snapshot -- present_firm_buckets intersects FIRM_DATA_BUCKETS with what the snapshot actually carries, so a missing bucket silently reduces the fan-out rather than erroring",
+        "_genuine_dangling is TRUNCATED TO 20 in the returned dict while meta.genuine_dangling carries the true count -- the sample and the count are different quantities and only the count is complete"
+      ],
+      "basis": "measured",
+      "evidence": "meta assembly at derive_stitch.py:180-201 (note '_genuine_dangling': genuine_dangling[:20] at :200 against meta.genuine_dangling = len(...) at :197). _wild at :215-221; _known_transient at :207-211; FIRM_KEY_PREFIXES gate at :165; present_firm_buckets intersection at :162.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "MULTI-SPACE BY CONSTRUCTION, and reconciling the spaces is this script's entire purpose. AWS nodes are ARN-keyed; portal/pipeline nodes are path/name-keyed ('lambda:NAME', 's3:<key>'); trace nodes carry their own ids. The join is performed by lam() (trace lambda name -> ARN) and by the STORED_IN boundary edge (firm-relative key -> bucket ARN). _index_aws keys on (arn or id), so a node lacking an arn silently falls back to its id and enters the same key set as an ARN.",
+      "key_is_stable": "unstable",
+      "crosses_spaces": true,
+      "declared_mapping": "Declared in the module docstring at derive_stitch.py:11-21 (the five STITCH edge types and the name->ARN intent) and implemented at :113-129 (lam) and :161-169 (STORED_IN). The docstring declares WHAT joins; it does not declare that the name->ARN step may match a normalized candidate, nor that STORED_IN is one-to-many.",
+      "basis": "measured",
+      "evidence": "_index_aws at derive_stitch.py:72-86 (node_keys.add(arn or nid); lam_by_name[n.get('name') or nid]); lam normalization at :113-129; STORED_IN at :161-169. Rated UNSTABLE, not stable, on two grounds read at source: the same logical Lambda is addressable under at least three spellings (trace basename, hyphenated, opal-prefixed) with no canonical form recorded on the emitted edge; and an AWS node without an arn is keyed by id, so one entity can occupy two key shapes within one run.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "failure_mode": {
+      "returns_on_failure": "MIXED, and the mixture is the finding. LOUD paths: load_aws_layer() has no exception handling, so a missing pointer, absent tarball or malformed member RAISES and the run dies; a grain-sentinel violation prints GRAIN_SENTINEL_FAIL and RETURNS 2 WITHOUT WRITING (the refuse-to-emit gate, derive_stitch.py:243-248); genuine dangling edges return rc=1 while still writing. SILENT path: _load_grain_baseline() at :255-260 wraps its read in a bare 'except Exception: return {}', so an unreadable, missing or malformed baseline yields {} -- and the function's own docstring states that omitting the baseline degrades the sentinel to 'AC-GRAIN.1 only'. The instrument therefore drops from two checks to one, prints its normal PASS render, and exits 0.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "_load_grain_baseline() bare except at :259 -> {} -> grain sentinel runs AC-GRAIN.1 only -> a magnitude/count regression that AC-GRAIN.2 exists to catch passes unnoticed, with rc=0 and no warning line",
+        "lam() normalization matching a DIFFERENT real Lambda -> counted in lam_matched -> a wrong ARN is stitched and reads as a successful join",
+        "a firm bucket missing from the snapshot -> present_firm_buckets shrinks -> fewer STORED_IN edges emitted, stored_in count drops, and nothing distinguishes that from there being fewer keys"
+      ],
+      "basis": "measured",
+      "evidence": "EXERCISED, not read. Imported the module and called _load_grain_baseline() twice with arms reaching DIFFERENT truths: ARM1 with the real org/modules/graph/grain_baseline.json (present, 12,266 B) -> dict with 35 keys; ARM2 with GRAIN_BASELINE repointed to a nonexistent path -> dict with 0 keys. Discriminator: ARM2 == {} is True, i.e. byte-identical to a genuinely empty baseline; ARM1 != ARM2 confirms the arms are not degenerate. Source at derive_stitch.py:255-260; the 'omit -> AC-GRAIN.1 only' claim is the function's own docstring at :256.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "The design is careful and unusually self-instrumented for this estate: it refuses to emit a grain-violating graph rather than warning, it discloses its own unmatched-Lambda set instead of dropping it, it exempts wildcard and transient endpoints deliberately with a cited ruling, and it carries its denominators in meta on every run. The artifact is current (02:38:14Z at carding) and the artifact-first/marker-last ordering was confirmed live. QUALIFIED rather than SOUND on three measured defects, none of which requires redesign: (1) the DECLARED cadence is not the operating one -- the nightly EventBridge->CodeBuild leg is ENABLED and has failed 20 of its 20 most recent fires, 2026-08-10 through 2026-08-29, with zero successes, while a different unidentified path keeps the artifact fresh and thereby hides the outage; (2) the grain baseline loads through a bare except, so an unreadable baseline is byte-identical to an empty one and silently halves the sentinel while the run still exits 0 -- EXERCISED this session, both arms; (3) STORED_IN is a one-to-many fan-out emitted as a plain edge, so it asserts a possibility in the grammar of a fact and its stored_in counter counts EDGES while reading as keys. QUALIFIED is a statement about load-bearing standing TODAY: the output is fresh and usable now, and the mechanism that is supposed to guarantee that has not worked in twenty days.",
+    "blocking_defects": [
+      "nightly produce leg 20/20 FAILED since 2026-08-10 with the artifact kept fresh by an unidentified second path (cadence row; owner 0.7.0_AE_CloudOps base; surfaced ARMED at 84713)",
+      "grain baseline bare except at derive_stitch.py:259 -- instrument failure becomes a passing verdict, exercised (failure_mode row)",
+      "STORED_IN fan-out asserts one key in up to 5 firm buckets and stored_in counts edges, not keys (methodology.invents + coverage rows)"
+    ]
+  },
+  "carded_by": "0.7.0_AE_CloudOps~K"
+}
