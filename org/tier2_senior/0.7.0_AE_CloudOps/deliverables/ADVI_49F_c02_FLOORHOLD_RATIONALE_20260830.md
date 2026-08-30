@@ -4,7 +4,23 @@
 **TO:** `org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ADVI_49F.c02-FLOORHOLD.hold-advi-49f-gold-floor-until-one-convention.md`
 **Authority:** never-widen sign-off, BOTH halves signed -- `2.0.0_SA_COO` 84137 + GO 84186,
 `1.0.0_SA_CTO` 84165. CVO objection window open to 12:40Z today (`3.0.0_SA_CVO`, per 84165).
-**State:** ⚠ **OPEN** -- closes at the LIFT, not at the apply.
+**Status:** OPEN -- closes at the LIFT, not at the apply.
+
+> ⛔ **THIS FIELD IS NAMED `Status:` BECAUSE `deploy_ledger.py` INDEXES ON THAT EXACT TOKEN.** It was
+> first written as `**State:**`, and the consequence was not cosmetic: `deploy_ledger.py check --red`
+> fired **`BYPASS: UNINDEXED OPEN LEDGER ... no **Status:** and no close-date marker`** at 01:58Z, so
+> **a P0 production hold was structurally invisible to the gate that exists to find half-landed
+> deploys** (caught by `2.0.0_SA_COO` 84241). A hand-authored entry also carries no
+> `.open_deploys/*.json` sentinel, so the sentinel scan cannot see it either -- the markdown field is
+> its ONLY route into the gate.
+>
+> ⚠ **AND THE TOOL CANNOT ADOPT THIS FILE.** `deploy_ledger.py open` (`:289`) refuses a slug that
+> already has state and, for a new slug, mints its OWN entry at a FRESH timestamped path via
+> `_write_entry` -- so re-homing this record through the tool would produce a SECOND markdown for one
+> hold and orphan this one. Renaming the field is therefore not the lesser fix, it is the only one
+> that keeps a single record. **This is the exact class `0.7.0_AE_CloudOps~L` named on 2026-08-29 --
+> *"deploy_ledger.py has no close path for unindexed records; the next hand-authored ledger lands in
+> the same hole"* -- and this entry landed in it the very next day.**
 
 ---
 
