@@ -207,10 +207,16 @@ def main():
             #   bd_days_held = our_days_linked + hole-days-in-window + anchor-day + OUR non-OK days
             # The third term is a mechanism candidate for the VALUE delta in its own right:
             # BD linked days our chain REFUSED. Distinct from the hole, and only visible per cell.
+            # VINTAGE-DERIVED, not hardcoded. HOLE_DATES was a constant and it went STALE the
+            # moment C02-g-7 backfilled those five partitions: the residual read -5 on a run where
+            # the hole no longer existed. A manifest of absent dates is a property of the VINTAGE,
+            # so it is computed from the spine actually loaded. HOLE_DATES survives only as the
+            # PINNED-VINTAGE record of what was absent then.
             ws, we_ = r["window_start"], r["window_end"]
             hole_in_win = 0
             if ws:
-                hole_in_win = sum(1 for d in HOLE_DATES if ws <= d <= we_)
+                hole_in_win = sum(1 for d in HOLE_DATES
+                                  if ws <= d <= we_ and ppr._d(d) not in spine)
             # BD counts the anchor day itself; our SI opens the next trading day (BMV-0 rule).
             anchor_term = 1 if (period == "SI" and r["bd_first_return_day"]
                                 and r["bd_anchor"] != r["bd_first_return_day"]) else 0
