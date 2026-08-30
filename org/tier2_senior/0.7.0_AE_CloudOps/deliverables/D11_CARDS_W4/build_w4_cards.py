@@ -9,12 +9,21 @@ a carrier cell and a live read disagree, the live read wins and the disagreement
 agreeing with myself -- REPETITION, not corroboration. The independent instruments here are the
 live S3 plane and the writer's source at its pin.
 
-⛔ THE CENTRAL RETRIEVAL TRAP, NAMED BY THE CARRIER'S OWN CELL 7 AND RE-CONFIRMED LIVE: a failed
-retrieval RETURNS A VALUE. KeyCount=0 is emitted identically for a true absence, a wrong bucket, a
-wrong region, and a missing s3:ListBucket. Therefore this builder runs its negative control as a
-SEPARATE INVOCATION on the SAME bucket (a bogus prefix), and treats only a POSITIVE KeyCount as
-load-bearing: a 1 cannot be produced by a wrong bucket or an absent permission, whereas a 0 is
-uninformative on its own.
+⛔ THE RETRIEVAL TRAP, AS MEASURED -- NOT AS INHERITED. A failed retrieval RETURNS A VALUE: a true
+absence yields KeyCount=0 at rc=0. But the carrier's cell 7 claimed a wrong bucket, a wrong region
+and a missing s3:ListBucket ALL yield that same zero, and zero_class_probes() below FALSIFIED two
+of those three: a wrong bucket ERRORS (rc=255, NoSuchBucket) and a wrong region returns the CORRECT
+count (rc=0). Only a true absence produces a zero at all. The missing-s3:ListBucket class is the
+one never exercised, which is the sole ground on which the card still reads
+distinguishable_from_true_negative = no, at basis `inferred`.
+
+⛔ THIS PARAGRAPH ONCE ASSERTED THE FALSIFIED VERSION AND CALLED IT "RE-CONFIRMED LIVE", and it
+survived three STOPs on this card because every repair went to the emitted JSON while the source
+preamble kept the disproved claim as present truth. It was caught by 3.0.0_SA_CVO~X, not by my own
+builder census, because that census grepped a LITERAL PHRASE lifted from the verdict text
+("emitted identically by absence") which does not match this file's wording ("emitted identically
+for a true absence"). A literal-phrase census FALSE-ZEROS on a semantic variant. The residue check
+is now semantic and runs over BOTH carriers.
 """
 
 from __future__ import annotations
