@@ -16,7 +16,17 @@ An account is only pullable if it resolves to a `bd_account_id`.
 | ours NOT pullable -> `UNAVAILABLE-NOT-RESOLVABLE` | **2,061** |
 | BD-pullable with no our-side value | **66** |
 
-⭐ **5,309 independently reproduces the figure `3.0.0_SA_CVO` used in ANNOTATION 2** ("cannot anchor a 5,309-account census") — two seats, different arithmetic, same number.
+⛔ **A CORROBORATION CLAIM MADE HERE WAS FALSE AND IS WITHDRAWN (`3.0.0_SA_CVO` R2).** This section
+read: *"5,309 independently reproduces the figure `3.0.0_SA_CVO` used in ANNOTATION 2 — two seats,
+different arithmetic, same number."* **Measured: 5,309 first entered the record in THIS SEAT's own
+2026-08-29T17:38Z message, as the same 7,370 x 5,375 intersection.** ANNOTATION 2 **cited** it and
+computed nothing. **The ruling is not a second source; it is the first source read back, and a claim
+that INHERITED a number cannot corroborate it.** The number stands; the claim about it does not.
+**THE SECOND CARRIER, with its bound stated:** the xref's own stored `in_0833_universe` column reads
+**True on exactly 5,309** rows (5,309 distinct `schwab_account_id`, all carrying a `bd_account_id`).
+That is a **different carrier** — a stored flag, not my join. ⚠ **What COMPUTES `in_0833_universe`
+is UNESTABLISHED** (no definition located in first-party source), so **whether it is derived from
+the same join is unknown, and I am not calling it independent.** It agrees; that is all I can say.
 ⛔ **The two residuals are printed, never dropped.** A census reporting 5,309 without them looks complete while omitting **2,127** accounts' worth of story.
 ⛔ **THE "13 NINE-DIGIT KEYS" EXCLUSION DOES NOT APPLY AND IS WITHDRAWN AS A POPULATION OPERAND** (`2.0.0_SA_COO` 86424). Measured: `twr_daily` and `canonical_positions` are **100% ten-digit, ZERO nine-digit**. The nine-digit keys — **142**, many not Schwab-shaped (`J26000039`, `X04944670`, `Z05818068`, `BWF021838`, 8 masked) — live on the **xref** plane, which is R3's scope, untouched here. **I found no set of exactly 13 anywhere and did not reconcile to a number I was handed.**
 
@@ -37,18 +47,35 @@ pass 2   SI re-requested AT that anchor — the only comparable SI value.
 ```
 **SI's pass is its own line, so deferring SI to P3 reads as a halving rather than vanishing into a total.**
 
-## 4. ⭐ THE COST, AND THE ONE UNMEASURED THING THAT MOVES IT 50x
+## 4. THE COST — 50x on pass 1, ~2x on the census
 
 Per-call cost **MEASURED at the probe**: 21s for 15 calls = **1.40 s/call**.
 
-| per-call account cardinality | calls (2 passes) | serial runtime |
-|---|---|---|
-| **ASSUMED = 1** (never measured) | **10,618** | **~4.1 h** |
-| if N = 10 | 1,062 | ~25 min |
-| if N = 50 | 214 | ~5 min |
+⛔ **THE FIRST VERSION OF THIS TABLE WAS WRONG IN THE DIRECTION THAT FLATTERS THE ASK, and it is the
+number Andrew would have decided on** (`3.0.0_SA_CVO` R1). It priced both passes as `10,618 / N`,
+which treats **pass 2 as batchable. It is not.** Pass 2 requests SI **at each account's OWN anchor**
+— a date range that **differs per account** — and a request carries **ONE range**. N accounts in one
+call share that one range, so pass 2 batches **only across accounts whose anchors are EQUAL**, and
+the distinct-anchor count is **unknowable until pass 1 completes** (the anchors live inside pass-1
+responses). **Corrected, at the measured 1.40 s/call:**
+
+| cardinality | pass 1 (QTD/YTD/1Y) | pass 2 (SI at anchor) | total | serial runtime |
+|---|---|---|---|---|
+| **ASSUMED = 1** | 5,309 | **5,309** | **10,618** | **~4.1 h** |
+| if N = 10 | 531 | **5,309** (upper bound) | 5,840 | ~2.3 h |
+| if N = 50 | 106 | **5,309** (upper bound) | 5,415 | ~2.1 h |
+
+**Pass 2's 5,309 is an UPPER BOUND** = one call per distinct anchor; the lower bound is unknown until
+pass 1 lands. ⭐ **So the batching lever is 50x ON PASS 1 and only ~2x on the whole census — 4.1 h
+vs ~2.1 h, NOT 4.1 h vs 5 minutes.** The earlier figure was carried to Andrew in an interim report
+and **is corrected here before the formal ask.**
 
 ⛔ **CARDINALITY IS ASSUMED, NOT MEASURED, AND THE PLAN SAYS SO.** `accountFilters.accounts` is a **LIST**; every call we have ever made put exactly **one** account in it — because `run()` loops per account, **not because BD requires it**. Nobody has established what the endpoint accepts.
-**THE OPTIONAL FIRST WORD:** one probe call, **2 accounts**, settles it and re-sizes everything above. **A word granted at one-account-per-call and executed at fifty is a different act from the one approved — and so is the reverse.** Andrew picks; nothing is fired either way without him.
+**THE OPTIONAL FIRST WORD, SCOPED:** one probe call, **2 accounts, ONE shared range** — it measures
+**PASS-1 cardinality ONLY**. ⚠ **It says NOTHING about pass 2**, which would need two accounts sent
+with **two different ranges** — a **different probe** and a **second, separate unmeasured
+cardinality** (whether the builder can carry a per-account range inside one call has also never been
+exercised). **The word being asked for is the pass-1 probe.** **A word granted at one-account-per-call and executed at fifty is a different act from the one approved — and so is the reverse.** Andrew picks; nothing is fired either way without him.
 
 ## 5. REQUEST-SIDE HOLE MANIFEST
 
@@ -60,7 +87,34 @@ Per-call cost **MEASURED at the probe**: 21s for 15 calls = **1.40 s/call**.
 - **Thresholds** `4.0.0_SA_CRO` @`9f894ec5d9` + A1: **EXACT |d| <= 0.5 bp · TIGHT 0.5 < |d| <= 10 bp with its distribution · LARGE > 10 bp**; unit bp of **cumulative** return; `delta = ours - BD`, **SIGNED, never absolute**; **day-count residual FIRST**.
 - **Period convention** `1.0.0_SA_CTO` 85237: `[start, end]` links every trading day from start **through** end inclusive, base = close of the trading day before start.
 - **Anchor + basis** `3.0.0_SA_CVO` @`f11fb765ad` + annotations 1–3: anchor = BD funding-inception, admissible only where our coverage (**first-linkable**) opens on or before BD's first return day; basis **CUMULATIVE**, read from BD's own `returnAnnualized` field, **never inferred from which of our figures matches**.
-- **Outcome vocabulary** (MECE, coverage first): `COMPUTED` · `UNAVAILABLE-NO-COVERAGE` · `UNAVAILABLE-SI-WINDOW-NOT-AT-ANCHOR` · `UNAVAILABLE-NO-ANCHOR` · `UNAVAILABLE-RANGE-MISMATCH` · `UNAVAILABLE-NOT-RESOLVABLE` (new at P2, §1) · and on differenced windows `VACUOUS-NO-LINKED-DAYS` with its Rule-24 record.
+### Outcome vocabulary — FOUR GRAINS, each MECE over its OWN declared domain
+
+⛔ **The first version of this list mixed grains and omitted three members the census will meet on
+real cells** (`3.0.0_SA_CVO` R3). An enum is the PRODUCER's declared set; this face must name the
+producer beside each member, and claim MECE per domain rather than over the union.
+
+**(a) CELL grain — emitted by the LINKER** (`parity_period_returns.py` @`2762f02f6a` :161-166, its
+declared set, MECE over *the result of attempting ONE (account, period) cell*). **All six by name:**
+`COMPUTED` · `UNAVAILABLE-NO-ANCHOR` · `UNAVAILABLE-NO-COVERAGE` · `UNAVAILABLE-WINDOW-NOT-LOADED` ·
+`UNAVAILABLE-NO-OBSERVATIONS` · `UNAVAILABLE-NO-LINKABLE-DAYS`.
+⚠ **The three the plan previously omitted — WINDOW-NOT-LOADED, NO-OBSERVATIONS, NO-LINKABLE-DAYS —
+will occur at census scale**, and a face that does not name them would meet them as surprises.
+
+**(b) CELL grain — emitted by the COMPARISON layer, not the linker** (the probe-table harness, from
+ANNOTATION 3): `UNAVAILABLE-SI-WINDOW-NOT-AT-ANCHOR` · `UNAVAILABLE-RANGE-MISMATCH`. **The linker
+never emits these** — they are properties of the REQUEST-versus-RESPONSE, which the linker does not
+see. Naming the emitter is the point: two producers write into one column.
+
+**(c) CENSUS/ACCOUNT grain — `UNAVAILABLE-NOT-RESOLVABLE`, and it is NOT a cell value.** An
+unresolvable account **has no cell**, so it cannot sit beside cell-grain members (Rule 24 (ii)). It
+lives as **a row of §1's census table**, where it already is, and its four-postulate record binds at
+the ACCOUNT grain.
+
+**(d) DIFFERENCED-WINDOW grain — `VACUOUS-NO-LINKED-DAYS`**, with its Rule-24 record in the harness.
+⚠ **`VACUOUS-NO-LINKED-DAYS` and `UNAVAILABLE-NO-LINKABLE-DAYS` are TWO TOKENS AT TWO GRAINS, not a
+typo of each other:** the first is a *differenced* window where **both** sides linked nothing; the
+second is a *whole* window the linker attempted and found no linkable day in. Stated because a
+reader meeting them in one table will otherwise read one as a misspelling of the other.
 
 ## 7. WHAT EVERY CELL PRINTS
 
