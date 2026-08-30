@@ -38,7 +38,7 @@ import json
 import re
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 BUCKET = "opal-data-49financial"
@@ -71,6 +71,8 @@ LEDGER = DEFAULT_LEDGER
 
 # Both starters. EITHER one ENABLED means the hold is incomplete.
 STARTERS = ("advi-49f-gold-floor", "advi-49f-publisher")
+# Margin required BEYOND the projected campaign span before a fire (R-2).
+MARGIN_S = 60 * 60
 
 # date -> (why it is special, what a CORRECT re-emission looks like).
 # A populated return on any of these is a DEFECT, not a repair.
@@ -158,17 +160,88 @@ def census_domain() -> list[str]:
     return sorted(dates)
 
 
-def check_mutex() -> None:
-    """BOTH starters must be DISABLED. Re-read before every batch, never once."""
+def _next_fire(expr: str, now: datetime) -> datetime:
+    """Next UTC occurrence of a DAILY cron(M H * * ? *). FAILS CLOSED on any other shape.
+
+    ⛔ The fire time is READ FROM THE SCHEDULER API at run time and parsed here -- never
+    assumed to be 12:45Z. A hardcoded fire time is a typed number beside a derived one, and
+    this driver's whole margin argument rests on it being right. Anything this parser does
+    not recognise raises, so an unusual schedule blocks the campaign instead of silently
+    granting it a margin computed from a misread expression.
+    """
+    m = re.fullmatch(r"cron\((\d{1,2}) (\d{1,2}) \* \* \? \*\)", expr.strip())
+    if not m:
+        raise SystemExit(
+            f"BLOCKED: cannot parse schedule expression {expr!r} as a daily cron. This "
+            "driver refuses to compute a fire margin from an expression it does not "
+            "understand -- a wrong margin is worse than no margin."
+        )
+    minute, hour = int(m.group(1)), int(m.group(2))
+    fire = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    if fire <= now:
+        fire += timedelta(days=1)
+    return fire
+
+
+def check_mutex(projected_span_s: float = 0.0) -> None:
+    """R-2's rule, TWO limbs, re-read before EVERY batch and never once.
+
+    LIMB (i)  every starter DISABLED -- the hold form. Unchanged.
+    LIMB (ii) time to the next fire > projected span + MARGIN_S, AND zero non-terminal SSM
+              commands on the host (no production run in flight).
+
+    ⛔ WHY (ii) EXISTS: R-2 / P14 V14-4c(d) forbids a campaign date inside [span + margin] of
+    the fire and any coexistence with a production run. It does NOT require the schedule to be
+    DISABLED. While a hold was in force those were the same thing; once the hold lifts on its
+    own condition, "both DISABLED" is a predicate only a hold can satisfy, and re-holding a
+    production schedule to satisfy an instrument rather than a risk is manufactured friction.
+    Ruled by 2.0.0_SA_COO on 1.0.0_SA_CTO 85530's gate position.
+
+    Limb (ii) is NOT a loosening: it re-arms by construction as the fire approaches, and the
+    driver STOPS on its own inside the margin without anyone intervening.
+    """
+    now = datetime.now(timezone.utc)
+    states = {}
+    exprs = {}
     for name in STARTERS:
-        st = sched().get_schedule(Name=name).get("State")
-        if st != "DISABLED":
-            raise SystemExit(
-                f"BLOCKED: starter {name} reads State={st}, not DISABLED. The hold is "
-                "INCOMPLETE and this driver does not disable anything itself -- that is the "
-                "issuer's act on CVO 84079's fallback. Stopping with nothing dispatched."
-            )
-    print(f"OK: mutex held -- {' + '.join(STARTERS)} both DISABLED ({now_iso()})", flush=True)
+        d = sched().get_schedule(Name=name)
+        states[name] = d.get("State")
+        exprs[name] = d.get("ScheduleExpression", "")
+
+    if all(s == "DISABLED" for s in states.values()):
+        print(f"OK: mutex LIMB (i) -- {' + '.join(STARTERS)} all DISABLED ({now_iso()})",
+              flush=True)
+        return
+
+    enabled = {n: e for n, e in exprs.items() if states[n] != "DISABLED"}
+    soonest_name, soonest = None, None
+    for name, expr in enabled.items():
+        f = _next_fire(expr, now)
+        if soonest is None or f < soonest:
+            soonest_name, soonest = name, f
+    margin_s = (soonest - now).total_seconds()
+    need_s = projected_span_s + MARGIN_S
+
+    inv = ssm().list_commands(InstanceId=INSTANCE, MaxResults=50).get("Commands", [])
+    live = [c for c in inv if c.get("Status") in ("Pending", "InProgress")]
+    if live:
+        raise SystemExit(
+            f"BLOCKED: {len(live)} non-terminal SSM command(s) on {INSTANCE} "
+            f"(of {len(inv)} scanned) -- a production run may be in flight and the campaign "
+            "never coexists with one. Stopping with nothing dispatched."
+        )
+    if margin_s <= need_s:
+        raise SystemExit(
+            f"BLOCKED: next fire {soonest_name} at {soonest:%Y-%m-%dT%H:%M:%SZ} is "
+            f"{margin_s / 60:.1f} min away; this campaign needs "
+            f"{need_s / 60:.1f} min (projected span {projected_span_s / 60:.1f} + "
+            f"{MARGIN_S / 60:.0f} min margin). Inside the margin -- stopping with nothing "
+            "dispatched. This driver never disables a schedule; a hold is the issuer's act."
+        )
+    print(f"OK: mutex LIMB (ii) -- states {states}; next fire {soonest_name} "
+          f"{soonest:%Y-%m-%dT%H:%M:%SZ} in {margin_s / 3600:.2f} h > need "
+          f"{need_s / 60:.1f} min; non-terminal SSM commands 0 of {len(inv)} scanned "
+          f"({now_iso()})", flush=True)
 
 
 def load_done() -> dict:
@@ -332,7 +405,9 @@ def main() -> int:
     timeout_s = 1800
     for i in range(0, len(remaining), args.batch):
         batch = remaining[i : i + args.batch]
-        check_mutex()  # re-read before EVERY batch, never once at start
+        # projected span for the REMAINING dates, from the measured median
+        span_s = len(remaining[i:]) * 2.5
+        check_mutex(span_s)  # re-read before EVERY batch, never once at start
         before = {d: versions_for(d) for d in batch}
         send_iso = now_iso()
         cid = dispatch(batch, args.mode, timeout_s)
