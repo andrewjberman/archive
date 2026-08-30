@@ -1,0 +1,162 @@
+{
+  "schema_version": 3.1,
+  "subject": {
+    "id": "infra/aws/globgrph/cse_emit_deploy.py",
+    "kind": "script",
+    "declared_domain": "NFRA_CSE.P3 -- the DEPLOY producer: deploy-completion ledger legs -> DEPLOY CSEs into the C0 log. Implements the certed contract_deploy (ProducerKind.DEPLOY, ref = the ledger id, compiler deploy-ledger-compiler, recognizer deploy_ledger_recognizer over org/critical_paths/change_management/*_deploy_completion.md, verb = create). Its declared discipline is HIGH-PRECISION-ONLY typing: a typed subject requires a lexically CERTAIN resource name, and anything ambiguous degrades to Concept(untyped)+low rather than inventing a type."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-30T08:40:00Z",
+    "commit_ish": "0ae699e57b",
+    "graph_vintage": "The module has no vintage of its own -- it reads whatever deploy-completion ledgers exist in the working tree at run time. Its OUTPUT's vintage is MEASURED in the store: the globgrph.cse table's source=deploy partition holds ONE append, ingested_at=1783478255766, event_date=2026-07-08, marker_head=dfc00300271c. The branch-head marker read at 08:0xZ gives the cse table last_write_iso 2026-08-30T03:31:08Z -- but that write is the nightly Fargate legs, not this producer."
+  },
+  "process": {
+    "methodology": {
+      "how": "glob(org/critical_paths/change_management/*_deploy_completion.md), optionally sliced to the last --limit. For each ledger, _LEG_ROW (a multiline regex requiring the CLOSED state) yields (leg_id, kind, target, proof, state); recognize_resource runs five ORDERED high-precision patterns over target+proof and returns the first match. A leg resolving a NOT-yet-seen resource emits a typed CSE at confidence 1.0; a leg resolving nothing emits ONE Concept(untyped)+0.2 CSE, gated on the ledger having emitted nothing YET; every other leg is dropped by `else: continue`. The batch is validated fail-closed via cse_store.validate_batch (any rejection prints up to 15 and returns 1 WITHOUT writing) and written to --out as JSONL.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "canonical",
+      "composes": [
+        {
+          "id": "org/critical_paths/change_management/*_deploy_completion.md",
+          "note": "the sole input -- LOCAL repo state, which is why this producer cannot run on the Fargate task"
+        },
+        {
+          "id": "org/modules/graph/cse_schema.py",
+          "note": "CSE / EntityRef / Provenance / Entity / ProducerKind / Qualifier and SCHEMA_VERSION (0.3 in the emitted rows)"
+        },
+        {
+          "id": "infra/aws/globgrph/cse_store.py",
+          "note": "validate_batch is the fail-closed gate at :136; ingest_jsonl (:461-486) and append_cses are the two writers that can carry this producer's JSONL into the table"
+        },
+        {
+          "id": "infra/aws/globgrph/cse_producers_nightly.py",
+          "note": "leg_sweep is the SCHEDULED route for a staged batch -- it does NOT call this module; carded on the CC face"
+        }
+      ],
+      "invents": [
+        {
+          "id": "the Concept(untyped) fallback ref",
+          "note": "f'deploy:{slug}:<unresolved>' at :85 -- a synthesised subject standing in for a resource the ledger text does not lexically name. Declared as the honest-degrade. MEASURED AT 77% OF EMITTED ROWS (10 of 13), so in practice the synthesised subject is the MAJORITY of this producer's output, not an edge case"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "Read in full at infra/aws/globgrph/cse_emit_deploy.py:1-151 @0ae699e57b. LEDGER_GLOB :40; the high-precision comment :42-46; _RESOURCE_RULES :47-53; _LEG_ROW :54 (its trailing group requires CLOSED); _first_group :57-58; recognize_resource :61-67; ledger_cses :70-101 -- dedup branch :80-82, honest-degrade branch :83-85, the drop :86-87, CSE construction :88-100; _now_iso :104-106; _to_dict :109-117; main :120-147. EVERY CITATION IN THIS CARD WAS RE-DERIVED AGAINST THE FILE AFTER A FIRST DRAFT CARRIED A SYSTEMATIC OFF-BY-ONE: I drafted from an earlier read rather than from the file, and roughly a dozen line references pointed one line high. A citation that lands on the wrong line is not a citation.",
+      "owner": "0.7.0_AE_CloudOps (AE class owns infra/aws/globgrph); file author 0.5.0_AE_OpalETL, which has no live instance"
+    },
+    "cadence": {
+      "declared_rhythm": "TWO declared routes, and the module's own docstring names only the second. ROUTE A (the sweep): cse_producers_nightly's docstring (:20-24) declares that LOCAL-source producers -- deploy, frontend_coevolution, promote, agent local emits -- run where the repo is visible, stage a JSONL to warehouse/cse_ingest/pending/, and the nightly CSE_SWEEP_ENABLED leg ingests it (valid -> append + move to done/, invalid -> rejected/, fail-closed). ROUTE B (direct ingest): this module's own docstring (:16-18) declares 'the APPEND into globgrph.cse is in-VPC via cse_store --ingest (as the derive role)' -- cse_store.py:577 defines --ingest, :601-603 dispatches it into ingest_jsonl (:461-486), which reads the JSONL, reconstructs, validates fail-closed, appends and stamps the marker. Route B leaves NO artifact in the sweep lane at all.",
+      "actual_trigger": "NOTHING SCHEDULES THIS PRODUCER ON EITHER ROUTE. Only the sweep's ingest stage is on a timer; running the recognizer and moving its JSONL are manual acts on Route A, and Route B is a hand-run CLI end to end. MEASURED CONSEQUENCE, read from the table rather than inferred: the source=deploy partition holds ONE append -- 13 rows, 10 ledgers, all ingested_at=1783478255766, all event_date=2026-07-08, all marker_head=dfc00300271c -- and NOTHING since. The module's own docstring is dated 2026-07-08, so this producer emitted once on the day it was authored and has not emitted in the 53 days since.",
+      "live_matches_declared": "no",
+      "live_instance_age": "53 DAYS, and the cross-producer split is the discriminator. Partition census of globgrph.cse (denominator 143 data objects, IsTruncated=None): source=agent 43 files, event_date 2026-07-08..2026-08-30 (CURRENT); source=graph_head 44 files, 2026-07-08..2026-08-30 (CURRENT); source=git 54 files, 2025-11-20..2026-07-07 (a historical backfill, stopped); source=deploy 1 file, 2026-07-08 only; source=promote 1 file, 2026-07-08 only. THE TWO PRODUCERS THAT ARE CURRENT ARE EXACTLY THE TWO THAT RUN ON THE SCHEDULED FARGATE TASK, AND THE TWO THAT FIRED ONCE AT AUTHORING ARE EXACTLY THE TWO LOCAL-SOURCE ONES. The structural reading predicted the split; the partition census measured it. A fifth declared producer, frontend_coevolution, has NO PARTITION AT ALL -- zero rows, ever.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "Route A at cse_producers_nightly.py:20-24 and leg_sweep :174-212; Route B at cse_emit_deploy.py:16-18 + cse_store.py:577, :601-603, :461-486. TABLE READS at 08:3xZ: warehouse/_branch_head.main.json (1508 B, LastModified 2026-08-30T08:08:34Z) gives the cse table's metadata_location and snapshot; the partition census lists s3://opal-313476888478-globgrph/warehouse/globgrph/cse_b557721f-.../data/ (143 objects, untruncated) and groups by the source= partition key; the single deploy parquet (17,505 B) was downloaded and read with pyarrow (13 rows x 24 columns). INSTRUMENT TRAPS RECORDED, BOTH CAUGHT BY CONTROLS AND BOTH MINE: (1) an earlier listing used --query 'KeyCount' and returned None for a prefix I had already proven non-empty -- a false zero from a broken projection; (2) the replacement listing's positive control returned 0 because I passed the wrong prefix string ('warehouse/stitch/' for 'stitch/'), so the control failed and I re-ran rather than reading the subject. Final controls: stitch/ -> 2 keys (positive), warehouse/__no_such_prefix_zzz9/ -> 0 keys (negative).",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "source",
+      "mutation_policy": "append_only",
+      "form": "A local JSONL at --out (default cse_deploy.jsonl), one DEPLOY CSE per line via _to_dict. Its records reach globgrph.cse only when a human carries the file down Route A or Route B; the module itself writes nothing to S3 and never touches the store.",
+      "basis": "measured",
+      "evidence": "The write at :142-144; _to_dict :109-117; --out default :122. 'source' because a DEPLOY CSE is a RECOGNITION -- the ledger holds prose and a leg table, while the CSE's typed-or-degraded subject, its confidence and its producer framing are created here. 'append_only' describes the destination contract read at source (cse_store.py:13-14, 'APPEND-ONLY: table.append() -- one Nessie commit per batch ... NEVER overwrite'), NOT the local file, which is opened 'w' and REPLACED on each run.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "location": {
+      "home": "A local file at --out (default cse_deploy.jsonl in the working directory). It has no S3 home of its own: the staging key on Route A, or the JSONL URI on Route B, and the eventual table rows are the ingester's doing, not this module's.",
+      "projection_of": [
+        {
+          "id": "org/critical_paths/change_management/*_deploy_completion.md",
+          "note": "the deploy-completion ledgers -- repo state, read by glob at run time"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/cse_ingest/pending|done|rejected/",
+          "note": "Route A's lane. MEASURED 08:1xZ: ZERO objects in all three. Consistent with this producer having last emitted on 2026-07-08 -- but an empty done/ does NOT by itself mean nothing was ever ingested, because Route B bypasses the lane entirely. The TABLE, not the lane, is what settles it"
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/cse_ingest_staging/",
+          "note": "a DIFFERENT prefix holding two 2026-07-08 batches that no code reads: cse_frontend_coevolution.jsonl (259,918 B) and cse_promote.jsonl (998 B). The stranded-batch finding is 0.8.0_AE_CloudComp's W3-dljc, credited in failure_mode, NOT claimed here"
+        },
+        {
+          "id": "globgrph.cse",
+          "note": "table cse_b557721f-8b81-4ec2-9289-fe5f44c3f272 -- the shared destination for all producers, PARTITIONED BY source= -- which is what makes a per-producer liveness read possible from S3 alone, without the in-VPC Nessie catalog"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "--out default :122; LEDGER_GLOB :40. S3 prefixes and the table partition layout read live at 08:1xZ-08:3xZ with both control arms (see cadence evidence). The table's UUID path comes from the branch-head marker's table_metadata.cse.metadata_location, not from a guess at the naming convention.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every *_deploy_completion.md in org/critical_paths/change_management (optionally the last --limit of them), and within each, every leg row _LEG_ROW matches in the CLOSED state. MEASURED TODAY: the glob matches 464 deploy-completion ledgers, and the table's source=deploy partition carries recognitions of 10 distinct ledgers -- so 454 ledgers present in the corpus right now have never produced a CSE. I do NOT claim the corpus was 464 on 2026-07-08 (it was smaller, and the run very likely used --limit); the sound statement is about the graph's content today, not that run's coverage at the time.",
+      "denominator": "THE PRINTED DENOMINATOR IS LEDGERS, AND THE DROPS HAPPEN AT LEG GRAIN. main() prints 'recognized {len(cses)} CSEs from {len(ledgers)} ledgers' (:132) and a typed/untyped split (:145-146) -- so a reader gets CSEs, ledgers and the type split, but NEVER the number of LEGS considered. Legs are dropped at :86-87 in two uncounted cases: (a) a leg resolving a resource already in `seen` for that ledger, (b) a leg resolving NOTHING once the ledger has already emitted anything. MEASURED ON THE ONLY LIVE BATCH: 13 rows from 10 ledgers, with the leg locus distribution L1 x10, L2 x2, L3 x1 -- 8 of the 10 ledgers contributed exactly one row, always from L1. Deploy ledgers routinely carry several CLOSED legs, so that distribution is the empirical footprint of the drop, and nothing in the run's own output would show it.",
+      "explicitly_out": [
+        "leg rows not in the CLOSED state -- _LEG_ROW requires it (:54), so an open or failed leg contributes no CSE and is not counted",
+        "repeat legs naming a resource already recognized IN THE SAME LEDGER -- deduped at :80-82 with no counter, by design (one CSE per distinct resource per ledger). The dedup is PER-LEDGER and correctly so: globgrph-derive-build appears twice in the live batch, once from each of two different ledgers, because two deploys of one service are two events",
+        "unresolvable legs after the ledger's first emission -- the fallback at :83 is gated on `not out`",
+        "free-text tokens like 'log' or 'role' alone -- the comment at :42-46 DECLARES the patterns do not match them, and I EXERCISED it rather than repeating the declaration: a 7-member negative arm ('log', 'role', 'the role was updated', 'see the log', 'table', 'service', 'deployed the lambda') all resolve to None, against a 5-member positive arm that resolves one member of every rule (S3Bucket, IAMRole, Table, Service, Lambda) -- so the negative arm is not merely a dead matcher. A correctness choice, not a gap",
+        "anything at all if the JSONL is never carried down Route A or Route B -- the local write is where this producer's responsibility ends"
+      ],
+      "basis": "measured",
+      "evidence": "Print sites :132 and :145-146; the uncounted drops at :86-87; the dedup at :80-82; _LEG_ROW's CLOSED requirement at :54. Row/ledger/locus counts from the live parquet (13 rows, producer_ref 10 distinct, prov_locus L1 x10 / L2 x2 / L3 x1, subject_ref 12 distinct over 13 with globgrph-derive-build twice).",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "CSE event ids in the DEPLOY namespace, scoped per (ledger, leg, resolved-subject) rather than per deploy. The producer ref is the ledger slug, which crosses from the change-management record space into the CSE producer space unchanged.",
+      "key_expression": "EVENT ID: f'deploy:{slug}:{leg_id}:{subj_ref}'[:180] (:89), where slug = basename minus '_deploy_completion.md' (:75) and subj_ref is either the recognized resource ref or f'deploy:{slug}:<unresolved>' (:85) -- so on the untyped path the slug appears TWICE in one id. SUBJECT REF: the first non-empty group of the first matching pattern, via _first_group (:57-58). PRODUCER REF: the ledger slug (:91). THE 180-CHAR TRUNCATION IS A REAL BUT UNEXERCISED HAZARD, AND IT IS SIZED RATHER THAN ASSERTED: measured over the 13 live rows, event_id length runs 61..137, so the worst live case sits 43 characters under the cap and NONE is at it. Because the untyped form doubles the slug, a slug of roughly 72+ characters would reach the cap; the longest slug observed is 49. A collision would present as the store's event_id idempotency filter silently skipping a row, not as an error -- so it is worth knowing about, but it has not happened and is not near happening.",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "The recognizer set and its first-match-wins ordering are declared in the comment at :42-46, with the reasoning ('a wrong-typed subject is worse than an honest-degrade') and the deliberate exclusion of free-text tokens. NOT DECLARED: the 180-character truncation; and the module docstring's account of WHEN the untyped CSE is emitted is looser than the code -- see failure_mode.",
+      "basis": "measured",
+      "evidence": "Expressions read at :75, :85, :89, :91, :57-58. Length distribution computed over the 13 live event_ids from the parquet; longest is 137 chars ('deploy:20260707T1643Z_partner-etl-ops-consumer-messageid-log:L1:deploy:20260707T1643Z_partner-etl-ops-consumer-messageid-log:<unresolved>'). Rated STABLE: every component is derived deterministically from the ledger filename, the leg id and the matched text -- no clock, no randomness, no fallback ordering -- which is what lets the ingest path's idempotency filter work across re-runs.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "failure_mode": {
+      "returns_on_failure": "FAIL-CLOSED ON VALIDATION, ZERO LOCAL HANDLERS. An AST handler census returns 0 except-handlers in this module, so an unreadable ledger file (open at :73) or a schema import failure (:37) PROPAGATES -- the module never converts a RAISED exception into a value. I originally wrote 'a missing ledger directory' into that same list and my credit census falsified it: glob.glob returns [] rather than raising, so a missing or RENAMED ledger directory never becomes an exception at all -- see the silent-degrade paths. Validation is fail-closed at :136-140 (rejection prints up to 15 and returns 1 with NO file write), and cse_store's own ingest path re-validates and aborts rather than writing a partial batch (:468-480). THE REAL FAILURE MODE IS NOT AN EXCEPTION -- IT IS A HANDOFF NOBODY COMPLETES, AND IT HAS ALREADY HAPPENED. Neither route is scheduled at the producer end, and the table shows the outcome: one append on 2026-07-08 and silence for 53 days. On Route A the nightly sweep prints batches=0 and exits clean when the lane is empty, so an empty lane and a healthy quiet night are the same observable.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "AN EMPTY OR MISSING CORPUS IS A CLEAN SUCCESS. glob.glob returns [] for a missing or renamed ledger directory (EXERCISED: [] for a non-existent dir, 464 ledgers for the real one as the positive control), and cse_store.validate_batch([]) returns ([], []) without raising (EXERCISED). Nothing between :126 and :147 guards an empty ledger list, so the run prints 'OK: 0/0 DEPLOY CSEs PASS fail-closed validation', WRITES AN EMPTY JSONL over --out, prints 'wrote 0', and returns 0. A relocated ledger directory, a changed filename convention and a genuine absence of CLOSED legs are one observable, and the rc is the success rc. This is the same shape as the module's other failures: the loud paths are guarded and the quiet ones return 0.",
+        "THE UNTYPED FALLBACK IS ORDER-DEPENDENT, NOT CONTENT-DEPENDENT, AND THE DOCSTRING SAYS OTHERWISE. Docstring :12-14 declares 'a ledger contributes a Concept-untyped deploy CSE if it names no resolvable resource'. The code condition at :83 is `elif ent is None and not out`, evaluated leg by leg -- so a ledger whose FIRST leg does not resolve emits the untyped row even when a LATER leg resolves cleanly. EXERCISED on the live batch: 2 of the 10 ledgers carry BOTH an L1 Concept(untyped)+0.2 row AND typed rows from L2/L3 (nfra-cse-p2-c0-log-land -> L1 untyped + L2 Service globgrph-derive-build + L3 Table globgrph.cse; nfra-infrpt-p3-producer-fold-derive -> L1 untyped + L2 Service). Those untyped rows assert that the resource is not lexically resolvable from a ledger the recognizer resolved two legs later",
+        "the honest-degrade dominates the output in practice: 10 of 13 live rows (77%) are Concept(untyped)+0.2, so most of what this producer has ever contributed to the graph carries a synthesised subject and a 0.2 confidence",
+        "neither route is scheduled at the producer end; on Route A the sweep's 'batches=0' on an empty lane is identical to its line on a healthy quiet day, and Route B leaves no lane artifact at all to be missing",
+        "legs dropped at :86-87 with no counter while the printed denominator is LEDGERS (:132), so leg-level loss is structurally invisible in the run's own output",
+        "the event_id truncation at 180 chars (:89) would be absorbed by the idempotency filter as an already-emitted skip rather than surfaced -- sized above at 43 characters of headroom and NOT exercised",
+        "execution_meta.timestamp is _now_iso() (:97) -- the RECOGNIZER's clock, not the deploy's -- and actor is the hardcoded '0.5.0_AE_OpalETL' (:97) regardless of who ran it. THE LIVE BATCH CANNOT DISCRIMINATE THE TIMESTAMP LIMB: its ledgers are all dated 2026-07-07/07-08 and the run was 2026-07-08, so recognizer-clock and deploy-date agree by coincidence. That finding is STRUCTURAL, read at :97, and I am not dressing it as exercised. The actor limb IS exercised: all 13 rows carry that actor"
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "AST handler census: 0 except-handlers, on the attribution-controlled v2 instrument. Fail-closed sites :136-140 and cse_store.py:468-480. Docstring-vs-code discrepancy: :12-14 against :83. All row-level facts from the 13-row parquet. THE STRANDED-BATCH FINDING IS NOT MINE AND IS CREDITED: 0.8.0_AE_CloudComp recorded it as W3-dljc on 2026-08-27 (org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-27/substratecarding_w3_ccy3_two_blockings_and_four_paths_0606-0730Z.md:72-78) -- 'A 259,918-BYTE VALID BATCH ONE PREFIX FROM ITS CONSUMER FOR 50 DAYS, EVERY INSTRUMENT GREEN ... a clean green, because an empty prefix and nothing-to-do are the same event', seam noted UNOWNED, file deliberately NOT moved. I re-measured independently at 53 days and CONFIRM it. WHAT I ADD, from the partition census W3-dljc did not run: the stranded 259,918-byte batch belongs to frontend_coevolution, and that producer has NO source= PARTITION IN THE TABLE AT ALL -- zero rows, ever. So the stranded batch is not merely late; it is that producer's ENTIRE contribution, and the graph has never held one of its events.",
+      "owner": "0.7.0_AE_CloudOps for the module; the pending-vs-staging seam is UNOWNED per W3-dljc and is not claimed here"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "The recognizer is the most disciplined thing IN THIS MODULE and the card should say so precisely -- I first wrote 'on this face', which is a comparative over four subjects of which I have carded two, and my credit census caught it. Five patterns declared high-precision-only with the reasoning in the source; a refusal of bare free-text tokens that I exercised with a live 7-member negative arm and a 5-member positive arm rather than quoting the comment; an honest-degrade instead of an invented type; and fail-closed validation on both the local run and the ingest. Its handler count is zero, but that buys less than it appears -- see the blocking defect on the empty corpus. QUALIFIED on four measured points. FIRST, AND IT IS THE ONE THAT MATTERS: nothing schedules this producer on either of its two routes, and the table shows the cost -- source=deploy holds ONE append of 13 rows dated 2026-07-08, the day the module was authored, and nothing in the 53 days since. The partition census splits the five producers exactly along the line the code structure predicts: the two that run on the scheduled Fargate task are current to 2026-08-30, the two LOCAL-source ones fired once at authoring, and a fifth has never landed a row at all. SECOND, an exercised correctness defect: the untyped fallback is gated on `not out` rather than on the ledger's content, so 2 of 10 live ledgers carry a Concept(untyped) row asserting the resource is unresolvable alongside typed rows the recognizer resolved two legs later -- the docstring describes content-dependent behaviour the code does not implement. THIRD, 77% of everything this producer has ever emitted is that untyped fallback. FOURTH, legs are dropped uncounted while the printed denominator is ledgers. I record two of my own instrument failures on this card rather than only its subject's: a --query KeyCount projection that returned a false zero on a prefix I had proven non-empty, and a positive control that failed because I passed the wrong prefix string. Neither reached a finding, and only because the controls ran. My first draft of this card also carried a systematic off-by-one across roughly a dozen line citations, drafted from an earlier read instead of from the file, and every citation here was re-derived.",
+    "blocking_defects": [
+      "UNSCHEDULED ON BOTH ROUTES: Route A (stage to warehouse/cse_ingest/pending/ for the nightly sweep) and Route B (cse_store --ingest, the module's own declared path) are both manual at the producer end; only the sweep's ingest stage is on a timer (cadence row)",
+      "MEASURED DORMANCY: globgrph.cse source=deploy = 1 append, 13 rows, event_date 2026-07-08, marker_head dfc00300271c, nothing for 53 days -- while source=agent and source=graph_head, the two Fargate-scheduled producers, are current to 2026-08-30 (cadence row)",
+      "DECLARED-VS-ACTUAL, EXERCISED: the untyped fallback at :83 is gated on `not out` (order) while the docstring at :12-14 declares it fires when a ledger 'names no resolvable resource' (content); 2 of 10 live ledgers carry an L1 untyped row beside typed L2/L3 rows (failure_mode row)",
+      "EMPTY-CORPUS SILENT SUCCESS: a missing or renamed ledger directory yields glob [], validate_batch([]) -> ([], []), an 'OK: 0/0 ... PASS' line, an EMPTY JSONL written over --out, and rc=0 -- indistinguishable from a genuine absence of CLOSED legs (failure_mode row; both limbs exercised)",
+      "CORPUS COVERAGE TODAY: 464 ledgers match the glob; the table holds recognitions of 10 of them, so 454 present-day ledgers have no CSE (coverage row)",
+      "77% of emitted rows (10 of 13) are Concept(untyped)+0.2, so the synthesised subject is the majority of this producer's contribution rather than an edge case (methodology.invents, failure_mode rows)",
+      "legs dropped uncounted at :86-87 while the run prints only CSEs and LEDGERS (:132); the live locus distribution L1 x10 / L2 x2 / L3 x1 is the footprint (coverage row)",
+      "execution_meta carries the RECOGNIZER's clock (:97) and a hardcoded actor '0.5.0_AE_OpalETL' (:97); the actor limb is exercised on all 13 rows, the timestamp limb is structural and NOT discriminable from this batch (failure_mode row)"
+    ]
+  },
+  "carded_by": "0.7.0_AE_CloudOps~K"
+}
