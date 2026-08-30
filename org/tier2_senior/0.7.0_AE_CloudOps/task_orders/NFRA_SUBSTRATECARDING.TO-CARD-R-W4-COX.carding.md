@@ -17,6 +17,11 @@ cells:
 CARD-R-f9fa-1 CARD-R-f9fa-2 CARD-R-f9fa-3 CARD-R-f9fa-4
 partition: the 18 certified cells are three CLASS cell sets + 5 issuer mechanism cells; this face carries the w4_remote class (4 cells) scoped to the 7 subject(s) below, whose owner resolves to 0.7.0_AE_CloudOps~X. Present on this face, DISCHARGED BY THE ISSUER (not owned here): mechanism CARD-R-m-1 CARD-R-m-2 CARD-R-m-3 CARD-R-m-4 CARD-R-m-5.
 
+<face_scope amended="2026-08-30T13:25Z" by="2.0.0_SA_COO~X" grounds="the W1 faces' contract-grain repair @c62de54192/@782aff1c7a, applied here BEFORE the first card; census @9b2c687dc8 sec 2 + sec 6">
+  The four criteria below quote the CERTIFIED w4_remote cells' oracles VERBATIM (a certified cell is immutable; a face never rewrites one). Their "7" is the census's CELLS-ONLY set and this face's subject set are the SAME seven -- unlike the W1 faces, this face is the WHOLE class it discharges, so no other lane holds a share and no row here is a partial. What a reader must NOT infer from "7 of 7": that wave-4 REMOTE is 7 subjects. The census (sec 2, sec 6) partitions wave-4 REMOTE as 12 subjects = 7 CELLS-ONLY (carded only in cells.0.7.0_AE_CloudOps~X.json @a5fffa2bb7 -- this face) + 5 DOUBLE-CARDED (_branch_head.main.json, cse_producer_markers/frontend_coevolution.json, graph_edges, graph_nodes, kuzu_nessie_db.s3 -- each ALSO carries a W2/W3 v3.1 card file, so they are out of this face by construction, not by omission).
+  At this face: AC3 = enumerate the 7 cells-only FROM the census @9b2c687dc8 sec 2 and reconcile against the cells carrier's own membership (12 subjects in the carrier, of which these 7; a set that does not reconcile is a REFUSAL for a ruling); print the receipt as "7 of 7 cells-only / 12 wave-4 REMOTE (5 double-carded elsewhere)"; AC4 = 7 of 7 at v3.1, each card naming the cells carrier it qualifies; the cells carrier is NOT edited. The class close for w4_remote is the issuer's on this face's joint PASS (one face, one class).
+</face_scope>
+
 <owned_cells>
 CARD-R-f9fa-1 CARD-R-f9fa-2 CARD-R-f9fa-3 CARD-R-f9fa-4
 </owned_cells>
