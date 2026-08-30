@@ -30,7 +30,35 @@ CONSUMER = ("org/tier2_senior/0.8.0_AE_CloudComp/deliverables/"
             "D11_L3C01_STABILITY_CONSUMER/check_stability_L3C01.py")
 DECOMP_PIN = "94935b740e"
 CONSUMER_PIN = "28f3028a66"
-CELLS_PIN = "PENDING-THIS-COMMIT"
+SENTINEL = "PENDING-THIS-COMMIT"
+
+
+def artifact_identity(path: str) -> str:
+    """The contract's rule, DERIVED per artifact instead of hand-set.
+
+    (b) permits the sentinel ONLY where the artifact is covered by the very commit that carries
+    this proof. An artifact already committed EARLIER is covered by that earlier commit and must
+    carry its resolvable hex.
+
+    ⛔ THIS FUNCTION EXISTS BECAUSE I GOT IT WRONG BY HAND. In the first emission I set one
+    constant to the sentinel and applied it to l3c01_floor_rows.json and build_rows.py, which
+    had been committed at a133d4a59d one commit earlier -- so the proof claimed "my own commit
+    covers these" about files it did not carry. proof-of-spec-check passed (the sentinel is a
+    LEGAL value; what was wrong was WHERE it was used), and 3.0.0_SA_CVO~X caught it by
+    comparing the claim against git. The discriminator is: is this path dirty/uncommitted RIGHT
+    NOW? Only then will the commit about to be made carry it.
+    """
+    dirty = subprocess.run(["git", "status", "--porcelain", "--", path],
+                           capture_output=True, text=True).stdout.strip()
+    if dirty:
+        return SENTINEL
+    r = subprocess.run(["git", "log", "-1", "--format=%H", "--", path],
+                       capture_output=True, text=True)
+    h = r.stdout.strip()
+    if not h:
+        raise SystemExit("REFUSED: %s is neither dirty nor committed -- it has no identity to "
+                         "claim, and the sentinel would be a lie about coverage." % path)
+    return h
 
 
 def parse_face(text: str):
@@ -147,18 +175,18 @@ def main() -> int:
             "vintage_commit": "f757ed7129",
         },
         "artifacts_produced": [
-            {"path_or_key": ROWS, "kind": "config_data", "commit_or_etag": CELLS_PIN,
+            {"path_or_key": ROWS, "kind": "config_data", "commit_or_etag": artifact_identity(ROWS),
              "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
              "deploy_evidence": "Five cell rows, all WRITTEN on the fired gate. No producing "
                                 "store written; run 1 and the sweep artifact were opened "
                                 "READ-ONLY at their pins.",
              "artifact_covered_by": [c[0] for c in crits]},
-            {"path_or_key": BUILDER, "kind": "script", "commit_or_etag": CELLS_PIN,
+            {"path_or_key": BUILDER, "kind": "script", "commit_or_etag": artifact_identity(BUILDER),
              "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
              "deploy_evidence": "Derives every value from artifacts at their pins; three guard "
                                 "mutants exercised and all REFUSED.",
              "artifact_covered_by": ["L3W3-CCX-AC2", "L3W3-CCX-AC4"]},
-            {"path_or_key": CONSUMER, "kind": "script", "commit_or_etag": CONSUMER_PIN,
+            {"path_or_key": CONSUMER, "kind": "script", "commit_or_etag": artifact_identity(CONSUMER),
              "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
              "deploy_evidence": "The consuming half: firm_representation binding, INSUFFICIENT_N "
                                 "as its own typed result, basis check, earned-refusal check.",
