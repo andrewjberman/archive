@@ -409,9 +409,17 @@ def card_code_heat_snap():
                         "rejected LOUD and left in pending/ rather than partially written."),
                 "determinism": "deterministic",
                 "composes": [
+                    {"id": "infra/aws/globgrph/code_heat_emit.py @c934701a67",
+                     "note": "PRODUCES the staged batch this table is built from: SNAP_PENDING "
+                             "at :241 is warehouse/snap_ingest/pending/code_heat_snap/, "
+                             "sibling_rows() at :244 builds rows directly from git, "
+                             "stage_sibling() at :261 writes the JSONL key at :265, reachable "
+                             "via --emit-sibling / --sibling-only at :281-283. It imports no "
+                             "snap_store and calls no append_rows -- that is the INTENDED "
+                             "ASYNCHRONOUS stage-then-ingest boundary, not an absent dependency"},
                     {"id": "warehouse/snap_ingest/pending/code_heat_snap/*.jsonl",
-                     "note": "the staged batch is the ONLY measured input to this table; "
-                             "snap_store reads it, coerces it and appends"},
+                     "note": "the staged batch: the handoff artifact between the producer above "
+                             "and the writer below, and the only measured input to this table"},
                     {"id": writer,
                      "note": "the ONE writer for all snap surfaces: append_rows() at :243, "
                              "t.append(table) at :256, ingest loop at :285-315"}],
@@ -422,17 +430,30 @@ def card_code_heat_snap():
                     "Read at source, line numbers from grep -n AT THE PIN: %s @%s -- SURFACES "
                     "registry at :74-79 with code_heat_snap at :97, append_rows() :243, "
                     "t.append(table) :256, the pending->coerce->append->done loop :285-315. "
-                    "\u26d4 CORRECTION CARRIED: an earlier version of this card listed "
-                    "code_heat_emit.py in `composes`, inherited from the carrier's cell 1 ('rows "
-                    "are assembled by code_heat_emit.py and WRITTEN by snap_store.py'). THAT "
-                    "COMPOSITION IS NOT SUPPORTED AND THIS SEAT ASSERTED IT WITHOUT CHECKING: "
-                    "code_heat_emit.py imports no snap_store and calls no append_rows (its "
-                    "imports read argparse/os/shutil/subprocess/sys/tempfile/time), and "
-                    "append_rows is invoked only from inside snap_store.py:307. The emitter "
-                    "writes a DIFFERENT surface -- a hive-partitioned PARQUET whose declared "
-                    "default output is s3://%s/warehouse/code_heat/, measured live at 2 objects, "
-                    "newest 2026-07-16T03:40:46Z. Two surfaces, one name, no call edge between "
-                    "them." % (writer, wpin[:10], BUCKET)),
+                    "\u26d4 A CORRECTION THAT WAS ITSELF WRONG, CARRIED BECAUSE THE ERROR IS "
+                    "THE INSTRUCTIVE PART. An earlier version of this card REMOVED "
+                    "code_heat_emit.py from `composes`, on the ground that it imports no "
+                    "snap_store and calls no append_rows. That test is a CALL-GRAPH criterion "
+                    "and `composes` is defined by the schema as WHAT IT REUSES -- so the "
+                    "removal destroyed a TRUE dependency, and 3.0.0_SA_CVO~X caught it. The "
+                    "producer IS the source of this table's only input, measured at its pin: "
+                    "SNAP_PENDING :241 = warehouse/snap_ingest/pending/code_heat_snap/, "
+                    "sibling_rows() :244 building rows straight from git, stage_sibling() :261 "
+                    "writing the JSONL key at :265, reachable via --emit-sibling / "
+                    "--sibling-only :281-283, under a :237 comment naming the batch "
+                    "'S3-only, dev-box-writable'. The staged batch actually ingested, "
+                    "20260716T150116Z.jsonl, matches that writer's %%Y%%m%%dT%%H%%M%%SZ.jsonl "
+                    "format exactly, and the :237 'dev-box-writable' independently corroborates "
+                    "the host-bound cadence recorded above. The missing import is the INTENDED "
+                    "asynchronous boundary, not an absent edge. The instrument failure was mine "
+                    "twice over: the grep that 'proved' the absence was "
+                    "`snap_store|append_rows|import`, a pattern that could not have found a "
+                    "staging handoff if one existed. WHAT REMAINS TRUE from that pass, and is "
+                    "kept: the emitter ALSO writes a separate hive PARQUET surface whose "
+                    "declared default output is s3://%s/warehouse/code_heat/ (2 objects, newest "
+                    "2026-07-16T03:40:46Z), which is a DIFFERENT store carried in "
+                    "co_resident_stores and must not be confused with this Iceberg table."
+                    % (writer, wpin[:10], BUCKET)),
                 "owner": LANE,
             },
             "cadence": {
@@ -445,12 +466,21 @@ def card_code_heat_snap():
                 "live_matches_declared": "unmeasured",
                 "live_instance_age": ("%d days: sole write-day %s, newest object %s"
                                       % (age, sorted(cen["per_day_tail"])[0], cen["newest_utc"])),
-                "basis": "held",
+                "basis": "absent",
                 "basis_by_field": {"declared_rhythm": "held",
                                    "actual_trigger": "held",
                                    "live_matches_declared": "absent",
                                    "live_instance_age": "measured"},
                 "evidence": (
+                    "\u26d4 THE SCALAR IS `absent` BECAUSE BASIS IS THE FLOOR -- the MINIMUM "
+                    "over this row's own basis_by_field map, ordered measured > held > "
+                    "inferred > absent. Two limbs are `held` (quoted from named "
+                    "authorities), one is `measured` (the object age), and "
+                    "live_matches_declared is `absent` because NO measurement of the host "
+                    "cadence exists -- so the ROW is `absent`, not `held`. An earlier "
+                    "version read `held` while carrying an `absent` field: the floor rule "
+                    "violated on my own row after a day spent applying it to other "
+                    "evidence. 4.0.0_SA_CRO~X caught it. "
                     "DECLARED, quoted from two named authorities rather than derived. "
                     "infra/aws/terraform/globgrph/item2a.tf:402-406: GLOBGRPH_CODEHEAT_ENABLED "
                     "was REVERTED on 2026-07-16 per CTO TO-2 ruling 033933Z, because code_heat "
@@ -613,11 +643,17 @@ def card_code_heat_snap():
                     "HELD rather than measured; coverage spans the OBJECT plane only; the "
                     "failure mode is not distinguishable from a true negative on the one "
                     "unexercised permission class; whether any consumer still reads this store "
-                    "is UNMEASURED; and materializer_standing is `unknown`. COLD IS NOT A "
-                    "DEFECT VERDICT -- a point-in-time snapshot written once may be exactly "
-                    "what was intended, and the declared host-bound cadence makes a long gap "
-                    "unremarkable rather than alarming. Naming it is the carder's job; deciding "
-                    "it is the owner's." % age),
+                    "is UNMEASURED; and materializer_standing is `unknown`. "
+                    "\u26d4 THIS CARD DOES NOT CLASSIFY THE GAP IN EITHER DIRECTION. A "
+                    "point-in-time snapshot written once may be exactly what was intended, and "
+                    "a declared host-bound cadence can legitimately run rarely -- but this "
+                    "card's own evidence says run-versus-no-run is NOT DISTINGUISHABLE from "
+                    "this seat, and a row that cannot separate those two cannot call the gap "
+                    "unremarkable any more than it can call it alarming. An earlier version "
+                    "called it unremarkable, asserting the benign branch of a distinction the "
+                    "card had just declared unmeasurable. Naming the gap is the carder's job; "
+                    "classifying it needs a measurement of the host plane that does not exist "
+                    "here, and deciding it is the owner's." % age),
             "blocking_defects": None,
         },
         "forward_disposition": {
