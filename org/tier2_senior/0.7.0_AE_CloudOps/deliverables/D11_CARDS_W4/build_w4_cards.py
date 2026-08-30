@@ -135,14 +135,17 @@ def card_cse():
                 "invents": [
                     {"id": "ingested_at_ms",
                      "note": "stamped from _now_ms() at write time, so the same logical batch "
-                             "appended twice yields different rows -- this is the limb that "
-                             "makes determinism hybrid rather than deterministic"}],
+                             "appended twice yields rows that differ in this column. That is "
+                             "OUTPUT VARIATION, not model inference, and it does NOT move the "
+                             "determinism axis -- recorded here because invents is the field "
+                             "that asks it"}],
                 "materializer_standing": "canonical",
                 "basis": "measured",
-                "evidence": ("Read at source @%s: append_cses() at %s:355, table.append(pa_table) "
+                "evidence": ("Read at source @%s: append_cses() at %s:357, table.append(pa_table) "
                              "at :386 inside the retry loop, table re-loaded each attempt for "
-                             "post-conflict metadata; the fail-closed raise at :372-376; the "
-                             "empty-batch early return printing CSE_APPEND_NOOP at :364-366. "
+                             "post-conflict metadata; validation call, rejection and fail-closed "
+                             "raise at :370-376; the empty-batch early return printing "
+                             "CSE_APPEND_NOOP at :366-368. "
                              "⛔ determinism=deterministic, not hybrid: the enum's own conditional "
                              "requires inference_detail{model, invocations_per_run, "
                              "failure_is_loud} for hybrid/inferential, so the axis is MODEL "
@@ -165,7 +168,7 @@ def card_cse():
                     "so the write-day distribution was measured rather than the latest write: %d "
                     "distinct write-days, %d objects total. Over the last 12 write-days the "
                     "modal count is %d objects/day, and %s sit at less than that (%s). "
-                    "append_cses() returns EARLY on an empty batch (CSE_APPEND_NOOP at :364) "
+                    "append_cses() returns EARLY on an empty batch (CSE_APPEND_NOOP at :366) "
                     "writing nothing at all, so a short day is consistent with a producer batch "
                     "being empty -- NOT with a failed write, which raises. Which of the callers "
                     "was short on those days is NOT measured here."
@@ -243,14 +246,20 @@ def card_cse():
                                        "wrong bucket, a wrong region, and a missing "
                                        "s3:ListBucket. A failed retrieval returns a VALUE, not "
                                        "an error."),
-                "distinguishable_from_true_negative": "yes",
+                "distinguishable_from_true_negative": "no",
                 "basis": "measured",
-                "evidence": ("discriminated by TWO SEPARATE INVOCATIONS on the SAME bucket, "
-                             "never one call: target prefix -> KeyCount=%d; a bogus sibling "
-                             "prefix (%s) -> KeyCount=%d. The pair is what makes the positive "
-                             "load-bearing: a 1 cannot arise from a wrong bucket or an absent "
-                             "permission, while a 0 alone would still be uninformative. A "
-                             "control sharing an invocation with its target is not a control."
+                "evidence": ("⛔ NO. Two SEPARATE invocations on the SAME bucket -- target "
+                             "prefix -> KeyCount=%d, bogus sibling prefix (%s) -> KeyCount=%d -- "
+                             "establish that THIS target exists NOW, since a 1 cannot arise from "
+                             "a wrong bucket or an absent permission. They do NOT make a FUTURE "
+                             "zero readable: a later 0 here would still be emitted identically "
+                             "by a true absence, a wrong bucket, a wrong region and a revoked "
+                             "s3:ListBucket. The earlier `yes` conflated 'I discriminated the "
+                             "present positive' with 'the failure mode is distinguishable' -- "
+                             "different claims. Separating the zero classes needs instruments "
+                             "outside this call (HeadBucket, an explicit region probe, "
+                             "simulate-principal-policy for the permission limb, each run "
+                             "separately); none was run, so this reads `no`."
                              % (kc, BOGUS.rsplit("/", 2)[-2], bogus_kc)),
                 "owner": LANE,
             },
@@ -259,9 +268,13 @@ def card_cse():
             "standing": "QUALIFIED",
             "why": ("LOAD-BEARING: the production CSE store, authority_role=source, appended by "
                     "the nightly producers and read downstream. QUALIFIED on two named limbs -- "
-                    "the catalog-to-prefix binding is HELD rather than measured (trust.key), and "
+                    "the catalog-to-prefix binding is HELD rather than measured (trust.key); "
                     "coverage is over the OBJECT plane only, asserting nothing about whether the "
-                    "CSE event population is complete. The %s short write-day(s) (%s) are "
+                    "CSE event population is complete; and the failure mode is NOT "
+                    "distinguishable from a true negative -- a KeyCount of 0 is emitted "
+                    "identically by absence, a wrong bucket, a wrong region and a revoked "
+                    "ListBucket, so an absence verdict here needs an instrument this card did "
+                    "not run. The %s short write-day(s) (%s) are "
                     "recorded as an observation about the as-built rhythm, not a defect: an "
                     "empty batch writes nothing by design and a failed write raises."
                     % (len(short) or "no", ", ".join(short) or "n/a")),
