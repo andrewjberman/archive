@@ -110,7 +110,8 @@ def carrier_cells(group):
 
 def card_cse():
     home = HOMES["cse"]
-    kc, bogus_kc = key_count(home), key_count(BOGUS)      # SEPARATE invocations, by construction
+    kc = key_count(home)          # the bogus-prefix call now lives in zero_class_probes(),
+                                  # which runs each class as its own invocation
     cen = object_census(home)
     zc = zero_class_probes(home)
     writer = "infra/aws/globgrph/cse_store.py"
@@ -273,34 +274,31 @@ def card_cse():
                                        "and is the one class that may still return an "
                                        "ambiguous result."),
                 "distinguishable_from_true_negative": "no",
-                "basis": "measured",
-                "basis_by_field": {"returns_on_failure": "measured",
-                                   "distinguishable_from_true_negative": "measured"},
-                "evidence": ("⛔ NO. Two SEPARATE invocations on the SAME bucket -- target "
-                             "prefix -> KeyCount=%d, bogus sibling prefix (%s) -> KeyCount=%d -- "
-                             "establish that THIS target exists NOW, since a 1 cannot arise from "
-                             "a wrong bucket or an absent permission. They do NOT make a FUTURE "
-                             "zero readable: a later 0 here would still be emitted identically "
-                             "by a true absence, a wrong bucket, a wrong region and a revoked "
-                             "s3:ListBucket. The earlier `yes` conflated 'I discriminated the "
-                             "present positive' with 'the failure mode is distinguishable' -- "
-                             "different claims. Separating the zero classes needs instruments "
-                             "outside this call. THOSE PROBES WERE THEN RUN, each a SEPARATE "
-                             "read-only invocation, and they FALSIFY the inherited claim that "
-                             "all four classes emit an identical zero: true absence -> rc=%d "
-                             "%r; wrong bucket -> rc=%d %r; wrong region -> rc=%d %r. Only the "
-                             "true absence produces a zero at all -- a wrong bucket ERRORS and "
-                             "a wrong region returned the CORRECT count. ⛔ THAT CLAIM CAME "
-                             "FROM THE CARRIER'S CELL 7 AND I REPEATED IT AS 're-confirmed' "
-                             "WITHOUT EXERCISING IT. distinguishable stays `no` on the ONE "
-                             "remaining unexercised class -- a missing s3:ListBucket, which "
-                             "cannot be probed from this principal without altering a "
-                             "permission -- and no longer on the two now measured to be "
-                             "distinguishable."
-                             % (kc, BOGUS.rsplit("/", 2)[-2], bogus_kc,
-                                zc["true_absence"][0], zc["true_absence"][1],
-                                zc["wrong_bucket"][0], zc["wrong_bucket"][1],
-                                zc["wrong_region"][0], zc["wrong_region"][1])),
+                "basis": "inferred",
+                "basis_by_field": {
+                    "returns_on_failure": "measured",
+                    "distinguishable_from_true_negative": "inferred"},
+                "evidence": (
+                    "THREE READ-ONLY PROBES, each a SEPARATE invocation, rc read UNPIPED: "
+                    "true absence (real bucket, bogus prefix %s) -> rc=%d %r; wrong bucket "
+                    "(nonexistent) -> rc=%d %r; wrong region (real bucket, --region us-west-1) "
+                    "-> rc=%d %r. Target existence, separately: KeyCount=%d. "
+                    "⛔ ONLY A TRUE ABSENCE PRODUCES A ZERO. A wrong bucket ERRORS; a wrong "
+                    "region returns the CORRECT count. The earlier claim on this row -- that "
+                    "all four classes emit an identical zero -- came from the CARRIER'S CELL 7, "
+                    "written by this same seat in wave 3, and was repeated here as "
+                    "'re-confirmed' when what had actually been exercised was the target's "
+                    "EXISTENCE. Different claims about different objects. distinguishable "
+                    "stays `no`, but ONLY on the one class never exercised: a missing "
+                    "s3:ListBucket, unprobeable from this principal without altering a "
+                    "permission. ⛔ BASIS IS THE FLOOR, SO THIS ROW IS `inferred`: "
+                    "returns_on_failure is measured, but the `no` is a conservative judgement "
+                    "resting on an UNEXERCISED class, and a row may not read measured while a "
+                    "sub-claim is weaker."
+                    % (BOGUS.rsplit("/", 2)[-2],
+                       zc["true_absence"][0], zc["true_absence"][1],
+                       zc["wrong_bucket"][0], zc["wrong_bucket"][1],
+                       zc["wrong_region"][0], zc["wrong_region"][1], kc)),
                 "owner": LANE,
             },
         },
@@ -313,10 +311,11 @@ def card_cse():
                     "the catalog-to-prefix binding is HELD rather than measured (trust.key); "
                     "coverage is over the OBJECT plane only, asserting nothing about whether the "
                     "CSE event population is complete; and the failure mode is NOT "
-                    "distinguishable from a true negative -- a KeyCount of 0 is emitted "
-                    "identically by absence, a wrong bucket, a wrong region and a revoked "
-                    "ListBucket, so an absence verdict here needs an instrument this card did "
-                    "not run. The %s short write-day(s) (%s) are "
+                    "distinguishable from a true negative -- MEASURED: only a true absence "
+                    "returns a zero (a wrong bucket ERRORS at rc=255, a wrong region returns "
+                    "the CORRECT count), so the `no` rests solely on the one class never "
+                    "exercised, a revoked s3:ListBucket, and that row carries basis "
+                    "`inferred` rather than measured. The %s short write-day(s) (%s) are "
                     "recorded as an observation about the as-built rhythm, not a defect: an "
                     "empty batch writes nothing by design and a failed write raises."
                     % (len(short) or "no", ", ".join(short) or "n/a")),
