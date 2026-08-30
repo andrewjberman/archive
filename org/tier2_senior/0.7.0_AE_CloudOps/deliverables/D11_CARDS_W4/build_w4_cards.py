@@ -13,9 +13,11 @@ live S3 plane and the writer's source at its pin.
 absence yields KeyCount=0 at rc=0. But the carrier's cell 7 claimed a wrong bucket, a wrong region
 and a missing s3:ListBucket ALL yield that same zero, and zero_class_probes() below FALSIFIED two
 of those three: a wrong bucket ERRORS (rc=255, NoSuchBucket) and a wrong region returns the CORRECT
-count (rc=0). Only a true absence produces a zero at all. The missing-s3:ListBucket class is the
-one never exercised, which is the sole ground on which the card still reads
-distinguishable_from_true_negative = no, at basis `inferred`.
+count (rc=0). AMONG THE THREE EXERCISED CLASSES, only a true absence produces a zero -- the
+scope qualifier is load-bearing, because the FOURTH class (a missing s3:ListBucket) was never
+exercised and may also return a zero. That unexercised class is the sole ground on which the card
+reads distinguishable_from_true_negative = no, at basis `inferred`. An unscoped "only a true
+absence produces a zero" would contradict that same row.
 
 ⛔ THIS PARAGRAPH ONCE ASSERTED THE FALSIFIED VERSION AND CALLED IT "RE-CONFIRMED LIVE", and it
 survived three STOPs on this card because every repair went to the emitted JSON while the source
@@ -292,8 +294,11 @@ def card_cse():
                     "true absence (real bucket, bogus prefix %s) -> rc=%d %r; wrong bucket "
                     "(nonexistent) -> rc=%d %r; wrong region (real bucket, --region us-west-1) "
                     "-> rc=%d %r. Target existence, separately: KeyCount=%d. "
-                    "⛔ ONLY A TRUE ABSENCE PRODUCES A ZERO. A wrong bucket ERRORS; a wrong "
-                    "region returns the CORRECT count. The earlier claim on this row -- that "
+                    "⛔ AMONG THE THREE EXERCISED CLASSES, ONLY A TRUE ABSENCE PRODUCES A "
+                    "ZERO -- a wrong bucket ERRORS and a wrong region returns the CORRECT "
+                    "count. The scope is load-bearing: the FOURTH class was never exercised "
+                    "and may also return a zero, so an unscoped 'only' would contradict this "
+                    "row's own returns_on_failure. The earlier claim on this row -- that "
                     "all four classes emit an identical zero -- came from the CARRIER'S CELL 7, "
                     "written by this same seat in wave 3, and was repeated here as "
                     "'re-confirmed' when what had actually been exercised was the target's "
@@ -320,9 +325,11 @@ def card_cse():
                     "the catalog-to-prefix binding is HELD rather than measured (trust.key); "
                     "coverage is over the OBJECT plane only, asserting nothing about whether the "
                     "CSE event population is complete; and the failure mode is NOT "
-                    "distinguishable from a true negative -- MEASURED: only a true absence "
-                    "returns a zero (a wrong bucket ERRORS at rc=255, a wrong region returns "
-                    "the CORRECT count), so the `no` rests solely on the one class never "
+                    "distinguishable from a true negative -- MEASURED OVER THE THREE "
+                    "EXERCISED CLASSES: of those, only a true absence returns a zero (a wrong "
+                    "bucket ERRORS at rc=255, a wrong region returns the CORRECT count). The "
+                    "fourth class was not exercised and may also return a zero, so the `no` "
+                    "rests on that one class never "
                     "exercised, a revoked s3:ListBucket, and that row carries basis "
                     "`inferred` rather than measured. The %s short write-day(s) (%s) are "
                     "recorded as an observation about the as-built rhythm, not a defect: an "
