@@ -27,6 +27,12 @@ TYPED RESULTS on the L3-C01 axis, each its own value and none a synonym for anot
   SPREAD_TAIL           an IN-BATTERY draw at the deriving pin lies outside the band of the
                         other draws -> REFUSE TO DERIVE the floor for that statistic
   SPREAD_SANITY_FAIL    the DERIVING run's own observed does not clear the floor it produced
+  INSUFFICIENT_N        the deriving battery's N is below THIS statistic's derivation
+                        threshold -> REFUSE TO DERIVE for that statistic. Provenance is
+                        VERIFIABLE and verified; it is the N that refuses. NOT a synonym for
+                        PROVENANCE_UNVERIFIED (which is about a claim that could not be
+                        measured at all) and NOT SPREAD_TAIL (which is about a draw's position
+                        in the band). Issuer ruling 84349, design lane 84369.
   STABILITY_FAIL        THIS run's observed is below a floor that binds
 """
 import io
@@ -162,6 +168,23 @@ BATTERY_KEYS = [('spearman_rho', 'rho'), ('topdecile_jaccard', 'J')]
 BATT_REQ = ['n_permutations', 'null', 'spread', 'spread_status', 'draws', 'observed']
 TAIL_MULT = 3.0
 TAIL_RETRY_N = 20
+# ADDENDUM 1d item 2 -> certified cell L3W3-b8a2-5, applied by issuer ruling 84349 and the
+# design lane's precision 84369(2). THE TWO STATISTICS HAVE DIFFERENT DERIVATION THRESHOLDS
+# and the difference is not cosmetic: J's is 20 BECAUSE wave 2 observed a tail draw at n=6,
+# so J's own history is what raised its bar. rho has no tail and stays at the Addendum 1 form's
+# N >= 5. A single shared threshold cannot express this, which is why it is a per-statistic map.
+DERIVE_MIN_N = {'spearman_rho': 5, 'topdecile_jaccard': TAIL_RETRY_N}
+# A statistic that CANNOT derive carries a TYPED REFUSAL in place of a derivation, not an
+# absent entry and not a derivation with null-ish fields. Design lane 84369(2) fixes the
+# carried fields: the refusal names its result, its numbers, and STILL carries full provenance,
+# because provenance is verifiable here -- it is the N that refuses.
+REFUSAL_RESULTS = ('REFUSED-INSUFFICIENT-N',)
+REFUSAL_CANON = ['result', 'n_permutations', 'threshold', 'tail_observed_at_n',
+                 'derived_from_run_id', 'derived_at_commit']
+# The wave-2 observation that set J's threshold. Carried as a VALUE on the refusal so a later
+# reader sees WHY 20 rather than having to find the addendum. It is a RECORD of a past
+# observation, never a live measurement of the battery under test.
+TAIL_OBSERVED_AT_N = 6
 # 1a's canonical floor_derivation field list names NO artifact path, but 1c binds the two
 # carriers as ONE contract ("reads null / spread / n_permutations / observed FROM this block
 # at the deriving pin"). A pin without a path does not address a block, so this accepts any
@@ -433,6 +456,30 @@ def _loo_tail(vals, mult=TAIL_MULT):
     return upper, both, True
 
 
+def _prior_battery_shown_stable(e):
+    """Is the multiplier's basis MEASURED rather than HELD?
+
+    Addendum 1's form records the multiplier as `held` UNTIL a second run shows the spread is
+    stable across runs. So `measured` is legal only on EVIDENCE, and the evidence is a
+    cross-run comparison the entry must CARRY -- two named run ids and their two spreads.
+
+    Returns False when the field is absent, which is the run-2 case: absence of the evidence is
+    not the evidence being weak, it is the claim being unmade. This deliberately does NOT try to
+    go and measure stability itself: the consumer reads typed fields (1e item 1) and does not
+    manufacture a warrant the producer declined to state.
+    """
+    ev = e.get('spread_stability_across_runs')
+    if not isinstance(ev, dict):
+        return False
+    runs = ev.get('run_ids')
+    spreads = ev.get('spreads')
+    if not (isinstance(runs, list) and isinstance(spreads, list)):
+        return False
+    # Two DISTINCT runs, two spreads, both numeric. One run cannot show stability across runs.
+    return (len(runs) >= 2 and len(set(map(str, runs))) >= 2
+            and len(spreads) >= 2 and all(_num(x) for x in spreads))
+
+
 def _blob_sha256(path, commit):
     try:
         env = dict(os.environ, MSYS_NO_PATHCONV='1')
@@ -494,6 +541,24 @@ def main(argv):
         print("REFUSED (exit 3): pair_denominator absent or not a positive count -- a statistic "
               "without the domain it was computed over is a frame error.")
         return 3
+    # ---- L3W3-c69f-1 / AC1: THE firm_representation BINDING.
+    # The cell exists because of a measured pattern, not a hypothetical: a field everyone
+    # believes is read, but that nobody cuts a cell to READ, drifts to unpopulated. Measured on
+    # this project: 0 of 16 defective where a validator rejects, against 5 of 39 in the
+    # neighbouring free string. The consuming half IS the mechanism -- so this seat owns
+    # reading it, and the cell names the field explicitly rather than inheriting it from any
+    # message.
+    # REJECTS, DOES NOT WARN. A warning leaves the artifact admitted, which is the same outcome
+    # as not reading the field at all -- the drift this cell exists to stop.
+    # SCOPE, KEPT NARROW ON PURPOSE: absence and unresolvability are refused. The INTERNAL
+    # shape is NOT adjudicated here. This file has already been caught inventing two slot names
+    # the producer never agreed (see REQ above), and the producing cell is
+    # L3W3-dc02-7 on 0.8.0_AE_CloudComp~Y's face, not mine. Refusing on a shape I made up would
+    # reject the real artifact and read as this consumer being strict.
+    # The ENFORCEMENT of this binding is regime-scoped and lives after `is_run2` is known --
+    # see "L3W3-c69f-1 / AC1" below. It cannot run here: at this point the artifact has not yet
+    # been classified run-1 vs run-2, and firm_representation is a WAVE-3 field that run-1
+    # evidence artifacts legitimately do not carry.
     # RULED 1.0.0_SA_CTO~X 80806: TWO domains, both printed, NEVER conflated. The OUTPUT domain
     # is the UNION (all ratified entities, all pairs, each carrying its per-view mask); the
     # METRIC domain for rho/J/control is the BOTH-MEASURED pairs, because over one-view pairs the
@@ -567,6 +632,53 @@ def main(argv):
     # floor_status HELD-UNEXERCISED and no floor_derivation (1b forbids same-run derivation);
     # a consuming run carries the block. 1e (A) binds split_half "from run 2".
     is_run2 = s.get('floor_status') == 'RE-DERIVED' or isinstance(s.get('floor_derivation'), dict)
+    # ---- L3W3-c69f-1 / AC1: THE firm_representation BINDING.
+    # The cell exists because of a measured pattern: a field everyone believes is read, but
+    # that nobody cuts a cell to READ, drifts to unpopulated. Measured on this project: 0 of 16
+    # defective where a validator rejects, against 5 of 39 in the neighbouring free string. The
+    # consuming half IS the mechanism, so this seat owns reading it and the cell names the
+    # field explicitly rather than inheriting it from any message.
+    # REJECTS, DOES NOT WARN -- on a RUN-2 artifact. A warning would leave the artifact
+    # admitted, which is the same outcome as never reading the field.
+    # ⛔ SCOPED TO RUN 2, AND THE SCOPE IS LOAD-BEARING, NOT A SOFTENING. firm_representation is
+    # a WAVE-3 arm field; run-1 evidence artifacts predate it and legitimately do not carry it.
+    # My first cut enforced it unconditionally and the harness caught it immediately: 38 of 39
+    # arms went to exit 3 before reaching the behaviour under test, AND it would have REFUSED
+    # run 1 @f8c1ad1b09 -- the very artifact AC2 requires the rho floor to be DERIVED FROM. An
+    # unconditional binding here does not make the consumer stricter, it makes AC2 unsatisfiable.
+    # The regime split mirrors 1e (A)'s treatment of split_half directly above: absent on run 1
+    # is an OBSERVATION, absent on run 2 is a REFUSAL.
+    # SCOPE KEPT NARROW: absence and unresolvability are refused; the INTERNAL shape is NOT
+    # adjudicated. This file has already been caught inventing slot names the producer never
+    # agreed (see REQ), and the PRODUCING cell is L3W3-dc02-7 on 0.8.0_AE_CloudComp~Y's face.
+    _fr, _fr_where = None, None
+    for _holder, _label in ((s, 'stability_L3C01.firm_representation'),
+                            (a, 'firm_representation (artifact top level)')):
+        if isinstance(_holder, dict) and 'firm_representation' in _holder:
+            _fr, _fr_where = _holder['firm_representation'], _label
+            break
+    _fr_empty = _fr is None or (isinstance(_fr, (dict, list, str)) and len(_fr) == 0)
+    if not is_run2:
+        print("  L3W3-c69f-1: firm_representation %s, and this is a RUN-1 artifact -- recorded "
+              "as an OBSERVATION, NOT a refusal (the field is a wave-3 arm; run-1 evidence "
+              "predates it). Mirrors 1e (A) for split_half."
+              % ('ABSENT' if _fr_where is None else 'present at %s' % _fr_where))
+    elif _fr_where is None:
+        print("REFUSED (exit 3): `firm_representation` is ABSENT on a RUN-2 artifact. Looked in "
+              "stability_L3C01.firm_representation and at the artifact top level -- both "
+              "printed, so the search's own denominator is stated. L3W3-c69f-1 binds this "
+              "consumer to READ the field; an absent field is refused, never read as a value.")
+        return 3
+    elif _fr_empty:
+        print("REFUSED (exit 3): `firm_representation` found at %s on a RUN-2 artifact but is "
+              "UNRESOLVABLE (%r). Present-and-empty is not a value -- it is indistinguishable "
+              "from absent to every consumer downstream, and AC1 refuses both rather than "
+              "warning on either." % (_fr_where, _fr))
+        return 3
+    else:
+        print("  L3W3-c69f-1: firm_representation READ at %s (%s)"
+              % (_fr_where, ('%d entries' % len(_fr)) if isinstance(_fr, (dict, list))
+                 else type(_fr).__name__))
     if sh is None:
         rep = (a.get('rows') or {}).get('reproducibility') if isinstance(a.get('rows'), dict) else None
         if not is_run2:
@@ -664,8 +776,14 @@ def main(argv):
     # from a different scheme than the artifact it binds is FORM_DEFECT/provenance. Two
     # batteries with different schemes measure different nulls: COX permutes half-B's W1
     # labels, CTO~Y permutes view 2's. Nulls compare only WITHIN one scheme.
+    # `basis` added per design lane 84369 precision (1): Addendum 1's form records the
+    # multiplier as `held` UNTIL a second run shows the spread stable across runs. Run 2 is the
+    # first run a floor binds on, so its basis is `held`; `measured` cannot legally appear
+    # before run 3, on a spread shown stable across TWO batteries. A floor binding on its first
+    # outing while calling its own basis `measured` is the typed-number-beside-a-derived-one
+    # class -- the number would be derived and its WARRANT typed by hand.
     CANON = ['derived_from_run_id', 'metric_domain', 'null', 'spread', 'multiplier', 'floor',
-             'deriving_run_observed', 'scheme']
+             'deriving_run_observed', 'scheme', 'basis']
     d = s.get('floor_derivation')
     if not isinstance(d, dict):
         print("REFUSED (exit 3): floor_status RE-DERIVED with no `floor_derivation` block. A "
@@ -689,11 +807,73 @@ def main(argv):
         return 2
     evaluated_run = s.get('run_id')
     bad, sanity, unresolved, tails = [], [], [], []
+    # Statistics that legitimately REFUSED to derive, and the refusals a producer DECLARED but
+    # has not earned. The second list exists because a refusal is an easy way to dodge a floor
+    # that would otherwise bind: if a declared refusal were never checked against the numbers,
+    # "REFUSED-INSUFFICIENT-N" would become a way to opt out of derivation at any N.
+    refused, unearned, insufficient = [], [], []
     deriv_cache = {}
     for nm, obs in (('spearman_rho', s['spearman_rho']), ('topdecile_jaccard', s['topdecile_jaccard'])):
         e = d.get(nm)
         if not isinstance(e, dict):
             bad.append("%s: floor_derivation.%s absent" % (nm, nm))
+            continue
+        # ---- TYPED REFUSAL BRANCH (issuer ruling 84349, design lane 84369(2)).
+        # A statistic below ITS OWN derivation threshold carries a typed refusal instead of a
+        # derivation. It is not an error and not a gap: it is the correct value for that half.
+        # THE REFUSAL IS VERIFIED, NEVER TAKEN ON ITS WORD -- an unearned refusal is a way to
+        # dodge a floor that would otherwise bind, so the numbers are checked against
+        # DERIVE_MIN_N here and a refusal at a sufficient N is FORM_DEFECT.
+        if isinstance(e.get('result'), str) and e['result'].startswith('REFUSED'):
+            res = e['result']
+            if res not in REFUSAL_RESULTS:
+                bad.append("%s: floor_derivation result %r is not one of the typed refusals %s. "
+                           "A refusal spelled freehand is not censusable -- the same defect the "
+                           "artifacts_contract names for commit_or_etag." % (nm, res, list(REFUSAL_RESULTS)))
+                continue
+            rmiss = [k for k in REFUSAL_CANON if k not in e]
+            if rmiss:
+                bad.append("%s: typed refusal %s missing required field(s) %s. Provenance stays "
+                           "REQUIRED on a refusal: it is the N that refuses, not the provenance, "
+                           "and dropping the pins would make the two indistinguishable."
+                           % (nm, res, rmiss))
+                continue
+            rn, thr = e['n_permutations'], e['threshold']
+            need = DERIVE_MIN_N[nm]
+            if thr != need:
+                bad.append("%s: refusal cites threshold %r but this statistic's derivation "
+                           "threshold is %d (DERIVE_MIN_N, from 1d item 2). A refusal against "
+                           "the wrong bar proves nothing." % (nm, thr, need))
+                continue
+            if not isinstance(rn, int) or isinstance(rn, bool):
+                bad.append("%s: refusal n_permutations %r is not an integer" % (nm, rn))
+                continue
+            if rn >= need:
+                unearned.append("%s: DECLARES %s at n_permutations=%d, but the threshold is %d "
+                                "and %d >= %d -- this statistic CAN derive and the refusal is "
+                                "not earned. A floor that would bind was declined by assertion."
+                                % (nm, res, rn, need, rn, need))
+                continue
+            # Provenance is still MEASURED on a refusal, exactly as the design lane requires.
+            rc_ = e['derived_at_commit']
+            if not isinstance(rc_, str) or not re.fullmatch(r'[0-9a-f]{7,40}', rc_ or ''):
+                bad.append("%s: refusal derived_at_commit %r is not a commit-ish" % (nm, rc_))
+                continue
+            ranc = _is_ancestor(rc_, carrier)
+            if ranc is False:
+                bad.append("%s: refusal cites derived_at_commit %s which is NOT an ancestor of "
+                           "the carrier %s" % (nm, rc_, carrier))
+                continue
+            if ranc is None:
+                unresolved.append("%s: refusal derived_at_commit %s could not be resolved -- "
+                                  "ancestry UNVERIFIED on a REFUSAL is still unverified"
+                                  % (nm, rc_))
+                continue
+            refused.append("%s: %s -- n_permutations=%d against threshold %d, "
+                           "tail_observed_at_n=%r, provenance VERIFIED at %s (ancestor of the "
+                           "carrier). No floor is derived for this statistic and floor_status "
+                           "stays HELD-UNEXERCISED for it."
+                           % (nm, res, rn, thr, e.get('tail_observed_at_n'), rc_))
             continue
         miss = [k for k in CANON if k not in e]
         if miss:
@@ -704,6 +884,27 @@ def main(argv):
             bad.append("%s: floor_derivation.<S>.n_permutations is %r. 1e (2) makes it PER "
                        "STATISTIC and SUPERSEDES 1a's level-wide field, because 1d lets rho "
                        "(N>=5) and J (N>=20) diverge; >= 5 required." % (nm, ns))
+            continue
+        # NOTE ON ORDERING: the per-statistic INSUFFICIENT_N threshold is NOT checked here. It
+        # is checked AFTER the tail evaluation below, and the order is load-bearing -- see the
+        # comment at that site. Checking N first would mask a REAL tail behind a threshold
+        # refusal, and the tail is the more specific finding.
+        # ---- BASIS (design lane 84369 precision 1). Run 2 is the first run a floor binds on,
+        # so its multiplier is `held`; `measured` requires a spread shown stable across TWO
+        # batteries and cannot legally appear before run 3.
+        basis = e.get('basis')
+        if basis not in ('held', 'measured'):
+            bad.append("%s: floor_derivation.basis is %r -- it must be `held` or `measured`. "
+                       "A derived floor whose WARRANT is untyped is a number without its claim."
+                       % (nm, basis))
+            continue
+        if basis == 'measured' and not _prior_battery_shown_stable(e):
+            bad.append("%s: basis `measured` claimed, but a measured basis requires the spread "
+                       "shown stable ACROSS RUNS (Addendum 1's form; design lane 84369). At run "
+                       "2 the multiplier %r is still HELD -- run 3 is the earliest a measured "
+                       "basis can appear. A floor binding on its first outing while typing its "
+                       "own basis `measured` is the typed-number-beside-a-derived-one class."
+                       % (nm, e.get('multiplier')))
             continue
         # ADDENDUM 1b @4c1886a50f -- THE NON-CIRCULAR SHAPE. There is NO same-run emission:
         # run N's artifact carries the battery as EVIDENCE with floor_status HELD-UNEXERCISED and
@@ -861,11 +1062,40 @@ def main(argv):
             # until N >= 20. Without this branch a clean N=6 retry would derive the very floor
             # 1d forbids -- the tail's whole forward effect would be silently discarded.
             if ns < TAIL_RETRY_N:
-                tails.append("%s: the battery is clean, but floor_derivation records "
-                             "tail_observed_at_n=%r -- a tail was observed for this statistic "
-                             "at an earlier N. 1d item 2: derivation waits for N >= %d and this "
-                             "deriving battery is N=%d." % (nm, prior_n, TAIL_RETRY_N, ns))
+                # RETYPED 2026-08-30 (issuer ruling 84349, design lane 84369(2)): this was
+                # SPREAD_TAIL and that was WRONG BY THIS FILE'S OWN DEFINITION. SPREAD_TAIL is
+                # "an IN-BATTERY draw at the deriving pin lies outside the band of the other
+                # draws" -- and this branch is reached only when `up` is empty and `declared` is
+                # falsy, i.e. THE BATTERY IS CLEAN AND NO DRAW IS OUTSIDE ANY BAND. What refuses
+                # here is the N, carrying forward a tail observed at an EARLIER N. Emitting
+                # SPREAD_TAIL made a clean battery report a tail it does not have, and collapsed
+                # two typed results the certified cells require to stay distinct (c69f-3 tail
+                # binding vs c69f-5 refusal typing).
+                insufficient.append(
+                    "%s: the battery is CLEAN (no in-battery draw outside the leave-one-out "
+                    "band), but floor_derivation records tail_observed_at_n=%r -- a tail was "
+                    "observed for this statistic at an earlier N. 1d item 2: derivation waits "
+                    "for N >= %d and this deriving battery is N=%d."
+                    % (nm, prior_n, TAIL_RETRY_N, ns))
                 continue
+        # ---- INSUFFICIENT_N, THE GENERAL FORM, AND ITS POSITION IS THE POINT.
+        # Reached only when the battery under test is CLEAN -- no in-battery draw outside the
+        # band, no declared tail. A DERIVED floor is nonetheless claimed below this statistic's
+        # own threshold, so the required carrier was a typed refusal, not a derivation.
+        # ⛔ THIS MUST STAY BELOW THE TAIL BLOCK. Checked earlier it PREEMPTS a real tail: a J
+        # battery at N=6 that genuinely carries a tail draw would report INSUFFICIENT_N and the
+        # tail would never be named, collapsing the more specific finding into the more general
+        # one. My first cut had it above, and the D2 arm (a real declared tail at N=6) caught it
+        # by flipping from SPREAD_TAIL. The two are ordered specific-first, not by convenience.
+        if ns < DERIVE_MIN_N[nm]:
+            insufficient.append(
+                "%s: a DERIVED floor is claimed at n_permutations=%d, below this statistic's "
+                "threshold of %d, on a CLEAN battery. The required carrier here is a typed "
+                "refusal (REFUSED-INSUFFICIENT-N with n_permutations, threshold and "
+                "tail_observed_at_n), not a derivation. rho and J do NOT share a bar: 1d item 2 "
+                "raised J's to %d because a tail was observed for J at N=%d."
+                % (nm, ns, DERIVE_MIN_N[nm], TAIL_RETRY_N, TAIL_OBSERVED_AT_N))
+            continue
             print("  %s: prior tail at N=%r is RECORDED and cleared -- deriving battery N=%d "
                   ">= %d (1d item 2)" % (nm, prior_n, ns, TAIL_RETRY_N))
         m = e['multiplier']
@@ -881,6 +1111,14 @@ def main(argv):
                           % (nm, e['deriving_run_observed'], e['floor'], e['derived_from_run_id']))
     if bad:
         print("REFUSED (exit 2) result=FORM_DEFECT: %s" % bad)
+        return 2
+    if unearned:
+        print("REFUSED (exit 2) result=FORM_DEFECT: %s" % unearned)
+        print("      AN UNEARNED REFUSAL IS A DODGE, NOT A DISPOSITION. The refusal path exists "
+              "so a statistic below its threshold can decline honestly; a refusal declared at a "
+              "SUFFICIENT N declines a floor that would have bound, and nothing downstream can "
+              "tell the two apart from the typed value alone. That is why the numbers are "
+              "checked against DERIVE_MIN_N here rather than read as a claim.")
         return 2
     if unresolved:
         print("REFUSED (exit 3) result=PROVENANCE_UNVERIFIED: %s. Ancestry could not be measured "
@@ -900,6 +1138,17 @@ def main(argv):
               "inflates the band and hides itself. The ruling fixes neither ddof nor a side; "
               "both choices are named here and neither is silent." % TAIL_MULT)
         return 2
+    if insufficient:
+        print("REFUSED (exit 2) result=INSUFFICIENT_N: %s" % insufficient)
+        print("      ITS OWN VALUE. NOT SPREAD_TAIL: no in-battery draw lies outside any band "
+              "and the battery under test is clean -- what refuses is the N. NOT "
+              "PROVENANCE_UNVERIFIED: the pins resolve and the ancestry is measured; the "
+              "derivation is refused with its provenance INTACT. NOT FORM_DEFECT: the shape is "
+              "well formed. CONSEQUENCE: no floor is derived for that statistic, floor_status "
+              "stays HELD-UNEXERCISED for it, its held constant is REPORTED beside the observed "
+              "value and binds in NEITHER direction, and derivation is retried at N >= %d."
+              % TAIL_RETRY_N)
+        return 2
     if sanity:
         print("REFUSED (exit 2) result=SPREAD_SANITY_FAIL: %s" % sanity)
         print("      NOT a stability failure. The deriving run did NOT fail a binding floor -- the "
@@ -909,9 +1158,22 @@ def main(argv):
               "raises the multiplier ONLY when the sec-6 falsifier fires (a second, INDEPENDENT "
               "battery under which the observed no longer clears), and never lowers it.")
         return 2
-    below = [nm for nm, obs in (('spearman_rho', s['spearman_rho']),
-                                ('topdecile_jaccard', s['topdecile_jaccard']))
-             if obs <= d[nm]['floor']]
+    # A statistic carrying a TYPED REFUSAL has no `floor` and cannot be compared against one.
+    # Guarding this is load-bearing rather than defensive: the refusal path is precisely the
+    # case where `d[nm]['floor']` does not exist, so an unguarded read would KeyError on the
+    # ruling's own expected outcome -- the checker would crash on the artifact it was told to
+    # accept. The refused statistic is REPORTED, never silently dropped.
+    if refused:
+        print("  DERIVATION REFUSED for %d of 2 statistic(s), and the refusal is the CORRECT "
+              "value -- not a gap, not a deferral:" % len(refused))
+        for r in refused:
+            print("    %s" % r)
+        print("    Its held constant is REPORTED beside the observed value and binds in NEITHER "
+              "direction (ruling 80787). floor_status stays HELD-UNEXERCISED for that statistic "
+              "into the next run.")
+    derived_stats = [nm for nm in ('spearman_rho', 'topdecile_jaccard')
+                     if isinstance(d.get(nm), dict) and _num(d[nm].get('floor'))]
+    below = [nm for nm in derived_stats if s[nm] <= d[nm]['floor']]
     if below:
         print("REFUSED (exit 2) result=STABILITY_FAIL: %s below the RE-DERIVED floor "
               "(null + 3*spread), which does "
@@ -919,11 +1181,16 @@ def main(argv):
               "zero-weighted pair domain can read high on the agreeing zeros while disagreeing "
               "about every pair that carries signal." % below)
         return 2
-    print("  floors RE-DERIVED per Addendum 1a: rho >= %.6f, J >= %.6f (null + m*spread, m=%s, "
-          "N per-stat %s, recomputed not trusted); sanity holds against deriving_run_observed"
-          % (d['spearman_rho']['floor'], d['topdecile_jaccard']['floor'],
-             d['spearman_rho']['multiplier'],
-             [d[k].get('n_permutations', n) for k in ('spearman_rho', 'topdecile_jaccard')]))
+    # PRINT THE DENOMINATOR: "floors RE-DERIVED" must say how many of the two actually derived,
+    # or a one-of-two outcome reads as a clean two-of-two. This is the m-9 count-with-its-unit
+    # rule applied to the checker's own success line.
+    print("  floors RE-DERIVED per Addendum 1a for %d of 2 statistic(s) [%s]; recomputed, not "
+          "trusted; sanity holds against deriving_run_observed"
+          % (len(derived_stats), ', '.join(derived_stats) or 'none'))
+    for nm in derived_stats:
+        print("    %-18s floor >= %.6f  (null + m*spread, m=%s, basis=%s, N=%s)"
+              % (nm, d[nm]['floor'], d[nm]['multiplier'], d[nm].get('basis'),
+                 d[nm].get('n_permutations', n)))
     print("OK (exit 0): both statistics at/above the RE-DERIVED floor and the permuted control "
           "dropped below both.")
     rc63 = check_sec63(a)
