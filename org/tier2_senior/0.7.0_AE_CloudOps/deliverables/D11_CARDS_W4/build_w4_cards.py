@@ -183,6 +183,74 @@ def refuse_prose_basis_mismatch(doc):
     return True
 
 
+BASIS_VOCAB = ("measured", "held", "inferred", "absent")
+
+
+def refuse_prose_enum_mismatch(doc):
+    """Any prose that NAMES a structured key in its own section and ASSERTS a value for it must
+    agree with that field.
+
+    The sibling of refuse_prose_basis_mismatch(), and it exists because that guard could not see
+    the defect it was written for. That one sweeps BASIS-shaped phrases; a sentence asserting an
+    ENUM VALUE is a different class and sat outside its corpus, so a pre-presentation scan
+    deliberately made BROADER THAN THE SHIPPED GUARD still returned a clean, confident zero --
+    broader within one class is a wider net over the wrong pond. A GUARD SHAPED TO THE LAST
+    DEFECT CLASS CANNOT SEE THE NEXT ONE.
+
+    Measured instance (card 5 @4a5e165fbf, found by 1.0.0_SA_CTO~X, independently reproduced and
+    STOPped by 4.0.0_SA_CRO~X): mutation_policy was repaired at the builder from an INVENTED enum
+    value to `append_only`, and the sentence explaining the field kept asserting the retracted
+    value. A reader learns one value; a consumer rejecting on the field sees the other -- which
+    defeats the point of a value carrying its claim in a field a consumer can reject on.
+
+    ⛔ THE SENTENCE `<key>` is `<token>` IS AMBIGUOUS AND THE ARM MUST DISAMBIGUATE, NOT GUESS.
+    When the token is basis vocabulary AND the key carries a basis_by_field entry, the sentence is
+    a claim about that field's BASIS and is checked against basis_by_field -- not against the
+    field's value. The first version of this arm lacked that branch and FIRED ON A CLOSED,
+    CERTIFIED CARD (code_heat_snap: prose "live_matches_declared is `absent`" about the basis,
+    while the VALUE is `unmeasured`). That card is correct and says both things correctly. An arm
+    that cannot tell a basis claim from a value claim manufactures a defect in certified work,
+    which costs a certifier a round and is worse than the hole it was closing.
+    """
+    pat = re.compile(r"`?([a-z_]{4,})`?\s+is\s+`([^`]{1,40})`")
+    bad = []
+    for sec in ("process", "artifact", "trust"):
+        rows = doc.get(sec, {})
+        declared, bases = {}, {}
+        for row, body in rows.items():
+            if not isinstance(body, dict):
+                continue
+            for k, v in body.items():
+                if isinstance(v, (str, bool, int)) and k not in ("evidence", "owner"):
+                    declared[k] = v
+            for k, v in (body.get("basis_by_field") or {}).items():
+                bases[k] = v
+        for row, body in rows.items():
+            if not isinstance(body, dict):
+                continue
+            for m in pat.finditer(body.get("evidence", "") or ""):
+                key, claimed = m.group(1), m.group(2)
+                if key not in declared:
+                    continue
+                # a basis-vocabulary token about a key that HAS a basis is a BASIS claim, and
+                # belongs to refuse_prose_basis_mismatch()'s domain, not this one
+                if claimed.lower() in BASIS_VOCAB and key in bases:
+                    if bases[key] != claimed.lower():
+                        bad.append("%s.%s: prose says %s basis is %r, basis_by_field says %r"
+                                   % (sec, row, key, claimed, bases[key]))
+                    continue
+                actual = declared[key]
+                if isinstance(actual, bool):
+                    actual = "true" if actual else "false"
+                if str(actual) != claimed:
+                    bad.append("%s.%s: prose says %s is %r, structured value is %r"
+                               % (sec, row, key, claimed, str(actual)))
+    if bad:
+        raise ValueError("PROSE/STRUCTURE ENUM MISMATCH -- a repaired field whose sentence still "
+                         "asserts the old value:\n  " + "\n  ".join(bad))
+    return True
+
+
 def card_cse():
     home = HOMES["cse"]
     kc = key_count(home)          # the bogus-prefix call now lives in zero_class_probes(),
@@ -1436,7 +1504,15 @@ def card_cse_test_24458e6c():
                     "UNPOPULATED field, and an unpopulated field is not a measured negative -- "
                     "collapsing those two is the defect this wave exists to stop. (2) "
                     "`actual_trigger` is MEASURED, and it is a stronger statement than 'no "
-                    "trigger was found': the table was written EXACTLY ONCE. The discriminator "
+                    "trigger was found' -- BUT IT IS SCOPED TO THE SURVIVING SET AND NOT BEYOND "
+                    "IT: the objects and metadata PRESENT AT THIS HOME were written by "
+                    "exactly ONE commit in one 3-second window. ⛔ THIS DOES NOT "
+                    "EXCLUDE AN EARLIER WRITE SINCE REPLACED OR EXPIRED -- snapshot "
+                    "expiry and overwrite both converge on one surviving snapshot, so "
+                    "'only ever written once' would need the metadata log's snapshot "
+                    "HISTORY, not its current head, and that is UNMEASURED here. The "
+                    "cadence point does not rest on it: what carries the row is the "
+                    "surviving set plus the staleness. The discriminator "
                     "is the Iceberg metadata tree, not the timestamps -- %d snapshot object and "
                     "%d distinct write-commit uuid (%s) across all %d objects, so every data "
                     "file belongs to one append. A one-shot write cannot be a cadence that "
@@ -1466,9 +1542,10 @@ def card_cse_test_24458e6c():
                     "POSITIVE prefix 'warehouse/' -> 1; NEGATIVE prefix "
                     "'warehouse/globgrph/zzz_no_such_prefix_99999/' -> 0. Both fired, so a 0 "
                     "here would have been a real 0. Segment split counted client-side from the "
-                    "auto-paginated list: %s. ⛔ `mutation_policy` is "
-                    "`append_only_but_droppable` and the second half is the part that is NOT "
-                    "true of the production log: ensure_cse_table() is ENSURE-ONLY and never "
+                    "auto-paginated list: %s. ⛔ `mutation_policy` is `append_only`; "
+                    "DROPPABILITY IS A LIFECYCLE FACT RECORDED HERE, NOT AN ENUM VALUE, and it "
+                    "is the part that is NOT true of the production log: "
+                    "ensure_cse_table() is ENSURE-ONLY and never "
                     "overwrites or repartitions (%s:321-325 @%s), but --drop at :579 explicitly "
                     "permits dropping a SCRATCH table and 'refuses the real log'. This table is "
                     "on the permitted side of that guard. Whether it SHOULD be dropped is the "
@@ -1652,6 +1729,7 @@ def main():
             raise SystemExit("no builder for %r (have: %s)" % (name, ", ".join(BUILDERS)))
         doc = BUILDERS[name]()
         refuse_prose_basis_mismatch(doc)
+        refuse_prose_enum_mismatch(doc)
         p = os.path.join(D, "%s.v3.1.json" % name)
         with open(p, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(doc, fh, indent=1)
