@@ -57,7 +57,8 @@ GROUPS = {"code_heat_snap": "W4-wvft", "cse": "W4-bqrk", "cse_test_24458e6c": "W
           "fedobs_coverage_snap": "W4-siwi", "ms_heat_snap": "W4-cjtn"}
 
 BUCKET = "opal-313476888478-globgrph"
-HOMES = {"cse": "warehouse/globgrph/cse_b557721f-8b81-4ec2-9289-fe5f44c3f272/"}
+HOMES = {"cse": "warehouse/globgrph/cse_b557721f-8b81-4ec2-9289-fe5f44c3f272/",
+         "code_heat_snap": "warehouse/globgrph/code_heat_snap_8b0bca7a-9078-4b8e-8868-ef04062d9952/"}
 BOGUS = "warehouse/globgrph/cse_00000000-0000-0000-0000-000000000000/"
 
 
@@ -348,7 +349,218 @@ def card_cse():
     }
 
 
-BUILDERS = {"cse": card_cse}
+def card_code_heat_snap():
+    home = HOMES["code_heat_snap"]
+    kc = key_count(home)
+    cen = object_census(home)
+    zc = zero_class_probes(home)
+    cells = carrier_cells(GROUPS["code_heat_snap"])
+    writer, rowbuilder = "infra/aws/globgrph/snap_store.py", "infra/aws/globgrph/code_heat_emit.py"
+    wpin, rpin = git_pin(writer), git_pin(rowbuilder)
+    newest = datetime.strptime(cen["newest_utc"][:19], "%Y-%m-%dT%H:%M:%S").replace(
+        tzinfo=timezone.utc)
+    age = (datetime.now(timezone.utc) - newest).days
+
+    return {
+        "schema_version": 3.1,
+        "subject": {
+            "id": "code_heat_snap",
+            "kind": "store",
+            "declared_domain": (
+                "The code-heat SNAPSHOT store: an Iceberg table under the globgrph Nessie "
+                "catalog holding point-in-time code-heat rows. The subject is THE STORE. Its "
+                "row-builder code_heat_emit.py is carded separately by 0.8.0_AE_CloudComp at "
+                "D11_CARDS_CC/code_heat_emit.v3.1.json, and the write primitive snap_store.py "
+                "is a third object again -- the manifest names the ROW-BUILDER as materializer, "
+                "which is why conflating the three is the grain error this line prevents. "
+                "QUALIFIES THE CELLS CARRIER (AC4): %s @%s, cells %s -- this card is the v3.1 "
+                "reading of those 7 cells; the carrier is NOT edited."
+                % (CARRIER, CARRIER_PIN, " ".join(c["cell_id"] for c in cells))),
+        },
+        "as_of": {
+            "carded_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "commit_ish": subprocess.run(["git", "rev-parse", "HEAD"],
+                                         capture_output=True, text=True).stdout.strip(),
+            "graph_vintage": "S3, EventBridge and terraform planes read live at card time; no "
+                             "graph consulted",
+        },
+        "process": {
+            "methodology": {
+                "how": ("Iceberg append. Rows are ASSEMBLED by code_heat_emit.py and WRITTEN by "
+                        "snap_store.py append_rows(), one Nessie commit per batch, append-only. "
+                        "The store carries a point-in-time claim, not a current-state one."),
+                "determinism": "deterministic",
+                "composes": [
+                    {"id": rowbuilder,
+                     "note": "assembles the rows; named as the manifest's materializer, which "
+                             "is the ROW-BUILDER and not the writer"},
+                    {"id": writer,
+                     "note": "the write primitive: append_rows() at :243, t.append(table) :256"}],
+                "invents": [],
+                "materializer_standing": "unknown",
+                "basis": "measured",
+                "evidence": ("Read at source with line numbers from grep -n AT THE PIN, never "
+                             "inferred from a display window: %s:243 append_rows(), :256 "
+                             "t.append(table), @%s; row-builder @%s. materializer_standing is "
+                             "`unknown` rather than `canonical` because nothing measured here "
+                             "establishes this store as the current authority for code-heat, "
+                             "and the cadence row is why that matters."
+                             % (writer, wpin[:10], rpin[:10])),
+                "owner": LANE,
+            },
+            "cadence": {
+                "declared_rhythm": None,
+                "actual_trigger": "NONE FOUND, measured across two planes -- not inherited from "
+                                  "the manifest's null field",
+                "live_matches_declared": "not_applicable",
+                "live_instance_age": ("%d days: sole write-day %s, newest object %s"
+                                      % (age, sorted(cen["per_day_tail"])[0], cen["newest_utc"])),
+                "basis": "measured",
+                "evidence": (
+                    "A NULL MANIFEST FIELD IS AN UNPOPULATED CLAIM, NOT A MEASURED NEGATIVE, so "
+                    "the carrier's `absent` was re-derived rather than copied. TWO PLANES, each "
+                    "with its own control. EVENTBRIDGE: 140 rules enumerated (auto-paginated, "
+                    "counted client-side); none names code_heat -- but that plane's control "
+                    "FAILED, because `cse`, which writes daily, matches no rule either, so the "
+                    "EventBridge zero is NOT load-bearing and is reported only for "
+                    "completeness. TERRAFORM: code_heat IS declared, in glue_code_heat.tf, but "
+                    "ONLY as aws_glue_catalog_database / _table / _partition -- no "
+                    "schedule_expression, no event rule, no ECS task, no Lambda. That plane's "
+                    "control FIRES: the same corpus carries cse_producer's ECS declaration and "
+                    "comp_learns_producer_nightly at cron(0 4 * * ? *), so it demonstrably "
+                    "contains both schedules and producers. The terraform absence is therefore "
+                    "MEASURED, and it is consistent with the object plane: ONE write-day, %d "
+                    "days ago. ONE NAME COLLISION CAUGHT AND DISCARDED: the EventBridge rule "
+                    "`infrastructure-snapshot-daily` (ENABLED, cron(0 7 * * ? *)) matched a "
+                    "`snap` grep, but its Lambda source references neither code_heat_snap nor "
+                    "snap_store nor globgrph -- 0 hits over 2 files scanned. A name match is "
+                    "not an identity." % age),
+                "owner": LANE,
+            },
+        },
+        "artifact": {
+            "persistence": {
+                "persisted": True,
+                "authority_role": "source",
+                "mutation_policy": "append_only",
+                "form": "an Iceberg table: data files plus a metadata/ tree",
+                "basis": "measured",
+                "evidence": ("KeyCount at the declared home = %d (a POSITIVE, which a wrong "
+                             "bucket or a missing s3:ListBucket cannot produce). %d objects / "
+                             "%d bytes counted client-side over an auto-paginated listing."
+                             % (kc, cen["objects"], cen["bytes"])),
+                "owner": LANE,
+            },
+            "location": {
+                "home": "s3://%s/%s" % (BUCKET, home),
+                "projection_of": [],
+                "co_resident_stores": [
+                    {"id": "s3://%s/warehouse/globgrph/" % BUCKET,
+                     "note": "sibling globgrph warehouse tables share this bucket and prefix "
+                             "root; CONTENT overlap was not measured, only co-residence"}],
+                "basis": "measured",
+                "evidence": ("the s3:// URI is an EXACT IDENTITY a consumer can equality-join; "
+                             "resolved live at KeyCount=%d." % kc),
+                "owner": LANE,
+            },
+        },
+        "trust": {
+            "coverage": {
+                "universe": ("objects under the store's own S3 home -- NOT the code-heat row "
+                             "population, which this card does not measure"),
+                "denominator": ("%d of %d objects at the declared home"
+                                % (cen["objects"], cen["objects"])),
+                "explicitly_out": [
+                    "NO COMPLETENESS OF THE CODE-HEAT ROW POPULATION IS ASSERTED. Whether the "
+                    "single append covered what it should have is a different question with a "
+                    "different denominator, and nothing here measures it.",
+                    "the row-level contents of the Iceberg data files (object plane only)",
+                    "whether any consumer still READS this store -- UNMEASURED, and it is the "
+                    "question a forward disposition would turn on",
+                ],
+                "basis": "measured",
+                "evidence": ("aws s3api list-objects-v2 auto-paginated, counted client-side: %d "
+                             "objects, %d bytes, %d distinct write-day(s), newest %s."
+                             % (cen["objects"], cen["bytes"], cen["distinct_write_days"],
+                                cen["newest_utc"])),
+                "owner": LANE,
+            },
+            "key": {
+                "identity_space": ("S3 (bucket, key) for the artifact plane; (namespace, table) "
+                                   "in the Nessie catalog for the logical table"),
+                "key_expression": "bucket + key, exact string match",
+                "key_is_stable": "stable",
+                "crosses_spaces": True,
+                "declared_mapping": ("addressed logically through the catalog and physically by "
+                                     "the s3:// home; the join between the two spaces was not "
+                                     "traversed"),
+                "basis": "held",
+                "evidence": ("basis is the FLOOR: the S3 identity is MEASURED (listed live), "
+                             "but that the catalog's (namespace, table) resolves to THIS prefix "
+                             "was read from the manifest and NOT verified against the catalog. "
+                             "One limb measured, one limb read -> held."),
+                "owner": LANE,
+            },
+            "failure_mode": {
+                "returns_on_failure": ("A true absence returns KeyCount=0 at rc=0 -- a failed "
+                                       "retrieval returns a VALUE, not an error. MEASURED: a "
+                                       "wrong BUCKET does NOT do this (rc=255, NoSuchBucket) "
+                                       "and a wrong REGION does NOT either (rc=0, the CORRECT "
+                                       "KeyCount). A missing s3:ListBucket was NOT exercised "
+                                       "and is the one class that may still return an "
+                                       "ambiguous result."),
+                "distinguishable_from_true_negative": "no",
+                "basis": "inferred",
+                "basis_by_field": {
+                    "returns_on_failure": "measured",
+                    "distinguishable_from_true_negative": "inferred"},
+                "evidence": (
+                    "THREE READ-ONLY PROBES, each a SEPARATE invocation, rc read UNPIPED: true "
+                    "absence -> rc=%d %r; wrong bucket -> rc=%d %r; wrong region -> rc=%d %r. "
+                    "Target existence, separately: KeyCount=%d. AMONG THE THREE EXERCISED "
+                    "CLASSES, only a true absence produces a zero -- the scope is load-bearing, "
+                    "because the FOURTH class (a missing s3:ListBucket) was never exercised and "
+                    "may also return a zero. This card does NOT repeat the carrier cell-7 claim "
+                    "that all four classes emit an identical zero: that claim was FALSIFIED on "
+                    "card 1 of this same face, against this same bucket, and is not inherited "
+                    "here. distinguishable is `no` on the one unexercised class alone, and the "
+                    "row floors to `inferred` because that sub-claim is weaker than measured."
+                    % (zc["true_absence"][0], zc["true_absence"][1],
+                       zc["wrong_bucket"][0], zc["wrong_bucket"][1],
+                       zc["wrong_region"][0], zc["wrong_region"][1], kc)),
+                "owner": LANE,
+            },
+        },
+        "verdict": {
+            "standing": "QUALIFIED",
+            "why": ("The store RESOLVES and holds real bytes, but it is COLD: one write-day, %d "
+                    "days ago, and NO trigger exists in the terraform plane that declares it -- "
+                    "measured with a firing control, not inferred from a null manifest field. "
+                    "QUALIFIED on the limbs ENUMERATED below and deliberately NOT counted, so "
+                    "that adding a limb cannot desynchronise a cardinal: the catalog-to-prefix "
+                    "binding is HELD rather than measured; coverage spans the OBJECT plane only "
+                    "and asserts nothing about row completeness; the failure mode is not "
+                    "distinguishable from a true negative on the one unexercised permission "
+                    "class; whether any consumer still reads this store is UNMEASURED; and "
+                    "materializer_standing is `unknown` rather than canonical. COLD IS NOT A "
+                    "DEFECT VERDICT -- a point-in-time snapshot written once may be exactly "
+                    "what was intended. Naming it is the carder's job; deciding it is the "
+                    "owner's." % age),
+            "blocking_defects": None,
+        },
+        "forward_disposition": {
+            "standing": "undecided",
+            "set_by": None,
+            "basis": "absent",
+            "evidence": ("NOT SET BY THE CARDING LANE -- the store owner's call at the class "
+                         "close. The cadence and consumer rows are what it would turn on."),
+            "decided_utc": None,
+        },
+        "carded_by": LANE,
+    }
+
+
+BUILDERS = {"cse": card_cse, "code_heat_snap": card_code_heat_snap}
 
 
 def main():
