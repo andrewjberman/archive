@@ -1,0 +1,101 @@
+diff --git a/infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/lambda_function.py b/infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/lambda_function.py
+index 13365b6003..66c42cd452 100644
+--- a/infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/lambda_function.py
++++ b/infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/lambda_function.py
+@@ -165,20 +165,82 @@ def _calendar_year_ranges(run_year: int, n: int = 2) -> list:
+     return out
+ 
+ 
++# --- BP1-1 (ADVI_BDPARITY P1-PROBE): the RULED period set QTD / YTD / 1Y / SI --------
++# The pre-existing builder emitted Custom + two trailing CALENDAR YEARS + SinceInception,
++# which does not carry YTD or a trailing-12m 1Y (issuer amendment 2026-08-29T17:5xZ, A2).
++# These close it WITHOUT a new vendor call: 1Y needs no new BD type, and YTD defaults to
++# the PROVEN Custom shape rather than betting the single authorized pull on a type that is
++# ATTESTED only on /Dashboard/data (singular dateRange), never on performancePeriod (plural).
++YTD_MODES = ("custom", "typed", "both")
++
++# Which inception anchors "Since Inception" is a METHODOLOGY cell owned by 3.0.0_SA_CVO
++# (Andrew-direct 2026-08-29T212315Z @7a4d8a1888). This module does NOT choose it -- it
++# carries the caller's choice and records which one was used, per face A3.
++INCEPTION_ANCHORS = ("roster-trade-start", "bd-funding-inception", "our-first-linked-date")
++
++
++def _minus_one_year(iso_date: str) -> str:
++    """iso_date minus exactly one year; 29 Feb folds to 28 Feb (no calendar-invalid date)."""
++    y, m, d = (int(x) for x in iso_date.split("-"))
++    if m == 2 and d == 29:
++        return "%04d-02-28" % (y - 1)
++    return "%04d-%02d-%02d" % (y - 1, m, d)
++
++
++def _trailing_12m_range(q_end: str) -> dict:
++    """1Y as a Custom with COMPUTED dates -- NO new BD dateRange type needed (A2: 'NOT AT RISK').
++
++    A trailing full CALENDAR year is not a trailing twelve months; this is the latter.
++    The start/end BOUNDARY convention (whether the first day is a base date or an earning
++    day) is a methodology detail the probe MEASURES AND NAMES -- it is not tuned here."""
++    return {"endDate": q_end, "name": "Trailing 12 Months",
++            "startDate": _minus_one_year(q_end), "type": "Custom"}
++
++
++def _ytd_ranges(run_year: int, q_end: str, ytd_mode: str) -> list:
++    """YTD. DEFAULT 'custom' = a Jan-1 Custom, the SAME shape already proven on this endpoint.
++
++    'typed' emits BD's YearToDate type -- upgraded GUESS->ATTESTED by 1.0.0_SA_CTO 83444 from
++    Andrew's 2026-08-20 HAR, but attested on /advisor/api/v1/Dashboard/data with a SINGULAR
++    dateRange, while this endpoint takes a PLURAL array. A type valid on one endpoint is
++    EVIDENCE about the other, not proof of it -- so it is OPT-IN, never the default: exactly
++    one bounded pull is authorized and an unknown type risks the whole request, not just YTD."""
++    if ytd_mode not in YTD_MODES:
++        raise ValueError("ytd_mode must be one of %r, got %r" % (YTD_MODES, ytd_mode))
++    jan1 = "%d-01-01" % run_year
++    custom = {"endDate": q_end, "name": "Year To Date", "startDate": jan1, "type": "Custom"}
++    typed = {"endDate": q_end, "name": "Year To Date", "startDate": jan1, "type": "YearToDate"}
++    return {"custom": [custom], "typed": [typed], "both": [custom, typed]}[ytd_mode]
++
++
+ def body_performance_period(account_id: int, q_start: str, q_end: str,
+-                            inception: str, run_year: int) -> dict:
++                            inception: str, run_year: int,
++                            ytd_mode: str = "custom",
++                            return_method: str = "Annualized") -> dict:
++    """`return_method` is the CUMULATIVE-vs-ANNUALISED methodology cell (3.0.0_SA_CVO's to
++    rule). It is a PARAMETER carrying the proven default, never a silently baked constant,
++    so the ruling lands as an argument rather than a code change + redeploy."""
++    if not inception:
++        raise ValueError(
++            "SinceInception REFUSED for account %s: no EXPLICIT inception. BD collapses a "
++            "missing SinceInception start to the Custom window and returns a figure LABELLED "
++            "'Since Inception' that is arithmetically QTD -- and NOTHING RAISES (P1-PROBE "
++            "face A3). Pass an explicit inception or drop the account from the probe."
++            % account_id)
+     return {"parameters": {
+         "accountFilters": {"accounts": [account_id], "taxStatuses": [], "excludePositionOnly": False},
+         "groupings": ["Account", "Asset"],
+         "dateRanges": [
+             {"endDate": q_end, "name": "Custom", "startDate": q_start, "type": "Custom"},
++            *_ytd_ranges(run_year, q_end, ytd_mode),
++            _trailing_12m_range(q_end),
+             *_calendar_year_ranges(run_year),
+             {"endDate": q_end, "name": "Since Inception", "startDate": inception, "type": "SinceInception"},
+         ],
+         "asOfDate": {"asOfDate": q_end, "excludeHistoryRanges": False},
+         "dataPointOptions": {
+             "enableAccountCompression": False, "smaNameSource": "Account",
+-            "feeMethod": "NetOfFees", "returnMethod": "Annualized", "feesIn": "NetAdditions",
++            "feeMethod": "NetOfFees", "returnMethod": return_method, "feesIn": "NetAdditions",
+             "marketValueMethod": "Accrued", "allocationDecimals": 1,
+             "enableClassificationOverrides": False,
+             "asOfDatePoints": {"includeLastDataUpdate": False, "includePrice": False, "includeYield": False},
+@@ -293,8 +355,10 @@ def run(accounts: list, q_start: str, q_end: str, pull_date: str,
+     for acct in accounts:
+         aid = int(acct["bd_account_id"])
+         for feed, (path, builder) in ENDPOINTS.items():
++            # NO SILENT FALLBACK (face A3): a missing inception used to default to q_start,
++            # which makes BD return a QTD figure LABELLED "Since Inception" with nothing raised.
+             body = builder(account_id=aid, q_start=q_start, q_end=q_end,
+-                           inception=acct.get("inception", q_start), run_year=run_year)
++                           inception=acct.get("inception"), run_year=run_year)
+             raw = _request("POST", path, cookie=cookie, token=token, body=body, raw=True)
+             key = land_bronze(raw, feed, aid, q_end, pull_date)
+             landed.append(key)
