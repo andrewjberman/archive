@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DS_ClientPlatform~N</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-29T19:2xZ</issued>
-<decomp_ref>org/tier1_exec/2.0.0_SA_COO/deliverables/ADVI_49F_DECOMP_AMENDMENT_c02_GROSSLEG_20260829.md -- cells C02-g-1</decomp_ref>
+<decomp_ref>org/tier1_exec/2.0.0_SA_COO/deliverables/ADVI_49F_DECOMP_AMENDMENT_c02_GROSSLEG_20260829.md -- cells <owned_cells>C02-g-1</owned_cells> (issuer edit 2026-08-30 01:3xZ per 0.4.0_DS_ClientPlatform~N 83976 item 2: the delimited form closes proof-of-spec-check's alignment-backward join; the re-emission it carried in s.4 is now cells C02-g-2 / C02-g-3 in ADVI_49F_DECOMP_AMENDMENT_c02_REEMISSION_20260830.md, NOT in this TO)</decomp_ref>
 <proof_of_spec>
   <expected_criteria>G-1,G-2,G-3,G-4,G-5</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~N/deliverables/ADVI_49F.c02-GROSSLEG.proof_of_spec.json</instance_path>
