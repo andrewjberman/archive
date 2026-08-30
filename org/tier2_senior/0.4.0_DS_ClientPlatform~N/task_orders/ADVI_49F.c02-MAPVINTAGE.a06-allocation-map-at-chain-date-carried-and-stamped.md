@@ -1,4 +1,4 @@
-# TO ADVI_49F.c02-MAPVINTAGE — a06 reads the allocation map AT the chain date (carried forward from the latest POPULATED partition ≤ D) and STAMPS the map vintage (cell C02-g-8)
+# TO ADVI_49F.c02-MAPVINTAGE — a06 reads the NEWEST POPULATED allocation-map partition (header-only skipped) and STAMPS `map_date` + `map_carried` (cell C02-g-8; the filename's "at-chain-date-carried" is the first ruling's wording, WITHDRAWN at CTO 86490 — the body governs; title corrected 08:4xZ on 86765)
 
 <task_order id="ADVI_49F.c02-MAPVINTAGE" project="ADVI_49F">
 <issued_to>0.4.0_DS_ClientPlatform~N</issued_to>
@@ -10,7 +10,7 @@
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~N/deliverables/ADVI_49F.c02-MAPVINTAGE.proof_of_spec.json</instance_path>
   <!-- Validate with the POSITIONAL id form: python .tools/proof-of-spec-check.py <instance>.json M-1,M-2,M-3,M-4,M-5 ; print the checker's commit-ish beside the verdict -->
 </proof_of_spec>
-<status>pending -- GO on delivery of this face; M-1 (one read) first, then M-2/M-3 as fast as the DS gate allows: landing M-3 before ~12:40Z makes TODAY's 12:45Z fire the first exercise; otherwise Monday 2026-08-31 12:45Z is, and that fire is the one that matters (its abort would leave Tuesday's run with no D-1). The 12:45Z fire is NOT held (issuer 86469; CTO 86478 concurs).</status>
+<status>M-1..M-3 DONE (DS~N 86765: fix @fec349cf79 deployed 08:42:34Z, served ETag == index blob, 4.0 h before the 12:45Z fire; M-4 after that fire; M-5 the re-drive GO 08:4xZ) -- was: pending -- GO on delivery of this face; M-1 (one read) first, then M-2/M-3 as fast as the DS gate allows: landing M-3 before ~12:40Z makes TODAY's 12:45Z fire the first exercise; otherwise Monday 2026-08-31 12:45Z is, and that fire is the one that matters (its abort would leave Tuesday's run with no D-1). The 12:45Z fire is NOT held (issuer 86469; CTO 86478 concurs).</status>
 <priority>P1 -- a live scheduled-fire hazard with a ~4.5 h clock at cut; every C02-g-7 backfill date aborts identically until this lands; the crosswalk's emitted vintage is undeclared on every partition today.</priority>
 <authority>AE~L's halt + census (86456: 13 of 46 map partitions empty, all weekend; a06 reads NEWEST regardless of D); the CTO's convention ruling (86478, adopted verbatim in the cell); the issuer's disarm + fire decision (86469); Rule 13 (DS commits + QA-deploys gold scripts). D2 drive-pair scope. Not to 4.0.0_SA_CRO.</authority>
 </task_order>
