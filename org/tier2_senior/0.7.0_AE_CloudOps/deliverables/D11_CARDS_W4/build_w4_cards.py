@@ -83,7 +83,12 @@ HOMES = {"cse": "warehouse/globgrph/cse_b557721f-8b81-4ec2-9289-fe5f44c3f272/",
          # which reads exactly like an absent table. A wrong prefix and a true absence
          # are the same zero.
          "fedobs_coevolution_snap": "warehouse/globgrph/fedobs_coevolution_snap_499558ba-0181-42ab-a008-93a518692299/",
-         "fedobs_coverage_snap": "warehouse/globgrph/fedobs_coverage_snap_a9637eab-f8d2-4421-847c-4a2ca27cdc86/"}
+         "fedobs_coverage_snap": "warehouse/globgrph/fedobs_coverage_snap_a9637eab-f8d2-4421-847c-4a2ca27cdc86/",
+         # COPIED from the cells carrier @a5fffa2bb7 cell -4, never typed: these
+         # two share the table name `cse_test` and differ ONLY in the uuid, so a
+         # transcription slip here lands on a REAL populated table, not on a zero.
+         "cse_test_24458e6c": "warehouse/globgrph/cse_test_24458e6c-667c-4e85-ba44-33751795e182/",
+         "cse_test_bb57a916": "warehouse/globgrph/cse_test_bb57a916-76de-454d-a71e-932dc173620e/"}
 BOGUS = "warehouse/globgrph/cse_00000000-0000-0000-0000-000000000000/"
 
 
@@ -1263,9 +1268,380 @@ def card_fedobs_coverage_snap():
     }
 
 
+def _iceberg_layout(prefix):
+    """Object layout under an Iceberg table home, counted CLIENT-SIDE from an auto-paginated
+    list. Local to this card on purpose: object_census() is shared with the four CLOSED cards
+    and changing it would move their output, so this measures the extra shape here instead."""
+    out = _aws("s3api", "list-objects-v2", "--bucket", BUCKET, "--prefix", prefix,
+               "--query", "Contents[].[Key,LastModified,Size]", "--output", "text")
+    rows = [ln.split("\t") for ln in out.splitlines() if ln.strip()]
+    seg = collections.Counter(r[0][len(prefix):].split("/")[0] for r in rows)
+    snaps = [r[0] for r in rows if "/metadata/snap-" in r[0]]
+    commits = {m.group(1) for m in
+               (re.search(r"-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
+                          r"\.parquet$", r[0]) for r in rows) if m}
+    eds = sorted({m.group(1) for m in
+                  (re.search(r"event_date=([^/]+)/", r[0]) for r in rows) if m})
+    stamps = sorted(r[1] for r in rows)
+    return {"objects": len(rows), "bytes": sum(int(r[2]) for r in rows),
+            "by_segment": dict(seg), "snapshots": len(snaps),
+            "write_commit_uuids": sorted(commits), "event_date_partitions": len(eds),
+            "event_date_range": (eds[0], eds[-1]) if eds else None,
+            "first_write": stamps[0], "last_write": stamps[-1],
+            "distinct_write_days": len({s[:10] for s in stamps}),
+            "keys": {r[0] for r in rows}}
+
+
+def refuse_sibling_confusion(mine, sibling):
+    """cse_test_24458e6c and cse_test_bb57a916 share the TABLE NAME `cse_test` and are told apart
+    ONLY by the uuid in their S3 home.
+
+    Everywhere else on this face a wrong home fails LOUD -- it resolves to nothing and KeyCount
+    returns 0. Here it does not: a home copied or edited between these two lands on a REAL,
+    POPULATED table, so KeyCount=1 still returns, every arm written for the other card still
+    passes, and the card is silently about the wrong table. That is the one place on this face
+    where the copy hazard is structural rather than stylistic, so it gets a structural refusal
+    rather than a note telling a later reader to be careful.
+    """
+    if mine["keys"] & sibling["keys"]:
+        raise ValueError("SIBLING CONFUSION: the two cse_test homes share %d key(s); they must "
+                         "be disjoint" % len(mine["keys"] & sibling["keys"]))
+    if (mine["objects"], mine["bytes"]) == (sibling["objects"], sibling["bytes"]):
+        raise ValueError("SIBLING CONFUSION: both cse_test homes census identically "
+                         "(%d objects / %d bytes) -- indistinguishable, so this card cannot "
+                         "claim which table it measured" % (mine["objects"], mine["bytes"]))
+    return True
+
+
+def card_cse_test_24458e6c():
+    home = HOMES["cse_test_24458e6c"]
+    sib_home = HOMES["cse_test_bb57a916"]
+    home_uri = "s3://%s/%s" % (BUCKET, home)
+    sib_uri = "s3://%s/%s" % (BUCKET, sib_home)
+    kc = key_count(home)
+    cen = object_census(home)
+    lay = _iceberg_layout(home)
+    sib = _iceberg_layout(sib_home)
+    refuse_sibling_confusion(lay, sib)
+    zc = zero_class_probes(home)
+    # a wrong-prefix probe built by mutating THIS home's uuid tail: the class that returned a
+    # KeyCount of 0 and read as a vanished table on card 3
+    wrong_prefix = probe("s3api", "list-objects-v2", "--bucket", BUCKET, "--prefix",
+                         home[:-2] + "3/", "--max-keys", "1", "--query", "KeyCount",
+                         "--output", "text")
+    cells = carrier_cells(GROUPS["cse_test_24458e6c"])
+    writer = "infra/aws/globgrph/cse_store.py"
+    wpin = git_pin(writer)
+    newest = datetime.strptime(cen["newest_utc"][:19], "%Y-%m-%dT%H:%M:%S").replace(
+        tzinfo=timezone.utc)
+    age = (datetime.now(timezone.utc) - newest).days
+
+    return {
+        "schema_version": 3.1,
+        "subject": {
+            "id": "cse_test_24458e6c",
+            "kind": "store",
+            "declared_domain": (
+                "An ISOLATED TEST-HARNESS Iceberg table in the globgrph Nessie namespace, "
+                "holding CSE (Change/Signal Event) rows partitioned by (source, event_date) -- "
+                "the same shape as the production log, written once and never again. "
+                "⛔ THE SUBJECT IS THE TABLE AT THIS EXACT S3 HOME (uuid 24458e6c-667c-4e85-"
+                "ba44-33751795e182). It is NOT the production `cse` store, and it is NOT its "
+                "same-named sibling cse_test_bb57a916 -- BOTH scratch tables carry the table "
+                "name `cse_test` and are distinguished ONLY by the uuid in their home, which is "
+                "why this card's coverage row names the sibling in explicitly_out and the "
+                "builder refuses structurally if the two census identically. "
+                "QUALIFIES THE CELLS CARRIER (AC4): %s @%s, cells %s -- the carrier is NOT edited."
+                % (CARRIER, CARRIER_PIN, " ".join(c["cell_id"] for c in cells))),
+        },
+        "as_of": {
+            "carded_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "commit_ish": subprocess.run(["git", "rev-parse", "HEAD"],
+                                         capture_output=True, text=True).stdout.strip(),
+            "graph_vintage": "S3 object plane read live at card time for this home AND for the "
+                             "sibling home used as the discrimination control; no graph consulted",
+        },
+        "process": {
+            "methodology": {
+                "how": ("Iceberg create_table + a SINGLE append through cse_store.py's "
+                        "unconstrained --table override: ensure_cse_table() creates "
+                        "globgrph.<table> with cse_iceberg_schema() partitioned by "
+                        "(source, event_date), and the append path writes one Nessie commit. "
+                        "⛔ THE INVOCATION THAT DID THIS WAS NOT FOUND AND IS NOT CLAIMED -- "
+                        "see the basis."),
+                "determinism": "deterministic",
+                "composes": [
+                    {"id": writer + " @" + wpin[:10],
+                     "note": "the code path that can create this table: --table at :581 carries "
+                             "no choices=, so it accepts any name in the namespace; "
+                             "ensure_cse_table() at :321 creates it; catalog.create_table at "
+                             ":338. Its docstring at :325 invites exactly this use -- 'pass a "
+                             "scratch name (e.g. cse_test) for an ISOLATED test harness'"}],
+                "invents": [],
+                "materializer_standing": "historical_in_use",
+                "basis": "inferred",
+                "basis_by_field": {
+                    "how": "inferred",
+                    "composes": "inferred",
+                    "determinism": "inferred",
+                    "materializer_standing": "measured",
+                },
+                "evidence": (
+                    "⛔ THE ROW IS `inferred` AND THE SENTENCE MUST NOT OUTRUN IT. "
+                    "generation.materializer is null in the manifest and NO code names this "
+                    "table; I did not find the invocation that created it and I am not claiming "
+                    "one. The MEASURED facts that follow sit UNDER that `inferred` floor and do "
+                    "NOT raise it -- they are what makes the inference more than a "
+                    "name-shape guess: the physical layout at this home matches cse_store.py's declared "
+                    "partition spec EXACTLY -- %d data objects all under source=git/ across %d "
+                    "event_date partitions (%s..%s), which is the (source, event_date) spec "
+                    "ensure_cse_table() applies at %s:%s @%s. A structural match to a writer's "
+                    "partition spec identifies the writer CLASS; it does not identify the run. "
+                    "materializer_standing is `historical_in_use` (MEASURED): exactly %d "
+                    "snapshot and %d distinct write-commit uuid exist at this home, so the "
+                    "writer ran here and has not run again."
+                    % (lay["by_segment"].get("data", 0), lay["event_date_partitions"],
+                       lay["event_date_range"][0], lay["event_date_range"][1],
+                       writer, "321/338", wpin[:10], lay["snapshots"],
+                       len(lay["write_commit_uuids"]))),
+                "owner": LANE,
+            },
+            "cadence": {
+                "declared_rhythm": "NONE DECLARED -- generation.trigger is null in the manifest",
+                "actual_trigger": ("none found; and the write history says none is needed -- this "
+                                   "table was written ONCE"),
+                "live_matches_declared": "not_applicable",
+                "live_instance_age": ("%s objects written between %s and %s -- a %d-second "
+                                      "window on %d distinct write-day; %d days stale at carding"
+                                      % (lay["objects"], lay["first_write"], lay["last_write"],
+                                         (datetime.strptime(lay["last_write"][:19],
+                                                            "%Y-%m-%dT%H:%M:%S")
+                                          - datetime.strptime(lay["first_write"][:19],
+                                                              "%Y-%m-%dT%H:%M:%S")).seconds,
+                                         lay["distinct_write_days"], age)),
+                "basis": "absent",
+                "basis_by_field": {
+                    "declared_rhythm": "absent",
+                    "actual_trigger": "measured",
+                    "live_instance_age": "measured",
+                    "live_matches_declared": "absent",
+                },
+                "evidence": (
+                    "⛔ TWO DIFFERENT CLAIMS LIVE IN THIS ROW AND THEY DO NOT SHARE A BASIS, SO THE "
+                    "ROW BASIS IS THE FLOOR OF ITS FIELDS -- `absent` -- WHICH IS "
+                    "WEAKER THAN ITS STRONGEST FIELD ON PURPOSE (the same shape as "
+                    "code_heat_snap's cadence row, and the floor rule holds in 7 of 7 "
+                    "basis_by_field rows across the four closed cards). "
+                    "(1) `declared_rhythm` floors to `absent`: generation.trigger is an "
+                    "UNPOPULATED field, and an unpopulated field is not a measured negative -- "
+                    "collapsing those two is the defect this wave exists to stop. (2) "
+                    "`actual_trigger` is MEASURED, and it is a stronger statement than 'no "
+                    "trigger was found': the table was written EXACTLY ONCE. The discriminator "
+                    "is the Iceberg metadata tree, not the timestamps -- %d snapshot object and "
+                    "%d distinct write-commit uuid (%s) across all %d objects, so every data "
+                    "file belongs to one append. A one-shot write cannot be a cadence that "
+                    "failed, and it does not become one by ageing. Timestamps corroborate: first "
+                    "%s, last %s, %d distinct write-day. ⛔ WHY the run happened, and whether "
+                    "anyone intended it to repeat, is UNMEASURED."
+                    % (lay["snapshots"], len(lay["write_commit_uuids"]),
+                       lay["write_commit_uuids"][0], lay["objects"],
+                       lay["first_write"], lay["last_write"], lay["distinct_write_days"])),
+                "owner": LANE,
+            },
+        },
+        "artifact": {
+            "persistence": {
+                "persisted": True,
+                "authority_role": "source",
+                "mutation_policy": "append_only",
+                "form": ("an Iceberg table: %d data parquet objects under data/source=git/"
+                         "event_date=*/ plus a %d-object metadata/ tree (2 *.metadata.json, one "
+                         "-m0.avro manifest, one snap-*.avro snapshot)"
+                         % (lay["by_segment"].get("data", 0),
+                            lay["by_segment"].get("metadata", 0))),
+                "basis": "measured",
+                "evidence": (
+                    "KeyCount at the declared home = %d, a POSITIVE -- which a wrong bucket or a "
+                    "missing s3:ListBucket cannot produce. Controls run as SEPARATE invocations: "
+                    "POSITIVE prefix 'warehouse/' -> 1; NEGATIVE prefix "
+                    "'warehouse/globgrph/zzz_no_such_prefix_99999/' -> 0. Both fired, so a 0 "
+                    "here would have been a real 0. Segment split counted client-side from the "
+                    "auto-paginated list: %s. ⛔ `mutation_policy` is "
+                    "`append_only_but_droppable` and the second half is the part that is NOT "
+                    "true of the production log: ensure_cse_table() is ENSURE-ONLY and never "
+                    "overwrites or repartitions (%s:321-325 @%s), but --drop at :579 explicitly "
+                    "permits dropping a SCRATCH table and 'refuses the real log'. This table is "
+                    "on the permitted side of that guard. Whether it SHOULD be dropped is the "
+                    "owner's call and is not set here."
+                    % (kc, lay["by_segment"], writer, wpin[:10])),
+                "owner": LANE,
+            },
+            "location": {
+                "home": home_uri,
+                "projection_of": [],
+                "co_resident_stores": [
+                    {"id": sib_uri,
+                     "note": "⛔ THE SAME-NAMED SIBLING. Shares the table name `cse_test`; "
+                             "differs only in the uuid. MEASURED disjoint from this home: %d "
+                             "objects / %d bytes against this table's %d / %d, key-set "
+                             "intersection 0. It is the reason this card carries a structural "
+                             "sibling refusal rather than a caution."
+                             % (sib["objects"], sib["bytes"], lay["objects"], lay["bytes"])},
+                    {"id": "s3://%s/warehouse/globgrph/" % BUCKET,
+                     "note": "the globgrph warehouse prefix root, shared with every sibling "
+                             "table; overlap of CONTENT was not measured, only of PREFIX"}],
+                "basis": "measured",
+                "evidence": (
+                    "the s3:// URI is an EXACT IDENTITY a consumer can equality-join, not a "
+                    "description. ⛔ COPIED BYTE-FOR-BYTE from the cells carrier's own cell "
+                    "%s-4 and never retyped from a display -- on card 3 a uuid tail "
+                    "reconstructed from a truncated print was wrong in its LAST character and "
+                    "returned KeyCount=0, which reads exactly like a vanished table. Existence "
+                    "at this exact key was then MEASURED: KeyCount=%d. The wrong-prefix probe "
+                    "run here mutates this home's own uuid tail and returns rc=%s out=%r, "
+                    "confirming that a near-miss on this key is indistinguishable from absence "
+                    "by KeyCount alone."
+                    % (GROUPS["cse_test_24458e6c"], kc, wrong_prefix[0], wrong_prefix[1])),
+                "owner": LANE,
+            },
+        },
+        "trust": {
+            "coverage": {
+                "universe": ("the objects under THIS table's own S3 home -- not the CSE event "
+                             "population, not the production cse store, and not the same-named "
+                             "sibling cse_test_bb57a916"),
+                "denominator": "%d of %d objects at the declared home" % (lay["objects"],
+                                                                         lay["objects"]),
+                "explicitly_out": [
+                    "%s -- the same-named sibling: a SEPARATE subject with its own card (card 6 "
+                    "of this face), %d objects, measured here ONLY as the discrimination control"
+                    % (sib_uri, sib["objects"]),
+                    "row-level content -- no row was read. Whether these rows duplicate the "
+                    "production cse store's is UNMEASURED, so authority_role=`source` describes "
+                    "this table holding its own rows, not a claim that they are unique",
+                    "the Nessie catalog plane -- not reachable from this seat; see the key row"],
+                "basis": "measured",
+                "evidence": ("aws s3api list-objects-v2 auto-paginated, rows counted CLIENT-SIDE "
+                             "-- never --query length(), which returns the PAGE count, and never "
+                             "--no-paginate. %d objects, %d bytes, segments %s. The denominator "
+                             "certifies the SWEEP of this prefix, not the correctness of the "
+                             "prefix; the prefix is certified separately by the copied-home "
+                             "evidence in the location row."
+                             % (lay["objects"], lay["bytes"], lay["by_segment"])),
+                "owner": LANE,
+            },
+            "key": {
+                "identity_space": ("S3 (bucket, key) on the artifact plane; (namespace, table) = "
+                                   "(globgrph, cse_test) on the Nessie catalog plane"),
+                "key_expression": "bucket + key, exact string match",
+                "key_is_stable": "stable",
+                "crosses_spaces": True,
+                "declared_mapping": ("the catalog key (globgrph, `cse_test`) does NOT uniquely "
+                                     "address this home -- two homes carry that table name"),
+                "basis": "inferred",
+                "basis_by_field": {
+                    "identity_space": "measured",
+                    "key_expression": "measured",
+                    "key_is_stable": "measured",
+                    "crosses_spaces": "measured",
+                    "declared_mapping": "inferred",
+                },
+                "evidence": (
+                    "⛔ THE FINDING IN THIS CARD, AND IT IS `inferred` ON PURPOSE. MEASURED: "
+                    "two S3 homes exist under warehouse/globgrph/ whose table-name component is "
+                    "identically `cse_test`, differing only in uuid -- this one (%s, written %s) "
+                    "and %s (written %s). Their key sets are disjoint. INFERRED: pyiceberg/Nessie "
+                    "assigns a NEW uuid-suffixed location on each create_table, and a namespace "
+                    "admits one table per name, so two locations for one name is consistent with "
+                    "a create -> drop -> create cycle in which at most ONE of these homes is "
+                    "still reachable by the catalog key and the other is an ORPHANED physical "
+                    "location. ⛔ UNMEASURED, AND IT IS THE DECIDING FACT: which home the "
+                    "catalog resolves to today, or whether either is still registered. The "
+                    "Nessie catalog is not reachable from this seat, so this card CANNOT say "
+                    "which of the two is live and does not guess. Settling it needs one "
+                    "catalog.load_table((globgrph, 'cse_test')) read of its metadata location. "
+                    "⛔ THIS CARD DOES NOT CLASSIFY THE ORPHAN AS A DEFECT -- naming it is "
+                    "the carder's job, deciding it is the owner's."
+                    % ("24458e6c", lay["first_write"][:10], "bb57a916", sib["first_write"][:10])),
+                "owner": LANE,
+            },
+            "failure_mode": {
+                "returns_on_failure": ("A true absence returns KeyCount=0 at rc=0 -- a failed "
+                                       "retrieval returns a VALUE, not an error. And at THIS "
+                                       "subject a wrong home does not even return 0: the "
+                                       "same-named sibling returns a populated census"),
+                "distinguishable_from_true_negative": "no",
+                "basis": "inferred",
+                "basis_by_field": {
+                    "returns_on_failure": "measured",
+                    "distinguishable_from_true_negative": "inferred",
+                },
+                "evidence": (
+                    "FOUR read-only probe classes, each a SEPARATE invocation, rc read UNPIPED. "
+                    "MEASURED: (1) true absence -- real bucket, bogus prefix -> rc=%s out=%r; "
+                    "(2) wrong bucket -> rc=%s out=%r, an ERROR, not a zero; (3) wrong region -> "
+                    "rc=%s out=%r; (4) near-miss prefix, this home's own uuid tail mutated -> "
+                    "rc=%s out=%r. So among the exercised classes a zero is produced by absence "
+                    "and by a wrong prefix, and NOT by a wrong bucket. ⛔ THE FIFTH CLASS -- "
+                    "a missing s3:ListBucket -- WAS NOT EXERCISED and may also return a zero; "
+                    "that unexercised class is the SOLE ground on which "
+                    "distinguishable_from_true_negative is `no` at basis `inferred`. An unscoped "
+                    "'only a true absence produces a zero' would contradict this same row. "
+                    "⛔ AND AT THIS SUBJECT THE SHARPEST FAILURE IS NOT A ZERO AT ALL: "
+                    "because the sibling home is real and populated, a home confused between the "
+                    "two returns a healthy KeyCount=1 and a full census, so every arm passes "
+                    "while the card describes the wrong table. That class is caught "
+                    "structurally by refuse_sibling_confusion() at build time, not by reading a "
+                    "count."
+                    % (zc["true_absence"][0], zc["true_absence"][1],
+                       zc["wrong_bucket"][0], zc["wrong_bucket"][1][:60],
+                       zc["wrong_region"][0], zc["wrong_region"][1],
+                       wrong_prefix[0], wrong_prefix[1])),
+                "owner": LANE,
+            },
+        },
+        "verdict": {
+            "standing": "QUALIFIED",
+            "why": (
+                "NOT LOAD-BEARING, on the evidence gathered here: an isolated test-harness table "
+                "written in a single %d-second append on %s and never touched again, %d days "
+                "stale at carding. It is carded because it EXISTS in the manifest and consumes a "
+                "real S3 home, not because anything was shown to read it. QUALIFIED, and these "
+                "are the qualifications: the materializer is `inferred` -- the invocation that "
+                "created this table was never found, and the partition-spec match identifies a "
+                "writer CLASS, not a run; the `key` row carries an UNRESOLVED identity question, "
+                "since two homes share the table name `cse_test` and this seat cannot reach the "
+                "Nessie catalog to say which one it addresses -- so one of the two may be an "
+                "orphaned location and this card does not claim which; coverage spans the OBJECT "
+                "plane only and NO row was read, so whether this table's rows duplicate the "
+                "production cse store's is UNMEASURED; and whether any consumer reads it, or is "
+                "harmed by it existing, is UNMEASURED here. ⛔ THIS CARD DOES NOT CLASSIFY "
+                "THE TABLE AS DEBT AND DOES NOT PROPOSE DROPPING IT: --drop permits it and the "
+                "production guard would refuse the real log, but that is a permission, not a "
+                "recommendation. Naming the state is the carder's job; deciding it is the "
+                "owner's."
+                % ((datetime.strptime(lay["last_write"][:19], "%Y-%m-%dT%H:%M:%S")
+                    - datetime.strptime(lay["first_write"][:19], "%Y-%m-%dT%H:%M:%S")).seconds,
+                   lay["first_write"][:10], age)),
+            "blocking_defects": None,
+        },
+        "forward_disposition": {
+            "standing": "undecided",
+            "set_by": None,
+            "basis": "absent",
+            "evidence": ("NOT SET BY THE CARDING LANE -- the store owner's call at the class "
+                         "close. The key row's unresolved catalog question is an input that "
+                         "owner will want settled first."),
+            "decided_utc": None,
+        },
+        "carded_by": LANE,
+    }
+
+
 BUILDERS = {"cse": card_cse, "code_heat_snap": card_code_heat_snap,
             "fedobs_coevolution_snap": card_fedobs_coevolution_snap,
-            "fedobs_coverage_snap": card_fedobs_coverage_snap}
+            "fedobs_coverage_snap": card_fedobs_coverage_snap,
+            "cse_test_24458e6c": card_cse_test_24458e6c}
 
 
 def main():
