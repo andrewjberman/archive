@@ -88,7 +88,8 @@ HOMES = {"cse": "warehouse/globgrph/cse_b557721f-8b81-4ec2-9289-fe5f44c3f272/",
          # two share the table name `cse_test` and differ ONLY in the uuid, so a
          # transcription slip here lands on a REAL populated table, not on a zero.
          "cse_test_24458e6c": "warehouse/globgrph/cse_test_24458e6c-667c-4e85-ba44-33751795e182/",
-         "cse_test_bb57a916": "warehouse/globgrph/cse_test_bb57a916-76de-454d-a71e-932dc173620e/"}
+         "cse_test_bb57a916": "warehouse/globgrph/cse_test_bb57a916-76de-454d-a71e-932dc173620e/",
+         "ms_heat_snap": "warehouse/globgrph/ms_heat_snap_a1875ebc-9d80-4078-b8e7-19e6455265bd/"}
 BOGUS = "warehouse/globgrph/cse_00000000-0000-0000-0000-000000000000/"
 
 
@@ -2114,11 +2115,327 @@ def card_cse_test_bb57a916():
     }
 
 
+def _heartbeat_read(surface):
+    """snap_store.py writes warehouse/snap_ingest/last_append/{surface}.json on every append --
+    a SECOND plane, independent of the table's own objects. Returns (LastModified, Size) or None."""
+    out = _aws("s3api", "list-objects-v2", "--bucket", BUCKET,
+               "--prefix", "warehouse/snap_ingest/last_append/%s.json" % surface,
+               "--query", "Contents[].[LastModified,Size]", "--output", "text")
+    rows = [ln.split("\t") for ln in out.splitlines() if ln.strip()]
+    return (rows[0][0], int(rows[0][1])) if rows else None
+
+
+def card_ms_heat_snap():
+    home = HOMES["ms_heat_snap"]
+    home_uri = "s3://%s/%s" % (BUCKET, home)
+    kc = key_count(home)
+    cen = object_census(home)
+    lay = _iceberg_layout(home)
+    zc = zero_class_probes(home)
+    wrong_prefix = probe("s3api", "list-objects-v2", "--bucket", BUCKET, "--prefix",
+                         home[:-2] + "e/", "--max-keys", "1", "--query", "KeyCount",
+                         "--output", "text")
+    hb = _heartbeat_read("ms_heat_snap")
+    cells = carrier_cells(GROUPS["ms_heat_snap"])
+    writer = "infra/aws/globgrph/snap_store.py"
+    wpin = git_pin(writer)
+    newest = datetime.strptime(cen["newest_utc"][:19], "%Y-%m-%dT%H:%M:%S").replace(
+        tzinfo=timezone.utc)
+    age = (datetime.now(timezone.utc) - newest).days
+
+    return {
+        "schema_version": 3.1,
+        "subject": {
+            "id": "ms_heat_snap",
+            "kind": "store",
+            "declared_domain": (
+                "The ms (microservice) HEAT snapshot store: a dated APPEND-ONLY Iceberg sibling of "
+                "a STATE-shaped Trino analytics surface, partitioned on the snapshot_date IDENTITY "
+                "key with the four standard snap columns (snapshot_date, computed_at, "
+                "producer_ref, marker_head) plus this surface's payload. It is the P1 surface of "
+                "the snap family -- the FIRST one snap_store.py shipped, with code_heat_snap and "
+                "fedobs_coverage_snap added at P2. Its SURVIVING objects were written by TWO "
+                "appends on consecutive days and carry no later surviving write. "
+                "⛔ NOT its sibling code_heat_snap, which is a different surface with a different "
+                "payload, a different write history and its own card. "
+                "QUALIFIES THE CELLS CARRIER (AC4): %s @%s, cells %s -- the carrier is NOT edited."
+                % (CARRIER, CARRIER_PIN, " ".join(c["cell_id"] for c in cells))),
+        },
+        "as_of": {
+            "carded_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "commit_ish": subprocess.run(["git", "rev-parse", "HEAD"],
+                                         capture_output=True, text=True).stdout.strip(),
+            "graph_vintage": "S3 object plane, the snap_ingest heartbeat plane and the "
+                             "snap_ingest pending queue all read live at card time; no graph "
+                             "consulted",
+        },
+        "process": {
+            "methodology": {
+                "how": ("Iceberg append via snap_store.py append_rows(): a producer STAGES a "
+                        "JSONL batch under warehouse/snap_ingest/pending/ms_heat_snap/, the "
+                        "writer coerces it against this surface's typed payload, appends in one "
+                        "Nessie commit, MOVES the batch to done/ and stamps "
+                        "warehouse/snap_ingest/last_append/ms_heat_snap.json. Ensure-only table "
+                        "creation; append-only by construction."),
+                "determinism": "deterministic",
+                "composes": [
+                    {"id": writer + " @" + wpin[:10],
+                     "note": "the ONE writer for every snap sibling. ⛔ IT NAMES THIS SURFACE "
+                             "EXPLICITLY: the SURFACES registry declares `ms_heat_snap` at :79-80 "
+                             "and the module docstring records it as the P1 surface, with "
+                             "code_heat_snap + fedobs_coverage_snap added at P2. This is the "
+                             "difference from the cse_test cards on this face, whose materializer "
+                             "had to be inferred because NO code named them"},
+                    {"id": "warehouse/snap_ingest/pending/ms_heat_snap/*.jsonl",
+                     "note": "the staged-batch handoff between producer and writer; measured "
+                             "EMPTY at card time"},
+                    {"id": "warehouse/snap_ingest/last_append/ms_heat_snap.json",
+                     "note": "the heartbeat key this writer stamps on every append -- a SECOND "
+                             "plane for the write history, independent of the table's objects"}],
+                "invents": [],
+                "materializer_standing": "historical_in_use",
+                "basis": "measured",
+                "evidence": (
+                    "⛔ THIS ROW IS `measured` AND THAT IS THE DIFFERENCE FROM CARDS 5 AND 6 ON "
+                    "THIS FACE, whose methodology floored to `inferred` because no code named the "
+                    "table and no invocation was found. Here the writer NAMES the surface: read "
+                    "at the pin, %s @%s declares `ms_heat_snap` in its SURFACES registry (:79-80), "
+                    "partitions on the snapshot_date identity key (:68), and documents the "
+                    "pending (:52) and last_append (:54) prefixes this card measures. The "
+                    "physical layout corroborates rather than carries the claim: %d data objects "
+                    "under data/snapshot_date=*/ across %d partitions. ⛔ WHAT IS STILL NOT "
+                    "CLAIMED: the specific INVOCATIONS were not found, and naming a surface in a "
+                    "registry identifies the writer, not the run."
+                    % (writer, wpin[:10], lay["by_segment"].get("data", 0),
+                       lay["event_date_partitions"] or 2)),
+                "owner": LANE,
+            },
+            "cadence": {
+                "declared_rhythm": ("the module docstring declares every STATE-shaped surface gets "
+                                    "a DATED append-only snapshot sibling -- a per-snapshot_date "
+                                    "rhythm, with no cloud schedule named in the writer itself"),
+                "actual_trigger": ("none found in the writer; the SURVIVING write history shows "
+                                   "TWO appends on consecutive days and no later surviving write"),
+                "live_matches_declared": "no",
+                "live_instance_age": ("%d surviving objects written %s and %s -- %d distinct "
+                                      "write-days across %d appends; %d days stale at carding. "
+                                      "The heartbeat key agrees: %s, %d B"
+                                      % (lay["objects"], lay["first_write"], lay["last_write"],
+                                         lay["distinct_write_days"],
+                                         len(lay["write_commit_uuids"]) or lay["snapshots"], age,
+                                         hb[0] if hb else "ABSENT", hb[1] if hb else 0)),
+                "basis": "measured",
+                "basis_by_field": {
+                    "declared_rhythm": "measured",
+                    "actual_trigger": "measured",
+                    "live_instance_age": "measured",
+                    "live_matches_declared": "measured",
+                },
+                "evidence": (
+                    "⛔ SCOPED TO THE SURVIVING SET AND NOT BEYOND IT, which is the repair this "
+                    "face's cards 5 and 6 were STOPPED for: %d snapshot objects and the "
+                    "snapshot_date partitions describe what SURVIVES at this home. Snapshot "
+                    "expiry and overwrite both converge on fewer surviving snapshots, so an exact "
+                    "LIFETIME append count would need the metadata log's snapshot HISTORY rather "
+                    "than its current head, and that is UNMEASURED. "
+                    "⭐ AND A SECOND, INDEPENDENT PLANE AGREES, which neither cse_test card had: "
+                    "the writer stamps warehouse/snap_ingest/last_append/ms_heat_snap.json on "
+                    "every append, and it reads %s -- the SAME instant as the newest surviving "
+                    "object (%s). Two planes written by different code paths agreeing on the last "
+                    "append is stronger than either alone; it still does not reach LIFETIME, "
+                    "because the heartbeat is overwritten in place and carries only the latest. "
+                    "⛔ AND THIS SURFACE IS NOT PART OF THE ONE-BUILD PAIR ON THIS FACE'S OTHER "
+                    "CARDS, measured on the same heartbeat plane: code_heat_snap stamps "
+                    "2026-07-16T15:28:06Z and fedobs_coverage_snap 2026-07-16T15:28:07Z -- one "
+                    "second apart, one run -- while this surface stamps %s, about 27 hours later. "
+                    "`live_matches_declared` is `no`: a per-snapshot_date rhythm predicts a row "
+                    "per date and the surviving set stops after two. WHY it stopped is UNMEASURED "
+                    "and this card does not guess."
+                    % (lay["snapshots"], hb[0] if hb else "ABSENT", lay["last_write"],
+                       hb[0] if hb else "ABSENT")),
+                "owner": LANE,
+            },
+        },
+        "artifact": {
+            "persistence": {
+                "persisted": True,
+                "authority_role": "projection",
+                "mutation_policy": "append_only",
+                "form": ("an Iceberg table: %d data parquet under data/snapshot_date=*/ plus a "
+                         "%d-object metadata/ tree (metadata.json documents, -m0.avro manifests "
+                         "and snap-*.avro snapshots)"
+                         % (lay["by_segment"].get("data", 0),
+                            lay["by_segment"].get("metadata", 0))),
+                "basis": "measured",
+                "evidence": (
+                    "KeyCount at the declared home = %d, a POSITIVE, which a wrong bucket or a "
+                    "missing s3:ListBucket cannot produce. Controls as SEPARATE invocations: "
+                    "POSITIVE prefix 'warehouse/' -> 1; NEGATIVE "
+                    "'warehouse/globgrph/zzz_no_such_prefix_99999/' -> 0. Both fired. Segment "
+                    "split counted client-side: %s. `authority_role` is `projection`, NOT "
+                    "`source`: the module docstring defines a snap sibling as the dated "
+                    "append-only projection OF a STATE-shaped Trino analytics surface, so the "
+                    "rows originate elsewhere and this table holds a dated copy. ⛔ THE PROJECTED "
+                    "SURFACE'S OWN CONTENT WAS NOT READ and no row-level comparison was made, so "
+                    "`projection` is taken from the writer's declared design and not from a "
+                    "measured row correspondence."
+                    % (kc, lay["by_segment"])),
+                "owner": LANE,
+            },
+            "location": {
+                "home": home_uri,
+                "projection_of": [],
+                "co_resident_stores": [
+                    {"id": "s3://%s/warehouse/snap_ingest/last_append/ms_heat_snap.json" % BUCKET,
+                     "note": "this surface's heartbeat key -- a different prefix and a different "
+                             "object, written by the same writer on every append; measured %s"
+                             % (hb[0] if hb else "ABSENT")},
+                    {"id": "s3://%s/warehouse/globgrph/" % BUCKET,
+                     "note": "the globgrph warehouse prefix root, shared with every sibling "
+                             "table; overlap of CONTENT was not measured, only of PREFIX"}],
+                "basis": "measured",
+                "evidence": (
+                    "the s3:// URI is an EXACT IDENTITY a consumer can equality-join. ⛔ COPIED "
+                    "BYTE-FOR-BYTE from the cells carrier's own cell %s-4 and never retyped from "
+                    "a display. Existence at this exact key was MEASURED: KeyCount=%d. The "
+                    "wrong-prefix probe mutates this home's own uuid tail and returns rc=%s "
+                    "out=%r, confirming a near-miss on this key is indistinguishable from absence "
+                    "by KeyCount alone."
+                    % (GROUPS["ms_heat_snap"], kc, wrong_prefix[0], wrong_prefix[1])),
+                "owner": LANE,
+            },
+        },
+        "trust": {
+            "coverage": {
+                "universe": ("the objects under THIS table's own S3 home, plus its single "
+                             "heartbeat key read as a corroborating plane -- NOT the ms-heat "
+                             "population and NOT the Trino surface this table projects"),
+                "denominator": "%d of %d objects at the declared home" % (lay["objects"],
+                                                                          lay["objects"]),
+                "explicitly_out": [
+                    "the projected Trino analytics surface -- its rows were NOT read, so no "
+                    "parity between this table and its source is claimed",
+                    "row-level content -- no row was read at this home either; the payload "
+                    "columns are known from the writer's registry, not from the data",
+                    "the sibling snap surfaces code_heat_snap, fedobs_coverage_snap and "
+                    "fedobs_coevolution_snap -- separate subjects with their own cards; their "
+                    "heartbeat keys were read ONLY to place this surface's write against theirs",
+                    "the Nessie catalog plane -- not reachable from this seat"],
+                "basis": "measured",
+                "evidence": ("aws s3api list-objects-v2 auto-paginated, rows counted CLIENT-SIDE "
+                             "-- never --query length(), which returns the PAGE count, and never "
+                             "--no-paginate. %d objects, %d bytes, segments %s. The denominator "
+                             "certifies the SWEEP of this prefix, not the correctness of the "
+                             "prefix; the prefix is certified separately by the copied-home "
+                             "evidence in the location row."
+                             % (lay["objects"], lay["bytes"], lay["by_segment"])),
+                "owner": LANE,
+            },
+            "key": {
+                "identity_space": ("S3 (bucket, key) on the artifact plane; (namespace, table) = "
+                                   "(globgrph, ms_heat_snap) on the Nessie catalog plane; "
+                                   "snapshot_date is the table's own IDENTITY PARTITION key"),
+                "key_expression": "bucket + key, exact string match",
+                "key_is_stable": "stable",
+                "crosses_spaces": True,
+                "declared_mapping": ("the table name is UNIQUE among the globgrph homes measured "
+                                     "on this face, so the catalog key addresses one home"),
+                "basis": "held",
+                "basis_by_field": {
+                    "identity_space": "measured",
+                    "key_expression": "measured",
+                    "key_is_stable": "measured",
+                    "crosses_spaces": "measured",
+                    "declared_mapping": "held",
+                },
+                "evidence": (
+                    "⛔ basis is the FLOOR. MEASURED: the S3 identity, and that `ms_heat_snap` "
+                    "occurs exactly ONCE as a table-name component across the 12 REMOTE-tranche "
+                    "homes -- so unlike the two `cse_test` homes on cards 5 and 6, which share a "
+                    "table name and differ only by uuid, this one has no same-named twin in the "
+                    "measured set and no orphan question arises from it. HELD, not measured: that "
+                    "the catalog key (globgrph, ms_heat_snap) actually RESOLVES to this home. The "
+                    "Nessie catalog is not reachable from this seat, so uniqueness of the NAME is "
+                    "not the same as a verified catalog binding, and this row does not treat it "
+                    "as one. Settling it needs one catalog.load_table read of its metadata "
+                    "location -- the same read cards 5 and 6 name for their own unresolved case."),
+                "owner": LANE,
+            },
+            "failure_mode": {
+                "returns_on_failure": ("A true absence returns KeyCount=0 at rc=0 -- a failed "
+                                       "retrieval returns a VALUE, not an error. And a --query "
+                                       "PROJECTION can render `None` where the field is 0"),
+                "distinguishable_from_true_negative": "no",
+                "basis": "inferred",
+                "basis_by_field": {
+                    "returns_on_failure": "measured",
+                    "distinguishable_from_true_negative": "inferred",
+                },
+                "evidence": (
+                    "FOUR read-only probe classes, each a SEPARATE invocation, rc read UNPIPED. "
+                    "MEASURED: (1) true absence -> rc=%s out=%r; (2) wrong bucket -> rc=%s "
+                    "out=%r, an ERROR not a zero; (3) wrong region -> rc=%s out=%r; (4) near-miss "
+                    "prefix, this home's own uuid tail mutated -> rc=%s out=%r. ⛔ THE FIFTH "
+                    "CLASS -- a missing s3:ListBucket -- WAS NOT EXERCISED and may also return a "
+                    "zero; that unexercised class is the SOLE ground on which "
+                    "distinguishable_from_true_negative is `no` at basis `inferred`. "
+                    "⭐ AND A FIFTH RENDERING CLASS MEASURED AT THIS CARD, on the pending queue: "
+                    "`--query KeyCount --output text` printed `None` for the empty "
+                    "warehouse/snap_ingest/pending/ms_heat_snap/ prefix, while the FULL response "
+                    "for the same prefix carries `\"KeyCount\": 0`. `None` is not a number a "
+                    "consumer can reject on and it is not the same token as `0`. The queue IS "
+                    "genuinely empty -- read from the full response, with the identical "
+                    "projection returning 1 on a populated prefix as the control -- but a "
+                    "projection that renders a real 0 as `None` is a retrieval trap in its own "
+                    "right, and this card reports the full-response read rather than the "
+                    "projection."
+                    % (zc["true_absence"][0], zc["true_absence"][1],
+                       zc["wrong_bucket"][0], zc["wrong_bucket"][1][:60],
+                       zc["wrong_region"][0], zc["wrong_region"][1],
+                       wrong_prefix[0], wrong_prefix[1])),
+                "owner": LANE,
+            },
+        },
+        "verdict": {
+            "standing": "QUALIFIED",
+            "why": (
+                "A REGISTERED, NAMED SURFACE that stopped: the P1 member of the snap family, "
+                "declared in its writer's own SURFACES registry, whose SURVIVING objects were "
+                "written by two appends on consecutive days with no later surviving write and %d "
+                "days of staleness at carding. Unlike this face's cse_test cards it is not a "
+                "scratch table -- the writer names it -- which is why its methodology row is "
+                "`measured` rather than `inferred`. QUALIFIED, and these are the qualifications: "
+                "`authority_role` is `projection` taken from the writer's DECLARED design and not "
+                "from any measured row correspondence, because the projected Trino surface was "
+                "not read; coverage spans the OBJECT plane plus one heartbeat key and NO row was "
+                "read at either; the catalog binding is HELD, since name-uniqueness in the "
+                "measured set is not a verified catalog resolution; the failure mode is not "
+                "distinguishable from a true negative on the one unexercised permission class; "
+                "and WHY the per-snapshot_date rhythm stopped after two days is UNMEASURED. "
+                "⛔ THIS CARD DOES NOT CLASSIFY THE STOP AS A DEFECT. A dated snapshot sibling "
+                "that ran twice may have been exercised exactly as intended, and this seat "
+                "measured the planes rather than the intent. Naming the state is the carder's "
+                "job; deciding it is the owner's." % age),
+            "blocking_defects": None,
+        },
+        "forward_disposition": {
+            "standing": "undecided",
+            "set_by": None,
+            "basis": "absent",
+            "evidence": ("NOT SET BY THE CARDING LANE -- the store owner's call at the class "
+                         "close."),
+            "decided_utc": None,
+        },
+        "carded_by": LANE,
+    }
+
+
 BUILDERS = {"cse": card_cse, "code_heat_snap": card_code_heat_snap,
             "fedobs_coevolution_snap": card_fedobs_coevolution_snap,
             "fedobs_coverage_snap": card_fedobs_coverage_snap,
             "cse_test_24458e6c": card_cse_test_24458e6c,
-            "cse_test_bb57a916": card_cse_test_bb57a916}
+            "cse_test_bb57a916": card_cse_test_bb57a916,
+            "ms_heat_snap": card_ms_heat_snap}
 
 
 def main():
