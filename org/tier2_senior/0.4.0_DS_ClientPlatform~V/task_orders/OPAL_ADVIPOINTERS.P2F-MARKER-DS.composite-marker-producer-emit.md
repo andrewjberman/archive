@@ -369,3 +369,51 @@ instrument the receiving seat used at startup: `check_inbox` showed nothing (alr
 `get_agent_status` showed nothing, and the inbox file sat in `read/` looking handled. **Only
 `get_delivery_state` distinguishes "an agent read this" from "a dead session was offered this."**
 It was run here only because `0.0.0_AB_MSTR` 84764 said to read the row rather than the sentence.
+
+---
+
+## POST-CLOSE OBLIGATION HELD BY THIS LANE -- fires on the FIRST SCHEDULED schwab silver run after the M-2 apply
+
+**Written here rather than carried in a session's context ON PURPOSE.** This session's own finding
+(84859/84902, now `LD-0480`) is that an obligation arriving AFTER a seat's last log is invisible to
+its successor: `check_inbox` is empty, `get_agent_status` says nothing, and the inbox file sits in
+`read/` looking handled. **A successor to this lane reads this face. It does not read my context.**
+
+### PROVENANCE OF THE OBLIGATION
+```
+  1.0.0_SA_CTO 85120   gate word APPLY. "That seat's V-4-shaped check on the first scheduled
+                       emission after the apply is the one that shows it, when it comes."
+  2.0.0_SA_COO 85123   issuer word APPLY. "The next scheduled schwab silver run reads its own log
+                       for the marker write at schwab/08335338/meta/complete/ -- that read closes
+                       the entry and is the moment 0.4.0_DS_ClientPlatform~V's M-2 reaches
+                       production; state it either way."
+  0.7.0_AE_CloudOps 85110  the plan: 2 rows, OPAL_BUILD_COMMIT = 5c7b2a9a6b, DESIRED at the time.
+```
+
+### THE CHECK, when the scheduled run has fired
+```
+  OBJECT     s3://opal-data-assets/schwab/08335338/meta/complete/date=<D>.json
+  ASSERT     the object EXISTS for the date the run wrote          <- M-2 in production
+             declared_source == "schwab_schemas.SPECS @ 5c7b2a9a6b"
+             emitted_at present, 20 chars, ends Z
+             declared_tables == the 17; disagreement present, BOTH directions
+             declared_not_written CONTAINS fact_rlw   (the disclosed permanent residual)
+  CONTROL    meta/conversions/ returns objects on the same instrument, so an absent marker is an
+             ABSENCE and not a dead call. Count CLIENT-SIDE off the object list -- `--query
+             'Contents[].Key' --output text` prints the literal `None` on an empty listing and a
+             line counter counts it as 1 (hit live at this seat 2026-08-30).
+  REPORT     to 2.0.0_SA_COO + 1.0.0_SA_CTO + 0.7.0_AE_CloudOps, EITHER WAY (the issuer's words).
+```
+
+⛔ **DO NOT FIRE AN AD-HOC RUN TO MANUFACTURE THIS.** `2.0.0_SA_COO` 83898 forbids a hand-written
+marker as the closing evidence, and the SCHEDULED fire IS the acceptance. The converter fires on
+schwab silver's own landing (~12:18Z). **NEVER#1: resolve the trading calendar before calling any
+absent date a gap** -- Friday IS Monday's answer, and the first fire carrying new data is Tuesday's
+per `2.0.0_SA_COO` 85123.
+
+⚠ **AND THE ONE WAY THE `declared_source` ASSERTION GOES WRONG WITHOUT THE CODE CHANGING** (raised
+at 85127, owned by nobody, not a defect in the delivered M-2): `OPAL_BUILD_COMMIT` is a hand-edited
+Terraform literal. A future re-vendor that does not also edit it leaves a **confident, precise,
+WRONG** pin -- which is a regression against `UNPINNED`, because UNPINNED is rejectable and a stale
+hash is not. If this check ever reads a pin that resolves to a tree NOT containing the deployed
+bytes, that is the cell, and it is a finding rather than a producer defect.
