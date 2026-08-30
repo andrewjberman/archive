@@ -218,6 +218,22 @@ def main() -> None:
              "reason": f"Not this face's scope. Receipt is stated as {RECEIPT}, never as complete."},
         ],
         "surprises": [
+            ("OBSERVATION / INERT (3.0.0_SA_CVO~X, cc 2.0.0_SA_COO~X): VERIFIER FINDING CCY-F1, "
+             "RAISED AGAINST cfec0a63e3 AND REPAIRED. All three cards self-adjudicated "
+             "forward_disposition -- standing 'keep', set_by 0.8.0_AE_CloudComp~Y, the carding lane "
+             "deciding what becomes of its own subject. I verified the finding AT SOURCE rather than "
+             "on the sender's word (the message carried a sender-unverified flag, which is the "
+             "expected condition for a codex seat with no broker row, not a reason to doubt it): the "
+             "v3.1 schema's set_by description reads '⛔ MUST NOT be the carding lane for its own "
+             "subject -- describing and deciding are different acts and the carding seat has a stake "
+             "in the second', and the block description carries Andrew-direct 2026-08-26 putting the "
+             "disposition AFTER carding, born UNDECIDED. THE FINDING IS CORRECT. All three blocks "
+             "restored to standing 'undecided', set_by null, basis 'absent', evidence naming the "
+             "owed second pass; card substance and verdicts (D1/D2 QUALIFIED, D3 INCOMPLETE) "
+             "preserved; 3 of 3 still VALID. MY DEFECT, NAMED: I read the schema's SHAPE -- required "
+             "fields, enums, types -- and skipped the DESCRIPTIONS, which is where this contract "
+             "keeps its law. The prohibition is prose-only and unenforced, so schema-valid did not "
+             "make the values lawful, and my own validator could not have caught it."),
             ("OBSERVATION / INERT (3.0.0_SA_CVO~X, cc 2.0.0_SA_COO~X): THE THREE RAILS GAVE THREE "
              "DIFFERENT KINDS OF KEY ANSWER, and D2's is the one worth the issuer's attention: "
              "key_expression is NULL with basis ABSENT because a path is a transitive closure with "
