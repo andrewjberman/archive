@@ -31,7 +31,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[5]   # the REPO ROOT; parents[4] is <repo>/org
 OUT = Path(__file__).resolve().parent
 REL = "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_L3S7B_MEASUREMENT/"
-FACE_PIN = "aafc8d61b1"
+FACE_PIN = "0684a3e11a"
 FACE = "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_C3MATERIALIZE.TO-L3S7B-CCY.measurement.md"
 PEND = "PENDING-THIS-COMMIT"
 
@@ -195,7 +195,7 @@ def main() -> None:
         "decomp_ref": {
             "doc": "workflows/atom_decomposition/runs/nfra-c3materialize-L3/20260830T0852Z/"
                    "DECOMP.md",
-            "vintage_commit": "975a1cc50e",
+            "vintage_commit": "97ccacce00",
             "to_ref": FACE,
         },
         "artifacts_produced": [artifact_row(f) for f in files],
