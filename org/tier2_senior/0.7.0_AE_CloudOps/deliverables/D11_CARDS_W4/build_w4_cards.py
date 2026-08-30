@@ -33,6 +33,7 @@ from __future__ import annotations
 import collections
 import json
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -135,6 +136,39 @@ def carrier_cells(group):
     raw = subprocess.run(["git", "show", "%s:%s" % (CARRIER_PIN, CARRIER)],
                          capture_output=True).stdout
     return [c for c in json.loads(raw)["cells"] if c["cell_id"].startswith(group + "-")]
+
+
+def refuse_prose_basis_mismatch(doc):
+    """Any PROSE assertion about a row's basis must equal that row's STRUCTURED basis.
+
+    The structured repair and the sentence explaining it are two carriers of one claim. Nothing
+    in the schema or the checker compares them, so a row can carry basis='absent' while its own
+    evidence says it floors to 'held' -- which is exactly what shipped at @fd6b4ccb3f and what
+    4.0.0_SA_CRO~X caught. An all-row STRUCTURED audit cannot see this: it compares scalars to
+    maps and never reads the prose.
+    """
+    pat = re.compile(r"(?:floors? to|row is|row floors to|basis is)\s*`?"
+                     r"(measured|held|inferred|absent)`?", re.I)
+    bad = []
+    for sec in ("process", "artifact", "trust"):
+        for row, body in doc.get(sec, {}).items():
+            if not isinstance(body, dict) or "basis" not in body:
+                continue
+            for claimed in pat.findall(body.get("evidence", "") or ""):
+                if claimed.lower() != body["basis"]:
+                    bad.append("%s.%s: prose says %r, structured basis is %r"
+                               % (sec, row, claimed, body["basis"]))
+    # the verdict speaks ABOUT rows, so it is checked against the row it names
+    why = doc.get("verdict", {}).get("why", "") or ""
+    for m in re.finditer(r"cadence row is\s*`?(measured|held|inferred|absent)`?", why, re.I):
+        actual = doc["process"]["cadence"]["basis"]
+        if m.group(1).lower() != actual:
+            bad.append("verdict.why: says cadence row is %r, structured basis is %r"
+                       % (m.group(1), actual))
+    if bad:
+        raise ValueError("PROSE/STRUCTURE BASIS MISMATCH -- a corrected field whose sentence was "
+                         "not corrected:\n  " + "\n  ".join(bad))
+    return True
 
 
 def card_cse():
@@ -492,7 +526,7 @@ def card_code_heat_snap():
                     "tool_activity) tied to /log. "
                     "APPLIED IS UNMEASURED AND THE ROW SAYS SO. A dev-box /log cadence is not "
                     "observable from this seat, so live_matches_declared is `unmeasured` and the "
-                    "row floors to `held`. What IS measured is the STAGE-THEN-INGEST plane: "
+                    "row floors to `absent`. What IS measured is the STAGE-THEN-INGEST plane: "
                     "pending/code_heat_snap/ KeyCount=0 (nothing awaiting ingest); "
                     "done/code_heat_snap/ holds exactly ONE batch, 20260716T150116Z.jsonl, "
                     "12,925,409 bytes, ingested 2026-07-16T15:28:06Z -- the SAME INSTANT as the "
@@ -636,7 +670,7 @@ def card_code_heat_snap():
                     "host-bound -- dev-box cadence tied to /log, per the CTO revert at "
                     "item2a.tf:402-406 and the Andrew-ruled split at 04_federated.md:21 -- and "
                     "whether that cadence has RUN is UNMEASURABLE from this seat, so the "
-                    "cadence row is `held`. QUALIFIED on the limbs ENUMERATED below and "
+                    "cadence row is `absent`. QUALIFIED on the limbs ENUMERATED below and "
                     "deliberately NOT counted, so that adding a limb cannot desynchronise a "
                     "cardinal: authority_role is `projection` and the git plane it projects was "
                     "NOT traversed; the catalog-to-prefix binding and the (repo, path) join are "
@@ -679,6 +713,7 @@ def main():
         if name not in BUILDERS:
             raise SystemExit("no builder for %r (have: %s)" % (name, ", ".join(BUILDERS)))
         doc = BUILDERS[name]()
+        refuse_prose_basis_mismatch(doc)
         p = os.path.join(D, "%s.v3.1.json" % name)
         with open(p, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(doc, fh, indent=1)
