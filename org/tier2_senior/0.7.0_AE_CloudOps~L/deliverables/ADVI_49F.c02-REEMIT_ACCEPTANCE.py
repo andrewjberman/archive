@@ -127,6 +127,8 @@ def main() -> int:
     r5_rows_with_vintage = 0
     r5_bad: list[str] = []
     schema_10 = []
+    shape_census: dict = {}
+    per_partition = []
 
     for i, d in enumerate(dates, 1):
         key = f"{GOLD_ROOT}/canonical/twr_daily/date={d}/data.parquet"
@@ -152,9 +154,38 @@ def main() -> int:
         else:
             r5_bad.append(d)
 
-        missing = [c for c in VALUE_COLS if c not in new.columns]
-        if missing:
-            schema_10.append({"date": d, "absent_columns": missing,
+        # THREE-STATE SCHEMA CENSUS, not two.
+        # ⛔ MY FIRST VERSION OF THIS COMMENT SAID THE MIXED PRESENT-AS-NaN SHAPE IS SOMETHING
+        # C02-g-5 CREATES ON 396 PARTITIONS. THAT IS FALSE AND I MEASURED IT FALSE: censused
+        # all 535 served partitions on 2026-08-30 BEFORE C02-g-5 -- 532 are ALREADY
+        # PRESENT-AS-NaN, 3 are ABSENT (the all-refused ones), and ZERO are clean. 412,142
+        # rows carry a NaN operand, which is EXACTLY the non-OK row count, with 0 partitions
+        # where the two sets differ. The mixed shape is the NORM, not a consequence.
+        # WHY IT IS STRUCTURAL: the engine's refusal branches append a five-key dict with no
+        # operands, and pandas unions the frame, so every refusal row reads NaN there.
+        # ⛔ THE REAL TRAP, AND IT IS WORSE THAN THE ONE I FIRST WROTE: operand-NaN and
+        # `status != OK` are PERFECTLY REDUNDANT on today's data (535 of 535, zero
+        # mismatches). So a consumer keying on operand PRESENCE gets the right answer every
+        # time and is indistinguishable from a correct status-keyed one -- and stays
+        # indistinguishable after C02-g-5. Shape-keying has always been wrong and has always
+        # looked right. That is why the contract sets SHAPE_IS_A_VALID_CLASSIFIER = False and
+        # perfrp_contract.py:325-331 names the NaN->0 rendering (it did exactly that in
+        # link_returns @2e87c580b2). Reported here per partition, with the NaN row count, so
+        # the census states the shape rather than inferring it from an absence test.
+        absent = [c for c in VALUE_COLS if c not in new.columns]
+        present = [c for c in VALUE_COLS if c in new.columns]
+        nan_rows = int(new[present].isna().any(axis=1).sum()) if present else 0
+        if absent:
+            shape_state = "ABSENT"
+        elif nan_rows:
+            shape_state = "PRESENT-AS-NaN"
+        else:
+            shape_state = "PRESENT-AND-POPULATED"
+        shape_census[shape_state] = shape_census.get(shape_state, 0) + 1
+        if shape_state != "PRESENT-AND-POPULATED":
+            schema_10.append({"date": d, "shape_state": shape_state,
+                              "absent_columns": absent,
+                              "rows_with_a_NaN_operand": nan_rows,
                               "rows": int(len(new)),
                               "status_census": Counter(new["status"]).most_common()})
 
@@ -207,6 +238,15 @@ def main() -> int:
                     r4_gap_min = lo if r4_gap_min is None else min(r4_gap_min, lo)
                     r4_gap_max = hi if r4_gap_max is None else max(r4_gap_max, hi)
 
+        per_partition.append({
+            "date": d, "rows": int(len(new)), "cols": int(len(new.columns)),
+            "shape_state": shape_state, "rows_with_a_NaN_operand": nan_rows,
+            "status_census": dict(Counter(new["status"])),
+            "vintage_ok": bool(has_v.all()), "schema_ok": bool(sv_ok),
+            "OK_rows_with_negative_bmv": (
+                int(((new["status"] == "OK") & (new["bmv"] < 0)).sum())
+                if "bmv" in new.columns else None),
+        })
         if i % 50 == 0:
             print(f"  ... {i}/{len(dates)}", flush=True)
 
@@ -242,7 +282,9 @@ def main() -> int:
                "rows_total": r5_rows_total, "rows_with_expected_vintage": r5_rows_with_vintage,
                "expected_vintage": EXPECT_VINTAGE, "expected_schema": EXPECT_SCHEMA},
         "R6_out_of_domain_tables": r6,
+        "SHAPE_CENSUS": shape_census,
         "NOT_EVALUABLE_BY_SCHEMA": schema_10,
+        "PER_PARTITION": per_partition,
     }
     Path(args.out).write_text(json.dumps(res, indent=1), encoding="utf-8")
 
@@ -266,7 +308,10 @@ def main() -> int:
     for t, v in r6.items():
         print(f"       {t:24s} {v['created_after_campaign_start']} new of "
               f"{v['versions_total']} total (newest {v['newest']})")
-    print(f"NOT-EVALUABLE-BY-SCHEMA partitions (value columns ABSENT): {len(schema_10)}")
+    print("SHAPE CENSUS (three states, denominator = partitions evaluated):")
+    for k in ("PRESENT-AND-POPULATED", "PRESENT-AS-NaN", "ABSENT"):
+        print(f"       {k:24s} {shape_census.get(k, 0)} of {len(dates)}")
+    print(f"NOT-EVALUABLE-BY-SCHEMA / mixed partitions listed: {len(schema_10)}")
     for s in schema_10:
         print(f"       {s['date']}  absent={s['absent_columns']}  rows={s['rows']}  "
               f"status={s['status_census']}")
