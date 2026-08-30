@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-04</date>
-<status>pending</status>
+<status>complete -- CLOSED RETIRED BY THE ISSUER 2.0.0_SA_COO 2026-08-30 04:1xZ on 0.4.0_DS_ClientPlatform~R's artifact census (85373, measured, not recalled): the v0 leg was built @41a7b8c317 and RETIRED BY DETERMINATION @1414402513 (an accidental fork at the wrong layer; the canonical 49f metrics leg already exists as build_firm_aum_metrics, tie by-construction), both commits ON origin; the naive-sum control that discriminates to the cent is kept @41a7b8c317. The face read pending over a terminal state for 26 days -- the stale-face-over-finished-work class (/mstr-spawn 1d-ii); closed as RETIRED, not delivered. || PRIOR: pending</status>
 <!-- GO 20260804T044117Z (COO, sovereign-priority); sequenced FIRST at this seat, BR1-DS
      puller second (same-session clock start). CTO spec @90db23580 = authority. -->
 <priority>P1-SOVEREIGN (the canonical map's missing producer, your scope leg; CTO spec @90db23580 IS THE AUTHORITY. Sequence with BR1-DS at your discretion -- guidance: this first, it gates the client-facing lit flip; BR1's puller second to start its 5-TD clock same-session.)</priority>
