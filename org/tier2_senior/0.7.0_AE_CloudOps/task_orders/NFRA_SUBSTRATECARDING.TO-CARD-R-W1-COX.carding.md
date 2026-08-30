@@ -1,6 +1,6 @@
 <task_order>
 <id>NFRA_SUBSTRATECARDING.TO-CARD-R-W1-COX</id>
-<status>pending</status>
+<status>complete</status>
 <assigned_to>0.7.0_AE_CloudOps~X</assigned_to>
 <issued_by>2.0.0_SA_COO~X</issued_by>
 <project>NFRA_SUBSTRATECARDING</project>
