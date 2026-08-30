@@ -285,6 +285,106 @@ question is real, is not mine, and is named rather than answered.
 
 ---
 
+### 7.2 ⛔ STEP 0 EXECUTED 2026-08-30 01:2x–01:4xZ — THE SUBSTRATE IS A **LAMBDA PACKAGE**, THE MINT IS **0 FILES**, AND THE FIRST-MINT IS COUPLED TO TWO OTHER SEATS' HELD WORK
+
+Measured by `0.4.0_DS_ClientPlatform~R` on the issuer's instruction (`2.0.0_SA_COO` 78473; form
+re-confirmed at 84035 — *"MEASURE at the DS seat … then carry the result to `0.7.0_AE_CloudOps`
+(base) for confirmation before minting anything"*, superseding the predecessor handoff's "the AE
+lane's to state"). **Every citation below is `@5da0a45c47`, and all six cited files read CLEAN in
+`git status --porcelain` at that commit-ish.**
+
+⭐ **THE ANSWER IS s.7.1's BRANCH 2 — a PACKAGE — AND IT IS BETTER THAN THAT BRANCH HOPED: the two
+dependencies are already vendored into the package by construction.**
+
+```
+  infra/aws/lambda/opal-assets/opal-assets-silver-blackdiamond/BUILD_MANIFEST.json
+    "vendored_modules": 8 entries, FLAT at zip root
+       data/assets/scripts/silver/raw_json_reader.py     <- PRESENT  (the :113 import)
+       data/assets/scripts/silver/silver_registry.py     <- PRESENT  (the :114 import)
+       data/assets/scripts/silver/bd49f_insurance_conversion.py   <- ABSENT (denominator 8)
+    "vendoring": "FLAT at zip root -- repo files are the source of truth; fix there and rebuild"
+```
+
+The estate's silver substrate for `opal-data-assets` is `module.silver_converter` (`silver.tf:463`)
+— one Lambda per family, `opal-assets-silver-<family>`, triggered by prefix-scoped S3 notifications
+(`silver_event_rules`, `silver.tf:122`) plus a per-family sweep (`silver_sweep_slots`). **It reads no
+S3 code prefix at run time.** Corroborated from the other side by `0.5.0_AE_OpalETL~B` 70946, whose
+subject was a different question: *"Every `mirror_schemas` consumer runs IN THE LAMBDA, which vendors
+FLAT per BUILD_MANIFEST.json and never reads S3 at runtime."*
+
+**THREE CANDIDATE SUBSTRATES, AND THEY IMPLY OPPOSITE MINTS. The measurement is what separates them:**
+
+| substrate | how it gets code | the three files there | mint |
+|---|---|---|---|
+| **(A) `opal-assets-silver-blackdiamond` Lambda** — the estate's existing pattern for THIS bucket+family | vendored FLAT into the zip; no runtime S3 read | deps **PRESENT**, producer ABSENT | ⭐ **0 to S3** |
+| (B) the ADVI 49F gold chain — s.3's proposal, *"the same way `a00_runner` is"* | `aws s3 sync s3://opal-data-49financial/_code/ /tmp/advi_49f_code/ --delete` then `cd`, `advi_49f_floor.tf:280-281` | **all three ABSENT** (denominator **79** keys, live; positive controls `a00_runner.py` 1, `lib/trading_calendar.py` 1) | 3, into `_code/` |
+| (C) `s3://opal-data-mdpf/code/scripts/silver/` — the prefix s.7.1 measured | synced by the **mdpf-daily-runner** EC2 (`mdpf-daily-dispatch.sh:125`, `--delete`), the cottonwood/mdpf legs | **all three ABSENT** (still exactly **2** keys, live 01:3xZ: `build_fact_taxsma_report.py`, `rebalancer_schemas.py`) | a copy nothing executes |
+
+⛔ **(B) IS NOT REACHABLE BY THE DEPLOY RAIL AS IT STANDS, WHICH IS ITSELF THE FINDING ABOUT (B).**
+`file_to_s3_target` EXERCISED (not read) at `.tools/safe_deploy_core.py:337`, with controls:
+```
+  data/assets/scripts/silver/bd49f_insurance_conversion.py -> ('opal-data-mdpf', 'code/scripts/silver/...', 'mdpf')
+  data/assets/scripts/silver/raw_json_reader.py            -> ('opal-data-mdpf', ...)
+  data/assets/scripts/silver/silver_registry.py            -> ('opal-data-mdpf', ...)
+  POS CONTROL  gold/runners_49f/a00_runner.py  -> ('opal-data-49financial', '_code/a00_runner.py', 'advi')
+  POS CONTROL  gold/build_dim_model_portfolio.py -> ('opal-data-mdpf', 'code/scripts/assets_gold/...', 'mdpf')
+  NEG CONTROL  README.md                       -> None
+```
+**The producer's ONLY deploy target is the mdpf bucket; the chain s.3 names executes from the
+49financial bucket. `safe-deploy` cannot place this file where that chain would run it** — that is a
+deploy-rail / chain-wiring act, not a DS one.
+
+⛔ **WHAT THIS RETIRES, AND s.7.1 PREDICTED IT IN ITS OWN WORDS.** Minting to (C) would create *"a
+deployed copy nothing executes, which then drifts from the repo unverified."* **The 2-of-20 number in
+s.7.1 is not wrong — it is about a prefix this producer's chain never reads.** The narrow claim held;
+the implicit assumption underneath it (that the deploy target IS the execution substrate) did not.
+
+⛔ **THE PART THAT IS A BLOCKING FINDING RATHER THAN A RESULT — THE REBUILD CANNOT BE SCOPED TO THIS
+PRODUCER, AND BOTH HAZARDS ARE RECORDED IN THE MANIFEST I WOULD BE EDITING:**
+1. **`vendor_parity_expected_red`** — `rebalancer_conversion.py` + `rebalancer_schemas.py` are AHEAD in
+   source vs vendored AND deployed (the 3F-S5 provenance sidecar, source-only since `1351c74d96`,
+   2026-07-23). **`vendor-manifest.sh` copy mode has NO module filter (`:38` iterates every entry,
+   `:47` `cp` unconditional)** — so a routine re-vendor to add the insurance module **ships S5 as a
+   side effect**, which is precisely the unsequenced-cross-layer-change defect that note exists to
+   prevent.
+2. **`deploy_precondition_S7` — ARMED-ON-SHIP.** Shipping S5 without correcting
+   `rebalancer_schemas.py:83 PROVENANCE_CONTRACT_START = "2026-07-23"` leaves the force-guard at
+   `rebalancer_conversion.py:589` passing every date in the 07-23..actual-deploy window — a forced
+   reconversion silently synthesizes provenance never observed. **The manifest names its remedy as a
+   DS-lane edit under Rule 13**, i.e. potentially this lane's, and names `0.7.0_AE_CloudOps` as the S5
+   deploy owner.
+> ⭐ **SO THE FIRST-MINT OF THIS STAGE IS SEQUENCED BEHIND TWO OTHER SEATS' HELD WORK. That is not a
+> reason to route around it into (B) or (C)** — a mint at the wrong prefix would look like progress and
+> execute nowhere. **It is the sequencing the issuer needs before the build opens.**
+
+⚠ **AND (A) IS THE SUBSTRATE, NOT YET THE WIRING. STATED SEPARATELY SO THE TWO ARE NOT CONFLATED.**
+The 49F insurance bronze prefix is **NOT** covered by any event rule today: the `blackdiamond` row is
+`prefix = "blackdiamond/cottonwood/bronze/", suffix = ".xlsx"` (`silver.tf:127`), and the function's
+own docstring scopes itself — *"V2-8 silver converter lambda, **cottonwood family** … Event path:
+Section-3 rule 5"*. **So `blackdiamond/49financial/bronze/insurance_*` reaches no converter at all.**
+Adding that rule (and deciding whether it rides this family's Lambda or its own) is the **AE/TF act**,
+and the notification resource is the bucket **SINGLETON** — a second one silently deletes the other 9
+rules (`silver.tf:502-507`). **I am naming this, not designing it.**
+
+⚠ **WHAT I DID NOT MEASURE, AT ITS REAL GRAIN.** I did **not** read the live SSM document body
+(`ssm get-document`) for (B). Its runCommand is DESIRED at `advi_49f_floor.tf:280-290`; APPLIED is
+**INFERRED** from 559 live objects under `s3://opal-data-49financial/gold/advi/_logs/` (newest
+`chain_20260829T124542Z.log`, `CHAIN START … mode=production`), whose key convention has exactly ONE
+writer in first-party source — that same `:290` line. **Reasonable, and not the same as reading the
+document.** The aws-plane node reads `drift=DECLARED` off a Kuzu DB built 2026-08-28T20:28Z (**29h,
+flagged STALE**) — recorded rather than leaned on. **Nothing in my recommendation turns on (B).**
+
+⛔ **NOT CONCLUDED: that (A) is the right DESIGN.** It is the measured SUBSTRATE of every sibling silver
+converter on this bucket and the only branch where this producer's imports resolve by construction —
+which is why it is the recommendation. **Whether the insurance stage should be a rule on the
+blackdiamond family Lambda, its own family, or a step in the 49F chain is the issuer's call with the
+AE lane, and s.3's proposal is still on the table.** ⚠ Adjacent, carried not chased: `.tools/
+safe_deploy_core.py:355` still comments *"a check-only tree (mdpf) returns None exactly as before"*
+while `CODE_TREES["mdpf"]["deploy_gated"]` is `True` (`:124`) — a stale comment in the deploy rail,
+owner `0.8.0_AE_CloudComp`. It changes no behaviour and I did not touch it.
+
+---
+
 ## 8. WHAT THIS DESIGN DOES NOT SOLVE — stated so nobody reads it as more than it is
 
 - **Cohort coverage on `relationshipdetail` stays open.** Today's partition holds **1 relationship of
