@@ -6,8 +6,8 @@
   "declared_domain": "The production CSE (Change/Signal Event) store: an Apache Iceberg table under the globgrph Nessie catalog, holding validated CSE rows appended by the nightly producers. The subject is THE STORE, not its writer -- cse_store.py is carded separately at D11_CARDS_W3 (PATH_A_append / PATH_B_drop), and conflating the two is the grain error this domain line exists to prevent. QUALIFIES THE CELLS CARRIER (AC4): org/tier2_senior/0.7.0_AE_CloudOps/deliverables/cells.0.7.0_AE_CloudOps~X.json @a5fffa2bb7, cells W4-bqrk-1 W4-bqrk-2 W4-bqrk-3 W4-bqrk-4 W4-bqrk-5 W4-bqrk-6 W4-bqrk-7 -- this card is the v3.1 reading of those 7 cells and the carrier itself is NOT edited."
  },
  "as_of": {
-  "carded_utc": "2026-08-30T14:15:12Z",
-  "commit_ish": "bf393fcd4ee7f2063a4d63838427ef9cd691086d",
+  "carded_utc": "2026-08-30T14:34:26Z",
+  "commit_ish": "6e574dec5bd5ce82522b4bce63027d09b12bc80a",
   "graph_vintage": "S3 plane read live at card time; no graph consulted"
  },
  "process": {
@@ -93,16 +93,20 @@
    "owner": "0.7.0_AE_CloudOps~X"
   },
   "failure_mode": {
-   "returns_on_failure": "KeyCount=0 -- returned IDENTICALLY for a true absence, a wrong bucket, a wrong region, and a missing s3:ListBucket. A failed retrieval returns a VALUE, not an error.",
+   "returns_on_failure": "A true absence returns KeyCount=0 at rc=0 -- a failed retrieval returns a VALUE, not an error. MEASURED: a wrong BUCKET does NOT do this (rc=255, NoSuchBucket) and a wrong REGION does NOT either (rc=0, the CORRECT KeyCount). A missing s3:ListBucket was NOT exercised and is the one class that may still return an ambiguous result.",
    "distinguishable_from_true_negative": "no",
    "basis": "measured",
-   "evidence": "\u26d4 NO. Two SEPARATE invocations on the SAME bucket -- target prefix -> KeyCount=1, bogus sibling prefix (cse_00000000-0000-0000-0000-000000000000) -> KeyCount=0 -- establish that THIS target exists NOW, since a 1 cannot arise from a wrong bucket or an absent permission. They do NOT make a FUTURE zero readable: a later 0 here would still be emitted identically by a true absence, a wrong bucket, a wrong region and a revoked s3:ListBucket. The earlier `yes` conflated 'I discriminated the present positive' with 'the failure mode is distinguishable' -- different claims. Separating the zero classes needs instruments outside this call (HeadBucket, an explicit region probe, simulate-principal-policy for the permission limb, each run separately); none was run, so this reads `no`.",
+   "basis_by_field": {
+    "returns_on_failure": "measured",
+    "distinguishable_from_true_negative": "measured"
+   },
+   "evidence": "\u26d4 NO. Two SEPARATE invocations on the SAME bucket -- target prefix -> KeyCount=1, bogus sibling prefix (cse_00000000-0000-0000-0000-000000000000) -> KeyCount=0 -- establish that THIS target exists NOW, since a 1 cannot arise from a wrong bucket or an absent permission. They do NOT make a FUTURE zero readable: a later 0 here would still be emitted identically by a true absence, a wrong bucket, a wrong region and a revoked s3:ListBucket. The earlier `yes` conflated 'I discriminated the present positive' with 'the failure mode is distinguishable' -- different claims. Separating the zero classes needs instruments outside this call. THOSE PROBES WERE THEN RUN, each a SEPARATE read-only invocation, and they FALSIFY the inherited claim that all four classes emit an identical zero: true absence -> rc=0 '0'; wrong bucket -> rc=255 'An error occurred (NoSuchBucket) when calling the ListObjectsV2 operation: The specified bucket does not exist'; wrong region -> rc=0 '1'. Only the true absence produces a zero at all -- a wrong bucket ERRORS and a wrong region returned the CORRECT count. \u26d4 THAT CLAIM CAME FROM THE CARRIER'S CELL 7 AND I REPEATED IT AS 're-confirmed' WITHOUT EXERCISING IT. distinguishable stays `no` on the ONE remaining unexercised class -- a missing s3:ListBucket, which cannot be probed from this principal without altering a permission -- and no longer on the two now measured to be distinguishable.",
    "owner": "0.7.0_AE_CloudOps~X"
   }
  },
  "verdict": {
   "standing": "QUALIFIED",
-  "why": "LOAD-BEARING: the production CSE store, authority_role=source, appended by the nightly producers and read downstream. QUALIFIED on two named limbs -- the catalog-to-prefix binding is HELD rather than measured (trust.key); coverage is over the OBJECT plane only, asserting nothing about whether the CSE event population is complete; and the failure mode is NOT distinguishable from a true negative -- a KeyCount of 0 is emitted identically by absence, a wrong bucket, a wrong region and a revoked ListBucket, so an absence verdict here needs an instrument this card did not run. The 2 short write-day(s) (2026-08-20, 2026-08-28) are recorded as an observation about the as-built rhythm, not a defect: an empty batch writes nothing by design and a failed write raises.",
+  "why": "LOAD-BEARING: the production CSE store, authority_role=source, appended by the nightly producers and read downstream. QUALIFIED on the limbs ENUMERATED below and deliberately NOT counted, so that adding a limb cannot desynchronise a cardinal: the catalog-to-prefix binding is HELD rather than measured (trust.key); coverage is over the OBJECT plane only, asserting nothing about whether the CSE event population is complete; and the failure mode is NOT distinguishable from a true negative -- a KeyCount of 0 is emitted identically by absence, a wrong bucket, a wrong region and a revoked ListBucket, so an absence verdict here needs an instrument this card did not run. The 2 short write-day(s) (2026-08-20, 2026-08-28) are recorded as an observation about the as-built rhythm, not a defect: an empty batch writes nothing by design and a failed write raises.",
   "blocking_defects": null
  },
  "forward_disposition": {

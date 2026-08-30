@@ -57,6 +57,28 @@ def _aws(*args):
     return r.stdout.strip()
 
 
+def probe(*args):
+    """Run a read-only call and RETURN (rc, first line), never raise. _aws() raises on rc!=0,
+    which would make the error-producing classes unmeasurable by the very helper used to measure
+    them -- the instrument would refuse exactly the cases under test."""
+    r = subprocess.run([AWS] + list(args), capture_output=True, text=True)
+    out = (r.stdout.strip() or r.stderr.strip()).splitlines()
+    return r.returncode, (out[0][:150] if out else "")
+
+
+def zero_class_probes(home):
+    """Which failure classes actually PRODUCE a KeyCount of 0? Each a SEPARATE invocation."""
+    base = ["s3api", "list-objects-v2", "--max-keys", "1", "--query", "KeyCount",
+            "--output", "text"]
+    return {
+        "true_absence": probe(*(base + ["--bucket", BUCKET, "--prefix", BOGUS])),
+        "wrong_bucket": probe(*(base + ["--bucket", "opal-no-such-bucket-probe-20260830",
+                                        "--prefix", "x/"])),
+        "wrong_region": probe(*(base + ["--bucket", BUCKET, "--prefix", home,
+                                        "--region", "us-west-1"])),
+    }
+
+
 def key_count(prefix):
     """A POSITIVE is load-bearing; a 0 is not (see the module docstring)."""
     return int(_aws("s3api", "list-objects-v2", "--bucket", BUCKET, "--prefix", prefix,
@@ -90,6 +112,7 @@ def card_cse():
     home = HOMES["cse"]
     kc, bogus_kc = key_count(home), key_count(BOGUS)      # SEPARATE invocations, by construction
     cen = object_census(home)
+    zc = zero_class_probes(home)
     writer = "infra/aws/globgrph/cse_store.py"
     wpin = git_pin(writer)
     cells = carrier_cells(GROUPS["cse"])
@@ -242,12 +265,17 @@ def card_cse():
                 "owner": LANE,
             },
             "failure_mode": {
-                "returns_on_failure": ("KeyCount=0 -- returned IDENTICALLY for a true absence, a "
-                                       "wrong bucket, a wrong region, and a missing "
-                                       "s3:ListBucket. A failed retrieval returns a VALUE, not "
-                                       "an error."),
+                "returns_on_failure": ("A true absence returns KeyCount=0 at rc=0 -- a failed "
+                                       "retrieval returns a VALUE, not an error. MEASURED: a "
+                                       "wrong BUCKET does NOT do this (rc=255, NoSuchBucket) "
+                                       "and a wrong REGION does NOT either (rc=0, the CORRECT "
+                                       "KeyCount). A missing s3:ListBucket was NOT exercised "
+                                       "and is the one class that may still return an "
+                                       "ambiguous result."),
                 "distinguishable_from_true_negative": "no",
                 "basis": "measured",
+                "basis_by_field": {"returns_on_failure": "measured",
+                                   "distinguishable_from_true_negative": "measured"},
                 "evidence": ("⛔ NO. Two SEPARATE invocations on the SAME bucket -- target "
                              "prefix -> KeyCount=%d, bogus sibling prefix (%s) -> KeyCount=%d -- "
                              "establish that THIS target exists NOW, since a 1 cannot arise from "
@@ -257,17 +285,31 @@ def card_cse():
                              "s3:ListBucket. The earlier `yes` conflated 'I discriminated the "
                              "present positive' with 'the failure mode is distinguishable' -- "
                              "different claims. Separating the zero classes needs instruments "
-                             "outside this call (HeadBucket, an explicit region probe, "
-                             "simulate-principal-policy for the permission limb, each run "
-                             "separately); none was run, so this reads `no`."
-                             % (kc, BOGUS.rsplit("/", 2)[-2], bogus_kc)),
+                             "outside this call. THOSE PROBES WERE THEN RUN, each a SEPARATE "
+                             "read-only invocation, and they FALSIFY the inherited claim that "
+                             "all four classes emit an identical zero: true absence -> rc=%d "
+                             "%r; wrong bucket -> rc=%d %r; wrong region -> rc=%d %r. Only the "
+                             "true absence produces a zero at all -- a wrong bucket ERRORS and "
+                             "a wrong region returned the CORRECT count. ⛔ THAT CLAIM CAME "
+                             "FROM THE CARRIER'S CELL 7 AND I REPEATED IT AS 're-confirmed' "
+                             "WITHOUT EXERCISING IT. distinguishable stays `no` on the ONE "
+                             "remaining unexercised class -- a missing s3:ListBucket, which "
+                             "cannot be probed from this principal without altering a "
+                             "permission -- and no longer on the two now measured to be "
+                             "distinguishable."
+                             % (kc, BOGUS.rsplit("/", 2)[-2], bogus_kc,
+                                zc["true_absence"][0], zc["true_absence"][1],
+                                zc["wrong_bucket"][0], zc["wrong_bucket"][1],
+                                zc["wrong_region"][0], zc["wrong_region"][1])),
                 "owner": LANE,
             },
         },
         "verdict": {
             "standing": "QUALIFIED",
             "why": ("LOAD-BEARING: the production CSE store, authority_role=source, appended by "
-                    "the nightly producers and read downstream. QUALIFIED on two named limbs -- "
+                    "the nightly producers and read downstream. QUALIFIED on the limbs "
+                    "ENUMERATED below and deliberately NOT counted, so that adding a limb "
+                    "cannot desynchronise a cardinal: "
                     "the catalog-to-prefix binding is HELD rather than measured (trust.key); "
                     "coverage is over the OBJECT plane only, asserting nothing about whether the "
                     "CSE event population is complete; and the failure mode is NOT "
