@@ -21,28 +21,23 @@ L3W3-c69f-1 L3W3-c69f-2 L3W3-c69f-3 L3W3-c69f-4 L3W3-c69f-5
 </decomp_ref>
 
 <proof_of_spec>
-  <criterion id="L3W3-CCX-AC1">
-    <cell_refs>L3W3-c69f-1</cell_refs>
+  <criterion id="L3W3-CCX-AC1" cell_refs="L3W3-c69f-1">
     <label>L3C01_floor.consumer_binding</label>
     <oracle>THE SEAT SEATED ON THIS CELL OWNS READING `firm_representation` AND THIS CELL NAMES THE FIELD EXPLICITLY rather than inheriting it from any message. MEASURED by 0.8.0_AE_CloudComp~X at the pin: NO consumer reads it today -- check_stability_L3C01.py @d8725bc60c, 936 lines, `firm_representation` 0 / `effective_partition` 0 / `base_rate` 0 / `mdpf` 0, positive control `permutation_battery` 6. That is the EXPECTED answer (those are wave-3 arm fields on an artifact that did not exist), not a gap in that seat's work -- and it is exactly why the binding needs an owner: a field everyone believes is read that nobody cuts a cell to read drifts to unpopulated. Measured on this project: 0 of 16 defective where a validator rejects, 5 of 39 in the neighbouring free string. The consumer REJECTS on a missing or unresolvable firm_representation; it does not warn.</oracle>
   </criterion>
-  <criterion id="L3W3-CCX-AC2">
-    <cell_refs>L3W3-c69f-2</cell_refs>
+  <criterion id="L3W3-CCX-AC2" cell_refs="L3W3-c69f-2">
     <label>L3C01_floor.floor_derivation</label>
     <oracle>THIS IS RUN 2, so a floor MAY finally be derived -- and only from run 1's battery, never its own (1b prohibits same-run derivation). floor_derivation.<S> carries derived_from_run_id, derived_at_commit, derived_from_path, derived_artifact_sha256, metric_domain, null, spread, n_permutations, multiplier 3, floor (the checker RECOMPUTES it), deriving_run_observed and sanity. derived_at_commit MUST be a strict ancestor of the carrier.</oracle>
   </criterion>
-  <criterion id="L3W3-CCX-AC3">
-    <cell_refs>L3W3-c69f-3</cell_refs>
+  <criterion id="L3W3-CCX-AC3" cell_refs="L3W3-c69f-3">
     <label>L3C01_floor.tail_binding</label>
     <oracle>J's derivation is BLOCKED until N >= 20 and carries tail_observed_at_n 6; rho may derive at N >= 5 having no tail. An in-battery draw outside the band of the others at derivation time returns SPREAD_TAIL and REFUSES to derive for that statistic -- not SPREAD_SANITY_FAIL, which is about the deriving run's observed.</oracle>
   </criterion>
-  <criterion id="L3W3-CCX-AC4">
-    <cell_refs>L3W3-c69f-4</cell_refs>
+  <criterion id="L3W3-CCX-AC4" cell_refs="L3W3-c69f-4">
     <label>L3C01_floor.sanity_arm</label>
     <oracle>floor_S must lie strictly BELOW the observed S of the run it was derived from; a re-derived floor the deriving run itself fails is a finding about the spread being too wide to discriminate, and floor_status stays HELD-UNEXERCISED rather than binding.</oracle>
   </criterion>
-  <criterion id="L3W3-CCX-AC5">
-    <cell_refs>L3W3-c69f-5</cell_refs>
+  <criterion id="L3W3-CCX-AC5" cell_refs="L3W3-c69f-5">
     <label>L3C01_floor.refusal_on_absence</label>
     <oracle>An absent battery, an absent scheme, a missing derived_from_path or a non-ancestor derived_at_commit each REFUSE the derivation with its own typed result -- PROVENANCE_UNVERIFIED is never a pass, and an unrunnable provenance check is not a passed one.</oracle>
   </criterion>

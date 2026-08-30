@@ -33,34 +33,29 @@ CARD-R-0961-1 CARD-R-0961-2 CARD-R-0961-3 CARD-R-0961-4 CARD-R-0961-5
 <sequence_gates>load-bearing-two-first -- a gated cell may be PREPARED, but its value is written only after the gate's receipt is cited in its evidence. Gated on the AE face's two load-bearing cards (0961-1).</sequence_gates>
 
 <proof_of_spec>
-  <criterion id="ETL-AC1">
-    <cell_refs>CARD-R-0961-1</cell_refs>
+  <criterion id="ETL-AC1" cell_refs="CARD-R-0961-1">
     <label>uncarded_20.load_bearing_first</label>
     <oracle>derive_stitch.py and kuzu_nessie_load.py are carded FIRST and their cards are the gate on the rest. derive_stitch.py writes stitch_graph.json, which is view 2's source in NFRA_C3MATERIALIZE; kuzu_nessie_load.py is the canonical projection loader. Both are load-bearing for a project currently running experiments ON their output, so an uncarded failure mode there is the most expensive one in the estate.</oracle>
   </criterion>
-  <criterion id="ETL-AC2">
-    <cell_refs>CARD-R-0961-2</cell_refs>
+  <criterion id="ETL-AC2" cell_refs="CARD-R-0961-2">
     <label>uncarded_20.scope_and_denominator</label>
     <oracle>The 20 resolvable uncarded subjects (19 manifest writers + rebuild.tmp.SET) enumerated FROM the census @9b2c687dc8. Print 20 with its denominator on every receipt. rebuild.tmp.SET is named explicitly because a subject that looks like a temp artifact is exactly the one a reader silently drops.</oracle>
   </criterion>
-  <criterion id="ETL-AC3">
-    <cell_refs>CARD-R-0961-3</cell_refs>
+  <criterion id="ETL-AC3" cell_refs="CARD-R-0961-3">
     <label>uncarded_20.substrate_test_in_full</label>
     <oracle>Each card answers all 7 questions across the 3 grains -- and 5, 6 and 7 (coverage + denominator, key/identity space, failure mode distinguishable from a genuine negative) are the ones that get skipped and the ones that matter. A card that answers 1-4 and hand-waves 5-7 is not a card.</oracle>
   </criterion>
-  <criterion id="ETL-AC4">
-    <cell_refs>CARD-R-0961-4</cell_refs>
+  <criterion id="ETL-AC4" cell_refs="CARD-R-0961-4">
     <label>uncarded_20.no_card_without_a_reading</label>
     <oracle>A card is written by someone who READ the subject, never generated from its manifest entry. STOP: a generated card is a description that has never been compared with the thing it describes -- the artifact-describes-itself defect, at scale, across 20 subjects.</oracle>
   </criterion>
-  <criterion id="ETL-AC5">
-    <cell_refs>CARD-R-0961-5</cell_refs>
+  <criterion id="ETL-AC5" cell_refs="CARD-R-0961-5">
     <label>uncarded_20.acceptance</label>
     <oracle>20 of 20 at v3.1 with the two load-bearing writers landed and verified first. Partial completion is reported with its numerator AND denominator; 'substantially complete' is not a state.</oracle>
   </criterion>
 </proof_of_spec>
 
 <artifacts_contract>
-  Every card is a FILE validating against SUBSTRATE_CARD.v3.1 (org/standards/SUBSTRATE_CARD.schema.json), one carrier per qualification, authored by a lane that READ the subject (never generated). Every artifacts_produced row carries commit_or_etag as a resolvable git hex or sha256:<64 hex>, or the EXACT sentinel PENDING-THIS-COMMIT; prose refused. Proofs cite file:line @ commit-ish; every count prints what it is a count of (m-5). Tool runs bound to this TO via comp-to.
+  Every card is a FILE validating against SUBSTRATE_CARD.v3.1 (org/standards/SUBSTRATE_CARD.v3.1.schema.json -- schema_version const 3.1; NOT SUBSTRATE_CARD.schema.json, which is the legacy v1 contract, const 1), one carrier per qualification, authored by a lane that READ the subject (never generated). Every artifacts_produced row carries commit_or_etag as a resolvable git hex or sha256:<64 hex>, or the EXACT sentinel PENDING-THIS-COMMIT; prose refused. Proofs cite file:line @ commit-ish; every count prints what it is a count of (m-5). Tool runs bound to this TO via comp-to.
 </artifacts_contract>
 </task_order>
