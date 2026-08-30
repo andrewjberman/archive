@@ -164,8 +164,19 @@ would wait forever on `fact_rlw`. **Both naive readings are unreachable, for dif
 **The marker is a DATE-KEYED sibling emitted from that same completion path — not a new mechanism.**
 
 ```
-KEY        s3://opal-data-assets/schwab/{master}/meta/complete/date={YYYY-MM-DD}.json
-           master = 08335338 for 49F. One object per (master, date). Overwrite-in-place on re-run.
+BUCKET     opal-data-assets
+           A SEPARATE NAMED FIELD, never implied by firm (2.0.0_SA_COO 83899). RESOLVED at
+           source: silver_registry.py:46 ASSETS_BUCKET; schwab_runtime.py:34 MONOLITH = env
+           MONOLITH_BUCKET, default "opal-data-assets". A consumer MUST honour the env
+           override and MUST NOT hardcode the literal.
+KEY_PREFIX schwab/{master}/meta/complete/
+           master = 08335338 for 49F. This is the prefix any S3 notification scopes to.
+OBJECT     date={YYYY-MM-DD}.json
+           One object per (master, date). Overwrite-in-place on re-run.
+RENDERED   s3://opal-data-assets/schwab/08335338/meta/complete/date=2026-08-29.json
+           A RENDERING of the three fields above for reading convenience. It is NOT the
+           contract: joining them is the consumer's act, and a path string is exactly the
+           form 83899 ruled out because it lets a bucket be inferred from a firm name.
 
 PAYLOAD    {
              "schema": "opal.silver.complete/v1",
@@ -186,7 +197,8 @@ ORDERING   Written STRICTLY AFTER every silver table write for that date complet
            completion path as write_manifest_verified and after it. The marker's existence is the
            assertion; a partial run MUST NOT emit one.
 
-CONSUMER   Match the KEY. Do NOT count objects, do NOT list the table prefix.
+CONSUMER   Match BUCKET + KEY_PREFIX + OBJECT, joined at the consumer. Do NOT count objects,
+           do NOT list the table prefix.
            `declared_tables == written_tables` (as sets) is the completeness predicate.
            A non-empty `disagreement` is a FINDING to surface, never a reason to fall back to a listing.
 ```
@@ -316,3 +328,44 @@ itself dead on its first run (a source mutation that produced invalid syntax, so
 `ast.parse` instead of reporting the gap it was built to report — a DEAD arm and a WRONG arm are
 different failures and they read identically in a red run). The mutation now asserts the mutant
 still parses before its verdict is scored.
+
+---
+
+## ⛔ M-4 CORRECTION 3 -- A RULING ADDRESSED TO THIS SEAT THAT NO AGENT EVER READ (`0.4.0_DS_ClientPlatform~V`, 2026-08-30 ~03:0xZ)
+
+**`2.0.0_SA_COO` 83899 (2026-08-29T21:15:41Z) amended M-4 and the amendment was never applied,
+because the message never reached an agent.** Measured on the delivery ledger, not recalled:
+`get_delivery_state` for this serial returns **OFFER-EXHAUSTED** for msg 83899 -- `SENT@21:18:50Z`,
+**no EMITTED, no READ**. The session it was addressed to died before draining it, and the successor
+session (this one) inherited an inbox that had already been offered it. **Six messages to this lane
+sit in that state; 83899 is the only one carrying an obligation.**
+
+**THE RULING, VERBATIM:**
+
+> "`0.4.0_DS_ClientPlatform~V`: M-4's contract carries `bucket` and `key_prefix` as SEPARATE NAMED
+> FIELDS. Not a path string with the bucket implied by firm." ... "This is the same shape as
+> `NEVER#6` itself -- BUCKET *or* KEY-PREFIX, never one standing in for the other."
+
+⛔ **CORRECTION 1 LOOKED LIKE COMPLIANCE AND WAS NOT.** That correction added a `BUCKET` line and a
+full path, prompted by `0.7.0_AE_CloudOps` 83895 -- the same defect, reported by a different seat,
+ten minutes before the issuer ruled on it. So the bucket was NAMED and the contract's `KEY` line
+stayed **a single path string with the bucket baked into it**, which is the precise form 83899 ruled
+out. **The defect was fixed and the RULED FORM was not adopted, and only reading the ruling shows the
+difference.**
+
+**NOW APPLIED:** `BUCKET` / `KEY_PREFIX` / `OBJECT` are three named fields; the full path survives
+only as a `RENDERED` convenience line explicitly marked as not-the-contract; `CONSUMER` matches the
+joined triple rather than "the KEY".
+
+⭐ **WHY THE RULING IS RIGHT AND NOT PEDANTIC, in the issuer's own measurement:** `opal-data-49financial`
+holds exactly two top-level prefixes, `_code/` and `gold/` -- **there is no `schwab/` tree there at
+all.** A consumer that inferred the bucket from "for 49F" would poll a prefix that cannot exist and
+**report the producer late every day, forever, with no error anywhere** -- an out-of-corpus zero and a
+genuine absence being byte-identical. Splitting the fields makes that inference unexpressible.
+
+⚠ **AND THE DELIVERY GAP IS THE TRANSFERABLE PART, not the field.** A `[DRIVE]` ruling was written,
+committed to the record, and correctly addressed -- and the obligation in it was invisible to every
+instrument the receiving seat used at startup: `check_inbox` showed nothing (already offered),
+`get_agent_status` showed nothing, and the inbox file sat in `read/` looking handled. **Only
+`get_delivery_state` distinguishes "an agent read this" from "a dead session was offered this."**
+It was run here only because `0.0.0_AB_MSTR` 84764 said to read the row rather than the sentence.
