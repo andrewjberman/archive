@@ -4,7 +4,6 @@
 <issued_to>0.7.0_AE_CloudOps~K</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-30T14:0xZ</issued>
-<decomp_ref>NONE -- a one-act remediation of an existing tool under its charter: `.tools/safe-deploy.sh` / `.tools/safe_deploy_core.py` (Rule 13, ADHC_DSFLOW; `docs/architecture/ADHC_DSFLOW.md`). The ruling 1.0.0_SA_CTO 87705 (owner of the ruling; fix shape (1)-(3) + falsifiers + non-application) is the specification; the CVO's class row is the index-blob-vs-worktree item.</decomp_ref>
 <proof_of_spec>
   <expected_criteria>IB-1,IB-2,IB-3,IB-4,IB-5</expected_criteria>
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/ADHC_DSFLOW.TO-INDEXBYTES-DEPLOY.proof_of_spec.json</instance_path>
@@ -12,7 +11,7 @@
 </proof_of_spec>
 <status>pending -- SEQUENCED AFTER ADHC_COMMITGATE.TO-ZEROCHECK-REFUSE at this seat (the gate's word 87705: one executor, two tooling faces, in order). GO the moment ZEROCHECK-REFUSE's proof is delivered; nothing here is started before that. Rule 27: one instance, one line of work at a time -- both faces are tooling remediations under existing charters, not projects.</status>
 <priority>P2 -- the fourth instance this session of a worktree file diverging from its LF index blob by CRLF alone (a07: 557 CRs, 30,604 B vs the 30,047 B index blob), caught BEFORE the 14:00Z push only because MSTR compared worktree md5 to `git show HEAD:<path>` by hand; 9 of 82 tracked runner .py files carry the same divergence today. A served object whose ETag matches no commit is the drift-blindness INF-ONEWRITER spent the day closing, minted by the tool that exists to prevent it.</priority>
-<authority>1.0.0_SA_CTO 87705 (ruling + shape + owner; executor = the base's allocation, sequenced after ZEROCHECK-REFUSE); 0.0.0_AB_MSTR 87683 (the catch and the standing hand-compare it replaces); 22a ("the index blob is the identity, never the worktree"); memory: a worktree sha256 on an autocrlf box hashes the CHECKOUT, not the record. Not to 4.0.0_SA_CRO.</authority>
+<authority>1.0.0_SA_CTO 87705 (ruling + shape + owner; executor = the base's allocation, sequenced after ZEROCHECK-REFUSE); 0.0.0_AB_MSTR 87683 (the catch and the standing hand-compare it replaces); 22a ("the index blob is the identity, never the worktree"); memory: a worktree sha256 on an autocrlf box hashes the CHECKOUT, not the record. Not to 4.0.0_SA_CRO. DECOMP REFERENCE (moved here from a <decomp_ref> tag 14:2xZ, AE~K 87870: the checker keys on tag PRESENCE and demands cell_refs it forbids inventing; a one-file remediation under an existing charter has no decomposition and takes the ANNOUNCE branch): NONE -- a one-act remediation of an existing tool under its charter: `.tools/safe-deploy.sh` / `.tools/safe_deploy_core.py` (Rule 13, ADHC_DSFLOW; `docs/architecture/ADHC_DSFLOW.md`). The ruling 1.0.0_SA_CTO 87705 (owner of the ruling; fix shape (1)-(3) + falsifiers + non-application) is the specification; the CVO's class row is the index-blob-vs-worktree item.</authority>
 </task_order>
 
 ## The one-paragraph version
