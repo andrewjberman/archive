@@ -113,11 +113,22 @@ def main() -> None:
         "phase": "BUILD-GENERAL",
         "assignee": "0.8.0_AE_CloudComp~Y",
         "spec_ref": {"doc": FACE, "group": "OTHER", "vintage_commit": FACE_PIN},
+        # decomp_ref is {doc, vintage_commit, to_ref} exactly -- additionalProperties:false.
+        # to_ref is STATED, never derived from to_id by filename (the schema's own rule: a
+        # filename-resolved lookup reports drift where there is none and reads clean where two
+        # copies have diverged). owned_cells does NOT belong here; the cell set is declared in
+        # the TO's <owned_cells> and the checker JOINS against that file.
+        # doc is DECOMP.md at ITS OWN pin, not the certified JSON at the rectangle's pin. The
+        # face's <decomp_ref> names both -- the JSON as the record, DECOMP.md as the rendering
+        # -- and the checker joins against the one the TO names, so an instance citing the
+        # other one disagrees with its own TO about which decomp the work discharges. The
+        # substantive source for every value here is still the certified JSON; each carrier
+        # cites it under certified_record with its own sha256.
         "decomp_ref": {
             "doc": "workflows/atom_decomposition/runs/nfra-c3materialize-L3/20260830T0852Z/"
-                   "rectangle.final.certified.json",
-            "vintage_commit": "391cd500e5",
-            "owned_cells": ["L3S7B-1c16-1", "L3S7B-1c16-3", "L3S7B-0b5f-1"],
+                   "DECOMP.md",
+            "vintage_commit": "42342fd0ed",
+            "to_ref": FACE,
         },
         "artifacts_produced": [
             {"path_or_key": REL + f,
