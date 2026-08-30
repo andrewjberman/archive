@@ -63,6 +63,25 @@ def sha256_file(p):
         return hashlib.sha256(fh.read()).hexdigest()
 
 
+def artifact_identity(path):
+    """(commit_or_etag, note) DERIVED from git, never typed.
+
+    Addendum 1l: a repo artifact's identity is its COMMITTED BLOB at a pin. A pin typed by hand
+    drifts from what the commit actually carries -- measured twice on this face (a dead path,
+    then four PENDING rows for artifacts the candidate did not carry). Derived so it cannot.
+    """
+    dirty = subprocess.run(["git", "status", "--porcelain", "--", path],
+                           capture_output=True, text=True).stdout.strip()
+    if dirty:
+        return "PENDING-THIS-COMMIT", "worktree differs from HEAD; the next commit carries it"
+    last = subprocess.run(["git", "log", "-1", "--format=%h", "--", path],
+                          capture_output=True, text=True).stdout.strip()
+    if not last:
+        raise ValueError("cannot derive an identity for %s: clean but no commit touches it"
+                         % path)
+    return last, "clean at HEAD; last commit touching this path"
+
+
 def git_head():
     return subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
                           text=True).stdout.strip()[:10]
@@ -120,24 +139,42 @@ def main():
              "uri": "s3://opal-313476888478-globgrph/c3materialize-b4/out/"
                     "eb009c01-c27e-46b3-af85-eb22dbfba01a-b4231e6374ce/W_STRUCTURE_FACTORIZED.json",
              "sha256": sw["inputs"]["view1_served_sha256"], "bytes": 2662267,
+             "digest_of": "served-object",
+             "digest_note": "content hash of the bytes DOWNLOADED from the immutable "
+                            "run-addressed URI; an S3 ETag is not this object's identity",
              "verified": "downloaded and re-hashed by this seat BEFORE compute; byte-identical "
                          "to wave 2's declared digest"},
             {"name": "view 2 membership carrier", "object_kind": "UNTRACKED FILE, content-addressed",
              "path": "infra/aws/globgrph/stitch_graph.json",
              "sha256": sw["inputs"]["stitch_graph_sha256"], "bytes": 25489187,
-             "pin_type": "CONTENT DIGEST -- a commit cannot pin it (0.8.0_AE_CloudComp~Y 84782)"},
+             "digest_of": "content-addressed",
+             "digest_note": "in NO commit and on NO served plane -- the digest IS the "
+                            "identity. blob-at-pin would assert a pin that does not "
+                            "exist (Addendum 1l(vi)).",
+             "retrieval": "UNTRACKED-LOCAL on this device at infra/aws/globgrph/stitch_graph.json",
+             "named_gap": "a primary input must be tracked, commit-pinned, or served at "
+                          "an immutable run-addressed URI with a digest; this is none of "
+                          "the three. Gap: publish or track before the L4 cut. Owner: the "
+                          "artifact's producer. A certification closing with this row "
+                          "open carries the gap on its face."},
             {"name": "view P", "object_kind": "GIT BLOB",
              "path": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_L3W3_VIEWP/"
                      "VIEWP_firm_partition.json", "pin": "8e606c8ff8",
-             "sha256": "2405cdf5e57aff2a52019a1e897b4c2443539e8d037b2528795a069ea1e8786f"},
+             "sha256": "2405cdf5e57aff2a52019a1e897b4c2443539e8d037b2528795a069ea1e8786f",
+             "digest_of": "blob-at-pin",
+             "digest_note": "sha256 of `git show <pin>:<path>` -- the committed blob"},
             {"name": "shared cohort", "object_kind": "GIT BLOB",
              "path": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D11_L3W2_FUSION/"
                      "firm_cohort_shared.json", "pin": "9f8a1f13e6",
-             "sha256": "ad361014a7da885037421da005011c32b28cfb37f64da8feafad1cba95db3f19"},
+             "sha256": "ad361014a7da885037421da005011c32b28cfb37f64da8feafad1cba95db3f19",
+             "digest_of": "blob-at-pin",
+             "digest_note": "sha256 of `git show <pin>:<path>` -- the committed blob"},
             {"name": "mask carrier", "object_kind": "GIT BLOB",
              "path": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D11_L3W2_FUSION/"
                      "mask_carrier_union.json", "pin": "1f5d4f6136",
-             "sha256": "a3354b0e8ddc3a67c20fa39333b3268da598fce3f1b14adc82818b6fab8eb7dd"}],
+             "sha256": "a3354b0e8ddc3a67c20fa39333b3268da598fce3f1b14adc82818b6fab8eb7dd",
+             "digest_of": "blob-at-pin",
+             "digest_note": "sha256 of `git show <pin>:<path>` -- the committed blob"}],
          "count": 5,
          "object_kind_is_named_per_input": True,
          "why_object_kind_is_a_field": "wave 2 carried served_sha256 / stitch_sha256 / sha256 "
@@ -253,11 +290,12 @@ def main():
         p = DELIV + "fusion_l3w3cox_K%s.json" % k
         with open(p, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(art, fh, indent=1)
-        per_k.append({"K": int(k), "path": p, "commit_or_etag": "PENDING-THIS-COMMIT",
+        _pin, _pin_note = artifact_identity(p)
+        per_k.append({"K": int(k), "path": p, "commit_or_etag": _pin,
+                      "pin_basis": _pin_note,
                       "sha256": None,
-                      "digest_of": "the LF bytes as written and as committed (the file is "
-                                   "written newline='\n', so worktree bytes == git blob "
-                                   "bytes; verified after commit, not assumed)"})
+                      "digest_of": "blob-at-pin",
+                      "digest_note": "sha256 of `git show <commit_or_etag>:<path>` -- the committed blob, per Addendum 1l. No rendering digest travels on this row; 1l(iii) as amended makes one FORM_DEFECT on a certified carrier."})
     for row in per_k:
         row["sha256"] = "sha256:" + sha256_file(row["path"])
 

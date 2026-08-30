@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 
 FACE = ("org/tier2_senior/0.7.0_AE_CloudOps/task_orders/"
         "NFRA_C3MATERIALIZE.TO-L3W3-COX.k-sweep.md")
@@ -38,6 +39,25 @@ def face_criteria():
         o = re.search(r"<oracle>(.*?)</oracle>", body, re.S)
         out.append((cid, " ".join(o.group(1).split()) if o else ""))
     return out
+
+
+def artifact_identity(path):
+    """(commit_or_etag, note) DERIVED from git, never typed.
+
+    Addendum 1l: a repo artifact's identity is its COMMITTED BLOB at a pin. A pin typed by hand
+    drifts from what the commit actually carries -- measured twice on this face (a dead path,
+    then four PENDING rows for artifacts the candidate did not carry). Derived so it cannot.
+    """
+    dirty = subprocess.run(["git", "status", "--porcelain", "--", path],
+                           capture_output=True, text=True).stdout.strip()
+    if dirty:
+        return "PENDING-THIS-COMMIT", "worktree differs from HEAD; the next commit carries it"
+    last = subprocess.run(["git", "log", "-1", "--format=%h", "--", path],
+                          capture_output=True, text=True).stdout.strip()
+    if not last:
+        raise ValueError("cannot derive an identity for %s: clean but no commit touches it"
+                         % path)
+    return last, "clean at HEAD; last commit touching this path"
 
 
 def main():
@@ -163,7 +183,8 @@ def main():
         "build_proof.py": ["L3W3-COX-AC1"],
         "NFRA_C3MATERIALIZE.TO-L3W3-COX_PROOF_OF_SPEC.json": ["L3W3-COX-AC1"],
     }
-    arts = [dict({"path_or_key": D + n, "kind": k, "commit_or_etag": c,
+    arts = [dict({"path_or_key": D + n, "kind": k,
+                  "commit_or_etag": artifact_identity(D + n)[0],
                   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence":
                   "repo artifact; this face deploys nothing to a served plane"},
                  **({"artifact_covered_by": COVERED_BY[n]} if n in COVERED_BY else {}))
