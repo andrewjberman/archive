@@ -41,8 +41,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[5]   # the REPO ROOT; parents[4] is <repo>/org
 OUT = Path(__file__).resolve().parent
-FACE_PIN = "f95818e96b"
-FACE_SHA = "3abccf69b1c0892a"  # first 16 hex, as the issuer published it
+FACE_PIN = "aafc8d61b1"
+FACE_SHA = "e953ffcdbbf774f5"  # first 16 hex of the re-cut face
 ENGINE_PIN = "e2ab79fba4"
 ENGINE_SHA = "86ae5ca5f72ed8748cc035535ac6ea8db02fb5c47d0fe7391562400b25f58374"
 
@@ -229,9 +229,9 @@ def envelope(cell_id: str, label: str, criterion: str) -> dict:
                  "pin": FACE_PIN, "sha256_first16": FACE_SHA},
         "certified_record": {
             "record": "rectangle.final.certified.json",
-            "pin": "391cd500e5",
+            "pin": "975a1cc50e",
             "digest_of": "blob-at-pin",
-            "sha256": "09c49480161cd57a7c06e03442abe1277fb503252c9eb49f8fa9c62de1966613",
+            "sha256": "74712c80532dbcee406b0938b25f2e7113e9010a6ed5c1d62cd9d19464f93902",
         },
         "design_declarations": declarations_block(),
         "carrier_table": FRAME["carrier_table"],

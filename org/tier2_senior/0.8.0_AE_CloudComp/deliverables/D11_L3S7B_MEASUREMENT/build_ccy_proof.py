@@ -31,7 +31,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[5]   # the REPO ROOT; parents[4] is <repo>/org
 OUT = Path(__file__).resolve().parent
 REL = "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_L3S7B_MEASUREMENT/"
-FACE_PIN = "f95818e96b"
+FACE_PIN = "aafc8d61b1"
 FACE = "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_C3MATERIALIZE.TO-L3S7B-CCY.measurement.md"
 PEND = "PENDING-THIS-COMMIT"
 
@@ -104,6 +104,7 @@ def main() -> None:
              "frame_block_census.json",
              "build_measurement_carriers.py",
              "build_ccy_proof.py",
+             "run_measurement.py",
              "_ac1_result.json", "_ac3_result.json", "_controls_result.json"]
 
     inst = {
@@ -127,7 +128,7 @@ def main() -> None:
         "decomp_ref": {
             "doc": "workflows/atom_decomposition/runs/nfra-c3materialize-L3/20260830T0852Z/"
                    "DECOMP.md",
-            "vintage_commit": "42342fd0ed",
+            "vintage_commit": "975a1cc50e",
             "to_ref": FACE,
         },
         "artifacts_produced": [
@@ -145,8 +146,11 @@ def main() -> None:
                 "criterion_id": "L3S7B-CCY-AC1",
                 "criterion_verbatim": crit["L3S7B-CCY-AC1"]["oracle"],
                 "method": "command",
-                "invocation": "python ac1.py -- snf_ksweep.py @e2ab79fba4 "
-                              "view1_affinity + firm_separation_auc, NO snf() call",
+                "invocation": "python org/tier2_senior/0.8.0_AE_CloudComp/deliverables/"
+                              "D11_L3S7B_MEASUREMENT/run_measurement.py --out <dir> ; the "
+                              "AC1 half: engine materialised from pin e2ab79fba4 and its "
+                              "sha256 asserted, view1_affinity + firm_separation_auc, NO "
+                              "snf() call (the fused() guard refuses if one ran first)",
                 "output_evidence":
                     f"frame B (judged): AUC(W1) unfused = {B['auc_w1_unfused']:.6f}, "
                     f"n_within {B['n_within']:,} n_cross {B['n_cross']:,}, pairs judged "
@@ -187,9 +191,11 @@ def main() -> None:
                 "criterion_id": "L3S7B-CCY-AC3",
                 "criterion_verbatim": crit["L3S7B-CCY-AC3"]["oracle"],
                 "method": "command",
-                "invocation": "python ac3.py -- SeedSequence(20260830).spawn(20), one "
-                              "independent child per draw; snf_ksweep.py @e2ab79fba4 "
-                              "permute_view + snf(K=20,T=20) + firm_separation_auc",
+                "invocation": "python org/tier2_senior/0.8.0_AE_CloudComp/deliverables/"
+                              "D11_L3S7B_MEASUREMENT/run_measurement.py --out <dir> ; the "
+                              "AC3 half: SeedSequence(20260830).spawn(20), one independent "
+                              "child per draw, permute_view + snf(K=20,T=20) + "
+                              "firm_separation_auc on the same pinned engine",
                 "output_evidence":
                     f"instrument REBUILT (the wave-2 permuted arm @c11d1ff734, carded UNSOUND "
                     f"AS A GATE @4e7016f471, is not used). Control run on perm(W1): C1 = "
