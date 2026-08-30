@@ -216,3 +216,74 @@ def pair_vector(M: np.ndarray) -> np.ndarray:
 def sha256_of_file(path: str) -> str:
     with open(path, "rb") as fh:
         return hashlib.sha256(fh.read()).hexdigest()
+
+
+# --------------------------------------------------------------------------------------
+# view P -- the firm partition (0.8.0_AE_CloudComp~Y, TO-L3W3-CCY)
+# --------------------------------------------------------------------------------------
+
+def viewP_affinity(firm_of: dict, ids: list[str]) -> np.ndarray:
+    """W_P(i,j) = 1 if firm(i) == firm(j) else 0, over the measured members.
+
+    ⛔ P IS EFFECTIVELY A TWO-BLOCK bd-VERSUS-inf PARTITION (view P's own
+    firm_representation cell: mdpf_share_of_ones 0.00039, 19 symbols, 171 same-firm pairs,
+    "MDPF SEPARATION IS UNMEASURABLE IN THIS ARM -- not merely small"). Any per-firm reading
+    of a P row IS a bd-versus-inf reading and must say so rather than implying three-firm
+    coverage. Its base rate 0.4904 is PRINTED BESIDE EVERY P ROW AT EVERY K, by that cell's
+    own print_rule.
+    """
+    f = [firm_of[i] for i in ids]
+    arr = np.array(f, dtype=object)
+    return (arr[:, None] == arr[None, :]).astype(np.float64)
+
+
+# --------------------------------------------------------------------------------------
+# the firm-separation metric
+# --------------------------------------------------------------------------------------
+
+def firm_separation_auc(M: np.ndarray, firms: list, mask_measured: np.ndarray | None = None):
+    """AUC that within-firm pairs outrank cross-firm pairs, ties credited 0.5.
+
+    Returns (auc, n_within, n_cross, n_ties_at_the_decision). Rank AUC is NOT tie-invariant,
+    which is why AC4's exact-zero integer travels beside every AUC this function produces --
+    the same value can be reached by genuinely better ordering or by fewer ties, and the two
+    are different findings.
+    """
+    n = len(firms)
+    iu = np.triu_indices(n, k=1)
+    vals = M[iu]
+    a = np.asarray(firms, dtype=object)
+    same = (a[iu[0]] == a[iu[1]])
+    if mask_measured is not None:
+        keep = mask_measured[iu[0]] & mask_measured[iu[1]]
+        vals, same = vals[keep], same[keep]
+    pos, neg = vals[same], vals[~same]
+    if pos.size == 0 or neg.size == 0:
+        return float("nan"), int(pos.size), int(neg.size), 0
+    order = np.argsort(np.concatenate([pos, neg]), kind="mergesort")
+    ranks = np.empty(order.size, dtype=np.float64)
+    srt = np.concatenate([pos, neg])[order]
+    i = 0
+    while i < srt.size:                      # average ranks within tie groups
+        j = i
+        while j + 1 < srt.size and srt[j + 1] == srt[i]:
+            j += 1
+        ranks[order[i:j + 1]] = 0.5 * (i + j) + 1.0
+        i = j + 1
+    rp = ranks[:pos.size].sum()
+    auc = (rp - pos.size * (pos.size + 1) / 2.0) / (pos.size * neg.size)
+    ties = int(np.count_nonzero(np.isin(pos, neg)))
+    return float(auc), int(pos.size), int(neg.size), ties
+
+
+def permute_view(W: np.ndarray, seed: int) -> np.ndarray:
+    """C2's complement: permute the ENTITY LABELS of a view, re-fuse, re-measure.
+
+    The permuted object is the view's entity labelling -- not its values -- so the marginal
+    distribution of affinities is preserved exactly and only the correspondence to entities is
+    destroyed. A permutation that changed the value distribution would test a different
+    hypothesis than the one the arm names.
+    """
+    rng = np.random.default_rng(seed)
+    p = rng.permutation(W.shape[0])
+    return W[np.ix_(p, p)]
