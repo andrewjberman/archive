@@ -276,7 +276,7 @@ def main():
                        "corpus, run before converting any zero into an absence"}],
     }
     p = PROOF_PATH
-    with open(p, "w", encoding="utf-8") as fh:
+    with open(p, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(proof, fh, indent=1)
     print("WROTE %s -- %d criteria, %d artifacts" % (p, len(acceptance), len(arts)))
     for a in acceptance:

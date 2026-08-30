@@ -44,6 +44,21 @@ GATE_RECEIPTS = {
 
 
 def sha256_file(p):
+    """sha256 of the file's bytes ON DISK.
+
+    THIS IS ONLY AN IDENTITY OF THE COMMITTED BLOB IF THE FILE IS WRITTEN LF. On Windows a
+    text-mode write translates LF to CRLF, git stores LF, and the two digests diverge while the
+    JSON still parses equal -- so the manifest names bytes git does not hold. MEASURED on this
+    face: 81 CR bytes in the worktree, 0 in the blob, `git ls-files --eol` reporting i/lf
+    w/crlf, and 4 of 4 declared digests matching the WORKTREE and none matching the BLOB.
+    Found by 4.0.0_SA_CRO~X at joint certification.
+
+    The writers now pass an explicit LF newline, so the worktree bytes ARE the blob bytes --
+    one carrier, not two reconciled after the fact.
+
+    My own AC2 cell states the governing rule -- a digest field must name what it digests --
+    and this cell broke it one row over. A digest without its normalisation is not an identity.
+    """
     with open(p, "rb") as fh:
         return hashlib.sha256(fh.read()).hexdigest()
 
@@ -236,10 +251,13 @@ def main():
                                      "the metric domain, never coerced to 0.0",
                "arms": arms[k]}
         p = DELIV + "fusion_l3w3cox_K%s.json" % k
-        with open(p, "w", encoding="utf-8") as fh:
+        with open(p, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(art, fh, indent=1)
         per_k.append({"K": int(k), "path": p, "commit_or_etag": "PENDING-THIS-COMMIT",
-                      "sha256": None})
+                      "sha256": None,
+                      "digest_of": "the LF bytes as written and as committed (the file is "
+                                   "written newline='\n', so worktree bytes == git blob "
+                                   "bytes; verified after commit, not assumed)"})
     for row in per_k:
         row["sha256"] = "sha256:" + sha256_file(row["path"])
 
@@ -384,7 +402,7 @@ def main():
                    "by build_cells.py; no value is typed.",
            "cells": cells}
     p = DELIV + "cells.L3W3-COX.json"
-    with open(p, "w", encoding="utf-8") as fh:
+    with open(p, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(out, fh, indent=1)
     print("WROTE %s -- %d cells" % (p, len(cells)))
     for c in cells:
