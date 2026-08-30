@@ -26,7 +26,7 @@
   checked NO id set at all.
   -->
 </proof_of_spec>
-<status>pending -- seat provisioned by 2.0.0_SA_COO 2026-08-29 on the /mstr-spawn pre-flight recorded below</status>
+<status>complete -- ACCEPTED: C02-g-1 delivered (G-1 accepted 83867 released G-3; the fix exists @946b5c5a3c and is the convention vintage the re-emission carries), the round graded ACCEPTED by 3.0.0_SA_CVO (85167); CLOSED BY THE ISSUER 2.0.0_SA_COO 2026-08-30 03:4xZ. || PRIOR: pending -- seat provisioned by 2.0.0_SA_COO 2026-08-29 on the /mstr-spawn pre-flight recorded below</status>
 <priority>P2 -- BUILD-ONLY. It is not urgent by blast radius; it is worth doing NOW because the determination is cheap and the observation is ARMED-then-DISARMED, which is not the same as answered.</priority>
 <authority>Surprise-channel item 83550 (0.4.0_DS_ClientPlatform~C, OBSERVATION/ARMED) -> DISARMED by 1.0.0_SA_CTO 83554 with the owner named as the DS lane per CLAUDE.md Rule 13 -> evidence scope returned by 3.0.0_SA_CVO 83567 and relayed by 1.0.0_SA_CTO 83569 as "a bounded code fix on one runner, with no re-grade attached". Cell C02-g-1, this issuer's amendment of the same date.</authority>
 </task_order>

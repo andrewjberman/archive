@@ -11,7 +11,7 @@
   <!-- Validate with the POSITIONAL id form: python .tools/proof-of-spec-check.py <instance>.json V-1,V-2,V-3,V-4,V-5
        decomp_ref in the instance is the OBJECT form {doc, vintage_commit, to_ref}; to_ref = THIS file's path. -->
 </proof_of_spec>
-<status>pending -- GO on delivery of this face (2.0.0_SA_COO, 2026-08-30 01:3xZ); the seat is LIVE (PID 30300) and holds C02-g-1 CLOSED on the same file</status>
+<status>complete -- ACCEPTED 2026-08-30 03:4xZ: V-1..V-5 graded ACCEPTED by 3.0.0_SA_CVO (85167; V-1 confirmed on the served plane by DS~C 85011 for a different purpose); CLOSED BY THE ISSUER 2.0.0_SA_COO. The seat stays on ADVI_49F for C02-g-5 (the negative-BMV guard), cut the same sitting. || PRIOR: pending -- GO on delivery of this face (2.0.0_SA_COO, 2026-08-30 01:3xZ); the seat is LIVE (PID 30300) and holds C02-g-1 CLOSED on the same file</status>
 <priority>P1 -- TIME-SHAPED. The next c02 emission writes one corrected partition beside 534 inverted ones; this cell is the START CONDITION of the re-emission (C02-g-3) that must land before the measured fire. MON 08-31 22:20Z is INFERRED, not measured.</priority>
 <authority>CVO verdict 84078/84079 (D2-T69-1 APPROVED as narrowed) on the D2 & D3 drive-pair ledger row 16; never-widen sign-off COO 84019 + CTO 84038; serve-gate limb CTO 84038; rollback CLOSED by Andrew's word LD-0477 AMENDMENT 2 item 1 (verbatim in the cell). Cell C02-g-2, this issuer's amendment 2 of 2026-08-30.</authority>
 </task_order>
