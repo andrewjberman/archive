@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[5]
@@ -116,6 +117,27 @@ EVIDENCE = {
 }
 
 
+def row_identity(rel_path: str) -> str:
+    """DERIVE commit_or_etag instead of asserting it.
+
+    PENDING-THIS-COMMIT is legal ONLY where the artifact is covered by the very commit that
+    will carry this proof -- i.e. only where the file is dirty or untracked RIGHT NOW and
+    will therefore ride. A file already committed and unchanged does NOT ride, and marking
+    it PENDING is a false claim the artifact_resolution_check cannot catch (it verifies a
+    PENDING path EXISTS in the worktree, and a committed file exists too). That gap is
+    named on the checker's own frame line as NOT COVERED; this function closes it here.
+    """
+    dirty = subprocess.run(["git", "status", "--porcelain", "--", rel_path],
+                           cwd=str(ROOT), capture_output=True, text=True).stdout.strip()
+    if dirty:
+        return PEND
+    h = subprocess.run(["git", "log", "-1", "--format=%H", "--", rel_path],
+                       cwd=str(ROOT), capture_output=True, text=True).stdout.strip()
+    if not h:
+        raise SystemExit(f"FAIL: {rel_path} is clean but has no commit -- cannot identify it")
+    return h
+
+
 def face_oracles() -> dict[str, dict[str, str]]:
     text = FACE.read_text(encoding="utf-8")
     out = {}
@@ -157,7 +179,8 @@ def main() -> None:
         {
             "path_or_key": f"org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_CC/{n}.v3.1.json",
             "kind": "config_data",
-            "commit_or_etag": PEND,
+            "commit_or_etag": row_identity(
+                f"org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_CC/{n}.v3.1.json"),
             "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
             "deploy_evidence": (f"Carded at v3.1 from a read of the writer at its own pin. VALID; "
                                 f"substrate-card-check rc=0. Receipt: {RECEIPT}."),
@@ -169,7 +192,8 @@ def main() -> None:
         "path_or_key": ("org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_CC/"
                         "build_cc_proof.py"),
         "kind": "script",
-        "commit_or_etag": PEND,
+        "commit_or_etag": row_identity(
+            "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS_CC/build_cc_proof.py"),
         "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
         "deploy_evidence": "Proof builder; criterion_verbatim extracted from the face's bytes.",
         "artifact_covered_by": ["CC-AC1", "CC-AC2", "CC-AC3", "CC-AC4", "CC-AC5"],
