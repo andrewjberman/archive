@@ -18,6 +18,15 @@ import re
 FACE = ("org/tier2_senior/0.7.0_AE_CloudOps/task_orders/"
         "NFRA_C3MATERIALIZE.TO-L3W3-COX.k-sweep.md")
 D = "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D11_L3W3_KSWEEP/"
+DELIV_ROOT = "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/"
+# ⛔ ONE carrier for the proof's location. The artifacts row and the write used to derive it
+# separately -- the row said D + name (inside D11_L3W3_KSWEEP/) while the write said the
+# parent -- so the manifest declared a path `git cat-file` returns rc=128 on. Two carriers of
+# one quantity disagree the moment either moves, and proof-of-spec-check has no arm on
+# artifacts_produced path resolution, so the instance read VALID with a dead path in it.
+# Found by 3.0.0_SA_CVO~X at pre-cert; confirmed here by git cat-file at the pin.
+PROOF_NAME = "NFRA_C3MATERIALIZE.TO-L3W3-COX_PROOF_OF_SPEC.json"
+PROOF_PATH = DELIV_ROOT + PROOF_NAME
 
 
 def face_criteria():
@@ -170,9 +179,20 @@ def main():
                 ("fusion_l3w3cox_K50.json", "config_data", "2234620592"),
                 ("fusion_l3w3cox_K100.json", "config_data", "2234620592"),
                 ("fusion_l3w3cox_K200.json", "config_data", "2234620592"),
-                ("build_proof.py", "script", "PENDING-THIS-COMMIT"),
-                ("NFRA_C3MATERIALIZE.TO-L3W3-COX_PROOF_OF_SPEC.json", "config_data",
-                 "PENDING-THIS-COMMIT")]]
+                # ⛔ PENDING, not c36a309f4d. The CVO/issuer instruction to pin this
+                # row at c36 rested on "build_proof.py will not be carried by the
+                # repair commit" -- true of a proof-ONLY patch. This repair fixes the
+                # ROOT (one carrier for the proof path) so the builder IS carried,
+                # and naming c36 would cite the version that HELD the defect.
+                ("build_proof.py", "script", "PENDING-THIS-COMMIT")]]
+    # the proof itself: declared at the path it is actually WRITTEN to, and the only
+    # row that may still say PENDING -- the repair commit carries this file.
+    arts.append({"path_or_key": PROOF_PATH, "kind": "config_data",
+                 "commit_or_etag": "PENDING-THIS-COMMIT",
+                 "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+                 "deploy_evidence": "repo artifact; this face deploys nothing to a "
+                                    "served plane",
+                 "artifact_covered_by": ["L3W3-COX-AC1"]})
 
     proof = {
         "schema_version": "1.0",
@@ -255,7 +275,7 @@ def main():
              "result": "PASS -- positive control that a lane inbox read/ file is inside the "
                        "corpus, run before converting any zero into an absence"}],
     }
-    p = D.replace("D11_L3W3_KSWEEP/", "") + "NFRA_C3MATERIALIZE.TO-L3W3-COX_PROOF_OF_SPEC.json"
+    p = PROOF_PATH
     with open(p, "w", encoding="utf-8") as fh:
         json.dump(proof, fh, indent=1)
     print("WROTE %s -- %d criteria, %d artifacts" % (p, len(acceptance), len(arts)))
