@@ -46,10 +46,18 @@ BUCKET = "opal-data-49financial"
 GOLD_ROOT = "gold/advi"
 REGION = "us-east-1"
 EXPECT_VINTAGE = "946b5c5a3c89b61865ae1f4f60a609e831034cc2"
-EXPECT_SCHEMA = "1.1"
+# DEFAULT IS C02-g-3's "1.1" ON PURPOSE. C02-g-6 emits "1.2" and passes it via
+# --expect-schema; retyping this constant would make a re-run of the GRADED C02-g-3
+# record report 535 of 535 nonconformant, i.e. a constant edited in place silently
+# rewrites a past verdict. The vintage does NOT move in either round (Q-2 FAILS on a
+# moved vintage), so it stays a constant.
+DEFAULT_EXPECT_SCHEMA = "1.1"
 
 HERE = Path(__file__).resolve().parent
-LEDGER = HERE / "ADVI_49F.c02-REEMIT_CAMPAIGN_LEDGER.jsonl"
+# See the driver: the default is the C02-g-3 ledger so that graded round remains
+# reproducible; each round passes its own via --ledger.
+DEFAULT_LEDGER = HERE / "ADVI_49F.c02-REEMIT_CAMPAIGN_LEDGER.jsonl"
+LEDGER = DEFAULT_LEDGER
 
 VALUE_COLS = ("bmv", "emv", "cf_net", "cf_gross")
 OTHER_CANON = ("canonical_valuation", "canonical_positions", "flow_ledger", "nna_canonical")
@@ -97,7 +105,17 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="ADVI_49F.c02-REEMIT acceptance pass")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--out", default=str(HERE / "ADVI_49F.c02-REEMIT_ACCEPTANCE_RESULT.json"))
+    ap.add_argument("--ledger", default=str(DEFAULT_LEDGER),
+                    help="campaign ledger for THIS round")
+    ap.add_argument("--expect-schema", default=DEFAULT_EXPECT_SCHEMA,
+                    help='schema_version this round expects ("1.1" C02-g-3, "1.2" C02-g-6)')
     args = ap.parse_args()
+    expect_schema = args.expect_schema
+    global LEDGER
+    LEDGER = Path(args.ledger)
+    print(f"LEDGER: {LEDGER}", flush=True)
+    print(f"EXPECTING schema_version {expect_schema!r} and vintage {EXPECT_VINTAGE}",
+          flush=True)
 
     led = load_ledger()
     dates = sorted(led)
@@ -147,9 +165,9 @@ def main() -> int:
         r5_rows_total += len(new)
         has_v = new["gross_leg_vintage"].notna() & (new["gross_leg_vintage"] == EXPECT_VINTAGE)
         r5_rows_with_vintage += int(has_v.sum())
-        sv_ok = set(new["schema_version"].astype(str).unique()) == {EXPECT_SCHEMA}
+        sv_ok = set(new["schema_version"].astype(str).unique()) == {expect_schema}
         if bool(has_v.all()) and sv_ok and man.get("gross_leg_vintage") == EXPECT_VINTAGE \
-                and str(man.get("schema_version")) == EXPECT_SCHEMA:
+                and str(man.get("schema_version")) == expect_schema:
             r5_parts_ok += 1
         else:
             r5_bad.append(d)
@@ -280,7 +298,7 @@ def main() -> int:
                "nonfee_gap_exactly_zero": r4_nonfee_exact_zero},
         "R5": {"partitions_conformant": r5_parts_ok, "partitions_nonconformant": r5_bad,
                "rows_total": r5_rows_total, "rows_with_expected_vintage": r5_rows_with_vintage,
-               "expected_vintage": EXPECT_VINTAGE, "expected_schema": EXPECT_SCHEMA},
+               "expected_vintage": EXPECT_VINTAGE, "expected_schema": expect_schema},
         "R6_out_of_domain_tables": r6,
         "SHAPE_CENSUS": shape_census,
         "NOT_EVALUABLE_BY_SCHEMA": schema_10,

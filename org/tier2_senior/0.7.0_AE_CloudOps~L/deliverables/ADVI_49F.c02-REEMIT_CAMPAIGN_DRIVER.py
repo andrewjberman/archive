@@ -49,10 +49,19 @@ REGION = "us-east-1"
 # The convention vintage every re-emitted partition must carry (0.4.0_DS_ClientPlatform~N
 # 84360; CVO 84129 reading (B) -- a CONVENTION vintage, not an engine-HEAD vintage).
 EXPECT_VINTAGE = "946b5c5a3c89b61865ae1f4f60a609e831034cc2"
-EXPECT_SCHEMA = "1.1"
+# See the acceptance instrument: the default stays C02-g-3's "1.1" so that round's
+# ledger remains reproducible; C02-g-6 passes --expect-schema 1.2. The VINTAGE does not
+# move in either round.
+DEFAULT_EXPECT_SCHEMA = "1.1"
 
 HERE = Path(__file__).resolve().parent
-LEDGER = HERE / "ADVI_49F.c02-REEMIT_CAMPAIGN_LEDGER.jsonl"
+# DEFAULT IS THE C02-g-3 LEDGER so that round stays reproducible. A round writes its OWN
+# ledger: pointed at a ledger whose dates are already ARTIFACT-COMPLETE, this driver
+# computes remaining=[] and drives NOTHING while exiting 0 -- a no-op that reports
+# success. And appending a new round into the graded C02-g-3 file would silently change
+# what that round's own acceptance instrument reads.
+DEFAULT_LEDGER = HERE / "ADVI_49F.c02-REEMIT_CAMPAIGN_LEDGER.jsonl"
+LEDGER = DEFAULT_LEDGER
 
 # BOTO3 IN-PROCESS, NOT THE CLI SHIM. `.tools/aws` is a bash script and Windows python
 # cannot exec it (WinError 193), and `.tools/aws.cmd` needs a shell. Going through boto3
@@ -258,7 +267,8 @@ def parse_summaries(stdout: str) -> dict:
     return out
 
 
-def verify(date: str, before: list[dict], send_iso: str) -> dict:
+def verify(date: str, before: list[dict], send_iso: str,
+           expect_schema: str = DEFAULT_EXPECT_SCHEMA) -> dict:
     """THE ORACLE. A date is complete only on PRODUCED-ARTIFACT evidence."""
     after = versions_for(date)
     before_ids = {v["VersionId"] for v in before}
@@ -273,7 +283,7 @@ def verify(date: str, before: list[dict], send_iso: str) -> dict:
         "status_census": man.get("status_census"),
         "bmv_source": man.get("bmv_source"),
         "vintage_ok": man.get("gross_leg_vintage") == EXPECT_VINTAGE,
-        "schema_ok": man.get("schema_version") == EXPECT_SCHEMA,
+        "schema_ok": man.get("schema_version") == expect_schema,
         "wrote_something": len(new_ids) > 0,
         "send_time_utc": send_iso,
     }
@@ -287,7 +297,14 @@ def main() -> int:
     ap.add_argument("--confirm-campaign-start", action="store_true",
                     help="required for --mode upload; an emission is never a default")
     ap.add_argument("--status", action="store_true", help="report and exit")
+    ap.add_argument("--ledger", default=str(DEFAULT_LEDGER),
+                    help="campaign ledger for THIS round (a round writes its own)")
+    ap.add_argument("--expect-schema", default=DEFAULT_EXPECT_SCHEMA,
+                    help='schema_version this round expects ("1.1" C02-g-3, "1.2" C02-g-6)')
     args = ap.parse_args()
+    global LEDGER
+    LEDGER = Path(args.ledger)
+    print(f"LEDGER: {LEDGER}", flush=True)
 
     domain = census_domain()
     done = load_done()
@@ -343,7 +360,7 @@ def main() -> int:
             elif args.mode == "dry-run":
                 row["outcome"] = "DRY-RUN-OK" if s.get("engine_rc") == 0 else "DRY-RUN-FAIL"
             else:
-                ev = verify(d, before[d], send_iso)
+                ev = verify(d, before[d], send_iso, args.expect_schema)
                 row["artifact_evidence"] = ev
                 ok = (ev["wrote_something"] and ev["vintage_ok"] and ev["schema_ok"]
                       and s.get("engine_rc") == 0)
