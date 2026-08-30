@@ -283,32 +283,47 @@ def read_manifest(date: str) -> dict:
     return json.loads(body)
 
 
+# C02-g-11 R-2: the re-emit capability is RETIRED, object and driver TOGETHER, on Andrew's word
+# of 2026-08-30 ~17:1xZ ("5.) Rec approved."), recorded verbatim at
+# org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260830_171xZ_SEVEN_CARD_RULINGS.md.
+# The host object it shelled out to is deleted; the bucket is versioned, so the bytes survive
+# behind a delete marker and are restorable BY THIS VERSION ID:
+RETIRED_CELL = "ADVI_49F.c02-REEMITRETIRE (C02-g-11 R-2)"
+RETIRED_OBJECT = "s3://opal-data-49financial/_code/c02_reemit_mirror_pull.py"
+RETIRED_VERSION_ID = "1qPpKmV5CkFCG2pa06_CxQQAW.ntPlIG"   # 32 chars, NOT truncated -- see below
+# ⛔ THE FULL VERSION ID IS THE POINT. The card that carried this decision printed it as
+# "1qPpKmV5CkFCG2pa06_CxQ" because the census script sliced [:22]; a truncated id presented
+# without an ellipsis reads as complete and RESTORES NOTHING. Retention is only as good as the
+# identifier that reaches the person who needs it.
+
+
+class CapabilityRetired(RuntimeError):
+    """Raised instead of dispatching. A retired path must refuse LOUDLY at its entry, never
+    fail deep in a shell as a missing file -- the second is indistinguishable from a broken box."""
+
+
 def dispatch(dates: list[str], mode: str, timeout_s: int) -> str:
-    """One SSM command driving N dates sequentially on the box. The per-date evidence is
-    preserved: the runner prints one C02_REEMIT_SUMMARY line per date."""
-    cmds = [
-        "#!/bin/bash",
-        "set -uo pipefail",
-        f"aws s3 sync s3://{BUCKET}/_code/ /tmp/advi_49f_code/ --delete --only-show-errors",
-        "cd /tmp/advi_49f_code",
-        "md5sum c02_twr_engine.py c02_reemit_mirror_pull.py",
-        "rc_all=0",
-    ]
-    for d in dates:
-        cmds.append("rm -rf /tmp/c02_reemit_mirror /tmp/c02_reemit_out")
-        cmds.append(
-            f"python3 c02_reemit_mirror_pull.py --date {d} --mode {mode} || rc_all=1"
-        )
-    cmds.append("exit ${rc_all}")
+    """RETIRED -- refuses. Was: one SSM command driving N dates sequentially on the box.
 
-    out = ssm().send_command(
-        DocumentName="AWS-RunShellScript",
-        InstanceIds=[INSTANCE],
-        Parameters={"commands": cmds, "executionTimeout": [str(timeout_s)]},
-        Comment=f"ADVI_49F.c02-REEMIT {mode} x{len(dates)}"[:100],
-    )
-    return out["Command"]["CommandId"]
+    Kept as a refusal rather than deleted so a caller gets the CELL and the RESTORE HANDLE
+    instead of an ImportError or a silent no-op. Rebuilding is legitimate under a new cell:
+    restore the object at RETIRED_VERSION_ID, or re-deploy the repo copy at
+    org/tier2_senior/0.7.0_AE_CloudOps~L/deliverables/c02_reemit_mirror_pull.py (untouched).
+    """
+    raise CapabilityRetired(
+        "the c02 re-emit capability is RETIRED by %s on Andrew's word 2026-08-30 ~17:1xZ. "
+        "The host object %s was deleted (delete marker; bucket versioned). "
+        "Restore it at VersionId %s, or re-deploy the repo copy, under a NEW cell -- "
+        "this driver will not dispatch it. Requested: %d date(s), mode=%r, timeout=%ss."
+        % (RETIRED_CELL, RETIRED_OBJECT, RETIRED_VERSION_ID, len(dates), mode, timeout_s))
 
+
+# The pre-retirement dispatch body is DELETED, not commented out and not kept as an
+# unreachable helper. It contained the literal shell-out to the now-deleted object, and
+# dead code that invokes a retired path is the second-writer hazard the retirement exists
+# to remove -- the same rule this seat applied to keeping a mutant out of production code.
+# The restore path does not need it: git history holds the body, and the repo copy of the
+# script itself is untouched at deliverables/c02_reemit_mirror_pull.py.
 
 def wait(cid: str, timeout_s: int) -> dict:
     t0 = time.time()
