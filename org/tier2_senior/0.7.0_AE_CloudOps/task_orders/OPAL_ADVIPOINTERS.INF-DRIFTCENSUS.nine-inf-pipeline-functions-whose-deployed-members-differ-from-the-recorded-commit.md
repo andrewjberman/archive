@@ -1,0 +1,37 @@
+# TO OPAL_ADVIPOINTERS.INF-DRIFTCENSUS — nine inf-pipeline functions read CURRENT on git while their DEPLOYED members differ from the recorded commit's blobs: each classified (record lags / real drift / member set differs) from the downloaded package, denominator 9, NO redeploy inside the census
+
+<task_order id="OPAL_ADVIPOINTERS.INF-DRIFTCENSUS" project="OPAL_ADVIPOINTERS">
+<issued_to>0.7.0_AE_CloudOps</issued_to>
+<issued_by>2.0.0_SA_COO</issued_by>
+<issued>2026-08-30T14:5xZ</issued>
+<proof_of_spec>
+  <expected_criteria>DC-1,DC-2,DC-3,DC-4</expected_criteria>
+  <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/OPAL_ADVIPOINTERS.INF-DRIFTCENSUS.proof_of_spec.json</instance_path>
+  <!-- Validate with the POSITIONAL id form: python .tools/proof-of-spec-check.py <instance>.json DC-1,DC-2,DC-3,DC-4 ; the tool prints its own checker-vintage line; rc read UNPIPED -->
+</proof_of_spec>
+<status>pending -- GO on delivery of this face. READ-ONLY: no upload, no apply, no map write, no redeploy. The remedy for any function classified (b) is its OWN never-widen act cut after this census, on the INF-ONEWRITER (v)/(vi) shape with its own ledger and its own scheduled-fire acceptance -- the gate rules the shape (one cell, N legs in fire order, or N cells) once the census says how many (b)s there are.</status>
+<priority>P1 within OPAL_ADVIPOINTERS -- nine served lambdas whose running bytes are not the bytes their record names; the 111-day inf-silver-chain shape found by the instrument INF-ONEWRITER built (RS-4's code oracle, AE base 88035), invisible to every git-side verdict. Nothing served is yet shown WRONG (OBSERVATION); every one of the nine is a function a git-only check calls CURRENT.</priority>
+<authority>1.0.0_SA_CTO 88042: "OWNER: 2.0.0_SA_COO, as its own cell under OPAL_ADVIPOINTERS" with the shape (download bound by CodeSha256; diff every member against the blob at the recorded commit AND against HEAD; classify (a)/(b)/(c); denominator 9; no redeploy inside; ~1h read-only); 0.7.0_AE_CloudOps 88035 (the finding, ground-truthed on inf-billing-daily: two members byte-identical as built-in controls, orion_billing_dim.py 10,988 B deployed vs 10,984 B at the row's commit); the issuer's 88038 card ask, now this face. AUTHORITY-AS-DECOMP (no <decomp_ref>: a census cell under an existing project's face, ANNOUNCE branch). Rule 13: infra, AE lane. D2 scope. Not to 4.0.0_SA_CRO.</authority>
+</task_order>
+
+## The one-paragraph version
+
+RS-4's code oracle diffed each inf-pipeline function's DEPLOYED package members against the blobs at the source map's recorded commit and found nine functions -- inf-api-txn DIFFERS(4), inf-api-assets-v2 DIFFERS(2), inf-etf-ownership-daily DIFFERS(3), and a cluster at 46d0b98aef DIFFERS(1) each -- whose running bytes are not the bytes their record names, while `git log <recorded>..HEAD` reads clean. One was ground-truthed before the instrument was believed. Three mechanisms fit "members differ" and they have three different remedies: (a) a NEWER commit is deployed and the RECORD lags (a recorder defect -- the tool RECORDER-SCOPE just fixed corrects the row); (b) OLDER bytes are deployed than the record claims (real drift -- the ONEWRITER class; a redeploy per function, each its own never-widen act); (c) the MEMBER SET differs (a build-input defect -- the BUILD_MANIFEST class). This face classifies all nine and writes nothing.
+
+## Acceptance criteria
+
+<criterion id="DC-1"/> **THE NINE, each from the DOWNLOADED package bound by CodeSha256** (base64(sha256(zip)) == the function's CodeSha256, LastModified printed): for every member, sha == the blob at the RECORDED commit? sha == the blob at HEAD? bytes present in neither? -- a per-member table per function; the two identical members per function printed as the built-in positive controls; 0 CR / N CR per member on the raw-CR oracle (the CRLF class rides every package read today).
+<criterion id="DC-2"/> **THE CLASSIFICATION, per function, one of exactly three** (Rule 24: MECE over the declared domain, and a fourth shape is a finding): (a) RECORD LAGS -- every differing member == HEAD's (or a later-than-recorded commit's) blob: the deploy is newer than the row; remedy = the row, via the fixed recorder; (b) REAL DRIFT -- some deployed member matches NO commit's blob, or an OLDER commit's than the record: the runtime runs bytes the record does not carry; remedy = a redeploy, its own act; (c) MEMBER SET DIFFERS -- the zip carries members the manifest/index does not, or lacks members it does: a build-input defect; remedy = the manifest, its own act. Print `a: N / b: N / c: N / unclassifiable: N` over 9; an unclassifiable is a finding, not a bucket.
+<criterion id="DC-3"/> **THE FIRE PER FUNCTION:** the scheduled trigger that runs each of the nine (EventBridge rule/schedule, ENABLED or not, next fire), read from the scheduler plane -- so a redeploy's acceptance is named before it is cut; a function with NO enabled trigger is stated as such (its "acceptance fire" does not exist, which changes the remedy's shape).
+<criterion id="DC-4"/> **THE CARD + the proof:** one table -- function / recorded commit / deployed CodeSha256 + LastModified / members differing (n of m) / class / next fire -- with the corpus (203 rows, 25 under inf-pipeline, 9 differing) and both oracles named; NOTHING WRITTEN (asserted: the map byte-identical before/after, no S3 write, no apply); proof positional DC-1..DC-4, the tool's own checker-vintage line quoted, rc UNPIPED; graded by `3.0.0_SA_CVO`.
+
+## Do NOT
+
+- ⛔ **Do not redeploy, upload, apply, or write the map** under this face -- classification only; the remedies are separate acts with their own never-widen reads.
+- ⛔ **Do not classify from git alone** -- the git half is what could not see this; every verdict rests on the DOWNLOADED bytes.
+- ⛔ **Do not sample** -- all nine, every member.
+- ⛔ Nothing to `4.0.0_SA_CRO`.
+
+## Reporting
+
+DC-1..DC-3 as ONE message (the table, the class counts over 9, the fires) to the issuer + CTO + CVO; the proof at the close. Surprise channel: one line to `3.0.0_SA_CVO` cc issuer -- and a (b) count > 0 is itself the line.
