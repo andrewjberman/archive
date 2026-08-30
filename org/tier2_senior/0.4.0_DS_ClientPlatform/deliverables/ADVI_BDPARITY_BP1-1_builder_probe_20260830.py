@@ -39,8 +39,12 @@ arm("ruled/ALL-FOUR-ruled-periods-in-ONE-request", all(ruled_present.values()),
     "present=%s" % ruled_present)
 
 # YTD default must be the PROVEN Custom shape, not the un-attested type
+# crash-safe: on the BASELINE there is no YTD range at all, and an IndexError here would kill
+# the run before the later arms are ever REACHED -- a dead arm reads like a passing one.
+_ytd_hits = [r for r in dr if r["name"] == "Year To Date"]
 arm("ytd/default-is-proven-Custom-shape",
-    [r for r in dr if r["name"]=="Year To Date"][0]["type"] == "Custom", "type=Custom")
+    bool(_ytd_hits) and _ytd_hits[0]["type"] == "Custom",
+    "type=%s" % (_ytd_hits[0]["type"] if _ytd_hits else "NO YTD RANGE"))
 bt = L.body_performance_period(account_id=1, q_start=Q_START, q_end=Q_END, inception="2024-01-01",
                                run_year=RUN_YEAR, ytd_mode="typed")
 arm("ytd/typed-mode-emits-YearToDate",
@@ -56,16 +60,46 @@ try:
 except ValueError:
     arm("ytd/bad-mode-raises", True, "ValueError")
 
-# A3: the silent-collapse defect must now be LOUD
+# RE-POINTED by 3.0.0_SA_CVO 84169: the SI range is ALWAYS REQUESTED. BD substitutes its own
+# funding-inception and ignores our startDate, so omitting the range would drop the very range
+# that SUPPLIES the anchor. The strict no-default rule moves to OUR linking side.
 for bad in (None, ""):
-    try:
-        L.body_performance_period(account_id=99, q_start=Q_START, q_end=Q_END,
-                                  inception=bad, run_year=RUN_YEAR)
-        arm("A3/missing-inception-RAISES (%r)" % bad, False, "SILENT COLLAPSE STILL LIVE")
-    except ValueError as e:
-        arm("A3/missing-inception-RAISES (%r)" % bad, "arithmetically QTD" in str(e), "loud refusal")
+    nb = L.body_performance_period(account_id=99, q_start=Q_START, q_end=Q_END,
+                                   inception=bad, run_year=RUN_YEAR)
+    ndr = nb["parameters"]["dateRanges"]
+    si = [r for r in ndr if r["type"] == "SinceInception"]
+    arm("si/ALWAYS-requested-even-with-no-anchor (%r)" % bad, len(si) == 1,
+        "the anchor-supplying range is never dropped")
+    arm("si/probe-start-falls-back-to-q_start (%r)" % bad,
+        bool(si) and si[0]["startDate"] == Q_START, "a PROBE value, not an anchor assertion")
+    arm("si/no-anchor-KEEPS-the-other-periods (%r)" % bad,
+        all(any(pred(r) for r in ndr) for pred in (
+            lambda r: r["type"] == "Custom" and r["startDate"] == Q_START,
+            lambda r: r["name"] == "Year To Date",
+            lambda r: r["name"] == "Trailing 12 Months")),
+        "QTD/YTD/1Y unaffected")
+arm("si/known-anchor-is-passed-through",
+    [r for r in dr if r["type"] == "SinceInception"][0]["startDate"] == "2024-03-15",
+    "caller's value carried")
+try:
+    L.body_performance_period(account_id=1, q_start=Q_START, q_end=Q_END, inception="2024-01-01",
+                              run_year=RUN_YEAR, anchor_basis="made-up")
+    arm("cell-i/bad-anchor_basis-raises", False, "no raise")
+except ValueError:
+    arm("cell-i/bad-anchor_basis-raises", True, "ValueError")
 
-# methodology cell (ii) is a parameter, not a baked constant
+# POSITION IS THE JOIN (84169): BD returns name=None/type=None, so the probe joins by index and
+# certifies with the dates at that index.
+idx = L.requested_range_index(b)
+arm("join/index-is-dense-and-ordered", [e["index"] for e in idx] == list(range(len(dr))),
+    "indices=%s" % [e["index"] for e in idx])
+arm("join/index-carries-the-dates-that-certify",
+    all(e["startDate"] == dr[e["index"]]["startDate"] and e["endDate"] == dr[e["index"]]["endDate"]
+        for e in idx), "start/end recoverable at every index")
+arm("join/SI-slot-is-locatable-by-index",
+    any(e["type"] == "SinceInception" for e in idx),
+    "SI at index %s" % [e["index"] for e in idx if e["type"] == "SinceInception"])
+
 arm("cell-ii/default-is-proven-Annualized",
     b["parameters"]["dataPointOptions"]["returnMethod"] == "Annualized", "default preserved")
 bc = L.body_performance_period(account_id=1, q_start=Q_START, q_end=Q_END, inception="2024-01-01",
