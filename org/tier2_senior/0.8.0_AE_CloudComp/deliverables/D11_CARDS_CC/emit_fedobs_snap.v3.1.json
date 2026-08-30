@@ -1,0 +1,119 @@
+{
+ "schema_version": 3.1,
+ "carded_by": "0.8.0_AE_CloudComp~Y",
+ "subject": {
+  "id": "infra/aws/globgrph/emit_fedobs_snap.py",
+  "kind": "script",
+  "declared_domain": "NFRA_GRAPHFEED TO-7 P2b: the fedobs delta-sibling STAGER. It READS the served fedobs_observations.json and projects its columnar signals into snap_ingest/pending/{surface}/ batches for the in-VPC snap_store append. The manifest names it as materializer of `fedobs_coverage_snap`. ⛔ IT IS A READER OF THE FEDOBS PRODUCER'S OUTPUT, NOT THE PRODUCER -- a distinction that determines its entire cadence row and that I got wrong before reading the terraform."
+ },
+ "as_of": {
+  "carded_utc": "2026-08-30T06:00:00Z",
+  "commit_ish": "85a4b4e006",
+  "graph_vintage": "kuzu_nessie_db built 2026-08-30T01:51:34Z for the AWS-plane sweep; the DECLARED plane (terraform) is read at worktree HEAD, clean."
+ },
+ "process": {
+  "methodology": {
+   "how": "A CLI. It GETs the served fedobs_observations.json from S3, walks a fixed signal->surface map, and for each mapped signal projects the columnar {cols, rows} block into flat dicts, prefixes the four standard convention columns (snapshot_date, computed_at, producer_ref, marker_head) taken from the SERVED artifact's own header, applies an optional per-signal payload transform, and PUTs the result as one timestamped JSONL into the surface's pending prefix. The in-VPC snap_store --ingest-pending does the actual table append; this file never touches Nessie.",
+   "determinism": "deterministic",
+   "composes": [
+    {"id": "warehouse/fedobs_signals/observations/fedobs_observations.json", "note": "the SERVED producer output; the sole input and the source of every convention column"},
+    {"id": "snap_store", "note": "the in-VPC appender that consumes the staged batches; not invoked by this file"}
+   ],
+   "invents": [
+    {"id": "the stage-then-ingest split", "note": "reading the served artifact instead of editing the producer -- the producer runs in-VPC under a Deny-on-truth task role and cannot append globgrph tables, and editing it would force a coordinated image rebuild"}
+   ],
+   "materializer_standing": "canonical",
+   "basis": "measured",
+   "basis_by_field": {"how": "measured", "determinism": "measured", "composes": "measured", "invents": "measured"},
+   "evidence": "READ AT SOURCE, not from the manifest entry: infra/aws/globgrph/emit_fedobs_snap.py @85a4b4e006, 7,626 bytes / 153 lines, clean. Docstring :1-31 states the reader-not-producer design and its reason; SURFACE_OF :45-52; sibling_rows :84-103 builds the four standard columns from the SERVED header (computed_at, marker_head) rather than from wall clock; stage :106-118 is the only write.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "cadence": {
+   "declared_rhythm": null,
+   "actual_trigger": "MANUAL CLI INVOCATION. Nothing schedules this file. It is designed to be run on a dev-box or in-VPC after the producer's nightly output lands.",
+   "live_matches_declared": "not_applicable",
+   "live_instance_age": null,
+   "basis": "measured",
+   "basis_by_field": {"declared_rhythm": "measured", "actual_trigger": "measured", "live_matches_declared": "measured"},
+   "evidence": "⛔ THIS ROW IS THE ONE I GOT WRONG FIRST, AND THE ERROR IS WORTH THE SPACE BECAUSE IT IS THE INVERSE OF THIS FACE'S OTHER TRIGGER TRAP. An AWS-plane sweep on the token 'fedobs' returns an ECS task definition (globgrph-fedobs-producer), a nightly EVENT_RULE (opal-globgrph-fedobs-producer-nightly), two IAM roles, three policies and a log group -- and I attributed them to THIS FILE on name adjacency, because the file and the resources share the 'fedobs' prefix. THEY BELONG TO A DIFFERENT COMPONENT. Read at source in the DECLARED plane: infra/aws/terraform/globgrph/fedobs_producer.tf:133-138 defines the rule with schedule_expression cron(30 4 * * ? *), and :140-141 targets the ECS task definition whose command is ['python', '/app/fedobs_observe.py'] (:74). That is the PRODUCER, and fedobs_observe.py is not even in this directory -- it lives at /app/ inside the derive image. THE STAGER ITSELF IS NAMED BY ZERO TERRAFORM: comp-find 'emit_fedobs_snap' scoped to infra returns 5 hits across 11,319 files -- 4 in its own source, 1 in a surface_map note reading 'not a GENESIS dep'. So: no rule, no schedule, no task definition, no workflow. The two traps on this one face are mirror images -- cse_producers_nightly.py was FALSE-ZEROED by a file-name-shaped token, and this file was FALSE-POSITIVED by a resource-name-shaped one. Both come from assuming a file's name and a resource's name denote the same thing.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  }
+ },
+ "artifact": {
+  "persistence": {
+   "persisted": true,
+   "authority_role": "evidence",
+   "mutation_policy": "append_only",
+   "form": "One timestamped newline-delimited JSON object per surface per run, in a pending prefix.",
+   "basis": "measured",
+   "evidence": "authority_role 'evidence' rather than 'source' or 'projection': the rows are a re-shaping of the served producer artifact for a different consumer, and the docstring is explicit that 'the snapshot reflects exactly the served bytes MOTIF/PROMOTE already consume' -- it adds no signal. mutation_policy append_only: stage() :113 mints a fresh timestamped key per run and PUTs; nothing overwrites and nothing deletes.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "location": {
+   "home": "s3://opal-313476888478-globgrph/warehouse/snap_ingest/pending/{surface}/<TS>.jsonl",
+   "projection_of": [
+    {"id": "warehouse/fedobs_signals/observations/fedobs_observations.json", "note": "the served producer output; every staged row is a projection of one of its signal blocks plus that artifact's own header columns"}
+   ],
+   "co_resident_stores": [
+    {"id": "fedobs_coverage_snap", "note": "the ONLY surface currently reachable -- the compiler_coverage signal, SHIPPED at P2b, and the one the manifest names"},
+    {"id": "fedobs_coevolution_snap", "note": "WIRED BUT INERT: mapped in SURFACE_OF, but the served coevolution signal carries an 'error' key until the first post-image-rebuild producer run, and an errored signal projects [] -- so nothing is staged and the surface stays empty by construction, not by omission"},
+    {"id": "fedobs_direff_snap", "note": "NOT WIRED: the directive_effectiveness mapping is commented out at :51 as P3, deferred for scope"}
+   ],
+   "basis": "measured",
+   "evidence": "BUCKET :39, SERVED_KEY :40, PENDING :41, SURFACE_OF :45-52 (with the direff line commented), stage()'s key composition :113. ONE WRITE PATH -- unlike the two prior cards on this face, this writer's file-grain count and its write-path count agree at 1, and that is worth recording because it shows the manifest undercount is a property of particular writers rather than of the manifest as such.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  }
+ },
+ "trust": {
+  "coverage": {
+   "universe": "The columnar signal blocks inside the served fedobs_observations.json that are mapped in SURFACE_OF and are not carrying an error.",
+   "denominator": "3 signals named in the source, 2 mapped, 1 reachable. compiler_coverage -> fedobs_coverage_snap is mapped and healthy; coevolution -> fedobs_coevolution_snap is mapped and INERT (errored signal); directive_effectiveness -> fedobs_direff_snap is COMMENTED OUT as P3. The ROW count per run is a run-time property of the served artifact and is not measured by this card.",
+   "explicitly_out": [
+    "directive_effectiveness -- the mapping is commented out at :51; a P3 scope deferral, not a failure.",
+    "Any signal carrying an 'error' key -- project_columnar returns [] for it and stage() prints FEDOBS_SNAP_EMPTY. This is deliberate honest-degrade, and it is why the coevolution surface is inert rather than wrong.",
+    "The append itself -- this file stages only; the in-VPC snap_store --ingest-pending performs the table write."
+   ],
+   "basis": "held",
+   "basis_by_field": {"universe": "measured", "explicitly_out": "measured", "denominator": "held"},
+   "evidence": "universe, the surface map and all three exclusions read at source (SURFACE_OF :45-52 including the commented P3 line; project_columnar :75-81; stage :107-109). The DENOMINATOR is 'held' rather than 'measured': the 3/2/1 signal counts are read from the SOURCE's own map, not from the served artifact -- I did not GET fedobs_observations.json and enumerate its actual signal blocks, so a signal present in the artifact but absent from SURFACE_OF would be invisible to this count. A named authority (the source) declares the map; this card did not verify it against the served bytes.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "key": {
+   "identity_space": "snap_store surface rows, keyed by the four standard convention columns the whole snap family shares.",
+   "key_expression": "The four standard columns built at sibling_rows :90-95: snapshot_date (derived as gmtime of computed_at, formatted %Y-%m-%d), computed_at (taken from the SERVED artifact's own header, falling back to time.time()), producer_ref (the literal string 'fedobs_observe-' + the first 12 chars of the served marker_head), and marker_head (the served value verbatim). A consumer computes a row's identity from those four plus the payload columns; every one of them is derived from the served artifact rather than from this process, which is what makes a staged batch attributable to the producer run it came from.",
+   "key_is_stable": "stable",
+   "crosses_spaces": true,
+   "declared_mapping": "The producer_ref string is the declared bridge from a staged row back to the producing run: 'fedobs_observe-{marker_head[:12]}'. It is a truncation to 12 characters, so it is a stable but NOT injective handle -- two producer runs sharing a marker prefix would be indistinguishable in this column, and nothing in the source guards that.",
+   "basis": "measured",
+   "basis_by_field": {"identity_space": "measured", "key_expression": "measured", "key_is_stable": "measured", "crosses_spaces": "measured", "declared_mapping": "measured"},
+   "evidence": "All read at source, sibling_rows :90-95. key_is_stable 'stable' is measured from the derivation rather than assumed: every component comes from the served artifact's header, so re-running the stager against the SAME served bytes reproduces the same four values -- unlike a wall-clock stamp, which the code deliberately avoids except as a fallback when the served computed_at is absent. crosses_spaces TRUE and declared_mapping is the producer_ref bridge; the 12-character truncation is stated because a non-injective key expressed as an identity is exactly the sort of thing a consumer will join on without checking.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "failure_mode": {
+   "returns_on_failure": "IT STAGES NOTHING AND SAYS SO. An errored or absent signal projects [] (project_columnar :78-79), and stage() prints 'INFO: FEDOBS_SNAP_EMPTY surface=... (signal errored/absent -- nothing staged)' and returns 0. The docstring names this as LAW 1 honest-degrade: 'never stages a fabricated row'. A read failure on the served key propagates as an exception from read_served :70-72; main() returns 2 on the error path and 0 otherwise.",
+   "distinguishable_from_true_negative": "no",
+   "silent_degrade_paths": [
+    "⛔ THE PRIMARY ONE: 'signal errored' and 'signal absent' print THE SAME LINE. FEDOBS_SNAP_EMPTY covers both, so a surface that is inert because the producer is broken looks identical to a surface that is inert because the signal was never emitted. The coevolution surface is in exactly this state today and the card can only tell them apart because the DOCSTRING says which one it is -- not because the output does.",
+    "A staged batch is a PUT into a pending prefix and the append is somebody else's act. If snap_store never ingests, this file reports OK: FEDOBS_SNAP_STAGED and the surface stays empty; the writer's success line is not evidence the row landed.",
+    "computed_at falls back to time.time() when the served artifact omits it, so a header-less served file yields rows stamped with the STAGER's clock while looking exactly like producer-stamped rows.",
+    "producer_ref truncates marker_head to 12 characters, so two producer runs sharing a prefix are indistinguishable in the staged rows."
+   ],
+   "basis": "measured",
+   "basis_by_field": {"returns_on_failure": "measured", "distinguishable_from_true_negative": "measured", "silent_degrade_paths": "measured"},
+   "evidence": "Read at source: project_columnar :75-81 (the [] on a missing/errored block), stage :107-109 (the single FEDOBS_SNAP_EMPTY line covering both causes), :113-118 (the PUT and its OK line), sibling_rows :90 (the time.time() fallback) and :93 (the [:12] truncation), main :141 (return 2). 'distinguishable_from_true_negative: NO' is the measured reading of the first degrade path and it is the sharpest thing on this card: the writer honestly declines to fabricate, and then reports the decline in a form that cannot distinguish a broken producer from an absent signal.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  }
+ },
+ "verdict": {
+  "standing": "QUALIFIED",
+  "why": "A deliberately small, honest reader: it declines to fabricate a row when its input is broken, it takes every identity column from the served artifact rather than from its own clock, and it solves a real constraint (the producer cannot append, and editing it would force an image rebuild) with the lighter of the two available designs. One write path, matching its file grain -- the manifest undercount seen on this face's first two cards does not apply here. Three qualifications. (1) A BROKEN PRODUCER AND AN ABSENT SIGNAL PRINT THE SAME LINE, so the coevolution surface's inertness is legible only from the docstring, not from the output. (2) It stages; it does not append -- an OK line means a PUT landed, never that the row reached a table. (3) producer_ref truncates the marker to 12 characters, giving a stable but non-injective bridge back to the producing run.",
+  "blocking_defects": null
+ },
+ "forward_disposition": {
+  "standing": "undecided",
+  "set_by": null,
+  "basis": "absent",
+  "evidence": "NONE -- basis is absent. A SECOND PASS IS OWED, by a seat with the authority to retire something and without a stake in this subject. This card DESCRIBES; it does not decide. Andrew-direct 2026-08-26 puts the disposition AFTER carding, and the contract states set_by MUST NOT be the carding lane for its own subject.",
+  "decided_utc": null
+ }
+}
