@@ -1,0 +1,168 @@
+{
+ "schema_version": 3.1,
+ "carded_by": "0.8.0_AE_CloudComp~Y",
+ "subject": {
+  "id": "infra/aws/globgrph/code_heat_emit.py",
+  "kind": "script",
+  "declared_domain": "The NFRA_MSGRAPH S3b git code-heat emitter. The manifest names it as the materializer of the part `code_heat_snap`. THIS CARD IS AT (FILE, WRITE PATH) GRAIN AND THE FILE CARRIES TWO PATHS -- the manifest entry names only one of them. Read from the source, not from the manifest entry."
+ },
+ "as_of": {
+  "carded_utc": "2026-08-30T04:35:00Z",
+  "commit_ish": "c934701a67",
+  "graph_vintage": "kuzu_nessie_db built 2026-08-30T01:51:34Z (27,073 nodes / 60,552 edges), age 2.8h at the AWS-plane sweep for this card."
+ },
+ "process": {
+  "methodology": {
+   "how": "A CLI (argparse `main()`). For each configured repo it calls build_repo_rows(), which WRAPS the existing primitives org/modules/heatmap/object_freshness.py (per-path git write-recency) and heat_map.py (the pure banding lib) -- it adds NO new heat logic. What it does add: per-repo iteration over ajb_workspace and the portal submodule as separate git roots; the submodule boundary (the ajb pass EXCLUDES portal/, or the two passes gap-or-double-count); and the parity columns {repo, repo_head_sha, computed_at} written as actual COLUMNS so a comp-drift Trino sweep can SELECT DISTINCT the vintage and catch a stale-checkout live-read. Emission is pure over git at a single pinned now_ts, so the parquet path and the snap path are computed from the SAME timestamp and are row-identical by construction.",
+   "determinism": "deterministic",
+   "composes": [
+    {
+     "id": "org/modules/heatmap/object_freshness.py",
+     "note": "per-path git write-recency; the wrapped primitive"
+    },
+    {
+     "id": "org/modules/heatmap/heat_map.py",
+     "note": "the pure banding library"
+    },
+    {
+     "id": "git",
+     "note": "the canonical write-history; the emitter never copies git into Iceberg"
+    }
+   ],
+   "invents": [
+    {
+     "id": "the parity column set",
+     "note": "{repo, repo_head_sha, computed_at} as in-file columns -- design Section 8 AC, CTO design-in LD-0221 / NFRA_COMPDRIFT seam-6"
+    },
+    {
+     "id": "graph_path",
+     "note": "a workspace-relative path column minted so the federated join to graph_nodes needs no repo-CASE"
+    }
+   ],
+   "materializer_standing": "canonical",
+   "basis": "measured",
+   "basis_by_field": {
+    "how": "measured",
+    "determinism": "measured",
+    "composes": "measured",
+    "invents": "measured"
+   },
+   "evidence": "READ AT SOURCE, not from the manifest entry: infra/aws/globgrph/code_heat_emit.py @c934701a67, 14,812 bytes / 298 lines, `git status --porcelain` EMPTY so the worktree bytes equal the committed bytes. Module docstring :1-31 states the wrapping and the three additions; SCHEMA :73-89 carries the parity fields; sibling_rows() :244 pins the SAME now_ts as the parquet emit and says so in its own docstring.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "cadence": {
+   "declared_rhythm": null,
+   "actual_trigger": "MANUAL CLI INVOCATION. No scheduler and no event rule invokes this writer in either plane.",
+   "live_matches_declared": "not_applicable",
+   "live_instance_age": null,
+   "basis": "measured",
+   "basis_by_field": {
+    "declared_rhythm": "measured",
+    "actual_trigger": "measured",
+    "live_matches_declared": "measured"
+   },
+   "evidence": "TRIGGER CENSUS SWEPT BOTH PLANES, because a repo-only sweep answers the wrong question. REPO PLANE: comp-find content 'code_heat_emit' scoped to infra + org/modules + .github -> 33 hits across 11,789 files scanned; every hit is the source itself, its test, its parity sibling, a surface_map note or nerves-risk-edge rows. NO cron, no workflow, no scheduler entry. AWS PLANE: comp-find --corpus aws over the live graph (2,094 nodes scanned, DB built 2026-08-30T01:51:34Z) -> ZERO hits for code_heat. The negative is discriminating rather than empty: the SAME aws sweep returned an ECS task definition, a nightly EVENT_RULE, two IAM roles, three policies and a log group for a SIBLING writer (emit_fedobs_snap.py), so the instrument demonstrably finds triggers where they exist. 'not_applicable' rather than 'no': there is no declared rhythm for a manual CLI, so there is no DESIRED state for an APPLIED state to miss.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  }
+ },
+ "artifact": {
+  "persistence": {
+   "persisted": true,
+   "authority_role": "projection",
+   "mutation_policy": "replaceable",
+   "form": "Two forms, one per write path: a hive-partitioned parquet, and a newline-delimited JSON staging object.",
+   "basis": "measured",
+   "evidence": "The docstring :5-7 is explicit that the output is 'a cheap, refreshable DERIVED snapshot (vintage-stamped), NOT a source of truth: git remains the write-history' -- hence authority_role projection, not source. mutation_policy replaceable: _write_partition() :165-169 writes code_heat.parquet into repo=<repo>/ unconditionally and _publish_to_s3() :174-191 uploads over the same keys; nothing appends and nothing versions.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "location": {
+   "home": "s3://opal-313476888478-globgrph/warehouse/code_heat/repo=<repo>/code_heat.parquet",
+   "projection_of": [
+    {
+     "id": "git",
+     "note": "both repos' write history, read via object_freshness.py; the emitter projects git and stores nothing git does not already hold"
+    }
+   ],
+   "co_resident_stores": [
+    {
+     "id": "s3://opal-313476888478-globgrph/warehouse/snap_ingest/pending/code_heat_snap/<TS>.jsonl",
+     "note": "THE SECOND WRITE PATH, and the one the manifest actually names. stage_sibling() :261-272 puts a per-run timestamped JSONL into the pending prefix, which the in-VPC snap_store --ingest-pending --surface code_heat_snap appends. Same rows, same now_ts, different form and different consumer."
+    },
+    {
+     "id": "infra/aws/globgrph/code_heat_parity.py",
+     "note": "a sibling reader over the same surface; not a second writer"
+    }
+   ],
+   "basis": "measured",
+   "evidence": "DEFAULT_OUT :55 = s3://opal-313476888478-globgrph/warehouse/code_heat/ ; _write_partition :165-169 composes repo=<repo>/code_heat.parquet ; SNAP_BUCKET :240 + SNAP_PENDING :241 + stage_sibling :261-272 give the second key. Both read from the source this session.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  }
+ },
+ "trust": {
+  "coverage": {
+   "universe": "Every path in each configured git repo that object_freshness.py returns a write-recency for -- ajb_workspace (EXCLUDING portal/) and the portal submodule, each iterated as its own git root with its own HEAD.",
+   "denominator": null,
+   "denominator_absent_reason": "NOT MEASURED BY THIS CARD, and stating a number would require running the emitter. The row count is whatever the two repos' tracked path sets yield at run time; it is not fixed, not declared anywhere in the source, and not recorded in the file. The one denominator the source DOES assert is a semantic AC in the SCHEMA comment: graph_path was 'Verified 374/374 against the live portal module nodes' -- that is a join-coverage figure for the portal repo at the time of the S3b acceptance, not this writer's output cardinality, and reporting it as the latter would be a grain substitution.",
+   "explicitly_out": [
+    "portal/ during the ajb_workspace pass -- excluded by _is_portal_path() :98, because the submodule is iterated separately and including it in both passes would double-count.",
+    "Untracked paths -- the `tracked` column is emitted per row, so untracked-ness is carried rather than filtered, but the universe is what object_freshness.py enumerates.",
+    "Any repo not in DEFAULT_REPOS :61 or passed via --repo."
+   ],
+   "basis": "held",
+   "basis_by_field": {
+    "universe": "measured",
+    "explicitly_out": "measured",
+    "denominator": "absent",
+    "denominator_absent_reason": "measured"
+   },
+   "evidence": "universe and exclusions read at source (:61 DEFAULT_REPOS, :98 _is_portal_path, :104 build_repo_rows' exclude_portal argument, :217 the per-repo emit loop). The row basis is HELD rather than measured because the denominator is genuinely absent: I did not run the emitter, and this card's own AC forbids inventing a number for a field I did not measure.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "key": {
+   "identity_space": "Workspace-relative source paths, joined to the graph's Module node namespace. Two spaces: the parquet's own (repo, path) and the graph's node-name space 'module:<workspace_path>'.",
+   "key_expression": "`graph_path` -- a non-nullable string column emitted per row. It is the workspace-relative path: for ajb_workspace it equals `path`; for the portal submodule it is 'portal/' + path. The declared join is graph_path == substr(graph_nodes.name, len('module:')+1), stated in the SCHEMA comment at :75-79. A consumer computes the key directly from the column with no parse and no repo-CASE, which is why the column exists at all.",
+   "key_is_stable": "unstable",
+   "crosses_spaces": true,
+   "declared_mapping": "DECLARED AND EXERCISED, uniquely among the three rails and writers carded by this lane so far: the join is written down in the schema comment AND carries its own acceptance figure, 'Verified 374/374 against the live portal module nodes (NFRA_MSGRAPH S3b semantic AC)'. That is a real mapping with a real denominator, not a prose note.",
+   "basis": "held",
+   "basis_by_field": {
+    "identity_space": "measured",
+    "key_expression": "measured",
+    "key_is_stable": "measured",
+    "crosses_spaces": "measured",
+    "declared_mapping": "held"
+   },
+   "evidence": "ROW BASIS IS held, NOT measured, PER THE FLOOR RULE: the weakest sub-claim on this row is declared_mapping (held), and the scalar is the floor rather than the mode. The schema enforces exactly this case. key_expression itself is MEASURED at source: SCHEMA :80 declares graph_path non-nullable, and :75-79 states the derivation and the join both. key_is_stable is 'unstable' and that is a deliberate call, not a hedge: the key is a FILE PATH, and a rename or a move changes it while the underlying module is the same module -- so identity is not preserved across the ordinary lifecycle of the thing it names. declared_mapping is HELD, not measured: the 374/374 figure is the S3b acceptance's, recorded in a comment, and I did not re-run it this session; a named authority measured it, this card did not.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "failure_mode": {
+   "returns_on_failure": "IT RAISES, and this is the writer's best property. _assert_parity() :146-158 is a fail-closed guard: zero emitted rows raises RuntimeError('PARITY_FAIL repo=... zero rows emitted (empty heat view)'), and any row missing repo_head_sha or computed_at raises naming the count and three example paths. _git() :91-95 raises RuntimeError on any non-zero git exit. So the two failures that would silently poison a downstream federated read -- an empty heat view, and rows with no vintage signal -- both stop the run instead of publishing.",
+   "distinguishable_from_true_negative": "yes",
+   "silent_degrade_paths": [
+    "THE TWO WRITE PATHS ARE NOT GUARDED ALIKE. _assert_parity is called on the parquet path; stage_sibling() :261-272 builds its rows via sibling_rows() and PUTs them with no parity assertion of its own. It re-derives from the same build_repo_rows(), so a zero-row repo would still raise inside that call -- but the guard is inherited, not stated, and a future edit to sibling_rows that stopped calling build_repo_rows would drop the guard without touching any line that mentions parity.",
+    "A partial S3 publish. _publish_to_s3 :174-191 uploads file by file in a loop and prints a count at the end; an exception mid-loop leaves some repo partitions new and others stale, with no transaction and no marker. A reader then joins a mixed-vintage code_heat -- and the parity columns make that DETECTABLE (SELECT DISTINCT computed_at per repo) rather than silent, which is exactly what they were added for.",
+    "boto3 is a local import inside _publish_to_s3 and stage_sibling ('optional dep, only needed on the s3 path'). Absent boto3 fails loudly at publish time -- but AFTER the parquet has been written to the staging dir, so a local run looks successful up to the publish."
+   ],
+   "basis": "measured",
+   "basis_by_field": {
+    "returns_on_failure": "measured",
+    "distinguishable_from_true_negative": "measured",
+    "silent_degrade_paths": "measured"
+   },
+   "evidence": "All read at source: _assert_parity :146-158 (both raise arms and their messages), _git :91-95, _publish_to_s3 :174-191 (the per-file loop and its terminal print), stage_sibling :261-272 (no parity call of its own), and the local-import comment at :178. 'distinguishable_from_true_negative: yes' is measured from the guard, not assumed -- an empty heat view RAISES rather than publishing an empty parquet, so a consumer never sees a well-formed empty result it could mistake for 'nothing is hot'.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  }
+ },
+ "verdict": {
+  "standing": "QUALIFIED",
+  "why": "A well-built writer with an unusually good failure mode -- it fails CLOSED on both of the conditions that would otherwise poison a downstream federated read, and it mints parity columns specifically so a stale-checkout read is detectable at query time. Three qualifications. (1) IT HAS TWO WRITE PATHS AND THE MANIFEST NAMES ONE: the part `code_heat_snap` is the JSONL staging path, while the parquet at warehouse/code_heat/ is a second published surface with its own consumers. A census counting this writer once at file grain undercounts its surfaces. (2) The parity guard is asserted on the parquet path and only INHERITED by the snap path. (3) The key is a file path and is therefore unstable across renames, and the join's 374/374 acceptance figure is held from the S3b acceptance rather than re-measured here.",
+  "blocking_defects": null
+ },
+ "forward_disposition": {
+  "standing": "undecided",
+  "set_by": null,
+  "basis": "absent",
+  "evidence": "NONE -- basis is absent. A SECOND PASS IS OWED, by a seat with the authority to retire something and without a stake in this subject. This card DESCRIBES; it does not decide. Andrew-direct 2026-08-26 puts the disposition AFTER carding, and the contract states set_by MUST NOT be the carding lane for its own subject.",
+  "decided_utc": null
+ }
+}
