@@ -1,0 +1,152 @@
+{
+  "schema_version": 3.1,
+  "subject": {
+    "id": "kuzu_nessie_db.rebuild.tmp.SET",
+    "kind": "artifact",
+    "declared_domain": "The SET of per-rebuild temporary Kuzu databases written beside the canonical DB while a rebuild is in flight, plus their .wal and _build_manifest.json sidecars. Its DECLARED purpose is that a rebuild does not mutate the canonical surface in place: a build lands in a member of this set and the caller atomic-swaps it in. What I verified of that purpose is narrower than the purpose itself -- the incremental writer opens the canonical DB read_only=True and writes only to its --db target, and _canonical promotes by os.replace; I did not exercise a rebuild, so 'never mutates in place' is the design's claim and the read-only open plus the swap are my evidence for it. The census names it as the one manifest part with a cut wave-4 DECOMP and no card located, which is why it is subject 7 on this face."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-30T05:22:00Z",
+    "commit_ish": "5da9e7fffc",
+    "graph_vintage": "The set is transient by intent, so its 'vintage' is per-member. MEASURED live at 2026-08-30T05:21:24Z: 6 members totalling 158,848,513 B (151.5 MiB) -- one legacy-shared tmp 0.05 h old, two per-unique tmps 37.77 h and 37.91 h old, their two .wal sidecars at 37.66 h and 37.86 h, and one manifest sidecar 0.06 h old."
+  },
+  "process": {
+    "methodology": {
+      "how": "Members are CREATED by two writers and REAPED by one. _canonical.ensure_fresh mints the path before a rebuild: _unique_tmp() (:284-288) yields '<db>.rebuild.tmp.<pid>.<monotonic_ns>.<counter>' when the liveness flag is on, and the LEGACY SHARED '<db>.rebuild.tmp' (:618) when it is not. kuzu_incremental_refresh writes into whichever path the caller passes as --db, so its output is a member while in flight. Kuzu adds a .wal beside a member, and _provenance.write_manifest adds a _build_manifest.json. A member's normal end is the atomic os.replace SWAP that promotes it to the canonical path; its abnormal end is _rm_kuzu on a failure, or _gc_stale_tmps (:291-304) reaping it if it is older than TMP_GC_AGE_S.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "canonical",
+      "composes": [
+        {
+          "id": "infra/aws/globgrph/_canonical.py",
+          "note": "mints the member path, performs the swap, and is the SOLE reaper via _gc_stale_tmps; subject 3 on this face"
+        },
+        {
+          "id": "infra/aws/globgrph/kuzu_incremental_refresh.py",
+          "note": "writes a member as its --db output before the caller swaps it; subject 6 on this face"
+        },
+        {
+          "id": "infra/aws/globgrph/kuzu_nessie_load.py",
+          "note": "the full-reload path builds into a member on the fallback route; subject 2 on this face"
+        },
+        {
+          "id": "infra/aws/globgrph/_provenance.py",
+          "note": "write_manifest stamps a _build_manifest.json sidecar onto a member; subject 4 on this face"
+        }
+      ],
+      "invents": [],
+      "basis": "measured",
+      "evidence": "_unique_tmp at _canonical.py:284-288 and the legacy branch at :618; _gc_stale_tmps :291-304 with TMP_GC_AGE_S at :59 (1800 s, env-overridable via GLOBGRPH_KUZU_TMP_GC_AGE_S); the swap at :637-641; kuzu_incremental_refresh's --db contract at :331-334 and its own _rm_kuzu on non-zero exit at :344-345. Member list enumerated on disk at 05:21:24Z.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "cadence": {
+      "declared_rhythm": "Per rebuild, and transient by design -- a member is expected to live only from mint to swap. The reaper is declared as a best-effort sweep of members older than TMP_GC_AGE_S (1800 s), with its docstring stating the age gate is 'much greater than any real build' so it can never take a live one.",
+      "actual_trigger": "CREATION is demand-driven with the canonical refresh. REAPING runs only inside ensure_fresh AND only under 'if live:' (_canonical.py:602), i.e. only when GLOBGRPH_KUZU_REBUILD_LIVENESS is set -- which only the three comp-kuzu wrappers export. So members minted on a direct-import (unflagged) run are created by a path that never reaps, and are reaped only if some later flagged run happens by.",
+      "live_matches_declared": "no",
+      "live_instance_age": "MEASURED 2026-08-30T05:21:24Z: two per-unique members at 37.77 h and 37.91 h with .wal sidecars at 37.66 h and 37.86 h -- 75x the 1800 s reap gate and still present. I measured the same two members at 03:35:39Z (36.0 h and 36.1 h); 1.77 h later they are still here, which is a SECOND observation of the same members rather than a single snapshot, and it establishes that no reaping run occurred in that window. The legacy-shared member was 0.05 h old and its manifest 0.06 h, so rebuild activity in that window was real -- the reaper simply was not part of it.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "Reap gate _canonical.py:59 and :291-304; the 'if live:' guard on the reap call at :602; the flag's exporters are .tools/comp-kuzu:24, comp-kuzu-full:12, comp-kuzu-inc:13. Two disk enumerations 1.77 h apart (03:35:39Z and 05:21:24Z) with the same two abandoned members present at both. live_matches_declared is 'no' because the declared lifetime is transient-until-swap and the measured lifetime of two members is 37.9 h.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "none",
+      "mutation_policy": "replaceable",
+      "form": "Kuzu databases -- a single file on this box, though the code handles the directory form too -- named by one of two patterns, each with optional .wal and _build_manifest.json sidecars. MEASURED at 05:21:24Z: 6 members, 158,848,513 B (151.5 MiB) total. authority_role is 'none' deliberately: a member is authoritative for nothing. Before its swap it is a candidate; after its swap it is no longer a member of this set but the canonical DB; abandoned, it is scratch that outlived its purpose. Nothing should ever read a member.",
+      "basis": "measured",
+      "evidence": "Both naming patterns at _canonical.py:284-288 and :618; both-shapes handling in _rm_kuzu (:295-311) and _copy_kuzu. Member list, sizes and ages enumerated on disk at 05:21:24Z. 'persisted: true' is the MEASURED answer and it is the finding rather than the design: the set is INTENDED to be transient and two of its members are 37.9 h old.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "location": {
+      "home": "infra/aws/globgrph/, as siblings of the canonical kuzu_nessie_db -- derived from the canonical path by suffix, so the set has no home of its own and cannot be relocated independently of the DB it shadows.",
+      "projection_of": [
+        {
+          "id": "infra/aws/globgrph/kuzu_nessie_db",
+          "note": "a member on the incremental path begins as a FILE COPY of the canonical DB; on the full path it is built from the warehouse instead"
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_nodes",
+          "note": "the full-reload path materialises a member from this table"
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_edges",
+          "note": "same, for edges"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "infra/aws/globgrph/kuzu_nessie_db",
+          "note": "the canonical DB shares the directory and the name prefix; the set is addressed only by suffixing it"
+        },
+        {
+          "id": "infra/aws/globgrph/kuzu_nessie_db.rebuild.lock",
+          "note": "the mutex directory shares the same prefix. MEASURED at 05:21:24Z: present, 16.1 min old and EMPTY -- a second empty lock, distinct from the 25.1-min one measured at 03:35Z, so unflagged rebuilds continue to take the lock without a heartbeat"
+        },
+        {
+          "id": "infra/aws/globgrph/kuzu_stitch_db",
+          "note": "a scratch DB in the same directory that is explicitly NOT the canonical surface and is not a member of this set"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "Paths derived by suffix at _canonical.py:284-288, :561, :618. Directory enumeration at 05:21:24Z; the lock's age and empty contents read in the same call.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every path matching the canonical DB path plus a '.rebuild.tmp' prefix -- both naming forms and every sidecar.",
+      "denominator": "6 members, 158,848,513 B, enumerated on disk at 2026-08-30T05:21:24Z. ⛔ THE REAPER'S OWN DENOMINATOR IS SMALLER THAN THE SET'S, and this is the card's sharpest measured finding. _gc_stale_tmps globs '<db>.rebuild.tmp.' + '*' -- WITH A TRAILING DOT (:297-298). Simulated against the actual member list: it matches 5 of the 6. The one it cannot match is the LEGACY SHARED member 'kuzu_nessie_db.rebuild.tmp', which has no dot after 'tmp'. So the set's sole reaper is structurally blind to exactly the member that the unflagged code path creates.",
+      "explicitly_out": [
+        "the legacy shared member '<db>.rebuild.tmp' -- unreachable by the reaper's glob (trailing dot), and it is the member the liveness-OFF path writes",
+        "members younger than TMP_GC_AGE_S (1800 s) -- excluded on purpose, the reaper's docstring reasoning being that the gate is 'much greater than any real build'. That rationale is the module's, not a measurement of mine: I did not time a rebuild, so I can report the gate value and its stated basis but not that it is in fact larger than every real build",
+        "every member, whenever the reaping run is unflagged -- _gc_stale_tmps is called only under 'if live:' (:602), so an entire class of runs creates members and reaps none",
+        "the canonical DB and kuzu_stitch_db, which share the directory but are not members"
+      ],
+      "basis": "measured",
+      "evidence": "Glob pattern read at _canonical.py:297-298 and SIMULATED against the enumerated member list at 05:21:24Z: 5 of 6 reachable, the legacy shared member unreachable. The 'if live:' guard at :602. TMP_GC_AGE_S at :59.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "FILESYSTEM PATH, in two forms that are not interchangeable: the per-unique form carries pid + monotonic_ns + an intra-process counter, which the source declares makes concurrent builds unable to share a path -- structurally sound as read (distinct pids across processes, an atomic counter within one), though I verified the CONSTRUCTION and did not exercise a collision, and the legacy shared form is a single fixed path that concurrent builds WOULD collide on. Which form a member gets is decided by an environment variable, not by anything about the member.",
+      "key_expression": "PER-UNIQUE MEMBER, _canonical.py:284-288 verbatim: f'{db_path.rstrip(chr(47)+chr(92))}.rebuild.tmp.{os.getpid()}.{time.monotonic_ns()}.{next(_UNIQ)}' -- the trailing counter exists because Windows monotonic_ns has coarse resolution and two rapid calls can return the same value. LEGACY SHARED MEMBER, :618 verbatim: db_path.rstrip('/\\\\') + '.rebuild.tmp'. SIDECARS: member + '.wal' (Kuzu) and member + '._build_manifest.json' (_provenance.MANIFEST_SUFFIX). MEMBERSHIP AS THE REAPER COMPUTES IT, :297-298: glob(db_path.rstrip('/\\\\') + '.rebuild.tmp.' + '*') -- note this is a THIRD expression, and it is not the union of the first two.",
+      "key_is_stable": "stable",
+      "crosses_spaces": false,
+      "declared_mapping": "_unique_tmp's docstring declares why the per-unique form exists ('concurrent builds NEVER share a path, so a false-positive steal cannot delete a slow-live winner's in-progress tmp'); the counter's necessity is declared at :34-37. ⛔ WHAT IS NOT DECLARED ANYWHERE is that the reaper's membership expression excludes the legacy form -- the three expressions are each correct in isolation and no comment relates them.",
+      "basis": "measured",
+      "evidence": "All three expressions read verbatim at the cited lines and the third simulated against the real member list. Rated STABLE: each expression is deterministic, and a given member's path never changes during its life -- the instability is in WHICH EXPRESSION MINTS IT, which is a cadence/coverage property rather than a key one, and is recorded there.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "failure_mode": {
+      "returns_on_failure": "A MEMBER HAS NO RETURN VALUE -- it is an artifact, so its failure mode is PERSISTING WHEN IT SHOULD HAVE BEEN REMOVED, and that mode is live on this box. The intended ends are all implemented: a successful build ends in the atomic swap; a failed rebuild removes the member and its manifest (_canonical.py:632-634); a non-zero incremental exit removes it (kuzu_incremental_refresh.py:344-345); an abandoned member is reaped by _gc_stale_tmps once older than 1800 s. ⛔ WHAT IS MEASURED IS THAT THE LAST OF THOSE DOES NOT HAPPEN HERE: two members are 37.9 h old, 75x the reap gate, and were still present across two enumerations 1.77 h apart. They persist not because the age gate holds them but because the reaper runs only under 'if live:' and the runs producing members on this box are unflagged. ⛔ AND THE REAPER'S GLOB EXCLUDES THE LEGACY MEMBER WHILE INCLUDING ITS MANIFEST: 'kuzu_nessie_db.rebuild.tmp' is unmatched, but 'kuzu_nessie_db.rebuild.tmp._build_manifest.json' IS matched, so a flagged run arriving more than 1800 s after a legacy build would delete that member's provenance stamp and leave the 47 MB member itself -- turning a described artifact into an undescribed one rather than removing it.",
+      "distinguishable_from_true_negative": "yes",
+      "silent_degrade_paths": [
+        "an abandoned member accumulates silently: nothing counts members, nothing reports the set's size, and the only reason its growth is visible at all is that someone enumerated the directory -- 151.5 MiB across 6 members at 05:21:24Z, of which 111,874,683 B is 37.9 h old",
+        "the reaper is unreachable for the legacy shared member by construction (trailing-dot glob), so the member the unflagged path creates is the member the reaper cannot take -- and the unflagged path is also the one that never calls the reaper",
+        "the manifest sidecar of a legacy member IS reachable by that glob, so the reaper can strip a member's provenance while leaving the member",
+        "a stale .wal beside an abandoned member is reaped only with its member; _rm_kuzu removes the sidecars, but only when it is reached at all"
+      ],
+      "basis": "measured",
+      "evidence": "Removal paths at _canonical.py:632-634 and kuzu_incremental_refresh.py:344-345; reap at _canonical.py:291-304 under the 'if live:' guard at :602; TMP_GC_AGE_S :59. TWO disk enumerations, 03:35:39Z and 05:21:24Z, showing the same two abandoned members at 36.0/36.1 h and then 37.8/37.9 h -- a second observation rather than a single snapshot, which is what distinguishes 'not yet reaped' from 'not reaped'. The glob asymmetry SIMULATED against the real member list rather than reasoned about: 5 of 6 matched, the legacy member unmatched, its manifest matched.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "The set is a sound design carrying a measured operational defect, and the two should not be collapsed. THE DESIGN IS RIGHT: building into a member and promoting it by atomic swap is what keeps readers from ever seeing a half-built canonical DB, and the per-unique naming -- pid plus monotonic_ns plus an intra-process counter, the counter present because Windows monotonic_ns is coarse enough for two rapid calls to collide -- is what makes a false-positive lock steal unable to disturb a live build. Every intended end for a member is implemented: swap on success, removal on rebuild failure, removal on a non-zero incremental exit, reap when abandoned. QUALIFIED on what I measured of the LAST of those. Two members are 37.9 h old, 75 times the 1800 s reap gate, and were present across two enumerations 1.77 h apart -- a second observation, not a single snapshot, which is what makes this 'not reaped' rather than 'not yet reaped'. They survive because _gc_stale_tmps runs only under 'if live:' and the runs minting members on this box are unflagged, which is subject 3's flag coupling seen from the artifact side. AND THE REAPER'S REACH IS NARROWER THAN THE SET, which I found by simulating its glob against the enumerated members rather than reading it: '<db>.rebuild.tmp.' + '*' matches 5 of 6, and the one member it cannot match is the LEGACY SHARED path that the unflagged code path creates -- so the member most likely to be abandoned is the member structurally excluded from reaping. Its manifest sidecar, however, IS matched, so a flagged run arriving late would strip a member's provenance and leave the member. None of this needs redesign: the three path expressions are each correct in isolation and no comment relates them, which is exactly the kind of gap a card is for.",
+    "blocking_defects": [
+      "the reaper's membership glob (_canonical.py:297-298, '<db>.rebuild.tmp.' + '*') excludes the LEGACY SHARED member '<db>.rebuild.tmp' while including that member's _build_manifest.json -- simulated against the real member list, 5 of 6 reachable. The member the unflagged path creates is the one the reaper cannot take, and a late reap would strip its provenance stamp while leaving it (coverage + failure_mode rows)",
+      "two abandoned members plus their .wal sidecars, 111,874,683 B, measured at 36.0/36.1 h and again 1.77 h later at 37.8/37.9 h -- 75x the reap gate, unreaped because _gc_stale_tmps is called only under 'if live:' (_canonical.py:602) and the member-minting runs on this box are unflagged (cadence + failure_mode rows)",
+      "nothing counts or reports the set: its size is observable only by enumerating the directory, so growth is invisible to every instrument the fabric already runs (failure_mode row)",
+      "the three path expressions -- per-unique mint, legacy mint, reaper glob -- are each correct alone and no comment relates them, so the exclusion above is discoverable only by simulating the glob against real members (key row)"
+    ]
+  },
+  "carded_by": "0.7.0_AE_CloudOps~K"
+}
