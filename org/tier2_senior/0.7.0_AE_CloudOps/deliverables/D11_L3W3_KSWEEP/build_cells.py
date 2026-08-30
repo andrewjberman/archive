@@ -1,9 +1,22 @@
 """Emit TO-L3W3-COX's 11 cell values + AC6's per-K output artifacts.
 
-⛔ EVERY VALUE IS DERIVED FROM THE MEASUREMENT ARTIFACTS, NEVER TYPED. A hand-authored number
-beside a derived one goes stale the moment either moves and nothing detects it; this builder
-reads ksweep_measurements.json and ksweep_battery.json and computes each cell from them, so a
-re-run against new measurements produces new cells or fails loudly.
+PROVENANCE, IN THREE PARTS -- and it is three parts BECAUSE the single blanket sentence that
+stood here was falsified by my own later edits:
+
+  MEASURED VALUES    DERIVED from ksweep_measurements.json and ksweep_battery.json. A
+                     hand-authored number beside a derived one goes stale the moment either
+                     moves and nothing detects it, so a re-run against new measurements
+                     produces new cells or fails loudly.
+  IDENTITIES         DERIVED FROM GIT by artifact_identity(): dirty -> PENDING-THIS-COMMIT,
+                     clean -> the last commit touching the path, neither -> refuse.
+  digest_of VALUES   TYPED, from Addendum 1l(vi)'s ruled enum. These are design constants, not
+                     measurements; refuse_bare_digests() is their enforcing half.
+
+⛔ THIS DOCSTRING PREVIOUSLY READ "EVERY VALUE IS DERIVED FROM THE MEASUREMENT ARTIFACTS, NEVER
+TYPED". That was true when written and my own identity/enum fields falsified it. I corrected the
+EMITTED carrier's note and left this one standing, so the committed source contradicted its own
+output for one candidate -- 4.0.0_SA_CRO~X found it. A correction is only as complete as its
+last surviving carrier, and a blanket claim has more carriers than the one you remember editing.
 
 GATE RECEIPT. All 7 b8a2 cells carry sequence_gate `after-view-P`; the 4 fadd cells carry
 `after-sweep-runs`. Per the standing on every wave-3 face, a gated cell's value is written only
