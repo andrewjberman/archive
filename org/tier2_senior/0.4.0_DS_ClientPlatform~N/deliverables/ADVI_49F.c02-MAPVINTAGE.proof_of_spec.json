@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_49F.c02-MAPVINTAGE",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.4.0_DS_ClientPlatform~N",
+  "decomp_ref": {
+    "doc": "org/tier1_exec/2.0.0_SA_COO/deliverables/ADVI_49F_DECOMP_AMENDMENT_c02_REEMISSION_20260830.md",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform~N/task_orders/ADVI_49F.c02-MAPVINTAGE.a06-allocation-map-at-chain-date-carried-and-stamped.md",
+    "vintage_commit": "fec349cf79"
+  },
+  "spec_ref": {
+    "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_A_20260811.md",
+    "group": "A",
+    "vintage_commit": "9c294bbf15"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/a06_dim_identity_crosswalk.py",
+      "kind": "script",
+      "commit_or_etag": "fec349cf79",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "[kind as written: gold stage A_06 (producer)] [state as written: DEPLOYED and VERIFIED ON THE RUNNING ARTIFACT] s3://opal-data-49financial/_code/a06_dim_identity_crosswalk.py ETag f8763326799bba70dac9edf5c55bdaf8, 11,148 B, LastModified 2026-08-30T08:42:34Z, VersionId mUbfPzyUaEiYJPVJ2jbhmG4QbocOgg_N. BYTE-IDENTICAL to the committed INDEX BLOB at fec349cf79 (11,148 B, 0 CR, same md5) -- this file's worktree is LF, so the served ETag equals the blob md5 directly and no CRLF normalisation applies; the CR-stripped equality was checked anyway and also holds. The reference was `git cat-file blob`, NEVER a worktree cp (22a). Baseline replaced: ETag 2017d687..., 6,263 B, deployed 2026-08-19T01:22:34Z -- the version that aborted on 08-23 and 08-24."
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/tests/test_a06_map_vintage.py",
+      "kind": "test",
+      "commit_or_etag": "fec349cf79",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "[kind as written: acceptance arms, new module] [state as written: COMMITTED] 6 arms, four reachable from four different truths as the cell requires. The module did not exist before this cell -- a06 had no test module at all, which is part of why the weekend condition survived."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~N/deliverables/ADVI_49F.c02-MAPVINTAGE.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "[kind as written: proof-of-spec instance] [state as written: RECORD] Validated positional M-1..M-5 with the checker's own commit-ish printed beside the verdict."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "M-1",
+      "criterion_verbatim": "THE FIRST READ -- ANSWERED AT CUT (DS~N 86499): floor-form chain logs 12 of 560: 08-23 Sun AND 08-24 Mon both ABORT @a06 (Tue 08-25 OK, the negative control); 3 of 12 floor fires aborted; the 08-29 backfill wrote the missing 08-21 partitions and masked it. The instance quotes that census with its denominator; no further read.",
+      "method": "live_read",
+      "invocation": "census of gold/advi/_logs/, floor-form logs matched as chain_<TS>.log (no explicit date); each log body read for CHAIN ABORT / CHAIN OK",
+      "output_evidence": "12 floor-form logs of 560 total. 2026-08-20 Thu ABORT @a00_dim_account (a DIFFERENT cause, closed separately below); 08-21 Fri OK; 08-22 Sat OK; **2026-08-23 Sun ABORT @a06_identity_crosswalk**; **2026-08-24 Mon ABORT @a06_identity_crosswalk**; 08-25 Tue through 08-29 Sat OK (5 fires, the negative control). 3 of 12 aborted. THE SCOPE IS SUNDAY AND MONDAY, not Sunday alone: every fire reads yesterday's map (the map lands ~13:15Z, after the 12:45Z fire), so Sunday reads Saturday's and Monday reads Sunday's, and 13 of 46 map partitions are header-only with all 13 a weekend. WHY IT WAS INVISIBLE: both aborted fires derived D = 2026-08-21 and those partitions were written 2026-08-29T09:52Z by the backfill campaign -- twr_daily reads complete for that week, by a campaign and not by the schedule. The data plane cannot show this failure; only the logs can.",
+      "denominator": "12 floor-form logs of 560 log objects; 3 of 12 aborted; 2 of 3 at a06; 13 of 46 map partitions header-only, 13 of 13 a weekend",
+      "status": "PASS",
+      "status_reason": "Answered at cut and quoted here with its denominator. The finding converted 0.7.0_AE_CloudOps~L's forecast into a reproduced production failure and widened its scope from Sunday to Sunday+Monday."
+    },
+    {
+      "criterion_id": "M-2",
+      "criterion_verbatim": "THE CODE at source: (i)-(v) implemented; four unit arms each reachable from a different truth (newest populated -> selected; newest header-only with an older populated -> the older selected, map_carried=true; no populated at all -> the :49 refusal; no map_date on the emitted crosswalk -> refused); commit-gate clean; safe-commit -F on the DS lane.",
+      "method": "test_suite",
+      "invocation": "python -m pytest tests/test_a06_map_vintage.py -q (clean / mutant / clean-after-restore); python -m pytest tests/ -q for the whole 49F suite; .tools/commit-gate.sh on both files",
+      "output_evidence": "(i) resolve_map_partition walks the partition list NEWEST-FIRST and takes the first frame with rows; emptiness is tested on the FRAME, never on object byte-size -- a 4,507 B threshold is a proxy a schema change breaks silently, and rows are the property the guard tests. (ii) the :49 guard STAYS and is the ONLY refusal point: with nothing populated the resolver returns the newest empty frame so the refusal happens there with its existing message. A different SELECTION with the guard intact, NOT tolerance of an empty map. (iii) map_date + map_carried on every ROW and in the MANIFEST from the same two values. (iv) validate_crosswalk refuses a frame missing either field or carrying an empty map_date. (v) the resolution PRINTS which partition was chosen of how many and NAMES every skipped one. ARMS: 6 added, 4 of them reachable from four different truths. CLEAN 6 passed. WHOLE 49F SUITE 131 passed -- the change breaks nothing. commit-gate clean 2 of 2. Committed fec349cf79 via safe-commit -F under this seat's author line.",
+      "denominator": "6 arms, 4 truths; 131 of 131 in the full 49F suite; 2 of 2 files gate-clean",
+      "status": "PASS",
+      "status_reason": "The ruled convention as AMENDED at 86490 -- newest POPULATED, not 'the map at the chain's date', which stays queued at the gate because a date-matched read would island the 534 stored P14 crosswalks."
+    },
+    {
+      "criterion_id": "M-3",
+      "criterion_verbatim": "THE DEPLOY read on the running artifact: host _code/a06_dim_identity_crosswalk.py ETag == LF md5 of the committed INDEX blob, _code/ VersionId printed; deploy ledger opened at the deploy, closed on this read.",
+      "method": "live_read",
+      "invocation": "HALT_ACK=1 bash .tools/safe-deploy.sh --author ... a06_dim_identity_crosswalk.py ; then s3api head-object + s3 cp of the served object, compared against `git cat-file blob fec349cf79:<path>`",
+      "output_evidence": "Served ETag f8763326799bba70dac9edf5c55bdaf8, 11,148 B, 2026-08-30T08:42:34Z, VersionId mUbfPzyUaEiYJPVJ2jbhmG4QbocOgg_N -- BYTE-IDENTICAL to the index blob. CONTENT READ of the DOWNLOADED bytes rather than the tool's report: resolve_map_partition present, validate_crosswalk present, the newest-first skip loop present, map_date/map_carried stamped, the :49 guard RETAINED, and the NEGATIVE CONTROL -- the old blind `map_asof = args.map_date or (map_dates[-1] ...)` line ABSENT. DEPLOYED 4.0 h before the 12:45Z fire, which is what made TODAY's fire the first exercise rather than Monday's. The HALT-GATE blocked the first invocation on 3 unreviewed base-serial messages; they were read before HALT_ACK=1 was set, which is the gate working.",
+      "denominator": "1 file deployed and verified; 6 content assertions incl. 1 negative control; 4.0 h of margin against the fire",
+      "status": "PASS",
+      "status_reason": "Verified on the running artifact by this seat and independently by the gate. The reference was the index blob, never the worktree."
+    },
+    {
+      "criterion_id": "M-4",
+      "criterion_verbatim": "THE FIRST SCHEDULED EXERCISE read from the S3 chain log (never SSM stdout): a06's line with map_date + map_carried, the chain completing past a06; if M-3 missed today's fire, today's 12:50Z abort read is printed beside it as the pre-registered falsifier.",
+      "method": "live_read",
+      "invocation": "s3 read of gold/advi/_logs/chain_20260830T124542Z.log (floor-form, never SSM stdout -- the ~24 KB SSM truncation is how the original abort line went unseen)",
+      "output_evidence": "`CHAIN START date=2026-08-28 mode=production stages=17` | `map resolution: chose date=2026-08-28 of 46 partition(s); SKIPPED header-only: 2026-08-29` | `map date=2026-08-28: 7,359 rows | fact_acc universe 7,371 (date=2026-08-28) | map_carried=False` | `STAGE OK a06_identity_crosswalk rc=0 wall=1.2s` | `CHAIN OK date=2026-08-28 wall=104.4s`. THE STAGE THAT ABORTED ON 08-23 AND 08-24 PASSED, AND THE CHAIN COMPLETED -- the first SUNDAY fire to survive since the floor was created on 08-19, same weekday, same condition, opposite outcome. The falsifier did not fire. \u26d4 ON map_carried=False: this is CORRECT and is NOT a miss against 87057's stated `True`. The flag is (map_date != chain date); the fire's chain date is prev_trading_day(Sun 08-30) = 2026-08-28 and the resolved map is 2026-08-28, so False is the only correct value -- a True would have been the crosswalk claiming a carried vintage while built from its own date's map. 86780's True was made for and scored on the five backfill dates, where 08-28 differs from every chain date; 87057 lifted it to the fire without the scope. The same code produced True on five dates and False on one, which is the first live evidence the flag DISCRIMINATES.",
+      "denominator": "1 scheduled fire; 5 quoted lines, all re-read identically by the gate; 18 STAGE OK, 0 STAGE FAIL, 0 ERROR/ABORT",
+      "status": "PASS",
+      "status_reason": "Read from the artifact the cell named, by this seat and independently by the gate on its own instrument. The 08-28 rewrite belongs to this fire, not to C02-g-7, whose arm was '0 new versions outside the five dates'."
+    },
+    {
+      "criterion_id": "M-5",
+      "criterion_verbatim": "C02-g-7's re-drive UNBLOCKED by M-3 (AE~L's act); proof VALID rc=0 positional M-1..M-5, checker vintage printed; graded by 3.0.0_SA_CVO.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py <this file> M-1,M-2,M-3,M-4,M-5 (positional id form; rc read UNPIPED)",
+      "output_evidence": "C02-g-7's re-drive was unblocked by M-3 at 08:47Z and ran all five dates to CHAIN OK by 09:00Z -- 5 of 5 matching the pre-registration published at 08:48Z on all four literals, scored at this seat from the chain logs rather than from the driving seat's report. Date 2026-08-11 additionally yields a before/after on ONE date with ONE vehicle where only the engine differs: 08:04:32Z ABORT @a06 (no map resolution line at all, pre-fix) -> 08:52:50Z CHAIN OK (chose 08-28, SKIPPED 08-29). The checker's own commit-ish is printed beside the verdict in the commit message.",
+      "denominator": "5 of 5 re-driven dates; 4 of 4 literals each; 1 before/after pair on a single date",
+      "status": "PASS",
+      "status_reason": "The round's closing criterion; the grade is 3.0.0_SA_CVO's."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The weekend arm must FAIL when the resolver is reverted to the blind `map_dates[-1]`, and the guard arm must NOT -- the mutation does not reach it. An arm that dies at a guard never tests the field under test.",
+      "expected": "Restoring the pre-fix resolver makes the newest (header-only) partition the selection again, so the header-only-fallback arm fails on its own assertion; the :49 guard arm and the explicit --map-date arm are unaffected and must stay green.",
+      "observed": "1 FAILED / 5 passed. test_header_only_newest_falls_back_to_the_older_populated failed with 'the older POPULATED partition must be selected'. The guard arm, the validator arm, the stamp arm and the explicit-map-date arm all stayed green, which is the discrimination that matters. The mutation used an asserted anchor so a silent no-op replace was impossible; the file was restored from a scratch backup and re-verified at 6 passed, then the whole 49F suite re-run at 131 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The resolver is a pure read over an immutable partition listing plus one frame read per candidate; it writes nothing. The arms drive it through a fake reader keyed by date that RAISES on an undeclared partition, so an arm that reads a partition it never declared fails loudly instead of silently receiving an empty frame. The production path was then exercised six times on real bytes -- five backfill dates and one scheduled fire -- against the same map plane.",
+      "observed": "Identical resolution on all six real exercises: `chose date=2026-08-28 of 46 partition(s); SKIPPED header-only: 2026-08-29`. map_carried True on the five backfill dates (chain date != 08-28) and False on the fire (chain date == 08-28) -- the flag varies with its input rather than reading one way always.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "'The map at the chain's date' semantics",
+      "reason": "The better convention in principle and explicitly QUEUED at the CTO's gate as its own cell (86490). Adopting it here would re-derive the 534 stored P14 crosswalks under a second rule and island the five backfill dates one layer down; clauses (i)/(ii) of 86478 were WITHDRAWN for that reason. The map_date stamp this cell adds is what makes that future migration measurable."
+    },
+    {
+      "item": "The SmartX fact_allocation_account_map itself",
+      "reason": "Upstream, another plane, another owner. Why 13 of 13 weekend partitions are header-only is not this cell's question and the map was not touched."
+    },
+    {
+      "item": "The :49 guard's live behaviour",
+      "reason": "NOT exercised by any of the six production runs and correctly so -- a populated partition existed every time, and the only condition that reaches the guard is an entirely empty map plane, which nobody should engineer. It is covered by the unit arm alone and that is the right state, stated rather than left implicit."
+    },
+    {
+      "item": "Monday 2026-08-31's fire",
+      "reason": "The second half of the Sunday+Monday class. Monday reads Sunday's map; today's 2026-08-30 partition had NOT landed at 12:59Z (it lands ~13:16Z). The gate asked for a one-line PRE-REGISTRATION of Monday's expected lines measured from that partition once it lands, before the 12:45Z fire -- owed, not done here."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION x DISARMED (owner: the issuer and the gate, surfaced by this seat at 86765). The cell's HEADING and the TO's TITLE both read 'carried forward from the latest POPULATED partition <= D' -- the pre-amendment wording -- while the cell's ruled-convention paragraph says NEWEST POPULATED and explicitly marks clauses (i)/(ii) of 86478 WITHDRAWN. I built to the ruled paragraph. Flagged because a heading is what a reader meets FIRST and '<= D' would produce the exact islanding the amendment exists to prevent. Third stale-first-carrier this project has paid for, after chain_49f_entrypoint.py:270-271 and NEAR_ZERO_BMV's comment.",
+    "OBSERVATION x DISARMED (owner: this seat, disclosed at 86852). My delivery ledger read READ COVERAGE 0/32 -- I stopped acking when the a06 HALT landed at 08:09Z and did not resume for ~50 minutes. The cost was not the missing receipts: sweeping those 32 rows surfaced FOUR asks I had not seen, all sequenced 'after M-3', one of which was live (the 08-20 a00 cause line). The ack is not bookkeeping -- the sweep that produces it is how a seat discovers what it owes, and a long working stretch inside one turn is the same hazard as a session boundary with nothing to prompt you.",
+    "OBSERVATION x CLOSED (owner: this seat, answered at 86852). The 2026-08-20 Thu ABORT @a00_dim_account named in M-1's census is a DIFFERENT class and closes on its line: the chain derived D = 2026-08-20, the fire day itself (T-0), and asked for a silver partition that did not exist. That is the pre-R14-T1FIX derivation. Discriminated rather than asserted -- the CHAIN START date of every floor fire against its own fire day shows 08-20 alone at T-0 and every fire after it at T-1, and R14-T1FIX is dated 2026-08-20 in the entrypoint's own comment. A one-off with a named cause, already remediated, no cell."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~N/logs/2026-08-30/",
+  "compiler_tools": [
+    {
+      "tool": "the floor-form chain-log census (purpose-built, read-only)",
+      "invocation": "s3 listing of gold/advi/_logs/ filtered to chain_<TS>.log, each body read for CHAIN ABORT / CHAIN OK",
+      "result": "M-1's instrument and the one that converted a forecast into a reproduced failure: 08-23 and 08-24 both ABORT @a06, 3 of 12 floor fires aborted, Tue 08-25 onward the negative control. It is also the only instrument that could have found it -- every partition-presence read on twr_daily is clean for that week because a backfill wrote the same keys."
+    },
+    {
+      "tool": "pytest (as the falsifier)",
+      "invocation": "python -m pytest tests/test_a06_map_vintage.py -q, three runs: clean / mutant / clean-after-restore; plus tests/ for the full suite",
+      "result": "6 / 5 / 6, and 131 passed across the whole 49F suite. Recorded under controls.mutant. The fake reader RAISES on an undeclared partition date, so an arm cannot silently read a frame it never set up."
+    },
+    {
+      "tool": ".tools/safe-deploy.sh (Rule 13 DS commit->QA-deploy)",
+      "invocation": "HALT_ACK=1 bash .tools/safe-deploy.sh --author '0.4.0_DS_ClientPlatform~N ...' a06_dim_identity_crosswalk.py",
+      "result": "DEPLOYED + VERIFY OK on the tool's own comp-pipescript confirm -- and then re-verified independently at this seat against the index blob, because a producer's self-report is never the evidence. The HALT-GATE refused the first invocation on 3 unreviewed base-serial messages; reading them before setting HALT_ACK=1 is the gate working as designed."
+    },
+    {
+      "tool": "aws s3api / s3 cp",
+      "invocation": "head-object + s3 cp on _code/a06...py; list-objects-v2 on the map plane (46 partitions) and the log prefix; get_object per chain log",
+      "result": "s3api throughout, never `s3 ls`, so timestamps are UTC by construction. The map-plane walk is what produced the pre-registered prediction at 08:48Z (08-29 header-only 4,507 B skipped, 08-28 populated 779,487 B selected) that then held 5-for-5 on the re-drive and again on the fire."
+    },
+    {
+      "tool": "git (as an evidence instrument)",
+      "invocation": "git cat-file blob fec349cf79:<path> as the deploy reference; ls-remote + merge-base --is-ancestor with a positive control for push state",
+      "result": "The index blob, never a worktree cp (22a; four instances of that class tonight). Push state read as a measured value with ac7792ac50 as the positive control on the same command."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'ADVI_49F.P14*' and '*P14*LEDGER*' (during the earlier vintage census); the rail also GATED a raw recursive grep of the inbox tree and routed it here",
+      "result": "Used on the adjacent per-producer census rather than on this cell's build. Recorded because the rail fired correctly twice today and the comp-find form printed denominators a raw grep would not have."
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py <this file> M-1,M-2,M-3,M-4,M-5",
+      "result": "Positional id form; the checker's own commit-ish is printed beside the verdict, per the class banked earlier today. Result recorded in the commit message."
+    }
+  ]
+}
