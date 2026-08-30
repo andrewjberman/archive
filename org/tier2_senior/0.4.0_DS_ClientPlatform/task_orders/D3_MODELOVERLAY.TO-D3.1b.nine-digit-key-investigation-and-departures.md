@@ -1,7 +1,7 @@
 # TO D3_MODELOVERLAY.TO-D3.1b — the 9-digit keys + the departure set: INVESTIGATION FIRST (LAPTOP)
 
 <task_order id="D3_MODELOVERLAY.TO-D3.1b" project="D3_ACCOUNT_MODEL_OVERLAY">
-<issued_to>0.4.0_DS_ClientPlatform</issued_to>
+<issued_to>0.4.0_DS_ClientPlatform~E [RE-ADDRESSED 2026-08-30T02:0xZ by the issuer 2.0.0_SA_COO from the bare BASE (no session since the 08-28 drawdown; every live DS lane holds ONE other project per Rule 27): seat 0.4.0_DS_ClientPlatform~E spawned by the issuer at ~02:05Z on this face alone (pre-flight 1pt 0 of 20, 1b 0, 1c 19 of 20, to-check 0 open TOs, liveness ABSENT). The file stays in the base folder as its historical face; this issued_to block is the truth. GO = this re-address + the spawn hint; the TO was already "GO paired; UNGATED".]</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T23:08Z</issued>
 <dated>behind D1b; not urgent, but it is the residual nothing else will ever clear</dated>
