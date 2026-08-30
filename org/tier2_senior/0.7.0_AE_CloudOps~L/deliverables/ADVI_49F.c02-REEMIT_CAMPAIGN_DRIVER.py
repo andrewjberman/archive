@@ -66,9 +66,22 @@ STARTERS = ("advi-49f-gold-floor", "advi-49f-publisher")
 # date -> (why it is special, what a CORRECT re-emission looks like).
 # A populated return on any of these is a DEFECT, not a repair.
 SPECIAL_DATES = {
+    # CORRECTED 2026-08-30T03:0xZ. My first registration here said NO-PRIOR-TRADING-DAY and
+    # the partition returned REFUSED-NO-BMV on 4,074 of 4,074 -- identical to its stored
+    # value, so nothing drifted, but the predicted STATUS STRING was wrong.
+    # WHY I PREDICTED IT: chain_49f_entrypoint.py:270-271 states "c02 will emit
+    # NO-PRIOR-TRADING-DAY, which is not a defect and must never be 'fixed'". That sentence
+    # is FALSE about c02 (0.4.0_DS_ClientPlatform~N 84848, read at source): prev_map is built
+    # through astype(str), so a NULL prev_trading_day becomes the STRING 'None', which is not
+    # None and is truthy, the NO-PRIOR-TRADING-DAY branch never fires, and the row falls
+    # through to REFUSED-NO-BMV. I predicted what the comment promises rather than what the
+    # code does. The row already written keeps the original prediction text: a ledger is a
+    # record and is not rewritten -- this correction sits beside it.
     "2024-07-08": (
-        "series floor -- no prior trading day exists",
-        "REFUSAL-SHAPE (NO-PRIOR-TRADING-DAY); populated returns would be a defect",
+        "series floor -- dim_calendar HAS the key with prev_trading_day NULL, which "
+        "astype(str) renders as the string 'None'",
+        "REFUSAL-SHAPE, specifically REFUSED-NO-BMV (not NO-PRIOR-TRADING-DAY -- see the "
+        "note above); populated returns would be a defect",
     ),
     "2025-01-09": (
         "US market CLOSED (0.4.0_DS_ClientPlatform~N 84375); not a key in prev_map",
