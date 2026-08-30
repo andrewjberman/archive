@@ -74,7 +74,7 @@ def artifact_identity(path):
                            capture_output=True, text=True).stdout.strip()
     if dirty:
         return "PENDING-THIS-COMMIT", "worktree differs from HEAD; the next commit carries it"
-    last = subprocess.run(["git", "log", "-1", "--format=%h", "--", path],
+    last = subprocess.run(["git", "log", "-1", "--format=%H", "--", path],
                           capture_output=True, text=True).stdout.strip()
     if not last:
         raise ValueError("cannot derive an identity for %s: clean but no commit touches it"
@@ -85,6 +85,45 @@ def artifact_identity(path):
 def git_head():
     return subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
                           text=True).stdout.strip()[:10]
+
+
+
+DIGEST_OF_ENUM = {"blob-at-pin", "s3-etag", "served-object", "content-addressed"}
+
+
+def refuse_bare_digests(doc):
+    """Every sha256 on the emitted carrier must be paired with a ruled digest_of value.
+
+    Addendum 1l(i): a sha256 without digest_of is FORM_DEFECT. 1l(iii) as amended: a rendering
+    digest never appears on a certified row, so `worktree-rendering` is NOT admissible here --
+    it names the refused class for local sidecars only.
+
+    This walks the EMITTED structure rather than the source, so a row added later is covered
+    too. A typed field with no consuming half drifts to unpopulated; this is that half.
+    """
+    bad = []
+
+    def walk(o, path=""):
+        if isinstance(o, dict):
+            if isinstance(o.get("sha256"), str):
+                g = o.get("digest_of")
+                if g is None:
+                    bad.append((path, "BARE -- no digest_of"))
+                elif g not in DIGEST_OF_ENUM:
+                    bad.append((path, "digest_of=%r not in the ruled enum" % g))
+                elif g == "blob-at-pin" and not (o.get("commit_or_etag") or o.get("pin")):
+                    bad.append((path, "blob-at-pin without a pin on the same row"))
+            for k, v in o.items():
+                walk(v, path + "/" + k)
+        elif isinstance(o, list):
+            for i, v in enumerate(o):
+                walk(v, path + "[%d]" % i)
+
+    walk(doc)
+    if bad:
+        raise ValueError("REFUSED -- %d digest row(s) violate Addendum 1l:\n  %s"
+                         % (len(bad), "\n  ".join("%s: %s" % b for b in bad)))
+    return True
 
 
 def cell(cid, label, value, evidence, gate):
@@ -436,9 +475,22 @@ def main():
            "decomp_ref": DECOMP,
            "cell_count": len(cells),
            "built_at_head": git_head(),
-           "note": "every value DERIVED from ksweep_measurements.json and ksweep_battery.json "
-                   "by build_cells.py; no value is typed.",
+           "provenance": {
+               "measured_values": "DERIVED by build_cells.py from ksweep_measurements.json "
+                                  "and ksweep_battery.json -- no measured value is typed",
+               "identities": "DERIVED FROM GIT at build time (artifact_identity(): dirty -> "
+                             "PENDING-THIS-COMMIT, clean -> the last commit touching the path); "
+                             "never typed by hand",
+               "digest_of_values": "TYPED, from the ruled enum in Addendum 1l(vi) -- these are "
+                                   "design constants, not measurements, and refuse_bare_digests() "
+                                   "enforces them on every build",
+               "why_stated_in_three_parts": "the previous single sentence claimed NO value is "
+                                            "typed. That was true when written and my own later "
+                                            "edits falsified it (3.0.0_SA_CVO~X, recert of "
+                                            "0b9655a432). A blanket provenance claim goes stale "
+                                            "the moment a field it did not anticipate is added."},
            "cells": cells}
+    refuse_bare_digests(out)   # item 3: refuse a bare sha256 at build time
     p = DELIV + "cells.L3W3-COX.json"
     with open(p, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(out, fh, indent=1)
