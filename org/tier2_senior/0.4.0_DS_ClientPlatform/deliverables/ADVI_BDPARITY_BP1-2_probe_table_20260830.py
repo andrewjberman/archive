@@ -101,11 +101,17 @@ def load_gold(accounts, start, end):
 #
 #   MEMBER            VACUOUS-NO-LINKED-DAYS
 #   (i)  MECE over    the DIFFERENCED-window domain: a sub-window formed by subtracting two nested
-#                     ruled windows. Uncovered member hunted: a sub-window with linked days on one
-#                     side only cannot arise -- both sides are OUR OWN linked counts over nested
-#                     windows, so the difference is >= 0 and 0 means neither window linked a day.
-#   (ii) SAME GRAIN   one (account, differenced sub-window) row -- the same grain as the class it
-#                     replaces (EXACT / TIGHT / LARGE), never mixed with a per-cell outcome.
+#                     ruled windows. UNCOVERED MEMBER HUNTED, and the hunt has a real neighbour --
+#                     a sub-window empty on OUR side while BD computed days is NOT vacuous: it is a
+#                     LARGE row carrying OUR-DATA-ABSENCE as its mechanism. BOTH-SIDES-EMPTY is
+#                     this member. (Refined to 1.0.0_SA_CTO 86052's wording; my first statement
+#                     said a one-sided sub-window "cannot arise", which collapsed those two cases.)
+#   (ii) SAME GRAIN   the DIFFERENCED-WINDOW row -- one (account, sub-window). This is the postulate
+#                     that decides PLACEMENT, and it is why the member does not join the linker:
+#                     the linker's set is MECE over attempting ONE cell, and a single cell with no
+#                     linked days on our side is already UNAVAILABLE-*/OUR-DATA-ABSENCE. Housing
+#                     this member there would FALSIFY the linker's own domain sentence to admit a
+#                     member from another domain -- the same drift, in the other direction.
 #   (iii) INTENT      one axis, one intent: IS THERE A COMPARISON TO BIN. It does not encode
 #                     magnitude, direction, or mechanism -- those stay in their own fields.
 #   (iv) STATE        what ONE remedy does NOT move: loading more history does not create an
