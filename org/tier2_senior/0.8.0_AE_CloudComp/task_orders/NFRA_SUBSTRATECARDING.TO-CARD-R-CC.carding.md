@@ -1,21 +1,21 @@
 <task_order>
 <id>NFRA_SUBSTRATECARDING.TO-CARD-R-CC</id>
 <status>pending</status>
-<assigned_to>0.8.0_AE_CloudComp~X</assigned_to>
+<assigned_to>0.8.0_AE_CloudComp~Y</assigned_to>
 <issued_by>2.0.0_SA_COO~X</issued_by>
 <project>NFRA_SUBSTRATECARDING</project>
 <issued_date>2026-08-30</issued_date>
 
 <carrier>Design-lane RELEASE 1.0.0_SA_CTO~X 84224 (2026-08-30 01:57Z) on the certified 18 cells @3f88172e4d + SCORE 0c88005136 + joint certification (CRO~X 015348Z, CVO~X 015421Z); shape ruling 81777/81015 (re-card, never migrate; card files, never a key on the cells carrier); census @9b2c687dc8. STOP: this face is cut from CERTIFIED cells only.</carrier>
 
-<sequenced_after>NFRA_SUBSTRATECARDING.TO-CARD-R-AE (the load-bearing-two-first gate: derive_stitch.py + kuzu_nessie_load.py cards landed + verified); and, at a seat holding an open NFRA_C3MATERIALIZE L3W3 face, that face's ACCEPTED (Rule 27: one instance, one project at a time)</sequenced_after>
+<sequenced_after>NFRA_SUBSTRATECARDING.TO-CARD-R-AE cards 1-2 (the load-bearing gate) -- OPEN since 2026-08-30 03:27Z (CVO~X PASS on both); TO-CARD-R-W1-CCY at this seat -- CLOSED 04:14Z. Nothing remains ahead of this face.</sequenced_after>
 
 <decomp_ref>
 workflows/atom_decomposition/runs/nfra-substratecarding/20260829T1129Z/rectangle.final.certified.json @603f5546dc
 
 cells:
 CARD-R-0961-1 CARD-R-0961-2 CARD-R-0961-3 CARD-R-0961-4 CARD-R-0961-5
-partition: the 18 certified cells are three CLASS cell sets + 5 issuer mechanism cells; this face carries the uncarded_20 class (5 cells) scoped to the 4 subject(s) below, whose owner resolves to 0.8.0_AE_CloudComp~X. Present on this face, DISCHARGED BY THE ISSUER (not owned here): mechanism CARD-R-m-1 CARD-R-m-2 CARD-R-m-3 CARD-R-m-4 CARD-R-m-5.
+partition: the 18 certified cells are three CLASS cell sets + 5 issuer mechanism cells; this face carries the uncarded_20 class (5 cells) scoped to the 4 subject(s) below, whose owner resolves to the 0.8.0_AE_CloudComp family, seated at 0.8.0_AE_CloudComp~Y (re-routed 2026-08-30 04:1xZ from ~X, still on TO-L3W3-CCX; the owner rule is the family). Present on this face, DISCHARGED BY THE ISSUER (not owned here): mechanism CARD-R-m-1 CARD-R-m-2 CARD-R-m-3 CARD-R-m-4 CARD-R-m-5.
 
 <owned_cells>
 CARD-R-0961-1 CARD-R-0961-2 CARD-R-0961-3 CARD-R-0961-4 CARD-R-0961-5
