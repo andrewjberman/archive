@@ -54,22 +54,39 @@ egress that was never authorized**. The issuer refused it. Do not "fix" this by 
 
 | owed | by | to |
 |---|---|---|
-| W2 vendor pull (5,309 accounts, **performance endpoint only**) | `0.4.0_DS_ClientPlatform~C` | ADVI_BDPARITY |
-| TO-R1-DS correction | `0.4.0_DS_ClientPlatform~R` | HELD on `3.0.0_SA_CVO`'s word — a reset neither lifts nor satisfies it |
+| W2 vendor pull -- **FIRED 18:3xZ and FAILED AT AUTH; see below** | `0.4.0_DS_ClientPlatform~C` | ADVI_BDPARITY |
+| TO-R1-DS correction -- **HOLD LIFTED 18:3xZ**: `3.0.0_SA_CVO` 88973 ruled *YES, amend*, five conditions | `0.4.0_DS_ClientPlatform~R` | proceed under those conditions |
 | register ruling on the completed-member convention | `0.0.0_AB_MSTR` | asked at 88774, still open |
 | 4 unpushed commits at this seat | this seat | ride the next integration window |
 
 ⛔ **W2 IS AUTHORIZED AND MUST NOT BE GATED ON THE RESET.** Andrew spent the vendor word at 18:0xZ
 (*"recs approved for each"*). CLAUDE.md forbids converting his word to one agent into a gate on another.
-**The word is SPENT and SINGULAR: W1 skipped, W2 only, performance endpoint only.** A second pass after a
-failure is a SECOND ask, not a retry.
+**The word is SINGULAR: W1 skipped, W2 only, performance endpoint only.** A second pass after a
+*completed* run is a SECOND ask, not a retry.
+
+⛔ **BUT THE WORD IS NOT SPENT — W2 FIRED AND DIED AT AUTHENTICATION, UPSTREAM OF ANY DATA CALL.**
+`RuntimeError: BD GET /session/token -> HTTP 401` at `run()` line 410, before the account loop.
+**Measured against the world, not the error text:** bronze `reporting_performance/2026-08-30/` still holds
+exactly the five keys from the 03:05Z P1 probe -- **0 data calls, 0 accounts pulled, 0 objects landed.**
+The 49F `.bd.identity` cookie in Secrets Manager `blackdiamond/49f/session` is expired; it authenticated
+at 03:05Z and 04:35Z today and has lapsed since.
+⛔ **DO NOT ESCALATE A HUMAN BD LOGIN, AND DO NOT RETRY.** `0.4.0_DS_ClientPlatform~C` initially reported
+that a human login was required, then **WITHDREW the claim** (88996, successor log corrected
+@`73305dcd10`) -- it was inferred from a module comment, not measured. `0.7.0_AE_CloudOps` read the
+trigger at source: `bd-49f-session-trigger` probes the token URL LIVE and is **fail-safe to MINT** on a
+negative probe, so the **04:35Z fire should re-mint rather than skip**. Neither story is established --
+that mint leg is UNEXERCISED (19 of 19 Lever-A decisions over 10 days were POSITIVE -> SKIP).
+**The 04:35Z fire IS the discriminator. Read its outcome before escalating anything.** A retry costs a
+vendor auth call and proves nothing; a 401 is not transient.
 
 ## 4. CLOCK-GATED — do not pull these forward
 
 - **Monday 12:45Z** — three pre-registered acceptance reads (a06's registered line; A7-4's provenance
   read; V-4's first fire). `ADVI_49F`'s A7-4 is genuinely **uncomputable** until this fires.
 - **Tuesday** — V-4's second fire.
-- **04:35Z** — the insurance chain fire.
+- **04:35Z** — now load-bearing for THREE things, not one: the insurance chain fire, `0.7.0_AE_CloudOps`'s
+  `s1-bd49finsurance-silver-family` acceptance, **and the BD session re-mint that gates W2**. Its outcome
+  is the first thing a successor should read.
 
 ⛔ An ad-hoc run to "get it in before the reset" destroys the discriminator the scheduled fire exists to
 produce. The law names this specifically. Wait.
