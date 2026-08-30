@@ -86,6 +86,22 @@ def load_gold(accounts, start, end):
 PERIOD_INDEX = {"QTD": 0, "YTD": 1, "1Y": 2, "SI": 5}
 
 
+def builder_minus_one_year(iso_date):
+    """What the PULLER actually SENT for 1Y -- mirrors lambda_function._minus_one_year.
+
+    ⛔ NOT the same as what our LINKER computes. The builder requests q_end minus one year
+    (2025-08-28); parity_period_returns.period_window opens 1Y the DAY AFTER that (2025-08-29),
+    so exactly one year of daily returns is linked. The two differ by ONE DAY BY CONSTRUCTION,
+    and the 1Y cell therefore compares two windows that are not identical. The table PRINTS both
+    rather than reconciling them: a one-day boundary difference at the open is precisely the
+    convention-mismatch shape the taxonomy reserves, and hiding it inside a matched-looking cell
+    is how it would be read as a data delta instead of a definition delta."""
+    y, m, d = (int(x) for x in iso_date.split("-"))
+    if m == 2 and d == 29:
+        return "%04d-02-28" % (y - 1)
+    return "%04d-%02d-%02d" % (y - 1, m, d)
+
+
 def main():
     import argparse
     ap = argparse.ArgumentParser()
@@ -100,7 +116,16 @@ def main():
     # For the rest BD computed 07-01..08-28, so its BMV is NOT the inception BMV -- passing it
     # would be reading a number from the wrong window. Absent -> the anchor branch, which the
     # cell prints. NEVER assumed to be 0 just because an inception "ought" to open empty.
-    bd_bmvs = {"0027265115": 0.0}
+    # BMV AT A TRUE INCEPTION IS 0.0 BY CONSTRUCTION, not by assumption: the anchor here is
+    # level.startDate, the date the account began, and an account begins empty. MEASURED on
+    # 22596361 (BD returned BMV 0.0 at exactly that range) and corroborated independently on
+    # 23221671 and 21089351, whose first LINKABLE day is one trading day after their inception --
+    # the same pattern, from a different instrument (our gold, not BD's payload). n=3.
+    # 3.0.0_SA_CVO ANNOTATION 3 applies the rule at n=2; this is the third.
+    # NOTE the distinction that matters: this is BMV at the TRUE anchor, NOT the beginningMarketValue
+    # BD returned for the four fallback-window ranges -- that number belongs to 07-01..08-28 and
+    # reading it here would be the right field off the wrong range.
+    bd_bmvs = {sch: 0.0 for sch in COHORT}
 
     lo = max(min(anchors.values()), "2025-01-01")
     daily, npart = load_gold(set(BD_BY_ID.values()), lo, ASOF)
@@ -122,9 +147,21 @@ def main():
             br = binfo["ranges"][idx]
             # WHAT WE ASKED FOR at that index (the builder's own construction)
             req = {0: (QSTART, ASOF), 1: ("2026-01-01", ASOF),
-                   2: (ppr._minus_one_year(ASOF), ASOF),
+                   2: (builder_minus_one_year(ASOF), ASOF),
                    5: (anchors[schwab] if schwab == "0027265115" else QSTART, ASOF)}[idx]
             range_match = (br["ret_start"] == req[0] and br["ret_end"] == req[1])
+            # COMPARISON OUTCOME, ruled by 3.0.0_SA_CVO ANNOTATION 3 @11c48031d7, in TEST ORDER
+            # (coverage first -- it is a permanent property of the account, the window is not):
+            #   our side cannot produce it            -> our own UNAVAILABLE-* stands
+            #   SI requested away from the TRUE anchor -> UNAVAILABLE-SI-WINDOW-NOT-AT-ANCHOR
+            # BD echoes the SI startDate we send (5 of 5), so an SI value is comparable ONLY when
+            # the requested SI start == level.startDate. Otherwise BD computed a real number over
+            # the WRONG window -- present, plausible and wrong, which is the class the taxonomy
+            # exists to refuse. NOT "no anchor": the anchors are in hand from level.startDate.
+            cmp_outcome = r["outcome"]
+            if period == "SI" and cmp_outcome == ppr.OUTCOME_COMPUTED:
+                if req[0] != binfo["inception"]:
+                    cmp_outcome = "UNAVAILABLE-SI-WINDOW-NOT-AT-ANCHOR"
             ours = r["r_net_cum"]
             theirs = br["bd_return"]
             delta = (None if (ours is None or theirs is None) else ours - theirs)
@@ -133,7 +170,7 @@ def main():
                 "requested": "%s..%s" % req,
                 "returned": "%s..%s" % (br["ret_start"], br["ret_end"]),
                 "range_match": range_match,
-                "our_outcome": r["outcome"], "our_window": "%s..%s" % (r["window_start"], r["window_end"])
+                "our_outcome": r["outcome"], "cell_outcome": cmp_outcome, "our_window": "%s..%s" % (r["window_start"], r["window_end"])
                                 if r["window_start"] else None,
                 "our_return": ours, "bd_return": theirs, "delta": delta,
                 "bd_annualized": br["bd_annualized"],
@@ -147,18 +184,20 @@ def main():
     pd.set_option("display.width", 250)
     pd.set_option("display.max_columns", 40)
     print("=== THE PROBE TABLE (5 accounts x 4 ruled periods = 20 cells) ===")
-    print(df[["account", "period", "requested", "returned", "range_match", "our_outcome",
+    print(df[["account", "period", "requested", "returned", "range_match", "cell_outcome",
               "our_return", "bd_return", "delta", "our_days_linked", "bd_days_held"]].to_string(index=False))
     print()
     print("=== SI LINE, per account ===")
     si = df[df["period"] == "SI"]
     print(si[["account", "bd_anchor", "bd_first_return_day", "branch", "our_first_linkable",
-              "coverage_basis", "our_outcome"]].to_string(index=False))
+              "coverage_basis", "cell_outcome"]].to_string(index=False))
     print()
     print("=== DENOMINATORS ===")
     print("cells: %d   range_match TRUE: %d   comparable (both values present): %d"
           % (len(df), int(df["range_match"].sum()), int(df["delta"].notna().sum())))
-    print("our outcomes:", json.dumps(df["our_outcome"].value_counts().to_dict()))
+    print("cell outcomes:", json.dumps(df["cell_outcome"].value_counts().to_dict()))
+    si = df[df["period"] == "SI"]
+    print("SI denominator: %s of %d" % (json.dumps(si["cell_outcome"].value_counts().to_dict()), len(si)))
     print("bd_annualized values seen:", sorted({str(v) for v in df["bd_annualized"]}))
     return df
 
