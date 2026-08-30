@@ -183,6 +183,76 @@ def refuse_prose_basis_mismatch(doc):
     return True
 
 
+LIFETIME_CLAIM = re.compile(
+    r"(never again|never touched again|never written again|ha(?:s|ve) not run again"
+    r"|then nothing\b|written once\b|written ONCE\b|writes ever\b)", re.I)
+LIFETIME_SCOPE = re.compile(
+    r"(surviving set|SURVIVING|latest surviving|snapshot HISTORY|UNMEASURED)", re.I)
+
+
+def refuse_unscoped_lifetime_claim(doc):
+    """A sentence asserting the subject was never written again is a claim about ALL TIME, and the
+    S3 object plane cannot carry it. Every carrier of that claim must scope itself.
+
+    THE THIRD ARM ON THIS FACE AND THE FIRST THAT COMPARES PROSE TO PROSE. Its two siblings --
+    refuse_prose_basis_mismatch() and refuse_prose_enum_mismatch() -- both compare a SENTENCE to a
+    STRUCTURED FIELD. This defect has no structured field in it at all: five sentences, one of them
+    correctly scoped and four asserting the unscoped claim, disagreeing only with each other. Both
+    existing arms are structurally blind to it.
+
+    MEASURED, and it is the reason this is an arm rather than a note (4.0.0_SA_CRO~X STOP on card 6
+    @19f0a0d69f, 2026-08-30): the object plane proves N surviving append commit uuids, N surviving
+    snapshots and no later SURVIVING object than some timestamp. It does NOT prove the total
+    lifetime write count. Card 6 scoped `/process/cadence/evidence` correctly and left
+    `/subject/declared_domain`, `/process/methodology/evidence`,
+    `/process/cadence/actual_trigger` and `/verdict/why` asserting the lifetime claim as fact --
+    and CARD 5, ALREADY JOINTLY CLOSED AND ON ORIGIN, CARRIES THE SAME FOUR.
+
+    ⛔ THE ROOT IS NOT CARELESSNESS ABOUT SENTENCES, IT IS FIXING THE CITED CARRIER INSTEAD OF
+    CENSUSING THE CLAIM. An earlier STOP required the write-once evidence be scoped; I scoped the
+    carrier that was named. At the moment of repair, a fix applied at the cited site and a fix
+    applied to the claim are indistinguishable -- which is why this has to be mechanical.
+
+    ⛔ THE PATTERN IS DELIBERATELY NARROW, because my own first census of this used `and never\b`
+    and returned three FALSE POSITIVES on the same cards: "ENSURE-ONLY and NEVER overwrites"
+    (a property of the writer), "NEVER retyped from a display" (provenance of a home string) and
+    "NEVER --query length()" (an instrument prohibition). All three are the word `never` about
+    something that is not the subject's write history. An arm that fires on those manufactures
+    defects in correct sentences, so the tokens here name the CLAIM, not the word.
+    """
+    bad = []
+
+    def walk(node, path):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                walk(v, path + "/" + k)
+        elif isinstance(node, list):
+            for i, v in enumerate(node):
+                walk(v, path + "/%d" % i)
+        elif isinstance(node, str):
+            for m in LIFETIME_CLAIM.finditer(node):
+                # ⛔ THE SCOPE QUALIFIER MUST TRAVEL WITH THE CLAIM, NOT MERELY SHARE ITS FIELD.
+                # A whole-field test FALSE-NEGATIVES: card 6's /verdict/why carries `UNMEASURED`
+                # about whether a CONSUMER reads the table, 300 characters from an unscoped
+                # `never touched again` -- a scope word about a DIFFERENT claim silently
+                # certified the lifetime one. 4.0.0_SA_CRO~X named that exact carrier and the
+                # whole-field version of this arm did not fire on it.
+                near = node[max(0, m.start() - 250):m.end() + 250]
+                if not LIFETIME_SCOPE.search(near):
+                    bad.append("%s: %r asserts a LIFETIME write history the object plane cannot "
+                               "carry, with no scoping qualifier in the same field"
+                               % (path, m.group(1)))
+
+    walk(doc, "")
+    if bad:
+        raise ValueError(
+            "UNSCOPED LIFETIME CLAIM -- the surviving set does not prove the lifetime:\n  "
+            + "\n  ".join(bad)
+            + "\n  FIX: scope each to the SURVIVING set / latest SURVIVING object, or obtain "
+              "snapshot-history or catalog evidence for an exact lifetime claim.")
+    return True
+
+
 BASIS_VOCAB = ("measured", "held", "inferred", "absent")
 
 
@@ -1412,7 +1482,8 @@ def card_cse_test_24458e6c():
             "declared_domain": (
                 "An ISOLATED TEST-HARNESS Iceberg table in the globgrph Nessie namespace, "
                 "holding CSE (Change/Signal Event) rows partitioned by (source, event_date) -- "
-                "the same shape as the production log, written once and never again. "
+                "the same shape as the production log. Its SURVIVING objects were written by a "
+                "SINGLE append and carry no later surviving write. "
                 "⛔ THE SUBJECT IS THE TABLE AT THIS EXACT S3 HOME (uuid 24458e6c-667c-4e85-"
                 "ba44-33751795e182). It is NOT the production `cse` store, and it is NOT its "
                 "same-named sibling cse_test_bb57a916 -- BOTH scratch tables carry the table "
@@ -1466,8 +1537,9 @@ def card_cse_test_24458e6c():
                     "ensure_cse_table() applies at %s:%s @%s. A structural match to a writer's "
                     "partition spec identifies the writer CLASS; it does not identify the run. "
                     "materializer_standing is `historical_in_use` (MEASURED): exactly %d "
-                    "snapshot and %d distinct write-commit uuid exist at this home, so the "
-                    "writer ran here and has not run again."
+                    "snapshot and %d distinct write-commit uuid SURVIVE at this home, so the "
+                    "writer ran here and has not run again IN THE SURVIVING RECORD -- which is "
+                    "not the same as never, and the lifetime count is UNMEASURED."
                     % (lay["by_segment"].get("data", 0), lay["event_date_partitions"],
                        lay["event_date_range"][0], lay["event_date_range"][1],
                        writer, "321/338", wpin[:10], lay["snapshots"],
@@ -1476,8 +1548,9 @@ def card_cse_test_24458e6c():
             },
             "cadence": {
                 "declared_rhythm": "NONE DECLARED -- generation.trigger is null in the manifest",
-                "actual_trigger": ("none found; and the write history says none is needed -- this "
-                                   "table was written ONCE"),
+                "actual_trigger": ("none found; and the SURVIVING write history says none is "
+                                   "needed -- the surviving set was written by ONE append, "
+                                   "with the lifetime count UNMEASURED"),
                 "live_matches_declared": "not_applicable",
                 "live_instance_age": ("%s objects written between %s and %s -- a %d-second "
                                       "window on %d distinct write-day; %d days stale at carding"
@@ -1681,8 +1754,8 @@ def card_cse_test_24458e6c():
             "standing": "QUALIFIED",
             "why": (
                 "NOT LOAD-BEARING, on the evidence gathered here: an isolated test-harness table "
-                "written in a single %d-second append on %s and never touched again, %d days "
-                "stale at carding. It is carded because it EXISTS in the manifest and consumes a "
+                "whose SURVIVING objects were written in a single %d-second append on %s with "
+                "no later surviving write, %d days stale at carding. It is carded because it EXISTS in the manifest and consumes a "
                 "real S3 home, not because anything was shown to read it. QUALIFIED, and these "
                 "are the qualifications: the materializer is `inferred` -- the invocation that "
                 "created this table was never found, and the partition-spec match identifies a "
@@ -1752,8 +1825,9 @@ def card_cse_test_bb57a916():
             "kind": "store",
             "declared_domain": (
                 "An ISOLATED TEST-HARNESS Iceberg table in the globgrph Nessie namespace holding "
-                "CSE (Change/Signal Event) rows partitioned by (source, event_date), written by "
-                "THREE separate appends inside one %d-minute session and never again. "
+                "CSE (Change/Signal Event) rows partitioned by (source, event_date). Its "
+                "SURVIVING objects were written by THREE appends inside one %d-minute "
+                "session and carry no later surviving write. "
                 "⛔ THE SUBJECT IS THE TABLE AT THIS EXACT S3 HOME (uuid bb57a916-76de-454d-a71e-"
                 "932dc173620e). It is NOT the production `cse` store and it is NOT its same-named "
                 "sibling cse_test_24458e6c, which is a DIFFERENT table carrying the SAME table "
@@ -1804,8 +1878,9 @@ def card_cse_test_bb57a916():
                     "is the (source, event_date) spec ensure_cse_table() applies at %s:321/338 "
                     "@%s. A structural match to a writer's partition spec identifies the writer "
                     "CLASS, never the run. materializer_standing is `historical_in_use` "
-                    "(MEASURED): %d snapshots and %d distinct write-commit uuids exist here, so "
-                    "the writer ran and has not run again."
+                    "(MEASURED): %d snapshots and %d distinct write-commit uuids SURVIVE here, so "
+                    "the writer ran and has not run again IN THE SURVIVING RECORD -- which is "
+                    "not the same as never, and the lifetime count is UNMEASURED."
                     % (lay["by_segment"].get("data", 0), lay["event_date_partitions"],
                        lay["event_date_range"][0], lay["event_date_range"][1],
                        writer, wpin[:10], lay["snapshots"],
@@ -1814,8 +1889,9 @@ def card_cse_test_bb57a916():
             },
             "cadence": {
                 "declared_rhythm": "NONE DECLARED -- generation.trigger is null in the manifest",
-                "actual_trigger": ("none found; and the write history is a SESSION, not a "
-                                   "schedule -- three appends inside %d minutes, then nothing"
+                "actual_trigger": ("none found; and the SURVIVING write history is a SESSION, "
+                                   "not a schedule -- three appends inside %d minutes with no "
+                                   "later surviving write; lifetime count UNMEASURED"
                                    % (span // 60)),
                 "live_matches_declared": "not_applicable",
                 "live_instance_age": ("%d objects written between %s and %s -- a %d-second span "
@@ -2009,8 +2085,8 @@ def card_cse_test_bb57a916():
             "standing": "QUALIFIED",
             "why": (
                 "NOT LOAD-BEARING on the evidence gathered here: an isolated test-harness table "
-                "written by %d appends inside %d minutes on %s and never touched again, %d days "
-                "stale at carding. It is carded because it EXISTS in the manifest and occupies a "
+                "whose SURVIVING objects were written by %d appends inside %d minutes on %s "
+                "with no later surviving write, %d days stale at carding. It is carded because it EXISTS in the manifest and occupies a "
                 "real S3 home, not because anything was shown to read it. QUALIFIED, and these "
                 "are the qualifications: the materializer is `inferred` -- the invocations were "
                 "never found and the partition-spec match identifies a writer CLASS, not a run; "
@@ -2054,6 +2130,7 @@ def main():
         doc = BUILDERS[name]()
         refuse_prose_basis_mismatch(doc)
         refuse_prose_enum_mismatch(doc)
+        refuse_unscoped_lifetime_claim(doc)
         p = os.path.join(D, "%s.v3.1.json" % name)
         with open(p, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(doc, fh, indent=1)
