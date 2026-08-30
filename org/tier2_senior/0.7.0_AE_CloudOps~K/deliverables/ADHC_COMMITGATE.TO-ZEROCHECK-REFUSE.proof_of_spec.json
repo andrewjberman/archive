@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADHC_COMMITGATE.TO-ZEROCHECK-REFUSE",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": ".tools/commit-gate.sh",
+    "vintage_commit": "3ebdcf9bf1",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~K/task_orders/ADHC_COMMITGATE.TO-ZEROCHECK-REFUSE.declared-suffix-with-zero-checks-refuses-and-bash-n-on-every-sh.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~K/task_orders/ADHC_COMMITGATE.TO-ZEROCHECK-REFUSE.declared-suffix-with-zero-checks-refuses-and-bash-n-on-every-sh.md",
+    "group": "OTHER",
+    "vintage_commit": "1940a78a78"
+  },
+  "assignee": "0.7.0_AE_CloudOps~K",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/commit_gate_runner.py",
+      "kind": "script",
+      "commit_or_etag": "9ed3bbfef8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The only file whose CODE changed. Passed its own gate at commit time -- the safe-commit run printed 'OK: bash -n syntax-checked .tools/commit-gate.sh', 'comp-shell scan clean', 'All checks passed!' and 'pre-commit gate clean for 2 of 2 file(s)', so the new behaviour is live in the real commit path and not only in a hand-run. A tooling file: no served output moves, D2/D3 out of scope by the TO's authority clause.",
+      "artifact_covered_by": [
+        "ZC-1",
+        "ZC-2",
+        "ZC-3"
+      ]
+    },
+    {
+      "path_or_key": ".tools/commit-gate.sh",
+      "kind": "script",
+      "commit_or_etag": "9ed3bbfef8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "COMMENT ONLY -- the header block (ZC-3). No executable line changed; the file is still the same 3-line wrapper that execs commit_gate_runner.py. Flagged explicitly because the TO says 'one file, one branch, one syntax check': the code change IS one file, and this is the header ZC-3 requires to state what runs where and what rc=2 means. If the gate reads that as scope creep it is a comment revert, not a code change.",
+      "artifact_covered_by": [
+        "ZC-3",
+        "ZC-5"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/ADHC_COMMITGATE.TO-ZEROCHECK-REFUSE.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This instance, at the path the TO's <instance_path> names. Validated positionally as the TO directs: python .tools/proof-of-spec-check.py <instance> ZC-1,ZC-2,ZC-3,ZC-4,ZC-5, rc read UNPIPED, checker vintage printed beside the verdict."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "ZC-1",
+      "criterion_verbatim": "THE REFUSE BRANCH: when a file's suffix is in the gate's DECLARED read set (.py / .sh / .tf / org/projects/*.json) and the file received ZERO checks, the gate exits a DISTINCT non-zero rc (rc=2, named in the header) with the same \"NOTHING WAS CHECKED\" text -- never rc=0. The operator then names the instrument actually used or widens the scope deliberately.",
+      "method": "command",
+      "invocation": "In .tools/commit_gate_runner.py: a `declared` counter incremented INSIDE each of the four declared dispatch branches; at the tail, `if checked == 0:` prints the unchanged NOTHING WAS CHECKED block and then, `if declared:`, a REFUSED line and `return 2`. Exercised by a mutant of .tools/commit_gate_runner.py carrying ONLY the removal of the .sh branch's `checked += 1`, run against data/.zerocheck_scratch/clean.sh, with the shipped runner on the same file as the control.",
+      "output_evidence": "MUTANT: 'OK: bash -n syntax-checked ...' then 'WARN: commit-gate checked 0 of 1 file(s) -- NOTHING WAS CHECKED.' (same text, unchanged) then 'REFUSED (rc=2): 1 of 1 file(s) carry a suffix this gate DECLARES it reads (.py / .sh / .tf / org/projects/*.json), and NOTHING was checked on any of them. A declared subject reaching zero checks is a GATE DEFECT, not a clean commit -- rc=2 exists so it can never be read as a pass.' rc=2. CONTROL, shipped runner, same file: 'OK: pre-commit gate clean for 1 of 1 file(s)', rc=0 -- so the rc=2 is caused by the removed counter, not by the subject. THE COUNTER IS COUNTED IN THE DISPATCH, NOT RE-DERIVED AT THE TAIL: a second predicate describing the same set would fail OPEN, which is this bug's own shape.",
+      "denominator": "4 of 4 declared dispatch branches carry `declared += 1` (verified by parsing the file and listing the increment line of each branch); 1 mutant + 1 control.",
+      "status": "PASS",
+      "status_reason": "PASS on the branch's behaviour, with a disclosure the grader should have: the branch is UNREACHABLE through today's dispatch, because all four declared branches also increment `checked` (verified, same parse). No live path can reach checked==0 && declared>0. It is a REGRESSION GUARD whose value is prospective -- it catches the next branch that forgets to count, which is exactly how this defect was born -- and I exercised it with the mutant rather than shipping an unfired branch and calling it a control."
+    },
+    {
+      "criterion_id": "ZC-2",
+      "criterion_verbatim": "bash -n ON EVERY .sh REGARDLESS of comp-shell's path scope, and the ds-precommit cross-firm scan where it already applies; \"N of N checked\" printed with the instrument named per file. A syntax check needs no runtime assumption. comp-shell's scope itself is NOT widened (non-application, by design).",
+      "method": "command",
+      "invocation": "New `_bash_syntax_check_one(f)` in .tools/commit_gate_runner.py, called unconditionally at the top of the .sh branch, before the scoped comp-shell call; `checked += 1` moved to the end of the branch so it bumps ONCE PER FILE regardless of how many instruments ran. Spawned via msys_argv_guard.msys_safe_run per CLAUDE.md. Verified against .tools/commit-gate.sh (in comp-shell scope, so both instruments run) and against three files outside it.",
+      "output_evidence": "Per-file instrument naming: 'OK: bash -n syntax-checked <file>' on every .sh. Summary: 'OK: pre-commit gate clean for N of N file(s)'. On .tools/commit-gate.sh -- IN scope -- both instruments ran ('bash -n syntax-checked' AND 'comp-shell scan clean (1 file(s) scanned, 0 findings)') and the pair of changed files still reported '2 of 2', so the file-counter semantics are intact and N cannot exceed the denominator. _SHELL_SCOPE is BYTE-UNCHANGED. The ds-precommit cross-firm scan was NOT extended: it applies where it already applied (the .py branch) and I added nothing to it, which is what 'where it already applies' asks for. FAIL-LOUD, NOT OPEN: if git_bash() resolves nothing the check BLOCKS rather than recording a check that did not run -- reopening the unrun-check class inside this fix would be self-defeating.",
+      "denominator": "4 .sh subjects exercised (orion-gold-dispatch.sh, broken.sh, clean.sh, commit-gate.sh); 1 of the 4 is inside _SHELL_SCOPE and is the case that proves double-counting does not occur.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ZC-3",
+      "criterion_verbatim": "THE HEADER says exactly what runs where -- which checks run on which paths, and what rc=2 means; the \"runs on ALL .sh regardless\" clause is either made true by ZC-2 or rewritten to the real scope. No clause promises a check the code does not run.",
+      "method": "manual_read_with_citation",
+      "invocation": "Rewrote the Shell block and added an EXIT CODES block to .tools/commit-gate.sh's header, and amended the .tools/commit_gate_runner.py docstring dispatch line. Written AFTER the arms were run, deliberately, so the header describes measured behaviour rather than intent.",
+      "output_evidence": "The header now states: bash -n on EVERY .sh whatever its path; comp-shell SCANNED only on the five in-scope prefixes, named, with the reason the scope is deliberate; bash -n and comp-manifest-check on ALL .sh regardless. All three exit codes are spelled out, rc=2 as 'neither a pass nor a check failure ... a GATE DEFECT ... do not re-run for a 0'. THE CLAUSE THAT WAS FALSE IS NOW TRUE RATHER THAN DELETED: the WARN text says the gate 'reads only .py / .sh / .tf / org/projects/*.json' -- pre-fix that sentence printed on a .sh while nothing had been read, which is precisely a clause promising a check the code did not run. ZC-2 makes it true for .sh instead of softening the wording, which is the branch of ZC-3's 'either/or' that adds coverage rather than removing a promise. CHARTER LINES INTACT: the TO names .tools/commit-gate.sh :4 and :8 as the record standing in for an absent register row; both are BYTE-IDENTICAL pre- and post-edit (git show 9ed3bbfef8^:.tools/commit-gate.sh vs the worktree), so the header rewrite did not disturb the lines this face's decomp_ref points at.",
+      "denominator": "2 header sites amended (commit-gate.sh block; runner docstring line); 3 of 3 exit codes documented; 0 clauses remaining that promise an unrun check.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ZC-4",
+      "criterion_verbatim": "NON-APPLICATION, exercised: suffixes OUTSIDE the declared read set (.md, .json outside org/projects/, frontend artifacts) keep the WARN + rc=0 they have now -- a ledger .md commit through the gate still exits 0 with the notice (the CVO's own held instance is the control).",
+      "method": "command",
+      "invocation": "Ran the fixed gate on a real ledger .md, and on a mixed set (.md + .sh together) to prove a declared file in company does not drag a non-declared one into a refusal.",
+      "output_evidence": "org/critical_paths/change_management/20260612T2024Z_advisor_intelligence_all_approval.md -> the unchanged three-line WARN block, rc=0. MIXED .md + .sh -> 'OK: pre-commit gate clean for 1 of 2 file(s)', rc=0: the .sh was checked, the .md was not, and the run is correctly NOT a refusal because `checked` is non-zero. The rc=0 reasoning the 2026-08-27 fix recorded is preserved exactly where it was right -- a commit of only non-dispatched files is a legitimate no-op, and the refusal is scoped to the case that fix could not reach.",
+      "denominator": "2 non-application runs (pure .md; mixed .md + .sh); 0 behaviour changes for either.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ZC-5",
+      "criterion_verbatim": "THE FALSIFIER, both polarities, from the running gate: (i) data/inf/scripts/gold/orion-gold-dispatch.sh through the fixed gate reads \"1 of 1 checked\" with bash -n named as the instrument, rc=0; (ii) a planted syntax error in a SCRATCH copy under data/ is REFUSED (non-zero, the error line quoted); (iii) the PRE-FIX gate run FIRST on TWO scratch subjects -- the planted-syntax-error .sh AND a syntactically clean in-set .sh outside comp-shell's scope -- exits 0 on BOTH with \"checked 0 of 1\"; the failing baseline first so a dead arm is distinguishable from a passing one; (iv) an .md through the fixed gate: WARN + rc=0 (ZC-4).",
+      "method": "command",
+      "invocation": "Four arms against the RUNNING gate, the baseline arm (iii) executed FIRST, before any edit to the runner. Scratch subjects: data/.zerocheck_scratch/broken.sh (sha256 b1060dd19d1e6617, an unterminated `if`) and clean.sh (sha256 1c7f102e38c802cf), both outside _SHELL_SCOPE, removed after the arms; their four lines are quoted in the report so any seat rebuilds them exactly.",
+      "output_evidence": "(iii) BASELINE, RUN FIRST, PRE-FIX: broken.sh -> 'checked 0 of 1 file(s) -- NOTHING WAS CHECKED', rc=0; clean.sh -> the same, rc=0; cmp: BYTE-IDENTICAL. The old exit code carried no information about content. (i) orion-gold-dispatch.sh -> 'OK: bash -n syntax-checked data/inf/scripts/gold/orion-gold-dispatch.sh' + 'OK: pre-commit gate clean for 1 of 1 file(s)', rc=0 -- a REAL production script, deployed through a window earlier today, that the pre-fix gate checked zero times. (ii) broken.sh -> 'BLOCKED (bash -n): data/.zerocheck_scratch/broken.sh is not syntactically valid bash:' then the parser's own line, 'line 5: syntax error: unexpected end of file from `if` command on line 3', rc=1. (ii-b) clean.sh -> '1 of 1', rc=0. (iv) ledger .md -> WARN, rc=0. So post-fix the twin subjects return 1 and 0 where pre-fix they returned 0 and 0 identically: two verdicts from one instrument, not one verdict twice.",
+      "denominator": "5 arms run (i, ii, ii-b, iii on 2 subjects, iv) plus the mixed-set run; baseline executed before any edit, reproduced afterwards from the saved pre-fix runner.",
+      "status": "PASS",
+      "status_reason": "One instrument failure of MINE inside this criterion, recorded because it nearly became evidence: my first REPRODUCTION of the (iii) baseline ran the saved pre-fix runner from the scratchpad, where its sibling imports do not resolve. It crashed, and my `cmp` then reported the two outputs 'byte-identical' -- comparing two TRACEBACKS. The conclusion was true from the original in-place baseline, but that evidence did not support it. Re-run with the pre-fix runner placed beside its own siblings, and I added an arm that tests the failure mode itself ('neither output is a traceback'). A control that cannot distinguish a crash from a result is not a control."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A mutant of the shipped runner carrying EXACTLY ONE change -- the .sh branch's `checked += 1` removed -- which recreates the pre-fix state (a declared file reaching zero checks) without shipping it. Run against a syntactically clean .sh, with the shipped runner on the same file as the paired control. This is the only way to fire the rc=2 branch at all, since no live dispatch path can reach it.",
+      "expected": "Mutant REFUSES rc=2 with the NOTHING WAS CHECKED text preserved; shipped runner on the identical file returns rc=0 with '1 of 1'.",
+      "observed": "Exactly that. Mutant: NOTHING WAS CHECKED block, then 'REFUSED (rc=2) ... A declared subject reaching zero checks is a GATE DEFECT', rc=2. Control: 'OK: pre-commit gate clean for 1 of 1 file(s)', rc=0. The difference is attributable to the removed counter and nothing else, because the subject, the runner and the invocation are otherwise identical. SECOND, INDEPENDENT MUTANT-SHAPED ARM: the pre-fix runner itself is a natural mutant of the fix, and on the twin subjects it produced byte-identical rc=0 output for a broken and a clean file -- the defect demonstrated on the real artifact rather than a synthetic one.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every arm re-run after the patch landed; the baseline arm re-run a second time from the saved pre-fix runner placed beside its own siblings; the gate run on its own two changed files through the actual safe-commit path rather than only by hand. rc read UNPIPED throughout -- a piped rc is the last command's, which is the error I made earlier today on a git ancestry probe and did not repeat here.",
+      "observed": "Stable across runs: orion-gold-dispatch.sh 1 of 1 rc=0; broken.sh rc=1 with the same parser line; clean.sh 1 of 1 rc=0; .md WARN rc=0; mixed 1 of 2 rc=0; self-gate 2 of 2 rc=0. NO SECOND SEAT HAS RE-DERIVED ANY OF IT: every number here is mine, on one instrument, and 3.0.0_SA_CVO grades ZC-5. The mutant and the pre-fix baseline are internal controls, not corroboration.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Widening comp-shell's _SHELL_SCOPE",
+      "reason": "Forbidden by the TO and correct on its merits -- comp-shell asks a Git Bash 3.6.7 local-runtime question and an EC2 script is not that subject. _SHELL_SCOPE is byte-unchanged; bash -n is a separate, scope-free check."
+    },
+    {
+      "item": "Extending the ds-precommit cross-firm scan",
+      "reason": "ZC-2 says 'where it already applies'. It applies in the .py branch and I added nothing to it."
+    },
+    {
+      "item": ".tools/safe-commit.sh, .tools/safe-deploy.sh, any hook",
+      "reason": "Explicitly forbidden. None was opened or edited."
+    },
+    {
+      "item": "A register row org/projects/ADHC_COMMITGATE.json",
+      "reason": "RULED none by 1.0.0_SA_CTO 87632/87633: the tool's own charter line (commit-gate.sh :4, :8) is the record, and minting a project to hold one tooling TO would add a member no directive named. If to-check --all cannot roll this face up without one, that is a finding against to-check -- printed here, not remedied by minting."
+    },
+    {
+      "item": "Production reachability of the rc=2 branch",
+      "reason": "It is UNREACHABLE through today's dispatch -- all four declared branches increment `checked`. Stated as a prospective regression guard rather than claimed as a live path; exercised by mutant instead."
+    },
+    {
+      "item": "Any change to the safe_deploy_core.py sibling of this class",
+      "reason": "The tail comment names it as the same class in another tool. It is a different file under a different charter and is not this face's."
+    }
+  ],
+  "surprises": [
+    "BLOCKING / SHAPE QUESTION TO 1.0.0_SA_CTO (owner of the ruling), ARMED: THIS INSTANCE CANNOT BE MADE VALID WITHOUT FABRICATING DATA, AND I HAVE NOT FABRICATED IT. proof-of-spec-check decides alignment enforcement on the mere PRESENCE of a <decomp_ref> TAG in the governing TO -- has_decomp_ref = (blob is not None) at :473, harvested by the regex at :428; :623 takes the ANNOUNCE branch (decomp_ref NOT required) only when the TO carries NO tag, otherwise :640 ENFORCEs and :663 requires every criterion to carry cell_refs. THIS TO CARRIES THE TAG AND ITS TEXT IS 'NONE -- a one-branch remediation of an existing tool under its own charter', and its five criteria are written <criterion id=\"ZC-n\"/> with no cell_refs, because there is no decomposition to reference. So the checker demands cell_refs that do not exist, while itself refusing them: ':663 -- REFUSED, never retrofitted: a derived cell_ref makes alignment LOOK satisfied while being FALSE'. Verdict on this instance: INVALID, rc=1 (UNPIPED), checker @3948c766a7, violations = the five cell_ref rows and nothing else -- every structural, artifact-coverage, artifact-resolution and vintage check passes. I am delivering it in that state deliberately. The remedy is a SHAPE call and belongs to the gate, not to this seat: either the TO omits the <decomp_ref> element (taking the ANNOUNCE branch it was written for) or the checker distinguishes a tag whose body DECLARES no decomposition from one that names cells. This is precisely the pattern 1.0.0_SA_CTO ruled at 87632 for the absent register row -- if the tooling cannot roll the face up, print it as a finding against the tooling, do not mint a member no directive named. A fabricated cell_ref would be that mint, one layer down.",
+    "OBSERVATION / resolved by this face -- the WARN text was SELF-CONTRADICTORY, not merely incomplete. Pre-fix it printed 'This gate reads only .py / .sh / .tf / org/projects/*.json' on a .sh whose checks numbered zero. The sentence named the file's own suffix as in-scope while the code had read nothing. ZC-2 makes it true rather than softening it.",
+    "OBSERVATION / owner 0.7.0_AE_CloudOps base, surfaced not claimed -- the rc=2 branch cannot fire on any live dispatch path today (all four declared branches increment `checked`). It is a guard against a FUTURE branch that forgets to count. I am recording this rather than letting a grader infer from 'PASS' that a refusal is now occurring in production; nothing in the estate will exit 2 until such a branch exists or one of the four regresses.",
+    "OBSERVATION / already owned at 1.0.0_SA_CTO -- the tail comment in commit_gate_runner.py names an identical class in .tools/safe_deploy_core.py ('all files deployed and verified' printed after deploying ZERO). That sibling is untouched by this face and is a different charter; noting only that the class has two members and this face closes one."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~K/logs/2026-08-30/",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate",
+      "invocation": ".tools/commit-gate.sh on the two changed files, via .tools/safe-commit.sh",
+      "result": "'OK: bash -n syntax-checked .tools/commit-gate.sh', 'OK: comp-shell scan clean (1 file(s) scanned, 0 findings)', 'All checks passed!' (ruff), 'OK: no unguarded strict-utf8 log reads.', 'OK: pre-commit gate clean for 2 of 2 file(s)'. The gate passed its own edit through its own new code path."
+    },
+    {
+      "tool": "comp-shell",
+      "invocation": "invoked BY the gate on .tools/commit-gate.sh (in _SHELL_SCOPE)",
+      "result": "clean, 1 file scanned, 0 findings -- and it ran ALONGSIDE bash -n on the same file while `checked` counted that file once, which is the evidence the file-counter semantics survived ZC-2."
+    },
+    {
+      "tool": "ruff",
+      "invocation": "via the gate, --target-version py39 on commit_gate_runner.py",
+      "result": "All checks passed!"
+    }
+  ]
+}
