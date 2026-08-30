@@ -122,9 +122,43 @@ is not something to move as a side effect of wiring an accelerator.
    *"if a `-target` is needed... target the specific resource. Note targeting in the RAVC"*); or
 2. sequence the held emitter act's own window FIRST, then apply P2F-3b on a clean plan.
 
+### ⛔ CORRECTION TO THIS SECTION -- THIS IS NOT A NEW FINDING, AND EXIT 1 IS ALREADY PRECEDENT
+
+The pre-commit risk reflex cited a change-management record on `advi_49f_floor.tf` that this seat
+then read. **The same coupling was hit on 2026-08-27 by `0.7.0_AE_CloudOps~L`, and it was already
+routed and adjudicated** -- `20260827T1652Z_advi-49f-p14-vehicle-ssm-date-param_deploy_completion.md`
+leg L1, verbatim:
+
+> *"TARGETED DELIBERATELY: the untargeted plan reads 4 changes, 3 of them FOREIGN to this seat
+> (MDPF egress AGGREGATE_PREFIX move + 2 output changes) -- **filed to the surprise channel as 76182,
+> CVO-accepted 76186**."*
+
+**So SS4 above should be read as a RE-MEASUREMENT of a known, CVO-accepted condition, not a
+discovery.** `-target` is not a proposal here -- it is the established, exercised precedent on this
+exact file against this exact coupling, and that apply closed 0-diff on a targeted re-plan. Stating
+it as new would have manufactured a second finding out of one.
+
 ⚠ **NOT ASSESSED HERE, deliberately:** whether the 2026-08-11 `_staging` re-home is still the
 current intent 18 days on. That is the held act's own question, it belongs to its own window, and
 chasing it is the halt-and-investigate this seat is told not to do. **Surfaced, not adjudicated.**
+
+### ⛔ BINARY TRAP -- STILL LIVE, AND IT BITES AT APPLY TIME, NOT PLAN TIME
+
+The same L1 record documents a version skew that **this seat re-measured today and found unchanged**:
+
+```
+  .tools/terraform.exe   v1.9.8    <- what .tools/safe-apply.sh resolves
+  PATH terraform         v1.14.5
+```
+
+> *"the apply REFUSED the cross-version plan file ('plan files cannot be transferred between
+> different Terraform versions') rather than mis-applying it. Re-init+re-plan on 1.9.8 before the
+> real apply."*
+
+**The plan in SS2 was cut with `.tools/terraform.exe` (1.9.8)**, i.e. the binary `safe-apply` uses,
+so it is not subject to the trap. A successor who re-plans with the PATH binary will produce a plan
+file `safe-apply` refuses. The refusal is loud and safe -- it is a trap for the schedule, not for
+correctness.
 
 ---
 
