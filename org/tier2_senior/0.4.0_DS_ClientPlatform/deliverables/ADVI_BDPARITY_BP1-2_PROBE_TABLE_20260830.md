@@ -96,6 +96,23 @@ they touch.
 
 **`3.0.0_SA_CVO`'s section-1 prediction held:** the two accounts failing on coverage are **the two oldest** (2023-03-24 and 2024-06-10, both before the 2024-07-08 gold floor). It landed as an outcome, not a defect.
 
+## ⛔ THE PINNED BD BYTES ARE NOW CITED BY VersionId, NOT BY KEY
+
+**W2 (the 5,309-account census, Andrew's word 18:0xZ) writes to FOUR OF THE FIVE SAME S3 KEYS as this
+table's BD side** — same `pull_date=2026-08-30`, same `q_end`, same accounts (13477111, 18927251,
+21089351, 22596361; only 23221671 is absent from the xref cohort). **A key is `{feed}_{account}_{q_end}`
+and carries no pull identity**, so W2's response for those accounts becomes the CURRENT object.
+
+**The bucket is versioned (Status: Enabled), so nothing is destroyed — but a citation BY KEY silently
+starts resolving to different bytes.** This table's BD side is therefore pinned by **VersionId**, all
+18 P1-era object-versions captured **BEFORE** W2 ran:
+`ADVI_BDPARITY_P1_bronze_object_versions_20260830.json`. The five performance objects this table was
+computed from are among them.
+
+⚠ **Captured live, in the only window where it was possible.** After W2 the "latest" version is
+W2's; recovering P1's would then require knowing a VersionId nobody had recorded. **Evidence that is
+about to be shadowed has to be pinned while it is still current.**
+
 ## Bounds
 
 - **`bd_annualized` is `False` on every cell** — read from BD's own `timeWeightedReturns.returnAnnualized`, never inferred from which of our figures matches. The ruled CUMULATIVE basis is confirmed against the vendor's own label.
