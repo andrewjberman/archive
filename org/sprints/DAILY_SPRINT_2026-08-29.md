@@ -4,7 +4,7 @@ TODAY SPRINT
 
 * My three Model Portfolios panel edits are live in production: Client total at Global, Primary before Custom, as-of in the footer.
 
-* Found and fixed a sign defect in 49 Financial's gross-of-fee returns; deployed and verified on the served data. Ruled: push forward, no rollback.
+* Found and fixed a sign defect in 49 Financial's gross-of-fee returns; the corrected engine is deployed and verified. Ruled: push forward, no rollback; the stored history re-emits next.
 
 * ETF ingestion is complete with zero open items, and the one unpriced holding on the Positioning page is fixed on the live data.
 
@@ -30,7 +30,7 @@ PROJECTS
 
 * Item 2 - Advisor Intelligence
 
-  49 Financial's 534-day performance history is complete and accepted. A sign defect in the gross-of-fee returns was found, fixed, and verified on the served data; ruled: keep pushing forward. The insurance chain fired on schedule for the first time and passed. Black Diamond parity: one bounded pull approved, methodology questions to verification.
+  49 Financial's 534-day performance history is complete and accepted. A sign defect in the gross-of-fee returns was found and fixed; the corrected engine is deployed and verified, and the stored 534-day history re-emits on the ruled range. Ruled: keep pushing forward, no rollback. The insurance chain fired on schedule for the first time and passed. Black Diamond parity: one bounded pull approved, methodology questions to verification.
 
 * Item 3 - Account-Level Model Overlay
 
@@ -80,7 +80,7 @@ PROCESS
 
 * Item 2 - Advisor Intelligence
   **Timeline: This week.**
-  Status: History complete; gross-of-fee fix live; parity pull approved, methodology first.
+  Status: History complete; gross-of-fee engine fixed, history re-emit pending; parity pull approved, methodology first.
 
 * Item 3 - Account-Level Model Overlay
   **Timeline: This week.**
