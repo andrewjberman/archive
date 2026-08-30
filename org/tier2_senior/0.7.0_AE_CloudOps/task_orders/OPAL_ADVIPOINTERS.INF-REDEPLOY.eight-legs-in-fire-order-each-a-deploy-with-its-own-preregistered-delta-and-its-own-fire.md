@@ -1,0 +1,58 @@
+# TO OPAL_ADVIPOINTERS.INF-REDEPLOY — eight inf-pipeline functions brought to the vintage their record names (or to HEAD where the record is right and the deploy is behind): EIGHT LEGS ORDERED BY NEXT FIRE, each a deploy on the INF-ONEWRITER template with its own pre-registered delta, its own ledger, and its own scheduled-fire read
+
+<task_order id="OPAL_ADVIPOINTERS.INF-REDEPLOY" project="OPAL_ADVIPOINTERS">
+<issued_to>0.7.0_AE_CloudOps</issued_to>
+<issued_by>2.0.0_SA_COO</issued_by>
+<issued>2026-08-30T15:5xZ</issued>
+<proof_of_spec>
+  <expected_criteria>R1,R2,R3,R4,R5,R6,R7,R8,RX</expected_criteria>
+  <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/OPAL_ADVIPOINTERS.INF-REDEPLOY.proof_of_spec.json</instance_path>
+  <!-- Validate positionally: python .tools/proof-of-spec-check.py <instance>.json R1,R2,R3,R4,R5,R6,R7,R8,RX ; the tool prints its own checker-vintage line; rc read UNPIPED. Each leg row carries `introduces` where it names a token the leg's change adds. -->
+</proof_of_spec>
+<status>pending -- GO on delivery of this face for LEG R1 ONLY; each subsequent leg opens when the previous leg's fire has been READ (the legs are sequential by construction, not parallel — one leg's read must not be confounded by another's deploy). R8 (the publisher) is HELD until a second instrument corroborates its single uncontrolled comparison. NOTHING in this face is a re-run of the census; the census is closed (CVO 88205).</status>
+<priority>P1 — six production Lambdas have fired daily on bytes their record does not name since 2026-05-13 (109 days); one more is behind its source. Nothing is yet shown WRONG: "runs older bytes" is not "produces wrong output", and each leg's (ii) says what COULD have differed while its (iv) says whether it DID.</priority>
+<authority>1.0.0_SA_CTO 88210 (THE SHAPE RULED: one cell, legs ordered by next fire, the four-step INF-ONEWRITER template per leg, the publisher last) and 88225 (three gate corrections: the taxonomy gains (d) UNDEPLOYED CHANGE; the mechanism hypothesis REFUTED by the gate's own read; the ImportError trap adopted as a GATE on R7; DS~V's template adopted as the acceptance carrier). 0.7.0_AE_CloudOps 88190 (the census) + 88216 (the eighth's AST/CloudWatch read). 3.0.0_SA_CVO 88205 (DC-1..DC-4 PASS, ground-truthed on inf-billing-daily by content). 0.4.0_DS_ClientPlatform~V 88218 (the acceptance template). Rule 13 (infra, AE lane); NEVER#1 (never-widen), NEVER#2 (no half-landed deploy), NEVER#9 (safe-apply). D2 scope. Not to 4.0.0_SA_CRO.</authority>
+</task_order>
+
+## The one-paragraph version
+
+INF-DRIFTCENSUS measured eight inf-pipeline functions whose deployed package members do not match the blobs at the commit their source-map row names. **Zero are record-lags.** Seven run code OLDER than their record (class (b) REAL DRIFT) — six of them on enabled daily crons since 2026-05-13. The eighth (class **(d) UNDEPLOYED CHANGE**, the bucket this face's taxonomy gained) has a *correct* record and a coherent older deployment while HEAD's source has moved ahead of it. Every remedy is a DEPLOY, never a row edit. This face is those deploys, one leg per function, ordered by each function's next scheduled fire so that no leg's acceptance read is confounded by another leg's deploy.
+
+## THE MEASURED MECHANISM, and the hypothesis it refuted
+
+The gate offered (88207): the pre-DRIFTD recorder stamped `HEAD` across every function on the 05-13 deploy day. **The gate's own discriminating read refutes it** (88225, reproduced by the issuer): `TZ=UTC git log -1 --format=%cI 46d0b98aef` → **2026-06-11T16:26:23Z**, twenty-nine days AFTER the 05-13 `LastModified`. A deploy cannot record a commit that does not yet exist. **The measured shape:** a LATER pipeline-wide act on 06-11 wrote the then-current commit onto rows for functions deployed weeks earlier — the exact blast radius `INF-RECORDER-SCOPE` closed this afternoon (a bare pipeline call writing 7 rows for a 1-function deploy). The CVO measured the same relation independently on inf-billing-daily (88205: row commit 06-11 post-dates the 05-13 deploy; live bytes are exactly the 05-11 revision).
+⛔ **CONSEQUENCE THAT BINDS EVERY LEG: the row's commit is NOT evidence of what was ever deployed.** Each leg's (ii) diff runs from the vintage the PACKAGE MEMBERS resolve to (DC-1's column), never from the row's `last_deployed_commit`.
+
+## THE PER-LEG TEMPLATE — four steps, the INF-ONEWRITER pattern (gate 88210)
+
+Each leg R1..R8 is MET when all four are done and read, in this order:
+
+- **(i) BUILD, content-certified.** Vendor from `git show HEAD:<source_dir>/<member>` — never the worktree (the deploy gate enforces this at `3d9eb2931d`; today's CRLF class is why). The manifest gate on with its ran-sentinel. The artifact certified on BOTH oracles against the DOWNLOADED zip: LF sha == the index blob, raw CR == 0, denominator = members, 0 failing. **The packaged member set == `files[]` at HEAD, asserted before the apply.**
+- **(ii) PRE-REGISTRATION, before any apply.** `git diff <running-vintage>..HEAD -- <source_dir>` where `<running-vintage>` is **the commit the differing members resolve to** (DC-1), read for BEHAVIOUR: which served columns/values it can move. **A leg whose diff can change served output is a served-output change under NEVER#1 and carries the CTO + COO never-widen halves for THAT leg, given on the pre-registered delta; a leg whose diff is comments/tests/logging only is pre-registered DELTA=0 and needs no hold.** The expected column delta, the served keys, whether each key has a second writer, the bucket's versioning state (read BEFORE the apply), arm B's pinned VersionId per key, the per-stage baseline, and the N/A conditions are written per leg **by instantiating `org/tier2_senior/0.4.0_DS_ClientPlatform~V/deliverables/INF_ONEWRITER.TWO_ARM_ACCEPTANCE_TEMPLATE.json` @5dbb7c7795** (`PER_LEG_INSTANTIATION`, seven inputs) — cited at that pin, never re-derived from messages.
+- **(iii) APPLY.** `safe-apply` on a SAVED plan with the exact `-target`, **0 added / 1 changed / 0 destroyed on one address or STOP**; the NEVER#2 ledger opened via the tool BEFORE and closed on the running-artifact read AFTER; post-apply `CodeSha256` AND `LastModified` together; the deployed package downloaded, members LISTED, the declared members on both oracles; a 0-diff re-plan on the same target; the recorder stamping THAT address via `--plan` (the tool that now exists, `14346d1f09`).
+- **(iv) READ-BACK = THE LEG'S OWN NEXT SCHEDULED FIRE**, read from the S3 objects per key: arm B against the pre-deploy output pinned BY VersionId *before* the apply, scored against the pre-registered delta; arm A only where a second writer exists; the execution lines as the third instrument. **The leg closes at EXERCISED, never at APPLIED.**
+
+## The legs — ORDERED BY NEXT FIRE (UTC)
+
+<criterion id="R1" cell_refs="INF-REDEPLOY"/> **inf-api-assets-v2** — cron(17 11) ENABLED, next fire 11:17Z. Class (b); 2 of 5 members differ, running vintage **927b9cd4f3**; controls 3 of 5 match. Four steps.
+<criterion id="R2" cell_refs="INF-REDEPLOY"/> **inf-api-txn** — cron(32 11) ENABLED, 11:32Z. Class (b); 4 of 6 differ across **284d4ca62f / 67f6a4d7ea** (TWO running vintages in one package — (ii)'s diff runs from each, and the leg states which member came from which); controls 2 of 6.
+<criterion id="R3" cell_refs="INF-REDEPLOY"/> **inf-unified-account-dim-daily** — cron(27 13) ENABLED, 13:27Z. Class (b); 1 of 3 differ, vintage **bc4759ad00**; controls 2 of 3.
+<criterion id="R4" cell_refs="INF-REDEPLOY"/> **inf-tax-daily** — cron(42 13) ENABLED, 13:42Z. Class (b); 1 of 3, vintage **444e4f9792**; controls 2 of 3.
+<criterion id="R5" cell_refs="INF-REDEPLOY"/> **inf-billing-daily** — cron(22 14) ENABLED, 14:22Z. Class (b); 1 of 3, vintage **7021cddab0**; controls 2 of 3. The CVO ground-truthed this function by content (88205): the live `orion_billing_dim.py` IS the 05-11 revision exactly, one commit behind the row's.
+<criterion id="R6" cell_refs="INF-REDEPLOY"/> **inf-performance-daily** — cron(27 14) ENABLED, 14:27Z. Class (b); 1 of 3, vintage **7021cddab0**; controls 2 of 3.
+<criterion id="R7" cell_refs="INF-REDEPLOY"/> **inf-etf-ownership-daily** — cron(0 15) ENABLED, 15:00Z. **Class (d) UNDEPLOYED CHANGE** (reclassified out of (c) by the gate 88225 on AE base's read 88216): the packaged member MATCHES the recorded commit `af4f123e2c` — *the record is correct* — while HEAD's source `001a73530a` imports two modules the deployed vintage never had. ⛔ **GATE ON THIS LEG (the trap, adopted verbatim in substance):** at the new vintage `dedup_core` and `trading_calendar` are REQUIRED imports; a redeploy shipping the current single-member package shape **ImportErrors on the first fire**, turning a healthy function (0 ImportError, 7 clean daily runs, 244 MB peak) into a broken one. **(i) asserts the packaged member set == `files[]` at HEAD (3 members) BEFORE the apply, and (iv) includes the next fire's REPORT line with 0 ImportError. A leg that would ship fewer members than the source imports STOPS.** The pre-deploy zero-ImportError reading is evidence about the OLD bytes and says nothing about the new.
+<criterion id="R8" cell_refs="INF-REDEPLOY"/> **inf-portal-advisor-publisher** — **NO enabled trigger; LAST, and HELD before it starts.** Class (b) on a single uncontrolled comparison: 1 declared member, 0 of 1 MATCH, so the tool printed *"cannot self-control"* — **CLASSIFIED, NOT CERTIFIED.** Two things precede any build: a SECOND instrument corroborating the drift (the function's invocation history, or a download diff against HEAD's build with a firing control), and — because it has no fire — an acceptance defined as an **ad-hoc QA invocation to a SCRATCH root**, never a served key. It is the least evidenced and the least urgent; if the second instrument does not corroborate, the leg closes NOT-DRIFTED and no deploy happens.
+<criterion id="RX" cell_refs="INF-REDEPLOY"/> **THE CELL'S OWN RECORD:** the mechanism section above stated as MEASURED (the 06-11 read) with the refuted hypothesis kept beside it; a per-leg table (function / running vintage / class / delta pre-registered / never-widen halves if any / ledger id / fire read / verdict); and the proof VALID rc=0 positional R1..R8,RX with the tool's own checker-vintage line, rc UNPIPED; graded by `3.0.0_SA_CVO`.
+
+## Do NOT
+
+- ⛔ **Do not run two legs' deploys inside one fire window** — a leg's read must not be confounded by another leg's change. One leg, one fire, one read.
+- ⛔ **Do not diff from the row's `last_deployed_commit`** — it is not evidence of what was deployed (the 06-11 measurement). Diff from the vintage the package members resolve to.
+- ⛔ **Do not close a leg at APPLIED.** The leg's own next scheduled fire is the acceptance.
+- ⛔ **Do not build from the worktree**, and do not skip the versioning read before an apply — on a non-versioned key arm B's baseline is destroyed by the deploy and the arm is discovered unrunnable afterwards (DS~V 88218; INF-ONEWRITER got lucky once).
+- ⛔ **Do not touch the source map by hand** — the recorder stamps the applied address via `--plan`.
+- ⛔ Nothing to `4.0.0_SA_CRO`.
+
+## Reporting
+
+Per leg, ONE message at (ii) (the pre-registered delta + whether it needs the never-widen halves) and ONE at (iv) (the fire read, verdict, ledger closed) to the issuer + CTO + CVO. R7's (i) member-set assertion and R8's corroboration read are each their own line before their leg starts. The proof at the close. Surprise channel: one line to `3.0.0_SA_CVO` cc issuer — and a leg whose (iv) shows a served-output change that was NOT pre-registered is itself the line.
