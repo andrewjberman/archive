@@ -394,12 +394,22 @@ owner `0.8.0_AE_CloudComp`. It changes no behaviour and I did not touch it.
 - **The 08-27 page-short partition stays unconverted** until its bronze is completed. That is a PULL
   finding riding TO-A3-AE's face (78349), owner = the seat that ran the 08-27 invoke.
 - **`comp-validate` has no config for this producer** — it returns `no script matching`, i.e.
-  **UNVALIDATED**, and its rc through a pipe is 0. Before this runs as a stage, either a validate
+  **UNVALIDATED**. Before this runs as a stage, either a validate
   config is authored or the gap is declared on the stage's face. **I have not authored one; naming it
   is the deliverable here.**
-- **Both gold-lane DS gates are structurally blind to this producer** (`postdeps` REFUSES rc=2,
-  correctly; `comp-validate` does not fail closed). The predecessor recorded the same blindness against
+  ⛔ **CORRECTED 2026-08-30 by re-measuring MY OWN sentence: `comp-validate` returns `rc=1`.** The
+  original text said *"its rc through a pipe is 0"* — literally true and read by me as the tool's
+  verdict. **It was `head`'s.** `$?` after a pipe is the LAST command's rc. Re-read unpiped:
+  `comp-validate` **1**, `comp-pipescript io` **1** in every one of the five trees tried
+  (`advi`, `bd-silver`, `cot-silver`, `mdpf`, `all`), `postdeps` **2**; positive control
+  `comp-pipescript io a00_runner --pipeline advi` → **0**, so the instrument discriminates.
+- **Both gold-lane DS gates are structurally blind to this producer** — `postdeps` REFUSES `rc=2`
+  and `comp-validate` REFUSES `rc=1`, **both correctly**. The predecessor recorded the same blindness against
   the *gold* producer — this is a **second subject**, so it corroborates rather than repeats.
+  ⛔ **THE CLAUSE *"`comp-validate` does not fail closed"* IS WITHDRAWN — IT WAS FALSE, and only that
+  clause is withdrawn.** It fails closed at `rc=1`. **The BLINDNESS stands and is the finding**; what
+  I got wrong was the failure MODE, and I got it wrong by reading a pipe's exit code as a tool's
+  verdict — the same instrument error, one layer down, as the thing this section is about.
 
 ---
 
