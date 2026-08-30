@@ -1,0 +1,76 @@
+diff --git a/infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/lambda_function.py b/infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/lambda_function.py
+index 0661e76dbd..0c0288d2c1 100644
+--- a/infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/lambda_function.py
++++ b/infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/lambda_function.py
+@@ -364,8 +364,39 @@ def discover_accounts(account_reader=None) -> list:
+ # ---------------------------------------------------------------------------
+ # Run
+ # ---------------------------------------------------------------------------
++def resolve_feeds(feeds=None) -> list:
++    """Which feeds ONE pull spends a vendor call on. P2-CENSUS item 1.
++
++    WARN: DEFAULT IS ALL THREE, AND THAT IS DELIBERATE AGAINST A LITERAL READING OF THE ASK.
++    1.0.0_SA_CTO 86548 asked the selector to "default to the PERFORMANCE endpoint only". Taken
++    literally that CHANGES A RUNNING PRODUCTION PULL: `data/assets/scripts/silver/
++    build_fact_taxsma_report.py` (:7-8, :88-89) reads `reporting_costbasis` and
++    `reporting_allocation` bronze, and OPAL_TAXSMA_PT2's scheduled fire is what lands them. A
++    performance-only default would starve that silver build SILENTLY -- no error, just two feeds
++    that stop arriving. So the default PRESERVES today's behaviour and the CALLER narrows.
++    The gate's intent is met where it costs money: P2 passes feeds=["performance"] and spends one
++    endpoint per account instead of three. Surfaced to 1.0.0_SA_CTO / 2.0.0_SA_COO, not decided here.
++
++    An UNLISTED feed is REFUSED rather than ignored -- silently dropping an unknown name would pull
++    fewer feeds than the caller asked for and report success."""
++    if feeds is None:
++        return list(ENDPOINTS)
++    feeds = list(feeds)
++    if not feeds:
++        raise ValueError(
++            "EMPTY feed list: a pull with no feed is not a pull. Name at least one of %r, or pass "
++            "None for the full set." % (sorted(ENDPOINTS),))
++    unknown = [f for f in feeds if f not in ENDPOINTS]
++    if unknown:
++        raise ValueError(
++            "UNKNOWN FEED(S) %r -- known feeds are %r. REFUSING rather than pulling what was not "
++            "asked for or silently skipping what was: a vendor call spent on the wrong feed is not "
++            "recoverable." % (unknown, sorted(ENDPOINTS)))
++    return feeds
++
++
+ def run(accounts: list, q_start: str, q_end: str, pull_date: str,
+-        cookie=None, token=None) -> dict:
++        cookie=None, token=None, feeds=None) -> dict:
+     """Pull the 3 reporting endpoints per account and land raw bronze under the `pull_date`
+     partition. `accounts` = list of {'bd_account_id','schwab_account','inception'}. cookie/token
+     injectable (dry test); otherwise minted from the live 49F session. Returns a manifest dict."""
+@@ -375,10 +406,12 @@ def run(accounts: list, q_start: str, q_end: str, pull_date: str,
+     if token is None:
+         token = get_clientview_token(cookie)
+     run_year = int(q_end[:4])
++    selected_feeds = resolve_feeds(feeds)
+     landed, sig = [], {}
+     for acct in accounts:
+         aid = int(acct["bd_account_id"])
+-        for feed, (path, builder) in ENDPOINTS.items():
++        for feed in selected_feeds:
++            path, builder = ENDPOINTS[feed]
+             # NO SILENT FALLBACK (face A3): a missing inception used to default to q_start,
+             # which makes BD return a QTD figure LABELLED "Since Inception" with nothing raised.
+             body = builder(account_id=aid, q_start=q_start, q_end=q_end,
+@@ -392,6 +425,7 @@ def run(accounts: list, q_start: str, q_end: str, pull_date: str,
+             "accounts": [a["bd_account_id"] for a in accounts], "q_start": q_start, "q_end": q_end,
+             # The ruled methodology travels WITH the artifact (a value must carry its claim), so a
+             # later reader never has to infer which anchor/basis produced these figures.
++            "feeds_requested": selected_feeds,
+             "methodology": {"anchor_basis": "bd-returned-si-start", "return_basis_compared": "cumulative",
+                             "returnMethod_requested": "Annualized", "ruled_by": "3.0.0_SA_CVO @f11fb765ad",
+                             "accounts_without_anchor": [a["bd_account_id"] for a in accounts
+@@ -448,7 +482,7 @@ def lambda_handler(event, context):
+     # land in distinct partitions, so BD's revisions never silently overwrite a prior snapshot.
+     pull_date = event.get("pull_date") or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+     accounts = event.get("accounts") or discover_accounts()
+-    manifest = run(accounts, q_start, q_end, pull_date)
++    manifest = run(accounts, q_start, q_end, pull_date, feeds=event.get("feeds"))
+     print("BD49F-REPORTING: landed=%d by_feed=%s accounts=%s pull_date=%s (DRY_RUN=%s)"
+           % (manifest["count"], json.dumps(manifest["by_feed"]), manifest["accounts"],
+              pull_date, DRY_RUN))
