@@ -112,6 +112,29 @@ TaxSMA roster's `trade_start_date` (3 active accounts have one) or a first-appea
 535 partitions, which this pass did not run. **Do not select the "inception-recent" rider member off
 this column.**
 
+> **ANNOTATION 2026-08-30T02:1xZ (`0.4.0_DS_ClientPlatform~C`): THE SWEEP THIS PARAGRAPH CALLS
+> MISSING HAS NOW BEEN RUN**, at `3.0.0_SA_CVO` 84222's ask. **DENOMINATOR: all 535 `twr_daily`
+> partitions, no sample, no early stop.** Full report in msg 84280.
+>
+> | schwab | bd_id | name | FIRST PRESENT | FIRST LINKABLE | days present | roster trade_start |
+> |---|---|---|---|---|---|---|
+> | 0027265115 | 22596361 | Chiles | 2026-02-27 | 2026-03-17 | 121 | 2026-04-08 |
+> | 0084073310 | 22659431 | Nixon | 2026-03-13 | 2026-03-20 | 112 | 2026-08-05 |
+> | 0076459710 | 23221671 | Tracey | 2026-07-01 | 2026-07-09 | 37 | 2026-08-05 |
+>
+> These are measured first-appearance dates over the WHOLE history, **not** the window-bounded
+> `first_seen` proxy -- so the rider member MAY be selected off this annotation, which is precisely
+> what the sentence above forbids doing off the column.
+>
+> **AN OPEN CELL THE SELECTION SHOULD KNOW ABOUT:** BD's measured inception for 22596361 is
+> **2026-03-16**, which falls **BETWEEN** our first-present (2026-02-27) and our first-linkable
+> (2026-03-17). The ruling's admissibility test ("gold coverage opens on or before the anchor")
+> therefore resolves **two ways, one day apart** -- ADMISSIBLE on presence,
+> `UNAVAILABLE-NO-COVERAGE` on linkability. **Raised to `3.0.0_SA_CVO` in 84280; not decided here.**
+>
+> Second corroboration of cell (i): **both 2026-08-05 roster accounts appear in our gold MONTHS
+> earlier** than their `trade_start_date`, which is not an inception on our plane either.
+
 ---
 
 ## 5. BOUNDS -- what this file does NOT establish
@@ -147,6 +170,28 @@ this column.**
 ---
 
 ## 6. WHAT IS ASKED OF `4.0.0_SA_CRO`
+
+> **ANNOTATION 2026-08-30T02:1xZ (`0.4.0_DS_ClientPlatform~C`, at `3.0.0_SA_CVO` 84222's ask --
+> ANNOTATION, NOT A REWRITE; the original text below is preserved as history).**
+>
+> **ITEMS 1 AND 2 BELOW ARE SUPERSEDED. DO NOT ANSWER THEM.** Andrew ruled 2026-08-29T212315Z
+> (@`7a4d8a1888`, verbatim): *"RECS APPROVED BUT THIS IS A MATTER THAT SHOULD BE HANDLED BY
+> 3.0.0_SA_CVO, NOT CRO"*. Both cells are **RULED AND FROZEN** by `3.0.0_SA_CVO` at
+> `org/tier1_exec/3.0.0_SA_CVO/deliverables/CVO_RULING_ADVI_BDPARITY_METHODOLOGY_CELLS_20260830.md`
+> @`f11fb765ad`, discriminator clarified at 84169:
+> - **item 1 -> SI anchor = BD funding-inception**, admissible only where our gold spans it.
+> - **item 2 -> CUMULATIVE** for every ruled period; `returnMethod: "Annualized"` stays as captured.
+>
+> They reach `4.0.0_SA_CRO` as **FROZEN INPUT, not as a question** (`2.0.0_SA_COO` 84208 C1). A
+> methodology remark is a P3-3 proposal through `1.0.0_SA_CTO`'s convention gate, never a re-opening.
+> **Msg 83415 (this seat's 08-29 filing of these cells to the CRO lane) is SUPERSEDED -- history, not
+> direction.** What IS asked of `4.0.0_SA_CRO` is the **SELECTION ONLY**.
+>
+> **AND ITEM 1's PARENTHETICAL IS NOW FALSE OF THE CODE:** *"the puller silently defaults to the
+> window start when none is supplied"* was true at `8ae7a3ab82` and is **fixed** -- the SI range is
+> always requested and our SI cell is computed only from the **returned** start
+> (`bd-returned-si-start`), never defaulted. Landed @`27af942259`.
+
 
 Select the 3-5 probe accounts from (or outside) the table above, and rule the two methodology cells
 that gate the first pull, both filed 2026-08-29 (msg 83415, queued -- the seat was dark):
