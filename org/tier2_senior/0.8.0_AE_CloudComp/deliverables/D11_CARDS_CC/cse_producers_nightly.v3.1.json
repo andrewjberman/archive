@@ -1,0 +1,198 @@
+{
+ "schema_version": 3.1,
+ "carded_by": "0.8.0_AE_CloudComp~Y",
+ "subject": {
+  "id": "infra/aws/globgrph/cse_producers_nightly.py",
+  "kind": "script",
+  "declared_domain": "NFRA_GRAPHFEED.W1 TO-1: the STANDING CSE producers orchestrator, a nightly one-shot Fargate task feeding the frozen C0 spine iceberg.globgrph.cse. The manifest names it as materializer of the part `cse`. THIS CARD IS AT (FILE, WRITE PATH) GRAIN AND THE FILE CARRIES SIX PATHS -- the manifest names one. Read from the source, not from the manifest entry."
+ },
+ "as_of": {
+  "carded_utc": "2026-08-30T05:35:00Z",
+  "commit_ish": "9369f74518",
+  "graph_vintage": "kuzu_nessie_db built 2026-08-30T01:51:34Z (27,073 nodes / 60,552 edges) for the AWS-plane trigger sweep. The cse table's own row counts are NOT read by this card -- they are a run-time retrieval, see coverage."
+ },
+ "process": {
+  "methodology": {
+   "how": "A one-shot orchestrator run as a Fargate task on the derive image. It loads the Nessie catalog, ensures the cse table, reads the CURRENT event_id set as a dedup spine, then runs three env-gated producer legs in sequence, each in its own try/except with its own import so one leg failing (or missing from the image) never blocks the others. Every leg filters its built batch against the existing event_ids before appending, so a re-run appends 0 -- IDEMPOTENT BY CONSTRUCTION rather than by a separate backfill script. Count-before and count-after are read back FROM THE CATALOG and printed every run; the writer never reports its own append count as the truth.",
+   "determinism": "hybrid",
+   "inference_detail": {
+    "model": null,
+    "invocations_per_run": null,
+    "stages_inferential": [
+     "leg_agent: a recognizer over recent s3://opal-mcp-audit/audit/ keys behind a SAFE_TOOLS allowlist -- a classification step, and the only leg whose output is not a direct projection. Default-DISABLED (CSE_AGENT_ENABLED=0)."
+    ],
+    "stages_deterministic": [
+     "leg_graphhead: build_graph_head_cses at full scope behind the dedup filter -- a projection of the graph",
+     "leg_sweep: ingest of already-built JSONL batches from the pending prefix",
+     "the dedup filter itself: set membership on event_id"
+    ],
+    "failure_is_loud": true
+   },
+   "composes": [
+    {
+     "id": "cse_store",
+     "note": "catalog, table ensure, SNAPSHOT_BUCKET and stamp_marker"
+    },
+    {
+     "id": "cse_emit_graphhead",
+     "note": "leg 1 producer, build_graph_head_cses"
+    },
+    {
+     "id": "cse_emit_agent",
+     "note": "leg 3 producer, default-disabled"
+    },
+    {
+     "id": "iceberg.globgrph.cse",
+     "note": "the append target AND the dedup source -- read before write, every run"
+    }
+   ],
+   "invents": [
+    {
+     "id": "the three-leg env-gated orchestration",
+     "note": "CSE_GRAPHHEAD_ENABLED / CSE_SWEEP_ENABLED / CSE_AGENT_ENABLED, so the option ruling is a task-def env flip rather than a code change"
+    },
+    {
+     "id": "the pending/done/rejected ingest lifecycle",
+     "note": "the standing lane for LOCAL-source producers whose repo/git sources a Fargate task cannot see"
+    }
+   ],
+   "materializer_standing": "canonical",
+   "basis": "measured",
+   "basis_by_field": {
+    "how": "measured",
+    "determinism": "measured",
+    "composes": "measured",
+    "invents": "measured",
+    "inference_detail": "measured"
+   },
+   "evidence": "READ AT SOURCE, not from the manifest entry: infra/aws/globgrph/cse_producers_nightly.py @9369f74518, 22,210 bytes / 448 lines, `git status --porcelain` EMPTY so worktree bytes equal committed bytes. Module docstring :1-37 states the design, the idempotency claim and the per-leg isolation; LEGS :280-286; run() :287; existing_event_ids() :106-114 is the dedup spine and prints CSE_LOG_BEFORE from the catalog; the docstring's own line 'Grounds on the LIVE store (Rule 22): counts are read back from the catalog, never producer self-report' is borne out by count_before/count_after in the terminal print at :353.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "cadence": {
+   "declared_rhythm": "Nightly, one-shot, sequenced AFTER the 02:00Z derive so vintages track the graph and BEFORE the 04:30Z fedobs so the same night's federation reads today's events.",
+   "actual_trigger": "LIVE AND DECLARED IN AWS: an EventBridge SCHEDULE 'globgrph-cse-producer-nightly' (arn:aws:scheduler:us-east-1:313476888478:schedule/default/globgrph-cse-producer-nightly) invoking a one-shot Fargate task from ECS task definition 'globgrph-cse-producer'.",
+   "live_matches_declared": "unmeasured",
+   "live_instance_age": null,
+   "basis": "held",
+   "basis_by_field": {
+    "declared_rhythm": "measured",
+    "actual_trigger": "measured",
+    "live_matches_declared": "held"
+   },
+   "evidence": "TRIGGER CENSUS SWEPT BOTH PLANES. REPO PLANE: the docstring names cse_producer.tf (EventBridge cron -> one-shot Fargate, the fedobs_producer.tf treatment). AWS PLANE: comp-find --corpus aws over the live graph (2,094 nodes scanned, DB built 2026-08-30T01:51:34Z) returns the SCHEDULE and the ECS task definition above, both drift=DECLARED. \u26d4 AND THE PATTERN MATTERS: my first sweep used the literal token 'cse_producers' (plural, underscored, as the FILE is named) and returned ZERO -- the live resources are 'globgrph-cse-producer' and 'globgrph-cse-producer-nightly', hyphenated and singular. A file-name-shaped token FALSE-ZEROED a writer that is demonstrably scheduled. Re-swept on 'cse' and the resources appear. live_matches_declared is HELD, not measured: I read the SCHEDULE's existence and its DECLARED drift class, not its recent invocation history -- so DESIRED is measured and APPLIED is not, and the scalar takes the floor.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  }
+ },
+ "artifact": {
+  "persistence": {
+   "persisted": true,
+   "authority_role": "source",
+   "mutation_policy": "append_only",
+   "form": "An Iceberg table append, plus S3 object moves and two JSON heartbeat objects.",
+   "basis": "measured",
+   "evidence": "authority_role SOURCE, not projection, and the distinction is real: the docstring calls iceberg.globgrph.cse 'the frozen C0 spine' that 'the whole observation stack (FEDOBS, MOTIF, PROMOTE) federates over'. This writer APPENDS the events the rest of the stack reads; it is not a restatement of something else. mutation_policy append_only: every leg filters against existing event_ids and appends; nothing updates or deletes a row, and the docstring's 'additive-only; the graph_nodes/graph_edges write paths are never touched' is enforced by the snapshot guard at :294-323.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "location": {
+   "home": "iceberg.globgrph.cse (Nessie catalog, namespace globgrph, table cse)",
+   "projection_of": [],
+   "co_resident_stores": [
+    {
+     "id": "warehouse/cse_ingest/pending/",
+     "note": "READ, not written -- the sweep leg's input prefix for LOCAL-source producers"
+    },
+    {
+     "id": "warehouse/cse_ingest/done/",
+     "note": "WRITE PATH 2 -- a valid batch is MOVED here after append (_move :221-228)"
+    },
+    {
+     "id": "warehouse/cse_ingest/rejected/",
+     "note": "WRITE PATH 3 -- an invalid batch is MOVED here and an ERROR printed; fail-closed, never silently retried forever (:199-201)"
+    },
+    {
+     "id": "warehouse/cse_ingest/last_run.json",
+     "note": "WRITE PATH 4 -- the TWIN_HEARTBEAT absence twin, written every run"
+    },
+    {
+     "id": "warehouse/cse_ingest/last_append.json",
+     "note": "WRITE PATH 5 -- written when an append lands"
+    },
+    {
+     "id": "cse_store.stamp_marker",
+     "note": "WRITE PATH 6 -- the 4-table one-marker, cse included, after any append; best-effort and it never unwinds a landed Nessie commit"
+    }
+   ],
+   "basis": "measured",
+   "evidence": "\u26d4 SIX WRITE PATHS FROM ONE FILE, AND THE MANIFEST NAMES ONE (`cse`). Read at source: CSE_TABLE :71 (path 1); DONE_PREFIX :76 + _move :212 (path 2); REJECTED_PREFIX :77 + :199-201 (path 3); LAST_RUN_KEY :84 (path 4); LAST_APPEND_KEY :85 (path 5); stamp_marker :317 (path 6). projection_of is an EMPTY ARRAY and that is a measured statement: this writer is the source of the cse events, not a projection of another store.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  }
+ },
+ "trust": {
+  "coverage": {
+   "universe": "CSE events appendable to iceberg.globgrph.cse from the three producer legs: graph_head at full graph scope, the staged JSONL batches in the pending prefix, and (when enabled) the agent recognizer over recent audit keys.",
+   "denominator": null,
+   "denominator_absent_reason": "THE DENOMINATOR IS A RUN-TIME RETRIEVAL AND THIS CARD DID NOT RUN IT. existing_event_ids() :106-114 reads the live table and prints 'CSE_LOG_BEFORE rows=<n> distinct_event_ids=<m>' -- that pair IS the run's retrieval denominator, and the docstring names it as such. Stating a number here would require executing the writer against the live Nessie catalog, which is in-VPC only and out of scope for a carding read. The docstring's one quoted figure -- the C0 spine 'static at 342 since the 07-09 SEMCTL close' -- is the SPINE's size, not this writer's output cardinality, and reporting it as the latter would be a grain substitution.",
+   "explicitly_out": [
+    "graph_nodes and graph_edges -- additive-only by design; the snapshot guard exists to prove this writer left them unchanged.",
+    "leg_agent's stream by default: CSE_AGENT_ENABLED defaults to 0, so the audit-key recognizer contributes nothing unless the task-def env is flipped.",
+    "Anything a Fargate task cannot see: the LOCAL-source producers (deploy / frontend_coevolution / promote / agent local emits) reach the table only via the pending-prefix sweep, never directly."
+   ],
+   "basis": "absent",
+   "basis_by_field": {
+    "universe": "measured",
+    "explicitly_out": "measured",
+    "denominator": "absent",
+    "denominator_absent_reason": "measured"
+   },
+   "evidence": "universe and all three exclusions read at source (docstring :10-31, LEGS :280-286, GUARDED_TABLES :87). Scalar basis is ABSENT per the floor rule (3.0.0_SA_CVO~X 04:51Z): the weakest sub-claim is the denominator, and a measured absence-reason proves the null is lawful without promoting it. universe and explicitly_out remain measured in the map.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "key": {
+   "identity_space": "Producer-minted CSE event ids in a single flat namespace, shared by all three legs and by the LOCAL-source producers that stage batches.",
+   "key_expression": "`event_id`, a column on iceberg.globgrph.cse. Producers mint it structurally rather than randomly: the graph_head leg's ids are 'graph_head:node:{nid}' and 'graph_head:edge:{...}' (docstring :20). A consumer computes membership by set-inclusion on that column -- which is exactly what the writer itself does at :106-114 before every append.",
+   "key_is_stable": "stable",
+   "crosses_spaces": false,
+   "declared_mapping": null,
+   "basis": "measured",
+   "basis_by_field": {
+    "identity_space": "measured",
+    "key_expression": "measured",
+    "key_is_stable": "measured",
+    "crosses_spaces": "measured",
+    "declared_mapping": "measured"
+   },
+   "evidence": "MEASURED at source and, unusually, EXERCISED BY THE SUBJECT ITSELF: the key expression is not merely declared, it is the writer's own idempotency spine. existing_event_ids() :106-114 scans the table for event_id only and returns the distinct set; filter_new() :116-127 splits every built batch on membership in that set. key_is_stable 'stable' is measured from the same code path rather than assumed: the docstring states 'stable producer event_ids + append-only writer => a re-run appends 0', and filter_new's within-batch collapse comment ('last wins -- producer event_ids are stable, the payload is equivalent') is the author asserting stability as the property the dedup depends on. crosses_spaces FALSE: one namespace, no join to a second identity space, so declared_mapping is null with basis measured -- there is nothing to map, and that is a measured fact rather than a missing one.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "failure_mode": {
+   "returns_on_failure": "MOSTLY FAIL-CLOSED, WITH ONE DELIBERATE EXCEPTION. The idempotency spine is hard-gated: if existing_event_ids() raises, run() prints 'ERROR: DEDUP_SNAPSHOT_FAIL ... refusing to run any leg without the idempotency spine (an unfiltered append is the duplicate class)' and no leg executes -- the writer will not append rather than append unfiltered. A malformed staged batch is MOVED to rejected/ with an ERROR rather than retried forever. Per-leg failures are caught, named, and set rc=1 while the other legs still run. THE EXCEPTION: the snapshot guard on graph_nodes/graph_edges prints 'WARN: SNAPSHOT_GUARD_VERDICT' and does NOT fail the run -- a concurrent incremental_updater commit is DISCLOSED, not blocked.",
+   "distinguishable_from_true_negative": "yes",
+   "silent_degrade_paths": [
+    "THE SNAPSHOT GUARD IS A WARN, NOT A GATE. If a graph table's snapshot_id moves during a run, the verdict line says WARN and the task still exits 0 (rc is set by failed LEGS only, :358). The docstring frames this as 'disclosed, not masked' and that is honest -- but a consumer reading only the ECS task state sees success, and the disclosure lives in a CloudWatch log line nothing consumes.",
+    "A DISABLED LEG AND A FAILED-TO-IMPORT LEG ARE BOTH SILENT IN THE SAME PLACE. Legs are env-gated and each imports inside its own try/except, so a leg missing from the image produces the same 'this leg contributed nothing' shape as a leg deliberately switched off. The rc distinguishes them (rc=1 only if an ENABLED leg hard-failed), but the append count does not.",
+    "stamp_marker is best-effort and never unwinds a landed Nessie commit, so an append can land with no marker -- a downstream freshness reader keyed to the marker sees staleness that the table does not have.",
+    "TWIN_HEARTBEAT_FAIL prints ERROR but does not change rc, so the absence twin can go unwritten on an otherwise successful run."
+   ],
+   "basis": "measured",
+   "basis_by_field": {
+    "returns_on_failure": "measured",
+    "distinguishable_from_true_negative": "measured",
+    "silent_degrade_paths": "measured"
+   },
+   "evidence": "All read at source: DEDUP_SNAPSHOT_FAIL :297-300; the rejected-batch arm :199-201; the per-leg try/except and failed-list :309-311; the terminal 'return 1 if failed else 0' :358; SNAPSHOT_GUARD_VERDICT's OK/WARN ternary at :323-324; stamp_marker :317 with the docstring's best-effort clause :33-34; TWIN_HEARTBEAT_FAIL :350-351. 'distinguishable_from_true_negative: yes' is measured on the PRIMARY failure -- an unfiltered append cannot happen quietly because the dedup gate refuses the whole run -- and the four degrade paths above are the honest qualification on that yes, each one named rather than folded into it.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  }
+ },
+ "verdict": {
+  "standing": "QUALIFIED",
+  "why": "One of the better-built writers in this population: idempotent by construction rather than by a separate backfill path, grounded on the live store rather than on its own report, fail-closed on the one condition that would cause duplicate appends, and carrying a snapshot guard specifically to prove it did not touch tables it has no business touching. Three qualifications. (1) SIX WRITE PATHS, ONE NAMED IN THE MANIFEST -- the table append, done/, rejected/, two heartbeat objects and the marker; a file-grain census undercounts this writer's surfaces by five. (2) THE SNAPSHOT GUARD IS A WARN, NOT A GATE: it discloses but does not block, and the disclosure lands in a log line nothing consumes while the task still exits 0. (3) live_matches_declared is unmeasured -- I read that the SCHEDULE exists and is DECLARED, not that it has been firing, so DESIRED is measured and APPLIED is not.",
+  "blocking_defects": null
+ },
+ "forward_disposition": {
+  "standing": "undecided",
+  "set_by": null,
+  "basis": "absent",
+  "evidence": "NONE -- basis is absent. A SECOND PASS IS OWED, by a seat with the authority to retire something and without a stake in this subject. This card DESCRIBES; it does not decide. Andrew-direct 2026-08-26 puts the disposition AFTER carding, and the contract states set_by MUST NOT be the carding lane for its own subject.",
+  "decided_utc": null
+ }
+}
