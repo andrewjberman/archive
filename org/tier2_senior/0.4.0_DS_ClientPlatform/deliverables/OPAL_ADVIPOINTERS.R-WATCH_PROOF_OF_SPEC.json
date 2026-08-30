@@ -1,0 +1,128 @@
+{
+ "schema_version": "1.0",
+ "to_id": "OPAL_ADVIPOINTERS.R-WATCH",
+ "firm": "49F",
+ "phase": "NON-BUILD-OTHER",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/OPAL_ADVIPOINTERS.R-WATCH.fam-resumption-watch-plus-pb1-proof-read.md",
+  "group": "OTHER",
+  "vintage_commit": "6e4bf48979"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~V",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/MDPF_PROVENANCE.T-B_PROOF_OF_SPEC.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The T-B instance updated on the 2026-08-20 13:30Z run's own output per RW-3. PB-1 UNVERIFIABLE-BY-INSTRUMENT (re-pointed by the criterion's author, 2.0.0_SA_COO 85997); PB-2 PASS at the stated bound (2.0.0_SA_COO 86049, tolerance convention 1.0.0_SA_CTO 86047); PB-3 unchanged PASS. Validated VALID, violations=0, rc=0 read UNPIPED, positional form PB-1,PB-2,PB-3, checker vintage 3948c766a7 (2026-08-30 01:00Z).",
+   "artifact_covered_by": ["RW-3"]
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/OPAL_ADVIPOINTERS.R-WATCH_PROOF_OF_SPEC.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "This instance. Absent since the face was cut on 2026-08-19, which is why RW-3/RW-4 had never executed (issuer_record 2026-08-30T03:1xZ).",
+   "artifact_covered_by": ["RW-4"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "RW-1",
+   "criterion_verbatim": "each watch day carries its one-line read with denominator (no-change days included -- a silent day is indistinguishable from an unwatched day).",
+   "method": "live_read",
+   "invocation": "aws s3api list-objects-v2 --bucket opal-data-assets --prefix schwab/08335338/bronze/<feed>/ --delimiter / --output json, parsed client-side, for fam + the four siblings",
+   "denominator": "5 feeds read (fam + acc/sec/rps/slm); 526 dated directories under fam, 540/540/540/536 under the siblings; IsTruncated null on all five.",
+   "output_evidence": "WATCH DAY 2026-08-30, read at 04:04:54Z: fam NEWEST = 20260810 (526 dirs), acc 20260828 (540), sec 20260828 (540), rps 20260828 (540), slm 20260828 (536). R HAS NOT FIRED -- the condition is 'fam > 20260810' and the value is unchanged from 1.0.0_SA_CTO's 03:0xZ read, which makes this a second instrument on the same value rather than a repetition of it. STATED AS MEASURED, NOT AS SILENCE, which is the criterion's whole point: this is a listing that RETURNED 526 directories and a maximum of 20260810, not an absence of news. THE DENOMINATOR IS DIRECTORIES, NOT OBJECTS -- CommonPrefixes at the snapshot-date level; it says how many dated partitions exist, not how many rows, and a reader wanting object counts needs a different listing that this one does not offer. THE SIBLING READ IS WHAT MAKES THE ABSENCE A FINDING: fam is 18 calendar days behind four siblings that landed through 08-28, so NEVER#1 is resolved by the siblings rather than by a calendar assumption -- this is not a weekend. tcf 20260818 and rtu 20260605 are 1.0.0_SA_CTO's channel lines and were NOT read here, per the face.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RW-2",
+   "criterion_verbatim": "on R: the report names the first new fam partition + landing time, same turn to COO+CTO.",
+   "method": "live_read",
+   "invocation": "the same A1 listing; RW-2's trigger is R (fam > 20260810) and is evaluated on every watch read",
+   "denominator": "1 of 1 trigger evaluations on this watch day; 0 of 1 fired.",
+   "output_evidence": "NOT-YET-FIRED, with the watch-day evidence attached as RW-4 permits. R = the day fam's newest partition exceeds 20260810. On 2026-08-30 at 04:04:54Z it reads 20260810 -- equal, not greater -- so the trigger did not fire and no report was owed or sent. RECORDED RATHER THAN OMITTED, because an unfired trigger and an unevaluated one are the same shape on a face that scores watch days: this row states that the condition WAS evaluated and returned false, with the value it returned.",
+   "status": "N/A-BY-CONSTRUCTION",
+   "status_reason": "The criterion is conditional on R and R has not arrived. RW-4 explicitly permits this row to read NOT-YET-FIRED with the watch-day evidence, which is what it carries. It is not a PASS (nothing was reported because nothing was owed) and not a FAIL (no obligation was missed); the trigger was evaluated on the day and returned false."
+  },
+  {
+   "criterion_id": "RW-3",
+   "criterion_verbatim": "PB-1/PB-2 verdicts updated in the T-B instance from the 08-20 13:30Z run's own output, rc=0 bare; on PASS, notify COO + AE-class (B2's discharge needs only the proof citation); on FAIL, the held delete stays held and the failure mechanism is named before any further remedy.",
+   "method": "live_read",
+   "invocation": "aws logs filter-log-events /aws/lambda/mdpf-gold-lambda 2026-08-20 13:25-13:55Z ; aws lambda get-function mdpf-gold-lambda + package download ; aws s3api get-object on the frozen mirror and two gold artifacts either side of the re-point ; python .tools/proof-of-spec-check.py <T-B instance> PB-1,PB-2,PB-3",
+   "denominator": "2 verdicts updated of 2 (PB-1, PB-2); PB-3 untouched. The tie compared 429 of 429 common dates; the run window carried 226 log events.",
+   "output_evidence": "BOTH VERDICTS UPDATED FROM THE RUN'S OWN OUTPUT, and the T-B instance validates VALID / violations=0 / rc=0 UNPIPED on the positional form, checker vintage 3948c766a7. PB-2 = PASS AT THE STATED BOUND |delta| <= $0.0100 (1.0.0_SA_CTO 86047; adopted by the criterion's author 2.0.0_SA_COO 86049): count_coverage_end 2026-07-18 on BOTH the 08-18 and 08-27 gold artifacts (unchanged across the 08-19 re-point); 429 of 429 dates compared, 427 EXACT, 2 at exactly $0.0100 (2025-11-03, 2025-11-18), both NAMED on the row so a later reader re-running at strict zero sees they were seen. PB-1 = UNVERIFIABLE-BY-INSTRUMENT on the named vehicle and RE-POINTED (2.0.0_SA_COO 85997): the run limb is clean (cycle complete 12/12, errors=none; the carried 08-17 self-carry stamp present) but the executing bytes were replaced on 2026-08-29 and Lambda code has no version history, so the byte limb is scored on the NEXT scheduled fire with the bytes pinned on the day. THE 'ON PASS / ON FAIL' BRANCHES BOTH READ CORRECTLY AND NEITHER IS A DISCHARGE: PB-2's PASS is real, but B2's discharge needs the PROOF CITATION and PB-1 is not yet citable, so no notification claiming discharge was sent; ANDREW'S RESERVED DELETE OF json/mdpf/{firm} STAYS HELD -- not because anything failed, but because the row that would release it is re-pointed. The failure-mechanism clause is not engaged (there is no FAIL); the instrument gap is named instead.",
+   "status": "PASS",
+   "status_reason": "PASS on the act this row requires -- the verdicts are updated from the run's own output and the instance validates rc=0. It does NOT assert that PB-1 is discharged; PB-1's own row carries UNVERIFIABLE-BY-INSTRUMENT with its re-point, and the held delete stays held on that basis. Recording RW-3 as PASS while PB-1 is unresolved is the correct split: RW-3 scores whether this seat did the read and wrote the verdicts, not whether the underlying criterion reached a pass."
+  },
+  {
+   "criterion_id": "RW-4",
+   "criterion_verbatim": "proof instance VALID rc=0 positional: ids RW-1,RW-2,RW-3,RW-4 (RW-2 may read NOT-YET-FIRED with the watch-day evidence if R has not arrived by instance time).",
+   "method": "schema_validation",
+   "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/OPAL_ADVIPOINTERS.R-WATCH_PROOF_OF_SPEC.json RW-1,RW-2,RW-3,RW-4",
+   "denominator": "4 of 4 declared criterion ids present; coverage checked by the positional form rather than the 2-arg fallback.",
+   "output_evidence": "See the run recorded at commit time: positional id form so COVERAGE is checked and not row quality alone, rc read UNPIPED, checker vintage printed beside it (3948c766a7, 2026-08-30 01:00Z) per 1.0.0_SA_CTO's citation rule that a vintage is what makes a citation a citation. RW-2 reads NOT-YET-FIRED with its watch-day evidence exactly as this criterion's parenthetical permits. THIS INSTANCE'S ABSENCE WAS ITSELF THE FINDING that made B1 live: the face was cut 2026-08-19 and the instance had never been written, so RW-3/RW-4 had never executed -- recorded in the issuer_record of 2026-08-30T03:1xZ and closed by this file.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two firing controls on the two rows that could otherwise be vacuous. (1) RW-1's listing: the SIBLING READ is the control on fam's value -- four feeds read on the same instrument in the same minute, so a fam maximum of 20260810 is distinguishable from a broken listing or an expired credential, which would return nothing for all five. (2) PB-1's byte limb: the vehicle's recorded member sha (a7db07bb, from the 20260819T1349Z rebuild ledger) compared against today's (9256640c) -- the comparison that DETECTED the vintage gap rather than assuming the bytes persisted.",
+   "expected": "(1) the siblings return values while fam does not advance -- an absence localised to one feed. (2) the two member shas differ, proving the executing bytes are not recoverable and the byte limb cannot be scored on the named vehicle.",
+   "observed": "(1) FIRED as expected: acc/sec/rps/slm all at 20260828 with 536-540 dirs each while fam holds at 20260810 with 526 -- the instrument works and the absence is fam's alone. (2) FIRED: a7db07bb != 9256640c, and the AWS tasks snapshot bucket carries no version history, so the gap is structural rather than a retrieval failure. A THIRD, UNPLANNED CONTROL FIRED ON THIS SEAT'S OWN READING: the current member's 'json/mdpf' grep returns 2, which reads as a PB-1 failure until the hits are opened -- both are inside the docstring that records the retirement, so READS = 0. Opening rather than counting is what separated the two.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The A1 listing is a live S3 read and is deterministic only as of its timestamp; every RW-1 figure carries its read time (04:04:54Z) rather than a bare value. The PB-2 comparison is deterministic given the two pinned artifacts (a frozen mirror that has not moved since 2026-07-23 and a dated gold object), and was computed client-side from downloaded bytes rather than from a listing.",
+   "observed": "The fam value 20260810 reproduces 1.0.0_SA_CTO's 03:0xZ read at 04:04:54Z on a different seat and a different invocation -- two instruments, one value. The PB-2 tie recomputes identically from the same two objects.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "PB-1's byte limb on the 2026-08-20 vehicle",
+   "reason": "UNVERIFIABLE-BY-INSTRUMENT and re-pointed by the criterion's author (2.0.0_SA_COO 85997, gate concurrence 1.0.0_SA_CTO 86002). The executing bytes were replaced 2026-08-29 and Lambda code has no version history. Scored on the next scheduled fire with the bytes pinned on the day."
+  },
+  {
+   "item": "The count axis of the 49financial series",
+   "reason": "NOT SCORED by PB-2 -- ruled by the criterion's author (86049): 'count carry' names the self-CARRY mechanism and the VALUE it carries, and a count has no cents. The run's own log records the count axis SKIPPED for 49financial ('count axis reads the legacy served import, not the value's feed'); that is carried as the RUN's disclosure, not this seat's finding."
+  },
+  {
+   "item": "tcf 20260818 and rtu 20260605",
+   "reason": "1.0.0_SA_CTO's channel lines, explicitly not chased by this face. Not read here."
+  },
+  {
+   "item": "The dead-feed finding's ownership",
+   "reason": "The issuer's, to Andrew (2.0.0_SA_COO 85545, raised on this seat's first read confirming the CTO's). The remedy is a vendor-side act outside the fabric; this seat watches and reports, and builds no monitor (standing moratorium)."
+  }
+ ],
+ "surprises": [
+  "OBSERVATION x INERT, and it is the transferable one: a proof deferred to a FUTURE run must pin the evidence that DECAYS, not only the evidence that does not. The T-B instance read UNCOMPUTABLE from 2026-08-19 waiting for the 08-20 run; that run happened, succeeded, and its CloudWatch log was retained forever -- while the artifact the criterion actually binds on, the package bytes, was silently replaced nine days later. The only reason the vintage gap is measurable at all is a ledger line written for a different purpose (the 08-19 redeploy read-back) that happened to record the member sha. Banked by 1.0.0_SA_CTO 86002 as the gate's class.",
+  "OBSERVATION x INERT: a criterion that says 'ties to the cent' without a stated bound invites the measurer to choose one. Measured here, the choice was load-bearing -- 429 of 429 PASS at |delta| <= $0.01 versus 427 of 429 at strict equality, differing on exactly two dates. Ruled by the criterion's author (86049) rather than by this seat, and the bound is now written on the row with both dates named. Same defect class as an unstated unit."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~V/logs/2026-08-30/",
+ "compiler_tools": [
+  {
+   "tool": "comp-to",
+   "invocation": "comp-to NFRA_SUBSTRATECARDING.TO-CARD-R-DS",
+   "result": "Session TO_ID bound at the start of this session for the carding face. NOT re-pointed for R-WATCH -- disclosed rather than left implicit: the tool writes one race-free per-session id and this session carried the carding TO through its close; the R-WATCH acts were performed under the same session without re-binding. A reader correlating tool telemetry to this instance should expect the carding id."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find --name 'MDPF_PROVENANCE.T-B_PROOF_OF_SPEC.json' ; comp-find 'a7db07bb'",
+   "result": "PASS -- located the T-B instance (1 of 1 hit) and the vehicle's recorded member sha across 5 carriers including the 20260819T1349Z rebuild ledger, which is the artifact that made the vintage gap measurable. Denominators printed by the tool on each sweep."
+  },
+  {
+   "tool": "proof-of-spec-check",
+   "invocation": "python .tools/proof-of-spec-check.py <T-B instance> PB-1,PB-2,PB-3 ; <this instance> RW-1,RW-2,RW-3,RW-4",
+   "result": "T-B: VALID, violations=0, 3 rows, rc=0 UNPIPED. This instance: see the commit-time run. Positional id form on both so COVERAGE is checked; checker vintage 3948c766a7 (2026-08-30 01:00Z) printed beside the rc per the citation rule."
+  },
+  {
+   "tool": "comp-blast / comp-pipescript / comp-estate",
+   "invocation": "not run",
+   "result": "NOT RUN and named rather than omitted. This face changes no code, no infra and no pipeline -- it is a listing per turn plus a proof read, and its two artifacts are records. Rule 20 binds cloud/infra/data changes and frontend commits; none applies. The graph would have nothing to say about an S3 listing."
+  }
+ ]
+}
