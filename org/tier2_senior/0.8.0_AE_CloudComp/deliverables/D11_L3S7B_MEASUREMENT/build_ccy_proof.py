@@ -60,6 +60,47 @@ def parse_criteria(txt: str) -> dict:
     return out
 
 
+def introduces_tokens(rel_path: str, pin: str) -> list:
+    """Tokens the CONTENT rung needs: present in the blob at `pin`, ABSENT at its parent.
+
+    ⛔ DERIVED FROM THE DIFF, NEVER TYPED. The checker (88109) requires each token to be present
+    at the pin and absent at the pin's parent -- that is what separates "the pin carries the
+    path" from "the pin carries the CHANGE". A hand-written token can satisfy the first while
+    being silent about the second, which is exactly the presence-for-content substitution the
+    rung exists to catch. So the tokens here are lifted from the added lines of the real diff:
+    if the diff added it, it is by construction present at the pin, and absent at the parent
+    unless the same text also survives elsewhere in the parent -- which is why each candidate is
+    CHECKED against the parent blob before it is emitted, and dropped if it is not truly new.
+
+    A row for which no such token can be found gets NO `introduces` key: it stays PRESENCE-ONLY
+    and is counted as such, which is honest, rather than carrying a token that does not
+    discriminate.
+    """
+    parent = subprocess.run(["git", "rev-parse", f"{pin}^"], cwd=str(ROOT),
+                            capture_output=True, text=True).stdout.strip()
+    at_pin = subprocess.run(["git", "show", f"{pin}:{rel_path}"], cwd=str(ROOT),
+                            capture_output=True).stdout.decode("utf-8", "replace")
+    at_parent = ""
+    if parent:
+        r = subprocess.run(["git", "show", f"{parent}:{rel_path}"], cwd=str(ROOT),
+                           capture_output=True)
+        if r.returncode == 0:
+            at_parent = r.stdout.decode("utf-8", "replace")
+    out = []
+    for line in at_pin.splitlines():
+        cand = line.strip().strip(",").strip()
+        if len(cand) < 24 or len(cand) > 160:
+            continue
+        if cand in at_parent:            # survives in the parent -> proves nothing about change
+            continue
+        if cand in out:
+            continue
+        out.append(cand)
+        if len(out) == 2:                # two is enough to bind a row; more is noise
+            break
+    return out
+
+
 def row_identity(rel_path: str) -> str:
     """⛔ A PATHSPEC THAT MATCHES NOTHING RETURNS EMPTY, NOT AN ERROR -- AND EMPTY READS CLEAN.
 
@@ -85,6 +126,32 @@ def row_identity(rel_path: str) -> str:
     if not h:
         raise SystemExit(f"FAIL: {rel_path} is clean but has no commit -- cannot identify it")
     return h
+
+
+def artifact_row(fname: str) -> dict:
+    """One artifacts_produced row, with the CONTENT rung filled where it can be filled truthfully.
+
+    A PENDING row gets no `introduces`: the artifact rides the commit being written, so there is
+    no pin yet and nothing to compare a token against. A pin-resolved row gets tokens derived
+    from its own diff, or none at all if the diff yields no token that is absent from the parent
+    -- in which case the row is PRESENCE-ONLY and the checker counts it as such. The one thing
+    not done here is quoting a row's pin resolution as if it were content evidence (3.0.0_SA_CVO~X
+    on a4009a50ff: "do not quote their existing pin resolution as content evidence").
+    """
+    rel = REL + fname
+    pin = row_identity(rel)
+    row = {"path_or_key": rel,
+           "kind": "script" if fname.endswith(".py") else "config_data",
+           "commit_or_etag": pin,
+           "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+           "deploy_evidence": "a cell carrier / builder on a decomposition rectangle; no deploy "
+                              "surface exists for it (no S3 key, no Lambda, no schedule). Not a "
+                              "deploy-scope path under Rule 13."}
+    if pin != PEND:
+        toks = introduces_tokens(rel, pin)
+        if toks:
+            row["introduces"] = toks
+    return row
 
 
 def main() -> None:
@@ -131,16 +198,7 @@ def main() -> None:
             "vintage_commit": "975a1cc50e",
             "to_ref": FACE,
         },
-        "artifacts_produced": [
-            {"path_or_key": REL + f,
-             "kind": "script" if f.endswith(".py") else "config_data",
-             "commit_or_etag": row_identity(REL + f),
-             "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-             "deploy_evidence": "a cell carrier / builder on a decomposition rectangle; no "
-                                "deploy surface exists for it (no S3 key, no Lambda, no "
-                                "schedule). Not a deploy-scope path under Rule 13."}
-            for f in files
-        ],
+        "artifacts_produced": [artifact_row(f) for f in files],
         "acceptance": [
             {
                 "criterion_id": "L3S7B-CCY-AC1",
