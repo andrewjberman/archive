@@ -235,7 +235,12 @@ def main():
 
     print()
     print("=== DIFFERENCED SUB-WINDOWS (hole-free by additivity of Dlog) ===")
-    print("%-12s %-16s %12s %8s %s" % ("account", "sub-window", "expm1(Dlog) bp", "class", "from"))
+    # 1.0.0_SA_CTO 85237-gate ask + rule (a)/(d): DAY-COUNT RESIDUAL FIRST applies to a DIFFERENCED
+    # window too. An EXACT row is clean only if its day counts also difference cleanly; a LARGE row
+    # must carry its candidate mechanism. Day counts subtract exactly as the returns do, because a
+    # differenced window IS the set-difference of two nested windows.
+    print("%-12s %-16s %12s %8s %8s %8s %8s  %s" % (
+        "account", "sub-window", "expm1(Dlog) bp", "class", "linked", "expect", "non_OK", "mechanism"))
     for acct in COHORT:
         g = df[df["account"] == acct].set_index("period")
         for name, a, b in (("Jan-Jun", "YTD", "QTD"), ("prior Aug-Dec", "1Y", "YTD")):
@@ -247,7 +252,21 @@ def main():
                 continue
             d = da - db
             v = math.expm1(d)
-            print("%-12s %-16s %12.1f %8s %s" % (acct, name, v * 10000.0, klass(v), "%s-%s" % (a, b)))
+            dl = g.loc[a, "our_days_linked"] - g.loc[b, "our_days_linked"]
+            de = g.loc[a, "our_days_expected"] - g.loc[b, "our_days_expected"]
+            nk = g.loc[a, "our_non_ok"] - g.loc[b, "our_non_ok"]
+            # The 6-day hole lies in JUL-AUG, inside BOTH nested windows, so it CANCELS in the
+            # difference -- which is the whole reason a differenced window is hole-free. What does
+            # NOT cancel is a refusal day inside the sub-window itself.
+            mech = "OUR-REFUSAL-DAYS %dd" % nk if nk and nk > 0 else "none beyond the difference"
+            # ⛔ A DIFFERENCED WINDOW WITH ZERO LINKED DAYS IS NOT "EXACT" -- it is the ABSENCE of a
+            # comparison. Both sides contribute nothing, 0 - 0 = 0, and the bin reads EXACT for a
+            # window in which the account did not exist. That is a present, plausible, wrong class,
+            # and it is only visible because the day columns were printed (1.0.0_SA_CTO's ask).
+            # It is an OUTCOME, not a bin -- rule (a).
+            cls = klass(v) if dl and dl > 0 else "VACUOUS-NO-LINKED-DAYS"
+            print("%-12s %-16s %12.1f %8s %8.0f %8.0f %8.0f  %s" % (
+                acct, name, v * 10000.0, cls, dl, de, nk, mech))
     pd.set_option("display.width", 250)
     pd.set_option("display.max_columns", 40)
     print("=== THE PROBE TABLE (5 accounts x 4 ruled periods = 20 cells) ===")
