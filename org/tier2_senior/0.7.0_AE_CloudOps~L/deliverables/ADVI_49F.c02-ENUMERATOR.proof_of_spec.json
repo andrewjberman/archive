@@ -1,0 +1,133 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_49F.c02-ENUMERATOR",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~L",
+ "decomp_ref": {
+  "doc": "org/tier1_exec/2.0.0_SA_COO/deliverables/ADVI_49F_DECOMP_AMENDMENT_c02_REEMISSION_20260830.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~L/task_orders/ADVI_49F.c02-ENUMERATOR.p14-date-set-from-calendar-and-inputs-plus-mirror-pull-retirement.md",
+  "vintage_commit": "d4319e5b6c"
+ },
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_C_TWR_ENGINE_20260811.md",
+  "group": "C",
+  "vintage_commit": "bfaa0a6e6e"
+ },
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~L/logs/2026-08-30/",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~L/deliverables/ADVI_49F.P14-VEHICLE_A00_ATTESTATION_REDERIVATION.py",
+   "kind": "script",
+   "commit_or_etag": "d4319e5b6c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "[kind: the P14 vehicle's date enumerator] [state: COMMITTED and READ ON THE RUNNING ARTIFACT via the driver's own loader -- there is NO deploy scope, because the vehicle is laptop-side and path-loaded, never a host object] The output-table read (gold/advi/canonical/flow_ledger/) is REMOVED and replaced by dim_calendar trading days AND a seven-input halting set derived at source. Identity: md5 of the LF-normalised worktree == md5 of the INDEX BLOB @d4319e5b6c == c7d48fedafc00b29c48e60c0360583ad (the 311-CR worktree is the autocrlf checkout and is never the identity).",
+   "artifact_covered_by": ["E-1", "E-3"]
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~L/deliverables/test_p14_enumerator_domain.py",
+   "kind": "test",
+   "commit_or_etag": "d4319e5b6c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "[kind: the E-2 arm set] [state: COMMITTED and EXERCISED, 4 of 4 PASS, rc=0 read unpiped; the script ends sys.exit(main()) so the exit code IS the verdict rather than prose beside it] Four arms from four truths plus the mutation restoring the flow_ledger read, which correctly FAILS arm (ii). Re-run independently by 3.0.0_SA_CVO with the same result.",
+   "artifact_covered_by": ["E-2"]
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "on both .py files before commit",
+   "result": "Clean on both. One real catch on the first pass: ruff F541, an f-string with no placeholders, fixed before commit rather than suppressed."
+  },
+  {
+   "tool": ".tools/comp-find",
+   "invocation": "pathspec-scoped content sweeps over data/assets/scripts/gold/runners_49f/ and repo-wide",
+   "result": "The instrument that carried E-1: fact_rps -> 0 hits over 108 files (a MEASURED zero, with the tool printing its 102-file ephemeral-floor exclusion); rc.read_partition( call sites -> the 28 reads that produced the halting set. comp-which was tried FIRST for the proof checker and returned NO CURATED RULE, recorded rather than resolved by taking its top fuzzy guess."
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "positional E-1,E-2,E-3,E-5",
+   "result": "See E-5."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The mutation is the DEFECT ITSELF restored: _mutant_domain_from_output() returns the output table's partitions as the domain, i.e. the pre-fix behaviour. It lives in the arm file and never in the module -- a mutant in production code is a second implementation waiting to be called.",
+   "expected": "Arm (ii) must PASS under the fix and FAIL under the mutant. If both pass, the arm cannot discriminate and the whole arm set is decorative.",
+   "observed": "Fix: the masked-from-output date 2026-08-26 IS enumerated. Mutant: it is NOT -- 'correctly FAILS the arm'. 4 of 4 arms pass, rc=0 unpiped, and 3.0.0_SA_CVO reproduced it on their own run.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The domain is computed by a PURE function compute_domain(trading_days, per_input) with no I/O, so the arms drive it with synthetic sets. This seam exists because a domain function exercisable only against live S3 CANNOT be shown to ignore the output table -- live S3 currently agrees with it.",
+   "observed": "Live run at HEAD: DOMAIN 539, calendar 539, presence 540, excluded-for-absent-input 0. Repeated across the arm run, the live E-2(i) check and the driver-loader read, with identical figures each time.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "E-4, the retirement of _code/c02_reemit_mirror_pull.py",
+   "reason": "DROPPED FROM THIS CELL to C02-g-11 after its premise was refuted by its own census. The leg was cut as 'retired after a zero-reference census'; the census returned host-side 0 of 79 with a firing positive control, but the REPO sweep found ONE LIVE CALLER -- the laptop-side ADVI_49F.c02-REEMIT_CAMPAIGN_DRIVER.py:300, exercised 2026-08-30T09:03:18Z. The object is DORMANT, NOT DEAD, and the delete is additionally reserved to HUMAN confirmation (CLAUDE.md Agent Autonomy; R6). Nothing was deleted."
+  },
+  {
+   "item": "A host copy of the enumerator",
+   "reason": "EXPLICITLY NOT WANTED, ruled by the issuer after this seat refuted E-3's premise. There is no host _code/A00_ATTESTATION_REDERIVATION.py and there never has been (ABSENT of 81 host objects, positive control a06 PRESENT). Minting one would create a second unreferenced writer of the enumeration on the runner -- the exact hazard C02-g-11 exists to remove. No S3 write, no deploy ledger, no campaign."
+  },
+  {
+   "item": "Re-running the P14 campaign with the corrected enumerator",
+   "reason": "OUT OF THIS CELL BY ITS OWN FACE: 'no campaign fired'. A campaign is its own never-widen act. The enumerator's domain is measured and printed here; producing from it is a separate decision with its own sign-off."
+  },
+  {
+   "item": "The 2025-01-09 stored partition",
+   "reason": "LEFT IN PLACE, never-widen. The enumerator correctly does not re-derive it (dim_calendar steps 2025-01-08 -> 2025-01-10) and names it as a STORED NON-TRADING DAY. The partition is inert -- 4,808 rows at 100% NO-PRIOR-TRADING-DAY, computing no return for any account -- and its own content is its label. Removing it was neither asked nor proposed."
+  }
+ ],
+ "surprises": [
+  "OBSERVATION x INERT (owner: this seat). THREE INPUT LISTS WERE WRONG BEFORE THE FOURTH, EACH FOR A DIFFERENT REASON, AND THE THIRD WAS MINE. The TO named acc/sec/rps/slm/fam -- two never read by any chain stage, four reads missing. The gate's ruling inherited it. My correction added trn/balance/position/upn and STILL missed dim_transaction, because I censused module-level prefix CONSTANTS and c01:232 reads f\"{rc.SILVER}/dim_transaction\" INLINE. A constant-census cannot see an inline prefix; only sweeping the CALL SITES found it. Each instrument was correct about the class it swept and blind to the member outside it. DISPOSITION: the definition ruled at CTO 87485 ('the inputs the chain HALTS without, derived at source') is what made the list correctable three times -- a correct DEFINITION survives a wrong MEMBER LIST, which a correct list alone would not have.",
+  "OBSERVATION x INERT (owner: this seat). fact_rps IS THE COINCIDENCE CASE: 540 partition dates, 0 difference either way against the stored set -- PERFECT coextension and ZERO dependency, because the upstream converter emits it on the same daily schedule as the tables that are read. Coextension with the store was never evidence that the chain needs an input, and on rps it was the entirety of what the original list rested on. DISPOSITION: banked as the reason the gate required TWO derivations rather than one.",
+  "OBSERVATION x INERT (owner: 2.0.0_SA_COO, accepted at 87716). TWO LEGS OF THIS CELL (E-3, E-4) WERE WRITTEN FROM A SIBLING CELL'S PATTERN -- a06's host _code/ deploy -- without measuring where THIS artifact lives: a deploy leg for a path-loaded laptop-side vehicle, and a retirement leg for an object whose only caller is laptop-side. Both premises were refuted by this seat's premise check BEFORE the act, so nothing was minted and nothing was deleted. DISPOSITION: the issuer's rule from it -- before cutting a deploy or retire leg, name the artifact's HOME from a read, never from the sibling cell.",
+  "OBSERVATION x INERT (owner: this seat, instrument). send_message REFUSED my E-3 report: 'body is EMPTY while subject is non-empty'. The subject ran ~380 characters and hit the known long-subject/dropped-body trap. The tool FAILED CLOSED rather than delivering an empty body, which at the recipient is byte-identical to a message saying 'no changes needed'. DISPOSITION: re-sent with a short subject; recorded because a refusal that prevents a silent empty send is the guard working, and the alternative would have been a blank message from this seat that nobody could distinguish from a considered 'nothing to change'.",
+  "OBSERVATION x INERT (owner: 0.4.0_DS_ClientPlatform~N's banked line, applied here as a CONSTRAINT). A BACKFILL THAT REPAIRS A GAP DESTROYS THE EVIDENCE THAT THE GAP RECURS -- and that is not only a lesson, it dictates arm design. Because C02-g-7 filled 2026-08-11..08-17, flow_ledger, the calendar and the input plane now AGREE, so the old and new enumerators emit the same set today and a 'reproduce the stored set' arm passes under BOTH. Arm (ii) therefore has to MANUFACTURE the outage shape synthetically or it cannot fire at all."
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "E-1",
+   "criterion_verbatim": "THE ENUMERATOR at source: calendar trading days INTERSECT input presence, never an output table; three denominators printed; every excluded calendar day named with its reason.",
+   "method": "diff",
+   "invocation": "[cell C02-g-9] source edit to ADVI_49F.P14-VEHICLE_A00_ATTESTATION_REDERIVATION.py @d4319e5b6c; halting set derived by comp-find over rc.read_partition( call sites in data/assets/scripts/gold/runners_49f/",
+   "output_evidence": "REMOVED: list_partition_dates(GOLD_BUCKET, 'gold/advi/canonical/flow_ledger/') -- an OUTPUT of the chain whose missing dates the vehicle exists to find, which is why 2026-08-11..08-17 were absent from its own work list. ADDED: DOMAIN = dim_calendar trading days AND input presence, with FIVE denominators printed (calendar days 539; per-input presence, seven rows; the AND 540; the domain 539; excluded-for-absent-input 0) and every excluded day named with the inputs it lacks. HALTING SET, seven, derived AT SOURCE with file:line: fact_acc a01:228/a02:166/a06:180, fact_sec a03:100/b02:104, fact_trn a05:111/c00:520, dim_balance b00:97/b02:107, dim_position b01:108/b02:105, fact_upn b02:108, dim_transaction c01:232. MECHANISM: rc.read_partition raises FileNotFoundError on absence (runner_common.py:81), so halting is the DEFAULT; only two callers catch it and both are GOLD dependencies (b01:123 dim_boundary, which re-raises SystemExit unless --allow-missing-boundary; b04:328 dim_relationship) -- no silver read is caught anywhere. ANNOTATION not gate: fact_fam reads at a RESOLVED latest (a01:206/:227) with a WARN and fam_declared_stale, so it cannot raise on the chain date; it is 14 short and those dates ARE emitted. OUT ENTIRELY: fact_rps and fact_slm, read by no chain stage.",
+   "denominator": "108 files scanned for the source derivation; 7 halting inputs; 5 denominators printed per run",
+   "status": "PASS",
+   "status_reason": "The domain's authority is now the trading calendar and the inputs the chain cannot run without. The list was corrected three times before it was right, and what made that possible was the DEFINITION being ruled first -- a member list is checkable only against a definition."
+  },
+  {
+   "criterion_id": "E-2",
+   "criterion_verbatim": "THE ARMS: (i) a DRY run at HEAD reproduces the stored set (0 missing / 0 extra); (ii) a synthetic masked-output date is STILL enumerated (the mutation restoring the flow_ledger read fails this arm); (iii) an inputs-absent date is EXCLUDED and printed UNBACKFILLABLE-INPUTS-ABSENT; commit-gate clean; safe-commit -F.",
+   "method": "test_suite",
+   "invocation": "[cell C02-g-9] python test_p14_enumerator_domain.py from its directory; rc read UNPIPED (the script ends sys.exit(main()), so the exit code carries the verdict)",
+   "output_evidence": "4 of 4 arms PASS, rc=0. (i) domain == calendar when every input is present, 4 of 4. (ii) the masked-from-output date 2026-08-26 is STILL enumerated, and the MUTATION restoring the flow_ledger read 'correctly FAILS the arm'. (iii) a date missing ONE halting input is EXCLUDED and prints UNBACKFILLABLE-INPUTS-ABSENT with the input named, exercised on dim_transaction -- the member my own census had missed. (iv) added: a SHORT ANNOTATION input removes no date -- the arm that would have caught the original five-table list, which by intersecting fact_fam would have refused the five dates C02-g-7 produced this morning. E-2(i) LIVE at HEAD in the ruled form: DOMAIN 539, stored 540, domain MINUS stored 0, stored MINUS domain {2025-01-09} -> 539 of 539, 0 missing / 0 extra, with 2025-01-09 printed STORED NON-TRADING DAY. commit-gate clean on both files; committed via safe-commit -F with a non-shell-authored message file. 3.0.0_SA_CVO re-ran the arms independently and reproduced 4 of 4 with rc=0.",
+   "denominator": "4 arms; 1 mutation; 539 domain dates against 540 stored",
+   "status": "PASS",
+   "status_reason": "Arm (ii) is the only arm that separates the two implementations, and it can fail: the mutant does fail it. The other three would pass under the defect."
+  },
+  {
+   "criterion_id": "E-3",
+   "criterion_verbatim": "THE DEPLOY read on the running artifact -- AS RE-CUT 14:0xZ by the issuer after this seat refuted the original premise: the running artifact is what the DRIVER loads; no host copy is wanted; no S3 write, no deploy ledger, no campaign.",
+   "method": "live_read",
+   "invocation": "[cell C02-g-9] host _code/ census (81 objects) for the premise; then the driver's own loader mechanism, importlib.util.spec_from_file_location, verbatim from ADVI_49F.P14-VEHICLE_CAMPAIGN_DRIVER.py:114-115",
+   "output_evidence": "PREMISE REFUTED FIRST, BEFORE ANY ACT: A00_ATTESTATION_REDERIVATION.py is ABSENT from all 81 host _code/ objects, as is any attestation/rederivation/ADVI_-named object, while the POSITIVE CONTROL a06_dim_identity_crosswalk.py is PRESENT -- so the probe can find a host object and the absence is measured. The vehicle is laptop-side: the driver sets REDERIVE = HERE / '<vehicle>' at :58 and path-loads it at :114-115. Minting a host copy would create a second unreferenced writer of the enumeration on the runner. RE-CUT AND MET: the module loaded through the driver's own mechanism carries compute_domain and the seven-member HALTING_INPUTS; the NEGATIVE CONTROL passes -- FLOW_PREFIX is ABSENT from the loaded module, so no caller of the artifact that actually runs can reach the old output-table constant; identity md5(worktree LF-normalised) == md5(INDEX BLOB @d4319e5b6c) == c7d48fedafc00b29c48e60c0360583ad, the 311-CR worktree being the autocrlf checkout and never the identity; running-artifact read prints DOMAIN 539 / calendar 539 / presence 540. NO S3 write, NO deploy ledger opened, NO campaign fired.",
+   "denominator": "81 host objects censused; 1 positive control; 1 negative control",
+   "status": "PASS",
+   "status_reason": "Met as RE-CUT, and the re-cut exists because the premise was checked before the act rather than after. A deploy ledger was deliberately NOT opened: an entry for a deploy that should not happen is itself a record of the wrong act."
+  },
+  {
+   "criterion_id": "E-5",
+   "criterion_verbatim": "proof VALID rc=0 positional E-1,E-2,E-3,E-5 (E-4 DROPPED -> C02-g-11), checker vintage printed; graded by 3.0.0_SA_CVO.",
+   "method": "schema_validation",
+   "invocation": "[cell C02-g-9] python .tools/proof-of-spec-check.py org/tier2_senior/0.7.0_AE_CloudOps~L/deliverables/ADVI_49F.c02-ENUMERATOR.proof_of_spec.json E-1,E-2,E-3,E-5",
+   "output_evidence": "VALID, rc=0 READ UNPIPED, checker vintage 3948c766a78b2a18372cdcadb5d924b15857ab3c. E-4 is absent from the expected set by the issuer's drop to C02-g-11 and is carried in declared_exclusions with its refuted premise, so its absence is DECLARED rather than silent.",
+   "denominator": "4 of 4 expected criteria present",
+   "status": "PASS",
+   "status_reason": "Self-referential by construction: satisfied by the validation of the instance that states it. Recorded as such rather than presented as independent evidence."
+  }
+ ]
+}
