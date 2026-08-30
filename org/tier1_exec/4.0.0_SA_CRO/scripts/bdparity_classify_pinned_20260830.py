@@ -11,7 +11,7 @@ import subprocess
 
 MD = ("org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/"
       "ADVI_BDPARITY_BP1-2_PROBE_TABLE_20260830.md")
-DASH = "—"  # the table renders an absent value as an em dash
+DASH = "\u2014"  # the table renders an absent value as an em dash
 
 
 def classify(delta, exact_bp, n_bp):
