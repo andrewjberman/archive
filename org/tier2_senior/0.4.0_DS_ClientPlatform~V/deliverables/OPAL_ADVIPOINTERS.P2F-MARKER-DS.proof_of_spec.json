@@ -1,64 +1,20 @@
 {
- "schema_version": "1.0",
- "to_id": "OPAL_ADVIPOINTERS.P2F-MARKER-DS",
- "firm": "49F",
- "phase": "BUILD-GENERAL",
- "spec_ref": {
-  "doc": "docs/architecture/OPAL_ADVIPOINTERS_PRD.md",
-  "group": "OTHER",
-  "vintage_commit": "b828354d55"
- },
- "assignee": "0.4.0_DS_ClientPlatform~V",
- "artifacts_produced": [
-  {
-   "path_or_key": "data/assets/scripts/silver/conversion_manifest.py",
-   "kind": "script",
-   "commit_or_etag": "8de15b7bb3 (M-2 build, on origin/CLOUD and origin/SITEZ) + this round's emitted_at / declared_source-vintage / named-read-back-failure correction",
-   "deployed_state": "STAGED-AWAITING-GATE",
-   "deploy_evidence": "NOT DEPLOYED, measured on the live plane rather than asserted: s3://opal-data-assets/schwab/08335338/meta/complete/ holds 0 objects, counted CLIENT-SIDE off the object list (IsTruncated null), with the POSITIVE CONTROL that the sibling s3://opal-data-assets/schwab/08335338/meta/conversions/ returns 481 objects on the same instrument, same bucket, same master -- so the zero is an ABSENCE and not a dead call. A first pass at this count read 1 object: `--query 'Contents[].Key' --output text` prints the literal `None` on an empty listing and the line counter counted it (CLAUDE.md 22a, a failed retrieval returns a VALUE). Corroborated independently by 0.7.0_AE_CloudOps 84134, which read the same prefix empty from its own seat. The lambda deploy is Terraform-only (CLAUDE.md NEVER) and infra is a DT/AE lane (Rule 13), so the emit runs nowhere yet.",
-   "artifact_covered_by": ["M-1", "M-2", "M-3", "M-4"]
-  },
-  {
-   "path_or_key": "data/assets/scripts/silver/schwab_runtime.py",
-   "kind": "script",
-   "commit_or_etag": "8de15b7bb3",
-   "deployed_state": "STAGED-AWAITING-GATE",
-   "deploy_evidence": "Same build input, same un-deployed state. THE BUILD INPUT IS NAMED, NOT INFERRED FROM A FILENAME (CLAUDE.md 22a): infra/aws/lambda/opal-assets/opal-assets-silver-schwab/BUILD_MANIFEST.json lists data/assets/scripts/silver/{schwab_runtime,conversion_manifest,...}.py under vendored_modules and states 'repo files are the source of truth; fix there and rebuild, never edit a zip'. The vendored staging copies under infra/aws/lambda/opal-assets/opal-assets-silver-schwab/ are therefore BEHIND by exactly this change and by nothing else -- measured as a strict subset: a unified diff of staging against repo yields 83 changed lines, ALL additions, and ZERO lines present in staging and absent from repo, on BOTH files. Nothing lurks in the staging tree; the rebuild is part of the deploy and is not this lane's act.",
-   "artifact_covered_by": ["M-2", "M-5"]
-  },
-  {
-   "path_or_key": "data/assets/scripts/silver/tests/test_conversion_manifest.py",
-   "kind": "test",
-   "commit_or_etag": "this round",
-   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "12 marker arms added to the REPO SUITE (module went 12 -> 24 tests). Placed here rather than in this seat's deliverables/arms/ deliberately: the M-2 build's own exercise evidence ('12 assertions over 6 arms') was written ad-hoc, never committed, and did not survive the 2026-08-29 reboot -- an exercise nobody can re-run is a claim, not evidence. Full silver suite after the change: 289 passed, 11 skipped, rc=0 read UNPIPED.",
-   "artifact_covered_by": ["M-1", "M-2", "M-3", "M-4", "M-5"]
-  },
-  {
-   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~V/task_orders/OPAL_ADVIPOINTERS.P2F-MARKER-DS.composite-marker-producer-emit.md",
-   "kind": "doc",
-   "commit_or_etag": "b9854c9122 (face + producer response) + 8de15b7bb3 (M-4 CORRECTION 1, the missing bucket) + this round (M-4 CORRECTION 2, the published-but-unemitted emitted_at)",
-   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "The face carries the M-4 consumer contract, which is the artifact 0.7.0_AE_CloudOps builds P2F-3b against. Both corrections are recorded ON the face rather than sent as separate messages, because a correction routed away from the artifact it corrects is unlinked from the error forever.",
-   "artifact_covered_by": ["M-1", "M-3", "M-4", "M-5"]
-  }
- ],
  "acceptance": [
   {
    "criterion_id": "M-1",
    "criterion_verbatim": "THE DECLARED TABLE LIST IS A HARD CONDITION, NOT A NICETY. The marker carries a DECLARED table list -- the set the converter itself asserts constitutes a complete 49F silver day -- never one derived from a listing, a value_counts, or an observation window. The 15 observed tables are a MEASUREMENT, not the contract.",
-   "method": "test_suite",
-   "invocation": "python -m pytest data/assets/scripts/silver/tests/test_conversion_manifest.py -q (arms test_MARKER_M1_the_declared_list_is_the_converters_OWN_pin_never_a_listing, test_MARKER_M1_declared_source_carries_a_VINTAGE_or_says_UNPINNED)",
    "denominator": "17 declared tables, rendered by CALLING silver_registry._fact_table over every one of the (feed, section) keys in schwab_schemas.SPECS -- not transcribed. 20 live prefix dirs as the contrasting measurement.",
+   "invocation": "python -m pytest data/assets/scripts/silver/tests/test_conversion_manifest.py -q (arms test_MARKER_M1_the_declared_list_is_the_converters_OWN_pin_never_a_listing, test_MARKER_M1_declared_source_carries_a_VINTAGE_or_says_UNPINNED)",
+   "method": "test_suite",
    "output_evidence": "The face's fallback clause ('if the converter does not currently declare one, that absence is the finding') DOES NOT FIRE -- it declares one. Cited at source rather than described: schwab_schemas.py:69 SPECS = {(FEED, SECTION): (cols...)}; silver_registry.py:70 _fact_table(source, feed, section) -> 'fact_' + feed.lower(), + '_s{N}' for N>1, all @86b77337f8. DECLARED SET = 17: fact_acc fact_fam fact_rld fact_rlu fact_rlw fact_rly fact_rps fact_rps_s2 fact_rtu fact_rty fact_sec fact_slm fact_trn fact_uln fact_ult fact_upn fact_upt. THE 'CALLS THE REGISTRY' CLAIM HAS A DISCRIMINATING CONSEQUENCE AND THE ARM SCORES IT: a helper that TRANSCRIBED the naming rule ('fact_' + feed.lower(), section ignored) agrees on 16 of 17 and silently loses fact_rps_s2 -- the arm asserts the transcribed set and the declared set DIFFER, so 'it calls the registry' is measured, not styled. Zero members start with dim_. VINTAGE: declared_source renders 'schwab_schemas.SPECS @ <OPAL_BUILD_COMMIT>' when the deploy stamps that env var and 'schwab_schemas.SPECS @ UNPINNED' when it does not -- both branches exercised in the arm, and the two renderings asserted DIFFERENT so the env read is real. UNPINNED is the state today and the face says so: BUILD_MANIFEST.json is not vendored into the zip and the lambda carries no git, so the vintage can only arrive as a build stamp. A citation without a vintage is not a citation, and a bare module name reads exactly like the pinned form -- which is why it renders UNPINNED rather than the bare name.",
    "status": "PASS"
   },
   {
    "criterion_id": "M-2",
    "criterion_verbatim": "THE MARKER IS EMITTED BY THE PRODUCER, AT THE POINT IT KNOWS. The converter emits marker + date + declared list as part of its own completion path, not from a separate observer. A second process that watches the producer and emits on its behalf re-creates the inference this ruling removes.",
-   "method": "test_suite",
-   "invocation": "python -m pytest data/assets/scripts/silver/tests/test_conversion_manifest.py -q (arms test_MARKER_M2_the_emit_rides_BOTH_completion_paths_AFTER_the_manifest, test_MARKER_M2_the_emit_gate_is_PER_LANE_not_the_RUN_WIDE_failure_list, test_MARKER_M2_one_marker_per_DATE_never_a_combined_total, test_MARKER_M2_a_FOREIGN_masters_keys_are_excluded_never_summed)",
    "denominator": "2 manifest-writing completion paths in schwab_runtime.py (run_event and the sweep), enumerated by AST as every function containing a write_manifest_verified call -- the denominator is DERIVED from the source, not typed, so a third completion path added later fails the arm rather than being silently uncovered.",
+   "invocation": "python -m pytest data/assets/scripts/silver/tests/test_conversion_manifest.py -q (arms test_MARKER_M2_the_emit_rides_BOTH_completion_paths_AFTER_the_manifest, test_MARKER_M2_the_emit_gate_is_PER_LANE_not_the_RUN_WIDE_failure_list, test_MARKER_M2_one_marker_per_DATE_never_a_combined_total, test_MARKER_M2_a_FOREIGN_masters_keys_are_excluded_never_summed)",
+   "method": "test_suite",
    "output_evidence": "CALL-SITE BOUND, NOT MERELY SHAPE-CORRECT. Both completion paths carry build_complete_markers + write_complete_marker_verified, each at a line strictly AFTER that function's own write_manifest_verified -- computed against max(manifest lines) and min(marker lines) rather than an unsorted ast.walk result, which is the exact mistake the first build made (it read False on correct code; the finding it surfaced was real, the verdict was not). PER-LANE GATE MEASURED, NOT READ: both emits sit under an `if not any(r.action == 'failed' for r in <lane results>)`, and the arm asserts the guard text contains 'failed' and does NOT contain 'failures' -- gating on the run-wide failures list would let a failure under master 08242234 SUPPRESS 08335338's marker, two masters sharing one verdict. One marker per DATE (2 dates in, 2 markers out, each carrying only its own date's tables) and a FOREIGN master's silver_keys excluded, with the control that the same table under the MATCHING master DOES appear -- so the exclusion is the master check and not the table name. CONTROL THAT FIRES: deleting the sweep emit from the source text and re-running the same predicate reports the gap; the mutant is asserted to still PARSE before its verdict is scored, because the first version of that control left invalid syntax and died inside ast.parse -- a DEAD control, not a firing one, and the two read identically in a red run.",
    "status": "PASS",
    "status_reason": "PASS ON THE BUILT ARTIFACT, AND THE DEPLOYED CONVERTER DOES NOT CARRY IT. Stated plainly because 'the fix landed' is not 'the marker exists': s3://opal-data-assets/schwab/08335338/meta/complete/ holds 0 objects (client-side count, positive control meta/conversions/ = 481), so no marker has ever been emitted by a running producer. What is verified here is WHERE the emit lives and under WHAT gate -- source-plane properties, which is what M-2 asks. The exercised limb needs a Terraform deploy: Lambda code deploy is Terraform-only (CLAUDE.md NEVER) and infra is a DT/AE lane (Rule 13), so it is out of this seat's lane, not merely undone. 2.0.0_SA_COO 83898 requires P2F-3b's closing arm to consume a PRODUCER-emitted marker; nothing in this instance offers a hand-written one as a substitute."
@@ -66,18 +22,18 @@
   {
    "criterion_id": "M-3",
    "criterion_verbatim": "THE DISAGREEMENT IS A FINDING, NOT A RECONCILIATION. If the declared list and the observed set disagree, SURFACE it. Do not reconcile silently, do not intersect the two, do not let the smaller win. Print both with their denominators. A predicate that quietly agrees with whatever it sees is the failure mode the composite marker exists to retire.",
-   "method": "live_read",
-   "invocation": "aws s3api list-objects-v2 --bucket opal-data-assets --prefix schwab/08335338/silver/ --delimiter / --output json (parsed client-side) ; python -m pytest ... (arms test_MARKER_M3_disagreement_fires_BOTH_ways_and_reconciles_NEITHER_side, test_MARKER_M3_CONTROL_the_block_is_present_and_EMPTY_when_they_agree)",
    "denominator": "DECLARED 17 (SPECS -> _fact_table) against OBSERVED 20 (live CommonPrefixes under the 49F silver prefix, IsTruncated null, counted client-side). Both denominators printed beside every number below, because neither is allowed to stand alone.",
+   "invocation": "aws s3api list-objects-v2 --bucket opal-data-assets --prefix schwab/08335338/silver/ --delimiter / --output json (parsed client-side) ; python -m pytest ... (arms test_MARKER_M3_disagreement_fires_BOTH_ways_and_reconciles_NEITHER_side, test_MARKER_M3_CONTROL_the_block_is_present_and_EMPTY_when_they_agree)",
+   "method": "live_read",
    "output_evidence": "LIVE CENSUS RE-TAKEN THIS SESSION rather than quoted from the build round, and it reproduces: DECLARED 17 / OBSERVED 20 / INTERSECTION 16 / DECLARED-but-ABSENT 1 = [fact_rlw] / IN-PREFIX-but-NOT-DECLARED 4 = [dim_asset, dim_balance, dim_position, dim_transaction]. 20 observed = 16 declared-and-present + 4 undeclared; 17 declared = 16 present + 1 absent. THIS NAMES THE MEMBERS OF THE 15-of-20 TRAP INSTEAD OF RESTATING IT: a predicate over 'all tables in the prefix' waits on 4 dirs this converter never writes and cannot fire; a predicate over the DECLARED set alone waits forever on fact_rlw. BOTH naive readings are unreachable, for DIFFERENT reasons. IN CODE: the disagreement block is ALWAYS present and carries both directions unreconciled -- the arm asserts declared_tables is the full 17 (not intersected), written_tables is the observed set verbatim (not trimmed), and explicitly that written_tables is NOT the intersection. CONTROL: a fabricated run writing exactly the 17 declared tables produces the block with BOTH lists EMPTY, so 'both lists non-empty' is a measurement and not a structural artifact of the code. fact_rlw is declared with a full column spec and has no directory at all -- disclosed as a permanent residual so no consumer 'fixes' it by dropping fact_rlw from the declaration; which member is wrong belongs to whoever owns the RLW feed, not to this emit.",
    "status": "PASS"
   },
   {
    "criterion_id": "M-4",
    "criterion_verbatim": "THE CONSUMER CONTRACT IS STATED ON THIS FACE, NOT INFERRED BY THE CONSUMER. State the marker's key, its exact payload shape and its write ordering relative to the tables it attests, in a form 0.7.0_AE_CloudOps can build P2F-3b against without reading this producer's source. A consumer built from PROSE invents keys the producer never agreed to -- so the face must carry the contract, and the AE side must exercise it against a REAL emitted marker before P2F-3b closes.",
-   "method": "test_suite",
-   "invocation": "python -m pytest data/assets/scripts/silver/tests/test_conversion_manifest.py -q (arms test_MARKER_M4_payload_key_set_is_EXACTLY_the_PUBLISHED_contract, test_MARKER_M4_key_shape_and_BUCKET_match_the_published_contract, test_MARKER_the_write_is_READ_BACK_and_a_failed_read_back_is_NAMED) ; plus a pre-fix falsifier: git show HEAD:...conversion_manifest.py extracted to a probe dir and imported with a positive control on cm.__file__",
    "denominator": "9 published payload keys compared as a SET in both directions (a missing key and an invented key both fail); 1 key shape; 1 bucket, asserted at its two independent sources.",
+   "invocation": "python -m pytest data/assets/scripts/silver/tests/test_conversion_manifest.py -q (arms test_MARKER_M4_payload_key_set_is_EXACTLY_the_PUBLISHED_contract, test_MARKER_M4_key_shape_and_BUCKET_match_the_published_contract, test_MARKER_the_write_is_READ_BACK_and_a_failed_read_back_is_NAMED) ; plus a pre-fix falsifier: git show HEAD:...conversion_manifest.py extracted to a probe dir and imported with a positive control on cm.__file__",
+   "method": "test_suite",
    "output_evidence": "THE CONTRACT IS STATED ON THE FACE AND THE UNBLOCKING MESSAGE LANDED: 0.4.0_DS_ClientPlatform~V -> 2.0.0_SA_COO + 0.7.0_AE_CloudOps 20:40Z (contract) and 21:26Z (M-2 built). 0.7.0_AE_CloudOps 84134 confirms it built P2F-3b against it: aws_s3_bucket_notification with prefix=schwab/08335338/meta/complete/, suffix=.json -- so the contract was consumable without reading this producer's source, which is the criterion. TWO CORRECTIONS, BOTH MINE, BOTH RECORDED ON THE FACE. (1) The key I first published carried NO BUCKET, and 'for 49F' invites opal-data-49financial; that seat measured the wrong bucket and nearly filed a false 'emit not landed'. Corrected at source: bucket opal-data-assets (silver_registry.py:46 ASSETS_BUCKET; schwab_runtime.py:34 MONOLITH, env MONOLITH_BUCKET), asserted here at both sources with an env-override control so no consumer hardcodes it. (2) FOUND THIS SESSION: the face published emitted_at and the build NEVER EMITTED IT -- the same failure class running the other way, and a consumer built exactly to the stated shape would have raised KeyError on an otherwise-correct marker. MEASURED AGAINST THE PRE-FIX MODULE, NOT RECALLED: the pre-fix payload keys are [date, declared_source, declared_tables, disagreement, master, run_id, schema, written_tables], MISSING vs contract = [emitted_at], declared_source = 'schwab_schemas.SPECS' with no vintage. THE INSTRUMENT CARRIES ITS OWN POSITIVE CONTROL: the probe asserts cm.__file__ resolves inside the probe dir before scoring anything, because the first run of that probe used an MSYS /tmp path native Python cannot resolve, silently loaded the PATCHED module, and reported 'the arm is DEAD' -- a wrong-module read shaped exactly like a verdict. WHY THE FIRST BUILD'S ARMS COULD NOT HAVE CAUGHT IT: they were transcribed from the code under test, and a key set copied from the implementation cannot detect the implementation disagreeing with the contract. The replacement arm transcribes PUBLISHED_MARKER_KEYS from the FACE. Also repaired: write_complete_marker_verified's docstring claimed to mirror write_manifest_verified and did not -- a blind head_object made a failed read-back arrive as a bare KeyError naming nothing; it now raises a named RuntimeError, exercised on the pre-fix module (bare KeyError) and post-fix (RuntimeError carrying 'NOT verified').",
    "status": "PASS",
    "status_reason": "The criterion's own last clause -- 'the AE side must exercise it against a REAL emitted marker before P2F-3b closes' -- is NOT satisfied and is not this row's to satisfy: it is a condition on P2F-3b's closure, owned by 0.7.0_AE_CloudOps, and it cannot be met until the producer is deployed (meta/complete/ = 0 objects). M-4's obligation on THIS seat is to state the contract on the face in a consumable form; that is done, was consumed, and both defects found in it are corrected on the face itself."
@@ -85,24 +41,105 @@
   {
    "criterion_id": "M-5",
    "criterion_verbatim": "NO ACCELERATOR, NO MONITOR, NO ALARM AT THIS SEAT. This TO builds the PRODUCER emit only. The accelerator is P2F-3b and belongs to 0.7.0_AE_CloudOps. And nothing here is a freshness-checker, alert or notification -- the standing moratorium (Andrew 2026-07-28) is not crossed by a producer writing a completeness marker for its own output, and this AC exists so that distinction is on the record rather than re-litigated at review.",
-   "method": "test_suite",
-   "invocation": "python -m pytest data/assets/scripts/silver/tests/test_conversion_manifest.py -q (arm test_MARKER_M5_no_alarm_monitor_or_notification_was_built_here) ; git show --stat 8de15b7bb3 ; git diff --stat for this round",
    "denominator": "8 banned tokens (sns, cloudwatch, put_metric, put_metric_alarm, publish(, describe_alarms, notification, subscribe() censused over BOTH files this TO touches; 3 files in the M-2 commit and 3 in this round's change, enumerated from git rather than recalled.",
+   "invocation": "python -m pytest data/assets/scripts/silver/tests/test_conversion_manifest.py -q (arm test_MARKER_M5_no_alarm_monitor_or_notification_was_built_here) ; git show --stat 8de15b7bb3 ; git diff --stat for this round",
+   "method": "test_suite",
    "output_evidence": "0 of 8 banned tokens present in either data/assets/scripts/silver/conversion_manifest.py or data/assets/scripts/silver/schwab_runtime.py. CONTROL THAT FIRES: the identical census over a planted string ('client.publish(TopicArn=...)') returns exactly ['publish('], so the clean result is a measurement and not a census that cannot match. WHAT THIS SEAT BUILT, ENUMERATED FROM GIT: 8de15b7bb3 touched 3 files (conversion_manifest.py, schwab_runtime.py, the TO face) -- 164 insertions, 0 deletions; this round touches the same two plus the repo test module and the face. No lambda, no schedule, no EventBridge rule, no S3 notification, no SNS topic, no alarm. THE ACCELERATOR EXISTS AND IT IS NOT MINE: 0.7.0_AE_CloudOps 84134 reports P2F-3b BUILT and NOT APPLIED (plan 1 add / 3 change / 0 destroy) under its own serial. THE CTO 83908 LIMB THIS FACE CARRIED FORWARD IS SATISFIED IN THAT SEAT'S ARTIFACT, read in their plan rather than assumed: the notification is scoped prefix=schwab/08335338/meta/complete/, NOT bucket-wide, on the three-firm bucket opal-data-assets -- a bucket-wide subscription there would have been a cross-firm reference and a NEVER violation. The 8 EventBridge configs were not touched.",
    "status": "PASS"
   }
  ],
+ "artifacts_produced": [
+  {
+   "artifact_covered_by": [
+    "M-1",
+    "M-2",
+    "M-3",
+    "M-4"
+   ],
+   "commit_or_etag": "8de15b7bb3 (M-2 build, on origin/CLOUD and origin/SITEZ) + this round's emitted_at / declared_source-vintage / named-read-back-failure correction",
+   "deploy_evidence": "NOT DEPLOYED, measured on the live plane rather than asserted: s3://opal-data-assets/schwab/08335338/meta/complete/ holds 0 objects, counted CLIENT-SIDE off the object list (IsTruncated null), with the POSITIVE CONTROL that the sibling s3://opal-data-assets/schwab/08335338/meta/conversions/ returns 481 objects on the same instrument, same bucket, same master -- so the zero is an ABSENCE and not a dead call. A first pass at this count read 1 object: `--query 'Contents[].Key' --output text` prints the literal `None` on an empty listing and the line counter counted it (CLAUDE.md 22a, a failed retrieval returns a VALUE). Corroborated independently by 0.7.0_AE_CloudOps 84134, which read the same prefix empty from its own seat. The lambda deploy is Terraform-only (CLAUDE.md NEVER) and infra is a DT/AE lane (Rule 13), so the emit runs nowhere yet.",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "kind": "script",
+   "path_or_key": "data/assets/scripts/silver/conversion_manifest.py"
+  },
+  {
+   "artifact_covered_by": [
+    "M-2",
+    "M-5"
+   ],
+   "commit_or_etag": "8de15b7bb3",
+   "deploy_evidence": "Same build input, same un-deployed state. THE BUILD INPUT IS NAMED, NOT INFERRED FROM A FILENAME (CLAUDE.md 22a): infra/aws/lambda/opal-assets/opal-assets-silver-schwab/BUILD_MANIFEST.json lists data/assets/scripts/silver/{schwab_runtime,conversion_manifest,...}.py under vendored_modules and states 'repo files are the source of truth; fix there and rebuild, never edit a zip'. The vendored staging copies under infra/aws/lambda/opal-assets/opal-assets-silver-schwab/ are therefore BEHIND by exactly this change and by nothing else -- measured as a strict subset: a unified diff of staging against repo yields 83 changed lines, ALL additions, and ZERO lines present in staging and absent from repo, on BOTH files. Nothing lurks in the staging tree; the rebuild is part of the deploy and is not this lane's act.",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "kind": "script",
+   "path_or_key": "data/assets/scripts/silver/schwab_runtime.py"
+  },
+  {
+   "artifact_covered_by": [
+    "M-1",
+    "M-2",
+    "M-3",
+    "M-4",
+    "M-5"
+   ],
+   "commit_or_etag": "this round",
+   "deploy_evidence": "12 marker arms added to the REPO SUITE (module went 12 -> 24 tests). Placed here rather than in this seat's deliverables/arms/ deliberately: the M-2 build's own exercise evidence ('12 assertions over 6 arms') was written ad-hoc, never committed, and did not survive the 2026-08-29 reboot -- an exercise nobody can re-run is a claim, not evidence. Full silver suite after the change: 289 passed, 11 skipped, rc=0 read UNPIPED.",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "kind": "test",
+   "path_or_key": "data/assets/scripts/silver/tests/test_conversion_manifest.py"
+  },
+  {
+   "artifact_covered_by": [
+    "M-1",
+    "M-3",
+    "M-4",
+    "M-5"
+   ],
+   "commit_or_etag": "b9854c9122 (face + producer response) + 8de15b7bb3 (M-4 CORRECTION 1, the missing bucket) + this round (M-4 CORRECTION 2, the published-but-unemitted emitted_at)",
+   "deploy_evidence": "The face carries the M-4 consumer contract, which is the artifact 0.7.0_AE_CloudOps builds P2F-3b against. Both corrections are recorded ON the face rather than sent as separate messages, because a correction routed away from the artifact it corrects is unlinked from the error forever.",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "kind": "doc",
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~V/task_orders/OPAL_ADVIPOINTERS.P2F-MARKER-DS.composite-marker-producer-emit.md"
+  }
+ ],
+ "assignee": "0.4.0_DS_ClientPlatform~V",
+ "compiler_tools": [
+  {
+   "invocation": "comp-which \"what depends on data/assets/scripts/silver/conversion_manifest.py before I change it\"",
+   "result": "NEAR-TIE, no silent pick: comp-blast / comp-estate --resource / comp-kuzu all scored 1.50 of 80 tools, and the router said in as many words that the order is not a ranking. Routed to comp-blast.",
+   "tool": "comp-which"
+  },
+  {
+   "invocation": "comp-blast build_complete_markers ; comp-blast write_manifest_verified",
+   "result": "COMPLETED AFTER THE INSTANCE WAS FIRST WRITTEN (exit 0, ~16 min wall) and the earlier 'NO RESULT' row is superseded by this one rather than deleted. VERDICT: NOT-FOUND for build_complete_markers over a printed denominator of 27,073 canonical graph nodes -- AND THE POSITIVE CONTROL IS THE DECISIVE PART: write_manifest_verified, a sibling that has lived in this module for weeks, is ALSO NOT-FOUND over the same denominator. So the silver converter's functions are not in the graph's universe at all, and the NOT-FOUND is OUT-OF-SCOPE, never a 'nothing depends on this' clear -- the tool prints that sentence itself. Without the control, the same output would have read as a clean blast radius. NOTED: the invocation triggered the tool's OWN canonical auto-refresh/rebuild (it was BEHIND Nessie HEAD and declares the full rebuild a designed daily ground-truth reset, CTO condition 2, not a defect). Rule 20 says QUERY, never rebuild; the rebuild was the tool's internal refresh on a query invocation, not a rebuild this seat asked for.",
+   "tool": "comp-blast"
+  },
+  {
+   "invocation": "comp-pipescript io data/assets/scripts/silver/conversion_manifest.py ; comp-pipescript io data/assets/scripts/silver/schwab_runtime.py",
+   "result": "OUT-OF-GRAPH on both -- the assets/silver tree has no curated DAG, so the answer is a deterministic AST derivation and NOT the curated pipeline graph; chain membership, run order and portal consumers are ABSENT from the answer and must not be read as absent from the estate. conversion_manifest: 4 recognized I/O call sites, 0 resolved READS, 0 resolved WRITES, 4 UNRESOLVED (including the put_object the marker rides) -- unresolved is a real call with a dynamic target, never absent I/O. schwab_runtime: 0 recognized I/O call sites, which the tool itself flags as a MEASURED zero over its recognizer set and not a claim the script is inert -- correct here, since its writes go through conversion_manifest.",
+   "tool": "comp-pipescript io"
+  },
+  {
+   "invocation": "comp-find --name '*ADVIPOINTERS*' ; comp-find --name 'OPAL_ASSETS*PRD*.md' ; comp-find 'opal-assets-silver-schwab' infra/aws/terraform",
+   "result": "Resolved the governing PRD (docs/architecture/OPAL_ADVIPOINTERS_PRD.md, 50 name hits over 135,200 files scanned) and the terraform surface (27 hits over 605 files, all CONFIG band, all in CHANGELOG.json). Denominators printed on every sweep.",
+   "tool": "comp-find"
+  },
+  {
+   "invocation": "not run",
+   "result": "NOT RUN, and named rather than omitted: the question this round needed was the BUILD INPUT for one lambda, which BUILD_MANIFEST.json answers directly and authoritatively. No infra resource was created, renamed or repointed by this seat, so there was no estate traversal to run.",
+   "tool": "comp-estate"
+  }
+ ],
  "controls": {
+  "determinism": {
+   "method": "The marker payload is deterministic in every field a completeness verdict depends on: declared_tables and written_tables are sorted tuples, the disagreement lists are sorted set differences, and write_complete_marker_verified dumps with sort_keys=True and encodes to bytes before put_object. emitted_at is DELIBERATELY NOT deterministic -- it is a clock read, it moves on every re-emission, and the contract on the face says so in as many words so no consumer keys idempotency on it. declared_source is deterministic given the environment and renders its own UNPINNED state when the build stamp is absent.",
+   "observed": "The 24-test module and the 289-test silver suite both reproduce across runs. Repeated build_complete_markers calls over the same fixtures return byte-identical payloads except emitted_at, which is the field declared non-deterministic.",
+   "status": "STABLE"
+  },
   "mutant": {
    "description": "FOUR firing controls, each built so an otherwise-vacuous check can fail. (1) M-2 CALL SITE: the sweep emit deleted from the source text, the same AST predicate re-run over the mutant. (2) M-5 CENSUS: the banned-token census re-run over a planted 'client.publish(TopicArn=...)' string. (3) M-1 NAMING: a transcribed 'fact_' + feed.lower() helper scored against the registry-derived set. (4) M-4 PRE-FIX FALSIFIER: the published key set scored against the pre-fix module extracted by git show, with a positive control asserting the module under test is the pre-fix copy. (5) M-3 EMPTY-BLOCK CONTROL: a run writing exactly the declared set, proving the disagreement lists CAN be empty.",
    "expected": "(1) the predicate reports a completion path with no emit. (2) the census returns ['publish(']. (3) the transcribed set differs from the declared set and lacks fact_rps_s2. (4) the pre-fix payload is MISSING emitted_at and its read-back failure is a bare KeyError. (5) both disagreement lists empty, the block still present.",
    "observed": "All five fired as expected. (4) additionally produced the sharpest result in this instance -- it is what found the published-but-unemitted emitted_at. TWO CONTROLS WERE THEMSELVES DEFECTIVE ON FIRST RUN AND ARE RECORDED RATHER THAN QUIETLY REPAIRED: control (1)'s first mutation produced invalid Python ('for marker in None  # comment:'), so the arm died inside ast.parse instead of reporting the gap -- a DEAD control, not a firing one, and in a red run the two are indistinguishable; it now asserts the mutant PARSES before scoring its verdict. Control (4)'s first run used an MSYS /tmp path native Python cannot resolve, silently loaded the PATCHED module and reported 'the arm is DEAD' -- a wrong-module read shaped exactly like a verdict; it now asserts cm.__file__ resolves inside the probe dir before scoring.",
    "status": "FIRED-AS-EXPECTED"
-  },
-  "determinism": {
-   "method": "The marker payload is deterministic in every field a completeness verdict depends on: declared_tables and written_tables are sorted tuples, the disagreement lists are sorted set differences, and write_complete_marker_verified dumps with sort_keys=True and encodes to bytes before put_object. emitted_at is DELIBERATELY NOT deterministic -- it is a clock read, it moves on every re-emission, and the contract on the face says so in as many words so no consumer keys idempotency on it. declared_source is deterministic given the environment and renders its own UNPINNED state when the build stamp is absent.",
-   "observed": "The 24-test module and the 289-test silver suite both reproduce across runs. Repeated build_complete_markers calls over the same fixtures return byte-identical payloads except emitted_at, which is the field declared non-deterministic.",
-   "status": "STABLE"
   }
  },
  "declared_exclusions": [
@@ -123,42 +160,24 @@
    "reason": "SURFACED, NOT RESOLVED, by M-3's own instruction. It is declared with a full column spec and has no directory at all; declared_not_written will carry it on every date until the spec is resolved. Which member is wrong -- the declaration or the feed -- belongs to whoever owns the RLW feed."
   },
   {
-   "item": "comp-blast on the marker functions",
-   "reason": "NO RESULT. The invocation exceeded 120s, was moved to the background, and had produced 0 bytes of output when this instance was written. Recorded as no-result rather than as a clean blast: a tool that returned nothing has said nothing. The Rule 20 question was answered instead by comp-pipescript io on both changed files."
+   "item": "A dependency-graph blast radius for the marker functions",
+   "reason": "NOT AVAILABLE FROM THIS INSTRUMENT, measured rather than assumed. comp-blast returns NOT-FOUND for build_complete_markers over 27,073 canonical nodes, and returns the SAME NOT-FOUND for the long-lived sibling write_manifest_verified -- so the assets/silver converter plane is outside the graph's universe, which is the same answer comp-pipescript io gave (OUT-OF-GRAPH, no curated DAG for assets/silver). Recorded as an instrument gap, never as a clean blast."
   }
  ],
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "schema_version": "1.0",
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~V/logs/2026-08-30/",
+ "spec_ref": {
+  "doc": "docs/architecture/OPAL_ADVIPOINTERS_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "b828354d55"
+ },
  "surprises": [
   "OBSERVATION x INERT: my own commit message at 8de15b7bb3 claims 'EXERCISED, not merely compiled: 12 assertions over 6 arms'. The arm was run ad-hoc and never committed; it is absent from this seat's deliverables/arms/ and the scratch that held it did not survive the 2026-08-29 reboot. The claim was true when written and is now unre-runnable, which makes it a sentence rather than evidence. Remedied by rebuilding the arms IN THE REPO SUITE. Surfaced rather than quietly replaced because the same shape -- exercise evidence living only in a commit message -- is invisible to every reader who was not present.",
   "OBSERVATION x INERT: write_complete_marker_verified's docstring said it mirrored write_manifest_verified's read-back and it did not (no try/except, no named error). A docstring that describes a sibling's behaviour is a second carrier of that sibling's contract and it went stale at the moment of writing. Repaired in code; noted because the defect was authored and reviewed in the same act that wrote the docstring claiming otherwise.",
   "OBSERVATION x INERT: `aws s3api list-objects-v2 --query 'Contents[].Key' --output text` prints the literal `None` on an EMPTY listing, so a naive line count reads 1 object where there are 0. Hit live this session on meta/complete/ and caught only because the number contradicted 0.7.0_AE_CloudOps's independent read of the same prefix. CLAUDE.md 22a already names the class ('a failed retrieval returns a VALUE'); this is one more member of it, on the count rather than on the value.",
   "OBSERVATION x INERT: 0.7.0_AE_CloudOps 84134 names an open question that is not mine to answer and is not carried anywhere else at this seat -- schwab silver lands ~12:18Z and the floor fires 12:45Z, so an accelerated day puts the floor's own fire onto a running chain, which the dispatcher classifies CHAIN REFUSED rc=3 and logs ERROR-loud by design. A healthy accelerated day could therefore emit a daily ERROR-class line. Routed by that seat to 2.0.0_SA_COO / 1.0.0_SA_CTO; recorded here only so it is not lost if that message is."
  ],
- "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~V/logs/2026-08-30/",
- "compiler_tools": [
-  {
-   "tool": "comp-which",
-   "invocation": "comp-which \"what depends on data/assets/scripts/silver/conversion_manifest.py before I change it\"",
-   "result": "NEAR-TIE, no silent pick: comp-blast / comp-estate --resource / comp-kuzu all scored 1.50 of 80 tools, and the router said in as many words that the order is not a ranking. Routed to comp-blast."
-  },
-  {
-   "tool": "comp-blast",
-   "invocation": "comp-blast build_complete_markers ; comp-blast write_manifest_verified",
-   "result": "NO RESULT -- exceeded 120s, backgrounded, 0 bytes of output at the time of writing. Reported as no-result, never as a clean blast: a tool that returned nothing has said nothing about the blast radius."
-  },
-  {
-   "tool": "comp-pipescript io",
-   "invocation": "comp-pipescript io data/assets/scripts/silver/conversion_manifest.py ; comp-pipescript io data/assets/scripts/silver/schwab_runtime.py",
-   "result": "OUT-OF-GRAPH on both -- the assets/silver tree has no curated DAG, so the answer is a deterministic AST derivation and NOT the curated pipeline graph; chain membership, run order and portal consumers are ABSENT from the answer and must not be read as absent from the estate. conversion_manifest: 4 recognized I/O call sites, 0 resolved READS, 0 resolved WRITES, 4 UNRESOLVED (including the put_object the marker rides) -- unresolved is a real call with a dynamic target, never absent I/O. schwab_runtime: 0 recognized I/O call sites, which the tool itself flags as a MEASURED zero over its recognizer set and not a claim the script is inert -- correct here, since its writes go through conversion_manifest."
-  },
-  {
-   "tool": "comp-find",
-   "invocation": "comp-find --name '*ADVIPOINTERS*' ; comp-find --name 'OPAL_ASSETS*PRD*.md' ; comp-find 'opal-assets-silver-schwab' infra/aws/terraform",
-   "result": "Resolved the governing PRD (docs/architecture/OPAL_ADVIPOINTERS_PRD.md, 50 name hits over 135,200 files scanned) and the terraform surface (27 hits over 605 files, all CONFIG band, all in CHANGELOG.json). Denominators printed on every sweep."
-  },
-  {
-   "tool": "comp-estate",
-   "invocation": "not run",
-   "result": "NOT RUN, and named rather than omitted: the question this round needed was the BUILD INPUT for one lambda, which BUILD_MANIFEST.json answers directly and authoritatively. No infra resource was created, renamed or repointed by this seat, so there was no estate traversal to run."
-  }
- ]
+ "to_id": "OPAL_ADVIPOINTERS.P2F-MARKER-DS"
 }
