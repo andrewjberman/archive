@@ -1,0 +1,139 @@
+{
+ "schema_version": 3.1,
+ "subject": {
+  "id": "comp-similar",
+  "kind": "tool",
+  "declared_domain": "The substrate underlying comp-similar: the DERIVE-AT-SCAN summary corpus ({arn -> SummaryDoc}) over which BM25 SUMMARY similarity is scored, plus the live heat the superseded-twin scan joins against."
+ },
+ "as_of": {
+  "carded_utc": "2026-08-30T08:29:25Z",
+  "commit_ish": "b339d1e3673b97f6e7ef7f19b138090c4b13beac",
+  "graph_vintage": "summary_corpus.build_corpus() executed live at this commit"
+ },
+ "process": {
+  "methodology": {
+   "how": "BM25 over a per-resource SUMMARY document (what a resource DOES), df-cut; sibling to comp-dups which scores NAME/body (what a resource IS). --supersede joins SUMMARY-similarity with heat divergence and emits the COLD member as a decommission CANDIDATE.",
+   "determinism": "deterministic",
+   "composes": [
+    {
+     "id": "estate-graph",
+     "note": "the live derive-at-scan source"
+    },
+    {
+     "id": "comp-heat",
+     "note": "data-heat join"
+    },
+    {
+     "id": "comp-debris",
+     "note": "invoke-heat join"
+    }
+   ],
+   "invents": [
+    {
+     "id": "SummaryDoc",
+     "note": "per-resource purpose summary"
+    },
+    {
+     "id": "bm25-score",
+     "note": "pairwise similarity"
+    },
+    {
+     "id": "superseded-twin",
+     "note": "decommission candidate pair"
+    }
+   ],
+   "materializer_standing": "canonical",
+   "basis": "held",
+   "evidence": "Read at source: the wrapper delegates to comp_similar.py, which imports build_corpus / SimilarityIndex / coverage from summary_corpus.py. BM25 over a fixed corpus is deterministic by construction, but this seat ran the corpus build ONCE and did not repeat it to observe stability, so the row reads `held`. The tool's own header states similarity is a HYPOTHESIS, never a verdict alone; this card does not upgrade it.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "cadence": {
+   "declared_rhythm": "on demand, per invocation",
+   "actual_trigger": "operator invocation; the corpus is rebuilt from the live graph at each scan",
+   "live_matches_declared": "yes",
+   "live_instance_age": "rebuilt this run; ~25 s to build 1863 entries",
+   "basis": "measured",
+   "evidence": "build_corpus() executed live this session and returned 1863 entries; there is no stored corpus whose staleness could drift.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  }
+ },
+ "artifact": {
+  "persistence": {
+   "persisted": false,
+   "authority_role": "evidence",
+   "mutation_policy": "not_applicable",
+   "form": "an in-memory {arn -> SummaryDoc} corpus, rebuilt per invocation",
+   "basis": "measured",
+   "evidence": "built live this run: 1863 ARN resources, no on-disk corpus",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "location": {
+   "home": "org/modules/graph/debtscan/summary_corpus.py (build_corpus, SimilarityIndex, coverage); driver comp_similar.py; wrapper .tools/comp-similar",
+   "projection_of": [
+    {
+     "id": "estate-graph",
+     "note": "derived per invocation; never a stored source"
+    },
+    {
+     "id": "comp-heat",
+     "note": "heat join input"
+    },
+    {
+     "id": "comp-debris",
+     "note": "invoke-cold join input"
+    }
+   ],
+   "co_resident_stores": null,
+   "basis": "measured",
+   "evidence": "all three files read at this commit; the wrapper delegates to the driver, which imports the corpus module",
+   "owner": "0.7.0_AE_CloudOps~X"
+  }
+ },
+ "trust": {
+  "coverage": {
+   "universe": "ARN-addressable estate resources reachable by the derive-at-scan",
+   "denominator": "1508 summarised of 1863 ARN resources scanned",
+   "explicitly_out": [
+    "355 UNKNOWN-thin (no purpose summary derivable; no twin knowable)",
+    "29 hold-marked",
+    "\u26d4 5 of 1863 match >= 1 canonical motif (1858 unmatched) -- any motif-conditioned question runs on a near-empty subset"
+   ],
+   "basis": "measured",
+   "evidence": "coverage() run live this session: {\"total_arn_resources\": 1863, \"summarized\": 1508, \"unknown_thin\": 355, \"held_marked\": 29, \"motif_matched\": 5, \"motif_unmatched\": 1858, \"membership_matched\": 1254, \"membership_unmatched\": 609, \"variance_verdicts\": 50, \"fork_shadows\": 6}",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "key": {
+   "identity_space": "AWS ARN",
+   "key_expression": "the resource ARN string, verbatim, as the corpus dict key",
+   "key_is_stable": "stable",
+   "crosses_spaces": true,
+   "declared_mapping": "the same ARN is the join key into comp-heat and comp-debris, which are separate stores",
+   "basis": "measured",
+   "evidence": "build_corpus() returns a dict keyed by ARN; 1863 keys this run. An ARN is stable for a resource's lifetime by AWS construction.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "failure_mode": {
+   "returns_on_failure": "A resource with no derivable summary enters the corpus THIN rather than being dropped; a thin doc scores no similarity, so 'no twin exists' and 'the summary failed to derive' both surface as 'no neighbours'.",
+   "distinguishable_from_true_negative": "yes",
+   "silent_degrade_paths": [
+    "a resource whose summary derives but is uninformative scores low without being counted thin -- degraded, not absent, and not separately counted"
+   ],
+   "basis": "measured",
+   "evidence": "coverage() prints unknown_thin separately (355 of 1863 this run), so a consumer CAN distinguish 'scanned, no twin' from 'never summarised'. This is the one row across both cards where distinguishability is MEASURED rather than reasoned.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  }
+ },
+ "verdict": {
+  "standing": "QUALIFIED",
+  "why": "LOAD-BEARING and advisory: the superseded-twin scan feeds a decommission CANDIDATE list, so a coverage hole here becomes a resource nobody proposes retiring. QUALIFIED on the motif coverage above -- 5 of 1863 matched -- and on determinism being held rather than observed. Read-only, hold-aware, no delete verb; deletion stays a per-batch Andrew word.",
+  "blocking_defects": null
+ },
+ "forward_disposition": {
+  "standing": "undecided",
+  "set_by": null,
+  "basis": "absent",
+  "evidence": "NOT SET BY THE CARDING LANE -- the tool owner's call, not the carder's.",
+  "decided_utc": null
+ },
+ "carded_by": "0.7.0_AE_CloudOps~X"
+}
