@@ -1,0 +1,168 @@
+{
+  "schema_version": 3.1,
+  "subject": {
+    "id": "infra/aws/globgrph/cse_emit_graphhead.py",
+    "kind": "script",
+    "declared_domain": "NFRA_CSE.P3 -- the graph_head PRODUCER: materialize the live CloudNode/CloudEdge graph as GRAPH_HEAD CSEs into the C0 log. Declared as 'the persistent full-graph stream that becomes the log's SUBSTANTIVE content at 0.3'. Implements contract_graph_head (ProducerKind.GRAPH_HEAD, ref = the Nessie marker at emission, compiler graph-head-delta-compiler, recognizers cloudnode/cloudedge_graph_recognizer, subject via map_cloudnode / CLOUDEDGE_TO_RELATIONSHIP, verb = create per the HEAD state). Declared SELF-CONTAINED and in-VPC only."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-30T09:05:00Z",
+    "commit_ish": "b1813e5ed8",
+    "graph_vintage": "This is a LIVE producer, unlike the first two on this face. globgrph.cse source=graph_head holds 44 partitions / 86,607 rows spanning event_date 2026-07-08..2026-08-30, the newest written 2026-08-30. Read in full: all 44 partitions synced and every row counted."
+  },
+  "process": {
+    "methodology": {
+      "how": "build_graph_head_cses (:159-187) scans graph_nodes for (node_id, node_type) and graph_edges for (src_id, dst_id, edge_type) through a pyiceberg catalog, then recognizes each: node_cse (:99-120) maps node_type -> Entity via cs.map_cloudnode, honest-degrading to Concept(untyped)+0.2 on a map gap; edge_cse (:122-152) maps edge_type -> Relationship via cs.map_cloudedge resolved BY THE DST NODE TYPE, returns None for an unmapped edge_type, and independently degrades the src subject. Nodes and edges are each sliced by an optional limit. main (:190-222) then validates fail-closed and appends. THE PRODUCTION PATH IS NOT main() -- see cadence.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "canonical",
+      "composes": [
+        {
+          "id": "globgrph.graph_nodes",
+          "note": "scanned for node_id + node_type; also builds the node_type map used to resolve BOTH endpoints of every edge"
+        },
+        {
+          "id": "globgrph.graph_edges",
+          "note": "scanned for src_id, dst_id, edge_type -- the RAW edge axis, deliberately not comp-kuzu's projected graph"
+        },
+        {
+          "id": "org/modules/graph/cse_schema.py",
+          "note": "map_cloudnode and map_cloudedge are the certed maps; a gap in either is what produces the untyped degrade, so the 37% untyped share measured below is a property of THAT module, not of this one. map_cloudedge is target-typed for the polysemous OWNED_BY (verified at cse_schema.py:399-403), and the same module ships owned_by_object_census (:406-413) for the unknown-object-type hazard -- which this producer does not call"
+        },
+        {
+          "id": "infra/aws/globgrph/cse_store.py",
+          "note": "get_catalog, validate_batch, append_cses, ensure_cse_table, stamp_marker, and NESSIE_URI"
+        },
+        {
+          "id": "infra/aws/globgrph/cse_producers_nightly.py",
+          "note": "leg_graphhead (:146-160) is the ACTUAL production caller -- it imports this module and calls build_graph_head_cses directly, bypassing main()"
+        }
+      ],
+      "invents": [
+        {
+          "id": "the Concept(untyped) node subject",
+          "note": "a map_cloudnode gap becomes Concept+0.2 at :102-103 rather than an invented type. MEASURED at 32,419 of 86,607 rows (37%)"
+        },
+        {
+          "id": "the 'unknown' marker string",
+          "note": "_current_marker (:57-68) returns the literal 'unknown' on failure, and that value would flow into FOUR fields -- producer.ref, provenance.source ('kuzu_nessie_db@unknown'), head.marker_head, and run_id ('graphhead-unknown'). MEASURED: it has NEVER fired -- 0 of 86,607 rows"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "Read in full at infra/aws/globgrph/cse_emit_graphhead.py:1-225 @b1813e5ed8. _current_marker :57-68; _scan :71-73; distinct_raw_edge_types :76-96; node_cse :99-120 (degrade :102-103, event_id :107); edge_cse :122-152 (unmapped-skip :131-132, event_id :141); _now_iso :154-156; build_graph_head_cses :159-187 (node loop :166-169, edge loop :176-186); main :190-222 (limit default :199, marker :203, validate :207-213, append :218-220). Production caller read at cse_producers_nightly.py:146-160 and :281.",
+      "owner": "0.7.0_AE_CloudOps (AE class owns infra/aws/globgrph); file author 0.5.0_AE_OpalETL, which has no live instance"
+    },
+    "cadence": {
+      "declared_rhythm": "The module's own CLI declares --limit N as 'the default first-proof mode', --full for 'the substantive-content run', and --nodes-only/--edges-only for scoping. The ORCHESTRATOR declares the real rhythm (cse_producers_nightly :13, :19-20): 'the first graph_head fire IS the ~55k backfill; every later fire appends only the graph delta', with CSE_GRAPHHEAD_ENABLED defaulting to 1 and the leg running 'build_graph_head_cses at FULL scope behind the dedup filter'.",
+      "actual_trigger": "THE NIGHTLY TASK, THROUGH leg_graphhead -- NOT THROUGH THIS MODULE'S main(). leg_graphhead (:146-160) imports the module, calls build_graph_head_cses(catalog, marker, limit=None, nodes_only=False, edges_only=False) -- full scope -- then applies filter_new(built, existing) to drop event_ids already in the table before validating and appending. main() is never on that path, and it is the ONLY path with a different dedup story (see failure_mode). CSE_GRAPHHEAD_ENABLED defaults to 1, and the module's own self-test asserts the posture graph_head=ON, sweep=ON, agent=OFF (:387-388).",
+      "live_matches_declared": "yes",
+      "live_instance_age": "CURRENT -- the newest partition is event_date 2026-08-30. But the calendar is not complete: 44 partitions across a 54-calendar-day span (2026-07-08..2026-08-30) leaves 10 DAYS WITH NO PARTITION AT ALL -- a contiguous seven-day gap 2026-07-09..2026-07-15 immediately after the first fire, then isolated misses on 07-26, 08-03 and 08-10. A partition is absent when the leg produced no new event_ids OR when it did not run, and the two are the same observable from the table; I did not measure which, and I am not inferring it. I first typed 'partial' into live_matches_declared, which is not a member of the declared enum ['yes','no','unmeasured','not_applicable'] -- inventing a value rather than choosing one is the taxonomy failure the schema exists to refuse, and the gate caught it. The correct member is 'yes': the orchestrator declares delta-only appends after the first backfill, and a day with no new event_ids therefore PREDICTS an absent partition -- so the 10 gaps are CONSISTENT WITH the declaration, not evidence against it. What I have not measured is whether the leg also failed to run on any of those days; that alternative is not excluded.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "Orchestrator read at cse_producers_nightly.py:13, :19-20, :116 (filter_new), :146-160 (leg_graphhead), :281 (registration + default '1'), :374-388 (self-test asserting in-batch dupe collapse and the leg defaults). Table read: aws s3 sync of the entire source=graph_head prefix, 44 of 44 partitions fetched in one call, each parquet read directly with pq.ParquetFile (a hive-partition inference error on the directory tree is why the per-file read is used). Calendar gap computed over the full partition set, not a sample.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "source",
+      "mutation_policy": "append_only",
+      "form": "Rows in globgrph.cse under source=graph_head, partitioned by event_date. 86,607 rows across 44 partitions at the read. The module writes no local file at all -- unlike the deploy and agent producers, it appends directly to the table through cse_store.",
+      "basis": "measured",
+      "evidence": "append at :219 via cse_store.append_cses, which appends in one Nessie commit and is append-only by contract (cse_store.py:357-363). Row and partition counts from the full local sync. 'source' because the CSE's typed-or-degraded subject, its confidence and its relationship mapping are created here from a graph row that carries none of them.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "location": {
+      "home": "globgrph.cse, partition source=graph_head, at s3://opal-313476888478-globgrph/warehouse/globgrph/cse_b557721f-8b81-4ec2-9289-fe5f44c3f272/data/source=graph_head/event_date=<day>/",
+      "projection_of": [
+        {
+          "id": "globgrph.graph_nodes",
+          "note": "one CSE per scanned node, subject = the node_id"
+        },
+        {
+          "id": "globgrph.graph_edges",
+          "note": "one CSE per MAPPED edge; an unmapped edge_type is skipped and counted"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "globgrph.cse",
+          "note": "shared with the other producers under different source= partitions; graph_head is the largest contributor by row count on this face"
+        },
+        {
+          "id": "warehouse/_branch_head.main.json",
+          "note": "the one-marker-commit oracle that stamp_marker (:220) re-stamps after every append; MARKER_TABLES includes cse"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "Table UUID path taken from the branch-head marker's table_metadata.cse.metadata_location rather than a guessed naming convention; partition layout confirmed by the sync.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every row of graph_nodes and every row of graph_edges visible to the catalog at emission, less unmapped edge_types, less event_ids already present in the table.",
+      "denominator": "THIS PRODUCER PRINTS ITS DENOMINATORS, AND THAT IS A REAL CREDIT ON A FACE WHERE THE OTHER SUBJECTS DO NOT. The node line prints 'recognized=N (of {len(nodes)} live nodes)' (:169) and the edge line prints 'recognized=N skipped_unmapped_edge_type=M (of {len(edges)} live edges)' (:184-186) -- so the skipped edges are COUNTED and surfaced, not dropped silently, which is exactly what cse_emit_deploy fails to do at its own drop site. The orchestrator adds built / skipped_existing to its summary (:151). WHAT IS STILL NOT VISIBLE: a node whose map_cloudnode lookup misses is not counted anywhere -- it is emitted as Concept+0.2 rather than skipped, so the untyped share is recoverable only by reading the table, and it is 32,419 of 86,607 rows (37%).",
+      "explicitly_out": [
+        "an unmapped edge_type -- edge_cse returns None (:131-132) and the caller counts it into skipped_unmapped_edge_type rather than inventing a relationship",
+        "any event_id already in the table -- filter_new in the orchestrator, not in this module",
+        "node and edge CHANGES and DELETIONS: verb is create for 86,607 of 86,607 rows, and the event_id is keyed on the node_id alone (:107) or the (src, edge_type, dst) triple (:141), never on the marker or a content hash. See the state consequence in failure_mode",
+        "on a --limit run, everything past the slice -- but the printed denominator still names the full live count, so the shortfall is visible"
+      ],
+      "basis": "measured",
+      "evidence": "Print sites :169 and :184-186; skip site :131-132; orchestrator summary :151. Untyped share and verb distribution computed over all 86,607 rows in the 44 synced partitions (subject_etype spans 23 distinct values; Concept = 32,419; verb create = 86,607 of 86,607).",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "CSE event ids in the GRAPH_HEAD namespace, keyed on the GRAPH's identity space rather than on the run: a node id, or a (src, edge_type, dst) triple. The producer ref is the Nessie marker, so producer identity is run-scoped while event identity is not.",
+      "key_expression": "NODE: f'graph_head:node:{nid}' (:107). EDGE: f'graph_head:edge:{src}->{edge_type}->{dst}' (:141). No truncation on either. THE OMISSION OF THE MARKER FROM THE EVENT ID IS THE DESIGN, NOT A DEFECT -- it is precisely what lets filter_new turn a full re-scan into a delta, and it is why 44 nightly full-scope runs produced 86,607 rows instead of millions. I had it the other way round in draft and the measurement corrected me: ZERO event_ids appear on more than one day, across all 44 partitions.",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "The orchestrator declares the dedup contract explicitly (:19-20, 'at FULL scope behind the dedup filter (event_ids graph_head:node:{nid} / graph_head:edge:{...})'), so the key expression is named in the place that depends on it. NOT DECLARED: that the (src, edge_type, dst) triple is not unique in graph_edges -- see the exercised duplicate in failure_mode.",
+      "basis": "measured",
+      "evidence": "Key expressions at :107 and :141; the orchestrator's declaration at :19-20. Cross-run uniqueness measured over all 44 partitions: 86,600 distinct event_ids over 86,607 rows, with 0 event_ids appearing on more than one day.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "failure_mode": {
+      "returns_on_failure": "ONE HANDLER IN THE MODULE, AND IT IS THE ONE THAT MATTERS. An AST census (attribution-controlled) finds exactly one except-handler: _current_marker :66, `except Exception` -> print WARN, return the literal string 'unknown'. Every other failure propagates -- _scan does not guard load_table or scan, and build_graph_head_cses does not guard the loops. THE SAME MODULE CONTAINS AN EXPLICITLY DOCUMENTED FAIL-LOUD CONTRACT TWO FUNCTIONS LOWER: distinct_raw_edge_types (:87-91) states 'FAIL-LOUD (spec Sec 1, THE load-bearing guard): a get_catalog / load_table / scan error PROPAGATES here (this NEVER returns a silent empty on error)'. So the module demonstrably knows the failure-philosophy question, argues it at length for the edge-type inventory, and answers it the other way for the marker -- without saying so.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "'unknown' HAS TWO CAUSES AND ONLY ONE OF THEM PRINTS. The except arm at :66 prints WARN: NESSIE_HEAD_FAIL. But the success arm at :65 is `data.get('hash') or (data.get('reference') or {}).get('hash') or 'unknown'` -- a 200 response whose payload carries neither field yields the identical 'unknown' with NO output at all. A reader who greps the logs for NESSIE_HEAD_FAIL would see nothing and conclude the marker was read. MEASURED: this has NEVER fired -- 0 of 86,607 rows carry 'unknown', all 44 marker_head values are distinct 64-character hashes, exactly one per partition. It is a latent hazard with a real blast radius (four fields), not a live defect, and the card says so",
+        "THE MODULE'S OWN main() HAS NO DEDUP OF ANY KIND, AND THE ONE PARTITION IT PRODUCED CARRIES THE FINGERPRINT. main() calls cse_store.append_cses directly (:219), and append_cses does NOT filter by event_id -- it validates and appends every row it is given (cse_store.py:357-393, read in full). The only dedup in the system is filter_new, which lives in the orchestrator (:116) and collapses in-batch duplicates as well as dropping existing ones (asserted by its own self-test at :374-375). EXERCISED: the 2026-07-08 partition is 50 rows = 25 nodes + 25 edges, which is exactly this module's default limit of 25 (:199) and therefore a main() run -- and it holds only 43 distinct event_ids, because ONE edge id (an instance-profile ASSUMES edge) appears EIGHT times with an identical ingested_at. Every other partition has zero duplicates. So the (src, edge_type, dst) triple is not unique in graph_edges, this module cannot see that, and production is protected only because the orchestrator dedups on its behalf",
+        "A CHANGED OR DELETED GRAPH OBJECT NEVER UPDATES ITS CSE. verb is create for 86,607 of 86,607 rows and the event_id carries no marker and no content hash, so once a node id is in the table filter_new suppresses it forever -- including after its node_type, and therefore its Entity mapping and confidence, has changed. A deleted node's CSE also stands. Reconstructing state from source=graph_head therefore yields the UNION of everything ever seen, not the graph's HEAD. The log is append-only by design and the docstring says 'verb=create per the HEAD state', so this is a consequence of a stated design rather than a violation of it -- but the name 'graph_head' invites the other reading, and nothing in the stream distinguishes a live node from one deleted in July",
+        "a --nodes-only or --edges-only run still prints only the line for the grain it ran, so a scoped run and a run whose other grain produced nothing look alike in the log",
+        "execution_meta.actor is the hardcoded '0.5.0_AE_OpalETL' (:117, :148) regardless of who ran it -- the same trap as the deploy producer, and exercised the same way: every row carries that actor",
+        "AN OWNED_BY EDGE WITH AN UNKNOWN OBJECT TYPE SILENTLY DEFAULTS TO OWNS, AND THE CENSUS BUILT TO CATCH THAT IS NEVER CALLED HERE. cse_schema.map_cloudedge (:399-403) resolves OWNED_BY to CONTAINS when the destination type is in _OWNED_BY_CONTAINER_TYPES and to OWNS otherwise -- and cse_schema's own owned_by_object_census (:406-413) states that an object type in NEITHER the actor nor the container set 'currently DEFAULTS to OWNS via map_cloudedge -- which is WRONG for a new CONTAINER', and exists to 'Surface it for a governed whitelist-bump ... NEVER silently default'. This producer calls map_cloudedge on every edge and NEVER calls owned_by_object_census, so on this path a new container type is absorbed as custody with confidence 1.0 and nothing prints. The hazard is DECLARED by the mapping module and UNGUARDED by this consumer; whether any live OWNED_BY object type is currently unknown is NOT measured here -- that census is the remedy, and running it is not this card's act."
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "Handler census on the AST, one handler at :66. Fail-loud contrast read at :87-91. append_cses read in full at cse_store.py:357-393 to establish that it does NOT dedup -- this mattered, because my first hypothesis was that the store deduplicated and the measurement refuted it. filter_new at cse_producers_nightly.py:116 with its self-test at :374-375. All row-level facts computed over the complete 44-partition sync: 0 'unknown' markers, 44 distinct 64-char markers one per day, 86,600 distinct event_ids over 86,607 rows, all 7 excess rows in the 2026-07-08 partition on a single event_id.",
+      "owner": "0.7.0_AE_CloudOps for the module; cse_schema owns the map gaps behind the 37% untyped share"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "This is the strongest of the three producers carded so far and the card should be specific about why: it is one of the TWO live producers on this face (44 partitions, 86,607 rows, current to today) and the larger of them -- I first wrote 'the only one', which my credit census falsified against my own card-1 measurement: source=agent is equally current at 43 partitions, it PRINTS ITS DENOMINATORS at both grains including the count of edges it skipped, it refuses to invent a relationship for an unmapped edge_type, it resolves OWNED_BY by the destination node type rather than with a flat lookup that could not disambiguate -- and I verified that in cse_schema.map_cloudedge (:399-403), not from the call site's comment about it, because a credit resting on an unread dependency is the class this face keeps catching, and it carries an explicitly argued FAIL-LOUD contract on its edge-type inventory. QUALIFIED on four measured points. FIRST, the production path is leg_graphhead, not this module's main() -- the same class this face's card 1 found in the agent producer, and here it has a visible fingerprint: main() has no dedup at all, append_cses does not dedup either, and the single partition main() produced carries one edge event_id eight times while all 43 other partitions are clean. Production is correct only because the orchestrator deduplicates on the module's behalf. SECOND, _current_marker fails soft to the literal 'unknown' and that value would reach four fields -- and it has TWO causes of which only one prints, so the silent cause would be invisible to a log search. It has never fired in 86,607 rows, which is why this is recorded as a latent hazard and not a defect. THIRD, the stream cannot express change or deletion: every row is create, the event_id is keyed on graph identity alone, so a node that changes type keeps its first CSE and a deleted node keeps its CSE forever. FOURTH, the calendar has 10 missing days in a 54-day span including a contiguous seven-day gap, and an absent partition does not distinguish 'no new event_ids' from 'did not run'. Two of my own errors are recorded rather than only the subject's: I drafted the event_id omission as a defect when it is the mechanism that makes the delta work, and I hypothesised store-side dedup before reading append_cses, which does not dedup. Both were corrected by measurement before this card was written.",
+    "blocking_defects": [
+      "PRODUCTION PATH IS NOT main(): leg_graphhead (:146-160) calls build_graph_head_cses at full scope then filter_new; main() is never on that path and has NO dedup, and append_cses does not dedup either (cadence, failure_mode rows)",
+      "EXERCISED CONSEQUENCE: the only main()-produced partition (2026-07-08, 50 rows = the default limit 25 at both grains) holds 43 distinct event_ids because one edge id repeats EIGHT times -- the (src, edge_type, dst) triple is not unique in graph_edges and the module cannot see it (failure_mode row)",
+      "_current_marker (:66) fails soft to the literal 'unknown' into producer.ref, provenance.source, head.marker_head and run_id; it has TWO causes and the success-arm cause (:65, a 200 lacking both hash fields) prints NOTHING. MEASURED 0 of 86,607 rows -- latent, never fired (failure_mode row)",
+      "THE SAME MODULE ARGUES THE OPPOSITE PHILOSOPHY 20 LINES LOWER: distinct_raw_edge_types (:87-91) documents itself as fail-loud and 'NEVER returns a silent empty on error', while the marker read above it does exactly that, undeclared (failure_mode row)",
+      "NO CHANGE OR DELETE SEMANTICS: verb=create on 86,607 of 86,607 rows and an event_id keyed on graph identity, so source=graph_head reconstructs the union of everything ever seen rather than the current HEAD (coverage, failure_mode rows)",
+      "CALENDAR GAPS: 44 partitions over a 54-day span, 10 days absent including a contiguous 2026-07-09..2026-07-15 gap; an absent partition does not distinguish an empty delta from a leg that did not run, and I did not measure which (cadence row)",
+      "37% of rows (32,419 of 86,607) carry Concept(untyped)+0.2 from a map_cloudnode gap, and an untyped node is NOT counted anywhere in the run's output -- unlike a skipped edge, which is (coverage row)",
+      "UNGUARDED OWNED_BY DEFAULT: an OWNED_BY edge whose object type is in neither the actor nor the container set resolves to OWNS at confidence 1.0 with no output; cse_schema documents this as 'WRONG for a new CONTAINER' and ships owned_by_object_census for it, which this producer never calls (failure_mode row)"
+    ]
+  },
+  "carded_by": "0.7.0_AE_CloudOps~K"
+}
