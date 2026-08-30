@@ -5,6 +5,7 @@ call. Ruled inputs: anchor = BD funding-inception, basis = CUMULATIVE, coverage 
 LINKABLE, SI window opens at bd_first_return_day (3.0.0_SA_CVO @f11fb765ad + ANNOTATION 1/2).
 """
 import json
+import math
 import sys
 import pandas as pd
 import pyarrow.parquet as pq
@@ -206,6 +207,47 @@ def main():
                 "branch": r["bd_first_return_day_branch"], "attr": attr,
             })
     df = pd.DataFrame(rows)
+
+    # ---- BP1-6: the CRO thresholds (@9f894ec5d9, frozen with that file) and the Dlog prints.
+    # unit: bp of CUMULATIVE return; delta = ours - BD, SIGNED, never absolute.
+    EXACT_BP, TIGHT_BP = 0.5, 10.0
+
+    def klass(delta):
+        if delta is None or pd.isna(delta):
+            return None
+        bp = abs(delta) * 10000.0
+        return "EXACT" if bp <= EXACT_BP else ("TIGHT" if bp <= TIGHT_BP else "LARGE")
+
+    df["delta_bp"] = df["delta"].apply(lambda d: None if pd.isna(d) else d * 10000.0)
+    # RULE (a), 4.0.0_SA_CRO @9f894ec5d9: the CLASSIFIED SET is COMPUTED cells with both values.
+    # UNAVAILABLE-* are OUTCOMES, not deltas -- an SI cell whose window is not at the anchor has a
+    # real number attached, and classifying it would put a bin on a figure the taxonomy refuses.
+    df["class"] = [klass(d) if o == ppr.OUTCOME_COMPUTED else None
+                   for d, o in zip(df["delta"], df["cell_outcome"])]
+    # Dlog is ADDITIVE over concatenated windows (4.0.0_SA_CRO): so differencing two ruled windows
+    # yields a sub-window that is HOLE-FREE, from the pinned table alone and with no re-run.
+    df["dlog"] = [None if (pd.isna(o) or pd.isna(b)) else math.log1p(o) - math.log1p(b)
+                  for o, b in zip(df["our_return"], df["bd_return"])]
+    print()
+    print("=== BP1-4 THRESHOLDS APPLIED (EXACT<=0.5bp / TIGHT<=10bp / LARGE), CRO @9f894ec5d9 ===")
+    print(df[["account", "period", "delta_bp", "class"]].dropna(subset=["class"]).to_string(index=False))
+    print("ruled-window classes:", json.dumps(df["class"].value_counts().to_dict()))
+
+    print()
+    print("=== DIFFERENCED SUB-WINDOWS (hole-free by additivity of Dlog) ===")
+    print("%-12s %-16s %12s %8s %s" % ("account", "sub-window", "expm1(Dlog) bp", "class", "from"))
+    for acct in COHORT:
+        g = df[df["account"] == acct].set_index("period")
+        for name, a, b in (("Jan-Jun", "YTD", "QTD"), ("prior Aug-Dec", "1Y", "YTD")):
+            try:
+                da, db = g.loc[a, "dlog"], g.loc[b, "dlog"]
+            except KeyError:
+                continue
+            if da is None or db is None or pd.isna(da) or pd.isna(db):
+                continue
+            d = da - db
+            v = math.expm1(d)
+            print("%-12s %-16s %12.1f %8s %s" % (acct, name, v * 10000.0, klass(v), "%s-%s" % (a, b)))
     pd.set_option("display.width", 250)
     pd.set_option("display.max_columns", 40)
     print("=== THE PROBE TABLE (5 accounts x 4 ruled periods = 20 cells) ===")
