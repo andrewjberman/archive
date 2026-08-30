@@ -24,9 +24,9 @@ CARD-R-b7dd-1 CARD-R-b7dd-2 CARD-R-b7dd-3 CARD-R-b7dd-4
 
 <subjects basis="enumerated FROM the census @9b2c687dc8; owner the v1 card's git creator (b7dd-3: the lane that authored the rung)">
   RECONCILE these against the census at its pin before writing anything; a set that does not reconcile is a REFUSAL for a ruling, never a rounding (b7dd-1, f9fa-3). Print the count beside its denominator on every receipt.
-  <subject id="None" path="org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS/D1.json" creator="0.8.0_AE_CloudComp~Y" />
-  <subject id="None" path="org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS/D2.json" creator="0.8.0_AE_CloudComp~Y" />
-  <subject id="None" path="org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS/D3.json" creator="0.8.0_AE_CloudComp~Y" />
+  <subject id="D1_value_grain" path="org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS/D1.json" creator="0.8.0_AE_CloudComp~Y" />
+  <subject id="D2_path_flow" path="org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS/D2.json" creator="0.8.0_AE_CloudComp~Y" />
+  <subject id="D3_contract_obligation" path="org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_CARDS/D3.json" creator="0.8.0_AE_CloudComp~Y" />
 </subjects>
 
 <sequence_gates>after-wave3-seating -- a gated cell may be PREPARED, but its value is written only after the gate's receipt is cited in its evidence. after-wave3-seating is SATISFIED (L3W3 faces cut @b8c47d1233, seated 02:0xZ); the owner rule (b7dd-3) binds this face to the rung's author, which is this seat.</sequence_gates>
