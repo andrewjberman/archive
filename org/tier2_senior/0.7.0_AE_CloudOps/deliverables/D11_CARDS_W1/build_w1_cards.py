@@ -28,7 +28,9 @@ from __future__ import annotations
 
 import collections
 import datetime
+import hashlib
 import json
+import os
 import subprocess
 import sys
 
@@ -46,7 +48,34 @@ def now():
     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+EXPECTED_STITCH_SHA256 = "7ac11d015e0ce4a068d6afb86cd51edddb8171b227afd5fc9e40ffb8d5dd5363"
+
+
+def content_identity(path, expected=None):
+    """Hash the EXACT bytes this run reads, and REFUSE on absent or drifted content.
+
+    An untracked carrier has no commit, so its DIGEST IS ITS IDENTITY -- naming it
+    "content-addressed" without carrying the content address states a class and withholds the
+    address. 3.0.0_SA_CVO~X stopped C3i for exactly that, and the lesson was already mine: the
+    L3W3 AC2 rows carry this same file's digest, measured by me hours earlier and not carried
+    into the card OF that file.
+    """
+    if not os.path.exists(path):
+        raise ValueError("REFUSED: %s is ABSENT -- an untracked carrier that is not present "
+                         "cannot be carded at all" % path)
+    raw = open(path, "rb").read()
+    got = hashlib.sha256(raw).hexdigest()
+    if expected and got != expected:
+        raise ValueError("REFUSED: %s DRIFTED -- expected %s, read %s. A card must not describe "
+                         "bytes it did not read." % (path, expected, got))
+    st = os.stat(path)
+    return {"sha256": got, "bytes": st.st_size,
+            "mtime_utc": datetime.datetime.fromtimestamp(
+                st.st_mtime, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+
+
 def measure_c3():
+    ident = content_identity(STITCH, EXPECTED_STITCH_SHA256)
     d = json.load(open(STITCH, encoding="utf-8"))
     nodes = d["classes_data"]["c2c3_motif"]["nodes"]
     c3 = {n["id"] for n in nodes if n["type"] == "C3System"}
@@ -58,7 +87,7 @@ def measure_c3():
     assign = sum(len(v) for v in mem.values())
     distinct = len({t for v in mem.values() for t in v})
     return {"c3": len(c3), "c2": len(c2), "edges": len(edges), "assign": assign,
-            "distinct": distinct, "overlap": assign - distinct,
+            "distinct": distinct, "overlap": assign - distinct, "ident": ident,
             "per_system": {k: len(v) for k, v in sorted(mem.items(), key=lambda x: -len(x[1]))}}
 
 
@@ -79,8 +108,13 @@ def card_c3(m, anchor):
                 "C3System nodes with CONTAINS edges to member C2Motifs. Carded as the AS-BUILT "
                 "BASELINE a replacement must beat -- never as a claim the cover is correct."},
         "as_of": {"carded_utc": now(), "commit_ish": anchor,
-                  "graph_vintage": "%s :: classes_data.c2c3_motif, read at this commit "
-                                   "(untracked, content-addressed)" % STITCH},
+                  "graph_vintage":
+                      "%s :: classes_data.c2c3_motif. UNTRACKED -- no commit pins these bytes, "
+                      "so the CONTENT ADDRESS is the identity: sha256 %s, %d bytes, mtime %s. "
+                      "commit_ish above pins the REPO CODE at this run and pins NOTHING about "
+                      "this file."
+                      % (STITCH, m["ident"]["sha256"], m["ident"]["bytes"],
+                         m["ident"]["mtime_utc"])},
         "process": {
             "methodology": {
                 "how": "OVERLAPPING-DOMAIN-COVER: a C3 system is defined by an ANCHOR "
@@ -131,10 +165,16 @@ def card_c3(m, anchor):
                 "co_resident_stores": [{"id": "graph_nodes/graph_edges",
                                         "note": "and their kuzu projection -- named by the rung, NOT opened at this seat"}],
                 "basis": "held",
-                "evidence": "the home file is UNTRACKED and content-addressed -- not "
-                            "retrievable by commit, its digest is its identity. The co-resident "
-                            "stores are named from the rung's own description and were not "
-                            "opened here, which is the floor that makes this row `held`.",
+                "evidence":
+                    "The home file is UNTRACKED: no commit pins it, so its DIGEST IS ITS "
+                    "IDENTITY -- sha256 %s, %d bytes, mtime %s, hashed from the exact bytes "
+                    "this run read (the builder REFUSES on absent or drifted content). "
+                    "RETRIEVAL: local to this device only; it is neither tracked, "
+                    "commit-pinned, nor served at an immutable URI, and that is a NAMED GAP "
+                    "owned by the graph's producer. The co-resident stores are named from the "
+                    "rung's description and were not opened here -- the floor that makes this "
+                    "row `held`."
+                    % (m["ident"]["sha256"], m["ident"]["bytes"], m["ident"]["mtime_utc"]),
                 "owner": LANE}},
         "trust": {
             "coverage": {
@@ -324,8 +364,14 @@ def card_comp_similar(cov, anchor):
 
 def main():
     anchor = head()
-    cards = {"C3i.v3.1.json": card_c3(measure_c3(), anchor),
-             "comp_similar.v3.1.json": card_comp_similar(measure_corpus(), anchor)}
+    # A scoped repair must not rewrite a card that already PASSED -- re-running the builder
+    # would move carded_utc/commit_ish on comp_similar and reopen a closed verdict.
+    target = sys.argv[1] if len(sys.argv) > 1 else "all"
+    cards = {}
+    if target in ("all", "c3"):
+        cards["C3i.v3.1.json"] = card_c3(measure_c3(), anchor)
+    if target in ("all", "comp"):
+        cards["comp_similar.v3.1.json"] = card_comp_similar(measure_corpus(), anchor)
     for name, doc in cards.items():
         with open(OUT + name, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(doc, fh, indent=1)
