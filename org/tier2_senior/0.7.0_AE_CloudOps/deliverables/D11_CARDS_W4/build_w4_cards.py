@@ -56,6 +56,23 @@ GROUPS = {"code_heat_snap": "W4-wvft", "cse": "W4-bqrk", "cse_test_24458e6c": "W
           "cse_test_bb57a916": "W4-dlqq", "fedobs_coevolution_snap": "W4-kyjs",
           "fedobs_coverage_snap": "W4-siwi", "ms_heat_snap": "W4-cjtn"}
 
+THREE_PLANE_NOTE = (
+    "TRIGGER PLANES SWEPT, AND WHY THE FIRST TWO WERE NOT ENOUGH. (1) EVENTBRIDGE: 140 rules "
+    "enumerated, none names code_heat -- but that plane's control FAILED, since `cse` writes "
+    "daily and matches no rule either (its producer is an ECS task), so that zero was never "
+    "load-bearing. (2) TERRAFORM SCHEDULER RESOURCES: glue_code_heat.tf declares only "
+    "aws_glue_catalog_database/_table/_partition; that plane's control fires, since the same "
+    "corpus carries cse_producer's ECS declaration and comp_learns_producer_nightly at "
+    "cron(0 4 * * ? *). (3) THE HOST-BOUND PLANE, which neither of the first two can see. "
+    "\u26d4 AN EARLIER VERSION OF THIS CARD CALLED THE TRIGGER A MEASURED ABSENCE ON PLANES 1-2 "
+    "ALONE. That was wrong and 4.0.0_SA_CRO~X caught it: a positive control certifies ITS OWN "
+    "SUBJECT, and the terraform control only established that CLOUD SCHEDULES are visible in "
+    "that corpus -- it cannot certify absence from a host-bound plane it does not cover. Worse, "
+    "item2a.tf was already IN this seat's own comp-find output as a content hit; the filename "
+    "match (glue_code_heat.tf) was read and the 26 SURFACED hits were not. An early stop and a "
+    "true absence read identically.")
+
+
 BUCKET = "opal-313476888478-globgrph"
 HOMES = {"cse": "warehouse/globgrph/cse_b557721f-8b81-4ec2-9289-fe5f44c3f272/",
          "code_heat_snap": "warehouse/globgrph/code_heat_snap_8b0bca7a-9078-4b8e-8868-ef04062d9952/"}
@@ -355,8 +372,8 @@ def card_code_heat_snap():
     cen = object_census(home)
     zc = zero_class_probes(home)
     cells = carrier_cells(GROUPS["code_heat_snap"])
-    writer, rowbuilder = "infra/aws/globgrph/snap_store.py", "infra/aws/globgrph/code_heat_emit.py"
-    wpin, rpin = git_pin(writer), git_pin(rowbuilder)
+    writer = "infra/aws/globgrph/snap_store.py"
+    wpin = git_pin(writer)
     newest = datetime.strptime(cen["newest_utc"][:19], "%Y-%m-%dT%H:%M:%S").replace(
         tzinfo=timezone.utc)
     age = (datetime.now(timezone.utc) - newest).days
@@ -367,114 +384,160 @@ def card_code_heat_snap():
             "id": "code_heat_snap",
             "kind": "store",
             "declared_domain": (
-                "The code-heat SNAPSHOT store: an Iceberg table under the globgrph Nessie "
-                "catalog holding point-in-time code-heat rows. The subject is THE STORE. Its "
-                "row-builder code_heat_emit.py is carded separately by 0.8.0_AE_CloudComp at "
-                "D11_CARDS_CC/code_heat_emit.v3.1.json, and the write primitive snap_store.py "
-                "is a third object again -- the manifest names the ROW-BUILDER as materializer, "
-                "which is why conflating the three is the grain error this line prevents. "
+                "The code_heat_snap Iceberg table: one registered SURFACE of snap_store.py, "
+                "which its own header calls THE ONE WRITER for all siblings. Rows arrive as "
+                "staged .jsonl batches under warehouse/snap_ingest/pending/<surface>/ and are "
+                "coerced, appended and moved to done/. The subject is THAT TABLE. "
                 "QUALIFIES THE CELLS CARRIER (AC4): %s @%s, cells %s -- this card is the v3.1 "
-                "reading of those 7 cells; the carrier is NOT edited."
+                "reading of those 7 cells; the carrier is NOT edited, and where it and a live "
+                "read disagree the live read wins and the disagreement is carried."
                 % (CARRIER, CARRIER_PIN, " ".join(c["cell_id"] for c in cells))),
         },
         "as_of": {
             "carded_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "commit_ish": subprocess.run(["git", "rev-parse", "HEAD"],
                                          capture_output=True, text=True).stdout.strip(),
-            "graph_vintage": "S3, EventBridge and terraform planes read live at card time; no "
-                             "graph consulted",
+            "graph_vintage": "S3 object plane, S3 staging plane, EventBridge, terraform and the "
+                             "host-bound declarations all read live at card time",
         },
         "process": {
             "methodology": {
-                "how": ("Iceberg append. Rows are ASSEMBLED by code_heat_emit.py and WRITTEN by "
-                        "snap_store.py append_rows(), one Nessie commit per batch, append-only. "
-                        "The store carries a point-in-time claim, not a current-state one."),
+                "how": ("Iceberg append via snap_store.py append_rows(): staged .jsonl batches "
+                        "are read from warehouse/snap_ingest/pending/code_heat_snap/, coerced "
+                        "against the surface's typed payload schema, appended in one Nessie "
+                        "commit, then MOVED to done/. Fail-closed: a batch with invalid rows is "
+                        "rejected LOUD and left in pending/ rather than partially written."),
                 "determinism": "deterministic",
                 "composes": [
-                    {"id": rowbuilder,
-                     "note": "assembles the rows; named as the manifest's materializer, which "
-                             "is the ROW-BUILDER and not the writer"},
+                    {"id": "warehouse/snap_ingest/pending/code_heat_snap/*.jsonl",
+                     "note": "the staged batch is the ONLY measured input to this table; "
+                             "snap_store reads it, coerces it and appends"},
                     {"id": writer,
-                     "note": "the write primitive: append_rows() at :243, t.append(table) :256"}],
+                     "note": "the ONE writer for all snap surfaces: append_rows() at :243, "
+                             "t.append(table) at :256, ingest loop at :285-315"}],
                 "invents": [],
                 "materializer_standing": "unknown",
                 "basis": "measured",
-                "evidence": ("Read at source with line numbers from grep -n AT THE PIN, never "
-                             "inferred from a display window: %s:243 append_rows(), :256 "
-                             "t.append(table), @%s; row-builder @%s. materializer_standing is "
-                             "`unknown` rather than `canonical` because nothing measured here "
-                             "establishes this store as the current authority for code-heat, "
-                             "and the cadence row is why that matters."
-                             % (writer, wpin[:10], rpin[:10])),
+                "evidence": (
+                    "Read at source, line numbers from grep -n AT THE PIN: %s @%s -- SURFACES "
+                    "registry at :74-79 with code_heat_snap at :97, append_rows() :243, "
+                    "t.append(table) :256, the pending->coerce->append->done loop :285-315. "
+                    "\u26d4 CORRECTION CARRIED: an earlier version of this card listed "
+                    "code_heat_emit.py in `composes`, inherited from the carrier's cell 1 ('rows "
+                    "are assembled by code_heat_emit.py and WRITTEN by snap_store.py'). THAT "
+                    "COMPOSITION IS NOT SUPPORTED AND THIS SEAT ASSERTED IT WITHOUT CHECKING: "
+                    "code_heat_emit.py imports no snap_store and calls no append_rows (its "
+                    "imports read argparse/os/shutil/subprocess/sys/tempfile/time), and "
+                    "append_rows is invoked only from inside snap_store.py:307. The emitter "
+                    "writes a DIFFERENT surface -- a hive-partitioned PARQUET whose declared "
+                    "default output is s3://%s/warehouse/code_heat/, measured live at 2 objects, "
+                    "newest 2026-07-16T03:40:46Z. Two surfaces, one name, no call edge between "
+                    "them." % (writer, wpin[:10], BUCKET)),
                 "owner": LANE,
             },
             "cadence": {
-                "declared_rhythm": None,
-                "actual_trigger": "NONE FOUND, measured across two planes -- not inherited from "
-                                  "the manifest's null field",
-                "live_matches_declared": "not_applicable",
+                "declared_rhythm": ("DEV-BOX CADENCE -- host-bound, tied to /log. Not a cloud "
+                                    "schedule, and not by omission: the container flag was "
+                                    "deliberately REVERTED to make it host-bound."),
+                "actual_trigger": ("host-bound invocation on a developer box, staged to "
+                                   "warehouse/snap_ingest/pending/code_heat_snap/ then ingested; "
+                                   "the invocation itself is UNOBSERVABLE from this seat"),
+                "live_matches_declared": "unmeasured",
                 "live_instance_age": ("%d days: sole write-day %s, newest object %s"
                                       % (age, sorted(cen["per_day_tail"])[0], cen["newest_utc"])),
-                "basis": "measured",
+                "basis": "held",
+                "basis_by_field": {"declared_rhythm": "held",
+                                   "actual_trigger": "held",
+                                   "live_matches_declared": "absent",
+                                   "live_instance_age": "measured"},
                 "evidence": (
-                    "A NULL MANIFEST FIELD IS AN UNPOPULATED CLAIM, NOT A MEASURED NEGATIVE, so "
-                    "the carrier's `absent` was re-derived rather than copied. TWO PLANES, each "
-                    "with its own control. EVENTBRIDGE: 140 rules enumerated (auto-paginated, "
-                    "counted client-side); none names code_heat -- but that plane's control "
-                    "FAILED, because `cse`, which writes daily, matches no rule either, so the "
-                    "EventBridge zero is NOT load-bearing and is reported only for "
-                    "completeness. TERRAFORM: code_heat IS declared, in glue_code_heat.tf, but "
-                    "ONLY as aws_glue_catalog_database / _table / _partition -- no "
-                    "schedule_expression, no event rule, no ECS task, no Lambda. That plane's "
-                    "control FIRES: the same corpus carries cse_producer's ECS declaration and "
-                    "comp_learns_producer_nightly at cron(0 4 * * ? *), so it demonstrably "
-                    "contains both schedules and producers. The terraform absence is therefore "
-                    "MEASURED, and it is consistent with the object plane: ONE write-day, %d "
-                    "days ago. ONE NAME COLLISION CAUGHT AND DISCARDED: the EventBridge rule "
-                    "`infrastructure-snapshot-daily` (ENABLED, cron(0 7 * * ? *)) matched a "
-                    "`snap` grep, but its Lambda source references neither code_heat_snap nor "
-                    "snap_store nor globgrph -- 0 hits over 2 files scanned. A name match is "
-                    "not an identity." % age),
+                    "DECLARED, quoted from two named authorities rather than derived. "
+                    "infra/aws/terraform/globgrph/item2a.tf:402-406: GLOBGRPH_CODEHEAT_ENABLED "
+                    "was REVERTED on 2026-07-16 per CTO TO-2 ruling 033933Z, because code_heat "
+                    "is git-history-shaped (it shells `git -C` against the workspace and portal "
+                    "repos) so the flag gated an import that can NEVER resolve in the Fargate "
+                    "derive; 'code_heat now runs on DEV-BOX CADENCE (option a)'. "
+                    "infra/system/04_federated.md:21 records the same split as Andrew-ruled: "
+                    "cloud producers on nightly EventBridge, host-bound producers (code_heat, "
+                    "tool_activity) tied to /log. "
+                    "APPLIED IS UNMEASURED AND THE ROW SAYS SO. A dev-box /log cadence is not "
+                    "observable from this seat, so live_matches_declared is `unmeasured` and the "
+                    "row floors to `held`. What IS measured is the STAGE-THEN-INGEST plane: "
+                    "pending/code_heat_snap/ KeyCount=0 (nothing awaiting ingest); "
+                    "done/code_heat_snap/ holds exactly ONE batch, 20260716T150116Z.jsonl, "
+                    "12,925,409 bytes, ingested 2026-07-16T15:28:06Z -- the SAME INSTANT as the "
+                    "table's sole write, which is the join that ties the two planes together. "
+                    "The batch was staged at 15:01:16Z per its own name and ingested 27 minutes "
+                    "later. That write-day is also the day the Fargate revert landed. Whether "
+                    "the host-bound cadence has since RUN and produced nothing, or has not run "
+                    "at all, is NOT distinguishable from here. %s" % THREE_PLANE_NOTE),
                 "owner": LANE,
             },
         },
         "artifact": {
             "persistence": {
                 "persisted": True,
-                "authority_role": "source",
+                "authority_role": "projection",
                 "mutation_policy": "append_only",
                 "form": "an Iceberg table: data files plus a metadata/ tree",
                 "basis": "measured",
-                "evidence": ("KeyCount at the declared home = %d (a POSITIVE, which a wrong "
-                             "bucket or a missing s3:ListBucket cannot produce). %d objects / "
-                             "%d bytes counted client-side over an auto-paginated listing."
-                             % (kc, cen["objects"], cen["bytes"])),
+                "evidence": (
+                    "KeyCount at the declared home = %d (a POSITIVE, which a wrong bucket or a "
+                    "missing s3:ListBucket cannot produce); %d objects / %d bytes counted "
+                    "client-side over an auto-paginated listing. "
+                    "\u26d4 authority_role is `projection`, NOT `source`. The object census "
+                    "establishes PERSISTENCE and nothing more -- it cannot establish authority "
+                    "for the declared concern, and reading it as if it could is the defect "
+                    "3.0.0_SA_CVO~X named. The pinned producer settles it against `source` "
+                    "directly: code_heat_emit.py @c934701a67 states 'This parquet is a cheap, "
+                    "refreshable DERIVED snapshot (vintage-stamped), NOT a source of truth: git "
+                    "remains the write-history', and 'we keep git canonical and never copy git "
+                    "into Iceberg'. A table whose upstream declares git canonical is not itself "
+                    "authoritative for code heat." % (kc, cen["objects"], cen["bytes"])),
                 "owner": LANE,
             },
             "location": {
                 "home": "s3://%s/%s" % (BUCKET, home),
-                "projection_of": [],
+                "projection_of": [
+                    {"id": "s3://%s/warehouse/snap_ingest/done/code_heat_snap/"
+                           "20260716T150116Z.jsonl" % BUCKET,
+                     "note": "the single staged batch this table was ingested from; 12,925,409 "
+                             "bytes, ingested 2026-07-16T15:28:06Z, matching the table's sole "
+                             "write instant"},
+                    {"id": "git write-history of the ajb_workspace and portal repos",
+                     "note": "declared CANONICAL by the code-heat producer's own header -- 'git "
+                             "remains the write-history' -- which is why this store is a "
+                             "projection rather than a source. The git plane itself was NOT "
+                             "traversed by this card"}],
                 "co_resident_stores": [
                     {"id": "s3://%s/warehouse/globgrph/" % BUCKET,
-                     "note": "sibling globgrph warehouse tables share this bucket and prefix "
-                             "root; CONTENT overlap was not measured, only co-residence"}],
+                     "note": "sibling snap surfaces share this bucket and prefix root; CONTENT "
+                             "overlap was not measured, only co-residence"},
+                    {"id": "s3://%s/warehouse/code_heat/" % BUCKET,
+                     "note": "the code_heat PARQUET surface written by code_heat_emit.py -- a "
+                             "DIFFERENT store carrying overlapping subject matter, 2 objects, "
+                             "newest 2026-07-16T03:40:46Z. Named here because a duplicate-store "
+                             "census that missed it would understate the estate"}],
                 "basis": "measured",
-                "evidence": ("the s3:// URI is an EXACT IDENTITY a consumer can equality-join; "
-                             "resolved live at KeyCount=%d." % kc),
+                "evidence": ("the s3:// URIs are EXACT IDENTITIES a consumer can equality-join; "
+                             "the home resolved live at KeyCount=%d, and both the staged batch "
+                             "and the parquet prefix were listed live." % kc),
                 "owner": LANE,
             },
         },
         "trust": {
             "coverage": {
                 "universe": ("objects under the store's own S3 home -- NOT the code-heat row "
-                             "population, which this card does not measure"),
+                             "population, and NOT the git history it ultimately projects"),
                 "denominator": ("%d of %d objects at the declared home"
                                 % (cen["objects"], cen["objects"])),
                 "explicitly_out": [
                     "NO COMPLETENESS OF THE CODE-HEAT ROW POPULATION IS ASSERTED. Whether the "
-                    "single append covered what it should have is a different question with a "
-                    "different denominator, and nothing here measures it.",
+                    "single ingested batch covered what it should have is a different question "
+                    "with a different denominator, and nothing here measures it.",
                     "the row-level contents of the Iceberg data files (object plane only)",
+                    "the git write-history this store projects -- named in projection_of but "
+                    "NOT traversed",
                     "whether any consumer still READS this store -- UNMEASURED, and it is the "
                     "question a forward disposition would turn on",
                 ],
@@ -491,14 +554,15 @@ def card_code_heat_snap():
                 "key_expression": "bucket + key, exact string match",
                 "key_is_stable": "stable",
                 "crosses_spaces": True,
-                "declared_mapping": ("addressed logically through the catalog and physically by "
-                                     "the s3:// home; the join between the two spaces was not "
-                                     "traversed"),
+                "declared_mapping": ("(repo, path) is the declared JOIN KEY from the code-heat "
+                                     "row shape into graph_nodes, per the producer's header; "
+                                     "that join was not exercised by this card"),
                 "basis": "held",
                 "evidence": ("basis is the FLOOR: the S3 identity is MEASURED (listed live), "
                              "but that the catalog's (namespace, table) resolves to THIS prefix "
-                             "was read from the manifest and NOT verified against the catalog. "
-                             "One limb measured, one limb read -> held."),
+                             "was read from the manifest and NOT verified against the catalog, "
+                             "and the (repo, path) join into graph_nodes was not exercised. "
+                             "Measured limb plus read limbs -> held."),
                 "owner": LANE,
             },
             "failure_mode": {
@@ -524,7 +588,11 @@ def card_code_heat_snap():
                     "that all four classes emit an identical zero: that claim was FALSIFIED on "
                     "card 1 of this same face, against this same bucket, and is not inherited "
                     "here. distinguishable is `no` on the one unexercised class alone, and the "
-                    "row floors to `inferred` because that sub-claim is weaker than measured."
+                    "row floors to `inferred`. \u26d4 A SECOND RETRIEVAL TRAP WAS HIT AND "
+                    "CAUGHT WHILE CARDING THIS SUBJECT: an s3api --query over an EMPTY prefix "
+                    "returns the literal string 'None', and a line-count over that output "
+                    "reported 1 object where KeyCount says 0. A failed retrieval returns a "
+                    "VALUE at the CLIENT layer too, not only at the service layer."
                     % (zc["true_absence"][0], zc["true_absence"][1],
                        zc["wrong_bucket"][0], zc["wrong_bucket"][1],
                        zc["wrong_region"][0], zc["wrong_region"][1], kc)),
@@ -534,18 +602,22 @@ def card_code_heat_snap():
         "verdict": {
             "standing": "QUALIFIED",
             "why": ("The store RESOLVES and holds real bytes, but it is COLD: one write-day, %d "
-                    "days ago, and NO trigger exists in the terraform plane that declares it -- "
-                    "measured with a firing control, not inferred from a null manifest field. "
-                    "QUALIFIED on the limbs ENUMERATED below and deliberately NOT counted, so "
-                    "that adding a limb cannot desynchronise a cardinal: the catalog-to-prefix "
-                    "binding is HELD rather than measured; coverage spans the OBJECT plane only "
-                    "and asserts nothing about row completeness; the failure mode is not "
-                    "distinguishable from a true negative on the one unexercised permission "
-                    "class; whether any consumer still reads this store is UNMEASURED; and "
-                    "materializer_standing is `unknown` rather than canonical. COLD IS NOT A "
+                    "days ago, from exactly one staged batch. Its trigger is DECLARED and "
+                    "host-bound -- dev-box cadence tied to /log, per the CTO revert at "
+                    "item2a.tf:402-406 and the Andrew-ruled split at 04_federated.md:21 -- and "
+                    "whether that cadence has RUN is UNMEASURABLE from this seat, so the "
+                    "cadence row is `held`. QUALIFIED on the limbs ENUMERATED below and "
+                    "deliberately NOT counted, so that adding a limb cannot desynchronise a "
+                    "cardinal: authority_role is `projection` and the git plane it projects was "
+                    "NOT traversed; the catalog-to-prefix binding and the (repo, path) join are "
+                    "HELD rather than measured; coverage spans the OBJECT plane only; the "
+                    "failure mode is not distinguishable from a true negative on the one "
+                    "unexercised permission class; whether any consumer still reads this store "
+                    "is UNMEASURED; and materializer_standing is `unknown`. COLD IS NOT A "
                     "DEFECT VERDICT -- a point-in-time snapshot written once may be exactly "
-                    "what was intended. Naming it is the carder's job; deciding it is the "
-                    "owner's." % age),
+                    "what was intended, and the declared host-bound cadence makes a long gap "
+                    "unremarkable rather than alarming. Naming it is the carder's job; deciding "
+                    "it is the owner's." % age),
             "blocking_defects": None,
         },
         "forward_disposition": {
@@ -553,7 +625,8 @@ def card_code_heat_snap():
             "set_by": None,
             "basis": "absent",
             "evidence": ("NOT SET BY THE CARDING LANE -- the store owner's call at the class "
-                         "close. The cadence and consumer rows are what it would turn on."),
+                         "close. The cadence, consumer-use and duplicate-surface rows are what "
+                         "it would turn on."),
             "decided_utc": None,
         },
         "carded_by": LANE,
