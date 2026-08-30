@@ -26,6 +26,12 @@ COHORT = {  # schwab -> (bd_id, cohort attribute per 4.0.0_SA_CRO @7cd0cc1200)
 }
 BD_BY_ID = {v[0]: k for k, v in COHORT.items()}
 HOLE = ("2026-08-11", "2026-08-17")  # 5 trading days absent, named per 3.0.0_SA_CVO 84554
+# The six dates BD counts and our chain does not carry a linkable return for: the 5 absent
+# trading days plus 2026-08-18, which is PRESENT but all-null (a partition-wide refusal).
+# ONLY the 5 ABSENT trading days. 2026-08-18 is deliberately NOT here: its partition EXISTS with
+# all-null returns, so it is already counted in days_neutral. Listing it in both places
+# double-counts it and drives every residual to -1 -- which is exactly what the first run showed.
+HOLE_DATES = ("2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14", "2026-08-17")
 
 
 def bd_side(local_paths):
@@ -162,6 +168,23 @@ def main():
             if period == "SI" and cmp_outcome == ppr.OUTCOME_COMPUTED:
                 if req[0] != binfo["inception"]:
                     cmp_outcome = "UNAVAILABLE-SI-WINDOW-NOT-AT-ANCHOR"
+            # PER-CELL DAY ACCOUNTING (3.0.0_SA_CVO 85268's gap: mechanism 1 held at the PERIOD
+            # grain and was NOT SHOWN at the CELL grain, where a THIRD term appears).
+            #   bd_days_held = our_days_linked + hole-days-in-window + anchor-day + OUR non-OK days
+            # The third term is a mechanism candidate for the VALUE delta in its own right:
+            # BD linked days our chain REFUSED. Distinct from the hole, and only visible per cell.
+            ws, we_ = r["window_start"], r["window_end"]
+            hole_in_win = 0
+            if ws:
+                hole_in_win = sum(1 for d in HOLE_DATES if ws <= d <= we_)
+            # BD counts the anchor day itself; our SI opens the next trading day (BMV-0 rule).
+            anchor_term = 1 if (period == "SI" and r["bd_first_return_day"]
+                                and r["bd_anchor"] != r["bd_first_return_day"]) else 0
+            non_ok = r["days_neutral"]
+            resid = None
+            if br["bd_days_held"] is not None and r["days_linked"] is not None:
+                resid = (br["bd_days_held"] - r["days_linked"] - hole_in_win
+                         - anchor_term - (non_ok or 0))
             ours = r["r_net_cum"]
             theirs = br["bd_return"]
             delta = (None if (ours is None or theirs is None) else ours - theirs)
@@ -175,6 +198,8 @@ def main():
                 "our_return": ours, "bd_return": theirs, "delta": delta,
                 "bd_annualized": br["bd_annualized"],
                 "our_days_linked": r["days_linked"], "our_days_expected": r["days_expected"],
+                "our_non_ok": non_ok, "hole_in_window": hole_in_win, "anchor_day": anchor_term,
+                "day_residual": resid,
                 "bd_days_held": br["bd_days_held"],
                 "coverage_basis": r["coverage_basis"], "our_first_linkable": r["our_first_linkable"],
                 "bd_anchor": r["bd_anchor"], "bd_first_return_day": r["bd_first_return_day"],
@@ -185,7 +210,13 @@ def main():
     pd.set_option("display.max_columns", 40)
     print("=== THE PROBE TABLE (5 accounts x 4 ruled periods = 20 cells) ===")
     print(df[["account", "period", "requested", "returned", "range_match", "cell_outcome",
-              "our_return", "bd_return", "delta", "our_days_linked", "bd_days_held"]].to_string(index=False))
+              "our_return", "bd_return", "delta"]].to_string(index=False))
+    print()
+    print("=== PER-CELL DAY ACCOUNTING (85268's gap): bd_held = linked + hole + anchor + non_OK + residual ===")
+    print(df[["account", "period", "our_days_linked", "our_days_expected", "our_non_ok",
+              "hole_in_window", "anchor_day", "bd_days_held", "day_residual"]].to_string(index=False))
+    nz = df[df["day_residual"].notna() & (df["day_residual"] != 0)]
+    print("CELLS WITH NON-ZERO DAY RESIDUAL: %d of %d" % (len(nz), int(df["day_residual"].notna().sum())))
     print()
     print("=== SI LINE, per account ===")
     si = df[df["period"] == "SI"]

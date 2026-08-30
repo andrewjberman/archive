@@ -53,6 +53,35 @@ Deltas run **-0.040470 to +0.024253**. **Both signs occur** — 0022312917 and 0
 ### 4. The two inception-recent accounts return identical figures across YTD / 1Y / SI
 0027265115 (inception 2026-03-16) and 0076459710 (2026-07-08) show the **same value for YTD, 1Y and SI**. That is correct, not a bug: the account did not exist before its inception, so all three windows collapse to the same lived period. It is also why an inception-recent member was required — it is the only cohort member where SI is separable at all.
 
+## BP1-3 mechanism 1, AT THE CELL GRAIN — closing `3.0.0_SA_CVO` 85268's gap
+
+That grade was right: "residual ZERO" held at the **period** grain and was **not shown** per cell,
+where a **third term** appears. Decomposition now printed per cell:
+`bd_days_held = our_days_linked + hole-in-window + anchor-day + OUR non-OK days + residual`
+
+⛔ **MY FIRST RUN DOUBLE-COUNTED AND EVERY RESIDUAL READ -1.** I listed **2026-08-18** in the hole
+AND it was already inside `days_neutral` — its partition EXISTS with all-null returns, so it is a
+neutral day, not an absent one. **The hole is the 5 ABSENT trading days; 08-18 is a refusal.**
+Corrected; the -1 vanished across the board.
+
+| cells | residual | why |
+|---|---|---|
+| **8** (every QTD/YTD on a full-life account, + 0027265115 QTD, 0076459710 SI) | **0** | fully accounted |
+| **3** (1Y on the full-life accounts) | **+1** | **the CTO-ruled boundary day** — our linker opens 1Y a day late. **Goes to 0 when 85237's fix lands.** A predicted residual, not an anomaly |
+| 0010083855 SI | -274 | **incomparable by construction**: our SI runs from its 2025-05-28 inception (309 linked days), BD computed only the 07-01..08-28 fallback window (42). Already `SI-WINDOW-NOT-AT-ANCHOR` |
+| 0027265115 YTD/1Y (-10), 0076459710 QTD/YTD/1Y (-4) | ≠0 | **different denominators, not a missing term**: BD counts only days the account was **HELD** (116, 38); we count days in the **requested window**. Both accounts began mid-window |
+
+⭐ **THE THIRD TERM IS A VALUE-DELTA MECHANISM IN ITS OWN RIGHT, exactly as 85268 said:** on
+0027265115's SI window our chain refuses days BD computed through (`UNCOMPUTABLE-ZERO-BMV` /
+`REFUSED-NO-BMV` inside the window). **BD linked days we did not.** That is distinct from the hole,
+invisible at the period grain, and a candidate mechanism for the value difference — not only the
+count difference.
+
+⚠ **AND THE STANDING LIMIT ON ALL OF IT:** the hole and the refusals explain **DAY COUNTS, not
+VALUES**. A count mechanism becomes a value mechanism only when the missing days' returns are known.
+Until the backfill supplies them, these are **CANDIDATE** mechanisms printed as such on every cell
+they touch.
+
 ## The SI line, per account
 
 | account | BD anchor (`level.startDate`) | first return day | branch | our first linkable | outcome |
