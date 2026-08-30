@@ -90,6 +90,33 @@ def load_gold(accounts, start, end):
     return df, len(want)
 
 
+# ---------------------------------------------------------------------------
+# RULE-24 RECORD for the outcome member this harness introduces (3.0.0_SA_CVO 85960).
+# It lives HERE and NOT in parity_period_returns' declared outcome set, deliberately: the linker's
+# set is MECE over "the result of attempting ONE (account, period) cell", and this member is not
+# that -- it is the result of DIFFERENCING two nested cells, which the linker never does. Recording
+# it where it exists stops the next reader finding two vocabularies with only one declared. The
+# linker's set is NOT edited for this (that file is deploy-scope; a touch serves it), and if the
+# member ever needs to live there it joins WITH this record at the next linker touch.
+#
+#   MEMBER            VACUOUS-NO-LINKED-DAYS
+#   (i)  MECE over    the DIFFERENCED-window domain: a sub-window formed by subtracting two nested
+#                     ruled windows. Uncovered member hunted: a sub-window with linked days on one
+#                     side only cannot arise -- both sides are OUR OWN linked counts over nested
+#                     windows, so the difference is >= 0 and 0 means neither window linked a day.
+#   (ii) SAME GRAIN   one (account, differenced sub-window) row -- the same grain as the class it
+#                     replaces (EXACT / TIGHT / LARGE), never mixed with a per-cell outcome.
+#   (iii) INTENT      one axis, one intent: IS THERE A COMPARISON TO BIN. It does not encode
+#                     magnitude, direction, or mechanism -- those stay in their own fields.
+#   (iv) STATE        what ONE remedy does NOT move: loading more history does not create an
+#                     account that did not exist in the window. A backfill fixes an absence of
+#                     DATA; it cannot fix an absence of ACCOUNT. So this member is not a coverage
+#                     gap wearing another name, and no re-run promotes it to EXACT.
+# WHY IT IS AN OUTCOME AND NOT A BIN (rule (a)): with zero linked days both sides contribute
+# nothing, the difference is 0 - 0 = 0, and EXACT would report agreement for a comparison that
+# never happened -- a present, plausible, wrong CLASS one field over from the true one.
+# ---------------------------------------------------------------------------
+
 PERIOD_INDEX = {"QTD": 0, "YTD": 1, "1Y": 2, "SI": 5}
 
 
