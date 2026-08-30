@@ -1,0 +1,161 @@
+{
+  "schema_version": 3.1,
+  "subject": {
+    "id": "infra/aws/globgrph/extract_portal_stitch.py",
+    "kind": "script",
+    "declared_domain": "NFRA_GLOBGRPH P2-STITCH step-1 -- the L1/L5 portal+pipeline extractor. Reuses the existing comp-graph substrate rather than inventing extraction (trace_graph.build_graph + cache_cli's React Query key extractor), normalizes the comp-trace vocabulary to the FROZEN comp-aws/NFRA_COMPAWS schema, and emits the portal/pipeline-OWNED node classes plus the INTRA-layer edges in comp_aws_cli graph-dict shape. The cross-layer STITCH edges to the AWS layer are deliberately NOT its job -- those are step-2, derive_stitch.py, subject 1 on this face."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-30T04:35:00Z",
+    "commit_ish": "5da9e7fffc",
+    "graph_vintage": "Holds no stored vintage: it rebuilds its subgraph from the working tree on every call (trace_graph.build_graph(ws) plus a scan of portal/src). Its output's freshness is therefore the WORKING TREE's, not a pinned artifact's -- a property with no timestamp anywhere in the emitted meta."
+  },
+  "process": {
+    "methodology": {
+      "how": "build_portal_stitch_graph(ws) calls trace_graph.build_graph(ws), then emits nodes in two passes: trace nodes whose node_type is in NODE_TYPE_MAP (COMPONENT/ENDPOINT/S3_ARTIFACT/GOLD_SCRIPT -> the four PRD classes), and REACT_QUERY_KEY nodes from cache_cli, plus one synthetic PORTAL_BUNDLE root. emit() dedups on node_id via a `seen` set. Two joins are then attempted per query key -- component -[QUERIES]-> key, and key -[FETCHES]-> api_route -- each by _match_component / _match_endpoint. Finally the trace edges whose type is in EDGE_TYPE_MAP are kept ONLY when BOTH endpoints were emitted, giving 0-dangling within the subgraph by construction; edges are deduped on (source, target, edge_type).",
+      "determinism": "hybrid",
+      "inference_detail": {
+        "model": null,
+        "invocations_per_run": null,
+        "stages_inferential": [
+          "_match_component (:171-176): matches a cache_cli component STEM against emitted PORTAL_COMPONENT nodes by THREE alternative predicates -- id.endswith('#'+stem) OR name == stem OR id.endswith(stem) -- and returns the FIRST hit. The third predicate is a bare suffix match, so two components whose ids both end with the stem resolve to whichever was emitted first, with nothing recorded.",
+          "_match_endpoint (:178-182): same shape, name == fn OR id.endswith(fn), first hit wins. A wrong match here produces a QUERIES/FETCHES edge that is structurally valid and semantically wrong.",
+          "the component-identity mismatch these two exist to bridge is declared in the source: trace_graph ids components as 'file#Component' while cache_cli yields the bare stem, so the join is a suffix heuristic rather than a shared key"
+        ],
+        "stages_deterministic": [
+          "the NODE_TYPE_MAP / EDGE_TYPE_MAP vocabulary normalisation -- closed dicts, an unmapped type is skipped rather than guessed (:120-127, :131-136)",
+          "the both-endpoints-emitted edge filter, which makes intra-subgraph 0-dangling structural rather than checked (:144-150)",
+          "node dedup on the `seen` set and edge dedup on (source, target, edge_type)"
+        ],
+        "failure_is_loud": false
+      },
+      "materializer_standing": "canonical",
+      "composes": [
+        {
+          "id": "org/modules/graph/trace_graph.py",
+          "note": "build_graph(ws) -- the comp-trace full-stack model, the source of every non-REACT_QUERY_KEY node and every intra-layer edge"
+        },
+        {
+          "id": "org/modules/graph/cache_cli.py",
+          "note": "extract(portal_src) -> (entries, unparseable, total). Reached through a local shim: cache_cli's TOOL-5 rebuild @9fd68ccba retired the old _extract_cache_keys(ws) API and BROKE this extractor (ImportError, found 2026-07-23 on the mdpf stitch-refresh); the adapter at :54-68 restores the old shape"
+        },
+        {
+          "id": "portal/src",
+          "note": "scanned directly by cache_cli for React Query keys -- the only filesystem input outside the trace graph"
+        },
+        {
+          "id": "infra/aws/globgrph/derive_stitch.py",
+          "note": "the step-2 consumer that imports this module and calls build_portal_stitch_graph in-process; subject 1 on this face"
+        }
+      ],
+      "invents": [
+        {
+          "id": "QUERIES / FETCHES edges from suffix matching",
+          "note": "both rest on _match_component / _match_endpoint returning the FIRST predicate hit; a wrong match yields a plausible, structurally valid edge and nothing distinguishes it from a correct one"
+        },
+        {
+          "id": "the synthetic PORTAL_BUNDLE root node",
+          "note": "emitted unconditionally as id 'portal' (:114); it corresponds to no extracted artifact and is declared as synthetic in the source"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "Read in full at infra/aws/globgrph/extract_portal_stitch.py:1-224 @5da9e7fffc. Shim :54-68; NODE_TYPE_MAP :71-76; EDGE_TYPE_MAP :79-84; CLASS_LAYER :87-94; emit + dedup :103-118; cache-key pass and the two joins :127-140; edge filter :144-150; edge dedup :152-155; _match_component :171-176; _match_endpoint :178-182.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "cadence": {
+      "declared_rhythm": "NONE -- a library plus a CLI, declaring only manual usage in its docstring (:30-33). It has no schedule of its own.",
+      "actual_trigger": "Two paths. (a) IN-PROCESS on every derive_stitch.py run -- imported and called directly, which puts it on the stitch producer's clock (the 03:00Z nightly CodeBuild leg, plus the push-triggered path). (b) Directly from the CLI with --out or --selftest. It therefore inherits card 1's cadence finding entirely: the nightly leg that would exercise it has failed 20 of 20 fires since 2026-08-10, while a push-triggered path keeps the stitch artifact fresh.",
+      "live_matches_declared": "yes",
+      "live_instance_age": "NOT APPLICABLE in the normal path -- this module's product is an in-memory dict, not a stored artifact, so there is no instance to age. Its output reaches disk only inside derive_stitch's stitch_graph.json (measured 2026-08-30T02:38:14Z on card 1) or when a caller passes --out.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "Usage block :30-33; main() with an optional --out and no scheduler :200-223. The in-process call is at derive_stitch.py:91 (portal.build_portal_stitch_graph(ws)), and the import alias at derive_stitch.py:49. The nightly-leg measurements are card 1's, re-cited rather than re-derived: EventBridge opal-stitch-produce-nightly ENABLED, CodeBuild 20 of 20 recent builds FAILED 2026-08-10..08-29.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": false,
+      "authority_role": "source",
+      "mutation_policy": "not_applicable",
+      "form": "An in-memory dict {classes_data, edges, meta} in comp_aws_cli shape, RETURNED to the caller. It is persisted only when a CLI caller passes --out, which writes json.dumps(indent=2) to that path; the default CLI run prints a summary and writes nothing, and the in-process path (derive_stitch) never writes at all. 'persisted: false' is the normal-path answer and the --out exception is stated rather than averaged away.",
+      "basis": "measured",
+      "evidence": "Return at :156-165; the --out write is conditional at :219-221 and its argparse default is None (:202); derive_stitch.py:91 consumes the return value directly. 'source' rather than 'projection': the vocabulary normalisation and the two synthesised join edges exist only here -- no upstream carries a PORTAL_COMPONENT class or a QUERIES edge, so this is where those facts are created.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "location": {
+      "home": "No home in the normal path -- the product is a return value. With --out, whatever path the caller names; in practice its content reaches disk only as part of derive_stitch's s3://opal-313476888478-globgrph/stitch/stitch_graph.json.",
+      "projection_of": [
+        {
+          "id": "org/modules/graph/trace_graph.py",
+          "note": "the comp-trace model rebuilt from the working tree on every call"
+        },
+        {
+          "id": "portal/src",
+          "note": "scanned by cache_cli for React Query keys"
+        }
+      ],
+      "co_resident_stores": null,
+      "basis": "measured",
+      "evidence": "argparse --out default None :202; conditional write :219-221; in-process consumption at derive_stitch.py:91. co_resident_stores is null rather than an empty list because in the normal path there is no store to be co-resident WITH -- an empty array would assert 'a home with no neighbours', which is a different and false claim.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every trace_graph node whose node_type is one of the four in NODE_TYPE_MAP, every React Query key cache_cli can parse out of portal/src, one synthetic root, and every trace edge whose type is in EDGE_TYPE_MAP and whose BOTH endpoints were emitted.",
+      "denominator": "⛔ ABSENT WHERE IT MATTERS MOST, AND IT IS ABSENT BY DISCARD RATHER THAN BY OMISSION. cache_cli.extract returns a THREE-tuple -- (entries, unparseable, total) -- and the shim at :67 destructures it as `entries, _unparseable, _total` and RETURNS ONLY entries. The upstream tool computes exactly the denominator a consumer needs (how many keys existed, how many could not be parsed) and this adapter throws both away, so the emitted REACT_QUERY_KEY count is a numerator with no denominator anywhere downstream. _summarize prints per-class node counts and per-verb edge counts, which describe what WAS emitted and can say nothing about what was not.",
+      "explicitly_out": [
+        "comp-trace LAMBDA / EVENTBRIDGE / CLOUDFRONT / UNKNOWN node types -- deliberately not re-emitted here because they are canonical in the ARN-keyed AWS layer; declared in the source and correct",
+        "cross-layer edges to LAMBDA / S3_BUCKET -- deferred to step-2 by design",
+        "trace edges whose type is not in EDGE_TYPE_MAP, and edges with an endpoint outside the emitted set -- both skipped with NO counter, so the intra-subgraph 0-dangling property is achieved partly by dropping edges silently rather than only by scope",
+        "React Query keys cache_cli could not parse -- counted by cache_cli, discarded by the shim (see denominator)",
+        "a duplicate node_id -- emit() returns early on a `seen` hit with no counter, so a genuine identity collision between two sources is indistinguishable from a single node",
+        "a query key whose component or endpoint does not match -- _match_component / _match_endpoint return None and the edge is simply not appended, with no counter"
+      ],
+      "basis": "measured",
+      "evidence": "The discard is at :67 (`entries, _unparseable, _total = _cache_extract(...)`) with only entries used at :68. emit's silent early return :104-106. The unmapped-type skips at :123-124 and :146-147. The unmatched-join skips at :134-140. _summarize :186-199 prints only emitted counts. ⛔ THE CONTRAST WITHIN THIS FACE IS THE POINT: kuzu_nessie_load.py (subject 2) counts key_collisions and skipped_missing_endpoint and prints both; derive_stitch.py (subject 1) counts lam_unmatched and carries the unmatched set. This module counts NOTHING it drops, and it is the only one of the three that had its denominator handed to it by its own upstream and discarded it.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "Node ids are inherited from trace_graph verbatim for the four mapped classes, so this module does not mint identity for them -- it re-labels their CLASS. It mints exactly two id forms of its own: the synthetic root and the React Query key ids. Edge endpoints are those same ids, and the both-endpoints-in-`seen` filter makes an edge expressible only within the emitted id space.",
+      "key_expression": "TRACE-DERIVED NODES: key = n.id verbatim from trace_graph.build_graph(ws) (:122-125) -- unchanged, unnormalised, no fallback. SYNTHETIC ROOT: the literal string 'portal' (:114). REACT QUERY KEYS: key = 'rqk:' + ce.query_key, where ce.query_key is cache_cli's verbatim key_str (:129, shim :62). DEDUP: emit() admits a node only if key not in `seen` (:104-106), first writer wins. EDGE KEY: the 3-tuple (source, target, edge_type) (:152-155), last writer wins -- note this is the OPPOSITE precedence to the node dedup in the same function, and neither is recorded on the output.",
+      "key_is_stable": "unstable",
+      "crosses_spaces": true,
+      "declared_mapping": "The class vocabulary mapping is declared twice -- as a table in the module docstring (:19-27) and as the NODE_TYPE_MAP / EDGE_TYPE_MAP dicts (:71-84) -- and the two agree. What is NOT declared is the JOIN: that a QUERIES or FETCHES edge is produced by suffix matching between two different id conventions, and that the first match wins. The docstring presents '(+ REACT_QUERY_KEY from cache_cli)' and '(cache) -> QUERIES' as if the join were given rather than inferred.",
+      "basis": "measured",
+      "evidence": "Node id passthrough :125; synthetic root :114; rqk id :129; shim key_str mapping :62; emit dedup :104-106; edge dedup :152-155; the two matchers :171-182. Rated UNSTABLE because the module joins TWO id conventions with a suffix heuristic: trace_graph's 'file#Component' against cache_cli's bare stem, resolved by id.endswith(stem) among others. A stem that is a suffix of more than one component id has no defined winner beyond emission order, and emission order is trace_graph's dict order -- so the same input can in principle yield a different join without any input changing.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "failure_mode": {
+      "returns_on_failure": "LOUD BY ABSENCE OF HANDLING, WHICH IS THE HONEST DESIGN HERE. A source-wide census found ZERO exception handlers in this module -- no try, no except, no raise, no finally anywhere in its 224 lines -- so a missing portal/src, an unimportable cache_cli, or a trace_graph failure PROPAGATES and kills the run rather than degrading it. That is materially safer than the collapse-to-None pattern carded on subjects 3 and 4, and it is a deliberate contrast worth stating: this module cannot report an asserted cause because it never converts an exception into a value. It also ships a real control: --selftest asserts zero intra-subgraph dangling edges AND a non-empty PORTAL_COMPONENT class, so an empty extraction fails loudly rather than emitting an empty-but-valid graph. ⛔ THE FAILURES IT DOES HAVE ARE ALL SILENT DROPS, NOT SILENT ERRORS: an unmatched component or endpoint simply produces no edge; an unmapped node or edge type is skipped; a duplicate id is discarded; and cache_cli's unparseable count is thrown away by the shim. None of these raises, none is counted, and each leaves an output that is structurally valid and quietly smaller than the truth.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "the shim (:67) discards cache_cli's `unparseable` and `total`, so a portal/src change that makes half the query keys unparseable produces a smaller REACT_QUERY_KEY set. The COUNT does change and _summarize prints it, so this is not invisible -- what is missing is anything that marks the smaller number as a SHORTFALL: with the denominator discarded, 'the portal genuinely has fewer query keys' and 'half of them stopped parsing' render as the same integer. The upstream computed the discriminator and the adapter dropped it",
+        "_match_component / _match_endpoint returning None (:174-176, :181-182) skips the QUERIES / FETCHES edge with no counter, so 'this component has no query key' and 'the suffix heuristic failed' are the same observable",
+        "a FIRST-hit suffix match that is WRONG (:174, id.endswith(stem)) produces a structurally valid edge to the wrong node; nothing distinguishes it from a correct join",
+        "emit()'s `seen` early return (:104-106) drops a duplicate node_id with no counter, unlike kuzu_nessie_load which counts key_collisions for the same situation",
+        "the both-endpoints filter (:148-149) drops an edge whose endpoint was not emitted, with no counter -- so the advertised intra-subgraph 0-dangling property is partly achieved BY the silent dropping rather than only by scoping"
+      ],
+      "basis": "measured",
+      "evidence": "HANDLER CENSUS run at draft time, not after a finding: zero except-handlers in this module, POSITIVE-CONTROLLED by running the same instrument against _provenance.py, where it correctly returned its 16 handlers and its three early-return guards including the two already carded (read_manifest :77, read_branch_head_marker :131). Independently cross-checked with a raw token grep for try|except|raise|finally over the subject: 0 matches. --selftest assertions at :212-217. Every silent-drop site read at the lines cited.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "The design is disciplined in the ways this face keeps rewarding: it reuses the existing comp-graph substrate instead of inventing extraction, normalises to a FROZEN schema through closed dicts so an unmapped type is skipped rather than guessed, makes intra-subgraph 0-dangling structural via a both-endpoints filter, declares its class vocabulary twice in agreeing forms, ships a --selftest that fails on an empty PORTAL_COMPONENT class, and -- uniquely among the five subjects carded so far -- has ZERO exception handlers, so it cannot convert an instrument failure into a value the way subjects 3 and 4 do. QUALIFIED on two measured defects, both about what it does not count. FIRST AND WORST: the shim at :67 destructures cache_cli's (entries, unparseable, total) and keeps only entries. Its own upstream computes the exact denominator a consumer needs and this adapter discards it, so the emitted REACT_QUERY_KEY population is a numerator that cannot be checked -- and the contrast is internal to this face, because kuzu_nessie_load counts key_collisions and skipped_missing_endpoint, and derive_stitch counts and carries lam_unmatched. This is the only subject that was HANDED its denominator and threw it away. SECOND: the QUERIES and FETCHES edges rest on suffix matching between two different id conventions (trace_graph 'file#Component' vs cache_cli's bare stem), first hit wins, and a wrong match produces a structurally valid edge indistinguishable from a correct one -- while the docstring presents the join as given rather than inferred. Neither defect needs redesign: the first is a two-line change to carry and print two integers the upstream already returns.",
+    "blocking_defects": [
+      "the cache_cli shim (:67) discards `unparseable` and `total`, destroying a denominator its own upstream computed -- the REACT_QUERY_KEY count is unauditable downstream and a parse regression in portal/src would be silent (coverage row)",
+      "QUERIES / FETCHES edges are produced by first-hit suffix matching across two id conventions (_match_component :171-176, _match_endpoint :178-182); a wrong match is structurally valid and unmarked, and the docstring presents the join as given rather than inferred (key + methodology.invents rows)",
+      "every drop in this module is uncounted -- unmatched joins, unmapped types, duplicate ids, and endpoint-filtered edges -- so the output can be smaller than the truth with nothing marking it as a shortfall. The emitted totals ARE printed by _summarize; what no instrument carries is the denominator those totals should be read against, in a face where two sibling subjects count exactly these things (coverage + failure_mode rows)",
+      "it inherits card 1's cadence finding in full: the nightly leg that exercises it has failed 20 of 20 fires since 2026-08-10 while a push-triggered path keeps the artifact fresh (cadence row; owner 0.7.0_AE_CloudOps base, already OWNED/INERT at 84713)"
+    ]
+  },
+  "carded_by": "0.7.0_AE_CloudOps~K"
+}
