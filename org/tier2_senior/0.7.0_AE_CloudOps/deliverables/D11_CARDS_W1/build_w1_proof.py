@@ -124,6 +124,28 @@ def run_controls(proof, crits, owned):
     return arms
 
 
+def refuse_coverage_contradiction(doc):
+    """An artifact named in an EXCLUSION as unscored may not also claim artifact_covered_by.
+
+    The exclusion and the coverage field are two carriers of ONE proposition, and nothing in the
+    schema or in proof-of-spec-check compares them -- the checker's A_03 arm is satisfied by
+    EITHER, so a row carrying both passes every automated gate while asserting a thing and its
+    negation. It walks the EMITTED structure rather than the source because the defect it exists
+    to catch was introduced by a blanket edit to the loop that builds these rows: correct line
+    by line, false in the document."""
+    excluded = [ex["item"] for ex in doc["declared_exclusions"]
+                if "EXCLUDED FROM ACCEPTANCE SCORING" in ex["item"]]
+    for a in doc["artifacts_produced"]:
+        base = a["path_or_key"].rsplit("/", 1)[-1]
+        named = [e for e in excluded if base in e]
+        if named and a.get("artifact_covered_by"):
+            raise ValueError(
+                "COVERAGE CONTRADICTION on %s: artifact_covered_by=%s while an exclusion says "
+                "no criterion scores it. Remove one; they cannot both be true"
+                % (a["path_or_key"], a["artifact_covered_by"]))
+    return len(excluded)
+
+
 EV = {
   "W1-COX-AC1": (
     "command",
@@ -179,15 +201,24 @@ def build(crits, ddoc, dvintage):
                                             "class close over 3+3+2, never at a single face. A "
                                             "row claiming 8/8 here is FORM_DEFECT."})
 
+    # PER-ROW, and the field is OMITTED where no criterion scores the artifact. A blanket
+    # append inside this loop is what put artifact_covered_by on build_w1_proof.py while the
+    # exclusion below said no AC scores it -- 3.0.0_SA_CVO~X STOPped @697a0134b4 on exactly that
+    # contradiction. AC2's invocation names build_w1_cards.py, so AC2 covers the card builder;
+    # AC4 scores the CARDS validating, not the builder, so the builder does not carry AC4.
     arts = []
-    for name, kind in (("build_w1_cards.py", "script"), ("C3i.v3.1.json", "config_data"),
-                       ("comp_similar.v3.1.json", "config_data"),
-                       ("build_w1_proof.py", "script")):
-        arts.append({"path_or_key": D + name, "kind": kind,
-                     "commit_or_etag": artifact_identity(D + name),
-                     "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-                     "deploy_evidence": "repo artifact; this face deploys nothing",
-                     "artifact_covered_by": ["W1-COX-AC2", "W1-COX-AC4"]})
+    for name, kind, covered in (
+            ("build_w1_cards.py", "script", ["W1-COX-AC2"]),
+            ("C3i.v3.1.json", "config_data", ["W1-COX-AC2", "W1-COX-AC4"]),
+            ("comp_similar.v3.1.json", "config_data", ["W1-COX-AC2", "W1-COX-AC4"]),
+            ("build_w1_proof.py", "script", [])):
+        row = {"path_or_key": D + name, "kind": kind,
+               "commit_or_etag": artifact_identity(D + name),
+               "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+               "deploy_evidence": "repo artifact; this face deploys nothing"}
+        if covered:
+            row["artifact_covered_by"] = covered
+        arts.append(row)
     arts.append({"path_or_key": PROOF, "kind": "config_data",
                  "commit_or_etag": artifact_identity(PROOF),
                  "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
@@ -300,6 +331,17 @@ def main():
                         "c8e1f228783 where this seat had only faked a digest.",
             "status": "STABLE"}}
 
+    refuse_coverage_contradiction(proof)                       # BASELINE: must pass
+    bad = copy.deepcopy(proof)
+    for r in bad["artifacts_produced"]:
+        if r["path_or_key"].endswith("build_w1_proof.py"):
+            r["artifact_covered_by"] = ["W1-COX-AC2", "W1-COX-AC4"]    # the STOPped @697a shape
+    try:
+        refuse_coverage_contradiction(bad)
+        guard_arm = "[XX] UNSOUND -- guard did NOT refuse the shape CVO STOPped"
+    except ValueError as e:
+        guard_arm = "[ok] REFUSED: %s" % e
+
     with open(PROOF, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(proof, fh, indent=1)
 
@@ -308,6 +350,9 @@ def main():
     print("owned_cells: %s" % " ".join(owned))
     for a in proof["artifacts_produced"]:
         print("  %-13s %s" % (a["commit_or_etag"][:13], a["path_or_key"]))
+    print("COVERAGE-CONTRADICTION GUARD:")
+    print("  [ok] BASELINE emitted document passed")
+    print("  %s" % guard_arm)
     print("CONTROLS (baseline first):")
     for n, v, w, ok in arms:
         print("  [%s] %-9s %s" % ("ok" if ok else "XX", v, n))
