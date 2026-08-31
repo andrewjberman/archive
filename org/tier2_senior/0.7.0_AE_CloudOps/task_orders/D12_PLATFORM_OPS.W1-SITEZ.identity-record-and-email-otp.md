@@ -189,8 +189,13 @@ and the folder observed.
 
 ## 9. ⛔ YOU ARE BARRED FROM TEN BASE-ADDRESSED TASK ORDERS — MEASURED AT SEATING
 
+⚠ **CORRECTED 2026-08-31 ~23:4xZ:** this section first said *"six projects"* while the table below
+listed **five**. The TABLE was right; the prose count was eyeballed rather than computed, in the same
+breath as an instruction to read rows and not counts. Re-derived: **10 TOs, 5 projects.** Caught by
+`0.0.0_AB_MSTR` (laptop) re-deriving instead of relaying.
+
 **Your lane `~Z` is clean: this TO is the only one addressed to it.** But `0.7.0_AE_CloudOps` — the
-**bare base**, no lane suffix — holds **10 open TOs across 6 projects**, measured at seating time with
+**bare base**, no lane suffix — holds **10 open TOs across 5 projects** — **ALL TEN issued by `2.0.0_SA_COO` (the LAPTOP base COO), none by `~Z`** — measured at seating time with
 `to-check.py --all --assignee`:
 
 | | |
@@ -212,8 +217,8 @@ to halt and investigate it.
 
 ⚠ **THESE ARE NOT STALE-FACE ARTEFACTS AND I AM NOT ASSERTING THEY ARE DONE.** I measured that they are
 OPEN and base-addressed; **I did not measure whether their work is finished** — an `[ACTIVE]` face over
-completed work and a genuinely open TO render identically, and several of these are other devices' and
-other issuers' work. Their disposition is not this lane's and not this TO's.
+completed work and a genuinely open TO render identically, and **all ten belong to `2.0.0_SA_COO` on the OTHER DEVICE.**
+Their disposition is that seat's as issuer — not this lane's, not this TO's, and not this fabric's.
 
 ## 8. REPORTING
 
