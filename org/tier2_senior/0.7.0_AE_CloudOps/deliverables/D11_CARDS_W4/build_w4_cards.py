@@ -2169,10 +2169,22 @@ def _keycount_shapes(prefix):
                                % (args[-4:], str(e)[:150]))
         return "KeyCount" in body
 
-    wm_proj = probe(*(base + ["--max-keys", "1", "--query", "KeyCount", "--output", "text"]))
-    nm_proj = probe(*(base + ["--query", "KeyCount", "--output", "text"]))
-    return {"with_maxkeys_projection": wm_proj[1],
-            "no_maxkeys_projection": nm_proj[1],
+    def _proj(args):
+        """The PROJECTION half, rc-gated. probe() returns (rc, first line) and NEVER raises,
+        and the earlier version returned only [1] -- discarding BOTH projection return codes
+        while the card claimed the probe refuses on command failure. THE CLAIM WAS WIDER THAN
+        THE IMPLEMENTATION: only the full-response half failed closed. Caught by
+        3.0.0_SA_CVO~X on the successor that introduced the asymmetry."""
+        rc, out = probe(*args)
+        if rc != 0:
+            raise RuntimeError("keycount PROJECTION failed rc=%d args=%r out=%s"
+                               % (rc, args[-4:], out[:200]))
+        return out
+
+    wm_proj = _proj(base + ["--max-keys", "1", "--query", "KeyCount", "--output", "text"])
+    nm_proj = _proj(base + ["--query", "KeyCount", "--output", "text"])
+    return {"with_maxkeys_projection": wm_proj,
+            "no_maxkeys_projection": nm_proj,
             "with_maxkeys_full_has_keycount": _has_keycount(base + ["--max-keys", "1"]),
             "no_maxkeys_full_has_keycount": _has_keycount(base)}
 
@@ -2311,7 +2323,7 @@ def card_ms_heat_snap():
                 "basis": "absent",
                 "basis_by_field": {
                     "declared_rhythm": "absent",
-                    "actual_trigger": "measured",
+                    "actual_trigger": "absent",
                     "live_instance_age": "measured",
                     "live_matches_declared": "absent",
                 },
@@ -2339,8 +2351,14 @@ def card_ms_heat_snap():
                     "this card called it a per-snapshot_date rhythm and scored "
                     "live_matches_declared against that; the cited writer cannot carry the "
                     "claim, so declared_rhythm floors to `absent` and the row floors with it. "
-                    "`actual_trigger` is MEASURED AS NAME-TOKEN ABSENCE and the card will not "
-                    "say more than that. Both cloud planes auto-paginated and counted "
+                    "\u26d4 `actual_trigger` FLOORS TO `absent`, NOT `measured`: the name census "
+                    "below is EVIDENCE, not the field's value. What was measured is "
+                    "NAME-TOKEN ABSENCE; the trigger itself is UNRESOLVED, and a field whose "
+                    "value is unresolved cannot carry basis `measured` however carefully its "
+                    "prose is scoped. An earlier successor scoped the SENTENCE and left the "
+                    "STRUCTURED BASIS asserting measurement of something this seat did not "
+                    "measure -- this face's prose/structure split, inverted. Both cloud planes "
+                    "auto-paginated and counted "
                     "CLIENT-SIDE with denominators printed: EventBridge rules %d enumerated "
                     "(truncated=%s), 0 whose NAME contains ms_heat, positive control %d "
                     "naming globgrph so the sweep can find names; Scheduler schedules %d "
