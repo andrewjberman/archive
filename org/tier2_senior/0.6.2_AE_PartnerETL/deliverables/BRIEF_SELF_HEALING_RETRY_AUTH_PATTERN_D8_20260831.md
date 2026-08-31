@@ -160,3 +160,41 @@ the existing one.
 `0.0.0_AB_MSTR` was refused there earlier today for exactly this reason. **This brief is therefore
 written into my own deliverables lane; moving it to `docs/architecture/` is `1.0.0_SA_CTO`'s one
 commit, not mine.** Flagged rather than worked around.
+
+---
+
+# AMENDMENT 1 (2026-08-31 ~22:4xZ) — n=2 is CONFIRMED. §3's hedge was correct but aimed at the WRONG FUNCTION, and the corrected read STRENGTHENS the case
+
+⭐ **§3 said the project's justification "does not rest on the 49f incident" because `bd-49f-runner`
+showed Errors = 0.0. That check was sound and it had the WRONG SUBJECT.** `2.0.0_SA_COO` (90087)
+named the actual function: the 49f **reporting-pull** (`opal-assets-bd49f-reporting-pull`), a
+different lambda entirely. I measured the correct one:
+
+```
+opal-assets-bd49f-reporting-pull   2026-08-30 18:0xZ
+  RuntimeError: BD GET /session/token -> HTTP 401
+  lambda_function.py:147 get_clientview_token <- run(...)
+
+cot-rebalancer-runner              2026-08-31 06:00:41 / 06:01:35 / 06:03:26Z
+  RuntimeError: rebalancer /auth/token 200 but no access_token
+  lambda_function.py:151 mint_rebalancer_bearer <- :163 Puller.__init__
+```
+
+>> **n=2 IS REAL AND I CORROBORATE IT AT MY OWN SEAT: TWO FIRMS, TWO FUNCTIONS, TWO DIFFERENT BD APPS
+   (ClientView vs Rebalancer), BOTH COOKIE-RIDERS, BOTH DEAD AT THE AUTH STEP.** The failure is not
+   even the same shape — one is an HTTP 401 on the token GET, the other a 200 carrying no token — and
+   that is the point: **the pattern is the AUTH DEPENDENCY, not any single error signature.** <<
+
+**PRECISIONS, so this is not over-read in the other direction:**
+- **NOT "two failures in one day."** 08-30 and 08-31, one each. My original phrasing declined a claim
+  nobody had made; the real claim is two instances in two days across two firms.
+- **TTL/session-age is still UNMEASURED for the 49f side.** `2.0.0_SA_COO`'s "~18h into the session"
+  remains a hypothesis; I measured the FAILURE, not its session age. n=2 for *auth-step failure*, not
+  yet n=2 for *absolute-lifetime expiry*. **Do not let this amendment promote the mechanism claim.**
+- My §3 hedge is **superseded, not retracted as wrong** — it was accurate about `bd-49f-runner` and
+  correctly labelled its own limit. The lesson banked is narrower: *when a peer reports a failure,
+  ask WHICH function rather than inferring one from a sibling docstring.*
+
+**CONSEQUENCE FOR THE PROJECT:** §3's argument no longer rests on shared architecture alone. It now
+rests on shared architecture **plus two measured instances on different firms within 36 hours** —
+which is the difference between "this could generalize" and "this has already generalized."
