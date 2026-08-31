@@ -362,12 +362,28 @@ def build():
                 "distinguishable_from_true_negative": dtn_basis,
                 "silent_degrade_paths": "measured",
             },
+            # Addendum 1w conservation: this sentence is a THIRD CARRIER of the same claim as
+            # basis_by_field and the row scalar. It enumerated 2 of 3 parts and was SILENT on
+            # distinguishable_from_true_negative -- the one part the RULE 3 repair moves. Left
+            # unmoved it would have shipped a card whose basis floors to `absent` with no stated
+            # reason. Derived from dtn_basis so the three carriers cannot drift apart.
             "evidence": (
                 "silent_degrade_paths MEASURED: mtime and tracked state both read this session. "
                 "returns_on_failure is INFERRED -- I did NOT delete the artifact to observe a "
                 "consumer's error, and I will not: the standing rule is qualify-do-not-fix and "
                 "deleting a live artifact to characterise its absence would be the opposite. "
-                "The row scalar is therefore the floor over its parts."
+                + (
+                    "distinguishable_from_true_negative is MEASURED: it is read off the guard "
+                    "structure and the tracked state, both read this session. "
+                    if dtn_basis == "measured"
+                    else "distinguishable_from_true_negative is ABSENT, not measured: its VALUE "
+                    "is the null token, and a basis describes how a value was obtained -- 'this "
+                    "was not measured' cannot have been obtained by measuring (RULE 3 / Addendum "
+                    "1v). No probe was run to tell this artifact's failure from a true negative, "
+                    "and the field says so rather than claiming a measurement it does not have. "
+                )
+                + "The row scalar is therefore the floor over its parts, COMPUTED rather than "
+                "typed."
             ),
             "owner": part.get("owner") or "UNOWNED",
         }
