@@ -58,9 +58,17 @@ Q_END = "2026-08-28"
 FEED = "performance"
 
 # 148 was the relayed sizing for the 300 s timeout at 1.40 s/call (207 s, 31 pct margin). 120 is
-# used instead because it tolerates 2.5 s/call and COSTS NOTHING: the vendor bill is one call per
-# ACCOUNT regardless of how the accounts are grouped, so a smaller chunk buys latency headroom at
-# zero budget. Chunk size never changes the call count -- only the blast radius of one timeout.
+# used instead because it tolerates 2.5 s/call.
+#
+# ⛔ CORRECTED by 2.0.0_SA_COO 90067 -- THIS COMMENT SAID "COSTS NOTHING" AND THAT CONTRADICTED THE
+# ACCOUNTING IN THIS SAME FILE. run() mints a token PER INVOCATION, so the invocation count IS a
+# vendor cost, and the chunk size is precisely what moves it:
+#     chunk 148 -> ceil(5309/148) = 36 invocations -> 36 auth calls
+#     chunk 120 -> ceil(5309/120) = 45 invocations -> 45 auth calls   (+9)
+# The DATA leg is one call per account either way; only the AUTH leg moves. 120 is kept because 9
+# calls against ~5,354 is noise and the timeout headroom is worth more -- but the cost is +9, NOT
+# zero, and it must not be reported as zero. The seat that wrote "zero" is the same seat that had
+# just discovered the auth leg one paragraph earlier.
 CHUNK = 120
 
 _s3 = boto3.client("s3")
