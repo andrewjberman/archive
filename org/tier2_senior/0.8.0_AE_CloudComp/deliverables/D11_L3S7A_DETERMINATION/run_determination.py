@@ -171,6 +171,7 @@ def measure() -> dict:
         "symbols_reachable_from_a_module": len(reachable),
         "firm_declared_keys": firm_keys,
         "attr_key_vocabulary": sorted(attr_keys),
+        "edge_attr_key_vocabulary": sorted(edge_attr_keys),
         "firm_partner_modules": sum(partner.values()),
         "firm_partner_by_token": dict(partner),
         "store_owner": STORE_OWNER,
@@ -401,14 +402,36 @@ def build_cells(m: dict) -> list:
                 "decisive": True,
                 "measurement": {
                     "declared_firm_keys": m["firm_declared_keys"],
-                    "attr_key_vocabulary": m["attr_key_vocabulary"],
-                    "vocabulary_size": len(m["attr_key_vocabulary"]),
+                    "node_attr_key_vocabulary": {
+                        "keys": m["attr_key_vocabulary"],
+                        "distinct_keys": len(m["attr_key_vocabulary"]),
+                        "denominator": "%d nodes censused" % m["nodes"],
+                    },
+                    "edge_attr_key_vocabulary": {
+                        "keys": m["edge_attr_key_vocabulary"],
+                        "distinct_keys": len(m["edge_attr_key_vocabulary"]),
+                        "denominator": "%d edges censused" % m["edges"],
+                    },
                     "reading": (
                         "There is NO firm/tenant/client key anywhere in the carrier's attribute "
-                        "vocabulary -- %d distinct node attr keys censused across %d nodes, plus "
-                        "every edge attr key, and ZERO of them name a firm."
+                        "vocabulary. BOTH halves are ENUMERATED above, not asserted: %d distinct "
+                        "node attr keys over %d nodes, and %d distinct edge attr keys over %d "
+                        "edges. ZERO of the %d keys name a firm, a tenant or a client."
                     )
-                    % (len(m["attr_key_vocabulary"]), m["nodes"]),
+                    % (
+                        len(m["attr_key_vocabulary"]),
+                        m["nodes"],
+                        len(m["edge_attr_key_vocabulary"]),
+                        m["edges"],
+                        len(m["attr_key_vocabulary"]) + len(m["edge_attr_key_vocabulary"]),
+                    ),
+                    "checkable_end_to_end": (
+                        "Both vocabularies are listed with their own denominators so a reader can "
+                        "verify the WHOLE deciding measurement rather than half of it. Enumerating "
+                        "the edge half closes 1.0.0_SA_CTO~X's design-read finding at 89595; the "
+                        "verdict is unmoved, since the node vocabulary alone was already "
+                        "sufficient for NOT MET."
+                    ),
                 },
                 "fails_earlier_than_the_bar_contemplates": (
                     "The 75005 bar refuses a firm attribute PRESENT ON BOTH ENDPOINTS as 'two "
@@ -498,13 +521,18 @@ def build_cells(m: dict) -> list:
                 "which_condition_failed": failed,
                 "by_what_measurement": (
                     "7a condition 3. No firm/tenant/client key exists anywhere in the carrier's "
-                    "attribute vocabulary (%d node attr keys over %d nodes, plus every edge attr "
-                    "key: ZERO name a firm). The only firm signal is a _partners/<firm>/ path "
-                    "substring reaching %s of Module nodes, which L1 7a:348-350 refuses as a parse."
+                    "attribute vocabulary, BOTH halves enumerated on L3S7A-bcon-5 rather than "
+                    "asserted: %d node attr keys over %d nodes and %d edge attr keys over %d "
+                    "edges, ZERO of the %d naming a firm. The only firm signal is a "
+                    "_partners/<firm>/ path substring reaching %s of Module nodes, which L1 "
+                    "7a:348-350 refuses as a parse."
                 )
                 % (
                     len(m["attr_key_vocabulary"]),
                     m["nodes"],
+                    len(m["edge_attr_key_vocabulary"]),
+                    m["edges"],
+                    len(m["attr_key_vocabulary"]) + len(m["edge_attr_key_vocabulary"]),
                     pct(m["firm_partner_modules"], m["modules"]),
                 ),
                 "owner": m["store_owner"],
