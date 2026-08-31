@@ -2141,28 +2141,54 @@ def _keycount_shapes(prefix):
     """
     base = ["s3api", "list-objects-v2", "--bucket", BUCKET, "--prefix", prefix]
 
-    def _raw(args):
-        """FULL stdout. probe() returns only the FIRST LINE, which for a JSON response is
-        `{` -- so testing `"KeyCount" in probe(...)[1]` is False for BOTH shapes and cannot
-        discriminate. Caught in this builder before presentation: the emitted card said the
-        --max-keys full response did NOT carry KeyCount, contradicting a hand measurement.
-        A probe whose output shape cannot carry the thing under test always answers no."""
+    def _has_keycount(args):
+        """Does the FULL response carry a KeyCount field? RAISES on any command failure.
+
+        TWO defects have now been fixed in this one probe, and the second was introduced by
+        the repair for the first:
+          v1 tested `"KeyCount" in probe(...)[1]` -- probe() returns only the FIRST LINE,
+             which for a JSON response is `{`, so it answered False for BOTH shapes and
+             destroyed the contrast the paragraph exists to draw.
+          v2 captured full stdout but DISCARDED rc and stderr. A FAILED call returns empty
+             stdout, and `"KeyCount" in ""` is False -- THE SAME False used to prove the
+             field is omitted. Command failure and the finding were indistinguishable.
+             Caught by 3.0.0_SA_CVO~X, who named it as the exact executed-but-false class
+             the v1 repair had itself described.
+        So this version parses JSON only after rc=0 and REFUSES rather than returning a
+        value it cannot stand behind. A probe that answers when it failed is worse than one
+        that raises, because the answer is indistinguishable from a measurement.
+        """
         r = subprocess.run([AWS] + args, capture_output=True, text=True)
-        return r.stdout or ""
+        if r.returncode != 0:
+            raise RuntimeError("keycount probe FAILED rc=%d args=%r stderr=%s"
+                               % (r.returncode, args[-4:], (r.stderr or "").strip()[:200]))
+        try:
+            body = json.loads(r.stdout)
+        except Exception as e:
+            raise RuntimeError("keycount probe UNPARSEABLE rc=0 args=%r err=%s"
+                               % (args[-4:], str(e)[:150]))
+        return "KeyCount" in body
 
     wm_proj = probe(*(base + ["--max-keys", "1", "--query", "KeyCount", "--output", "text"]))
     nm_proj = probe(*(base + ["--query", "KeyCount", "--output", "text"]))
     return {"with_maxkeys_projection": wm_proj[1],
             "no_maxkeys_projection": nm_proj[1],
-            "with_maxkeys_full_has_keycount": '"KeyCount"' in _raw(base + ["--max-keys", "1"]),
-            "no_maxkeys_full_has_keycount": '"KeyCount"' in _raw(base)}
+            "with_maxkeys_full_has_keycount": _has_keycount(base + ["--max-keys", "1"]),
+            "no_maxkeys_full_has_keycount": _has_keycount(base)}
 
 
 def _trigger_planes(token):
     """BOTH cloud trigger planes, AUTO-PAGINATED and counted CLIENT-SIDE, each with its own
     denominator and a positive control -- never --query length(), which over a paginated
     list-* returns the PAGE count. Executed at build time so the card cannot narrate a
-    census it did not run."""
+    census it did not run.
+
+    ⛔ WHAT THIS MEASURES IS THE NAME TOKEN, AND NOTHING ELSE. It inspects rule and schedule
+    NAME strings. A rule whose name does not contain the token can still TARGET the surface
+    through its targets or its input payload, and this sweep does not open either. So a zero
+    here is NAME-TOKEN ABSENCE, not trigger absence, and the card must say so. 3.0.0_SA_CVO~X
+    STOPped c531605da5 for exactly the gap between those two sentences.
+    """
     rules = json.loads(_aws("events", "list-rules", "--output", "json"))
     scheds = json.loads(_aws("scheduler", "list-schedules", "--output", "json"))
     rn = [r["Name"] for r in rules.get("Rules", [])]
@@ -2171,7 +2197,10 @@ def _trigger_planes(token):
             "rules_control": sum("globgrph" in n for n in rn),
             "rules_truncated": "NextToken" in rules,
             "sched_total": len(sn), "sched_hit": sum(token in n for n in sn),
-            "sched_truncated": "NextToken" in scheds}
+            "sched_control": sum("globgrph" in n for n in sn),
+            "sched_truncated": "NextToken" in scheds,
+            "plane_measured": "rule/schedule NAME strings only; targets and input payloads "
+                              "NOT enumerated"}
 
 
 def card_ms_heat_snap():
@@ -2266,9 +2295,11 @@ def card_ms_heat_snap():
                                     "and the writer declares a DATED append-only sibling plus "
                                     "a snapshot_date IDENTITY PARTITION KEY, neither of which "
                                     "is a cadence"),
-                "actual_trigger": ("NONE FOUND on either cloud trigger plane, measured; the "
-                                   "SURVIVING write history shows TWO appends on consecutive "
-                                   "days and no later surviving write"),
+                "actual_trigger": ("NO RULE OR SCHEDULE NAME contains this surface's token on "
+                                   "either cloud plane, measured; whether a generically-named "
+                                   "rule TARGETS it is UNMEASURED. The SURVIVING write history "
+                                   "shows TWO appends on consecutive days and no later "
+                                   "surviving write"),
                 "live_matches_declared": "not_applicable",
                 "live_instance_age": ("%d surviving objects written %s and %s -- %d distinct "
                                       "write-days across %d appends; %d days stale at carding. "
@@ -2308,18 +2339,23 @@ def card_ms_heat_snap():
                     "this card called it a per-snapshot_date rhythm and scored "
                     "live_matches_declared against that; the cited writer cannot carry the "
                     "claim, so declared_rhythm floors to `absent` and the row floors with it. "
-                    "`actual_trigger` is MEASURED as an absence across BOTH cloud planes, "
-                    "each auto-paginated and counted CLIENT-SIDE with its denominator "
-                    "printed: EventBridge rules %d enumerated (truncated=%s), 0 naming "
-                    "ms_heat, positive control %d naming globgrph so the sweep can find "
-                    "names; Scheduler schedules %d enumerated (truncated=%s), 0 naming "
-                    "ms_heat. \u26d4 A HOST-BOUND PLANE IS NOT COVERED by either sweep, so "
-                    "this is an absence from the CLOUD planes and not from every plane. WHY "
-                    "the writes stopped is UNMEASURED."
+                    "`actual_trigger` is MEASURED AS NAME-TOKEN ABSENCE and the card will not "
+                    "say more than that. Both cloud planes auto-paginated and counted "
+                    "CLIENT-SIDE with denominators printed: EventBridge rules %d enumerated "
+                    "(truncated=%s), 0 whose NAME contains ms_heat, positive control %d "
+                    "naming globgrph so the sweep can find names; Scheduler schedules %d "
+                    "enumerated (truncated=%s), 0 whose NAME contains ms_heat. \u26d4 WHAT "
+                    "THIS SWEEP MEASURED: %s. A rule whose NAME lacks the token can still "
+                    "TARGET this surface through its targets or its input payload, and "
+                    "neither was opened -- so a zero here is NAME-TOKEN ABSENCE, NOT TRIGGER "
+                    "ABSENCE, and an earlier version of this card wrote the stronger "
+                    "sentence. 3.0.0_SA_CVO~X STOPped it for exactly that gap. \u26d4 A "
+                    "HOST-BOUND PLANE IS ALSO NOT COVERED. WHY the writes stopped is "
+                    "UNMEASURED."
                     % (lay["snapshots"], hb[0] if hb else "ABSENT", lay["last_write"],
                        hb[0] if hb else "ABSENT", tp["rules_total"],
                        tp["rules_truncated"], tp["rules_control"], tp["sched_total"],
-                       tp["sched_truncated"])),
+                       tp["sched_truncated"], tp["plane_measured"])),
                 "owner": LANE,
             },
         },
@@ -2487,7 +2523,9 @@ def card_ms_heat_snap():
                 "distinguishable from a true negative on the one unexercised permission class; "
                 "the cadence row attributes NO rhythm to the writer, which declares a dated "
                 "sibling and an identity partition key and neither is a cadence; the trigger "
-                "absence is measured on the two CLOUD planes only, not on a host-bound one; "
+                "finding is NAME-TOKEN ABSENCE on the two CLOUD planes -- targets and "
+                "payloads were not opened and a host-bound plane is not covered, so it "
+                "is not a trigger-absence claim; "
                 "and WHY the writes stopped after two days is UNMEASURED. "
                 "⛔ THIS CARD DOES NOT CLASSIFY THE STOP AS A DEFECT. A dated snapshot sibling "
                 "that ran twice may have been exercised exactly as intended, and this seat "
