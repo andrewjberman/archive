@@ -133,17 +133,87 @@ def landed_accounts(pull_date: str) -> set:
     return out
 
 
+def preflight() -> bool:
+    """ONE vendor auth call, ZERO data calls, ZERO objects -- and it exercises THIS SCRIPT's own
+    invoke/parse path, not just the CLI's.
+
+    MECHANISM: `feeds: []`. In run() the auth chain is UNCONDITIONAL and PRECEDES the feed check:
+        :406 _assert_firm_separation()
+        :408 cookie = load_bd_session()
+        :410 token  = get_clientview_token(cookie)   <- THE ONE VENDOR CALL
+        :412 selected_feeds = resolve_feeds(feeds)   <- RAISES on the empty list
+    So reaching a :412 ValueError is ONLY possible by passing :410. A dead cookie cannot surface
+    as that error -- it fails at :410 with a different named error or a 401. The probe
+    discriminates and it structurally cannot spend a data call.
+
+    `accounts` carries one real id because `event.get("accounts") or discover_accounts()` treats
+    an EMPTY list as falsy and would fall back to the tax-SMA roster. It is never reached.
+    """
+    payload = {"leg": "reporting", "q_start": Q_START, "q_end": Q_END,
+               "accounts": [{"bd_account_id": 13477111, "schwab_account": "PREFLIGHT-NOT-USED",
+                             "inception": None}],
+               "feeds": []}
+    r = _lam.invoke(FunctionName=FUNCTION, InvocationType="RequestResponse",
+                    Payload=json.dumps(payload).encode())
+    body = json.loads(r["Payload"].read() or b"{}")
+    msg = str(body.get("errorMessage", ""))
+    trace = " ".join(body.get("stackTrace", []) or [])
+    ok = body.get("errorType") == "ValueError" and "EMPTY feed list" in msg and "resolve_feeds" in trace
+    print("PRE-FLIGHT: errorType=%s" % body.get("errorType"))
+    print("  message : %s" % msg[:120])
+    if ok:
+        print("  VERDICT : AUTH PASSED -- reached resolve_feeds, which is only reachable past the")
+        print("            token mint. 1 vendor auth call, 0 data calls, 0 objects.")
+    else:
+        print("  VERDICT : AUTH DID NOT PASS (or the signature changed). Full body:")
+        print("            %s" % json.dumps(body)[:500])
+        print("  A 401 IS NOT TRANSIENT -- do NOT retry. Wait for a fresh mint.")
+    return ok
+
+
+def verify_untouched(before_path: str) -> bool:
+    """Criterion 3: both prior snapshots UNTOUCHED. Compares the live object versions against the
+    pinned before-image BY VersionId -- never by count, because a count is equal under a
+    same-count overwrite."""
+    before = json.load(open(before_path))
+    pinned = {r["key"]: r["version_id"] for r in before["versions"] if r.get("is_latest")}
+    pag = _s3.get_paginator("list_object_versions")
+    live = {}
+    for pg in pag.paginate(Bucket=before["bucket"], Prefix=before["prefix"]):
+        for v in pg.get("Versions", []):
+            if v["IsLatest"]:
+                live[v["Key"]] = v["VersionId"]
+    moved = [k for k, v in pinned.items() if live.get(k) != v]
+    gone = [k for k in pinned if k not in live]
+    print("CRITERION 3 -- prior snapshots untouched")
+    print("  pinned baseline objects : %d" % len(pinned))
+    print("  still at pinned VersionId: %d of %d" % (len(pinned) - len(moved), len(pinned)))
+    print("  MOVED (version changed) : %d %s" % (len(moved), moved[:5]))
+    print("  DISAPPEARED             : %d %s" % (len(gone), gone[:5]))
+    print("  VERDICT: %s" % ("UNTOUCHED" if not moved and not gone else "*** TOUCHED -- INVESTIGATE ***"))
+    return not moved and not gone
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--pull-date", required=True,
                     help="PINNED ingestion asOf, identical on every invocation (YYYY-MM-DD)")
     ap.add_argument("--plan-only", action="store_true",
                     help="derive cohort + resume set and print the plan. ZERO vendor calls.")
+    ap.add_argument("--preflight", action="store_true",
+                    help="ONE auth call, zero data calls. Run this against a fresh mint first.")
+    ap.add_argument("--verify-untouched", metavar="BEFORE_JSON", default="",
+                    help="criterion-3 check against a pinned before-image. ZERO vendor calls.")
     ap.add_argument("--limit-chunks", type=int, default=0,
                     help="fire at most N chunks (0 = all). For a bounded first fire.")
     a = ap.parse_args()
 
     dt.date.fromisoformat(a.pull_date)  # fail closed on a malformed pin
+
+    if a.verify_untouched:
+        return 0 if verify_untouched(a.verify_untouched) else 1
+    if a.preflight:
+        return 0 if preflight() else 1
 
     cohort, resid = derive_cohort()
     done = landed_accounts(a.pull_date)
