@@ -32,6 +32,7 @@ four rows in one state and scored a one-branch render as a pass.
 
 import json
 import os
+import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
@@ -56,6 +57,14 @@ ENVELOPE_FIELDS = ['contract_version', 'as_of', 'family', 'level', 'si_label',
 # basis_line is quoted verbatim, period_keyed explains why the picker does not move these
 # numbers, allocation_as_of dates the cut. Dropping any of them would force the component
 # to invent the fact instead.
+# Transactions carries the PRODUCER'S COLUMN CONTRACT, and the consumer zips the two
+# arrays positionally -- so both must travel or the card cannot build its headers at all.
+TRANSACTIONS_ENVELOPE_FIELDS = [
+    'contract_version', 'as_of', 'family', 'level', 'paged', 'window',
+    'prd_card_columns', 'served_columns',
+    'build_side_only_columns', 'declared_absent_columns',
+]
+
 ALLOCATION_ENVELOPE_FIELDS = ENVELOPE_FIELDS + [
     'allocation_as_of', 'basis_line', 'period_keyed',
     'residue_states_declared', 'residue_states_present', 'classes',
@@ -76,6 +85,12 @@ def load_gainloss(level):
 
 def load_book():
     p = os.path.join(EMISSIONS, 'perfrp_book_advisor.json')
+    with open(p, encoding='utf-8') as fh:
+        return p, json.load(fh)
+
+
+def load_transactions():
+    p = os.path.join(EMISSIONS, 'perfrp_transactions_relationship_sample.json')
     with open(p, encoding='utf-8') as fh:
         return p, json.load(fh)
 
@@ -337,6 +352,61 @@ def main():
         merged['perfrp_allocation_%s.json' % lvl] = alloc_env
         alloc_reports.append((alloc_path, alloc, rows, keys, residue_pop))
 
+    # ---- PRF-b-5, transactions. RELATIONSHIP GRAIN ONLY (the leaf declares it and its
+    # page is keyed by relationship_id), so there is one route and no account variant.
+    tx_path, tx = load_transactions()
+    hdrs = tx.get('prd_card_columns') or []
+    flds = tx.get('served_columns') or []
+    # The consumer ZIPS these two arrays positionally. If the emission ever ships them
+    # unequal, the fixture must not be the artifact that proves a mislabelled table
+    # "renders fine" -- refuse here as well as at the consumer.
+    if len(hdrs) != len(flds):
+        sys.exit('ABORT: %s emits %d display vs %d served column(s) -- a positional pair '
+                 'that would MISLABEL Units/Price/Amount rather than fail' % (
+                     tx_path, len(hdrs), len(flds)))
+    tx_env = {k: tx[k] for k in TRANSACTIONS_ENVELOPE_FIELDS if k in tx}
+    page = dict(tx.get('page') or {})
+    page['_source_relationship_id'] = page.get('relationship_id')
+    page['relationship_id'] = REL_KEY
+    # ⛔ PII GATE, SECOND INSTANCE -- and stricter than the roster's, because these values
+    # are RENDERED, not just carried. account_id is a real client account number and the
+    # detail/source descriptions are BANK TRANSACTION MEMOS -- the very class the PRD rules
+    # PII-EXCLUDED-PERMANENT for the `Notes` column ("transaction memo and wire
+    # instructions"). Accounts are pseudonymised by INDEX (not a hash: a stable hash still
+    # distinguishes real accounts and survives as a re-identification handle), and any
+    # embedded digit-run of 6+ is masked, because "JOURNAL FRM 47401914" carries an account
+    # number inside free text where no column-level rule would ever look for it.
+    acct_map = {}
+    scrubbed_rows = []
+    for r in (page.get('rows') or []):
+        nr = dict(r)
+        raw_acct = nr.get('account_id')
+        if raw_acct is not None:
+            if raw_acct not in acct_map:
+                acct_map[raw_acct] = 'FIXTURE_ACCT_%d' % (len(acct_map) + 1)
+            nr['account_id'] = acct_map[raw_acct]
+        for f in ('transaction_detail_description', 'transaction_source_code_description'):
+            if isinstance(nr.get(f), str):
+                nr[f] = re.sub(r'\d{6,}', '<acct>', nr[f])
+        scrubbed_rows.append(nr)
+    page['rows'] = scrubbed_rows
+    tx_env['page'] = page
+    tx_env['_fixture_provenance'] = {
+        'source_file': os.path.relpath(tx_path, ROOT).replace(os.sep, '/'),
+        'real': ('every served column value except the pseudonymised ones below, plus the '
+                 'producer column contract (prd_card_columns / served_columns) verbatim'),
+        'fixture': 'the relationship join key; the page names its _source_relationship_id',
+        'pseudonymised': (
+            '%d distinct account_id(s) -> FIXTURE_ACCT_n by index; digit-runs of 6+ masked '
+            'in the two description fields (an account number inside free text)'
+            % len(acct_map)),
+        'column_contract_checked': '%d display == %d served, verified before binding' % (
+            len(hdrs), len(flds)),
+        'not_a_data_oracle': 'render instrument only.',
+    }
+    merged['perfrp_transactions_relationship_sample.json'] = tx_env
+    globals()['_TX_REPORT'] = (tx_path, tx, page, acct_map)
+
     globals()['_ALLOC_REPORT'] = alloc_reports
     globals()['_BOOK_REPORT'] = (book_path, advisor_row, book)
     globals()['_GL_REPORT'] = gl_reports
@@ -391,6 +461,7 @@ def main():
     print('   perfrp_gainloss_account.json')
     print('   perfrp_allocation_relationship.json')
     print('   perfrp_allocation_account.json')
+    print('   perfrp_transactions_relationship_sample.json')
     print()
     for ap, al, rows, keys, residue_pop in globals()['_ALLOC_REPORT']:
         print('ALLOCATION %s -- entries %d, as_of %s, residue-carrying %d (%.1f%%)' % (
@@ -412,6 +483,18 @@ def main():
             tgl = (r.get('total_gain_loss') or {})
             print('   %-16s <- %-24s total_gain_loss=%s (%s)' % (
                 k, r['key'], tgl.get('value'), tgl.get('figure_state')))
+    txp, txl, txpage, acct_map = globals()['_TX_REPORT']
+    print()
+    print('TRANSACTIONS %s -- as_of %s, columns %d display == %d served' % (
+        txp.split(os.sep)[-1], txl.get('as_of'),
+        len(txl.get('prd_card_columns') or []), len(txl.get('served_columns') or [])))
+    print('   %-16s <- %-24s rows=%d of %d, page %d, more=%s' % (
+        txpage['relationship_id'], txpage['_source_relationship_id'],
+        txpage.get('returned'), txpage.get('total'), txpage.get('page'),
+        txpage.get('hasMoreResults')))
+    print('   PSEUDONYMISED: %d distinct account_id -> FIXTURE_ACCT_n; digit-runs 6+ masked '
+          'in both description fields' % len(acct_map))
+
     ct = bound.get('client_table') or []
     print()
     print('CLIENT TABLE (b-6) -- %d row(s) bound, ALL display labels PSEUDONYMISED' % len(ct))
