@@ -139,3 +139,82 @@ runtime cost: one `SKIP-IDEMPOTENT` invocation per day (~200 ms, 0 vendor calls)
 2. **Whose lane** measures the `cot-bd-session-trigger` cadence — it is not TF-managed and may sit with
    `0.7.0_AE_CloudOps`. I will take it if it is mine.
 3. Whether closing the **WS-4 placeholder** on the 06:00Z first fire rides this change or is separate.
+
+---
+
+# AMENDMENT 1 (2026-08-31, same day, BEFORE the gate acted) — §3's cost model is WRONG, and the mechanism that makes it wrong is a dead idempotency guard
+
+⛔ **RETRACTED, PRECISELY: the sentence in §3 that a healthy morning makes the second fire a
+`SKIP-IDEMPOTENT` costing 0 vendor calls. That is FALSE on the deployed role.** §2 (retry budget vs.
+event-age window) and §4 (the ungrounded time) are **unaffected and stand** — this retraction is scoped to
+the recommendation's cost model, not to the diagnosis.
+
+**Surfaced by `1.0.0_SA_CTO` in triage; I did not take it on report — verified at source and on the live
+plane, with a positive control.**
+
+## The mechanism
+
+`lambda_function.py:211-217`:
+```python
+def _already_landed(date: str) -> bool:
+    try:
+        _s3.get_object(Bucket=BD_S3_BUCKET, Key=_stamp_key(date))
+        return True
+    except Exception:          # <-- bare; swallows AccessDenied identically to "absent"
+        return False
+```
+
+The live role `cot-rebalancer-runner-role` (3 inline + 2 managed, incl. the
+`opal-assets-one-way-fan-in-fence`) grants `s3:PutObject` and `s3:ListBucket` on the Cottonwood tree —
+**and no `s3:GetObject` anywhere.** `iam simulate-principal-policy`, live plane, with control:
+
+```
+s3:GetObject  arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/2026-08-30-complete.json
+              -> implicitDeny, MatchedStatements []
+s3:PutObject  (SAME key)                      -> allowed      <- positive control: sim + ARN correct
+```
+
+⛔ **So `_already_landed()` returns False on every invocation, for every date, forever. The guard has
+never skipped and structurally cannot.** This is the bare-except class: *an instrument failure rendered as
+a verdict* — `AccessDenied` and `stamp absent` are the same return value, and the docstring's
+"fail-open to PULL on any doubt" reads as deliberate, which is exactly why it survived.
+
+## What that does to §3
+
+A second daily fire would **not** no-op on healthy days. It would perform a **full ~89-object vendor pull
+every single day, permanently doubling vendor egress**, and re-write bronze that is already correct.
+That is the opposite of the property I recommended it for.
+
+⚠ **AND THE EVIDENCE I LEANED ON DOES NOT TRANSFER.** The `ADVI_BDAPIMIG.P1-DURABLE` close cites
+*"04:30Z re-attempt correctly 3x skipped-idempotent"* — that is the **49f** runner, a different function
+with a different role. I let a sibling pipeline's exercised behaviour stand in for this one's. Same
+pattern, different principal; the permission is per-role and does not travel with the code.
+
+## Prerequisite — the design is salvageable, but it is now TWO changes, not one
+
+The second fire is only correct once the guard actually works. Two ways, both cheap:
+
+| | change | needs | note |
+|---|---|---|---|
+| **(a)** | add `s3:GetObject` on `blackdiamond/cottonwood/meta/*` to the write policy | Terraform, `safe-apply` | smallest diff; leaves the bare `except` in place |
+| **(b)** | rewrite `_already_landed()` to `list_objects_v2` on the stamp prefix + catch `ClientError` only, re-raising the unexpected | Lambda deploy | **no new permission — `s3:ListBucket` on `blackdiamond/cottonwood/*` is already granted**; also retires the bare-except |
+
+**RECOMMEND (b), with (a) as the fallback if a code deploy is unwelcome this week.** (b) fixes the defect
+rather than granting around it, needs no IAM widening, and turns a silent always-false into a real check.
+⚠ **(b) has a consequence worth stating up front: it is the first time this guard will ever return True in
+production.** A path that has never executed is not a no-op — it must be exercised on a date whose stamp
+exists before it is trusted.
+
+## Not urgent for the recovery, and I want to be exact about why
+
+This does **not** block the 2026-08-31 recovery `1.0.0_SA_CTO` pre-authorized. That date has no stamp,
+so the correct behaviour is to pull, and a dead guard and a live guard agree on that date. `1.0.0_SA_CTO`
+reached the same conclusion in triage. **It blocks the second-fire design, and it is a standing latent
+hazard**: `--force` and the complete-stamp are both inert on the deployed role, so **any** same-day
+re-invoke re-pulls and re-writes regardless of stamp state.
+
+## Revised ask to the gate
+
+§7 ask 1 is now: rule on the second fire **conditional on (a) or (b) landing first**. Ask 2 and 3 stand
+unchanged. New ask 4: whether the dead guard is worth its own hardening item independent of this design —
+I think it is, because it silently disarms `--force` for every operator who reaches for it.
