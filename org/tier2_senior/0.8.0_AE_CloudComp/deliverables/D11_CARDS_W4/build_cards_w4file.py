@@ -324,6 +324,15 @@ def build():
         }
 
         # ---- trust.failure_mode ----
+        # RULE 3 / Addendum 1v (1.0.0_SA_CTO~X, 89660): a field whose VALUE is the null token
+        # may NOT carry a basis of held/inferred/measured. The basis describes HOW THE VALUE WAS
+        # OBTAINED, so "this was not measured" cannot have been obtained BY measuring. This value
+        # is conditional and its basis was hardcoded `measured` beside it -- true for the "no"
+        # branch (read off the guard structure and the tracked state) and false for the
+        # "unmeasured" branch, which is the 8-card Class A hit in this lane. DERIVE it from the
+        # value so the two cannot drift apart again.
+        dtn_value = "no" if (pid == "kuzu_ac7.dir" or is_tracked is False) else "unmeasured"
+        dtn_basis = "absent" if dtn_value == "unmeasured" else "measured"
         failure_mode = {
             "returns_on_failure": (
                 "A consumer opening this path when the artifact is missing gets a filesystem "
@@ -336,9 +345,7 @@ def build():
                    "byte-identical to a genuinely empty result."
                    if pid == "kuzu_ac7.dir" else "")
             ),
-            "distinguishable_from_true_negative": (
-                "no" if (pid == "kuzu_ac7.dir" or is_tracked is False) else "unmeasured"
-            ),
+            "distinguishable_from_true_negative": dtn_value,
             "silent_degrade_paths": [
                 f"STALENESS IS SILENT: mtime {v['mtime_utc']} ({v['age_days']}d at carding) is "
                 f"carried by the filesystem, not by the artifact, so a consumer that reads only "
@@ -352,7 +359,7 @@ def build():
             "basis": "measured",
             "basis_by_field": {
                 "returns_on_failure": "inferred",
-                "distinguishable_from_true_negative": "measured",
+                "distinguishable_from_true_negative": dtn_basis,
                 "silent_degrade_paths": "measured",
             },
             "evidence": (
@@ -364,8 +371,15 @@ def build():
             ),
             "owner": part.get("owner") or "UNOWNED",
         }
-        # floor the failure_mode scalar honestly
-        failure_mode["basis"] = "inferred"
+        # floor the failure_mode scalar honestly -- DERIVED, not typed. It was hardcoded
+        # "inferred", which happened to equal the floor while every part was inferred-or-better.
+        # Once dtn_basis can be `absent`, a hardcoded "inferred" would claim MORE than its own
+        # parts support -- the same defect one level up, and the block's own evidence sentence
+        # already promises "the floor over its parts". Compute it so the promise is kept.
+        _RANK = {"absent": 0, "held": 1, "inferred": 2, "measured": 3}
+        failure_mode["basis"] = min(
+            failure_mode["basis_by_field"].values(), key=lambda b: _RANK[b]
+        )
 
         defects = []
         if pid == "kuzu_ac7.dir":
