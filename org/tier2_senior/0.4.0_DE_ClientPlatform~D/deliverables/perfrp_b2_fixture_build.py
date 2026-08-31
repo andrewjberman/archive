@@ -228,9 +228,9 @@ def main():
         'row carries _source_key naming the emission row it was taken from.',
         'The rows above this line remain synthetic, exactly as before.',
     ]
-    merged['perfrp/perfrp_performance_relationship.json'] = build_leaf(
+    merged['perfrp_performance_relationship.json'] = build_leaf(
         'relationship', rel_bindings, rel_path, rel)
-    merged['perfrp/perfrp_performance_account.json'] = build_leaf(
+    merged['perfrp_performance_account.json'] = build_leaf(
         'account', acct_bindings, acct_path, acct)
 
     # ---- PRF-b-6, the advisor book leaf (four ruled KPI tiles + the client table) ----
@@ -266,7 +266,7 @@ def main():
                 book.get('as_of'), (book.get('window') or {}).get('period'))),
         'not_a_data_oracle': 'render instrument only.',
     }
-    merged['perfrp/perfrp_book_advisor.json'] = book_env
+    merged['perfrp_book_advisor.json'] = book_env
 
     # ---- PRF-b-4, gain/loss, BOTH grains. The first emission carried bare numbers and this
     # lane refused to bind them; the re-emission @c118a8e4d7 carries {value, figure_state,
@@ -291,7 +291,7 @@ def main():
             'bare_figures': '0 of %d rows carry a bare figure (re-counted at build time)' % len(gl['entries']),
             'not_a_data_oracle': 'render instrument only.',
         }
-        merged['perfrp/perfrp_gainloss_%s.json' % lvl] = gl_env
+        merged['perfrp_gainloss_%s.json' % lvl] = gl_env
         gl_reports.append((gl_path, gl, rows, keys))
 
     # ---- PRF-b-3, allocation, BOTH grains. -----------------------------------------
@@ -334,7 +334,7 @@ def main():
                 'PerfrpFigureCell.'),
             'not_a_data_oracle': 'render instrument only.',
         }
-        merged['perfrp/perfrp_allocation_%s.json' % lvl] = alloc_env
+        merged['perfrp_allocation_%s.json' % lvl] = alloc_env
         alloc_reports.append((alloc_path, alloc, rows, keys, residue_pop))
 
     globals()['_ALLOC_REPORT'] = alloc_reports
@@ -378,13 +378,19 @@ def main():
     print()
     print('ROUTE KEYS ADDED (denominator %d total in file):' % (
         len([k for k in merged if not k.startswith('_')])))
-    print('   perfrp/perfrp_performance_relationship.json')
-    print('   perfrp/perfrp_performance_account.json')
-    print('   perfrp/perfrp_book_advisor.json')
-    print('   perfrp/perfrp_gainloss_relationship.json')
-    print('   perfrp/perfrp_gainloss_account.json')
-    print('   perfrp/perfrp_allocation_relationship.json')
-    print('   perfrp/perfrp_allocation_account.json')
+    # ROUTE KEYS ARE THE BARE LEAF FILENAME, not 'perfrp/<leaf>'. The fetcher moved onto
+    # platinum/advi/{firm}/<leaf> (precondition #2), so a 'perfrp/<leaf>' substring no longer
+    # occurs in the URL and every fixture would have gone DEAD -- silently, since an unmatched
+    # fixture just falls through to the real (unserved) route and the card renders its shell,
+    # which is indistinguishable from the correct pre-serve state. The bare filename matches
+    # both key classes, so the harness survives the move.
+    print('   perfrp_performance_relationship.json')
+    print('   perfrp_performance_account.json')
+    print('   perfrp_book_advisor.json')
+    print('   perfrp_gainloss_relationship.json')
+    print('   perfrp_gainloss_account.json')
+    print('   perfrp_allocation_relationship.json')
+    print('   perfrp_allocation_account.json')
     print()
     for ap, al, rows, keys, residue_pop in globals()['_ALLOC_REPORT']:
         print('ALLOCATION %s -- entries %d, as_of %s, residue-carrying %d (%.1f%%)' % (
