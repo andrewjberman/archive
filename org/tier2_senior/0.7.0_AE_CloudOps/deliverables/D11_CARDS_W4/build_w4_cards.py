@@ -2125,6 +2125,55 @@ def _heartbeat_read(surface):
     return (rows[0][0], int(rows[0][1])) if rows else None
 
 
+def _keycount_shapes(prefix):
+    """EXECUTE the two invocation shapes rather than narrate them.
+
+    3.0.0_SA_CVO~X STOP on card 7 @6379c948fc: the card claimed the FULL response carries
+    KeyCount 0 while its own projection rendered None -- but those outcomes come from
+    DIFFERENT ARGUMENT SETS, so the "identical control" was false as written, and the builder
+    HARDCODED the prose instead of running the comparison. Both halves were fair.
+
+    MEASURED on aws-cli/1.44.44: WITH --max-keys the response carries KeyCount and the
+    projection renders the integer; WITHOUT it the response OMITS KeyCount entirely and the
+    projection renders None. So None is the rendering of a MISSING FIELD, not of a real zero
+    -- the auto-pagination shape, same family as Rule 22a's "--query length() over a
+    paginated list-* returns the PAGE count".
+    """
+    base = ["s3api", "list-objects-v2", "--bucket", BUCKET, "--prefix", prefix]
+
+    def _raw(args):
+        """FULL stdout. probe() returns only the FIRST LINE, which for a JSON response is
+        `{` -- so testing `"KeyCount" in probe(...)[1]` is False for BOTH shapes and cannot
+        discriminate. Caught in this builder before presentation: the emitted card said the
+        --max-keys full response did NOT carry KeyCount, contradicting a hand measurement.
+        A probe whose output shape cannot carry the thing under test always answers no."""
+        r = subprocess.run([AWS] + args, capture_output=True, text=True)
+        return r.stdout or ""
+
+    wm_proj = probe(*(base + ["--max-keys", "1", "--query", "KeyCount", "--output", "text"]))
+    nm_proj = probe(*(base + ["--query", "KeyCount", "--output", "text"]))
+    return {"with_maxkeys_projection": wm_proj[1],
+            "no_maxkeys_projection": nm_proj[1],
+            "with_maxkeys_full_has_keycount": '"KeyCount"' in _raw(base + ["--max-keys", "1"]),
+            "no_maxkeys_full_has_keycount": '"KeyCount"' in _raw(base)}
+
+
+def _trigger_planes(token):
+    """BOTH cloud trigger planes, AUTO-PAGINATED and counted CLIENT-SIDE, each with its own
+    denominator and a positive control -- never --query length(), which over a paginated
+    list-* returns the PAGE count. Executed at build time so the card cannot narrate a
+    census it did not run."""
+    rules = json.loads(_aws("events", "list-rules", "--output", "json"))
+    scheds = json.loads(_aws("scheduler", "list-schedules", "--output", "json"))
+    rn = [r["Name"] for r in rules.get("Rules", [])]
+    sn = [x["Name"] for x in scheds.get("Schedules", [])]
+    return {"rules_total": len(rn), "rules_hit": sum(token in n for n in rn),
+            "rules_control": sum("globgrph" in n for n in rn),
+            "rules_truncated": "NextToken" in rules,
+            "sched_total": len(sn), "sched_hit": sum(token in n for n in sn),
+            "sched_truncated": "NextToken" in scheds}
+
+
 def card_ms_heat_snap():
     home = HOMES["ms_heat_snap"]
     home_uri = "s3://%s/%s" % (BUCKET, home)
@@ -2136,6 +2185,8 @@ def card_ms_heat_snap():
                          home[:-2] + "e/", "--max-keys", "1", "--query", "KeyCount",
                          "--output", "text")
     hb = _heartbeat_read("ms_heat_snap")
+    pend = _keycount_shapes("warehouse/snap_ingest/pending/ms_heat_snap/")
+    tp = _trigger_planes("ms_heat")
     cells = carrier_cells(GROUPS["ms_heat_snap"])
     writer = "infra/aws/globgrph/snap_store.py"
     wpin = git_pin(writer)
@@ -2211,12 +2262,14 @@ def card_ms_heat_snap():
                 "owner": LANE,
             },
             "cadence": {
-                "declared_rhythm": ("the module docstring declares every STATE-shaped surface gets "
-                                    "a DATED append-only snapshot sibling -- a per-snapshot_date "
-                                    "rhythm, with no cloud schedule named in the writer itself"),
-                "actual_trigger": ("none found in the writer; the SURVIVING write history shows "
-                                   "TWO appends on consecutive days and no later surviving write"),
-                "live_matches_declared": "no",
+                "declared_rhythm": ("NONE DECLARED -- generation.trigger is null in the manifest, "
+                                    "and the writer declares a DATED append-only sibling plus "
+                                    "a snapshot_date IDENTITY PARTITION KEY, neither of which "
+                                    "is a cadence"),
+                "actual_trigger": ("NONE FOUND on either cloud trigger plane, measured; the "
+                                   "SURVIVING write history shows TWO appends on consecutive "
+                                   "days and no later surviving write"),
+                "live_matches_declared": "not_applicable",
                 "live_instance_age": ("%d surviving objects written %s and %s -- %d distinct "
                                       "write-days across %d appends; %d days stale at carding. "
                                       "The heartbeat key agrees: %s, %d B"
@@ -2224,12 +2277,12 @@ def card_ms_heat_snap():
                                          lay["distinct_write_days"],
                                          len(lay["write_commit_uuids"]) or lay["snapshots"], age,
                                          hb[0] if hb else "ABSENT", hb[1] if hb else 0)),
-                "basis": "measured",
+                "basis": "absent",
                 "basis_by_field": {
-                    "declared_rhythm": "measured",
+                    "declared_rhythm": "absent",
                     "actual_trigger": "measured",
                     "live_instance_age": "measured",
-                    "live_matches_declared": "measured",
+                    "live_matches_declared": "absent",
                 },
                 "evidence": (
                     "⛔ SCOPED TO THE SURVIVING SET AND NOT BEYOND IT, which is the repair this "
@@ -2248,11 +2301,25 @@ def card_ms_heat_snap():
                     "CARDS, measured on the same heartbeat plane: code_heat_snap stamps "
                     "2026-07-16T15:28:06Z and fedobs_coverage_snap 2026-07-16T15:28:07Z -- one "
                     "second apart, one run -- while this surface stamps %s, about 27 hours later. "
-                    "`live_matches_declared` is `no`: a per-snapshot_date rhythm predicts a row "
-                    "per date and the surviving set stops after two. WHY it stopped is UNMEASURED "
-                    "and this card does not guess."
+                    "\u26d4 AND THIS ROW NO LONGER ATTRIBUTES A CADENCE TO THE WRITER, which is the "
+                    "repair 3.0.0_SA_CVO~X required: the writer declares a DATED sibling and "
+                    "a snapshot_date IDENTITY PARTITION KEY, and NEITHER IS A CADENCE -- a "
+                    "partition key does not predict a row per date. An earlier version of "
+                    "this card called it a per-snapshot_date rhythm and scored "
+                    "live_matches_declared against that; the cited writer cannot carry the "
+                    "claim, so declared_rhythm floors to `absent` and the row floors with it. "
+                    "`actual_trigger` is MEASURED as an absence across BOTH cloud planes, "
+                    "each auto-paginated and counted CLIENT-SIDE with its denominator "
+                    "printed: EventBridge rules %d enumerated (truncated=%s), 0 naming "
+                    "ms_heat, positive control %d naming globgrph so the sweep can find "
+                    "names; Scheduler schedules %d enumerated (truncated=%s), 0 naming "
+                    "ms_heat. \u26d4 A HOST-BOUND PLANE IS NOT COVERED by either sweep, so "
+                    "this is an absence from the CLOUD planes and not from every plane. WHY "
+                    "the writes stopped is UNMEASURED."
                     % (lay["snapshots"], hb[0] if hb else "ABSENT", lay["last_write"],
-                       hb[0] if hb else "ABSENT")),
+                       hb[0] if hb else "ABSENT", tp["rules_total"],
+                       tp["rules_truncated"], tp["rules_control"], tp["sched_total"],
+                       tp["sched_truncated"])),
                 "owner": LANE,
             },
         },
@@ -2379,20 +2446,27 @@ def card_ms_heat_snap():
                     "CLASS -- a missing s3:ListBucket -- WAS NOT EXERCISED and may also return a "
                     "zero; that unexercised class is the SOLE ground on which "
                     "distinguishable_from_true_negative is `no` at basis `inferred`. "
-                    "⭐ AND A FIFTH RENDERING CLASS MEASURED AT THIS CARD, on the pending queue: "
-                    "`--query KeyCount --output text` printed `None` for the empty "
-                    "warehouse/snap_ingest/pending/ms_heat_snap/ prefix, while the FULL response "
-                    "for the same prefix carries `\"KeyCount\": 0`. `None` is not a number a "
-                    "consumer can reject on and it is not the same token as `0`. The queue IS "
-                    "genuinely empty -- read from the full response, with the identical "
-                    "projection returning 1 on a populated prefix as the control -- but a "
-                    "projection that renders a real 0 as `None` is a retrieval trap in its own "
-                    "right, and this card reports the full-response read rather than the "
-                    "projection."
+                    "\u2b50 AND A FIFTH RENDERING CLASS, EXECUTED AT BUILD TIME RATHER THAN "
+                    "NARRATED, on the pending prefix -- AND THE COMPARISON IS BETWEEN TWO "
+                    "ARGUMENT SETS, WHICH THIS CARD NOW SAYS. WITH --max-keys: projection -> "
+                    "%r, full response carries KeyCount -> %s. WITHOUT --max-keys: projection "
+                    "-> %r, full response carries KeyCount -> %s. So `None` renders a MISSING "
+                    "FIELD, not a real zero: it is the auto-pagination shape, the same family "
+                    "as the documented trap that --query length() over a paginated list-* "
+                    "returns the PAGE count. \u26d4 AN EARLIER VERSION OF THIS CARD claimed "
+                    "the full response carried KeyCount 0 while its own projection rendered "
+                    "None, and called a differently-argumented call an identical control. "
+                    "FALSE AS WRITTEN, and hardcoded prose rather than an executed probe. "
+                    "3.0.0_SA_CVO~X caught both halves. The queue IS empty -- under "
+                    "--max-keys, the shape that can express a zero at all."
                     % (zc["true_absence"][0], zc["true_absence"][1],
                        zc["wrong_bucket"][0], zc["wrong_bucket"][1][:60],
                        zc["wrong_region"][0], zc["wrong_region"][1],
-                       wrong_prefix[0], wrong_prefix[1])),
+                       wrong_prefix[0], wrong_prefix[1],
+                       pend["with_maxkeys_projection"],
+                       pend["with_maxkeys_full_has_keycount"],
+                       pend["no_maxkeys_projection"],
+                       pend["no_maxkeys_full_has_keycount"])),
                 "owner": LANE,
             },
         },
@@ -2411,7 +2485,10 @@ def card_ms_heat_snap():
                 "read at either; the catalog binding is HELD, since name-uniqueness in the "
                 "measured set is not a verified catalog resolution; the failure mode is not "
                 "distinguishable from a true negative on the one unexercised permission class; "
-                "and WHY the per-snapshot_date rhythm stopped after two days is UNMEASURED. "
+                "the cadence row attributes NO rhythm to the writer, which declares a dated "
+                "sibling and an identity partition key and neither is a cadence; the trigger "
+                "absence is measured on the two CLOUD planes only, not on a host-bound one; "
+                "and WHY the writes stopped after two days is UNMEASURED. "
                 "⛔ THIS CARD DOES NOT CLASSIFY THE STOP AS A DEFECT. A dated snapshot sibling "
                 "that ran twice may have been exercised exactly as intended, and this seat "
                 "measured the planes rather than the intent. Naming the state is the carder's "
