@@ -187,6 +187,60 @@ and the folder observed.
 ⛔ **NO MONITOR, NO ALARM, NO DELIVERABILITY WATCHER.** The hold was lifted for the ticket reminder
 **by name** and nothing else. This is a **diagnostic and a config change**. GLOBALALARM stands.
 
+## 8c. ⭐ AMENDMENT 2 (2026-08-31 ~23:5xZ) — DMARC TARGET DECIDED, CELL 2.3 CLOSED, AND A SCOPE RULING FROM ME
+
+Source: `1.0.0_SA_CTO~Z` msg 17222; full findings
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/ctoZ_D12_CELLS_2.3_2.4_SES_READINESS_AND_DELIVERABILITY_20260831.md`
+@`db29f8a2e5` — **read that rather than re-deriving any of it.**
+
+### 2.6b IS UNBLOCKED. The `rua` target is SAME-DOMAIN, NOT dmarcian.
+Andrew answered **twice** and **the second supersedes the first** — same shape as the domain reversal
+in Amendment 1:
+> ~23:4xZ: *"use the same dmarcian mailbox as .com, i want to keep this system separate"*
+> ~23:5xZ: *"I do not have immedaite access to the opalinvest.com godaddy. if there are services that
+> domain is attached to which i commensurately also do not have access to, then i dont want to set up
+> dmarcian or anything else that connects to that. I want our system for this op to be independent and
+> in our control"*
+⛔ **NO DMARCIAN. NOTHING REACHED THROUGH `opalinvest.com`.**
+```
+DMARC  TXT  _dmarc.opalinvest.dev   v=DMARC1; p=none; rua=mailto:<addr>@opalinvest.dev
+```
+⭐ **WHY SAME-DOMAIN IS THE MECHANISM, NOT MERE COMPLIANCE — understand this rather than copying it:**
+RFC 7489 §7.1 requires an authorization record published by the **RECEIVING** domain whenever `rua`
+points OUTSIDE the domain publishing the DMARC record. An external target needs that third party to
+publish `opalinvest.dev._report._dmarc.<their domain>` first — and **without it you get SILENCE, not an
+error.** You would publish a correct-looking record and never receive a report. **A same-domain target
+needs nobody, so the whole dependency class disappears.** That is what satisfies his independence
+ruling rather than merely obeying it.
+
+### CELL 2.3 IS CLOSED — PASS
+SES production access **GRANTED**, account healthy. **His "no longer sandboxed" premise was MEASURED,
+not assumed.** You do not need to re-derive it; cite `db29f8a2e5`.
+
+### ⛔ MY SCOPE RULING AS TO OWNER: DMARC REPORT COLLECTION IS **OUT** OF W1
+`1.0.0_SA_CTO~Z` correctly refused to pick this and routed it to me. **Ruling: publish the record, do
+NOT build the collection pipeline.**
+- **W1-10 does not need it.** W1-10 is satisfied by sending a real OTP and observing the mailbox and
+  folder directly. Aggregate reports are gzipped XML — collecting them gives *ownership of the data,
+  not readability*, and would not make W1-10 more true.
+- ⚠ **AND THE CONSEQUENCE IS RECORDED RATHER THAN HIDDEN:** `opalinvest.dev` has **no MX** and there
+  are **no SES receipt rule sets** (measured, clean slate). So a published same-domain `rua` means
+  **aggregate reports are NOT actually received today.** The record is still valid and still protects
+  the domain; it simply has no collector behind it. **That is a known, stated gap — not a silent one**,
+  and it is the honest state to ship rather than a dangling pointer nobody wrote down.
+- If you think collection belongs in scope, **SURFACE IT TO ME — do not build it.**
+⛔ **NO MONITOR EITHER WAY.** The alarm hold was lifted for the D7 ticket reminder **BY NAME** and
+nothing else, explicitly including anything watching deliverability.
+
+### One flag that is NOT yours to resolve
+SES production access was granted against a use case naming recipients as *"Opal personnel"*.
+**Client-facing login codes sit outside that declaration.** Routed to Andrew by `1.0.0_SA_CTO~Z`.
+**Not a build blocker; do not try to fix it from the lane.**
+
+### 2.4 remains an ACCEPTANCE CONDITION, not a follow-up
+**WS-2 is not acceptable until these records exist AND an OTP is observed arriving in an INBOX rather
+than a spam folder.** That is W1-10.
+
 ## 9. ⛔ YOU ARE BARRED FROM TEN BASE-ADDRESSED TASK ORDERS — MEASURED AT SEATING
 
 ⚠ **CORRECTED 2026-08-31 ~23:4xZ:** this section first said *"six projects"* while the table below
