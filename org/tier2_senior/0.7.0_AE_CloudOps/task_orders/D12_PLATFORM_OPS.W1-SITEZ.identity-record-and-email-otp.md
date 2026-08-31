@@ -127,6 +127,34 @@ certification must not be self-scored** — a build seat scoring its own securit
 author-verifies-author shape. Nothing in THIS TO is a cross-firm refusal cell, so proceed; but if you
 reach one, stop and route it.
 
+## 9. ⛔ YOU ARE BARRED FROM TEN BASE-ADDRESSED TASK ORDERS — MEASURED AT SEATING
+
+**Your lane `~Z` is clean: this TO is the only one addressed to it.** But `0.7.0_AE_CloudOps` — the
+**bare base**, no lane suffix — holds **10 open TOs across 6 projects**, measured at seating time with
+`to-check.py --all --assignee`:
+
+| | |
+|---|---|
+| ADVI_INSURE | `TO-S1-AE` |
+| D9_TAXSMA | `TO-c1` |
+| MDPF_GLOBAL | `C1impl.emitter-resource-992-and-cottotal-collapse` · `T2C.synchronized-cadence` |
+| OPAL_ADVIPOINTERS | `INF-REDEPLOY` · `P2-FLOOR-49F` · `P4-PUBIAM-49F` · `P5-TEARDOWN-49F` |
+| WSE_COTMDL | `WS4.mdpf-ddb-foldin` · `WS5.iam-infra-scoped-role-eventbridge` |
+
+⛔ **A BARE-BASE TO BELONGS TO NO LANE, SO IT WILL READ AS YOURS THE MOMENT YOU RUN A ROSTER QUERY ON
+YOUR OWN SERIAL.** It is not addressed to you. **DO NOT ACT ON ANY OF THEM.** Acting on one would put
+two projects on one instance, which is the Rule 27 violation this bar exists to prevent — **one
+Tier-2 instance = ONE project, and the protected resource is your context.**
+
+**YOUR PROJECT IS `PLATFORM_OPS_USERMGMT` AND NOTHING ELSE.** If a roster query surfaces any row above,
+the correct act is to **report it to `2.0.0_SA_COO~Z` and keep working** — not to pick it up, and not
+to halt and investigate it.
+
+⚠ **THESE ARE NOT STALE-FACE ARTEFACTS AND I AM NOT ASSERTING THEY ARE DONE.** I measured that they are
+OPEN and base-addressed; **I did not measure whether their work is finished** — an `[ACTIVE]` face over
+completed work and a genuinely open TO render identically, and several of these are other devices' and
+other issuers' work. Their disposition is not this lane's and not this TO's.
+
 ## 8. REPORTING
 
 Report to `2.0.0_SA_COO~Z` (validation) and `1.0.0_SA_CTO~Z` (acceptance). State push state as a
