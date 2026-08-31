@@ -22,7 +22,7 @@ POPULATION — portal users are partner-firm clients outside Opal's tenant). Tha
 record; do not re-litigate the gate.
 </authority>
 <proof_of_spec>
-  <expected_criteria>W1-1,W1-2,W1-3,W1-4,W1-5,W1-6,W1-7,W1-8,W1-9</expected_criteria>
+  <expected_criteria>W1-1,W1-2,W1-3,W1-4,W1-5,W1-6,W1-7,W1-8,W1-9,W1-10</expected_criteria>
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D12_PLATFORM_OPS.W1_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 </task_order>
@@ -126,6 +126,66 @@ routed to `0.0.0_AB_MSTR~Z` as a reboot respawn. **Cells whose entire value is i
 certification must not be self-scored** — a build seat scoring its own security exercise is the
 author-verifies-author shape. Nothing in THIS TO is a cross-firm refusal cell, so proceed; but if you
 reach one, stop and route it.
+
+## 8b. ⭐ AMENDMENT 1 (2026-08-31 ~23:4xZ) — THE SENDING DOMAIN IS RULED, AND CELL 2.1 IS NOT SHIPPABLE ON TODAY'S DNS
+
+**READ THIS BEFORE WRITING ANY EMAIL CODE.** Source: `1.0.0_SA_CTO~Z` msg 17196; PRD amendment
+@`5ea66f3a4c`.
+
+### The domain is ruled — and it REVERSES an earlier word
+Andrew, ~23:3xZ, VERBATIM: *"I think it's better we handle this from **opalinvest.dev**"*. He had
+earlier said *"We can do it from auth.opalinvest.com"* and then reversed. ⛔ **THE LATER WORD BINDS —
+DO NOT BUILD AGAINST THE SUBDOMAIN.**
+
+### SES is healthy; the DNS is not — both MEASURED, with controls
+✅ SES production access GRANTED, EnforcementStatus HEALTHY, 50k/day, sending enabled. **Andrew's
+"no longer sandboxed" premise is CONFIRMED, not assumed** — that closes cell 2.3.
+✅ `opalinvest.dev` is a VERIFIED domain identity, DKIM Status SUCCESS, CNAME resolving on two
+instruments (a bogus token correctly failed to resolve — the probe discriminates).
+⛔ **NO SPF. NO DMARC. NO CUSTOM MAIL FROM.** The zone is live on Route53 (NS records read), so these
+are **TRUE ABSENCES, not failed lookups.**
+
+### NEW CELL 2.6 — the three DNS records. YOURS. Route53 zone `Z054626637UVVD9T5GO6`.
+⭐ **ZERO REGISTRAR ACCESS IS REQUIRED.** The registrar is GoDaddy, but the NAMESERVERS are already
+Route53 in our own account. Registrar-vs-DNS-host is the distinction that makes this self-service.
+
+| | record | value |
+|---|---|---|
+| **a** | `TXT opalinvest.dev` | `v=spf1 include:amazonses.com ~all` — ONE lookup against a FRESH 10-lookup budget |
+| **b** | `TXT _dmarc.opalinvest.dev` | `v=DMARC1; p=none; rua=mailto:<TARGET>` |
+| **c** | CUSTOM MAIL FROM | SES identity setting + `MX <mailfrom> 10 feedback-smtp.<region>.amazonses.com` and `TXT <mailfrom> v=spf1 include:amazonses.com ~all` |
+
+⛔ **(b) IS BLOCKED ON ANDREW FOR THE `rua` TARGET AND YOU MUST NOT INVENT ONE.** `opalinvest.com`
+reports to a dmarcian address; whether `.dev` shares it is his question, not a default. **Start at
+`p=none` deliberately — observe, then tighten. DO NOT SHIP `p=reject` ON DAY ONE.** Records (a) and
+(c) are not blocked by this.
+⚠ **(c) — VERIFY THE REGION TOKEN AT SOURCE.** `1.0.0_SA_CTO~Z` read SES in `us-east-1`; confirm
+before applying rather than trusting that line. **WHY (c) MATTERS:** without it the envelope sender
+stays an `amazonses.com` subdomain, so SPF authenticates AMAZON'S domain and cannot ALIGN to ours.
+DKIM alignment alone would carry DMARC, but a single alignment path for LOGIN mail is thin.
+
+### ⛔ DO NOT TOUCH `opalinvest.com`
+Different nameservers, **which we do not control**; its SPF is **one lookup from permerror**; breaking
+it takes down Patricia / White Label Creative marketing mail AND Microsoft 365 mail. **Nothing in D12
+requires touching it.**
+
+### This CHANGES cell 2.1's acceptance
+**2.1 IS NOT ACCEPTED UNTIL AUTH MAIL DEMONSTRABLY REACHES AN ORDINARY INBOX** — not a spam folder.
+A one-time code in spam is a **BROKEN login, not a degraded one**. Add criterion **W1-10** to the
+proof-of-spec instance: an OTP sent to a real mailbox **arrives in the inbox**, stated with the mailbox
+and the folder observed.
+
+### Two items ROUTED ELSEWHERE — not yours, and not blockers
+- ⚠ SES production access was granted against a written use case naming *"Opal personnel"* and two
+  internal uses. **Client-facing login codes are outside that declaration.** Flagged to Andrew by
+  `1.0.0_SA_CTO~Z`; an amendment is cheaper than a review. **Not your call and not a blocker.**
+- ⚠ `opalinvest.dev` **EXPIRES 2026-12-22.** It is the portal auth stack's domain AND now the sole
+  verified SES sending identity. Renewal needs registrar access; **our work does not.** Routed to
+  `0.0.0_AB_MSTR~Z` as a dated OBSERVATION.
+
+### Fences unchanged
+⛔ **NO MONITOR, NO ALARM, NO DELIVERABILITY WATCHER.** The hold was lifted for the ticket reminder
+**by name** and nothing else. This is a **diagnostic and a config change**. GLOBALALARM stands.
 
 ## 9. ⛔ YOU ARE BARRED FROM TEN BASE-ADDRESSED TASK ORDERS — MEASURED AT SEATING
 
