@@ -51,6 +51,16 @@ ADVISOR_KEY = 'Fixture Advisor'
 ENVELOPE_FIELDS = ['contract_version', 'as_of', 'family', 'level', 'si_label',
                    'periods', 'declared_absent_columns', 'window']
 
+# Allocation carries envelope fields the other leaves do not, and the RENDERER READS ALL
+# FOUR EXTRAS: residue_states_declared classifies residue rows (never a frontend literal),
+# basis_line is quoted verbatim, period_keyed explains why the picker does not move these
+# numbers, allocation_as_of dates the cut. Dropping any of them would force the component
+# to invent the fact instead.
+ALLOCATION_ENVELOPE_FIELDS = ENVELOPE_FIELDS + [
+    'allocation_as_of', 'basis_line', 'period_keyed',
+    'residue_states_declared', 'residue_states_present', 'classes',
+]
+
 
 def load(level):
     p = os.path.join(EMISSIONS, 'perfrp_performance_%s.json' % level)
@@ -68,6 +78,35 @@ def load_book():
     p = os.path.join(EMISSIONS, 'perfrp_book_advisor.json')
     with open(p, encoding='utf-8') as fh:
         return p, json.load(fh)
+
+
+def load_allocation(level):
+    p = os.path.join(EMISSIONS, 'perfrp_allocation_%s.json' % level)
+    with open(p, encoding='utf-8') as fh:
+        return p, json.load(fh)
+
+
+def pick_allocation_rows(leaf, n):
+    """Pick n entries, PREFERRING ones that carry a declared RESIDUE class.
+
+    ⛔ THIS IS THE SAME RULE AS THE STATE-SPANNING PICK ABOVE, APPLIED TO ALLOCATION'S
+    OWN DISPOSITION AXIS. Allocation has no figure_state; its dispositions live in the
+    CLASS dimension, where an unclassifiable dollar is emitted as a named residue class.
+    Residue reaches only 117 of 3,834 relationship entries (3.1%) and 170 of 6,179
+    account entries (2.8%) -- measured -- so a first-N pick would almost certainly draw
+    three tidy canonical classes and score a render that never exercised the residue
+    branch as a pass. That is the one-branch-render trap this builder already refuses
+    for figure_state, and it would be no less a false pass here.
+
+    Residue-carrying rows come FIRST; canonical-only rows backfill so the count is met
+    even if the emission ever stops emitting residue.
+    """
+    declared = set(leaf.get('residue_states_declared') or [])
+    with_residue, without = [], []
+    for e in leaf.get('entries') or []:
+        names = {c.get('asset_class') for c in (e.get('classes') or [])}
+        (with_residue if (names & declared) else without).append(e)
+    return (with_residue + without)[:n], len(with_residue)
 
 
 def pseudonymise_row(row, i):
@@ -255,6 +294,50 @@ def main():
         merged['perfrp/perfrp_gainloss_%s.json' % lvl] = gl_env
         gl_reports.append((gl_path, gl, rows, keys))
 
+    # ---- PRF-b-3, allocation, BOTH grains. -----------------------------------------
+    # ⛔ WHY THIS BINDS WHILE THE FIRST b-4 EMISSION DID NOT, THOUGH BOTH LACK
+    # figure_state: allocation's disposition axis is the CLASS dimension, not a per-figure
+    # state. An unclassifiable dollar is emitted as a NAMED RESIDUE CLASS carrying its real
+    # market value, so nothing is left unstated for the consumer to invent. The guard below
+    # is what makes that claim checkable instead of asserted.
+    alloc_reports = []
+    for lvl, keys in (('relationship', [REL_KEY]), ('account', ACCT_KEYS)):
+        alloc_path, alloc = load_allocation(lvl)
+        rows, residue_pop = pick_allocation_rows(alloc, len(keys))
+        if len(rows) < len(keys):
+            sys.exit('ABORT: %s has %d entries, need %d' % (alloc_path, len(rows), len(keys)))
+        # THE CLOSURE GUARD, the structural sibling of the bare-figure refusal above.
+        # The renderer presents these shares as a complete split; if the producer ever
+        # stops closing the distribution, the fixture must REFUSE rather than ship a
+        # split that silently totals less than 100%.
+        for r in rows:
+            s = sum(c.get('allocation_of_level') or 0 for c in (r.get('classes') or []))
+            if abs(s - 1.0) > 0.0005:
+                sys.exit('ABORT: %s row %s allocation_of_level sums to %.6f, not 1.0 -- '
+                         'refusing to bind an unclosed distribution' % (alloc_path, r.get('key'), s))
+        alloc_env = {k: alloc[k] for k in ALLOCATION_ENVELOPE_FIELDS if k in alloc}
+        alloc_env['entries'] = [rebind(r, k) for k, r in zip(keys, rows)]
+        alloc_env['_fixture_provenance'] = {
+            'source_file': os.path.relpath(alloc_path, ROOT).replace(os.sep, '/'),
+            'real': ('every class row -- asset_class, market_value, allocation_of_total, '
+                     'allocation_of_level -- plus the leaf basis_line and residue vocabulary'),
+            'fixture': 'the join key only; each row names its _source_key',
+            'row_selection': (
+                'RESIDUE-SPANNING, not first-N: %d of %d entries in this emission carry a '
+                'declared residue class, so a first-N pick would very likely have rendered '
+                'only canonical classes and never exercised the residue branch'
+                % (residue_pop, len(alloc.get('entries') or []))),
+            'closure_checked': 'allocation_of_level sums to 1.0 +/-0.0005 on every bound row',
+            'no_figure_state_is_correct_here': (
+                'allocation carries no per-figure state BY SHAPE; its dispositions are the '
+                'declared residue classes. These values must NOT be rendered through '
+                'PerfrpFigureCell.'),
+            'not_a_data_oracle': 'render instrument only.',
+        }
+        merged['perfrp/perfrp_allocation_%s.json' % lvl] = alloc_env
+        alloc_reports.append((alloc_path, alloc, rows, keys, residue_pop))
+
+    globals()['_ALLOC_REPORT'] = alloc_reports
     globals()['_BOOK_REPORT'] = (book_path, advisor_row, book)
     globals()['_GL_REPORT'] = gl_reports
 
@@ -300,6 +383,20 @@ def main():
     print('   perfrp/perfrp_book_advisor.json')
     print('   perfrp/perfrp_gainloss_relationship.json')
     print('   perfrp/perfrp_gainloss_account.json')
+    print('   perfrp/perfrp_allocation_relationship.json')
+    print('   perfrp/perfrp_allocation_account.json')
+    print()
+    for ap, al, rows, keys, residue_pop in globals()['_ALLOC_REPORT']:
+        print('ALLOCATION %s -- entries %d, as_of %s, residue-carrying %d (%.1f%%)' % (
+            ap.split(os.sep)[-1], len(al['entries']), al.get('allocation_as_of'),
+            residue_pop, 100.0 * residue_pop / max(1, len(al['entries']))))
+        declared = set(al.get('residue_states_declared') or [])
+        for k, r in zip(keys, rows):
+            cls = r.get('classes') or []
+            res = [c['asset_class'] for c in cls if c.get('asset_class') in declared]
+            tot = sum(c.get('allocation_of_level') or 0 for c in cls)
+            print('   %-16s <- %-24s classes=%d sum_of_level=%.6f residue=%s' % (
+                k, r['key'], len(cls), tot, ', '.join(res) if res else 'none'))
     print()
     for glp, gll, rows, keys in globals()['_GL_REPORT']:
         figs = sum(1 for e in gll['entries'] for v in e.values() if isinstance(v, dict))
