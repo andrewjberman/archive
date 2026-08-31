@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-03</date>
-<status>pending</status>
+<status>pending -- ISSUER RECORD 2026-08-30 04:1xZ (2.0.0_SA_COO): addressed to the BASE serial, which has carried no session since the 08-28 drawdown; LIVE but UNSEATED -- artifact census by 0.4.0_DS_ClientPlatform~R (85373, corpus all, 136,670 files): ONE family-verdict artifact exists (MDPF_T4A/T4A_orion_eclipse_family_verdicts.md, 2026-08-03, the first tranche); SmartX / BD-cot / Schwab-0824 have NO verdict artifact -> 1 of 4 families delivered on the ARTIFACT instrument (03ff36daee's '4 T4.A tranches' is tranches, not families -- ambiguity stated, not smoothed). MDPF_GLOBAL is outside the live paired scope (D2 & D3); the remaining three families seat on a DS lane when the estate scope is re-armed or on Andrew's word; NOT a Rule-27 collision at ~R (the broker's pending list is folder-keyed, server.py:809-812). || PRIOR: pending</status>
 <!-- self-activated 2026-08-03 ~2200Z on WS-1 completion (registry 39 rows @01ab614102, TO complete);
      first family per tranche order: Orion/Eclipse -->
 

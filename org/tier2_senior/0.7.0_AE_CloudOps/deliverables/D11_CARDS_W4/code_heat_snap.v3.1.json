@@ -1,0 +1,139 @@
+{
+ "schema_version": 3.1,
+ "subject": {
+  "id": "code_heat_snap",
+  "kind": "store",
+  "declared_domain": "The code_heat_snap Iceberg table: one registered SURFACE of snap_store.py, which its own header calls THE ONE WRITER for all siblings. Rows arrive as staged .jsonl batches under warehouse/snap_ingest/pending/<surface>/ and are coerced, appended and moved to done/. The subject is THAT TABLE. QUALIFIES THE CELLS CARRIER (AC4): org/tier2_senior/0.7.0_AE_CloudOps/deliverables/cells.0.7.0_AE_CloudOps~X.json @a5fffa2bb7, cells W4-wvft-1 W4-wvft-2 W4-wvft-3 W4-wvft-4 W4-wvft-5 W4-wvft-6 W4-wvft-7 -- this card is the v3.1 reading of those 7 cells; the carrier is NOT edited, and where it and a live read disagree the live read wins and the disagreement is carried."
+ },
+ "as_of": {
+  "carded_utc": "2026-08-30T16:20:02Z",
+  "commit_ish": "d1928aae5feca37891acd3b92583f0bf665ae6aa",
+  "graph_vintage": "S3 object plane, S3 staging plane, EventBridge, terraform and the host-bound declarations all read live at card time"
+ },
+ "process": {
+  "methodology": {
+   "how": "Iceberg append via snap_store.py append_rows(): staged .jsonl batches are read from warehouse/snap_ingest/pending/code_heat_snap/, coerced against the surface's typed payload schema, appended in one Nessie commit, then MOVED to done/. Fail-closed: a batch with invalid rows is rejected LOUD and left in pending/ rather than partially written.",
+   "determinism": "deterministic",
+   "composes": [
+    {
+     "id": "infra/aws/globgrph/code_heat_emit.py @c934701a67",
+     "note": "PRODUCES the staged batch this table is built from: SNAP_PENDING at :241 is warehouse/snap_ingest/pending/code_heat_snap/, sibling_rows() at :244 builds rows directly from git, stage_sibling() at :261 writes the JSONL key at :265, reachable via --emit-sibling / --sibling-only at :281-283. It imports no snap_store and calls no append_rows -- that is the INTENDED ASYNCHRONOUS stage-then-ingest boundary, not an absent dependency"
+    },
+    {
+     "id": "warehouse/snap_ingest/pending/code_heat_snap/*.jsonl",
+     "note": "the staged batch: the handoff artifact between the producer above and the writer below, and the only measured input to this table"
+    },
+    {
+     "id": "infra/aws/globgrph/snap_store.py",
+     "note": "the ONE writer for all snap surfaces: append_rows() at :243, t.append(table) at :256, ingest loop at :285-315"
+    }
+   ],
+   "invents": [],
+   "materializer_standing": "unknown",
+   "basis": "measured",
+   "evidence": "Read at source, line numbers from grep -n AT THE PIN: infra/aws/globgrph/snap_store.py @95084b38e0 -- SURFACES registry at :74-79 with code_heat_snap at :97, append_rows() :243, t.append(table) :256, the pending->coerce->append->done loop :285-315. \u26d4 A CORRECTION THAT WAS ITSELF WRONG, CARRIED BECAUSE THE ERROR IS THE INSTRUCTIVE PART. An earlier version of this card REMOVED code_heat_emit.py from `composes`, on the ground that it imports no snap_store and calls no append_rows. That test is a CALL-GRAPH criterion and `composes` is defined by the schema as WHAT IT REUSES -- so the removal destroyed a TRUE dependency, and 3.0.0_SA_CVO~X caught it. The producer IS the source of this table's only input, measured at its pin: SNAP_PENDING :241 = warehouse/snap_ingest/pending/code_heat_snap/, sibling_rows() :244 building rows straight from git, stage_sibling() :261 writing the JSONL key at :265, reachable via --emit-sibling / --sibling-only :281-283, under a :237 comment naming the batch 'S3-only, dev-box-writable'. The staged batch actually ingested, 20260716T150116Z.jsonl, matches that writer's %Y%m%dT%H%M%SZ.jsonl format exactly, and the :237 'dev-box-writable' independently corroborates the host-bound cadence recorded above. The missing import is the INTENDED asynchronous boundary, not an absent edge. The instrument failure was mine twice over: the grep that 'proved' the absence was `snap_store|append_rows|import`, a pattern that could not have found a staging handoff if one existed. WHAT REMAINS TRUE from that pass, and is kept: the emitter ALSO writes a separate hive PARQUET surface whose declared default output is s3://opal-313476888478-globgrph/warehouse/code_heat/ (2 objects, newest 2026-07-16T03:40:46Z), which is a DIFFERENT store carried in co_resident_stores and must not be confused with this Iceberg table.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "cadence": {
+   "declared_rhythm": "DEV-BOX CADENCE -- host-bound, tied to /log. Not a cloud schedule, and not by omission: the container flag was deliberately REVERTED to make it host-bound.",
+   "actual_trigger": "host-bound invocation on a developer box, staged to warehouse/snap_ingest/pending/code_heat_snap/ then ingested; the invocation itself is UNOBSERVABLE from this seat",
+   "live_matches_declared": "unmeasured",
+   "live_instance_age": "45 days: sole write-day 2026-07-16, newest object 2026-07-16T15:28:06.000Z",
+   "basis": "absent",
+   "basis_by_field": {
+    "declared_rhythm": "held",
+    "actual_trigger": "held",
+    "live_matches_declared": "absent",
+    "live_instance_age": "measured"
+   },
+   "evidence": "\u26d4 THE SCALAR IS `absent` BECAUSE BASIS IS THE FLOOR -- the MINIMUM over this row's own basis_by_field map, ordered measured > held > inferred > absent. Two limbs are `held` (quoted from named authorities), one is `measured` (the object age), and live_matches_declared is `absent` because NO measurement of the host cadence exists -- so the ROW is `absent`, not `held`. An earlier version read `held` while carrying an `absent` field: the floor rule violated on my own row after a day spent applying it to other evidence. 4.0.0_SA_CRO~X caught it. DECLARED, quoted from two named authorities rather than derived. infra/aws/terraform/globgrph/item2a.tf:402-406: GLOBGRPH_CODEHEAT_ENABLED was REVERTED on 2026-07-16 per CTO TO-2 ruling 033933Z, because code_heat is git-history-shaped (it shells `git -C` against the workspace and portal repos) so the flag gated an import that can NEVER resolve in the Fargate derive; 'code_heat now runs on DEV-BOX CADENCE (option a)'. infra/system/04_federated.md:21 records the same split as Andrew-ruled: cloud producers on nightly EventBridge, host-bound producers (code_heat, tool_activity) tied to /log. APPLIED IS UNMEASURED AND THE ROW SAYS SO. A dev-box /log cadence is not observable from this seat, so live_matches_declared is `unmeasured` and the row floors to `absent`. What IS measured is the STAGE-THEN-INGEST plane: pending/code_heat_snap/ KeyCount=0 (nothing awaiting ingest); done/code_heat_snap/ holds exactly ONE batch, 20260716T150116Z.jsonl, 12,925,409 bytes, ingested 2026-07-16T15:28:06Z -- the SAME INSTANT as the table's sole write, which is the join that ties the two planes together. The batch was staged at 15:01:16Z per its own name and ingested 27 minutes later. That write-day is also the day the Fargate revert landed. Whether the host-bound cadence has since RUN and produced nothing, or has not run at all, is NOT distinguishable from here. TRIGGER PLANES SWEPT, AND WHY THE FIRST TWO WERE NOT ENOUGH. (1) EVENTBRIDGE: 140 rules enumerated, none names code_heat -- but that plane's control FAILED, since `cse` writes daily and matches no rule either (its producer is an ECS task), so that zero was never load-bearing. (2) TERRAFORM SCHEDULER RESOURCES: glue_code_heat.tf declares only aws_glue_catalog_database/_table/_partition; that plane's control fires, since the same corpus carries cse_producer's ECS declaration and comp_learns_producer_nightly at cron(0 4 * * ? *). (3) THE HOST-BOUND PLANE, which neither of the first two can see. \u26d4 AN EARLIER VERSION OF THIS CARD CALLED THE TRIGGER A MEASURED ABSENCE ON PLANES 1-2 ALONE. That was wrong and 4.0.0_SA_CRO~X caught it: a positive control certifies ITS OWN SUBJECT, and the terraform control only established that CLOUD SCHEDULES are visible in that corpus -- it cannot certify absence from a host-bound plane it does not cover. Worse, item2a.tf was already IN this seat's own comp-find output as a content hit; the filename match (glue_code_heat.tf) was read and the 26 SURFACED hits were not. An early stop and a true absence read identically.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  }
+ },
+ "artifact": {
+  "persistence": {
+   "persisted": true,
+   "authority_role": "projection",
+   "mutation_policy": "append_only",
+   "form": "an Iceberg table: data files plus a metadata/ tree",
+   "basis": "measured",
+   "evidence": "KeyCount at the declared home = 1 (a POSITIVE, which a wrong bucket or a missing s3:ListBucket cannot produce); 5 objects / 908387 bytes counted client-side over an auto-paginated listing. \u26d4 authority_role is `projection`, NOT `source`. The object census establishes PERSISTENCE and nothing more -- it cannot establish authority for the declared concern, and reading it as if it could is the defect 3.0.0_SA_CVO~X named. The pinned producer settles it against `source` directly: code_heat_emit.py @c934701a67 states 'This parquet is a cheap, refreshable DERIVED snapshot (vintage-stamped), NOT a source of truth: git remains the write-history', and 'we keep git canonical and never copy git into Iceberg'. A table whose upstream declares git canonical is not itself authoritative for code heat.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "location": {
+   "home": "s3://opal-313476888478-globgrph/warehouse/globgrph/code_heat_snap_8b0bca7a-9078-4b8e-8868-ef04062d9952/",
+   "projection_of": [
+    {
+     "id": "s3://opal-313476888478-globgrph/warehouse/snap_ingest/done/code_heat_snap/20260716T150116Z.jsonl",
+     "note": "the single staged batch this table was ingested from; 12,925,409 bytes, ingested 2026-07-16T15:28:06Z, matching the table's sole write instant"
+    },
+    {
+     "id": "git write-history of the ajb_workspace and portal repos",
+     "note": "declared CANONICAL by the code-heat producer's own header -- 'git remains the write-history' -- which is why this store is a projection rather than a source. The git plane itself was NOT traversed by this card"
+    }
+   ],
+   "co_resident_stores": [
+    {
+     "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/",
+     "note": "sibling snap surfaces share this bucket and prefix root; CONTENT overlap was not measured, only co-residence"
+    },
+    {
+     "id": "s3://opal-313476888478-globgrph/warehouse/code_heat/",
+     "note": "the code_heat PARQUET surface written by code_heat_emit.py -- a DIFFERENT store carrying overlapping subject matter, 2 objects, newest 2026-07-16T03:40:46Z. Named here because a duplicate-store census that missed it would understate the estate"
+    }
+   ],
+   "basis": "measured",
+   "evidence": "the s3:// URIs are EXACT IDENTITIES a consumer can equality-join; the home resolved live at KeyCount=1, and both the staged batch and the parquet prefix were listed live.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  }
+ },
+ "trust": {
+  "coverage": {
+   "universe": "objects under the store's own S3 home -- NOT the code-heat row population, and NOT the git history it ultimately projects",
+   "denominator": "5 of 5 objects at the declared home",
+   "explicitly_out": [
+    "NO COMPLETENESS OF THE CODE-HEAT ROW POPULATION IS ASSERTED. Whether the single ingested batch covered what it should have is a different question with a different denominator, and nothing here measures it.",
+    "the row-level contents of the Iceberg data files (object plane only)",
+    "the git write-history this store projects -- named in projection_of but NOT traversed",
+    "whether any consumer still READS this store -- UNMEASURED, and it is the question a forward disposition would turn on"
+   ],
+   "basis": "measured",
+   "evidence": "aws s3api list-objects-v2 auto-paginated, counted client-side: 5 objects, 908387 bytes, 1 distinct write-day(s), newest 2026-07-16T15:28:06.000Z.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "key": {
+   "identity_space": "S3 (bucket, key) for the artifact plane; (namespace, table) in the Nessie catalog for the logical table",
+   "key_expression": "bucket + key, exact string match",
+   "key_is_stable": "stable",
+   "crosses_spaces": true,
+   "declared_mapping": "(repo, path) is the declared JOIN KEY from the code-heat row shape into graph_nodes, per the producer's header; that join was not exercised by this card",
+   "basis": "held",
+   "evidence": "basis is the FLOOR: the S3 identity is MEASURED (listed live), but that the catalog's (namespace, table) resolves to THIS prefix was read from the manifest and NOT verified against the catalog, and the (repo, path) join into graph_nodes was not exercised. Measured limb plus read limbs -> held.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  },
+  "failure_mode": {
+   "returns_on_failure": "A true absence returns KeyCount=0 at rc=0 -- a failed retrieval returns a VALUE, not an error. MEASURED: a wrong BUCKET does NOT do this (rc=255, NoSuchBucket) and a wrong REGION does NOT either (rc=0, the CORRECT KeyCount). A missing s3:ListBucket was NOT exercised and is the one class that may still return an ambiguous result.",
+   "distinguishable_from_true_negative": "no",
+   "basis": "inferred",
+   "basis_by_field": {
+    "returns_on_failure": "measured",
+    "distinguishable_from_true_negative": "inferred"
+   },
+   "evidence": "THREE READ-ONLY PROBES, each a SEPARATE invocation, rc read UNPIPED: true absence -> rc=0 '0'; wrong bucket -> rc=255 'An error occurred (NoSuchBucket) when calling the ListObjectsV2 operation: The specified bucket does not exist'; wrong region -> rc=0 '1'. Target existence, separately: KeyCount=1. AMONG THE THREE EXERCISED CLASSES, only a true absence produces a zero -- the scope is load-bearing, because the FOURTH class (a missing s3:ListBucket) was never exercised and may also return a zero. This card does NOT repeat the carrier cell-7 claim that all four classes emit an identical zero: that claim was FALSIFIED on card 1 of this same face, against this same bucket, and is not inherited here. distinguishable is `no` on the one unexercised class alone, and the row floors to `inferred`. \u26d4 A SECOND RETRIEVAL TRAP WAS HIT AND CAUGHT WHILE CARDING THIS SUBJECT: an s3api --query over an EMPTY prefix returns the literal string 'None', and a line-count over that output reported 1 object where KeyCount says 0. A failed retrieval returns a VALUE at the CLIENT layer too, not only at the service layer.",
+   "owner": "0.7.0_AE_CloudOps~X"
+  }
+ },
+ "verdict": {
+  "standing": "QUALIFIED",
+  "why": "The store RESOLVES and holds real bytes, but it is COLD: one write-day, 45 days ago, from exactly one staged batch. Its trigger is DECLARED and host-bound -- dev-box cadence tied to /log, per the CTO revert at item2a.tf:402-406 and the Andrew-ruled split at 04_federated.md:21 -- and whether that cadence has RUN is UNMEASURABLE from this seat, so the cadence row is `absent`. QUALIFIED on the limbs ENUMERATED below and deliberately NOT counted, so that adding a limb cannot desynchronise a cardinal: authority_role is `projection` and the git plane it projects was NOT traversed; the catalog-to-prefix binding and the (repo, path) join are HELD rather than measured; coverage spans the OBJECT plane only; the failure mode is not distinguishable from a true negative on the one unexercised permission class; whether any consumer still reads this store is UNMEASURED; and materializer_standing is `unknown`. \u26d4 THIS CARD DOES NOT CLASSIFY THE GAP IN EITHER DIRECTION. A point-in-time snapshot written once may be exactly what was intended, and a declared host-bound cadence can legitimately run rarely -- but this card's own evidence says run-versus-no-run is NOT DISTINGUISHABLE from this seat, and a row that cannot separate those two cannot call the gap unremarkable any more than it can call it alarming. An earlier version called it unremarkable, asserting the benign branch of a distinction the card had just declared unmeasurable. Naming the gap is the carder's job; classifying it needs a measurement of the host plane that does not exist here, and deciding it is the owner's.",
+  "blocking_defects": null
+ },
+ "forward_disposition": {
+  "standing": "undecided",
+  "set_by": null,
+  "basis": "absent",
+  "evidence": "NOT SET BY THE CARDING LANE -- the store owner's call at the class close. The cadence, consumer-use and duplicate-surface rows are what it would turn on.",
+  "decided_utc": null
+ },
+ "carded_by": "0.7.0_AE_CloudOps~X"
+}

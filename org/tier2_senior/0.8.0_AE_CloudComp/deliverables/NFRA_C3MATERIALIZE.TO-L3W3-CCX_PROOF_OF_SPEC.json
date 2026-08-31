@@ -1,0 +1,172 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_C3MATERIALIZE.TO-L3W3-CCX",
+ "firm": "FABRIC",
+ "phase": "NON-BUILD-OTHER",
+ "assignee": "0.8.0_AE_CloudComp~X",
+ "decomp_ref": {
+  "doc": "workflows/atom_decomposition/runs/nfra-c3materialize-L3/20260829T1906Z/DECOMP.md",
+  "vintage_commit": "94935b740e",
+  "to_ref": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_C3MATERIALIZE.TO-L3W3-CCX.k-sweep.md"
+ },
+ "spec_ref": {
+  "doc": "docs/architecture/NFRA_C3MATERIALIZE_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f757ed7129"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_L3W3_L3C01_FLOOR/l3c01_floor_rows.json",
+   "kind": "config_data",
+   "commit_or_etag": "a133d4a59dbc4916066dec407abcbea6557a1f23",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Five cell rows, all WRITTEN on the fired gate. No producing store written; run 1 and the sweep artifact were opened READ-ONLY at their pins.",
+   "artifact_covered_by": [
+    "L3W3-CCX-AC1",
+    "L3W3-CCX-AC2",
+    "L3W3-CCX-AC3",
+    "L3W3-CCX-AC4",
+    "L3W3-CCX-AC5"
+   ]
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_L3W3_L3C01_FLOOR/build_rows.py",
+   "kind": "script",
+   "commit_or_etag": "a133d4a59dbc4916066dec407abcbea6557a1f23",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Derives every value from artifacts at their pins; three guard mutants exercised and all REFUSED.",
+   "artifact_covered_by": [
+    "L3W3-CCX-AC2",
+    "L3W3-CCX-AC4"
+   ]
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D11_L3C01_STABILITY_CONSUMER/check_stability_L3C01.py",
+   "kind": "script",
+   "commit_or_etag": "28f3028a66ad70891c6f8ceedfc76c148cf2bd5d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The consuming half: firm_representation binding, INSUFFICIENT_N as its own typed result, basis check, earned-refusal check.",
+   "artifact_covered_by": [
+    "L3W3-CCX-AC1",
+    "L3W3-CCX-AC3",
+    "L3W3-CCX-AC5"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "L3W3-CCX-AC1",
+   "criterion_verbatim": "THE SEAT SEATED ON THIS CELL OWNS READING `firm_representation` AND THIS CELL NAMES THE FIELD EXPLICITLY rather than inheriting it from any message. MEASURED by 0.8.0_AE_CloudComp~X at the pin: NO consumer reads it today -- check_stability_L3C01.py @d8725bc60c, 936 lines, `firm_representation` 0 / `effective_partition` 0 / `base_rate` 0 / `mdpf` 0, positive control `permutation_battery` 6. That is the EXPECTED answer (those are wave-3 arm fields on an artifact that did not exist), not a gap in that seat's work -- and it is exactly why the binding needs an owner: a field everyone believes is read that nobody cuts a cell to read drifts to unpopulated. Measured on this project: 0 of 16 defective where a validator rejects, 5 of 39 in the neighbouring free string. The consumer REJECTS on a missing or unresolvable firm_representation; it does not warn.",
+   "method": "command",
+   "invocation": "python .../D11_L3W3_L3C01_FLOOR/build_rows.py  (derives every value from artifacts read AT THEIR PINS)  +  python .../D11_L3C01_STABILITY_CONSUMER/tail_harness.py  (49 arms)",
+   "output_evidence": "l3c01_floor_rows.json rows.L3W3-c69f-1: BOUND, RUN-2 scoped. The consumer at 28f3028a66 reads firm_representation and REFUSES on absence or unresolvability (exit 3), never warns. Harness arms F1 (absent on run 2 -> REFUSED), F2 (present-but-empty -> REFUSED) and F3 (absent on run 1 -> ADMITTED, the other truth) all as expected. The regime scope is load-bearing: unconditional, the binding would REFUSE run 1 @f8c1ad1b09, the artifact AC2 derives FROM.",
+   "denominator": "5 owned cells; 49 of 49 harness arms as expected, from a 39 of 39 baseline measured on the UNMODIFIED consumer before any edit",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "L3W3-CCX-AC2",
+   "criterion_verbatim": "THIS IS RUN 2, so a floor MAY finally be derived -- and only from run 1's battery, never its own (1b prohibits same-run derivation). floor_derivation.<S> carries derived_from_run_id, derived_at_commit, derived_from_path, derived_artifact_sha256, metric_domain, null, spread, n_permutations, multiplier 3, floor (the checker RECOMPUTES it), deriving_run_observed and sanity. derived_at_commit MUST be a strict ancestor of the carrier.",
+   "method": "command",
+   "invocation": "python .../D11_L3W3_L3C01_FLOOR/build_rows.py  (derives every value from artifacts read AT THEIR PINS)  +  python .../D11_L3C01_STABILITY_CONSUMER/tail_harness.py  (49 arms)",
+   "output_evidence": "rows.L3W3-c69f-2. rho DERIVED: floor 0.313689 recomputed as null -0.016284 + 3 x spread 0.109991 from run 1 read AT ITS PIN (sha256 88dbe726b1581dfb...), basis `held` per 84369(1), derived_at_commit f8c1ad1b09 a strict ancestor of the carrier. J: REFUSED-INSUFFICIENT-N, n_permutations 6 against threshold 20, tail_observed_at_n 6, provenance fields FILLED because it is the N that refuses and not the provenance.",
+   "denominator": "5 owned cells; 49 of 49 harness arms as expected, from a 39 of 39 baseline measured on the UNMODIFIED consumer before any edit",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "L3W3-CCX-AC3",
+   "criterion_verbatim": "J's derivation is BLOCKED until N >= 20 and carries tail_observed_at_n 6; rho may derive at N >= 5 having no tail. An in-battery draw outside the band of the others at derivation time returns SPREAD_TAIL and REFUSES to derive for that statistic -- not SPREAD_SANITY_FAIL, which is about the deriving run's observed.",
+   "method": "command",
+   "invocation": "python .../D11_L3W3_L3C01_FLOOR/build_rows.py  (derives every value from artifacts read AT THEIR PINS)  +  python .../D11_L3C01_STABILITY_CONSUMER/tail_harness.py  (49 arms)",
+   "output_evidence": "rows.L3W3-c69f-3. J blocked until N>=20 carrying tail_observed_at_n 6; rho derivable at N>=5 having no tail. SPREAD_TAIL and INSUFFICIENT_N are separate typed results in the consumer: arms D2 (a REAL declared tail -> SPREAD_TAIL), D3 and N1 (clean battery -> INSUFFICIENT_N), D4 (at N=20 the recorded tail clears). The tail test runs BEFORE the N threshold; the reverse order masks a real tail behind the general refusal, which the D2 arm caught.",
+   "denominator": "5 owned cells; 49 of 49 harness arms as expected, from a 39 of 39 baseline measured on the UNMODIFIED consumer before any edit",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "L3W3-CCX-AC4",
+   "criterion_verbatim": "floor_S must lie strictly BELOW the observed S of the run it was derived from; a re-derived floor the deriving run itself fails is a finding about the spread being too wide to discriminate, and floor_status stays HELD-UNEXERCISED rather than binding.",
+   "method": "command",
+   "invocation": "python .../D11_L3W3_L3C01_FLOOR/build_rows.py  (derives every value from artifacts read AT THEIR PINS)  +  python .../D11_L3C01_STABILITY_CONSUMER/tail_harness.py  (49 arms)",
+   "output_evidence": "rows.L3W3-c69f-4: PASS. floor 0.313689 strictly below the DERIVING run's observed 0.958398. Keyed on run 1 per the certified oracle's own words, confirmed as reading (a) by the issuer (85390) and the design lane (85407). The k-sweep AUC is NOT S and no row carries it as one: a full leaf-name census of ksweep_measurements.json @e2ab79fba4 returned 0 of 21 stability-family names, and the wrong-grain comparison would have PASSED (0.510390 > 0.313689).",
+   "denominator": "5 owned cells; 49 of 49 harness arms as expected, from a 39 of 39 baseline measured on the UNMODIFIED consumer before any edit",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "L3W3-CCX-AC5",
+   "criterion_verbatim": "An absent battery, an absent scheme, a missing derived_from_path or a non-ancestor derived_at_commit each REFUSE the derivation with its own typed result -- PROVENANCE_UNVERIFIED is never a pass, and an unrunnable provenance check is not a passed one.",
+   "method": "command",
+   "invocation": "python .../D11_L3W3_L3C01_FLOOR/build_rows.py  (derives every value from artifacts read AT THEIR PINS)  +  python .../D11_L3C01_STABILITY_CONSUMER/tail_harness.py  (49 arms)",
+   "output_evidence": "rows.L3W3-c69f-5. Absent battery / absent scheme / missing derived_from_path / non-ancestor derived_at_commit each refuse with their own typed result; PROVENANCE_UNVERIFIED is never a pass and an unrunnable provenance check is not a passed one. A DECLARED refusal is verified against DERIVE_MIN_N -- arms R1 (earned -> ADMITTED), R2 (unearned at N=25 -> FORM_DEFECT), R3 (wrong threshold cited -> FORM_DEFECT), R4 (provenance dropped -> FORM_DEFECT).",
+   "denominator": "5 owned cells; 49 of 49 harness arms as expected, from a 39 of 39 baseline measured on the UNMODIFIED consumer before any edit",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Three mutations of the REAL builder through the same path that produced the delivered rows, each a failure the ruling names: (1) J_THRESHOLD lowered so a J floor WOULD derive, making the typed refusal unearned; (2) RHO_THRESHOLD raised above run 1's N, so the rho half would also have to be a refusal; (3) RUN1_PIN made unresolvable. Paired with the UNMUTATED builder as a positive control, because a refusal alone cannot distinguish 'the guard caught it' from 'the input was invalid anyway'. SEPARATELY, the consumer carries a 49-arm harness whose 39-arm baseline was measured on the UNMODIFIED file FIRST -- a mutant battery from a failing base means nothing.",
+   "expected": "All three REFUSED; the unmutated builder emits; harness 49 of 49.",
+   "status": "FIRED-AS-EXPECTED",
+   "observed": "3 of 3 REFUSED, each naming its own condition -- 'the typed refusal below would be UNEARNED'; 'the rho half would also be a typed refusal'; 'did not resolve -- fatal: invalid object name'. Positive control: the unmutated builder wrote 5 of 5 rows. Harness: 49 of 49 as expected (baseline 39 of 39 before any edit)."
+  },
+  "determinism": {
+   "method": "build_rows.py re-run and the two emitted payloads compared by sha256, with a negative control confirming the digest MOVES on a changed payload (a comparison that cannot fail proves nothing).",
+   "expected": "identical across runs; the negative control differs.",
+   "status": "STABLE",
+   "observed": "re-run digests IDENTICAL; negative control digest MOVED as required"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "sec-6 tests (PRD 6.1 / 6.2 / 6.5)",
+   "reason": "Wave 3 discharges no sec-6 test by its own rule (m-7); it gates whether L4 is safe to build. A report naming any of them as PASSED is FALSE."
+  },
+  {
+   "item": "a topdecile_jaccard floor",
+   "reason": "REFUSED-INSUFFICIENT-N at n=6 against threshold 20. The refusal IS the correct value; floor_status.J stays HELD-UNEXERCISED into run 3."
+  },
+  {
+   "item": "run 2's own stability rho",
+   "reason": "Not read and not required by any of these five cells. It is the input to a FUTURE derivation (run 3's floor) and lives on L3W3-b8a2-5 / b8a2-7 on 0.7.0_AE_CloudOps~X's face, not here."
+  },
+  {
+   "item": "the internal shape of firm_representation",
+   "reason": "L3W3-dc02-7 on 0.8.0_AE_CloudComp~Y's face. This consumer refuses absence and unresolvability only; adjudicating a shape it did not agree would reject the real artifact."
+  },
+  {
+   "item": "the k-sweep's AUC as an observed S",
+   "reason": "REFUSED by construction (design lane 85407): a row carrying an AUC as observed_S is FORM_DEFECT."
+  }
+ ],
+ "surprises": [
+  "CORRECTION AGAINST MY OWN WAVE-2 CODE (recorded, remediated @28f3028a66): the consumer typed a CLEAN battery waiting on N as SPREAD_TAIL, which is wrong by the file's own definition of that result -- that branch is reached only when no draw lies outside any band. It collapsed two typed results the certified cells require to stay distinct (c69f-3 vs c69f-5).",
+  "OBSERVATION / INERT (0.7.0_AE_CloudOps~X, cc issuer): 85284 pointed this lane at ksweep_measurements.json for 'run 2's observed S'. A full leaf-name census AT THE PIN returned 0 of 21 stability-family names. The cell was NOT written on that pointer; the wrong-grain comparison would have PASSED (0.510390 > 0.313689). That seat corrected its own sentence unprompted (85403) and both halves ruled reading (a).",
+  "OBSERVATION / DISARMED: this lane briefly asserted that two peers had mis-transcribed CELL_ID_RE, having read the SHARED WORKTREE mid-repair rather than the pin they cited. Retracted in full (84973-84977); the peers were correct at 711a0717a0."
+ ],
+ "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-30/ (written at session close, with a mandatory Compiler Tools section)",
+ "compiler_tools": [
+  {
+   "tool": "comp-which",
+   "invocation": "comp-which \"how do I grep the repo\" (XXX.md A.3 exercise half)",
+   "result": "PASS -- a forwarder RAN and produced its banner; 105/105 resolve bare. Resolution is not execution, so both halves were run."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "--name over the estate for the proof-instance and consumer paths",
+   "result": "PASS -- located both with a printed denominator; the one zero it returned was correctly reported as a MEASURED zero over the scanned corpus, not an absence."
+  },
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "on every .py edit before each commit",
+   "result": "PASS -- clean, and it states its own scope honestly (1 of 2 files on the cells commit, because it reads .py and not .json)."
+  },
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "every commit, lane author line, -F message files written by a non-shell writer",
+   "result": "PASS -- msg-verify MATCH on all three commits."
+  },
+  {
+   "tool": "comp-tool-hud (Rule 21 rail)",
+   "invocation": "a raw `find` over org/mcp/inbox",
+   "result": "GATE FIRED CORRECTLY against me -- denied and routed to comp-find. I complied and dropped the search rather than working around it."
+  }
+ ]
+}

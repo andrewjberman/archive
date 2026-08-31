@@ -1,0 +1,171 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_49F.c02-NEGBMV",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.4.0_DS_ClientPlatform~N",
+  "decomp_ref": {
+    "doc": "org/tier1_exec/2.0.0_SA_COO/deliverables/ADVI_49F_DECOMP_AMENDMENT_c02_REEMISSION_20260830.md",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform~N/task_orders/ADVI_49F.c02-NEGBMV.negative-bmv-guard-and-refusal-status.md",
+    "vintage_commit": "946b5c5a3c"
+  },
+  "spec_ref": {
+    "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_C_TWR_ENGINE_20260811.md",
+    "group": "C",
+    "vintage_commit": "bfaa0a6e6e"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/c02_twr_engine.py",
+      "kind": "script",
+      "commit_or_etag": "this commit",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "[kind as written: gold runner (producer)] [state as written: COMMITTED; the window's deploy leg is CONSENTED AND WANTED -- C02-g-6 re-runs against the DEPLOYED engine] Three changes: the guard at the BMV branch now tests the VALUE and adds UNCOMPUTABLE-NEGATIVE-BMV with its Rule-24 record; SCHEMA_VERSION 1.1 -> 1.2 with the CTO's required comment line; the NEAR_ZERO_BMV comment corrected to say MAGNITUDE, which is what the only test using it actually did. GROSS_LEG_VINTAGE is UNCHANGED at 946b5c5a3c... per the ruled resolution (A) -- r_gross is computed identically on every row that still carries one. The deployed-plane ETag is NOT claimed here; it is owed as a measured s3api read after the window."
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/tests/test_c02_twr_engine.py",
+      "kind": "test",
+      "commit_or_etag": "this commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "[kind as written: acceptance arms (4 added, 1 moved)] [state as written: COMMITTED] 20 passed (16 pre-existing + 4 new). The MOVED one is the V-3 refuser the consumer census found -- the schema_version assertion this seat wrote for c02-VINTAGE, which had to move to '1.2' in the same commit as the bump. That is a refuser doing exactly what a refuser is for."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~N/deliverables/ADVI_49F.c02-NEGBMV.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "this commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "[kind as written: proof-of-spec instance] [state as written: RECORD] Validated positional N-1..N-5 before the status flip."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "N-1",
+      "criterion_verbatim": "THE CENSUS FIRST. Every account-day with bmv < 0 over all 535 partitions at the 03:22:43Z vintage: status distribution (OK-with-served-r_net vs already refused), emv sign (sign-inverted = emv > 0), bmv magnitude distribution, per-partition + per-account counts, the fee-day subset; denominators printed (2,593,321 OK account-days); reconciled to AE~L's 1,089 (agree or explain). The affected-PARTITION list with counts = the first deliverable. Fees-on-a-negative-valuation surfaced to the channel as its own line, not folded in.",
+      "method": "live_read",
+      "invocation": "python n1_negbmv_census.py <out.json> -- streams all 535 twr_daily partitions from S3, client-side counted, auto-paginated; no abs() applied to bmv or to any gap",
+      "output_evidence": "535 partitions scanned; 3,021,660 rows; 2,593,321 OK account-days == the face's stated denominator EXACTLY. bmv < 0 on 1,089 account-days, ALL status OK, ALL with non-null r_net -- zero already refused for another reason. bmv magnitude min -250,000.00 median -26.50 max -1.00; |bmv| < 1 among them: 0; bmv <= -1: 1,089 of 1,089, so the ruled enum covers the whole population with no overlap and no uncovered member. AFFECTED PARTITIONS 396 of 535 (74.0%), 1-7 rows each (median 2), spanning 2024-07-09..2026-08-28; 46 distinct accounts, top 155 days. FEE-DAY subset 15, signed gap NEGATIVE on 15 of 15 -- reconciles exactly to the R-4 negative set. Partitions with no bmv column: 3 (the known all-refused dates). RECONCILIATION: 1,089 and 15 both match 0.7.0_AE_CloudOps~L's independent acceptance-pass figures -- different code, different run, different pass, so corroboration rather than agreement.",
+      "denominator": "535 of 535 partitions; 1,089 of 2,593,321 OK account-days; 396 of 535 partitions affected; 15 of 1,089 are fee days",
+      "status": "PASS",
+      "status_reason": "Census ran before any code change and its numbers reconcile to an independent instrument. It also corrected a claim of this seat's own (see surprises) and produced the 396-partition figure that inverted the arithmetic C02-g-6's scope had been chosen on."
+    },
+    {
+      "criterion_id": "N-2",
+      "criterion_verbatim": "THE GUARD. :224 tests the value; UNCOMPUTABLE-NEGATIVE-BMV lands with its Rule-24 record; refusal rows carry None on both legs + the vintage/schema stamps; :47 comment + docstring agree with the code; no other branch moves.",
+      "method": "diff",
+      "invocation": "git diff on c02_twr_engine.py; comp-find 'schema_version.*(==|!=)' -- data/assets/scripts/gold/runners_49f (the consumer census BEFORE the bump)",
+      "output_evidence": "The guard now reads `if float(bmv) <= -NEAR_ZERO_BMV:` -> UNCOMPUTABLE-NEGATIVE-BMV, placed BEFORE the unchanged `abs(float(bmv)) < NEAR_ZERO_BMV` -> UNCOMPUTABLE-ZERO-BMV. Both refusal rows carry None on r_net AND r_gross, matching every other refusal branch in the function. The Rule-24 record is written beside the branch: three members, MECE over the declared domain, one grain, one intent, and the two refusal members are separate values because NO SINGLE REMEDY MOVES BOTH -- a thin base is a data condition more data can fix, a negative base is undefined arithmetic that no data fixes. The :47 comment now says MAGNITUDE, which is what the code always did, and records that the comment and the code disagreed for the life of the file with the code winning. SCHEMA_VERSION 1.1 -> 1.2 carries the CTO's required line verbatim in substance. The vintage/schema stamps reach the new refusal rows automatically because identity_stamp() is applied as a scalar to the whole frame -- the c02-VINTAGE design makes this structural rather than something this change had to add. CONSUMER CENSUS BEFORE THE BUMP: 4 hits across 107 files scanned, corpus=all. Exactly ONE is a refuser on the value being bumped -- this seat's own arm asserting stamp['schema_version'] == '1.1' -- and it moves in the same commit. The other three are POLICY_BLOCK's own version (a different object), a stamp-to-stamp inequality, and manifest_schema_version == 1 (a different field, int).",
+      "denominator": "4 schema_version comparisons across 107 files scanned; 1 of 4 is a refuser and it moved; 0 other branches touched",
+      "status": "PASS",
+      "status_reason": "The guard tests the value, the enum carries its record, and the one consumer that refuses on the bumped value moved with it. No downstream table was re-emitted here."
+    },
+    {
+      "criterion_id": "N-3",
+      "criterion_verbatim": "ARMS THAT CAN FAIL. A negative-BMV fixture that reaches the branch on REAL bytes; a polarity arm (bmv < 0, emv > 0 -> REFUSED, never a negative return); existing zero-BMV + OK arms unchanged and green; mutation: revert :224 to abs() -> both new arms FAIL.",
+      "method": "test_suite",
+      "invocation": "python -m pytest tests/test_c02_twr_engine.py -q, run three times: clean, mutant (negative branch removed), clean-after-restore",
+      "output_evidence": "CLEAN 20 passed (16 pre-existing + 4 added). MUTANT (the negative branch deleted, reverting to the abs()-only guard): 3 FAILED / 17 passed, and every failure landed on its ASSERTION with the row coming back status 'OK' -- the pre-fix behaviour exactly. The three that fired: the refusal arm ('a negative base must take its OWN refusal member, got OK'), the polarity arm ('OK' != 'UNCOMPUTABLE-NEGATIVE-BMV'), and the boundary arm ('-1.50: negative base'). CRITICALLY, test_positive_bmv_is_untouched_by_the_negative_guard PASSED under the mutation, which is the discrimination that matters: the arms that should fail did, the arm that should not did not. Restored and re-verified at 20 passed. The mutation was applied with an asserted anchor so a silent no-op replace was impossible.",
+      "denominator": "20 of 20 arms pass clean; 3 of 3 negative-BMV arms fired under mutation, 3 of 3 at an assertion; 1 of 1 control arm correctly unaffected",
+      "status": "PASS",
+      "status_reason": "The arms reach the branch on frames built through the module's own fixture helpers, and each failure lands on an assertion rather than a guard -- the wrong-arm-vs-dead-arm distinction this file has been burned by before."
+    },
+    {
+      "criterion_id": "N-4",
+      "criterion_verbatim": "NEGATIVE CONTROL ON THE FIX. One populated partition, --local-out before/after: every bmv >= 1 row byte-identical on r_net, r_gross, status, vintage; ONLY bmv <= -1 rows change (OK -> UNCOMPUTABLE-NEGATIVE-BMV, both legs None); (-1, 1) unchanged. Denominators printed.",
+      "method": "live_read",
+      "invocation": "python c02_twr_engine.py --date 2026-07-15 --local-out <scratch> --canonical-local <mirror> --calendar-local <mirror> (NO --upload), compared against the SERVED pre-fix partition downloaded from S3",
+      "output_evidence": "date=2026-07-15, 7,141 rows both sides, index identical. Run census: {'OK': 6222, 'UNCOMPUTABLE-ZERO-BMV': 907, 'NO-PRIOR-BALANCE-ACCOUNT-ABSENT': 7, 'UNCOMPUTABLE-NEGATIVE-BMV': 5} -- the 5 matching the N-1 census for this partition exactly. bmv >= 1 (6,222 rows): r_net identical 6222/6222, r_gross 6222/6222, status 6222/6222, gross_leg_vintage 6222/6222. bmv <= -1 (5 rows): before {'OK': 5} with r_net served on 5 of 5; after {'UNCOMPUTABLE-NEGATIVE-BMV': 5} with r_net AND r_gross null on all 5. ROWS WHOSE STATUS CHANGED AT ALL: 5 of 7,141, and every one is bmv <= -1. schema_version 1.1 -> 1.2; gross_leg_vintage UNCHANGED on every row.",
+      "denominator": "7,141 rows; 6,222 in the computable band all identical; 5 changed of 7,141; 914 already-refused rows status-identical 914 of 914",
+      "status": "PASS",
+      "status_reason": "The computable domain does not move and only the negative band does. ⛔ ONE HONEST LIMIT, NOT ROUNDED INTO THE PASS: the (-1,1) band has a ZERO DENOMINATOR on this partition -- 0 rows -- because an already-refused row carries no bmv, so the zero-BMV rows land in the NaN bucket and cannot be read by bmv band. A zero denominator is not a pass. What DOES cover them is preservation: all 914 NaN-bmv rows kept their exact status (907 UNCOMPUTABLE-ZERO-BMV, 7 NO-PRIOR-BALANCE-ACCOUNT-ABSENT), and the in-band behaviour is covered by the unit arm at the -0.50 / -1.50 / +0.50 boundary instead."
+    },
+    {
+      "criterion_id": "N-5",
+      "criterion_verbatim": "DEPLOY on the DS lane's own path (Rule 13; safe-commit; commit is consent to the window's deploy leg and the deploy is WANTED -- C02-g-6 re-runs against the deployed engine, read on the running artifact), with GROSS_LEG_VINTAGE bumped to the fix commit ... proof VALID rc=0 positional N-1..N-5.",
+      "method": "command",
+      "invocation": ".tools/commit-gate.sh on both .py files; .tools/safe-commit.sh --author '0.4.0_DS_ClientPlatform~N ...' -F <msgfile> -- <paths>",
+      "output_evidence": "commit-gate: 'OK: pre-commit gate clean for 2 of 2 file(s)' (py_compile + ds-precommit + ruff py39). No integration window open at commit time (last frame is the 03:27Z CLOSE). ⛔ THE VINTAGE BUMP IN THIS CRITERION'S TEXT IS STRUCK AND NOT PERFORMED: 3.0.0_SA_CVO 85200 raised the tension before the build (a moved vintage plus a scoped re-emission recreates the mixed-vintage column C02-g-3 spent 535 partitions removing, and moves a field for a change that does not touch r_gross), 2.0.0_SA_COO 85204 withdrew it as the issuer's own error, and 1.0.0_SA_CTO 85212 ruled resolution (A) as the convention gate. GROSS_LEG_VINTAGE therefore STAYS 946b5c5a3c89b61865ae1f4f60a609e831034cc2 and SCHEMA_VERSION carries the emission-contract change instead. The deployed-plane ETag is owed as a measured read after the window, not claimed here.",
+      "denominator": "2 of 2 files gate-clean; 1 commit; deployed-plane read outstanding by design",
+      "status": "PASS",
+      "status_reason": "Committed on the DS lane's own path under this seat's author line, with the vintage NOT moved per the ruled resolution. The criterion's original wording was amended by the issuer and the gate before the build, which is why the text and the act differ."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The three negative-BMV arms must FAIL when the guard is reverted to the abs()-only form, and must fail AT THEIR ASSERTIONS rather than at a guard. An arm that dies at a guard never reaches the field under test and passes a mutation battery by not running.",
+      "expected": "Removing the `float(bmv) <= -NEAR_ZERO_BMV` branch restores the pre-fix behaviour, so a negative-BMV row comes back status OK with a return computed over a negative denominator, and the three new arms fail; the positive-BMV control arm must remain green, since nothing about the computable domain changed.",
+      "observed": "3 FAILED / 17 passed. test_negative_bmv_refuses_and_never_returns_a_number: 'a negative base must take its OWN refusal member, got OK'. test_negative_bmv_with_a_gain_is_refused_not_reported_as_a_loss: assert 'OK' == 'UNCOMPUTABLE-NEGATIVE-BMV'. test_the_two_refusal_members_are_separated_at_the_boundary: '-1.50: negative base'. test_positive_bmv_is_untouched_by_the_negative_guard PASSED, as required. The mutation used an asserted anchor so a no-op replace was impossible, and the file was restored and re-verified at 20 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Both instruments are pure reads over pinned inputs. The N-1 census streams the served objects and writes nothing. The N-4 emission runs --local-out with NO --upload against five mirror partitions staged from S3, so it is repeatable to the same numbers and touches no served plane. The identity that would expose drift is asserted rather than eyeballed: the computable band must be identical row-for-row across the change, and the changed set must equal the bmv <= -1 set exactly rather than merely overlap it.",
+      "observed": "N-4: 6,222 of 6,222 computable rows identical on all four fields; the changed set is 5 rows and equals the bmv <= -1 set exactly (not a superset, not a subset); 914 of 914 already-refused rows status-preserved. N-1: the 1,089 and the 15 reproduce 0.7.0_AE_CloudOps~L's independently computed figures exactly.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Re-emission of any stored partition",
+      "reason": "C02-g-6 at 0.7.0_AE_CloudOps~L, ruled FULL 535 by the issuer. Nothing was written to S3 by this cell; the 1,089 rows still carry their served values until that campaign runs."
+    },
+    {
+      "item": "The GROSS_LEG_VINTAGE bump named in N-5's original text",
+      "reason": "STRUCK before the build by the convention gate (resolution (A)). Recorded under N-5 rather than silently omitted, because the criterion's text and the act deliberately differ."
+    },
+    {
+      "item": "The fees-on-a-negative-valuation question",
+      "reason": "15 account-days where an advisory fee was charged against a NEGATIVE beginning market value. Surfaced to the channel as its own line with the full list; it is a billing/data question about the fee feed, not an engine question, and the engine fix does not touch it -- those rows become refusals and the fee still happened."
+    },
+    {
+      "item": "The PRESENT-AS-NaN consequence on 396 partitions",
+      "reason": "Surfaced to the issuer, the gate and the grader before the build, not solved here. The fix moves affected partitions from an all-or-nothing shape into the mixed shape perfrp_contract.py:325-331 already documents as the dangerous one (a NaN passes a not-None test; a consumer coercing NaN->0 renders a refusal as 0.00%). No consumer of twr_daily is client-facing today, so it is a gate on a future act."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION x DISARMED (owner: this seat, corrected same-turn). My 85147 characterised the defect as a served r_net whose sign is 'inverted from the direction of the actual change', generalising from one vivid row (bmv -4.62 -> emv +10.12, served -319%). The N-1 census measured the population: emv > 0 on 28 of 1,089, emv <= 0 on 1,061. SIGN-INVERSION IS 2.6% OF THE POPULATION, NOT ITS CHARACTER. The defect is unchanged and covers all 1,089 -- a TWR over a negative base is undefined wherever EMV lands -- but the argument is 'the base is negative', not 'the sign is backwards'. Corrected in 85233 before it could propagate into the cell's framing.",
+    "OBSERVATION x DISARMED (owner: this seat, disclosed at 85233). Acking three ids, I typed one from a subject-line reference instead of reading its Msg-ID line, and the id was not addressed to this seat. The broker's new recipient check REFUSED it -- and this session's pre-restart server rendered that refusal as 'already carried an ACK', a reassuring sentence for a write that did not happen. Found only by reading the delivery row, where the real message was still SENT and unacked. Independent field confirmation that the recipient check works (0.0.0_AB_MSTR's falsifier was a deliberate foreign id; this was an accident, which is better evidence), and a caution that the stale print actively conceals it. LD-0480's 'ack it FROM ITS Msg-ID LINE' is exactly the rule that would have prevented it.",
+    "OBSERVATION x INERT (owner: the issuer, surfaced at 85253, not chased). 0.7.0_AE_CloudOps~L's fallback proposal to DERIVE C02-g-6's partition list at write time by the predicate 'contains a row with bmv <= -1' is self-extinguishing: after the fix those rows are refusals carrying no bmv at all, so a re-emitted partition no longer matches. Resumption is therefore correct by construction, but the predicate CANNOT verify its own coverage -- it returns empty whether the campaign completed or never ran past date 1, reading identically on success and on total failure. The coverage check must be the CTO's pre-registered sweep over all 535."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~N/logs/2026-08-30/",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'schema_version.*(==|!=)' -- data/assets/scripts/gold/runners_49f (the N-2 consumer census, run BEFORE the bump)",
+      "result": "4 hits across 107 files scanned, corpus=all, bands printed. Identified EXACTLY ONE refuser on the bumped value -- this seat's own c02-VINTAGE arm -- which moved in the same commit. The rail also GATED an earlier raw recursive grep of the same tree and routed it here, which is the hook working as designed; the comp-find form gave the graded bands the raw grep would not have."
+    },
+    {
+      "tool": "the N-1 census instrument (purpose-built, read-only)",
+      "invocation": "python n1_negbmv_census.py -- 535 partitions streamed from S3, auto-paginated and client-side counted",
+      "result": "The cell's first deliverable. Produced the 1,089 / 396-partition / 46-account shape and the 15 fee-days, reconciling exactly to an independent instrument. Deliberately retains the PER-PARTITION axis, which 0.7.0_AE_CloudOps~L's acceptance rollup does not -- that limit is why the full scan was necessary and it was confirmed by reading their artifact first (Build Ladder rung 2) rather than assumed."
+    },
+    {
+      "tool": "pytest (as the falsifier)",
+      "invocation": "python -m pytest tests/test_c02_twr_engine.py -q, three runs: clean / mutant / clean-after-restore",
+      "result": "20 / 17 / 20. Recorded under controls.mutant. Restore verified after the mutation rather than assumed, because a battery run from a damaged base reports 'all fired' and means nothing."
+    },
+    {
+      "tool": "c02_twr_engine.py itself (ad-hoc QA, N-4)",
+      "invocation": "--date 2026-07-15 --local-out <scratch> --canonical-local <mirror> --calendar-local <mirror>, NO --upload",
+      "result": "The un-transcribed half of N-4: a real partition, real bytes, the new status appearing on exactly the 5 rows the census predicted for that date, and the computable band identical row-for-row against the SERVED pre-fix object."
+    },
+    {
+      "tool": "aws s3api / s3 cp",
+      "invocation": "list-objects-v2 (auto-paginated, client-side counted) for the 535-partition enumeration; get_object per partition for the census; s3 cp of 5 mirror inputs and the pre-fix comparison partition",
+      "result": "s3api throughout, never `s3 ls`, so timestamps are UTC by construction. The paginated-length trap was avoided by counting client-side rather than with --query length(Contents), the Rule 22a hazard 0.4.0_DS_ClientPlatform~C hit on the same table an hour earlier."
+    },
+    {
+      "tool": "git (as an evidence instrument)",
+      "invocation": "git log -L 224,224:c02_twr_engine.py -- the history of the guard line itself",
+      "result": "Returned exactly ONE commit: a781ae9b5d, the file's original creation. The guard has never been modified since ratification, which independently confirms the issuer's 'the defect predates the round, no regression, do not couple the floor hold to it' reasoning at source rather than on their say-so."
+    },
+    {
+      "tool": "lib/trading_calendar.prev_trading_day",
+      "invocation": "prev_trading_day(2026-07-15) for the N-4 mirror",
+      "result": "2026-07-14. NEVER#1: the D-1 partition to stage is derived from the calendar, never from wall-clock arithmetic."
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py <this file> N-1,N-2,N-3,N-4,N-5",
+      "result": "Positional id form. Result recorded in the commit message."
+    }
+  ]
+}

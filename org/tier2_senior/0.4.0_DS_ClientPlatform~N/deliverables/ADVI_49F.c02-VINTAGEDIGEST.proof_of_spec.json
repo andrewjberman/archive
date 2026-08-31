@@ -1,0 +1,164 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_49F.c02-VINTAGEDIGEST",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.4.0_DS_ClientPlatform~N",
+ "decomp_ref": {
+  "doc": "org/tier1_exec/2.0.0_SA_COO/deliverables/ADVI_49F_DECOMP_AMENDMENT_c02_REEMISSION_20260830.md",
+  "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform~N/task_orders/ADVI_49F.c02-VINTAGEDIGEST.classifier-vintage-a-pure-function-of-the-substrate-with-a-claim-field.md",
+  "vintage_commit": "1befd43cef"
+ },
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_A_20260811.md",
+  "group": "A",
+  "vintage_commit": "9c294bbf15"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/a07_dim_asset_classification.py",
+   "kind": "script",
+   "commit_or_etag": "1befd43cef",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "[kind as written: gold stage A_07, the sole producer of the classifier vintage] [state as written: DEPLOYED and VERIFIED ON THE RUNNING ARTIFACT] s3://opal-data-49financial/_code/a07_dim_asset_classification.py ETag e0bde0a5394b7ab83d1797431327c33e, 32,419 B, LastModified 2026-08-30T14:42:52Z, BYTE-EQUAL to the git index blob at 1befd43cef. Deployed by the push gate at the 14:42Z window. Corroborated independently by 0.0.0_AB_MSTR (87979) at the same ETag and timestamp -- and it CORRECTED the issuer's standing expectation at 87999 that these bytes would wait for a later window, which is why the deploy state was measured rather than accepted from the message. Monday's 12:45Z fire runs e0bde0a5.",
+   "artifact_covered_by": [
+    "V-1",
+    "V-4"
+   ],
+   "introduces": [
+    "canon-json-v1"
+   ]
+  },
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/tests/test_a07_vintage_digest.py",
+   "kind": "test",
+   "commit_or_etag": "1befd43cef",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "[kind as written: pytest module, 7 arms, NEW] [state as written: DEPLOYED, same push-gate path and window as the producer] Carries the standing FAILING BASELINE (the legacy str(set) form) beside the determinism arm, so the arm that proves the hazard cannot silently become a dead arm.",
+   "artifact_covered_by": [
+    "V-2"
+   ],
+   "introduces": [
+    "canon-json-v1"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20260830T1442Z_vintagedigest-canon-json-v1-deploy.md",
+   "kind": "doc",
+   "commit_or_etag": "2d094cbdb9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "[kind as written: the V-4 deploy-completion ledger] [state as written: COMMITTED, no deploy surface] Opened 14:42:52Z on the object write, CLOSED 14:46Z on the running-artifact read; carries the ETag identity, the intentional served change on both tables, V-3's limit, the two-fire acceptance and the rollback with its trigger.",
+   "artifact_covered_by": [
+    "V-3",
+    "V-4"
+   ],
+   "introduces": [
+    "canon-json-v1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "V-1",
+   "criterion_verbatim": "THE CANONICAL FORM as RULED (87534): `json.dumps(ticker_map, sort_keys=True, separators=(\",\",\":\"), ensure_ascii=False, default=canon)` with `canon(set|frozenset) -> sorted(list(x))`, `canon(Decimal) -> str(x)`, `canon(anything else) -> raise TypeError`; sha256 of the UTF-8 bytes, hex; the sibling `_classifier_vintage_form = \"canon-json-v1\"` on the same rows and in the manifest; nothing in the input passes through `str()`, `repr()` or default container iteration. Commit-gate clean; `safe-commit -F`.",
+   "method": "diff",
+   "invocation": "the form implemented at a07 `_canon` + `VINTAGE_FORM`, digest at the ddb_payload site; `.tools/commit-gate.sh` per file; `.tools/safe-commit.sh --author ... -F <msgfile>` with the message written by a non-shell writer",
+   "output_evidence": "Implemented EXACTLY as ruled and as ruled BEFORE any code was written. `_canon` maps set/frozenset -> sorted(list(x)) and Decimal -> str(x) (float() would round DDB numbers), and RAISES TypeError on any other type -- 'a type the form does not name is a FORM CHANGE, never a silent repr'. The digest is sha256 over the UTF-8 bytes of json.dumps(ticker_map, sort_keys=True, separators=(\",\",\":\"), ensure_ascii=False, default=_canon); ticker_map goes in WHOLE, so nothing passes through str(), repr() or default container iteration. `_classifier_vintage_form = VINTAGE_FORM` is stamped on both served tables' rows and in both manifests. An arm asserts the literal \"canon-json-v1\" appears EXACTLY ONCE in the module so the form string cannot be re-typed beside the constant. Served shape, measured: dim_asset_classification 10 -> 11 columns, alias_key_expansion 8 -> 9. commit-gate clean 2 of 2 (the test module was BLOCKED first on an unused hashlib import and fixed before the commit). Commit 1befd43cef, msg-verify MATCH len=4626.",
+   "denominator": "2 files; 2 of 2 gate-clean; 2 named types mapped + 1 refusing branch; 1 occurrence of the form literal; 4 stamp sites (2 row, 2 manifest)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "V-2",
+   "criterion_verbatim": "THE ARMS: (i) DETERMINISM -- three processes at the default seed over the same loaded substrate -> ONE value; the failing baseline (the current code, 3 values) run FIRST; the mutation restoring `str(set)` fails it; (ii) DISCRIMINATION both directions -- one alias ADDED in a scratch copy -> a DIFFERENT value; one alias REORDERED (same set, different insertion order) -> the SAME value; (iii) `content_hash` unchanged by the fix; (iv) THE DIGEST-FIELD CENSUS -- every field in a0*..c0* whose name or producer marks it a hash/digest/vintage run through arm (i), denominator = fields found, corpus named; `content_hash` expected to pass; any other failing is a FINDING routed to the issuer, not fixed here.",
+   "method": "test_suite",
+   "invocation": "the substrate frozen to a snapshot first (loader removed as a confound); the legacy form digested in 3 processes BEFORE the fix existed; then canon-json-v1 in 3 processes; then 3 runs of the real a07 code path; then pytest tests/test_a07_vintage_digest.py (7 arms) and the full tests/ suite; the digest-field census by AST over the runner set",
+   "output_evidence": "(i) FAILING BASELINE FIRST, over ONE frozen substrate: 3 processes -> 3 DISTINCT vintages. After the fix: 3 processes -> ONE value 48ec291d405a6b1b0e72b5ed4b311da26bc48929..., and THREE RUNS OF THE REAL a07 CODE PATH produced that same single value -- the harness and the live path agree, so the harness was modelling the right object. MUTATION restoring str(set): splits into 3 again. (ii) alias ADDED -> a different vintage; the same aliases REORDERED (same members, rebuilt in reverse) -> the SAME vintage, twice. (iii) content_hash UNCHANGED at e9703f0a06711ee98bb46e9c611afd7fadde4df68b761f743c60e2361b2b504b across all three post-fix runs and EQUAL to its pre-g-13 value: the fix moved the vintage and did not move the content. (iv) CENSUS 8 fields over 34 modules, ZERO further findings -- classifier_vintage/_classifier_vintage was the one failing member and is fixed here; classifier_vintage_form/_classifier_vintage_form are a module constant; content_hash passes; gross_leg_vintage (c02:180) is a module-level literal; vintage_quality (perfrp_emit_core:715) is already a CLAIM string declaring itself 'read-time-only ... NOT a reproducible vintage'; desc_hash (a03:80) is a manifest COUNT whose underlying key at a03:51-52 is hashlib.md5 -- a real digest, NOT Python's per-process hash(), which is the thing that read of the line was for. 7 arms passed; FULL 49F SUITE 143 passed.",
+   "denominator": "3 processes per determinism arm; 3 real code-path runs; 2 discrimination directions; 8 digest-bearing fields over 34 modules scanned; 7 arms; 143 suite",
+   "status": "PASS",
+   "status_reason": "The arms drive PYTHONHASHSEED EXPLICITLY rather than spawning at the default seed. The property under test is SEED-INDEPENDENCE, and asserting it by hoping three default-seeded processes happen to disagree is a coin-flip dressed as a control -- fixed seeds make the legacy arm's split deterministic, so the arm that proves the hazard cannot stop proving it. The instrument choice for (iv) is also declared: an AST census, because a comp-find text sweep on the same tokens returned 1,801 hits across 73 pages dominated by CONFIG data files -- the wrong instrument for a FIELD census, and page 1 is not an answer."
+  },
+  {
+   "criterion_id": "V-3",
+   "criterion_verbatim": "THE LIMIT, on the cell: the 1,080 stored partitions keep their random vintages, distinguished BY THE CLAIM FIELD (`_classifier_vintage_form` ABSENT vs `canon-json-v1`), never by value or deploy date; a re-stamp of history is its own never-widen act and whether it is cut at all is the issuer's question at this cell's close. The loader limit stated: the form is over the LOADED substrate; an order-dependent loader would still move the digest and arm (i) catches it as the loader's, named separately.",
+   "method": "live_read",
+   "invocation": "S3 listing of gold/advi/dimensions/{dim_asset_classification,alias_key_expansion}/ for the served date denominator; the parquet columns read at the OLDEST and NEWEST partition of each table",
+   "output_evidence": "THE DENOMINATOR IS MEASURED, NOT QUOTED: 540 served dates x 2 tables = 1,080 stored partitions, which is the figure the cell names. Distinguishability verified on the served plane rather than asserted: at date=2024-07-08 and date=2026-08-28 on BOTH tables (4 of 4 probes), `_classifier_vintage_form` reads ABSENT while `_classifier_vintage` is present -- so a consumer separates a pre-g-13 random vintage from a canon-json-v1 one BY THE ROW, with no knowledge of a deploy date. ABSENT is the honest value for a digest nobody can re-derive. No history is re-stamped by this cell and none is proposed; whether it is cut at all is recorded as the issuer's question at this cell's close. THE LOADER LIMIT IS CLOSED BY CONSTRUCTION, not by assertion: V-2's measurements ran over a FROZEN substrate snapshot, so the digest form was measured with the loader removed as a variable. If the loader itself were order-dependent the digest would still move, arm (i) would catch it, and the cause would then be the loader's and named separately -- stated here in advance so a future failure is attributed correctly rather than re-litigated.",
+   "denominator": "1,080 stored partitions (540 dates x 2 tables), measured; 4 of 4 served-partition probes read the form field ABSENT",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "V-4",
+   "criterion_verbatim": "THE SERVE: deployed under the index-blob identity (22a; ledger opened/closed on the running-artifact read) before a NAMED 12:45Z fire; two consecutive fires with an unchanged substrate carry the SAME `_classifier_vintage` and `_classifier_vintage_form = \"canon-json-v1\"`, read from the S3 objects on both tables. Proof positional V-1..V-4, checker vintage printed, rc unpiped; graded by `3.0.0_SA_CVO`.",
+   "method": "live_read",
+   "invocation": "boto3 head_object on s3://opal-data-49financial/_code/a07_dim_asset_classification.py, ETag compared to md5 of `git show 1befd43cef:<path>`; the ledger opened and closed on that read",
+   "output_evidence": "DEPLOY LIMB VERIFIED: served ETag e0bde0a5394b7ab83d1797431327c33e == the index blob at 1befd43cef, 32,419 B, LastModified 2026-08-30T14:42:52Z. Ledger 20260830T1442Z_vintagedigest-canon-json-v1-deploy.md opened 14:42:52Z, closed 14:46Z on that read. The custody chain to the running bytes was established at source in the 14:00Z ledger and is unchanged: cron(45 12 * * ? *) -> Lambda advi-49f-gold-dispatch -> SSM advi-49f-chain-dispatch v3 -> `aws s3 sync s3://opal-data-49financial/_code/ ... --delete` -> chain_49f_entrypoint.py --production. Monday's 12:45Z fire runs e0bde0a5. THE DEPLOY STATE WAS MEASURED, NOT ACCEPTED: the issuer's 87999 stated these bytes would wait for a later window; the measurement said they were already served, and the issuer corrected the clause on that evidence (87979). THE TWO-FIRE LIMB IS NOT YET COMPUTABLE -- see status_reason. PROOF SUB-CLAUSE OF THIS CRITERION, SATISFIED: this instance validates rc=0 VALID, violations=0, acceptance rows=4, structural=jsonschema, positional V-1..V-4, rc read UNPIPED; CHECKER VINTAGE cec2a9b663 2026-08-30T14:38:21Z, printed by the INSTRUMENT ITSELF rather than transcribed by this seat -- the repair that landed at cec2a9b663 after the vintage-bump class bit twice today. Alignment: 4/4 criteria carry a cell_ref, 1/1 cell_ref resolves, 1/1 declared cell reachable. THIRD RUN, at checker ecce0820d2 2026-08-30T15:15:23Z: the CONTENT RUNG (4200a54390 / ecce0820d2) landed after the two runs above, so the instance was re-run a third time rather than left standing on a verdict from before the rung existed. rc=0 VALID, violations=0, and every artifact row now declares `introduces` -- 3 of 3 rows CONTENT-resolved, ZERO PRESENCE-ONLY. All tokens were verified PRESENT at the pin and ABSENT at pin~1 BEFORE being written (shell=False, `~1` never a caret, a missing path counted as absent). This amendment is ADDITIVE: no criterion, evidence row or verdict text changed. Recorded here rather than implied, per 3.0.0_SA_CVO 88520 -- an amended instance that reads as though it always carried the field is a false record of what was graded.",
+   "denominator": "1 of 1 object identity-MATCH; 1 ledger opened and closed; 0 of 2 required fires observed; proof rc=0 over 4 of 4 criteria at checker cec2a9b663; third run rc=0 at checker ecce0820d2, 3 of 3 rows CONTENT-resolved",
+   "status": "UNCOMPUTABLE",
+   "status_reason": "NOT a failure and not an instrument gap: the subject does not exist yet. The criterion requires TWO CONSECUTIVE FIRES -- Monday 2026-08-31 and Tuesday 2026-09-01, both 12:45Z. ONE FIRE CANNOT SETTLE IT, and that is the whole point of the criterion: a single run of a RANDOMISED digest also produces exactly one value, so only the second fire discriminates between 'deterministic' and 'ran once'. Filing a PASS after Monday alone would be the error this criterion was written to prevent. The instance is re-filed when both fires have been read from the S3 objects."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Restoring the pre-g-13 construction -- `str(sorted(ticker_map[t].items()))`, i.e. str() of a container -- must make the determinism arm FAIL. The mutation is the whole defect, so an arm that survives it is testing nothing.",
+   "expected": "The canon-json-v1 digest is identical across hash seeds; the restored str(set) form SPLITS across those same seeds and the determinism assertion fails.",
+   "observed": "The legacy form split into 3 DISTINCT digests across seeds 1/2/3 while canon-json-v1 returned ONE value across the same three; over the frozen real substrate the same split appeared at the default seed (3 processes -> 3 vintages, then -> 1). The legacy arm is COMMITTED as a standing failing baseline rather than run once and discarded, so the determinism arm beside it cannot silently become a dead arm when some future change makes the split stop happening.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Determinism IS the property under change here, so it is measured directly rather than assumed: the substrate frozen to a snapshot (loader removed as a confound), then digested in separate PROCESSES -- both at explicit PYTHONHASHSEED values and at the default seed -- and then three runs of the real a07 code path end to end.",
+   "observed": "canon-json-v1: ONE value across 3 seeded processes, 3 default-seeded processes, and 3 real code-path runs (48ec291d405a6b1b0e72b5ed4b311da26bc48929...), the harness and the live path agreeing. Legacy: 3 distinct values under both conditions. content_hash unchanged throughout. The one thing NOT yet demonstrated is stability across two SCHEDULED FIRES on different days, which is V-4 and is why V-4 is UNCOMPUTABLE rather than PASS.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Re-stamping the 1,080 stored partitions with canon-json-v1 vintages",
+   "reason": "Explicitly out of scope by V-3 and by the issuer's cut. The historical values are irreproducible noise -- nobody can recover which substrate they were taken over -- so a re-stamp would be minting new claims about the past, not repairing old ones. It changes served bytes on 1,080 partitions and is its own never-widen act with its own before/after. The claim field is what makes the boundary readable in the meantime, which is why it was preferred over a deploy-date rule."
+  },
+  {
+   "item": "The order-dependence of the LOADER (as distinct from the digest form)",
+   "reason": "Named as the limit in V-3 and deliberately not chased. The form is over the LOADED substrate; if `_load_ddb` itself ever merged or dropped items differently per run, the digest would move for a reason outside this form. V-2's arm (i) catches that, and the cause would then be the loader's and routed separately. Measuring it now would require a second instrument on a component nothing has shown to be faulty -- the frozen-substrate design already separates the two, so the attribution is available if it ever fires."
+  },
+  {
+   "item": "The six other digest-bearing fields found by the V-2(iv) census",
+   "reason": "All six were classified against arm (i) and NONE failed, so there is nothing to route: content_hash and the form constants are deterministic by construction; gross_leg_vintage is a module-level literal; vintage_quality already declares its own non-reproducibility as a claim string; desc_hash's underlying key is hashlib.md5 rather than Python's per-process hash(). Recorded as an exclusion rather than silence so a future reader knows the census was RUN and returned clean, not that it was skipped."
+  }
+ ],
+ "surprises": [
+  "OBSERVATION x DISARMED (owner: 2.0.0_SA_COO as issuer; disarmed same-turn by the issuer's own [SYNC] correction). The issuer's 87999 stated the g-13 bytes would deploy at a LATER window; the measured served ETag showed them ALREADY on the key at 14:42:52Z, matching the index blob at 1befd43cef. Surfaced with the measurement rather than assumed either way, and the issuer corrected the clause. The general shape is worth the record: a deploy state stated in a message is a CLAIM, and the object is the only thing that settles it -- had the message been believed, V-4's ledger would have been opened against the wrong window and Monday's fire attributed to the wrong bytes.",
+  "OBSERVATION x INERT (owner: this seat, carried forward from C02-g-10 and NOT re-chased here). `vintage_quality` at perfrp_emit_core.py:715 already carries exactly the claim-field pattern this cell installs -- it declares itself 'read-time-only; no vintage store (contract: STRUCTURALLY-ABSENT)'. Two independent arrivals at the same convention, from different seats and different rounds, is a signal the convention is the right one; it is recorded so the g-13 form is not later described as novel when the estate already had a precedent."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~N/logs/2026-08-30/",
+ "compiler_tools": [
+  {
+   "tool": "the frozen-substrate digest harness (purpose-built for this cell)",
+   "invocation": "one DDB materialisation pickled to a snapshot, then N separate processes digesting THAT snapshot under both the legacy and the canon form, at explicit and default hash seeds",
+   "result": "The instrument that made the whole cell attributable. Freezing the substrate removed the loader as a confound BEFORE any claim was made about the form -- which is exactly the limit V-3 names, closed by construction rather than by a sentence. It also produced the measured detail that only 6 of 9,538 tickers carry a set-valued attribute: a cause that small randomised an entire served field, and a sampling census would have missed it."
+  },
+  {
+   "tool": "AST digest-field census (in-repo)",
+   "invocation": "ast.walk over Assign->Subscript and Dict keys matching (vintage|hash|digest|sha256|checksum) across {a,b,c}0*.py + runner_common + perfrp_* + the chain entrypoint",
+   "result": "8 fields over 34 modules, all classified, zero findings to route. Chosen after comp-find on the same tokens returned 1,801 hits across 73 pages dominated by CONFIG data files -- a text sweep answers 'where does this word appear', not 'what fields does this code emit', and its page 1 is not an answer."
+  },
+  {
+   "tool": "the real a07 code path, run three times ad-hoc to scratch roots",
+   "invocation": "python a07_dim_asset_classification.py --as-of 2026-08-28 --output-root <scratch> x3, manifests compared",
+   "result": "Confirmed the harness result on the actual producer: one vintage across three processes, content_hash unchanged, and the new column present on both tables. A harness that agrees with itself is not evidence; a harness that agrees with the live path is."
+  },
+  {
+   "tool": "boto3 head_object + git show (identity by content)",
+   "invocation": "served ETag vs md5 of the index blob at the pinned commit",
+   "result": "Established that the g-13 bytes were ALREADY served at 14:42:52Z, correcting a standing expectation in the issuer's own message. Deployed state is a property of the object, never of the sentence describing it."
+  },
+  {
+   "tool": "S3 served-plane column read",
+   "invocation": "parquet columns at the oldest and newest partition of both tables",
+   "result": "Turned V-3's distinguishability from an assertion into a measurement: 1,080 stored partitions counted rather than quoted, and the form field read ABSENT on 4 of 4 probes."
+  },
+  {
+   "tool": ".tools/commit-gate.sh and .tools/safe-commit.sh",
+   "invocation": "gate per file; safe-commit --author ... -F <msgfile> written by a non-shell writer",
+   "result": "2 of 2 gate-clean after the gate BLOCKED an unused hashlib import in the test module (used only inside the subprocess snippet string). Commit 1befd43cef, msg-verify MATCH len=4626."
+  }
+ ]
+}

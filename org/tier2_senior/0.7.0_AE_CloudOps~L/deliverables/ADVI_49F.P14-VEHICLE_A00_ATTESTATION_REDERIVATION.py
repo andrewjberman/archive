@@ -22,15 +22,43 @@ Without the guard that load would execute the whole report. Printed output is un
 from __future__ import annotations
 
 import json
+from io import BytesIO
 
 import boto3
+import pandas as pd
 
 SILVER_BUCKET = "opal-data-assets"
 GOLD_BUCKET = "opal-data-49financial"
 SCOPE = "schwab/08335338"
 ACC_PREFIX = f"{SCOPE}/silver/fact_acc/"
 CONV_PREFIX = f"{SCOPE}/meta/conversions/"
-FLOW_PREFIX = "gold/advi/canonical/flow_ledger/"
+CAL_PREFIX = "gold/advi/dimensions/dim_calendar/"
+
+# E-1 (C02-g-9): the DOMAIN is the trading calendar INTERSECT input presence. It is NEVER an
+# output table. The old line here read gold/advi/canonical/flow_ledger/ -- an OUTPUT of the very
+# chain whose missing dates this vehicle exists to find, so a date absent from the output was
+# absent from its own work list. That is how 2026-08-11..08-17 stayed invisible.
+#
+# PRESENCE = the inputs the chain HALTS without, derived AT SOURCE, not from coextension with the
+# store. rc.read_partition raises FileNotFoundError on absence (runner_common.py:81); only two
+# callers catch it and both are GOLD dependencies (b01:123 dim_boundary, b04:328 dim_relationship),
+# so every silver read at the chain date halts. Sites:
+HALTING_INPUTS = {
+    "fact_acc":        "a01:228, a02:166, a06:180",
+    "fact_sec":        "a03:100, b02:104",
+    "fact_trn":        "a05:111, c00:520",
+    "dim_balance":     "b00:97, b02:107",
+    "dim_position":    "b01:108, b02:105",
+    "fact_upn":        "b02:108",
+    "dim_transaction": "c01:232",   # inline f-string, invisible to a prefix-constant census
+}
+# ANNOTATIONS -- carried beside each date, NEVER membership tests. A membership test is a claim
+# that the chain cannot produce the date without the input; these are inputs the chain proceeds
+# past. fact_fam is read at a RESOLVED latest (a01:206/:227) with a WARN and fam_declared_stale,
+# so it cannot raise on the chain date. fact_rps and fact_slm are read by NO chain stage at all --
+# fact_rps's exact coextension with the store was upstream schedule coincidence, not dependency.
+ANNOTATION_INPUTS = ("fact_fam",)
+NOT_READ_BY_CHAIN = ("fact_rps", "fact_slm")
 
 s3 = boto3.client("s3")
 
@@ -45,6 +73,48 @@ def list_partition_dates(bucket, prefix):
             if part.startswith("date="):
                 dates.add(part[5:])
     return dates
+
+
+def trading_days():
+    """dim_calendar's trading_day column, read from its NEWEST partition. The calendar is the
+    domain's authority (CLAUDE.md: one frontier, lib/trading_calendar.py's convention)."""
+    dates = list_partition_dates(GOLD_BUCKET, CAL_PREFIX)
+    if not dates:
+        raise FileNotFoundError("no dim_calendar partition -- the domain has no authority; REFUSE")
+    newest = sorted(dates)[-1]
+    key = f"{CAL_PREFIX}date={newest}/data.parquet"
+    body = s3.get_object(Bucket=GOLD_BUCKET, Key=key)["Body"].read()
+    frame = pd.read_parquet(BytesIO(body))
+    return newest, {str(x) for x in frame["trading_day"]}
+
+
+def compute_domain(trading_days_set, per_input):
+    """PURE. The domain from a calendar set and per-input presence -- no I/O.
+
+    The seam exists so an arm can drive it with SYNTHETIC sets, including a date deliberately
+    masked from the output table. A domain function that can only be exercised against live S3
+    cannot be shown to ignore the output, because live S3 currently agrees with it.
+    """
+    presence = None
+    for d in per_input.values():
+        presence = d if presence is None else (presence & d)
+    presence = presence or set()
+    return (trading_days_set & presence), presence
+
+
+def input_presence():
+    """Per-input partition dates for the HALTING set, plus the annotation inputs.
+
+    Returns (per_input, presence, annotations). `presence` is the AND over the halting set --
+    a date the chain could actually be run for. Annotations are measured and reported, never
+    intersected: doing so would refuse dates the chain demonstrably produced.
+    """
+    per = {t: list_partition_dates(SILVER_BUCKET, f"{SCOPE}/silver/{t}/") for t in HALTING_INPUTS}
+    presence = None
+    for d in per.values():
+        presence = d if presence is None else (presence & d)
+    ann = {t: list_partition_dates(SILVER_BUCKET, f"{SCOPE}/silver/{t}/") for t in ANNOTATION_INPUTS}
+    return per, (presence or set()), ann
 
 
 def attested_dates():
@@ -78,7 +148,9 @@ def derive():
     """
     keys, attested, malformed = attested_dates()
     acc = list_partition_dates(SILVER_BUCKET, ACC_PREFIX)
-    flow = list_partition_dates(GOLD_BUCKET, FLOW_PREFIX)
+    cal_asof, tdays = trading_days()
+    per_input, _presence, annotations = input_presence()
+    flow, presence = compute_domain(tdays, per_input)   # THE DOMAIN: calendar AND presence
     att = set(attested)
     epoch = min(att) if att else None
 
@@ -99,7 +171,12 @@ def derive():
         "attested_map": attested,
         "malformed": malformed,
         "fact_acc_dates": acc,
-        "flow_dates": flow,
+        "domain": flow,
+        "calendar_asof": cal_asof,
+        "trading_days": tdays,
+        "per_input": per_input,
+        "presence": presence,
+        "annotations": annotations,
         "attested": att,
         "epoch": epoch,
         "proceed": proceed,
@@ -130,10 +207,37 @@ def main():
     print(f"  of those, CONFLICTING     : {len(conflicting)}  "
           f"(a00 REFUSES these too, :98 -- a second refusal mode)")
 
-    acc, flow = r["fact_acc_dates"], r["flow_dates"]
+    acc, flow = r["fact_acc_dates"], r["domain"]
+    tdays, presence = r["trading_days"], r["presence"]
+    per_input, annotations = r["per_input"], r["annotations"]
     print()
-    print(f"fact_acc partitions (gate 1 subject) : {len(acc)}")
-    print(f"flow_ledger partitions (BACKFILL SET): {len(flow)}")
+    print("=" * 78)
+    print("THE DOMAIN -- trading calendar AND input presence, never an output table")
+    print("=" * 78)
+    print(f"  dim_calendar read at date={r['calendar_asof']}")
+    print(f"  DENOMINATOR 1  calendar trading days in span      : {len(tdays)}")
+    print("  DENOMINATOR 2  per-input partition presence (the HALTING set, source-derived):")
+    for t, sites in HALTING_INPUTS.items():
+        d = per_input[t]
+        print(f"      {t:<16} {len(d):>5}   halts at {sites}")
+    print(f"  DENOMINATOR 3  presence = AND over the halting set : {len(presence)}")
+    print(f"  DENOMINATOR 4  DOMAIN = calendar AND presence      : {len(flow)}")
+    print("  ANNOTATIONS -- measured and carried, never intersected:")
+    for t, d in annotations.items():
+        short = sorted(tdays - d)
+        print(f"      {t:<16} {len(d):>5}   short {len(short)} vs the calendar"
+              f"{' -- frontier ' + max(d) if d else ''}")
+        if short:
+            print("          those dates ARE emitted; the chain proceeds and declares staleness")
+    for t in NOT_READ_BY_CHAIN:
+        print(f"      {t:<16}     -   NOT READ by any chain stage -- excluded from the predicate")
+    excluded = sorted(tdays - presence)
+    print(f"  DENOMINATOR 5  calendar days EXCLUDED for absent input : {len(excluded)}")
+    for d in excluded:
+        missing = [t for t in HALTING_INPUTS if d not in per_input[t]]
+        print(f"      {d}  UNBACKFILLABLE-INPUTS-ABSENT: {missing}")
+    if not excluded:
+        print("      (none -- every calendar trading day has all seven halting inputs)")
 
     att = r["attested"]
     proceed, refuse_attest = r["proceed"], r["refuse_attest"]
@@ -142,7 +246,7 @@ def main():
     print("THE SPLIT, denominator beside every number")
     print("=" * 78)
     D = len(flow)
-    print(f"  backfill set (denominator)                       : {D}")
+    print(f"  DOMAIN (denominator)                             : {D}")
     print(f"  a00 PROCEEDS (attested)                          : {len(proceed)}  "
           f"({100.0*len(proceed)/D:.2f}% of {D})")
     print(f"  a00 REFUSES  (not attested)                      : {len(refuse_attest)}  "
@@ -152,8 +256,8 @@ def main():
           f"{'OK' if len(proceed)+len(refuse_attest)==D else 'MISMATCH'}")
     print()
     print(f"  ALSO gate 1 (fact_acc partition missing entirely): "
-          f"{len(flow - acc)} of {D} backfill dates have NO fact_acc partition")
-    print(f"  attested dates NOT in the backfill set            : {len(att - flow)} of {len(att)}")
+          f"{len(flow - acc)} of {D} domain dates have NO fact_acc partition")
+    print(f"  attested dates NOT in the domain                  : {len(att - flow)} of {len(att)}")
 
     print()
     print("=" * 78)
@@ -163,10 +267,10 @@ def main():
     NEG, neg_ok = r["neg_control"]
     print("  POSITIVE (dates the chain demonstrably ran on -- must be ATTESTED):")
     for d in POS:
-        print(f"    {d}  attested={d in att}   in_backfill_set={d in flow}")
+        print(f"    {d}  attested={d in att}   in_domain={d in flow}")
     print("  NEGATIVE (the exercised abort + two others -- must be NOT attested):")
     for d in NEG:
-        print(f"    {d}  attested={d in att}   in_backfill_set={d in flow}")
+        print(f"    {d}  attested={d in att}   in_domain={d in flow}")
 
     print()
     print(f"  positive control: {'FIRED (all attested)' if pos_ok else '*** FAILED ***'}")

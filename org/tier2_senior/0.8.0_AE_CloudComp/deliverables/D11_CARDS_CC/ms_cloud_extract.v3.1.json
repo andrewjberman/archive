@@ -1,0 +1,183 @@
+{
+ "schema_version": 3.1,
+ "carded_by": "0.8.0_AE_CloudComp~Y",
+ "subject": {
+  "id": "infra/aws/globgrph/ms_cloud_extract.py",
+  "kind": "script",
+  "declared_domain": "NFRA_MSGRAPH S2: ingests the Microsoft doc-cloud (SharePoint + OneDrive STRUCTURE / METADATA / ACTIVITY) into the shared globgrph graph as an additive MS_CLOUD node class plus MS edges. The manifest names it as materializer of the part `ms_heat_snap`. \u26d4 THIS FILE HAS NO WRITE PRIMITIVE OF ITS OWN -- it mutates an in-memory dict and returns; see location."
+ },
+ "as_of": {
+  "carded_utc": "2026-08-30T08:00:00Z",
+  "commit_ish": "f861a238e6",
+  "graph_vintage": null
+ },
+ "process": {
+  "methodology": {
+   "how": "A best-effort FOLD, not a standalone job. derive_runner.main() calls extract_ms_cloud(graph, ...) alongside its sibling folds; the function appends the MS nodes as classes_data['MS_CLOUD'] and the MS edges to graph['edges'], then returns. It NEVER refactors, mutates or drops an AWS node, and when MS is disabled (the default) the graph is returned BYTE-IDENTICAL, so the AWS-only derive is unchanged. Emitted shape matches the existing globgrph convention -- fixed node keys {id, arn, type, name, layer, drift_class} with every other key auto-flowing to the additive props column, so there is no silent drop. Source access is confined to four document-storage gateway tools by an allowlist, and a second fail-closed layer certifies the emit itself.",
+   "determinism": "deterministic",
+   "composes": [
+    {
+     "id": "derive_runner",
+     "note": "the caller; this module is a fold inside its main(), not an entry point"
+    },
+    {
+     "id": "find_sharepoint_site",
+     "note": "one of the four allowlisted document-storage gateway tools"
+    },
+    {
+     "id": "list_site_files",
+     "note": "allowlisted gateway tool"
+    },
+    {
+     "id": "list_onedrive",
+     "note": "allowlisted gateway tool"
+    },
+    {
+     "id": "search_files",
+     "note": "allowlisted gateway tool"
+    }
+   ],
+   "invents": [
+    {
+     "id": "the MS_CLOUD node class",
+     "note": "MS nodes carry layer='ms', source='ms', drift_class=<ms_state>; additive to the AWS graph, never a refactor of it"
+    },
+    {
+     "id": "assert_no_content_comms",
+     "note": "the SS4 emit-time catastrophic-floor cert, raising MsContentCommsLeak on four distinct leak shapes"
+    }
+   ],
+   "materializer_standing": "canonical",
+   "basis": "measured",
+   "basis_by_field": {
+    "how": "measured",
+    "determinism": "measured",
+    "composes": "measured",
+    "invents": "measured"
+   },
+   "evidence": "READ AT SOURCE, not from the manifest entry: infra/aws/globgrph/ms_cloud_extract.py @f861a238e6, 31,519 bytes / 656 lines, clean. Docstring :1-30 states the additive-only fold contract and the byte-identical-when-disabled acceptance (#4); extract_ms_cloud :624-628 is the sole entry and its own docstring says it APPENDS to classes_data['MS_CLOUD'] and graph['edges']; the four-tool allowlist is named in the docstring's catastrophic-floor clause and enforced by ALLOWED_MS_NODE_TYPES :46 / ALLOWED_MS_EDGE_TYPES :57.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "cadence": {
+   "declared_rhythm": "None of its own. It runs whenever derive_runner runs, and only when MS is enabled -- which it is not by default.",
+   "actual_trigger": "INHERITED FROM ITS CALLER. This module has no entry point, no CLI and no schedule; derive_runner's own trigger is its trigger, and CRAWL_PERSONAL_ONEDRIVE and the MS-enable flag gate whether the fold does anything at all.",
+   "live_matches_declared": "not_applicable",
+   "live_instance_age": null,
+   "basis": "held",
+   "basis_by_field": {
+    "declared_rhythm": "measured",
+    "actual_trigger": "held",
+    "live_matches_declared": "measured"
+   },
+   "evidence": "REPO PLANE: the module has no `if __name__ == '__main__'` and no argparse; extract_ms_cloud :624 takes a graph dict as its first argument, which is what a fold looks like. AWS PLANE: comp-find --corpus aws on 'ms.heat|ms.cloud|msgraph' over the live graph (2,094 nodes, DB built 2026-08-30T01:51:34Z) -> 0 hits, and that negative is discriminating -- the same corpus returns triggers for other writers in this directory. actual_trigger is HELD, NOT measured, and the distinction is the one this face has twice been bitten by: I measured that THIS file has no trigger, and I did NOT card derive_runner or read its schedule. Saying 'it runs when derive_runner runs' is a statement about a component I did not measure. 'not_applicable' on live_matches_declared: there is no declared rhythm of its own for an APPLIED state to match.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  }
+ },
+ "artifact": {
+  "persistence": {
+   "persisted": false,
+   "authority_role": "none",
+   "mutation_policy": "not_applicable",
+   "form": null,
+   "basis": "measured",
+   "evidence": "\u26d4 persisted FALSE, and this is the card's central measurement. The module writes NOTHING: a token census over its 656 lines returns put_object 0, boto3 0, 'import s3' 0, 'open(' 0, 'write(' 0, to_parquet 0 -- with a positive control on the same instrument ('^def ' -> 18) proving the search can find what is there. It mutates the caller's dict and returns; persistence is derive_runner's act, at derive_runner's grain, under derive_runner's card.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "location": {
+   "home": null,
+   "projection_of": [
+    {
+     "id": "Microsoft Graph document-storage surfaces",
+     "note": "SharePoint sites/drives/items and OneDrive, read through the four allowlisted gateway tools"
+    }
+   ],
+   "co_resident_stores": [
+    {
+     "id": "derive_runner",
+     "note": "the caller that owns the commit; the MS nodes reach Iceberg through its commit_to_iceberg, never through this module"
+    },
+    {
+     "id": "snap_store.py",
+     "note": "the REGISTERED APPENDER of the ms_heat_snap surface -- SURFACES registry :74-80, and its own self-test at :331-347 uses ms_heat_snap as case 1. It is also one of the census's 13 ALREADY-CARDED writers"
+    }
+   ],
+   "basis": "absent",
+   "basis_by_field": {
+    "projection_of": "measured",
+    "co_resident_stores": "measured",
+    "home": "absent"
+   },
+   "evidence": "\u26d4 THE MANIFEST NAMES THIS FILE AS MATERIALIZER OF `ms_heat_snap`, AND THIS FILE NEVER NAMES THAT SURFACE. Measured: `ms_heat_snap` appears 0 times in ms_cloud_extract.py; it appears 12 times across 98 files in infra/aws/globgrph, ALL of them in snap_store.py, which registers the surface and appends it. So the manifest's materializer attribution for this part does not resolve to a writer of those bytes. \u26d4 I AM NOT CALLING THE MANIFEST WRONG, AND THE DISTINCTION MATTERS BECAUSE I ALREADY MADE THE OPPOSITE ERROR ONCE ON THIS FACE: the reading consistent with the evidence is that `generation.materializer` is not uniformly at (file, write-path) grain -- for this part it names the DATA ORIGIN, one or more hops upstream of the byte-writer. WHAT I DID NOT MEASURE, stated rather than glossed: I did not trace the path from this module's MS_CLOUD nodes to ms_heat_snap rows, so whether those rows derive from this fold at all is UNVERIFIED here. home is null with basis absent because this module has no home to name. SCALAR BASIS IS 'absent', NOT 'held', PER THE FLOOR RULE as 3.0.0_SA_CVO~X ruled it at 04:51Z: the weakest sub-claim on this row is `home`, which is absent because this module has no home to name. The per-field map preserves the measured projection_of and co_resident_stores, so the absent scalar erases neither. Caught by my own 7-row floor audit, not by the validator -- the schema mechanises the floor on trust.key only.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  }
+ },
+ "trust": {
+  "coverage": {
+   "universe": "SharePoint site/drive/item structure and OneDrive structure reachable through the four allowlisted gateway tools, minus the configured exclusions, capped by a node ceiling.",
+   "denominator": null,
+   "denominator_absent_reason": "NOT MEASURED BY THIS CARD. The emitted node count is a run-time property of the live MS tenant and of the exclusion set, and running the fold would require the gateway plus MS enabled -- which is off by default. The source declares a CEILING rather than a count: MS_NODE_CEILING :235 defaults to 8000 via GLOBGRPH_MS_NODE_CEILING. A ceiling is a bound, not a denominator, and quoting 8000 as the coverage denominator would be exactly the substitution this field exists to prevent.",
+   "explicitly_out": [
+    "CONTENT and COMMS, absolutely and by two independent mechanisms -- the CTO catastrophic-floor invariant. Structure, metadata and activity only.",
+    "Personal OneDrive by default: CRAWL_PERSONAL_ONEDRIVE :210 is '0' unless explicitly set to '1'.",
+    "The DEFAULT_ONEDRIVE_EXCLUSIONS set :214 and any path matching it (excluded_path_reason :238).",
+    "Everything above MS_NODE_CEILING :235 (default 8000).",
+    "The whole MS fold when MS is disabled -- the default, in which the graph is returned byte-identical."
+   ],
+   "basis": "absent",
+   "basis_by_field": {
+    "universe": "measured",
+    "explicitly_out": "measured",
+    "denominator": "absent",
+    "denominator_absent_reason": "measured"
+   },
+   "evidence": "universe and all five exclusions read at source (:46, :210, :214, :235, :238, and the docstring's acceptance #4). Scalar ABSENT per the floor rule: the weakest sub-claim is the denominator, and a measured absence-reason proves the null is lawful without promoting it. universe and explicitly_out remain measured in the map.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "key": {
+   "identity_space": "globgrph node ids in the shared graph namespace, with MS nodes distinguished by layer='ms' and source='ms' rather than by a separate id space.",
+   "key_expression": "The node dict's `id`, minted per node type by the builders _site_node :268, _drive_node :286, _item_node :305, _user_node :340, and edges by _edge :353 over (src_id, dst_id, edge_type). A consumer computes a member's key by reading that field; it is the same `id` key the AWS nodes use, which is the point of the additive design -- MS nodes join the existing namespace rather than opening a second one.",
+   "key_is_stable": "unknown",
+   "crosses_spaces": true,
+   "declared_mapping": "MS nodes carry the same fixed key set as AWS nodes ({id, arn, type, name, layer, drift_class}) with layer='ms' as the discriminator, so the mapping between the MS origin space and the graph node space is the builder functions themselves. There is no declared table and no reverse mapping from a graph id back to a Graph API object beyond what the builders encode.",
+   "basis": "held",
+   "basis_by_field": {
+    "identity_space": "measured",
+    "key_expression": "measured",
+    "key_is_stable": "held",
+    "crosses_spaces": "measured",
+    "declared_mapping": "measured"
+   },
+   "evidence": "key_expression MEASURED at source -- the five builder functions and the fixed-key convention are read directly (:268, :286, :305, :340, :353, docstring :14-17). key_is_stable is 'unknown' and marked HELD rather than measured: MS item ids come from the Graph API, and whether a SharePoint or OneDrive item id survives a move, rename or re-provision is a property of Microsoft's service that I did not test and that the source does not assert. Recording 'stable' here would be a guess about someone else's identity guarantees, which is precisely what v3.1 forbids for a key.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  },
+  "failure_mode": {
+   "returns_on_failure": "IT RAISES AND FAILS THE WHOLE DERIVE CLOSED. assert_no_content_comms :139-150 is an emit-time certificate that raises MsContentCommsLeak on four distinct leak shapes: a node_type outside the allowlist, a node field KEY matching a forbidden content/comms substring, a node web_url or path resolving to a comms surface, and an edge_type outside the allowlist. It returns None only on a clean structural-only emit. This is the CTO catastrophic-floor invariant, and it is fail-closed by design: a leak stops the derive rather than committing a graph.",
+   "distinguishable_from_true_negative": "yes",
+   "silent_degrade_paths": [
+    "THE FOLD IS BEST-EFFORT AND ITS ABSENCE IS INVISIBLE. When MS is disabled -- the DEFAULT -- the graph is returned byte-identical, which is exactly right for the AWS derive and means a consumer cannot tell 'MS is off' from 'MS ran and found nothing' by looking at the graph. The two states differ only in whether the MS_CLOUD class exists at all.",
+    "MS_NODE_CEILING silently bounds the emit at 8000 by default. A tenant larger than the ceiling produces a truncated MS_CLOUD class that is well-formed and incomplete; nothing in the emitted shape records that the ceiling bound it.",
+    "The exclusion set removes paths by design, and excluded_path_reason returns the reason -- but the reason lives in the run, not in the graph, so an excluded subtree and an absent subtree look identical to a downstream reader."
+   ],
+   "basis": "measured",
+   "basis_by_field": {
+    "returns_on_failure": "measured",
+    "distinguishable_from_true_negative": "measured",
+    "silent_degrade_paths": "measured"
+   },
+   "evidence": "assert_no_content_comms :139-150 read in full, including all four raise conditions and the docstring naming it 'the gate-impossible leg'. 'distinguishable_from_true_negative: YES' is measured on the PRIMARY failure -- a content/comms leak cannot pass quietly because the cert raises and the derive fails -- and it is backed by a named adversarial artifact rather than by the code alone: tests/test_ms_cloud_cert.py is the inject->FAIL / clean->PASS regression the docstring calls the catastrophic-floor acceptance artifact (CTO binding condition 1). A cert with a passing-and-failing pair is a control that has been shown to fire, which is a stronger claim than a guard that merely exists. The three degrade paths above are the honest qualification and are each about COMPLETENESS, never about leakage.",
+   "owner": "0.8.0_AE_CloudComp~Y"
+  }
+ },
+ "verdict": {
+  "standing": "QUALIFIED",
+  "why": "The strongest failure mode in this population of four: a fail-closed emit-time certificate covering four leak shapes, backed by a named adversarial regression that has been shown to fire in both directions -- not a guard that merely exists. The additive-only contract is real and testable (byte-identical graph when disabled), and the four-tool source allowlist means the catastrophic floor is enforced at two independent layers rather than one. Three qualifications, none of them about leakage. (1) IT WRITES NOTHING: zero write primitives over 656 lines, so the manifest's attribution of `ms_heat_snap` to this file does not resolve to a writer of those bytes -- `snap_store.py` registers and appends that surface. The consistent reading is that `generation.materializer` is not uniformly at (file, write-path) grain; for this part it names a data origin. I did NOT trace this module's MS nodes to ms_heat_snap rows, so that link is unverified here. (2) Its trigger is inherited from derive_runner, a component I did not card -- actual_trigger is held, not measured. (3) The key is a Graph API id whose stability across move/rename is Microsoft's guarantee, not one this card can assert; key_is_stable is 'unknown' and held.",
+  "blocking_defects": null
+ },
+ "forward_disposition": {
+  "standing": "undecided",
+  "set_by": null,
+  "basis": "absent",
+  "evidence": "NONE -- basis is absent. A SECOND PASS IS OWED, by a seat with the authority to retire something and without a stake in this subject. This card DESCRIBES; it does not decide. Andrew-direct 2026-08-26 puts the disposition AFTER carding, and the contract states set_by MUST NOT be the carding lane for its own subject.",
+  "decided_utc": null
+ }
+}

@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SUBSTRATECARDING.TO-CARD-R-AE",
+  "assignee": "0.7.0_AE_CloudOps~K",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_SUBSTRATECARDING.TO-CARD-R-AE.carding.md",
+    "group": "OTHER",
+    "vintage_commit": "9fb8236299"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/nfra-substratecarding/20260829T1129Z/rectangle.final.certified.json",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_SUBSTRATECARDING.TO-CARD-R-AE.carding.md",
+    "vintage_commit": "603f5546dc"
+  },
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~K/logs/2026-08-30/",
+  "acceptance": [
+    {
+      "criterion_id": "AE-AC1",
+      "criterion_verbatim": "derive_stitch.py and kuzu_nessie_load.py are carded FIRST and their cards are the gate on the rest. derive_stitch.py writes stitch_graph.json, which is view 2's source in NFRA_C3MATERIALIZE; kuzu_nessie_load.py is the canonical projection loader. Both are load-bearing for a project currently running experiments ON their output, so an uncarded failure mode there is the most expensive one in the estate.",
+      "method": "manual_read_with_citation",
+      "invocation": "git log on the two card files; 3.0.0_SA_CVO~X verification frames read at each boundary; issuer gate-open frame 2.0.0_SA_COO~X 03:32Z",
+      "output_evidence": "The two load-bearing subjects were carded FIRST and before any other subject on this face: derive_stitch.card.json and kuzu_nessie_load.card.json were the first two card files created, and no card 3-7 was drafted until both carried a CVO PASS. FINAL PINS: derive_stitch @d31070ec0b (CVO PASS 03:22Z), kuzu_nessie_load @d7f74b7a59 (CVO PASS 03:27Z). The GATE was then declared OPEN by 3.0.0_SA_CVO~X ('GATE RESULT: OPEN. Both load-bearing cards now carry independent CVO PASS receipts') and by the issuer 2.0.0_SA_COO~X at 03:32Z, which released cards 3-7 and the other six sequenced faces. I did NOT declare the gate open myself at any point -- the both-landed report (84810/84811) said explicitly 'LANDED: yes, both. VERIFIED: pending', because an author declaring its own gate open is the author grading the author.",
+      "denominator": "2 of 2 load-bearing writers carded first and CVO-passed, of the 7 subjects on this face",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AE-AC2",
+      "criterion_verbatim": "The 20 resolvable uncarded subjects (19 manifest writers + rebuild.tmp.SET) enumerated FROM the census @9b2c687dc8. Print 20 with its denominator on every receipt. rebuild.tmp.SET is named explicitly because a subject that looks like a temp artifact is exactly the one a reader silently drops.",
+      "method": "manual_read_with_citation",
+      "invocation": "MSYS_NO_PATHCONV=1 git show 9b2c687dc8:org/tier1_exec/1.0.0_SA_CTO~Y/deliverables/D11_SUBSTRATECARDING_COVERAGE_CENSUS_20260829.md  (sections 2 and 3 read at the pin)",
+      "output_evidence": "RECONCILE run BEFORE card 1, as the face requires. The face's 7 subjects reconcile against the census at its pin: SIX appear verbatim in AXIS P3's UNCARDED-19 writer table (_canonical.py, _provenance.py, derive_stitch.py, extract_portal_stitch.py, kuzu_incremental_refresh.py, kuzu_nessie_load.py) and the SEVENTH, kuzu_nessie_db.rebuild.tmp.SET, is AXIS P2's '1 cut in wave 4 with NO card located'. 19 writers + 1 manifest part = the 20. NO REFUSAL: the set reconciles. Subjects 3 and 7 deliberately share the path _canonical.py because one is the WRITER and one is the manifest part it writes -- the (FILE, WRITE PATH) grain the census's own grain note prescribes. rebuild.tmp.SET was NOT dropped: it is carded as subject 7 @f5f5ae2fd2, and its card is the one that found the reaper's glob reaches only 5 of the set's 6 members. The denominator '7 of 20 uncarded / 35 remainder' was printed on every card-boundary receipt (84745, 84810, 85187, 85380, 85613, 85876, and this instance).",
+      "denominator": "7 of 20 uncarded subjects carried on this face; 20 of 35 remainder is the class denominator, and the other 13 are on other faces",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AE-AC3",
+      "criterion_verbatim": "Each card answers all 7 questions across the 3 grains -- and 5, 6 and 7 (coverage + denominator, key/identity space, failure mode distinguishable from a genuine negative) are the ones that get skipped and the ones that matter. A card that answers 1-4 and hand-waves 5-7 is not a card.",
+      "method": "schema_validation",
+      "invocation": "python -c jsonschema.Draft202012Validator(schema).iter_errors(card) against org/standards/SUBSTRATE_CARD.v3.1.schema.json (60,768 B, sha256 19a3547047b750c8c1493eef4515824d847ae4016510245fad87ee4d3b790d5c, schema_version const 3.1) for each of the 7 cards, plus python .tools/substrate-card-check.py <card> with rc read UNPIPED",
+      "output_evidence": "All 7 cards: jsonschema POSITIVE 0 errors, and substrate-card-check violations=0 VALID rc=0 (derive_stitch, kuzu_nessie_load, _canonical, _provenance, extract_portal_stitch, kuzu_incremental_refresh, kuzu_nessie_db.rebuild.tmp.SET). THREE SHAPED NEGATIVE CONTROLS per card, each aimed at a different v3.1-specific requirement -- drop trust.key.key_expression, drop process.methodology.materializer_standing, set schema_version=1 -- ALL REJECTED on every card, so the positive is not a validator that accepts anything. A NEGATIVE CONTROL was also run on substrate-card-check itself: fed a non-card file it returns rc=1, so its rc discriminates rather than being a constant. ROWS 5/6/7 ARE WHERE THIS FACE'S FINDINGS LIVE, not where they were hand-waved: row 5 carries the extract_portal_stitch denominator discard and the rebuild.tmp.SET reaper-reach gap; row 6 carries the derive_stitch key instability, the kuzu_nessie_load node/edge key asymmetry, and the three unrelated path expressions on the SET; row 7 carries the derive_stitch bare-except (EXERCISED, two arms reaching different truths), the _provenance four-cause collapse, and the _canonical liveness coupling.",
+      "denominator": "7 of 7 cards validate; 7 of 7 questions answered on each; 21 negative controls run (3 per card) and 21 rejected",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AE-AC4",
+      "criterion_verbatim": "A card is written by someone who READ the subject, never generated from its manifest entry. STOP: a generated card is a description that has never been compared with the thing it describes -- the artifact-describes-itself defect, at scale, across 20 subjects.",
+      "method": "manual_read_with_citation",
+      "invocation": "Each card's process.methodology.evidence field cites the line ranges read at the subject pin 5da9e7fffc; independently re-derived by 3.0.0_SA_CVO~X at each boundary",
+      "output_evidence": "Every card cites specific line ranges read at the pin, and the findings are of a kind a manifest entry cannot produce: derive_stitch's grain-baseline bare except was EXERCISED, not read -- the module was imported and _load_grain_baseline driven with two arms reaching DIFFERENT truths (real baseline 35 keys; repointed to a nonexistent path 0 keys, == {} True). The rebuild.tmp.SET reaper gap was found by SIMULATING _gc_stale_tmps' glob against the enumerated live members (5 of 6 matched), not by reading it. kuzu_incremental_refresh's docstring-vs-caller drift required reading BOTH the subject and its consumer. 3.0.0_SA_CVO~X independently re-derived the source and disk state on every card and reproduced each substantive finding. ⛔ AND THE STRONGEST EVIDENCE FOR THIS CRITERION IS THE FAILURE RECORD: 3.0.0_SA_CVO~X returned findings on cards 3 (x4), 4 (x3), 5 (x3) and 6 (x2) -- twelve findings, EVERY ONE IN MY CARRIER AND NONE IN A SUBJECT. A generated card cannot fail that way; it fails by describing the subject wrongly. These failed by claiming more than the reading supported, which is the failure mode of a card that WAS read and then over-summarised.",
+      "denominator": "7 of 7 cards written from a source read at the pin; 12 verifier findings across 4 cards, 12 of 12 in the carrier, 0 in a subject",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AE-AC5",
+      "criterion_verbatim": "20 of 20 at v3.1 with the two load-bearing writers landed and verified first. Partial completion is reported with its numerator AND denominator; 'substantially complete' is not a state.",
+      "method": "manual_read_with_citation",
+      "invocation": "Card file enumeration under org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/D11_CARDS/ against the census's 20-subject class list",
+      "output_evidence": "PARTIAL, REPORTED WITH BOTH NUMBERS AS THE CRITERION ITSELF DEMANDS. This criterion's oracle is the CLASS acceptance -- 20 of 20 across the whole uncarded_20 class -- and this face carries 7 of those 20 subjects. THIS FACE IS 7 OF 7 COMPLETE; THE CLASS IS 7 OF 20. The remaining 13 sit on the other sequenced faces (ETL / CC / COO / DS / W1-COX / W1-CCX / W1-CCY / W4-COX), which the load-bearing gate opened at 03:32Z. The load-bearing precondition of this criterion IS satisfied: derive_stitch and kuzu_nessie_load were carded first and both carry an independent CVO PASS. ⛔ I am NOT recording this as PASS. Reporting 7 of 7 on my face as satisfaction of a 20 of 20 class oracle would be exactly the 'substantially complete' this criterion forbids, and the numerator/denominator sentence exists to make that inexpressible. The face's own completion is AE-AC1..AC4; AC5 closes when the class does, at the issuer's hand.",
+      "denominator": "face 7 of 7; class 7 of 20 (13 on other faces, all now released by the gate)",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "The criterion's oracle is the CLASS acceptance -- 20 of 20 across the whole uncarded_20 class -- and this face carries 7 of those 20 subjects, so it cannot be computed from this face at any level of effort. THE LATER RUN THAT COMPUTES IT: the issuer's close of the uncarded_20 class once the other sequenced faces (ETL / CC / COO / DS / W1-COX / W1-CCX / W1-CCY / W4-COX) have carded the remaining 13 subjects; those faces were released by the load-bearing gate at 03:32Z. This face is 7 of 7; the class is 7 of 20. The load-bearing precondition of this criterion IS satisfied here -- derive_stitch and kuzu_nessie_load were carded first and each carries an independent CVO PASS. Recording PASS on the strength of 7 of 7 would be exactly the 'substantially complete' this criterion's own text forbids."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/D11_CARDS/derive_stitch.card.json",
+      "kind": "doc",
+      "commit_or_etag": "d31070ec0bd125a397d2f8cf07dee886b4853893",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CVO PASS 03:22Z; QUALIFIED on the 20-of-20 nightly failure with a fresh artifact, the exercised bare-except, and the STORED_IN fan-out"
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/D11_CARDS/kuzu_nessie_load.card.json",
+      "kind": "doc",
+      "commit_or_etag": "d7f74b7a59c6e1e290c15a86ecad360cf7fd10f6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CVO PASS 03:27Z; QUALIFIED on docstring drift, an uncounted empty-key drop, and a node/edge key asymmetry CVO surfaced"
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/D11_CARDS/_canonical.card.json",
+      "kind": "doc",
+      "commit_or_etag": "0950ecb50859fafef4e7256f9bf049ccc5b14544",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CVO PASS 04:01Z after four carrier repairs; QUALIFIED on three protections riding one env var"
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/D11_CARDS/_provenance.card.json",
+      "kind": "doc",
+      "commit_or_etag": "92244ab94d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CVO PASS 04:29Z; QUALIFIED on a four-cause collapse, an absent-vs-unreadable manifest conflation, and an age-None that yields the verdict 'current'"
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/D11_CARDS/extract_portal_stitch.card.json",
+      "kind": "doc",
+      "commit_or_etag": "1abdfeee95",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CVO PASS 05:00Z after three carrier repairs; QUALIFIED on a discarded upstream denominator and first-hit suffix joins"
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/D11_CARDS/kuzu_incremental_refresh.card.json",
+      "kind": "doc",
+      "commit_or_etag": "9d42cd9910",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CVO PASS 05:20Z; QUALIFIED on a two-halves-stale docstring and a cardinality-only correctness guard"
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/D11_CARDS/kuzu_nessie_db.rebuild.tmp.SET.card.json",
+      "kind": "doc",
+      "commit_or_etag": "f5f5ae2fd2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "QUALIFIED on a reaper whose glob reaches 5 of 6 members and 111,874,683 B abandoned across two enumerations 1.77 h apart; CVO verification pending at instance time"
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~K/deliverables/NFRA_SUBSTRATECARDING.TO-CARD-R-AE_PROOF_OF_SPEC.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "this instance"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three SHAPED negative controls per card against the ACTUAL v3.1 schema, each aimed at a DIFFERENT v3.1-specific requirement so a positive cannot come from a validator that accepts anything: (1) drop trust.key.key_expression, (2) drop process.methodology.materializer_standing, (3) set schema_version=1. The third is deliberately the exact failure that produced the first re-authoring round -- I had validated two cards against the LEGACY v1 schema and reported them v3.1-valid. A fourth control was run on the CHECKER itself: feed .tools/substrate-card-check.py a file that is not a card and confirm its rc is not a constant.",
+      "expected": "Each mutation REJECTED by jsonschema against org/standards/SUBSTRATE_CARD.v3.1.schema.json (60,768 B, sha256 19a3547047b750c8c1493eef4515824d847ae4016510245fad87ee4d3b790d5c, schema_version const 3.1); the non-card file REJECTED by substrate-card-check with a non-zero rc.",
+      "observed": "21 of 21 mutations rejected (3 x 7 cards), 0 accepted. substrate-card-check: non-card file -> rc=1; all 7 cards -> rc=0, read UNPIPED after a first attempt read rc=$? through a pipe to tail and would have recorded 7 meaningless zeros.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Re-ran both gates on every card after every repair, and had each card independently re-derived by 3.0.0_SA_CVO~X at its own pin -- a second seat, different instruments (git show of the pin + python sha256 + grep on the pinned file, against my deployed-package and live-AWS reads). The exercised arm on derive_stitch's _load_grain_baseline was itself a two-arm determinism check: the same function called twice under different substrate truths must return different values.",
+      "observed": "Gate results identical across re-runs on all 7 cards (jsonschema 0 errors; substrate-card-check violations=0 rc=0). CVO~X reproduced every substantive subject finding independently and returned 12 findings across cards 3-6, ALL in the carrier and NONE in a subject. The exercised arm: ARM1 real baseline -> 35 keys, ARM2 nonexistent path -> 0 keys, ARM1 != ARM2, so the arms reach different truths and the instrument is not degenerate.",
+      "status": "STABLE"
+    }
+  },
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find \"insurance_relationshipdetail\" --all ; comp-find \"derive_stitch\" --all --files ; comp-find \"insurance_leg\" --all --files",
+      "result": "PASS -- the banded output separated the single [DEF] line from 52 [DOC] mentions, which is what located the converter side of the ADVI_INSURE finding earlier in this session. Slow on full-corpus content sweeps (two runs exceeded 120 s and were backgrounded); native Grep used for single-file and scoped searches, which Rule 21 does not gate."
+    },
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"how do I grep the repo\"",
+      "result": "PASS -- A.3 EXERCISE limb at session load, scored on OUTPUT (its own banner) rather than rc, because rc does not discriminate match-from-no-match."
+    },
+    {
+      "tool": "substrate-card-check",
+      "invocation": "python .tools/substrate-card-check.py <card.json>  (rc read UNPIPED, per issuer routing 04:22Z)",
+      "result": "PASS -- 7 of 7 cards violations=0 VALID rc=0, with a negative control confirming rc=1 on a non-card file."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "AE-AC5's class acceptance (20 of 20)",
+      "reason": "This face carries 7 of the 20 subjects. AC5 is recorded PARTIAL with numerator and denominator rather than PASS, as the criterion's own text requires; it closes when the class does, across the other sequenced faces, at the issuer's hand."
+    },
+    {
+      "item": "Any repair to a carded subject",
+      "reason": "This is a CARDING face. Every finding is recorded and owned; not one line of any subject was modified. The two ARMED observations raised (opal-stitch-produce's 20-of-20 nightly failure; the _canonical liveness/GC flag coupling) were DISARMED to 0.7.0_AE_CloudOps base by naming an owner, and both are OWNED/INERT pending that seat's queue -- Rule 27 binds this instance to NFRA_SUBSTRATECARDING."
+    },
+    {
+      "item": "Execution of any carded module",
+      "reason": "Only derive_stitch's _load_grain_baseline was driven, and only as an isolated two-arm probe. No loader, refresher or extractor was run, which is why kuzu_nessie_load's and kuzu_incremental_refresh's key rows carry basis 'absent' under the v3.1 FLOOR rule rather than a guessed 'measured'."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION / DISARMED-TO-OWNER: opal-stitch-produce's nightly EventBridge->CodeBuild leg is ENABLED and has FAILED 20 of its 20 most recent fires (2026-08-10 .. 08-29, zero successes) while stitch_graph.json stayed ~7 minutes fresh -- a second, unidentified path masks the dead scheduled leg. Filed 84713/84714/84715; owner 0.7.0_AE_CloudOps base; standing OWNED/INERT at queue position behind that seat's D2 order. No monitor is to be built (standing moratorium); the fix is to make the artifact's producer and its cadence the same thing.",
+    "OBSERVATION / DISARMED-TO-OWNER: _canonical's #17 rebuild-winner liveness, the per-unique tmp that makes a lock steal harmless, and the abandoned-tmp GC all ride ONE env var exported only by the three comp-kuzu wrappers, so direct-import callers take the rebuild lock unprotected. Measured live twice: an EMPTY lock past its 900 s backstop at 03:35Z (25.1 min) and a second empty lock at 05:21Z (16.1 min), with 111,874,683 B of 37.9 h-old tmps unreaped. Filed 85143/85144/85145; owner 0.7.0_AE_CloudOps base; OWNED/INERT. I touched neither the lock nor the tmps -- deleting a lock that might belong to a live rebuild is the act the missing discriminator cannot justify.",
+    "OBSERVATION (method, this seat's own): twelve verifier findings across cards 3-6, every one in the CARRIER and none in a subject. Four distinct control-scope failures, each different from the last: patterns built from the instances already found (card 3); a sound instrument applied to the wrong SCOPE, file vs path (card 5); correct detection with wrong ATTRIBUTION, where the control tested the wrong property (card 6); and claims stating a module's DECLARED intent in the voice of a verified finding (card 7, caught by my own credit census before presentation). The transferable half: a CREDIT reaches further unnoticed than a defect, because nobody audits praise as hard -- including the author auditing their own draft."
+  ]
+}

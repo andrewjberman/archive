@@ -1,0 +1,161 @@
+{
+  "schema_version": 3.1,
+  "subject": {
+    "id": "infra/aws/globgrph/cse_emit_promote.py",
+    "kind": "script",
+    "declared_domain": "NFRA_PROMOTE R4 -- the in-VPC PROMOTE CSE producer, the governed 5th producer's FEDOBS-feed wiring. A recognizer MATERIALIZED/DEMOTED transition is itself an observation (PROMOTE invariant #5), emitted as a schema-validated CSE into globgrph.cse alongside git/graph_head/agent/deploy. Declared REUSE-NOT-REBUILD: the CSE is built by comp_promote_materializer._build_promote_cse so every emission is IDENTICAL to the materializer's own; this module adds only the live promotion state, an honest commission-vintage timestamp, and the JSONL projection for the derive-role ingest."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-30T09:30:00Z",
+    "commit_ish": "b3b1705d26",
+    "graph_vintage": "globgrph.cse source=promote holds ONE partition, event_date=2026-07-08, ONE row: promote:recognizer:silent-display-fork:create, schema_version 0.4, Concept+0.2, actor comp_promote_materializer. Nothing since -- 53 days."
+  },
+  "process": {
+    "methodology": {
+      "how": "promote_cses (:99-123) reads the promotion manifest through the materializer's own helpers, iterates the recognizers, keeps only entries passing mat._loadable (state==MATERIALIZED with a non-null commission), and for each calls mat._build_promote_cse to construct the CSE -- the reuse contract, with validate_or_raise inside the builder. _stamp (:66-70) then overwrites the timestamp with the commission's own vintage so the store partitions by the real promotion date. An already_emitted set, when supplied, skips ids already in the store. dry_run (:142-160) is the DEFAULT with no arguments and writes nothing; emit (:162-183) validates fail-closed, writes the JSONL, and only then advances the emitted-marker.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "canonical",
+      "composes": [
+        {
+          "id": "comp_promote_materializer",
+          "note": "FOUR PRIVATE names are reached across the module boundary -- _read_manifest, _load_marker, _loadable and _build_promote_cse (:113-119). The reuse itself is the declared design and is a genuine strength; the fragility is that all four are underscore-private, so a refactor of that module's internals breaks this producer with no signature to warn either side"
+        },
+        {
+          "id": "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/promote_recognizer_manifest.json",
+          "note": "the authoritative promotion state, read through mat._read_manifest; it is the provenance.source on the emitted row"
+        },
+        {
+          "id": "org/modules/graph/cse_schema.py",
+          "note": "ProducerKind.PROMOTE @0.4, validate, and partition_key -- whose event_date is simply timestamp[:10] (:604-606)"
+        },
+        {
+          "id": "infra/aws/globgrph/cse_store.py",
+          "note": "validate_batch for the fail-closed gate; the actual append is a separate in-VPC act via cse_store --ingest, not performed by this module"
+        }
+      ],
+      "invents": [
+        {
+          "id": "the emit timestamp",
+          "note": "_stamp (:66-70) sets execution_meta.timestamp from the commission_id's embedded YYYYMMDDTHHMMZ stamp because the materializer's builder leaves it empty. This is a REPAIR of an upstream gap and it is the right one -- but see its fallback in failure_mode"
+        },
+        {
+          "id": "the Concept(untyped)+0.2 subject",
+          "note": "inherited from the reused builder, not chosen here: there is no Entity.RECOGNIZER, so a promoted recognizer degrades to Concept. The module documents at length (:15-18) that this LOW band is the SUBJECT'S TYPE-confidence and NOT the promotion's certainty"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "Read in full at infra/aws/globgrph/cse_emit_promote.py:1-286 @b3b1705d26. _commission_ts :54-62; _stamp :66-70; the Q4 standing-contract comment :73-77; MARKER_BUCKET/MARKER_KEY :76-77; _read_emitted :80-86; _write_emitted :89-96; promote_cses :99-123 (the four mat._ calls at :113-119); _to_dict :125; _validate :136-139; dry_run :142-160; emit :162-183; main :265-281. partition_key read at cse_schema.py:604-606. ⛔ TWO ENUM MEMBERS IN THIS CARD WERE INVENTED RATHER THAN CHOSEN AND THE GATE REFUSED BOTH: I typed materializer_standing='reuses_canonical' (the reuse is real, but it is a fact for prose, not a standing value -- the module's own standing is 'canonical') and mutation_policy='overwrite' (the member is 'replaceable'). This is the SECOND time in this session, after 'partial' for live_matches_declared on card 3. The pattern is mine and it is specific: when a row's truth sits between two enum members I write the word I was thinking in rather than re-reading the domain, and only a schema with real enums catches it.",
+      "owner": "0.7.0_AE_CloudOps (AE class owns infra/aws/globgrph); file author 0.5.0_AE_OpalETL, which has no live instance"
+    },
+    "cadence": {
+      "declared_rhythm": "EVENT-DRIVEN BY EXPLICIT CONTRACT, and this is the one producer on the face for which being unscheduled is the DESIGN rather than a gap. The standing-contract comment (:73-75, 'Q4 STANDING CONTRACT (CTO GO 2026-07-08)') states it emits on a promotion, not a clock, and that its 'incremental' is therefore an idempotent DEDUP: a re-run emits only promotions not already emitted, never a duplicate row in the append-only log. The emitted-event-id marker is also declared to be the S3 object a downstream leg watches.",
+      "actual_trigger": "A HUMAN RUNNING THE CLI, then a separate in-VPC cse_store --ingest. Nothing schedules either, which the contract permits. What the contract does NOT permit is the dedup being inert -- and it is: the marker object the whole idempotency scheme reads and writes DOES NOT EXIST. MEASURED: head-object on warehouse/cse_producer_markers/promote.json returns 404, and the entire cse_producer_markers/ prefix holds ZERO keys, against a positive control (warehouse/_branch_head.main.json, 1508 B) proving the instrument reads. So _read_emitted returns an empty set on every invocation, and every --emit re-emits every current promotion as though for the first time.",
+      "live_matches_declared": "no",
+      "live_instance_age": "53 DAYS. One row, event_date 2026-07-08, and the module's own docstring is dated 2026-07-08 -- so like the deploy producer this emitted once, on the day it was written. Unlike the deploy producer, that is not by itself a defect: an event-driven producer with no promotion to report is correctly silent. What makes it a finding is that the silence and the inert marker are indistinguishable -- a run today would re-emit the 2026-07-08 promotion, not nothing.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "Contract at :73-77. Marker absence: aws s3api head-object -> 'An error occurred (404) when calling the HeadObject operation: Not Found', plus list-objects-v2 on warehouse/cse_producer_markers/ -> 0 keys, with the branch-head marker as the positive control in the same session. Table state from the single source=promote parquet.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "projection",
+      "mutation_policy": "replaceable",
+      "form": "A local JSONL at --out (default cse_promote.jsonl), one PROMOTE CSE per line, plus the S3 emitted-marker object when a batch is written. 'projection' rather than 'source' because -- unlike every other producer on this face -- this module does NOT construct the CSE: mat._build_promote_cse does, and the module's declared contract is that its output is byte-identical to the materializer's own emission. What it adds is state selection, a timestamp and a file. mutation_policy is 'replaceable': the local JSONL is opened 'w' and the marker object is put wholesale, so each artifact is wholly replaced rather than edited in place -- this is NOT the append_only of the destination table, which this module never writes.",
+      "basis": "measured",
+      "evidence": "Write at :178-180 with open(out, 'w'), so the local file is REPLACED on each run; the marker object is put wholesale by _write_emitted (:89-96), also an overwrite. The reuse claim is EXERCISED rather than taken from the docstring: the single row in the table carries actor='comp_promote_materializer', not this module's own name, which is what the reuse contract predicts.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "location": {
+      "home": "A local file at --out (default cse_promote.jsonl). The module never appends to the table; the append is a separate in-VPC cse_store --ingest run as the derive role.",
+      "projection_of": [
+        {
+          "id": "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/promote_recognizer_manifest.json",
+          "note": "the MATERIALIZED entries under a non-null commission are the emitted set"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/cse_producer_markers/promote.json",
+          "note": "the idempotency ledger. MEASURED ABSENT -- 404, and the prefix holds zero keys"
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/cse_ingest_staging/cse_promote.jsonl",
+          "note": "998 B, 2026-07-08, one CSE -- and that CSE is ALREADY in the table. 0 new rows. See failure_mode"
+        },
+        {
+          "id": "globgrph.cse",
+          "note": "destination table; source=promote holds exactly one row"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "MARKER_BUCKET/MARKER_KEY at :76-77; --out default at :274. S3 reads as described in cadence. The staged file was downloaded and parsed line by line, not inferred from its size.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every recognizer in the promotion manifest whose entry passes mat._loadable -- state MATERIALIZED with a non-null commission_id -- less any event_id already recorded in the emitted-marker.",
+      "denominator": "The dry-run prints one line per CSE plus a header count, and emit prints 'N/M PASS fail-closed validation' with the mode named INCREMENTAL or FULL (:172-176), so the reader is told which dedup regime produced the number. NOT PRINTED: how many manifest entries were CONSIDERED and skipped by mat._loadable (:110-112 continues with no counter), so a manifest whose entries have all lost their commission_id yields the same clean 'NO-OP: no NEW promotion' line as a manifest with nothing new. The skip is on a DIFFERENT axis from the dedup skip, and only the dedup axis is reported.",
+      "explicitly_out": [
+        "manifest entries failing mat._loadable -- not MATERIALIZED, or a null commission -- skipped at :110-112 with no counter",
+        "DEMOTE / DELETE transitions: deliberately NOT reconstructed from the runtime trail, and the reasoning is stated at :105-113 -- the trail carries self-test and CVO-EXERCISE records that must never reach the real store, so a real reversal is to be emitted at the demote transition point instead. MEASURED CONSEQUENCE: source=promote holds 1 row, verb=create, and ZERO non-create rows have ever landed from any source",
+        "the append itself -- this module writes a file; the in-VPC --ingest is a separate act"
+      ],
+      "basis": "measured",
+      "evidence": "Skip site :110-112; print sites :146-152 and :172-181. Verb distribution over the single live partition: create=1, non-create=0.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "PROMOTE event ids in the recognizer-id space, and separately the emitted-marker's set of those same ids held in one S3 JSON object.",
+      "key_expression": "The event_id is built by the REUSED materializer builder, not here; the live row shows the shape promote:recognizer:<recognizer-id>:<verb> (promote:recognizer:silent-display-fork:create). No truncation. THE SECOND KEY IS THE ONE THAT MATTERS: the emitted-marker keys idempotency on the set of already-emitted event_ids stored at a single fixed S3 key (:76-77), so the producer's entire memory of what it has done lives in one object -- and that object does not exist.",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "The Q4 comment (:73-77) declares the dedup contract and names the marker object explicitly, including that a downstream leg watches it. NOT DECLARED: that a marker which is unreadable for any reason other than genuine absence is treated as absence -- the code comment at :85 conflates the two in its own words, 'absent/no-access -> nothing emitted yet (honest first run)'.",
+      "basis": "measured",
+      "evidence": "Marker key at :76-77; the conflating comment at :85. Event_id shape read from the live table row rather than reconstructed from the builder's source, since the builder is in another module.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "failure_mode": {
+      "returns_on_failure": "THE AST CENSUS FINDS TWO HANDLERS AND ONLY ONE IS A DATA-PATH SWALLOW -- I am naming both because reporting the count alone would misattribute the second. :269 in main is `except Exception: pass` around sys.stdout/sys.stderr .reconfigure(errors='replace'), i.e. console-encoding setup; it cannot affect a CSE and I do not count it against the module. :85 in _read_emitted is the real one: `except Exception: return set()` around a boto3 get_object, so ANY failure -- absent object, denied access, throttle, expired credentials, network -- returns 'nothing has ever been emitted'. Everything else propagates: _write_emitted has no handler, promote_cses has none, and the builder validates or raises inside.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "THE IDEMPOTENCY LEDGER FAILS OPEN, AND ITS OBJECT DOES NOT EXIST. _read_emitted (:80-86) cannot distinguish a genuine first run from a credentials or permissions failure -- its own comment fuses them -- and both yield an empty set, which means re-emit everything. MEASURED: the marker is absent (404; the whole prefix is empty; positive control reads). So today the dedup is not merely fragile, it is INERT: every --emit re-emits every MATERIALIZED promotion. Because cse_store.append_cses does NOT deduplicate by event_id (cse_store.py:357-393, read in full), a second ingest appends DUPLICATE rows into an append-only log. The failure is silent in both directions: nothing prints when the marker read fails, and the run's own output looks identical to a correct first emission",
+        "THE TIMESTAMP REPAIR FALLS BACK ONTO THE EXACT DEFECT IT EXISTS TO FIX, AND THE GUARD IS IN THE ONE PLACE IT CANNOT FIRE. _commission_ts (:54-62) requires a YYYYMMDDTHHMMZ substring and returns None otherwise (EXERCISED: 'CTO-PROMOTE-20260708T1521Z-abc' -> '2026-07-08T15:21:00Z', while 'CTO-PROMOTE-nostamp', '' and None all -> None). _stamp (:69) then falls back to the builder's value, which the module's own docstring says is '' -- the empty partition date the repair was written to prevent. cse_schema.partition_key (:604-606) is `ts[:10]`, so it returns event_date='' with no error (EXERCISED). And the check that would catch it -- `all(r['source'] and r['event_date'] for r in rows)` at cse_store.py:531 -- sits inside _self_test(), reachable only from the --self-test CLI at :588. IT IS NOT ON THE WRITE PATH. A guard that exists only in the self-test cannot protect a production emission",
+        "manifest entries skipped by mat._loadable are not counted (:110-112), so a manifest that has lost its commissions and a manifest with nothing new both print the same NO-OP line",
+        "the producer depends on FOUR underscore-private names in comp_promote_materializer (:113-119); a rename inside that module is a silent break here, and nothing in either module's signature records the coupling",
+        "no DELETE has ever reached the store: source=promote is 1 row, verb=create. The module's refusal to reconstruct demotes is DELIBERATE and well-argued (:105-113), and it delegates real reversals to the demote transition point -- but the table shows no reversal has ever arrived from that or any other path, so a consumer reading source=promote sees promotions that may since have been reversed"
+      ],
+      "basis": "measured",
+      "basis_by_field": {
+        "returns_on_failure": "measured",
+        "distinguishable_from_true_negative": "measured",
+        "silent_degrade_paths": "measured"
+      },
+      "evidence": "AST handler census, attribution-controlled: 2 handlers, :85 and :269, each read at source before being characterised. Marker absence measured with a positive control. _commission_ts exercised on four inputs; partition_key exercised on a populated and an empty timestamp. The location of :531 established by walking back to its enclosing def (_self_test at :507) and grepping every call site (one, at :588). ⭐ THE STRANDED-BATCH FINDING IS 0.8.0_AE_CloudComp's W3-dljc (2026-08-27) AND IS CREDITED AS THEIRS -- they found the batches sitting one prefix from their consumer with every instrument green, left them unmoved, and marked the seam UNOWNED. WHAT I ADD: this producer's stranded file carries exactly one CSE and that CSE is ALREADY IN THE TABLE -- 0 new rows -- and the same is true of the frontend_coevolution batch beside it (257 of 257 already present under source=git). Both staged files are 100% duplicates, so moving either into the ingest lane would append duplicate rows. Their restraint was correct, and this is the evidence for it. ⛔ I ALSO GOT THIS WRONG FIRST: in card 2 of this face I reported that frontend_coevolution had no partition and zero rows ever, because I queried the source= column -- which holds ProducerKind values -- for a producer NAME the enum cannot emit. That card is corrected at b3b1705d26.",
+      "owner": "0.7.0_AE_CloudOps for the module; the staging-prefix seam is UNOWNED per W3-dljc and is not claimed here"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "This module is the most carefully REASONED on the face and several of its choices deserve to be recorded as strengths rather than absorbed. Its default with no arguments is a DRY RUN that writes nothing -- emitting requires an explicit --emit, which is the right way round and the opposite of the deploy producer's default-to-write. It reuses the materializer's own builder rather than reimplementing the CSE, and the live row's actor of comp_promote_materializer exercises that claim. It refuses to reconstruct demotes from a runtime trail that carries self-test and exercise records, and says why. And it carries a consumer note, repeated into its own output, warning FEDOBS not to discount a promote CSE for its LOW confidence band because that 0.2 is the subject's TYPE-confidence and not the promotion's certainty -- a genuinely unusual piece of care about how a downstream reader will misread a number. Being unscheduled is its DECLARED contract, so unlike the deploy producer I do not count that against it. QUALIFIED on three measured points. FIRST: the idempotency ledger fails open AND its object does not exist, so the dedup is inert today -- every --emit re-emits every promotion, and since append_cses does not deduplicate, a second ingest writes duplicate rows into an append-only log. The code's own comment fuses 'absent' and 'no-access' into one value. SECOND: the timestamp repair falls back to the empty string it was written to prevent, partition_key propagates that as an empty event_date without error, and the only check for it lives inside _self_test and is unreachable from the write path -- a guard in the one place it cannot fire. THIRD: four private cross-module names carry the reuse, with no signature on either side recording the coupling. I record one error of my own that reached a committed artifact: on card 2 I read a manufactured zero as a finding, and the correction is at b3b1705d26.",
+    "blocking_defects": [
+      "IDEMPOTENCY INERT: warehouse/cse_producer_markers/promote.json is ABSENT (404; prefix holds 0 keys; positive control reads), so _read_emitted returns an empty set every time and every --emit re-emits every MATERIALIZED promotion (cadence, failure_mode rows)",
+      "THE LEDGER FAILS OPEN BY CONSTRUCTION: _read_emitted (:85) catches all exceptions and returns set(), its own comment fusing 'absent/no-access', so a permissions or credentials failure is indistinguishable from an honest first run (failure_mode row)",
+      "DUPLICATE-WRITE EXPOSURE: cse_store.append_cses does not deduplicate by event_id, so a re-emitted batch appends duplicate rows to an append-only log; the staged cse_promote.jsonl is already 100% duplicate of the table's single row (failure_mode row)",
+      "TIMESTAMP FALLBACK RETURNS THE DEFECT: _commission_ts yields None for any commission_id without a YYYYMMDDTHHMMZ stamp (exercised on 4 inputs), _stamp falls back to '', and partition_key yields event_date='' without raising (exercised) (failure_mode row)",
+      "THE GUARD IS UNREACHABLE FROM PRODUCTION: the empty-partition-key check at cse_store.py:531 is inside _self_test(), called only from the --self-test CLI at :588, never on the write path (failure_mode row)",
+      "FOUR PRIVATE CROSS-MODULE DEPENDENCIES on comp_promote_materializer (_read_manifest, _load_marker, _loadable, _build_promote_cse) carry the reuse contract with no public signature recording it (methodology.composes, failure_mode rows)",
+      "NO REVERSAL HAS EVER LANDED: source=promote is 1 row, verb=create, 0 non-create ever, so a consumer sees promotions that may since have been demoted (coverage row)"
+    ]
+  },
+  "carded_by": "0.7.0_AE_CloudOps~K"
+}

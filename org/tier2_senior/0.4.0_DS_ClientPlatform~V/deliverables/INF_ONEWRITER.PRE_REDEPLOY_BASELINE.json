@@ -1,0 +1,220 @@
+{
+ "record_kind": "PRE-REDEPLOY BASELINE for the INF-ONEWRITER two-arm EXERCISED read. Captured BEFORE 0.7.0_AE_CloudOps's redeploy of inf-silver-chain, because the subject it baselines is produced only by the STALE package and stops existing the moment the redeploy lands.",
+ "required_by": "1.0.0_SA_CTO 87078 -- 'the read carries a PRE-REDEPLOY BASELINE of per-stage outcomes from the last stale-bytes fire, so a post-redeploy 4/3 with the same accounts_v2 failure is neither a regression nor a pass'. Delivered WITH the two-arm read, per that ruling; RECORDED now because the evidence is perishable.",
+ "subject_run": {
+  "function": "inf-silver-chain",
+  "log_stream": "2026/08/29/[$LATEST]0f8e5b53c04c44ef98a7f9e868b910b8",
+  "request_id": "f8295a30-dff3-4d91-9197-1057dde83b8a",
+  "started_utc": "2026-08-29T11:19:19Z",
+  "runtime": "python:3.11.mainlinev2.v27",
+  "package_state": "STALE -- the 2026-08-05 build, whose four vendored members last moved 2026-05-11 (f6b7238a9)",
+  "events_denominator": 26
+ },
+ "per_stage_outcomes": {
+  "stages": [
+   {
+    "stage": "household",
+    "outcome": "FAILED",
+    "detail": "(0.1s): An error occurred (NoSuchKey) when calling the GetObject operation: The specified key does not exist."
+   },
+   {
+    "stage": "performance",
+    "outcome": "OK",
+    "detail": "911 rows -> s3://opal-data-inf/silver/api_dims/performance/snapshot_date=2026-08-29/data.parquet (0.5s)"
+   },
+   {
+    "stage": "activity",
+    "outcome": "FAILED",
+    "detail": "(0.0s): An error occurred (NoSuchKey) when calling the GetObject operation: The specified key does not exist."
+   },
+   {
+    "stage": "billing",
+    "outcome": "OK",
+    "detail": "911 rows -> s3://opal-data-inf/silver/api_dims/billing/snapshot_date=2026-08-29/data.parquet (0.3s)"
+   },
+   {
+    "stage": "tax_unrealized",
+    "outcome": "OK",
+    "detail": "911 rows -> s3://opal-data-inf/silver/api_dims/tax_unrealized/snapshot_date=2026-08-29/data.parquet (0.4s)"
+   },
+   {
+    "stage": "tax_realized",
+    "outcome": "OK",
+    "detail": "911 rows -> s3://opal-data-inf/silver/api_dims/tax_realized/snapshot_date=2026-08-29/data.parquet (0.5s)"
+   },
+   {
+    "stage": "accounts_v2",
+    "outcome": "FAILED",
+    "detail": "(0.2s): build_accounts_v2 requires local rep_map JSON at data/inf/manual_api/pulls/2026-08-29_household_rep_mapping.json. Run `python data/inf/manual_api/pull_inflection_representatives.py --date 2026"
+   }
+  ],
+  "summary_line": "4 ok / 3 fail -> s3://opal-data-inf/silver/api_dims/_chain_summary/2026-08-29.json",
+  "denominator": {
+   "stages_started": 7,
+   "terminal_lines_seen": 7
+  },
+  "reading": "'The chain completes' is NOT an arm (1.0.0_SA_CTO 87078). A post-redeploy 4 ok / 3 fail carrying these SAME three failures for these SAME reasons is neither a regression nor a pass; a 7/7 is the fix's doing only if the stage that moved is one whose bytes changed. household and activity fail on NoSuchKey (an absent upstream object) and accounts_v2 on an absent LOCAL file -- none of the three is a code-vintage failure, so none of them should move on this redeploy."
+ },
+ "arm_B_baseline": {
+  "why_it_exists": "Arm B compares the redeployed chain's output against THE CHAIN'S OWN LAST STALE OUTPUT. That object is overwritten ~37 minutes later every day by the second writer, so on a non-versioned bucket arm B would have had NO RETRIEVABLE SUBJECT. Checked rather than assumed: opal-data-inf versioning Status=Enabled, and both writes are preserved.",
+  "key": "s3://opal-data-inf/silver/api_dims/billing/snapshot_date=2026-08-29/data.parquet",
+  "chain_write": {
+   "version_id": "jCldmxzmg2ojS068AnJKywgRqyH1bGvD",
+   "last_modified": "2026-08-29T11:19:22.000Z",
+   "bytes": 34039,
+   "columns": 13,
+   "writer": "inf-silver-chain (STALE package) -- its own log records the write at 11:19:21.5Z"
+  },
+  "served_write": {
+   "version_id": "uNBX1q8UfqpfZ795T.EvjK5H0xIprak4",
+   "last_modified": "2026-08-29T11:56:59.000Z",
+   "bytes": 45542,
+   "columns": 17,
+   "writer": "the EC2 dispatch path (orion-gold-dispatch.sh:303 INF_API_SILVER_BILLING), which pulls current code at run time",
+   "is_the_served_object": true
+  }
+ },
+ "measured_delta": {
+  "only_in_chain_stale": [
+   "is_fee_earning"
+  ],
+  "only_in_served_current": [
+   "ending_mv_reported",
+   "ending_mv_source",
+   "ending_mv_status",
+   "period_end",
+   "period_start"
+  ],
+  "common_columns": 12,
+  "prediction_it_tests": "1.0.0_SA_CTO/86672 pre-registered arm B as DIFFERENT in exactly is_fee_earning / ending_mv_* / period_* and equal elsewhere. MEASURED, and it lands exactly there: is_fee_earning present ONLY in the chain's bytes; ending_mv_reported/_source/_status and period_start/_end present ONLY in the served bytes. The prediction was made before this measurement, not fitted to it."
+ },
+ "what_this_settles_and_what_it_does_not": {
+  "settles": "The masking mechanism is now MEASURED, not asserted. My BUILD_MANIFEST said a second execution path 'overwrote the served output daily with the correct schema, masking the drift entirely' -- that was a mechanism claim. Two preserved versions with different schemas ~37 minutes apart, the later one served, is the discriminating evidence for it.",
+  "does_not_settle": "WHICH PROCESS wrote the 11:56:59Z version. The timestamp and the current-code schema are consistent with the EC2 dispatch path and with nothing else I have measured, but I did not read that runner's log; the attribution is INFERRED, and it is labelled so here rather than in prose beside a measured number.",
+  "not_a_pattern_claim": "ONE day (2026-08-29). The 08-28 served object's LastModified (11:51:58Z) is consistent with the same ordering, but I did not open its bytes."
+ },
+ "consequence_for_the_deploy": "The served bytes are CURRENT today -- the drift has not been reaching consumers on this key. That lowers the urgency of the redeploy and raises the value of the one-writer decision: the redeploy's visible effect on this key will be that the 11:19Z write stops being wrong, not that the served object changes.",
+ "recorded_by": "0.4.0_DS_ClientPlatform~V",
+ "recorded_at_utc": "2026-08-30T09:40:38Z",
+ "per_key_coverage": {
+  "why": "My first capture scoped ONE key (billing). 1.0.0_SA_CTO 87078 makes arm A/B PER SERVED KEY, so a one-key baseline would have left three keys unbaselined and the drift's blast radius unmeasured.",
+  "denominator": {
+   "served_keys_the_chain_writes": 4,
+   "all_carry_two_versions": true,
+   "schema_equal": 3,
+   "schema_different": 1
+  },
+  "keys": {
+   "performance": {
+    "chain_version": {
+     "version_id": "o_NSTlrIHEIngRSf.avN3YSFp4BtIsdj",
+     "last_modified": "2026-08-29T11:19:21.000Z",
+     "bytes": 61844
+    },
+    "served_version": {
+     "version_id": "NcWm3bSdeIah1A83lrfQi5pfukPPfPsJ",
+     "last_modified": "2026-08-29T11:58:08.000Z",
+     "bytes": 61844
+    },
+    "rows": {
+     "chain": 911,
+     "served": 911
+    },
+    "columns": {
+     "chain": 27,
+     "served": 27
+    },
+    "only_in_chain": [],
+    "only_in_served": [],
+    "schema_verdict": "SCHEMA-EQUAL",
+    "value_verdict": "VALUE-EQUAL",
+    "cells_compared": 24597
+   },
+   "billing": {
+    "chain_version": {
+     "version_id": "jCldmxzmg2ojS068AnJKywgRqyH1bGvD",
+     "last_modified": "2026-08-29T11:19:22.000Z",
+     "bytes": 34039
+    },
+    "served_version": {
+     "version_id": "uNBX1q8UfqpfZ795T.EvjK5H0xIprak4",
+     "last_modified": "2026-08-29T11:56:59.000Z",
+     "bytes": 45542
+    },
+    "rows": {
+     "chain": 911,
+     "served": 911
+    },
+    "columns": {
+     "chain": 13,
+     "served": 17
+    },
+    "only_in_chain": [
+     "is_fee_earning"
+    ],
+    "only_in_served": [
+     "ending_mv_reported",
+     "ending_mv_source",
+     "ending_mv_status",
+     "period_end",
+     "period_start"
+    ],
+    "schema_verdict": "SCHEMA-DIFFERENT",
+    "value_verdict": "NOT COMPARED -- the schemas differ, so a cell comparison would be scoring a column set, not values."
+   },
+   "tax_unrealized": {
+    "chain_version": {
+     "version_id": "6KhBXaFemCJam.pzwi4P.Y0z8cVlQTAH",
+     "last_modified": "2026-08-29T11:19:22.000Z",
+     "bytes": 79985
+    },
+    "served_version": {
+     "version_id": "eGGxUMg4DQlhveLAmwHCYzZthUR4ILSy",
+     "last_modified": "2026-08-29T11:55:16.000Z",
+     "bytes": 79985
+    },
+    "rows": {
+     "chain": 911,
+     "served": 911
+    },
+    "columns": {
+     "chain": 36,
+     "served": 36
+    },
+    "only_in_chain": [],
+    "only_in_served": [],
+    "schema_verdict": "SCHEMA-EQUAL",
+    "value_verdict": "VALUE-EQUAL",
+    "cells_compared": 32796
+   },
+   "tax_realized": {
+    "chain_version": {
+     "version_id": "KUONmlZnHUi11MrhvUU2scLXDepO7tnQ",
+     "last_modified": "2026-08-29T11:19:22.000Z",
+     "bytes": 83656
+    },
+    "served_version": {
+     "version_id": "xovpcJ4CAGSG4xOK9Pa1MyLu7.VyagW2",
+     "last_modified": "2026-08-29T11:55:16.000Z",
+     "bytes": 83656
+    },
+    "rows": {
+     "chain": 911,
+     "served": 911
+    },
+    "columns": {
+     "chain": 36,
+     "served": 36
+    },
+    "only_in_chain": [],
+    "only_in_served": [],
+    "schema_verdict": "SCHEMA-EQUAL",
+    "value_verdict": "VALUE-EQUAL",
+    "cells_compared": 32796
+   }
+  },
+  "finding": "THE 111-DAY DRIFT'S OUTPUT BLAST RADIUS ON 2026-08-29 IS ONE KEY. On performance, tax_unrealized and tax_realized the stale package's write and the current-code write are VALUE-EQUAL across every cell (24,597 / 32,796 / 32,796 cells, 911 rows each), sorted by every column first so row order between two independent writes is not scored as a difference. Only billing differs, and it differs exactly where predicted. The digest drift is real in all four members; it REACHES THE OUTPUT in one.",
+  "scope_limit": "One day (2026-08-29) and four keys -- the ones this run wrote. The converter's own outputs and the three FAILED stages produced nothing to compare on this date."
+ },
+ "instrument_correction": "ETag was the wrong instrument and I nearly shipped its verdict. I compared the two versions' ETags first; they were DIFFERENT on all four keys, and a pre-written reading in the same script called three of them IDENTICAL on the strength of equal byte SIZES. Both halves were wrong. Parquet is not byte-deterministic -- writer metadata, row-group layout and created_by differ between runs -- so an ETag cannot separate 'different code' from 'the same code run twice', and equal size is not equal content. The axis the drift lives on is the SCHEMA, then the VALUES; both are measured above. Recorded because the wrong instrument here would have manufactured a 4-of-4 difference and buried the actual finding, which is that three of the four are identical."
+}

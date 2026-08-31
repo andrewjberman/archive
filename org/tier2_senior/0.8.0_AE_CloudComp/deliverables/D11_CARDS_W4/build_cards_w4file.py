@@ -324,6 +324,15 @@ def build():
         }
 
         # ---- trust.failure_mode ----
+        # RULE 3 / Addendum 1v (1.0.0_SA_CTO~X, 89660): a field whose VALUE is the null token
+        # may NOT carry a basis of held/inferred/measured. The basis describes HOW THE VALUE WAS
+        # OBTAINED, so "this was not measured" cannot have been obtained BY measuring. This value
+        # is conditional and its basis was hardcoded `measured` beside it -- true for the "no"
+        # branch (read off the guard structure and the tracked state) and false for the
+        # "unmeasured" branch, which is the 8-card Class A hit in this lane. DERIVE it from the
+        # value so the two cannot drift apart again.
+        dtn_value = "no" if (pid == "kuzu_ac7.dir" or is_tracked is False) else "unmeasured"
+        dtn_basis = "absent" if dtn_value == "unmeasured" else "measured"
         failure_mode = {
             "returns_on_failure": (
                 "A consumer opening this path when the artifact is missing gets a filesystem "
@@ -336,9 +345,7 @@ def build():
                    "byte-identical to a genuinely empty result."
                    if pid == "kuzu_ac7.dir" else "")
             ),
-            "distinguishable_from_true_negative": (
-                "no" if (pid == "kuzu_ac7.dir" or is_tracked is False) else "unmeasured"
-            ),
+            "distinguishable_from_true_negative": dtn_value,
             "silent_degrade_paths": [
                 f"STALENESS IS SILENT: mtime {v['mtime_utc']} ({v['age_days']}d at carding) is "
                 f"carried by the filesystem, not by the artifact, so a consumer that reads only "
@@ -352,20 +359,43 @@ def build():
             "basis": "measured",
             "basis_by_field": {
                 "returns_on_failure": "inferred",
-                "distinguishable_from_true_negative": "measured",
+                "distinguishable_from_true_negative": dtn_basis,
                 "silent_degrade_paths": "measured",
             },
+            # Addendum 1w conservation: this sentence is a THIRD CARRIER of the same claim as
+            # basis_by_field and the row scalar. It enumerated 2 of 3 parts and was SILENT on
+            # distinguishable_from_true_negative -- the one part the RULE 3 repair moves. Left
+            # unmoved it would have shipped a card whose basis floors to `absent` with no stated
+            # reason. Derived from dtn_basis so the three carriers cannot drift apart.
             "evidence": (
                 "silent_degrade_paths MEASURED: mtime and tracked state both read this session. "
                 "returns_on_failure is INFERRED -- I did NOT delete the artifact to observe a "
                 "consumer's error, and I will not: the standing rule is qualify-do-not-fix and "
                 "deleting a live artifact to characterise its absence would be the opposite. "
-                "The row scalar is therefore the floor over its parts."
+                + (
+                    "distinguishable_from_true_negative is MEASURED: it is read off the guard "
+                    "structure and the tracked state, both read this session. "
+                    if dtn_basis == "measured"
+                    else "distinguishable_from_true_negative is ABSENT, not measured: its VALUE "
+                    "is the null token, and a basis describes how a value was obtained -- 'this "
+                    "was not measured' cannot have been obtained by measuring (RULE 3 / Addendum "
+                    "1v). No probe was run to tell this artifact's failure from a true negative, "
+                    "and the field says so rather than claiming a measurement it does not have. "
+                )
+                + "The row scalar is therefore the floor over its parts, COMPUTED rather than "
+                "typed."
             ),
             "owner": part.get("owner") or "UNOWNED",
         }
-        # floor the failure_mode scalar honestly
-        failure_mode["basis"] = "inferred"
+        # floor the failure_mode scalar honestly -- DERIVED, not typed. It was hardcoded
+        # "inferred", which happened to equal the floor while every part was inferred-or-better.
+        # Once dtn_basis can be `absent`, a hardcoded "inferred" would claim MORE than its own
+        # parts support -- the same defect one level up, and the block's own evidence sentence
+        # already promises "the floor over its parts". Compute it so the promise is kept.
+        _RANK = {"absent": 0, "held": 1, "inferred": 2, "measured": 3}
+        failure_mode["basis"] = min(
+            failure_mode["basis_by_field"].values(), key=lambda b: _RANK[b]
+        )
 
         defects = []
         if pid == "kuzu_ac7.dir":

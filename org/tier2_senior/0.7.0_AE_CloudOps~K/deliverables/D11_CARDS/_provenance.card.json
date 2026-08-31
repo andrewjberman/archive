@@ -1,0 +1,157 @@
+{
+  "schema_version": 3.1,
+  "subject": {
+    "id": "infra/aws/globgrph/_provenance.py",
+    "kind": "script",
+    "declared_domain": "NFRA_GLOBGRPH TO-F1 -- Kuzu query-surface provenance, and the CONTRACT OWNER for the sidecar suffixes and the Nessie HEAD oracle. Writes <db>._build_manifest.json beside each DB on a successful build for all three Kuzu loaders; supplies the provenance header kuzu_cli prints on EVERY comp-kuzu invocation; owns the FRESHGUARD leg-4 centralized marker stamp that all three graph writers call, and the _nessie_head_status BEHIND/CURRENT/UNKNOWN decision that _canonical's refresh trigger keys on."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-30T04:05:00Z",
+    "commit_ish": "5da9e7fffc",
+    "graph_vintage": "Holds no vintage of its own -- it is the thing that STAMPS and READS vintages. The marker it owns, s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json, was measured live this session at LastModified 2026-08-30T02:11:47Z. The manifest it writes was measured beside the canonical DB at 902 B, ~14 min old at 03:35Z."
+  },
+  "process": {
+    "methodology": {
+      "how": "Three roles in one module. (1) MANIFEST: write_manifest stamps {schema_version, source_kind (tarball|nessie|stitch), source_vintage, built_at UTC ISO, node_count, edge_count} to a SIBLING path so it survives whether Kuzu materializes the DB as a file or a directory and a --force wipe cannot clobber it; read_manifest returns it or None. (2) HEAD ORACLE: read_branch_head_marker fetches the writer-stamped branch-head marker, and _nessie_head_status compares this DB's pinned nodes_snapshot_id against the marker's, as STRINGS because the marker carries int and the manifest carries str, returning 'current' | 'behind' | 'unknown' -- an absent marker yields UNKNOWN, explicitly never a silent guess, the mtime-scan oracle having been retired on CVO dc06744c6. (3) HEADER: format_provenance_header is a pure string builder (the caller decides the sink; kuzu_cli sends it to stderr so --json stays parseable) that surfaces a refresh failure LOUD at the top, distinguishes a DELIBERATE comp-kuzu-inc labeled-stale serve from a broken rebuild in different words, and prints a loud UNKNOWN VINTAGE block when no manifest exists.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "canonical",
+      "composes": [
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json",
+          "note": "MARKER_KEY :96 -- the HEAD oracle this module both stamps and reads"
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/_branch_head.history/",
+          "note": "HISTORY_PREFIX :102 -- where a superseded marker is archived"
+        },
+        {
+          "id": "infra/aws/globgrph/kuzu_nessie_load.py",
+          "note": "one of the three loaders that call write_manifest; subject 2 on this face"
+        },
+        {
+          "id": "infra/aws/globgrph/_canonical.py",
+          "note": "consumes _nessie_head_status for its refresh trigger and _REFRESH_STATUS_SUFFIX for the #25 marker; subject 3 on this face"
+        },
+        {
+          "id": "infra/aws/globgrph/kuzu_cli.py",
+          "note": "prints format_provenance_header on every comp-kuzu invocation -- the universal caller-facing surface"
+        }
+      ],
+      "invents": [],
+      "basis": "measured",
+      "evidence": "Read at infra/aws/globgrph/_provenance.py:1-641 @5da9e7fffc. Suffix constants :34, :40; DEFAULT_AGE_WARN_HOURS :41; manifest_path :44-47; write_manifest :49-72; read_manifest :74-84; MARKER_KEY :96; HISTORY_PREFIX :102; read_branch_head_marker :128-142; _nessie_head_status :145-167; TABLE_CADENCE_MAX_HOURS :180-185; stamp_marker :194; the CAS/unconditional stamp pair :242 / :305; _read_refresh_failure :530-542; format_provenance_header :545-641.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "cadence": {
+      "declared_rhythm": "NONE, and correctly so -- this is a LIBRARY, not a producer. Its writes happen on its callers' schedules: write_manifest on each successful loader build, stamp_marker on each of the three graph writers' commits (FRESHGUARD leg-4 makes it the SINGLE stamp all three call, because a triplicated stamp is the drift class that work fixed), and format_provenance_header on every comp-kuzu invocation.",
+      "actual_trigger": "Caller-driven, on three distinct clocks: loader builds, graph-writer commits, and every interactive comp-kuzu query. It has no timer of its own and declares none.",
+      "live_matches_declared": "yes",
+      "live_instance_age": "The module has no instance. Its ARTIFACTS were measured: the branch-head marker it owns at 2026-08-30T02:11:47Z, and kuzu_nessie_db._build_manifest.json at 902 B and ~14 min old at 03:35Z. Both current at carding.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "Module docstring :3-27 states the two caller roles; the FRESHGUARD leg-4 block :169-177 states the single-stamp-for-three-writers design. Artifact ages measured live: s3api on the marker (02:11:47Z) and a directory listing beside the canonical DB (902 B manifest). No scheduler names this module -- it is imported, not invoked.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "evidence",
+      "mutation_policy": "replaceable",
+      "form": "Two JSON artifacts and one string. (a) <db>._build_manifest.json -- the per-DB build stamp, rewritten whole on each successful build. (b) warehouse/_branch_head.main.json -- the branch-head marker naming each table's metadata_location, snapshot_id and last_write_iso, with superseded versions archived under warehouse/_branch_head.history/. (c) the provenance header, a multi-line string returned to the caller rather than printed, so the module never chooses a sink.",
+      "basis": "measured",
+      "evidence": "Manifest schema documented :12-19 and written at :49-72; marker key :96 and history prefix :102; header returned as a joined string at the end of format_provenance_header (:545-641), with the docstring explicitly stating 'Pure string builder -- the caller decides where to write it'. Classified 'evidence' rather than 'source' or 'projection' ON PURPOSE: these artifacts are not the graph and are not derived from it as a view -- they are the CLAIMS ABOUT the graph's vintage that every consumer's freshness decision rests on, which is exactly what the evidence role names.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "location": {
+      "home": "The module at infra/aws/globgrph/_provenance.py; its artifacts at <db_path> + '._build_manifest.json' (per DB, local) and s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json (one per warehouse, remote).",
+      "projection_of": [
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_nodes",
+          "note": "the manifest records this table's pinned snapshot_id; the marker records its HEAD snapshot_id"
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_edges",
+          "note": "same, for the edge table"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/_branch_head.history/",
+          "note": "archived superseded markers share the bucket and the warehouse/ prefix with the live marker"
+        },
+        {
+          "id": "kuzu_nessie_db._refresh_status.json",
+          "note": "the #25 refresh-failure marker: this module OWNS the suffix and READS the file, while _canonical.py WRITES it -- a split that is deliberate and single-sourced here so the pair cannot drift"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "MANIFEST_SUFFIX :34, _REFRESH_STATUS_SUFFIX :40 with the comment at :35-39 stating the single-sourcing rationale verbatim ('one contract, one definition'); MARKER_KEY :96; HISTORY_PREFIX :102. ⛔ NOTE THE SAME PREFIX HAZARD CARD 2 RECORDS: the marker lives at warehouse/_branch_head.main.json, OUTSIDE the warehouse/globgrph/ namespace the tables use, so a prefix-scoped grant or lifecycle rule written against warehouse/globgrph/ reaches the tables and MISSES the oracle that says whether they are current.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every Kuzu DB any of the three loaders builds (tarball / nessie / stitch) gets a manifest; every comp-kuzu invocation gets a header; the marker covers the tables named in TABLE_CADENCE_MAX_HOURS (graph_edges, graph_nodes, cse).",
+      "denominator": "3 source_kinds are handled by name in the header builder (tarball, nessie, stitch) and 3 tables carry declared cadence thresholds (graph_edges 26.0 h, graph_nodes 6.0 h, cse 26.0 h). DEFAULT_AGE_WARN_HOURS is 26.0, chosen as '> one nightly cycle == missed-nightly signal' -- the threshold carries its own reasoning in the source rather than being a bare number.",
+      "explicitly_out": [
+        "any DB built by something other than the three loaders -- it simply has no manifest, and the header then says UNKNOWN VINTAGE loudly rather than assuming freshness",
+        "a source_kind not in {tarball, nessie, stitch} -- the header's if/elif chain prints the DB line and source line but no kind-specific vintage rows, so a new kind degrades to less detail rather than to an error",
+        "tables absent from TABLE_CADENCE_MAX_HOURS -- graph_contracts is named in the source as advisory, with no hard cadence",
+        "the CHOICE of sink for the header -- deliberately out of scope; the module returns a string and never prints"
+      ],
+      "basis": "measured",
+      "evidence": "source_kind branches in format_provenance_header :578-590; TABLE_CADENCE_MAX_HOURS :180-185 with the graph_contracts advisory note at :178-179; DEFAULT_AGE_WARN_HOURS :41 with its inline rationale; the UNKNOWN VINTAGE block :572-577.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "TWO key spaces, joined by this module and not elsewhere. LOCAL: a DB path, from which every sidecar is derived by suffix. REMOTE: a fixed bucket-relative S3 key for the marker, plus per-table names inside it. The join between them is the snapshot_id comparison -- the manifest's pinned id (local, str) against the marker's HEAD id (remote, int).",
+      "key_expression": "SIDECAR KEYS, each verbatim: manifest = db_path.rstrip('/\\\\') + '._build_manifest.json' (manifest_path :44-47, MANIFEST_SUFFIX :34); refresh-status = db_path.rstrip('/\\\\') + '._refresh_status.json' (_REFRESH_STATUS_SUFFIX :40, read at :537). MARKER KEY is a CONSTANT, not derived: 'warehouse/_branch_head.main.json' (:96), with archived predecessors under 'warehouse/_branch_head.history/' (:102). THE CROSS-SPACE JOIN, and it is the one a consumer must compute correctly: str(source_vintage['nodes_snapshot_id']) == str(marker['table_metadata']['graph_nodes']['snapshot_id']) -- :162-164, compared AS STRINGS because the marker carries an int and the manifest a str; comparing them untyped would report 'behind' for an identical pin.",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "The suffix contract is declared at :34-40 and the comment there states the reason single-sourcing is load-bearing verbatim -- 'so the writer/reader suffix cannot drift (the leg-4 lesson: one contract, one definition)'. The snapshot-id comparison and its str-coercion are declared in _nessie_head_status's own docstring and inline comment (:145-164).",
+      "basis": "measured",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_expression": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "All expressions read verbatim at the lines cited. Rated STABLE: the sidecar keys are suffix concatenation over ONE EXPLICIT NORMALISATION -- db_path.rstrip('/\\\\') at manifest_path :46 and at the refresh-status read :537, which strips trailing separators so a DB addressed as 'x' and as 'x/' yields the SAME sidecar key -- with NO fallback and no alternate form, and the marker key is a module constant. STABLE stands: the normalisation is deterministic and collapses two spellings onto one key rather than letting one entity occupy two. CORRECTED after 3.0.0_SA_CVO~X's F2: this row previously said 'no normalisation', contradicting the rstrip that my own key_expression field quotes verbatim two fields above. The int-vs-str coercion is handled AT the comparison rather than left to the caller, which is what keeps the cross-space join stable rather than merely documented.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "failure_mode": {
+      "returns_on_failure": "SPLIT DISCIPLINE WITHIN ONE MODULE -- this is the accurate shape, and my first version of this card got it wrong by calling it 'exemplary with one exception'. A source-wide census of every except-handler (16 handlers) finds TWO readers that DISCRIMINATE their failure causes and SEVEN that COLLAPSE them to a bare None. DISCRIMINATING: _read_refresh_failure (:530-542) catches FileNotFoundError FIRST so ABSENT reads as healthy None, and returns a dict with kind='unreadable-marker' for a present-but-corrupt marker so the header still fires -- its docstring names the incident that taught it (DS~B RAVC b50855e20). cohort_vintage_lines (:490-503) returns a LINE naming the cause -- 'UNAVAILABLE (kuzu not importable)' and 'UNAVAILABLE (<ExceptionType>)' -- and says 'data age UNMEASURED' rather than implying a value. COLLAPSING, and THREE of them reach a caller-facing claim: (a) read_branch_head_marker (:128-142) returns None on FOUR causes (empty bucket :131-132, boto3 import :134-136, S3 fetch and JSON parse both :137-142), and _nessie_head_status (:156) labels all four 'no branch-head marker'. The STATUS stays honest ('unknown'); the CAUSE is asserted. (b) read_manifest (:74-83) returns None for ABSENT (:77-78, an explicit os.path.exists check) AND for UNREADABLE (:79-83, broad except) -- the distinction is COMPUTED and then DISCARDED -- and format_provenance_header (:575-579) renders that None as 'UNKNOWN VINTAGE -- no _build_manifest.json beside this DB'. A present, corrupt manifest is reported as ABSENT. Its own docstring says 'absent/unreadable', so the function knows the two are different and the header does not. (c) _age_hours (:86-93) returns None on any parse failure, and _canonical.needs_refresh (:93-96) tests 'age is not None and age > age_warn_hours' -- so an UNPARSEABLE built_at SKIPS the staleness branch entirely and falls through to (False, 'current'). This is the most consequential of the three because it produces the word CURRENT rather than UNKNOWN. THE COMPOUND, and its boundary corrected after 3.0.0_SA_CVO~X caught me overstating it: an unparseable built_at (age check skipped) together with an unreachable marker (status 'unknown', which needs_refresh does not treat as BEHIND) leaves a DB that NEITHER TRIGGER REFRESHES -- _canonical.needs_refresh returns (False, 'current'). I first wrote that this happens 'with a header reporting a vintage rather than a problem'. THAT IS FALSE and the truth is a sharper finding: format_provenance_header REPORTS BOTH PROBLEMS LOUDLY -- ':602-604' emits 'built: <value> (age: unparseable)' and ':617-620' emits 'HEAD-ORACLE UNKNOWN (no branch-head marker) -- <detail>'. So THE DIAGNOSTIC SURFACE AND THE DECISION SURFACE DIVERGE ON THE SAME TWO VALUES: a human reading the header is told the age is unparseable and the HEAD oracle is unknown, while needs_refresh, reading those same two values, ignores both and answers 'current'. Nobody is left blind; the information is produced, displayed, and then discarded at the only point that decides whether to act on it.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "read_branch_head_marker returns None on FOUR distinct causes (:131-132 empty bucket, :134-136 boto3 import, :137-142 fetch-or-parse), and _nessie_head_status (:156) labels every one of them 'no branch-head marker' -- so a credentials failure, corruption, a missing dependency and a caller bug are all reported as a missing file",
+        "read_manifest (:74-83) discards a distinction it has already COMPUTED: os.path.exists separates absent from present, then both absent and unreadable return None, and the header (:575-579) asserts 'no _build_manifest.json beside this DB'. A corrupt manifest is reported as an absent one",
+        "_age_hours (:86-93) returns None on an unparseable built_at, and _canonical.needs_refresh (:93-96) compares age only when it is not None -- so a malformed timestamp makes the DB read 'current' by age rather than unknown. Compounds with an unknown marker into a DB neither trigger will refresh -- while the header DOES print 'age: unparseable' (:602-604) and 'HEAD-ORACLE UNKNOWN' (:617-620), so this is a decision-surface defect, not a blind one",
+        "_pending_event_count (:112-125) returns None on any exception and the header tests 'if pending' (:635) -- so a queue count of 0 and an UNREACHABLE / no-permission queue both emit NO line. The source comment at :631-633 states the intent (so that 'current' is never silently blind to the <=2min SQS debounce window) and, one line later, its own limit ('absent on 0 / no perms'). The intent and the conflation are two lines apart",
+        "the header degrades to fewer vintage lines, not an error, for an unrecognised source_kind"
+      ],
+      "basis": "measured",
+      "evidence": "SOURCE-WIDE CENSUS of every except-handler in _provenance.py @5da9e7fffc -- 16 handlers, each classified by what it returns. Collapsing to a bare None: :82 read_manifest, :92 _age_hours, :124 _pending_event_count, :135 and :141 read_branch_head_marker, :190 _iso_from_snapshot_ms, :219 stamp_marker. Discriminating: :539/:541 _read_refresh_failure (FileNotFoundError first, then the unreadable-marker dict), :492/:502 cohort_vintage_lines (names the cause and says UNMEASURED). Caller-facing consequences read at their consumption sites: format_provenance_header :575-579 (manifest None -> asserted absence), :635 ('if pending' -> None and 0 identical), _nessie_head_status :156 (four causes -> one detail string), and _canonical.needs_refresh :93-96 (age None -> staleness branch skipped -> 'current'). CORRECTION RECORD: my first version of this card asserted 'MOSTLY EXEMPLARY, WITH ONE PRECISE EXCEPTION' and named only the branch-marker collapse. 3.0.0_SA_CVO~X found two more; censusing the SOURCE for the defect CLASS then found a third (_age_hours) that neither of us had named. My pre-presentation census swept my own PHRASINGS -- count-words and absolutes -- and never swept the SOURCE for other instances of the class I had just documented. That is the card-3 lesson one level up: I built the census around the instance I had found rather than around the defect type.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "This is the contract owner the rest of the family leans on, and it mostly earns that position. It single-sources the sidecar suffixes so a writer and a reader cannot drift, and says why in the source. It refuses to guess a HEAD: an absent marker yields UNKNOWN, never a silent 'current', with the retired mtime oracle named and its CVO finding cited. It coerces int-vs-str at the snapshot-id comparison rather than leaving that trap to callers. It returns the provenance header as a string instead of choosing a sink, so --json output stays parseable while the header is still emitted on every comp-kuzu invocation -- though that emission is kuzu_cli's doing, not this module's: it returns a string and never prints, so 'provenance is always surfaced' is a property of the CALLER and is not guaranteed by the subject carded here. And _read_refresh_failure is the best failure reader on this face: FileNotFoundError caught FIRST so absent reads healthy, a corrupt marker returned as 'unreadable-marker' so the header still fires, with the incident that taught it named in the docstring. QUALIFIED, not SOUND, on a MEASURED CLASS rather than the single defect I first claimed -- a source-wide census of all 16 except-handlers finds two discriminating readers and seven collapses, THREE of which reach a caller-facing claim: read_branch_head_marker collapses FOUR causes -- empty-bucket, boto3-import, S3-fetch and JSON-parse -- into a single None, and _nessie_head_status then renders all four as the detail string 'no branch-head marker'; its own docstring lists three, undercounting its own code. The STATUS stays honest -- 'unknown' -- so nothing downstream is told the graph is current when it is not; but the CAUSE reported to a human is asserted rather than known, and it points the diagnosis at a missing file when the real fault may be credentials or corruption. read_manifest COMPUTES the absent-vs-unreadable distinction with an os.path.exists check and then discards it, so a corrupt manifest is reported as an absent one; and _age_hours returns None on an unparseable built_at, which makes _canonical.needs_refresh skip its staleness branch and report the DB 'current' -- the only one of the three that produces a positive freshness word rather than an honest unknown, and the one that compounds with an unknown marker into a DB neither trigger will refresh -- though the header itself prints both 'age: unparseable' and 'HEAD-ORACLE UNKNOWN', so the divergence is between what the module DISPLAYS and what the refresh decision ACTS ON, not a case of anyone being left blind. The sharpest evidence that these are defects rather than design choices is inside the same module: _read_refresh_failure separates ABSENT from UNREADABLE deliberately and explains why, and cohort_vintage_lines names its exception type and says UNMEASURED. The module holds the lesson in two readers and does not apply it in seven.",
+    "blocking_defects": [
+      "read_branch_head_marker (:128-142) collapses FOUR distinct failure causes into one None (empty bucket, boto3 import, S3 fetch, JSON parse), and _nessie_head_status (:156) reports all of them as 'no branch-head marker'; the function's own docstring (:130) lists only three, undercounting its own code",
+      "read_manifest (:74-83) discards an absent-vs-unreadable distinction it has already computed, and the header (:575-579) then asserts 'no _build_manifest.json beside this DB' for a manifest that is present but corrupt",
+      "_age_hours (:86-93) returns None on an unparseable built_at and _canonical.needs_refresh (:93-96) skips its staleness branch on None, so a malformed timestamp yields the verdict 'current'; compounds with an unknown marker into a DB neither trigger refreshes. The header DOES report both conditions (:602-604, :617-620) -- the defect is that the refresh DECISION ignores what the DISPLAY correctly shows",
+      "_pending_event_count (:112-125) conflates a zero queue with an unreachable one under 'if pending' (:635), so the header is silently blind to in-flight events exactly when the probe is unavailable -- two lines below a comment stating the feature exists so that 'current' is never silently blind",
+      "the marker key sits at warehouse/_branch_head.main.json, OUTSIDE the warehouse/globgrph/ prefix its tables use -- a prefix-scoped IAM or lifecycle rule can cover the tables and miss the oracle for their freshness (location row; same hazard recorded on card 2)"
+    ]
+  },
+  "carded_by": "0.7.0_AE_CloudOps~K"
+}

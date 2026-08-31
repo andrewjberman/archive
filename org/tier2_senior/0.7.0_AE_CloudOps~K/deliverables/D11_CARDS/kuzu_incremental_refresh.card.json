@@ -1,0 +1,155 @@
+{
+  "schema_version": 3.1,
+  "subject": {
+    "id": "infra/aws/globgrph/kuzu_incremental_refresh.py",
+    "kind": "script",
+    "declared_domain": "NFRA_GLOBGRPH -- the INCREMENTAL local Kuzu-projection refresh, the local analog of the cloud incremental_updater Lambda (Andrew-directed 2026-07-08). Applies ONLY the delta between the canonical DB's pinned snapshot and the new Nessie HEAD -- MERGE changed/added nodes, DETACH DELETE removed ones, MERGE/DELETE edges -- on a FILE-COPY, so _canonical's mutex and atomic swap are untouched. Signals FALLBACK when the delta approximates a full-table overwrite, letting the caller run the full kuzu_nessie_load instead."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-30T05:10:00Z",
+    "commit_ish": "5da9e7fffc",
+    "graph_vintage": "Holds no vintage of its own; it pins per-run to the same branch-head marker as subjects 2 and 3, measured live this session at 2026-08-30T02:11:47Z. It STAMPS a vintage via _provenance.write_manifest on a successful incremental apply, carrying the HEAD snapshot ids it just diffed against."
+  },
+  "process": {
+    "methodology": {
+      "how": "A subprocess entry point. _read_head_tables pins to the branch-head marker (RAISING if the marker cannot be resolved -- incremental requires a deterministic pin) and reads both Iceberg tables whole. The pure diff+apply core takes head data as PARAMETERS so it is unit-testable without Iceberg or cloud access: it opens the live canonical DB READ-ONLY, reads {key: snapshot_ts} and the edge identity map, releases the handle, then computes node upserts (absent or snapshot_ts-changed) and deletes (present locally, absent from HEAD). If the node delta is both >= FALLBACK_MIN_ABS (4000) AND >= FALLBACK_FRACTION (0.25) of head, it returns 'fallback' unapplied. Otherwise it FILE-COPIES the DB to a tmp path, applies in the order delete-edges, DETACH-DELETE-nodes, upsert-nodes, upsert-edges, then runs a post-apply guard and stamps a manifest. Exit codes are the caller's signal: 0 incremental applied, 2 fallback, 1 error; on any non-zero the tmp is removed so the caller's full reload starts clean.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "canonical",
+      "composes": [
+        {
+          "id": "infra/aws/globgrph/_provenance.py",
+          "note": "read_branch_head_marker for the pin and write_manifest for the stamp; subject 4 on this face"
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_nodes",
+          "note": "read whole via pyiceberg StaticTable at the marker's metadata_location"
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_edges",
+          "note": "read whole; the edge delta is computed against the live DB's edge identity map"
+        },
+        {
+          "id": "infra/aws/globgrph/_canonical.py",
+          "note": "the sole caller -- invokes this as a subprocess and interprets its exit codes; subject 3 on this face"
+        },
+        {
+          "id": "infra/aws/globgrph/kuzu_nessie_load.py",
+          "note": "the FALLBACK target: _canonical runs the full loader on exit code 2 or 1. This module deliberately mirrors its node-key and dedup rules; subject 2 on this face"
+        }
+      ],
+      "invents": [],
+      "basis": "measured",
+      "evidence": "Read in full at infra/aws/globgrph/kuzu_incremental_refresh.py:1-350 @5da9e7fffc. _node_key :47-49; _dedup_nodes :50-60; _read_head_tables :63-94 with the marker RAISE at :72-74; _cur_node_ts :96-103; _cur_edges :106-119; node diff :164-171; the fallback gate :173-176; edge diff :178-192; file-copy and apply :194-222; the post-apply guard :224-231; manifest stamp :233-234; the subprocess main and exit-code contract :321-350.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "cadence": {
+      "declared_rhythm": "NONE of its own -- it is a subprocess invoked by _canonical, and its docstring declares no schedule.",
+      "actual_trigger": "Called by _canonical.ensure_fresh on a refresh when the incremental path is enabled, which it is BY DEFAULT: _canonical.py:384 reads os.environ.get('GLOBGRPH_KUZU_INCREMENTAL_REFRESH', '1') != '0'. So it runs on every demand-driven canonical refresh unless a caller opts OUT. The three comp-kuzu wrappers additionally export the flag explicitly.",
+      "live_matches_declared": "no",
+      "live_instance_age": "No instance of its own. Its product is the tmp DB the caller atomic-swaps in, so its output's age is the canonical DB's -- measured on card 3 at 2026-08-30T01:52:20Z.",
+      "basis": "measured",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "measured",
+        "live_instance_age": "measured"
+      },
+      "evidence": "The subject's own docstring :27-28 states 'Gated OFF by default (GLOBGRPH_KUZU_INCREMENTAL_REFRESH=1) pending CTO arch-gate of the design'. The consumer contradicts BOTH halves at _canonical.py:365-366 -- 'DEFAULT-ON (GLOBGRPH_KUZU_INCREMENTAL_REFRESH defaults to \"1\"; set \"0\" to opt OUT -> full-only). CTO arch-gate GO 195732Z; flipped opt-IN -> DEFAULT after the 2026-07-09 graph-infra incident (DS~B)' -- and implements default-ON at :384. Measured in this shell: the variable is UNSET, so the consumer's default applies and the path is ON. live_matches_declared is 'no' for exactly this reason: the declared gating state is not the operating one.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "projection",
+      "mutation_policy": "replaceable",
+      "form": "A Kuzu DB written to the caller-supplied tmp path (--db), produced as a FILE-COPY of the live canonical DB with the delta applied in place, plus a _provenance manifest stamped beside it carrying the HEAD snapshot ids just diffed against. The caller atomic-swaps it in; this module never touches the canonical path itself. On any non-zero exit the tmp is REMOVED so the caller's full reload starts from a clean slate.",
+      "basis": "measured",
+      "evidence": "File-copy at :194-196 (_rm_kuzu then _copy_kuzu); manifest stamp :233-234; tmp removal on non-zero at :344-345 inside the main() finally block; the --current / --db argument contract :331-334. 'projection' not 'source': every value applied is read from the Iceberg tables, and the DB is recoverable in full by the fallback loader.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "location": {
+      "home": "No fixed home -- the output path is supplied by the caller as --db, and in practice is _canonical's per-rebuild tmp path (the kuzu_nessie_db.rebuild.tmp SET, subject 7 on this face).",
+      "projection_of": [
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_nodes",
+          "note": "the HEAD node set at the marker pin"
+        },
+        {
+          "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_edges",
+          "note": "the HEAD edge set at the marker pin"
+        },
+        {
+          "id": "infra/aws/globgrph/kuzu_nessie_db",
+          "note": "the LIVE canonical DB is both the diff baseline and the copy source -- this module's output is the previous projection plus a delta, not a rebuild from source"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "kuzu_nessie_db.rebuild.tmp.SET",
+          "note": "its output IS a member of that set while in flight; the set is subject 7 on this face and _canonical is its sole reaper"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "--db is required and caller-supplied (:332-334); _canonical passes its per-rebuild tmp path. The diff-and-copy-from-live design is stated in the module docstring :12-19 and implemented at :159-196.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every row of graph_nodes and graph_edges at the marker-pinned HEAD, diffed against every node and edge in the live canonical DB. Both sides are read WHOLE -- no sampling, no time window.",
+      "denominator": "PRINTED PER RUN AND WITH BOTH SIDES NAMED, which is the strongest denominator discipline on this face: INCR_HEAD_READ gives nodes/edges read and both snapshot ids; INCR_NODE_DELTA gives head, cur, upsert, delete AND the changed percentage of head; INCR_EDGE_DELTA gives head, cur, upsert, delete. A reader can reconstruct the delta ratio the fallback gate turns on, from the log alone.",
+      "explicitly_out": [
+        "node rows with an empty key -- _dedup_nodes skips them at :55-56 with NO counter, exactly as kuzu_nessie_load does; the two modules share the defect because they deliberately share the key rule",
+        "edges whose src or dst is not in the HEAD node set -- skipped at :183-184, uncounted, and the source states this is deliberate parity with the full loader",
+        "anything at all when the delta is large -- the fallback gate returns UNAPPLIED at :173-176, which is a refusal rather than a partial application, and it is counted and explained in the returned stats",
+        "the whole path when the marker cannot be resolved -- _read_head_tables RAISES rather than proceeding on an unpinned HEAD (:72-74)"
+      ],
+      "basis": "measured",
+      "evidence": "Log lines at :81-82, :169-171, :191-192. The empty-key skip :55-56; the endpoint skip :183-184 with its parity comment; the fallback return :173-176 carrying reason and changed-count in stats.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "TWO identities, both deliberately mirrored from kuzu_nessie_load. NODE identity is the Kuzu PK; EDGE identity is the 4-tuple the full loader MERGEs on, and I verified both expressions are character-for-character the same rule as the full loader's. ⚠ SCOPE OF THAT CLAIM, stated because the obvious wider version is false: matching key rules means the two paths cannot diverge ON KEY CONSTRUCTION. It does NOT mean the resulting DBs cannot diverge -- the incremental path applies a delta to an existing projection while the full path rebuilds from source, and the post-apply count guard exists precisely because they CAN differ for reasons that have nothing to do with the key rule.",
+      "key_expression": "NODE KEY, _node_key :47-49 verbatim: (row.get('arn') or '').strip() or (row.get('node_id') or '').strip() -- identical to kuzu_nessie_load.py:150, and rows yielding an empty key are dropped (:55-56). Dedup keeps the highest snapshot_ts per key (:57-59). EDGE IDENTITY, :185: the 4-tuple (src_id, dst_id, edge_type or '', props or '') -- raw src_id/dst_id with no strip and no fallback, matching the full loader's edge handling exactly, INCLUDING its asymmetry with the node rule. THE COMPARAND, and it is what makes an in-place change visible: _cur_edges (:106-119) maps that identity to the SET-fields (layer, snapshot_ts), so an edge whose identity is unchanged but whose layer or snapshot_ts moved is detected as a delta and re-upserted rather than left stale.",
+      "key_is_stable": "unknown",
+      "crosses_spaces": false,
+      "declared_mapping": "Declared in _node_key's docstring ('Kuzu PK: arn-if-present else node_id (matches kuzu_nessie_load)') and in _cur_edges' docstring, which names the drift vector it closes: 'an IN-PLACE layer/snapshot_ts change (identity unchanged -- e.g. a governed edge re-layer) is still detected as a delta and re-upserted, not left stale (CVO~B drift-vector-2, eliminated here rather than only oracle-caught)'.",
+      "basis": "absent",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_expression": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured",
+        "key_is_stable": "absent"
+      },
+      "evidence": "All expressions read verbatim at the lines cited and compared against kuzu_nessie_load.py:150 and :184-187. The row basis is 'absent' under the v3.1 FLOOR rule for the same reason as card 2's: key_is_stable is UNKNOWN because I did not execute this module, and unlike the full loader it does not even carry a collision counter -- so here the instrument that would answer it does not exist rather than merely being unrun. Reporting the row 'measured' on the strength of the four expression facts would over-promise.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "failure_mode": {
+      "returns_on_failure": "FAIL-SAFE BY REFUSAL, AND THE REFUSALS ARE THE DESIGN. Four distinct refusal paths, each leaving the canonical DB untouched: (1) an unresolvable marker RAISES (:72-74) rather than proceeding on an unpinned HEAD; (2) a large delta returns 'fallback' UNAPPLIED with the reason and the changed-count in stats (:173-176); (3) a post-apply guard compares node and edge counts against the HEAD sets and, on mismatch, DELETES the tmp and returns 'fallback' (:224-231); (4) any unexpected exception in main() is caught, PRINTS its type and message to stderr, and sets rc=1 (:340-342), with the tmp removed in the finally block so the caller's full reload starts clean. Exit codes 0/2/1 are the caller's contract and _canonical falls through to the full loader on 2 or 1 -- so every failure hands off to the FULL RELOAD path rather than swapping in its own partial result. ⚠ The measured credit is the HAND-OFF, not the destination: the full loader is subject 2 on this face and carries its own QUALIFIED verdict, so 'degrades to the full path' is what I verified and 'degrades to a correct result' is not mine to assert here. ⛔ THE HANDLER PICTURE, CORRECTED -- my first version of this row said all four handlers were _rm_kuzu / _copy_kuzu cleanup passing on OSError and therefore 'cannot mask a data defect'. THAT WAS FALSE IN THREE WAYS. At 5da9e7fffc _copy_kuzu (:314-320) has NO except-handlers at all. The true set: TWO in _rm_kuzu (:303, :310), both 'except OSError: pass', genuine filesystem cleanup; and TWO at MODULE LEVEL in the __main__ block -- :339 'except Exception' which sits OVER THE DATA PATH (it wraps the refresh() call itself), printing the exception type and message to stderr and setting rc=1; and :348 'except Exception: pass' around the pyarrow finalize_s3 cleanup. So a data-path catch-all DOES exist. It does not MASK the failure -- it names it on stderr and signals rc=1, which routes the caller to the full reload -- but 'no handler covers the data path' was wrong and the distinction matters: what protects the data here is the rc contract and the tmp-only write, not an absence of handlers. ⛔ THE ONE CLAIM THAT NEEDS NARROWING IS THE MODULE'S OWN: its docstring says the guard means 'never swap in a wrong DB' (:26). What is implemented is a CARDINALITY check -- rn != len(head_keys) or re_ != len(head_edge_set) -- and equal counts do not mean equal membership. A compensating pair (one node wrongly deleted and one wrongly added in the same run) passes the guard. 'Never swap in a wrong-CARDINALITY DB' is the property that exists.",
+      "distinguishable_from_true_negative": "yes",
+      "silent_degrade_paths": [
+        "the post-apply guard is a COUNT comparison, not a content or checksum comparison (:224-231), so a compensating error pair -- equal numbers of wrong deletions and wrong additions -- passes it and is swapped in",
+        "the empty-key skip in _dedup_nodes (:55-56) drops a node row with no counter, and the same row would be dropped by the full loader too, so a fallback does not surface it either",
+        "the edge endpoint skip (:183-184) drops an edge with no counter; because head_edge_set is built from the FILTERED rows, the post-apply guard compares against the filtered total and cannot see the drop",
+        "CROSS-IMPORT, inherited from subject 4: the RuntimeError raised at :72-74 says 'HEAD-ORACLE UNKNOWN (no branch-head marker)' for ALL FOUR causes _provenance.read_branch_head_marker collapses into None (empty bucket, boto3 import failure, S3 fetch failure, JSON parse failure). The REFUSAL is correct and loud; the CAUSE in the operator-facing message is asserted rather than known"
+      ],
+      "basis": "measured",
+      "evidence": "HANDLER CENSUS at draft time reported 4 except-handlers and attributed :339 and :348 to _copy_kuzu. ⛔ THAT ATTRIBUTION WAS AN INSTRUMENT BUG, caught by 3.0.0_SA_CVO~X: my census tracked the last `def` seen and a module-level `if __name__` block is not a def, so both __main__ handlers were charged to the helper defined above them. MY POSITIVE CONTROL COULD NOT CATCH IT -- it proved the census could FIND handlers and never tested whether it ATTRIBUTED them correctly; detection and attribution are two properties and one control covered one. Instrument rebuilt on the AST (scope structural rather than inferred) and RE-CONTROLLED on attribution against _provenance.py, where it now places each handler in its own def, matching the by-hand reading card 4 used. CORRECTED CENSUS: :303 and :310 in _rm_kuzu (except OSError, pass); :339 and :348 MODULE-LEVEL (except Exception; rc=1 and pass respectively). CROSS-IMPORT CENSUS, per the card-5 lesson that a per-file census cannot support a path claim: the module's two imported dependencies were read at their call sites -- _provenance.read_branch_head_marker (returns None on four causes, and THIS module converts that None into a raise rather than proceeding, which is the correct handling of a collapsed value) and _provenance.write_manifest; pyiceberg StaticTable and kuzu are imported inside functions, so an ImportError surfaces as the main() exception and becomes rc=1 -> full-reload fallback. Guard implementation :224-231; main() exception path :340-350.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "On the evidence I measured, this is the most carefully failure-engineered subject on the face, and the credits below are scoped to exactly what I read rather than generalised from it. It refuses in four distinct ways and every refusal leaves the canonical DB untouched: it RAISES on an unresolvable pin rather than proceeding, returns FALLBACK unapplied when the delta approximates a full overwrite, deletes its own tmp and falls back when a post-apply check disagrees, and converts any unexpected exception into rc=1 with the type and message printed. Every one of those degrades to the more expensive FULL RELOAD path rather than swapping in its own partial result. ⚠ The credit is that it hands off rather than guesses -- NOT that the destination is correct: the full loader is subject 2 on this face and carries its own QUALIFIED verdict, so 'degrades to the full path' is what I measured and 'degrades to a correct result' is not mine to assert here. Two of its four except-handlers are filesystem cleanup in _rm_kuzu; the other two are module-level, and one of those DOES sit over the data path -- it prints the exception type and message and sets rc=1 rather than masking it, so what protects the data is the rc contract and the tmp-only write, not an absence of handlers (a claim this card made in its first version and I have corrected). It mirrors the full loader's node key and edge identity character-for-character, so the two paths cannot diverge on KEY CONSTRUCTION -- which is narrower than 'cannot produce different DBs', a claim the post-apply guard's own existence contradicts -- and its _cur_edges comparand carries the SET-fields specifically to catch an in-place re-layer that identity-only matching would miss -- a named drift vector closed in code rather than left to an oracle. It prints both sides of every delta, so the ratio its fallback gate turns on is reconstructible from the log alone. QUALIFIED on two measured defects. FIRST, A DECLARATIVE DRIFT WHOSE TWO HALVES ARE BOTH STALE: the docstring says this path is 'Gated OFF by default ... pending CTO arch-gate of the design', while its only caller records 'DEFAULT-ON', cites the arch-gate GO at 195732Z, and states the flag was deliberately flipped opt-IN to DEFAULT after the 2026-07-09 graph-infra incident. The environment variable is unset on this box, so the caller's default applies and this path runs on every canonical refresh -- a reader of the subject would believe an unratified, off-by-default feature while the ratified one is executing. SECOND, AND IT IS THE SUBJECT'S OWN OVERCLAIM RATHER THAN A HIDDEN BUG: the docstring promises the guard means 'never swap in a wrong DB', but the implemented check compares CARDINALITY only -- a compensating pair of wrong deletion and wrong addition passes it. The guard is real and worth having; the sentence describing it reaches one step past what it does, which is precisely the failure mode this carding wave keeps finding in prose rather than in code.",
+    "blocking_defects": [
+      "DECLARATIVE DRIFT, both halves: the docstring (:27-28) says 'Gated OFF by default ... pending CTO arch-gate' while the sole caller records DEFAULT-ON, the arch-gate GO at 195732Z, and a deliberate opt-IN -> DEFAULT flip after the 2026-07-09 incident (_canonical.py:365-366, :384). The variable is unset on this box, so the path is ON (cadence row; a documentation edit, not a code change)",
+      "the post-apply guard compares COUNTS, not content (:224-231), so a compensating pair of wrong deletion and wrong addition passes -- the implemented property is 'never swap a wrong-CARDINALITY DB', narrower than the docstring's 'never swap in a wrong DB' (:26) (failure_mode row)",
+      "the empty-key node skip (:55-56) and the edge endpoint skip (:183-184) drop rows with no counter, and because head_edge_set is built from the filtered rows the count guard structurally cannot see the second (coverage + failure_mode rows)",
+      "the operator-facing RuntimeError at :72-74 names one cause ('no branch-head marker') for the four that _provenance.read_branch_head_marker collapses -- inherited from subject 4 and surfacing here in an error message a human reads (failure_mode row)"
+    ]
+  },
+  "carded_by": "0.7.0_AE_CloudOps~K"
+}

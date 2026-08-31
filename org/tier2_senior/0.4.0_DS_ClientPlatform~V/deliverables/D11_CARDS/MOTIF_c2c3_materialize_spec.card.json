@@ -1,0 +1,146 @@
+{
+ "schema_version": 3.1,
+ "carded_by": "0.4.0_DS_ClientPlatform~V",
+ "subject": {
+  "id": "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/MOTIF_c2c3_materialize_spec.py",
+  "kind": "script",
+  "declared_domain": "The C2/C3-in-graph MATERIALIZE SPEC writer: emits proposed node + CONTAINS-edge records (C2Motif class nodes, C3System nodes, C3->C2 and C2->C1 CONTAINS edges) as ONE json artifact for 0.7.0_AE_CloudOps to ingest into the estate graph. It is a SPEC EMITTER, not an ingester: it writes no graph, opens no store, and performs no promotion. Its declared domain stops at the file it writes."
+ },
+ "as_of": {
+  "carded_utc": "2026-08-30T03:57:33Z",
+  "commit_ish": "c0dc3f09a0",
+  "graph_vintage": null
+ },
+ "process": {
+  "methodology": {
+   "how": "A single build_spec() pass over two upstream catalogs plus a decompression ladder. It iterates NFRA_MOTIF_P1_c2_catalog.CATALOG, calls P1.build_motif(spec) per entry and RETAINS ONLY those whose recurrence >= P1.AC3_THRESHOLD; the surviving motifs become C2Motif node records. For each it derives the C1 layer via comp_ladder.decompress(motif) filtered to layer=='C1', canonicalises each C1 nid by stripping the ladder discriminator, DEDUPES by canonical target while merging the detector provenance into props.via_detectors, and emits one C2->C1 CONTAINS edge per distinct target. It then loads the cluster index and shares-source from NFRA_MOTIF_P2_c3_emergence, builds C3 systems over the retained motif nodes, and emits a C3System node plus one C3->C2 CONTAINS edge per member. The return is a single dict carrying producer/consumer/cert/grounding strings, a convention_note, a taxonomy_prereq block, a counts block and the nodes and edges arrays; main() serialises it with json.dump(indent=2).",
+   "composes": [
+    {
+     "id": "org/modules/graph/NFRA_MOTIF_P1_c2_catalog.py",
+     "note": "CATALOG, build_motif, AC3_THRESHOLD, GraphUnavailable -- imported at :40"
+    },
+    {
+     "id": "org/modules/graph/NFRA_MOTIF_P2_c3_emergence.py",
+     "note": "load_cluster_index, load_shares_source, build_c3_systems -- imported at :41"
+    },
+    {
+     "id": "comp_ladder.decompress",
+     "note": "the C0-C3 decompression ladder; supplies the C1 layer per motif -- imported at :42, used at :50"
+    }
+   ],
+   "invents": [
+    {
+     "id": "node_type C2Motif",
+     "note": "a NEW estate node_type originated here; not present in the store's taxonomy at authoring time"
+    },
+    {
+     "id": "node_type C3System",
+     "note": "as above"
+    },
+    {
+     "id": "the C2->C1 canonicalisation",
+     "note": "_canonical_c1 at :60-64 -- strips '^c1:(D\\d+):' so the edge targets the EXISTING estate node; the detector is preserved in props.via_detectors rather than discarded"
+    }
+   ],
+   "determinism": "hybrid",
+   "materializer_standing": "historical_in_use",
+   "basis": "measured",
+   "evidence": "READ IN FULL at MOTIF_c2c3_materialize_spec.py:1-175 @c0dc3f09a0 (175 lines). Specific sites: imports :40-42; _c1_instances :47-50; _C1_DISCRIM regex :57 and _canonical_c1 :60-64; the recurrence filter :73; dedupe-by-canonical-target :91-101; C3 systems :104-113; the returned dict :115-143; json.dump :160-161. determinism is HYBRID and that is measured, not assumed: the pure shaping is deterministic, but P1.build_motif and P2.load_cluster_index read live graph state, so the same source yields different output as the graph moves -- which is exactly why the module has a GraphUnavailable branch at all. materializer_standing is HELD, not measured here: it is the value the D11 manifest's generation block carries for this materializer (graph_object_manifest.json, part 'motif_c2c3_materialize.json'), itself sourced to 1.0.0_SA_CTO~X 73215 Q2.",
+   "owner": "0.4.0_DS_ClientPlatform lane (file created by 0.4.0_DS_ClientPlatform~B, 4 of 4 commits; no live ~B instance)",
+   "inference_detail": {
+    "model": null,
+    "invocations_per_run": 0,
+    "stages_inferential": [
+     "P1.build_motif -- recurrence is computed against LIVE graph state, so the same CATALOG entry can pass or fail the AC3_THRESHOLD across runs",
+     "P2.load_cluster_index / P2.load_shares_source / P2.build_c3_systems -- C3 membership follows the live cluster index",
+     "comp_ladder.decompress -- the C1 layer reachable from a motif follows the live graph"
+    ],
+    "stages_deterministic": [
+     "_canonical_c1 -- a pure regex strip, same input same output",
+     "the dedupe-by-canonical-target and detector merge at :91-101",
+     "the counts block and the json.dump shaping at :138-161"
+    ],
+    "failure_is_loud": true
+   }
+  },
+  "cadence": {
+   "declared_rhythm": "None. The D11 manifest declares cadence 'frozen -- no cadence' and trigger 'none (frozen artifact, consumed on each derive)' for this materializer's output. The module's own docstring declares only a manual CLI usage (:23-24).",
+   "actual_trigger": "None found. No scheduler entry, no caller, no import of this module anywhere in the estate: the only executable entry is the `if __name__ == '__main__'` guard at :173-174. Every other occurrence of the module name is a DESCRIPTION of it (the D11 manifest's generator path, build_reconcile's RESOLVED_AS_GENERATOR row, wave-2 card-builder prose, message archives, RCG label/scan rows) -- not an invocation.",
+   "live_matches_declared": "yes",
+   "basis": "measured",
+   "evidence": "comp-find 'MOTIF_c2c3_materialize' @c0dc3f09a0: 252 hits across 132,309 files scanned, bands HEAD=4 SURFACED=45 CONFIG=85 DOC=118 -- ZERO of the inspected hits is a call site or an import of the module. Entry point read at source: :173-174. The declared side is graph_object_manifest.json part 'motif_c2c3_materialize.json', generation.cadence and generation.trigger. BOTH SIDES SAY 'NO CADENCE', so live_matches_declared is 'yes' -- and this row is the one most likely to be MISREAD, so it is stated twice: the SCRIPT has no cadence, while the ARTIFACT it wrote is consumed on every derive. Those are different subjects and only the first is this card's.",
+   "owner": "0.4.0_DS_ClientPlatform lane"
+  }
+ },
+ "artifact": {
+  "persistence": {
+   "persisted": true,
+   "authority_role": "source",
+   "mutation_policy": "editable",
+   "form": "Python 3 module, 175 lines, executable bit set, tracked in git.",
+   "basis": "measured",
+   "evidence": "stat + git @c0dc3f09a0: 9,729 bytes, mode -rwxr-xr-x, tracked. It ORIGINATES the spec rather than projecting one -- its `lineage.projection_of` in the D11 manifest is the empty list for the artifact it writes, and the module reads no prior version of its own output. authority_role 'source' is therefore the script's role for motif_c2c3_materialize.json.",
+   "owner": "0.4.0_DS_ClientPlatform lane"
+  },
+  "location": {
+   "home": "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/MOTIF_c2c3_materialize_spec.py",
+   "projection_of": [],
+   "basis": "measured",
+   "evidence": "Path read at HEAD @c0dc3f09a0. Its single write target is SPEC_ARTIFACT, defined at :44 as os.path.join(_HERE, 'motif_c2c3_materialize.json') -- i.e. a sibling in the same deliverables directory -- and opened for write exactly once, at :160. ONE FILE, ONE WRITE PATH: this matters because the governing census (D11_SUBSTRATECARDING_COVERAGE_CENSUS_20260829.md @9b2c687dc8 sec 3) warns that its 19 uncarded writers are counted at FILE grain and 'each may split into more than one write path when carded -- 19 is a FLOOR'. Measured here: this subject does NOT split. It contributes exactly 1 write path to that floor.",
+   "owner": "0.4.0_DS_ClientPlatform lane"
+  }
+ },
+ "trust": {
+  "coverage": {
+   "universe": "The C2 motifs from P1.CATALOG that survive the recurrence >= P1.AC3_THRESHOLD filter, plus the C3 systems P2 builds over exactly those survivors, plus the C1 estate nodes reachable by decompressing them. Motifs BELOW the threshold are silently absent from the output: the artifact records what passed, never what was considered.",
+   "denominator": "6 of 6 C2Motif nodes and 1 of 1 C3System node in the emitted artifact; 36 of 36 CONTAINS edges = 33 C2->C1 + 3 C3->C2. The C2->C1 edges resolve to 30 DISTINCT targets from 33 edges. The size of P1.CATALOG before the threshold filter is NOT captured in the artifact and is therefore not stated here.",
+   "explicitly_out": [
+    "Motifs whose recurrence is below P1.AC3_THRESHOLD -- filtered at :73, never recorded, so the artifact cannot report its own rejection count",
+    "The A/B sibling motif_c2c3_materialize_ab.json (13 C2Motif / 3 C3System / 5,088 edges) -- a DIFFERENT artifact from a DIFFERENT materializer (NFRA_MOTIF_P1_canonical_ab_catalog.py); named here because the two are routinely conflated (see blocking_defects)",
+    "Any ingestion outcome -- this script writes a proposal; whether 0.7.0_AE_CloudOps ingested it is outside the subject"
+   ],
+   "basis": "measured",
+   "evidence": "Counted CLIENT-SIDE off the artifact at org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/motif_c2c3_materialize.json (15,255 bytes, committed @fad55a83c7), THREE INDEPENDENT WAYS that agree: the file's own counts.c2_motif_nodes field = 6; a recount of the nodes array filtered on node_type == 'C2Motif' = 6; the distinct set of those node_ids = 6. Edges recounted the same way: 36 total, Counter over props.layer = {'C2->C1': 33, 'C3->C2': 3}. The three-way agreement matters because the file's counts block is COMPUTED BY THE SUBJECT ITSELF (:138-140) -- reading only that field would be trusting the artifact's self-description, which is the defect this card class exists to catch.",
+   "denominator_absent_reason": null,
+   "owner": "0.4.0_DS_ClientPlatform lane"
+  },
+  "key": {
+   "identity_space": "Emitted node_ids are ladder-space strings: 'motif:<idiom>' for C2Motif and 'system:<name>' for C3System. C2->C1 edge TARGETS are in a DIFFERENT space -- the canonical ESTATE node_id, bare '<type>:...' -- and the module deliberately converts between the two.",
+   "key_expression": "For emitted nodes: motif.nid and sys_node.nid, taken verbatim from the P1/P2 objects (:84, :105). For C2->C1 targets: _canonical_c1(nid) at :60-64, which applies re.match('^c1:(D\\d+):(.*)$') and returns group(2) -- i.e. STRIPS the 'c1:D{n}:' detector discriminator -- falling through to the input unchanged when the pattern does not match.",
+   "key_is_stable": "stable",
+   "crosses_spaces": true,
+   "declared_mapping": "The mapping is declared TWICE inside the subject: as executable code at _C1_DISCRIM :57 + _canonical_c1 :60-64, and as prose in the emitted artifact's own convention_note (:122-127), which states the rule and cites its verification. It is NOT declared in any external crosswalk.",
+   "basis": "measured",
+   "evidence": "Read at source :53-64 @c0dc3f09a0 AND exercised against the emitted artifact: of 33 C2->C1 edge targets, 0 still carry the 'c1:' prefix -- the strip is total, not partial. 33 edges resolve to 30 distinct targets, so 3 are collapse-cases where one canonical estate node is contained by more than one motif; the module handles that deliberately, deduping by target within a motif at :91-101 while MERGING detector provenance into props.via_detectors rather than discarding it. THE CROSS-SPACE CLAIM IS THE LOAD-BEARING ONE AND IT IS CITED, NOT RE-DERIVED HERE: the code comment at :53-56 records comp-kuzu verification on 2026-07-08 (0.7.0_AE_CloudOps RAVC1) that the 'c1:D{n}:' form resolves to 0 store nodes while the stripped form resolves 30 of 30. I did not re-run that store query; it is HELD from that citation, and the 30/30 there matches the 30 distinct targets I counted in the artifact, which is corroboration on a different instrument but not a re-derivation.",
+   "owner": "0.4.0_DS_ClientPlatform lane for the expression; 0.7.0_AE_CloudOps for whether the estate side still resolves"
+  },
+  "failure_mode": {
+   "returns_on_failure": "TWO DIFFERENT PLANES, AND ONLY THE FIRST IS GUARDED. (a) BEFORE THE OPEN: if build_spec() raises P1.GraphUnavailable, main() catches it at :154, prints the fail-closed notice, RETURNS EXIT CODE 2, and never reaches the write -- the previous motif_c2c3_materialize.json is preserved intact. Any other exception raised inside build_spec() is also pre-open: it propagates as an uncaught traceback and the artifact is untouched. (b) ON THE WRITE PLANE, UNGUARDED: :160 opens SPEC_ARTIFACT with mode 'w', which TRUNCATES the last-good file at the open, and only then does :161 call json.dump. A serialization error, a short or failed write, an encoding error, or an interruption after the open leaves the artifact EMPTY OR PARTIAL, with no temp-file-and-rename and no read-back to recover from. The fail-closed guarantee covers (a) and does NOT extend to (b).",
+   "distinguishable_from_true_negative": "no",
+   "silent_degrade_paths": [
+    "THE UNGUARDED WRITE PLANE (:160-161): open(mode='w') truncates before json.dump runs, so a failure between the two destroys the last-good artifact rather than preserving it. The module has no write-to-temp-then-rename and no post-write read-back. This is the one path where the subject's own stated requirement -- that a partial or empty spec must not be silently ingested (:155-156) -- is NOT enforced by the code that states it, and the artifact is consumed on every derive.",
+    "THE GUARDED PATH IS INVISIBLE ON THE ARTIFACT PLANE: after the GraphUnavailable branch fires, the artifact is byte-identical to what not running the script at all produces. Only the exit code and the stdout line separate them, and both are ephemeral -- nothing durable records that a regeneration was attempted and refused.",
+    "The emitted artifact carries no emitted_at, no run id and no input vintage: its grounding block pins upstream COMMITS but not the moment or the graph state of the run. A reader of the file alone cannot date it except by filesystem or git metadata external to it.",
+    "Because the script has no cadence and no trigger, the GraphUnavailable guard is CORRECT AND UNREACHABLE in the live estate: it protects a regeneration path that nothing invokes. The truncate-then-serialize exposure is dormant for the same reason -- and stops being dormant the moment anyone runs it."
+   ],
+   "basis": "measured",
+   "evidence": "Read at source :146-170 @c0dc3f09a0. The except clause is :154, the refusal prints :157-158, return 2 at :159. THE WRITE IS :160-161 AND ITS MODE IS THE POINT: open(SPEC_ARTIFACT, 'w', encoding='utf-8') then json.dump(spec, fh, indent=2) -- mode 'w' truncates AT THE OPEN, so the destructive act precedes the serialization and nothing re-establishes the prior content if the serialization does not complete. CORRECTED ON 3.0.0_SA_CVO~X BOUNDARY FINDING DS-F1, AND VERIFIED AT SOURCE HERE BEFORE ACCEPTING IT (the finding arrived with a Sender-unverified header, so the claim was re-read at the pin rather than taken on the from-line): this card's first version asserted that every non-GraphUnavailable failure occurs before the write 'so a partial file is not produced either'. THAT WAS FALSE, and it was an overclaim on the exact axis this row exists to measure. distinguishable_from_true_negative stays 'no' because it is scored on the GUARDED path, where the post-failure artifact is byte-identical to the never-run state; the unguarded write-plane failure is a different and worse outcome (a corrupt or empty artifact) and is recorded in silent_degrade_paths rather than folded into this scalar. NOT EXERCISED: neither branch was induced -- GraphUnavailable would require making the graph unreachable and the write-plane failure would require interrupting a write, both outside this TO's no-deploy/no-infra scope. Both are READ, not RUN, and this row says so rather than implying an exercise.",
+   "owner": "0.4.0_DS_ClientPlatform lane"
+  }
+ },
+ "verdict": {
+  "standing": "QUALIFIED",
+  "why": "The script does several careful things well: it canonicalises across two identity spaces with the conversion verified at the store, and it preserves detector provenance through a dedupe that would otherwise lose it. What qualifies it is a gap between what it guards and what it claims to guard, plus a gap between what it is and how the estate uses it. FOUR QUALIFYING FACTS, each measured above: (1) THE FAIL-CLOSED GUARANTEE IS NARROWER THAN THE CODE'S OWN COMMENT CLAIMS -- :155-156 says a partial or empty spec would be silently ingested and must be refused, but the guard covers only pre-open failures; the write itself is truncate-then-serialize (:160-161, mode 'w'), so a failure during serialization destroys the last-good artifact instead of preserving it, with no temp-and-rename and no read-back; (2) the script has NO cadence and NO trigger -- nothing invokes it -- while the artifact it wrote in July is read on every derive, so a frozen output is load-bearing and its writer is dormant; (3) on the guarded path the failure mode is not distinguishable from a genuine negative, because the preserved artifact is byte-identical to the never-run state; (4) the artifact carries no self-dating field, so its age is knowable only from metadata outside it. None of these makes the current output wrong -- it was measured correct at 6 / 1 / 36. Together they mean nothing in the system would notice if it became wrong, and one of them means a single interrupted run could make it wrong destructively.",
+  "blocking_defects": [
+   "SUBJECT DEFECT, NOT REMEDIATED HERE (this TO authorises no code change): the write at :160-161 truncates the last-good artifact at open(mode='w') and only then serializes, so any failure on the write plane leaves an empty or partial motif_c2c3_materialize.json -- an artifact consumed on every derive. The module's own comment at :155-156 states the requirement this path violates. The conventional remedy is to serialize to a string or a temp file and rename over the target. Raised by 3.0.0_SA_CVO~X as DS-F1 at the card boundary and VERIFIED AT SOURCE HERE before acceptance; owner is the 0.4.0_DS_ClientPlatform lane.",
+   "NOT A DEFECT IN THIS SUBJECT, RAISED AGAINST ANOTHER ARTIFACT AND ROUTED: the D11 graph_object_manifest.json entry for part 'motif_c2c3_materialize.json' carries basis 'measured' and the evidence line stating it emits 19 C2Motif CLASS nodes. The artifact emits 6. Verified on the identical file -- same home path, same 15,255 bytes, same commit fad55a83c7, all three matching the manifest's own identifiers -- and counted three independent ways, all 6. The A/B sibling emits 13, and 6 + 13 = 19, so the row appears to attribute the SUM OF BOTH SPEC ARTIFACTS to one of them. A total that ties can hide a wrong split. Surfaced to 3.0.0_SA_CVO~X cc the issuer; not remediated here and it does not block this card."
+  ]
+ },
+ "forward_disposition": {
+  "standing": "undecided",
+  "set_by": null,
+  "basis": "absent",
+  "evidence": "NONE -- basis is absent. Born UNDECIDED by the schema's own design: forward_disposition is set in a SECOND pass by a seat with the authority to retire something, and MUST NOT be set by the carding lane for its own subject. This card's first draft set 'keep' with a rationale; that was the carding lane adjudicating its subject and it is withdrawn. The observation that motivated it is not lost -- it is stated in verdict.why, which is where a description belongs.",
+  "decided_utc": null
+ }
+}

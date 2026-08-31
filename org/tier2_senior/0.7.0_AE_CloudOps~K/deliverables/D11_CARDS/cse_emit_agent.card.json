@@ -1,0 +1,151 @@
+{
+  "schema_version": 3.1,
+  "subject": {
+    "id": "infra/aws/globgrph/cse_emit_agent.py",
+    "kind": "script",
+    "declared_domain": "NFRA_CSE.P3 -- the AGENT producer: OPLMCP .05 audit-lake mcp_audit records -> AGENT CSEs. Implements the certed contract_agent (ProducerKind.AGENT, ref = the audit `user`, compiler mcp-audit-compiler, recognizer mcp_audit_recognizer over opal_mcp.mcp_audit). Its declared load-bearing property is REDACTION-SAFE BY CONSTRUCTION: the recognizer never reads or emits MCP `args` content, so the subject degrades honestly to Concept(untyped)+low and the evidence is metadata only."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-30T06:00:00Z",
+    "commit_ish": "5da9e7fffc",
+    "graph_vintage": "No vintage of its own. Its INPUT is s3://opal-mcp-audit/audit/dt=<date>/*.jsonl, bounded per run by the caller. Its OUTPUT reaches the graph only through cse_store's append into globgrph.cse. The deployed carrier that runs it is ECS task definition globgrph-cse-producer, revision 1, registeredAt 2026-07-15T22:38:38Z -- 45.3 days old at carding, and the ONLY revision, so the applied configuration has not moved since."
+  },
+  "process": {
+    "methodology": {
+      "how": "⛔ TWO PATHS, AND THE PRODUCTION ONE IS NOT main(). CLI PATH (main(), :112-158): list recent audit keys, read each, parse each line, build a CSE per allowlisted record via agent_cse(), dedup WITHIN the run on event_id, validate fail-closed via cse_store.validate_batch (any rejection prints and returns 1 WITHOUT writing), then write the accepted set to --out as jsonl. PRODUCTION PATH (cse_producers_nightly.leg_agent, :230-272): imports this module and reuses exactly THREE of its names -- _recent_audit_keys (a PRIVATE helper), the AUDIT_BUCKET constant, and agent_cse -- then REIMPLEMENTS the read loop, the parse, the skip counting, the validation call, the append and the summary. It uses filter_new(built, existing) for CROSS-RUN idempotency, RAISES CSEValidationError on rejection rather than returning 1, appends through cse_store.append_cses, and never writes a jsonl. So this module's production surface is three functions, and main()'s dedup, its return-code contract and its file write are CLI-only.",
+      "determinism": "deterministic",
+      "inference_detail": null,
+      "materializer_standing": "canonical",
+      "composes": [
+        {
+          "id": "org/modules/graph/cse_schema.py",
+          "note": "CSE, EntityRef, Provenance, ProducerKind, Transformation, Entity, Qualifier and SCHEMA_VERSION -- the contract every emitted CSE is built against"
+        },
+        {
+          "id": "infra/aws/globgrph/cse_store.py",
+          "note": "validate_batch is the fail-closed gate on both paths; append_cses is the production writer. THE WRITER is cse_store, not this module"
+        },
+        {
+          "id": "infra/aws/globgrph/cse_producers_nightly.py",
+          "note": "THE PRODUCTION CALLER -- reuses _recent_audit_keys, AUDIT_BUCKET and agent_cse and reimplements the rest. Carded on the CC face, not here"
+        },
+        {
+          "id": "s3://opal-mcp-audit/audit/",
+          "note": "the mcp_audit jsonl lake -- a DIFFERENT bucket from the globgrph warehouse, read by the operator identity"
+        }
+      ],
+      "invents": [
+        {
+          "id": "action_id",
+          "note": "'mcp:' + tool + ':' + sha1(tool+user+ts)[:12] (:76). A synthesised stable id standing in for a target the producer is FORBIDDEN to read -- declared, not smuggled: the subject is Concept(untyped) with confidence 0.2 rather than a guessed entity type"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "Read in full at infra/aws/globgrph/cse_emit_agent.py:1-161 @5da9e7fffc. SAFE_TOOLS :46-47; _recent_audit_keys :54-64; agent_cse :67-92 with the action_id at :76 and the metadata-only Provenence evidence at :86; main() :112-158 with the dedup at :141-143, the fail-closed validate at :147-152 and the write at :154-156. PRODUCTION path read across the import per the card-5 lesson: cse_producers_nightly.py:230-272, the three reused names at :231-234 and :250, filter_new at :255, the raise at :263, append_cses at :267.",
+      "owner": "0.7.0_AE_CloudOps (AE class owns infra/aws/globgrph, .owned-paths.yaml:340); file creator 0.5.0_AE_OpalETL, which has no live instance"
+    },
+    "cadence": {
+      "declared_rhythm": "The module declares CLI usage only. Its ORCHESTRATOR declares the rhythm: cse_producers_nightly runs on the derive image via cse_producer.tf as an EventBridge-cron one-shot ECS task, with the agent leg gated on CSE_AGENT_ENABLED. ⛔ THE ORCHESTRATOR'S CODE DEFAULT IS OFF: LEGS at cse_producers_nightly.py:283 is ('agent', 'CSE_AGENT_ENABLED', '0', leg_agent), and its docstring at :26 says 'CSE_AGENT_ENABLED (default 0, Option B)'.",
+      "actual_trigger": "ENABLED IN THE DEPLOYED CONFIGURATION, measured on the live primitive rather than the .tf. aws ecs describe-task-definition globgrph-cse-producer -> revision 1, containerDefinitions[0].environment carries CSE_AGENT_ENABLED = '1' and CSE_AGENT_AUDIT_FILES = '40', command ['python', '/app/cse_producers_nightly.py']. The terraform declares the same and says why: 'Option B2 (CTO-ruled): the agent leg ON -- the daily-novelty producer. Flip to \"0\" to fall back to Option A behavior without a code change' (cse_producer.tf:152-156). So the CODE default is OFF and the APPLIED configuration is ON, deliberately and with a recorded ruling.",
+      "live_matches_declared": "yes",
+      "live_instance_age": "The carrier's vintage, not the data's: task definition globgrph-cse-producer revision 1, registeredAt 2026-07-15T22:38:38Z, 45.3 days old at carding and the ONLY revision -- so the applied environment has not changed since registration. ⛔ NOT MEASURED: whether the EventBridge rule that starts this task is ENABLED, and whether any run has actually succeeded. I read the task DEFINITION, which is what the schedule would launch; I did not read the rule's state or a run history, so 'it would run with the agent leg on' is established and 'it has run' is not.",
+      "basis": "inferred",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "measured",
+        "live_matches_declared": "inferred",
+        "live_instance_age": "measured"
+      },
+      "evidence": "Orchestrator gate at cse_producers_nightly.py:283 and its docstring :26; terraform at infra/aws/terraform/globgrph/cse_producer.tf:152-160 and the task-definition resource at :121-122 (family globgrph-cse-producer); the ECS command at :140. LIVE READ: aws ecs describe-task-definition --task-definition globgrph-cse-producer -> revision 1, registeredAt 1784155118.877 = 2026-07-15T22:38:38Z, env CSE_AGENT_ENABLED='1', CSE_AGENT_AUDIT_FILES='40'. ⛔ THE ROW BASIS IS 'inferred' BY THE FLOOR RULE: the flag value is MEASURED on the applied task definition, but live_matches_declared asserts the leg actually fires on the declared cadence, and I did not read the EventBridge rule's state or any task-run history. Reading a task DEFINITION is not reading a RUN -- the same DESIRED-vs-APPLIED-vs-EXERCISED gap that produced my DRY_RUN error earlier in this session, and I am not repeating it by promoting a definition read into a run claim.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "source",
+      "mutation_policy": "append_only",
+      "form": "AGENT CSE records. On the PRODUCTION path they are appended to the globgrph.cse Iceberg store by cse_store.append_cses and never written locally. On the CLI path they are written as jsonl to --out (default cse_agent.jsonl) via _to_dict. Each record carries event_id, producer{kind,ref}, compiler, transformation{verb, subject EntityRef, edges[]}, provenance{source,locus,recognizer,evidence}, execution_meta, head{marker_head} and qualifiers{confidence,scope}.",
+      "basis": "measured",
+      "evidence": "_to_dict :103-110 and the CLI write :154-156; the production append at cse_producers_nightly.py:267. 'source' rather than 'projection': an AGENT CSE is a RECOGNITION -- it exists nowhere upstream. The audit lake holds mcp_audit rows; the CSE, its producer/compiler framing, its Concept(untyped) subject and its confidence are created here. 'append_only' READ AT SOURCE rather than inferred from the function name: cse_store.append_cses (cse_store.py:357-363) states 'APPEND the accepted CSEs to globgrph.<table> in ONE Nessie commit (append-only)', and idempotency is enforced upstream by filtering already-emitted event_ids, not by rewriting rows. ⚠ I had written this clause BEFORE reading cse_store and my own credit census caught it as a claim about an unread dependency -- the card-5 class. Reading it also found a credit I had missed: append_cses RE-VALIDATES the batch itself (:370) and RAISES CSEValidationError on any rejection, so the production path is fail-closed TWICE -- once in leg_agent and again at the store -- and a caller that skipped validation still cannot write an invalid CSE.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "location": {
+      "home": "Production: the globgrph.cse Iceberg table, reached only through cse_store.append_cses. CLI: a local jsonl at --out (default cse_agent.jsonl in the working directory).",
+      "projection_of": [
+        {
+          "id": "s3://opal-mcp-audit/audit/",
+          "note": "the mcp_audit jsonl lake -- the sole input; a DIFFERENT bucket from the globgrph warehouse this producer's output lands in"
+        }
+      ],
+      "co_resident_stores": [
+        {
+          "id": "globgrph.cse",
+          "note": "shared with the other cse producers. THE SET IS THE MANIFEST'S CLAIM, NOT MY MEASUREMENT: graph_object_manifest.json names the materializer as 'cse_store.py [THE WRITER] <- orchestrated by cse_producers_nightly.py over emitters cse_emit_agent + cse_emit_deploy + cse_emit_frontend_coevolution + cse_emit_graphhead + cse_emit_promote'. I read that string and cse_store.append_cses, not each producer, so 'they all append through one store' is carried as the manifest's declaration plus one verified writer. The consequence either way: an event_id collision ACROSS producers is a cross-producer concern this module cannot see alone"
+        }
+      ],
+      "basis": "measured",
+      "evidence": "AUDIT_BUCKET / AUDIT_PREFIX :42-43; the docstring's own statement that the audit source is a different bucket read by the operator identity while the append is in-VPC as the derive role (:18-20); cse_store.append_cses at cse_producers_nightly.py:267; the five-producer LEGS/emitter set named in the graph_object_manifest materializer string.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "The most recent N audit jsonl keys under s3://opal-mcp-audit/audit/, where N is 40 in the applied configuration (CSE_AGENT_AUDIT_FILES) and 20 on the CLI default -- and, within those files, ONLY records whose `tool` is in the six-member SAFE_TOOLS allowlist.",
+      "denominator": "⛔ THE REPORTED DENOMINATOR COUNTS FILES LISTED, NOT FILES READ, ON BOTH PATHS. main() prints 'recognized {len(cses)} CSEs from {len(keys)} audit files' (:144-146) and leg_agent's summary carries 'audit_files': len(keys) (:257) -- in both, len(keys) is what _recent_audit_keys RETURNED, and a key whose read raises is skipped by a `continue` (:123-125 / :237-240) without decrementing it. So a run that failed to read half its files reports the same denominator as a run that read them all, with only a per-file WARN line to distinguish them. The `skipped` counter is also narrower than it reads: it counts ONLY non-allowlist tool records, while a malformed JSON line is dropped by `except ValueError: continue` (:131-133) and counted nowhere.",
+      "explicitly_out": [
+        "every tool outside SAFE_TOOLS -- six members (whoami, find_sharepoint_site, ms_site_children, list_recent_email, list_chats, list_teams); agent_cse returns None and the record is counted as skipped_non_allowlist. This is a DELIBERATE scope, declared as defence-in-depth pending args-redaction, not an oversight",
+        "MCP `args` content in every form -- the load-bearing safety property; the evidence field is 'tool=<tool> outcome=<outcome>' and nothing else",
+        "audit files older than the most recent N -- a deliberate bound, but see denominator: the S3 LIST that produces the candidate set is NOT bounded, only the slice taken from it",
+        "malformed JSON lines -- dropped with no counter, and absent from both the numerator and the reported denominator",
+        "any typed entity subject -- Concept(untyped) is the honest-degrade the redaction contract forces, not a fallback from a failed attempt"
+      ],
+      "basis": "measured",
+      "evidence": "SAFE_TOOLS :46-47; the allowlist return at :71-72; the metadata-only evidence at :86; _recent_audit_keys :54-64 (a full paginated list over the whole prefix, then sorted()[-limit_files:] -- the bound applies to the SLICE, not the LIST); the two counter sites :144-146 and cse_producers_nightly.py:257; the uncounted ValueError drop :131-133.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "CSE event ids in the AGENT namespace, derived from audit metadata alone. The producer identity is the audit `user` -- an agent serial or MCP principal -- which crosses from the audit lake's identity space into the CSE producer space unchanged.",
+      "key_expression": "EVENT ID: 'agent:' + action_id, where action_id = 'mcp:' + tool + ':' + hashlib.sha1((tool + user + ts).encode()).hexdigest()[:12] (:76, :79). PRODUCER REF: rec.get('user') or 'unknown' (:73) -- a missing user becomes the LITERAL STRING 'unknown', which then flows into BOTH producer.ref AND the action_id hash, so every record lacking a user collapses onto one producer identity and one hash input. SUBJECT REF: EntityRef(Entity.CONCEPT, action_id) -- the subject id IS the action id, deliberately, because the real target is unreadable. IDEMPOTENCY KEY: the same event_id, filtered against the already-emitted set by filter_new on the production path and by a within-run dict on the CLI path -- two different scopes for one key.",
+      "key_is_stable": "stable",
+      "crosses_spaces": true,
+      "declared_mapping": "agent_cse's docstring declares the redaction-safe construction and the Concept(untyped)+low degrade; the inline comment at :75 declares the id as 'a stable id from tool+user+ts (NOT the args content)'. What is NOT declared is the 'unknown' collapse: nothing says that a record without a user is attributed to a producer literally named 'unknown' rather than being skipped.",
+      "basis": "measured",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_expression": "measured",
+        "key_is_stable": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured"
+      },
+      "evidence": "All expressions read verbatim at :73-79. Rated STABLE: sha1 over three metadata fields is deterministic and the truncation to 12 hex is fixed, so the same audit record always yields the same event_id -- which is exactly what makes the idempotency filter work across runs. The 'unknown' collapse is a COLLISION risk in producer.ref, not an instability of the expression, and is recorded under key_expression and failure_mode rather than inflating this field.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "failure_mode": {
+      "returns_on_failure": "FAIL-CLOSED ON VALIDATION, ON BOTH PATHS, AND THAT IS THE STRONGEST PROPERTY HERE. A CSE that fails cse_store.validate_batch is never written: the CLI prints up to 15 rejections and returns 1 with NO file write (:147-152); production prints up to 10 and RAISES CSEValidationError, so the leg aborts rather than appending a partial batch (cse_producers_nightly.py:261-264) -- and cse_store.append_cses RE-VALIDATES the batch a second time (:370) and raises again, so an invalid CSE cannot reach the table even from a caller that skipped the first check. The redaction property is structural rather than checked -- the evidence string is built from `tool` and `outcome` only (:86), so there is no path on which args content can reach a CSE, and the Concept(untyped) subject is the declared honest-degrade rather than a fallback. ⛔ THE FAILURES IT DOES HAVE ARE COUNTING FAILURES, NOT SAFETY ONES: an audit file whose read raises is WARNed and skipped while still counted in the reported denominator; a malformed JSON line is dropped by a bare `except ValueError: continue` with no counter at all; and a record with no `user` is attributed to the literal producer 'unknown' rather than being skipped or counted. None of these can leak content; all of them make the output quietly smaller or differently-attributed than the run's own summary implies.",
+      "distinguishable_from_true_negative": "no",
+      "silent_degrade_paths": [
+        "an audit-file read failure prints WARN and continues (:123-125), but len(keys) is already fixed, so the run's own summary reports the same 'from N audit files' whether N were read or one was -- the WARN is the only discriminator and it is per-file, not in the summary",
+        "a malformed JSON line is dropped at :131-133 with no counter; the visible `skipped` number counts ONLY non-allowlist tools, so its label ('skipped N non-allowlist tool records') is accurate and its scope is narrower than a reader would assume",
+        "a record with no `user` becomes producer.ref 'unknown' (:73) AND feeds 'unknown' into the action_id hash, so all such records across all tools and timestamps share one producer identity -- and, for identical tool+ts, one event_id",
+        "the S3 LIST in _recent_audit_keys is unbounded (:58-63): it paginates the ENTIRE audit/ prefix and slices afterwards, so the cost grows with the lake while the docstring calls the parameter a 'bounded audit-file count'",
+        "the CLI path's dedup is WITHIN-RUN only (:141-143), so running main() twice writes the same CSEs twice to two files -- harmless for a CLI artifact, but it is NOT the cross-run idempotency the production path has, and the module's own docstring does not distinguish them"
+      ],
+      "basis": "measured",
+      "evidence": "AST HANDLER CENSUS at draft time, attribution-controlled: 2 handlers, both inside main() -- :123 'except Exception' printing WARN: AUDIT_READ_FAIL then continue, and :132 'except ValueError' continue. ZERO module-level handlers. CROSS-IMPORT CENSUS per the card-5 lesson: the production path adds its own two handlers with the SAME shapes (cse_producers_nightly.py:239 WARN+continue, :247 ValueError+continue), so the counting defects are present on BOTH paths rather than being a CLI-only artifact -- which strengthens the finding rather than narrowing it. Fail-closed sites read at :147-152 and cse_producers_nightly.py:261-264.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "Its load-bearing property holds and is structural rather than promised: the evidence string is assembled from `tool` and `outcome` only, so no path exists on which MCP args content reaches a CSE, and the Concept(untyped)+0.2 subject is the redaction contract's honest-degrade used exactly as intended rather than a guess smuggled in under a low confidence. Validation is fail-closed on both paths -- the CLI returns 1 without writing, production RAISES and aborts the leg -- and the SAFE_TOOLS allowlist is declared as defence-in-depth rather than as the safety mechanism. QUALIFIED on two measured points. FIRST, AND IT SHAPES EVERY OTHER ROW ON THIS CARD: the production path is NOT this module's main(). cse_producers_nightly.leg_agent imports the module and reuses exactly three names -- the PRIVATE _recent_audit_keys, the AUDIT_BUCKET constant, and agent_cse -- then reimplements the read loop, the counting, the validation call and the append, with cross-run idempotency via filter_new and a raise instead of a return code. So main()'s dedup scope, return contract and file write are CLI-only, and a card written about main() as though it were production would describe a path the scheduler never takes. I verified this by reading across the import rather than assuming, which is the card-5 lesson applied to the EXECUTION surface rather than the failure surface. SECOND: the reported denominator counts files LISTED, not files READ, on both paths -- a key whose read raises is skipped without decrementing len(keys) -- while the visible `skipped` counter covers only non-allowlist tools and malformed JSON lines are dropped uncounted; and a record with no `user` collapses onto the literal producer 'unknown' in both the ref and the id hash. None of these can leak content. All of them make the output quietly smaller or differently attributed than the run's own summary implies, which is the same class this face's sibling subjects keep producing.",
+    "blocking_defects": [
+      "the PRODUCTION path is cse_producers_nightly.leg_agent, not this module's main(): it reuses only _recent_audit_keys (private), AUDIT_BUCKET and agent_cse and reimplements the rest, so main()'s within-run dedup, rc contract and jsonl write are CLI-only and do not describe what the scheduler runs (methodology + failure_mode rows)",
+      "the reported denominator counts files LISTED not READ on BOTH paths -- a failed read continues without decrementing len(keys), leaving only a per-file WARN to distinguish a half-read run from a whole one (coverage row)",
+      "malformed JSON lines are dropped uncounted (:131-133) while the visible `skipped` counter covers only non-allowlist tools, so the summary's two drop reasons are represented by one number that names only one of them (coverage row)",
+      "a record with no `user` becomes the literal producer 'unknown' AND feeds 'unknown' into the action_id hash (:73, :76), collapsing all such records onto one producer identity -- undeclared anywhere (key row)",
+      "_recent_audit_keys paginates the ENTIRE audit/ prefix before slicing (:58-63), so the S3 LIST cost grows with the lake while the parameter is documented as a 'bounded audit-file count' (coverage row)"
+    ]
+  },
+  "carded_by": "0.7.0_AE_CloudOps~K"
+}

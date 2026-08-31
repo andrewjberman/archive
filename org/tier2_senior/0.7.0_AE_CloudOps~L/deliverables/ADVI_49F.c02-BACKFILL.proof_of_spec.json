@@ -1,0 +1,186 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_49F.c02-BACKFILL",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~L",
+ "decomp_ref": {
+  "doc": "org/tier1_exec/2.0.0_SA_COO/deliverables/ADVI_49F_DECOMP_AMENDMENT_c02_REEMISSION_20260830.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~L/task_orders/ADVI_49F.c02-BACKFILL.five-date-outage-backfill-cause-read-first.md",
+  "vintage_commit": "946b5c5a3c"
+ },
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_C_TWR_ENGINE_20260811.md",
+  "group": "C",
+  "vintage_commit": "bfaa0a6e6e"
+ },
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~L/logs/2026-08-30/",
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-data-49financial/gold/advi/canonical/twr_daily/",
+   "kind": "s3_object",
+   "commit_or_etag": "5 NEW partitions written 2026-08-30T08:52-09:00Z (date=2026-08-11/12/13/14/17); date=2026-08-18 re-emitted 09:03:18Z",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "[kind: the round's product -- the stored gold column] [state: WRITTEN and READ BACK from the artifact, never rc] twr_daily distinct partition-dates 535 -> 540 measured on a BEFORE/AFTER whole-tree snapshot (08:49:27Z / 09:01:01Z). Per partition: 08-11 7,264 rows / 6,333 OK; 08-12 7,281 / 6,347; 08-13 7,287 / 6,354; 08-14 7,297 / 6,362; 08-17 7,307 / 6,366. schema_version 1.2 and gross_leg_vintage 946b5c5a3c89 uniform on all five; OK rows with bmv<0 = 0 on all five. date=2026-08-18 moved 7,315 REFUSED-NO-BMV / 0 OK -> 6,382 OK (VersionId BWWlo5pvRg -> p0f_Ko7sNZ, 70,008 -> 298,386 B, signed +228,378)."
+  },
+  {
+   "path_or_key": "s3://opal-data-49financial/gold/advi/ (23 prefixes)",
+   "kind": "s3_object",
+   "commit_or_etag": "138 NEW KEYS / 12 REWRITTEN / 0 VANISHED between 08:49:27Z and 09:01:01Z",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "[kind: the full chain write set] [state: MEASURED by whole-tree snapshot diff over 23,342 -> 23,480 objects] NEW KEYS land in 16 of 23 prefixes and in NO date outside the five. The 12 REWRITTEN are the halted run's six tables x2 objects, all at date=2026-08-11, EVERY ONE with an UNCHANGED ETag and a signed size delta of +0 -- idempotency measured by content.",
+   "artifact_covered_by": [
+    "B-5"
+   ]
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~L/deliverables/ADVI_49F.c02-REEMIT_B5_MAP_VINTAGE_COLUMN.py",
+   "kind": "script",
+   "commit_or_etag": "c8f76b8c44",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "[kind: the B-5 instrument] [state: COMMITTED and EXERCISED, rc=0 read unpiped] The map-vintage column, computed per partition from S3 object metadata. Laptop-side analysis; nothing is served from it."
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20260830T0554Z_advi-49f-c02g7-five-date-forward-production_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "8cf9670ac2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "[kind: the NEVER-2 deploy ledger entry] [state: OPENED 05:54Z, HELD on a named external gate during the M-3 wait rather than aged out, RELEASED as the re-drive started, legs G1-G5 CLOSED with measured proofs at 09:1xZ] The entry was never left to expire silently; the hold named its gate and its re-read event verbatim. Commit 8cf9670ac2 carries the hold; the leg closures are tool-written into the same file.",
+   "artifact_covered_by": [
+    "B-4"
+   ]
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "on the B-5 instrument before commit",
+   "result": "All checks passed; clean 1 of 1 file."
+  },
+  {
+   "tool": ".tools/deploy_ledger.py",
+   "invocation": "hold --gate-type external / hold --release / close-leg G2..G5 / check --red",
+   "result": "Entry tracked-not-stranded throughout. NOTE: the tool's HELD_STATUS is a module constant at :90 @67dc16081a, so an EXTERNAL gate is labelled HELD-SOVEREIGN-GATED -- surfaced as an OBSERVATION, not edited here."
+  },
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "-F <msgfile> written by a non-shell writer, per commit",
+   "result": "msg-verify MATCH on every commit (0ae699e57b, 8cf9670ac2, c8f76b8c44)."
+  },
+  {
+   "tool": ".tools/comp-find",
+   "invocation": "--name 'proof_of_spec' and content 'PROOF_OF_SPEC.schema'",
+   "result": "Located the standard and the checker with the denominator printed (279 / 295 hits); comp-which was tried FIRST and returned NO CURATED RULE, which is recorded rather than resolved by picking its top fuzzy guess."
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> B-1,B-2,B-3,B-4,B-5,B-6",
+   "result": "See B-6."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The a06 fix is NOT this seat's code, so the mutation control belongs to its author and is cited, not re-run: 0.4.0_DS_ClientPlatform~N restored the blind map_dates[-1] selection and exactly the weekend arm failed (1 of 6), with the :49 guard arm correctly staying GREEN because the mutation does not reach it. What THIS seat contributes is a DIFFERENT instrument on the same object: an independent re-derivation of the served identity plus a content read.",
+   "expected": "The served bytes must be the fixed ones and not the 2026-08-19 baseline; the resolver, the stamps and the validator present; the :49 guard retained.",
+   "observed": "md5 RECOMPUTED from the downloaded bytes = f8763326799bba70dac9edf5c55bdaf8 = the ETag, 11,148 B, 0 CR, VersionId mUbfPzy..., 2 versions with the 6,263 B 2026-08-19T01:22:34Z baseline beneath. resolve_map_partition / validate_crosswalk / map_date / map_carried all PRESENT; the :49 refusal message retained. MY OWN NEGATIVE CONTROL FIRED FALSELY and is recorded as a defect in my instrument, not in the fix: I tested for the TOKEN map_dates[-1] and found it PRESENT, where the author had said the blind LINE was absent. Reading the context settled it -- line 55 is a COMMENT describing the defect and line 87 is the ruled fallback returning the newest empty frame so the guard stays the single refusal point. A token-level control cannot separate a defect from its own description; the line-level one can.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Completion is read from the PRODUCED ARTIFACT and the S3 chain log, never from SSM rc -- which reported Success on all six sends and is not evidence. Idempotency is measured by ETag equality across a re-write, not asserted.",
+   "observed": "5 of 5 dates completed the full chain a00..c04 + perfrp_projection, each with its own S3 chain log (11,825-11,897 B). The halted run's six tables at date=2026-08-11 were re-written with UNCHANGED ETags and a signed size delta of +0 on all 12 objects. 0 VANISHED keys. 0 new-key dates outside the five.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The c02 mirror-pull as the vehicle for the five dates",
+   "reason": "AMENDED BY THE ISSUER AT B-1 (86087) BEFORE ANY WRITE: two staged inputs are absent for these dates, so the mirror-pull cannot run here. B-4 became a FORWARD PRODUCTION on the full chain via advi-49f-chain-dispatch. The mirror-pull IS still used, once, for its correct case: the 2026-08-18 re-emission (B-5 (v)), whose upstream tables do exist."
+  },
+  {
+   "item": "The cause's FIX (the scheduler / dispatch plane that produced the outage)",
+   "reason": "OUT OF THIS TO BY ITS OWN FACE: the cause is READ here and its fix is routed to its owner. B-1 established that the dispatch path was created 2026-08-19, after the outage window, and that the P14 re-derivation enumerates from flow_ledger -- an OUTPUT table carrying the same hole. Named, not repaired."
+  },
+  {
+   "item": "The a06 map-vintage defect and its fix",
+   "reason": "DISARMED BY OWNERSHIP to 0.4.0_DS_ClientPlatform~N (COO 86472, Rule 13 -- a06 is a DS-lane gold stage). This seat MEASURED it, halted on it, and proposed nothing about the read semantics. The fix (c02-MAPVINTAGE, cell C02-g-8) is that seat's cell; this instance verifies its SERVED state as an input to B-4, and no more."
+  },
+  {
+   "item": "The dim_calendar _ingested_at observation and the a07 clock-stamp item",
+   "reason": "RE-CLASSED AWAY FROM THIS SEAT ON A WIDER READ. I raised it at coverage 1 as a misnamed vintage field; 3.0.0_SA_CVO 86712 read runner_common.py:16/:88 and established it is Atom 9 BY DESIGN (the asof partition date, never a clock, for byte-reproducibility). My explanation was wrong and is withdrawn; the real defect the read found (a07:352 stamping a clock under the same name) is a DS cell, not mine."
+  },
+  {
+   "item": "anomalous_return_census, the validation check that did not run",
+   "reason": "FOUND IN MY OWN OUTPUT, ROUTED NOT CHASED. Every one of the five chain logs carries '[NOT-EVALUATED] anomalous_return_census: NOT WIRED: run_battery received twr_daily=None (main passes it hardcoded)'. It is honest -- it announces itself rather than passing silently -- but c04_validation's coverage is smaller than a green-check count implies. OBSERVATION x INERT, DS lane; run_battery is UNREAD at source by me and I proposed no fix."
+  }
+ ],
+ "surprises": [
+  "BLOCKING x DISARMED (owner: 0.4.0_DS_ClientPlatform~N). a06 reads the NEWEST allocation-map partition regardless of chain date; the map is header-only every Sat/Sun (13 of 46) and lands ~13:15Z, AFTER the 12:45Z fire -- so every SUNDAY AND MONDAY floor fire aborts at a06. Filed as a Sunday-only hazard and CORRECTED to Sunday+Monday by 0.4.0_DS_ClientPlatform~N 86498: both inputs were in my own prior message one paragraph apart and I propagated only one. It is also not a prediction -- 08-23 (Sun) and 08-24 (Mon) had ALREADY aborted in production, found in the floor-form chain logs. My 'masked by the hold' reading is retracted: the hold was applied a week later; those two fires failed in the open and nothing read the logs. DISPOSITION: DISARMED same-turn by ownership (COO 86472); REMEDIATED at M-3, served 2026-08-30T08:42:34Z and exercised on 5 real dates by this round 3.5 h before its first scheduled fire.",
+  "OBSERVATION x INERT (owner: 0.7.0_AE_CloudOps~L). An instrument correctly ruled out for ONE question is not ruled out for the NEXT one. I characterised gold/advi/_logs/ as postdating the 08-11..08-17 window -- true -- and then stopped using the prefix entirely, while it held the DIRECT evidence for the 08-23/08-24 production aborts, four days inside its retention. Another seat went back to it; I did not. DISPOSITION: Banked as a class. Recorded in the durable addendum (0ae699e57b) rather than only in a broker thread.",
+  "OBSERVATION x INERT (owner: 0.7.0_AE_CloudOps~L). A QUOTED TIMESTAMP IS A CLAIM, NOT A COORDINATE. Probing the B-5 map inference at 2026-08-28T09:55Z -- a time taken from a ruling's prose -- returned the 08-27 map and was one step from a reported 'the P14 campaign split 224/311 across two vintages'. It is false: no partition was written at that time; the 08-28 partitions begin at 16:08Z, after the map landed. Computing the column per partition from each object's OWN recorded instant gives 533/2 of 535. The gate (86746) and the issuer (86757) each independently found they had inherited the same quoted time. DISPOSITION: Written into the B-5 instrument's docstring at c8f76b8c44 so the next reader inherits the trap, not just the number.",
+  "OBSERVATION x INERT (owner: 0.7.0_AE_CloudOps~L). A circular observation offered as evidence: I reported that all 535 crosswalk partitions fall inside 'the campaign window', where the window was DERIVED from those same partitions' min..max -- true of any set by construction. Caught by 3.0.0_SA_CVO 86751. It did no damage only because I had flagged it as a discrepancy rather than claimed it. DISPOSITION: Conceded; the question was then settled on a discriminating instrument (an ABSENT dated log with a positive control).",
+  "OBSERVATION x INERT (owner: unnamed -- offered to 1.0.0_SA_CTO's NFRA queue). .tools/deploy_ledger.py labels EVERY hold HELD-SOVEREIGN-GATED -- HELD_STATUS is a module constant at :90 @67dc16081a -- so an --gate-type external hold reads as awaiting Andrew's sign-off while the blocker is a peer seat. Exercised, not inferred. Denominator: 2 of 2 currently-held entries are external-gated and both carry the SOVEREIGN label. DISPOSITION: Surfaced, not edited; the tool is not this seat's to change mid-round.",
+  "OBSERVATION x INERT (owner: 0.4.0_DS_ClientPlatform~N). anomalous_return_census is NOT WIRED (run_battery receives twr_daily=None because main passes it hardcoded) and reported NOT-EVALUATED on all five dates this round produced. DISPOSITION: Named in the completion report; not chased, source unread by me."
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "B-1",
+   "criterion_verbatim": "THE CAUSE, READ per date, instrument named; the fix routed to its owner, not made here.",
+   "method": "live_read",
+   "invocation": "[cell C02-g-7] EventBridge Scheduler + Lambda + SSM plane read for the five dates; floor-form chain-log census under gold/advi/_logs/",
+   "output_evidence": "CAUSE ESTABLISHED: the advi-49f-gold-floor dispatch path was CREATED 2026-08-19, after the 08-11..08-17 window -- there was no scheduled producer for those dates, so nothing failed; the dates were never attempted. Compounding it, the P14 re-derivation enumerates candidate dates from flow_ledger, an OUTPUT table carrying the same hole, so the gap was invisible to the instrument that would have found it. Three named instruments were blind to this and controls were the only reason it surfaced. The FIX is routed to its owner and is NOT made here.",
+   "denominator": "5 of 5 dates; 12 floor-form chain logs of 560 log objects",
+   "status": "PASS",
+   "status_reason": "The cause is a producer that did not exist, not a producer that failed -- a distinction that changes the remedy, and one an rc-based or presence-based read cannot make."
+  },
+  {
+   "criterion_id": "B-2",
+   "criterion_verbatim": "INPUT PRESENCE per date (DS~N's read quoted with its denominator); absent-input dates EXCLUDED and printed UNBACKFILLABLE-INPUTS-ABSENT.",
+   "method": "manual_read_with_citation",
+   "invocation": "[cell C02-g-7] 0.4.0_DS_ClientPlatform~N's bronze/silver input-presence read per date, quoted with its denominator (86087)",
+   "output_evidence": "All five dates have their bronze/silver inputs. ZERO dates were excluded and NO date printed UNBACKFILLABLE-INPUTS-ABSENT. The read did, however, change the VEHICLE: two of the c02 mirror-pull's staged inputs are absent for these dates, which is why B-4 became a full-chain forward production rather than a mirror-pull re-emission. That amendment is in declared_exclusions.",
+   "denominator": "5 of 5 dates read",
+   "status": "PASS",
+   "status_reason": "Supplied by the DS seat by message as the TO's decomp_ref specifies, and quoted rather than re-derived here -- re-running that seat's read on my own instrument would have been repetition, not corroboration."
+  },
+  {
+   "criterion_id": "B-3",
+   "criterion_verbatim": "THE PLAN under a FRESH never-widen (the c02-only sign-offs do not cover a full-chain production): the five dates NAMED BY HAND as the vehicle input with the dim_calendar-minus-stored derivation printed beside as the equality check (never flow_ledger); ... readers of ALL 18 tables announced; per-date expected shapes pre-registered; SEQUENTIAL oldest-first with the per-date D-1 gate; the three pre-existing 08-11 partitions named with their disposition; CTO+COO sign.",
+   "method": "manual_read_with_citation",
+   "invocation": "[cell C02-g-7] Plan issued to the gate and the issuer; never-widen BOTH halves signed on one shape",
+   "output_evidence": "SIGNED: CTO 86149 (A)(B)(C) and COO 86183 with the (C) word at 86229. The five dates were HAND-NAMED as the vehicle input, with dim_calendar-minus-stored printed BESIDE as an equality check and never as the source -- flow_ledger was explicitly not used, which matters because flow_ledger is the table that hid the gap in the first place. Readers of all tables announced before the first send; per-date shapes pre-registered; oldest-first with a per-date D-1 gate; the three pre-existing 08-11 partitions (dim_boundary / dim_calendar / dim_security, written 2026-08-19T01:13:37Z) named with their disposition and admitted as declared overwrites by the gate at 86149 (A).",
+   "denominator": "2 of 2 never-widen halves signed; 5 of 5 dates hand-named",
+   "status": "PASS",
+   "status_reason": "The date SOURCE and the date CHECK are different objects and were kept so. A derivation used as its own check is not a check."
+  },
+  {
+   "criterion_id": "B-4",
+   "criterion_verbatim": "PRODUCTION oldest-first, one date per send, per-date artifact oracle (D-1 present and conformant before D runs; a refused D-1 stops the run), mutex limb (ii) re-read before every date, floor ENABLED and untouched, publisher DISABLED, ledger via the tool; every new twr_daily partition carries vintage 946b5c5a3c... + schema \"1.2\" + ruled statuses only.",
+   "method": "live_read",
+   "invocation": "[cell C02-g-7] 6 SSM sends on advi-49f-chain-dispatch / AWS-RunShellScript; completion read from the S3 chain log per date",
+   "output_evidence": "5 of 5 dates produced OLDEST-FIRST, one send each: 2026-08-11 cid 2a813838, 08-12 62531fb9, 08-13 bd391e3a, 08-14 7b89b833, 08-17 3fc1f030. MUTEX LIMB (ii) RE-READ BEFORE EVERY DATE and printed: time-to-fire 14,099 / 13,867 / 13,764 / 13,657 / 13,561 s against span+margin 3,780 s, and non-terminal SSM commands 0 of 200 enumerated each time -- the enumeration denominator printed beside the count so a blind probe cannot read as a pass. The floor stayed ENABLED and untouched throughout (the issuer declined to hold it, deliberately). Every new twr_daily partition carries gross_leg_vintage 946b5c5a3c89 and schema_version 1.2, with ruled statuses only and 0 OK rows with bmv<0. The completion oracle was the S3 chain log per date, never SSM rc, which read Success on all six sends. An earlier attempt at date 1 HALTED at a06 and is recorded as a partial rather than smoothed over; the re-drive rewrote its six tables byte-identically.",
+   "denominator": "5 of 5 dates; 5 of 5 mutex re-reads printed; 6 of 6 SSM sends terminal",
+   "status": "PASS",
+   "status_reason": "rc is not the oracle and was not used as one. The one instrument failure in this leg -- an SSM status-enum ValidationException -- RAISED rather than returning empty, which is the only reason it was not silently read as '0 non-terminal = PASS'."
+  },
+  {
+   "criterion_id": "B-5",
+   "criterion_verbatim": "ACCEPTANCE (CVO 86105 as graded): (i) 0 new versions on the 535 existing twr_daily partitions; (ii) five new twr_daily partitions with the current stamps; (iii) 0 new versions on EVERY other table the chain writes, the 18-table list printed as the denominator, EXCEPT the five date partitions in each -- the three 08-11 overwrites on their OWN line with pre/post digests; (iv) domain census after per table (535 -> 540, +5 elsewhere); (v) 2026-08-18 re-emitted LAST and read AS PREDICTED; the instance names its DATE SOURCE.",
+   "method": "diff",
+   "invocation": "[cell C02-g-7] whole-tree BEFORE/AFTER snapshot over 23 prefixes (08:49:27Z / 09:01:01Z), 23,342 -> 23,480 objects",
+   "output_evidence": "(i) twr_daily gained 10 NEW KEYS and ZERO rewritten keys -- the pre-existing 535 are untouched. (ii) five new partitions present with gross_leg_vintage 946b5c5a3c89 and schema 1.2. (iii) NEW KEYS 138 across 16 of 23 prefixes; NEW-KEY DATES OUTSIDE THE FIVE: NONE; VANISHED 0; REWRITTEN 12 objects, ALL at date=2026-08-11, every one with an UNCHANGED ETag and signed size delta +0. The three declared 08-11 overwrites on their OWN line, measured BEFORE the re-drive: dim_boundary 7,265 rows / 9 cols / 0 changed cells (control fired on 14,675), dim_security 2,325 / 13 / 0 changed (control on 12,264), dim_calendar 526 -> 539 rows / +13 additive with 0 rows LOST and 0 changed cells across the 526 shared days (its own control fired). (iv) DOMAIN CENSUS AFTER, per table: twr_daily and 11 others 535 -> 540 (+5); dim_account / dim_boundary / dim_calendar / dim_relationship / dim_security / ref_txn_classification 536 -> 540 (+4, 08-11 already present from the partial); the 7 OUT prefixes UNCHANGED -- so 16 IN / 7 OUT is confirmed on a SECOND axis (distinct dates), not only on object counts. (v) 2026-08-18 re-emitted LAST on the c02 mirror-pull (cid a4de0c21) with its D-1 2026-08-17 present for the first time: prev_outcome PULLED, and the artifact moved 7,315 rows / 11 cols / REFUSED-NO-BMV 7,315 / OK 0 -> 7,315 / 15 cols / OK 6,382 + UNCOMPUTABLE-ZERO-BMV 921 + NO-PRIOR-BALANCE-ACCOUNT-ABSENT 9 + UNCOMPUTABLE-NEGATIVE-BMV 3, OK rows with bmv<0 = 0. THE DATE SOURCE IS NAMED: the five dates were HAND-NAMED from the TO; dim_calendar-minus-stored was the equality CHECK, re-run at send time (539 in span, 535 stored, derived set identical to the pre-registered five); flow_ledger was NOT used. B-5's map-vintage line: the five stamp map_date=2026-08-28 with map_carried=True, their neighbours 2026-08-10 and 2026-08-18 INFER 2026-08-28 from S3 object metadata, whole series 538 of 540 on the 08-28 map and 2 on 08-27 -- EQUAL, so NO ISLAND by measurement.",
+   "denominator": "23 prefixes / 23,480 objects after; 5 of 5 new partitions; 12 of 12 rewritten objects byte-identical; 540 crosswalk partitions",
+   "status": "PASS",
+   "status_reason": "Every limb measured against an artifact. The island verdict is a PRINT: it would have been reported identically had the columns come out unequal, and the reason they are equal is timing the re-drive before Monday's map lands -- stated, not credited to the plan."
+  },
+  {
+   "criterion_id": "B-6",
+   "criterion_verbatim": "proof VALID rc=0 positional B-1..B-6, checker vintage printed; graded by 3.0.0_SA_CVO.",
+   "method": "schema_validation",
+   "invocation": "[cell C02-g-7] python .tools/proof-of-spec-check.py org/tier2_senior/0.7.0_AE_CloudOps~L/deliverables/ADVI_49F.c02-BACKFILL.proof_of_spec.json B-1,B-2,B-3,B-4,B-5,B-6",
+   "output_evidence": "VALID, rc=0 READ UNPIPED. Checker vintage 3948c766a78b2a18372cdcadb5d924b15857ab3c (2026-08-30T01:00:15-04:00), printed beside the verdict as the cell requires. rc read unpiped because $? after a pipe is the LAST command rc and this fabric has been bitten by that. THE FAILING RUNS ARE RECORDED RATHER THAN SILENTLY FIXED: run 1 rc=1 INVALID with 15 violations -- cell_ref used as an acceptance FIELD (the schema forbids additional properties; the checker finds the cell id by scanning the TEXT fields instead), owned_cells added to decomp_ref, all 6 surprises authored as OBJECTS where the schema wants one STRING each, one artifact with no covering acceptance row (the A_03 zero-battery class), and a ledger artifact whose commit_or_etag carried prose instead of a commit-ish. Run 2 rc=1 with 2 violations -- artifact_covered_by given as a string where an ARRAY is required. Run 3 VALID. The checker WARNED on runs 1-2 that its alignment figures print identically on an invalid instance and must not be quoted without the verdict; that warning is why the 6/6 and 1/1 alignment lines above are quoted only now.",
+   "denominator": "6 of 6 expected criteria present with a cell_ref",
+   "status": "PASS",
+   "status_reason": "Self-referential by construction: the criterion is satisfied by the validation of the instance that states it. Recorded as such rather than presented as independent evidence."
+  }
+ ]
+}

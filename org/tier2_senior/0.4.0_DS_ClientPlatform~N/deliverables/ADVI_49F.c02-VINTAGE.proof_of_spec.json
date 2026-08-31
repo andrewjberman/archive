@@ -1,0 +1,187 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_49F.c02-VINTAGE",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.4.0_DS_ClientPlatform~N",
+  "decomp_ref": {
+    "doc": "org/tier1_exec/2.0.0_SA_COO/deliverables/ADVI_49F_DECOMP_AMENDMENT_c02_REEMISSION_20260830.md",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform~N/task_orders/ADVI_49F.c02-VINTAGE.gross-leg-vintage-field-and-schema-bump.md",
+    "vintage_commit": "946b5c5a3c"
+  },
+  "spec_ref": {
+    "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_C_TWR_ENGINE_20260811.md",
+    "group": "C",
+    "vintage_commit": "bfaa0a6e6e"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/c02_twr_engine.py",
+      "kind": "script",
+      "commit_or_etag": "this commit",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "[kind as written: gold runner (producer)] [state as written: COMMITTED; the window's deploy leg is CONSENTED AND WANTED per the TO -- C02-g-3 at 0.7.0_AE_CloudOps~L re-runs against the DEPLOYED engine at this vintage] Three changes only: SCHEMA_VERSION 1.0 -> 1.1, the new GROSS_LEG_VINTAGE constant, and identity_stamp() feeding BOTH the row columns and the manifest keys from one dict. The deployed-plane ETag is NOT claimed here -- it is owed after the window lands and will be read with s3api head-object, not inferred from the push."
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/tests/test_c02_twr_engine.py",
+      "kind": "test",
+      "commit_or_etag": "this commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "[kind as written: acceptance arms (3 added, all RELATION/resolution arms)] [state as written: COMMITTED] 16 passed (13 pre-existing + 3 new). Each new arm was mutation-proven to FAIL, and each failed at its ASSERTION rather than at a guard -- the wrong-arm-vs-dead-arm distinction this seat was burned by on c02-GROSSLEG."
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/perfrp_contract.py",
+      "kind": "script",
+      "commit_or_etag": "this commit",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "[kind as written: declared column-shape surface for twr_daily] [state as written: COMMITTED] The V-3 consumer that moves in the same commit. TWR_DAILY_SHAPE_FULL and TWR_DAILY_SHAPE_REFUSED both gain gross_leg_vintage beside schema_version, matching the emitted order measured on the QA artifact. This is a DECLARATION kept true, not a gate that moved: TWR_DAILY_SHAPE_* is read only inside this same file (export dict :473-474, census print :507-510) and nothing in the estate asserts against it."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~N/deliverables/ADVI_49F.c02-VINTAGE.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "this commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "[kind as written: proof-of-spec instance] [state as written: RECORD] Validated with the POSITIONAL id form before the status flip."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "V-1",
+      "criterion_verbatim": "THE FIELD. gross_leg_vintage (string) on every emitted row and in the manifest, value = the producing engine's commit-ish from a declared constant in the module (never git at runtime on the host). Non-OK rows carry it too.",
+      "method": "live_read",
+      "invocation": "python c02_twr_engine.py --date 2026-08-28 --local-out <scratch> --canonical-local <mirror> --calendar-local <mirror>   (ad-hoc QA, NO --upload) ; then pandas read of the emitted data.parquet + manifest.json",
+      "output_evidence": "EMIT: rows=7370 cols=15. gross_leg_vintage present, NON-NULL on 7370 of 7370 rows, exactly ONE distinct value '946b5c5a3c89b61865ae1f4f60a609e831034cc2'. Status census {'OK': 6436, 'UNCOMPUTABLE-ZERO-BMV': 924, 'NO-PRIOR-BALANCE-ACCOUNT-ABSENT': 10} -- so 934 NON-OK rows, and every one of them carries the vintage (measured, not asserted by construction). Manifest gross_leg_vintage is the same value; row == manifest on all 7370. The value comes from the module constant GROSS_LEG_VINTAGE; the host is never asked for git.",
+      "denominator": "7370 of 7370 emitted rows; 934 of 934 non-OK rows; 3 status classes of 3 present in the fixture date",
+      "status": "PASS",
+      "status_reason": "The field is on every row including all three refusal classes, non-empty, single-valued, and equal to the manifest. Scalar assignment in the emit block is what makes the non-OK coverage structural rather than incidental."
+    },
+    {
+      "criterion_id": "V-2",
+      "criterion_verbatim": "SCHEMA BESIDE IT. SCHEMA_VERSION -> \"1.1\" in the same commit; the POLICY_BLOCK check at :132 is a DIFFERENT object and is NOT touched -- say so in the commit message.",
+      "method": "diff",
+      "invocation": "git diff -U0 -- data/assets/scripts/gold/runners_49f/c02_twr_engine.py | (comment lines stripped) ; pandas read of the emitted partition + manifest",
+      "output_evidence": "Emitted rows carry schema_version distinct = ['1.1']; manifest schema_version = '1.1'; row == manifest on all 7370. The changed-code census (comments stripped) is exactly 6 lines: the SCHEMA_VERSION constant, the GROSS_LEG_VINTAGE constant, the identity_stamp() def + its return, the emit-block stamp loop replacing part['schema_version'] = SCHEMA_VERSION, and **stamp replacing the manifest's schema_version key. The POLICY_BLOCK guard `if pol.get(\"schema_version\") != \"1.0\"` does NOT appear anywhere in the changed set -- it is load_policy()'s read of POLICY_BLOCK.json's OWN version, a different object, and it still reads \"1.0\" because that file did not change. Said in the commit message as required, and graded here on the diff.",
+      "denominator": "6 changed non-comment lines in c02_twr_engine.py; 0 of them the POLICY_BLOCK guard",
+      "status": "PASS",
+      "status_reason": "schema_version moved to 1.1 beside the new field and carries no vintage meaning; a committed arm (test_schema_version_is_not_the_vintage_carrier) fails if a later edit collapses the two."
+    },
+    {
+      "criterion_id": "V-3",
+      "criterion_verbatim": "CONSUMER CENSUS BEFORE THE BUMP. Readers of twr_daily's schema_version and of r_gross across runners_49f/, its tests/, the arms tree, parity_period_returns.py -- comp-find, -i, denominator printed. A != \"1.0\" refuser moves in the same commit. Downstream tables carrying r_gross-derived values are NAMED to the issuer as follow-on candidates, not re-emitted here.",
+      "method": "command",
+      "invocation": "comp-find 'schema_version' -i -- data/assets/scripts/gold/runners_49f ; comp-find 'r_gross' -i (estate, --corpus all) ; comp-find 'TWR_DAILY_SHAPE' (--corpus all) ; native Grep TWR_DAILY_SHAPE over *.py ; per-file rollup of r_gross across runners_49f",
+      "output_evidence": "r_gross ESTATE: 538 hits / 131,091 files scanned, corpus=all (bands HEAD=16 DEF=1 SURFACED=76 CONFIG=13 TEST=8 DOC=424 -- the mass is DOC, i.e. org records, not code). r_gross IN runners_49f: 4 files of 81 .py -- c02_twr_engine.py (the producer), parity_period_returns.py (10 hits), tests/test_c02_twr_engine.py (8), perfrp_contract.py (2). schema_version IN runners_49f: 109 hits / 107 files. REFUSER SWEEP (the load-bearing half): the only `schema_version` comparison in the whole tree that could refuse is c02_twr_engine.py:132 `pol.get(\"schema_version\") != \"1.0\"` -- POLICY_BLOCK's own version, a DIFFERENT object, explicitly out of scope per V-2. The one other comparison, tests/test_wave2_fixtures.py:125, asserts `manifest_schema_version == 1`, a different field (int, a00's MANIFEST_SCHEMA_VERSION). SO: ZERO consumers refuse on twr_daily's schema_version != \"1.0\", and NOTHING had to move for the bump itself. TWR_DAILY_SHAPE: 154 hits / 131,139 files; referenced ONLY inside perfrp_contract.py (export dict + census print), no assertion anywhere -- moved in this commit as a declaration kept true.",
+      "denominator": "estate r_gross 538 hits / 131,091 files (corpus=all); runners_49f 4 of 81 .py carry r_gross; 0 of 2 schema_version comparators are twr_daily refusers; TWR_DAILY_SHAPE 154 hits / 131,139 files, 0 asserting consumers",
+      "status": "PASS",
+      "status_reason": "Census ran BEFORE the bump. No refuser exists, so none had to move; the one declared-shape surface that my change made untrue (perfrp_contract.py) moved in the same commit. Downstream candidates NAMED to the issuer, not touched: parity_period_returns.py (derives period returns from r_gross) and canonical/twr_periods, plus the 533 stored twr_daily partitions that C02-g-3 re-emits."
+    },
+    {
+      "criterion_id": "V-4",
+      "criterion_verbatim": "EXERCISED, COMMITTED. A test arm (committed) asserting the field present + non-empty on every row and == the manifest, and schema_version == \"1.1\" on part + manifest; plus one ad-hoc --local-out emission on a real date showing the column -- invocation + output in the instance.",
+      "method": "test_suite",
+      "invocation": "python -m pytest tests/test_c02_twr_engine.py -q  (4 runs: clean + 3 mutants) ; python c02_twr_engine.py --date 2026-08-28 --local-out <scratch> --canonical-local <mirror> --calendar-local <mirror>",
+      "output_evidence": "CLEAN: 16 passed (13 pre-existing + 3 added). MUTATION CONTROL, each reverted immediately and the file re-verified at 16 passed: (M1) last hex char of GROSS_LEG_VINTAGE flipped -> test_gross_leg_vintage_resolves_to_a_real_commit FAILED at its assertion, 15 passed; (M2) SCHEMA_VERSION reverted to '1.0' -> test_gross_leg_vintage_stamps_every_row_including_refused_ones FAILED at its assertion, 15 passed; (M3) vintage collapsed INTO schema_version -> test_schema_version_is_not_the_vintage_carrier FAILED with 'schema_version has absorbed the vintage value', 14 passed. EVERY failure landed on an ASSERTION, never on a guard -- the arms are live, not dead. LIVE EMISSION on a REAL date: date=2026-08-28, rows=7370 cols=15, attestation_basis=converter-attested, rc=0, NO --upload. The engine also fail-CLOSED correctly on the first attempt (missing a00 dim_account manifest -> ValueError refusing to default the attestation basis), which is the P14-STAMP guard working and is recorded rather than tidied away.",
+      "denominator": "16 of 16 arms pass clean; 3 of 3 mutants fired, 3 of 3 at an assertion; 1 live emission, 7370 rows",
+      "status": "PASS",
+      "status_reason": "The arm is committed and mutation-proven; the ad-hoc emission is the un-transcribed evidence, since a harness transcribed from the implementation would score the implementation's own blind spot as a pass. identity_stamp() makes row==manifest structural, so the arm tests a guarantee rather than a coincidence."
+    },
+    {
+      "criterion_id": "V-5",
+      "criterion_verbatim": "NOTHING ELSE MOVED. Diff census: emit block, constant, test module, any V-3 consumer -- and :198-207 / :286-292 UNTOUCHED, shown by the diff.",
+      "method": "diff",
+      "invocation": "git status --porcelain -- data/assets/scripts/gold/runners_49f/ ; git diff -U0 -- c02_twr_engine.py filtered to changed non-comment lines matching the return arithmetic",
+      "output_evidence": "THREE files modified, all four categories the criterion permits: c02_twr_engine.py (constant + emit block), tests/test_c02_twr_engine.py (test module), perfrp_contract.py (a V-3 consumer). Changed NON-COMMENT lines touching r_gross / cf_gross / r_net: ZERO. The complete changed-code set is the 6 lines enumerated under V-2. The arithmetic named by the criterion is unchanged and reads, in the CURRENT file: :233 `r_gross = (float(emv) - cf_gross) / float(bmv) - 1.0`, :238 the BOD form, :351 `cf[\"cf_gross\"] = cf[\"cf_net\"].add(fee_cf.reindex(cf.index).fillna(0.0), fill_value=0.0)` -- the c02-GROSSLEG fix, intact. NOTE ON THE CITED LINE NUMBERS: the criterion says ':198-207 / :286-292', which were correct when the TO was written; adding the constant block shifted them, so the regions are cited by CONTENT above rather than by a number that my own edit moved. A first pass of this census returned 1, not 0 -- the single match was a COMMENT line I had added documenting the convention, and it is recorded because a census that cannot tell code from comment would have let a real change hide behind the same excuse.",
+      "denominator": "3 files modified of 3 permitted categories; 0 of 6 changed code lines touch the return arithmetic; 3 arithmetic sites verified present and unchanged by content",
+      "status": "PASS",
+      "status_reason": "Nothing outside the criterion's four permitted categories moved. Two untracked files exist in the tree (fit_streak.json, fit_reports/fit_report_2026-08-07.json) -- both dated 2026-08-11, pre-existing and NOT produced by this session's run; left untouched and not committed."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Each of the three added arms was mutation-proven, one mutant at a time, the file restored from a scratch backup after each and re-verified at 16 passed. M1 typo in the vintage constant -> the resolve arm failed. M2 SCHEMA_VERSION back to 1.0 -> the stamp arm failed. M3 vintage folded into schema_version -> the intent-coherence arm failed. THE POINT OF RECORDING WHERE each failure landed: on c02-GROSSLEG this seat found an arm that had been DEAD (dying at a schema guard) rather than merely wrong, and a dead arm passes a mutation battery by never reaching the field under test. All three failures here landed on assertions.",
+      "expected": "Each of the three added arms must FAIL when the property it asserts is broken, and must fail AT ITS ASSERTION rather than at a guard. An arm that dies at a guard never reaches the field under test, so it passes a mutation battery by not running -- the exact failure this seat found on c02-GROSSLEG, where the fee arm had been DEAD since cab1f8bff9 rather than merely wrong.",
+      "observed": "M1 (last hex char of GROSS_LEG_VINTAGE flipped): test_gross_leg_vintage_resolves_to_a_real_commit FAILED at its assertion, 15 passed. M2 (SCHEMA_VERSION reverted to '1.0'): test_gross_leg_vintage_stamps_every_row_including_refused_ones FAILED at its assertion, 15 passed. M3 (vintage folded INTO schema_version): test_schema_version_is_not_the_vintage_carrier FAILED with 'schema_version has absorbed the vintage value', 14 passed. 3 of 3 fired, 3 of 3 at an assertion. The file was restored from a scratch backup after EVERY mutant and re-verified at 16 passed, because a battery run from an already-damaged base reports 'all fired' and means nothing.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The V-4 emission is a pure read-and-emit over pinned inputs: five mirror partitions staged from S3 (canonical_valuation at D and D-1, flow_ledger at D, dim_calendar at D, a00's dim_account manifest) and a --local-out target in scratch, with NO --upload, so nothing on the served plane is touched and the run is repeatable to the same numbers. The identity that would expose drift is asserted rather than eyeballed: the gross-net gap must be signed POSITIVE on fee days and EXACTLY zero on non-fee days, with no abs() anywhere in the measurement.",
+      "observed": "On the QA partition: 43 of 6436 OK rows have r_gross != r_net, and the signed gap is POSITIVE on all 43 (min +5.453918e-04, max +6.046468e-03) -- gross ABOVE net, the add-back direction. The remaining 6393 of 6436 have r_gross == r_net EXACTLY (0.000000e+00), the non-fee-day negative control. No abs() anywhere in the measurement.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Re-emission / backfill of the 534 stored partitions",
+      "reason": "C02-g-3 at 0.7.0_AE_CloudOps~L, whose START CONDITION is this TO's commit message. Explicitly forbidden here. The stored partitions carry neither schema_version 1.1 nor gross_leg_vintage until that campaign runs."
+    },
+    {
+      "item": "cf_net / r_net and the return arithmetic",
+      "reason": "The served leg and the closed C02-g-1 cell. V-5 measures that they did not move; nothing here intends to touch them."
+    },
+    {
+      "item": "The deployed-plane ETag of the engine after this commit",
+      "reason": "NOT CLAIMED IN THIS INSTANCE. The window had not run when this was written. It is owed to 2.0.0_SA_COO and 0.7.0_AE_CloudOps~L as a MEASURED s3api head-object read afterwards, never inferred from the push. Recording it as owed rather than absent is the point."
+    },
+    {
+      "item": "TWR_DAILY_SHAPE_FULL's omission of flow_boundary",
+      "reason": "PRE-EXISTING and NOT INTRODUCED HERE: the emitted partition carries flow_boundary (measured, 15 columns) and the declared FULL tuple did not list it before my edit and still does not. I added only gross_leg_vintage, the column this TO creates. Named to the issuer as an observation; correcting another field's declaration is outside this cell."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION x DISARMED (owner: this seat, same turn). The V-5 arithmetic census returned 1 rather than 0 on its first run. The single match was a COMMENT line added in this change that documents the convention in words ('cf_gross = cf_net + fee_cf ... r_gross - r_net == +|fee|/BMV'), not a code line. Disarmed by re-running the census with comment lines stripped, which returns 0. Recorded because the instrument cannot distinguish code from prose, so a real arithmetic change could hide behind exactly the same explanation -- the fix is to strip comments in the census, not to trust the reading.",
+    "OBSERVATION x DISARMED (owner: this seat). The first ad-hoc emission attempt FAILED, rc=1, on a missing a00 dim_account manifest in the staged mirror. This is _attestation_basis_from_mirror refusing to default the attestation basis (P14-STAMP ruling (i)) and it is the guard working correctly, not a defect. Disarmed by staging the a00 manifest from S3 and re-running. Recorded because a QA run that fails closed is evidence about the engine's guards and is worth more on the record than a tidy single-attempt narrative."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~N/logs/2026-08-30/",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'c02_twr_engine' --corpus all ; comp-find 'chain_49f_entrypoint' --band SURFACED ; comp-find 'schema_version' -i -- data/assets/scripts/gold/runners_49f ; comp-find 'r_gross' -i --corpus all ; comp-find 'TWR_DAILY_SHAPE' --corpus all",
+      "result": "The V-3 census instrument and, earlier in the session, the instrument that answered the dispatch-path question: the 'c02_twr_engine' sweep (489 hits / 130,910 files) established that the engine has exactly ONE executor, chain_49f_entrypoint.py:181-186, which is what made the 12:45Z scheduler finding provable rather than plausible. Denominators printed on every sweep, --corpus all throughout, no census headed. TWO SWEEPS TIMED OUT at 120s and were backgrounded rather than trimmed -- the r_gross and TWR_DAILY_SHAPE estate sweeps -- and their full denominators are quoted above from the completed background runs, not from a truncated page."
+    },
+    {
+      "tool": "native Grep (not gated per org/XXX.md; used where a comp-find estate sweep was still running)",
+      "invocation": "Grep 'TWR_DAILY_SHAPE' --glob *.py -n",
+      "result": "Established that TWR_DAILY_SHAPE_FULL / _REFUSED are referenced ONLY inside perfrp_contract.py -- the finding that turned 'a gate might break' into 'a declaration went stale', which is what let the tuples move safely in this commit. The comp-find estate sweep that was running concurrently agreed (154 hits, no asserting consumer)."
+    },
+    {
+      "tool": "comp-pipescript",
+      "invocation": "comp-pipescript consumers c02_twr_engine --pipeline advi ; comp-pipescript io c02_twr_engine.py --pipeline advi",
+      "result": "Rule 20 satisfied by QUERY, never rebuild. consumers: 'no downstream pipeline consumers (terminal or portal-only)'. READ AS THE MANIFEST'S OWN ANTI-PATTERN NOTE INSTRUCTS -- an empty consumer list is pipeline-INTERNAL only and is NOT 'safe to change'; the estate-wide V-3 census is the instrument that actually covers portal/Lambda consumers. io: READS/WRITES '(none detected)' with the tool's own WARN that c02 takes paths from argv and emits via runner_common.emit, so the static reader cannot see them -- a denominator-zero, not an absence. The flagless form is rc=2 REFUSED by design; 'consumers c02_twr_engine.py' with the .py suffix returned 'Unknown script' and was re-run without it."
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh c02_twr_engine.py perfrp_contract.py tests/test_c02_twr_engine.py",
+      "result": "'OK: pre-commit gate clean for 3 of 3 file(s)' -- py_compile + ds-precommit + ruff py39, plus 'OK: no unguarded strict-utf8 log reads.' on each."
+    },
+    {
+      "tool": "pytest (as the falsifier, not a formality)",
+      "invocation": "python -m pytest tests/test_c02_twr_engine.py -q, run 5 times: clean, M1, M2, M3, and clean again after the final restore",
+      "result": "16 / 15 / 15 / 14 / 16. Recorded under controls.mutant. The restore was verified after EVERY mutant rather than only at the end, because a mutation battery run from an already-damaged base reports 'all fired' and means nothing."
+    },
+    {
+      "tool": "aws s3api / s3 cp (evidence reads, UTC by construction)",
+      "invocation": "head-object on _code/c02_twr_engine.py ; list-objects-v2 on canonical/twr_daily/ ; list-object-versions on date=2026-08-28/data.parquet ; s3 cp of 5 mirror inputs",
+      "result": "s3api throughout, never `s3 ls`, so every timestamp is UTC rather than local. The list-object-versions read (exactly ONE version of date=2026-08-28, 2026-08-29T12:47:01Z) is what established that the Saturday floor fire wrote it on pre-fix bytes and that today's fire would OVERWRITE rather than append. The head-object read is what caught this seat's own ADDENDUM 1 ETag going stale by line-ending normalisation."
+    },
+    {
+      "tool": "git (as an evidence instrument)",
+      "invocation": "git cat-file blob HEAD:<engine> vs the downloaded S3 object ; git cat-file -s across HEAD / origin / the fix commit and its parent ; git merge-base --is-ancestor with a positive AND a negative control ; git diff -U0 with comments stripped",
+      "result": "The blob-vs-object digest comparison resolved an apparent revert into a CRLF/LF normalisation (28,557 LF == the git blob; 29,016 with 459 CRs == the recorded ETag). The is-ancestor reads always carried both controls -- a commit known on origin and one known local -- because an is-ancestor test with only one arm cannot distinguish a true negative from a broken invocation."
+    },
+    {
+      "tool": "lib/trading_calendar.prev_trading_day",
+      "invocation": "prev_trading_day for 2026-08-29 / 08-30 / 08-31",
+      "result": "NEVER#1 resolved before any timing claim. Returned 08-28 for both today's and Monday's fires -- the fact that turns 'a new mixed-vintage partition appears' into 'an existing served partition is overwritten in place', and the reason the hold COO signed is free until TUE 09-01."
+    },
+    {
+      "tool": ".tools/audit-archive-invoker.py (startup A.2)",
+      "invocation": "python .tools/audit-archive-invoker.py",
+      "result": "rc=1, 2 findings -- [COVERAGE/UNCOVERED-AUDIT-LOG] org/to-pos-override-audit.log and [LIVENESS/STALE-BASELINE] baseline 236.6h old. Both are the KNOWN OWNED-UNTIL-rv0057-f001 pair named in org/XXX.md, which instructs seats not to re-file them. No third finding, no shrink/absence row. snapshot=deferred (this lane is not GOVERNANCE_AUDIT-permitted)."
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform~N/deliverables/ADVI_49F.c02-VINTAGE.proof_of_spec.json V-1,V-2,V-3,V-4,V-5",
+      "result": "POSITIONAL id form. The TO warns there is no --expected-criteria flag and that the flagged form's loud rc=2 is less dangerous than the silent 2-arg fallback, which returns a clean VALID having checked no id set at all. Result recorded in the commit message."
+    }
+  ]
+}

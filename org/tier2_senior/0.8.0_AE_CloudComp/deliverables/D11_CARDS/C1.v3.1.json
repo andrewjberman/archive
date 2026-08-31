@@ -1,0 +1,121 @@
+{
+ "schema_version": 3.1,
+ "carded_by": "0.8.0_AE_CloudComp~X",
+ "subject": {
+  "id": "C1",
+  "kind": "rung",
+  "declared_domain": "The C1 rung of the C0..C4 system ladder: INTERACTIONS -- the typed directed edges over C0 facts. The canon declares it as 'INTERACTIONS ~40k EDGES: the 10 relations (produces, consumes, derives-from, depends-on, contains, triggers, guards, governs, denies, owns)' and marks it VIEW-COMPILED. The declared domain is therefore the RELATION vocabulary; the live artifact is an edge_type population, and this card measures the distance between them."
+ },
+ "as_of": {
+  "carded_utc": "2026-08-30T08:40:00Z",
+  "commit_ish": "759891f91a",
+  "graph_vintage": "kuzu_nessie_db, source nessie; edges snapshot-id 7253036561073380687; nodes snapshot-id 8480715439779380391; built 2026-08-30T08:15:16Z. RE-READ at this carding, not carried from the v1 card."
+ },
+ "process": {
+  "methodology": {
+   "how": "C1 is view-compiled by the same globgrph derive runner that produces C0 (infra/aws/globgrph/derive_runner.py @ec0408628a). Each discovered relationship between two node_ids is materialized as a row in the Iceberg table graph_edges carrying src_id, dst_id and edge_type (:366-369, via the _nid() resolver over the fixed key set at :215), then projected into kuzu_nessie_db as CREATE REL TABLE CloudEdge(FROM CloudNode TO CloudNode, edge_type STRING, ...) at :1451. As with C0 the producer ORIGINATES the physical edge_type vocabulary (53 distinct values live) while the rule bank DECLARES the relation vocabulary; the two are joined only by the rule bank's blocks.",
+   "determinism": "unknown",
+   "inference_detail": null,
+   "composes": [
+    {
+     "id": "NFRA_ONTOLOGY_RULE_BANK.yaml",
+     "note": "the relation vocabulary and its composites, read @5fc45ad69d. All 53 live edge_types appear somewhere in this file -- see the instrument caveat on the coverage row."
+    },
+    {
+     "id": "C0 node population",
+     "note": "both endpoints are C0 node_ids, so C1 INHERITS C0's heterogeneous identity space and every limit on it."
+    }
+   ],
+   "invents": [
+    {
+     "id": "edge_type vocabulary",
+     "note": "53 distinct values live, ORIGINATED by derive_runner.py at :369 and declared nowhere upstream."
+    }
+   ],
+   "materializer_standing": "canonical",
+   "basis": "measured",
+   "evidence": "Read at source at this carding: :215 _EDGE_FIXED_KEYS, :366-369 the src_id/dst_id/edge_type construction, :1451 the REL table declaration. Population re-measured live via comp-kuzu at the vintage above.",
+   "owner": "0.4.0_DE_ClientPlatform"
+  },
+  "cadence": {
+   "declared_rhythm": "nightly 02:00Z full re-derive plus a continuous event-driven CloudTrail incremental -- the same two producers as C0; graph_edges is overwritten in the same derive pass as graph_nodes (:6, :301).",
+   "actual_trigger": "RE-READ LIVE at this carding: opal-globgrph-derive-runner-nightly State ENABLED, cron(0 2 * * ? *); opal-globgrph-cloudtrail-mgmt State ENABLED, event pattern. Both trigger planes swept.",
+   "live_matches_declared": "yes",
+   "live_instance_age": "Graph built 2026-08-30T08:15:16Z. A TABLE LAST-WRITE IS NOT A RE-DERIVE: comp-kuzu's own header states graph_nodes/graph_edges are written by TWO producers, so ONE incremental row makes the whole table read as freshly written. This card measured that the TRIGGERS are ENABLED; it did NOT observe a 02:00Z full fire, and the 08:15Z build was triggered by this carding's own query.",
+   "basis": "measured",
+   "evidence": "aws events describe-rule on both rules at 08:2xZ returned State ENABLED. The two-producer caveat is quoted from the instrument's own provenance header, not inferred.",
+   "owner": "0.4.0_DE_ClientPlatform"
+  }
+ },
+ "artifact": {
+  "persistence": {
+   "persisted": true,
+   "authority_role": "projection",
+   "mutation_policy": "replaceable",
+   "form": "Iceberg table graph_edges in the Nessie warehouse, snapshot-versioned; projected to CloudEdge in the local kuzu database",
+   "basis": "measured",
+   "evidence": "comp-kuzu provenance header at this carding: edges snapshot-id 7253036561073380687, 58,325 edges. VIEW-COMPILED like C0 -- editing the table does not change the world; the next derive overwrites it.",
+   "owner": "0.4.0_DE_ClientPlatform"
+  },
+  "location": {
+   "home": "Iceberg table graph_edges in the Nessie warehouse; local projection infra/aws/globgrph/kuzu_nessie_db (CloudEdge REL table)",
+   "projection_of": [
+    {
+     "id": "graph_edges",
+     "note": "the Iceberg table is the projected-FROM store; CloudEdge is the traversal projection, declared at derive_runner.py:1451."
+    },
+    {
+     "id": "live AWS estate + repo source tree",
+     "note": "the world graph_edges is a view OF. C1 is VIEW-COMPILED; neither store is source."
+    }
+   ],
+   "basis": "measured",
+   "evidence": "Both exercised at this carding: comp-kuzu returned edge counts, and its header names the Iceberg snapshot.",
+   "owner": "0.4.0_DE_ClientPlatform"
+  }
+ },
+ "trust": {
+  "coverage": {
+   "universe": "Every typed directed relationship the derive runner discovers between two C0 node_ids, across the same three substrate sides.",
+   "denominator": "RE-MEASURED AT THIS CARDING: 58,325 edges, 53 distinct edge_types (the v1 card also read 53 -- unchanged). All 53 live edge_types appear somewhere in NFRA_ONTOLOGY_RULE_BANK.yaml @5fc45ad69d, so NONE is entirely absent from the declared vocabulary.",
+   "explicitly_out": [
+    "C1 inherits every C0 coverage limit through its endpoints: an edge whose endpoint sits under one of C0's 10 UNBOUND node_types is present in the edge population but unreachable by any role-keyed traversal."
+   ],
+   "basis": "measured",
+   "evidence": "INSTRUMENT CAVEAT, stated because it changes what the 53 of 53 means: my sweep tested whether each live edge_type STRING APPEARS ANYWHERE in the rule-bank file. That can only OVER-count -- a token occurring in prose scores as named. It therefore establishes that no edge_type is ABSENT from the file; it does NOT reproduce the v1 card's stronger claim that all 53 are bound within the four NAMED blocks (#relations, #relation_composites and the two explicit-out blocks). That stronger claim is UNVERIFIED at this carding and is not asserted.",
+   "owner": "4.0.0_SA_CRO / rule-bank ratification chain; 0.4.0_DE_ClientPlatform (the edge population)"
+  },
+  "key": {
+   "identity_space": "The triple (src_id, edge_type, dst_id). Both endpoints live in C0's heterogeneous node_id space (ARNs, repo paths, S3 key globs, synthetic ids), so C1 INHERITS C0's identity heterogeneity and its unknown key stability.",
+   "key_expression": "(_nid(e, 'source', 'src'), str(e.get('edge_type', '')), _nid(e, 'target', 'dst')) -- read at infra/aws/globgrph/derive_runner.py:366-369 @ec0408628a, over the fixed key set _EDGE_FIXED_KEYS at :215 which accepts either the source/target or the src/dst spelling. The triple is written to graph_edges and projected to CloudEdge at :1451.",
+   "key_is_stable": "unknown",
+   "crosses_spaces": true,
+   "basis": "measured",
+   "evidence": "THE KEY IS NOT ENFORCED, AND THIS CARD MEASURED THE CONSEQUENCE -- an arm C0's card could not run. CREATE REL TABLE CloudEdge (:1451) declares NO PRIMARY KEY, so a duplicate triple PERSISTS rather than being rejected at load. Measured live: 58,325 edges against 58,324 distinct (src_id, edge_type, dst_id) triples -- EXACTLY ONE DUPLICATE, named: arn:aws:states:us-east-1:313476888478:stateMachine:YangDataPipeline --INVOKES--> arn:aws:lambda:us-east-1:313476888478:function:yang-generate-allocation-summary, count 2. The rate is 1 in 58,325 and the defect is real rather than theoretical. CONTRAST WITH C0 DELIBERATELY: C0's node_id IS a PRIMARY KEY, so its distinct==rows reading proves nothing about producer-side collisions; here there is no such mask and the collision is visible. Same producer, opposite evidential situation.",
+   "owner": "0.4.0_DE_ClientPlatform (edge construction); 4.0.0_SA_CRO / rule-bank chain (the relation vocabulary)"
+  },
+  "failure_mode": {
+   "returns_on_failure": "An EMPTY RESULT SET, or a SILENTLY DOUBLE-COUNTED path. A traversal that crosses the duplicated edge counts it twice with no diagnostic; a traversal that misses an edge returns nothing distinguishable from the relationship not existing.",
+   "distinguishable_from_true_negative": "no",
+   "silent_degrade_paths": [
+    "the one duplicate triple double-counts any path or aggregate crossing it -- a count over that state machine's INVOKES fan-out is wrong by one and reads clean",
+    "an edge whose endpoint is under a C0 UNBOUND node_type is invisible to role-keyed traversal while being present in the edge table",
+    "an edge_type present in the file but not BOUND in a named block would score as covered by this card's instrument -- see the coverage caveat"
+   ],
+   "basis": "measured",
+   "evidence": "The duplicate is measured and named above. The C0-inheritance paths follow from C0's own measured 76.7% role coverage at the same vintage.",
+   "owner": "0.4.0_DE_ClientPlatform"
+  }
+ },
+ "verdict": {
+  "standing": "QUALIFIED",
+  "why": "Every row is worked and carries basis, evidence and owner, so this is not INCOMPLETE; it is usable as load-bearing substrate within stated limits, so QUALIFIED rather than SOUND. Four limits bound the use: (1) ONE DUPLICATE EDGE TRIPLE EXISTS AND IS NAMED -- CloudEdge has no primary key, so any aggregate crossing that edge is wrong by one and reads clean; (2) C1 INHERITS every C0 coverage limit through its endpoints, including the 23.3% of nodes outside the role mapping; (3) the 53-of-53 vocabulary reading comes from a substring sweep that can only over-count -- the stronger named-block claim is UNVERIFIED here and not asserted; (4) determinism and key stability are UNEXERCISED and marked unknown. NOT CLAIMED: that the 53 edge_types are correctly bound, that the duplicate is the only integrity defect (only THIS arm was run), or that a 02:00Z full re-derive was observed.",
+  "blocking_defects": null
+ },
+ "forward_disposition": {
+  "standing": "undecided",
+  "set_by": null,
+  "basis": "absent",
+  "evidence": "NONE -- basis is absent, the designed state at carding time. A SECOND PASS IS OWED by a seat with authority to retire and no stake in this subject. This card DESCRIBES; it does not decide. set_by is null BY CONSTRUCTION (the CCY-F1 defect), and .tools/substrate-card-check.py refuses set_by == carded_by."
+ }
+}

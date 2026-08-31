@@ -1,0 +1,144 @@
+{
+  "schema_version": 3.1,
+  "subject": {
+    "id": "infra/aws/globgrph/kuzu_nessie_load.py",
+    "kind": "script",
+    "declared_domain": "NFRA_GLOBGRPH Item-3 -- THE canonical projection loader. Reads the Iceberg graph_nodes + graph_edges tables at the Nessie branch head and projects them into a local Kuzu DB (CloudNode / CloudEdge) for cross-layer Cypher traversal. Unlike kuzu_load.py (snapshot-tarball, nodes only) it reads the tables themselves, so it includes incremental commits made since the last nightly snapshot, and it loads the EDGE set."
+  },
+  "as_of": {
+    "carded_utc": "2026-08-30T03:12:00Z",
+    "commit_ish": "5da9e7fffc",
+    "graph_vintage": "Pins at RUN time to the branch-head marker s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json, measured live this session at LastModified 2026-08-30T02:11:47Z -- 2 s before the AWS snapshot tarball (02:11:49Z) that its sibling producer reads. The marker names the graph_nodes / graph_edges metadata_location the run actually loads."
+  },
+  "process": {
+    "methodology": {
+      "how": "main() reads the writer-stamped branch-head marker via _provenance.read_branch_head_marker() and takes the graph_nodes / graph_edges metadata_location from it (the HEAD oracle). If the marker is absent it prints WARN: HEAD-ORACLE UNKNOWN and falls back to latest_table_metadata(), a paginated newest-*.metadata.json-by-mtime scan. Each table is read whole through pyiceberg StaticTable.from_metadata(...).scan().to_arrow(). Nodes dedup into `best` on (arn if non-empty else node_id), keeping the highest snapshot_ts and COUNTING key collisions. With --force (the DEFAULT) the existing Kuzu DB is dropped -- file or directory, plus its .wal -- and a surviving path raises SystemExit rather than proceeding. Nodes are MERGEd, then edges, with endpoints required to exist in `best`; missing-endpoint edges are COUNTED AND SKIPPED, never stubbed. Edge MERGE keys on {edge_type, props} because props is part of edge identity (CTO 225614Z). An untyped-node check, a per-layer summary, a provenance manifest write, and the comp_detect TSGRAPH fold gate follow; rc is 0 only when untyped == 0 and the gate did not block.",
+      "determinism": "hybrid",
+      "inference_detail": {
+        "model": null,
+        "invocations_per_run": null,
+        "stages_inferential": [
+          "the FALLBACK pin only: latest_table_metadata() treats newest-*.metadata.json-by-mtime as HEAD, which the code's own comment marks RETIRED because mtime-newest can be an orphaned-commit artifact (CVO dc06744c6). It is inferential, it is NOT the active path (the marker resolved live this session), and when taken the run announces it."
+        ],
+        "stages_deterministic": [
+          "the marker-driven pin, the pyiceberg StaticTable full-table read, and the snapshot-id capture",
+          "node dedup on (arn or node_id) keeping max snapshot_ts, with key_collisions counted",
+          "drop-and-rebuild under --force with a hard SystemExit on a surviving path",
+          "edge MERGE on {edge_type, props} with missing-endpoint edges counted and skipped"
+        ],
+        "failure_is_loud": true
+      },
+      "materializer_standing": "canonical",
+      "composes": [
+        { "id": "s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json", "note": "the HEAD oracle marker; _provenance.MARKER_KEY:96. Confirmed live at 2026-08-30T02:11:47Z" },
+        { "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_nodes", "note": "Iceberg table read whole via pyiceberg StaticTable at the marker's metadata_location" },
+        { "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_edges", "note": "Iceberg table read whole; the edge set kuzu_load.py does not load" },
+        { "id": "infra/aws/globgrph/_provenance.py", "note": "read_branch_head_marker (the pin) and write_manifest (the beside-the-DB provenance stamp); subject 4 on this same face" },
+        { "id": "infra/aws/globgrph/comp_detect.py", "note": "gate_check -- the TSGRAPH D1/D2 fold gate that can HALT promotion" }
+      ],
+      "invents": [
+        { "id": "newest-metadata-by-mtime HEAD guess", "note": "FALLBACK ONLY and announced when used (:105-107). Nothing is invented on the active marker path -- the node key is read from the row and the pin is read from the marker." }
+      ],
+      "basis": "measured",
+      "evidence": "Read in full at infra/aws/globgrph/kuzu_nessie_load.py:1-417 @5da9e7fffc. Marker read + fallback :91-107; StaticTable read :64-71; dedup + collision count :146-163; force-wipe hard-fail :121-133; edge skip-not-stub :183-201; untyped check :208-210; manifest :213-229; fold gate :231-256. MARKER_KEY confirmed at infra/aws/globgrph/_provenance.py:96; marker object confirmed present live by s3api list.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "cadence": {
+      "declared_rhythm": "NONE -- no schedule is declared and that is deliberate. The module docstring declares CLI usage only (:25-28). No EventBridge rule, CodeBuild project, workflow or cron names this script; a sweep over **/*.{tf,yml,yaml,sh,json} returned callers and documentation only.",
+      "actual_trigger": "DEMAND-DRIVEN, two named entry points: (a) the comp-kuzu-full tool override, documented as 'forces a FULL kuzu_nessie_load' (.tools/tool_overrides.yaml:157); and (b) _canonical.ensure_fresh's marker-oracle rebuild path, which this script's own fold-gate comment describes -- a gate failure makes '_canonical's rebuild raise -> ensure_fresh serves the EXISTING DB'. Refresh happens when a consumer asks and the marker reads BEHIND, not on a clock.",
+      "live_matches_declared": "yes",
+      "live_instance_age": "NOT MEASURED. I did not stat the Kuzu DB or its provenance manifest, and I did not execute the loader, so I have no instance age for this substrate. The pinning INPUT was measured fresh (marker 2026-08-30T02:11:47Z) but the input's age is not the projection's age.",
+      "basis": "inferred",
+      "basis_by_field": {
+        "declared_rhythm": "measured",
+        "actual_trigger": "inferred",
+        "live_matches_declared": "inferred",
+        "live_instance_age": "absent"
+      },
+      "evidence": "MEASURED half: no scheduler exists -- a sweep over **/*.{tf,yml,yaml,sh,json} for 'kuzu_nessie_load' returned callers and docs only, no rule/cron/project; the docstring declares CLI usage at :25-28. INFERRED half: the demand-driven trigger is read from the caller set (.tools/tool_overrides.yaml:157) and from this file's own comments at :231-236, NOT observed firing -- I did not instrument a consumer calling ensure_fresh and I did not read a run log. ⛔ Do not upgrade this row without watching an actual demand-triggered rebuild: 'no schedule exists' is measured, 'this is how it actually refreshes' is not. Row basis is the FLOOR over those sub-claims.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "artifact": {
+    "persistence": {
+      "persisted": true,
+      "authority_role": "projection",
+      "mutation_policy": "replaceable",
+      "form": "A Kuzu database at --db (default infra/aws/globgrph/kuzu_nessie_db), materialized by Kuzu as either a directory or a single file depending on version -- the wipe path handles both. Two tables: CloudNode(node_id PK, arn, node_type, name, layer, drift_class, source, snapshot_ts, props) and CloudEdge(FROM CloudNode TO CloudNode, edge_type, layer, snapshot_ts, props). A provenance manifest is written BESIDE the DB carrying source_kind=nessie, both snapshot ids, both metadata keys and their LastModified, the warehouse bucket/prefix, and node/edge counts.",
+      "basis": "measured",
+      "evidence": "DEFAULT_DB_PATH at kuzu_nessie_load.py:42; table DDL :134-141; both-shapes wipe :125-129; manifest fields :213-229. Classified 'projection' not 'source' deliberately: every value it holds is read from the Iceberg tables, which remain the authority -- the DB is rebuilt from them and holds nothing not recoverable from the marker plus the warehouse. That is the exact opposite of its sibling derive_stitch.py, which DERIVES edges existing nowhere else and is therefore a source.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "location": {
+      "home": "infra/aws/globgrph/kuzu_nessie_db (local, default), plus the provenance manifest written beside it.",
+      "projection_of": [
+        { "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_nodes", "note": "at the metadata_location named by the branch-head marker" },
+        { "id": "s3://opal-313476888478-globgrph/warehouse/globgrph/graph_edges", "note": "at the metadata_location named by the branch-head marker" },
+        { "id": "s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json", "note": "the pin that selects both table metadata locations" }
+      ],
+      "co_resident_stores": [
+        { "id": "s3://opal-313476888478-globgrph/snapshots/", "note": "the comp-aws nightly snapshot shares this bucket; a bucket-scoped IAM or lifecycle change reaches this loader's input and the sibling producer's input at once" },
+        { "id": "s3://opal-313476888478-globgrph/stitch/", "note": "derive_stitch.py's output shares the same bucket" },
+        { "id": "kuzu_nessie_db.rebuild.tmp.SET", "note": "the temp manifest part written by _canonical.py -- subject 7 on this same face, carded separately" }
+      ],
+      "basis": "measured",
+      "evidence": "WAREHOUSE_BUCKET / WAREHOUSE_NS_PREFIX / DEFAULT_DB_PATH at kuzu_nessie_load.py:39-42; MARKER_KEY at _provenance.py:96. Marker confirmed live: s3api list over the bucket returned warehouse/_branch_head.main.json at 2026-08-30T02:11:47Z. ⛔ NOTE the marker sits at warehouse/_branch_head.main.json, OUTSIDE the warehouse/globgrph/ namespace prefix the tables use -- a prefix-scoped grant or lifecycle rule written against warehouse/globgrph/ would MISS the marker. Measured by the same list: a prefix query on warehouse/globgrph/_branch_head returned nothing while a bucket-wide contains() query found it.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "trust": {
+    "coverage": {
+      "universe": "Every row of graph_nodes and graph_edges at the pinned metadata_location -- full-table scans, not sampled, not filtered by layer or type.",
+      "denominator": "PRINTED BY THE RUN ITSELF, unusually completely: ICEBERG_READ nodes=<n> edges=<n>; NODES_DEDUP unique=<n> (from <n> rows, key_collisions=<n>); EDGES_WRITTEN written=<n> skipped_missing_endpoint=<n>; a per-layer LAYER <layer> nodes=<n> breakdown; UNTYPED_NODES count=<n>. Every reported number carries what it is a count of, and the read-vs-written gap is visible rather than reconciled away. ⛔ I did not RUN it, so I quote the emitting statements, not values.",
+      "explicitly_out": [
+        "edges whose src_id or dst_id is not in the deduped node set -- COUNTED as skipped_missing_endpoint and dropped rather than stubbed, so the graph never gains a fabricated endpoint",
+        "node rows with an empty key (neither arn nor node_id) -- skipped by the `if not key: continue` guard at :150-151, and these are NOT counted anywhere, the one uncounted drop in the file",
+        "any Iceberg commit newer than the marker's metadata_location -- by design, the pin is the point of consistency",
+        "the fold gate's own findings when comp_detect raises internally -- fail-open by explicit design"
+      ],
+      "basis": "measured",
+      "evidence": "Print statements at kuzu_nessie_load.py:115-116, :143-144, :162-163, :202, :204-210. The empty-key skip is at :150-151 and is the one drop with no counter beside it -- read at source, not inferred.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "key": {
+      "identity_space": "MIXED WITHIN ONE COLUMN BY DESIGN. The Kuzu primary key node_id is set to `arn if non-empty else node_id`, because comp_aws_cli keys EDGES by ARN while a node's own `id` is the short name with the ARN in a separate column. The PK column therefore holds ARNs for AWS-plane nodes and short names for everything else, and edge endpoints must be expressed in the same mixed space to match.",
+      "key_expression": "TWO DIFFERENT EXPRESSIONS, and they are NOT symmetric -- stating them separately because asserting one rule for both is false against the pinned writer. (1) NODE MEMBER KEY, kuzu_nessie_load.py:150 verbatim: `key = (row.get('arn') or '').strip() or (row.get('node_id') or '').strip()` -- i.e. STRIPPED arn if non-empty after stripping, else STRIPPED node_id. Rows yielding an empty key are dropped (:151-152). On collision the higher snapshot_ts wins. (2) EDGE ENDPOINT KEYS, :184 verbatim: `src, dst = row.get('src_id') or '', row.get('dst_id') or ''` -- RAW src_id / dst_id or empty string, with NO .strip() and NO arn-or-id fallback. Those raw strings are then membership-tested VERBATIM against the computed node-key set `best` (:185), and an endpoint absent from it increments `skipped` and drops the edge (:186-187). ⛔ THE ARMS ARE DISTINGUISHABLE BY A WHITESPACE-BEARING ENDPOINT: the node expression would strip it into the key set, the edge path compares the unstripped string, misses, and silently counts a skip. A consumer computing edge endpoint keys with the node rule would predict a match the writer does not make.",
+      "key_is_stable": "unknown",
+      "crosses_spaces": true,
+      "declared_mapping": "Declared and justified in an inline comment at :145-149 ('the Kuzu PK is arn-if-present else node_id'), with the dedup rule (newest snapshot_ts wins per key) in the same block. The docstring's Schema section (:19-24) declares the column list but NOT this key rule -- the rule lives only in the implementation comment.",
+      "basis": "absent",
+      "basis_by_field": {
+        "identity_space": "measured",
+        "key_expression": "measured",
+        "crosses_spaces": "measured",
+        "declared_mapping": "measured",
+        "key_is_stable": "absent"
+      },
+      "evidence": "NODE key expression read verbatim at kuzu_nessie_load.py:150; empty-key drop :151-152; EDGE endpoint assignment :184 and its verbatim membership test + skip :185-187; identity_space :145-149; collision counting :149-163. ⛔ CORRECTED AFTER A VERIFIER CATCH (3.0.0_SA_CVO~X @d31070ec0b): my first version asserted 'edge endpoints are matched by the SAME expression applied to src_id/dst_id'. THAT WAS FALSE AGAINST THE PINNED WRITER -- edges take raw src_id/dst_id with no .strip() and no arn-or-id fallback. I re-read :150 and :184-187 at source and confirmed the asymmetry before repairing. A card that states a computation a consumer would then perform must be exact; a plausible symmetry is exactly the kind of error that reads correct. ⛔ THE ROW BASIS IS 'absent' BY THE FLOOR RULE AND THAT IS NOT A TYPO: four sub-claims are measured at source, but key_is_stable is 'unknown' because I did NOT execute the loader and therefore have NO collision count for the live tables. The instrument that would answer it already exists and prints on every run (key_collisions=), so this is MEASURABLE HERE AND UNMEASURED BY ME, not fine-by-default.",
+      "owner": "0.7.0_AE_CloudOps"
+    },
+    "failure_mode": {
+      "returns_on_failure": "LOUD ALMOST EVERYWHERE, which makes this substrate materially safer than its sibling. Missing branch-head marker -> printed WARN: HEAD-ORACLE UNKNOWN plus an explicit fallback (the degrade ANNOUNCES itself). No metadata.json for a table prefix -> SystemExit naming the prefix. --force unable to remove the DB -> SystemExit rather than a MERGE into a half-wiped DB (this exact hazard was once observed: 1967 nodes from a 1180-row table after a Windows file-lock rmtree failure). Edge endpoints missing -> counted and skipped, never stubbed. Untyped nodes -> OK/ERROR line and rc=1. A NEW un-baselined fold-gate finding -> BLOCKED, promotion halted, rc=1, with an audited COMP_DETECT_GATE_OVERRIDE escape. THE ONE FAIL-OPEN: comp_detect raising internally is caught by a bare `except Exception` at :253 which prints WARN: TSGRAPH fold gate could not run (<err>) and does NOT block -- deliberate and documented ('a gate crash must not block a valid graph'), and it PRINTS, so it is visible in a log. A SECOND, quieter one: _provenance.read_branch_head_marker swallows every failure into None, so 'marker absent', 'S3 unreachable' and 'unparseable JSON' become one value -- the caller still announces UNKNOWN, so the DEGRADE is distinguishable while its CAUSE is not.",
+      "distinguishable_from_true_negative": "yes",
+      "silent_degrade_paths": [
+        "an all-empty-key node batch would be skipped by the `if not key: continue` guard at :150-151 with no counter incremented -- the only uncounted drop in the file",
+        "comp_detect gate raising internally -> gate does not run, rc stays 0; visible only as a WARN line, so a caller reading rc alone sees a clean load with no gate",
+        "read_branch_head_marker's bare except (_provenance.py:133-142) collapses absent / unreachable / malformed into None -- the fallback is announced but the reason is lost"
+      ],
+      "basis": "measured",
+      "evidence": "Read at source: WARN + fallback :105-107; SystemExit on no metadata :60-61; wipe hard-fail :130-131; edge skip :186-188; untyped rc :208-210, :257; fold gate block :244-251 and fail-open except :253-254; empty-key skip :150-151; _provenance.py:133-142 for the three-into-one None. ⛔ NOT EXERCISED, and named because the SIBLING card's row 7 WAS: I did not run this loader or force any of these branches. Its failure modes are READ, not provoked. The one live measurement is that the primary oracle RESOLVES (marker present, 02:11:47Z), so the announced-fallback path is not currently active. A verifier should weight this row BELOW derive_stitch's row 7, which had two arms reaching different truths.",
+      "owner": "0.7.0_AE_CloudOps"
+    }
+  },
+  "verdict": {
+    "standing": "QUALIFIED",
+    "why": "This is the better-built of the two load-bearing writers and the card should say so plainly: it announces its own degrade instead of hiding it (HEAD-ORACLE UNKNOWN), hard-fails rather than proceeding on a partial wipe after that exact corruption was once observed, counts and reports every drop it makes instead of reconciling it away, keeps props in edge identity so distinct edges cannot collapse last-wins, and ends on a fold gate that actually HALTS promotion rather than warning. Its primary pin resolved live at carding. QUALIFIED, not SOUND, on three points, and the first will bite a reader: (1) DECLARATIVE DRIFT -- the module docstring at :10-18 still presents newest-metadata-by-mtime as THE pinning mechanism, while the code retired it to a fallback and its own inline comment cites the CVO finding that mtime-newest can be an orphaned-commit artifact; the docstring is what a reader meets first and it describes a mechanism that is no longer primary. (2) One uncounted drop: the empty-key guard at :150-151 is the single skip in the file with no counter beside it, in a file whose whole discipline is counting its skips. (3) The key space is mixed within one PK column by design and its stability is MEASURABLE by the collision counter the code already prints, but UNMEASURED here because this lane did not execute the loader -- recorded as key_is_stable 'unknown' with the row basis dropped to 'absent' rather than guessed. None of the three requires redesign; (1) is a documentation edit.",
+    "blocking_defects": [
+      "NODE and EDGE key rules are ASYMMETRIC: node keys are stripped ARN-or-node_id (:150), edge endpoints are raw src_id/dst_id with no strip and no fallback (:184) compared verbatim to the node-key set (:185). A whitespace-bearing endpoint is stripped into the key set by the node rule and MISSED by the edge rule, silently incrementing skipped_missing_endpoint. Surfaced by 3.0.0_SA_CVO~X's verification of this card and confirmed at source (key row)",
+      "docstring :10-18 documents the RETIRED mtime pin as primary while the code pins on the branch-head marker (declarative drift; owner 0.7.0_AE_CloudOps; a doc edit, not a code change)",
+      "empty-key node rows dropped at :151-152 with no counter, in a file that counts every other skip (coverage row)",
+      "key_is_stable UNKNOWN and the key row's basis is therefore 'absent' -- the collision counter exists and prints, but the loader was not executed by this carding lane (key row; resolvable by one run)"
+    ]
+  },
+  "carded_by": "0.7.0_AE_CloudOps~K"
+}
