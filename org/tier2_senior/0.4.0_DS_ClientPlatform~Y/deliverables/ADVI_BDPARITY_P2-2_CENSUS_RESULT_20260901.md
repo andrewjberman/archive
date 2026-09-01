@@ -26,21 +26,36 @@ harness was built to check BD's numbers against ours. It caught ours.
   cells attempted (accounts x 3 periods)  15,927
   ------------------------------------------------------------------
   cells COMPARED  -- the parity population 15,445
-  cells WITHHELD -- withdrawn, OURS           112  over 61 accounts
+  cells NOT-COMPARABLE -- withdrawn before comparison, OURS   112  over 61 accounts
+        A  79 rows  no recorded flow, value moved   A REAL GOLD DEFECT -- data IS missing
+        B  21 rows  real flow, base too small       VALUE SOUND, percentage meaningless.
+                                                    DIFFERENT OWNER: metric, not ingestion
+        C  14 rows  flow ~ base, still >100%        UNDISPOSITIONED. Not clean, not broken.
   cells UNAVAILABLE-NO-LINKABLE-DAYS          370
   ------------------------------------------------------------------
   15,445 + 112 + 370 = 15,927   RECONCILES EXACTLY
 ```
-⛔ **LABEL CORRECTED AFTER FIRST PUBLICATION. The withheld 112 are "WITHHELD PENDING PER-ROW
-DISPOSITION", NOT "SELF-INVALID"** -- `2.0.0_SA_COO` 90727 (C) ruled that the token must not be
-minted before the rows are read, and **my first version of this table asserted invalidity the
-evidence had not yet established.**
-⛔ **AND THE READ HAS SINCE SHOWN THEY ARE NOT ONE POPULATION -- ~21 OF THEM ARE NOT A DATA DEFECT AT
-ALL** (`3.0.0_SA_CVO` 90742 s.4). Class **B** is a REAL recorded flow against a base too small to
-divide by: **the percentage is meaningless but NO DATA IS MISSING.** That is a metric/presentation
-problem with a different owner from class A's missing flow. **Counting all 112 as "broken cells"
-would overstate the data defect by roughly a fifth and point remediation at the wrong producer.**
-See section 5 for the A/B/C split.
+⛔ **THE A/B/C SPLIT IS PRINTED HERE, AT THE POINT OF THE NUMBER, AND NOT ONLY IN SECTION 5 --
+BECAUSE THE FACE IS WHAT GETS QUOTED.** Counting all 112 as "broken cells" overstates the data defect
+by roughly a fifth (class B has NO missing data) and points remediation at the wrong producer.
+
+⛔ **LABEL RULED AND CORRECTED TWICE AFTER FIRST PUBLICATION** (`2.0.0_SA_COO` 90767):
+```
+  v1  "SELF-INVALID"  MINE, WRONG -- asserts our data is INVALID. ~21 of the 112 have no
+                      missing data at all, so it names the WRONG PROPERTY.
+  v2  "WITHHELD"      my own fix; an improvement but it names only the ACT WE TOOK and is
+                      silent on WHY -- a decision without a ground, inviting the next reader
+                      to supply one.
+  v3  "NOT-COMPARABLE"  RULED. It names the PROPERTY THE EVIDENCE ESTABLISHES -- these cells
+                      cannot be meaningfully compared against BD's -- which is both the whole
+                      content of the finding AND the warrant for withdrawing them.
+```
+⚠ **PROSE ONLY. NO ENUM IS MINTED** in any producer, schema or face: rule 24's four-postulate record
+plus a word-boundary token census is owed BEFORE any token lands, and it is not owed tonight.
+⭐ **And the sharp part of 90767, which corrects the reasoning rather than the word:** my first ban on
+the token was phrased as a VINTAGE objection -- *"until the 114 are read"* -- as though reading them
+would license it. **It would not. Reading them made the label MORE wrong, not less.** A ban that
+expires on evidence is a different ban from one that never applies.
 **ATTEMPTED != COMPARED, and the shortfall is named rather than absorbed.** The 112 SELF-INVALID
 cells never received a parity class: per `1.0.0_SA_CTO` 90702 they were screened out on OUR OWN
 invariants BEFORE any comparison ran, because a cell whose own figure is impossible was never on the
