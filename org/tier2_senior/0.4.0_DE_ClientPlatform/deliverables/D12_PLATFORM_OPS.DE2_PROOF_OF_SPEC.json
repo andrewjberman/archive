@@ -1,0 +1,168 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D12_PLATFORM_OPS.DE2-SITEZ",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/D12_PLATFORM_OPS.DE2-SITEZ.mfa-challenge-screen.md",
+    "group": "D",
+    "vintage_commit": "c7dfddcdff"
+  },
+  "assignee": "0.4.0_DE_ClientPlatform~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/auth/MfaChallengeForm.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "087a456f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git ls-remote origin DEV -> be39451b (live read 2026-09-01T02:2xZ); local HEAD 087a456f; rev-list --left-right --count HEAD...origin/DEV = 1 0. PUSH STATE: LOCAL, unpushed. Portal work is DEV; PROD promotion is a DT lane act and is not in these TOs. WHAT IT INTRODUCES: the code-entry screen: 6-digit input, submit, resend, cancel, honest error states.",
+      "artifact_covered_by": [
+        "DE2-1",
+        "DE2-2",
+        "DE2-3",
+        "DE2-4",
+        "DE2-5"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/contexts/AuthContext.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "087a456f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git ls-remote origin DEV -> be39451b (live read 2026-09-01T02:2xZ); local HEAD 087a456f; rev-list --left-right --count HEAD...origin/DEV = 1 0. PUSH STATE: LOCAL, unpushed. Portal work is DEV; PROD promotion is a DT lane act and is not in these TOs. WHAT IT INTRODUCES: verifyMfa(challengeId, code) -> POST /auth/mfa/verify, sharing establishSession() with login() so the two session paths cannot drift.",
+      "artifact_covered_by": [
+        "DE2-1",
+        "DE2-2",
+        "DE2-3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DE2-1",
+      "criterion_verbatim": "A code delivered to a real mailbox is typed into the screen and the user reaches the dashboard. THIS IS THE CRITERION W1 LOST -- it is a PERSON reaching a PAGE, not an endpoint returning 200.",
+      "method": "live_read",
+      "invocation": "NOT RUN. Deliberately not attempted -- see status_reason.",
+      "output_evidence": "No mailbox was observed and no dashboard was reached by a redeemed code. The screen EXISTS and renders -- screenshot .playwright-mcp/page-2026-09-01T02-18-47-167Z.png READ: 'Enter your code / We sent a 6-digit code to your email. It expires in 10 minutes.' with the code field, Verify and sign in, Send a new code, Cancel -- but rendering the screen is NOT this criterion.",
+      "denominator": "0 of 1 real-mailbox redemptions performed.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "This criterion REQUIRES an MFA-enabled account and a real mailbox. 0 of 48 accounts are gated; DE2 section 4 and DE3 section 4 both bar this lane from enabling one or creating a test account, and provisioning a subject is 2.0.0_SA_COO~Z's to arrange on Andrew's word. Scoring it from the stubbed run would be EXACTLY the substitution this TO series exists to prevent: I can make a stub return a token and watch the browser reach /market, and that would prove nothing about a person, a mailbox or a code. Recorded UNVERIFIABLE rather than PASS. INSTRUMENT LIMIT, stated not implied, and AMENDED 2026-09-01 ~03:0xZ because the version first committed here UNDERSTATED the evidence. It read: 'it cannot show the server emits these shapes -- that is a source read, three seats on ONE rung.' THAT IS NO LONGER TRUE. 0.7.0_AE_CloudOps~Z (msg 17424) EXERCISED the deployed handler live for W1-3 and captured POST /auth/login on an MFA-enabled account: HTTP 200, body {mfaRequired, challengeId, channel}, accessToken present false, set-cookie present false, and NO `user` key at all -- so the TypeError my RED produced is the REAL SERVER'S behaviour, not an artifact of my override, which is the one thing my instrument structurally could not establish about itself. THE UPGRADE, in that seat's own bounding rather than a looser restatement of mine: rungs 1-4 move from source-confirmed to SERVER-SIDE EXERCISED AT THE FETCH BOUNDARY. It does NOT make the browser observation an integrated-system test -- the two halves were run separately, by different seats, hours apart. A STUB VERIFIED AGAINST A LIVE CAPTURE IS A STRONGER INSTRUMENT THAN A STUB; IT IS NOT THE SAME AS NEVER HAVING STUBBED. What remains true: a fetch-boundary error would still be invisible to every frame that stubs there, because all of them make it."
+    },
+    {
+      "criterion_id": "DE2-2",
+      "criterion_verbatim": "A wrong code shows an error and the user stays out.",
+      "method": "live_read",
+      "invocation": "Portal served at localhost:5175 from 087a456f. /auth/mfa/verify stubbed to HTTP 401 {error:'Invalid or expired code'} -- the shape the real handler returns for a wrong code. Code 123456 typed and submitted; screenshot READ.",
+      "output_evidence": "Error rendered: 'Invalid or expired code' in dark red (text-red-900) on a light red panel, legible on the silver canvas -- screenshot .playwright-mcp/page-2026-09-01T02-19-10-508Z.png opened and READ, not inferred from class names. The code field was CLEARED, the submit button returned to disabled, path stayed /login, localStorage.accessToken stayed null. The user stayed out.",
+      "denominator": "1 wrong-code submission; 1 verify request issued, measured at the request layer rather than assumed.",
+      "status": "PASS",
+      "status_reason": "Error LEGIBILITY is load-bearing for this row, not cosmetic: the pre-existing login error box was text-red-400 on the silver canvas -- the documented #1 portal defect -- and this criterion has to be READ in that box. Changed to text-red-900 as part of this work and disclosed."
+    },
+    {
+      "criterion_id": "DE2-3",
+      "criterion_verbatim": "A replayed (already-consumed) code shows an error and the user stays out -- not a spinner, not a silent retry.",
+      "method": "live_read",
+      "invocation": "Run DISTINCTLY from DE2-2 rather than relabelled. The stub models CONSUMPTION: the first redemption of code 654321 marks the challenge consumed, and the SAME code thereafter finds nothing and returns 401 -- mirroring verifyAndConsumeChallenge(), which DELETES rather than flags. The same code was then submitted twice.",
+      "output_evidence": "The call log shows two verify requests with consumedAtCallTime false then TRUE, so the second genuinely hit a consumed challenge. On the replay: error shown ('Invalid or expired code'), still on /login, spinnerStuck FALSE, field cleared, localStorage.accessToken null throughout. Total verify requests 2 for 2 deliberate submits -- exactly one per submit, so there was NO silent retry.",
+      "denominator": "2 submits, 2 verify requests. A silent retry would have produced 3 or more.",
+      "status": "PASS",
+      "status_reason": "BOUNDED: the DELETION is a SERVER property, exercised by W1-5, not by me. What this run establishes is the CLIENT half -- a replay surfaces as an error, keeps the user out, leaves no spinner running, and triggers no automatic resubmit. The component guards the double-submit with an explicit early return on isSubmitting rather than relying on the disabled attribute alone, because against the real handler a second in-flight submit would burn a code that had just worked."
+    },
+    {
+      "criterion_id": "DE2-4",
+      "criterion_verbatim": "Resend issues a new code and the previous one no longer works.",
+      "method": "manual_read_with_citation",
+      "invocation": "All 16 routes of auth-handler/src/index.ts read; src/mfa.ts exports enumerated; call sites of issueChallenge traced.",
+      "output_evidence": "There is no resend endpoint and no standalone issuer. issueChallenge() has exactly ONE call site, inside login(). The only way to mint a new code today is to call /auth/login again -- which requires the PASSWORD again. A Resend built on that would have to retain the password in client state, which DE2-5 forbids, and would re-run the WS-1 login throttle counter keyed on the submitted email.",
+      "denominator": "16 of 16 routes read; 2 of 2 mfa.ts exports enumerated; 1 of 1 issueChallenge call sites.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "BLOCKED BY THE BACKEND. NOT scored as PASS. The 'Send a new code' control exists and is wired to requestMfaCode() -> POST /auth/mfa/send -- the same endpoint DE1-1 needs -- so the row passes with no further frontend change once issuance is split out of login(). The second half, 'the previous one no longer works', is a SERVER property that will follow from re-issuing the challenge; I have not exercised it and do not claim it. Proposed owner 0.7.0_AE_CloudOps~Z; routed to 2.0.0_SA_COO~Z as msg 17360."
+    },
+    {
+      "criterion_id": "DE2-5",
+      "criterion_verbatim": "NEGATIVE: the code appears in no URL, no console log, no analytics payload and no persisted client state. Enumerate where you looked and carry a positive control proving the search would have found it.",
+      "method": "live_read",
+      "invocation": "After submitting code 123456, every candidate carrier was read out of the live page and tested for the literal code, beside a planted positive control.",
+      "output_evidence": "ENUMERATED, all false: window.location.href (len 27); localStorage serialised whole (len 112 -- non-empty, so the search had real content to miss); sessionStorage (len 0); document.cookie (len 0); window.history.state (len 51); the DOM input value (cleared, len 0). Every browser console message was dumped -- 55 of 55, level info, all:true -- and none contains the code. POSITIVE CONTROL: the same matcher run against a planted string of the same kind ('accessToken=123456') FIRED true. The code DOES appear in the body of the single POST /auth/mfa/verify, which is where it belongs and is the one request that redeems it. Analytics: OpalAnalytics.init is called only from establishSession(), which runs only after a session exists, and the code is not in scope there -- the payload carries email, name, role, firmId only.",
+      "denominator": "6 client-state carriers enumerated + 55 of 55 console messages + 1 analytics call site.",
+      "status": "PASS",
+      "status_reason": "POSITIVE CONTROL CARRIED because this is an ABSENCE claim, the class where a broken detector reproduces the desired answer exactly: six false results from a matcher that cannot fire would read identically to a true clean. BOUND: this enumerates the carriers readable from the page. It does not cover a browser extension, devtools history, or the network log -- the code is necessarily in the request body in transit, protected by TLS, not by this criterion."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO controls, and the first is the one that matters. (1) THE RED: 3.0.0_SA_CVO~Z observed (msg 17378) that landing the AuthContext fix first would make the pre-existing client-side gate bypass permanently unobservable, so a later DE3-2 PASS could not show it discriminates -- the criterion-cannot-fail class, which this same workstream already hit once with W1-3's 10/10. The pre-fix state was therefore exercised in a browser at pristine be39451b BEFORE the fix, with predictions pre-registered in msg 17390 so the outcome could not be fitted afterwards. (2) THE TYPECHECK: portal/CLAUDE.md warns a bare tsc --noEmit compiles an empty file set here and returns rc=0 on broken code, so the instrument was proven failable before its clean pass was trusted.",
+      "expected": "(1) Pre-registered: with the login response stubbed to the tokenless 200, the browser reaches /market and localStorage.accessToken is the string 'undefined'. After the fix, the identical stub yields no session and /market refuses. (2) A planted type error makes tsc -b report errors.",
+      "observed": "(1) RED, PARTIALLY FALSIFYING MY OWN PREDICTION and recorded rather than smoothed: the submit did NOT navigate -- OpalAnalytics.init read data.user.email, undefined on the mfaRequired branch, and threw a TypeError that LoginPage's catch rendered as a login error. But setState runs BEFORE that throw, so localStorage.accessToken WAS the string 'undefined' and the auth state was poisoned; /market by in-session URL navigation was then ADMITTED -- no redirect, no login form, blank silver canvas READ from the screenshot -- while all 5 data prefetches returned 401, so no data was disclosed. A FULL RELOAD correctly bounced to /login. My reported rung 5 (LoginPage navigates) is WITHDRAWN; rungs 1-4 stand; correction routed as msg 17420. GREEN, identical stub against 087a456f: accessToken null, ONLY /auth/login called (no /auth/me, none of the 5 prefetches), and /market by URL BOUNCED to /login with the login form present. (2) Mutant CODE_LENGTH: string = 6 produced 4 errors (TS2322 x2, TS2345, TS2367); reverted, clean.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Same-input repeats compared within the GREEN build. The guarded-route probe (history.pushState('/market') + popstate) was run twice from different entry points -- once after the opt-in step and once after Cancel -- and the 401-error path was driven twice (DE2-2's wrong code and DE2-3's replay).",
+      "observed": "Both /market probes: landed /login, hasLoginForm true, accessToken null -- identical. Both error runs: error rendered, user stayed on /login, field cleared, no stuck spinner, exactly one verify request per submit. No run-to-run variation observed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Enabling MFA on any account, including for testing",
+      "reason": "DE2 section 4 fence. 0 of 48 gated, deliberately -- Andrew was locked out of PROD by this exact flow."
+    },
+    {
+      "item": "Creating a test account or using a live human email address",
+      "reason": "DE2 section 4 fence; a test account on a live address mailed Andrew two production-shaped messages earlier tonight."
+    },
+    {
+      "item": "POST /auth/mfa/send and the resend semantics",
+      "reason": "auth-handler is not the portal lane (rule 13). Proposed owner 0.7.0_AE_CloudOps~Z."
+    },
+    {
+      "item": "Distinguishing a wrong code from a replayed code in the UI",
+      "reason": "The handler returns the SAME generic 401 for both BY DESIGN -- enumeration safety, stated in DE2 section 2. Making the UI distinguish them would be a regression dressed as a better error state."
+    },
+    {
+      "item": "Any alarm, monitor, SNS, SES-send or notifier",
+      "reason": "GLOBALALARM standing moratorium."
+    },
+    {
+      "item": "PROD promotion, the push, and the workspace submodule pointer bump",
+      "reason": "DT lane acts. This commit is DEV, local-only, unpushed."
+    }
+  ],
+  "surprises": [
+    "The blocking backend dependency and the client-side gate bypass are recorded in full in the DE1 proof-of-spec and were routed as msg 17360, with a self-correction in 17420. Not restated at length here -- one obligation, one primary carrier, because two carriers of one obligation diverge from minute one.",
+    "OBSERVATION, not chased: a single 'useAuth must be used within an AuthProvider' error appears once in the console during a Vite HOT-RELOAD remount of DataSourceProvider, caught by the ErrorBoundary. It does not reproduce on a fresh page load and every clean-navigation run in this session rendered correctly. Recorded as an HMR artifact -- and NOT claimed to be unrelated to my change with more confidence than one observation supports."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-09-01/",
+  "compiler_tools": [
+    {
+      "tool": "playwright (headless Chromium)",
+      "invocation": "navigate / fetch-stub / submit / screenshot / evaluate, five scripted runs",
+      "result": "DE2-2, DE2-3 and DE2-5 exercised in a browser; the challenge screen screenshot READ. DE2-1 deliberately NOT attempted."
+    },
+    {
+      "tool": "bun run typecheck",
+      "invocation": "bun run typecheck (tsc -b --noEmit), mutant-first",
+      "result": "Clean; the mutant produced 4 errors, so the instrument is proven failable per portal/CLAUDE.md."
+    },
+    {
+      "tool": "bun run lint",
+      "invocation": "bun run lint",
+      "result": "0 errors, 11 pre-existing warnings, none in the touched files."
+    },
+    {
+      "tool": "source read",
+      "invocation": "auth-handler/src/{index,auth,mfa,types,email}.ts",
+      "result": "The contract this screen is built against, including CODE_DIGITS=6 and CHALLENGE_TTL_SEC=600 that the on-screen copy quotes as 10 minutes."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "--author '0.4.0_DE_ClientPlatform~Z <...>' -F <msgfile written by the Write tool>",
+      "result": "087a456f. NOTE: commit-gate reported 'checked 0 of 5 files' -- it reads only .py/.sh/.tf/json and is NOT cited as validation for this frontend artifact."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this file>",
+      "result": "Run to VALID; the first draft was rejected on real schema violations and rewritten against org/standards/PROOF_OF_SPEC.schema.json rather than a sibling example."
+    }
+  ]
+}
