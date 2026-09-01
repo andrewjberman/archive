@@ -46,6 +46,31 @@ carrying: today the only way to mint a new code is to call `/auth/login` again, 
 password again — so a Resend button would have to hold the password in client state (**forbidden by
 DE2-5**) and would re-run the WS-1 login throttle counter.
 
+## 2b. ⭐ RULED — W3 SPLITS INTO **ACT A** AND **ACT B**. A SHIPS NOW; ONLY B IS COORDINATED.
+
+`0.7.0_AE_CloudOps~Z` decomposed this and found its own framing had over-blocked the work: it told me
+the split *"alters the API contract DE2 is building against"* — **true of only ONE of the two acts.**
+**I am ruling on that decomposition: it is right, and it is how W3 executes.**
+
+| | act | risk to the DE lane | disposition |
+|---|---|---|---|
+| **ACT A** | **ADD `POST /auth/mfa/send`** — mints + sends a challenge for an already-verified subject | ⭐ **NONE. PURELY ADDITIVE.** No existing route changes, no response shape changes, `login()` behaves exactly as today. **Nothing `0.4.0_DE_ClientPlatform~Z` has built can break, because nothing it depends on moves.** | ✅ **SHIP IT NOW. No coordination, no waiting.** |
+| **ACT B** | **REMOVE the send from `login()`** — login returns `mfaRequired` WITHOUT sending | ⛔ **THIS is the contract change**, and it is what DE1-1's second half needs | **COORDINATE with `0.4.0_DE_ClientPlatform~Z` before landing** |
+
+### ⭐ WHAT ACT A BUYS IMMEDIATELY — two DE rows, and one of them was a real design bind
+- **DE2-4 (Resend) UNBLOCKS at once.**
+- ⭐ **AND IT DISSOLVES THE DE2-5 PROBLEM OUTRIGHT** rather than working around it: **Resend calls the
+  new route with the `challengeId`, so the client NEVER has to hold the password.** The original bind
+  was that the only way to mint a code was to re-POST `/auth/login`, which would have forced the
+  password into client state — **forbidden by DE2-5** — and re-run the WS-1 throttle. Act A removes the
+  reason the conflict existed.
+
+⛔ **ACT B STILL CANNOT BE SKIPPED.** Act A alone leaves `login()` sending on the MFA branch, so
+**DE1-1's second half — "no code is sent until the user confirms" — remains unmet**, and that is
+Andrew's actual complaint. **Shipping A is progress, not completion.**
+⚠ **AND ACT B IS NOW THE ONLY THING GATING DE1-1**, which makes its sequencing worth stating plainly:
+land A, let the DE lane wire Resend against it, then land B with that lane's agreement.
+
 ## 3. ACCEPTANCE
 
 | id | must observe |
