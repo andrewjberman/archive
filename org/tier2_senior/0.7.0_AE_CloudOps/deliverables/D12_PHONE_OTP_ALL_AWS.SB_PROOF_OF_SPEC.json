@@ -74,6 +74,34 @@
       "artifact_covered_by": [
         "SB-5"
       ]
+    },
+    {
+      "path_or_key": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts",
+      "kind": "script",
+      "commit_or_etag": "775dc28917",
+      "deployed_state": "BUILT-NOT-DEPLOYED",
+      "deploy_evidence": "Local bundle only. setMfaPreference is now CHANNEL-ONLY (the phoneNumber parameter DELETED, not left unused -- an unused parameter is an invitation); setVerifiedPhone added as the sole writer of {phoneNumber, phoneVerifiedAt}; getUser maps phoneVerifiedAt.",
+      "introduces": [
+        "setVerifiedPhone",
+        "phoneVerifiedAt mapping"
+      ],
+      "artifact_covered_by": [
+        "SB-6",
+        "SB-8"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/opalinvest_dev/lambda/auth-handler/src/throttle.ts",
+      "kind": "script",
+      "commit_or_etag": "775dc28917",
+      "deployed_state": "BUILT-NOT-DEPLOYED",
+      "deploy_evidence": "Local bundle only. ENROLL_THROTTLE = 3 starts/account/hour, keyed on the ACCOUNT.",
+      "introduces": [
+        "ENROLL_THROTTLE"
+      ],
+      "artifact_covered_by": [
+        "SB-7"
+      ]
     }
   ],
   "acceptance": [
@@ -136,6 +164,26 @@
       "denominator": "1 guard read at source; 0 API calls made.",
       "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
       "status_reason": "THE CRITERION NAMES AN EXHIBITION AND THE EXHIBITION NEEDS A DEPLOYED HANDLER. 'A DIRECT API call ... and the SERVER REFUSING it' cannot be shown against a guard that exists only in git. Nothing is deployed. ⛔ AND THAT IS NOT A BOOKKEEPING PROBLEM: SB-6's stated purpose is to BIND BEFORE SF-1 flips sms available:true, and a guard in a commit binds nothing. The deploy question -- which I held open deliberately -- is now on SB-6's critical path, and it is raised rather than resolved by me. ⚠ Scope: this is the 'a number EXISTS' half only. 'Verified' has no field yet (F3b, joint with SF-2)."
+    },
+    {
+      "criterion_id": "SB-7",
+      "criterion_verbatim": "send-code-to-candidate: SMS an OTP to a CANDIDATE number NOT yet the stored preference. Cannot reuse SB-2 resend (dispatches on the stored challenge; storing-first would violate F1); reuses sendMfaCodeSms. Must NOT mutate the account's stored channel/number.",
+      "method": "source_read + static_bundle_census",
+      "invocation": "Built at 775dc28917 against the contract agreed with 0.4.0_DE_ClientPlatform~Z (18958/18963) and approved by 1.0.0_SA_CTO~Z (18989). tsc clean; bundle censused.",
+      "output_evidence": "POST /auth/mfa/enroll/send-code + /enroll/resend, both AUTHENTICATED (account from session, no email in body). The candidate number is written to the CHALLENGE row (candidatePhone), never to opal-users-v2 -- so F1 holds by construction. Relay defence BUILT not inherited: auth + ENROLL_THROTTLE (3/account/hour, CTO-ruled, keyed on the ACCOUNT never the destination) + MAX_SENDS per challenge. Prior live enrolment INVALIDATED before minting via an O(1) pointer item (mfa#enrol#<accountHash>), closing DE~Z's Q4 residue. Markers: enroll/send-code 1, enroll/resend 1, mfa#enrol# 1, candidatePhone 7.",
+      "denominator": "2 routes read at source; 0 requests made; 0 SMS sent.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "NOTHING IS DEPLOYED AND NO SMS CAN BE SENT -- no origination identity exists (SP-1). ⭐ ONE PROPERTY IS WORTH RECORDING EVEN THOUGH THE ATOM IS UNSCORED: SB-7 names an ARBITRARY destination, so it CANNOT inherit the property that makes /auth/mfa/send safe ('no address in the request, therefore no arbitrary recipient'). That is why the defence is built in layers rather than assumed to transfer -- the property-transfer-by-assumption trap this handler has hit repeatedly. It also disposed of enrolment-surface option (b): authenticating this on a login-challenge context would mean a PASSWORD ALONE could make us text an arbitrary number. 1.0.0_SA_CTO~Z ruled option (c), which needs no server change."
+    },
+    {
+      "criterion_id": "SB-8",
+      "criterion_verbatim": "verify-and-mark: verify the entered code against the enrolment challenge, and on success store the number + MARK IT VERIFIED (the F3b field on opal-users-v2). Distinct from verifyAndConsumeChallenge (that consumes a LOGIN challenge). F1 holds: an unverified number is never stored.",
+      "method": "source_read + static_bundle_census",
+      "invocation": "Built at 775dc28917. tsc clean; bundle censused.",
+      "output_evidence": "POST /auth/mfa/enroll/verify -> verifyEnrolmentChallenge -> setVerifiedPhone, which writes {phoneNumber, phoneVerifiedAt} in ONE update so they cannot disagree. CROSS-PURPOSE REFUSAL IN BOTH DIRECTIONS (mfa_purpose_mismatch occurs 2x in the bundle). OWNERSHIP is checked INSIDE verifyEnrolmentChallenge, ABOVE both the attempts increment and the consuming delete. Deliberately does NOT select the sms channel -- that stays a separate updateMfaPreference call so SB-6's guard remains reachable.",
+      "denominator": "1 route + 1 primitive read at source; 0 verifications performed.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "NOTHING IS DEPLOYED. ⛔ TWO THINGS THE ATOM DID NOT ASK FOR AND I ADDED, BOTH RECORDED SO A SCORER LOOKS FOR THEM: (1) THE CROSS-PURPOSE REFUSAL -- an enrolment code is texted to a number the account does NOT yet own, possibly a stranger's; without refusing it at the LOGIN verify, that stranger's code would complete a login. Confused deputy, invisible from inside either function because the hazard exists only in the pair. (2) THE OWNERSHIP CHECK'S POSITION -- I first wrote it in the caller, AFTER the verify call, which is too late twice over: the challenge is already consumed and a guess already counted, so a stranger submitting to someone else's live enrolment could destroy it or burn its budget while still being refused the result. Moving it above both is the fix, and the first version would have passed any test that only checked the RETURN value."
     }
   ],
   "controls": {
@@ -179,6 +227,10 @@
     {
       "item": "A fix for F-1",
       "reason": "Unchanged from W3: the ses:SendEmail pair (one conditioned Resource '*', one unconditioned Resource identity/*) means the condition constrains nothing. Open, owned by 1.0.0_SA_CTO~Z. sms-iam.tf cites it as the pattern NOT to repeat and adds exactly one sms-voice grant, but it does not touch the SES statements."
+    },
+    {
+      "item": "The enrolment UI surface",
+      "reason": "0.4.0_DE_ClientPlatform~Z measured that NO settings page exists (0 of 433 files) and that the login opt-in stage has no session, so both literal candidates failed. My input was the server half: option (c) post-login costs zero server change, while option (b) login-inline would have meant a PASSWORD ALONE could make us text an arbitrary number -- removing the only non-rate-limit layer of the relay defence, on the one route that names its own destination. 1.0.0_SA_CTO~Z ruled (c). Nothing in SB-7/SB-8 changes as a result."
     }
   ],
   "surprises": [
@@ -205,6 +257,12 @@
       "standing": "INERT",
       "item": "A residual lockout survives CVO's withdrawn chain: if a phone number is removed while an sms challenge is live, dispatch reads the frozen row, finds no number, and the resend returns 200 with no text until the <=10 min TTL expires.",
       "disposition": "Self-healing; a fresh login then 503s loudly. mfa_sms_refused with reason no_phone_number_enrolled was built for exactly this branch so the estate sees it -- the USER still sees a dead button. 3.0.0_SA_CVO~Z recorded it as a stated bound rather than promoting it to a criterion (18920 §4); disposition is 1.0.0_SA_CTO~Z's."
+    },
+    {
+      "class": "OBSERVATION",
+      "standing": "DISARMED",
+      "item": "SB-6 as I first built it keyed its guard on `phoneNumber === undefined`, so a SUPPLIED number sailed past it -- a direct updateMfaPreference(email,'sms','+1...') stored an UNVERIFIED number and flipped the channel, defeating the whole enrolment requirement.",
+      "disposition": "Found by 1.0.0_SA_CTO~Z (18989) reading the contract against my committed code -- not by me, and it was my atom. Ruled: updateMfaPreference is channel-only, setVerifiedPhone is the sole writer, and the gate checks phoneVerifiedAt (verified) rather than mere existence. Applied at 775dc28917."
     }
   ],
   "compiler_tools": [
