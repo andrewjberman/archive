@@ -4,7 +4,9 @@
 **Authorisation:** Andrew-direct 03:4xZ, verbatim *"you have vendor egress yes, granted, talk with COO
 and lets get this done"*, relayed `1.0.0_SA_CTO` 90604, both limbs discharged `2.0.0_SA_COO` 90614.
 **Graded against:** `3.0.0_SA_CVO` 90610's four criteria, pre-registered BEFORE the run.
-**Shape ruled by:** `1.0.0_SA_CTO` 90702 -- SELF-INVALID is a PRIOR GATE, not a parity band.
+**Shape ruled by:** `1.0.0_SA_CTO` 90702 -- the withdrawal is a PRIOR GATE on our own side, not a
+fourth parity band. (That ruling's own label `SELF-INVALID` was superseded by `2.0.0_SA_COO` 90767;
+the SHAPE it ruled is unaffected.)
 
 ---
 
@@ -50,13 +52,20 @@ by roughly a fifth (class B has NO missing data) and points remediation at the w
                       cannot be meaningfully compared against BD's -- which is both the whole
                       content of the finding AND the warrant for withdrawing them.
 ```
+⛔ **AND THE FIRST APPLICATION OF THIS RELABEL WAS ITSELF INCOMPLETE** (`3.0.0_SA_CVO` 90781): the
+table was fixed at `9992d25d78` while THREE assertive body occurrences still read `SELF-INVALID`,
+including a bolded sentence. Token census then: 5 occurrences, **the same count as at the graded
+commit**. Completed here. **A correction is only as complete as its last surviving carrier -- a
+sentence this seat had cited three times tonight and then failed to apply to its own relabel.**
+The v1/v2/v3 log above is a DELIBERATE historical record, not a survival.
+
 ⚠ **PROSE ONLY. NO ENUM IS MINTED** in any producer, schema or face: rule 24's four-postulate record
 plus a word-boundary token census is owed BEFORE any token lands, and it is not owed tonight.
 ⭐ **And the sharp part of 90767, which corrects the reasoning rather than the word:** my first ban on
 the token was phrased as a VINTAGE objection -- *"until the 114 are read"* -- as though reading them
 would license it. **It would not. Reading them made the label MORE wrong, not less.** A ban that
 expires on evidence is a different ban from one that never applies.
-**ATTEMPTED != COMPARED, and the shortfall is named rather than absorbed.** The 112 SELF-INVALID
+**ATTEMPTED != COMPARED, and the shortfall is named rather than absorbed.** The 112 NOT-COMPARABLE
 cells never received a parity class: per `1.0.0_SA_CTO` 90702 they were screened out on OUR OWN
 invariants BEFORE any comparison ran, because a cell whose own figure is impossible was never on the
 parity axis. They are a PRODUCER finding with their own denominator (section 5).
@@ -119,7 +128,7 @@ digit.**
 
 ## 5. THE PRODUCER FINDING -- the reason this is a two-way audit
 
-**112 cells over 61 accounts were withdrawn as SELF-INVALID** on our own side. The specimen:
+**112 cells over 61 accounts were withdrawn as NOT-COMPARABLE** on our own side. The specimen:
 ```
   account 0077573397, 2025-10-15
   bmv $2.33 -> emv $1,164.46, cf_net 0.0, r_net 498.768 (+49,877% in ONE DAY), status OK
@@ -186,7 +195,7 @@ Compared **by VersionId, never by count** -- a count is equal under a same-count
 
 - **Not that the 1,516 residual LARGE cells are BD's fault.** They are unexplained by coverage;
   attribution is P3's.
-- **Not that 112 is the whole SELF-INVALID population.** It is everything above a 100% single-day
+- **Not that 112 is the whole NOT-COMPARABLE population.** It is everything above a 100% single-day
   return. **A milder version of the same missing-flow defect on a larger base produces a
   plausible-looking number and this screen cannot see it.** The screen bounds what it catches, never
   what exists.
