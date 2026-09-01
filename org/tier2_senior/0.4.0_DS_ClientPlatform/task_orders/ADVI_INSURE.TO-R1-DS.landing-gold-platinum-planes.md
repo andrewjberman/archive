@@ -97,15 +97,34 @@
      from an instrument blind to the wrong one is not evidence, and it is recorded here rather than
      quietly replaced because the corrected number alone would look like the original had been fine.
 
-     == (b) RULED APPROVED @91569 -- AC4's RE-READ INSTRUCTION RE-POINTED TO A PROPERTY ==
-     The AC4 block below cites `advi-49f-publisher` State=DISABLED. That function DOES NOT EXIST
-     (census of all 200 Lambda functions; positive control returns two live siblings).
-     ⛔ **DO NOT RE-READ AC4 BY ANY RESOURCE NAME.** THE PROPERTY, which is what the hold is
-     actually about: **NO INSURANCE LEAF IS EMITTED UNDER `platinum/advi/49financial/` ON
-     `opal-data-portal-v2`, AND THE ADVI PUBLISH GRANT HAS NOT BEEN GIVEN.** Measure the property;
-     a name goes unsatisfiable the moment the substrate moves, which is a gate failing SILENTLY
-     rather than holding. ⛔ THE SOVEREIGN GATE ITSELF IS UNTOUCHED (Andrew-direct 2026-08-21T19:18Z);
-     the issuer re-pointed the INSTRUCTION only and explicitly did not move the gate.
+     == (b) ⛔⛔ WITHDRAWN 14:2xZ -- I WAS WRONG, THE INSTRUMENT IS ALIVE, AND THIS EDIT RESTED ON
+        A FALSE PREMISE THE ISSUER AUTHORIZED IN GOOD FAITH ==
+     WHAT I WROTE HERE AND RETRACT IN FULL: *"The AC4 block cites `advi-49f-publisher` State=DISABLED.
+     That function DOES NOT EXIST (census of all 200 Lambda functions; positive control returns two
+     live siblings). DO NOT RE-READ AC4 BY ANY RESOURCE NAME."*
+     ⛔ **`advi-49f-publisher` EXISTS.** It is not a Lambda FUNCTION -- it is an **EventBridge
+     SCHEDULER SCHEDULE**, a DIFFERENT API from `events`. Found by `3.0.0_SA_CVO` (91648); RE-MEASURED
+     HERE on my own call rather than relayed:
+       `aws scheduler list-schedules` -> 18 schedules (denominator printed)
+       advi-49f-publisher   State=DISABLED   cron(15 13 * * ? *)  -> advi-49f-gold-dispatch
+       advi-49f-gold-floor  State=ENABLED    cron(45 12 * * ? *)  -> advi-49f-gold-dispatch
+     >> **AC4's ORIGINAL RE-READ INSTRUCTION RESOLVES CORRECTLY, ON THE RIGHT PLANE, AND READS
+        EXACTLY AS THIS FACE RECORDED IT ON 2026-08-26: DISABLED. IT NEEDS NO RE-POINTING. USE THE
+        NAME -- ON THE SCHEDULER PLANE.** `0.7.0_AE_CloudOps~K`'s 08-26 measurement was right and my
+        contradiction of it was wrong. <<
+     ⛔ **MY 200-FUNCTION CENSUS WAS SOUND AND ITS POSITIVE CONTROL FIRED. IT WAS THE WRONG RESOURCE
+     TYPE.** A positive control proves the matcher works ON THE PLANE YOU ARE STANDING ON; it says
+     NOTHING about a plane never queried. **The tell I walked past: a resource CITED BY A CRITERION
+     AS DISABLED reading as absent. When something that provably exists censuses to zero, the
+     question is WHICH PLANE, not whether.**
+     ⚠ THE GENERALISATION I DREW STANDS AND IS NOT RETIRED -- *a hold naming a SUBJECT rather than a
+     PROPERTY goes unsatisfiable when the substrate shifts.* **True in general. It simply did not
+     happen here, and I applied it to a case that did not need it.**
+     ⛔ **NOTHING WAS LOOSENED:** the sovereign gate (Andrew-direct 2026-08-21T19:18Z) was never
+     touched by this edit or its withdrawal, and the property below is retained as an ADDITIONAL
+     check, never as a replacement for the name: **no insurance leaf under `platinum/advi/49financial/`
+     on `opal-data-portal-v2` (measured 0 of 19), and no ADVI publish grant.** ARMED item (b) is
+     DISSOLVED, not remediated -- **one fewer act in the issuer's queue.**
 
      == (c) RULED APPROVED @91569 -- THE AC3 BEFORE BASELINE, POINTER FIXED ==
      AUTHORITATIVE LOCATION, so no successor hunts a dead tree:
