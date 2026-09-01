@@ -98,21 +98,35 @@ by this exact flow and the revert is what cleared it.
 - **When you reach this cell, STOP AND ASK `2.0.0_SA_COO~Z` for a test subject.** Requesting one is one
   message; provisioning one yourself is how tonight's incident happened.
 
-## 4b. ⛔ DE3-1 HAS **TWO** BLOCKERS AND ONLY ONE WAS ASKED ABOUT - and the second one changes WHERE it runs
+## 4b. ⛔ DE3-1 RUNS ON A **LOCAL SERVE** OF `087a456f` - ONE BLOCKER, PLUS ONE LABELLED COVERAGE BOUND
+
+⚠ **AMENDED ~03:1xZ per `1.0.0_SA_CTO~Z` (17688), and the correction is mine.** I first headed this
+section *"DE3-1 HAS TWO BLOCKERS"*. **The body named the escape -- *"it runs against a LOCAL serve"*
+-- and the HEADING still said BLOCKER. A reader quotes the heading.** A coverage bound labelled as a
+blocker stops work that was never stopped.
 
 `0.4.0_DE_ClientPlatform~Z` correctly stopped and asked for a test subject. **The subject is the
 VISIBLE blocker. There is a second, and nobody has stated it:**
 ```
-BLOCKER 1  the test subject          -- held at 2.0.0_SA_COO~Z; a PRODUCTION write (see 4c)
-BLOCKER 2  THERE IS NOWHERE TO SERVE THE MFA UI
-           production serves index-D9vMtGZu.js -- mfaRequired 0, mfa/verify 0, challengeId 0
-           the UI exists ONLY at portal 087a456f, which is LOCAL AND UNPUSHED
-           (3.0.0_SA_CVO~Z: unreachable from 0 of 364 remote refs; origin/DEV = be39451b)
+BLOCKER (one)   the test subject -- ✅ AUTHORIZED, see 4c. 0.7.0_AE_CloudOps~Z owns the write.
+COVERAGE BOUND  the MFA UI is served NOWHERE public: production ships index-D9vMtGZu.js
+                (mfaRequired 0, mfa/verify 0, challengeId 0); the screen exists only at
+                portal 087a456f -- LOCAL, UNPUSHED (3.0.0_SA_CVO~Z: unreachable from 0 of
+                364 remote refs; origin/DEV = be39451b)
 ```
->> **SO EVEN WITH A SUBJECT IN HAND, DE3-1 CANNOT RUN "AGAINST PROD" - THE SCREEN IT NEEDS IS NOT
-   SERVED ANYWHERE.** It runs against a LOCAL serve of `087a456f`, or it does not run. **State this
-   before planning, or the row waits on a promote that is not coming and reads as blocked on the
-   subject alone.** <<
+⭐ **RULED: A LOCAL SERVE IS NOT A COMPROMISE HERE.**
+```
+the CLIENT   087a456f bytes -- IDENTICAL to what a promote would ship
+the SERVER   the REAL deployed handler on opalinvest.dev -- not stubbed, not local
+the CODE     really issued, really emailed
+=>           THE JOIN IS EXERCISED. Nothing stubs the fetch boundary.
+```
+**What a local serve does NOT cover, as a LABELLED bound and not a silent gap:** the production
+bundle DELIVERY path -- CDN, cache headers, the promote itself. **Real, small, and a DIFFERENT risk
+from the one F-2 is about.** The promote closes it; **F-2 does not wait on it.**
+>> **DE3-1 RUNS AGAINST A LOCAL SERVE OF `087a456f`, AND ITS ROW CARRIES THE BOUND VERBATIM:
+   *"client served locally at 087a456f; PROD BUNDLE DELIVERY NOT COVERED."* ** <<
+⚠ **What it must NOT read as: blocked on a promote.** It is not.
 
 ### ⭐ AND THAT IS AN UPGRADE, NOT A COMPLAINT - DE3-1 IS THE ACT THAT RETIRES F-2's OPEN LIMB
 Every frame so far -- the DE RED, the CVO RED, the CVO GREEN -- **stubs the fetch boundary**, and all
@@ -125,7 +139,7 @@ invisible to every frame because every frame makes it.*
 live host), **say so** -- the proxy is part of the deliverable, and a DE3-1 run against a stubbed
 backend would be a fourth frame on the same instrument rather than the observation.
 
-## 4c. ⛔ THE SUBJECT IS A **PRODUCTION** ACT - which is why it is held rather than handed over
+## 4c. ✅ THE TEST SUBJECT IS **AUTHORIZED** - and my routing of it was the error
 
 There is **no evidence of a separate DEV user store.** `https://opalinvest.dev` fronts the MFA-capable
 handler (`/auth/mfa/verify` answers `401 {"error":"Invalid or expired code"}` -- the HANDLER's own body,
@@ -135,10 +149,26 @@ creating an account and enabling MFA in the LIVE production users table.**
 `andrew+d12mfatest@opalinvest.com` -- **a plus-address on a LIVE HUMAN mailbox**, which is precisely
 what was barred after it caused tonight's false bug report. **A `.invalid` recipient sends but cannot
 be READ, so it cannot satisfy "code arrives in a real mailbox -> typed".**
->> **THE OPEN QUESTION IS THEREFORE NOT "MAY WE ENABLE MFA" BUT "DOES A MAILBOX WE CONTROL AND NO
-   HUMAN READS EXIST?"** Creating one is an M365 admin act, which this seat does not hold. **That is
-   the question that goes up, and it is answerable cold.** <<
-⛔ **Nothing here authorises provisioning. No account created, none enabled, no flag written.**
+>> **THE QUESTION WAS THEREFORE NEVER "MAY WE ENABLE MFA ON A TEST ACCOUNT" BUT "CAN WE READ THE
+   MAILBOX?"** <<
+
+### ✅ AUTHORIZED ~03:1xZ BY `1.0.0_SA_CTO~Z` (17688) - AND I ROUTED IT WRONG
+I wrote that this question *"goes up"* to Andrew. **Ruled otherwise, and correctly: a DEDICATED test
+account on a mailbox no human reads is not an MFA change to any real user and CANNOT LOCK ANYONE OUT.
+It was decidable at Tier 1, and sending it upward would have been DELEGATION UPWARD.**
+⚠ **The distinction I collapsed:** *writing to the production table* and *changing a real person's
+access* are not the same act, and only the second needed the sovereign. **I reasoned from the table.**
+```
+WRITE       0.7.0_AE_CloudOps~Z owns it.
+CONSTRAINT  ⛔ NOT A LIVE HUMAN ADDRESS. Hard -- the direct lesson of tonight's false escalation.
+FALLBACK    if no readable non-human mailbox exists in the tenant, the code MAY be read from the
+            AUTHORITATIVE MFA TABLE, declared ON THE ROW as a labelled proxy for the mailbox hop.
+```
+⭐ **The fallback is sound because the mailbox hop is ALREADY independently closed** -- Andrew's
+verbatim *"both came to top of inbox no junk"* on both senders, which is W1-10. **The property DE3-1
+exists to test is the CLIENT/SERVER JOIN, and reading the code from the store leaves that join fully
+exercised. A proxy is legitimate; an UNLABELLED proxy is the defect.**
+⛔ **This authorises ONE dedicated test subject and nothing else. No real user's MFA is enabled.**
 
 ## 5. WHAT THIS TO DOES NOT DO
 
