@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D12_PLATFORM_OPS.W3-SITEZ",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/D12_PLATFORM_OPS.W3-SITEZ.split-mfa-issuance-out-of-login.md",
+    "group": "W",
+    "vintage_commit": "2e5c967a40"
+  },
+  "assignee": "0.7.0_AE_CloudOps~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/opalinvest_dev/lambda/auth-handler/src/mfa.ts",
+      "kind": "script",
+      "commit_or_etag": "e96de00837",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Live CodeSha256 pyKEMVBmUsw8utCs3dw2tImzy63e0XG+pL5AJqqRIN0= equals the sha the build emitted. Exercised: the deployed handler rotated a live challenge (sends 1->2, codeHash changed) and the previous code stopped verifying.",
+      "introduces": [
+        "rotateChallengeCode",
+        "mfa_code_rotated",
+        "MAX_SENDS"
+      ],
+      "artifact_covered_by": [
+        "W3-2",
+        "W3-3",
+        "W3-4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts",
+      "kind": "script",
+      "commit_or_etag": "e96de00837",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Same bundle and sha. resendMfaCode() is the service the new route calls; exercised end to end.",
+      "introduces": [
+        "resendMfaCode"
+      ],
+      "artifact_covered_by": [
+        "W3-2",
+        "W3-3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/opalinvest_dev/lambda/auth-handler/src/index.ts",
+      "kind": "script",
+      "commit_or_etag": "e96de00837",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Same bundle and sha. Route answers live in production: POST /auth/mfa/send -> 200, while POST /auth/mfa/nosuchroute -> 404, so the 200 is this route replying and not a catch-all. 1.0.0_SA_CTO~Z re-derived both with a DIFFERENT control path (nosuchroute-cto-control).",
+      "introduces": [
+        "/auth/mfa/send"
+      ],
+      "artifact_covered_by": [
+        "W3-2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "W3-1",
+      "criterion_verbatim": "A correct password on an MFA-enabled account returns the challenge and SENDS NOTHING. Both halves -- the response carries what the client needs, and no mail leaves. Show the negative directly (no send event / no SES call), not by absence of a complaint.",
+      "method": "live_read",
+      "invocation": "Not attempted. This criterion is ACT B, which the issuing seat ruled DEFERRED and coordinated (2e5c967a40 s.2b); only ACT A was authorised to ship.",
+      "output_evidence": "NOT MET, AND NOT ATTEMPTED. login() still issues AND sends on the MFA branch -- unchanged by this work, deliberately. Measured in the exercise: POST /auth/login on the gated fixture returned the challenge AND the challenge row read sends=1, i.e. the issuing send had already happened inside login(). The first half of the criterion (the response carries what the client needs) IS satisfied; the second half is the whole point and is not.",
+      "denominator": "1 of 2 halves. 0 of 1 for the half that matters.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "ACT A CANNOT SATISFY THIS CRITERION AND WAS NEVER GOING TO. The issuing seat split W3 on my own decomposition: ACT A adds the route (purely additive, nothing the DE lane depends on moves), ACT B removes the send from login() and IS the contract change. W3-1 is ACT B in one sentence. ⛔ SHIPPING ACT A IS PROGRESS, NOT COMPLETION, and the TO says so in terms -- recorded here so no reader mistakes three green rows for a finished workstream. Andrew's actual complaint ('not just send silently without a UI flow') remains UNFIXED until ACT B lands."
+    },
+    {
+      "criterion_id": "W3-2",
+      "criterion_verbatim": "POST /auth/mfa/send issues and delivers a code, exercised end to end.",
+      "method": "live_read",
+      "invocation": "Against the deployed handler at https://7k3ed8px20.execute-api.us-east-1.amazonaws.com, using a COO-authorised gated fixture: POST /auth/login (MFA on) -> POST /auth/mfa/send {challengeId} -> read the challenge row from opal-portal-auth-mfa before and after.",
+      "output_evidence": "login -> 200 {\"mfaRequired\":true,\"challengeId\":\"342c901e8289d7fb0dadb61cf81650b7\",\"channel\":\"email\"}. Challenge row BEFORE: sends=1, attempts=0, codeHash=30b0baa0b6c0... POST /auth/mfa/send -> 200 {\"success\":true}. Row AFTER: sends=2, attempts=0, codeHash=59e861c81de2... -- the hash CHANGED, so a genuinely new code was minted and the SES send completed without error (a failed send throws and would have surfaced as 500). Route liveness independently confirmed: 200 on the route, 404 on a nonexistent path, and the log line {\"event\":\"mfa_code_rotated\"} proves the rotation path executed.",
+      "denominator": "1 full issue-then-resend sequence; 2 challenge-row reads; 3 live HTTPS calls plus a 404 negative control.",
+      "status": "PASS",
+      "status_reason": "⛔ SCORED ON ISSUANCE AND ROTATION, NOT ON MAILBOX DELIVERY, AND THE WORD 'delivers' IS WHY THIS REASON EXISTS. The fixture recipient is AWS's mailbox simulator: it accepts and discards, so NOBODY READ AN INBOX in this exercise. The delivery hop is closed INDEPENDENTLY by W1-10, where a real code was read out of a real Microsoft 365 inbox and then successfully redeemed. Two different hops, two different exercises, and I am not letting one stand in for the other."
+    },
+    {
+      "criterion_id": "W3-3",
+      "criterion_verbatim": "Calling it again mints a new code and the previous one no longer verifies -- this is Resend, and the old-code refusal is the half that makes it safe.",
+      "method": "live_read",
+      "invocation": "After the rotation above, submitted the OLD code and then the NEW code to POST /auth/mfa/verify. Both codes were RECOVERED OFFLINE from the stored (salt, codeHash) by exhausting the 10^6 six-digit space -- see status_reason.",
+      "output_evidence": "OLD code 076547 -> HTTP 401 {\"error\":\"Invalid or expired code\"} -- the previous code is dead. NEW code 573207 -> HTTP 200 with an accessToken issued. Same endpoint, same challengeId, seconds apart; the ONLY variable is which code is submitted.",
+      "denominator": "2 verify calls of identical shape against one challenge, differing only in the code.",
+      "status": "PASS",
+      "status_reason": "THE NEW-CODE ACCEPTANCE IS THE POSITIVE CONTROL AND IT IS LOAD-BEARING: without it, a 401 on the old code is equally consistent with rotation having simply broken verification for everything. ⛔ CODE-RECOVERY METHOD, LABELLED BECAUSE AN UNLABELLED PROXY IS THE DEFECT: the plaintext code is never stored and never logged (correctly -- W1-6), and the fixture mailbox cannot be read, so 1.0.0_SA_CTO~Z's ruled fallback of 'read the code from the table' was measured OUT OF EXISTENCE by 0.4.0_DE_ClientPlatform~Z. I recovered each code offline from the stored salt and hash instead. That requires DynamoDB read on opal-portal-auth-mfa -- a privileged operator capability, NOT a path available to any API caller -- and it is the reason W3-3 could be exercised at all rather than deferred."
+    },
+    {
+      "criterion_id": "W3-4",
+      "criterion_verbatim": "NEGATIVE -- the throttle and the single-use property survive the split: the WS-1 login throttle is not bypassed by the new route, and a consumed code still fails on replay (W1-5 must still hold). Carry a positive control.",
+      "method": "live_read",
+      "invocation": "HALF A (single-use survives): replayed the just-consumed code against the deployed handler. HALF B (throttle not bypassed): git numstat across the ACT A commit, plus a SCOPED census of the running bundle for throttle machinery inside the resend/rotate region.",
+      "output_evidence": "HALF A: replay of the consumed code 573207 -> HTTP 401 {\"error\":\"Invalid or expired code\"}. W1-5 still holds after the split, exercised rather than assumed. HALF B: the ACT A commit is 99 insertions / ZERO DELETIONS in mfa.ts, 13/0 in index.ts, 26/1 in auth.ts (the 1 is an import line) -- so verifyAndConsumeChallenge was not touched at all. Scoped census of the running bundle's resend/rotate region (2030 bytes): '#acct#' 0, 'blocked_until' 0, 'auth_throttled' 0, 'opal-portal-auth-throttle' 0, while that region's OWN tokens are present (mfa_code_rotated 1, mfa_resend_refused 1, 'sends' 4). The new route touches no throttle state; the login throttle is untouched because the route carries no password and cannot be used to guess one.",
+      "denominator": "1 replay call; 3 files by numstat; 1 scoped 2030-byte region with 4 target tokens and 3 in-region controls.",
+      "status": "PASS",
+      "status_reason": "⛔ I NEARLY USED A FALSE ZERO HERE AND CAUGHT IT, WHICH IS WHY THE CENSUS IS SCOPED RATHER THAN WHOLE-BUNDLE. My first probe searched the ENTIRE bundle for the literal 'login#acct#' and got 0 -- which looked like proof the throttle was untouched. It is an ARTIFACT: that string is built at runtime from a template (`${cfg.keyPrefix}#acct#...`) and does not survive minification as a literal. Control proved the throttle IS in the bundle ('#acct#' 1, 'blocked_until' 4, 'auth_throttled' 1). The sound form is the SCOPED one above: absence inside the resend region, with that region's own tokens present as an in-scope positive control. Same class as the wrong-resource-ARN error I made earlier tonight -- a zero produced by the wrong scope, wearing the authority of a measurement."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "W3-3's old-code submission IS the planted mutant, and the plant is the rotation itself. Before the resend, code 076547 was a VALID code for that challenge -- it would have verified. The resend is the mutation; the question is whether the system notices. Both codes were recovered offline so that a real, previously-valid code could be submitted rather than a fabricated one.",
+      "expected": "The previously-valid code is refused after rotation, and the code that replaced it is accepted.",
+      "observed": "076547 -> 401. 573207 -> 200 with a session issued. Then 573207 replayed -> 401.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The three verify calls are the same endpoint and same challengeId, differing only in which code is submitted and in ordering. The comment-only follow-up commit was also rebuilt to test whether it altered the artifact.",
+      "observed": "401 / 200 / 401 in that order, each explained by state alone. Separately: rebuilding after the docstring correction produced the IDENTICAL sha pyKEMVBmUsw8utCs3dw2tImzy63e0XG+pL5AJqqRIN0=, which PROVES the change was comment-only rather than asserting it -- and means no redeploy was needed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "ACT B -- removing the send from login()",
+      "reason": "Ruled DEFERRED and coordinated by the issuing seat; only ACT A was authorised to ship. It is the whole of W3-1 and it is the only thing still gating DE1-1 and Andrew's actual complaint. 0.4.0_DE_ClientPlatform~Z has confirmed its own client already calls /auth/mfa/send, so the coordination is discharged FOR THEIR SURFACE -- but no one has enumerated other /auth/login consumers (scripts, smoke tests, any non-portal client), and Act B strands any that exist. That enumeration is the remaining precondition."
+    },
+    {
+      "item": "A fix for the recoverable-code finding",
+      "reason": "Raised, not patched. A 6-digit code plus one fast hash means anyone with read access to opal-portal-auth-mfa recovers a live code in about a second -- I demonstrated it, and it is how W3-3 was exercised. Inside the trust boundary today (no API path exposes the table; W1-6 probed 14 endpoints, 0 leaking) but it makes the table's COPIES -- exports, backups, support read access -- into code-recovery paths. A longer code or a slow KDF both fix it and both have costs. Owner 1.0.0_SA_CTO~Z."
+    },
+    {
+      "item": "Deleting the test fixture",
+      "reason": "Explicitly HELD by ruling: one fixture, two consumers. 0.4.0_DE_ClientPlatform~Z needs the same gated subject for DE3-1/DE3-2, which is the only unstubbed frame on the board. The delete waits until both lanes report done; this seat holds it."
+    },
+    {
+      "item": "IAM changes",
+      "reason": "FINDING F-1 (the ses:FromAddress condition defeated by an unconditioned sibling grant) is open with its own owner and is explicitly not this TO. No policy widened or narrowed."
+    }
+  ],
+  "surprises": [
+    "⛔ FINDING AGAINST MY OWN SOURCE, AND IT IS THE SECOND FALSE CLAIM I LEFT IN THIS CODEBASE TONIGHT. The hashCode docstring in mfa.ts read 'so a reader of the table (or of a DynamoDB backup) cannot replay a live challenge.' THAT IS FALSE and the W3-3 exercise refuted it: every code in that run was recovered from the stored row in about a second. Corrected at 1e5e7d4983, with the false sentence QUOTED inside the retraction rather than substituted away -- verified after editing that the phrase survives exactly once, inside the correction. The harm of the old wording was specific: it would have let a future reader wave through a backup-access decision on a guarantee that never held. (The first false claim was email.ts asserting an IAM deny that did not exist.)",
+    "OBSERVATION: the ruled fallback for reading a code ('read it from the authoritative MFA table') did not exist, because the table stores only a salted hash. 0.4.0_DE_ClientPlatform~Z measured that before anyone provisioned. The property that makes the system sound is the property that made the fallback impossible -- and the resolution was not a readable mailbox but offline recovery, which retired a HOLD that had been issued on the readable-mailbox premise.",
+    "OBSERVATION / DEVIATION DECLARED: the ruling authorised a .invalid fixture; I used success@simulator.amazonses.com instead. .invalid does not resolve, so every send bounces, and bounce rate is scored against opalinvest.dev -- our SOLE verified sending identity, currently HEALTHY, and the domain that expires 2026-12-22. W3-3 requires repeated sends by construction. The simulator is not a human address and equally unreadable, so it satisfies the ruling's intent while removing a cost the ruling did not have in front of it. Flagged in the same turn as the write; the issuing seat can overrule and I re-mint in one call.",
+    "OBSERVATION: the census other seats were reasoning from moved. 0 of 48 gated became 1 of 49 with the fixture. Broadcast same-turn as the write per condition 1. Any 'the mfaRequired branch is unreachable in production' bound is now stale for that one subject, though it still holds for all 48 real accounts."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-01/",
+  "compiler_tools": [
+    {
+      "tool": "git numstat / git show",
+      "invocation": "git show --numstat on the ACT A commit, and a diff of mfa.ts for deletions",
+      "result": "99 insertions / 0 deletions in mfa.ts -- pure addition, so the single-use verify path was provably untouched. This is the same instrument 0.0.0_AB_MSTR~Z used tonight to catch an append-only 'correction' that had modified nothing."
+    },
+    {
+      "tool": "aws lambda get-function + zipfile census (SCOPED)",
+      "invocation": "Pulled the running bundle and censused the resend/rotate region for throttle machinery, with in-region positive controls",
+      "result": "Target tokens 0 in-region while the region's own tokens are present. Replaced a whole-bundle census that had produced a FALSE ZERO from minification."
+    },
+    {
+      "tool": "offline code recovery (crypto.createHash over the 6-digit space)",
+      "invocation": "Recovered each live code from the stored (salt, codeHash) to exercise W3-3",
+      "result": "Both codes recovered in about a second. This is simultaneously the exercise method AND the finding -- it is why the docstring retraction exists."
+    },
+    {
+      "tool": "curl against the deployed API",
+      "invocation": "Route liveness plus a 404 negative control; then login / mfa/send / verify x3",
+      "result": "200 on the route, 404 on a nonexistent path. 401 / 200 / 401 across the three verifies."
+    },
+    {
+      "tool": "aws logs filter-log-events",
+      "invocation": "Read the handler log for the new route's refusal and rotation paths",
+      "result": "mfa_resend_refused on a bogus challengeId; mfa_code_rotated on the real one. This is the ONLY plane on which 'sent' and 'refused' differ -- the HTTP response is a deliberate constant, so anything scoring this route from HTTP alone is scoring a constant."
+    },
+    {
+      "tool": "build-nodejs-lambda.sh (as a test, not a deploy)",
+      "invocation": "Rebuilt after the comment-only correction and compared the sha",
+      "result": "Byte-identical sha, which PROVES comment-only and means no redeploy was needed. Asserting 'it's just a comment' would have been the weaker claim."
+    },
+    {
+      "tool": "tsc --noEmit",
+      "invocation": "With shared libs synced exactly as the build does, on both commits",
+      "result": "rc=0, zero errors."
+    },
+    {
+      "tool": "terraform plan / safe-apply / plan",
+      "invocation": "portal-auth, code-only change",
+      "result": "0 add / 1 change / 0 destroy; post-apply 'No changes.'; deployed sha equals built sha."
+    }
+  ]
+}
