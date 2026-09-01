@@ -16,6 +16,7 @@ PRD: `1.0.0_SA_CTO~Z` @`65f7a59396`.
   <expected_criteria>SB-1,SB-2,SB-3,SB-4,SB-5,SB-6,SB-7,SB-8,SB-9</expected_criteria>
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D12_PHONE_OTP_ALL_AWS.SB_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
+  <decomp_ref>org/tier1_exec/2.0.0_SA_COO/deliverables/laneZ_DECOMP_20260901_D12_PHONE_OTP_ALL_AWS.md</decomp_ref>
 </task_order>
 
 ## SCOPE — you hold this project and this project only (Rule 27)
