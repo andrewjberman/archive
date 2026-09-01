@@ -47,13 +47,40 @@ with its own owner and gate. Nothing is failing today.
 | id | must observe |
 |---|---|
 | **W2-1** | Every auth-path sender now reads `noreply@`. **Print the denominator** — how many sender constants/usages exist in the auth path, and that all of them were checked. A census of two when he said "all" is not this criterion. |
-| **W2-2** | A real auth email is sent after the change and its **From** header is observed as `noreply@`. Deployed-byte currency stated (running `CodeSha256` == the sha the build emitted). |
+| **W2-2** | ⚠ **AMENDED 2026-09-01 ~02:0xZ — SEE §3b. AS ORIGINALLY WRITTEN THIS CRITERION WAS UNSATISFIABLE WITHOUT BREAKING §4's OWN STANDING RULES.** Now: **DEFERRED to the first NATURAL send of a changed mailer** (password-reset or welcome) — observe its `From` then. Deployed-byte currency stated (running `CodeSha256` == the sha the build emitted) is required NOW and is independent. |
 | **W2-3** | `getUserPKByEmail` with **two records sharing one email** returns a surfaced ambiguity rather than an arbitrary pick. **Construct the collision** — a fixture with two rows, not an argument that it could happen. Then show the single-match path still returns normally (positive control). |
 | **W2-4** | **NEGATIVE — nothing alarm-shaped created, no IAM policy widened or narrowed.** Enumerate what changed; print the created/modified resource set. |
 | **W2-5** | **NEGATIVE — no account beyond `andrew@opalinvest.com` had MFA enabled by this work.** Census `mfaEnabled` across all accounts with its denominator. |
 
 ⚠ **W2-4 and W2-5 are negative criteria: carry a POSITIVE CONTROL or they cannot tell a true absence
 from a broken probe.**
+
+## 3b. ⛔ W2-2 AS I FIRST WROTE IT CONTRADICTED §4 — MY DEFECT, RECORDED AND FIXED
+
+`0.7.0_AE_CloudOps~Z` hit this and **recorded the conflict rather than resolving it by quietly breaking
+one of my rules.** That was the right act and the contradiction is mine:
+
+- W2-2 demanded *"a real auth email is sent after the change and its **From** observed."*
+- The only senders this work CHANGED are **password-reset** and **welcome** (the OTP mailer already
+  used `noreply@`). Firing either means unsolicited auth mail to a real mailbox, **or** a test account
+  on a live human address — which **§4 rule 1 of this same TO forbids**, and §4 rule 2 forbids aiming an
+  outbound-side-effect route at a live sender. A `.invalid` recipient sends but cannot be READ, so it
+  cannot satisfy *"observed"*.
+> **I wrote an acceptance criterion whose only satisfying act my own standing rules prohibit.** A spec
+> that cannot be satisfied without violating itself is a spec defect, not an executor problem.
+
+### THE DISPOSITION — DEFERRED, NOT WAIVED, AND NOT N/A
+
+⛔ **I AM NOT RULING IT N/A ON THE RUNNING-BYTES CENSUS**, which was offered and is tempting. That
+census shows the deployed code contains only `noreply@` and zero `support@` — real evidence, and
+**exactly one rung below what the criterion names.** Substituting the code rung for the observation
+rung is the precise error that let W1 pass 10/10 on a feature no human could use, and I am not
+committing it twice in one night to close a row faster.
+✅ **DEFERRED to the first NATURAL send of a changed mailer.** No unsolicited mail, no rule broken, and
+the observation happens for real when it happens. **The likeliest trigger is the WS-4 admin UI creating
+its first account (welcome mailer), or any genuine password reset.** Whoever observes it closes W2-2 by
+reporting the `From` header.
+**Not blocking:** W2's other four rows stand on their own, and nothing downstream waits on W2-2.
 
 ## 4. THREE STANDING PRACTICE RULES — from tonight's trace, binding on this TO and after
 
