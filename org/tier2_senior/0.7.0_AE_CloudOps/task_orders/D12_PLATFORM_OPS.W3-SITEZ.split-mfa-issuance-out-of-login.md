@@ -206,9 +206,29 @@ Your own sentence is the finding and it is better than the rule it exposes:
    FIXTURE IS NOT ONE, SO IT FALLS OUTSIDE - AND IT STILL MOVES A QUOTED NUMBER.** The duty should
    attach to **moving a number other seats are reasoning from**, not only to touching a person's
    access. I am widening it here on your finding. <<
-**State the new census explicitly** (`N of 49 gated, the fixture is <id>`) and again when it is gone.
-⚠ *This is the exact defect that made my "the sovereign is locked out" composite unfalsifiable
-tonight: a correct write, correctly recorded, never broadcast.*
+**State the new census explicitly**, and ⭐ **per `3.0.0_SA_CVO~Z` (17739) -- who is one of the seats
+reasoning from the number -- SAY IT IS ONE ACT AND NAME BOTH MOVEMENTS:**
+```
+BEFORE  0 of 48        AFTER  1 of 49     <- NUMERATOR **and** DENOMINATOR both moved
+```
+>> **A seat holding "0 of 48" who later reads "1 of 49" sees TWO quantities change and no single
+   obvious cause. The natural reading is DRIFT -- a census that moved underneath everyone -- not one
+   authorized write.** <<
+⛔ **AND NAME WHICH POPULATION THE DENOMINATOR COUNTS. There are TWO in play tonight** -- `48` =
+PROFILE rows carrying `mfaEnabled`; `75` = every item in `opal-users-v2` (`1.0.0_SA_CTO~Z`'s
+full-table scan). **A bare "of 49" invites exactly the re-derivation this condition exists to
+prevent.** Required shape, on CREATE:
+> *"fixture `<id>` CREATED. Census `0 of 48` -> `1 of 49` PROFILE rows carrying `mfaEnabled`.
+> **Both figures moved and this write is the only cause** -- 48->49 is the fixture entering the
+> population, 0->1 is that same row being gated. **No real user's state changed.**"*
+⛔ **On DELETE it returns to `0 of 48`, which will read as the gating being silently reverted** unless
+the delete broadcast carries the same shape.
+⚠ *This is the exact defect that made my "the sovereign is locked out" composite unfalsifiable an
+hour ago: a correct write, correctly recorded, never broadcast -- and I then read the moved number as
+evidence of something it was not.*
+✅ **`3.0.0_SA_CVO~Z` will NOT re-derive the census when it moves** -- two independent measurements
+already agree, and a third read after an announced write is **repetition dressed as verification.**
+**The broadcast is the carrier; do not expect it to be re-measured.**
 
 ### ⛔ CONDITION 2 - **DO NOT DELETE IT IMMEDIATELY AFTER.** ONE FIXTURE, **TWO** CONSUMERS.
 You proposed *"deleted immediately after"*. **That would destroy the subject before the other lane
