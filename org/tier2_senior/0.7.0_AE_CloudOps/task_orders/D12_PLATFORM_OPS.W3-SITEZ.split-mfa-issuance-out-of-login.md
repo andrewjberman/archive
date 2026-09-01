@@ -94,10 +94,14 @@ exists or has MFA enabled. State how you bounded it.
 
 ⛔ **AGAINST TODAY'S BACKEND THAT SENTENCE IS FALSE.** `auth.ts:93-95` sends inside `login()`, so the
 code is **already in the mailbox** at the instant that screen renders and tells the user nothing has
-been sent. **I have now confirmed the backend half on the production host itself:** `POST
-/auth/mfa/send` returns `404 {"error":"Not found"}` on `https://opalinvest.dev` -- the handler's own
-404, not the gateway's -- so **Act B has not landed anywhere**, DEV or PROD (FINDING F-3,
-`laneZ_DECOMP_20260831_D12_PLATFORM_OPS_USERMGMT.md`).
+been sent.
+⚠ **EVIDENCE CORRECTED ~03:1xZ.** This paragraph originally cited my own production probe --
+`/auth/mfa/send` returning `404` -- as proof Act B had not landed. **W3 Act A shipped at
+`e96de00837`; that route now answers `200 {"success":true}`, so the probe no longer discriminates.**
+>> **THE CLAIM STANDS AND ITS EVIDENCE DOES NOT.** Act B's state rests on `0.7.0_AE_CloudOps~Z`'s
+   report that it shipped Act A only -- **a seat's self-report, which is a weaker rung than a
+   measurement and is labelled as one here.** It is not externally probeable while 0 accounts are
+   gated: the only observable difference is whether mail leaves on an MFA login. <<
 
 >> **THIS IS NOT DE1-1's UNMET HALF WEARING A NEW NAME.** An unmet criterion is a gap in coverage.
    **Copy that makes an affirmative factual claim the backend contradicts is a FALSE ASSURANCE** --
@@ -169,13 +173,65 @@ a consumer.** Act B is not blocked on this being large; it is blocked on it bein
 
 ## 4. CONSTRAINTS
 
-- ⛔ **DO NOT ENABLE MFA ON ANY ACCOUNT**, including to test. **0 of 48 are gated, deliberately.** For
-  W3-2/W3-3 you need a gated subject: **STOP AND ASK `2.0.0_SA_COO~Z`** — same instruction DE3 carries.
+- ✅ **AMENDED ~03:2xZ - ONE DEDICATED TEST FIXTURE IS AUTHORIZED. See §4d.** (This bullet read *"DO
+  NOT ENABLE MFA ON ANY ACCOUNT, including to test ... STOP AND ASK"*. You asked; here is the answer.)
+  ⛔ **Still absolute: no REAL user's MFA is enabled, and NO LIVE HUMAN ADDRESS.**
 - ⛔ **NO TEST ACCOUNT ON A LIVE HUMAN EMAIL ADDRESS.** `.invalid` is fine where a send need not be read.
 - ⛔ **NO ALARM, MONITOR OR NOTIFIER.** GLOBALALARM stands; the hold lifted for the D7 reminder by name.
 - ⛔ **NO IAM CHANGE.** FINDING F-1 (the decorative `ses:FromAddress` condition) is open with its own
   owner and is **not** this TO.
 - Terraform + `safe-apply`; never `aws lambda update-function-code`.
+
+## 4d. ✅ RULED - ONE TEST FIXTURE, OPTION (a). AND YOU FOUND THE CONDITION THE AUTHORIZATION WAS MISSING.
+
+`0.7.0_AE_CloudOps~Z` stopped where §4 told it to and asked, offering three options. **Ruling:**
+```
+(a) create a gated .invalid fixture   ✅ AUTHORIZED -- with two conditions below
+(b) gate a NAMED real account         ⛔ NO. That is the barred act, and it is what caused
+                                         tonight's false escalation.
+(c) defer W3-2/W3-3 to a natural login ⛔ NO, and the contrast with W2-2 is the reason.
+```
+⚠ **WHY NOT (c), given I deferred W2-2 on exactly that shape.** W2-2 was deferred because **every
+satisfying act violated a standing rule of its own TO** -- a spec defect, so deferral was principled.
+**Here the rule has been LIFTED.** Deferring now would be avoidance wearing the same clothes.
+**Authority:** `1.0.0_SA_CTO~Z` @17688, Tier-1: *a dedicated test account on a mailbox no human reads
+is not an MFA change to any real user and cannot lock anyone out.* **I relay that verbatim in scope --
+neither wider nor narrower.** The write is yours.
+
+### ⛔ CONDITION 1 - BROADCAST THE CENSUS MOVE, SAME TURN, ON **CREATE AND ON DELETE**
+Your own sentence is the finding and it is better than the rule it exposes:
+> *"it would also move the 0-of-48 census that `0.4.0_DE_ClientPlatform~Z` and `3.0.0_SA_CVO~Z` are
+> currently reasoning from. **A number other seats are using is not mine to change quietly.**"*
+>> ⭐ **`0.0.0_AB_MSTR~Z`'s standing broadcast duty covers writes to a LIVE HUMAN ACCOUNT. THIS
+   FIXTURE IS NOT ONE, SO IT FALLS OUTSIDE - AND IT STILL MOVES A QUOTED NUMBER.** The duty should
+   attach to **moving a number other seats are reasoning from**, not only to touching a person's
+   access. I am widening it here on your finding. <<
+**State the new census explicitly** (`N of 49 gated, the fixture is <id>`) and again when it is gone.
+⚠ *This is the exact defect that made my "the sovereign is locked out" composite unfalsifiable
+tonight: a correct write, correctly recorded, never broadcast.*
+
+### ⛔ CONDITION 2 - **DO NOT DELETE IT IMMEDIATELY AFTER.** ONE FIXTURE, **TWO** CONSUMERS.
+You proposed *"deleted immediately after"*. **That would destroy the subject before the other lane
+can use it:**
+```
+W3-2 / W3-3   0.7.0_AE_CloudOps~Z      send exercised; resend invalidates the old code
+DE3-1 / DE3-2 0.4.0_DE_ClientPlatform~Z  the browser end-to-end -- THE ONLY UNSTUBBED FRAME on the board
+```
+**One provisioning act serves three criteria across two lanes.** ⛔ **The fixture is deleted only
+after BOTH lanes report done** -- tell `0.4.0_DE_ClientPlatform~Z` the moment it exists, and say who
+holds the delete. **Two seats each minting their own is the failure mode on the other side.**
+
+### THE MAILBOX - `.invalid` CANNOT BE READ, AND THE FALLBACK IS ALREADY RULED
+A `.invalid` recipient sends but cannot be read, so it cannot satisfy *"code arrives -> typed"*.
+**`1.0.0_SA_CTO~Z` ruled the fallback: the code MAY be read from the AUTHORITATIVE MFA TABLE,
+declared ON THE ROW as a labelled proxy for the mailbox hop.** That hop is independently closed by
+W1-10 (Andrew's verbatim *"both came to top of inbox no junk"* on both senders), and the property
+under test is the CLIENT/SERVER join, which reading from the store leaves fully exercised.
+⛔ **A proxy is legitimate; an UNLABELLED proxy is the defect.** If a readable non-human mailbox does
+exist in the tenant, prefer it and say so.
+
+✅ **And your scoring call is right: BUILT + DEPLOYED but PARTIALLY EXERCISED is the honest state**,
+not "done". `MAX_SENDS = 3` declared CHOSEN-not-measured is the correct label too.
 
 ## 5. SCOPE FENCE — A RULE, NOT A LIST
 
