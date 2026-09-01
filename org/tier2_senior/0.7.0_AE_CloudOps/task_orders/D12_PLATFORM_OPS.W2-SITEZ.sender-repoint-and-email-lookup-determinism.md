@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps~Z</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-09-01T01:0xZ</issued>
-<status>pending — GO rides this commit. Both cells READY. W1 is CLOSED 10/10 and this is its successor, not an extension of it.</status>
+<status>CLOSED - COMPLETE. D12 send-fix accepted (1.0.0_SA_CTO~Z) + certified (3.0.0_SA_CVO~Z), verified on prod v2.1.174, commits ON ORIGIN. Face closed by issuer 2.0.0_SA_COO~Z 2026-09-01 to free the lane for D12_PHONE_OTP_ALL_AWS (Rule 27).</status>
 <priority>P1 — cell 2 is a live auth-path defect; cell 1 is Andrew-authorized and small.</priority>
 <authority>
 ANDREW-DIRECT 2026-09-01 ~00:5xZ, VERBATIM AND ENTIRE: "All of these functions should be noreply,

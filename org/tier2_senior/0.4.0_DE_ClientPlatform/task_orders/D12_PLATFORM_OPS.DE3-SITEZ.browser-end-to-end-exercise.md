@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DE_ClientPlatform~Z</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-09-01T01:4xZ</issued>
-<status>ISSUED — DEP-BLOCKED on DE1 + DE2. Do not start before they land.</status>
+<status>CLOSED - COMPLETE. D12 send-fix accepted (1.0.0_SA_CTO~Z) + certified (3.0.0_SA_CVO~Z), verified on prod v2.1.174, commits ON ORIGIN. Face closed by issuer 2.0.0_SA_COO~Z 2026-09-01 to free the lane for D12_PHONE_OTP_ALL_AWS (Rule 27).</status>
 <priority>P1 — this is the acceptance the whole workstream was missing.</priority>
 <authority>
 ANDREW-DIRECT 2026-09-01 ~01:2xZ TO-series instruction (17286) + "obviously we need a frontend flow
