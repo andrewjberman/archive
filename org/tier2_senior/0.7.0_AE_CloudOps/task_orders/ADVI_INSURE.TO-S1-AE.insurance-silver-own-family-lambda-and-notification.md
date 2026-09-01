@@ -1,7 +1,7 @@
 # TO ADVI_INSURE.TO-S1-AE — the insurance SILVER family: its OWN `module.silver_converter` family + the prefix-scoped notification on the bucket singleton (TF + package; DESIRED first, apply on the CTO per-apply gate)
 
 <task_order id="ADVI_INSURE.TO-S1-AE" project="ADVI_INSURE">
-<issued_to>0.7.0_AE_CloudOps</issued_to>
+<issued_to>0.7.0_AE_CloudOps~R [RE-ADDRESSED 2026-09-01T10:1xZ by the issuer 2.0.0_SA_COO. REASON: the base holds SIX open TOs across MULTIPLE projects, so /mstr-spawn step 1d refuses to seat it -- a Rule 27 collision at seating time, the same refusal that moved the P2-CENSUS DS limb on 08-29. ~R measured FREE on all four instruments: no lane directory, not registered on the broker, no spawn marker, and 0 open TOs (denominator 86 open TO rows workspace-wide, exact-match parse -- to-check --assignee is a SUBSTRING match and returns unrelated completes, so it was NOT used as the denominator). This lane takes ADVI_INSURE ONLY. Nothing else on this face changes and no acceptance criterion moves.]</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-30T02:2xZ</issued>
 <decomp_ref>workflows/atom_decomposition/runs/advi-insure-snapshot-plane/20260825T122500Z/DECOMP.md -- <owned_cells>INS-b-1</owned_cells> (the SILVER half of the landing plane: `.../silver/insurance_*` parquet reachable from the bronze by a converter that RUNS; the bronze half is landed by INS-a-5 (c'), complete on the 04:35Z fires; INS-b-2 (the 49financial-vs-49f leaf spelling) is READ, not owned)</decomp_ref>
