@@ -52,6 +52,19 @@ UNION DENOMINATOR    82 code files, from THREE differently-keyed censuses
 WRITE A PROJECT JSON 1 of 82
 ```
 
+**COVERAGE QUALIFIER, added 2026-09-01 06:5xZ — it was missing from the original statement.** All
+three censuses ran at `comp-find`'s default `corpus=all` (tracked + untracked + gitignored), which
+scans 48,977 files and **prints, but does not search, a 299,961-file EPHEMERAL FLOOR.** The 82 is
+therefore a denominator over the default corpus, not over every file on the device — and the original
+text did not say so. Re-run at `--corpus raw` (378,227 files scanned): **10,842 hits vs 10,840**, and
+the entire floor-exclusive population is **one file**,
+`portal/node_modules/@tanstack/react-query/README.md` — a vendored README, non-executable, accounting
+for both extra hits. **No script lives in the previously-unsearched population, so the 1-of-82 stands
+with a widened denominator behind it.** Asymmetry named, not chased: both file lists total 1154, so
+one file is default-exclusive too (raw marks 9,212 UNREADABLE vs default's 1); it cannot matter,
+because a default-exclusive file was already scanned by the original censuses and already passed the
+taint detector.
+
 That one is `org/modules/graph/registry_cli.py:476`, writing `REGISTRY_PATH` =
 `org/projects/REGISTRY.md` (`:38`) — the **derived markdown table**, not a project JSON. It carries
 no close/sweep/dormant/status-flip verb; its only writing subcommand is `sync --apply`, which
