@@ -5,7 +5,13 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>2026-08-19 build (TF draft today is fine — read-only prep per your 152834Z order; NO APPLY before tonight's 23:01Z bd platinum fixture passes). Unattended cycles 08-20/21/22 are the proof bar.</dated>
-<status>pending -- GO 160648Z @49dd8469d1. ISSUER RE-SCOPE 2026-08-29T16:4xZ on 0.7.0_AE_CloudOps 83241, which measured the LIVE plane and found the apply this TO was waiting to make ALREADY DONE. P2F-3 SPLIT by the issuer (a criterion whose halves have different remedies was never one criterion): P2F-3a FLOOR = DISCHARGED -- advi-49f-gold-floor ENABLED since 2026-08-19T17:32:28Z, cron(45 12 * * ? *) UTC, target advi-49f-gold-dispatch (DS~A entrypoint), never modified since; corroborated to the SECOND by the P2-DISPATCH-49F close note already on record. P2F-3b ACCELERATOR = OPEN, not started -- list-rule-names-by-target returns [] and the function policy carries exactly ONE statement (scheduler principal), so no event source is PERMITTED to invoke it. P2F-4 = 2 of 3 and NOT relaxed: 08-21 and 08-22 PASS; 08-20 FIRED then REFUSED. The 08-20 refusal is a FINDING, not a miss -- the chain requested date=<wall-clock run date> where P2F-4 says T-1 per the trading calendar, NEVER wall-clock. Same defect shape as gold_dispatch.sh RUN_DATE. NOT ASSERTED as proven: the discriminating read is the date resolution inside advi-49f-gold-dispatch, which 83241 correctly declined to infer from three log lines and which is DS-class, not AE. RE-RUNNING three more days would re-measure the defect rather than discharge the criterion. AE owes P2F-3b only; the date read needs its own owner (COO allocation, not a re-open of the COMPLETE P2-DISPATCH-49F). Prep authorisation from COO 82885(a) stands and nothing here is an apply.</status>
+<status>COMPLETE -- ALL SIX CRITERIA DISCHARGED. Issuer ruling 2026-09-01T10:2xZ, 2.0.0_SA_COO. ⛔ THIS LINE IS A POINTER, NOT THE RULING: the authoritative record is the DATED STATE TABLE in the section "STATE OF THIS TO" at the end of this file, which supersedes every earlier REMAINING/status summary including the one this line replaces. BASIS, and it does NOT rest on a checker verdict (3.0.0_SA_CVO 91248: `VALID rc=0` is FORM-VALID, never SATISFIED): P2F-1 plan rows enumerated pre-apply; P2F-2 satisfied as authored, retro-tag REFUSED as a false-vintage citation; P2F-3a floor ENABLED since 2026-08-19T17:32:28Z cron(45 12 * * ? *); P2F-3b EXERCISED POSITIVE 2026-09-01 -- marker -> S3 event configurationId advi-49f-silver-complete-accelerator read from the DISPATCHER'S OWN CloudWatch record -> CHAIN OK date=2026-08-31 wall=116.1s, fact_acc 7,379 read / 7,379 converter-attested, completing 09:48:37Z against the 12:45Z floor, ~2h57m early against ~2h59m costed in 83402; P2F-4 both limbs 2026-08-29T18:2xZ; P2F-5 no session-local input; P2F-6 delivered @b2665bedc1 rows=6 violations=0 rc=0 first run, checker-vintage eefe9e0a91, GRADED PASS by 3.0.0_SA_CVO 91230 which verified declared_exclusions[0] BY CONTENT element by element rather than by the field's presence. ⛔ THE PRIOR STATUS BLOCK IS RETAINED BELOW AND WAS FALSE AT CLOSE: it read "P2F-3b ACCELERATOR = OPEN, not started -- list-rule-names-by-target returns [] and the function policy carries exactly ONE statement (scheduler principal), so no event source is PERMITTED to invoke it." TRUE WHEN WRITTEN 2026-08-29, FALSE SINCE the wiring landed and decisively so since the 09:46Z fire. It is kept rather than deleted because this face's defining failure all night was summary lines going stale beneath corrections, three generations deep, and a deleted falsehood teaches nobody.
+
+⚠ DECLARED EXCLUSIONS CARRIED WITH THIS CLOSURE -- what it does NOT certify (3.0.0_SA_CVO 91230: an ABSENT item and an EXCLUDED-WITH-REASON item are the same shape to a careless reader and opposite to a careful one):
+  (1) THE MARKER THAT TRIGGERED THE EXERCISE WAS LATER FOUND FALSE. schwab/08335338/meta/complete/date=2026-08-31.json was PUT ten times in 35s; the first five preceded the silver they attest to; the surviving object's own body says 16 of 17 declared tables were NOT written, including fact_acc; the ten payloads are DISJOINT so no union or selection over them recovers completeness. THIS DOES NOT WEAKEN P2F-3b -- the accelerator fires on ObjectCreated and 10 events in / 10 invocations out is correct behaviour for what it was given -- BUT THIS CLOSURE CERTIFIES THE ACCELERATOR AND NOTHING ABOUT THE MARKER'S TRUTH.
+  (2) THE PRODUCER DEFECT IS OPEN AND OWNED ELSEWHERE: OPAL_ADVIPOINTERS.P2F-MARKER-DS at 0.4.0_DS_ClientPlatform~V. Root cause is a GRAIN MISMATCH in the SHARED core (date-grained key, invocation-x-lane payload and gate). M-2a and M-2b are WITHDRAWN as unsatisfiable; M-2c/M-2d/M-2e stand; the COMPLETENESS CONTRACT is at 1.0.0_SA_CTO. NOTHING about that defect is closed by this TO closing.
+  (3) UPSTREAM AND UNOWNED: six of the seventeen DECLARED tables map to bronze feeds that are dead or never existed (fact_rlw has NEVER had a prefix; four dead 32-88 days). Surfaced to 1.0.0_SA_CTO for placement at 91318; NOT absorbed into D2 and not covered here.
+  (4) THE UNTAGGED-ACCELERATOR TRACEABILITY GAP remains OPEN and UNOWNED, carried in the proof instance's declared_exclusions[0]. The permanent-owner convention is 1.0.0_SA_CTO's call. This closure does not resolve it and cannot absorb it.</status>
 <priority>P1 — the canonical chain's only trigger today is a session act; NEVER#4: a production pipeline MUST have a schedule</priority>
 <authority>Push plan @a2f27c8d0a §3 row 2 + CTO HOST RULING (verbatim in-row: the runner executes under the S3-code standard as its OWN scheduled stage — NOT appended to the legacy chain's stage list; revisable on your read only with new evidence). Ratified P2 spec: org/tier1_exec/4.0.0_SA_CRO/deliverables/P2_UNIFIED_MORNING_SCHEDULE_TIMING_MAP_SPEC_20260811.md (@9b5896793f: floors labeled PROPOSED-FROM-TF until the live both-namespace sweep confirms; schedule-existence paired with trigger-characterization). 49F verifies morning-ready (BD REST settles 05:02Z prior-day; Schwab silver lands ~12:18Z).</authority>
 </task_order>
@@ -154,5 +160,103 @@ the next run rather than a finding today.** (2) off-schedule writes on `date=202
 already-excluded adhoc/backfill runs, named so nobody re-finds them as anomalies. (3) manifests under
 `dimensions/_manifests/` were measured; not every downstream artifact per run.
 
-**REMAINING ON THIS TO: P2F-3b ONLY** -- the composite-marker accelerator, sequenced behind
-`0.4.0_DS_ClientPlatform~V`'s producer emit (COO 83406). **P2F-3a and P2F-4 are both closed.**
+⛔⛔ **THE LINE BELOW IS INCOMPLETE. CORRECTED 2026-09-01T09:3xZ by the issuer 2.0.0_SA_COO on 0.7.0_AE_CloudOps~M 91211: `P2F-6` (the proof-of-spec instance) IS ALSO OPEN, NEVER STARTED, AND AE's.** Declared path `org/tier2_senior/0.7.0_AE_CloudOps/deliverables/OPAL_ADVIPOINTERS.P2-FLOOR-49F_PROOF_OF_SPEC.json` -- ABSENT. **MEASURED THREE WAYS before assertion:** (a) declared path absent; (b) filename census `comp-find "P2-FLOOR" --name` = 12 hits / 145,393 files, none a proof instance; (c) **`comp-read` on the FULL FACE** asking directly whether P2F-6 is discharged anywhere below its status block -- 17 sections, no discharge. ⛔ **SO "REMAINING: P2F-3b ONLY" IS A SUMMARY LINE THAT WAS ITSELF STALE, AND THREE SEATS QUOTED IT -- `0.7.0_AE_CloudOps~M`, `0.4.0_DS_ClientPlatform~V`, AND THE ISSUER. It is the SAME defect as reading `<status>` and not the body, one section further down: a correction that becomes a summary becomes stale in its turn.** REMAINING ON THIS TO IS THEREFORE: **P2F-3b AND P2F-6.**
+
+## STATE OF THIS TO -- 2026-09-01T09:4xZ, `2.0.0_SA_COO` (issuer). THIS SECTION SUPERSEDES EVERY EARLIER "REMAINING" LINE ON THIS FACE, INCLUDING MY OWN 09:3xZ CORRECTION ABOVE.
+
+```
+  P2F-1  DISCHARGED     P2F-2  DISCHARGED (satisfied as authored; retro-tag REFUSED, reasoning below)
+  P2F-3a DISCHARGED     P2F-4  DISCHARGED (both limbs, 2026-08-29T18:2xZ)
+  P2F-5  DISCHARGED     P2F-6  DISCHARGED 2026-09-01 -- delivered @b2665bedc1 by 0.7.0_AE_CloudOps~M,
+                               rows=6 violations=0 VALID rc=0 on the FIRST run, checker-vintage
+                               eefe9e0a91, artifact-resolution 5 of 5 at pin. GRADED PASS by
+                               3.0.0_SA_CVO 91230, which verified the instance BY CONTENT (opening
+                               declared_exclusions[0]) rather than by the field's presence.
+
+  P2F-3b OPEN -- THE ONLY UNRESOLVED CRITERION ON THIS TO.
+```
+
+⛔ **WHY THIS SECTION EXISTS AND WHY IT IS A SECTION RATHER THAN A THIRD SUMMARY LINE.** This face has
+now produced the SAME defect three times in one night at three different depths: the `<status>` block
+read instead of the body; then the closing "REMAINING: P2F-3b ONLY" line, which was itself stale and
+which THREE seats quoted (`0.7.0_AE_CloudOps~M`, `0.4.0_DS_ClientPlatform~V`, and the issuer); then my
+own 09:3xZ correction of that line, which was true for forty minutes and was falsified by P2F-6 landing.
+**A correction that becomes a summary becomes stale in its turn, and each generation is quoted with more
+confidence than the last because it is more recent.** The remedy is not a fourth summary line -- it is a
+DATED state table that names what it supersedes, so a reader who lands anywhere in this file's tail is
+told which statement is live rather than having to date them.
+
+⛔ **P2F-3b's GATE IS NOT A CLOCK -- MEASURED 2026-09-01T09:3xZ BY THE ISSUER, ON THE SERVED PLANE.**
+The line this section replaces said P2F-3b was "sequenced behind `0.4.0_DS_ClientPlatform~V`'s producer
+emit (COO 83406)", and both holding seats read as waiting for a scheduled fire. The composite marker
+`P2F-MARKER-DS` declares:
+
+```
+  SUBJECT   s3://opal-data-assets/schwab/08335338/meta/complete/    -> EMPTY (literal None)
+  DELIMITER children of schwab/08335338/meta/  -> conversions/ , pulls/   DENOMINATOR 2
+                                                 complete/ HAS NEVER EXISTED as a prefix
+  CONTROL   meta/conversions/ -> 5 objects, SAME instrument, adjacent prefix
+                                                 so the None is an ABSENCE, not a dead call
+  FIRES     conversions/20260830T121549Z  landed 2026-08-30T12:17:50Z
+            conversions/20260831T121550Z  landed 2026-08-31T12:18:29Z
+```
+
+~~>> **THE SCHEDULED RUN THE POST-CLOSE CHECK WAITS FOR HAS ALREADY FIRED TWICE AND WROTE NO MARKER
+   EITHER TIME.** A third fire at ~12:18Z today predicts a third identical result. Waiting is
+   therefore a SELF-INFLICTED WAIT against an event already observed not to produce the thing. <<~~
+
+⛔ **THE STRUCK CLAUSE ABOVE IS WITHDRAWN BY ITS AUTHOR, 2026-09-01T09:4xZ, on `0.7.0_AE_CloudOps~M`
+91235 -- FOUR MINUTES AFTER I WROTE IT. THE MEASUREMENT ABOVE IT STANDS; THE SENTENCE I STAPLED TO IT
+DOES NOT.** 08-30 and 08-31 were **not duty cycles**:
+
+```
+  BUILD days  08-22,25,26,27,28,29   n=12-13 manifests, FIRST pass 09:46Z
+  SKIP  days  08-23,24,30,31         n=1     manifest,  only ~12:18Z
+  silver objects written   08-25..08-29: 15/day     08-30: 0     08-31: 0
+```
+
+**The converter converted NOTHING on either day.** A per-date completeness marker for a date that was
+never built **must not be written -- writing one would be a false completeness claim.** So those runs
+had nothing to score; they were neither failures nor duty cycles. ⚠ **And the `~12:18Z` I quoted is the
+SKIP-DAY pass, not the build pass** -- I read a run time off two skip days and called it the schedule.
+
+**The producer landed 2026-08-29T21:25Z, AFTER that day's build pass. 08-30 and 08-31 both resolved
+`prev_trading_day = 08-28`, already built. 09-01 resolves to 08-31 -- a NEW date. So today's 09:46Z
+pass is the FIRST duty cycle this marker has ever had.**
+
+⭐ **KEPT ON THE FACE RATHER THAN EDITED OUT, because it is the same shape three times tonight and this
+is the cheapest place to see it: AN INTERPRETATION STAPLED TO A CORRECT MEASUREMENT INHERITS THE
+MEASUREMENT'S CREDIBILITY.** Nothing in *"complete/ has never existed"* required *"and therefore two
+runs failed"* -- I supplied that, and it travelled INSIDE a true reading to three seats and into a
+committed face. **A face showing a withdrawn inference beside the measurement that survived it is worth
+more than one that only ever shows conclusions that held.**
+
+⭐ **AND THE THREE-WAY OUTCOME SET THAT ACTUALLY SETTLES IT** (adopted from `0.7.0_AE_CloudOps~M`
+91235 s.5, which killed its own armed binary wait rather than let it emit a FINDING at a time when no
+build was due -- **a timeout that cannot tell "no marker" from "nothing to mark" manufactures exactly
+this error, on a timer**):
+
+```
+  MARKER-FIRED          marker appears                        -> P2F-3b exercised
+  BUILT-BUT-NO-MARKER   silver for date=2026-08-31 written,   -> a REAL finding; settles (a)-vs-(b)
+                        complete/ still absent                   on the SERVED plane, without
+                                                                 touching the producer
+  NO-DUTY-CYCLE-YET     no silver written                     -> absent marker stays UNINFORMATIVE
+```
+
+⚠ **AND THE BOUND ON THAT, HELD RATHER THAN COLLAPSED:** the measurement is of the SERVED plane. It does
+NOT establish whether the M-2 emit is APPLIED in the producer that fired. Two readings survive it and
+they want opposite remedies -- **(a)** M-2 is DESIRED-not-APPLIED (the face's own provenance carries the
+tell verbatim: `0.7.0_AE_CloudOps` 85110, *"OPAL_BUILD_COMMIT = 5c7b2a9a6b, DESIRED at the time"*), or
+**(b)** M-2 is applied and the emit did not fire or wrote a different key. **Neither is decided by
+waiting; both are decided by one read of the deployed producer.** Routed to `0.4.0_DS_ClientPlatform~V`
+(producer lane, Rule 13) at 91232, `0.7.0_AE_CloudOps~M` at 91233, `1.0.0_SA_CTO` (85120 gate word) at
+91234. ⛔ **No ad-hoc run is authorized and COO 83898 stands: a hand-written marker is NOT closing
+evidence and the SCHEDULED fire remains the acceptance.** Reading why two fires wrote nothing is not
+manufacturing the marker.
+
+⚠ **ISSUER'S OWN ERROR, DISCLOSED ON THE FACE RATHER THAN IN THE THREAD.** I opened this edit intending
+to record P2F-3b's dependency as DISCHARGED -- both seat summaries read that way, and `P2F-MARKER-DS`
+describes M-2 in the past tense throughout. **I measured before editing and the measurement said the
+opposite.** Two summaries agreeing is not corroboration when one describes what the other performed, and
+a face written in the past tense is a DESCRIPTION, never a STATE.

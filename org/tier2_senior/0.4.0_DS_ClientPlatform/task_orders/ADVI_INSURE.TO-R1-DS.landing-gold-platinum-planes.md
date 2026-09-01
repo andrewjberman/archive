@@ -26,6 +26,181 @@
 <!-- seat RELEASED 2026-08-28 17:4xZ by 2.0.0_SA_COO (78492, reversible); open set gated on INS-a-5's
      first fire; re-seat on that fire or Andrew's word. AC1/AC5/AC6 PASS, AC2/AC3 APPLIED-GATED,
      AC4 SHUT. Status stays `pending` deliberately -- a released seat is not a closed TO. -->
+<!-- ⛔ MEASURED STATE RE-READ 2026-09-01 ~11:2xZ BY 0.4.0_DS_ClientPlatform~R (re-seated). THE NOTE
+     ABOVE IS THREE DAYS STALE AND ITS OWN RE-SEAT CONDITION HAS BEEN MET: it gates the open set on
+     "INS-a-5's first fire", and INS-a-5 has now fired on FOUR consecutive scheduled 04:35Z days
+     (bronze present for 2026-08-29/30/31 and 09-01; 23 bronze keys walked under
+     blackdiamond/49financial/bronze/, denominator printed).
+     ⛔ NOTHING HERE RULES A CRITERION. Criterion status is the ISSUER's and 73382 stands. This
+     records WHAT IS TRUE ON THE WORLD so the next seat does not re-derive it; instruments named.
+
+     AC1  PASS STANDS -- and it is no longer only a ruling, it is EXERCISED. The deployed converter
+          `opal-assets-silver-bd49finsurance` fired on TWO consecutive scheduled days and wrote silver
+          at the ruled `fact_*` grammar: date=2026-08-31 (33,165 B / 12,271 B) and date=2026-09-01
+          (33,052 B @04:35:15Z / 12,275 B @04:35:22Z). Rule 17a RE-MEASURED BY ME on the live plane:
+          `.parquet` under `bronze/` = 0 of 23 keys. POSITIVE CONTROL: the same matcher returns 7 over
+          the 14-key silver set, so that zero is ABSENCE and not a dead matcher. The 77/77/77 row
+          agreement is RELAYED from 0.7.0_AE_CloudOps~R 91452 -- measured by that seat, not by me.
+     ⚠ AC1 CARRIES A COVERAGE HOLE ITS PASS DOES NOT COVER, AND THE PASS IS NOT FALSIFIED BY IT: AC1
+          was ruled on "3 of 3 CONVERTIBLE at the grammar" -- a CAPABILITY claim, not a COVERAGE one.
+          THREE convertible bronze days have NO silver: 2026-08-28, 08-29, 08-30. CAUSE MEASURED, not
+          inferred: the converter's own deploy landed 2026-08-30T08:06:05Z, AFTER all three. (08-27
+          detailsearch is a FOURTH absence and is DESIGNED -- 50 of a vendor-attested 77, held
+          UNCONVERTED-REFUSED by the completeness control.) A backfill is the ISSUER's call, not this
+          seat's: spec is FROZEN mid-round and writing production silver is not a QA act.
+
+     AC2  ⛔ THE GATE OPENED AND THE LIMB IS UNBUILT -- the one state change that matters. AC2's
+          APPLIED limb was gated behind AC1's applied limb; THAT GATE OPENED 2026-08-31T04:35Z.
+          MEASURED: `gold/advi/insurance/insurance_nav_current/` holds EXACTLY ONE partition,
+          date=2026-08-25, LastModified 2026-08-27T19:12:18Z, ETag 3dd4f7e0c6f922ee4aed045e111a2d40 --
+          an AD-HOC QA artifact, and ad-hoc artifacts are NEVER production evidence (CLAUDE.md s.5).
+          The producer `data/assets/scripts/gold/bd49f_insurance_nav_current.py` is ABSENT FROM THE
+          DEPLOYED CHAIN ROSTER -- measured on the `_code/` the SSM document `advi-49f-chain-dispatch`
+          actually syncs (`s3://opal-data-49financial/_code/chain_49f_entrypoint.py`, 33,416 B), NOT on
+          the repo copy. That roster carries a00-a07, b00-b03, c00-c02, c04 and `d_publisher_port.py`,
+          and no insurance stage. POSITIVE CONTROL: the same read enumerated all of those, so the
+          absence is measured. CONSEQUENCE: gold is SEVEN DAYS STALE against a source landing daily.
+
+     AC3  UNCHANGED, AND CORRECTLY SO. The AFTER half is still not takeable -- nothing insurance-derived
+          has entered the AM serve. ⚠ FLAGGED: the BEFORE baseline lives in the DEAD ~J TREE at
+          `org/tier2_senior/0.4.0_DS_ClientPlatform~J/deliverables/AC3_AM_BYTE_IDENTITY_BASELINE_BEFORE.json`
+          -- the re-seat moved `instance_path` and this file did not travel with it. The one artifact
+          that CANNOT be re-taken later is the one sitting in the tree nothing points at.
+
+     AC4  STILL SHUT, and the world agrees: `platinum/advi/` on `opal-data-49financial` = 0 keys.
+          ⚠ BUT THIS FACE'S OWN AC4 INSTRUMENT NO LONGER RESOLVES. The block below cites
+          `advi-49f-publisher` State=DISABLED (0.7.0_AE_CloudOps~K, 2026-08-26). THAT FUNCTION DOES NOT
+          EXIST: a census of ALL 200 Lambda functions in the account returns no such name. POSITIVE
+          CONTROL: the same matcher returns `opal-assets-silver-bd49finsurance` and
+          `advi-49f-gold-dispatch`, so it is not failing toward zero. The live emitter is
+          `d_publisher_port.py`, invoked INSIDE the deployed chain at :351. ⛔ THE SOVEREIGN GATE IS
+          UNAFFECTED -- a gate is a WORD, not a resource state, and nothing here loosens it -- but a
+          hold that names a SUBJECT rather than a PROPERTY goes unsatisfiable when the substrate
+          shifts, so AC4's re-read instruction needs RE-POINTING by the issuer.
+
+     AC5 / AC6  UNCHANGED. SOURCE-grounded; no re-measurement owed and none taken.
+
+     STATUS STAYS `pending`. Not mine to move, and the enum still cannot express issuer-ruled closure
+     (0 of 1,067 criterion rows estate-wide carry a CLOSED value, census @4776a2305c). -->
+<!-- ⛔⛔ CORRECTION + ISSUER RULING 91569 APPLIED, 13:4xZ 2026-09-01, 0.4.0_DS_ClientPlatform~R.
+
+     == I MEASURED AC4 ON THE WRONG BUCKET AND THE BLOCK ABOVE CARRIES THE ERROR ==
+     The block above states: "platinum/advi/ on `opal-data-49financial` = 0 keys." ⛔ THAT IS A
+     WRONG-OBJECT MEASUREMENT. The platinum serve root is **`opal-data-portal-v2`**, named by the
+     AC3 baseline's own `bucket` field. `opal-data-49financial` has NO `platinum/` prefix at all,
+     so my zero was the zero of a bucket that could not have held the answer either way.
+     ⛔ **THE VERDICT SURVIVES; THE EVIDENCE DID NOT.** Re-measured on the correct bucket:
+     19 keys under `platinum/advi/49financial/`, of which **INSURANCE-bearing = 0**; POSITIVE
+     CONTROL, the same matcher returns 5 on `manifest`, so it fires and the zero is absence.
+     **AC4 IS STILL SHUT.** But it was shut on an instrument that could not have detected the
+     opposite -- Rule 22's named order: DISCRIMINATION passes inside a wrong GRAIN. A right answer
+     from an instrument blind to the wrong one is not evidence, and it is recorded here rather than
+     quietly replaced because the corrected number alone would look like the original had been fine.
+
+     == (b) ⛔⛔ WITHDRAWN 14:2xZ -- I WAS WRONG, THE INSTRUMENT IS ALIVE, AND THIS EDIT RESTED ON
+        A FALSE PREMISE THE ISSUER AUTHORIZED IN GOOD FAITH ==
+     WHAT I WROTE HERE AND RETRACT IN FULL: *"The AC4 block cites `advi-49f-publisher` State=DISABLED.
+     That function DOES NOT EXIST (census of all 200 Lambda functions; positive control returns two
+     live siblings). DO NOT RE-READ AC4 BY ANY RESOURCE NAME."*
+     ⛔ **`advi-49f-publisher` EXISTS.** It is not a Lambda FUNCTION -- it is an **EventBridge
+     SCHEDULER SCHEDULE**, a DIFFERENT API from `events`. Found by `3.0.0_SA_CVO` (91648); RE-MEASURED
+     HERE on my own call rather than relayed:
+       `aws scheduler list-schedules` -> 18 schedules (denominator printed)
+       advi-49f-publisher   State=DISABLED   cron(15 13 * * ? *)  -> advi-49f-gold-dispatch
+       advi-49f-gold-floor  State=ENABLED    cron(45 12 * * ? *)  -> advi-49f-gold-dispatch
+     >> **AC4's ORIGINAL RE-READ INSTRUCTION RESOLVES CORRECTLY, ON THE RIGHT PLANE, AND READS
+        EXACTLY AS THIS FACE RECORDED IT ON 2026-08-26: DISABLED. IT NEEDS NO RE-POINTING. USE THE
+        NAME -- ON THE SCHEDULER PLANE.** `0.7.0_AE_CloudOps~K`'s 08-26 measurement was right and my
+        contradiction of it was wrong. <<
+     ⛔ **MY 200-FUNCTION CENSUS WAS SOUND AND ITS POSITIVE CONTROL FIRED. IT WAS THE WRONG RESOURCE
+     TYPE.** A positive control proves the matcher works ON THE PLANE YOU ARE STANDING ON; it says
+     NOTHING about a plane never queried. **The tell I walked past: a resource CITED BY A CRITERION
+     AS DISABLED reading as absent. When something that provably exists censuses to zero, the
+     question is WHICH PLANE, not whether.**
+     ⚠ THE GENERALISATION I DREW STANDS AND IS NOT RETIRED -- *a hold naming a SUBJECT rather than a
+     PROPERTY goes unsatisfiable when the substrate shifts.* **True in general. It simply did not
+     happen here, and I applied it to a case that did not need it.**
+     ⛔ **NOTHING WAS LOOSENED:** the sovereign gate (Andrew-direct 2026-08-21T19:18Z) was never
+     touched by this edit or its withdrawal, and the property below is retained as an ADDITIONAL
+     check, never as a replacement for the name: **no insurance leaf under `platinum/advi/49financial/`
+     on `opal-data-portal-v2` (measured 0 of 19), and no ADVI publish grant.** ARMED item (b) is
+     DISSOLVED, not remediated -- **one fewer act in the issuer's queue.**
+
+     == (c) RULED APPROVED @91569 -- THE AC3 BEFORE BASELINE, POINTER FIXED ==
+     AUTHORITATIVE LOCATION, so no successor hunts a dead tree:
+       FILE org/tier2_senior/0.4.0_DS_ClientPlatform~J/deliverables/AC3_AM_BYTE_IDENTITY_BASELINE_BEFORE.json
+       blob 09ae63acf7d520986e0eaab1a47a455e93cc7a54 | 5,333 B | git-TRACKED, ON origin/CLOUD
+       bucket `opal-data-portal-v2` | serve_root `platinum/advi/49financial` | captured 2026-08-25T12:43:52Z
+     ⚠ It sits in the DEAD ~J tree and STAYS THERE. It needs a REFERENCE, NOT A RESCUE (issuer).
+     ⛔ I FIRST CALLED IT "AT RISK". THAT WAS WRONG and I retract it: STRANDED and AT-RISK want
+     OPPOSITE remedies -- a pointer versus a copy -- and the retraction is what makes this the
+     cheapest item rather than the most expensive.
+
+     == AC3 INTERIM, MEASURED WHILE FIXING THE POINTER -- THE INVARIANT HOLDS ==
+     The BEFORE half is 12 objects. The serve root now holds 19. Compared key by key:
+       **11 of 12 BYTE-IDENTICAL by ETag** -- every AM FIGURE unmoved (mix_summary, leaderboard,
+       ownership_map, timeseries_overview, cumulative_chart, clients-tab-slim, timeseries_chart,
+       timeseries_chart_full, partner_analytics_quarterly/annual, the dated manifest). 0 GONE.
+       **1 MOVED: `_manifests/latest.json`** -- a POINTER file, not an AM figure (11:06:00Z today).
+       **7 NEW: 4 `perfrp_*.json` + 3 manifests** -- ADVI_PERFRP's work, not insurance.
+     ⭐ **THIS IS THE BASELINE'S OWN DISCRIMINATOR EARNING ITS KEEP:** it recorded last_modified +
+     etag per key precisely so the AFTER could tell "the publisher re-ran" from "insurance moved an
+     AM figure". The publisher HAS re-run and NO AM FIGURE MOVED. **This is NOT the AC3 AFTER half**
+     -- that is still gated behind AC2's applied artifact, and no insurance byte has entered the
+     serve. It is an interim reading, and it says the invariant is intact under a moving serve root.
+     ⚠ OBSERVATION, NOT MINE: `platinum/advi/49financial/_manifests//4b36d4f5743c.json` carries a
+     DOUBLE SLASH. Publisher lane, surfaced not chased.
+
+     == (a) NOT AUTHORIZED @91569 -- and it is NOT a blocker ==
+     The 3-day silver hole (08-28/29/30) is HISTORICAL and off AC2's path; no criterion on this TO
+     names those dates. Cause already measured. It stays an OPEN ITEM. **If a NAMED consumer needs
+     those dates, name the consumer and the issuer rules again.** Do not carry it as a stall. -->
+<!-- ⛔ ROOT CAUSE OF AC2's ROSTER ABSENCE, 14:1xZ 2026-09-01 -- MY BLOCK ABOVE NAMED THE SYMPTOM
+     AND MISSED THE CAUSE, AND MY PROPOSED REMEDY WOULD HAVE WRITTEN TO ANOTHER FIRM'S BUCKET.
+
+     The block above says the producer is "ABSENT FROM THE DEPLOYED CHAIN ROSTER". True, and it
+     reads as though the fix were a deploy. **IT IS NOT. THE PRODUCER IS IN THE WRONG TREE.**
+     Found by `0.7.0_AE_CloudOps~R` (91626/91635) and CONFIRMED HERE on my own run of the resolver
+     `safe-deploy.sh` actually executes (`safe_deploy_core.file_to_s3_target`):
+       data/assets/scripts/gold/bd49f_insurance_nav_current.py
+           -> ('opal-data-mdpf', 'code/scripts/assets_gold/...', 'mdpf')     ** MDPF's bucket **
+       data/assets/scripts/gold/runners_49f/bd49f_dim_portfolio_group.py     <- POSITIVE CONTROL
+           -> ('opal-data-49financial', '_code/...', 'advi')
+     **The advi gold home is `data/assets/scripts/gold/runners_49f/`. The producer sits one level UP,
+     in MDPF's shared `assets_gold` home.** Longest-prefix resolution is working correctly; the file
+     cannot reach `_code/` from where it lives. It is deployed NOWHERE -- head-object on the MDPF
+     path returns 404. **So this was never a skipped mint. It is a misplaced file.**
+     ⛔ **AND I HAD ASKED THE ISSUER TO AUTHORISE A FIRST MINT "into s3://opal-data-49financial/_code/"
+     (91621). THE TOOL WOULD HAVE PUT IT IN `opal-data-mdpf`** -- `safe-deploy` exits 0, a readback
+     against the bucket the TOOL chose rather than the bucket the ASK named cannot fail, `_code/`
+     stays 0 of 82, and every seat reads the precondition as met. **ASK RETRACTED at 91639.**
+     ⚠ `0.7.0_AE_CloudOps~R` declined to call it a NEVER#8 cross-firm violation -- correctly, since
+     this is a CODE prefix and not a data prefix -- but a 49F insurance artifact landing in MDPF's
+     bucket should be a DECISION, not a side effect. Recorded here on that basis.
+
+     ⛔ THE CHAIN-ABORT TRAP, EXERCISED BY ME rather than reasoned (`0.7.0_AE_CloudOps~R` derived it):
+       --date D --upload   -> "unrecognized arguments: --upload"    rc=2
+       --date D --dry-run  -> "unrecognized arguments: --dry-run"   rc=2
+       --date D (native)   -> rc=0                                  <- POSITIVE CONTROL
+     The chain's universal stage idiom is `--upload`/`--dry-run`; this producer's verb is `--write`
+     with a dry-run DEFAULT -- a different token AND inverted polarity. **The chain is FAIL-FAST, so
+     registering it naively aborts the whole 49F chain on EVERY fire, including a dry-run QA fire,
+     and takes both post-emission stages (c04 validation battery, ADVI_PERFRP projection) with it.**
+     `a07_asset_class_pair` is the existing special-cased precedent. **THE DEFECT IS IN THIS
+     PRODUCER'S INTERFACE, NOT THE CHAIN'S.**
+
+     THE FOUR ACTS, all `data/*/scripts/gold/**.py` or an `aws s3 cp` = Rule 13 DS LANE:
+       (i) MOVE the producer into `runners_49f/` -- this ALONE fixes the destination;
+       (ii) REGISTER in `_stage_list` with special-cased argv;  (iii) RESOLVE the argv polarity;
+       (iv) THEN deploy. **The SSM document needs NO edit -- it syncs the whole prefix.**
+     ⛔ **NONE TAKEN. The second half was seated to `0.7.0_AE_CloudOps~R` at 91569 and it turned out
+     to be DS-lane; picking it up because it became mine would be a seat re-scoping itself off a
+     peer's finding. One word from the issuer and all four execute in one turn -- nobody is blocked
+     on knowledge, only on lane.**
+     ⚠ AND FOR WHOEVER READS AC2's ACCEPTANCE: 91569 makes the SCHEDULED FIRE the acceptance, but
+     `0.7.0_AE_CloudOps~R` found NO 12:45Z cron among 140 EventBridge rules and marked the trigger
+     UNTRACED. **If the chain is driven by an S3-notification accelerator rather than a schedule,
+     "scheduled fire" needs pinning to a real mechanism before it can serve as the oracle.** -->
 
 <priority>P0 -- Andrew-direct 2026-08-25 ~12:0xZ named this project as one of two waiting on the decomp seat. PRD v0.2 approved by him ~18:3xZ 08-24; the project has been unblocked and unseated since.</priority>
 <date>2026-08-25</date>
