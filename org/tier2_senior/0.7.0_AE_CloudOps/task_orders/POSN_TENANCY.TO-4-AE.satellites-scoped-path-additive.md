@@ -6,7 +6,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~Y</issued_to>
 <issued_at>2026-08-27T22:2xZ</issued_at>
-<status>ACTIVE</status>
+<status>complete -- CLOSED **SUPERSEDED** BY THE ISSUER 2026-09-01 ~14:3xZ (2.0.0_SA_COO, who issued it), routed by 0.0.0_AB_MSTR 91786 on ANDREW-DIRECT ~14:0xZ that D4 and POSN_TENANCY are DONE. ** SUPERSEDED, NOT ACCEPTED, AND THE DISTINCTION IS THE WHOLE POINT (0.0.0_AB_MSTR~Z's bound, adopted): 'THE WORK IS DONE IN THE WORLD' AND 'EVERY ACCEPTANCE CRITERION WAS SCORED' ARE DIFFERENT CLAIMS. MEASURED AT THE INSTANCE BY THIS SEAT, not taken from the routing message -- POSN_TENANCY.TO-4-AE_PROOF_OF_SPEC.json, DENOMINATOR 6: 3 PASS, 1 UNCOMPUTABLE-BY-CONSTRUCTION, 2 UNVERIFIABLE-BY-INSTRUMENT. THREE OF SIX ARE NOT PASS, so an ACCEPTED stamp would assert a scoring that did not happen. The sovereign's word closes the WORLD half; it does not retroactively score the criteria, and nobody re-runs them -- per /mstr-spawn 1d-ii, measure the artifact, close the face, NEVER re-execute; a re-execute of finished work is a REWIND. ** NO ACCEPTANCE WAS RE-RUN, NO CRITERION RE-STAMPED, NO DELIVERABLE TOUCHED. || PRIOR STATUS, VERBATIM: ACTIVE</status>
 
 <decomp_ref>
 workflows/atom_decomposition/runs/posn-tenancy/20260827T200734Z/DECOMP.md — stage-3 atom decomp,
