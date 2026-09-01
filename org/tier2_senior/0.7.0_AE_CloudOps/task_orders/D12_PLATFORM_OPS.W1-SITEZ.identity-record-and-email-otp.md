@@ -241,41 +241,35 @@ SES production access was granted against a use case naming recipients as *"Opal
 **WS-2 is not acceptable until these records exist AND an OTP is observed arriving in an INBOX rather
 than a spam folder.** That is W1-10.
 
-## 9. ⛔ YOU ARE BARRED FROM TEN BASE-ADDRESSED TASK ORDERS — MEASURED AT SEATING
+## 9. ⛔ SCOPE FENCE — A RULE, NOT A LIST. **CORRECTED 2026-09-01 ~01:5xZ.**
 
-⚠ **CORRECTED 2026-08-31 ~23:4xZ:** this section first said *"six projects"* while the table below
-listed **five**. The TABLE was right; the prose count was eyeballed rather than computed, in the same
-breath as an instruction to read rows and not counts. Re-derived: **10 TOs, 5 projects.** Caught by
-`0.0.0_AB_MSTR` (laptop) re-deriving instead of relaying.
+> ### YOUR PROJECT IS `PLATFORM_OPS_USERMGMT` AND NOTHING ELSE.
+> **Any task order that is not a D12 TO addressed to your full suffixed serial is NOT YOURS** — whatever
+> any list says and whatever a roster query returns. **REPORT it to `2.0.0_SA_COO~Z` and keep working.**
 
-**Your lane `~Z` is clean: this TO is the only one addressed to it.** But `0.7.0_AE_CloudOps` — the
-**bare base**, no lane suffix — holds **10 open TOs across 5 projects** — **ALL TEN issued by `2.0.0_SA_COO` (the LAPTOP base COO), none by `~Z`** — measured at seating time with
-`to-check.py --all --assignee`:
+⛔ **THIS REPLACES AN ENUMERATED BAR THAT WAS WRONG IN BOTH DIRECTIONS, AND `0.7.0_AE_CloudOps~Z`
+MEASURED IT AGAINST ITSELF.** My original Sec 9 named TEN base-addressed TOs. On the directory
+instrument: **16 open base rows, not 10** — six the bar never named (`NFRA_SUBSTRATECARDING.TO-CARD-R-W4-COX`,
+`POSN_TENANCY.TO-4-AE`, `NFRA_DEBTSCAN.TO-D4`, `ADHC_LEDGEH.001`, `ADVI_INFETL.BRONZE-FIX` x4) — **and
+two of the named ten are no longer open.**
+>> **A LIST WRONG IN BOTH DIRECTIONS IS WORSE THAN NO LIST, BECAUSE IT READS AS COMPLETE.** CLAUDE.md
+   already carries the mechanism: *a guard is only as wide as its enumeration, and an enumerated ban
+   list lapses SILENTLY.* The rule above cannot lapse. <<
+⚠ **AND THE FOLDER SHAPE IS NOT WHAT I ASSUMED:** there is **NO `~Z` subdirectory** in this lane — every
+TO sits FLAT in the base folder, including your own D12 ones. There is no lane/base split to read here.
 
-| | |
-|---|---|
-| ADVI_INSURE | `TO-S1-AE` |
-| D9_TAXSMA | `TO-c1` |
-| MDPF_GLOBAL | `C1impl.emitter-resource-992-and-cottotal-collapse` · `T2C.synchronized-cadence` |
-| OPAL_ADVIPOINTERS | `INF-REDEPLOY` · `P2-FLOOR-49F` · `P4-PUBIAM-49F` · `P5-TEARDOWN-49F` |
-| WSE_COTMDL | `WS4.mdpf-ddb-foldin` · `WS5.iam-infra-scoped-role-eventbridge` |
+### THREE MEASURED INSTRUMENT LIMITS — why a roster query will mislead you
 
-⛔ **A BARE-BASE TO BELONGS TO NO LANE, SO IT WILL READ AS YOURS THE MOMENT YOU RUN A ROSTER QUERY ON
-YOUR OWN SERIAL.** It is not addressed to you. **DO NOT ACT ON ANY OF THEM.** Acting on one would put
-two projects on one instance, which is the Rule 27 violation this bar exists to prevent — **one
-Tier-2 instance = ONE project, and the protected resource is your context.**
+1. **`to-check --assignee` OVER-matches** — substring, and it matches the **ISSUER** too. A serial
+   appears as author, recipient and owner; only the third is an obligation. **Read the ROWS.**
+2. ⛔ **It also UNDER-matches, the dangerous direction:** it returns **0** when an `issued_to` carries
+   **prose** rather than a bare serial. **A zero does NOT establish that you hold nothing.**
+3. **`list_task_orders` reads the BASE folder** — and per the note above, that is where lane TOs live
+   here anyway.
 
-**YOUR PROJECT IS `PLATFORM_OPS_USERMGMT` AND NOTHING ELSE.** If a roster query surfaces any row above,
-the correct act is to **report it to `2.0.0_SA_COO~Z` and keep working** — not to pick it up, and not
-to halt and investigate it.
-
-⚠ **THESE ARE NOT STALE-FACE ARTEFACTS AND I AM NOT ASSERTING THEY ARE DONE.** I measured that they are
-OPEN and base-addressed; **I did not measure whether their work is finished** — an `[ACTIVE]` face over
-completed work and a genuinely open TO render identically, and **all ten belong to `2.0.0_SA_COO` on the OTHER DEVICE.**
-Their disposition is that seat's as issuer — not this lane's, not this TO's, and not this fabric's.
-
-## 8. REPORTING
-
-Report to `2.0.0_SA_COO~Z` (validation) and `1.0.0_SA_CTO~Z` (acceptance). State push state as a
-MEASURED value. **Surprise items** (class {OBSERVATION, BLOCKING}) route to `0.0.0_AB_MSTR~Z` while
-there is no CVO reader — surface and keep working; do not halt-and-investigate.
+⭐ **THE SOUND INSTRUMENT IS THE DIRECTORY** — an assignment is a file in a folder and `ls` parses no
+`issued_to`. ⚠ **Sound for ENUMERATION, blind for STATUS:** it tells you what exists, not what is open.
+⚠ **A BARE-BASE TO BELONGS TO NO LANE**, so it reads as yours the moment you query your own serial;
+acting on one puts two projects on one instance (Rule 27).
+⚠ **OPEN IS NOT UNFINISHED.** An `[ACTIVE]` face over completed work and a genuinely open TO render
+identically. **Do not infer a row still needs doing, and do not close one — it is not yours either way.**

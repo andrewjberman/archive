@@ -107,26 +107,40 @@ Surprise items to `0.0.0_AB_MSTR~Z`. **Bound your own findings** — `APPLIED, N
 a claimed pass.
 
 
-## ⛔ YOU ARE BARRED FROM FOUR BASE-ADDRESSED TASK ORDERS — MEASURED AT SEATING
+## ⛔ SCOPE FENCE — A RULE, NOT A LIST. **CORRECTED 2026-09-01 ~01:5xZ.**
 
-**Your `~Z` lane is CLEAN: 0 open TOs besides this series** (computed, not eyeballed). But the **BARE
-BASE** `0.4.0_DE_ClientPlatform` holds **FOUR**:
+> ### YOUR PROJECT IS `PLATFORM_OPS_USERMGMT` AND NOTHING ELSE.
+> **Any task order that is not one of the D12 TOs addressed to your full suffixed serial is NOT YOURS
+> — whatever any list says, and whatever a roster query returns. REPORT it to `2.0.0_SA_COO~Z` and
+> keep working.**
 
-| status | task order |
-|---|---|
-| ACTIVE | `D3_MODELOVERLAY.TO-D3.4` |
-| ACTIVE | `NFRA_MOTIF.P0.tsgraph-p2-2-cluster-materialize` (DE is a gated co-assignee) |
-| ACTIVE | `NFRA_MOTIF.P1.absorb-detectors-c2-catalog` (DE is a gated co-assignee) |
-| PENDING | `OPAL_ADVIPOINTERS.P4-REPOINT-49F` |
+⛔ **THIS REPLACES AN ENUMERATED BAR, AND THE ENUMERATION WAS WRONG IN BOTH DIRECTIONS.** I originally
+named a fixed list of base-addressed TOs. Measured on the directory instrument afterwards, that list
+was **under-inclusive** (open rows it never named) **and over-inclusive** (rows it named that are no
+longer open, or whose files are not even in this folder). **A list that is wrong in both directions is
+worse than no list, because it reads as complete.**
+CLAUDE.md already carries this: **a guard is only as wide as its enumeration, and an enumerated ban
+list lapses SILENTLY when a name changes.** The rule above cannot lapse.
 
-⛔ **A BARE-BASE TO BELONGS TO NO LANE, SO IT READS AS YOURS THE MOMENT YOU RUN A ROSTER QUERY ON YOUR
-OWN SERIAL.** It is not addressed to you. **DO NOT ACT ON ANY OF THEM** — that would put two projects
-on one instance, the Rule 27 violation this bar exists to prevent. **Your project is
-`PLATFORM_OPS_USERMGMT` and nothing else.** If a roster query surfaces one, **REPORT it to
-`2.0.0_SA_COO~Z` and keep working.**
-⚠ **I measured that they are OPEN and BASE-ADDRESSED. I did NOT measure whether their work is
-finished** — an `[ACTIVE]` face over completed work and a genuinely open TO render identically. Their
-disposition belongs to their issuers, not to this lane.
-⚠ **INSTRUMENT:** `to-check --assignee` SUBSTRING-matches and matches the ISSUER as well as the
-assignee. **Read the ROWS, never the count.** (`--project` filters correctly — an earlier report that
-it did not was withdrawn after three seats measured it with negative controls.)
+### WHY A ROSTER QUERY WILL MISLEAD YOU — three measured instrument limits
+
+1. **`to-check --assignee` OVER-matches:** it is a substring match and it matches the **ISSUER** as
+   well as the assignee. A serial appears as author, recipient and owner; only the third is an
+   obligation. **Read the ROWS, never the count.**
+2. ⛔ **`to-check --assignee` also UNDER-matches, which is the dangerous direction:** it returns **0**
+   when an `issued_to` carries **prose** rather than a bare serial — and this fabric writes prose
+   `issued_to` routinely. **A zero from it does NOT establish that you hold nothing.**
+3. **`list_task_orders` reads the BASE folder**, and lane TOs are not reliably in a lane folder — in
+   some lanes there is no lane subdirectory at all and every TO sits flat in the base.
+
+⭐ **THE SOUND INSTRUMENT IS THE DIRECTORY**: an assignment is a file in a folder, and `ls` parses no
+`issued_to`. ⚠ **But it is a sound ENUMERATION instrument and a blind STATUS one** — it tells you what
+exists, not what is open. **A zero from it is strong; a non-zero is only a population.**
+
+⚠ **AND A BARE-BASE TO BELONGS TO NO LANE**, so it reads as yours the moment you query your own
+serial. Acting on one puts two projects on one instance — the Rule 27 violation this fence exists to
+prevent (*one Tier-2 instance = ONE project; the protected resource is your context*).
+⚠ **OPEN IS NOT UNFINISHED.** An `[ACTIVE]` face over completed work and a genuinely open TO render
+identically — closing a face is the ISSUER's act and nothing does it automatically. **Do not infer that
+a row still needs doing, and do not close one: it is not yours either way.**
+
