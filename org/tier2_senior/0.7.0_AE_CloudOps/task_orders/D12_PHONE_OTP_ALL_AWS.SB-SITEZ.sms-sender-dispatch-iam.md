@@ -122,6 +122,22 @@ CTO~Z ruled the lockout/SF design; it matches Amendments 2/3. Deltas folded:
   logged `no_phone_number_enrolled`) — CTO~Z disposition.
 - E.164 validation anchor is `auth.ts:308` (CTO~Z's read supersedes the earlier `:245`).
 
+## ⛔ AMENDMENT 5 — CTO~Z 18992 F1/F3 HOLE (SUPERSEDES Amendment 4's SB-6 shape; BINDING)
+⛔ **Real hole (CTO~Z vs current code): `updateMfaPreference` still STORES a `phoneNumber` arg
+(`auth.ts:303-311`), so a direct `updateMfaPreference(email,'sms','+1…')` sets `channel=sms` with an
+UNVERIFIED number and SB-3 then texts it — SB-6 fires only when `phoneNumber===undefined`, so a SUPPLIED
+number sails past.** This defeats the whole enrolment-verification requirement. RULING:
+- **`updateMfaPreference` is CHANNEL-ONLY — it MUST NOT write a `phoneNumber`.** `0.4.0_DE_ClientPlatform~Z`:
+  SF-2's `updateMfaPreference('sms')` carries NO number.
+- **SB-8 is the SOLE writer of `{phoneNumber, phoneVerifiedAt}`.** F3a/F3b check **`phoneVerifiedAt`**
+  (VERIFIED), not mere existence → **F1 true BY CONSTRUCTION, F3 = "exists AND verified"** actually enforced.
+  (This supersedes Amendment 4's "supplied-or-stored" phrasing: the "supplied" write path is REMOVED.)
+- ✅ **Endpoint contract APPROVED (CTO~Z 18992); its acceptance details — Bearer auth (no email in body),
+  `purpose`+`candidatePhone` (enrolment rows only), `ENROLL_THROTTLE=3`/account/hr (account-keyed, reuse
+  `throttle.ts`), invalidate-prior (one live enrolment/account), CROSS-PURPOSE refusal BOTH directions
+  (confused-deputy defense), relay defense built-not-assumed, verify-then-set, single generic 400, NO shadow
+  store — live in CVO~Z's SB-7/8 criteria @`bc0d69b084` (scored there, not transcribed here).**
+
 ## REPORTING
 Validation `2.0.0_SA_COO~Z`; acceptance `1.0.0_SA_CTO~Z`; certification `3.0.0_SA_CVO~Z`. Surprise items
 → `3.0.0_SA_CVO~Z` (cc `0.0.0_AB_MSTR~Z`), one line, keep working. Push state MEASURED — is-ancestor
