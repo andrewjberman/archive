@@ -45,6 +45,7 @@ import datetime as dt
 
 import boto3
 import pandas as pd
+from botocore.config import Config as BotoConfig
 
 FUNCTION = "opal-assets-bd49f-reporting-pull"
 GOLD_BUCKET = "opal-data-49financial"
@@ -72,7 +73,37 @@ FEED = "performance"
 CHUNK = 120
 
 _s3 = boto3.client("s3")
-_lam = boto3.client("lambda")
+
+# ⛔ MEASURED DEFECT, 2026-09-01T03:08Z -- THE DEFAULT LAMBDA CLIENT SPENT 5x THE VENDOR BUDGET.
+# A bare boto3 lambda client carries read_timeout=60 s and RETRIES ON TIMEOUT. A chunk of 120
+# accounts takes ~168 s, so the client gave up at 60 s while the Lambda kept running to completion,
+# then botocore RE-INVOKED it. Measured by object-version census: 120 keys x 5 versions = 600 data
+# calls for 120 accounts' worth of data. 480 calls wasted, exactly 5.0x.
+#   read_timeout        360 > the function's own 300 s ceiling, so the CLIENT never gives up first
+#   total_max_attempts  1   = NO RETRY AT ALL. A retry on a NON-IDEMPOTENT VENDOR-SPENDING invoke
+#                             is not a resilience feature, it is a duplicate purchase. The run is
+#                             already resumable at account grain; that is the correct recovery path.
+# THE FAILURE WAS SILENT IN THE DIRECTION THAT COSTS MONEY: the client raised, so the runner
+# reported ZERO landed for a chunk that had in fact landed five times.
+#
+# ⛔ AND THE FIRST VERSION OF THIS FIX WAS ALSO WRONG, CAUGHT ONLY BY READING THE APPLIED CONFIG:
+# `retries={"max_attempts": 1}` renders as `total_max_attempts: 2` -- botocore's `max_attempts` is
+# the RETRY count, not the TOTAL. That would have left ONE retry live and halved a 5x overspend to
+# 2x while reporting success. **The field you set and the field that governs are different fields.**
+# Use total_max_attempts and ASSERT it below; never trust the value you passed in.
+_lam = boto3.client("lambda", config=BotoConfig(
+    read_timeout=360, connect_timeout=15,
+    retries={"total_max_attempts": 1, "mode": "standard"}))
+
+# FAIL-CLOSED AT IMPORT, because this guard protects money and a silent regression here is
+# indistinguishable from working code until the bill arrives.
+assert _lam.meta.config.retries.get("total_max_attempts") == 1, (
+    "REFUSING: lambda client would RETRY a vendor-spending invoke -- retries=%r"
+    % (_lam.meta.config.retries,))
+assert _lam.meta.config.read_timeout > 300, (
+    "REFUSING: client read_timeout %s <= the function's 300 s ceiling; the client would give up "
+    "first and the invoke would look failed while it was still spending."
+    % (_lam.meta.config.read_timeout,))
 
 
 def _read_parquet(bucket: str, key: str) -> pd.DataFrame:
