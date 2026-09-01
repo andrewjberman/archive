@@ -1,10 +1,10 @@
 # TO D12_PLATFORM_OPS.DE3-SITEZ — the browser end-to-end exercise (the criterion W1 lost, rebuilt as its own TO)
 
 <task_order id="D12_PLATFORM_OPS.DE3-SITEZ" project="PLATFORM_OPS_USERMGMT">
-<issued_to>⛔ **PENDING — ANDREW'S SERIAL CONFIRMATION. SEE DE1 §0. THIS TO IS NOT YET ISSUED.**</issued_to>
+<issued_to>0.4.0_DE_ClientPlatform~Z</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
-<issued>2026-09-01T01:3xZ (authored; NOT issued)</issued>
-<status>NOT-YET-ISSUED. DEP-BLOCKED on DE1 + DE2.</status>
+<issued>2026-09-01T01:4xZ</issued>
+<status>ISSUED — DEP-BLOCKED on DE1 + DE2. Do not start before they land.</status>
 <priority>P1 — this is the acceptance the whole workstream was missing.</priority>
 <authority>
 ANDREW-DIRECT 2026-09-01 ~01:2xZ TO-series instruction (17286) + "obviously we need a frontend flow
@@ -72,3 +72,28 @@ Validation `2.0.0_SA_COO~Z`; acceptance `1.0.0_SA_CTO~Z`. Push state MEASURED. S
 ⭐ **And if a criterion here cannot be satisfied honestly, say so in those words.** Tonight
 `UNVERIFIABLE-BY-INSTRUMENT` on a folder observation was upgraded to PASS by a different observer
 hours later — **a bounded refusal survived contact with the truth, and a guess would not have.**
+
+
+## ⛔ YOU ARE BARRED FROM FOUR BASE-ADDRESSED TASK ORDERS — MEASURED AT SEATING
+
+**Your `~Z` lane is CLEAN: 0 open TOs besides this series** (computed, not eyeballed). But the **BARE
+BASE** `0.4.0_DE_ClientPlatform` holds **FOUR**:
+
+| status | task order |
+|---|---|
+| ACTIVE | `D3_MODELOVERLAY.TO-D3.4` |
+| ACTIVE | `NFRA_MOTIF.P0.tsgraph-p2-2-cluster-materialize` (DE is a gated co-assignee) |
+| ACTIVE | `NFRA_MOTIF.P1.absorb-detectors-c2-catalog` (DE is a gated co-assignee) |
+| PENDING | `OPAL_ADVIPOINTERS.P4-REPOINT-49F` |
+
+⛔ **A BARE-BASE TO BELONGS TO NO LANE, SO IT READS AS YOURS THE MOMENT YOU RUN A ROSTER QUERY ON YOUR
+OWN SERIAL.** It is not addressed to you. **DO NOT ACT ON ANY OF THEM** — that would put two projects
+on one instance, the Rule 27 violation this bar exists to prevent. **Your project is
+`PLATFORM_OPS_USERMGMT` and nothing else.** If a roster query surfaces one, **REPORT it to
+`2.0.0_SA_COO~Z` and keep working.**
+⚠ **I measured that they are OPEN and BASE-ADDRESSED. I did NOT measure whether their work is
+finished** — an `[ACTIVE]` face over completed work and a genuinely open TO render identically. Their
+disposition belongs to their issuers, not to this lane.
+⚠ **INSTRUMENT:** `to-check --assignee` SUBSTRING-matches and matches the ISSUER as well as the
+assignee. **Read the ROWS, never the count.** (`--project` filters correctly — an earlier report that
+it did not was withdrawn after three seats measured it with negative controls.)

@@ -1,10 +1,10 @@
 # TO D12_PLATFORM_OPS.DE1-SITEZ — the MFA opt-in prompt + channel selection (his most explicit ask)
 
 <task_order id="D12_PLATFORM_OPS.DE1-SITEZ" project="PLATFORM_OPS_USERMGMT">
-<issued_to>⛔ **PENDING — ANDREW'S SERIAL CONFIRMATION. SEE §0. THIS TO IS NOT YET ISSUED.**</issued_to>
+<issued_to>0.4.0_DE_ClientPlatform~Z</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
-<issued>2026-09-01T01:3xZ (authored; NOT issued)</issued>
-<status>NOT-YET-ISSUED — held on the `issued_to` serial only. Content is complete and authorized.</status>
+<issued>2026-09-01T01:4xZ</issued>
+<status>ISSUED — GO rides this commit. Serial confirmed by Andrew ~01:3xZ.</status>
 <priority>P1 — first of the DE series; the login flow is unusable by a human without it.</priority>
 <authority>
 ANDREW-DIRECT 2026-09-01 ~01:2xZ, three messages VERBATIM: "COO needs to just write a TO series of
@@ -23,19 +23,18 @@ Rule 27 chain: PRD `docs/architecture/D12_PLATFORM_OPS_PRD.md` @2da36986f6 -> CO
 </proof_of_spec>
 </task_order>
 
-## 0. ⛔ THIS TO IS NOT ISSUED YET, AND WHY THE FIELD IS BLANK RATHER THAN GUESSED
+## 0. HOW THIS TO GOT ITS ADDRESS — RESOLVED, and worth one paragraph
 
-Andrew named **`0.2.0_DE_ClientPlatform~Z`**. **That serial does not exist.** MEASURED, with a positive
-control: `comp-find` over 36,016 files returns **0 hits** for `0.2.0_DE_ClientPlatform` and **1,036**
-for `0.4.0_DE_ClientPlatform` — the probe works, so the absence is real. Pod `0.2.0` is
-*PortfolioAnalytics*; *ClientPlatform* is pod `0.4.0`. He combined a pod number with another pod's name.
+Andrew first named **`0.2.0_DE_ClientPlatform~Z`**. **That serial does not exist**, measured with a
+positive control: `comp-find` over 36,016 files returned **0 hits** for `0.2.0_DE_ClientPlatform` and
+**1,036** for `0.4.0_DE_ClientPlatform`. Pod `0.2.0` is *PortfolioAnalytics*; *ClientPlatform* is pod
+`0.4.0` — he combined a pod number with another pod's name.
 
-⛔ **NOBODY SUBSTITUTES A SERIAL. A SERIAL IS AN ADDRESS**, and silently correcting a sovereign's
-address is how the wrong seat gets spawned and explained afterwards. `1.0.0_SA_CTO~Z` has put the
-one-word question to him.
-⚠ **AND THIS FIELD IS NOT A ROLE-CLASS PLACEHOLDER.** A TO addressed to a class with no instance
-**reads as issued and is held by nobody** — measured on this fabric, three days. This one reads
-**NOT-YET-ISSUED** on purpose. **Do not execute it until `issued_to` carries a real serial.**
+⛔ **NO SEAT SUBSTITUTED IT. A SERIAL IS AN ADDRESS**, and silently correcting a sovereign's address is
+how the wrong seat gets spawned and explained afterwards. The question went to him and he ruled
+~01:3xZ, VERBATIM: *"sure we can do 0.4.0_DE thats fine."* `0.4.0_DE` resolves to exactly ONE seat
+family in the tree (verified: it is the only `0.4.0_DE_*`), so the pod determines the name uniquely.
+**`issued_to` is now `0.4.0_DE_ClientPlatform~Z` and this TO IS ISSUED.**
 
 ## 1. OBJECTIVE
 
@@ -106,3 +105,28 @@ Validation `2.0.0_SA_COO~Z`; acceptance `1.0.0_SA_CTO~Z`. State push state as a 
 Surprise items to `0.0.0_AB_MSTR~Z`. **Bound your own findings** — `APPLIED, NOT EXERCISED` and
 `UNVERIFIABLE-BY-INSTRUMENT` are what let two corrections land cleanly tonight instead of contradicting
 a claimed pass.
+
+
+## ⛔ YOU ARE BARRED FROM FOUR BASE-ADDRESSED TASK ORDERS — MEASURED AT SEATING
+
+**Your `~Z` lane is CLEAN: 0 open TOs besides this series** (computed, not eyeballed). But the **BARE
+BASE** `0.4.0_DE_ClientPlatform` holds **FOUR**:
+
+| status | task order |
+|---|---|
+| ACTIVE | `D3_MODELOVERLAY.TO-D3.4` |
+| ACTIVE | `NFRA_MOTIF.P0.tsgraph-p2-2-cluster-materialize` (DE is a gated co-assignee) |
+| ACTIVE | `NFRA_MOTIF.P1.absorb-detectors-c2-catalog` (DE is a gated co-assignee) |
+| PENDING | `OPAL_ADVIPOINTERS.P4-REPOINT-49F` |
+
+⛔ **A BARE-BASE TO BELONGS TO NO LANE, SO IT READS AS YOURS THE MOMENT YOU RUN A ROSTER QUERY ON YOUR
+OWN SERIAL.** It is not addressed to you. **DO NOT ACT ON ANY OF THEM** — that would put two projects
+on one instance, the Rule 27 violation this bar exists to prevent. **Your project is
+`PLATFORM_OPS_USERMGMT` and nothing else.** If a roster query surfaces one, **REPORT it to
+`2.0.0_SA_COO~Z` and keep working.**
+⚠ **I measured that they are OPEN and BASE-ADDRESSED. I did NOT measure whether their work is
+finished** — an `[ACTIVE]` face over completed work and a genuinely open TO render identically. Their
+disposition belongs to their issuers, not to this lane.
+⚠ **INSTRUMENT:** `to-check --assignee` SUBSTRING-matches and matches the ISSUER as well as the
+assignee. **Read the ROWS, never the count.** (`--project` filters correctly — an earlier report that
+it did not was withdrawn after three seats measured it with negative controls.)
