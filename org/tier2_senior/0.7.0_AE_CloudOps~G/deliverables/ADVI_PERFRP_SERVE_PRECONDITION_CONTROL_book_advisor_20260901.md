@@ -24,9 +24,16 @@
 > and **REVERTED at v12**. **ANDREW RULED IT DIRECTLY, VERBATIM:** *"This does not matter, client
 > names are already published throughout the Advisor Intelligence views"* -- he is sovereign on firm
 > exposure and answered with the fact in front of him.
-> >> So `perfrp_book_advisor` is **MORE OF THE SAME SHAPE AT LARGER SCALE (3,297 vs 190), NOT A NEW
->    EXPOSURE CLASS.** The 9,868/9,868 census below stands as a true measurement of the leaf; it is
->    NOT a live blocker, and no seat may cite this file to hold a serve. <<
+> >> So on the CLIENT-LABEL limb, `perfrp_book_advisor` is **MORE OF THE SAME SHAPE AT LARGER SCALE,
+>    NOT A NEW EXPOSURE CLASS**, and no seat may cite this file to hold a serve **ON THAT LIMB**. <<
+> ⛔ **TWO SCOPE CORRECTIONS TO THIS PARAGRAPH, BOTH MADE LATER THE SAME NIGHT — it was written before
+> either was known, and left unscoped it over-clears:**
+> **(i)** the counts it leaned on are wrong — the "9,868/9,868" and the distinct figure are the
+> INCONSISTENT ones §2a retracts, and the distinct count is INFLATED by sentinel strings. Do not quote
+> a number from this paragraph.
+> **(ii)** *"not a live blocker"* is true of the CLIENT-LABEL limb ONLY. The **CUSTODIAN limb is
+> NOT DISCHARGED** and is tripped on **3 of the 4 publishable leaves** (§6). **This file DOES hold a
+> serve on that limb.**
 > ⚠ **WHY THIS ANNOTATION EXISTS AT ALL:** `1.0.0_SA_CTO` 90406 s.6 names the real defect -- the
 > precondition sits ARMED in `org/projects/ADVI_PERFRP.json` `blocking` encoding a posture the estate
 > abandoned at router v12, and **it will trip EVERY future serve until retired.** That record is CTO's
@@ -209,3 +216,72 @@ It was caught only because the printed sample did not look like names.
 
 ⛔ This lane will not activate on ANY signal until `1.0.0_SA_CTO` rules -- including a re-issued CALL-1
 completion report.
+
+---
+
+## 6. THE PLURAL CENSUS -- all 11 families, and it MOVES THE REMEDY
+
+This file was scoped to ONE leaf and said so. That gap is now closed. Dry run, all 11 PERFRP families
+(`perfrp_emitters.PERFRP_EMITTER_FAMILIES`, the one definition), no `--publish`, no grant, zero S3 writes.
+
+### 6a. The attempted set is not what anyone had been quoting
+
+```
+  WOULD_PUBLISH (4):   perfrp_performance_account   perfrp_gainloss_relationship
+                       perfrp_gainloss_account      perfrp_book_advisor
+  EMITTER_REFUSED (7): activity_rel, activity_acct, performance_rel, allocation_rel,
+                       allocation_acct, transactions_rel, roster_rel
+  DENOMINATOR: 11 attempted of 26 EMIT twins (23 emitter entries); 7 not clean
+```
+
+⛔ This contradicts `chain_49f_entrypoint.py`'s documented 2026-08-25 census
+`{would_publish: 6, emitter_refused: 5}` **in both directions** -- gainloss rel+acct were listed as
+refusing BY DESIGN and now PUBLISH; performance_relationship published and now REFUSES.
+**The set has moved twice. Stop quoting that docstring -- including this lane's own quotations of it
+at 90349.** The number that matters for a grade is not "10 of 11 attempted" but **4 that would write**.
+
+### 6b. Custodian ids across every built payload
+
+Joined against `dim_account` (8,633 ids). POSITIVE CONTROL `0022002671` True; NEGATIVE `9999999999` False.
+
+| leaf (WOULD_PUBLISH) | real custodian account ids |
+|---|---|
+| `perfrp_performance_account.json` | **8,632** -- essentially the entire account universe |
+| `perfrp_gainloss_account.json` | **6,183** |
+| `perfrp_book_advisor.json` | **57** |
+| `perfrp_gainloss_relationship.json` | 0 |
+
+>> **THE LIMB IS TRIPPED ON 3 OF THE 4 PUBLISHABLE LEAVES, AND `book_advisor` IS THE SMALLEST INSTANCE
+   BY TWO ORDERS OF MAGNITUDE.** <<
+
+### 6c. ⛔ SO REMEDY (a) AS THIS FILE FIRST STATED IT IS WRONG, AND THE ERROR IS THIS LANE'S
+
+`--hold-leaves perfrp_book_advisor` **would hold the leaf carrying 57 and publish the leaf carrying
+8,632.** It was proposed having censused exactly one leaf -- the same one-leaf-reads-as-the-set mistake
+this lane spent the night naming in other people's work. If taken, the hold list is at minimum
+`perfrp_book_advisor,perfrp_performance_account,perfrp_gainloss_account`, i.e. the serve becomes one leaf.
+
+### 6d. TWO DIFFERENT CASES -- not conflated, and the ruling probably turns on this
+
+```
+  ACCOUNT-GRAIN    entries[].key = '0010020692' -- a RAW custodian account id as the entity KEY.
+                   performance_account (8,632), gainloss_account (6,183). The leaf's NATURAL GRAIN;
+                   may be accepted design rather than a leak.
+  RELATIONSHIP-GRAIN  book_advisor: client / relationship_id ARE pseudonymised to rel_*; the 57 leak
+                   through the UNLABELLED sentinel into a field where a pseudonym was expected.
+                   gainloss_relationship: 0 -- the scheme holds there.
+```
+
+The estate's pattern is coherent: **relationship grain is pseudonymised, account grain is keyed raw.**
+The 57 are an ESCAPE from a working scheme; the 8,632/6,183 are the scheme not existing at that grain.
+⚠ **But the precondition's text does not grant that distinction** -- it says *"a custodian account
+identifier in any label/identity/**key** field."* Key fields are named. Whether account-grain keys were
+always in scope, or the clause was written with only the label case in mind, is a **PRD-author
+question** (`1.0.0_SA_CTO`), not this lane's.
+
+### 6e. LIMITS
+
+BUILD plane, not served -- nothing published. The `.verification.json` siblings also carry ids
+(5,208 / 6,183 / 6,183) but the dry run does NOT list them as WOULD_PUBLISH, so they are excluded from
+the served set here and it is NOT confirmed whether another path serves them. **This pass is the
+CUSTODIAN limb only** -- the client-name limb is not censused across the other three leaves.
