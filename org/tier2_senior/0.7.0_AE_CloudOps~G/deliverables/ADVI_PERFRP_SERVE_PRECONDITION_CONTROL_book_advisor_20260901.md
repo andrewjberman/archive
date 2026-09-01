@@ -1,4 +1,17 @@
-# ADVI_PERFRP SERVE PRECONDITION -- THE CONTROL, RUN. VERDICT: **UNMET** -- ⭐ **AND THE PRECONDITION IS SUPERSEDED. DO NOT BLOCK A SERVE ON THIS FILE.**
+# ADVI_PERFRP SERVE PRECONDITION -- THE CONTROL, RUN. **TWO LIMBS, TWO DIFFERENT ANSWERS**
+
+> ⛔⛔ **SCOPE YOUR CITATION OF THIS FILE TO A LIMB. THE PRECONDITION HAS TWO AND THEY DIVERGED ON
+> 2026-09-01. AN EARLIER VERSION OF THIS HEADER SAID "the precondition is SUPERSEDED, do not block a
+> serve on this file" -- THAT WAS TRUE OF ONE LIMB AND WOULD HAVE CLEARED THE OTHER.**
+>
+> | limb | status |
+> |---|---|
+> | **CLIENT DISPLAY LABEL** | **SUPERSEDED.** Andrew ruled directly; premise measured false (labels already on 5 of 12 served advi keys). See the note below. Do NOT hold a serve on this limb. |
+> | **CUSTODIAN ACCOUNT IDENTIFIER** (+ book-scoping) | ⛔ **NOT DISCHARGED. UNRESOLVED, which is not dischargeable** (`1.0.0_SA_CTO` 90449). See §2a/§2b. |
+>
+> **`relationship` is ONE FIELD carrying BOTH limbs**, and that is the trap: tonight the names in it
+> became permitted while the account ids in it stayed forbidden. A reader who takes "superseded" as a
+> property of the FIELD rather than of ONE LIMB will stop scrubbing exactly where the live trigger is.
 
 > ⛔⛔ **READ THIS BEFORE THE VERDICT BELOW. ANNOTATED 2026-09-01 ~00:1xZ, SAME SESSION.**
 > **The measurement in this file is CORRECT and the precondition it tests is SUPERSEDED.** Those are
@@ -57,17 +70,73 @@ have concluded the leaf never serves and the exposure was moot.
 
 ## 2. THE CONTROL -- census over EVERY served row
 
+⛔⛔ **THE BLOCK BELOW IS THE ORIGINAL AND THREE OF ITS LINES ARE MUTUALLY INCONSISTENT. CORRECTED
+IMMEDIATELY AFTER IT — READ BOTH. `1.0.0_SA_CTO` 90449 ruled this control NOT SOUND EVIDENCE for the
+custodian limb while these figures stand, and that ruling is right.**
+
 ```
   client_table rows (DENOMINATOR) .........: 9,868
-  rows whose `relationship` is a REAL NAME : 9,868      <- 100%, not a subset
-  DISTINCT REAL CLIENT NAMES ..............: 3,297
-  rows UNMAPPED-RELATIONSHIP-* ............: 0
+  rows whose `relationship` is a REAL NAME : 9,868      <- 100%, not a subset   [WRONG]
+  DISTINCT REAL CLIENT NAMES ..............: 3,297                              [INFLATED]
+  rows UNMAPPED-RELATIONSHIP-* ............: 0                                  [WRONG]
   rows pseudonymous in `relationship` .....: 0
 
   POSITIVE CONTROL (these SHOULD be pseudonymous; 0 = pass):
     rows where `client` NOT rel_* .........: 132
     rows where `relationship_id` NOT rel_* : 132
 ```
+
+### 2a. CORRECTED — the three lines were ONE population counted twice with opposite verdicts
+
+Caught by `3.0.0_SA_CVO` 90437; both candidate mechanisms it named are confirmed, and both are mine.
+The read `3.0.0_SA_CVO` asked for and `1.0.0_SA_CTO` 90449 s.3 adopted, run:
+
+```
+  PATTERN USED:  PSEUDO = ^rel_[0-9a-f]+$
+                 elif rel.startswith('UNMAPPED-RELATIONSHIP')      <- the arm that returned 0
+
+  3 SAMPLES from the 132 rows the positive-control arm flagged:
+    relationship    = 'UNLABELLED-RELATIONSHIP:UNMAPPED-RELATIONSHIP:0017633210'
+    client          = 'UNMAPPED-RELATIONSHIP:0017633210'
+    relationship_id = 'UNMAPPED-RELATIONSHIP:0017633210'
+
+  of those 132, startswith('UNMAPPED-RELATIONSHIP') matches:  0
+```
+
+- **(a) HYPHEN-VS-PREFIX:** the value begins `UNLABELLED-`, not `UNMAPPED-`. The prefix arm could never
+  fire, so the sentinel population reported as **0**.
+- **(b) THE DETECTOR WAS NEGATION-DEFINED** — "REAL NAME" meant *not `rel_*`, not the prefix*. All 132
+  sentinel strings fell through to `else`, were counted as real names, and were added to the distinct
+  set. **This is the worse mechanism because it is SELF-CONSISTENT**: it produces 100% and 0 together.
+- ⛔ **THEREFORE `DISTINCT REAL CLIENT NAMES = 3,297` IS INFLATED BY SENTINEL STRINGS AND MUST NOT BE
+  QUOTED.** A negation-defined detector cannot distinguish *a name* from *any non-pseudonymous string*.
+
+### 2b. ⛔ AND IT LANDS ON THE **SURVIVING** LIMB, NOT THE SUPERSEDED ONE
+
+```
+  DISTINCT >=6-DIGIT NUMERIC TOKENS embedded in those `relationship` values: 57
+    samples: 0012581195  0013341925  0014816851  0015346352  0017329807
+```
+
+Ten-digit, zero-padded — the same shape as the schwab custodian ids quoted at `1.0.0_SA_CTO` 90328 s.3
+(`0022002671`, `0026881039`, `0065125789`). They sit in `client` and `relationship_id` **too**, so for
+these 132 rows pseudonymisation is absent across all three fields.
+
+⚠ **STATED AT ITS REAL STRENGTH: SHAPE-CONSISTENT, NOT CONFIRMED.** These 57 tokens have NOT been
+matched against `dim_account_xref`. The confirming read is one join (are any present as
+`schwab_account_id`, date=2026-08-28, 6,201 rows, with a positive control on a known-good id).
+
+⭐ **AND THE FACT THAT MAKES THIS MORE THAN A CONTROL BUG** (`1.0.0_SA_CTO` 90449 s.2): the 08-28
+precondition text *itself names this population* — *"the UNMAPPED sentinel token, **132 rows,
+ten-digit account-shaped** — CVO 79804; **replaced by an opaque id** at the re-open with the
+label-field removal."* Same sentinel, same cardinality, **twelve days later**. The believed
+remediation either never landed or never held, and **the record has carried it as done since 08-28**.
+
+>> **THE SUPERSESSION HAZARD, which is why this file needed correcting rather than deleting:
+   `relationship` is ONE FIELD carrying BOTH limbs. Tonight the names in it became PERMITTED and the
+   account ids in it stayed FORBIDDEN. A seat reading "the client-label limb is superseded" stops
+   scrubbing that field — and the surviving trigger lives in the same field, in exactly the rows where
+   the name is ABSENT.** <<
 
 >> **VERDICT: UNMET.** A cleartext client-name field is present in every served row of a leaf that
    would be written to a STATIC key -- estate-wide authenticated-fetchable, irreversibly. <<
