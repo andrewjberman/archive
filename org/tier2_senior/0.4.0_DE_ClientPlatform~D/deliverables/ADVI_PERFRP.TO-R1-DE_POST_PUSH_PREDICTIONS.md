@@ -111,6 +111,29 @@ AC11-independent criterion proceeds.
 rollup is actually unweighted is UNMEASURED and stays so until the arm runs. Absence is not a
 verdict.
 
+## ⛔ CORRECTION 2026-09-01 13:5xZ — AC11 IS A **RECOMPUTE**, NOT AN EQUALITY CHECK
+
+**This file described AC11 in the TO's paraphrase. The authoritative cell says something
+stronger, and I am fixing the carrier rather than leaving the weaker word in the file a
+future reader opens first.**
+
+`DECOMP.md:71`, `PRF-inv-3` oracle column, verbatim and read at source by this seat:
+> **`DS+DE · recompute each level from the level below on the served block; print all three`**
+
+```
+  THE CELL (authoritative)          "RECOMPUTE each level from the level below"
+  TO-R1-DE issuer records (derived) "cross-level EQUALITY" / "displayed-equality test"
+```
+⛔ **A RECOMPUTE DERIVES THE PARENT INDEPENDENTLY AND COMPARES IT AGAINST THE SERVED PARENT.**
+So a naive-mean parent and an MV-weighted derivation DIFFER and the test FAILS — which is
+exactly the discrimination the vacuity warning below said was missing. **The vacuity risk was
+real for the EQUALITY form and does not apply to the form the cell actually specifies.**
+⚠ **The guard below still stands and I now expect never to reach it** — which is the right
+shape for a guard, not a reason to delete it.
+⚠ **The scoring bar is UNAFFECTED and I did not ask for it to lift.** The weighting harness
+tests a different plane (does `_performance` CALL the shared law), and the recompute cannot run
+until `performance_relationship` is SERVED, which it is not.
+
 ## ⛔ AC11 IS **NOT** DISCHARGED BY ANY OF THIS, AND I AM SAYING SO BEFORE THE READ
 
 AC11 is a CROSS-LEVEL displayed-equality test. It needs the **same entity** readable at two
