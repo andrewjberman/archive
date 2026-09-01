@@ -82,6 +82,60 @@
 
      STATUS STAYS `pending`. Not mine to move, and the enum still cannot express issuer-ruled closure
      (0 of 1,067 criterion rows estate-wide carry a CLOSED value, census @4776a2305c). -->
+<!-- ⛔⛔ CORRECTION + ISSUER RULING 91569 APPLIED, 13:4xZ 2026-09-01, 0.4.0_DS_ClientPlatform~R.
+
+     == I MEASURED AC4 ON THE WRONG BUCKET AND THE BLOCK ABOVE CARRIES THE ERROR ==
+     The block above states: "platinum/advi/ on `opal-data-49financial` = 0 keys." ⛔ THAT IS A
+     WRONG-OBJECT MEASUREMENT. The platinum serve root is **`opal-data-portal-v2`**, named by the
+     AC3 baseline's own `bucket` field. `opal-data-49financial` has NO `platinum/` prefix at all,
+     so my zero was the zero of a bucket that could not have held the answer either way.
+     ⛔ **THE VERDICT SURVIVES; THE EVIDENCE DID NOT.** Re-measured on the correct bucket:
+     19 keys under `platinum/advi/49financial/`, of which **INSURANCE-bearing = 0**; POSITIVE
+     CONTROL, the same matcher returns 5 on `manifest`, so it fires and the zero is absence.
+     **AC4 IS STILL SHUT.** But it was shut on an instrument that could not have detected the
+     opposite -- Rule 22's named order: DISCRIMINATION passes inside a wrong GRAIN. A right answer
+     from an instrument blind to the wrong one is not evidence, and it is recorded here rather than
+     quietly replaced because the corrected number alone would look like the original had been fine.
+
+     == (b) RULED APPROVED @91569 -- AC4's RE-READ INSTRUCTION RE-POINTED TO A PROPERTY ==
+     The AC4 block below cites `advi-49f-publisher` State=DISABLED. That function DOES NOT EXIST
+     (census of all 200 Lambda functions; positive control returns two live siblings).
+     ⛔ **DO NOT RE-READ AC4 BY ANY RESOURCE NAME.** THE PROPERTY, which is what the hold is
+     actually about: **NO INSURANCE LEAF IS EMITTED UNDER `platinum/advi/49financial/` ON
+     `opal-data-portal-v2`, AND THE ADVI PUBLISH GRANT HAS NOT BEEN GIVEN.** Measure the property;
+     a name goes unsatisfiable the moment the substrate moves, which is a gate failing SILENTLY
+     rather than holding. ⛔ THE SOVEREIGN GATE ITSELF IS UNTOUCHED (Andrew-direct 2026-08-21T19:18Z);
+     the issuer re-pointed the INSTRUCTION only and explicitly did not move the gate.
+
+     == (c) RULED APPROVED @91569 -- THE AC3 BEFORE BASELINE, POINTER FIXED ==
+     AUTHORITATIVE LOCATION, so no successor hunts a dead tree:
+       FILE org/tier2_senior/0.4.0_DS_ClientPlatform~J/deliverables/AC3_AM_BYTE_IDENTITY_BASELINE_BEFORE.json
+       blob 09ae63acf7d520986e0eaab1a47a455e93cc7a54 | 5,333 B | git-TRACKED, ON origin/CLOUD
+       bucket `opal-data-portal-v2` | serve_root `platinum/advi/49financial` | captured 2026-08-25T12:43:52Z
+     ⚠ It sits in the DEAD ~J tree and STAYS THERE. It needs a REFERENCE, NOT A RESCUE (issuer).
+     ⛔ I FIRST CALLED IT "AT RISK". THAT WAS WRONG and I retract it: STRANDED and AT-RISK want
+     OPPOSITE remedies -- a pointer versus a copy -- and the retraction is what makes this the
+     cheapest item rather than the most expensive.
+
+     == AC3 INTERIM, MEASURED WHILE FIXING THE POINTER -- THE INVARIANT HOLDS ==
+     The BEFORE half is 12 objects. The serve root now holds 19. Compared key by key:
+       **11 of 12 BYTE-IDENTICAL by ETag** -- every AM FIGURE unmoved (mix_summary, leaderboard,
+       ownership_map, timeseries_overview, cumulative_chart, clients-tab-slim, timeseries_chart,
+       timeseries_chart_full, partner_analytics_quarterly/annual, the dated manifest). 0 GONE.
+       **1 MOVED: `_manifests/latest.json`** -- a POINTER file, not an AM figure (11:06:00Z today).
+       **7 NEW: 4 `perfrp_*.json` + 3 manifests** -- ADVI_PERFRP's work, not insurance.
+     ⭐ **THIS IS THE BASELINE'S OWN DISCRIMINATOR EARNING ITS KEEP:** it recorded last_modified +
+     etag per key precisely so the AFTER could tell "the publisher re-ran" from "insurance moved an
+     AM figure". The publisher HAS re-run and NO AM FIGURE MOVED. **This is NOT the AC3 AFTER half**
+     -- that is still gated behind AC2's applied artifact, and no insurance byte has entered the
+     serve. It is an interim reading, and it says the invariant is intact under a moving serve root.
+     ⚠ OBSERVATION, NOT MINE: `platinum/advi/49financial/_manifests//4b36d4f5743c.json` carries a
+     DOUBLE SLASH. Publisher lane, surfaced not chased.
+
+     == (a) NOT AUTHORIZED @91569 -- and it is NOT a blocker ==
+     The 3-day silver hole (08-28/29/30) is HISTORICAL and off AC2's path; no criterion on this TO
+     names those dates. Cause already measured. It stays an OPEN ITEM. **If a NAMED consumer needs
+     those dates, name the consumer and the issuer rules again.** Do not carry it as a stall. -->
 
 <priority>P0 -- Andrew-direct 2026-08-25 ~12:0xZ named this project as one of two waiting on the decomp seat. PRD v0.2 approved by him ~18:3xZ 08-24; the project has been unblocked and unseated since.</priority>
 <date>2026-08-25</date>
