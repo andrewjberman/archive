@@ -41,11 +41,50 @@ reach it without the code.**
 | id | must observe |
 |---|---|
 | **DE3-1** | **THE POSITIVE PATH, END TO END IN A BROWSER:** password -> opt-in prompt -> confirm -> code arrives in a real mailbox -> typed -> **dashboard renders.** State the mailbox, the folder observed, and attach the screenshot you actually read. |
-| **DE3-2** | **THE REFUSAL, IN THE SAME BROWSER:** with the correct password and **no** code, the dashboard is **not reachable** — by URL, by back-navigation, or by refresh. ⛔ This is the security property. A success-path-only exercise scores identically whether the gate exists or not. **Name the input that makes it refuse, and run it.** |
+| **DE3-2** | ⛔ **TWO HALVES, AND A PASS WITHOUT THE FIRST IS `UNVERIFIABLE-BY-DISCRIMINATION`, NOT PASS — SEE §3b.** (i) the **RED BASELINE**, captured BEFORE the client fix; (ii) **THE REFUSAL, IN THE SAME BROWSER:** with the correct password and **no** code, the dashboard is **not reachable** — by URL, by back-navigation, or by refresh. ⛔ This is the security property. A success-path-only exercise scores identically whether the gate exists or not. **Name the input that makes it refuse, and run it.** |
 | **DE3-3** | The whole flow renders correctly against the **silver-canvas colour law** — screenshot READ, not asserted. |
 
 ⛔ **NO ROW HERE MAY BE SATISFIED BY AN API CALL.** If it can be, it is the wrong row and this TO has
 failed at the thing it exists for.
+
+## 3b. ⏳ DE3-2 NEEDS ITS **RED** CAPTURED BEFORE THE FIX, OR ITS GREEN CANNOT DISCRIMINATE
+
+Raised by `3.0.0_SA_CVO~Z` minutes before the client fix was to land, and it is the sharpest catch of
+the night: **the remedy destroys the only chance to observe the failure.**
+
+> ⛔ **AFTER THE FIX, DE3-2 WILL PASS — AND NOBODY WILL HAVE SEEN IT FAIL.** A green that could not have
+> gone red scores identically whether the fix works, whether the branch was unreachable, or whether the
+> test never touched the path at all.
+
+⭐ **AND IT IS THE SECOND TIME IN THIS WORKSTREAM.** W1-3's honest 10/10 was the first — a criterion
+satisfied while the outcome was never at risk. **This series exists to correct that defect; closing it
+with a criterion carrying the same weakness would be the same error wearing the fix's clothes.**
+
+### THE RED IS EXERCISABLE WITH NOTHING ENABLED — the barrier four seats accepted does not apply
+
+*"0 of 48 accounts are gated and we may not enable one"* was treated as fixed. **All five rungs of F-2
+are CLIENT-side; the server is already correct.** So the baseline needs **no MFA-enabled account, no
+account change, no server change and no IAM act**:
+
+> Serve the portal at its current pin, **intercept the `/auth/login` response only**, return HTTP 200
+> with `{mfaRequired:true, challengeId, channel:'email'}` and **no accessToken** — exactly the shape
+> `index.ts:167` already emits — and **observe where the browser lands.**
+> **Expected RED:** `/market` is reached and `localStorage.accessToken === "undefined"`.
+
+⚠ **BOUND, kept from its author so it is not oversold: a stub exercises THE CLIENT, not the integrated
+system.** It cannot prove the server emits that shape — that is a separate source read, already done by
+two seats. **It proves the half actually in dispute: that this client, in a real browser, admits a
+tokenless 200.**
+**Local, read-only, uncommitted. Not a deploy; it does not touch DEV.**
+
+### SCORING
+
+**DE3-2's evidence is the PAIR:** the RED baseline (pre-fix, browser-observed) **and** the GREEN
+(post-fix, same instrument). ⛔ **A GREEN ALONE IS `UNVERIFIABLE-BY-DISCRIMINATION` — score it in those
+words, never PASS.** If the RED was genuinely never capturable, say that instead of implying a
+discriminating test ran.
+⛔ **THIS IS NOT A NEW GATE.** `1.0.0_SA_CTO~Z`'s cohort gate stands unchanged; this only makes its
+evidence real. If the RED is missed the gate still holds — it just closes on a PASS nobody can size.
 
 ## 4. ⛔ THE ACCOUNT PROBLEM — READ BEFORE PLANNING DE3-1
 
