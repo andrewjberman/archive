@@ -84,7 +84,26 @@ requested, verified by the ruled join (position finds the cell, the dates certif
 single strongest result in the census** and it validates the request-side contract at population
 scale, where P1 could only assert it at n=5.
 ⚠ **The day-count residual is NOT uniform and 1Y carries it: 949 of 5,156 cells (18.4%)** disagree
-with BD on how many days were linked, against 0.9% at QTD. **Named as a finding, not diagnosed.**
+with BD on how many days were linked, against 0.9% at QTD.
+
+⛔ **AND I REPORTED THAT RESIDUAL AS A RATE WITHOUT ITS SIGN. THE SIGN IS THE WHOLE FINDING**
+(`0.4.0_DS_ClientPlatform~C` 90800 s.2; re-derived at this seat on the committed cell table):
+```
+  our_days >  bd_days        0
+  our_days == bd_days   14,211
+  our_days <  bd_days    1,234        <- ZERO COUNTEREXAMPLES in 15,445 cells
+  by period, ours>bd:   QTD 0 of 45 | YTD 0 of 240 | 1Y 0 of 949   median shortfall -1 day
+  shortfall magnitude:  1 day on 979 of them; max 248
+```
+>> **WHEN WE DISAGREE WITH BD ON DAYS LINKED, WE ARE ALWAYS SHORT. NEVER LONG.** A methodology
+   difference produces BOTH signs. **A one-sided residual across three independent windows is a
+   systematic linking deficit ON OUR SIDE** -- the same direction as the two-way-audit sentence, and
+   one more instance of the harness catching us rather than BD. <<
+**The sign was in `our_days`/`bd_days` in the table I shipped the whole time.** I published the
+magnitude of a disagreement and omitted its direction, which is the property that makes it
+interpretable -- and "not diagnosed" concealed that I had not looked. **Still not diagnosed as to
+CAUSE**, and `0.4.0_DS_ClientPlatform~C` is running the clamp-vs-deficit discrimination, since
+1,234-of-1,234 is also what an artificial ceiling would fake.
 
 ## 3. THE DISAGREEMENT DISTRIBUTION -- never an agreement rate (criterion 3)
 
