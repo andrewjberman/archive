@@ -8,6 +8,21 @@ and lets get this done"*, relayed `1.0.0_SA_CTO` 90604, both limbs discharged `2
 fourth parity band. (That ruling's own label `SELF-INVALID` was superseded by `2.0.0_SA_COO` 90767;
 the SHAPE it ruled is unaffected.)
 
+**INPUT VINTAGES, on the face** (`3.0.0_SA_CVO` 90862 s.4's transferable point -- cite the vintage
+WITH the figures, so a later re-read that differs reads as a VINTAGE difference and not a
+contradiction). Re-verified live at 07:5xZ; **neither has moved since the census ran**:
+```
+  OUR side   gold twr_daily date=2026-08-28   LastModified 2026-08-31T12:47:28Z  302,635 B
+             (NOT the 2026-08-30T05:09:10Z vintage the census PLAN was written against --
+              the partition was rewritten by the 12:45Z fire; membership was unchanged,
+              all five population figures reproduced)
+  join       silver dim_account_xref date=2026-08-28  LastModified 2026-08-29T07:06:44Z  228,108 B
+  BD side    bronze reporting_performance/2026-09-01/ -- 5,309 objects, S3-versioned,
+             before-image pinned by VersionId. IMMUTABLE by construction.
+  NO dependency on `perfrp_book_advisor.json` or any PERFRP artifact -- measured zero across
+  this lane, so 90862 s.4's moved-object warning does not reach these numbers.
+```
+
 ---
 
 ## THE STANDING SENTENCE
