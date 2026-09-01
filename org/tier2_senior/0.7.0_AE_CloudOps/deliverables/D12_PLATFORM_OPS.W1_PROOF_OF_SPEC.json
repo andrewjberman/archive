@@ -284,11 +284,11 @@
       "criterion_id": "W1-10",
       "criterion_verbatim": "An OTP sent to a real mailbox arrives in the inbox, stated with the mailbox and the folder observed.",
       "method": "live_read",
-      "invocation": "A live login triggered a real SES send; the message was then READ out of Andrew's Microsoft 365 mailbox through the opal-gateway Graph surface (search_email, then read_email on the returned id).",
-      "output_evidence": "MAILBOX: Andrew@opalinvest.com (addressed andrew+d12mfatest@opalinvest.com). Subject '084699 is your Opal Invest login code', receivedDateTime 2026-09-01T00:15:49Z, from noreply@opalinvest.dev, body legible with the code rendered, links rewritten by the tenant's Avanan gateway. The code READ FROM THAT MAILBOX was then submitted and ACCEPTED (200) by the deployed handler -- so the delivered message is provably the live challenge, not a lookalike.",
-      "denominator": "1 OTP sent, 1 message located and read, 1 successful redemption of the code taken from it.",
-      "status": "UNVERIFIABLE-BY-INSTRUMENT",
-      "status_reason": "DELIVERY IS PROVEN; THE FOLDER IS NOT, AND I WILL NOT CLAIM IT. The gateway tools available to this seat (list_recent_email / search_email / read_email) return no parentFolderId and are not folder-scoped, so I cannot discriminate Inbox from Junk on my own instrument. Claiming 'inbox' from a successful search would be exactly the unearned half of this criterion. Andrew's own view of the mailbox settles it in one look, and the SPF + DMARC + custom MAIL FROM records this TO landed are the reason to expect Inbox."
+      "invocation": "A live login triggered a real SES send; the message was then READ out of Andrew's Microsoft 365 mailbox through the opal-gateway Graph surface (search_email, then read_email on the returned id). THEN, the observation I could not make myself: Andrew read his own mailbox and reported the folder directly (~00:4xZ, verbatim).",
+      "output_evidence": "MAILBOX: Andrew@opalinvest.com (addressed andrew+d12mfatest@opalinvest.com). Subject '084699 is your Opal Invest login code', receivedDateTime 2026-09-01T00:15:49Z, from noreply@opalinvest.dev, body legible with the code rendered, links rewritten by the tenant's Avanan gateway. The code READ FROM THAT MAILBOX was then submitted and ACCEPTED (200) by the deployed handler -- so the delivered message is provably the live challenge, not a lookalike. FOLDER, OBSERVED BY THE MAILBOX OWNER, Andrew ~00:4xZ VERBATIM: \"Both the password reset and the otp code, from support and noreply respectively, came to top of inbox no junk.\" TOP OF INBOX, NOT JUNK -- and he independently reports the SAME for a support@ message, which matters for the corrected finding below.",
+      "denominator": "1 OTP sent, 1 message located and read, 1 successful redemption of the code taken from it.; plus 1 direct folder observation by the mailbox owner, covering 2 messages from 2 different senders.",
+      "status": "PASS",
+      "status_reason": "UPGRADED FROM UNVERIFIABLE-BY-INSTRUMENT TO PASS, and the upgrade came from a DIFFERENT observer on a DIFFERENT instrument, not from me re-reading my own. I could prove delivery but not the folder -- the gateway tools return no parentFolderId -- so I declined to claim it. Andrew looked at the mailbox and named the folder. That is the criterion's own requirement ('the folder observed') satisfied by the only party who could satisfy it, and it is why the honest UNVERIFIABLE score was the right one to publish rather than a guess."
     }
   ],
   "controls": {
@@ -323,7 +323,7 @@
     },
     {
       "item": "Repointing the two PRE-EXISTING mailers off support@opalinvest.dev",
-      "reason": "Changing the sender address a client sees is a user-visible decision outside this TO, so it is SURFACED to COO/CTO instead. They remain IAM-denied and will fail on first use -- a live exposure this TO did not create and did not fix."
+      "reason": "NOT DONE, and the reason CHANGED after the fact. It was excluded as a client-visible decision outside this TO; it is now additionally under an explicit HOLD from 1.0.0_SA_CTO~Z (17245) because the premise for repointing -- that support@ was IAM-denied -- was FALSIFIED by Andrew receiving one. See the corrected surprises entry. The two mailers are untouched and they work."
     },
     {
       "item": "Cells 2.3 (SES readiness) and 2.4 (DNS/DKIM/DMARC health)",
@@ -331,7 +331,7 @@
     }
   ],
   "surprises": [
-    "OBSERVATION / BLOCKING-IF-USED: the live opalinvest-auth-lambda-role permits ses:SendEmail ONLY from noreply@opalinvest.dev, while the two pre-existing mailers (password reset, welcome) send from support@opalinvest.dev -- implicitDeny on simulate-principal-policy, with an ISOLATED positive control returning allowed for noreply@. APPLIED but NOT EXERCISED: zero /auth/forgot-password calls in the 30-day log window, on a retrieval proven live by a control. Routed to COO/CTO; not fixed here because the remedy is a client-visible sender change.",
+    "CORRECTED AND FALSIFIED BY THE WORLD -- I REPORT THIS AGAINST MY OWN EARLIER FINDING. I claimed the live auth role denied ses:SendEmail from support@opalinvest.dev and that 'the first real send fails'. THAT CONCLUSION IS FALSE. Andrew received a password reset FROM support@ (~00:4xZ, verbatim: 'Both the password reset and the otp code, from support and noreply respectively, came to top of inbox no junk'). 1.0.0_SA_CTO~Z falsified it first; I then measured the cause. THE ROLE CARRIES TWO SES GRANTS: 'opalinvest-auth-permissions' (Resource '*', Condition ses:FromAddress = noreply@opalinvest.dev) and 'ses-send-email' (Resource arn:aws:ses:us-east-1:313476888478:identity/*, CONDITION: NONE). IAM is a union of Allows and there is no Deny, so the unconditioned grant permits exactly what the conditioned one excludes. CAUSE OF MY FALSE DENY, NOW MEASURED RATHER THAN GUESSED: I passed --resource-arns \"*\", which matches the conditioned statement's Resource but NOT 'identity/*', so the simulator evaluated only the conditioned grant. Re-run with the real ARN arn:aws:ses:...:identity/opalinvest.dev: Decision=allowed, MatchedStatements=['role_opalinvest-auth-lambda-role_ses-send-email']. My positive control was sound and my conclusion was still wrong, because BOTH calls carried the same wrong resource ARN -- a control inside a wrong GRAIN agrees about the wrong thing. THE REAL DEFECT IS THE OPPOSITE OF THE ONE I REPORTED, AND IT IS SHARPER: an intended restriction that restricts nothing, where every future reader of 'opalinvest-auth-permissions' will believe sending is limited to noreply@ when it is not. Repointing support@ -> noreply@ would have buried it. HOLD is in force per 1.0.0_SA_CTO~Z (17245); NO repoint was made and NO IAM policy was widened or narrowed. My new OTP mailer uses noreply@ -- which remains correct on its own merits and is unaffected.",
     "OBSERVATION: build-nodejs-lambda.sh:132 states the src/lib build mirror 'is gitignored so only the canonical copy lives in git'. git check-ignore returned rc=1 -- no rule existed. My own commit tripped over it; fixed for this Lambda only. Other Lambdas may share the latent gap -- surfaced, not swept (LD-0405).",
     "OBSERVATION: opalinvest.dev EXPIRES 2026-12-22 and is now BOTH the portal auth domain and the sole verified SES sending identity. Renewal needs registrar access; this work did not. Already routed to 0.0.0_AB_MSTR~Z by CTO~Z; repeated here so it survives in a durable artifact rather than only in a broker message.",
     "OBSERVATION: a startup roster query on my OWN lane serial surfaced NFRA_SUBSTRATECARDING.TO-CARD-R-W4-COX, which is base/other-lane addressed and is NOT among the ten TOs section 9 bars. The bar's list is one row short of what a single mandated startup probe returns. No action taken on any of them.",
@@ -393,6 +393,11 @@
       "tool": "aws logs filter-log-events",
       "invocation": "AccessDenied and forgot-password sweeps, each followed by a positive control on the same call shape",
       "result": "Both zeros are REAL absences: the control returned live events from the same window. An early 30-minute query looked empty only because --limit returns oldest-first -- caught by the control, not by luck."
+    },
+    {
+      "tool": "aws iam list-role-policies / get-role-policy / simulate-principal-policy (re-run)",
+      "invocation": "Enumerated all 4 inline policies + 1 managed on the live role, read ses-send-email verbatim, then re-simulated support@ with the CORRECT resource ARN instead of \"*\".",
+      "result": "ses-send-email grants ses:SendEmail on identity/* with NO Condition. Re-simulation: allowed, matched by ses-send-email. This MEASURED the cause of my own earlier false deny, which 1.0.0_SA_CTO~Z had correctly left UNMEASURED rather than guessing at."
     }
   ]
 }
