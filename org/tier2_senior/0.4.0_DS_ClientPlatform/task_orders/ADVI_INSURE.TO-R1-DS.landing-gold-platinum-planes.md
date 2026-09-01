@@ -26,6 +26,62 @@
 <!-- seat RELEASED 2026-08-28 17:4xZ by 2.0.0_SA_COO (78492, reversible); open set gated on INS-a-5's
      first fire; re-seat on that fire or Andrew's word. AC1/AC5/AC6 PASS, AC2/AC3 APPLIED-GATED,
      AC4 SHUT. Status stays `pending` deliberately -- a released seat is not a closed TO. -->
+<!-- ⛔ MEASURED STATE RE-READ 2026-09-01 ~11:2xZ BY 0.4.0_DS_ClientPlatform~R (re-seated). THE NOTE
+     ABOVE IS THREE DAYS STALE AND ITS OWN RE-SEAT CONDITION HAS BEEN MET: it gates the open set on
+     "INS-a-5's first fire", and INS-a-5 has now fired on FOUR consecutive scheduled 04:35Z days
+     (bronze present for 2026-08-29/30/31 and 09-01; 23 bronze keys walked under
+     blackdiamond/49financial/bronze/, denominator printed).
+     ⛔ NOTHING HERE RULES A CRITERION. Criterion status is the ISSUER's and 73382 stands. This
+     records WHAT IS TRUE ON THE WORLD so the next seat does not re-derive it; instruments named.
+
+     AC1  PASS STANDS -- and it is no longer only a ruling, it is EXERCISED. The deployed converter
+          `opal-assets-silver-bd49finsurance` fired on TWO consecutive scheduled days and wrote silver
+          at the ruled `fact_*` grammar: date=2026-08-31 (33,165 B / 12,271 B) and date=2026-09-01
+          (33,052 B @04:35:15Z / 12,275 B @04:35:22Z). Rule 17a RE-MEASURED BY ME on the live plane:
+          `.parquet` under `bronze/` = 0 of 23 keys. POSITIVE CONTROL: the same matcher returns 7 over
+          the 14-key silver set, so that zero is ABSENCE and not a dead matcher. The 77/77/77 row
+          agreement is RELAYED from 0.7.0_AE_CloudOps~R 91452 -- measured by that seat, not by me.
+     ⚠ AC1 CARRIES A COVERAGE HOLE ITS PASS DOES NOT COVER, AND THE PASS IS NOT FALSIFIED BY IT: AC1
+          was ruled on "3 of 3 CONVERTIBLE at the grammar" -- a CAPABILITY claim, not a COVERAGE one.
+          THREE convertible bronze days have NO silver: 2026-08-28, 08-29, 08-30. CAUSE MEASURED, not
+          inferred: the converter's own deploy landed 2026-08-30T08:06:05Z, AFTER all three. (08-27
+          detailsearch is a FOURTH absence and is DESIGNED -- 50 of a vendor-attested 77, held
+          UNCONVERTED-REFUSED by the completeness control.) A backfill is the ISSUER's call, not this
+          seat's: spec is FROZEN mid-round and writing production silver is not a QA act.
+
+     AC2  ⛔ THE GATE OPENED AND THE LIMB IS UNBUILT -- the one state change that matters. AC2's
+          APPLIED limb was gated behind AC1's applied limb; THAT GATE OPENED 2026-08-31T04:35Z.
+          MEASURED: `gold/advi/insurance/insurance_nav_current/` holds EXACTLY ONE partition,
+          date=2026-08-25, LastModified 2026-08-27T19:12:18Z, ETag 3dd4f7e0c6f922ee4aed045e111a2d40 --
+          an AD-HOC QA artifact, and ad-hoc artifacts are NEVER production evidence (CLAUDE.md s.5).
+          The producer `data/assets/scripts/gold/bd49f_insurance_nav_current.py` is ABSENT FROM THE
+          DEPLOYED CHAIN ROSTER -- measured on the `_code/` the SSM document `advi-49f-chain-dispatch`
+          actually syncs (`s3://opal-data-49financial/_code/chain_49f_entrypoint.py`, 33,416 B), NOT on
+          the repo copy. That roster carries a00-a07, b00-b03, c00-c02, c04 and `d_publisher_port.py`,
+          and no insurance stage. POSITIVE CONTROL: the same read enumerated all of those, so the
+          absence is measured. CONSEQUENCE: gold is SEVEN DAYS STALE against a source landing daily.
+
+     AC3  UNCHANGED, AND CORRECTLY SO. The AFTER half is still not takeable -- nothing insurance-derived
+          has entered the AM serve. ⚠ FLAGGED: the BEFORE baseline lives in the DEAD ~J TREE at
+          `org/tier2_senior/0.4.0_DS_ClientPlatform~J/deliverables/AC3_AM_BYTE_IDENTITY_BASELINE_BEFORE.json`
+          -- the re-seat moved `instance_path` and this file did not travel with it. The one artifact
+          that CANNOT be re-taken later is the one sitting in the tree nothing points at.
+
+     AC4  STILL SHUT, and the world agrees: `platinum/advi/` on `opal-data-49financial` = 0 keys.
+          ⚠ BUT THIS FACE'S OWN AC4 INSTRUMENT NO LONGER RESOLVES. The block below cites
+          `advi-49f-publisher` State=DISABLED (0.7.0_AE_CloudOps~K, 2026-08-26). THAT FUNCTION DOES NOT
+          EXIST: a census of ALL 200 Lambda functions in the account returns no such name. POSITIVE
+          CONTROL: the same matcher returns `opal-assets-silver-bd49finsurance` and
+          `advi-49f-gold-dispatch`, so it is not failing toward zero. The live emitter is
+          `d_publisher_port.py`, invoked INSIDE the deployed chain at :351. ⛔ THE SOVEREIGN GATE IS
+          UNAFFECTED -- a gate is a WORD, not a resource state, and nothing here loosens it -- but a
+          hold that names a SUBJECT rather than a PROPERTY goes unsatisfiable when the substrate
+          shifts, so AC4's re-read instruction needs RE-POINTING by the issuer.
+
+     AC5 / AC6  UNCHANGED. SOURCE-grounded; no re-measurement owed and none taken.
+
+     STATUS STAYS `pending`. Not mine to move, and the enum still cannot express issuer-ruled closure
+     (0 of 1,067 criterion rows estate-wide carry a CLOSED value, census @4776a2305c). -->
 
 <priority>P0 -- Andrew-direct 2026-08-25 ~12:0xZ named this project as one of two waiting on the decomp seat. PRD v0.2 approved by him ~18:3xZ 08-24; the project has been unblocked and unseated since.</priority>
 <date>2026-08-25</date>
