@@ -34,6 +34,29 @@ Your `PLATFORM_OPS_USERMGMT` faces (W1/W2/W3) are CLOSED as of this seating. Thi
 ⛔ **NO SMS to a real (unverified) user until: SP-1 TFN verified · SP-2 sandbox exited or the number verified · Andrew's go.** The sandbox enforces verified-destinations-only; SB-1 asserts it in code too.
 ⛔ **SB-5 APPLY waits on the TFN ARN.** Author the Terraform now; do not apply an IAM grant scoped to an ARN that does not exist. No monitor/alarm on this surface (moratorium).
 
+## ⛔ AMENDMENT 1 — CTO~Z acceptance contract (18859, adopting CVO~Z 18845). These REFINE the atoms above and are BINDING.
+⛔ **CHANNEL IS SERVER-AUTHORITATIVE AND BOUND AT ISSUE — measured gap: the challenge row does NOT persist
+a channel today (`mfa.ts:245` hardcodes `'email'`; the challenge Item has no channel field).** So:
+- **SB-4 (widened):** (a) PERSIST `channel` on the challenge row at `issueChallenge`, set from
+  `user.mfaChannel` (passed by `login()`) — exactly as the RECIPIENT is bound today ("the challenge names
+  its own recipient; the caller does not"). (b) The existing events (`mfa_code_sent`, `mfa_send_refused`,
+  `mfa_challenge_issued`) carry a **`channel` PARAMETER** — ⛔ **NEVER a new event name (`mfa_sms_sent`).
+  HARD-FAIL criterion (Rule 24: channel is a dimension, not a new type)** — a new name silently under-counts
+  every `mfa_code_sent` census and voids CVO~Z's certified Act-C rubrics.
+- **SB-2 (corrected):** `resendMfaCode` dispatches on the **CHALLENGE's** stored channel, NOT re-derived
+  from the caller or re-read from `user` at resend time. ⛔ Deriving the channel from the caller is F-1's
+  unconditioned-choice lesson on the APPLICATION plane (an SMS demanded for a phone-less account; per-channel
+  budget bypassed by channel-switching). A mid-flight `email→sms` preference change must NOT switch an
+  in-flight challenge's channel — it is bound at issue.
+- **SB-3:** the `login()` response's `channel` = `user.mfaChannel` (`email|sms`) so `0.4.0_DE_ClientPlatform~Z`'s
+  per-channel "we texted/emailed you" copy is correct. Act B parity unchanged (issue, send NOTHING).
+- **BUDGET:** per-challenge `MAX_SENDS` is UNCHANGED (the accepted bound: N logins = N challenges = N×budget).
+  SMS makes the worst case partly billable → the dollar backstop is the AWS **spend cap (SP-2, a SECURITY
+  parameter, held at CTO~Z)**, not app logic. Named edge (backstopped, not hidden): a mid-flight `email→sms`
+  change can leave one email + one sms live challenge = 2×MAX_SENDS, half billable.
+⭐ **CVO~Z's Act B/C rubrics (`ef3ec6f019`, `57dd460e6c`) TRANSFER unchanged; only the oracle binding moves,
+and SB-4(b) keeps it stable. CVO~Z pre-registers the SMS criteria to CTO~Z for review BEFORE your code exists.**
+
 ## REPORTING
 Validation `2.0.0_SA_COO~Z`; acceptance `1.0.0_SA_CTO~Z`; certification `3.0.0_SA_CVO~Z`. Surprise items
 → `3.0.0_SA_CVO~Z` (cc `0.0.0_AB_MSTR~Z`), one line, keep working. Push state MEASURED — is-ancestor

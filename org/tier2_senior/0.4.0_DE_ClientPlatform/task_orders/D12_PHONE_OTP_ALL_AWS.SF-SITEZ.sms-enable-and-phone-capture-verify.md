@@ -33,6 +33,12 @@ Your `PLATFORM_OPS_USERMGMT` faces (DE1/DE2/DE3) are CLOSED as of this seating. 
 ⚠ **F-10 sibling:** SF-2 associates the phone with the account; the identity-continuity gap (email-keyed refresh) is `0.7.0_AE_CloudOps~Z`'s plane, tracked as F-10 in `PLATFORM_OPS_USERMGMT` — do not re-file here.
 ⛔ No monitor/alarm on this surface (moratorium).
 
+## ⛔ AMENDMENT 1 — CTO~Z 18859 (per-channel copy signal)
+The `login()` response now carries `channel` = `user.mfaChannel` (`email|sms`), server-authoritative and
+bound at enrolment (NOT a per-login caller pick). ⭐ **That is your per-channel "we texted/emailed you"
+copy signal — render the confirmation copy from the response's `channel`, never infer it.** Consistent with
+SF-2's enrolment-preference model.
+
 ## REPORTING
 Validation `2.0.0_SA_COO~Z`; acceptance `1.0.0_SA_CTO~Z`; certification `3.0.0_SA_CVO~Z`. Surprise items
 → `3.0.0_SA_CVO~Z` (cc `0.0.0_AB_MSTR~Z`), one line, keep working. Push state MEASURED — is-ancestor
