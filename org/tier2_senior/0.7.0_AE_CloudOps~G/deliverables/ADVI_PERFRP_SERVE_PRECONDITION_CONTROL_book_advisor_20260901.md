@@ -122,9 +122,36 @@ Ten-digit, zero-padded — the same shape as the schwab custodian ids quoted at 
 (`0022002671`, `0026881039`, `0065125789`). They sit in `client` and `relationship_id` **too**, so for
 these 132 rows pseudonymisation is absent across all three fields.
 
-⚠ **STATED AT ITS REAL STRENGTH: SHAPE-CONSISTENT, NOT CONFIRMED.** These 57 tokens have NOT been
-matched against `dim_account_xref`. The confirming read is one join (are any present as
-`schwab_account_id`, date=2026-08-28, 6,201 rows, with a positive control on a known-good id).
+### ⛔ CONFIRMED BY JOIN — these are REAL custodian account identifiers, not account-SHAPED strings
+
+An earlier revision of this section read *"SHAPE-CONSISTENT, NOT CONFIRMED."* **That is now understated
+in the direction that matters.** The join, with controls in both directions:
+
+```
+  DENOMINATORS
+    distinct sentinel tokens from the 132 rows : 57
+    dim_account account_id population          : 8,633 (rows 8,633)
+
+  JOIN: tokens present as a real dim_account.account_id ....... 57 of 57
+    samples: 0012581195  0013341925  0014816851  0015346352  0017329807
+
+  POSITIVE CONTROL (the three schwab ids at 1.0.0_SA_CTO 90328 s.3):
+    0022002671 True    0026881039 True    0065125789 True
+  NEGATIVE CONTROL:
+    9999999999 False
+```
+
+Both directions hold — the instrument CAN see real ids and does NOT match everything. **57 of 57.**
+
+>> **THEREFORE THE 08-28 RECORD IS FALSE ON MEASUREMENT, NOT MERELY SUSPECT.** It states this
+   population was *"replaced by an opaque id at the re-open with the label-field removal."*
+   **An opaque id does not resolve in `dim_account`. These do, all 57.** The replacement either never
+   landed or did not hold, and the record has carried it as done for twelve days. <<
+
+**REMEDY OPTIONS (reported, not chosen — `1.0.0_SA_CTO` rules):** (a) `--hold-leaves
+perfrp_book_advisor` on the activation — available immediately in this lane, the publisher already
+carries the flag and it BUILDS + manifests but never writes; (b) a producer-side opaque-id fix in the
+DS emitter — durable, and the one the 08-28 record already believed had happened.
 
 ⭐ **AND THE FACT THAT MAKES THIS MORE THAN A CONTROL BUG** (`1.0.0_SA_CTO` 90449 s.2): the 08-28
 precondition text *itself names this population* — *"the UNMAPPED sentinel token, **132 rows,
