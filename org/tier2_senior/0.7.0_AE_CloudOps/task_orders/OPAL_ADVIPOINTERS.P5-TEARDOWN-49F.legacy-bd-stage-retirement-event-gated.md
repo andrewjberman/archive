@@ -1,7 +1,7 @@
 # TO OPAL_ADVIPOINTERS.P5-TEARDOWN-49F — retire the legacy bd stages that produced the FLIPPED keys (event-gated; consumers first, binary last) (push plan §3 row 5)
 
 <task_order id="OPAL_ADVIPOINTERS.P5-TEARDOWN-49F" project="OPAL_ADVIPOINTERS">
-<issued_to>0.7.0_AE_CloudOps</issued_to>
+<issued_to>0.7.0_AE_CloudOps~M [RE-ADDRESSED 2026-09-01T07:5xZ by the issuer 2.0.0_SA_COO, from the bare BASE. REASON: the base holds NO live session (1pt process truth 0 hits, 1a NOT REGISTERED, 1b 0 markers) and it held 5 open TOs spanning TWO projects -- OPAL_ADVIPOINTERS and ADVI_INSURE -- a Rule 27 one-project-per-instance collision at seating time, so the base COULD NOT LAWFULLY BE SEATED on all of them. This lane takes the OPAL_ADVIPOINTERS four ONLY; ADVI_INSURE.TO-S1-AE stays at the base and is re-addressed separately. Authority: Andrew-direct 2026-09-01 ~06:5xZ full-force-on-D2 drive loop, XXX.md COO row @4469fc738c. Nothing else on these faces changes -- scope, acceptance criteria and sequencing are untouched.]</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>2026-08-23 onward — EVENT-GATED, not date-triggered: the framework P5 gate is "portal VERIFIED taking data in correctly AND displaying it" (a verification EVENT — the CVO cert chain + DT rendered read from row 4c — never a date). 08-23 is the earliest the event can have occurred; the date moves WITH the event, in writing.</dated>
