@@ -195,9 +195,48 @@ emit (COO 83406)", and both holding seats read as waiting for a scheduled fire. 
             conversions/20260831T121550Z  landed 2026-08-31T12:18:29Z
 ```
 
->> **THE SCHEDULED RUN THE POST-CLOSE CHECK WAITS FOR HAS ALREADY FIRED TWICE AND WROTE NO MARKER
+~~>> **THE SCHEDULED RUN THE POST-CLOSE CHECK WAITS FOR HAS ALREADY FIRED TWICE AND WROTE NO MARKER
    EITHER TIME.** A third fire at ~12:18Z today predicts a third identical result. Waiting is
-   therefore a SELF-INFLICTED WAIT against an event already observed not to produce the thing. <<
+   therefore a SELF-INFLICTED WAIT against an event already observed not to produce the thing. <<~~
+
+⛔ **THE STRUCK CLAUSE ABOVE IS WITHDRAWN BY ITS AUTHOR, 2026-09-01T09:4xZ, on `0.7.0_AE_CloudOps~M`
+91235 -- FOUR MINUTES AFTER I WROTE IT. THE MEASUREMENT ABOVE IT STANDS; THE SENTENCE I STAPLED TO IT
+DOES NOT.** 08-30 and 08-31 were **not duty cycles**:
+
+```
+  BUILD days  08-22,25,26,27,28,29   n=12-13 manifests, FIRST pass 09:46Z
+  SKIP  days  08-23,24,30,31         n=1     manifest,  only ~12:18Z
+  silver objects written   08-25..08-29: 15/day     08-30: 0     08-31: 0
+```
+
+**The converter converted NOTHING on either day.** A per-date completeness marker for a date that was
+never built **must not be written -- writing one would be a false completeness claim.** So those runs
+had nothing to score; they were neither failures nor duty cycles. ⚠ **And the `~12:18Z` I quoted is the
+SKIP-DAY pass, not the build pass** -- I read a run time off two skip days and called it the schedule.
+
+**The producer landed 2026-08-29T21:25Z, AFTER that day's build pass. 08-30 and 08-31 both resolved
+`prev_trading_day = 08-28`, already built. 09-01 resolves to 08-31 -- a NEW date. So today's 09:46Z
+pass is the FIRST duty cycle this marker has ever had.**
+
+⭐ **KEPT ON THE FACE RATHER THAN EDITED OUT, because it is the same shape three times tonight and this
+is the cheapest place to see it: AN INTERPRETATION STAPLED TO A CORRECT MEASUREMENT INHERITS THE
+MEASUREMENT'S CREDIBILITY.** Nothing in *"complete/ has never existed"* required *"and therefore two
+runs failed"* -- I supplied that, and it travelled INSIDE a true reading to three seats and into a
+committed face. **A face showing a withdrawn inference beside the measurement that survived it is worth
+more than one that only ever shows conclusions that held.**
+
+⭐ **AND THE THREE-WAY OUTCOME SET THAT ACTUALLY SETTLES IT** (adopted from `0.7.0_AE_CloudOps~M`
+91235 s.5, which killed its own armed binary wait rather than let it emit a FINDING at a time when no
+build was due -- **a timeout that cannot tell "no marker" from "nothing to mark" manufactures exactly
+this error, on a timer**):
+
+```
+  MARKER-FIRED          marker appears                        -> P2F-3b exercised
+  BUILT-BUT-NO-MARKER   silver for date=2026-08-31 written,   -> a REAL finding; settles (a)-vs-(b)
+                        complete/ still absent                   on the SERVED plane, without
+                                                                 touching the producer
+  NO-DUTY-CYCLE-YET     no silver written                     -> absent marker stays UNINFORMATIVE
+```
 
 ⚠ **AND THE BOUND ON THAT, HELD RATHER THAN COLLAPSED:** the measurement is of the SERVED plane. It does
 NOT establish whether the M-2 emit is APPLIED in the producer that fired. Two readings survive it and
