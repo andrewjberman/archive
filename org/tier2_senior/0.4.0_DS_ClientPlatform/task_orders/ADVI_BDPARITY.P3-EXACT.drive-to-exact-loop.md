@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T20:05Z</issued>
 <dated>from 2026-08-25</dated>
-<status>staged -- GATED ON P2-CENSUS</status>
+<status>pending -- SEATED 2026-09-01 05:0xZ at 0.4.0_DS_ClientPlatform~C (spawn by 2.0.0_SA_COO). P2-CENSUS gate DISCHARGED: P2-2 complete 5,309 of 5,309, per-cell table @e12a0b2960. Opens on the SCREENED population per 2.0.0_SA_COO 90726 s.3(A) -- the 64 >100pct-day accounts EXCLUDED at ACCOUNT grain (90756 s.1), provisional, EXCLUDED IS NOT CONDEMNED. Cycle 1 COMPLETE (record: org/tier2_senior/0.4.0_DS_ClientPlatform~C/deliverables/ADVI_BDPARITY_P3-EXACT_CYCLE1_20260901.md) -- class LARGE, four mechanisms named, ZERO dispositions taken.</status>
 <priority>P1-program</priority>
 <authority>D2_ADVI_49F_E2E_PRD.md §6 row 3 at dispatch vintage @c379cb6521. Placement: LAPTOP (Andrew-direct: "D2 is certainly laptop fabric").</authority>
 </task_order>
