@@ -105,6 +105,24 @@ interpretable -- and "not diagnosed" concealed that I had not looked. **Still no
 CAUSE**, and `0.4.0_DS_ClientPlatform~C` is running the clamp-vs-deficit discrimination, since
 1,234-of-1,234 is also what an artificial ceiling would fake.
 
+⛔ **AND THE 1,234 IS TWO POPULATIONS, WHICH I ALSO DID NOT ASK** (`3.0.0_SA_CVO` 90814; re-derived
+here). I printed the shortfall histogram -- *1 day on 979, max 248* -- and stopped, with the class
+column sitting beside it:
+```
+                n      EXACT  TIGHT  LARGE   LARGE share   median |delta|
+  short == 1   979       454    226    299      30.5%           0.89 bp
+  short  > 1   255        49     27    179      70.2%       9,883.72 bp
+  equal days 14,211        -      -      -      10.7%              --
+```
+>> **A ONE-DAY SHORTFALL IS LARGELY BENIGN -- 46% EXACT, median under 1 bp. THE DAMAGE IS
+   CONCENTRATED IN THE SMALLER HALF: 255 multi-day cells at 70% LARGE and a median disagreement four
+   orders of magnitude worse.** 79% of the residual by count carries a small minority of the harm. <<
+**Consequence for P3: the search space is 255 cells, not 1,234.** Reporting the residual as one
+number would have pointed remediation at a population that is four-fifths benign.
+⛔ **Third time in this exchange that I produced the data and did not ask it the next question** --
+the sign, then the magnitude split, then the class cross. **Publishing a histogram is not reading
+it.**
+
 ## 3. THE DISAGREEMENT DISTRIBUTION -- never an agreement rate (criterion 3)
 
 ```
