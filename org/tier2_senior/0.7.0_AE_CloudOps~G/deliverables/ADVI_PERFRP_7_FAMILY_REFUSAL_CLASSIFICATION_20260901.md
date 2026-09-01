@@ -39,7 +39,43 @@ no authority. **The emitter RAN and DIED.**
 > sovereign deferral produce the SAME STATUS STRING, so the manifest showed seven considered
 > decisions where there was one decision and five bugs.
 
-## 3. ⭐ ROOT CAUSE — ONE MECHANISM, NOT FIVE INPUTS
+## 3. ROOT CAUSE — ⛔ **RETRACTED AS WRITTEN: IT IS THREE PATHS, NOT ONE MECHANISM**
+
+> ⛔⛔ **THE HEADING BELOW AND ITS "ONE MECHANISM, FIVE FAMILIES" CLAIM ARE REFUTED. READ §3a FIRST.**
+> Retracted 2026-09-01 ~08:0xZ after `3.0.0_SA_CVO` 90994; **the wrong sentence originated HERE**, in
+> 90962 s.2 and in this file, and CVO amplified a claim this lane had already overstated. Do not book
+> it as a grading failure.
+>
+> **HOW IT HAPPENED, and it is in this file's own evidence:** §3 says plainly *"obtained by running
+> one emitter directly."* **One emitter, five families.** The n=1 was disclosed in the same breath as
+> a conclusion that exceeded it — **a disclosed sample size does not license generalising past it; it
+> only makes the overreach auditable.** I diagnosed by running ONE instance, then read source only at
+> the site that instance reached. The census that would have caught it — call sites of each gold-read
+> helper, occurrences CLASSIFIED rather than counted — is the same discipline I applied to every
+> `comp-find` denominator tonight and did not apply to my own root cause.
+
+### 3a. CORRECTED — three distinct paths, verified at source by this lane
+
+```
+  activity_{rel,acct}    (2)  _activity:291-292    _read_gold("canonical_valuation" / "dim_relationship")
+  allocation_{rel,acct}  (2)  _allocation:623-624  _read_gold_meta(...) DIRECT -- never via _read_gold
+  performance_relation.  (1)  _performance:387     _read_twr_window(window_dates) -- NOT a gold read
+```
+
+>> **A FIX SCOPED TO `_read_gold` RESTORES THE ACTIVITY PAIR AND NOTHING ELSE — 2 OF 5.** The five
+   share a **PATTERN** (a literal `asof` resolved against a store the port has already aliased), not a
+   **MECHANISM**. `3.0.0_SA_CVO`'s line is the one to keep: *a pattern is fixed five times; a
+   mechanism is fixed once.* <<
+
+⚠ **THE FIX-SCOPE CONSEQUENCE IS THE WHOLE COST:** a TO cut to "fix `_read_gold`" would land, verify
+green on the activity pair, and leave allocation and `performance_relationship` still crashing —
+**with a green fix report standing over three families that never moved.**
+
+**WHAT SURVIVES:** the 7-of-7 classification (§1), "5 of 7 are unhandled crashes" (§2), the
+activity-pair diagnosis and its named missing input (below) — **for 2 families, not 5** — and the
+pattern across three sites. **WHAT DOES NOT:** "one mechanism accounts for every observation."
+
+### 3b. The original text, kept dated rather than deleted (TRUE OF THE ACTIVITY PAIR ONLY)
 
 Obtained by running one emitter directly (the manifest cannot show it — see §5), then read at source:
 
@@ -63,7 +99,11 @@ Obtained by running one emitter directly (the manifest cannot show it — see §
 publish; families reading via `_read_gold` crash **whenever asof has no real partition**. That is
 **date-dependent, not design-dependent** — so the set moves between runs, `gainloss_{rel,acct}` were
 listed as by-design refusals and now publish, and `performance_relationship` lives or dies by the
-calendar. **One mechanism accounts for every observation.**
+calendar. ~~**One mechanism accounts for every observation.**~~ ⛔ **REFUTED — see §3a.** It accounts
+for the ACTIVITY PAIR. `allocation_{rel,acct}` reach S3 via `_read_gold_meta` DIRECT and
+`performance_relationship` via `_read_twr_window`, which is not a gold-partition read at all. The
+date-dependence explanation above still holds as a PATTERN across all three sites; the single-cause
+sentence does not.
 
 ## 4. THE TWO DELIBERATE ONES
 
