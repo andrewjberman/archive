@@ -13,7 +13,7 @@ preceded by "I'd prefer to operate this entirely out of AWS." BUILD LEG AUTHORIZ
 PRD: `1.0.0_SA_CTO~Z` @`65f7a59396`.
 </authority>
 <proof_of_spec>
-  <expected_criteria>SB-1,SB-2,SB-3,SB-4,SB-5</expected_criteria>
+  <expected_criteria>SB-1,SB-2,SB-3,SB-4,SB-5,SB-6</expected_criteria>
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D12_PHONE_OTP_ALL_AWS.SB_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 </task_order>
@@ -56,6 +56,37 @@ a channel today (`mfa.ts:245` hardcodes `'email'`; the challenge Item has no cha
   change can leave one email + one sms live challenge = 2×MAX_SENDS, half billable.
 ⭐ **CVO~Z's Act B/C rubrics (`ef3ec6f019`, `57dd460e6c`) TRANSFER unchanged; only the oracle binding moves,
 and SB-4(b) keeps it stable. CVO~Z pre-registers the SMS criteria to CTO~Z for review BEFORE your code exists.**
+
+## ⛔ AMENDMENT 2 — SB-6 SERVER GUARD (CVO~Z 18909, CORRECTED by AE~Z 18919 + MSTR~Z 18914; BINDING)
+⛔ **THE LOOSE GUARD (CVO~Z, confirmed verbatim by AE~Z at source): `updateMfaPreference(email,'sms')` with
+no `phoneNumber` passes both guards today — enum + format-IF-supplied. Nothing checks a number EXISTS, let
+alone that it is VERIFIED.**
+⛔ **CHAIN CORRECTED: CVO~Z's silent-lockout chain measured the tree BEFORE SB-3 committed. SB-3 as committed
+(`8fd0ae2810`) requires `user.mfaChannel==='sms' && user.phoneNumber` before issuing — so a no-number sms
+user gets a LOUD 503 at login (naming support), NOT a silent 200-no-text.** ✅ CVO~Z's core conclusion
+stands: Amendment 1 makes the loose guard LOAD-BEARING; the committed consequence is a hard 503, not a
+silent lockout.
+⚠ **RESIDUAL that DOES survive (AE~Z §3, narrower): sms+number user logs in (channel frozen 'sms') → the
+number is REMOVED while the challenge is live → resend reads the row 'sms', finds no number → SILENT refuse
+(the route must not be an account probe) → 200, no text, until the challenge TTLs (≤10 min, self-healing;
+fresh login then 503s).** Real, bounded, worth closing.
+✅ **REACHABILITY (MSTR~Z 18914): NOT reachable today — the UI ships sms `available:false` and NO sender
+exists in the deployed handler. A BUILD-TIME finding, not a live exposure; Andrew + aj@ cannot reach it.
+NOT a reason to soften it.**
+- **SB-6 — COMMISSIONED (AE~Z's requested "say the word"): `updateMfaPreference` MUST REJECT
+  `mfaChannel='sms'` unless a phone number is SUPPLIED in the same call OR ALREADY STORED on the record.**
+  ~3 lines, AE~Z's lane. ⛔ A UI cannot satisfy this — **F3 is a SERVER refusal; routing it to SF-2 UI is
+  D12's original defect shape (a client enforcing what the server did not).** Acceptance exhibits a DIRECT
+  API call requesting sms with no number and the SERVER REFUSING it (a guard with no exhibited refusing
+  input is untested).
+- ⚠ **SB-6 is only the "a number EXISTS" half. The "a number is VERIFIED" half is JOINT** — verification
+  state has no home in the user record today; SF-2 adds the field and the server checks it. **F1** (unverified
+  number never stored): oracle = the USER RECORD read directly, BRACKETED before/after (never a client/handler
+  self-report).
+- ⛔ **DEADLINE (MSTR~Z): SB-6 MUST BIND BEFORE SF-1 flips sms `available:true` — not before ship, before
+  that ONE LINE.** `0.4.0_DE_ClientPlatform~Z`: treat `available:true` as gated on SB-6 + SF-2's verify path,
+  and SAY SO on the SF row rather than holding it in your head.
+- `1.0.0_SA_CTO~Z` rules the exact error shape / enforcement points; the INVARIANT (refuse it) is not in dispute.
 
 ## REPORTING
 Validation `2.0.0_SA_COO~Z`; acceptance `1.0.0_SA_CTO~Z`; certification `3.0.0_SA_CVO~Z`. Surprise items
