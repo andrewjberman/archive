@@ -46,6 +46,50 @@ NOT IN THIS TO: `transactions_relationship` (RULED-REFUSAL, sovereign deferral, 
 
 ---
 
+## ⛔⛔⛔⛔ AMENDMENT 3 — 2026-09-01T08:2xZ — **THE THREE GUARDED SITES ARE TWO REMEDIES, NOT ONE TEMPLATE**
+
+**Amendment 2 said "the correct pattern already exists at three sites — bring six call sites to it."
+THAT SENTENCE IS UNSAFE AS WRITTEN.** Found by `3.0.0_SA_CVO` (91047 s.2) while grading amendment 2
+PASS. The classification stands; the REMEDY GUIDANCE was wrong.
+
+```
+  :168   _read_gold_le     resolves true_date FIRST, then reads   -> RESOLVE: "it exists under a
+                                                                     different date — go find it"
+  :241   _read_twr_window  catches NoSuchKey, treats as missing   -> TOLERATE: "this day genuinely
+  :1083  flow_ledger       catches NoSuchKey, RECORDS fl_absent      has no data — proceed without it"
+```
+
+>> ⛔ **APPLYING THE *TOLERATE* PATTERN TO A SITE WHOSE PARTITION IS MERELY ALIASED CONVERTS A LOUD
+   CRASH INTO SILENT DATA LOSS. The emitter would stop dying, start succeeding, and emit output
+   MISSING THE VERY DATA IT FAILED TO FIND — closing AC1, passing the negative control, and producing
+   a wrong answer quietly. STRICTLY WORSE THAN TODAY'S CRASH, WHICH AT LEAST ANNOUNCES ITSELF.** <<
+
+**The diagnosis says the port ALREADY KNOWS the partition is absent at the literal `asof` and holds a
+staged alias — which points at `:168`'s RESOLVE pattern for the six. BUT THAT IS UNVERIFIED PER SITE,
+and amendment 2 said "guarded" without saying WHICH GUARD.**
+
+### `R2DS-AC1` (AMENDMENT 3, AUTHORITATIVE — supersedes amendments 1 and 2)
+
+All six unguarded `_read_gold_meta` call sites resolve or declare absence rather than raising —
+**and each carries a one-line justification naming WHICH remedy and WHY:**
+
+```
+  RESOLVE             the partition EXISTS under the true date (the :168 pattern)
+  TOLERATE-AND-RECORD it genuinely does not exist for that day (the :1083 pattern)
+```
+
+**Six sites, six named remedies, six one-line reasons.** ⛔ **A SITE FIXED WITH THE WRONG GUARD PASSES
+EVERY OTHER ARM IN THIS TO.** That is the whole reason this clause exists.
+
+⭐ **WHERE TOLERATE IS GENUINELY CORRECT, USE `:1083` — TOLERATE-AND-RECORD — NOT `:241`.** `:1083`
+counts the absence into `fl_absent`. **An absence that is counted can be graded later; one that is
+skipped silently cannot.** Prefer the disclosing template even where the tolerating one would work.
+
+⛔ **THE NEGATIVE CONTROL IS UNCHANGED AND NOW MATTERS MORE:** `:168`, `:241`, `:1083` must not change
+behaviour. They are simultaneously the remedy templates and the arm that must stay green.
+
+---
+
 ## ⛔⛔⛔ AMENDMENT 2 — 2026-09-01T08:1xZ — **SUPERSEDES AMENDMENT 1 BELOW. IT IS ONE MECHANISM.**
 
 **AMENDMENT 1 (three mechanisms) IS WITHDRAWN. `0.4.0_DS_ClientPlatform~G` reversed its own source
