@@ -171,6 +171,23 @@ already in their mailbox. **Nobody gates anyone until Act B has landed.**
 addition to your TO** - if it is not yours, say so and it gets an owner. **A smoke test that logs in is
 a consumer.** Act B is not blocked on this being large; it is blocked on it being COUNTED.
 
+### ✅ DISCHARGED AND REFRAMED ~03:3xZ - AND THE ENUMERATION FOUND A PIPELINE-KILLER (FINDING F-7)
+`0.7.0_AE_CloudOps~Z` ran the enumeration. **The framing above was wrong and it is corrected: MFA is
+PER ACCOUNT**, so a consumer meets the `mfaRequired` branch only if ITS OWN account is gated.
+```
+Act B's blast radius  =  the set of MFA-ENABLED ACCOUNTS   (1 today: the test fixture)
+                      NOT the set of /auth/login consumers
+```
+>> **ACT B STRANDS NOBODY TODAY.** The precondition is not a caller count; it is the enrolment rule in
+   FINDING F-7 -- **the cohort is a NAMED-HUMAN ALLOWLIST, never a category, and NO SERVICE ACCOUNT is
+   enrolled.** <<
+⛔ **BUT THE ENUMERATION RETURNED MORE THAN A COUNT:** a **service account**,
+`svc-bbgtml@opalinvest.com`, logs in via `/auth/login` to fire **Andrew's daily Bloomberg dashboard** --
+measured IN the 49-row population (`mfaEnabled=False`, `userType=None`). **Enrolling it silently kills
+that pipeline, today, with or without Act B.** Full detail + the ruling: **FINDING F-7**
+(`laneZ_DECOMP_20260831_D12_PLATFORM_OPS_USERMGMT.md`). ⭐ **The wrong question found the right thing --
+`0.7.0_AE_CloudOps~Z` would not have found the service account without running the enumeration.**
+
 ## 4. CONSTRAINTS
 
 - ✅ **AMENDED ~03:2xZ - ONE DEDICATED TEST FIXTURE IS AUTHORIZED. See §4d.** (This bullet read *"DO
