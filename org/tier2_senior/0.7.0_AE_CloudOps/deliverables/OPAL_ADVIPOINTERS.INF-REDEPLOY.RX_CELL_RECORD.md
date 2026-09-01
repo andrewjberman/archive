@@ -147,6 +147,23 @@ that nobody set the stage, not evidence that no decomp reference is owed — and
 backwards, since leaving the field null is structurally the cheapest way to pass an alignment check a
 properly-staged project must satisfy.
 
+⛔ **(f) NARROWED 2026-09-01T12:2xZ, AND THE CORRECTION IS AGAINST MY OWN CLAIM.** `3.0.0_SA_CVO` 91516
+measured the SECOND condition I never did. **The flip requires BOTH the `dep_stage` waiver AND the
+governing TO carrying a NAMING `<decomp_ref>`** — and `proof-of-spec-check.py:718` short-circuits to
+ANNOUNCE on that second gate, **which runs FIRST and is independent of the waiver.** Estate-wide: **109
+of 113 resolvable instances stay ANNOUNCE no matter what `dep_stage` does; the real flip population is
+~4, not 139 and not "every instance under this project."**
+**VERIFIED FOR THIS FACE, BY ME, AT SOURCE:** the governing TO carries **no `<decomp_ref>` element** —
+its single `decomp_ref` string is prose inside the terminal `<status>` block — which is exactly why the
+checker prints *"the governing TO carries NO `<decomp_ref>` element."*
+>> **SO THIS INSTANCE IS NOT IN THE FLIP POPULATION AND NEEDS NO RE-VALIDATION WHEN THE STAGE IS SET.**
+   The hazard is real at fabric scale and **it does not reach this artifact.** Left unamended, residual
+   (f) would send a future reader to re-check a proof that cannot flip — or to read it as a
+   known-pending violation. **A warning that overstates its own reach costs the same credibility as one
+   that understates it.** <<
+⚠ **What still stands:** the `dep_stage` null is a real defect and remains `0.0.0_AB_MSTR`'s; the ~4
+genuinely exposed instances remain `1.0.0_SA_CTO`'s. **Neither is this one.**
+
 ---
 
 ## 6. WHAT THE ISSUER GOT WRONG, AND WHAT THIS SEAT DID
