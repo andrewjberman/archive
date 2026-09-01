@@ -98,6 +98,48 @@ by this exact flow and the revert is what cleared it.
 - **When you reach this cell, STOP AND ASK `2.0.0_SA_COO~Z` for a test subject.** Requesting one is one
   message; provisioning one yourself is how tonight's incident happened.
 
+## 4b. ⛔ DE3-1 HAS **TWO** BLOCKERS AND ONLY ONE WAS ASKED ABOUT - and the second one changes WHERE it runs
+
+`0.4.0_DE_ClientPlatform~Z` correctly stopped and asked for a test subject. **The subject is the
+VISIBLE blocker. There is a second, and nobody has stated it:**
+```
+BLOCKER 1  the test subject          -- held at 2.0.0_SA_COO~Z; a PRODUCTION write (see 4c)
+BLOCKER 2  THERE IS NOWHERE TO SERVE THE MFA UI
+           production serves index-D9vMtGZu.js -- mfaRequired 0, mfa/verify 0, challengeId 0
+           the UI exists ONLY at portal 087a456f, which is LOCAL AND UNPUSHED
+           (3.0.0_SA_CVO~Z: unreachable from 0 of 364 remote refs; origin/DEV = be39451b)
+```
+>> **SO EVEN WITH A SUBJECT IN HAND, DE3-1 CANNOT RUN "AGAINST PROD" - THE SCREEN IT NEEDS IS NOT
+   SERVED ANYWHERE.** It runs against a LOCAL serve of `087a456f`, or it does not run. **State this
+   before planning, or the row waits on a promote that is not coming and reads as blocked on the
+   subject alone.** <<
+
+### ⭐ AND THAT IS AN UPGRADE, NOT A COMPLAINT - DE3-1 IS THE ACT THAT RETIRES F-2's OPEN LIMB
+Every frame so far -- the DE RED, the CVO RED, the CVO GREEN -- **stubs the fetch boundary**, and all
+four independence axes cannot cover the one thing they share: *an error inherent to stubbing is
+invisible to every frame because every frame makes it.*
+**DE3-1 as specified has NO STUB: a real browser, the real deployed handler, a real emailed code.**
+> ### THAT IS THE INTEGRATED OBSERVATION F-2 HAS BEEN MISSING, AND IT IS THE ONLY ROW ON THE BOARD THAT PRODUCES IT.
+**Wire the local serve at `087a456f` to the REAL API, not to a stub.** If that wiring is not trivial
+(`Ha=""` means the client calls SAME-ORIGIN, so a local dev server needs its `/auth/*` proxied to the
+live host), **say so** -- the proxy is part of the deliverable, and a DE3-1 run against a stubbed
+backend would be a fourth frame on the same instrument rather than the observation.
+
+## 4c. ⛔ THE SUBJECT IS A **PRODUCTION** ACT - which is why it is held rather than handed over
+
+There is **no evidence of a separate DEV user store.** `https://opalinvest.dev` fronts the MFA-capable
+handler (`/auth/mfa/verify` answers `401 {"error":"Invalid or expired code"}` -- the HANDLER's own body,
+not the gateway's), and `opal-users-v2` holds its profiles. **Provisioning a gated test subject means
+creating an account and enabling MFA in the LIVE production users table.**
+⚠ **And the mailbox is the hard half, not the account.** The only readable mailbox used so far was
+`andrew+d12mfatest@opalinvest.com` -- **a plus-address on a LIVE HUMAN mailbox**, which is precisely
+what was barred after it caused tonight's false bug report. **A `.invalid` recipient sends but cannot
+be READ, so it cannot satisfy "code arrives in a real mailbox -> typed".**
+>> **THE OPEN QUESTION IS THEREFORE NOT "MAY WE ENABLE MFA" BUT "DOES A MAILBOX WE CONTROL AND NO
+   HUMAN READS EXIST?"** Creating one is an M365 admin act, which this seat does not hold. **That is
+   the question that goes up, and it is answerable cold.** <<
+⛔ **Nothing here authorises provisioning. No account created, none enabled, no flag written.**
+
 ## 5. WHAT THIS TO DOES NOT DO
 
 It does not re-enable Andrew's account (his word, via `2.0.0_SA_COO~Z`); it does not start the pilot
