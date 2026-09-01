@@ -102,6 +102,22 @@
       "artifact_covered_by": [
         "SB-7"
       ]
+    },
+    {
+      "path_or_key": "opalinvest-auth-handler (deployed)",
+      "kind": "lambda",
+      "commit_or_etag": "RIAv5cTFNKIH2X04tAuB7zen7gzDIrXgjdlN8ftN+7w=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Applied 15:54:25Z. Deployed CodeSha256 == the built artifact hash (POSITIVE match), 0-diff re-plan, comp-tagauthz PASSED. Tree byte-identical to the CVO-cleared 14a88f66c9 (git diff EMPTY, verified -- a sentinel rename I had applied was REVERTED rather than shipped uncleared). Email-no-regression 12/12 run FIRST, which mattered here because the deploy changed a SHARED function's signature and the login resend is one of its two callers.",
+      "introduces": [
+        "F-11 fix",
+        "required owner param (fail-open made inexpressible)"
+      ],
+      "artifact_covered_by": [
+        "SB-7",
+        "SB-8",
+        "SB-9"
+      ]
     }
   ],
   "acceptance": [
@@ -109,31 +125,31 @@
       "criterion_id": "SB-1",
       "criterion_verbatim": "sendMfaCodeSms(phoneE164, code, ttlMin) via @aws-sdk/client-pinpoint-sms-voice-v2 SendTextMessageCommand (OriginationIdentity=TFN ARN, MessageType:'TRANSACTIONAL'), mirroring email.ts sendMfaCodeEmail. Unit-exercised against the SANDBOX on a VERIFIED destination only; returns a message id; the code ASSERTS verified-only so a future sandbox exit does not silently open sends.",
       "method": "source_read + static_bundle_census",
-      "invocation": "tsc --noEmit (clean, --listFiles confirms sms.ts compiled). Local bun bundle, then occurrence counts via grep -o | wc -l (NOT grep -c: the bundle is one long line and grep -c counts lines).",
+      "invocation": "tsc --noEmit (clean, --listFiles confirms sms.ts compiled). Local bun bundle, then occurrence counts via grep -o | wc -l (NOT grep -c: the bundle is one long line and grep -c counts lines). | RE-SCORED on the deployed plane RIAv5cTFNKIH2X04tAuB7zen7gzDIrXgjdlN8ftN+7w= (F-11 fix), 2026-09-01T15:5xZ.",
       "output_evidence": "SendTextMessageCommand 1 · TRANSACTIONAL 1 · SMS_VERIFIED_DESTINATIONS 1 · SMS_ALLOW_UNVERIFIED 1 · mfa_sms_refused 2. Signature is (phoneE164, code, expiresMinutes) and it returns {messageId}. The verified-only assertion is a default-deny allowlist plus a separate explicit release flag, so leaving the sandbox requires TWO acts, one of which is a reviewable commit.",
       "denominator": "1 of 3 clauses computable. Built + statically present: yes. Returns a message id: yes, by signature. UNIT-EXERCISED AGAINST THE SANDBOX: NOT DONE.",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "THE EXERCISE CLAUSE CANNOT BE RUN AND WILL NOT BE UNTIL SP-1. Sending anything requires an OriginationIdentity; the toll-free number does not exist (measured: zero End User Messaging configuration sets on the account), so there is no identity to send from and no verified destination to send to. The code fails CLOSED without one -- which is the correct behaviour and is also why no send can be exercised. ⛔ I am NOT scoring the two computable clauses as a PASS on SB-1: the exercise clause is the one that would catch a wrong SDK shape, and calling this PASS would certify an untested call path."
+      "status": "PARTIAL",
+      "status_reason": "THE REFUSAL RAN; THE SEND STILL CANNOT. Deployed log 15:28:27.540 carries `mfa_sms_refused reason=no_origination_identity` -- sms.ts's FAIL-CLOSED path EXECUTING on the served plane, reached via a real enrolment send-code. So the guarantee 'no SMS leaves without an origination identity' is now MEASURED, not asserted. ⛔ The SEND itself remains unexercised and unexercisable until SP-1: no identity exists to send from, no verified destination to send to. I am NOT upgrading this to PASS -- the clause the atom actually names (unit-exercised against the SANDBOX on a verified destination) has not run, and the refusal is the half that costs nothing."
     },
     {
       "criterion_id": "SB-2",
       "criterion_verbatim": "resendMfaCode (auth.ts:223): after sendChallengeCode (already charges the channel-agnostic budget), branch on the channel -- email->sendMfaCodeEmail, sms->sendMfaCodeSms(user.phoneNumber, issued.code, TTL). Act C parity: ONE sealed code per challenge across N resends, never rotated -- on SMS as on email.",
       "method": "source_read",
-      "invocation": "Read the committed branch at 8fd0ae2810. AMENDED MID-BUILD: the TO said 'branch on user.mfaChannel' (option b); 1.0.0_SA_CTO~Z ruled option (c) -- persist channel on the challenge row at issue, dispatch off the ROW -- at 18871, and 2.0.0_SA_COO~Z amended the TO text.",
+      "invocation": "Read the committed branch at 8fd0ae2810. AMENDED MID-BUILD: the TO said 'branch on user.mfaChannel' (option b); 1.0.0_SA_CTO~Z ruled option (c) -- persist channel on the challenge row at issue, dispatch off the ROW -- at 18871, and 2.0.0_SA_COO~Z amended the TO text. | RE-SCORED on the deployed plane RIAv5cTFNKIH2X04tAuB7zen7gzDIrXgjdlN8ftN+7w= (F-11 fix), 2026-09-01T15:5xZ.",
       "output_evidence": "if (issued.channel === 'sms') { ... sendMfaCodeSms(user.phoneNumber, issued.code, CHALLENGE_TTL_MINUTES) } else sendMfaCodeEmail(...). Nothing in either branch mints, rotates or re-charges: sendChallengeCode has already unsealed the one code minted at issue and already charged the budget in the same conditional update that authorised the send.",
       "denominator": "1 dispatch site read at source; 0 live sends.",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "ACT C PARITY IS INHERITED BY STRUCTURE, NOT RE-IMPLEMENTED -- the SMS branch is a delivery step downstream of an unchanged issuance path, so 'one sealed code per challenge' holds for the same reason it holds on email. ⛔ BUT THAT IS AN ARGUMENT, NOT A MEASUREMENT. The property was exercised on the email path against a deployed handler (Act C C1, 12/12); on SMS it is asserted from source and NOTHING is deployed. A structural argument that a property transfers is exactly the kind of claim that has failed on this handler before (source != deployed, repeatedly), so it is not scored PASS."
+      "status": "PARTIAL",
+      "status_reason": "THE DISPATCH BRANCH RAN ON BOTH LEGS, ASYMMETRICALLY. Email: 12/12 on the deployed plane (the Act C suite re-run twice, at gmJnyiaSC and again at RIAv5cTF), so Act C parity holds on email THROUGH the SB changes -- one sealed code across N sends, budget charged per send. SMS: the branch was entered (an sms-channel challenge dispatched to sendMfaCodeSms) and refused for want of an identity. ⛔ WHAT IS STILL UNMEASURED IS THE ONE THING THE ATOM IS ABOUT: that N resends on an SMS challenge deliver ONE code. That needs a delivered text. Structure argues it (the branch is downstream of an unchanged issuance path) and structure is what I refuse to score."
     },
     {
       "criterion_id": "SB-3",
       "criterion_verbatim": "login() sms-branch: replace the current 503 -- if user.phoneNumber present, issueChallenge(channel:'sms'), return {mfaRequired, challengeId, channel:'sms'}, send NOTHING (Act B parity). Keep 503 only for sms-selected-but-no-number. Evidence: a CloudWatch check shows challenge issued and NO send at credential time.",
       "method": "source_read",
-      "invocation": "Read the committed branch at 8fd0ae2810.",
+      "invocation": "Read the committed branch at 8fd0ae2810. | RE-SCORED on the deployed plane RIAv5cTFNKIH2X04tAuB7zen7gzDIrXgjdlN8ftN+7w= (F-11 fix), 2026-09-01T15:5xZ.",
       "output_evidence": "if (user.mfaChannel === 'sms' && user.phoneNumber) { const { challengeId } = await issueChallenge(user.email, 'sms'); return { mfa: { mfaRequired: true, challengeId, channel: 'sms' } }; } -- no send call between issueChallenge and the return, mirroring the email branch exactly. The 503 survives for sms-with-no-number and for any future channel with no branch, and now logs a 'reason' distinguishing the two for the estate while the CALLER still gets one indistinguishable 503.",
       "denominator": "1 branch read at source; 0 logins driven.",
       "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "THE CRITERION NAMES ITS OWN ORACLE AND THE ORACLE CANNOT RUN: 'a CloudWatch check shows challenge issued and NO send at credential time' requires a deployed handler and an sms-channel account, and neither exists -- nothing is deployed and the gated-account census is 2 of 48, both email. ⛔ The absence half is the half that matters and it is precisely the half a source read cannot establish: reading that there is no send call is not the same as observing that no send occurred, which is the distinction the whole D12 send-fix was about."
+      "status_reason": "STILL NOT RUN, AND A NEARBY LOG LINE MUST NOT BE MISREAD AS IT. The deployed log shows `mfa_challenge_issued channel=sms`, which is tempting evidence -- but it came from `issueEnrolmentChallenge` (SB-7), NOT from login(). ⛔ SB-3's branch requires an account with mfaChannel='sms' AND a stored phoneNumber, and no such account exists: the gated census is 2 of 48, both email, and SB-6/SB-9 now make an sms preference unreachable without a VERIFIED number, which needs SP-1. So the atom is blocked behind its own guard, correctly. Recording the near-miss because the log line is one function away from the claim and reads like it."
     },
     {
       "criterion_id": "SB-4",
@@ -169,21 +185,21 @@
       "criterion_id": "SB-7",
       "criterion_verbatim": "send-code-to-candidate: SMS an OTP to a CANDIDATE number NOT yet the stored preference. Cannot reuse SB-2 resend (dispatches on the stored challenge; storing-first would violate F1); reuses sendMfaCodeSms. Must NOT mutate the account's stored channel/number.",
       "method": "source_read + static_bundle_census",
-      "invocation": "Built at 775dc28917 against the contract agreed with 0.4.0_DE_ClientPlatform~Z (18958/18963) and approved by 1.0.0_SA_CTO~Z (18989). tsc clean; bundle censused.",
+      "invocation": "Built at 775dc28917 against the contract agreed with 0.4.0_DE_ClientPlatform~Z (18958/18963) and approved by 1.0.0_SA_CTO~Z (18989). tsc clean; bundle censused. | RE-SCORED on the deployed plane RIAv5cTFNKIH2X04tAuB7zen7gzDIrXgjdlN8ftN+7w= (F-11 fix), 2026-09-01T15:5xZ.",
       "output_evidence": "POST /auth/mfa/enroll/send-code + /enroll/resend, both AUTHENTICATED (account from session, no email in body). The candidate number is written to the CHALLENGE row (candidatePhone), never to opal-users-v2 -- so F1 holds by construction. Relay defence BUILT not inherited: auth + ENROLL_THROTTLE (3/account/hour, CTO-ruled, keyed on the ACCOUNT never the destination) + MAX_SENDS per challenge. Prior live enrolment INVALIDATED before minting via an O(1) pointer item (mfa#enrol#<accountHash>), closing DE~Z's Q4 residue. Markers: enroll/send-code 1, enroll/resend 1, mfa#enrol# 1, candidatePhone 7.",
       "denominator": "2 routes read at source; 0 requests made; 0 SMS sent.",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "NOTHING IS DEPLOYED AND NO SMS CAN BE SENT -- no origination identity exists (SP-1). ⭐ ONE PROPERTY IS WORTH RECORDING EVEN THOUGH THE ATOM IS UNSCORED: SB-7 names an ARBITRARY destination, so it CANNOT inherit the property that makes /auth/mfa/send safe ('no address in the request, therefore no arbitrary recipient'). That is why the defence is built in layers rather than assumed to transfer -- the property-transfer-by-assumption trap this handler has hit repeatedly. It also disposed of enrolment-surface option (b): authenticating this on a login-challenge context would mean a PASSWORD ALONE could make us text an arbitrary number. 1.0.0_SA_CTO~Z ruled option (c), which needs no server change."
+      "status": "PASS",
+      "status_reason": "EXERCISED ON THE DEPLOYED PLANE. E1w-ctl2: an authenticated caller minted a real enrolment challenge carrying purpose='enrolment' and the candidatePhone (read off the row). E1-a/b: both enrolment routes 401 unauthenticated, with E1-ctl proving a real Bearer is obtainable -- without which the 401s are unscoreable. E1w-c: a cross-account resend charges NO send against the victim -- 0 -> 0 after the F-11 fix, against 0 -> 1 before it. ⭐ THE COUNTER IS THE DISCRIMINATOR AND THE REFUSAL IS NOT: both builds refuse, and scoring on the refusal would have passed the broken one. F1 holds by construction and was checked directly -- nothing reached opal-users-v2 before verify."
     },
     {
       "criterion_id": "SB-8",
       "criterion_verbatim": "verify-and-mark: verify the entered code against the enrolment challenge, and on success store the number + MARK IT VERIFIED (the F3b field on opal-users-v2). Distinct from verifyAndConsumeChallenge (that consumes a LOGIN challenge). F1 holds: an unverified number is never stored.",
       "method": "source_read + static_bundle_census",
-      "invocation": "Built at 775dc28917. tsc clean; bundle censused.",
+      "invocation": "Built at 775dc28917. tsc clean; bundle censused. | RE-SCORED on the deployed plane RIAv5cTFNKIH2X04tAuB7zen7gzDIrXgjdlN8ftN+7w= (F-11 fix), 2026-09-01T15:5xZ.",
       "output_evidence": "POST /auth/mfa/enroll/verify -> verifyEnrolmentChallenge -> setVerifiedPhone, which writes {phoneNumber, phoneVerifiedAt} in ONE update so they cannot disagree. CROSS-PURPOSE REFUSAL IN BOTH DIRECTIONS (mfa_purpose_mismatch occurs 2x in the bundle). OWNERSHIP is checked INSIDE verifyEnrolmentChallenge, ABOVE both the attempts increment and the consuming delete. Deliberately does NOT select the sms channel -- that stays a separate updateMfaPreference call so SB-6's guard remains reachable.",
       "denominator": "1 route + 1 primitive read at source; 0 verifications performed.",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "NOTHING IS DEPLOYED. ⛔ TWO THINGS THE ATOM DID NOT ASK FOR AND I ADDED, BOTH RECORDED SO A SCORER LOOKS FOR THEM: (1) THE CROSS-PURPOSE REFUSAL -- an enrolment code is texted to a number the account does NOT yet own, possibly a stranger's; without refusing it at the LOGIN verify, that stranger's code would complete a login. Confused deputy, invisible from inside either function because the hazard exists only in the pair. (2) THE OWNERSHIP CHECK'S POSITION -- I first wrote it in the caller, AFTER the verify call, which is too late twice over: the challenge is already consumed and a guess already counted, so a stranger submitting to someone else's live enrolment could destroy it or burn its budget while still being refused the result. Moving it above both is the fix, and the first version would have passed any test that only checked the RETURN value."
+      "status": "PASS",
+      "status_reason": "EXERCISED, BOTH DIRECTIONS AND BOTH IDENTITIES. Cross-purpose: E8-a login-verify refuses an enrolment challenge and E8-b enrolment-verify refuses a login challenge, each on its OWN FRESH challenge because a verify is destructive on success (3.0.0_SA_CVO~Z 19070 -- I would have reused one and the second would have failed for the wrong reason). Two mfa_purpose_mismatch lines with OPPOSITE predicates from two different functions. Ownership: E1w-a a cross-account verify with the CORRECT code is refused and leaves attempts at 0 -- above the increment and above the consuming delete. E1w-ctl4/5: B's own Bearer, same challenge, same code -> 200 and the record then carries the verified number, so every refusal was about IDENTITY rather than a dead challenge."
     }
   ],
   "controls": {
@@ -263,6 +279,18 @@
       "standing": "DISARMED",
       "item": "SB-6 as I first built it keyed its guard on `phoneNumber === undefined`, so a SUPPLIED number sailed past it -- a direct updateMfaPreference(email,'sms','+1...') stored an UNVERIFIED number and flipped the channel, defeating the whole enrolment requirement.",
       "disposition": "Found by 1.0.0_SA_CTO~Z (18989) reading the contract against my committed code -- not by me, and it was my atom. Ruled: updateMfaPreference is channel-only, setVerifiedPhone is the sole writer, and the gate checks phoneVerifiedAt (verified) rather than mere existence. Applied at 775dc28917."
+    },
+    {
+      "class": "OBSERVATION",
+      "standing": "DISARMED",
+      "item": "F-11: resendPhoneEnrolmentCode refused a cross-account caller only AFTER sendChallengeCode had charged the VICTIM's send budget. The ownership check was correct and every outcome-level invariant held; the defect was a SIDE EFFECT on the way to a correct refusal.",
+      "disposition": "Found by running the wrong-session limb 3.0.0_SA_CVO~Z scored E1 PARTIAL for omitting -- after I had already reported green. No source read could have found it: the check reads correctly because it IS correct. Fixed 688e37909a (check moved above the charge), hardened 14a88f66c9 (owner param REQUIRED, with a measured negative control: an omitting caller gives TS2554, rc=2), deployed and re-verified 1->0. It is the same position error I had ALREADY fixed in verifyEnrolmentChallenge in the same commit, while writing the paragraph about why position matters."
+    },
+    {
+      "class": "OBSERVATION",
+      "standing": "INERT",
+      "item": "My own E1w test script prints a HARDCODED deployed-sha in its banner, and it was STALE at the re-run.",
+      "disposition": "The banner read gmJnyiaSC while the live function was RIAv5cTF. A reader spot-checking that line would have concluded the PASS was measured on the build that still had the bug. The result stands because the old build produced sends 0->1 and this run produced 0->0 -- the flip ITSELF identifies which bytes answered, an artifact certifying its own plane. The banner should READ the sha, not carry it: measured-not-asserted, applied to the instrument rather than only to its subject."
     }
   ],
   "compiler_tools": [
