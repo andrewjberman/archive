@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_PERFRP.TO-R2-DS",
+  "firm": "49F",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_PERFRP.TO-R2-DS.read-gold-defeated-aliasing-producer-fix.md",
+    "group": "OTHER",
+    "vintage_commit": "58fee4fde9"
+  },
+  "decomp_ref": {
+    "doc": "workflows/atom_decomposition/runs/advi-perfrp/20260824T201222Z/DECOMP.md",
+    "vintage_commit": "92a405e69f",
+    "to_ref": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_PERFRP.TO-R2-DS.read-gold-defeated-aliasing-producer-fix.md"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~G",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/perfrp_emit_core.py",
+      "kind": "script",
+      "commit_or_etag": "7f5b0c7cc8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TWO COMMITS: c1f2af8a43 routed the six unguarded sites; 7f5b0c7cc8 deleted the then-callerless _read_gold. The pin above is the LATER of the two and is the artifact's current state. NO DEPLOY AND NO PUBLISH IS AUTHORIZED BY THIS TO -- it authorizes the FIX and its QA exercise only. Post-commit `comp-pipescript deployed --pipeline advi`: 71 object(s) / 71 checked / 0 unrendered -> 70 MATCH, 1 STALE, and the 1 STALE IS perfrp_emit_core.py. That STALE is the CORRECT AND EXPECTED state, not a regression: the fix is committed and deliberately not served. PLANE NAMED per the TO's compiler_tools_mandate: comp-pipescript compares WORKTREE-vs-S3 and CANNOT see ORIGIN-vs-S3."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R2DS-AC1",
+      "criterion_verbatim": "_read_gold resolves a gold read when the literal asof partition is ABSENT but a staged/aliased partition exists",
+      "method": "live_read",
+      "invocation": "python: build() over the 5 crash-class families at asof=2026-09-01, a date with NO real partition; plus s3api list-objects-v2 partition census per table",
+      "output_evidence": "0 unhandled exceptions. SIX unguarded call sites routed through _read_gold_le at perfrp_emit_core.py:312,313 (_activity) :561,563 (_performance) :666,667,691 (_allocation) @c1f2af8a43. REMEDY DECLARED PER SITE = RESOLVE, justified on a measurement, not an argument: canonical_valuation / canonical_positions / dim_relationship / dim_asset_classification each hold 540 partitions, newest date=2026-08-28, NOTHING at date=2026-09-01 -- the data EXISTS under an earlier date, so this is aliasing and not a dataless day. TOLERATE-AND-RECORD was REJECTED per amendment 3: it would have emitted leaves missing data sitting in the store, trading a loud crash for silent data loss. Every resulting pin carries aliased_from_requested=TRUE, so the alias is DISCLOSED rather than swallowed.",
+      "denominator": "6 of 6 unguarded reader paths (7 call sites; :122 served two callers through the wrapper). Full census, no head: _read_gold_meta = 1 def + 9 calls, every occurrence classified.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "R2DS-AC2",
+      "criterion_verbatim": "the five crash-class families each reach a DECLARED terminal state -- published, or refused with a reason string",
+      "method": "live_read",
+      "invocation": "python: core.build(family, '2026-09-01') for each of the 5, classifying EMITTED / EmitRefused / raw exception. build() is PURE over its reads and writes nothing.",
+      "output_evidence": "0 RAW TRACEBACKS ACROSS 5 OF 5, and all five EMIT rather than merely refusing: activity_relationship 4,422 entries; activity_account 7,370; allocation_relationship 3,837; allocation_account 6,185; performance_relationship 5,676. Every upstream pin carries aliased_from_requested=True.",
+      "denominator": "5 of 5 crash-class families",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "R2DS-AC3",
+      "criterion_verbatim": "CONSUMER DENOMINATOR. performance_relationship, allocation_account, allocation_relationship are SERVED",
+      "method": "live_read",
+      "invocation": "s3api list-objects-v2 --bucket opal-data-portal-v2 --prefix platinum/advi/49financial/ (the real serve plane, read from d_publisher_port.py:61-62 SERVE_BUCKET/SERVE_ROOT)",
+      "output_evidence": "NOT MET, AND NOT MEETABLE UNDER THIS TO. The serve root holds 18 objects, of which exactly FOUR are perfrp keys -- book_advisor, gainloss_account, gainloss_relationship, performance_account. The three consumer leaves are ABSENT. This TO authorizes the fix and its QA exercise and FORBIDS deploy and publish, so serving them is a separate authorized act requiring its own word and its own change_management entry per NEVER#2. The producer half is cleared -- all three BUILD -- but BUILDING IS NOT SERVING. Recorded as uncomputable rather than FAIL: nothing in the assignee's authorized scope could have moved it.",
+      "denominator": "0 of 3 consumer leaves served; 4 perfrp keys present of 18 objects under the serve root",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "This TO authorizes the FIX and its QA exercise and FORBIDS deploy and publish (TO 90997 s.3). Serving the three leaves is a separate authorized act needing its own word and its own change_management entry per NEVER#2. No act inside the assignee's authorized scope could have moved this criterion, so it is recorded as uncomputable here rather than FAIL. The producer half IS cleared: all three families BUILD. Building is not serving."
+    },
+    {
+      "criterion_id": "R2DS-AC4",
+      "criterion_verbatim": "transactions_relationship STILL REFUSES. A pass here is a NEGATIVE control: if it emits, AC4 FAILS and the fix over-reached",
+      "method": "live_read",
+      "invocation": "python: core.build('perfrp_transactions_relationship', '2026-09-01') -- and the same over the FULL 11-family registry",
+      "output_evidence": "NEGATIVE CONTROL HELD. transactions_relationship returned DECLARED-REFUSAL with its reason intact ('transactions is served on a PER-RELATIONSHIP PAGED key (s.11 #6); it is not a whole-firm leaf'). It did NOT emit. roster_relationship -- explicitly out of scope and not to be touched -- also still refuses. A remedy applied at six sites that leaves exactly the two it should leave is the discriminating result: had the count gone to 11, THAT would have been the finding. Independently corroborated on a DIFFERENT plane by 0.7.0_AE_CloudOps~G's publisher dry run: WOULD_PUBLISH 9, EMITTER_REFUSED 2, same two families.",
+      "denominator": "1 of 1 sovereign-deferred family still refusing; 2 of 11 registry families refusing, both the intended ones",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "R2DS-AC5",
+      "criterion_verbatim": "no regression on the four already-serving leaves",
+      "method": "live_read",
+      "invocation": "s3api list-objects-v2 on the serve plane for byte-size + LastModified; plus a full 11-family build sweep before and after the dead-wrapper deletion",
+      "output_evidence": "NO REGRESSION, on two independent readings. (1) SERVED PLANE: the four standing leaves are byte-for-byte untouched and their LastModified all PRE-DATE both of this TO's commits -- book_advisor 15,000,091 @07:27:05Z, gainloss_account 11,896,644 @03:17:03Z, gainloss_relationship 7,419,826 @03:16:43Z, performance_account 1,923,593 @03:16:07Z, against commits at ~08:3xZ and ~08:5xZ. They cannot have moved: nothing was deployed or published. (2) BUILD PLANE: full registry sweep 9 EMITTED / 2 DECLARED-REFUSAL / 0 RAW TRACEBACKS, identical before and after the deletion commit.",
+      "denominator": "4 of 4 standing served leaves unchanged; 11 of 11 registry families swept",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "PAIRED MUTANT/BASELINE on the operative change. In-process, _read_gold_le was replaced with a literal-asof reader reproducing the pre-fix behaviour, the 5 crash-class families were built, then the real function was restored and the same 5 rebuilt. The prediction was stated before running: if the families still EMIT under the mutant, the aliasing is NOT what is doing the work.",
+      "expected": "mutant -> the original failure class returns on all 5; restored -> all 5 emit",
+      "observed": "FIRED 5 OF 5 with the exact original error class, RAW NoSuchKey, on every one of activity_{relationship,account}, allocation_{relationship,account}, performance_relationship. Restored baseline emitted 5 of 5. The mutant discriminates in BOTH directions, so it bounds over-firing as well as under-firing.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "build() is PURE over its reads and performs no S3 write, no clock-dependent branch inside the emit path, and no randomised ordering. The full 11-family sweep was run three times across the session -- before the deletion commit, after it, and as the mutant's restored baseline.",
+      "status": "STABLE",
+      "observed": "9 EMITTED / 2 DECLARED-REFUSAL / 0 RAW TRACEBACKS on every run, with identical entry counts. The one time-varying input is asof, which is derived from the trading-day frontier and was pinned to 2026-09-01 for every run in this instance."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "NO DEPLOY, NO PUBLISH, NO SERVE",
+      "reason": "TO 90997 s.3: this TO authorizes the FIX and its QA exercise only. A serve act needs its own word and its own change_management entry per NEVER#2. This is why R2DS-AC3 is UNCOMPUTABLE-BY-CONSTRUCTION rather than FAIL."
+    },
+    {
+      "item": "roster_relationship NOT TOUCHED",
+      "reason": "TO 90997 s.4: UNMET but NOT the crash class. 1.0.0_SA_CTO flagged it as PLAUSIBLY related to ADVI_ROSTERCOLS and explicitly refused to infer that from adjacency. Surfaced, not fixed. It still refuses, unchanged."
+    },
+    {
+      "item": "transactions_relationship LEFT REFUSING",
+      "reason": "Rests on a sovereign deferral (s.11 #6). Un-refusing it would violate a standing ruling; it is the AC4 negative control."
+    },
+    {
+      "item": "the three GUARDED sites :168 / :241 / :1083 NOT CHANGED",
+      "reason": "Amendment 2's negative control -- a diff touching them would have over-reached. Verified byte-identical against origin/CLOUD after the change."
+    },
+    {
+      "item": "the AC11 emit-path harness NOT REPAIRED",
+      "reason": "Out of AC1-AC5 scope, and a verification arm repaired inside the act it would certify has no independent vintage. Routed to 1.0.0_SA_CTO / 2.0.0_SA_COO for a ride-or-detach ruling; unowned at the time of this instance."
+    }
+  ],
+  "surprises": [
+    "[OBSERVATION/INERT] The AC11 emit-path harness (org/tier2_senior/0.4.0_DS_ClientPlatform~G/deliverables/perfrp_ac11_weighting_on_emit_path.py) is DEAD and has been since the Round-2 rewrite, on two independent counts: it patches core._read_gold, which _performance has not called since Round 2, so its sign-flipped fixture injects nothing; and it treats _performance's return as a list when it has returned a tuple since Round 2 (TypeError at :148 when run). PROVEN AGAINST origin/CLOUD, so it pre-dates this TO's change. AC11 therefore has an exercise artifact that has never run green since Round 2 -- anyone treating AC11 as verified is holding a promise, not a control. 0.4.0_DE_ClientPlatform~D 91079 raised the severity: a dead producer-weighting arm lets that seat's separate RENDER-plane AC11 pass VACUOUSLY, because a naive cross-level equality compares the producer's parent against the producer's own children -- one artifact read twice. Deleting the now-callerless _read_gold changes that harness's failure from TypeError to AttributeError: a dead artifact failing earlier and more diagnostically, not a live one broken.",
+    "[OBSERVATION/INERT] comp-validate, named in this TO's compiler_tools_mandate, CANNOT COVER THIS SCRIPT: 'ERROR: no script matching data/assets/scripts/gold/runners_49f/perfrp_emit_core.py' -- its registry is the BD/INF config set (21 scripts) and holds no advi entry. Recorded as a mandate naming a tool whose subject does not include the file. AND A NEAR-MISS WORTH THE LINE: a first invocation piped to `tail` returned rc=0, which is TAIL'S exit code, not the tool's. Reading a pipeline's rc as the tool's verdict would have recorded a false PASS on a tool that never ran against the subject."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~G/logs/2026-09-01/",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read data/assets/scripts/gold/runners_49f/perfrp_emit_core.py --for \"how does _read_gold resolve the asof date to an S3 key, and does it ever consult locally staged or aliased partitions instead of going straight to S3?\"",
+      "result": "PASS -- and it is what surfaced _read_gold_le. Its SHAPE block listed all 48 sections untruncated and flagged _read_gold_le's docstring ('Read the latest partition AT OR BEFORE date, and SAY whether it aliased'), which is the remedy template the fix uses. Run per the rule-21 law edit cut six hours earlier; first real occasion, and it worked."
+    },
+    {
+      "tool": "comp-pipescript io",
+      "invocation": "comp-pipescript io data/assets/scripts/gold/runners_49f/perfrp_emit_core.py --pipeline advi",
+      "result": "PASS rc=0. READS resolved to s3://opal-data-49financial and s3://opal-data-assets; 3 UNRESOLVED call sites disclosed by the tool on its own face (dynamic targets), not absent I/O."
+    },
+    {
+      "tool": "comp-pipescript deployed",
+      "invocation": "comp-pipescript deployed --pipeline advi (post-commit)",
+      "result": "PASS-WITH-EXPECTED-STALE. 71 object(s) / 71 checked / 0 unrendered -> 70 MATCH, 1 STALE, 0 TIMEOUT / 0 AWS_UNREACHABLE / 0 ETAG_NOT_COMPARABLE. The 1 STALE is perfrp_emit_core.py and is CORRECT: the fix is committed and no deploy is authorized. PLANE NAMED: this instrument compares WORKTREE-vs-S3 and cannot see ORIGIN-vs-S3."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find '_read_gold\\b' --corpus default",
+      "result": "PASS -- 45 hits / 29,216 files, bands DEF=2 SURFACED=11 CONFIG=3 DOC=29. This is what found the AC11 harness's monkey-patch of core._read_gold and so stopped the dead wrapper being deleted blind."
+    },
+    {
+      "tool": ".tools/commit-gate.sh (via safe-commit.sh)",
+      "invocation": "safe-commit.sh --author ... -F <msgfile> -- data/assets/scripts/gold/runners_49f/perfrp_emit_core.py",
+      "result": "PASS -- 'pre-commit gate clean for 1 of 1 file(s)' on both commits; py_compile + ds-precommit + ruff. risk-reflex REFLEX CLEAN, 1 file checked against 1,662 danger nodes."
+    },
+    {
+      "tool": "comp-validate",
+      "invocation": "comp-validate data/assets/scripts/gold/runners_49f/perfrp_emit_core.py",
+      "result": "NOT-APPLICABLE / GAP FOUND. 'ERROR: no script matching ...' -- the tool's registry is the BD/INF config set and has no advi entry, so it cannot validate this script. Recorded as a gap in the TO's compiler_tools_mandate rather than as a pass. See the second surprises entry for the rc-of-tail near-miss."
+    }
+  ]
+}
