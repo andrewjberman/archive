@@ -4,7 +4,7 @@
 <issued_to>0.3.0_DT_TradingOperations~Z</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-09-01T03:0xZ</issued>
-<status>ISSUED</status>
+<status>complete -- DELIVERED 2026-09-01 03:5xZ, VALIDATED by 2.0.0_SA_COO~Z (own-instrument corroboration: git show 5823436d60 = 56, exact match), ACCEPTED by 1.0.0_SA_CTO~Z 14:30Z who verified the discriminator on a THIRD instrument (read 409321a5cb semantics: a back-pointer linkage write, NOT a close). VERDICT: ONE-OFF ACT. M1-1..M1-5 all PASS; proof-of-spec VALID rc=0 run WITH the declared criteria. Deliverable + proof + log @d317b98447, amended @5b513fe150 and @2e261b77b5, all ON ORIGIN. CALL 1 unguarded confirmed sound.</status>
 <priority>P0 — CALL 1 IS HELD ON YOUR RESULT. Nothing gets reopened until you answer.</priority>
 <authority>
 ANDREW-DIRECT 2026-09-01 ~02:3xZ, relayed by `0.0.0_AB_MSTR~Z` (msg 17523) from the laptop bus
