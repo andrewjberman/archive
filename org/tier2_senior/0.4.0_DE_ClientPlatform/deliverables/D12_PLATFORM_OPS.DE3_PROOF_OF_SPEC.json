@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D12_PLATFORM_OPS.DE3-SITEZ",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/D12_PLATFORM_OPS.DE3-SITEZ.browser-end-to-end-exercise.md",
+    "group": "D",
+    "vintage_commit": "c7dfddcdff"
+  },
+  "assignee": "0.4.0_DE_ClientPlatform~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/vite.config.ts",
+      "kind": "config_data",
+      "commit_or_etag": "89ecfd89",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal DEV local: 087a456f (client) + 89ecfd89 (same-origin /auth dev proxy). LOCAL, unpushed -- ls-remote origin/DEV read earlier this session = be39451b. PROD promotion is a DT lane act, not in this TO. WHAT IT INTRODUCES: a bare '/auth' same-origin dev proxy so a local dev server reproduces production's same-origin wiring (VITE_AUTH_API_URL='') -- without it dev talks to the auth gateway CROSS-ORIGIN and the refresh cookie behaves as a third-party cookie, which would make DE3-2's reload limb pass or fail for a reason production does not have. Dev-server config only; no production behaviour changes and no route added to any deployed surface.",
+      "artifact_covered_by": [
+        "DE3-1",
+        "DE3-2"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/contexts/AuthContext.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "087a456f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal DEV local: 087a456f (client) + 89ecfd89 (same-origin /auth dev proxy). LOCAL, unpushed -- ls-remote origin/DEV read earlier this session = be39451b. PROD promotion is a DT lane act, not in this TO. The client under test: login() establishes NO session on the mfaRequired branch, and verifyMfa() completes the session only after /auth/mfa/verify. This is the fix DE3-2 confirms and DE3-1 exercises.",
+      "artifact_covered_by": [
+        "DE3-1",
+        "DE3-2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DE3-1",
+      "criterion_verbatim": "THE POSITIVE PATH, END TO END IN A BROWSER: password -> opt-in prompt -> confirm -> code arrives in a real mailbox -> typed -> dashboard renders. State the mailbox, the folder observed, and attach the screenshot you actually read.",
+      "method": "live_read",
+      "invocation": "INSTRUMENT: headless Chromium (Playwright) driving portal served locally at localhost:5176 from the 087a456f client with VITE_AUTH_API_URL='' so /auth/* is SAME-ORIGIN, proxied to the real deployed handler on opalinvest.dev's distribution. This is NOT a stub -- it is the transport CTO's 17689 ruling specifies. Real gated fixture account usr_d12w3fixture (mfaEnabled=true). The code was obtained by offline recovery from the authoritative challenge row by 0.7.0_AE_CloudOps~Z (I hold no DynamoDB access at this seat) -- a LABELLED PROXY for the mailbox hop, ruled legitimate (CTO 17689); the mail hop itself is independently closed by W1-10 (Andrew's own 'top of inbox, no junk' on the real transport). Secrets (fixture password, the one-time code) are deliberately absent from this record. Flow: fixture email + correct password submitted; opt-in prompt rendered; 'Send me a code' clicked (POST /auth/mfa/send 200, code minted); challengeId f56ee14c51310f1b23f0098e8235456d read from the send request body and handed to 0.7.0_AE_CloudOps~Z, who recovered the code from the row and returned it; the code TYPED into the rendered #mfa-code form; Verify clicked.",
+      "output_evidence": "Every hop a real request through the same-origin proxy: POST /auth/login -> 200 {mfaRequired:true, challengeId:<32 hex>, channel:email}; POST /auth/mfa/send -> 200; POST /auth/mfa/verify -> 200 (network request #79). RESULT: landed /market, NO login form present, localStorage.accessToken = a real 652-character JWT of type string (NOT the pre-fix 'undefined' literal). Dashboard RENDERED WITH REAL CONTENT -- screenshot READ at .playwright-mcp/page-2026-09-01T03-58-15-609Z.png: 'MARKET OVERVIEW', Trending Topics, Bullish Drivers / Bearish Pressures panels, Top/Bottom Performers, a 2026-08-31 dateline. MAILBOX: success@simulator.amazonses.com (AWS SES mailbox simulator -- accepts and discards, non-human, unreadable); FOLDER: none observed, because the code was recovered from the authoritative challenge row rather than a mailbox -- the labelled proxy, stated below.",
+      "denominator": "1 complete end-to-end login by a person in a browser; 3 of 3 auth hops (login, send, verify) real and 200.",
+      "status": "PASS",
+      "status_reason": "LABELLED PROXY, stated not hidden (CTO 17689: 'a labelled proxy is legitimate; an unlabelled proxy is the defect'): the code was obtained by offline recovery from the authoritative challenge row by 0.7.0_AE_CloudOps~Z, NOT from the mailbox. What DE3-1 tests is the CLIENT/SERVER JOIN, and the code is an INPUT to it, not the property under test -- so however the real server-minted code is retrieved, typing it into the rendered form and POSTing it to the real /auth/mfa/verify produces a real session, which is what the row asserts. The mail hop is the proxied part and is independently closed by W1-10. NEGATIVE DECLARATION (ratified binding clause, 1.0.0_SA_CTO~Z 17693 / 17811; FATAL-IF-ABSENT): no window.fetch override, no Service Worker, no MSW, no route interception, no Playwright request routing. VERIFIED IN THE BROWSER, not asserted -- window.fetch === '[native code]', no controlling Service Worker, and my OWN RED/GREEN stub markers (__redCalls, __calls, __verifyAttempts) all read undefined, checked BEFORE any credential was typed and again after. /auth/* reached the real deployed handler via the vite same-origin proxy (89ecfd89); nothing intercepted it."
+    },
+    {
+      "criterion_id": "DE3-2",
+      "criterion_verbatim": "THE REFUSAL, IN THE SAME BROWSER: with the correct password and no code, the dashboard is not reachable -- by URL, by back-navigation, or by refresh. This is the security property. A success-path-only exercise scores identically whether the gate exists or not. Name the input that makes it refuse, and run it.",
+      "method": "live_read",
+      "invocation": "INSTRUMENT: headless Chromium (Playwright) driving portal served locally at localhost:5176 from the 087a456f client with VITE_AUTH_API_URL='' so /auth/* is SAME-ORIGIN, proxied to the real deployed handler on opalinvest.dev's distribution. This is NOT a stub -- it is the transport CTO's 17689 ruling specifies. Real gated fixture account usr_d12w3fixture (mfaEnabled=true). The code was obtained by offline recovery from the authoritative challenge row by 0.7.0_AE_CloudOps~Z (I hold no DynamoDB access at this seat) -- a LABELLED PROXY for the mailbox hop, ruled legitimate (CTO 17689); the mail hop itself is independently closed by W1-10 (Andrew's own 'top of inbox, no junk' on the real transport). Secrets (fixture password, the one-time code) are deliberately absent from this record. Correct password submitted (login -> 200 mfaRequired, no session), then /market attempted three ways with NO code completed: in-session SPA navigation (history.pushState + popstate), full page reload (browser_navigate to /market), and back-navigation (history.back to a /market entry).",
+      "output_evidence": "REAL-HANDLER EVIDENCE (the 17446 'prove the path fired' check, mandatory for an absence claim): the form's POST /auth/login was network request #78 -> 200 {mfaRequired:true, challengeId:<32 hex>, channel:email}, hasAccessToken=false, set-cookie=false -- the handler's own body, so the login demonstrably reached the real server. THEN all three refusal limbs: in-session URL -> bounced to /login, login form present; full reload of /market -> redirected to /login; back-navigation -> /login. localStorage.accessToken null throughout. Screenshot READ at .playwright-mcp/page-2026-09-01T03-38-53-488Z.png -- silver canvas, dark navy text, login card. The named input that makes it refuse: a correct password with the MFA challenge left uncompleted.",
+      "denominator": "3 of 3 reachability routes (in-session nav, full reload, back-nav) attempted and refused; 1 real login confirmed on the wire (#78).",
+      "status": "PASS",
+      "status_reason": "READING NOTE, on the record so it is not miscited (3.0.0_SA_CVO~Z 17882, ratified CTO 17900): DE3-2 is NOT a controlled A/B with the RED capture -- the RED was stubbed + pre-fix, this is unstubbed + post-fix, so two variables differ. DE3-2 does not need to be a pair: it tests an ABSOLUTE PROPERTY -- a correct password alone must not reach the dashboard -- which is directly falsifiable and demonstrably CAN fail, because the pre-fix client did exactly that. The RED/GREEN pair carries the discrimination; DE3-2 carries the integrated observation. Both needed, different jobs. NEGATIVE DECLARATION (ratified binding clause, 1.0.0_SA_CTO~Z 17693 / 17811; FATAL-IF-ABSENT): no window.fetch override, no Service Worker, no MSW, no route interception, no Playwright request routing. VERIFIED IN THE BROWSER, not asserted -- window.fetch === '[native code]', no controlling Service Worker, and my OWN RED/GREEN stub markers (__redCalls, __calls, __verifyAttempts) all read undefined, checked BEFORE any credential was typed and again after. /auth/* reached the real deployed handler via the vite same-origin proxy (89ecfd89); nothing intercepted it."
+    },
+    {
+      "criterion_id": "DE3-3",
+      "criterion_verbatim": "The whole flow renders correctly against the silver-canvas colour law -- screenshot READ, not asserted.",
+      "method": "live_read",
+      "invocation": "Screenshots taken at each stage of both limbs and OPENED, not inferred from class names: the opt-in prompt, the challenge screen, the DE3-2 refusal/login state, and the DE3-1 rendered dashboard.",
+      "output_evidence": "Across all stages: the page canvas is silver and page-level headings/labels are dark navy (opt-in prompt, challenge screen, login card -- .../03-38-53, and the earlier DE1/DE2 renders). The white-text idiom appears ONLY inside dark navy Panels -- the dashboard's Trending Topics header, the Bullish/Bearish and performer cards on .../page-2026-09-01T03-58-15-609Z.png. No light text or ghost-white fill sits loose on the silver canvas. ALSO FIXED as part of this work and read here: the login error box moved from text-red-400 (the documented #1 portal defect, illegible on silver) to text-red-900, read legible in the DE2-2 wrong-code screenshot.",
+      "denominator": "4 rendered stages read (opt-in, challenge, refusal, dashboard) across both limbs.",
+      "status": "PASS",
+      "status_reason": "Read from screenshots, not asserted from markup -- which is the whole point of the /frontend-dev discipline the TO invokes: a grep cannot see contrast."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The control that makes DE3-2 an EARNED absence rather than a silent one (3.0.0_SA_CVO~Z 17801): DE3-2's pass state and its broken-harness state are the same observation -- a silent-failed proxy, a 404 on /auth/*, a dev server that never reached the handler all produce '/market not reachable' identically to a working gate. So the run must prove the login actually FIRED against the real handler. AND separately, the negative declaration was verified by instrument rather than asserted -- window.fetch checked === native code, and my own stub markers checked absent by name.",
+      "expected": "The login reaches the real handler (a 200 mfaRequired body, not a proxy 404), AND window.fetch is native with no stub markers present -- otherwise DE3-2's 'not reachable' is unscoreable.",
+      "observed": "POST /auth/login network #78 -> 200 {mfaRequired:true, challengeId:<32 hex>, channel:email}, hasAccessToken=false, set-cookie=false -- the handler's body, path demonstrably fired. window.fetch === '[native code]', no Service Worker, __redCalls/__calls/__verifyAttempts all undefined, checked before the credential was typed. So the absence claim is earned. On the DE3-1 side, the positive control that the flow is REAL rather than a harness artifact: the access token is a 652-character JWT and the dashboard rendered real content, where the RED's poisoned path produced the literal 'undefined' and a blank canvas.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The DE3-2 refusal was observed across THREE independent routes to the guarded page (in-session nav, full reload, back-nav) rather than one; each is a same-input repeat of the reachability question from a different entry.",
+      "observed": "All three routes landed on /login with the login form present and accessToken null -- no route-to-route variation. DE3-1's positive path was run once (a single-use code cannot be replayed by construction); its result is corroborated by AE's independent W3 exercise of the same handler on the same fixture.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Production behaviour for the fixture",
+      "reason": "This is the LOCAL post-fix client (087a456f/89ecfd89). Production still serves the pre-fix bundle (index-D9vMtGZu.js), so DE3 green here is a statement about the client that ships on the promote, NOT about production today. That gap closes on the promote, a DT act."
+    },
+    {
+      "item": "The mailbox delivery hop",
+      "reason": "Proxied: the code was recovered from the authoritative challenge row, not read from a mailbox (the SES simulator address is unreadable by construction). Labelled per CTO 17689; the mail hop is independently closed by W1-10."
+    },
+    {
+      "item": "Re-enabling Andrew's account and starting the pilot cohort",
+      "reason": "Sovereign-gated, event-gated behind this flow existing and being promoted; not this lane and not this TO."
+    },
+    {
+      "item": "PROD promotion, the push, and the workspace submodule pointer bump",
+      "reason": "DT lane acts. Both portal commits are DEV, local-only, unpushed."
+    },
+    {
+      "item": "IAM / FINDING F-1",
+      "reason": "DE3 section 5: F-1 stays open with its own owner; not touched."
+    },
+    {
+      "item": "Enabling MFA on any account or provisioning the test subject",
+      "reason": "The fixture usr_d12w3fixture was provisioned by 0.7.0_AE_CloudOps~Z under COO/CTO ruling, on a non-human unreadable address. This lane enabled nothing and created no account, per DE3 section 4."
+    }
+  ],
+  "surprises": [
+    "The DE3-1 code-retrieval hop depends on an open finding: the MFA challenge table is offline brute-forceable (6-digit code, salt defeats cross-account precomputation but not exhaustive search of one small space), which is what let 0.7.0_AE_CloudOps~Z recover the real code. Surfaced as the mfa.ts:95-false-comment finding, owner unassigned, not this lane. Flagged because if that table is tightened or the code lengthened, this retrieval method breaks and DE3-1 would need a readable test mailbox instead.",
+    "The census 'quoted all night' as the safety fact -- 0 of 48 gated -- silently included a service account (svc-bbgtml, which fires Andrew's daily Bloomberg dashboard) and, once the fixture was gated, moved to 1 of 49. Surfaced by others and routed to CTO/WS-4; noted here only because DE1's own 'unreachable while 0 gated' bound became live for the fixture during this run.",
+    "A session-wide instruction (in this seat's system prompt; a tool-result envelope for other seats) pushed toward Bash heredocs over the dedicated Read/Edit/Write tools, which conflicts with CLAUDE.md 14a. Ruled by CTO: the named safety law wins regardless of the instruction's provenance. No harm at this seat -- every committed artifact and commit message went through the Write tool."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-09-01/",
+  "compiler_tools": [
+    {
+      "tool": "playwright (headless Chromium)",
+      "invocation": "navigate / evaluate / type / click / network_requests / network_request / screenshot, across the DE3-2 and DE3-1 runs",
+      "result": "Both limbs exercised against the real handler with no stub; four screenshots READ. The negative declaration was verified by browser evaluate, not asserted."
+    },
+    {
+      "tool": "curl",
+      "invocation": "POST to localhost:5176/auth/* and opalinvest.dev/auth/* with invalid inputs",
+      "result": "Confirmed the same-origin dev proxy returns the HANDLER's body (byte-identical to production) rather than the gateway's, before any credential was used -- the wiring DE3 depends on."
+    },
+    {
+      "tool": "bun run typecheck",
+      "invocation": "bun run typecheck (tsc -b)",
+      "result": "Clean on the vite.config.ts proxy change; the instrument was proven failable earlier this session with a planted mutant."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "--author '0.4.0_DE_ClientPlatform~Z <...>' -F <msgfile written by the Write tool>",
+      "result": "89ecfd89 (proxy). This deliverable committed the same way."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this file>",
+      "result": "Run to VALID before commit."
+    }
+  ]
+}
