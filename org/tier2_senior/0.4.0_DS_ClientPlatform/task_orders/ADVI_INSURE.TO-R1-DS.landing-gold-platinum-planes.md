@@ -136,6 +136,52 @@
      The 3-day silver hole (08-28/29/30) is HISTORICAL and off AC2's path; no criterion on this TO
      names those dates. Cause already measured. It stays an OPEN ITEM. **If a NAMED consumer needs
      those dates, name the consumer and the issuer rules again.** Do not carry it as a stall. -->
+<!-- ⛔ ROOT CAUSE OF AC2's ROSTER ABSENCE, 14:1xZ 2026-09-01 -- MY BLOCK ABOVE NAMED THE SYMPTOM
+     AND MISSED THE CAUSE, AND MY PROPOSED REMEDY WOULD HAVE WRITTEN TO ANOTHER FIRM'S BUCKET.
+
+     The block above says the producer is "ABSENT FROM THE DEPLOYED CHAIN ROSTER". True, and it
+     reads as though the fix were a deploy. **IT IS NOT. THE PRODUCER IS IN THE WRONG TREE.**
+     Found by `0.7.0_AE_CloudOps~R` (91626/91635) and CONFIRMED HERE on my own run of the resolver
+     `safe-deploy.sh` actually executes (`safe_deploy_core.file_to_s3_target`):
+       data/assets/scripts/gold/bd49f_insurance_nav_current.py
+           -> ('opal-data-mdpf', 'code/scripts/assets_gold/...', 'mdpf')     ** MDPF's bucket **
+       data/assets/scripts/gold/runners_49f/bd49f_dim_portfolio_group.py     <- POSITIVE CONTROL
+           -> ('opal-data-49financial', '_code/...', 'advi')
+     **The advi gold home is `data/assets/scripts/gold/runners_49f/`. The producer sits one level UP,
+     in MDPF's shared `assets_gold` home.** Longest-prefix resolution is working correctly; the file
+     cannot reach `_code/` from where it lives. It is deployed NOWHERE -- head-object on the MDPF
+     path returns 404. **So this was never a skipped mint. It is a misplaced file.**
+     ⛔ **AND I HAD ASKED THE ISSUER TO AUTHORISE A FIRST MINT "into s3://opal-data-49financial/_code/"
+     (91621). THE TOOL WOULD HAVE PUT IT IN `opal-data-mdpf`** -- `safe-deploy` exits 0, a readback
+     against the bucket the TOOL chose rather than the bucket the ASK named cannot fail, `_code/`
+     stays 0 of 82, and every seat reads the precondition as met. **ASK RETRACTED at 91639.**
+     ⚠ `0.7.0_AE_CloudOps~R` declined to call it a NEVER#8 cross-firm violation -- correctly, since
+     this is a CODE prefix and not a data prefix -- but a 49F insurance artifact landing in MDPF's
+     bucket should be a DECISION, not a side effect. Recorded here on that basis.
+
+     ⛔ THE CHAIN-ABORT TRAP, EXERCISED BY ME rather than reasoned (`0.7.0_AE_CloudOps~R` derived it):
+       --date D --upload   -> "unrecognized arguments: --upload"    rc=2
+       --date D --dry-run  -> "unrecognized arguments: --dry-run"   rc=2
+       --date D (native)   -> rc=0                                  <- POSITIVE CONTROL
+     The chain's universal stage idiom is `--upload`/`--dry-run`; this producer's verb is `--write`
+     with a dry-run DEFAULT -- a different token AND inverted polarity. **The chain is FAIL-FAST, so
+     registering it naively aborts the whole 49F chain on EVERY fire, including a dry-run QA fire,
+     and takes both post-emission stages (c04 validation battery, ADVI_PERFRP projection) with it.**
+     `a07_asset_class_pair` is the existing special-cased precedent. **THE DEFECT IS IN THIS
+     PRODUCER'S INTERFACE, NOT THE CHAIN'S.**
+
+     THE FOUR ACTS, all `data/*/scripts/gold/**.py` or an `aws s3 cp` = Rule 13 DS LANE:
+       (i) MOVE the producer into `runners_49f/` -- this ALONE fixes the destination;
+       (ii) REGISTER in `_stage_list` with special-cased argv;  (iii) RESOLVE the argv polarity;
+       (iv) THEN deploy. **The SSM document needs NO edit -- it syncs the whole prefix.**
+     ⛔ **NONE TAKEN. The second half was seated to `0.7.0_AE_CloudOps~R` at 91569 and it turned out
+     to be DS-lane; picking it up because it became mine would be a seat re-scoping itself off a
+     peer's finding. One word from the issuer and all four execute in one turn -- nobody is blocked
+     on knowledge, only on lane.**
+     ⚠ AND FOR WHOEVER READS AC2's ACCEPTANCE: 91569 makes the SCHEDULED FIRE the acceptance, but
+     `0.7.0_AE_CloudOps~R` found NO 12:45Z cron among 140 EventBridge rules and marked the trigger
+     UNTRACED. **If the chain is driven by an S3-notification accelerator rather than a schedule,
+     "scheduled fire" needs pinning to a real mechanism before it can serve as the oracle.** -->
 
 <priority>P0 -- Andrew-direct 2026-08-25 ~12:0xZ named this project as one of two waiting on the decomp seat. PRD v0.2 approved by him ~18:3xZ 08-24; the project has been unblocked and unseated since.</priority>
 <date>2026-08-25</date>
