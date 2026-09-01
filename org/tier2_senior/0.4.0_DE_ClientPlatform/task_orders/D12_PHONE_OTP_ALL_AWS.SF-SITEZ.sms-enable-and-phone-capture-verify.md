@@ -52,6 +52,21 @@ SF-2's enrolment-preference model.
   ON THE SF-1 ROW** (MSTR~Z's deadline), not held in your head. The one-line flip is the "smaller,
   safer-looking edit that lands ahead of its validation" shape.
 
+## ⛔ AMENDMENT 3 — surface (c) RULED + SF-1 REFRAMED (CTO~Z 19024; BINDING)
+✅ **Enrolment surface RULED: (c) POST-LOGIN authenticated step** (CTO~Z, concurring with the COO scope
+verdict; (b) OUT on the assurance-level principle, (a) is future scope). SF-2 is a component in the
+authenticated shell (post-login landing `/market`) — **NO new route, stays in scope.** The TRIGGER widget
+(one-time nudge / dismissible card / menu-item modal) is `0.4.0_DE_ClientPlatform~Z`'s UX proposal to bring;
+CTO~Z rules the surface, not the widget.
+⛔ **SF-1 REFRAMED — it is NOT "add a selectable sms radio."** `mfaChannel` is a SINGLE stored value bound
+at issue, so the login-time `MfaOptInPrompt` must **RENDER the user's stored channel** ("we'll text a code
+to the number on file" / "we'll email you") with "Send me a code" as the consent. The current email-vs-sms
+picker is VESTIGIAL: `requestMfaCode` sends only `{challengeId}` and the backend dispatches on the
+challenge's bound channel, ignoring any client channel — **a UI offering a choice the backend ignores would
+LIE.** So SF-1 = "the login prompt correctly REFLECTS + the send HONORS the stored sms channel for enrolled
+users," NOT a per-login channel choice (which would require multi-channel enrolment — not the model).
+`3.0.0_SA_CVO~Z`: score SF-1 to this framing.
+
 ## REPORTING
 Validation `2.0.0_SA_COO~Z`; acceptance `1.0.0_SA_CTO~Z`; certification `3.0.0_SA_CVO~Z`. Surprise items
 → `3.0.0_SA_CVO~Z` (cc `0.0.0_AB_MSTR~Z`), one line, keep working. Push state MEASURED — is-ancestor
