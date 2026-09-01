@@ -13,7 +13,7 @@ preceded by "I'd prefer to operate this entirely out of AWS." BUILD LEG AUTHORIZ
 PRD: `1.0.0_SA_CTO~Z` @`65f7a59396`.
 </authority>
 <proof_of_spec>
-  <expected_criteria>SB-1,SB-2,SB-3,SB-4,SB-5,SB-6,SB-7,SB-8</expected_criteria>
+  <expected_criteria>SB-1,SB-2,SB-3,SB-4,SB-5,SB-6,SB-7,SB-8,SB-9</expected_criteria>
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D12_PHONE_OTP_ALL_AWS.SB_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 </task_order>
@@ -137,6 +137,20 @@ number sails past.** This defeats the whole enrolment-verification requirement. 
   `throttle.ts`), invalidate-prior (one live enrolment/account), CROSS-PURPOSE refusal BOTH directions
   (confused-deputy defense), relay defense built-not-assumed, verify-then-set, single generic 400, NO shadow
   store — live in CVO~Z's SB-7/8 criteria @`bc0d69b084` (scored there, not transcribed here).**
+
+## ⛔ AMENDMENT 6 — SB-9 number-change refusal (CTO~Z RULED IN, folds before the apply; BINDING)
+⛔ **Cheerful-200 lockout (AE~Z 19068, sharper than E7's "intent-not-honored"): `updateMfaPreference('sms',
+<new number B>)` on an account holding a DIFFERENT verified number A silently enables sms against A — the
+next login texts a code to a handset the user may no longer hold. A 200 with a lockout under it, the D12
+class. NOT reachable from the ruled UI (SF-2 sends no number; number CHANGE goes through enrolment) — a
+DIRECT-API hazard, and "not reachable from the current client" is the assumption D12 exists to distrust.**
+- **SB-9:** `updateMfaPreference` REFUSES (400) when a supplied `phoneNumber` DIFFERS from the stored
+  VERIFIED one. ⛔ Precise: a caller echoing the SAME number still passes (nothing that works today breaks);
+  no-number passes (channel-only, per E7); only the genuinely ambiguous different-number case is refused.
+  Refines E7 from ignore-different to refuse-different. Number CHANGE is a RE-ENROLMENT (SB-7/8 → SB-8
+  overwrites `{phoneNumber, phoneVerifiedAt}`).
+- ⛔ **FOLDS BEFORE THE APPLY (CTO~Z ruling):** the combined deploy is SB-1..9; SB-9 gets `3.0.0_SA_CVO~Z`'s
+  DELTA source re-review (the 775dc28917 clearance does NOT cover it) before the deploy condition is met.
 
 ## REPORTING
 Validation `2.0.0_SA_COO~Z`; acceptance `1.0.0_SA_CTO~Z`; certification `3.0.0_SA_CVO~Z`. Surprise items
