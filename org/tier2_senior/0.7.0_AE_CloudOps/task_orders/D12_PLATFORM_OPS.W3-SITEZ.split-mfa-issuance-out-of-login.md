@@ -144,19 +144,28 @@ answer today): **the UI shows the failure and refuses to advance rather than cla
 **Both are right. Neither ordering is safe on its own** - and this is exactly the kind of conflict that
 surfaces halfway through a deploy, when one of the two is already done.
 
-### ⭐ THE RESOLUTION, AND IT IS THE COHORT GATE DOING DOUBLE DUTY
+### ⭐ THE RESOLUTION — AND ~04:0xZ `0.7.0_AE_CloudOps~Z` SHARPENED IT: THE BINDING CONSTRAINT IS **PROMOTE-BEFORE-ENROLMENT**, NOT PROMOTE-BEFORE-ACT-B
+⚠ **CORRECTED. My earlier sequence below read *"promote → land Act B → gate."* That is SAFE but it
+guards the wrong edge.** MFA is PER ACCOUNT, so with **0 accounts gated, Act B changes the behaviour
+of EXACTLY ZERO logins whatever PROD serves** — the `mfaRequired` branch is unreachable for an
+unenrolled account.
 ```
-1. PROMOTE 087a456f      safe: 0 of 48 gated, so NO USER REACHES THE MFA BRANCH and the false
-                         copy is unreachable by anyone
-2. LAND ACT B            safe: the promoted client already calls /auth/mfa/send. The copy
-                         becomes TRUE at this step
-3. GATE THE FIRST ACCOUNT
+ship ACT B, 0 gated, old PROD bundle   -> nobody affected; the branch is unreachable
+enrol ANYONE, old PROD bundle          -> THE LOCKOUT — and it happens WITH OR WITHOUT Act B,
+                                          because the pre-fix client cannot complete an MFA login either way
 ```
->> **THE CONFLICT ONLY EXISTS IF SOMEONE IS GATED BETWEEN STEP 1 AND STEP 2.** The cohort gate is not
-   merely a safety hold on F-2 -- **it is the thing that makes both orderings compatible.** <<
-⛔ **THE HAZARD, STATED SO IT CANNOT BE STUMBLED INTO: gating any account between step 1 and step 2
-delivers BOTH defects at once** - a screen that says nothing has been sent, to a user whose code is
-already in their mailbox. **Nobody gates anyone until Act B has landed.**
+>> ⛔ **THE PROMOTE IS A PRECONDITION OF THE *PILOT/ENROLMENT*, NOT OF ACT B.** Sequencing Act B
+   behind the promote protects nothing; sequencing ENROLMENT behind it is what prevents the outage.
+   **Getting it backwards leaves the real gate unguarded while feeling careful.** <<
+**THE ONE HARD RULE:** ⛔ **NO ACCOUNT IS ENROLLED IN MFA UNTIL `087a456f` IS PROMOTED.** That is the
+F-7 cohort gate, and it binds Andrew's pilot decision.
+**ACT B TIMING (low-stakes, ruled):** Act B is SAFE to ship now (0 gated). Whether it lands tonight or
+holds to the promote is `0.4.0_DE_ClientPlatform~Z`'s call — it is invisible to that client either way
+(the client already calls `/auth/mfa/send`), and DE was the blocked party twice, so DE gets the say on
+a single-stable-contract preference.
+⛔ **AND `0.7.0_AE_CloudOps~Z`'s own limit is RATIFIED: do NOT land Act B and enrol an account in the
+same window to "prove" W3-1** — that is how a lockout gets built by being thorough. **W3-1 stays
+UNCOMPUTABLE-BY-CONSTRUCTION until a deliberate, separately-authorised enrolment (the pilot, post-promote).**
 
 ### ⚠ AND THE RESIDUAL IS THE REAL ACT B PRECONDITION - IT HAS NO OWNER
 `0.4.0_DE_ClientPlatform~Z` bounded its own clearance precisely, and the bound is load-bearing:
