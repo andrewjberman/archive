@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0",
+  "to_id": "CALL2_SWEEPLIVENESS.M1-SITEZ",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.3.0_DT_TradingOperations/task_orders/CALL2_SWEEPLIVENESS.M1-SITEZ.can-the-2026-08-25-cleanup-fire-again.md",
+    "group": "M",
+    "vintage_commit": "0b555d6d2c"
+  },
+  "assignee": "0.3.0_DT_TradingOperations~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.3.0_DT_TradingOperations/deliverables/CALL2_SWEEPLIVENESS.M1_SITEZ_SWEEP_LIVENESS.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Investigation report. Nothing is deployed by this TO -- the TO is READ-ONLY on AWS and forbids writing the register. PENDING-THIS-COMMIT: the artifact rides the commit that carries this proof. Measurement was taken at HEAD 97df34efb5.",
+      "artifact_covered_by": ["M1-1", "M1-2", "M1-3", "M1-4", "M1-5"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.3.0_DT_TradingOperations/deliverables/CALL2_SWEEPLIVENESS.M1_PROOF_OF_SPEC.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This instance. Schema-validated against org/standards/PROOF_OF_SPEC.schema.json.",
+      "artifact_covered_by": ["M1-1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "M1-1",
+      "criterion_verbatim": "Which of the three it is, decided by a NAMED ARTIFACT -- file:line @ <commit-ish> for code, or a resource ARN for infrastructure. A description is never a state. If the artifact does not decide it, say so and name what would.",
+      "method": "diff",
+      "invocation": "git log --all --since=2026-08-24 --until=2026-08-27 -- org/projects/ ; git show -s --format=%B <hash> ; git show --stat --name-only <hash> | grep -Ev '\\.(json|md)$' ; multi-line taint scan over the union of 3 comp-find censuses",
+      "output_evidence": "SWEEP = d5e5790970 (18:31:52Z, 64 TOs) + 5823436d60 (18:35:46Z, 56 projects) + 2f0ad6d1c8 (18:48:55Z, 45 projects + 144 TOs) - f7c9130f14 (19:03:46Z, reinstate 2) = 99, all authored 1.0.0_SA_CTO~X. Non-.json/.md files in all four commits: NONE. Taint scan: 'RESULT: 1 of 82 write a project JSON' and that one is org/modules/graph/registry_cli.py:476 writing REGISTRY_PATH = org/projects/REGISTRY.md (:38), the derived table -- no close/sweep/status-flip verb exists in it. .tools/lib/project_registry.py:2 'THE ONLY SANCTIONED WAY TO READ'; zero write verbs. VERDICT: ONE-OFF ACT.",
+      "denominator": "4 sweep commits of 4 identified; 0 code files of the total files in those 4 commits; 1 project-JSON writer of 82 code files across 3 differently-keyed censuses",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "M1-2",
+      "criterion_verbatim": "If scheduling is claimed OR ruled out: census BOTH EventBridge planes AND the device plane, and PRINT ALL THREE DENOMINATORS. list-rules structurally cannot see an EventBridge Scheduler schedule -- they are two separate APIs. Windows Scheduled Tasks is a third plane. A zero on one plane is not a zero.",
+      "method": "live_read",
+      "invocation": ".tools/aws events list-rules --output json | python -c \"...len(Rules)...\" ; .tools/aws scheduler list-schedules --output json | python -c \"...len(Schedules)...\" ; Get-ScheduledTask (PowerShell)",
+      "output_evidence": "PLANE 1 EventBridge Rules: LIVE EVENT_RULE COUNT = 140, NextToken present: False, register-domain name matches: 8 (all data-domain: cot-satellites-registry-producer-daily, 6x opal-assets-silver-*-sweep-daily, security-sweep-comprehensive). PLANE 2 EventBridge Scheduler: LIVE SCHEDULE COUNT = 18, NextToken present: False, register-domain name matches: 0. PLANE 3 device (site Z): 204 scheduled tasks total, 17 non-Microsoft, 6 OPAL_*; 0 touching the register. autolaunch-agents.ps1 read at source: launches 2 serials, zero projects/REGISTRY/close/sweep/clean/directive tokens.",
+      "denominator": "140 of 140 rules (NextToken absent, counted client-side); 18 of 18 schedules; 204 of 204 device tasks (17 non-Microsoft enumerated in full, all 17 actions+triggers read)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "M1-3",
+      "criterion_verbatim": "A POSITIVE CONTROL on every negative. Before reporting 'no schedule exists', show the instrument finding a schedule you know IS live, and name it. A control proves the ENGINE, not your PATTERN -- so also show the pattern matching something it should match.",
+      "method": "test_suite",
+      "invocation": "planted mutant at scratchpad/PLANTED_MUTANT_writer.py run through the taint detector (ARM 1) then the 82 real files (ARM 2) ; .tools/aws scheduler get-schedule --name mdpf-scheduled-floor|mdpf-accrual-bridge-daily|opal-assets-mdpf-portal-publisher-daily",
+      "output_evidence": "ENGINE, code side: first detector returned a clean '0 of 45' and was DEAD (same-line requirement); planted-mutant ARM 1 caught it BEFORE the zero was reported. Re-armed multi-line taint: 'ARM 1 POSITIVE CONTROL: FIRES [(8, 'path.write_text(json.dumps(d))')]'. ENGINE, AWS side: mdpf-scheduled-floor FOUND state=ENABLED expr=cron(30 13 * * ? *); mdpf-accrual-bridge-daily FOUND ENABLED cron(40 13 * * ? *); opal-assets-mdpf-portal-publisher-daily FOUND ENABLED cron(50 13 * * ? *) -- 3/3, same API and address space as the subject. ENGINE, device side: the same Get-ScheduledTask census returns OPAL_BBGTML_daily_pull + OPAL_BBGTML_freshness_check, independently known live via /bbg-daily. PATTERN arm: the register-domain regex DID match 8 EventBridge rules, so it is not structurally dead -- it returns zero on the register domain because that domain is empty.",
+      "denominator": "3 of 3 known-live MDPF schedules found; 1 of 1 planted mutant detected; 8 pattern matches proving the regex is live (of 140 rules)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "M1-4",
+      "criterion_verbatim": "DESIRED vs APPLIED vs EXERCISED. Has it fired since 2026-08-25? Name the evidence surface and its retention horizon -- log retention is a RATIO, not a device property, and an absence inside a window shorter than the question is not an absence.",
+      "method": "command",
+      "invocation": "TZ=UTC git log --all --format='@@@%H|%cd|%an|%s' --date=iso-strict-local --name-only -- org/projects/ | awk '(single pass, count .json per commit, emit >=15)'",
+      "output_evidence": "Complete >=15 population across ALL branches, ALL time: 56 5823436d60 2026-08-25T18:35:46Z (TRANCHE A); 45 2f0ad6d1c8 2026-08-25T18:48:55Z (TRANCHE B); 19 44c6925b35 2026-05-22T13:39:05Z (the prior dormancy close-out, 95 days earlier); 17 409321a5cb 2026-08-25T19:29:26Z (back-pointer write, NOT a close). Largest single-commit project-JSON touch since the sweep closed (>2026-08-25T19:10Z) = 17, the back-pointer write. SPRING CLEAN marker in later commits: 4, all ABOUT the sweep (exec-sum, integrate merge, the COMB, one unrelated restamp) -- none a re-execution. EXERCISED: fired exactly ONCE, 2026-08-25, never since. EVIDENCE SURFACE: git history of org/projects/*.json. RETENTION HORIZON: full repository history, unbounded -- deliberately chosen over any log surface, whose retention is a ratio and could be shorter than the question.",
+      "denominator": "4 of 4 commits in all history touching >=15 project JSONs; window for the post-sweep test = every commit on every branch after 2026-08-25T19:10Z",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "M1-5",
+      "criterion_verbatim": "The device boundary, answered explicitly: does the mechanism live on THIS device or the laptop?",
+      "method": "manual_read_with_citation",
+      "invocation": "grep -c '1\\.0\\.0_SA_CTO~X' org/mcp/agent-spawn-audit.log ; grep -c '1\\.0\\.0_SA_CTO~Z' org/mcp/agent-spawn-audit.log (positive control) ; plus the M1-1 and M1-4 evidence bases",
+      "output_evidence": "NEITHER DEVICE -- there is no resident mechanism; a one-off act has no device home. Actor attribution: 1.0.0_SA_CTO~X appears 0 times in this device's agent-spawn-audit.log (489 lines) while the positive control 1.0.0_SA_CTO~Z, a known site-Z lane, appears 161 times -- so ~X is laptop-side. THE M1-5 STOP IS NOT TRIGGERED, and the reason is instrumental: no step of this measurement reads a laptop-local record. The conclusion rests on the SHARED git history (identical on both devices by definition) and the AWS planes (global account-level, not per-device), both fully readable from here. NOT MEASURABLE FROM SITE Z, handed back: (1) the laptop's Windows Scheduled Tasks plane -- device-plane denominator is 1 of 2 devices; (2) whether an uncommitted mutator persists in the laptop's working tree. Neither can promote the act into a standing job, and that is measured not assumed: any mechanism on either device that closed projects must WRITE THE SHARED REPO, and M1-4's all-branch all-time census finds bulk closure exactly twice.",
+      "denominator": "489 audit-log lines scanned; 0 CTO~X vs 161 CTO~Z (positive control); device plane measured on 1 of 2 devices, stated",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A planted script that DOES close a project JSON (assigns path from PROJECTS_DIR on one line, then path.write_text(json.dumps(d)) on the next) was run through the project-JSON-writer detector before any negative was reported.",
+      "expected": "The detector must flag the planted writer; if it cannot, every 0-of-N negative in this deliverable is worthless.",
+      "observed": "FIRST DETECTOR DID NOT FIRE -- it required the projects path and the write on the SAME LINE, and returned a clean but meaningless '0 of 45'. The control caught this before the zero was reported anywhere. Re-armed as a multi-line taint check: ARM 1 FIRES [(8, 'path.write_text(json.dumps(d))')], ARM 2 returns 1 of 82.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs of each AWS plane census, compared.",
+      "observed": "scheduler run1=18 run2=18 -> STABLE; events run1=140 run2=140 -> STABLE.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The laptop's Windows Scheduled Tasks plane.",
+      "reason": "Structurally not measurable from site Z -- no remote task API, no shared record. The device-plane denominator is stated as 1 of 2 devices rather than presented as complete. Handed back per M1-5. It cannot change the M1-1 answer: a mechanism that fires must write the shared repo, and M1-4's all-branch census finds bulk closure exactly twice."
+    },
+    {
+      "item": "Whether an uncommitted mutator script persists in the laptop's working tree.",
+      "reason": "Laptop-local records are structurally invisible from here; a confident answer would be manufactured rather than measured. Same bound as above -- it would relocate WHERE an operator's tooling sits, never make the act scheduled."
+    },
+    {
+      "item": "Re-running the 2026-08-25 membership predicate.",
+      "reason": "Explicitly forbidden by the TO (Andrew-direct, standing). This TO measures the mechanism's LIVENESS, never re-executes it."
+    },
+    {
+      "item": "Any write to the project register.",
+      "reason": "Forbidden by the TO. CALL 1 is 0.0.0_AB_MSTR~Z's act. Reading the register is this seat's; writing it is not."
+    },
+    {
+      "item": "Any alarm, monitor, notifier, SNS topic or freshness-checker for the operator residual.",
+      "reason": "Standing moratorium; the TO names this seat as specifically tempted by it. The residual lands as a line in the report instead."
+    },
+    {
+      "item": "Target-level inspection of all 140 EventBridge rules and 18 schedules.",
+      "reason": "Screened by name and by domain, then closed structurally rather than by enumeration: no committed code can write a project closure (M1-1, 1 of 82), so no trigger of any kind has a target that could perform one. Enumerating 158 targets would re-derive the same conclusion by a weaker route."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.3.0_DT_TradingOperations/logs/2026-09-01/session_call2_sweepliveness_0300-0400Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find -i 'spring.?clean' ; comp-find 'org/projects' --files --all ; comp-find '\"projects\"' --files --all ; comp-find -i 'status.{0,20}closed' --files --all ; comp-find --name '*PROOF_OF_SPEC*'",
+      "result": "Primary repo census, three differently-keyed runs unioned to 82 code files. Located the origin artifact (ANDREW_DIRECT_20260825_1555Z_SPRING_CLEAN_DORMANCY_CLOSEOUT_TAG.md) and the CTO~X session log. Denominators printed on every run; never head-ed. The rail also correctly refused a raw `find` and routed it to comp-find --name."
+    },
+    {
+      "tool": "comp-find --corpus aws",
+      "invocation": "comp-find '.' --corpus aws --band SCHEDULE --all ; --band EVENT_RULE --all",
+      "result": "Covers BOTH EventBridge planes as distinct node types (EVENT_RULE=139, SCHEDULE=18). Disclosed its own vintage -- built 2026-08-28T23:42:07Z, age 75.7h, WARN: STALE -- which is what triggered the live re-read that found the +1 drift (bd-49f-insurance-session-daily). The instrument reporting its own staleness is what made the gap closable."
+    },
+    {
+      "tool": ".tools/aws (shim), read-only",
+      "invocation": "events list-rules --output json ; scheduler list-schedules --output json ; scheduler get-schedule --name <3 known-live>",
+      "result": "Live census of both AWS planes, auto-paginated, counted CLIENT-side with NextToken explicitly checked rather than assumed. 140 rules / 18 schedules. Also carried the M1-3 positive control (3/3 MDPF schedules ENABLED with cron)."
+    },
+    {
+      "tool": "Get-ScheduledTask (PowerShell)",
+      "invocation": "Get-ScheduledTask ; then per-task Actions + Triggers for all 17 non-Microsoft tasks",
+      "result": "Device plane: 204 total / 17 non-Microsoft / 6 OPAL_*. Read by ACTION and TRIGGER rather than by name, which is what closed the OPAL_autolaunch_agents path (launches 2 serials, zero register tokens)."
+    },
+    {
+      "tool": "git log --name-only single-pass + awk",
+      "invocation": "TZ=UTC git log --all --format='@@@%H|%cd|%an|%s' --date=iso-strict-local --name-only -- org/projects/ | awk '...'",
+      "result": "The all-history bulk-close census (M1-4). Chosen after a per-commit `git show` loop timed out at 2 minutes; the single pass is also the sounder instrument because it cannot silently truncate. Yielded the decisive four-row population."
+    },
+    {
+      "tool": ".tools/to-check.py",
+      "invocation": "python .tools/to-check.py --all --assignee 0.3.0_DT_TradingOperations~Z ; and again with the BASE serial as a control",
+      "result": "Startup holdings read: total=1, scanned=2230, exactly the TO issued by COO~Z. Run against both suffixed and base serial as a control on the documented `SEATED:`-prose matching defect; both returned the same single row."
+    },
+    {
+      "tool": "python multi-line taint detector (authored this session)",
+      "invocation": "ASSIGN/WRITE regex pair over the 82-file union, with a planted mutant as ARM 1",
+      "result": "1 of 82 files write a project JSON, correctly disqualified as REGISTRY.md. Its FIRST version was dead and the planted-mutant arm caught it -- the control did the work it exists for."
+    }
+  ]
+}
