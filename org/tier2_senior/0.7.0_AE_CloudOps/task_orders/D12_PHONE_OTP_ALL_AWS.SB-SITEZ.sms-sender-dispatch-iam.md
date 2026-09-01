@@ -13,7 +13,7 @@ preceded by "I'd prefer to operate this entirely out of AWS." BUILD LEG AUTHORIZ
 PRD: `1.0.0_SA_CTO~Z` @`65f7a59396`.
 </authority>
 <proof_of_spec>
-  <expected_criteria>SB-1,SB-2,SB-3,SB-4,SB-5,SB-6</expected_criteria>
+  <expected_criteria>SB-1,SB-2,SB-3,SB-4,SB-5,SB-6,SB-7,SB-8</expected_criteria>
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D12_PHONE_OTP_ALL_AWS.SB_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 </task_order>
@@ -87,6 +87,28 @@ NOT a reason to soften it.**
   that ONE LINE.** `0.4.0_DE_ClientPlatform~Z`: treat `available:true` as gated on SB-6 + SF-2's verify path,
   and SAY SO on the SF row rather than holding it in your head.
 - `1.0.0_SA_CTO~Z` rules the exact error shape / enforcement points; the INVARIANT (refuse it) is not in dispute.
+
+## ⛔ AMENDMENT 3 — SB-7/SB-8 ENROLMENT-VERIFICATION BACKEND (DE~Z 18934 finding; UNBLOCKS SF-2; BINDING)
+⛔ **DECOMP GAP (DE~Z, correct — my miss): SB-1..SB-6 build the LOGIN-challenge SMS path + the preference
+guard. NONE builds the ENROLMENT-VERIFICATION round-trip SF-2 depends on** ("collect E.164, SEND A TEST
+CODE, CONFIRM, store"). SF-2 has nothing to CALL until these exist, so it is BLOCKED, not merely un-enabled.
+- **SB-7 (enrolment send-code-to-candidate):** an endpoint that sends an SMS OTP to a CANDIDATE number that
+  is NOT yet the account's stored preference. ⛔ Cannot reuse SB-2 resend (it dispatches on the STORED
+  challenge, and storing the number first to trigger it would violate F1). Reuses `sendMfaCodeSms` (SB-1)
+  for delivery. Acceptance: sends a code to a candidate number WITHOUT mutating the account's stored
+  channel/number.
+- **SB-8 (enrolment verify-and-mark + the F3b field):** verifies the entered code against the enrolment
+  challenge and, on success, stores the number + MARKS IT VERIFIED (writes the F3b verified-state field on
+  the `opal-users-v2` record). ⛔ Distinct from `verifyAndConsumeChallenge` (that consumes a LOGIN
+  challenge; marking a NUMBER verified at enrolment is a different act). Acceptance: only a correctly-verified
+  number is stored+marked; F1 holds (an unverified number is never stored), oracle = the user record bracketed.
+- ⛔ **NO SHADOW SYSTEM (Andrew veto): EXTEND the existing challenge mechanism with a PURPOSE parameter
+  (`login|enrolment`), not a parallel challenge store.** `1.0.0_SA_CTO~Z` rules the design; `0.7.0_AE_CloudOps~Z`
+  builds; ⛔ **AE~Z + DE~Z AGREE THE ENDPOINT CONTRACT (paths, request/response) BEFORE DE~Z builds SF-2's
+  client** — DE~Z is blocked until the contract is named, and rightly holds SF-2 rather than build against
+  presumed endpoints.
+- **F3b lane precision (DE~Z, adopted): DE-CALLS / AE-WRITES** — SF-2 DRIVES the verify (calls SB-8); the
+  field and the record write are AE~Z's plane. SF-2 (UI) never writes `opal-users-v2` (Rule 13).
 
 ## REPORTING
 Validation `2.0.0_SA_COO~Z`; acceptance `1.0.0_SA_CTO~Z`; certification `3.0.0_SA_CVO~Z`. Surprise items

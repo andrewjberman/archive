@@ -39,6 +39,19 @@ bound at enrolment (NOT a per-login caller pick). ⭐ **That is your per-channel
 copy signal — render the confirmation copy from the response's `channel`, never infer it.** Consistent with
 SF-2's enrolment-preference model.
 
+## ⛔ AMENDMENT 2 — proof-of-spec scoping + SF-2 unblock path (DE~Z 18934, adopted)
+- **SF proof-of-spec scores the CLIENT contract ONLY:** SF-2's UI round-trip (F2), the client correctly
+  gating store-behind-verify, E.164 matching `auth.ts:245`. ⛔ The SERVER invariants (F1, F3a, F4, F5) are
+  scored against the SB backend atom's acceptance, NOT this SF face — else SF is graded on properties its
+  lane cannot deliver (D12's original-defect shape, one level up).
+- **F3b: DE-CALLS / AE-WRITES.** SF-2 DRIVES the verify (calls SB-8); the verified-state field is written
+  server-side (AE~Z's plane). SF-2 never writes the user record (Rule 13).
+- **SF-2 build UNBLOCKS once SB-7/SB-8's endpoint contract is named** (AE~Z↔DE~Z handshake, per SB Amendment
+  3). Holding SF-2 until then is correct — build the client against real endpoints, not presumed ones.
+- ⛔ **SF-1 (`available:true`) GATED on F3a binding + SF-2's verify path existing — as a VALIDITY CONDITION
+  ON THE SF-1 ROW** (MSTR~Z's deadline), not held in your head. The one-line flip is the "smaller,
+  safer-looking edit that lands ahead of its validation" shape.
+
 ## REPORTING
 Validation `2.0.0_SA_COO~Z`; acceptance `1.0.0_SA_CTO~Z`; certification `3.0.0_SA_CVO~Z`. Surprise items
 → `3.0.0_SA_CVO~Z` (cc `0.0.0_AB_MSTR~Z`), one line, keep working. Push state MEASURED — is-ancestor
