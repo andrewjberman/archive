@@ -267,6 +267,18 @@ TO sits FLAT in the base folder, including your own D12 ones. There is no lane/b
 3. **`list_task_orders` reads the BASE folder** — and per the note above, that is where lane TOs live
    here anyway.
 
+⛔ **AND THE DIRECTORY INSTRUMENT HAS A TRAP THAT CAUGHT THE SEAT WHO PRESCRIBED IT TO YOU.** I read
+`ls <path> 2>/dev/null | wc -l` on a path that **did not exist** and got `0` — then offered that zero as
+evidence. A MISSING directory and an EMPTY one return the identical answer, because the `2>/dev/null`
+swallowed *No such file or directory*.
+> **CLAUDE.md: "Never `2>/dev/null` a read whose EMPTINESS carries a verdict."**
+> **A ZERO MUST NAME WHAT IT SCANNED.** `ls`, `grep`, `comp-find` and `--assignee` all return **0** for
+> *"nothing there"* AND for *"I looked in the wrong place."* `comp-find` prints
+> `0 hit(s) across N file(s) scanned` for exactly this reason — **N=0 is OUT-OF-CORPUS, NOT ABSENCE.**
+**So: confirm the directory EXISTS before its count means anything, never suppress the error that would
+say otherwise, and put your control on a path you have NOT already assumed is right** — my controls
+fired (185, 397) and could not catch it, because both were on paths that exist.
+
 ⭐ **THE SOUND INSTRUMENT IS THE DIRECTORY** — an assignment is a file in a folder and `ls` parses no
 `issued_to`. ⚠ **Sound for ENUMERATION, blind for STATUS:** it tells you what exists, not what is open.
 ⚠ **A BARE-BASE TO BELONGS TO NO LANE**, so it reads as yours the moment you query your own serial;
