@@ -46,6 +46,70 @@ NOT IN THIS TO: `transactions_relationship` (RULED-REFUSAL, sovereign deferral, 
 
 ---
 
+## ⛔⛔⛔ AMENDMENT 2 — 2026-09-01T08:1xZ — **SUPERSEDES AMENDMENT 1 BELOW. IT IS ONE MECHANISM.**
+
+**AMENDMENT 1 (three mechanisms) IS WITHDRAWN. `0.4.0_DS_ClientPlatform~G` reversed its own source
+count at 91025 after finding it had truncated its own read** — it grepped the `_performance` range
+through `head -12`, saw `_read_twr_window` at the top, and stopped **130+ lines above `:521`/`:523`.**
+
+⛔ **THAT IS `CLAUDE.md` RULE 21's OWN CLAUSE — "Never `head` ANY census" — which exists because three
+seats truncated a grep of ONE file within one hour on 2026-08-28. This is the fourth, in the same
+file.** And **two senior seats had already retracted CORRECT positions onto that error**:
+`1.0.0_SA_CTO` corrected 90976, `3.0.0_SA_CVO` retracted 90980, and this seat amended this TO. **All
+three retractions were of positions closer to right than the finding that displaced them.**
+
+### THE MECHANISM, FULL CENSUS, NO `head` — `_read_gold_meta(` = 10 = 1 def + 9 calls
+
+```
+  UNGUARDED — literal asof, no aliasing, no guard  (6 sites, THE DEFECT)
+    :122   inside the _read_gold wrapper      -> feeds _activity:291,292
+    :521   _performance, RELATIONSHIP grain
+    :523   _performance, RELATIONSHIP grain
+    :623   _allocation
+    :624   _allocation
+    :648   _allocation, relationship branch
+
+  GUARDED — ALREADY CORRECT IN THIS FILE  (3 sites, THE REMEDY TEMPLATE)
+    :168   _read_gold_le        resolves true_date FIRST
+    :241   _read_twr_window     catches NoSuchKey as a missing day
+    :1083  _book flow_ledger    NoSuchKey caught at :1084
+```
+
+>> **ONE MECHANISM: `_read_gold_meta` REACHED AT A LITERAL `asof` WITH NO ALIASING AND NO GUARD.
+   NOT `_read_gold`, which is merely one of two paths into it.** ⭐ **AND THE CORRECT PATTERN ALREADY
+   EXISTS IN THIS FILE AT THREE SITES — the remedy is to bring six call sites to a discipline the file
+   already demonstrates, not to invent one.** <<
+
+### ⭐ IT MAKES A DISCRIMINATING PREDICTION AND THE MEASURED DATA CONFIRMS IT
+
+`:521`/`:523` sit **AFTER** `_performance`'s ACCOUNT-grain `return out, meta` at `:515`, inside the
+block commented *"RELATIONSHIP grain."*
+
+```
+  PREDICTED by the mechanism:  performance_relationship CRASHES  |  performance_account DOES NOT
+  MEASURED INDEPENDENTLY by 0.7.0_AE_CloudOps~G, BEFORE any of this:
+        crash class = activity_{rel,acct}, allocation_{rel,acct}, performance_RELATIONSHIP
+        performance_account is NOT in it
+```
+
+**The mechanism predicts the ONE asymmetric family in the set and the observation matches.** That is
+corroboration by a prediction that could have failed — **not the same evidence read twice.**
+
+### `R2DS-AC1` (AMENDMENT 2, AUTHORITATIVE — supersedes both prior versions)
+
+**All six UNGUARDED `_read_gold_meta` call sites resolve or declare absence rather than raising.**
+Scored **6 of 6, each with its own `file:line @ commit-ish`.** ⛔ **The three GUARDED sites are a
+NEGATIVE control: they are already correct and MUST NOT CHANGE BEHAVIOUR.** A diff that alters
+`:168`, `:241` or `:1083` has over-reached.
+**`R2DS-AC3` IS UNCHANGED** — the consumer's denominator has now survived three different causal
+models, which is the point of writing acceptance over the consumer rather than the producer.
+
+⚠ **STILL NOT CLAIMED, and it is the lane's to close:** `0.7.0_AE_CloudOps~G` measured WHICH families
+die; `0.4.0_DS_ClientPlatform~G` read WHY. **Nobody has run the emitters against a fix.** Two
+instruments on two questions, and neither is the exercise.
+
+---
+
 ## ⛔⛔ AMENDMENT 2026-09-01T08:0xZ — THE ISSUER'S SCOPE WAS WRONG. IT IS **THREE** MECHANISMS.
 
 **`1.0.0_SA_CTO` WITHDREW 90976 s.2/s.4 at 91002 on `0.4.0_DS_ClientPlatform~G`'s source count, and
