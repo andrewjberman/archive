@@ -86,6 +86,41 @@ nothing has been fixed and the DE series stays blocked.
 relay.** It must not send for an arbitrary posted email, and it must not reveal whether an account
 exists or has MFA enabled. State how you bounded it.
 
+## 3b. ⛔ ACT B NOW CARRIES A SECOND OBJECT: THE SHIPPED COPY. **THEY PROMOTE TOGETHER OR NOT AT ALL.**
+
+`3.0.0_SA_CVO~Z` read the shipped MFA prompt off its own GREEN screenshot, verbatim:
+> *"This account uses a one-time code. Choose where to receive it, then confirm below -- **nothing is
+> sent until you do**."* + a **"Send me a code"** button.
+
+⛔ **AGAINST TODAY'S BACKEND THAT SENTENCE IS FALSE.** `auth.ts:93-95` sends inside `login()`, so the
+code is **already in the mailbox** at the instant that screen renders and tells the user nothing has
+been sent. **I have now confirmed the backend half on the production host itself:** `POST
+/auth/mfa/send` returns `404 {"error":"Not found"}` on `https://opalinvest.dev` -- the handler's own
+404, not the gateway's -- so **Act B has not landed anywhere**, DEV or PROD (FINDING F-3,
+`laneZ_DECOMP_20260831_D12_PLATFORM_OPS_USERMGMT.md`).
+
+>> **THIS IS NOT DE1-1's UNMET HALF WEARING A NEW NAME.** An unmet criterion is a gap in coverage.
+   **Copy that makes an affirmative factual claim the backend contradicts is a FALSE ASSURANCE** --
+   and it is strictly worse than the silent send Andrew objected to. **Silence misleads by omission;
+   this asserts the opposite of what happens**, to a user who is at that moment deciding whether to
+   expect an email. <<
+
+**THE CONSTRAINT, and it is a SEQUENCING fact, not a new gate:** `3.0.0_SA_CVO~Z` observed that the
+dependency was real and **nothing tracked it**. It is tracked here now:
+| | condition | consequence |
+|---|---|---|
+| ✅ | **Act B lands BEFORE the MFA frontend is promoted** | the copy becomes TRUE. Nothing else to do. **This is the sequence already planned.** |
+| ⛔ | **Act B slips and the frontend promotes first** | ⚠ **THE COPY IS THE THING THAT MUST MOVE** -- soften it until Act B lands. |
+
+⛔ **NEITHER BRANCH IS URGENT TONIGHT AND I AM NOT MAKING IT SO:** the fix commit `087a456f` is LOCAL
+and UNPUSHED, and the production bundle contains no MFA code at all, so **this copy is not on
+production and cannot be reached by any user today.** It becomes live at the same moment the cohort
+does. **Whoever promotes the MFA frontend owns checking this row first.**
+
+⚠ **AND ONE READ TO REFRESH BEFORE ACTING:** `3.0.0_SA_CVO~Z` flagged that its finding rests on
+`auth.ts:93-95` being unchanged. **`0.7.0_AE_CloudOps~Z` owns that surface -- if Act A's commit
+altered `login()`, say so, because that read is then stale.**
+
 ## 4. CONSTRAINTS
 
 - ⛔ **DO NOT ENABLE MFA ON ANY ACCOUNT**, including to test. **0 of 48 are gated, deliberately.** For
