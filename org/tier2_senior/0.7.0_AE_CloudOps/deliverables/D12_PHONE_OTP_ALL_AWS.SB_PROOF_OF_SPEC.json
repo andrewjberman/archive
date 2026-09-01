@@ -1,0 +1,237 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D12_PHONE_OTP_ALL_AWS.SB-SITEZ",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/D12_PHONE_OTP_ALL_AWS.SB-SITEZ.sms-sender-dispatch-iam.md",
+    "group": "SB",
+    "vintage_commit": "f0e68ec1f7"
+  },
+  "assignee": "0.7.0_AE_CloudOps~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/opalinvest_dev/lambda/auth-handler/src/sms.ts",
+      "kind": "script",
+      "commit_or_etag": "8fd0ae2810",
+      "deployed_state": "BUILT-NOT-DEPLOYED",
+      "deploy_evidence": "NOT DEPLOYED AND NOT UPLOADED. Bundled locally only (117.64 KB, handler export present). The deployed CodeSha256 is still the Act C build oExO72SrEDqOKsJ+dPmP23d8MNXCLqB5xnCzoPGE3lw= -- unchanged since 08:56:27Z. No S3 artifact was pushed, deliberately: build-nodejs-lambda.sh uploads as part of building, and the TF resource reads s3_object_version, so an uploaded artifact would arm ANY seat's portal-auth apply to ship the SMS leg.",
+      "introduces": [
+        "sendMfaCodeSms",
+        "mfa_sms_refused",
+        "SMS_ORIGINATION_IDENTITY",
+        "SMS_VERIFIED_DESTINATIONS",
+        "SMS_ALLOW_UNVERIFIED"
+      ],
+      "artifact_covered_by": [
+        "SB-1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts",
+      "kind": "script",
+      "commit_or_etag": "8fd0ae2810",
+      "deployed_state": "BUILT-NOT-DEPLOYED",
+      "deploy_evidence": "Same local bundle; not uploaded, not applied. resendMfaCode dispatches on issued.channel (the challenge ROW) and login() gained the sms branch.",
+      "introduces": [
+        "resendMfaCode sms dispatch",
+        "login sms branch",
+        "no_phone_number_enrolled",
+        "updateMfaPreference sms guard (SB-6)"
+      ],
+      "artifact_covered_by": [
+        "SB-2",
+        "SB-3",
+        "SB-6"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/opalinvest_dev/lambda/auth-handler/src/mfa.ts",
+      "kind": "script",
+      "commit_or_etag": "8fd0ae2810",
+      "deployed_state": "BUILT-NOT-DEPLOYED",
+      "deploy_evidence": "Same local bundle; not uploaded, not applied. issueChallenge takes a channel and PERSISTS it on the row; sendChallengeCode reads it back and puts it on mfa_code_sent.",
+      "introduces": [
+        "issueChallenge channel param",
+        "challenge row channel attribute",
+        "mfa_code_sent channel param"
+      ],
+      "artifact_covered_by": [
+        "SB-2",
+        "SB-4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/portal-auth/sms-iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "8fd0ae2810",
+      "deployed_state": "AUTHORED-NOT-APPLIED",
+      "deploy_evidence": "terraform validate Success, fmt clean, and plan reads 'No changes' with sms_origination_identity_arn empty -- the grant creates nothing until SP-1 lands. Positive control run and NOT applied: plan with a hypothetical ARN reads 'Plan: 1 to add' creating sms-send-text-message with Action [\"sms-voice:SendTextMessage\"] on that one phone-number ARN.",
+      "introduces": [
+        "aws_iam_role_policy.auth_sms",
+        "var.sms_origination_identity_arn"
+      ],
+      "artifact_covered_by": [
+        "SB-5"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SB-1",
+      "criterion_verbatim": "sendMfaCodeSms(phoneE164, code, ttlMin) via @aws-sdk/client-pinpoint-sms-voice-v2 SendTextMessageCommand (OriginationIdentity=TFN ARN, MessageType:'TRANSACTIONAL'), mirroring email.ts sendMfaCodeEmail. Unit-exercised against the SANDBOX on a VERIFIED destination only; returns a message id; the code ASSERTS verified-only so a future sandbox exit does not silently open sends.",
+      "method": "source_read + static_bundle_census",
+      "invocation": "tsc --noEmit (clean, --listFiles confirms sms.ts compiled). Local bun bundle, then occurrence counts via grep -o | wc -l (NOT grep -c: the bundle is one long line and grep -c counts lines).",
+      "output_evidence": "SendTextMessageCommand 1 · TRANSACTIONAL 1 · SMS_VERIFIED_DESTINATIONS 1 · SMS_ALLOW_UNVERIFIED 1 · mfa_sms_refused 2. Signature is (phoneE164, code, expiresMinutes) and it returns {messageId}. The verified-only assertion is a default-deny allowlist plus a separate explicit release flag, so leaving the sandbox requires TWO acts, one of which is a reviewable commit.",
+      "denominator": "1 of 3 clauses computable. Built + statically present: yes. Returns a message id: yes, by signature. UNIT-EXERCISED AGAINST THE SANDBOX: NOT DONE.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "THE EXERCISE CLAUSE CANNOT BE RUN AND WILL NOT BE UNTIL SP-1. Sending anything requires an OriginationIdentity; the toll-free number does not exist (measured: zero End User Messaging configuration sets on the account), so there is no identity to send from and no verified destination to send to. The code fails CLOSED without one -- which is the correct behaviour and is also why no send can be exercised. ⛔ I am NOT scoring the two computable clauses as a PASS on SB-1: the exercise clause is the one that would catch a wrong SDK shape, and calling this PASS would certify an untested call path."
+    },
+    {
+      "criterion_id": "SB-2",
+      "criterion_verbatim": "resendMfaCode (auth.ts:223): after sendChallengeCode (already charges the channel-agnostic budget), branch on the channel -- email->sendMfaCodeEmail, sms->sendMfaCodeSms(user.phoneNumber, issued.code, TTL). Act C parity: ONE sealed code per challenge across N resends, never rotated -- on SMS as on email.",
+      "method": "source_read",
+      "invocation": "Read the committed branch at 8fd0ae2810. AMENDED MID-BUILD: the TO said 'branch on user.mfaChannel' (option b); 1.0.0_SA_CTO~Z ruled option (c) -- persist channel on the challenge row at issue, dispatch off the ROW -- at 18871, and 2.0.0_SA_COO~Z amended the TO text.",
+      "output_evidence": "if (issued.channel === 'sms') { ... sendMfaCodeSms(user.phoneNumber, issued.code, CHALLENGE_TTL_MINUTES) } else sendMfaCodeEmail(...). Nothing in either branch mints, rotates or re-charges: sendChallengeCode has already unsealed the one code minted at issue and already charged the budget in the same conditional update that authorised the send.",
+      "denominator": "1 dispatch site read at source; 0 live sends.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "ACT C PARITY IS INHERITED BY STRUCTURE, NOT RE-IMPLEMENTED -- the SMS branch is a delivery step downstream of an unchanged issuance path, so 'one sealed code per challenge' holds for the same reason it holds on email. ⛔ BUT THAT IS AN ARGUMENT, NOT A MEASUREMENT. The property was exercised on the email path against a deployed handler (Act C C1, 12/12); on SMS it is asserted from source and NOTHING is deployed. A structural argument that a property transfers is exactly the kind of claim that has failed on this handler before (source != deployed, repeatedly), so it is not scored PASS."
+    },
+    {
+      "criterion_id": "SB-3",
+      "criterion_verbatim": "login() sms-branch: replace the current 503 -- if user.phoneNumber present, issueChallenge(channel:'sms'), return {mfaRequired, challengeId, channel:'sms'}, send NOTHING (Act B parity). Keep 503 only for sms-selected-but-no-number. Evidence: a CloudWatch check shows challenge issued and NO send at credential time.",
+      "method": "source_read",
+      "invocation": "Read the committed branch at 8fd0ae2810.",
+      "output_evidence": "if (user.mfaChannel === 'sms' && user.phoneNumber) { const { challengeId } = await issueChallenge(user.email, 'sms'); return { mfa: { mfaRequired: true, challengeId, channel: 'sms' } }; } -- no send call between issueChallenge and the return, mirroring the email branch exactly. The 503 survives for sms-with-no-number and for any future channel with no branch, and now logs a 'reason' distinguishing the two for the estate while the CALLER still gets one indistinguishable 503.",
+      "denominator": "1 branch read at source; 0 logins driven.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "THE CRITERION NAMES ITS OWN ORACLE AND THE ORACLE CANNOT RUN: 'a CloudWatch check shows challenge issued and NO send at credential time' requires a deployed handler and an sms-channel account, and neither exists -- nothing is deployed and the gated-account census is 2 of 48, both email. ⛔ The absence half is the half that matters and it is precisely the half a source read cannot establish: reading that there is no send call is not the same as observing that no send occurred, which is the distinction the whole D12 send-fix was about."
+    },
+    {
+      "criterion_id": "SB-4",
+      "criterion_verbatim": "parameterize the hardcoded channel:'email' in the issueChallenge log (cosmetic); the field reflects the real channel, no other behavior change.",
+      "method": "source_read + static_bundle_census",
+      "invocation": "Read the committed diff; confirmed the literal is gone and the parameter is in the bundle.",
+      "output_evidence": "issueChallenge(email, channel='email') and the log emits `channel` rather than the 'email' literal. Beyond the atom as written, mfa_code_sent ALSO carries `channel` -- per 3.0.0_SA_CVO~Z 18842 §4, a NEW event name for SMS would have silently under-counted every census keyed on mfa_code_sent, including the C2/C4 invariants certified on the email path. A parameter keeps them valid; a new name would have made them quietly stale rather than failing.",
+      "denominator": "2 log sites changed (mfa_challenge_issued, mfa_code_sent); 0 log lines observed on a deployed plane.",
+      "status": "PASS",
+      "status_reason": "SCORED PASS BECAUSE THIS ATOM IS A SOURCE PROPERTY AND SOURCE IS THE RIGHT PLANE FOR IT -- the criterion is 'the field reflects the real channel', which is fully established by reading that the literal is gone and the parameter is threaded. ⚠ WHAT IS NOT CLAIMED: that any such line has been EMITTED. Nothing is deployed. The atom's own text calls it cosmetic; I am scoring the cosmetic change, not its runtime appearance."
+    },
+    {
+      "criterion_id": "SB-5",
+      "criterion_verbatim": "IAM: add sms-voice:SendTextMessage to the auth-handler role, RESOURCE-SCOPED to the origination-identity ARN -- NOT a blanket Allow. Do NOT repeat F-1 (the unconditioned ses:SendEmail). Terraform + safe-apply (never bare). Terraform AUTHORED now; APPLY gated on the TFN ARN existing (SP-1).",
+      "method": "terraform_plan + positive_control",
+      "invocation": "terraform validate; terraform fmt; terraform plan (ARN variable empty); then terraform plan -var 'sms_origination_identity_arn=arn:aws:sms-voice:us-east-1:313476888478:phone-number/pn-EXAMPLE' as a POSITIVE CONTROL. No apply.",
+      "output_evidence": "validate: Success. plan with the variable empty: 'No changes. Your infrastructure matches the configuration.' Positive control: 'Plan: 1 to add, 0 to change, 0 to destroy' creating aws_iam_role_policy.auth_sms[0] name sms-send-text-message with Action [\"sms-voice:SendTextMessage\"] and Resource = that exact phone-number ARN -- one action, one resource, no wildcard.",
+      "denominator": "2 plans (dormant + controlled), 1 validate, 1 fmt. 0 applies.",
+      "status": "PASS",
+      "status_reason": "SCORED PASS ON THE AUTHORING CLAUSE, WHICH IS THE WHOLE OF WHAT THE ATOM ASKS FOR NOW ('Terraform AUTHORED now; APPLY gated'). ⭐ THE POSITIVE CONTROL IS LOAD-BEARING AND WITHOUT IT THIS ROW WOULD BE WORTHLESS: 'No changes' is produced equally by a correctly-dormant resource and by dead code that never creates, and only the controlled plan distinguishes them. ⚠ NOT CLAIMED: that the grant works, that the ARN is right, or that F-1 is fixed. F-1 is open, owned by 1.0.0_SA_CTO~Z, and is on the SES actions."
+    },
+    {
+      "criterion_id": "SB-6",
+      "criterion_verbatim": "updateMfaPreference MUST REJECT mfaChannel='sms' unless a phone number is SUPPLIED in the same call OR ALREADY STORED. Acceptance exhibits a DIRECT API call for sms with no number and the SERVER REFUSING it.",
+      "method": "source_read",
+      "invocation": "Commissioned by 2.0.0_SA_COO~Z 18927 after I measured it, declined to build it off-spec (Rule 27) and asked for a home. Built and typechecked; NOT exercised.",
+      "output_evidence": "if (mfaChannel === 'sms' && phoneNumber === undefined) { const existing = await getUser(email); if (!existing?.phoneNumber) throw ... }. The read fires only when no number is supplied in the call. Checked at source that setMfaPreference writes phoneNumber ONLY when supplied and never clears a stored one -- so 'already stored' genuinely survives the call and the guard is not racing its own write.",
+      "denominator": "1 guard read at source; 0 API calls made.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "THE CRITERION NAMES AN EXHIBITION AND THE EXHIBITION NEEDS A DEPLOYED HANDLER. 'A DIRECT API call ... and the SERVER REFUSING it' cannot be shown against a guard that exists only in git. Nothing is deployed. ⛔ AND THAT IS NOT A BOOKKEEPING PROBLEM: SB-6's stated purpose is to BIND BEFORE SF-1 flips sms available:true, and a guard in a commit binds nothing. The deploy question -- which I held open deliberately -- is now on SB-6's critical path, and it is raised rather than resolved by me. ⚠ Scope: this is the 'a number EXISTS' half only. 'Verified' has no field yet (F3b, joint with SF-2)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No planted mutant. The nearest thing exercised is the SB-5 positive control, which is a REAL control rather than a mutant: it distinguishes a dormant resource from a non-existent one by supplying the one input that should make it create.",
+      "expected": "With an ARN supplied, the dormant grant materialises with exactly one action on exactly one resource.",
+      "observed": "Plan: 1 to add. Action [\"sms-voice:SendTextMessage\"], Resource the supplied phone-number ARN.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "tsc --noEmit run twice across the option-(b)->option-(c) rebuild; terraform plan run in both the empty-variable and supplied-variable configurations.",
+      "observed": "tsc clean both times. plan deterministic in both configurations: 0-diff empty, 1-to-add supplied.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any deployment of the SMS leg",
+      "reason": "NOT UPLOADED AND NOT APPLIED, deliberately and beyond what the TO required. The TO gates the SB-5 apply and any real send; it is silent on the Lambda CODE deploy. Silence is not authorisation for a world-facing act, and there is a specific hazard: build-nodejs-lambda.sh uploads as part of building and the TF resource reads s3_object_version, so an uploaded artifact arms ANY seat's portal-auth apply to ship the SMS leg. The same side door was closed during Act C. Whether the code deploy is in scope now or waits with SP-1 is 2.0.0_SA_COO~Z / 1.0.0_SA_CTO~Z's call, and it is asked, not assumed."
+    },
+    {
+      "item": "F3a -- refusing mfaChannel='sms' with no number at updateMfaPreference",
+      "reason": "MEASURED AND NOT BUILT. 3.0.0_SA_CVO~Z 18908 measured that updateMfaPreference(email,'sms') with phoneNumber undefined passes both guards; I confirmed it verbatim at source. It is three lines in auth.ts -- my lane -- but it is NOT an SB atom and Rule 27 freezes the spec mid-round. CVO withdrew the accompanying lockout CHAIN at 18920 (SB-3 503s a no-number sms user at login, so no challenge is ever frozen), and re-routed F3 to AE after initially sending it to the client seat. Awaiting a home from 1.0.0_SA_CTO~Z / 2.0.0_SA_COO~Z."
+    },
+    {
+      "item": "F3b -- verification state on the user record",
+      "reason": "'A number EXISTS' is not 'a number is VERIFIED', and no verified-state field exists today. Genuinely joint: SF-2 sets it, an AE-side guard reads it. Not buildable from this lane alone."
+    },
+    {
+      "item": "A downstream delivery oracle for SMS (rubric S5)",
+      "reason": "MEASURED ABSENT: the account has ZERO End User Messaging configuration sets, and event destinations -- the mechanism that emits per-message delivery events -- attach to configuration sets. So no downstream delivery record exists. ⚠ CONFOUND STATED: only AWS/SES appears among the account's CloudWatch namespaces, but no SMS has ever been sent from this account, so a namespace would be absent either way -- the config-set reading is sound, the namespace reading is NOT and is not asserted. Creating one is new infrastructure this TO does not authorise and brushes the monitor moratorium."
+    },
+    {
+      "item": "Any provisioning (SP-1 / SP-2)",
+      "reason": "Andrew-gated and held at 1.0.0_SA_CTO~Z. No phone number resource, no sandbox-exit request, no spend cap authored here."
+    },
+    {
+      "item": "Any monitor, alarm, SNS topic or spend notification on the SMS surface",
+      "reason": "Standing moratorium -- none may be built unless Andrew explicitly asks. sms-iam.tf records this omission explicitly so it reads as deliberate rather than forgotten."
+    },
+    {
+      "item": "A fix for F-1",
+      "reason": "Unchanged from W3: the ses:SendEmail pair (one conditioned Resource '*', one unconditioned Resource identity/*) means the condition constrains nothing. Open, owned by 1.0.0_SA_CTO~Z. sms-iam.tf cites it as the pattern NOT to repeat and adds exactly one sms-voice grant, but it does not touch the SES statements."
+    }
+  ],
+  "surprises": [
+    {
+      "class": "OBSERVATION",
+      "standing": "DISARMED",
+      "item": "The TO's option (b) resolves the delivery channel at SEND time from the live user record, so it is not stable for the life of a challenge -- a preference flipped mid-flight delivers by a channel the login response already promised was a different one.",
+      "disposition": "Surfaced rather than built (Rule 27). 1.0.0_SA_CTO~Z ruled option (c) ADOPTED at 18871, having reached the same design independently in a crossing message; 2.0.0_SA_COO~Z amended the SB-2 text. Built as (c). It also made SB-4's channel parameter on mfa_code_sent possible -- under (b) the channel was resolved after the log had already fired."
+    },
+    {
+      "class": "OBSERVATION",
+      "standing": "INERT",
+      "item": "Multi-challenge send amplification is unchanged in structure but changes in KIND: two logins are two budgets, so a user who flips to sms between them can reach 2 x MAX_SENDS billable texts. Option (c) does not fix this; nothing in this TO does.",
+      "disposition": "Named to 3.0.0_SA_CVO~Z (18849 §3) and agreed by 1.0.0_SA_CTO~Z (18871): the spend cap (SP-2) is the dollar backstop and CTO's leg; a per-user/per-window send cap is a separate control, outside this TO and under the monitor moratorium. Not commissioned."
+    },
+    {
+      "class": "OBSERVATION",
+      "standing": "DISARMED",
+      "item": "mfa.ts's header carried the now-stale prohibition 'NO SMS SENDER IS WIRED and none may be added without Andrew's explicit per-use word'.",
+      "disposition": "REWRITTEN, not deleted -- the bound is recorded as DISCHARGED with the authority that discharged it, because a prohibition that quietly vanishes leaves no way to tell 'authorized' from 'forgotten'. The third-party-provider half of the bound is restated as still live."
+    },
+    {
+      "class": "OBSERVATION",
+      "standing": "INERT",
+      "item": "A residual lockout survives CVO's withdrawn chain: if a phone number is removed while an sms challenge is live, dispatch reads the frozen row, finds no number, and the resend returns 200 with no text until the <=10 min TTL expires.",
+      "disposition": "Self-healing; a fresh login then 503s loudly. mfa_sms_refused with reason no_phone_number_enrolled was built for exactly this branch so the estate sees it -- the USER still sees a dead button. 3.0.0_SA_CVO~Z recorded it as a stated bound rather than promoting it to a criterion (18920 §4); disposition is 1.0.0_SA_CTO~Z's."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "rotateChallengeCode / channel / MfaChannel|phoneNumber / 'export async function resendMfaCode' / \"from './email'\"",
+      "result": "PASS",
+      "note": "Confirmed every anchor the TO relayed from the PRD rather than trusting the relay -- resendMfaCode really is at auth.ts:223, and the import site for the new sms module."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "mfa.ts --for 'resend/rotate/sends/MAX_SENDS/logs'; db.ts --for 'users table, schema, mfaEnabled'",
+      "result": "PASS",
+      "note": "mfa.ts's qualifier list surfaced the hashCode self-correction that underpins the sealing argument; a grep would have returned the function and none of the reasoning."
+    },
+    {
+      "tool": "terraform validate / fmt / plan",
+      "invocation": "portal-auth, dormant and with a hypothetical ARN",
+      "result": "PASS",
+      "note": "The controlled plan is the only thing that distinguishes a dormant resource from dead code."
+    },
+    {
+      "tool": "tsc --noEmit --listFiles",
+      "invocation": "auth-handler",
+      "result": "PASS",
+      "note": "--listFiles matters: a clean tsc that never compiled the edited files is a silent pass. All three confirmed compiled."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-01/session_close_0808-0910Z_D12_W3_ACTB_ACTC_F8.md"
+}
