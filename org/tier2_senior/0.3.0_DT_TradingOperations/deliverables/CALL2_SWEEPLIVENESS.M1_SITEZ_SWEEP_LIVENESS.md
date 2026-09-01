@@ -238,7 +238,11 @@ instructed.
 
 1. **⛔ `--date=format:'...Z'` renders LOCAL time and stamps a literal `Z`.** My first UTC read
    labelled the commits `14:31:52Z` etc. Those are `-04:00` local. **True UTC is 18:31:52Z.** The
-   error reached msgs 17768/17769 and was corrected to both recipients before this deliverable.
+   error reached msgs 17768/17769 and was corrected in msgs 17927/17928/17929 -- which were sent
+   AFTER this deliverable was first committed, **not before it.** The original wording here said
+   "corrected ... before this deliverable" while the correction had not yet been sent: a
+   completed-act report for an act not yet performed. Amended in place and left visible rather
+   than quietly restated, because the tidy version is the one that would have survived.
    Substance unaffected — hashes, counts and ordering were right — but the corrected times are what
    make the commit clock reconcile with Andrew's ~18:24Z / ~18:4xZ anchors, so the fix strengthens
    the finding rather than merely tidying it. CLAUDE.md Rule 22a names this trap; I walked into it.
