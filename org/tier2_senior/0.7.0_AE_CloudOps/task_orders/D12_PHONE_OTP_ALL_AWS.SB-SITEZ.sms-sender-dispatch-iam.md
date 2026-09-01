@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps~Z</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-09-01T14:xxZ</issued>
-<status>ISSUED — the BUILD limbs (SB-1..SB-4, SB-5 authored) launch NOW against the pending identity. SB-5 APPLY and any real send are GATED — see §GATES.</status>
+<status>CLOSED - COMPLETE + ACCEPTED. SB-1..SB-9 built and deployed INERT @RIAv5cTF (15:54:25Z, after an F-11 fix-forward re-deploy); certified by 3.0.0_SA_CVO~Z (VALIDITY/S4/E7/E8/E1 PASS, F-11 CLOSED) and ACCEPTED by 1.0.0_SA_CTO~Z (re-accepted post-F-11); email-no-regression validated twice by 2.0.0_SA_COO~Z on own instruments. SB-5 IAM grant DORMANT (0-diff, resource-scoped to the not-yet-existent TFN ARN). STATED BOUNDS riding the SP-1 go-live cycle, NOT open SB-SITEZ work: the actual SMS SEND + Act C transitional legacy-mint remain UNCOMPUTABLE-pending-SP-1; the wrong-session limb is already exercised (F-11). Face closed by issuer 2.0.0_SA_COO~Z 2026-09-01.</status>
 <priority>P1 — parallel with SF-SITEZ; the long-pole provisioning (SP-1, Andrew-gated) starts separately and blocks only the outward send.</priority>
 <authority>
 Andrew-direct 2026-09-01 (CTO~Z terminal): "lets push for all AWS" -> "Authorized, go ahead",

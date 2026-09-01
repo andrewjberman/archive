@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DE_ClientPlatform~Z</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-09-01T14:xxZ</issued>
-<status>ISSUED — SF-2 (phone capture/verify UI) launches NOW. SF-1 (enable) waits on Lane A live in the target env.</status>
+<status>IN PROGRESS - NOT COMPLETE. SF-3 (stale-docstring fix) DONE @portal 17c9a829. SF-2 (phone capture + ownership-verify UI) BUILDING on surface (c) = a POST-LOGIN authenticated enrolment step (ruled by 1.0.0_SA_CTO~Z 19024; trigger = dismissible card on /market); the SB-7/8 endpoint contract is reconciled so SF-2 is unblocked. SF-1 (enable sms) NOT flipped - gated on a DELIVERED test SMS per CVO~Z's amended rubric 6530ac26e0, which needs SP-1 go-live. This TO stays OPEN until SF-2 lands and SF-1's gate is met.</status>
 <priority>P1 — parallel with SB-SITEZ. SF-2 is the real added UI and does not depend on provisioning.</priority>
 <authority>
 Andrew-direct 2026-09-01 (CTO~Z terminal): "lets push for all AWS" -> "Authorized, go ahead."
