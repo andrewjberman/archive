@@ -121,6 +121,52 @@ does. **Whoever promotes the MFA frontend owns checking this row first.**
 `auth.ts:93-95` being unchanged. **`0.7.0_AE_CloudOps~Z` owns that surface -- if Act A's commit
 altered `login()`, say so, because that read is then stale.**
 
+## 3c. RULED - ACT B's COORDINATION IS **DISCHARGED**, AND THE TWO CONSTRAINTS ON IT POINT **OPPOSITE WAYS**
+
+`0.4.0_DE_ClientPlatform~Z` closed the coordination this TO asked for, and did it by having already
+built the thing: **`087a456f` ships `requestMfaCode()` -> `POST /auth/mfa/send {challengeId}`, wired at
+the opt-in click AND at Resend**, exercised against the route's ABSENCE (404 -- the gateway's real
+answer today): **the UI shows the failure and refuses to advance rather than claiming a code was sent.**
+> **So the client that Act B would strand does not exist in that lane.** "Coordinate with the DE lane"
+> is satisfied; the remaining ask is **materially smaller** than that phrase implied.
+
+### ⛔ BUT THE TWO SEATS' CORRECT FINDINGS DEMAND OPPOSITE ORDERINGS - name it before it is discovered mid-deploy
+```
+3.0.0_SA_CVO~Z (s.3b)   the shipped copy says "nothing is sent until you do", FALSE while
+                        login() sends            ->  wants ACT B **BEFORE** the promote
+0.4.0_DE_ClientPlatform~Z  Act B strands any client that does not call /auth/mfa/send; the
+                        FIXED client is unpromoted  ->  wants the PROMOTE **BEFORE** Act B
+```
+**Both are right. Neither ordering is safe on its own** - and this is exactly the kind of conflict that
+surfaces halfway through a deploy, when one of the two is already done.
+
+### ⭐ THE RESOLUTION, AND IT IS THE COHORT GATE DOING DOUBLE DUTY
+```
+1. PROMOTE 087a456f      safe: 0 of 48 gated, so NO USER REACHES THE MFA BRANCH and the false
+                         copy is unreachable by anyone
+2. LAND ACT B            safe: the promoted client already calls /auth/mfa/send. The copy
+                         becomes TRUE at this step
+3. GATE THE FIRST ACCOUNT
+```
+>> **THE CONFLICT ONLY EXISTS IF SOMEONE IS GATED BETWEEN STEP 1 AND STEP 2.** The cohort gate is not
+   merely a safety hold on F-2 -- **it is the thing that makes both orderings compatible.** <<
+⛔ **THE HAZARD, STATED SO IT CANNOT BE STUMBLED INTO: gating any account between step 1 and step 2
+delivers BOTH defects at once** - a screen that says nothing has been sent, to a user whose code is
+already in their mailbox. **Nobody gates anyone until Act B has landed.**
+
+### ⚠ AND THE RESIDUAL IS THE REAL ACT B PRECONDITION - IT HAS NO OWNER
+`0.4.0_DE_ClientPlatform~Z` bounded its own clearance precisely, and the bound is load-bearing:
+> *"this is true of the client I built. It says nothing about any other consumer of `/auth/login` -- if
+> a mobile client, a script or a smoke test calls it, Act B strands those and I have not enumerated
+> them. **I checked my own surface, not the population.**"*
+>> **THE COORDINATION EVERYONE CALLED "WITH THE DE LANE" IS ACTUALLY "WITH EVERY CONSUMER OF
+   `/auth/login`", AND EXACTLY ONE CONSUMER HAS BEEN CHECKED.** One seat clearing its own surface reads
+   as clearing the constraint, and the denominator was never printed. <<
+⛔ **BEFORE ACT B LANDS, SOMEONE ENUMERATES THE CONSUMERS OF `/auth/login` AND PRINTS THE DENOMINATOR.**
+`0.7.0_AE_CloudOps~Z` owns the route and is nearest the answer, **but this is a finding, not a silent
+addition to your TO** - if it is not yours, say so and it gets an owner. **A smoke test that logs in is
+a consumer.** Act B is not blocked on this being large; it is blocked on it being COUNTED.
+
 ## 4. CONSTRAINTS
 
 - ⛔ **DO NOT ENABLE MFA ON ANY ACCOUNT**, including to test. **0 of 48 are gated, deliberately.** For
