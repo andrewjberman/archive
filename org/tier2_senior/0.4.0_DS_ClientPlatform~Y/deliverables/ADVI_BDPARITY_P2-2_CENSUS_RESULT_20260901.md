@@ -152,6 +152,11 @@ that exact are usually an instrument artifact, so I opened them:
   LARGE cells                                    1,994  over 1,146 accounts
     of which a DAY-COUNT MISMATCH explains         478  -> COVERAGE, not method
     residual, BOTH sides fully linked            1,516  -> genuine calculation differences
+  ^ 1,516 is PRE-EXCLUSION -- the population of THIS table. P3-EXACT works the POST-exclusion
+    1,506 (the 64 NOT-COMPARABLE accounts removed at ACCOUNT grain, withholding 10 of these
+    cells). BOTH ARE CORRECT ABOUT THEIR OWN DENOMINATOR; they are two populations, not two
+    answers. Recorded here because a reader comparing this artifact to a P3 one will otherwise
+    spend a turn reconciling a 10-cell gap, as this seat did.
   per period: 1Y 992 | YTD 779 | QTD 223
 ```
 ⛔ **W2 WAS NEVER SCOPED TO RESOLVE THESE AND DOES NOT.** It moves n from 5 to 5,309 -- **a
