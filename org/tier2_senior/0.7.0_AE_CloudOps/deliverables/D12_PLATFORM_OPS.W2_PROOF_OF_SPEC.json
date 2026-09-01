@@ -1,0 +1,177 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D12_PLATFORM_OPS.W2-SITEZ",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/D12_PLATFORM_OPS.W2-SITEZ.sender-repoint-and-email-lookup-determinism.md",
+    "group": "W",
+    "vintage_commit": "12421cc00d"
+  },
+  "assignee": "0.7.0_AE_CloudOps~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/opalinvest_dev/lambda/auth-handler/src/email.ts",
+      "kind": "script",
+      "commit_or_etag": "7f40b7c65b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Bundled and applied; live CodeSha256 i6POeTZAHi14588lyM+x2PPiriq9rhGA6y0CE/BTkjI= equals the sha the build emitted. Census of the RUNNING bundle pulled from the live function: sender addresses = ['noreply@opalinvest.dev'], support@ occurrences = 0. \u26a0 NO `introduces` TOKEN IS CLAIMED FOR THIS ROW, DELIBERATELY. The change at this pin is a REMOVAL (support@ deleted, two constants collapsed into one), and `introduces` can only express a token that APPEARS. The checker correctly refused my first attempt: I had listed 'noreply@opalinvest.dev', which was ALREADY present at the parent because I introduced it hours earlier at 30676928e4 for the OTP mailer. Naming a token that predates the pin would have asserted this commit made a change it did not make. The row is PRESENCE-ONLY on purpose; the behaviour is evidenced by the running-bytes census under W2-1 and W2-2 instead.",
+      "artifact_covered_by": [
+        "W2-1",
+        "W2-2",
+        "W2-4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts",
+      "kind": "script",
+      "commit_or_etag": "7f40b7c65b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Same bundle and sha. EXERCISED against a constructed collision on the live table: the deployed handler emitted user_lookup_ambiguous naming both PKs and returned 500, then returned 401 normally once one row was removed.",
+      "introduces": [
+        "user_lookup_ambiguous"
+      ],
+      "artifact_covered_by": [
+        "W2-3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260901T0058Z_d12-w1-noreply-repoint-and-ambiguous-lookup_deploy.md",
+      "kind": "doc",
+      "commit_or_etag": "8571d98a37",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER-2 deploy ledger, opened before the apply and closed COMPLETE after, carrying the duplicate-email pre-check and the explicit note that the IAM defect is NOT closed by this work.",
+      "artifact_covered_by": [
+        "W2-4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "W2-1",
+      "criterion_verbatim": "Every auth-path sender now reads noreply@. Print the denominator -- how many sender constants/usages exist in the auth path, and that all of them were checked. A census of two when he said 'all' is not this criterion.",
+      "method": "command",
+      "invocation": "comp-find for 'Source:|FROM_EMAIL|@opalinvest.(dev|com)' over auth-handler/src, then a wider sweep for SendEmailCommand|SendRawEmailCommand across infra/aws/opalinvest_dev AND infra/aws/users to find any sender outside the file already named.",
+      "output_evidence": "DENOMINATOR: THREE `Source:` sites exist in the entire auth path -- email.ts l.42 (password reset), l.130 (welcome), l.234 (OTP). No fourth sender exists anywhere in either tree. All three now resolve to one constant. Post-change census: Source: sites = [FROM_EMAIL, FROM_EMAIL, FROM_EMAIL]; support@opalinvest.dev occurrences = 0; AUTH_FROM_EMAIL occurrences = 0.",
+      "denominator": "3 of 3 sender usages, and 1 of 1 sender constant, over 2 source trees swept for any additional SES send site.",
+      "status": "PASS",
+      "status_reason": "The TO warned against scoping to the two senders already named. I treated 'ALL of these functions' as a census instruction: the answer is three, and the third (the OTP mailer) already used the target address. I ALSO collapsed the two constants into one -- I had introduced the second myself hours earlier, and two constants holding one address is two carriers with no named primary."
+    },
+    {
+      "criterion_id": "W2-2",
+      "criterion_verbatim": "A real auth email is sent after the change and its From header is observed as noreply@. Deployed-byte currency stated (running CodeSha256 == the sha the build emitted).",
+      "method": "live_read",
+      "invocation": "HALF A (currency): aws lambda get-function-configuration against the live function. HALF B (From header): requires a real auth email to be SENT after the change and read out of a mailbox.",
+      "output_evidence": "HALF A SATISFIED: live CodeSha256 = i6POeTZAHi14588lyM+x2PPiriq9rhGA6y0CE/BTkjI=, byte-identical to the sha build-nodejs-lambda.sh emitted. Additionally the RUNNING bundle was pulled from the live function and censused: sender addresses present = ['noreply@opalinvest.dev'], support@ = 0, positive control mfa_challenge_issued = 1 (the census engine works on this bundle). HALF B NOT SATISFIED: no auth email has been sent since the repoint, so no From header has been observed post-change.",
+      "denominator": "1 of 2 halves. Currency: measured. From header: 0 observations.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "NOT SCORED PASS, AND THE GAP IS A DELIBERATE CONFLICT BETWEEN THIS CRITERION AND THE TO's OWN STANDING RULES. The only senders this work CHANGED are the password-reset and welcome mailers; the OTP mailer already used noreply@. Firing one therefore means either (a) sending unsolicited auth mail to a real person's mailbox, or (b) a test account on a live human address -- which standing rule 1 in this same TO forbids, because that is exactly what caused tonight's false bug report. Standing rule 2 separately forbids aiming an outbound-side-effect route at a live sender. A synthetic .invalid recipient sends but cannot be READ, so it cannot satisfy 'observed'. I am recording the conflict rather than resolving it by quietly breaking one of the two rules. The cheapest sound resolution is Andrew's word to fire one password reset at his own mailbox -- the same shape that closed W1-10 -- and it is put to him rather than assumed."
+    },
+    {
+      "criterion_id": "W2-3",
+      "criterion_verbatim": "getUserPKByEmail with two records sharing one email returns a surfaced ambiguity rather than an arbitrary pick. Construct the collision -- a fixture with two rows, not an argument that it could happen. Then show the single-match path still returns normally (positive control).",
+      "method": "live_read",
+      "invocation": "Wrote TWO PROFILE items sharing the email d12-w2-collision@opal.invalid into the live opal-users-v2, confirmed the email-index GSI returned 2, then POSTed /auth/login against the deployed handler. Deleted one row and repeated the IDENTICAL request.",
+      "output_evidence": "COLLISION CONSTRUCTED, not argued: GSI length(Items) = 2. TARGET (2 rows): HTTP 500, and the handler log names the path -- {\"event\":\"user_lookup_ambiguous\",\"pks\":[\"USER#usr_w2collide02\",\"USER#usr_w2collide01\"],\"count\":2} followed by 'Account lookup is ambiguous'. POSITIVE CONTROL (1 row, byte-identical request): HTTP 401 {\"error\":\"Invalid email or password\"} with log {\"event\":\"login_failed\",\"reason\":\"bad_password\"} -- the normal path, unchanged. Fixture fully removed afterwards: 48 PROFILE items, 0 collision rows remaining.",
+      "denominator": "2 identical login requests; the ONLY variable is the number of rows sharing the email. 2 fixture rows created, 2 deleted.",
+      "status": "PASS",
+      "status_reason": "The log line is what makes this sound rather than suggestive: a bare 500 is consistent with any handler error, so it would not by itself distinguish the ambiguity path from an unrelated failure. The named event with both PKs is the discriminator, and the 401 control shows the change did not simply break login for everyone. A synthetic .invalid address was used deliberately -- standing rule 1 forbids a live human address, and the ambiguity throws before any SES call so nothing was sent."
+    },
+    {
+      "criterion_id": "W2-4",
+      "criterion_verbatim": "NEGATIVE -- nothing alarm-shaped created, no IAM policy widened or narrowed. Enumerate what changed; print the created/modified resource set.",
+      "method": "command",
+      "invocation": "terraform plan with every action line printed, then the apply summary; plus the IAM policy set read from the live role before and after.",
+      "output_evidence": "CHANGED SET, complete: `aws_lambda_function.auth_handler` updated in place. That is the ENTIRE set -- plan read `0 to add, 1 to change, 0 to destroy`, and the post-apply re-plan read 'No changes.' NOTHING was created: no alarm, no SNS topic or subscription, no monitor, no freshness checker, no new table, no new DNS record. IAM: the role still carries exactly the same 4 inline policies + 1 managed attachment it carried before this work (cross-firm-secret-deny, opalinvest-auth-permissions, PartnerIdentityReadPermissions, ses-send-email; AWSLambdaBasicExecutionRole). No statement added, removed, widened or narrowed.",
+      "denominator": "1 of 1 resource actions in the plan; 4 inline + 1 managed policy enumerated on the live role.",
+      "status": "PASS",
+      "status_reason": "POSITIVE CONTROL for the negative: the plan instrument DID report a change (the Lambda), so a silent or empty plan is excluded -- an instrument that reported nothing at all could not distinguish 'no alarm created' from 'plan produced no output'."
+    },
+    {
+      "criterion_id": "W2-5",
+      "criterion_verbatim": "NEGATIVE -- no account beyond andrew@opalinvest.com had MFA enabled by this work. Census mfaEnabled across all accounts with its denominator.",
+      "method": "live_read",
+      "invocation": "Full scan of opal-users-v2 filtered to SK=PROFILE, projecting email and mfaEnabled, paginated to exhaustion.",
+      "output_evidence": "48 PROFILE items, no further pages. mfaEnabled TRUE = 0, list empty. NOT ONE account is gated -- including andrew@opalinvest.com, whose MFA was enabled earlier under his direct instruction to test and then DISABLED at 01:20:10Z when that test proved the flow cannot be completed without a login UI. Read back after the write: {'mfaChannel': 'none', 'mfaEnabled': False}.",
+      "denominator": "48 of 48 PROFILE items in the live table, scan complete (LastEvaluatedKey absent).",
+      "status": "PASS",
+      "status_reason": "POSITIVE CONTROL for the negative: this same scan shape returned mfaEnabled TRUE = 1 (andrew@opalinvest.com) before the revert, so it demonstrably CAN report an enabled account. A census that has only ever returned zero cannot tell a true absence from a broken projection."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "W2-3 IS ITSELF THE PLANTED MUTANT, which is why it is the strongest row here. The defect under test -- a duplicate email resolving nondeterministically -- does not occur naturally in the live table (48 emails, 48 distinct). Rather than argue it could happen, the duplicate state was CONSTRUCTED on the live table and the deployed handler was driven against it.",
+      "expected": "With 2 rows sharing an email the handler surfaces the ambiguity by name and refuses; with 1 row the identical request behaves normally.",
+      "observed": "2 rows -> HTTP 500 with {\"event\":\"user_lookup_ambiguous\",\"pks\":[both],\"count\":2}. 1 row -> HTTP 401 'Invalid email or password' with a normal login_failed log. Fixture removed; 0 collision rows remain.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The W2-3 pair is two byte-identical POSTs differing only in the row count behind the email. The running-bytes census was also taken after the apply and compared against the sha the build emitted.",
+      "observed": "The ambiguity path fired on BOTH requests made while two rows existed (two separate request ids, 01:49:09.515Z and 01:49:09.780Z, same event, same PKs) and did not fire once one row was removed. Deployed sha matched the built sha exactly.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The two-Allow SES IAM structure",
+      "reason": "EXPLICITLY NOT CLOSED BY THIS WORK, and the TO required that be recorded rather than implied. opalinvest-auth-permissions carries a ses:FromAddress = noreply@ condition that is defeated by an unconditioned ses-send-email Allow on the same role. Every sender now HAPPENS to be noreply@, which makes the condition LOOK satisfied -- that is appearance, not enforcement. No IAM policy was widened or narrowed. The finding is 1.0.0_SA_CTO~Z's with its own owner and gate."
+    },
+    {
+      "item": "The login-challenge UI, opt-in prompt and channel selection",
+      "reason": "DE-class and not this lane. Andrew ruled OTP must be opt-in with a prompt; the portal has no challenge screen at all (mfaRequired/mfa/verify: 0 matches in portal/src, on a probe with a working positive control). Three DE TOs are authored and the seat 0.4.0_DE_ClientPlatform~Z was named by Andrew."
+    },
+    {
+      "item": "Re-enabling MFA on any account",
+      "reason": "Standing rule 3 of this TO. 0 of 48 accounts are gated and none will be enabled from this lane."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION: I executed W2's work from relayed broker messages BEFORE reading the TO that governs it. The TO existed at the declared path the whole time and I found it only by running 0.0.0_AB_MSTR~Z's directory check against my own folder. The work happened to satisfy 4 of its 5 criteria, but W2-3 (CONSTRUCT the collision) was NOT done until I read the file -- I had measured that no duplicate exists, which is a different claim from showing the handler surfaces one. Executing from a relay and executing from the spec are not the same act, and this time only the spec named the exercise.",
+    "OBSERVATION: my TO's \u00a79 bar names TEN base-addressed TOs. A directory read of my own task_orders folder (397 files, a different instrument from the --assignee query the bar used) finds SIXTEEN non-mine rows that do not read complete, AND shows 2 of the named ten no longer read open. The fence is stale in BOTH directions -- a vintage problem, not a counting error. Reported to 2.0.0_SA_COO~Z; no action taken on any of them.",
+    "OBSERVATION: lane-addressed TOs live FLAT in the base task_orders folder -- there is no ~Z subdirectory for this seat and none is required for a ~Z assignment. 1.0.0_SA_CTO~Z used this to falsify its own 'the DE lane is clean by construction' green light, which had inferred emptiness from a missing lane directory.",
+    "OBSERVATION: opalinvest.dev EXPIRES 2026-12-22 and is both the portal auth domain and the sole verified SES sending identity. Renewal needs registrar access; this work did not. Routed to 0.0.0_AB_MSTR~Z."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-01/",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "Sender census over auth-handler/src, then a wider SendEmailCommand|SendRawEmailCommand sweep across infra/aws/opalinvest_dev and infra/aws/users",
+      "result": "Exactly 3 Source: sites, 1 constant, no fourth sender in either tree. This is the W2-1 denominator and it is why 'all of these functions' could be answered with a number instead of a phrase."
+    },
+    {
+      "tool": "aws dynamodb put-item / query / delete-item",
+      "invocation": "Constructed a 2-row duplicate-email fixture on the live table, confirmed GSI length = 2, then removed both rows",
+      "result": "The W2-3 collision, built rather than argued. Cleanup verified by re-census: 48 PROFILE items, 0 fixture rows."
+    },
+    {
+      "tool": "curl against the deployed API",
+      "invocation": "POST /auth/login with the ambiguous email, then the byte-identical request after deleting one row",
+      "result": "500 (ambiguity surfaced by name in the log) vs 401 (normal path). Ordering is the only variable."
+    },
+    {
+      "tool": "aws logs filter-log-events",
+      "invocation": "Read the handler log for the two requests above",
+      "result": "user_lookup_ambiguous with BOTH PKs and count=2. This is the discriminator -- a bare 500 is consistent with any error and would not have proven the ambiguity path fired."
+    },
+    {
+      "tool": "aws lambda get-function + zipfile census",
+      "invocation": "Pulled the RUNNING bundle from the live function and censused sender addresses",
+      "result": "['noreply@opalinvest.dev'], support@ = 0, control mfa_challenge_issued = 1. Deliberately used INSTEAD of firing /auth/forgot-password, per this TO's standing rule 2."
+    },
+    {
+      "tool": "aws iam list-role-policies / list-attached-role-policies",
+      "invocation": "Enumerated the live role's policy set for W2-4",
+      "result": "4 inline + 1 managed, unchanged by this work. Nothing widened or narrowed."
+    },
+    {
+      "tool": "terraform plan / safe-apply / plan",
+      "invocation": "portal-auth, code-only change",
+      "result": "0 add / 1 change / 0 destroy; post-apply 'No changes.' The plan reporting a real change is the positive control that makes the W2-4 negative meaningful."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "Against this instance",
+      "result": "Recorded in the commit that lands it."
+    }
+  ]
+}
