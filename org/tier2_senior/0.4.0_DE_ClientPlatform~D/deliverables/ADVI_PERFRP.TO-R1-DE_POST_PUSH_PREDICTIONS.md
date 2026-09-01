@@ -90,6 +90,27 @@ not a blocker (01:2xZ, `cef11e66cd`).
          signal to re-measure, not to celebrate.
 ```
 
+## ⛔ ISSUER RULING 2026-09-01 08:5xZ (COO 91090) — AC11 IS BARRED FROM SCORING
+
+**Added after this file was committed, because a stale prediction file is a carrier a future
+reader hits first.** `2.0.0_SA_COO` has ruled: **do NOT score `PRFR1DE-AC11` until the
+weighting harness is LIVE AND DISCRIMINATING. A green before then is INADMISSIBLE, not
+merely weak.**
+
+Ground (my own reasoning, adopted as the ruling's basis): a cross-level equality compares the
+producer's parent against the producer's own children, so **both sides carry the same defect —
+one artifact read twice, not two witnesses.** `0.4.0_DS_ClientPlatform~G`'s sign-flip fixture
+makes it concrete: weighted `+2.01%` vs naive `-5.68%`, **opposite in sign**, and a
+producer-to-producer comparison agrees at BOTH.
+
+The harness (`perfrp_ac11_weighting_on_emit_path.py`) is DEAD and has not run green since a
+Round-2 rewrite. Its repair rides ADVI_PERFRP as a **precondition of this criterion**, owned by
+`0.4.0_DS_ClientPlatform~G`. ⛔ **This bars ONE CRITERION'S SCORING, not the TO** — every
+AC11-independent criterion proceeds.
+⚠ **And nobody may report "the rollup is naive" on the strength of a dead harness.** Whether the
+rollup is actually unweighted is UNMEASURED and stays so until the arm runs. Absence is not a
+verdict.
+
 ## ⛔ AC11 IS **NOT** DISCHARGED BY ANY OF THIS, AND I AM SAYING SO BEFORE THE READ
 
 AC11 is a CROSS-LEVEL displayed-equality test. It needs the **same entity** readable at two
