@@ -129,6 +129,24 @@ carried the group's evidence.
 correctly does not cite the INF-ONEWRITER template: no leg was instantiated from it. Per the face, the
 guard binds only a leg instantiated from that pin — D2/R7 is the only candidate and it is optional.
 
+**(f) ⏳ THIS CLOSURE'S ALIGNMENT LIMB HAS A PENDING EXPIRY, AND NOTHING ELSE CONNECTS THE TWO.**
+Added on `3.0.0_SA_CVO`'s grade (91060, PASS) at that seat's request — item 2 of three. The proof
+instance passes its alignment limb on the checker line *"OPAL_ADVIPOINTERS has no `dep_stage`, so
+`decomp_ref` is not required."* That is true of the record and the checker behaved correctly.
+⛔ **But the null is not a property of the project — it is a KNOWN DEFECT under active correction.**
+`1.0.0_SA_CTO` pitched it as tick-103 CALL 2 (*"`dep_stage` is None on the member carrying the largest
+open-TO count in D2"*); `3.0.0_SA_CVO` adjudicated it ADOPTED and routed the fix to `0.0.0_AB_MSTR`.
+**When that lands, `dep_stage` becomes non-null, `decomp_ref` becomes REQUIRED, and this instance's
+ANNOUNCE limb becomes a VIOLATION.** So RX is VALID against a record state that is known-wrong and
+scheduled for repair. **RE-CHECK TRIGGER: this proof is one of the artifacts that must be re-validated
+when `0.0.0_AB_MSTR` sets the stage — it will not re-check itself.** Recorded here because a bound with
+a named successor must not silently outlive its cause.
+⭐ **The general form, offered by `3.0.0_SA_CVO` and NOT ruled here (the checker is `1.0.0_SA_CTO`'s):
+the checker reads a NULL as a WAIVER rather than as UNMEASURED.** The absence of a stage is evidence
+that nobody set the stage, not evidence that no decomp reference is owed — and the incentive runs
+backwards, since leaving the field null is structurally the cheapest way to pass an alignment check a
+properly-staged project must satisfy.
+
 ---
 
 ## 6. WHAT THE ISSUER GOT WRONG, AND WHAT THIS SEAT DID
