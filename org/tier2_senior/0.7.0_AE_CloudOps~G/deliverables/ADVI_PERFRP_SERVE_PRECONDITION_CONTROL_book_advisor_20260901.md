@@ -1,4 +1,30 @@
-# ADVI_PERFRP SERVE PRECONDITION -- THE CONTROL, RUN. VERDICT: **UNMET**
+# ADVI_PERFRP SERVE PRECONDITION -- THE CONTROL, RUN. VERDICT: **UNMET** -- ⭐ **AND THE PRECONDITION IS SUPERSEDED. DO NOT BLOCK A SERVE ON THIS FILE.**
+
+> ⛔⛔ **READ THIS BEFORE THE VERDICT BELOW. ANNOTATED 2026-09-01 ~00:1xZ, SAME SESSION.**
+> **The measurement in this file is CORRECT and the precondition it tests is SUPERSEDED.** Those are
+> not in tension and the distinction is the whole point of this note.
+> `1.0.0_SA_CTO` 90406 lifted the halt and RESUMED CALL 2 after measuring, at source on the LIVE
+> SERVED plane, that **the precondition's premise is FALSE: client display labels are ALREADY served
+> on static advi keys today** -- `platinum/advi/49financial/partner_analytics_annual.json` carries
+> `"label": "WILLIAM CHAN"`, and **5 of 12 served advi keys carry real client labels** (190 / 171 /
+> 88 / 88 / 88). Router history corroborates on a different plane: a PII fix was attempted at v10/v11
+> and **REVERTED at v12**. **ANDREW RULED IT DIRECTLY, VERBATIM:** *"This does not matter, client
+> names are already published throughout the Advisor Intelligence views"* -- he is sovereign on firm
+> exposure and answered with the fact in front of him.
+> >> So `perfrp_book_advisor` is **MORE OF THE SAME SHAPE AT LARGER SCALE (3,297 vs 190), NOT A NEW
+>    EXPOSURE CLASS.** The 9,868/9,868 census below stands as a true measurement of the leaf; it is
+>    NOT a live blocker, and no seat may cite this file to hold a serve. <<
+> ⚠ **WHY THIS ANNOTATION EXISTS AT ALL:** `1.0.0_SA_CTO` 90406 s.6 names the real defect -- the
+> precondition sits ARMED in `org/projects/ADVI_PERFRP.json` `blocking` encoding a posture the estate
+> abandoned at router v12, and **it will trip EVERY future serve until retired.** That record is CTO's
+> to rewrite. **This file is the same hazard one carrier down**: an artifact of mine, titled UNMET,
+> that a future reader would find and treat as current. Annotating it is the same stale-carrier
+> discipline this lane applied to the TO face all session -- a correction is only as complete as its
+> last surviving carrier.
+> **What survives as genuinely useful here:** §1 (a docstring is not a state -- `book_advisor`
+> WOULD_PUBLISH where I predicted it would refuse) and §3 (a partially-pseudonymised row makes an
+> id-field check return a FALSE ALL-CLEAR beside an untouched name field). Both are instrument
+> lessons and neither depends on the precondition being live.
 
 **Author:** `0.7.0_AE_CloudOps~G` (the ruled OWNER: "the serving design (publisher lane / 0.7.0)")
 **PRD author / discharge authority:** `1.0.0_SA_CTO` · **Date:** 2026-09-01 ~00:0xZ
