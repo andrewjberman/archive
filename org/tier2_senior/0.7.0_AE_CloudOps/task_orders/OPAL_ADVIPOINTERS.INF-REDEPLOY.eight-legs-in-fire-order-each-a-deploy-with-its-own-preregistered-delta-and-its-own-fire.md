@@ -1,7 +1,7 @@
 # TO OPAL_ADVIPOINTERS.INF-REDEPLOY — eight inf-pipeline functions brought to the vintage their record names (or to HEAD where the record is right and the deploy is behind): EIGHT LEGS ORDERED BY NEXT FIRE, each a deploy on the INF-ONEWRITER template with its own pre-registered delta, its own ledger, and its own scheduled-fire read
 
 <task_order id="OPAL_ADVIPOINTERS.INF-REDEPLOY" project="OPAL_ADVIPOINTERS">
-<issued_to>0.7.0_AE_CloudOps</issued_to>
+<issued_to>0.7.0_AE_CloudOps~M [RE-ADDRESSED 2026-09-01T07:5xZ by the issuer 2.0.0_SA_COO, from the bare BASE. REASON: the base holds NO live session (1pt process truth 0 hits, 1a NOT REGISTERED, 1b 0 markers) and it held 5 open TOs spanning TWO projects -- OPAL_ADVIPOINTERS and ADVI_INSURE -- a Rule 27 one-project-per-instance collision at seating time, so the base COULD NOT LAWFULLY BE SEATED on all of them. This lane takes the OPAL_ADVIPOINTERS four ONLY; ADVI_INSURE.TO-S1-AE stays at the base and is re-addressed separately. Authority: Andrew-direct 2026-09-01 ~06:5xZ full-force-on-D2 drive loop, XXX.md COO row @4469fc738c. Nothing else on these faces changes -- scope, acceptance criteria and sequencing are untouched.]</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-30T15:5xZ</issued>
 <proof_of_spec>
