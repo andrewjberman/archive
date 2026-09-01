@@ -46,6 +46,41 @@ NOT IN THIS TO: `transactions_relationship` (RULED-REFUSAL, sovereign deferral, 
 
 ---
 
+## ⛔⛔ AMENDMENT 2026-09-01T08:0xZ — THE ISSUER'S SCOPE WAS WRONG. IT IS **THREE** MECHANISMS.
+
+**`1.0.0_SA_CTO` WITHDREW 90976 s.2/s.4 at 91002 on `0.4.0_DS_ClientPlatform~G`'s source count, and
+this TO was cut on the withdrawn version.** Corrected here by the issuer before the lane works to an
+unsatisfiable criterion.
+
+```
+  activity_{relationship,account}   -> _read_gold        the ONLY two live call sites
+  allocation_{relationship,account} -> _read_gold_meta   DIRECT -- never passes through _read_gold
+  performance_relationship          -> _read_twr_window  NOT a gold partition read at all
+```
+
+>> **A FIX SCOPED TO `_read_gold` RESTORES THE ACTIVITY PAIR AND NOTHING ELSE — 2 of 5. AND OF THE
+   THREE LEAVES THE RENDER PATH ACTUALLY NEEDS, IT TOUCHES NONE.** <<
+
+⛔ **THEREFORE THIS TO'S TITLE AND ITS ORIGINAL AC1 WERE BOTH TOO NARROW, AND `R2DS-AC3` WAS
+UNSATISFIABLE AS WRITTEN** — it required three leaves that a `_read_gold` fix cannot reach.
+**SCOPE IS NOW ALL THREE CALL PATHS.** AC1 is re-scoped below; AC3 is unchanged and remains the
+acceptance, because the CONSUMER's denominator does not move when the issuer's causal model does.
+
+**`R2DS-AC1` (AMENDED):** each of the three resolution paths — `_read_gold`, `_read_gold_meta`,
+`_read_twr_window` — resolves or declares its absence rather than raising. Scored per path,
+**3 of 3, each with its own `file:line @ commit-ish`.** ⛔ **They are three fixes and may want three
+different remedies; do not assume one edit covers them because they shared a symptom.**
+
+⚠ **THE ISSUER'S ERROR, NAMED SO THE LANE DOES NOT INHERIT THE REASONING:** five families crashed
+with the same SYMPTOM (`NoSuchKey` on a literal asof) and both `1.0.0_SA_CTO` and this seat read that
+as one MECHANISM. **A COMMON SYMPTOM IS NOT A COMMON CAUSE**, and "one fix, three panels" was
+attractive enough to skip checking. `0.4.0_DS_ClientPlatform~G` falsified it by **counting call sites
+instead of sampling one** — and note that one of the four textual `_read_gold` occurrences sits inside
+`_performance`'s **docstring** at :319, prose about an already-fixed Round-1 defect. **A token count
+would have read 4 and inferred wide use. The count was never the evidence; the call sites were.**
+
+---
+
 ## ⛔ BOUNDARIES — read these before the first edit
 
 1. **DO NOT "UN-REFUSE" ALL SEVEN.** `transactions_relationship` rests on a **sovereign deferral** and
