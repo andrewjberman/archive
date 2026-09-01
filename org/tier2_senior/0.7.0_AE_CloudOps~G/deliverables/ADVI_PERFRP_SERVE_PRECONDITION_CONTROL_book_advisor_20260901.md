@@ -285,3 +285,65 @@ BUILD plane, not served -- nothing published. The `.verification.json` siblings 
 (5,208 / 6,183 / 6,183) but the dry run does NOT list them as WOULD_PUBLISH, so they are excluded from
 the served set here and it is NOT confirmed whether another path serves them. **This pass is the
 CUSTODIAN limb only** -- the client-name limb is not censused across the other three leaves.
+
+---
+
+## 7. THE DECISIVE TEST -- are raw custodian ids ALREADY SERVED today? **YES**
+
+`3.0.0_SA_CVO` 90481 s.2 named the one unrun test and set its own branch conditions: the client-label
+limb was superseded not by argument but because the LIVE SERVING PLANE was measured and its premise
+failed. **The parallel test for the custodian limb, run here.** It needs the serving plane, which is
+this lane's.
+
+All served advi keys listed via `s3api`, pulled, every string walked for >=6-digit tokens, joined
+against `dim_account` (8,633 ids). POSITIVE CONTROL `0022002671` True; NEGATIVE `9999999999` False.
+
+| served key | tokens | REAL custodian acct ids |
+|---|---|---|
+| `ownership_map.json` | 5,969 | **5,208 — SERVED, TODAY** |
+| `cumulative_chart.json` | 27 | 0 |
+| `partner_analytics_annual.json` | 55 | 0 |
+| `partner_analytics_quarterly.json` | 43 | 0 |
+| `timeseries_chart{,_full}.json` | 28 | 0 |
+| `clients-tab-slim` / `leaderboard` / `mix_summary` / `timeseries_overview` | 0 | 0 |
+
+**DENOMINATOR: 10 served data keys** (12 objects; 2 are `_manifests`, excluded).
+
+### 7a. Not a coincidental token match -- the structure was read, not trusted
+
+```
+  ownership_map.json   generated_at 2026-08-21T15:03Z, firm_id 49financial
+    advisors: 146, keyed by advisor slug ('abby_horton')
+      accounts      = ['0015027485','0017926421','0026661490', ...]    <- RAW custodian ids, NAMED FIELD
+      relationships = ['rel_05b7c126ca6dcf','rel_2892aa2691dd70', ...] <- PSEUDONYMISED
+```
+
+>> **THE SERVED PLANE ALREADY CARRIES RAW CUSTODIAN ACCOUNT IDS IN A FIELD LITERALLY NAMED `accounts`,
+   AND HAS SINCE 2026-08-21** -- exhibiting the exact convention measured in the unserved perfrp
+   leaves at §6d: **account grain raw, relationship grain pseudonymised.** The pattern is not only
+   coherent, it is already in production. <<
+
+So `3.0.0_SA_CVO` 90481's own IF-YES branch applies: *the custodian limb's premise is false the same
+way the label limb's was, the same precedent applies, and this is more-of-the-same-shape rather than a
+new exposure class.*
+
+### 7b. ⚠ TWO PLACES THE PARALLEL IS WEAKER THAN THE LABEL CASE
+
+Stated so no ruling is handed a cleaner story than the evidence supports:
+
+- **BREADTH:** the label limb was already served on **5 of 12** keys. This is **1 of 10**. One live
+  instance is a thinner precedent than five.
+- **SCALE:** 5,208 served today vs **8,632** in `perfrp_performance_account` — 1.66x, so
+  "more of the same shape at larger scale" is fair, but it would still be the largest single instance
+  the estate holds.
+
+Neither weakens the PREMISE finding: the premise was *"raw custodian ids are not served on static
+keys"*, and that is now **false on measurement**.
+
+### 7c. THIS IS NOT A DISCHARGE, AND THIS LANE IS NOT RULING
+
+The label limb was superseded by **Andrew**, on a measured premise — not by the measurement alone.
+This supplies the same CLASS of premise for the custodian limb. Whether it discharges, and whether the
+convention should extend to 8,632, is `1.0.0_SA_CTO`'s call and his.
+**Still open:** the client-name limb across the other three publishable leaves is uncensused, and the
+`.verification.json` siblings' serve path is unconfirmed.
