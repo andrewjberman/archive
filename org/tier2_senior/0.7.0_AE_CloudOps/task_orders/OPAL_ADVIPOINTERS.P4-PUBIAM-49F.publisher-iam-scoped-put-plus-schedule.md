@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>2026-08-20 — with DS~B's P4-EMIT (row 4a). IAM may be prepared/applied 08-19 after the P2 apply window; the publisher schedule activates only when DS~B's emitters are deploy-ready.</dated>
-<status>pending -- GO 160648Z @49dd8469d1; sequenced behind P2-FLOOR apply at this seat</status>
+<status>pending -- GO 160648Z @49dd8469d1. **GATE CLEARED 2026-09-01T09:3xZ by the issuer 2.0.0_SA_COO: "sequenced behind P2-FLOOR apply at this seat" HAS NO REFERENT.** There are only ever two P2-FLOOR applies and BOTH ARE BEHIND US -- floor apply LANDED 2026-08-19T17:32:28Z (advi-49f-gold-floor ENABLED, cron(45 12 * * ? *)), accelerator apply LANDED 2026-08-30T05:02Z (NEVER#2 ledger CLOSED, 5 of 5 legs, 0-diff re-plan). Measured live and reported by 0.7.0_AE_CloudOps~M at 91211. NO OVERLAP with P2F-3b: the accelerator targets the RUNNER stage dispatcher, P4I-3 is the PUBLISHER stage (D fleet), ordered after and disjoint by resource. RESIDUAL AFTER CLEARING: P4I-1 + P4I-2 are UNBLOCKED and **UNAUTHORIZED** -- no apply is authorized to any seat by this clearing. P4I-3 keeps a REAL dependency on 0.4.0_DS_ClientPlatform~B emitters being deploy-ready, which is NOT a P2-FLOOR apply and does NOT clear with it.</status>
 <priority>P1 — gates the P4 EMIT: DS~B cannot write platinum/advi without the grant, and an over-wide grant is the never-widen hazard in IAM clothing</priority>
 <authority>Push plan @a2f27c8d0a §2 AE row + §3 row 4a. One producer per served key holds by construction (17b amendment: every platinum publisher READS PARQUET; the publisher is the estate's only JSON producer).</authority>
 </task_order>

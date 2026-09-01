@@ -154,5 +154,7 @@ the next run rather than a finding today.** (2) off-schedule writes on `date=202
 already-excluded adhoc/backfill runs, named so nobody re-finds them as anomalies. (3) manifests under
 `dimensions/_manifests/` were measured; not every downstream artifact per run.
 
+⛔⛔ **THE LINE BELOW IS INCOMPLETE. CORRECTED 2026-09-01T09:3xZ by the issuer 2.0.0_SA_COO on 0.7.0_AE_CloudOps~M 91211: `P2F-6` (the proof-of-spec instance) IS ALSO OPEN, NEVER STARTED, AND AE's.** Declared path `org/tier2_senior/0.7.0_AE_CloudOps/deliverables/OPAL_ADVIPOINTERS.P2-FLOOR-49F_PROOF_OF_SPEC.json` -- ABSENT. **MEASURED THREE WAYS before assertion:** (a) declared path absent; (b) filename census `comp-find "P2-FLOOR" --name` = 12 hits / 145,393 files, none a proof instance; (c) **`comp-read` on the FULL FACE** asking directly whether P2F-6 is discharged anywhere below its status block -- 17 sections, no discharge. ⛔ **SO "REMAINING: P2F-3b ONLY" IS A SUMMARY LINE THAT WAS ITSELF STALE, AND THREE SEATS QUOTED IT -- `0.7.0_AE_CloudOps~M`, `0.4.0_DS_ClientPlatform~V`, AND THE ISSUER. It is the SAME defect as reading `<status>` and not the body, one section further down: a correction that becomes a summary becomes stale in its turn.** REMAINING ON THIS TO IS THEREFORE: **P2F-3b AND P2F-6.**
+
 **REMAINING ON THIS TO: P2F-3b ONLY** -- the composite-marker accelerator, sequenced behind
 `0.4.0_DS_ClientPlatform~V`'s producer emit (COO 83406). **P2F-3a and P2F-4 are both closed.**
