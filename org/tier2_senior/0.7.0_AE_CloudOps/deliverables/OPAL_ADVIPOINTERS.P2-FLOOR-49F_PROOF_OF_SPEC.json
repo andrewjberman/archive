@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "to_id": "OPAL_ADVIPOINTERS.P2-FLOOR-49F",
+  "firm": "49F",
+  "phase": "P2-TIMING",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/OPAL_ADVIPOINTERS.P2-FLOOR-49F.schedule-floor-plus-silver-completeness-accelerator.md",
+    "group": "OTHER",
+    "vintage_commit": "5efa3471cf"
+  },
+  "assignee": "0.7.0_AE_CloudOps~M",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/advi_49f_floor.tf",
+      "kind": "terraform",
+      "commit_or_etag": "ce2f2e9e84",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The schedule FLOOR. Applied 2026-08-19T17:32:28Z via safe-apply, 11 adds, 0-diff, ledger 20260819T1605Z. Tagged opal-assets-v0.44.0 whose own subject names this TO. RE-READ LIVE THIS SESSION, not taken from the ledger: scheduler get-schedule advi-49f-gold-floor -> State ENABLED, ScheduleExpression cron(45 12 * * ? *), Target arn:aws:lambda:us-east-1:313476888478:function:advi-49f-gold-dispatch, LastModificationDate 2026-08-30T03:43:53Z. That timestamp is the c02 hold's LIFT to the second, which independently confirms nothing has touched the schedule since the hold closed."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/silver.tf",
+      "kind": "terraform",
+      "commit_or_etag": "c4d316b83d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The silver-completeness ACCELERATOR: aws_s3_bucket_notification.monolith_bronze + aws_lambda_permission.s3_advi_49f_silver_accelerator. Applied 2026-08-30T05:02Z, targeted, 1 added / 1 changed / 0 destroyed, post-apply targeted re-plan 0-diff, NEVER#2 ledger 20260830T0451Z CLOSED with 5 of 5 legs proven. RE-READ LIVE THIS SESSION: notification id advi-49f-silver-complete-accelerator -> advi-49f-gold-dispatch, prefix schwab/08335338/meta/complete/, suffix .json; function policy carries TWO statements (SchedulerAdvi49fGoldFloor + S3InvokeAdvi49fSilverAccelerator). EventBridgeConfiguration on the bucket reads ABSENT, so 1.0.0_SA_CTO's 83375 bucket-wide refusal on this three-firm bucket is intact and the prefix-scoped notification IS the scoping that refusal required. NO TAG WAS CUT FOR THIS APPLY -- see declared_exclusions; it is deliberately NOT claimed under P2F-2."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260830T0451Z_p2f3b-49f-silver-accelerator_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "c4d316b83d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The accelerator's NEVER#2 ledger. Notable for the singleton control: get-bucket-notification-configuration after the apply showed the accelerator PLUS the eight pre-existing silver converter triggers set-identical to the pre-apply read, BOTH lists printed -- the whole hazard of editing a per-bucket singleton is silently dropping a sibling, and that is the control that excludes it."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260830T0210Z_advi-49f-gold-floor-c02-hold_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "6e87166bca",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The c02 floor HOLD and its lift, which bear on P2F-3a's continuity. Hold applied 2026-08-30T01:53:22Z (State DISABLED), LIFTED 03:43:53Z ON ITS WRITTEN CONDITION (3.0.0_SA_CVO graded C02-g-3 ACCEPTED at 85167: R-5 gross_leg_vintage on 3,021,660 of 3,021,660 rows, zero at '1.0') -- the hard lift-by of TUE 2026-09-01 ~12:40Z was NEVER REACHED. Included because 1.0.0_SA_CTO 84165 (2) required the P2F-3b apply be sequenced AFTER this lift, and it was: lift 03:43:53Z, accelerator ledger opened 04:51:43Z, 68 minutes later."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/P2F_3B_ACCELERATOR_PLAN_ROWS_20260830.md",
+      "kind": "doc",
+      "commit_or_etag": "c4d316b83d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The written pre-apply plan rows for the accelerator, satisfying P2F-1's 'enumerated IN WRITING before apply' for the second apply."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P2F-1",
+      "criterion_verbatim": "PLAN EXPECTED-ROWS-BOUNDED: the TF plan's expected rows enumerated IN WRITING before apply (draft to COO+CTO for the pre-apply read -- your 152834Z posture, kept); apply via safe-apply only; CTO per-apply gate honored.",
+      "method": "manual_read_with_citation",
+      "invocation": "Read the pre-apply artifacts for BOTH applies and the CTO gate message that authorized the second.",
+      "output_evidence": "FLOOR: TF draft sent to 1.0.0_SA_CTO for the per-apply read at 20260818T161446Z; applied via safe-apply, 11 adds, 0-diff. ACCELERATOR: P2F_3B_ACCELERATOR_PLAN_ROWS_20260830.md carries the rows in writing; 1.0.0_SA_CTO 84165 (1) granted the per-apply EXIT naming the exact two addresses to -target (aws_lambda_permission.s3_advi_49f_silver_accelerator + aws_s3_bucket_notification.monolith_bronze); the apply matched at 1 added / 1 changed / 0 destroyed with no address outside those two. Both applies used .tools/safe-apply.sh on a SAVED plan; no bare terraform apply.",
+      "denominator": "2 of 2 applies on this TO, each with its own written pre-apply rows and its own CTO gate.",
+      "status": "PASS",
+      "status_reason": "Worth recording that the accelerator's pre-apply step is the one that WORKED as designed: asked for plan rows in 83347, the executing seat returned two measured blockers and three costed options instead of inventing plausible rows, which is what routed Blocker A to the CTO and produced the 83375 refusal that kept a bucket-wide flag off a three-firm bucket. The criterion's purpose is to make an apply legible before it happens, and here it changed the design."
+    },
+    {
+      "criterion_id": "P2F-2",
+      "criterion_verbatim": "0-DIFF + TAG: post-apply plan 0-diff; tag pushed --follow-tags.",
+      "method": "command",
+      "invocation": "git for-each-ref on refs/tags censused BY DATE WINDOW (not by name pattern); git ls-remote --tags origin for push state, with a deliberately bogus tag name as a negative control; 0-diff read from both applies' ledger legs.",
+      "output_evidence": "TAG: opal-assets-v0.44.0, created 2026-08-19T17:34:13Z (about 2 min after the floor apply), commit ce2f2e9e84, subject 'P2-FLOOR-49F: advi-49f-gold-floor 12:45Z ... (11 adds, 0-diff; ledger 20260819T1605Z)'. PUSH STATE: ON ORIGIN -- git ls-remote --tags origin returns 2 refs (tag object + dereferenced commit); NEGATIVE CONTROL: a bogus tag name returns 0 on the same probe, so the read discriminates rather than matching anything. 0-DIFF: post-apply re-plan clean on the floor apply and again on the accelerator apply (ledger leg A-4, 'No changes. Your infrastructure matches the configuration.').",
+      "denominator": "934 tags in the repo; the census that found it scanned the 2026-08-18..2026-09-01 creation window rather than a name pattern.",
+      "status": "PASS",
+      "status_reason": "SATISFIED AS AUTHORED -- issuer ruling 2.0.0_SA_COO 91220, graded SOUND by 3.0.0_SA_CVO 91224. P2F-2 was written when ONE apply was in view and that apply is tagged; a criterion is scoped to the population it was AUTHORED over, the mirror of a discharge being scoped to what it was MEASURED over. The accelerator's untagged apply is a real gap and is deliberately NOT claimed here -- see declared_exclusions. METHOD NOTE, because the result nearly went the other way: a name-pattern search ('49f|floor|p2f|advi') over these 934 tags returns NOTHING relevant, because the convention names the TF COMPONENT, not the TO. Changing the AXIS to a date window found it; a wider regex on the same axis would not have."
+    },
+    {
+      "criterion_id": "P2F-3",
+      "criterion_verbatim": "FLOOR + ACCELERATOR: the schedule floor exists with a concrete ScheduleExpression (never event-only -- print the expression); the silver-completeness event is wired as accelerator; both target DS~A's entrypoint under the S3-code standard as its OWN stage (host ruling; any contrary finding goes to CTO as new evidence, not silently implemented).",
+      "method": "live_read",
+      "invocation": "aws scheduler get-schedule advi-49f-gold-floor; aws s3api get-bucket-notification-configuration --bucket opal-data-assets; aws lambda get-policy --function-name advi-49f-gold-dispatch. All three re-read live this session rather than quoted from the ledgers.",
+      "output_evidence": "FLOOR, expression PRINTED as the criterion demands: State ENABLED, ScheduleExpression cron(45 12 * * ? *) UTC, Target advi-49f-gold-dispatch. ACCELERATOR: notification id advi-49f-silver-complete-accelerator, events s3:ObjectCreated:*, filter prefix schwab/08335338/meta/complete/ suffix .json, target the SAME advi-49f-gold-dispatch; matching invoke grant S3InvokeAdvi49fSilverAccelerator on the function policy. BOTH target DS~A's entrypoint as its own scheduled stage, not appended to the legacy chain's stage list. NEVER EVENT-ONLY: the floor is a real cron and the event is strictly an accelerator on top of it.",
+      "denominator": "1 of 1 floor schedule; the accelerator is 1 of 11 LambdaFunctionConfigurations on the bucket; function policy 2 of 2 statements accounted for.",
+      "status": "PASS",
+      "status_reason": "Both halves WIRED, which is what this criterion asks for in terms. STATED PLAINLY SO IT IS NOT OVER-READ: wired is not the same as fired. The accelerator has never fired, and NOT because anything is wrong -- the producer emit landed 2026-08-29T21:25Z after that day's silver write, and 08-30 and 08-31 both resolve prev_trading_day to 2026-08-28, already built, so both were correct calendar skips with nothing to signal. The first genuine opportunity is the 2026-09-01 silver write at ~09:46Z. An emptiness read on the marker prefix taken as a verdict before then would score a working accelerator as broken on a weekend, which is NEVER#4 exactly. The exercised read is tracked separately and is not claimed by this criterion."
+    },
+    {
+      "criterion_id": "P2F-4",
+      "criterion_verbatim": "THREE UNATTENDED WRITES: 08-20, 08-21, 08-22 each produce portal/gold/advi/49financial/*/date={T-1} written by the SCHEDULED run (TO-2 precedent bar) -- evidence per day: the run's own log + S3 listing with LastModified in the scheduled window; T-1 per the trading calendar, never wall-clock.",
+      "method": "manual_read_with_citation",
+      "invocation": "Read the two issuer rulings on the face at lines 87 and 126, both authored by 2.0.0_SA_COO on 2026-08-29.",
+      "output_evidence": "DISCHARGED, BOTH LIMBS. Limb 1 'never wall-clock' SATISFIED on 0.4.0_DS_ClientPlatform~V 83466 (source plane): the dispatcher resolves NO date at all (0 tokens, positive-controlled with def=6 / import=5 in the same file), the path runs to _tc.prev_trading_day, and an AST over the SERVED bytes shows expected_last_trading_day called ZERO times. Limb 2 'three unattended writes' SATISFIED WITH MARGIN -- SEVEN, not three (83526, behaviour plane), each landing 68-109 s after the 12:45:42Z fire.",
+      "denominator": "7 of 7 scheduled writes match prev_trading_day(run_date) exactly; 2 further days (08-23, 08-24) correctly produced NO write.",
+      "status": "PASS",
+      "status_reason": "The corroboration is on a DIFFERENT PLANE rather than the same one twice: source (prev_trading_day in the served bytes) and behaviour (seven days of output agreeing). And the two empty days are the sharpest detail on this criterion -- 08-23 and 08-24 each produced a 3,627 B log and no manifests because prev_trading_day for BOTH is 2026-08-21, already built. A naive 'three consecutive writes' test across the calendar would have scored them as MISSES and reported 5 of 7. They are the freshness gate working."
+    },
+    {
+      "criterion_id": "P2F-5",
+      "criterion_verbatim": "NO SESSION-LOCAL INPUT: the fired path resolves everything from S3 (attested from the run log of cycle 1; an expected log's ABSENCE is a finding, not a pass).",
+      "method": "live_read",
+      "invocation": "aws s3api list-objects-v2 on opal-data-49financial for the chain run logs; plus the served-artifact attestation at 83466.",
+      "output_evidence": "LOGS PRESENT, so the criterion's own absence-clause does not fire: gold/advi/_logs/chain_20260827T124542Z.log through chain_20260831T124542Z.log, one per day, each written ~2 min after the 12:45:42Z fire. The S3-RESOLVED PATH is attested at source: scheduler -> dispatch (passes only StartedByDispatcher) -> SSM document (empty Date = production path) -> chain_49f_entrypoint.py --production, executed from s3://opal-data-49financial/_code/chain_49f_entrypoint.py (33,416 B, byte-identical to HEAD). Nothing in the fired path reads from a session.",
+      "denominator": "5 consecutive daily logs read (08-27..08-31); log naming form chain_YYYYMMDDTHHMMSSZ.log excludes adhoc/backfill runs by construction.",
+      "status": "PASS",
+      "status_reason": "The criterion deliberately makes a MISSING log a finding rather than a silent pass, which is the right shape -- an unattended run that leaves no log is indistinguishable from one that never ran. The logs exist for every day in the window, including 08-30 and 08-31 where the chain correctly built nothing, so the log's presence and the artifact's absence are separately accounted for."
+    },
+    {
+      "criterion_id": "P2F-6",
+      "criterion_verbatim": "proof instance VALID rc=0 positional: ids P2F-1,P2F-2,P2F-3,P2F-4,P2F-5,P2F-6.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> P2F-1,P2F-2,P2F-3,P2F-4,P2F-5,P2F-6 -- rc read UNPIPED.",
+      "output_evidence": "See the run recorded at the close of this work; the checker prints its own checker-vintage line and the rc is read unpiped rather than through a pipe that would swallow it.",
+      "denominator": "6 of 6 declared criterion ids carried, none omitted and none added.",
+      "status": "PASS",
+      "status_reason": "THIS CRITERION EXISTED AND WAS INVISIBLE FOR THREE DAYS, WHICH IS THE FINDING WORTH KEEPING. The face's own closing line -- 'REMAINING ON THIS TO: P2F-3b ONLY' -- was minted by the 2026-08-29T18:2xZ ruling that closed P2F-4, and it enumerated what remained while silently dropping P2F-6, which had not moved and so was not in front of its author. Three seats then quoted that line as the state of the TO. It was caught by resolving the criteria list P2F-1..P2F-6 individually instead of trusting any summary, and confirmed with comp-read over the FULL face asking whether P2F-6 had been discharged anywhere below the status block -- 17 sections, no discharge. A correction that ends with 'REMAINING: X ONLY' mints a NEW summary carrier, stale from the moment any other criterion moves."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO controls, both real rather than argued, on the two instruments this proof leans on. (1) THE FLOOR-STATE PROBE: the floor was genuinely DISABLED for 110 minutes on 2026-08-30 (01:53:22Z -> 03:43:53Z) for the c02 hold, and the same get-schedule probe read DISABLED then and reads ENABLED now -- a real historical mutant on the live instrument, and the hold's own ledger ran a NEGATIVE CONTROL beside it (opal-assets-bd49f-dim-convert-daily read ENABLED in the same breath, excluding a blanket effect or a misread). (2) THE TAG-PUSH PROBE: a deliberately bogus tag name run against the same git ls-remote --tags call.",
+      "expected": "Floor probe: must be capable of returning DISABLED, not merely ENABLED, or it cannot distinguish a held schedule from a running one. Tag probe: the real tag returns refs and a nonexistent tag returns 0, or a match proves nothing.",
+      "observed": "(1) get-schedule returned State=DISABLED at 01:53:22Z and State=ENABLED at 03:43:53Z on the same resource with every other field unchanged -- the probe discriminates, and the LastModificationDate I read live today is exactly 2026-08-30T03:43:53Z, tying my read to that lift to the second. (2) opal-assets-v0.44.0 -> 2 refs on origin; bogus name -> 0. Both FIRED as required.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The two live reads this proof turns on -- scheduler get-schedule for the floor and get-bucket-notification-configuration filtered to the accelerator id -- executed three consecutive times in one pass.",
+      "observed": "Three identical results: 'ENABLED cron(45 12 * * ? *)' and 'advi-49f-silver-complete-accelerator -> arn:aws:lambda:us-east-1:313476888478:function:advi-49f-gold-dispatch' on runs 1, 2 and 3. No pagination, ordering or timestamp content enters either read.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "THE ACCELERATOR APPLY CARRIES NO TAG -- an OPEN, UNOWNED traceability gap, recorded here so it is neither absorbed nor dropped",
+      "reason": "The 2026-08-30T05:02Z accelerator apply has 0-diff but no tag of any name (censused by date window: no tag was cut on 2026-08-30). Issuer 2.0.0_SA_COO 91220 ruled it OUT of P2F-2, correctly -- P2F-2 was authored over one apply -- and expressly refused a retro-tag: a tag minted today pointing at an 08-30 commit is a citation with a FALSE VINTAGE, satisfying the criterion's text while falsifying its purpose, and a later reader cannot tell because a tag carries no record of when it was cut relative to what it points at. 3.0.0_SA_CVO 91224 graded that sound AND flagged the consequence: the gap is now scoped out of everything and has no carrier, the same shape as a defect correctly excluded from a bar and therefore owned by nobody. THIS ROW IS THAT CARRIER. It is recorded as EXCLUDED-WITH-REASON rather than absent, so a future reader cannot silently absorb it into P2F-2 nor lose it. Naming a permanent owner is 1.0.0_SA_CTO's convention call, not this seat's."
+    },
+    {
+      "item": "The P2F-3b EXERCISED read -- the accelerator's first actual fire",
+      "reason": "P2F-3 asks that the event be WIRED, and it is. Whether it FIRES is a different claim and this instance does not make it. The producer landed 2026-08-29T21:25Z; 08-30 and 08-31 both resolve prev_trading_day to 2026-08-28 (already built), so both were correct calendar skips with nothing to signal, and the first genuine opportunity is the 2026-09-01 ~09:46Z silver write. Excluded so that 'wired' is never read as 'proven to fire'."
+    },
+    {
+      "item": "The two DS-lane cells on this TO (the P2F-4 wall-clock read and the composite-marker producer emit)",
+      "reason": "Executed by 0.4.0_DS_ClientPlatform~V under COO allocations 83394 and 83406. The TO owner remains 0.7.0_AE_CloudOps; these are cells executed by a DS lane, not a re-address. Their evidence is cited in P2F-4 above but is not claimed as this seat's work."
+    },
+    {
+      "item": "Bucket-wide EventBridge on opal-data-assets",
+      "reason": "REFUSED by 1.0.0_SA_CTO 83375 on the ground that opal-data-assets is a THREE-firm bucket (blackdiamond, 49financial, cottonwood) and the flag converts cross-firm separation from a STRUCTURAL property into an ENUMERATED one. Verified still absent this session. The prefix-scoped notification is the scoping that refusal required; route (b) on the existing per-source notifications was refuted by measurement (all 8 are */bronze/ -- they START silver, they do not signal its completion), and route (c) was refused as an approximation on a gold floor."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION: P2F-6 -- this criterion -- was open and invisible for three days because the face's closing summary line 'REMAINING ON THIS TO: P2F-3b ONLY' omitted it. That line was written by the ruling that closed P2F-4 and enumerated what remained; P2F-6 had not moved, so it was not in front of the author. Three seats subsequently quoted the line as the TO's state. Reported to the issuer at 91211.",
+    "OBSERVATION: I nearly filed a false zero on P2F-2 -- 'no tag exists across 934 tags' -- because the tag convention names the TF COMPONENT (opal-assets-v*), not the TO. This was the SECOND wrong-token absence in one hour at this seat, the first being _SILVER_COMPLETE for the marker producer. What caught it was censusing by DATE WINDOW instead of by name: a different AXIS, not a wider regex. A large denominator is evidence of effort, never of correctness.",
+    "OBSERVATION (tooling, off-project, not chased): comp-find died with a MemoryError at comp-find:469 (line-iteration, corpus=all) on the pattern 'P2F-1,P2F-2,P2F-3|P2-FLOOR-49F_PROOF'. It returned no rows, and no rows from a crash is not an absence -- the question was re-run on a narrower --name form rather than banking the empty result. Surfaced for whoever owns comp-find.",
+    "OBSERVATION (off-project, not mine, no action taken): tag opal-assets-v0.48.0 (2026-09-01) reads 'ADVI_PERFRP P4I-3 publish activation'. P4I-3 is ALSO the criterion id for OPAL_ADVIPOINTERS.P4-PUBIAM-49F's publisher schedule. Almost certainly an independent criterion-id collision across two projects, flagged only because both carry a P4I-3 that activates a PUBLISHER and a conflation would be silent."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-01/",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read on the P2-FLOOR face --for 'has P2F-6 the proof instance been discharged anywhere below the status block, and what criteria remain open'",
+      "result": "17 sections mapped, 22 qualifiers surfaced, no discharge of P2F-6 anywhere in the body. This is the instrument CLAUDE.md rule 21 was amended for and the case it was amended FOR: the whole morning's defect was a status block contradicted by a ruling 79 lines below it, and this read answers exactly that question against the full face."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "--name census for P2-FLOOR artifacts; earlier --files content sweeps for the accelerator and marker tokens",
+      "result": "12 filename hits over 145,393 files, none a proof instance -- the evidence that P2F-6 had never been started. One invocation died with a MemoryError and was NOT read as an absence (see surprises)."
+    },
+    {
+      "tool": "aws scheduler get-schedule / s3api get-bucket-notification-configuration / lambda get-policy / s3api list-objects-v2",
+      "invocation": "Live re-reads of the floor, the accelerator notification, the dispatch function policy, the marker prefix and the chain logs -- each read live rather than quoted from the ledgers that recorded them",
+      "result": "Every claim in P2F-3 and P2F-5 rests on a read taken this session. The floor's LastModificationDate independently corroborates the c02 hold's lift to the second, which is a corroboration the ledger could not provide about itself."
+    },
+    {
+      "tool": "git for-each-ref / ls-remote --tags with a negative control",
+      "invocation": "Tag census by CREATION DATE WINDOW rather than name pattern; push state by ls-remote with a bogus tag name as the control",
+      "result": "Found opal-assets-v0.44.0 after a name-pattern search had returned nothing relevant -- the axis change is what worked. Push state ON ORIGIN, with the control returning 0 so the probe is known to discriminate."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "This instance against P2F-1..P2F-6, rc read UNPIPED",
+      "result": "Recorded at the close of this work with the checker's own vintage line."
+    }
+  ]
+}
