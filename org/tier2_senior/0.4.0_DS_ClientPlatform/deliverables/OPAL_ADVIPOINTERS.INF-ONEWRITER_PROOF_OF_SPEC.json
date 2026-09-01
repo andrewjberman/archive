@@ -1,0 +1,151 @@
+{
+ "schema_version": "1.0",
+ "to_id": "OPAL_ADVIPOINTERS.INF-ONEWRITER",
+ "firm": "INF",
+ "phase": "NON-BUILD-OTHER",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/OPAL_ADVIPOINTERS.INF-ONEWRITER.inf-silver-chain-one-producer-per-key-plus-billing-consumer.md",
+  "group": "OTHER",
+  "vintage_commit": "05a6f21d57"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~V",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/OPAL_ADVIPOINTERS.INF-ONEWRITER_PROOF_OF_SPEC.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "This instance. ABSENT from the face's cut on 2026-08-18 until 2026-09-01, across the whole of Steps 1 and 2 AND a grader's CLOSED-AT-EXERCISED verdict (3.0.0_SA_CVO 87477). Census before writing: comp-find '*INF-ONEWRITER*' --all, 63 hits over 145,246 files scanned, no page truncation -- every hit an inbox copy, the TO itself, or the change_management ledger. The absence is the finding, and it is the SECOND instance of it on this project in 48 hours (R-WATCH's instance was absent on the same basis, issuer_record 2026-08-30T03:1xZ).",
+   "artifact_covered_by": [
+    "OW-1",
+    "OW-2",
+    "OW-3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "OW-1",
+   "criterion_verbatim": "step 1 -- both writers ATTRIBUTED with log lines + object versions side by side.",
+   "method": "live_read",
+   "invocation": "CloudWatch filter-log-events on /aws/lambda/inf-silver-chain + the EC2 SSM dispatch log; aws s3api list-object-versions on silver/api_dims/billing/. Executed 2026-08-30 by this serial (msgs 85526 -> 85780); RE-VERIFIED on the object plane 2026-09-01 by this session.",
+   "denominator": "2 writers of 2 attributed; 3 of 3 consecutive dates carried the two-version shape at attribution time (08-27, 08-28, 08-29).",
+   "output_evidence": "BOTH WRITERS NAMED, NOT ASSUMED. Writer 1 = inf-silver-chain, declared 'authoritative' at lambda_function.py:83, CloudWatch naming the billing key at 11:19:21Z on 08-29; its object was the 34,039 B LOSER, 13 columns, built from a Jun-11 VENDORED copy of build_billing_dim.py. Writer 2 = orion-gold-dispatch.sh's INF_API_SILVER_BILLING leaf on EC2 via SSM AWS-RunShellScript, pulling s3://opal-data-inf/code/silver/build_billing_dim.py at run time -- the CURRENT builder, 17 columns matching the ratified contract, landing ~37 min later as the served IsLatest. ONE logical producer at TWO vintages on TWO sanctioned paths: Rule 22a's two-homes class. The repo builder had been fixed 2026-08-11 and never vendored into the chain for 19 days, masked daily by the EC2 path overwriting it. STATED LIMIT, carried rather than dropped: CloudTrail could NOT name a writer on that prefix (write data events were not captured; the selectors were read before the query), so the attribution rests on the two producers' own execution logs plus the version timestamps, not on a CloudTrail identity.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "OW-2",
+   "criterion_verbatim": "`billing` removed from SILVER_BUILDERS; inf-silver-chain TF-redeployed 0-diff + tagged; bundled file removed; next-day partition = ONE version, retired signature, canonical writer; CW stream clean.",
+   "method": "live_read",
+   "invocation": "aws s3api list-object-versions on billing/snapshot_date=2026-08-31/; parquet download + column/cell comparison of 4 pinned versions; aws logs filter-log-events /aws/lambda/inf-silver-chain 2026-08-31; aws s3api get-object on code/gold/orion-gold-dispatch.sh + CHAIN_PULL token count on two instruments.",
+   "denominator": "17 columns compared over 911 rows on arm A; 4 of 4 untouched-key positive controls read on the same date; CHAIN_PULL 19 tokens re-derived on 2 instruments.",
+   "output_evidence": "THE ONE-VERSION LIMB IS MET AND MEASURED. billing/snapshot_date=2026-08-31/data.parquet carries ONE version, 45,542 B, LastModified 11:18:10Z -- inside the chain's window, 6 s after its own log line '[billing] OK: 911 rows' at 11:18:09.713Z. The ~11:5xZ second version present on 08-29 and 08-30 is GONE. ARM A vs the 08-30 certified write: 17-column denominator, 911 rows both, identical account set, 16 of 17 columns EQUAL cross-date -- the sole difference is snapshot_date itself, 911 of 911, which IS the partition key. ARM B vs the pinned stale v=jCldmxzm: DIFFERENT with the pre-registered delta landing exactly (only-in-new {ending_mv_reported, ending_mv_source, ending_mv_status, period_start, period_end}; only-in-stale {is_fee_earning}) -- equality here would have been the finding and did not occur. THE DISCRIMINATOR, because ONE version is also what a CRASHED second writer produces: the untouched keys on the SAME date show the dispatch path ALIVE and writing -- performance 2 versions (11:18:09 + 11:51:14), tax_unrealized 2 (11:18:11 + 11:48:52), tax_realized 2 (11:18:11 + 11:48:52) -- while billing has 1. The dispatch path ran and wrote three keys; billing is absent from exactly that run. SERVED RUNTIME re-verified: orion-gold-dispatch.sh ETag 46dce6c7f1ce4987bddf9a225efd733a == the value recorded at the 14:03:13Z apply, 113,320 B, 0 CR, CHAIN_PULL 19 tokens, INF_API_SILVER_BILLING once in the whole file at line 310 -- the RETAINED catalog row, absent from CHAIN_PULL.",
+   "status": "PASS",
+   "status_reason": "PASS IS SCORED ON THE OUTCOME LIMB ONLY, AND THE MECHANISM IS THE INVERSE OF THIS ROW'S TEXT. The verbatim says \"billing removed from SILVER_BUILDERS ... bundled file removed\" -- retire the CHAIN. What was ruled and executed retires the OTHER writer: the current builder was vendored INTO the chain package (Step 2 (i)-(vi), applied 2026-08-30T09:54:24Z, CodeSha256 y7hEGWsh..., 0 added / 1 changed / 0 destroyed on one address, 0-diff re-plan) and the EC2 dispatch billing leaf was retired from CHAIN_PULL (@09ffccc6ef, served 14:03:13Z). \"Retire writer 2 first\" and \"remove billing from SILVER_BUILDERS first\" are both recorded WITHDRAWN as first acts (issuer_record 2026-08-30T05:0xZ). billing REMAINS in SILVER_BUILDERS at lambda_function.py:83 today and that is now CORRECT -- the chain is the intended sole producer. I FIRST SCORED THIS ROW \"MET-BY-SUPERSEDING-REMEDY\" AND THE CHECKER REFUSED THE TOKEN; minting an enum value to fit my reading is the Rule-24 defect, so the row is scored on the ratified enum and the qualification lives here where a reader cannot take the PASS without it. What is asserted: one version, canonical writer, clean stream, verified on the next scheduled day. What is NOT asserted: that the fabric performed the act this row describes -- it deliberately did not. The row's text is stale against its own face and the remedy is an issuer edit of the criterion, not a re-scoring by the measurer."
+  },
+  {
+   "criterion_id": "OW-3",
+   "criterion_verbatim": "the 7-row builder table (key / sole-or-second-home / disposition / evidence), denominator 7 printed; the 3 daily-failers classified DEAD or BROKEN-SOLE with the fix-or-remove named.",
+   "method": "live_read",
+   "invocation": "SILVER_BUILDERS read at infra/aws/lambda/inf-pipeline/inf-silver-chain/lambda_function.py:79-88; per-key aws s3api list-object-versions on snapshot_date=2026-08-31; per-key newest-partition listing; CloudWatch on /aws/lambda/inf-silver-chain and /aws/lambda/inf-accounts-v2-daily; the served orion-gold-dispatch.sh catalog + CHAIN_PULL membership.",
+   "denominator": "7 of 7 SILVER_BUILDERS classified. DENOMINATOR 7 PRINTED. Separately: 13 prefixes exist under silver/api_dims/ -- the 6 outside SILVER_BUILDERS (_chain_summary, assets, assets_v2, household_rep_mapping, positions_mv, representatives) are written by other paths and are OUT of this row's declared denominator, read once unscoped and named so the 7 is not mistaken for the population.",
+   "output_evidence": "THE 7-ROW TABLE, every writer attributed to a named execution path. (1) household -- key silver/api_dims/household/; 0 versions on 08-31; chain arm FAILS NoSuchKey daily; the key holds ONE partition ever, snapshot_date=2026-04-28, written 2026-05-11. No second writer. DISPOSITION: BROKEN-SOLE-PRODUCER, dead ~3.5 months -- fix-or-remove turns on whether any consumer reads it, which this row does NOT establish and does not guess. (2) performance -- 2 versions, chain 11:18:09Z + EC2 INF_API_SILVER_PERF_DIM 11:51:14Z. SECOND-HOME. (3) activity -- 0 versions on 08-31; chain arm FAILS NoSuchKey daily; 92 partitions, NEWEST snapshot_date=2026-08-14. DISPOSITION: BROKEN-SOLE-PRODUCER, and UNLIKE household it was HEALTHY UNTIL 2026-08-14 and stopped 18 days ago -- a recent silent stop, not a long-dead builder. NEW FINDING, reported not chased. (4) billing -- 1 version, chain 11:18:10Z only. SOLE-WRITER-KEEP; the second home was retired 2026-08-30 and the single-writer day is verified at OW-2. (5) tax_unrealized -- 2 versions, chain 11:18:11Z + EC2 INF_API_SILVER_TAX 11:48:52Z. SECOND-HOME. (6) tax_realized -- 2 versions, chain 11:18:11Z + the SAME EC2 INF_API_SILVER_TAX 11:48:52Z. SECOND-HOME. (7) accounts_v2 -- 2 versions, 11:07:39Z + 11:34:25Z, AND NEITHER IS THE CHAIN: the chain's accounts_v2 arm FAILED at 11:18:10.823Z on a local rep_map FileNotFoundError. Attributed: 11:07:39Z = inf-accounts-v2-daily (its own log, 'STEP3 DONE -> silver/api_dims/accounts_v2/snapshot_date=2026-08-31/data.parquet', 872 rows); 11:34:25Z = EC2 INF_API_SILVER_ACCOUNTS_V2, which writes LAST and is therefore the SERVED bytes. DISPOSITION: SECOND-HOME with the chain arm BROKEN -- three declared writers, two live, one dead. TALLY over the denominator 7: SOLE-WRITER-KEEP 1, SECOND-HOME 4, BROKEN-SOLE-PRODUCER 2. THE 3 DAILY FAILERS the face names are classified above (household, activity, accounts_v2) and they do NOT fall into one class: two are broken sole producers on missing bronze, the third is a broken arm of a key that two OTHER paths write successfully -- so 'the 3 of 7 that fail every day' is one symptom over two mechanisms, and a single remedy applied to all three would be wrong for at least one.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "OW-4",
+   "criterion_verbatim": "consumer leg -- `.get(is_fee_earning, 0.0)` replaced by the retired-signature read + refusal default; served advisor headline fee_earning_aua non-zero + ties (or step-1-refuted, stated).",
+   "method": "manual_read_with_citation",
+   "invocation": "face read at org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/OPAL_ADVIPOINTERS.INF-ONEWRITER.inf-silver-chain-one-producer-per-key-plus-billing-consumer.md @05a6f21d57; no execution attempted",
+   "denominator": "0 of 1 executed.",
+   "output_evidence": "NOT EXECUTED. No edit was made to the inf advisor consumer and no served-headline read was taken.",
+   "status": "N/A-BY-CONSTRUCTION",
+   "status_reason": "NOT EXECUTED -- and this is NOT a claim that the criterion does not apply. It applies, it is unstarted, and the ratified status enum carries no value for \"declared, applicable, unstarted\", so N/A-BY-CONSTRUCTION is the least-wrong token available and this sentence is the correction to it. WHY UNSTARTED: the 2026-09-01 seating GO authorises SEATING and READING only -- explicitly no producer edit. OW-4 is a CODE CHANGE to a served consumer, needing its own word and its own change_management entry. Step 1 CONFIRMED the mechanism (OW-1 PASS), so the gate this criterion names is OPEN and the leg is startable the moment the word exists; it is not blocked on evidence. NOT CLAIMED: that the 08-12 served defect is fixed. It is not -- the consumer still carries the silent .get default and the served headline is still wrong."
+  },
+  {
+   "criterion_id": "OW-5",
+   "criterion_verbatim": "08-12 defect record updated: CLOSED-BY-MECHANISM (or NOT, with the refutation) citing OW-1.",
+   "method": "manual_read_with_citation",
+   "invocation": "face read at org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/OPAL_ADVIPOINTERS.INF-ONEWRITER.inf-silver-chain-one-producer-per-key-plus-billing-consumer.md @05a6f21d57; no execution attempted",
+   "denominator": "0 of 1 executed.",
+   "output_evidence": "NOT EXECUTED. DEFECT_INF_ADVISOR_FEE_SPLIT_IS_FEE_EARNING_DROPPED_20260812 (@97e2cadc14) is unedited.",
+   "status": "N/A-BY-CONSTRUCTION",
+   "status_reason": "NOT EXECUTED -- applicable and unstarted; see the OW-4 note on the enum gap. SEQUENCED BEHIND OW-4, NOT BLOCKED. OW-1 supplies the mechanism this record would cite, but CLOSED-BY-MECHANISM would be a FALSE record while the consumer leg is unfixed: the root cause is understood, the DEFECT is still live on the served plane. Writing \"closed\" on the strength of an explanation is the desired-not-applied substitution."
+  },
+  {
+   "criterion_id": "OW-6",
+   "criterion_verbatim": "MSTR's class note carried: this is instance 3 of the two-homes class; the \"how many more / cheap detector\" question is PROPOSED to Andrew via CTO's residual bank -- not built here.",
+   "method": "manual_read_with_citation",
+   "invocation": "face read at org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/OPAL_ADVIPOINTERS.INF-ONEWRITER.inf-silver-chain-one-producer-per-key-plus-billing-consumer.md @05a6f21d57; no execution attempted",
+   "denominator": "0 of 1 executed.",
+   "output_evidence": "NOT EXECUTED as a proposal to Andrew. Carried here as a measurement instead, because OW-3 changed the count: the two-homes class on this ONE Lambda is not 1 instance, it is FOUR live second-homes (performance, tax_unrealized, tax_realized, accounts_v2) plus the billing one just retired. The 'how many more' question therefore has a partial answer inside this TO's own denominator, and it is larger than the face assumed.",
+   "status": "N/A-BY-CONSTRUCTION",
+   "status_reason": "NOT EXECUTED as a proposal -- applicable and unstarted; see the OW-4 note on the enum gap. NOT THIS SEAT'S ACT: the criterion routes the question TO ANDREW via 1.0.0_SA_CTO's residual bank, and a DS lane proposing directly would bypass the named route. The SUBSTANCE is now measured and sits in OW-3 for whoever cuts the proposal, and it is larger than the face assumed: four live second-homes on this one Lambda, not one. Explicitly NOT BUILT: no detector, no monitor, no alarm -- the standing moratorium binds."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Three controls, each on a row that could otherwise have passed vacuously. (1) OW-2's single-writer claim: ONE object version is ALSO what a CRASHED second writer produces, so the three UNTOUCHED keys were read on the SAME date as a positive control on the dispatch path's liveness. (2) OW-2's content claim: size and ETag were both ruled wrong instruments on this key (parquet is not byte-deterministic; equal size is not equal content), so arm A was computed cell-wise over a 17-column denominator from downloaded bytes, and arm B's column delta was pre-registered before the comparison ran. (3) OW-3's accounts_v2 row: the chain's NEVER_EMPTY_DIMS 0-row guard sits on an arm that fails daily, which reads as a live safety gap -- so the LIVE writer's own path was opened rather than inferred.",
+   "expected": "(1) the untouched keys show TWO versions while billing shows one. (2) arm A equal on substantive columns, arm B different in exactly the five-in / one-out registered set. (3) either the live EC2 accounts_v2 path carries no 0-row guard -- a real finding -- or it carries its own.",
+   "observed": "(1) FIRED AS EXPECTED: performance / tax_unrealized / tax_realized each carry two versions on 2026-08-31 (dispatch at 11:48-11:51Z) while billing carries one. The retirement, not a dead writer, explains the single version. (2) FIRED AS EXPECTED: 16 of 17 columns equal, the exception being snapshot_date itself; arm B's registered delta landed exactly, set-equal both directions. (3) FIRED AND REFUTED MY OWN ALARM -- convert_orion_api_to_silver.py main() carries an orchestrator-level 0-row refusal (:1119-1124, ADHC_BUGB) that skips the write for ANY dim returning an empty DataFrame, which is BROADER than the chain's accounts_v2-only NEVER_EMPTY_DIMS. The live writer IS guarded. Recorded because I was one step from filing 'the served accounts_v2 writer is unguarded' off an absence I had not opened -- absence-for-mechanism, caught by reading the builder instead of the dispatcher.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Every S3 listing is current-state and carries its read time (2026-09-01 08:1x-08:3xZ) rather than a bare value. The arm A / arm B comparisons are deterministic given four pinned VersionIds and were computed client-side from downloaded bytes, not from listing metadata. The CHAIN_PULL token count was re-derived on two instruments (awk, then python) after a stray shell token polluted the first reading.",
+   "observed": "The 2026-08-31 billing object reproduces identically across the version listing, the download, and the chain's own execution log (11:18:09.713Z log line, 11:18:10Z object). The CHAIN_PULL count read 19 on both instruments, and INF_API_SILVER_BILLING resolved to a single whole-file occurrence at line 310 on both.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "fee_amount's 120-cell cross-date difference",
+   "reason": "NOT SETTLED HERE, and deliberately not closed. New evidence only: fee_amount is EQUAL cross-date 2026-08-30 to 2026-08-31. The original 120-cell difference was measured against the STALE object, i.e. across a code change AND a date change; this pair moves only the date and shows no churn, which NARROWS the cause toward the vintage rather than the date. That is a narrowing, not a diagnosis. The gate's condition (iii) stands: the definitional trace is owed only if a future same-day pair disagrees."
+  },
+  {
+   "item": "Days after 2026-08-31 on the billing key",
+   "reason": "2026-09-01 carried no billing object at read time (08:2xZ). The chain fires ~11:18Z, so the partition was NOT-YET-DUE rather than missing. No claim is made about 09-01 or later."
+  },
+  {
+   "item": "The 6 served api_dims keys outside SILVER_BUILDERS",
+   "reason": "_chain_summary, assets, assets_v2, household_rep_mapping, positions_mv, representatives exist under silver/api_dims/ but are written by other paths and sit outside OW-3's declared denominator of 7. Read once unscoped and named so that 7 is not mistaken for the population."
+  },
+  {
+   "item": "OW-4 / OW-5 / OW-6 execution",
+   "reason": "Out of the authority this seat holds on 2026-09-01 (reads and records only; no producer edit) or routed to another seat by the criterion itself. Each carries its own status_reason above."
+  }
+ ],
+ "surprises": [
+  "OBSERVATION x INERT, and it is the transferable one: THIS INSTANCE DID NOT EXIST WHILE THE TO WAS GRADED CLOSED AT EXERCISED. The face declared expected_criteria OW-1..OW-6 and an instance_path from 2026-08-18; Steps 1 and 2 executed, a never-widen sign-off completed, and a grader recorded CLOSED-AT-EXERCISED on 2026-08-30 -- with the declared proof artifact absent the whole time. The grade was sound about the ACTS it read; nothing in the pipeline noticed that the artifact the face names as the record of those acts had never been created. This is the SECOND instance on this project in 48 hours (R-WATCH's instance was absent on identical grounds, issuer_record 2026-08-30T03:1xZ). A declared instance_path with nothing behind it is a coverage claim nobody evaluates.",
+  "OBSERVATION x INERT: an acceptance criterion outlived the remedy it describes. OW-2's verbatim text still instructs removing billing from SILVER_BUILDERS -- the exact act that was WITHDRAWN and inverted five days later. A measurer arriving cold, scoring OW-2 against its own words, would either mark it FAIL (the removal never happened) or PASS (the outcome is right) and both readings are wrong in different directions. Same carrier-drift shape as the face's [status] field, which still reads 'staged -- DATED this week (08-20/21)' above eleven issuer_records dated 08-30 that describe the work completing.",
+  "OBSERVATION x INERT: 'the 3 of 7 that fail every day' is one symptom over two mechanisms. household and activity are broken sole producers on missing bronze; accounts_v2 is a broken ARM of a key two other paths write successfully. The face groups them as one row of the table and a single fix-or-remove applied to all three would be wrong for at least one. Also inside that row: activity was healthy until 2026-08-14 and stopped 18 days ago -- a recent silent stop that the daily-failure framing conceals by treating all three as a standing condition.",
+  "OBSERVATION x INERT, and it is a TAXONOMY finding under Rule 24 postulate (i): the ratified proof-of-spec status enum [PASS, FAIL, UNCOMPUTABLE-BY-CONSTRUCTION, UNVERIFIABLE-BY-INSTRUMENT, N/A-BY-CONSTRUCTION, UNCOMPUTABLE] has NO value for a criterion that is DECLARED, APPLICABLE and SIMPLY NOT YET EXECUTED. That is the uncovered member. Every partial instance must therefore either overclaim (PASS/N-A on unstarted work) or mislabel, and the mislabel is invisible downstream because N/A-BY-CONSTRUCTION reads as \"this never applied\" when the truth is \"this applies and nobody has done it\". Measured here on three rows at once (OW-4/5/6). I am NOT proposing a value: Rule 24 requires a four-postulate record plus a word-boundary token census with a proposal, and this seat holds neither the schema nor the mandate. Routed as an observation to 1.0.0_SA_CTO as the schema owner. Cost of the gap today: three rows whose status field is load-bearingly wrong and whose status_reason is the only carrier of the truth -- and a status field is what gets aggregated, while a reason field is what gets read by a human who already suspects something."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~V/logs/2026-09-01/",
+ "compiler_tools": [
+  {
+   "tool": "comp-read",
+   "invocation": "comp-read on both TO faces; on infra/aws/lambda/inf-pipeline/inf-silver-chain/lambda_function.py; on data/inf/scripts/silver/convert_orion_api_to_silver.py; on .tools/proof-of-spec-check.py",
+   "result": "PASS and load-bearing twice. On the INF-ONEWRITER face it surfaced eleven 08-30 issuer_records sitting ABOVE a [status] line the issuer had quoted as current -- the carrier split that inverted this session's premise. On convert_orion_api_to_silver.py it located the ADHC_BUGB 0-row guard in main() that refuted my own accounts_v2 alarm before it left the seat."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find --name 'OPAL_ADVIPOINTERS*' --files ; comp-find --name '*INF-ONEWRITER*' --all",
+   "result": "PASS. The second sweep is the evidence for this instance's own absence: 63 hits over 145,246 files scanned, run with --all so no page truncation could manufacture the zero. Denominators printed by the tool on both sweeps."
+  },
+  {
+   "tool": "proof-of-spec-check",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> OW-1,OW-2,OW-3,OW-4,OW-5,OW-6",
+   "result": "See the commit-time run. Positional id form so COVERAGE is checked and not row quality alone; rc read UNPIPED; checker vintage eefe9e0a91 (2026-08-30) printed beside it."
+  },
+  {
+   "tool": "lib.trading_calendar",
+   "invocation": "is_trading_day / expected_last_trading_day / trading_days_behind over 2026-08-28..2026-09-01",
+   "result": "PASS, and it REFUSED a finding I was about to file on the sibling R-WATCH feeds. NEVER#1 resolved before any staleness call: the four vendor-frontier siblings sit at the DELIVERY frontier, not behind it."
+  },
+  {
+   "tool": "comp-blast / comp-pipescript / comp-estate",
+   "invocation": "not run",
+   "result": "NOT RUN and named rather than omitted. This session changed no code, no infra and no pipeline -- reads and one record. Rule 20 binds cloud/infra/data changes and frontend commits; none applies."
+  }
+ ]
+}
