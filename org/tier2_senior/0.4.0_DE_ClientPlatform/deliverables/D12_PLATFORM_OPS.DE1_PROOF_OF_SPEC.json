@@ -1,0 +1,199 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D12_PLATFORM_OPS.DE1-SITEZ",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/D12_PLATFORM_OPS.DE1-SITEZ.mfa-optin-prompt-and-channel-selection.md",
+    "group": "D",
+    "vintage_commit": "c7dfddcdff"
+  },
+  "assignee": "0.4.0_DE_ClientPlatform~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/auth/MfaOptInPrompt.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "087a456f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git ls-remote origin DEV -> be39451b (live read 2026-09-01T02:2xZ); local HEAD 087a456f; rev-list --left-right --count HEAD...origin/DEV = 1 0. PUSH STATE: LOCAL, unpushed. Portal work is DEV; PROD promotion is a DT lane act and is not in these TOs. WHAT IT INTRODUCES: the opt-in prompt and channel-selection screen.",
+      "artifact_covered_by": [
+        "DE1-1",
+        "DE1-2",
+        "DE1-3"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/contexts/AuthContext.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "087a456f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git ls-remote origin DEV -> be39451b (live read 2026-09-01T02:2xZ); local HEAD 087a456f; rev-list --left-right --count HEAD...origin/DEV = 1 0. PUSH STATE: LOCAL, unpushed. Portal work is DEV; PROD promotion is a DT lane act and is not in these TOs. WHAT IT INTRODUCES: login() now returns a LoginOutcome discriminated union and establishes NO session on the mfaRequired branch; adds requestMfaCode(); extracts establishSession() shared with verifyMfa().",
+      "artifact_covered_by": [
+        "DE1-1",
+        "DE1-3"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/auth/LoginPage.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "087a456f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git ls-remote origin DEV -> be39451b (live read 2026-09-01T02:2xZ); local HEAD 087a456f; rev-list --left-right --count HEAD...origin/DEV = 1 0. PUSH STATE: LOCAL, unpushed. Portal work is DEV; PROD promotion is a DT lane act and is not in these TOs. WHAT IT INTRODUCES: the credentials -> optin -> challenge step machine on /login; the challenge is held in component state only, so it cannot reach the address bar or outlive the component.",
+      "artifact_covered_by": [
+        "DE1-1",
+        "DE1-3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DE1-1",
+      "criterion_verbatim": "After a correct password on an MFA-enabled account, the browser shows a prompt asking whether to send a code -- and NO code is sent until the user confirms. Both halves: the prompt renders, AND no send occurs before the click.",
+      "method": "live_read",
+      "invocation": "Portal served at localhost:5175 from 087a456f, headless Chromium. window.fetch overridden to return ONLY the /auth/login shape the deployed handler already emits (index.ts:166): HTTP 200 {mfaRequired:true, challengeId, channel:'email'}, no accessToken, no refresh cookie. Login form filled and submitted; screenshot taken and READ. Separately: auth-handler/src/{index,auth,mfa}.ts read at source.",
+      "output_evidence": "FIRST HALF PASSES -- the prompt renders. Observed body text: 'Two-step verification / This account uses a one-time code. Choose where to receive it, then confirm below -- nothing is sent until you do.' Screenshot READ at .playwright-mcp/page-2026-09-01T02-18-01-368Z.png. SECOND HALF CANNOT PASS: auth.ts:93-95 calls issueChallenge() then sendMfaCodeEmail() INSIDE login(), before the response returns. All 16 routes of index.ts read; mfa.ts exports exactly two operations; issueChallenge has exactly ONE call site, inside login(). There is no endpoint that issues or sends a challenge independently of /auth/login, so the mail has already gone before any browser can render this prompt. Exercised with POST /auth/mfa/send ABSENT (stubbed 404, the gateway's real answer today): the failure is SHOWN -- 'Could not send the code. Please try again.' -- the flow does NOT advance, and nothing reports a code as sent. Screenshot READ at .playwright-mcp/page-2026-09-01T02-18-16-991Z.png.",
+      "denominator": "16 of 16 routes in index.ts read; 2 of 2 mfa.ts exported operations enumerated; 1 of 1 issueChallenge call sites.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "BLOCKED BY THE BACKEND, and NOT scored on its satisfied half -- the row is a conjunction. The prompt renders; the no-send-before-confirm half is unsatisfiable by ANY frontend against today's handler, because issuance is welded inside login(). requestMfaCode() is already wired to POST /auth/mfa/send, so the row passes with NO further frontend change once issuance is split out. Proposed owner 0.7.0_AE_CloudOps~Z (rule 13 puts infra there); routed to 2.0.0_SA_COO~Z as msg 17360. This is Andrew's literal complaint -- 'not just send silently without a UI flow' IS this line -- so passing the row on the rendered prompt alone would satisfy the letter while shipping the thing he objected to. INSTRUMENT LIMIT, stated not implied: the auth responses are stubbed at window.fetch, so every browser row here exercises THE CLIENT from the fetch boundary inward, NOT the integrated system. It cannot show the server emits these shapes -- that is a source read, and three seats performing it is three seats on ONE rung, which is repetition rather than corroboration."
+    },
+    {
+      "criterion_id": "DE1-2",
+      "criterion_verbatim": "The prompt offers the channel choice. If sms is presented at all it is visibly unavailable, not silently broken.",
+      "method": "live_read",
+      "invocation": "Same run as DE1-1. Screenshot .playwright-mcp/page-2026-09-01T02-18-01-368Z.png opened and read, not inferred from class names.",
+      "output_evidence": "Two channels render. 'Email -- Send the code to your email address' is selectable and selected (purple ring). 'Text message -- Not available yet' renders greyed at reduced opacity, radio DISABLED, carrying an explicit UNAVAILABLE pill. Both rows use dark navy text on the silver card, per the colour law. sms is additionally refused client-side inside requestMfaCode() before any request is made, so it could not silently no-op even if the control were reachable.",
+      "denominator": "2 of 2 channels the identity record can express as a delivery choice (email, sms); 'none' is not a delivery choice and is not offered.",
+      "status": "PASS",
+      "status_reason": "Visible unavailability observed in a READ screenshot, not asserted from markup. sms is shown rather than hidden deliberately: a user whose stored preference is sms needs to see WHY nothing arrives."
+    },
+    {
+      "criterion_id": "DE1-3",
+      "criterion_verbatim": "Declining / dismissing the prompt leaves the user not logged in and sends nothing.",
+      "method": "live_read",
+      "invocation": "Cancel clicked from the MFA step, then the SAME guarded-route probe the RED capture used: history.pushState('/market') + popstate.",
+      "output_evidence": "After Cancel: path /login, credential form present, password field cleared to empty, localStorage.accessToken null. Then the /market probe: landed /login, hasLoginForm true, accessToken null. NOT logged in, and the guarded route refuses.",
+      "denominator": "1 of 1 cancel paths -- both the opt-in and challenge steps route to the same handleCancelMfa.",
+      "status": "PASS",
+      "status_reason": "Exercised rather than reasoned. 'Sends nothing' holds for the right reason: cancelling only discards component state and issues no request. handleCancelMfa deliberately does NOT call logout() -- calling it would imply a session had existed, and on the MFA branch login() establishes none."
+    },
+    {
+      "criterion_id": "DE1-4",
+      "criterion_verbatim": "NEGATIVE: no path in the new UI reveals whether an account exists or whether MFA is enabled on it, beyond what the pre-existing login already reveals.",
+      "method": "manual_read_with_citation",
+      "invocation": "Traced every render path added by this change and compared the pre-authentication surface against the unmodified one; cross-checked the handler's failure branches at auth.ts:60-75.",
+      "output_evidence": "The opt-in prompt and the challenge screen render ONLY when login() returns mfaRequired, which the handler emits only after verifyPassword() succeeds -- so both are reachable only by a caller who already holds the correct password. The credential-form failure path is untouched: the handler still throws one generic 'Invalid email or password' for a non-existent account and a wrong password alike, and records an attempt on the same throttle key in both branches. This change adds no new pre-authentication branch and no new request before the password check.",
+      "denominator": "3 of 3 render branches added (credentials, optin, challenge); 0 new pre-auth network calls -- requestMfaCode and verifyMfa both run strictly after a successful password.",
+      "status": "PASS",
+      "status_reason": "BOUNDED: this is a code-path argument plus the observed absence of any new pre-auth request. It is NOT a timing measurement. I did not measure response-time differentials between existing and non-existent accounts; that is a handler property and is unchanged by this commit, and I say so rather than let 'PASS' imply I measured it."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO controls, and the first is the one that matters. (1) THE RED: 3.0.0_SA_CVO~Z observed (msg 17378) that landing the AuthContext fix first would make the pre-existing client-side gate bypass permanently unobservable, so a later DE3-2 PASS could not show it discriminates -- the criterion-cannot-fail class, which this same workstream already hit once with W1-3's 10/10. The pre-fix state was therefore exercised in a browser at pristine be39451b BEFORE the fix, with predictions pre-registered in msg 17390 so the outcome could not be fitted afterwards. (2) THE TYPECHECK: portal/CLAUDE.md warns a bare tsc --noEmit compiles an empty file set here and returns rc=0 on broken code, so the instrument was proven failable before its clean pass was trusted.",
+      "expected": "(1) Pre-registered: with the login response stubbed to the tokenless 200, the browser reaches /market and localStorage.accessToken is the string 'undefined'. After the fix, the identical stub yields no session and /market refuses. (2) A planted type error makes tsc -b report errors.",
+      "observed": "(1) RED, PARTIALLY FALSIFYING MY OWN PREDICTION and recorded rather than smoothed: the submit did NOT navigate -- OpalAnalytics.init read data.user.email, undefined on the mfaRequired branch, and threw a TypeError that LoginPage's catch rendered as a login error. But setState runs BEFORE that throw, so localStorage.accessToken WAS the string 'undefined' and the auth state was poisoned; /market by in-session URL navigation was then ADMITTED -- no redirect, no login form, blank silver canvas READ from the screenshot -- while all 5 data prefetches returned 401, so no data was disclosed. A FULL RELOAD correctly bounced to /login. My reported rung 5 (LoginPage navigates) is WITHDRAWN; rungs 1-4 stand; correction routed as msg 17420. GREEN, identical stub against 087a456f: accessToken null, ONLY /auth/login called (no /auth/me, none of the 5 prefetches), and /market by URL BOUNCED to /login with the login form present. (2) Mutant CODE_LENGTH: string = 6 produced 4 errors (TS2322 x2, TS2345, TS2367); reverted, clean.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Same-input repeats compared within the GREEN build. The guarded-route probe (history.pushState('/market') + popstate) was run twice from different entry points -- once after the opt-in step and once after Cancel -- and the 401-error path was driven twice (DE2-2's wrong code and DE2-3's replay).",
+      "observed": "Both /market probes: landed /login, hasLoginForm true, accessToken null -- identical. Both error runs: error rendered, user stayed on /login, field cleared, no stuck spinner, exactly one verify request per submit. No run-to-run variation observed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Enabling MFA on any account, including for testing",
+      "reason": "TO section 5 fence. 0 of 48 accounts are gated, deliberately -- Andrew was locked out of PROD by this exact flow. Re-enabling is his word via 2.0.0_SA_COO~Z."
+    },
+    {
+      "item": "Creating a test account, or using any live human email address",
+      "reason": "TO section 5 fence. A test account on a live address mailed Andrew two production-shaped messages earlier tonight, costing a false bug report and ~40 minutes of three seats."
+    },
+    {
+      "item": "POST /auth/mfa/send -- the issuance split that unblocks DE1-1",
+      "reason": "auth-handler is not the portal lane (rule 13). Proposed owner 0.7.0_AE_CloudOps~Z. The frontend call site is wired and waiting; I did not touch that tree."
+    },
+    {
+      "item": "Any alarm, monitor, SNS, SES-send or notifier",
+      "reason": "GLOBALALARM standing moratorium; the D7 lift was by name and covers nothing here."
+    },
+    {
+      "item": "PROD promotion, the push, and the workspace submodule pointer bump",
+      "reason": "DT lane acts. Portal work is DEV; this commit is local-only and unpushed, stated as a measured value."
+    },
+    {
+      "item": "Response-time differential measurement for account enumeration",
+      "reason": "DE1-4 is scored on the code path and the absence of new pre-auth requests, not on timing. Recorded so the PASS is not read wider than the evidence."
+    },
+    {
+      "item": "DE3 in its entirety",
+      "reason": "DEP-BLOCKED on DE1 + DE2 by its own status line, and DE3-1 additionally needs a test subject that only 2.0.0_SA_COO~Z can arrange."
+    }
+  ],
+  "surprises": [
+    "BLOCKING, routed as msg 17360 to 2.0.0_SA_COO~Z / 3.0.0_SA_CVO~Z / 1.0.0_SA_CTO~Z / 0.7.0_AE_CloudOps~Z: the MFA send is welded inside login(), so DE1-1's second half and DE2-4 are unsatisfiable frontend-only. No action taken in that tree.",
+    "IN-LANE FINDING, same message: AuthContext.login() admitted the tokenless 200 and set isAuthenticated true, which ProtectedRoute consults alone. RED captured in a browser before fixing. No data disclosed -- all 5 prefetches 401 -- so a broken empty page, not a breach; and unreachable in production while 0 accounts are gated. It goes live with the first gated account, i.e. with the pilot cohort.",
+    "SELF-CORRECTION on my own report, msg 17420: I told four seats 'a correct password alone NAVIGATES to /market'. The navigation half was WRONG -- a TypeError blocked it. The reachability is BY URL within the session. Corrected before anyone built on it.",
+    "OBSERVATION, acted on because it is inside the artifact under test: LoginPage.tsx carried text-red-400 on the SILVER canvas -- the documented #1 portal defect, and the very box DE2-2/DE2-3 have to be READ in. Changed to text-red-900 per portal/CLAUDE.md and disclosed in the commit body as beyond the literal ask.",
+    "OBSERVATION, not chased: send_message refused four sends reporting 'body is EMPTY' when my body parameter was failing to transmit. I briefly concluded the cause was SUBJECT LENGTH and said so on the wire; that was wrong and I corrected it in msg 17360's opening rather than let it stand.",
+    "OBSERVATION, not chased: .tools/proof-of-spec-check.py rejected my first draft of this file on 11 real schema violations because I inferred the schema from a sibling deliverable instead of reading org/standards/PROOF_OF_SPEC.schema.json. The checker was right and caught it; recorded because 'modelled on an existing example' is not the same as 'validated against the contract'."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-09-01/",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find -i 'mfaRequired|mfa/verify|mfaToken|mfaChannel|mfa_required' portal/src",
+      "result": "0 hits across 431 files -- the frontend genuinely did not exist. POSITIVE CONTROL comp-find -i 'LoginPage' portal/src returned 7 hits, so the zero was ABSENCE and not an out-of-corpus read."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find -i '\\\\bmfa|\\\\botp' portal/src",
+      "result": "0 hits across 431 files -- the broader census agreed."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name '*rotected*' portal/src",
+      "result": "Found ProtectedRoute.tsx. An earlier run of the SAME query from inside portal/ returned '0 hits across 0 files' -- OUT-OF-CORPUS, not absence, because comp-find is bounded to the workspace worktree. Re-run from the root."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find -i 'mfaRequired' .",
+      "result": "Located the handler at infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts:95 -- the origin of the blocking finding."
+    },
+    {
+      "tool": "to-check",
+      "invocation": "python .tools/to-check.py --all --project PLATFORM_OPS_USERMGMT",
+      "result": "5 TOs: 3 ACTIVE to this lane (DE1/DE2/DE3), 2 PENDING to 0.7.0_AE_CloudOps~Z. --assignee on the lane serial was also run as a cross-check; per the TO's own instrument note I read the ROWS, never the count."
+    },
+    {
+      "tool": "bun run typecheck",
+      "invocation": "bun run typecheck (tsc -b --noEmit), mutant planted FIRST",
+      "result": "Clean after the fix. The mutant produced 4 errors, so the clean pass is meaningful rather than the empty-file-set artifact portal/CLAUDE.md warns about."
+    },
+    {
+      "tool": "bun run lint",
+      "invocation": "bun run lint",
+      "result": "0 errors, 11 warnings -- all pre-existing, none in the five touched files (output grepped for Mfa|LoginPage|AuthContext -> no match)."
+    },
+    {
+      "tool": "playwright (headless Chromium)",
+      "invocation": "navigate / fetch-stub / submit / screenshot / evaluate, across five scripted runs",
+      "result": "RED and GREEN captured with the identical stub; four screenshots taken and READ. This is the instrument the whole series turns on -- an API response is not acceptance for any row."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "--author '0.4.0_DE_ClientPlatform~Z <...>' -F <msgfile written by the Write tool, not a shell heredoc>",
+      "result": "087a456f, 5 files, 614 insertions / 23 deletions, msg-verify MATCH len=5943. NOTE: commit-gate printed 'checked 0 of 5 files -- NOTHING WAS CHECKED' because it reads only .py/.sh/.tf/json; it is NOT cited as validation for a frontend artifact."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this file>",
+      "result": "Run to VALID. The first draft was rejected on 11 violations; see the surprise entry."
+    },
+    {
+      "tool": "get_delivery_state",
+      "invocation": "get_delivery_state(0.4.0_DE_ClientPlatform~Z, since=...) x3 to walk past the 50-row cap",
+      "result": "Newest row to this lane predates this session (2026-08-29T20:15Z, READ). 25 non-READ rows all belong to a closed prior project; surfaced, not chased, per the Rule 27 one-project fence."
+    }
+  ]
+}
