@@ -7,7 +7,12 @@
 > | limb | status |
 > |---|---|
 > | **CLIENT DISPLAY LABEL** | **SUPERSEDED.** Andrew ruled directly; premise measured false (labels already on 5 of 12 served advi keys). See the note below. Do NOT hold a serve on this limb. |
-> | **CUSTODIAN ACCOUNT IDENTIFIER** (+ book-scoping) | ⛔ **NOT DISCHARGED. UNRESOLVED, which is not dischargeable** (`1.0.0_SA_CTO` 90449). See §2a/§2b. |
+> | **CUSTODIAN ACCOUNT IDENTIFIER** | ⭐ **ANSWERED BY ANDREW-DIRECT ~01:2xZ 2026-09-01** (CVO 90494, record `cef11e66cd`): *"we dont care about publishing any of this."* **It does NOT block the publish.** Pseudonymisation is **RE-HOMED, not cancelled** — a separate TOP-DOWN project over **ALL KEYS, page-wide**. Was `NOT DISCHARGED / UNRESOLVED` per `1.0.0_SA_CTO` 90449; that status is **SUPERSEDED**. §2a/§2b/§6/§7 remain true as MEASUREMENTS. |
+> | **BOOK-SCOPING** | ⚠ **UNDETERMINED — do not read it as travelling with the above.** The 08-28 text named TWO remedies ("pseudonymisation **+ book-scoping**"). Andrew's words address pseudonymisation/anonymisation; **book-scoping is an ACCESS-CONTROL property (which advisor may see which book), not a disclosure-content property.** `1.0.0_SA_CTO`'s call as PRD author. Neither this lane nor CVO infers it survived OR travelled. |
+>
+> ⛔ **AND NOTHING ABOVE IS AN ACTIVATION SIGNAL.** CALL 2's signal was named in 90332, WITHDRAWN in 90365/90368, and never re-named. **This removes a REASON to hold; it resumes nothing.** Acting on it as a GO would be acting on the artifact-that-was-once-a-trigger — the exact habit `0.4.0_DS_ClientPlatform~G` warned about at 90422 s.2.
+>
+> ⭐ **WHY THIS FILE EXISTS AT ALL, and it is the transferable half** (`3.0.0_SA_CVO` 90494 s.4): the precondition was authored 2026-08-28 and **its premise was never re-checked for twelve days.** BOTH limbs rested on premises already false on the live plane — client labels served on 5 of 12 keys, raw custodian ids served since 08-21. It cost a `[STOP]`, a fabric-wide halt, two withdrawn senior GOs and a CTO ruling. **Every measurement taken during that halt was correct.** The failure was that the posture the gate encoded had been overtaken by the estate and no carrier recorded it. **A GATE THAT ENCODES AN ABANDONED POSTURE IS INDISTINGUISHABLE FROM A LIVE ONE, and it points at exactly the people doing their jobs. A standing precondition needs its premise re-measured on a cadence, or it becomes a tripwire.**
 >
 > **`relationship` is ONE FIELD carrying BOTH limbs**, and that is the trap: tonight the names in it
 > became permitted while the account ids in it stayed forbidden. A reader who takes "superseded" as a
