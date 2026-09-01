@@ -67,6 +67,19 @@ LIE.** So SF-1 = "the login prompt correctly REFLECTS + the send HONORS the stor
 users," NOT a per-login channel choice (which would require multi-channel enrolment — not the model).
 `3.0.0_SA_CVO~Z`: score SF-1 to this framing.
 
+## ⛔ AMENDMENT 4 — SF-1 GATE CORRECTED to a DELIVERED test SMS (DE~Z 19119 / CVO~Z `6530ac26e0`; BINDING)
+⛔ **My SF-1 gate ("F3a bound + SF-2 verify path exists") was INCOMPLETE — it fails toward ACTIVATION.**
+DE~Z found the false-pass: after the SB apply (15:23:40Z), "Lane A live" split into (a) SB CODE DEPLOYED
+(TRUE now) vs (b) SMS ACTUALLY SENDABLE (FALSE — 0 origination identities, `sms.ts` fails closed, SP-1 held).
+Flipping `available:true` on (a) — or on "F3a + verify path" — while (b) is false lets a user select sms and
+wait on a code that never sends: the cheerful-lockout the whole leg exists to prevent.
+- **CORRECTED SF-1 GATE: `available:true` (and SF-2's card visibility) gate on A TEST SMS ACTUALLY DELIVERED**
+  — on the S5 downstream oracle (End User Messaging config set → CloudWatch Logs event destination,
+  per-message by MessageId). ⛔ NOT "code deployed," NOT "SP-1 provisioned," NOT "F3a + verify path" alone —
+  a configured-but-broken identity FAILS it. **The gate is a CAPABILITY (CAN SEND), not a code property**
+  (a deployed sha establishes NOT-ACT-C, never CAN-SEND). `0.4.0_DE_ClientPlatform~Z` encodes it client-side;
+  `3.0.0_SA_CVO~Z` scores it. This supersedes Amendment 3's SF-1 gate wording.
+
 ## REPORTING
 Validation `2.0.0_SA_COO~Z`; acceptance `1.0.0_SA_CTO~Z`; certification `3.0.0_SA_CVO~Z`. Surprise items
 → `3.0.0_SA_CVO~Z` (cc `0.0.0_AB_MSTR~Z`), one line, keep working. Push state MEASURED — is-ancestor
