@@ -110,6 +110,18 @@ CODE, CONFIRM, store"). SF-2 has nothing to CALL until these exist, so it is BLO
 - **F3b lane precision (DE~Z, adopted): DE-CALLS / AE-WRITES** — SF-2 DRIVES the verify (calls SB-8); the
   field and the record write are AE~Z's plane. SF-2 (UI) never writes `opal-users-v2` (Rule 13).
 
+## ⛔ AMENDMENT 4 — CTO~Z 18950 design rulings (CONVERGE with Amendments 2/3; refinements folded)
+CTO~Z ruled the lockout/SF design; it matches Amendments 2/3. Deltas folded:
+- **SB-6 is a COHERENCE guard, NOT the lockout remedy** — the login-time lockout is CLOSED by SB-3's 503
+  (Amendment 2 #1). SB-6's value is rejecting an incoherent preference at SET time (immediate, actionable)
+  via a **400** from `updateMfaPreference`. As built (`2e43b4d68a`) it checks "a number is SUPPLIED-or-STORED";
+  ⭐ **once SB-8 writes `phoneVerified`, F3a reads it → the full invariant becomes "sms requires a number that
+  EXISTS and is VERIFIED."** (An evolution, not a rebuild.)
+- **F3b field name: `phoneVerified:true`** on `opal-users-v2` — SB-8 WRITES, SF-2 DRIVES.
+- **RESIDUAL (number removed mid-challenge) is a stated BOUND, not a scored criterion** (self-healing ≤10min,
+  logged `no_phone_number_enrolled`) — CTO~Z disposition.
+- E.164 validation anchor is `auth.ts:308` (CTO~Z's read supersedes the earlier `:245`).
+
 ## REPORTING
 Validation `2.0.0_SA_COO~Z`; acceptance `1.0.0_SA_CTO~Z`; certification `3.0.0_SA_CVO~Z`. Surprise items
 → `3.0.0_SA_CVO~Z` (cc `0.0.0_AB_MSTR~Z`), one line, keep working. Push state MEASURED — is-ancestor
