@@ -1,34 +1,39 @@
 TODAY SPRINT
 
-* Rebuilt the daily report so it reports the day we actually had. It was showing barely half the
-  work and mislabelling the rest; both are fixed and measured.
+* Two-factor sign-in is now on for every client, not just us. The rollout that started yesterday
+  is finished.
 
-* The report reads properly on a phone again. Feature photos were coming through at a fifth of
-  their size; they are now full width and legible.
+* Opened our Azure account with LDT on it, so the people who run our IT can administer identity
+  and devices directly.
 
-* The ETF coverage guardrail is specified and now sits under pipeline fortification, where the
-  problem it solves actually lives.
+* Specified how the portal, the website and the data service get defended at their own front
+  doors, with suspicious traffic blocked on the spot and kept on file. Build starts this week.
 
-* Approved and specified moving the data map into the cloud, so it rebuilds itself overnight
-  instead of taking ten minutes out of a morning.
+* Ran a security review of everything we expose to the internet first, so the spec answers real
+  findings rather than a checklist.
 
-* Hardened the ten-step workflow we built yesterday. Work on the second machine could not
-  physically graduate into a fix; that is repaired, along with a dozen gaps in its checks.
+* Built out the workflow infrastructure and the schema design the agents run on: how work is
+  registered, specified, decomposed and checked, in one shape end to end.
 
-* A run of internal repairs: a check that was timing out against its own deadline, and a test
-  suite that was reporting green while it failed.
+* Specified moving the data map into the cloud so it rebuilds itself overnight, and settled how
+  the two machines divide work between them.
 
-* Advisor intelligence stays paused for now, on my call. Everything else keeps moving.
+* A large pass over the internal tooling: what each tool is for, which ones earn their place, and
+  repairs to the checks that had been reporting green while failing.
 
-* 96 commits across 8 agents today.
+* Call with Canterbury next week on data infrastructure. I have opened a directive block for
+  External Implementations to hold that class of work; the name is not final.
+
+* 132 commits across 10 agents today.
 
 
 PROJECTS
 
 * Item 0 - Agent Infrastructure (Process Management)
 
-  The busiest item today by a wide margin. The daily report was rebuilt end to end, the cloud data
-  map was specified and registered, and a batch of internal checks were repaired.
+  The busiest item today by a wide margin. Workflow infrastructure and schema design for how the
+  agents operate, the cloud data map registered and specified, and a large pass over the internal
+  tooling with the failing checks repaired.
 
 * Item 1 - Model Portfolios: Asset-Category Views
 
@@ -36,7 +41,7 @@ PROJECTS
 
 * Item 2 - Advisor Intelligence
 
-  Paused on my call. Nine briefs from yesterday are ready to go the moment it resumes.
+  Paused on my call. The nine briefs from yesterday are ready the moment it resumes.
 
 * Item 3 - Account-Level Model Overlay
 
@@ -61,7 +66,7 @@ PROJECTS
 
 * Item 8 - Model Portfolios Pipeline Fortification
 
-  Picked up the ETF coverage guardrail and specified it through to a build plan: holes in the
+  Picked up the ETF coverage guardrail and specified it through to a build plan: gaps in the
   monthly report get caught before it goes out, and anything that survives repair gets named.
 
 * Item 9 - Tax SMA Ops + YCharts
@@ -70,24 +75,25 @@ PROJECTS
 
 * Item 10 - Global Pipeline Structure
 
-  No movement today. The overnight cloud rebuild approved today is registered under agent
-  infrastructure, not here.
+  No movement today. The overnight cloud rebuild specified today is registered under agent
+  infrastructure.
 
 * Item 11 - Substrate/Tooling Enhancements
 
-  Continued tightening what counts as a finished record, and the tools now report their own usage
-  so we can see which ones actually earn their place.
+  Tightened what counts as a finished record, and the tools now report their own usage so we can
+  see which ones actually earn their place.
 
 * Item 12 - Platform Ops
 
-  Two-factor sign-in stays live for Opal users. No movement today; client rollout is still next.
+  Two-factor sign-in finished its rollout to every client. Separately, the security work is now
+  specified end to end off a review of everything we expose, and the build starts this week.
 
 
 PROCESS
 
 * Item 0 - Agent Infrastructure (Process Management)
   **Timeline: Ongoing.**
-  Status: Daily report rebuilt and verified; cloud data map registered; internal checks repaired.
+  Status: Workflow and schema design built out; cloud data map registered; tooling pass done.
 
 * Item 1 - Model Portfolios: Asset-Category Views
   **Timeline: Live.**
@@ -134,8 +140,8 @@ PROCESS
   Status: Record standards tightened; tools now report their own usage.
 
 * Item 12 - Platform Ops
-  **Timeline: Client rollout next.**
-  Status: Two-factor live for Opal users. No movement today.
+  **Timeline: Security build starts this week.**
+  Status: Two-factor rollout complete to all clients; endpoint protection specified end to end.
 
 
 BLOCKED
