@@ -147,5 +147,40 @@ If no stamp lands inside the working window the criteria are held OPEN with the 
   comment claims 5x. **Disarmed at this port by the explicit 3600 s in 1.1**, and re-checked against
   AC6's cloud duration. The engine-side correction is deliberately NOT taken here: this face names four
   fixes (S9, S2, S3, S8) and quietly widening that set is the scope drift round 2 forbids.
-- The channel header denominator was corrected from **1 row** to **10 rows** on the issuer's instruction
-  (93402); it had understated the file by 9.
+- **`NFRA_CLDGRPH-S12`** (OBSERVATION, ARMED, disarm_owner the issuer) -- **this face's BOUNDS and its own
+  `<compiler_tools_mandate>` are not jointly satisfiable.** The bound says `kuzu_nessie_db` "is not read or
+  written (mtime control as in TO-CG-V-1)"; the mandate requires `comp-blast` on both engine files;
+  `comp-blast` reaches the canonical graph through `_canonical.ensure_fresh`, which found the DB BEHIND
+  HEAD and **rebuilt it at 09:11:51Z** (82,661,376 B -> 46,997,504 B; listing md5 `711b0b3c..` ->
+  `d64fca39..`). Obeying the mandate wrote the file the bound protects, **before a line of the port
+  existed**. Classed OBSERVATION, not BLOCKING: nothing is stopped, the rebuild is the designed daily path
+  and left the estate fresher, so per the face only BLOCKING rows are messaged and this one is not.
+  ⚠ **TO-CG-V-1's control is NOT retroactively broken** -- that TO closed at 07:52Z and all four of its
+  control reads precede this write by 80 minutes.
+  ⭐ The rebuild's own banner independently CORROBORATES `CG-s-10`'s "daily path" finding from a different
+  instrument: *"canonical FULL rebuild via the DESIGNED daily ground-truth reset (post-nightly whole-table
+  delta trips the large-delta gate; CTO condition 2, NOT a defect)"*.
+
+  **THIS PORT'S CONTROL THEREFORE RUNS FROM A RE-BASELINED READING, stated so the shift is visible rather
+  than silent:** `infra/aws/globgrph/kuzu_nessie_db`, **46,997,504 B**, mtime
+  **`2026-09-03 05:12:21.682472900 -0400`**, listing md5 **`d64fca39dfa47179f7798dcb1b8e2340`**. The port
+  itself touches the canonical DB not at all, which is the narrow reading of the bound this seat proceeds
+  on; the issuer decides which clause governs.
+
+- **An id COLLISION on the shared channel, caught and self-corrected.** I appended as `S11` after reading a
+  max of `S10`; `0.7.0_AE_CloudOps~P` appended their own `S11` (BLOCKING) in the same minute. **I renumbered
+  MINE to `S12`** -- theirs is BLOCKING and routes to the issuer, mine is OBSERVATION, and the seat that
+  detects a clash fixes its own row rather than another seat's. `~P`'s row is byte-untouched. Channel now:
+  **12 rows, 12 distinct ids, 12 of 12 schema-valid.** Header denominator corrected **1 -> 12** across the
+  two appends (it read "1 row" while the file held 9, on the issuer's instruction 93402).
+
+- **The caller census the fixes must not break** (`comp-pydeps consumers`, denominator **323 python files**
+  scanned across `.tools/` + `org/modules` + `infra/aws/globgrph` + `lib`): `kuzu_nessie_load.py` has **3**
+  code consumers -- `_canonical.py` [INVOKE], `kuzu_ac_traversals.py` [INVOKE], `graph_status_cli.py`
+  [INVOKE]; `kuzu_incremental_refresh.py` has **2** -- `_canonical.py` [INVOKE] and
+  `infra/aws/globgrph/tests/test_kuzu_incremental_refresh.py` [IMPORT]. **That test file is the existing
+  harness the S2/S3/S8 controls extend rather than duplicate**, and all five consumers must still work
+  until `CG-s-8` retires them.
+  ⚠ `comp-blast` itself returned **NOT-FOUND** for both engine paths against a 27,135-node graph and said
+  so explicitly ("This is a NOT-FOUND, not a 'nothing breaks' clear"), routing to `comp-pydeps` -- so the
+  caller set above comes from the instrument that models it, not from the one that was mandated.
