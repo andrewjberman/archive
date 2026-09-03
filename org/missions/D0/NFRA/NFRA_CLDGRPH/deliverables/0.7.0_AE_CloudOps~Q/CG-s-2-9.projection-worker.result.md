@@ -42,7 +42,46 @@ part of the engine.
 | **Queue visibility timeout** | **2400 s** | the longest step that holds the message is the whole task: cold start (UNMEASURED, closed by B2-AC6) + up to the 3600 s deadline... see 1.4, which is why this number is stated as PROVISIONAL-ON-AC6 |
 | **Trigger** | EventBridge **Pipe**, SQS source -> `ecs:RunTask` target | see 1.2 |
 
+### 1.2-RESTATED (2026-09-03 ~12:4xZ) -- the mechanism limb, corrected on a MEASURED read
+
+⛔ **This subsection supersedes 1.2 below on ONE point: who the consumer of record is.** 1.2 is kept
+verbatim underneath because a decision document that quietly rewrites its own rejected alternatives is
+worse than one that shows the correction. Row `NFRA_CLDGRPH-S14` @`6c02972` carries the finding; the
+issuer confirmed NO face amendment is needed (93623) because `B2-AC1`'s own words -- *"the queue's
+visibility timeout set from the measured numbers (>= the longest step that HOLDS the message)"* -- already
+admit this reading.
+
+**WHAT I GOT WRONG.** 1.2 rejected a Pipe that "deletes the message on RunTask acceptance" and concluded
+*"the task itself is the consumer of record"*. **Measured on the live API surface:** a Pipes SQS source
+exposes only `BatchSize` and `MaximumBatchingWindowInSeconds` -- no retention, no defer-ack, no on-failure
+control, where the Kinesis and DynamoDB sources in the same skeleton do carry retry options. The Pipe owns
+receive/delete around a `RunTask` that returns on ACCEPTANCE. **The rejection of the naive form was right;
+the claim that the chosen form escaped it was wrong.** No Pipe/SQS shape, and no Lambda event-source
+mapping, can make a ~16-minute ECS task the SQS consumer of record.
+
+**THE DECISION, RE-STATED:**
+
+| | |
+|---|---|
+| **Consumer of record** | **the PIPE**, not the task. Stated plainly because the wiring cannot support the alternative. |
+| **Visibility timeout** | derived from the **PIPE's** hold, NOT the run duration. With `BatchSize` 1 and `MaximumBatchingWindowInSeconds` 0 the Pipe holds a message for one `RunTask` API call. **The applied 30 s placeholder already exceeds that with wide margin, so the declared value is 30 s and `~P`'s resource needs no change.** The hold is CONFIRMED by measurement at `B2-AC6` and the number re-derived there if the observation disagrees. |
+| **Retry property** | **NOT SQS redrive.** A task that dies mid-run leaves no message to redrive. Recovery is **marker idempotency** -- the next stamp rebuilds from HEAD regardless -- plus the **nightly derive at 02:00Z**, which bounds the worst case at one day. That is a smaller and truer claim than the one 1.2 made. |
+| **Ceiling rule** | UNAFFECTED. The work still runs in an ECS task with no wall-clock ceiling; 940.6-1006.3 s never meets a 900 s limit under any of these shapes. |
+
+⚠ **The issuer RETRACTED, narrowly, its own endorsement of 2400 s** (93623 item 2): that number's stated
+derivation from the V-1 run duration presupposed the task holding the message, which S14 measured false.
+**2400 s is withdrawn as the declared value.** Nothing else in 93565 changes.
+
+**A RECORDED RESIDUAL, not a re-apply** (93623 item 3): under this mechanism the **Pipe's execution role**
+carries the consume grant (`sqs:ReceiveMessage`/`DeleteMessage`/`GetQueueAttributes` + `ecs:RunTask` +
+`iam:PassRole`), and `~P`'s `aws_iam_role_policy.projection_worker_sqs` on the worker role becomes **dead**.
+It **stays applied this round**: an unused grant to our own role widens no exposure, and removing it would
+be an edit of `CG-s-1`'s applied resource. Named here with its address so it is a recorded residual rather
+than a silent orphan; it retires with `CG-s-8`'s cleanup round.
+
 ### 1.2 The queue-to-compute mechanism, and the two designs I did not choose
+*(SUPERSEDED on the consumer-of-record point by 1.2-RESTATED above; kept as the record of the reasoning
+and of its correction.)*
 
 The face admits three shapes. All three can satisfy the ceiling rule; they are not equally good.
 
@@ -231,6 +270,16 @@ mechanism whose ack semantics I have not verified against the live service -- re
 remember of Pipes is precisely the document-claim-over-measurement failure this project exists to correct.
 The mechanism limb of `B2-AC1` is therefore OPEN; the runtime, CPU, memory, ephemeral, deadline and
 timeout limbs are unaffected and stand.
+
+> **CLOSED 2026-09-03 ~12:4xZ.** The measured read was taken (`aws pipes create-pipe
+> --generate-cli-skeleton`: `SqsQueueParameters` = `BatchSize` + `MaximumBatchingWindowInSeconds`, nothing
+> else; the stream sources in the same skeleton DO carry retry controls, which is the discriminating
+> contrast). Filed as row `NFRA_CLDGRPH-S14` @`6c02972`; the issuer confirmed no face amendment is needed
+> and narrowly retracted its 2400 s derivation (93623). **The limb is re-stated in s.1.2-RESTATED: the
+> PIPE is the consumer of record, the timeout is derived from the Pipe's hold (declared 30 s, which the
+> applied placeholder already satisfies), and the retry property is marker idempotency plus the nightly
+> 02:00Z guarantee -- not SQS redrive.** `B2-AC1`'s proof row moves from OPEN to PASS **only** on that
+> re-statement, and the declared hold is confirmed by measurement at `B2-AC6`.
 
 ### 6a. The wiring names, relayed 09:19Z (93433) -- **DESIRED, NOT APPLIED**
 
