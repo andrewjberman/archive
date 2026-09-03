@@ -1,3 +1,146 @@
+# ROUND 5 AMENDMENT (TO-CE-T-9R, S13 disarm) -- 2026-09-03T12:05Z-12:20Z, `0.8.0_AE_CloudComp`
+
+**This section is NEW, dated, and sits ABOVE the round-4 record below (unchanged, kept as the
+record of what was measured then).** Read-vintage: fix commit `a140eed779` (before-cell for this
+amendment: `7737320640`, round-4's own fix).
+
+## THE BAR THIS AMENDMENT CLOSES ON, QUOTED VERBATIM (PRD v0.5 s.4.3 @`5bbdab5ec7`)
+
+> **PASS** = four cases, four distinguishable outputs. **FAIL** = any two states print alike. This
+> is FWD-2 and it is the load-bearing test of the project. **GRAIN (v0.5, T-7 F2, CTO
+> adjudication):** distinguishability is judged within ONE invocation's output by the STATE TOKEN
+> in the tool's own voice; two subcommands answering two questions may share an rc, but each must
+> print which of the four states it is -- a bare REFUSE shape whose state is carried only by the
+> echoed argument is FAIL on the token, not on the rc.
+
+## WHY: CVO's S13 finding, and what changed
+
+Round-4's scope+delegation line printed on **every** miss, so it separated nothing: three of four
+planted states (`SUBJECT_ABSENT_FROM_CORPUS`, `PRESENT_WITH_ZERO_RESULTS`, `PARTIAL_OR_BLIND`)
+fell through comp_trigger.py's ONE `if not matches:` branch and printed byte-identical bodies at
+rc 0. This cell adds: (1) a real function-existence check against two read-only planes the estate
+already builds (the live graph's LAMBDA nodes, queried via the existing `kuzu_cli.py` subprocess
+-- zero new AWS clients/calls; and Terraform's `aws_lambda_function` declarations, both the
+literal resource shape and the widely-used `module "X" { function_name = "..." }` wrapper shape --
+measured 61 files on the module pattern, which a resource-only scan would have missed entirely,
+including this project's own `bd-price-update` specimen); (2) the S3-notification separation
+through the graph's real `S3_BUCKET -[TRIGGERS]-> LAMBDA` edge (the exact delegation round-4
+measured at `comp_aws_cli.py:273-279`, more precisely at its edge-deriving sibling `:1439-1447`);
+(3) a literal `ANSWER-STATE: <TOKEN>` line on every non-hit answer, satisfying v0.5's GRAIN
+sentence directly, and the FIRST live code carrier anywhere in the estate for three of the four
+ratified states (all three had `tool_voice.token: null` in the enum before this cell).
+
+## THE FOUR CASES, RE-PLANTED AND QUOTED (real runs of the production binary, `a140eed779`)
+
+**SUBJECT_ABSENT_FROM_CORPUS** -- `comp-trigger ZZZ_NONEXISTENT_FUNCTION_93999`, rc **3** (new,
+distinct value; `--list` and a real hit both stay rc 0):
+```
+comp-trigger -- forensics for: "ZZZ_NONEXISTENT_FUNCTION_93999"
+  denominator: 140 events-rules + 18 schedules scanned, region us-east-1
+  scope: EventBridge rules + Scheduler schedules ONLY; ... (unchanged from round 4)
+  existence check -- graph LAMBDA lookup: ABSENT (built: 2026-09-03T12:06:05Z (age: 0.0h));
+  DESIRED-plane (Terraform aws_lambda_function, infra/aws/**/*.tf) scan: 0 hits
+  ANSWER-STATE: SUBJECT_ABSENT_FROM_CORPUS
+  Neither plane the estate carries (the live graph's LAMBDA nodes, the DESIRED-plane Terraform
+  declarations) knows this subject. This is NOT a claim about the EventBridge/Scheduler scan --
+  with no confirmed subject, that scan was never a reason to reach for the S3-notification
+  delegation either.
+```
+
+**PRESENT_WITH_ZERO_RESULTS** -- `comp-trigger bd-price-update` (real, TF-declared via the
+`module "price_update" { source = "../modules/yang-lambda"; function_name = "bd-price-update" }`
+shape -- confirmed present in the live graph too), rc 0:
+```
+  existence check -- graph LAMBDA lookup: FOUND (built: 2026-09-03T12:09:58Z (age: 0.0h));
+  DESIRED-plane (Terraform aws_lambda_function, infra/aws/**/*.tf) scan: 1 hit(s):
+  infra/aws/terraform/bd-pipeline/lambdas.tf:module:price_update
+  ANSWER-STATE: PRESENT_WITH_ZERO_RESULTS
+  this subject EXISTS (per the existence check above) and matches no EventBridge rule, no
+  Scheduler schedule, AND no S3 bucket-notification trigger (graph checked, 0 edges) -- a genuine,
+  checked zero across every class this tool and its measured delegation together can see.
+```
+
+**PARTIAL_OR_BLIND** -- `comp-trigger bd-allocation-processor` (the TF-confirmed S3-notification
+target on `opal-data-bd`), rc 0 -- **BUT see NFRA_COMPEFFICACY-S15 below: the LIVE graph's own
+TRIGGERS edge for this specimen is empty**, so the real run of this specimen at this write
+actually prints `ANSWER-STATE: PRESENT_WITH_ZERO_RESULTS`, identical in shape to the case above
+except for the echoed subject and TF hit path
+(`infra/aws/terraform/bd-pipeline/lambdas.tf:module:allocation_processor`). The PARTIAL_OR_BLIND
+branch itself is real, live-wired code, exercised end-to-end against a FIXTURE (see Controls
+below) rather than a live specimen, because the delegation's live DATA is currently empty
+estate-wide -- disclosed, not hidden. Fixture-exercised body (battery arm
+`CT9R-FULL-PIPELINE-THREE-STATES`, real `render()`/`_check_s3_notification()` code, a mocked
+`_kuzu_query` seam):
+```
+  existence check -- graph LAMBDA lookup: FOUND (built: fixture); DESIRED-plane scan: 0 hits
+  ANSWER-STATE: PARTIAL_OR_BLIND
+  this subject EXISTS and matches no EventBridge rule or Scheduler schedule, BUT the graph shows
+  an S3 bucket-notification trigger the scope above excludes: bucket 'fixture-bucket'
+  -[TRIGGERS]-> this function (org/modules/graph/comp_aws_cli.py:1439-1447). The scope genuinely
+  excludes something this subject HAS -- this is NOT a claim of zero triggers.
+```
+
+**NOT_APPLICABLE** -- `comp-trigger --list --region us-west-2` (unchanged subcommand, new token
+added), rc 0:
+```
+comp-trigger census -- 0 events-rules + 0 schedules, region us-west-2
+  ANSWER-STATE: NOT_APPLICABLE
+  this subcommand (--list) has NO population to census in this region/account -- not a miss on
+  any one subject, the whole census is empty.
+```
+
+## THE PAIRWISE-DIFF LINE (T9R-AC1)
+
+Embedded self-test arm `render.six_of_six_pairs_distinct`: **6 of 6 pairs differ** -- the hit body,
+`SUBJECT_ABSENT_FROM_CORPUS`, `PRESENT_WITH_ZERO_RESULTS`, and `PARTIAL_OR_BLIND` (fixture) are
+pairwise distinct BY TOKEN (never by the echoed query argument alone -- the battery's
+`CT9R-FULL-PIPELINE-THREE-STATES` arm extracts and compares the literal `ANSWER-STATE:` token
+specifically, which is what the PRD's own GRAIN sentence requires; a body-text `!=` check alone
+would be satisfied even by two states sharing a token, differing only by the echoed subject name --
+exactly the shape the GRAIN sentence rules out).
+
+## FINDING NFRA_COMPEFFICACY-S15 (filed, not hidden): the delegation is real code, empty data
+
+The measured S3-notification delegation (`comp_aws_cli.py:273-279` counting, `:1439-1447` deriving
+the real edge) is genuinely wired and this cell's code queries it correctly -- but **the
+`S3_BUCKET -[TRIGGERS]-> LAMBDA` edge is EMPTY across the ENTIRE live graph** (0 rows for `MATCH
+(b:CloudNode)-[e:CloudEdge]->(l:CloudNode) WHERE b.node_type='S3_BUCKET' AND e.edge_type='TRIGGERS'
+AND l.node_type='LAMBDA' ...`), despite the estate carrying multiple real
+`aws_s3_bucket_notification` Terraform resources with real Lambda targets. `opal-data-bd` IS an
+S3_BUCKET node in the current graph (round-4's own F3 -- "account-scope, undetermined" -- was
+TIME-BOUND to a since-superseded graph vintage; the bucket is present now), yet it carries ZERO
+outgoing `TRIGGERS` edges despite Terraform declaring 3 real Lambda targets on it. Traced to a bare
+`except: pass` around `get_bucket_notification_configuration` in `comp_aws_cli.py` -- a failed
+read for this bucket is structurally indistinguishable from a genuinely empty one. Filed as
+`NFRA_COMPEFFICACY-S15` (`UNDER_INVESTIGATION`, hazard_standing ARMED, disarm_owner the comp-aws
+graph lane -- out of this cell's BOUNDS to fix, `comp_aws_cli.py` consumed not edited). This is why
+the PARTIAL_OR_BLIND demonstration above is fixture-based rather than live.
+
+## Controls (T9R-AC4)
+
+Embedded self-test: 14/14 -> **20/20** (6 new: `subject_absent_token`,
+`subject_absent_never_says_no_trigger`, `present_zero_token`, `partial_or_blind_token`,
+`partial_or_blind_names_the_bucket`, `six_of_six_pairs_distinct`). External battery
+(`.tools/tests/test_comp_trigger_battery.py`): 8/8 -> **11/11** -- 3 new arms:
+`CT9R-FULL-PIPELINE-THREE-STATES` (the real `_resolve_existence`/`_check_s3_notification`/`render`
+pipeline, fixture-driven via the one seam `_kuzu_query`, all three tokens confirmed pairwise
+distinct), `CT9R-MUTANT-S13-COLLAPSE-DETECTED` (red-first: a mutant that collapses the miss branch
+back to the exact S13 shape correctly loses ALL THREE tokens, caught), `CT9R-MUTANT-UNAVAILABLE-
+AS-ABSENT-DETECTED` (red-first: a mutant that silently reads an UNAVAILABLE graph response as
+ABSENT is caught -- production correctly keeps them distinct, per BOUNDS). Confirmed direct AND
+under pytest (7.42s); commit-gate clean 2/2 files (the battery's own three new mutants, plus the
+two carried from round 4, all confirmed removed after their runs).
+
+## Production sha, push state
+
+`org/modules/graph/comp_trigger.py`: `7737320640` (round-4's fix) -> `a140eed779` (this amendment,
+255 insertions / 15 deletions -- one new investigation row committed alongside, no new files
+outside the battery/deliverable/proof). Push state, MEASURED (ls-remote + is-ancestor) at write
+time: `git merge-base --is-ancestor a140eed779 origin/CLOUD` reads non-zero -- LOCAL ONLY, the
+expected state under Andrew's standing push hold.
+
+---
+
 # comp-trigger -- NFRA_COMPEFFICACY per-tool result (PRD v0.4 s.4 schema)
 
 Schema: `org/missions/D11/NFRA/NFRA_COMPEFFICACY/prd/NFRA_COMPEFFICACY_PRD.md` v0.4 @`19bf1c7322` s.4
