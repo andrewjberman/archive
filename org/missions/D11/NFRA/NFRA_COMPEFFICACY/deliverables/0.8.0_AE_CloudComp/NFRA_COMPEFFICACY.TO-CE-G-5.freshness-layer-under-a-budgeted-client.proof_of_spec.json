@@ -1,0 +1,164 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_COMPEFFICACY.TO-CE-G-5.freshness-layer-under-a-budgeted-client",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.8.0_AE_CloudComp",
+ "spec_ref": {
+  "doc": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/task-orders/NFRA_COMPEFFICACY.TO-CE-G-5.freshness-layer-under-a-budgeted-client.md",
+  "group": "OTHER",
+  "vintage_commit": "0110eb7cb7"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/decompositions/NFRA_COMPEFFICACY_DECOMP.md",
+  "vintage_commit": "f54000091d",
+  "to_ref": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/task-orders/NFRA_COMPEFFICACY.TO-CE-G-5.freshness-layer-under-a-budgeted-client.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/globgrph/_canonical.py",
+   "kind": "script",
+   "commit_or_etag": "173dd335f4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "a repo-local engine module imported by kuzu_cli.py; no S3/Lambda deploy surface; not a deploy-scope path under Rule 13.",
+   "introduces": [
+    "def _run_child_supervised",
+    "wait_for_peer"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/globgrph/kuzu_cli.py",
+   "kind": "script",
+   "commit_or_etag": "173dd335f4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the CLI comp-find shells out to; not a deploy-scope path.",
+   "introduces": [
+    "wait_for_peer=False"
+   ]
+  },
+  {
+   "path_or_key": ".tools/tests/test_comp_find_battery.py",
+   "kind": "test",
+   "commit_or_etag": "173dd335f4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "a pytest/direct-run test file; not a deploy-scope path.",
+   "introduces": [
+    "G5-AC1-NO-ORPHAN",
+    "G5-AC2-SERVE-STALE-IMMEDIATELY"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp/comp-kuzu.freshness.result.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the cell's result deliverable; a document, not a deploy artifact."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "G5-AC1",
+   "criterion_verbatim": "NO ORPHAN: with a rebuild planted in progress and a --budget 1 client killed at its budget, the process table read AFTER the kill shows no surviving kuzu_nessie_load.py (or, under the detach design, a supervised rebuild with a readable status the losers use); rc 0; the pair (before/after) shown.",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_comp_find_battery.py (arm G5-AC1-NO-ORPHAN + its red-first mutant G5-AC1-MUTANT-STILL-ORPHANS)",
+   "output_evidence": "G5-AC1-NO-ORPHAN PASS: a real wrapper subprocess spawns a grandchild (writes its own pid, sleeps 90s) via the SHIPPED _run_child_supervised; the wrapper is killed externally (proc.kill()) well before either timeout; the grandchild pid, read from the OS process table (tasklist) after the kill, is NOT alive. G5-AC1-MUTANT-STILL-ORPHANS PASS: the identical exercise against an UNSUPERVISED spawn (bare subprocess.Popen, the pre-fix shape) shows the grandchild pid STILL ALIVE after the kill -- the arm correctly reds on the old behavior. The mechanism (a Windows Job Object with JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE) was additionally validated standalone (two throwaway scripts, not this engine) via PowerShell Stop-Process -Force on the live parent pid, BEFORE any production code was written, confirming the primitive itself before applying it.",
+   "denominator": "2 of 2 sub-checks (production behavior PASS, mutant correctly RED)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "G5-AC2",
+   "criterion_verbatim": "SERVE STALE IMMEDIATELY: a second caller during a held lock returns WITHIN BUDGET inside the default budget with the stale label AND the age on the line (AC-7), never BUDGET REACHED ... scanned 0; the line quoted.",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_comp_find_battery.py (arm G5-AC2-SERVE-STALE-IMMEDIATELY); direct call canon.ensure_fresh(db_path, wait_for_peer=False) with a planted fresh lock directory beside a temp (non-real) db_path",
+   "output_evidence": "PASS: ensure_fresh returned in well under 1s (elapsed printed in the arm's detail string) with refreshed=False and reason starting 'STALE (age ...)' -- orders of magnitude under MUTEX_WAIT_S=180s, confirming the caller never polls. kuzu_cli.py's own disclosure line ('INFO: canonical surface NOT refreshed (mode=inc): STALE (age <H>h): ...') is new -- the reason string existed before this cell but was silently discarded on the refreshed=False path; it is now printed.",
+   "denominator": "1 of 1 planted-lock scenario exercised; elapsed time measured directly, not estimated",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "G5-AC3",
+   "criterion_verbatim": "THE TWO WAITS RECONCILED: one carrier states the relationship between the engine's wait and the caller's budget (derived from remaining(), or zero under AC2, or a stated bound); comp-read --enumerate 'MUTEX_WAIT_S' shows the constant and its consumer agree; cited file:line @ commit.",
+   "method": "command",
+   "invocation": "comp-read infra/aws/globgrph/_canonical.py --enumerate 'MUTEX_WAIT_S|ORPHAN_LOCK_S|INCREMENTAL_TIMEOUT_S|remaining'",
+   "output_evidence": "20 hits (DOCSTRING=4, COMMENT=4, CODE=12); ensure_fresh's own docstring states the carrier explicitly: wait_for_peer=False makes the engine's wait UNCONDITIONALLY ZERO (not a timer reduced to zero -- a different code path that never reaches the MUTEX_WAIT_S loop at all); wait_for_peer=True (comp-kuzu-full/auto) is UNCHANGED and still consumes MUTEX_WAIT_S/RECHECK_SLEEP_S exactly as before this cell. Verified by reading the diff (the new wait_for_peer=False branch returns before the time.sleep(RECHECK_SLEEP_S) line), not merely asserted.",
+   "denominator": "4 of 4 named constants (MUTEX_WAIT_S, ORPHAN_LOCK_S, INCREMENTAL_TIMEOUT_S, remaining) accounted for by the enumerate census",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "G5-AC4",
+   "criterion_verbatim": "THE CADENCE MEASURED: the trigger predicate named at file:line, the count of rebuild triggers per hour over the last 24 h with its denominator and the log it was read from; a FINDING with an owner if the cadence is a defect, no edit to it under this cell.",
+   "method": "manual_read_with_citation",
+   "invocation": "read infra/aws/globgrph/_canonical.py:needs_refresh() (the trigger predicate) and every existing persistence point (_write_refresh_failure/_clear_refresh_failure, _append_fallback_sink) for a usable 24h trigger log",
+   "output_evidence": "Trigger predicate named: _canonical.py needs_refresh() -- no manifest (True) OR Nessie-behind (_provenance._nessie_head_status) OR build age > age_warn_hours. NO PERSISTENT PER-TRIGGER LOG EXISTS: the refresh-status file is overwritten (not appended) per DB, and the fallback sink covers only the narrower served-stale-on-large-delta sub-case. A true 24h count is UNCOMPUTABLE from existing logs without adding one, which this cell's bounds forbid. Nearest available signal, stated as such and not conflated with a 24h count: this seat's own first-hand observation of 3 trigger events in a ~51-minute window (2026-09-03 03:16Z-04:07Z, denominator = every --corpus aws call two seats made in that window). Filed as FINDING G5-F1 in the deliverable with an owner (comp-kuzu's operational-logging owner, candidate this seat's own CE-t-22 lane) -- not edited under this cell, per the TO's own instruction that a cadence defect is a finding, not a code change here.",
+   "denominator": "0 of 24h computable from a persistent log (the gap itself is the measured fact); 3 of a non-24h ~51-min window from first-hand observation, stated with its own denominator",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "G5-AC5",
+   "criterion_verbatim": "BATTERY + MUTANT: the existing arms stay GREEN on production at the FILE grain (directory grain stated as it reads, CTO's three files noted if still aborting); the new arm GREEN; its planted mutant RED; production sha before/after stated.",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_comp_find_battery.py; python -m pytest -q .tools/tests/test_comp_find_battery.py; python -m pytest -q --collect-only .tools/tests/",
+   "output_evidence": "FILE GRAIN: 13 of 13 PASS direct and under pytest (36.85s) -- 10 pre-existing arms unchanged GREEN, 3 new (G5-AC1-NO-ORPHAN, G5-AC1-MUTANT-STILL-ORPHANS, G5-AC2-SERVE-STALE-IMMEDIATELY) all GREEN, mutant correctly RED. DIRECTORY GRAIN unchanged: still INTERNALERROR/SystemExit at test_fabric_check_classify.py:76 (CTO's F6 file, not this cell's). Production sha before (HEAD @f659b4edd2) / after: _canonical.py edaa00ae4617f06b07932f8706c20fbbe0482ee610f8854ac1f7d591a1dd601c -> d494be6660b0dd9674383a2504756d4fb852677eee5729718cc3298ff69b2952; kuzu_cli.py ac7f2e5cca7d12838e8b807bd426f17c0adef4ea166ce1cad2ae99363e5e0eaf -> 37a8accbd12f9fc11d6b3de3c07393ac28c0529eb91f17af0f211f82e0eb7c49.",
+   "denominator": "13 of 13 file-grain arms PASS (10 pre-existing + 3 new, exceeding the 1 new arm strictly required since AC1 and AC2 each needed their own); directory grain 1 of 22 known aborters still blocks the sweep, not this cell's",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "G5-AC6",
+   "criterion_verbatim": "PUSH STATE MEASURED at report (ls-remote + is-ancestor). Under Andrew's push hold (LD-0522) the expected reading is LOCAL; say which state was read. The proof instance is VALID with every surprises entry resolving to a row (the SURPRISES limb) BEFORE the complete flip -- which the seat commits itself.",
+   "method": "command",
+   "invocation": "git ls-remote origin refs/heads/CLOUD ; git merge-base --is-ancestor <commit> origin/CLOUD ; python .tools/proof-of-spec-check.py <this instance>",
+   "output_evidence": "measured at report time in the DELIVERABLE REPORT message to 2.0.0_SA_COO (git ls-remote + is-ancestor read there, not duplicated here to avoid a second, possibly stale, measurement). Expected LOCAL under Andrew's standing push hold (LD-0522) -- stated as expected, confirmed by the actual read at report.",
+   "denominator": "1 of 1 fix commit measured for push state at report time",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "an UNSUPERVISED spawn (bare subprocess.Popen with no job-object/process-group supervision, the exact pre-fix shape) planted as a standalone module and exercised through the SAME wrapper-kill harness as the production check",
+   "expected": "the grandchild pid survives the wrapper's external kill (an orphan, matching the pre-fix defect exactly)",
+   "observed": "grandchild pid alive-after-parent-kill=True under the mutant (G5-AC1-MUTANT-STILL-ORPHANS PASS, i.e. the arm correctly detected the mutant's orphan); grandchild pid alive-after-parent-kill=False under production (G5-AC1-NO-ORPHAN PASS)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "re-ran the full battery a second time (pytest -q, 36.85s) after the direct run (immediate prior) and compared arm-by-arm results",
+   "observed": "13 of 13 identical PASS/PASS on both runs; the G5-AC2 elapsed-time measurement varied in absolute value across runs (sub-second both times) but never approached the 10s threshold the arm asserts against, so the PASS/FAIL verdict was stable even though the exact timing was not bit-identical (expected for a wall-clock measurement)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Rule T's client-side form (comp-find's --budget/--cursor/90s default)",
+   "reason": "explicitly named in the TO's own bounds as NOT the subject of this cell -- ratified in PRD v0.4 s.4.4, ready before this cell started"
+  },
+  {
+   "item": "a persistent 24h trigger-cadence log",
+   "reason": "would require a new file this cell's bounds do not permit adding; the gap itself is reported as FINDING G5-F1 with an owner, per the TO's own instruction that a cadence defect is a finding, not an edit"
+  },
+  {
+   "item": "the live rebuild process (PID 25896 or its successor)",
+   "reason": "explicitly bound: do not kill it; every exercise in this cell used disposable temp fixtures instead"
+  },
+  {
+   "item": "CE-g-2 (the served AGE bound's own row) and CE-t-22 (the engine's prior code-half, already met)",
+   "reason": "read-dependencies per the decomp_ref, not claimed by this cell"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-09-03/ce_t1_comp_find_rule_t_landed_form_rework_0216-0345Z.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-read",
+   "invocation": "infra/aws/globgrph/_canonical.py --enumerate 'MUTEX_WAIT_S|ORPHAN_LOCK_S|INCREMENTAL_TIMEOUT_S|remaining' (before write, per the compiler_tools_mandate)",
+   "result": "20 hits; located every constant and consumer cited in G5-AC3's evidence"
+  },
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "on infra/aws/globgrph/_canonical.py, infra/aws/globgrph/kuzu_cli.py, .tools/tests/test_comp_find_battery.py",
+   "result": "clean, 3 of 3 files (2 pre-existing non-ASCII WARN-only lines noted, not introduced by this cell)"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> G5-AC1,G5-AC2,G5-AC3,G5-AC4,G5-AC5,G5-AC6",
+   "result": "see the commit report -- validated on the COMMITTED bytes before the complete flip"
+  }
+ ]
+}
