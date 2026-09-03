@@ -222,6 +222,64 @@ enumerate dict literals by binding. Treat the payoff as real and the cost as UNK
 
 ---
 
+## 4a. IS THE OUTPUT TOO MUCH TEXT? MEASURED, AND THE ANSWER IS "NO, EXCEPT IN ONE BLOCK"
+
+**Andrew-direct at this terminal, verbatim:** *"also is the text an agent receives from this too much
+information?"*
+
+⛔ **A PRIOR OF THIS AUTHOR'S WAS FALSIFIED BY THE MEASUREMENT AND IS RECORDED RATHER THAN QUIETLY
+DROPPED.** Before measuring, this seat expected the repeated didactic prose to be the bulk of the
+frame. **It is 5 lines.** Diffed across three `--for` outputs on three different files, only 5
+non-blank lines are byte-identical in all three. **Almost the entire output varies with the file, so
+"the tool repeats itself at every agent" is FALSE.**
+
+```
+  --for OUTPUT SIZES, captured and counted (not estimated)
+
+  SUBJECT                    FILE LN   OUTPUT LN   SHAPE LN   SHAPE %   MARKED << / UNMARKED
+  .tools/deploy_ledger.py       1328         108         45       41%        6 / 37
+  org/XXX.md                     596         162        102       62%        6 / 94
+  lib/trading_calendar.py        163          49         13       26%        2 /  9
+
+  fixed text identical across all three: 5 lines
+  compression vs reading the file: 12.3x / 3.7x / 3.3x
+```
+
+### The verdict has three parts
+
+**(1) NOT too much, for the job it does.** 108 lines to map a 1328-line file is a 12x compression, and
+this seat used it exactly that way today: the SHAPE block is what turned a hunt into one precise
+second read at `:227-286`. **That is the tool's best feature and it should not be cut.**
+
+**(2) ONE BLOCK IS MISCALIBRATED, AND IT IS `SHAPE`.** It is unbounded by design -- the header says
+*"all N, never truncated"* -- and it scales with **SECTION COUNT, not with relevance or file size.**
+On `org/XXX.md` it is **62% of the output**, and **94 of its 102 rows are unmarked.**
+
+⭐ **THE COST AND THE VALUE COME APART, WHICH IS THE ACTIONABLE PART.** Output cost tracks SECTION
+COUNT; value tracks FILE SIZE. `XXX.md` is the smaller file (596 lines) and produces the LARGER output
+(162 lines); `deploy_ledger.py` is more than twice its length and produces 108. **A section-dense file
+gets the worst deal, and a section-dense file is exactly where an agent most needs the map.**
+
+**(3) THE FIX IS SMALL BECAUSE THE TOOL ALREADY KNOWS THE ANSWER.** SHAPE already marks
+question-relevant rows with `<<`, and the marked count matches the SALIENT set exactly (6/6/2). So the
+relevance signal is computed and then discarded at render time.
+
+| P6 | Collapse UNMARKED runs in SHAPE into one counted line (e.g. *"lines 550-660: 8 sections, none scoring above 0.5"*), keeping every marked row verbatim | small | cuts ~60% of the output on section-dense files |
+
+⛔ **THIS PRESERVES "NEVER TRUNCATED" RATHER THAN BREAKING IT.** Nothing is hidden and the denominator
+is still printed -- a collapsed run states its own count. The property that matters is *the reader can
+see that N sections exist and were considered*, not *N lines were emitted*.
+
+### ⛔ THE SELF-CHECK THIS SECTION OWES, because it cuts against section 4
+
+**Do NOT cut the claim-carrying lines to save space.** The 3-line `CONTRADICTIONS: none detected
+(intra-file signature claims only)` block is the tool **stating an absence WITH ITS SCOPE** -- which is
+precisely what P1 asks it to do MORE of. **A brief that proposes adding claim disclosures in section 4
+and then trims them in section 4a would be arguing both sides.** The finding is not *less text*. It is
+**less of the text that does not vary, and none of the text that carries a claim.**
+
+---
+
 ## 5. THE RULE THAT SHOULD OUTLIVE THIS BRIEF
 
 ⛔ **A SCHEMA QUESTION IS NOT ANSWERED UNTIL EVERY CONSTRUCTOR IS FOUND AND SHOWN TO AGREE.**
