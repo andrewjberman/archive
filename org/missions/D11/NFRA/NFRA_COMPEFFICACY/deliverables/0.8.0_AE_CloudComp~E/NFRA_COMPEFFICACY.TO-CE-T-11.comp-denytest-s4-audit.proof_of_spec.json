@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_COMPEFFICACY.TO-CE-T-11.comp-denytest-s4-audit",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.8.0_AE_CloudComp~E",
+  "spec_ref": {
+    "doc": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/task-orders/NFRA_COMPEFFICACY.TO-CE-T-11.comp-denytest-s4-audit.md",
+    "group": "OTHER",
+    "vintage_commit": "6e5d443ad3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/decompositions/NFRA_COMPEFFICACY_DECOMP.md",
+    "vintage_commit": "39515415cc",
+    "to_ref": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/task-orders/NFRA_COMPEFFICACY.TO-CE-T-11.comp-denytest-s4-audit.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/comp-denytest.py",
+      "kind": "script",
+      "commit_or_etag": "f8f9e8809f732a95cf16b3921c508414be52290e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Repository-local CLI engine invoked by .tools/comp-denytest; no deploy surface and no live IAM change.",
+      "introduces": [
+        "RC_NOT_DECIDABLE = 2",
+        "STATE_PRESENT_ZERO = \"PRESENT_WITH_ZERO_RESULTS\"",
+        "timeout=timeout_s",
+        "def _offline_answer_state_self_test()"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_comp_denytest_battery.py",
+      "kind": "test",
+      "commit_or_etag": "f8f9e8809f732a95cf16b3921c508414be52290e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline fixture/stub battery; zero AWS processes and zero live IAM evaluations.",
+      "introduces": [
+        "DENY-AC2-FOUR-STATES-ONE-OFFLINE-INVOCATION",
+        "DENY-AC2-CONDITIONED-FALSE-DENY-NOT-DECIDABLE",
+        "DENY-AC4-TIMEOUT-CARRIER-AND-RC-CONSUMER",
+        "DENY-AC5-MUTANT-TIMEOUT-REMOVED-RED"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~E/comp-denytest.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The T11 per-tool audit result; a document, not a deploy artifact."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T11-AC1",
+      "criterion_verbatim": "the deliverable parses, every required s.4 field present or explicitly ABSENT; 4.1 from the ENGINE; 4.2 quotes a real fixture run and states the correct zero in the tool's voice.",
+      "method": "schema_validation",
+      "invocation": "PowerShell regex extraction of the sole fenced JSON block, ConvertFrom-Json, then property counts for identity/disclosure/answer_state/bounds/passcraft/usage",
+      "output_evidence": "JSON_FENCES=1; GROUP_COUNTS=7,8,4,4,3,5; REQUIRED_FIELD_COUNT=31. identity.engine_path=.tools/comp-denytest.py (673 lines), identity.shim_path=.tools/comp-denytest (12 lines). The quoted default fixture case prints ANSWER-STATE: PRESENT_WITH_ZERO_RESULTS and 'zero population without an IAM change is CORRECT'.",
+      "denominator": "31 of 31 required s.4 fields present in one of one parseable fenced JSON blocks",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T11-AC2",
+      "criterion_verbatim": "four planted cases on the ratified enum, offline, produce four distinct state tokens within one invocation; the conditioned-grant false-deny reads NOT-DECIDABLE with a non-clean rc, never a verdict.",
+      "method": "command",
+      "invocation": "bash -lc '.tools/comp-denytest --offline-self-test'",
+      "output_evidence": "One invocation prints ANSWER-STATE exactly once for SUBJECT_ABSENT_FROM_CORPUS rc 0, PRESENT_WITH_ZERO_RESULTS rc 0, NOT_APPLICABLE rc 0, and PARTIAL_OR_BLIND inner rc 2. The conditioned implicitDeny with MissingContextValues=['aws:SourceVpc'] prints STATE: NOT-DECIDABLE and no RESULT: PASS. Final summary: OFFLINE ANSWER-STATE SELF-TEST: 4/4 PASS; ZERO live IAM calls.",
+      "denominator": "4 of 4 ratified states planted and pairwise token-distinct; 1 of 1 conditioned-grant false-deny classified NOT-DECIDABLE at non-clean rc 2; 0 live IAM calls",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T11-AC3",
+      "criterion_verbatim": "the RETIRE-candidate is surfaced, not acted: the usage census from runs.jsonl plus rail log records 8 ever with the denominator; no retirement act.",
+      "method": "diff",
+      "invocation": "exact JSON parsing of occurrence-bearing org/mcp/comp-tool-runs.jsonl rows by tool=='comp-denytest'; exact execution-shaped rail regex; git show --stat f8f9e8809f",
+      "output_evidence": "Issuer-pinned baseline is 8 ever/2 in 30d. Current first post-fix remeasurement was 12 exact tool rows of 28,480 non-empty JSONL rows, with 17 occurrence-bearing rows parsed and 5 rejected as other tools merely mentioning the name; 6 exact rows fell within rolling 30d. Rail measurement found 0 exact comp-denytest execution rows in 50,020 physical lines; route/search mentions were not counted as executions. Finding F4 proposes RETIRE-candidate to Andrew only. f8f9e8809f changes only engine+battery; the shim and registries are untouched.",
+      "denominator": "baseline: 8 of 8 exact executions; remeasurement: 12 exact execution rows / 28,480 non-empty JSONL rows plus 0 exact execution rows / 50,020 physical rail rows; 2 changed files, 0 retirement files",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T11-AC4",
+      "criterion_verbatim": "Rule T's form where a subprocess carries a timeout; --help discloses the carrier and rc vocabulary; expiry/unreadable simulate never returns PASS; non-application is stated where no loop exists.",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_comp_denytest_battery.py (DENY-AC4 arms) and python .tools/comp-denytest.py --help",
+      "output_evidence": "Production simulate() passes Clock.remaining() as timeout=. The timeout arm plants TimeoutExpired under --budget 0.25, observes one non-null timeout <=0.25, BUDGET REACHED, PARTIAL_OR_BLIND, STATE: NOT-DECIDABLE and rc 2. The clean/fail/not-decidable rc tuple is exactly 0/1/2. Help prints all three rc meanings, --budget > COMP_BUDGET_S > default 90 s, and that no corpus-width loop/safe partial-verdict cursor exists.",
+      "denominator": "3 of 3 rc states pairwise distinct; 1 of 1 production timeout carriers receives remaining budget; 1 of 1 expiry cases returns rc 2; 1 of 1 help surfaces discloses carrier, rc vocabulary and loop non-application",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T11-AC5",
+      "criterion_verbatim": "new battery with a RED mutant per arm, direct and pytest at FILE grain; commit-gate clean on every Python file touched; zero live IAM calls in battery and audit.",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_comp_denytest_battery.py; python -m pytest -q .tools/tests/test_comp_denytest_battery.py; bash .tools/commit-gate.sh .tools/comp-denytest.py .tools/tests/test_comp_denytest_battery.py; python -m pytest -q .tools/tests",
+      "output_evidence": "Direct battery 9/9 PASS; file-grain pytest 1 passed in 1.42s; commit-gate clean 2/2. Three disposable source mutants were detected: state collapse, clean rc on undecidable, timeout removed. Zero AWS processes/live IAM evaluations: fixtures and injected simulators only. Directory grain measured rc 1/no tests ran because pre-existing test_fabric_check_classify.py:76 raises SystemExit during collection after its own 14/14 checks; the T11 file remains green.",
+      "denominator": "9 of 9 external battery arms pass, including 3 of 3 RED mutant detectors; 1 of 1 pytest file tests passes; 2 of 2 touched Python files gate-clean; 0 live IAM calls; directory sweep 0 tests run because 1 pre-existing collector aborts",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T11-AC6",
+      "criterion_verbatim": "push state measured at report; proof instance valid with every surprises entry resolving to a row before the complete flip, which the lane commits itself.",
+      "method": "command",
+      "invocation": "git ls-remote origin refs/heads/CLOUD; git merge-base --is-ancestor f8f9e8809f <origin/CLOUD>; python .tools/proof-of-spec-check.py <this instance>",
+      "output_evidence": "At 2026-09-03T15:03:35Z origin/CLOUD=351f309e0a6ded1a5a5bdf3aacec18a5f9f8dbee and merge-base --is-ancestor returned rc 1: f8f9e8809f is LOCAL ONLY. Msg-ID 93725 expressly says NEVER git push. surprises=[] so 0 of 0 entries require row resolution. Validation result is recorded after this file is checked and before the task-order status flips complete.",
+      "denominator": "1 of 1 production commits measured for push state; 0 of 0 surprises to resolve; 1 of 1 proof instance validated before complete flip",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three real source-text mutations are written to disposable sibling-engine files: collapse the answer-state printer to PARTIAL_OR_BLIND; change the undecidable branch from rc 2 to clean rc 0; replace the simulate subprocess timeout with None.",
+      "expected": "The state census rejects the collapsed tokens; the rc-only predicate exposes the clean-on-undecidable defect; the timeout observer records None for the carrier-removed mutant.",
+      "observed": "DENY-AC5-MUTANT-STATE-COLLAPSE-RED, DENY-AC5-MUTANT-CLEAN-ON-UNDECIDABLE-RED and DENY-AC5-MUTANT-TIMEOUT-REMOVED-RED all PASS, meaning each mutant fired RED under its paired production predicate. All temporary mutant files were removed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Repeated the new battery direct and under pytest before commit, then obtained one real post-commit shim run from independent seat 0.8.0_AE_CloudComp~C.",
+      "observed": "All author runs were 9/9 and the independent run reproduced the same four-state token set and 4/4 summary at f8f9e8809f; timeout numeric values vary with Clock.remaining(), but every asserted state/rc predicate was stable.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "live IAM evaluation or IAM mutation",
+      "reason": "Explicit task bound; every audit case is a local plan fixture or injected simulator stub."
+    },
+    {
+      "item": "retiring comp-denytest or editing its shim/registry for retirement",
+      "reason": "T11-AC3 requires only surfacing the low-use RETIRE-candidate to Andrew; the disposition decision is not this seat's."
+    },
+    {
+      "item": "repairing the unrelated .tools/tests directory collection abort",
+      "reason": "The abort is in pre-existing test_fabric_check_classify.py and outside T11's named engine/battery/deliverable/proof surfaces; it is disclosed at directory grain, not hidden."
+    },
+    {
+      "item": "git push",
+      "reason": "Issuer Msg-ID 93725: shared branches are pushed only by MSTR seats on Andrew's word; this seat commits and reports LOCAL."
+    }
+  ],
+  "surprises": [],
+  "session_log": "ABSENT -- the task order forbids any new file outside the engine, shim, new battery, deliverable and proof instance; this proof is the canonical session evidence.",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "python .tools/comp-read .tools/comp-denytest.py --for 'how the expected verdict is derived from the plan, how the simulate result is read, what rc each outcome returns, every subprocess with a timeout'",
+      "result": "passed before write; engine read rather than shim"
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "python .tools/comp-read org/modules/graph/iam_cli.py --for 'the stub suite and the documented false-deny modes'",
+      "result": "passed before write; family precedent read"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh .tools/comp-denytest.py .tools/tests/test_comp_denytest_battery.py",
+      "result": "clean for 2 of 2 touched Python files"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "VALID (rc=0), structural=jsonschema, acceptance rows=6, violations=0; validated before the complete flip"
+    }
+  ]
+}
