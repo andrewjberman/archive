@@ -1,0 +1,71 @@
+{
+  "slug": "opsec-s1-limb2-rest-authorizer",
+  "title": "NFRA_OPSEC202609.TO-OP-S-1 limb 2 (FWD-1, scope ruled (A) on row Z-S80): ONE REQUEST authorizer requiring the CloudFront origin secret, attached to the 19 CloudFront-REACHABLE methods of f61h681z9g. The other 20 of 39 have NO CloudFront route and are a NAMED RESIDUAL, not served",
+  "author": "0.7.0_AE_CloudOps~Z",
+  "status": "OPEN",
+  "opened_at": "2026-09-03T21:20:18.030252+00:00",
+  "window_hours": 6.0,
+  "entry_path": "org/critical_paths/change_management/20260903T2120Z_opsec-s1-limb2-rest-authorizer_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "git",
+      "target": "the REST authorizer Lambda source (reusing the limb-2a extracted module, never a second copy of the read), its Terraform, and the OpenAPI body change attaching the authorizer to the 19 reachable methods; committed under 0.7.0_AE_CloudOps~Z",
+      "proof_required": "commit hash + the 19/20 split printed",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "verify",
+      "target": "SCOPE PROOF before any apply: exactly 19 methods carry the authorizer in the body and exactly 20 do not, enumerated by path+verb, matching the CloudFront-reachability measurement in row Z-S80. A method outside the 19 carrying the authorizer is a STOP and a row",
+      "proof_required": "the two enumerated sets",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "activation",
+      "target": "build the REST authorizer via build-nodejs-lambda.sh and PROVE the extracted module is inlined in the artifact BEFORE applying (the limb-2a shape: download, recompute sha, unpack, module strings present in the bundle and absent from the entrypoint source)",
+      "proof_required": "artifact sha + the inlining measurement",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "activation",
+      "target": "THE ROLLBACK EXERCISED BEFORE IT IS RELIED ON, per deliverable 6: attach on ONE method, read it, DETACH, read it back to NONE, then attach the 19 -- ROLLBACK NAMED BEFORE THE APPLY: remove the authorizer from the body, re-apply, redeploy BOTH stages; both stages currently serve deployment 4ykw9p",
+      "proof_required": "both live reads plus the apply outputs",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L5",
+      "kind": "verify",
+      "target": "S1-AC3 AS AMENDED: get-authorizers reads exactly ONE; get-resources --embed methods (auto-paginated, no position key) reads the authorizer on 19 of 39 with BOTH denominators printed and the 20 out-of-reach stated with the reason; get-stages reads a NEW deploymentId on prod AND production, neither left on 4ykw9p",
+      "proof_required": "pasted before/after reads",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L6",
+      "kind": "verify",
+      "target": "THE PROBES: a refused GET and a refused OPTIONS at the raw address of BOTH stages; AMEND D's POSITIVE CONTROL, a preflight THROUGH CloudFront on a REACHABLE path that SUCCEEDS (a refusal there is a STOP and a rollback), and N/A-BY-CONSTRUCTION for the 20 since no browser path exists to preflight",
+      "proof_required": "exact invocations + captured responses",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L7",
+      "kind": "verify",
+      "target": "re-plan: portal-auth files UNVERIFIABLE-BY-INSTRUMENT per the S1-AC5 amendment; portfolio-management owes a REAL 0-diff; 0 destroy and 0 forces-replacement PLAN-WIDE on both; push state MEASURED with a positive control",
+      "proof_required": "plans + ls-remote",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20260903T212018Z OPENED by 0.7.0_AE_CloudOps~Z with 7 leg(s)"
+  ],
+  "last_red_at": null
+}
