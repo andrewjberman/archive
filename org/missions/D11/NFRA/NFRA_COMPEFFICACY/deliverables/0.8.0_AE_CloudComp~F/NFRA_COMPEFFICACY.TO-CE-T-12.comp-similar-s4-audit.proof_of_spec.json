@@ -1,0 +1,177 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_COMPEFFICACY.TO-CE-T-12",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/prd/NFRA_COMPEFFICACY_PRD.md",
+    "group": "T",
+    "vintage_commit": "5bbdab5ec7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/decompositions/NFRA_COMPEFFICACY_DECOMP.md",
+    "vintage_commit": "39515415cc",
+    "to_ref": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/task-orders/NFRA_COMPEFFICACY.TO-CE-T-12.comp-similar-s4-audit.md"
+  },
+  "assignee": "0.8.0_AE_CloudComp~F",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/modules/graph/debtscan/comp_similar.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Repository-local advisory tool engine; no service or image deployment is in scope.",
+      "introduces": [
+        "STATE_SUBJECT_ABSENT = \"SUBJECT_ABSENT_FROM_CORPUS\"",
+        "ap.add_argument(\"--budget\""
+      ],
+      "artifact_covered_by": ["T12-AC1", "T12-AC2", "T12-AC4"]
+    },
+    {
+      "path_or_key": ".tools/comp-similar",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Public wrapper delegates import-inert --help to the engine; repository tool only.",
+      "artifact_covered_by": ["T12-AC1", "T12-AC4"]
+    },
+    {
+      "path_or_key": ".tools/tests/test_comp_similar_battery.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Direct 12/12 and pytest file-grain 1/1 pass; directory collection sees the test before a pre-existing SystemExit.",
+      "introduces": ["def test_comp_similar_battery()"],
+      "artifact_covered_by": ["T12-AC2", "T12-AC4", "T12-AC5"]
+    },
+    {
+      "path_or_key": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~F/comp-similar.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Project-tree s.4 audit deliverable; no deployment applies.",
+      "artifact_covered_by": ["T12-AC1", "T12-AC2", "T12-AC3", "T12-AC4", "T12-AC5", "T12-AC6"]
+    },
+    {
+      "path_or_key": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~F/NFRA_COMPEFFICACY.TO-CE-T-12.comp-similar-s4-audit.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Validated in the worktree before the local implementation commit.",
+      "artifact_covered_by": ["T12-AC6"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T12-AC1",
+      "criterion_verbatim": "The deliverable parses, every required s.4 field is present or explicitly ABSENT; identity comes from the engine with deployed-image and committed-byte SHA values beside it, and the shim is named as the shim.",
+      "method": "manual_read_with_citation",
+      "invocation": "Extract the sole fenced JSON block from comp-similar.result.md; ConvertFrom-Json; count top fields plus answer_state members.",
+      "output_evidence": "json_blocks=1 top_fields=28 answer_states=4 semantic_fields=31; engine 943 lines; shim 29 lines; production SHA before/after and current ECR member SHA recorded.",
+      "denominator": "31 of 31 semantic s.4 fields and 4 of 4 answer-state enum keys.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T12-AC2",
+      "criterion_verbatim": "Four PLANTED cases on the ratified enum produce four DISTINCT state tokens within one invocation with rc and text quoted; the stale-corpus case carries its vintage in the tool's voice.",
+      "method": "test_suite",
+      "invocation": "python org/modules/graph/debtscan/comp_similar.py --self-test; python .tools/tests/test_comp_similar_battery.py",
+      "output_evidence": "One rc-0 self-test prints PLANTED absent-subject/PRESENT-zero/stale-corpus/not-applicable with SUBJECT_ABSENT_FROM_CORPUS, PRESENT_WITH_ZERO_RESULTS, PARTIAL_OR_BLIND, NOT_APPLICABLE; stale line includes corpus built 2025-01-01 and age STALE. Four literal mutants are detected.",
+      "denominator": "4 of 4 planted production arms distinct; 4 of 4 state mutants red.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T12-AC3",
+      "criterion_verbatim": "DEPLOYED != COMMITTED is recorded, not fixed: image summary_corpus.py bytes versus repo bytes are measured with SHA and owner named; zero image or similarity-semantics change occurs under this order.",
+      "method": "live_read",
+      "invocation": "aws ecr describe-images/batch-get-image/get-download-url-for-layer for opal-globgrph-derive-runner:latest; extract app/org/modules/graph/debtscan/summary_corpus.py; Get-FileHash against build-input member and repo.",
+      "output_evidence": "Historical mismatch retained in NFRA_COMPEFFICACY-S23 with owner 0.7.0_AE_CloudOps. Current post-cut image sha256:3a4e078... member is 92,840 bytes SHA-256 2c56cd7...add7c6c85, equal to build input and repo after independent rebuild. This cell made no image or summary_corpus change; similarity controls remain 0.0/1.0 and the same candidate pair.",
+      "denominator": "3 of 3 current byte surfaces equal (served image member, build-input ZIP member, repo file); 1 historical divergence row; 0 image changes by this seat.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T12-AC4",
+      "criterion_verbatim": "Rule T's form is disclosed by --help; a small budget on the corpus scan emits the expiry line and resumable cursor beside a clean completion; rc execution-only is stated with the consumer census including comp-heat's library use.",
+      "method": "command",
+      "invocation": "bash .tools/comp-similar --help; bash .tools/comp-similar supersede --budget 0.000001 --top 3; bash .tools/comp-similar cluster --type NO_SUCH_TYPE --top 3",
+      "output_evidence": "Help prints Rule T flag > env > 90s default, unbounded 0 and --cursor. Prefix: BUDGET REACHED 1e-06 s (flag); scanned 1 of 1871; cursor arn:aws:apigateway:us-east-1::/apis/7k3ed8px20; rc 0. Completion: WITHIN BUDGET 1871 of 1871, budget 90 s (default), used 20.61 s; rc 0. Census finds wrapper rc propagation and no rc-verdict gate; load_heat_live invokes comp-heat freshness and comp-debris.",
+      "denominator": "2 of 2 independent Rule T discriminators on both runs; 1871 ARN units; 2 of 2 live-heat subprocesses remaining-derived/deferred.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T12-AC5",
+      "criterion_verbatim": "The battery is new with a RED mutant per arm, runs direct and under pytest at FILE grain, commit-gate is clean on every Python file touched, and D1-D3 vintage remains a regression arm.",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_comp_similar_battery.py; python -m pytest -q .tools/tests/test_comp_similar_battery.py; bash .tools/commit-gate.sh org/modules/graph/debtscan/comp_similar.py .tools/tests/test_comp_similar_battery.py .tools/comp-similar",
+      "output_evidence": "Direct PASS 12/12; pytest 1 passed; four state mutants, Rule T mutant and vintage-capture mutant detected; C3b/C3c PASS; commit-gate clean 3 of 3. Directory --collect-only sees 52 tests including this battery then pre-existing test_fabric_check_classify.py raises SystemExit 0.",
+      "denominator": "12 of 12 direct arms; 1 of 1 file-grain pytest test; 6 of 6 mutants red; 3 of 3 touched code files gate-clean; directory collector sees 52 tests before shared interference.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T12-AC6",
+      "criterion_verbatim": "Push state is measured at report; the proof instance is VALID with every surprises entry resolving to a row before the complete flip, which the lane commits itself.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~F/NFRA_COMPEFFICACY.TO-CE-T-12.comp-similar-s4-audit.proof_of_spec.json T12-AC1,T12-AC2,T12-AC3,T12-AC4,T12-AC5,T12-AC6",
+      "output_evidence": "Proof validates before the local commit; sole surprise resolves to NFRA_COMPEFFICACY-S23@c8a2ebbe1d5, whose valid shared-file override preserves surfaced_by 0.8.0_AE_CloudComp~F. Push state is LOCAL and this seat never pushes per issuer ruling 93726 and @812b5135b2.",
+      "denominator": "6 of 6 expected criterion ids; 1 of 1 surprise id resolves; 1 local implementation commit required; 0 pushes authorized.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Four answer-state literal mutants, one Rule T expiry mutant, and one vintage-capture runtime mutant exercise the rejectable contracts independently.",
+      "expected": "Each altered arm becomes distinguishable from the production PASS and is rejected by its paired assertion.",
+      "observed": "All six mutants were detected; the full production battery remained 12 of 12 PASS.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Direct and pytest file-grain runs repeat the 24-resource offline corpus, stable lexical ARN cursor, fixed scores and planted answer states in separate processes.",
+      "observed": "Both grains passed; cursor arn:fill0, scores 0.0/1.0, candidate/replacement, and four state tokens were stable.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "opal-globgrph-derive-runner image and org/modules/graph/debtscan/summary_corpus.py",
+      "reason": "Read-only deployed/build-input evidence under this order; the historical owner is 0.7.0_AE_CloudOps and a post-cut independent rebuild already changed current state."
+    },
+    {
+      "item": "Output-row PAGE i of N contract",
+      "reason": "Recorded ABSENT in s.4.4; the scoped change adds Rule T work pagination and answer states without changing similarity/output semantics."
+    },
+    {
+      "item": "Shared INVESTIGATION_v1.md commit",
+      "reason": "NFRA_COMPEFFICACY-S23 was authored here and already landed at c8a2ebbe1d5 under a valid shared-file override with surfaced_by/authorship unchanged; it must not ride this implementation commit again."
+    },
+    {
+      "item": "git push",
+      "reason": "Explicitly forbidden to this seat by issuer ruling 93726 and @812b5135b2; state is LOCAL."
+    }
+  ],
+  "surprises": [
+    "NFRA_COMPEFFICACY-S23: The historical deployed-versus-committed mismatch was true at cut but the current served image now matches after a foreign post-cut rebuild; this cell records the transition and performs no image action."
+  ],
+  "session_log": "ABSENT -- T12 BOUNDS permit only engine, shim, new battery, deliverable and proof; no separate session-log artifact was requested.",
+  "compiler_tools": [
+    {
+      "tool": "comp-to",
+      "invocation": "bash .tools/comp-to NFRA_COMPEFFICACY.TO-CE-T-12.comp-similar-s4-audit",
+      "result": "Exact TO context established."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "python .tools/comp-read comp_similar.py; comp-heat; _compbudget.py; PRD s.4/s.7; answer-state enum",
+      "result": "Engine, consumer, shared budget carrier and governing contracts read before write."
+    },
+    {
+      "tool": "comp-passcraft",
+      "invocation": "bash .tools/comp-passcraft recon comp-similar; bash .tools/comp-passcraft taxonomy",
+      "result": "Eight-move evidence pack and 12-shape hunt order read; hand-run controls recorded in the result."
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh org/modules/graph/debtscan/comp_similar.py .tools/tests/test_comp_similar_battery.py .tools/comp-similar",
+      "result": "OK: pre-commit gate clean for 3 of 3 files."
+    }
+  ]
+}
