@@ -4,17 +4,17 @@
 
 **Seat:** `0.7.0_AE_CloudOps~T`
 
-**Phase state:** Phase A complete; Phase B remains gated on TO-CG-B-2's committed `complete` status.
+**Phase state:** Phase B implementation committed; the issuer-authorized retained-marker task may finish, with no further B-2 task-definition launch by this seat.
 
 ```json
 {
   "to_id": "NFRA_CLDGRPH.TO-CG-B-3",
   "cell": "CG-s-3",
-  "phase": "A_COMPLETE_B_HELD",
+  "phase": "B_IMPLEMENTED_EXERCISE_IN_PROGRESS",
   "phase_b_release": {
-    "condition": "NFRA_CLDGRPH.TO-CG-B-2 status is complete at a named commit",
-    "observed_status": "pending",
-    "observed_at": "2026-09-03T13:58:51Z",
+    "condition": "issuer written release after TO-CG-B-2 reported no further Python edit pending",
+    "observed_status": "released by issuer Msg 93769",
+    "observed_at": "2026-09-03T16:04:02Z",
     "bounded_paths": [
       "infra/aws/globgrph/**",
       "infra/aws/terraform/globgrph/**"
@@ -87,11 +87,18 @@
     "CG-s-7": "Read pointer then manifest with the straddle re-read; report source pins, producer mode/commit, post-load counts, missing-endpoint count, exact bytes, and the 42,294,879..51,693,741 B expected publish-set band."
   },
   "phase_b": {
-    "release_commit": null,
-    "pointer_writer": null,
+    "release_commit": "Msg 93769; B2 worker a9ef0f6160b6aa786b0321f1893e5089c08e118a and engine 117e539280d678e946f5c74a1f2593e07d41e01a",
+    "pointer_writer": "infra/aws/globgrph/projection_worker.py @59aeb265cca69506ec8c02f76d11a2b615dbe195",
     "producer_agreement": null,
     "publish_keys": [],
-    "incomplete_artifact_refusal": null,
+    "incomplete_artifact_refusal": {
+      "plant_key": "projection/2026-09-03T13:23:54.000000+00:00/kuzu_nessie_db",
+      "written_by": "this seat via .tools/aws s3api put-object at 2026-09-03T16:25:44Z",
+      "size_bytes": 71,
+      "manifest_present": false,
+      "size_band_minimum_bytes": 42294879,
+      "result": "PublicationRefused: expected the database plus _build_manifest.json, actual set contained only the database; projection/current.json was unchanged and absent"
+    },
     "backward_vintage_refusal": null
   }
 }
@@ -111,4 +118,4 @@ All 2,256 excess rows were byte-identical across every stored source-table colum
 
 ## Phase boundary
 
-This seat did not edit either bounded infrastructure tree and did not run `comp-blast`; concurrent staged work there belongs to the TO-CG-B-2 seat. Phase B starts only after a committed TO-CG-B-2 `complete` flip is named here. It then adds the pointer writer to the worker's own publish path, conforms both manifest producers, exercises two real publishes, and runs the required refusal controls.
+Phase A made no edit in either bounded infrastructure tree and did not run `comp-blast`. The issuer released Phase B in Msg 93769 after ~S stated no further Python edit was pending. The pointer/manifests landed at `5bb91c894d`, and the issuer-ruled same-vintage conditional-create guard plus S22 landed worktree-only at `59aeb265cc`. The incomplete 71-byte plant was refused before any pointer write. Per Msg 93802, the already-running retained-real-marker task `968bf1a3ca4d48d5bc60244228bbfcda` may finish, but this seat launches no further B-2 task definition; remaining AC5 exercise waits on the issuer/~S relay and uses only an authorized path.
