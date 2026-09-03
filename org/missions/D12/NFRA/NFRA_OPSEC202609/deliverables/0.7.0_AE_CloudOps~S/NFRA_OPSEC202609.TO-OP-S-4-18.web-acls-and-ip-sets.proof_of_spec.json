@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-4-18",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "2fd3843047",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-4-18.web-acls-and-ip-sets.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/prd/NFRA_OPSEC202609_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "001709c96e"
+  },
+  "assignee": "0.7.0_AE_CloudOps~S",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/portal-auth/waf-cloudfront.tf",
+      "kind": "terraform",
+      "commit_or_etag": "819d704105",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Two IP sets and four rules added to opal-cloudfront-protection. Final apply 'Apply complete! Resources: 1 added, 1 changed, 0 destroyed' at 19:46:36Z, completing a first attempt that had half-landed. Verified on the applied plane at 19:59:51Z: 6 rules with BlockedIPs at priority 0 and three managed groups all in Count."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/waf.tf",
+      "kind": "terraform",
+      "commit_or_etag": "37c4bde812",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Two IP sets and one rule added to opal-gateway-waf. safe-apply 'Apply complete! Resources: 2 added, 1 changed, 0 destroyed' at 20:23:42-20:24:34Z. Verified at 20:26:54Z: 5 rules with BlockedIPs at priority 4 and all four pre-existing rules unmoved. This root's post-apply UNSCOPED re-plan reads No changes rc=0."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three controls that could fail, one per risk this face actually carries. (1) THE BOT-CONTROL CENSUS on the CloudFront ACL -- S4-AC1 requires AWSManagedRulesBotControlRuleSet count = 0, and a census that cannot see managed groups at all would return 0 for the wrong reason. (2) THE PRE-EXISTING RULE ARRAY on both ACLs, read AFTER each apply rather than inferred from the plan -- on the regional ACL the plan actually showed two existing rules as remove-and-re-add, so the plan could not have settled whether anything moved. (3) THE EMPTY-SET READS -- get-ip-set on all four sets, because an empty Addresses list is the deliverable here and an empty list from a broken read looks identical.",
+      "expected": "BotControl count 0 against a non-zero managed-group denominator; every pre-existing rule holding its original priority and action/override on both ACLs after the applies; all four sets reading Addresses [].",
+      "observed": "ALL THREE FIRED AS EXPECTED. (1) CloudFront census: 6 rules total, 3 managed rule groups, AWSManagedRulesBotControlRuleSet count = 0 -- and the same reader returns 3 for the groups that ARE present, so the zero is an absence and not a blind matcher. (2) CloudFront after: RateLimitRule 1 Block and AuthLoginRateLimit 2 Block, both unmoved. Regional after: rate-based-ip 0 Block, ip-reputation 1 None, known-bad-inputs 2 Count, common-rule-set 3 Count -- 4 of 4 unmoved, DESPITE the plan having proposed remove-and-re-add on two of them. (3) All four sets read Addresses [] -- EMPTY.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "UNSCOPED terraform plan -detailed-exitcode on BOTH roots, before the first edit and after each apply. Unscoped because a -target plan cannot see a defect in what a root's resources share.",
+      "observed": "BEFORE: portal-auth 'No changes' rc=0 and opal-gateway 'No changes' rc=0 -- both roots clean, so the Z-S17 dirty-baseline shape did not fire on either. AFTER: opal-gateway 'No changes' rc=0, CONVERGED. portal-auth does NOT converge -- rc=2, 'Plan: 0 to add, 1 to change, 0 to destroy', stable across four post-apply plans including one taken after a dedicated convergence apply. That non-convergence is rows Z-S68 and Z-S75 and is why S418-AC3 files per root rather than once.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "NOTHING graduates to Block anywhere in this face.",
+      "reason": "All three CloudFront managed groups land in Count; the regional ACL's known-bad-inputs and common-rule-set stay Count and its ip-reputation stays enforced exactly as it was. The cell graduates reputation to BLOCK only after a watch-only soak with a MEASURED false-positive count, and that soak STARTS with this apply. A group in Block would be a FAIL under S4-AC1, not a bonus."
+    },
+    {
+      "item": "AWSManagedRulesBotControlRuleSet was NOT added, on either ACL.",
+      "reason": "NOT AUTHORIZED under PRD s.5. S4-AC1 carries a census that must read 0 for it, and it does, against a printed denominator."
+    },
+    {
+      "item": "No address was written to any of the four IP sets, and none ever will be by this face.",
+      "reason": "C-2 binds: opal-suspicious-addresses is the source of truth and OP-s-15's reconciler is the ONLY writer of these sets. An address authored here would be a second source of truth for the block list and would drift from the table the moment either changed. The rule that references them blocks nobody on day one, which is the intended state."
+    },
+    {
+      "item": "No existing rule was renumbered on either ACL.",
+      "reason": "The cell asks for rule 0 on BOTH ACLs and priority 0 is TAKEN on the regional ACL by a live rate-based Block rule, so the literal instruction is unsatisfiable there. The issuer RULED the lowest FREE priority per ACL and no renumbering: 0 on CloudFront, 4 on regional. Renumbering live rules would trade working protection for cosmetic ordering."
+    },
+    {
+      "item": "No dashboard, alarm, notification or metric filter was built.",
+      "reason": "The standing moratorium binds and this face carries no exception. The soak's counts land in the logging destination OP-s-5 established, which a later face reads."
+    },
+    {
+      "item": "The portal-auth plan churn was NOT silenced.",
+      "reason": "The two available fixes both trade a real property for a cosmetic one -- pinning the managed group's version selects a ruleset VERSION on live edge traffic, and a lifecycle ignore_changes on rule blinds Terraform to the exact array S18-AC2 depends on. Filed as rows Z-S68 and Z-S75 for the issuer rather than resolved by the assignee."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S68: opal-cloudfront-protection does not re-plan 0-diff after the apply while the live ACL is exactly correct, so S418-AC3's 0-diff limb cannot be met on the portal-auth root. Filed with a stated mechanism that later proved FALSE -- see Z-S75. ARMED, disarm owner 2.0.0_SA_COO~Z, ruled to file UNVERIFIABLE-BY-INSTRUMENT with substitute evidence enumerated.",
+    "NFRA_OPSEC202609-Z-S75: CORRECTS Z-S68. The churn is a PRE-APPLY artifact that RESOLVES ON APPLY -- opal-gateway's pre-apply plan carried the identical remove-and-re-add and its post-apply re-plan reads No changes rc=0, while portal-auth still churns after three applies. So the condition is a property of ONE ROOT, not of aws_wafv2_web_acl, and Z-S68's empty-attribute mechanism is refuted by its own control. The cause is UNKNOWN and the row says so rather than offering a third guess."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~S/logs/2026-09-03/session_1700-1815Z_NFRA_OPSEC202609_TO-OP-S-17R-28.md",
+  "acceptance": [
+    {
+      "criterion_id": "S18-AC1",
+      "criterion_verbatim": "S18-AC1 -- THE SETS EXIST, ARE EMPTY, AND ARE TERRAFORM-DECLARED: list-ip-sets in BOTH scopes returns the new set(s) where it previously returned [] (the empty read is quoted from this face as the before); get-ip-set on each reads Addresses: []; and each address appears in terraform state list in its carrier. Denominator: sets created of sets expected.",
+      "method": "live_read",
+      "invocation": "aws wafv2 list-ip-sets and get-ip-set in BOTH scopes; terraform state list in both carriers",
+      "output_evidence": "READ 19:59:51Z (CLOUDFRONT) and 20:26:54Z (REGIONAL). BEFORE, quoted from this face: list-ip-sets returned [] for CLOUDFRONT and [] for REGIONAL -- OP-s-18 is a pure create, not an adoption, and this seat re-grounded both zeros before the first edit. AFTER: CLOUDFRONT returns 2 -- opal-blocked-ips-cloudfront (b2e008a6-40d9-4d07-bef5-1caa8b682bb3, IPV4) and opal-blocked-ips-cloudfront-ipv6 (eb1a0caa-60a0-492e-a685-e5456cea8b7d, IPV6). REGIONAL returns 2 -- opal-blocked-ips-regional (f073f448-eb85-4d23-9306-0cadf4573331, IPV4) and opal-blocked-ips-regional-ipv6 (85f90377-7cba-45dd-baca-397310d61f8e, IPV6). get-ip-set on ALL FOUR reads Addresses [] -- EMPTY, which is the deliverable and not an unfinished state. All four appear in terraform state list in their own carrier: the CLOUDFRONT pair in portal-auth beside the ACL that can reference them, the REGIONAL pair in opal-gateway beside its ACL. DENOMINATOR: 4 sets created of 4 expected. THE FACE ASKED WHICH SHAPE THE PROVIDER GIVES AND THIS IS THE ANSWER: aws_wafv2_ip_set carries a SINGLE ip_address_version, so v4 and v6 cannot share a resource -- two sets per scope, four in total, and that is why each ACL rule ORs two ip_set_reference_statements rather than naming one set.",
+      "denominator": "4 sets created of 4 expected across 2 scopes; 4 get-ip-set reads; 2 list-ip-sets reads against 2 quoted empty befores; 4 state-list confirmations.",
+      "status": "PASS",
+      "status_reason": "Every clause holds on both scopes. The sets are EMPTY by design under C-2 -- the DynamoDB table is truth and OP-s-15's reconciler is the only writer -- so an empty read here is the criterion being met rather than work outstanding. Scope is not interchangeable, which is why the pairs live in different carriers: a CLOUDFRONT set can only be referenced by a CLOUDFRONT ACL."
+    },
+    {
+      "criterion_id": "S18-AC2",
+      "criterion_verbatim": "S18-AC2 -- THE IPSetReference RULE IS LIVE ON BOTH ACLs AND NO EXISTING RULE MOVED: get-web-acl on each ACL, before and after, with the FULL rule array pasted both times -- name, priority, action/override for every rule. The new rule is Block at the priority named in the proof; every pre-existing rule holds the SAME priority and the SAME action/override it had at this cut (CloudFront RateLimitRule 1 Block, AuthLoginRateLimit 2 Block; regional rate-based-ip 0 Block, ip-reputation 1 None, known-bad-inputs 2 Count, common-rule-set 3 Count). Any movement is a FAIL and a row.",
+      "method": "live_read",
+      "invocation": "aws wafv2 get-web-acl on both ACLs, before (re-grounded at 19:19-19:22Z) and after (19:59:51Z and 20:26:54Z)",
+      "output_evidence": "CLOUDFRONT, opal-cloudfront-protection a09833c0. BEFORE, 2 rules: RateLimitRule priority 1 Block (RateBasedStatement), AuthLoginRateLimit priority 2 Block (RateBasedStatement). Zero managed groups. AFTER, 6 rules: BlockedIPs priority 0 Block (OrStatement over both ip_set references), RateLimitRule priority 1 Block, AuthLoginRateLimit priority 2 Block, ip-reputation priority 3 Count, common-rule-set priority 4 Count, known-bad-inputs priority 5 Count. REGIONAL, opal-gateway-waf 181df35e. BEFORE, 4 rules: rate-based-ip priority 0 Block (RateBasedStatement), ip-reputation priority 1 OverrideAction None, known-bad-inputs priority 2 Count, common-rule-set priority 3 Count. AFTER, 5 rules: the same four at the same priorities with the same actions and overrides, plus BlockedIPs priority 4 Block (OrStatement). NO PRE-EXISTING RULE MOVED ON EITHER ACL -- 2 of 2 on CloudFront and 4 of 4 on regional hold both their priority and their action or override. THE PRIORITIES, named as the ruling requires: 0 on CloudFront, which was FREE, and 4 on regional, the lowest integer not in {0,1,2,3}, because priority 0 there is held by a live rate-based Block rule. NO EXISTING RULE'S PRIORITY WAS CHANGED on either ACL. The CloudFront plan corroborates independently: it wrote only + priority lines at 0, 3, 4 and 5 and no ~ priority line anywhere.",
+      "denominator": "2 ACLs x (1 before read + 1 after read) = 4 full rule-array reads; 6 pre-existing rules checked on both priority and action; 2 new rules placed.",
+      "status": "PASS",
+      "status_reason": "THE POST-APPLY READ IS WHAT SETTLES THIS CRITERION AND ON THE REGIONAL ACL IT HAD TO BE. That root's plan proposed ip-reputation and known-bad-inputs as remove-and-re-add, so the plan alone could not distinguish 'churn that reproduces the rule identically' from 'a rule actually moving'. Only the live array afterwards can, and it shows all four pre-existing rules holding their exact priority and action. Reading the world rather than the plan is the whole reason this criterion asks for before-and-after arrays instead of a diff."
+    },
+    {
+      "criterion_id": "S4-AC1",
+      "criterion_verbatim": "S4-AC1 -- THREE MANAGED GROUPS ON CLOUDFRONT, ALL IN COUNT, BOT CONTROL ABSENT: get-web-acl reads AWSManagedRulesAmazonIpReputationList, AWSManagedRulesCommonRuleSet and AWSManagedRulesKnownBadInputsRuleSet each with OverrideAction: Count -- 3 of 3 pasted -- and a census of the rule array showing AWSManagedRulesBotControlRuleSet count = 0, printed with its denominator. A group in Block is a FAIL, not a bonus.",
+      "method": "live_read",
+      "invocation": "aws wafv2 get-web-acl on opal-cloudfront-protection, with a python census over the returned rule array",
+      "output_evidence": "READ 19:59:51Z. THREE MANAGED GROUPS, 3 OF 3 IN COUNT: AWSManagedRulesAmazonIpReputationList at priority 3, OverrideAction Count; AWSManagedRulesCommonRuleSet at priority 4, OverrideAction Count; AWSManagedRulesKnownBadInputsRuleSet at priority 5, OverrideAction Count. Groups in Block or None: 0. THE CENSUS WITH ITS DENOMINATOR: 6 rules total on the ACL, of which 3 are managed rule groups; AWSManagedRulesBotControlRuleSet count = 0. It is NOT AUTHORIZED under PRD s.5 and was never added. THE CENSUS CAN GENUINELY FAIL: the identical reader returns 3 for the managed groups that ARE present, so a zero for Bot Control is a measured absence and not a blind matcher. This ACL carried ZERO managed rule groups before this face, which is the condition OP-s-4 exists to fix.",
+      "denominator": "6 rules scanned, 3 managed rule groups found, 3 of 3 in Count, 0 in Block or None, Bot Control 0 of 3.",
+      "status": "PASS",
+      "status_reason": "COUNT IS THE DELIVERABLE RATHER THAN A CAUTIOUS FIRST STEP, and the criterion says so by making Block a FAIL. The cell graduates reputation to BLOCK only after a watch-only soak with a MEASURED false-positive count, and that soak begins with this apply. A group in Block would enforce an unmeasured ruleset on live edge traffic. The regional ACL's own Count groups were deliberately left alone for the same reason."
+    },
+    {
+      "criterion_id": "S4-AC2",
+      "criterion_verbatim": "S4-AC2 -- THE SOAK IS RUNNING AND COUNTING, MEASURED NOT ASSERTED: after the apply, a read showing the CloudFront ACL is evaluating the new groups -- sampled requests or the CloudWatch metric for at least one of the three groups showing a non-null datapoint, with the read time and the window. If no traffic has arrived yet, this files UNCOMPUTABLE with the window and the read time, never PASS on the configuration -- C-15's lesson one surface over: a configuration read is not an exercise. The soak's END and any graduation to BLOCK are NOT in this face.",
+      "method": "live_read",
+      "invocation": "aws wafv2 get-sampled-requests on the ACL ARN for rule-metric-name ip-reputation, and aws cloudwatch get-metric-statistics for CountedRequests on all three groups",
+      "output_evidence": "READ 20:04:26Z, window 2026-09-03T19:46:00Z to 20:05:00Z -- i.e. from the moment all three groups went live in Count. get-sampled-requests returns SampledRequests [] with PopulationSize 0. CloudWatch CountedRequests returns 0 datapoints for ip-reputation, 0 for common-rule-set and 0 for known-bad-inputs. NO TRAFFIC REACHED THE ACL IN THAT WINDOW, so there is nothing for the groups to have counted. SOAK START, stated as the face requires: 2026-09-03T19:46:36Z, the moment the apply completed and all three groups became live in Count. The ACL's logging destination is unchanged and is the one OP-s-5 established -- aws-waf-logs-opal-cloudfront, declared in the same carrier -- so the soak's counts land where a later face can read them.",
+      "denominator": "1 sampled-requests read over a 19-minute window (PopulationSize 0) plus 3 CloudWatch metric reads, one per managed group, all returning 0 datapoints.",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "UNCOMPUTABLE BY TIME, exactly as the criterion prescribes, and deliberately NOT a PASS on the configuration. The groups are demonstrably present and in Count -- S4-AC1 establishes that on the applied plane -- but presence is not evaluation, and this criterion exists precisely to refuse the substitution. A soak with zero requests measures nothing: PopulationSize 0 means the ACL saw no traffic in the window, not that the groups failed to evaluate it. THE SOAK'S END AND ANY GRADUATION TO BLOCK ARE NOT IN THIS FACE, so nothing downstream waits on this row. Ledger opsec-s418-cloudfront-acl leg L5 remains OPEN BY DESIGN inside its 24h window for a later read; a non-null datapoint arriving later re-grades this to PASS on stronger evidence than any configuration read could give."
+    },
+    {
+      "criterion_id": "S418-AC3",
+      "criterion_verbatim": "S418-AC3 -- BASELINE QUOTED, 0-DIFF AFTER, NOTHING ELSE RODE, PUSH STATE MEASURED, PER ROOT: for EACH of the two roots, the UNSCOPED plan quoted BEFORE the first edit (0/0/0 or the row that says otherwise); the apply's changed-resource list enumerated with its count, containing ONLY the new IP set(s), the new rule's parent ACL and the CloudFront ACL's managed-group additions; the UNSCOPED re-plan 0-diff after; the ledger entry CLOSED with its proof and rollback named. 0 to destroy and 0 forces-replacement bind PLAN-WIDE on both roots -- a web ACL replacement would drop protection between destroy and create and is an immediate STOP.",
+      "method": "live_read",
+      "invocation": "terraform plan -detailed-exitcode (unscoped, per root, before and after); terraform state list; git ls-remote origin SITEZ; git merge-base --is-ancestor; deploy_ledger.py",
+      "output_evidence": "ROOT 2, opal-gateway -- ALL LIMBS PASS. Baseline before the first edit: 'No changes' rc=0. Changed-resource list, count 3, only this face's resources: the two regional IP sets created and aws_wafv2_web_acl.gw modified IN-PLACE. 'Apply complete! Resources: 2 added, 1 changed, 0 destroyed.' Post-apply UNSCOPED re-plan: 'No changes. Your infrastructure matches the configuration.' rc=0, with zero minus-rule and zero plus-rule blocks -- 0-DIFF MET. Ledger opsec-s418-regional-acl CLOSED, 5 of 5 legs, rollback named. ROOT 1, portal-auth -- THREE LIMBS PASS AND THE 0-DIFF LIMB DOES NOT. Baseline before the first edit: 'No changes' rc=0. Changed-resource list across both attempts, count 3, only this face's resources: the two CloudFront IP sets created and aws_wafv2_web_acl.opal_cloudfront_protection modified IN-PLACE. Post-apply UNSCOPED re-plan: rc=2, 'Plan: 0 to add, 1 to change, 0 to destroy', stable across four plans including one after a dedicated convergence apply. Ledger opsec-s418-cloudfront-acl open on its soak leg only, all other legs closed with rollback named. 0 TO DESTROY AND 0 FORCES-REPLACEMENT HELD PLAN-WIDE ON BOTH ROOTS ON EVERY PLAN -- zero lines matching destroyed, must be replaced, or forces replacement at any point. No web ACL was ever proposed for replacement, which is the STOP this clause exists to catch. PUSH STATE, MEASURED: git ls-remote origin SITEZ reads 001709c96ef22a508255b1242734c73a9d37c854 and merge-base --is-ancestor is FALSE for every commit of this face -- all LOCAL-ONLY, the branch 94 commits ahead. The push is the integrator lane's act.",
+      "denominator": "2 roots x (1 baseline plan + at least 1 post-apply plan) = 6 unscoped plans in total; 6 resources changed across both roots; 2 ledger entries with 11 legs; every commit of this face checked for push state.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PER THE ISSUER'S RULING (19968): the 0-diff limb files UNVERIFIABLE-BY-INSTRUMENT for portal-auth -- NOT PASS, because a 0-diff did not happen and this instance must not claim one, and NOT FAIL, because the world is correct and nothing rode. THE CRITERION'S PURPOSE IS 'NOTHING ELSE RODE'; THE 0-DIFF RE-PLAN IS ITS MEASURE, and here the measure is broken by a provider artifact while the purpose is independently satisfied. Where a measure and its purpose come apart, the purpose governs and the substitute evidence is enumerated. THE THREE SUBSTITUTE EVIDENCES, which together are stronger than a 0-diff would have been: (1) get-web-acl reads EXACTLY the specified six-rule array on the CloudFront ACL, so the world is what the face asked for; (2) the plan's own structure shows only + priority lines at 0, 3, 4 and 5 and NO ~ priority line anywhere, so no existing rule was touched; (3) the condition is characterised and bounded by rows Z-S68 and Z-S75. THE CHARACTERISATION WAS CORRECTED MID-FACE AND THE CORRECTION MATTERS: Z-S68 blamed state carrying empty attributes the config does not produce. That is FALSE -- opal-gateway carries byte-identical empty attributes on two rules and CONVERGED. Z-S75 records the measured shape instead: the churn is a PRE-APPLY artifact that resolves on apply, and portal-auth is the lone root where it does not. The cause is UNKNOWN and the row says so rather than guessing a third time. THE STANDING COST is a DETECTION cost on one root -- a real future drift there must be spotted inside a diff that is never empty -- not a protection cost. EVERY OTHER LIMB BINDS AND PASSES ON BOTH ROOTS, and opal-gateway meets the 0-diff limb outright. *** SUBSTITUTE-EVIDENCE UPGRADE (issuer 19976), forced by this seat's own methodological catch. *** The ruling first stated the substitute as 'three consecutive plans'. THAT IS THE WRONG INSTRUMENT, and opal-gateway is the proof: its pre-apply plan carried the identical churn and it converged anyway, so a count of dirty PLANS discriminates nothing. THE EVIDENCE THAT ACTUALLY DISCRIMINATES IS APPLIES: portal-auth has had THREE APPLIES -- the half-landed first attempt at 19:41Z, its completion at 19:46:36Z, and a dedicated convergence apply that returned rc=0 with 'Modifications complete after 21s' -- and a re-plan taken AFTER all three still returns rc=2. That is what separates this root from opal-gateway, which needed one apply and converged. A plan is a prediction; only an apply followed by a re-plan tests convergence."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "terraform plan (UNSCOPED, 6 runs across 2 roots)",
+      "invocation": "terraform -chdir=<root> plan -detailed-exitcode -no-color, before the first edit and after each apply",
+      "result": "Both baselines 0/0/0. opal-gateway converged after its apply; portal-auth did not, which is the finding in rows Z-S68 and Z-S75. The pre-edit baselines are what make 'nothing else rode' checkable rather than assumed."
+    },
+    {
+      "tool": "safe-apply.sh (Rule 18), with a BROKER DRAIN immediately before each",
+      "invocation": "HALT_ACK=1 bash .tools/safe-apply.sh -chdir=<root> apply -auto-approve <saved plan>",
+      "result": "Three applies, all rc=0. The drain-before-each-apply requirement was adopted from the issuer this session and honoured on every one; each drain returned only messages already acted on. THE FIRST CLOUDFRONT APPLY HALF-LANDED -- the IPv6 set created, then CreateIPSet REFUSED the IPv4 set on a ValidationException because its description carried an apostrophe and a semicolon, which WAFv2's description character class forbids. Finished in-session per NEVER-2."
+    },
+    {
+      "tool": "terraform validate + fmt",
+      "invocation": "per root, before each commit",
+      "result": "A NAMED INSTRUMENT LIMITATION rather than a clean bill: validate AND plan BOTH PASSED on the description that the WAFv2 API then refused. No local gate can see a service-side character class, so a clean plan is not evidence that an apply will succeed. portal-auth also carries two PRE-EXISTING validate warnings that are not this seat's -- measured, not assumed."
+    },
+    {
+      "tool": "terraform show -json (state comparison across two roots)",
+      "invocation": "on both ACLs, comparing managed_rule_group_statement attributes",
+      "result": "The diagnostic the issuer asked for. It REFUTED this seat's own stated cause in Z-S68: the converging root carries byte-identical empty attributes. That refutation is the reason Z-S75 exists."
+    },
+    {
+      "tool": "aws wafv2 get-web-acl / list-ip-sets / get-ip-set / get-sampled-requests",
+      "invocation": "before and after on both ACLs and both scopes, each zero paired with a control",
+      "result": "The post-apply rule arrays are what settle S18-AC2, because on the regional root the PLAN proposed remove-and-re-add on two existing rules and could not have distinguished churn from movement."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "--for on both carriers and the face; --enumerate on '<status>' and 'lifecycle' and 'ignore_changes'",
+      "result": "Located the flip target, the working managed-rule-group idiom in the sibling carrier, and the lifecycle asymmetry between the two ACLs -- the last of which remains the only structural difference found between the converging and non-converging roots."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "2 entries, 11 legs, opened before each apply with rollbacks named",
+      "result": "opsec-s418-regional-acl CLOSED 5 of 5. opsec-s418-cloudfront-acl open on its soak leg only, in-window; its 0-diff leg closed AS A FINDING rather than as a pass."
+    }
+  ]
+}
