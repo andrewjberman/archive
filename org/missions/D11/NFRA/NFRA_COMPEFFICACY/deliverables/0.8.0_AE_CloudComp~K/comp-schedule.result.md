@@ -72,7 +72,7 @@ disclosure 8, answer-state 4, bounds 4, passcraft 3, and usage 5.
     "hook_driven": "0 of 25 observed explicit task-order preflight declarations are proven hook-driven. The two telemetry sinks contain zero invocations and no origin evidence; preflights are issuer/author declarations, not gate execution.",
     "battery": "New .tools/tests/test_comp_schedule_battery.py: 18/18 PASS direct and 1 passed under pytest file grain; historical .tools/tests/test_comp_schedule.py: 9/9 PASS direct; commit-gate clean 1/1 on the new Python battery. Directory collect aborts on pre-existing test_fabric_check_classify.py module-scope sys.exit after enumerating both comp-schedule files.",
     "overlap": "comp-schedule overlaps no decision engine: it reads five gate-record carriers and reports their own decidability. to-pipeline-gate validates only the existence/shape of preflight declarations. graph-call-manifest excludes comp-schedule as a records query pending the CTO curated-vocabulary batch.",
-    "proposed": "CLEARED-candidate -- implementation and local evidence pass T5-AC1..AC5; final clearance remains the independent FWD-9 observation plus proof-of-spec validation and complete flip."
+    "proposed": "CLEARED-candidate -- implementation, local evidence, and the independent post-commit FWD-9 witness pass T5-AC1..AC5; final clearance remains proof-of-spec validation and the complete flip."
   }
 }
 ```
@@ -197,6 +197,10 @@ and not fixed. The diff is limited to `.tools/comp-schedule` and the new
 - `origin/CLOUD`: `351f309e0a6ded1a5a5bdf3aacec18a5f9f8dbee`;
   `git merge-base --is-ancestor 86b4ecc265 origin/CLOUD` returned rc 1.
 - Push state: **LOCAL, MEASURED; no push performed**.
-- FWD-9 command sent to `2.0.0_SA_COO`: `python .tools/comp-schedule --budget 0`;
-  independent output receipt pending at this report-write point.
-
+- Canonical FWD-9 command sent to `2.0.0_SA_COO`: `python .tools/comp-schedule --budget 0`.
+  That offline seat retained the delivered request unread, so live seat
+  `0.8.0_AE_CloudComp~G` supplied the independent witness without replacing
+  the canonical routing: rc 0; `WITHIN BUDGET: scanned 5 of 5 carriers;
+  budget: unbounded (--budget 0), used 19.032 s`; C1=21, C2=4, C3=12,
+  C4=20, C5=337; 21 gates armed; 138 needs-read; C4/C5 both
+  `PARTIAL_OR_BLIND / NOT-DECIDABLE`. LOCAL; no push.
