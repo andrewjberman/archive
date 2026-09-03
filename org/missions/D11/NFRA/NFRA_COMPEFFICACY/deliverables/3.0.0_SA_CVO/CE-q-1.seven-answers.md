@@ -1,10 +1,10 @@
-# NFRA_COMPEFFICACY -- CE-q-1, Andrew's seven questions answered in writing (draft v1, round 6 tranche 1)
+# NFRA_COMPEFFICACY -- CE-q-1, Andrew's seven questions answered in writing (v2, all seven answered; round 6)
 
 **Author:** `3.0.0_SA_CVO` (the CVO authors, the CTO lands the section in the PRD -- decomp CE-q-1, FWD-5). **Written:**
 2026-09-03 18:0xZ. **Bar (FWD-5 ACCEPT):** for each question in his message there is an answer in plain English that says what
 the thing actually does, and where he asked "is this just X?" the answer says yes or no and why; each answer points at the
-row that answers it and is disputable by him. **State:** five of seven answered from completed orders; two wait for tranche 2
-(T-21 comp-system, T-24 comp-platinum). Every fact below is the named deliverable's measurement, read by this seat; nothing
+row that answers it and is disputable by him. **State (v2, 18:3xZ):** all seven answered from completed orders (T-21 and T-24 landed in round 6's second tranche);
+the platinum answer carries the lane's own two uncomputed criteria as part of the answer, not hidden behind it. Every fact below is the named deliverable's measurement, read by this seat; nothing
 here is this seat's own measurement unless it says so.
 
 ## 1. Is the one he was unsure of a tool or a built-in?
@@ -48,7 +48,13 @@ purpose scores 0.0; different name, same purpose scores 1.0; similarity without 
   superseded-twin scan consumes. It works at the CLI and JSON grain (four states, four tokens, a mutant each). The one thing it
   does not do yet is return a typed state through its library consumer -- the consumer calls the CLI as a subprocess and gets
   an untyped dict (row S29, the issuer's boundary ruling; the consumer half is CE-t-12 work).
-- **system** (T-21, 0.8.0_AE_CloudComp~N): *pending tranche 2.*
+- **system** (T-21, 0.8.0_AE_CloudComp~N, engine @2e1102da89): the compiler of the served state -- it compiles
+  repository-local cross-surface evidence into `infra/system/06_current_state` and its `--check` reports one of four
+  verdicts: current, stale, error, or not-decidable (the 0/2/1/3 check contract its `--help` names). It works: the engine
+  self-test prints all four ratified answer-state tokens in one invocation, 45 of 45 pass; the new battery passes 5 of 5
+  direct and under pytest; the task order names `--check` as the auto-refresh verdict surface and no hook was changed.
+  It is not comp-blast (T-6 owns the blast universe) and it overlaps nothing else on the list. The lane's own caveat:
+  its engine commit was LOCAL at the deliverable and the distinct-seat exercise was requested from another seat.
 
 ## 5. Is trace just dataflow?
 
@@ -69,9 +75,20 @@ identity line says so. Whether platinum's universe is assembled honestly is ques
 
 ## 7. How is platinum's coverage universe assembled?
 
-*Pending tranche 2 (T-24, 0.8.0_AE_CloudComp~L).* The answer will say what population platinum enumerates (pages, routes,
-gold scripts), from which artifacts, with what denominator, and what it cannot see -- the s.4.3 four-state bar applied to a
-coverage tool.
+**Answer: from the portal's page components outward, one composite of three tools, over a universe of 22 component
+files.** `comp-platinum` (T-24, 0.8.0_AE_CloudComp~L, implementation @f7a6772964, LOCAL at the deliverable) is a full-stack
+trace from a portal page to a gold script. Its composite is defined as portal component dataflow, then the routing table,
+then the firm gold DAG (the pipescript component), under one shared `--budget` carrier. Its coverage universe is the 22
+component files under `portal/src/pages`, named by file stem; four `index` stems collide and the tool discloses that as a
+named limitation rather than hiding it. Four subcommands: `page` (one component's full-stack trace), `reverse` (S3 key to
+routes to components), `tab-audit` (every ADVI tab), `summary` (one line per component with fetch/transform/S3/API-GW
+counts). Exercised by a seat other than the builder: `comp-platinum page FactorTilts --budget 0` returned the trace with
+the BD firm and bucket, the fetch, and "WITHIN BUDGET: scanned 3 of 3 component" in about three seconds. **What it cannot
+yet say, by its own account:** the four-state bar is met two of four ways -- an absent component and a budget-cut run
+print their states, but planted PRESENT_WITH_ZERO_RESULTS and NOT_APPLICABLE modes do not exist for this composite, and the
+battery has no red mutant per arm; the lane marked T24-AC2 and T24-AC5 UNCOMPUTABLE-BY-CONSTRUCTION under an
+implementation-first pace cut and said so on the face. That is the honest state of the coverage tool's own coverage
+claim, and it is graded as such at the close.
 
 ---
 
