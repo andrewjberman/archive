@@ -1,0 +1,135 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPSEC202609.TO-OP-S-10",
+ "firm": "FABRIC",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-10.signing-key-rotation.md",
+  "group": "OTHER",
+  "vintage_commit": "170f8611d2"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+  "vintage_commit": "2fd3843047",
+  "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-10.signing-key-rotation.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~V",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "7396e8a613",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Row NFRA_OPSEC202609-Z-S100, class BLOCKING, hazard_standing ARMED, disarm_owner 2.0.0_SA_COO~Z. The surprise-row gate read it at commit: '2 new row(s) of 100 total checked (98 pre-existing, NOT re-graded) ... OK: all new rows carry their step-7/step-10 fields.' The second new row in that commit is 0.7.0_AE_CloudOps~T's Z-S99, which was uncommitted in the shared six-lane working tree at the moment of this write and rides under this author line; the attribution is stated in band in the commit message. Z-S100 is the only row this seat authored."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "S10-AC1",
+   "criterion_verbatim": "BOTH CONSUMERS' KEY-SELECTION IS READ AT SOURCE, NOT ASSUMED: for `auth-validator-edge` and for the API authorizer, the code that chooses a verification key quoted with `file:line @ <commit-ish>`, and an explicit statement of how many keys each can hold. Denominator: 2 of 2 consumers read. A face that rotates having read one is the failure this criterion exists to catch.",
+   "method": "manual_read_with_citation",
+   "invocation": "comp-read <file> --for '<key-selection question>' then comp-read <file> --enumerate 'jwt\\.verify|cachedPublicKey|cacheExpiry' (edge) and --enumerate 'jwt\\.verify|getPublicKey|publicKey' (authorizer); sed -n over the cited regions; git status --porcelain over all four cited files to confirm the commit-ish is honest against a dirty worktree; aws lambda get-function + curl of Code.Location for both artifacts, unzipped and read as bytes.",
+   "output_evidence": "CONSUMER 1 of 2 -- auth-validator-edge @998c79b970: index.mjs:68 'let cachedPublicKey = null;' and :69 'let cacheExpiry = 0;' (two scalars, not a map or array); :225 'if (!cachedPublicKey || Date.now() > cacheExpiry) {'; :230 'cachedPublicKey = response.SecretString;' (the whole secret string into one variable -- no parse, no slot selection); :231 'cacheExpiry = Date.now() + 300000; // 5 min'; :235 'const payload = jwt.verify(token, cachedPublicKey, { algorithms: [\"RS256\"] });'. HOW MANY KEYS IT CAN HOLD: ONE. CONSUMER 2 of 2 -- opal-portal-authorizer @998c79b970: index.mjs:20 'let publicKey = null;'; :25-28 'async function getPublicKey() { if (publicKey) { return publicKey; }' -- a bare truthiness check with NO time component; :35 'publicKey = response.SecretString;'; :195 'const pubKey = await getPublicKey();'; :198 'const decoded = jwt.verify(token, pubKey, {'. HOW MANY KEYS IT CAN HOLD: ONE, AND INDEFINITELY -- the cache has no TTL. ENUMERATION COMPLETENESS: both --enumerate runs returned 8 hits, PAGE 1 of 1, so 'one key variable, one verify call site' is a complete enumeration of each file and not a truncated page. VINTAGE HONESTY: git status --porcelain over index.mjs (edge), index.mjs (authorizer), originVerify.mjs and opal_auth/__init__.py returned EMPTY, so all four are clean at HEAD 998c79b970 even though the worktree overall is dirty. SERVING PLANE, run because the authorizer was modified TODAY at 2026-09-03T20:43:43Z and a source-only read would have been the stale instrument: auth-validator-edge CodeSha256 5ZeZy/9Y+mhuV4QWbRRw85rTR6rbp+s3rblLi0/9kCo= bundle reads 'if(!R8||Date.now()>H4)R8=(...SecretId:\"opal/auth/jwt-public-key\"...).SecretString,H4=Date.now()+300000;let J=Y4.default.verify(W,R8,{algorithms:[\"RS256\"]});'; opal-portal-authorizer CodeSha256 WNm3LnJpgcs9wqNlJ4bU2T6n65IgcMM/fgf2EyENcoY= bundle reads 'var fq=null;async function uJ(){if(fq)return fq;try{let q=new yJ({SecretId:\"opal/auth/jwt-public-key\"});return fq=(await vJ.send(q)).SecretString,fq}'. Occurrences of the secret id per deployed bundle: EXACTLY 1 and EXACTLY 1.",
+   "denominator": "2 of 2 consumers named by the face were read, on 2 planes each (committed source at 998c79b970 and the downloaded deployed artifact), plus the secret's own value as a third plane. 8 of 8 enumerate hits per file, PAGE 1 of 1, no truncation.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S10-AC2",
+   "criterion_verbatim": "THE OVERLAP EXISTS BEFORE THE SWITCH, MEASURED AT EACH CONSUMER: evidence that BOTH consumers were serving the new verification key BEFORE signing moved to it, each read separately with its timestamp. \"Deployed\" is not \"serving\" -- for the replicated edge, the read must be against what is actually answering.",
+   "method": "live_read",
+   "invocation": "NOT RUN. The face's deliverable 1 gates deliverable 2 on both consumers being two-slot; S10-AC1 measured both as single-slot, so no new key was minted, no second slot was published, and no signing switch occurred.",
+   "output_evidence": "UNREACHABLE BY CONSTRUCTION, and the construction is the deliverable rather than a shortfall. There is no second verification slot for either consumer to serve: each holds exactly one scalar assigned the whole SecretString, and the secret itself is a bare 452-character PEM with one BEGIN block. A SHARPER STATEMENT THAN 'NOT REACHED', recorded because it changes the remedy: for opal-portal-authorizer this criterion is UNSATISFIABLE AT ANY WAIT LENGTH even after a second slot is added, because getPublicKey() at index.mjs:25-28 has no TTL -- a warm execution environment holds the pre-rotation key for the life of that environment and Lambda does not bound that lifetime. The only convergence mechanism available today is a redeploy that cycles the execution environments. The estate's own statement of this exact mechanism sits at originVerify.mjs:48-54 for the origin secret. The remedy is therefore TWO changes and not one: a second slot AND a bounded TTL.",
+   "denominator": "0 of 2 consumers serving a new key, because 0 new keys exist and 0 rotations were performed.",
+   "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+   "status_reason": "Gated OFF by S10-AC1 per the face's own deliverable 1: 'If either consumer can only hold ONE key at a time, then a no-sign-out rotation is impossible as the system stands, and THAT is the finding ... Do not rotate into a single-slot consumer.' Both are single-slot. Blocker filed as NFRA_OPSEC202609-Z-S100."
+  },
+  {
+   "criterion_id": "S10-AC3",
+   "criterion_verbatim": "NOBODY WAS SIGNED OUT, AND THIS IS THE OUTCOME'S OWN BAR: a token minted under the OLD key before the rotation, presented AFTER the signing switch, still verifies -- request, response and the token's identity and expiry pasted at each step. NEGATIVE CONTROL: a token signed by a key that was never in either slot is REFUSED, so the acceptance is not measuring \"everything passes\".",
+   "method": "live_read",
+   "invocation": "NOT RUN. No signing switch occurred, so there is no 'after' to present a pre-rotation token against.",
+   "output_evidence": "UNREACHABLE BY CONSTRUCTION. Nobody was signed out because nothing was rotated -- which satisfies the outcome's plain-language bar trivially and does NOT demonstrate the capability FWD-10 asks for. This criterion is recorded as unmet rather than vacuously passed: 'no one was signed out' is true here only because the act that would sign them out was refused at the gate. The negative-control limb the face names as the control that must be able to FAIL was likewise not exercised on the login path; the discriminating control this deliverable DOES carry is described under controls.mutant and is aimed at S10-AC1's assertion, which is the claim this face actually stands on.",
+   "denominator": "0 tokens minted, 0 presented, 0 signing switches performed.",
+   "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+   "status_reason": "Gated OFF by S10-AC1. Recorded explicitly as NOT a vacuous pass: the absence of sign-outs is a consequence of refusing the rotation, not evidence that a rotation would preserve sessions."
+  },
+  {
+   "criterion_id": "S10-AC4",
+   "criterion_verbatim": "THE NEW KEY IS ACTUALLY THE ONE SIGNING: a login performed after the switch yields a token whose header/key-id resolves to the NEW key, pasted; and the old key is confirmed still present as a verification slot at that moment. A rotation nobody can observe on the wire has not been demonstrated.",
+   "method": "live_read",
+   "invocation": "NOT RUN. No new key was minted and no signing switch occurred.",
+   "output_evidence": "UNREACHABLE BY CONSTRUCTION. Worth recording for the re-cut: this criterion presumes a key-id the wire can carry, and neither consumer reads one. Both call jwt.verify with a single key argument and no kid lookup, so even after a two-slot remedy, 'the token's header/key-id resolves to the NEW key' needs a kid claim to be minted at signing and read at verification -- neither exists today. That is a third element of the remedy beyond the slot and the TTL.",
+   "denominator": "0 logins performed after a switch, because 0 switches occurred.",
+   "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+   "status_reason": "Gated OFF by S10-AC1. The criterion additionally presumes a kid-bearing token header that neither consumer implements; surfaced here for the re-cut rather than left for the next seat to rediscover."
+  },
+  {
+   "criterion_id": "S10-AC5",
+   "criterion_verbatim": "THE OLD MATERIAL SURVIVES AND THE LEDGER CLOSES ON THE ARTIFACT: the old secret version confirmed still retrievable with NO scheduled deletion (`describe-secret` pasted showing no `DeletedDate`); the runbook committed; the ledger CLOSED with its proof and rollback named; push state read by `ls-remote` + `is-ancestor` and stated as MEASURED. `RotationEnabled` is confirmed still unset -- this face does not turn on automatic rotation.",
+   "method": "live_read",
+   "invocation": "aws secretsmanager describe-secret --secret-id opal/auth/jwt-private-key and opal/auth/jwt-public-key --query '{S:Name,Rot:RotationEnabled,Del:DeletedDate,Stages:VersionIdsToStages}'; run twice for determinism.",
+   "output_evidence": "THE MEASURABLE LIMBS ARE MEASURED AND ALL HOLD. opal/auth/jwt-private-key: RotationEnabled null, DeletedDate null, VersionIdsToStages holds exactly one version 1acd44f3-d07e-486b-9ad8-66993a0b6716 staged AWSCURRENT, no AWSPREVIOUS. opal/auth/jwt-public-key: RotationEnabled null, DeletedDate null, one version fabe94f0-019d-455d-8c72-47b3d709bd8b staged AWSCURRENT, no AWSPREVIOUS. Identical on both runs. So: the material survives untouched, NO deletion is scheduled, and automatic rotation remains OFF -- this face turned nothing on. THE LIMBS THAT CANNOT EXIST: no runbook was committed and no deploy ledger was opened or closed, because no act occurred that a ledger would record. An opened ledger would have asserted the start of an act the gate forbids; a runbook would have documented a procedure that cannot be performed as the system stands. Both are correctly absent rather than skipped, and both belong to the remedy cut.",
+   "denominator": "2 of 2 secrets described, on 2 runs each, all four limbs (RotationEnabled, DeletedDate, version count, stage set) identical across runs.",
+   "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+   "status_reason": "The preservation limbs (old material retrievable, no DeletedDate, RotationEnabled still unset) are MEASURED AND CONFIRMED on both secrets across two runs. The ledger and runbook limbs are unreachable by construction: no rotation was performed, so there is no ledger to close and no performable procedure to document. Recorded as UNCOMPUTABLE rather than PASS because the criterion is a conjunction and two of its limbs do not exist."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The claim this deliverable stands on is S10-AC1's 'neither consumer can hold two keys'. The reading that could have made that claim TRUE ON THE CODE AND FALSE ON THE SYSTEM is a scalar holding a multi-key JSON envelope: both consumers assign response.SecretString to one variable, and if that string were itself a two-slot envelope, every source and byte-level reading would stay true while the conclusion inverted. The planted control runs the IDENTICAL probe -- get-secret-value, then json.loads plus a token search for 'current'/'previous' plus a count of PEM BEGIN blocks -- against a secret KNOWN to carry two slots, opal/auth/origin-verify, in a SEPARATE invocation from the target. If the probe could not distinguish an envelope from a bare key, it would return the same shape for both.",
+   "expected": "target opal/auth/jwt-public-key -> json.loads RAISES, 'current' absent, 'previous' absent, exactly 1 BEGIN block. Control opal/auth/origin-verify -> json.loads SUCCEEDS and yields slots ['current','previous']. The two must differ, or the absence on the target is an instrument failure rather than a finding.",
+   "observed": "target: len 452, BEGIN blocks 1, JSON-FAIL, current False, previous False. Control (separate invocation): slots ['current','previous']. Identical on both determinism runs. The probe demonstrably CAN see a two-slot envelope, so the absence on the JWT key is a real absence.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Every load-bearing read run TWICE with identical inputs and the outputs compared field by field: comp-read --enumerate on both consumer files; the get-secret-value shape probe on opal/auth/jwt-public-key (length, BEGIN-block count, json.loads outcome, current/previous token presence); the positive control on opal/auth/origin-verify in a separate invocation; get-function-configuration CodeSha256 on both Lambdas; describe-secret on both secrets.",
+   "observed": "edge enumerate run1 = run2 = '8 hit(s) | 7 whole | 1 sub'; authorizer enumerate run1 = run2 = '8 hit(s) | 6 whole | 2 sub'; secret shape run1 = run2 = (len 452, 1 BEGIN block, JSON-FAIL, current False, previous False); positive control run1 = run2 = ['current','previous']; CodeSha256 run1 = run2 = 5ZeZy/9Y+mhuV4QWbRRw85rTR6rbp+s3rblLi0/9kCo= and WNm3LnJpgcs9wqNlJ4bU2T6n65IgcMM/fgf2EyENcoY=; describe-secret run1 = run2 = (RotationEnabled null, DeletedDate null, one version, AWSCURRENT only) on both secrets -- which additionally confirms the investigation itself disturbed nothing.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Deliverables 2, 3, 4 and 5 of the face -- the rotation itself, the session-survival evidence, the runbook, and the deploy ledger.",
+   "reason": "Excluded by the face in terms. Deliverable 1 states: 'If either consumer can only hold ONE key at a time, then a no-sign-out rotation is impossible as the system stands, and THAT is the finding: file a row, state it as the blocker, and the remedy (teaching that consumer a second slot) is a separate cut. Do not rotate into a single-slot consumer.' Both consumers measured single-slot, so the gate's negative branch fires and these four deliverables are out of scope for this cut."
+  },
+  {
+   "item": "Whether the four ADDITIONAL first-party readers of opal/auth/jwt-public-key are live consumers on the production login path -- infra/aws/lambda/shared/opal_auth/__init__.py:28,33 (itself a single scalar, '_cached_public_key: Optional[str] = None'), infra/aws/auth/validator.py:31, infra/aws/auth/validator.ts:29, and two under infra/aws/opalinvest_dev/.",
+   "reason": "Out of this face's scope: S10-AC1's denominator is the 2 consumers the face names, and both were read. Surfaced in Z-S100 as NOT ESTABLISHED rather than asserted either way, because if any is live the rotation surface is wider than the face models and the remedy must cover it. That is a question for the re-cut to settle, not a claim this deliverable makes. comp-find over 'jwt-public-key' reads 191 hits across 51,628 files; the shared module has 2 importers in source."
+  },
+  {
+   "item": "A live CloudFront read of the edge's actually-serving replica version.",
+   "reason": "comp-routes edge-versions reports auth-validator-edge bound by qualified_arn (DYNAMIC, auto-updating on apply) but discloses itself as DESIRED plane only and explicitly cannot distinguish a declared binding from a pinned stale one. Excluded because it cannot change the verdict for a structural reason rather than an optimistic one: two-slot verification was never implemented in ANY version of this consumer -- the deployed $LATEST bundle carries exactly one occurrence of the secret id and one verify call -- and an older pinned replica cannot contain a capability that was never written. Stated as a named residual rather than silently dropped."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPSEC202609-Z-S100: BOTH consumers of the login signing key are single-slot, so FWD-10's no-sign-out rotation is impossible as the system stands and nothing was rotated. Confirmed on three planes (source @998c79b970, the deployed bundles, and the secret's own bare-PEM value) with a positive control proving the envelope probe can see slots when they exist. The authorizer is worse than single-slot -- its key cache has no TTL, so S10-AC2 is unsatisfiable at any wait length for that consumer even after a second slot is added. The two-slot pattern this face was told to copy is already deployed in the SAME authorizer for the ORIGIN secret, and originVerify.mjs:48-54 states the exact mechanism that makes the JWT path unrotatable. Class BLOCKING, hazard_standing ARMED, disarm_owner 2.0.0_SA_COO~Z because the remedy is an L6 re-cut. Committed 7396e8a613."
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-03/session_0.7.0_AE_CloudOps~V_2300-2330Z_OPSEC_S10_GATE.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-read",
+   "invocation": "comp-read infra/aws/lambda-edge/auth-validator-edge/index.mjs --for 'how does it select a verification key, how many keys can it hold at once, does it support a second or previous key slot'",
+   "result": "Returned the file SHAPE (450 lines, 1 whole-file section) and 18 qualifiers, surfacing ':224 Get public key from Secrets Manager (cached)' as the salient region. Established WHERE to read; the capacity question was then settled by --enumerate rather than by the salience ranking."
+  },
+  {
+   "tool": "comp-read --enumerate",
+   "invocation": "comp-read infra/aws/lambda-edge/auth-validator-edge/index.mjs --enumerate 'jwt\\.verify|cachedPublicKey|cacheExpiry' and comp-read infra/aws/users/lambda/portal-authorizer/index.mjs --enumerate 'jwt\\.verify|getPublicKey|publicKey'",
+   "result": "8 hits each, both PAGE 1 of 1 with the denominator printed, so the 'one key variable, one verify call site' finding is a COMPLETE enumeration per file and not a truncated page. This is the read that turned a plausible impression into a countable claim, and it is why S10-AC1 can state a capacity rather than an appearance."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'jwt-public-key' --limit 40 ; comp-find 'auth-validator-edge' --files --limit 40 ; comp-find 'opal_auth' --limit 30",
+   "result": "Located both named consumers (edge index.mjs:228, authorizer index.mjs:32) against a printed denominator of 191 hits / 51,628 files scanned, corpus=all. Also surfaced FOUR additional first-party readers of the same secret that the face does not name -- the basis for the consumer-population exclusion above. A filename-scoped or single-file read would not have found them."
+  },
+  {
+   "tool": "comp-routes",
+   "invocation": "comp-routes trace auth-validator-edge ; comp-routes edge-versions",
+   "result": "trace returned 'No match' for the function name (it resolves URLs, not Lambda names). edge-versions reported auth-validator-edge bound by qualified_arn, DYNAMIC. Both outputs led with their own COVERAGE/BLIND disclosure that they are DESIRED plane only and cannot distinguish a declared binding from a pinned stale one -- which is why the serving-version question is carried as a named residual rather than answered from this tool."
+  },
+  {
+   "tool": "comp-schedule",
+   "invocation": "Not re-run this session; the face carries the issuer's run at 2026-09-03 19:1xZ (21 gates armed over 5 carriers, DEPLOY-LEDGER binding).",
+   "result": "The DEPLOY-LEDGER carrier binds only if a ledgered act occurs. No act occurred, so no ledger was opened and the carrier is not engaged. Recorded rather than silently skipped."
+  }
+ ]
+}
