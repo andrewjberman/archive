@@ -21,14 +21,22 @@
       "commit_or_etag": "6df07696eac80fb5322e498d6b121bd9a56d0d02",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Repository comp-blast engine; no deployment or graph rebuild is performed.",
-      "artifact_covered_by": ["T6-AC1", "T6-AC2", "T6-AC3", "T6-AC4"]
+      "artifact_covered_by": ["T6-AC1", "T6-AC2", "T6-AC3", "T6-AC4", "T6-AC7"]
+    },
+    {
+      "path_or_key": "org/modules/graph/comp_blast_universe.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Budgeted canonical load serves the existing stale graph without refresh/wait and discloses age/reason; unbudgeted labels preserve the existing path.",
+      "artifact_covered_by": ["T6-AC7"]
     },
     {
       "path_or_key": ".tools/tests/test_comp_blast_battery.py",
       "kind": "test",
       "commit_or_etag": "6df07696eac80fb5322e498d6b121bd9a56d0d02",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Direct 6/6 and pytest 6 passed; commit gate clean.",
+      "deploy_evidence": "Direct 7/7 and pytest 7 passed; commit gate clean.",
       "artifact_covered_by": ["T6-AC2", "T6-AC3", "T6-AC4", "T6-AC5"]
     },
     {
@@ -52,7 +60,7 @@
       "criterion_verbatim": "The deliverable parses with identity, graph built vintage, denominator, and shim named.",
       "method": "manual_read_with_citation",
       "invocation": "Read comp-blast.result.md against TO-CE-T-6 and the shim-named cli.py engine.",
-      "output_evidence": "Report names .tools/comp-blast, org/modules/graph/cli.py, canonical Kuzu, built timestamp, 27134-node denominator, and called components.",
+      "output_evidence": "Report names .tools/comp-blast, org/modules/graph/cli.py, canonical Kuzu, built timestamp, 27206-node denominator, and called components.",
       "denominator": "31 required s.4 fields represented by report JSON and sections.",
       "status": "PASS"
     },
@@ -87,9 +95,9 @@
       "criterion_id": "T6-AC5",
       "criterion_verbatim": "New battery has one red mutant per arm and passes direct, pytest file grain, and commit gate.",
       "method": "test_suite",
-      "invocation": "python .tools/tests/test_comp_blast_battery.py; python -m pytest -q .tools/tests/test_comp_blast_battery.py; bash .tools/commit-gate.sh org/modules/graph/cli.py .tools/tests/test_comp_blast_battery.py",
-      "output_evidence": "Direct 6/6 PASS; pytest 6 passed; 4/4 source mutants compile as negative controls; commit gate clean for 2/2 Python files.",
-      "denominator": "6 production tests, 4 red-mutant arms, 2 gated Python files.",
+      "invocation": "python .tools/tests/test_comp_blast_battery.py; python -m pytest -q .tools/tests/test_comp_blast_battery.py; bash .tools/commit-gate.sh org/modules/graph/cli.py org/modules/graph/comp_blast_universe.py .tools/tests/test_comp_blast_battery.py",
+      "output_evidence": "Direct 7/7 PASS; pytest 7 passed; 5/5 source mutants compile as negative controls; commit gate clean for 3/3 Python files.",
+      "denominator": "7 production tests, 5 red-mutant arms, 3 gated Python files.",
       "status": "PASS"
     },
     {
@@ -100,13 +108,22 @@
       "output_evidence": "Proof validation is required before completion; 2.0.0_SA_COO distinct-seat FWD-9 at HEAD 9879a8d5ab ran the carried --exact/--all flags with rc 0 and WITHIN BUDGET 507/507; this Codex lane records LOCAL state and never runs git push.",
       "denominator": "6 of 6 criterion ids plus one post-commit FWD-9 run.",
       "status": "PASS"
+    },
+    {
+      "criterion_id": "T6-AC7",
+      "criterion_verbatim": "The Rule-T budget bounds the whole comp-blast call: a budgeted stale graph is served immediately with age disclosure and no rebuild/wait; unbudgeted calls retain and disclose today's path.",
+      "method": "test_suite",
+      "invocation": "bash .tools/comp-blast --exact arn:aws:s3:::opal-data-bd --direction down --depth 1 --budget 60; python .tools/tests/test_comp_blast_battery.py",
+      "output_evidence": "Live stale-pin probe returned rc 0 in 8.5 s with BUDGETED CALL: SERVING EXISTING GRAPH STALE (age 0.5h), BEHIND Nessie HEAD reason, and no kuzu_nessie_load.py child; battery 7/7 direct, including no-child arm and budgeted-refresh-ambush RED mutant.",
+      "denominator": "Whole call: universe load plus 158 traversal units; 5 source-mutant arms.",
+      "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Four source-mutant arms cover NOT-FOUND radius, exact resolution, direction aliasing, and partial rc.",
+      "description": "Five source-mutant arms cover NOT-FOUND radius, exact resolution, direction aliasing, partial rc, and budgeted refresh ambush.",
       "expected": "Each mutation changes one required behavior while compiling successfully.",
-      "observed": "4/4 mutant arms changed source and compiled; production tests stayed green.",
+      "observed": "5/5 mutant arms changed source and compiled; production tests stayed green.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
@@ -125,7 +142,9 @@
       "reason": "Read-only graph universe; no rebuild or deployment is authorized by this order."
     }
   ],
-  "surprises": [],
+  "surprises": [
+    "NFRA_COMPEFFICACY-S31: budgeted comp-blast previously rebuilt a stale Kuzu universe outside the traversal clock; disarmed by 0.8.0_AE_CloudComp~G via carrier NFRA_COMPEFFICACY-S32 after the AC-7 whole-call fix."
+  ],
   "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-09-03/TO-CE-T-6_comp-blast_s4_audit.md",
   "compiler_tools": [
     {
@@ -136,7 +155,7 @@
     {
       "tool": "commit-gate",
       "invocation": "bash .tools/commit-gate.sh org/modules/graph/cli.py .tools/tests/test_comp_blast_battery.py",
-      "result": "Gate passed for every Python file touched."
+      "result": "Gate passed for every Python file touched: cli.py, comp_blast_universe.py, and test_comp_blast_battery.py."
     },
     {
       "tool": "proof-of-spec-check",
