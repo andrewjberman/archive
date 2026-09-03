@@ -132,6 +132,10 @@ The pointer is written with one ordinary, non-multipart S3 `PutObject` after ver
 
 Therefore a pointer can name only a complete, verified artifact. A hand-written pointer object is a plant and never a publish.
 
+### Same-vintage collision rule
+
+Each versioned artifact object is created conditionally with `If-None-Match: *`. If an object at that key already exists, the producer reads it back. Exact byte equality is an idempotent no-op; any size, SHA-256, or manifest-byte difference is a refused same-vintage collision. The producer never overwrites a versioned object. An incomplete prefix left by an interrupted producer remains incomplete and invisible; another attempt at that vintage does not repair it in place. Recovery waits for a later real marker vintage. This rule applies before the pointer rule, so concurrent producers cannot race by last-writer-wins beneath one immutable prefix.
+
 ## 6. Reader straddle obligation
 
 A reader must not treat one pointer GET as a transaction over later object GETs:
