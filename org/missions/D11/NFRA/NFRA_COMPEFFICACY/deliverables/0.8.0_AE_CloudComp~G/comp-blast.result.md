@@ -81,7 +81,7 @@ Schema: `NFRA_COMPEFFICACY_PRD` v0.6 @`7138c4a176`, s.4. Row T-6. Cell CE-t-6
     "T6-AC3": "PASS — exact/all/upstream/downstream/both carry accepted; comp-trace blob unchanged.",
     "T6-AC4": "PASS — shared carrier/help, rc 6 expiry, cursor, cursor resume, and 167-run consumer census recorded.",
     "T6-AC5": "PASS — battery direct and pytest green; four red mutants; commit gate clean.",
-    "T6-AC6": "PASS pending final evidence commit — proof validates before complete flip; COO distinct-seat FWD-9 is measured and recorded; no push."
+    "T6-AC6": "PASS — proof validates before complete flip; COO distinct-seat FWD-9 is measured and recorded; commits are LOCAL and no push was performed."
   },
   "push_state": {
     "before": "engine blob abac8d92b2bba70eec8e1982a6a651b2c9e427c9; comp-trace blob 9bcf128cf6ff4b7e95f6ed2e6869526b9588fd2d",
