@@ -57,6 +57,8 @@ Schema: `NFRA_COMPEFFICACY_PRD` v0.6 @`7138c4a176`, s.4. Row T-6. Cell CE-t-6
     "cut_capture": "--budget 0.001: rc 6, BUDGET REACHED, scanned 1 of 158 traversal, cursor down:<first-node>, ANSWER-STATE PARTIAL_OR_BLIND",
     "resume_capture": "--budget 0 --cursor down:<first-node>: rc 0, WITHIN BUDGET, remaining 157 traversal units; true radius verdict restored",
     "consumer_census": "167 comp-blast runs / 30 days in the TO; blast's ordinary rc is execution/reporting except --check-consumers rc 4, so the verdict-bearing row applies to --check-consumers and budget expiry remains non-clean.",
+    "distinct_seat_fwd9": "2.0.0_SA_COO at 16:45:06Z, HEAD 9879a8d5ab: --force --exact arn:aws:s3:::opal-313476888478-globgrph --all --budget 0 -> rc 0, WITHIN BUDGET scanned 507 of 507 traversal; Kuzu 27134 nodes / 58432 edges, Nessie snapshot 7140819680255399272.",
+    "unbounded_convention": "The distinct-seat run proves --budget 0 is explicitly UNBOUNDED; it does not exercise expiry. The positive 0.001-second local arm is the expiry control."
     "cursor": "Stable direction:node-id key; totals are measured after cursor filtering."
   },
   "overlap": {
@@ -79,7 +81,7 @@ Schema: `NFRA_COMPEFFICACY_PRD` v0.6 @`7138c4a176`, s.4. Row T-6. Cell CE-t-6
     "T6-AC3": "PASS — exact/all/upstream/downstream/both carry accepted; comp-trace blob unchanged.",
     "T6-AC4": "PASS — shared carrier/help, rc 6 expiry, cursor, cursor resume, and 167-run consumer census recorded.",
     "T6-AC5": "PASS — battery direct and pytest green; four red mutants; commit gate clean.",
-    "T6-AC6": "PENDING COMMIT — proof validates before complete flip; post-commit FWD-9 carried-flag run is requested from COO seat; no push."
+    "T6-AC6": "PASS pending final evidence commit — proof validates before complete flip; COO distinct-seat FWD-9 is measured and recorded; no push."
   },
   "push_state": {
     "before": "engine blob abac8d92b2bba70eec8e1982a6a651b2c9e427c9; comp-trace blob 9bcf128cf6ff4b7e95f6ed2e6869526b9588fd2d",
