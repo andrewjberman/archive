@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_GLOBGRPH.TO-USERS-DELPROT",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.8.0_AE_CloudComp~K/task_orders/NFRA_GLOBGRPH.TO-USERS-DELPROT.declare-deletion-protection.md",
+    "group": "OTHER",
+    "vintage_commit": "ee688a660b"
+  },
+  "assignee": "0.8.0_AE_CloudComp~K",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/shared-infra/dynamo.tf",
+      "kind": "terraform",
+      "commit_or_etag": "14fbeace00",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "One-line declaration committed after the ledger opened; scoped saved plan and safe-apply were no-op; live pre/post reads both returned deletion protection true.",
+      "introduces": ["deletion_protection_enabled = true"],
+      "artifact_covered_by": ["UDP-AC1", "UDP-AC2", "UDP-AC3", "UDP-AC4", "UDP-AC5"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260903T1639Z_shared-infra-users-v2-deletion-protection_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "8ddc19238a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CLOSED ledger with all four legs proven; its open sentinel was removed by deploy_ledger.py close.",
+      "artifact_covered_by": ["UDP-AC1", "UDP-AC2", "UDP-AC3", "UDP-AC4", "UDP-AC5"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp~K/deliverables/NFRA_GLOBGRPH.TO-USERS-DELPROT.live-pre-read.txt",
+      "kind": "config_data",
+      "commit_or_etag": "8ddc19238a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Captured 2026-09-03T16:41:22Z live pre-read returned true.",
+      "artifact_covered_by": ["UDP-AC1"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp~K/deliverables/NFRA_GLOBGRPH.TO-USERS-DELPROT.scoped-plan.txt",
+      "kind": "doc",
+      "commit_or_etag": "8ddc19238a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Captured target plan says No changes. Your infrastructure matches the configuration.",
+      "artifact_covered_by": ["UDP-AC3"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp~K/deliverables/NFRA_GLOBGRPH.TO-USERS-DELPROT.safe-apply-output.txt",
+      "kind": "doc",
+      "commit_or_etag": "8ddc19238a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Captured safe-apply terminal output: Apply complete! Resources: 0 added, 0 changed, 0 destroyed.",
+      "artifact_covered_by": ["UDP-AC4"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp~K/deliverables/NFRA_GLOBGRPH.TO-USERS-DELPROT.unscoped-post-plan.txt",
+      "kind": "doc",
+      "commit_or_etag": "8ddc19238a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Captured unscoped control is 0/9/0 with users-table and lifecycle lines gone and all nine untouched route drifts disclosed.",
+      "artifact_covered_by": ["UDP-AC5"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp~K/deliverables/NFRA_GLOBGRPH.TO-USERS-DELPROT.live-post-read.txt",
+      "kind": "config_data",
+      "commit_or_etag": "8ddc19238a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Captured 2026-09-03T16:46:21Z live post-read returned true.",
+      "artifact_covered_by": ["UDP-AC5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "UDP-AC1",
+      "criterion_verbatim": "THE PRE-READ: live describe-table DeletionProtectionEnabled quoted BEFORE any act, reading true (or the STOP on anything else).",
+      "method": "live_read",
+      "invocation": "bash .tools/aws dynamodb describe-table --table-name opal-users-v2 --query Table.DeletionProtectionEnabled --output json",
+      "output_evidence": "UTC=2026-09-03T16:41:22Z; true. The read followed the ledger-first commit and preceded the declaration, plan, and apply.",
+      "denominator": "1 of 1 ordered live attributes read before the declaration",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "UDP-AC2",
+      "criterion_verbatim": "THE DECLARATION: one attribute added to aws_dynamodb_table.opal_users_v2 in shared-infra/dynamo.tf, terraform fmt -check clean, committed under the ledger entry opened FIRST.",
+      "method": "diff",
+      "invocation": ".tools/terraform.exe -chdir=infra/aws/terraform/shared-infra fmt -check dynamo.tf; git show 14fbeace00 -- infra/aws/terraform/shared-infra/dynamo.tf",
+      "output_evidence": "fmt-check exit 0. Commit 14fbeace00 under exact seat authorship adds only deletion_protection_enabled = true. Ledger-first commit is earlier at 45b99d1f96.",
+      "denominator": "1 of 1 ordered attributes added; 1 source file changed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "UDP-AC3",
+      "criterion_verbatim": "THE SCOPED PLAN: -target=aws_dynamodb_table.opal_users_v2, saved to a file named in the ledger, reading exactly 0 add / 0 change / 0 destroy on that address (DESIRED == APPLIED); any change on that address is a STOP with the output pasted, no apply.",
+      "method": "command",
+      "invocation": ".tools/terraform.exe -chdir=infra/aws/terraform/shared-infra plan -input=false -lock=true -target=aws_dynamodb_table.opal_users_v2 -out=users-v2-deletion-protection-targeted.tfplan -no-color",
+      "output_evidence": "One target refreshed. No changes. Your infrastructure matches the configuration. Scoped plan exit 0 and the ledger-named saved plan was produced.",
+      "denominator": "1 of 1 target addresses refreshed; 0 planned changes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "UDP-AC4",
+      "criterion_verbatim": "THE APPLY LEG: safe-apply of the saved plan (a no-op apply, still run and captured to a file); never bare, never unscoped.",
+      "method": "command",
+      "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/shared-infra apply -input=false -no-color users-v2-deletion-protection-targeted.tfplan",
+      "output_evidence": "Authorization and tombstone gates passed. Captured terminal line: Apply complete! Resources: 0 added, 0 changed, 0 destroyed. The saved target-scoped plan was consumed; no unscoped apply ran.",
+      "denominator": "1 of 1 saved scoped plans consumed; 0 resource changes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "UDP-AC5",
+      "criterion_verbatim": "AMENDED acceptance: the unscoped re-plan after this order reads the users-table line GONE and the nine API route drifts untouched and disclosed whole with their addresses; UDP-AC5 is graded on the lifecycle change GONE from the unscoped plan, the control disclosed WHOLE (summary plus every address; the nine API route drifts named, none applied), and the live reads.",
+      "method": "command",
+      "invocation": ".tools/terraform.exe -chdir=infra/aws/terraform/shared-infra plan -input=false -lock=true -no-color; bash .tools/aws dynamodb describe-table --table-name opal-users-v2 --query Table.DeletionProtectionEnabled --output json",
+      "output_evidence": "Plan: 0 to add, 9 to change, 0 to destroy. Users-table and lifecycle addresses are absent. Whole remaining list: module.apigateway_portal.aws_apigatewayv2_route.r_as2dsme, r_c0k8rl0, r_gwygx58, r_m8wdq80, r_mxus2bs, r_o2xr1ct, r_ruzaqhq, r_sogv7z9, r_t81twif; each is CUSTOM -> NONE and naqxlm -> null; none applied. UTC=2026-09-03T16:46:21Z live post-read: true. Ledger CLOSED at 8ddc19238a.",
+      "denominator": "9 of 9 remaining plan addresses disclosed; 0 of 9 applied; 1 of 1 live post attributes true; 4 of 4 ledger legs closed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "UDP-AC6",
+      "criterion_verbatim": "Push state MEASURED at report; the proof instance VALID (proof-of-spec-check.py); the status flip on this flat-root face is the issuer's on the report; no git push.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.8.0_AE_CloudComp~K/deliverables/NFRA_GLOBGRPH.TO-USERS-DELPROT_PROOF_OF_SPEC.json UDP-AC1,UDP-AC2,UDP-AC3,UDP-AC4,UDP-AC5,UDP-AC6; git rev-list --left-right --count origin/CLOUD...HEAD",
+      "output_evidence": "Proof checker returns VALID with all six expected ids. Push state measured on CLOUD: origin/CLOUD 351f309e0a6d; local fca007a4cf9c before proof commit; 0 behind / 75 ahead. State is LOCAL and this seat ran no git push.",
+      "denominator": "6 of 6 expected criteria present; 0 pushes by this seat",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The pre-declaration configuration was the natural mutant: live deletion protection was true while Terraform omitted the attribute and planned true -> null.",
+      "expected": "Adding the exact true declaration removes only the users-table line; the scoped plan becomes a no-op while unrelated unscoped route drift remains untouched.",
+      "observed": "Before declaration the users-table line appeared in the unscoped plan. After commit 14fbeace00 the scoped plan said No changes and the final unscoped plan dropped only that line, moving 0/10/0 to 0/9/0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Compare live pre/post describe-table reads, the scoped saved plan, no-op apply, and before/after unscoped address sets.",
+      "observed": "Live protection was true before and after; scoped plan and apply both had zero changes; the final unscoped set differed from the prior control only by removal of the users-table address.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Nine API Gateway route authorization drifts in the final unscoped control",
+      "reason": "Issuer amendment ee688a660b requires disclosure, not remediation. They are outside this one-attribute order, remain in NFRA_GLOBGRPH-S2, and none was applied."
+    }
+  ],
+  "surprises": [
+    "NFRA_GLOBGRPH-S1: live users-table deletion protection was true while the Terraform declaration omitted it and would plan true to null.",
+    "NFRA_GLOBGRPH-S2: nine API Gateway routes remain CUSTOM live while the module would plan NONE; disclosed whole and not applied."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-09-03/nfra_globgrph_two_order_execution_1415-1649Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/terraform/shared-infra/dynamo.tf --for the opal_users_v2 resource census, followed by a full 92-line read",
+      "result": "Confirmed no deletion-protection or ignore/lifecycle declaration and located the exact one-line insertion point."
+    },
+    {
+      "tool": "comp-adversary",
+      "invocation": "comp-adversary compose <TO-USERS-DELPROT face> --no-packet",
+      "result": "Four of four cited commits verified at read-vintage; expected not-yet-produced paths were declared rather than silently treated as stable."
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "comp-schedule immediately before the safe-apply leg",
+      "result": "23 armed gates enumerated; this order's open ledger was visible as G-11 and no additional gate named this table act."
+    },
+    {
+      "tool": "safe-apply",
+      "invocation": "safe-apply on users-v2-deletion-protection-targeted.tfplan",
+      "result": "Authorization and tombstone gates passed; saved scoped no-op applied at exact 0/0/0."
+    }
+  ]
+}
