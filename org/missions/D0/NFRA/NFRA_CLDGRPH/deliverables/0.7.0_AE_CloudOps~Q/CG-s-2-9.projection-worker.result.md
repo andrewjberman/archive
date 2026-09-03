@@ -135,6 +135,34 @@ Both are exactly where the GO put them: `B2-AC6` releases on `TO-CG-B-1`'s `B1-A
 reaches this seat through the issuer when `B1-AC3` lands. **Neither is idle waiting** -- the decision, the
 fixes and the Terraform are the unblocked work and proceed now.
 
+### 6a. The wiring names, relayed 09:19Z (93433) -- **DESIRED, NOT APPLIED**
+
+| | name |
+|---|---|
+| queue | `arn:aws:sqs:us-east-1:313476888478:opal-globgrph-projection-events` |
+| DLQ | `arn:aws:sqs:us-east-1:313476888478:opal-globgrph-projection-events-dlq` |
+| role | `arn:aws:iam::313476888478:role/opal-globgrph-projection-worker` (carries `CG-s-1`'s queue-consume statement only; the S3-read / `projection/*`-write / logs statements are THIS face's to attach per `B2-AC5`) |
+
+⛔ **These are deterministic names read off `~P`'s `projection.tf` on the DESIRED plane. This port wires
+against them and does NOT cite them as existing** -- my own probes above returned `NoSuchEntity` and an
+absent queue, and a relayed name is not an applied resource. `B2-AC6` still releases on `~P`'s **OBSERVED**
+queue message (`B1-AC4`), not on this relay.
+
+### 6b. A hazard carried into `B2-AC5`'s apply, named before the plan rather than discovered at it
+
+`~P`'s module-wide plan of `infra/aws/terraform/globgrph` surfaced **four foreign committed-never-applied
+items** beside its own six resources: three Glue partition changes and an SNS email subscription to a human
+address that is a **recorded Andrew EXCLUSION**. `~P` stopped and filed BLOCKING row `NFRA_CLDGRPH-S11`;
+the issuer ruled `safe-apply -target` on exactly the owned addresses, verified by ONE **UNSCOPED** re-plan
+asserted by address list.
+
+**The same tree is this face's apply surface, so the same hazard is mine.** The plan of record for
+`B2-AC5`: `-target` on exactly this port's own addresses; **verification by an UNSCOPED re-plan**, asserted
+by address list -- my resources ABSENT from it, the four foreign ones still PRESENT. ⚠ This is deliberately
+*not* a `-target` re-plan: CLAUDE.md Rule 22 records a `-target` apply verified by a `-target` re-plan as a
+measured failure class, because a check scoped to the members cannot see a defect in what they share. The
+unscoped read is the whole control.
+
 ⛔ **The exercise waits for REAL marker stamps.** `CG-s-10` measured a **1h58m** quiet window against R5's
 45-stamps/24h sizing input; the nightly derive (`cron(0 2 * * ? *)` UTC) guarantees at least one per day.
 If no stamp lands inside the working window the criteria are held OPEN with the window's bounds stated.
