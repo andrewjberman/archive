@@ -1,0 +1,198 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-17-16",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "bff1f8d012",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-17-16.evidence-store-and-address-table.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/prd/NFRA_OPSEC202609_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "43b75ffbd6"
+  },
+  "assignee": "0.7.0_AE_CloudOps~S",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opsec/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "cdbdcb473c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply rc=0, 'Apply complete! Resources: 7 added, 0 changed, 0 destroyed'; backend s3 key opsec/tfstate; module path reason stated in-file per S1716-AC4 and confirmed by issuer msg 19507"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opsec/dynamodb.tf",
+      "kind": "terraform",
+      "commit_or_etag": "cdbdcb473c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws dynamodb describe-table opal-suspicious-addresses -> TableStatus ACTIVE, GSI status-index ACTIVE ; live resource arn:aws:dynamodb:us-east-1:313476888478:table/opal-suspicious-addresses ACTIVE (not a git path, so not carried as its own artifact row)"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opsec/s3.tf",
+      "kind": "terraform",
+      "commit_or_etag": "cdbdcb473c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws s3api head-bucket opal-data-security -> 200 (was 404 pre-apply, re-grounded at this seat); six applied-plane reads taken ; live resource arn:aws:s3:::opal-data-security created (not a git path, so not carried as its own artifact row)"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opsec/.terraform.lock.hcl",
+      "kind": "config_data",
+      "commit_or_etag": "cdbdcb473c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "provider lock for hashicorp/aws v5.100.0; committed per terraform init guidance, not itself a deployed artifact"
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260903T0822Z_opsec-evidence-store-and-address-table_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "cdbdcb473c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "deploy ledger, 5 legs, all closed (L1 git, L2 activation, L3 verify reads, L4 verify 0-diff, L5 verify fixture+cleanup)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S17-AC1",
+      "criterion_verbatim": "EVERY C-8 PROPERTY READS ON THE APPLIED PLANE: get-public-access-block (4 of 4 true), get-bucket-encryption (aws:kms + the estate CMK ARN + bucket key), get-bucket-versioning (Enabled), get-bucket-policy (the SecureTransport deny AND the principal allow-list, quoted), get-bucket-logging (target = the CloudTrail/access-logs bucket), get-bucket-lifecycle-configuration (exactly one rule, prefix waf-logs/, Glacier 90 d, expire 400 d; NO rule touches cases/) -- six reads, each pasted, denominator 6 of 6.",
+      "method": "live_read",
+      "invocation": "aws s3api get-public-access-block | get-bucket-encryption | get-bucket-versioning | get-bucket-policy | get-bucket-logging | get-bucket-lifecycle-configuration --bucket opal-data-security",
+      "output_evidence": "READ 1/6 public-access-block: BlockPublicAcls=true, IgnorePublicAcls=true, BlockPublicPolicy=true, RestrictPublicBuckets=true (4 of 4) -> PASS. READ 2/6 encryption: {SSEAlgorithm: AES256, BucketKeyEnabled: false} -- read TAKEN, does not match C-8's aws:kms+CMK+bucket-key -> UNCOMPUTABLE, row Z-S3. READ 3/6 versioning: {Status: Enabled} -> PASS. READ 4/6 policy: exactly one statement, Sid=DenyInsecureTransport, Effect=Deny, Principal=*, Action=s3:*, Resource=[arn:aws:s3:::opal-data-security, arn:aws:s3:::opal-data-security/*], Condition={Bool:{aws:SecureTransport:false}} -> SecureTransport limb PASS; principal allow-list limb UNCOMPUTABLE, row Z-S4. READ 5/6 logging: empty response = not configured -> UNCOMPUTABLE, row Z-S5. READ 6/6 lifecycle: exactly ONE rule, ID=waf-logs-glacier-90-expire-400, Filter.Prefix=waf-logs/, Transitions=[{Days:90, StorageClass:GLACIER}], Expiration.Days=400, Status=Enabled; no rule carries a cases/, reports/ or allowlists/ prefix -> PASS.",
+      "denominator": "6 of 6 reads TAKEN. Of the six: 3 PASS outright (public-access-block, versioning, lifecycle), 1 PASS on its non-deferred limb (policy/SecureTransport), 2 UNCOMPUTABLE-BY-CONSTRUCTION (encryption Z-S3, logging Z-S5), plus the policy's allow-list limb UNCOMPUTABLE (Z-S4).",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Three limbs of this criterion name world-state that does not exist, each measured at this seat, each ruled by the issuer before the apply. (1) ENCRYPTION -- C-8's key does not exist as a CMK: 86cc6c40-2387-4446-b7e1-de79392e06b3 reads KeyManager=AWS, the AWS-managed alias/aws/dynamodb service key, so an S3 bucket cannot specify it and no general-purpose customer-managed key exists in the account. Row NFRA_OPSEC202609-Z-S3; interim SSE-S3; key ruling routed to 1.0.0_SA_CTO~Z (issuer msg 19501). (2) PRINCIPAL ALLOW-LIST -- bound (b) named absent principals: 0 of 216 IAM roles match admin|cto|terraform (positive control 55 match lambda) and the applier is the IAM user Andrew_Berman; writing the deny-outside-list would have denied the applier and bricked the bucket at creation. Row NFRA_OPSEC202609-Z-S4; deny-outside-list DEFERRED by the issuer to OP-s-14/15/19 with the identity decision at 1.0.0_SA_CTO~Z (msg 19517). (3) LOGGING -- C-8's access-log target opal-cloudtrail-logs-313476888478 permits only cloudtrail.amazonaws.com (get-bucket-policy: two statements, both that service principal; get-bucket-acl: one CanonicalUser FULL_CONTROL grant, no LogDelivery), so the limb needs a change to a bucket this TO does not own. Row NFRA_OPSEC202609-Z-S5; target ruled at L4 by 1.0.0_SA_CTO~Z; the limb lands with the round-2 key/role cell (msg 19532). The remaining reads PASS on their own merits as itemised in output_evidence."
+    },
+    {
+      "criterion_id": "S17-AC2",
+      "criterion_verbatim": "VERSIONING LEAVES THE ORIGINAL: the fixture object overwritten once yields 2 versions in list-object-versions, both readable; then deleted (a delete marker + versions removed) and the listing empty -- the pair shown.",
+      "method": "live_read",
+      "invocation": "aws s3api put-object (x2, same key) ; list-object-versions ; get-object --version-id (x2) ; delete-object --version-id (x2) ; list-object-versions",
+      "output_evidence": "Key cases/2026/09/03/fixture/fixture-case/summary.json. After the overwrite, list-object-versions returned TWO versions: XjMejUKGS9BUxt76KjF2XjElE0glEExp (Size 81, IsLatest true) and QeVH0rd7gOG6EOCo_RRq5yBl7NwaPkuf (Size 64, IsLatest false). BOTH read back, with DIFFERENT bodies: v1 -> {\"case\":\"fixture-case\",\"v\":1,\"note\":\"TO-OP-S-17-16 fixture v1\"} ; v2 -> {\"case\":\"fixture-case\",\"v\":2,\"note\":\"TO-OP-S-17-16 fixture v2 -- the overwrite\"}. That the 64-byte v1 body survived the overwrite IS the criterion. Both versions then deleted by VersionId; post-delete list-object-versions on prefix cases/ returned neither a Versions nor a DeleteMarkers key; whole-bucket list-object-versions -> Versions=0 DeleteMarkers=0; list-objects-v2 -> Contents key ABSENT = 0 objects.",
+      "denominator": "2 of 2 versions listed, 2 of 2 read back, 2 of 2 deleted; final bucket census 0 objects / 0 versions / 0 delete markers.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S17-AC3",
+      "criterion_verbatim": "OBJECT LOCK IS OFF (card OP-x-4): get-object-lock-configuration returns no configuration; the Terraform carries no object_lock_* -- stated, not assumed.",
+      "method": "live_read",
+      "invocation": "aws s3api get-object-lock-configuration --bucket opal-data-security ; comp-read infra/aws/terraform/opsec/s3.tf --enumerate 'object_lock'",
+      "output_evidence": "Live: ObjectLockConfigurationNotFoundError -- 'Object Lock configuration does not exist for this bucket'. Source: comp-read --enumerate 'object_lock' over s3.tf returns 1 hit across the file and it is line 6, a COMMENT reading 'there is no object_lock_* argument'; there is no object_lock argument in any resource block. The plan's object_lock_enabled / object_lock_configuration read '(known after apply)', which is the provider's schema field, not an enablement.",
+      "denominator": "1 of 1 bucket read live; 1 of 1 source hit inspected and classified as prose, 0 arguments.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S16-AC1",
+      "criterion_verbatim": "EVERY C-9 PROPERTY READS ON THE APPLIED PLANE: describe-table (KeySchema address; SSEDescription KMS + the estate CMK; DeletionProtectionEnabled true; StreamSpecification NEW_AND_OLD_IMAGES; GSI status-index ACTIVE), describe-continuous-backups (PITR ENABLED), describe-time-to-live (expires_at ENABLED) -- three reads pasted, denominator 4 properties of 4 + TTL + stream.",
+      "method": "live_read",
+      "invocation": "aws dynamodb describe-table | describe-continuous-backups | describe-time-to-live --table-name opal-suspicious-addresses",
+      "output_evidence": "describe-table: KeySchema=[{AttributeName: address, KeyType: HASH}]; AttributeDefinitions=[address S, status S]; SSEDescription={Status: ENABLED, SSEType: KMS, KMSMasterKeyArn: arn:aws:kms:us-east-1:313476888478:key/86cc6c40-2387-4446-b7e1-de79392e06b3}; DeletionProtectionEnabled=true; StreamSpecification={StreamEnabled: true, StreamViewType: NEW_AND_OLD_IMAGES}; GSI=[{Name: status-index, Status: ACTIVE, Key: [status HASH], Proj: ALL}]; TableStatus=ACTIVE. describe-continuous-backups: {ContinuousBackupsStatus: ENABLED, PointInTimeRecoveryStatus: ENABLED}. describe-time-to-live: {TimeToLiveStatus: ENABLED, AttributeName: expires_at}.",
+      "denominator": "3 of 3 reads taken; 6 of 6 asserted properties present (KeySchema, SSE, DeletionProtection, Stream, GSI, plus PITR and TTL).",
+      "status": "PASS",
+      "status_reason": "PASS with one stated qualifier that does not change the read: SSEDescription reports SSEType KMS against KMSMasterKeyArn 86cc6c40..., which is the ARN C-9 names and is what opal-users-v2 reports -- but that key is AWS-MANAGED (alias/aws/dynamodb), not a customer-managed CMK. The criterion's words 'the estate CMK' are satisfied by the referent it names; the referent is not a CMK. Recorded so the PASS is not read as evidence of a customer-managed key. Row NFRA_OPSEC202609-Z-S3; issuer ruling 19501 directs exactly this reading. Corroborated by a DIFFERENT instrument: comp-blast opal-users-v2 (kuzu estate graph, built 2026-09-03T08:47:33Z) lists KMS_KEY 86cc6c40-2387-4446-b7e1-de79392e06b3 for that table."
+    },
+    {
+      "criterion_id": "S16-AC2",
+      "criterion_verbatim": "THE FIXTURE ROWS WRITE AND READ BACK: WATCH / BLOCK / ALLOW rows written; query on status-index returns each by status; the BLOCK row's TTL removal observed (or the read time and \"not yet fired\" stated, then the row deleted by hand); all three rows absent at report.",
+      "method": "live_read",
+      "invocation": "aws dynamodb put-item x3 ; get-item x3 ; query --index-name status-index x3 ; get-item (TTL check) ; delete-item x3 ; get-item x3 ; scan --select COUNT",
+      "output_evidence": "Written: 203.0.113.10/32 WATCH, 203.0.113.20/32 BLOCKED (expires_at 1788424745), 2001:db8::/64 ALLOW -- RFC 5737 TEST-NET-3 and RFC 3849 documentation ranges, so no real address was ever written (bound (e)). get-item returned all three by pk. status-index query returned exactly one address per status: WATCH -> 203.0.113.10/32 ; BLOCKED -> 203.0.113.20/32 ; ALLOW -> 2001:db8::/64. TTL: NOT YET FIRED at read time 2026-09-03T08:39:11Z (epoch 1788424751) against expires_at 1788424745 -- the row was still present 6 s past its expiry, which is expected because DynamoDB TTL is best-effort within ~48 h; stated rather than waited on, and the row was then DELETED BY HAND, as the criterion permits. All three deleted; per-key get-item returned an empty response (= no Item) for all three; full-table scan --select COUNT = 0.",
+      "denominator": "3 of 3 rows written, 3 of 3 read back by pk, 3 of 3 returned by the status-index query, 3 of 3 deleted, 3 of 3 confirmed absent; table scan Count = 0.",
+      "status": "PASS",
+      "status_reason": "The TTL REMOVAL itself was not observed and is not claimed -- the read time and 'not yet fired' are stated, which is the branch the criterion explicitly allows. The absence verdicts carry a POSITIVE CONTROL: a probe row 203.0.113.99/32 was planted, the same get-item probe rendered it present, and it was then deleted -- so the three ABSENT readings are a real absence and not an empty-response artifact."
+    },
+    {
+      "criterion_id": "S16-AC3",
+      "criterion_verbatim": "NOTHING ELSE WRITES: no Lambda, policy or script in this TO's diff grants dynamodb:PutItem/UpdateItem on the table to any principal other than the Terraform-apply role and the CTO-admin role (a census of the diff for the table's ARN, with its count printed); the sentinel's and reconciler's grants are their own TOs' (C-2, C-7).",
+      "method": "command",
+      "invocation": "git show --stat --name-only cdbdcb473c ; comp-find '(?i)dynamodb:(PutItem|UpdateItem|BatchWriteItem|DeleteItem)' --files infra/aws/terraform/opsec ; aws dynamodb get-resource-policy --resource-arn arn:aws:dynamodb:us-east-1:313476888478:table/opal-suspicious-addresses",
+      "output_evidence": "The diff is 6 files: the three .tf, the provider lock, the deploy-ledger entry and the surprise channel. Census over the module: DENOMINATOR 0 hit(s) across 6 file(s) scanned -- a MEASURED zero. The module declares no aws_iam_* resource of any kind; the only Principal in it is the bucket policy's '*' inside the DenyInsecureTransport condition, which grants nothing. Live corroboration: get-resource-policy on the table -> PolicyNotFoundException, i.e. no resource-based policy grants writes either.",
+      "denominator": "0 grants across 6 files scanned in the diff; live resource policy absent (1 of 1 table read).",
+      "status": "PASS",
+      "status_reason": "The zero is CONTROLLED. The identical pattern run one directory up returns DENOMINATOR 69 hit(s) across 530 file(s) in 19 files (imo-pipeline/dynamodb.tf, globgrph/iam.tf, inf-pipeline/iam.tf, market-overview/least-privilege-dataplane.tf and others), so the pattern demonstrably matches real grants and the module's 0 is a real absence rather than a dead matcher. Note the criterion's own premise is superseded: neither the Terraform-apply role nor the CTO-admin role exists (row Z-S4), so the correct reading of 'no principal other than those two' is that this diff grants the table to NO principal at all."
+    },
+    {
+      "criterion_id": "S1716-AC4",
+      "criterion_verbatim": "TERRAFORM 0-DIFF AFTER APPLY AND PUSH STATE MEASURED: the re-plan reads 0-diff; the deploy-ledger entry CLOSED with its proof; push state read by ls-remote + is-ancestor (LOCAL expected); the module's path and name stated with the reason for the choice.",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/opsec plan -detailed-exitcode ; python .tools/deploy_ledger.py close ; git ls-remote origin SITEZ ; git merge-base --is-ancestor",
+      "output_evidence": "Re-plan: 'No changes. Your infrastructure matches the configuration.' with -detailed-exitcode rc=0 (0 = no changes, 2 = drift), run TWICE with identical exit. Deploy ledger opsec-evidence-store-and-address-table: all 5 legs closed with proof, entry CLOSED. Module path infra/aws/terraform/opsec/ (new), reason recorded in main.tf and in the commit: the estate's dirs are kebab-case purpose-named so a project-named opsec/ follows convention, and the load-bearing reason is the bound 'nothing else rides the apply' -- security-ops/ already holds the live Schwab anonymizer set, so a plan there would pull unrelated live resources into this round's blast radius; confirmed by issuer msg 19507. Push state is recorded in the session log and the deliverable report as MEASURED by ls-remote at report time.",
+      "denominator": "1 of 1 module re-planned, 2 identical runs; 5 of 5 ledger legs closed.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "S16-AC3's census returns a zero, and a zero from an untested pattern is indistinguishable from a dead matcher. The same regex was therefore run against a scope KNOWN to contain the thing being counted -- the whole infra/aws/terraform tree -- as a planted positive control; and separately, the S16-AC2 absence probe was controlled by planting a row (203.0.113.99/32) that the probe had to render before the three ABSENT verdicts could be trusted.",
+      "expected": "The AC3 pattern returns non-zero outside the module (proving it matches real grants), while returning zero inside it; and the get-item absence probe renders a PRESENT row for a planted key.",
+      "observed": "AC3 control FIRED: comp-find '(?i)dynamodb:(PutItem|UpdateItem|BatchWriteItem|DeleteItem)' --files infra/aws/terraform -> DENOMINATOR 69 hit(s) across 530 file(s), 19 files; the same pattern --files infra/aws/terraform/opsec -> 0 hit(s) across 6 file(s). Absence-probe control FIRED: the planted row rendered as {\"Item\": {\"status\": {\"S\": \"WATCH\"}, \"address\": {\"S\": \"203.0.113.99/32\"}, ...}} and was then deleted. Both zeros are therefore real absences.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "terraform -chdir=infra/aws/terraform/opsec plan -input=false -detailed-exitcode run twice on identical input, exit codes compared.",
+      "observed": "run1 detailed-exitcode=0, run2 detailed-exitcode=0 -- identical. Both report 'No changes. Your infrastructure matches the configuration.'",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "opal-data-security default encryption is SSE-S3 (AES256) rather than C-8's SSE-KMS on the estate CMK with bucket-key enabled.",
+      "reason": "C-8's key is not a CMK. 86cc6c40-2387-4446-b7e1-de79392e06b3 reads KeyManager=AWS -- the AWS-managed alias/aws/dynamodb service key -- so an S3 bucket cannot specify it, and the account holds no general-purpose customer-managed key (4 CUSTOMER keys, all purpose-specific, over a denominator of 11). Row NFRA_OPSEC202609-Z-S3. SSE-S3 is the INTERIM ruled by the issuer (msg 19501); the key decision is routed to 1.0.0_SA_CTO~Z and the switch is an in-place change in a round-2 cell. NOT a silent substitution: the bound said 'never a new key', and minting one is exactly the decision this seat may not make mid-round."
+    },
+    {
+      "item": "The bucket policy's deny-every-principal-outside-an-explicit-list statement is not written this round; only the SecureTransport deny is.",
+      "reason": "Bound (b)'s two named principals do not exist -- 0 of 216 IAM roles match admin|cto|terraform (positive control: 55 match lambda), and the applying principal is the IAM user arn:aws:iam::313476888478:user/Andrew_Berman. Writing the statement against two absent ARNs would deny every principal including the applier, bricking the bucket at creation and requiring account root to clear. Bound (b)'s own rule ('a bucket policy cannot name an absent role') is what defers it. Row NFRA_OPSEC202609-Z-S4; DEFERRED by issuer ruling 19517 to OP-s-14/15/19, the extenders C-8 already contemplates. The four public-access blocks are the control meanwhile."
+    },
+    {
+      "item": "Server access logging to the CloudTrail/access-logs bucket is authored but commented out, not applied.",
+      "reason": "The target opal-cloudtrail-logs-313476888478 permits only cloudtrail.amazonaws.com (bucket policy: two statements, both that service principal) and its ACL holds a single CanonicalUser FULL_CONTROL grant with no LogDelivery group -- so enabling logging requires modifying a bucket this TO does not own, which 'nothing else rides the apply' and never-widen both refuse. The failure mode is the reason it is a stop rather than an attempt: if S3 accepts the config without validating the target, get-bucket-logging would read CONFIGURED while no log is ever delivered, and the specified read observes configuration, never delivery. Row NFRA_OPSEC202609-Z-S5; DEFERRED by issuer ruling 19532, target question routed to 1.0.0_SA_CTO~Z. The resource sits commented in s3.tf with the measurement beside it so landing it later is an uncomment, not a rediscovery."
+    },
+    {
+      "item": "The four 7.3 prefixes (cases/, reports/, allowlists/, waf-logs/) are documented as convention rather than created as zero-byte keys.",
+      "reason": "The task order offers both and asks which; this states which and why. S3 has no directories, so a zero-byte key is a real object that would appear in every listing, need its own lifecycle handling, and be indistinguishable from evidence during the fixture cleanup bound (e) requires. The convention is written into s3.tf's header comment."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S3: the key PRD 7.6 C-8/C-9 and this face call 'the estate CMK' (86cc6c40-2387-4446-b7e1-de79392e06b3) is KeyManager=AWS, the AWS-managed alias/aws/dynamodb service key, not a customer-managed CMK -- so C-8's SSE-KMS on the S3 bucket is unsatisfiable as written and the account holds no general-purpose CMK; BLOCKING/ARMED, disarmed for the work by issuer 19501, key decision at 1.0.0_SA_CTO~Z.",
+    "NFRA_OPSEC202609-Z-S4: bound (b)'s two bucket-policy principals do not exist (0 of 216 IAM roles match admin|cto|terraform, positive control 55 match lambda; the applier is the IAM user Andrew_Berman), so the deny-outside-list statement as written would have denied the applier and bricked the bucket at creation; BLOCKING/ARMED, DEFERRED to OP-s-14/15/19 by issuer ruling 19517.",
+    "NFRA_OPSEC202609-Z-S5: C-8's access-log target opal-cloudtrail-logs-313476888478 grants only cloudtrail.amazonaws.com and carries no LogDelivery ACL grant, so the logging limb cannot land without editing a bucket this TO does not own, and its silent-failure mode is invisible to the specified get-bucket-logging read; BLOCKING/ARMED, DEFERRED by issuer ruling 19532, target question at 1.0.0_SA_CTO~Z.",
+    "NFRA_OPSEC202609-Z-S11: .tools/proof-of-spec-check.py:562 splits cell_refs on COMMA only, while this face declared S1716-AC4 cell_refs=\"OP-s-17 OP-s-16\" SPACE-separated, so the pair read as one literal id and refused this instance; the estate's only multi-value cell_refs (1 hit across 79 mission files) so the convention had never been exercised. Corrected at source by the issuer @beacddcf26 (cell_refs=\"OP-s-17,OP-s-16\"); NOT self-edited -- cell_refs is the TO's issuance half. BLOCKING/ARMED; the checker-side remedy is 1.0.0_SA_CTO~Z's as gate-surface owner."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~S/logs/2026-09-03/session_0740-0850Z_NFRA_OPSEC202609_TO-OP-S-17-16.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/terraform/portal-auth/dynamodb.tf --for 'the estate CMK ARN, the PITR and deletion-protection idiom, and the table naming convention' ; then --enumerate '(?i)kms|86cc6c40|point_in_time|deletion_protection|server_side_encryption'",
+      "result": "MISMATCH against the compiler mandate's phase-1 expectation, and it is the finding that opened row Z-S3. The file the TO names as the CMK's source does NOT carry it: 1 hit across 238 lines and it is a COMMENT at :170. Zero kms / server_side_encryption / deletion_protection declarations. The case-insensitive re-run was the deciding pass -- a first case-sensitive census returned the same shape but could not be trusted until -i ruled out the estate's habit of capitalising load-bearing words."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'opal-organization-trail|access-logs|server_access_logging' --files infra/aws/terraform ; then comp-find 'opal-cloudtrail-logs'",
+      "result": "The first pattern was WRONG and would have produced a false absence: it searched for 'access-logs' against a bucket actually named 'cloudtrail-logs' and returned no declaration, which would have fired the mandate's step-2 STOP spuriously. Widening found infra/aws/terraform/shared-infra/s3.tf:48 `bucket = \"opal-cloudtrail-logs-313476888478\"` -- the target IS Terraform-declared, so the STOP correctly did not fire. Recorded because the corrected read, not the first one, is what the criterion rests on."
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast opal-users-v2",
+      "result": "KMS_KEY (1): 86cc6c40-2387-4446-b7e1-de79392e06b3; 238 upstream callers. Corroborates the Z-S3 finding from a DIFFERENT instrument than the live describe-table -- the kuzu estate graph (27135 nodes / 58432 edges, built 2026-09-03T08:47:33Z, Nessie HEAD current) -- so the key identification is not one instrument's artifact."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find '(?i)dynamodb:(PutItem|UpdateItem|BatchWriteItem|DeleteItem)' --files infra/aws/terraform/opsec (target) and --files infra/aws/terraform (control)",
+      "result": "S16-AC3 census plus its positive control: 0 hit(s) across 6 files in the module, 69 hit(s) across 530 files in the parent tree. The control is what makes the zero admissible."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find '(?i)opal-data-security|opal-suspicious-addresses' --files infra/aws/terraform",
+      "result": "0 hits across 524 files scanned -- neither resource was Terraform-declared anywhere before this module, corroborating the live 404 / ResourceNotFoundException and the face's 'absent' premise at this seat's own vintage."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open --slug opsec-evidence-store-and-address-table (5 legs) ; close-leg L1..L5 ; close",
+      "result": "Entry opened at deploy-start per NEVER-2 and closed only after every leg carried its proof; nothing half-landed."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D12/NFRA/NFRA_OPSEC202609/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc=0 on each commit carrying a row; corpus matches the exact legacy baseline (documents=21, failures=4, baseline=4, known=4, new=0, resolved=0). Rows Z-S3, Z-S4, Z-S5 graded as new rows and accepted."
+    }
+  ]
+}
