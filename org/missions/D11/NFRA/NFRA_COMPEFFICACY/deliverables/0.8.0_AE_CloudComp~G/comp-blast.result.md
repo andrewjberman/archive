@@ -13,7 +13,7 @@ Schema: `NFRA_COMPEFFICACY_PRD` v0.6 @`7138c4a176`, s.4. Row T-6. Cell CE-t-6
   "cell": "CE-t-6",
   "measured_by": "0.8.0_AE_CloudComp~G",
   "measured_at_utc": "2026-09-03",
-  "read_vintage": "HEAD @327217feba5b749b14d775363cdacce103536959",
+    "read_vintage": "HEAD @5bba38864cd97c6aca2f811daeaa02d1333e7c98",
   "surprises": [],
   "identity": {
     "tool": "comp-blast",
@@ -87,7 +87,7 @@ Schema: `NFRA_COMPEFFICACY_PRD` v0.6 @`7138c4a176`, s.4. Row T-6. Cell CE-t-6
   },
   "push_state": {
     "before": "engine blob abac8d92b2bba70eec8e1982a6a651b2c9e427c9; comp-trace blob 9bcf128cf6ff4b7e95f6ed2e6869526b9588fd2d",
-    "after_local": "commit 6df07696eac80fb5322e498d6b121bd9a56d0d02; engine blob 85c35d0567eab3aca743ebe2e83cb7e0100f706a; battery blob c02223250bacccb1434f1f2679eebe130477da4c",
+    "after_local": "commit 5bba38864cd97c6aca2f811daeaa02d1333e7c98; cli blob 135a40488d9cd0b9dd79436623f0ee699c324e5d; comp_blast_universe blob 96bab04fccc4e7b3b6a2602635f7c351e1277f7c; battery blob 01652f81f3c272752cdbff5615c621e09f28425e",
     "origin": "MEASURED ABSENT: origin/CLOUD 351f309e0a6ded1a5a5bdf3aacec18a5f9f8dbee; git merge-base --is-ancestor returned rc=1; no push performed"
   }
 }
