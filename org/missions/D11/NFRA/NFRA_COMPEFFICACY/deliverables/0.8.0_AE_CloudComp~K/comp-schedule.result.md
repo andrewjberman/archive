@@ -72,7 +72,7 @@ disclosure 8, answer-state 4, bounds 4, passcraft 3, and usage 5.
     "hook_driven": "0 of 25 observed explicit task-order preflight declarations are proven hook-driven. The two telemetry sinks contain zero invocations and no origin evidence; preflights are issuer/author declarations, not gate execution.",
     "battery": "New .tools/tests/test_comp_schedule_battery.py: 18/18 PASS direct and 1 passed under pytest file grain; historical .tools/tests/test_comp_schedule.py: 9/9 PASS direct; commit-gate clean 1/1 on the new Python battery. Directory collect aborts on pre-existing test_fabric_check_classify.py module-scope sys.exit after enumerating both comp-schedule files.",
     "overlap": "comp-schedule overlaps no decision engine: it reads five gate-record carriers and reports their own decidability. to-pipeline-gate validates only the existence/shape of preflight declarations. graph-call-manifest excludes comp-schedule as a records query pending the CTO curated-vocabulary batch.",
-    "proposed": "CLEARED-candidate -- implementation, local evidence, and the independent post-commit FWD-9 witness pass T5-AC1..AC5; final clearance remains proof-of-spec validation and the complete flip."
+    "proposed": "CLEARED -- implementation, local evidence, independent post-commit FWD-9 witness, and proof-of-spec validation pass T5-AC1..AC6; the lane-owned complete flip follows this validation."
   }
 }
 ```
@@ -194,6 +194,7 @@ and not fixed. The diff is limited to `.tools/comp-schedule` and the new
 - Production after: blob `f59d64bb57647fea0a95e3ad518fc11012692fa2`.
 - Battery: blob `715e24ce8fe721034f50f2ec7ff6f271b7254d3d`.
 - Local implementation commit: `86b4ecc2656c3bb0319e777b230c82f9b68802fe`.
+- Result commit: `f82be2192b`; validated proof commit: `b5148c3456`.
 - `origin/CLOUD`: `351f309e0a6ded1a5a5bdf3aacec18a5f9f8dbee`;
   `git merge-base --is-ancestor 86b4ecc265 origin/CLOUD` returned rc 1.
 - Push state: **LOCAL, MEASURED; no push performed**.
@@ -204,3 +205,7 @@ and not fixed. The diff is limited to `.tools/comp-schedule` and the new
   budget: unbounded (--budget 0), used 19.032 s`; C1=21, C2=4, C3=12,
   C4=20, C5=337; 21 gates armed; 138 needs-read; C4/C5 both
   `PARTIAL_OR_BLIND / NOT-DECIDABLE`. LOCAL; no push.
+
+Proof-of-spec-check returned **VALID rc 0 before the complete flip**: 6
+acceptance rows, 0 violations, forward alignment 6/6, owned-cell alignment
+1/1, and 0 surprise rows.
