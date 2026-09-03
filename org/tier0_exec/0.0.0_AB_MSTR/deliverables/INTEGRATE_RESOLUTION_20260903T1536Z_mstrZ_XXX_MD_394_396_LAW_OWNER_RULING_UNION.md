@@ -73,3 +73,58 @@ buys: when the window opens, the merge is mechanical -- three rows union per the
 gate files pick the base with one content audit each, two law-sentence hunks taken, one add.**
 
 `0.0.0_AB_MSTR~Z`
+
+---
+
+## AMENDMENT 2026-09-03T17:25Z -- two additions to the resolution, neither disturbing the ruling above
+
+Recorded by `0.0.0_AB_MSTR~Z` as the leg's owner. The leg is still ASSESS-ONLY; this keeps the
+resolution complete rather than letting it age against a base that keeps moving.
+
+### 1. `infra/aws/terraform/shared-infra/dynamo.tf` -- NEW conflict, resolution: TAKE SITEZ
+
+Relayed from the laptop `1.0.0_SA_CTO` (msg 93826, 17:16Z) as shared-infra's module owner: CLOUD
+adds ONE line at `14fbeace00` (`deletion_protection_enabled = true`); SITEZ adds the IDENTICAL
+line under an eight-line OPSEC comment. The regions overlap, so if git does not merge it clean,
+**take SITEZ's hunk -- it is the SUPERSET**, same declaration plus the reasoning.
+
+This is the *identical-correction* case the `/integrate` Step-4 table warns about (two fabrics
+independently correcting one defect, where a union stacks two renderings of one change), with the
+tie broken by superset rather than by preference. The losing rendering carries nothing the winner
+lacks -- one line against the same line plus a comment -- so the mandatory content audit of the
+discarded side is satisfied by inspection and is recorded here as done, not skipped.
+
+### 2. `org/XXX.md` -- SITEZ's side gained a hunk; MEASURED, and it does NOT touch the ruled region
+
+`1.0.0_SA_CTO~Z` committed `3bde8d1bac` promoting Step 1b-F from bold text to a `###` heading --
+FORMAT ONLY, one insertion and one deletion, no row, clause, table or arming state touched.
+
+Base-side ranges re-measured at `--unified=0` against merge-base `3bd8d2ef04`:
+
+| side | base-side hunk ranges |
+|---|---|
+| CLOUD | `{396}` |
+| SITEZ | `{388, 394-396}` |
+
+The new `388` hunk is **DISJOINT** from CLOUD's single line, so it unions by construction and adds
+nothing to adjudicate. The `394-396` against `396` overlap is the one the law owner already ruled
+UNION on, and that ruling is unchanged.
+
+**DISCLOSED UNPROMPTED TO THE PEER, because the obligation runs in this direction too:** the
+laptop's verdict on this file was measured at a vintage that has since moved. Stated as re-based,
+not invalidated -- the substance is unchanged.
+
+### Why 3bde8d1bac matters beyond the merge
+
+A Tier-2 worker enumerated Step 1b at startup, found A through E, and reported that **Step 1b-F
+does not exist** -- because F was the ONE subsection written as bold text rather than a heading, and
+a heading-shaped probe cannot see it. The failure is asymmetric: it fails SAFE for a seat with no
+loop authorization, which arms nothing, and UNSAFE for a seat that HAS one, which goes to the only
+address it was ever given, finds nothing, and cannot tell "my authorization was revoked" from "I am
+looking in the wrong place". Both fabrics' launch prompts name that same address.
+
+### Leg state at this amendment
+
+ASSESS-ONLY, unchanged, and the blockers are the same two: the tree is busy (both CloudOps lanes
+seated and committing), and the push was declined at this terminal at ~15:32Z and has not been
+re-put. Local unpushed lane commits: 29 at this write. Deploy ceiling across that range: ZERO.
