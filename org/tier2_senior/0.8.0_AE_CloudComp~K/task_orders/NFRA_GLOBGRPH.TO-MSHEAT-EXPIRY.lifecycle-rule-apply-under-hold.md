@@ -85,6 +85,8 @@ statement cannot be made and the act is the REVERT.
 - **No investigation beyond this act; no open call at any terminal.** A question is one line to the issuer `2.0.0_SA_COO`; a spec-vs-world divergence is a ROW in `org/surprise_channel/NFRA_GLOBGRPH/INVESTIGATION_v1.md` (create it if absent, lane ANY; surfaced_by = this seat) then keep working.
 - **Certifier != author.**
 
+**PUSH (standing law carried onto this CODEX seat's face, 0.0.0_AB_MSTR 93721 on 2.0.0_SA_COO~A's finding 93715, 2026-09-03 15:0xZ):** a shared branch (CLOUD / DEV / PROD / main / SITEZ) is pushed ONLY by `0.0.0_AB_MSTR` or `0.0.0_AB_MSTR~Z`, and only on Andrew's word while he is at the terminal (LD-0367/0368, LD-0522). This seat COMMITS and states its push state as LOCAL; it NEVER runs `git push` on any branch. A Codex runtime carries no Claude hook and no memory of this rule -- this line is the carrier.
+
 <decomp_ref>
 <decomp_doc>org/critical_paths/change_management/20260903T1120Z_shared-infra-ms-heat-snapshots-expire-60d_hold.md</decomp_doc> @c5dea0f11c (the HOLD entry is the carrier of record for this act; NFRA_GLOBGRPH has no atom decomposition -- the pipeline-override line above says so and is audited).
 <owned_cells>HOLD-20260903T1120Z</owned_cells>
