@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CLDGRPH.TO-CG-V-2",
+  "phase": "INVESTIGATION",
+  "firm": "FABRIC",
+  "assignee": "0.7.0_AE_CloudOps~P",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-V-2.reachability-iam-authkind-verified.md",
+    "group": "OTHER",
+    "vintage_commit": "d0c21677c7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+    "vintage_commit": "994c9381d0",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-V-2.reachability-iam-authkind-verified.md"
+  },
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~P/logs/2026-09-03/session_P_0637-07xxZ_cldgrph_round1_CG-s-11-12-13.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.7.0_AE_CloudOps~P/CG-s-11-12-13.reachability-iam-authkind.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A measurement deliverable. This TO changes nothing deployable by construction: infra/aws/terraform modified-file count 0, infra/aws/ec2/opal-gateway dirty-line count 0, comp-iam gaps byte-identical before/after (sha256 62bf854dc7ab03190ee5c67ed93da099f40a59a082a29ead783b6d7174d5d109)."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise-channel row NFRA_CLDGRPH-S1; validated against org/surprise_channel/schemas/investigation_item.schema.json (jsonschema.validate -> SCHEMA VALID) and gated by .tools/surprise-row-gate.py at commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "V2-AC1",
+      "criterion_verbatim": "TOPOLOGY READ on two instruments (aws corpus node props with `built:` vintage; live `describe-*`) for the gateway instance and the four cluster SGs: VPC, subnet, SG ids, ingress rules, route; the two instruments agree or the disagreement is a filed row.",
+      "method": "live_read",
+      "invocation": "comp-find --corpus aws 'opal-globgrph' --all --budget 300 ; comp-find --corpus aws 'opal-gateway' --budget 300 (pages 1 AND 2) ; .tools/aws ec2 describe-instances --instance-ids i-07dccb1615503ac99 ; .tools/aws ecs list-services/list-tasks/describe-tasks --cluster opal-globgrph ; .tools/aws ec2 describe-network-interfaces --network-interface-ids eni-0706a11d0911bc28a eni-010c7b1817e6e2f79 ; .tools/aws ec2 describe-subnets --subnet-ids subnet-023db8cbfd99ffff2 subnet-039d04cfaee66a5f6 ; .tools/aws ec2 describe-security-groups --group-ids sg-00e3eb040efab5577 sg-0f27eda3ce895395d sg-0715c43654a151f69 sg-0f6cedf53107c6f8c sg-0191bda6ae427c0bb",
+      "output_evidence": "INSTRUMENT 1 vintage quoted from the tool: 'DB: kuzu_nessie_db (27122 nodes / 58414 edges) built: 2026-09-03T00:36:15.576756+00:00 (age: 6.2h)'. SECURITY_GROUP band = 4 DECLARED: sg-0f27eda3ce895395d nessie, sg-0715c43654a151f69 trino, sg-0f6cedf53107c6f8c derive-runner, sg-0191bda6ae427c0bb incremental-updater; gateway SECURITY_GROUP band = 2: sg-00e3eb040efab5577, sg-02571ff2f33d2f9d4; EC2_INSTANCE = i-07dccb1615503ac99. INSTRUMENT 2 (live): gateway i-07dccb1615503ac99 t4g.nano running, VpcId vpc-0cc0c6a75e54605e3, SubnetId subnet-039d04cfaee66a5f6 (172.31.80.0/20, us-east-1a), PrivateIp 172.31.89.135, SG sg-00e3eb040efab5577; nessie task ENI eni-0706a11d0911bc28a 172.31.5.0 sg-0f27eda3ce895395d, trino task ENI eni-010c7b1817e6e2f79 172.31.14.197 sg-0715c43654a151f69, both subnet-023db8cbfd99ffff2 (172.31.0.0/20, us-east-1d), both VpcId vpc-0cc0c6a75e54605e3, both RUNNING/HEALTHY. INGRESS: nessie tcp 19120 from 172.31.0.0/16; trino tcp 8080 from 172.31.0.0/16; derive-runner none; incremental-updater none (egress tcp 19120 -> 172.31.0.0/16); gateway tcp 8080 from sg-02571ff2f33d2f9d4 only, egress -1 -> 0.0.0.0/0. ROUTE: single VPC vpc-0cc0c6a75e54605e3 on both ends -> VPC-local route, no peering/TGW/NAT hop. AGREEMENT: the two instruments agree on instance id, instance type, gateway SG and all four cluster SG ids -- NO disagreement, so no row is owed under this criterion.",
+      "denominator": "comp-find: 70 hits across 2100 aws nodes ('opal-globgrph'), 34 hits across 2100 aws nodes ('opal-gateway', 2 of 2 pages read). Live: 1 of 1 gateway instance, 2 of 2 RUNNING tasks, 2 of 2 ENIs, 2 of 2 subnets, 5 of 5 security groups. Cross-instrument agreement: 6 of 6 compared identifiers.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V2-AC2",
+      "criterion_verbatim": "THE PROBE from the gateway host to an existing in-cluster listener (positive control) and to a must-be-closed target (negative control), both results quoted with the command and its timeout; no install, no restart, `--workers 1` untouched (the gateway's process table before/after quoted).",
+      "method": "command",
+      "invocation": ".tools/aws ssm send-command --cli-input-json file://probe_input.json (DocumentName AWS-RunShellScript, InstanceIds [i-07dccb1615503ac99], CommandId 068fdff4-96c8-4f43-9e6b-efca95f580e1); each probe is `timeout 5 bash -c \"exec 3<>/dev/tcp/<host>/<port>\"` followed by `curl -s -o /dev/null -w '%{http_code}' --max-time 5`; process table captured by `ps -eo pid,ppid,etimes,args` before AND after in the same invocation",
+      "output_evidence": "Status Success, host ip-172-31-89-135.ec2.internal, 2026-09-03T06:54:31Z. PROBE POSITIVE_nessie 172.31.5.0:19120 rc=0 | PROBE POSITIVE_trino 172.31.14.197:8080 rc=0 | PROBE NEGATIVE_nessie_wrongport 172.31.5.0:8080 rc=124 | PROBE NEGATIVE_trino_wrongport 172.31.14.197:19120 rc=124. Application layer: CURL nessie /api/v2/config http_code=200 time=0.097134 ; CURL trino /v1/info http_code=200 time=0.001456. PROC BEFORE '289407 1 477622 ... uvicorn app.server:app --host 0.0.0.0 --port 8080 --workers 1' / PROC AFTER '289407 1 477632 ... --workers 1'; PROC_BEFORE_SHA=c20f4be13fea644a59e7ba3952f3a5d7 == PROC_AFTER_SHA=c20f4be13fea644a59e7ba3952f3a5d7 -- same PID, same argv, identical digest, only etimes advanced by the 10s the probe took. No install, no restart, no file written on the host.",
+      "denominator": "4 of 4 probes returned a terminal result (2 positive controls, 2 negative controls); 2 of 2 positive probes additionally confirmed at the application layer with HTTP 200; 1 of 1 process-table pair compared, digest-identical.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V2-AC3",
+      "criterion_verbatim": "THE VERDICT, exactly one of REACHABLE / NOT-REACHABLE / REACHABLE-WITH-CHANGE, with the blocking or admitting layer named and, for the third, the Terraform text NOT applied (the control: `terraform plan` on the untouched tree shows no change, or the plan is not run and the working tree is shown clean).",
+      "method": "live_read",
+      "invocation": "verdict derived from V2-AC1 (rules) + V2-AC2 (probe); apply-free control: git status --porcelain infra/aws/terraform/ | grep -c '^ M'",
+      "output_evidence": "VERDICT = REACHABLE (exactly one of the three). ADMITTING LAYER NAMED: the CIDR ingress rule 172.31.0.0/16 on each listener SG (nessie sg-0f27eda3ce895395d tcp/19120; trino sg-0715c43654a151f69 tcp/8080), reached over the VPC-local route inside vpc-0cc0c6a75e54605e3, with the gateway's 172.31.89.135 inside that CIDR and gateway egress unrestricted (-1 -> 0.0.0.0/0). No REACHABLE-WITH-CHANGE Terraform text is owed because no change is required. CONTROL, second limb taken (plan not run, tree shown clean): infra/aws/terraform modified-file count = 0; the only entry in that tree is a pre-existing untracked shared-infra/infrastructure-alerts-durable-limb.tf.proposed. CONSEQUENCE FOR THE DECOMP: CG-s-5's shape is NOT invalidated and no BLOCKING row is filed.",
+      "denominator": "1 verdict of the 3 permitted values; 0 of 0 Terraform changes owed; 0 modified .tf files across 3 scanned terraform trees.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V2-AC4",
+      "criterion_verbatim": "`comp-iam refresh-census` RUN FIRST with its vintage < 24 h at every APPLIED read; the three principals' APPLIED policies beside their DESIRED text; drift named or \"0 drift on N statements\".",
+      "method": "command",
+      "invocation": "comp-iam refresh-census (run BEFORE any APPLIED read) ; comp-iam role opal-globgrph-incremental-updater / opal-globgrph-nessie-task / opal-gateway-role (DESIRED) ; APPLIED statements read from docs/briefs/cmpaws-iam-census-20260903.json by an in-process JSON read against the census's own `statements` key",
+      "output_evidence": "Census _meta: generated_utc 2026-09-03T06:46:12Z, account 313476888478, api iam:GetAccountAuthorizationDetails, roles 216, managed_policies_resolved false. Age at every APPLIED read < 1 h (TTL 24 h). DESIRED vs APPLIED: opal-globgrph-incremental-updater 6 vs 6; opal-globgrph-nessie-task 2 vs 2; opal-gateway-role 10 vs 10. 0 DRIFT ON 16 RESOLVED STATEMENTS. The 2 non-resolved rows are attached-managed and differ in CARRIER only, not in what is held: AWSLambdaVPCAccessExecutionRole (updater) and AmazonSSMManagedInstanceCore (gateway) -- comp-iam renders their contents from Terraform while the census records them UNRESOLVED, so they are UNCOVERED, never absent. KEY FINDING: opal-gateway-role statements mentioning globgrph = 0 of 10 on BOTH planes.",
+      "denominator": "3 of 3 principals read on both planes; 18 statements total = 16 resolved (0 drift) + 2 attached-managed UNRESOLVED; census role denominator 216.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V2-AC5",
+      "criterion_verbatim": "THE DELTA as DESIRED text only (worker / service / gateway), each statement with actions + resource ARNs + the applying task order named; `comp-iam gaps` denominator identical before and after (nothing applied); two `simulate` calls, one ARN each, the gateway-role read of a globgrph key reading DENIED (the negative control), any conditioned deny read with its condition.",
+      "method": "command",
+      "invocation": "comp-iam gaps (twice, before and after authoring the delta; full stdout sha256-compared) ; 3 separate `.tools/aws iam simulate-principal-policy` invocations, ONE --resource-arns value each ; .tools/aws s3api head-object for the marker key's grain",
+      "output_evidence": "DELTA authored as DESIRED HCL in the deliverable and nowhere else, three blocks: (i) NEW WORKER `globgrph_projection_worker` -- sqs 4 actions on the NEW queue, s3 GetObject/ListBucket/GetBucketLocation on the globgrph bucket, s3:PutObject on projection/* (deliberately NO DeleteObject), logs 3 actions -- applied by CG-s-1/CG-s-2; (ii) NEW SERVING SERVICE `globgrph_serving_task` -- s3 read-only on the bucket + projection/*, logs -- applied by CG-s-4; (iii) GATEWAY -- EMPTY delta, and that emptiness is PRD R3 in machine-checkable form (a globgrph grant on opal-gateway-role would mean the gateway is hosting, not proxying). GAPS CONTROL: before and after are BYTE-IDENTICAL -- 95940 bytes, 998 lines, sha256 62bf854dc7ab03190ee5c67ed93da099f40a59a082a29ead783b6d7174d5d109 on both runs; summary line identical: 'Total: 14 missing | 292 deny-present | 0 coverage-unknown | 2 resource-mismatch across 31 service(s)'. GRAIN: head-object marker key = 1508 B, LastModified 2026-09-03 05:53:56 GMT, ETag 5d18065561bebe151720c53fd551434c. SIMULATE (3 separate invocations, one ARN each): (1) opal-globgrph-incremental-updater / s3:GetObject / marker key -> allowed, matched role_opal-globgrph-incremental-updater_S3WarehouseWrite; (2) opal-gateway-role / s3:GetObject / marker key -> implicitDeny, MatchedStatements EMPTY, MissingContext [sts:ExternalId, s3:prefix]; (3) opal-gateway-role / s3:GetObject / opal-data-portal-v2/json/probe.json -> allowed, matched role_opal-gateway-role_opal-gateway-queryv0-portal-read, MissingContext []. CONDITIONED-DENY READ AS THE RULE REQUIRES: the two MissingContext keys condition statement 1 (sts:AssumeRole on iam::role/opal-mcp-emp-*, StringEquals sts:ExternalId=opal-mcp-taxsma-pt2) and statement 4 (s3:ListBucket on opal-data-portal-v2, StringLike s3:prefix=daily-reports/*); NEITHER can match s3:GetObject on a globgrph key under any context because both action and resource differ, and MatchedStatements was empty -- nothing matched to be conditioned. Call (3) kills the broken-policy-source mode and calls (1)+(3) kill the bogus-action-name mode by returning allowed for the same literal s3:GetObject. Call (2) is therefore a TRUE deny.",
+      "denominator": "3 delta blocks of 3 required (worker/service/gateway); 3 simulate calls, 1 ARN per call, 3 separate invocations (0 batched); gaps compared over 998 of 998 lines and 95940 of 95940 bytes (full-output hash, not a summary line); 3 of 3 documented simulate false-deny modes explicitly excluded.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V2-AC6",
+      "criterion_verbatim": "THE AUTHKIND NAMED at `file:line @ commit` with the one it does not fit and why; whether the 5-step checklist admits a read-only proxy integration with the framework unmodified; `ENABLED_INTEGRATIONS` untouched (the file's diff is empty -- quoted).",
+      "method": "manual_read_with_citation",
+      "invocation": "comp-read infra/aws/ec2/opal-gateway/app/integrations/registry.py --for '...' ; comp-read docs/architecture/NFRA_INTEGRATIONS_STANDARD.md --for '...' ; source reads of base.py:1-75 and :160-199, registry.py:1-45, STANDARD.md:51-103 and :172-182 ; comp-find 'AuthKind' --all --budget 120 ; git diff -- infra/aws/ec2/opal-gateway/app/integrations/",
+      "output_evidence": "AUTHKIND NAMED: AuthKind.NONE at infra/aws/ec2/opal-gateway/app/integrations/base.py:44 @a1af5d70c2 -- 'NONE = \"none\"  # no external auth (read-only in-estate source)'. Corroborated at base.py:5-6 ('new sources (YCharts now; kuzu/nessie/iceberg read-only later) plug in without touching the core dispatch'), base.py:18 ('a read-only in-estate graph surface'), and docs/architecture/NFRA_INTEGRATIONS_STANDARD.md:60 whose NONE-row example column reads 'read-only in-estate graph (kuzu/nessie/iceberg)'. registry.py:37 already holds the slot: '# Future (read-only in-estate graph surfaces): kuzu / nessie / iceberg -> register here.' THE ONE IT DOES NOT FIT: SHARED_SECRET, because it means one server-held Secrets Manager credential per call (STANDARD.md:59, base.py:12-17) and an in-estate traversal has no external credential -- the serving hop is in-VPC HTTP (CG-s-11) and the artifact hop is IAM-role-based; choosing it would oblige a secret_id that does not exist and base.py:176 refuses exactly that ('if spec.auth_kind is AuthKind.SHARED_SECRET and not spec.secret_id'). DELEGATED_USER also does not fit (base.py:9-11: the caller's own token against an external service enforcing that user's permissions; there is no external IdP here); under NONE the caller identity is still resolved for audit + the SCTY tier gate (STANDARD.md:60, base.py:93-139), so no attribution is lost. CHECKLIST: STANDARD.md:86-102 admits a read-only proxy integration WITH THE FRAMEWORK UNMODIFIED -- steps 1/2/5 need no framework change (run_integration_tool already serves 'SHARED_SECRET / NONE tools', STANDARD.md:71-72, base.py:93-139) and steps 3/4 are vacuous because they are SHARED_SECRET-scoped on their face. NON-OBVIOUS TRAP CARRIED FOR CG-s-5: validate_integration_spec rejects an EMPTY hosts (base.py:172-173) and a rejected spec is skip-registered fail-closed (base.py:82, registry.py:60-61), while STANDARD.md:239 makes spec.hosts the egress-allowlist CONTROL -- so an author reasoning 'in-estate, no egress, hosts=()' would ship a spec that registers ZERO tools silently. ENABLED_INTEGRATIONS UNTOUCHED: git diff over app/integrations/ = 0 bytes; git status --porcelain infra/aws/ec2/opal-gateway/ = 0 lines.",
+      "denominator": "1 AuthKind named of 3 in the enum; 2 of 2 non-fitting kinds stated with reasons; 5 of 5 checklist steps walked; comp-find 'AuthKind' 86 hits across 146602 files scanned with exactly 1 DEF-band hit (base.py:41); diff evidence 0 bytes of 0 expected.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V2-AC7",
+      "criterion_verbatim": "the three verdict lines in section D in the manifest's `claim` vocabulary with instrument + vintage; PUSH STATE MEASURED at report (`ls-remote` + `is-ancestor`; LOCAL expected -- say which state was read); the proof instance VALID (`.tools/proof-of-spec-check.py` rc 0) with every `surprises` entry resolving to a row BEFORE the complete flip, which this seat commits itself.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> ; python .tools/surprise-row-gate.py <the channel file> ; git ls-remote origin CLOUD + git merge-base --is-ancestor <commit> origin/CLOUD",
+      "output_evidence": "SECTION D carries all three verdict lines in the manifest's claim vocabulary with instrument and vintage: CG-s-11 absent -> measured (REACHABLE; SSM probe 2026-09-03T06:54:31Z + live describe-* + aws corpus built 2026-09-03T00:36:15Z); CG-s-12 unmeasured -> measured (0 drift on 16 resolved statements, 2 attached-managed UNRESOLVED, gateway holds nothing on globgrph 0 of 10 on both planes; census 2026-09-03T06:46:12Z); CG-s-13 unmeasured -> measured (AuthKind.NONE; base.py:44 + STANDARD.md:60 @a1af5d70c2). SURPRISES: 1 entry, opening with its row id NFRA_CLDGRPH-S1, resolving to org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md, jsonschema-validated against investigation_item.schema.json BEFORE the complete flip. PUSH STATE and the checker's rc are recorded in section E.4 of the deliverable and in the report, MEASURED after the artifact commit exists -- a push state read before that commit would describe a different object. VALIDITY LIMB, MEASURED: `python .tools/proof-of-spec-check.py <this instance>` -> 'proof-of-spec-check | structural=jsonschema | acceptance rows=7 | violations=0'; 'alignment-forward-2 (cell_ref -> decomp): 3/3 distinct cell_ref(s) resolve'; 'alignment-backward: 3/3 cell(s) declared in the TO's <owned_cells> are reachable from >=1 criterion'; 'surprises-frame: 2 entries; 2 open with a row id; 2 resolve to a channel row'; VALID (rc=0). HISTORY RECORDED RATHER THAN ERASED: this limb first returned rc 1 on a SOLE violation that was on the TO's issuance half, not in this instance -- V2-AC7's cell_refs were space-separated while proof-of-spec-check.py:562 splits on commas. This seat filed it BLOCKING as NFRA_CLDGRPH-S5 rather than self-editing the criterion it is graded against (TO BOUNDS: certifier != author), and the disarm owner 2.0.0_SA_COO~A amended the face in-round (encoding only; declared cell set unchanged), after which the run above returned rc 0. The surprise channel discharged it without a message, which is the mechanism working as designed.",
+      "denominator": "3 of 3 verdict lines present with instrument + vintage; 1 of 1 surprises entry resolving to a filed row; 7 of 7 criteria answered in this instance.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The reachability claim's load-bearing assertion is 'the SG CIDR ingress rule is what admits the traffic'. Mutated by changing ONLY the destination port, on the SAME two hosts, from the SAME source, in the SAME SSM invocation seconds apart: nessie 19120 -> 8080 and trino 8080 -> 19120. Every other variable (source IP, route, VPC, egress rule, timeout, method) held fixed, so the port is the only thing that can explain a difference in outcome.",
+      "expected": "If the SG ingress rule is genuinely what admits the traffic, the two wrong-port probes must NOT connect; if instead something broader were admitting traffic (or the probe were incapable of failing), they would connect exactly as the correct-port probes did.",
+      "observed": "PROBE NEGATIVE_nessie_wrongport 172.31.5.0:8080 rc=124 (TIMEOUT at 5s) and PROBE NEGATIVE_trino_wrongport 172.31.14.197:19120 rc=124 (TIMEOUT at 5s), while in the same run PROBE POSITIVE_nessie 172.31.5.0:19120 rc=0 and PROBE POSITIVE_trino 172.31.14.197:8080 rc=0 with HTTP 200 from both services. A second, independent mutant on the IAM axis: opal-gateway-role reading a globgrph key returned implicitDeny with empty MatchedStatements while the SAME role reading opal-data-portal-v2/json/* returned allowed -- so that deny is a property of the resource, not of a broken probe.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "comp-iam gaps executed twice -- once before authoring the IAM delta and once after -- with the FULL stdout compared by sha256 rather than by its summary line, so the check cannot pass while any row beneath the summary moved.",
+      "observed": "Run 1: 95940 bytes, 998 lines, sha256 62bf854dc7ab03190ee5c67ed93da099f40a59a082a29ead783b6d7174d5d109. Run 2: 95940 bytes, 998 lines, sha256 62bf854dc7ab03190ee5c67ed93da099f40a59a082a29ead783b6d7174d5d109. BYTE-IDENTICAL. Summary line identical on both: 'Total: 14 missing | 292 deny-present | 0 coverage-unknown | 2 resource-mismatch across 31 service(s)'.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The APPLIED contents of the 2 attached-managed policies (AWSLambdaVPCAccessExecutionRole on opal-globgrph-incremental-updater, AmazonSSMManagedInstanceCore on opal-gateway-role).",
+      "reason": "The census records attached-managed policies without resolving them (_meta.managed_policies_resolved = false), so their statements are UNRESOLVED. Treated as UNCOVERED, never as absent, and named individually in section B.2 rather than silently folded into the 0-drift count."
+    },
+    {
+      "item": "terraform plan was not run.",
+      "reason": "V2-AC3 offers two limbs and the second is taken: 'the plan is not run and the working tree is shown clean'. The tree is shown clean (0 modified .tf files across 3 terraform trees). Running a plan would also have been a heavier act than the READ-ONLY bound invites, for no additional discrimination."
+    },
+    {
+      "item": "The NEW SQS queue's own queue-policy principal set (the CG-s-1 read-dependency named in the TO's decomp_ref).",
+      "reason": "The queue does not exist yet -- CG-s-1 creates it. This deliverable names the CONSUMING principal and its sqs action set so CG-s-1's queue policy can admit it; the policy itself is CG-s-1's artifact, not this cell's, and is explicitly listed as a read-dependency NOT claimed."
+    },
+    {
+      "item": "Attribution of the 4 infra/aws/globgrph/kuzu_nessie_db.* runtime artifacts whose mtimes fall inside this session's window.",
+      "reason": "They are comp-kuzu backend runtime files (refresh status, fallback sink, rebuild WAL, load lock), not repo source, not infra state, and not a Terraform/IAM/SG/route change. Two coincide with this seat's comp-find --corpus aws calls and two post-date its last corpus read; 0.7.0_AE_CloudOps~Q runs full loads this round and a background refresh is also possible. Which process wrote them was NOT established and is therefore not claimed -- recorded in section E.2 so that 'the tree is clean' is not stated wider than it was measured."
+    },
+    {
+      "item": "Remediation of surprise row NFRA_CLDGRPH-S1.",
+      "reason": "This seat surfaces; REMEDIATION rows are 3.0.0_SA_CVO~A's at L8/L9. The defect is in NFRA_INTEGRATIONS's document, so even the routing is the CVO's call and is not adjudicated here."
+    }
+  ],
+  "surprises": [
+    "NFRA_CLDGRPH-S1: NFRA_INTEGRATIONS_STANDARD.md:99-100 @a1af5d70c2 -- the canonical 5-step ADD-CHECKLIST's IAM step instructs granting secretsmanager:GetSecretValue to `m365-mcp-gateway-role`, a role ABSENT from account 313476888478 (216 roles censused; 'm365' matches 0 against a positive control of 2 'gateway' matches); the live gateway instance role is `opal-gateway-role`. OBSERVATION/ARMED, disarm owner 1.0.0_SA_CTO~A. Vacuous for AuthKind.NONE (no secret) so CG-s-5 is unharmed and this TO is not blocked; armed for the next SHARED_SECRET integration built to the contract.",
+    "NFRA_CLDGRPH-S5: TO-CG-V-2's V2-AC7 face writes cell_refs SPACE-separated (\"CG-s-11 CG-s-12 CG-s-13\") while .tools/proof-of-spec-check.py:562 splits on COMMA, so the attribute is read as one phantom cell id matching none of the decomp's 19 -- the instance returns rc 1 on that SOLE violation and V2-AC7's validity limb cannot be satisfied by the assignee. BLOCKING/ARMED, disarm owner 2.0.0_SA_COO~A (the issuer owns the issuance half). Census: 1 of 842 cell_refs attributes estate-wide is space-separated against 282 comma-separated, so this is a single typo on one face, NOT a checker defect."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md --for 'What do cells CG-s-11, CG-s-12 and CG-s-13 require...'",
+      "result": "33 sections, 39 qualifiers (24 near the queried regions), 0 contradictions; surfaced the ROUND 1 ordering rationale and the per-cell 'closes on' bounds that shaped the probe design."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/ec2/opal-gateway/app/integrations/registry.py --for 'the AuthKind enum, what each kind requires, and how ENABLED_INTEGRATIONS gates a new integration'",
+      "result": "6 sections via python-ast; showed registry.py does NOT define AuthKind (it imports validate_integration_spec), which is what sent the search to base.py rather than concluding from the TO-named file alone."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read docs/architecture/NFRA_INTEGRATIONS_STANDARD.md --for 'the 5-step checklist for adding a new integration, and what each AuthKind requires'",
+      "result": "52 sections, 37 qualifiers; :89 pre-emptively reconciled the '5-step vs 3-part' wording, which killed a candidate surprise row before it was filed."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --corpus aws 'opal-globgrph' --all --budget 300",
+      "result": "70 hits across 2100 aws nodes; vintage built 2026-09-03T00:36:15Z; SECURITY_GROUP band = the 4 DECLARED cluster SGs, matching the TO's ids exactly."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --corpus aws 'opal-gateway' --budget 300 (then --page 2)",
+      "result": "34 hits across 2100 nodes; page 1 did NOT contain the SECURITY_GROUP band -- page 2 carried sg-00e3eb040efab5577 and sg-02571ff2f33d2f9d4. A page-1-only read would have missed the gateway SG entirely."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'AuthKind' --all --budget 120",
+      "result": "86 hits across 146602 files scanned, exactly 1 DEF-band hit (base.py:41) -- the band split took the answer straight to the definition past 42 DOC-band mentions."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam refresh-census",
+      "result": "APPLIED census written, generated_utc 2026-09-03T06:46:12Z, 216 roles / 1 group / 7 users, account 313476888478; disclosed managed_policies_resolved=false, which is carried as a coverage bound rather than swallowed."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam role opal-globgrph-incremental-updater / opal-globgrph-nessie-task / opal-gateway-role",
+      "result": "DESIRED plane: 6 / 2 / 10 statements; confirmed opal-gateway-role holds nothing on globgrph, later corroborated independently on the APPLIED plane and by simulate."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam gaps (twice, before + after)",
+      "result": "Byte-identical: 998 lines / 95940 bytes / sha256 62bf854d... both runs; Total 14 missing | 292 deny-present | 0 coverage-unknown | 2 resource-mismatch across 31 services. Its self-disclosed blindness (24 NOT-ATTACHED + 11 standalone policy blocks, 2 unparsed deny statements) is quoted in the deliverable as the reason the live simulate arms exist."
+    },
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to NFRA_CLDGRPH.TO-CG-V-2.reachability-iam-authkind-verified",
+      "result": "session TO_ID set race-free per session file (never via the shared .agent_context)."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "run before the complete flip; result recorded in the report and in deliverable section E.4."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "pre-stage run returned the fail-closed 'could not read the STAGED blob' (the gate validates the staged blob and CLAUDE.md 14a forbids pre-git-add), so the row was additionally validated standalone with jsonschema against investigation_item.schema.json -> SCHEMA VALID; the gate itself fires at commit. Corpus check: 21 documents / 202 rows / 0 malformed / 4 known-baseline failures, 0 new."
+    }
+  ]
+}
