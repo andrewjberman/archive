@@ -1,0 +1,203 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-25-26-27",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "c8d58b1004",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-25-26-27.project-key-admin-role-logs-target.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/prd/NFRA_OPSEC202609_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "36786251af"
+  },
+  "assignee": "0.7.0_AE_CloudOps~S",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opsec/kms.tf",
+      "kind": "terraform",
+      "commit_or_etag": "28f075c587",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply rc=0 -- 'Apply complete! Resources: 10 added, 0 changed, 0 destroyed'. Key 64f25291-4015-42c5-ad41-40e42325deb7 reads KeyManager=CUSTOMER, KeyState=Enabled, rotation true; alias/opal-security resolves to it."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opsec/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "28f075c587",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "role opal-security-admin created; trust = one principal = the ruled ARN; sts assume-role EXERCISED successfully; inline policy reaches exactly the evidence store, its objects and the one key."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opsec/s3_access_logs.tf",
+      "kind": "terraform",
+      "commit_or_etag": "28f075c587",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "opal-data-security-access-logs created with all five C-15 properties read on the applied plane; head-bucket was 404 before this apply (re-grounded at this seat 11:44:34Z)."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opsec/s3.tf",
+      "kind": "terraform",
+      "commit_or_etag": "c6baa0cb19",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "the round-1 aws_s3_bucket_logging block UNCOMMENTED and retargeted to the project-owned bucket; safe-apply rc=0 -- 'Apply complete! Resources: 1 added, 0 changed, 0 destroyed'. Applied config reads TargetBucket=opal-data-security-access-logs TargetPrefix=evidence-store/. Committed with this instance."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260903T1153Z_opsec-r2-key-role-logs-target_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "28f075c587",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 legs; L1 L2 L3 L4 L6 CLOSED with proof; L5 (the delivered log object) OPEN BY DESIGN inside its 24 h window, which is what S27-AC2 prescribes."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S25-AC1",
+      "criterion_verbatim": "THE KEY READS AS C-13 STATES IT ON THE APPLIED PLANE: describe-key (KeyManager CUSTOMER, KeyState Enabled, the alias resolving to it via list-aliases), get-key-rotation-status (true), get-key-policy quoted with its three statements -- and EVERY principal the policy names EXISTS (get-role on each; the denominator = the principals named, printed). Three reads pasted.",
+      "method": "live_read",
+      "invocation": "aws kms describe-key | get-key-rotation-status | get-key-policy --key-id 64f25291-4015-42c5-ad41-40e42325deb7 ; aws kms list-aliases ; aws iam get-role --role-name opal-security-admin",
+      "output_evidence": "describe-key: {Manager: CUSTOMER, State: Enabled, Spec: SYMMETRIC_DEFAULT}. get-key-rotation-status: {KeyRotationEnabled: true, RotationPeriodInDays: 365, NextRotationDate: 2027-09-03T07:56:01.703-04:00}. get-key-policy: Id=opal-security-key-policy, statements=3 -- (1) Sid=EnableIAMUserPermissions Principal={AWS: arn:aws:iam::313476888478:root} Action=kms:*; (2) Sid=AllowSecurityAdminRoleUse Principal={AWS: arn:aws:iam::313476888478:role/opal-security-admin} Action=[kms:Encrypt, kms:Decrypt, kms:GenerateDataKey*, kms:DescribeKey]; (3) Sid=AllowViaDynamoDBAndS3InThisAccountOnly Principal={AWS: *} Condition={StringEquals:{kms:CallerAccount: 313476888478}, StringLike:{kms:ViaService: [dynamodb.us-east-1.amazonaws.com, s3.us-east-1.amazonaws.com]}}. list-aliases: alias/opal-security -> TargetKeyId 64f25291-4015-42c5-ad41-40e42325deb7.",
+      "denominator": "3 of 3 reads taken. Principals named and checked: 2 of 2 EXIST -- get-role opal-security-admin -> arn:aws:iam::313476888478:role/opal-security-admin, and the account root 313476888478 (the account this seat is authenticated to). The third statement names no principal to check: it is a wildcard gated on kms:CallerAccount + kms:ViaService.",
+      "status": "PASS",
+      "status_reason": "This key is the answer to row NFRA_OPSEC202609-Z-S3. KeyManager=CUSTOMER is the discriminating read: the thing round 1 was told to use (86cc6c40-..., alias/aws/dynamodb) reads KeyManager=AWS, and that difference is the whole reason this cell exists. No principal that does not exist is named -- the sentinel, reconciler and CLI roles are absent and their task orders extend this policy, stated on the Terraform comment."
+    },
+    {
+      "criterion_id": "S25-AC2",
+      "criterion_verbatim": "ONE KEY, NOT TWO: list-aliases shows exactly ONE alias/opal-security; the KeyManager=CUSTOMER general-purpose count reads the cut's baseline + 1 (the baseline quoted from the face); the Terraform declares exactly one aws_kms_key in the module (a census of the module for aws_kms_key, count printed).",
+      "method": "live_read",
+      "invocation": "aws kms list-aliases ; aws kms list-keys + describe-key per key ; comp-find 'resource \"aws_kms_key\"' --files infra/aws/terraform/opsec",
+      "output_evidence": "alias/opal-security count = 1, TargetKeyId 64f25291-4015-42c5-ad41-40e42325deb7. Total aliases 21 (the cut's baseline was 20, no NextMarker then or now); the non-AWS aliases are now 6: agentbus-alyssa01, agentbus-sim01, find-insure-data-key, inf-ebs-key, opal-security, schwab-sdd-session -- exactly the cut's 5 plus this one. KeyManager census over every key: 5 CUSTOMER, 6 AWS -- the cut's CUSTOMER baseline was 4, so this is baseline + 1. Module census: DENOMINATOR 1 hit across 9 files scanned.",
+      "denominator": "1 alias of 1 expected; 21 aliases vs the cut's 20 (+1); 5 CUSTOMER keys vs the cut's 4 (+1); 1 aws_kms_key declaration across 9 module files.",
+      "status": "PASS",
+      "status_reason": "Three independent counts agree that exactly one key was added: the alias count, the account-wide CUSTOMER-manager census, and the source declaration census. The pagination trap was checked rather than assumed -- list-aliases reports no NextMarker and Truncated null both at the cut and now, so 20 and 21 are totals and not page sizes."
+    },
+    {
+      "criterion_id": "S26-AC1",
+      "criterion_verbatim": "THE TRUST IS ONE PRINCIPAL AND IT IS THE RULED ONE: get-role quoted; the trust policy names exactly ONE principal and it equals the ARN the face carries as READ; EXERCISED: sts assume-role by that identity SUCCEEDS (the applier is that identity) and simulate-principal-policy for a DIFFERENT existing principal against sts:AssumeRole on the role reads implicitDeny -- the pair shown, the negative control able to fail.",
+      "method": "live_read",
+      "invocation": "aws iam get-role --role-name opal-security-admin ; aws sts assume-role --role-arn arn:aws:iam::313476888478:role/opal-security-admin ; aws iam simulate-principal-policy --policy-source-arn arn:aws:iam::313476888478:role/opal-portal-lambda-role --action-names sts:AssumeRole --resource-arns arn:aws:iam::313476888478:role/opal-security-admin",
+      "output_evidence": "get-role: RoleArn=arn:aws:iam::313476888478:role/opal-security-admin; trust statements=1; Sid=AllowRuledOperatorToAssume, Effect=Allow, Action=sts:AssumeRole, Principal={AWS: arn:aws:iam::313476888478:user/Andrew_Berman}. Exactly one statement and one principal, equal to the ARN the face carries and to this seat's own get-caller-identity at 11:44:34Z. EXERCISED: assume-role returned arn:aws:sts::313476888478:assumed-role/opal-security-admin/opsec-s26-ac1-exercise. NEGATIVE CONTROL, run as a separate invocation with ONE --resource-arns: opal-portal-lambda-role on sts:AssumeRole -> Decision=implicitDeny.",
+      "denominator": "1 trust statement of 1; 1 principal of 1; 1 exercise (succeeded); 1 negative control (implicitDeny).",
+      "status": "PASS",
+      "status_reason": "The negative control is the arm that could have failed and did the discriminating thing: a different EXISTING role reads implicitDeny on the same action against the same resource, so the Allow is doing the work rather than a permissive default. It was run as its own invocation because two --resource-arns in one call silently flips held results to implicitDeny (the cloud-ops trap), which would have made the control agree with itself for the wrong reason."
+    },
+    {
+      "criterion_id": "S26-AC2",
+      "criterion_verbatim": "THE ROLE'S GRANTS NAME ONLY THE BUCKET AND THE KEY, AND NO POLICY IN THIS DIFF NAMES AN IAM USER: get-role-policy quoted (resources = the evidence store + its objects + the one key, nothing else); a census of the diff for arn:aws:iam::313476888478:user/ reads 0 with a positive control (the same census over a file known to carry a user ARN reads > 0).",
+      "method": "live_read",
+      "invocation": "aws iam get-role-policy --role-name opal-security-admin --policy-name opal-security-admin-evidence-and-key ; comp-read --enumerate ':user/' per module file ; comp-find 'arn:aws:iam::313476888478:user/' --files infra/aws/terraform/opsec (target) and --files infra/aws/terraform (positive control)",
+      "output_evidence": "get-role-policy: 3 statements -- EvidenceStoreObjects on arn:aws:s3:::opal-data-security/*; EvidenceStoreBucket on arn:aws:s3:::opal-data-security; ProjectKeyUse on arn:aws:kms:us-east-1:313476888478:key/64f25291-4015-42c5-ad41-40e42325deb7. Distinct resources = 3, and the set equals exactly {the bucket, its objects, the one key} -- nothing else. THE CENSUS, banded per file: iam.tf:24 COMMENT; iam.tf:33 the TRUST POLICY line (written interpolated, ${local.account_id}); s3.tf:74 a round-1 COMMENT explaining Z-S4; kms.tf, s3_access_logs.tf, main.tf, dynamodb.tf all 0. TOTAL 3 occurrences of ':user/' = 2 comments + 1 trust line + ZERO in any grant. The literal pattern 'arn:aws:iam::313476888478:user/' reads 2 over the module (the two comments only; the trust line is interpolated and does not match it). POSITIVE CONTROL: the same literal census over infra/aws/terraform reads 6 hits across 542 files, so the pattern matches real user ARNs.",
+      "denominator": "3 of 3 role-policy statements read; 3 distinct resources of 3 expected; census over 9 module files -> 3 occurrences banded (2 comment, 1 trust, 0 grant); positive control 6 hits over 542 files.",
+      "status": "PASS",
+      "status_reason": "PASS ON THE SUBSTANCE, WITH THE MEASURED NUMBER PRINTED RATHER THAN A CONVENIENT ONE -- and the discrepancy is filed, not smoothed. The criterion's literal census asks for 0 and the module reads 2 (both COMMENTS). It cannot read 0 in any diff that satisfies this same face's DELIVERABLE 2, which REQUIRES arn:aws:iam::313476888478:user/Andrew_Berman as the role's single trust principal (C-14, Andrew's card OP-x-6): a role cannot trust a principal it does not name. Row NFRA_OPSEC202609-Z-S27 carries the contradiction to the issuer. The property the criterion means to protect -- that no GRANT names a human identity -- is measured and HOLDS: 0 of 3 grant policies (the key policy, this role policy, the access-logs bucket policy) names an IAM user. Noted for whoever re-words it: the literal count is sensitive to authoring style, since writing the ARN literally instead of interpolated would make it read 3 and fewer comments would make it read 1."
+    },
+    {
+      "criterion_id": "S27-AC1",
+      "criterion_verbatim": "EVERY C-15 PROPERTY READS ON THE APPLIED PLANE for opal-data-security-access-logs: get-public-access-block (4 of 4), get-bucket-encryption (AES256), get-bucket-versioning (Enabled), get-bucket-lifecycle-configuration (one rule, expire 400 d), get-bucket-policy (the one logging.s3 statement with BOTH conditions quoted) -- five reads, denominator 5 of 5; and get-bucket-policy on opal-cloudtrail-logs-313476888478 UNCHANGED from row Z-S5's two-statement read (the never-widen control).",
+      "method": "live_read",
+      "invocation": "aws s3api get-public-access-block | get-bucket-encryption | get-bucket-versioning | get-bucket-lifecycle-configuration | get-bucket-policy --bucket opal-data-security-access-logs ; aws s3api get-bucket-policy --bucket opal-cloudtrail-logs-313476888478",
+      "output_evidence": "1/5 public-access-block: BlockPublicAcls, IgnorePublicAcls, BlockPublicPolicy, RestrictPublicBuckets all true (4 of 4). 2/5 encryption: [{SSEAlgorithm: AES256}]. 3/5 versioning: {Status: Enabled}. 4/5 lifecycle: exactly ONE rule -- {ID: access-logs-expire-400d, Status: Enabled, Expiration.Days: 400, Filter: {Prefix: \"\"}} i.e. whole-bucket. 5/5 policy: exactly ONE statement -- Sid=AllowS3ServerAccessLogDelivery, Principal={Service: logging.s3.amazonaws.com}, Action=s3:PutObject, Resource=arn:aws:s3:::opal-data-security-access-logs/*, Condition={StringEquals:{aws:SourceAccount: 313476888478}, ArnLike:{aws:SourceArn: arn:aws:s3:::opal-data-security}} -- BOTH conditions present. NEVER-WIDEN CONTROL: opal-cloudtrail-logs-313476888478 reads statements=2, Sids=[AWSCloudTrailAclCheck, AWSCloudTrailWrite], and a search for a logging.s3 principal in it returns False -- identical to row Z-S5's read.",
+      "denominator": "5 of 5 reads taken and all 5 as C-15 states; 1 of 1 never-widen control read, unchanged.",
+      "status": "PASS",
+      "status_reason": "The never-widen control is the arm that could have failed: satisfying C-15 by adding a grant to the shared audit-log bucket was the tempting wrong answer round 1 refused (row Z-S5), and this read proves that bucket is byte-identical in policy shape to how Z-S5 found it. Encryption is deliberately SSE-S3 and not the project key just minted, because a KMS log target would need a log-delivery grant on the key and would widen the key policy for no gain."
+    },
+    {
+      "criterion_id": "S27-AC2",
+      "criterion_verbatim": "A DELIVERED OBJECT, NEVER THE CONFIGURATION: after the uncomment is applied and the fixture write is made, list-objects-v2 on opal-data-security-access-logs/evidence-store/ returns >= 1 REAL log object (a zero-byte placeholder or a test file is NOT one; state what was excluded) -- read time stated. S3 server access log delivery is best-effort within hours: an empty prefix inside the ledger window is filed UNCOMPUTABLE-BY-TIME with the read time and the window, never as PASS on get-bucket-logging, and the ledger's delivery leg stays OPEN BY DESIGN up to 24 h; the complete flip waits on the delivered object or on the 24 h statement -- nothing else.",
+      "method": "live_read",
+      "invocation": "aws s3api list-objects-v2 --bucket opal-data-security-access-logs --prefix evidence-store/",
+      "output_evidence": "READ AT 2026-09-03T12:15:42Z: objects under evidence-store/ = 0 (non-zero-byte = 0). EMPTY at this read time. Sequence for the record: the logging block was applied at ~11:58Z, and the fixture write + read-back + delete on the evidence store at ~11:59Z is the activity there is to deliver. Nothing was excluded as a placeholder or test file because nothing was returned at all -- the exclusion rule has not yet had anything to apply to. The configuration read (get-bucket-logging -> TargetBucket=opal-data-security-access-logs, TargetPrefix=evidence-store/) is recorded as CONFIGURATION ONLY and is explicitly NOT offered as evidence for this criterion.",
+      "denominator": "1 delivery read taken at 12:15:42Z, 17 minutes after the logging block was applied; ledger window 24 h, leg L5 OPEN BY DESIGN.",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "STATUS VALUE NOTE FIRST, so the enum member is not mistaken for a weaker verdict than the face intended: S27-AC2 prescribes filing 'UNCOMPUTABLE-BY-TIME', but that string is NOT a member of PROOF_OF_SPEC.schema.json's status enum (PASS, FAIL, UNCOMPUTABLE-BY-CONSTRUCTION, UNVERIFIABLE-BY-INSTRUMENT, N/A-BY-CONSTRUCTION, UNCOMPUTABLE) and the checker REFUSES the instance on it. The nearest valid member, UNCOMPUTABLE, is used and the BY-TIME qualifier is carried here. Row NFRA_OPSEC202609-Z-S29. Exactly the branch the criterion prescribes for an empty prefix inside the window. S3 server access log delivery is best-effort and typically takes hours, so 17 minutes is far inside the expected latency and an empty read here carries no information about whether the limb works. It is NOT filed as PASS on get-bucket-logging -- that read cannot discriminate a working limb from a dead one, which is the defect row Z-S5 named and the issuer accepted for the round-2 re-cut. ONE PIECE OF POSITIVE EVIDENCE SHORT OF DELIVERY, offered as suggestive and not as the criterion: PutBucketLogging SUCCEEDED. S3 validates the target's permissions when the configuration is set, so the target's logging.s3 statement was accepted rather than the configuration being taken and silently dropped. The complete flip WAITS on the delivered object or on the 24 h statement, and this instance is committed without that flip."
+    },
+    {
+      "criterion_id": "S252627-AC3",
+      "criterion_verbatim": "0-DIFF AFTER EVERY APPLY, THE BASELINE QUOTED, NO OTHER RESOURCE RIDES: the module's UNSCOPED plan read BEFORE the first edit (0 / 0 / 0 quoted, or the row that said otherwise); each apply's plan adds ONLY the resources this face lists (the additions enumerated, count printed); the re-plan reads 0-diff after the last apply; the ledger entries CLOSED with their proofs; push state read by ls-remote + is-ancestor and stated as MEASURED.",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/opsec plan (unscoped, before any edit; after each apply) ; terraform show -json ; deploy_ledger.py ; git ls-remote origin SITEZ + git merge-base --is-ancestor",
+      "output_evidence": "BASELINE, the named first act, read BEFORE any edit: 'No changes. Your infrastructure matches the configuration.' -detailed-exitcode rc=0 -- 0/0/0, so no dirty-baseline row. APPLY 1 PLAN from terraform show -json: 17 resource_changes of which 10 CREATE and 7 NO-OP; the 10 are aws_kms_key.opsec, aws_kms_alias.opsec, aws_iam_role.security_admin, aws_iam_role_policy.security_admin, aws_s3_bucket.access_logs and its five configurations; the 7 no-ops are exactly the round-1 resources. 'Plan: 10 to add, 0 to change, 0 to destroy.' APPLY 2 PLAN: '# aws_s3_bucket_logging.data_security will be created / Plan: 1 to add, 0 to change, 0 to destroy.' RE-PLAN after the last apply: 'No changes. Your infrastructure matches the configuration.', rc=0. LEDGER opsec-r2-key-role-logs-target: L1 L2 L3 L4 L6 CLOSED with proof; L5 OPEN BY DESIGN inside its 24 h window per S27-AC2.",
+      "denominator": "2 applies; 11 additions total (10 + 1), enumerated; 0 changed and 0 destroyed across both; 7 no-ops confirming the round-1 resources were untouched; 6 ledger legs, 5 closed and 1 open by design.",
+      "status": "PASS",
+      "status_reason": "The 7 NO-OP rows are the positive form of 'no other resource rides': not merely that nothing else was added, but that every pre-existing resource was refreshed and found unchanged. Push state is MEASURED and is stated in the deliverable report and session log at read time rather than defaulted; it is perishable and the integrator moves it independently of this seat. One item deliberately left out of these commits: terraform fmt wanted a one-line whitespace realignment inside 0.7.0_AE_CloudOps~Z's committed OP-s-5 block in s3.tf, which is not this task order's content; it was restored to HEAD for apply 1 and is carried only in the commit that legitimately edits s3.tf for the uncomment."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two controls with a real failure mode, both run as separate invocations rather than folded into the thing they check. (1) S26-AC1's NEGATIVE CONTROL: a DIFFERENT existing principal (opal-portal-lambda-role) simulated against sts:AssumeRole on the new role -- if this returned allowed, the trust policy would not be doing the work and the whole C-14 single-principal claim would be empty. (2) S27-AC1's NEVER-WIDEN CONTROL: re-reading opal-cloudtrail-logs-313476888478's policy after the apply -- if a logging.s3 principal had appeared there, this cell would have widened a bucket it does not own, which is precisely the act row Z-S5 refused.",
+      "expected": "The different principal reads implicitDeny; the CloudTrail bucket reads exactly its two pre-existing cloudtrail.amazonaws.com statements with no logging.s3 principal.",
+      "observed": "Both FIRED AS EXPECTED. simulate-principal-policy for opal-portal-lambda-role on sts:AssumeRole -> Decision=implicitDeny (run with ONE --resource-arns, as its own invocation, because two ARNs in one call silently flip held results to implicitDeny and would have manufactured this answer). opal-cloudtrail-logs-313476888478 -> statements=2, Sids=[AWSCloudTrailAclCheck, AWSCloudTrailWrite], logging.s3 principal present: False -- identical to row Z-S5's read of the same bucket before any round-2 work.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "terraform -chdir=infra/aws/terraform/opsec plan -input=false -detailed-exitcode run after the final apply and compared against the pre-edit baseline run of the same command.",
+      "observed": "Both report 'No changes. Your infrastructure matches the configuration.' with rc=0 -- the baseline before any edit and the re-plan after both applies agree, with 11 resources created in between.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The key flips are not in this task order: opal-data-security stays SSE-S3 and opal-suspicious-addresses stays on the AWS-managed key.",
+      "reason": "The face's bound says so in terms -- the flips are OP-s-16 / OP-s-17, the NEXT task order on this seat, dispatched on THIS key's APPLIED read rather than on this face's complete flip. This cell mints the key and changes nothing that already exists; the via-service statement in the key policy is what will let those flips work without naming a human."
+    },
+    {
+      "item": "The deny-outside-list statement is still not written on opal-data-security's bucket policy.",
+      "reason": "Creating opal-security-admin satisfies only one of the principals C-8 needs. The statement lands with OP-s-14 / OP-s-15 / OP-s-19 once the sentinel, reconciler and CLI principals exist -- rows Z-S4 and its disarm record Z-S8. Stated on the Terraform comment so the next reader does not mistake the role's existence for the statement being safe."
+    },
+    {
+      "item": "The demo table's import and CMK alignment are not here.",
+      "reason": "OP-s-8's round-2 limb under the tick-2 bar (row Z-S14, ruling 19600). No terraform import, no update-table, no console act was performed on opal-partner-demo by this task order."
+    },
+    {
+      "item": "The access-logs bucket is encrypted SSE-S3, not with the project key this same task order mints.",
+      "reason": "C-15 says SSE-S3, and the reason holds on inspection: an SSE-KMS log target would additionally need a log-delivery grant on the key, widening the key policy for no security gain. The logs are access records; the evidence store itself is what gets the key, in the next task order."
+    },
+    {
+      "item": "The complete flip is NOT made in the commit carrying this instance.",
+      "reason": "S27-AC2 says the flip waits on a delivered log object or on the 24 h statement, and nothing else. At 12:15:42Z the prefix is empty, 17 minutes after the logging block was applied, which is far inside S3's best-effort delivery latency. Ledger leg L5 is OPEN BY DESIGN inside its 24 h window. Flipping now would assert a delivery that has not been observed."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S27: S26-AC2's census ('the diff reads 0 occurrences of arn:aws:iam::313476888478:user/') and the same face's DELIVERABLE 2 / C-14 ('TRUST POLICY = ONE principal, arn:aws:iam::313476888478:user/Andrew_Berman') are mutually exclusive -- a role cannot trust a principal it does not name. Measured: 3 occurrences of ':user/' in the diff = 2 COMMENTS + 1 mandated TRUST line + ZERO in any GRANT policy. The substance the criterion protects holds; its literal wording cannot. OBSERVATION/ARMED, at the issuer -- ARMED because OP-s-19's CLI role and any later operator role will hit it identically.",
+    "NFRA_OPSEC202609-Z-S29: S27-AC2 prescribes filing the empty-delivery case as status 'UNCOMPUTABLE-BY-TIME', which is NOT a member of PROOF_OF_SPEC.schema.json's status enum -- proof-of-spec-check REFUSES the instance on it (exercised: INVALID rc=1, then VALID rc=0 after moving to the nearest valid member UNCOMPUTABLE with the BY-TIME qualifier and read time in status_reason). The face prescribes a value its own gate rejects. OBSERVATION/ARMED; the schema was NOT edited -- widening a ratified estate contract is not an assignee's act."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~S/logs/2026-09-03/session_1140-1230Z_NFRA_OPSEC202609_TO-OP-S-25-26-27.md",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan (unscoped baseline)",
+      "invocation": "terraform -chdir=infra/aws/terraform/opsec plan -input=false -detailed-exitcode, run BEFORE any edit",
+      "result": "'No changes' rc=0 -- 0/0/0. The named first act of this task order, and the Z-S17 shape did not fire. Worth having: a peer (0.7.0_AE_CloudOps~Z) had edited this module's s3.tf for OP-s-5 between round 1 and now, so a clean baseline was not a foregone conclusion; their work was already applied."
+    },
+    {
+      "tool": "aws sts/kms/iam/s3api (phase-1 referent re-reads)",
+      "invocation": "get-caller-identity; kms list-aliases; iam get-role opal-security-admin; s3api head-bucket opal-data-security-access-logs -- each with its positive control",
+      "result": "ALL FIVE AGREE with the face's 11:3xZ line at this seat's 11:44:34Z vintage: the applier ARN matches C-14's trust principal, 0 alias/opal-security across 20 aliases with NextMarker absent, NoSuchEntity for the role (control opal-portal-lambda-role returns), 404 for the bucket (control opal-data-security 200), 7 resources in state. No difference, so no row -- and had one differed it would have been a row before any write, not a substitution."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'aws_kms_key' --files infra/aws/terraform (phase-1 step 3)",
+      "result": "46 hits across 539 files; the idiom read at nfra-agentbus/kms.tf -- the account-root EnableIAMUserPermissions statement plus a scoped usage statement, and an aws_kms_alias resource. Followed for statement (a)."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read --enumerate ':user/' over each of the 6 module files",
+      "result": "The banded census behind S26-AC2 and row Z-S27: 3 occurrences, banded to 2 comments + 1 trust line + 0 grants. The banding is the whole finding -- an unbanded count would have read 2 or 3 depending on authoring style and settled nothing."
+    },
+    {
+      "tool": "aws iam simulate-principal-policy",
+      "invocation": "one --resource-arns, as a separate invocation, for a DIFFERENT existing principal on sts:AssumeRole",
+      "result": "implicitDeny -- the negative control S26-AC1 requires. Run in isolation because 2+ --resource-arns in one call flips held results to implicitDeny, which would have made the control agree with itself for the wrong reason."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open (6 legs, 24 h window) -> close-leg L1 L2 L3 L4 L6 -> L5 left OPEN BY DESIGN",
+      "result": "Two applies under one entry, each leg closed on its own proof. L5 is the delivery leg and stays open inside the window, which is what S27-AC2 prescribes rather than a stranded leg."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "on the Z-S27 commit (the row committed ALONE per the face's bound)",
+      "result": "rc=0, '1 new row(s) of 27 total checked'; corpus matches the exact legacy baseline. A first attempt mis-generated the id as NFRA_OPSEC202609-Z-27 (the 'S' dropped by a substitution); caught and repaired to -Z-S27 BEFORE the commit, and every id in the channel was then re-validated against the required form."
+    }
+  ]
+}
