@@ -72,9 +72,9 @@
     {
       "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.7.0_AE_CloudOps~T/CG-s-3.projection-contract.result.md",
       "kind": "doc",
-      "commit_or_etag": "823ea90776e5a8239c8a6b43588330e8cb714ee8",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Phase A result is committed at 823ea90776. The worktree carries the released implementation, S21 boundary disclosure, and 71-byte incomplete plant; the final flip will co-commit that update with this instance and the task face after the issuer/~S relay.",
+      "deploy_evidence": "Phase A result exists at 823ea90776 and the interim Phase B record at 327ab20f58. This final revision carries the same-graph producer agreement, two forward publishes, reader consistency, both live refusals, S21/S23 boundary disclosures, and is staged with the proof and task-face completion.",
       "artifact_covered_by": ["B3-AC1", "B3-AC2", "B3-AC3", "B3-AC4", "B3-AC5", "B3-AC6"]
     }
   ],
@@ -93,7 +93,7 @@
       "criterion_verbatim": "THE POINTER WRITER in the engine's own publish path, edited only AFTER TO-CG-B-2's status reads complete at a commit named on the proof row: verification of artifact completeness before the PUT; the refuse-backward rule; any conforming manifest edit; file:line @ commit; no second copy of the engine.",
       "method": "test_suite",
       "invocation": "python -m pytest infra/aws/globgrph/tests/test_projection_worker.py infra/aws/globgrph/tests/test_kuzu_incremental_refresh.py infra/aws/globgrph/tests/test_s9_graph_key_symmetry.py -q; issuer release Msg 93769; git show 59aeb265cc:infra/aws/globgrph/projection_worker.py",
-      "output_evidence": "10 passed. Phase B released by issuer Msg 93769 after ~S's 15:58:16Z no-more-Python-edits statement; B2 worker pin a9ef0f6160 and engine pin 117e539280. The one engine path is projection_worker.py:300 conform_manifest, :348 verify_remote_publish, :390 advance_pointer, and :497 build_and_publish @59aeb265cc. It pins one retained marker, stamps both modes, verifies exact two-key set/bytes/SHA/size band, refuses backward/equal conflicts, conditionally creates immutable versioned objects, and performs one pointer PUT last. Full/incremental missing-endpoint stamps are kuzu_nessie_load.py:268 and kuzu_incremental_refresh.py:256 @5bb91c894d. No second engine copy exists.",
+      "output_evidence": "10 passed. Phase B released by issuer Msg 93769 after ~S's 15:58:16Z no-more-Python-edits statement; B2 worker pin a9ef0f6160 and engine pin 117e539280. The one engine path is projection_worker.py:300 conform_manifest, :348 verify_remote_publish, :390 advance_pointer, and :497 build_and_publish @59aeb265cc. It pins one retained marker, stamps both modes, verifies exact two-key set/bytes/SHA/size band, refuses backward/equal conflicts, conditionally creates immutable versioned objects, and performs one pointer PUT last. Full/incremental missing-endpoint stamps are kuzu_nessie_load.py:268 and kuzu_incremental_refresh.py:256 @5bb91c894d. No second engine copy exists. S23 @952fae0cc4 records that B2 task fa5df7 crossed its no-pointer bound; no undo. The B3 completeness check plus If-None-Match:* conditional create disarm the shared-path hazard, with redeployment explicitly carried to round 3 by Msg 93803.",
       "denominator": "10 of 10 focused tests; 2 of 2 producer manifest paths conformed; 1 of 1 pointer implementation in the existing worker path.",
       "status": "PASS"
     },
@@ -101,11 +101,10 @@
       "criterion_id": "B3-AC3",
       "criterion_verbatim": "BOTH PRODUCERS AGREE on one graph: edge_count and node_count equal across the full and incremental manifests and equal to a direct COUNT(*) on the artifact; the numbers quoted (the control that can fail: the pre-S8-fix loader would read 60,688 here).",
       "method": "live_read",
-      "invocation": "After ~S's first artifact relay, run the committed full/incremental producer comparison on one retained marker and direct Kuzu MATCH COUNT(*) queries.",
-      "output_evidence": "Implementation is present, but issuer Msg 93788 sequences live count evidence after ~S's B2 retry publishes the first artifact. The pre-fix failing value remains 60,688 merge attempts versus 58,432 stored edges.",
-      "denominator": "0 of 2 producer manifests compared on the released artifact; named later run is the post-~S-relay full/incremental same-graph control.",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "The next computation is the issuer-authorized post-~S-artifact producer-agreement run; Msg 93788 currently holds this seat to worktree-only implementation."
+      "invocation": "Download released full artifact+manifest at 2026-09-03T16:27:39.471730+00:00; pin the exact live marker in PROJECTION_MARKER_JSON; run committed kuzu_incremental_refresh.py --current <full> --db <scratch>; conform mode=incremental; run direct Kuzu MATCH counts against both files.",
+      "output_evidence": "Same marker and snapshots for both producers: vintage 2026-09-03T16:27:39.471730+00:00, nodes snapshot 8525533673192182741, edges snapshot 2253722689641059303. Full manifest = 27,206 nodes / 58,550 edges / 383 skipped. Incremental rc 0 in 5.450 s with zero node/edge delta; incremental manifest = 27,206 / 58,550 / 383. Direct Cypher on the full artifact = 27,206 / 58,550 and on the incremental artifact = 27,206 / 58,550. The failing pre-S8 value 60,688 is merge attempts, not stored edges.",
+      "denominator": "2 of 2 producer manifests agree; 2 of 2 direct artifact count pairs agree with both manifests; 4 of 4 node/edge comparisons equal; 1 of 1 pre-S8 control distinguished.",
+      "status": "PASS"
     },
     {
       "criterion_id": "B3-AC4",
@@ -120,28 +119,26 @@
       "criterion_id": "B3-AC5",
       "criterion_verbatim": "EXERCISED: two real publishes through the committed publish path with the pointer advancing forward; a reader's pointer-then-manifest read consistent; the incomplete-artifact plant REFUSED (pointer unmoved, refusal quoted); the backward-vintage plant REFUSED.",
       "method": "live_read",
-      "invocation": "Issuer-authorized retained-marker task 968bf1a3ca4d48d5bc60244228bbfcda may finish; then wait for ~S relay and exercise only an authorized committed publish path. Incomplete plant: .tools/aws s3api put-object .../13:23:54.../kuzu_nessie_db; python run-incomplete-control.py.",
-      "output_evidence": "Incomplete live plant is proven now: this seat wrote exactly one 71-byte object at projection/2026-09-03T13:23:54.000000+00:00/kuzu_nessie_db at 16:25:44Z; no manifest exists and 71 bytes is below the 42,294,879-byte minimum. Committed advance_pointer refused: candidate file set incomplete or extra, expected database+manifest, actual database only; pointer before/after null and bytes unchanged. Issuer Msg 93802 permits already-running retained-real-marker task 968bf1a3 to finish but forbids any further B2 task-definition launch by this seat. Two forward publishes, consistent reader, and backward live refusal remain sequenced after ~S's retry artifact relay.",
-      "denominator": "1 of 2 planted refusals passed live; 0 of 2 required forward publishes accepted as final evidence; 0 of 1 reader straddle controls run after two flips.",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "The next computation is after ~S relays that issuer-authorized B2 retry task 312c57e440c542daae2ee241c775bedd published the first artifact; Msg 93788 holds AC5 until then, and Msg 93802 forbids this seat from launching the B2 task definition again."
+      "invocation": "CloudWatch get-log-events for ECS tasks 968bf1a3ca4d48d5bc60244228bbfcda and fa5df7737afc48fdbda6a9106d5676b6; live pointer-manifest-pointer read; incomplete plant advance_pointer; committed advance_pointer on older complete 13:23:55 candidate behind current 16:27:39.",
+      "output_evidence": "Two exit-0 cloud tasks on digest sha256:1e1aaa14... published through the committed path and each logged pointer_written=true/pointer_status=advanced: 968bf1a3 -> 13:23:55.222893Z, 47,054,848 B, manifest cb26341d..., 27,134/58,432; fa5df773 -> 16:27:39.471730Z, 48,046,080 B, manifest 0c2c0052..., 27,206/58,550. Reader pointer1/manifest/pointer2 all named 16:27:39; pointer bytes stable, manifest SHA matched, prefix matched. The exact 71-byte incomplete prefix without manifest refused: expected database+manifest, actual database only; pointer was absent before/after. The committed writer verified the older complete prefix then refused 'backward vintage refused: candidate=2026-09-03T13:23:55.222893+00:00 current=2026-09-03T16:27:39.471730+00:00'; pointer SHA 432ec284... and ETag 3e945885... were unchanged.",
+      "denominator": "2 of 2 forward publishes advanced; 1 of 1 pointer-manifest-pointer reader controls consistent; 2 of 2 planted refusals fired; pointer unchanged in 2 of 2 refusal controls.",
+      "status": "PASS"
     },
     {
       "criterion_id": "B3-AC6",
       "criterion_verbatim": "THE HANDOFF LINES for CG-s-4 / CG-s-6 / CG-s-7: the pointer key, the manifest fields a reader uses for the age line and the status read, the straddle rule, the artifact size band, the recovery property; PUSH STATE MEASURED at report; the proof instance VALID (.tools/proof-of-spec-check.py rc 0) with every surprises entry resolving to a row BEFORE the complete flip, which this seat commits itself.",
       "method": "schema_validation",
       "invocation": "python .tools/proof-of-spec-check.py <this instance>; after final co-commit: git ls-remote origin CLOUD; git merge-base --is-ancestor <flip> <remote-head>.",
-      "output_evidence": "Handoffs are written: CG-s-4 reads only projection/current.json, verifies manifest SHA/artifact and repeats on a straddled pointer; CG-s-6 displays manifest.age_line from committed_at; CG-s-7 reports all source pins, producer/count/size fields and the 42,294,879..51,693,741-byte band; pointer-last keeps a pre-pointer crash invisible and next real stamp heals. S16, S21, and S22 are filed rows. Final schema rc, push state, and complete flip necessarily follow the remaining AC3/AC5 computation.",
-      "denominator": "3 of 3 reader handoffs written; 3 of 3 surprise entries resolve; final checker/push/flip are 0 of 3 pending the named post-exercise run.",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "The named later run is finalization immediately after B3-AC3 and B3-AC5 pass: validate all six rows, co-commit task face+instance+deliverable, then measure origin with ls-remote and is-ancestor without pushing."
+      "output_evidence": "Handoffs are written: CG-s-4 reads only projection/current.json, verifies manifest SHA/artifact and repeats on a straddled pointer; CG-s-6 displays manifest.age_line from committed_at; CG-s-7 reports all source pins, producer/count/size fields and the 42,294,879..51,693,741-byte band; pointer-last keeps a pre-pointer crash invisible and next real stamp heals. S16, S21, S22, and S23 are filed and resolve. Pre-final measurement: local HEAD fca007a4cf, origin/CLOUD 351f309e0a, local-is-ancestor rc 1; this seat does not push. Final task face, proof, result, and log are co-staged; the exact final commit and post-commit origin/is-ancestor result are reported to the issuer without pushing.",
+      "denominator": "3 of 3 reader handoffs written; 4 of 4 surprise entries resolve; 6 of 6 acceptance rows PASS; checker VALID rc 0 required before commit; post-commit push-state report is 1 of 1 named follow-up and never a push.",
+      "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
       "description": "Three independent fail-capable axes: exact remote file-set completeness, pointer chronological order, and same-vintage object immutability. The live incomplete plant omits its manifest; unit controls install an older complete candidate behind a newer pointer and install both identical and differing bytes at an existing versioned key.",
       "expected": "Incomplete candidate refuses without pointer write; backward candidate refuses without pointer move; identical same-vintage artifact/manifest bytes are no-ops; any differing bytes refuse.",
-      "observed": "Live incomplete plant refused with pointer null before/after. Unit controls passed all four collision arms and backward/incomplete pointer arms; focused suite 10 of 10 twice. The live backward plant remains part of B3-AC5 after two genuine flips.",
+      "observed": "Live incomplete plant refused with pointer null before/after. Unit controls passed all four collision arms and backward/incomplete pointer arms; focused suite 10 of 10 twice. After two genuine forward flips, the live backward candidate refused and pointer SHA/ETag/LastModified remained unchanged.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
@@ -175,7 +172,8 @@
   "surprises": [
     "NFRA_CLDGRPH-S16: At commit 823ea90776, of 2,256 excess source-edge observations only 13 are expected profile-role repeats; 2,235 are uncollapsed C2-instance member emissions owned by 3.0.0_SA_CVO and 8 are EventBridge target configurations made indistinguishable by comp_aws_cli.py owned by 0.8.0_AE_CloudComp.",
     "NFRA_CLDGRPH-S21: This seat stopped B2 task 6aa88972790949a5bbe9b315381ec895 after 288.286 seconds at 16:26:35.641Z; issuer Msg 93787 ruled the stop outside CG-s-3, and the report discloses it without relabeling exit 137 as OOM.",
-    "NFRA_CLDGRPH-S22: At commit 59aeb265cc, the B2 publisher's pre-build absence check plus unconditional upload permits non-identical same-vintage overwrite; issuer Msg 93788 required the conditional-create byte-identity guard, and Msg 93803 accepted it for B3-AC1/B3-AC2 while carrying redeployment to round 3."
+    "NFRA_CLDGRPH-S22: At commit 59aeb265cc, the B2 publisher's pre-build absence check plus unconditional upload permits non-identical same-vintage overwrite; issuer Msg 93788 required the conditional-create byte-identity guard, and Msg 93803 accepted it for B3-AC1/B3-AC2 while carrying redeployment to round 3.",
+    "NFRA_CLDGRPH-S23: At commit 952fae0cc4, B2 task fa5df7737afc48fdbda6a9106d5676b6 advanced projection/current.json despite B2's no-pointer bound; no undo. Disarm owner is this seat through B3-AC2's completeness check plus conditional same-vintage create in the shared path."
   ],
   "compiler_tools": [
     {
@@ -196,12 +194,12 @@
     {
       "tool": ".tools/aws live S3/ECS/CodeBuild reads",
       "invocation": "s3api/head/list/get through shim; CodeBuild build 52; ECR digest read; incomplete plant PutObject and committed advance_pointer invocation",
-      "result": "Build 52 succeeded from commit 5bb91c894d and yielded digest sha256:1e1aaa14...; live incomplete 71-byte one-object prefix was refused with pointer unchanged. Remaining AC5 reads wait on the issuer/~S relay."
+      "result": "Build 52 succeeded from commit 5bb91c894d and yielded digest sha256:1e1aaa14...; live tasks 968bf1a3/fa5df773 produced two forward flips; pointer-manifest-pointer was consistent; both incomplete and backward live candidates refused with pointer unchanged."
     },
     {
       "tool": "proof-of-spec-check.py",
       "invocation": "python .tools/proof-of-spec-check.py org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.7.0_AE_CloudOps~T/NFRA_CLDGRPH.TO-CG-B-3.artifact-manifest-pointer-contract.proof_of_spec.json",
-      "result": "Interim instance VALID rc 0 with six acceptance rows, seven artifact pins resolved, three of three surprise entries resolved, and zero violations. Final rc 0 with every row PASS is required before the complete flip."
+      "result": "Interim instance VALID rc 0 at commit 327ab20f58 after the CCX pin repair. Final run requires six of six PASS, seven artifact rows resolved including the staged result revision, four of four surprise entries resolved, and zero violations before the complete flip."
     }
   ]
 }

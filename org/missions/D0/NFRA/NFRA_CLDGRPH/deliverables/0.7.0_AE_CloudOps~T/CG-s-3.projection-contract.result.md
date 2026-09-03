@@ -4,13 +4,13 @@
 
 **Seat:** `0.7.0_AE_CloudOps~T`
 
-**Phase state:** Phase B implementation committed; the issuer-authorized retained-marker task may finish, with no further B-2 task-definition launch by this seat.
+**Phase state:** Complete. Contract, publisher controls, producer agreement, duplicate census, two forward publishes, reader check, and both refusal controls are exercised.
 
 ```json
 {
   "to_id": "NFRA_CLDGRPH.TO-CG-B-3",
   "cell": "CG-s-3",
-  "phase": "B_IMPLEMENTED_EXERCISE_IN_PROGRESS",
+  "phase": "COMPLETE",
   "phase_b_release": {
     "condition": "issuer written release after TO-CG-B-2 reported no further Python edit pending",
     "observed_status": "released by issuer Msg 93769",
@@ -89,8 +89,50 @@
   "phase_b": {
     "release_commit": "Msg 93769; B2 worker a9ef0f6160b6aa786b0321f1893e5089c08e118a and engine 117e539280d678e946f5c74a1f2593e07d41e01a",
     "pointer_writer": "infra/aws/globgrph/projection_worker.py @59aeb265cca69506ec8c02f76d11a2b615dbe195",
-    "producer_agreement": null,
-    "publish_keys": [],
+    "producer_agreement": {
+      "graph_vintage": "2026-09-03T16:27:39.471730+00:00",
+      "nodes_snapshot_id": 8525533673192182741,
+      "edges_snapshot_id": 2253722689641059303,
+      "full_manifest": {"mode": "full", "node_count": 27206, "edge_count": 58550, "edges_skipped_missing_endpoint": 383},
+      "incremental_manifest": {"mode": "incremental", "node_count": 27206, "edge_count": 58550, "edges_skipped_missing_endpoint": 383},
+      "full_direct_count": {"node_count": 27206, "edge_count": 58550},
+      "incremental_direct_count": {"node_count": 27206, "edge_count": 58550},
+      "incremental_delta": {"node_upsert": 0, "node_delete": 0, "edge_upsert": 0, "edge_delete": 0},
+      "incremental_seconds": 5.450,
+      "control": "all four count pairs equal; the pre-S8 merge-attempt value 60,688 is not reported as stored edge_count"
+    },
+    "publish_keys": [
+      {
+        "task": "968bf1a3ca4d48d5bc60244228bbfcda",
+        "artifact_prefix": "projection/2026-09-03T13:23:55.222893+00:00/",
+        "manifest_sha256": "cb26341dd4635d81af907cca21989d31f0cfb4c4d2854ae1337aec1c6dea51ca",
+        "artifact_bytes": 47054848,
+        "node_count": 27134,
+        "edge_count": 58432,
+        "pointer_status": "advanced",
+        "pointer_written": true,
+        "exit_code": 0
+      },
+      {
+        "task": "fa5df7737afc48fdbda6a9106d5676b6",
+        "artifact_prefix": "projection/2026-09-03T16:27:39.471730+00:00/",
+        "manifest_sha256": "0c2c0052c43ca06ce92bb37fe822a733c4999a0405e2a8b456b015f14d40f101",
+        "artifact_bytes": 48046080,
+        "node_count": 27206,
+        "edge_count": 58550,
+        "pointer_status": "advanced",
+        "pointer_written": true,
+        "exit_code": 0
+      }
+    ],
+    "reader_control": {
+      "pointer_1_vintage": "2026-09-03T16:27:39.471730+00:00",
+      "manifest_vintage": "2026-09-03T16:27:39.471730+00:00",
+      "pointer_2_vintage": "2026-09-03T16:27:39.471730+00:00",
+      "pointer_bytes_same": true,
+      "manifest_sha256_match": true,
+      "artifact_prefix_match": true
+    },
     "incomplete_artifact_refusal": {
       "plant_key": "projection/2026-09-03T13:23:54.000000+00:00/kuzu_nessie_db",
       "written_by": "this seat via .tools/aws s3api put-object at 2026-09-03T16:25:44Z",
@@ -99,7 +141,21 @@
       "size_band_minimum_bytes": 42294879,
       "result": "PublicationRefused: expected the database plus _build_manifest.json, actual set contained only the database; projection/current.json was unchanged and absent"
     },
-    "backward_vintage_refusal": null
+    "backward_vintage_refusal": {
+      "candidate": "2026-09-03T13:23:55.222893+00:00",
+      "current": "2026-09-03T16:27:39.471730+00:00",
+      "result": "PointerRefused: backward vintage refused: candidate=2026-09-03T13:23:55.222893+00:00 current=2026-09-03T16:27:39.471730+00:00",
+      "pointer_sha256_before": "432ec2848835649bfd01c548589dfa4ad04dfba855b0ac13412e303fd25c3359",
+      "pointer_sha256_after": "432ec2848835649bfd01c548589dfa4ad04dfba855b0ac13412e303fd25c3359",
+      "pointer_etag_before": "3e945885dc5bb2d9e3d2c98811297ac6",
+      "pointer_etag_after": "3e945885dc5bb2d9e3d2c98811297ac6",
+      "pointer_unchanged": true
+    },
+    "boundary_disclosures": {
+      "S21": "This seat stopped B2 task 6aa88972790949a5bbe9b315381ec895 after 288.286 seconds at 2026-09-03T16:26:35.641Z with reason 'CG-s-3 prevent pre-contract image collision at released vintage'; issuer Msg 93787 ruled the stop outside this order. Exit 137 is not labeled OOM.",
+      "S23": "B2 task fa5df7737afc48fdbda6a9106d5676b6 crossed B2's no-pointer bound and advanced projection/current.json. S23 @952fae0cc4 routes disarm to B3-AC2; no undo. The completeness check and If-None-Match:* same-vintage guard @59aeb265cc supersede the bare shared writer, with deployment carried to round 3.",
+      "runtime_actions_after_ruling": "No further B2 task-definition launch, stop-task, Pipe mutation, or queue mutation by this seat."
+    }
   }
 }
 ```
@@ -118,4 +174,6 @@ All 2,256 excess rows were byte-identical across every stored source-table colum
 
 ## Phase boundary
 
-Phase A made no edit in either bounded infrastructure tree and did not run `comp-blast`. The issuer released Phase B in Msg 93769 after ~S stated no further Python edit was pending. The pointer/manifests landed at `5bb91c894d`, and the issuer-ruled same-vintage conditional-create guard plus S22 landed worktree-only at `59aeb265cc`. The incomplete 71-byte plant was refused before any pointer write. Per Msg 93802, the already-running retained-real-marker task `968bf1a3ca4d48d5bc60244228bbfcda` may finish, but this seat launches no further B-2 task definition; remaining AC5 exercise waits on the issuer/~S relay and uses only an authorized path.
+Phase A made no edit in either bounded infrastructure tree and did not run `comp-blast`. The issuer released Phase B in Msg 93769 after ~S stated no further Python edit was pending. The publisher/manifests landed at `5bb91c894d`; the issuer-ruled same-vintage conditional-create guard and S22 landed at `59aeb265cc`, deliberately not redeployed because Msg 93803 carries that B2 runtime act to round 3.
+
+The already-running retained-marker task `968bf1a3ca4d48d5bc60244228bbfcda` and authentic Pipe task `fa5df7737afc48fdbda6a9106d5676b6` both finished at exit 0 through digest `sha256:1e1aaa14df31da756001f3a42b1f5b6c671e4d75586aeb72c96586534a50f01c`; their `PROJECTION_RESULT` records show two strictly forward pointer advances. The live reader control matched pointer/manifest/pointer vintages and manifest SHA. The 71-byte incomplete prefix and the older complete vintage were independently refused with the pointer unmoved. S23 records that the B2 task wrote a pointer outside its own bound; B3 disarms that shared-path hazard through the completeness and conditional-create controls without undoing a valid live pointer.
