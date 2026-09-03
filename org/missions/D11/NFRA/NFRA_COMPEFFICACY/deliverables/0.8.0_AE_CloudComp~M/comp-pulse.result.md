@@ -75,4 +75,8 @@ The normal completion prints `WITHIN BUDGET: scanned N of N telemetry row(s); bu
 | T18-AC3 | Cut census and current post-wiring census stated with denominators and time boundary. |
 | T18-AC4 | Shared carrier in help; real budget prefix; verdict-bearing `diff` rc 2; read-only consumer behavior stated. |
 | T18-AC5 | New 12-arm battery, 12/12 direct, 1/1 file pytest, every paired mutant fires. |
-| T18-AC6 | Proof instance accompanies this report and resolves S25 before any complete flip; push/independent-seat evidence remains pending after the implementation commit. |
+| T18-AC6 | Proof instance validated before this complete flip and resolves S25. COO FWD-9 independently observed implementation SHA `25684b8d96` as an ancestor of `ab8280509d` and ran the real shim command with rc 0. Push state is LOCAL: this seat did not push. |
+
+## FWD-9 distinct-seat post-commit evidence
+
+Issuer seat `2.0.0_SA_COO` executed `bash .tools/comp-pulse diff org/modules/graph/comp_pulse.py` at 2026-09-03T16:56:26Z, observing HEAD `ab8280509d`; `git merge-base --is-ancestor 25684b8d96 HEAD` returned rc 0. The shim returned rc 0 with one checked file, a 1,906-node denominator, `ANSWER STATE: PRESENT_WITH_ZERO_RESULTS`, `REFLEX CLEAN -- a MEASURED result`, and `WITHIN BUDGET`. COO also ran this proof instance and observed `VALID (rc=0)`. This is the required distinct-seat evidence; the production change remains LOCAL and was never pushed by this seat.
