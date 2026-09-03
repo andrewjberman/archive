@@ -28,3 +28,12 @@ Post-commit self-test ended: self-test: 45/45 passed (grounded-or-UNKNOWN, no fa
 The required prior unit-1 regeneration is recorded at c08c1bbe99 for
 infra/system/06_current_state.{md,json}. Its header carries as_of_head, source_fingerprint,
 emitted_at_utc, source_health, and rule_t; this lane did not regenerate or widen that shared record.
+
+## FWD-9 distinct-seat exercise
+
+COO seat `2.0.0_SA_COO` ran the exact command `python org/modules/graph/comp_system.py --check`
+from the workspace root at 2026-09-03T18:03:30Z on HEAD `1fb2f2a21e`; both evidence commit
+`b6a2274c7d` and engine commit `2e1102da89` were ancestors. It returned rc 0 and printed
+`SYSTEM CURRENT`, `WITHIN BUDGET: scanned 1 of 1 check_verdict; budget: 90 s (default), used
+4.688 s`, and `DEFERRED: 0 of 1 check_verdict(s) did not return`. This is the required
+independent verdict-bearing FWD-9 exercise.
