@@ -72,12 +72,12 @@ No spec-vs-world surprise row was required by this audit.
     "T14-AC3": "PASS — comp-similar overlap is a name-level note only; seam engines were not edited.",
     "T14-AC4": "PASS — shared Rule-T carrier, disclosure, expiry rc=3, small-budget cut, cursor, deep guard, and complete cursor resume are measured.",
     "T14-AC5": "PASS — new battery is green direct and under pytest; commit gate is clean; four RED mutation arms are present.",
-    "T14-AC6": "PENDING COMMIT — proof instance must validate before this order flips complete; push state is measured below."
+    "T14-AC6": "PASS — proof checker returned VALID before complete flip; local commit and origin ancestry were measured below."
   },
   "push_state": {
     "before": "production engine blob 2392e85d5d781c7354c0a1160b1f008a83461cff; battery added in this work",
-    "after_local": "measured after report write and before commit",
-    "origin": "ABSENT — not asserted until the lane commit and ls-remote/is-ancestor measurement"
+    "after_local": "commit 9334701e712cb99f606e4ab755a7788f4c053d04; engine blob 2392e85d5d781c7354c0a1160b1f008a83461cff; battery blob 64482eed05b5247d41632ddcdfe1346d6531ed8f",
+    "origin": "MEASURED ABSENT: origin/CLOUD at 351f309e0a6ded1a5a5bdf3aacec18a5f9f8dbee; git merge-base --is-ancestor returned rc=1 (local commit not on origin)"
   }
 }
 ```
@@ -156,6 +156,7 @@ and resumable (`rc=3`, scanned/total, and cursor).
 
 ## Push state (measured after commit)
 
-The lane must measure `git ls-remote origin refs/heads/CLOUD` and
-`git merge-base --is-ancestor <lane-commit> origin/CLOUD` after the own-path
-commit; no remote state is claimed before that probe.
+Measured after the own-path commit: `git ls-remote origin refs/heads/CLOUD`
+returned `351f309e0a6ded1a5a5bdf3aacec18a5f9f8dbee`; ancestry probe for local
+commit `9334701e712cb99f606e4ab755a7788f4c053d04` returned rc=1. The lane
+commit is therefore local and not present on origin/CLOUD.
