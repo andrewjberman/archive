@@ -1,0 +1,185 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-8",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "bff1f8d012",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-8.identity-and-rbac-table-protection.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/prd/NFRA_OPSEC202609_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "43b75ffbd6"
+  },
+  "assignee": "0.7.0_AE_CloudOps~S",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/modules/partner-firm-table/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "f5859c4097",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply rc=0 on infra/aws/terraform/partner-firms -- 'Apply complete! Resources: 0 added, 3 changed, 0 destroyed'; all three Modifying/in-place. Both settings declared in the MODULE so every instantiation inherits them and a new firm cannot be onboarded without them."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/shared-infra/dynamo.tf",
+      "kind": "terraform",
+      "commit_or_etag": "946ec2c50d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply rc=0 with -target=aws_dynamodb_table.opal_users_v2 (targeting DECLARED in the ledger) -- 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed'. This is opal-users-v2's REAL carrier; the face named portal-auth/dynamodb.tf (row Z-S17)."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260903T0921Z_opsec-s8-identity-rbac-table-protection_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "f5859c4097",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "deploy ledger for the three partner tables, 4 legs, all closed, sentinel removed"
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260903T0929Z_opsec-s8-users-v2-deletion-protection_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "946ec2c50d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "deploy ledger for the scoped opal-users-v2 apply, 4 legs, all closed, sentinel removed; L4 records the two-sided unscoped verification"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S8-AC1",
+      "criterion_verbatim": "PITR ON, FIVE OF FIVE: aws dynamodb describe-continuous-backups --table-name <t> for opal-users-v2, opal-partner-49financial, opal-partner-cottonwood, opal-partner-inflection, opal-partner-demo reads PointInTimeRecoveryStatus: ENABLED on each, with EarliestRestorableDateTime present -- five reads pasted, denominator 5 of 5.",
+      "method": "live_read",
+      "invocation": "aws dynamodb describe-continuous-backups --table-name <t>  (x5)",
+      "output_evidence": "FINAL reads 2026-09-03T09:37Z: opal-users-v2 ENABLED (EarliestRestorableDateTime 2026-07-30T05:34:35.668-04:00, pre-existing); opal-partner-49financial ENABLED (2026-09-03T05:24:22-04:00); opal-partner-cottonwood ENABLED (same stamp); opal-partner-inflection ENABLED (same stamp); opal-partner-demo DISABLED. The three partner tables were DISABLED in the BEFORE snapshot at 2026-09-03T09:04:21Z and are ENABLED after this cell's apply -- the change is this cell's, measured either side.",
+      "denominator": "5 of 5 tables read. 4 of 5 ENABLED with EarliestRestorableDateTime present; 1 of 5 (opal-partner-demo) DISABLED and deferred.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "The four MANAGED tables PASS outright. The fifth limb is unreachable by this cell as scoped: opal-partner-demo is LIVE but NOT Terraform-managed -- 0 declarations across 530 files, no firm_id=\"demo\", and absent from every initialized module's terraform state (positive-controlled: the same loop resolves firm_49financial -> opal-partner-49financial). Row NFRA_OPSEC202609-Z-S14; issuer ruling 19600 took rec (a) and DEFERRED the demo limb to round 2 as a Terraform IMPORT adoption, with NO import, NO update-table and NO console act this round. The five-of-five denominator stays on the frozen face; this limb files UNCOMPUTABLE, the same shape S17-AC1 took on Z-S3/Z-S4/Z-S5."
+    },
+    {
+      "criterion_id": "S8-AC2",
+      "criterion_verbatim": "DELETION PROTECTION ON, FIVE OF FIVE: describe-table reads DeletionProtectionEnabled: true on the same five -- five reads pasted, denominator 5 of 5.",
+      "method": "live_read",
+      "invocation": "aws dynamodb describe-table --table-name <t> --query Table.DeletionProtectionEnabled  (x5)",
+      "output_evidence": "FINAL reads 2026-09-03T09:37Z: opal-users-v2 True; opal-partner-49financial True; opal-partner-cottonwood True; opal-partner-inflection True; opal-partner-demo True. BEFORE snapshot 09:04:21Z for the same five: False, False, False, False, True.",
+      "denominator": "5 of 5 tables read, 5 of 5 read true.",
+      "status": "PASS",
+      "status_reason": "PASS in full, with the attribution stated so the number is not over-claimed: FOUR of the five were flipped False -> True by this cell (opal-users-v2 and the three partner tables). The fifth, opal-partner-demo, ALREADY read true in the BEFORE snapshot and in brief F6 -- deletion protection was the one axis on which the demo table was ahead of the real ones, not behind. So the criterion's state assertion holds five of five, while this cell's ACT accounts for four of them. The demo table's PITR limb is the one that remains open (S8-AC1, row Z-S14)."
+    },
+    {
+      "criterion_id": "S8-AC3",
+      "criterion_verbatim": "THE DEMO TABLE READS LIKE THE REAL ONES: describe-table opal-partner-demo SSEDescription shows SSEType: KMS with KMSMasterKeyArn = the estate CMK (the same ARN opal-users-v2 reports), and the table was UPDATED not replaced (TableId / CreationDateTime identical before and after -- the pair pasted).",
+      "method": "live_read",
+      "invocation": "aws dynamodb describe-table --table-name opal-partner-demo ; and the before/after TableId+CreationDateTime pair on every table this cell did change",
+      "output_evidence": "opal-partner-demo AFTER: SSE remains AWS-OWNED (no SSEDescription KMS block), TableId 99ddc090..., CreationDateTime 2026-06-03T15:26:08 -- unchanged, because this cell made no change to it at all. THE UPDATED-NOT-REPLACED CONTROL, run on the four tables this cell DID change, all pairs identical: opal-users-v2 TableId 8e590a34 / created 2026-01-08T12:46:52; opal-partner-49financial created 2026-03-04T11:47:53; opal-partner-cottonwood created 2026-04-29T15:07:53; opal-partner-inflection created 2026-04-21T17:03:51. Terraform reported every one as 'Modifying...'/'will be updated in-place', never as replacement, and both plans read 0 to destroy.",
+      "denominator": "1 of 1 demo read (unchanged); the replace-control run on 4 of 4 tables actually changed, 4 of 4 identical.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "This criterion's SUBJECT is the demo table's SSE switch, which row NFRA_OPSEC202609-Z-S14 shows cannot be performed by Terraform this round -- there is no resource block to edit, and the criterion's own TableId control presupposes that Terraform is doing the updating. Issuer ruling 19600 item 3: graded on the four, the demo limb files this way. The control the criterion exists to run IS run and PASSES on all four tables this cell changed, which is the part that could have failed. Phase-1 step 4 is discharged for the round-2 cut: the AWS-managed key's policy (Id auto-dynamodb-3) carries the via-service grant -- Principal AWS:* conditioned on kms:CallerAccount=313476888478 and kms:ViaService=dynamodb.*.amazonaws.com -- so the demo table's SSE switch cannot fail on key policy whenever it is authorised."
+    },
+    {
+      "criterion_id": "S8-AC4",
+      "criterion_verbatim": "THE EPHEMERAL TABLES ARE UNTOUCHED: describe-table on opal-portal-auth-mfa and opal-portal-auth-throttle before and after, the SSE / PITR / DP / TTL fields identical (2 of 2 pairs pasted); the plan showed no change on either.",
+      "method": "live_read",
+      "invocation": "aws dynamodb describe-table --table-name opal-portal-auth-mfa|opal-portal-auth-throttle, captured at 09:04:21Z (before) and 09:25:39Z (after), compared field by field",
+      "output_evidence": "opal-portal-auth-mfa: IDENTICAL before/after on DeletionProtectionEnabled (False), SSEType (AWS-OWNED, no KMS block), KMSMasterKeyArn (absent), TableId c4818918..., CreationDateTime 2026-08-31T20:10:34. opal-portal-auth-throttle: IDENTICAL on the same five fields, TableId 5438a051..., CreationDateTime 2026-07-20T12:23:06. Neither table appears in either applied plan: partner-firms' plan named only the three module instantiations, and the shared-infra plan was -target scoped to aws_dynamodb_table.opal_users_v2. Both tables are declared in portal-auth, a module this cell never applied.",
+      "denominator": "2 of 2 pairs compared, 2 of 2 identical; 0 of 2 present in any plan this cell applied.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S8-AC5",
+      "criterion_verbatim": "NO TABLE REPLACED, 0-DIFF AFTER, LEDGER CLOSED, PUSH STATE MEASURED: the plan's summary line shows 0 to destroy and 0 to replace (quoted); the re-plan after apply reads 0-diff on portal-auth and every partners-api module touched; the deploy-ledger entry CLOSED with its proof; push state read by ls-remote + is-ancestor (LOCAL expected).",
+      "method": "command",
+      "invocation": "terraform plan (both modules, before and after) ; terraform show -json ; deploy_ledger.py close ; git ls-remote origin SITEZ + git merge-base --is-ancestor",
+      "output_evidence": "PLAN SUMMARIES, quoted: partner-firms 'Plan: 0 to add, 3 to change, 0 to destroy.' with all three '# ... will be updated in-place'; shared-infra scoped 'Plan: 0 to add, 1 to change, 0 to destroy.' with '# aws_dynamodb_table.opal_users_v2 will be updated in-place'. No 'must be replaced' / 'forces replacement' line in either. BASELINES were read BEFORE editing: partner-firms clean (0-diff), shared-infra NOT clean (1 to change on a foreign resource -- row Z-S17). RE-PLAN AFTER: partner-firms -detailed-exitcode rc=0, 'no differences, so no changes are needed', run twice identically. shared-infra verified UNSCOPED, two-sided: opal_users_v2 ABSENT from the plan (0-diff) AND aws_s3_bucket_lifecycle_configuration.global_graph's '0 to add, 1 to change, 0 to destroy' STILL PRESENT untouched. LEDGERS: opsec-s8-identity-rbac-table-protection CLOSED (4 legs) and opsec-s8-users-v2-deletion-protection CLOSED (4 legs). PUSH STATE, ls-remote at 09:37:04Z, origin/SITEZ = 946ec2c50d: f5859c4097 ON ORIGIN, 946ec2c50d ON ORIGIN (the integrator carried both; the face expected LOCAL, and this reports what was measured instead).",
+      "denominator": "2 of 2 modules planned before and after; 2 of 2 ledgers closed with 8 of 8 legs proven; 2 of 2 commits resolved against origin.",
+      "status": "PASS",
+      "status_reason": "Two departures from the criterion's literal wording, both measured rather than assumed. (1) The modules re-planned are partner-firms and shared-infra, NOT 'portal-auth and every partners-api module touched' -- those are the face's names for carriers that do not hold these tables (row Z-S17 for opal-users-v2, row Z-S14 for the partner instantiations); portal-auth was never applied by this cell and partners-api holds none of these tables. (2) Push state reads ON ORIGIN for both commits, not the LOCAL the face expected, because the integrator pushed between the commits and this read; a perishable value, stated with its instrument and time rather than defaulted."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two controls that could actually have failed, both run rather than asserted. (1) THE BASELINE-BEFORE-EDIT read: each module was planned BEFORE this cell touched it, so a change appearing afterwards is provably this cell's. (2) THE TWO-SIDED UNSCOPED RE-PLAN on shared-infra, where the apply had to be -target scoped because the module carried a foreign unapplied change: verifying a -target apply with a -target re-plan proves nothing, because the scoped check cannot see what the scope excluded, so the PASS condition was made two-sided -- HALF 1 the changed table reads 0-diff, HALF 2 the foreign drift is STILL PRESENT. HALF 2 is the arm that fails if this cell silently shipped another module's change.",
+      "expected": "Baselines: partner-firms clean, shared-infra dirty by exactly one foreign resource. Unscoped re-plan: opal_users_v2 absent AND global_graph still showing 1 to change. A CLEAN unscoped plan would be a FAILURE, not a success.",
+      "observed": "Baselines FIRED as a discriminator: partner-firms 'No changes' (rc=0) while shared-infra read 'Plan: 0 to add, 1 to change, 0 to destroy' on aws_s3_bucket_lifecycle_configuration.global_graph -- the same tooling, same credentials, same minute, opposite verdicts, so the dirty baseline is a property of the module and not of the instrument. Unscoped re-plan after the apply: opal_users_v2 ABSENT (0-diff) and global_graph STILL '0 to add, 1 to change, 0 to destroy' -- both halves as required. Additionally the scoped plan was read via terraform show -json and changed exactly ONE attribute (deletion_protection_enabled False -> True) with server_side_encryption identical before and after, which is the check that the apply would not drop the identity table's SSE.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "terraform -chdir=infra/aws/terraform/partner-firms plan -input=false -detailed-exitcode run twice on identical input, exit codes compared.",
+      "observed": "run1 detailed-exitcode=0, run2 detailed-exitcode=0 -- identical, both 'No changes'.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "opal-partner-demo receives neither the SSE switch to the estate key nor PITR this round; it is untouched.",
+      "reason": "It is LIVE but NOT Terraform-managed (row NFRA_OPSEC202609-Z-S14): 0 declarations across 530 files, no firm_id=\"demo\", absent from every initialized module's terraform state under a positive-controlled probe. Reaching it needs a terraform import or an out-of-band update-table, both beyond the face's 'five settings' and its Terraform bound. Issuer ruling 19600 took rec (a): DEFERRED to round 2 as an IMPORT adoption with the plan required to read 0 add / 0 replace first. NO import, NO update-table, NO console act was performed. The table holds 1 item and no real client identity."
+    },
+    {
+      "item": "The lane actually edited is modules/partner-firm-table/main.tf + shared-infra/dynamo.tf, not the face's portal-auth/dynamodb.tf + partners-api/**.",
+      "reason": "Both of the face's carrier names are wrong and both were corrected against terraform state, not against prose. opal-users-v2 is managed by shared-infra (state list holds aws_dynamodb_table.opal_users_v2) while portal-auth holds the LEGACY opal_users plus two comments at :167/:173 recording the June de-dup via state rm -- so the face's own 'a table declared twice is a row' check PASSES. The partner instantiations live in partner-firms/ (three of them), not partners-api/**. Rows Z-S17 and Z-S14; carrier correction ACCEPTED by the issuer at 19622 item 3."
+    },
+    {
+      "item": "shared-infra's pre-existing foreign drift (aws_s3_bucket_lifecycle_configuration.global_graph, rule ms-heat-snapshots-expire-60d) is left exactly as found, and the apply was -target scoped because of it.",
+      "reason": "An unscoped apply would have shipped another seat's unapplied change under this cell's ledger entry and this seat's author line -- the bound 'nothing else rides the apply'. Targeting is the sanctioned mechanism (cloud-ops pre-flight step 2) provided it is declared, and it is declared in the ledger entry and in row Z-S17. The drift was not applied, not reverted and not investigated beyond naming the resource; the issuer routes it as a fabric item to 0.0.0_AB_MSTR~Z and 1.0.0_SA_CTO~Z (19622 item 4)."
+    },
+    {
+      "item": "opal-users-v2's server_side_encryption is still undeclared in Terraform while the live table is SSE-KMS.",
+      "reason": "Outside this cell's 'five tables, five settings' bound, and the key question itself sits at 1.0.0_SA_CTO~Z via row Z-S3 (the ARN in question is the AWS-MANAGED aws/dynamodb key, not a CMK). Deliberately not closed, and a comment was added at the resource telling the next reader that the gap is DESIRED != APPLIED and to read Z-S3 before tidying it. The apply was verified NOT to drop the live SSE: terraform show -json reads server_side_encryption identical before and after."
+    },
+    {
+      "item": "Hashing `email` in the partner tables was not built.",
+      "reason": "The face states it is a brief suggestion, not an outcome, and directs that it not be built. No row filed: it is a design idea with no measured defect behind it, and this cell found nothing that makes it more or less warranted."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S14: opal-partner-demo is LIVE but NOT Terraform-managed (0 declarations across 530 files, no firm_id=\"demo\", absent from every initialized module's state under a positive-controlled probe), so DELIVERABLE 3 had no resource block to edit; also the instantiations are in partner-firms/ not partners-api/** and there are THREE not four. BLOCKING/ARMED; issuer ruling 19600 took rec (a) and deferred the demo limb to round 2 as an IMPORT adoption.",
+    "NFRA_OPSEC202609-Z-S17: opal-users-v2's real carrier is shared-infra/dynamo.tf, not portal-auth/dynamodb.tf as the face and ruling 19600 item 2 both said (terraform state proves it; portal-auth's only mentions are comments recording the June twin removal); AND shared-infra's baseline plan carries a FOREIGN unapplied change (aws_s3_bucket_lifecycle_configuration.global_graph) that an unscoped apply would have shipped under this cell. BLOCKING/ARMED; carrier correction accepted at 19622, the drift left exactly as found and routed as a fabric item."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~S/logs/2026-09-03/session_0855-0945Z_NFRA_OPSEC202609_TO-OP-S-8.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/terraform/modules/partner-firm-table/main.tf --for 'whether point_in_time_recovery, deletion_protection_enabled and server_side_encryption are declared, variable-driven or absent'",
+      "result": "server_side_encryption { enabled = true } present at :47-48; point_in_time_recovery and deletion_protection_enabled ABSENT, and no variable for either -- so both were added to the MODULE, not per firm. The module's own comment independently corroborates row Z-S3: it describes that setting as 'AWS-managed KMS (aws/dynamodb)', i.e. the estate's KMS tier here is the AWS-managed key, not a CMK."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'partner-firm-table' --files infra/aws/terraform  (mandate phase-1 step 2)",
+      "result": "MISMATCH against the mandate's expectation of four. 4 hits, of which shared-infra/main.tf's are COMMENTS at :238/:243; THREE real instantiations, all under partner-firms/. Opened row Z-S14."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'opal-partner-demo|partner_demo' then 'firm_id *= *\"demo\"|firm_demo' --files infra/aws/terraform",
+      "result": "0 and 0 (the one 'demo' hit is ticket-center, unrelated). The FIRST pattern alone would have been unsound -- the module CONSTRUCTS the name as opal-partner-${var.firm_id}, so a literal probe structurally cannot find an instantiation; the constructor's input had to be searched too."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/terraform/portal-auth/dynamodb.tf --enumerate 'opal-users-v2|opal_users_v2'",
+      "result": "2 hits, BOTH comments (:167 'TWIN REMOVED 2026-06-29 (CVO dispatch a47d169ef)', :173 the state rm). Together with terraform state this settles that opal-users-v2 is declared ONCE, in shared-infra -- the face's 'declared twice is a row' check PASSES, and its Lane pointer is wrong. Row Z-S17."
+    },
+    {
+      "tool": "terraform state list",
+      "invocation": "terraform -chdir=<module> state list, on partner-firms / portal-auth / shared-infra",
+      "result": "partner-firms: exactly three partner_table resources. portal-auth: opal_users (LEGACY), no v2. shared-infra: opal_users_v2. NOTE: the FIRST run of this probe returned an empty-looking result for every module and was BROKEN -- terraform exited rc=1 'Backend initialization required' and a grep read the error as an empty listing. Caught by a positive control on partner-firms, which demonstrably has three."
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast opal-users-v2 (run under TO-OP-S-17-16, same table, cited rather than re-run)",
+      "result": "KMS_KEY 86cc6c40-2387-4446-b7e1-de79392e06b3, 238 upstream callers; a PITR/DP change alters no consumer contract."
+    },
+    {
+      "tool": "aws kms get-key-policy",
+      "invocation": "aws kms get-key-policy --key-id 86cc6c40-... --policy-name default  (mandate phase-1 step 4)",
+      "result": "EXPECTATION MET: policy Id auto-dynamodb-3 carries the via-service grant -- Principal AWS:* with kms:CallerAccount=313476888478 and kms:ViaService=dynamodb.*.amazonaws.com -- so a demo-table SSE switch cannot fail on key policy whenever round 2 authorises it. No key-policy edit was needed or made."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open x2 -> close-leg x8 -> close x2",
+      "result": "Two entries, one per apply, each opened at deploy-start per NEVER-2 and closed only on proven legs. The second entry's L4 records the two-sided unscoped verification as its own leg."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "on each commit carrying a row",
+      "result": "rc=0; corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved) on every run."
+    }
+  ]
+}
