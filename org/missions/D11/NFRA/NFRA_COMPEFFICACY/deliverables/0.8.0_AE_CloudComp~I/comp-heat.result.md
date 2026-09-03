@@ -37,3 +37,6 @@ New `.tools/tests/test_comp_heat_battery.py`: direct `2 tests` passed; pytest `2
 
 `NFRA_COMPEFFICACY-S29 @696fa4c6be` remains the consumer-boundary record. COO ruling 93774 resolves T20's grading boundary to comp-heat itself; consumer adoption remains CE-t-12 work and was not edited here.
 
+## Independent FWD-9
+
+COO completed the required distinct-seat exercise in Message 93785 at `f1dce36b9b`: a real `comp_similar.load_heat_live(timeout=120)` call returned `dict` with `[]` top-level keys, rc 0, in 0.0 s. Its opt-in/best-effort consumer path therefore returned before reaching comp-heat. This is independent evidence for the ruled CLI/engine grading boundary and confirms S29; it is not a consumer adoption claim. Push remains LOCAL only.
