@@ -112,7 +112,60 @@ stale-but-labelled.
 
 ---
 
-## 2-5. THE PORT, THE FIXES, THE EXERCISE, THE HANDOFF -- IN PROGRESS
+## 3. `B2-AC3` + `B2-AC4` -- THE FOUR FIXES, EACH WITH A CONTROL THAT WAS RUN
+
+Landed @`117e539280`. Two of the four were demonstrated against the **pre-port blob** so the control
+is shown to fail, not asserted to.
+
+| fix | RED arm (pre-port `e445642c5f`) | GREEN arm (ported) |
+|---|---|---|
+| **S9** one key rule | `endpoint_resolves = False` | `= True` |
+| **S3** singleton scope | `_lock_path_for` absent; ONE lock for every target | `lock(A) != lock(B)`, `lock(A)` stable |
+| **S8** manifest edge_count | manifest 60,688 vs stored 58,432, **delta +2,256** | manifest 58,432 = stored 58,432, **delta 0** |
+| **S2** flag semantics | enumerate 4 hits incl. the retired text | 2 hits / 363 lines, contradictory string **ABSENT** |
+
+`node_count` agrees in BOTH S8 arms (27,133 / 27,135), so that control is specific to the field
+that was wrong rather than a blanket pass.
+
+### 3a. What the S9 fix did NOT do, stated because the opposite would be the easy claim
+
+**`skipped_missing_endpoint` is 383 before the fix and 383 after it** (pre-port FULL-1/FULL-2, and the
+ported run at 11:36-11:51Z on a later marker). **The fix recovered ZERO edges on today's data.** None of
+the 383 skipped endpoints carries whitespace; they are genuinely absent from the head node set. S9 closes
+a **LATENT** defect -- the control proves the two rules had diverged and now agree -- and it is honest to
+say the card's specimen does not occur in the current warehouse. The count is carried here so `CG-s-3`
+and any later reader inherit a measured number rather than an implication.
+
+### 3b. S8 corroborated in the wild, by a caller this seat did not run
+
+At 11:41:09Z `_canonical.ensure_fresh` rebuilt the canonical DB through some other caller on this box,
+and the manifest it produced carries **`edge_count: 58432` -- the STORED count**, where every pre-fix
+manifest carried the merge-attempt count. A rebuild this seat did not invoke, through a different entry
+point, independently exercises the fix. (Node count 27,134 there vs 27,135 in my run: a different, later
+marker, not a disagreement.)
+
+### 3c. S8's second limb -- the guard question, DECIDED on control flow
+
+The remediation row warned explicitly against asserting absence from a token census
+(*"3.0.0_SA_CVO~A enumerated one token, not the file's control flow"*). Read as control flow:
+the full loader **HAS** two enforced post-load guards -- the untyped-nodes check and the TSGRAPH fold
+gate -- and **both gate the return code** at `:261` (`return 0 if (untyped == 0 and not gate_fail) else 1`).
+What it does **NOT** have is the incremental engine's post-apply comparison of what landed against what
+was read (`kuzu_incremental_refresh.py:227-232`), and `skipped_missing_endpoint` is **printed and never
+enforced**. So: guards present, count-comparison ABSENT, both cited. Whether the loader should refuse on
+`skipped > 0` is a real question this fix deliberately does not answer silently -- at 383 it would refuse
+every current build.
+
+### 3d. Caller safety, and a failing suite that is not mine
+
+`comp-pydeps consumers` (denominator **323** python files): the loader has 3 consumers, the incremental 2,
+including `tests/test_kuzu_incremental_refresh.py`. Suite re-run: **48 passed**. The 1 failure and 6 errors
+are PRE-EXISTING -- `git status` shows this seat's `infra/` change set is exactly the two engine files plus
+the new control; neither failing test file is in it; and `test_canonical_rebuild_liveness.py` has **0 hits**
+for either engine file across 232 lines (its errors are `fixture 'td' not found`, and the other is a
+graph-vintage denominator mismatch from the 09:11Z rebuild). Proven, not asserted.
+
+## 2, 4, 5. THE PORT, THE EXERCISE, THE HANDOFF -- IN PROGRESS
 
 Recorded here so the file is honest about its own state rather than reading as coverage:
 
@@ -134,6 +187,50 @@ Recorded here so the file is honest about its own state rather than reading as c
 Both are exactly where the GO put them: `B2-AC6` releases on `TO-CG-B-1`'s `B1-AC4`, and the queue ARN
 reaches this seat through the issuer when `B1-AC3` lands. **Neither is idle waiting** -- the decision, the
 fixes and the Terraform are the unblocked work and proceed now.
+
+### 6-RELEASED. `CG-s-1` APPLIED at 11:33Z -- `B2-AC5`'s blocker is CLEARED
+
+`TO-CG-B-1` is complete, CVO-certified (93540) and RAVC-accepted @`afd94db0ce`. The role and queue that
+returned `NoSuchEntity`/absent when I probed them at 08:5xZ now exist on the APPLIED plane. `B2-AC6`'s
+exercise remains gated on consuming a **REAL** marker stamp.
+
+### 6c. LIVE-QUEUE FACTS the consumer must carry (93566), and the two that bite
+
+1. **TWO message shapes arrive.** The S3 event envelope `{"Records":[...]}` **and** a one-off
+   `{"Service":"Amazon S3","Event":"s3:TestEvent"}` with **no `Records` key**. A consumer that assumes
+   `Records` crashes on it (`~P`'s first parser did). The worker tolerates both; a TestEvent is deleted,
+   never DLQ'd.
+2. **No `versionId`** -- bucket versioning is Andrew-locked OFF, so object identity is `eTag` + `sequencer`.
+3. ⛔ **The DLQ baseline is 3, not 0**, self-inflicted by `~P`'s four receive-polls (every `ReceiveMessage`
+   increments `ApproximateReceiveCount` even at `--visibility-timeout 0`; `maxReceiveCount` 3). **My DLQ
+   reads are DELTAS on 3** until ~09:25Z 2026-09-04. And **I must not `receive-message` the main queue more
+   than twice before the consumer runs, or I DLQ my own exercise message.**
+4. **Main depth 0**: the 09:42:42Z stamp expired at retention 3600. The exercise consumes a real stamp;
+   the marker is **never** hand-written (`probe_ifmatch_cas.py:81` FORBIDDEN_KEYS). Nightly derive 02:00Z
+   guarantees one; daytime stamps came 09:24, 09:25, 09:42Z.
+5. **Each real event carries `userIdentity.principalId`** -- that is the "no seat stamped it" control, and
+   it is stronger than an invocation log because it rides the event's own face.
+
+### 6d. ⛔ AN OPEN DESIGN POINT IN MY OWN `B2-AC1`, found while authoring the Terraform
+
+`B2-AC1` states *"the TASK is the consumer of record"* so that a ~16-minute job dying at minute 12 stays
+redrivable, and rejects the naive Pipe form for acking on `RunTask` acceptance. **But an EventBridge Pipe
+with an SQS source acks when the TARGET INVOCATION succeeds, and `RunTask` returns on acceptance -- which
+is the same defect I rejected, relocated into the design I chose.** Either the Pipe is the consumer (and
+the retry property I claimed is not there) or the task is (and the Pipe is the wrong trigger).
+
+Two facts now bear on it, both from the issuer: `~P`'s role grants the **worker** `sqs:ReceiveMessage`,
+`DeleteMessage`, `GetQueueAttributes`, `ChangeMessageVisibility` -- an IAM shape for a worker that consumes
+the queue **itself**; and *"a run longer than the timeout re-receives its own message and DLQs it on the
+third attempt -- demonstrated live"*, which only bites if the consumer holds the message for the run. Both
+point at task-as-consumer, and the issuer endorsing the **2400 s** visibility timeout derived from the V-1
+duration only makes sense on that reading.
+
+**RESOLUTION IS DEFERRED TO A MEASURED READ, NOT A RECALLED ONE.** I will not author Terraform on a
+mechanism whose ack semantics I have not verified against the live service -- reasoning from what I
+remember of Pipes is precisely the document-claim-over-measurement failure this project exists to correct.
+The mechanism limb of `B2-AC1` is therefore OPEN; the runtime, CPU, memory, ephemeral, deadline and
+timeout limbs are unaffected and stand.
 
 ### 6a. The wiring names, relayed 09:19Z (93433) -- **DESIRED, NOT APPLIED**
 
