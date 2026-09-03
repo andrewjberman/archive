@@ -83,8 +83,8 @@ Schema: `NFRA_COMPEFFICACY_PRD` v0.6 @`7138c4a176`, s.4. Row T-6. Cell CE-t-6
   },
   "push_state": {
     "before": "engine blob abac8d92b2bba70eec8e1982a6a651b2c9e427c9; comp-trace blob 9bcf128cf6ff4b7e95f6ed2e6869526b9588fd2d",
-    "after_local": "working-tree engine blob 85c35d0567eab3aca743ebe2e83cb7e0100f706a",
-    "origin": "MUST MEASURE AFTER LANE COMMIT; standing law forbids git push from this seat"
+    "after_local": "commit 6df07696eac80fb5322e498d6b121bd9a56d0d02; engine blob 85c35d0567eab3aca743ebe2e83cb7e0100f706a; battery blob c02223250bacccb1434f1f2679eebe130477da4c",
+    "origin": "MEASURED ABSENT: origin/CLOUD 351f309e0a6ded1a5a5bdf3aacec18a5f9f8dbee; git merge-base --is-ancestor returned rc=1; no push performed"
   }
 }
 ```
