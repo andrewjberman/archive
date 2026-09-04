@@ -1,36 +1,42 @@
 TODAY SPRINT
 
-* Shipped the security build in a single day: seventeen changes out, fourteen closed and verified,
-  three still running tonight. This is defense in depth and SOC 2 preparation.
+* Twenty-one security changes shipped today and every one of them is closed and verified. This is
+  defense in depth and SOC 2 preparation, not a patch job.
 
-* Sign-in and two-factor already stood in front of the platform and our storage was already
-  encrypted. Today we added the layers underneath them.
+* Sign-in, two-factor and encrypted storage already stood in front of the platform. Today we built
+  the layers around them.
+
+* Finished by taking one of our own defenses out of service on purpose and driving a burst of failed
+  logins at it, to prove the layer underneath caught it. It did, and everything went back.
 
 * Nine more data endpoints now check for a signed-in session at the gateway itself, so the check
   happens at the door as well as inside the room. Sixty-nine of seventy-two.
 
-* Traffic now enters through one controlled front door, and the service verifies that is where it
+* Traffic now enters through one controlled front door and the service verifies that is where it
   came from. One more layer between the internet and anything of ours.
 
-* Partner advisor records and the main user directory can now be rolled back to any point in the
-  last month, cannot be deleted by accident, and sit on encryption keys we control and can audit.
+* A firewall now stands at all three of our entrances - dashboard, data service and the marketing
+  site - sharing one block list. Block an address once and it is blocked everywhere.
 
-* A firewall now stands at both entrances with block lists ready to use. The managed rule sets are
-  watching before they act, so we tune on our own traffic rather than guesses.
+* Partner advisor records and the main user directory roll back to any point in the last month,
+  cannot be deleted by accident, and the core tables now sit on encryption keys we own and can audit.
 
-* Every access log lands in one private, encrypted store on our own key. That is the audit trail an
-  assessor asks for, and it is now in one place instead of six.
+* Every access log lands in one private encrypted store, with alarms on repeated failed sign-ins.
+  That is the audit trail an assessor asks for, in one place instead of six.
 
-* Brought the older portal service under proper management so it gets the same treatment as
-  everything else, and so every change to it is reviewable. Change control is a SOC 2 line item.
+* Brought the older portal service under proper management so every change to it is reviewable.
+  Change control is its own SOC 2 line item.
+
+* Pending my call: who gets the alert when someone hammers a login. The alarms are live; the
+  recipient is one name I have not given yet.
 
 * Spent the day running the new agent workflow at full scale on the laptop. The testing is the
   result: the structure and the way work compiles are strong, the mechanics are not.
 
 * That gap is what we are optimizing. The concepts hold; the execution around them is where the
-  time goes, and we now have a day of evidence on exactly where.
+  time goes, and we now have a full day of evidence on exactly where.
 
-* 510 commits across 27 agents today.
+* 558 commits across 30 agents today.
 
 
 PROJECTS
@@ -40,8 +46,8 @@ PROJECTS
   Ran the new workflow end to end, at full load, for a full day, and took notes the whole way. The
   verdict is worth more than any single build: the way work is structured and compiled is genuinely
   good, and the mechanics around it are not there yet. Six specific points of friction are written
-  down with what each one cost, and two are already fixed. That is the optimization list for this
-  week, and it came from running the thing rather than reviewing it.
+  down with what each one cost, and two are already fixed. That is the list for this week, and it
+  came from running the thing rather than reviewing it.
 
 * Item 1 - Model Portfolios: Asset-Category Views
 
@@ -91,15 +97,16 @@ PROJECTS
 
 * Item 12 - Platform Ops
 
-  The security build, start to finish, in one day, and the shape of it is defense in depth. Sign-in,
-  two-factor and encrypted storage were already in place; today we added the layers around them.
-  Data endpoints now check for a signed-in session at the gateway as well as inside the service.
-  Traffic enters through one controlled front door and the service verifies it came from there. A
-  firewall stands at both entrances with block lists ready and managed rules watching first. Partner
-  advisor records and the main user directory gained point-in-time recovery, delete protection and
-  keys we control. Every access log lands in one private encrypted store, which is the audit trail an
-  assessor asks for. And the older portal service is now under proper management, so every change to
-  it is reviewable - change control being its own SOC 2 line item. Three pieces finish tonight.
+  Twenty-one security changes, every one closed and verified, in a single day. The shape of it is
+  defense in depth. Sign-in, two-factor and encrypted storage were already in place; today added the
+  layers around them. Data endpoints now check the session at the gateway as well as inside the
+  service. Traffic enters through one controlled front door and the service verifies it came from
+  there. A firewall stands at all three of our entrances sharing one block list, with the marketing
+  site's edge built and waiting on a DNS move. Partner advisor records and the main user directory
+  gained point-in-time recovery, delete protection and our own keys. Every access log lands in one
+  private encrypted store, with alarms on the login path. The older portal service is under
+  management, so its changes are reviewable. And we finished by taking one defense out of service on
+  purpose to prove the layer beneath it held.
 
 
 PROCESS
@@ -153,8 +160,8 @@ PROCESS
   Status: Two reading tools corrected off findings from the day's testing.
 
 * Item 12 - Platform Ops
-  **Timeline: Finishing tonight.**
-  Status: Seventeen security changes shipped, fourteen closed and verified, three still running.
+  **Timeline: Build complete.**
+  Status: Twenty-one changes shipped, all closed and verified. Alert recipient pending my call.
 
 
 BLOCKED
