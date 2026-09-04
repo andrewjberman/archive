@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-7",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-7.throttle-fail-open-coverage.md",
+    "group": "OTHER",
+    "vintage_commit": "4dd2664b7d"
+  },
+  "assignee": "0.7.0_AE_CloudOps~Z",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "fe7d6ff657",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-7.throttle-fail-open-coverage.md"
+  },
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-03/session_0.7.0_AE_CloudOps~Z_2245-2359Z_OPSEC_S7_THROTTLE_FAILOPEN.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/critical_paths/change_management/20260903T2339Z_opsec-s7-throttle-failopen-coverage_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S7 ledger. Opened BEFORE the IAM change with 4 legs; the IAM deny (L1) and its revert (L3) each carry their applied-plane simulate proof, the discriminating burst pair is L2, and L4 records the 0-diff source + functional restore. CLOSED 4 of 4, sentinel removed, absent from org/critical_paths/.open_deploys/ (measured by listing that directory)."
+    },
+    {
+      "path_or_key": "infra/aws/opalinvest_dev/lambda/auth-handler/src/throttle.ts",
+      "kind": "script",
+      "commit_or_etag": "775dc28917",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ, NOT EDITED. This face changed no source: git diff --stat HEAD is empty and the fail-open behaviour at :112/:147/:164 is untouched. Cited at its own vintage because S7-AC1's fail-open site enumeration is against these exact lines; the file is an INPUT to the proof, not an artifact this face produced."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S7-AC1",
+      "criterion_verbatim": "`S7-AC1` -- THE THREE FAIL-OPEN SITES ARE ENUMERATED AT SOURCE WITH A VINTAGE: `:112`, `:147`, `:164` quoted with `file:line @ <commit-ish>`, each with the operation that fails and the `key_type` it logs. Denominator: fail-open sites found of sites in the file, printed. **A count of one is a FAIL** -- the cell's own `:112-114` was the incomplete read this criterion exists to correct.",
+      "method": "manual_read_with_citation",
+      "invocation": "comp-read infra/aws/opalinvest_dev/lambda/auth-handler/src/throttle.ts --enumerate 'fail-open' and --enumerate 'catch', re-read at HEAD in phase 1 before any probe; each site read in context with sed.",
+      "output_evidence": "THREE fail-open sites, enumerated at source with a vintage, exactly as the cell's own '`:112-114`' single-site read is corrected. throttle.ts @775dc28917: (1) `:112` `console.error(\\`WARN: throttle GetItem failed (fail-open) key_type=${cfg.keyPrefix}:\\`, err);` -- the operation that fails is docClient.send(GetCommand(...)) in enforceThrottle, key_type = cfg.keyPrefix, caller does `return; // fail-open` at :113 (so no cooldown is enforced). (2) `:147` `console.error(\\`WARN: throttle UpdateItem failed (fail-open) key_type=${cfg.keyPrefix}:\\`, err);` -- the failed op is the UpdateCommand ADD-count in recordAttempt, key_type = cfg.keyPrefix, caller does `return;` at :148 (the attempt is simply not counted). (3) `:164` `console.error(\\`WARN: throttle set-block failed (fail-open) key_type=${cfg.keyPrefix}:\\`, err);` -- the failed op is the UpdateCommand that WRITES blocked_until once count>=threshold, key_type = cfg.keyPrefix, caller falls through (no throw), so the block is simply not set. DENOMINATOR: comp-read --enumerate 'fail-open' reports 4 whole-value hits over 191 lines / 1 section -- :112, :113 (the `return; // fail-open` comment), :147, :164 -- of which THREE are error-site log lines and one is the return comment; and --enumerate 'catch' reports 4 catch blocks (:111, :146, :163, :174), the fourth being clearCounter's DeleteItem which logs but is NOT a fail-open of an enforcement path (a failed counter-clear only leaves a stale counter, it never opens the door). So fail-open enforcement sites = 3 of 3, printed. A COUNT OF ONE WOULD BE A FAIL: the cell named only :112-114 and there are three.",
+      "denominator": "3 fail-open enforcement sites of 3 found in throttle.ts (191 lines, 1 section); 4 total 'fail-open' token hits (3 log sites + 1 return comment) and 4 catch blocks, the 4th being clearCounter which is not an enforcement-path fail-open.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7-AC2",
+      "criterion_verbatim": "`S7-AC2` -- THE SECOND CONTROL IS IDENTIFIED AND ITS PARAMETERS ARE READ, NOT RECALLED: the rule holding the login path named, with its live threshold, evaluation window, key and scope pasted from `get-web-acl`, plus the explicit statement of whether its scope covers the `/auth/login` requests the throttle counts. **\"It exists\" is not the criterion; \"it covers these requests at this threshold\" is.**",
+      "method": "live_read",
+      "invocation": "aws wafv2 get-web-acl --scope CLOUDFRONT --name opal-cloudfront-protection --id a09833c0-4043-49fc-a92c-0dcdeaff9abd (parsed for the rule set); aws cloudfront get-distribution --id EVTSA9VEHNZVH (parsed for WebACLId association and the /auth/* behavior); base64-decode of the rule's ScopeDown ByteMatch SearchStrings.",
+      "output_evidence": "THE SECOND CONTROL IDENTIFIED AND ITS PARAMETERS READ, NOT RECALLED. The rule holding the login path is AuthLoginRateLimit, Priority 2, Action Block, on opal-cloudfront-protection (6 rules total: BlockedIPs p0, RateLimitRule p1 Limit 2000, AuthLoginRateLimit p2, then three managed groups at Count p3-5). READ PARAMETERS: RateBasedStatement Limit=100, EvaluationWindowSec=300, AggregateKeyType=IP. SCOPE, decoded from the rule's own OrStatement ByteMatch SearchStrings (UriPath, STARTS_WITH, LOWERCASE): 'L2F1dGgvbG9naW4='='/auth/login', 'L2F1dGgvZm9yZ290LXBhc3N3b3Jk'='/auth/forgot-password', 'L2F1dGgvcmVzZXQtcGFzc3dvcmQ='='/auth/reset-password'. DOES ITS SCOPE COVER THE THROTTLE'S REQUESTS: YES and it is exact. The throttle guards login (LOGIN_THROTTLE, at /auth/login via index.ts:198) and reset (RESET_THROTTLE, at /auth/reset-password and reached from /auth/forgot-password), and all three of those paths are in the rule's scope-down. LIVE ASSOCIATION verified on the APPLIED plane, because a rule that exists but is not attached protects nothing: get-distribution EVTSA9VEHNZVH (Status Deployed, aliases opalinvest.dev + www.opalinvest.dev) reads WebACLId = arn:aws:wafv2:us-east-1:313476888478:global/webacl/opal-cloudfront-protection/a09833c0-4043-49fc-a92c-0dcdeaff9abd -- the same ACL -- and the live behavior /auth/* -> APIGateway-portal is 1 of 27 cache behaviors on that distribution. 'It exists' is not the criterion; 'it covers these requests at this threshold' is, and both are read. ONE COVERAGE GAP NAMED, not a defect of this face: the ENROLL_THROTTLE path /auth/mfa/enroll/send-code (index.ts:299) is NOT in the WAF rule's scope-down -- but its own design (throttle.ts:59-65) is account-keyed and its abuse bound is a texting budget, not a login-guess rate, so it is out of FWD-7's scope; recorded so a later reader does not mistake the WAF's three-path scope for total /auth/ coverage.",
+      "denominator": "1 rule of 6 on the ACL identified as the login-path control; 3 of 3 scope-down paths decoded and matched against the throttle's guarded paths; 1 of 1 live WebACL association on the serving distribution; 27 cache behaviors of which /auth/* is 1.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7-AC3",
+      "criterion_verbatim": "`S7-AC3` -- THE COVERAGE IS EXERCISED IN BOTH CONDITIONS AND THEY DIFFER: a burst with the throttle healthy (captured: what blocked, and which control blocked it) and a burst with the throttle's bookkeeping unavailable (captured: same). **The discriminator is that the second condition still blocks.** State the method used to create the second condition, its ledger entry and that it was reverted. **If the two conditions cannot be distinguished by the evidence, this files `UNCOMPUTABLE` with the reason** -- an undifferentiated pair proves nothing about the fail-open window.",
+      "method": "live_read",
+      "invocation": "A login-abuse burst against https://opalinvest.dev/auth/login with a FABRICATED non-account email and a fixed junk password (never a credential, never a real human), run in two conditions. Condition 2 (throttle blind) was produced by a reversible, GetItem-only IAM deny on opalinvest-auth-lambda-role -- opened in ledger opsec-s7-throttle-failopen-coverage, applied, exercised, and REVERTED in the same window.",
+      "output_evidence": "THE DISCRIMINATING PAIR, same burst shape, differing ONLY in throttle availability, and the second condition STILL BLOCKS. CONDITION 1 -- THROTTLE HEALTHY (PHASE A, before any IAM change), 8 POSTs to /auth/login: #1-5 -> HTTP 401 {\"error\":\"Invalid email or password\"}; #6-8 -> HTTP 429 {\"error\":\"Too many attempts. Please try again later.\"}. The 429 is the THROTTLE -- Lambda JSON via API Gateway -- firing at LOGIN_THROTTLE.threshold=5, and the WAF counter was ~8 so it cannot be the WAF. WHICH CONTROL BLOCKED: the account-keyed DynamoDB throttle. CONDITION 2 -- THROTTLE BLIND (PHASE C, GetItem deny in force, confirmed explicitDeny by simulate before the burst), 120 POSTs to /auth/login on one fabricated account: 120 x HTTP 401, ZERO 429 -- the identical burst that 429'd at #6 when healthy is NEVER blocked by the throttle, because enforceThrottle's GetItem is denied and the :112 path fails OPEN. Then PHASE C2 (still blind), 60 further POSTs after AWS WAF rate-aggregation caught up: 60 x HTTP 403 with server=CloudFront and an HTML edge body (NOT the Lambda's JSON) -- the WAF AuthLoginRateLimit blocking at its IP threshold WHILE the throttle is blind. WHICH CONTROL BLOCKED: the IP-keyed edge WAF. THE DISCRIMINATOR IS SATISFIED: condition 1's door is held by the throttle (429), condition 2's door -- with the throttle unable to read its table -- is held by the WAF (403); the two are distinguished by both status code and response source, and the second still blocks. NOTE ON WAF LATENCY, because it changed the probe shape: AWS WAF rate-based rules aggregate over a trailing window and engage the block with a lag, so the first 120-request blind burst completed at 401 before the block engaged; the follow-on 60-request burst, once the trailing count was aggregated above 100, returned 403 throughout. The lag is a property of the instrument, not evidence the WAF failed to cover the window.",
+      "denominator": "2 conditions of 2 (throttle healthy, throttle blind); PHASE A 8 requests (5x401 + 3x429); PHASE C 120 requests (120x401, 0x429); PHASE C2 60 requests (60x403); 1 IAM deny applied and 1 reverted, both simulate-verified on the applied plane.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7-AC4",
+      "criterion_verbatim": "`S7-AC4` -- THE VERDICT IS STATED AS A VERDICT: either **FWD-7 IS SERVED** by the measured coverage, with the reasoning and the numbers, or **A GAP EXISTS**, named precisely, with a row id, and explicitly NOT remediated in this face. **Both are PASS outcomes for this criterion; the FAIL is an unstated verdict or a silently-closed gap.**",
+      "method": "live_read",
+      "invocation": "Synthesis of S7-AC1/AC2/AC3: the measured coverage of the login path during the throttle's fail-open window.",
+      "output_evidence": "THE VERDICT, STATED AS A VERDICT: FWD-7 IS SERVED. FWD-7's DONE WHEN is 'losing the login throttle's bookkeeping never opens the door wider.' MEASURED: when the throttle's bookkeeping is unavailable (the exact GetItem-fail condition that drives every fail-open site), the login path is still rate-limited by the WAF AuthLoginRateLimit at 100 requests / 300s / IP, which is LIVE-associated with the serving distribution, scoped to /auth/login (+ forgot/reset), and -- being evaluated at the edge BEFORE the request reaches the Lambda -- does NOT share the throttle's DynamoDB failure mode. That last point is the reasoning: the two controls have DISJOINT dependencies (the throttle needs DynamoDB, the WAF does not), so the throttle's bookkeeping failure cannot widen the WAF's door, which is precisely FWD-7's bar. The numbers: healthy door closes at 5 attempts/account (throttle); blind door closes at 100 requests/IP (WAF); the fail-open transition moves the binding limit from a per-account count to a per-IP rate, but it never removes a limit. THE ONE NAMED RESIDUAL, not remediated here: the WAF's per-IP aggregation limits an attacker to 100 login attempts per IP per 5 minutes but does not enforce a per-ACCOUNT bound during the fail-open window, so a distributed (many-IP) low-per-IP credential-stuffing run against one account is bounded by the throttle when healthy and only loosely by the WAF when blind. This is a narrower door than 'no limit', so it does not violate FWD-7's 'never wider' bar; it is recorded as the honest edge of the coverage rather than a gap that blocks the face. No remedy is invented in this face.",
+      "denominator": "1 verdict of 1 (SERVED, with the disjoint-dependency reasoning and both threshold numbers); 1 named residual (distributed low-per-IP stuffing), not remediated, not a gap that fails FWD-7's 'never wider' bar.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7-AC5",
+      "criterion_verbatim": "`S7-AC5` -- NOTHING WAS MADE FAIL-CLOSED AND NOTHING PERMANENT CHANGED: a diff census of `throttle.ts` against HEAD showing **0 changes to its fail-open behaviour**, and a census of any temporary change made for AC3 showing it is REVERTED, read on the APPLIED plane after the revert with a positive control. The login path is left exactly as found.",
+      "method": "diff",
+      "invocation": "git diff --stat HEAD -- throttle.ts; git status --porcelain over the auth-handler src tree; aws iam list-role-policies before/after; aws iam simulate-principal-policy after the revert with a positive control; and a functional post-revert burst.",
+      "output_evidence": "NOTHING MADE FAIL-CLOSED AND NOTHING PERMANENT CHANGED. throttle.ts: git diff --stat HEAD is EMPTY -- 0 changes to its fail-open behaviour; the file was READ, never edited. The whole auth-handler src tree: git status --porcelain is clean, no file touched. THE TEMPORARY CHANGE, made only to produce S7-AC3's second condition, IS REVERTED and the revert is read on the APPLIED plane with a positive control: list-role-policies before = [cross-firm-secret-deny, opalinvest-auth-permissions, PartnerIdentityReadPermissions, ses-send-email]; during = those four + s7-tmp-throttle-getitem-deny; after the delete-role-policy = the original four, s7-tmp absent. simulate-principal-policy after the revert: dynamodb:GetItem on the throttle table -> allowed (matched the original opalinvest-auth-permissions); POSITIVE CONTROL, a separate call, dynamodb:GetItem on a table the role does not hold -> implicitDeny, so the tool discriminates and the 'allowed' is a real allow. FUNCTIONAL END-TO-END CONFIRMATION (PHASE D), a fresh fabricated non-account, 8 POSTs after the revert: #1-5 -> 401, #6 -> 429 -- the throttle blocks at threshold 5 again, identical to PHASE A, so the GetItem revert restored the throttle behaviour end-to-end and not merely in the policy document. THE WAF RATE-STATE WAS TRANSIENT: a 3-request probe between the revert and PHASE D returned 401 (not 403), so the AuthLoginRateLimit rate-counter on the probe IP lapsed on its own; no standing block was left on the login path. The login path is left exactly as found.",
+      "denominator": "1 source file (throttle.ts) diffed = 0 changes; auth-handler src tree = 0 files changed; role inline-policy set 4 before / 5 during / 4 after; 1 revert simulate-verified with 1 positive control; 1 functional 8-request re-confirmation (5x401 + 429 at #6).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The control that AC3 designates as the one that must be able to FAIL: if the login burst blocked IDENTICALLY whether or not the throttle could read its table, the evidence would not discriminate and the criterion would have to file UNCOMPUTABLE. The mutant is the throttle-blind condition itself -- a real GetItem deny applied to the live role -- run against the throttle-healthy baseline.",
+      "expected": "If the throttle contributes nothing distinguishable, the blind burst blocks the same way the healthy burst does (429 at 6) or not at all. If it discriminates, the blind burst does NOT 429 (fail-open) and the block, when it comes, comes from a different control.",
+      "observed": "DISCRIMINATED. Healthy: 429 at request 6 (throttle, Lambda JSON). Blind: 120 requests with ZERO 429 (the throttle demonstrably stopped blocking) and then 403 from CloudFront (a different control, the edge WAF). The pair is differentiated by status code AND response source, so AC3 is a PASS-SERVED and not an UNCOMPUTABLE. A SECOND, INDEPENDENT CONTROL rode the IAM verification: the simulate positive controls -- UpdateItem allowed while GetItem denied (deny is surgical), and GetItem on a non-held table returning implicitDeny after the revert (the allow is real) -- so the deny and its revert were each confirmed on the applied plane and not asserted.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The throttle-healthy 429-at-threshold-5 behaviour was observed twice on independent fabricated accounts: PHASE A (before any change) and PHASE D (after the revert), each 8 requests.",
+      "observed": "STABLE. Both runs: 401 for requests 1-5, 429 from request 6, on LOGIN_THROTTLE.threshold=5. The blind condition's zero-429 result was likewise observed across 120 requests, not a single sample. The only non-repeated value was the WAF's block-engagement point, which AWS rate-aggregation makes non-deterministic in timing by design; the block's OCCURRENCE (403 from the edge while blind) is the stable fact, its exact request index is not, and the proof claims only the occurrence.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The IP-blindness of throttle.ts (throttle.ts:14 -- /auth/* forwards no CloudFront-* headers)",
+      "reason": "Its CAUSE is upstream of this file, in the CloudFront /auth/* behavior's origin-request header forwarding, not in throttle.ts. The face names it (READ LIVE section) as 'a different surface from this one' and routes it to L4 as a candidate remedy for another lane. Read and used to explain WHY the throttle must be account-keyed (it cannot see the IP), not fixed here."
+    },
+    {
+      "item": "The ENROLL_THROTTLE path /auth/mfa/enroll/send-code, absent from the WAF rule's scope-down",
+      "reason": "Out of FWD-7's scope. FWD-7 is about the LOGIN path's fail-open; the enrolment throttle guards a texting budget (throttle.ts:59-65), is account-keyed by deliberate design, and its abuse model is mail-amplification, not login-guessing. Recorded in S7-AC2 so the WAF's three-path scope is not mistaken for total /auth/ coverage; not a gap this face owns."
+    },
+    {
+      "item": "Making throttle.ts fail CLOSED",
+      "reason": "An explicit STOP per the face's first section and FWD-7's bar: a rate-limiter that takes down login on a DynamoDB blip converts a bookkeeping failure into an outage, which is a WIDER door than the one FWD-7 is about. Nothing in this face touches the fail-open behaviour; the whole deliverable is a measurement that the fail-open window is covered, not a change to it."
+    },
+    {
+      "item": "The WAF managed-rule-group and rate-limit configuration (TO-OP-S-4-18 / OP-s-4)",
+      "reason": "Read-only dependency (OP-s-4). The ACL's rules were READ to identify and parameterise the second control; nothing was edited. The managed-group work belongs to TO-OP-S-4-18."
+    },
+    {
+      "item": "A remedy for the distributed low-per-IP credential-stuffing residual named in S7-AC4",
+      "reason": "The face forbids inventing a remedy inside this measurement face (deliverable 3). The residual is a narrower door than 'no limit' and does not fail FWD-7's 'never wider' bar, so it is stated as the honest edge of the coverage; any remedy is a separate cut for L4/L5 to decide."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "comp-read infra/aws/opalinvest_dev/lambda/auth-handler/src/throttle.ts --enumerate 'fail-open' ; --enumerate 'catch'",
+      "result": "Gave S7-AC1 its denominator: 4 'fail-open' token hits and 4 catch blocks, printed with the 191-line/1-section scan total, which is how the three enforcement-path fail-open sites (:112/:147/:164) were separated from the return comment (:113) and from clearCounter's non-enforcement catch (:174). A bare grep -c would have returned a single number with no band and no denominator."
+    },
+    {
+      "tool": "comp-read --for",
+      "invocation": "comp-read infra/aws/opalinvest_dev/lambda/auth-handler/src/index.ts --for 'how a request path is matched to a handler' ; --enumerate \"path === '[^']+'\" --all",
+      "result": "Enumerated the router's 15 exact path matches, which is how /auth/login (index.ts:198), /auth/reset-password (:256) and /auth/forgot-password (:249) were confirmed as the paths the throttle guards and matched against the WAF scope-down -- and how /auth/mfa/enroll/send-code (:299) was found to be OUTSIDE the WAF rule's scope, the residual named in S7-AC2."
+    },
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which 'the live rules, priorities, actions and rate-limit thresholds on the CloudFront WAF web ACL opal-cloudfront-protection'",
+      "result": "Returned NO CURATED RULE MATCHED over all 79 tools -- the catalog does not cover a wafv2 rule read. That is why the get-web-acl / get-distribution / simulate-principal-policy calls carry rail-checked markers: comp-routes is DESIRED-plane with no WAF-rule surface, and comp-iam simulates (action,resource) but does not enumerate an ACL's rules or evaluate an ad-hoc out-of-Terraform deny."
+    },
+    {
+      "tool": "comp-iam (context)",
+      "invocation": "the /cloud-ops IAM-instrument-traps guidance re-read before the simulate calls.",
+      "result": "Applied: one --resource-arns per call (so the multi-ARN implicit-deny mode could not fire), and the positive control run as a SEPARATE invocation from the target (so the target could not disarm it). The 22a note that comp-iam simulate discriminates on (action,resource) on the APPLIED plane -- not the stale action-only description -- is why simulate was the right primitive for confirming the deny and its revert, rather than comp-iam service/gaps which would read the ad-hoc deny as drift."
+    }
+  ]
+}
