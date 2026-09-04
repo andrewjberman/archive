@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CLDGRPH.TO-CG-D-4",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_NFRA_CLDGRPH~3",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-D-4.operator-status-read.md",
+    "group": "OTHER",
+    "vintage_commit": "eedb24b9060bf7cff95db50ae91ed5f5b798ccba"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+    "vintage_commit": "70918d5d2bc7f4634df572001d5656d5d8e381a0",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-D-4.operator-status-read.md"
+  },
+  "session_log": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/CG-s-7.operator-status-read.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/modules/graph/graph_status_cli.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A laptop-fabric CLI engine (comp-graph's engine); no deploy scope -- it runs at read time from the operator's own machine and reads AWS live, never a deployed service.",
+      "introduces": ["_straddle_read", "projection.last_night", "_last_full_before_boundary"],
+      "artifact_covered_by": ["D4-AC1", "D4-AC2", "D4-AC3", "D4-AC4", "D4-AC5", "D4-AC7"]
+    },
+    {
+      "path_or_key": ".tools/tests/test_cg7_status_read_battery.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file; runs locally at both direct and pytest grain, no deploy scope.",
+      "introduces": ["ARM-II-RED-MUTANT-EMPTY-WINDOW-YES", "ARM-III-RED-MUTANT-SILENT-NO"],
+      "artifact_covered_by": ["D4-AC6", "D4-AC7"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/plant/current.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local fixture pointer (never a live S3 object); the live bucket was never written by this work.",
+      "artifact_covered_by": ["D4-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/plant/2026-09-02T20_00_00.000000+00_00/_build_manifest.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local fixture manifest (the plant's own 'newest full' record, 30h+ before every future nightly boundary); never a live S3 object. The ':' in the vintage is escaped to '_' in the directory name because Windows forbids ':' in a path component -- the production reader's local-fixture branch applies the identical escape on read (org/modules/graph/graph_status_cli.py's _get_local_object/_list_local_vintages).",
+      "artifact_covered_by": ["D4-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/CG-s-7.operator-status-read.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Result doc co-staged with the code, tests, plant and this proof in one commit.",
+      "artifact_covered_by": ["D4-AC1", "D4-AC2", "D4-AC3", "D4-AC4", "D4-AC5", "D4-AC6", "D4-AC7"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D4-AC1",
+      "criterion_verbatim": "THE READ ANSWERS yes/no + a time from the served artifact's own manifest (FWD-8).",
+      "method": "command",
+      "invocation": "bash .tools/comp-graph status",
+      "output_evidence": "  projection.last_night YES          present            no-TTL    REFRESHED LAST NIGHT: YES at 2026-09-04T02:22:43.290435+00:00\n                       evaluated: boundary 2026-09-04T02:00:00+00:00 (+6h window); checked 1 manifest(s)",
+      "denominator": "1 of 1 status invocation; the projection.last_night line matches expect on 1 of 1 run",
+      "status": "PASS",
+      "expect": "REFRESHED LAST NIGHT: (YES at 20[0-9]{2}-[0-9]{2}-[0-9]{2}T[0-9:.]+|NO \\(last full: )"
+    },
+    {
+      "criterion_id": "D4-AC2",
+      "criterion_verbatim": "A NIGHT THAT DID NOT RUN READS DIFFERENTLY: the planted stale pointer+manifest pair (yours, committed under `plant/` in your deliverables folder, newest full vintage older than the last boundary) prints `NO`. The control that can fail.",
+      "method": "command",
+      "invocation": "COMP_GRAPH_POINTER_URI=org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/plant/current.json bash .tools/comp-graph status",
+      "output_evidence": "  projection.last_night NO           present            no-TTL    REFRESHED LAST NIGHT: NO (last full: 2026-09-02T20:15:00.000000+00:00)\n                       evaluated: boundary 2026-09-04T02:00:00+00:00 (+6h window); checked 1 manifest(s)",
+      "denominator": "1 of 1 planted invocation; the plant's only vintage (2026-09-02T20:00:00, full/derive_runner) is ~35h before today's boundary and recedes further every day, so this arm stays valid on every future run",
+      "status": "PASS",
+      "expect": "REFRESHED LAST NIGHT: NO \\(last full: "
+    },
+    {
+      "criterion_id": "D4-AC3",
+      "criterion_verbatim": "THE WRONG ARTIFACTS ARE GONE from the cloud group (brief F6).",
+      "method": "command",
+      "invocation": "bash .tools/comp-graph status | grep -c -E 'kuzu_db .*(81d|MISSING|present)|stitch_graph'",
+      "output_evidence": "0\n(no 'kuzu_db' or 'stitch_graph' row appears anywhere in the rendered CLOUD / CROSS-LAYER group)",
+      "denominator": "0 hit(s) across the cloud group's 2 rendered row(s) (projection.current, projection.last_night) -- kuzu_db/stitch_graph no longer exist in the cloud group at all",
+      "status": "PASS",
+      "expect": "^0$"
+    },
+    {
+      "criterion_id": "D4-AC4",
+      "criterion_verbatim": "THE CONTRACT'S FIELD SET is reported (`PROJECTION_CONTRACT.md` s.8, CG-s-7 handoff) in `--json`.",
+      "method": "command",
+      "invocation": "bash .tools/comp-graph status --json | python -c \"import sys,json; d=json.load(sys.stdin); r=[g for g in d['graphs'] if g['name']=='projection.current'][0]; print('FIELDS', all(k in r for k in ('vintage','age_line','built_at','writer_id','producer_mode','node_count','edge_count','edges_skipped_missing_endpoint','artifact_bytes','band_status')))\"",
+      "output_evidence": "FIELDS True",
+      "denominator": "10 of 10 required contract fields present on the projection.current JSON row",
+      "status": "PASS",
+      "expect": "FIELDS True"
+    },
+    {
+      "criterion_id": "D4-AC5",
+      "criterion_verbatim": "R4 HOLDS: no alarm, SNS, metric, event or schedule call in the engine (the census, denominator printed by the tool).",
+      "method": "command",
+      "invocation": "python .tools/comp-read org/modules/graph/graph_status_cli.py --enumerate 'sns|put_metric|cloudwatch|events\\.put|schedule|create_alarm' --limit 5",
+      "output_evidence": "ENUMERATE: 0 hit(s) across 707 lines / 30 section(s) scanned\n    whole-value matches: 0   |   substring matches: 0",
+      "denominator": "0 hit(s) across 707 of 707 source line(s) / 30 of 30 section(s) scanned (comp-read's own printed denominator)",
+      "status": "PASS",
+      "expect": "ENUMERATE: 0 hit\\(s\\)"
+    },
+    {
+      "criterion_id": "D4-AC6",
+      "criterion_verbatim": "THE BATTERY passes at the direct grain, each arm with its denominator.",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_cg7_status_read_battery.py",
+      "output_evidence": "[PASS] ARM-I-LIVE-SHAPED-YES\n[PASS] ARM-II-PLANT-NO\n[PASS] ARM-II-RED-MUTANT-EMPTY-WINDOW-YES\n[PASS] ARM-III-UNREADABLE-POINTER-UNVERIFIABLE\n[PASS] ARM-III-RED-MUTANT-SILENT-NO\n[PASS] ARM-IV-JSON-REFRESHED-LAST-NIGHT-AND-VINTAGE\n[PASS] ARM-V-R4-CENSUS-NO-ALARM-SNS-SCHEDULE (0/707 source line(s) scanned)\nCG7-STATUS-READ BATTERY: 7/7 PASS (denominator 7)",
+      "denominator": "7 of 7 battery arms PASS (denominator 7, printed by the battery itself); also 1 passed via python -m pytest .tools/tests/test_cg7_status_read_battery.py -q",
+      "status": "PASS",
+      "expect": "PASS"
+    },
+    {
+      "criterion_id": "D4-AC7",
+      "criterion_verbatim": "COMMIT GATE clean on every `.py` this order touches.",
+      "method": "command",
+      "invocation": "bash .tools/commit-gate.sh org/modules/graph/graph_status_cli.py .tools/tests/test_cg7_status_read_battery.py",
+      "output_evidence": "All checks passed!\nOK: no unguarded strict-utf8 log reads.\nAll checks passed!\nOK: no unguarded strict-utf8 log reads.\nOK: pre-commit gate clean for 2 of 2 file(s)",
+      "denominator": "2 of 2 changed .py files clean",
+      "status": "PASS",
+      "expect": "pre-commit gate clean for 2 of 2"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two independent fail-capable axes in the battery, both exercised against the real engine via a temp-file source mutation (never the production file): (a) forcing every listed vintage into the nightly window, so the plant's empty-window truth should wrongly read YES -- the exact class the TO names ('a reader that prints YES when the window is empty'); (b) breaking the unreachable-pointer message so it silently claims NO instead of UNVERIFIABLE, proving the 'never a default' invariant is load-bearing.",
+      "expected": "Mutant (a): the plant (newest full 30h before the boundary, nothing inside it) wrongly reads 'REFRESHED LAST NIGHT: YES at ...' and the correct 'NO (last full:' string disappears. Mutant (b): the unreadable-pointer arm's 'REFRESHED LAST NIGHT: UNVERIFIABLE (' string disappears and is replaced by a silent 'NO (last full: none ...'.",
+      "observed": "ARM-II-RED-MUTANT-EMPTY-WINDOW-YES: PASS (mutant stdout carried 'REFRESHED LAST NIGHT: YES at' and no longer carried 'REFRESHED LAST NIGHT: NO (last full:'). ARM-III-RED-MUTANT-SILENT-NO: PASS (mutant stdout no longer carried 'REFRESHED LAST NIGHT: UNVERIFIABLE (' and instead carried 'REFRESHED LAST NIGHT: NO (last full: none'). Both mutants ran against a temp-file copy of the real engine and were deleted after; the production file was never rewritten.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Run the full battery twice in separate processes.",
+      "observed": "Run 1: 'CG7-STATUS-READ BATTERY: 7/7 PASS (denominator 7)'. Run 2: identical line, same 7 arm names, same pass membership.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No edit to the local trace-layer group (_collect's graph/baseline/platinum.* rows), the FRESHNESS CONTRACT / POPULATION print block, or cmd_clear.",
+      "reason": "Task-order bound: only the cloud group's two wrong-artifact rows were repointed; nothing else in graph_status_cli.py changed except the now-dead _GLOBGRPH_DIR constant, removed because it existed solely to build the two replaced paths."
+    },
+    {
+      "item": "No write to the live S3 bucket, no engine call, no rebuild, no cache file.",
+      "reason": "PULL READ ONLY per the task order's bounds; every read used GetObject/ListObjectsV2 and the plant is a local fixture."
+    },
+    {
+      "item": "No alarm, SNS topic/subscription, EventBridge rule, Lambda, checker, monitor, or scheduled anything.",
+      "reason": "R4 + CLAUDE.md s.5 standing moratorium; verified by D4-AC5's census (0 hits)."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "python .tools/comp-read org/modules/graph/graph_status_cli.py --for \"the cloud group rows, how records are collected and rendered, the --json shape, and every place the local trace-layer group is computed so it is left alone\"",
+      "result": "Located the two wrong-artifact rows at the (then) 214-232 cloud group and confirmed the local trace-layer group's own functions (_trace_freshness, _ttl_verdict, _present_verdict) so the repoint touched only the cloud group."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "python .tools/comp-read org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.7.0_AE_CloudOps~T/PROJECTION_CONTRACT.md --for \"the pointer body, the manifest field set, the straddle rule and the CG-s-7 handoff\"",
+      "result": "Surfaced s.3 (manifest field table + required shape), s.4 (pointer body), s.6 (reader straddle obligation, five numbered steps), and s.8's CG-s-7 handoff line naming the exact field set to report; the full file was then read directly for byte-exact implementation."
+    },
+    {
+      "tool": ".tools/aws + boto3 live reads",
+      "invocation": ".tools/aws s3 cp s3://opal-313476888478-globgrph/projection/current.json - ; .tools/aws s3api list-objects-v2 --bucket opal-313476888478-globgrph --prefix projection/ --delimiter / ; python -c \"import boto3; boto3.client('s3').get_object(...)\"",
+      "result": "Confirmed the live pointer (vintage 2026-09-04T05:53:37.689093+00:00, incremental), 17 versioned prefixes 2026-09-03T13:23:54..2026-09-04T05:53:37, and the last nightly full (2026-09-04T02:09:19.993324+00:00, derive_runner, built_at 02:22:43.290435Z, 27246/58646) -- matching the issuer's cut-time measurement exactly. boto3 1.42.54 confirmed importable under both `python` and `python3` before choosing it as the primary read path."
+    },
+    {
+      "tool": "pytest / commit-gate",
+      "invocation": "python -m pytest .tools/tests/test_cg7_status_read_battery.py -q; bash .tools/commit-gate.sh org/modules/graph/graph_status_cli.py .tools/tests/test_cg7_status_read_battery.py",
+      "result": "1 passed. commit-gate clean for 2 of 2 changed Python files (py_compile + ds-precommit + ruff py39)."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/NFRA_CLDGRPH.TO-CG-D-4.operator-status-read.proof_of_spec.json D4-AC1,D4-AC2,D4-AC3,D4-AC4,D4-AC5,D4-AC6,D4-AC7",
+      "result": "Run before the commit that carries the PENDING-THIS-COMMIT artifacts; rc reported in the worker's final message."
+    }
+  ]
+}
