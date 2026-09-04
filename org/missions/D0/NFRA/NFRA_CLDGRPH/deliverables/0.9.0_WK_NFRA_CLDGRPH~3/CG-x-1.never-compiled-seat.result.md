@@ -191,5 +191,107 @@ rc=0
 - It does not claim the served graph is CORRECT about the bd bucket's triggers. It claims the asker got an answer
   with a vintage, fast, with no build. Whether those three lambdas are the live estate's triggers is the derive's
   question and belongs to TO-CG-D-1/D-12, not to this closing pass.
-- It does not close `D5-AC4`, which is FAIL against the expectation as written (s.1, row `NFRA_CLDGRPH-W3-S1`),
-  so this TO stays OPEN and its `<status>` is NOT flipped.
+- ~~It does not close `D5-AC4`, which is FAIL against the expectation as written (s.1, row `NFRA_CLDGRPH-W3-S1`),
+  so this TO stays OPEN and its `<status>` is NOT flipped.~~ **SUPERSEDED BY s.8 (the re-hand pass, 2026-09-04
+  ~18:4xZ), NOT retracted:** the sentence was TRUE of the order as it stood at `70ecc4068e`. The issuer amended
+  `D5-AC4`'s pattern at `88c4db9dd4` and re-handed the order; s.8 re-measures it and it PASSES. Row
+  `NFRA_CLDGRPH-W3-S1` stands as filed.
+
+
+---
+
+# 8. THE RE-HAND PASS (round 2, same asker, same worktree, amended `D5-AC4`)
+
+**Written** 2026-09-04 ~18:4xZ - **worktree** `wk-NFRA_CLDGRPH-3` @`5376ecaa8b` (LOCAL; CLOUD merged in, and the
+first pass's own commit `70ecc4068e` is an ancestor of this HEAD, so the evidence in s.1-s.7 above is AT my HEAD).
+**Why this section exists:** the issuer amended `D5-AC4` at `88c4db9dd4` - dropping the `--mode` alternative that
+matched the module docstring documenting its own absence - and re-handed the order. Sections 1-7 are the first
+pass and are NOT re-derived. This section re-measures every mechanical criterion at THIS head, so no row in the
+proof instance is carried on a number I did not take myself.
+
+## 8.1 `D5-AC4` on the AMENDED invocation - the criterion this re-hand exists for
+
+```
+$ timeout 120 python .tools/comp-read infra/aws/globgrph/kuzu_cli.py --enumerate 'ensure_fresh|kuzu_nessie_load|import kuzu' --limit 3
+  SOURCE: 169 lines | 8 section(s) via python-ast | enumerate: 'ensure_fresh|kuzu_nessie_load|import kuzu'
+  ENUMERATE: 0 hit(s) across 169 lines / 8 section(s) scanned
+    whole-value matches: 0   |   substring matches: 0
+    BANDS (sum to 0):
+      DOCSTRING   0
+      COMMENT     0
+      DEF         0
+      CODE        0
+         0  ENUMERATE   ABSENT hit 0/0 scanned 169 lines / 8 sections; pattern absent from this file
+ENUMERATE-END: 0 hit(s) | 0 whole | 0 sub | DOCSTRING=0 | COMMENT=0 | DEF=0 | CODE=0
+rc=0
+```
+
+**PASS by output** against `expect` = `ENUMERATE: 0 hit\\(s\\)`. **Denominator: 169 lines / 8 AST sections, the
+whole file** - not a page, not a band. Every band is 0, so this is a true absence and not a re-banding of the
+first pass's docstring hit.
+
+**THE ARM IS NOT DEAD - the control, taken by me, not quoted from the issuer.** The issuer stated the amended
+pattern still returns 5 hits with CODE=4 on the pre-CG-s-6 client @`c7b6a0d200`. I did not take that number on
+trust; I reproduced it. `git show c7b6a0d200:infra/aws/globgrph/kuzu_cli.py` (rc=0, 10327 bytes - the positive
+control that the ref resolved and the read is not a mangled empty) into `.scratch/`, then the IDENTICAL enumerate:
+
+```
+  SOURCE: 189 lines | 6 section(s) via python-ast
+  ENUMERATE: 5 hit(s) across 189 lines / 6 section(s) scanned
+    whole-value matches: 2   |   substring matches: 3
+    BANDS (sum to 5): DOCSTRING 0 | COMMENT 1 | DEF 0 | CODE 4
+        18  CODE        WHOLE  hit 1/5 import kuzu
+        43  COMMENT     WHOLE  hit 2/5 #   full -> force the full kuzu_nessie_load UNCONDITIONALLY ...
+        51  CODE        SUB    hit 3/5 refreshed, reason = _canonical.ensure_fresh(
+ENUMERATE-END: 5 hit(s) | 2 whole | 3 sub | DOCSTRING=0 | COMMENT=1 | DEF=0 | CODE=4
+```
+
+Same detector, same pattern, a file that genuinely embeds the engine: **5 hits, CODE=4**, matching the issuer's
+measurement exactly. The amended criterion can still fail on the thing it exists to catch, and - unlike the
+original - it can now also PASS when the property holds. The first pass's finding is intact: what changed is the
+carrier, not the bar.
+
+## 8.2 The other mechanical criteria, RE-MEASURED at this head (not carried on the first pass's numbers)
+
+| criterion | invocation (bounded) | deciding output | denominator | verdict |
+|---|---|---|---|---|
+| `D5-AC1` | `ls -d infra/aws/globgrph/kuzu_nessie_db 2>&1; echo "rc=$?"` | `ls: cannot access ...: No such file or directory` / `rc=2` | 1 of 1 path named; the SAME command on `infra/aws/globgrph` returns the dir at `rc=0`, so the arm is live | **PASS** |
+| `D5-AC2` | `bash .../ask.sh` | `TIME_TO_ANSWER_S=17.058` then `VINTAGE: Built from the estate as of 2026-09-04 18:11:48 UTC.` | 1 ask, 3 answer rows by the client's own `(3 rows)` denominator, `CLIENT_RC=0` | **PASS** |
+| `D5-AC3` | `bash .../ask.sh \\| grep -E '^PROCS_(BEFORE\\|AFTER)='` | `PROCS_BEFORE=0` / `PROCS_AFTER=0` | 0 matches of `kuzu_nessie_load\\|kuzu_incremental_refresh\\|derive_runner` out of a 52-row `ps -ef` table, `grep -v grep` discipline; `PROCS_DURING_MAX=0`; the same pipeline over `bash` returned 38, so the counter is not a dead arm | **PASS** |
+
+The answer is unchanged in substance: the same three bd-pipeline lambdas (`bd-allocation-processor`,
+`bd-gold-trigger`, `bd-silver-merge`) from `arn:aws:s3:::opal-data-bd`, `ANSWER_ROW_COUNT=3` on both runs.
+
+## 8.3 TWO THINGS MOVED BETWEEN THE PASSES. Both are recorded, neither is graded here.
+
+**(a) The projection's vintage moved, and that is not my act.** First pass:
+`manifest=c3ba0330e306`, `2026-09-04 16:38:39 UTC`. This pass, on BOTH runs, byte-identical to each other:
+`manifest=a78b6836265e`, `2026-09-04 18:11:48 UTC`. Some other seat built a projection between the two passes.
+It is not this asker's doing and the evidence is positive, not merely absent: `PROCS_BEFORE/DURING_MAX/AFTER` are
+0 on every run, and my FIRST ask of this pass already read `18:11:48` - before it I had run only
+`comp-kuzu --schema` (the order's `compiler_tools_mandate`, a read). The manifest being IDENTICAL across my two
+asks is the third witness that nothing built under me. For FWD-1 this sharpens rather than weakens the endpoint:
+a seat that has compiled nothing consumed a graph somebody else built, and was told which graph it was.
+
+**(b) THE TIME TO ANSWER ROUGHLY DOUBLED, and it now sits ABOVE the comparator the order names.**
+
+| pass | runs | `TIME_TO_ANSWER_S` | mean | vs the order's comparator (`comp-find --corpus aws` = 11.55 s at L5) |
+|---|---|---|---|---|
+| first (`70ecc4068e`) | n=3 | 7.802, 8.497, 7.668 | 7.99 s | BELOW |
+| re-hand (this) | n=2 | 17.058, 16.372 | 16.72 s | ABOVE |
+
+**This is recorded, NOT graded.** `D5-AC5` ("in the time an ordinary lookup takes") is `judgment="true"` and
+belongs to `3.0.0_SA_CVO` at L9; a worker verdict on it is INVALID by the order's own `proof_of_spec` block. What
+I can say without grading: n=2 and n=3 are both small, the two passes ran against DIFFERENT projections
+(`c3ba0330e306` vs `a78b6836265e`) over a network round trip, and this pass holds no measurement that separates a
+slower client from a larger projection from a slower link - I did not run one, because isolating it is a
+different question than the one this cell asks and would have been work the order did not name. The CVO grades
+the endpoint on the numbers above, with both passes visible.
+
+## 8.4 What this section still does not claim
+
+Sections 7's other two bullets stand unchanged: this record does not grade `D5-AC5`, and it does not claim the
+three answered TRIGGERS edges are true of the live AWS estate (that is TO-CG-D-1/D-12's cell, not this closing
+pass's). What IS now claimed, and was not at `70ecc4068e`: every mechanical criterion of TO-CG-D-5 reads PASS by
+its own output at `5376ecaa8b`, so the order's `<status>` is flipped to `complete` in the same commit as this
+record and the proof instance.
