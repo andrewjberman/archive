@@ -84,7 +84,7 @@ remedy: two-slot current/previous, `JWT_KEY_TTL_MS = 300000` (300s), and it acce
 (the secret's shape today) and a `{current, previous}` envelope (its shape after rotation) -- so it is
 deployable BEFORE the rotation rather than as part of it.
 
-⭐ **AND THE PACKAGING NOTE IN THAT MODULE POINTS DIRECTLY AT THIS FUNCTION.** It records that the
+NOTE: **AND THE PACKAGING NOTE IN THAT MODULE POINTS DIRECTLY AT THIS FUNCTION.** It records that the
 build-time mirror of `infra/aws/lambda/lib/` into `<source_dir>/src/lib/`
 (`build-nodejs-lambda.sh:137-158`) is **gated on the consumer having a `src/` directory**, and that
 "neither `portal-authorizer` nor `auth-validator-edge` has one". **`session-analytics` HAS a `src/`.**

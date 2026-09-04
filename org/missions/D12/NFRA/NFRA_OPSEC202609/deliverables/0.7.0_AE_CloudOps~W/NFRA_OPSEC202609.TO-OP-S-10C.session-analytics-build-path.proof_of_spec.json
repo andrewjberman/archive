@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-10C",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-10C.session-analytics-build-path.md",
+    "group": "OTHER",
+    "vintage_commit": "95ba080bc4b477bf1b19d6b28cd3857872891604"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "916eae30a42cebbcd4b08d7fc649bb0d5fc61d3f",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-10C.session-analytics-build-path.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~W",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/portal-auth/session-analytics.tf",
+      "kind": "terraform",
+      "commit_or_etag": "ea544ac7e2",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "terraform import rc=0, then an UNSCOPED plan showing the resource ONLY in a 'Refreshing state...' line and in NO change block. Live function untouched across the import: CodeSha256, LastModified, handler, runtime, memory, timeout, environment and empty tag set all identical before and after. DEPLOYED-VERIFIED refers to the ADOPTION being applied to state and verified, not to any code deploy -- act one deploys no code by design."
+    },
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/deliverables/0.7.0_AE_CloudOps~W/NFRA_OPSEC202609.TO-OP-S-10C.session-analytics-rotation-note.md",
+      "kind": "doc",
+      "commit_or_etag": "e70ca4e244",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S10C-AC4 answer, delivered to TO-OP-S-10's assignee 0.7.0_AE_CloudOps~V as msg 20226 and to 2.0.0_SA_COO~Z as 20227."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260904T0418Z_opsec-s10c-session-analytics-adopt_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "ea544ac7e2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy ledger CLOSED, 4 of 4 legs proven, sentinel removed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S10C-AC1",
+      "criterion_verbatim": "ALIVENESS RE-ESTABLISHED ON AN INSTRUMENT THAT COULD SAY \"DEAD\": the function's activity confirmed at this assignee's own vintage, with the instrument named and its discriminating power stated -- what it would show if the function were idle, and how that differs from what it shows now. `Invocations` is DISQUALIFIED by `Z-S124` (reads 0 on this very function under load); citing it as the aliveness oracle FAILS this criterion. Region denominator printed if the evidence is log-based.",
+      "method": "live_read",
+      "invocation": "aws cloudwatch list-metrics --namespace AWS/Lambda --metric-name Invocations --dimensions Name=FunctionName,Value=<fn> (the existence probe) ; then aws cloudwatch get-metric-statistics --period 86400 --statistics Sum over a 14-day window, run identically across five functions",
+      "output_evidence": "THE DISQUALIFICATION WAS RETRACTED BY THE ISSUER BEFORE THIS WAS FILED, at HEAD fee193444c: 'S10C-AC1's disqualification of Invocations is RETRACTED... The principle still binds and IS the criterion.' Z-S124's false zero was on auth-validator-edge, and opal-session-analytics was that row's POSITIVE CONTROL, in its own words. So Invocations is a SOUND oracle here and the criterion's principle is answered on it. THE INSTRUMENT HAS TWO STAGES AND THE FIRST IS THE ONE THAT DISCRIMINATES: list-metrics returns 2 metrics for opal-session-analytics and [] for auth-validator-edge and deck-generation -- a metric that does not EXIST returns an empty datapoint set that renders as Sum=0, byte-identical to a real zero. Only when the metric exists is a Sum meaningful. WHAT IT SHOWS NOW: Sum=141,686 across 12 datapoints, 14-day window ending 2026-09-04T04:00Z, at this seat's own vintage. WHAT IT WOULD SHOW IF IDLE, demonstrated rather than asserted: the identical query returns 2,214 for opal-portal-authorizer and 4,459 for opalinvest-auth-handler -- 64x and 32x lower on the same instrument in the same call-set -- so the probe does not return a large number for everything, and a quiet function reads quiet. A genuinely idle function would keep its metric (metrics persist once created) and its datapoints and Sum would fall toward zero. CORROBORATION ON A SECOND AXIS: the count moved from 141,685 to 141,686 between two reads an hour apart, so the number is tracking live traffic rather than a cached figure. STRUCTURAL EVIDENCE THAT THE Z-S124 TRAP CANNOT APPLY HERE AT ALL: this function is not Lambda@Edge and is structurally ineligible to be -- its role opal-portal-lambda-role trusts lambda.amazonaws.com ONLY, while the control lambda-edge-execution-role carries edgelambda.amazonaws.com, and CloudFront rejects an association whose role lacks it. Corroborated on a different instrument: enumerating every behavior's LambdaFunctionAssociations across BOTH distributions (denominator 2) returns zero appearances. REGION DENOMINATOR, printed although the evidence is not log-based and the viewer-region trap is void for a non-edge function: 1 region, us-east-1, log group /aws/lambda/opal-session-analytics with no region-prefixed siblings.",
+      "denominator": "5 functions run on the identical query (2 with the metric absent, 3 present); 2 of 2 CloudFront distributions enumerated for edge associations; 1 of 1 regions carrying this function's logs",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S10C-AC2",
+      "criterion_verbatim": "THE BUILD PATH IS REPEATABLE, NOT A ONE-OFF: the build run twice from a clean state producing a byte-identical or explained-different artifact, with the commands recorded such that another seat could run them. A single successful manual build does not pass -- the whole defect being repaired is that no repeatable path exists.",
+      "method": "command",
+      "invocation": "Twice, into two separate clean directories: cp -r <repo>/infra/aws/opalinvest_dev/lambda/session-analytics/{src,package.json,package-lock.json,tsconfig.json} <builddir>/ ; cd <builddir> ; npm ci --no-audit --no-fund ; npm run build   (which is `tsc`). Built in a scratch dir rather than in place because neither dist/ nor node_modules/ is gitignored and seven lanes share this checkout.",
+      "output_evidence": "BUILD-A vs BUILD-B: 12 of 12 first-party outputs byte-identical by sha256 -- index.js, auth.js, types.js, their three .d.ts and all six .map files. AND THE RESULT IS STRONGER THAN THE CRITERION ASKED FOR: both builds are ALSO byte-identical to the artifact CURRENTLY DEPLOYED, downloaded from Lambda via get-function. Same sha256 on all 12. The live artifact was deployed 2026-01-08 (LastModified, CodeSha256 eQswWf3zdISgafQwQ+GhHgyWNfoxPOSeriqYVxiN9VU=); the reproducing builds ran 2026-09-03 on node 26.8.1, npm 11.19.0 and TypeScript 5 against a nodejs20.x target. Eight months and a different Node major apart, identical bytes. THAT IS A DIFFERENT AND STRONGER CLAIM THAN REPEATABILITY: it proves the repo source IS what production is serving, with no drift and no mystery artifact. THE PREMISE THIS REFUTES: the face's title and WHY section assert the function 'has NO build path'. It has a complete one -- src/{index,auth,types}.ts, tsconfig.json (outDir dist, declaration and sourceMap true, matching the deployed artifact's shape exactly), package.json with build and package scripts, package-lock.json, deploy.sh and a README. The belief came from lambda-source-map.json:1740 reading source_dir EXTERNAL, runtime python3.11 and 'No repo source. Code must be downloaded from AWS' -- three false fields in the estate's designated authority for this exact pairing. Filed as Z-S110 (the defect, pre-existing) and Z-S134 (its measured cost and this byte-identity proof).",
+      "denominator": "2 builds from clean state; 12 of 12 first-party build outputs compared by sha256 in both the A-vs-B and the A-vs-deployed direction",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S10C-AC3",
+      "criterion_verbatim": "DEPLOYED AND SERVING, VERIFIED AT THE EDGE RATHER THAN AT THE API: the published version number, the CloudFront association updated to it, and evidence the NEW code is actually executing at an edge location -- not merely that the association was updated. `update-distribution` returning 200 proves a configuration change, never that replication completed; state how long it took and how you knew it had finished.",
+      "method": "live_read",
+      "invocation": "aws lambda get-function-configuration (paired before/after the import) ; aws cloudfront get-distribution-config across both distributions ; aws iam get-role on the execution role and on the edge control role",
+      "output_evidence": "THE CRITERION'S PRESCRIBED METHOD IS VOID AND THE ISSUER RETRACTED IT AT HEAD fee193444c: 'S10C-AC3's edge mechanics are VOID and ROLLBACK IS FAST -- no published version, no association, no replication wait.' opal-session-analytics is not Lambda@Edge and cannot be: its role trusts lambda.amazonaws.com only (control: lambda-edge-execution-role carries edgelambda.amazonaws.com), and it holds zero LambdaFunctionAssociations across both distributions. There is no published version to state, no association to update, and no replication to time. THE CRITERION'S QUESTION -- IS THE RIGHT CODE ACTUALLY RUNNING -- IS ANSWERED AFFIRMATIVELY BY S10C-AC2'S EVIDENCE, on a stronger instrument than the one it prescribes: the artifact executing in production is byte-identical to what the repo build produces, 12 of 12 by sha256. The function is demonstrably serving (141,686 invocations/14d). BUT NO NEW CODE WAS DEPLOYED BY THIS FACE, DELIBERATELY, AND THAT IS WHY THIS FILES UNCOMPUTABLE RATHER THAN PASS. Act one of the adoption is an INERT import by construction -- the governing ruling required the post-import plan to show NO changes to the running function, and it does. A code deploy is act two: it removes the lifecycle ignore_changes, builds via build-nodejs-lambda.sh, swaps to an S3 artifact and forces the handler to dist/index.handler.",
+      "denominator": "0 code deploys performed of 0 authorised in act one; 2 of 2 CloudFront distributions enumerated to establish the edge mechanics do not apply; 1 of 1 execution roles checked against the edge-eligibility control",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "No code was deployed, so there is no 'new code executing' to verify. That is by design and doubly bound. FIRST, the ruling that put the adoption in scope made the import's inertness the control: 'the plan must show NO changes to the running function... if the plan is not clean: STOP, and reconcile the DECLARATION to the WORLD.' A face whose control is that nothing changed cannot also evidence that something was deployed. SECOND, act two is currently un-runnable: 2.0.0_SA_COO~Z placed an estate-wide BAR on portal-auth applies at ~04:3xZ, caused by this seat's own Z-S136 finding, and the artifact pipeline for this function does not exist yet. THE LATER RUN THIS NAMES: act two, whose first step is deleting the lifecycle block in portal-auth/session-analytics.tf -- the file states that sequence in terms so a later reader cannot mistake a clean plan for a closed build-path question. The criterion's underlying question is not left open: the code running IS the repo build, proven at 12 of 12 by sha256 under S10C-AC2."
+    },
+    {
+      "criterion_id": "S10C-AC4",
+      "criterion_verbatim": "THE KEY-REFRESH QUESTION IS ANSWERED EITHER WAY: either a refresh path demonstrated with the function picking up a changed key without a redeploy, or an explicit statement that redeploy-per-rotation is required, with the rotation runbook amended to say so. Both pass. Silence on it fails.",
+      "method": "manual_read_with_citation",
+      "invocation": "Read src/auth.ts and the deployed auth.js at source; measured container lifetime from aws logs describe-log-streams (creation to lastEventTimestamp); read infra/aws/lambda/lib/authkeys/jwtPublicKeys.mjs; searched the project deliverables for an existing rotation runbook",
+      "output_evidence": "ANSWERED THE SECOND WAY, EXPLICITLY: redeploy-per-rotation is required today. auth.js:24-26 is `if (cachedPublicKey) return cachedPublicKey;` then a GetSecretValue on opal/auth/jwt-public-key -- module-level, no TTL, no invalidation, one slot. A warm container verifies against the OLD public key and rejects tokens signed with the new private key for as long as it lives. THERE IS NO RUNBOOK TO AMEND AND THAT IS STATED RATHER THAN WORKED AROUND: TO-OP-S-10 reads staged and the dual-key overlap runbook is its own deliverable; the project's only rotation runbook is TO-OP-S-3's, for the ORIGIN secret. So the answer is a committed note (e70ca4e244) DELIVERED to TO-OP-S-10's assignee as msg 20226 -- amending a runbook that does not exist would satisfy the criterion's words and none of its purpose. AND A CORRECTION TO THIS FACE'S OWN FRAMING, MEASURED: 'breaks PERMANENTLY, with no mechanism left to repair it' overstates it. The cache is bounded by CONTAINER LIFETIME -- median 5.6 min, p90 52.3, p99 138.0, max observed 143.0 (2.4 h), from 107 measurable spans of 200 streams sampled with NextToken present, so a FLOOR not a census and biased toward recently-active containers. The true shape is a PARTIAL, SILENT, SELF-CLEARING OUTAGE OF UNBOUNDED TAIL DURATION, which is worse than permanent breakage in one respect: permanent breakage gets NOTICED, while a partial outage that clears on its own is absorbed as 'some 401s during the rotation' and never traced to this consumer. THE REFRESH PATH EXISTS AND NEEDS DEPLOYING RATHER THAN DESIGNING: jwtPublicKeys.mjs is two-slot with JWT_KEY_TTL_MS=300000 and accepts both the secret's current bare-PEM shape and its post-rotation envelope. Its own packaging note records that the lib mirror is gated on the consumer having a src/ and that neither portal-authorizer nor auth-validator-edge has one -- session-analytics HAS one, so it is the consumer the shared remedy fits most cleanly. Deploying it is act two.",
+      "denominator": "1 of 1 key-fetch sites in the function read at source; 107 container lifetimes measured of 200 streams sampled; 1 of 1 shared refresh libraries evaluated; 2 existing rotation runbooks checked, 0 governing this key",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S10C-AC5",
+      "criterion_verbatim": "THE VERDICT IS DELIVERED IN ONE OF THE THREE NAMED FORMS, and `TO-OP-S-10`'s owning lane has it in writing with the message id recorded. A verdict nobody receives has not unblocked anything. Plus: the unscoped plan before, the changed-resource list enumerated, the unscoped re-plan after, ledger CLOSED on exercised evidence, push state MEASURED.",
+      "method": "diff",
+      "invocation": "terraform plan (UNSCOPED, file moved aside = true BEFORE) ; terraform import ; terraform plan (UNSCOPED, after) ; deploy_ledger.py open/close-leg/close ; mcp send_message ; git ls-remote + merge-base --is-ancestor",
+      "output_evidence": "VERDICT (a) -- A BUILD PATH EXISTS AND IS EXERCISED -- delivered to TO-OP-S-10's assignee 0.7.0_AE_CloudOps~V as msg 20226 and to 2.0.0_SA_COO~Z as 20227, with the earlier build result at 20167/20168 and the phase-1 re-grounding at 20157/20158. UNSCOPED BEFORE, taken with this seat's file moved aside so it is a true baseline, rc=2 captured directly and never through a pipe: 'Plan: 0 to add, 3 to change, 0 to destroy' -- aws_wafv2_ip_set.opal_blocked_ips_cloudfront_v4, its v6 sibling, and aws_wafv2_web_acl.opal_cloudfront_protection, all FOREIGN and pre-existing. CHANGED-RESOURCE LIST AFTER THE IMPORT, enumerated: identical three. aws_lambda_function.session_analytics appears exactly ONCE, in a 'Refreshing state...' line, and in NO change block. Plan: 0 to add, 3 to change, 0 to destroy, 0 forces-replacement, 0 destroyed. TWO-SIDED BY NECESSITY: a clean whole-root plan would have been a FAILURE here, not a success -- it would mean this act had swallowed another lane's pending work. THE CONTROL FIRED TWICE BEFORE PASSING and each time the DECLARATION moved, never the world: attempt 1 proposed adding four default_tags to a function with none; attempt 2 reconciled tags and left publish; attempt 3 ignored publish, which declaring it explicitly did NOT fix because it is a Terraform-only meta-argument import cannot read, so state holds null and null-to-false renders as a change. LEDGER opsec-s10c-session-analytics-adopt CLOSED, 4 of 4 legs proven on exercised evidence, sentinel removed. PUSH STATE MEASURED, not defaulted: git ls-remote origin SITEZ reads 001709c96ef22a; merge-base --is-ancestor returns non-zero for ea544ac7e2, e70ca4e244, 0019bac19c and c4e25265e9 -- all LOCAL, none on origin. Push is the integrator's act under LD-0367 and this seat does not push.",
+      "denominator": "1 root planned before and after; 3 of 3 foreign changed resources enumerated and unchanged across the act; 4 of 4 ledger legs closed; 4 of 4 commits' push state measured; 2 of 2 owning parties delivered (TO-OP-S-10's assignee and the issuer)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The face names S10C-AC1's instrument test as the control that must be able to fail -- an aliveness oracle that cannot say 'dead' is the one that read ZERO on a function under load. Tested by running the identical query across five functions spanning both outcomes, rather than only against the subject.",
+      "expected": "If the instrument were incapable of saying 'dead', every function would return a live-looking number. If it were broken the other way, the known-live subject would read zero.",
+      "observed": "Two functions returned metric-absent (auth-validator-edge, deck-generation) and three returned live counts spanning two orders of magnitude -- 141,686 / 4,459 / 2,214. The instrument distinguishes present from absent AND loud from quiet. A SECOND, INDEPENDENT MUTANT sits under S10C-AC2: the build was run twice into separate clean directories, and had the path not been repeatable the two would have differed; had the repo source not been production, both would have differed from the deployed artifact. Neither happened -- 12 of 12 identical in both directions.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The build was executed twice from clean state in separate directories and the outputs compared by sha256; the aliveness query was re-run an hour after the first read.",
+      "observed": "Builds: 12 of 12 outputs byte-identical between runs. Aliveness: 141,685 then 141,686 an hour later -- the one-count movement is live traffic, not instability, and a frozen number would have been the suspicious result.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No code was deployed to opal-session-analytics.",
+      "reason": "Act one of the adoption is an inert import by construction, which the governing ruling made the control. Act two -- removing the lifecycle ignore_changes, building via build-nodejs-lambda.sh, swapping to an S3 artifact and changing the handler to dist/index.handler -- is additionally un-runnable right now: an estate-wide BAR on portal-auth applies stands, caused by this seat's own Z-S136 finding."
+    },
+    {
+      "item": "aws lambda update-function-code was never invoked, including as a test.",
+      "reason": "Banned by CLAUDE.md's NEVER block and /cloud-ops, and the issuer restated it in terms: 'do not invoke it, not even to test, and do not treat its presence in the repo as authorisation'. deploy.sh:41 is the committed path that uses it."
+    },
+    {
+      "item": "The four build-path defects were named, not fixed.",
+      "reason": "The ruling scoped fixes to defects that block the compliant deploy path itself. deploy.sh's banned update-function-code, its unavailable `zip` dependency, and its packaging disagreement with production (it excludes the source maps the live artifact contains) are all defects OF deploy.sh, which the Terraform path replaces rather than repairs. One of the four -- Windows MAX_PATH on node_modules -- was WITHDRAWN after re-measurement: the canonical build bundles to a single file and archives no node_modules, so the wall was a property of this seat's ad-hoc packaging, not of the estate's build."
+    },
+    {
+      "item": "waf-cloudfront.tf and opal-gateway/waf.tf were not edited despite this seat finding the Z-S136 defect in them.",
+      "reason": "They belong to TO-OP-S-4-18 and the reconciler's cell, and the scope ruling bounds this face to one Lambda: 'a rotation-blocker face is not an authorisation to restructure a root.' Surfaced and left; fixed by 0.7.0_AE_CloudOps~T at 3758b14afc."
+    },
+    {
+      "item": "Whether any other consumer of opal/auth/jwt-public-key carries the same unbounded-cache shape.",
+      "reason": "This face measured one function. Z-S105 bounded the reachable set at 25 live functions and called that an upper bound rather than a count. The consumer census is TO-OP-S-10's, and per Z-S134 a CloudTrail GetSecretValue census under-counts exactly the no-TTL consumers that matter most."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S134: what Z-S110's source-map defect COST -- it redirected a competent search away from a repo source that provably IS production, and the belief propagated through four carriers before anyone re-read the map.",
+    "NFRA_OPSEC202609-Z-S136: Terraform is a second writer of all four blocked-IP sets -- `addresses = []` declares them EMPTY rather than unmanaged, so any apply erases the reconciler's block list. Found in the unscoped baseline taken for this face's import."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-03/session_0.7.0_AE_CloudOps~W_2330-0010Z_OPSEC_S8R2B_USERS_V2_CMK.md",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan / import",
+      "invocation": "UNSCOPED plan with this seat's file moved aside (true BEFORE), terraform import, UNSCOPED re-plan, -detailed-exitcode with rc captured directly",
+      "result": "THE INSTRUMENT OF THIS FACE. The true-BEFORE baseline is what surfaced Z-S136 -- a -target plan on the Lambda would have been clean and silent. Capturing rc before any pipe is what kept a plan-with-changes from reading as a failure: an early attempt piped through tail and reported the rc of tail, which is the exact trap CLAUDE.md's Git section names."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "on waf-cloudfront.tf, opal-gateway/waf.tf, build-nodejs-lambda.sh, lambda-source-map.json and the task order",
+      "result": "Established the Z-S136 denominator at 4 of 4 sets across 2 roots with a NEGATIVE CONTROL on the guard-absence claim (the same probe DOES find a lifecycle block at waf-cloudfront.tf:239 for a different resource, so the zero is measured rather than a probe that cannot fire). On build-nodejs-lambda.sh it withdrew this seat's own defect 3 and revealed the deterministic-zip property."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "'opal-session-analytics' over infra/aws/terraform (measured zero, 560 files) ; 'opal-portal-auth' and 'opal-portal-api' --band DEF to locate the source by a constant lifted from the decompiled bundle ; 'rotation runbook' to establish none governs this key",
+      "result": "The measured zero over the terraform corpus established the function was unmanaged, which made the adoption an import rather than an edit. The DEF-band search on a distinctive constant is what FOUND the repo source after the source map's _note had sent this seat to download the code from AWS."
+    },
+    {
+      "tool": "npm ci + tsc, twice from clean state",
+      "invocation": "source copied to two scratch dirs, npm ci against the committed lockfile, npm run build, outputs compared by sha256 against each other and against the downloaded deployment package",
+      "result": "12 of 12 byte-identical in both directions. Built in scratch rather than in place because neither dist/ nor node_modules/ is gitignored and seven lanes share this checkout."
+    },
+    {
+      "tool": "aws cloudwatch list-metrics / get-metric-statistics / describe-log-streams",
+      "invocation": "the two-stage aliveness probe across five functions; container-lifetime distribution from log-stream creation-to-last-event",
+      "result": "Established S10C-AC1's discriminating power on a real spread rather than on the subject alone, and produced the container-lifetime distribution that corrected 'breaks permanently' to a bounded-but-unbounded-tail partial outage."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open (4 legs, rollback and the act-one/act-two split in the title) -> close-leg x4 -> close",
+      "result": "Opened before the import with the rollback named. The title states in terms that the entry does NOT close the build-path question, so an adopted-therefore-deployable reading is refused at the ledger as well as in the .tf."
+    }
+  ]
+}
