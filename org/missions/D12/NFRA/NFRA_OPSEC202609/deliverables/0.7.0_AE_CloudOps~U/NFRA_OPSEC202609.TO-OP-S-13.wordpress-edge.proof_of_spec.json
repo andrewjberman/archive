@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-13",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "998c79b970",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-13.wordpress-edge.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/prd/NFRA_OPSEC202609_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3619ebecd9"
+  },
+  "assignee": "0.7.0_AE_CloudOps~U",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/website/cloudfront.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply.sh rc=0 -- 'Apply complete! Resources: 2 added, 0 changed, 0 destroyed'. UNSCOPED baseline plan BEFORE read 2-add/0-change/0-destroy with the changed-resource list enumerated to exactly aws_wafv2_web_acl.website_edge and aws_cloudfront_distribution.website. UNSCOPED re-plan AFTER read 'No changes. Your infrastructure matches the configuration.' with 0 changed-resource stanzas. Deploy ledger org/critical_paths/change_management/20260903T2353Z_opsec-s13-website-edge_deploy_completion.md opened BEFORE the apply and closed after. RESOURCES CREATED BY THIS ARTIFACT, ids read back from AWS after the apply: aws_wafv2_web_acl.website_edge = arn:aws:wafv2:us-east-1:313476888478:global/webacl/opal-website-edge-protection/af7ed304-f3b9-4135-b7c4-42af5913df6d; aws_cloudfront_distribution.website = E1DHJH4Y1W8YC2 (dmq5420cdhgqf.cloudfront.net), created in 2m49s and associated to that ACL. The distribution was EXERCISED end-to-end: six live requests returned four 200s with distinct real page content and two 404s, all carrying Via / X-Cache / X-Amz-Cf-Id CloudFront response headers. The two AWS resources are folded into this row rather than carried as separate artifacts_produced entries because the schema's kind enum is repo-centric and commit_or_etag must be a commit-ish -- an AWS resource id is neither, and inventing a kind to hold one would have made the instance lie about what sort of object it is."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S13-AC1",
+      "criterion_verbatim": "S13-AC1 -- THE SITE STILL LOADS FOR A VISITOR, AND THIS IS GRADED FIRST: an unauthenticated GET of the site's home page through the new edge returning 200 with real page content, plus at least two further real paths. NEGATIVE CONTROL: a path that should 404 returns 404 and not a catch-all 200. A face that hardens a site nobody can reach has failed its own outcome.",
+      "method": "live_read",
+      "invocation": "curl -s against https://dmq5420cdhgqf.cloudfront.net<path> for / , /contact/ , /team/ , /investment-platform/ , /this-path-should-not-exist-s13-negctl , /another-definitely-absent-xyzzy-9931 ; response headers read separately with curl -D -",
+      "output_evidence": "FOUR REAL PATHS, ALL 200, ALL DISTINCT: / -> 200, title 'Opal Capital | Investment Platform for Independent Advisors', h1 'Institutional Resources. Independent Control.', 96173 bytes. /contact/ -> 200, title 'Contact Opal Capital | Boca Raton, FL', h1 'Let's start a conversation.', 97719 bytes. /team/ -> 200, title 'Investment Team | Opal Capital', h1 '120+ years at the desk.', 89798 bytes. /investment-platform/ -> 200, title 'Investment Platform for Advisors: Models, ETFs, Tax | Opal', h1 'Your platform. Your way.', 107755 bytes. NEGATIVE CONTROL ON TWO INDEPENDENT ABSENT PATHS: /this-path-should-not-exist-s13-negctl -> 404, title '404 - Page not found - Opal Capital', h1 'Page not found', 64339 bytes; /another-definitely-absent-xyzzy-9931 -> 404, 64345 bytes. TRAVERSAL PROVEN, NOT ASSUMED: Via: 1.1 84ee72f7470310cc4167f95ed9189afa.cloudfront.net (CloudFront), X-Cache: Miss from cloudfront, X-Amz-Cf-Pop: MIA50-P9, X-Amz-Cf-Id present, server: LiteSpeed underneath.",
+      "denominator": "6 paths requested through the edge: 4 real (4/4 returned 200 with distinct titles and h1s) + 2 absent (2/2 returned 404). No path returned an unexpected class.",
+      "status": "PASS",
+      "status_reason": "The size differences alone would NOT have settled this -- four DISTINCT titles and h1s are what separate real per-path serving from one shell returned for everything, which is why the content markers were read and not just the byte counts."
+    },
+    {
+      "criterion_id": "S13-AC2",
+      "criterion_verbatim": "S13-AC2 -- A KNOWN-BAD REQUEST IS REFUSED BEFORE WORDPRESS HANDLES IT: a request the edge refuses, with the response pasted, and evidence it did not reach the origin -- an origin-side log absence for that request id, or the edge's own block record naming the rule. 'The edge returned 403' alone does not establish that WordPress never saw it.",
+      "method": "live_read",
+      "invocation": "NOT RUN. The precondition -- a rule on this ACL capable of refusing anything -- does not exist, and building one requires the allow-list input recorded absent in row NFRA_OPSEC202609-Z-S102.",
+      "output_evidence": "THE APPLIED ACL HAS NO REFUSING RULE, and this is read off the applied object rather than inferred: get-web-acl returns DefaultAction Allow; the three managed groups all at OverrideAction Count, which by definition forwards the request to the origin and therefore produces the OPPOSITE of the evidence this criterion demands; and BlockedIPs pri 0 Block referencing two IP sets that are EMPTY BY DESIGN under constraint C-2 (opal-suspicious-addresses is truth and the OP-s-15 reconciler is their only writer). Every rule on this ACL either counts or matches an empty set.",
+      "denominator": "4 rules on the applied ACL: 1 Block rule matching 2 empty IP sets, 3 managed groups in Count. 0 rules capable of refusing a request today.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Cites row NFRA_OPSEC202609-Z-S102. THE FACE TREATS AC2 AND AC3 AS INDEPENDENT AND THEY ARE NOT: the /wp-admin and xmlrpc.php source-restriction rule is the ONLY refusal mechanism this face is authorized to build, because the managed groups are mandated to COUNT and both reused IP sets are empty by design. So the missing allow-list does not merely make AC3 uncomputable -- it removes AC2's only available demonstration. This is filed as UNCOMPUTABLE rather than FAIL because the blocking input was never supplied and the face forbids inventing it. A ruling that xmlrpc.php may be blocked outright for all sources would make this criterion satisfiable immediately without any address being guessed."
+    },
+    {
+      "criterion_id": "S13-AC3",
+      "criterion_verbatim": "S13-AC3 -- /wp-admin AND xmlrpc.php ARE SOURCE-RESTRICTED AT THE EDGE: both paths refused from an address outside the list and reachable from one inside it, four captures. If the allow-list was never supplied, this files UNCOMPUTABLE-BY-CONSTRUCTION citing the row, and the paths are left as they were rather than guessed at.",
+      "method": "live_read",
+      "invocation": "NOT RUN. No allow-list was supplied in the task order, in the GO message (Msg-ID 20015), or in the follow-up (Msg-ID 20024), and the face states in terms that the allowed addresses are an INPUT the assignee does not invent.",
+      "output_evidence": "THE PATHS ARE LEFT EXACTLY AS THEY WERE, as the criterion directs, and their pre-existing state is recorded so the eventual after-state is comparable: https://opalinvest.com/wp-admin/ returns 302 to /wp-login.php (i.e. reachable from any address), and https://opalinvest.com/xmlrpc.php returns 405 to a GET. THE 405 IS RECORDED WITH ITS QUALIFIER: 405 is METHOD-not-allowed and is NOT evidence the endpoint is closed -- xmlrpc.php is a POST endpoint and a GET result says nothing about whether POST is accepted. Reading that 405 as 'already hardened' would be a false negative.",
+      "denominator": "2 paths in scope (/wp-admin, xmlrpc.php); 0 allow-list entries available; 4 captures required by the criterion, 0 producible.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Cites row NFRA_OPSEC202609-Z-S102, filed BEFORE the build per the issuer's instruction rather than at proof-writing time. This is the disposition the criterion itself prescribes for exactly this case. No address was guessed and no path was left more open than it was found."
+    },
+    {
+      "criterion_id": "S13-AC4",
+      "criterion_verbatim": "S13-AC4 -- THE RULE GROUPS ARE REUSED AND IN COUNT, AND THE IP SET IS SHARED: the ACL read showing the managed groups with OverrideAction: Count, and the IP set reference resolving to the SAME set TO-OP-S-4-18 created -- its id or ARN pasted and compared. A second, parallel IP set is a FAIL: the cell's whole sequencing exists so one BLOCK row covers both surfaces.",
+      "method": "live_read",
+      "invocation": "aws wafv2 get-web-acl --scope CLOUDFRONT --name opal-website-edge-protection --id af7ed304-f3b9-4135-b7c4-42af5913df6d ; and aws wafv2 list-ip-sets --scope CLOUDFRONT fully paginated BEFORE and AFTER the apply",
+      "output_evidence": "MANAGED GROUPS IN COUNT, read off the applied object: pri 3 ip-reputation / AWSManagedRulesAmazonIpReputationList OverrideAction=Count; pri 4 common-rule-set / AWSManagedRulesCommonRuleSet Count; pri 5 known-bad-inputs / AWSManagedRulesKnownBadInputsRuleSet Count. THE IP SET REFERENCES, PASTED AND COMPARED: this ACL's BlockedIPs (pri 0, Action Block) ORs arn:aws:wafv2:us-east-1:313476888478:global/ipset/opal-blocked-ips-cloudfront/b2e008a6-40d9-4d07-bef5-1caa8b682bb3 and arn:aws:wafv2:us-east-1:313476888478:global/ipset/opal-blocked-ips-cloudfront-ipv6/eb1a0caa-60a0-492e-a685-e5456cea8b7d -- BYTE-IDENTICAL to the two ARNs TO-OP-S-4-18's opal-cloudfront-protection references, which were read from that ACL directly. NO SECOND SET WAS BORN: the CLOUDFRONT-scope IP-set census, fully paginated, read 2 across 2 pages BEFORE the apply and 2 across 2 pages AFTER it.",
+      "denominator": "CLOUDFRONT-scope IP sets: 2 before, 2 after, both counts fully paginated rather than read off page 1 (page 1 carried a NextMarker, so it was not the population). 3 managed rule groups, 3 of 3 at Count. 2 of 2 IP set ARNs match.",
+      "status": "PASS",
+      "status_reason": "REUSE IS PROVEN ON THE APPLIED PLANE, not only at plan time. The IPv6 SIBLING is the part a naive reuse drops: the dispatch message named only the IPv4 set and a regional set, but aws_wafv2_ip_set carries a single ip_address_version, so referencing only the v4 set would leave every IPv6 address the reconciler blocks unblocked HERE while reading correct on the portal. Both are referenced by data-source lookup rather than literal ARN, so a rename or deletion fails loudly at plan time instead of silently drifting off the shared block list."
+    },
+    {
+      "criterion_id": "S13-AC5",
+      "criterion_verbatim": "S13-AC5 -- THE BOX WAS NOT MOVED OR MODIFIED: the instance id, its security group ids and their rules read BEFORE and AFTER, identical. Plus the usual: unscoped baseline before, changed-resource list enumerated, unscoped re-plan 0-diff after, ledger CLOSED with rollback named, push state MEASURED.",
+      "method": "diff",
+      "invocation": "aws ec2 describe-instances --instance-ids i-0152e3fe2599fa630 and aws ec2 describe-security-groups --group-ids sg-062bbb40a6c92509c, captured BEFORE any write and again AFTER the apply, then compared field-by-field in python",
+      "output_evidence": "INSTANCE identical: True -- InstanceId i-0152e3fe2599fa630, InstanceType t3.small, State running, PublicIpAddress 18.208.18.213, PrivateIpAddress 172.31.85.69, ImageId ami-0d28727121d5d4a3c, LaunchTime 2026-07-09T16:15:16+00:00, SubnetId and SecurityGroups list all unchanged. SECURITY GROUP identical: True -- including the full IpPermissions and IpPermissionsEgress structures; ingress remains exactly tcp/80 and tcp/443 from 0.0.0.0/0 and egress remains 1 rule. UNSCOPED BASELINE BEFORE: 2 to add, 0 to change, 0 to destroy, changed-resource list enumerated to exactly 2 stanzas. UNSCOPED RE-PLAN AFTER: 'No changes. Your infrastructure matches the configuration.', 0 stanzas. TERRAFORM CORROBORATES FROM THE OTHER SIDE: the apply reported 0 changed and 0 destroyed, and the module outputs still read instance_id=i-0152e3fe2599fa630, security_group_id=sg-062bbb40a6c92509c, elastic_ip=18.208.18.213.",
+      "denominator": "2 objects compared (1 instance, 1 security group), 9 instance fields and both permission structures, 0 differences. Plan stanzas: 2 before, 0 after.",
+      "status": "PASS",
+      "status_reason": "The BEFORE captures were committed at dba1113ea9 BEFORE the first write, so they are a timestamped baseline in git rather than a recollection taken after the fact. ROLLBACK NAMED, AND IT IS NOT DNS FOR THIS APPLY: because no DNS record was repointed and the distribution carries no alias, no visitor traffic ever reached the new resources, so rollback is terraform destroy of the two NEW resources only, with zero visitor impact. The DNS rollback the face names becomes the relevant one only at the cutover, which is blocked -- see row NFRA_OPSEC202609-Z-S101, and its propagation reality is the apex A record's own TTL of 3600s, not the zone SOA default of 600s."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The face names the control that must be able to FAIL: S13-AC1's 404 negative control, without which a catch-all edge returning 200 to everything would read as a working site. The mutant this face is exposed to is a CloudFront custom_error_response mapping 404 to a 200 shell -- the exact configuration that silently converts the criterion into a tautology, and the shape this project was fooled by earlier today.",
+      "expected": "If the control is real, the SAME instrument must return DIFFERENT verdicts on the two classes of path: 200 on paths that exist and 404 on paths that do not. A catch-all edge cannot produce both.",
+      "observed": "It returned both, on 6 requests through one distribution: 4 real paths -> 200 with four DISTINCT titles and h1s, 2 independent absent paths -> 404 carrying the origin's real WordPress 404 page (title '404 - Page not found - Opal Capital', h1 'Page not found'). The distribution was authored with NO custom_error_response block, deliberately and with the reason stated in cloudfront.tf, so the origin's genuine 404 reaches the viewer unaltered.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "expected": "Identical verdicts across repeats: the same status codes and the same IP-set denominator.",
+      "observed": "Identical. The 4 real paths returned 200 on both passes with matching sizes, the absent paths returned 404 on both, and the IP-set census read 2 across 2 pages on both runs.",
+      "status": "STABLE",
+      "method": "Each load-bearing read was repeated against the same applied world with the same instrument: the four real paths and the two absent paths were requested twice through https://dmq5420cdhgqf.cloudfront.net (once capturing status and byte size, once capturing response headers and the title/h1 content markers), and the fully-paginated CLOUDFRONT-scope IP-set census was run once before the apply and once after it."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deliverable 4 -- the DNS cutover and the ACM certificate for opalinvest.com.",
+      "reason": "NOT EXECUTABLE FROM THIS FABRIC, not deferred by choice. opalinvest.com has no Route53 hosted zone (denominator 2 zones, IsTruncated absent) and is delegated to GoDaddy ns47/ns48.domaincontrol.com, read authoritatively from GoDaddy's own nameserver. No ACM certificate for the name exists (us-east-1 denominator 1, opalinvest.dev only) and minting one requires a validation CNAME in that same GoDaddy zone, so the certificate and the cutover are blocked by ONE credential. A second independent carrier agrees: infra/aws/terraform/website/README.md calls the EIP 'the stable public IP handed to GoDaddy apex-A at W3 cutover'. Separately, the apex is an A record and CloudFront publishes no stable IP, and RFC 1034 s.3.6.2 forbids a CNAME at a zone apex -- so an ALIAS-class record is needed, which Route53 provides and whose GoDaddy equivalent is NOT ESTABLISHED here. Row NFRA_OPSEC202609-Z-S101, ARMED."
+    },
+    {
+      "item": "Deliverable 3 -- the /wp-admin and xmlrpc.php source-address restriction rules.",
+      "reason": "The allowed addresses are an INPUT the face forbids inventing and none was supplied. The paths are left exactly as they were rather than guessed at, per S13-AC3's own instruction. Row NFRA_OPSEC202609-Z-S102, ARMED."
+    },
+    {
+      "item": "Graduating any managed rule group from Count to Block.",
+      "reason": "Explicitly a later act on measured soak evidence shared with the portal's, per the face and the S-4-18 carrier. A group in Block here would enforce an unmeasured ruleset on live visitor traffic in front of a public marketing site and is a FAIL under S13-AC4, not a bonus. AWSManagedRulesBotControlRuleSet is unauthorized under PRD s.5 and is deliberately absent."
+    },
+    {
+      "item": "Closing the direct-to-origin bypass.",
+      "reason": "sg-062bbb40a6c92509c permits tcp/80 and tcp/443 from 0.0.0.0/0 and the EIP answers on both, so the origin serves non-edge traffic today and the edge is bypassable by requesting the address directly. S13-AC5 requires the security group to be IDENTICAL before and after, so closing it is explicitly NOT this face's act. Named here so that no claim in this instance is read as 'known-bad requests are refused' without its scope -- any refusal this face demonstrates is scoped to traffic that traversed the edge."
+    },
+    {
+      "item": "Cache tuning for WordPress.",
+      "reason": "The distribution runs Managed-CachingDisabled. The cell's outcome is a SECURITY one -- a known-bad request refused before WordPress handles it -- not a performance one, and caching a logged-in WordPress response to the wrong viewer is a correctness and privacy defect. A WP-appropriate cookie/query-string cache policy is a separate, measured act."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S101: the DNS and certificate half of this face is not executable from this fabric -- opalinvest.com is delegated to GoDaddy with no Route53 zone and no ACM certificate, and the apex is an A record that CloudFront cannot be the target of without an ALIAS-class record. Resolves S13-AC2's and S13-AC3's custom-domain framing and both entries in declared_exclusions concerning the cutover. ARMED, disarm_owner 2.0.0_SA_COO~Z.",
+    "NFRA_OPSEC202609-Z-S102: the /wp-admin allow-list is absent as the face anticipated, but the consequence is wider than the face states -- the source-restriction rule is the only rule this face is authorized to build that can refuse anything, so its absence removes S13-AC2's only demonstration as well as making S13-AC3 uncomputable. Resolves the S13-AC2 and S13-AC3 UNCOMPUTABLE-BY-CONSTRUCTION dispositions above. ARMED, disarm_owner 2.0.0_SA_COO~Z."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~U/logs/2026-09-03/session_2230-2359Z_NFRA_OPSEC202609_TO-OP-S-13.md",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan (UNSCOPED)",
+      "invocation": "terraform -chdir=infra/aws/terraform/website plan -input=false -no-color, run before the apply as the baseline and again after as the 0-diff check",
+      "result": "BEFORE: 'Plan: 2 to add, 0 to change, 0 to destroy' with the changed-resource list enumerated to exactly aws_wafv2_web_acl.website_edge and aws_cloudfront_distribution.website. AFTER: 'No changes. Your infrastructure matches the configuration.', 0 changed-resource stanzas. Both runs UNSCOPED -- no -target was used, so neither reading is a scoped check certifying its own scope."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "comp-read on the plan output for the ipset ARN pattern, and on INVESTIGATION_v1.md for the row-id pattern",
+      "result": "The plan enumerate confirmed both reused IP set ARNs resolved at plan time (4 hits, all flagged SUBSTRING with the WARN that an anchored probe would report zero -- read and accounted for). The row-id enumerate printed its denominator and paged, which is how the id collision below was caught."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py (via safe-commit)",
+      "invocation": "fired automatically on the commit carrying the two new rows",
+      "result": "BLOCKED the first attempt: both new rows were missing the required 'disposition' field. Fixed at source rather than overridden, and the second attempt passed with 'all new rows carry their step-7/step-10 fields'. The gate taught at violation time exactly as intended."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py",
+      "invocation": "open --slug opsec-s13-website-edge with 5 legs BEFORE the apply; close-leg per leg with proof; close at the end",
+      "result": "Ledger opened at 20260903T2353Z before any irreversible act and carried the manifest for all 5 legs."
+    },
+    {
+      "tool": "aws cloudfront list-cache-policies / list-origin-request-policies",
+      "invocation": "run before authoring the TF to resolve the managed policy ids",
+      "result": "Managed-CachingDisabled 4135ea2d-6df8-44a3-9df3-4b5a84be39ad (denominator 15, NextMarker None) and Managed-AllViewerExceptHostHeader b689b0a8-53d0-40ab-baf2-68738e2966ac (denominator 8, NextMarker None). READ LIVE rather than recalled, because a wrong managed-policy id is accepted by terraform and changes what the origin receives."
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+    "WebACL": {
+        "Name": "opal-website-edge-protection",
+        "Id": "af7ed304-f3b9-4135-b7c4-42af5913df6d",
+        "ARN": "arn:aws:wafv2:us-east-1:313476888478:global/webacl/opal-website-edge-protection/af7ed304-f3b9-4135-b7c4-42af5913df6d",
+        "DefaultAction": {
+            "Allow": {}
+        },
+        "Description": "NFRA_OPSEC202609 OP-s-13 edge ACL for the opalinvest.com marketing site. Managed rule groups in COUNT for the soak. BlockedIPs REUSES the shared CloudFront-scope IP sets so one reconciler write covers site and portal.",
+        "Rules": [
+            {
+                "Name": "BlockedIPs",
+                "Priority": 0,
+                "Statement": {
+                    "OrStatement": {
+                        "Statements": [
+                            {
+                                "IPSetReferenceStatement": {
+                                    "ARN": "arn:aws:wafv2:us-east-1:313476888478:global/ipset/opal-blocked-ips-cloudfront/b2e008a6-40d9-4d07-bef5-1caa8b682bb3"
+                                }
+                            },
+                            {
+                                "IPSetReferenceStatement": {
+                                    "ARN": "arn:aws:wafv2:us-east-1:313476888478:global/ipset/opal-blocked-ips-cloudfront-ipv6/eb1a0caa-60a0-492e-a685-e5456cea8b7d"
+                                }
+                            }
+                        ]
+                    }
+                },
+                "Action": {
+                    "Block": {}
+                },
+                "VisibilityConfig": {
+                    "SampledRequestsEnabled": true,
+                    "CloudWatchMetricsEnabled": true,
+                    "MetricName": "WebsiteBlockedIPs"
+                }
+            },
+            {
+                "Name": "ip-reputation",
+                "Priority": 3,
+                "Statement": {
+                    "ManagedRuleGroupStatement": {
+                        "VendorName": "AWS",
+                        "Name": "AWSManagedRulesAmazonIpReputationList"
+                    }
+                },
+                "OverrideAction": {
+                    "Count": {}
+                },
+                "VisibilityConfig": {
+                    "SampledRequestsEnabled": true,
+                    "CloudWatchMetricsEnabled": true,
+                    "MetricName": "WebsiteIpReputation"
+                }
+            },
+            {
+                "Name": "common-rule-set",
+                "Priority": 4,
+                "Statement": {
+                    "ManagedRuleGroupStatement": {
+                        "VendorName": "AWS",
+                        "Name": "AWSManagedRulesCommonRuleSet"
+                    }
+                },
+                "OverrideAction": {
+                    "Count": {}
+                },
+                "VisibilityConfig": {
+                    "SampledRequestsEnabled": true,
+                    "CloudWatchMetricsEnabled": true,
+                    "MetricName": "WebsiteCommonRuleSet"
+                }
+            },
+            {
+                "Name": "known-bad-inputs",
+                "Priority": 5,
+                "Statement": {
+                    "ManagedRuleGroupStatement": {
+                        "VendorName": "AWS",
+                        "Name": "AWSManagedRulesKnownBadInputsRuleSet"
+                    }
+                },
+                "OverrideAction": {
+                    "Count": {}
+                },
+                "VisibilityConfig": {
+                    "SampledRequestsEnabled": true,
+                    "CloudWatchMetricsEnabled": true,
+                    "MetricName": "WebsiteKnownBadInputs"
+                }
+            }
+        ],
+        "VisibilityConfig": {
+            "SampledRequestsEnabled": true,
+            "CloudWatchMetricsEnabled": true,
+            "MetricName": "opal-website-edge-protection"
+        },
+        "Capacity": 927,
+        "ManagedByFirewallManager": false,
+        "LabelNamespace": "awswaf:313476888478:webacl:opal-website-edge-protection:",
+        "RetrofittedByFirewallManager": false,
+        "OnSourceDDoSProtectionConfig": {
+            "ALBLowReputationMode": "ACTIVE_UNDER_DDOS"
+        }
+    },
+    "LockToken": "61ea5cea-6d4f-4480-bd40-bf54b41db1d4"
+}
