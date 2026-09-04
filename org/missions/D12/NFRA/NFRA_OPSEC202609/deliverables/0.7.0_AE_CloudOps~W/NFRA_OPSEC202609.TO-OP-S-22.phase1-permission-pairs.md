@@ -242,3 +242,87 @@ reading, offered as a recommendation and not a ruling:
   an explicitly LATER increment, so this is not a defect today -- but if that page is later expected
   to show *who lifted a block and why*, the audit will have to move or be duplicated, and duplicating
   it is the two-carriers-diverge shape. **Better decided once, now, than migrated later.**
+
+---
+
+# ADDENDUM 2 -- 2026-09-04 ~01:5xZ: ALL THREE DECLARED POLICIES READ AT SOURCE
+
+**All three roles are now DECLARED** (none applied). This section reconciles the spec-derived list
+above against the policy source, which upgrades it from *spec-derived* to *policy-reconciled*.
+
+| role | carrier | pin |
+|---|---|---|
+| `opal-sentinel` | `infra/aws/terraform/opsec/iam_sentinel.tf` (244 lines) | `0.7.0_AE_CloudOps~S` |
+| `opal-ipset-reconciler` | `infra/aws/terraform/opsec/iam_reconciler_and_cli.tf` (308 lines) | `3578b10a00`, `0.7.0_AE_CloudOps~T` |
+| `opal-ipblock-cli` | same file | `3578b10a00` |
+
+⛔ **WHAT THIS UPGRADE DOES AND DOES NOT BUY.** The IAM **policy** source now exists and has been read,
+so the pair list is no longer a guess about what will be granted. **The Lambda FUNCTION code still does
+not exist**, so the question *"does the code actually make these calls"* is still open and stays open
+after the verdict. `S22-AC4`'s scope sentence already carries it: **an allowed pair is not an exercised
+pair.** A verdict certifies that the grant matches the declared need; only the code proves the need.
+
+## RECONCILIATION -- every MUST-HAVE is granted, and SIX places are TIGHTER than this list asked
+
+Nothing in the spec-derived list turned out to be missing. Six grants are narrower than specified, and
+each divergence is recorded so the verdict grades the BUILT policy and does not mark a deliberate
+tightening as a gap:
+
+| # | this list said | built | why the built form is better |
+|---|---|---|---|
+| 1 | reconciler: `Scan` **or** `Query` | `Query` + `GetItem` only, **no `Scan`** | C-9: the lockout question must be answerable without a table scan, and never granting `Scan` stops a later edit reintroducing one |
+| 2 | sentinel: `s3:PutObject` on `reports/daily/*` | pinned to `reports/daily/*`, **not** `reports/*` | the grant cannot be read as the whole reports tree |
+| 3 | sentinel: `s3:GetObject` on the allowlist | scoped to the **single object** `allowlists/partner-egress.json`, not the prefix | a prefix grant would let a future edit read whatever else lands there |
+| 4 | sentinel: `ses:SendEmail` | **conditioned** on `ses:FromAddress = noreply@opalinvest.dev` | the role cannot send as anything else on that domain |
+| 5 | all three: `kms:DescribeKey` | **absent from all three** | reachable via `ViaService` but never called directly -- an UNUSED grant, which fails never |
+| 6 | MUST-NOTs as omissions | **explicit `Deny`** on all three roles | an omission is indistinguishable from an oversight; a `Deny` cannot be overridden by any later `Allow` |
+
+### ⭐ THE ALLOW/DENY ASYMMETRY IS DELIBERATE AND CORRECT, AND IT ABSORBS THE FOUR-SET FINDING
+
+The reconciler's **Allow** on `wafv2:UpdateIPSet` is scoped to the enumerated four ARNs
+(`local.blocked_ip_set_arns`). The sentinel's and the CLI's **Deny** on the same action is
+`Resource = "*"`.
+
+That asymmetry is right and both seats reasoned to it independently: **an Allow should be narrow
+(a fifth set must be granted deliberately, never inherited), and a Deny should be broad (a Deny
+written to a list inherits the two-versus-four error and every future one).** `iam_sentinel.tf` says so
+in terms -- *"a Deny on `*` cannot miss a set that is added later"* -- citing the four-set measurement
+from this face. **The finding did not just correct a count; it changed the shape of the guard.**
+
+## ⛔ THE ONE CONDITIONED STATEMENT IN THE ENTIRE CHAIN -- `S22-AC4`'s context entry, now known exactly
+
+`iam_sentinel.tf` carries a warning addressed to this face:
+
+> *"THIS IS THE ONLY CONDITIONED STATEMENT IN THIS POLICY. `simulate-principal-policy` EVALUATES
+> conditions, so simulating it without `--context-entries ses:FromAddress` returns implicitDeny that is
+> byte-identical to a missing grant. TO-OP-S-22 must pass the context entry or it will verdict a false
+> DENY here."*
+
+Confirmed by reading all three policies: **it is the only `Condition` block across the whole chain.**
+The verdict therefore runs the sentinel's SES simulation as:
+
+```
+--context-entries ContextKeyName=ses:FromAddress,ContextKeyValues=noreply@opalinvest.dev,ContextKeyType=string
+```
+
+**Without it this face would have filed a FALSE DENY on a correctly-granted permission** -- an
+under-permissioning verdict, which sends a seat to widen a policy that was already right. That is the
+opposite of this cell's purpose and it would have looked like diligence.
+
+## THE VERDICT'S OWN DENOMINATORS, fixed now so `S22-AC1` prints them rather than derives them late
+
+- **Roles:** 3 declared, **0 applied** -> all three file `UNCOMPUTABLE` until the applies land.
+- **IP sets:** **4 of 4**, walked to exhaustion. One simulation per set per role.
+- **Conditioned statements:** **1 of 1** identified, with its context entry known.
+- **Explicit `Deny` statements to control against:** 3 (reconciler table-write, sentinel IP-set write,
+  CLI IP-set write) -- these will return **`explicitDeny`**, which is a sharper `S22-AC2` result than
+  `implicitDeny` because `implicitDeny` is ambiguous between *no grant* and *a typo'd action name*, a
+  named false-deny mode of this instrument.
+
+## RESIDUAL, DECLARED
+
+The CLI's trust policy names **one** principal (`user/Andrew_Berman`), following `opal-security-admin`'s
+ruled pattern. `iam_reconciler_and_cli.tf` flags -- and does not decide -- whether the unblock CLI
+should be assumable by a **wider operator set** than the evidence-store admin. **That is
+`2.0.0_SA_COO~Z`'s call, not this face's**, and it is named here only so the verdict does not read a
+deliberately narrow trust as an oversight. Narrow is the reversible direction.
