@@ -26,21 +26,21 @@
     {
       "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "e6689cc7cc3d00ebf3199b8d49098806237fc493",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Surprise-channel row ETFS_GUARDRAIL-W2-S1 appended (never edits the existing ETFS_GUARDRAIL-S1 row); JSON block re-parsed after the edit (2 rows) and gated by .tools/surprise-row-gate.py at commit."
+      "deploy_evidence": "Row ETFS_GUARDRAIL-W2-S1 landed this seat's original commit a0fad924aa, merged at d008067fa3, and is present at HEAD as of the drain-merge e6689cc7cc (4 rows total: S1, W2-S1, W1-S1, W1-S2). NOT touched by this amendment-response commit -- this pass edits only the instance and the result document (the S3-AC1 amendment), never the channel file."
     }
   ],
   "acceptance": [
     {
       "criterion_id": "S3-AC1",
-      "criterion_verbatim": "the source's own battery is green at HEAD, both arms (record N passed).",
+      "criterion_verbatim": "AMENDED BY THE ISSUER AT THE DRAIN (2.0.0_SA_COO~B, 2026-09-04 21:1xZ, on row ETFS_GUARDRAIL-W2-S1, face vintage @de8693863c): the original expectation 'passed' was UNREACHABLE at HEAD; the criterion now RECORDS the battery's collection state (rc and the first error line, verbatim).",
       "method": "test_suite",
-      "invocation": "python -m pytest infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/test_catchup_scan.py -q",
-      "output_evidence": "ERROR collecting infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/test_catchup_scan.py -- KeyError: 'ASSETS_BUCKET' raised at lambda_function.py:77 during module import inside test_catchup_scan.py:_run (line 59, importlib.import_module). '1 error during collection', 'Interrupted: 1 error during collection!!!'. The module never finishes loading, so _catchup_missing_dates is never called and neither fixture (a) nor (b) executes.",
-      "denominator": "0 of 4 checks executed (fixture (a): 2 checks; fixture (b): 2 checks) -- collection error, not a graded run.",
-      "status": "FAIL",
-      "status_reason": "The battery is NOT green: rc=2, pytest reports 1 collection ERROR, not 'passed'. Root cause (dateable, filed as ETFS_GUARDRAIL-W2-S1): test_catchup_scan.py was landed at 288bfe8378 (2026-08-01) against the pre-repoint source shape (env vars INF_BUCKET/HOLDINGS_PREFIX; helpers _holdings_key_for/_holdings_exists; two-arg _catchup_missing_dates(universe, skip_date)); the repoint landed at 001a73530a (2026-08-03) introduced ASSETS_BUCKET/FACT_POSITIONS_PREFIX/META_DEDUP_PREFIX and the current three-arg _catchup_missing_dates(universe, all_dates, skip_date). The test was never re-vendored across that repoint. This TO's bound is READ-ONLY on the port source ('PORT SOURCE. Relied on, NOT owned -- do not modify to suit the port'; 'the inf directory is named for READING and for running its battery, not for editing') so the test file is not repaired by this order; the port contract (S3-AC5) is built from a direct read of the live lambda_function.py bytes, not from the broken battery's assumptions."
+      "invocation": "python -m pytest infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/test_catchup_scan.py -q; echo BATTERY_RC=$?",
+      "output_evidence": "ERROR collecting infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/test_catchup_scan.py -- KeyError: 'ASSETS_BUCKET' raised at lambda_function.py:77 during module import inside test_catchup_scan.py:_run (line 59, importlib.import_module). '1 error during collection', 'Interrupted: 1 error during collection!!!'. BATTERY_RC=2 (rc reported by the trailing echo, matching the amended expect pattern 'BATTERY_RC='). The module never finishes loading, so _catchup_missing_dates is never called and neither fixture (a) nor (b) executes -- this remains the correct, faithfully-recorded battery state; only the GRADE changed at the amendment, not the world.",
+      "denominator": "0 of 4 checks executed (fixture (a): 2 checks; fixture (b): 2 checks) -- collection error, not a graded run; 1 of 1 BATTERY_RC line recorded.",
+      "status": "PASS",
+      "status_reason": "Per the amended face: expect='BATTERY_RC=' is a RECORDING pattern, not a pass/fail assertion on the battery's own result -- the output ends with the literal line 'BATTERY_RC=2', matching the expectation. Root cause of the battery's own dead state (dateable, filed as ETFS_GUARDRAIL-W2-S1, unchanged by the amendment): test_catchup_scan.py was landed at 288bfe8378 (2026-08-01) against the pre-repoint source shape (env vars INF_BUCKET/HOLDINGS_PREFIX; helpers _holdings_key_for/_holdings_exists; two-arg _catchup_missing_dates(universe, skip_date)); the repoint landed at 001a73530a (2026-08-03) introduced ASSETS_BUCKET/FACT_POSITIONS_PREFIX/META_DEDUP_PREFIX and the current three-arg _catchup_missing_dates(universe, all_dates, skip_date). The test was never re-vendored across that repoint. This TO's bound is READ-ONLY on the port source, so the test file is not repaired here; the defect stays W2-S1's for the CVO's disposition and the producer's owner."
     },
     {
       "criterion_id": "S3-AC2",
@@ -109,7 +109,8 @@
     }
   ],
   "surprises": [
-    "ETFS_GUARDRAIL-W2-S1: EG-s-3's bound and S3-AC1 assert the port source's own battery (test_catchup_scan.py) is green at HEAD, driving the REAL _catchup_missing_dates unmodified -- it is not: the test crashes at import (KeyError: 'ASSETS_BUCKET', rc=2) because it was landed 2026-08-01 against the pre-repoint env-var/helper shape and was never updated across the 2026-08-03 repoint that introduced ASSETS_BUCKET/FACT_POSITIONS_PREFIX/META_DEDUP_PREFIX and the current three-arg _catchup_missing_dates signature. OBSERVATION/ARMED, disarm_owner 3.0.0_SA_CVO (out of this TO's read-only write lane on the port source)."
+    "ETFS_GUARDRAIL-W2-S1: EG-s-3's bound and S3-AC1 assert the port source's own battery (test_catchup_scan.py) is green at HEAD, driving the REAL _catchup_missing_dates unmodified -- it is not: the test crashes at import (KeyError: 'ASSETS_BUCKET', rc=2) because it was landed 2026-08-01 against the pre-repoint env-var/helper shape and was never updated across the 2026-08-03 repoint that introduced ASSETS_BUCKET/FACT_POSITIONS_PREFIX/META_DEDUP_PREFIX and the current three-arg _catchup_missing_dates signature. OBSERVATION/ARMED, disarm_owner 3.0.0_SA_CVO (out of this TO's read-only write lane on the port source). Now RESOLVED by the issuer's amendment on S3-AC1 (row content unchanged, disposition still UNDER_INVESTIGATION at the channel).",
+    "ETFS_GUARDRAIL-W2-S2: this TO's own <proof_of_spec> block names the instance path with the SHORT to_id form ('ETFS_GUARDRAIL.TO-EG-s-3.proof_of_spec.json'), but .tools/to-pipeline-gate.py's check_complete_flip derives the required filename from the TO FILE's full basename stem ('ETFS_GUARDRAIL.TO-EG-s-3.the-port-source-verified.proof_of_spec.json') -- the exact path the TO's text instructs is mechanically REFUSED at the complete flip. Resolved for this cell by renaming the instance to the gate-satisfying name (single canonical file, re-validated VALID rc=0); the TO's own prose is left unedited (outside the status-line-only grant) and now cites a stale filename. Sibling instance ETFS_GUARDRAIL.TO-EG-s-10.proof_of_spec.json carries the same short-form defect, unresolved. OBSERVATION/ARMED, disarm_owner 2.0.0_SA_COO~B (template-wide across the L6 issuance's 14 cells)."
   ],
   "compiler_tools": [
     {

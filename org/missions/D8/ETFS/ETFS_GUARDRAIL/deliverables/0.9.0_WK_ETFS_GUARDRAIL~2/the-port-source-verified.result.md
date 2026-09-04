@@ -45,6 +45,8 @@ to `3.0.0_SA_CVO` -- this TO's bound is READ-ONLY on the port source, so re-vend
 order's write lane). This TO does not modify the test or the source; the port contract below is built from a
 direct read of the live bytes, not from the broken battery's assumptions.
 
+**AMENDMENT (2.0.0_SA_COO~B, 2026-09-04 21:1xZ, face vintage @de8693863c, on row `ETFS_GUARDRAIL-W2-S1`):** S3-AC1's expectation `passed` was UNREACHABLE at HEAD (the premise it assumed does not hold) and is now `BATTERY_RC=` -- a RECORDING criterion, not a pass/fail assertion on the battery's own result; re-run verbatim `python -m pytest infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/test_catchup_scan.py -q; echo BATTERY_RC=$?` -> same collection error as above, trailing line `BATTERY_RC=2`, matching the amended expectation -- PASS-by-output. The battery's dead state itself is unchanged; only the grade is.
+
 ---
 
 ## 2. Helper census
@@ -208,7 +210,7 @@ signal, never a lag count.
 
 | id | invocation | output (deciding line) | rc | denominator | verdict |
 |---|---|---|---|---|---|
-| S3-AC1 | `python -m pytest .../test_catchup_scan.py -q` | `KeyError: 'ASSETS_BUCKET'` / `1 error during collection` | 2 | 0 of 4 checks reached | **FAIL** (not "passed") |
+| S3-AC1 | `python -m pytest .../test_catchup_scan.py -q; echo BATTERY_RC=$?` (AMENDED @de8693863c) | `KeyError: 'ASSETS_BUCKET'` / `1 error during collection` / `BATTERY_RC=2` | 2 | 0 of 4 checks reached; 1 of 1 BATTERY_RC line recorded | **PASS** (recording criterion; expect=`BATTERY_RC=` matched -- see AMENDMENT note above) |
 | S3-AC2 | `python -c "...CATCHUP_WINDOW_DAYS..."` | `CATCHUP_WINDOW_DAYS=10` | 0 | 1 of 1 constant matched | PASS |
 | S3-AC3 | `python -c "...HELPERS=..."` | `HELPERS=_catchup_missing_dates,_list_all_partitions,_output_exists,_partition_exists,_process_date` | 0 | 5 of 5 named helpers present | PASS |
 | S3-AC4 | `git diff --stat HEAD -- infra/.../inf-etf-ownership-daily/` | (empty) | 0 | 0 of 0 lines changed | PASS (empty diff as expected) |
