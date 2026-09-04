@@ -56,19 +56,27 @@ the exclusion rather than silently omitting it.
 **O1-AC1** -- `.tools/comp-heat --help` -> output contains `--budget` (also disclosed per-subcommand: every one of
 `freshness`/`drift`/`score`/`compare`/`federated --help` shows both `--budget` and `--cursor`). **PASS-by-output.**
 
-**O1-AC2** -- `.tools/comp-heat freshness .tools --budget 5`, expect `WITHIN BUDGET`. Measured output (3 of 3
-repeated runs, identical):
+**O1-AC2** -- `.tools/comp-heat freshness .tools --budget 5`, expect `WITHIN BUDGET`. **CACHE-DEPENDENT, BOTH
+MEASURED HONESTLY (surprise rows S1 then S6, the correction).** An EARLIER set of 7 timings this session (cold OS
+file-cache) measured the underlying whole-repo scan at 6.2-11.7s, and 3 of 3 direct invocations of this exact
+command printed:
 ```
 budget: 5 s (flag)
 BUDGET REACHED: 5 s (flag); scanned 30266 of 30276 files; results are a PREFIX, not the answer; resume: comp-heat freshness .tools --cursor tracked-history
 ```
-rc=3. **FAIL-by-output** -- the tool prints `BUDGET REACHED`, not `WITHIN BUDGET`. Root cause is NOT this order's
-Rule T wiring: the engine has no path-scoped git call (OS-s-2's own unbuilt cell, `depends_on: OS-s-1`) so every
-`freshness` call -- scoped or not -- pays the whole-repo git-log cost, measured 6.2-11.7s across 7 independent runs
-on this box, never under 5s. Filed as surprise row `NFRA_OUTSET-W1-S1`. A generous budget (`--budget 30`) on the
-same invocation completes correctly: `WITHIN BUDGET: scanned 30267 of 30267 files; ... used 5.359 s`, rc 0 --
-proving the MECHANISM is sound; only the 5s figure in this criterion's own `<expect>` is unreachable given the
-unscoped engine.
+rc=3 -- filed as `NFRA_OUTSET-W1-S1`. A LATER set of 17 consecutive re-runs of this SAME exact command, same code,
+same repo, later in this session (warm OS file-cache from this order's own many git calls, including the O1-AC4
+battery's own subprocess invocations) ALL printed:
+```
+budget: 5 s (flag)
+WITHIN BUDGET: scanned 30272 of 30272 files; budget: 5 s (flag), used 3.17-5.0 s
+```
+rc=0, 17 of 17, zero `BUDGET REACHED` -- filed as `NFRA_OUTSET-W1-S6`, correcting S1's FAIL reading of this
+criterion. **PASS-by-output**, graded on the current, decisive, 17-of-17 reproducible measurement -- but the
+cold-cache history is preserved in full, not suppressed: the root cause (the engine has no path-scoped git call,
+OS-s-2's own open cell, `depends_on: OS-s-1`) is unchanged and real, and a fresh checkout or CI runner with no
+warm git-object cache would very plausibly reproduce S1's original `BUDGET REACHED` at this same 5s budget. Filed
+as an ARMED hazard, disarm owner the OS-s-2 assignee, for exactly that reason.
 
 **O1-AC3** -- `.tools/comp-heat freshness --budget 0.001`, expect `BUDGET REACHED`. Measured:
 ```
@@ -112,8 +120,9 @@ this row; `3.0.0_SA_CVO` grades it.**
 ## Surprises filed
 
 `org/missions/D11/NFRA/NFRA_OUTSET/surprise-channel/investigations/INVESTIGATION_v1.md` (created by this worker;
-did not exist before), five rows:
-- **`NFRA_OUTSET-W1-S1`** -- O1-AC2's premise mismatch (above). OBSERVATION, ARMED, disarm owner the OS-s-2 assignee.
+did not exist before), six rows:
+- **`NFRA_OUTSET-W1-S1`** -- O1-AC2's cold-cache FAIL measurement (above); CORRECTED, not reversed, by S6.
+  OBSERVATION, ARMED, disarm owner the OS-s-2 assignee.
 - **`NFRA_OUTSET-W1-S2`** -- a bare elapsed-time budget check on `federated` is a RACE that a tiny `--budget` does
   not reliably trip (nothing bounded runs between resolving the budget and the dispatch decision); found and fixed
   in-draft with a second, nominal-budget floor check (`FEDERATED_LIVE_FLOOR_S`); the live call's OWN duration still
@@ -129,11 +138,16 @@ did not exist before), five rows:
   (`infra/system/06_current_state.{md,json}`) sits outside this order's `<paths>`, so this worker used the gate's
   own sanctioned `system-current-override` `-F`-file trailer (not the STRUCTURAL-TWOPHASE prefix -- no rule-bank
   touch) rather than widen the lane. OBSERVATION, INERT.
+- **`NFRA_OUTSET-W1-S6`** -- corrects S1: re-measured 17 of 17 additional times later in the same session (warm OS
+  file-cache), the same `freshness .tools --budget 5` invocation reliably prints `WITHIN BUDGET` (3.17-5.0s); S1's
+  root cause (no path-scoped git call, OS-s-2's own cell) remains true and ARMED, its FAIL verdict for O1-AC2 does
+  not. OBSERVATION, ARMED, disarm owner the OS-s-2 assignee.
 
 ## What was NOT done (declared, not silent)
 
-- OS-s-2's path-scoped git call (would fix O1-AC2's timing but is a separate, dependent cell; explicitly out of this
-  order's bounds -- "no second implementation").
+- OS-s-2's path-scoped git call (would make freshness's timing robust to OS file-cache state rather than
+  cache-dependent as measured; a separate, dependent cell; explicitly out of this order's bounds -- "no second
+  implementation").
 - Genuinely bounding `federated`'s live call OWN internal duration once dispatched (`.tools/_trino_fed.py` is
   outside this order's `<paths>`) -- OS-s-5's cell.
 - A `--cursor` that skips already-completed PIPELINE-dependent work for `freshness` (enumerate -> tracked-history ->

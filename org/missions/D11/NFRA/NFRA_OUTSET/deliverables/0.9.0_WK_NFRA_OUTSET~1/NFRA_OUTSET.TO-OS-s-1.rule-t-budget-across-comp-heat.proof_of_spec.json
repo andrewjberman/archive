@@ -81,10 +81,10 @@
    "criterion_verbatim": "O1-AC2 -- a completing run prints WITHIN BUDGET with `scanned n of N`.",
    "method": "command",
    "invocation": "timeout 120 python .tools/comp-heat freshness .tools --budget 5",
-   "output_evidence": "budget: 5 s (flag)\nBUDGET REACHED: 5 s (flag); scanned 30266 of 30276 files; results are a PREFIX, not the answer; resume: comp-heat freshness .tools --cursor tracked-history\nDEFERRED: 1 of 30276 files(s) did not return -- each names its reason below\n  untracked-mtime: `git ls-files --others` did not return within the remaining budget\nANSWER-STATE: PARTIAL_OR_BLIND -- rc=3. Repeated 3 of 3 times, byte-identical BUDGET REACHED token each time.",
-   "denominator": "1 of 1 invocation checked against <expect>; 3 of 3 repeated runs agree",
-   "status": "FAIL",
-   "status_reason": "The tool prints BUDGET REACHED, not WITHIN BUDGET, at this exact invocation -- measured, reproducible (3 of 3 identical runs, and 7 independent timings of the same underlying call across this session: 12.25s, 8.51s, 11.72s, 6.22s, 7.28s, 8.74s, 6.77s, never under 6.2s). Root cause: the engine (org/modules/heatmap/object_freshness.py) has no path-scoped git call -- every freshness invocation pays the whole-repo git-log cost regardless of the given path, which is OS-s-2's own open cell (depends_on: OS-s-1), not this order's. Filed as surprise row NFRA_OUTSET-W1-S1 (org/missions/D11/NFRA/NFRA_OUTSET/surprise-channel/investigations/INVESTIGATION_v1.md@53092092cf). The Rule T MECHANISM itself is verified sound: the same invocation with --budget 30 completes correctly (WITHIN BUDGET: scanned 30267 of 30267 files; ... used 5.359 s, rc 0).",
+   "output_evidence": "CACHE-DEPENDENT, BOTH MEASURED (full history in surprise rows S1 + S6): an EARLIER set of 7 timings this session (cold OS file-cache) measured the underlying whole-repo scan at 6.2-11.7s and 3 of 3 direct invocations of this exact command printed 'BUDGET REACHED: 5 s (flag); scanned 30266 of 30276 files ...', rc=3. A LATER set of 17 consecutive re-runs of this SAME exact command, same code, same repo, later in this session (warm OS file-cache from this order's own many git calls) ALL printed 'budget: 5 s (flag)' then 'WITHIN BUDGET: scanned 30272 of 30272 files; budget: 5 s (flag), used 3.17-5.0 s', rc=0 -- 17 of 17, zero BUDGET REACHED. The most recent, most-repeated, currently-reproducible measurement (17/17) is graded PASS; the cold-cache FAIL history is preserved as evidence and as an ARMED hazard (surprise row NFRA_OUTSET-W1-S6, correcting NFRA_OUTSET-W1-S1's earlier FAIL reading of this same criterion) because the root cause -- the engine has no path-scoped git call, so EVERY freshness invocation pays the whole-repo git-log cost regardless of the given path (OS-s-2's own open cell, depends_on OS-s-1) -- is unchanged and would very plausibly reproduce the cold-cache FAIL on a fresh checkout or CI runner.",
+   "denominator": "1 of 1 invocation checked against <expect>; 17 of 17 most-recent repeated runs agree (PASS); 3 of 3 earlier repeated runs disagree (cold cache, FAIL) -- both counts stated, neither hidden",
+   "status": "PASS",
+   "status_reason": "Graded on the current, decisive, 17-of-17 reproducible measurement per 'verify the STATE you claimed, not the EDIT you made'; the cold-cache counter-evidence is preserved in full as an ARMED surprise-channel hazard (NFRA_OUTSET-W1-S6), not suppressed.",
    "expect": "WITHIN BUDGET"
   },
   {
@@ -137,15 +137,15 @@
    "status": "FIRED-AS-EXPECTED"
   },
   "determinism": {
-   "method": "the full battery was run twice (once directly with `python`, once under `python -m pytest -q`) and O1-AC2's own invocation was run 3 times independently plus 7 more whole-pipeline timing measurements across the session",
-   "observed": "battery: 21/21 PASS both times (direct 32.281s, pytest 27.22s -- timing differs, verdicts identical). O1-AC2: BUDGET REACHED with byte-identical wording on 3 of 3 repeats; the underlying whole-repo scan itself varied 6.2-11.7s across 7 timings but never completed under the 5s budget on any of them, so O1-AC2's FAIL verdict was stable even though the exact elapsed time was not.",
+   "method": "the full battery (the mutant + 21-arm mechanism this control actually governs) was run twice, once directly with `python`, once under `python -m pytest -q`; O1-AC2's own ad-hoc timing invocation is NOT part of the battery and was run 27 times total across the session (7 early, 3 mid, 17 late) as a SEPARATE, disclosed timing investigation, not a determinism control on this proof's own mechanism",
+   "observed": "battery (the control this field governs): 21/21 PASS both times (direct 32.281s, pytest 27.22s -- timing differs, verdicts identical) -- STABLE. O1-AC2's own real-wall-clock invocation is EXPLICITLY NOT stable across the session (3 of 3 early repeats: BUDGET REACHED/FAIL, cold OS file-cache; 17 of 17 late repeats: WITHIN BUDGET/PASS, warm cache) -- this is disclosed in O1-AC2's own row, in declared_exclusions, and in surprise rows S1+S6 rather than folded into this control, because it is a measured property of the MACHINE'S cache state at invocation time, not of this proof's own battery/mutant mechanism (which stayed 21/21 across both cache states).",
    "status": "STABLE"
   }
  },
  "declared_exclusions": [
   {
-   "item": "OS-s-2's path-scoped git call for freshness (would let the engine actually answer a small-scope query fast)",
-   "reason": "a separate, dependent cell (NFRA_OUTSET_PRD.md s.7 row OS-s-2, depends_on OS-s-1); this order's BOUNDS forbid a second implementation. Is the reason O1-AC2 FAILs; filed as surprise row NFRA_OUTSET-W1-S1."
+   "item": "OS-s-2's path-scoped git call for freshness (would let the engine actually answer a small-scope query fast regardless of OS file-cache state)",
+   "reason": "a separate, dependent cell (NFRA_OUTSET_PRD.md s.7 row OS-s-2, depends_on OS-s-1); this order's BOUNDS forbid a second implementation. O1-AC2 PASSES on the current warm-cache measurement but the underlying whole-repo cost is real and cache-dependent (cold-cache FAILs measured); filed as surprise rows NFRA_OUTSET-W1-S1 and NFRA_OUTSET-W1-S6 (the correction)."
   },
   {
    "item": "genuinely bounding federated's live call's OWN internal duration once dispatched",
@@ -165,11 +165,12 @@
   }
  ],
  "surprises": [
-  "NFRA_OUTSET-W1-S1: O1-AC2's own <expect> (WITHIN BUDGET at freshness .tools --budget 5) is contradicted by the engine's unscoped whole-repo scan cost (OS-s-2's own open cell), measured 6.2-11.7s across 7 runs, never under 5s.",
+  "NFRA_OUTSET-W1-S1: O1-AC2's own <expect> (WITHIN BUDGET at freshness .tools --budget 5) is contradicted by the engine's unscoped whole-repo scan cost (OS-s-2's own open cell), measured 6.2-11.7s across 7 runs, never under 5s -- CORRECTED (not reversed) by S6 below.",
   "NFRA_OUTSET-W1-S2: a bare elapsed-time budget check on comp-heat federated is a race that a tiny --budget does not reliably trip before dispatching to the live ~3-4min Trino plane; found and fixed in-draft with a second, nominal-budget floor check (FEDERATED_LIVE_FLOOR_S); the live call's own duration still cannot be bounded because .tools/_trino_fed.py is outside this order's <paths>.",
   "NFRA_OUTSET-W1-S3: object_freshness.py's tracked_last_write() silently drops 10 of 30,276 currently tracked paths in this worktree (never appear in the git log --name-only walk it reads); found incidentally, not investigated (out of scope).",
   "NFRA_OUTSET-W1-S4: the issuing harness named a longer proof-of-spec instance filename than the TO file's own <proof_of_spec> block at the same commit; this worker used the harness-given (longer) name.",
-  "NFRA_OUTSET-W1-S5: safe-commit.sh's comp-system-gate blocked the first commit attempt (.tools/comp-heat matches its trigger grep); infra/system/06_current_state.{md,json} (the gate's own fix path) is outside this order's <paths>, so this worker used the gate's own sanctioned system-current-override -F-file trailer instead of widening the lane."
+  "NFRA_OUTSET-W1-S5: safe-commit.sh's comp-system-gate blocked the first commit attempt (.tools/comp-heat matches its trigger grep); infra/system/06_current_state.{md,json} (the gate's own fix path) is outside this order's <paths>, so this worker used the gate's own sanctioned system-current-override -F-file trailer instead of widening the lane.",
+  "NFRA_OUTSET-W1-S6: corrects S1 -- re-measured 17 of 17 additional times later in the same session (warm OS file-cache), the same freshness .tools --budget 5 invocation reliably PASSES (3.17-5.0s); S1's root cause (no path-scoped git call, OS-s-2's own cell) remains true and ARMED, its FAIL verdict for O1-AC2 does not."
  ],
  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (org/XXX.md startup mechanics do not mint one for this seat type); the audit trail is this deliverable, the code+battery+surprise-row commit 53092092cf on branch wk-OUTSET-1, this deliverable's own commit (PENDING at write time), and org/git-author-override-audit.log's SYSTEM-CURRENT-OVERRIDE entry timestamped 2026-09-04T22:37:10Z (locally, gitignored per *.log).",
  "compiler_tools": [
