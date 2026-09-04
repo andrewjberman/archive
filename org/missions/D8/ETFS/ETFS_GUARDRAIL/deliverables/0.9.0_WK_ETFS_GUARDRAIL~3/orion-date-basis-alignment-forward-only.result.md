@@ -125,9 +125,10 @@ All checks passed!
 OK: no unguarded strict-utf8 log reads.
 OK: pre-commit gate clean for 2 of 2 file(s)
 ```
-rc=0. Denominator: 2 of 2 files clean. (The vendored `data/etfs/scripts/coverage/_orion_vendor_asof.py`
-was separately run through the same gate though not named in this criterion's invocation:
-`OK: pre-commit gate clean for 1 of 1 file(s)`, rc=0.) PASS.
+rc=0. Denominator: 2 of 2 files clean. (At the time of this first run the vendored
+`data/etfs/scripts/coverage/_orion_vendor_asof.py` also existed and was separately run through
+the same gate: `OK: pre-commit gate clean for 1 of 1 file(s)`, rc=0. That file was later `git
+rm`'d per the "Amendment" section below -- see its own re-run of this criterion.) PASS.
 
 **`S13-AC6`** -- judgment="true". RECORD, NO VERDICT. From the cutover month forward the three
 partners' series share one date basis: 49F and Cottonwood were always settled-labelled (brief
@@ -165,9 +166,10 @@ worker report per the record-face convention (a value read here would age before
   artifact upload is the deploy vector; out of this order's scope.
 - `data/etfs/scripts/coverage/__init__.py`, `classifier.py`, `remediate.py`,
   `trading_calendar.py` (the coverage package proper) are NOT created here -- they are `EG-s-4`/
-  `EG-s-7`/`EG-s-6`'s cells (a different worker slot, concurrent). Only
-  `_orion_vendor_asof.py` was added to `data/etfs/scripts/coverage/`, per this order's own
-  instruction and within its `<paths>` grant.
+  `EG-s-7`/`EG-s-6`'s cells (a different worker slot, concurrent). `_orion_vendor_asof.py` was
+  originally vendored under `data/etfs/scripts/coverage/` by this order, then `git rm`'d per the
+  issuer's amendment (`ETFS_GUARDRAIL-W1-S1`, below) -- `data/etfs/scripts/coverage/` carries no
+  file from this order after the amendment.
 - `write_month_csvs`'s independent alignment call is an extension beyond the deliverable's
   literal call-site sentence, filed as `ETFS_GUARDRAIL-W3-S1` (OBSERVATION, INERT, disarmed
   same-turn by this order's own second call site) rather than silently left as a gap.
@@ -187,3 +189,18 @@ newly-added TO file(s) carry `<decomp_ref>` and a complete `<preflight>` block."
 `ETFS_GUARDRAIL-W3-S2` (OBSERVATION, INERT, disarmed same-turn for this order by committing
 both filenames; the generic mismatch is left named for a wider owner since it will recur on
 every ETFS_GUARDRAIL TO whose `<proof_of_spec>` section names the short form).
+
+## Amendment (issuer, 2.0.0_SA_COO~B, after the first commit)
+
+The issuer's drain confirmed row `ETFS_GUARDRAIL-W3-S2` at `.tools/to-pipeline-gate.py:1262-1263`
+and fixed it on all 14 faces; for THIS order the final resolution is to keep ONE instance under
+the gate-expected long-stem filename only (the short-name duplicate git rm'd, superseding this
+document's earlier "commit both" disarm). Separately, on row `ETFS_GUARDRAIL-W1-S1` (CTO~Z
+ruling @`1da1e2b73b`, "MINT THE LAYER, NOT A FIFTH COPY"): a committed first-party module copy
+is REFUSED -- `data/etfs/scripts/coverage/_orion_vendor_asof.py` was `git rm`'d. The import
+bootstrap's fallback path is unchanged code (a sibling `_orion_vendor_asof.py` beside the
+coverage package, which `EG-s-6`'s deploy places on the reporter box at build time and which
+this repo never carries); only the committed vendored copy is gone. S13-AC1 re-run clean from
+the repo's primary import lane (`5 passed in 0.45s`); the amended S13-AC2 invocation (adding
+`COMMITTED_ORION_COPY=os.path.exists(...)`) returns `ALIGN_CALLS=1 CUTOVER=2026-09
+SECOND_IMPL=0 COMMITTED_ORION_COPY=False`; S13-AC5 re-run clean on the now-two-file .py surface.
