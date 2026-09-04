@@ -1,96 +1,22 @@
-# NFRA_COMPEFFICACY -- CE-q-1, Andrew's seven questions answered in writing (v2, all seven answered; round 6)
+# NFRA_COMPEFFICACY -- CE-q-1, Andrew's seven questions answered in writing (v1, round 6 close)
 
-**Author:** `3.0.0_SA_CVO` (the CVO authors, the CTO lands the section in the PRD -- decomp CE-q-1, FWD-5). **Written:**
-2026-09-03 18:0xZ. **Bar (FWD-5 ACCEPT):** for each question in his message there is an answer in plain English that says what
-the thing actually does, and where he asked "is this just X?" the answer says yes or no and why; each answer points at the
-row that answers it and is disputable by him. **State (v2, 18:3xZ):** all seven answered from completed orders (T-21 and T-24 landed in round 6's second tranche);
-the platinum answer carries the lane's own two uncomputed criteria as part of the answer, not hidden behind it. Every fact below is the named deliverable's measurement, read by this seat; nothing
-here is this seat's own measurement unless it says so.
+**Author:** `3.0.0_SA_CVO` (decomp CE-q-1: "CVO authors, CTO lands" -- the written-answers section lands in the PRD
+in the CTO's version; this file is the CVO's text). **Written:** 2026-09-04 ~07:2xZ. **Bar (FWD-5 ACCEPT):** each
+answer says what the thing actually does, and "is this just X?" gets yes / no and why; each is disputable by Andrew.
+**Evidence vintage:** every row's proof-of-spec instance re-validated at this seat (VALID rc 0) with the author read from
+git; the s.7 table of PRD v0.6 @`7138c4a176`; the deliverables under `../` by seat. Push state: LOCAL.
 
-## 1. Is the one he was unsure of a tool or a built-in?
+| # | His question | The answer | Row |
+|---|---|---|---|
+| 1 | **How is comp-platinum defined; what coverage universe?** | A composite: portal component dataflow -> routing table -> firm gold DAG (transform + routes + pipescript), page-first. Universe: **22 component files under `portal/src/pages`**, named by stem (four `index` stems collide and are disclosed as a limitation). One `--budget` carrier over the three legs; `page FactorTilts --budget 0` traced 3 of 3 components in 3.2 s at the issuer's FWD-9. Honest state: two of four boundary modes and the executable red-mutant arms are unbuilt (T24-AC2, AC5 disclosed as UNCOMPUTABLE-BY-CONSTRUCTION in the instance). | T-24 @`3052545c56` (0.8.0_AE_CloudComp~L), `comp-platinum.result.md` |
+| 2 | **What does comp-system do?** | It compiles repository-local cross-surface evidence into `infra/system/06_current_state.{md,json}` -- the SYSTEM home's dynamic half (584 runs). `--check` is the auto-refresh verdict surface (rc 0 current / 2 / 1; `--check --budget` prints BUDGET REACHED, rc 3). Its invariant is no fabrication: an unreadable required source is named, the compile reads NOT-DECIDABLE with `compile_complete=false`, and no complete record is written on a partial. It is not a monitor and not a report; it is the compiler of one file pair. | T-21 @`82b73ff68f` (0.8.0_AE_CloudComp~N), `comp-system.result.md` |
+| 3 | **Is comp-cache the same thing as comp-platinum?** | **No.** comp-cache is React Query cache-key analysis across `portal/src` (415 of 415 files scanned, 118 useQuery call sites captured) -- a portal-local grain: shared keys, collisions, type mismatches. comp-platinum is the portal-page -> gold-script plane. Different corpus, different question; the deliverable names the two planes apart. | T-23 (0.8.0_AE_CloudComp~J), `comp-cache.result.md` |
+| 4 | **Is comp-trace just dataflow?** (and, the R-4 form: just a subset of blast?) | **No, on both.** Not dataflow: comp-dataflow answers origin / gate questions over pipeline data lineage with a verdict-bearing rc; comp-trace walks the code graph from a file or symbol. Not a subset of blast: measured two ways (S17, PRD v0.6 R-4) -- trace carries `--exact`, `--all` and the direction spellings that blast rejects (rc 1), and blast resolves only 38.6% of trace's own node ids (58.2% under the most generous mapping). R-4's condition failed, so its conditional ruling did not fire: comp-trace is **kept**, T-19 closed NOT-RETIRED, and the three carryable flags moved into blast under CE-t-6. (The decomp's cell text still reads "it is a subset of BLAST" -- that is the superseded v0.4 line-range read; this answer follows the measurement.) | T-19 WITHDRAWN / NOT-RETIRED; S17 @`a140eed779`; CE-t-6 @`dad11b5207` |
+| 5 | **Is comp-denytest needed?** | It **works** (four exact answer states; a conditioned-grant false deny is deferred as NOT-DECIDABLE rc 2 rather than reported as a verdict; the AWS subprocess is Rule-T bound; battery 4 of 4) and it is **barely used**: 2 runs in 30 days, 8 ever; a zero population when no IAM change is in the plan is correct behaviour, not disuse. It is the only tool that derives the *expected* verdict from an IAM change type. **REC: keep**, as the gate-side check an IAM change runs, not a daily tool; its retirement is surfaced as a candidate on usage and the decision is yours. | T-11 @`7c2dbf6611` (0.8.0_AE_CloudComp~E), `comp-denytest.result.md` |
+| 6 | **Does comp-similar supplant the three roll-ups (dups, drift, similar)?** | **No.** comp-similar compares *purpose summaries* (1,871 ARN resources; 1,514 with a summary, 357 UNKNOWN-thin) and joins heat; comp-dups compares *names and bodies* -- its own engine by CTO ruling 3, 0 runs ever, a RETIRE-candidate whose disposition is the CTO's; comp-drift is *propagation* across seam engines (13 topology bindings, 15 sweep units), not function. The overlap with similar is by name only. | T-12 @`685023581d` (~F); T-13 (CTO, record); T-14 @`9334701e71` (~G) |
+| 7 | **What do comp-pulse and comp-heat do, and do they work?** | **comp-pulse** is the pre-commit risk reflex: 8,359 of 8,364 runs were the commit hook's `diff`, 5 by hand; it scores a proposed file set against the danger map before commit. It works (issuer FWD-9: rc 0, PRESENT_WITH_ZERO_RESULTS, a 1,906-node denominator) and it is a hook, not a morning read. **comp-heat** is a five-subcommand freshness / drift / score CLI over one git-history snapshot; it works as a CLI (four answer states, battery 2 tests / 8 subtests) and **is used by nothing**: 0 CLI runs, its only library consumer (`comp-similar.load_heat_live`) returned `{}` before reaching it (S29), the daily-report wiring @`09355b6d93` invokes it from nowhere. One grade against it stands in this round: T20-AC4 **FAIL** -- `comp-heat freshness` with no path scores the whole repo and accepts no `--budget` (adjudication C-S5). | T-18 @`cd5e84ae2f` (~M); T-20 @`4e96cfba07` (~I) |
 
-**Answer: neither of the two names that are not tools is a tool.** `comp-hud` is not a tool: it is the rail's hook
-(`.tools/hooks/comp-tool-hud.sh`, a PreToolUse gate on Bash), recorded as DOES-NOT-EXIST at row T-4 by this seat at the
-enumeration (decomp CE-t-4, DONE). `comp-legacy` is not a tool either: 0 of 106 entrypoints exist under that name (row T-15,
-CE-t-15, DONE). Both stay on the list marked as such, per FWD-1, and are never dropped. *If the name he was unsure of is a
-third one, the brief's parenthetical names it and this answer is re-pointed at that row in the second pass.*
-
-## 2. Is the deny-tester needed in practice?
-
-**Answer: needed when an IAM change ships, not in daily practice -- and it now works honestly, which it did not.** `comp-denytest`
-derives the expected verdict from the change type (deny-add, allow-removal, no-op) and simulates it; before T-11 a plan with
-no testable change collapsed into a generic error, and a `MissingContextValues` simulation could print a deny that was
-byte-identical to a real one. After T-11 (0.8.0_AE_CloudComp~E, @7c2dbf6611) it separates no-subject, present-zero and
-unsupported-change with exact tokens, defers the conditioned-grant false deny as NOT-DECIDABLE rc 2 instead of a verdict,
-and bounds its AWS subprocess under Rule T. Usage is the honest part: 8 runs ever and 2 in 30 days at the issuer's pinned
-baseline (6 in 30 days re-measured, most of them the audit's own). The lane surfaced RETIRE-candidate on usage and
-removed nothing. **So: yes as a deploy-time instrument for IAM changes (it is the only thing in the estate that turns an
-IAM diff into an expected verdict and it caught a real false-deny class); no as a tool anyone reaches for otherwise.**
-Whether that is "keep on the short list" or "retire" is his FWD-4 call, with the measured numbers above.
-
-## 3. Does the similarity tool supplant the three roll-ups?
-
-**Answer: no.** `comp-similar` (T-12, 0.8.0_AE_CloudComp~F, @3b1ef874ad) is BM25 similarity over what resources *do* --
-summary text -- plus an advisory superseded-twin scan that requires heat divergence and suppresses designed parallels and
-held resources. It is not `comp-dups` (a separate engine by the CTO's arch-gate ruling 3; T-13 is HELD at the CTO on that
-ruling), and it is not `comp-drift` (T-14: propagation across 13 declared topology seams -- whether a change reached the
-places it must reach -- not function similarity). Three different questions: "does anything else do this?", "is this a
-duplicate?", "did this change propagate?". The lane's own guard controls make the point measurable: same name, different
-purpose scores 0.0; different name, same purpose scores 1.0; similarity without heat divergence yields no supersession.
-
-## 4. What do pulse, heat and system actually do, and do they work?
-
-- **pulse** (T-18, 0.8.0_AE_CloudComp~M, @cd5e84ae2f): the danger-map-before-commit reflex -- `comp-pulse diff` checks a
-  commit's files against the estate's danger map and prints a measured CLEAN or the hits. It works: 12,778 recorded runs, of
-  which 12,763 are the `diff` mode the pre-commit hook fires (the hook is the caller for ~99.9% of them, by mode evidence), and
-  the new battery passes 12 of 12 with a mutant per state. No second engine does this; coldness is `comp-debris`'s, not pulse's.
-- **heat** (T-20, 0.8.0_AE_CloudComp~I, @4e96cfba07): the resource heat/coldness state library that `comp-similar`'s
-  superseded-twin scan consumes. It works at the CLI and JSON grain (four states, four tokens, a mutant each). The one thing it
-  does not do yet is return a typed state through its library consumer -- the consumer calls the CLI as a subprocess and gets
-  an untyped dict (row S29, the issuer's boundary ruling; the consumer half is CE-t-12 work).
-- **system** (T-21, 0.8.0_AE_CloudComp~N, engine @2e1102da89): the compiler of the served state -- it compiles
-  repository-local cross-surface evidence into `infra/system/06_current_state` and its `--check` reports one of four
-  verdicts: current, stale, error, or not-decidable (the 0/2/1/3 check contract its `--help` names). It works: the engine
-  self-test prints all four ratified answer-state tokens in one invocation, 45 of 45 pass; the new battery passes 5 of 5
-  direct and under pytest; the task order names `--check` as the auto-refresh verdict surface and no hook was changed.
-  It is not comp-blast (T-6 owns the blast universe) and it overlaps nothing else on the list. The lane's own caveat:
-  its engine commit was LOCAL at the deliverable and the distinct-seat exercise was requested from another seat.
-
-## 5. Is trace just dataflow?
-
-**Answer: no -- and it is not a subset of blast either, which is what the PRD had recorded.** `comp-trace` (T-19,
-0.8.0_AE_CloudComp~B, deliverable @bfbff9dc14) traverses a head-pinned working-tree graph of 2,302 nodes with `gold:`,
-`lambda:`, `s3:`, `eventbridge:` ids and declares `--exact`, `--all` and direction spellings. `comp-dataflow` (T-7) is a
-producer/consumer gate over file writes, a different plane. `comp-blast` answers over the kuzu graph of 27,134 nodes carrying
-none of trace's id prefixes, so blast resolves 38.6% of trace's own ids as spelled and 58.2% under the best mapping. On that
-measurement the CTO re-adjudicated R-4's conditional word at L2 (PRD v0.6 @7138c4a176): comp-trace is kept, T-19 closed
-NOT-RETIRED, and the three trace-only flags were carried into blast under CE-t-6 (@dad11b5207) so nothing was lost either way.
-
-## 6. Where does cache sit against platinum?
-
-**Answer: on a different plane; neither contains the other.** `comp-cache` (T-23, 0.8.0_AE_CloudComp~J, @895b54ef8d) is
-React Query cache-key analysis across `portal/src` -- keys, collisions with generated TSX, the audit made zero portal changes.
-`comp-platinum` answers the portal-page-to-gold-script plane: which page reaches which gold script. The cache tool's own
-identity line says so. Whether platinum's universe is assembled honestly is question 7.
-
-## 7. How is platinum's coverage universe assembled?
-
-**Answer: from the portal's page components outward, one composite of three tools, over a universe of 22 component
-files.** `comp-platinum` (T-24, 0.8.0_AE_CloudComp~L, implementation @f7a6772964, LOCAL at the deliverable) is a full-stack
-trace from a portal page to a gold script. Its composite is defined as portal component dataflow, then the routing table,
-then the firm gold DAG (the pipescript component), under one shared `--budget` carrier. Its coverage universe is the 22
-component files under `portal/src/pages`, named by file stem; four `index` stems collide and the tool discloses that as a
-named limitation rather than hiding it. Four subcommands: `page` (one component's full-stack trace), `reverse` (S3 key to
-routes to components), `tab-audit` (every ADVI tab), `summary` (one line per component with fetch/transform/S3/API-GW
-counts). Exercised by a seat other than the builder: `comp-platinum page FactorTilts --budget 0` returned the trace with
-the BD firm and bucket, the fetch, and "WITHIN BUDGET: scanned 3 of 3 component" in about three seconds. **What it cannot
-yet say, by its own account:** the four-state bar is met two of four ways -- an absent component and a budget-cut run
-print their states, but planted PRESENT_WITH_ZERO_RESULTS and NOT_APPLICABLE modes do not exist for this composite, and the
-battery has no red mutant per arm; the lane marked T24-AC2 and T24-AC5 UNCOMPUTABLE-BY-CONSTRUCTION under an
-implementation-first pace cut and said so on the face. That is the honest state of the coverage tool's own coverage
-claim, and it is graded as such at the close.
-
----
-
-**Pointers per question (the row that answers it):** 1 -> T-4, T-15 · 2 -> T-11 · 3 -> T-12, T-13 (HELD), T-14 · 4 -> T-18,
-T-20, T-21 (pending) · 5 -> T-19, T-6, T-7 · 6 -> T-23 · 7 -> T-24 (pending).
+**What this file does not decide:** the marquis list (CE-mrq-1, PRD s.5 "not cut, deliberately" -- the draft
+`org/tier1_exec/3.0.0_SA_CVO/deliverables/CVO_PROPOSAL_COMPTOOL_MARQUIS_RETIRE_ELEVATE_DRAFT_20260902.md` @`ac52464f82`
+stands and now needs a v2 against the s.7 dispositions above), any retirement (T-11, T-13: candidates surfaced, decisions
+his and the CTO's), and CE-g-4 (the Codex-runtime rail, unreachable while no Codex seat exists).

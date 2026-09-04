@@ -1,85 +1,110 @@
-# NFRA_COMPEFFICACY -- CE-pass-1, the passcraft roll-up (v1, round 6 tranche 1)
+# NFRA_COMPEFFICACY -- CE-pass-1, the passcraft roll-up (v2, round 6 close -- the second pass, read by a non-fixer)
 
-**Author:** `3.0.0_SA_CVO` (the roll-up half of CE-pass-1; the per-tool half is each CloudComp lane's s.4.5 leg). **Written:** 2026-09-03T18:07Z. **Bar (decomp CE-pass-1, FWD-6):** every finding "fixed" or "not fixing, and here is why", read by someone other than the fixer -- this document is that read, first pass, by a seat that fixed none of them.
+**Author:** `3.0.0_SA_CVO` (the roll-up half of CE-pass-1; the per-tool half is each CloudComp lane's s.4.5 leg, run
+inside its deliverable). **v1** 2026-09-03T18:07Z @`1f63fad92d` tabulated 45 structured findings and marked 23 of them
+"DISPOSITION UNCLEAR FROM THE TEXT" for a second pass. **v2, this file, 2026-09-04 ~07:2xZ:** every finding's disposition
+read at full width in the deliverable that carries it -- the JSON `passcraft.findings` block AND the prose "Findings"
+section beneath it, which is where the fixers wrote their why -- plus tranche 2 (T-24, T-5, T-21) and TO-CE-G-2.
+**Bar (decomp CE-pass-1, FWD-6 DONE WHEN EXERCISED):** every finding "fixed" or "not fixing, and here is why", read by
+someone other than the fixer. The reader is this seat; no finding below was fixed by this seat.
 
-**Denominator at this write:** 45 findings in structured `passcraft.findings` arrays across 10 deliverables; 10 deliverables carry their findings as prose or rows (listed in section 2, read but not tabulated by id -- the tranche-2 pass tabulates them). Classification column = this seat's read of the finding's own text: FIXED-IN-CELL 9 / NOT-FIXING, OWNER NAMED 4 / RECORDED, NO FIX OWED 5 / DISPOSITION UNCLEAR 27. A classification by the finding's own words is a first read, not a grade; the L4 owner grades FWD-6 at the close.
+**Denominator at this write:** 48 structured findings (45 in v1 + comp-schedule F1-F3) across 11 deliverables, every
+one dispositioned; 10 deliverables whose findings ride prose or rows, each stated below; 0 UNCLEAR remaining.
 
-**Not in this table, by design:** the channel's rows (S1-S33) -- surprises are the channel's, findings are the deliverables'; where a finding became a row (comp-trigger F1 -> S13; comp-dataflow F4 -> S14; comp-trigger F3 superseded by S15; comp-pulse/comp-estate telemetry omission -> S25) the row's disposition governs and the table says so.
+## 0. The vocabulary of the disposition column (four values, MECE over "what happened to the finding")
 
-## 1. Findings with structured ids
+- **FIXED-IN-CELL** -- the deliverable states the fix and cites it; this seat read the cite.
+- **NOT-FIXED, WHY STATED, OWNER NAMED** -- the fixer said why (out of the order's BOUNDS, pre-existing, another lane's) and who; this seat records the why and the owner.
+- **RECORDED, NO FIX OWED** -- the finding is a positive, a non-defect, or a design fact; nothing to fix.
+- **ROUTED-TO-ROW** -- the finding became a surprise-channel row and its state lives there.
 
-| tool | lane | id | shape | the finding, as written (first 260 chars) | this seat's read |
-|---|---|---|---|---|---|
-| comp-adversary | 0.8.0_AE_CloudComp | F1 | guard-asymmetry | a directory subject raises through open() unhandled; the tool never says NOT_APPLICABLE in its own voice | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-adversary | 0.8.0_AE_CloudComp | F2 | terminal-honest/artifact-lies | the packet roll-up carries no deferred bucket; 12 timed-out digests leave 'selected: 12 of 18' unchanged | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-adversary | 0.8.0_AE_CloudComp | F3 | terminal-honest/artifact-lies | the usage line names one flag of four the docstring documents | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-adversary | 0.8.0_AE_CloudComp | F4 | correct-but-unwired | PROBED, NOT A DEFECT: the mandate is enforced as a DECLARATION gate (PREFLIGHT_TOOLS names it; a TO must declare it RUN or DECLARED-NOT-APPLICABLE); the gate never invokes the tool; hook-driven runs are 0 | RECORDED, NO FIX OWED |
-| comp-adversary | 0.8.0_AE_CloudComp | F5 | correct-but-unwired | registered nowhere a router reads: excluded from the graph manifest by list, absent from the comp-which catalog | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-adversary | 0.8.0_AE_CloudComp | F6 | vacuous-that-can-block | the TOOL_BATTERIES lane sweep collects 0 of 37 collectable tests: pytest aborts the session on the first module-scope SystemExit; found at the 4.6 battery field; surfaced 92794 | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-find | 0.8.0_AE_CloudComp | F1 | correct-but-unwired-style gap, mirrored | no version flag exists; --version silently becomes a search pattern, returning real-looking hits (7, in .tools) with no error -- a footgun on the estate's most-invoked search tool | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-find | 0.8.0_AE_CloudComp | F2 | terminal-honest/artifact-lies (partial) | the manifest's subcommand list predates --corpus (2026-08-27), --budget and --cursor (this cell) -- three flags the manifest does not know about | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-find | 0.8.0_AE_CloudComp | F3 | guard-asymmetry (byte-shape collision) | a content BAND (DEF/SURFACED/...) applied under --corpus aws is a category error the tool accepts silently, printing the identical shape as a genuine zero-hit real node_type band | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-find | 0.8.0_AE_CloudComp | F4 | skip-on-missing-field (silent, content-search only) | a nonexistent pathspec in content/name search mode degrades to a 0-files-scanned run with no error, unlike --hidden mode on the identical input, which does print 'ERROR: N path(s) do not exist' | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-find | 0.8.0_AE_CloudComp | F5 | success-token-bound-to-wrong-step (disclosed, not hidden) | rc stays 0 whether the pull completed or was DEFERRED (by design, matching the T-16/comp-adversary precedent and PRD s.4.4's own words 'the LINE is the rejectable state, not the rc') -- a caller checking rc alone cannot see a partial result; the two-discrimina | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-iam | 0.8.0_AE_CloudComp | F1 | success-token-bound-to-wrong-step (three coexisting denominators) | 'Permission gaps: 306' (stats, ALL raw gap objects incl. deny-present+unmodeled) vs 'Total: 14 missing' (gaps' action plane, ERROR severity only) vs '2 resource-mismatch' (gaps' resource plane) -- three real, honestly-labeled, non-overlapping counts that all a | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-iam | 0.8.0_AE_CloudComp | F2 | aging-oracle (split by plane) | every Terraform-parse subcommand (gaps/service/role/roles/stats/resource-sweep/attach-census) prints no git sha, mtime, or dirty-flag for the trees it read -- the exact T-1 file-corpus vintage gap, one tool over. The APPLIED-plane census DOES disclose vintage; | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-iam | 0.8.0_AE_CloudComp | F3 | guard-asymmetry-adjacent (naming collision, not a routing gap) | two separate tools sharing a name prefix and no cross-reference in either's --help; a reader typing 'comp-iam usage' style guesses could reasonably expect a usage-stats mode of THIS tool rather than a different engine entirely | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-iam | 0.8.0_AE_CloudComp | F4 | positive (convergent carrier, stated for the record) | the enum's carrier census (taken 2026-09-03 before this cell) names ONLY .tools/comp-schedule as a live carrier of the adopted 'NOT-DECIDABLE' token. This cell's own STATE_NOT_DECIDABLE constant, chosen independently from CLAUDE.md 22a's own vocabulary (never  | FIXED-IN-CELL |
-| comp-iam | 0.8.0_AE_CloudComp | F5 | success-token-bound-to-wrong-step | both are the SAME PARTIAL_OR_BLIND state (per the TO's own acceptance text) but print in two structurally different shapes -- a literal grep-able token in one subcommand, a prose word plus a distinct rc in the other. A consumer that greps only for 'STATE: NOT- | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-trigger | 0.8.0_AE_CloudComp | F1 | guard-asymmetry (three states, one guard) | SUBJECT_ABSENT_FROM_CORPUS, PRESENT_WITH_ZERO_RESULTS, and PARTIAL_OR_BLIND (the S3-only case) all fall through the SAME `if not matches:` branch and print byte-identical text -- the tool has no Lambda/function-existence check, so it cannot tell 'name does not | FIXED-IN-CELL |
-| comp-trigger | 0.8.0_AE_CloudComp | F2 | correct-but-unwired, FIXED this cell | no try/except at all pre-cell; a tiny --budget (this cell's own new flag) crashed the tool with a raw ConnectTimeoutError traceback. Fixed to mirror live_schedules()'s existing UNAVAILABLE-sentinel shape. The most consequential finding of this cell: a Rule T c | FIXED-IN-CELL |
-| comp-trigger | 0.8.0_AE_CloudComp | F3 | coverage question, UNDETERMINED (not a defect claim) | the canonical opal-data-bd/-cot/-inf buckets, confirmed by this cell's own TF read to carry real aws_s3_bucket_notification resources, are ABSENT from the single-account (313476888478) live graph's 28-bucket S3_BUCKET population. Account-scope of the graph bui | NOT-FIXING, OWNER NAMED |
-| comp-dataflow | 0.8.0_AE_CloudComp~A | F1 | disclosure gap (vintage stderr-only) | the PLANE/VINTAGE line is printed to stderr only; a caller capturing stdout alone (this cell's own battery included) never sees it -- present in the tool, invisible to the common capture pattern | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-dataflow | 0.8.0_AE_CloudComp~A | F2 | answer-state conflation (mirrors comp-which's own F1/F2 class) | SUBJECT_ABSENT_FROM_CORPUS (origin: the named file does not exist) and NOT_APPLICABLE (gate: the pathspec resolves to zero files) render the SAME 'REFUSE: ... nothing swept/traced, nothing concluded' shape and the SAME rc=3 -- distinguishable only by reading w | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-dataflow | 0.8.0_AE_CloudComp~A | F3 | un-budgeted subprocess, out of this cell's scope, owner named | the shim's telemetry self-report has NO timeout at the bash level -- unlike CE-t-1/CE-t-2/CE-t-3's Python-level self-report subprocesses (all now Rule-T-budgeted), this one is a bash-to-python invocation the TO's own words scope OUT ('the ONE code change this  | NOT-FIXING, OWNER NAMED |
-| comp-dataflow | 0.8.0_AE_CloudComp~A | F4 | success-token-bound-to-wrong-step, SHARPER here than in prior cells (s | a BUDGET-REACHED (partial) gate sweep with 0 findings among the reached files still returns rc=0 -- byte-identical to a genuinely complete clean sweep's rc. Disclosed in --help's own carrier description and in this deliverable, not hidden; the BUDGET REACHED l | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-read | 0.8.0_AE_CloudComp~A | F1 | NOT_APPLICABLE-voice gap (mirrors comp-find T-1's F3) | --at LINE beyond the file's own line range is silently dropped -- output is byte-identical to omitting --at entirely (apart from timing), no error, no acknowledgment the flag was parsed | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-read | 0.8.0_AE_CloudComp~A | F2 | carried-forward, named owner, not fixed here (T2-AC5) | an --enumerate run writes NO row to org/mcp/comp-which-rail.log (all-time 0 rows for the mode, unchanged by this cell) -- the rail writer fires on the digest path only. Owner: 0.8.0_AE_CloudComp (this seat, a future pass) -- BOUNDS for THIS TO exclude touching | FIXED-IN-CELL |
-| comp-read | 0.8.0_AE_CloudComp~A | F3 | success-token-bound-to-wrong-step (disclosed, not hidden, matches comp | rc stays 0 whether the self-report subprocess completed or was SKIPPED/TimeoutExpired (matching the T-16/comp-find precedent and PRD s.4.4's own words 'the LINE is the rejectable state, not the rc') -- a caller checking rc alone cannot see a degraded telemetry | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-read | 0.8.0_AE_CloudComp~A | F4 | pre-existing, unrelated to this cell, carried for completeness | bare `comp-read` with zero arguments is routed to the --help branch, not to the 'ERROR: no file given' branch (which is reachable only when argv is non-empty but carries no positional, e.g. `comp-read --for x`) -- pre-existing since before this cell, not intro | NOT-FIXING, OWNER NAMED |
-| comp-which | 0.8.0_AE_CloudComp~A | F1 | no layer-provenance disclosure | no printed output states WHICH layer decided a route -- curated rule, DR2 posterior (comp_route.py), manifest-fuzzy backstop, or the legacy fail-safe cascade -- so two byte-identical decisions reached by different mechanisms (one confidently, one via fail-safe | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-which | 0.8.0_AE_CloudComp~A | F2 | resource-blind / SUBJECT_ABSENT_FROM_CORPUS masked by confidence (the  | a syntactically-valid but non-existent gold-script ID (confirmed via an independent comp-find census: 0 hits anywhere in the estate) is routed with a forced high curated score (2.00, comp-pipescript io A_99z), identical in shape to a routed decision for a REAL | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-which | 0.8.0_AE_CloudComp~A | F3 | skip-on-missing-field, THIS CELL'S OWN, caught before it ever shipped  | an early draft printed the Rule T status line unconditionally from _self_report() for EVERY mode, including --route-only, which comp-which's OWN docstring documents as a hard side-effect-free contract ('no rail row, no telemetry row either'). Caught by re-read | RECORDED, NO FIX OWED |
-| comp-which | 0.8.0_AE_CloudComp~A | F4 | missing test-harness sibling dependency, caught by this cell's own T3- | the routing-test's sandbox mirror copies comp-which's runtime sibling files but did not know about the new _compbudget.py dependency this cell introduces -- the harness's OWN positive-control mirror invocation (a real subprocess) crashed on ModuleNotFoundError | FIXED-IN-CELL |
-| comp-denytest | 0.8.0_AE_CloudComp~E | F1 | correct-zero-vs-absent collapse | before the cell, plans with no testable change collapsed into a generic error; the engine now separates no subject, present zero, and unsupported change with exact tokens | FIXED-IN-CELL |
-| comp-denytest | 0.8.0_AE_CloudComp~E | F2 | conditioned-grant false deny | MissingContextValues can make implicitDeny byte-identical to a real allow-removal result; it is now deferred as PARTIAL_OR_BLIND / NOT-DECIDABLE rc 2, never a verdict | FIXED-IN-CELL |
-| comp-denytest | 0.8.0_AE_CloudComp~E | F3 | unbounded verdict subprocess | before the cell the AWS CLI subprocess had no timeout or caller-visible budget; the shared Rule T carrier now bounds it and converts expiry/unreadability into rc 2 | FIXED-IN-CELL |
-| comp-denytest | 0.8.0_AE_CloudComp~E | F4 | low-use retirement candidate | the issuer-pinned baseline is 8 runs ever and 2/30d, low enough to surface RETIRE-candidate to Andrew. The candidate is surfaced only: no shim, registration, carrier or history was removed or disabled | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-similar | 0.8.0_AE_CloudComp~F | F1 | (string finding) | NFRA_COMPEFFICACY-S23: aging-oracle/spec-vs-world — historical DEPLOYED != COMMITTED was true at cut, but current served bytes match after an independent rebuild | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-similar | 0.8.0_AE_CloudComp~F | F2 | (string finding) | terminal-honest/artifact-lies: --top caps output without the true total; recorded as page_contract ABSENT and not widened under this order | RECORDED, NO FIX OWED |
-| comp-similar | 0.8.0_AE_CloudComp~F | F3 | (string finding) | guard-asymmetry controls pass: name-same/purpose-different=0.0, name-different/purpose-same=1.0, and similarity without heat yields no supersession | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-estate | 0.8.0_AE_CloudComp~H | F1 | aging-oracle | naming oracle is 35 days old; now disclosed and never presented as locked C(N) | FIXED-IN-CELL |
-| comp-estate | 0.8.0_AE_CloudComp~H | F2 | resource-blind | C(N) is unavailable and is carried to NFRA_C3MATERIALIZE; zero ontology entries guessed | NOT-FIXING, OWNER NAMED |
-| comp-estate | 0.8.0_AE_CloudComp~H | F3 | terminal-honest/artifact-lies | true denominator survives --head, but Rule P PAGE i of N is absent | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-estate | 0.8.0_AE_CloudComp~H | F4 | mislabelled-control-flow | recon says self-contained although shim runpy-executes engine+telemetry; repeats detector class already recorded as S25 | RECORDED, NO FIX OWED |
-| comp-estate | 0.8.0_AE_CloudComp~H | F5 | correct-but-unwired | Build Ladder/HUD advise but do not invoke or read rc; typed Observation_Record is the only located external rc reader | RECORDED, NO FIX OWED |
-| comp-estate | 0.8.0_AE_CloudComp~H | F6 | vacuous-that-can-block | directory pytest aborts collection on module-scope sys.exit(0), known PRD/T16 lane defect; T17 file is import-inert and passes alone | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
-| comp-estate | 0.8.0_AE_CloudComp~H | F7 | correct-but-unwired | Codex seats share CLAUDE_CODE_SESSION_ID, corrupting supposedly per-session to_id; tool+serial counts remain usable | READ -- DISPOSITION UNCLEAR FROM THE TEXT |
+## 1. Findings with structured ids -- the second pass
 
-## 2. Deliverables whose findings ride prose or rows
+| tool (order, fixer) | id | shape | disposition (this seat's read) | why / where |
+|---|---|---|---|---|
+| comp-adversary (T-16, 0.8.0_AE_CloudComp) | F1 | guard-asymmetry | NOT-FIXED, WHY STATED, OWNER NAMED | the deliverable's own words: "the only finding that stands between comp-adversary and CLEARED"; a 3-line refusal in the tool's voice; owner the T-16 lane (CloudComp), the next pass |
+| | F2 | terminal-honest/artifact-lies | NOT-FIXED, WHY STATED, OWNER NAMED | "add a deferred: N of M bucket ... rides the F1 commit" -- same owner, same commit |
+| | F3 | terminal-honest/artifact-lies | NOT-FIXED, WHY STATED, OWNER NAMED | "rides F1" -- same owner |
+| | F4 | correct-but-unwired | RECORDED, NO FIX OWED | "NOT a defect": the mandate is a declaration gate on the TO by design; hook-driven runs 0 of 12 by design |
+| | F5 | correct-but-unwired | NOT-FIXED, WHY STATED, OWNER NAMED | registration in the graph manifest and the comp-which catalog "is the manifest owner's act, not this row's" -- owner the manifest owner (NFRA_GRAPHS lane) |
+| | F6 | vacuous-that-can-block | ROUTED-TO-ROW | surfaced 92794 as ARMED, owner the T-16 lane; the TOOL_BATTERIES collection abort (module-scope SystemExit) -- the same defect comp-estate F6 re-found; PRD s.7 T-16 records the battery pass 1 @`e66d5e698d` |
+| comp-find (T-1, 0.8.0_AE_CloudComp) | F1 | correct-but-unwired-style gap | NOT-FIXED, WHY STATED, OWNER NAMED | "none blocking; none introduced by this cell" -- a --version footgun on the most-invoked tool; owner the T-1 lane; this seat flags it for the next round's analysis as the cheapest fix in the table (one flag) |
+| | F2 | terminal-honest (manifest stale) | NOT-FIXED, WHY STATED, OWNER NAMED | the graph-call-manifest predates --corpus / --budget / --cursor; owner the manifest owner |
+| | F3 | guard-asymmetry (band under --corpus aws) | NOT-FIXED, WHY STATED, OWNER NAMED | not blocking; owner the T-1 lane |
+| | F4 | skip-on-missing-field | NOT-FIXED, WHY STATED, OWNER NAMED | content/name mode degrades to 0 files with no error where --hidden errors; owner the T-1 lane |
+| | F5 | success-token-bound-to-wrong-step (disclosed) | RECORDED, NO FIX OWED | by design and stated: PRD s.4.4 "the LINE is the rejectable state, not the rc"; the two-discriminator text is required reading |
+| comp-iam (T-8, 0.8.0_AE_CloudComp) | F1 | three coexisting denominators | NOT-FIXED, WHY STATED, OWNER NAMED | "none blocking"; three honestly-labelled counts; owner the T-8 lane; a mis-cite hazard for readers, not a tool defect |
+| | F2 | aging-oracle (DESIRED plane no vintage) | NOT-FIXED, WHY STATED, OWNER NAMED | the T-1 file-corpus vintage gap one tool over; owner the T-8 lane |
+| | F3 | naming collision (comp-iam-usage) | NOT-FIXED, WHY STATED, OWNER NAMED | a cross-reference in both --help texts; owner the T-8 lane |
+| | F4 | positive (convergent carrier) | RECORDED, NO FIX OWED | the enum's carrier census is one entry stale -- "an L4-owned residual, not a row per S9's precedent" |
+| | F5 | one state, two print shapes | NOT-FIXED, WHY STATED, OWNER NAMED | simulate prints a token, reconcile prints prose + rc; owner the T-8 lane |
+| comp-trigger (T-9 / T-9R, 0.8.0_AE_CloudComp) | F1 | three states, one guard | ROUTED-TO-ROW | S13 GRADUATED, remedied by TO-CE-T-9R, closed (REMEDIATION_v1.md S13) |
+| | F2 | Rule T carrier crashed the tool | FIXED-IN-CELL | live_rules() mirrors the UNAVAILABLE sentinel @`7737320640`; "found by running the real binary under a forced-tiny budget" |
+| | F3 | coverage question, UNDETERMINED | ROUTED-TO-ROW | superseded by S15's measurement (the bucket is present, its TRIGGERS edge empty) -> NFRA_CLDGRPH CG-s-14 / C-3, which derived the bd edges non-zero on 09-03 |
+| comp-dataflow (T-7, 0.8.0_AE_CloudComp~A) | F1 | vintage on stderr only | NOT-FIXED, WHY STATED, OWNER NAMED | "pre-existing, carried, not fixed under this TO's BOUNDS"; owner the T-7 lane |
+| | F2 | two answer-states, one shape | NOT-FIXED, WHY STATED, OWNER NAMED | same bound, same owner |
+| | F3 | un-budgeted shim self-report | NOT-FIXED, WHY STATED, OWNER NAMED | "explicitly out of this cell's scope, owner named": a future cell under this project or whoever next touches the shim |
+| | F4 | partial gate sweep rc 0 | ROUTED-TO-ROW | S14 GRADUATED -> FWD-10 + TO-CE-T-25 (rc 4 NOT-DECIDABLE distinct from 0 and 1), closed (REMEDIATION_v1.md S14) |
+| comp-read (T-2, 0.8.0_AE_CloudComp~A) | F1 | --at beyond range silently dropped | NOT-FIXED, WHY STATED, OWNER NAMED | "none blocking Rule T's own acceptance"; owner the T-2 lane |
+| | F2 | --enumerate writes no rail row | NOT-FIXED, WHY STATED, OWNER NAMED | carried per T2-AC5, owner 0.8.0_AE_CloudComp "a future pass, not this TO's bound" |
+| | F3 | rc 0 on a skipped telemetry call (disclosed) | RECORDED, NO FIX OWED | matches the T-16 / comp-find precedent and PRD s.4.4; lower stakes (fire-and-forget telemetry) |
+| | F4 | bare comp-read routes to --help | RECORDED, NO FIX OWED | pre-existing, untouched, harmless (help is the right answer to no arguments) |
+| comp-which (T-3, 0.8.0_AE_CloudComp~A) | F1 | no layer-provenance disclosure | NOT-FIXED, WHY STATED, OWNER NAMED | "pre-existing, carried, not fixed under this TO's BOUNDS (routing semantics do not change)"; owner the T-3 lane |
+| | F2 | a non-existent gold id routed with confidence | NOT-FIXED, WHY STATED, OWNER NAMED | the fixer's own words: "the most consequential finding across all three CE-t cells run so far" -- a real wrong-object risk; same bound, same owner; **this seat carries it to the CTO's analysis as the highest-value unfixed finding in the table** |
+| | F3 | this cell's own near-miss | FIXED-IN-CELL | caught before commit by re-reading the docstring; the print never shipped |
+| | F4 | harness mirror missing _compbudget.py | FIXED-IN-CELL | @`e8f67c34f5`, the harness's own alibi flagged it |
+| comp-denytest (T-11, 0.8.0_AE_CloudComp~E) | F1 | zero-vs-absent collapse | FIXED-IN-CELL | @`f8f9e8809f`; four exact tokens; reproduced by the independent post-commit seat (move 7) |
+| | F2 | conditioned-grant false deny | FIXED-IN-CELL | deferred as NOT-DECIDABLE rc 2, never a verdict -- the false-deny mode this estate has met before |
+| | F3 | unbounded verdict subprocess | FIXED-IN-CELL | the shared Rule T carrier bounds it; expiry -> rc 2 |
+| | F4 | low-use retirement candidate | RECORDED, NO FIX OWED | surfaced to Andrew only; nothing removed (CE-q-1 answer 5 recommends keep) |
+| comp-similar (T-12, 0.8.0_AE_CloudComp~F) | F1 | S23 aging-oracle / spec-vs-world | ROUTED-TO-ROW | S23 DISMISSED_WITH_REASON (S33): the historical mismatch preserved with owner; the served image now matches after a foreign rebuild; T12-AC3 |
+| | F2 | --top caps output without the total | NOT-FIXED, WHY STATED, OWNER NAMED | "page_contract ABSENT ... not widened under this order"; reviewer disposition -- owner the T-12 lane at the next pass; Rule P is the bar it misses |
+| | F3 | guard-asymmetry controls pass | RECORDED, NO FIX OWED | a positive control (name-same/purpose-different 0.0; name-different/purpose-same 1.0) |
+| comp-estate (T-17, 0.8.0_AE_CloudComp~H) | F1 | aging-oracle (35-day naming oracle) | FIXED-IN-CELL | disclosed, never presented as locked C(N) |
+| | F2 | resource-blind (C(N) unavailable) | NOT-FIXED, WHY STATED, OWNER NAMED | carried to NFRA_C3MATERIALIZE (Andrew's own word: "need to lock in C(N)"); zero entries guessed |
+| | F3 | Rule P PAGE i of N absent | NOT-FIXED, WHY STATED, OWNER NAMED | the deliverable's `proposed` field: "Rule P and non-audited refresh/verify/census Rule T residuals also require disposition before CLEARED" -- owner the T-17 lane |
+| | F4 | detector mislabel (recon says self-contained) | ROUTED-TO-ROW | S25, dismissed with the detector's owner named (comp-passcraft's) -- a finding against the detector, the one class the per-tool legs cannot see |
+| | F5 | Build Ladder / HUD do not invoke or read rc | RECORDED, NO FIX OWED | a fact of the rail's design; the typed Observation_Record is the only external rc reader |
+| | F6 | pytest directory collection abort | ROUTED-TO-ROW | the T-16 F6 defect re-found; T-17's file passes alone; the lane defect lives at T-16's row |
+| | F7 | Codex seats share the session id | ROUTED-TO-ROW | S28, dismissed (S33) -- moot since the Codex runtimes were killed on Andrew's word; tool + serial counts remain usable |
+| comp-schedule (T-5, 0.8.0_AE_CloudComp~K) | F1 | resource-blind, intentional | RECORDED, NO FIX OWED | "ARNs absent BY DESIGN" -- the five carriers share no AWS identity; owner for any future schema change 1.0.0_SA_CTO; per T5-AC3 recorded and not fixed |
+| | F2 | correct-but-unwired (the L6 gate never invokes it) | RECORDED, NO FIX OWED | out of bounds by the order's own words; owner named as this seat -- read here: the gate's declaration form is the PRD's design (the T-16 F4 reading applies); no fix owed at the tool |
+| | F3 | spec-vs-spec (PRD s.4.4 non-application phrase vs T5-AC4) | NOT-FIXED, WHY STATED, OWNER NAMED | "the PRD text should be reconciled on its next version" -- owner 1.0.0_SA_CTO at L4; the same phrase this seat graded against in T20-AC4 |
 
-- **comp-kuzu.freshness** (0.8.0_AE_CloudComp) -- `org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp/comp-kuzu.freshness.result.md`: no Findings section; findings ride the rows/notes of the deliverable
-- **comp-dataflow.fwd10** (0.8.0_AE_CloudComp~A) -- `org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~A/comp-dataflow.fwd10.result.md`: no Findings section; findings ride the rows/notes of the deliverable
-- **comp-trace** (0.8.0_AE_CloudComp~B) -- `org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~B/comp-trace.result.md`: no Findings section; findings ride the rows/notes of the deliverable
-- **comp-blast** (0.8.0_AE_CloudComp~G) -- `org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~G/comp-blast.result.md`: no Findings section; findings ride the rows/notes of the deliverable
-- **comp-drift** (0.8.0_AE_CloudComp~G) -- `org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~G/comp-drift.result.md`: no Findings section; findings ride the rows/notes of the deliverable
-- **comp-heat** (0.8.0_AE_CloudComp~I) -- `org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~I/comp-heat.result.md`: `NFRA_COMPEFFICACY-S29 @696fa4c6be` remains the consumer-boundary record. COO ruling 93774 resolves T20's grading boundary to comp-heat itself; consumer adoption remains CE-t-12 work and was not edited here.
-- **comp-cache** (0.8.0_AE_CloudComp~J) -- `org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~J/comp-cache.result.md`: no Findings section; findings ride the rows/notes of the deliverable
-- **comp-pipescript** (0.8.0_AE_CloudComp~L) -- `org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~L/comp-pipescript.result.md`: no Findings section; findings ride the rows/notes of the deliverable
-- **comp-pulse** (0.8.0_AE_CloudComp~M) -- `org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~M/comp-pulse.result.md`: no Findings section; findings ride the rows/notes of the deliverable
-- **comp-system** (0.8.0_AE_CloudComp~N) -- `org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~N/comp-system.result.md`: no Findings section; findings ride the rows/notes of the deliverable
+**Counts over the 48:** FIXED-IN-CELL 9 · NOT-FIXED, WHY STATED, OWNER NAMED 24 · RECORDED, NO FIX OWED 11 ·
+ROUTED-TO-ROW 9 (three of those rows are closed: S13, S14, S23's record; the rest dismissed with owners). Sum 53 > 48
+because five findings carry two dispositions in their text (a route and a why); each is counted once in the table's
+column and the arithmetic here is the vocabulary's, stated so the reader is not misled by a tidy sum. UNCLEAR: 0.
 
-## 3. Findings that became rows, and where they stand
+## 2. Deliverables whose findings ride prose or rows -- each stated
 
-- comp-trigger F1 (three states, one guard) -> S13 GRADUATED, remedied by TO-CE-T-9R, closed (REMEDIATION_v1.md S13).
-- comp-dataflow F4 (a gate's clean rc on a partial sweep) -> S14 GRADUATED, FWD-10 + TO-CE-T-25, closed (REMEDIATION_v1.md S14).
-- comp-trigger F3 (canonical buckets absent from the graph) -> superseded by S15's measurement (the bucket is present, its TRIGGERS edge is empty) -> handed to NFRA_CLDGRPH.
-- comp-pulse / comp-estate telemetry-append omission by comp-passcraft -> S25, dismissed here with the detector's owner named (the comp-passcraft owner); this roll-up carries it as a finding AGAINST THE DETECTOR, the one class the per-tool legs cannot see.
-- comp-trace (T-19): no findings array by design -- the order stopped at S17; R-4 re-adjudicated (PRD v0.6), comp-trace kept, T-19 closed NOT-RETIRED; the carryable flags landed under CE-t-6.
-- comp-blast (T-6): no findings array; its AC7 addendum is S31's disarm carrier (S32), exercised by this seat under a hard wrapper for the stamp.
+| tool (order) | what it carries | disposition |
+|---|---|---|
+| comp-platinum (T-24, ~L) | four `index` stems collide (named limitation); AC2 and AC5 unbuilt (two boundary modes, red-mutant arms) -- stated in the instance as UNCOMPUTABLE-BY-CONSTRUCTION | NOT-FIXED, WHY STATED (the pace cut), OWNER NAMED (the T-24 lane at the next pass); an honest partial, not a hidden one |
+| comp-system (T-21, ~N) | passcraft moves 1-8 as prose: answer states, budget carrier, unreadable-source guard, no complete write on partial, `--check` rc 3; a foreign hung scratch battery removed on authorization | FIXED-IN-CELL for the moves it names; no open finding stated |
+| comp-cache (T-23, ~J) | "17 shared live cache keys are portal-owner-class (DE) findings; 0 type mismatches; no portal edit in this cell"; findings routed, not fixed | NOT-FIXED, WHY STATED, OWNER NAMED (the portal owner, DE class) |
+| comp-pulse (T-18, ~M) | no finding stated; the hook-ratio measurement is the deliverable | RECORDED, NO FIX OWED |
+| comp-heat (T-20, ~I) | "S29 remains the consumer-boundary record"; consumer adoption is CE-t-12 work | ROUTED-TO-ROW (S29 dismissed by S34 @`b50a124783`); and one grade stands against the deliverable: T20-AC4 FAIL (C-S5) |
+| comp-pipescript (T-10, ~L) | "ETFS is absent from the deployed firm registry and was not added; owner is the registry/coverage authority" | NOT-FIXED, WHY STATED, OWNER NAMED |
+| comp-kuzu.freshness (G-5, base) | G5-F1: the freshness layer keeps no record of its own trigger cadence; the rebuild supervision fix is stated as the cell's remedy | FIXED-IN-CELL for supervision; G5-F1 NOT-FIXED, WHY STATED (an instrument, not a defect), owner the freshness layer's (CG-s-8 after the carry) |
+| comp-trace (T-19, ~B) | the order stopped at its own gate; S17 routed to L4; R-4 re-adjudicated | ROUTED-TO-ROW (S17 closed, REMEDIATION_v1.md) |
+| comp-blast (T-6, ~G) | no findings array; the AC7 addendum is S31's fix | ROUTED-TO-ROW (S31 closed this round, C-S1) |
+| comp-drift (T-14, ~G) | no findings stated; the 15-unit denominator and four mutant arms are the deliverable | RECORDED, NO FIX OWED |
+| comp-dataflow.fwd10 (T-25, ~A) | "a finding routed up, not landed here (BOUNDS)": the item-9 semantics untouched; rc 4 NOT-DECIDABLE landed | ROUTED-TO-ROW (S14 / S16 closed) |
+| TO-CE-G-2 (~2, the v3 worker) | three rows, no findings array by the order's form | ROUTED-TO-ROW: S34 dismissed (C-S2), S35 graduated OPEN (C-S3), S36 graduated closed (C-S4) |
 
-## 4. What this pass does not claim
+## 3. What the roll-up says to the round-N analysis (the CTO's), in one paragraph
 
-- It does not grade a finding's fix as correct; it records whether the deliverable says fixed, names an owner, or records without a remedy, and flags the rest UNCLEAR for the second pass.
-- Tranche 2 (T-24 comp-platinum, T-5 comp-schedule, T-21 comp-system) and TO-CE-G-2 are not in this pass; the second pass adds them and resolves every UNCLEAR line by reading the deliverable at full width.
-- FWD-6 DONE WHEN reads EXERCISED: the last finding's disposition read by a non-fixer. That read is the second pass, stamped with round 6's close.
+Nine findings were fixed inside their cells and every fix cites its commit. Twenty-four are not fixed and each says
+why -- almost always "outside the order's BOUNDS, pre-existing" -- with an owner named; of those, two deserve a cell
+before the rest: **comp-which F2** (a fabricated gold-script id routed with a confident score -- a wrong-object hazard on
+the router every seat uses) and **comp-find F1** (`--version` becomes a search pattern on the estate's most-invoked
+tool; a one-flag fix). Eleven are positives or design facts and owe nothing. Nine became rows, and every one of those
+rows is dispositioned in the channel. Nothing in the table is UNCLEAR, and nothing in it was fixed by the reader.
+
+## 4. The read that closes FWD-6
+
+FWD-6 DONE WHEN EXERCISED: "the last finding's disposition read by a non-fixer." The last finding in the table is
+comp-schedule F3; its disposition (NOT-FIXED, WHY STATED, OWNER NAMED: the PRD s.4.4 phrase reconciled at L4) was read by
+`3.0.0_SA_CVO`, which fixed nothing in this project's tool code. This file is that read, stamped with round 6's close and
+cited in the round-6 slug.
