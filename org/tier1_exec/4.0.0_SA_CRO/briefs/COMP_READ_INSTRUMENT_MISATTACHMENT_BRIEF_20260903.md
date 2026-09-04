@@ -309,6 +309,44 @@ confidence, one disagreeing constructor away from wrong.** This is the estate's 
      against ~15 for --enumerate, so splitting is CHEAPER in context, not dearer.
 ```
 
+### ⚠ QUALIFIER ON RULE 1, added 2026-09-04 from a log scan this brief did not have when it landed
+
+**`--enumerate` IS THREE DAYS OLD AND HAS ALMOST NO OPERATING HISTORY.** It landed @`7d857989eb`
+(2026-08-31, `3.0.0_SA_CVO~C`). **Rule 1 therefore rests on ONE seat's use over ONE session, and it
+was stated at a confidence the evidence does not carry.** Two measurements bound it:
+
+```
+  comp-read rows in org/mcp/comp-tool-runs.jsonl   343, ALL of them 2026-09-02 or later
+    -> NOT adoption. comp-read has existed since 2026-08-06 and made ZERO logging calls until
+       f34122edfb (09-02). Its own source at :1158 carries the audit that found it:
+       "Last 30 days: 2,401 rail rows / 0 runs.jsonl rows."
+  the two sinks cannot be combined into a mode split at ANY date, per :1164:
+       the rail writer fires on the DIGEST path only -- "an --enumerate run writes NO rail row".
+```
+
+⛔ **THERE IS NO WINDOW IN WHICH BOTH MODES ARE MEASURABLE, AND THE ADOPTION CURVE THIS AUTHOR WAS
+ABOUT TO READ OFF THAT LOG WOULD HAVE BEEN AN INSTRUMENTATION GAP MISREAD AS BEHAVIOUR.** Caught by
+asking WHEN THE TOOL GAINED ITS LOGGING rather than by trusting the zero.
+
+**RULE 1 STANDS, at reduced confidence and for a stated reason.** Its argument is STRUCTURAL -- a
+ranking cannot support an absence claim, and a SET survives a rename where a TOKEN does not -- and a
+structural argument does not need a track record. **What the age denies it is the claim that it WORKS
+IN PRACTICE AT ESTATE SCALE, which this brief implied and should not have.** Read rule 1 as a
+derivation, not as a measured result.
+
+⚠ **Section 3a cuts HARDER under this qualifier, not softer:** three of the four instances in section
+1 are `--enumerate` failures, produced by the seat with the most practice on a three-day-old mode.
+**A rule promoted to first position on an instrument its own author keeps misusing is exactly the
+claim that should carry its age on its face.**
+
+⛔ **DECIDED IN LANE, NOT ESCALATED, AND THE PRIOR FRAMING WAS THE ERROR.** This author put the
+question to Andrew on 2026-09-03 as *"I would rather you read it first than have me quietly soften my
+own advice."* **That was wrong: this is my own artifact, in my own lane, under my own gates, and a
+seat that can decide must decide** (`0.0.0_AB_MSTR~Z` 20456, restating the `/open-calls` rule: *"If a
+candidate turns out to be decidable, THE FINDING IS THAT THE SENDING SEAT SHOULD DECIDE IT"*).
+**Qualifying my own recommendation in writing is not softening it; routing it upward would have spent
+a sovereign call on an editorial choice.**
+
 ---
 
 ## 6. WHAT IS NOT A TOOL PROBLEM
