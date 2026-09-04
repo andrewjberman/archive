@@ -1,0 +1,175 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPSEC202609.TO-OP-S-14-21",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+  "vintage_commit": "32891e2720",
+  "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-14-21.sentinel-watch-only.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/prd/NFRA_OPSEC202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3619ebecd9"
+ },
+ "assignee": "0.7.0_AE_CloudOps~S",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/opsec/iam_sentinel.tf",
+   "kind": "iam",
+   "commit_or_etag": "c027eb4f6f",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Applied 2026-09-04T01:51:56Z. get-role returns arn:aws:iam::313476888478:role/opal-sentinel; get-role-policy returns 8 statements including the explicit DENY on wafv2 UpdateIPSet/CreateIPSet/DeleteIPSet at Resource *. Read with the live primitive, not comp-iam, because Rule 22a is explicit that a DECLARED view cannot tell landed from planned.",
+   "introduces": [
+    "SentinelMayNeverWriteAnIpSet",
+    "ProjectKeyThroughDynamoDBAndS3"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/opsec/sentinel.tf",
+   "kind": "terraform",
+   "commit_or_etag": "94d15e76ac",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Applied 9 added / 0 changed / 0 destroyed, then three in-place function updates. Final UNSCOPED re-plan rc=0 'No changes.' C-7 reserved concurrency 1 confirmed by get-function-concurrency and by get-function's Concurrency block. Both subscription filters live; digest rule ENABLED at cron(0 6 * * ? *).",
+   "introduces": [
+    "sentinel_block_armed",
+    "opal-sentinel-daily-digest"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/opsec/opal-sentinel/lambda_function.py",
+   "kind": "script",
+   "commit_or_etag": "7a4cc2c348",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Deployed CodeSha256 xaAT7vYieuJJWEwqV8SZaljjXYZHtUgNtjI5/aiVL9k= equals the base64 sha256 of the artifact BUILD INPUT, compared against the built zip rather than by filename (Rule 22a CODE layer). Commit gate clean: py_compile + ds-precommit + ruff py39.",
+   "introduces": [
+    "open_case_id",
+    "allowed_skipped"
+   ]
+  },
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/opsec/opal-sentinel.zip",
+   "kind": "s3_object",
+   "commit_or_etag": "g0j9S_J726oEkZfZUCyJ09ycq2nweh8f",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "head-object: ContentLength 7751, metadata content-sha256=xaAT7vYieuJJWEwqV8SZaljjXYZHtUgNtjI5/aiVL9k=. The yang-lambda module reads that metadata key for source_code_hash, so an upload without it plans a null hash."
+  },
+  {
+   "path_or_key": "s3://opal-security-evidence/reports/daily/2026-09-04.json",
+   "kind": "s3_object",
+   "commit_or_etag": "1245-bytes",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "The daily digest as a FILE (deliverable 5). Written by the digest path, read back: watch_rows 3, block_armed false, coverage_bound present, listing three REAL addresses. It is an object and never a send -- C-6 states a digest EMAIL is an OPTION carried to Andrew and is NOT authorized by this ratification."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "S14-AC1",
+   "criterion_verbatim": "S14-AC1 -- THE PIPELINE RUNS END TO END ON A FIXTURE: a staged burst under OP-x-1 produces, in order and each pasted: a parsed event, a counter increment, an ALLOW check result, a WATCH row in the table, and a case file in the evidence store. Denominator: stages evidenced of stages in the pipeline.",
+   "method": "live_read",
+   "invocation": "lambda invoke of opal-sentinel with a gzipped/base64 CloudWatch Logs subscription payload carrying 5 synthetic WAF records for 203.0.113.7 (RFC 5737 TEST-NET-3), then a read-back of the table row and the evidence-store objects.",
+   "output_evidence": "ALL FIVE STAGES EVIDENCED, 5 of 5. (1) PARSED: records_parsed 5, addresses 1. (2) COUNTER INCREMENT: the row's hits went 1 -> 2 -> 3 across successive bursts, each read back from the table. (3) ALLOW CHECK RESULT: allow_list_present false and allowed_skipped 0 on this arm, against allowed_skipped 1 on the allowed arm -- the check is evidenced by its DIFFERING result across the pair, not by its mere presence. (4) WATCH ROW: address 203.0.113.7/32, status WATCH, case_ids populated, coverage_bound written onto the row. (5) CASE FILE: cases/2026/09/04/203.0.113.7_32/eebea61cc1bb/ holding summary.json, timeline.md and waf-samples shards. THE PIPELINE ALSO RAN ON REAL TRAFFIC WITHOUT A FIXTURE, which is stronger than the criterion asks: the live subscription filters caught 103.203.57.3/32 at 02:44:34Z and later 45.61.124.129/32 and 66.132.172.45/32, each producing a genuine WATCH row and case file. NO PROBE WAS RUN AGAINST PRODUCTION: the fixture is a direct function invocation with a crafted event, so OP-x-1's 'no probe runs on production without his word' is not engaged.",
+   "denominator": "5 of 5 pipeline stages evidenced, each read back individually; plus 3 real addresses processed by the live filters with no fixture involved.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S14-AC2",
+   "criterion_verbatim": "S14-AC2 -- NO BLOCK ROW EXISTS AND THE ARM IS OFF: a census of rows written by this face showing BLOCK count = 0 with its denominator, and the gate that holds the BLOCK path shown in its off state. A single BLOCK row written by this face is a FAIL.",
+   "method": "live_read",
+   "invocation": "dynamodb scan of opal-suspicious-addresses projecting address and status, counted by status; plus get-function-configuration for the environment gate.",
+   "output_evidence": "CENSUS AFTER FIXTURE CLEANUP: 2 rows, by status {WATCH: 2}, BLOCK/BLOCKED = 0 of 2. DURING the exercise, with both fixtures present: 3 rows, {ALLOW 1, WATCH 2}, BLOCK/BLOCKED = 0 of 3. THE GATE SHOWN OFF, on the applied plane: SENTINEL_BLOCK_ARMED reads 'false' in the deployed function's environment, and every invocation returns block_armed false in its own result. THE GATE IS A TERRAFORM VARIABLE (sentinel_block_armed, default false), so the later arm is a config change and not a code change -- deliverable 2. THREE INDEPENDENT REFUSALS STAND BEHIND IT so the flag alone cannot produce a block: the ALLOW check short-circuits first (C-4), an ABSENT allow list refuses the arm outright (C-4's 'arming with an empty list is a violation, not a phase', enforced in code), and a single rate trip is never enough (C-3).",
+   "denominator": "0 of 2 rows post-cleanup; 0 of 3 during the exercise. Both counts stated because the population changed between them.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S14-AC3",
+   "criterion_verbatim": "S14-AC3 -- THE ALLOW CHECK IS CONSULTED AND CANNOT BE OVERRIDDEN (C-4): a fixture address present in the ALLOW list, driven hard enough to trip the counter, producing no WATCH row; and the same burst from a non-allowed fixture producing one. The pair is the criterion -- a single arm shows only that something happened.",
+   "method": "live_read",
+   "invocation": "Identical 5-record bursts against two RFC 5737 TEST-NET-3 addresses: 203.0.113.9/32 seeded with a status=ALLOW row (the ALLOW FIXTURE the criterion asks for, NOT OP-s-20's partner list, which does not exist), and 203.0.113.7/32 with no ALLOW row.",
+   "output_evidence": "BOTH ARMS RUN, IDENTICAL BURSTS, OPPOSITE RESULTS. ARM A (allowed): watch_rows 0, allowed_skipped 1, and the row's status read back as ALLOW AFTER the burst -- unchanged. ARM B (not allowed): watch_rows 1, allowed_skipped 0, one case file written. THE ARM THAT HAD TO BE ABLE TO FAIL IS ARM A, AND IT DID FAIL IN THE FIRST CUT, WHICH IS WHY THE PAIR IS THE CRITERION: the ALLOW check originally ran AFTER bump_counter, so an allow-listed address got a row created with status=WATCH via if_not_exists, and record_row would then have OVERWRITTEN AN EXISTING ALLOW ROW WITH WATCH -- the sentinel overriding an ALLOW, precisely the act C-4 forbids. Deliverable 1 already required the ALLOW check 'before any row is written'; the order was wrong and the criterion's allowed arm is what exposed it. The check now precedes every write and an allow-listed address is observed and counted but never status-written.",
+   "denominator": "2 of 2 arms exercised, same burst shape, opposite outcomes read back from the table.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S14-AC4",
+   "criterion_verbatim": "S14-AC4 -- ONE EMAIL, AND THE DIGEST IS A FILE: the send record for exactly one email for one event, with a census showing one per event and no batch; and the daily digest present as an OBJECT in the evidence store with its key pasted. A digest delivered by email is a FAIL against C-6 and the moratorium. If the recipient is unnamed, the email limb files UNCOMPUTABLE-BY-CONSTRUCTION citing its row and the digest limb still PASSES on its own.",
+   "method": "live_read",
+   "invocation": "lambda invoke with {\"digest\": true}, then get-object on the returned key; plus a read of the deployed environment for the recipient and of the send path's suppression logic.",
+   "output_evidence": "DIGEST LIMB PASSES ON ITS OWN, key pasted: reports/daily/2026-09-04.json, 1245 bytes, watch_rows 3, block_armed false, coverage_bound present, listing the three real addresses. IT IS AN OBJECT AND NOT A SEND. EMAIL LIMB IS UNEXERCISABLE, AND FOR A REASON THIS CRITERION DOES NOT ANTICIPATE. The criterion's escape hatch is keyed to an UNNAMED RECIPIENT. THE RECIPIENT IS NAMED: C-6 names andrew@opalinvest.com, FWD-15's ACCEPT names it, its SOURCE is Andrew-direct 2026-09-02 'trigger an email to me at andrew@opalinvest.com', and the decomposition distinguishes this face from OP-s-6 in one line at :196 -- 'OP-s-6's recipient is ONE named human; OP-s-14's is andrew@opalinvest.com'. The email is built, the grant is IAM-verdicted, and it CANNOT FIRE, because C-6 sends one email per address per INCIDENT on a BLOCK and this face is required to build WATCH-ONLY. No BLOCK event can exist for it to report. Sending one would require arming BLOCK, which C-4 forbids while the ALLOW list is empty. So the limb is UNCOMPUTABLE BY CONSTRUCTION -- by the WATCH-only construction, not by a missing recipient. ALSO RECORDED, because it changes what 'one per event' means: C-6's violation condition is 'more than one email per address per 24 h' and this task order paraphrases it as 'ONE email PER EVENT'. Building literally to the paraphrase would VIOLATE the constraint the criterion cites the first time one address trips twice in a day. Built to C-6, with the 24 h suppression stamp on the row.",
+   "denominator": "Digest limb: 1 of 1 object present and read back. Email limb: 0 of 0 BLOCK events available to email about, which is the construction rather than a shortfall.",
+   "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+   "status_reason": "The digest limb PASSES independently and its key is pasted above. The email limb cannot be exercised because a WATCH-only sentinel produces no BLOCK event, and C-6 ties the email to a block. The criterion's own escape is keyed to an unnamed recipient and that cause does NOT apply here -- the recipient is named in three places. Routed to 2.0.0_SA_COO~Z as a criterion-wording question rather than resolved at this seat, since only the issuer may restate a criterion."
+  },
+  {
+   "criterion_id": "S21-AC1",
+   "criterion_verbatim": "S21-AC1 -- THE COVERAGE BOUND IS PRESENT AND IS TRUE AT YOUR VINTAGE: the bound string quoted from a real case file AND from a real daily report -- both, not one -- and a measured statement of which addresses the sentinel can and cannot see, derived from what the subscription filters actually cover rather than from this face's expectation. A bound string that is present but stale is worse than none.",
+   "method": "live_read",
+   "invocation": "get-object on a REAL case file (cases/2026/09/04/103.203.57.3_32/10c6ceca71fe/summary.json, an address caught by the live filter and not a fixture) and on the daily report reports/daily/2026-09-04.json; plus describe-log-groups and describe-subscription-filters to derive the coverage claim.",
+   "output_evidence": "PRESENT ON BOTH CARRIERS, quoted from each and identical: 'COVERAGE BOUND (OP-s-21), measured 2026-09-04: this sentinel sees ONLY what the two WAF web ACLs log -- CLOUDFRONT scope via aws-waf-logs-opal-cloudfront (the portal) and REGIONAL scope via aws-waf-logs-opal-gateway (the opal-gateway ALB). IT CANNOT SEE: raw execute-api addresses, which reach API Gateway without passing either ACL and remain invisible until FWD-2 lands (OP-s-1 IN FLIGHT); opalinvest.com, which carries no CloudFront and no WAF at this vintage (OP-s-13 HELD); and any request body, so NO firm attribution is possible from this source at all. A report with no findings is therefore NOT evidence of a quiet week for anything in that list.' DERIVED FROM THE FILTERS, NOT FROM EXPECTATION: describe-log-groups on prefix aws-waf-logs returns exactly TWO groups and describe-subscription-filters returned 0 pre-existing filters on each, so the two filters this face added are the WHOLE of the sentinel's input and the CAN-SEE half is exactly those two scopes. NOT DERIVED FROM storedBytes, deliberately: that field reads 0 on the cloudfront group while it demonstrably holds records, at both grains -- 0.7.0_AE_CloudOps~U measured that (row Z-S118) and it corrects an evidence line in this seat's own row Z-S90. NOT STALE BY CONSTRUCTION: the bound is a Terraform local injected as an environment variable, so removing it when FWD-2 lands is a RECORDED change and it cannot quietly cease to be emitted.",
+   "denominator": "2 of 2 required carriers (a real case file and a real daily report), both read back; coverage derived from 2 of 2 log groups and 2 of 2 filters this face owns.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S1421-AC5",
+   "criterion_verbatim": "S1421-AC5 -- VERDICTED BEFORE DEPLOY, AND NOTHING ELSE RODE: the TO-OP-S-22 verdict for the sentinel's role referenced by instance with its date preceding deployment; per root the unscoped baseline, the enumerated changed-resource list, the unscoped re-plan 0-diff, ledgers CLOSED, push state MEASURED; and every fixture cleaned up with the cleanup read back.",
+   "method": "live_read",
+   "invocation": "Sequence executed in the order the criterion requires, each step measured at the time: role apply, ARN handoff, verdict receipt, then code deploy; plus terraform plan/apply records and a cleanup read-back.",
+   "output_evidence": "VERDICT PRECEDES DEPLOY, and the ordering is real rather than reconstructed: role APPLIED 2026-09-04T01:51:56Z -> ARN handed to 0.7.0_AE_CloudOps~W as msg 20110 -> VERDICT RETURNED 02:05Z (msg 20116: all three roles PASS, 45 simulations, 28 allowed / 17 denied, 0 mismatches, code deploy explicitly CLEARED) -> function deployed after. UNSCOPED BASELINE, taken before this face wrote anything: 4 to add, and ALL FOUR were TO-OP-S-15-19's with ZERO this seat's. ENUMERATED CHANGED RESOURCES: role apply 6 added (2 this face, 4 that face's riding the shared root); function apply 9 added -- aws_lambda_function, its log group, 2 subscription filters, 3 lambda permissions, the digest rule and target; then 3 in-place function updates carrying defect fixes. UNSCOPED RE-PLAN: rc=0, 'No changes. Your infrastructure matches the configuration.' -- unscoped, never -target, because a -target re-plan verifying a -target apply is the named blind spot in Rule 22. LEDGERS CLOSED: opsec-s14-sentinel-role 5 of 5 legs, opsec-s14-sentinel-function 6 of 6 legs; comp-schedule --owner reads GATES ARMED 0 for this seat. PUSH STATE MEASURED: LOCAL at commit 7a534cc6ae -- GATE 5, push is the integrator's and this lane does not push. FIXTURES CLEANED AND READ BACK: both TEST-NET-3 rows deleted and 7 fixture case objects deleted; the read-back reports fixture rows NONE and fixture case objects NONE. THE 2 REMAINING ROWS AND 9 REMAINING CASE OBJECTS ARE REAL ADDRESSES caught by the live filters and are deliberately RETAINED -- deleting them would destroy genuine evidence, and the cleanup was scoped by address rather than by prefix for exactly that reason. NOTHING ELSE RODE, WITH ONE DISCLOSED EXCEPTION: TO-OP-S-15-19's resources landed on both of this face's root applies because they were already committed to the shared root. A terraform apply lands the ROOT, not a lane's FILE, so this is not avoidable by file separation; it is enumerated above and was announced to that lane and the issuer as msgs 20111 and 20139 rather than left to be discovered.",
+   "denominator": "6 of 6 sub-requirements evidenced individually: verdict-before-deploy, unscoped baseline, enumerated changes, unscoped 0-diff, ledgers closed, push state measured -- plus the fixture cleanup read back.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "THE CONTROLS THAT HAD TO BE ABLE TO FAIL ARE S14-AC3's ALLOWED ARM AND S14-AC2's BLOCK CENSUS, and the allowed arm DID fail, twice, before it passed -- which is the only reason this instance is worth reading. FIRST FAILURE: the ALLOW check ran after bump_counter, so an allow-listed address would have had its ALLOW row overwritten with WATCH, a C-4 violation. Caught by running the arm rather than by reading the code. SECOND AND THIRD: the run surfaced two DynamoDB errors that every static instrument passed -- 'rules' is a reserved keyword, and then a fixed alias map declared names the WATCH branch does not use, which DynamoDB rejects just as firmly. Each fix exposed the next, so the sequence of runs proved more than any single run could. A FOURTH defect was found by reading a REAL case the live sentinel wrote rather than a fixture: a WATCH minted a new case id per invocation where PRD 7.3 step 5 says APPEND TO THE OPEN CASE, so a recurring address grew the evidence store without bound. Verified fixed by DISCRIMINATION -- a second burst grew case_ids by 0 and wrote a new sample shard into the reused case. THE BLOCK CENSUS CAN FAIL BY CONSTRUCTION: it counts a status value the pipeline is capable of writing, gated only by configuration, so a 0 is a measurement and not a tautology. A SECOND CONTROL FAILED IN THE OTHER DIRECTION AND IS RECORDED HERE BECAUSE IT WOULD HAVE PRODUCED A FALSE FILING: C-7's reserved concurrency was first read with get-function-configuration, which returned null and reads exactly like an unset reservation -- a FALSE FAILURE, because that API's response shape does not carry the field at all. Re-measured on the two APIs that do report it.",
+   "expected": "S14-AC3's ALLOWED arm must produce NO WATCH row and must leave the ALLOW row's status untouched, while the identical burst from a NOT-allowed address produces exactly one WATCH row and one case file. If both arms produced the same outcome, or if the allowed arm produced a row, the criterion FAILS. S14-AC2's BLOCK census must be able to return non-zero: it counts a status value this pipeline can write, gated only by configuration.",
+   "observed": "The allowed arm FAILED on the first run exactly as the criterion is designed to catch -- it produced a row and would have overwritten the ALLOW status with WATCH, a C-4 violation -- and two DynamoDB errors were surfaced by running it, each hidden behind the last. After the fixes: ARM A watch_rows 0, allowed_skipped 1, status still ALLOW; ARM B watch_rows 1 plus a case file, on an identical burst. BLOCK census 0 of 2 post-cleanup, 0 of 3 during the exercise. The append-to-open-case fix was verified by DISCRIMINATION rather than by absence: a second burst grew case_ids by 0 and wrote a new shard into the reused case.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Each claim was re-measured on a second, independent read rather than quoted once: the unscoped re-plan was run after every apply; the deployed CodeSha256 was compared to the artifact BUILD INPUT after each of the four deployments; C-7's reserved concurrency was read on two distinct APIs (get-function-concurrency and get-function); and the fixture pair was re-run end to end after each defect fix.",
+   "observed": "STABLE where it counts, and the two instabilities found were INSTRUMENT errors rather than world instability -- both recorded above because each nearly produced a wrong filing. The final state re-reads identically: unscoped plan rc=0 'No changes'; deployed sha equals the build input; reserved concurrency 1 on both APIs; fixture cleanup reads NONE on both carriers.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The BLOCK arm is NOT armed and no BLOCK row was written.",
+   "reason": "This face builds WATCH-only in its own terms. C-4 makes arming BLOCK with zero ALLOW rows a VIOLATION rather than a phase, and OP-s-20's ALLOW list does not exist -- it stopped at its own GO condition (rows Z-S90, Z-S94, and 0.7.0_AE_CloudOps~U's Z-S118). The BLOCK code path is present and gated by a Terraform variable so the later arm is a config change, not a code change."
+  },
+  {
+   "item": "The C-8 deny-outside-list bucket-policy statement was NOT written.",
+   "reason": "s3.tf carries the ruling that it lands with OP-s-14, OP-s-15 and OP-s-19 TOGETHER once all three principals exist. Writing it from this face, with only some principals created, would deny the ones still coming -- the shape row Z-S4 refused in round 1."
+  },
+  {
+   "item": "The project key policy was NOT extended to name the sentinel, although kms.tf says the sentinel's task order would extend it.",
+   "reason": "MEASURED as unnecessary rather than skipped: statement (c) AllowViaDynamoDBAndS3InThisAccountOnly already admits any principal in this account THROUGH dynamodb and s3, and this role reaches KMS only through those two services. A fourth named-principal statement would be an unused grant and would push the policy past C-13's 'exactly three statements'. Stated on the channel so the issuer may overrule it; if C-13 is read as REQUIRING a statement per principal it is a one-line addition."
+  },
+  {
+   "item": "No probe was run against production.",
+   "reason": "OP-x-1 forbids it without Andrew's word. S14-AC1 was satisfied by DIRECT FUNCTION INVOCATION with a crafted subscription payload, which exercises the whole pipeline without generating any traffic against a production endpoint, and additionally by real traffic the live filters caught on their own."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPSEC202609-Z-S114: the C-14 operator role opal-security-admin grants opal-data-security -- the LOG DESTINATION -- under Sids reading EvidenceStoreObjects and EvidenceStoreBucket, while the evidence store post-split is opal-security-evidence. Its KMS grant is correct, so the operator can DECRYPT OBJECTS IT CANNOT FETCH. This bites this face directly: the case files the sentinel now writes into opal-security-evidence/cases/ cannot be read by the C-14 operator who investigates them. Filed, not fixed -- the grants are OP-s-26's and that cell is COMPLETE."
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~S/logs/2026-09-04/session_0130-0320Z_NFRA_OPSEC202609_TO-OP-S-14-21.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-schedule",
+   "invocation": "comp-schedule --owner 0.7.0_AE_CloudOps~S, after each of the two deploy ledgers closed",
+   "result": "GATES ARMED: 0 for this seat. The remaining DEPLOY-LEDGER carriers belong to other seats."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'recipient|alarm_recipient|ALARM_RECIPIENT|notify|@opalinvest' over the project tree, --limit 25",
+   "result": "41 hits across 57 files. This is what established that deliverable 4's premise does not hold for this face: the decomposition at :196 distinguishes OP-s-6's unnamed recipient from OP-s-14's, which is andrew@opalinvest.com, and C-6 plus FWD-15 name the same address. Filing the UNCOMPUTABLE branch on an unnamed recipient would have recorded a gap this face does not have."
+  },
+  {
+   "tool": "comp-iam",
+   "invocation": "DECLARED-NOT-APPLICABLE as the face's preflight states -- the sentinel role's permissions are OP-s-22's verdict on the APPLIED role.",
+   "result": "The verdict was returned by 0.7.0_AE_CloudOps~W (msg 20116): all three roles PASS, 45 simulations, 0 mismatches, code deploy CLEARED. This face's iam_sentinel.tf carried a written warning to that face that ses:SendEmail is its only conditioned statement and that simulating it without --context-entries returns an implicitDeny byte-identical to a missing grant; that seat confirmed the trap in both directions and reported it would otherwise have filed a FALSE DENY on a correctly-granted permission."
+  }
+ ]
+}
