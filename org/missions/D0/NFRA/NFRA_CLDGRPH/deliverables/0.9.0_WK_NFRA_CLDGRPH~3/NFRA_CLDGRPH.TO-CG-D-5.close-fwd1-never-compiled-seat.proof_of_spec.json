@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CLDGRPH.TO-CG-D-5",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/prd/NFRA_CLDGRPH_PRD.md",
+    "group": "D",
+    "vintage_commit": "25c66d3358"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+    "vintage_commit": "70918d5d2b",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-D-5.close-fwd1-never-compiled-seat.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_CLDGRPH~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/ask.sh",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The ask itself, 60 lines of bash, invoked by D5-AC2 and D5-AC3 by name. It shells `.tools/comp-kuzu` and nothing else: no engine, no refresh, no S3 write, no code edit. It builds the Cypher ONCE in a double-quoted variable and passes that same variable as one argv element, then prints it as CYPHER_AS_SENT, which is the control against the W1-S10 shell-escape trap. It samples the engine process table before, during (a spin loop over the query's whole lifetime, no sleep) and after."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/CG-x-1.never-compiled-seat.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The record the cell closes on: the asker, the question, the cypher, the 3 answer rows, the vintage line, the time to answer, the process-table counts, and the raw transcripts of both labelled runs plus the instrument control. Carries the required fenced JSON block and states in section 7 what it does NOT claim."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended, NFRA_CLDGRPH-W3-S1 and W3-S2, the first W3-coordinate rows in this channel; no existing row edited. Header denominator restated 55 -> 57, counted mechanically both sides of the append (comp-read --enumerate: 55/55/0 before, 57/57/0 after). Both rows validate against org/surprise_channel/schemas/investigation_item.schema.json with 0 errors under jsonschema.Draft7Validator."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D5-AC1",
+      "criterion_verbatim": "D5-AC1 -- THE ASKER HOLDS NO LOCAL GRAPH: the local DB path is absent in this worktree (a non-zero rc; the `2>&1` keeps the error text in the record, it does not hide it).",
+      "method": "command",
+      "invocation": "timeout 120 ls -d infra/aws/globgrph/kuzu_nessie_db 2>&1; echo \"rc=$?\"",
+      "output_evidence": "ls: cannot access 'infra/aws/globgrph/kuzu_nessie_db': No such file or directory\nrc=2",
+      "denominator": "1 of 1 path named by the criterion, read in worktree wk-NFRA_CLDGRPH-3 @4e30d6b635. The arm is not dead: the SAME command on infra/aws/globgrph (a path that does exist) returns the directory and rc=0, so a non-zero rc here is a property of the path, not of the command.",
+      "status": "PASS",
+      "expect": "rc=[1-9]"
+    },
+    {
+      "criterion_id": "D5-AC2",
+      "criterion_verbatim": "D5-AC2 -- THE ASK IS ANSWERED, timed, with the vintage line on the answer.",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/ask.sh",
+      "output_evidence": "ASKER=0.9.0_WK_NFRA_CLDGRPH~3\nQUESTION=Which Lambda functions does the bd data bucket trigger?\nCYPHER_AS_SENT=MATCH (a:CloudNode)-[e:CloudEdge]->(b:CloudNode) WHERE e.edge_type='TRIGGERS' AND a.node_id CONTAINS 'opal-data-bd' RETURN a.node_id AS bucket, b.node_id AS target ORDER BY target\nCLIENT=bash .tools/comp-kuzu \"$CYPHER\"   (one argv element, no shell re-quoting)\nPROCS_PATTERN=kuzu_nessie_load|kuzu_incremental_refresh|derive_runner\nPROCS_TABLE_ROWS=42\nPROCS_POSCTL_BASH=37\nPROCS_BEFORE=0\nTIME_TO_ANSWER_S=7.668\nCLIENT_RC=0\n--- ANSWER (client stdout) ---\nbucket                     target                                                                \n-------------------------  ----------------------------------------------------------------------\narn:aws:s3:::opal-data-bd  arn:aws:lambda:us-east-1:313476888478:function:bd-allocation-processor\narn:aws:s3:::opal-data-bd  arn:aws:lambda:us-east-1:313476888478:function:bd-gold-trigger        \narn:aws:s3:::opal-data-bd  arn:aws:lambda:us-east-1:313476888478:function:bd-silver-merge        \n\n(3 rows)\n--- CLIENT STDERR (carries the VINTAGE line) ---\nVINTAGE: Built from the estate as of 2026-09-04 16:38:39 UTC.  [vintage=2026-09-04T16:38:39.485910+00:00 manifest=c3ba0330e306 prefix=projection/2026-09-04T16:38:39.485910+00:00/]\n--- end client output ---\nANSWER_ROW_COUNT=3\nPROCS_DURING_MAX=0\nPROCS_AFTER=0",
+      "denominator": "1 of 1 ask, and the answer is 3 of 3 expected bd-pipeline targets (bd-allocation-processor, bd-gold-trigger, bd-silver-merge) out of the 203 LAMBDA nodes the same client counts. The VINTAGE line appears on 4 of 4 live client invocations this turn (three ask.sh runs plus the LAMBDA control), byte-identical each time at manifest=c3ba0330e306.",
+      "status": "PASS",
+      "expect": "TIME_TO_ANSWER_S=[0-9]+\\.[0-9]+[\\s\\S]*VINTAGE: Built from the estate as of"
+    },
+    {
+      "criterion_id": "D5-AC3",
+      "criterion_verbatim": "D5-AC3 -- NO BUILD RAN: the engine process count is 0 before and after the ask (the negative control; `ask.sh` prints both lines).",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/ask.sh | grep -E '^PROCS_(BEFORE|AFTER)='",
+      "output_evidence": "PROCS_BEFORE=0\nPROCS_AFTER=0",
+      "denominator": "0 matches of pattern 'kuzu_nessie_load|kuzu_incremental_refresh|derive_runner' out of a process table carrying 42 rows on this call (45 and 34 on the other two runs), with the grep -v grep discipline; PROCS_DURING_MAX=0 as well, sampled by a spin loop over the query's entire lifetime. The counter is not a dead arm: the same pipeline over 'bash' returned 37 on this call, and a PLANTED decoy process whose argv contained 'derive_runner_DECOY_NOT_AN_ENGINE' drove the detector to 1 and back to 0 when it exited. COVERAGE QUALIFIER, stated not hidden: ps -ef under Git Bash enumerates the MSYS process table, so a build launched from a native Windows shell by another seat would not appear in it; this witness bounds THIS asker's acts, and the independent witness is D5-AC4 plus the manifest that never moved across all four calls.",
+      "status": "PASS",
+      "expect": "PROCS_BEFORE=0[\\s\\S]*PROCS_AFTER=0"
+    },
+    {
+      "criterion_id": "D5-AC4",
+      "criterion_verbatim": "D5-AC4 -- NO REFRESH STEP EXISTS on the path the asker used (the client's source, at your HEAD).",
+      "method": "command",
+      "invocation": "timeout 120 python .tools/comp-read infra/aws/globgrph/kuzu_cli.py --enumerate 'ensure_fresh|kuzu_nessie_load|import kuzu|--mode' --limit 3",
+      "output_evidence": "comp-read: infra/aws/globgrph/kuzu_cli.py\n  SOURCE: 169 lines | 8 section(s) via python-ast | enumerate: 'ensure_fresh|kuzu_nessie_load|import kuzu|--mode'\n\n  ENUMERATE: 1 hit(s) across 169 lines / 8 section(s) scanned\n    whole-value matches: 1   |   substring matches: 0\n    BANDS (sum to 1):\n      DOCSTRING   1\n      COMMENT     0\n      DEF         0\n      CODE        0\n\n  PAGE 1 of 1  (showing 1 of 1)\n        14  DOCSTRING   WHOLE  hit 1/1 WHAT IS GONE AND WHY (FWD-6): there is no --db-path, no --mode, no --force/--refresh/--fresh\n  WITHIN BUDGET: scanned 1 of 1 telemetry_call; budget: 90 s (default), used 0.64 s\nENUMERATE-END: 1 hit(s) | 1 whole | 0 sub | DOCSTRING=1 | COMMENT=0 | DEF=0 | CODE=0",
+      "denominator": "1 hit over 169 lines / 8 AST sections scanned, banded DOCSTRING=1 COMMENT=0 DEF=0 CODE=0; the single hit is kuzu_cli.py:14, the module docstring sentence 'WHAT IS GONE AND WHY (FWD-6): there is no --db-path, no --mode, no --force/--refresh/--fresh' -- prose that DOCUMENTS the absence, matched on its own '--mode' token. The detector is not a dead arm: the identical enumerate against infra/aws/globgrph/derive_runner.py returns 4 hits with CODE=1 ('import kuzu' at :1425), so it demonstrably finds a CODE-band engine when one is there, and finds none in the client.",
+      "status": "FAIL",
+      "status_reason": "FAIL AGAINST THE EXPECTATION AS WRITTEN, NOT AGAINST THE PROPERTY IT NAMES, and the two must not be collapsed. The expectation 'ENUMERATE: 0 hit(s)' cannot be satisfied by any client that keeps its own FWD-6 disclosure, because the pattern's own '--mode' alternative matches the docstring sentence declaring that no --mode exists; re.search(r'ENUMERATE: 0 hit\\(s\\)', output, re.S|re.M) -> None, evaluated mechanically (the same evaluator returns a match for D5-AC2 and D5-AC3, so it is not a dead arm). The PROPERTY the criterion names IS satisfied: CODE=0, DEF=0, COMMENT=0 -- no refresh step exists on the path the asker used. Filed as NFRA_CLDGRPH-W3-S1 (BLOCKING, INERT). NOT SELF-GRANTED: a PASS here was reachable by dropping the optional `expect` field, which is exactly the route the row exists to refuse -- proof-of-spec-check.py:94-101 makes the match, not the worker, decide a mechanical criterion, so the expectation the task order minted is carried verbatim and the criterion is left FAIL. Consequence, stated plainly: TO-CG-D-5 stays OPEN and its <status> is NOT flipped to complete. The remedy is one pattern in the criterion (e.g. 'CODE=0' on the ENUMERATE-END line, or a --band CODE invocation) and belongs to 2.0.0_SA_COO~A at a recut or to 3.0.0_SA_CVO at L9; the acceptance battery is frozen mid-round and a worker rewriting the criterion it is graded by is the one edit it must never make.",
+      "expect": "ENUMERATE: 0 hit\\(s\\)"
+    },
+    {
+      "criterion_id": "D5-AC5",
+      "criterion_verbatim": "D5-AC5 -- \"IN THE TIME AN ORDINARY LOOKUP TAKES\": the measured `TIME_TO_ANSWER_S` against the estate's ordinary lookups (comp-find --corpus aws measured 11.55 s at L5; a `comp-read` under 1 s), and whether a 0-row answer (if D-1 has not landed) still exercises FWD-1. A reading act; NO verdict; graded by `3.0.0_SA_CVO` at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/ask.sh  (TIME_TO_ANSWER_S line, n=3 runs) + timeout 120 bash .tools/comp-kuzu \"MATCH (n:CloudNode) WHERE n.node_type='LAMBDA' RETURN count(n)\"",
+      "output_evidence": "TIME_TO_ANSWER_S=7.802 on first contact (the record of the ask), then 8.497 and 7.668 on the two later runs of the same script: mean 7.99 s, spread 0.83 s, n=3, every run returning the same 3 rows at the same manifest c3ba0330e306.\nThe comparators the task order names: comp-find --corpus aws measured 11.55 s at L5; a comp-read under 1 s (this order's own comp-read calls reported 'used 0.16 s' and 'used 0.45 s' in their own budget lines).\nThe whole of the measured time is one round trip to the served projection over the network: the client holds no database (D5-AC1: local DB absent, rc=2) and runs no engine (CODE-band engine tokens in kuzu_cli.py = 0), so there is no local read, compile or build inside the number.\nON THE SECOND HALF OF THE CRITERION ('whether a 0-row answer still exercises FWD-1'): it did not arise. The derive has landed and the ask returned 3 rows -- bd-allocation-processor, bd-gold-trigger and bd-silver-merge -- the exact shape the issuer predicted, at vintage 2026-09-04 16:38:39 UTC. The 0-row branch was discriminated rather than assumed: the issuer's control \"MATCH (n:CloudNode) WHERE n.node_type='LAMBDA' RETURN count(n)\" returned 203 through this same client this hour, matching the issuer's own measurement, and that control carries a string literal, so the W1-S10 quoting trap (a literal arriving as '\"TRIGGERS\"', unmatchable, 0 rows at a correct vintage with no error) is excluded by demonstration and not by assertion.\nNO VERDICT IS RECORDED HERE. Whether 7.802 s is 'the time an ordinary lookup takes' is graded by 3.0.0_SA_CVO at L9.",
+      "denominator": "3 timed runs of the same ask (7.802 / 8.497 / 7.668 s), against 2 comparators named by the task order (comp-find --corpus aws at 11.55 s; comp-read under 1 s, self-reported at 0.16 s and 0.45 s in this order's own calls). Answer: 3 of 3 expected targets.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT CRITERION (judgment=\"true\" at the cut): 'the time an ordinary lookup takes' is not reducible to an invocation and an expectation, so it carries its output and NO verdict. The substitute oracle is the grading seat: 3.0.0_SA_CVO at L9, reading this row's measured seconds against the two comparators the task order names. PASS or FAIL on this row is INVALID by the task order's own words and is refused by proof-of-spec-check.py.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Four mutants, each run through the SAME detector that grades the real output. (a) D5-AC1 arm: the same `ls -d` against infra/aws/globgrph, a path that DOES exist -- if the arm could only ever return non-zero, the criterion would be vacuous. (b) D5-AC4 arm: the identical comp-read enumerate, same pattern, against infra/aws/globgrph/derive_runner.py, a file that genuinely imports the engine. (c) D5-AC3 arm: a DECOY process planted with argv containing 'derive_runner_DECOY_NOT_AN_ENGINE' (a python sleep; no engine was run), counted by the exact ps|grep|grep -v grep pipeline ask.sh uses, then re-counted after it exited. (d) The expect-evaluator itself: the same re.search harness was run over all three mechanical rows rather than only the ones expected to pass.",
+      "expected": "(a) rc=0 and the directory printed; (b) CODE-band hits > 0; (c) 1 while planted, 0 after it exits; (d) the evaluator returns both MATCH and NO-MATCH verdicts, not one constant.",
+      "observed": "(a) 'infra/aws/globgrph' with rc=0 -- the arm can fail, so rc=2 on the DB path is a fact about the path. (b) 'ENUMERATE-END: 4 hit(s) | 1 whole | 3 sub | DOCSTRING=1 | COMMENT=2 | DEF=0 | CODE=1', the CODE hit being 'import kuzu' at derive_runner.py:1425 -- the detector finds an engine when there is one, and finds CODE=0 in the client. (c) PROCS_WITH_DECOY_PLANTED=1 with the decoy's own ps row printed, then PROCS_AFTER_DECOY_GONE=0 -- the process counter is alive, so 0/0/0 around the ask is a measurement and not a broken pipeline. (d) MATCH for D5-AC2 and D5-AC3, NO-MATCH for D5-AC4 on the same call of the same harness.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The ask was run 3 times in this session with identical input (run 1, the labelled variance run 2, and the D5-AC2 acceptance invocation) and the answers compared row by row, together with the vintage line and the manifest id.",
+      "observed": "STABLE on everything the criterion turns on: the same 3 rows in the same ORDER BY target order, the same '(3 rows)' count, and a byte-identical vintage line '2026-09-04 16:38:39 UTC ... manifest=c3ba0330e306' on all 3 runs plus the LAMBDA control -- 4 of 4 calls. The only varying quantity is wall time (7.802 / 8.497 / 7.668 s, spread 0.83 s), which is network round-trip and is REPORTED as a range rather than as a single number. The unchanged manifest across the whole session is itself the third witness that no build ran.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any verification that the 3 answered TRIGGERS edges are TRUE of the live AWS estate.",
+      "reason": "Out of this order's question and out of its lane. TO-CG-D-5 closes on the asker being ANSWERED with a vintage and no build, not on the derive's correctness; the derive is TO-CG-D-1/TO-CG-D-12's cell. The answer's shape was compared to the issuer's stated expectation (three bd-pipeline lambdas) and matched, which is a shape check, not a correctness claim about AWS."
+    },
+    {
+      "item": "Any remediation of D5-AC4's unsatisfiable expect pattern in the task order file.",
+      "reason": "The acceptance battery is FROZEN mid-round (CLAUDE.md rule 27) and a worker rewriting the criterion that grades it is the one edit it must never make, even though the task order file is inside this order's <paths> for the status flip. Filed as NFRA_CLDGRPH-W3-S1 for 2.0.0_SA_COO~A / 3.0.0_SA_CVO instead."
+    },
+    {
+      "item": "The <status> flip of NFRA_CLDGRPH.TO-CG-D-5 to complete.",
+      "reason": "NOT PERFORMED. D5-AC4 is FAIL against its stated expectation, and a VALID instance is not a met order. The order stays OPEN; the flip belongs to whoever disposes of NFRA_CLDGRPH-W3-S1."
+    },
+    {
+      "item": "org/mcp/agent_telemetry, the telemetry census the task order cites as the no-graph-history denominator.",
+      "reason": "Unreachable from a worker worktree: the path is untracked runtime state and does not exist here, so comp-find returns '0 hit(s) across 0 file(s)' -- NO MEASUREMENT, not a zero. Filed as NFRA_CLDGRPH-W3-S2. The claim it was cited for stands on evidence a worktree CAN see (D5-AC1's absent local DB; the serial minted for this spawn)."
+    }
+  ],
+  "surprises": [
+    "NFRA_CLDGRPH-W3-S1: D5-AC4 pairs an invocation with the expectation 'ENUMERATE: 0 hit(s)' that the invocation can never satisfy -- the pattern's own '--mode' alternative matches kuzu_cli.py:14, the docstring sentence documenting that no --mode exists -- so the criterion returns '1 hit(s)' with CODE=0 and is recorded FAIL against its stated expectation while the property it names holds. BLOCKING, INERT, UNDER_INVESTIGATION; not remediated (the battery is frozen mid-round); TO-CG-D-5 stays OPEN.",
+    "NFRA_CLDGRPH-W3-S2: the task order's cited census for 'this seat has never run a graph tool' (comp-find over org/mcp/agent_telemetry) scans ZERO files in a worker worktree because the telemetry directory is untracked runtime state absent from any fresh worktree, so it returns '0 hit(s) across 0 file(s)' -- the out-of-corpus signature, which rule 21 rules is NO MEASUREMENT rather than absence, and which will read the same clean zero for every future spine-v3 worker. OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~A, UNDER_INVESTIGATION; the premise itself survives on other evidence."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/CG-x-1.never-compiled-seat.result.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-kuzu",
+      "invocation": "timeout 120 bash .tools/comp-kuzu --schema",
+      "result": "The mandated dialect read BEFORE the ask. It states that node_type and edge_type are PROPERTIES, not node-labels or typed relationships, and names the #1 dialect error (MATCH (a)-[:WRITES]->(b)). The Cypher in this order is written in that form -- (a:CloudNode)-[e:CloudEdge]->(b:CloudNode) WHERE e.edge_type='TRIGGERS' -- which is why it returned rows rather than a silent 0."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "timeout 120 python .tools/comp-read infra/aws/globgrph/kuzu_cli.py --for \"how is the cypher statement taken from argv and sent; is there any echo of the statement; where does the VINTAGE line print\"",
+      "result": "169 lines / 8 sections. Established that the client never echoes the statement it sends -- which is why ask.sh prints CYPHER_AS_SENT itself rather than trusting the client to disclose it -- and that the disclosure/vintage line is written by _disclosure (:46-61) from the SERVICE's own age_line, with ':59 AGE NOT STATED BY THE SERVICE -- no age was inferred' as the qualifier on the failure path."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "timeout 120 python .tools/comp-read .tools/proof-of-spec-check.py --for \"how is the expect field graded; what happens when expect does not match output_evidence; judgment rows; surprises limb\"",
+      "result": "1256 lines / 34 sections. Surfaced conditional_checks:94-101 -- the expect match, not the worker, decides a mechanical criterion, and PASS with a non-matching expect is INVALID -- which is what makes D5-AC4's FAIL the honest record rather than a choice, and surfaced the self-test line 1080 that plants exactly this case."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "timeout 120 python .tools/comp-read org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md --enumerate '\"id\": \"NFRA_CLDGRPH-[A-Z0-9-]*S[0-9]+\"'",
+      "result": "The channel denominator, counted rather than trusted from the header: 55 hits / 55 whole / 0 substring BEFORE the append, 57 / 57 / 0 after -- a delta of exactly the two rows appended, confirming no id was touched. A separate enumerate for 'NFRA_CLDGRPH-W3-S[0-9]+' returned 0 hits beforehand, which is why this worker's rows start at W3-S1."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "timeout 120 python .tools/comp-find '0.9.0_WK_NFRA_CLDGRPH~3' org/mcp/agent_telemetry --limit 3  (then: comp-find --hidden org/mcp/agent_telemetry)",
+      "result": "'DENOMINATOR: 0 hit(s) across 0 file(s) scanned in scope [corpus=all]' -- and the --hidden census verb resolved it: 'ERROR: 1 path(s) do not exist ... A count over a path that is not there is not a zero -- it is NO MEASUREMENT.' This is the whole of row NFRA_CLDGRPH-W3-S2 and the reason the zero was not quoted as an absence."
+    }
+  ]
+}
