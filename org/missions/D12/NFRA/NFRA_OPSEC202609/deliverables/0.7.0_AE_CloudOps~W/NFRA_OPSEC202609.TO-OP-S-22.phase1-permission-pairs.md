@@ -134,7 +134,7 @@ EXPIRED / TTL remove = UpdateIPSet remove; plus a once-daily full reconcile. C-7
 | `dynamodb:GetItem` | TABLE | read the row before flipping, so the CLI can refuse an address it does not hold |
 | `dynamodb:Query` | TABLE + `status-index` | listing blocked addresses for the operator |
 | `kms:GenerateDataKey`, `kms:Decrypt` | CMK | CMK-encrypted table |
-| `s3:PutObject` | `opal-security-evidence/cases/*/actions.jsonl` | **CONDITIONAL -- only if the CLI appends its audit line to the case file.** If the audit lives solely in the table row, this pair is NOT required and granting it would be over-permissioning. **Resolve against source before verdicting.** |
+| ~~`s3:PutObject`~~ | ~~`opal-security-evidence/cases/*/actions.jsonl`~~ | **RESOLVED 2026-09-04 ~01:33Z -- NOT REQUIRED, NOT GRANTED.** Settled against source by `0.7.0_AE_CloudOps~T` (msg 20089): the row already carries `unblocked_by`, `unblocked_at` and `notes`, and the address IS the partition key, so `S19-AC3`'s actor/address/reason/timestamp all fit with no S3 write. The repeat-unblock history gap (a row holds only the LATEST) is closed by a repo-side append-only audit log, this estate's existing convention -- durable history at ZERO additional AWS permission. **The conditional is discharged; granting this pair now would be exactly the padding this cell exists to catch.** One reading could still reopen it -- see the C-8 question below. |
 
 ### MUST NOT HAVE -- the C-11 control
 | action | resource | which constraint |
@@ -177,3 +177,68 @@ owning faces and a verdict target for this one -- never a patch.
 **Two things each owner should push back on if the source disagrees:** the reconciler's
 `wafv2:GetIPSet` (needed for the LockToken, easy to omit) and the CLI's conditional
 `s3:PutObject` on `actions.jsonl` (grant it only if the code writes there).
+
+---
+
+# ADDENDUM 2026-09-04 ~01:4xZ -- WHAT WAS ACTUALLY BUILT, so the verdict grades the BUILT thing
+
+`0.7.0_AE_CloudOps~T` DECLARED the reconciler and CLI roles at commit `3578b10a00`, in a separate file
+`infra/aws/terraform/opsec/iam_reconciler_and_cli.tf` (kept separate so concurrent `iam.tf` edits by
+`0.7.0_AE_CloudOps~S` cannot textually conflict). Plan reads **4 to add, 0 to change, 0 to destroy**;
+UNSCOPED baseline on that root measured with the new file moved aside is `No changes`, rc=0.
+**NOT APPLIED** -- the apply waits on the sentinel-role apply, and no function code deploys before this
+verdict returns.
+
+⛔ **THE VERDICT MUST GRADE THE BUILT POLICY, NOT THIS SPEC-DERIVED LIST.** Three deliberate divergences
+are already recorded, and every one of them is TIGHTER than what this artifact specified. A verdict
+run against the list above would mark two of them as gaps that are not gaps.
+
+| what this list said | what was BUILT | reading for the verdict |
+|---|---|---|
+| reconciler: `dynamodb:Scan` **or** `Query` on `status-index` | **`Query` on `status-index` ONLY; `Scan` deliberately NOT granted** | C-9 requires the lockout question be answerable without a table scan, and the absence of `Scan` stops a later edit quietly reintroducing one. **Do NOT verdict a missing `Scan` as a gap.** |
+| MUST-NOT pairs, expressed as omissions | **explicit `Deny` statements** -- reconciler denied `PutItem`/`UpdateItem`/`DeleteItem`/`BatchWriteItem` on the table; CLI denied `UpdateIPSet`/`CreateIPSet`/`DeleteIPSet` on every set | Strictly stronger. An omission is indistinguishable from an oversight and survives a careless widening; an explicit `Deny` cannot be overridden by any later `Allow`. It also makes `S22-AC2`'s positive controls return **`explicitDeny`** rather than `implicitDeny` -- a sharper result, and the instrument distinguishes them. |
+| both roles: `kms:DescribeKey` among the KMS pairs | **REMOVED from both** | Measured first-hand by that seat: `DescribeKey` IS reachable via the `kms:ViaService` path, so the grant was not WRONG -- it was **UNUSED**, because neither role calls KMS directly. An unused grant fails never, which is this cell's whole premise, so it was removed rather than kept as harmless. Final: reconciler `Decrypt` only (it never writes the table); CLI `Decrypt` + `GenerateDataKey` (it reads and writes rows). |
+
+## THE FOUR-SET FINDING IS CORROBORATED, AND THE PAGINATION TRAP CUTS BOTH WAYS
+
+Two seats reached "four IP sets" independently and from opposite directions -- `0.7.0_AE_CloudOps~T`
+by enumerating the applied plane to build the grant, this seat from the verdict side by noticing
+`S22-AC3`'s prose says "both sets". **Two instruments on two planes agreeing is corroboration, not
+repetition.**
+
+⚠ **AND THIS SEAT'S ORIGINAL READ WAS RIGHT BY LUCK, WHICH IS WORTH RECORDING RATHER THAN GLOSSING.**
+That seat reported its first `list-ip-sets` returned `NextMarker` TRUE on BOTH scopes, so the obvious
+read was a PAGE. This seat's four came from exactly that unpaginated first call. **Re-verified properly
+by walking `NextMarker` to exhaustion:**
+
+```
+  CLOUDFRONT  pages=2  count=2   opal-blocked-ips-cloudfront, opal-blocked-ips-cloudfront-ipv6
+  REGIONAL    pages=2  count=2   opal-blocked-ips-regional,  opal-blocked-ips-regional-ipv6
+  TRUE DENOMINATOR: 4
+```
+
+The count stands. **But the mechanism is worth carrying, because it misleads in BOTH directions:** page 1
+was complete here, so a seat that stopped at it got the right answer for the wrong reason -- and a seat
+that saw `NextMarker` present and *inferred more sets existed* would have been wrong the other way.
+**A `NextMarker` is not evidence of more data any more than its absence is evidence of none.** Only
+walking it settles the denominator. This estate's standing rule is "a page is not an answer"; the
+mirror -- "a next-marker is not a promise" -- is the half that had not been written down.
+
+## THE ONE OPEN QUESTION, ROUTED NOT DECIDED
+
+`0.7.0_AE_CloudOps~T` invited pushback on exactly one point: **if C-8's case record is this framework's
+audit OF RECORD, the unblock must land in `cases/*/actions.jsonl` and `s3:PutObject` becomes REQUIRED.**
+
+**This face does not adjudicate that** -- deliverable 4 is explicit that roles belong to the faces that
+declare them and this cell produces a VERDICT, never a patch. Routed to `2.0.0_SA_COO~Z`. This seat's
+reading, offered as a recommendation and not a ruling:
+
+- **Endorse NOT REQUIRED as built.** C-11 constrains the CLI to the ROW and is silent on S3; the row
+  plus an append-only repo log satisfies `S19-AC3`'s four fields with strictly less privilege, and
+  least privilege is this cell's entire subject.
+- **ONE FORWARD RISK, named so it is not discovered later:** the repo log and the evidence bucket are
+  on DIFFERENT durability and access planes. FWD-16's portal Admin page ("Security -> Blocked
+  addresses -> Unblock") could not render unblock history from a repo file. The face calls that page
+  an explicitly LATER increment, so this is not a defect today -- but if that page is later expected
+  to show *who lifted a block and why*, the audit will have to move or be duplicated, and duplicating
+  it is the two-carriers-diverge shape. **Better decided once, now, than migrated later.**
