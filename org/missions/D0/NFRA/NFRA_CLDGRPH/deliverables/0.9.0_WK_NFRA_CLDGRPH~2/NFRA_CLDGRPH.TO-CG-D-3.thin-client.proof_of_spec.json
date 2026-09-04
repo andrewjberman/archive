@@ -1,0 +1,221 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CLDGRPH.TO-CG-D-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/prd/NFRA_CLDGRPH_PRD.md",
+    "group": "D",
+    "vintage_commit": "25c66d3358"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+    "vintage_commit": "70918d5d2b",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-D-3.thin-client.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_CLDGRPH~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/globgrph/projection_client.py",
+      "kind": "script",
+      "commit_or_etag": "d060cf9223",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW, 218 lines, stdlib only (json, os, subprocess, sys, time, urllib.request, urllib.error); boto3 NOT used -- the capability bearer is read through the repo's .tools/aws shim via subprocess, resolved with .tools/git_bash_resolver.bash_argv so no bare unix name enters argv. Exercised live against https://mcp.opalinvest.dev/graph/cypher this turn: `python infra/aws/globgrph/projection_client.py \"MATCH (n:CloudNode) WHERE n.node_type='LAMBDA' RETURN count(*) AS c\"` returned {\"rows\":[{\"c\":203}], \"vintage\":\"2026-09-04T14:45:21.329463+00:00\", \"age_line\":\"Built from the estate as of 2026-09-04 14:45:21 UTC.\", ...}. A laptop tool: nothing to deploy.",
+      "artifact_covered_by": ["D3-AC1", "D3-AC4", "D3-AC6", "D3-AC7"]
+    },
+    {
+      "path_or_key": "infra/aws/globgrph/kuzu_cli.py",
+      "kind": "script",
+      "commit_or_etag": "d060cf9223",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "REWRITTEN as the thin client, 189 -> 169 lines. REMOVED: --db-path, --mode {auto,full,inc}, `import kuzu`, both seam imports, the provenance header and the whole ensure_fresh block (10 named switches, all gone -- enumerated line by line in s.1b of the result doc). KEPT: query, --json, --limit, --schema, the static dialect note and the 0-rows scope note. ADDED: the FWD-3 disclosure line on stderr on every answer. Exercised live three ways this turn (table, --json, error path).",
+      "artifact_covered_by": ["D3-AC1", "D3-AC2", "D3-AC3", "D3-AC4", "D3-AC6", "D3-AC7"]
+    },
+    {
+      "path_or_key": ".tools/comp-kuzu",
+      "kind": "script",
+      "commit_or_etag": "d060cf9223",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "REWRITTEN, 30 -> 14 lines. Both `export GLOBGRPH_KUZU_INCREMENTAL_REFRESH=1` and `export GLOBGRPH_KUZU_REBUILD_LIVENESS=1` and the rebuild commentary are gone; the header states the transport in two lines and one line states there is no refresh flag. The comp_log_auto.py telemetry call and the exit-code passthrough are byte-unchanged.",
+      "artifact_covered_by": ["D3-AC1", "D3-AC4"]
+    },
+    {
+      "path_or_key": ".tools/tests/test_cg6_thin_client_battery.py",
+      "kind": "test",
+      "commit_or_etag": "d060cf9223",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW, 332 lines, 7 arms / 45 checks, no network in any arm (projection_client.query stubbed by a context manager; the transport arm stubs urllib.request.urlopen and sets a fake in-memory token, so Secrets Manager is never called). 3 RED mutants across arms iv, v and vii, all CAUGHT. Passes direct (rc=0, prints PASS) and under pytest at the FILE grain (7 passed in 0.10s).",
+      "artifact_covered_by": ["D3-AC6", "D3-AC7"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-s-6.thin-client.result.md",
+      "kind": "doc",
+      "commit_or_etag": "d060cf9223",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The cell deliverable: before/after CLI surfaces quoted whole, the 10 removed switches named line by line, the rendering choice stated for D3-AC8, the battery numbers at both grains with the mutant table, the three live exercises quoted whole with their VINTAGE lines, and the _canonical.py hash read on two planes.",
+      "artifact_covered_by": ["D3-AC5", "D3-AC8"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d060cf9223",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One appended row NFRA_CLDGRPH-W2-S11 (W2-S1..W2-S10 were taken; this is the next unused in this seat's coordinate). No existing row edited. Header denominator restated 54 -> 55 with the mechanical count beside it (54 distinct ids and 54 total occurrences before the append, so no duplicate) and the branch caveat kept. `python .tools/surprise-row-gate.py <file>` rc=0: 'OK: 1 file(s), all new rows carry their step-7/step-10 fields' and '[surprise-corpus] OK: corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved)'.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D3-AC1",
+      "criterion_verbatim": "D3-AC1 -- EVERY ANSWER CARRIES THE AGE IN PLAIN WORDS: the service's age_line verbatim on the disclosure line (FWD-3).",
+      "method": "command",
+      "invocation": "timeout 120 bash .tools/comp-kuzu \"MATCH (n) RETURN count(n) AS nodes\" 2>&1",
+      "output_evidence": "VINTAGE: Built from the estate as of 2026-09-04 14:45:21 UTC.  [vintage=2026-09-04T14:45:21.329463+00:00 manifest=84eb18f1abc2 prefix=projection/2026-09-04T14:45:21.329463+00:00/]\nnodes\n-----\n27206\n\n(1 rows)\nrc=0",
+      "denominator": "The disclosure line appears on 1 of 1 invocations here, and on 4 of 4 live invocations this turn: the clean count, the 5-row table exercise, the --json exercise, and the error exercise (whose line names the ABSENCE, per the criterion's own FWD-3 intent). The sentence printed is byte-identical to the age_line the service returned in the same response body, matched against the criterion's regex 'Built from the estate as of 20[0-9]{2}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} UTC\\.'.",
+      "status": "PASS",
+      "expect": "VINTAGE: Built from the estate as of 20[0-9]{2}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} UTC\\."
+    },
+    {
+      "criterion_id": "D3-AC2",
+      "criterion_verbatim": "D3-AC2 -- NO REFRESH CHOICE EXISTS WHERE A USER WORKS: the CLI surface enumerated shows the absence (FWD-6).",
+      "method": "command",
+      "invocation": "timeout 120 python infra/aws/globgrph/kuzu_cli.py --help | grep -c -E -- '--mode|--db-path|--force|--refresh|--fresh'",
+      "output_evidence": "0\n(pipeline rc=1, which is `grep -c`'s documented exit for a zero count, NOT a failure of the invocation; the criterion's expect grades the OUTPUT '^0$' and the output is exactly 0)",
+      "denominator": "5 forbidden flag patterns swept over the full 12-line --help surface; 0 hits. The control is live and can fail: the SAME invocation on the same file at the base commit 0df8682fa0 returned 6.",
+      "status": "PASS",
+      "expect": "^0$"
+    },
+    {
+      "criterion_id": "D3-AC3",
+      "criterion_verbatim": "D3-AC3 -- THE LOCAL DB PATH IS NOT READ: the client's source names no engine, no local path, no seam.",
+      "method": "command",
+      "invocation": "timeout 120 python .tools/comp-read infra/aws/globgrph/kuzu_cli.py --enumerate 'import kuzu|_canonical|_provenance|CANONICAL_DB_PATH|ensure_fresh|kuzu_nessie_db' --limit 5",
+      "output_evidence": "Printed verbatim: '  ENUMERATE: 0 hit(s) across 169 lines / 8 section(s) scanned' with 'whole-value matches: 0 | substring matches: 0', BANDS all 0, and the ABSENT row 'scanned 169 lines / 8 sections; pattern absent from this file'. Tail: 'ENUMERATE-END: 0 hit(s) | 0 whole | 0 sub | DOCSTRING=0 | COMMENT=0 | DEF=0 | CODE=0'. rc=0.",
+      "denominator": "6 alternation tokens swept over 169 lines / 8 sections of infra/aws/globgrph/kuzu_cli.py (the whole file, not a region); 0 hits in every band including DOCSTRING and COMMENT. The control is live and can fail: the SAME invocation on the same path at the base commit returned 'ENUMERATE: 20 hit(s) across 189 lines' (4 whole, 16 substring). Battery arm vi re-derives the same property with a DIFFERENT instrument (a plain python substring scan of the file's bytes) and agrees: 6 of 6 tokens absent.",
+      "status": "PASS",
+      "expect": "ENUMERATE: 0 hit\\(s\\)"
+    },
+    {
+      "criterion_id": "D3-AC4",
+      "criterion_verbatim": "D3-AC4 -- --json STDOUT STAYS A PARSEABLE ARRAY (the disclosure rides stderr).",
+      "method": "command",
+      "invocation": "timeout 120 bash .tools/comp-kuzu --json \"MATCH (n) RETURN count(n) AS nodes\" 2>/dev/null | python -c \"import sys,json; d=json.load(sys.stdin); print('JSON-OK', type(d).__name__, len(d))\"",
+      "output_evidence": "JSON-OK list 1\nrc=0",
+      "denominator": "1 live --json invocation parsed by a real json.load (not a regex); type list, length 1 for a 1-row count query. Re-run once: identical. A second live --json exercise with a 3-row result and a quoted string literal also parsed clean (array of 3 objects). The 2>/dev/null here discards stderr whose content D3-AC1 graded; battery arm ii holds the same property in-process and additionally asserts 'VINTAGE:' is ABSENT from stdout and PRESENT on stderr, which the shell arm cannot see.",
+      "status": "PASS",
+      "expect": "JSON-OK list 1"
+    },
+    {
+      "criterion_id": "D3-AC5",
+      "criterion_verbatim": "D3-AC5 -- THE SEAM IS UNTOUCHED: _canonical.py byte-identical to the cut (hashed via git show; CG-s-8 retires it, not this order).",
+      "method": "command",
+      "invocation": "timeout 120 git show HEAD:infra/aws/globgrph/_canonical.py | sha256sum | cut -d' ' -f1",
+      "output_evidence": "d494be6660b0dd9674383a2504756d4fb852677eee5729718cc3298ff69b2952\nrc=0",
+      "denominator": "1 file hashed at the RECORD grain (git show HEAD:, not the checkout, so autocrlf cannot forge it) and matched character-for-character against the expected digest d494be6660b0dd9674383a2504756d4fb852677eee5729718cc3298ff69b2952. Second instrument on a different plane: sha256sum of the WORKTREE copy returns the same digest and `git status --porcelain infra/aws/globgrph/_canonical.py` returns empty, so record and checkout agree that nothing moved. This is a control that can fail: it would have failed the moment this seat edited the seam, which is why the rewrite reached it through projection_client.py instead.",
+      "status": "PASS",
+      "expect": "d494be6660b0dd9674383a2504756d4fb852677eee5729718cc3298ff69b2952"
+    },
+    {
+      "criterion_id": "D3-AC6",
+      "criterion_verbatim": "D3-AC6 -- THE BATTERY passes at the direct grain, each arm printing its denominator.",
+      "method": "test_suite",
+      "invocation": "timeout 120 python .tools/tests/test_cg6_thin_client_battery.py",
+      "output_evidence": "CG-s-6 THIN-CLIENT BATTERY -- 7 arm(s), no network\nARM i   clean answer: table + age_line verbatim    9 of 9 checks PASS\nARM ii  --json: stdout array, disclosure on stderr 6 of 6 checks PASS\nARM iii empty result: (0 rows) + note + VINTAGE    4 of 4 checks PASS\nARM iv  service error: rc1, no fabricated age      7 of 7 checks PASS\nARM v   CLI surface: no refresh/db-path choice     5 of 5 checks PASS\nARM vi  kuzu_cli.py source: no engine, no seam     7 of 7 checks PASS\nARM vii string literal: byte-for-byte to the wire  7 of 7 checks PASS\nBATTERY: 7 of 7 arm(s) PASS\nPASS\nrc=0",
+      "denominator": "7 arms / 45 checks, 45 PASS 0 FAIL, each arm printing its own denominator; arms vi and vii print an extra denominator line (6 source tokens over 170 lines; 2 transport grains, 102-char statement carrying 2 quote characters). Second grain, as the compiler-tools mandate requires: `python -m pytest .tools/tests/test_cg6_thin_client_battery.py -q` -> '7 passed in 0.10s', rc=0 -- the FILE grain collects all 7, so no arm is silently uncollected. 3 RED mutants embedded (arms iv x2, v, vii) and all 3 CAUGHT.",
+      "status": "PASS",
+      "expect": "PASS"
+    },
+    {
+      "criterion_id": "D3-AC7",
+      "criterion_verbatim": "D3-AC7 -- COMMIT GATE clean on every .py this order touches.",
+      "method": "command",
+      "invocation": "timeout 120 bash .tools/commit-gate.sh infra/aws/globgrph/kuzu_cli.py infra/aws/globgrph/projection_client.py .tools/tests/test_cg6_thin_client_battery.py",
+      "output_evidence": "All checks passed!\n... MANIFEST-ADVISORY: 5 graph-access finding(s) (5 would block in blocking mode). Advisory -- not blocking. See org/modules/graph/graph-call-manifest.yaml.\nOK: no unguarded strict-utf8 log reads.\nOK: pre-commit gate clean for 3 of 3 file(s)\nrc=0",
+      "denominator": "3 of 3 .py files this order touches, gated together in one invocation; rc=0. QUALIFIER READ, not skipped: the run also printed 5 MANIFEST-ADVISORY findings, all 5 in the battery file and all 5 on Cypher strings inside stubbed fixtures that make no graph call. They are ADVISORY at this vintage (the gate's own words: 'Advisory -- not blocking') and did not gate anything; they are filed as row NFRA_CLDGRPH-W2-S11 rather than silently passed over, because the advisory's remedy text names a local DB comp-kuzu no longer reaches.",
+      "status": "PASS",
+      "expect": "pre-commit gate clean"
+    },
+    {
+      "criterion_id": "D3-AC8",
+      "criterion_verbatim": "D3-AC8 -- THE RENDERING CHOICE, stated: why the disclosure line reads as it does (the age_line verbatim first, the machine fields after), and the before/after CLI surfaces side by side. A reading act; NO verdict; graded by 3.0.0_SA_CVO at L9 (FWD-3's 'plain words' is a judgment).",
+      "method": "manual_read_with_citation",
+      "invocation": "read: org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-s-6.thin-client.result.md s.2 (the rendering choice, 6 numbered reasons) and s.1a/s.1b (before/after CLI surfaces quoted whole, plus the 10 removed switches named line by line)",
+      "output_evidence": "RECORDED, NOT GRADED. The line is: `VINTAGE: Built from the estate as of 2026-09-04 14:45:21 UTC.  [vintage=2026-09-04T14:45:21.329463+00:00 manifest=84eb18f1abc2 prefix=projection/2026-09-04T14:45:21.329463+00:00/]`. Stated reasons, in the order the line reads: (1) the service's sentence FIRST and verbatim, because PROJECTION_CONTRACT.md s.3 makes age_line the reader-facing rendering and s.8 says display it verbatim -- any re-wording gives the age a second author and two carriers that drift; (2) the client runs NO clock, so no age can be computed here even in principle; (3) the machine triple (vintage / manifest first-12 / artifact_prefix) trails in brackets because its audience is a re-deriving auditor, not a reader -- order encodes audience; (4) the whole line rides stderr in BOTH modes so --json stdout stays a parseable array, because a disclosure that breaks a consumer gets deleted by that consumer; (5) on failure the line names an ABSENCE ('unavailable -- the projection service did not answer; no age was inferred and no local copy was read') rather than a stale vintage, because a last-known age printed during an outage is a lie with a citation; (6) the empty answer discloses identically, since 0 rows is exactly where a reader most needs to know whether the emptiness belongs to the graph or to the vintage. BEFORE/AFTER: usage goes from `[-h] [--db-path DB_PATH] [--json] [--limit LIMIT] [--schema] [--mode {auto,full,inc}] [query]` to `[-h] [--json] [--limit LIMIT] [--schema] [query]`; the forbidden-flag census over --help goes 6 -> 0; the 10 named refresh/DB switches go 10 -> 0.",
+      "denominator": "1 rendering decision stated across 6 numbered reasons, each tied to a contract clause or a named failure mode; 2 CLI surfaces quoted whole (12 lines after, 26 lines before); 10 of 10 removed switches named with file and line.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\" at the cut: FWD-3's 'plain words' is a judgment and is graded by 3.0.0_SA_CVO at L9. PASS or FAIL from this seat would be INVALID. Recorded here as the reading act with its evidence and no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three RED mutants inside the battery, one per arm where a mutant is expressible, each run through the SAME detector that grades the real output: (a) a client printing 'VINTAGE: age: 0.0h (assumed current)' on the error path, and (b) a client printing the service's real age_line when the service never answered -- both against arm iv's fabricated-age detector; (c) a --help text with --mode {auto,full,inc} re-added, against arm v's forbidden-flag scan; (d) a client applying the shell-escape idiom to the request body, against arm vii's byte-equality check. Independently, the two source-plane controls were exercised against the BASE commit: the D3-AC2 flag census returned 6 there and 0 here, and the D3-AC3 token enumerate returned 20 hits there and 0 here.",
+      "expected": "each mutant is CAUGHT by the detector that passes the real output; each base-commit control returns a NON-zero count where the criterion expects zero",
+      "observed": "MUTANT-fabricated-age-0.0h CAUGHT; MUTANT-service-sentence-on-a-dead-service CAUGHT; MUTANT-remode ['--mode'] CAUGHT; MUTANT-requote bytes differ from statement.encode('utf-8') CAUGHT; real output clean on all four detectors. BASE-COMMIT D3-AC2 = 6 (criterion expects 0); BASE-COMMIT D3-AC3 = 'ENUMERATE: 20 hit(s) across 189 lines' (criterion expects 0). Every detector that grades this order can therefore be shown to fire.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The four criteria whose value could drift were run twice on the same input, same session, minutes apart: D3-AC1 and D3-AC4 hit the LIVE gateway (so a pointer swap between runs would show), D3-AC6 runs 45 stubbed checks, D3-AC2 re-parses the argparse surface.",
+      "observed": "D3-AC1 run 1 and run 2 both 'VINTAGE: Built from the estate as of 2026-09-04 14:45:21 UTC.  [vintage=2026-09-04T14:45:21.329463+00:00 manifest=84eb18f1abc2 ...]' -- identical, and the vintage matches the /graph/health read taken separately, so no swap occurred inside the measurement window. D3-AC4 run 1 and run 2 both 'JSON-OK list 1'. D3-AC6 run 1 and run 2 both 'BATTERY: 7 of 7 arm(s) PASS' / 'PASS'. D3-AC2 run 1 and run 2 both '0'. D3-AC5 is a hash and is deterministic by construction.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Repointing the OTHER 33 local-DB consumers (comp-find --corpus aws, org/modules/graph/cli.py, comp_blast_universe.py, comp_detect.py, comp_debt.py, the _canonical.py seam and the engines) through projection_client.py.",
+      "reason": "Explicitly NOT this order's: the TO's BOUNDS name them as CG-s-8 / TO-CG-D-7's surface and forbid touching them, and D3-AC5 makes the seam's byte-identity an acceptance criterion. They keep reading the local copy until CG-s-8 retires it."
+    },
+    {
+      "item": "Re-wording org/modules/graph/graph-call-manifest.yaml's C_adhoc_reimplementation rule, whose remedy text names a local persisted Kuzu DB that comp-kuzu no longer reaches.",
+      "reason": "Outside this order's <paths>; org/modules/graph/ is named in the BOUNDS as another cell's surface. Surfaced as row NFRA_CLDGRPH-W2-S11 instead of widened into, which is what the channel is for. The advisory is non-blocking at this vintage and gated nothing here (D3-AC7 rc=0)."
+    },
+    {
+      "item": "Deleting infra/aws/globgrph/kuzu_nessie_db, kuzu_nessie_load.py or any local build path.",
+      "reason": "CG-s-8's decommission, not this cell's. This order removes the CLIENT's reliance on the local copy; it does not remove the copy, and other consumers still need it."
+    },
+    {
+      "item": "A cache, a stale-answer fallback, or a local read when the service is down.",
+      "reason": "Refused by design, not omitted: a local fallback is a SECOND CLOCK, which is the exact defect FWD-3 exists to close. The error path prints an ABSENT vintage and exits 1."
+    },
+    {
+      "item": "Any freshness monitor, alarm or notifier over the projection's vintage.",
+      "reason": "Standing moratorium; nobody asked, and a monitor is not in this order."
+    }
+  ],
+  "surprises": [
+    "NFRA_CLDGRPH-W2-S11: the graph-call manifest's C_adhoc_reimplementation advisory fired 5 ERROR-labelled findings on this order's battery with the remedy 'Route graph queries through comp-kuzu so they hit the canonical persisted Kuzu DB' -- a surface comp-kuzu stops reaching with this order, and all 5 hits are Cypher STRINGS in stubbed fixtures that make 0 graph calls; advisory today (gate rc=0, 'pre-commit gate clean'), with 'advisory -> blocking' declared at graph-call-manifest.yaml:6 @dffbee781c. OBSERVATION, INERT, UNDER_INVESTIGATION, not remediated (out of <paths>, CG-s-8's surface)."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-s-6.thin-client.result.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "python .tools/comp-read infra/aws/globgrph/kuzu_cli.py --for \"every flag, every env read, every import of the engine, and the two blocks worth keeping: the schema note and the zero-rows note\"",
+      "result": "189 lines / 6 sections; 21 qualifiers, 21 near the asked regions. The four that mattered: ':29 explicit --db-path -- never the default', ':37 DBs reached via explicit --db-path are never auto-refreshed', ':40-41 the NEVER-full property now lives on the FLAG', and ':55-56 mode=inc is comp-find's BUDGETED-CLIENT path'. Told me the --mode contract was load-bearing for a NEIGHBOURING tool (comp-find), which is why the removal is scoped to this CLI and comp-find's own path is left to CG-s-8. The unread ledger named _log and the __main__ entry; the file was then read whole before rewriting it."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "python .tools/comp-read org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.7.0_AE_CloudOps~T/PROJECTION_CONTRACT.md --for \"the age_line field's producer semantics and the CG-s-6 handoff\"",
+      "result": "175 lines / 18 sections; the deciding line is s.3's field table :47 -- 'age_line | Plain words derived from committed_at: Built from the estate as of <YYYY-MM-DD HH:MM:SS UTC>. A reader may display this sentence without knowing build internals.' The unread ledger flagged s.8 (Binding handoffs) as unshown at score 0.69, which is exactly the CG-s-6 clause; it was then read directly at :162-167 rather than inferred: 'display the manifest's age_line verbatim. Its source is committed_at, not built_at, local file mtime, or wall-clock inference.'"
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "python .tools/comp-read infra/aws/globgrph/kuzu_cli.py --enumerate 'import kuzu|_canonical|_provenance|CANONICAL_DB_PATH|ensure_fresh|kuzu_nessie_db' --limit 5",
+      "result": "The D3-AC3 instrument, run twice on the same path at two vintages: 20 hit(s) across 189 lines (4 whole, 16 substring, COMMENT=3 CODE=17) at the base commit; 0 hit(s) across 169 lines / 8 sections after the rewrite, ABSENT in every band. Both runs printed their denominator, so the zero is a swept zero and not an unrun one."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "python .tools/comp-read org/modules/graph/graph-call-manifest.yaml --enumerate 'blocking|advisory|C_adhoc_reimplementation' --limit 12",
+      "result": "19 hits / 2 pages, UNBANDED (the yaml backend cannot type regions and says so rather than printing typed zeros). The grounding line for row W2-S11 is :6 -- 'Gate: comp-manifest-check (advisory -> blocking)' -- i.e. the promotion is declared, not hypothetical."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/globgrph/kuzu_cli.py infra/aws/globgrph/projection_client.py .tools/tests/test_cg6_thin_client_battery.py",
+      "result": "rc=0, 'OK: pre-commit gate clean for 3 of 3 file(s)'. Also printed 5 advisory MANIFEST findings, read rather than skipped -> row NFRA_CLDGRPH-W2-S11."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "First run BLOCKED with 1 NEW corpus failure at /surfaced_at (the row carried a '15:5xZ' placeholder, which is not a timestamp). Fixed to 2026-09-04T16:34Z; re-run rc=0, 'OK: 1 file(s), all new rows carry their step-7/step-10 fields' and 'corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved)'. The gate's first refusal is recorded because a silently corrected block is an unaudited self-attribution."
+    }
+  ]
+}
