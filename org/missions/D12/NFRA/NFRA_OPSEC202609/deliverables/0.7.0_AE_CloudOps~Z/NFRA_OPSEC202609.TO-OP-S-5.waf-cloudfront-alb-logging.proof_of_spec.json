@@ -1,0 +1,206 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-5",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-5.waf-cloudfront-alb-logging.md",
+    "group": "OTHER",
+    "vintage_commit": "5494591e91"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "bff1f8d012",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-5.waf-cloudfront-alb-logging.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/portal-auth/waf-cloudfront.tf",
+      "kind": "terraform",
+      "commit_or_etag": "2866bd5f1f",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws_cloudwatch_log_group.waf_cloudfront (aws-waf-logs-opal-cloudfront, retention 400 d) + aws_wafv2_web_acl_logging_configuration.opal_cloudfront_protection. safe-apply 2 added / 0 changed / 0 destroyed; post-apply re-plan -detailed-exitcode = 0. LIVE get-logging-configuration on the CLOUDFRONT ACL now returns the destination and RedactedFields [authorization, cookie]; it returned WAFNonexistentItemException before."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opsec/s3.tf",
+      "kind": "terraform",
+      "commit_or_etag": "3ec97557bc",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Two statements added to aws_s3_bucket_policy.data_security, applied 0/1/0. LIVE get-bucket-policy shows 3 Sids: DenyInsecureTransport (pre-existing, bucket-wide), AllowCloudFrontAccessLogDelivery scoped to waf-logs/cloudfront-access/* ONLY, AllowALBAccessLogDelivery scoped to waf-logs/alb-opal-gateway/* ONLY. Neither new statement names the bucket."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/alb.tf",
+      "kind": "terraform",
+      "commit_or_etag": "3ec97557bc",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "access_logs block on aws_lb.gw, applied 0/1/0 UPDATE IN PLACE with 0 replacements (checked before applying; a replacement of this internet-facing ALB would have been an outage). LIVE describe-load-balancer-attributes: access_logs.s3.enabled=true, bucket=opal-data-security, prefix=waf-logs/alb-opal-gateway. IN BOUNDS per issuer ruling 19636 s.1."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/portal-auth/cloudfront-distribution.tf",
+      "kind": "terraform",
+      "commit_or_etag": "3ec97557bc",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws_cloudwatch_log_delivery_source / _destination / _delivery for EVTSA9VEHNZVH (standard logging v2), applied 3 added / 0 changed / 0 destroyed; re-plan 0-diff. The IMPORTED distribution resource did NOT move in that plan (0 changes), so the cloudfront-distribution.tf:5 bound holds."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260903T0921Z_opsec-s5-waf-cloudfront-logging_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "2866bd5f1f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy ledger for leg 1, 3 legs. L1 and L3 CLOSED with proof; L2 OPEN BY DESIGN (records arrive only from production traffic; no probe permitted)."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260903T0939Z_opsec-s5-s3-access-logs_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "3ec97557bc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy ledger for legs 2 and 3, 4 legs. L1, L2 and L3 CLOSED with proof; L4 OPEN BY DESIGN for the CloudFront delivery-window read."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S5-AC1",
+      "criterion_verbatim": "WAF LOGGING ON BOTH ACLs AT APPLIED: `aws wafv2 get-logging-configuration --resource-arn <acl>` for BOTH ACLs (denominator 2 of 2) returns the CloudWatch Logs destination and the two redacted header fields; the log groups exist with retention 400 d (`describe-log-groups`).",
+      "method": "live_read",
+      "invocation": "aws wafv2 get-logging-configuration --resource-arn <each ACL arn> --region us-east-1 ; aws logs describe-log-groups --log-group-name-prefix aws-waf-logs-",
+      "output_evidence": "2 of 2 ACLs carry a logging configuration. (1) opal-cloudfront-protection (global/webacl/.../a09833c0-4043-49fc-a92c-0dcdeaff9abd) -> LogDestinationConfigs [arn:aws:logs:us-east-1:313476888478:log-group:aws-waf-logs-opal-cloudfront], RedactedFields [authorization, cookie]. BUILT BY THIS CELL: the same call returned WAFNonexistentItemException before the apply, re-measured at this seat. (2) opal-gateway-waf (regional/webacl/.../181df35e-e886-40c6-a8dc-9d0b60346a44) -> LogDestinationConfigs [arn:aws:logs:us-east-1:313476888478:log-group:aws-waf-logs-opal-gateway], RedactedFields [authorization, cookie, x-amzn-ava-user-context, x-amzn-oidc-accesstoken, x-amzn-oidc-data, x-amzn-oidc-identity] -- ALREADY PRESENT, DISCHARGED BY PRIOR STATE per issuer ruling 19614(b), declared at infra/aws/terraform/opal-gateway/waf.tf:194 @a7312b946b, NOTHING EDITED there. Row NFRA_OPSEC202609-Z-S13. RETENTION: aws-waf-logs-opal-cloudfront 400 d (this cell); aws-waf-logs-opal-gateway 90 d, filed AS READ with ruling 19614(a)'s qualifier that 90 stands this round.",
+      "denominator": "2 of 2 web ACLs (both scopes enumerated live: CLOUDFRONT 1, REGIONAL 1); 2 of 2 log groups read",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC2",
+      "criterion_verbatim": "RECORDS ARRIVE WITHOUT A PROBE: within one hour of the apply each group holds >= 1 stream with >= 1 event (`describe-log-streams` + `get-log-events`, one event quoted with its `action` field; production traffic is the writer, no request is sent by this seat) -- for the CloudFront ACL this is near-certain; for the regional ACL state the count read and, if 0 after an hour, say so (an empty gateway hour is a fact, not a failure).",
+      "method": "live_read",
+      "invocation": "aws logs describe-log-streams --log-group-name <group> --query 'length(logStreams)' ; aws logs describe-log-groups --log-group-name-prefix <group> --query 'logGroups[0].storedBytes'",
+      "output_evidence": "2 of 2 groups hold records, and NO REQUEST WAS SENT BY THIS SEAT to cause either -- production traffic is the writer, and the arrival was observed by an armed watch rather than polled or provoked. (1) CloudFront aws-waf-logs-opal-cloudfront: 1 stream, cloudfront_opal-cloudfront-protection_0, first record at 2026-09-03T10:21:59Z -- 60 minutes after its 09:21Z creation, inside the face's one-hour window. EVENT QUOTED with its action field as the criterion requires: action=ALLOW, terminatingRuleId=Default_Action, webaclId=arn:aws:wafv2:us-east-1:313476888478:global/webacl/opal-cloudfront-protection/a09833c0-4043-49fc-a92c-0dcdeaff9abd, httpRequest.uri=/, header names [Host, User-Agent, Accept, Accept-Encoding, Accept-Language, Cache-Control, Connection, Pragma]. >> AND THE REDACTION IS VERIFIED ON THE RECORD ITSELF, not on the configuration that claims it: the logged event carries NO authorization or cookie header VALUE. A logging configuration asserting RedactedFields and a log that actually omits them are two different claims, and this is the second one. << (2) Regional aws-waf-logs-opal-gateway: streams=2, storedBytes=84,723,696. NOTE THE FACE'S EXPECTATION WAS INVERTED, and the reason is age not health -- it called the CloudFront group near-certain and allowed for an empty regional hour, but the regional group has been collecting for three weeks while the CloudFront group was 35 minutes old at the first read and simply needed its window.",
+      "denominator": "2 of 2 log groups read; 2 of 2 hold records; 1 event quoted of 1 read",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC3",
+      "criterion_verbatim": "CLOUDFRONT ACCESS LOGS ON, OBJECTS PRESENT: `get-distribution-config` (or the v2 delivery source/destination reads) shows logging ON to the stated destination; within the delivery window (up to an hour for standard logs) >= 1 object exists under `waf-logs/cloudfront-access/` (`list-objects-v2` with the count and the newest key). The bucket's object-ownership setting is UNCHANGED from OP-s-17's (read before/after).",
+      "method": "live_read",
+      "invocation": "aws logs describe-delivery-sources ; aws logs describe-delivery-destinations ; aws s3api get-bucket-ownership-controls --bucket opal-data-security (before AND after every apply) ; aws s3api list-objects-v2 --bucket opal-data-security --prefix waf-logs/cloudfront-access/",
+      "output_evidence": "LOGGING ON, VIA THE v2 PATH, AND THE CHOICE WAS MEASURED: legacy CloudFront standard logging writes objects with an ACL and therefore requires ACLs enabled on the destination, but opal-data-security reads ObjectOwnership=BucketOwnerEnforced (ACLs DISABLED) -- read BEFORE choosing a path -- and the face forbids changing that setting to suit it, so the face's own v2 fallback was taken. describe-delivery-sources: name opal-portal-cloudfront-access, logType ACCESS_LOGS, resourceArns [arn:aws:cloudfront::313476888478:distribution/EVTSA9VEHNZVH]. describe-delivery-destinations: name opal-portal-cloudfront-access-s3, deliveryDestinationType S3, destinationResourceArn arn:aws:s3:::opal-data-security/waf-logs/cloudfront-access. OWNERSHIP UNCHANGED: BucketOwnerEnforced read before the first apply and again after the last -- the pair is the control, not a single read. OBJECTS: list-objects-v2 on waf-logs/cloudfront-access/ returns 2 keys at 2026-09-03T10:23:11Z, of which 1 IS REAL -- EVTSA9VEHNZVH.2026-09-03-10.74ff5ab2.gz, 701 bytes, delivered at ~10:2xZ inside the v2 window. The other key is the ZERO-BYTE PREFIX PLACEHOLDER and is EXCLUDED: at the earlier 09:56:39Z read it was the ONLY key, so a bare count of 1 would have read as a pass while zero log records existed. The count is reported filtered for exactly that reason. >> AND THESE OBJECTS ARE THE ONLY POSSIBLE EVIDENCE FOR THIS LEG: unlike the ALB, CloudFront v2 delivery has NO test-write oracle -- it is created happily and would simply never deliver against a prefix-scoped policy -- so an object landing under the granted prefix is what proves the grant, the destination ARN prefix and the delivery path all agree. They do. <<",
+      "denominator": "2 keys listed under the prefix, of which 1 is a real log object (1 excluded: the zero-byte prefix placeholder); ownership read 2 of 2 times (before, after)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC4",
+      "criterion_verbatim": "ALB ACCESS LOGS ON, OBJECTS PRESENT: `describe-load-balancer-attributes` shows `access_logs.s3.enabled=true` with the bucket + prefix; the bucket policy carries the log-delivery principal on that prefix ONLY (`get-bucket-policy` quoted); >= 1 object under `waf-logs/alb-opal-gateway/` within the 5-minute delivery window, or the count read and stated.",
+      "method": "live_read",
+      "invocation": "aws elbv2 describe-load-balancer-attributes --load-balancer-arn <opal-gateway arn> ; aws s3api get-bucket-policy --bucket opal-data-security ; aws s3api list-objects-v2 --bucket opal-data-security --prefix waf-logs/alb-opal-gateway/",
+      "output_evidence": "ATTRIBUTES: access_logs.s3.enabled=true, access_logs.s3.bucket=opal-data-security, access_logs.s3.prefix=waf-logs/alb-opal-gateway. All three read false/empty/empty before the apply. POLICY: Sid AllowALBAccessLogDelivery, Effect Allow, Principal Service logdelivery.elasticloadbalancing.amazonaws.com, Action s3:PutObject, Resource arn:aws:s3:::opal-data-security/waf-logs/alb-opal-gateway/* -- THAT PREFIX ONLY, never the bucket. OBJECTS: 2 keys under the prefix, of which 1 is a REAL production log object -- waf-logs/alb-opal-gateway/AWSLogs/313476888478/elasticloadbalancing/us-east-1/2026/09/03/313476888478_elasticloadbalancing_us-east-1_app.opal-gateway.89166a68f337e5a4_20260903T0950Z_54.161.142.181_1htjr620.log.gz -- written by production traffic at 09:50Z, no request sent by this seat. The other key is AWSLogs/313476888478/ELBAccessLogTestFile, the enablement test write, EXCLUDED from the count because it is an artifact of switching logging on rather than evidence that logs flow.",
+      "denominator": "2 keys under the prefix, of which 1 is a real production log object (1 excluded: ELBAccessLogTestFile); 1 of 1 policy statement quoted",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC5",
+      "criterion_verbatim": "RETENTION >= 7 DAYS ON EVERY DESTINATION: the two log groups' `retentionInDays` (400) and the bucket's lifecycle rule on `waf-logs/` (Glacier 90 d, expire 400 d, read from `get-bucket-lifecycle-configuration`) -- four destinations, denominator 4 of 4, each >= 7 d.",
+      "method": "live_read",
+      "invocation": "aws logs describe-log-groups --log-group-name-prefix aws-waf-logs- ; aws s3api get-bucket-lifecycle-configuration --bucket opal-data-security",
+      "output_evidence": "4 of 4 destinations, every one >= 7 d. (1) aws-waf-logs-opal-cloudfront retentionInDays 400. (2) aws-waf-logs-opal-gateway retentionInDays 90 -- filed AS READ, not as the face's 400: issuer ruling 19614(a) holds it at 90 this round because the face's own bound says 'retention values are settings; >= 7 d is the bar', and raising a live control in a module this TO does not name would be an unrequested change. Row Z-S13. (3) and (4) the two S3 prefixes are covered by EXACTLY ONE lifecycle rule read from the APPLIED bucket, not from its task order's report: ID waf-logs-glacier-90-expire-400, Filter.Prefix waf-logs/, Status Enabled, Transitions [GLACIER at 90 d], Expiration 400 d. Both waf-logs/cloudfront-access/ and waf-logs/alb-opal-gateway/ sit under waf-logs/, so the existing rule covers them and this cell added no second rule.",
+      "denominator": "4 of 4 destinations (2 CloudWatch log groups + 2 S3 prefixes under 1 lifecycle rule); minimum observed value 90 d against a 7 d bar",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC6",
+      "criterion_verbatim": "NOTHING ALERTS: the diff creates no `aws_cloudwatch_metric_alarm`, no `aws_cloudwatch_log_metric_filter`, no `aws_cloudwatch_log_subscription_filter`, no SNS/SES resource (a census of the commit's diff for those resource types, count 0 with the denominator of resources added printed). FWD-5's exception is logging; the rest is other cells'.",
+      "method": "command",
+      "invocation": "terraform show -json <planfile> for each of the three plans, then count resource_changes whose actions are not no-op/read and whose type is in the banned set",
+      "output_evidence": "0 alarm / metric-filter / subscription-filter / SNS / SES resources across ALL THREE plans. Changing-resource denominators: leg 1 = 2 (aws_cloudwatch_log_group, aws_wafv2_web_acl_logging_configuration); policy = 1 (aws_s3_bucket_policy); ALB = 1 (aws_lb); CloudFront v2 = 3 (delivery source, destination, delivery). INSTRUMENT NOTE, and it is the finding of this leg: my FIRST census grepped the whole plan TEXT and returned 5 aws_cloudwatch_metric_alarm and 5 aws_cloudwatch_log_metric_filter -- every one a REFRESH line for a resource that already exists and is NOT in the diff. A plan-text grep reads as a moratorium breach where there is none; the criterion says a census of the DIFF, and only the structured plan answers that. NEGATIVE CONTROL: aws_cloudwatch_log_group in the leg-1 diff = 1, so the zeros are absences and not a broken probe.",
+      "denominator": "7 changing resources across 3 plans (2 + 1 + 1 + 3), 0 of them alarm-class",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC7",
+      "criterion_verbatim": "0-DIFF, LEDGER CLOSED, PUSH STATE MEASURED: the re-plan reads 0-diff on every module touched; the deploy-ledger entry CLOSED with its proof; push state read by ls-remote + is-ancestor (LOCAL expected).",
+      "method": "command",
+      "invocation": "terraform plan -detailed-exitcode per module ; python .tools/deploy_ledger.py check ; git ls-remote origin SITEZ ; git merge-base --is-ancestor <hash> origin/SITEZ",
+      "output_evidence": "ALL THREE HALVES MET. (1) RE-PLAN 0-DIFF ON EVERY MODULE TOUCHED, not just the one with two applies: portal-auth -detailed-exitcode = 0, opsec = 0, opal-gateway = 0 -- 3 of 3. (2) LEDGERS CLOSED: opsec-s5-waf-cloudfront-logging CLOSED, all 3 legs proven, sentinel removed; opsec-s5-s3-access-logs CLOSED, all 4 legs proven, sentinel removed. deploy_ledger.py check returns neither entry OPEN. THEY WERE HELD OPEN UNTIL THE RECORDS ARRIVED rather than closed on enablement -- closing them earlier would have asserted a completion proof for records that did not yet exist, which is the NEVER-2 failure the ledger exists to prevent, and this criterion was carried WHOLE at UNCOMPUTABLE until then rather than filed PASS on its two measured halves. (3) PUSH STATE MEASURED at 2026-09-03T10:2xZ, ls-remote + is-ancestor: origin/SITEZ = 946ec2c50dd6fa4ecdf257b02fe9d0a276547c6c; 2866bd5f1f ON ORIGIN; 3ec97557bc LOCAL; 5d3f953afd LOCAL. LOCAL is the EXPECTED reading under LD-0367 and GATE 5 -- SITEZ is a shared branch and a non-integrator seat's push is denied by design; 0.0.0_AB_MSTR~Z moves the lane's work. The value is perishable (it moved once already during TO-OP-S-3), so the deliverable report carries its own reading at report time.",
+      "denominator": "3 of 3 modules re-planned; 2 ledger entries, 7 of 7 legs closed with per-leg proof, 2 of 2 entries terminal; 3 commits measured against origin/SITEZ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "S5-AC6's assertion is 'zero alarm-class resources in the diff'. The mutant is not planted here -- IT OCCURRED NATURALLY AND IS RECORDED because it is stronger evidence than a planted one: the FIRST run of this census used a plan-TEXT grep and returned 5 metric alarms and 5 metric filters, which is exactly what a real moratorium breach would look like. The corrected census reads the structured plan's resource_changes. Both instruments were run over the SAME plans, so the difference isolates the instrument rather than the world.",
+      "expected": "a census that measures the DIFF returns 0 alarm-class; a census that measures the plan TEXT returns non-zero because refresh lines name existing resources -- so the two must disagree, and the structured one must be the 0",
+      "observed": "plan-text grep: aws_cloudwatch_metric_alarm=5, aws_cloudwatch_log_metric_filter=5, aws_ses=2. Structured resource_changes: 0 of 7 changing resources are alarm-class. Negative control on the structured instrument: aws_cloudwatch_log_group = 1 (non-zero), so its zeros are absences.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the S5-AC1 two-ACL read and the S5-AC5 four-destination read were each taken more than once across the session (before the apply, after the apply, and again at the final state check) and compared",
+      "observed": "S5-AC1: the regional ACL returned the identical LogDestinationConfigs and the identical six RedactedFields on every read; the CloudFront ACL returned WAFNonexistentItemException on every pre-apply read and the identical configuration on every post-apply read. S5-AC5: aws-waf-logs-opal-gateway read 90 d on every read, aws-waf-logs-opal-cloudfront read 400 d on every post-apply read, and the bucket lifecycle returned the same single rule each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A second aws_wafv2_web_acl_logging_configuration for the REGIONAL ACL opal-gateway-waf (deliverable 1's regional half)",
+      "reason": "DISCHARGED BY PRIOR STATE, per issuer ruling 19614(b). The ACL already carries a live, IaC-declared logging configuration (infra/aws/terraform/opal-gateway/waf.tf:194 @a7312b946b) delivering to the exact group the face names, with 84,723,696 bytes already stored. wafv2 permits ONE logging configuration per ACL, so authoring a second would have failed the apply or silently replaced a control that is capturing gateway traffic today. Surfaced as row NFRA_OPSEC202609-Z-S13 BEFORE any edit, exactly as the face's Phase-1 if_mismatch directs. Nothing was edited there."
+    },
+    {
+      "item": "Raising aws-waf-logs-opal-gateway retention from 90 d to the face's 400 d",
+      "reason": "Issuer ruling 19614(a): 90 d STAYS this round. It clears FWD-5's ACCEPT bar and S5-AC5's own '>= 7 days', and the face's bound states 'retention values are settings; >= 7 d is the bar'. Raising a live control's retention in a module this task order does not name would be an unrequested mid-round change; if the estate wants 400 d there it is a round-2 cell naming the correct carrier."
+    },
+    {
+      "item": "Changing opal-data-security's object-ownership setting to enable legacy CloudFront standard logging",
+      "reason": "Forbidden by the face's own bound ('the bucket's ownership/ACL setting is not changed to satisfy legacy CloudFront logging -- use the v2 delivery path instead'). The bucket reads BucketOwnerEnforced; the v2 path was taken and ownership was read before and after every apply to prove it did not move."
+    },
+    {
+      "item": "Granting the legacy regional ELB account principal (127311923021) alongside the service principal for ALB log delivery",
+      "reason": "Would have widened past the face's 'that prefix ONLY' by adding a second principal that may be unnecessary. The service-principal form was asserted alone and VERIFIED by the enablement itself: elbv2 test-writes on switch-on and refuses if the policy denies, so the apply succeeding is the measurement. Granting both would have made the correct one unknowable."
+    },
+    {
+      "item": "Any alarm, metric filter, subscription filter, notification, dashboard, GuardDuty / Security Hub / Config enablement",
+      "reason": "FWD-5 is a NAMED exception to the standing alert/monitor moratorium and the exception is for the RECORD only. The alarm pair is OP-s-6's cell and the subscription filter is OP-s-14's, each with its own authorization. S5-AC6 is the control that nothing beyond logging rode in."
+    },
+    {
+      "item": "Any request sent to a production surface to make records arrive",
+      "reason": "Forbidden by the face ('No request is sent to any production surface by this seat; production traffic is the writer'). It is also why S5-AC2 and S5-AC3 file UNCOMPUTABLE-BY-CONSTRUCTION rather than FAIL: a probe would both breach the bound and make this seat the writer, destroying the very discriminator those criteria exist to produce."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S13: TO-OP-S-5 asserts WAF logging is OFF on BOTH ACLs and instructs this cell to create it on both; at this vintage the REGIONAL ACL opal-gateway-waf ALREADY HAD a live, IaC-declared logging configuration to the exact group the face names, with 84,723,696 bytes stored and the two required redactions already present. Only the CLOUDFRONT ACL was genuinely unconfigured. Surfaced at the face's own mandated Phase-1 pre-write read, BEFORE any edit. Two consequences ruled by the issuer (19614): the regional group's 90 d retention STAYS and is filed as read, and the face's Lane clause path (infra/aws/ec2/opal-gateway/**, 0 .tf) is the issuer's error -- the resource lives at infra/aws/terraform/opal-gateway/, which 19636 s.1 confirms IN BOUNDS for the ALB leg."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-03/session_0.7.0_AE_CloudOps~Z_0740-0900Z_OPSEC_S3_ORIGIN_SECRET.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/terraform/portal-auth/waf-cloudfront.tf --for 'whether any aws_wafv2_web_acl_logging_configuration exists, and how the ACL resource is named for the logging resource to reference'",
+      "result": "Located the ACL's Terraform address (aws_wafv2_web_acl.opal_cloudfront_protection, :8) and confirmed no logging configuration in that file. Its UNREAD LEDGER disclosed 8 of 119 lines shown, so the ACL block was read directly rather than concluded from the digest."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "comp-read infra/aws/terraform/opal-gateway/waf.tf --enumerate 'aws_wafv2_web_acl_logging_configuration|retention_in_days|aws_cloudwatch_log_group|redacted' ; comp-read infra/aws/terraform/opsec/s3.tf --enumerate 'aws_s3_bucket_policy|Sid|resource \"' ; comp-read infra/aws/terraform/opal-gateway/alb.tf --enumerate 'access_logs|resource \"aws_lb\"'",
+      "result": "THE READ THAT CHANGED THE CELL: waf.tf:194 carries an aws_wafv2_web_acl_logging_configuration and :20-23 a log group at retention_in_days = 90 -- so the regional half of deliverable 1 was already built, three weeks before this project. s3.tf located the single bucket-policy resource at :86 with its one Sid at :93. alb.tf showed aws_lb.gw at :55 with NO access_logs block, confirming leg 3 is real work."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'aws_wafv2_web_acl_logging_configuration' ; comp-find 'resource \"aws_lb\"' ; comp-find 'opal-data-security'",
+      "result": "7 hits / 51,058 files for the logging-configuration type, which is what prompted reading waf.tf rather than trusting the face's 'zero today'. 1 hit / 51,095 files located the ALB at opal-gateway/alb.tf:55 (denominator printed, so the single hit is a census not a guess). The bucket census located its owning module at infra/aws/terraform/opsec/, which is the 'NEW module OP-s-17 creates' the face names in the Lane."
+    },
+    {
+      "tool": "terraform show -json",
+      "invocation": "terraform show -json <planfile> on each of the three plans, parsing resource_changes",
+      "result": "The S5-AC6 instrument. A plan-TEXT grep over the same plans returned 5 metric alarms and 5 metric filters -- all refresh lines for existing resources -- which reads exactly like a moratorium breach. The structured plan gave 0 of 7 changing resources alarm-class, with a non-zero negative control. Same tool that settled TO-OP-S-3's header question; the human renderer is not the plan."
+    },
+    {
+      "tool": ".tools/safe-apply.sh",
+      "invocation": "HALT_ACK=1 .tools/safe-apply.sh -chdir=<module> apply <planfile>, three times: opsec (policy), opal-gateway (ALB), portal-auth (v2 delivery); plus the earlier leg-1 apply",
+      "result": "policy 0/1/0; ALB 0/1/0 UPDATE IN PLACE with 0 replacements checked beforehand; v2 delivery 3/0/0; leg 1 2/0/0. Ordering was the control -- the bucket policy alone changes no behaviour, so applying it FIRST and separately meant no later failure could strand anything."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py",
+      "invocation": "open/close-leg/close on slugs opsec-s5-waf-cloudfront-logging and opsec-s5-s3-access-logs",
+      "result": "Two entries, 7 legs, 5 closed with per-leg proof. Both entries deliberately left OPEN on their verify legs rather than closed on enablement -- closing them now would assert a completion proof for records that have not arrived, which is the NEVER-2 failure the ledger exists to prevent."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit --author '0.7.0_AE_CloudOps~Z <...>' -F <msgfile> -- <paths>, twice",
+      "result": "The non-ASCII commit-message gate REFUSED the first S-5 attempt over a U+26D4 in my own message; corrected to the sanctioned '>>' form rather than spending ASCII_OVERRIDE. Every hunk on every staged path was classified with git diff -U0 before staging, after an earlier commit in this session swept a peer's hunk."
+    }
+  ]
+}

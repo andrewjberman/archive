@@ -1,0 +1,146 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPSEC202609.TO-OP-S-9C",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-9C.trade-role-residual-grant-on-opal-users.md",
+  "group": "OTHER",
+  "vintage_commit": "1d4d1831cf"
+ },
+ "assignee": "0.7.0_AE_CloudOps~X",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+  "vintage_commit": "32891e2720",
+  "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-9C.trade-role-residual-grant-on-opal-users.md"
+ },
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-04/session_0.7.0_AE_CloudOps~X_0000-0230Z_OPSEC_S9_11_LEGACY_USERS_AND_TOKEN_BINDING.md",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/trade-pipeline/iam.tf",
+   "kind": "iam",
+   "commit_or_etag": "aabf8ca2e9",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Unscoped apply on the trade-pipeline root: 'aws_iam_role_policy.trade_submission_policy: Modifications complete after 0s' / 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' APPLIED-plane get-role-policy shows the DynamoDBAccess resource list going 8 -> 6, removing exactly table/opal-users and table/opal-users/index/*, with all six trade-* ARNs preserved. Ledger opsec-s9c-trade-role-opal-users-grant CLOSED, 5 of 5 legs proven.",
+   "artifact_covered_by": [
+    "S9C-AC3"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/trade-pipeline/README.md",
+   "kind": "doc",
+   "commit_or_etag": "227140aad3",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The runbook residual required by ruling 20149 -- 'put the residual in the runbook, not a monitor ... write it where a person diagnosing a failed trade will actually meet it'. The README now OPENS with 'IF A TRADE FAILS ON A DYNAMODB ACCESS DENIAL -- CHECK THIS FIRST', naming the rollback as one apply, listing what was checked, and stating the two-of-seven gap in terms rather than burying it. --- EVIDENCE AMENDED, VERDICT UNCHANGED: pin resolved 2026-09-04 ~06:5xZ from the sentinel PENDING-THIS-COMMIT to 227140aad3, the commit that actually landed this file. Found by applying 0.7.0_AE_CloudOps~U msg-20325 back to my own instances. IT DOES NOT FAIL THE ERROR-OR-INVERSION TEST and is fixed anyway: the README has not moved since -- 227140aad3 is its newest commit and the file is 98 lines at that pin and at HEAD -- so a grader resolving at HEAD today reads exactly what this row describes. That is the DIFFERENCE from the case that prompted this check, where a second apply inside the same face made HEAD contradict the limb. It is resolved because a RUNBOOK is expected to be edited, so an unpinned citation to one is drift waiting to happen rather than drift already arrived, and because a sentinel is not something a grader can resolve mechanically at all.",
+   "artifact_covered_by": [
+    "S9C-AC5"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "S9C-AC1",
+   "criterion_verbatim": "S9C-AC1 -- THE RUNTIME PLANE WAS INTERROGATED AND ITS INSTRUMENT'S REACH IS STATED: whether CloudTrail data events on opal-users are enabled, read and pasted; if enabled, the access census over a stated window with its denominator; if not enabled, that fact stated explicitly as the reason a no-access reading would have been vacuous. A quiet trail is not evidence of no access unless the trail was recording the events in question -- this criterion FAILS on a no-access claim from an unverified trail.",
+   "method": "live_read",
+   "invocation": "aws cloudtrail describe-trails --include-shadow-trails; aws cloudtrail get-event-selectors per trail; aws cloudtrail list-event-data-stores (CloudTrail Lake, a SEPARATE surface that can record data events independently of a trail).",
+   "output_evidence": "THE PREFERRED ORACLE DOES NOT EXIST, and this criterion is filed on that rather than on a no-access reading. TRAILS: exactly two in the account, opal-organization-trail (multi-region, IsOrganizationTrail FALSE despite the name) and opal-served-key-write-trail (single-region). EVENT SELECTORS: opal-organization-trail carries EventSelectors with IncludeManagementEvents true and DataResources of type AWS::S3::Object ONLY, on two bucket prefixes; opal-served-key-write-trail carries an AdvancedEventSelector restricted to eventCategory Data, resources.type AWS::S3::Object, readOnly false, on three platinum/firm/ prefixes. NEITHER TRAIL CARRIES ANY DynamoDB DATA RESOURCE. LAKE: list-event-data-stores returns an EMPTY array, so there is no second surface. CONSEQUENCE, stated as AC1 requires: a read of opal-users -- or of ANY DynamoDB table in this account -- leaves no CloudTrail record whatsoever, so a 'CloudTrail shows no access' reading would have been VACUOUS. Applying the phase-1 mandate's own test: if the grant WERE in active use, these trails would show exactly the same nothing, and an instrument whose output is identical under the hypothesis and its negation is not an oracle. That is the false absence this face was written to refuse, and it was refused rather than cited.",
+   "denominator": "2 of 2 trails in the account read, plus 0 CloudTrail Lake event data stores; DynamoDB data resources found on 0 of 2 trails.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S9C-AC2",
+   "criterion_verbatim": "S9C-AC2 -- THE SOURCE CENSUS WAS TRANSFERRED TO THE DEPLOYED BYTES, OR DECLARED UNTRANSFERABLE: for each of the seven functions, the deployed artifact compared against its build input by CONTENT, never by filename, with the denominator 7 of 7 printed. Any function whose deployed bytes cannot be resolved to a source tree is named, and its presence forces UNVERIFIABLE-BY-INSTRUMENT on the removal.",
+   "method": "live_read",
+   "invocation": "aws lambda get-function per function to obtain PackageType, runtime and a presigned code Location; the artifact downloaded and every entry read out of the zip; an exact matcher table/opal-users(?![-\\w]) applied to the concatenated bytes, alongside opal-users-v2 and trade-users as controls. Then aws lambda get-function-configuration --query Environment.Variables on all seven, to close the gap a byte scan structurally cannot see.",
+   "output_evidence": "ANSWERED IN A STRONGER FORM THAN THE CRITERION SPECIFIES, and the difference matters. The criterion asks for deployed-versus-build-input parity SO THAT the source census can transfer. Asking the deployed bytes directly REMOVES THE TRANSFER STEP: there is no inference from source to production, because production is the thing examined. RESULT, 7 of 7: trade-auth-handler (Zip, python3.11, 280,997 bytes, 13 files, 662,139 bytes scanned) 0 hits; trade-authorizer (1,218 / 1 file / 2,964 bytes) 0; trade-dashboard-api (11,366 / 3 / 38,078) 0; trade-identifier-cache (2,290 / 1 / 6,292) 0; trade-parquet-batch-export (4,068 / 2 / 13,210) 0; trade-submission-handler (8,123 / 3 / 32,999) 0; trade-workflow-handler (20,472 / 5 / 75,636) 0. ZERO UNSCANNABLE -- every function is PackageType Zip and every artifact downloaded and unzipped, so no function forces UNVERIFIABLE-BY-INSTRUMENT on this leg. POSITIVE CONTROL, on the same artifacts and the same matcher family, which is what makes the seven zeroes an absence rather than a dead scanner: trade-auth-handler's DEPLOYED bytes carry opal-users-v2 FIVE times. AFFIRMATIVE CORROBORATION: 4 of 7 name trade-users, the pipeline's own users table -- so the census shows what they DO use, not merely what they do not. THE CONFIGURATION GAP, closed because a byte scan cannot see a table name supplied at runtime: environment variables read on 7 of 7. The ONLY users-table pointer in the entire role is trade-auth-handler's USERS_TABLE=opal-users-v2, which is a DIFFERENT table granted by the separate opal-users-v2-access policy. No function carries an environment variable naming the legacy table. Nothing points at opal-users in bytes OR in config. --- EVIDENCE AMENDED, VERDICT UNCHANGED: the DENOMINATOR ITSELF IS NOW VERIFIED ON THE LIVE PLANE, 2026-09-04 ~07:1xZ. This limb's '7 of 7' was taken from org/modules/graph/aws-shapes/g2-edge-census-cut1.yaml:179-185 -- THE SAME GRAPH FILE whose 'live' adjective this seat had already proven wrong in row Z-S130. The membership was never re-derived from AWS, so the population was inherited from a source known to be unreliable about a DIFFERENT property of the same objects. RE-DERIVED NOW WITH NO NARROWING PARAMETER: aws lambda list-functions account-wide returns 203 live functions with no NextMarker (so nothing was truncated), and filtering on execution role gives EXACTLY the same seven -- trade-auth-handler, trade-authorizer, trade-dashboard-api, trade-identifier-cache, trade-parquet-batch-export, trade-submission-handler, trade-workflow-handler. Set difference in BOTH directions is empty. THE DENOMINATOR WAS CORRECT AND IS NOW MEASURED RATHER THAN INHERITED, which are different epistemic states that produce the same number. Recorded because a denominator that happens to be right teaches nothing about the method that produced it, and this one was carried from a source this project had already caught being wrong once.",
+   "denominator": "7 of 7 functions content-scanned, 0 unscannable, 0 naming the table; 7 of 7 environments read, 0 naming the table; 1 positive control firing 5 times on a deployed artifact.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S9C-AC3",
+   "criterion_verbatim": "S9C-AC3 -- THE ACT MATCHES THE VERDICT: if the oracles agreed, the iam.tf diff and the applied policy re-read showing :63-64 absent; if they did not, NO DIFF EXISTS and this criterion PASSES on the stated non-removal with its reason. Both outcomes pass this criterion. Only an unevidenced removal fails it.",
+   "method": "diff",
+   "invocation": "git diff -U0 on infra/aws/terraform/trade-pipeline/iam.tf @aabf8ca2e9; aws iam get-role-policy --role-name trade-submission-lambda-role --policy-name trade-submission-policy read after the apply.",
+   "output_evidence": "THE ORACLES AGREED, SO THE ACT IS A REMOVAL. SOURCE DIFF: three minus-lines -- the two opal-users ARNs, plus the trade-security-identifiers/index/* line which is re-added without its trailing comma because it becomes the list's last element. APPLIED RE-READ, differential rather than assertional: the DynamoDBAccess statement's Resource list goes 8 -> 6, and the six survivors are exactly opal-trade-submissions, opal-trade-submissions/index/*, trade-users, trade-users/index/*, trade-security-identifiers and trade-security-identifiers/index/*. Exact table/opal-users grants remaining in this policy: 0. THE SEPARATE opal-users-v2-access POLICY ON THE SAME ROLE WAS NOT TOUCHED, which matters because trade-auth-handler genuinely reads opal-users-v2 and removing that grant would have broken it. Terraform reported 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.'",
+   "denominator": "1 resource changed of 1 planned; 2 of 2 target ARNs removed; 6 of 6 trade-* ARNs preserved; 0 exact grants remaining in the policy.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S9C-AC4",
+   "criterion_verbatim": "S9C-AC4 -- ALL SEVEN FUNCTIONS EXERCISED AFTER ANY REMOVAL, WITH A BEFORE: each of the seven invoked before and after, both results pasted, denominator 7 of 7. The before is what makes the after mean anything. If no removal occurred, this files N/A-BY-CONSTRUCTION naming S9C-AC3's outcome.",
+   "method": "live_read",
+   "invocation": "aws lambda invoke per function with a minimal probe payload, once BEFORE the removal and once AFTER, capturing StatusCode, FunctionError and the full response body each time, then diffing the two runs field by field.",
+   "output_evidence": "FIVE OF SEVEN EXERCISED BOTH SIDES, AND ALL FIVE ARE BYTE-IDENTICAL. BEFORE and AFTER, every one StatusCode 200 with no FunctionError: trade-authorizer {\"isAuthorized\": false}; trade-auth-handler statusCode 400; trade-dashboard-api statusCode 200; trade-identifier-cache statusCode 404; trade-parquet-batch-export {\"error\": \"No submission_id provided\"}. Field-by-field diff of the two captures: 5 of 5 IDENTICAL on StatusCode, FunctionError and body. Note the probes deliberately do not drive business logic -- per ruling 20149 the invocation is a CONTROL ON THE BYTE SCAN and not a test of the function, so an error return proves execution just as well as a success return, and trade-parquet-batch-export declining for a missing submission_id is a clean execution rather than a failure. TWO OF SEVEN COULD NOT BE EXERCISED AND ARE NAMED: trade-submission-handler and trade-workflow-handler. THE CONSTRUCTION, precisely: zero event source mappings; resource policies admitting ONLY apigateway.amazonaws.com (APIs w8jnzvs21g and 7k3ed8px20, one statement scoped to /api/general/trades/*), so they fire only when a human submits a trade; no invocation since 2026-07-14 on CloudWatch Invocations and no log event since the same date on the independent Logs plane; and EMAIL_FROM=trades@opalinvest.dev with DASHBOARD_URL set, so a driven invocation risks real mail egress -- which ruling 20149 refused as irreversible and worse than an unverified criterion. BOTH ROUTES ARE CLOSED and the face says so rather than pretending one is open.",
+   "denominator": "5 of 7 invoked before and after, 5 of 5 byte-identical; 2 of 7 UNCOMPUTABLE-BY-CONSTRUCTION with the construction enumerated; 7 of 7 accounted for.",
+   "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+   "status_reason": "The criterion's bar is 7 of 7 and only 5 are obtainable, so a PASS would overclaim a denominator that was not met. Filed UNCOMPUTABLE-BY-CONSTRUCTION per ruling 20149, which directs exactly this for trade-submission-handler and trade-workflow-handler. THE REDUCTION IS BOUNDED AND STATED RATHER THAN HIDDEN: the invocation test was ALWAYS a control on the byte scan, never a test of the table-access path, because the byte and configuration censuses establish that NO code path in any of the seven touches opal-users at all. Two of seven lacking that control is a reduction in corroboration, not an absence of evidence. The residual is written into the trade-pipeline runbook where a person diagnosing a failed trade will meet it, and the rollback is one apply."
+  },
+  {
+   "criterion_id": "S9C-AC5",
+   "criterion_verbatim": "S9C-AC5 -- BASELINE QUOTED, 0-DIFF AFTER, NOTHING ELSE RODE: the trade-pipeline root's UNSCOPED plan before the first edit; the changed-resource list enumerated with its count; the UNSCOPED re-plan 0-diff after; ledger CLOSED on exercised evidence rather than an apply's rc; push state read by ls-remote + is-ancestor and stated as MEASURED.",
+   "method": "command",
+   "invocation": "terraform plan (unscoped) on infra/aws/terraform/trade-pipeline BEFORE the first edit; terraform plan after the edit to enumerate the change; safe-apply.sh apply (unscoped) with HALT_ACK; terraform plan (unscoped) after; deploy_ledger.py close-leg/close.",
+   "output_evidence": "BASELINE, CAPTURED BEFORE THE FIRST EDIT AND GENUINELY CLEAN: 'No changes. Your infrastructure matches the configuration.' -- a TRUE 0-diff, unlike portal-auth's documented non-converging root, so this criterion's limb IS satisfiable here and does not need the S911-AC4 substitute treatment. A SECOND THING THAT BASELINE PROVES, worth stating because it was a live hazard: this root requires a jwt_secret variable with NO default, and supplying a wrong value would silently rewrite a live authorizer's signing secret. The value was sourced from the LIVE function's own environment, so the clean baseline is simultaneously proof that the correct secret was supplied -- a wrong one would have shown six Lambda environment changes, which is the exact spurious drift the root's own README documents. CHANGED-RESOURCE LIST, enumerated with its count: 'Plan: 0 to add, 1 to change, 0 to destroy', the single resource being aws_iam_role_policy.trade_submission_policy, with the plan body showing the two opal-users ARNs as minus-lines. APPLY: 'Modifications complete after 0s' / '0 added, 1 changed, 0 destroyed'. UNSCOPED RE-PLAN AFTER: 'No changes. Your infrastructure matches the configuration.' -- 0-diff achieved, nothing else rode. LEDGER opsec-s9c-trade-role-opal-users-grant CLOSED on all 5 legs, each carrying exercised evidence (invocation captures, applied-plane reads, censuses) rather than the apply's return code. PUSH STATE: UNREAD at this vintage, stated as unread rather than assumed.",
+   "denominator": "1 root; baseline clean, 1 resource changed of 1 planned, re-plan clean; 5 of 5 ledger legs closed on evidence.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The face names S9C-AC1's trail check as the control that must be able to fail -- a no-access reading from a trail that never recorded DynamoDB data events is the false absence the face exists to refuse. A SECOND control was necessary and added, because the byte scan has the identical failure shape: a matcher that silently matched nothing would return seven clean zeroes and read as the strongest possible evidence for removal. The control is the same matcher family run against the same deployed artifacts for a token that MUST be present.",
+   "expected": "If the scanner or the extraction were broken, the control token would also return zero, and the seven zeroes would be an artifact rather than a measurement.",
+   "observed": "BOTH FIRED AS EXPECTED. (1) The trail check refused itself: both trails carry S3-only data resources and Lake is empty, so CloudTrail was disqualified as an oracle rather than cited as clean -- the criterion was filed on the disqualification. (2) The byte-scan control fired: trade-auth-handler's deployed bytes returned opal-users-v2 FIVE times and four of seven returned trade-users, on the same artifacts, the same extraction and the same matcher family that returned zero for the legacy name. A third, unplanned control also fired during the dormancy work and is recorded because it nearly shipped a wrong answer: an intermediate CloudWatch Logs query returned NO-EVENTS for all seven functions INCLUDING the two known-live ones, which is a broken probe wearing an absence's clothes; it was caught precisely because two of the seven had a known answer.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The load-bearing readings were taken on separated instruments rather than repeated on one. Function liveness: CloudWatch Invocations over 30 days AND CloudWatch Logs last-event time -- separate planes with separate retention and separate failure modes. Grant population: comp-iam refresh-census at 00:26:29Z, 02:52:43Z and 03:45:22Z, plus a direct get-role-policy read of the single policy. Function behaviour: the same five probe payloads invoked before and after the change.",
+   "observed": "STABLE, and the two liveness instruments partition the seven functions IDENTICALLY -- the same five dormant at 51/51/129/129/52 days, the same two live at 0 days. The three IAM censuses trace 2 -> 1 -> 0 exact grants as the two removals landed, with the positive control returning 4 roles for the v2 ARN on every run. The five invocation probes returned byte-identical responses before and after.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Invoking trade-submission-handler and trade-workflow-handler",
+   "reason": "Ruled out by 2.0.0_SA_COO~Z (20149): invoking a function whose effect is sending mail to a real address is egress off Opal infrastructure and is not reversible. An email cannot be un-sent, and a test invocation reaching a real inbox is a worse outcome than an unverified criterion. They file UNCOMPUTABLE-BY-CONSTRUCTION under S9C-AC4 with the construction enumerated."
+  },
+  {
+   "item": "Remediation of the cleartext JWT_SECRET environment variable (row Z-S127)",
+   "reason": "Ruled out by 20149: it is not this cell's, and a credential change riding a grant-removal face is exactly the nothing-else-rode violation S9C-AC5 exists to catch. Two sizing facts were gathered for the issuer to route it, and nothing was rotated."
+  },
+  {
+   "item": "The 174 UNRESOLVED attached-managed policy statements in every IAM census",
+   "reason": "comp-iam refresh-census records attached-managed policies without resolving them and discloses this on its own face. The estate-wide 'zero grants remain' result is therefore scoped to the INLINE plane across 224 roles, and that scope is stated wherever the result is quoted rather than dropped."
+  },
+  {
+   "item": "The opal-users table itself",
+   "reason": "Out of scope for this face entirely -- TO-OP-S-9C removes a grant and touches no table. The retirement decision was parked with a human under TO-OP-S-9-11's S9-AC4 and has since been authorised separately as TO-OP-S-9D."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPSEC202609-Z-S127: A symmetric JWT signing secret is held in CLEARTEXT Lambda environment variables on both trade-auth-handler and trade-authorizer, readable by any principal holding lambda:GetFunctionConfiguration, while the sibling portal auth path deliberately holds its RS256 private key in Secrets Manager behind a two-ARN allowlist. Filed not chased; kept ARMED for a placement decision by 2.0.0_SA_COO~Z; nothing rotated.",
+  "NFRA_OPSEC202609-Z-S128: S9C-AC4 as originally written required invoking all seven functions, and two of them send mail, so the verification step was not executable by an agent as specified. Superseded by ruling 20149, which amended the criterion.",
+  "NFRA_OPSEC202609-Z-S130: The 'seven LIVE lambdas' premise -- which this seat introduced in Z-S112 from an ATTACHMENT census and which propagated into the face title and into ruling 20138 -- is WRONG. Measured on two independent planes, FIVE of the seven are dormant 51 to 129 days and only two are live, which made 20138's observation route structurally impossible and forced its supersession."
+ ],
+ "compiler_tools": [
+  {
+   "tool": "comp-iam refresh-census",
+   "invocation": "run three times at 00:26:29Z, 02:52:43Z and 03:45:22Z, each --out to the scratchpad",
+   "result": "The APPLIED-plane instrument for the residual census, 224 roles / 1,191 inline statements at the final vintage. It traced the grant population 2 -> 1 -> 0 across the two removals with the positive control returning 4 roles for the v2 ARN every run, and it is the instrument that found this face's subject in the first place. It discloses its own blind spot -- 174 attached-managed statements recorded UNRESOLVED -- which is carried into every quotation of the result."
+  },
+  {
+   "tool": "comp-routes auth-map",
+   "invocation": "comp-routes auth-map",
+   "result": "Used while sizing Z-S127 to establish which paths sit behind an API Gateway authorizer. It placed /api/general/trades/* under EDGE JWT + API GW AUTHORIZER -- and, importantly, its own COVERAGE banner states that auth_api_gw is derived from origin TYPE and NOT from an authorizer's existence, a named topology-inferred residual. That disclosure is why the follow-up question (WHICH authorizer) was taken to the live plane under a rail-checked marker rather than answered from the tool."
+  },
+  {
+   "tool": "comp-read",
+   "invocation": "comp-read infra/aws/terraform/trade-pipeline/README.md --for '<question>'",
+   "result": "Gave the runbook's section shape before writing into it, so the new residual section could be placed where a diagnosing reader meets it rather than appended blindly. It also surfaced that the README ALREADY records trade-submission-handler as COLD with 0 invocations in 90 days -- an independent third corroboration of the dormancy finding in Z-S130, written by someone else months earlier."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'opal-users($|[^-])' over the trade lambda and terraform trees",
+   "result": "The SOURCE-plane census: denominator 2 hits across 302 files, both hits being the grant lines themselves. Recorded here as the WEAKEST leg deliberately -- it is the claim this face was cut to refuse taking at face value, and it was superseded by the deployed-bytes read rather than relied upon."
+  }
+ ]
+}

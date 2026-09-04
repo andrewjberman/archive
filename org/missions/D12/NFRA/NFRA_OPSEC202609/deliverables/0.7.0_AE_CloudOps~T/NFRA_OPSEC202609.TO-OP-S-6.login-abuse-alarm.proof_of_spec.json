@@ -1,0 +1,146 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPSEC202609.TO-OP-S-6",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~T",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/prd/NFRA_OPSEC202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3619ebecd9"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+  "vintage_commit": "2fd3843047",
+  "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-6.login-abuse-alarm.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/portal-auth/cloudwatch-alarms.tf",
+   "kind": "terraform",
+   "commit_or_etag": "ab76a1c0c8",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-apply rc=0 (HALT_ACK=1 after reading msg 4355 in full at this seat -- 13d old, addressed to the BASE serial not this lane, no [STOP]/[HALT] prefix, and its own text says 'neither is a gate'). 'Apply complete! Resources: 4 added, 0 changed, 0 destroyed.' The scoped plan header read '4 to add, 0 to change', so the module's pre-existing web-ACL churn did NOT ride the apply. Enumerated changed-resource list, complete: aws_cloudwatch_log_metric_filter.auth_throttled CREATED [id=OPSEC-AuthThrottled]; aws_sns_topic.login_abuse_alerts CREATED [id=arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts]; aws_cloudwatch_metric_alarm.auth_throttled CREATED [id=OPSEC-auth-throttled]; aws_cloudwatch_metric_alarm.auth_login_rate_limit_blocked CREATED [id=OPSEC-auth-login-rate-limit-blocked]. EXISTING resources in the changed list: ZERO. Apply window 2026-09-03T23:45Z-23:46Z.",
+   "introduces": [
+    "OPSEC-auth-login-rate-limit-blocked",
+    "OPSEC-auth-throttled",
+    "OPSEC-AuthThrottled",
+    "opal-login-abuse-alerts",
+    "login_abuse_alerts",
+    "auth_login_ratelimit_rule"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20260903T2338Z_opsec-s6-login-abuse-alarm_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "ab76a1c0c8",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Deploy ledger opened BEFORE the apply with 6 legs and the rollback named, and CLOSED after with all 6 legs proven: 'OK: CLOSED deploy ledger opsec-s6-login-abuse-alarm -- all 6 legs proven; sentinel removed'. Opened 23:38Z, closed 00:1xZ, inside its 4.0h window, stranded=[]."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "THE CONTROL THAT HAD TO BE ABLE TO FAIL IS S6-AC2's PRE-BURST ALARM STATE, and it is the one the face names first. The criterion grades the ALARM TRANSITIONING, not the rule blocking, and its whole load is carried by the negative control: if the alarm is ALREADY in ALARM when the burst starts, a subsequent ALARM reading is indistinguishable from a standing condition and the criterion certifies nothing. This control was not simulated -- it FIRED TWICE ON REAL STATE and blocked two attempts before it passed.",
+   "expected": "If the pre-burst state is anything other than a freshly-measured OK, the run is refused and no transition is claimed.",
+   "observed": "FIRED TWICE, BOTH TIMES BLOCKING A CLAIM THIS SEAT WOULD OTHERWISE HAVE MADE. (1) At 23:46:37Z the WAF alarm was already in ALARM pre-burst: a peer lane's probe (UA opal-s7-probe) had blocked 60 requests at 23:44:00Z, two minutes before the alarm existed. A staged burst then would have been uninterpretable. (2) A second attempt read OK at 23:52:26Z, but the OK->ALARM transition at 23:52:36Z fired on the PEER'S 23:51 datapoint (3.0) -- ten seconds after the read and two minutes BEFORE this seat's burst -- so that burst SUSTAINED an already-breaching alarm and the transition is NOT claimed as this seat's. Only the third run, with ZERO gap between the control read and the burst (OK measured 00:02:36Z, burst started 00:02:36Z), produced a transition this seat can own. THE CONTROL ALSO CHANGED THE DESIGN: because the auth path carries live peer and user traffic, timing alone can never attribute a transition here, so attribution was moved to CONTENT -- magnitude and User-Agent -- which no coincidence can forge.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The staged burst was run TWICE with identical shape (240 requests, same fixture-identity form, same User-Agent) at 23:54:15Z and at 00:02:36Z, and the resulting AuthThrottled metric was summed independently on each run.",
+   "observed": "Both runs produced the identical status histogram {401: 5, 429: 235} and both produced exactly 235 counted throttle events on the metric plane -- run 1 as a single 235.0 datapoint at 23:54, run 2 split 190.0 at 00:02 + 45.0 at 00:03 = 235 across the two minute-buckets it straddled. Same input, same count, twice; the bucket split differs only because the second run crossed a minute boundary.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Deliverable 3's SNS SUBSCRIPTION -- no subscriber is attached to opal-login-abuse-alerts.",
+   "reason": "DEFERRED BY THE FACE ITSELF, NOT BY THIS SEAT'S CHOICE. C-6 requires one email per event to ONE NAMED PERSON and the face states in terms that the issuer does not have the name, instructing the assignee to file a row, ask, build everything else and leave the subscription as the single open leg. The address is NOT guessed, NOT a role address, and NOT defaulted to Andrew's. Row NFRA_OPSEC202609-Z-S97 holds the gap ARMED with 2.0.0_SA_COO~Z as disarm_owner; the issuer confirmed at 23:25Z it has routed the question to Andrew and will not disarm it by picking someone. A notification wired to a guessed address reads as delivered and reaches nobody, which is strictly worse than this named absence."
+  },
+  {
+   "item": "The module's pre-existing UNSCOPED diff on aws_wafv2_web_acl.opal_cloudfront_protection was NOT absorbed, fixed, or applied.",
+   "reason": "It predates this task order and is not this face's to move. Three managed-rule blocks are removed and re-added at identical names and priorities; normalised, the removed and added blocks are 39 lines each with an EMPTY symmetric difference, so it is provider re-serialisation of committed config against live AWS and not a loss of protection. The apply was TARGETED to the four new addresses precisely so it would not ride along, and the verification was an UNSCOPED re-plan so the scoping could not certify itself."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPSEC202609-Z-S97: C-6's named recipient is an input this project does not hold; filed BEFORE the build so the absent subscription is legible as a named absence rather than as an alarm that appears wired. ARMED at 2.0.0_SA_COO~Z. This is the row S6-AC3 cites.",
+  "NFRA_OPSEC202609-Z-S98: phase-1 re-grounding -- three of the face's four live premises re-measured EXACTLY (49 alarms, the rule at priority 2 action Block, carrier tracked) and one moved (WAFV2 metrics 364 -> 377, benign direction, carries no criterion, nothing substituted). Also recorded the CLOUDFRONT-vs-REGIONAL dimension trap that shaped alarm (a).",
+  "NFRA_OPSEC202609-Z-S99: CORRECTS this seat's own Z-S98 trap A before anything was built on it. Z-S98 claimed a JSON metric-filter pattern could not match the auth handler's Text-format prefixed lines and recommended a substring pattern; measured with test-metric-filter plus a negative control, the JSON pattern matches AND discriminates while the substring pattern also matches bare prose containing the token. Every fact in the original row was true and the conclusion drawn from them was false."
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-03/session_0.7.0_AE_CloudOps~T_2237-0020Z_OPSEC_S6_LOGIN_ABUSE_ALARM.md",
+ "acceptance": [
+  {
+   "criterion_id": "S6-AC1",
+   "criterion_verbatim": "S6-AC1 -- TWO ALARMS EXIST ON THE AUTH PATH AND THE COUNT MOVED: describe-alarms after, with the two new alarm names quoted and their MetricName, Namespace, Threshold, ComparisonOperator and AlarmActions pasted; the alarm count read against the 49 quoted in this face as the before. Both addresses appear in terraform state list. A console-created alarm is a FAIL even if it works.",
+   "method": "live_read",
+   "invocation": "aws cloudwatch describe-alarms --region us-east-1 (full JSON dump, counted client-side); terraform state list",
+   "output_evidence": "COUNT MOVED 49 -> 51. describe-alarms returns 51 MetricAlarms + 0 CompositeAlarms, against the 49 quoted in the face and independently re-measured by this seat at 23:0xZ before any write. NextToken ABSENT on both reads, so both are true denominators and not page counts -- the CLAUDE.md 22a paginated-list trap was checked rather than assumed. Delta +2, exactly the two new alarms. ALARM (a) OPSEC-auth-login-rate-limit-blocked: Namespace AWS/WAFV2, MetricName BlockedRequests, Threshold 0.0, ComparisonOperator GreaterThanThreshold, Statistic Sum, Period 60, EvaluationPeriods 1, TreatMissingData notBreaching, AlarmActions ['arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts'], Dimensions {WebACL: opal-cloudfront-protection, Rule: AuthLoginRateLimit} -- EXACTLY TWO DIMENSIONS AND NO Region. ALARM (b) OPSEC-auth-throttled: Namespace opal/authabuse, MetricName AuthThrottled, Threshold 0.0, GreaterThanThreshold, Sum, Period 60, EvaluationPeriods 1, notBreaching, same single AlarmAction. NEITHER WAS CONSOLE-CREATED: terraform state list moved 88 -> 92 and contains all four new addresses (4 of 4 matched), which a console-created alarm would not.",
+   "denominator": "51 alarms scanned of 51 returned (NextToken absent = complete listing, not a page); 92 terraform state addresses of 92; 4 of 4 new addresses matched.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S6-AC2",
+   "criterion_verbatim": "S6-AC2 -- THE ALARM FIRED ON A STAGED BURST, MEASURED ON THE ALARM AND NOT ON THE RULE: after the burst, describe-alarm-history shows a transition to ALARM with its timestamp, and the WAF rule's BlockedRequests datapoint for the same window is pasted beside it. A blocked request is NOT the criterion; the alarm transitioning is. NEGATIVE CONTROL: state the alarm's state BEFORE the burst, so the transition is a change and not a standing condition.",
+   "method": "live_read",
+   "invocation": "python burst against POST https://opalinvest.dev/auth/login (fixture identity opsec-s6-probe-fixture2@opal.invalid, UA opal-s6-probe, 240 requests), preceded in the SAME act by a poll of aws cloudwatch describe-alarms until OK; then describe-alarm-history, get-metric-statistics on opal/authabuse AuthThrottled and on AWS/WAFV2 BlockedRequests, and filter-log-events on aws-waf-logs-opal-cloudfront for User-Agent attribution.",
+   "output_evidence": "PRE-BURST STATE, MEASURED: OK at 2026-09-04T00:02:36Z, with zero gap -- the burst began the same second, because an earlier attempt proved the gap is exploitable. TRANSITION: describe-alarm-history shows 'Alarm updated from OK to ALARM' at 2026-09-04T00:03:36Z on datapoint 190.0 at 00:02:00. The full state history is coherent and shows the alarm is not stuck: INSUFFICIENT_DATA->OK 23:46:36Z, OK->ALARM 23:52:36Z (the PEER's datapoint, not claimed), ALARM->OK 00:01:36Z, OK->ALARM 00:03:36Z (this burst). ATTRIBUTION IS BY CONTENT, NOT TIMING, because the auth path carries live peer and user traffic: AuthThrottled datapoints 190.0 at 00:02 + 45.0 at 00:03 = 235, EXACTLY this burst's 429 count, split across the two minute-buckets it straddled; the peer lane's bursts are 3-11 requests, an order of magnitude away; and the WAF log for 00:02-00:04 shows 240 of 240 events carrying UA opal-s6-probe and ZERO from the peer, so the crossing minute was exclusively this seat's traffic. THE WAF RULE'S BlockedRequests FOR THE SAME WINDOW, pasted as the criterion requires: ZERO datapoints -- terminatingRuleId Default_Action on 240 of 240, because the application throttle returns 429 before the WAF rate-based threshold is crossed. THAT IS WHY BOTH ALARMS ARE EVIDENCED FROM DIFFERENT REAL CAUSES: alarm (b) transitioned on this staged burst as above; alarm (a) transitioned INSUFFICIENT_DATA->ALARM at 23:46:29Z on a peer lane's genuine 60-block burst at 23:44:00Z -- unplanned real production traffic, reported as the PEER'S and not as this seat's.",
+   "denominator": "240 requests sent of 240 attempted; 240 of 240 WAF records in the crossing window attributed to UA opal-s6-probe; 4 of 4 alarm state-history items enumerated; 235 of 235 throttle events accounted for across two datapoints.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S6-AC3",
+   "criterion_verbatim": "S6-AC3 -- THE NAMED PERSON RECEIVED IT, OR THIS FILES UNCOMPUTABLE WITH THE REASON: FWD-4's DONE WHEN is that a human is reached, so the criterion is an agent-side confirmation that the message ARRIVED at the named address -- not that SNS accepted it, which is the SENT != EMITTED != READ trap. If the recipient is still unnamed, this files UNCOMPUTABLE-BY-CONSTRUCTION citing the row from deliverable 2, and the flip waits on nothing else. Do not substitute a self-addressed test.",
+   "method": "live_read",
+   "invocation": "aws sns list-subscriptions-by-topic --topic-arn arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts",
+   "output_evidence": "0 subscriptions on opal-login-abuse-alerts. THE ZERO IS A REAL ZERO AND NOT A BLIND PROBE: the identical call against opal-infrastructure-alerts returns 1 subscription, so the instrument can see a subscriber when one exists. NO SELF-ADDRESSED TEST WAS SUBSTITUTED and no address was attached for the purpose of producing a passing read -- doing so would have satisfied the letter of the criterion while defeating FWD-4 entirely.",
+   "denominator": "1 topic queried of 1 created; positive control 1 of 1 returning a non-zero subscriber count.",
+   "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+   "status_reason": "The recipient is unnamed, exactly the branch this criterion prescribes. C-6 requires ONE named person; the face states the issuer does not have the name and forbids inventing one; 2.0.0_SA_COO~Z confirmed at 23:25Z that it has routed the question to Andrew and will not disarm the gap by picking someone. Cites surprise-channel row NFRA_OPSEC202609-Z-S97, filed BEFORE the build and ARMED with the issuer as disarm_owner. Everything the criterion depends on other than the address is built and exercised: the topic exists, both alarms name it as their sole AlarmAction, and both have demonstrated a real ALARM transition. The single remaining act is one aws_sns_topic_subscription once the address arrives. The completion flip waits on nothing else."
+  },
+  {
+   "criterion_id": "S6-AC4",
+   "criterion_verbatim": "S6-AC4 -- THE MORATORIUM HELD, CENSUSED WITH ITS DENOMINATOR: a census of everything this task order created -- alarms, topics, subscriptions, metric filters, dashboards -- with the count of each, showing exactly 2 alarms, exactly 1 topic, 0 dashboards, 0 additional subscribers, and 0 GuardDuty / Security Hub / Config resources. The control that must be able to fail: run the same census against the whole account's dashboards and confirm the number did not change.",
+   "method": "live_read",
+   "invocation": "terraform state list (module census, case-insensitive greps for dashboard / guardduty|securityhub|aws_config / aws_sns_topic_subscription); aws cloudwatch list-dashboards; aws sns list-topics; aws sns list-subscriptions-by-topic on both the new topic and a control topic.",
+   "output_evidence": "CREATED BY THIS TASK ORDER: alarms 2 (OPSEC-auth-login-rate-limit-blocked, OPSEC-auth-throttled) -- exactly 2, not 3; SNS topics 1 (opal-login-abuse-alerts) -- exactly 1; metric filters 1 (OPSEC-AuthThrottled); dashboards 0; GuardDuty/SecurityHub/Config 0; SNS subscriptions 0 (the single deliberate open leg). Account-wide SNS topic count moved 15 -> 16, +1, exactly the one topic this face is authorised to create. CONTROL (i), ACCOUNT-WIDE DASHBOARDS: list-dashboards returns 2 (Inflection-HistBackfill-RateLimiter, opal-portal-cloudfront-performance), NextToken absent so the listing is complete. HONEST LIMIT, STATED RATHER THAN PAPERED OVER: this seat did NOT take an account-wide dashboard count BEFORE the apply, so that number alone cannot prove the count did not change. The discriminating evidence that no dashboard was created is the apply's own enumerated changed-resource list (exactly 4, all named, none a dashboard) together with the module state carrying ZERO dashboard resources of any kind, so this module structurally cannot have created one. CONTROL (ii), added because control (i) has that gap: the subscription probe returns 1 for opal-infrastructure-alerts while returning 0 for opal-login-abuse-alerts, so a zero from that instrument is a measurement and not a blind read.",
+   "denominator": "92 terraform state addresses scanned of 92; 2 account-wide dashboards of 2 (NextToken absent); 16 SNS topics of 16 (NextToken absent); 51 alarms of 51.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S6-AC5",
+   "criterion_verbatim": "S6-AC5 -- BASELINE QUOTED, 0-DIFF AFTER, NOTHING ELSE RODE: the module's UNSCOPED plan quoted BEFORE the first edit; the apply's changed-resource list enumerated with its count, containing ONLY the alarms, the topic, the subscription and the metric filter; the UNSCOPED re-plan 0-diff after; the ledger CLOSED with its proof and rollback; push state read by ls-remote + is-ancestor and stated as MEASURED.",
+   "method": "diff",
+   "invocation": "terraform plan -no-color -lock=false BEFORE the first edit; safe-apply -chdir=... apply -target x4; terraform plan -no-color -lock=false -detailed-exitcode after (UNSCOPED, never a -target re-plan); git ls-remote origin SITEZ; git merge-base --is-ancestor.",
+   "output_evidence": "BASELINE, taken BEFORE the first edit: 'Plan: 0 to add, 1 to change, 0 to destroy'. RE-PLAN AFTER, UNSCOPED: 'Plan: 0 to add, 1 to change, 0 to destroy', detailed-exitcode rc=2. IDENTICAL TO THE BASELINE, so DELTA AGAINST THE QUOTED BASELINE IS ZERO, and '0 to add' is the load-bearing half -- all four resources are applied and nothing of this seat's is outstanding. APPLY'S CHANGED-RESOURCE LIST, enumerated with its count: 4 CREATED (aws_cloudwatch_log_metric_filter.auth_throttled, aws_sns_topic.login_abuse_alerts, aws_cloudwatch_metric_alarm.auth_throttled, aws_cloudwatch_metric_alarm.auth_login_rate_limit_blocked); EXISTING resources changed: ZERO; the scoped plan header read '4 to add, 0 to CHANGE', so the pre-existing churn did not ride. THE VERIFICATION WAS DELIBERATELY UNSCOPED: a -target re-plan of a -target apply certifies itself, which CLAUDE.md names as a measured defect class. LEDGER CLOSED: 'all 6 legs proven; sentinel removed', opened 23:38Z before the apply, rollback named (terraform destroy -target on the same four addresses; all additive, independently removable, no existing resource modified so nothing to restore). PUSH STATE, MEASURED: git ls-remote origin SITEZ = 001709c96ef22a508255b1242734c73a9d37c854; merge-base --is-ancestor FALSE for BOTH e2dabdc3ab and ab76a1c0c8, so both are LOCAL-ONLY -- the push is the integrator lane's act. Negative control on the instrument: git log against a bogus hash fails 'unknown revision', so an ancestry answer here is a real answer.",
+   "denominator": "2 unscoped plans compared (1 before, 1 after), both whole-module and neither -target; 4 of 4 created addresses enumerated; 6 of 6 ledger legs closed; 2 of 2 commits tested for ancestry plus 1 negative control.",
+   "status": "PASS",
+   "status_reason": "PASS ON A DELTA=0 READING, AND THE DIVERGENCE FROM THE CRITERION'S LITERAL WORDING IS DECLARED RATHER THAN QUIETLY REINTERPRETED. The criterion says 'the UNSCOPED re-plan 0-diff after'. A literal 0-diff is UNSATISFIABLE on this module and was unsatisfiable before this seat touched it: the baseline already read 1-to-change on aws_wafv2_web_acl.opal_cloudfront_protection, a standing provider re-serialisation whose removed and added rule blocks are 39 lines each with an EMPTY symmetric difference. The before and after reads are identical, which is what 'nothing else rode' actually asks and what CLAUDE.md's NEVER-1 names as a verified DELTA=0. Reporting this as a literal 0-diff would have been false; reporting it as a FAIL would have been misattributing a pre-existing condition to this task order."
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "comp-read",
+   "invocation": "comp-read on the task order and on infra/aws/terraform/portal-auth/cloudwatch-alarms.tf and .tools/surprise-row-gate.py, each with --for",
+   "result": "Gave the carrier's shape and its qualifier set. On the .tf it surfaced the tail comment asserting that opal-infrastructure-alerts has NO subscribers -- which is FALSE on the live plane (it has one SMS subscriber), so that comment was NOT relied on and is flagged. On the task order the UNREAD LEDGER showed 15 of 67 lines surfaced, so the file was then read WHOLE rather than acted on from the salient extract."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'auth_throttled' --all --limit 40",
+   "result": "DENOMINATOR 12 hits across 51,633 files scanned, bands SURFACED=2 CONFIG=2 DOC=8. Located the emitter at infra/aws/opalinvest_dev/lambda/auth-handler/src/throttle.ts:118 and separated it from 8 DOC-band mentions that merely describe it. The rail refused an earlier attempt that piped this census into head, which would have erased the denominator -- the refusal was correct."
+  },
+  {
+   "tool": "aws logs test-metric-filter (with a negative control)",
+   "invocation": "test-metric-filter on both the JSON pattern and the substring pattern, against the real prefixed line AND three by-intent non-matching decoys",
+   "result": "THE DECISIVE INSTRUMENT OF THIS FACE. The JSON pattern matches the real Text-format prefixed line and returns an EMPTY set against all three decoys; the substring pattern matches the real line but ALSO matches bare prose containing the token. This refuted this seat's own earlier claim (Z-S98) that the JSON pattern could not match, and condemned the looser remedy it had recommended. Confirmed afterwards on the applied plane: the deployed filter counted 235 real events from a live burst."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open --slug opsec-s6-login-abuse-alarm (6 legs, before the apply); close-leg x6; close",
+   "result": "OPENED 23:38Z before the apply with the rollback named; all 6 legs closed with proof; 'CLOSED -- all 6 legs proven; sentinel removed'. Inside the 4.0h window, stranded=[]."
+  },
+  {
+   "tool": "safe-apply.sh / safe-commit.sh",
+   "invocation": "safe-apply -chdir=infra/aws/terraform/portal-auth apply -target x4; safe-commit --author 0.7.0_AE_CloudOps~T -F <file>",
+   "result": "safe-apply rc=0 after the HALT-gate message was read in full at this seat rather than inherited from a peer's record of the same message. NO HALTGT PASS IS CITED AS EVIDENCE. safe-commit used -F with a message file written by a non-shell writer on a session-unique path; msg-verify MATCH on both commits."
+  }
+ ]
+}
