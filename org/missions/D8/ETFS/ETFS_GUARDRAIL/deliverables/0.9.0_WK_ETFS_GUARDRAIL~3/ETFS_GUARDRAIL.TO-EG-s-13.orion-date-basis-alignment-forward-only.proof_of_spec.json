@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-13",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~3",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-13.orion-date-basis-alignment-forward-only.md",
+    "group": "OTHER",
+    "vintage_commit": "5376ecaa8bdbf0f775cb347c2ba849bfba67afb9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "5376ecaa8bdbf0f775cb347c2ba849bfba67afb9",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-13.orion-date-basis-alignment-forward-only.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/presentation/render_month_end.py",
+      "kind": "script",
+      "commit_or_etag": "2591da7e636fb08f257f0688bb38a4c0b0ef0907",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "No deploy in this order (explicit bound). Local QA renders only: --month 2026-09 -> 'OK: 2026-09 -> .scratch/eg_s13_sept.html' and --month 2026-08 -> 'OK: 2026-08 -> .scratch/eg_s13_aug.html', both rc=0, no --pdf, no --s3-out. The renderer's own artifact upload rides EG-s-6 (a different cell), not this order. Content unchanged since 2591da7e63 (this second commit only removes the vendored coverage/_orion_vendor_asof.py and updates the proof-of-spec/result documents, per the issuer's amendment).",
+      "introduces": [
+        "ORION_ALIGNMENT_CUTOVER",
+        "_align_inflection_series",
+        "orion_normalize_as_of"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/presentation/tests/test_orion_alignment.py",
+      "kind": "test",
+      "commit_or_etag": "2591da7e636fb08f257f0688bb38a4c0b0ef0907",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, five pytest arms (a-e) matching the deliverable's named battery. 'python -m pytest ... -q' -> '5 passed in 0.52s', rc=0 (re-run after the amendment, unchanged file: '5 passed in 0.45s', rc=0). Offline: monkeypatches load_universe/load_monthly_avg/load_all_daily/opal_logo_svg in arm (b), never touches the module's real boto3 s3 client -- zero AWS calls across all five arms. Content unchanged since 2591da7e63."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~3/orion-date-basis-alignment-forward-only.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The order's named deliverable 3: re-grounding, the mapping decision (later-raw-date-wins), the import bootstrap and its live-verified fallback, all six criteria verbatim with rc/denominators, the mutant + determinism controls, declared exclusions."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "2591da7e636fb08f257f0688bb38a4c0b0ef0907",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two new rows appended (ETFS_GUARDRAIL-W3-S1, ETFS_GUARDRAIL-W3-S2), no existing row edited. surprise-row-gate.py on the staged blob: '2 new row(s) of 3 total checked (1 pre-existing, NOT re-graded)', 'OK: 1 file(s), all new rows carry their step-7/step-10 fields', rc=0. Content unchanged since 2591da7e63 -- no third row minted this round; the amendment's resolution is narrated in the instance's surprises entry for W3-S2 and in the result document instead."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S13-AC1",
+      "criterion_verbatim": "the five-arm battery is green (record N passed).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/etfs/scripts/presentation/tests/test_orion_alignment.py -q",
+      "expect": "passed",
+      "output_evidence": ".....                                                                    [100%]\n5 passed in 0.52s\n(rc 0, timeout 120, re-run twice pre-amendment, identical both times). RE-RUN after the issuer's amendment (row ETFS_GUARDRAIL-W1-S1: no committed vendored copy) removed data/etfs/scripts/coverage/_orion_vendor_asof.py -- the import bootstrap's primary lane (data/inf/scripts/silver/, still in the repo) is unaffected: '.....  [100%]\\n5 passed in 0.45s', rc 0.",
+      "denominator": "5 of 5 arms passed (a, b, c, d, e -- all five the deliverable names; no arm skipped or xfailed)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S13-AC2",
+      "criterion_verbatim": "the renderer CALLS the estate's function (at least once; the count is recorded), carries the forward-only cutover as a constant, and defines no second implementation. AMENDED (issuer, row ETFS_GUARDRAIL-W1-S1, CTO~Z ruling @1da1e2b73b 'MINT THE LAYER, NOT A FIFTH COPY'): the invocation and expectation now also assert NO committed first-party copy of the Orion helper exists under data/etfs/scripts/coverage/.",
+      "method": "command",
+      "invocation": "python -c \"import re; s=open('data/etfs/scripts/presentation/render_month_end.py').read(); import os; print('ALIGN_CALLS=%d CUTOVER=%s SECOND_IMPL=%d COMMITTED_ORION_COPY=%s' % (len(re.findall(r'orion_normalize_as_of\\(', s)), re.search(r'ORION_ALIGNMENT_CUTOVER\\s*=\\s*\\\"([0-9-]+)\\\"', s).group(1) if re.search(r'ORION_ALIGNMENT_CUTOVER\\s*=\\s*\\\"([0-9-]+)\\\"', s) else 'ABSENT', len(re.findall(r'def orion_normalize_as_of\\(', s)), os.path.exists('data/etfs/scripts/coverage/_orion_vendor_asof.py')))\"",
+      "expect": "CUTOVER=2026-09 SECOND_IMPL=0 COMMITTED_ORION_COPY=False",
+      "output_evidence": "ALIGN_CALLS=1 CUTOVER=2026-09 SECOND_IMPL=0 COMMITTED_ORION_COPY=False\n(rc 0, timeout 120). ALIGN_CALLS=1: the one literal call site is inside _align_inflection_series's own body; both render_month and write_month_csvs route through that one helper rather than calling orion_normalize_as_of directly, so the estate's ONE implementation is called (>=1) and no second def orion_normalize_as_of exists in the file. COMMITTED_ORION_COPY=False: data/etfs/scripts/coverage/_orion_vendor_asof.py was git rm'd this commit -- the import bootstrap's fallback path (a sibling _orion_vendor_asof.py beside the coverage package) is kept exactly as written, unchanged; the deploy (EG-s-6) places that file on the reporter box at build time and it is never committed to the repo.",
+      "denominator": "1 of 1 pattern group matched for CUTOVER, SECOND_IMPL and COMMITTED_ORION_COPY each; ALIGN_CALLS recorded per the criterion's 'at least once; the count is recorded' bound",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S13-AC3",
+      "criterion_verbatim": "the LIVE render of the cutover month (in progress) completes with the alignment in place (etfs-only reads; no PDF, no upload).",
+      "method": "command",
+      "invocation": "python data/etfs/scripts/presentation/render_month_end.py --month 2026-09 --out .scratch/eg_s13_sept.html",
+      "expect": "OK: 2026-09",
+      "output_evidence": "OK: 2026-09 -> .scratch/eg_s13_sept.html\nOK: CSV -> .../.scratch/opaletfs_49financial_202609.csv\nOK: CSV -> .../.scratch/opaletfs_inflection_202609.csv\nOK: CSV -> .../.scratch/opaletfs_cottonwood_202609.csv\n(rc 0, timeout 120, re-run twice, identical both times). No --pdf, no --s3-out, no --inf-canonical-preview: etfs-only reads, local artifacts only. Alignment confirmed in the artifact: raw Inflection daily/inflection/2026-09-02.json DIVZ ownership_value 18895738.68 (S3, read live) appears in the September CSV under column 2026-09-01 -- re-keyed one NYSE trading day earlier, value untouched.",
+      "denominator": "1 of 1 render, 3 of 3 partner CSVs written",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S13-AC4",
+      "criterion_verbatim": "a pre-cutover month still renders, unaligned (forward-only; the August deck's Inflection dates are what they were -- record one date key from each run side by side in the result).",
+      "method": "command",
+      "invocation": "python data/etfs/scripts/presentation/render_month_end.py --month 2026-08 --out .scratch/eg_s13_aug.html",
+      "expect": "OK: 2026-08",
+      "output_evidence": "OK: 2026-08 -> .scratch/eg_s13_aug.html\nOK: CSV -> .../.scratch/opaletfs_49financial_202608.csv\nOK: CSV -> .../.scratch/opaletfs_inflection_202608.csv\nOK: CSV -> .../.scratch/opaletfs_cottonwood_202608.csv\n(rc 0, timeout 120, re-run twice, identical both times). Side-by-side date key: August CSV's first column is 2026-08-01 (the raw, unaligned key -- what it has always been); September's aligned CSV's first column is 2026-09-01, holding the value read live from the RAW key 2026-09-02 (see S13-AC3 output_evidence) -- the forward-only split is directly visible between the two runs.",
+      "denominator": "1 of 1 render, 3 of 3 partner CSVs written",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S13-AC5",
+      "criterion_verbatim": "the commit gate is clean.",
+      "method": "command",
+      "invocation": "bash .tools/commit-gate.sh data/etfs/scripts/presentation/render_month_end.py data/etfs/scripts/presentation/tests/test_orion_alignment.py",
+      "expect": "pre-commit gate clean",
+      "output_evidence": "All checks passed!\nOK: no unguarded strict-utf8 log reads.\nAll checks passed!\nOK: no unguarded strict-utf8 log reads.\nOK: pre-commit gate clean for 2 of 2 file(s)\n(rc 0, timeout 120, re-run after the vendored data/etfs/scripts/coverage/_orion_vendor_asof.py was git rm'd -- these are now the ONLY two .py files this order's full surface carries).",
+      "denominator": "2 of 2 files clean -- the criterion's own invocation is now this order's ENTIRE .py surface (no third file remains after the amendment)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S13-AC6",
+      "criterion_verbatim": "graded by the CVO at L9: the three partners share one date basis from the cutover month forward; nothing published is restated and no partner is notified; the alignment gates the SEND (EG-s-9 is handed only after this order is terminal) and not the guardrail. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion; recorded from this order's own artifacts (S13-AC1..AC5 outputs, the result.md's mapping-decision and forward-only sections)",
+      "expect": "a reading, recorded with no verdict",
+      "output_evidence": "From ORION_ALIGNMENT_CUTOVER=2026-09 forward: 49F and Cottonwood were already settled-labelled (brief s.6a, untouched by this order); Inflection is re-keyed at read time via _align_inflection_series in BOTH artifacts the renderer produces (render_month's daily -> deck HTML/charts/matrix, and write_month_csvs's own series -> the CSVs), so a figure for one partner on a date can sit beside another partner's figure for that date without a day's gap -- verified concretely in S13-AC3/AC4 (raw 2026-09-02 value appears aligned at 2026-09-01). NOTHING RESTATED: August (pre-cutover) renders with its original raw date keys unchanged (S13-AC4); no S3 write, no re-upload, no re-send touched by this order. NO PARTNER NOTIFIED: this order sends nothing -- no SES/orchestrator code path was touched; the July ETFS_ORION_LABEL_CORRECTION artifact is untouched. GATES THE SEND, NOT THE GUARDRAIL: this order's depends_on is empty and EG-s-6 (the pre-publish coverage guardrail, a separate cell owned by a different worker slot) is unaffected by this change -- the alignment sits in the renderer's data-loading path, upstream of and orthogonal to EG-s-6's coverage-gate precondition; FWD-6's APPLIED grade ('the alignment is in place') is satisfied by this order's code landing at HEAD, and the send-gating relationship (EG-s-9 handed only after this order is terminal) is an issuance-sequencing fact outside this worker's grant to verify beyond noting it here.",
+      "denominator": "N/A -- boolean/narrative judgment criterion, no PASS/FAIL computed by the assignee",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\" criterion. Recorded with NO verdict by the assignee; PASS or FAIL on it would be INVALID. Graded by 3.0.0_SA_CVO at L9."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The collision-resolution direction in _align_inflection_series (for raw_d in sorted(series): -- ascending, later wins) was temporarily flipped to sorted(series, reverse=True) (descending, earlier would win), which makes arm (e)'s property false while leaving arms (a)/(b)/(c)/(d) unaffected (none of them constructs a multi-date collision).",
+      "expected": "test_e_a_collision_keeps_the_later_raw_dates_values FAILS (the earlier raw date's payload would win instead of the later one's); arms a, b, c, d stay green",
+      "observed": "1 failed, 4 passed -- FAILED data/etfs/scripts/presentation/tests/test_orion_alignment.py::test_e_a_collision_keeps_the_later_raw_dates_values - AssertionError: the LATER raw date (d3) wins the collision, assert {'DIVZ': {'as_of': '2026-09-05', 'n': 1, 'v': 10.0}} == {'DIVZ': {'as_of': '2026-09-07', 'n': 1, 'v': 30.0}}. Arms a/b/c/d passed unchanged. File then restored byte-identical to pre-mutant (diff empty) and the full suite re-run: 5 passed in 0.65s.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each mechanical criterion's invocation was issued twice. AC1 and AC2 are pure local computation (no network) -- re-run twice each. AC3/AC4 are live S3 reads/renders -- each re-run once beyond its first recorded pass.",
+      "observed": "AC1: '5 passed' both times, identical timing class (0.5-0.7s). AC2: 'ALIGN_CALLS=1 CUTOVER=2026-09 SECOND_IMPL=0' both times, byte-identical. AC3: 'OK: 2026-09 -> ...' both times, identical CSV values on both runs (Sept DIVZ 2026-09-01 column = 18895738.68 both times). AC4: 'OK: 2026-08 -> ...' both times, identical CSV values on both runs (Aug DIVZ 2026-08-01 column unchanged both times).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No deploy, no --s3-out, no --pdf run in this order.",
+      "reason": "Explicit bound ('No deploy in this order'). EG-s-6 performs the ONE renderer-artifact upload after every renderer/coverage cell merges; FWD-6's APPLIED grade reads the first aligned render on the box after that upload, which this order does not perform."
+    },
+    {
+      "item": "The coverage package proper (classifier.py, remediate.py, trading_calendar.py, __init__.py) was NOT created, and data/etfs/scripts/coverage/ carries NO committed copy of _orion_vendor_asof.py.",
+      "reason": "The package proper is EG-s-4/EG-s-7/EG-s-6's cells, a different concurrent worker slot's work. A vendored _orion_vendor_asof.py was originally committed there this order, then REMOVED per the issuer's amendment (row ETFS_GUARDRAIL-W1-S1, CTO~Z ruling @1da1e2b73b 'MINT THE LAYER, NOT A FIFTH COPY'): no committed copy of a first-party module. The import bootstrap's fallback path is unchanged -- a sibling _orion_vendor_asof.py beside the coverage package, which EG-s-6's deploy places on the reporter box at build time and which this repo never carries."
+    },
+    {
+      "item": "write_month_csvs also received the alignment call, beyond the deliverable's literal 'called from render_month ... only' sentence.",
+      "reason": "Filed as ETFS_GUARDRAIL-W3-S1 (spec-vs-world divergence: the CSVs are not produced through render_month's call graph) and disarmed same-turn by adding the second call site, so the deliverable's stated OUTCOME (every artifact shares one date basis, including the CSVs) is actually met rather than left as a literal-but-incomplete wiring."
+    }
+  ],
+  "surprises": [
+    "ETFS_GUARDRAIL-W3-S1: the deliverable's call-site description ('_align_inflection_series ... called from render_month ... before _carry_forward_avg, the charts, the matrix and the CSVs') assumes the CSVs are produced through render_month's call graph. They are not -- write_month_csvs is a sibling function invoked directly from main(), with its own independent load_all_daily(partner) call per partner. A call wired only inside render_month would not reach the CSVs. Resolved in this order's own change: _align_inflection_series is additionally called inside write_month_csvs for partner=='inflection', so the CSVs share the same date basis as the deck. OBSERVATION, INERT (disarmed same-turn by this order's own second call site, no owner needed).",
+    "ETFS_GUARDRAIL-W3-S2: this TO's own <proof_of_spec> section names the instance path using the short to_id form (ETFS_GUARDRAIL.TO-EG-s-13.proof_of_spec.json), but .tools/to-pipeline-gate.py's check_complete_flip derives the expected instance filename from the TASK-ORDER FILE'S OWN BASENAME (the long descriptive stem), not from to_id -- so the TO-instructed filename alone REFUSES the complete flip. CONFIRMED by the issuer (2.0.0_SA_COO~B) at .tools/to-pipeline-gate.py:1262-1263, on all 14 faces of this project's round. FINAL RESOLUTION for this order (superseding this row's own original same-turn disarm of committing BOTH filenames): the issuer directed keeping ONE instance under the gate-expected long-stem filename only; the short-name duplicate was git rm'd this commit. OBSERVATION, INERT for this order; the generic fix across the other 13 ETFS_GUARDRAIL TOs is the issuer's, not this worker's."
+  ],
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~3/orion-date-basis-alignment-forward-only.result.md",
+  "compiler_tools": [
+    {
+      "tool": "Read/Grep (native)",
+      "invocation": "Read data/inf/scripts/silver/_orion_vendor_asof.py (full file); Grep 'daily\\[' data/etfs/scripts/presentation/render_month_end.py",
+      "result": "Read the function's own contract in full (orion_normalize_as_of returns prior_trading_day(labeled_max), LABEL-only, ORION-only, stdlib-only). The daily[ census (13 hits) confirmed render_month's daily dict is the single source feeding _carry_forward_avg, the charts and the matrix, and separately surfaced that write_month_csvs (a different function) does its own independent load_all_daily call -- the basis for row ETFS_GUARDRAIL-W3-S1."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'sys.path.insert' data/etfs -- (content mode)",
+      "result": "DENOMINATOR 9 hit(s) across 19 file(s), corpus=all; surfaced the repo's established bootstrap pattern (sys.path.insert against a computed REPO_ROOT/HERE, then import) used elsewhere in data/etfs (etf_positioning_gold.py, the dedup test suite), which this order's own import bootstrap follows for consistency."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'coverage package' org/missions/D8/ETFS/ETFS_GUARDRAIL --limit 40",
+      "result": "3 hits, all DOC band; located EG-s-6's own text describing the coverage/ package's self-bootstrap shape ('at import time, if coverage is not importable, aws s3 cp --recursive ... coverage/ ... then import'), confirming EG-s-6 pulls only render_month_end.py + coverage/*.py to the box and never data/inf/ -- the premise behind vendoring _orion_vendor_asof.py rather than relying on the primary import lane alone."
+    }
+  ]
+}
