@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-20",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "7b4df401a7",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-20.partner-egress-allow-list.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/prd/NFRA_OPSEC202609_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3619ebecd9"
+  },
+  "assignee": "0.7.0_AE_CloudOps~U",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "85e6a3d577",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row NFRA_OPSEC202609-Z-S118 (BLOCKING/ARMED) carrying the full GO-condition measurement, appended AND committed in the same act at 85e6a3d577 per the issuer's instruction after two uncommitted rows were destroyed on this shared file earlier in the night. THE MEASUREMENT IS THE DELIVERABLE OF THIS FACE: the cell's stated value is 'a MEASUREMENT with its denominator (firms x addresses x window)', and the allow-list artifact the face would otherwise produce is deliberately NOT built because the GO condition returned negative. Issuer acceptance at Msg-ID 20094: 'DO NOT BUILD THE LIST ... file the proof-of-spec instance with the build criteria as UNCOMPUTABLE-BY-CONSTRUCTION, naming the contaminated window as the construction, and the measurement itself as the evidence.'"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S20-AC1",
+      "criterion_verbatim": "S20-AC1 -- THE CENSUS HAS ALL THREE DENOMINATORS AND NAMES ITS SOURCES: firms observed of firms expected (with the expected set derived from a live read of the partner tables, not recalled); addresses per firm; the window start and end. Each observation attributed to the log source it came from, with a statement of what each source cannot see.",
+      "method": "live_read",
+      "invocation": "aws dynamodb list-tables for the expected firm set; aws logs describe-log-groups + describe-log-streams for the two WAF sources; aws elbv2 describe-load-balancers + describe-load-balancer-attributes and aws s3api list-objects-v2 for the ALB source; CloudWatch Logs Insights over aws-waf-logs-opal-cloudfront for the population, the exact-path census, the User-Agent census and the 30-minute time bins",
+      "output_evidence": "DENOMINATOR 1, FIRMS OBSERVED OF FIRMS EXPECTED = 0 of 4. Expected set read LIVE, not recalled: list-tables returns 38 tables with LastEvaluatedTableName ABSENT (so 38 is a true denominator, not a page), of which 4 match opal-partner-*: 49financial, cottonwood, demo, inflection. DENOMINATOR 2, ADDRESSES PER FIRM = 0 for all four, and the reason is structural rather than sparse -- see S20-AC2. DENOMINATOR 3, THE WINDOWS, PER SOURCE: aws-waf-logs-opal-cloudfront 2026-09-03T10:20:36Z to 2026-09-04T01:24:12Z (15.06h, 2,771 records, recordsScanned 2771 = recordsMatched 2771); aws-waf-logs-opal-gateway 2026-08-15T02:56:15Z to 2026-09-04T00:56:32Z (~19.7d); ALB opal-gateway access logs at s3://opal-data-security/waf-logs/alb-opal-gateway 2026-09-03T09:43:36Z to 2026-09-04T01:35:05Z (15.9h, 166 objects, 532,775 bytes, IsTruncated absent). SOURCE ATTRIBUTION AND WHAT EACH CANNOT SEE: (a) aws-waf-logs-opal-cloudfront fronts the PORTAL and is the ONLY source that observes /auth/login at all -- 695 exact-path events; it cannot see request bodies, so it cannot see which firm signed in. (b) aws-waf-logs-opal-gateway fronts the gateway, a JSON-RPC/OAuth surface; it yielded 2 exact-path /auth/login events over 19.7 days (figure RELAYED from 0.7.0_AE_CloudOps~S Msg-ID 20084 and NOT re-measured here, because re-running that seat's query would be repetition rather than corroboration); it cannot see portal sign-ins because they do not traverse it. (c) The ALB source is the SAME SURFACE as (b) -- describe-load-balancers returns exactly 1 load balancer, opal-gateway, so there is no portal ALB; it cannot see portal sign-ins for the same reason, and it records connection-level access rather than firm identity.",
+      "denominator": "Firms: 0 observed of 4 expected (from 38 tables scanned). Addresses per firm: 0 for each of the 4. Windows: 15.06h / 19.7d / 15.9h across the three named sources. Exact-path sign-in population: 695 of 2,771 records on the only source that sees it.",
+      "status": "PASS",
+      "status_reason": "All three denominators are present and each observation is attributed to the source it came from, including an explicit statement of what each source structurally cannot see. The gateway figure is labelled RELAYED rather than presented as this seat's own measurement -- a relayed number that loses its qualifier is how a census silently acquires evidence it never took."
+    },
+    {
+      "criterion_id": "S20-AC2",
+      "criterion_verbatim": "S20-AC2 -- ZERO-ADDRESS FIRMS ARE LISTED, NOT OMITTED: every expected firm with no observed address named explicitly, each labelled \"did not sign in during the window\" or \"log coverage unknown for this path\". A census that silently drops them is a FAIL -- those are exactly the firms C-4 exists to protect.",
+      "method": "live_read",
+      "invocation": "The four expected firms enumerated from the live list-tables read, then each checked against the exact-path census output and against the field inventory of a sampled /auth/login record",
+      "output_evidence": "ALL FOUR EXPECTED FIRMS ARE ZERO-ADDRESS AND ARE NAMED HERE RATHER THAN OMITTED: opal-partner-49financial -- LOG COVERAGE UNKNOWN FOR THIS PATH. opal-partner-cottonwood -- LOG COVERAGE UNKNOWN FOR THIS PATH. opal-partner-demo -- LOG COVERAGE UNKNOWN FOR THIS PATH. opal-partner-inflection -- LOG COVERAGE UNKNOWN FOR THIS PATH. EVERY ONE TAKES THE 'log coverage unknown' LABEL AND NOT 'did not sign in during the window', AND THE DISTINCTION IS THE WHOLE POINT OF THE CRITERION: no field on any of the three sources maps an address to a firm, so these four would have read as zero-address EVEN IF ALL FOUR HAD SIGNED IN REPEATEDLY DURING THE WINDOW. Proven on the record rather than argued: a sampled /auth/login record is httpMethod POST with args '' and the complete header set Accept-Encoding, Content-Length, Host, User-Agent, Content-Type, Connection -- no Cookie and no tenant-bearing field; the firm-identifying credential travels in the JSON body (Content-Length 84, Content-Type application/json) and WAF does not log bodies. Claiming 'did not sign in' for any of these four would assert a fact this census has no instrument to establish.",
+      "denominator": "4 of 4 expected firms are zero-address; 4 of 4 labelled 'log coverage unknown for this path'; 0 labelled 'did not sign in during the window'.",
+      "status": "PASS",
+      "status_reason": "This is the criterion the face names as the control that must be able to fail, and it fired. A census that returned a clean list with no zero-address firms would have meant the seat had not looked; this one returns the maximum possible number of them, 4 of 4, and assigns each the label the evidence actually supports rather than the label that would look tidier."
+    },
+    {
+      "criterion_id": "S20-AC3",
+      "criterion_verbatim": "S20-AC3 -- THE ARTIFACT IS VERSIONED AND CARRIES ITS OWN NUMBERS: allowlists/partner-egress.json present in the evidence store with its version id pasted, and the denominators readable INSIDE the file. A file whose provenance lives only in a proof will be read later without it.",
+      "method": "live_read",
+      "invocation": "NOT RUN AND DELIBERATELY NOT RUN. Writing this artifact is the act the face's GO condition exists to gate, and the GO condition returned negative.",
+      "output_evidence": "NO allowlists/partner-egress.json WAS WRITTEN to opal-security-evidence. THE CONSTRUCTION THAT MAKES THIS UNCOMPUTABLE, measured and recorded in row Z-S118: the only window in which sign-in traffic is observable at all is contaminated by this project's own instrumentation. Of 695 exact-path /auth/login events, 680 -- 97.8% -- carry User-Agent opal-s6-probe (480) or opal-s7-probe (200), the staged bursts driven by TO-OP-S-6 and TO-OP-S-7 earlier tonight; a second, independent instrument agrees, with 679 of 695 (97.7%) falling in the two 30-minute bins spanning the hour that contains TO-OP-S-7's own ledger burst timestamps (closed 20260903T234907Z). The genuine candidate population is AT MOST 15 events across 3 addresses over 15 hours. A file built from this data would have entered 108.242.96.89 -- the fabric's own egress address -- as a partner firm's permanent edge allow rule.",
+      "denominator": "695 exact-path sign-in events available; 680 (97.8%) are this project's own probes; at most 15 candidate genuine events; 3 distinct addresses, of which the dominant one contributes 689.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Cites row NFRA_OPSEC202609-Z-S118 and the issuer's explicit direction at Msg-ID 20094: 'DO NOT BUILD THE LIST.' This is UNCOMPUTABLE rather than FAIL because the input the artifact requires -- a representative window of partner sign-in traffic -- does not exist, and building the artifact anyway is the specific harm C-4 exists to prevent."
+    },
+    {
+      "criterion_id": "S20-AC4",
+      "criterion_verbatim": "S20-AC4 -- THE ALLOW ROWS ARE IN THE TABLE AND MATCH THE FILE: a read of the S16 table's ALLOW rows, counted, compared item-by-item against the file, and shown equal. The count alone is not the comparison.",
+      "method": "live_read",
+      "invocation": "aws dynamodb scan --table-name opal-suspicious-addresses",
+      "output_evidence": "THERE IS NOTHING TO COMPARE, AND BOTH SIDES OF THE COMPARISON ARE READ RATHER THAN ASSUMED. The S16 table opal-suspicious-addresses scans to Count 0, ScannedCount 0, with LastEvaluatedKey ABSENT -- so 0 is the true table population and not a first page. The file side does not exist per S20-AC3. An item-by-item comparison of an empty set against an absent file is vacuous, and reporting it as 'equal, 0 == 0' would be a criterion satisfied by the absence of the work rather than by the work.",
+      "denominator": "0 ALLOW rows in the table (of 0 total items, LastEvaluatedKey absent); 0 entries in a file that was not written.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Depends entirely on S20-AC3's artifact and inherits its construction. Filed as UNCOMPUTABLE rather than PASS specifically to avoid the vacuous-truth reading: this criterion is designed to catch a file and a table that disagree, and it cannot do that work when neither exists. A PASS here would be a criterion that cannot fail."
+    },
+    {
+      "criterion_id": "S20-AC5",
+      "criterion_verbatim": "S20-AC5 -- NOTHING WAS ARMED AND NO SET WAS WRITTEN: a census showing 0 BLOCK rows written by this face and 0 calls to UpdateIPSet from any identity used here; the IP sets read before and after and shown unchanged. Push state read by ls-remote + is-ancestor and stated as MEASURED.",
+      "method": "live_read",
+      "invocation": "aws wafv2 get-ip-set on both CLOUDFRONT-scope sets; aws wafv2 list-ip-sets fully paginated; aws dynamodb scan on opal-suspicious-addresses; git ls-remote origin SITEZ and git merge-base --is-ancestor",
+      "output_evidence": "BOTH SETS EMPTY: opal-blocked-ips-cloudfront (b2e008a6-40d9-4d07-bef5-1caa8b682bb3, IPV4) Addresses = [] and opal-blocked-ips-cloudfront-ipv6 (eb1a0caa-60a0-492e-a685-e5456cea8b7d, IPV6) Addresses = [], 0 entries each. THE STRONGER EVIDENCE THAT NO UpdateIPSet SUCCEEDED, and it is a property of the object rather than a search that could miss: a WAFv2 LockToken is REISSUED ON EVERY MUTATION, and these two read LockToken 59ea48dc... and 63db9af8... NOW, byte-identical to the values this same seat read at approximately 23:0xZ during the TO-OP-S-13 phase-1 census hours earlier. Unchanged LockTokens across the whole session are positive evidence that neither set was mutated by any identity used here -- a CloudTrail absence would have been weaker, because an absence cannot distinguish 'no call' from 'call not found'. 0 BLOCK ROWS: the S16 table scans to Count 0 / ScannedCount 0 with LastEvaluatedKey absent, so this face wrote no BLOCK row and no ALLOW row. THE SET POPULATION IS ALSO UNCHANGED: the fully-paginated CLOUDFRONT-scope list-ip-sets census reads 2 across 2 pages, the same denominator this seat measured before and after the unrelated TO-OP-S-13 apply. PUSH STATE MEASURED: git ls-remote origin SITEZ read against local HEAD, with merge-base --is-ancestor confirming this face's commit 85e6a3d577 is in HEAD's history; the work is LOCAL and not on origin, and push is the integrator's act under LD-0367.",
+      "denominator": "2 of 2 CloudFront-scope IP sets read, 0 addresses in each, 2 of 2 LockTokens unchanged across the session; 0 of 0 table items; CLOUDFRONT-scope set census 2 across 2 pages, unchanged.",
+      "status": "PASS",
+      "status_reason": "The bounds hold, and they hold for the right reason rather than trivially: the face stopped at its own GO condition before any write, which is precisely what that condition exists to produce. Recorded so the ease of this PASS is not mistaken for rigour -- a face that builds nothing passes a 'nothing was armed' criterion easily, so the LockToken identity is cited as the discriminating evidence rather than the empty Addresses arrays, which would read identical whether or not a write had been attempted and reverted."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The face names the control that must be able to fail: S20-AC2 -- 'a census that produces a clean list with no zero-address firms named has probably not looked for them.' The mutant is a census that reports only the firms it happened to observe and silently drops the rest, which reads as a clean, confident result and is exactly the shape that would arm BLOCK against an unobserved partner office.",
+      "expected": "If the control is real, the census must be able to RETURN zero-address firms and must distinguish the two reasons for a zero -- 'did not sign in during the window' versus 'log coverage unknown for this path' -- rather than collapsing them into one silent absence.",
+      "observed": "It returned the maximum possible number of zero-address firms, 4 of 4, and assigned every one of them the 'log coverage unknown for this path' label rather than the tidier 'did not sign in'. The distinction was forced by evidence rather than asserted: a sampled /auth/login record carries no Cookie and no tenant-bearing field and the firm-identifying credential is in an unlogged JSON body, so all four would have read zero-address even had they signed in continuously. A census that had reported 'did not sign in during the window' for these four would have passed this criterion while asserting a fact it had no instrument to establish.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The load-bearing figure -- that the window's sign-in traffic is dominated by this project's own instrumentation -- was established on TWO INDEPENDENT AXES rather than by repeating one query: a User-Agent census over the 695 exact-path events, and a 30-minute time-bin distribution over the same population. The two share no field. The exact-path census and the total-population count were each run against the same window with service-printed recordsScanned/recordsMatched statistics.",
+      "expected": "If the contamination finding is real rather than an artifact of one filter, the two axes must agree closely on the contaminated fraction despite sharing no field.",
+      "observed": "They agree to within one tenth of a percentage point: the User-Agent axis gives 680 of 695 = 97.8%, and the time-bin axis gives 679 of 695 = 97.7%. The exact-path census returned the same 695 matched against a 2,771 population on repeat invocation.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deliverable 4 -- allowlists/partner-egress.json written and versioned in the evidence store.",
+      "reason": "NOT BUILT, on the face's own GO condition and by explicit issuer direction (Msg-ID 20094, 'DO NOT BUILD THE LIST'). The only observable window is 97.8% this project's own probe traffic, so a list built from it would enter the fabric's own egress address as a partner firm's permanent edge allow rule. Row NFRA_OPSEC202609-Z-S118, ARMED."
+    },
+    {
+      "item": "Deliverable 5 -- ALLOW rows mirrored into the S16 table.",
+      "reason": "Depends on deliverable 4 and is excluded with it. The table was read and left at Count 0; nothing was written."
+    },
+    {
+      "item": "Re-measuring the aws-waf-logs-opal-gateway exact-path census.",
+      "reason": "DELIBERATELY NOT RE-RUN. 0.7.0_AE_CloudOps~S measured it (Msg-ID 20084) and re-running that seat's query would re-run that seat's frame -- repetition, not corroboration. Its figures are carried here labelled RELAYED. The independent contribution of this face is a DIFFERENT source, aws-waf-logs-opal-cloudfront, which is how the divergence from that seat's premise was found at all."
+    },
+    {
+      "item": "Any judgement on whether C-4's per-firm allow list is expressible on the WAF plane.",
+      "reason": "That question is open at 1.0.0_SA_CTO~Z and is not this seat's to settle. This face answers a DIFFERENT and prior question -- whether the data to build such a list exists at all -- and the issuer is routing the measurement to L4 as that ruling's input."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S118: the GO condition returns NEGATIVE on both halves. The handoff's premise is corrected -- aws-waf-logs-opal-cloudfront is LIVE with 2,771 records and 695 exact-path /auth/login events, 347x the gateway source -- and the face is still unbuildable, because 680 of those 695 (97.8%) carry User-Agent opal-s6-probe or opal-s7-probe and are this project's own test bursts from tonight, so a list built from the only available window would allow-list the fabric's own egress address as a partner office. Also extends Z-S93: storedBytes reads 0 on this group at the GROUP grain, not only the stream grain, while the group demonstrably holds records, so it is not a liveness oracle at either grain here. Resolves the S20-AC3 and S20-AC4 UNCOMPUTABLE-BY-CONSTRUCTION dispositions above. ARMED, disarm_owner 2.0.0_SA_COO~Z with 1.0.0_SA_CTO~Z on the C-4 question."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~U/logs/2026-09-03/session_2230-2359Z_NFRA_OPSEC202609_TO-OP-S-13.md",
+  "compiler_tools": [
+    {
+      "tool": "CloudWatch Logs Insights",
+      "invocation": "Four queries over aws-waf-logs-opal-cloudfront across 2026-09-03T10:20:36Z to 2026-09-04T01:24:12Z: a stats count() population; an exact-path census on the three portal auth paths; a User-Agent parse across that population; and a bin(30m) time distribution",
+      "result": "Population 2,771 (recordsScanned == recordsMatched, so a true denominator). Exact-path 695, all /auth/login, 3 addresses. User-Agent: opal-s6-probe 480, opal-s7-probe 200, 15 others. Time bins: 439 + 240 in the 23:30 and 00:00 bins. The three auth paths were taken from the AuthLoginRateLimit rule's own scope-down statement rather than guessed."
+    },
+    {
+      "tool": "aws wafv2 get-ip-set / list-ip-sets (paginated)",
+      "invocation": "Both CLOUDFRONT-scope sets read for contents and LockToken; the scope census fully paginated with a printed denominator",
+      "result": "Both sets 0 addresses; both LockTokens byte-identical to the values read hours earlier in this session, which is the positive evidence for S20-AC5 that no UpdateIPSet succeeded. Scope census 2 across 2 pages -- page 1 carried a NextMarker, so it was never treated as the population."
+    },
+    {
+      "tool": "aws dynamodb list-tables / scan",
+      "invocation": "list-tables for the expected firm set; scan on opal-suspicious-addresses for the S16 row census",
+      "result": "38 tables with LastEvaluatedTableName absent, 4 opal-partner-*. Table scans to Count 0 / ScannedCount 0 with LastEvaluatedKey absent -- a true zero, not a first page."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py (via safe-commit)",
+      "invocation": "fired on the commit carrying row Z-S118, which was appended and committed in the same act",
+      "result": "OK -- 1 new row of 118 total checked, 117 pre-existing not re-graded. The row's id was chosen after re-measuring HEAD, INDEX and WORKTREE id sets in the same breath as the write, because two uncommitted rows had already been destroyed on this shared file tonight."
+    }
+  ]
+}
