@@ -1,0 +1,137 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPSEC202609.TO-OP-S-17B",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-17B.object-lock-on-cases.md",
+  "group": "OTHER",
+  "vintage_commit": "cb67888289"
+ },
+ "assignee": "0.7.0_AE_CloudOps~X",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+  "vintage_commit": "a1511942a4",
+  "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-17B.object-lock-on-cases.md"
+ },
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-04/session_0.7.0_AE_CloudOps~X_1740-1830Z_OPSEC_S17B_OBJECT_LOCK.md",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/opsec/s3_evidence.tf",
+   "kind": "terraform",
+   "commit_or_etag": "cb67888289",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Adds aws_s3_bucket_object_lock_configuration.security_evidence (GOVERNANCE, 365 days) and corrects the two comment blocks this change falsifies. Applied via safe-apply on the opsec root: 'Creation complete after 1s' / 'Apply complete! Resources: 1 added, 0 changed, 0 destroyed.' Live get-object-lock-configuration reads back ObjectLockEnabled=Enabled, Mode=GOVERNANCE, Days=365. Ledger opsec-s17b-object-lock-cases CLOSED, 4 of 4 legs proven.",
+   "artifact_covered_by": ["S17B-AC1", "S17B-AC5"]
+  },
+  {
+   "path_or_key": "arn:aws:s3:::opal-security-evidence",
+   "kind": "s3_object",
+   "commit_or_etag": "object-lock-enabled-2026-09-04T18:09:25Z",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "The live bucket. Object Lock enabled IN PLACE on an existing versioned bucket at 2026-09-04T18:09:25Z; no new bucket, no migration, no replacement. The coverage boundary is written into the bucket's own documentation (the s3_evidence.tf header) with that timestamp and with both demonstration keys named.",
+   "artifact_covered_by": ["S17B-AC2", "S17B-AC3", "S17B-AC4"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "S17B-AC1",
+   "criterion_verbatim": "S17B-AC1 -- THE LOCK IS ON AND READ BACK ON THE APPLIED PLANE: get-object-lock-configuration pasted showing ObjectLockEnabled and GOVERNANCE, plus the default retention period. A Terraform plan or apply output alone does NOT satisfy this -- read the live configuration.",
+   "method": "live_read",
+   "invocation": "aws s3api get-object-lock-configuration --bucket opal-security-evidence, run AFTER the apply. Deliberately not the plan or apply output, which the criterion excludes.",
+   "output_evidence": "LIVE READ, 2026-09-04T18:1xZ: {\"ObjectLockConfiguration\": {\"ObjectLockEnabled\": \"Enabled\", \"Rule\": {\"DefaultRetention\": {\"Mode\": \"GOVERNANCE\", \"Days\": 365}}}}. THE PRE-STATE IS ALSO RECORDED so the read is a differential rather than an assertion: the same call before the apply returned ObjectLockConfigurationNotFoundError, so this was a fresh enable and not a re-apply of something already present. THE DEFAULT RETENTION PERIOD IS 365 DAYS AND ITS FLOOR IS MEASURED RATHER THAN CHOSEN: the sentinel builds these case files from WAF logs, and that log group is retention_in_days = 90 (waf.tf:20-23). A case file whose retention did not EXCEED 90 days would expire no later than the source it exists to outlive, which defeats the point of writing it down. 90 days is therefore a hard floor derived from the pipeline; 365 clears it four times over and covers an annual review cycle, while a multi-year period would import a records-retention posture no endpoint in this project states, on a prefix growing at roughly 400 objects per 4.5 hours.",
+   "denominator": "1 bucket; 1 live configuration read after the act and 1 before it.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S17B-AC2",
+   "criterion_verbatim": "S17B-AC2 -- THE FORWARD-ONLY BOUNDARY IS DEMONSTRATED, NOT ASSERTED, AND THIS IS THE CRITERION THAT MATTERS: get-object-retention on a PRE-EXISTING case object showing NO retention, AND on a NEWLY-WRITTEN one showing GOVERNANCE. A criterion that only checked the bucket's configuration would PASS while every existing case file is uncovered. Both reads pasted, both keys named, with the enable timestamp between them.",
+   "method": "live_read",
+   "invocation": "aws s3api get-object-retention on two named keys, both read after the enable. The PRE-EXISTING witness is the OLDEST object in the prefix; the NEWLY-WRITTEN witness is a REAL sentinel-written case file that landed 15 seconds after the enable -- no probe object was created.",
+   "output_evidence": "ENABLE TIMESTAMP 2026-09-04T18:09:25Z, and it sits between the two objects' WRITE times. PRE-EXISTING, cases/2026/09/04/103.203.57.3_32/10c6ceca71fe/summary.json, written 2026-09-04T02:47:46Z: get-object-retention returns NoSuchObjectLockConfiguration -- 'The specified object does not have a ObjectLock configuration'. NO RETENTION. NEWLY-WRITTEN, cases/2026/09/04/172.202.121.66_32/8038c0e01b53/summary.json, written 2026-09-04T18:09:40Z: {\"Retention\": {\"Mode\": \"GOVERNANCE\", \"RetainUntilDate\": \"2027-09-04T18:09:39.870000+00:00\"}}. Note the RetainUntilDate runs 365 days from the OBJECT'S write, not from the enable. THE CONTROL COULD HAVE FAILED AND DID NOT: had the pre-existing object returned retention, the forward-only finding would have been wrong and the whole coverage statement would have had to be re-derived; the face required that be said rather than proceeded past. NO PROBE OBJECT WAS WRITTEN, and that was a deliberate choice with a reason: any object written now acquires 365-day GOVERNANCE retention and becomes undeletable without a bypass, so a synthetic probe would have left permanent litter in an evidence store. The prefix gains roughly 90 objects an hour, so a real production write was available within seconds and is stronger evidence than a driven one. A FURTHER DISCRIMINATION WORTH RECORDING: before the enable, get-object-retention returned 'Bucket is missing Object Lock Configuration' for BOTH a real key and a deliberately nonexistent one -- the call was UNDISCRIMINATING and could not have supported a pre-enable 'no retention' claim. It only becomes discriminating after the enable, when the error moves from bucket-level to object-level. That is why both reads in this criterion are taken after the act.",
+   "denominator": "2 objects read, 1 either side of the boundary; 1 pre-enable control read that established the call was undiscriminating until the lock existed.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S17B-AC3",
+   "criterion_verbatim": "S17B-AC3 -- NOTHING WAS RE-WRITTEN: a census showing the pre-existing objects' LastModified UNCHANGED across the act, with the denominator printed. Evidence of any copy-object, re-put-object or bulk re-write of cases/ FAILS this criterion even if the retention outcome looks better. The method IS the criterion.",
+   "method": "diff",
+   "invocation": "aws s3api list-objects-v2 --prefix cases/ before the act and again after it, both counted CLIENT-SIDE off the merged listing; a key->LastModified map captured from the first and compared key-by-key against the second.",
+   "output_evidence": "DENOMINATOR 839 pre-act keys, measured at 2026-09-04T17:4xZ. AFTER THE ACT: 839 of 839 still present, 0 missing, and ZERO LastModified values changed. Nothing was re-written by any verb -- no copy-object, no re-put, no bulk operation was issued at any point, and the census is the differential proof rather than a promise. THE COMPARISON IS KEY-BY-KEY AND NOT A COUNT, WHICH MATTERS ON THIS PREFIX: the sentinel writes continuously, so the object count is a moving target and rose by 3 during the act itself. A count-based census would have shown a DIFFERENCE and said nothing about whether any existing object was touched; only comparing the same keys' timestamps answers the criterion. THE ISSUER'S NUMBER WAS 438 AT 13:1xZ AND MINE IS 839 AT 17:4xZ -- the prefix nearly doubled in about four and a half hours, which is why the face demanded the count be re-read at the assignee's own vintage rather than carried.",
+   "denominator": "839 of 839 pre-existing keys compared; 0 changed, 0 missing; 3 new objects arrived during the act and are correctly outside the pre-existing set.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S17B-AC4",
+   "criterion_verbatim": "S17B-AC4 -- THE BYPASS IS ENUMERATED: every principal holding s3:BypassGovernanceRetention on this bucket, printed with its denominator and its instrument, on the APPLIED plane. Governance mode is a control with a documented override; a reader told 'Object Lock ON' and not told who can bypass it has been given a stronger impression than the control supports. Simulate rather than filter policy documents -- an inherited wildcard matches no text.",
+   "method": "live_read",
+   "invocation": "aws iam simulate-principal-policy for s3:BypassGovernanceRetention against arn:aws:s3:::opal-security-evidence/*, ONE --resource-arns per call, run over every principal in a population DERIVED at this vintage rather than inherited: list-roles and list-users, both counted client-side off streamed values rather than with --query length(), which returns the PAGE size.",
+   "output_evidence": "DENOMINATOR 231 principals (224 roles + 7 users), nothing sampled. ALLOWED 3, denied 228, errored 0. THE THREE ARE ALL HUMAN OR INTERACTIVE IAM USERS AND ZERO ARE ROLES: user/Andrew_Berman, user/Andrew_Berman_Console, user/Opal_Terminal. THAT IS THE SHAPE A READER NEEDS: no service principal, no automation, no CI role and no Lambda execution role can bypass governance retention on this bucket, so the control is not silently undermined by the machinery that writes to it. The override is held only by identities a person signs in as. THE CONTROL STORY, REPORTED BECAUSE MY FIRST CHOICE OF CONTROL WAS WRONG: simulate does not validate action names, so a deny carries no information unless something is shown returning allowed. My first positive control -- infrastructure-snapshot-role against s3:GetObject on this ARN -- returned implicitDeny, because that role's breadth is in Lambda and not in this bucket. A second control on the same resource ARN, user/Andrew_Berman against s3:GetObject, returned allowed, which is what establishes that the call shape and the resource ARN resolve. The negative control, a deliberately bogus action name, returned implicitDeny as expected. Without the fallback control the sweep would have produced a universal deny indistinguishable from a broken probe.",
+   "denominator": "231 principals simulated of 231 derived (224 roles + 7 users); 3 allowed, 228 denied, 0 errors; 2 positive controls attempted and 1 fired; 1 negative control fired.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S17B-AC5",
+   "criterion_verbatim": "S17B-AC5 -- BASELINE QUOTED, 0-DIFF AFTER, NOTHING ELSE RODE: the root's UNSCOPED plan before, the changed-resource list enumerated with its count, the UNSCOPED re-plan after, ledger CLOSED on exercised evidence, push state MEASURED. If the root carries a known non-converging diff, file UNVERIFIABLE-BY-INSTRUMENT and substitute -- the purpose is nothing-else-rode; the 0-diff is only its measure.",
+   "method": "command",
+   "invocation": "terraform plan (unscoped) on infra/aws/terraform/opsec before the edit, after the edit, after the apply, and again after the documentation edit; safe-apply.sh apply; deploy_ledger.py close-leg/close.",
+   "output_evidence": "THE 0-DIFF IS AVAILABLE ON THIS ROOT AND WAS ACHIEVED, so nothing needs the substitute clause. BASELINE, before any edit: 'No changes. Your infrastructure matches the configuration.' CHANGED-RESOURCE LIST: 'Plan: 1 to add, 0 to change, 0 to destroy', the single resource being aws_s3_bucket_object_lock_configuration.security_evidence. THE REPLACEMENT CHECK, which is the one that mattered here: grep counts of 'must be replaced', 'forces replacement' and 'will be destroyed' were ALL ZERO, and the aws_s3_bucket resource does not appear in the change set at all. That is not luck -- object_lock_enabled on the bucket resource is CREATE-TIME-ONLY, so using it would have planned a REPLACEMENT of a live evidence store holding 839 case files; the separate configuration resource was chosen precisely to avoid that, and the plan is the proof it worked. APPLY: '1 added, 0 changed, 0 destroyed'. RE-PLAN after the apply: 'No changes.' RE-PLAN again after the documentation edit: 'No changes.' -- confirming that edit was comment-only. The apply was UNSCOPED rather than targeted because this root's baseline was genuinely clean, unlike portal-auth. LEDGER opsec-s17b-object-lock-cases CLOSED on 4 of 4 legs, each carrying live reads rather than the apply's return code. PUSH STATE: UNREAD at this vintage, stated as unread rather than assumed.",
+   "denominator": "1 root; 4 unscoped plans read (before edit, after edit, after apply, after doc edit); 1 resource added of 1 planned; 0 replacements; 4 of 4 ledger legs closed.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The face names S17B-AC2's pre-existing-object read as the control that must be able to fail: if it returned retention, the forward-only finding would be wrong and the coverage statement would have to be re-derived. A SECOND control was necessary on S17B-AC4 and a THIRD on the AC2 call itself, both because a deny and a broken probe are indistinguishable without one.",
+   "expected": "AC2: a pre-existing object returns retention, falsifying forward-only. AC4: a universal deny that is actually a broken call or unresolvable ARN. AC2's instrument: a 'no retention' reading that is really 'the bucket has no lock configuration'.",
+   "observed": "ALL THREE BEHAVED AS DESIGNED. (1) The AC2 control did NOT trip and was genuinely capable of it: the pre-existing object returned NoSuchObjectLockConfiguration while an object written 15 seconds after the enable returned GOVERNANCE, so forward-only is demonstrated rather than assumed. (2) The AC4 positive control FAILED ON MY FIRST CHOICE -- infrastructure-snapshot-role returned implicitDeny for s3:GetObject on this bucket because its breadth is in Lambda, not S3 -- and a second control, user/Andrew_Berman on the same ARN, returned allowed. Without that fallback the 3-of-231 result would have been indistinguishable from a broken sweep. (3) The AC2 instrument control fired BEFORE the act and changed the plan: pre-enable, get-object-retention returned the identical error for a real key and a deliberately nonexistent one, proving the call was undiscriminating until the lock existed, which is why both AC2 reads were taken after the enable.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Load-bearing readings taken more than once or on separate instruments. The cases/ population was listed before and after the act and compared key-by-key rather than by count. The lock configuration was read before the apply (absent) and after (present). The unscoped plan was run four times across the change. The principal population was re-derived at this vintage rather than carried from the 224+7 measured ten hours earlier.",
+   "observed": "STABLE. The pre/post listings agree on all 839 pre-existing keys with zero LastModified changes. The lock configuration reads absent before and Enabled/GOVERNANCE/365 after. All four plans behave as expected: clean, 1-to-add, clean, clean. The re-derived population came back 224 roles + 7 users, identical to the earlier measurement -- which is a match rather than an assumption, since it was measured again rather than reused.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Any re-write of the 839 pre-existing case objects to give them retention",
+   "reason": "Forbidden by the face as a RULING rather than a preference, and S17B-AC3 makes the method the criterion. Re-PUTting an evidence object changes its write timestamp, and a store whose records were all re-stamped on one day to satisfy a control is worse evidence than one that is honestly unprotected. A copy-in-place is the same defect wearing a different verb. Neither was done; the census proves it."
+  },
+  {
+   "item": "object_lock_enabled on the aws_s3_bucket resource",
+   "reason": "Create-time-only. Setting it on this bucket would have planned a REPLACEMENT of a live evidence store holding 839 case files. The separate aws_s3_bucket_object_lock_configuration resource enables the lock in place, and the plan's zero forces-replacement lines are the evidence that this was the right choice rather than an equivalent one."
+  },
+  {
+   "item": "A synthetic probe object written to demonstrate S17B-AC2's newly-written half",
+   "reason": "Any object written after the enable acquires 365-day GOVERNANCE retention and becomes undeletable without a bypass, so a probe would have left permanent litter in an evidence store. The prefix gains roughly 90 objects an hour, so a REAL sentinel-written case file was available 15 seconds after the enable and is stronger evidence than a driven write."
+  },
+  {
+   "item": "Exercising the removal of Object Lock to prove the rollback",
+   "reason": "Object Lock cannot be disabled once enabled on a bucket -- documented AWS behaviour. The rollback is therefore PARTIAL and is stated at its real shape rather than optimistically: the default retention RULE can be removed so future objects stop acquiring retention, but the bucket stays Object-Lock-enabled permanently and already-retained objects keep retention for up to 365 days absent a bypass holder. The removal path was not exercised and will not be on a live evidence store."
+  }
+ ],
+ "surprises": [],
+ "compiler_tools": [
+  {
+   "tool": "comp-read",
+   "invocation": "comp-read infra/aws/terraform/opsec/s3_evidence.tf --for '<question>' ; comp-read ... --enumerate 'object_lock'",
+   "result": "The --for read gave the file's shape and its 17 qualifiers before any edit. The --enumerate run is what resolved a guard failure correctly rather than by overriding it: my edit script refused on 'object_lock already exists', and the enumerate showed exactly ONE occurrence -- the COMMENT at :42 that I was replacing -- with the tool's own WARN that every hit was a FRAGMENT and an anchored probe would return zero. The guard was matching its own target; I narrowed it to non-comment lines rather than deleting it."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'opal-security-evidence' infra/aws/terraform ; comp-find 'retention period|days *= *[0-9]+' over the project tree",
+   "result": "The first located the owning root in 6 hits across 561 files. The second is what made the 365-day period DEFENSIBLE rather than invented: it found no evidence-retention period stated anywhere in the project, and surfaced the WAF log group's retention_in_days = 90 -- the source data these case files are built from, which is the measured floor the choice is anchored to."
+  },
+  {
+   "tool": "comp-schedule",
+   "invocation": "issuer preflight, not re-run by the assignee",
+   "result": "The face states its own C1 correction (20 lines -> 4 gates, not the tool's 21 -> 5, because it counts a log QUOTING a sentinel as a gate) and declares it ORIENTATION rather than a criterion. This face discharges no gate and builds no monitor, so nothing was re-run. Stated rather than left blank."
+  },
+  {
+   "tool": "comp-iam",
+   "invocation": "DECLARED-NOT-APPLICABLE for the verdict, per the preflight",
+   "result": "The preflight says comp-iam is a DESIRED-plane lens whose silence is never an ALLOW, and that S17B-AC4's verdict must come from simulate-principal-policy on the applied plane. That is what was run: 231 principals, one --resource-arns per call, controls in separate invocations. comp-iam was not used to reach the bypass answer."
+  }
+ ]
+}
