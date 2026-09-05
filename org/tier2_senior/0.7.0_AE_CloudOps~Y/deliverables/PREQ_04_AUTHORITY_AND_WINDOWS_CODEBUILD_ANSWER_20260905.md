@@ -139,3 +139,49 @@ unsatisfiable until that environment is built and proven.
 2. **The product boundary was not verified.** `C:\Users\AndrewBerman\Downloads\scratchpad_tmp`
    at `c71e7300080c80bf3f9a44c1f3d094c3485e58ca` "expected clean" was not measured by this
    seat; it is outside the workspace and nothing in the questions required it.
+
+---
+
+# ADDENDUM — Q13 has an exact, already-ratified answer, authored by the asker
+
+Added after the first send. A `comp-find --corpus raw` census (**DENOMINATOR: 2335 hits across
+290,348 files scanned**, 11723 unreadable / 9004 binary not searched) — a different instrument
+from the `Grep` used above, so this is corroboration, not repetition — surfaced PREQ-04's full
+history in `1.0.0_SA_CTO~Y`'s inbox. It does not change any answer above, but it replaces my
+generic "an authority artifact is missing" with the fabric's own precise finding.
+
+**PREQ-04 executable GO was REFUSED, and the refusal was accepted and closed.**
+
+- `20260904T142934Z` — `4.0.0_SA_CRO~Y` → `1.0.0_SA_CTO~Y`: *"CRO INDEPENDENT RULING: ACCEPT
+  REFUSE EXECUTABLE GO for P3-TO-05-PREQ-04 generation 199."* Grounds given: **no authorized
+  or provisioned disposable guest exists**; no explicit authority for the byte-identical
+  77-file guest copy/path, the four NCSI contacts, guest firewall/Job Object mutations, or
+  rollback; no complete containment/evidence implementation is materialized. *"Nothing may
+  execute, mutate, or contact an endpoint. A1/B/product/Fabric/deploy/push holds remain."*
+- `20260904T143649Z` — `3.0.0_SA_CVO~Y`: PREQ-04 **closed READ-ONLY DESIGN ONLY at generation
+  200**, verifier PASS 132/132.
+- `20260904T143717Z` — `4.0.0_SA_CRO~Y` ACKs that generation-200 closure.
+
+**The exact missing item, in the asker's own words (gen-199 ruling):**
+
+> *"Exact next authority must come from **Andrew**: select the disposable environment
+> (**Hyper-V guest versus the previously recommended CodeBuild/quarantined AWS boundary**) and
+> explicitly authorize its provisioning/copy, scoped network contacts, containment mutations,
+> evidence capture, and rollback. Until then PREQ-04 remains READ-ONLY DESIGN ONLY."*
+
+**Three consequences that bear on the 13 questions:**
+
+1. **The gate is a human selection, not a supplied pin.** No set of values from this seat —
+   or any agent seat — can clear it. Asking an AE seat for account/role/project pins cannot
+   unblock PREQ-04, because the blocker is Andrew's environment decision plus five explicit
+   authorizations, all of which are reserved to him by CRO's own accepted ruling.
+2. **"The PREQ-04 disposable Windows CodeBuild path" is not a selected path.** The ruling
+   holds CodeBuild open as *one of two* candidates against a Hyper-V guest. Treating CodeBuild
+   as decided would adopt a premise the governing ruling explicitly leaves open.
+3. **My Q7 finding and the ruling agree from independent directions.** The ruling refuses on
+   *"no authorized/provisioned disposable guest exists"*; I measured, separately and without
+   having seen it, that no Windows CodeBuild capability exists in this estate at all. Same
+   gap, two instruments, neither derived from the other.
+
+**Net:** the honest answer to `4.0.0_SA_CRO~Y`'s Q13 is that the missing authority was already
+identified, ruled on, and closed by `4.0.0_SA_CRO~Y` on 2026-09-04, and it is pending Andrew.
