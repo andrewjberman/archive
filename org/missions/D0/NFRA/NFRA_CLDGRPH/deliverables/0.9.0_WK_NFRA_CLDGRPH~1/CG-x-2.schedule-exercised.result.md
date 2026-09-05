@@ -6,6 +6,69 @@
 
 ---
 
+## THE PASS-3 HEADLINE (2026-09-05 13:0xZ) -- LIMB (iii) IS CAUGHT; THIS SUPERSEDES LIMB (iii) ONLY
+
+**D9-AC4 PASSES on a caught window, and the two honest NOT-CAUGHTs below are not retracted --
+they are explained.** Pass 3 was spawned into a live producer burst. Between 12:10:36Z and
+12:23:09Z the marker stamped EIGHT times, roughly every 60-90 s; a second burst ran 12:47-12:54Z.
+Across the 45-minute bounded poll (`behind.sh --poll 2700`, 12:10:59Z -> 12:56:01Z, run to its
+declared bound and not stopped on a favourable read) the detector caught the BEHIND window
+**fourteen** times. The deciding lines:
+
+```
+BEHIND_CAUGHT=true
+POINTER_MOVED_BY_READ=false
+LEGIT_REBUILD_REPORTED=true
+```
+
+**Nothing was provoked.** No derive, no rebuild, no engine, no marker write, no pointer write, no
+AWS mutation of any kind. The stamps are the estate's own; this worker only read. The cause of
+passes 1 and 2's NOT-CAUGHT is now measured rather than argued: those passes ran 5h40m against a
+marker frozen at `2026-09-05T05:55:42.571886+00:00`, and a BEHIND window exists only between a
+stamp and the pointer's advance. There was no window to catch, and the instrument said so.
+
+**THREE INSTRUMENT DEFECTS WERE FOUND AND FIXED IN THIS PASS, EACH BY A CONTROL AND NOT BY
+READING THE OUTPUT.** They are listed here because two of them could have decided the criterion:
+
+1. **`NFRA_CLDGRPH-S57`, the issuer's row, DISARMED BY EXERCISE.** The two `aws s3 cp` reads no
+   longer silence stderr; the `s3 cp` rc and the jq rc are captured, empty bodies and null fields
+   are guarded, every evidence row carries `read_ok`, and the report emits **`READ_FAILED` as a
+   third outcome** distinct from both true and false. Demonstrated, not asserted: the positive
+   control (a scratch copy pointed at a non-existent bucket, separate evidence file, the real
+   pointer untouched) prints `READS_OK=0 of 1`, `BEHIND_CAUGHT=READ_FAILED`,
+   `POINTER_MOVED_BY_READ=UNREAD`, `LEGIT_REBUILD_REPORTED=UNREAD` and the 404s verbatim with
+   their rc. **S57 disarms only when the instrument actually prints the third outcome; it does.**
+2. **`NFRA_CLDGRPH-W1-S19`, filed this pass -- `POINTER_MOVED_BY_READ` was a DIFFERENCE where the
+   criterion names a CAUSE.** A client read costs ~40 s and the burst stamped every 60-90 s, so an
+   advance lands inside the read window by arithmetic: 10 of the 14 behind-reads had the pointer
+   move while the read was in flight, and the bare before-vs-after difference would have printed
+   `POINTER_MOVED_BY_READ=true` and FAILED this criterion on a world that satisfies it -- the exact
+   mirror of S57's defect, on the same script, in the opposite direction. Replaced with a
+   three-limb ATTRIBUTION using the method THIS ORDER prescribes, and the strict unattributed
+   difference is still printed on the next line so a grader can take either reading.
+3. **Two defects of this worker's OWN new code, both caught by running the control instead of
+   trusting the patch, and recorded so they are not rediscovered.** (a) The first form of the S57
+   fix returned an EMPTY value field on a failed read, and TAB IS AN IFS WHITESPACE CHARACTER, so
+   `IFS=$'\t' read` collapses adjacent tabs into one delimiter and every later field shifts left;
+   the verdict was never wrong (`read_ok` was correctly false) but the error text landed in the
+   marker field. Fixed with a `READ_FAILED` sentinel so no field is ever empty. (b) The captured
+   stderr carried the `.tools/aws` shim's **CR** -- the same CRLF that W1-S18 found on night.sh --
+   and a bare CR inside a JSON string made the READ_FAILED row, the very row the clause exists to
+   produce, unparseable by jq. **And fixing that one exposed a third hiding beneath it:** jq's `//`
+   is the ALTERNATIVE operator and fires on `false` as well as `null`, so
+   `.read_ok // <derived>` silently discarded an explicit `read_ok: false` and counted the failed
+   read as OK. While jq was still erroring on the CR it emitted nothing, `grep -c` read 0, and
+   `READS_OK=0` was RIGHT FOR THE WRONG REASON. Two defects masking each other, the second visible
+   only once the first was fixed -- which is why the control was re-run after every patch rather
+   than once at the end.
+
+**WHAT IS STILL OPEN AND IS NOT THIS SEAT'S TO CLOSE:** whether the ATTRIBUTED reading of
+`POINTER_MOVED_BY_READ` is the criterion's reading, or whether the strict difference governs and
+D9-AC4 fails. That is a grading question and it belongs to `3.0.0_SA_CVO` at L9 (W1-S19, ARMED,
+same standing as W1-S17). Both numbers are printed on adjacent lines and neither is hidden.
+
+---
+
 ## THE PASS-2 HEADLINE (the RE-HAND) -- READ THIS FIRST
 
 **THE ORDER IS STILL NOT MET AND IS NOT FLIPPED -- but on ONE criterion now, not two.**
@@ -802,4 +865,483 @@ DISTINCT_SERVED=2026-09-05T03:31:16.793943+00:00
   2026-09-05T08:08:01.256244000Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00
   2026-09-05T08:10:11.775480900Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00
   2026-09-05T08:12:16.819642400Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00
+```
+
+---
+
+# PASS 3 (2026-09-05 12:10Z -> 13:0xZ) -- LIMB (iii), THE CAUGHT WINDOW
+
+## THE POLL
+
+`bash behind.sh --poll 2700`, started **2026-09-05T12:10:59Z**, ended **2026-09-05T12:56:01Z** at
+its declared bound. 33 client reads through `.tools/comp-kuzu` this pass (115 cumulative in
+`behind_evidence.jsonl` across the three passes), interleaved with cheap marker-only polls: the
+loop reads the marker every ~5-10 s (a ~2 s S3 GET) and spends the expensive ~40 s client read only
+when the marker has MOVED or on a periodic baseline, because a read-everything loop samples slower
+than the ~30 s window it is hunting and would miss it for an instrument reason rather than a world
+reason.
+
+**The burst, from the poll's own marker line** (this is what passes 1 and 2 did not have):
+`12:10:36.884158` -> `12:11:27.375244` -> `12:12:05.739979` -> `12:13:33.832979` ->
+`12:14:42.810835` -> `12:14:56.469712` -> `12:16:43.795811` -> `12:16:58.855158` -> ... and a
+second burst `12:47:37` -> `12:50:07` -> `12:50:45` -> `12:52:19` -> `12:54:31`. Twenty-one
+distinct marker values are in the evidence file; passes 1 and 2 saw two.
+
+## THE CATCH (limb iii's first arm)
+
+| field | value |
+|---|---|
+| `BEHIND_CAUGHT` | **true** |
+| `BEHIND_READ_AT` | `2026-09-05T12:12:47.239769100Z` |
+| `BEHIND_MARKER` | `2026-09-05T12:12:05.739979+00:00` |
+| `BEHIND_SERVED` | `2026-09-05T12:11:27.375244+00:00` |
+| `BEHIND_NODE_COUNT` | `27292` |
+| behind reads in the file | **14** |
+
+The client answered while behind, with its age line, exactly as limb (iii) requires:
+
+```
+VINTAGE: Built from the estate as of 2026-09-05 12:11:27 UTC.  [vintage=2026-09-05T12:11:27.375244+00:00 manifest=a15d4e2746db prefix=projection/2026-09-05T12:11:27.375244+00:00/]
+```
+
+The marker was 38.4 s ahead of the served artifact at that read: the stale answer WITH its age,
+returned by a client that has no rebuild path (`CLIENT_REBUILD_PATH_HITS=0`, D9-AC5).
+
+## THE READ MOVED NOTHING (limb iii's second arm) -- ATTRIBUTED, WITH THE STRICT NUMBER BESIDE IT
+
+```
+POINTER_MOVED_BY_READ=false
+POINTER_ADVANCED_DURING_A_BEHIND_READ=10 of 14 behind reads   (the STRICT before-vs-after difference, printed unattributed and unhidden)
+ATTRIB_UNATTRIBUTED_ADVANCES=0
+```
+
+Three limbs, any one of which can fail it:
+
+- **L1 PROVENANCE -- 10 of 10 advances SERVICE-only.** Every `globgrph-projection-worker` task
+  active across an advancing behind-read, described from ECS and classified by its OWN `startedBy`:
+  all return `Started by Eventbridge Pipes`. This is PROVENANCE, not a name-match against a list --
+  the discipline D9-AC2 was amended onto after a name list convicted a scheduled producer. An
+  EMPTY `startedBy`, the signature of an ad-hoc `RunTask` by a principal, is classified
+  `NON_SERVICE` and fails the limb. Captured to `behind_task_provenance.jsonl` **with its
+  measurement time** (`2026-09-05T12:57:23Z`) because ECS drops STOPPED tasks after about an hour --
+  the W1-S16 phenomenon -- and a report making the call live would print a different answer
+  tomorrow than it printed today. 36 tasks named by the behind rows, 34 described, 2 already aged
+  out; both aged-out tasks appear on BOTH sides of their read and so are in no active set.
+- **L2 KEYING -- 10 of 10.** Every new pointer vintage equals a marker `committed_at_iso` observed
+  in this same evidence file (21 distinct markers). The pointer's vintage is minted by the marker
+  writer; a read does not write the marker.
+- **L3 BASE RATE, the negative control with its denominator -- 94 reads whose marker was UNCHANGED
+  from the previous read advanced the pointer ZERO times**, while 20 reads whose marker HAD moved
+  account for all 10 advances. If a read moved pointers, the 94 marker-static reads are where that
+  would show. The advance tracks the MARKER. It does not track the READ.
+
+The instrument's own falsifier was RUN, not declared: `behind_attribute.py` against an EMPTY
+provenance file prints `POINTER_MOVED_BY_READ=true` with `ATTRIB_UNATTRIBUTED_ADVANCES=6` and every
+advance labelled `PROVENANCE_UNMEASURED`. It does not default to false.
+
+## THE CAN-FAIL ARM (limb iii's third arm)
+
+```
+LEGIT_REBUILD_REPORTED=true
+LEGIT_REBUILD_AT=2026-09-05T12:13:35.337534700Z
+LEGIT_REBUILD_SERVED=2026-09-05T12:12:05.739979+00:00
+```
+
+The SAME detector that reported the stale answer at 12:12:47Z reported the caught-up one 48 s
+later: served advanced `12:11:27.375244` -> `12:12:05.739979`, produced by Pipe-started tasks
+`2ece7b4df961` and `ba23a328741f`. The cycle repeats through both bursts and the world ends the
+poll caught up (marker == served == `2026-09-05T12:54:31.241426+00:00`). A legitimate,
+marker-triggered rebuild, reported by the same read, with no question having caused it.
+
+## THE S57 POSITIVE CONTROL -- the THIRD OUTCOME, exercised
+
+Run on a scratch COPY of `behind.sh` pointed at a non-existent bucket, writing to its own evidence
+file. The live pointer, the live marker and the deliverable's own evidence file were not touched.
+
+```
+READS_OK=0 of 1  (rows carrying an EXPLICIT read_ok field: 1 of 1)
+BEHIND_CAUGHT=READ_FAILED
+READ_FAILED=true  1 of 1 reads could not read the marker, the pointer or the served vintage
+POINTER_MOVED_BY_READ=UNREAD
+LEGIT_REBUILD_REPORTED=UNREAD
+--- the read errors, verbatim:
+  2026-09-05T13:05:21.792671900Z  rc=1  err=S3_CP_RC_1 download failed: s3://...-NO-SUCH-BUCKET-s57-control/warehouse/_branch_head.main.json to - An error occurred (404) when calling the HeadObject operation: Not Found ...
+```
+
+A world that is not behind prints `BEHIND_CAUGHT=false`; a world that could not be read prints
+`BEHIND_CAUGHT=READ_FAILED`. They are no longer the same line.
+
+## CRITERIA -- PASS 3
+
+| id | invocation | deciding output | status |
+|---|---|---|---|
+| D9-AC1 | `night.sh \| grep -E '^(NIGHT_VINTAGE\|PREV_EVENING)='` | `NIGHT_VINTAGE=2026-09-05T02:11:10.919000+00:00` / `PREV_EVENING=2026-09-04T18:11:48.783142+00:00` | PASS (pass 2, carried by citation) |
+| D9-AC2 | `night.sh \| grep -E '^(REBUILD_TRIGGER\|SEAT_CAUSED_REBUILDS)='` | `REBUILD_TRIGGER=events-rule/opal-globgrph-derive-runner-nightly` / `SEAT_CAUSED_REBUILDS=0 of 15` | PASS (pass 2, carried by citation) |
+| D9-AC3 | `latency.sh \| grep -E '^STAMP_TO_ANSWER_S='` | `STAMP_TO_ANSWER_S=82.186` | PASS (pass 2, carried by citation) |
+| **D9-AC4** | `behind.sh \| grep -E '^(BEHIND_CAUGHT\|POINTER_MOVED_BY_READ\|LEGIT_REBUILD_REPORTED)='` | `BEHIND_CAUGHT=true` / `POINTER_MOVED_BY_READ=false` / `LEGIT_REBUILD_REPORTED=true` | **PASS (pass 3, MEASURED HERE)** |
+| D9-AC5 | `comp-read kuzu_cli.py --enumerate 'ensure_fresh\|kuzu_nessie_load\|_incremental_or_serve_stale'` | `ENUMERATE: 0 hit(s) across 169 lines` | PASS (pass 2, carried by citation) |
+| D9-AC6 | a reading act | recorded, no verdict | UNVERIFIABLE-BY-INSTRUMENT -- `3.0.0_SA_CVO` at L9 |
+
+## D9-AC6 -- PASS-3 AMENDMENT TO THE READING (a reading act; NO verdict)
+
+Limb (iii) of FWD-2's DONE WHEN -- *"no question is ever the reason a rebuild starts"* -- now has
+both of its halves on the record rather than one. The NEGATIVE half was always the stronger one and
+is unchanged: the client has no rebuild path at all (`CLIENT_REBUILD_PATH_HITS=0`), so a question
+CANNOT start a rebuild, which is a structural fact and not a sampling result. What passes 1 and 2
+could not supply was the POSITIVE half -- an actual behind window, actually read through, actually
+returning the stale answer with its age while a rebuild it did not cause ran to completion beside
+it. That is now supplied 14 times over.
+
+**The reading I had to make, stated as a reading and not as a finding:** the criterion's phrase is
+"the pointer does not move FOR the read", and in a quiet estate that is indistinguishable from "the
+pointer does not move". Under a burst the two separate, and I read the criterion as the CAUSAL
+claim its own method paragraph states -- *"unchanged BY the read; it moves later BY the producer"* --
+because the alternative reading makes the criterion unsatisfiable in exactly the conditions it
+requires: a behind window only exists during a burst, and during a burst a 40 s read will straddle
+an advance. A criterion that can only be met when the phenomenon it measures is absent is not a
+criterion. **I may be wrong about that, which is why W1-S19 is ARMED to `3.0.0_SA_CVO` and why the
+strict number is printed beside the attributed one.** The CVO can grade this either way without
+re-running anything.
+
+The other two limbs read as they did in pass 2 and are not re-argued here.
+
+## PASS-3 TRANSCRIPTS
+
+### behind.sh (limb iii, pass 3 report) -- verbatim
+
+```
+=== TO-CG-D-9 LIMB (iii): TESTED BY TRYING (reported from behind_evidence.jsonl)
+READS=115  FIRST=2026-09-05T04:03:42.948885900Z  LAST=2026-09-05T12:54:39.838720400Z
+READS_OK=115 of 115  (rows carrying an EXPLICIT read_ok field: 33 of 115)
+BEHIND_CAUGHT=true
+BEHIND_READ_AT=2026-09-05T12:12:47.239769100Z
+BEHIND_MARKER=2026-09-05T12:12:05.739979+00:00
+BEHIND_SERVED=2026-09-05T12:11:27.375244+00:00
+BEHIND_NODE_COUNT=27292
+BEHIND_ANSWER_AGE_LINE=VINTAGE: Built from the estate as of 2026-09-05 12:11:27 UTC.  [vintage=2026-09-05T12:11:27.375244+00:00 manifest=a15d4e2746db prefix=projection/2026-09-05T12:11:27.375244+00:00/]
+TASKS_BEFORE={"running":"","stopped":"arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/018ac34d707a4f0ab6a399b9e6d8fba6 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/0b291391e5254fd796b175423c1ce80a arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/166f976d2d334941b857064da06da806 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/1996262a6ba341ae94758397f102afd1 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/23d020e8c8994b648a9218b09fee79ae arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/3cec1489ba8f4345a439906d91fae84e arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/54c8c675d8e14f60afcfd30849f8ec69 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/65f75849bc684e4f8ddeab9f53e232e6 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/6dbf081418b940e2a7f4050483d79050 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/719d546ae1de4899a0a2f73568b6df7a arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/765540f369ed47c1907bff0cff0d5652 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/8b39e99d551d48dfb89ef7012d3977b4 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/8d603f95b6ea4371a9dee2ed5e536426 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/9b362183778846eda4fb45fe51a98099 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/a0e2280953784d3ead5b2469b10443fc arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/a22002d5139b4b7d8e078c8508b84c51 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/b8834c1c57204358a248536bf83b2940 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/cd06303f343d45488c84f29cf1fc5a9a arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/f9cc497ae9734ea5ba9efbc25051bdb4"}
+TASKS_AFTER={"running":"arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/2ece7b4df9614db0a25918b33122a935","stopped":"arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/018ac34d707a4f0ab6a399b9e6d8fba6 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/0b291391e5254fd796b175423c1ce80a arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/166f976d2d334941b857064da06da806 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/1996262a6ba341ae94758397f102afd1 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/23d020e8c8994b648a9218b09fee79ae arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/3cec1489ba8f4345a439906d91fae84e arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/54c8c675d8e14f60afcfd30849f8ec69 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/65f75849bc684e4f8ddeab9f53e232e6 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/6dbf081418b940e2a7f4050483d79050 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/719d546ae1de4899a0a2f73568b6df7a arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/765540f369ed47c1907bff0cff0d5652 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/8b39e99d551d48dfb89ef7012d3977b4 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/8d603f95b6ea4371a9dee2ed5e536426 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/9b362183778846eda4fb45fe51a98099 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/a0e2280953784d3ead5b2469b10443fc arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/a22002d5139b4b7d8e078c8508b84c51 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/b8834c1c57204358a248536bf83b2940 arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/cd06303f343d45488c84f29cf1fc5a9a arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/f9cc497ae9734ea5ba9efbc25051bdb4"}
+POINTER_MOVED_BY_READ=false
+POINTER_ADVANCED_DURING_A_BEHIND_READ=10 of 14 behind reads   (the STRICT before-vs-after difference, printed unattributed and unhidden)
+ATTRIB_L1_PROVENANCE: every projection-worker task active across an advancing behind-read, classified by its OWN startedBy -- 10 of 10 advances SERVICE-only
+ATTRIB_L2_KEYING: advances whose new pointer vintage equals a marker committed_at_iso observed in this evidence file -- 10 of 10   (denominator of DISTINCT observed markers: 21)
+ATTRIB_L3_BASE_RATE (the negative control): reads whose MARKER was unchanged from the previous read = 94; of those, reads that advanced the pointer = 0.  Reads whose marker HAD moved = 20; of those, advanced = 10.  The advance tracks the MARKER, not the READ.
+ATTRIB_UNATTRIBUTED_ADVANCES=0
+--- per-advance attribution (the control that must agree with the count above):
+  2026-09-05T12:13:35.337534700Z  ptr 2026-09-05T12:12:05.739979+00:00 -> 2026-09-05T12:13:33.832979+00:00  L2_KEYED_TO_AN_OBSERVED_MARKER=true  L1=SERVICE_ONLY  -> PRODUCER_CAUSED
+      tasks active across the read: 2ece7b4df961=SERVICE:Started by Eventbridge Pipes; ba23a328741f=SERVICE:Started by Eventbridge Pipes
+  2026-09-05T12:14:47.571638000Z  ptr 2026-09-05T12:13:33.832979+00:00 -> 2026-09-05T12:14:56.469712+00:00  L2_KEYED_TO_AN_OBSERVED_MARKER=true  L1=SERVICE_ONLY  -> PRODUCER_CAUSED
+      tasks active across the read: 8a634b8a51e8=SERVICE:Started by Eventbridge Pipes; e582d75697c6=SERVICE:Started by Eventbridge Pipes
+  2026-09-05T12:16:49.306069300Z  ptr 2026-09-05T12:14:56.469712+00:00 -> 2026-09-05T12:16:58.855158+00:00  L2_KEYED_TO_AN_OBSERVED_MARKER=true  L1=SERVICE_ONLY  -> PRODUCER_CAUSED
+      tasks active across the read: 77385700b944=SERVICE:Started by Eventbridge Pipes; 968a8a947563=SERVICE:Started by Eventbridge Pipes
+  2026-09-05T12:18:53.767855900Z  ptr 2026-09-05T12:16:58.855158+00:00 -> 2026-09-05T12:19:10.768569+00:00  L2_KEYED_TO_AN_OBSERVED_MARKER=true  L1=SERVICE_ONLY  -> PRODUCER_CAUSED
+      tasks active across the read: 5379d65d2019=SERVICE:Started by Eventbridge Pipes; d7797d58e02d=SERVICE:Started by Eventbridge Pipes
+  2026-09-05T12:21:04.810225600Z  ptr 2026-09-05T12:19:10.768569+00:00 -> 2026-09-05T12:21:03.085712+00:00  L2_KEYED_TO_AN_OBSERVED_MARKER=true  L1=SERVICE_ONLY  -> PRODUCER_CAUSED
+      tasks active across the read: 03ae59d23811=SERVICE:Started by Eventbridge Pipes; 40fc9b865bbe=SERVICE:Started by Eventbridge Pipes
+  2026-09-05T12:23:09.581944100Z  ptr 2026-09-05T12:21:25.739594+00:00 -> 2026-09-05T12:23:09.662217+00:00  L2_KEYED_TO_AN_OBSERVED_MARKER=true  L1=SERVICE_ONLY  -> PRODUCER_CAUSED
+      tasks active across the read: 6c2ee7813904=SERVICE:Started by Eventbridge Pipes
+  2026-09-05T12:47:43.375244400Z  ptr 2026-09-05T12:23:09.662217+00:00 -> 2026-09-05T12:47:37.329883+00:00  L2_KEYED_TO_AN_OBSERVED_MARKER=true  L1=SERVICE_ONLY  -> PRODUCER_CAUSED
+      tasks active across the read: 102e420d5b20=SERVICE:Started by Eventbridge Pipes
+  2026-09-05T12:50:14.062481500Z  ptr 2026-09-05T12:47:37.329883+00:00 -> 2026-09-05T12:50:07.498295+00:00  L2_KEYED_TO_AN_OBSERVED_MARKER=true  L1=SERVICE_ONLY  -> PRODUCER_CAUSED
+      tasks active across the read: 1ecc979cd1f2=SERVICE:Started by Eventbridge Pipes
+  2026-09-05T12:50:57.157589400Z  ptr 2026-09-05T12:50:07.498295+00:00 -> 2026-09-05T12:50:45.008597+00:00  L2_KEYED_TO_AN_OBSERVED_MARKER=true  L1=SERVICE_ONLY  -> PRODUCER_CAUSED
+      tasks active across the read: 53dda85afc8a=SERVICE:Started by Eventbridge Pipes
+  2026-09-05T12:52:23.621817700Z  ptr 2026-09-05T12:50:45.008597+00:00 -> 2026-09-05T12:52:19.817312+00:00  L2_KEYED_TO_AN_OBSERVED_MARKER=true  L1=SERVICE_ONLY  -> PRODUCER_CAUSED
+      tasks active across the read: 37e076503549=SERVICE:Started by Eventbridge Pipes
+LEGIT_REBUILD_REPORTED=true
+LEGIT_REBUILD_AT=2026-09-05T12:13:35.337534700Z
+LEGIT_REBUILD_SERVED=2026-09-05T12:12:05.739979+00:00
+LEGIT_REBUILD_STARTER=arn:aws:pipes:us-east-1:313476888478:pipe/opal-globgrph-projection-worker (the Pipe; see night.sh arm (b) CloudTrail rows)
+CLIENT_REBUILD_PATH_HITS=0
+
+--- every marker/served pair observed:
+  2026-09-05T04:03:42.948885900Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:04:43.505027700Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:06:51.328782200Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:09:59.642213300Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:11:58.459485100Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:13:57.513787200Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:15:57.879293600Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:17:54.711489300Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:20:00.161407300Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:22:16.652593200Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:24:28.219722100Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:26:24.581429200Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:28:20.560031700Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:30:17.358665600Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:32:10.259994600Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:33:47.640012900Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:35:22.674520600Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:37:15.094746400Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:39:31.485131300Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:44:59.136212500Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:46:50.246337700Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:48:57.764624700Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:50:56.046437900Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:52:49.253888300Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:54:51.343417800Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:56:48.240410000Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T04:59:13.216817800Z  marker=2026-09-05T03:31:16.793943+00:00  served=2026-09-05T03:31:16.793943+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:22:53.226735200Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:24:42.283518900Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:26:26.011624500Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:28:25.615361200Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:30:20.673784500Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:32:30.428863000Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:34:38.630738400Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:36:42.483584600Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:38:48.417279100Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:41:05.124333100Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:43:02.270443600Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:45:01.029673300Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:47:13.680502100Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:49:12.750208700Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:51:21.987829300Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:53:30.534215300Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:55:30.670856400Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T06:57:45.068230800Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:00:02.415928500Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:02:24.896381500Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:03:51.969406800Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:06:00.703547200Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:08:09.075239700Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:10:03.296542700Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:12:13.158504500Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:14:09.504805400Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:16:13.315046000Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:18:18.203646900Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:20:30.367234600Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:22:38.505761000Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:24:35.639299300Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:26:33.367327100Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:28:32.315984200Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:30:23.759969800Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:32:27.700757000Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:34:42.310568600Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:36:50.596133700Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:39:02.529032800Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:41:08.474024800Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:43:21.652343200Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:45:30.872413500Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:47:16.513963000Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:49:10.816297300Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:51:03.652925400Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:53:05.649255600Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:53:36.944702700Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:55:34.976724600Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:57:18.269221900Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T07:59:15.762784700Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T08:01:28.317987500Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T08:03:36.872849000Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T08:05:45.301524900Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T08:08:01.256244000Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T08:10:11.775480900Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T08:12:16.819642400Z  marker=2026-09-05T05:55:42.571886+00:00  served=2026-09-05T05:55:42.571886+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:11:05.518226300Z  marker=2026-09-05T12:10:36.884158+00:00  served=2026-09-05T12:10:36.884158+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:11:57.620030000Z  marker=2026-09-05T12:11:27.375244+00:00  served=2026-09-05T12:11:27.375244+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:12:47.239769100Z  marker=2026-09-05T12:12:05.739979+00:00  served=2026-09-05T12:11:27.375244+00:00  behind=true  ptr_moved_by_read=false
+  2026-09-05T12:13:35.337534700Z  marker=2026-09-05T12:13:33.832979+00:00  served=2026-09-05T12:12:05.739979+00:00  behind=true  ptr_moved_by_read=true
+  2026-09-05T12:14:47.571638000Z  marker=2026-09-05T12:14:42.810835+00:00  served=2026-09-05T12:13:33.832979+00:00  behind=true  ptr_moved_by_read=true
+  2026-09-05T12:15:31.337466400Z  marker=2026-09-05T12:14:56.469712+00:00  served=2026-09-05T12:14:56.469712+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:16:49.306069300Z  marker=2026-09-05T12:16:43.795811+00:00  served=2026-09-05T12:14:56.469712+00:00  behind=true  ptr_moved_by_read=true
+  2026-09-05T12:17:43.325404900Z  marker=2026-09-05T12:16:58.855158+00:00  served=2026-09-05T12:16:58.855158+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:18:53.767855900Z  marker=2026-09-05T12:18:50.261442+00:00  served=2026-09-05T12:16:58.855158+00:00  behind=true  ptr_moved_by_read=true
+  2026-09-05T12:19:34.236403400Z  marker=2026-09-05T12:19:10.768569+00:00  served=2026-09-05T12:19:10.768569+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:21:04.810225600Z  marker=2026-09-05T12:21:03.085712+00:00  served=2026-09-05T12:19:10.768569+00:00  behind=true  ptr_moved_by_read=true
+  2026-09-05T12:21:53.249796900Z  marker=2026-09-05T12:21:25.739594+00:00  served=2026-09-05T12:19:10.768569+00:00  behind=true  ptr_moved_by_read=false
+  2026-09-05T12:23:09.581944100Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:21:25.739594+00:00  behind=true  ptr_moved_by_read=true
+  2026-09-05T12:24:44.387055200Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:26:21.024198500Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:28:01.678333200Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:29:42.580684800Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:31:25.171036400Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:33:03.938489800Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:34:46.081477200Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:36:31.773865300Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:38:27.062211400Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:40:22.473281300Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:42:23.816925300Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:44:22.664576800Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:46:13.505901200Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:47:43.375244400Z  marker=2026-09-05T12:47:37.329883+00:00  served=2026-09-05T12:23:09.662217+00:00  behind=true  ptr_moved_by_read=true
+  2026-09-05T12:49:32.341770800Z  marker=2026-09-05T12:47:37.329883+00:00  served=2026-09-05T12:47:37.329883+00:00  behind=false  ptr_moved_by_read=false
+  2026-09-05T12:50:14.062481500Z  marker=2026-09-05T12:50:07.498295+00:00  served=2026-09-05T12:47:37.329883+00:00  behind=true  ptr_moved_by_read=true
+  2026-09-05T12:50:57.157589400Z  marker=2026-09-05T12:50:45.008597+00:00  served=2026-09-05T12:47:37.329883+00:00  behind=true  ptr_moved_by_read=true
+  2026-09-05T12:52:23.621817700Z  marker=2026-09-05T12:52:19.817312+00:00  served=2026-09-05T12:50:45.008597+00:00  behind=true  ptr_moved_by_read=true
+  2026-09-05T12:53:13.357113400Z  marker=2026-09-05T12:53:04.983210+00:00  served=2026-09-05T12:52:19.817312+00:00  behind=true  ptr_moved_by_read=false
+  2026-09-05T12:54:39.838720400Z  marker=2026-09-05T12:54:31.241426+00:00  served=2026-09-05T12:52:19.817312+00:00  behind=true  ptr_moved_by_read=false
+```
+
+### behind.sh --poll (pass 3, the live poll) -- verbatim
+
+```
+POLL start 2026-09-05T12:10:59Z budget=2700s evidence=/c/Users/AndrewBerman/Desktop/wk-NFRA_CLDGRPH-1b/org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~1/behind_evidence.jsonl
+  2026-09-05T12:11:05.518226300Z  marker=2026-09-05T12:10:36.884158+00:00  served=2026-09-05T12:10:36.884158+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  >>> MARKER MOVED: 2026-09-05T12:10:36.884158+00:00 -> 2026-09-05T12:11:27.375244+00:00 -- reading the client NOW
+  2026-09-05T12:11:57.620030000Z  marker=2026-09-05T12:11:27.375244+00:00  served=2026-09-05T12:11:27.375244+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  >>> MARKER MOVED: 2026-09-05T12:11:27.375244+00:00 -> 2026-09-05T12:12:05.739979+00:00 -- reading the client NOW
+  2026-09-05T12:12:47.239769100Z  marker=2026-09-05T12:12:05.739979+00:00  served=2026-09-05T12:11:27.375244+00:00  BEHIND=true  read_ok=true  pointer_moved_by_read=false
+  >>> MARKER MOVED: 2026-09-05T12:12:05.739979+00:00 -> 2026-09-05T12:13:33.832979+00:00 -- reading the client NOW
+  2026-09-05T12:13:35.337534700Z  marker=2026-09-05T12:13:33.832979+00:00  served=2026-09-05T12:12:05.739979+00:00  BEHIND=true  read_ok=true  pointer_moved_by_read=true
+  12:14:16Z  marker unchanged (2026-09-05T12:13:33.832979+00:00) -- cheap poll, no client read
+  12:14:28Z  marker unchanged (2026-09-05T12:13:33.832979+00:00) -- cheap poll, no client read
+  12:14:36Z  marker unchanged (2026-09-05T12:13:33.832979+00:00) -- cheap poll, no client read
+  >>> MARKER MOVED: 2026-09-05T12:13:33.832979+00:00 -> 2026-09-05T12:14:42.810835+00:00 -- reading the client NOW
+  2026-09-05T12:14:47.571638000Z  marker=2026-09-05T12:14:42.810835+00:00  served=2026-09-05T12:13:33.832979+00:00  BEHIND=true  read_ok=true  pointer_moved_by_read=true
+  >>> MARKER MOVED: 2026-09-05T12:14:42.810835+00:00 -> 2026-09-05T12:14:56.469712+00:00 -- reading the client NOW
+  2026-09-05T12:15:31.337466400Z  marker=2026-09-05T12:14:56.469712+00:00  served=2026-09-05T12:14:56.469712+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:16:25Z  marker unchanged (2026-09-05T12:14:56.469712+00:00) -- cheap poll, no client read
+  12:16:38Z  marker unchanged (2026-09-05T12:14:56.469712+00:00) -- cheap poll, no client read
+  >>> MARKER MOVED: 2026-09-05T12:14:56.469712+00:00 -> 2026-09-05T12:16:43.795811+00:00 -- reading the client NOW
+  2026-09-05T12:16:49.306069300Z  marker=2026-09-05T12:16:43.795811+00:00  served=2026-09-05T12:14:56.469712+00:00  BEHIND=true  read_ok=true  pointer_moved_by_read=true
+  >>> MARKER MOVED: 2026-09-05T12:16:43.795811+00:00 -> 2026-09-05T12:16:58.855158+00:00 -- reading the client NOW
+  2026-09-05T12:17:43.325404900Z  marker=2026-09-05T12:16:58.855158+00:00  served=2026-09-05T12:16:58.855158+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:18:32Z  marker unchanged (2026-09-05T12:16:58.855158+00:00) -- cheap poll, no client read
+  12:18:42Z  marker unchanged (2026-09-05T12:16:58.855158+00:00) -- cheap poll, no client read
+  >>> MARKER MOVED: 2026-09-05T12:16:58.855158+00:00 -> 2026-09-05T12:18:50.261442+00:00 -- reading the client NOW
+  2026-09-05T12:18:53.767855900Z  marker=2026-09-05T12:18:50.261442+00:00  served=2026-09-05T12:16:58.855158+00:00  BEHIND=true  read_ok=true  pointer_moved_by_read=true
+  >>> MARKER MOVED: 2026-09-05T12:18:50.261442+00:00 -> 2026-09-05T12:19:10.768569+00:00 -- reading the client NOW
+  2026-09-05T12:19:34.236403400Z  marker=2026-09-05T12:19:10.768569+00:00  served=2026-09-05T12:19:10.768569+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:20:15Z  marker unchanged (2026-09-05T12:19:10.768569+00:00) -- cheap poll, no client read
+  12:20:23Z  marker unchanged (2026-09-05T12:19:10.768569+00:00) -- cheap poll, no client read
+  12:20:32Z  marker unchanged (2026-09-05T12:19:10.768569+00:00) -- cheap poll, no client read
+  12:20:41Z  marker unchanged (2026-09-05T12:19:10.768569+00:00) -- cheap poll, no client read
+  12:20:51Z  marker unchanged (2026-09-05T12:19:10.768569+00:00) -- cheap poll, no client read
+  >>> MARKER MOVED: 2026-09-05T12:19:10.768569+00:00 -> 2026-09-05T12:21:03.085712+00:00 -- reading the client NOW
+  2026-09-05T12:21:04.810225600Z  marker=2026-09-05T12:21:03.085712+00:00  served=2026-09-05T12:19:10.768569+00:00  BEHIND=true  read_ok=true  pointer_moved_by_read=true
+  >>> MARKER MOVED: 2026-09-05T12:21:03.085712+00:00 -> 2026-09-05T12:21:25.739594+00:00 -- reading the client NOW
+  2026-09-05T12:21:53.249796900Z  marker=2026-09-05T12:21:25.739594+00:00  served=2026-09-05T12:19:10.768569+00:00  BEHIND=true  read_ok=true  pointer_moved_by_read=false
+  12:22:38Z  marker unchanged (2026-09-05T12:21:25.739594+00:00) -- cheap poll, no client read
+  12:22:49Z  marker unchanged (2026-09-05T12:21:25.739594+00:00) -- cheap poll, no client read
+  12:22:59Z  marker unchanged (2026-09-05T12:21:25.739594+00:00) -- cheap poll, no client read
+  >>> MARKER MOVED: 2026-09-05T12:21:25.739594+00:00 -> 2026-09-05T12:23:09.662217+00:00 -- reading the client NOW
+  2026-09-05T12:23:09.581944100Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:21:25.739594+00:00  BEHIND=true  read_ok=true  pointer_moved_by_read=true
+  12:23:51Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:24:01Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:24:09Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:24:19Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:24:28Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:24:36Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  2026-09-05T12:24:44.387055200Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:25:26Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:25:35Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:25:44Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:25:53Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:26:03Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:26:11Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  2026-09-05T12:26:21.024198500Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:27:00Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:27:10Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:27:19Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:27:29Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:27:39Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:27:49Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  2026-09-05T12:28:01.678333200Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:28:42Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:28:53Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:29:03Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:29:11Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:29:22Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:29:31Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  2026-09-05T12:29:42.580684800Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:30:26Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:30:35Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:30:44Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:30:55Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:31:05Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:31:13Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  2026-09-05T12:31:25.171036400Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:32:07Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:32:17Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:32:26Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:32:35Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:32:44Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:32:53Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  2026-09-05T12:33:03.938489800Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:33:48Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:33:57Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:34:05Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:34:13Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:34:24Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:34:35Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  2026-09-05T12:34:46.081477200Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:35:32Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:35:42Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:35:51Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:36:01Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:36:12Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:36:23Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  2026-09-05T12:36:31.773865300Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:37:17Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:37:30Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:37:39Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:37:50Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:38:02Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:38:14Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  2026-09-05T12:38:27.062211400Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:39:19Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:39:29Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:39:42Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:39:51Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:40:03Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:40:12Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  2026-09-05T12:40:22.473281300Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:41:18Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:41:29Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:41:41Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:41:51Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:42:01Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:42:13Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  2026-09-05T12:42:23.816925300Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:43:11Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:43:22Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:43:34Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:43:48Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:43:59Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:44:10Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  2026-09-05T12:44:22.664576800Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:45:12Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:45:23Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:45:32Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:45:42Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:45:51Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:46:03Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  2026-09-05T12:46:13.505901200Z  marker=2026-09-05T12:23:09.662217+00:00  served=2026-09-05T12:23:09.662217+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  12:46:54Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:47:05Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:47:16Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:47:25Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  12:47:33Z  marker unchanged (2026-09-05T12:23:09.662217+00:00) -- cheap poll, no client read
+  >>> MARKER MOVED: 2026-09-05T12:23:09.662217+00:00 -> 2026-09-05T12:47:37.329883+00:00 -- reading the client NOW
+  2026-09-05T12:47:43.375244400Z  marker=2026-09-05T12:47:37.329883+00:00  served=2026-09-05T12:23:09.662217+00:00  BEHIND=true  read_ok=true  pointer_moved_by_read=true
+  12:48:24Z  marker unchanged (2026-09-05T12:47:37.329883+00:00) -- cheap poll, no client read
+  12:48:35Z  marker unchanged (2026-09-05T12:47:37.329883+00:00) -- cheap poll, no client read
+  12:48:45Z  marker unchanged (2026-09-05T12:47:37.329883+00:00) -- cheap poll, no client read
+  12:48:57Z  marker unchanged (2026-09-05T12:47:37.329883+00:00) -- cheap poll, no client read
+  12:49:08Z  marker unchanged (2026-09-05T12:47:37.329883+00:00) -- cheap poll, no client read
+  12:49:21Z  marker unchanged (2026-09-05T12:47:37.329883+00:00) -- cheap poll, no client read
+  2026-09-05T12:49:32.341770800Z  marker=2026-09-05T12:47:37.329883+00:00  served=2026-09-05T12:47:37.329883+00:00  BEHIND=false  read_ok=true  pointer_moved_by_read=false
+  >>> MARKER MOVED: 2026-09-05T12:47:37.329883+00:00 -> 2026-09-05T12:50:07.498295+00:00 -- reading the client NOW
+  2026-09-05T12:50:14.062481500Z  marker=2026-09-05T12:50:07.498295+00:00  served=2026-09-05T12:47:37.329883+00:00  BEHIND=true  read_ok=true  pointer_moved_by_read=true
+  >>> MARKER MOVED: 2026-09-05T12:50:07.498295+00:00 -> 2026-09-05T12:50:45.008597+00:00 -- reading the client NOW
+  2026-09-05T12:50:57.157589400Z  marker=2026-09-05T12:50:45.008597+00:00  served=2026-09-05T12:47:37.329883+00:00  BEHIND=true  read_ok=true  pointer_moved_by_read=true
+  12:51:44Z  marker unchanged (2026-09-05T12:50:45.008597+00:00) -- cheap poll, no client read
+  12:51:53Z  marker unchanged (2026-09-05T12:50:45.008597+00:00) -- cheap poll, no client read
+  12:52:03Z  marker unchanged (2026-09-05T12:50:45.008597+00:00) -- cheap poll, no client read
+  12:52:14Z  marker unchanged (2026-09-05T12:50:45.008597+00:00) -- cheap poll, no client read
+  >>> MARKER MOVED: 2026-09-05T12:50:45.008597+00:00 -> 2026-09-05T12:52:19.817312+00:00 -- reading the client NOW
+  2026-09-05T12:52:23.621817700Z  marker=2026-09-05T12:52:19.817312+00:00  served=2026-09-05T12:50:45.008597+00:00  BEHIND=true  read_ok=true  pointer_moved_by_read=true
+  12:53:03Z  marker unchanged (2026-09-05T12:52:19.817312+00:00) -- cheap poll, no client read
+  >>> MARKER MOVED: 2026-09-05T12:52:19.817312+00:00 -> 2026-09-05T12:53:04.983210+00:00 -- reading the client NOW
+  2026-09-05T12:53:13.357113400Z  marker=2026-09-05T12:53:04.983210+00:00  served=2026-09-05T12:52:19.817312+00:00  BEHIND=true  read_ok=true  pointer_moved_by_read=false
+  12:54:00Z  marker unchanged (2026-09-05T12:53:04.983210+00:00) -- cheap poll, no client read
+  12:54:09Z  marker unchanged (2026-09-05T12:53:04.983210+00:00) -- cheap poll, no client read
+  12:54:18Z  marker unchanged (2026-09-05T12:53:04.983210+00:00) -- cheap poll, no client read
+  12:54:30Z  marker unchanged (2026-09-05T12:53:04.983210+00:00) -- cheap poll, no client read
+  >>> MARKER MOVED: 2026-09-05T12:53:04.983210+00:00 -> 2026-09-05T12:54:31.241426+00:00 -- reading the client NOW
+  2026-09-05T12:54:39.838720400Z  marker=2026-09-05T12:54:31.241426+00:00  served=2026-09-05T12:52:19.817312+00:00  BEHIND=true  read_ok=true  pointer_moved_by_read=false
+  12:55:30Z  marker unchanged (2026-09-05T12:54:31.241426+00:00) -- cheap poll, no client read
+  12:55:42Z  marker unchanged (2026-09-05T12:54:31.241426+00:00) -- cheap poll, no client read
+  12:55:54Z  marker unchanged (2026-09-05T12:54:31.241426+00:00) -- cheap poll, no client read
+POLL end 2026-09-05T12:56:01Z
 ```
