@@ -240,10 +240,11 @@ Stated as falsifiers, because a decision that names none is an opinion:
 | `NFRA_OUTSET-W3-S3` | OBSERVATION / INERT | O3 hardcodes `timeout=180` / `timeout=60` on its `git grep` calls; comp-heat's Rule T budget cannot reach them, so OS-s-16 must thread or refuse. |
 | `NFRA_OUTSET-W3-S4` | OBSERVATION / **ARMED** | `comp-heat freshness` labels a flat leaf-dir grouping `cold SUBTREES`; a 100%-cold 8-file tree yields 0 candidates. Disarm needs a `.tools/comp-heat` write this cell does not hold. |
 | `NFRA_OUTSET-W3-S5` | **BLOCKING** / INERT | The lane gate refused the deliverables write to the `~1` folder the order's `<paths>` names: clause 4 resolves the owner from the serial IN THE PATH. Resolved same-turn by landing in `deliverables/0.9.0_WK_NFRA_OUTSET~3/`, which the order's own `<preflight>` grants. |
+| `NFRA_OUTSET-W3-S6` | OBSERVATION / INERT | Absorbs the issuer's amendment `b630052d6a` (`<issued_to>` re-addressed `~1` -> `~3`) and partly corrects its premise: a mis-addressed `<issued_to>` disables the **deliverables limb alone**, not "any path" -- the lane-ANY task-order and channel writes were admitted in the same call. |
 
 ## 9. What I changed
 
-`org/missions/D11/NFRA/NFRA_OUTSET/surprise-channel/investigations/INVESTIGATION_v1.md` (5 rows appended;
+`org/missions/D11/NFRA/NFRA_OUTSET/surprise-channel/investigations/INVESTIGATION_v1.md` (6 rows appended;
 `git diff --numstat` = **96 insertions, 0 deletions**, and the pre-existing byte prefix was asserted identical
 before writing), this document, and the proof-of-spec instance beside it. **`.tools/comp-heat` and
 `org/modules/heatmap/` were read and never written.**
