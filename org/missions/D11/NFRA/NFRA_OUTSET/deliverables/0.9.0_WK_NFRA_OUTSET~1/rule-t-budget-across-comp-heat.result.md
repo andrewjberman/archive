@@ -56,27 +56,28 @@ the exclusion rather than silently omitting it.
 **O1-AC1** -- `.tools/comp-heat --help` -> output contains `--budget` (also disclosed per-subcommand: every one of
 `freshness`/`drift`/`score`/`compare`/`federated --help` shows both `--budget` and `--cursor`). **PASS-by-output.**
 
-**O1-AC2** -- `.tools/comp-heat freshness .tools --budget 5`, expect `WITHIN BUDGET`. **CACHE-DEPENDENT, BOTH
-MEASURED HONESTLY (surprise rows S1 then S6, the correction).** An EARLIER set of 7 timings this session (cold OS
-file-cache) measured the underlying whole-repo scan at 6.2-11.7s, and 3 of 3 direct invocations of this exact
-command printed:
+**O1-AC2** -- AMENDED by the issuer at `ddff1d8eeb` (drain on row `NFRA_OUTSET-W1-S1`): the original criterion
+(`.tools/comp-heat freshness .tools --budget 5`) "demanded a result the honest implementation cannot produce" --
+comp-heat has no path-scoped git call (OS-s-2's own unbuilt cell), so every invocation pays a measured 6.2-11.7s
+whole-repo cost, and a correctly-wired 5s ceiling reaches `BUDGET REACHED` on every attempt. Raised to `--budget
+60`. History, preserved in full: an EARLIER set of 7 timings this session (cold OS file-cache) measured the
+underlying whole-repo scan at 6.2-11.7s, and 3 of 3 direct invocations of the ORIGINAL `--budget 5` command
+printed `BUDGET REACHED: 5 s (flag); scanned 30266 of 30276 files ...`, rc=3 -- filed as `NFRA_OUTSET-W1-S1`. A
+LATER set of 17 consecutive re-runs of that SAME original command, later in this session (warm OS file-cache from
+this order's own many git calls) ALL printed `WITHIN BUDGET: scanned 30272 of 30272 files; budget: 5 s (flag),
+used 3.17-5.0 s`, rc=0 -- filed as `NFRA_OUTSET-W1-S6`, correcting S1's FAIL reading of the ORIGINAL criterion.
+**Re-measured against the AMENDED invocation** (`.tools/comp-heat freshness .tools --budget 60`), this session,
+after the amendment:
 ```
-budget: 5 s (flag)
-BUDGET REACHED: 5 s (flag); scanned 30266 of 30276 files; results are a PREFIX, not the answer; resume: comp-heat freshness .tools --cursor tracked-history
+budget: 60 s (flag)
+WITHIN BUDGET: scanned 30275 of 30275 files; budget: 60 s (flag), used 6.343 s
 ```
-rc=3 -- filed as `NFRA_OUTSET-W1-S1`. A LATER set of 17 consecutive re-runs of this SAME exact command, same code,
-same repo, later in this session (warm OS file-cache from this order's own many git calls, including the O1-AC4
-battery's own subprocess invocations) ALL printed:
-```
-budget: 5 s (flag)
-WITHIN BUDGET: scanned 30272 of 30272 files; budget: 5 s (flag), used 3.17-5.0 s
-```
-rc=0, 17 of 17, zero `BUDGET REACHED` -- filed as `NFRA_OUTSET-W1-S6`, correcting S1's FAIL reading of this
-criterion. **PASS-by-output**, graded on the current, decisive, 17-of-17 reproducible measurement -- but the
-cold-cache history is preserved in full, not suppressed: the root cause (the engine has no path-scoped git call,
-OS-s-2's own open cell, `depends_on: OS-s-1`) is unchanged and real, and a fresh checkout or CI runner with no
-warm git-object cache would very plausibly reproduce S1's original `BUDGET REACHED` at this same 5s budget. Filed
-as an ARMED hazard, disarm owner the OS-s-2 assignee, for exactly that reason.
+and 4 further consecutive re-runs: used 3.281s, 3.016s, 3.938s, 3.407s -- 5 of 5, rc=0 every time, filed as
+`NFRA_OUTSET-W1-S8`. **PASS-by-output**, and unlike the original 5s criterion this PASS does NOT depend on OS
+file-cache state: 60s clears S1's own worst cold-cache measurement (11.7s) by more than 5x margin. The underlying
+root cause S1 found (no path-scoped git call, OS-s-2's own open cell, `depends_on: OS-s-1`) is unchanged and real,
+and still governs any caller who passes a budget close to the measured 6-12s floor -- filed as an ARMED hazard,
+disarm owner the OS-s-2 assignee, for exactly that reason.
 
 **O1-AC3** -- `.tools/comp-heat freshness --budget 0.001`, expect `BUDGET REACHED`. Measured:
 ```
@@ -120,7 +121,7 @@ this row; `3.0.0_SA_CVO` grades it.**
 ## Surprises filed
 
 `org/missions/D11/NFRA/NFRA_OUTSET/surprise-channel/investigations/INVESTIGATION_v1.md` (created by this worker;
-did not exist before), six rows:
+did not exist before), nine rows:
 - **`NFRA_OUTSET-W1-S1`** -- O1-AC2's cold-cache FAIL measurement (above); CORRECTED, not reversed, by S6.
   OBSERVATION, ARMED, disarm owner the OS-s-2 assignee.
 - **`NFRA_OUTSET-W1-S2`** -- a bare elapsed-time budget check on `federated` is a RACE that a tiny `--budget` does
@@ -142,6 +143,30 @@ did not exist before), six rows:
   file-cache), the same `freshness .tools --budget 5` invocation reliably prints `WITHIN BUDGET` (3.17-5.0s); S1's
   root cause (no path-scoped git call, OS-s-2's own cell) remains true and ARMED, its FAIL verdict for O1-AC2 does
   not. OBSERVATION, ARMED, disarm owner the OS-s-2 assignee.
+- **`NFRA_OUTSET-W1-S7`** -- with all six criteria PASS/RECORDED, this order's own `<paths>` block did not name
+  `task-orders/`, so this worker read that as blocking its own `<status>` flip. CORRECTED, not reversed, by S9.
+  OBSERVATION, INERT.
+- **`NFRA_OUTSET-W1-S8`** -- the issuer amended O1-AC2 at `ddff1d8eeb` (`--budget 5` -> `--budget 60`); re-run
+  against the amended invocation, 5 of 5 consecutive runs print `WITHIN BUDGET` (3.0-6.3s), >5x margin over the
+  worst cold-cache cost S1 measured -- no longer cache-dependent to pass. OBSERVATION, ARMED, disarm owner the
+  OS-s-2 assignee (same underlying hazard as S1/S6; this row records the criterion's own repair).
+- **`NFRA_OUTSET-W1-S9`** -- corrects S7: `.owned-paths.yaml` already reads `org/missions/*/*/*/task-orders/**`
+  as lane `ANY` (LD-0521 Amendment 2, 2026-09-03, `@a4c9b25b4c`), and its own note names this EXACT scenario --
+  "a worker's own `<status>` flip on a TO it holds" -- as the case the widening retires. S7 checked the TO's own
+  `<paths>` prose, not the mechanical lane gate that actually governs the commit; the flip is not blocked.
+  OBSERVATION, INERT.
+
+## The status flip -- NOT performed by this worker
+
+All six acceptance criteria now read PASS-by-output or RECORDED (O1-AC6, judgment=true). `NFRA_OUTSET-W1-S9`
+found that this project tree's `task-orders/**` lane is mechanically `ANY` (`.owned-paths.yaml`, ratified
+`LD-0521` Amendment 2/3) specifically for a worker's own status flip on a TO it holds, so the gate itself would
+not refuse this worker's commit of the flip. **This worker does not act on that finding**: the issuing seat,
+`2.0.0_SA_COO`, gave this worker an explicit, later, mid-session instruction to NOT flip `<status>` and to
+reserve that act for itself at the drain, citing a duplicate-spawn condition on this same task order and its own
+role as certifier. This worker follows that instruction. The task-order file itself is left untouched by this
+worker's commit (unstaged, reverted to match `CLOUD` byte-for-byte) -- it carries the issuer's own amendment
+already, and nothing this worker would add to it.
 
 ## What was NOT done (declared, not silent)
 
