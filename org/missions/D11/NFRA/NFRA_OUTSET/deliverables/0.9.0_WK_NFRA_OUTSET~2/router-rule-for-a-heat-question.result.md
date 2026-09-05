@@ -5,7 +5,7 @@
 **Executed by:** `0.9.0_WK_NFRA_OUTSET~2` in worktree `C:/tmp/wk-OUTSET-2`, branch `wk-OUTSET-2`, base HEAD `22e38e7963`
 **Both addressing limbs were correct at seating** (`<issued_to>` = `~2`, deliverables folder = `~2`), so no carry step was needed. Verified at branch HEAD, not from a checkout.
 
-> **HEADLINE: two of three criteria PASS. `O3-AC3` FAILS and I did not bend anything to change that.** Its own invocation cannot produce its own `<expect>` under the order's own mandatory bound, by a factor of at least 6.4x, and it could not before this cell touched anything. Rows `NFRA_OUTSET-W2-S7` (BLOCKING) and `-W2-S8` (a second, independent limb). **`<status>` is NOT flipped.**
+> **HEADLINE: all three criteria PASS.** `O3-AC1` and `O3-AC2` route to comp-heat. `O3-AC3` first FAILED as originally written -- its own invocation could not produce its own `<expect>` under the order's own mandatory bound, by a factor of at least 6.4x, and could not before this cell touched anything (rows `NFRA_OUTSET-W2-S7` BLOCKING and `-W2-S8`, a second independent limb). The issuer amended it at `df14ecd5f1`, moving **both** limbs together, and the amended form **PASSES**: `VERDICT: PASS`, rc 0, 12 min 31 s.
 
 ---
 
@@ -64,7 +64,42 @@ comp-which -- candidates for: "what have I not touched in months"
 ```
 **Denominator: 1 of 1.** This is the criterion that was genuinely red: PRE it produced no route at all and ran a content search instead.
 
-### O3-AC3 -- **FAIL**, and the recorded output is a timeout
+### O3-AC3 -- **PASS by output**, after the issuer amended a criterion that could not be satisfied as written
+
+**Amended invocation (`df14ecd5f1`, carried onto this branch and committed at `d9bd63b35a` before the re-run, then confirmed with `git show HEAD:`):**
+
+```
+timeout 1200 python .tools/comp-which-routing-test.py --out \
+  org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.9.0_WK_NFRA_OUTSET~2/comp-which-routing-baseline.json
+```
+`<expect>` `VERDICT: PASS` -- **rc 0**, started `07:33:57Z`, finished `07:46:28Z` (**12 min 31 s**, inside the 1200 s bound and above the ~770 s floor measured below):
+
+```
+==============================================================================
+VERDICT: PASS -- controls held, zero pollution, and comp-which ABSTAINED on
+         100%% of generated gibberish.
+         baseline -> org\missions\D11\NFRA\NFRA_OUTSET\deliverables\0.9.0_WK_NFRA_OUTSET~2\comp-which-routing-baseline.json
+==============================================================================
+```
+
+The harness's own instrument controls, which it says to read first (*"if these fail, DISCARD every number below"*), all held:
+
+```
+  POSITIVE (isolated)   score=5                PASS
+  GIBBERISH @ RULES     n=40  nonzero=0   max=0  PASS
+  r[1] ANTI-CONTROL     poisoned=51  clean=0     PASS
+  MUTATION all-zero     detected: YES
+  MUTATION all-nine     detected: YES
+  scorer restored       PASS
+```
+
+**Denominator: 1 of 1 invocation matches `<expect>`** (`grep -c 'VERDICT: PASS'` = 1); 6 of 6 instrument controls held.
+
+**W2-S8's limb is confirmed disarmed, not assumed:** `git status --porcelain -- org/tier2_senior/` is **empty** after the completed run, and the report landed in this order's own deliverables folder. The `--out` and the raised bound had to ship together -- the bound was the only thing that had been preventing the default re-baseline into `0.8.0_AE_CloudComp`'s tree from ever firing.
+
+**A correction to my own earlier evidence, and I now have the control I lacked.** My first report cited `grep -c -E "^\s*(PASS|FAIL)\b"` = 0 as showing no verdict was produced. **That detector returns 0 on every outcome** -- the harness prints `VERDICT: PASS` / `VERDICT: SUBJECT FAILED` / `VERDICT: *** INSTRUMENT FAILED ***` (`comp-which-routing-test.py:1581,1588,1593,1600`), so the token never begins a line. Run against **this** completed passing run it still returns **0**, while `grep -c 'VERDICT: PASS'` returns **1**. A constant wearing a measurement's clothes. The conclusion it sat beside survives untouched, because the real evidence was the expired bound -- recorded below as it was measured. Row `NFRA_OUTSET-W2-S13`.
+
+### O3-AC3 as originally written -- the measurement that produced the amendment
 
 `timeout 120 python .tools/comp-which-routing-test.py` -- **the bound expired; no verdict line produced** (152 lines of output, `grep -c -E "^\s*(PASS|FAIL)\b"` = **0**).
 
@@ -80,7 +115,7 @@ Measured **three times**, two of them on the committed router *before* this cell
 
 **A second, independent limb** (`NFRA_OUTSET-W2-S8`): the criterion's literal form carries no `--out`, and the harness's default output is `org/tier2_senior/0.8.0_AE_CloudComp/deliverables/comp-which-routing-baseline.json` -- **another seat's tree, outside this order's `<paths>`** -- which the tool's own `--help` calls a clobber hazard that has fired once before. Nothing was clobbered here (`git status --porcelain -- org/tier2_senior/` empty after every run) only because no run reached the write. **Raising the bound without adding `--out` would convert that latent hazard into a live one.**
 
-**What I refused to do:** substitute a cheaper battery of my own and grade AC3 against it (a different instrument answers a different question, and the order says a mechanical criterion's pass is decided by *the match*); raise the bound and call the result PASS; edit the harness or the criterion.
+**What I refused to do:** substitute a cheaper battery of my own and grade AC3 against it (a different instrument answers a different question, and the order says a mechanical criterion's pass is decided by *the match*); raise the bound and call the result PASS; edit the harness or the criterion. The bound was raised by the **issuer**, in the face, together with the `--out` fix -- which is the only place that decision belongs.
 
 **What I did instead, as evidence rather than as a verdict:** ran `python org/modules/graph/tests/test_compwhich_toolpass_rules.py` -- a routing-rank battery, run-only, not edited -- against **both** routers:
 
@@ -161,6 +196,7 @@ The router is running **lexical-only**. My two mechanisms (`_score_rule` substri
 | `W2-S10` | OBSERVATION / ARMED | two cheap PRE/POST proxies both returned confident wrong numbers, in opposite directions |
 | `W2-S11` | OBSERVATION / ARMED | every routing measurement here is against a lexical-fallback router (POTION FAIL-CLOSED) |
 | `W2-S12` | OBSERVATION / ARMED | the comp-system arms disagree on a real `_SOURCE`; the commit-time gate fails open |
+| `W2-S13` | OBSERVATION / INERT | **corrects my own W2-S7 evidence line**: the `^(PASS\|FAIL)` grep returns 0 on *every* outcome, so it never measured anything; the expired bound, which is independent and sound, is what carried the conclusion |
 
 ## 9. DECLARED NON-APPLICATIONS
 
