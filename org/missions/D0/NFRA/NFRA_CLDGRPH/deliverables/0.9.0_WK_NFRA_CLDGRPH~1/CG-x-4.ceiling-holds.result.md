@@ -3,7 +3,13 @@
 **TO** `NFRA_CLDGRPH.TO-CG-D-10` · **cell** CG-x-4 · **assignee** `0.9.0_WK_NFRA_CLDGRPH~1` ·
 **branch** `wk-CLDGRPH-d10` · **base HEAD** `76c5f90155` · **read at** 2026-09-05T15:02:08Z.
 
-## THE ANSWER FIRST
+> **PASS 2 (2026-09-05 ~17:3xZ) IS APPENDED AT THE END OF THIS FILE.** `D10-AC3` was RE-CUT by
+> the issuer on `1.0.0_SA_CTO`'s ruling @`9f4a57262f` and re-measured as
+> `HAND_ENFORCED_CEILING=1 of 3`. Everything below is PASS 1 and every number in it still
+> reproduces byte-identically at pass 2's HEAD; only the BAR moved, and the order still
+> does not flip.
+
+## THE ANSWER FIRST (PASS 1)
 
 **The ceiling holds, and it holds by itself where the ceiling is concerned.** Over the pinned
 24 h cycle 2026-09-04T13:00:00Z -> 2026-09-05T13:00:00Z the oldest answer served was
@@ -666,4 +672,408 @@ infra/aws/globgrph/tests/test_projection_server.py::SwapTests::test_backward_tes
 infra/aws/globgrph/tests/test_projection_server.py::RequestTests::test_refuses_multiple_statements
 
 3/7 tests collected (4 deselected) in 0.25s
+```
+
+---
+
+# PASS 2 -- D10-AC3 RE-CUT, RE-MEASURED, AND STILL FAILING (on a better question)
+
+**TO** `NFRA_CLDGRPH.TO-CG-D-10` · **cell** CG-x-4 · **assignee** `0.9.0_WK_NFRA_CLDGRPH~1` ·
+**branch** `wk-CLDGRPH-d10b` · **base HEAD** `497ffff69c` · **read at** 2026-09-05T17:1xZ ·
+**scope** D10-AC3 ONLY, per the amendment dated 2026-09-05 ~16:4xZ on `1.0.0_SA_CTO`'s ruling
+@`9f4a57262f`. FWD-4 is not amended, CG-x-4 is not amended, and D10-AC1/AC2/AC4/AC5 are untouched.
+
+## THE ANSWER FIRST
+
+**`HAND_ENFORCED_CEILING=1 of 3`. D10-AC3 FAILS AGAIN, AND THE ORDER STAYS OPEN.** The amendment
+diagnosed the pass-1 instrument correctly -- the old `<expect>` counted hand-STARTED RunTasks when
+the cell asks about hands ENFORCING -- and its new test is the right one. The world does not clear
+the new bar either. Of the three hand-started tasks in the cycle, **two are excused by their own
+bytes and one is not**:
+
+| hand task | what it ran | artifact | effect on served freshness |
+|---|---|---|---|
+| 2026-09-04T13:41:39Z `globgrph-trino` | one read-only `SELECT ... GROUP BY` on the statement API | none | **NONE** -- no vintage committed in its 57.7 s window |
+| 2026-09-04T16:30:15Z `globgrph-derive-runner:7`, `startedBy=wk-cldgrph-1-cgs15` | the derive-runner entrypoint; committed the graph tables at 16:38:39.485910Z | **vintage `2026-09-04T16:38:39.485910+00:00`, served from 16:51:51Z** | **FRESHER -- 20 of 261 answers, by up to 6798.156 s** |
+| 2026-09-04T21:18:53Z `globgrph-trino` | the same read-only `SELECT` | none | **NONE** -- no vintage committed in its 49.8 s window |
+
+**This is not a criterion defect and it does not ask for another re-cut.** The amendment's worked
+example asserts the `wk-cldgrph-1-cgs15` task is *"a digest-pinned rebuild for a DIFFERENT cell and
+not ceiling enforcement"*. That is true of its **purpose** and false of its **effect**, and the
+amendment's own operative sentence forbids reading the effect from anything but the task and the
+artifact it produced. Row `NFRA_CLDGRPH-W1-S25` carries the divergence. The face is explicit that a
+criterion which fails because the world is what it is *"FAILS honestly and the order stays open"*,
+and that no reading may be reached for because it passes -- so none was.
+
+**Every number pass 1 measured is carried unchanged and none is lost**, which the ruling requires:
+
+| carried | pass 1 | pass 2 | bar? |
+|---|---|---|---|
+| `OLDEST_AGE_SERVED_S` / `CEILING_S` / `WITHIN_CEILING` | 18138.643 / 87191.260 / true | **identical** | D10-AC1, PASS |
+| `ANSWERS_IN_CYCLE` / `SWAPS_IN_CYCLE` / `NIGHTLY_SWAP_AT` | 261 / 38 / 2026-09-05T02:23:34Z | **identical** | D10-AC2, PASS |
+| `HANDS_OFF_RUNTASK` | `3 of 61` | **`3 of 61`** | no longer the bar; evidence |
+| `WRITERS_IN_CYCLE` | `{cse_producers_nightly, derive_runner, incremental_updater}` | **identical, every member named** | no longer the bar; evidence |
+| RunTask per-row labels | `PIPE 54 / EVENTS_RULE 3 / CHRONOS 1 / HAND 3` = 61 | **identical, label-sum control AGREE** | the readability control, kept |
+| `UNPLACED_ANSWERS` | `0 of 3151` | **identical** | the coverage claim |
+| the control | `3 passed, 4 deselected` | **identical** | D10-AC4, PASS |
+
+## THE WINDOW: THE SAME PINNED CYCLE, AND THE FLATTERING CUT NAMED AND REFUSED
+
+**`2026-09-04T13:00:00Z -> 2026-09-05T13:00:00Z`, unchanged from pass 1.** The face leaves the window
+to this worker and asks it to say which and why. Three reasons, in order of weight:
+
+1. **It is the cycle the other four criteria describe.** Re-cutting D10-AC3's window would leave
+   AC1, AC2 and AC5 reporting a different population than AC3, and the L9 grader would be reading
+   five criteria about four cycles. Every number in the table above reproduces byte-identically
+   because the population did not move.
+2. **It is CLOSED and it is defensible**: 24 h exactly, both ends in the past at the cut, exactly one
+   02:00Z boundary and the nightly's swap inside it.
+3. **The alternative is a flattering cut, and it is named here so the refusal is auditable.** The
+   latest *admissible* closed 24 h window at this cut is `2026-09-04T16:48Z -> 2026-09-05T16:48Z`.
+   It excludes the 16:30:15Z RunTask by 18 minutes -- so the criterion, which counts hand-started
+   tasks *in the cycle*, would print **`HAND_ENFORCED_CEILING=0 of 2` and PASS** -- while still
+   containing the 16:51:51Z swap to that task's artifact and the answers it freshened. The window
+   would move the RunTask out of the denominator without moving its EFFECT out of the window, which
+   is the one thing the amended criterion measures. Declined.
+
+## THE METHOD: EFFECT, READ FROM THE ARTIFACT, THEN COMPUTED AS A COUNTERFACTUAL
+
+**Step 1 -- open every hand-started task** (`cycle.sh` section 4d). Its own log stream gives the
+window; CloudTrail's `requestParameters` gives the container command verbatim. Neither is an
+inference about the task, and neither is the fact that a hand started it.
+
+**Step 2 -- attribute a served vintage to a task, on BOTH limbs or neither** (`cycle_hand_effect.py`):
+
+- **CONTAINMENT.** The vintage instant falls inside the task's own execution window. A vintage is
+  the **source-warehouse commit instant**, not a build time: the manifest carries the same value
+  three times (`vintage`, `committed_at`, `source_vintage.{nodes,edges}_metadata_last_modified`), so
+  "the source data was committed while this task was running" is read from the artifact.
+- **FAMILY CONSISTENCY.** The manifest's `(writer_id, mode)` is a form that task's family produces.
+
+Containment alone convicts any task that merely overlapped somebody else's commit; family
+consistency alone convicts every derive-runner that ever ran. **A family with no declared form, an
+unreadable manifest, or an unreadable/empty task window FAILS CLOSED** -- it attributes *everything*
+to the task rather than nothing, because the cheap bug here is a window that collapses to zero width
+and silently excuses every hand.
+
+**Step 3 -- compute the effect, do not argue it.** Remove every timeline entry serving an attributed
+vintage and re-age all 261 answers; the previous vintage simply stays served for longer, which is
+what would have happened had the task never run. The task made a served answer fresher iff some
+answer's age **strictly increases**. *Stated limit:* a later incremental build is assumed to keep its
+own vintage, because a vintage is the source commit instant and does not depend on which projection
+the incremental was layered onto -- so ages after the next non-attributed swap are unchanged by
+construction and the measured effect is bounded to the interval between the two swaps.
+
+## THE ZERO IS CONTROLLED BEFORE IT IS SPENT
+
+`HAND_ENFORCED_CEILING` is a count of absences on two of three tasks, so the arm is proven able to
+fire first, on a producer nobody's hand started:
+
+> `CONTROL 2026-09-05T02:00:05Z (events-rule/opal-globgrph-derive-runner-nightly): removing its
+> vintage would have aged 30 answer(s), max +4705.316 s, over 2026-09-05T02:55:09Z .. 03:32:29Z`
+> `EFFECT_POSITIVE_CONTROL=FIRED`
+
+The identical chain shape from a **scheduled** derive-runner (RunTask 02:00:05Z -> warehouse commit
+02:11:10.919Z -> pipe-started projection worker 02:11:13Z -> swap 02:23:34Z) fires the counterfactual.
+So `EFFECT=NONE` on the two trino tasks is a **measured absence**, not a dead instrument. The script
+returns non-zero and refuses to print a count at all if the control does not fire.
+
+## THE CHAIN THAT COUNTS, ON FOUR PLANES THAT DO NOT SHARE A PRODUCER
+
+1. **Control plane** -- CloudTrail `RunTask` 2026-09-04T16:30:15Z, `globgrph-derive-runner:7`,
+   `startedBy=wk-cldgrph-1-cgs15`, `userIdentity=IAMUser/Andrew_Berman`, task
+   `4a1baae562c8496983eb068146ae33d5`.
+2. **The task's own log** -- `/ecs/globgrph/derive-runner`, stream
+   `derive-runner/derive-runner/4a1baae5...`: first event `1788539450256` = 16:30:50Z, last
+   `1788539984914` = 16:39:44Z (paged to exhaustion: the next forward token returns 0 events), ending
+   `OK: DERIVE_RUNNER_COMPLETE date=20260904 batch_ts=1788539433147`.
+3. **The artifact** -- `projection/2026-09-04T16:38:39.485910+00:00/_build_manifest.json`:
+   `writer_id=derive_runner`, `producer.mode=full`, `built_at=2026-09-04T16:51:03.403904+00:00`, and
+   `source_vintage.nodes_metadata_last_modified == edges_metadata_last_modified ==
+   2026-09-04T16:38:39.485910+00:00` -- **inside the task's own window**.
+4. **The service's own log** -- `projection swap complete` at 2026-09-04T16:51:51Z carrying that
+   vintage; the next swap is 2026-09-04T18:12:58Z (vintage 18:11:48.783142Z).
+
+The 61-event RunTask census contains exactly **two** derive-runner runs: this one and the nightly.
+Nothing else in the cycle could have produced a `mode=full` vintage at that instant.
+
+## WHAT THE ARM NOW SAYS ABOUT FWD-4, WITHOUT GRADING IT
+
+The **ceiling** held by itself: 18138.643 s against 87191.260 s, 20.8% of budget. **Removing the hand
+act does not move that number at all** -- the counterfactual oldest is *identical*, 18138.643 s,
+because the oldest answer of the cycle lies outside the interval the hand act touched. The 20 answers
+it did touch would have reached at most **12197.572 s**, 14.0% of the ceiling. So the hand did not
+rescue the ceiling and did not even bear on the arm that measures it; it moved *freshness* for 81
+minutes, which is a different property and is exactly the one the amended criterion asks about. Whether FWD-4's acceptance -- *"no one is
+handed an answer older than the last scheduled refresh"* -- is about the ceiling holding or about no
+person moving freshness is a reading of the endpoint, and that reading is `3.0.0_SA_CVO`'s at L9 and
+`1.0.0_SA_CTO`'s in the PRD. It is not this worker's, and no verdict on it is offered here.
+
+## ROWS FILED THIS PASS (channel: 96 rows at base -> 98; counted by PARSING every fenced block)
+
+- **`NFRA_CLDGRPH-W1-S24`** -- `.tools/jq.exe` emits CRLF too. Row W1-S18 recorded that hazard for
+  `.tools/aws` and `cycle.sh`'s control is scoped to the aws shim; jq is a second carrier and the
+  scoped control could not see it. It bit this pass's own new code and **failed closed**
+  (`NO_LOG_CONFIG` on 4 of 4 tasks) rather than returning a wrong count -- had the join failed open,
+  `HAND_ENFORCED_CEILING` would have read `0 of 3` with no visible defect at all. Fixed in the
+  instance; ARMED on the uncensused population, `disarm_owner 2.0.0_SA_COO~A`.
+- **`NFRA_CLDGRPH-W1-S25`** -- the amendment's worked example is contradicted by the artifact: the
+  CG-s-15 rebuild's output WAS served. ARMED, `disarm_owner 2.0.0_SA_COO~A`.
+
+W1-S20..W1-S23 stand exactly as written and none was edited.
+
+## THE PASS-2 KEY=VALUE SET
+
+```json
+{
+  "to_id": "NFRA_CLDGRPH.TO-CG-D-10",
+  "cell": "CG-x-4",
+  "pass": 2,
+  "scope": "D10-AC3 only (amended 2026-09-05 ~16:4xZ on ruling 9f4a57262f)",
+  "base_head": "497ffff69c",
+  "CYCLE_START": "2026-09-04T13:00:00Z",
+  "CYCLE_END": "2026-09-05T13:00:00Z",
+  "cycle_unchanged_from_pass_1": true,
+  "HAND_ENFORCED_CEILING": "1 of 3",
+  "HANDS_OFF_RUNTASK": "3 of 61",
+  "WRITERS_IN_CYCLE": "{cse_producers_nightly, derive_runner, incremental_updater}",
+  "ANSWERS_IN_CYCLE": 261,
+  "SWAPS_IN_CYCLE": 38,
+  "NIGHTLY_SWAP_AT": "2026-09-05T02:23:34Z",
+  "OLDEST_AGE_SERVED_S": 18138.643,
+  "OLDEST_AGE_SERVED_S_COUNTERFACTUAL_NO_HAND": 18138.643,
+  "OLDEST_AGE_SERVED_S_COUNTERFACTUAL_NOTE": "identical to the measured value: the cycle's oldest answer is outside the interval the hand act touched",
+  "MAX_AGE_AMONG_HAND_AFFECTED_ANSWERS_COUNTERFACTUAL_S": 12197.572,
+  "CEILING_S": 87191.260,
+  "WITHIN_CEILING": true,
+  "UNPLACED_ANSWERS": "0 of 3151",
+  "runtask_labels": {"PIPE": 54, "SCHEDULER_EVENTS_RULE": 3, "SCHEDULER_CHRONOS": 1, "HAND": 3, "sum": 61, "label_sum_control": "AGREE"},
+  "positive_control": {"task": "events-rule/opal-globgrph-derive-runner-nightly", "at": "2026-09-05T02:00:05Z", "answers_aged_by_removal": 30, "max_delta_s": 4705.316, "verdict": "FIRED"},
+  "hand_tasks": [
+    {"at": "2026-09-04T13:41:39Z", "family": "globgrph-trino", "task": "540a18975358499dbe8afd783ad8381f", "own_window_s": 57.7, "ran": "read-only SELECT on the Trino statement API", "attributed_vintages": 0, "effect": "NONE"},
+    {"at": "2026-09-04T16:30:15Z", "family": "globgrph-derive-runner", "started_by": "wk-cldgrph-1-cgs15", "task": "4a1baae562c8496983eb068146ae33d5", "own_window_s": 569.9, "ran": "the derive-runner image entrypoint (no command override)", "attributed_vintages": 1, "vintage": "2026-09-04T16:38:39.485910+00:00", "served_from": "2026-09-04T16:51:51Z", "served_until": "2026-09-04T18:12:58Z", "answers_made_fresher": 20, "max_delta_s": 6798.156, "affected_span": "2026-09-04T16:57:07Z .. 2026-09-04T18:08:38Z", "effect": "FRESHER"},
+    {"at": "2026-09-04T21:18:53Z", "family": "globgrph-trino", "task": "cc317e333c004f2d8a0ff2e07883f4ef", "own_window_s": 49.8, "ran": "read-only SELECT on the Trino statement API", "attributed_vintages": 0, "effect": "NONE"}
+  ],
+  "criteria": {"D10-AC1": "PASS", "D10-AC2": "PASS", "D10-AC3": "FAIL", "D10-AC4": "PASS", "D10-AC5": "UNVERIFIABLE-BY-INSTRUMENT (3.0.0_SA_CVO)"},
+  "order_flipped": false,
+  "rows_filed": ["NFRA_CLDGRPH-W1-S24", "NFRA_CLDGRPH-W1-S25"]
+}
+```
+
+## THE GRADED INVOCATIONS, PASS 2, VERBATIM
+
+```
+$ timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~1/cycle.sh | grep -E '^(HAND_ENFORCED_CEILING|HANDS_OFF_RUNTASK|WRITERS_IN_CYCLE)='
+HAND_ENFORCED_CEILING=1 of 3
+HANDS_OFF_RUNTASK=3 of 61
+WRITERS_IN_CYCLE={cse_producers_nightly, derive_runner, incremental_updater}
+PIPELINE_RC=0
+  -- the pipeline's rc is grep's, not the script's; cycle.sh's OWN rc read UNPIPED is 0 (70 s
+     against the order's 120 s bound).  D10-AC3 FAILS: <expect> requires HAND_ENFORCED_CEILING=0
+     of [0-9]+ and the measured value is 1 of 3.  Denominator: 3 hand-started tasks of 61 RunTask
+     events, each one opened and read individually above.
+
+$ timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~1/cycle.sh | grep -E '^(OLDEST_AGE_SERVED_S|CEILING_S|WITHIN_CEILING)='
+OLDEST_AGE_SERVED_S=18138.643
+CEILING_S=87191.260
+WITHIN_CEILING=true
+PIPELINE_RC=0
+  -- D10-AC1 PASSES.  Denominator: 261 placed answers, 0 unplaced of 3151 http lines.
+
+$ timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~1/cycle.sh | grep -E '^(ANSWERS_IN_CYCLE|SWAPS_IN_CYCLE|NIGHTLY_SWAP_AT)='
+ANSWERS_IN_CYCLE=261
+SWAPS_IN_CYCLE=38
+NIGHTLY_SWAP_AT=2026-09-05T02:23:34Z
+PIPELINE_RC=0
+  -- D10-AC2 PASSES.  Denominator: 39 vintage-setting log events in the window plus the seed.
+
+$ timeout 120 python -m pytest infra/aws/globgrph/tests/test_projection_server.py -q -k "backward or refus"
+...                                                                      [100%]
+3 passed, 4 deselected in 0.50s
+RC=0
+  -- D10-AC4 PASSES, rc read UNPIPED.  Denominator: 3 selected of 7 collected.
+```
+
+## THE PASS-2 RUN IN FULL (`cycle.sh`, unpiped, rc 0, 70 s)
+
+```
+=== TO-CG-D-10 / CG-x-4 -- FWD-4: THE CEILING HOLDS BY ITSELF
+READ_AT=2026-09-05T17:30:26Z
+REPO_HEAD=497ffff69c44612fec7ca0df918bb3d39d67536e
+WINDOW_MS=1788526800000 -> 1788613200000   (pinned, closed, 24h)
+
+--- 1. THE SERVED-VINTAGE TIMELINE (the service's own log)
+The access line carries NO vintage (projection_server.py:499-500), so an answer is placed
+against this timeline.  BOTH vintage-setting lines are read: the watcher's swap (:406) AND
+startup's 'open read-only' (:514) -- startup's install returns "started", never "swapped",
+so a swaps-only timeline SILENTLY LOSES the served vintage across a task replacement.
+  TIMELINE_IN_WINDOW: rc=0  pages=1  events=39
+
+--- 1b. THE SEED: the vintage already being served at CYCLE_START (24h lookback before it)
+Without this the first answers of the cycle are UNPLACEABLE and would be silently dropped.
+  TIMELINE_SEED_LOOKBACK: rc=0  pages=1  events=37
+
+--- 1c. STREAMS THE WINDOW SPANS (a timeline crossing a task replacement must say so)
+  stream serving/globgrph-serving/8889156e83ad4e3e95931e9d505169a9  first=1788539209370 last=1788624467986
+  stream serving/globgrph-serving/c18ee8b40e4a4bf3993f8f78cc2f98a6  first=1788460959874 last=1788539258092
+  STREAMS_TOTAL_IN_GROUP=2   (read rc=0)
+
+--- 2. THE ANSWERS (every http line in the window; POST /cypher is the served answer)
+  HTTP_IN_WINDOW: rc=0  pages=1  events=3151
+
+--- 2b. THE REFUSAL CENSUS (the seam that keeps a stale artifact off the wire)
+  REFUSALS: rc=0  pages=1  events=0
+
+--- 4. HANDS OFF, limb (i): every RunTask in the cycle, paginated to a real denominator
+  RUNTASK_PAGES=2  RUNTASK_EVENTS_FETCHED=61  (read rc=0)
+  INSTRUMENT QUALIFIER: CloudTrail management-event delivery lags up to ~15 min; this window
+    closed at 2026-09-05T13:00:00Z and is read after it, so no in-window event is undelivered.
+
+--- 4b. HANDS OFF, limb (ii): CloudTrail on the POINTER KEY itself (projection/current.json)
+  POINTER_KEY_EVENTS=0 (read rc=0)
+  POINTER_TRAIL_COVERAGE=UNKNOWN -- S3 DATA events are not enabled on this trail, so a
+    zero here CANNOT distinguish 'nobody wrote the pointer' from 'the trail does not see
+    object writes at all'.  The order anticipates exactly this and routes the question to
+    the manifests' writer_id instead (WRITERS_IN_CYCLE), a PRODUCER-side record that is
+    not subject to this gap.
+
+--- 4c. AN UNCOVERED MEMBER OF THE HANDS-OFF DOMAIN, printed because the census cannot see it
+The order's hands-off definition enumerates two members: RunTask and a pointer PutObject.
+A control-plane ecs:UpdateService is NEITHER, yet it replaces the SERVING task inside the
+cycle -- and a task replacement re-seats the served vintage from whatever the pointer then
+says.  A hands-off claim that cannot see it is scoped narrower than its own sentence.
+  UPDATESERVICE 2026-09-04T16:26:11Z | identity=IAMUser/arn:aws:iam::313476888478:user/Andrew_Berman | service=arn:aws:ecs:us-east-1:313476888478:service/opal-globgrph/globgrph-serving | taskDefinition=arn:aws:ecs:us-east-1:313476888478:task-definition/globgrph-serving:2
+
+  SEED_SET_AT_MS=1788526164556  SEED_VINTAGE=2026-09-04T12:48:00.440101+00:00
+  swap-complete lines inside the window: 38
+  POSITIVE CONTROL for the CloudWatch filter instrument -- it must find something before any
+    zero of its counts as an absence: 'POST /cypher' lines = 264, swap lines = 38.
+  REFUSALS_IN_CYCLE=0 (the read returned rc=0, so this is a MEASURED absence and not a
+    dead arm -- the same instrument on the same window returned the two non-zero counts above)
+
+--- 3. THE WRITER CENSUS -- every vintage served in the cycle, from ITS OWN manifest
+  DISTINCT_VINTAGES_TO_READ=39
+  MANIFEST_CACHE_HITS=39  MANIFEST_LIVE_READS=0  (cache: /c/Users/AndrewBerman/Desktop/wk-CLDGRPH-d10b/org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~1/manifest_writer_cache.tsv)
+
+--- 4d. EACH HAND-STARTED TASK OPENED: its own execution window and its own command
+  TASKS_TO_OPEN=4  (every HAND task in the cycle, PLUS the
+    scheduled nightly derive-runner, opened ONLY to serve as the positive control: the
+    counterfactual arm must be shown to FIRE before any hand task's zero is believed)
+  WINDOWS_FROM_CACHE=0  WINDOWS_FETCHED_LIVE=4  WINDOWS_TOTAL=4
+  (a READ_FAILED / EMPTY_STREAM / NO_LOG_CONFIG row is kept AS A FAILURE so the attribution
+   join fails CLOSED on that task rather than quietly excusing it)
+    window be97f46226f74bae86b9cf853e78763c rc=0 first_ms=1788573648761 last_ms=1788574346404
+    window cc317e333c004f2d8a0ff2e07883f4ef rc=0 first_ms=1788556777165 last_ms=1788556782765
+    window 4a1baae562c8496983eb068146ae33d5 rc=0 first_ms=1788539450256 last_ms=1788539984914
+    window 540a18975358499dbe8afd783ad8381f rc=0 first_ms=1788529350477 last_ms=1788529356701
+  THE COMMAND EACH HAND TASK RAN (verbatim from CloudTrail's own requestParameters):
+    2026-09-04T21:18:53Z | globgrph-trino | cmd=B=http://trino.opal-globgrph.local:8080; q(){ echo "@@CHQ@@ $1"; r=$(curl -s -XPOST "$B/v1/statement" -H 'X-Trino-User: comp-heat' --data "$1"); echo "$r"; n=$(echo "$r" | grep -o '"nextUri":"[^"]*"' | head -1 | sed 's/.*"nextUri":"//;s/"$//'); i=0; while [ -n "$n" ] && [ $i -lt 90 ]; do i=$((i+1)); r=$(curl -s "$n"); echo "$r"; n=$(echo "$r" | grep -o '"nex
+    2026-09-04T16:30:15Z | globgrph-derive-runner:7 | cmd=(none -- the image entrypoint runs)
+    2026-09-04T13:41:39Z | globgrph-trino | cmd=B=http://trino.opal-globgrph.local:8080; q(){ echo "@@CHQ@@ $1"; r=$(curl -s -XPOST "$B/v1/statement" -H 'X-Trino-User: comp-heat' --data "$1"); echo "$r"; n=$(echo "$r" | grep -o '"nextUri":"[^"]*"' | head -1 | sed 's/.*"nextUri":"//;s/"$//'); i=0; while [ -n "$n" ] && [ $i -lt 90 ]; do i=$((i+1)); r=$(curl -s "$n"); echo "$r"; n=$(echo "$r" | grep -o '"nex
+
+--- 5. THE AGE JOIN
+TIMELINE_RAW_LINES=40  TIMELINE_EVENTS_PARSED=40
+HTTP_RAW_LINES=3151  HTTP_LINES_PARSED=3151
+PLACEMENT_METHOD=last-vintage-setting-event-at-or-before-answer (event ts => UPPER BOUND age)
+UNPLACED_ANSWERS=0 of 3151
+  http_status 200 = 3148
+  http_status 500 = 3
+  route GET/health = 2887
+  route POST/cypher = 264
+SERVED_POST_CYPHER_200=261
+TOP5_OLDEST_ANSWERS (age_s | answered_at | served_vintage):
+  18138.643 | 2026-09-04T23:14:07.426000Z | 2026-09-04T18:11:48.783142+00:00
+  18130.814 | 2026-09-04T23:13:59.597000Z | 2026-09-04T18:11:48.783142+00:00
+  15972.629 | 2026-09-04T22:38:01.412000Z | 2026-09-04T18:11:48.783142+00:00
+  15805.890 | 2026-09-05T10:19:08.461000Z | 2026-09-05T05:55:42.571886+00:00
+  15796.385 | 2026-09-05T10:18:58.956000Z | 2026-09-05T05:55:42.571886+00:00
+OLDEST_AGE_CANDIDATE=18138.643
+WIDER_BOUND_OLDEST_AGE_ANY_HTTP_S=22649.197
+  cycle_ages.py rc=0
+
+--- 6. THE CEILING, THE WRITERS, THE RUNTASK LABELS
+VINTAGES_SERVED_IN_CYCLE=39 distinct (incl. the seed served at CYCLE_START)
+MANIFEST_READS_OK=39 of 39
+  writer cse_producers_nightly = 1 vintage(s)
+  writer derive_runner = 3 vintage(s)
+  writer incremental_updater = 35 vintage(s)
+WRITERS_VALUE={cse_producers_nightly, derive_runner, incremental_updater}
+NIGHTLY_CANDIDATES=1 (full + derive_runner + swap in the 02:00-04:00Z band)
+  2026-09-05T02:23:34Z | vintage 2026-09-05T02:11:10.919000+00:00 | built_at 2026-09-05T02:23:22.179104+00:00
+CEILING_ARITHMETIC: 86400 (cron period) + 731.260104 (built_at 2026-09-05T02:23:22.179104+00:00 - vintage 2026-09-05T02:11:10.919000+00:00) + 60 (watcher interval) = 87191.260104
+NIGHTLY_SWAP_AT_VALUE=2026-09-05T02:23:34Z
+CHAIN_S_VALUE=731.260
+CEILING_S_VALUE=87191.260
+RUNTASK_EVENTS_CLASSIFIED=61
+  label HAND = 3
+  label PIPE = 54
+  label SCHEDULER_CHRONOS = 1
+  label SCHEDULER_EVENTS_RULE = 3
+RUNTASK_LABEL_SUM=61 (must equal RUNTASK_EVENTS_CLASSIFIED=61): AGREE
+  HAND_ROW 2026-09-04T21:18:53Z | startedBy='' | invokedBy=- | identity=IAMUser/arn:aws:iam::313476888478:user/Andrew_Berman
+  HAND_ROW 2026-09-04T16:30:15Z | startedBy='wk-cldgrph-1-cgs15' | invokedBy=- | identity=IAMUser/arn:aws:iam::313476888478:user/Andrew_Berman
+  HAND_ROW 2026-09-04T13:41:39Z | startedBy='' | invokedBy=- | identity=IAMUser/arn:aws:iam::313476888478:user/Andrew_Berman
+RUNTASK_HAND_VALUE=3
+RUNTASK_TOTAL_VALUE=61
+  cycle_census.py rc=0
+
+--- 6b. D10-AC3 AS AMENDED: DID ANY HAND-STARTED TASK MAKE A SERVED ANSWER FRESHER?
+Not 'was a hand involved' (it was, 3 times, and that count is still printed below) but
+whether the ARTIFACT a hand-started task produced was SERVED and displaced an older one.
+The effect is COMPUTED as a counterfactual re-ageing, and the arm is proven able to fire
+on a SCHEDULED producer before any hand task's zero is spent as an absence.
+EFFECT_BASE: answers=261  timeline_entries=40  unplaced=0
+EFFECT_POSITIVE_CONTROL -- the counterfactual arm must FIRE on a SCHEDULED producer
+  before any per-task zero below is spent as an absence.  Control: the cycle's own
+  nightly derive-runner, started by an EventBridge rule, not by a hand.
+    own-log window 2026-09-05T02:00:05Z .. 2026-09-05T02:12:26Z (task ran 741.4 s past its RunTask call)
+    ATTRIBUTED 2026-09-05T02:11:10.919000+00:00 (contained AND writer_id=derive_runner mode=full is family globgrph-derive-runner's form)
+    CONTROL 2026-09-05T02:00:05Z (events-rule/opal-globgrph-derive-runner-nightly): removing its vintage would have aged 30 answer(s), max +4705.316 s, over 2026-09-05T02:55:09Z .. 2026-09-05T03:32:29Z
+EFFECT_POSITIVE_CONTROL=FIRED -- the arm can detect a freshening effect, so a per-task
+  zero below is a MEASURED absence and not a dead instrument.
+
+HAND_TASKS_IN_CYCLE=3 (the denominator N; every one is examined below)
+  HAND_TASK 2026-09-04T13:41:39Z | family=globgrph-trino | startedBy=(empty) | task=540a18975358499dbe8afd783ad8381f
+      own-log window 2026-09-04T13:41:39Z .. 2026-09-04T13:42:36Z (task ran 57.7 s past its RunTask call)
+      NO served vintage was committed inside this task's own window
+      EFFECT=NONE -- produced no vintage that was served; it did not enforce the
+      ceiling and it does not void the arm.
+  HAND_TASK 2026-09-04T16:30:15Z | family=globgrph-derive-runner | startedBy=wk-cldgrph-1-cgs15 | task=4a1baae562c8496983eb068146ae33d5
+      own-log window 2026-09-04T16:30:15Z .. 2026-09-04T16:39:44Z (task ran 569.9 s past its RunTask call)
+      ATTRIBUTED 2026-09-04T16:38:39.485910+00:00 (contained AND writer_id=derive_runner mode=full is family globgrph-derive-runner's form)
+      EFFECT=FRESHER -- 20 served answer(s) were fresher than the schedule alone
+      would have made them, by up to 6798.156 s, over 2026-09-04T16:57:07Z .. 2026-09-04T18:08:38Z
+      THIS COUNTS: a hand made a served answer fresher.
+  HAND_TASK 2026-09-04T21:18:53Z | family=globgrph-trino | startedBy=(empty) | task=cc317e333c004f2d8a0ff2e07883f4ef
+      own-log window 2026-09-04T21:18:53Z .. 2026-09-04T21:19:42Z (task ran 49.8 s past its RunTask call)
+      NO served vintage was committed inside this task's own window
+      EFFECT=NONE -- produced no vintage that was served; it did not enforce the
+      ceiling and it does not void the arm.
+HAND_ENFORCED_VALUE=1
+HAND_DENOM_VALUE=3
+  cycle_hand_effect.py rc=0
+
+=============================== CG-x-4 SUMMARY ===============================
+CYCLE_START=2026-09-04T13:00:00Z
+CYCLE_END=2026-09-05T13:00:00Z
+ANSWERS_IN_CYCLE=261
+SWAPS_IN_CYCLE=38
+NIGHTLY_SWAP_AT=2026-09-05T02:23:34Z
+OLDEST_AGE_SERVED_S=18138.643
+CEILING_S=87191.260
+WITHIN_CEILING=true
+HAND_ENFORCED_CEILING=1 of 3
+HANDS_OFF_RUNTASK=3 of 61
+WRITERS_IN_CYCLE={cse_producers_nightly, derive_runner, incremental_updater}
+==============================================================================
+  (HANDS_OFF_RUNTASK and WRITERS_IN_CYCLE are CARRIED UNCHANGED from the pass-1
+   instrument.  They are no longer the bar -- HAND_ENFORCED_CEILING is -- but the
+   ruling requires that no number the failing instrument measured is lost.)
+SUPPLEMENTARY (never graded; printed so the graded numbers carry their frame):
+  CEILING_CHAIN_S=731.260  (the nightly's own built_at - vintage, from ITS manifest)
+  UNPLACED=0 of 3151  (answers the timeline could not place; a zero IS the coverage claim)
+  STRICTER_ARM_ALL_HTTP_OLDEST_S=22649.197 -> within ceiling: true
+    (every http response incl. /health, which also hands out a vintage; a WIDER population
+     than the graded one, printed so the graded number cannot be the flattering cut)
+  EXTRA_UPDATESERVICE_IN_CYCLE=1  (an uncovered member of the hands-off domain -- see 4c)
 ```
