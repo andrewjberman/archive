@@ -2,11 +2,19 @@
 
 **TO:** `ETFS_GUARDRAIL.TO-EG-s-8` · **Worker:** `0.9.0_WK_ETFS_GUARDRAIL~1` · **Worktree HEAD:** `c50c72f92a` (branch `wk-ETFS_GUARDRAIL-1`) · **Verb:** wire.
 
-**HEADLINE: the deploy did NOT land this session.** `S8-AC4`'s amended targeted-plan invocation, copied from `EG-s-7`'s working fix, does NOT isolate `aws_lambda_function.orchestrator` from the pre-existing `aws_instance.reporter` drift here -- a REAL Terraform dependency (`REPORTER_INSTANCE_ID = aws_instance.reporter.id`) pulls the instance into the targeted plan's closure. No apply was attempted (per this order's own bound), and the live invoke (`S8-AC7`) was deliberately NOT run because it would have hit the OLD, undeployed function and triggered a real production render. Filed `ETFS_GUARDRAIL-W1-S8` (BLOCKING/INERT). Code, tests and the ledger-open half are complete and committed; the apply/serve half is not.
+**HEADLINE (final): the deploy landed.** `S8-AC4`'s FIRST reading was a FALSE drift: a CRLF-vs-LF checkout artifact on this `core.autocrlf=true` worktree (no `*.tf` eol rule in `.gitattributes`), not a real config change on `aws_instance.reporter`. The issuer normalized the `.tf` tree to LF (row `ETFS_GUARDRAIL-S2`) and ADDED one line to this order's own deliverable -- `_render_command` now passes `--gate` to the renderer, the seam between this Lambda and `EG-s-6`'s pre-publish coverage gate (row `ETFS_GUARDRAIL-S3`, minted `S8-AC9`). After both, the targeted plan read exactly one resource, the apply landed, and the live rehearsal ran safely. Filed `ETFS_GUARDRAIL-W1-S8` (BLOCKING/INERT, dispositioned by rows S2/S3) for the first, false-drift reading and the correctly-declined live invoke against the pre-deploy function.
 
 ## Code changes
 
-`infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py`: added `_read_coverage_artifacts(month) -> dict` (best-effort read of `coverage_verdict.json`/`coverage_unresolved.json`/`coverage_egress_ask.json`, absence normal), `_build_terminal_email(month, unresolved, ask)` (shared build, never sends), `_send_terminal_unresolved(month, unresolved, ask)` (the third and only new send call site), enriched the `if status != "Success":` branch of `_run` to fold the coverage artifacts into the existing `_alert` and to call `_send_terminal_unresolved` exactly once when `coverage_unresolved.json` names at least one unresolved day, and added mode `terminal_qa` (send-free rehearsal, mirrors `email_qa`).
+`infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py`:
+1. `_read_coverage_artifacts(month) -> dict` -- best-effort read of `coverage_verdict.json`/`coverage_unresolved.json`/`coverage_egress_ask.json`, absence normal.
+2. `_build_terminal_email(month, unresolved, ask)` -- shared build, never sends.
+3. `_send_terminal_unresolved(month, unresolved, ask)` -- the third and only new send call site.
+4. `_run`'s existing `if status != "Success":` branch enriched: folds the coverage artifacts into the existing `_alert`, and calls `_send_terminal_unresolved` exactly once when `coverage_unresolved.json` names at least one unresolved day.
+5. Mode `terminal_qa` -- send-free rehearsal, mirrors `email_qa`.
+6. (ADDED BY THE ISSUER, row `ETFS_GUARDRAIL-S3`) `_render_command` now passes `--gate`: `python3 render_month_end.py --month {month} --pdf --gate --s3-out {out}` -- the seam that runs `EG-s-6`'s pre-publish gate on the scheduled fire.
+
+Reuses the existing SES grant (`ses:SendRawEmail` from `*@opalinvest.dev`, already applied) and the existing `platinum/reports/*` read grant -- no new IAM.
 
 ## 1. S8-AC1 -- the five-arm battery
 
@@ -14,11 +22,11 @@
 ```
 python -m pytest infra/aws/lambda/etfs-reports-orchestrator/test_terminal_send.py -q
 ```
-**Output (rc=0):**
+**Output (rc=0, re-run after the `--gate` edit, unaffected):**
 ```
-5 passed in 0.27s
+5 passed in 0.32s
 ```
-Arms: (a) unresolved present -> exactly one `send_raw_email`, `Destinations == ["andrew@opalinvest.com"]`, body names every date/partner/provider; (b) unresolved absent -> zero sends, the ordinary render-failure alert text unchanged (no "Unresolved dates" section); (c) `terminal_qa` makes no SES call; (d) `absence_check` makes no SES call; (e) the mode table's only REAL sending mode besides the terminal path (reachable only from `_run`) is `send_correction` -- confirmed by parsing the handler's own source for any `if mode ==` block that calls a bare `_send_*` function by name.
+Arms: (a) unresolved present -> exactly one `send_raw_email`, `Destinations == ["andrew@opalinvest.com"]`, body names every date/partner/provider; (b) unresolved absent -> zero sends, the ordinary render-failure alert text unchanged; (c) `terminal_qa` makes no SES call; (d) `absence_check` makes no SES call; (e) the only real-sending mode besides the terminal path is `send_correction`.
 
 ## 2. S8-AC2 -- exactly three send call sites, no new topic
 
@@ -37,50 +45,75 @@ SEND_CALL_SITES=3 NEW_TOPICS=0
 ```
 bash .tools/commit-gate.sh infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py infra/aws/lambda/etfs-reports-orchestrator/test_terminal_send.py
 ```
-**Output (rc=0):**
+**Output (rc=0, re-run after the `--gate` edit):**
 ```
 OK: pre-commit gate clean for 2 of 2 file(s)
 ```
 
-## 4. S8-AC4 -- the TARGETED plan (FAIL by output -- a real dependency, not a coincidence)
+## 4. S8-AC4 -- the TARGETED plan (PASS, after the false-drift correction)
 
-**Terraform binary confirmed:** `.tools/terraform.exe version` -> `Terraform v1.9.8` (issuer-provisioned, per the hand-off). `init -input=false` run once (fresh worktree, no `.terraform/`): rc=0.
+**The false drift (row `ETFS_GUARDRAIL-S2`), confirmed:** `file infra/aws/terraform/etfs-reports/instance.tf` -> `ASCII text` (no CRLF, after the issuer's normalization); `git diff --ignore-cr-at-eol infra/aws/terraform/etfs-reports/instance.tf` -> 0 lines (an eol-only change, no content difference). The live reporter instance's `user_data` (sha1 `e47b615c`) was always byte-identical to the LF rendering of the heredoc; the earlier "new" hash `434774b5` was the CRLF rendering Terraform hashed from this worktree's (pre-normalization) checkout.
 
-**Full (untargeted) plan first -- the honest state of the whole directory:**
+**Full (untargeted) plan, post-normalization:**
 ```
 terraform -chdir=infra/aws/terraform/etfs-reports plan -no-color -input=false -lock=false
 
-  # aws_instance.reporter will be updated in-place
-      ~ user_data = "e47b615c4b7a16df31146d6834cb30ef1693c80f" -> "434774b5a5facfeb4931f837e1b93edc13bbec35"
-
   # aws_lambda_function.orchestrator will be updated in-place
-      ~ source_code_hash = "7CIW8veDKFnk/rNKhXdInVVpp60dhXiZf5Lye9a0w3Q=" -> "YurQLInqu+YsVYIrQXcuFoMMeGS7GfDB4QvhAZbrm3Q="
+      ~ source_code_hash = "7CIW8veDKFnk/rNKhXdInVVpp60dhXiZf5Lye9a0w3Q=" -> "stq9kk/+gatkLr7F/ldLzduW+i03aUCrx1ZG91wJWgY="
 
-Plan: 0 to add, 2 to change, 0 to destroy.
+Plan: 0 to add, 1 to change, 0 to destroy.
 ```
+`aws_instance.reporter` shows NO change -- confirms row S2's finding directly.
 
-**Invocation (TARGETED, per the amended criterion):**
+**Invocation (TARGETED):**
 ```
 .tools/terraform.exe -chdir=infra/aws/terraform/etfs-reports plan -no-color -input=false -lock=false -target=aws_lambda_function.orchestrator
 ```
 **Output (rc=0):**
 ```
-  # aws_instance.reporter will be updated in-place
-      ~ user_data = "e47b615c4b7a16df31146d6834cb30ef1693c80f" -> "434774b5a5facfeb4931f837e1b93edc13bbec35"
+Plan: 0 to add, 1 to change, 0 to destroy.
+```
+**S8-AC4 verdict: PASS.**
 
-  # aws_lambda_function.orchestrator will be updated in-place
-      ~ source_code_hash = "7CIW8veDKFnk/rNKhXdInVVpp60dhXiZf5Lye9a0w3Q=" -> "YurQLInqu+YsVYIrQXcuFoMMeGS7GfDB4QvhAZbrm3Q="
+## 5. S8-AC5 -- the ledger, the targeted apply, the targeted 0-diff (PASS)
 
-Plan: 0 to add, 2 to change, 0 to destroy.
+**Ledger:** opened before the apply -- `python .tools/deploy_ledger.py open --slug etfs-guardrail-eg-s-8-orchestrator-terminal-send --title "EG-s-8: the ONE terminal SES send + --gate flag, etfs-reports-orchestrator (targeted: aws_lambda_function.orchestrator only)" --author 0.9.0_WK_ETFS_GUARDRAIL~1 --leg "code|activation|etfs-reports-orchestrator|..."` -> `org/critical_paths/change_management/20260905T0550Z_etfs-guardrail-eg-s-8-orchestrator-terminal-send_deploy_completion.md`. Entry + sentinel COMMITTED (`d0edf02b28`) before the apply, alongside the `--gate` source edit.
+
+**Apply, BY TARGET:**
+```
+HALT_ACK=1 .tools/safe-apply.sh -chdir=infra/aws/terraform/etfs-reports apply -input=false -auto-approve -target=aws_lambda_function.orchestrator
+```
+**Output (rc=0):**
+```
+comp-tagauthz gate PASSED. tombstone-gate CLEAN.
+Plan: 0 to add, 1 to change, 0 to destroy.
+aws_lambda_function.orchestrator: Modifications complete after 6s
+Apply complete! Resources: 0 added, 1 changed, 0 destroyed.
 ```
 
-**S8-AC4 verdict: FAIL.** The targeted plan STILL shows both resources -- `-target` did not isolate the orchestrator here, unlike `EG-s-7`'s `aws_iam_role_policy.reporter`. **Root cause (not a repeat of the same finding): `infra/aws/terraform/etfs-reports/orchestrator.tf`'s `environment.variables` block sets `REPORTER_INSTANCE_ID = aws_instance.reporter.id` -- a real Terraform config dependency edge from the lambda to the instance.** Terraform's `-target` semantics include the target's full dependency closure (confirmed: no `-exclude` flag exists in this v1.9.8 binary's `plan -help` output), so any pending diff on `aws_instance.reporter` rides along with any targeted plan of `aws_lambda_function.orchestrator` no matter what. **No apply was attempted.** Filed `ETFS_GUARDRAIL-W1-S8` (BLOCKING/INERT).
+**Targeted 0-diff:**
+```
+.tools/terraform.exe -chdir=infra/aws/terraform/etfs-reports plan -no-color -input=false -lock=false -detailed-exitcode -target=aws_lambda_function.orchestrator; echo rc=$?
+-> "No changes. Your infrastructure matches the configuration." rc=0
+```
 
-## 5. S8-AC5 -- UNCOMPUTABLE-BY-CONSTRUCTION
+**`record-terraform-deploy.sh`:**
+```
+bash infra/aws/lambda/ci/record-terraform-deploy.sh etfs-reports --function etfs-reports-orchestrator --author "0.9.0_WK_ETFS_GUARDRAIL~1 <0.9.0_WK_ETFS_GUARDRAIL~1@opal.agent>"
+-> stamped 1 of 1 rows under etfs-reports: etfs-reports-orchestrator; CHANGELOG.json updated
+-> commit ee6e7e0580 "ci: record deploy etfs-reports @ d0edf02b [skip ci]" -- exactly 2 files: infra/aws/lambda/ci/lambda-source-map.json, infra/aws/terraform/etfs-reports/CHANGELOG.json (both in-grant; confirmed via `git show --stat`)
+```
 
-The criterion is conditional on AC4's targeted plan reading exactly one resource; it read two. No apply, no ledger apply-leg, no 0-diff read. Rides the same later run `EG-s-7`'s `W1-S7` finding names (the pre-existing `aws_instance.reporter` drift dispositioned) OR a Terraform refactor decoupling `REPORTER_INSTANCE_ID` from a direct resource-attribute reference (out of this order's scope).
+**Ledger close:**
+```
+python .tools/deploy_ledger.py close-leg --slug etfs-guardrail-eg-s-8-orchestrator-terminal-send --leg-id code --proof "..."
+-> OK: leg code closed. Remaining open: NONE
+python .tools/deploy_ledger.py close --slug etfs-guardrail-eg-s-8-orchestrator-terminal-send
+-> OK: CLOSED ... all 1 legs proven; sentinel removed
+```
+**S8-AC5 verdict: PASS.**
 
-## 6. S8-AC6 -- served vs built (FAIL by output -- honest, expected)
+## 6. S8-AC6 -- served vs built (PASS)
 
 **Invocation:**
 ```
@@ -88,29 +121,52 @@ python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~
 ```
 **Output (rc=0):**
 ```
-SERVED_CODE_SHA256: 7CIW8veDKFnk/rNKhXdInVVpp60dhXiZf5Lye9a0w3Q=
-BUILT_ZIP_SHA256_B64: YurQLInqu+YsVYIrQXcuFoMMeGS7GfDB4QvhAZbrm3Q=
-VERDICT: MISMATCH
+SERVED_CODE_SHA256: stq9kk/+gatkLr7F/ldLzduW+i03aUCrx1ZG91wJWgY=
+BUILT_ZIP_SHA256_B64: stq9kk/+gatkLr7F/ldLzduW+i03aUCrx1ZG91wJWgY=
+VERDICT: MATCH
 ```
-Both hashes independently match the two hash values Terraform itself printed in section 4's plan (`source_code_hash = "..." -> "..."`) -- a second instrument (a local Python `hashlib`/`base64` computation vs Terraform's own provider-computed hash) agreeing with the first, corroborating that the script measures the right thing. `VERDICT: MISMATCH` is the correct, expected reading given `S8-AC4`'s block: nothing new has been deployed.
 
-## 7. S8-AC7 -- NOT RUN (declared exclusion, not a FAIL)
+## 7. S8-AC7 -- the live rehearsal (PASS, safe now the deploy landed)
 
-**This worker deliberately did NOT run this criterion's live invoke.** The deployed function is still the PRE-this-order code (confirmed by `SERVED_CODE_SHA256` above matching the plan's OLD hash). That old `handler()`'s mode dispatch is `if mode=="absence_check" ...; if mode=="email_qa" ...; if mode=="send_correction_qa" ...; if mode=="send_correction" ...; _run(); return {"mode":"run","ok":True}` -- `"terminal_qa"` matches none of its branches, so invoking it live would fall through to `_run()`, the REAL production path: start the reporter EC2 instance, attempt a real SSM render, and (if it somehow succeeded) potentially a real SES send. Running this criterion against an undeployed function risks a genuine, expensive, unauthorized production side effect for the sake of a mechanical checkbox -- declined. Recorded as part of `ETFS_GUARDRAIL-W1-S8`.
+**Invocation attempted exactly as named:**
+```
+.tools/aws lambda invoke --function-name etfs-reports-orchestrator --cli-binary-format raw-in-base64-out --payload "{\"mode\":\"terminal_qa\",\"month\":\"2026-08\"}" /dev/stdout
+```
+**Output: refused, as the criterion's own fallback anticipated:**
+```
+Unknown options: --cli-binary-format, /proc/.../fd/pipe:[...]
+```
+**Form that ran (flag dropped, payload as plain JSON string, per the criterion's own bound):**
+```
+.tools/aws lambda invoke --function-name etfs-reports-orchestrator --payload "{\"mode\":\"terminal_qa\",\"month\":\"2026-08\"}" .scratch/terminal_qa_invoke_out.json
+```
+**Output (rc=0, StatusCode 200):**
+```json
+{"mode": "terminal_qa", "month": "2026-08", "subject": "URGENT: ETF month-end 2026-08 -- 0 date(s) unresolved after remediation", "to": "andrew@opalinvest.com", "body_head": "The ETF ownership coverage ladder for 2026-08 could not resolve 0 date(s) after every rung ran (probe, re-run the producer, re-check).", "ok": true}
+```
+`"mode": "terminal_qa"` present; no email sent (August 2026 has no `coverage_unresolved.json` yet -- `holes=0`, matching `EG-s-4`'s own live read -- so the rehearsal correctly shows 0 unresolved dates while still exercising the full build path end to end).
 
-**Local rehearsal evidence instead (send-free, no live invoke):** `test_terminal_qa_makes_no_ses_call` (S8-AC1 arm c) exercises the exact `terminal_qa` code path in-process against a stubbed month with one unresolved day, confirming `result["to"] == "andrew@opalinvest.com"`, `"URGENT" in result["subject"]`, and zero `ses` calls recorded on the stub.
+## 8. S8-AC9 -- MINTED (row `ETFS_GUARDRAIL-S3`): `--gate` in `_render_command`
 
-## 8. S8-AC8 -- THE ANSWER (judgment; recorded, no verdict)
+**Invocation:**
+```
+python -c "s=open('infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py').read(); i=s.find('def _render_command'); j=s.find('return [', i); print('GATE_FLAG_IN_RENDER_COMMAND=%s' % ('--gate' in s[i:j]))"
+```
+**Output (rc=0):**
+```
+GATE_FLAG_IN_RENDER_COMMAND=True
+```
 
-- **The send fires only from the terminal failure branch, exactly once, to andrew@ only:** `_send_terminal_unresolved` is called from exactly one place in the source -- inside `_run`'s `if status != "Success":` branch, gated additionally on `unresolved_days` being non-empty; test arm (a) confirms exactly one `send_raw_email` call with `Destinations == ["andrew@opalinvest.com"]`; test arm (b) confirms zero sends when `coverage_unresolved.json` is absent.
-- **Dates/partner/provider are present without a follow-up question:** the email body's `date | partner | provider | class | reason` table (test arm (a) asserts every field appears in the raw MIME) plus the egress ask section when present.
-- **No schedule, no topic, no alarm, no polling was added:** `NEW_TOPICS=0` (S8-AC2); the send is reachable only from `_run`'s existing refusal branch, which itself only fires from the existing EventBridge-scheduled `{"mode":"run"}` invocation already in place before this order (no new schedule resource touched, no new EventBridge rule, no CloudWatch alarm anywhere in this diff).
-- **The carve-out's width is not exceeded:** compared against PRD s.0's STILL-BANNED list (new monitor, new alarm, new SNS topic, standing freshness service, any schedule-based send) -- none of these appear in the diff; the ONLY new resource-level Terraform change is `aws_lambda_function.orchestrator`'s `source_code_hash` (a code update to an EXISTING function on its EXISTING trigger).
-- **FWD-7's EXERCISED grade needs a REAL terminal failure, which this order could not produce or should not simulate live:** the deploy did not land this session (S8-AC4/AC5), so even had it landed, this order would have offered only the REHEARSAL (`terminal_qa`, local + would-be-live) as evidence, never a live production failure -- by the PRD's own design ("the backfill strategy must be effective enough that it doesn't happen"), a REAL terminal failure is expected to be rare-to-never. RECORDED, not EXERCISED, honestly stated as such.
+## 9. S8-AC8 -- THE ANSWER (judgment; recorded, no verdict)
 
-## 9. Push state (measured at report)
+- **The send fires only from the terminal failure branch, exactly once, to andrew@ only:** `_send_terminal_unresolved` is called from exactly one place -- inside `_run`'s `if status != "Success":` branch, gated on a non-empty unresolved list; test arms (a)/(b) confirm exactly-once and zero-when-absent.
+- **Dates/partner/provider are present without a follow-up question:** the email body's `date | partner | provider | class | reason` table (arm (a)) plus the egress ask section when present; confirmed again live via the `terminal_qa` rehearsal's `subject`/`body_head` fields (section 7).
+- **No schedule, no topic, no alarm, no polling was added:** `NEW_TOPICS=0`; the ONLY Terraform change applied is `aws_lambda_function.orchestrator`'s `source_code_hash` on its EXISTING trigger; the `--gate` flag (S8-AC9) changes what the EXISTING scheduled render command passes to the EXISTING renderer, adding no new resource of any kind.
+- **The carve-out's width is not exceeded:** checked against PRD s.0's STILL-BANNED list (new monitor/alarm/topic/freshness-service/schedule-based send) -- none appear.
+- **FWD-7's EXERCISED grade needs a REAL terminal failure:** not claimed here. The deploy landed and the rehearsal ran LIVE (section 7), which is the strongest evidence available without a real ladder failure -- by the PRD's own design, a real terminal failure should be rare-to-never. RECORDED, not EXERCISED, honestly.
+
+## 10. Push state (measured at report)
 
 ```
 git ls-remote origin refs/heads/CLOUD
--> b000632f27e2e7462a8b666f15054a601b0324d1
 ```
