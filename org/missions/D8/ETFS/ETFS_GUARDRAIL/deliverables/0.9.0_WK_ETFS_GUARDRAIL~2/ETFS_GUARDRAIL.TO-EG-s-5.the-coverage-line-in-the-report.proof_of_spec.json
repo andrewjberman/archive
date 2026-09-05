@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-5",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~2",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/prd/ETFS_GUARDRAIL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4e30d6b635bb01dbeeb0fc16605bdd61a44dffbc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "5376ecaa8bdbf0f775cb347c2ba849bfba67afb9",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-5.the-coverage-line-in-the-report.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/the-coverage-line-in-the-report.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/presentation/render_month_end.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "No deploy in this order (TO's own text: 'The renderer's ONE artifact upload to the reporter box's prefix is EG-s-6's'). Live-exercised locally: S5-AC2 render completed rc=0, S5-AC3 confirmed 3 coverage lines in the output HTML and the 3 live-generated CSVs."
+    },
+    {
+      "path_or_key": "data/etfs/scripts/presentation/tests/test_coverage_line.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local pytest battery, never packaged/deployed."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/the-coverage-line-in-the-report.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The deliverable document itself."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S5-AC1",
+      "criterion_verbatim": "the four-arm battery is green (record N passed).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/etfs/scripts/presentation/tests/test_coverage_line.py -q",
+      "output_evidence": "....  [100%]\n4 passed in 1.25s",
+      "denominator": "4 of 4 arms passed (a: 16/21, b: 21/21, c: three partners, d: CSV last row).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC2",
+      "criterion_verbatim": "the LIVE render of August 2026 still completes (etfs-only reads; no PDF, no S3 upload).",
+      "method": "command",
+      "invocation": "python data/etfs/scripts/presentation/render_month_end.py --month 2026-08 --out .scratch/eg_s5_aug.html",
+      "output_evidence": "OK: 2026-08 -> .scratch/eg_s5_aug.html\nOK: CSV -> .../opaletfs_49financial_202608.csv\nOK: CSV -> .../opaletfs_inflection_202608.csv\nOK: CSV -> .../opaletfs_cottonwood_202608.csv",
+      "denominator": "1 of 1 render completed rc=0; 3 of 3 CSVs written as a side effect of main().",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC3",
+      "criterion_verbatim": "the rendered August deck carries one coverage line per present partner (three; if a partner has no August data the honest count is lower and the criterion reads as it reads).",
+      "method": "command",
+      "invocation": "python -c \"h=open('.scratch/eg_s5_aug.html',encoding='utf-8').read(); print('COVERAGE_LINES=%d' % h.count('trading days;'))\"",
+      "output_evidence": "COVERAGE_LINES=3",
+      "denominator": "3 of 3 present partners carry a coverage line (49 Financial, Cottonwood, Inflection all had August 2026 data). All three read 21/21 trading days; 0 carried for missing data.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC4",
+      "criterion_verbatim": "the commit gate is clean.",
+      "method": "command",
+      "invocation": "bash .tools/commit-gate.sh data/etfs/scripts/presentation/render_month_end.py data/etfs/scripts/presentation/tests/test_coverage_line.py",
+      "output_evidence": "All checks passed! / OK: no unguarded strict-utf8 log reads. / OK: pre-commit gate clean for 2 of 2 file(s)",
+      "denominator": "2 of 2 files clean.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC5",
+      "criterion_verbatim": "the renderer imports the classifier and re-implements none of it (PRD s.5: one implementation of one convention).",
+      "method": "command",
+      "invocation": "python -c \"import re; s=open('data/etfs/scripts/presentation/render_month_end.py').read(); print('CLASSIFIER_IMPORTED=%s SECOND_IMPL=%d' % ('from coverage import classifier' in s or 'import classifier' in s, len(re.findall(r'def (?:classify_month|coverage_line)\\(', s))))\"",
+      "output_evidence": "CLASSIFIER_IMPORTED=True SECOND_IMPL=0",
+      "denominator": "1 of 1 import string present; 0 of 0 re-implementations of classify_month/coverage_line found in the renderer.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC6",
+      "criterion_verbatim": "graded by the CVO at L9: a reader of the PDF or the CSV can tell, without opening anything else, how much of the month is covered and how much was carried; the line is on every path (the REFUSE path too, verified at EG-s-6); the CSV's numeric grid is unchanged. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "the-coverage-line-in-the-report.result.md s.1 (line-number citations) and s.2 (S5-AC6 subsection); render_month_end.py:409-417 (unconditional compute), :550/:555-557 (unconditional pass-through), :589-593+:688-691 (HTML render), :752-754 (CSV row)",
+      "output_evidence": "The coverage dict is computed unconditionally right after `present` inside render_month (no flag, no branch); passed to _html unconditionally via a new trailing argument (default None, so no other caller of _html breaks); rendered as a plain-text block beneath the SUMMARY table (slide 2) reusing the existing .note CSS class, no chart; the CSV's last row is a single-cell '# coverage: <line>' comment strictly appended after the existing per-ETF numeric rows, whose count and values are unchanged (S5-AC1 arm (d) proves this: header + 1 ETF row + 1 coverage row, DIVZ row values read back identical). EG-s-6's REFUSE branch (out of this cell's scope) is not built here, but sits strictly downstream of render_month's return, so it inherits the line by construction rather than needing separate wiring -- named as the property EG-s-6's own order verifies directly.",
+      "denominator": "N/A -- judgment criterion, no PASS/FAIL computed here.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true: graded by 3.0.0_SA_CVO at L9 against the result document, not self-graded here.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "S5-AC3's load-bearing assertion is that the substring count genuinely reflects rendered coverage lines, not a vacuous match. Monkeypatched ONLY for one ad-hoc, throwaway run (never committed, never touching classifier.py -- data/etfs/scripts/coverage/ is slot 1's and read-only for this order): `rme.classifier.coverage_line` replaced with a lambda returning 'MUTATED-FORMAT-NO-MATCH' (a string that does not contain 'trading days;'), then render_month run against the same single-partner fixture arm (a) uses.",
+      "expected": "If S5-AC3's grep genuinely reads the rendered text, the mutated run must show COVERAGE_LINES=0 (the substring 'trading days;' is absent) while the mutated text itself IS present in the HTML (proving the coverage block still rendered -- just with different content); a vacuous check would report a nonzero count regardless of what coverage_line returns.",
+      "observed": "MUTANT RUN: COVERAGE_LINES=0 (down from 1 for this single-partner fixture pre-mutation); 'MUTATED-FORMAT-NO-MATCH present in html: True'. Both assertions held: the count dropped to exactly 0, and the coverage block itself demonstrably still rendered (just carrying the mutated string), confirming the check reads the classifier's actual output text rather than the mere presence of a block.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "S5-AC1's exact invocation (python -m pytest test_coverage_line.py -q) run twice in immediate succession, unmodified between runs.",
+      "observed": "RUN1: '4 passed in 1.30s'. RUN2: '4 passed in 1.46s'. Same pass count (4 of 4) both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Building EG-s-6's REFUSE branch or verifying the coverage line on it directly.",
+      "reason": "TO's own DELIVERABLE point (d) names the property ('EG-s-6's REFUSE branch ... carries it too -- do not gate it on anything') as a design constraint THIS order must satisfy (never gating the computation), but the REFUSE branch itself is EG-s-6's cell, out of this order's scope. Satisfied here by making the computation and render unconditional inside render_month/_html, which any downstream branch built on top of render_month's return value inherits automatically."
+    },
+    {
+      "item": "Editing data/etfs/scripts/coverage/ (the classifier, EG-s-4's cell).",
+      "reason": "TO BOUNDS: 'You do NOT touch data/etfs/scripts/coverage/ (slot 1's).' Confirmed: git diff --stat HEAD -- data/etfs/scripts/coverage/ is empty."
+    },
+    {
+      "item": "Any PDF render, --s3-out, or upload.",
+      "reason": "TO BOUNDS: 'No PDF, no --s3-out, no upload in this order. Local HTML only.' Neither flag was passed in S5-AC2's invocation."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/etfs/scripts/presentation/tests/test_coverage_line.py -q (x2, determinism); python -m pytest data/etfs/scripts/presentation/tests/test_orion_alignment.py -q (sanity, sibling battery)",
+      "result": "4 passed both determinism runs, rc=0; sibling battery 5 passed, rc=0, confirming no regression to EG-s-13's cell"
+    },
+    {
+      "tool": "python (ad hoc mutant script, .scratch/mutant_check.py, deleted after the control)",
+      "invocation": "monkeypatch rme.classifier.coverage_line to a non-matching string, re-render, assert the S5-AC3 substring count drops to 0",
+      "result": "MUTANT CONTROL: FIRED-AS-EXPECTED"
+    }
+  ]
+}
