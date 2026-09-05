@@ -1,0 +1,222 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-7",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~1",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-7.the-remediation-ladder-rungs-1-2-and-the-invoke-grant.md",
+    "group": "OTHER",
+    "vintage_commit": "83d8175729a243f427aff8a2985ad45dfc0b3c2d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "5376ecaa8bdbf0f775cb347c2ba849bfba67afb9",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-7.the-remediation-ladder-rungs-1-2-and-the-invoke-grant.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-remediation-ladder-rungs-1-2-and-the-invoke-grant.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/coverage/remediate.py",
+      "kind": "script",
+      "commit_or_etag": "0f80e6f7ed163dc159c5c061879c21367cbd0d62",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module, importable, tested against stub invoke/s3 only; not wired into the renderer's precondition (EG-s-6, another queue) by this order."
+    },
+    {
+      "path_or_key": "data/etfs/scripts/coverage/tests/test_remediate.py",
+      "kind": "test",
+      "commit_or_etag": "0f80e6f7ed163dc159c5c061879c21367cbd0d62",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6/6 passed locally, zero AWS calls (every arm supplies invoke/s3 stubs explicitly)."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/etfs-reports/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "0f80e6f7ed163dc159c5c061879c21367cbd0d62",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "RULING (issuer 2.0.0_SA_COO~B @2baa6af162): apply BY TARGET to aws_iam_role_policy.reporter only (the pre-existing aws_instance.reporter user_data drift, commit 1502fdd6f9 2026-07-08, is routed separately, a confirm-with-Andrew STOP/START act). Targeted plan -target=aws_iam_role_policy.reporter: 0 to add, 1 to change, 0 to destroy; applied via HALT_ACK=1 .tools/safe-apply.sh ... -target=aws_iam_role_policy.reporter, rc=0, 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.'; live read `.tools/aws iam get-role-policy --role-name etfs-reports-reporter-role --policy-name etfs-reports-reporter --query \"PolicyDocument.Statement[?Sid=='InvokeProducersForRemediation'].Action\"` -> 'lambda:InvokeFunction'; targeted 0-diff `-detailed-exitcode` rc=0 'No changes.'"
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-remediation-ladder-rungs-1-2-and-the-invoke-grant.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Result document; no deploy surface of its own."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260905T0239Z_etfs-guardrail-eg-s-7-reporter-invoke-grant_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "d1c4204aa1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Ledger entry OPENED (commit d1c4204aa1, before the apply) and CLOSED (this commit) after the get-role-policy proof and the targeted 0-diff; python .tools/deploy_ledger.py close --slug etfs-guardrail-eg-s-7-reporter-invoke-grant -> 'CLOSED ... all 1 legs proven; sentinel removed'."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S7-AC1",
+      "criterion_verbatim": "the six-arm battery is green (record N passed).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/etfs/scripts/coverage/tests/test_remediate.py -q",
+      "output_evidence": "6 passed in 0.07s",
+      "denominator": "6 of 6 arms passed: (a) C->resolved one invoke, (b) B->never invoked/expected_empty, (c) D->invoke raises, unresolved, one invoke no retry, (d) UNKNOWN->rung1 once then recheck, (e) never put_object across a mixed month, (f) dry_run zero invokes/zero s3 reads",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7-AC2",
+      "criterion_verbatim": "the module carries no HTTP client and no S3 write: no rung can egress and no rung can fabricate, as a property of the bytes.",
+      "method": "command",
+      "invocation": "python -c \"import re; s=open('data/etfs/scripts/coverage/remediate.py').read(); print('HTTP_CLIENT_IMPORTS=%d PUT_OBJECT_CALLS=%d' % (len(re.findall(r'^\\s*(?:import|from)\\s+(?:requests|urllib|http)\\b', s, re.M)), len(re.findall(r'put_object\\(', s))))\"",
+      "output_evidence": "HTTP_CLIENT_IMPORTS=0 PUT_OBJECT_CALLS=0",
+      "denominator": "0 of 0 matches on both counts",
+      "expect": "HTTP_CLIENT_IMPORTS=0 PUT_OBJECT_CALLS=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7-AC3",
+      "criterion_verbatim": "the live DRY RUN over August cottonwood plans without invoking (record the counts; holes=0 is the expected state after the 09-01 repair, and any other number is a real finding).",
+      "method": "command",
+      "invocation": "python data/etfs/scripts/coverage/remediate.py --partner cottonwood --month 2026-08 --dry-run",
+      "output_evidence": "LADDER: partner=cottonwood month=2026-08 holes=0 rung0=0 rung1=0 rung2=0 unresolved=0 dry_run=True",
+      "denominator": "holes=0 matches the expected post-repair state (EG-s-4's own live read)",
+      "expect": "dry_run=True",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7-AC4",
+      "criterion_verbatim": "the commit gate is clean.",
+      "method": "command",
+      "invocation": "bash .tools/commit-gate.sh data/etfs/scripts/coverage/remediate.py data/etfs/scripts/coverage/tests/test_remediate.py",
+      "output_evidence": "OK: pre-commit gate clean for 2 of 2 file(s)",
+      "denominator": "2 of 2 files clean",
+      "expect": "pre-commit gate clean",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7-AC5",
+      "criterion_verbatim": "AMENDED (issuer ruling @2baa6af162, row ETFS_GUARDRAIL-W1-S7): the TARGETED plan after the edit changes EXACTLY the reporter role policy (aws_iam_role_policy.reporter): 0 to add, 1 to change, 0 to destroy. Run init first if .terraform/ is absent. If the targeted plan shows ANY other resource, do NOT apply: BLOCKING row, stop this criterion.",
+      "method": "command",
+      "invocation": ".tools/terraform.exe -chdir=infra/aws/terraform/etfs-reports init -input=false ; .tools/terraform.exe -chdir=infra/aws/terraform/etfs-reports plan -no-color -input=false -lock=false -target=aws_iam_role_policy.reporter (the estate's pinned v1.9.8 binary, copied into this worktree by the issuer per the ruling; the earlier PATH v1.14.5 substitution, row ETFS_GUARDRAIL-W1-S6, is RETIRED)",
+      "output_evidence": "Full untargeted plan reproduced first (honest state of the whole directory): 'Plan: 0 to add, 2 to change, 0 to destroy' (aws_iam_role_policy.reporter expected + aws_instance.reporter's pre-existing, out-of-scope user_data drift, byte-identical to the earlier v1.14.5 reading). TARGETED plan: 'Plan: 0 to add, 1 to change, 0 to destroy', showing only aws_iam_role_policy.reporter's added InvokeProducersForRemediation Sid.",
+      "denominator": "1 of 1 resource changed in the targeted plan; the full plan's 2nd resource (aws_instance.reporter) is confirmed out-of-scope per the ruling and excluded by -target",
+      "expect": "1 to change",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7-AC6",
+      "criterion_verbatim": "AMENDED (issuer ruling @2baa6af162): the APPLIED plane carries the grant (read after HALT_ACK=1 .tools/safe-apply.sh ... apply -input=false -auto-approve -target=aws_iam_role_policy.reporter, run only after AC5's TARGETED plan read exactly one resource; then the 0-diff read is the TARGETED plan with -detailed-exitcode, rc=0, recorded beside the full plan's remaining drift line).",
+      "method": "command",
+      "invocation": "python .tools/deploy_ledger.py open --slug etfs-guardrail-eg-s-7-reporter-invoke-grant ... (committed d1c4204aa1 before the apply) ; HALT_ACK=1 .tools/safe-apply.sh -chdir=infra/aws/terraform/etfs-reports apply -input=false -auto-approve -target=aws_iam_role_policy.reporter ; .tools/aws iam get-role-policy --role-name etfs-reports-reporter-role --policy-name etfs-reports-reporter --query \"PolicyDocument.Statement[?Sid=='InvokeProducersForRemediation'].Action\" --output text ; .tools/terraform.exe -chdir=infra/aws/terraform/etfs-reports plan ... -target=aws_iam_role_policy.reporter -detailed-exitcode ; python .tools/deploy_ledger.py close-leg ... ; close",
+      "output_evidence": "Apply: comp-tagauthz PASSED, tombstone-gate CLEAN, 'Plan: 0 to add, 1 to change, 0 to destroy', 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.'. get-role-policy: 'lambda:InvokeFunction' (full statement confirmed: Action=[lambda:InvokeFunction], Resource=exactly the 3 producer ARNs, Sid=InvokeProducersForRemediation). Targeted 0-diff: '-detailed-exitcode' rc=0, 'No changes. Your infrastructure matches the configuration.'. Full untargeted plan post-apply: 'Plan: 0 to add, 1 to change, 0 to destroy' -- ONLY aws_instance.reporter's pre-existing drift remains. Ledger: opened (d1c4204aa1) before the apply, closed (this commit) after the proof.",
+      "denominator": "1 of 1 apply targeted and applied; 1 of 1 Sid confirmed on the APPLIED plane; 1 of 1 targeted 0-diff clean (rc=0); 1 of 1 ledger leg proven and closed",
+      "expect": "lambda:InvokeFunction",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7-AC7",
+      "criterion_verbatim": "graded by the CVO at L9: rungs 0-2 are unattended and never fabricate; the invoke grant names exactly three functions and no bucket; rung 3 is a STOP left to EG-sb-7; the Inflection re-check is stated against the deployed producer's bucket per EG-s-12's answer. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "test arms (b),(c),(e),(f) of test_remediate.py; S7-AC2's byte census; the applied Statement block read live via get-role-policy (S7-AC6's output); source read of remediate.py's _INFLECTION_DEPLOYED_UPSTREAM constant and its use in the D-day reason strings; EG-s-11's result document (WRITER=bd-49f-etf-ownership-daily) cross-checked against _PRODUCER_BY_PARTNER['49financial']",
+      "output_evidence": "RECORDED in org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-remediation-ladder-rungs-1-2-and-the-invoke-grant.result.md section 7: (1) unattended/never-fabricate demonstrated by 4 of 6 test arms plus the 0/0 byte census; (2) the applied Sid's Resource array is exactly the 3 producer ARNs, 0 s3/bucket references anywhere in the statement -- CONFIRMED ON THE APPLIED PLANE (S7-AC6), not just DESIRED text; (3) remediate.py carries zero HTTP-client imports (rung 3 is a STOP by construction, not policy, and is EG-sb-7's own module); (4) the Inflection D-day reason string names opal-data-inf/gold/canonical/holdings_<date>.parquet as the DEPLOYED read per EG-s-12, never the repo's committed-but-unapplied design; (5) the 49F producer map (bd-49f-etf-ownership-daily, not -canonical) matches EG-s-11's confirmed WRITER; (6) the pre-existing aws_instance.reporter drift was surfaced (ETFS_GUARDRAIL-W1-S7) and excluded BY TARGET from every plan/apply this order ran, per the issuer's ruling, rather than silently applied or silently swallowed.",
+      "denominator": "4 of 4 named properties addressed with citations; 1 of 1 producer map cross-checked against EG-s-11's result; 1 of 1 Inflection-specific bucket citation traced to EG-s-12's result; 1 of 1 grant confirmed on the APPLIED plane",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L6/L9: a judgment criterion carries its output and no self-graded verdict; 3.0.0_SA_CVO is the oracle at L9 and its grade lands in the adjudication row."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The ladder's load-bearing claim is 'a B day STOPS before any invoke, while a C/D/UNKNOWN day always gets exactly one rung-1 invoke attempt'. Mutated the classification of the SAME date across two calls: once with class B (probe priced=0), once with class C (probe priced=7), holding partner/month/s3 fixed and using a fresh RecordingInvoke each time.",
+      "expected": "The B call must produce ZERO invoke calls and add the date to expected_empty; the C call must produce EXACTLY ONE invoke call with {'date': d} and (given the stub s3 reports the slice present) resolve the date.",
+      "observed": "test_b_day_never_invoked_expected_empty: invoke.calls == [] and result['expected_empty'] == [DATE]. test_c_day_invoked_once_then_resolved: invoke.calls == [('cot-etf-ownership-daily', {'date': DATE})] and result['resolved'] == [DATE]. Both PASS with only the probe's `priced` value differing -- FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest data/etfs/scripts/coverage/tests/test_remediate.py -q executed twice; python data/etfs/scripts/coverage/remediate.py --partner cottonwood --month 2026-08 --dry-run executed twice; terraform plan executed twice (before and after re-reading git status, no state-changing action between).",
+      "observed": "Both pytest runs: '6 passed'. Both dry-run CLI runs: identical 'LADDER: partner=cottonwood month=2026-08 holes=0 rung0=0 rung1=0 rung2=0 unresolved=0 dry_run=True'. Both terraform plans: identical 'Plan: 0 to add, 2 to change, 0 to destroy' with the same two resources and the same diff content.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Applying (or resolving) the pre-existing aws_instance.reporter user_data drift.",
+      "reason": "RULED out-of-scope by the issuer 2.0.0_SA_COO~B @2baa6af162: a user_data change on aws_instance applies through a provider-side STOP/START of the reporter instance, a confirm-with-Andrew act routed by the issuer. This order plans/applies BY TARGET to aws_iam_role_policy.reporter only (S7-AC5/AC6, amended); the drift's own originating commit (1502fdd6f9, 2026-07-08) already names it deferred to a future TIER-B/C safe-apply batch by a different owner."
+    },
+    {
+      "item": "Wiring remediate.py into the renderer's precondition (EG-s-6) or building rung 3 (EG-sb-7).",
+      "reason": "Out of this cell's BOUNDS ('you do NOT touch ... rung 3 is EG-sb-7, your NEXT order' -- explicitly not started per the coordinator's hand-off instruction)."
+    }
+  ],
+  "surprises": [
+    "ETFS_GUARDRAIL-W1-S6: S7-AC5's original invocation named .tools/terraform.exe, absent in this fresh worktree (per-device, gitignored); this worker's PATH v1.14.5 substitution was RETIRED by the issuer's ruling @2baa6af162, which instead copied the estate's pinned .tools/terraform.exe (v1.9.8) into this worktree -- confirmed present and used for every terraform invocation after the ruling. OBSERVATION/INERT, resolved.",
+    "ETFS_GUARDRAIL-W1-S7: the plan after this order's own IAM edit shows TWO resources changing (aws_iam_role_policy.reporter, expected, and aws_instance.reporter, a pre-existing, already-documented 2026-07-08 user_data drift this worker did not cause) -- the criterion's expect ('1 to change') did not match under the UNTARGETED plan; per this TO's own BOUNDS, no apply was attempted at that time. BLOCKING/INERT, no disarm owner (a stop, correctly taken). DISPOSITIONED by the issuer's ruling @2baa6af162: S7-AC5/AC6 amended to plan/apply BY TARGET to aws_iam_role_policy.reporter, which this worker then did (PASS/PASS)."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/etfs/scripts/coverage/tests/test_remediate.py -q",
+      "result": "6 passed in 0.07s, zero AWS calls."
+    },
+    {
+      "tool": "python (byte census)",
+      "invocation": "python -c \"import re; ... HTTP_CLIENT_IMPORTS ... PUT_OBJECT_CALLS ...\"",
+      "result": "0 and 0."
+    },
+    {
+      "tool": "python (CLI)",
+      "invocation": "python data/etfs/scripts/coverage/remediate.py --partner cottonwood --month 2026-08 --dry-run",
+      "result": "holes=0, dry_run=True, zero invokes."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/etfs/scripts/coverage/remediate.py data/etfs/scripts/coverage/tests/test_remediate.py",
+      "result": "pre-commit gate clean for 2 of 2 file(s)."
+    },
+    {
+      "tool": "terraform (PATH, v1.14.5, substituted for the absent .tools/terraform.exe)",
+      "invocation": "terraform -chdir=infra/aws/terraform/etfs-reports init -input=false ; plan -no-color -input=false -lock=false",
+      "result": "init OK; plan shows 2 resources changing (1 expected + 1 pre-existing unrelated drift) -- filed ETFS_GUARDRAIL-W1-S7, no apply."
+    },
+    {
+      "tool": "git",
+      "invocation": "git status --short infra/aws/terraform/etfs-reports/ ; git diff infra/aws/terraform/etfs-reports/instance.tf ; git log -3 --format='%h %ad %s' -- infra/aws/terraform/etfs-reports/instance.tf",
+      "result": "Confirmed this worker's edit is scoped to iam.tf only; located the originating commit (1502fdd6f9, 2026-07-08) that already documents the user_data drift as a deferred, benign residual."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/terraform/etfs-reports/instance.tf --for 'how is user_data computed for the reporter EC2 instance'",
+      "result": "Confirmed user_data is a static heredoc, unrelated to any variable this worker's edit could have touched."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 2 new row(s) of 13 total, all carrying step-7/step-10 fields; corpus baseline unchanged."
+    },
+    {
+      "tool": "terraform.exe v1.9.8 (issuer-copied, per ruling @2baa6af162)",
+      "invocation": ".tools/terraform.exe version ; rm -rf .terraform (clear the v1.14.5-initialized backend cache) ; init -input=false ; plan (untargeted, twice, before and after apply) ; plan -target=aws_iam_role_policy.reporter ; plan -target=aws_iam_role_policy.reporter -detailed-exitcode",
+      "result": "v1.9.8 confirmed; init clean; untargeted plan reproduced 'Plan: 0 to add, 2 to change, 0 to destroy' byte-identical to the earlier v1.14.5 reading (version-independent); targeted plan 'Plan: 0 to add, 1 to change, 0 to destroy'; post-apply targeted -detailed-exitcode rc=0 'No changes'; post-apply untargeted plan 'Plan: 0 to add, 1 to change, 0 to destroy' (only aws_instance.reporter's pre-existing drift remains)."
+    },
+    {
+      "tool": "safe-apply.sh (HALT-GATE)",
+      "invocation": "HALT_ACK=1 .tools/safe-apply.sh -chdir=infra/aws/terraform/etfs-reports apply -input=false -auto-approve -target=aws_iam_role_policy.reporter",
+      "result": "First call BLOCKED (rc=3, HALT-GATE IDENTITY UNRESOLVED -- no session .serial file); wrote org/mcp/sessions/<session-id>.serial with this worker's own serial per the gate's own fix instructions, re-ran: comp-tagauthz gate PASSED, tombstone-gate CLEAN, 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.'"
+    },
+    {
+      "tool": ".tools/aws (iam)",
+      "invocation": ".tools/aws iam get-role-policy --role-name etfs-reports-reporter-role --policy-name etfs-reports-reporter --query \"PolicyDocument.Statement[?Sid=='InvokeProducersForRemediation'].Action\" --output text ; same query, full statement --output json",
+      "result": "'lambda:InvokeFunction'; full statement confirms Resource = exactly the 3 producer ARNs, Sid = InvokeProducersForRemediation, Effect = Allow."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open --slug etfs-guardrail-eg-s-7-reporter-invoke-grant ... (committed d1c4204aa1) ; close-leg --slug ... --leg-id iam --proof \"...\" ; close --slug ...",
+      "result": "OPENED (1 leg); CLOSED -- 'all 1 legs proven; sentinel removed'."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> S7-AC1,S7-AC2,S7-AC3,S7-AC4,S7-AC5,S7-AC6,S7-AC7",
+      "result": "run before the complete flip; result recorded in the report."
+    }
+  ]
+}
