@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-3",
+  "phase": "INVESTIGATION",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~2",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/prd/ETFS_GUARDRAIL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4e30d6b635bb01dbeeb0fc16605bdd61a44dffbc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "5376ecaa8bdbf0f775cb347c2ba849bfba67afb9",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-3.the-port-source-verified.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/the-port-source-verified.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/the-port-source-verified.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A measurement + specification deliverable. This TO changes nothing deployable by construction: git diff --stat HEAD -- infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/ is empty (S3-AC4)."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "e6689cc7cc3d00ebf3199b8d49098806237fc493",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row ETFS_GUARDRAIL-W2-S1 landed this seat's original commit a0fad924aa, merged at d008067fa3, and is present at HEAD as of the drain-merge e6689cc7cc (4 rows total: S1, W2-S1, W1-S1, W1-S2). NOT touched by this amendment-response commit -- this pass edits only the instance and the result document (the S3-AC1 amendment), never the channel file."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S3-AC1",
+      "criterion_verbatim": "AMENDED BY THE ISSUER AT THE DRAIN (2.0.0_SA_COO~B, 2026-09-04 21:1xZ, on row ETFS_GUARDRAIL-W2-S1, face vintage @de8693863c): the original expectation 'passed' was UNREACHABLE at HEAD; the criterion now RECORDS the battery's collection state (rc and the first error line, verbatim).",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/test_catchup_scan.py -q; echo BATTERY_RC=$?",
+      "output_evidence": "ERROR collecting infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/test_catchup_scan.py -- KeyError: 'ASSETS_BUCKET' raised at lambda_function.py:77 during module import inside test_catchup_scan.py:_run (line 59, importlib.import_module). '1 error during collection', 'Interrupted: 1 error during collection!!!'. BATTERY_RC=2 (rc reported by the trailing echo, matching the amended expect pattern 'BATTERY_RC='). The module never finishes loading, so _catchup_missing_dates is never called and neither fixture (a) nor (b) executes -- this remains the correct, faithfully-recorded battery state; only the GRADE changed at the amendment, not the world.",
+      "denominator": "0 of 4 checks executed (fixture (a): 2 checks; fixture (b): 2 checks) -- collection error, not a graded run; 1 of 1 BATTERY_RC line recorded.",
+      "status": "PASS",
+      "status_reason": "Per the amended face: expect='BATTERY_RC=' is a RECORDING pattern, not a pass/fail assertion on the battery's own result -- the output ends with the literal line 'BATTERY_RC=2', matching the expectation. Root cause of the battery's own dead state (dateable, filed as ETFS_GUARDRAIL-W2-S1, unchanged by the amendment): test_catchup_scan.py was landed at 288bfe8378 (2026-08-01) against the pre-repoint source shape (env vars INF_BUCKET/HOLDINGS_PREFIX; helpers _holdings_key_for/_holdings_exists; two-arg _catchup_missing_dates(universe, skip_date)); the repoint landed at 001a73530a (2026-08-03) introduced ASSETS_BUCKET/FACT_POSITIONS_PREFIX/META_DEDUP_PREFIX and the current three-arg _catchup_missing_dates(universe, all_dates, skip_date). The test was never re-vendored across that repoint. This TO's bound is READ-ONLY on the port source, so the test file is not repaired here; the defect stays W2-S1's for the CVO's disposition and the producer's owner."
+    },
+    {
+      "criterion_id": "S3-AC2",
+      "criterion_verbatim": "the shipped constant is 10 at HEAD (the number the PRD says a straight port would carry and fail property 2 with).",
+      "method": "command",
+      "invocation": "python -c \"import re; s=open('infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/lambda_function.py').read(); m=re.search(r'CATCHUP_WINDOW_DAYS\\s*=\\s*(\\d+)', s); print('CATCHUP_WINDOW_DAYS=%s' % (m.group(1) if m else 'ABSENT'))\"",
+      "output_evidence": "CATCHUP_WINDOW_DAYS=10",
+      "denominator": "1 of 1 constant matched, at line 271 (grep -n confirmed).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S3-AC3",
+      "criterion_verbatim": "the five helpers the port contract names all exist at HEAD.",
+      "method": "command",
+      "invocation": "python -c \"import re; s=open('infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/lambda_function.py').read(); print('HELPERS=' + ','.join(sorted(n for n in ('_catchup_missing_dates','_list_all_partitions','_output_exists','_partition_exists','_process_date') if re.search(r'^def ' + n + r'\\(', s, re.M))))\"",
+      "output_evidence": "HELPERS=_catchup_missing_dates,_list_all_partitions,_output_exists,_partition_exists,_process_date",
+      "denominator": "5 of 5 named helpers present (at lines 274, 101, 120, 112, 241 respectively). The sixth helper the deliverable's own helper census names, _load_universe, is present at line 88 (confirmed by the same grep -n \"^def \" sweep, not part of this criterion's own 5-name check).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S3-AC4",
+      "criterion_verbatim": "the relied-on producer is UNCHANGED by this order (an EMPTY diff is the expectation; the PRD's bound is a property of the bytes you leave behind).",
+      "method": "diff",
+      "invocation": "git diff --stat HEAD -- infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/",
+      "output_evidence": "(empty -- no output, no changed files)",
+      "denominator": "0 of 0 files changed in the port-source directory.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S3-AC5",
+      "criterion_verbatim": "graded by the CVO at L9: the port contract is complete (verbatim set, the one replacement, the invariants, the probe addition, the 49F-tail test arm) and it re-proposes NO day-count window (ruling 1: \"not to be re-proposed\"). RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "the-port-source-verified.result.md section 3 (a)-(e), built from a direct read of lambda_function.py:241-317 (the loop, the three skips, the try/except, the return keys, the log-line shapes) cross-read against PRD s.4 properties 1/2/4, s.6 rulings 1/2, and the two receiving TOs (EG-s-1 cot, EG-s-2 bd-49f) already cut against this contract's shape",
+      "output_evidence": "(a) VERBATIM: the per-date loop with the three skips (just-processed date; output-exists; upstream-absent), the non-fatal try/except, the CATCHUP:/CATCHUP-SKIP: log lines, the catchup_processed/catchup_failed return-key construction (lambda_function.py:314-315). (b) REPLACED: CATCHUP_WINDOW_DAYS=10 and the today-timedelta walk-back are dropped; the replacement is trading-day-only span from the 1st of the prior month (if that month's report is not shipped) or the 1st of the current month (if it is), through yesterday UTC, terminus tested by head_object on s3://opal-data-etfs/platinum/reports/<YYYY-MM>/etf_ownership.pdf with a denied/errored read counted as NOT shipped (WARN:, never silently ends the window) -- no day-count constant anywhere in the replacement, matching ruling 1's 'not to be re-proposed'. (c) INVARIANTS named and traced to source line numbers: skip-on-absent-partition, skip-on-existing-output, the ZERO-vs-MISSING contract (lambda_function.py:197-201, priced==0 -> no slice, excluded not averaged-as-zero) untouched across both receiving producers' own equivalent guards, per-date failures non-fatal. (d) PROBE mode stated explicitly as an ADDITION the source does not have and neither port derives from anywhere else: {date, probe:true} -> {status, date, partition, priced, output_exists}, no put_object reachable. (e) 49F TAIL: property 2's numeric case (partition lands D+13, checked at D+14) traced against the reporting-obligation window's calendar-date-plus-shipped-signal boundary (never a lag count, so it is in-window by construction), with the specific test arm named -- (i) the tail positive case and (j) its negative control simulating the OLD CATCHUP_WINDOW_DAYS=10 semantics on the SAME fixture to prove the two designs are discriminable, not just that one happens to pass.",
+      "denominator": "N/A -- judgment criterion, no PASS/FAIL computed here.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true: this criterion is graded by 3.0.0_SA_CVO at L9 against the port contract text in the-port-source-verified.result.md section 3, not self-graded here.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "S3-AC2 and S3-AC3's load-bearing assertion is that the regex/def-scan checks actually discriminate the named constant's value and the named helpers' presence, rather than passing vacuously. Mutated ONLY in a throwaway scratch copy (.scratch/lambda_function_mutant.py, never the real source -- S3-AC4's empty-diff bound holds): CATCHUP_WINDOW_DAYS changed 10 -> 99, and `def _partition_exists` renamed to `def _xx_partition_exists_MUTATED`, with every other byte identical to the real file.",
+      "expected": "If the checks genuinely read the live constant/helper set, the mutated copy must report CATCHUP_WINDOW_DAYS=99 (not 10) and a HELPERS list missing _partition_exists (4 of 5, not 5 of 5); a vacuous check would report 10 and the full 5-name list regardless.",
+      "observed": "Mutant run: CATCHUP_WINDOW_DAYS=99 (would fail S3-AC2's expect '=10'); HELPERS=_catchup_missing_dates,_list_all_partitions,_output_exists,_process_date (4 of 5, _partition_exists absent -- would fail S3-AC3's expect, which requires all 5). Both mutations changed the recorded output exactly as expected; the mutant file was deleted after the control (git status confirms it is untracked/absent, never committed).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "S3-AC2's and S3-AC3's exact invocations run twice in immediate succession against the real (unmutated) lambda_function.py, outputs compared verbatim.",
+      "observed": "RUN1: CATCHUP_WINDOW_DAYS=10 / HELPERS=_catchup_missing_dates,_list_all_partitions,_output_exists,_partition_exists,_process_date. RUN2: identical, byte-for-byte, both lines.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Repairing test_catchup_scan.py so S3-AC1 passes.",
+      "reason": "TO bound: 'PORT SOURCE. Relied on, NOT owned -- do not modify to suit the port'; 'the inf directory is named for READING and for running its battery, not for editing'. The break is filed as ETFS_GUARDRAIL-W2-S1 (OBSERVATION/ARMED, disarm_owner 3.0.0_SA_CVO) rather than fixed here."
+    },
+    {
+      "item": "Building or editing the two receiving producers (cot-etf-ownership-daily, bd-49f-etf-ownership-daily).",
+      "reason": "Out of this TO's cell (EG-s-3 only); that work is EG-s-1 and EG-s-2, both premise-dependent on this order's port contract and already in this worker's queue."
+    },
+    {
+      "item": "Vendoring trading_calendar.py's byte-identity proof against lib/trading_calendar.py for the two receiving producers.",
+      "reason": "The vendored copy inside inf-etf-ownership-daily/ (trading_calendar.py) is read here only to confirm the primitive (trading_days_between) exists for the port contract's replacement window to cite; the sha256-pair proof for EACH receiving producer's OWN vendored copy is that producer's own criterion (S1-AC3, S2-AC3), not this cell's."
+    }
+  ],
+  "surprises": [
+    "ETFS_GUARDRAIL-W2-S1: EG-s-3's bound and S3-AC1 assert the port source's own battery (test_catchup_scan.py) is green at HEAD, driving the REAL _catchup_missing_dates unmodified -- it is not: the test crashes at import (KeyError: 'ASSETS_BUCKET', rc=2) because it was landed 2026-08-01 against the pre-repoint env-var/helper shape and was never updated across the 2026-08-03 repoint that introduced ASSETS_BUCKET/FACT_POSITIONS_PREFIX/META_DEDUP_PREFIX and the current three-arg _catchup_missing_dates signature. OBSERVATION/ARMED, disarm_owner 3.0.0_SA_CVO (out of this TO's read-only write lane on the port source). Now RESOLVED by the issuer's amendment on S3-AC1 (row content unchanged, disposition still UNDER_INVESTIGATION at the channel).",
+    "ETFS_GUARDRAIL-W2-S2: this TO's own <proof_of_spec> block names the instance path with the SHORT to_id form ('ETFS_GUARDRAIL.TO-EG-s-3.proof_of_spec.json'), but .tools/to-pipeline-gate.py's check_complete_flip derives the required filename from the TO FILE's full basename stem ('ETFS_GUARDRAIL.TO-EG-s-3.the-port-source-verified.proof_of_spec.json') -- the exact path the TO's text instructs is mechanically REFUSED at the complete flip. Resolved for this cell by renaming the instance to the gate-satisfying name (single canonical file, re-validated VALID rc=0); the TO's own prose is left unedited (outside the status-line-only grant) and now cites a stale filename. Sibling instance ETFS_GUARDRAIL.TO-EG-s-10.proof_of_spec.json carries the same short-form defect, unresolved. OBSERVATION/ARMED, disarm_owner 2.0.0_SA_COO~B (template-wide across the L6 issuance's 14 cells)."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/test_catchup_scan.py -q",
+      "result": "rc=2, 1 error during collection (KeyError: 'ASSETS_BUCKET')"
+    },
+    {
+      "tool": "python (stdlib re, ad hoc)",
+      "invocation": "python -c \"...CATCHUP_WINDOW_DAYS...\" and python -c \"...HELPERS=...\"",
+      "result": "CATCHUP_WINDOW_DAYS=10; HELPERS=_catchup_missing_dates,_list_all_partitions,_output_exists,_partition_exists,_process_date -- both rc=0, both reproduced twice (determinism) and both shown to flip on a scratch mutant (mutant control)"
+    },
+    {
+      "tool": "git",
+      "invocation": "git diff --stat HEAD -- infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/ ; git log --oneline --follow -- .../lambda_function.py ; git log -1 --format=%H\\ %ad --date=iso <commit>",
+      "result": "empty diff (S3-AC4); history located the 288bfe8378 (test landed) / 001a73530a (repoint landed) pair grounding the surprise row's dateable claim"
+    }
+  ]
+}

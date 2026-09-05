@@ -1,276 +1,248 @@
-# NFRA_CLDGRPH CG-s-15 -- shared image rebuild, digest pins, live derive
+# CG-s-15 -- the shared image rebuilt, THIS PROJECT'S THREE families pinned by digest, and the whole chain exercised in the cloud
 
-**TO:** `NFRA_CLDGRPH.TO-CG-D-1` · **assignee:** `0.9.0_WK_NFRA_CLDGRPH~1` · **branch:** `wk-NFRA_CLDGRPH-1` · **HEAD:** `5644fee152` (LOCAL)
+**TO:** `NFRA_CLDGRPH.TO-CG-D-1` (REOPENED pass) · **Cell:** `CG-s-15` (decomposition v0.3) · **Seat:** `0.9.0_WK_NFRA_CLDGRPH~1`
+**Branch:** `wk-NFRA_CLDGRPH-1` · **Push state: LOCAL** · **Written:** 2026-09-04 ~17:1xZ
 
-The image half of CG-s-15 landed and is EXERCISED. The pin half never started: `safe-apply`'s halt gate
-refuses the spine-v3 worker serial grammar itself and offers no reachable override, so this seat cannot run
-any `terraform apply` (`NFRA_CLDGRPH-W1-S1`). The live derive nevertheless answered the question the cell was
-cut to ask -- and the answer is not the one the cell expected: the C-3 denominator line printed
-`buckets read=0 / buckets unreadable=34`, which means the silent-zero TRIGGERS defect (S20) is an **IAM gap on
-the cloud derive role**, not an image-currency defect. TRIGGERS is still 0, now for a named and measured
-reason (`NFRA_CLDGRPH-W1-S7`). The rebuild was necessary and is not sufficient.
+> THIS PASS closed what the FIRST pass could not: the terraform apply (leg L4), the projection
+> family's launch on the pinned digest (L6), the serving family's rollout (L7), and a SECOND
+> ad-hoc derive -- this one on the PINNED revision `globgrph-derive-runner:7` and AFTER the
+> `s3:GetBucketNotification` grant of TO-CG-D-12 -- whose own log reads
+> `buckets read=34 / buckets unreadable=0` against the first pass's `read=0 / unreadable=34`.
+> The live served graph answers **TRIGGERS = 171**. Rows `S20` and `S28` have their cloud proof.
 
 ```json
 {
-  "to_id": "NFRA_CLDGRPH.TO-CG-D-1",
-  "cell": "CG-s-15",
-  "assignee": "0.9.0_WK_NFRA_CLDGRPH~1",
-  "source_commit": "5644fee152600506259a8869f7067e89c8e6c0f2",
-  "push_state": "LOCAL (no push attempted; worker branch)",
+  "record_kind": "CG-s-15 shared-image rebuild + digest pins + live cloud exercise",
+  "claim": "measured",
+  "seat": "0.9.0_WK_NFRA_CLDGRPH~1",
+  "branch": "wk-NFRA_CLDGRPH-1",
+  "push_state": "LOCAL (no push attempted; this seat never pushes)",
+  "region": "us-east-1",
+  "account": "313476888478",
 
-  "build": {
+  "image": {
+    "repository": "opal-globgrph-derive-runner",
     "build_id": "globgrph-derive-build:442305e5-9d54-4e89-96de-b22a6ed9f776",
-    "build_status": "SUCCEEDED",
-    "start_time_epoch": 1788508908.293,
-    "end_time_epoch": 1788509033.546,
-    "env_override": "PROJECTION_SOURCE_COMMIT=5644fee152600506259a8869f7067e89c8e6c0f2",
-    "source_zip": {
-      "key": "s3://opal-313476888478-globgrph/build-source/derive-runner-source.zip",
-      "entries": 37,
-      "bytes_local": 449396,
-      "bytes_read_back_from_s3": 449396,
-      "etag_read_back": "a4cbe63234f0a3e3ad22e12113f91daa",
-      "md5_local": "a4cbe63234f0a3e3ad22e12113f91daa",
-      "last_modified": "2026-09-04T08:00:09Z",
-      "pre_state_bytes": 447665,
-      "pre_state_etag": "db6386e955e58a1bb9a4c1a6c0d1007e",
-      "verified_by": "s3api head-object read-back, NOT the cp exit code",
-      "baked_artifact_control": {
-        "c2_instances.json": 0,
-        "c3_structures.json": 0,
-        "positive_control_same_grep": {"c2_individuate.py": 1, "c3_cover.py": 1, "comp_aws_cli.py": 1}
-      }
-    },
-    "image": {
-      "repository": "313476888478.dkr.ecr.us-east-1.amazonaws.com/opal-globgrph-derive-runner",
-      "digest": "sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778",
-      "tags": ["latest", "20260904-080337"],
-      "pushed_at_epoch": 1788509032.393,
-      "previous_digest": "sha256:68bd8b932689a331928c1c3a6cc00fe124d24e04e7a9b64ba008f1a2d3de10e8",
-      "previous_build": "globgrph-derive-build:efc258e6-713c-47ae-ba79-fa2e691e0d0e"
-    }
+    "build_status": "SUCCEEDED (codebuild batch-get-builds, re-read this pass 2026-09-04 17:0xZ)",
+    "digest": "sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778",
+    "tags": ["latest", "20260904-080337"],
+    "pushed_at": "2026-09-04T08:03:52Z",
+    "built_from_commit": "5644fee152600506259a8869f7067e89c8e6c0f2",
+    "pre_cut_digest_replaced": "sha256:68bd8b932689a331928c1c3a6cc00fe124d24e04e7a9b64ba008f1a2d3de10e8",
+    "note": "BUILT ON THE FIRST PASS, NOT REBUILT HERE. build_id.txt and digest.txt at HEAD agree with ECR, so step 2 was not repeated."
   },
 
   "copy_source_diff": {
-    "from_commit": "649164d75bc96b7c9f3001a9342108a5852ad0a2",
-    "from_commit_provenance": "TO-CG-C-2 result, image.build_source_head -- the commit behind the image being replaced",
-    "to_commit": "5644fee152600506259a8869f7067e89c8e6c0f2",
-    "denominator": 37,
-    "denominator_derivation": "35 Dockerfile COPY sources + Dockerfile + buildspec.yml, agreed by TWO independent instruments (a python COPY parse and build-derive-image.sh's own grep+awk)",
-    "missing": 0,
-    "dirty": 0,
-    "changed": 1,
-    "table": [
+    "instrument": "my own Dockerfile COPY parse over `git show HEAD:infra/aws/globgrph/Dockerfile`, a SECOND instrument beside build-derive-image.sh's grep+awk which leg L3 used",
+    "denominator": "37 zip sources = 35 distinct COPY sources + Dockerfile + buildspec.yml (35 COPY directives, 35 distinct -- no duplicate source)",
+    "from_last_built_commit": "649164d75bc96b7c9f3001a9342108a5852ad0a2 (the commit behind the image being replaced, C-2's build)",
+    "to": "5644fee152600506259a8869f7067e89c8e6c0f2 (the built commit) and to this branch's HEAD",
+    "changed_files": [
       {
-        "file": "org/modules/graph/comp_aws_cli.py",
-        "commits": 1,
-        "commit": "b5bc1c8b27 NFRA_CLDGRPH: preserve S3 notification read state",
-        "blob_before": "57788c66dc18e244ede9d9cd841f4a333cdddada",
-        "blob_after": "327c35cfcb105b999220c66f8801860a864acf0c",
-        "diffstat": "168 insertions, 18 deletions",
-        "families_depending_on_it": ["globgrph-derive-runner"],
-        "why_only_that_family": "the ONLY import in the image is infra/aws/globgrph/derive_runner.py:40 `import comp_aws_cli`; the other 20 references across infra/aws/globgrph are comments or shape notes (e.g. resource_summaries_store.py:300)"
+        "path": "org/modules/graph/comp_aws_cli.py",
+        "numstat": "168 insertions / 18 deletions",
+        "commits": "1 -- b5bc1c8b27 (NFRA_CLDGRPH: preserve S3 notification read state, the C-3 deriver fix)",
+        "families_depending_on_it": "family (1) globgrph-derive-runner ONLY -- imported by exactly one file in the image, infra/aws/globgrph/derive_runner.py:40 `import comp_aws_cli`; every other reference in infra/aws/globgrph is a comment or a shape note"
       }
     ],
-    "anything_beyond_the_deriver_fix": "NO",
-    "dockerfile_and_buildspec": "byte-identical to the last build (empty diffstat) -- therefore NO new pip dependency and no resolution risk for any of the seven families",
-    "contrast_with_precedent": "the 2026-08-26 rebuild shipped 10 changed files over 58 commits plus a new pip dep (kuzu==0.11.3); this one ships 1 file over 1 commit"
+    "dockerfile_changed": false,
+    "buildspec_changed": false,
+    "anything_beyond_the_deriver_fix": "NO. Over the 37-path set the diff is exactly one file and one commit. Dockerfile and buildspec.yml are byte-identical to the last build, so there is no new pip dependency and no resolution risk for families (2)-(7).",
+    "built_commit_vs_this_HEAD": "EMPTY DIFF over all 37 paths -- the running image is current with this branch's HEAD on every byte the image carries."
   },
 
-  "seven_families_blast_radius": {
-    "pinned_by_this_order": "NONE -- the apply never ran (NFRA_CLDGRPH-W1-S1)",
-    "families": [
-      {"n": 1, "family": "globgrph-derive-runner", "project": "NFRA_CLDGRPH", "task_def": "globgrph-derive-runner:6", "image_ref": ":latest", "next_fire": "cron(0 2 * * ? *) EventBridge Rule opal-globgrph-derive-runner-nightly", "exercised_on_new_image": true},
-      {"n": 2, "family": "globgrph-projection-worker", "project": "NFRA_CLDGRPH", "task_def": "globgrph-projection-worker:3", "image_ref": ":latest", "next_fire": "on the next marker stamp via Pipe opal-globgrph-projection-worker", "exercised_on_new_image": true},
-      {"n": 3, "family": "globgrph-serving", "project": "NFRA_CLDGRPH", "task_def": "globgrph-serving:1", "image_ref": ":latest", "next_fire": "only on a service deployment; the running task is NOT replaced by a tag move", "exercised_on_new_image": false},
-      {"n": 4, "family": "globgrph-comp-learns-producer", "project": "NFRA_GLOBGRPH", "task_def": "globgrph-comp-learns-producer:1", "image_ref": ":latest", "next_fire": "cron(0 4 * * ? *) EventBridge Rule opal-globgrph-comp-learns-producer-nightly", "exercised_on_new_image": false},
-      {"n": 5, "family": "globgrph-cse-producer", "project": "NFRA_GLOBGRPH", "task_def": "globgrph-cse-producer:1", "image_ref": ":latest", "next_fire": "cron(30 3 * * ? *) EventBridge SCHEDULER globgrph-cse-producer-nightly -- a DIFFERENT service from Rules; a Rules-only census reports this family unscheduled", "exercised_on_new_image": false},
-      {"n": 6, "family": "globgrph-fedobs-producer", "project": "NFRA_GLOBGRPH", "task_def": "globgrph-fedobs-producer:1", "image_ref": ":latest", "next_fire": "cron(30 4 * * ? *) EventBridge Rule opal-globgrph-fedobs-producer-nightly", "exercised_on_new_image": false},
-      {"n": 7, "family": "globgrph-resource-summaries-producer", "project": "NFRA_GLOBGRPH", "task_def": "globgrph-resource-summaries-producer:1", "image_ref": ":latest", "next_fire": "NONE -- no EventBridge Rule, no Scheduler, and the only reference to its task definition in infra/aws/terraform is an `output` (row NFRA_CLDGRPH-W1-S8)", "exercised_on_new_image": false}
-    ],
-    "note": "families 4-7 were NAMED, never edited and never run, per the order's bound"
-  },
-
-  "terraform": {
-    "edits_made": "one local + three image lines; NOTHING else",
-    "diffstat": "item2a.tf +6-2, projection.tf +6-2, serving.tf +15-1 (3 files, 22 insertions, 5 deletions)",
-    "local": {"file": "infra/aws/terraform/globgrph/serving.tf", "name": "globgrph_image_digest", "value": "sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778", "placement_reason": "locals.tf does not exist and the module's other locals live in main.tf, which is OUTSIDE this order's PATHS block -- the order's own stated fallback"},
+  "pins_applied": {
+    "edit_surface": "one local + three image lines; the Pipe target already referenced aws_ecs_task_definition.projection_worker.arn and needed no edit",
+    "local": "infra/aws/terraform/globgrph/serving.tf:22  globgrph_image_digest = \"sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778\"",
     "image_lines": [
-      "item2a.tf:361 aws_ecs_task_definition.derive_runner -> ...amazonaws.com/opal-globgrph-derive-runner@${local.globgrph_image_digest}",
-      "projection.tf:231 aws_ecs_task_definition.projection_worker -> ${aws_ecr_repository.derive_runner.repository_url}@${local.globgrph_image_digest}",
-      "serving.tf:125 aws_ecs_task_definition.globgrph_serving -> ${aws_ecr_repository.derive_runner.repository_url}@${local.globgrph_image_digest}"
+      "infra/aws/terraform/globgrph/item2a.tf:361  aws_ecs_task_definition.derive_runner",
+      "infra/aws/terraform/globgrph/projection.tf:231  aws_ecs_task_definition.projection_worker",
+      "infra/aws/terraform/globgrph/serving.tf:125  aws_ecs_task_definition.globgrph_serving"
     ],
-    "pipe_target": "aws_pipes_pipe.projection_worker target_parameters.ecs_task_parameters.task_definition_arn ALREADY reads aws_ecs_task_definition.projection_worker.arn -- a symbolic reference that follows the new revision, so NO text edit was needed or made",
-    "fmt_check": "terraform fmt -check -diff item2a.tf projection.tf serving.tf -> rc 0, no diff",
-    "unscoped_plan_control": {
-      "file": "unscoped_plan_pre.txt",
-      "summary": "Plan: 5 to add, 8 to change, 3 to destroy",
-      "address_count": 13,
-      "mine": ["aws_ecs_task_definition.derive_runner", "aws_ecs_task_definition.projection_worker", "aws_ecs_task_definition.globgrph_serving", "aws_pipes_pipe.projection_worker", "aws_iam_role_policy.derive_runner_events_ecs", "aws_iam_role_policy.projection_pipe", "aws_cloudwatch_event_target.derive_runner_nightly", "aws_ecs_service.globgrph_serving"],
-      "foreign": ["aws_sns_topic_subscription.critical_surface_alerts_email", "aws_glue_partition.tool_activity[\"routing\"]", "aws_glue_partition.tool_activity[\"rolling_log\"]", "aws_glue_partition.tool_activity[\"rolling_log_summary\"]", "aws_codebuild_project.stitch_produce"],
-      "foreign_known_from_C1_C2": 4,
-      "foreign_new_since_C2": ["aws_codebuild_project.stitch_produce -- a buildspec re-render diff, pre-existing, not adjudicated here"],
-      "stale_outputs_found": "7 root outputs planned for removal with no accompanying resource change -- residue of the authorized 858554332d freshness teardown (row NFRA_CLDGRPH-W1-S3); the TARGETED plan does not touch them"
+    "terraform_fmt_check": "rc 0 on all three files",
+    "apply": {
+      "command": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/globgrph apply -input=false -no-color -auto-approve -target=<eight addresses>",
+      "addresses": [
+        "aws_ecs_task_definition.derive_runner",
+        "aws_ecs_task_definition.projection_worker",
+        "aws_ecs_task_definition.globgrph_serving",
+        "aws_pipes_pipe.projection_worker",
+        "aws_iam_role_policy.derive_runner_events_ecs",
+        "aws_iam_role_policy.projection_pipe",
+        "aws_cloudwatch_event_target.derive_runner_nightly",
+        "aws_ecs_service.globgrph_serving"
+      ],
+      "targeted_plan": "Plan: 3 to add, 5 to change, 3 to destroy. -- exactly those eight, no foreign address (targeted_plan.txt)",
+      "apply_result": "Apply complete! Resources: 3 added, 5 changed, 3 destroyed. rc 0 (targeted_apply.txt)",
+      "unscoped_plan_control": {
+        "file": "unscoped_plan_pre.txt (run BEFORE the apply, against the live S3 backend)",
+        "summary": "Plan: 5 to add, 8 to change, 3 to destroy. over 13 addresses",
+        "foreign_addresses_not_applied": [
+          "aws_codebuild_project.stitch_produce",
+          "aws_glue_partition.tool_activity[\"rolling_log\"]",
+          "aws_glue_partition.tool_activity[\"rolling_log_summary\"]",
+          "aws_glue_partition.tool_activity[\"routing\"]",
+          "aws_sns_topic_subscription.critical_surface_alerts_email"
+        ],
+        "d12_second_carrier": "the TO-CG-D-12 s3:GetBucketNotification inline policy in iam.tf shows NO diff in the unscoped plan -- config and state agree. LEFT EXACTLY AS FOUND, not folded into item2a.tf (row W1-S9 stands)."
+      }
     },
-    "targeted_plan": {
-      "file": "targeted_plan.txt",
-      "summary": "Plan: 3 to add, 5 to change, 3 to destroy",
-      "addresses": 8,
-      "address_set_correction": "the order named FOUR; the measured dependent closure is EIGHT. The two IAM role policies scope `ecs:RunTask` to the task definition AT ITS REVISION, and -target pulls a resource's dependencies but never its DEPENDENTS -- a four-address apply would have left the nightly rule and the Pipe authorized only for the revisions the same apply superseded (row NFRA_CLDGRPH-W1-S2)",
-      "output_changes": "exactly one, derive_runner_task_definition_arn"
+    "task_definitions_after": [
+      {"family": "globgrph-derive-runner", "arn": "arn:aws:ecs:us-east-1:313476888478:task-definition/globgrph-derive-runner:7", "image": "313476888478.dkr.ecr.us-east-1.amazonaws.com/opal-globgrph-derive-runner@sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778"},
+      {"family": "globgrph-projection-worker", "arn": "arn:aws:ecs:us-east-1:313476888478:task-definition/globgrph-projection-worker:4", "image": "313476888478.dkr.ecr.us-east-1.amazonaws.com/opal-globgrph-derive-runner@sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778"},
+      {"family": "globgrph-serving", "arn": "arn:aws:ecs:us-east-1:313476888478:task-definition/globgrph-serving:2", "image": "313476888478.dkr.ecr.us-east-1.amazonaws.com/opal-globgrph-derive-runner@sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778"}
+    ],
+    "digest_equals_digest_txt": true,
+    "latest_tag_present_in_any_of_the_three": false,
+    "pipe_target_live": {
+      "pipe": "opal-globgrph-projection-worker",
+      "current_state": "RUNNING",
+      "target_cluster": "arn:aws:ecs:us-east-1:313476888478:cluster/opal-globgrph",
+      "task_definition_arn": "arn:aws:ecs:us-east-1:313476888478:task-definition/globgrph-projection-worker:4"
     },
-    "targeted_apply": {
-      "status": "NEVER RAN",
-      "blocker": "NFRA_CLDGRPH-W1-S1 -- .tools/safe-apply.sh fires .tools/halt-gate-check.sh, whose halt_gate_validate_serial rejects 0.9.0_WK_NFRA_CLDGRPH~1 on BOTH limbs (lane suffix must be [A-Z], base must match an agent home folder; 105 folders censused, 0 match, positive control 2.0.0_SA_COO -> 3). rc 3, terraform never invoked, with HALT_OVERRIDE and HALT_ACK both set.",
-      "bare_terraform_apply": "NOT RUN -- forbidden, and not attempted"
-    }
+    "nightly_rule_target_live": "arn:aws:ecs:us-east-1:313476888478:task-definition/globgrph-derive-runner:7 (events list-targets-by-rule opal-globgrph-derive-runner-nightly) -- the revision-scoped ecs:RunTask grants moved WITH the task definitions, so the W1-S2 hazard did not occur"
   },
 
   "derive_family_launch": {
-    "kind": "ONE ad-hoc run-task, QA (CLAUDE.md s.5); the 02:00Z scheduled fire remains the acceptance",
-    "task_arn": "arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/7286e56c80614ab49fa2fba791bb8b43",
-    "task_definition": "globgrph-derive-runner:6 (UNPINNED -- references :latest, which now resolves to the new digest)",
-    "params_source": "events list-targets-by-rule opal-globgrph-derive-runner-nightly, mirrored exactly: subnet-023db8cbfd99ffff2, sg-0f6cedf53107c6f8c, assignPublicIp ENABLED, FARGATE",
-    "image_digest_actually_run": "sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778",
+    "kind": "ONE ad-hoc QA run-task (CLAUDE.md s.5) on the PINNED revision -- the 02:00Z scheduled fire stays the acceptance",
+    "task_arn": "arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/4a1baae562c8496983eb068146ae33d5",
+    "task_definition": "globgrph-derive-runner:7",
+    "network": "FARGATE, subnet-023db8cbfd99ffff2, sg-0f6cedf53107c6f8c, assignPublicIp ENABLED -- the nightly rule's own live parameters, mirrored",
+    "started_at": "1788539432.975 = 2026-09-04T16:30:32Z",
+    "stopped_at": "1788540008.657 = 2026-09-04T16:40:08Z (576 s)",
     "exit_code": 0,
-    "started_at_epoch": 1788511057.509,
-    "stopped_at_epoch": 1788511860.622,
-    "duration_seconds": 803,
+    "stopped_reason": "Essential container in task exited",
+    "image_digest": "sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778 (= the pin)",
     "log_group": "/ecs/globgrph/derive-runner",
-    "log_stream": "derive-runner/derive-runner/7286e56c80614ab49fa2fba791bb8b43",
-    "denominator_line": "s3 notifications buckets read=0 / buckets unreadable=34; unreadable=opal-313476888478-globgrph,opal-313476888478-lambda-artifacts,opal-313476888478-lambda-layers,opal-313476888478-terraform-state,opal-313476888478-yang-qa-scratch,opal-cloudtrail-logs-313476888478,opal-cur-313476888478,opal-data-49financial,opal-data-assets,opal-data-astn,opal-data-bd,opal-data-cot,opal-data-demo,opal-data-etfs,opal-data-imo,opal-data-inf,opal-data-mdpf,opal-data-news-av,opal-data-news-v2,opal-data-pm,opal-data-portal-v2,opal-data-portfolio,opal-data-security,opal-data-security-access-logs,opal-data-trade-submissions,opal-estate-report,opal-infrastructure-snapshots,opal-mcp-athena-results,opal-mcp-audit,opal-runner-shared,opal-security-evidence,opal-served-key-write-trail-logs,opal-website-backups,opalinvest-portal"
+    "log_stream": "derive-runner/derive-runner/4a1baae562c8496983eb068146ae33d5",
+    "denominator_line": "s3 notifications buckets read=34 / buckets unreadable=0; unreadable=none",
+    "contrast": "the FIRST pass's derive (task 7286e56c..., ledger leg L5) read 0 of 34 -- the IAM gap row W1-S7 named. TO-CG-D-12's grant moved it to 34 of 34."
   },
 
   "projection_family_launch": {
-    "task_arn": "arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/08459e7d5608493bb149fb991b16fe1b",
-    "started_by": "Started by Eventbridge Pipes -- the REAL launch the derive's marker stamp caused, not a driven run",
-    "task_definition": "globgrph-projection-worker:3 (UNPINNED, :latest)",
-    "image_digest_actually_run": "sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778",
-    "digest_equals_the_intended_pin": true,
-    "reference_is_pinned": false,
+    "launched_by": "the derive's OWN marker stamp through the EventBridge Pipe -- no hand",
+    "marker_before": "warehouse/_branch_head.main.json LastModified Fri 04 Sep 2026 14:45:22 GMT ETag 2b7aeb6f97cb974ed533a0d4b4d8ed10",
+    "marker_after": "Fri 04 Sep 2026 16:38:40 GMT ETag 6ac588a987d7e00500ad9c0b248636ce",
+    "task_arn": "arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/7b2d3bbefb2a4573bc5af5c8459f6e8a",
+    "task_definition": "globgrph-projection-worker:4 (the pinned revision)",
+    "image_digest": "sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778 (= the pin)",
+    "started_at": "1788539938.255 = 2026-09-04T16:38:58Z",
+    "stopped_at": "1788540696.908 = 2026-09-04T16:51:36Z (759 s)",
     "exit_code": 0,
-    "started_at_epoch": 1788511779.664,
-    "stopped_at_epoch": 1788512664.603,
-    "duration_seconds": 885,
-    "mode": "INCR_RESULT status=fallback -- delta 27296 >= 4000 and >= 25% of head, bulk reload cheaper",
-    "pointer_log_order": ["POINTER_VERIFY_OK", "POINTER_PUT_OK"],
-    "node_count": 27278,
-    "edge_count": 58727
+    "pointer_put_ok": "POINTER_PUT_OK key=projection/current.json vintage=2026-09-04T16:38:39.485910+00:00 manifest_sha256=c3ba0330e3065984b247a1733f4d62387eff8ad507aad90b7bb7fc27ad337e48",
+    "log_group": "/aws/ecs/opal-globgrph-projection-worker",
+    "log_stream": "projection-worker/projection-worker/7b2d3bbefb2a4573bc5af5c8459f6e8a"
   },
 
-  "marker_and_pointer": {
-    "marker_pre": {"last_modified": "2026-09-04T05:53:38Z", "etag": "ee38c260c3d7eb67149113474497289e"},
-    "marker_post": {"last_modified": "2026-09-04T08:49:21Z", "etag": "bfe5c18640c822ca1f476f7c22b9adf1"},
-    "pointer_pre_vintage": "2026-09-04T05:53:37.689093+00:00",
-    "pointer_post_vintage": "2026-09-04T08:49:20.217966+00:00",
-    "pointer_post_manifest_sha256": "6f6fa5fe50b4730d75652012575b13a150e9dde86a55dc027bd2b266918d0a94",
-    "written_by": "the derive runner and the projection worker themselves; this seat wrote NO marker, NO pointer and NO object under projection/"
+  "pointer": {
+    "before": "2026-09-04T14:45:21.329463+00:00 (manifest_sha256 84eb18f1abc29f55c8d7bfe6e9223f0d9bcfb36bf3d51c35a690181c0fe911a9)",
+    "after": "2026-09-04T16:38:39.485910+00:00 (manifest_sha256 c3ba0330e3065984b247a1733f4d62387eff8ad507aad90b7bb7fc27ad337e48)",
+    "written_by_this_seat": false
   },
 
   "serving_family_launch": {
-    "status": "DID NOT HAPPEN -- no new task, no new revision",
-    "primary_deployment_rollout_state": "COMPLETED",
-    "primary_deployment_task_definition": "arn:aws:ecs:us-east-1:313476888478:task-definition/globgrph-serving:1",
-    "reason": "a service only redeploys on a task-definition change, and the apply is blocked (NFRA_CLDGRPH-W1-S1). No force-new-deployment and no stop-task were used -- the order forbids replacing the task by hand.",
-    "artifact_swap_did_happen": "the RUNNING serving process picked the new vintage up in place via its 60 s pointer watch: /health last_swap 2026-09-04T09:04:50.007848+00:00, vintage 2026-09-04T08:49:20.217966+00:00 -- an ARTIFACT swap, which is NOT the task replacement D1-AC6 asks for"
+    "deployment_id": "ecs-svc/5051693120450624574",
+    "rollout_state": "COMPLETED",
+    "task_definition": "arn:aws:ecs:us-east-1:313476888478:task-definition/globgrph-serving:2",
+    "running_desired": "1 / 1, and the PRIMARY is the only deployment",
+    "new_task_arn": "arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/8889156e83ad4e3e95931e9d505169a9",
+    "new_task_started_at": "1788539216.079 = 2026-09-04T16:26:56Z",
+    "new_task_image_digest": "sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778 (= the pin)",
+    "replaced_task": "c18ee8b40e4a4bf3993f8f78cc2f98a6 (by the service's own rolling deployment; no stop-task)",
+    "health": "{\"status\":\"ok\",\"vintage\":\"2026-09-04T16:38:39.485910+00:00\",\"pointer_read_at\":\"2026-09-04T16:51:51.910784+00:00\",\"last_swap\":\"2026-09-04T16:51:51.953750+00:00\"}"
   },
 
-  "triggers_query": {
-    "instrument": "triggers_query.sh -- SSM AWS-RunShellScript on i-07dccb1615503ac99 -> curl http://projection.opal-globgrph.local:8181/cypher",
-    "post_derive": {
-      "vintage": "2026-09-04T08:49:20.217966+00:00",
-      "vintage_is_later_than_derive_start": true,
-      "shape_control_nodes": 27278,
-      "triggers": 0,
-      "bd_targets": []
-    },
-    "pre_derive_baseline": {
-      "vintage": "2026-09-04T05:53:37.689093+00:00",
-      "shape_control_nodes": 27244,
-      "triggers": 0,
-      "bd_targets": []
-    },
-    "why_the_shape_control_matters": "nodes answers 27278 on the same transport in the same call, so triggers=0 is the GRAPH's answer and not a dead query path -- the discrimination the silent-zero class needs",
-    "cause": "NFRA_CLDGRPH-W1-S7 -- the derive task role opal-globgrph-derive-runner-task has no s3:GetBucketNotification, so 0 of 34 buckets' notification configurations were readable and no S3_BUCKET-[TRIGGERS]->LAMBDA edge can be derived in the cloud at all"
+  "triggers": {
+    "count": 171,
+    "served_vintage": "2026-09-04T16:38:39.485910+00:00",
+    "derive_started_at": "2026-09-04T16:30:32Z",
+    "vintage_is_later_than_derive_start": true,
+    "shape_control": "MATCH (n) RETURN count(n) AS nodes -> {\"nodes\":27295} at the same vintage",
+    "query_1_as_the_server_received_it": "MATCH (a:CloudNode)-[e:CloudEdge]->(b:CloudNode) WHERE e.edge_type = 'TRIGGERS' RETURN count(e) AS triggers",
+    "query_2_as_the_server_received_it": "MATCH (a:CloudNode)-[e:CloudEdge]->(b:CloudNode) WHERE e.edge_type = 'TRIGGERS' AND a.node_id CONTAINS 'opal-data-bd' RETURN b.node_id AS target ORDER BY target",
+    "bd_pipeline_targets": [
+      "arn:aws:lambda:us-east-1:313476888478:function:bd-allocation-processor",
+      "arn:aws:lambda:us-east-1:313476888478:function:bd-gold-trigger",
+      "arn:aws:lambda:us-east-1:313476888478:function:bd-silver-merge"
+    ],
+    "inf_pipeline_targets_additional_evidence": [
+      "arn:aws:lambda:us-east-1:313476888478:function:inf-portal-publisher",
+      "arn:aws:lambda:us-east-1:313476888478:function:inf-silver-aggregator"
+    ],
+    "cot_pipeline": "contributes none -- EventBridge-only (S27, corrected at decomposition v0.3; S32 the disarm ack)",
+    "instrument": "the REPAIRED triggers_query.sh (row W1-S10): each cypher travels base64 and the script echoes it as the server received it, so the FALSE ZERO class that made the previous pass read triggers:0 cannot hide"
+  },
+
+  "the_four_nfra_globgrph_families": {
+    "policy": "named per the S31 discipline line, NOT edited and NOT run; they stay on :latest and pick the new image up on their next scheduled fire",
+    "next_fire_utc_from_2026_09_04T17_0xZ": [
+      {"family": "globgrph-comp-learns-producer", "trigger": "EventBridge Rule opal-globgrph-comp-learns-producer-nightly cron(0 4 * * ? *) ENABLED", "next_fire": "2026-09-05T04:00Z", "claim": "inferred from the cron expression, ENABLED state measured"},
+      {"family": "globgrph-cse-producer", "trigger": "EventBridge SCHEDULER globgrph-cse-producer-nightly cron(30 3 * * ? *) ENABLED -- a Rules-only census misses it (W1-S8)", "next_fire": "2026-09-05T03:30Z", "claim": "inferred from the cron expression, ENABLED state measured"},
+      {"family": "globgrph-fedobs-producer", "trigger": "EventBridge Rule opal-globgrph-fedobs-producer-nightly cron(30 4 * * ? *) ENABLED", "next_fire": "2026-09-05T04:30Z", "claim": "inferred from the cron expression, ENABLED state measured"},
+      {"family": "globgrph-resource-summaries-producer", "trigger": "NONE -- no EventBridge Rule (describe-rule: ResourceNotFoundException) and no Scheduler schedule", "next_fire": "NONE", "claim": "measured; row W1-S8"}
+    ]
   },
 
   "deploy_ledger": {
-    "entry": "org/critical_paths/change_management/20260904T0756Z_cldgrph-cgs15-shared-image-digest-pins_deploy_completion.md",
     "slug": "cldgrph-cgs15-shared-image-digest-pins",
-    "state": "OPEN (RED)",
-    "closed_legs": ["L1", "L2", "L3", "L5"],
-    "stranded_legs": ["L4", "L6", "L7"],
-    "hold_attempted_and_REFUSED": "deploy_ledger.py hold -> 'REFUSED: cannot HELD -- open APPLY/DEPLOY leg(s) [L4] -- a half-landed deploy cannot be HELD (stays RED)'. The entry therefore stays OPEN and BLARES, which IS the loud escalation NEVER-2 asks for; it was not silenced.",
-    "leg_kind_substitution": "the order declares L5/L6/L7 as kind `exercise`, which deploy_ledger.py refuses (LEG_KINDS has no such member); opened as `verify` with the order's ids and proof text verbatim (row NFRA_CLDGRPH-W1-S4)"
+    "entry": "org/critical_paths/change_management/20260904T0756Z_cldgrph-cgs15-shared-image-digest-pins_deploy_completion.md",
+    "legs_closed": "7 of 7",
+    "status_line": "**Status:** CLOSED -- nothing stranded -- closed 20260904T170545Z",
+    "sentinel": "org/critical_paths/.open_deploys/cldgrph-cgs15-shared-image-digest-pins.json -- COMMITTED first (f497b7d71b) so the OPEN state could survive a worktree drain (S34), then UNLINKED by `deploy_ledger.py close` (W2-S5); both states are on this branch."
   },
 
-  "rollback_considered": {
-    "decision": "NOT rolled back",
-    "reasoning": "the world is CONSISTENT, not half-landed: the pin never started, so no family sits in an intermediate state -- every family is exactly where :latest semantics put it, which is where it was before this act. The new image is MEASURED GOOD end to end (derive exit 0, projection exit 0, pointer advanced, serving swapped, 27278 nodes / 58727 edges) and differs from its predecessor by one file and one commit with no dependency change. Re-pointing :latest backwards would delete the only instrument that has ever named S20's cause and would itself be an unexercised mutation.",
-    "contrast": "the 2026-08-26 precedent rolled back because its verification run FAILED at import; this one has a measured clean run on both consumers"
+  "bounds_respected": {
+    "marker_or_pointer_written_by_this_seat": false,
+    "s3_object_deleted": false,
+    "four_nfra_globgrph_families_touched_or_run": false,
+    "ad_hoc_derives_this_pass": 1,
+    "stop_task_used": false,
+    "terraform_files_edited_this_pass": "none -- the local and the three image lines were already at HEAD and re-read, not re-edited",
+    "alarm_sns_monitor_built": false
   },
 
-  "surprise_rows_filed": [
-    "NFRA_CLDGRPH-W1-S1 BLOCKING/ARMED -- halt gate refuses every spine-v3 worker serial; no terraform apply is possible for this seat",
-    "NFRA_CLDGRPH-W1-S2 OBSERVATION/ARMED -- the apply address set is 8, not the 4 the order names",
-    "NFRA_CLDGRPH-W1-S3 OBSERVATION/ARMED -- 7 stale root outputs in the module's state",
-    "NFRA_CLDGRPH-W1-S4 OBSERVATION/INERT -- no `exercise` leg kind; safe-apply is .tools/safe-apply.sh",
-    "NFRA_CLDGRPH-W1-S5 OBSERVATION/INERT -- non-ASCII in 8 of 22 module .tf files",
-    "NFRA_CLDGRPH-W1-S6 OBSERVATION/ARMED -- sibling workers share one scratchpad directory; same-named files overwrite silently",
-    "NFRA_CLDGRPH-W1-S7 BLOCKING/ARMED -- s3:GetBucketNotification missing from the derive role: the ROOT CAUSE of S20",
-    "NFRA_CLDGRPH-W1-S8 OBSERVATION/ARMED -- globgrph-resource-summaries-producer has no trigger at all"
-  ]
+  "rows_filed_this_pass": ["NFRA_CLDGRPH-W1-S11", "NFRA_CLDGRPH-W1-S12"]
 }
 ```
 
-## What this run settles, and what it does not
+## What this pass proves, and what it does not
 
-**Settled.** The image is current: `:latest` and `20260904-080337` both resolve to
-`sha256:1b89853f...`, built by CodeBuild `442305e5-9d54-4e89-96de-b22a6ed9f776` from a source zip
-whose S3 read-back matched local bytes on size AND ETag. Exactly one COPY source moved since the
-image it replaces -- `comp_aws_cli.py`, the C-3 deriver fix, one commit -- and the Dockerfile and
-buildspec are byte-identical, so no other family inherits anything and there is no new pip
-dependency. Two of the seven consumers then ran the new bytes to completion: the derive (exit 0,
-803 s) and the projection worker the derive's own marker stamp launched through the Pipe (exit 0,
-885 s, `POINTER_VERIFY_OK` then `POINTER_PUT_OK`, pointer advanced 05:53:37 -> 08:49:20). The
-serving process picked the new artifact up in place at 09:04:50. Nothing in the chain needed a
-manual marker, pointer or S3 write, and none was made.
+**The chain ran end to end on the pinned bytes.** The three families this project owns now reference
+`opal-globgrph-derive-runner@sha256:1b89853f...` and no mutable tag; each family's NEXT launch was
+observed on that digest -- the derive by this order's own ad-hoc QA run (`globgrph-derive-runner:7`,
+exit 0), the projection worker by the real Pipe launch the derive's marker stamp produced
+(`globgrph-projection-worker:4`, exit 0, `POINTER_PUT_OK`), and the serving service by its own
+rolling deployment reaching `COMPLETED` on `globgrph-serving:2`. Each launch's `imageDigest` was read
+from `describe-tasks`, which is the discriminator that separates "ran the new bytes" from "resolved a
+tag that happens to point at them".
 
-**Not settled, and the reason is measured.** No family is pinned by digest, because no
-`terraform apply` ran: `safe-apply` fires a halt gate whose serial validator admits neither limb of
-a spine-v3 worker serial -- the `~1` slot suffix is a digit where it requires `[A-Z]`, and no agent
-home folder exists for a `0.9.0_WK_*` seat (105 folders censused, 0 matches, positive control
-returns 3). The identity refusal returns before the audited-override branch, and setting
-`HALT_OVERRIDE` and `HALT_ACK` together still produced rc 3 with terraform never invoked. That is
-`NFRA_CLDGRPH-W1-S1`, and it closes D1-AC3, D1-AC6 and D1-AC7 to this seat. The plan itself is
-sound and saved: eight addresses, `3 to add, 5 to change, 3 to destroy`, one output, no foreign
-address -- and the address set is **eight, not the four the order names**, because two IAM role
-policies scope `ecs:RunTask` to the task definition at its revision and `-target` never pulls a
-dependent (`NFRA_CLDGRPH-W1-S2`). A four-address apply would have produced a green result and a
-nightly derive that cannot start.
+**The denominator moved for a reason that is not this image.** The first pass's derive, on the same
+image bytes, printed `read=0 / unreadable=34`. This pass printed `read=34 / unreadable=0`. The image
+did not change between them; the IAM grant of TO-CG-D-12 did. That is worth stating plainly because
+it is the exact shape of a false attribution: the rebuild is a NECESSARY condition for the denominator
+line to exist at all (C-3 wrote it), and the grant is the condition for its VALUE to be non-zero.
+Neither alone produces `TRIGGERS = 171`.
 
-**The finding that outranks both.** D1-AC5 asked for a non-zero TRIGGERS count and got 0 -- but for
-the first time the derive said why. `buckets read=0 / buckets unreadable=34`, all 34 named. The
-derive task role `opal-globgrph-derive-runner-task` carries four inline policies and no attached
-managed policy, and its complete S3 action set is `GetBucketPolicy, GetBucketVersioning,
-GetBucketLocation, ListAllMyBuckets, GetObject, PutObject, DeleteObject, ListBucket`.
-`s3:GetBucketNotification` -- the single API that yields an `S3_BUCKET-[TRIGGERS]->LAMBDA` edge --
-is absent from the role and, measured with a positive control, from all 495 terraform files in the
-estate. The laptop's 34-read / TRIGGERS=188 came from a different principal, not different code:
-same image digest, same bytes, opposite result. So S20's silent zero is an IAM gap, S28's disarm
-cannot complete on an image rebuild alone, and the correct next act is a grant in
-`infra/aws/terraform/globgrph/iam.tf` -- outside this order's PATHS block and behind the same
-blocked apply. That is `NFRA_CLDGRPH-W1-S7`, and whoever closes S20 should read it first, because
-closing S20 on the rebuild would close it on the wrong cause.
+**TRIGGERS = 171 is read through a repaired instrument.** The previous pass read `triggers:0` from
+this same script and the reading measured the tool, not the graph (row W1-S10): shell re-quoting made
+the server evaluate `e.edge_type='"TRIGGERS"'`, valid and unmatchable, at a correct vintage, beside a
+shape control that could not exercise the same hazard because it carries no string literal. The
+repaired script transports each cypher as base64 and echoes it as the server received it; that echo is
+in the output above, unmangled, beside the answer.
 
-The value the C-3 fix delivered is precisely this: before it, this run would have shown TRIGGERS=0
-with nothing to say about why, and the next seat would have rebuilt the image again. The fix did not
-make the count non-zero. It made the zero answerable.
+**What this does NOT establish.** `171` is the count at ONE vintage from ONE served projection; it is
+not a claim about the completeness of the estate's notification graph, and the `read=34` denominator
+certifies the SWEEP (34 buckets the deriver enumerated), not that 34 is every bucket the account has.
+The four NFRA_GLOBGRPH families remain on `:latest` by design and their next-fire times above are
+INFERRED from cron expressions -- only the ENABLED state and the absence of any trigger for
+`globgrph-resource-summaries-producer` are measured. The 02:00Z scheduled derive is the acceptance a
+later seat reads; this ad-hoc run is QA, not production evidence.
 
-## Ledger
+## Ledger leg L5 -- read it with its date
 
-`org/critical_paths/change_management/20260904T0756Z_cldgrph-cgs15-shared-image-digest-pins_deploy_completion.md`
-is **OPEN and RED**, 4 of 7 legs closed with proof (L1 zip, L2 build, L3 diff, L5 derive), 3 stranded
-(L4 apply, L6 projection-on-the-pin, L7 serving). A `hold` was attempted and correctly refused -- the
-tool will not let an entry with an open apply leg go quiet. Leaving it RED is the loud escalation,
-not an oversight; it names its blocker in every leg's text and in `NFRA_CLDGRPH-W1-S1`.
+Leg `L5` was closed on the FIRST pass, against the derive that ran on `globgrph-derive-runner:6`
+(unpinned, `read=0/34`). It could not be reopened and the `change_management/*.md` is never hand-edited,
+so the leg's text still says "the pin is NOT in force". The derive family's launch ON THE PINNED
+REVISION is task `4a1baae562c8496983eb068146ae33d5` recorded above and in row `NFRA_CLDGRPH-W1-S12`,
+not the task L5 names. A reader taking L5 as this deploy's pinned-derive proof would be reading a
+correct record of a different act.

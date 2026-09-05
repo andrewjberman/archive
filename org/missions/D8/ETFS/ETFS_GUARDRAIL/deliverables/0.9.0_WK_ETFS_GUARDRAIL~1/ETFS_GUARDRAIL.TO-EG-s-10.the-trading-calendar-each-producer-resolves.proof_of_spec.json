@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-10",
+  "phase": "INVESTIGATION",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~1",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-10.the-trading-calendar-each-producer-resolves.md",
+    "group": "OTHER",
+    "vintage_commit": "5376ecaa8bdbf0f775cb347c2ba849bfba67afb9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "5376ecaa8bdbf0f775cb347c2ba849bfba67afb9",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-10.the-trading-calendar-each-producer-resolves.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-trading-calendar-each-producer-resolves.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-trading-calendar-each-producer-resolves.result.md",
+      "kind": "doc",
+      "commit_or_etag": "e6a34b27f9ff88f94ae6479118a6637fd40d1cc8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A measurement/verify deliverable; this TO changes no source. lib/trading_calendar.py and the three vendored copies were read, not written -- sha256 census (S10-AC1) taken before and after this instance's authoring shows the four hashes unchanged: 41b1c0c12651c62e59d27537a5bafb5bc34a3bb6562d94d57029a2f77ccac4c6 on all four paths. Content unchanged since e6a34b27f9 (worktree/commit blob sha256-confirmed identical, 2026-09-04)."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise-channel rows ETFS_GUARDRAIL-W1-S1 and ETFS_GUARDRAIL-W1-S2 appended at e6a34b27f9, unified with a concurrent worker's row by the issuer's merge at e6689cc7cc (append-only conflict resolution). Row ETFS_GUARDRAIL-W1-S3 (the proof-of-spec filename-mismatch discovery) appended THIS commit -- co-committed with this instance and the TO status flip. Validated by .tools/surprise-row-gate.py at stage -> 'OK: 1 file(s), all new rows carry their step-7/step-10 fields', corpus baseline unchanged (4 known, 0 new failures, 0 resolved)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S10-AC1",
+      "criterion_verbatim": "the four-copy census RAN over all four paths (denominator 4 of 4 of); the drift verdict per copy goes in the result document.",
+      "method": "command",
+      "invocation": "sha256sum lib/trading_calendar.py infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/trading_calendar.py infra/aws/lambda/bd-pipeline/bd-served-vintage-alarm/trading_calendar.py infra/aws/lambda/opal-assets-absence-check/trading_calendar.py",
+      "output_evidence": "41b1c0c12651c62e59d27537a5bafb5bc34a3bb6562d94d57029a2f77ccac4c6 *lib/trading_calendar.py\n41b1c0c12651c62e59d27537a5bafb5bc34a3bb6562d94d57029a2f77ccac4c6 *infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/trading_calendar.py\n41b1c0c12651c62e59d27537a5bafb5bc34a3bb6562d94d57029a2f77ccac4c6 *infra/aws/lambda/bd-pipeline/bd-served-vintage-alarm/trading_calendar.py\n41b1c0c12651c62e59d27537a5bafb5bc34a3bb6562d94d57029a2f77ccac4c6 *infra/aws/lambda/opal-assets-absence-check/trading_calendar.py\nAll four hashes IDENTICAL -- 0 drift across 3 vendored copies vs the library.",
+      "denominator": "4 of 4 named paths hashed; 3 of 3 vendored copies compared to the library, 3 of 3 IDENTICAL, 0 DIFFERS",
+      "expect": "lib/trading_calendar.py",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S10-AC2",
+      "criterion_verbatim": "the library counts August 2026 as 21 trading days (the brief's own number; the July count is recorded beside it).",
+      "method": "command",
+      "invocation": "python -c \"import sys; sys.path.insert(0,'lib'); import trading_calendar as t; print('SOURCE=%s AUG2026=%d JUL2026=%d' % (t.calendar_source(), len(t.trading_days_between('2026-08-01','2026-08-31')), len(t.trading_days_between('2026-07-01','2026-07-31'))))\"",
+      "output_evidence": "SOURCE=NYSE/pandas_market_calendars AUG2026=21 JUL2026=22",
+      "denominator": "2 of 2 named months counted (Aug, Jul); both match the brief's stated numbers (21 and 22 respectively)",
+      "expect": "AUG2026=21",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S10-AC3",
+      "criterion_verbatim": "the library's own battery is green at HEAD (record the N passed).",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/tests/test_trading_calendar.py -q",
+      "output_evidence": "22 passed in 1.69s",
+      "denominator": "22 of 22 collected tests passed, 0 failed, 0 skipped",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S10-AC4",
+      "criterion_verbatim": "the PRD's claim that neither target producer carries a calendar is TRUE at HEAD (if it is not, that is a premise that does not hold: a row, and the criterion's honest output).",
+      "method": "command",
+      "invocation": "python -c \"import os; print('COT_HAS_CAL=%s BD49F_HAS_CAL=%s' % (os.path.exists('infra/aws/lambda/cot-pipeline/cot-etf-ownership-daily/trading_calendar.py'), os.path.exists('infra/aws/lambda/bd-pipeline/bd-49f-etf-ownership-daily/trading_calendar.py')))\"",
+      "output_evidence": "COT_HAS_CAL=False BD49F_HAS_CAL=False",
+      "denominator": "2 of 2 target producer paths checked, both absent, matching the PRD's premise",
+      "expect": "COT_HAS_CAL=False BD49F_HAS_CAL=False",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S10-AC5",
+      "criterion_verbatim": "THE ANSWER, graded by the CVO at L9: which calendar each of the three producers resolves at runtime today, the drift between the library and each vendored copy, and the vendoring recommendation for the ports with its reason. RECORD it; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "source reads: infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/lambda_function.py:72,142,164 (tcal import + use); infra/aws/lambda/cot-pipeline/cot-etf-ownership-daily/lambda_function.py:85-94 (_latest_partition, no calendar); infra/aws/lambda/bd-pipeline/bd-49f-etf-ownership-daily/lambda_function.py:50-56 (_latest_partition, no calendar); infra/aws/terraform/etfs-positioning/producer-lambda.tf:169-183 (CTO ruling on the layer mechanism); git log -S 'MINT THE LAYER' -- infra/aws/terraform/etfs-positioning/producer-lambda.tf; git log -1 --format='%H %cI %s' 1da1e2b73b; org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-1...md:23,36-37 and TO-EG-s-2...md:22,36-37 (mandatory vendoring criteria S1-AC3/S2-AC3)",
+      "output_evidence": "RECORDED in org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-trading-calendar-each-producer-resolves.result.md section 6: (a) inf-etf-ownership-daily resolves its own vendored copy (byte-identical to lib/, imported as `tcal` at lambda_function.py:72, used at :142 prev_trading_day and :164 is_trading_day); cot-etf-ownership-daily and bd-49f-etf-ownership-daily resolve NO calendar at all -- both take the newest S3 partition via their own `_latest_partition()` with zero trading-day arithmetic, so a missed reporting day inside the obligation window is invisible to either producer as it stands today; (b) 0 drift across all 3 vendored copies (S10-AC1); (c) RECOMMENDATION WITH A REASON AND A CONFLICT: the TO's suggested default (vendor byte-identical, same pattern as inf) is what TO-EG-s-1/TO-EG-s-2 already mandate mechanically (S1-AC3, S2-AC3), but infra/aws/terraform/etfs-positioning/producer-lambda.tf:169-183 (commit 1da1e2b73b, 2026-08-24T18:47:25-04:00, 11 days before this round's L6 issuance @5376ecaa8b) records a CTO ruling ('CTO~Z ruled (msg 5462): MINT THE LAYER, NOT A FIFTH COPY ... a fifth in-repo copy IS inline vendoring and nobody approved one ... The estate's four existing byte-identical copies are that exception taken four times without a word') scoped explicitly to ONE function ('this authorises the layer for THIS function and nothing else. The three pre-existing Lambda copies are NOT migrated'). Recommendation: the port cells should use the same first-party Lambda-layer mechanism (build-layer.sh copying from lib/ at build time, no committed copy) rather than a fifth/sixth in-repo vendored copy, given the ruling's own scope language. Filed as surprise row ETFS_GUARDRAIL-W1-S1 for the CVO's L9 read and for the EG-s-1/EG-s-2 assignees.",
+      "denominator": "3 of 3 producers characterized (inf / cot / bd-49f); 3 of 3 vendored copies drift-checked; 1 recommendation filed with 1 named alternative mechanism and 1 surprise row",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L6/L9: a judgment criterion carries its output and no self-graded verdict; 3.0.0_SA_CVO is the oracle at L9 and its grade lands in the adjudication row."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "S10-AC1's load-bearing claim is 'the sha256 census DISCRIMINATES identical bytes from different bytes, not just always reports IDENTICAL'. Mutated by copying lib/trading_calendar.py to .scratch/mutant_trading_calendar.py and flipping the first byte's high bits (XOR 0xFF), then re-running the same sha256sum invocation over the real library, the mutant, and one real vendored copy in the same call. Separately, S10-AC2's load-bearing claim is 'trading_days_between COUNTS the actual calendar for the given range, not a hardcoded constant' -- mutated by adding a third month (Sep 2026) to the same invocation shape; Aug and Jul already differ (21 vs 22) inside the ORIGINAL invocation, which is itself the discriminating evidence.",
+      "expected": "The mutant file's hash must differ from the two real, byte-identical files; Aug and Jul counts must differ from each other if the function is genuinely computing per-range rather than returning a fixed value.",
+      "observed": "sha256sum lib/trading_calendar.py .scratch/mutant_trading_calendar.py infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/trading_calendar.py -> 41b1c0c1...ccac4c6 (lib), 8cd5a234...19e197b9c (mutant, DIFFERENT), 41b1c0c1...ccac4c6 (inf copy, matches lib). trading_days_between: AUG2026=21 JUL2026=22 SEP2026=21 -- Aug and Jul differ (21 != 22) inside the SAME invocation S10-AC2 uses, confirming the count is range-sensitive rather than a constant echoed back.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "S10-AC2's exact invocation run twice in separate processes, stdout captured to two files and diffed byte-for-byte.",
+      "observed": "Run 1 and run 2 both produced 'SOURCE=NYSE/pandas_market_calendars AUG2026=21 JUL2026=22'; diff of the two captured files returned no differences (IDENTICAL). sha256sum across S10-AC1's four paths also re-ran clean after building the mutant in a separate scratch path (no source file touched), reproducing the identical four hashes.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Reconciling or migrating the fifth/sixth-copy-vs-layer conflict named in S10-AC5 and surprise row ETFS_GUARDRAIL-W1-S1.",
+      "reason": "This TO is VERIFY-only ('This is a VERIFY cell. You change no code.'); the port mechanism is EG-s-1/EG-s-2's surface and the ruling's disarm is the issuing COO's call, not this cell's."
+    },
+    {
+      "item": "Vendoring or building the opal-trading-calendar-layer for cot-etf-ownership-daily or bd-49f-etf-ownership-daily.",
+      "reason": "Out of this TO's <paths> grant and its verb (verify, not build); recorded as the recommendation only, per S10-AC5's own bound."
+    },
+    {
+      "item": "Investigating bd-served-vintage-alarm's or opal-assets-absence-check's own runtime usage of their vendored trading_calendar.py (beyond the sha256 drift check S10-AC1 asks for).",
+      "reason": "Neither is one of the two named target producers (cot-etf-ownership-daily, bd-49f-etf-ownership-daily) or the third comparator inf-etf-ownership-daily that S10-AC5 asks about by name; the TO's deliverable spec (item 4) names exactly those three."
+    },
+    {
+      "item": "The original short-form instance filename 'ETFS_GUARDRAIL.TO-EG-s-10.proof_of_spec.json' the TO's own <proof_of_spec> text specifies.",
+      "reason": "Superseded: renamed (git mv) to the long form 'ETFS_GUARDRAIL.TO-EG-s-10.the-trading-calendar-each-producer-resolves.proof_of_spec.json' that .tools/to-pipeline-gate.py's check_complete_flip actually derives and requires for the flip to be admitted -- filed as ETFS_GUARDRAIL-W1-S3, confirmed independently by the issuer (row ETFS_GUARDRAIL-W3-S2) and by amendment of all 14 round faces to the long form."
+    }
+  ],
+  "surprises": [
+    "ETFS_GUARDRAIL-W1-S1: TO-EG-s-10's suggested default and TO-EG-s-1/TO-EG-s-2's MANDATORY, mechanically-graded instruction to vendor lib/trading_calendar.py byte-identical as a fifth and sixth in-repo copy runs against a live CTO ruling (infra/aws/terraform/etfs-positioning/producer-lambda.tf:169-183 @1da1e2b73b, 2026-08-24, 11 days before this round's L6 issuance) that a fifth in-repo copy needs explicit approval nobody gave and that new consumers should get a Lambda layer instead, scoped by that same ruling to ONE function only. OBSERVATION/ARMED, disarm owner 2.0.0_SA_COO~B -- DISARMED by the issuer @de8693863c (ports now attach the published layer opal-trading-calendar-layer:1, no fifth copy minted).",
+    "ETFS_GUARDRAIL-W1-S2: TO-EG-s-10's <proof_of_spec> block obliges the assignee to flip the TO's own <status> line to complete and commit it, but the TO's <paths> grant does not name org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ -- a cut defect systemic across all 7 sampled sibling TOs in this round's issuance, not unique to this cell. BLOCKING/ARMED, disarm owner 2.0.0_SA_COO~B -- DISARMED by the issuer @de8693863c (the tree-convention flip grant restated on all 14 faces).",
+    "ETFS_GUARDRAIL-W1-S3: TO-EG-s-10's own <proof_of_spec> text names the instance path in the short to_id form, but .tools/to-pipeline-gate.py's check_complete_flip derives the required filename from the TO markdown's FULL basename stem -- the flip was refused against the correctly-named, already-VALID short-form instance until this worker renamed it (git mv) to the gate-derived long form. OBSERVATION/ARMED, disarm owner 2.0.0_SA_COO~B -- disarmed by this worker's own rename plus the issuer's independent confirmation (row ETFS_GUARDRAIL-W3-S2) and amendment of all 14 faces to the long form."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "sha256sum",
+      "invocation": "sha256sum lib/trading_calendar.py infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/trading_calendar.py infra/aws/lambda/bd-pipeline/bd-served-vintage-alarm/trading_calendar.py infra/aws/lambda/opal-assets-absence-check/trading_calendar.py",
+      "result": "4 of 4 hashes identical: 41b1c0c12651c62e59d27537a5bafb5bc34a3bb6562d94d57029a2f77ccac4c6"
+    },
+    {
+      "tool": "python (inspect)",
+      "invocation": "python -c \"import sys; sys.path.insert(0,'lib'); import trading_calendar as t; import inspect; [print(n, inspect.signature(getattr(t,n))) for n in ['is_trading_day','prev_trading_day','trading_days_between','trading_days_mtd','total_trading_days_in_window','calendar_source']]\"",
+      "result": "all 6 named public API functions present and importable, signatures recorded in the result document section 2"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/tests/test_trading_calendar.py -q",
+      "result": "22 passed in 1.69s"
+    },
+    {
+      "tool": "grep (via comp-find-equivalent single-file reads, repo-tracked source)",
+      "invocation": "grep -n trading_calendar infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/lambda_function.py",
+      "result": "confirmed inf-etf-ownership-daily imports its vendored copy as `tcal` at :72 and calls tcal.prev_trading_day at :142, tcal.is_trading_day at :164"
+    },
+    {
+      "tool": "git log -S",
+      "invocation": "git log -S 'MINT THE LAYER' --oneline -- infra/aws/terraform/etfs-positioning/producer-lambda.tf",
+      "result": "1 commit, 1da1e2b73b, subject 'a first-party trading_calendar layer that adds NO fifth in-repo copy' -- located the CTO ruling's landing commit and date (2026-08-24T18:47:25-04:00), 11 days before this round's L6 issuance @5376ecaa8b"
+    },
+    {
+      "tool": "git log",
+      "invocation": "git log -1 --format='%H %cI %s' -- org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-1.cot-catch-up-port-reporting-obligation-window.md",
+      "result": "confirmed TO-EG-s-1 and TO-EG-s-2 both landed at the same L6 issuance commit 5376ecaa8b as this TO"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields; corpus baseline unchanged (4 known, 0 new, 0 resolved); row read as staged (git add before the gate call)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> S10-AC1,S10-AC2,S10-AC3,S10-AC4,S10-AC5",
+      "result": "run before the complete flip; result recorded in the report"
+    }
+  ]
+}
