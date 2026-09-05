@@ -19,23 +19,23 @@
     {
       "path_or_key": "data/etfs/scripts/coverage/remediate.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "0f80e6f7ed163dc159c5c061879c21367cbd0d62",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "New module, importable, tested against stub invoke/s3 only; not wired into the renderer's precondition (EG-s-6, another queue) by this order."
     },
     {
       "path_or_key": "data/etfs/scripts/coverage/tests/test_remediate.py",
       "kind": "test",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "0f80e6f7ed163dc159c5c061879c21367cbd0d62",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "6/6 passed locally, zero AWS calls (every arm supplies invoke/s3 stubs explicitly)."
     },
     {
       "path_or_key": "infra/aws/terraform/etfs-reports/iam.tf",
       "kind": "terraform",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "DESIRED-not-APPLIED: the plan (S7-AC5) showed a SECOND, pre-existing, unrelated resource change (aws_instance.reporter user_data, documented drift from commit 1502fdd6f9 2026-07-08) that this TO's own BOUNDS forbid applying alongside. No apply attempted; filed ETFS_GUARDRAIL-W1-S7 (BLOCKING/INERT). The IAM statement is committed as DESIRED text only, exactly as EG-s-10's sibling TOs' pattern of recording a DESIRED delta when APPLY is blocked."
+      "commit_or_etag": "0f80e6f7ed163dc159c5c061879c21367cbd0d62",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "RULING (issuer 2.0.0_SA_COO~B @2baa6af162): apply BY TARGET to aws_iam_role_policy.reporter only (the pre-existing aws_instance.reporter user_data drift, commit 1502fdd6f9 2026-07-08, is routed separately, a confirm-with-Andrew STOP/START act). Targeted plan -target=aws_iam_role_policy.reporter: 0 to add, 1 to change, 0 to destroy; applied via HALT_ACK=1 .tools/safe-apply.sh ... -target=aws_iam_role_policy.reporter, rc=0, 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.'; live read `.tools/aws iam get-role-policy --role-name etfs-reports-reporter-role --policy-name etfs-reports-reporter --query \"PolicyDocument.Statement[?Sid=='InvokeProducersForRemediation'].Action\"` -> 'lambda:InvokeFunction'; targeted 0-diff `-detailed-exitcode` rc=0 'No changes.'"
     },
     {
       "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-remediation-ladder-rungs-1-2-and-the-invoke-grant.result.md",
@@ -43,6 +43,13 @@
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Result document; no deploy surface of its own."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260905T0239Z_etfs-guardrail-eg-s-7-reporter-invoke-grant_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "d1c4204aa1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Ledger entry OPENED (commit d1c4204aa1, before the apply) and CLOSED (this commit) after the get-role-policy proof and the targeted 0-diff; python .tools/deploy_ledger.py close --slug etfs-guardrail-eg-s-7-reporter-invoke-grant -> 'CLOSED ... all 1 legs proven; sentinel removed'."
     }
   ],
   "acceptance": [
@@ -88,32 +95,31 @@
     },
     {
       "criterion_id": "S7-AC5",
-      "criterion_verbatim": "the plan after the edit changes EXACTLY the reporter role policy (aws_iam_role_policy.reporter): 0 to add, 1 to change, 0 to destroy. Run init first if .terraform/ is absent. If the plan shows ANY other resource, do NOT apply: BLOCKING row, stop this criterion.",
+      "criterion_verbatim": "AMENDED (issuer ruling @2baa6af162, row ETFS_GUARDRAIL-W1-S7): the TARGETED plan after the edit changes EXACTLY the reporter role policy (aws_iam_role_policy.reporter): 0 to add, 1 to change, 0 to destroy. Run init first if .terraform/ is absent. If the targeted plan shows ANY other resource, do NOT apply: BLOCKING row, stop this criterion.",
       "method": "command",
-      "invocation": "terraform -chdir=infra/aws/terraform/etfs-reports init -input=false ; terraform -chdir=infra/aws/terraform/etfs-reports plan -no-color -input=false -lock=false (tool substitution: .tools/terraform.exe absent in this worktree -- per-device, gitignored, documented in .gitignore and .tools/safe-apply.sh's own fallback; substituted the PATH-resolved terraform v1.14.5, filed ETFS_GUARDRAIL-W1-S6)",
-      "output_evidence": "Plan: 0 to add, 2 to change, 0 to destroy. Resources: aws_iam_role_policy.reporter (this order's own edit, expected) AND aws_instance.reporter (user_data in-place diff, e47b615c...->434774b5..., NOT this order's edit -- git diff instance.tf is 0 bytes; a pre-existing drift documented by commit 1502fdd6f9 2026-07-08 as 'crawl user_data in-place ... deferred to a TIER-B/C safe-apply batch'). Per this TO's own BOUNDS, NOT applied.",
-      "denominator": "2 of 2 resources changed shown; 1 of 2 is this order's edit, 1 of 2 is a pre-existing unrelated drift",
+      "invocation": ".tools/terraform.exe -chdir=infra/aws/terraform/etfs-reports init -input=false ; .tools/terraform.exe -chdir=infra/aws/terraform/etfs-reports plan -no-color -input=false -lock=false -target=aws_iam_role_policy.reporter (the estate's pinned v1.9.8 binary, copied into this worktree by the issuer per the ruling; the earlier PATH v1.14.5 substitution, row ETFS_GUARDRAIL-W1-S6, is RETIRED)",
+      "output_evidence": "Full untargeted plan reproduced first (honest state of the whole directory): 'Plan: 0 to add, 2 to change, 0 to destroy' (aws_iam_role_policy.reporter expected + aws_instance.reporter's pre-existing, out-of-scope user_data drift, byte-identical to the earlier v1.14.5 reading). TARGETED plan: 'Plan: 0 to add, 1 to change, 0 to destroy', showing only aws_iam_role_policy.reporter's added InvokeProducersForRemediation Sid.",
+      "denominator": "1 of 1 resource changed in the targeted plan; the full plan's 2nd resource (aws_instance.reporter) is confirmed out-of-scope per the ruling and excluded by -target",
       "expect": "1 to change",
-      "status": "FAIL",
-      "status_reason": "The plan shows 'Plan: 0 to add, 2 to change, 0 to destroy', not 1 to change -- a second, pre-existing resource (aws_instance.reporter) also diffs, unrelated to this order's edit (confirmed by a 0-byte git diff on instance.tf and a 2026-07-08 commit already documenting the same drift class as deferred/benign). Filed ETFS_GUARDRAIL-W1-S7 (BLOCKING/INERT); no apply attempted, per this TO's own bound."
+      "status": "PASS"
     },
     {
       "criterion_id": "S7-AC6",
-      "criterion_verbatim": "the APPLIED plane carries the grant (read after HALT_ACK=1 .tools/safe-apply.sh -chdir=infra/aws/terraform/etfs-reports apply -input=false -auto-approve, which you run only after AC5's plan read exactly one resource; then a 0-diff plan, recorded in the result).",
+      "criterion_verbatim": "AMENDED (issuer ruling @2baa6af162): the APPLIED plane carries the grant (read after HALT_ACK=1 .tools/safe-apply.sh ... apply -input=false -auto-approve -target=aws_iam_role_policy.reporter, run only after AC5's TARGETED plan read exactly one resource; then the 0-diff read is the TARGETED plan with -detailed-exitcode, rc=0, recorded beside the full plan's remaining drift line).",
       "method": "command",
-      "invocation": "NOT RUN -- S7-AC5's own precondition (a plan reading exactly one resource) was not met",
-      "output_evidence": "No apply was attempted and no get-role-policy read was made against a not-yet-applied grant. This criterion is UNCOMPUTABLE-BY-CONSTRUCTION: it rides the later run that follows once ETFS_GUARDRAIL-W1-S7's pre-existing aws_instance.reporter drift is dispositioned (per its own originating commit's plan: 'a TIER-B/C safe-apply batch') and a re-plan reads exactly one resource.",
-      "denominator": "0 of 1 apply attempted (deliberately, per this TO's own bound)",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "Named later run: a re-plan of infra/aws/terraform/etfs-reports after the pre-existing aws_instance.reporter user_data drift (documented 1502fdd6f9, 2026-07-08) is dispositioned, showing exactly 1 to change (aws_iam_role_policy.reporter only); that run then applies and reads get-role-policy for the Sid."
+      "invocation": "python .tools/deploy_ledger.py open --slug etfs-guardrail-eg-s-7-reporter-invoke-grant ... (committed d1c4204aa1 before the apply) ; HALT_ACK=1 .tools/safe-apply.sh -chdir=infra/aws/terraform/etfs-reports apply -input=false -auto-approve -target=aws_iam_role_policy.reporter ; .tools/aws iam get-role-policy --role-name etfs-reports-reporter-role --policy-name etfs-reports-reporter --query \"PolicyDocument.Statement[?Sid=='InvokeProducersForRemediation'].Action\" --output text ; .tools/terraform.exe -chdir=infra/aws/terraform/etfs-reports plan ... -target=aws_iam_role_policy.reporter -detailed-exitcode ; python .tools/deploy_ledger.py close-leg ... ; close",
+      "output_evidence": "Apply: comp-tagauthz PASSED, tombstone-gate CLEAN, 'Plan: 0 to add, 1 to change, 0 to destroy', 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.'. get-role-policy: 'lambda:InvokeFunction' (full statement confirmed: Action=[lambda:InvokeFunction], Resource=exactly the 3 producer ARNs, Sid=InvokeProducersForRemediation). Targeted 0-diff: '-detailed-exitcode' rc=0, 'No changes. Your infrastructure matches the configuration.'. Full untargeted plan post-apply: 'Plan: 0 to add, 1 to change, 0 to destroy' -- ONLY aws_instance.reporter's pre-existing drift remains. Ledger: opened (d1c4204aa1) before the apply, closed (this commit) after the proof.",
+      "denominator": "1 of 1 apply targeted and applied; 1 of 1 Sid confirmed on the APPLIED plane; 1 of 1 targeted 0-diff clean (rc=0); 1 of 1 ledger leg proven and closed",
+      "expect": "lambda:InvokeFunction",
+      "status": "PASS"
     },
     {
       "criterion_id": "S7-AC7",
       "criterion_verbatim": "graded by the CVO at L9: rungs 0-2 are unattended and never fabricate; the invoke grant names exactly three functions and no bucket; rung 3 is a STOP left to EG-sb-7; the Inflection re-check is stated against the deployed producer's bucket per EG-s-12's answer. RECORD; NO VERDICT.",
       "method": "manual_read_with_citation",
-      "invocation": "test arms (b),(c),(e),(f) of test_remediate.py; S7-AC2's byte census; the plan diff's added Statement block (S7-AC5's output); source read of remediate.py's _INFLECTION_DEPLOYED_UPSTREAM constant and its use in the D-day reason strings; EG-s-11's result document (WRITER=bd-49f-etf-ownership-daily) cross-checked against _PRODUCER_BY_PARTNER['49financial']",
-      "output_evidence": "RECORDED in org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-remediation-ladder-rungs-1-2-and-the-invoke-grant.result.md section 7: (1) unattended/never-fabricate demonstrated by 4 of 6 test arms plus the 0/0 byte census; (2) the added Sid's Resource array is exactly the 3 producer ARNs, 0 s3/bucket references anywhere in the diff; (3) remediate.py carries zero HTTP-client imports (rung 3 is a STOP by construction, not policy, and is EG-sb-7's own module); (4) the Inflection D-day reason string names opal-data-inf/gold/canonical/holdings_<date>.parquet as the DEPLOYED read per EG-s-12, never the repo's committed-but-unapplied design; (5) the 49F producer map (bd-49f-etf-ownership-daily, not -canonical) matches EG-s-11's confirmed WRITER. NOTE: the grant itself is DESIRED-not-APPLIED (S7-AC5/AC6) -- this criterion's evidence is about the MODULE's and the DELTA TEXT's properties, not a live-plane confirmation of the grant.",
-      "denominator": "4 of 4 named properties addressed with citations; 1 of 1 producer map cross-checked against EG-s-11's result; 1 of 1 Inflection-specific bucket citation traced to EG-s-12's result",
+      "invocation": "test arms (b),(c),(e),(f) of test_remediate.py; S7-AC2's byte census; the applied Statement block read live via get-role-policy (S7-AC6's output); source read of remediate.py's _INFLECTION_DEPLOYED_UPSTREAM constant and its use in the D-day reason strings; EG-s-11's result document (WRITER=bd-49f-etf-ownership-daily) cross-checked against _PRODUCER_BY_PARTNER['49financial']",
+      "output_evidence": "RECORDED in org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-remediation-ladder-rungs-1-2-and-the-invoke-grant.result.md section 7: (1) unattended/never-fabricate demonstrated by 4 of 6 test arms plus the 0/0 byte census; (2) the applied Sid's Resource array is exactly the 3 producer ARNs, 0 s3/bucket references anywhere in the statement -- CONFIRMED ON THE APPLIED PLANE (S7-AC6), not just DESIRED text; (3) remediate.py carries zero HTTP-client imports (rung 3 is a STOP by construction, not policy, and is EG-sb-7's own module); (4) the Inflection D-day reason string names opal-data-inf/gold/canonical/holdings_<date>.parquet as the DEPLOYED read per EG-s-12, never the repo's committed-but-unapplied design; (5) the 49F producer map (bd-49f-etf-ownership-daily, not -canonical) matches EG-s-11's confirmed WRITER; (6) the pre-existing aws_instance.reporter drift was surfaced (ETFS_GUARDRAIL-W1-S7) and excluded BY TARGET from every plan/apply this order ran, per the issuer's ruling, rather than silently applied or silently swallowed.",
+      "denominator": "4 of 4 named properties addressed with citations; 1 of 1 producer map cross-checked against EG-s-11's result; 1 of 1 Inflection-specific bucket citation traced to EG-s-12's result; 1 of 1 grant confirmed on the APPLIED plane",
       "judgment": true,
       "status": "UNVERIFIABLE-BY-INSTRUMENT",
       "status_reason": "spine v3.0 L6/L9: a judgment criterion carries its output and no self-graded verdict; 3.0.0_SA_CVO is the oracle at L9 and its grade lands in the adjudication row."
@@ -134,16 +140,8 @@
   },
   "declared_exclusions": [
     {
-      "item": "Applying the Terraform edit (safe-apply.sh) and reading the APPLIED grant via get-role-policy.",
-      "reason": "S7-AC5's own precondition (a plan reading exactly one resource) was not met -- a second, pre-existing, unrelated resource (aws_instance.reporter) also diffs. Filed ETFS_GUARDRAIL-W1-S7 (BLOCKING); per this TO's own BOUNDS, not applied. S7-AC6 rides a later run."
-    },
-    {
-      "item": "Opening/closing the org/critical_paths/change_management/ ledger entry (etfs-guardrail-eg-s-7-reporter-invoke-grant).",
-      "reason": "No apply was executed; opening a ledger entry for a deploy this worker does not carry out would itself be a stray, unclosed entry -- worse than not opening one. The ledger opens with the later apply run (S7-AC6's rider)."
-    },
-    {
-      "item": "Dispositioning or fixing the pre-existing aws_instance.reporter user_data drift.",
-      "reason": "Out of this cell's write surface and scope (a NEW module + ONE IAM Sid); the drift is ~2 months old, pre-dates this project, and is already named in its own originating commit as deferred to a future TIER-B/C safe-apply batch by a different owner."
+      "item": "Applying (or resolving) the pre-existing aws_instance.reporter user_data drift.",
+      "reason": "RULED out-of-scope by the issuer 2.0.0_SA_COO~B @2baa6af162: a user_data change on aws_instance applies through a provider-side STOP/START of the reporter instance, a confirm-with-Andrew act routed by the issuer. This order plans/applies BY TARGET to aws_iam_role_policy.reporter only (S7-AC5/AC6, amended); the drift's own originating commit (1502fdd6f9, 2026-07-08) already names it deferred to a future TIER-B/C safe-apply batch by a different owner."
     },
     {
       "item": "Wiring remediate.py into the renderer's precondition (EG-s-6) or building rung 3 (EG-sb-7).",
@@ -151,8 +149,8 @@
     }
   ],
   "surprises": [
-    "ETFS_GUARDRAIL-W1-S6: S7-AC5's invocation names .tools/terraform.exe, absent in this fresh worktree (per-device, gitignored, documented in .gitignore and safe-apply.sh's own fallback); substituted the PATH-resolved terraform v1.14.5, the same fallback the estate's own gate script already implements. OBSERVATION/INERT.",
-    "ETFS_GUARDRAIL-W1-S7: the plan after this order's own IAM edit shows TWO resources changing (aws_iam_role_policy.reporter, expected, and aws_instance.reporter, a pre-existing, already-documented 2026-07-08 user_data drift this worker did not cause) -- the criterion's expect ('1 to change') does not match; per this TO's own BOUNDS, no apply was attempted. BLOCKING/INERT, no disarm owner (a stop, not a live hazard)."
+    "ETFS_GUARDRAIL-W1-S6: S7-AC5's original invocation named .tools/terraform.exe, absent in this fresh worktree (per-device, gitignored); this worker's PATH v1.14.5 substitution was RETIRED by the issuer's ruling @2baa6af162, which instead copied the estate's pinned .tools/terraform.exe (v1.9.8) into this worktree -- confirmed present and used for every terraform invocation after the ruling. OBSERVATION/INERT, resolved.",
+    "ETFS_GUARDRAIL-W1-S7: the plan after this order's own IAM edit shows TWO resources changing (aws_iam_role_policy.reporter, expected, and aws_instance.reporter, a pre-existing, already-documented 2026-07-08 user_data drift this worker did not cause) -- the criterion's expect ('1 to change') did not match under the UNTARGETED plan; per this TO's own BOUNDS, no apply was attempted at that time. BLOCKING/INERT, no disarm owner (a stop, correctly taken). DISPOSITIONED by the issuer's ruling @2baa6af162: S7-AC5/AC6 amended to plan/apply BY TARGET to aws_iam_role_policy.reporter, which this worker then did (PASS/PASS)."
   ],
   "compiler_tools": [
     {
@@ -196,9 +194,29 @@
       "result": "OK: 2 new row(s) of 13 total, all carrying step-7/step-10 fields; corpus baseline unchanged."
     },
     {
+      "tool": "terraform.exe v1.9.8 (issuer-copied, per ruling @2baa6af162)",
+      "invocation": ".tools/terraform.exe version ; rm -rf .terraform (clear the v1.14.5-initialized backend cache) ; init -input=false ; plan (untargeted, twice, before and after apply) ; plan -target=aws_iam_role_policy.reporter ; plan -target=aws_iam_role_policy.reporter -detailed-exitcode",
+      "result": "v1.9.8 confirmed; init clean; untargeted plan reproduced 'Plan: 0 to add, 2 to change, 0 to destroy' byte-identical to the earlier v1.14.5 reading (version-independent); targeted plan 'Plan: 0 to add, 1 to change, 0 to destroy'; post-apply targeted -detailed-exitcode rc=0 'No changes'; post-apply untargeted plan 'Plan: 0 to add, 1 to change, 0 to destroy' (only aws_instance.reporter's pre-existing drift remains)."
+    },
+    {
+      "tool": "safe-apply.sh (HALT-GATE)",
+      "invocation": "HALT_ACK=1 .tools/safe-apply.sh -chdir=infra/aws/terraform/etfs-reports apply -input=false -auto-approve -target=aws_iam_role_policy.reporter",
+      "result": "First call BLOCKED (rc=3, HALT-GATE IDENTITY UNRESOLVED -- no session .serial file); wrote org/mcp/sessions/<session-id>.serial with this worker's own serial per the gate's own fix instructions, re-ran: comp-tagauthz gate PASSED, tombstone-gate CLEAN, 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.'"
+    },
+    {
+      "tool": ".tools/aws (iam)",
+      "invocation": ".tools/aws iam get-role-policy --role-name etfs-reports-reporter-role --policy-name etfs-reports-reporter --query \"PolicyDocument.Statement[?Sid=='InvokeProducersForRemediation'].Action\" --output text ; same query, full statement --output json",
+      "result": "'lambda:InvokeFunction'; full statement confirms Resource = exactly the 3 producer ARNs, Sid = InvokeProducersForRemediation, Effect = Allow."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open --slug etfs-guardrail-eg-s-7-reporter-invoke-grant ... (committed d1c4204aa1) ; close-leg --slug ... --leg-id iam --proof \"...\" ; close --slug ...",
+      "result": "OPENED (1 leg); CLOSED -- 'all 1 legs proven; sentinel removed'."
+    },
+    {
       "tool": "proof-of-spec-check.py",
       "invocation": "python .tools/proof-of-spec-check.py <this instance> S7-AC1,S7-AC2,S7-AC3,S7-AC4,S7-AC5,S7-AC6,S7-AC7",
-      "result": "run before the report; result recorded in the report (rc reflects S7-AC5's FAIL row is still structurally valid -- proof-of-spec-check.py grades SCHEMA validity, not whether every criterion PASSED)."
+      "result": "run before the complete flip; result recorded in the report."
     }
   ]
 }
