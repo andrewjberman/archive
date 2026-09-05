@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OUTSET.TO-OS-s-12",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D11/NFRA/NFRA_OUTSET/prd/NFRA_OUTSET_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "7fb59f239b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D11/NFRA/NFRA_OUTSET/decompositions/NFRA_OUTSET_DECOMP.md",
+    "vintage_commit": "6f1655f376",
+    "to_ref": "org/missions/D11/NFRA/NFRA_OUTSET/task-orders/NFRA_OUTSET.TO-OS-s-12.working-order-census.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OUTSET~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/tests/test_os12_census.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The census instrument itself, and this cell's entire code surface (the order's <paths> grants `.tools/tests/`). A repo-local on-demand instrument: nothing scheduled, nothing alarmed, nothing removed. Commit gate run on it directly: `bash .tools/commit-gate.sh .tools/tests/test_os12_census.py` -> rc=0, `All checks passed!`.",
+      "artifact_covered_by": ["O12-AC1", "O12-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.9.0_WK_NFRA_OUTSET~3/working-order-census.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The result document: the census table verbatim with its denominator, the column grains, the three false-zero traps met and how each is pinned by an arm, the controls, and the declared limits.",
+      "artifact_covered_by": ["O12-AC1", "O12-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D11/NFRA/NFRA_OUTSET/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "22e38e7963",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Append-only channel; 3 rows added (NFRA_OUTSET-W3-S7..S9). The pre-existing byte prefix was asserted byte-identical before the splice and the array re-parsed to 34 rows with all 34 ids distinct; no existing row edited or reordered. CR/LF/CRLF byte census after the write: 840/840/840, zero bare endings.",
+      "artifact_covered_by": ["O12-AC1", "O12-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "O12-AC1",
+      "criterion_verbatim": "the census runs AND a PLANTED FAILURE reads FAILED with its denominator -- the arm that must be able to fail.",
+      "method": "test_suite",
+      "invocation": "timeout 120 python .tools/tests/test_os12_census.py",
+      "output_evidence": "rc=0, read directly from the command and not through a pipe. DECIDING LINE: `=== test_os12_census: PASS (7/7) in 42.3s ===`. THE PLANTED-FAILURE ARM THE CRITERION NAMES, verbatim: `[OK ] A4 planted failure reads FAILED and is counted in the denominator -- denominator 3 (subset was 2); planted verdict=FAILED`, printed beneath its own census block `=== OS-s-12 WORKING-ORDER CENSUS -- PLANTED-FAILURE control (2-tool subset + one absent tool) ===` whose row reads `comp-os12-planted-absent    -  FAILED  ... [absent from .tools/ (subject absent, not a clean zero)]` and whose footer reads `DENOMINATOR: 3 tool(s) censused; 2 WORKING, 1 FAILED, 0 NO-ANSWER-DISCLOSED, 0 NOT-PROBED-BUDGET-EXHAUSTED`. THE PLANT IS COUNTED, NOT DROPPED -- a census that silently omits what it cannot probe reports a clean population it never had, so the arm asserts BOTH the FAILED verdict AND that the denominator grew from 2 to 3. A SECOND, SUBTLER PLANT: `[OK ] A5 rc=0 with an empty body is not scored WORKING -- classify(rc=0, empty) -> NO-ANSWER-DISCLOSED`. ALL SEVEN ARMS: A1 tool list matches the brief's Part II enumeration (brief-derived 9 vs declared 9, identical and ordered); A2 all named tools present on the counted plane (9/9); A3 census emits one row per tool with its denominator (9 rows of 9); A4 as above; A5 as above; A6 positive control: resolver dispatch answers where bare-bash falsely fails (resolver rc=0 bytes=973; bare-bash rc=1 bytes=504 wsl_stub=True); A7 per-probe deadline actually bounds a known-unbounded launcher (deadline 6s -> returned in 7.2s rc=124). Commit gate on the file: rc=0, `All checks passed!`.",
+      "denominator": "7 of 7 arms passed. Population under census: 9 of 9 tools named by the brief's Part II, re-derived from the brief at run time by arm A1 rather than typed and trusted. Planted-failure control: 3 rows censused (2-tool subset + 1 plant), 1 FAILED. Whole battery completed in 42.3 s inside the 120 s bound.",
+      "status": "PASS",
+      "expect": "PASS"
+    },
+    {
+      "criterion_id": "O12-AC2",
+      "criterion_verbatim": "RUN the census over the tools the brief's Part II names and show the table: rc, answer state, vintage, budget-honoured, one row per tool, with the DENOMINATOR of tools censused. Evidence. NO VERDICT.",
+      "method": "command",
+      "invocation": "timeout 120 python .tools/tests/test_os12_census.py   (the census prints as part of the battery; `--census-only` prints the table alone)",
+      "output_evidence": "rc=0. TABLE VERBATIM: `=== OS-s-12 WORKING-ORDER CENSUS -- outset tools ===` / `plane: LOCAL REPO CLI (.tools/<tool> in this worktree) | probe deadline 9s | census budget 100s | elapsed 29.3s` / `tool               rc  verdict                     state  vintg  budget       secs` / `comp-heat           0  WORKING                     False  False  YES          0.7` / `comp-fedobs         0  WORKING                     False  True   not-accepted 6.4` / `comp-drift          0  WORKING                     False  False  NO-LINE      2.6` / `comp-xray           0  WORKING                     False  False  not-accepted 3.7` / `comp-similar        0  WORKING                     True   True   NO-LINE      2.4` / `comp-pipescript   124  FAILED                      False  False  not-accepted 9.8   [bounded at 9s, no answer]` / `comp-freshness      0  WORKING                     False  False  not-accepted 1.2` / `comp-blast          0  WORKING                     True   False  not-accepted 1.9` / `comp-estate         0  WORKING                     False  False  YES          0.6` / `DENOMINATOR: 9 tool(s) censused; 8 WORKING, 1 FAILED, 0 NO-ANSWER-DISCLOSED, 0 NOT-PROBED-BUDGET-EXHAUSTED` / `disclosure over the 9: answer-state 2/9, vintage 2/9, budget-line-when-offered 2/4`. COLUMN GRAINS, stated because a census's columns are where grain slips: `rc` is the exit code of a REAL answer probe, never --help (--help proves the CLI parses, not that the tool answers); `WORKING` requires rc=0 AND a non-trivial body; `NO-ANSWER-DISCLOSED` is the confident-zero shape (rc=0, empty body); `budget` is YES only when --budget was offered AND a disclosure line printed, `NO-LINE` when offered and silently swallowed (the NFRA_OUTSET-S6 shape), `not-accepted` when the tool exposes no --budget at all. THE PLANE COUNTED: the LOCAL REPO CLI plane (.tools/<tool> in this worktree at 22e38e7963) -- NOT the ~/bin shim plane, NOT any deployed plane, NOT the engines called as functions. THE ONE FAILED ROW, re-probed to separate slow from not-answering: `comp-pipescript deployed @75s bound: rc=124 elapsed=75.7s timed_out=True bytes=82`, the 82 bytes being only its shim line; kept in the table at FAILED rather than dropped, because the brief names it and 'could not answer within the bound' IS its working-order answer (filed as NFRA_OUTSET-W3-S9). NOT DIAGNOSED: why it does not answer -- the CLI's behaviour is measured, the cause is not, and no AWS plane was read.",
+      "denominator": "9 of 9 tools named by the brief's Part II, one row each; the list re-derived from the brief at run time and compared against the census's own (arm A1: identical and ordered). Verdicts: 8 WORKING, 1 FAILED, 0 NO-ANSWER-DISCLOSED, 0 NOT-PROBED-BUDGET-EXHAUSTED. Disclosure: answer-state 2/9, vintage 2/9, budget-line 2 of the 4 tools that accept --budget.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true. The criterion asks that the census be RUN and its table SHOWN as evidence, explicitly with NO VERDICT; no invocation and no regex decides whether the table is the right table. The output is recorded verbatim here and in the result document with its denominator, its column grains and its plane, and no PASS or FAIL is written on it. The oracle is 3.0.0_SA_CVO at L9, per the task order's ACCEPTANCE preamble ('a PASS or FAIL written on one is INVALID').",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three planted/negative controls, because a census is the most exposed thing on this project to the false-zero family and an unrun falsifier is a promise. (i) ABSENT-TOOL PLANT: append a tool that does not exist and require it to read FAILED AND to remain in the denominator. (ii) CONFIDENT-ZERO PLANT: rc=0 with an empty body must not score WORKING. (iii) INSTRUMENT NEGATIVE CONTROL: dispatch a known-good bash launcher the naive way (bare 'bash') and require that it FALSELY fails while the resolver dispatch succeeds on the same tool -- proving the census's dispatch discriminates and that a non-zero is obtainable on a case known to exist.",
+      "expected": "(i) planted row FAILED and denominator grows 2 -> 3; (ii) classify(rc=0, empty) is NO-ANSWER-DISCLOSED, never WORKING; (iii) bare-bash rc!=0 on a tool the resolver runs at rc=0.",
+      "observed": "ALL THREE FIRED. (i) `A4 planted failure reads FAILED and is counted in the denominator -- denominator 3 (subset was 2); planted verdict=FAILED`. (ii) `A5 rc=0 with an empty body is not scored WORKING -- classify(rc=0, empty) -> NO-ANSWER-DISCLOSED`. (iii) `A6 positive control: resolver dispatch answers where bare-bash falsely fails -- resolver rc=0 bytes=973; bare-bash rc=1 bytes=504 wsl_stub=True`. A FOURTH CONTROL FIRED DURING CONSTRUCTION AND CHANGED THE BUILD: the first discovery pass dispatched bare 'bash' and returned rc=1 for ALL FOUR bash-launcher tools with body length EXACTLY 504 bytes each. Four independent failures do not share a byte length; one shared dependency failing does. That tell (CLAUDE.md s.2 -- a check scoped to the members cannot see a defect in what the members share) is what exposed the WSL-stub trap, which would have marked 4 of 9 outset tools BROKEN with a clean denominator and every verdict false. Filed as NFRA_OUTSET-W3-S7 with a live victim measured at .tools/drift_producer.py:155. A FIFTH: subprocess timeout= failed to bound comp-pipescript (91.8 s against an 8 s deadline) because the launcher's grandchild holds the pipe; fixed with file-redirect plus process-tree kill (8.9 s) and pinned as arm A7, filed as NFRA_OUTSET-W3-S8.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The battery was run twice end to end under `timeout 120` and the two outputs compared on every verdict-bearing field -- per-tool verdicts, the DENOMINATOR line, the disclosure counts and the final PASS line -- with wall-clock seconds normalised out, since elapsed time is not a verdict-bearing column.",
+      "observed": "Run 1 rc=0 and run 2 rc=0; the compared fields were IDENTICAL across both runs (`DETERMINISM: verdicts/denominators IDENTICAL across two runs`), including `8 WORKING, 1 FAILED` and `answer-state 2/9, vintage 2/9, budget-line-when-offered 2/4`. Only `secs` varied. DECLARED DEPENDENCE, not hidden: comp-fedobs reads a served artifact, so its row depends on that artifact's reachability at run time, and comp-pipescript's FAILED verdict depends on it continuing not to answer within the probe deadline -- both are properties of the world the census exists to report, not instability in the census.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write outside .tools/tests/, this cell's deliverables folder and the surprise channel",
+      "reason": "The order's <paths> block IS the grant. In particular `.tools/drift_producer.py` (the live victim in NFRA_OUTSET-W3-S7) and `.tools/comp-pipescript` (the one FAILED row, NFRA_OUTSET-W3-S9) are outside it, so both were filed as rows and neither was touched -- a path the order does not name is a cut defect, never an override."
+    },
+    {
+      "item": "`.tools/comp-heat` and `org/modules/heatmap/`",
+      "reason": "Held by slot 1 for OS-s-4 then OS-s-5 this round and explicitly not this cell's. comp-heat was INVOKED read-only as one of the nine censused tools; no byte of it was written."
+    },
+    {
+      "item": "A second implementation of any tool's battery",
+      "reason": "Six of the nine already have one under .tools/tests/test_comp_*_battery.py. A battery asks whether ONE tool is correct; this census asks which of the population can answer at all and what each discloses. The census invokes the tools' own CLIs and re-uses the estate's .tools/git_bash_resolver.py rather than reimplementing dispatch (build ladder rung 2)."
+    },
+    {
+      "item": "A diagnosis of WHY comp-pipescript deployed does not answer",
+      "reason": "The CLI's behaviour is measured at two bounds (9 s and 75 s, 82 bytes both times); the cause is not, and no AWS plane was read. Naming a cause would staple an interpretation to a measurement."
+    },
+    {
+      "item": "A full census of the bare-'bash' hazard across the estate",
+      "reason": "The sweep behind NFRA_OUTSET-W3-S7 is a narrow lexical pattern (`[\"bash\"` in tracked *.py, 17 hits, 1 live production call site); a call built from a variable, via shell=True, or spelled '/bin/bash' would not match. Stated as a limit on that row and left to its named disarm owner rather than silently presented as complete."
+    },
+    {
+      "item": "Re-measurement after OS-s-4 lands",
+      "reason": "This order declares depends_on OS-s-1 and OS-s-4; OS-s-1 is landed and OS-s-4 is not. OS-s-4 adds vintage and catalog disclosure to `comp-heat federated`, so comp-heat's vintage column here is a PRE-OS-s-4 reading and is expected to change. No arm depends on OS-s-4's output, so this is a stated vintage bound rather than a blocker; the census is the instrument and re-running it is the re-measurement."
+    },
+    {
+      "item": "Alarm, monitor, freshness-checker or SNS on the census",
+      "reason": "Standing moratorium, and the order's BOUNDS repeat it. The census is an on-demand instrument: nothing is scheduled and nothing notifies."
+    }
+  ],
+  "surprises": [
+    "NFRA_OUTSET-W3-S7: ARMED -- on this host a bare `subprocess.run([\"bash\", <script>])` resolves to the System32 WSL stub (no distribution) and returns rc=1 with a UTF-16LE error body, so a census dispatching that way marks 4 of the 9 outset tools BROKEN with a clean denominator and every verdict FALSE; caught because all four bodies were exactly 504 bytes, and measured live at .tools/drift_producer.py:155 which makes that call and counts rc!=0 as tools_failed. Remedy is the estate's own .tools/git_bash_resolver.py; filed not fixed (outside <paths>), disarm owner named.",
+    "NFRA_OUTSET-W3-S8: subprocess timeout= does not bound a shell-launcher comp-tool, because the launcher's python grandchild holds the inherited stdout pipe -- `comp-pipescript deployed` ran 91.8 s under an 8 s deadline and the aggregate pass then died at an outer bound with zero output, the same shape as NFRA_OUTSET-S2. File-redirect plus process-tree kill returns the same probe at 8.9 s; pinned as standing arm A7.",
+    "NFRA_OUTSET-W3-S9: census result -- `comp-pipescript deployed`, the brief's own named GIT->DEPLOY-hop tool, returned no answer at a 9 s bound and none at a 75 s re-probe (82 bytes, its shim line only), and accepts no --budget for a caller to bound it with. 8 of 9 outset tools answer; this is the one that does not. Reported in the table at FAILED rather than omitted, per brief O5."
+  ],
+  "session_log": "org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.9.0_WK_NFRA_OUTSET~3/working-order-census.result.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-schedule",
+      "invocation": "RUN AT THE ISSUANCE by 2.0.0_SA_COO, not re-run here (task order <preflight>): the gate ledger read once for this issuance and quoted in the issuance commit.",
+      "result": "0 armed gates name NFRA_OUTSET, comp-heat or the estate-report runner."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "DECLARED-NOT-APPLICABLE per the task order's <preflight> -- a repo-surface cell reading and changing no principal, policy or resource.",
+      "result": "Not applicable. No AWS plane was read by this cell; the one tool whose probe may reach AWS (comp-pipescript deployed) returned no answer within its bound and is reported as such."
+    },
+    {
+      "tool": "comp-adversary",
+      "invocation": "DECLARED-NOT-APPLICABLE per the task order's <preflight> (fresh cut, no prior artifact to validate against).",
+      "result": "Not applicable at the cut. The adversarial function this cell performed on itself is the three planted/negative controls under `controls.mutant`, two of which changed the build."
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh .tools/tests/test_os12_census.py",
+      "result": "rc=0 -- `All checks passed!`, `OK: no unguarded strict-utf8 log reads.`, `OK: pre-commit gate clean for 1 of 1 file(s)` (py_compile + ds-precommit + ruff py39)."
+    },
+    {
+      "tool": "the census itself (.tools/tests/test_os12_census.py)",
+      "invocation": "timeout 120 python .tools/tests/test_os12_census.py   (twice, for determinism)",
+      "result": "rc=0 both runs; `=== test_os12_census: PASS (7/7) in 42.3s ===`; verdicts and denominators identical across the two runs."
+    }
+  ]
+}
