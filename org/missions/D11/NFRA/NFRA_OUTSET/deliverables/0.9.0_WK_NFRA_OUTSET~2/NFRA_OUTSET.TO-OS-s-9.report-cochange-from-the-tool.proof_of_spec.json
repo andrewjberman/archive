@@ -1,0 +1,159 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OUTSET.TO-OS-s-9.report-cochange-from-the-tool",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OUTSET~2",
+ "spec_ref": {
+  "doc": "org/missions/D11/NFRA/NFRA_OUTSET/task-orders/NFRA_OUTSET.TO-OS-s-9.report-cochange-from-the-tool.md",
+  "group": "OTHER",
+  "vintage_commit": "8c231d47bf"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D11/NFRA/NFRA_OUTSET/decompositions/NFRA_OUTSET_DECOMP.md",
+  "vintage_commit": "6f1655f376",
+  "to_ref": "org/missions/D11/NFRA/NFRA_OUTSET/task-orders/NFRA_OUTSET.TO-OS-s-9.report-cochange-from-the-tool.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/estate-report-runner/estate_report_runner.py",
+   "kind": "script",
+   "commit_or_etag": "c2854e93e7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the estate-report runner's single source file; the systemd unit pulls exactly this one file as code/estate_report_runner.py (infra/aws/terraform/estate-report/instance.tf:215). NOT DEPLOYED BY THIS CELL and deliberately so: ESTATE_OUTSET_SEAM_PREFIX stays UNSET, so the seam branch this commit adds is unreachable in production and the host branch runs exactly as before, now carrying its stand-in declaration. Landed at c2854e93e7 on wk-OUTSET-2.",
+   "introduces": [
+    "OUTSET_COCHANGE_KEY",
+    "COCHANGE_STANDS_IN_FOR",
+    "STAND-IN, not a tool answer"
+   ],
+   "artifact_covered_by": [
+    "O9-AC1",
+    "O9-AC2"
+   ]
+  },
+  {
+   "path_or_key": ".tools/tests/test_os9_cochange_source.py",
+   "kind": "test",
+   "commit_or_etag": "c2854e93e7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "a directly-runnable AND pytest-collectible battery (both grains exercised: rc 0 and '1 passed'); not a deploy-scope path. Landed at c2854e93e7.",
+   "introduces": [
+    "def arm_a_artifact_is_the_source",
+    "def arm_b_red_mutant",
+    "def arm_c_failed_publish_reads_failed",
+    "def arm_d_declaration",
+    "def arm_e_grain_is_measured_not_asserted"
+   ],
+   "artifact_covered_by": [
+    "O9-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.9.0_WK_NFRA_OUTSET~2/report-cochange-from-the-tool.result.md",
+   "kind": "doc",
+   "commit_or_etag": "c2854e93e7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the cell's result deliverable, at the exact path the task order's DELIVERABLE clause names. Landed at c2854e93e7."
+  },
+  {
+   "path_or_key": "org/missions/D11/NFRA/NFRA_OUTSET/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "c2854e93e7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the project's append-only surprise channel; rows NFRA_OUTSET-W2-S14..W2-S17 appended by this worker at c2854e93e7 (53 rows before, 57 after). Text splice, never a json.dump round trip; no existing row edited, reordered or dropped."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "O9-AC1",
+   "criterion_verbatim": "O9-AC1 -- a battery proving the report's co-change rows come from the tool's ARTIFACT, with a RED mutant restoring the host-git path. <invocation>python .tools/tests/test_os9_cochange_source.py</invocation> <expect>PASS</expect>",
+   "method": "test_suite",
+   "invocation": "timeout 120 python .tools/tests/test_os9_cochange_source.py",
+   "output_evidence": "rc=0. Final line: '=== test_os9_cochange_source: PASS (16/16) ==='. Second required grain: 'timeout 120 python -m pytest -q .tools/tests/test_os9_cochange_source.py' -> '1 passed in 4.10s', rc 0.\nARMS, each printing its own detail line:\n  A1 rows ARE the artifact's rows -- status=OK row_count=2 first_pair='OS9-SENTINEL-PAIR-NOT-FROM-GIT'. The sentinel is a row shape no host git walk can emit, so 'it came from the artifact' is FALSIFIABLE rather than merely plausible.\n  A2 vintage names the TOOL, not the host -- 'comp-cochange (resource grain) produced 2026-09-05T10:00:00Z (tool vintage: repo @deadbeef), age 2.0 h @PIN'.\n  A3 denominator carries the TOOL's denominators -- 'comp-cochange (resource grain) -- pairs_observed=2; tool_scalars.commits=41'.\n  B2 RED MUTANT (the one the criterion names), EXECUTED: the seam branch deleted from a temp copy of the runner restores the host-git path -> status=INSTRUMENT_FAILED rows=0 sentinel_present=False. A configured prefix is ignored and the sentinel becomes unreachable, so arm A's assertion genuinely fails under it.\n  C x6 a FAILED publish reads FAILED, never a clean empty -- ABSENT, UNREADABLE/not-JSON, FOREIGN TAG, STALE, FUTURE-DATED and UNMAPPED answer_state each return status != OK with rows == [] AND row_count is None AND an instrument_error naming the reason. 6 of 6.\n  D1 the declaration names the tool, the grain and the seam key (missing=[], len=707).\n  D2a it reaches the RENDERED stratum on the git-FAILED exit -- vintage 'host git history @PIN -- STAND-IN, not a tool answer (claim=host-computed)'.\n  D2b and on the COMPUTED exit against the live repo -- status=OK, same STAND-IN vintage.\n  D3 RED MUTANT: the declaration emptied AT ITS DEFINITION breaks D2a AND D2b -- 'mutant constant=''; declaration still in failed-exit=False computed-exit=False'.\n  E1 the grain claim is RE-MEASURED live, not asserted -- grain='type', active_tags=['AB','AE','BG','DE','DS','DT','SA','WK'], first_pair=('AE','SA'), pairs=14.\nNO AWS, NO NETWORK. Arm E runs the co-change ENGINE directly under sys.executable rather than through the bash shim, which sidesteps two measured host hazards at once: a bare subprocess.run(['bash', <script>]) reaches the WSL stub (rc=1, 504 bytes of UTF-16LE on stdout, reading as a broken tool), and subprocess timeout= does not bound a shell launcher because the grandchild holds the stdout pipe.\nREGRESSION on the file this cell edits: 'timeout 120 python .tools/tests/test_os10_seam.py' -> 'OS10-SEAM BATTERY: 12/12 PASS (denominator 12; 0 AWS calls, 0 network)', rc 0 -- the contract between the two seam halves still holds after adding a second consumer to it.",
+   "denominator": "16 of 16 battery arms PASS (the battery prints its own denominator on its final line); 2 of 2 RED mutants EXECUTED and each breaks the arm it targets; 6 of 6 publish-failure modes render non-OK with a reason; 12 of 12 arms still pass in the OS-s-10 contract battery",
+   "status": "PASS",
+   "status_reason": "The <expect> string PASS is present and the battery exits rc 0 at both required file grains. DISCLOSED AGAINST THIS PASS, because a count of green arms can imply more than it measures: this is a CONTRACT test against an INJECTED artifact, not a live end-to-end read. Nothing publishes <prefix>/comp_cochange.json today and nothing can from inside this grant -- see NFRA_OUTSET-W2-S15.",
+   "expect": "PASS"
+  },
+  {
+   "criterion_id": "O9-AC2",
+   "criterion_verbatim": "O9-AC2 -- QUOTE estate_report_runner.py:1308 and :1996 at file:line, before and after. If the host copy must stay, it DECLARES which tool it stands in for -- FWD-6's own words. Evidence. NO VERDICT.",
+   "method": "manual_read_with_citation",
+   "invocation": "git show HEAD:infra/aws/ec2/estate-report-runner/estate_report_runner.py | sed -n '1308p;1996p'   (BEFORE, read from the RECORD not the worktree) ; cat infra/aws/ec2/estate-report-runner/estate_report_runner.py | grep -n 'def _stratum_cochange|_stratum_cochange(repo|COCHANGE_STANDS_IN_FOR|OUTSET_COCHANGE_KEY'  (AFTER) ; timeout 120 python org/modules/graph/comp_cochange.py matrix --since '14 days ago' --json   (the grain measurement)",
+   "output_evidence": "A CITATION CORRECTION FIRST, because one of the two lines the criterion names has moved (NFRA_OUTSET-W2-S16). At 8c231d47bf, `sed -n '1308p;1996p'` returns:\n  1308: def _stratum_cochange(repo_dir: str, end, maps: dict, pin: str) -> dict:\n  1996: #\n:1308 is correct. :1996 is a bare comment-block filler line; the WIRING is at :2149, '\"B\": _stratum_cochange(repo, end_local, maps, pin),' beside D/C/A at :2148/:2150/:2151. Both are quoted below rather than silently substituting one for the other. The drift is consistent with OS-s-10 landing a ~130-line seam block above :1996 at 508d4ce31d.\n\nBEFORE @8c231d47bf -- :1308 'def _stratum_cochange(repo_dir: str, end, maps: dict, pin: str) -> dict:', a docstring saying the stratum is 'computed from git history METADATA', and a body that calls commits_in_window(repo_dir, start, end) (:282, ONE git subprocess), then attribute_path(p, maps) (:903) keeping only kind == 'chain' labels, then pairs them. Wiring at :2149.\n\nAFTER (worktree, landed at c2854e93e7) -- :1308 'def _stratum_cochange(repo_dir: str, end, maps: dict, pin: str, prefix=..., loader=None, now=None, max_age_hours=None) -> dict:'; :1327 'prefix = OUTSET_SEAM_PREFIX if prefix is ... else prefix'; :1328 'if prefix:'; :1332 'src = prefix.rstrip(\"/\") + \"/\" + OUTSET_COCHANGE_KEY'; :1333 'r = _outset_read(src, loader or _outset_loader, ...)'; :1334-1336 return _stratum(... status=r[\"status\"], error=r[\"error\"]). OUTSET_COCHANGE_KEY at :1463, COCHANGE_STANDS_IN_FOR at :1509. WIRING AT :2221 AND DELIBERATELY UNCHANGED in shape -- '\"B\": _stratum_cochange(repo, end_local, maps, pin),' -- the call site passes no prefix, so the default resolves to the module-level OUTSET_SEAM_PREFIX at call time; injection exists for the battery and production reads its own env.\n\nTHE HOST COPY STAYS, AND THIS IS ITS DECLARATION (:1509, rendered into the denominator of every host-path stratum and into its vintage): 'STAND-IN DECLARATION (FWD-6): these rows are computed on this HOST from git metadata, not by a tool. They stand in for a RESOURCE-GRAIN co-change answer published through the OS-s-10 seam as <ESTATE_OUTSET_SEAM_PREFIX>/comp_cochange.json; when that artifact exists this stratum reads it and stops computing. THE NAMED TOOL IS NOT A DROP-IN AND THAT IS MEASURED, NOT ASSUMED: .tools/comp-cochange answers AGENT-TYPE/SERIAL co-movement (--grain {type,serial}; a live matrix run yields agent tags, not resource labels), while these rows pair pipeline-chain labels from attribute_path(). Same word, different axis -- substituting it would answer a different question under the same heading. claim=host-computed.' The rendered vintage reads 'host git history @<pin>, trailing 14d -- STAND-IN, not a tool answer (claim=host-computed)'.\n\nTHE MEASUREMENT BEHIND THE DECLARATION, run rather than asserted: 'python org/modules/graph/comp_cochange.py matrix --since \"14 days ago\" --json' -> rc 0 in 1.3 s, grain='type', active_tags ['AB','AE','BG','DE','DS','DT','SA','WK'], 14 pairs of AGENT TAGS (['AE','SA'], ['AB','SA'], ['AE','DT']) with shared_files/jaccard columns and ZERO resource or chain labels anywhere in the output. The tool's own shim header: 'which agent TYPES change the same files together'.\n\nA GAP IN THIS CELL'S OWN CHANGE, CAUGHT BY ITS OWN BATTERY AND REPORTED RATHER THAN QUIETLY FIXED: the first version put the declaration only on the COMPUTED exit, so arm D2 failed with 'vintage=repo @PIN' -- the git-FAILED early return rendered without it. That is not cosmetic: a reader seeing GROUP B INSTRUMENT_FAILED would conclude A TOOL FAILED when no tool was ever called. Repaired at :1318, and arm D2 was split into D2a/D2b so both exits are asserted.",
+   "denominator": "3 of 3 things the criterion asks for are present (BEFORE at file:line, AFTER at file:line, the FWD-6 declaration); 2 of 2 cited lines quoted, 1 of which had drifted and is quoted alongside the line it means; the grain claim rests on 14 of 14 tool pairs being agent tags and 0 of 14 resource labels",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "judgment=true per the task order: this criterion carries its evidence and NO verdict. Oracle: 3.0.0_SA_CVO at L9. This worker writes no PASS or FAIL on it.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "TWO RED MUTANTS, both EXECUTED inside .tools/tests/test_os9_cochange_source.py against temp copies of the runner, never against the tracked file. (1) THE ONE THE CRITERION NAMES: the seam branch removed from _stratum_cochange so a configured prefix is ignored and the host-git path is restored. (2) The FWD-6 declaration emptied AT ITS DEFINITION (COCHANGE_STANDS_IN_FOR), which kills every carrier at once.",
+   "expected": "(1) with a valid artifact present and a prefix configured, the artifact's sentinel row must become unreachable, so arm A's provenance assertion fails. (2) the declaration must disappear from BOTH rendered host exits, so arms D2a and D2b both fail.",
+   "observed": "(1) FIRED: status=INSTRUMENT_FAILED, rows=0, sentinel_present=False -- the mutant reaches the host path, which fails on the battery's nonexistent repo, and the artifact is never read. (2) FIRED: mutant constant='' and 'declaration still in failed-exit=False computed-exit=False'.\nTHE SECOND MUTANT WAS WRONG ON ITS FIRST WRITING AND IS REPORTED AS SUCH (NFRA_OUTSET-W2-S17): it originally replaced ONE USE SITE -- the computed exit's denominator f-string -- while a SECOND live carrier existed on the git-FAILED exit, and the arm exercised the exit the mutant did not touch. It reported PASS while the declaration was still rendering. A mutant applied at a USE SITE is only as wide as that site; applied at the DEFINITION it covers every use. Corrected before this instance was written.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the battery was run at BOTH required file grains after the final source state -- directly under python and under 'python -m pytest -q' -- and the OS-s-10 contract battery, which grades the SAME runner file from the producer side, was run as an independent instrument on the same bytes.",
+   "observed": "16 of 16 arms PASS directly (rc 0) and '1 passed in 4.10s' under pytest -- same verdicts, different runner. test_os10_seam.py: 12/12 PASS rc 0, unchanged by this cell's edit. Arms A-D are fully deterministic (a tempfile directory, an injected loader and a frozen NOW of 2026-09-05T12:00:00Z, so the staleness and future-dating arms cannot drift with wall clock). Arm E reads the LIVE repo and is therefore the one arm whose numbers move between runs; it asserts a SHAPE (grain in {type,serial}, short upper-case tags, no path separators in any pair) rather than a count, so a changing corpus cannot flip it.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "registering a resource-grain co-change producer in SEAM_PRODUCERS",
+   "reason": "org/modules/heatmap/outset_seam.py is outside this order's <paths>. It holds exactly two producers at 8c231d47bf, both comp-heat, so nothing publishes <prefix>/comp_cochange.json and the seam branch this cell adds is DORMANT by construction. That is the real retirement path and it is carried as NFRA_OUTSET-W2-S15, not worked around."
+  },
+  {
+   "item": "adding a --grain resource mode to .tools/comp-cochange",
+   "reason": "a SECOND IMPLEMENTATION, which this order's BOUNDS forbid, and the tool is outside <paths>. It is also the wrong shape of fix: the seam exists precisely so the host does not grow tool logic."
+  },
+  {
+   "item": "deleting the host co-change computation outright",
+   "reason": "it is the only thing measuring this question today. Deleting it would remove the measurement; swapping in the differently-grained tool would answer a different question under the same heading. FWD-6's declaration clause is the third option and the one this cell took."
+  },
+  {
+   "item": "any IAM change for the seam prefix",
+   "reason": "the applied estate-report-runner-role grants s3:GetObject on opal-estate-report/{daily/*,code/*,manifest/*} plus one exact key and nothing on the globgrph bucket. This cell adds a SECOND key under the SAME prefix OS-s-10 already reads, so it inherits that gap exactly and widens nothing. Already carried as NFRA_OUTSET-W1-S19; cited rather than restated as new."
+  },
+  {
+   "item": "setting a default value for ESTATE_OUTSET_SEAM_PREFIX",
+   "reason": "a default would point the runner at a prefix nobody publishes to, converting a quiet INSTRUMENT_UNAVAILABLE into a daily INSTRUMENT_FAILED. Production stays byte-unchanged: the prefix is unset, so every production run takes the host branch exactly as before, now carrying its declaration."
+  }
+ ],
+ "surprises": [
+  "NFRA_OUTSET-W2-S14: the cell's premise is half true -- _stratum_cochange is host-computed with 0 tool calls, but there is NO TOOL AT THIS GRAIN to retire it in favour of. It pairs resource/pipeline-chain labels; .tools/comp-cochange answers agent-type co-movement (--grain {type,serial}, live run: agent tags, 0 resource labels). Substituting it would answer a different question under the same heading. ARMED: the obvious later 'completion' is exactly that substitution, and nothing in the report would look broken.",
+  "NFRA_OUTSET-W2-S15: the seam branch this cell built is DORMANT BY CONSTRUCTION -- nothing publishes comp_cochange.json (SEAM_PRODUCERS holds two comp-heat entries; outset_seam.py is outside <paths>), and the runner's applied role grants nothing on a seam prefix (W1-S19, inherited not introduced). O9-AC1 is a CONTRACT test against an injected artifact, never a live end-to-end read on this fabric, and 16 green arms are not a live seam.",
+  "NFRA_OUTSET-W2-S16: line-citation drift -- :1308 is correct but :1996 is a bare '#' at HEAD; the wiring is :2149 (:2221 after this change). A bare line number is a pointer into a moving file, and OS-s-10 moved this one by ~130 lines.",
+  "NFRA_OUTSET-W2-S17: SELF-REPORTED -- this cell's first declaration mutant left a SECOND LIVE CARRIER, so the mutant arm PASSED while the declaration was still rendering. Same family as W2-S13 from the opposite side: there a detector that could never fire, here a mutant that could never falsify. Count the carriers before trusting a mutant; mutate at the DEFINITION."
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent. The audit trail is this instance, the result deliverable at org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.9.0_WK_NFRA_OUTSET~2/report-cochange-from-the-tool.result.md, rows NFRA_OUTSET-W2-S14..W2-S17 in the project's investigation file, and the commits on branch wk-OUTSET-2 in worktree C:/tmp/wk-OUTSET-2 from base HEAD 8c231d47bf: c2854e93e7 (the runner change, the battery, four rows and the result document) and the commit carrying this instance plus the <status> flip. Never pushed by this worker; push state read with git ls-remote.",
+ "compiler_tools": [
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "timeout 120 bash .tools/commit-gate.sh infra/aws/ec2/estate-report-runner/estate_report_runner.py .tools/tests/test_os9_cochange_source.py",
+   "result": "'OK: pre-commit gate clean for 2 of 2 file(s)', rc 0. It BLOCKED on the first attempt (ruff: an unused import and an unused local in the battery); both were fixed rather than suppressed."
+  },
+  {
+   "tool": "comp-system --gate --changed (BOTH arms, deliberately)",
+   "invocation": "timeout 120 comp-system --gate --changed <runner> <battery>  ;  timeout 120 bash .tools/comp-system --gate --changed <runner> <battery>",
+   "result": "'NOT_APPLICABLE: ... no comp-system _SOURCE in the changeset; not a trigger-surface commit, gate open', rc 0 on BOTH arms -- this cell's pathspec matches none of the safe-commit.sh:789 triggers, so infra/system/06_current_state is untouched and was correctly NOT granted on this face. Measured rather than assumed, because the two arms are known to disagree (NFRA_OUTSET-W2-S12)."
+  },
+  {
+   "tool": ".tools/tests/test_os10_seam.py (run-only; the OTHER half's contract test)",
+   "invocation": "timeout 120 python .tools/tests/test_os10_seam.py",
+   "result": "'OS10-SEAM BATTERY: 12/12 PASS (denominator 12; 0 AWS calls, 0 network)', rc 0 -- an INDEPENDENT instrument on the same runner file, from the producer side."
+  },
+  {
+   "tool": "org/modules/graph/comp_cochange.py (the tool under question, run directly)",
+   "invocation": "timeout 120 python org/modules/graph/comp_cochange.py matrix --since '14 days ago' --json",
+   "result": "rc 0 in 1.3 s; grain='type', active_tags ['AB','AE','BG','DE','DS','DT','SA','WK'], 14 agent-tag pairs, 0 resource labels. This is the measurement the FWD-6 declaration rests on. Run under sys.executable rather than the bash shim: an earlier attempt with 'python .tools/comp-cochange' hit the same extensionless-shim class this worker filed as NFRA_OUTSET-W2-S2 (here surfacing as a python SyntaxError on a bash script rather than WinError 193)."
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.9.0_WK_NFRA_OUTSET~2/NFRA_OUTSET.TO-OS-s-9.report-cochange-from-the-tool.proof_of_spec.json O9-AC1,O9-AC2",
+   "result": "see the WORKER REPORT. The checker grades the INSTANCE, not the criteria: rc=0 is a precondition for the flip, never a licence for it."
+  }
+ ]
+}
