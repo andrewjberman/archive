@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-6",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~2",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/prd/ETFS_GUARDRAIL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4e30d6b635bb01dbeeb0fc16605bdd61a44dffbc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "5376ecaa8bdbf0f775cb347c2ba849bfba67afb9",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-6.the-pre-publish-gate-inside-the-renderer.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/the-pre-publish-gate-inside-the-renderer.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/presentation/render_month_end.py",
+      "kind": "script",
+      "commit_or_etag": "7cd25f5998",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "renderer_artifact_served_vs_local.py VERDICT: MATCH 6 of 6 -- served ETag == local md5 for ec2/etfs-reports/render_month_end.py (and the 5 coverage-package files)."
+    },
+    {
+      "path_or_key": "data/etfs/scripts/presentation/tests/test_coverage_gate.py",
+      "kind": "test",
+      "commit_or_etag": "7cd25f5998",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local pytest battery, never packaged/uploaded."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/renderer_artifact_served_vs_local.py",
+      "kind": "script",
+      "commit_or_etag": "4cc172fe3d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A read-only S6-AC6 verification script (boto3 head_object x6 + local file reads); no write call anywhere in the module."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/the-pre-publish-gate-inside-the-renderer.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The deliverable document itself."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260905T0644Z_etfs-guardrail-eg-s-6-renderer-artifact-upload_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "4cc172fe3d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The change-management ledger entry -- CLOSED (deploy_ledger.py close, 'all 1 legs proven'), not merely committed. org/critical_paths/.open_deploys/etfs-guardrail-eg-s-6-renderer-artifact-upload.json deleted in the same commit."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "7cd25f5998",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row ETFS_GUARDRAIL-W2-S6 landed in the source-commit 7cd25f5998, not this instance's own commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S6-AC1",
+      "criterion_verbatim": "the six-arm battery is green (record N passed).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/etfs/scripts/presentation/tests/test_coverage_gate.py -q",
+      "output_evidence": "......  [100%]\n6 passed in 1.38s",
+      "denominator": "6 of 6 arms passed (a-f).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC2",
+      "criterion_verbatim": "property 3, first half: August 2026 AS IT STOOD BEFORE THE 09-01 REPAIR (the five real holes removed in memory) is REFUSED and exactly five holes are named (the probe here answers from the deployed producers' probe mode for those five dates; record rc=3 beside the line).",
+      "method": "command",
+      "invocation": "python data/etfs/scripts/presentation/render_month_end.py --month 2026-08 --out .scratch/eg_s6_pre_repair.html --gate --no-ladder --fixture-remove cottonwood:2026-08-04,2026-08-18,2026-08-20,2026-08-21,2026-08-31; echo rc=$?",
+      "output_evidence": "OK: 2026-08 -> .scratch/eg_s6_pre_repair.html\nOK: CSV -> .../opaletfs_49financial_202608.csv\nOK: CSV -> .../opaletfs_inflection_202608.csv\nOK: CSV -> .../opaletfs_cottonwood_202608.csv\nVERDICT: REFUSE holes=5\nrc=3",
+      "denominator": "5 of 5 removed cottonwood dates classified C via a live probe invoke of cot-etf-ownership-daily each (5 real lambda:InvokeFunction calls).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC3",
+      "criterion_verbatim": "property 3, second half: August as it stands now PUBLISHES (rc=0; no --s3-out, so nothing is uploaded by this QA run).",
+      "method": "command",
+      "invocation": "python data/etfs/scripts/presentation/render_month_end.py --month 2026-08 --out .scratch/eg_s6_now.html --gate --no-ladder; echo rc=$?",
+      "output_evidence": "OK: 2026-08 -> .scratch/s6_now/eg_s6_now.html\n...\nVERDICT: PUBLISH holes=0\nrc=0",
+      "denominator": "0 of 63 possible partner-days probed (all 3 partners x 21 trading days already COVERED); 0 uploads (no --s3-out).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC4",
+      "criterion_verbatim": "the refused deck still carries every partner's coverage line (property 6 on the REFUSE path).",
+      "method": "command",
+      "invocation": "python -c \"h=open('.scratch/eg_s6_pre_repair.html',encoding='utf-8').read(); print('COVERAGE_LINES_ON_REFUSE=%d' % h.count('trading days;'))\"",
+      "output_evidence": "COVERAGE_LINES_ON_REFUSE=3",
+      "denominator": "3 of 3 present partners carry a coverage line on the REFUSE path.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC5",
+      "criterion_verbatim": "the commit gate is clean.",
+      "method": "command",
+      "invocation": "bash .tools/commit-gate.sh data/etfs/scripts/presentation/render_month_end.py data/etfs/scripts/presentation/tests/test_coverage_gate.py",
+      "output_evidence": "All checks passed! / OK: no unguarded strict-utf8 log reads. / OK: pre-commit gate clean for 2 of 2 file(s)",
+      "denominator": "2 of 2 files clean.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC6",
+      "criterion_verbatim": "the uploaded artifacts (the renderer + the three committed package files + the two build-time copies taken from lib/ and data/inf/scripts/silver/) match their local sources by head-object ETag/md5, 6 of 6; your script prints each pair and one verdict line.",
+      "method": "command",
+      "invocation": "python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/renderer_artifact_served_vs_local.py",
+      "output_evidence": "PAIR ec2/etfs-reports/render_month_end.py ... MATCH\nPAIR ec2/etfs-reports/coverage/__init__.py ... MATCH\nPAIR ec2/etfs-reports/coverage/classifier.py ... MATCH\nPAIR ec2/etfs-reports/coverage/remediate.py ... MATCH\nPAIR ec2/etfs-reports/coverage/trading_calendar.py ... MATCH\nPAIR ec2/etfs-reports/coverage/_orion_vendor_asof.py ... MATCH\nVERDICT: MATCH 6 of 6",
+      "denominator": "6 of 6 pairs matched.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC7",
+      "criterion_verbatim": "the coverage package is at the box's pull prefix.",
+      "method": "command",
+      "invocation": ".tools/aws s3api list-objects-v2 --bucket opal-313476888478-lambda-artifacts --prefix ec2/etfs-reports/coverage/ --query \"Contents[].Key\" --output text",
+      "output_evidence": "ec2/etfs-reports/coverage/__init__.py\tec2/etfs-reports/coverage/_orion_vendor_asof.py\tec2/etfs-reports/coverage/classifier.py\tec2/etfs-reports/coverage/remediate.py\tec2/etfs-reports/coverage/trading_calendar.py",
+      "denominator": "5 of 5 coverage-dir files present, including classifier.py.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC8",
+      "criterion_verbatim": "graded by the CVO at L9: the gate is a render precondition and not a standing service; catch-up runs before the gate (the ports landed first; the ladder runs inside it); a REFUSE writes no report at the publish key and surfaces on the existing topic through the orchestrator's existing branches; B is never a hole; FWD-2's EXERCISED grade (\"has actually refused a month, and the refusal reached a person\") is a real refusal on a scheduled fire, which this order rehearses on a fixture and does not manufacture. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "the-pre-publish-gate-inside-the-renderer.result.md s.2 (S6-AC8 subsection); render_month_end.py:890-949 (coverage_gate), infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py:310-314 (the existing FAILED-status alert branch, read not edited)",
+      "output_evidence": "coverage_gate is one function called once per --gate invocation, no state, no schedule of its own. Catch-up (EG-s-1/EG-s-2's ports) runs on the producers' own schedules, independent of this renderer. Ladder (rungs 0-2) runs inside the gate via remediate.remediate_month; rung 3 (EG-sb-7's ask) fires from inside remediate_month when applicable. A REFUSE writes no etf_ownership.pdf (test_d asserts this on the stub S3's recorded keys) and sys.exit(3) makes the SSM command status Failed, which the orchestrator's OWN existing branch at :310-314 already alerts on -- no orchestrator edit made. B is excluded from both the holes list (:937) and the verdict gate (:938, if summary['C'] > 0) by construction. FWD-2's EXERCISED bar is rehearsed on the pre-09-01-repair fixture (S6-AC2), never manufactured as a live refusal by this order.",
+      "denominator": "N/A -- judgment criterion, no PASS/FAIL computed here.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true: graded by 3.0.0_SA_CVO at L9 against the result document, not self-graded here.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "coverage_gate's verdict is load-bearing on `if summary[\"C\"] > 0: any_c = True` (line 938) -- the ONE condition that turns a real C-class hole into a REFUSE. Mutated ONLY via an in-process exec of a PATCHED SOURCE STRING (never touching the file on disk): the condition replaced with `if False:` in a throwaway module object (sys.modules['rme_mutant']), leaving every other line, including the classification logic that PRODUCES the C-class holes, untouched.",
+      "expected": "If the condition genuinely gates the verdict, the mutant must report the SAME hole count (5, since classification is unaffected) but a DIFFERENT verdict (PUBLISH instead of REFUSE); a vacuous/dead condition would report REFUSE regardless.",
+      "observed": "REAL RUN: verdict=REFUSE holes=5. MUTANT RUN: verdict=PUBLISH holes=5 -- the hole count held exactly steady while the verdict flipped, proving the condition is genuinely load-bearing and not vacuous. Scratch script deleted after the control (git status confirms absent/untracked).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "S6-AC1's exact invocation (python -m pytest test_coverage_gate.py -q) run twice in immediate succession, unmodified between runs.",
+      "observed": "RUN1: '6 passed in 1.43s'. RUN2: '6 passed in 1.41s'. Same pass count (6 of 6) both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Editing the orchestrator (infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py) to add --gate to _render_command.",
+      "reason": "TO BOUNDS: 'The orchestrator (EG-s-8), the coverage package (EG-s-4/EG-s-7) and the producers are other cells: you IMPORT and INVOKE, you do not edit them.' EG-s-8 (slot 1's cell) is the one that wires --gate into _render_command; this order only makes render_month_end.py ACCEPT --gate correctly, verified locally."
+    },
+    {
+      "item": "Editing data/etfs/scripts/coverage/ (classifier.py, remediate.py) or the three producers.",
+      "reason": "TO BOUNDS, same clause. Confirmed: git diff --stat HEAD -- data/etfs/scripts/coverage/ is empty; no producer source file was touched."
+    },
+    {
+      "item": "A genuine live refusal on a real scheduled fire (FWD-2's own EXERCISED bar).",
+      "reason": "TO's own S6-AC8 text: 'which this order rehearses on a fixture and does not manufacture.' The 10-01 scheduled fire is the eventual EXERCISED read; this order proves the mechanism and lands the artifact."
+    }
+  ],
+  "surprises": [
+    "ETFS_GUARDRAIL-W2-S6: TO-EG-s-6's coverage_gate design invokes each non-covered day's producer with {\"date\": d, \"probe\": true} for classification -- but inf-etf-ownership-daily (Inflection's producer) has NO probe-key handling at all (EG-s-1/EG-s-2 added probe mode to cot/bd-49f only, never to inf, a VERIFY-only PORT SOURCE per EG-s-3), so such an invoke against a REAL Inflection hole would fall through to inf's ordinary explicit-date path and WRITE A REAL SLICE, not \"writes nothing\" as this order's own BOUNDS require. Mitigated by never invoking Inflection for classification at all (a partner allowlist, cottonwood+49financial only, _PROBE_CAPABLE_PARTNERS); Inflection's non-covered days always classify UNKNOWN with zero invokes. OBSERVATION/ARMED, disarm_owner 2.0.0_SA_COO~B. Not triggered by this order's own live criteria (current August has zero Inflection holes)."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/etfs/scripts/presentation/tests/test_coverage_gate.py -q (x2, determinism); python -m pytest data/etfs/scripts/presentation/tests/ -q (all 15, sanity)",
+      "result": "6 passed both determinism runs, rc=0; 15 of 15 sibling+own tests pass together, rc=0"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "py_compile.compile() on all 6 upload files",
+      "result": "All 6 files pass py_compile."
+    },
+    {
+      "tool": "boto3 (via renderer_artifact_served_vs_local.py) + .tools/aws s3 cp / s3api list-objects-v2",
+      "invocation": "6x s3 cp (upload); 6x head-object (verify, via boto3); 1x s3api list-objects-v2",
+      "result": "6 of 6 uploads rc=0; VERDICT: MATCH 6 of 6; coverage/ prefix lists 5 of 5 files"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open --leg \"s3-code|activation|...\" ; close-leg --leg-id s3-code --proof ... ; close",
+      "result": "opened 1 leg, closed with proof, entry CLOSED (sentinel removed)"
+    }
+  ]
+}
