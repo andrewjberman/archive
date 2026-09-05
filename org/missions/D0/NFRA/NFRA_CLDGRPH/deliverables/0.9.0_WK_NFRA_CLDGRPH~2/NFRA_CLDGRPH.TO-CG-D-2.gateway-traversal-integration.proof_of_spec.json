@@ -1,0 +1,352 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CLDGRPH.TO-CG-D-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/prd/NFRA_CLDGRPH_PRD.md",
+    "group": "D",
+    "vintage_commit": "25c66d3358"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+    "vintage_commit": "70918d5d2b",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-D-2.gateway-traversal-integration.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_CLDGRPH~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/deploy-to-ec2.sh",
+      "kind": "script",
+      "commit_or_etag": "03b1cb0f7d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The ONE line this seat changed: the .env printf's ENABLED_INTEGRATIONS value goes from 'ycharts opal_portal' to 'ycharts opal_portal globgrph' under the CTO's SIGNED G8 (94158). Executed on the box via safe-ec2-deploy.sh 2026-09-04T12:52:42Z; the box's own .env now reads ENABLED_INTEGRATIONS=ycharts opal_portal globgrph (SSM read, not the wrapper rc) and the startup integration report lists globgrph with exactly ['graph_cypher','graph_status'].",
+      "artifact_covered_by": [
+        "D2-AC5",
+        "D2-AC7"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/graph-read.tf",
+      "kind": "terraform",
+      "commit_or_etag": "4c3999de4a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "APPLIED 2026-09-04 via safe-apply.sh on a targeted plan ('Plan: 2 to add, 0 to change, 0 to destroy'; apply 'Resources: 2 added, 0 changed, 0 destroyed'). Verified on the APPLIED plane, not from the apply output: aws iam get-role-policy --role-name opal-gateway-role --policy-name opal-gateway-graph-read-secret-read returns ONE statement, secretsmanager:GetSecretValue on arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/mcp/graph-read-token-MGAqlV, and nothing on any globgrph S3/ECS resource. Confirmed at the reopen to be in the data-source shape (no random_password / no aws_secretsmanager_secret_version), so no secret value enters TF state.",
+      "artifact_covered_by": [
+        "D2-AC6"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/alb.tf",
+      "kind": "terraform",
+      "commit_or_etag": "4c3999de4a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws_lb_listener_rule.graph_capability APPLIED in the same targeted apply; live elbv2 describe-rules on the HTTPS listener shows priority 32 = ['/graph/cypher','/graph/health'] with 10/20/30/31/default unchanged. The lifecycle ignore_changes=[access_logs] guard on aws_lb.gw (row W2-S2) is KEPT unmodified per the CTO's G8 condition, and the apply's '0 changed' is the evidence it did its job.",
+      "artifact_covered_by": [
+        "D2-AC3",
+        "D2-AC4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "480ffaf58e",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Written by safe-ec2-deploy.sh itself and self-committed: deployed_commit 03b1cb0f7d7fd08984a9845ba53fe7a766bb52d5, deployed_by 0.9.0_WK_NFRA_CLDGRPH~2, deployed_at 2026-09-04T12:52:42Z.",
+      "artifact_covered_by": [
+        "D2-AC7"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/globgrph/integration.py",
+      "kind": "script",
+      "commit_or_etag": "4c3999de4a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Built by the predecessor in this slot, unmodified by this seat, now RUNNING on i-07dccb1615503ac99: the deployed process's startup report reads globgrph -> tools ['graph_cypher','graph_status'], auth_kind 'none', read_only True, min_tier 'read_only', hosts ['projection.opal-globgrph.local'], secret_id None.",
+      "artifact_covered_by": [
+        "D2-AC1",
+        "D2-AC8"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/globgrph/__init__.py",
+      "kind": "script",
+      "commit_or_etag": "4c3999de4a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Package init only; exports GlobgrphIntegration. On the box in the same artifact as the deploy above.",
+      "artifact_covered_by": [
+        "D2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/registry.py",
+      "kind": "script",
+      "commit_or_etag": "4c3999de4a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Checklist step 2: one register_factory('globgrph', GlobgrphIntegration) line at the pre-written slot. Proven live by the deployed process registering exactly two graph_ tools when and only when the id is in ENABLED_INTEGRATIONS (0 tools before this deploy, 2 after).",
+      "artifact_covered_by": [
+        "D2-AC5",
+        "D2-AC8"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/graph_read.py",
+      "kind": "script",
+      "commit_or_etag": "4c3999de4a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The static-capability-bearer gate for /graph/*. Live: /graph/health on the box returns 401 without a bearer and 200 with the bearer from /opt/opal-gateway/.env; before this deploy the same path returned 404.",
+      "artifact_covered_by": [
+        "D2-AC3",
+        "D2-AC4",
+        "D2-AC8"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+      "kind": "script",
+      "commit_or_etag": "4c3999de4a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The two routes POST /graph/cypher and GET /graph/health beside /ms/*. On-box md5 after the deploy: 56cdab4f54595eca69680c25608b6d0f. /mcp unauth still 401 (unchanged hard gate).",
+      "artifact_covered_by": [
+        "D2-AC3",
+        "D2-AC4",
+        "D2-AC8"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/config.py",
+      "kind": "script",
+      "commit_or_etag": "4c3999de4a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "GRAPH_READ_BEARER read from os.environ exactly as MS_INGEST_BEARER is. Live: the box's .env carries exactly 1 GRAPH_READ_BEARER line (grep -c) and the bearer path answers 200, so the value is being read.",
+      "artifact_covered_by": [
+        "D2-AC8"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260904T0803Z_cldgrph-cgd2-gateway-graph-path_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The NEVER-2 ledger entry, CLOSED with all six legs carrying proof (L3 the targeted apply + live IAM/ALB reads, L4 the deploy + on-box md5/unit/argv, L5 the exercise + the negative control, L6 the unscoped-plan address assertion). Its own Status line reads '**Status:** CLOSED -- nothing stranded -- closed 20260904T131003Z'.",
+      "artifact_covered_by": [
+        "D2-AC9"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-s-5.gateway-traversal.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The deliverable, rewritten for the reopened order: the apply, the enablement, the deploy, the box-verify quoted whole, the exercise, the G1-G8 arch-gate record with G8's signature quoted verbatim from 94158, and the framework-diff reading.",
+      "artifact_covered_by": [
+        "D2-AC10"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three new rows appended (W2-S8, W2-S9, W2-S10) and the header denominator restated 47 -> 50, counted in-process by parsing every fenced json array in the file rather than by eye. No existing row edited.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D2-AC1",
+      "criterion_verbatim": "D2-AC1 -- THE SPEC VALIDATES.",
+      "method": "command",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -c \"from app.integrations.globgrph.integration import GlobgrphIntegration; from app.integrations.base import validate_integration_spec; print('VALIDATE', validate_integration_spec(GlobgrphIntegration().spec))\"",
+      "output_evidence": "VALIDATE []\nrc=0",
+      "denominator": "1 spec validated against the validator's 5 axes (min_tier known / mutating-needs-elevated-tier / hosts non-empty / tool_prefix non-empty / SHARED_SECRET-needs-secret_id); 0 violations returned. Mutated twice this session on the same real spec (hosts=(), read_only=False), each returning exactly its own one violation.",
+      "status": "PASS",
+      "expect": "VALIDATE \\[\\]"
+    },
+    {
+      "criterion_id": "D2-AC2",
+      "criterion_verbatim": "D2-AC2 -- THE FRAMEWORK IS NOT MODIFIED (hashed through `git show`, never the worktree path).",
+      "method": "command",
+      "invocation": "git show HEAD:infra/aws/ec2/opal-gateway/app/integrations/base.py | sha256sum | cut -d' ' -f1",
+      "output_evidence": "718246435530d59e853ed7dca99791d59e1b629e2df516b6a98c3146902cf616\nrc=0",
+      "denominator": "1 framework file hashed at HEAD (480ffaf58e) and equal to the value measured at the cut; corroborated by git diff --name-only 5644fee152..HEAD -- infra/aws/ec2/opal-gateway/app/ returning 6 files, 0 of them base.py / tools.py / guard.py / tier.py / audit.py",
+      "status": "PASS",
+      "expect": "718246435530d59e853ed7dca99791d59e1b629e2df516b6a98c3146902cf616"
+    },
+    {
+      "criterion_id": "D2-AC3",
+      "criterion_verbatim": "D2-AC3 -- A NON-GATEWAY SEAT GETS THE SERVICE'S ANSWER THROUGH THE GATEWAY: rows AND the vintage.",
+      "method": "command",
+      "invocation": "bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/graph_query.sh",
+      "output_evidence": "SEAT: Andrew (NOT the gateway host i-07dccb1615503ac99, NOT in the VPC)\nPOST https://mcp.opalinvest.dev/graph/cypher\nSTATEMENT: MATCH (n) RETURN count(n) AS nodes\n--- response ---\n{\"rows\":[{\"nodes\":27276}],\"vintage\":\"2026-09-04T12:48:00.440101+00:00\",\"age_line\":\"Built from the estate as of 2026-09-04 12:48:00 UTC.\",\"manifest_sha256\":\"7b3d6fd93e7b56c93c2db9e1469582e664cbd3298e2f1c1fc00a4a82716f09e7\",\"artifact_prefix\":\"projection/2026-09-04T12:48:00.440101+00:00/\"}\nHTTP_STATUS:200\ncurl rc=0",
+      "denominator": "1 traversal from 1 seat that is provably not the host and not in the VPC (hostname Andrew; the in-VPC service name projection.opal-globgrph.local:8181 is unreachable from it); the response carries all 4 of the service's own stamps (vintage, age_line, manifest_sha256, artifact_prefix), none invented by the seat. Re-run once: same shape, vintage moved 12:48:00 -> 12:55:59 and nodes 27276 -> 27206 (the projection rebuilt), which is also the evidence the gateway caches nothing.",
+      "status": "PASS",
+      "expect": "\"rows\":\\s*\\[\\{\"nodes\":\\s*[1-9][0-9]*\\}\\].*\"vintage\":\\s*\"20[0-9]{2}-"
+    },
+    {
+      "criterion_id": "D2-AC4",
+      "criterion_verbatim": "D2-AC4 -- NO BEARER, NO ANSWER: 401 (the fail-closed control).",
+      "method": "command",
+      "invocation": "curl -sS -m 20 -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: text/plain' --data 'MATCH (n) RETURN count(n) AS nodes' https://mcp.opalinvest.dev/graph/cypher",
+      "output_evidence": "401\ncurl rc=0 (exit 0; the transport succeeded and the SERVER answered 401 -- this is not a connection failure rendered as a number)\nrun twice, 401 both times\nSAME CALL, PREDECESSOR'S SESSION, BEFORE the listener rule existed: 302 (the ALB's authenticate-oidc default action; the request never reached the gateway app)\nCORROBORATION ON THE BOX (SSM): GRAPH-HEALTH-NOBEARER: 401, and the same path answered 404 before this deploy",
+      "denominator": "1 unauthenticated request, run twice (401, 401). DISCRIMINATING: the predecessor's identical call read 302 before the listener rule existed (the ALB's authenticate-oidc default), so 401 is the APP refusing a request the ALB now forwards -- the two failure modes are distinguishable and the control can therefore fail. Corroborated on the box: localhost:8080/graph/health without a bearer = 401, and = 404 before this deploy.",
+      "status": "PASS",
+      "expect": "^401$"
+    },
+    {
+      "criterion_id": "D2-AC5",
+      "criterion_verbatim": "D2-AC5 -- THE MCP INTEGRATION IS ENABLED BY THE SIGNED GATE: the deploy script's `ENABLED_INTEGRATIONS` value carries `globgrph` exactly once.",
+      "method": "command",
+      "invocation": "python .tools/comp-read infra/aws/ec2/opal-gateway/deploy-to-ec2.sh --enumerate 'ENABLED_INTEGRATIONS=ycharts opal_portal globgrph' --limit 3",
+      "output_evidence": "ENUMERATE: 1 hit(s) across 241 lines / 31 section(s) scanned\n  whole-value matches: 0   |   substring matches: 1\n  PAGE 1 of 1  (showing 1 of 1)\n     170  UNBANDED    SUB    hit 1/1 printf 'MOCK_GRAPH=0\\n...\\nENABLED_INTEGRATIONS=ycharts opal_portal globgrph\\n' ...",
+      "denominator": "1 hit across 241 lines / 31 sections scanned -- exactly one occurrence, and it is the .env printf itself (the rewritten comment block above it deliberately does not repeat the literal string, so the count is not inflated by prose). Substring rather than whole-value because the string sits inside the printf's format literal.",
+      "status": "PASS",
+      "expect": "ENUMERATE: 1 hit\\(s\\)"
+    },
+    {
+      "criterion_id": "D2-AC6",
+      "criterion_verbatim": "D2-AC6 -- THE ONE NEW GRANT IS APPLIED: the gateway role carries the inline policy for the graph-read secret.",
+      "method": "live_read",
+      "invocation": ".tools/aws iam list-role-policies --role-name opal-gateway-role --output text",
+      "output_evidence": "POLICYNAMES\topal-gateway-assume-emp-roles\nPOLICYNAMES\topal-gateway-audit-lake-write\nPOLICYNAMES\topal-gateway-daily-reports-read\nPOLICYNAMES\topal-gateway-golive\nPOLICYNAMES\topal-gateway-graph-read-secret-read\nPOLICYNAMES\topal-gateway-opal-portal-secret-read\nPOLICYNAMES\topal-gateway-queryv0-portal-read\nPOLICYNAMES\topal-gateway-ycharts-secret-read",
+      "denominator": "8 inline policies on opal-gateway-role, 1 of them the graph grant (it was 7 with 0 matching 'graph' at the predecessor's read, so the applied delta is exactly one). get-role-policy on that name returns ONE statement: secretsmanager:GetSecretValue on arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/mcp/graph-read-token-MGAqlV, Sid GraphReadCapabilityBearerRead -- and nothing on any globgrph S3 bucket, ECS or service-discovery resource (the R3 control).",
+      "status": "PASS",
+      "expect": "graph"
+    },
+    {
+      "criterion_id": "D2-AC7",
+      "criterion_verbatim": "D2-AC7 -- `--workers 1` UNTOUCHED on the deployed box, re-run AFTER the deploy.",
+      "method": "live_read",
+      "invocation": "bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/box_workers.sh",
+      "output_evidence": "SSM Status: Success\n--- StandardOutputContent (verbatim) ---\nPROBE-1 the ps -C python3.11 form the TO names:\nCOMMAND\nPROBE-2 the RUNNING argv of the unit MainPID:\nMainPID=552785\n/opt/opal-gateway/.venv/bin/python3.11 /opt/opal-gateway/.venv/bin/uvicorn app.server:app --host 0.0.0.0 --port 8080 --workers 1\nPROBE-3 unit state:\nactive",
+      "denominator": "1 running process on i-07dccb1615503ac99, resolved by the unit's own MainPID (552785) rather than by name -- row W2-S6 recorded that `ps -o args -C python3.11` returns only its header on this box, and PROBE-1 above reproduces that empty read as the negative control beside the positive one. Read AFTER the 12:52:42Z deploy restarted the unit.",
+      "status": "PASS",
+      "expect": "--workers 1"
+    },
+    {
+      "criterion_id": "D2-AC8",
+      "criterion_verbatim": "D2-AC8 -- COMMIT GATE clean on every `.py` this order touches.",
+      "method": "command",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/integrations/globgrph/integration.py infra/aws/ec2/opal-gateway/app/graph_read.py infra/aws/ec2/opal-gateway/app/server.py infra/aws/ec2/opal-gateway/app/integrations/registry.py infra/aws/ec2/opal-gateway/app/config.py",
+      "output_evidence": "OK: no unguarded strict-utf8 log reads.\nAll checks passed!\nOK: pre-commit gate clean for 5 of 5 file(s)",
+      "denominator": "5 of 5 .py files checked (py_compile + ds-precommit + ruff py39); 0 violations. terraform fmt -check on both touched .tf files returned rc 0 in the same pass.",
+      "status": "PASS",
+      "expect": "pre-commit gate clean"
+    },
+    {
+      "criterion_id": "D2-AC9",
+      "criterion_verbatim": "D2-AC9 -- THE LEDGER CLOSED with every leg proven, read from the entry's own Status line; the sentinel's state committed with it.",
+      "method": "command",
+      "invocation": "grep -c '^\\*\\*Status:\\*\\* CLOSED' org/critical_paths/change_management/20260904T0803Z_cldgrph-cgd2-gateway-graph-path_deploy_completion.md",
+      "output_evidence": "1\nrc=0\nTHE LINE THAT COUNT COMES FROM, read back verbatim from the entry:\n**Status:** CLOSED -- nothing stranded -- closed 20260904T131003Z\nTHE CLOSER THAT WROTE IT: python .tools/deploy_ledger.py close --slug cldgrph-cgd2-gateway-graph-path ->\nOK: CLOSED deploy ledger 'cldgrph-cgd2-gateway-graph-path' -- all 6 legs proven; sentinel removed; entry: org/critical_paths/change_management/20260904T0803Z_cldgrph-cgd2-gateway-graph-path_deploy_completion.md\nBEFORE (predecessor's read of the same slug): OPEN: cldgrph-cgd2-gateway-graph-path ... stranded=['L3','L4','L5','L6']",
+      "denominator": "1 Status line in 1 ledger entry; the entry reads '**Status:** CLOSED -- nothing stranded -- closed 20260904T131003Z'. All 6 legs carry proof (L1 commit, L2 secret, L3 apply, L4 deploy, L5 exercise, L6 unscoped-plan address assertion); deploy_ledger.py close refuses if any leg is unproven, and it returned 'OK: CLOSED ... all 6 legs proven; sentinel removed'. SENTINEL: it was present but UNTRACKED in this worktree (git ls-files empty for that path, though 5 sibling sentinels are tracked -- row W2-S7) and close removed it, so the closure travels in the entry .md and there is no sentinel byte left to commit.",
+      "status": "PASS",
+      "expect": "^1$"
+    },
+    {
+      "criterion_id": "D2-AC10",
+      "criterion_verbatim": "D2-AC10 -- THE ARCH-GATE RECORD G1-G8 with its grounding (G8 quoting 94158), and the framework DIFF read as \"the 5-step checklist only\" with the capability path placed inside or beside it, the `/ms/*` precedent cited. NO verdict; graded by 3.0.0_SA_CVO at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "read: org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-s-5.gateway-traversal.result.md section 5 (the G1-G8 table, G8's six conditions each against evidence, and the framework-diff reading), grounded on git diff --stat 5644fee152..HEAD, docs/architecture/NFRA_INTEGRATIONS_STANDARD.md:151-182, app/server.py:462-517 (/otp/*) and :526-582 (/ms/*), alb.tf:219-234 + ms-ingest.tf:129-145, and 1.0.0_SA_CTO Msg-ID 94158 (20260904T094459Z) read at org/mcp/inbox/2.0.0_SA_COO/~A/read/",
+      "output_evidence": "G1 GROUNDED (validator [] + read_only=True on the live box report + no write verb on the proxy); G2 GROUNDED-LIVE (hosts = exactly ['projection.opal-globgrph.local'], read off the deployed process); G3 GROUNDED-LIVE (the deployed startup report: globgrph -> tools ['graph_cypher','graph_status'], exactly two); G4 GROUNDED-APPLIED (live get-role-policy: one statement, GetSecretValue on the one secret ARN, nothing on globgrph S3/ECS) -- was HOLD; G5 N/A-BY-CONSTRUCTION (min_tier=read_only IS the floor, so no caller can be below it; the tier is still resolved and audit-stamped); G6 PARTIAL (run_integration_tool audits on all three branches and the tools are live-registered, but audit.jsonl holds 41,489 records and 0 containing 'graph_' -- the only audited run-path is an MCP tool call behind ALB authenticate-oidc, and /graph/* is audit-silent by construction as /ms/* and /otp/* are; row W2-S8); G7 GROUNDED on the DEPLOYED bytes both sides (before: .env 'ycharts opal_portal', 0 GRAPH_READ_BEARER lines, /graph/health 404; after: 'ycharts opal_portal globgrph', 1 bearer line, 2 graph_ tools, /graph/health 401-without / 200-with) -- was PARTIAL; G8 SIGNED, quoted verbatim from 94158 with all six conditions checked against this order's own evidence. FRAMEWORK DIFF: 9 files / +409 / -2 across the gateway app and its terraform; base.py, tools.py, guard.py, tier.py, audit.py absent from the diff entirely and base.py's sha256 unchanged; the integration half is the new package + one register_factory line = checklist steps 1-2, graph-read.tf = steps 3-4, deploy-to-ec2.sh = step 5. THE CAPABILITY PATH IS BESIDE THE CHECKLIST, NOT INSIDE IT: it adds ZERO MCP tools and is a second consumer of the same proxy functions, in the class the gateway already runs twice (/otp/* server.py:462-517 ALB priority 30; /ms/* server.py:526-582 ALB priority 31), each a static capability bearer validated constant-time outside the /mcp guard because a static bearer is not an RS256 JWT. THREE consequences stated for the CVO: (i) s.6 fail-closed enablement does NOT cover this path -- it went live with the code and its off switch is the bearer's absence (503) plus the ALB rule, not ENABLED_INTEGRATIONS, and the pre/post box readings show the two halves moving independently; (ii) who may hold the bearer is inherited from no precedent -- today it is 'whoever can read one Secrets Manager secret', the same answer /ms/* gives; (iii) the capability path is AUDIT-SILENT, the same answer /ms/* and /otp/* give, stated rather than assumed.",
+      "denominator": "8 of 8 arch-gate items recorded (5 GROUNDED incl. 3 on the live/applied plane, 1 N/A-BY-CONSTRUCTION, 1 PARTIAL, 1 SIGNED); G8's 6 conditions each answered against a measurement; 9 files in the diff, 0 of them framework files",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true: a reading act the task order could not reduce to an invocation and an expectation. Graded by 3.0.0_SA_CVO at L9 (spine v3). This row carries the output and NO verdict; a PASS or FAIL on it from this seat would be invalid.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec validator that decides D2-AC1 was mutated twice this session on the REAL spec via dataclasses.replace, to prove [] is a measurement rather than a validator that returns [] for everything: hosts=() and read_only=False.",
+      "expected": "each mutant returns exactly its own one violation while the unmutated spec returns []",
+      "observed": "BASELINE [] ; MUTANT-hosts-empty ['hosts allowlist is empty (egress-governance axis)'] ; MUTANT-read_only-false ['a mutating integration (read_only=False) requires an explicit elevated min_tier (> read_only) -- refusing a permissive read_only default']",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The criteria whose values could drift were re-run: D2-AC4 (the unauthenticated HTTP control) twice, and D2-AC3 (the exercise) twice. D2-AC1 and D2-AC2 are pure functions of committed bytes and were each run once per session.",
+      "observed": "D2-AC4: 401 on both runs. D2-AC3: identical SHAPE on both runs (rows + a 20xx vintage + HTTP 200) with the values moving -- nodes 27276 @ vintage 2026-09-04T12:48:00.440101+00:00, then nodes 27206 @ vintage 2026-09-04T12:55:59.236365+00:00. The drift is the projection service rebuilding between the two calls, NOT criterion instability: the criterion asserts rows-and-a-vintage, and a moving vintage is additionally the evidence that the gateway caches nothing (R3).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The SERVED audit record for one ok and one denied graph_ call, read from the box's audit.jsonl (deliverable step 8, G6's live half).",
+      "reason": "NOT PRODUCIBLE FROM THIS SEAT, measured not assumed: audit.jsonl holds 41,489 records and 0 containing 'graph_' after a successful enabling deploy, because the only run-path that calls audit.log_call is run_integration_tool on the MCP surface, and /mcp requires an ALB authenticate-oidc (Entra) session a worker subagent cannot complete; the /graph/* HTTP routes are audit-silent by construction, as /ms/* and /otp/* are. Row NFRA_CLDGRPH-W2-S8. G6 is recorded PARTIAL inside D2-AC10, which is judgment and carries no verdict from this seat."
+    },
+    {
+      "item": "Any remediation of the four drifting addresses the unscoped post-apply plan revealed (aws_instance.gw update, aws_wafv2_web_acl.gw update, aws_wafv2_ip_set.opal_blocked_ips_regional_v4/_v6 delete).",
+      "reason": "OUT OF SCOPE AND DELIBERATELY UNTOUCHED. The WAF and instance files are outside this order's <paths>, and a lifecycle guard on another lane's resource would be exactly the widening the surprise channel exists to prevent. Surfaced as row NFRA_CLDGRPH-W2-S10 (ARMED, disarm_owner 0.7.0_AE_CloudOps) and left exactly as found; this order's own two addresses read no-op in the same plan."
+    },
+    {
+      "item": "Enabling, testing or touching any integration other than globgrph, and any change to GATEWAY_WORKERS / --workers 1.",
+      "reason": "FORBIDDEN by the order and by G8's scope (94158 signs globgrph ONLY). ENABLED_INTEGRATIONS gained exactly one id; --workers 1 was measured after the deploy and is unchanged (MainPID 552785 argv)."
+    },
+    {
+      "item": "Any second deploy, any hand-edit on the box, any SSH or inline-Python delivery of code.",
+      "reason": "Rule 12 and the order's one-deploy bound. Exactly one safe-ec2-deploy.sh run was made, it succeeded, and every subsequent box interaction was a read-only SSM probe (unit state, .env grep for non-secret keys, curl to localhost, journalctl, ps by MainPID, wc/grep on audit.jsonl)."
+    },
+    {
+      "item": "Pushing any commit.",
+      "reason": "A worker never pushes. All four commits of this session are LOCAL on wk-NFRA_CLDGRPH-2."
+    }
+  ],
+  "surprises": [
+    "NFRA_CLDGRPH-W2-S8: G6's served audit record cannot be produced by a seat holding only the capability bearer -- the /graph/* HTTP path is audit-silent by construction (as /ms/* and /otp/* are) and the only audited run-path, run_integration_tool on the MCP surface, sits behind ALB authenticate-oidc; measured after the enabling deploy as 0 'graph_' records in 41,489. OBSERVATION, INERT.",
+    "NFRA_CLDGRPH-W2-S9: safe-ec2-deploy.sh deliberately resolves HALT_GATE_REPO_ROOT to the MAIN worktree, and the halt gate resolves its principal only from ${HALT_GATE_REPO_ROOT}/org/mcp/sessions/${CLAUDE_CODE_SESSION_ID}.serial -- so a worker in a git worktree must write that file outside any <paths> block its order can name. Gitignored, session-unique, no tracked byte moved; the deploy then attributed correctly. OBSERVATION, INERT.",
+    "NFRA_CLDGRPH-W2-S10: the one unscoped post-apply plan that certifies this order converged (both its addresses no-op, 0 to add) shows in the same read FOUR non-no-op addresses owned by nobody in this project -- aws_instance.gw [update], aws_wafv2_web_acl.gw [update], and aws_wafv2_ip_set.opal_blocked_ips_regional_v4 + _v6 [DELETE] -- so an unscoped apply in this module would destroy two live WAF IP sets. Left exactly as found. OBSERVATION, ARMED, disarm_owner 0.7.0_AE_CloudOps.",
+    "NFRA_CLDGRPH-W2-S1 (predecessor's, now DISCHARGED for this order): the shared HALT gate of safe-apply.sh and safe-ec2-deploy.sh refused every spine-v3 worker serial with exit 3. Fixed by 1.0.0_SA_CTO @68f22f74f5 and exercised by this seat: both wrappers admitted 0.9.0_WK_NFRA_CLDGRPH~2 and ran to completion. The row's disposition remains 3.0.0_SA_CVO~A's at L9.",
+    "NFRA_CLDGRPH-W2-S2 (predecessor's, KEPT by CTO ruling): the lifecycle ignore_changes=[access_logs] guard on aws_lb.gw is unmodified by this seat and is one of G8's six signed conditions; this order's apply reported '0 changed' while the live ALB's access_logs stay enabled, which is the guard doing its job.",
+    "NFRA_CLDGRPH-W2-S4 (predecessor's): the bearer was minted out-of-band and graph-read.tf references it metadata-only; re-verified at the reopen to be in the data-source shape, so no secret value is in TF state.",
+    "NFRA_CLDGRPH-W2-S5 (predecessor's): D2-AC9's expectation was corrected at the reopen to read the entry's own Status line, because deploy_ledger.py close DELETES the sentinel that list reads.",
+    "NFRA_CLDGRPH-W2-S6 (predecessor's): ps -C python3.11 returns only its header on this box; D2-AC7 reads the unit's MainPID argv, and PROBE-1 keeps the empty read beside it as the negative control.",
+    "NFRA_CLDGRPH-W2-S7 (predecessor's): the ledger sentinel was present in this worktree but UNTRACKED (git ls-files empty for it) while five sibling sentinels are tracked; deploy_ledger.py close removed it, so the closure travels in the entry .md alone."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-s-5.gateway-traversal.result.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "python .tools/comp-read org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-s-5.gateway-traversal.result.md --for \"what was built, the two apply addresses, the ledger's open legs, and every measurement already made\"",
+      "result": "18 sections / 169 lines; 19 qualifiers, 14 near the asked regions -- the four that mattered were 'the apply did not run / rc=3', the G4 'NOT APPLIED' line, the L3-L6 stranded line, and the access_logs guard note. Read the file whole afterwards because it is the predecessor's whole record and the unread ledger named 11 unshown sections."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "python .tools/comp-read infra/aws/terraform/opal-gateway/graph-read.tf --for \"whether the secret is referenced by data source or declared as a resource pair\"",
+      "result": "data \"aws_secretsmanager_secret\" \"graph_read_bearer\" { name = \"opal/mcp/graph-read-token\" } + a separate aws_iam_role_policy -- ALREADY the ms-ingest.tf shape the reopen requires; no random_password, no aws_secretsmanager_secret_version. No fix needed."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "python .tools/comp-read infra/aws/ec2/opal-gateway/deploy-to-ec2.sh --for \"the GRAPH_READ_BEARER fetch, the .env printf, and the ENABLED_INTEGRATIONS value\"",
+      "result": "31 sections; the GRAPH_READ_BEARER fetch at :150 and the single .env printf at :165 (pre-edit) with ENABLED_INTEGRATIONS=ycharts opal_portal and a DORMANCY comment block above it -- which is why the comment was rewritten with the value, not left as a second carrier of a quantity that had moved."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "python .tools/comp-read infra/aws/ec2/opal-gateway/deploy-to-ec2.sh --enumerate 'ENABLED_INTEGRATIONS=ycharts opal_portal globgrph' --limit 3",
+      "result": "ENUMERATE: 1 hit(s) across 241 lines / 31 sections -- D2-AC5's own instrument, and the reason the rewritten comment deliberately avoids repeating the literal string."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "python .tools/comp-read infra/aws/terraform/opal-gateway/alb.tf --enumerate 'graph_capability|ignore_changes' --limit 10",
+      "result": "7 hits / 292 lines: the graph_capability rule at :258 and the aws_lb.gw lifecycle ignore_changes = [access_logs] at :77 both present and unmodified -- the G8 condition checked before the apply, not after."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "python .tools/comp-read infra/aws/ec2/opal-gateway/app/server.py --enumerate 'graph' --limit 40",
+      "result": "31 hits banded (4 DOCSTRING / 4 COMMENT / 3 DEF / 20 CODE); the /graph/* handlers and route table entries enumerated, and NOT ONE audit.log_call among them -- the source half of row W2-S8."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <the 5 .py files>",
+      "result": "OK: pre-commit gate clean for 5 of 5 file(s)"
+    },
+    {
+      "tool": "terraform fmt -check",
+      "invocation": "terraform fmt -check infra/aws/terraform/opal-gateway/graph-read.tf infra/aws/terraform/opal-gateway/alb.tf",
+      "result": "rc=0 on both files"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py close-leg --slug cldgrph-cgd2-gateway-graph-path --leg-id L3|L4|L5|L6 --proof \"...\" ; then close --slug cldgrph-cgd2-gateway-graph-path",
+      "result": "OK: leg L3 closed. Remaining open: ['L4','L5','L6'] -> ... -> OK: leg L6 closed. Remaining open: NONE -> OK: CLOSED deploy ledger 'cldgrph-cgd2-gateway-graph-path' -- all 6 legs proven; sentinel removed"
+    }
+  ]
+}

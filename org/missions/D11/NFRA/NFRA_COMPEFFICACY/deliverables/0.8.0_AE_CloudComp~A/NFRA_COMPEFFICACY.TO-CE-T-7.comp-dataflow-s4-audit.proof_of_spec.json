@@ -1,0 +1,166 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_COMPEFFICACY.TO-CE-T-7.comp-dataflow-s4-audit",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.8.0_AE_CloudComp~A",
+ "spec_ref": {
+  "doc": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/task-orders/NFRA_COMPEFFICACY.TO-CE-T-7.comp-dataflow-s4-audit.md",
+  "group": "OTHER",
+  "vintage_commit": "2c7fd65946"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/decompositions/NFRA_COMPEFFICACY_DECOMP.md",
+  "vintage_commit": "b7daeaa6f0",
+  "to_ref": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/task-orders/NFRA_COMPEFFICACY.TO-CE-T-7.comp-dataflow-s4-audit.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/modules/graph/comp_dataflow.py",
+   "kind": "script",
+   "commit_or_etag": "8fdc3d0602",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "a repo-local Python engine invoked via .tools/comp-dataflow; never deployed as an S3/Lambda artifact; not a deploy-scope path under Rule 13.",
+   "introduces": [
+    "UNRESOLVED_REASONS = (\"DYNAMIC-PATH\", \"DEPLOY-TIME-ONLY\", \"FIRM-TREE-ABSENT\", \"OTHER\")",
+    "g.add_argument(\"--budget\""
+   ]
+  },
+  {
+   "path_or_key": ".tools/tests/test_comp_dataflow_battery.py",
+   "kind": "test",
+   "commit_or_etag": "8fdc3d0602",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "a new pytest/direct-run test file; not a deploy-scope path.",
+   "introduces": [
+    "NEVER-GUESS-MUTANT",
+    "MUTANT-BUDGET"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~A/comp-dataflow.result.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the s.4 per-tool result deliverable; a document, not a deploy artifact."
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp~A/logs/2026-09-03/ce_t7_comp_dataflow_enriched_0816-0940Z.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the session log for this TO's execution window, filed in this lane's own agent folder (org/tier2_senior/0.8.0_AE_CloudComp~A/**, granted @05b7e1c77e)."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "T7-AC1",
+   "criterion_verbatim": "the deliverable parses (one fenced JSON block), every required s.4 field present or explicitly ABSENT, 4.1 identity read from the ENGINE path, the shim named as the shim.",
+   "method": "schema_validation",
+   "invocation": "python -c \"import re,json; json.loads(re.search(r'```json\\\\s*(.*?)```', open('comp-dataflow.result.md',encoding='utf-8').read(), re.S).group(1))\"",
+   "output_evidence": "parses cleanly; all six s.4 groups present (identity 7 base fields + 2 notes, disclosure 9, answer_state 4 cases + verdict, bounds 4 (with a subprocess_timeouts_note explaining the tool has none), passcraft 4, usage 5); every field carries a MEASURED value or an explicit grade/finding. 4.1 identity.shim_path/engine_path explicitly distinguish the 17-line bash forwarder from the 635-line Python engine that carries ALL logic, read from both files directly.",
+   "denominator": "6 of 6 s.4 groups present (4.1-4.6); 0 silently omitted fields",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T7-AC2",
+   "criterion_verbatim": "(AC-2) four PLANTED cases keyed on the ratified enum produce four DISTINGUISHABLE, machine-rejectable outputs in the tool's own voice (rc + text quoted per case), all on the SOURCE plane (zero AWS calls).",
+   "method": "command",
+   "invocation": "four direct comp-dataflow invocations, quoted verbatim in comp-dataflow.result.md (SUBJECT_ABSENT_FROM_CORPUS: comp-dataflow origin <nonexistent>.py / PRESENT_WITH_ZERO_RESULTS: comp-dataflow gate data/inf/scripts/silver / PARTIAL_OR_BLIND: the two real honest-unresolved specimens named at cut / NOT_APPLICABLE: comp-dataflow gate <nonexistent-dir>), all pure AST/file-read operations at working-tree HEAD, zero AWS calls per the engine's own docstring",
+   "output_evidence": "rc 3 with an explicit REFUSE line for SUBJECT_ABSENT_FROM_CORPUS ('did not resolve to a producer .py file ... NOT a clean no served reads'); rc 0 with a real non-zero denominator and 0 findings for PRESENT_WITH_ZERO_RESULTS (VERIFIED LIVE after an initial pathspec choice was found NOT to be a clean case -- caught before publishing, corrected to a pathspec confirmed to sweep clean); rc 0 with 'UNRESOLVED' + 'reason: DYNAMIC-PATH'/'reason: FIRM-TREE-ABSENT' on two REAL production files for PARTIAL_OR_BLIND, this cell's own owed enrichment; rc 3 with an explicit REFUSE line for NOT_APPLICABLE. Two findings recorded, not hidden: F1 (vintage disclosure is stderr-only) and F2 (SUBJECT_ABSENT_FROM_CORPUS and NOT_APPLICABLE render the SAME REFUSE shape and rc, distinguishable only by which argument text is echoed).",
+   "denominator": "4 of 4 planted cases exercised and quoted, ALL VERIFIED LIVE (including a mid-draft correction after one exercise did not match its planned description); 2 findings recorded (F1, F2)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T7-AC3",
+   "criterion_verbatim": "HONEST-UNRESOLVED PRESERVED AND ENRICHED: the 4 of 4 known unresolved specimens (named by file at cut by the assignee from the tool's own current output, denominator stated) still read UNRESOLVED after the change, each now carrying its reason class on the line; the count is unchanged; a planted mutant that resolves one of them by reading deploy-time config goes RED.",
+   "method": "test_suite",
+   "invocation": "a real baseline gate sweep over data/ BEFORE any code change (532 files, 1036 reads, 604 unresolved: 542 DYNAMIC-PATH-shaped / 62 FIRM-TREE-ABSENT-shaped / 0 of the other two classes) named the population; two specimens picked from it by file+line (build_cottonwood_interpolated_backfill.py:196, runners_49f/a01_runner.py:86); two PLANTED fixtures constructed for the two zero-occurrence classes; .tools/tests/test_comp_dataflow_battery.py arm 1 (NEVER-GUESS-REAL / NEVER-GUESS-MUTANT)",
+   "output_evidence": "AFTER the code change, all 4 specimens still print 'UNRESOLVED' with their expected reason (DYNAMIC-PATH / FIRM-TREE-ABSENT on the 2 real files; DEPLOY-TIME-ONLY / OTHER on the 2 planted fixtures) -- 'NEVER-GUESS-REAL: PASS'. The count is unchanged: the same 604-of-1036 split re-measured after the code change (this cell's own commit) matches the pre-change baseline exactly (32 unresolved on the data/assets/scripts/gold subtree, split 25 DYNAMIC-PATH / 7 FIRM-TREE-ABSENT both before and after, since the classification logic itself was never touched -- BOUNDS). The mutant (an unresolved Name falling back to a LIVE os.environ read, built in a scratch mirror matching the engine's own _WS depth) DOES resolve the DEPLOY-TIME-ONLY fixture when its env var is actually set -- 'NEVER-GUESS-MUTANT: PASS' (the control correctly detects the violation it exists to catch).",
+   "denominator": "4 of 4 specimens named at cut and preserved unresolved after the change; 1 of 1 never-guess mutant FIRED-AS-EXPECTED",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T7-AC4",
+   "criterion_verbatim": "(AC-4) Rule T's form applied: --help discloses the carrier via _compbudget.py; a planted small --budget on gate over a wide pathspec produces the s.4.4 expiry line with its source word and reached denominator, side by side with a clean completion line; origin's non-application half stated in the class the form names.",
+   "method": "command",
+   "invocation": "comp-dataflow gate --help ; comp-dataflow origin --help ; comp-dataflow gate data/assets/scripts/gold (healthy default) ; comp-dataflow gate data/ --budget 0.001 (forced, wide pathspec, 532 files) ; the same command with --cursor <resumed value>",
+   "output_evidence": "gate --help: '--budget N    RULE T (PRD s.4.4, shared .tools/_compbudget): wall-clock ceiling in seconds for this sweep (carrier: --budget > env COMP_BUDGET_S > default 90 s) ... Only gate has this flag -- origin traces exactly one file and has no corpus-width loop to bound.' origin --help: shows NEITHER --budget nor --cursor (structural non-application, verified by absence, not merely claimed). Healthy: 'WITHIN BUDGET: scanned 101 of 101 producer_file; budget: 90 s (default), used 0.92 s'. Forced: 'BUDGET REACHED: 0.001 s (flag); scanned 1 of 532 producer_file; results are a PREFIX, not the answer; resume: comp-dataflow gate data/ --budget 0.001 --cursor <last-file>' -- a REAL cursor, exercised further: re-running with that exact cursor skipped precisely the completed unit and advanced to the next file in sorted order (verified: the second run's DEFERRED list begins at a different, later file).",
+   "denominator": "2 of 2 --help surfaces checked (gate discloses, origin correctly does not); 3 of 3 planted shapes exercised (healthy, forced, cursor-resumed); production sha256 checked at 2 points (before/after this cell's commit)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T7-AC5",
+   "criterion_verbatim": "battery: the NEW .tools/tests/test_comp_dataflow_battery.py with the never-guess control as its first arm, one arm per new behaviour, and a planted mutant per arm going RED; direct AND under pytest at the FILE grain; directory grain stated as it reads.",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_comp_dataflow_battery.py ; python -m pytest -q .tools/tests/test_comp_dataflow_battery.py ; python -m pytest -q --collect-only .tools/tests/",
+   "output_evidence": "FILE GRAIN: 8 of 8 rec()-calls PASS -- NEVER-GUESS-REAL/-MUTANT (arm 1, the control the TO names, first), REASON-CLASS/MUTANT-REASON (arm 2), REASON-CONSERVATION (arm 3, an arithmetic identity control needing no mutant, Rule 24 (i)), ITEM-9-UNCHANGED (arm 4, a regression control against the RF-7 charter specimen, needing no mutant since it is BOUNDS-required to stay byte-identical), BUDGET-CARRIER/MUTANT-BUDGET (arm 5). Three of the five logical arms carry a red-first mutant (arms 1/2/5); the other two (3/4) are arithmetic/regression identity checks whose own predicate IS the control (a wrong conservation sum or a changed served-origin count would be the failure, with no separate mutant needed to prove it). Confirmed direct AND under pytest -q (16.35s). DIRECTORY GRAIN: pytest --collect-only .tools/tests/ still INTERNALERROR / SystemExit at test_fabric_check_classify.py:76 (CTO's F6, unchanged), 35 tests collected before the abort (up from 25 at CE-t-1/CE-t-2's read, since this new file sorts before the abort point alphabetically) -- not this cell's, carried.",
+   "denominator": "8 of 8 file-grain rec()-calls PASS; 3 of 3 mutants (arms 1/2/5) FIRED-AS-EXPECTED; directory grain: 1 of 22 known aborters still blocks the sweep, not this cell's (CTO's)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T7-AC6",
+   "criterion_verbatim": "push state MEASURED at report (ls-remote + is-ancestor; LOCAL expected while Andrew gates the cadence, say which state was read); the proof instance VALID with every surprises entry resolving to a row BEFORE the complete flip, which the seat commits itself.",
+   "method": "command",
+   "invocation": "git ls-remote origin refs/heads/CLOUD ; git merge-base --is-ancestor 8fdc3d0602 origin/CLOUD",
+   "output_evidence": "see the commit report to 2.0.0_SA_COO for the MEASURED push state read at report time (not asserted in this instance). This instance carries ZERO surprises entries -- none filed this cell; the one mid-draft correction (T7-AC2's PRESENT_WITH_ZERO_RESULTS pathspec) was caught and fixed BEFORE the deliverable was ever committed or read by another agent, so it never rose to a spec-vs-world divergence needing a surprise row.",
+   "denominator": "0 of 0 surprises entries need resolution; push state stated fresh in the commit report",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "THREE mutants exercised, one per arm carrying a red-first control: (1) NEVER-GUESS -- _resolve_expr's Name-lookup fallback changed from _DYNAMIC to os.environ.get(node.id, _DYNAMIC), built in a scratch mirror tree (org/modules/graph/comp_dataflow.py + .tools/_compbudget.py under a tempdir, matching the engine's own _WS resolution depth so imports succeed) so a REAL subprocess run with DATA_PREFIX actually set in its env demonstrates the violation; (2) MUTANT-REASON -- _unresolved_reason forced to always return 'OTHER'; (3) MUTANT-BUDGET -- resolve_budget's args.budget argument replaced with a hardcoded None, ignoring the flag.",
+   "expected": "each mutant RUNS (rc as normal, no crash -- a crash would be a DEAD arm, not a pass) and FAILS its sibling arm's own predicate: (1) the DEPLOY-TIME-ONLY fixture stops reading UNRESOLVED and instead shows the sneaked-in env value; (2) the DYNAMIC-PATH specimen's reason line reads OTHER instead of DYNAMIC-PATH; (3) BUDGET REACHED never appears at --budget 0.001 on the full data/ tree",
+   "observed": "(1) NEVER-GUESS-MUTANT: the fixture resolved via the live env var (\"sneaked-in-from-the-live-environment\" appeared in the output, UNRESOLVED did not) -- PASS (the mutant broke the control as expected, proving the real code's refusal is what NEVER-GUESS-REAL certifies). (2) MUTANT-REASON: the DYNAMIC-PATH specimen's line read 'reason: OTHER' -- PASS. (3) MUTANT-BUDGET: 'WITHIN BUDGET' printed instead of 'BUDGET REACHED' at --budget 0.001 on the full tree -- PASS. None of the three mutants crashed (all would have been DEAD arms if they had).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "re-ran the baseline gate sweep over data/ twice (before writing any code, and again after this cell's commit) and compared the reads_unresolved total and its per-reason split; separately re-ran the forced-tiny-budget cursor-resume exercise twice",
+   "observed": "reads_unresolved stayed 604 (data/ full tree) / 32 (data/assets/scripts/gold subtree, the value actually diffed pre/post-commit) across both measurements -- BYTE-IDENTICAL, since the classification logic itself (is_unresolved) was never touched, only the additive reason label. The cursor-resume exercise produced the same 'skip exactly the completed unit, advance to the next in sorted order' behavior on repeat.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "F1 (vintage disclosure is stderr-only) and F2 (SUBJECT_ABSENT_FROM_CORPUS and NOT_APPLICABLE share one printed REFUSE shape)",
+   "reason": "both pre-exist this cell's edit, unchanged by it; BOUNDS scope this TO to the unresolved-print enrichment and Rule T, not a general disclosure audit; carried as findings, not fixed."
+  },
+  {
+   "item": "F3 (.tools/comp-dataflow's own un-budgeted self-report subprocess, at the bash level)",
+   "reason": "the TO's own words name only 'the gate sweep' as owed for Rule T; the shim's bash-level self-report call is a different mechanism (no Python subprocess.run, no timeout at the shell level either) and is explicitly out of BOUNDS ('no new dependency; no new file outside the engine, the shim, the NEW battery, the deliverable and the proof instance' -- the shim is named as a SURFACE but the ONE code change owed is scoped to the engine's gate sweep + print). Owner not self-assigned; carried for a future cell."
+  },
+  {
+   "item": "F4 (a partial, budget-limited gate sweep's rc stays 0, matching a genuinely clean full sweep)",
+   "reason": "this is Rule T's own documented behavior (PRD s.4.4: 'the LINE is the rejectable state, not the rc'), unchanged from the reference application (comp-find) and this project's own precedent (comp-read, comp-which); disclosed explicitly in the deliverable with a note that this tool's GATE archetype makes the risk sharper than in prior cells, not silently accepted."
+  },
+  {
+   "item": "the three F6 files at .tools/tests/ still aborting pytest's directory-grain collection",
+   "reason": "carried unchanged from CE-t-1/CE-t-2/CE-t-3, owned by 1.0.0_SA_CTO, out of this cell's lane"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/tier2_senior/0.8.0_AE_CloudComp~A/logs/2026-09-03/ce_t7_comp_dataflow_enriched_0816-0940Z.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-read",
+   "invocation": "comp-read org/modules/graph/comp_dataflow.py --for \"where a read is classified resolved or unresolved, where the unresolved line is printed, and where the summary counts are computed\"",
+   "result": "located is_unresolved, cmd_origin's print loop, and _denominator exactly, before any edit"
+  },
+  {
+   "tool": "comp-dataflow gate",
+   "invocation": "a real baseline sweep over data/ BEFORE any code change (the TO's own FIRST-step mandate)",
+   "result": "532 producer files, 1036 reads scanned, 604 unresolved (542 DYNAMIC-PATH-shaped / 62 FIRM-TREE-ABSENT-shaped / 0 of the other two classes) -- the population that grounded the classifier design"
+   },
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "on org/modules/graph/comp_dataflow.py, .tools/tests/test_comp_dataflow_battery.py",
+   "result": "clean, 2 of 2 file(s)"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> T7-AC1,T7-AC2,T7-AC3,T7-AC4,T7-AC5,T7-AC6",
+   "result": "see the commit report -- validated on the COMMITTED bytes before the complete flip"
+  }
+ ]
+}

@@ -1,0 +1,230 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CLDGRPH.TO-CG-V-1",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/prd/NFRA_CLDGRPH_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "25c66d3358"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+    "vintage_commit": "994c9381d0",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-V-1.full-fallback-duration-measured.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~Q",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.7.0_AE_CloudOps~Q/CG-s-10.full-fallback-duration.result.md",
+      "kind": "doc",
+      "commit_or_etag": "a9aea6f3ce",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A measurement deliverable has no deploy surface. This task order's BOUNDS are READ-ONLY against AWS with no repo source edited, so nothing here is deployable by construction.",
+      "artifact_covered_by": ["V1-AC1", "V1-AC2", "V1-AC3", "V1-AC4", "V1-AC5"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.7.0_AE_CloudOps~Q/measure_run.py",
+      "kind": "test",
+      "commit_or_etag": "a9aea6f3ce",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The measurement harness. Checked in beside the deliverable so all four runs are REPRODUCIBLE rather than asserted; it invokes the engines unchanged as subprocesses and deploys nothing. Passed .tools/commit-gate.sh (py_compile + ds-precommit + ruff py39), 1 of 1 file clean.",
+      "artifact_covered_by": ["V1-AC2", "V1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "a9aea6f3ce",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Shared append-only channel, lane ANY. This seat appended rows S2, S3, S4, S8. PROVENANCE NOTE, stated because it would otherwise be mis-read: S2/S3/S4 were physically carried into the record by commit abd89d2263 (authored by 1.0.0_SA_CTO~A, which staged the shared file while this seat's rows sat in the working tree); S8 landed in a9aea6f3ce. Authorship of every row is carried by its own `surfaced_by` field, not by the commit author.",
+      "artifact_covered_by": ["V1-AC6"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~Q/logs/session_0647-0805Z_NFRA_CLDGRPH_TO-CG-V-1_CG-s-10.md",
+      "kind": "doc",
+      "commit_or_etag": "a9aea6f3ce",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Session log per org/ref/SESSION_LOG_STANDARD.md, with the mandatory Compiler Tools section and the AE Deployment-Sequence table replaced by a Measurement Sequence table with the reason stated (this TO deployed nothing).",
+      "artifact_covered_by": ["V1-AC6"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "V1-AC1",
+      "criterion_verbatim": "THE TWO OPERATIONS NAMED at `file:line @ commit`: the full load entry point, the incremental entry point, the full-fallback trigger and its threshold value, and the local orchestrator; each cited from a comp-read of the file, not from memory.",
+      "method": "manual_read_with_citation",
+      "invocation": "comp-read infra/aws/globgrph/kuzu_incremental_refresh.py --for \"where the full-fallback is triggered, what threshold flips it, and what the incremental path applies\"; comp-read infra/aws/globgrph/kuzu_nessie_load.py --for \"the full-load entry point, what it reads from Nessie/Iceberg, and where the output DB path is chosen\"; comp-read infra/aws/globgrph/_canonical.py --enumerate 'ensure_fresh|MUTEX_WAIT_S|ORPHAN_LOCK_S|INCREMENTAL_TIMEOUT_S|CANONICAL_DB_PATH'; blob identity per pin via git rev-parse <pin>:<path> vs git hash-object <worktree>",
+      "output_evidence": "FULL entry: kuzu_nessie_load.py:74 'def main() -> int:' @e445642c5f, CLI :372, output path :76 'ap.add_argument(\"--db\", default=DEFAULT_DB_PATH)' with DEFAULT_DB_PATH :43 = <script dir>/kuzu_nessie_db. INCREMENTAL entry: kuzu_incremental_refresh.py:134 'def refresh(current_db_path, tmp_db_path, log=None)' @aebe0d0a67, CLI :322, exit codes :326-327 (0=applied, 2=FALLBACK, 1=error). TRIGGER: :174 'if changed >= FALLBACK_MIN_ABS and changed >= FALLBACK_FRACTION * total:' with THRESHOLD VALUES :44-45 FALLBACK_MIN_ABS=4000, FALLBACK_FRACTION=0.25 -> effective gate max(4000, 0.25*27133) = 6,784 changed nodes. Second independent fallback: post-apply count guard :227-232. ORCHESTRATOR: _canonical.py:610 'def ensure_fresh(db_path, ...)' @173dd335f4, constants CANONICAL_DB_PATH :42, MUTEX_WAIT_S=180.0 :44, ORPHAN_LOCK_S=900.0 :47, INCREMENTAL_TIMEOUT_S=600 :67. Blob identity CONFIRMED for all four pins (e.g. kuzu_nessie_load.py @e445642c5f == worktree == 8ed0108820852e4be03ee5a06647e4e17a4f251f).",
+      "denominator": "4 of 4 named surfaces cited at file:line @ commit (full entry, incremental entry, fallback trigger + threshold, orchestrator); 4 of 4 pins blob-verified pin==worktree; comp-read enumerate census on _canonical.py returned 26 hits across 746 lines / 41 sections",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V1-AC2",
+      "criterion_verbatim": "TWO FULL LOADS MEASURED into a temp path: for each run, wall clock + peak memory with the instrument named, input sizes (rows per table, bytes read, marker `committed_at`), environment; the variance between runs stated; the canonical local DB untouched (its mtime before and after quoted -- the control that can fail).",
+      "method": "command",
+      "invocation": "python org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.7.0_AE_CloudOps~Q/measure_run.py --operation full --db <scratchpad>/full{1,2}_db --label FULL-{1,2} --out <scratchpad>/full{1,2}.json",
+      "output_evidence": "FULL-1 rc=0 wall=1001.172s peak=7,079,927,808B sampled=7,079,829,504B samples=12783; FULL-2 rc=0 wall=935.500s peak=7,079,985,152B sampled=7,079,006,208B samples=12049. VARIANCE 65.672 s, mean 968.336 s, spread +/-3.39% about mean; peak memory delta 57,344 B (0.0008%). INSTRUMENTS NAMED: wall = time.monotonic() around Popen/wait; peak = OS peak working set (GetProcessMemoryInfo via psutil memory_info().peak_wset, kernel-maintained, not sample-dependent); corroborating sampled peak RSS at 50 ms, which sits BELOW the OS peak in both runs as construction predicts. INPUT SIZES: marker committed_at_iso=2026-09-03T05:53:54.509091+00:00, hash 9a0e597f...985c, writer incremental_updater; ICEBERG_READ nodes=27156 edges=61071; NODES_DEDUP unique=27133 key_collisions=0; EDGES_WRITTEN written=60688 skipped_missing_endpoint=383; Iceberg BYTES 1,972,625 across 3 data files (nodes 1,309,906 / edges 662,719), manifest record counts 27,156/61,071 matching the loader's own read. ENVIRONMENT: Windows-11-10.0.26100, Intel64 Family 6 Model 189, 8 logical/8 physical, 31.7 GB RAM (8.0 GB available at start), Python 3.12.10, kuzu 0.11.3, pyiceberg 0.9.1, pyarrow 18.1.0, boto3 1.42.54; public internet to s3.us-east-1, NOT in-VPC. CONTROL: canonical infra/aws/globgrph/kuzu_nessie_db size 82,661,376 and mtime '2026-09-02 20:36:15.505342500 -0400' BEFORE and AFTER all four runs; listing md5 711b0b3c78f0bfecff7a92bcdcd49193 identical at 4 read points.",
+      "denominator": "2 of 2 full runs measured and both rc=0; 4 control read points (before, mid-FULL-1, after FULL-1, after all runs) all identical; 3 of 3 Iceberg data files sized; 12,783 + 12,049 memory samples",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V1-AC3",
+      "criterion_verbatim": "ONE INCREMENTAL RUN MEASURED on a real delta: the same fields plus delta rows applied and whether the count-guard fired; labeled as the second operation.",
+      "method": "command",
+      "invocation": "python .../measure_run.py --operation incremental --current <copy of canonical> --db <scratchpad>/incA_db --label INC-A-fallback-trigger; and --current <scratchpad>/full1_db --db <scratchpad>/incB_db --label INC-B-apply-path",
+      "output_evidence": "INC-A rc=2 wall=5.094s peak=481,992,704B: 'INCR_RESULT status=fallback stats={reason: delta 27133 >= 4000 and >= 25% of head (full-derive overwrite) -- bulk reload cheaper, changed: 27133}' with 'INCR_NODE_DELTA head=27133 cur=27122 upsert=27133 delete=0 (100.0% of head)'. ROWS APPLIED = 0 (fallback; tmp removed at :344, output_db_bytes=0). COUNT-GUARD: did NOT fire and was NOT REACHED -- the delta-size gate at :174 returns first. INC-B rc=0 wall=7.531s peak=488,116,224B: 'INCR_REFRESH_COMPLETE {node_upsert: 0, node_delete: 0, edge_upsert: 0, edge_delete: 0, nodes: 27133, edges: 58432}'. ROWS APPLIED = 0 (zero delta). COUNT-GUARD: REACHED and PASSED (27,133 nodes / 58,432 edges == head set exactly). LABELLED THROUGHOUT as the second of the two operations the four figures conflate. Both runs carry the same marker vintage and environment as AC2; marker_moved_during_run=false on all four records.",
+      "denominator": "2 incremental runs covering both branches of the path (fallback branch and apply branch), out of the 1 the criterion requires; deltas 27,133 (100.0% of head) and 0 (0.0%)",
+      "status": "PASS",
+      "status_reason": "PASS with a DECLARED LIMITATION, stated rather than hidden: no MID-SIZED real delta existed in the measurement window. The branch-head marker did not advance between 2026-09-03T05:53:54Z and 07:51:30Z (1h58m, against R5's sizing input of 45 stamps/24h), so the world offered exactly two deltas -- 100%-of-head against the stale canonical, and zero against a DB already at HEAD -- and both were measured rather than one being manufactured. INC-B is therefore the FLOOR of the incremental path, not a typical cost, and is reported as such. The absence is MEASURED (marker committed_at identical at four read points), not skipped."
+    },
+    {
+      "criterion_id": "V1-AC4",
+      "criterion_verbatim": "THE FIT TABLE: every measured figure against the three Lambda ceilings and the ECS alternative, fits / does not fit / marginal with the margin; no runtime chosen in this deliverable (the absence is the criterion).",
+      "method": "manual_read_with_citation",
+      "invocation": "arithmetic over the four measured records against the ceilings the task order states (900 s timeout, 10,240 MB memory, 10 GB ephemeral); rendered as s.4 of CG-s-10.full-fallback-duration.result.md",
+      "output_evidence": "TIMEOUT 900s: FULL-1 1001.172s DOES NOT FIT (over by 101.2s, 11.2%); FULL-2 935.500s DOES NOT FIT (over by 35.5s, 3.9%); full-fallback min 940.594s DOES NOT FIT (over by 40.6s, 4.5%); max 1006.266s DOES NOT FIT (over by 106.3s, 11.8%). 2 of 2 runs over, and the run-to-run spread (+/-3.39%) is SMALLER than the shortfall, so no lucky run fits -- not marginal. MEMORY 10,240MB: peak 6,752.0 MB FITS, uses 65.9%, headroom 3,488.0 MB, with the caveat that this sits at/near the maximum tier with nothing larger to grow into. EPHEMERAL 10GB: peak ~53.8 MB FITS, uses 0.53%. INCREMENTAL: 5.094-7.531s and 459.7-465.5MB FIT all three comfortably. ECS one-off task on the existing opal-globgrph cluster: FITS on the timeout axis (no wall-clock ceiling); memory requires a task >= ~6.75 GB peak; COLD START EXPLICITLY UNMEASURED -- no ECS task was started. NO RUNTIME IS CHOSEN: the deliverable states 'NO RUNTIME IS CHOSEN IN THIS DELIVERABLE' in its header block and again in s.4, and the machine-readable block carries \"runtime_chosen\": null with \"runtime_choice_owner\": \"CG-s-2\".",
+      "denominator": "4 measured figures x 3 Lambda ceilings + the ECS alternative = every measured figure placed against every named ceiling; 0 runtimes chosen",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V1-AC5",
+      "criterion_verbatim": "THE FOUR PRIOR FIGURES RECONCILED AFTER MEASUREMENT: each attributed to one of the two operations with its input size, or NOT RECONSTRUCTIBLE with the reason; your own measurement never moved toward any of them (the runs' raw numbers appear unchanged in AC2/AC3).",
+      "method": "manual_read_with_citation",
+      "invocation": "comp-read docs/briefs/globgrph-cloud-compile-and-gateway-traversal-20260901.md --enumerate '[0-9][0-9.]*\\s*(min|minute|minutes|sec|second|seconds|s\\b|MB|GB|MiB|GiB)'; comp-read docs/architecture/NFRA_KUZUSPLIT_PRD.md --enumerate '(356|3\\.9|92|~6 min|~10 min|P0-INSTRUMENT)'; comp-read docs/architecture/NFRA_GRAPHS.md --enumerate '(~8 min|8 min|derive)'",
+      "output_evidence": "Brief enumerate: 9 hits / 403 lines, the figures at :7, :320-323. ATTRIBUTION: (1) '~6 min' NFRA_KUZUSPLIT_PRD.md:45 col 2 = comp-kuzu-full = THE FULL PROJECTION -> NOT consistent, measured mean 968.336s is 2.69x it. (2) '~10 min' same table col 1 = comp-aws derive -> OUT OF SCOPE, a different operation this TO did not run. (3) '~8 min' NFRA_GRAPHS.md:18 and :61 = comp-aws derive ('REBUILD, cloud (live boto3 + TF state)') -> NOT APPLICABLE, never about the projection. (4) '356 s' NFRA_KUZUSPLIT_PRD.md:22 = full projection -> NOT consistent, 2.72x. (5) '3.9 s' same line = incremental -> PARTLY consistent, same order as the 7.531s zero-delta floor. (6) '92x' ratio -> DIRECTIONALLY consistent, measured 128.6x. (7) '9-10 min' brief:7 (Andrew verbatim) = OPERATION NOT PINNED -> NOT consistent, 1.61-1.79x, and the CLOSEST of the four. RESIDUAL: NOT RECONSTRUCTIBLE -- no prior figure carries an input size, a date, a machine or an instrument, so their conditions cannot be reproduced. Graph growth EXCLUDED as the explanation by measurement (brief measured 27,107 nodes on 2026-09-01; I measured 27,133 on 2026-09-03 = +0.1%, nowhere near 2.7x). Memory pressure NAMED as an unresolved candidate (8.0 GB available vs 6.75 GB peak; paging not instrumented, so neither asserted nor dismissed). NO MOVEMENT: raw numbers 1001.172 / 935.500 / 5.094 / 7.531 appear identically in AC2, AC3, the deliverable s.2/s.3, the machine-readable block and the four harness JSON records -- five carriers, no divergence.",
+      "denominator": "4 of 4 brief-named figures attributed (expanding to 7 distinct claims across the three sources, all attributed); 2 of 7 bear on the projection's full path and both are inconsistent in the same direction",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V1-AC6",
+      "criterion_verbatim": "PUSH STATE MEASURED at report (`ls-remote` + `is-ancestor`; LOCAL is the expected reading under the integrator's cadence -- say which state was read). The proof instance is VALID (`.tools/proof-of-spec-check.py` rc 0) with every `surprises` entry resolving to a row BEFORE the complete flip, which this seat commits itself.",
+      "method": "live_read",
+      "invocation": "git ls-remote origin CLOUD; git merge-base --is-ancestor <commit> origin/CLOUD; python .tools/proof-of-spec-check.py <this instance>",
+      "output_evidence": "See the DELIVERABLE REPORT to 2.0.0_SA_COO~A for the values as measured at report time. At the time of this instance's authoring: git ls-remote origin CLOUD = 3bd8d2ef04b69596560173a57c0cf83494dea5ec (read directly, matching the state MSTR's CLOSE 93271 cited -- corroborated by this seat's own read rather than relayed); local HEAD carries a9aea6f3ce which is NOT an ancestor of origin/CLOUD, so the state read is LOCAL, which the GO names as expected under the integrator's cadence. The four surprises entries each open with a row id (NFRA_CLDGRPH-S2/S3/S4/S8) that resolves in org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md at HEAD -- verified by parsing the committed blob: 8 rows total, 8 distinct ids, 0 collisions, 8 of 8 schema-valid against org/surprise_channel/schemas/investigation_item.schema.json.",
+      "denominator": "4 of 4 surprises entries resolve to a committed row; 8 of 8 channel rows schema-valid with 0 id collisions; 1 ls-remote read + 1 is-ancestor test",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The AC2 untouched-canonical control is a fingerprint over size + full-ISO mtime. A control that cannot detect a change is indistinguishable from one whose subject did not change, so the method was PLANTED against: a byte-identical COPY of the canonical DB (canon_copy_db, 82,661,376 B) was mutated with `touch` -- an mtime-only change that preserves size AND content, i.e. the SMALLEST mutation the method must still catch -- and the same fingerprint was recomputed. The real canonical was never touched; it was read by the same method in the same instant as a simultaneous negative control.",
+      "expected": "the copy's fingerprint CHANGES after the touch (proving the method detects even a content-preserving mutation), while the real canonical's fingerprint stays 711b0b3c78f0bfecff7a92bcdcd49193",
+      "observed": "copy BEFORE = 5446cab64636e0dd8bcc79bc8e287a39 (mtime 2026-09-03 03:49:23.411749500 -0400); copy AFTER touch = abebfe86ed457936a83caa7381fc7ea2 (mtime 2026-09-03 04:16:58.614782500 -0400), size unchanged at 82,661,376 B -- FINGERPRINT CHANGED. Real canonical read by the same method at the same instant = 711b0b3c78f0bfecff7a92bcdcd49193, UNCHANGED. So the method discriminates, and the canonical's clean reading is a REAL NEGATIVE rather than a blind instrument.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The criterion itself requires two full runs, so determinism is tested by the acceptance work rather than by an extra pass: FULL-1 and FULL-2 were run 21 minutes apart against a marker that provably did not move (marker_moved_during_run=false on both records, same nessie_commit_hash at both ends of both runs), and their OUTPUTS were compared -- build manifests, row counts, and output byte sizes.",
+      "observed": "OUTPUTS IDENTICAL: both runs produced node_count=27133, edge_count=60688, output_db 46,993,408 B, same nodes_snapshot_id 1242378212505298814 and edges_snapshot_id 1026441646305052092, same ICEBERG_READ 27156/61071, same NODES_DEDUP unique=27133 key_collisions=0, same EDGES_WRITTEN 60688 skipped_missing_endpoint=383, same layer breakdown (aws 2102 / ms 6102 / pipeline 1337 / portal 11338 / semctl 6254). Independently re-counted by direct Cypher on both DBs: 27,133 nodes and 58,432 edges in each. TIMING is deterministic only to +/-3.39% (1001.172 s vs 935.500 s), which is the measured variance the criterion asks for and is REPORTED AS SUCH rather than smoothed; peak memory reproduced to 0.0008%.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A mid-sized real incremental delta (one that applies rows without tripping the fallback gate)",
+      "reason": "Did not exist in the measurement window and was not manufactured. The branch-head marker did not advance between 2026-09-03T05:53:54Z and 07:51:30Z -- 1h58m with no stamp, against R5's sizing input of 45 stamps/24h -- so the only two deltas available were 100%-of-head (against the stale canonical) and zero (against a DB at HEAD). Both were measured. Waiting for a stamp would have blocked the cell on an event with no predictable arrival; fabricating a delta would have manufactured a measurement, which is the exact failure 4.0.0_SA_CRO's refusal exists to prevent."
+    },
+    {
+      "item": "ECS task cold-start time on the opal-globgrph cluster",
+      "reason": "BOUNDS are READ-ONLY against AWS with no ECS resource created, so no task was started. The fit table records it as UNMEASURED rather than estimating it -- an inferred cold start in a table whose other cells are measured would be the strongest possible invitation to read it as measured."
+    },
+    {
+      "item": "Whether memory pressure on this box inflated the measured wall clock",
+      "reason": "8.0 GB RAM was available at start against a 6,752 MB peak, which is tight. Paging was not instrumented, so the question is NAMED as a live alternative in AC5's residual rather than asserted or dismissed. Resolving it needs the measurement re-taken on the target runtime, which is CG-s-2's act and outside this cell."
+    },
+    {
+      "item": "A fix for any of the four surprise rows (S2, S3, S4, S8)",
+      "reason": "BOUNDS: 'No edit to any repo source. The engine is invoked, not changed. A defect found in it is a surprise row, never a patch under this cell.' All four were filed as rows and left unfixed by design."
+    },
+    {
+      "item": "Choosing the worker runtime, or sizing the worker",
+      "reason": "BOUNDS: 'Do not pick a runtime and do not size the worker. The fit table is a finding; CG-s-2 decides.' The absence is criterion V1-AC4."
+    },
+    {
+      "item": "Adjudicating this seat's own surprise row NFRA_CLDGRPH-S3, whose ARMED discharge condition is now met",
+      "reason": "The disarming ACT was performed (both full loads completed; the engine released the singleton lock, ABSENT at 07:52Z) and the evidence is carried in the deliverable s.6 and the report. The DISPOSITION is 3.0.0_SA_CVO~A's at L8 -- CLAUDE.md reserves remediation rows to the CVO, and a seat adjudicating its own row is the least-audited claim in the fabric."
+    },
+    {
+      "item": "The skipped_missing_endpoint=383 edges observed in both full loads",
+      "reason": "That is the CG-s-9 / R10 node-edge key asymmetry surface, a named read-dependency of this TO and not a cell it owns. Recorded with its measured count in the deliverable and the log so CG-s-9 inherits a number rather than a description."
+    }
+  ],
+  "surprises": [
+    "NFRA_CLDGRPH-S2: kuzu_incremental_refresh.py:27 says the incremental path is 'Gated OFF by default (GLOBGRPH_KUZU_INCREMENTAL_REFRESH=1) pending CTO arch-gate', but its only caller _canonical.py:450 defaults that flag to '1' (ON), _canonical.py:431 documents it as DEFAULT-ON, and NFRA_KUZUSPLIT_PRD.md:22 records the CTO GO as landed -- the stale carrier is the file a reader opens first, and CG-s-2 ports this engine. OBSERVATION / ARMED.",
+    "NFRA_CLDGRPH-S3: the TO's bound 'run to the temp path in parallel, which needs no lock' is true of _canonical.py's mkdir mutex but FALSE of the loader's own singleton, whose _LOCK_PATH is keyed to the SCRIPT directory (:294) and acquired unconditionally before main() (:401) regardless of --db -- exercised in both directions (stale dead-holder pid 29220 cleared by the engine, then this run's pid 34684 holding it). OBSERVATION / ARMED, discharge condition now MET (lock ABSENT at 07:52Z); disposition left to 3.0.0_SA_CVO~A.",
+    "NFRA_CLDGRPH-S4: two distinct local rebuild attempts left _canonical mkdir-mutex + tmp + WAL residue inside 40 minutes (mutex 06:49:01Z, re-created 07:05:32Z; each WAL stopped growing within ~40s) with no kuzu process alive at either observation -- both PRECEDE this seat's first run at 07:10:05Z. Cause NOT established and explicitly NOT asserted against CE-G-5. OBSERVATION / INERT.",
+    "NFRA_CLDGRPH-S8: kuzu_nessie_load.py stamps _build_manifest.edge_count with its MERGE-attempt count (60,688 = 61,071 read - 383 skipped) rather than the graph's stored edge count (58,432 by direct Cypher on both DBs), while node_count agrees exactly and the incremental path writes the correct 58,432 for the same graph -- the manifest is the provenance record CG-s-3 ports to S3 and CG-s-7 repoints comp-graph status at. OBSERVATION / ARMED."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~Q/logs/session_0647-0805Z_NFRA_CLDGRPH_TO-CG-V-1_CG-s-10.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md --for \"cell CG-s-10: what it owns, its status, its dependency edges, and what round it is in\"",
+      "result": "PASS -- 179 lines / 33 sections; returned the CG-s-10 row (claim `unmeasured`, OPEN ROUND 1, depends_on EMPTY so the cell was unblocked) plus an UNREAD LEDGER making the 24-of-179 read an explicit choice. Worktree blob confirmed identical to the blob at the @994c9381d0 pin (6fb06abe73), so the worktree read IS the read at the pin."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/globgrph/kuzu_incremental_refresh.py --for \"where the full-fallback is triggered, what threshold flips it, and what the incremental path applies\"",
+      "result": "PASS -- returned the :174 trigger in the SALIENT band AND, in the QUALIFIERS band, the stale 'Gated OFF by default' docstring that became surprise row S2. A grep for the threshold would have returned the threshold and not the qualifier; this is the right-file-wrong-conclusion class the tool exists for."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/globgrph/kuzu_nessie_load.py --for \"the full-load entry point, what it reads from Nessie/Iceberg, and where the output DB path is chosen\"",
+      "result": "PASS -- returned the entry point and, unprompted in SALIENT, _LOCK_PATH at :294 (the script-directory-keyed singleton) which became surprise row S3 and changed how the runs had to be sequenced. I was not looking for it."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "comp-read infra/aws/globgrph/_canonical.py --enumerate 'ensure_fresh|MUTEX_WAIT_S|ORPHAN_LOCK_S|INCREMENTAL_TIMEOUT_S|CANONICAL_DB_PATH'",
+      "result": "PASS -- 26 hits across 746 lines / 41 sections, 17 whole-value / 9 substring, bands DOCSTRING=7 COMMENT=4 DEF=1 CODE=14. Printed denominator; gave every constant the BOUNDS require staying clear of."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "comp-read infra/aws/globgrph/_canonical.py --enumerate 'GLOBGRPH_KUZU_INCREMENTAL_REFRESH'",
+      "result": "PASS -- 2 hits across 746 lines, both quoted in row S2, so that census is COMPLETE rather than sampled. Negative control: the same instrument on the same file returned 26 hits for the constants pattern, so the 2 is a real count and not a broken read."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "comp-read docs/briefs/globgrph-cloud-compile-and-gateway-traversal-20260901.md --enumerate '[0-9][0-9.]*\\s*(min|minute|minutes|sec|second|seconds|s\\b|MB|GB|MiB|GiB)'",
+      "result": "PASS -- 9 hits / 403 lines, locating all four prior figures at :7 and :320-323 with a printed denominator, which is what let AC5 claim it attributed 4 of 4 rather than 'the ones I happened to find'."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "comp-read docs/architecture/NFRA_KUZUSPLIT_PRD.md --enumerate '(356|3\\.9|92|~6 min|~10 min|P0-INSTRUMENT)' ; comp-read docs/architecture/NFRA_GRAPHS.md --enumerate '(~8 min|8 min|derive)'",
+      "result": "PASS -- 5 hits / 113 lines and 17 hits / 410 lines respectively. Pinned figures 1 and 3 to KUZUSPLIT :22 and :45, and established from NFRA_GRAPHS :18/:61 that the '~8 min' figure is comp-aws derive (cloud producer), i.e. NOT the projection -- the conflation AC5 exists to name."
+    },
+    {
+      "tool": "comp-find --name",
+      "invocation": "comp-find --name 'PROOF_OF_SPEC.schema.json'",
+      "result": "PASS -- 1 hit across 150,930 files scanned [corpus=all], 71,679 EPHEMERAL-FLOOR disclosed on its own denominator line."
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.7.0_AE_CloudOps~Q/measure_run.py",
+      "result": "PASS -- 'All checks passed! OK: no unguarded strict-utf8 log reads. OK: pre-commit gate clean for 1 of 1 file(s)' (py_compile + ds-precommit + ruff py39)."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md (standalone), then again inside safe-commit",
+      "result": "PARTIAL then PASS -- standalone it fail-closed on 'could not read the STAGED blob', correctly, because the rows were not yet staged; it validates at commit. Inside safe-commit: '1 new row(s) of 8 total checked (7 pre-existing, NOT re-graded); OK: all new rows carry their step-7/step-10 fields', corpus limb 21 documents / 211 rows / 0 malformed / 4 known-baseline failures / 0 new."
+    },
+    {
+      "tool": "jsonschema (independent of the gate)",
+      "invocation": "python -c \"jsonschema.validate(row, org/surprise_channel/schemas/investigation_item.schema.json)\" over every row parsed from the committed blob",
+      "result": "PASS -- 8 of 8 rows valid, 8 distinct ids, 0 collisions. Run as a SECOND instrument because the surprise-row gate only grades NEW rows, so it structurally cannot tell me the file as a whole is sound."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.7.0_AE_CloudOps~Q <...>\" -F <msgfile written by the Write tool, not a shell heredoc> -- <4 paths>",
+      "result": "PASS -- commit a9aea6f3ce, 4 files changed, 949 insertions; risk-reflex REFLEX CLEAN (4 files vs 1,906 danger nodes); to-pipeline-gate OK; missions-tree-check 0 violations; msg-verify MATCH len=5293. The .pyc under __pycache__ was auto-skipped."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.7.0_AE_CloudOps~Q/NFRA_CLDGRPH.TO-CG-V-1.full-fallback-duration-measured.proof_of_spec.json",
+      "result": "run on THIS instance before the <status> complete flip -- see the DELIVERABLE REPORT for the rc and the SURPRISES-limb resolution of NFRA_CLDGRPH-S2/S3/S4/S8."
+    },
+    {
+      "tool": "comp-schedule / comp-iam / comp-adversary",
+      "invocation": "not re-run by this seat",
+      "result": "SKIPPED with reason -- all three were run by the ISSUER at cut and are recorded in the task order's <preflight> (comp-schedule: 19 gates armed across 5 carriers, 0 naming NFRA_CLDGRPH/globgrph/kuzu; comp-adversary: rc 0 @a1af5d70c2; comp-iam: DECLARED-NOT-APPLICABLE). comp-iam remains not-applicable for the execution too: this task order creates, changes and newly grants NO principal, policy or resource, so the lens has an empty population at this subject grain. No IAM refusal was met during any run -- had one occurred it would be carried as a CG-s-12 finding per the BOUNDS."
+    }
+  ]
+}

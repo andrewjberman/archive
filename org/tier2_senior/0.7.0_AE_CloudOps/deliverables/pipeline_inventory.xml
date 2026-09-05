@@ -912,6 +912,21 @@
 
   </etfs_writeout_producers>
 
+  <globgrph_projection_worker>
+    <!-- NFRA_CLDGRPH CG-s-2/CG-s-9 (2026-09-03): the branch-head marker now
+         starts one cloud-resident Kuzu projection build.  The Pipe is the SQS
+         consumer of record; ECS task completion is not SQS-redriven. -->
+    <module>
+      <tf_dir>infra/aws/terraform/globgrph/ (projection.tf)</tf_dir>
+      <trigger>warehouse/_branch_head.main.json -> opal-globgrph-projection-events -> EventBridge Pipe opal-globgrph-projection-worker</trigger>
+      <runtime>ECS Fargate one-off task globgrph-projection-worker; 2 vCPU, 16 GiB, 3600s engine deadline</runtime>
+      <engine>infra/aws/globgrph/kuzu_incremental_refresh.py with kuzu_nessie_load.py full fallback; same sources as local callers</engine>
+      <artifact>s3://opal-313476888478-globgrph/projection/{marker committed_at ISO-8601}/kuzu_nessie_db plus _build_manifest.json</artifact>
+      <consumer_contract>The worker accepts Records and s3:TestEvent queue bodies; TestEvent is a successful no-op. Artifact is uploaded before manifest. No pointer, delete, or serving action belongs to this cell.</consumer_contract>
+      <recovery>Marker-idempotent next-stamp replay plus the nightly 02:00Z producer guarantee; no false claim that SQS retains a message after RunTask acceptance.</recovery>
+    </module>
+  </globgrph_projection_worker>
+
   <nfra_agentbus>
     <!-- Cross-principal Agent Bus transport + IAM/KMS partition (control-1 of the S1 5-control
          security model). NFRA_AGENTBUS.S2. SINGLE-TENANT-SIMULATED ONLY (both fleets = same-account

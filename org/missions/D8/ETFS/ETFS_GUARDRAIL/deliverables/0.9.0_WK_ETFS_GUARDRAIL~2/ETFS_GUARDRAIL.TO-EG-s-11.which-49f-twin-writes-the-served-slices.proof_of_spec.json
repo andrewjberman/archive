@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-11",
+  "phase": "INVESTIGATION",
+  "firm": "49F",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~2",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/prd/ETFS_GUARDRAIL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4e30d6b635bb01dbeeb0fc16605bdd61a44dffbc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "5376ecaa8bdbf0f775cb347c2ba849bfba67afb9",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-11.which-49f-twin-writes-the-served-slices.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/which-49f-twin-writes-the-served-slices.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/twin_writer_census.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "A read-only census script (no AWS write/invoke call anywhere in the module); run twice this turn with byte-identical WRITER/TWIN decision lines (determinism control) and once against a scratch-mutated tolerance constant (mutant control), both recorded in the result document."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/which-49f-twin-writes-the-served-slices.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A measurement deliverable. This TO changes no source: git diff --stat HEAD over the four named read-surface paths (the two lambda dirs, the .tf file, the source map) is empty."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row ETFS_GUARDRAIL-W2-S3 appended (never edits the 5 pre-existing rows); JSON block re-parsed after the edit (6 rows) and gated by .tools/surprise-row-gate.py at commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S11-AC1",
+      "criterion_verbatim": "the first twin is LIVE and its configured output prefix is the served prefix.",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda get-function-configuration --function-name bd-49f-etf-ownership-daily --query \"[FunctionName,LastModified,Environment.Variables.OUTPUT_PREFIX]\" --output text",
+      "output_evidence": "bd-49f-etf-ownership-daily\\t2026-07-29T01:46:07.000+0000\\tdaily/49financial/",
+      "denominator": "1 of 1 named function read; 1 of 1 output prefix matches 'daily/49financial/'.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S11-AC2",
+      "criterion_verbatim": "the canonical twin's live existence READ either way (a ResourceNotFoundException with a non-zero rc is a valid answer: NOT DEPLOYED, as its header says; record which).",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda get-function-configuration --function-name bd-49f-etf-ownership-daily-canonical --query FunctionName --output text; echo rc=$?",
+      "output_evidence": "An error occurred (ResourceNotFoundException) when calling the GetFunctionConfiguration operation: Function not found: arn:aws:lambda:us-east-1:313476888478:function:bd-49f-etf-ownership-daily-canonical / rc=255",
+      "denominator": "1 of 1 named function read, answer determinate (absent, matching the dir header's own 'NOT YET DEPLOYED' claim).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S11-AC3",
+      "criterion_verbatim": "the census RAN and printed its determination line (a WRITER=bd-49f-etf-ownership-daily confirms EG-s-2's address; WRITER=bd-49f-etf-ownership-daily-canonical or UNDETERMINED is a BLOCKING row on EG-s-2's premise, filed by you now so the issuer re-addresses before that order is handed).",
+      "method": "command",
+      "invocation": "python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/twin_writer_census.py",
+      "output_evidence": "WRITER=bd-49f-etf-ownership-daily EVIDENCE=3 / TWIN=bd-49f-etf-ownership-daily LIVE=True SCHEDULED=bd-49f-etf-ownership-scheduled-floor LAST_WROTE=2026-09-04T10:45:11.493000+00:00 / TWIN=bd-49f-etf-ownership-daily-canonical LIVE=False SCHEDULED=(none) LAST_WROTE=none. Full run log in the result document section 3, including the manual nextToken pagination that recovered 3 of 3 matching log events (see ETFS_GUARDRAIL-W2-S3) rather than the 1 a literal single un-paginated call returns.",
+      "denominator": "list-functions: 5 pages scanned, 1 match; per-twin config: 2 of 2 named twins read; EventBridge rules: 1 of 1 live function checked; CloudWatch: 4 pages followed, 3 of 3 matching events recovered; S3: 1 page, 87 objects total, 3 newest downloaded and parsed.",
+      "status": "PASS",
+      "status_reason": "WRITER=bd-49f-etf-ownership-daily confirms EG-s-2's address; no BLOCKING row is owed on this account (a BLOCKING row would only be filed if WRITER named -canonical or UNDETERMINED). Determinism control: re-run twice, WRITER/TWIN lines byte-identical. Mutant control: shrinking the 5-minute match tolerance to 0.001s in a scratch copy flips the result to WRITER=UNDETERMINED, confirming the discrimination is real."
+    },
+    {
+      "criterion_id": "S11-AC4",
+      "criterion_verbatim": "the newest served September slice READ (its LastModified is the timestamp the log census is keyed to).",
+      "method": "live_read",
+      "invocation": ".tools/aws s3api list-objects-v2 --bucket opal-data-etfs --prefix daily/49financial/2026-09 --query \"Contents[-1].[Key,LastModified]\" --output text",
+      "output_evidence": "daily/49financial/2026-09-03.json\\t2026-09-04T10:45:12.000Z",
+      "denominator": "1 of 1 prefix queried, 1 newest object named -- same object independently confirmed by the census script's own S3 step.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S11-AC5",
+      "criterion_verbatim": "graded by the CVO at L9: the writer is named on the APPLIED plane with log evidence tied to a served object, both ends (function side, object side) read, the DESIRED plane's answer compared and any drift stated. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "which-49f-twin-writes-the-served-slices.result.md sections 1-6, cross-read against the DESIRED plane (the .tf module + source map entry cited in the TO's own THE CELL section)",
+      "output_evidence": "APPLIED plane named: bd-49f-etf-ownership-daily, LIVE, scheduled cron(45 10 * * ? *) via rule bd-49f-etf-ownership-scheduled-floor, OUTPUT_PREFIX=daily/49financial/. FUNCTION SIDE evidence: 3 of 3 'OK: wrote' log lines in the 3-day window, each naming a served key. OBJECT SIDE evidence: 3 of 3 newest served slices under s3://opal-data-etfs/daily/49financial/ carry a LastModified within 5 minutes of the matching log line's timestamp, and each object's own source_artifact (s3://opal-data-assets/schwab/08242234/silver/fact_rps/date=<d>/data.parquet) matches the RPS_PREFIX EG-s-2's own TO cites for this function's shell. DESIRED plane compared: Terraform module bd_49f_etf_ownership_daily + source map entry both name bd-49f-etf-ownership-daily as the writer -- APPLIED and DESIRED AGREE; no drift stated because none was found. The canonical twin is absent on the APPLIED plane (ResourceNotFoundException) and absent from the DESIRED plane (no .tf, no source-map entry) -- both planes agree it does not write.",
+      "denominator": "N/A -- judgment criterion, no PASS/FAIL computed here.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true: graded by 3.0.0_SA_CVO at L9 against the result document, not self-graded here.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The WRITER determination's load-bearing assertion is that the 5-minute (300s) match tolerance between a log event's timestamp and a served object's LastModified is what discriminates 'this function wrote this object' from coincidence. Mutated ONLY in a throwaway scratch copy (.scratch/census_mutant.py, never the committed script): the tolerance constant changed from `<= 300:` to `<= 0.001:` (near-zero), every other line identical.",
+      "expected": "If the tolerance is genuinely load-bearing, shrinking it to near-zero must flip the determination from a named WRITER to UNDETERMINED (no real-world log-to-object gap is ever exactly 0.001s); a vacuous check would report the same WRITER regardless.",
+      "observed": "Mutant run: 'WRITER=UNDETERMINED REASON=no live function's 'OK: wrote' log line names a served key within 5 minutes of that object's LastModified' -- flipped exactly as expected. Real run (unmutated, run twice): 'WRITER=bd-49f-etf-ownership-daily EVIDENCE=3' both times. Scratch file deleted after the control (git status confirms absent/untracked).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "twin_writer_census.py run twice in immediate succession against the same live AWS state, the three decision lines (WRITER=..., TWIN=bd-49f-etf-ownership-daily ..., TWIN=bd-49f-etf-ownership-daily-canonical ...) compared verbatim.",
+      "observed": "RUN1 and RUN2 decision lines byte-identical: 'WRITER=bd-49f-etf-ownership-daily EVIDENCE=3', 'TWIN=bd-49f-etf-ownership-daily LIVE=True SCHEDULED=bd-49f-etf-ownership-scheduled-floor LAST_WROTE=2026-09-04T10:45:11.493000+00:00', 'TWIN=bd-49f-etf-ownership-daily-canonical LIVE=False SCHEDULED=(none) LAST_WROTE=none'.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Editing the two lambda dirs, the .tf file, or the source map.",
+      "reason": "TO bound: 'No source change; the two lambda dirs and the TF file are named for READING.' This is a live-plane verify cell; nothing in the four named read-surface paths is modified (git diff --stat HEAD over them is empty)."
+    },
+    {
+      "item": "Invoking either Lambda function.",
+      "reason": "TO bound: 'READS ONLY on the live plane ... No invoke, no write.' The census script contains no invoke/put/delete call; every AWS call it makes is a read (list, get, describe, filter)."
+    },
+    {
+      "item": "Reading opal-data-assets/schwab/* or any firm bucket directly.",
+      "reason": "TO bound (NEVER#1): 'you read the AGGREGATION bucket's 49financial prefix and the function's configuration; you do NOT read opal-data-assets/schwab/* or any firm bucket.' The source_artifact string cited in this deliverable is read FROM the served object's own JSON body in opal-data-etfs, not by a direct read of the firm bucket."
+    }
+  ],
+  "surprises": [
+    "ETFS_GUARDRAIL-W2-S3: TO-EG-s-11's prescribed single-call invocation of `logs filter-log-events ... --limit 20` under-reports matching events (1 of 3 found in the same 3-day window) because filter-log-events does not auto-fill --limit per page the way list_objects_v2/list_functions do -- a coverage trap, not a WRITER-determination error. Resolved in twin_writer_census.py by manually following nextToken to the true end. OBSERVATION/ARMED, disarm_owner 2.0.0_SA_COO~B (candidate addition to Rule 22a's instrument-trap catalogue)."
+  ],
+  "compiler_tools": [
+    {
+      "tool": ".tools/aws (CLI v1 shim)",
+      "invocation": "lambda get-function-configuration (x2) ; lambda list-functions ; events list-rule-names-by-target ; events describe-rule ; logs filter-log-events (x1 + manual nextToken follow x3) ; s3api list-objects-v2 (x2) ; s3api get-object",
+      "result": "all reads rc=0 except the canonical twin's config read (rc=255, ResourceNotFoundException, a valid determinate answer)"
+    },
+    {
+      "tool": "python (boto3 1.42.54, via twin_writer_census.py)",
+      "invocation": "python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~2/twin_writer_census.py (x2, plus 1 mutant run against a scratch copy)",
+      "result": "rc=0 both real runs, byte-identical WRITER/TWIN lines; mutant run flips to WRITER=UNDETERMINED as expected"
+    }
+  ]
+}

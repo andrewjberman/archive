@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_GLOBGRPH.TO-MSHEAT-EXPIRY",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.8.0_AE_CloudComp~K/task_orders/NFRA_GLOBGRPH.TO-MSHEAT-EXPIRY.lifecycle-rule-apply-under-hold.md",
+    "group": "OTHER",
+    "vintage_commit": "ee688a660b"
+  },
+  "assignee": "0.8.0_AE_CloudComp~K",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/critical_paths/change_management/20260903T1120Z_shared-infra-ms-heat-snapshots-expire-60d_hold.md",
+      "kind": "doc",
+      "commit_or_etag": "327217feba",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Closed carrier contains the measured rebuildability statement, bounded loss surface, scoped apply result, two-rule live read, and amended whole-control disclosure.",
+      "artifact_covered_by": ["MSH-AC1", "MSH-AC4"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/shared-infra/s3.tf",
+      "kind": "terraform",
+      "commit_or_etag": "4cd024c5c6",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Target-scoped safe-apply completed 0/1/0; live get-bucket-lifecycle-configuration returned exactly the unchanged abort rule plus the Enabled 60-day MS heat rule.",
+      "artifact_covered_by": ["MSH-AC3", "MSH-AC4"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260903T1418Z_shared-infra-ms-heat-snapshots-expire-60d_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "327217feba",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CLOSED ledger; all five legs carry proof and its open sentinel was removed by deploy_ledger.py close.",
+      "artifact_covered_by": ["MSH-AC2", "MSH-AC3", "MSH-AC4"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp~K/deliverables/NFRA_GLOBGRPH.TO-MSHEAT-EXPIRY.safe-apply-output.txt",
+      "kind": "doc",
+      "commit_or_etag": "49c49c218f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Captured safe-apply terminal output: Apply complete! Resources: 0 added, 1 changed, 0 destroyed.",
+      "artifact_covered_by": ["MSH-AC3"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp~K/deliverables/NFRA_GLOBGRPH.TO-MSHEAT-EXPIRY.lifecycle-post-read.json",
+      "kind": "config_data",
+      "commit_or_etag": "49c49c218f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Captured live AWS response has Rules denominator 2 with the exact ordered ids, status, prefix, and day counts.",
+      "artifact_covered_by": ["MSH-AC3", "MSH-AC4"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp~K/deliverables/NFRA_GLOBGRPH.TO-MSHEAT-EXPIRY.unscoped-post-plan.txt",
+      "kind": "doc",
+      "commit_or_etag": "49c49c218f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Captured unscoped control reports 0/10/0, omits the lifecycle address, lists the users-table drift and all nine route drifts, and was never applied.",
+      "artifact_covered_by": ["MSH-AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "MSH-AC1",
+      "criterion_verbatim": "THE STATEMENT: the HOLD entry carries the rebuildability statement as measured lines with their instruments (producer, rebuild path, source, loss surface), or the measured reason it cannot be made; nothing applied before it exists (the ledger entry's opened_at is later than the statement's commit).",
+      "method": "manual_read_with_citation",
+      "invocation": "Read org/modules/heatmap/ms_heat_index.py, infra/aws/globgrph/snap_store.py, the live snapshot prefix, exact source snapshot manifests, and Iceberg metadata; then read the REBUILDABILITY STATEMENT in the HOLD carrier.",
+      "output_evidence": "The HOLD carrier at f42be3d548 names the producer, recompute source, three-of-three live snapshot objects, all three retained graph-snapshot manifests, append-only ms_heat_snap metadata, and the bounded loss of byte identity/convenience. The deploy ledger opened later at 2026-09-03T14:18:33Z.",
+      "denominator": "3 of 3 dated JSON snapshots and 3 of 3 recorded graph-source manifests read; 2 of 2 Iceberg partitions account for 11,164 rows",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MSH-AC2",
+      "criterion_verbatim": "THE PRE-READ: a live get-bucket-lifecycle-configuration read BEFORE any act, quoted, settling never applied vs changed out of band.",
+      "method": "live_read",
+      "invocation": "bash .tools/aws s3api get-bucket-lifecycle-configuration --bucket opal-313476888478-globgrph --output json",
+      "output_evidence": "2026-09-03T14:19Z: Rules denominator=1; only abort-incomplete-mpu-7d was Enabled with DaysAfterInitiation=7. ms-heat-snapshots-expire-60d was absent, settling NEVER APPLIED.",
+      "denominator": "1 of 1 live pre-apply lifecycle rules enumerated",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MSH-AC3",
+      "criterion_verbatim": "THE ACT UNDER THE LEDGER, GATED: 1.0.0_SA_CTO's go quoted; safe-apply (never bare apply) on the SAVED plan produced with -target=aws_s3_bucket_lifecycle_configuration.global_graph, the output captured to a file reading exactly 0 added / 1 changed / 0 destroyed on ONE address; the live read-back after, with abort-incomplete-mpu-7d untouched.",
+      "method": "command",
+      "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/shared-infra apply -input=false -no-color ms-heat-snapshots-expire-60d-targeted.tfplan",
+      "output_evidence": "CTO Msg 93750 GO stood for the scoped amendment. The new saved plan was 0 add / 1 change / 0 destroy on aws_s3_bucket_lifecycle_configuration.global_graph. Captured output ends Apply complete! Resources: 0 added, 1 changed, 0 destroyed. Live read-back retained abort-incomplete-mpu-7d unchanged.",
+      "denominator": "1 of 1 planned and applied resource addresses; 2 of 2 post-apply rules read",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MSH-AC4",
+      "criterion_verbatim": "AMENDMENT 2: MSH-AC4 is graded on (i) the lifecycle change GONE from the unscoped plan; (ii) the control DISCLOSED whole -- the summary line and every address listed, none applied; (iii) the live lifecycle read of two rules. The ledger's L5 closes on that disclosed control.",
+      "method": "command",
+      "invocation": ".tools/terraform.exe -chdir=infra/aws/terraform/shared-infra plan -input=false -lock=true -no-color; bash .tools/aws s3api get-bucket-lifecycle-configuration --bucket opal-313476888478-globgrph --output json",
+      "output_evidence": "Unscoped summary: Plan: 0 to add, 10 to change, 0 to destroy. Lifecycle address absent. Addresses disclosed whole: aws_dynamodb_table.opal_users_v2 plus module.apigateway_portal.aws_apigatewayv2_route.r_as2dsme, r_c0k8rl0, r_gwygx58, r_m8wdq80, r_mxus2bs, r_o2xr1ct, r_ruzaqhq, r_sogv7z9, r_t81twif. None applied. Live read has exactly abort-incomplete-mpu-7d and ms-heat-snapshots-expire-60d. Ledger and HOLD carrier are CLOSED at 327217feba.",
+      "denominator": "10 of 10 unscoped change addresses disclosed; 0 of 10 applied; 2 of 2 live lifecycle rules verified; 5 of 5 ledger legs closed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MSH-AC5",
+      "criterion_verbatim": "Push state MEASURED at report; the proof instance VALID (proof-of-spec-check.py); the status flip on this flat-root face is the issuer's on the report; no message to any seat other than the issuer and the one gated message to 1.0.0_SA_CTO citing this order.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.8.0_AE_CloudComp~K/deliverables/NFRA_GLOBGRPH.TO-MSHEAT-EXPIRY_PROOF_OF_SPEC.json MSH-AC1,MSH-AC2,MSH-AC3,MSH-AC4,MSH-AC5; git rev-list --left-right --count origin/CLOUD...HEAD",
+      "output_evidence": "Proof checker returns VALID with all five expected ids. Push state measured on CLOUD: origin/CLOUD 351f309e0a6d; local fca007a4cf9c before proof commit; 0 behind / 75 ahead. State is LOCAL and this seat ran no git push.",
+      "denominator": "5 of 5 expected criteria present; 0 pushes by this seat",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The original unscoped saved plan was the widening mutant: it contained the ordered lifecycle change plus an unrelated users-table deletion-protection removal.",
+      "expected": "The exact 0/1/0 gate refuses the plan and no apply runs; a new target-scoped plan must isolate the lifecycle address.",
+      "observed": "The 0/2/0 plan was refused and never consumed, NFRA_GLOBGRPH-S1 was filed, and the new scoped plan applied only the lifecycle address at 0/1/0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Compare the saved scoped plan, captured safe-apply terminal output, live post-read, and independent unscoped control.",
+      "observed": "All four agree that the lifecycle change alone landed; the independent unscoped control contains no lifecycle address and the live API has exactly the two declared rules.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Nine API Gateway route authorization drifts in the unscoped control",
+      "reason": "Outside both lifecycle and users-table orders. Disclosed whole in NFRA_GLOBGRPH-S2, none applied, and routed by 2.0.0_SA_COO to 1.0.0_SA_CTO."
+    }
+  ],
+  "surprises": [
+    "NFRA_GLOBGRPH-S1: the original unscoped lifecycle plan also proposed removing live users-table deletion protection, so the exact gate refused it.",
+    "NFRA_GLOBGRPH-S2: the post-lifecycle unscoped control exposed nine API Gateway routes whose live CUSTOM authorization would be planned to NONE."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-09-03/nfra_globgrph_two_order_execution_1415-1649Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read on ms_heat_index.py, snap_store.py, and shared-infra/s3.tf with the order's declared questions",
+      "result": "Established the producer, full recompute path, append-only historical store, exact lifecycle resource, and bounded loss surface before apply."
+    },
+    {
+      "tool": "safe-apply",
+      "invocation": "safe-apply on the NEW saved target-scoped lifecycle plan",
+      "result": "Authorization and tombstone gates passed; one lifecycle address changed; exact terminal triple 0/1/0."
+    },
+    {
+      "tool": "Terraform unscoped control",
+      "invocation": ".tools/terraform.exe -chdir=infra/aws/terraform/shared-infra plan -input=false -lock=true -no-color",
+      "result": "Lifecycle address absent; all ten unrelated remaining drift addresses disclosed and none applied."
+    }
+  ]
+}

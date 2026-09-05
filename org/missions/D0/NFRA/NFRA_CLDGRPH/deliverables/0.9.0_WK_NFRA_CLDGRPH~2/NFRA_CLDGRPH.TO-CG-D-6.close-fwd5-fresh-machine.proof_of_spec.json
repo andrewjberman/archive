@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CLDGRPH.TO-CG-D-6",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/prd/NFRA_CLDGRPH_PRD.md",
+    "group": "D",
+    "vintage_commit": "25c66d3358"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+    "vintage_commit": "70918d5d2b",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-D-6.close-fwd5-fresh-machine.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_CLDGRPH~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/fresh_ask.sh",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW, 55 lines of bash, no dependency beyond git/date/hostname/ls and the repo's own .tools/comp-kuzu. It (1) prints the two absence reads as LOCAL_DB_BEFORE= and a name census DB_NAME_CENSUS_BEFORE=, (2) makes ONE json ask and prints FIRST_TRY_RC= plus the captured stderr disclosure, (3) repeats the ask in table mode, (4) re-prints the absence reads as LOCAL_DB_AFTER=. It resolves the workspace with `git rev-parse --show-toplevel` (no device-specific path) and writes its temp captures to .scratch/wk2/ ONLY -- never under infra/aws/globgrph/, which is what makes the AFTER read meaningful. Exercised 3 times this turn (17:34:23Z, and once for each of D6-AC2 and D6-AC3), rc=0 each time. A laptop script: nothing to deploy.",
+      "artifact_covered_by": ["D6-AC2", "D6-AC3", "D6-AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-x-5.fresh-machine.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The CG-x-5 record: one fenced JSON block carrying machine / local_db_present_before=false / local_db_present_after=false / question / cypher / first_try_rc=0 / answer_json (all 58 node_type rows) / vintage_line / laptop_seat_comparison='ISSUER'S AT THE DRAIN -- see the round-4 step log', then the raw transcripts (the deliverable run, the pre-ask absence reads with their positive controls, and the whole directory listing that carries the census denominator).",
+      "artifact_covered_by": ["D6-AC1", "D6-AC2", "D6-AC3", "D6-AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D6-AC1",
+      "criterion_verbatim": "D6-AC1 -- NO LOCAL DB ON THIS MACHINE, proven before the ask.",
+      "method": "command",
+      "invocation": "timeout 120 bash -c \"ls infra/aws/globgrph/ | grep -c kuzu_nessie_db\"",
+      "output_evidence": "0\nrc=1 (grep -c exits 1 on ZERO matching lines; the printed count 0 is the verdict, and the criterion's expect is the OUTPUT ^0$, not the rc). Taken at 2026-09-04T17:30:45Z, BEFORE any query left this machine. Corroborated by a DIFFERENT instrument on a different axis -- a direct stat rather than a name scan over a listing: `ls -d infra/aws/globgrph/kuzu_nessie_db; echo rc=$?` -> \"ls: cannot access 'infra/aws/globgrph/kuzu_nessie_db': No such file or directory\" rc=2 at 2026-09-04T17:30:44Z. Re-read inside the deliverable script both before the ask (DB_NAME_CENSUS_BEFORE=0, LOCAL_DB_BEFORE=absent) and after it (DB_NAME_CENSUS_AFTER=0, LOCAL_DB_AFTER=absent).",
+      "denominator": "0 of 60 entries in `ls infra/aws/globgrph/` (wc -l = 60, the whole directory, no head/limit) match the token kuzu_nessie_db -- and that census covers the DB directory AND all four of its named siblings (._refresh_status.json, .fallback.jsonl, .rebuild.tmp, .kuzu_nessie_load.lock), since every one of them carries the same token in its name. 3 of 3 absence reads agree (2 pre-ask instruments + the script's own), across 3 script runs.",
+      "status": "PASS",
+      "expect": "^0$"
+    },
+    {
+      "criterion_id": "D6-AC2",
+      "criterion_verbatim": "D6-AC2 -- ANSWERED ON THE FIRST TRY, with the vintage line.",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/fresh_ask.sh",
+      "output_evidence": "FIRST_TRY_RC=0\nVINTAGE: Built from the estate as of 2026-09-04 16:38:39 UTC.  [vintage=2026-09-04T16:38:39.485910+00:00 manifest=c3ba0330e306 prefix=projection/2026-09-04T16:38:39.485910+00:00/]\nTABLE_RC=0\n(second, identical VINTAGE line from the table-mode run)\nScript rc=0. The json ask returned a 58-row array; the table-mode run of the same statement printed \"(58 rows)\". The regex the criterion names was applied to the captured stdout: FIRST_TRY_RC=0[\\s\\S]*VINTAGE: Built from the estate as of -> True. FIRST TRY MEANS FIRST TRY: this was the first and only ask of the question from this machine, it succeeded, and no retry was made; a failure would have been recorded here as a FAIL with its rc and error text, per the order's bound.",
+      "denominator": "1 of 1 first-try asks answered (the ask this cell exists to make). Across the whole turn the client answered 3 of 3 json asks and 3 of 3 table asks rc=0, and printed the disclosure line on 6 of 6 answers; the --schema call (7th invocation, service-free) exited 0 as designed. NO ask this turn failed and none was retried.",
+      "status": "PASS",
+      "expect": "FIRST_TRY_RC=0[\\s\\S]*VINTAGE: Built from the estate as of"
+    },
+    {
+      "criterion_id": "D6-AC3",
+      "criterion_verbatim": "D6-AC3 -- THE READER DID NOT BECOME A BUILDER: absent before, absent after.",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/fresh_ask.sh | grep -E '^LOCAL_DB_(BEFORE|AFTER)='",
+      "output_evidence": "LOCAL_DB_BEFORE=absent\nLOCAL_DB_AFTER=absent\nrc=0 (grep's rc, PIPESTATUS[1]). The paired name census in the same run reads DB_NAME_CENSUS_BEFORE=0 and DB_NAME_CENSUS_AFTER=0, so a second instrument agrees on both ends. The AFTER read is taken after BOTH asks (json and table), so nothing either mode could have created is missed.",
+      "denominator": "2 of 2 reads (before, after) report absent, on each of 3 script runs = 6 of 6; and the second instrument (the name census) reports 0 on 6 of 6 of the same reads. What could have appeared and did not: the DB directory and its 4 named siblings -- all 5 are covered by the census token.",
+      "status": "PASS",
+      "expect": "LOCAL_DB_BEFORE=absent[\\s\\S]*LOCAL_DB_AFTER=absent"
+    },
+    {
+      "criterion_id": "D6-AC4",
+      "criterion_verbatim": "D6-AC4 -- SAME ANSWER AS A LAPTOP SEAT: your --json answer and its vintage line, set beside the issuer's laptop-seat answer for the identical Cypher (the round-4 step log). You record your half with NO verdict; 3.0.0_SA_CVO grades the pair at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "read: org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-x-5.fresh-machine.result.md -- the fenced JSON block (answer_json + vintage_line) produced by `bash .tools/comp-kuzu --json \"MATCH (n:CloudNode) RETURN n.node_type AS t, count(*) AS c ORDER BY c DESC, t\"` from the fresh checkout",
+      "output_evidence": "RECORDED, NOT GRADED. MY HALF: 58 node_type rows, 27295 CloudNodes in total, ordered c DESC then t; sha256 of the canonicalised row array = 071acd2274b159267ea265c13f62074a172a43b88b5ae1bdac07c5449faeec42. Head of the distribution: C2Motif=6303, MS_FILE=5049, Field=4969, JSXElement=2205, JSXRender=1433. Anchor for cross-seat comparison: LAMBDA=203, IAM_ROLE=216, S3_BUCKET=34, S3Key=232, tail singletons ECS_CLUSTER=1, LOAD_BALANCER=1, MS_LIBRARY=1, MS_SITE=1, STATE_MACHINE=1. VINTAGE LINE, verbatim: `VINTAGE: Built from the estate as of 2026-09-04 16:38:39 UTC.  [vintage=2026-09-04T16:38:39.485910+00:00 manifest=c3ba0330e306 prefix=projection/2026-09-04T16:38:39.485910+00:00/]`. THE OTHER HALF IS THE ISSUER'S: 2.0.0_SA_COO~A runs the identical Cypher from the main workspace (a laptop seat that still holds the local graph until CG-s-8 retires it) and records both answers in org/missions/D0/NFRA/NFRA_CLDGRPH/ledger/STEP_LOG.2.0.0_SA_COO~A.round4.json. HOW THE PAIR SHOULD BE READ (stated, not adjudicated): the vintage line is the join key -- two readers of ONE served artifact at ONE vintage must agree row-for-row, and readers at DIFFERENT vintages are compared on the vintage line rather than on the rows, because the estate moves between projections. Graded by 3.0.0_SA_CVO at L9.",
+      "denominator": "My half only: 1 of 2 seats recorded here (the fresh-checkout reader); the laptop seat's half is out of this order's hands by the order's own text. 58 of 58 rows are quoted in the record's JSON block, not sampled.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\" at the cut. The comparison needs the ISSUER's laptop-seat answer, which this worker cannot obtain (it has no second machine, no broker and no message). A PASS or FAIL here would be INVALID per the order's proof_of_spec block; 3.0.0_SA_CVO grades the pair at L9 from the round-4 step log.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Four mutants, each run through the SAME detector that grades the real output, plus two live positive controls on the two absence instruments the order names as the controls that must be able to FAIL. (a) D6-AC2's regex against a transcript whose FIRST_TRY_RC reads 1; (b) the same regex against a transcript whose disclosure is the client's failure line 'VINTAGE: unavailable -- the projection service did not answer'; (c) the same regex against a transcript where the VINTAGE line PRECEDES FIRST_TRY_RC=0 (the ordering the criterion encodes: answered-then-disclosed, not disclosed-then-answered); (d) D6-AC3's regex against LOCAL_DB_AFTER=present (the reader-became-a-builder case). LIVE POSITIVE CONTROLS, same instruments, different subject: `ls .tools/ | grep -c comp-kuzu` -> 1 (the AC1 census is not stuck on 0) and `[ -e infra/aws/globgrph/kuzu_cli.py ]` -> CONTROL_STATE=present (the AC3 state predicate is not stuck on absent). NOTE ON SCOPE: no mutant was planted in any .py or in the client -- this order forbids editing code, so the mutants are on the DETECTORS and the INSTRUMENTS, which is where this order's verdicts are made.",
+      "expected": "each of the four mutants is REJECTED by the detector that accepts the real output, and each live control returns the OPPOSITE reading from the same instrument on a subject that exists",
+      "observed": "REAL_AC2_DETECTOR=True; MUTANT_A_rc_nonzero=False (caught); MUTANT_B_no_vintage=False (caught); MUTANT_C_order_reversed=False (caught); REAL_AC3_DETECTOR=True; MUTANT_D_after_present=False (caught). Live controls: `ls .tools/ | grep -c comp-kuzu` -> 1 rc=0 (vs 0 rc=1 for the DB token), and CONTROL_STATE=present (vs absent for the DB path). 4 of 4 mutants caught, 2 of 2 live controls discriminating.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The identical deliverable script was run 3 times against the live service (17:34:23Z, then once per D6-AC2 and D6-AC3 invocation) and the 58-row json payload was extracted from each transcript, canonicalised with sort_keys and sha256'd. Independently, the table-mode rendering was re-parsed back into (node_type, count) pairs and compared to the json array -- a SECOND rendering path out of the same answer, not a re-run of the same one.",
+      "observed": "run1=071acd2274b15926, run2(AC2)=071acd2274b15926, run3(AC3)=071acd2274b15926, 58 rows each, ALL_THREE_IDENTICAL=True. The vintage line is byte-identical across runs (2026-09-04T16:38:39.485910+00:00, manifest c3ba0330e306), so the three reads are of ONE served projection -- determinism here is of the client+transport, and the constant vintage is what says so. TABLE_vs_JSON_IDENTICAL=True (58 pairs of 58). The ORDER BY c DESC, t in the statement is what makes row order comparable at all: without the tie-break on t, equal-count types could permute between readers and a same-answer comparison would false-alarm.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The laptop-seat half of D6-AC4 -- running the identical Cypher from the main workspace and setting the two answers side by side.",
+      "reason": "The order assigns it to 2.0.0_SA_COO~A at the drain and to 3.0.0_SA_CVO at L9. This worker has one worktree, no second machine and no way to reach a laptop seat; recording a verdict on the pair would be self-grading a judgment criterion."
+    },
+    {
+      "item": "Retiring, deleting or repointing anything that still reads the local kuzu_nessie_db (comp-find --corpus aws, org/modules/graph/cli.py, the engines, kuzu_nessie_load.py).",
+      "reason": "CG-s-8 / TO-CG-D-7's surface, explicitly downstream of this order and named as NOT mine in the decomp_ref block. This order is the RELEASE for that retirement (R7: it starts once a fresh machine has been answered), not the retirement."
+    },
+    {
+      "item": "Creating, copying, downloading or rebuilding any local graph in this worktree, and running any engine.",
+      "reason": "The order's BOUNDS forbid it, and it would destroy the very property the cell measures: a fresh machine is a READER, not a builder. The AFTER read exists to prove this exclusion was honoured mechanically, not merely declared."
+    },
+    {
+      "item": "The status-clause premise re-ground `bash .tools/comp-kuzu \"MATCH (n) RETURN count(n) AS nodes\"`.",
+      "reason": "NOT run as a separate act: the cell's OWN ask is a stronger instance of the same premise (it answered rc=0 with a VINTAGE line from this worktree on the first try), and running it AFTER the first-try ask would have added asks without changing any verdict. The service-free `bash .tools/comp-kuzu --schema` mandated by <compiler_tools_mandate> WAS run before the ask, rc=0."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-x-5.fresh-machine.result.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-kuzu",
+      "invocation": "timeout 120 bash .tools/comp-kuzu --schema",
+      "result": "rc=0, 21 lines, service-free as documented. Confirmed the dialect BEFORE writing the statement: node_type is a PROPERTY on (n:CloudNode), not a node label, so the cell's question is answered by `MATCH (n:CloudNode) RETURN n.node_type AS t, count(*) AS c` and NOT by a typed-label match -- the #1 dialect error the schema note exists to stop. Run before the ask per the order's <compiler_tools_mandate>."
+    },
+    {
+      "tool": "comp-kuzu",
+      "invocation": "timeout 120 bash .tools/comp-kuzu --json \"MATCH (n:CloudNode) RETURN n.node_type AS t, count(*) AS c ORDER BY c DESC, t\" (inside fresh_ask.sh)",
+      "result": "rc=0 on the FIRST try from a checkout with no local database: 58 rows on stdout, the FWD-3 disclosure on stderr. This is the cell's act."
+    },
+    {
+      "tool": "cat (source read, no search rail needed)",
+      "invocation": "cat .tools/comp-kuzu; cat infra/aws/globgrph/kuzu_cli.py",
+      "result": "Read at HEAD 4e30d6b635 before the ask, to know what the ask could POSSIBLY touch: comp-kuzu is a 15-line forwarder into kuzu_cli.py, and kuzu_cli.py's only data path is projection_client.query(q) over the gateway route -- no --db-path, no --mode, no refresh flag, no environment switch and no local path this process can open. That is why LOCAL_DB_AFTER=absent is an expected consequence of the design and not a lucky read: there is no code path from this ask to a local file."
+    }
+  ]
+}

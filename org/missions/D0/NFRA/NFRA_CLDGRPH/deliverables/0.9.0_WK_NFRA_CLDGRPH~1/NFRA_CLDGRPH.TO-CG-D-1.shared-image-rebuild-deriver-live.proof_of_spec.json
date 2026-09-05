@@ -1,0 +1,233 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CLDGRPH.TO-CG-D-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/prd/NFRA_CLDGRPH_PRD.md",
+    "group": "D",
+    "vintage_commit": "25c66d3358"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+    "vintage_commit": "eedb24b906",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-D-1.shared-image-rebuild-deriver-live.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_CLDGRPH~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-globgrph/build-source/derive-runner-source.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "a4cbe63234f0a3e3ad22e12113f91daa",
+      "artifact_covered_by": [
+        "D1-AC2",
+        "D1-AC8"
+      ],
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "PASS-1 ARTIFACT, re-read not re-built on this pass. s3api head-object read-back at 2026-09-04T08:00:09Z: ContentLength 449396 == local 449396, ETag a4cbe63234f0a3e3ad22e12113f91daa == local md5 (single-part), against a pre-state of 447665 B / db6386e955e58a1bb9a4c1a6c0d1007e -- verified on the SERVED object, never the cp exit code. Consumed by CodeBuild globgrph-derive-build:442305e5-9d54-4e89-96de-b22a6ed9f776 whose startTime 2026-09-04T08:01:48Z is AFTER the read-back."
+    },
+    {
+      "path_or_key": "ECR opal-globgrph-derive-runner sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778",
+      "kind": "s3_object",
+      "commit_or_etag": "sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778",
+      "artifact_covered_by": [
+        "D1-AC1",
+        "D1-AC3",
+        "D1-AC4"
+      ],
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ecr describe-images --image-ids imageTag=latest -> sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778, tags [latest, 20260904-080337], imagePushedAt 2026-09-04T08:03:52Z, replacing the pre-cut sha256:68bd8b932689a331928c1c3a6cc00fe124d24e04e7a9b64ba008f1a2d3de10e8. Built from commit 5644fee152600506259a8869f7067e89c8e6c0f2, which carries the C-3 deriver fix b5bc1c8b27; the COPY-source set at that commit is byte-identical to this branch's HEAD (empty diff over all 37 zip sources)."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/globgrph/serving.tf",
+      "kind": "terraform",
+      "commit_or_etag": "0df8682fa0",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The edits were already at this branch's base and were RE-READ, not re-made, on this pass. APPLIED this pass: bash .tools/safe-apply.sh -chdir=infra/aws/terraform/globgrph apply on eight -target addresses -> rc 0, 'Apply complete! Resources: 3 added, 5 changed, 3 destroyed.' LIVE READ-BACK: ecs describe-task-definition on each of the three families returns 313476888478.dkr.ecr.us-east-1.amazonaws.com/opal-globgrph-derive-runner@sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778 -- no ':latest' in any of the three. terraform fmt -check rc 0 on all three files."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/globgrph/item2a.tf",
+      "kind": "terraform",
+      "commit_or_etag": "0df8682fa0",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Line 361, the derive runner's image, reads \"${local.account_id}.dkr.ecr.${local.region}.amazonaws.com/opal-globgrph-derive-runner@${local.globgrph_image_digest}\" at this pin -- re-read, not re-edited, on this pass. LIVE READ-BACK after the apply: ecs describe-task-definition globgrph-derive-runner -> 313476888478.dkr.ecr.us-east-1.amazonaws.com/opal-globgrph-derive-runner@sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778 on revision 7, and the nightly rule's live target is .../globgrph-derive-runner:7."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/globgrph/projection.tf",
+      "kind": "terraform",
+      "commit_or_etag": "0df8682fa0",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Line 231, the projection worker's image, reads \"${aws_ecr_repository.derive_runner.repository_url}@${local.globgrph_image_digest}\" at this pin. The Pipe target at line 361 is `task_definition_arn = aws_ecs_task_definition.projection_worker.arn`, a resource reference that follows the new revision and needed no edit. LIVE READ-BACK: ecs describe-task-definition globgrph-projection-worker -> 313476888478.dkr.ecr.us-east-1.amazonaws.com/opal-globgrph-derive-runner@sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778 on revision 4; pipes describe-pipe opal-globgrph-projection-worker -> CurrentState RUNNING, TaskDefinitionArn .../globgrph-projection-worker:4."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260904T0756Z_cldgrph-cgs15-shared-image-digest-pins_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "0df8682fa0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER-2 ledger entry, 7 of 7 legs proven, Status line '**Status:** CLOSED -- nothing stranded -- closed 20260904T170545Z'. Its sentinel org/critical_paths/.open_deploys/cldgrph-cgs15-shared-image-digest-pins.json was COMMITTED FIRST (commit f497b7d71b) so the OPEN state could survive a worktree drain (row NFRA_CLDGRPH-S34), then unlinked by deploy_ledger.py close (row W2-S5); both states are on this branch."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~1/CG-s-15.shared-image-digest-pins.result.md",
+      "kind": "doc",
+      "commit_or_etag": "0df8682fa0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The cell's deliverable: one fenced JSON block (build id, digest, tags, COPY diff table, the three pinned task-definition ARNs and revisions, the Pipe target, the service deployment id + new task ARN + digest, the derive task ARN + exit + denominator line, the post-derive vintage, TRIGGERS with both queries, the four NFRA_GLOBGRPH families' next fire times) then prose."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D1-AC1",
+      "criterion_verbatim": "THE IMAGE MOVED: `:latest` resolves to a digest that is NOT the pre-cut digest (an unmoved tag prints the old one and fails).",
+      "method": "live_read",
+      "invocation": ".tools/aws ecr describe-images --repository-name opal-globgrph-derive-runner --image-ids imageTag=latest --query 'imageDetails[0].imageDigest' --output text",
+      "expect": "sha256:(?!68bd8b932689a331928c1c3a6cc00fe124d24e04e7a9b64ba008f1a2d3de10e8)[0-9a-f]{64}",
+      "output_evidence": "sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778   (rc 0; tags read separately: latest, 20260904-080337)",
+      "denominator": "1 of 1 repository tag resolved. The negative control is the criterion's own regex: the pre-act read at 07:5xZ, before the zip upload and before start-build, printed sha256:68bd8b93... which the regex excludes -- so a passing read on the pre-state was impossible.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D1-AC2",
+      "criterion_verbatim": "THE BUILD SUCCEEDED.",
+      "method": "live_read",
+      "invocation": ".tools/aws codebuild batch-get-builds --ids \"$(cat org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~1/build_id.txt)\" --query 'builds[0].buildStatus' --output text",
+      "expect": "SUCCEEDED",
+      "output_evidence": "SUCCEEDED   (rc 0; build_id.txt = globgrph-derive-build:442305e5-9d54-4e89-96de-b22a6ed9f776)",
+      "denominator": "1 of 1 build id, read from build_id.txt as the criterion's invocation prescribes. The build itself ran on the FIRST pass; this pass re-read the status rather than rebuilding, per the reopened face's step 2.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D1-AC3",
+      "criterion_verbatim": "THE THREE FAMILIES ARE PINNED BY DIGEST: each family's ACTIVE task definition references `@sha256:` and no `:latest` (three lines, all three pinned; the deliverable shows the digest equals `digest.txt`).",
+      "method": "live_read",
+      "invocation": "for fam in globgrph-derive-runner globgrph-projection-worker globgrph-serving; do .tools/aws ecs describe-task-definition --task-definition $fam --query 'taskDefinition.containerDefinitions[0].image' --output text; done",
+      "expect": "^[^\\n]*@sha256:[0-9a-f]{64}\\n[^\\n]*@sha256:[0-9a-f]{64}\\n[^\\n]*@sha256:[0-9a-f]{64}$",
+      "output_evidence": "rc 0. Three lines, every one a digest reference, no ':latest' anywhere:\n313476888478.dkr.ecr.us-east-1.amazonaws.com/opal-globgrph-derive-runner@sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778\n313476888478.dkr.ecr.us-east-1.amazonaws.com/opal-globgrph-derive-runner@sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778\n313476888478.dkr.ecr.us-east-1.amazonaws.com/opal-globgrph-derive-runner@sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778\nThe digest equals digest.txt byte for byte.",
+      "denominator": "3 of 3 families this project owns (globgrph-derive-runner:7, globgrph-projection-worker:4, globgrph-serving:2). The digest equals digest.txt byte for byte. THE CONTROL THAT COULD FAIL: the identical invocation run BEFORE the apply on this same pass printed three ':latest' lines and would have failed the regex; it is the same command, so the difference is the apply and nothing else. The other four of the seven consumers are deliberately NOT in this denominator -- they stay on :latest by the order's bound.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D1-AC4",
+      "criterion_verbatim": "THE DENOMINATOR PRINTED ON THE CLOUD BUILD: the ad-hoc derive's own log carries the read-versus-unreadable line C-3 added.",
+      "method": "live_read",
+      "invocation": ".tools/aws logs filter-log-events --log-group-name \"$(cat .../derive_log_group.txt)\" --log-stream-names \"$(cat .../derive_log_stream.txt)\" --filter-pattern \"unreadable\" --query 'events[].message' --output text",
+      "expect": "buckets read=[0-9]+ .*unreadable=[0-9]+",
+      "output_evidence": "  s3 notifications buckets read=34 / buckets unreadable=0; unreadable=none   (rc 0; group /ecs/globgrph/derive-runner, stream derive-runner/derive-runner/4a1baae562c8496983eb068146ae33d5)",
+      "denominator": "1 of 1 matching log event in the stream of THIS pass's derive task 4a1baae562c8496983eb068146ae33d5, which ran on the PINNED revision globgrph-derive-runner:7 and exited 0. The line's own denominator is 34 buckets swept, 34 read, 0 unreadable -- and 34 certifies the SWEEP, not that 34 is every bucket in the account. CONTRAST that makes the value meaningful: the first pass's derive, on the same image bytes, printed read=0 / unreadable=34; the variable between them is TO-CG-D-12's s3:GetBucketNotification grant, not this image.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D1-AC5",
+      "criterion_verbatim": "TRIGGERS NON-ZERO ON THE LIVE GRAPH at a vintage LATER than the derive task's start (both timestamps in the deliverable); a zero fails.",
+      "method": "live_read",
+      "invocation": "bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~1/triggers_query.sh",
+      "expect": "\"triggers\":\\s*[1-9][0-9]*",
+      "output_evidence": "{\"rows\":[{\"triggers\":171}],\"vintage\":\"2026-09-04T16:38:39.485910+00:00\",\"age_line\":\"Built from the estate as of 2026-09-04 16:38:39 UTC.\",\"manifest_sha256\":\"c3ba0330e3065984b247a1733f4d62387eff8ad507aad90b7bb7fc27ad337e48\"}   (rc 0, ssm invocation Success). Query as the server received it, echoed by the script: MATCH (a:CloudNode)-[e:CloudEdge]->(b:CloudNode) WHERE e.edge_type = 'TRIGGERS' RETURN count(e) AS triggers",
+      "denominator": "171 TRIGGERS edges out of 27295 nodes / one served projection at vintage 2026-09-04T16:38:39.485910+00:00, which is LATER than the derive task's start 2026-09-04T16:30:32Z -- the criterion's own timing bar. Declared Lambda targets enumerated: bd-pipeline 3 of 3 (bd-allocation-processor, bd-gold-trigger, bd-silver-merge); inf-pipeline 2 of 2 (inf-portal-publisher, inf-silver-aggregator) as additional evidence; cot-pipeline 0, EventBridge-only by S27/S32. INSTRUMENT DISCLOSURE: read through the REPAIRED triggers_query.sh -- the previous pass read triggers:0 from the broken transport (row W1-S10) and that reading measured the tool, not the graph; the repaired script echoes each query as the server received it, and the echo above is unmangled. Shape control at the same vintage: MATCH (n) RETURN count(n) -> nodes 27295.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D1-AC6",
+      "criterion_verbatim": "THE SERVING FAMILY'S NEXT LAUNCH: the PRIMARY deployment on a revision later than 1 (the pinned one) reached COMPLETED.",
+      "method": "live_read",
+      "invocation": ".tools/aws ecs describe-services --cluster opal-globgrph --services globgrph-serving --query 'services[0].deployments[?status==`PRIMARY`].[rolloutState,taskDefinition]' --output text",
+      "expect": "COMPLETED\\s+\\S+globgrph-serving:([2-9]|[1-9][0-9]+)$",
+      "output_evidence": "rc 0. The deciding line, verbatim:\nCOMPLETED\tarn:aws:ecs:us-east-1:313476888478:task-definition/globgrph-serving:2\nRevision 2 is the pinned one; revision 1 was the ':latest' one.",
+      "denominator": "1 of 1 PRIMARY deployment (ecs-svc/5051693120450624574), runningCount 1 / desiredCount 1, and it is the only deployment on the service -- no ACTIVE remains. The replacement task 8889156e83ad4e3e95931e9d505169a9 carries imageDigest sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778 = the pin, and replaced c18ee8b40e4a4bf3993f8f78cc2f98a6 by the service's OWN rolling deployment; no stop-task was used. THE CONTROL THAT COULD FAIL: before the apply the service was on globgrph-serving:1, which the regex excludes.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D1-AC7",
+      "criterion_verbatim": "THE LEDGER CLOSED with every leg proven and the seven families named (NEVER-2 + the S31 discipline line), read from the entry's own Status line.",
+      "method": "command",
+      "invocation": "grep -c '^\\*\\*Status:\\*\\* CLOSED' org/critical_paths/change_management/20260904T0756Z_cldgrph-cgs15-shared-image-digest-pins_deploy_completion.md",
+      "expect": "^1$",
+      "output_evidence": "rc 0. The count the invocation printed, verbatim:\n1\nThe Status line it counted reads: '**Status:** CLOSED -- nothing stranded -- closed 20260904T170545Z'",
+      "denominator": "7 of 7 legs closed with proof (L1 L2 L3 L5 on the first pass; L4 L6 L7 on this one), and 7 of 7 task families that pull this image named in the entry's Deploy line per the S31 discipline: globgrph-derive-runner, globgrph-projection-worker, globgrph-serving (pinned here) and globgrph-comp-learns-producer, globgrph-cse-producer, globgrph-fedobs-producer, globgrph-resource-summaries-producer (named, not edited, not run). READ FROM THE ENTRY, not from deploy_ledger.py list, which enumerates OPEN sentinels only and unlinks the sentinel on close (row W2-S5).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D1-AC8",
+      "criterion_verbatim": "THE COPY-SOURCE DIFF between the last built commit and your HEAD, per file, with which families depend on it and whether anything beyond the deriver fix rides this rebuild; and the projection family's launch on the pinned digest (the task the derive's stamp launched: ARN, digest, exit, `POINTER_PUT_OK`). A reading act; recorded with NO verdict; graded by 3.0.0_SA_CVO at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "(a) COPY diff: a python parse of `git show HEAD:infra/aws/globgrph/Dockerfile` -> 35 COPY directives, 35 distinct sources, + Dockerfile + buildspec.yml = 37 zip sources; then `git diff --numstat 649164d75b HEAD -- <the 37 paths>` and the same against the built commit 5644fee152. (b) projection launch: .tools/aws ecs describe-tasks on the Pipe-launched task + .tools/aws logs filter-log-events --filter-pattern POINTER_PUT_OK.",
+      "output_evidence": "(a) 649164d75b -> HEAD over the 37-path set: '168\t18\torg/modules/graph/comp_aws_cli.py' -- EXACTLY ONE FILE, one commit (b5bc1c8b27, the C-3 deriver fix). 5644fee152 (the BUILT commit) -> HEAD over the same 37 paths: EMPTY -- the running image is current with this branch's HEAD on every byte it carries. Dockerfile and buildspec.yml unchanged, so no new pip dependency and no resolution risk for the other six families. FAMILY DEPENDENCY: comp_aws_cli.py is imported by exactly one file in the image, infra/aws/globgrph/derive_runner.py:40 `import comp_aws_cli`, so the change reaches family (1) globgrph-derive-runner ONLY; the other six get identical bytes on a different code path. NOTHING BEYOND THE DERIVER FIX RIDES THIS REBUILD.  (b) PROJECTION FAMILY'S LAUNCH, by the derive's own marker stamp through the Pipe, not by hand: task arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/7b2d3bbefb2a4573bc5af5c8459f6e8a, taskDefinitionArn .../globgrph-projection-worker:4 (the pinned revision), containers[0].imageDigest sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778 (= the pin), lastStatus STOPPED, exitCode 0, startedAt 2026-09-04T16:38:58Z stoppedAt 2026-09-04T16:51:36Z (759 s), and in /aws/ecs/opal-globgrph-projection-worker stream projection-worker/projection-worker/7b2d3bbefb2a4573bc5af5c8459f6e8a: 'POINTER_PUT_OK key=projection/current.json vintage=2026-09-04T16:38:39.485910+00:00 manifest_sha256=c3ba0330e3065984b247a1733f4d62387eff8ad507aad90b7bb7fc27ad337e48'. The pointer advanced 2026-09-04T14:45:21.329463+00:00 -> 2026-09-04T16:38:39.485910+00:00, read from the object itself; no marker and no pointer was written by this seat.",
+      "denominator": "(a) 37 of 37 zip sources compared, 0 missing, 1 changed; two instruments agree on the denominator -- this pass's own python COPY parse and, on the first pass, build-derive-image.sh's grep+awk. (b) 1 of 1 Pipe-launched projection task in the window; 1 of 1 POINTER_PUT_OK line.",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\" at the cut: PASS or FAIL on this criterion is INVALID by the task order's own proof_of_spec block. The reading is recorded with no verdict; the SUBSTITUTE ORACLE is 3.0.0_SA_CVO at L9, which grades whether the diff is safe to ship and whether the projection launch evidences the pin."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three of this instance's PASS rows were exercised against a world in which they could only FAIL, using the IDENTICAL invocation, so the difference between the two readings is the act and not the instrument. (1) D1-AC3: the same three-family describe-task-definition loop, run on this pass BEFORE the apply, printed three ':latest' lines -- no '@sha256:' anywhere -- which the criterion's regex rejects. (2) D1-AC6: before the apply the service's PRIMARY deployment was on globgrph-serving:1, which the criterion's regex excludes by construction. (3) D1-AC1: the pre-act ECR read at 07:5xZ printed sha256:68bd8b93..., the one digest the criterion's negative lookahead forbids. D1-AC5 additionally carries an INSTRUMENT mutant from the previous pass: the same script, unrepaired, answered triggers:0 at a correct vintage.",
+      "expected": "the pre-act reads print ':latest' (AC3), globgrph-serving:1 (AC6) and sha256:68bd8b93... (AC1) -- each rejected by its own criterion",
+      "observed": "exactly that, all three measured on this pass or quoted from the first pass's record, and each moved to the passing value only after the act that was supposed to move it",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs compared for the two criteria whose value is a live read that could drift under me: D1-AC3's three-family loop was run twice (immediately after the apply and again while writing this instance) and returned the identical three digest lines; D1-AC1 was read twice (before the run-task and after) and returned the identical digest. D1-AC5 is NOT re-run for determinism by design -- a second SSM query is a second read of the same vintage and would prove nothing the vintage field does not already carry, and the deliverable pins the vintage to the manifest_sha256 of the projection the derive produced.",
+      "observed": "stable across both pairs; the served answer is additionally pinned to manifest_sha256 c3ba0330e3065984b247a1733f4d62387eff8ad507aad90b7bb7fc27ad337e48, which the projection worker's own POINTER_PUT_OK line names",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The four NFRA_GLOBGRPH families -- globgrph-comp-learns-producer, globgrph-cse-producer, globgrph-fedobs-producer, globgrph-resource-summaries-producer",
+      "reason": "The order's bound: NAMED, not edited, not run. They stay on :latest and pick the new image up on their next scheduled fire, recorded as DESIRED with each one's next fire time (03:30Z Scheduler, 04:00Z Rule, 04:30Z Rule, and NONE for resource-summaries-producer, which has no trigger at all -- row W1-S8). Their next fire times are INFERRED from cron expressions; only the ENABLED state and the absence of any trigger are measured."
+    },
+    {
+      "item": "A rebuild of the image on this pass",
+      "reason": "The reopened face's step 2: the build is DONE and must not be repeated. build_id.txt and digest.txt at HEAD were re-read and agree with ECR (D1-AC1/D1-AC2 both read the live plane), so no rebuild was performed."
+    },
+    {
+      "item": "The D-12 s3:GetBucketNotification grant's second carrier (its own inline policy in iam.tf rather than folded into item2a.tf's Sid AccountWideReadOnly)",
+      "reason": "The order's step 5: 'That is not yours to fold in; leave it exactly as found.' It was left as found; the unscoped plan control shows NO diff on it, so config and state agree. Row W1-S9 stands, owner 0.7.0_AE_CloudOps."
+    },
+    {
+      "item": "Reopening ledger leg L5 to record the PINNED derive run",
+      "reason": "Mechanically impossible and forbidden: deploy_ledger.py has no reopen/amend verb, and hand-editing the change_management/*.md is barred by the order. L5 stands closed against the first pass's UNPINNED run; the pinned derive (4a1baae562c8496983eb068146ae33d5, read=34/unreadable=0) is recorded in this instance, in the deliverable, and in row NFRA_CLDGRPH-W1-S12."
+    }
+  ],
+  "surprises": [
+    "NFRA_CLDGRPH-W1-S11: the halt gate resolves its principal ONLY from org/mcp/sessions/<session>.serial and never from OPAL_AGENT_SERIAL, so a spine-v3 worker's first safe-apply returns rc 3 'IDENTITY UNRESOLVED' and the fix is a write to a gitignored path no order grants. Filed this pass. OBSERVATION, ARMED, disarm_owner 1.0.0_SA_CTO.",
+    "NFRA_CLDGRPH-W1-S12: ledger leg L5 ('derive family next launch on the pinned revision') was closed on pass 1 against the UNPINNED globgrph-derive-runner:6 run, and a closed leg cannot be reopened for pass 2, so the CLOSED entry cites a run that predates both the pin and the IAM grant. Filed this pass. OBSERVATION, INERT.",
+    "NFRA_CLDGRPH-W1-S1: safe-apply's halt gate refused the spine-v3 worker serial GRAMMAR on both limbs (digit lane suffix, no agent home folder), rc 3 before terraform. Filed on the first pass; DISARMED at @68f22f74f5, which this pass exercised -- the worker limb admitted this seat once its identity resolved (see W1-S11).",
+    "NFRA_CLDGRPH-W1-S2: the measured apply address set is EIGHT, not the four the original face named -- two IAM role policies scope ecs:RunTask to the task definition AT ITS REVISION. Filed on the first pass; the reopened face adopted the eight and this pass applied exactly those, and the nightly rule's live target now reads globgrph-derive-runner:7, so the hazard did not occur.",
+    "NFRA_CLDGRPH-W1-S3: the globgrph terraform state carries seven root outputs its config no longer declares. Filed on the first pass; unchanged by this one.",
+    "NFRA_CLDGRPH-W1-S4: the deploy ledger has no `exercise` leg kind, and safe-apply is `.tools/safe-apply.sh` not `.tools/safe-apply`. Filed on the first pass; both re-encountered on this one and neither blocked it.",
+    "NFRA_CLDGRPH-W1-S5: non-ASCII in 8 of 22 terraform files in the globgrph module. Filed on the first pass; not touched by this order's edits.",
+    "NFRA_CLDGRPH-W1-S6: sibling worker subagents share ONE scratchpad directory and silently overwrite same-named files. Filed on the first pass; this pass used <worktree>/.scratch/ only.",
+    "NFRA_CLDGRPH-W1-S7: the silent-zero TRIGGERS defect is an IAM GAP -- the cloud derive role could not read S3 bucket notifications on ANY bucket (read=0 / unreadable=34). Filed on the first pass; TO-CG-D-12 granted it, and THIS pass's derive reads 34 of 34, which is the measured close of that finding.",
+    "NFRA_CLDGRPH-W1-S8: one of the seven shared-image consumers (globgrph-resource-summaries-producer) has NO trigger at all, so 'picks it up on its next scheduled fire' is unanswerable for it. Filed on the first pass; re-measured this pass (describe-rule ResourceNotFoundException, no Scheduler schedule) and recorded as next_fire NONE.",
+    "NFRA_CLDGRPH-W1-S9: the D-12 grant landed as its own inline policy in iam.tf, so the derive role's account-wide S3 reads have TWO carriers. Filed under TO-CG-D-12; bears on this order because an unscoped plan shows it. Left exactly as found, per this order's step 5.",
+    "NFRA_CLDGRPH-W1-S10: the served-graph instrument returned a FALSE ZERO for every WHERE-filtered cypher. Filed under TO-CG-D-12; it governs D1-AC5 directly -- this pass's 171 is read through the repaired script, and the previous pass's 0 through the broken one."
+  ],
+  "session_log": "2026-09-04, worktree C:/Users/AndrewBerman/Desktop/wk-NFRA_CLDGRPH-1, branch wk-NFRA_CLDGRPH-1, based on CLOUD @0df8682fa0. PUSH STATE: LOCAL (no push attempted; this seat never pushes). THE REOPENED PASS. Order of acts: (1) grounded the tree (branch + org/ + .tools/ present; every commit the face names -- b687429234, 68f22f74f5, b5bc1c8b27, aea8346fe1, a8136d19bb, 5644fee152 -- confirmed ANCESTOR of HEAD, so the face's premises are readable at this base). (2) FIRST ACT per the face: committed the restored OPEN sentinel (f497b7d71b) after re-reading its own legs array rather than trusting the face's sentence -- L1 L2 L3 L5 closed, L4 L6 L7 stranded, which matched. (3) Re-measured the world: :latest already at 1b89853f (D1-AC1 PASS), build SUCCEEDED (D1-AC2 PASS), but all three families still on ':latest' (D1-AC3 would have FAILED) -- the apply had never landed. (4) terraform init; unscoped plan control (13 addresses, 5 add / 8 change / 3 destroy) with the five foreign addresses named; targeted plan on the eight W1-S2 addresses (3 add / 5 change / 3 destroy, no foreign address). (5) safe-apply rc 3 IDENTITY UNRESOLVED -> wrote the gitignored session serial the gate's own banner prescribes -> rc 0, 3 added / 5 changed / 3 destroyed; row W1-S11 filed for the gap. (6) ONE ad-hoc QA run-task on the PINNED globgrph-derive-runner:7, polled bounded (7 x 60 s), exit 0, denominator read=34 / unreadable=0. (7) Watched the chain bounded: marker stamped 16:38:40Z, the Pipe launched globgrph-projection-worker:4 on the pinned digest (exit 0, POINTER_PUT_OK), pointer 14:45:21 -> 16:38:39, serving deployment COMPLETED on globgrph-serving:2 with the new task on the pinned digest, /health served vintage = the post-derive pointer. (8) TRIGGERS = 171 through the REPAIRED script, with both queries echoed as the server received them; bd 3 of 3 and inf 2 of 2 Lambda targets enumerated. (9) Closed legs L4 L6 L7 with proof, closed the entry (7 of 7), wrote the deliverable, filed rows W1-S11 and W1-S12 and restated the channel header 54 -> 56 (branch-local, and it says so). WHAT I DID NOT DO: rebuild the image; edit any .tf on this pass; write the marker or the pointer; stop-task the serving container; touch or run the four NFRA_GLOBGRPH families; delete any S3 object; build an alarm or monitor; use any override.",
+  "compiler_tools": [
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "python .tools/comp-read infra/aws/globgrph/Dockerfile --enumerate 'COPY '",
+      "result": "38 hit(s) across 206 lines, 0 whole / 38 sub -- of which one (line 198) is a comment mentioning a missed COPY, giving 35 real COPY directives. My own parse of `git show HEAD:<Dockerfile>` agrees: 35 directives, 35 distinct sources; + Dockerfile + buildspec.yml = the 37-entry zip-source denominator leg L3 used."
+    },
+    {
+      "tool": "comp-read --for",
+      "invocation": "python .tools/comp-read infra/aws/terraform/globgrph/projection.tf --for \"the Pipe target's task-definition reference and how C-2 moved it to revision 3\"",
+      "result": "397 lines, 1 section, 11 QUALIFIERS surfaced. The load-bearing finding: the Pipe's target at projection.tf:361 is `task_definition_arn = aws_ecs_task_definition.projection_worker.arn`, a RESOURCE reference, so it follows the new revision automatically and needed NO edit -- the order's 'Pipe target reference' edit was already satisfied. Verified on the live plane after the apply: pipes describe-pipe returns .../globgrph-projection-worker:4."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "python .tools/comp-read infra/aws/terraform/globgrph/projection.tf --enumerate 'aws_cloudwatch_log_group'",
+      "result": "5 hits, 2 whole / 3 substring; the whole-value hits are the two log-group resources, and projection.tf:183 gives the projection worker's group name /aws/ecs/opal-globgrph-projection-worker -- which is NOT the /ecs/globgrph/ prefix the derive runner uses, and guessing it would have produced an empty log read that reads exactly like a missing POINTER_PUT_OK."
+    },
+    {
+      "tool": "terraform fmt -check",
+      "invocation": "terraform fmt -check item2a.tf projection.tf serving.tf (in infra/aws/terraform/globgrph)",
+      "result": "rc 0, no file listed -- all three already canonically formatted."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> D1-AC1,D1-AC2,D1-AC3,D1-AC4,D1-AC5,D1-AC6,D1-AC7,D1-AC8",
+      "result": "see the run recorded in the worker report; only the exit code is the verdict."
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CLDGRPH.TO-CG-C-3",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.8.0_AE_CloudComp~O",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-C-3.deriver-read-state.md",
+    "group": "OTHER",
+    "vintage_commit": "918923adaa05f1dea0519c7bcc308ea96dc8b77f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+    "vintage_commit": "70918d5d2bc7f4634df572001d5656d5d8e381a0",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-C-3.deriver-read-state.md"
+  },
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-09-03/nfra_cldgrph_c3_deriver_read_state_1830-1935Z.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/modules/graph/comp_aws_cli.py",
+      "kind": "script",
+      "commit_or_etag": "b5bc1c8b27e89a477e17a5d9b789fdc010173af5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Canonical source is committed and exercised against the live account read-only. Docker COPY requires a separately routed shared-image rebuild; deployment is expressly outside C-3 and recorded as NFRA_CLDGRPH-S28.",
+      "artifact_covered_by": ["C3-AC1", "C3-AC2", "C3-AC3", "C3-AC4", "C3-AC5"]
+    },
+    {
+      "path_or_key": "org/modules/graph/tests/test_comp_aws_s3_notification_state.py",
+      "kind": "test",
+      "commit_or_etag": "b5bc1c8b27e89a477e17a5d9b789fdc010173af5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four focused read-state, legacy-mutant, source-merge, and Terraform-provenance tests pass; combined touched/adjacent suite is 27/27.",
+      "artifact_covered_by": ["C3-AC1", "C3-AC2", "C3-AC4", "C3-AC5"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.8.0_AE_CloudComp~O/CG-s-14.deriver-read-state.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Completion record carries the exact census, three live-account edges, denominator, denial before/after, runtime route, measured push state, and comp-trigger handoff.",
+      "artifact_covered_by": ["C3-AC1", "C3-AC2", "C3-AC3", "C3-AC4", "C3-AC5", "C3-AC6"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6e5af8cdc7610e7a6efbba98a4e4d919607988ec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "S28 passed the one-new-row gate at denominator 27 and routes the required shared-image rebuild to the issuer without performing it.",
+      "artifact_covered_by": ["C3-AC5", "C3-AC6"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C3-AC1",
+      "criterion_verbatim": "THE READ STATE: no failed notification read collapses to zero in `derive_edges` or the node-property twin; the census of bare-except swallows before and after with `file:line @ commit`; the denominator line on the build.",
+      "method": "test_suite",
+      "invocation": "python .tools/comp-read org/modules/graph/comp_aws_cli.py --enumerate 'except:\\s*$|except Exception|pass$' --width 10000 --limit 200; python -m pytest -q org/modules/graph/tests/test_comp_aws_s3_notification_state.py org/modules/graph/tests/test_comp_aws_cert_mutants.py; python org/modules/graph/comp_aws_cli.py derive",
+      "output_evidence": "At parent 57500ca0fb: 3 notification reads swallowed failure (node :273-281 to zero, Lambda edge :1442-1447 to pass, SNS/SQS :1679-1683 to continue); whole-file executable census was bare except 0, Exception handlers 81, pass statements 25. At b5bc1c8b27: notification swallows 0; bare except 0, handlers 79, pass statements 24. Helper :202-222 records READ/UNREADABLE, node :418-419 records state/error, and the real build prints 's3 notifications buckets read=34 / buckets unreadable=0; unreadable=none'. Tests: 27 passed.",
+      "denominator": "3 of 3 notification failure-swallow sites removed; 34 of 34 real buckets read and 0 of 34 unreadable on the exercised build; 27 of 27 tests passed.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3-AC2",
+      "criterion_verbatim": "THE SECOND SOURCE: TRIGGERS edges derived from the declared `aws_s3_bucket_notification` resources with provenance on the edge; a live/declared disagreement visible, never reconciled silently; `file:line @ commit`.",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q org/modules/graph/tests/test_comp_aws_s3_notification_state.py; read-only Python invocation of comp_aws_cli._derive_s3_lambda_trigger_edges over live_s3()",
+      "output_evidence": "Declared loader is comp_aws_cli.py:242-275 and merge is :278-343 @b5bc1c8b27; provenance is set at :322/:336 and disagreement at :323-338. Live-account bd edges are all provenance=both and disagreement=NONE. The denial seam preserves a declared edge with provenance=declared, live_read_state=UNREADABLE, source_disagreement=UNKNOWN_LIVE_UNREADABLE. Focused tests: 4 passed.",
+      "denominator": "3 of 3 provenance classes exercised (live, declared, both); 4 of 4 focused tests passed.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3-AC3",
+      "criterion_verbatim": "EXERCISED on the live account: the three declared targets derive NON-ZERO (quoted with provenance) and the denominator prints on a real build; the pre-fix zero shown as the before.",
+      "method": "test_suite",
+      "invocation": "python org/modules/graph/comp_aws_cli.py derive; read-only Python invocation filtering _derive_s3_lambda_trigger_edges for arn:aws:s3:::opal-data-bd",
+      "output_evidence": "Real derive exited 0 with edges total=3934, TRIGGERS=188, denominator 34/0, and NOT PERSISTED. The three bd targets are bd-allocation-processor, bd-gold-trigger, and bd-silver-merge; each is edge_type=TRIGGERS, provenance=both, live_read_state=READ, source_disagreement=NONE. Before-control S20 @72c0022be8 measured zero live graph S3-to-Lambda TRIGGERS rows.",
+      "denominator": "3 of 3 required actual bd Lambda targets derived non-zero; 34 of 34 S3 notification reads accounted for; 188 total TRIGGERS edges in the full build.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3-AC4",
+      "criterion_verbatim": "THE CAN-FAIL ARM: a planted denied read reports UNREADABLE, the denominator moves by one, no zero-by-silence; the plant never touches a real bucket's configuration.",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q org/modules/graph/tests/test_comp_aws_s3_notification_state.py::test_denied_node_read_is_unreadable_not_zero_and_moves_denominator org/modules/graph/tests/test_comp_aws_s3_notification_state.py::test_planted_denial_kills_the_legacy_zero_mutant org/modules/graph/tests/test_comp_aws_s3_notification_state.py::test_trigger_edges_merge_live_declared_and_unreadable_provenance",
+      "output_evidence": "Stubbed PermissionError at test lines 65-105 makes legacy_count()==0 but the repaired helper returns state=UNREADABLE and configuration=None. Node counts are None, error names PermissionError, and summary becomes read=1/unreadable=1 with ['denied']. Declared target remains standing with UNKNOWN_LIVE_UNREADABLE. The FakeS3 seam performs no AWS write.",
+      "denominator": "3 of 3 denial/mutant/declared-survival arms passed; 1 planted denial of 2 buckets moved the unreadable denominator from 0 to 1; 0 AWS configurations touched.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3-AC5",
+      "criterion_verbatim": "ONE ENGINE: no second deriver or output path; the runtime question (does the fix reach the cloud deriver without an image rebuild) answered on the record, routed as a row if it needs an act outside this cell; `.tools/commit-gate.sh` clean on every .py touched.",
+      "method": "test_suite",
+      "invocation": "python .tools/comp-find 'comp_aws_cli.py|cmd_derive|derive_runner' infra/aws/globgrph infra/aws/terraform/globgrph --all; bash .tools/commit-gate.sh org/modules/graph/comp_aws_cli.py org/modules/graph/tests/test_comp_aws_s3_notification_state.py",
+      "output_evidence": "derive_runner.py:101 calls canonical comp_aws_cli.cmd_derive; Dockerfile:56 copies that file and :206 runs derive_runner.py. Therefore a shared-image rebuild is required and was routed as NFRA_CLDGRPH-S28 @6e5af8cdc7, which names five image consumers. No second engine/output was added. Read-dependency release reports CG-s-2 COMPLETE @1c0d13904e with proof VALID and authentic revision-3 task f8b288ad95ec42dab2d17ef5a33cbd29 advancing the existing marker-to-projection path to the 19:02 vintage after exact verification. Commit gate: clean for 2 of 2 touched Python files.",
+      "denominator": "1 of 1 canonical derive engines changed; 1 of 1 existing downstream paths independently verified; 2 of 2 touched Python files clean; 1 of 1 required runtime questions answered and routed.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3-AC6",
+      "criterion_verbatim": "PUSH STATE MEASURED at report (never a push); the proof instance VALID (`.tools/proof-of-spec-check.py` rc 0) with every `surprises` entry resolving to a row (S20 at its commit plus any new row) BEFORE the complete flip, which this seat commits itself; the handoff line for `comp-trigger`.",
+      "method": "test_suite",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.8.0_AE_CloudComp~O/NFRA_CLDGRPH.TO-CG-C-3.deriver-read-state.proof_of_spec.json C3-AC1,C3-AC2,C3-AC3,C3-AC4,C3-AC5,C3-AC6; git ls-remote origin refs/heads/CLOUD; git merge-base --is-ancestor b5bc1c8b27e89a477e17a5d9b789fdc010173af5 351f309e0a6ded1a5a5bdf3aacec18a5f9f8dbee",
+      "output_evidence": "Proof validator returns rc 0 with 6 expected/6 proven criteria and every surprise ID resolved before the status flip. origin/CLOUD=351f309e0a6ded1a5a5bdf3aacec18a5f9f8dbee; implementation ancestry rc=1, so state is LOCAL and no push occurred. Result ends with the required NFRA_COMPEFFICACY comp-trigger HANDOFF line.",
+      "denominator": "6 of 6 criteria PASS; 4 of 4 cited surprise rows resolve; 1 of 1 origin ancestry probes reports LOCAL; 0 pushes.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Recreate the pre-fix denial branch by catching FakeS3 PermissionError and returning zero, then compare it with the committed helper and declared-edge merge.",
+      "expected": "Legacy branch returns 0; repaired branch returns UNREADABLE/configuration null, increments unreadable by one, and retains the declared edge with visible unknown-live disagreement.",
+      "observed": "legacy_count()==0; repaired state=UNREADABLE; buckets_read=1; buckets_unreadable=1; unreadable_buckets=['denied']; declared edge provenance=declared and source_disagreement=UNKNOWN_LIVE_UNREADABLE.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Repeated read-only live helper exercises and sorted unit-test assertions compare the same account/input shape; the helper sorts bucket names, target keys, and declared provenance.",
+      "observed": "Repeated live exercises returned the same 34/0 denominator and the same three ordered opal-data-bd targets with provenance=both; repeated focused/combined tests remained green.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Shared globgrph image rebuild and runtime deployment",
+      "reason": "Explicitly outside C-3's no-deploy bounds; required for live runtime application and routed to the issuer in NFRA_CLDGRPH-S28."
+    },
+    {
+      "item": "Terraform, AWS resource, bucket notification, marker, and projection writes",
+      "reason": "Explicitly forbidden; validation used reads and a stubbed refusal seam only."
+    },
+    {
+      "item": "A cot-pipeline S3-to-Lambda target",
+      "reason": "No such declared target exists: cot-pipeline is EventBridge-only. The spec/world divergence is recorded in NFRA_CLDGRPH-S27; the three-target acceptance arm is satisfied by the three real bd targets."
+    }
+  ],
+  "surprises": [
+    "NFRA_CLDGRPH-S20: the ported deriver swallowed failed S3 notification reads and published zero TRIGGERS edges",
+    "NFRA_CLDGRPH-S26: bare compiler shims were ACL-denied; repository-local entry points were authorized and used without changing ACLs",
+    "NFRA_CLDGRPH-S27: cot-pipeline is EventBridge-only despite the task face naming it as Lambda-notification-bearing",
+    "NFRA_CLDGRPH-S28: the committed engine fix requires a separately routed rebuild of the shared five-consumer cloud image"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which before each search/inspection question",
+      "result": "Routing was measured before repository and AWS inspection; low-confidence/no-curated matches were treated as such, not silently selected."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "python .tools/comp-read org/modules/graph/comp_aws_cli.py --for ...; python .tools/comp-read org/modules/graph/comp_aws_cli.py --enumerate 'except:\\s*$|except Exception|pass$'",
+      "result": "Repository-local Python entry point read the notification sites and measured the post-change exception census. Bare user-bin shim was ACL-denied under S26; COO ruling 93884 prohibited ACL changes and authorized this entry point."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "python .tools/comp-find --corpus aws 'TRIGGERS'; python .tools/comp-find 'comp_aws_cli.py|cmd_derive|derive_runner' infra/aws/globgrph infra/aws/terraform/globgrph --all",
+      "result": "Pre-write live graph: 0 textual TRIGGERS hits across 2132 AWS nodes at DB vintage 2026-09-03T18:23:39Z. Runtime search resolved the canonical runner and Docker COPY path. Repository-local Python entry point used per ruling."
+    },
+    {
+      "tool": "comp-to",
+      "invocation": "bash .tools/comp-to NFRA_CLDGRPH.TO-CG-C-3.deriver-read-state",
+      "result": "Race-free seat/session TO_ID set through the authorized repository-local entry point."
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh org/modules/graph/comp_aws_cli.py org/modules/graph/tests/test_comp_aws_s3_notification_state.py",
+      "result": "Clean for 2 of 2 touched Python files."
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py <this proof> C3-AC1,C3-AC2,C3-AC3,C3-AC4,C3-AC5,C3-AC6",
+      "result": "VALID before the task-order complete flip."
+    }
+  ]
+}

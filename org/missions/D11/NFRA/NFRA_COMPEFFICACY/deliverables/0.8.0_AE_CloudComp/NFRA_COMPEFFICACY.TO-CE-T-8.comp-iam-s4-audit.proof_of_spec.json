@@ -1,0 +1,158 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_COMPEFFICACY.TO-CE-T-8.comp-iam-s4-audit",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.8.0_AE_CloudComp",
+ "spec_ref": {
+  "doc": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/task-orders/NFRA_COMPEFFICACY.TO-CE-T-8.comp-iam-s4-audit.md",
+  "group": "OTHER",
+  "vintage_commit": "f11c72e808"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/decompositions/NFRA_COMPEFFICACY_DECOMP.md",
+  "vintage_commit": "070907b56e",
+  "to_ref": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/task-orders/NFRA_COMPEFFICACY.TO-CE-T-8.comp-iam-s4-audit.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/modules/graph/iam_cli.py",
+   "kind": "script",
+   "commit_or_etag": "eb7966105a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "a repo-local CLI engine invoked via the .tools/comp-iam shim; no S3/Lambda deploy surface; not a deploy-scope path under Rule 13.",
+   "introduces": [
+    "STATE_NOT_DECIDABLE",
+    "raise_on"
+   ]
+  },
+  {
+   "path_or_key": ".tools/tests/test_comp_iam_battery.py",
+   "kind": "test",
+   "commit_or_etag": "eb7966105a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "a pytest/direct-run test file; not a deploy-scope path.",
+   "introduces": [
+    "IAM-AC3-STATE-TOKEN-CENSUS",
+    "IAM-AC5-MUTANT-BUDGET-IGNORED-DETECTED"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp/comp-iam.result.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the cell's result deliverable; a document, not a deploy artifact."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "T8-AC1",
+   "criterion_verbatim": "the deliverable parses (one fenced JSON block), every required s.4 field present or explicitly ABSENT, 4.1 identity read from the ENGINE path (iam_cli.py), the shim named as the shim.",
+   "method": "schema_validation",
+   "invocation": "python -c \"import re,json; t=open('org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp/comp-iam.result.md',encoding='utf-8').read(); m=re.search(r'```json\\n(.*?)\\n```', t, re.S); d=json.loads(m.group(1)); print(list(d.keys()))\"",
+   "output_evidence": "JSON OK, top-level keys: ['schema', 'row', 'measured_by', 'measured_at_utc', 'read_vintage', 'surprises', 'identity', 'disclosure', 'answer_state', 'three_state', 'rule_t', 'bounds', 'passcraft', 'usage']. identity.engine_path names org/modules/graph/iam_cli.py explicitly and identity.shim_path names .tools/comp-iam as the 8-line shim, not the engine -- no field conflates the two. Fields with no live carrier are graded ABSENT/N-A explicitly (disclosure.pagination graded N/A with a reason; identity.self_identifies.version_flag graded ABSENT) rather than omitted.",
+   "denominator": "1 of 1 fenced JSON block parses; 14 of 14 top-level s.4 fields present (schema/row/measured_by/measured_at_utc/read_vintage/surprises/identity/disclosure/answer_state/three_state/rule_t/bounds/passcraft/usage)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T8-AC2",
+   "criterion_verbatim": "(AC-2) four PLANTED cases keyed on the ratified enum produce four DISTINGUISHABLE, machine-rejectable outputs in the tool's own voice (rc + text quoted per case), planted through the OFFLINE stub suite where the case is a simulate case -- zero live IAM calls owed by this criterion.",
+   "method": "command",
+   "invocation": "comp-iam service ZZZ_NONEXISTENT_SERVICE_93999 ; comp-iam gaps astn-wsjft-scraper ; comp-iam simulate-self-test (case 3, offline stub) ; comp-iam reconcile --census-ttl-hours 0.0001 ; comp-iam service opal-inf-value-parity",
+   "output_evidence": "Four states, five printed shapes (PARTIAL_OR_BLIND has two limbs), quoted verbatim in the deliverable: SUBJECT_ABSENT_FROM_CORPUS rc=0 (\"No service matching '...'\" + candidate lists); PRESENT_WITH_ZERO_RESULTS rc=0 (\"No ACTION-plane findings...\" + \"RESOURCE PLANE: 6 call(s) verdicted across 1 mapped role(s)\"); PARTIAL_OR_BLIND(a) rc=2 (\"STATE: NOT-DECIDABLE\", offline stub, zero live calls); PARTIAL_OR_BLIND(b) rc=3 (\"REFUSED: APPLIED reconcile NOT PERFORMED -- the census is STALE\"); NOT_APPLICABLE rc=0 (\"SERVICE: opal-inf-value-parity [lambda]\" ... \"No AWS operations detected.\"). All five distinguishable pairwise by rc, header presence, or the RESOURCE PLANE second number -- never by rc alone (three of the five share rc=0).",
+   "denominator": "4 of 4 states planted; 5 of 5 printed shapes distinguishable pairwise; 0 live IAM calls made for the simulate case (offline Stub client)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T8-AC3",
+   "criterion_verbatim": "THE THREE-STATE: every deny-shaped answer prints exactly one of ALLOWED / DENIED / NOT-DECIDABLE by token; a conditioned statement with no --context prints NOT-DECIDABLE (never DENIED); a batched multi-ARN call is REFUSED or split (never a HELD ARN read as denied); a census past its TTL prints NOT-DECIDABLE / refused (never ALLOWED); the pair (a real deny vs a false deny) shown side by side from the stub suite.",
+   "method": "test_suite",
+   "invocation": "python org/modules/graph/iam_cli.py simulate-self-test ; python .tools/tests/test_comp_iam_battery.py (arms IAM-AC3-STATE-TOKEN-CENSUS, IAM-AC3-MUTANT-FALSE-ALLOW-DETECTED)",
+   "output_evidence": "simulate-self-test: 6/6 PASS -- case1 multi-ARN REFUSED before any call (0 calls made, s.calls==[]); case2 real deny STATE: DENIED rc=1; case3 false deny (missing context) STATE: NOT-DECIDABLE rc=2 (never DENIED); case4 control-also-denies STATE: NOT-DECIDABLE rc=2; case5 allow STATE: ALLOWED rc=0; case6 (new, DEFERRED) STATE: NOT-DECIDABLE rc=2. IAM-AC3-STATE-TOKEN-CENSUS PASS: a real subprocess run of simulate-self-test censuses the printed STATE: tokens and finds exactly {ALLOWED:1, DENIED:1, NOT-DECIDABLE:3} -- matching the six cases above exactly. IAM-AC3-MUTANT-FALSE-ALLOW-DETECTED PASS (red-first control): a planted mutant that flips case 3's STATE: NOT-DECIDABLE to STATE: ALLOWED (rc unchanged at 2) leaves the self-test's OWN internal rc-based grading GREEN (\"OK: all simulate self-test cases pass\") while the token census correctly disagrees ({ALLOWED:2, NOT-DECIDABLE:2} != expected) -- proving the census, not the rc, is the load-bearing check for AC3's own 'machine-rejectable by TOKEN' wording. reconcile's stale-census case (T8-AC2's PARTIAL_OR_BLIND(b)) is rc=3 'REFUSED', never ALLOWED, never DENIED.",
+   "denominator": "6 of 6 simulate-self-test cases PASS; 2 of 2 new battery arms PASS (1 real, 1 red-first mutant); STATE-token census exact match on all 3 token values (ALLOWED, DENIED, NOT-DECIDABLE)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T8-AC4",
+   "criterion_verbatim": "(AC-4) Rule T's form applied: --help discloses the carrier via _compbudget.py; a planted small --budget on a corpus-width sweep produces the s.4.4 expiry line with its source word and reached denominator, side by side with a clean completion line; an AWS-plane call that would outlive the budget lands in the DEFERRED bucket, never a hang; the non-application half stated for the census-file subcommands.",
+   "method": "command",
+   "invocation": "comp-iam simulate --help ; comp-iam resource-sweep --help ; comp-iam attach-census --help ; comp-iam resource-sweep --budget 0 ; comp-iam resource-sweep --budget 0.00001 ; comp-iam attach-census --budget 0.00001 ; simulate-self-test case 6 (DEFERRED)",
+   "output_evidence": "all three --help texts quote the shared carrier verbatim ('Rule T (PRD s.4.4): seconds for ... carrier: --budget > env COMP_BUDGET_S > default 90s'). resource-sweep --budget 0: 'WITHIN BUDGET: scanned 166 of 166 lambda; budget: unbounded (--budget 0), used 14.16 s'. resource-sweep --budget 0.00001: 'BUDGET REACHED: 1e-05s (flag); scanned 0 of 166 lambda(s); ... NO CURSOR YET ... resume: re-run with a larger --budget.' attach-census --budget 0.00001: 'NOT WITHIN BUDGET: the _build() pass took 12.86s, over the budget: 1e-05 s (flag) -- but it already RAN TO COMPLETION ... Disclosed non-application of the early-abort half of Rule T for this specific subcommand shape.' -- the non-application half stated explicitly, not silently. DEFERRED bucket: simulate-self-test case 6 stub raises TimeoutError on the TARGET call -> 'DEFERRED: call did not complete within 90s (default) -- TimeoutError: ...' / 'STATE: NOT-DECIDABLE', rc=2, never a hang (the offline stub returns instantly; the live path's ceiling is the boto3.config.Config connect/read timeout wired to the same resolved budget_s).",
+   "denominator": "3 of 3 --help texts disclose the carrier; 1 side-by-side pair (WITHIN BUDGET vs BUDGET REACHED) exercised on the real production binary for resource-sweep; 1 of 1 census-file subcommand (attach-census) states its non-application explicitly; 1 of 1 DEFERRED case exercised offline",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T8-AC5",
+   "criterion_verbatim": "battery: _simulate_self_test stays GREEN (its arm count stated) plus ONE new arm per new behaviour (the three-state token, the budget carrier), each with a planted mutant RED; stated at the FILE grain, directory grain of .tools/tests/ as it reads.",
+   "method": "test_suite",
+   "invocation": "python org/modules/graph/iam_cli.py simulate-self-test ; python .tools/tests/test_comp_iam_battery.py ; python -m pytest -q .tools/tests/test_comp_iam_battery.py ; python -m .tools/commit-gate.sh org/modules/graph/iam_cli.py .tools/tests/test_comp_iam_battery.py",
+   "output_evidence": "_simulate_self_test: was 5/5, now 6/6 GREEN (case 6, the DEFERRED bucket, is the new-behaviour arm inside the embedded suite). New external battery .tools/tests/test_comp_iam_battery.py (254 lines, NEW this cell): 8/8 PASS -- IAM-AC3-STATE-TOKEN-CENSUS + its red-first mutant IAM-AC3-MUTANT-FALSE-ALLOW-DETECTED (the three-state token behaviour); IAM-AC5-SWEEP-WITHIN-BUDGET, IAM-AC5-SWEEP-RESUME-AFTER, IAM-AC5-SWEEP-BUDGET-REACHED-NO-CURSOR, IAM-AC5-ATTACH-CENSUS-WITHIN-BUDGET, IAM-AC5-ATTACH-CENSUS-DISCLOSED-NONAPPLICATION + its red-first mutant IAM-AC5-MUTANT-BUDGET-IGNORED-DETECTED (the budget-carrier behaviour). Confirmed direct (COMP-IAM BATTERY: 8/8 PASS) AND under pytest (1 passed in 67.77s). Two fixture defects found and fixed live during authoring, both disclosed in the battery file's own docstring: (1) _iam_module()'s spec_from_file_location import initially raised ModuleNotFoundError on a sibling module iam_cli.py assumes is on sys.path under `python iam_cli.py` script-dir-on-path semantics -- fixed by inserting the tool's own directory before exec_module; (2) mutant fixtures must live BESIDE the real engine (org/modules/graph/_tmp_iam_mutant_<kind>_<pid>.py, not a temp dir) because iam_cli.py's _WORKSPACE = 3-parents-up computation is depth-sensitive -- both mutants confirmed removed after each run (ls org/modules/graph/ | grep _tmp_iam_mutant -> none left). commit-gate.sh: clean 2 of 2 files (one unused-import ruff finding caught and fixed live: `tempfile` imported, never used). DIRECTORY GRAIN, .tools/tests/, stated as it reads (not re-run this cell; T-1's 2026-09-02 census is the last read, unchanged in nature): pytest --collect-only .tools/tests/ still INTERNALERROR/SystemExit at test_fabric_check_classify.py (one of CTO's three named F6 files) -- this cell's own two files (test_comp_iam_battery.py, and iam_cli.py's embedded self-test which is not pytest-collected at all) are unaffected by that abort since it is a different file's import-time SystemExit.",
+   "denominator": "6 of 6 embedded self-test cases GREEN; 8 of 8 new external battery arms PASS (4 behaviour arms + 2 red-first mutants + 2 supporting Rule-T completion arms), confirmed at 2 grains (direct, pytest); 2 of 2 touched .py files clean under commit-gate; directory grain 1 of 22 known aborters still blocks the full .tools/tests/ sweep, not introduced by this cell",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T8-AC6",
+   "criterion_verbatim": "push state MEASURED at report (ls-remote + is-ancestor; LOCAL expected while Andrew gates the cadence, say which state was read); the proof instance VALID with every surprises entry resolving to a row BEFORE the complete flip, which the seat commits itself.",
+   "method": "command",
+   "invocation": "git fetch origin CLOUD ; git rev-parse origin/CLOUD ; git merge-base --is-ancestor eb7966105a origin/CLOUD ; python .tools/proof-of-spec-check.py <this instance>",
+   "output_evidence": "measured at report time in the DELIVERABLE REPORT message to 2.0.0_SA_COO (git ls-remote/is-ancestor read there, not duplicated here to avoid a second, possibly-stale measurement). Expected LOCAL under Andrew's standing push hold -- stated as expected, confirmed by the actual read at report. surprises: [] (empty) -- no row exists to resolve; per NFRA_COMPEFFICACY-S9's own precedent, an audit finding discovered inside a per-tool deliverable (this cell's F4) rides the project's per-tool carrier and is not a spec-vs-world surprise-channel row.",
+   "denominator": "1 of 1 fix commit measured for push state at report time; 0 of 0 surprises entries to resolve (none filed)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "TWO planted mutants, each a real source-text mutation of org/modules/graph/iam_cli.py written to a disposable sibling file beside the real engine (never a copy elsewhere, per the _WORKSPACE depth-sensitivity fixture lesson): (a) state_flip -- the missing-context branch's STATE: NOT-DECIDABLE line is changed to STATE: ALLOWED while its rc stays 2 unchanged; (b) budget_ignored -- resource-sweep's per-iteration `if remaining is not None and remaining <= 0` check is neutered to `if False and ...`, disabling the budget entirely.",
+   "expected": "(a) the mutant's own internal simulate-self-test rc-based grading stays falsely GREEN while the external STATE-token census (IAM-AC3-STATE-TOKEN-CENSUS's own predicate) disagrees with the expected {ALLOWED:1,DENIED:1,NOT-DECIDABLE:3} distribution; (b) a 0.00001s budget on resource-sweep against the mutant fails to print BUDGET REACHED and instead completes the full 166-lambda scan, silently ignoring the ceiling.",
+   "observed": "(a) mutant self-test printed 'OK: all simulate self-test cases pass' (rc=0, internally green) while its STATE-token census read {ALLOWED:2, DENIED:1, NOT-DECIDABLE:2} != expected -- IAM-AC3-MUTANT-FALSE-ALLOW-DETECTED PASS (i.e. the arm correctly detected the mutant's defect). (b) mutant run under --budget 0.00001 printed 'WITHIN BUDGET: scanned 166 of 166 lambda ...' with no 'BUDGET REACHED' anywhere in output -- IAM-AC5-MUTANT-BUDGET-IGNORED-DETECTED PASS (the arm correctly detected the ignored budget). Both mutant files confirmed removed after their runs (no _tmp_iam_mutant_* files remain in org/modules/graph/).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "ran the full new battery (.tools/tests/test_comp_iam_battery.py) three times across this cell's work: once direct after the sys.path fixture fix, once again direct after removing the unused `tempfile` import (commit-gate fix), once under pytest -q -- compared arm-by-arm results across all three runs",
+   "observed": "8 of 8 arms identical PASS/PASS/PASS across all three runs. The resource-sweep timing values varied run to run (13.5s-14.16s for the full 166-lambda _build() pass, consistent with Terraform-parse wall-clock variance already documented for this repo's other tools) but never crossed any threshold the arms assert against (the tiny-budget arms use 0.00001s, orders of magnitude below any observed _build() time), so PASS/FAIL verdicts were stable even though exact timings were not bit-identical.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a literal top-level SUBJECT_ABSENT_FROM_CORPUS / PRESENT_WITH_ZERO_RESULTS / NOT_APPLICABLE token printed by comp-iam's own voice",
+   "reason": "the ratified enum itself states these three carry NO code carrier anywhere in the estate today (origin: MINTED, tool_voice.token: null) -- comp-iam's planted cases are graded declared_by_tool: false for all three, same posture as the comp-find precedent (T-1), not a gap this cell was asked to close (BOUNDS: the three-state token work is scoped to the DENY-shaped answer axis specifically, not a rewrite of every subcommand's voice)"
+  },
+  {
+   "item": "a comprehensive audit of comp_iam_live.py / comp_iam_census.py / comp_iam_investigate.py's own internal Rule T or three-state posture",
+   "reason": "in-lane per the TO's SURFACES list but not touched by the code change this cell owed (BOUNDS: the ONE code change is the budget carrier + machine-rejectable three-state on cmd_simulate/resource-sweep/attach-census in iam_cli.py; the three siblings are read-only context for this audit, not rewritten)"
+  },
+  {
+   "item": "org/standards/COMPTOOL_ANSWER_STATE.enum.json's carrier-list update to add iam_cli.py as a second NOT-DECIDABLE carrier",
+   "reason": "the enum is an L4-owned (1.0.0_SA_CTO) ratified artifact; this cell is not that lane. Filed as finding F4 in the deliverable, not edited here."
+  },
+  {
+   "item": "comp-iam refresh-census (a fresh live-IAM census pull)",
+   "reason": "not re-run this cell: the existing default-resolved census (cmpaws-iam-census-20260903.json, generated 2026-09-03T06:46:12Z) was already FRESH (age 0.2h) at every APPLIED-plane read this cell made (reconcile), satisfying the compiler_tools_mandate's precondition without a redundant live GetAccountAuthorizationDetails call"
+  },
+  {
+   "item": "CE-t-6, CE-t-9, CE-t-7 (STAGE 2's next cells)",
+   "reason": "read-dependencies per the decomp_ref, sequenced AFTER this cell, not claimed by it"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-09-03/ce_t8_comp_iam_s4_audit_three_state_rule_t_0610-0710Z.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-read",
+   "invocation": "org/modules/graph/iam_cli.py --enumerate 'implicitDeny|explicitDeny|allowed|NOT-DECIDABLE|timeout=|remaining' (before write, per the compiler_tools_mandate)",
+   "result": "32 hit(s) | 23 whole | 9 sub | DOCSTRING=2 | COMMENT=6 | DEF=0 | CODE=24 -- located every false-deny-mode citation, every remaining()/Clock consumer, and every allowed/implicitDeny string literal cited in this deliverable's evidence"
+  },
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "on org/modules/graph/iam_cli.py, .tools/tests/test_comp_iam_battery.py",
+   "result": "clean, 2 of 2 files (1 ruff finding caught and fixed live: unused `tempfile` import in the new battery file, removed before commit)"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> T8-AC1,T8-AC2,T8-AC3,T8-AC4,T8-AC5,T8-AC6",
+   "result": "see the commit report -- validated on the COMMITTED bytes before the complete flip"
+  }
+ ]
+}

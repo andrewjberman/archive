@@ -1,0 +1,164 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_COMPEFFICACY.TO-CE-T-25.comp-dataflow-gate-under-fwd10",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.8.0_AE_CloudComp~A",
+ "spec_ref": {
+  "doc": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/task-orders/NFRA_COMPEFFICACY.TO-CE-T-25.comp-dataflow-gate-under-fwd10.md",
+  "group": "OTHER",
+  "vintage_commit": "8a5d683c38"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/decompositions/NFRA_COMPEFFICACY_DECOMP.md",
+  "vintage_commit": "dcf07b4799",
+  "to_ref": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/task-orders/NFRA_COMPEFFICACY.TO-CE-T-25.comp-dataflow-gate-under-fwd10.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/modules/graph/comp_dataflow.py",
+   "kind": "script",
+   "commit_or_etag": "72e7846ca7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "a repo-local Python engine invoked via .tools/comp-dataflow; never deployed as an S3/Lambda artifact; not a deploy-scope path under Rule 13.",
+   "introduces": [
+    "RC_NOT_DECIDABLE = 4",
+    "STATE_NOT_DECIDABLE = \"NOT-DECIDABLE\""
+   ]
+  },
+  {
+   "path_or_key": ".tools/tests/test_comp_dataflow_battery.py",
+   "kind": "test",
+   "commit_or_etag": "72e7846ca7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "test file update; not a deploy-scope path.",
+   "introduces": [
+    "VERDICT-RC-CONSUMER",
+    "MUTANT-VERDICT-RC"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~A/comp-dataflow.fwd10.result.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the FWD-10 result deliverable; a document, not a deploy artifact."
+  },
+  {
+   "path_or_key": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "710819ddc6",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the project's surprise-channel row file; a PRE-EXISTING tracked file (many prior commits), so its citation is a REAL commit hash, never PENDING-THIS-COMMIT (that value is only for artifacts with no prior git history). NFRA_COMPEFFICACY-S16 appended by this cell as the S14 disarm carrier, committed alone in this hash so the citation is real at write time.",
+   "introduces": [
+    "NFRA_COMPEFFICACY-S16"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "T25-AC1",
+   "criterion_verbatim": "THE BAR, QUOTED: the deliverable quotes FWD-10's ACCEPT clause and the s.4.4 verdict-bearing row verbatim; a real --budget-cut gate sweep prints the BUDGET REACHED line AND returns the non-clean rc carrying NOT-DECIDABLE, distinct from both the clean rc and the measured failing rc; the whole rc vocabulary is on --help and in the deliverable.",
+   "method": "command",
+   "invocation": "comp-dataflow.fwd10.result.md quotes FWD-10 + s.4.4 verbatim from PRD v0.5 @5bbdab5ec7; python org/modules/graph/comp_dataflow.py gate --help ; python org/modules/graph/comp_dataflow.py gate data/ --budget 0.001",
+   "output_evidence": "the deliverable's 'THE BAR, QUOTED' section reproduces FWD-10 and the s.4.4 row verbatim (block-quoted, no paraphrase). gate --help's epilog states the 5-value rc vocabulary (0 clean / 1 findings / 2 usage / 3 refused / 4 not-decidable) with the iam_cli.py:50 family-precedent note and WHY rc=4 was adopted instead of the precedent's rc=2 (this tool's own rc=2 was already occupied). The forced-budget run prints the BUDGET REACHED line unchanged from CE-t-7 PLUS a new 'STATE: NOT-DECIDABLE (rc=4, distinct from clean rc=0 and findings rc=1 ...)' line, and returns rc=4 -- measured directly (subprocess returncode), not inferred. A separate real complete-sweep-with-findings run returns rc=1, confirming rc=4 and rc=1 are genuinely distinct values, not a shared shape.",
+   "denominator": "2 of 2 quoted spec blocks (FWD-10 + s.4.4 row) verbatim; 3 of 3 real rc values measured pairwise distinct (0, 1, 4); rc vocabulary present on --help and in the deliverable",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T25-AC2",
+   "criterion_verbatim": "EXERCISED (FWD-10 DONE WHEN): an rc-only consumer (a shell conjunction or a tiny hook, quoted) reads the budget-cut sweep as NOT clean and does not proceed; the cursor is then followed to completion and the complete sweep's rc is the true verdict; both runs quoted with rc + line.",
+   "method": "command",
+   "invocation": "python org/modules/graph/comp_dataflow.py gate data/ --budget 0.001 > /dev/null 2>/dev/null && echo PROCEEDED || echo 'CORRECTLY DID NOT PROCEED (rc=$?)' ; then the printed --cursor value followed with --budget 30 to completion",
+   "output_evidence": "Run 1: the shell && correctly does not proceed past the budget-cut sweep (rc=4); the tool's own BUDGET REACHED + new STATE: NOT-DECIDABLE line quoted. Run 2: following the exact printed cursor with an ample budget (30s, comfortably over the measured ~8.8s full-tree baseline) completes (531 of 531 producer_file, 0 deferred, WITHIN BUDGET) and returns rc=1 -- the TRUE verdict, confirmed by a second && check that correctly does not proceed for a DIFFERENT reason now (a real finding, not partial coverage). BOTH runs quoted verbatim in the deliverable, including the FIRST (failed) attempt at Run 2 that exposed the cursor-denominator bug before the fix -- not selectively omitted.",
+   "denominator": "2 of 2 required runs exercised and quoted (rc-only bail, cursor-to-completion); 1 real bug found and fixed while exercising this exact criterion",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T25-AC3",
+   "criterion_verbatim": "NON-APPLICATION STATED: origin's rc semantics unchanged (diff shown); the round-4 cursor resume still skips exactly the completed units; the item-9 semantics (served-origin flagging, exemptions) untouched.",
+   "method": "diff",
+   "invocation": "git diff -- org/modules/graph/comp_dataflow.py | sed -n '/^@@.*cmd_origin/,/^@@/p' (confirms zero hunks anchored inside cmd_origin's body)",
+   "output_evidence": "cmd_origin carries ZERO diff lines -- confirmed by grepping the diff for hunks inside its body (none found; the function name appears only as unchanged CONTEXT in a nearby hunk for the RC_* constants block). The cursor SKIP mechanism (which files get processed after --cursor) was already exact at CE-t-7 and remains exact, confirmed by this cell's own Run 2 (exactly 531 files processed, the one before the cursor correctly excluded). Item-9 semantics (_served_findings, classify_layer, trace_file's classification) carry zero diff lines; re-verified live against the RF-7 charter specimen (unchanged, still exactly 5 SERVED-ORIGIN flags, matching CE-t-7's own measurement).",
+   "denominator": "1 of 1 function (cmd_origin) confirmed zero-diff; 1 of 1 regression specimen (RF-7) re-verified unchanged",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T25-AC4",
+   "criterion_verbatim": "battery: the three verdict arms + the RED mutant that returns 0 at expiry, the round-4 arms still green, direct AND pytest at the FILE grain, directory grain stated as it reads; commit-gate clean on every .py touched.",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_comp_dataflow_battery.py ; python -m pytest -q .tools/tests/test_comp_dataflow_battery.py ; python -m pytest -q --collect-only .tools/tests/ ; bash .tools/commit-gate.sh org/modules/graph/comp_dataflow.py .tools/tests/test_comp_dataflow_battery.py",
+   "output_evidence": "11 of 11 PASS (8 round-4 arms + 3 new: VERDICT-RC-CONSUMER, VERDICT-RC-VOCABULARY, MUTANT-VERDICT-RC), direct and under pytest -q (32.15s). MUTANT-VERDICT-RC (a build with 'if partial: return RC_CLEAN' planted) correctly reproduces the FWD-10 violation on demand (rc=0 from a budget-cut sweep) -- RED-first confirmed, built in a scratch mirror matching comp_dataflow.py's own _WS depth. All 8 round-4 arms re-confirmed PASS, unaffected. Directory grain: still INTERNALERROR/SystemExit at test_fabric_check_classify.py:76 (CTO's F6, unchanged), 36 tests collected before the abort (was 35 at CE-t-7). commit-gate.sh: clean, 2 of 2 files.",
+   "denominator": "11 of 11 file-grain rec()-calls PASS (3 new + 8 unaffected); 1 of 1 new mutant FIRED-AS-EXPECTED; directory grain: 1 of 22 known aborters still blocks the sweep, not this cell's; commit-gate 2 of 2 clean",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T25-AC5",
+   "criterion_verbatim": "the proof instance VALID with a surprises entry resolving to NFRA_COMPEFFICACY-S14@153522a509 carrying the fix commit as this lane's DISARM (disarm_owner 0.8.0_AE_CloudComp~A; the disposition stays 3.0.0_SA_CVO's); push state MEASURED at report; the complete flip self-committed.",
+   "method": "command",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> T25-AC1,T25-AC2,T25-AC3,T25-AC4,T25-AC5 ; git ls-remote origin refs/heads/CLOUD ; git merge-base --is-ancestor 72e7846ca7 origin/CLOUD",
+   "output_evidence": "the surprises entry below cites NFRA_COMPEFFICACY-S14@153522a509 (the ARMED row this cell disarms) AND names NFRA_COMPEFFICACY-S16@72e7846ca7 (this cell's own append, the disarm carrier, hazard_standing INERT, disposition left UNDER_INVESTIGATION for 3.0.0_SA_CVO's own L9 adjudication per the TO's own words -- not self-closed). The surprise-row-gate.py run on the updated INVESTIGATION_v1.md returned rc=0. Push state measured fresh in the commit report, not asserted here.",
+   "denominator": "1 of 1 required surprises entry present, resolving to a real row at a real commit; disposition correctly left unset by this row",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "one NEW mutant this cell (MUTANT-VERDICT-RC): the 'if partial: return RC_NOT_DECIDABLE' block in cmd_gate replaced with 'return RC_CLEAN', built in a scratch mirror tree (org/modules/graph/comp_dataflow.py + .tools/_compbudget.py under a tempdir, matching the engine's own _WS resolution depth, the CE-t-7 precedent). The 8 round-4 mutants (never-guess, reason, budget-carrier) are unaffected and re-confirmed still fire.",
+   "expected": "the mutant RUNS (no crash) and reproduces the EXACT FWD-10 violation the round-4 F4 finding named: rc=0 (RC_CLEAN) returned from a --budget 0.001 sweep over the full data/ tree, where the real code returns rc=4",
+   "observed": "MUTANT-VERDICT-RC: the mutant returned rc=0 from the budget-cut sweep, exactly the FWD-10 violation reproduced on demand -- PASS (the mutant broke the control as expected, proving arm 7's rc=4 is produced by real compliance with the new form, not an accident of the test).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "re-ran the full Run-1/Run-2 EXERCISED sequence (budget-cut bail, then cursor-to-completion) three times; separately re-ran the pairwise-distinct rc check (clean/findings/not-decidable) across repeated invocations",
+   "observed": "3/3 repetitions: Run 1 always rc=4 with the STATE: NOT-DECIDABLE line; Run 2 (post-fix) always rc=1, 531 of 531, WITHIN BUDGET, 0 deferred -- stable. clean_rc/findings_rc/notdecidable_rc read 0/1/4 identically across repeated measurements.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "landing the verdict-bearing expiry-rc mechanism in the shared _compbudget.py module itself",
+   "reason": "BOUNDS: '_compbudget.py is consumed, not edited by this order... if the expiry rc for verdict-bearing tools belongs in the shared module, say so in a FINDING' -- proposed shape stated in the deliverable, not built; the L4 owner and sequencer place it."
+  },
+  {
+   "item": "F1 (vintage disclosure stderr-only), F2 (SUBJECT_ABSENT_FROM_CORPUS/NOT_APPLICABLE share one REFUSE shape), F3 (the shim's own un-budgeted self-report)",
+   "reason": "carried unchanged from CE-t-7's own deliverable, out of this cell's narrow FWD-10 scope (rc at expiry only, per the TO's own words: 'no change to what the gate FLAGS, only to what it RETURNS at expiry')"
+  },
+  {
+   "item": "the three F6 files at .tools/tests/ still aborting pytest's directory-grain collection",
+   "reason": "carried unchanged from CE-t-1/CE-t-2/CE-t-3/CE-t-7, owned by 1.0.0_SA_CTO, out of this cell's lane"
+  }
+ ],
+ "surprises": [
+  "NFRA_COMPEFFICACY-S14@153522a509: the ARMED hazard this cell disarms (comp-dataflow gate returning the clean rc from a partial sweep, the SCOPE_CHANGE that produced FWD-10)",
+  "NFRA_COMPEFFICACY-S16@72e7846ca7: this cell's own row, the disarm carrier -- the fix commit, EXERCISED end-to-end, hazard_standing INERT; disposition intentionally left for 3.0.0_SA_CVO's own L9 adjudication"
+ ],
+ "session_log": "org/tier2_senior/0.8.0_AE_CloudComp~A/logs/2026-09-03/ce_t25_comp_dataflow_fwd10_verdict_rc_0927-1204Z.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-read",
+   "invocation": "comp-read org/modules/graph/comp_dataflow.py --for \"cmd_gate's return paths: the clean rc, the findings rc, and what happens at BUDGET REACHED\" ; comp-read org/modules/graph/iam_cli.py --for \"how STATE_NOT_DECIDABLE maps to the process exit code\"",
+   "result": "located cmd_gate's three pre-existing return points and the BUDGET REACHED print block exactly; found iam_cli.py:50 STATE_NOT_DECIDABLE and its rc=2 return sites (grep-confirmed at :535,:593,:769,:783,:789,:810,:844,:853,:920) -- the family precedent this cell reads and does not duplicate"
+  },
+  {
+   "tool": "grep (rc enumeration)",
+   "invocation": "grep -n \"return [0-9]\" org/modules/graph/comp_dataflow.py (before write)",
+   "result": "confirmed rc=2 was already occupied (a --budget usage error, landed at CE-t-7) before choosing rc=4 for RC_NOT_DECIDABLE, per the TO's own instruction to pick the next unoccupied value"
+  },
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "on org/modules/graph/comp_dataflow.py, .tools/tests/test_comp_dataflow_battery.py",
+   "result": "clean, 2 of 2 file(s)"
+  },
+  {
+   "tool": ".tools/surprise-row-gate.py",
+   "invocation": "python .tools/surprise-row-gate.py org/missions/D11/NFRA/NFRA_COMPEFFICACY/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "result": "rc=0, OK -- the S16 append validated"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> T25-AC1,T25-AC2,T25-AC3,T25-AC4,T25-AC5",
+   "result": "see the commit report -- validated on the COMMITTED bytes before the complete flip"
+  }
+ ]
+}

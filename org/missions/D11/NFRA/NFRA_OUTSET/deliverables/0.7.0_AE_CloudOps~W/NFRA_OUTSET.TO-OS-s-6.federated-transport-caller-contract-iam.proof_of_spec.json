@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OUTSET.TO-OS-s-6",
+  "phase": "INVESTIGATION",
+  "firm": "FABRIC",
+  "assignee": "0.7.0_AE_CloudOps~W",
+  "spec_ref": {
+    "doc": "org/missions/D11/NFRA/NFRA_OUTSET/task-orders/NFRA_OUTSET.TO-OS-s-6.federated-transport-caller-contract-iam.md",
+    "group": "OTHER",
+    "vintage_commit": "14f26b5eff"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D11/NFRA/NFRA_OUTSET/decompositions/NFRA_OUTSET_DECOMP.md",
+    "vintage_commit": "6f1655f376",
+    "to_ref": "org/missions/D11/NFRA/NFRA_OUTSET/task-orders/NFRA_OUTSET.TO-OS-s-6.federated-transport-caller-contract-iam.md"
+  },
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~W/logs/2026-09-04/session_W_2030-2200Z_outset_os-s-6_os-s-7.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.7.0_AE_CloudOps~W/federated-transport-caller-contract-iam.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "An AUDIT deliverable. This TO changes nothing deployable by construction: every AWS call was describe-task-definition, list-attached-user-policies, list-user-policies, list-groups-for-user, list-attached-group-policies, list-group-policies, get-caller-identity or simulate-principal-policy -- all read-only. No principal, policy, resource, task definition or log group was created, modified or deleted. infra/aws/terraform modified-file count 0."
+    },
+    {
+      "path_or_key": "org/missions/D11/NFRA/NFRA_OUTSET/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise-channel rows NFRA_OUTSET-S1, -S2, -S3. This seat mints the file (both its orders name it in <paths>). Validated with jsonschema.validate against org/surprise_channel/schemas/investigation_item.schema.json -> 3/3 rows SCHEMA VALID, and gated by .tools/surprise-row-gate.py at commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "O6-AC1",
+      "criterion_verbatim": "the instrument is named and its own disclosure read before use.",
+      "method": "command",
+      "invocation": "timeout 120 comp-iam --help",
+      "expect": "usage",
+      "output_evidence": "RE-RUN 2026-09-05 ~00:5xZ against the AMENDED face (issuer repaired O6-AC1 at 8d13fc6b80; `git merge-base --is-ancestor 8d13fc6b80 HEAD` -> YES, and `git show HEAD:<face>` line 27 reads <criterion id=\"O6-AC1\" cell_refs=\"OS-s-6\"><invocation>comp-iam --help</invocation><expect>usage</expect></criterion>). rc=0, captured BEFORE any pipe. Matches for the expect string 'usage' = 1. Output opens: 'usage: comp-iam [-h] {gaps,roles,services,service,role,stats,reconcile,attach-census,resource-sweep,gaps-filtered,simulate,simulate-self-test,refresh-census,census-self-test,live,investigate-candidates,investigate-candidates-self-test} ... IAM permission cross-reference: source code ops vs Terraform policies.' DETERMINISM: two same-input repeats, both rc=0, both md5=534a89df4a440cd8, both matches=1. NEGATIVE CONTROL, run so the PASS is attributable to the amendment and not to environment drift: the ORIGINAL cut form `python .tools/comp-iam --help` STILL fails at this same moment -- rc=1, matches=0. The tool did not change; the criterion did. PRIOR HISTORY OF THIS ROW, carried rather than overwritten: as originally cut the invocation was `python .tools/comp-iam --help` against a #!/bin/bash forwarder -- rc=1, SyntaxError, 0 matches for its own expect string. That was recorded FAIL, filed as NFRA_OUTSET-S1 (BLOCKING/ARMED) and routed to the issuer; the working invocation was NOT substituted by this seat, because a mechanical criterion's pass is decided by the MATCH and not by the assignee. The issuer amended the face and re-armed the order (msg 94322), and this row is the re-run under that amendment.",
+      "denominator": "1 invocation, 1 expect clause; grep -c over the full captured stdout+stderr of that invocation. Plus 2 determinism repeats and 1 negative control on the superseded cut form.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "O6-AC2",
+      "criterion_verbatim": "THE HOLDERS, MEASURED not assumed: which principals hold `ecs:RunTask` on the trino task definition and `logs:GetLogEvents`. State the APPLIED plane read and its vintage, and answer whether a WORKER SUBAGENT and the report host can call it -- a worker holds no cloud identity of its own, which is the question this cell exists to settle. Denominators printed. NO VERDICT.",
+      "method": "live_read",
+      "invocation": "timeout 120 comp-iam refresh-census; then .tools/aws ecs describe-task-definition --task-definition globgrph-trino; .tools/aws sts get-caller-identity; .tools/aws iam list-attached-user-policies / list-user-policies / list-groups-for-user --user-name Andrew_Berman; .tools/aws iam list-attached-group-policies / list-group-policies --group-name AdministratorAccessOpalCapital; .tools/aws iam simulate-principal-policy (one --resource-arns per call, 4 calls + 2 control calls)",
+      "output_evidence": "APPLIED PLANE AND VINTAGE: comp-iam refresh-census rc=0 -> docs/briefs/cmpaws-iam-census-20260904.json, generated_utc 2026-09-04T21:18:31Z, account 313476888478, api iam:GetAccountAuthorizationDetails, roles 224 | groups 1 | users 7. Refreshed BEFORE use per the 24h-TTL trap. TARGET: arn:aws:ecs:us-east-1:313476888478:task-definition/globgrph-trino:6 (family globgrph-trino rev 6; taskRole opal-globgrph-trino-task; execRole opal-globgrph-trino-execution); log group /ecs/globgrph/trino; requirement stated by the producer at .tools/_trino_fed.py:84. ROLE-PLANE HOLDERS (wildcard-aware match over action and resource): ecs:RunTask -> 1 role, lambda-execution-role (inline FargateTriggerPermissions, resource *, unconditioned). logs:GetLogEvents -> 3 roles: infrastructure-ops-lambda-role (inline LogsRead, *), opal-portal-lambda-role (inline MonitorReadLambdaLogs, arn:aws:logs:us-east-1:313476888478:log-group:*), workspace-sync-lambda-role (inline CloudWatchLogsRead, *); plus 1 explicit Deny, opal-drift-producer-codebuild-role sid DenySensitiveDataReads. USER PLANE (the census enumerates NO users, so read live): sts get-caller-identity -> arn:aws:iam::313476888478:user/Andrew_Berman; no inline policies; four narrow attached policies (OpalSecretsReader, ycharts-credentials-read, inf-andrew-otp-write, IAMUserChangePassword), none granting either action; member of group AdministratorAccessOpalCapital whose sole attached policy is arn:aws:iam::aws:policy/AdministratorAccess (Action:*, Resource:*). SIMULATE, one resource ARN per call: user/Andrew_Berman ecs:RunTask @ task-definition/globgrph-trino:6 -> allowed; logs:GetLogEvents @ log-group:/ecs/globgrph/trino -> allowed; @ log-group:/ecs/globgrph/trino:* -> allowed; @ * -> allowed. CONTROLS: NEGATIVE role/advi-49f-floor-scheduler-role ecs:RunTask @ the task-def -> implicitDeny (fires); POSITIVE the same role lambda:InvokeFunction @ its own function -> allowed (fires). WORKER SUBAGENT ANSWER: a worker subagent holds no cloud identity of its own and does not need one -- it is a subprocess on this box and inherits the box's ambient credentials, which resolve to user/Andrew_Berman, which carries AdministratorAccess via its group. So a worker subagent CAN call the federated transport, holding Action:* on Resource:* rather than a scoped transport identity; there is no worker principal to scope because there is no worker principal at all. REPORT HOST ANSWER: UNREADABLE -- it is a PRD-s.3 design object ('a minimal, self-parking box working from a blobless clone', NFRA_OUTSET_PRD.md:180-183), not a provisioned resource; no instance, instance profile or role bearing a report-host identity was resolvable at this vintage. Recorded as not-yet-existing-to-measure, never as none.",
+      "denominator": "224 roles in the census (the full role plane at vintage 2026-09-04T21:18:31Z); 7 users and 1 group counted in summary and enumerated nowhere in the artifact, of which 1 user and 1 group were resolved live; 4 simulate calls plus 2 control calls, each carrying exactly one --resource-arns.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the CVO grades it at L9. Evidence recorded with denominators and no verdict written, as the face requires.",
+      "judgment": true
+    },
+    {
+      "criterion_id": "O6-AC3",
+      "criterion_verbatim": "Any principal you could NOT resolve reads UNREADABLE with its reason -- never absent, never assumed-none. THE FALSE-DENY TRAPS BIND HERE: simulate-principal-policy returns an implicitDeny on a CONDITIONED grant, and POISONS verdicts across a batched multi-ARN call. One --resource-arns per call.",
+      "method": "live_read",
+      "invocation": "timeout 120 python (census analysis over docs/briefs/cmpaws-iam-census-20260904.json enumerating managed-policy ARNs and their role counts); .tools/aws iam simulate-principal-policy across three log-group-grain ARNs and one log-stream-grain ARN, one --resource-arns per call",
+      "output_evidence": "UNREADABLE-1, attached-managed statements: 137 of 224 roles (61.2%) carry at least one UNRESOLVED managed policy. The census discloses this itself (_meta.managed_policies_resolved = false; 'attached-managed policies are RECORDED, not resolved ... A reconcile treats them as uncovered, never as absent'). Overhang BOUNDED rather than left open: 35 distinct managed policy ARNs across the census; by name and AWS-published content exactly one can bear on either target action -- ReadOnlyAccess (1 role) grants logs:GetLogEvents and does not grant ecs:RunTask; AmazonECSTaskExecutionRolePolicy (5 roles) is image-pull plus log WRITE, not RunTask; AWSLambdaBasicExecutionRole (96 roles) is log create plus PutLogEvents, not GetLogEvents; the remaining 32 have no bearing. RESIDUAL: at most 1 additional logs:GetLogEvents holder and 0 additional ecs:RunTask holders could hide in the unresolved plane. This bound is INFERRED from policy names and published content -- iam get-policy-version was NOT called on the 137 documents -- and is labelled inferred while the role-plane counts remain measured. UNREADABLE-2, user and group planes: 7 users and 1 group counted in summary and enumerated nowhere in the artifact; 1 user (the local caller) and its 1 group resolved live; the other 6 users NOT swept, their grants on these two actions UNREADABLE at this vintage. UNREADABLE-3, resource-policy and permissions-boundary planes not traversed; no boundary is set on the measured user, and role boundaries were read as a field but not evaluated as constraints. TRAP 1 (conditioned grant) RESPECTED: every holder recorded with its condition field; all four matching grants unconditioned, so no verdict rests on a simulate over a conditioned grant. TRAP 2 (multi-ARN poisoning) RESPECTED: exactly one --resource-arns on every call, all 6. TRAP 3, NEW AND MEASURED THIS SESSION: a WRONG-GRAIN resource ARN is a third false-deny mode. logs:GetLogEvents simulated against the log-STREAM-grain ARN arn:aws:logs:us-east-1:313476888478:log-group:/ecs/globgrph/trino:log-stream:* returns implicitDeny for a principal holding AdministratorAccess (*/*) -- impossible on the world; the same action and principal against all three log-GROUP-grain forms returns allowed. Both known mitigations were in force and neither prevents it. Detected only because */* makes a deny self-evidently false; against a narrowly-scoped principal this mode is invisible and reads as a true negative, failing in the UNDER-GRANTED direction. Filed as NFRA_OUTSET-S3.",
+      "denominator": "224 roles partitioned into 87 fully-inline-readable and 137 carrying at least one UNRESOLVED managed policy; 35 distinct managed policy ARNs enumerated with per-policy role counts; 8 users+groups counted, 2 resolved, 6 unresolved; 4 resource-ARN grains tested for the false-deny mode (3 log-group forms, 1 log-stream form).",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the CVO grades it at L9. Every unresolved principal is named with its reason and none is reported as absent.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The load-bearing assertion of O6-AC2 is that an 'allowed' from simulate-principal-policy reflects a real grant rather than an instrument that says yes indiscriminately. Mutated by holding the instrument, action-class and resource fixed and changing ONLY the principal: the same ecs:RunTask question against the same task-definition ARN was put to role/advi-49f-floor-scheduler-role, whose full inline grant set (lambda:InvokeFunction on one function, sqs:SendMessage on one queue) demonstrably excludes ECS.",
+      "expected": "If the simulator discriminates, the scheduler role must return implicitDeny on ecs:RunTask while the admin-bearing user returns allowed; and the scheduler role must still return allowed on an action it genuinely holds, proving the deny is discrimination rather than a dead arm.",
+      "observed": "role/advi-49f-floor-scheduler-role ecs:RunTask @ arn:aws:ecs:us-east-1:313476888478:task-definition/globgrph-trino:6 -> implicitDeny. Same role, lambda:InvokeFunction @ arn:aws:lambda:us-east-1:313476888478:function:advi-49f-gold-dispatch -> allowed. Both arms fire in the expected directions, so the instrument discriminates and the 'allowed' verdicts in O6-AC2 are not vacuous. Separately, the wrong-grain probe (NFRA_OUTSET-S3) is itself a sealed mutant on the RESOURCE axis: holding principal and action fixed and changing only the ARN grain flips allowed -> implicitDeny, which is how that false-deny mode was isolated.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Same-input repeat, twice, in-session: (a) the O6-AC1 invocation `timeout 120 python .tools/comp-iam --help`, output hashed (md5, CR-stripped); (b) `simulate-principal-policy` for user/Andrew_Berman ecs:RunTask @ task-definition/globgrph-trino:6, one --resource-arns; (c) the wrong-grain probe, logs:GetLogEvents @ the log-STREAM-grain ARN, one --resource-arns. (c) is included deliberately: the S3 false-deny finding is only worth filing if the anomalous verdict is reproducible rather than a transient.",
+      "observed": "run1 -> ac1_md5=3504b3d002312540, runtask=allowed, wrong-grain=implicitDeny. run2 -> ac1_md5=3504b3d002312540, runtask=allowed, wrong-grain=implicitDeny. Identical on all three arms across both runs, including the byte-level hash of the failing O6-AC1 output.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The APPLIED contents of the attached-managed policy documents on 137 of 224 roles.",
+      "reason": "The census records attached-managed policies without resolving them (_meta.managed_policies_resolved = false), so their statements are UNRESOLVED. Treated as UNCOVERED and never as absent, bounded by a named-and-counted enumeration of all 35 distinct policy ARNs in O6-AC3, and labelled inferred rather than measured. Resolving all 137 via iam get-policy-version was not this order's clause and would have been an unbounded sweep against the face's timeout-120 bound."
+    },
+    {
+      "item": "The other 6 IAM users in the account.",
+      "reason": "The census enumerates no users at all. The cell's question is the caller contract of the transport, and the caller observable from this seat is the one that runs it (user/Andrew_Berman), which was resolved in full. The remaining 6 are recorded as UNREADABLE with that reason rather than swept; a 6-user sweep is a defensible next cut but is not a clause of this face."
+    },
+    {
+      "item": "The report host's caller contract.",
+      "reason": "It is a PRD-s.3 design object, not a provisioned resource -- the consumption seam that would give it an identity is what OS-s-10 is cut to settle. Recorded as UNREADABLE/not-yet-existing-to-measure rather than asserted as none."
+    },
+    {
+      "item": "Resource-based policies and permissions-boundary evaluation.",
+      "reason": "Not named by the face. No boundary is set on the measured user; role boundaries were read as a census field but not evaluated as constraints against the two target actions. Named here so the O6-AC2 counts are not read as a full authorization evaluation."
+    },
+    {
+      "item": "docs/briefs/cmpaws-iam-census-20260904.json is NOT committed by this order.",
+      "reason": "comp-iam refresh-census writes it by its own design, and docs/briefs/ is outside this order's <paths> grant. The artifact is cited by absolute path and vintage as evidence; committing it would be a write outside the grant. Flagged to the issuer."
+    }
+  ],
+  "surprises": [
+    "NFRA_OUTSET-S1: BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO. O6-AC1's <invocation> runs `python .tools/comp-iam --help` against a #!/bin/bash forwarder -> rc=1 SyntaxError, 0 matches for its own <expect> 'usage'; `comp-iam --help` -> rc=0, 1 match. CUT DEFECT: the criterion cannot pass as written, so TO-OS-s-6 is not flipped to complete. Proposed repair (issuer's call): amend the invocation to `comp-iam --help`.",
+    "NFRA_OUTSET-S2: OBSERVATION/ARMED, disarm_owner 2.0.0_SA_COO. comp-find CONTENT mode returns rc=124 with zero bytes on both stdout and stderr, so a timed-out search is indistinguishable from a clean zero-hit search and the printed denominator Rule 21 depends on never appears. Reproduced on a positive control ('NFRA_OUTSET', certain to exist) which failed identically, while native Grep for the same pattern returned 40+ files. Off-task; root cause not chased; no finding in this order rests on a comp-find content result.",
+    "NFRA_OUTSET-S3: OBSERVATION/ARMED, disarm_owner 2.0.0_SA_COO. A third simulate-principal-policy false-deny mode: a resource ARN at the wrong GRAIN for the action returns implicitDeny even for a principal holding */*. logs:GetLogEvents @ log-stream-grain ARN -> implicitDeny; @ all three log-group-grain forms -> allowed. Distinct from the conditioned-grant and multi-ARN-batch modes, both of which were in force as mitigations and neither of which prevents it. Invisible against a narrowly-scoped principal; fails in the under-granted direction.",
+    "NFRA_OUTSET-S4: BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO. SYSTEMIC CUT DEFECT: 16 of this project's 17 faces name their proof instance by the SHORT stem, but .tools/to-pipeline-gate.py:1261-1270 globs the FULL face stem including the slug, so an instance written at the face's own stated path is invisible to the gate and the complete flip is REFUSED. MEASURED by the gate actually aborting this seat's commit, not predicted. OS-s-1 is the accidental control: it alone carries the correct full-stem form. Resolved for this seat's two orders by writing both instances under the full stem (same granted folder); the other 15 faces are the issuer's to amend.",
+    "NFRA_OUTSET-S5: OBSERVATION/INERT. DISARM ACK on S1 and S4, measured at this seat rather than taken from the issuer's report. 2.0.0_SA_COO amended both cut defects at 8d13fc6b80 (verified in lineage via merge-base --is-ancestor, and the criterion re-read with git show HEAD:<face>). O6-AC1 now passes (rc=0, 1 match, stable across two repeats) while the superseded cut form still fails (rc=1, 0 matches), so the pass is attributable to the amendment and not to drift. Also corrects this seat's own arithmetic in msg 94310: 16 faces needed amendment, not 15 -- repairing OS-s-7's instance did not repair the face whose prose named it. Writes no disposition on S1 or S4; the CVO grades at L9."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-iam",
+      "invocation": "timeout 120 comp-iam refresh-census",
+      "result": "rc=0. Wrote the APPLIED census docs/briefs/cmpaws-iam-census-20260904.json at generated_utc 2026-09-04T21:18:31Z, account 313476888478, roles 224 | groups 1 | users 7, api iam:GetAccountAuthorizationDetails. Run BEFORE any APPLIED-plane use per the 24h-TTL trap. Its own disclosure (managed_policies_resolved=false) is what established the 137-role UNRESOLVED partition in O6-AC3."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read org/missions/D11/NFRA/NFRA_OUTSET/prd/NFRA_OUTSET_PRD.md --for 'what is the federated transport, the trino task definition, and the code_heat parquet; what are rows OS-s-6 and OS-s-7 and preconditions P2 and P3'",
+      "result": "270 lines, 37 sections, 37 qualifiers (27 near the queried regions). Surfaced s.7 rows OS-s-6/OS-s-7 and the s.3 architectural choice, including the report host's description at :180-183 that grounds the UNREADABLE verdict on the report-host limb of O6-AC2."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read .tools/comp-heat --for 'how does comp-heat call the federated transport, what ECS task definition and cluster does it use, what IAM does it need'",
+      "result": "415 lines, 13 sections via python-ast, 18 qualifiers. cmd_federated at :348-360 named .tools/_trino_fed.py as the engine and the in-VPC run-task -> Trino-REST -> CloudWatch transport, which is what routed the audit to the correct object rather than to comp-heat itself."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read .tools/proof-of-spec-check.py --enumerate 'judgment'",
+      "result": "13 whole-value hits across 1256 lines, 0 substring; bands DOCSTRING=1 COMMENT=1 DEF=0 CODE=11. Established at :86-87 that judgment=true with status PASS or FAIL is a violation, and at :1083-1084 that judgment=true with UNVERIFIABLE-BY-INSTRUMENT plus a status_reason is the 0-violation form used for O6-AC2 and O6-AC3."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "timeout 120 comp-find 'trino' | comp-find 'RunTask' | comp-find 'NFRA_OUTSET' --limit 5",
+      "result": "rc=124 on every content-mode call, zero bytes stdout and stderr, including the positive control. NO MEASUREMENT was obtained from this tool and no finding rests on it; the searches were completed with native Grep, which CLAUDE.md Rule 21 carves out of the rail. Filed as NFRA_OUTSET-S2."
+    }
+  ]
+}

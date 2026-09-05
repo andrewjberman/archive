@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_COMPEFFICACY.TO-CE-T-10.comp-pipescript-s4-audit",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.8.0_AE_CloudComp~L",
+  "spec_ref": {"doc": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/task-orders/NFRA_COMPEFFICACY.TO-CE-T-10.comp-pipescript-s4-audit.md", "group": "T", "vintage_commit": "6e5d443ad3"},
+  "decomp_ref": {"doc": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/decompositions/NFRA_COMPEFFICACY_DECOMP.md", "vintage_commit": "39515415cc", "to_ref": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/task-orders/NFRA_COMPEFFICACY.TO-CE-T-10.comp-pipescript-s4-audit.md"},
+  "artifacts_produced": [
+    {"path_or_key": "org/modules/graph/pipeline_cli.py", "kind": "script", "commit_or_etag": "44bc9852cc9d", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "repository-local engine; no deploy artifact", "introduces": ["ANSWER-STATE: PARTIAL_OR_BLIND", "_SkipgateBudgetReached"], "artifact_covered_by": ["T10-AC2", "T10-AC4"]},
+    {"path_or_key": ".tools/tests/test_comp_pipescript_battery.py", "kind": "test", "commit_or_etag": "44bc9852cc9d", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "test artifact", "introduces": ["test_verdict_rc_mutant_returns_clean_at_expiry_and_is_detected"], "artifact_covered_by": ["T10-AC5"]},
+    {"path_or_key": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~L/comp-pipescript.result.md", "kind": "doc", "commit_or_etag": "PENDING-THIS-COMMIT", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "audit deliverable", "artifact_covered_by": ["T10-AC1", "T10-AC3", "T10-AC6"]},
+    {"path_or_key": "org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.8.0_AE_CloudComp~L/NFRA_COMPEFFICACY.TO-CE-T-10.comp-pipescript-s4-audit.proof_of_spec.json", "kind": "doc", "commit_or_etag": "PENDING-THIS-COMMIT", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "proof instance", "artifact_covered_by": ["T10-AC6"]}
+  ],
+  "acceptance": [
+    {"criterion_id": "T10-AC1", "criterion_verbatim": "deliverable parses and the shim self-identifies", "method": "command", "invocation": "bash .tools/comp-pipescript deployed --help", "output_evidence": "shim text names .tools/comp-pipescript and org/modules/graph/pipeline_cli.py", "denominator": "1 shim and 1 engine", "status": "PASS"},
+    {"criterion_id": "T10-AC2", "criterion_verbatim": "four planted answer-state cases are distinct and SKIPPED remains distinct", "method": "test_suite", "invocation": "python -m pytest -q .tools/tests/test_comp_pipescript_battery.py", "output_evidence": "6 passed; controls assert absent, present-zero, partial, and not-applicable state tokens", "denominator": "4 states plus 1 distinct SKIPPED verdict", "status": "PASS"},
+    {"criterion_id": "T10-AC3", "criterion_verbatim": "registry measured and ETFS not widened", "method": "manual_read_with_citation", "invocation": "rg _FIRM_TO_PIPELINE org/modules/graph/pipeline_cli.py", "output_evidence": "registry has no etfs token; battery asserts the unchanged CLI firm choices", "denominator": "1 registry declaration", "status": "PASS"},
+    {"criterion_id": "T10-AC4", "criterion_verbatim": "Rule T form and verdict-bearing deployed partial rc", "method": "command", "invocation": "comp-pipescript deployed; comp-pipescript skipgate INF_B_00 --budget 0.001", "output_evidence": "COO distinct-seat run: rc=4, BUDGET REACHED, NOT-DECIDABLE, PARTIAL_OR_BLIND, deferred head-object; local skipgate shows its two timeout forms", "denominator": "6 timeout sites; 1 independent deployed exercise", "status": "PASS"},
+    {"criterion_id": "T10-AC5", "criterion_verbatim": "new battery, RED mutant, both grains, F9 green, commit gate clean", "method": "test_suite", "invocation": "python battery; pytest battery; commit-gate; F9 hook", "output_evidence": "6/6 direct; 6/6 pytest; scoped gate clean; F9 141 passed in 93.10s; executable mutant returned clean rc=0 as expected", "denominator": "6 battery tests and 141 F9 tests", "status": "PASS"},
+    {"criterion_id": "T10-AC6", "criterion_verbatim": "push state measured and proof valid before complete flip", "method": "command", "invocation": "git ls-remote origin refs/heads/CLOUD; git merge-base --is-ancestor 44bc9852cc origin/CLOUD", "output_evidence": "origin/CLOUD=351f309e0a6d; is-ancestor rc=1; LOCAL; no push run by this seat", "denominator": "1 branch and 1 ancestry comparison", "status": "PASS"}
+  ],
+  "controls": {"mutant": {"description": "in-memory production-path mutant returns rc=0 after _PipescriptBudgetReached", "expected": "mutant recreates FWD-10 clean-partial violation", "observed": "mutant returned rc=0 at a real tiny-budget partial boundary", "status": "FIRED-AS-EXPECTED"}, "determinism": {"method": "direct and pytest file-grain runs compared", "observed": "both runs reported 6 passed", "status": "STABLE"}},
+  "declared_exclusions": [{"item": "ETFS registry widening", "reason": "T-10 expressly prohibits it; absence is the recorded finding."}],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp~L/logs/2026-09-03/NFRA_COMPEFFICACY.TO-CE-T-10.md",
+  "compiler_tools": [{"tool": "comp-read", "invocation": "comp-read pipeline_cli.py and safe-deploy.sh before write", "result": "identified deployed return paths, registry, consumer, and six timeout sites"}, {"tool": "commit-gate", "invocation": "bash .tools/commit-gate.sh pipeline_cli.py battery", "result": "clean"}]
+}

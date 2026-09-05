@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OUTSET.TO-OS-s-7",
+  "phase": "INVESTIGATION",
+  "firm": "FABRIC",
+  "assignee": "0.7.0_AE_CloudOps~W",
+  "spec_ref": {
+    "doc": "org/missions/D11/NFRA/NFRA_OUTSET/task-orders/NFRA_OUTSET.TO-OS-s-7.code-heat-parquet-cadence-and-owner.md",
+    "group": "OTHER",
+    "vintage_commit": "14f26b5eff"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D11/NFRA/NFRA_OUTSET/decompositions/NFRA_OUTSET_DECOMP.md",
+    "vintage_commit": "6f1655f376",
+    "to_ref": "org/missions/D11/NFRA/NFRA_OUTSET/task-orders/NFRA_OUTSET.TO-OS-s-7.code-heat-parquet-cadence-and-owner.md"
+  },
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~W/logs/2026-09-04/session_W_2030-2200Z_outset_os-s-6_os-s-7.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.7.0_AE_CloudOps~W/code-heat-parquet-cadence-and-owner.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "An AUDIT deliverable. Every AWS call was events list-rules, s3api list-objects-v2 or glue get-table -- all read-only. No rule, object, table or producer was created, modified or deleted. NEVER-AUTO-DELETE (PRD R-5) is trivially satisfied: nothing was removed and no candidate list was acted on. infra/aws/terraform modified-file count 0."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "O7-AC1",
+      "criterion_verbatim": "THE CADENCE, from the PRODUCER and not from the artifact's appearance: what writes code_heat, on what schedule, and when it last ran. A glue-bound artifact's own timestamp is NOT its cadence. Evidence with vintage. NO VERDICT.",
+      "method": "live_read",
+      "invocation": "manual read at pin of infra/aws/terraform/globgrph/item2a.tf:404-409 and .tools/_trino_fed.py:20,39-52; timeout 120 .tools/aws events list-rules --region us-east-1; timeout 120 .tools/aws s3api list-objects-v2 --bucket opal-313476888478-globgrph --prefix warehouse/code_heat/; timeout 120 .tools/aws glue get-table --database-name globgrph --name code_heat",
+      "output_evidence": "OBJECT IDENTIFIED FIRST, because the estate holds two adjacent stores: this cell's object is the PARQUET at s3://opal-313476888478-globgrph/warehouse/code_heat/, Glue-catalogued as code_heat.globgrph.code_heat and read by the federated join (.tools/_trino_fed.py:20); it is NOT the Iceberg code_heat_snap table under warehouse/globgrph/code_heat_snap_8b0bca7a-.../, which the existing substrate card org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D11_CARDS_W4/code_heat_snap.v3.1.json (carded 2026-08-30T16:20:02Z @d1928aae5f) is about -- that card names this parquet only as a co-resident 'DIFFERENT store carrying overlapping subject matter'. The card was used as a lead; every number below is grounded on the producer and the live plane, so nothing here inherits its claim. PRODUCER: infra/aws/globgrph/code_heat_emit.py, which builds rows directly from git (shells `git -C` against the ajb_workspace and portal repos). SCHEDULE: NONE, and deliberately so. infra/aws/terraform/globgrph/item2a.tf:404-409 at HEAD, verbatim: 'GLOBGRPH_CODEHEAT_ENABLED REVERTED (deleted) 2026-07-16 per CTO TO-2 ruling 033933Z: code_heat is git-history-shaped (shells git -C against workspace+portal repos), so the container flag gated an import that can NEVER resolve in the Fargate derive -- a permanent expected-WARN every nightly trains readers to ignore WARNs. code_heat now runs on DEV-BOX CADENCE (option a); the freshness twins on its keys are the guard. CTO-authored revert, landed by 0.7.0_AE_CloudOps (owned-paths lane routing).' CORROBORATED ON A DIFFERENT INSTRUMENT (the live APPLIED schedule plane, not the Terraform text): aws events list-rules returns 142 rules in us-east-1; 5 match globgrph|heat|snap|trino by name -- infrastructure-snapshot-daily cron(0 7 * * ? *), opal-globgrph-cloudtrail-mgmt (event pattern), opal-globgrph-comp-learns-producer-nightly cron(0 4 * * ? *), opal-globgrph-derive-runner-nightly cron(0 2 * * ? *), opal-globgrph-fedobs-producer-nightly cron(30 4 * * ? *) -- and 0 of 142 fires the code_heat producer. Sibling producers on this same federation do have nightly rules; code_heat is the one that does not. LAST RAN: 2026-07-16T03:40:46Z, i.e. 50.7 days before this read. s3api (UTC; `aws s3 ls` would render local time) returns exactly 2 objects under the prefix, no pagination truncation: warehouse/code_heat/repo=ajb_workspace/code_heat.parquet 1,151,262 B 2026-07-16T03:40:45.000Z and warehouse/code_heat/repo=portal/code_heat.parquet 50,657 B 2026-07-16T03:40:46.000Z. The fronting Glue table: Location s3://opal-313476888478-globgrph/warehouse/code_heat/, Created 2026-06-29T20:23:07Z, Updated 2026-06-29T20:34:47Z, classification=parquet, EXTERNAL=TRUE. THE DISTINCTION THE CELL ASKED FOR: the mtime and the producer read agree here, but the agreement is not what establishes the cadence and the mtime alone could not have. The mtime says when bytes last landed; the Terraform revert plus the empty schedule plane say nothing is coming to land more. A reader trusting the mtime would conclude '50 days stale, probably a broken nightly'; the producer says there is no nightly to break. TRADING-CALENDAR CHECK (NEVER#4): not applicable and stated rather than skipped -- a git-history artifact, not a market feed, so no trading-day frontier governs its staleness.",
+      "denominator": "142 EventBridge rules in us-east-1, all scanned, 5 name-matching, 0 producing code_heat; 2 S3 objects under warehouse/code_heat/, both listed; 1 Glue table; 1 Terraform declaration read at HEAD 14f26b5eff.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the CVO grades it at L9. Cadence recorded from the producer and the schedule plane with vintages, and no verdict written.",
+      "judgment": true
+    },
+    {
+      "criterion_id": "O7-AC2",
+      "criterion_verbatim": "THE OWNER: the seat or system accountable for that refresh, named. If no owner exists, SAY SO PLAINLY -- an unowned artifact under a daily join is the finding, not a gap in the audit.",
+      "method": "live_read",
+      "invocation": "timeout 120 .tools/aws glue get-table --database-name globgrph --name code_heat (Owner field); timeout 120 .tools/aws events list-rules --region us-east-1 (142-rule sweep); manual read at pin of infra/aws/terraform/globgrph/item2a.tf:404-409 and of the per-row owner fields in org/tier2_senior/0.7.0_AE_CloudOps/deliverables/D11_CARDS_W4/code_heat_snap.v3.1.json",
+      "output_evidence": "THERE IS NO OWNER OF THE code_heat REFRESH. Stated plainly, as the face requires. Every candidate carrier was checked and each is empty or owns something else: (1) the Glue table's own Owner field reads null; (2) an EventBridge rule owning the refresh -- 142 rules swept, none; (3) a scheduled ECS/Fargate task -- the nightly derive WAS the carrier and its flag was deliberately DELETED on 2026-07-16 by CTO TO-2 ruling 033933Z; (4) the substrate card's per-row owner, which reads 0.7.0_AE_CloudOps~X on all seven rows, owns the CARD ROW and does so for the Iceberg code_heat_snap object, not for this parquet's refresh; (5) the Terraform comment's actors -- the CTO authored the revert and 0.7.0_AE_CloudOps landed it -- own the 2026-07-16 revert ACT, not a standing refresh duty; (6) the producer's own header carries author attribution and no operator. The revert comment names its own replacement guard, 'the freshness twins on its keys are the guard', which is a DETECTOR and not an owner: it can tell you the artifact is old, and it makes nobody accountable for refreshing it. WHY THIS IS THE FINDING AND NOT A GAP: the artifact is a live input to the federated join -- Q_CODE_BANDS and Q_CODE_COLDEST at .tools/_trino_fed.py:39-52 join it against iceberg.globgrph.graph_nodes, and the graph side IS refreshed nightly by opal-globgrph-derive-runner-nightly cron(0 2 * * ? *). So one side of the join advances daily while the other has been frozen for 50.7 days, and no seat owns closing that gap. WHAT IS NOT CLAIMED: that the join is therefore wrong. The join was not run, and a git-heat projection may age gracefully for some questions and not others; that judgment needs the consumer's requirement, which OS-s-8 and OS-s-10 carry.",
+      "denominator": "6 candidate ownership carriers enumerated and each read to a result; 142 EventBridge rules swept for a scheduling owner; 7 card rows read for their owner field; 1 Glue Owner field; 1 Terraform declaration.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the CVO grades it at L9. The absence of an owner is recorded as a positive finding with the carriers enumerated, and no verdict is written.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The load-bearing assertion of O7-AC1 is that the cadence read from the PRODUCER differs from what the artifact's own timestamp would tell you -- the precise trap the face was cut against. The control is a two-instrument split on independent substrates: the DECLARED plane (Terraform text at HEAD, infra/aws/terraform/globgrph/item2a.tf:404-409) and the APPLIED plane (the live EventBridge rule set via aws events list-rules), which share no artifact and no code path.",
+      "expected": "If the producer is genuinely unscheduled, the Terraform declaration must say the flag was removed AND the live schedule plane must contain no rule that fires it. If instead a schedule existed and had merely failed, the Terraform would still declare it and the live sweep would return a matching rule in some state (ENABLED or DISABLED), and the two instruments would disagree.",
+      "observed": "Both instruments agree and neither inherited the other's claim: Terraform declares the flag REVERTED (deleted) 2026-07-16 with its reason and its ruling id; the live sweep returns 142 rules of which 5 name-match globgrph|heat|snap|trino and 0 fire the code_heat producer, while four sibling producers on the same federation DO carry nightly crons -- so the sweep is capable of finding a producer rule when one exists, which is the positive control on the negative result. Separately, the artifact-mtime instrument was run as the deliberately-wrong arm: it returns 2026-07-16, a number that coincides with the true last run and would therefore have been mistaken for a cadence answer; it cannot distinguish 'ran once and stopped by design' from 'nightly, last 50 days broken', which is exactly why the face forbids it as the basis.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Same-input repeat, twice, in-session, across all three instruments the cadence and owner findings rest on: `aws events list-rules --query length(Rules)`; `aws s3api list-objects-v2 --prefix warehouse/code_heat/` with Key+LastModified hashed (md5, CR-stripped); `aws glue get-table --query Table.Owner`.",
+      "observed": "run1 -> n_rules=142, s3_md5=79598c7bb81f0169, glue_owner='None'. run2 -> n_rules=142, s3_md5=79598c7bb81f0169, glue_owner='None'. Identical on all three arms across both runs. ('None' is the AWS CLI --output text rendering of the JSON null returned for Table.Owner; the two renderings agree.)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The federated join was not executed.",
+      "reason": "Running comp-heat federated launches an in-VPC Fargate task at roughly 3-4 minutes per call (.tools/_trino_fed.py:12-14), which exceeds this face's timeout-120 bound on every invocation, and the cell asks for the parquet's cadence and owner rather than the join's output. The staleness CONSEQUENCE for the join is therefore recorded as an unrun implication, not asserted as a measured defect."
+    },
+    {
+      "item": "Whether the 50.7-day-old projection is materially wrong for any consumer.",
+      "reason": "Out of this cell's scope and not answerable from the producer alone -- it needs the consumer's freshness requirement, which OS-s-8 (comp-similar heat weighting) and OS-s-10 (the consumption seam) carry. Recorded as a bounded non-claim rather than left implicit."
+    },
+    {
+      "item": "The git plane behind the producer was not traversed.",
+      "reason": "code_heat_emit.py derives rows from the git write-history of two repos; the parquet is a projection of that history. Verifying the projection's CONTENT against git is a different question from its cadence and owner, and is not a clause of this face."
+    },
+    {
+      "item": "The Iceberg code_heat_snap table's own cadence and owner.",
+      "reason": "A different store, already carded at v3.1 by 0.7.0_AE_CloudOps~X. Named in the result document only to prevent the two objects being conflated, which the shared 'code_heat' name invites."
+    }
+  ],
+  "surprises": [
+    "NFRA_OUTSET-S4: BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO. SYSTEMIC CUT DEFECT: 16 of this project's 17 faces name their proof instance by the SHORT stem, but .tools/to-pipeline-gate.py:1261-1270 globs the FULL face stem including the slug, so an instance written at the face's own stated path is invisible to the gate and the complete flip is REFUSED. MEASURED by the gate actually aborting this seat's commit, not predicted. OS-s-1 is the accidental control: it alone carries the correct full-stem form. Resolved for this seat's two orders by writing both instances under the full stem (same granted folder); the other 15 faces are the issuer's to amend."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read org/missions/D11/NFRA/NFRA_OUTSET/prd/NFRA_OUTSET_PRD.md --for 'what is the federated transport, the trino task definition, and the code_heat parquet; what are rows OS-s-6 and OS-s-7 and preconditions P2 and P3'",
+      "result": "270 lines, 37 sections, 37 qualifiers (27 near the queried regions). s.7 row OS-s-7 at :237 supplied the cell's bound ('glue-bound; refresh cadence and owner unknown (brief P3)') and confirmed the object is the parquet behind the federated join rather than the Iceberg snap table."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read .tools/comp-heat --for 'how does comp-heat call the federated transport, what ECS task definition and cluster does it use, what IAM does it need'",
+      "result": "415 lines, 13 sections via python-ast. cmd_federated at :348-360 routed to .tools/_trino_fed.py, whose :20 carries the federation surface map naming code_heat.globgrph.code_heat as 'Glue over parquet' and the join key -- the read that fixed WHICH of the two code_heat stores this cell is about."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "timeout 120 comp-find 'code_heat'",
+      "result": "rc=124, zero bytes on stdout and stderr -- NO MEASUREMENT. The corpus search for code_heat producers and consumers was completed with native Grep instead (30+ files, including infra/aws/terraform/globgrph/item2a.tf and the D11_CARDS_W4 substrate card), which CLAUDE.md Rule 21 carves out of the rail. Filed under TO-OS-s-6 as NFRA_OUTSET-S2; no finding in this order rests on a comp-find content result."
+    }
+  ]
+}
