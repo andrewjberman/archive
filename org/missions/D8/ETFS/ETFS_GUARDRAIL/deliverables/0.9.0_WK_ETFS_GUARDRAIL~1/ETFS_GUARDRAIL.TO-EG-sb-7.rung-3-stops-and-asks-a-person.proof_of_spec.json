@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-sb-7",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~1",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-sb-7.rung-3-stops-and-asks-a-person.md",
+    "group": "OTHER",
+    "vintage_commit": "83d8175729a243f427aff8a2985ad45dfc0b3c2d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "5376ecaa8bdbf0f775cb347c2ba849bfba67afb9",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-sb-7.rung-3-stops-and-asks-a-person.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/rung-3-stops-and-asks-a-person.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/coverage/remediate.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Extended module (rung3_stop_and_ask added, wired into remediate_month's last step); not wired into the renderer's gate (EG-s-6, another queue) or the orchestrator (EG-s-8, this worker's next order, not started)."
+    },
+    {
+      "path_or_key": "data/etfs/scripts/coverage/tests/test_remediate.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8/8 passed locally (6 from EG-s-7 + 2 new), zero AWS calls (every arm supplies invoke/s3 stubs explicitly; the stub's put_object no longer raises, it records, so arm (e) could be re-scoped to the correct post-rung-3 invariant)."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/rung-3-stops-and-asks-a-person.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Result document; no deploy surface of its own."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S7B-AC1",
+      "criterion_verbatim": "the battery is green with arms (g) and (h) added (record N passed; N must exceed EG-s-7's count by 2).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/etfs/scripts/coverage/tests/test_remediate.py -q",
+      "output_evidence": "8 passed in 0.06s (EG-s-7's count was 6; 6+2=8)",
+      "denominator": "8 of 8 arms passed: 6 original (a-f, arm (e) re-scoped to the post-rung-3 invariant, not weakened) + 2 new (g: two D days/two partners named completely, h: zero unresolved writes nothing)",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7B-AC2",
+      "criterion_verbatim": "still no HTTP client in the module after rung 3 lands, and exactly one ask-writer exists (the ask is data; the egress is a person's).",
+      "method": "command",
+      "invocation": "python -c \"import re; s=open('data/etfs/scripts/coverage/remediate.py').read(); print('HTTP_CLIENT_IMPORTS=%d ASK_WRITER=%d' % (len(re.findall(r'^\\s*(?:import|from)\\s+(?:requests|urllib|http)\\b', s, re.M)), len(re.findall(r'def rung3_stop_and_ask\\(', s))))\"",
+      "output_evidence": "HTTP_CLIENT_IMPORTS=0 ASK_WRITER=1",
+      "denominator": "0 of 0 HTTP-client imports; exactly 1 of 1 ask-writer function definition",
+      "expect": "HTTP_CLIENT_IMPORTS=0 ASK_WRITER=1",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7B-AC3",
+      "criterion_verbatim": "the ask names the date, the partner's provider and its per-use authorization, and write=False makes no S3 call.",
+      "method": "command",
+      "invocation": "python -c \"import json,sys; sys.path.insert(0,'data/etfs/scripts'); from coverage import remediate as r; a=r.rung3_stop_and_ask('cottonwood','2026-08',[{'date':'2026-08-04','class':'D','reason':'no partition'}], write=False); print('ASKS=%d PROVIDER=%s AUTH=%s' % (len(a['asks']), a['asks'][0]['provider'], a['authorization'][:8]))\"",
+      "output_evidence": "ASKS=1 PROVIDER=Black Diamond AUTH=PER-USE",
+      "denominator": "1 of 1 ask entry built; write=False and no s3 argument passed -- no S3 call attempted (the write-guard short-circuits on write=False alone)",
+      "expect": "ASKS=1 PROVIDER=Black Diamond AUTH=PER-USE",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7B-AC4",
+      "criterion_verbatim": "the commit gate is clean.",
+      "method": "command",
+      "invocation": "bash .tools/commit-gate.sh data/etfs/scripts/coverage/remediate.py data/etfs/scripts/coverage/tests/test_remediate.py",
+      "output_evidence": "OK: pre-commit gate clean for 2 of 2 file(s)",
+      "denominator": "2 of 2 files clean",
+      "expect": "pre-commit gate clean",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7B-AC5",
+      "criterion_verbatim": "graded by the CVO at L9: rung 3 is a DIFFERENT ACTOR (a person) and not a later automated step; no standing egress grant exists anywhere in the module or the estate this order touched; the ask is complete enough that a person can say yes without a follow-up question (dates, partner, provider). RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "source read of rung3_stop_and_ask's signature (no invoke param) and its authorization string; S7B-AC2's byte census; test arm (g)'s field-completeness assertions; test arm (f)/(h)'s dry-run and zero-unresolved guards; cross-check against EG-s-7's own IAM grant (lambda:InvokeFunction on 3 in-estate producers only, infra/aws/terraform/etfs-reports/iam.tf)",
+      "output_evidence": "RECORDED in org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/rung-3-stops-and-asks-a-person.result.md section 7: (1) rung3_stop_and_ask's own signature has no callable/invoke parameter at all -- structurally cannot call a producer or provider; its authorization string is embedded IN the artifact, not just documentation; (2) HTTP_CLIENT_IMPORTS=0, no credential/secret/provider SDK referenced anywhere in remediate.py, and the estate's only IAM grant this project touched (EG-s-7) is an in-estate Lambda invoke, never a vendor credential; (3) every ask entry carries date+partner+provider+class+reason (arm (g) asserts all fields on 2 partners); (4) the ask never fires under dry_run (arm f) and never fires with zero unresolved (arm h), and never targets anything but opal-data-etfs (the same bucket rungs 1-2 already touch).",
+      "denominator": "3 of 3 named properties addressed with citations (different actor, no standing grant, complete ask); 2 of 2 partners' asks field-checked in arm (g); 2 of 2 non-firing conditions (dry-run, zero-unresolved) tested",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L6/L9: a judgment criterion carries its output and no self-graded verdict; 3.0.0_SA_CVO is the oracle at L9 and its grade lands in the adjudication row."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The ask's load-bearing claim is 'rung 3 fires (writes exactly once) when unresolved is non-empty and dry_run is False, and does NOT fire (zero writes) when unresolved is empty OR dry_run is True'. Mutated the SAME classes fixture across three remediate_month calls: (i) dry_run=True (unresolved planned but not confirmed), (ii) dry_run=False with a mixed C/D/B/UNKNOWN month (2 days end up genuinely unresolved), (iii) a fully-COVERED/A month (0 unresolved).",
+      "expected": "(i) 0 put_object calls, no 'ask' key. (ii) exactly 1 put_object call (the ask, bundling both unresolved days), 'ask' key present with 2 entries. (iii) 0 put_object calls, no 'ask' key.",
+      "observed": "test_dry_run_makes_zero_invokes_returns_plan: put_object_calls == [] and 'ask' not in result. test_ladder_never_writes_a_data_slice_only_the_ask: len(put_object_calls)==1, key == the ask path, len(result['ask']['asks'])==2. test_rung3_zero_unresolved_writes_no_ask (second half, via remediate_month on an all-COVERED/A month): put_object_calls == [] and 'ask' not in result. All three PASS with only the unresolved-count/dry_run inputs differing -- FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest data/etfs/scripts/coverage/tests/test_remediate.py -q executed twice; the S7B-AC3 direct-call invocation executed twice.",
+      "observed": "Both pytest runs: '8 passed'. Both direct-call runs: identical 'ASKS=1 PROVIDER=Black Diamond AUTH=PER-USE' (the ask's asks/provider/authorization fields are deterministic; only generated_at varies run-to-run by design, and no criterion or test asserts on its exact value -- arm assertions check asks/authorization/provider, never generated_at).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Wiring the ask artifact into the orchestrator's refusal text.",
+      "reason": "That is EG-s-8's surface, this worker's NEXT order, explicitly not started per the coordinator's hand-off ('EG-s-8 ... follows in your queue when handed -- do NOT start it')."
+    },
+    {
+      "item": "A live S3 write of the ask artifact against real opal-data-etfs.",
+      "reason": "Out of this cell's BOUNDS ('No live S3 write in this order: every exercise runs with write=False or a stubbed s3'). Every exercise in this session used write=False or a stub."
+    },
+    {
+      "item": "Contacting Black Diamond, Schwab, or Orion in any way.",
+      "reason": "Out of this cell's BOUNDS ('NO PROVIDER CALL, NO HTTP CLIENT, NO CREDENTIAL, NO STANDING GRANT') and structurally impossible given rung3_stop_and_ask's signature (no callable parameter to reach a provider with)."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/etfs/scripts/coverage/tests/test_remediate.py -q",
+      "result": "8 passed in 0.06s, zero AWS calls; confirmed +2 over EG-s-7's 6."
+    },
+    {
+      "tool": "python (byte census)",
+      "invocation": "python -c \"import re; ... HTTP_CLIENT_IMPORTS ... ASK_WRITER ...\"",
+      "result": "0 and 1."
+    },
+    {
+      "tool": "python (direct call)",
+      "invocation": "python -c \"... r.rung3_stop_and_ask('cottonwood','2026-08',[...], write=False) ...\"",
+      "result": "ASKS=1 PROVIDER=Black Diamond AUTH=PER-USE; also dumped full JSON shape for the result document."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/etfs/scripts/coverage/remediate.py data/etfs/scripts/coverage/tests/test_remediate.py",
+      "result": "pre-commit gate clean for 2 of 2 file(s)."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance, long-stem name> S7B-AC1,S7B-AC2,S7B-AC3,S7B-AC4,S7B-AC5",
+      "result": "run before the complete flip; result recorded in the report."
+    }
+  ]
+}
