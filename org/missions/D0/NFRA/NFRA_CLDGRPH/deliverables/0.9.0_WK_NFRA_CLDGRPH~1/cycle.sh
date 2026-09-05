@@ -3,7 +3,24 @@
 # served answer's age read from the SERVICE'S OWN LOG against the SCHEDULE'S ceiling.
 # Author: 0.9.0_WK_NFRA_CLDGRPH~1.  READS ONLY.  No AWS mutation, nothing started/stopped/written.
 #
-# THE CYCLE IS PINNED, NOT ROLLING: 2026-09-04T13:00:00Z -> 2026-09-05T13:00:00Z.
+# THE CYCLE IS PINNED, NOT ROLLING: 2026-09-04T21:18:54Z -> 2026-09-05T21:18:54Z.
+#   PASS 3 WINDOW, re-derived by this worker, NOT copied from the hand-off's prose.  The hand-off
+#   named 21:18:53Z (the last hand RunTask's own eventTime, "globgrph-trino", IAMUser
+#   Andrew_Berman, an ad-hoc read-only Trino SELECT against code_heat/graph_nodes -- no artifact,
+#   no write, verified from the task's own CloudTrail command).  TESTED EMPIRICALLY:
+#   `cloudtrail lookup-events --start-time 2026-09-04T21:18:53Z` (the exact eventTime) STILL
+#   RETURNS that event -- CloudTrail's start-time is INCLUSIVE -- while `--start-time
+#   2026-09-04T21:18:54Z` (one second later) returns zero.  Using the hand-off's own timestamp
+#   verbatim would have left the very hand RunTask the window exists to exclude sitting inside it.
+#   CYCLE_START is therefore the hand-off's timestamp PLUS ONE SECOND, and CYCLE_END is
+#   CYCLE_START + 24h so the window stays exactly 24 h.  Both conditions independently re-verified
+#   against artifacts (not asserted): (i) a CloudTrail RunTask census 2026-09-03T00:00:00Z ->
+#   2026-09-05T21:29:21Z labelled every one of 144 events by provenance form and found the LAST
+#   HAND-labelled RunTask at 2026-09-04T21:18:53Z with nothing HAND after it; (ii) the swap
+#   timeline 2026-09-04T13:00Z -> now shows the seed vintage held at window-open
+#   (2026-09-04T18:11:48.783142+00:00) and all 31 in-window vintages are writer_id
+#   incremental_updater / derive_runner(nightly, SCHEDULER_EVENTS_RULE) / cse_producers_nightly --
+#   none attributable to a HAND task under the attribution rule in cycle_hand_effect.py.
 #   24 h exactly; contains exactly one 02:00Z boundary (2026-09-05T02:00Z) and the nightly's swap;
 #   both ends are in the PAST at the cut, so the window is closed and no event in it is still
 #   arriving.  A rolling "now - 24 h" would give the L9 grader a DIFFERENT population than the one
@@ -56,8 +73,8 @@ CACHE="$HERE/manifest_writer_cache.tsv"
 WCACHE="$HERE/task_window_cache.tsv"
 FCACHE="$HERE/taskdef_logconfig_cache.tsv"
 
-CYCLE_START_ISO="${CYCLE_START_ISO:-2026-09-04T13:00:00Z}"
-CYCLE_END_ISO="${CYCLE_END_ISO:-2026-09-05T13:00:00Z}"
+CYCLE_START_ISO="${CYCLE_START_ISO:-2026-09-04T21:18:54Z}"
+CYCLE_END_ISO="${CYCLE_END_ISO:-2026-09-05T21:18:54Z}"
 S_MS=$(( $(date -u -d "$CYCLE_START_ISO" +%s) * 1000 ))
 E_MS=$(( $(date -u -d "$CYCLE_END_ISO" +%s) * 1000 ))
 SEED_LOOKBACK_MS=$(( S_MS - 86400000 ))
