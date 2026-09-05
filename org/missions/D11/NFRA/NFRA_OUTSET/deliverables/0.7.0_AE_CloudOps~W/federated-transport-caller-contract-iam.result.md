@@ -37,9 +37,44 @@ mixing them is the false-deny this audit measured (row `NFRA_OUTSET-S3`, §4).
 
 ---
 
-## 1. CRITERION O6-AC1 -- MECHANICAL -- **FAIL AS WRITTEN (CUT DEFECT, row `NFRA_OUTSET-S1`)**
+## 1. CRITERION O6-AC1 -- MECHANICAL -- **PASS** (after the issuer's amendment @`8d13fc6b80`)
 
-The face names `<invocation>python .tools/comp-iam --help</invocation>` with `<expect>usage</expect>`.
+### 1.0 As it stands now -- the amended face
+
+The issuer amended the criterion and re-armed the order (msg 94322). Verified in lineage before relying
+on it, and the criterion re-read from HEAD rather than from the worktree:
+
+```
+$ git merge-base --is-ancestor 8d13fc6b80 HEAD                  -> rc=0 (YES), at HEAD 7cf450942b
+$ git show HEAD:<the OS-s-6 face> | line 27
+<criterion id="O6-AC1" cell_refs="OS-s-6"><invocation>comp-iam --help</invocation><expect>usage</expect></criterion>
+
+$ timeout 120 comp-iam --help
+RC = 0   (captured BEFORE any pipe)        matches for "usage" = 1
+usage: comp-iam [-h]
+                {gaps,roles,services,service,role,stats,reconcile,attach-census,resource-sweep,
+                 gaps-filtered,simulate,simulate-self-test,refresh-census,census-self-test,live,
+                 investigate-candidates,investigate-candidates-self-test} ...
+IAM permission cross-reference: source code ops vs Terraform policies.
+```
+
+**DETERMINISM:** two same-input repeats, both rc=0, both `md5=534a89df4a440cd8`, both 1 match.
+
+**NEGATIVE CONTROL -- the arm that makes the PASS mean something.** The superseded cut form still fails at
+the same moment: `python .tools/comp-iam --help` -> rc=1, 0 matches. **The tool did not change; the
+criterion did.** Without this control a green here is equally consistent with the environment having
+drifted, and would not establish that the amendment is what fixed it.
+
+`O6-AC1` = **PASS**. With the order's only mechanical criterion passing, `TO-OS-s-6` is flipped to
+`complete` under this seat's own commit. Disarm of `NFRA_OUTSET-S1` recorded at `NFRA_OUTSET-S5`.
+
+### 1.1 The original cut, carried because the defect is the instructive part
+
+**This section is history, not a live finding.** It is kept because a repaired defect that leaves no trace
+teaches nobody, and because the CVO grades the round on what happened.
+
+As originally cut the face named `<invocation>python .tools/comp-iam --help</invocation>` with
+`<expect>usage</expect>`.
 
 ```
 $ timeout 120 python .tools/comp-iam --help
@@ -70,10 +105,17 @@ usage: comp-iam [-h]
 ```
 
 **Recorded, not worked around.** A mechanical criterion's pass "is decided by the MATCH and never by
-your opinion", so I do not substitute the working invocation on my own authority. `O6-AC1` is
-**FAIL** and `TO-OS-s-6` is **NOT flipped to complete** -- the proof_of_spec guard requires every
-MECHANICAL criterion to PASS. The fix is the issuer's (amend the `<invocation>` to `comp-iam --help`),
-per the GO: "If something in a face is wrong or missing, that is a CUT DEFECT and it is mine."
+your opinion", so the working invocation was not substituted on this seat's authority. `O6-AC1` was
+recorded **FAIL**, the order was **held unflipped**, and the defect was routed to the issuer as
+`NFRA_OUTSET-S1` -- per the GO: "If something in a face is wrong or missing, that is a CUT DEFECT and it
+is mine." **AC2 and AC3 were executed in full anyway**, so the order's whole substantive value landed in
+the same pass while the defect stayed visible. The issuer amended the face at `8d13fc6b80` and the
+re-run is §1.0 above.
+
+*Why this mattered more than one refused flip:* quietly substituting the working invocation would have
+turned a visible cut defect into an invisible one and graded a criterion nobody wrote — and the same
+issuance carried the defect 16 more times (`NFRA_OUTSET-S4`), so the silent repair would have hidden a
+systemic fault behind one lane's convenience.
 
 **⚠ Self-correction carried because it is the instructive part.** My first read of this printed
 `RC=0`. That rc was `head`'s, not python's -- the rc of a pipeline is its LAST stage. Re-measured with
@@ -244,14 +286,16 @@ the file; both my orders name it in `<paths>`):
 | `NFRA_OUTSET-S2` | OBSERVATION (ARMED) | `comp-find` content mode returns rc=124 with empty stdout -- a timeout that reads as a zero |
 | `NFRA_OUTSET-S3` | OBSERVATION (ARMED) | wrong-grain resource ARN is a third `simulate-principal-policy` false-deny mode |
 | `NFRA_OUTSET-S4` | **BLOCKING** | 16 of 17 faces in this issuance name their proof instance by a stem `to-pipeline-gate.py` does not search |
+| `NFRA_OUTSET-S5` | OBSERVATION (INERT) | disarm ack on S1 and S4, measured at this seat; also corrects this seat's own "15 faces" count to 16 |
 
-⚠ **`NFRA_OUTSET-S4` also changes where this order's own proof instance lives.** The face's
-`<proof_of_spec>` block names
-`.../deliverables/0.7.0_AE_CloudOps~W/NFRA_OUTSET.TO-OS-s-6.proof_of_spec.json`, but
-`.tools/to-pipeline-gate.py:1261-1270` globs the **full face stem**, so the instance is written at
-`.../NFRA_OUTSET.TO-OS-s-6.federated-transport-caller-contract-iam.proof_of_spec.json` instead -- the same
-granted folder, a different filename. The mechanism was obeyed over the prose, and the divergence is
-recorded here rather than left for the next reader to rediscover.
+**Both S1 and S4 are now disarmed** by the issuer's amendments at `8d13fc6b80`, each verified at this seat
+rather than accepted from the report (`NFRA_OUTSET-S5`). This order's proof instance lives at
+`.../NFRA_OUTSET.TO-OS-s-6.federated-transport-caller-contract-iam.proof_of_spec.json` -- the full face
+stem -- and the amended face now names that same path, so prose and mechanism agree. While they disagreed,
+the mechanism was obeyed and the divergence recorded rather than left for the next reader.
+
+`S2` and `S3` remain ARMED and are **not** this lane's to close: `S2` is routed to `0.8.0_AE_CloudComp` as
+comp-rail owner, `S3` to the estate trap catalogue. Both are outside this order's `<paths>` grant.
 
 ## 5. WHAT I CHANGED
 
