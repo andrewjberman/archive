@@ -1,0 +1,242 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-9",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~1",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-9.join-both-recipients-at-four-sites.md",
+    "group": "OTHER",
+    "vintage_commit": "446a064491c112059b8f53dc6d8d69c84d1f8712"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "5376ecaa8bdbf0f775cb347c2ba849bfba67afb9",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-9.join-both-recipients-at-four-sites.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/join-both-recipients-at-four-sites.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "3d3fc81b7f81fa95d082fc76c83b1fe26ebbdd76",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "APPLIED BY TARGET twice (-target=aws_lambda_function.orchestrator): first for the JOIN itself, second for the email_qa To-header addition (row W1-S10). Final served CodeSha256 CvFmg9ZmBrSMZSSlplJGd7BWp99FXn5+ODaRbKTe/QI= == built zip's base64 sha256 (S9-AC7 MATCH). Full untargeted plan post-both-applies: 'No changes' -- zero drift anywhere in the directory."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/etfs-reports-orchestrator/test_recipients_join.py",
+      "kind": "test",
+      "commit_or_etag": "1d7c53e6eb6a08ce04dcfb52d011fc7932bf6200",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5/5 passed locally, re-run clean after the email_qa fix; NOT packaged (archive_file zips only lambda_function.py); boto3 clients stubbed at module level, zero real AWS calls."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/etfs-reports/orchestrator.tf",
+      "kind": "terraform",
+      "commit_or_etag": "1d7c53e6eb6a08ce04dcfb52d011fc7932bf6200",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "EMAIL_RECIPIENT = \"aj@opalinvest.com,andrew@opalinvest.com\" applied and confirmed live via get-function-configuration (S9-AC6); targeted plan/apply/0-diff all PASS."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/join-both-recipients-at-four-sites.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Result document; no deploy surface of its own."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260905T0811Z_etfs-guardrail-eg-s-9-orchestrator-join-recipients_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "1d7c53e6eb6a08ce04dcfb52d011fc7932bf6200",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "OPENED before the first apply, CLOSED (commit 19b11f082b) after the get-function-configuration proof and the targeted 0-diff."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260905T0850Z_etfs-guardrail-eg-s-9-orchestrator-emailqa-to_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Supplementary ledger entry (row ETFS_GUARDRAIL-W1-S10): opened and closed retroactively this commit, covering the second apply (email_qa To-header fix) that ran without a ledger entry open at the time."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "c6ddc5d6c4aa3b2f2297bd8173b340ec47abc63a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "record-terraform-deploy.sh etfs-reports --function etfs-reports-orchestrator, run twice (once per apply); final commit c6ddc5d6c4, in-grant (infra/aws/lambda/ci/lambda-source-map.json + infra/aws/terraform/etfs-reports/CHANGELOG.json only, confirmed via git show --stat)."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/etfs-reports/CHANGELOG.json",
+      "kind": "config_data",
+      "commit_or_etag": "c6ddc5d6c4aa3b2f2297bd8173b340ec47abc63a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Written by record-terraform-deploy.sh, same commits as the source map row above."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S9-AC1",
+      "criterion_verbatim": "the five-arm battery is green (record N passed).",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/etfs-reports-orchestrator/test_recipients_join.py -q",
+      "output_evidence": "5 passed in 0.39s (also re-run clean after the email_qa To-header fix; test_terminal_send.py's 5 arms also re-run clean, 10/10 total across both files)",
+      "denominator": "5 of 5 arms passed: (a) two-address join at all four sites, (b) one-address 1-element list, (c) whitespace tolerated, (d) terminal send stays andrew@-only, (e) email_qa send-free",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S9-AC2",
+      "criterion_verbatim": "AMENDED (issuer ruling on row ETFS_GUARDRAIL-W1-S9): both report/correction envelopes take the list, the one-element-list shape is gone, and THREE msg[\"To\"] header sites exist (the two of the PRD's four-site table plus EG-s-8's terminal header).",
+      "method": "command",
+      "invocation": "python -c \"import re; s=open('infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py').read(); print('ENVELOPE_LIST_SITES=%d HEADER_SITES=%d SINGLE_ELEMENT_ENVELOPES=%d' % (len(re.findall(r'Destinations=EMAIL_RECIPIENTS', s)), len(re.findall(r'msg\\[\\\"To\\\"\\]\\s*=', s)), len(re.findall(r'Destinations=\\[EMAIL_RECIPIENT\\]', s))))\"",
+      "output_evidence": "ENVELOPE_LIST_SITES=2 HEADER_SITES=3 SINGLE_ELEMENT_ENVELOPES=0 -- measured identically before and after the email_qa fix (that fix touched a return dict, not a msg[\"To\"]/Destinations line)",
+      "denominator": "2 of 2 envelopes take the list; 3 of 3 header-assignment sites present; 0 of 0 single-element-envelope shapes remain",
+      "expect": "ENVELOPE_LIST_SITES=2 HEADER_SITES=3 SINGLE_ELEMENT_ENVELOPES=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S9-AC3",
+      "criterion_verbatim": "the SES account is OUT of the sandbox, so an unverified recipient does not fail silently at delivery.",
+      "method": "live_read",
+      "invocation": ".tools/aws sesv2 get-account --query ProductionAccessEnabled --output text",
+      "output_evidence": "True (full read: SendingEnabled=true, EnforcementStatus=HEALTHY, ReviewDetails.Status=GRANTED, case 178727932800843)",
+      "denominator": "1 of 1 account read, production access confirmed",
+      "expect": "True",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S9-AC4",
+      "criterion_verbatim": "the commit gate is clean.",
+      "method": "command",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py infra/aws/lambda/etfs-reports-orchestrator/test_recipients_join.py",
+      "output_evidence": "OK: pre-commit gate clean for 2 of 2 file(s) (re-run clean after the email_qa fix too)",
+      "denominator": "2 of 2 files clean",
+      "expect": "pre-commit gate clean",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S9-AC5",
+      "criterion_verbatim": "the TARGETED plan changes EXACTLY aws_lambda_function.orchestrator (code hash + the one environment variable): 0 to add, 1 to change, 0 to destroy. Anything else in the targeted plan -> do NOT apply, BLOCKING row.",
+      "method": "command",
+      "invocation": ".tools/terraform.exe -chdir=infra/aws/terraform/etfs-reports init -input=false ; plan -no-color -input=false -lock=false -target=aws_lambda_function.orchestrator (run twice: once for the JOIN, once for the email_qa fix)",
+      "output_evidence": "Both targeted plans: 'Plan: 0 to add, 1 to change, 0 to destroy' -- only aws_lambda_function.orchestrator, confirming row ETFS_GUARDRAIL-S2's LF-normalization fix holds (aws_instance.reporter shows NO change in either the full or the targeted plan). Ledger opened (commit 1d7c53e6eb) before the first apply, applied ('Apply complete! Resources: 0 added, 1 changed, 0 destroyed.') twice, record-terraform-deploy.sh run twice (commits 19b11f082b, c6ddc5d6c4), ledger closed both times (main entry + the retroactive supplementary entry for row W1-S10).",
+      "denominator": "1 of 1 resource changed in both targeted plans; 2 of 2 applies succeeded; 2 of 2 ledger entries opened-and-closed",
+      "expect": "1 to change",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S9-AC6",
+      "criterion_verbatim": "the APPLIED plane carries the joined variable (read after the apply and a 0-diff plan, both recorded).",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda get-function-configuration --function-name etfs-reports-orchestrator --query Environment.Variables.EMAIL_RECIPIENT --output text",
+      "output_evidence": "aj@opalinvest.com,andrew@opalinvest.com",
+      "denominator": "1 of 1 environment variable read, matches the DESIRED value exactly",
+      "expect": "aj@opalinvest.com,andrew@opalinvest.com",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S9-AC7",
+      "criterion_verbatim": "served CodeSha256 equals the built zip's base64 sha256 (the script from EG-s-8, re-run against the new build).",
+      "method": "command",
+      "invocation": "python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/orchestrator_served_vs_built.py",
+      "output_evidence": "SERVED_CODE_SHA256: CvFmg9ZmBrSMZSSlplJGd7BWp99FXn5+ODaRbKTe/QI=\nBUILT_ZIP_SHA256_B64: CvFmg9ZmBrSMZSSlplJGd7BWp99FXn5+ODaRbKTe/QI=\nVERDICT: MATCH",
+      "denominator": "2 of 2 hash values printed and compared, equal (final state, post both applies)",
+      "expect": "VERDICT: MATCH",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S9-AC8",
+      "criterion_verbatim": "graded by the CVO at L9: JOIN not replace at all four sites; Andrew is never dropped; the variable is the carrier for a future recipient; FWD-5's EXERCISED grade ... is the scheduled etfs-reports-monthly-run fire read as DELIVERY at both inboxes -- this order does NOT send a report to AJ ahead of it. RECORD the email_qa rehearsal's To header; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "live email_qa invoke (mode=email_qa, month=2026-08) ; live terminal_qa invoke (unaffected control) ; test arm (a)/(b)/(c)/(d) field-level assertions",
+      "output_evidence": "RECORDED in org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/join-both-recipients-at-four-sites.result.md section 8: live email_qa returns {\"to\": \"aj@opalinvest.com,andrew@opalinvest.com\", ...}; live terminal_qa returns {\"to\": \"andrew@opalinvest.com\", ...} unaffected; no run/send_correction mode was ever invoked; FWD-5's EXERCISED grade explicitly NOT claimed -- deferred to the scheduled cron(0 10 1 * ? *) fire, per the TO's own bound against an outward-facing send ahead of it.",
+      "denominator": "2 live rehearsal invocations (send-free); 1 of 1 FWD-5 EXERCISED claim explicitly declined with reason",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L6/L9: a judgment criterion carries its output and no self-graded verdict; 3.0.0_SA_CVO is the oracle at L9 and its grade lands in the adjudication row."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The join's load-bearing claim is 'EMAIL_RECIPIENTS tracks EMAIL_RECIPIENT's parsed form 1:1, and the terminal path is IMMUNE to it'. Mutated the SAME module import across three EMAIL_RECIPIENT values: a 2-address join, a single address, and a whitespace-padded 2-address join -- holding all other inputs fixed.",
+      "expected": "2-address join -> EMAIL_RECIPIENTS == ['aj@opalinvest.com','andrew@opalinvest.com'] and both envelopes/headers reflect both. Single address -> a 1-element list. Whitespace-padded -> the SAME clean 2-element list as the unpadded case. In ALL THREE, TERMINAL_RECIPIENT stays 'andrew@opalinvest.com' and the terminal envelope/header are unaffected.",
+      "observed": "test_join_two_addresses_both_headers_and_both_envelopes, test_single_address_one_element_list_header_meaning_unchanged, test_whitespace_around_commas_tolerated, and test_terminal_send_stays_andrew_only_regardless_of_join all PASS with only the EMAIL_RECIPIENT input differing across the first three and the terminal check re-run identically in the fourth -- FIRED-AS-EXPECTED. A second mutant on the deploy axis: the served-vs-built script read MATCH before this order's edits (EG-s-8's own state), MISMATCH immediately after the JOIN code change (not yet applied), and MATCH again after each apply -- also FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Both test files executed twice (before and after the email_qa fix); the served-vs-built script and the targeted 0-diff plan executed twice, once per apply.",
+      "observed": "Both pytest runs: '10 passed' (5+5). Both post-apply served-vs-built runs: identical hash pairs and MATCH for their respective builds. Both targeted 0-diff plans: identical 'No changes' (rc=0).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A live send via mode=run or mode=send_correction.",
+      "reason": "Explicitly forbidden by this order's BOUNDS ('NO LIVE SEND OF ANY KIND in this order'). All evidence is from live READS and send-free rehearsal INVOKES only."
+    },
+    {
+      "item": "Sending the monthly report to AJ ahead of the scheduled etfs-reports-monthly-run fire.",
+      "reason": "S9-AC8's own text: 'this order does NOT send a report to AJ ahead of it (an outward-facing act on a report the alignment has only just landed).' FWD-5's EXERCISED grade is explicitly deferred to that scheduled fire."
+    },
+    {
+      "item": "Restructuring the surprise-channel row sequence to avoid a gap.",
+      "reason": "Not applicable; rows W1-S9 and W1-S10 are both real, distinct findings with no gap between them."
+    }
+  ],
+  "surprises": [
+    "ETFS_GUARDRAIL-W1-S9: S9-AC2's cut (HEADER_SITES=2) predated EG-s-8's third msg[\"To\"] site in the same file; a correct implementation of this order's own BOUNDS ('leave EG-s-8's terminal send andrew@-only') necessarily reads HEADER_SITES=3. Measured before any envelope edit to confirm the gap pre-existed this worker's own changes. AMENDED BY THE ISSUER (expect -> HEADER_SITES=3); S9-AC2 PASSES against the amended expect.",
+    "ETFS_GUARDRAIL-W1-S10: this worker closed the etfs-guardrail-eg-s-9-orchestrator-join-recipients ledger after the FIRST apply, then discovered deliverable item 4 required a small additional code change (email_qa surfacing the To header) that needed a SECOND apply -- made without re-opening the ledger first, a NEVER-2 sequencing deviation. Remediated same-turn: a supplementary ledger entry (etfs-guardrail-eg-s-9-orchestrator-emailqa-to) was opened and closed with proof from the post-fix measurements. INERT: both applies succeeded and are 0-diff-confirmed; the gap was in the ledger's bookkeeping order, not the infrastructure's state."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/etfs-reports-orchestrator/test_recipients_join.py infra/aws/lambda/etfs-reports-orchestrator/test_terminal_send.py -q",
+      "result": "10 passed, both before and after the email_qa fix."
+    },
+    {
+      "tool": "python (byte census)",
+      "invocation": "python -c \"import re; ... ENVELOPE_LIST_SITES ... HEADER_SITES ... SINGLE_ELEMENT_ENVELOPES ...\"",
+      "result": "2/3/0, measured before any envelope edit AND after, confirming the gap's origin."
+    },
+    {
+      "tool": ".tools/aws sesv2",
+      "invocation": ".tools/aws sesv2 get-account --query ProductionAccessEnabled --output text ; .tools/aws sesv2 get-account --output json",
+      "result": "True; full account details showing HEALTHY enforcement and GRANTED production access."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py infra/aws/lambda/etfs-reports-orchestrator/test_recipients_join.py",
+      "result": "clean, both before and after the email_qa fix."
+    },
+    {
+      "tool": "terraform.exe v1.9.8",
+      "invocation": "init -input=false ; plan (untargeted, twice) ; plan -target=aws_lambda_function.orchestrator (twice) ; apply -target=... (twice) ; plan -target=... -detailed-exitcode (twice)",
+      "result": "both applies '1 changed'; both targeted 0-diffs rc=0; final untargeted plan 'No changes' -- zero drift anywhere in the directory."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open/close-leg/close for etfs-guardrail-eg-s-9-orchestrator-join-recipients, then again for the supplementary etfs-guardrail-eg-s-9-orchestrator-emailqa-to",
+      "result": "both OPENED and CLOSED, 'all 1 legs proven; sentinel removed' each time."
+    },
+    {
+      "tool": "record-terraform-deploy.sh",
+      "invocation": "bash infra/aws/lambda/ci/record-terraform-deploy.sh etfs-reports --function etfs-reports-orchestrator --author ... (run twice)",
+      "result": "commits 19b11f082b and c6ddc5d6c4, both exactly 2 in-grant files (source map + CHANGELOG.json), verified via git show --stat."
+    },
+    {
+      "tool": ".tools/aws lambda invoke",
+      "invocation": "mode=email_qa (before and after the To-header fix) ; mode=terminal_qa (control, unaffected)",
+      "result": "email_qa (after fix): to=aj@opalinvest.com,andrew@opalinvest.com. terminal_qa: to=andrew@opalinvest.com, unaffected."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 new row(s) of 20 total, carrying step-7/step-10 fields; corpus baseline unchanged."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance, long-stem name> S9-AC1,S9-AC2,S9-AC3,S9-AC4,S9-AC5,S9-AC6,S9-AC7,S9-AC8",
+      "result": "run before the complete flip; result recorded in the report."
+    }
+  ]
+}
