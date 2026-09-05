@@ -53,6 +53,8 @@ BUCKET=opal-313476888478-globgrph
 LOG_GROUP=/ecs/globgrph-serving
 POINTER_KEY=projection/current.json
 CACHE="$HERE/manifest_writer_cache.tsv"
+WCACHE="$HERE/task_window_cache.tsv"
+FCACHE="$HERE/taskdef_logconfig_cache.tsv"
 
 CYCLE_START_ISO="${CYCLE_START_ISO:-2026-09-04T13:00:00Z}"
 CYCLE_END_ISO="${CYCLE_END_ISO:-2026-09-05T13:00:00Z}"
@@ -68,6 +70,7 @@ HTTP_RAW="$TMPD/http.tsv"
 CT_RAW="$TMPD/runtask.jsonl"
 SEED_RAW="$TMPD/seed.tsv"
 REF_RAW="$TMPD/refusals.tsv"
+WINDOWS="$TMPD/windows.tsv"
 
 echo "=== TO-CG-D-10 / CG-x-4 -- FWD-4: THE CEILING HOLDS BY ITSELF"
 echo "READ_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -329,6 +332,129 @@ if [ "$NEED_N" -gt 0 ]; then
 fi
 echo
 
+# ------------------------------------------------------------ 4d. THE AMENDED D10-AC3 EVIDENCE
+# D10-AC3 was re-cut on 1.0.0_SA_CTO's ruling @9f4a57262f: the bar is no longer "were there any
+# hand-started RunTasks" (there were 3, and that number is still printed below) but "did any of
+# them have the EFFECT of making a served answer fresher than the schedule alone would have".
+# So each hand-started task is OPENED: its own log stream gives the window a produced vintage must
+# fall inside, and its own container command says what it ran.  Both are read from the TASK, never
+# from the fact that a hand started it.
+echo "--- 4d. EACH HAND-STARTED TASK OPENED: its own execution window and its own command"
+: > "$TMPD/handtasks.tsv"
+if grep -q '^READ_FAILED$' "$CT_RAW"; then
+  echo "  HAND_TASK_OPEN_SKIPPED -- the RunTask read above FAILED, so no task list exists and no"
+  echo "    effect is derivable.  This is a READ failure, not an absence of hand tasks."
+else
+  "$JQ" -r '(.requestParameters.startedBy // "") as $sb
+    | (if ($sb|test("^Started by Eventbridge Pipes")) then "PIPE"
+       elif ($sb|test("^events-rule/")) then "SCHEDULER_EVENTS_RULE"
+       elif ($sb|test("^chronos-schedule/")) then "SCHEDULER_CHRONOS"
+       elif ($sb|test("^ecs-svc/")) then "SERVICE_SCHEDULER"
+       elif ($sb|test("^Started by ECS Service")) then "SERVICE_SCHEDULER"
+       else "HAND" end) as $lab
+    | ((.requestParameters.taskDefinition // "-")) as $td
+    | ($td|split("/")|last|split(":")|first) as $fam
+    | ((((.responseElements.tasks // [])[0]).taskArn // "-")|split("/")|last) as $tid
+    | select($lab == "HAND" or ($lab == "SCHEDULER_EVENTS_RULE" and ($fam|test("derive-runner"))))
+    | [$tid, $fam, $lab, .eventTime, $td] | @tsv' "$CT_RAW" | tr -d '\r' > "$TMPD/handtasks.tsv"
+fi
+echo "  TASKS_TO_OPEN=$(grep -c . "$TMPD/handtasks.tsv")  (every HAND task in the cycle, PLUS the"
+echo "    scheduled nightly derive-runner, opened ONLY to serve as the positive control: the"
+echo "    counterfactual arm must be shown to FIRE before any hand task's zero is believed)"
+
+# Every task definition's log configuration, resolved ONCE, from the EXACT REVISION CloudTrail
+# recorded -- a bare family lookup reads the ACTIVE revision, which is a different object.
+touch "$FCACHE"
+cut -f5 "$TMPD/handtasks.tsv" | sort -u | grep -v '^$' > "$TMPD/tds.txt"
+while read -r td; do
+  [ -z "$td" ] && continue
+  if awk -F'\t' -v k="$td" '$1==k && $2=="0" {found=1} END{exit !found}' "$FCACHE"; then continue; fi
+  timeout 60 "$AWS" ecs describe-task-definition --task-definition "$td" \
+    --query 'taskDefinition.containerDefinitions[0].[logConfiguration.options."awslogs-group",logConfiguration.options."awslogs-stream-prefix",name]' \
+    --output text > "$TMPD/td.out"
+  rc=$?
+  if [ "$rc" -ne 0 ]; then
+    echo "  TASKDEF_READ_FAILED rc=${rc} td=${td} -- no log stream is derivable for it"
+    printf '%s\t%s\tREAD_FAILED\tREAD_FAILED\tREAD_FAILED\n' "$td" "$rc" >> "$FCACHE"
+  else
+    tr -d '\r' < "$TMPD/td.out" | awk -v t="$td" -F'\t' 'NF>=3 {printf "%s\t0\t%s\t%s\t%s\n", t, $1, $2, $3}' >> "$FCACHE"
+  fi
+done < "$TMPD/tds.txt"
+sort -u "$FCACHE" -o "$FCACHE"
+
+# A STOPPED task's log stream is append-CLOSED, so a cached rc=0 window is the same bytes a live
+# read returns.  ONLY a window that ended before CYCLE_END is cached -- a still-running task's
+# last_ms moves, and caching one would freeze a moving number.  A FAILED read is NEVER cached.
+fetch_window() {
+  local tid="$1" grp="$2" pfx="$3" ctr="$4" out="$5" body rc n lo hi
+  body=$(timeout 60 "$AWS" logs get-log-events --log-group-name "$grp" \
+      --log-stream-name "${pfx}/${ctr}/${tid}" --start-from-head --output json)
+  rc=$?
+  if [ "$rc" -ne 0 ] || [ -z "$body" ]; then
+    printf '%s\tREAD_FAILED_rc%s\t0\t0\n' "$tid" "$rc" > "$out"
+    return
+  fi
+  body=$(printf '%s' "$body" | tr -d '\r')
+  n=$(printf '%s' "$body" | "$JQ" -r '.events | length')
+  if [ -z "$n" ] || [ "$n" = "0" ]; then
+    # An EMPTY stream must NOT collapse to a zero-width window: that would silently EXCUSE the
+    # task from every attribution.  It is recorded as a FAILURE so the join fails CLOSED on it.
+    printf '%s\tEMPTY_STREAM\t0\t0\n' "$tid" > "$out"
+    return
+  fi
+  lo=$(printf '%s' "$body" | "$JQ" -r '[.events[].timestamp] | min')
+  hi=$(printf '%s' "$body" | "$JQ" -r '[.events[].timestamp] | max')
+  printf '%s\t0\t%s\t%s\n' "$tid" "$lo" "$hi" > "$out"
+}
+
+touch "$WCACHE"
+: > "$WINDOWS"
+rm -rf "$TMPD/w"; mkdir -p "$TMPD/w"
+i=0
+WFETCH=0
+while IFS="$(printf '\t')" read -r tid fam lab etime td; do
+  [ -z "$tid" ] && continue
+  i=$(( i + 1 ))
+  CROW=$(awk -F'\t' -v k="$tid" '$1==k && $2=="0" {print; exit}' "$WCACHE")
+  if [ -n "$CROW" ]; then
+    printf '%s\n' "$CROW" >> "$WINDOWS"
+    continue
+  fi
+  LROW=$(awk -F'\t' -v k="$td" '$1==k && $2=="0" {print; exit}' "$FCACHE")
+  LGRP=$(printf '%s' "$LROW" | cut -f3)
+  LPFX=$(printf '%s' "$LROW" | cut -f4)
+  LCTR=$(printf '%s' "$LROW" | cut -f5)
+  if [ -z "$LGRP" ]; then
+    printf '%s\tNO_LOG_CONFIG\t0\t0\n' "$tid" > "$TMPD/w/$i.tsv"
+    continue
+  fi
+  WFETCH=$(( WFETCH + 1 ))
+  fetch_window "$tid" "$LGRP" "$LPFX" "$LCTR" "$TMPD/w/$i.tsv" &
+done < "$TMPD/handtasks.tsv"
+wait
+if ls "$TMPD"/w/*.tsv > "$TMPD/w.ls" 2>"$TMPD/w.lserr"; then
+  cat "$TMPD"/w/*.tsv >> "$WINDOWS"
+  awk -F'\t' -v e="$E_MS" '$2=="0" && $4+0 < e+0' $(cat "$TMPD/w.ls") >> "$WCACHE"
+  sort -u "$WCACHE" -o "$WCACHE"
+fi
+echo "  WINDOWS_FROM_CACHE=$(( i - WFETCH ))  WINDOWS_FETCHED_LIVE=${WFETCH}  WINDOWS_TOTAL=$(grep -c . "$WINDOWS")"
+echo "  (a READ_FAILED / EMPTY_STREAM / NO_LOG_CONFIG row is kept AS A FAILURE so the attribution"
+echo "   join fails CLOSED on that task rather than quietly excusing it)"
+while IFS="$(printf '\t')" read -r tid rc lo hi; do
+  [ -z "$tid" ] && continue
+  echo "    window ${tid} rc=${rc} first_ms=${lo} last_ms=${hi}"
+done < "$WINDOWS"
+
+# WHAT EACH HAND TASK ACTUALLY RAN -- CloudTrail carries the container command verbatim, so
+# "it rebuilt something else" is a READ of the task, not an inference about it.
+echo "  THE COMMAND EACH HAND TASK RAN (verbatim from CloudTrail's own requestParameters):"
+"$JQ" -r '(.requestParameters.startedBy // "") as $sb
+  | select(($sb|test("^(Started by Eventbridge Pipes|events-rule/|chronos-schedule/|ecs-svc/|Started by ECS Service)")) | not)
+  | "    " + .eventTime + " | " + ((.requestParameters.taskDefinition//"-")|split("/")|last)
+    + " | cmd=" + (((((.responseElements.tasks // [])[0]).overrides // {}).containerOverrides // [])
+        | map((.command // ["(none -- the image entrypoint runs)"]) | join(" ")) | join(" ;; ") | .[0:360])' "$CT_RAW" | tr -d '\r'
+echo
+
 # ------------------------------------------------------------ 5/6. the joins
 echo "--- 5. THE AGE JOIN"
 python "$HERE/cycle_ages.py" "$TL_RAW" "$HTTP_RAW" > "$TMPD/ages.txt"
@@ -345,6 +471,18 @@ cat "$TMPD/census.txt"
 echo "  cycle_census.py rc=${CEN_RC}"
 echo
 
+echo "--- 6b. D10-AC3 AS AMENDED: DID ANY HAND-STARTED TASK MAKE A SERVED ANSWER FRESHER?"
+echo "Not 'was a hand involved' (it was, 3 times, and that count is still printed below) but"
+echo "whether the ARTIFACT a hand-started task produced was SERVED and displaced an older one."
+echo "The effect is COMPUTED as a counterfactual re-ageing, and the arm is proven able to fire"
+echo "on a SCHEDULED producer before any hand task's zero is spent as an absence."
+python "$HERE/cycle_hand_effect.py" --timeline "$TL_RAW" --http "$HTTP_RAW" \
+  --manifests "$CACHE" --runtask "$CT_RAW" --windows "$WINDOWS" > "$TMPD/effect.txt"
+EFF_RC=$?
+cat "$TMPD/effect.txt"
+echo "  cycle_hand_effect.py rc=${EFF_RC}"
+echo
+
 # ------------------------------------------------------------ 7. the summary
 lift() { grep -E "^$1=" "$2" | tail -1 | sed -e "s/^$1=//"; }
 
@@ -358,10 +496,13 @@ NIGHTLY=$(lift NIGHTLY_SWAP_AT_VALUE "$TMPD/census.txt")
 WRITERS=$(lift WRITERS_VALUE "$TMPD/census.txt")
 HAND=$(lift RUNTASK_HAND_VALUE "$TMPD/census.txt")
 RTOTAL=$(lift RUNTASK_TOTAL_VALUE "$TMPD/census.txt")
+HANDEFF=$(lift HAND_ENFORCED_VALUE "$TMPD/effect.txt")
+HANDDEN=$(lift HAND_DENOM_VALUE "$TMPD/effect.txt")
 EXTRA_US=$(cat "$TMPD/us_count")
 
 for pair in "OLDEST:$OLDEST" "CEILING:$CEILING" "SERVED:$SERVED" "NIGHTLY:$NIGHTLY" \
-            "WRITERS:$WRITERS" "HAND:$HAND" "RTOTAL:$RTOTAL"; do
+            "WRITERS:$WRITERS" "HAND:$HAND" "RTOTAL:$RTOTAL" \
+            "HANDEFF:$HANDEFF" "HANDDEN:$HANDDEN"; do
   if [ -z "${pair#*:}" ]; then
     echo "FATAL: ${pair%%:*} did not lift from its helper -- refusing to print a summary line that"
     echo "  would read as a measurement.  Re-read the transcript above for the READ_FAILED sentinel."
@@ -381,9 +522,13 @@ echo "NIGHTLY_SWAP_AT=${NIGHTLY}"
 echo "OLDEST_AGE_SERVED_S=${OLDEST}"
 echo "CEILING_S=${CEILING}"
 echo "WITHIN_CEILING=${WITHIN}"
+echo "HAND_ENFORCED_CEILING=${HANDEFF} of ${HANDDEN}"
 echo "HANDS_OFF_RUNTASK=${HAND} of ${RTOTAL}"
 echo "WRITERS_IN_CYCLE=${WRITERS}"
 echo "=============================================================================="
+echo "  (HANDS_OFF_RUNTASK and WRITERS_IN_CYCLE are CARRIED UNCHANGED from the pass-1"
+echo "   instrument.  They are no longer the bar -- HAND_ENFORCED_CEILING is -- but the"
+echo "   ruling requires that no number the failing instrument measured is lost.)"
 echo "SUPPLEMENTARY (never graded; printed so the graded numbers carry their frame):"
 echo "  CEILING_CHAIN_S=${CHAIN}  (the nightly's own built_at - vintage, from ITS manifest)"
 echo "  UNPLACED=${UNPLACED}  (answers the timeline could not place; a zero IS the coverage claim)"
