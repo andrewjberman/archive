@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-4",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~1",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-4.the-coverage-classifier.md",
+    "group": "OTHER",
+    "vintage_commit": "83d8175729a243f427aff8a2985ad45dfc0b3c2d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "5376ecaa8bdbf0f775cb347c2ba849bfba67afb9",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-4.the-coverage-classifier.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-coverage-classifier.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/coverage/classifier.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module, not yet wired into any deploy (the renderer's EG-s-5/EG-s-6 imports it in another queue); this order builds and tests it against a stub probe only."
+    },
+    {
+      "path_or_key": "data/etfs/scripts/coverage/__init__.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Package marker, no logic."
+    },
+    {
+      "path_or_key": "data/etfs/scripts/coverage/tests/__init__.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Package marker for the test subpackage, no logic."
+    },
+    {
+      "path_or_key": "data/etfs/scripts/coverage/tests/test_classifier.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8/8 passed locally, zero AWS calls (verified: every arm supplies series/probe directly, never leaving series=None with s3=None)."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-coverage-classifier.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Result document; no deploy surface."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S4-AC1",
+      "criterion_verbatim": "the battery is green, all eight arms (record the N passed).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/etfs/scripts/coverage/tests/test_classifier.py -q",
+      "output_evidence": "8 passed in 1.11s",
+      "denominator": "8 of 8 arms passed: (a) COVERED, (b) A/Saturday, (c) B not-a-hole/expected-empty, (d) C, (e) D, (f) UNKNOWN never B/C/D, (g) August fixture 5 holes, (h) August fixture 0 holes",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S4-AC2",
+      "criterion_verbatim": "the LIVE read of August 2026 cottonwood as it stands after the 09-01 repair classifies no trading day UNKNOWN (every trading day has a slice). If it does not, that is a real hole today: the honest output, and a row.",
+      "method": "command",
+      "invocation": "python data/etfs/scripts/coverage/classifier.py --partner cottonwood --month 2026-08 --no-probe",
+      "output_evidence": "CLASSIFY: partner=cottonwood month=2026-08 trading_days=21 COVERED=21 A=10 B=0 C=0 D=0 UNKNOWN=0\n21/21 trading days; 0 carried for missing data",
+      "denominator": "21 of 21 trading days COVERED, 0 UNKNOWN",
+      "expect": "UNKNOWN=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S4-AC3",
+      "criterion_verbatim": "the live read runs for a calendar-day-delivered partner too (Inflection writes weekend files; A and COVERED must not collide -- record the counts).",
+      "method": "command",
+      "invocation": "python data/etfs/scripts/coverage/classifier.py --partner inflection --month 2026-08 --no-probe",
+      "output_evidence": "CLASSIFY: partner=inflection month=2026-08 trading_days=21 COVERED=21 A=10 B=0 C=0 D=0 UNKNOWN=0\n21/21 trading days; 0 carried for missing data",
+      "denominator": "A=10 + COVERED=21 = 31 (August's full calendar length), 0 overlap",
+      "expect": "CLASSIFY: partner=inflection month=2026-08",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S4-AC4",
+      "criterion_verbatim": "AMENDED on row W1-S1: NO committed copy of the calendar inside the package; the resolver reaches lib/ in the repo and the deploy-time sibling on the box.",
+      "method": "command",
+      "invocation": "python -c \"import os; print('COMMITTED_CAL_COPY=%s' % os.path.exists('data/etfs/scripts/coverage/trading_calendar.py'))\"",
+      "output_evidence": "COMMITTED_CAL_COPY=False",
+      "denominator": "N/A -- boolean check",
+      "expect": "COMMITTED_CAL_COPY=False",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S4-AC5",
+      "criterion_verbatim": "the commit gate is clean on every .py this order adds.",
+      "method": "command",
+      "invocation": "bash .tools/commit-gate.sh data/etfs/scripts/coverage/classifier.py data/etfs/scripts/coverage/__init__.py data/etfs/scripts/coverage/tests/test_classifier.py",
+      "output_evidence": "OK: pre-commit gate clean for 3 of 3 file(s)",
+      "denominator": "3 of 3 files clean",
+      "expect": "pre-commit gate clean",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S4-AC6",
+      "criterion_verbatim": "the module names no firm bucket: the etfs-only principal is a property of the bytes, not a promise.",
+      "method": "command",
+      "invocation": "python -c \"import re; s=open('data/etfs/scripts/coverage/classifier.py').read(); print('FIRM_BUCKET_REFS=%d' % len(re.findall(r'opal-data-(?:assets|inf|cot|bd|schwab)', s)))\"",
+      "output_evidence": "FIRM_BUCKET_REFS=0 (a first draft's docstring prose named opal-data-assets and scored FIRM_BUCKET_REFS=1; reworded to avoid the literal bucket string and re-verified 0, with the full battery and commit gate re-run clean afterward)",
+      "denominator": "0 of 0 firm-bucket-name matches across the file's bytes",
+      "expect": "FIRM_BUCKET_REFS=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S4-AC7",
+      "criterion_verbatim": "graded by the CVO at L9: class B is EXPECTED and never a hole (property 4), the ZERO-vs-MISSING contract is untouched, UNKNOWN is never guessed, and the taxonomy is MECE over \"a calendar day of the month\". RECORD the evidence (test arms, the live counts); NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "test arm (c) (data/etfs/scripts/coverage/tests/test_classifier.py::test_unpriced_upstream_is_class_b_expected_not_a_hole) asserting holes==0 and expected_empty==1 for a B day; arm (f) asserting class not in (B,C,D) with no probe; source read of classifier.py's summarize() holes/expected_empty formulas and _month_dates()'s calendar-day enumeration; live S4-AC2/AC3 counts (A=10, COVERED=21, sum=31)",
+      "output_evidence": "RECORDED in org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-coverage-classifier.result.md section 8: (1) B is excluded from holes by construction (holes = C+UNKNOWN+D, expected_empty = B, arm (c) asserts both numerically); (2) classifier.py never calls put_object/upload_* anywhere -- inspected, none found -- so the ZERO-vs-MISSING contract (a priced==0 day gets no slice) is read-only-respected, never backfilled; (3) UNKNOWN is produced ONLY when probe is None or the probe answers None for that date (arm (f) asserts class not in (B,C,D) under exactly that condition); (4) MECE: _month_dates() walks every calendar day from the 1st to the month cap with no gaps/duplicates, each day passes exactly one if/elif branch (A / COVERED / UNKNOWN(no probe) / UNKNOWN(probe None) / D / B / C), and live counts sum exactly to the full calendar month (S4-AC2/AC3: 10+21=31) and to the full trading-day count with zero double-count (fixture arms (g)/(h)).",
+      "denominator": "4 of 4 named properties addressed (B-not-a-hole, ZERO-vs-MISSING untouched, UNKNOWN-never-guessed, MECE); 8 of 8 test arms cited as evidence; 2 of 2 live runs' counts cited",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L6/L9: a judgment criterion carries its output and no self-graded verdict; 3.0.0_SA_CVO is the oracle at L9 and its grade lands in the adjudication row."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The taxonomy's load-bearing branch order is 'A checked BEFORE COVERED/probe-derived classes, and priced==0 routes to B, never C, while priced>0-with-no-slice routes to C, never B'. Mutated the PROBE ANSWER, not the code: for the same date, holding partition=True fixed, priced=0 vs priced=5 with no slice present -- the classifier must diverge to B vs C on that single input change (test arms (c) and (d), same date ANOTHER_TRADING_DAY, same series={}, only the probe's `priced` value differs).",
+      "expected": "priced=0 -> class B, holes unaffected (0), expected_empty=1. priced=5 -> class C, holes=1. A comparator that could not discriminate priced==0 from priced>0 would misclassify one of the two identically.",
+      "observed": "test_unpriced_upstream_is_class_b_expected_not_a_hole: entry['class']=='B', summary['holes']==0, summary['expected_empty']==1. test_producer_never_fired_is_class_c: entry['class']=='C', summary['holes']==1. Both PASS with the only input difference being the probe's priced value -- FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest data/etfs/scripts/coverage/tests/test_classifier.py -q executed twice; python data/etfs/scripts/coverage/classifier.py --partner cottonwood --month 2026-08 --no-probe executed twice.",
+      "observed": "Both pytest runs: '8 passed'. Both CLI runs: identical 'CLASSIFY: partner=cottonwood month=2026-08 trading_days=21 COVERED=21 A=10 B=0 C=0 D=0 UNKNOWN=0' and '21/21 trading days; 0 carried for missing data' lines, byte-identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Building or invoking a real probe against cot-etf-ownership-daily or bd-49f-etf-ownership-daily.",
+      "reason": "Out of this cell's BOUNDS ('NO PROBE OF YOUR OWN'; 'You do NOT touch ... the ladder EG-s-7'). This order builds and tests against a stub probe only; the live probe is EG-s-7's surface, next in this worker's queue but not started."
+    },
+    {
+      "item": "Wiring classifier.py into the renderer.",
+      "reason": "Out of this cell's BOUNDS ('You do NOT touch the renderer EG-s-5/EG-s-6, another queue'); this order builds the importable module and its own test battery only."
+    },
+    {
+      "item": "Confirming the reporter-box deploy actually places a trading_calendar.py sibling at build time.",
+      "reason": "That is EG-s-6's artifact-upload surface, not this cell's; this worker demonstrated both resolver paths locally in .scratch/ (never committed) as evidence the RESOLVER CODE itself works both ways, which is what this cell owns."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/etfs/scripts/coverage/tests/test_classifier.py -q",
+      "result": "8 passed in 1.11s, zero AWS calls (verified by code inspection: every test arm supplies series/probe explicitly)."
+    },
+    {
+      "tool": "python (CLI)",
+      "invocation": "python data/etfs/scripts/coverage/classifier.py --partner cottonwood --month 2026-08 --no-probe ; --partner inflection --month 2026-08 --no-probe",
+      "result": "Both: trading_days=21 COVERED=21 UNKNOWN=0; A=10+COVERED=21=31 for both partners."
+    },
+    {
+      "tool": "python (byte census)",
+      "invocation": "python -c \"import re; ... re.findall(r'opal-data-(?:assets|inf|cot|bd|schwab)', s)\"",
+      "result": "Caught a genuine first-draft violation (docstring prose naming opal-data-assets, FIRM_BUCKET_REFS=1) before commit; fixed and re-verified 0."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/etfs/scripts/coverage/classifier.py data/etfs/scripts/coverage/__init__.py data/etfs/scripts/coverage/tests/test_classifier.py",
+      "result": "pre-commit gate clean for 3 of 3 file(s)."
+    },
+    {
+      "tool": "python (resolver path demonstration, .scratch only)",
+      "invocation": "cp classifier.py + lib/trading_calendar.py into .scratch/flat_sibling_test/; import classifier; print(classifier.tcal.__file__)",
+      "result": "Confirmed the flat-sibling import path resolves when a sibling copy exists, and the repo-layout fallback resolves when it does not (the actual committed state) -- both resolver branches exercised, neither leaves a committed copy in the package."
+    },
+    {
+      "tool": "git log",
+      "invocation": "git log -1 --format='%H' -- org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-4.the-coverage-classifier.md",
+      "result": "83d8175729a243f427aff8a2985ad45dfc0b3c2d -- the vintage this instance is built against."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> S4-AC1,S4-AC2,S4-AC3,S4-AC4,S4-AC5,S4-AC6,S4-AC7",
+      "result": "run before the complete flip; result recorded in the report."
+    }
+  ]
+}
