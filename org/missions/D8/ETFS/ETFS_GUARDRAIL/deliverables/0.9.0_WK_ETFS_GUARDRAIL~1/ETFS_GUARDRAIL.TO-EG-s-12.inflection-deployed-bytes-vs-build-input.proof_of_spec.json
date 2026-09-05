@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-12",
+  "phase": "INVESTIGATION",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~1",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-12.inflection-deployed-bytes-vs-build-input.md",
+    "group": "OTHER",
+    "vintage_commit": "de8693863c1718027b0db3fa8a3904bcc2ae9ce6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "5376ecaa8bdbf0f775cb347c2ba849bfba67afb9",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-12.inflection-deployed-bytes-vs-build-input.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/inflection-deployed-bytes-vs-build-input.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/inflection-deployed-bytes-vs-build-input.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A measurement/verify deliverable; no Lambda code, IAM, or bucket is written. All AWS calls are read-only (get-function-configuration, get-function download via presigned URL, s3api list-objects-v2/get-object) under the launching seat's borrowed credentials, as the cell states."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/deployed_bytes_diff.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local verify-only script (this deliverable), never deployed anywhere; run twice this session producing byte-identical output both times (determinism control below)."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise-channel rows ETFS_GUARDRAIL-W1-S4 and ETFS_GUARDRAIL-W1-S5 appended this commit; validated by .tools/surprise-row-gate.py at stage -> 'OK: 1 file(s), all new rows carry their step-7/step-10 fields', corpus baseline unchanged (4 known, 0 new failures, 0 resolved)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S12-AC1",
+      "criterion_verbatim": "the live configuration READ (the three values recorded verbatim).",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda get-function-configuration --function-name inf-etf-ownership-daily --query \"[FunctionName,LastModified,CodeSha256]\" --output text",
+      "output_evidence": "inf-etf-ownership-daily\t2026-08-11T10:29:39.000+0000\tSibchin3yNutF+OC6d06fZNlfQKuKCcPUC3cG/m3LJI=",
+      "denominator": "3 of 3 requested fields returned (FunctionName, LastModified, CodeSha256)",
+      "expect": "inf-etf-ownership-daily",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S12-AC2",
+      "criterion_verbatim": "the deployed-bytes diff RAN and printed its one verdict line (MATCH or MISMATCH with the differing members named; either is a valid answer -- the CELL asks the question, it does not presume the answer).",
+      "method": "command",
+      "invocation": "python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/deployed_bytes_diff.py",
+      "output_evidence": "VERDICT: MISMATCH files=3 differing=dedup_core.py,lambda_function.py,trading_calendar.py -- full member-by-member output: dedup_core.py deployed=ABSENT repo=78f24ab352 DIFFERS; lambda_function.py deployed=3e98e00e16 repo=afcbd401a7 DIFFERS; trading_calendar.py deployed=ABSENT repo=41b1c0c126 DIFFERS. DEPLOYED_READS: env_bindings=ETFS_BUCKET<-ETFS_BUCKET,INF_BUCKET<-INF_BUCKET,HOLDINGS_PREFIX<-HOLDINGS_PREFIX,CONFIG_KEY<-CONFIG_KEY,OUTPUT_PREFIX<-OUTPUT_PREFIX,PARTNER<-PARTNER. REPO_READS: env_bindings=ETFS_BUCKET<-ETFS_BUCKET,ASSETS_BUCKET<-ASSETS_BUCKET,FACT_POSITIONS_PREFIX<-FACT_POSITIONS_PREFIX,META_DEDUP_PREFIX<-META_DEDUP_PREFIX,CONFIG_KEY<-CONFIG_KEY,OUTPUT_PREFIX<-OUTPUT_PREFIX,PARTNER<-PARTNER. Build-zip.sh deviation recorded: the named script failed rc=1 (invalid hardcoded touch date, filed ETFS_GUARDRAIL-W1-S5); an equivalent deterministic zip was built directly via Python zipfile per the TO's own fallback clause.",
+      "denominator": "3 of 3 source-map-declared files compared; 1 of 3 present-on-both-sides-but-differing, 2 of 3 absent from the deployed zip",
+      "expect": "VERDICT:",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S12-AC3",
+      "criterion_verbatim": "the last repo commit touching the source dir, re-measured (the brief says 2026-08-03 @001a73530a; record what git says).",
+      "method": "command",
+      "invocation": "git log --format=\"%h %ad %s\" --date=short -1 -- infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/",
+      "output_evidence": "001a73530a 2026-08-03 fix(ADHOC.inf-etf-regularization): complete the stranded COMMIT leg of the half-landed inf-etf deploy -- COMMIT ALL / APPLY NOTHING per CTO F2 ruling 20260803T215051Z",
+      "denominator": "1 of 1 most-recent commit touching the source dir; matches the brief's stated hash and date exactly",
+      "expect": "2026-",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S12-AC4",
+      "criterion_verbatim": "the newest September slice key READ (its source_artifact field is then fetched and recorded in the result: the bucket the slices CITE).",
+      "method": "live_read",
+      "invocation": ".tools/aws s3api list-objects-v2 --bucket opal-data-etfs --prefix daily/inflection/2026-09 --query \"Contents[-1].Key\" --output text",
+      "output_evidence": "daily/inflection/2026-09-04.json -- fetched via .tools/aws s3api get-object; every row's source_artifact = 's3://opal-data-inf/gold/canonical/holdings_2026-09-04.parquet' (legacy bucket/prefix, dated today)",
+      "denominator": "1 of 1 newest September key resolved; source_artifact read from all rows of that slice, all agreeing on the same legacy path",
+      "expect": "daily/inflection/2026-09",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S12-AC5",
+      "criterion_verbatim": "THE ANSWER, graded by the CVO at L9: do the three brief facts now fit, which bucket and prefix the DEPLOYED code reads, and what rung 2 of the ladder (EG-s-7) must check for Inflection. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "source reads: infra/aws/terraform/inf-pipeline/inf-etf-ownership-daily.tf:70-91 (the DECLARED HEAD-AHEAD-OF-APPLIED DIVERGENCE marker); git show af4f123e2c:.../lambda_function.py vs the extracted deployed zip (sha256 match); infra/aws/lambda/ci/lambda-source-map.json's inf-etf-ownership-daily entry (artifact_sha256, last_deployed_commit, last_deployed_at); the live get-function-configuration Environment.Variables; the 2026-09-04 slice's source_artifact field",
+      "output_evidence": "RECORDED in org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/inflection-deployed-bytes-vs-build-input.result.md section 5: (a) all three brief facts fit once the deployed-vs-committed distinction is made explicit -- the repo's opal-data-assets/orion/inflection/silver/fact_positions design IS committed (001a73530a, 2026-08-03) but was ruled COMMIT-ALL/APPLY-NOTHING (CTO F2); the deployed CODE still matches an EARLIER commit (af4f123e2c, 2026-08-01, byte-identical sha256 confirmed via git show); the later LastModified (2026-08-11) reflects a CONFIG-ONLY update (the env vars ASSETS_BUCKET/FACT_POSITIONS_PREFIX/META_DEDUP_PREFIX going live) without the code catching up -- exactly the 'ARMING' scenario the .tf file's own 2026-08-03 marker warned against ('Do not apply this increment as a side effect of an unrelated apply'), now measured as having occurred; (b) the DEPLOYED code reads opal-data-inf/gold/canonical/holdings_{date}.parquet (env INF_BUCKET+HOLDINGS_PREFIX), NOT the new-design bucket, confirmed by DEPLOYED_READS (S12-AC2) and the byte-match to the pre-repoint commit; (c) EG-s-7 must check the LEGACY bucket/prefix (not repo HEAD) for Inflection's presence checks, must treat the source map's last_deployed_commit/artifact_sha256 as more trustworthy than 'latest commit' assumptions, and must treat any future code-only redeploy of this function as a design-cutover event (the new code path activates instantly given the env vars are already live) rather than a routine push.",
+      "denominator": "3 of 3 brief facts addressed; 1 bucket/prefix pair named for the deployed code; 3 named checks for EG-s-7",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L6/L9: a judgment criterion carries its output and no self-graded verdict; 3.0.0_SA_CVO is the oracle at L9 and its grade lands in the adjudication row."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "S12-AC2's load-bearing claim is 'the file-by-file sha256 comparison discriminates identical bytes from different bytes and correctly reports ABSENT members, not a hash of the whole zip (which would differ on timestamps alone even for identical content)'. Mutated by (i) re-running deployed_bytes_diff.py a second time after the repo zip was already built once (idempotence/no-hidden-state check), and (ii) manually diffing the deployed lambda_function.py against the REPO'S CURRENT lambda_function.py (a member that DOES exist on both sides) vs against the historical af4f123e2c version (a member that should MATCH) -- the same file compared against two different reference points must give two different verdicts if the comparison is real.",
+      "expected": "Against repo HEAD's current lambda_function.py: DIFFERS (repo HEAD is the post-repoint design). Against af4f123e2c's lambda_function.py: MATCH (byte-identical). A comparator that always says MATCH or always says DIFFERS regardless of which reference is used would fail this control.",
+      "observed": "sha256sum against repo HEAD's infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/lambda_function.py: afcbd401a78e6168cedc42a48ace7d3ab5c999cddec6422790118385c4c30b57 (DIFFERS from deployed's 3e98e00e16d51664362096d64cabeff35cd73038b63579d195c7a1934cdbc401). sha256sum via `git show af4f123e2c:...lambda_function.py`: 3e98e00e16d51664362096d64cabeff35cd73038b63579d195c7a1934cdbc401 (MATCHES the deployed hash exactly). The comparator produces two different, correct verdicts against two different references -- FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/deployed_bytes_diff.py executed twice against the same already-downloaded deployed zip, full stdout compared.",
+      "observed": "Both runs produced identical SOURCE_MAP, DEPLOYED_ZIP_MEMBERS, REPO_ZIP_MEMBERS, per-member hash lines, VERDICT (MISMATCH files=3 differing=dedup_core.py,lambda_function.py,trading_calendar.py), DEPLOYED_READS and REPO_READS lines -- no run-to-run variation (the repo zip is rebuilt fresh each run from the same source files with a fixed date_time, and the deployed zip is read once and not re-downloaded).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Editing infra/aws/lambda/ci/build-zip.sh to fix its invalid touch date.",
+      "reason": "Out of this cell's BOUNDS ('No source file changes in this cell'); filed as ETFS_GUARDRAIL-W1-S5 with the TO's own named fallback used instead."
+    },
+    {
+      "item": "Reading the live IAM policy CONTENT (get-role-policy) for inf-etf-ownership-daily-role to establish whether the .tf-declared IAM increment (MonolithFactPositionsRead/List, MonolithDedupMetaReadWrite) is also live.",
+      "reason": "The TO's BOUNDS enumerate the live-read surface as get-function-configuration, get-function, and s3api list-objects-v2/get-object on the inflection prefix only; this worker already exceeded that once (list-role-policies, names only, filed ETFS_GUARDRAIL-W1-S4, INERT) and stopped rather than compounding it with a policy-content read. The IAM-liveness question is named as an open follow-on for EG-s-7 in the result document rather than answered here."
+    },
+    {
+      "item": "Determining WHO or WHAT applied the env-var-only change on 2026-08-11 (a specific Terraform run, actor, or ledger entry).",
+      "reason": "No org/critical_paths/change_management/ ledger entry for this function was named in this TO's <paths> grant, and this cell's bound is a deployed-bytes diff, not a change-management audit; the TIMING match (LastModified 2026-08-11) and the CODE STALENESS (matches 2026-08-01) are both measured directly and are sufficient to answer S12-AC5 without identifying the specific apply event."
+    }
+  ],
+  "surprises": [
+    "ETFS_GUARDRAIL-W1-S4: this worker ran .tools/aws iam list-role-policies (policy NAMES only), a call outside TO-EG-s-12's enumerated live-read surface, while checking whether the .tf-declared IAM increment had also gone live; stopped that line of inquiry on noticing the overreach rather than fetching policy content. OBSERVATION/INERT.",
+    "ETFS_GUARDRAIL-W1-S5: infra/aws/lambda/ci/build-zip.sh's reproducible-build step hardcodes an invalid touch date (month '00') and fails rc=1 for ANY function/file-list on this box -- a shared cross-project CI-script defect, reproduced live and confirmed via a positive control (a valid month succeeds). OBSERVATION/ARMED, disarm owner 2.0.0_SA_COO~B (or whoever owns infra/aws/lambda/ci/); this worker used the TO's own named fallback (an equivalent deterministic zip) instead of editing the script."
+  ],
+  "compiler_tools": [
+    {
+      "tool": ".tools/aws (lambda)",
+      "invocation": ".tools/aws lambda get-function-configuration --function-name inf-etf-ownership-daily",
+      "result": "Full config captured: LastModified 2026-08-11T10:29:39Z, CodeSha256 Sibchin3yNutF+OC6d06fZNlfQKuKCcPUC3cG/m3LJI=, Environment.Variables carrying BOTH legacy and new-design keys simultaneously, Layers=[pandas-pyarrow-requests-layer:1] only."
+    },
+    {
+      "tool": ".tools/aws (lambda get-function + curl)",
+      "invocation": ".tools/aws lambda get-function --function-name inf-etf-ownership-daily --query Code.Location --output text | curl -s -o .scratch/deployed_inf.zip <presigned URL>",
+      "result": "4942-byte zip downloaded, containing exactly ONE member: lambda_function.py (no dedup_core.py, no trading_calendar.py)."
+    },
+    {
+      "tool": "bash (build-zip.sh, FAILED)",
+      "invocation": "bash infra/aws/lambda/ci/build-zip.sh inf-etf-ownership-daily infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily .scratch/build lambda_function.py dedup_core.py trading_calendar.py",
+      "result": "rc=1, 'touch: invalid date format 202600010000' -- filed ETFS_GUARDRAIL-W1-S5, fell back to an equivalent Python zipfile build per the TO's own clause."
+    },
+    {
+      "tool": "python (zipfile, this deliverable's script)",
+      "invocation": "python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/deployed_bytes_diff.py",
+      "result": "VERDICT: MISMATCH files=3 differing=dedup_core.py,lambda_function.py,trading_calendar.py; DEPLOYED_READS and REPO_READS env-binding lines printed; run twice, byte-identical output both times."
+    },
+    {
+      "tool": "git show",
+      "invocation": "git show af4f123e2c:infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/lambda_function.py | sha256sum",
+      "result": "3e98e00e16d51664362096d64cabeff35cd73038b63579d195c7a1934cdbc401 -- byte-identical to the deployed extract, an independent instrument confirming the deployed code's true vintage (2026-08-01, af4f123e2c) versus the CodeSha256/timestamp reads alone."
+    },
+    {
+      "tool": "git log",
+      "invocation": "git log --format=\"%h %ad %s\" --date=short -1 -- infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/",
+      "result": "001a73530a 2026-08-03, matching the brief exactly; commit message and the .tf file's inline marker both name the 'COMMIT ALL / APPLY NOTHING' CTO F2 ruling."
+    },
+    {
+      "tool": ".tools/aws (s3api)",
+      "invocation": ".tools/aws s3api list-objects-v2 --bucket opal-data-etfs --prefix daily/inflection/2026-09 --query \"Contents[-1].Key\" --output text ; .tools/aws s3api get-object --bucket opal-data-etfs --key daily/inflection/2026-09-04.json",
+      "result": "Newest key daily/inflection/2026-09-04.json; every row's source_artifact = s3://opal-data-inf/gold/canonical/holdings_2026-09-04.parquet, dated today."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 2 new row(s) of 7 total, all carrying step-7/step-10 fields; corpus baseline unchanged (4 known, 0 new, 0 resolved)."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance, long-stem name> S12-AC1,S12-AC2,S12-AC3,S12-AC4,S12-AC5",
+      "result": "run before the complete flip; result recorded in the report."
+    }
+  ]
+}
