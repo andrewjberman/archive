@@ -1,159 +1,158 @@
-# NFRA_OUTSET.TO-OS-s-17 -- RESULT: what one day's proposals actually cite
+# NFRA_OUTSET.TO-OS-s-17 -- RESULT: the tool-row citation, inspected and then built
 
 **Assignee:** `0.9.0_WK_NFRA_OUTSET~1` (L7 worker subagent of `2.0.0_SA_COO`, spine v3)
-**Branch:** `wk-OUTSET-1` (linked worktree `C:\tmp\wk-OUTSET-1`) · **Base:** `7771968abd`
+**Branch:** `wk-OUTSET-1` (linked worktree `C:\tmp\wk-OUTSET-1`) · **Base:** `ed5c4e2b5b`
 **Cell:** `OS-s-17` · **outcome_ref:** FWD-4 · **verb:** build · **depends_on:** `OS-s-11`, `OS-s-12`
-(both `complete` at HEAD, read with `git show HEAD:`)
+
+This cell ran in two phases. **Phase 1 was an inspection under a grant with no repo surface**, and
+it ended in a BLOCKING row (`W1-S24`) because a `build` verb had nothing to build on. The issuer
+accepted that as its own cut defect and amended `<paths>` at `ed5c4e2b5b`. **Phase 2 is the build.**
+Both are recorded here; the phase-1 census is not re-run and is not reopened.
 
 ---
 
-## 0. THE HEADLINE
+## 0. THE HEADLINE, IN TWO SENTENCES THAT MUST BE READ TOGETHER
 
-**Every proposal cites something. No proposal cites a tool row.** Measured across 7 consecutive
-published days: **61 proposals, 61 of 61 carrying a non-empty `evidence_cited`, 0 discarded — and
-0 of 61 citing a tool row at `path@vintage`.**
+**The producer now requires a proposal to cite the tool row behind it, and refuses it separately if
+it does not.** **No published day carries that yet and none will until a deploy nobody has
+authorised** — so a green criterion here is not a live effect, and `NFRA_OUTSET-W1-S26` exists so
+that cannot be misread.
 
-And it could not have been otherwise, for two reasons neither of which lives in the proposal path:
+## 1. PHASE 1 -- WHAT A DAY'S PROPOSALS ACTUALLY CARRIED (recorded, not re-run)
 
-1. **The producer that actually ran is eleven days behind HEAD.** The deployed
-   `s3://opal-estate-report/code/estate_report_runner.py` is dated **2026-08-25** and contains
-   **zero** occurrences of `_outset_read`, `OUTSET_ANSWER_STATE_TO_STATUS`, `rerun_recipe` or
-   `tool_invocation`. Every traceability change this project landed — `OS-s-9`, `OS-s-10`,
-   `OS-s-11` — is absent from the code that produced all 7 days.
-2. **Nothing publishes a tool row for a proposal to point at** (`W1-S19`, `W1-S20`).
+7 consecutive published days, **61 proposals, 61 of 61 carrying a non-empty `evidence_cited`, 0
+discarded — and 0 of 61 citing a tool row at `path@vintage`**, 0 naming any comp-tool, 0 naming any
+`.json` artifact key. The zeros are absences, not dead reads: the same detector family returns
+**2 of 61** on a bare `@<hex>` (on 2026-09-04 the literal `@351f309e`), and a negative control
+returns 0. Full census and controls in `NFRA_OUTSET-W1-S24`.
 
-So the cell's accept is not reachable by editing the proposal path, and **this order grants no repo
-surface at all**. That is `NFRA_OUTSET-W1-S24`, filed **BLOCKING** on the build limb, as the issuer
-instructed in advance. The **evidence limb of `O17-AC1` is fully recorded below, with no verdict.**
+**And the mechanism the manifest credits is real — it answers a different question.**
+`evidence_resolves()` passes if a known ruling id appears, or if any distinctive token of **the
+`evidence_ref` this runner itself put in the prompt** survives into the citation. Its docstring
+records the 2026-08-06 repair that made it a real control after a prefix match passed 7 of 7 live
+calls including a planted fabrication. It establishes that the model quoted what it was shown. It
+cannot establish that what it was shown came from a named tool at a named vintage — **a verifier
+scoped by the same set as the act.** That is the gap this cell closes.
 
-## 1. THE SUBJECT, NAMED AT ITS VINTAGE
+## 2. PHASE 2 -- WHAT WAS BUILT
 
-`s3://opal-estate-report/daily/` holds **33** daily `.json` artifacts. This inspection reads the
-**last 7**: 2026-08-29 … 2026-09-04. The most recent is
-`daily/2026/09/04/estate-report-2026-09-04.json`, 205,013 B, LastModified `2026-09-04T13:31:49Z`,
-whose own header reads `date=2026-09-04`, `written_at=2026-09-04T13:01:01.455336+00:00`.
+All in `infra/aws/ec2/estate-report-runner/estate_report_runner.py`:
 
-**One day would have been a one-day pattern.** Seven days is what makes the zero a property of the
-producer rather than of a Thursday.
+- **`tool_row_ref(stratum)`** — mints `<stratum>@<vintage>` from the stratum's own `OS-s-11`
+  `reproduce` recipe, and returns `None` when there is no recipe. An untraceable stratum has no row
+  to cite, and that must read as *"there is none"* rather than as an empty string a citation could
+  trivially match.
+- **`tool_row_resolves(cited, stratum)`** — requires the stratum **name AND the vintage** in the
+  citation. **An AND, not an OR, and that is the load-bearing choice:** the name is guessable from
+  the prompt's own headings and the vintage is shared by every stratum of the day, so either alone
+  would resolve to a *region* rather than to a *row*.
+- **`citation_verdict(parsed, cand, strata, nugget_ids) -> (ok, code, reason)`** — the whole
+  decision as one named thing. **The order is the contract:** the anti-fabrication gate runs first
+  and unchanged; the tool-row gate runs after it with its own code. A proposal failing both is
+  reported against the first, because *"you did not cite what you were shown"* is the more serious
+  finding and collapsing the two would hide it.
+- **The author prompt** shows the row and demands `tool_row_cited` back, stating that the two
+  obligations are discarded separately.
+- **An accepted proposal carries `tool_row_cited` *and* the full `tool_row` recipe**, so a reader of
+  the artifact can re-run what the proposal rests on without leaving the document.
 
-## 2. THE CENSUS
+### 2.1 The constraint I was given, and how it is held rather than asserted
 
-| day | proposals | discarded | carry `evidence_cited` | `path@vintage` | `comp-*` | `.json` key |
-|---|---|---|---|---|---|---|
-| 2026-08-29 | 8 | 0 | 8 | 0 | 0 | 0 |
-| 2026-08-30 | 6 | 0 | 6 | 0 | 0 | 0 |
-| 2026-08-31 | 10 | 0 | 10 | 0 | 0 | 0 |
-| 2026-09-01 | 10 | 0 | 10 | 0 | 0 | 0 |
-| 2026-09-02 | 5 | 0 | 5 | 0 | 0 | 0 |
-| 2026-09-03 | 12 | 0 | 12 | 0 | 0 | 0 |
-| 2026-09-04 | 10 | 0 | 10 | 0 | 0 | 0 |
-| **total** | **61** | **0** | **61** | **0** | **0** | **0** |
+**`evidence_resolves()` is byte-unchanged.** The tool-row requirement sits *beside* it, never in
+place of it. And the assertion that it still fires is itself a live control: **arm F** restores the
+2026-08-06 defect in a temporary copy, and under that mutant the same fabricated citation is
+**accepted**. **Arm G** removes the tool-row gate and the same `'nonsense'` citation is **accepted**.
+A control nobody has watched fail is a promise.
 
-### 2.1 The controls, because a zero is the whole finding
+### 2.2 One refactor, named because it changed a shape
 
-A zero from a dead detector and a zero from a real absence are the same bytes. So:
+The citation decision was **inline** in the author loop, so the only way to check which gate refused
+first was to read the source and believe it. It is now `citation_verdict()`, exercised directly by
+every arm with **no model call anywhere**. The loop's behaviour is unchanged; what changed is that it
+can be watched.
 
-- **POSITIVE CONTROL, on this very corpus:** the `@<hex>` detector **fires** — 2 of 61 proposals
-  match, and on 2026-09-04 proposal 9's `evidence_cited` literally contains **`@351f309e`**. The
-  instrument family is alive on the same strings that returned zero for the tool-row patterns.
-- **NEGATIVE CONTROL:** `NFRA_OUTSET-W` (a token that must not appear) → **0 of 10**.
-- **Corpus size the patterns ran over:** 3,040 characters across the 10 strings of 2026-09-04.
-
-I did not use `comp-find` CONTENT mode for any of this. The corpus is a fetched JSON document, not
-the repo, and it is parsed structurally — so neither of that tool's measured false-zero modes (rc=124
-with no output; rc=0 with a confident denominator and no budget line) is in this path at all.
-
-## 3. WHAT THE 61 CITATIONS *DO* CARRY
-
-The finding is not "they cite nothing". On 2026-09-04: **7 of 10** quote a stratum, **7 of 10** name
-a ruling, **6 of 10** carry a denominator-shaped number — all as **quoted prose inside one free-text
-string**, e.g.
-
-```
-"evidence_ref stratum denominator: '6305 commits over trailing 14d; 24 chain-resolved
- resource labels; 0 co-change pairs with >=2 shared commits (records axis excluded)';
- evidence_ref ruling ..."
-```
-
-`evidence_status` across those 10: **MEASURED 8, UNMEASURED 1, INFERRED 1**, with
-`evidence_status_defaulted = 0` — so no proposal fell through to the non-actionable label by default.
-
-## 4. THE MECHANISM THE MANIFEST CREDITS IS REAL, AND IT ANSWERS A DIFFERENT QUESTION
-
-Read from the **deployed** bytes — the code that actually produced these days — not from HEAD:
-
-```
-2125         cited = str(parsed.get("evidence_cited") or "")
-2126         if not evidence_resolves(cited, str(cand.get("evidence_ref") or ""), nugget_ids):
-2127             discarded.append({"candidate": cand, "evidence_cited": cited,
-2128                               "discarded_because": "evidence_cited does not resolve to the "
-2129                                                    "stated evidence_ref or a known ruling id"})
-```
-
-and the rule itself, at `:1551`:
-
-```
-    if any(i and len(i) >= 6 and i in cited for i in nugget_ids):
-        return True
-    toks = distinctive_tokens(ref)
-    if not toks:
-        return False
-    return any(t in cited for t in toks)
-```
-
-Its own docstring records why it looks like that: *"MEASURED BROKEN 2026-08-06 and this is the
-repair: a prefix match on a structured string tests the FORMAT, not the content — it passed 7 of 7
-live author calls INCLUDING a planted fabrication, and only the mutation revealed it."*
-
-**It is a sound anti-fabrication control, and it is scoped by the same set as the act.** It checks
-the citation against **the `evidence_ref` the runner itself put in the prompt**. It can establish
-that the model quoted what it was shown; it cannot establish that what it was shown came from a
-named tool at a named vintage. **That is precisely the gap `OS-s-17` exists to close** — and closing
-it is a producer change.
-
-## 5. ACCEPTANCE
+## 3. ACCEPTANCE
 
 ### O17-AC1 -- JUDGMENT (`judgment="true"`) -- RECORDED, NO VERDICT
 
-*"ONE DAY'S PROPOSALS, each citing the tool row behind it at path@vintage. Evidence. NO VERDICT --
-the CVO grades it at L9."*
+```
+[PASS] A-REAL-STRATUM-YIELDS-A-CITABLE-TOOL-ROW -- runner-produced stratum -> 'A_propagation@n/a (host-limited) @PIN9' (its recipe honestly names tool='none', the 'nothing ran' shape) ; a rail-reproducible row -> 'B_relationships@git history @351f309e' naming tool='comp-heat drift' ; both resolve against their own stratum
+[PASS] B-TOOL-ROW-CITATION-IS-AN-AND-NOT-AN-OR -- exact citation accepted; refused: {'name only': True, 'vintage only': True, 'empty': True, 'wrong stratum': True, 'unrelated prose': True}
+[PASS] C-A-STRATUM-WITH-NO-RECIPE-FAILS-CLOSED -- tool_row_ref(no recipe) = None ; verdict = (False, 'TOOL_ROW_ABSENT')
+[PASS] D-ANTI-FABRICATION-LIMB-STILL-FIRES -- a fabricated evidence_cited is refused as CITATION_UNRESOLVED even WITH a perfect tool row; an honest one passes both gates -> (True, 'OK')
+[PASS] E-GATES-ARE-IN-SERIES-AND-THE-FIRST-ONE-WINS -- both-bad -> CITATION_UNRESOLVED ; only-tool-row-bad -> TOOL_ROW_UNRESOLVED ; distinct reasons=True
+[PASS] F-RED-MUTANT-1-WEAKENED-ANTI-FABRICATION-IS-CAUGHT -- under the mutant a FABRICATED evidence_cited is ACCEPTED (OK) while production refuses the identical input (CITATION_UNRESOLVED)
+[PASS] G-RED-MUTANT-2-REMOVED-TOOL-ROW-GATE-IS-CAUGHT -- under the mutant a proposal citing 'nonsense' as its tool row is ACCEPTED (OK) while production refuses the identical input (TOOL_ROW_UNRESOLVED)
+[PASS] H-MUTATION-ANCHORS-UNIQUE
+[PASS] I-AUTHOR-PROMPT-SHOWS-THE-TOOL-ROW-AND-REQUIRES-IT
+[PASS] J-AN-ACCEPTED-PROPOSAL-CAN-CARRY-ITS-ROW
+OS17-TOOL-ROW BATTERY: 10/10 PASS (denominator 10; 0 model calls, 0 AWS, 0 network)
+```
+rc=0, stable across 2 direct runs; pytest `1 passed in 0.47s`.
 
-**The evidence limb is recorded in full in sections 1–4 above and in `NFRA_OUTSET-W1-S24`:** one
-day (2026-09-04) and six more beside it, 61 proposals, 61 cited, **0 citing a tool row**, with a live
-positive control proving the zero is an absence.
+**Denominator:** 10 of 10 arms; 2 RED mutants, both fired; 5 refusal shapes checked on the AND;
+61 of 61 proposals in the phase-1 census across 7 of 33 published days, with 1 positive and 1
+negative control.
 
-**The build limb is BLOCKED and the block is a cut defect, filed as instructed.** Making a proposal
-carry `path@vintage` requires editing
-`infra/aws/ec2/estate-report-runner/estate_report_runner.py`; this order's `<paths>` grants **only**
-the deliverables folder and the investigation channel. I read that file — from S3 and from HEAD — and
-**did not write it**; `0.9.0_WK_NFRA_OUTSET~2` holds it for `OS-s-14` as this is written.
-
-**Denominator:** 61 of 61 proposals inspected across 7 of 33 published days; 4 citation-shape
-patterns run per proposal; 1 positive and 1 negative control; 2 planes read for the producer
-(deployed S3 artifact and HEAD).
+**WHAT THIS DOES NOT SHOW.** It does not show a published day whose proposals cite tool rows, and it
+cannot. The served producer is `s3://opal-estate-report/code/estate_report_runner.py`, **125,857 B
+dated 2026-08-25**; the box runs whatever bytes sit there. **No deploy is authorised and no cell of
+the 17 owns one.** The next published day will look exactly like the seven censused in phase 1.
 
 **No verdict is written here or in the proof-of-spec instance.** `3.0.0_SA_CVO` grades it at L9.
 
-## 6. ROWS FILED (66 → 68, append-only)
+## 4. REGRESSION + GATES
 
-- **`NFRA_OUTSET-W1-S24`** — **BLOCKING**, ARMED, disarm_owner `2.0.0_SA_COO`. The build limb needs
-  a repo surface this order does not grant. Carries the whole census, both controls, and both
-  structural reasons.
-- **`NFRA_OUTSET-W1-S25`** — OBSERVATION, ARMED, disarm_owner `2.0.0_SA_COO`. **The deployed
-  producer is 11 days behind HEAD and carries none of `OS-s-9`/`OS-s-10`/`OS-s-11`.** Committed ≠
-  served, measured on content rather than filename (`_stratum(` appears 11 times, so it *is* the same
-  program; the four new tokens appear 0 times, so it is a version from before this project).
+| check | result |
+|---|---|
+| `python .tools/tests/test_os17_tool_row.py` | `10/10 PASS`, rc=0 (x2) |
+| `python -m pytest -q .tools/tests/test_os17_tool_row.py` | `1 passed in 0.47s`, rc=0 |
+| `test_os9_cochange_source.py` | `PASS (16/16)`, rc=0 |
+| `test_os10_seam.py` | `12/12 PASS`, rc=0 |
+| `test_os11_traceability.py` | `PASS (12/12)`, rc=0 |
+| `test_os14_fedobs_reaches.py` | `PASS (11/11)`, rc=0 |
+| `bash .tools/commit-gate.sh` on the 2 touched files | `OK: pre-commit gate clean for 2 of 2 file(s)`, rc=0 |
+
+This cell edits a file that four drained cells own, so the whole set was re-run rather than the one
+battery I wrote. The gate's non-ASCII WARN names 3 lines that are **unchanged from HEAD** (3 at HEAD,
+3 in the worktree) and are not mine.
+
+## 5. A CORRECTION TO MY OWN EARLIER ROW -- `NFRA_OUTSET-W1-S27`
+
+`W1-S25` offered four tokens as evidence that the served producer predates this project's work. **Two
+of them — `rerun_recipe` and `tool_invocation` — are zero at HEAD as well**, so their zero measured
+my own spelling rather than the artifact. I re-derived the set rather than taking the correction on
+the issuer's word:
+
+| token | HEAD | served | discriminates? |
+|---|---|---|---|
+| `_outset_read` | 4 | 0 | yes |
+| `OUTSET_ANSWER_STATE_TO_STATUS` | 3 | 0 | yes |
+| `reproduce` | 18 | 1 | yes |
+| `render_trace` | 2 | 0 | yes |
+| `rerun_recipe` | 0 | 0 | **no** |
+| `tool_invocation` | 0 | 0 | **no** |
+| `_stratum(` | 16 | 11 | positive control — same program, older vintage |
+
+The conclusion is unchanged and now rests on the four that separate the two. **The general form,
+since it has bitten me twice in this project: every token in a presence/absence census needs its own
+positive control — a census of four tokens is four detectors, not one.**
+
+## 6. ROWS FILED
+
+| row | class | standing |
+|---|---|---|
+| `W1-S24` | **BLOCKING** | phase 1 — a `build` cell with no write surface. **Resolved by the issuer's amendment at `ed5c4e2b5b`.** |
+| `W1-S25` | OBSERVATION | ARMED — committed ≠ served by 11 days |
+| `W1-S26` | OBSERVATION | ARMED — the build cannot reach a published day; a green criterion is not a live effect |
+| `W1-S27` | OBSERVATION | INERT — corrects `W1-S25`'s instrument, re-derived |
 
 ## 7. WHAT I DID NOT DO
 
-- **I did not write any repo file.** No code, no test, no engine — the `<paths>` block grants none,
-  and the one file that would need changing is held by another worker this round.
-- **I did not flip `<status>` to `complete`.** There is no mechanical criterion to pass, and a
-  BLOCKING row says the cell's own accept is not reached. Flipping would assert a build that did not
-  happen. The order stays open for the issuer, which is what a cut defect is for.
-- **I did not deploy the runner**, and I am not proposing that it be deployed mid-round — `OS-s-14`
-  is being written into that same file right now, and a deploy is a change-management act with its
-  own ledger.
+- **I did not weaken `evidence_resolves()`.** It is byte-unchanged, runs first, and two mutants
+  prove both claims.
+- **I did not deploy anything**, and I am not proposing a mid-round deploy.
+- **I made no AWS write of any kind.** The only AWS calls in this cell were phase 1's read-only ones.
 - **I wrote no verdict** on a judgment criterion.
 
 ## 8. PUSH STATE
