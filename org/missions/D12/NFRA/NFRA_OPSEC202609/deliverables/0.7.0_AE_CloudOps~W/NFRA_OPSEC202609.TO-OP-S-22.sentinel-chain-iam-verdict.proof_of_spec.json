@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-22",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-22.sentinel-chain-iam-verdict.md",
+    "group": "OTHER",
+    "vintage_commit": "7669a062e6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "916eae30a42cebbcd4b08d7fc649bb0d5fc61d3f",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-22.sentinel-chain-iam-verdict.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~W",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/deliverables/0.7.0_AE_CloudOps~W/NFRA_OPSEC202609.TO-OP-S-22.phase1-permission-pairs.md",
+      "kind": "doc",
+      "commit_or_etag": "a63dc951ec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Phase-1 enumeration: MUST-HAVE / MUST-NOT action-resource pairs per role with every resource ARN pre-resolved, then reconciled against all three declared policies at source. This is a VERDICT artifact; it deploys nothing by construction."
+    },
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/deliverables/0.7.0_AE_CloudOps~W/NFRA_OPSEC202609.TO-OP-S-22.simulation-log.txt",
+      "kind": "test",
+      "commit_or_etag": "4d31522182",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The full 45-row simulate-principal-policy log, captured on a SECOND run of the identical suite, which is also the determinism control. 45 simulations, 28 allowed, 17 denied, 0 mismatches, identical to run 1."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S22-AC1",
+      "criterion_verbatim": "EVERY ROLE VERDICTED ON THE APPLIED PLANE, ONE RESOURCE PER CALL: for each role, the `simulate-principal-policy` invocations pasted with their `--resource-arns` (one each) and their decisions. Denominator: roles verdicted of roles existing, and pairs simulated of pairs enumerated, both printed. A role that does not yet exist files `UNCOMPUTABLE` naming it, never a skipped row.",
+      "method": "live_read",
+      "invocation": "aws iam get-role --role-name {opal-sentinel|opal-ipset-reconciler|opal-ipblock-cli} ; then per pair: aws iam simulate-principal-policy --policy-source-arn <role> --action-names <one action> --resource-arns <ONE resource> [--context-entries ...] -- 45 separate invocations, driven from a script so each call carries exactly one resource",
+      "output_evidence": "APPLIED-PLANE EXISTENCE, read at this seat rather than taken from the handover message: opal-sentinel, opal-ipset-reconciler and opal-ipblock-cli each return an ARN from get-role with CreateDate 2026-09-04T01:51:56+00:00. NEGATIVE CONTROL as a separate invocation: get-role on 'opal-ipset-reconciler-NOSUCHROLE-9999' returns NoSuchEntity, so the three hits are real presence and not a probe that answers yes to everything. DENOMINATORS, BOTH PRINTED: ROLES 3 verdicted of 3 existing (0 UNCOMPUTABLE -- all three landed in one apply at 01:51:56Z). PAIRS 45 simulated of 45 enumerated: reconciler 13 must-have + 4 controls = 17; CLI 5 must-have + 6 controls = 11; sentinel 10 must-have + 6 controls + 1 trap-demonstration = 17. RESULTS: 28 allowed, 17 denied, 0 mismatches against expectation. ONE --resource-arns PER CALL on every one of the 45 -- the batching trap (2+ resource ARNs flipping held ones to implicitDeny) is avoided by construction rather than by care. Full log in the committed simulation-log.txt artifact.",
+      "denominator": "roles: 3 verdicted of 3 existing (of 221 roles live in the account); pairs: 45 simulated of 45 enumerated; 4 of 4 IP sets covered per IP-set criterion",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S22-AC2",
+      "criterion_verbatim": "THE POSITIVE CONTROL FIRED, AS A SEPARATE INVOCATION: for each role, at least one action it must NOT have, simulated separately, returning a deny. If every simulation in the instance returns `allowed`, this criterion FAILS regardless of the other results -- an instrument that cannot say no has not said yes.",
+      "method": "command",
+      "invocation": "Each control is its own aws iam simulate-principal-policy invocation, never batched with a target -- a control batched with its target is corrupted by its own presence.",
+      "output_evidence": "17 of 45 simulations returned a DENY, so the instrument demonstrably says no and the 28 allowed results are load-bearing. PER ROLE, at least one control each: RECONCILER -- dynamodb:PutItem, UpdateItem, DeleteItem on the table all explicitDeny (matched its own Deny statement), and ses:SendEmail implicitDeny (no grant at all). CLI -- wafv2:UpdateIPSet explicitDeny on all four sets, dynamodb:DeleteItem implicitDeny, s3:PutObject on the evidence bucket implicitDeny. SENTINEL -- wafv2:UpdateIPSet explicitDeny on all four sets, dynamodb:DeleteItem implicitDeny, s3:PutObject outside the two granted prefixes implicitDeny. TWO DISTINCT DENY KINDS OBSERVED AND THE DIFFERENCE MATTERS: explicitDeny comes from a written Deny statement and is unambiguous; implicitDeny means merely no matching Allow and is a NAMED FALSE-DENY MODE of this instrument -- it is byte-identical to what a typo'd action name or an unsatisfied condition returns. The explicit Deny statements the owning seats built therefore make this criterion sharper, not just the policies safer.",
+      "denominator": "17 denies of 45 total simulations; 3 of 3 roles carry at least one control; controls per role: reconciler 4, CLI 6, sentinel 6",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S22-AC3",
+      "criterion_verbatim": "C-2 AND C-11 ARE VERDICTED EXPLICITLY, NOT INFERRED: the reconciler ALLOWED `wafv2:UpdateIPSet` on ALL FOUR SETS, one simulation per set; the CLI and the sentinel DENIED the same action on the same resources, each as its own simulation. This is the invariant the whole chain rests on and it gets its own named result. THE DENOMINATOR IS 4 OF 4 AND IT IS PRINTED, OR THIS CRITERION FAILS.",
+      "method": "command",
+      "invocation": "12 separate simulate-principal-policy calls: wafv2:UpdateIPSet x {reconciler, sentinel, CLI} x {cloudfront, cloudfront-ipv6, regional, regional-ipv6}, one --resource-arns each; plus 4 more for the reconciler's wafv2:GetIPSet",
+      "output_evidence": "DENOMINATOR 4 OF 4, PRINTED. RECONCILER wafv2:UpdateIPSet -> allowed on all four: opal-blocked-ips-cloudfront (b2e008a6-40d9-4d07-bef5-1caa8b682bb3), opal-blocked-ips-cloudfront-ipv6 (eb1a0caa-60a0-492e-a685-e5456cea8b7d), opal-blocked-ips-regional (f073f448-eb85-4d23-9306-0cadf4573331), opal-blocked-ips-regional-ipv6 (85f90377-7cba-45dd-baca-397310d61f8e); each matched role_opal-ipset-reconciler_opal-ipset-reconciler-table-stream-and-sets. SENTINEL, same action, same four ARNs -> explicitDeny x4 (C-2). CLI, same action, same four ARNs -> explicitDeny x4 (C-11). RECONCILER wafv2:GetIPSet -> allowed x4, which UpdateIPSet needs for the LockToken and which the compare-before-write path needs to make an unchanged set a genuine no-op. THE FOUR-SET DENOMINATOR IS ITSELF THIS FACE'S FINDING: the criterion originally read 'both sets' and was corrected by the issuer at 7669a062e6 after this seat measured the applied plane. A verdict written to two would have covered 2 of 4 and read as complete, certifying C-2 while two sets stood unguarded with every arm of the check passing.",
+      "denominator": "4 of 4 IP sets, per role, for 3 roles = 12 UpdateIPSet simulations; plus 4 GetIPSet simulations for the reconciler; IP-set population walked to exhaustion via NextMarker (CLOUDFRONT 2 pages/2 sets, REGIONAL 2 pages/2 sets)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S22-AC4",
+      "criterion_verbatim": "CONDITIONS WERE EVALUATED WITH CONTEXT, AND THE LENS'S LIMITS ARE STATED: for any conditioned statement, the `--context-entries` supplied and why. Plus an explicit sentence naming what this verdict does NOT cover -- resource policies, SCPs, permission boundaries -- so a later reader does not read it as wider than it is. `comp-iam` output, if run, is labelled DESIRED-plane and is never cited as an ALLOW.",
+      "method": "command",
+      "invocation": "aws iam simulate-principal-policy --policy-source-arn <sentinel> --action-names ses:SendEmail --resource-arns arn:aws:ses:us-east-1:313476888478:identity/opalinvest.dev --context-entries ContextKeyName=ses:FromAddress,ContextKeyValues=noreply@opalinvest.dev,ContextKeyType=string -- and the SAME call again with the context entry omitted",
+      "output_evidence": "ONE CONDITIONED STATEMENT IN THE ENTIRE CHAIN, 1 of 1, established by reading all three policies at source rather than by sampling: the sentinel's ses:SendEmail, conditioned StringEquals ses:FromAddress = noreply@opalinvest.dev. THE TRAP WAS DEMONSTRATED IN BOTH DIRECTIONS, NOT ASSERTED: WITH the context entry -> allowed, matching role_opal-sentinel_opal-sentinel-table-evidence-and-notify. WITHOUT it -> implicitDeny, matched statements empty. That implicitDeny is byte-identical to the one a missing grant produces, so without the context entry this face would have filed a FALSE DENY on a correctly-granted permission -- an UNDER-permissioning verdict, which sends a seat to widen a policy that was already right, and which would have looked like diligence. The warning was written into iam_sentinel.tf by 0.7.0_AE_CloudOps~S addressed to this face; it was correct and load-bearing. WHAT THIS VERDICT DOES NOT COVER, stated so it is not read wider than it is: (1) RESOURCE POLICIES -- the opal-security-evidence bucket policy and the CMK key policy. Concretely relevant here: the CMK's AllowViaDynamoDBAndS3InThisAccountOnly is conditioned on kms:ViaService for dynamodb and s3 ONLY, so a role calling KMS DIRECTLY sits outside it and an identity-policy 'allowed' for kms:Decrypt could still fail in production; all three roles were built to reach KMS only through the services, which is why this does not bite. (2) SCPs, permission boundaries and session policies. (3) WHETHER THE CODE MAKES THE CALL -- an allowed pair is not an exercised pair, and the Lambda function code does not exist yet. (4) C-2's EXCLUSIVITY: this face verdicted THREE principals, while C-2 claims nothing else in the account ever calls UpdateIPSet -- a claim over 221 roles plus users and resource-policy paths. A fourth principal holding that permission would leave all 45 results unchanged. That enumeration is S15-AC3's criterion and is NOT discharged here. comp-iam: NOT RUN, and DECLARED-NOT-APPLICABLE per the face's own preflight -- it is a DESIRED-plane lens over Terraform, the PRD records at s.4 that it does not parse the Deny statements it reports, and this whole verdict turns on Deny statements. Its silence is never an ALLOW and it is cited nowhere in this instance.",
+      "denominator": "1 of 1 conditioned statements identified across all three policies and simulated both with and without context; 4 categories of non-coverage named explicitly",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S22-AC5",
+      "criterion_verbatim": "THE VERDICT WAS DELIVERED AND NO POLICY WAS EDITED: the message ids in which each owning face received its verdict, with timestamps preceding that face's code deployment; and a diff census showing zero IAM policy changes made by this task order.",
+      "method": "diff",
+      "invocation": "mcp send_message to_agents=[0.7.0_AE_CloudOps~T, 0.7.0_AE_CloudOps~S, 2.0.0_SA_COO~Z] ; git log --author='0.7.0_AE_CloudOps~W' --since=2026-09-03T23:00:00Z --name-only",
+      "output_evidence": "DELIVERED, per-recipient result map, 3 DELIVERED / 0 QUEUED / 0 REFUSED against a denominator of 3: msg 20115 to 0.7.0_AE_CloudOps~T (owner of the reconciler and CLI, TO-OP-S-15-19), msg 20116 to 0.7.0_AE_CloudOps~S (owner of the sentinel, TO-OP-S-14-21), msg 20117 to 2.0.0_SA_COO~Z. Sent 2026-09-04T02:0xZ. TIMESTAMP ORDERING SATISFIED: no function code for any of the three roles exists yet, let alone is deployed -- comp-find over the corpus returns implementation files for none of the three -- so delivery necessarily precedes every code deployment rather than merely happening to. DIFF CENSUS, ZERO IAM POLICY CHANGES: files touched by 0.7.0_AE_CloudOps~W this session number 7, of which exactly ONE is a .tf -- infra/aws/terraform/shared-infra/dynamo.tf, which is TO-OP-S-8R2B's DynamoDB SSE change and contains no IAM statement. ZERO IAM policy files, zero role definitions, zero policy documents touched by this task order. POSITIVE CONTROL ON THE CENSUS: the same query does return that .tf file, so the probe can see terraform files and the zero on IAM policy is a real absence rather than a broken filter. Every finding this cell produced went to the owning seat as a recommendation and all three substantive ones were acted on BY THE OWNERS: kms:DescribeKey removed from all three roles, the CLI's s3:PutObject settled NOT REQUIRED against source, and the four-set correction adopted into both criteria and into the Deny shape.",
+      "denominator": "3 of 3 owning parties delivered (2 owning faces + the issuer); 7 files touched by this seat, 1 .tf, 0 IAM policy files",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "S22-AC2 IS the planted mutant and the face wrote it to be able to fail: an instance in which every simulation returns allowed FAILS on its face, because an instrument that cannot say no has not said yes. Beyond that, each MUST-NOT pair is itself a mutation of the corresponding MUST-HAVE claim -- the same action, the same instrument, a principal that should NOT hold it. The sharpest is wafv2:UpdateIPSet run against all three roles on the identical four ARNs: if the instrument were returning a constant, the reconciler and the sentinel could not disagree on the same call.",
+      "expected": "The reconciler allowed on all four sets; the sentinel and the CLI denied on those same four. If all three returned allowed, C-2 is not enforced and the verdict is void; if all three returned deny, the instrument is broken and the allowed results mean nothing.",
+      "observed": "Reconciler allowed x4; sentinel explicitDeny x4; CLI explicitDeny x4 -- the same action on the same resources, splitting by principal exactly as the policies declare. Fleet-wide, 28 allowed and 17 denied over 45 simulations. The instrument discriminates by principal, by resource prefix (sentinel s3:PutObject allowed under cases/ and reports/daily/, implicitDeny under waf-logs/) and by CONDITION (ses:SendEmail allowed with the context entry, implicitDeny without it, same call otherwise).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The entire 45-simulation suite was run twice against the same applied roles and the two outputs compared; the second run is the committed artifact.",
+      "observed": "Run 1 and run 2 identical: 45 simulations, 28 allowed, 17 denied, 0 mismatches, 44 OK-flagged rows plus the one deliberately-unflagged trap-demonstration row in both.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "C-2's EXCLUSIVITY over the account is not established.",
+      "reason": "This face verdicted 3 principals. C-2 claims nothing else in the account ever calls wafv2:UpdateIPSet -- a claim over 221 roles plus users and resource-policy paths. A fourth principal holding it would leave all 45 results unchanged. That enumeration is S15-AC3's criterion, explicitly a read-dependency of this cell and not claimed by it. Named rather than left to inference, because a scoped check reading as a population check is the shape that has bitten this project three times tonight."
+    },
+    {
+      "item": "Resource policies, SCPs, permission boundaries and session policies were not evaluated.",
+      "reason": "simulate-principal-policy does not evaluate them. Concretely relevant: the CMK's key policy is conditioned on kms:ViaService for dynamodb and s3 only, so an identity-policy allowed for kms:Decrypt would not imply a direct KMS call succeeds. All three roles were built to reach KMS only through the services, so it does not bite -- but the verdict does not prove that, the policy reading does."
+    },
+    {
+      "item": "Whether the code makes these calls at all.",
+      "reason": "The Lambda function code for all three roles does not exist yet. An allowed pair is not an exercised pair, and an over-permissioned role is only visible once both the policy and the code exist. This verdict certifies the grant matches the DECLARED need."
+    },
+    {
+      "item": "The CLI's trust-policy breadth was not adjudicated.",
+      "reason": "Its trust names one principal, following opal-security-admin's ruled pattern. Whether the unblock CLI should be assumable by a wider operator set is flagged by its own carrier as 2.0.0_SA_COO~Z's call. Named so the verdict does not read a deliberately narrow trust as an oversight."
+    },
+    {
+      "item": "comp-iam was not run.",
+      "reason": "DECLARED-NOT-APPLICABLE per the face's own preflight and its binding clause. It is a DESIRED-plane lens over Terraform; the PRD records at s.4 that it does not parse the Deny statements it reports, and this verdict turns on Deny statements. Its silence is never an ALLOW, so running it would have added no evidence this instance relies on."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S103: TO-OP-S-9-11 was not blocked on TO-OP-S-8R2B -- the decomp edge gating OP-s-9/OP-s-11 carries a checkable PREDICATE (DP + PITR read ON per table), true on 5 of 5 tables live. Dispatched to 0.7.0_AE_CloudOps~X on the strength of it.",
+    "NFRA_OPSEC202609-Z-S104: three premise defects in TO-OP-S-8R2B, including the scope conflict whose resolution retired OP-s-8's round-2b limb entirely."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-03/session_0.7.0_AE_CloudOps~W_2330-0010Z_OPSEC_S8R2B_USERS_V2_CMK.md",
+  "compiler_tools": [
+    {
+      "tool": "aws iam simulate-principal-policy",
+      "invocation": "45 separate invocations, ONE --resource-arns each, controls as their own calls, --context-entries on the single conditioned statement",
+      "result": "THE INSTRUMENT OF THIS FACE. 28 allowed, 17 denied, 0 mismatches, stable across two runs. All three of its named false-deny modes were handled by construction rather than by care: one resource per call (batching flips held resources to implicitDeny), controls as separate invocations (a control batched with its target is corrupted by its own presence), and context entries on the conditioned statement (an unsatisfied condition returns a deny byte-identical to a real one)."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "on infra/aws/terraform/opsec/kms.tf, iam_sentinel.tf; and earlier on the PRD, the decomp and portal-auth/dynamodb.tf",
+      "result": "Confirmed aws_kms_key.opsec is the SINGLE project CMK (one key resource, alias/opal-security, policy Id opal-security-key-policy matching the live policy), so C-13's one-key constraint holds and the roles' kms grants point at the key this face verified. Located the sentinel role carrier."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "'opal-ipset-reconciler|opal-security-sentinel|ipset_reconciler|opsec-unblock' --limit 40 ; 'def lambda_handler' --files --limit 5 (positive control) ; 'opal-sentinel' --limit 12 infra",
+      "result": "Established that NO function code exists for any of the three roles -- 11 hits over 51,747 files, all of them spec -- with a positive control of 474 hits on 'def lambda_handler' proving the probe finds Lambda source when there is source. That measured zero is what makes the 'an allowed pair is not an exercised pair' limit a statement of fact rather than a caveat."
+    },
+    {
+      "tool": "aws iam get-role / list-roles",
+      "invocation": "get-role per role plus a fabricated-name negative control; list-roles enumerated client-side",
+      "result": "All three roles present on the APPLIED plane at 2026-09-04T01:51:56Z, negative control returning NoSuchEntity. The earlier list-roles census caught an instrument trap worth recording: --query 'length(Roles)' returned 100/100/21 because the CLI auto-paginates and length() applies PER PAGE -- reading the first would have published 100 against a true 221, on the read grounding an absence claim."
+    },
+    {
+      "tool": "aws wafv2 list-ip-sets",
+      "invocation": "per scope, then re-walked following NextMarker to exhaustion",
+      "result": "FOUR IP sets, not the two both faces' prose asserted -- this face's finding, confirmed by the issuer on the live plane and corrected into both S15-AC3 and S22-AC3 at 7669a062e6. The re-walk also caught that this seat's original count came from an unpaginated first call: NextMarker is present on BOTH scopes, so the first read was a page. It happened to be complete, which means the original finding was right by luck and is now right by measurement."
+    }
+  ]
+}

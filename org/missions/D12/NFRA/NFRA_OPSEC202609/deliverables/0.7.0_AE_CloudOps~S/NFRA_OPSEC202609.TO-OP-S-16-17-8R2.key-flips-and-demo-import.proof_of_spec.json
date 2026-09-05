@@ -1,0 +1,168 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-16-17-8R2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "df3c847ddc",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-16-17-8R2.key-flips-and-demo-import.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/prd/NFRA_OPSEC202609_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "001709c96e"
+  },
+  "assignee": "0.7.0_AE_CloudOps~S",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opsec/dynamodb.tf",
+      "kind": "terraform",
+      "commit_or_etag": "464c58b859",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply rc=0 -- 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed', modifications complete after 33s, in-place. describe-table at 16:44:47Z reads KMSMasterKeyArn = the project key 64f25291-4015-42c5-ad41-40e42325deb7 with TableId b4af2a9e-1a05-44b3-ba17-0aa22e72dd7c unchanged."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/partner-firms/demo.tf",
+      "kind": "terraform",
+      "commit_or_etag": "f570d3981e",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The DECLARATION for a resource already adopted by terraform import. Committed 1907 bytes, md5 d0c38cf8adc8e03f8376dfc0b4577c85. Verified by an UNSCOPED re-plan of partner-firms reading 'No changes' rc=0 with all four modules refreshed -- the destroy line that a state entry without a declaration produces is gone."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The control that had to be able to FAIL on this face is the REPLACE control on both tables: a DynamoDB SSE change is an in-place UpdateTable, but a forced replacement would present as success at every other rung -- new table, right settings, right name, plan applied, and the data gone. TableId plus CreationDateTime is the only pair that discriminates a modified table from a recreated one, because both survive an update and neither survives a replace. Run on BOTH tables. SECOND control, on the demo limb: live state can show the two expected attributes are PRESENT but cannot exclude a THIRD change, so the saved plan r2b-demo.tfplan was decoded read-only and its non-no-op rows enumerated against the face's expected set.",
+      "expected": "opal-suspicious-addresses TableId b4af2a9e-1a05-44b3-ba17-0aa22e72dd7c and CreationDateTime 2026-09-03T04:29:37 identical to the cut; opal-partner-demo TableId 99ddc090-8819-4346-b5e7-776036931200 and CreationDateTime 2026-06-03T15:26:08 identical to the cut; the decoded plan carries exactly one non-no-op row with empty replace_paths.",
+      "observed": "BOTH PAIRS IDENTICAL and the plan decode agrees. opal-suspicious-addresses: TableId b4af2a9e-1a05-44b3-ba17-0aa22e72dd7c, CreationDateTime 2026-09-03T04:29:37.404-04:00. opal-partner-demo: TableId 99ddc090-8819-4346-b5e7-776036931200, CreationDateTime 2026-06-03T15:26:08.297-04:00. Plan decode: 1 non-no-op row of 4, actions=update, replace_paths empty. NEGATIVE CONTROL on the deletion-protection instrument, which the severity of row Z-S41 turned on: opal-pii-lookup returns DeletionProtectionEnabled False on the same describe-table probe, so a True is reported per table and is not the instrument's default -- the positive-only pair originally offered could not have shown that.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "UNSCOPED terraform plan -detailed-exitcode on BOTH roots (opsec and partner-firms) after the last apply, compared against the pre-edit baselines quoted at L1. Unscoped deliberately: a -target re-plan cannot see a defect in what the modules SHARE, and partner-firms holds four instantiations of ONE shared module.",
+      "observed": "partner-firms 'No changes' rc=0 with all four modules refreshed; opsec 'No changes' rc=0 across 18 resources. Both agree with the pre-edit 0/0/0 baselines. RC HYGIENE STATED BECAUSE IT ALMOST WENT WRONG: an earlier invocation this session printed rc=2 beside an opsec plan; it belonged to a FAILED jq in a broken command chain (an unset TMPDIR), not to terraform, which never ran. A pipe or a substitution resets the status. Both plans were re-run with rc captured into a variable immediately after its own command, and the clobbered value was discarded rather than reported.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deliverable 2 -- opal-data-security's default encryption is NOT flipped to the project key.",
+      "reason": "RETIRED, not deferred, by the face's 15:5xZ amendment on PRD v0.9 @001709c96e (row Z-S37). Not this seat's to run and not anybody's. S17-AC5 and S17-AC6 file UNCOMPUTABLE accordingly."
+    },
+    {
+      "item": "The demo table is NOT moved to the project CMK; it stays on the AWS-managed aws/dynamodb key.",
+      "reason": "The face's item 4 and demo.tf's own header. modules/partner-firm-table declares server_side_encryption { enabled = true } with NO key input, so pointing demo at alias/opal-security would mean editing the SHARED module and touching 49financial, cottonwood and inflection -- three real firms' identity tables -- for one demo tenant. C-13 binds the two resources it names and this is not one of them."
+    },
+    {
+      "item": "The apply of the demo table's two settings diffs was NOT re-run by this session.",
+      "reason": "It had already succeeded before Andrew's ~14:0xZ kill. Row Z-S42 @9a6343cf40 measured the live table, and 2.0.0_SA_COO~Z msg 19846 WITHDREW its own restart-package instruction to re-apply. NEVER-2: an open ledger leg proves only that no device recorded a completion -- it was a missing RECORD, not an unchanged WORLD, and a re-execute of an already-applied change is the rewind class. The legs closed on measurement."
+    },
+    {
+      "item": "terraform state rm on module.firm_demo was NOT run.",
+      "reason": "It is the named ROLLBACK for the adoption, not the remedy for the untracked declaration. Running it would return the table to unmanaged and discard the import this face authorised. The declaration was committed instead."
+    },
+    {
+      "item": "The three real firms' tables were not modified, and the .tfplan artifacts were not committed.",
+      "reason": "49financial, cottonwood and inflection are absent from the import plan (no-op) and measured unchanged after. r2b-demo.tfplan and s8-partner-firms.tfplan are binary plan captures, useful as evidence in this round and not repo content."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S37: the project key admits ZERO service principals while opal-data-security is written by TWO (ALB access logs and CloudFront), so the C-13 default-encryption flip was predicted to stop both live delivery legs SILENTLY -- an absence, which no configuration read can detect. HELD by the issuer 13:07Z, routed to L4, and RULED by PRD v0.9 @001709c96e as a SPLIT of the surfaces. This instance files S17-AC5 and S17-AC6 UNCOMPUTABLE on that ruling.",
+    "NFRA_OPSEC202609-Z-S41: opal-partner-demo was in terraform STATE while its declaration partner-firms/demo.tf was UNTRACKED on a shared checkout, so any plan in that root carried a destroy LINE against a live table and blocked a root holding three real firms. SEVERITY CORRECTED IN THE ROW's OWN LIFETIME: the module declares deletion_protection_enabled = true, so a destroy would have been REFUSED BY THE API -- the certain cost was a blocked shared root, not a lost table. Discharged on its remedy limb by commit f570d3981e, this seat's first act; the disarm record is the issuer's.",
+    "NFRA_OPSEC202609-Z-S42: the restart package asserted the r2b settings apply had never run; the live table said otherwise (PITR ENABLED, SSE KMS, and all five module tags present, a combination no console toggle writes). The instruction to re-apply was withdrawn by the issuer at 16:10Z. Recorded here because it changed an ACT: the legs closed on measurement instead of on a repeat of the apply."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~S/logs/2026-09-03/session_1600-1700Z_NFRA_OPSEC202609_TO-OP-S-16-17-8R2.md",
+  "acceptance": [
+    {
+      "criterion_id": "S16-AC4",
+      "criterion_verbatim": "S16-AC4 -- THE TABLE READS THE PROJECT KEY, IN PLACE: describe-table SSEDescription SSEType KMS with KMSMasterKeyArn = ...key/64f25291-4015-42c5-ad41-40e42325deb7 (and NOT 86cc6c40-...); TableId b4af2a9e-1a05-44b3-ba17-0aa22e72dd7c and CreationDateTime IDENTICAL before and after (the pair pasted); PITR, DP, TTL, stream and the GSI unchanged; one fixture row written, read back and deleted after the flip (Count 0 at report).",
+      "method": "live_read",
+      "invocation": "aws dynamodb describe-table / describe-continuous-backups / describe-time-to-live on opal-suspicious-addresses; then put-item, get-item, query on status-index, delete-item, scan --select COUNT",
+      "output_evidence": "READ AT 2026-09-03T16:44:47Z. SSEType KMS, KMSMasterKeyArn arn:aws:kms:us-east-1:313476888478:key/64f25291-4015-42c5-ad41-40e42325deb7 -- the PROJECT key; the round-1 interim 86cc6c40-... is GONE from this table. REPLACE CONTROL, the pair pasted: BEFORE (the cut's read, face line) TableId b4af2a9e-1a05-44b3-ba17-0aa22e72dd7c created 2026-09-03T04:29:37; AFTER (this read) TableId b4af2a9e-1a05-44b3-ba17-0aa22e72dd7c created 2026-09-03T04:29:37.404-04:00 -- IDENTICAL, so modified and never recreated. UNCHANGED as required: PITR ENABLED, DeletionProtectionEnabled true, TTL ENABLED on expires_at, StreamSpecification enabled/NEW_AND_OLD_IMAGES, GSI status-index ACTIVE. FIXTURE, EXERCISED AFTER THE FLIP AND THEN REMOVED -- this is the rung that proves the new key is USABLE rather than merely configured, since every read and write above passes through it: put-item 203.0.113.7/32 status WATCH (RFC5737 documentation range, never a real address) rc=0; get-item read the row back in full; query on status-index returned Count 1, so the index still serves; delete-item rc=0; scan --select COUNT returns 0 AT REPORT; and a re-issued get-item on the deleted key returns no Item, which is the positive control on the absence.",
+      "denominator": "1 table; 5 configuration surfaces re-read (SSE, PITR, TTL, stream, GSI) plus DP; 1 fixture row through 5 operations (put, get, GSI query, delete, count) and 1 absence control.",
+      "status": "PASS",
+      "status_reason": "Every clause of the criterion is met on a live read taken by this seat, not carried over from the pre-kill session's report. The flip itself was applied before Andrew's ~14:0xZ kill (ledger legs L2 and L3, closed on their own proofs); what this row adds is the independent re-read plus the fixture exercise the criterion requires AFTER the flip, which the earlier session had not recorded."
+    },
+    {
+      "criterion_id": "S17-AC5",
+      "criterion_verbatim": "S17-AC5 -- FILES UNCOMPUTABLE citing row Z-S37 and the 15:5xZ amendment (PRD v0.9 split the surfaces; this bucket keeps SSE-S3 under C-16). The status_reason carries the BEFORE state captured 12:54:36Z as evidence nothing was attempted.",
+      "method": "live_read",
+      "invocation": "aws s3api get-bucket-encryption --bucket opal-data-security",
+      "output_evidence": "BEFORE, captured 2026-09-03T12:54:36Z: default encryption AES256, BucketKeyEnabled false. RE-READ BY THIS SEAT AT 2026-09-03T16:44:47Z: ServerSideEncryptionConfiguration Rules[0] ApplyServerSideEncryptionByDefault SSEAlgorithm AES256, BucketKeyEnabled false. UNCHANGED across the whole round -- no put-bucket-encryption was issued against this bucket by this task order.",
+      "denominator": "1 bucket, 2 reads of the same surface 3h50m apart (12:54:36Z and 16:44:47Z).",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "UNCOMPUTABLE, and BY RULING rather than by failure. Row NFRA_OPSEC202609-Z-S37 (this face's own phase-1 read) found that the project key admits ZERO service principals while opal-data-security is written by TWO. The issuer HELD the limb at 13:07Z, routed the constraint to L4, and PRD v0.9 @001709c96e RULED it: the surfaces are SPLIT. opal-data-security KEEPS its name, its SSE-S3 and its live delivery as FWD-5's log destination under the new C-16; the evidence store moves to a NEW bucket opal-security-evidence under the project CMK, whose cell is the issuer's to cut. The face's 15:5xZ AMENDMENT states deliverable 2 is RETIRED, NOT DEFERRED, and is not performed now or later by anybody; the ledger leg closes NOT ATTEMPTED with its reason, never as a failure. Performing the flip would now CONTRADICT the ratified spec. The enum member UNCOMPUTABLE is used per row Z-S29's ruling. EVIDENCE THAT NOTHING WAS ATTEMPTED, which is the only thing this row can positively show: the BEFORE state captured 12:54:36Z read AES256 with BucketKeyEnabled false, and this seat RE-READ the same surface at 2026-09-03T16:44:47Z -- still SSEAlgorithm AES256, BucketKeyEnabled false. No put-bucket-encryption was issued by this task order at any point."
+    },
+    {
+      "criterion_id": "S17-AC6",
+      "criterion_verbatim": "S17-AC6 -- FILES UNCOMPUTABLE citing row Z-S37 and the amendment -- there is no flip to survive. (Its instrument was also corrected: a delivered object whose LastModified is after the flip, NEVER an object COUNT, since the bucket receives continuously.)",
+      "method": "live_read",
+      "invocation": "aws s3api list-object-versions --bucket opal-data-security",
+      "output_evidence": "READ AT 2026-09-03T16:44:47Z: 109 versions, 0 delete markers -- 73 under waf-logs/alb-opal-gateway/ and 36 under waf-logs/cloudfront-access/, ZERO under cases/, reports/ or allowlists/. Newest 2026-09-03T16:43:25Z, i.e. delivery was live 84 seconds before this read. The count has risen monotonically across the round -- 28 at the cut, 31 at 12:54:36Z, 36 at 13:10Z, 109 now -- so no DROP occurred, which the face names as a STOP condition. THIS IS CONTEXT, NOT THE CRITERION: it shows the log destination is healthy, and it cannot be a PASS for a flip that was never made.",
+      "denominator": "109 versions across 2 prefixes, counted client-side from the Versions array; 4 successive census points across the round (28 / 31 / 36 / 109).",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "UNCOMPUTABLE, and BY RULING rather than by failure. Row NFRA_OPSEC202609-Z-S37 (this face's own phase-1 read) found that the project key admits ZERO service principals while opal-data-security is written by TWO. The issuer HELD the limb at 13:07Z, routed the constraint to L4, and PRD v0.9 @001709c96e RULED it: the surfaces are SPLIT. opal-data-security KEEPS its name, its SSE-S3 and its live delivery as FWD-5's log destination under the new C-16; the evidence store moves to a NEW bucket opal-security-evidence under the project CMK, whose cell is the issuer's to cut. The face's 15:5xZ AMENDMENT states deliverable 2 is RETIRED, NOT DEFERRED, and is not performed now or later by anybody; the ledger leg closes NOT ATTEMPTED with its reason, never as a failure. Performing the flip would now CONTRADICT the ratified spec. The enum member UNCOMPUTABLE is used per row Z-S29's ruling. EVIDENCE THAT NOTHING WAS ATTEMPTED, which is the only thing this row can positively show: the BEFORE state captured 12:54:36Z read AES256 with BucketKeyEnabled false, and this seat RE-READ the same surface at 2026-09-03T16:44:47Z -- still SSEAlgorithm AES256, BucketKeyEnabled false. No put-bucket-encryption was issued by this task order at any point. ADDITIONALLY, AND THIS IS WHY THE ROW CANNOT BE A PASS ON THE DELIVERY EVIDENCE ABOVE: this criterion grades whether log delivery SURVIVES THE FLIP. There was no flip. Continuing delivery is therefore consistent with the criterion's success condition AND with its never having been tested, so it does not discriminate -- and a quantity both hypotheses predict is not evidence. The face's own correction applies with full force: the instrument is a delivered object whose LastModified is strictly after the flip's timestamp, and no such timestamp exists."
+    },
+    {
+      "criterion_id": "S8R2-AC1",
+      "criterion_verbatim": "S8R2-AC1 -- THE IMPORT'S PLAN, CAPTURED BEFORE ANY SETTINGS CHANGE (the tick-2 bar; the one control on this limb that must be able to fail): the terraform plan after terraform import and before any settings apply, quoted in full for the demo table's resource -- 0 to add, 0 to destroy, NO 'forces replacement', deletion_protection_enabled unchanged or true (never true -> false); the three real firms' tables ABSENT from the plan; the expected in-place diffs (SSE AWS-owned -> AWS-managed KMS; PITR OFF -> ON) enumerated against what the plan actually shows, any third diff named.",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/partner-firms show -json r2b-demo.tfplan (read-only decode of the plan captured before the settings apply), plus the plan text captured at ledger leg L4",
+      "output_evidence": "CAPTURED AT L4 (closed 20260903T132039Z), before any settings apply: 'Plan: 0 to add, 1 to change, 0 to destroy' and '# module.firm_demo.aws_dynamodb_table.partner_table will be updated in-place'. READ-ONLY DECODE OF THE SAVED PLAN BY THIS SEAT: exactly 1 non-no-op row of 4, address module.firm_demo.aws_dynamodb_table.partner_table, actions=[update], replace_paths EMPTY. 0 to add TRUE. 0 to destroy TRUE. No forces-replacement TRUE. deletion_protection_enabled before=true after=true -- unchanged, never true -> false. THE THREE REAL FIRMS ABSENT: 49financial, cottonwood and inflection are all no-op rows. EXPECTED DIFFS ENUMERATED AGAINST WHAT THE PLAN SHOWS: point_in_time_recovery enabled false -> true MATCHES the expected PITR OFF -> ON; server_side_encryption [] -> [{enabled: true, kms_key_arn: null}] MATCHES the expected AWS-owned -> AWS-managed KMS (keyless, which is what the module declares). THE THIRD DIFF, NAMED AS THE CRITERION REQUIRES RATHER THAN PASSED OVER: the same row also carries tags {} -> {Environment: Production, ManagedBy: terraform, Partner: demo, Project: ADVI, System: PartnerFirms}. It is not a protection-posture change; it is adoption metadata written by the module's var.firm_id and the provider's default_tags, and it is unavoidable when an untagged live resource is brought under a tagged module.",
+      "denominator": "4 resource_changes rows in the decoded plan (1 update + 3 no-op); 3 attribute families compared against the face's expected set (PITR, SSE, tags) plus deletion_protection_enabled and replace_paths.",
+      "status": "PASS",
+      "status_reason": "Both clauses of the tick-2 bar hold and the control was genuinely able to fail: a forces-replacement line or a DP flip to false would have appeared in exactly the field that was read, and a change on any real firm's table would have shown as a non-no-op row. The third diff is DISCLOSED rather than absorbed, because the criterion says 'any third diff named' and because the face's summary wording -- two expected diffs -- would otherwise quietly under-describe what was applied. That the tags are written by var.firm_id and default_tags is also the limb that independently establishes the apply ran from THIS plan rather than from a console toggle (row Z-S42)."
+    },
+    {
+      "criterion_id": "S8R2-AC2",
+      "criterion_verbatim": "S8R2-AC2 -- THE DEMO TABLE AFTER THE APPLY, NOTHING REPLACED: describe-table (TableId 99ddc090-8819-4346-b5e7-776036931200 and CreationDateTime 2026-06-03T15:26:08 IDENTICAL to the cut's read; DP true; SSE as the module declares it), describe-continuous-backups PITR ENABLED, ItemCount still 1; the three real firms byte-identical before/after on DP / SSEType / KMSMasterKeyArn / TableId / CreationDateTime; terraform state list in partner-firms/ now FOUR addresses.",
+      "method": "live_read",
+      "invocation": "aws dynamodb describe-table on opal-partner-demo and on each of the three real firms; describe-continuous-backups on opal-partner-demo; terraform -chdir=infra/aws/terraform/partner-firms state list",
+      "output_evidence": "DEMO, read 2026-09-03T16:14:44Z: TableId 99ddc090-8819-4346-b5e7-776036931200 and CreationDateTime 2026-06-03T15:26:08.297-04:00 -- IDENTICAL to the cut's read, so nothing was replaced. DP true. SSE SSEType KMS on KMSMasterKeyArn ...key/86cc6c40-2387-4446-b7e1-de79392e06b3, the AWS-MANAGED aws/dynamodb key -- exactly what the module's keyless server_side_encryption block declares, and deliberately NOT the project CMK. describe-continuous-backups PITR ENABLED. ItemCount 1, unchanged. All five module/default tags present. THE THREE REAL FIRMS, read 2026-09-03T16:47Z, each on all five fields: 49financial TableId e99c39c8-9c68-4fcd-bcb0-1b6755a0a65a created 2026-03-04T11:47:53, SSEType KMS on 86cc6c40, DP true. cottonwood TableId b9e3ace3-a016-41ac-80fc-44a954ce3176 created 2026-04-29T15:07:53, SSEType KMS on 86cc6c40, DP true. inflection TableId 1be7baa1-7df9-4348-b878-6c50295207f6 created 2026-04-21T17:03:51, SSEType KMS on 86cc6c40, DP true. Every CreationDateTime is the table's original from March/April 2026, months before this round -- which is the discriminating fact, since a replaced table could not carry a creation date older than the act. terraform state list in partner-firms now returns FOUR addresses: firm_49financial, firm_cottonwood, firm_demo, firm_inflection.",
+      "denominator": "4 tables x 5 fields = 20 field comparisons; 1 PITR read; 1 ItemCount; 1 state list of 4 addresses (was 3 at the cut).",
+      "status": "PASS",
+      "status_reason": "The adoption is complete and nothing was replaced or disturbed. The three real firms are reported on the same five fields the criterion names rather than by a summary judgement, and their creation dates predate this round by months, which no replacement could reproduce."
+    },
+    {
+      "criterion_id": "S16178-AC3",
+      "criterion_verbatim": "S16178-AC3 -- BASELINES QUOTED, 0-DIFF AFTER, NOTHING ELSE RODE, PUSH STATE MEASURED: both modules' UNSCOPED plans read and quoted BEFORE the first edit (0 / 0 / 0, or the row that says otherwise -- the Z-S17 shape); each apply's changed-resource list enumerated with its count; the UNSCOPED re-plan reads 0-diff on both modules after the last apply; both ledger entries CLOSED with their proofs and their rollbacks named; push state read by ls-remote + is-ancestor and stated as MEASURED.",
+      "method": "live_read",
+      "invocation": "terraform plan -detailed-exitcode UNSCOPED on infra/aws/terraform/opsec and infra/aws/terraform/partner-firms; git ls-remote origin SITEZ; git merge-base --is-ancestor; deploy_ledger.py close",
+      "output_evidence": "BASELINES BEFORE THE FIRST EDIT, quoted at ledger leg L1: opsec and partner-firms both 'No changes' rc=0 -- the Z-S17 dirty-baseline shape did not fire. CHANGED-RESOURCE LISTS PER APPLY: the table flip 0 added / 1 changed / 0 destroyed, the single resource being aws_dynamodb_table.suspicious_addresses; the demo import 'Import successful!' followed by the settings apply whose plan was 0 add / 1 change / 0 destroy on module.firm_demo.aws_dynamodb_table.partner_table. NOTHING ELSE RODE: opsec state list holds 18 resources and its re-plan is clean; partner-firms holds 4 and its re-plan is clean. UNSCOPED RE-PLAN AFTER THE LAST APPLY, run by this seat: partner-firms 'No changes. Your infrastructure matches the configuration.' rc=0, all four modules refreshed; opsec 'No changes.' rc=0. Unscoped on purpose -- a -target re-plan cannot see a defect in what four instantiations of one shared module have in COMMON. LEDGER: opsec-r2b-key-flips-and-demo-import CLOSED 20260903T162328Z, all 6 legs proven, rollbacks named per leg (revert kms_key_arn to absent for the flip; terraform state rm for the adoption). PUSH STATE, MEASURED: git ls-remote origin SITEZ reads 001709c96ef22a508255b1242734c73a9d37c854; merge-base --is-ancestor returns FALSE for all three of this session's commits, so f570d3981e, 4370bcc705 and 71f74091d0 are LOCAL-ONLY. The push is the integrator lane's act, not this seat's.",
+      "denominator": "2 terraform roots x (1 baseline plan + 1 re-plan); 22 resources across both state lists (18 opsec + 4 partner-firms); 1 ledger entry with 6 legs; 3 commits checked for push state by ls-remote + is-ancestor.",
+      "status": "PASS",
+      "status_reason": "ONE DEVIATION FROM THE FACE'S LETTER IS DISCLOSED RATHER THAN GLOSSED. The face asks for 'a deploy-ledger entry per apply -- the two opsec/ flips as one entry, the import + settings as another', i.e. TWO entries. ONE entry was opened, opsec-r2b-key-flips-and-demo-import, carrying both limbs across six legs (L1-L3 the table flip, L4-L6 the import and its verification). The face's phrasing presumes TWO opsec flips; deliverable 2 was retired, so only one existed, and the executing session folded the import into the same entry. Every leg still carries its own proof and its own named rollback, which is the property the requirement protects -- but the shape is one entry, not two, and the issuer should see that stated rather than infer it from a slug. The push-state clause is satisfied as MEASURED and reads LOCAL, which is the correct terminal state for a worker lane under the integration window, not an omission."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "terraform plan (UNSCOPED, both roots)",
+      "invocation": "terraform -chdir=<root> plan -detailed-exitcode -no-color on opsec and partner-firms",
+      "result": "Both 'No changes' rc=0. The partner-firms run is also the verification that the first act worked: before demo.tf was committed, that root planned a destroy LINE against a live table."
+    },
+    {
+      "tool": "terraform show -json (read-only plan decode)",
+      "invocation": "terraform -chdir=infra/aws/terraform/partner-firms show -json r2b-demo.tfplan",
+      "result": "The instrument S8R2-AC1 actually needs. Live state can show the two expected attributes are PRESENT but cannot exclude a THIRD change; the decode enumerates every non-no-op row and surfaced the tags write that the face's two-diff wording does not name."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read on the TO face with --for, and --enumerate 'status' on the same face",
+      "result": "The --enumerate run banded 3 hits to 1 WHOLE and 2 SUBSTRING and located the single <status>pending</status> at line 8, which is what the complete flip edits. A bare grep would have returned the same 3 hits without telling which one was the flip target."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'TO-OP-S-*' org/missions/D12/NFRA/NFRA_OPSEC202609",
+      "result": "0 hits across 20 files -- a MEASURED zero, and it was informative rather than an absence: the tree uses task-orders/ with a hyphen, so the pattern was right and the assumed path shape was wrong."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "close-leg L5, close-leg L6, close on opsec-r2b-key-flips-and-demo-import",
+      "result": "All 6 legs proven, entry CLOSED, sentinel removed. The legs closed on measurement, not on a re-run."
+    },
+    {
+      "tool": "aws dynamodb (fixture exercise)",
+      "invocation": "put-item / get-item / query status-index / delete-item / scan --select COUNT",
+      "result": "The EXERCISED rung for S16-AC4: every one of those operations passes through the newly-attached project CMK, so a key that were mis-scoped would have failed the write or the read rather than reading healthy on describe-table. Count 0 at report with a positive control on the absence."
+    }
+  ]
+}

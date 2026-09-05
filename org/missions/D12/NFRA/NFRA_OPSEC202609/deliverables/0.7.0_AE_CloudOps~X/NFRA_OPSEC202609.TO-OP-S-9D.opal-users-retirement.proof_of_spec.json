@@ -1,0 +1,128 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPSEC202609.TO-OP-S-9D",
+ "phase": "P5-DECOMMISSION",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-9D.opal-users-retirement.md",
+  "group": "OTHER",
+  "vintage_commit": "051d5034c0"
+ },
+ "assignee": "0.7.0_AE_CloudOps~X",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+  "vintage_commit": "c8c7bf0fef",
+  "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-9D.opal-users-retirement.md"
+ },
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-04/session_0.7.0_AE_CloudOps~X_0000-0230Z_OPSEC_S9_11_LEGACY_USERS_AND_TOKEN_BINDING.md",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/portal-auth/dynamodb.tf",
+   "kind": "terraform",
+   "commit_or_etag": "051d5034c0",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "The aws_dynamodb_table.opal_users declaration removed and replaced by a tombstone. safe-apply then performed the destroy THROUGH Terraform: 'Destruction complete after 7s' / 'Apply complete! Resources: 0 added, 0 changed, 1 destroyed.' Post-apply describe-table returns ResourceNotFoundException and the unscoped re-plan proposes 0 to add. Ledger opsec-s9d-opal-users-retirement CLOSED, 4 of 4 legs proven.",
+   "artifact_covered_by": ["S9D-AC3", "S9D-AC4"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "S9D-AC1",
+   "criterion_verbatim": "S9D-AC1 -- THE SNAPSHOT AND THE TABLE WERE BOTH RE-READ IMMEDIATELY BEFORE THE DESTRUCTIVE ACT, not inherited from an earlier report: the backup's status, item count, size and expiry pasted with their read timestamp; the table's item count pasted with its own. Denominator: 12 of 12 expected. A moved row count FAILS this criterion and stops the face.",
+   "method": "live_read",
+   "invocation": "aws dynamodb describe-backup on the backup ARN; aws dynamodb scan --select COUNT and aws dynamodb describe-table on opal-users. All four reads taken at 2026-09-04T04:02:06Z, roughly ten minutes before the destroy, and deliberately re-run rather than carried over from the 00:47Z and 01:24Z readings.",
+   "output_evidence": "READ TIMESTAMP 2026-09-04T04:02:06Z. SNAPSHOT: opal-users-retire-snapshot-20260904T004712Z, BackupStatus AVAILABLE, BackupType USER, 12 items, 4,506 bytes, BackupExpiryDateTime null. TABLE: scan --select COUNT returns Count 12 / ScannedCount 12 -- a live count rather than the ~6h-stale ItemCount -- and describe-table returns ItemCount 12, TableSizeBytes 4506, TableStatus ACTIVE. THE ROW COUNT HAS NOT MOVED: 12 of 12 expected, identical to the 00:16Z reading taken before the grant removal and to the 01:24Z reading taken after it. The snapshot matches the live table on BOTH item count and byte size, which is what distinguishes a snapshot of the right table from a snapshot of a table of the same shape. THE CONTROL COULD HAVE FAILED AND DID NOT: a moved count would have meant something still writes to a table that four independent censuses said nothing reads, and the face's own instruction was to STOP and file that rather than proceed -- it would have been worth more than the retirement.",
+   "denominator": "12 of 12 rows expected and found, on two instruments (live scan and describe-table); 1 of 1 snapshot re-verified on 4 attributes.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S9D-AC2",
+   "criterion_verbatim": "S9D-AC2 -- THE PROTECTIONS CAME OFF IN THEIR OWN APPLY, BEFORE AND SEPARATE FROM THE DESTROY: the plan for the protection change quoted, its changed-resource list enumerated, and the applied-plane re-read confirming protection is off. A single apply that both unprotects and destroys FAILS this criterion regardless of outcome -- the point is that a human-legible destroy plan exists.",
+   "method": "live_read",
+   "invocation": "Read the declaration at portal-auth/dynamodb.tf:145-165 for a lifecycle block and a deletion_protection_enabled attribute; read DeletionProtectionEnabled from the live table via describe-table; and read it a third time off the destroy plan's own body.",
+   "output_evidence": "NEITHER GUARD IS ARMED, so there was no protection to remove and no prior apply to perform. THE DECLARATION carried NO lifecycle block at all -- so no prevent_destroy, which the face itself anticipated with its 'if declared' -- and NO deletion_protection_enabled attribute. THE LIVE TABLE read DeletionProtectionEnabled = false at 04:02:06Z, and independently at 00:16Z before any of tonight's work. THE DESTROY PLAN CONFIRMED IT A THIRD TIME on its own face: 'deletion_protection_enabled = false -> null'. Three reads, two instruments, one of them the plan Terraform generated for the destroy itself. NO APPLY WAS PERFORMED FOR THIS CRITERION, because performing one would have been theatre -- an apply that changes nothing, generated so a criterion could be marked done. THE CRITERION'S PURPOSE IS NEVERTHELESS SERVED IN FULL: its stated point is that a human-legible destroy plan exists showing exactly one resource destroyed and nothing else, and that plan exists, was read as its own artifact before the act, and is quoted under S9D-AC3.",
+   "denominator": "2 guards checked, 0 armed; DeletionProtectionEnabled read 3 times across 2 instruments, false every time.",
+   "status": "N/A-BY-CONSTRUCTION",
+   "status_reason": "The criterion presumes protections that are not present on this resource. The face expected deletion_protection_enabled to be on and prevent_destroy to be possibly declared; measurement found neither, with the destroy plan itself as the third corroborating read. Filed N/A-BY-CONSTRUCTION rather than PASS because no protection-removal apply occurred, and rather than FAIL because the criterion's purpose -- a separate, human-legible destroy plan showing exactly one resource -- was fully served. Surfaced to 2.0.0_SA_COO~Z in the commit message before the destructive act rather than reported afterwards."
+  },
+  {
+   "criterion_id": "S9D-AC3",
+   "criterion_verbatim": "S9D-AC3 -- THE DESTROY WAS PERFORMED BY TERRAFORM AND THE PLAN SHOWED EXACTLY ONE RESOURCE: the destroy plan quoted with its resource count, the apply output, and the post-apply describe-table returning ResourceNotFoundException. Evidence of terraform state rm, aws dynamodb delete-table, or a console deletion FAILS this criterion even if the table is gone -- the method IS the criterion.",
+   "method": "command",
+   "invocation": "terraform plan on portal-auth read as its own artifact after the declaration was removed; safe-apply.sh apply -target=aws_dynamodb_table.opal_users; then aws dynamodb describe-table on opal-users and, as a control, on opal-users-v2.",
+   "output_evidence": "THE PLAN, quoted: '# aws_dynamodb_table.opal_users will be destroyed' / '# (because aws_dynamodb_table.opal_users is not in configuration)' / '- resource \"aws_dynamodb_table\" \"opal_users\" {' with arn, name, hash_key and deletion_protection_enabled all going -> null. RESOURCE COUNT: grep -c 'will be destroyed' returns exactly 1. 'Plan: 0 to add, 1 to change, 1 to destroy' -- the single change being the root's documented perpetual WAF churn (3 minus-rule against 3 identical plus-rule blocks, 0 forces-replacement), which is why the APPLY was targeted to the table so that churn could not ride this ledger or author line. THE APPLY: 'aws_dynamodb_table.opal_users: Destroying... [id=opal-users]' / 'aws_dynamodb_table.opal_users: Destruction complete after 7s' / 'Apply complete! Resources: 0 added, 0 changed, 1 destroyed.' POST-APPLY: describe-table on opal-users returns ResourceNotFoundException. CONTROL, so the refusal is the table being gone rather than a broken probe or wrong credentials: the same call on opal-users-v2 in the same region returns TableStatus ACTIVE with 75 items. METHOD COMPLIANCE, positively stated: the destroy was performed BY TERRAFORM as a consequence of removing the declaration. No terraform state rm was run against this or any resource; no aws dynamodb delete-table was issued; nothing was deleted by console. The one aws-CLI delete-item calls made at this seat all session were against opal-users-v2's fixture row during the S11-AC2 probe under TO-OP-S-9-11, and that row was restored byte-identical.",
+   "denominator": "1 of 1 resource destroyed; 1 destroy line in the plan; 1 table absent after, 1 control table present.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S9D-AC4",
+   "criterion_verbatim": "S9D-AC4 -- NOTHING ELSE RODE AND NOTHING IS ORPHANED: the UNSCOPED plan after the destroy showing no proposal to re-create the table and no unrelated changes. If the root's known non-converging diff makes a clean re-plan unobtainable, file UNVERIFIABLE-BY-INSTRUMENT and substitute -- the plan structure showing the table absent from any create block, plus the applied-plane read. The purpose is nothing-else-rode; the 0-diff is only its measure.",
+   "method": "command",
+   "invocation": "terraform plan (UNSCOPED) on infra/aws/terraform/portal-auth after the targeted destroy, with the resource address counted across the entire plan output.",
+   "output_evidence": "NO RE-CREATION AND NOTHING ORPHANED, which is the exact outcome the method was chosen to produce. The unscoped re-plan reads 'Plan: 0 to add, 1 to change, 0 to destroy' -- ZERO TO ADD, so nothing proposes to re-create the table. Stronger than that: the address aws_dynamodb_table.opal_users appears ZERO times anywhere in the plan output, not even as a 'Refreshing state...' line, which every resource still in state receives. That is the positive form of the claim -- the resource is gone from configuration AND from state together, which is precisely what destroying THROUGH Terraform buys and what a state rm plus hand-delete would have failed to give. THE ONE REMAINING CHANGE is the pre-existing, documented, non-converging WAF churn (rows Z-S68/Z-S75), measured here again as 3 minus-rule blocks against 3 identical plus-rule blocks with 0 forces-replacement lines -- byte-for-byte the same shape as before this face began, so it did not ride and was not disturbed. FILED PASS RATHER THAN UNVERIFIABLE: the criterion's escape hatch exists for when the churn makes the CLAIM unobtainable, and it does not here -- 'no proposal to re-create' is directly readable as 0-to-add plus a zero occurrence count, independent of the unrelated in-place change.",
+   "denominator": "0 creates proposed of 0 expected; 0 occurrences of the resource address in the full plan; 1 unrelated in-place change, pre-existing and unchanged in structure.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S9D-AC5",
+   "criterion_verbatim": "S9D-AC5 -- LOGIN IS UNAFFECTED, WITH ITS BEFORE-HALF: a fixture login and /auth/me before and after the destroy, both pasted, the payloads compared. The before is what makes the after mean anything. Plus ledger CLOSED on exercised evidence with the rollback's real shape stated, and push state MEASURED.",
+   "method": "live_read",
+   "invocation": "POST https://opalinvest.dev/auth/refresh with the demo@demo.test fixture refresh token, then GET /auth/me with the returned access token, run once at 04:05:32Z before the destroy and again at 04:13:19Z after it, with the two /auth/me bodies compared byte-for-byte.",
+   "output_evidence": "BEFORE, 04:05:32Z: POST /auth/refresh HTTP 200 returning an accessToken; GET /auth/me HTTP 200 with the full demo user payload. AFTER, 04:13:19Z: POST /auth/refresh HTTP 200; GET /auth/me HTTP 200; and the two /auth/me payloads compared programmatically are BYTE-IDENTICAL. Login is unaffected by the destruction of the legacy table, and the before-half is what makes that mean anything -- an unaffected login after a change proves the change was harmless only if the same call was known to work before it. This also closes the loop the whole cell was about: the auth path reads opal-users-v2, the legacy table it was granted on is now gone, and the login is untouched. LEDGER opsec-s9d-opal-users-retirement CLOSED on 4 of 4 legs, each carrying exercised evidence -- live reads, the plan artifact, the invocation pair -- rather than an apply's return code. ROLLBACK'S REAL SHAPE, stated plainly because an optimistic rollback is worse than none: restore the backup with aws dynamodb restore-table-from-backup. IT IS NOT A BYTE-FOR-BYTE UNDO. A restore produces a NEW TABLE NAME, and re-adopting it under Terraform would require a fresh declaration and an import. The DATA is recoverable -- the snapshot was re-verified AVAILABLE with 12 items and 4,506 bytes AFTER the destroy -- but THIS EXACT RESOURCE is not. PUSH STATE: UNREAD at this vintage, stated as unread rather than assumed.",
+   "denominator": "2 endpoints exercised before and after, 4 calls, 4 HTTP 200s; 1 payload pair compared and identical; 4 of 4 ledger legs closed on exercised evidence.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The face names S9D-AC1's row count as the control that must be able to fail: if the count had moved, something still writes to a table four independent censuses said nothing reads, and the instruction was to STOP rather than proceed. A SECOND control was necessary on the destroy verification itself, because ResourceNotFoundException is exactly what a broken probe, a wrong region or expired credentials also return -- an absence and a failure read identically here.",
+   "expected": "For the first: a count other than 12 halts the face. For the second: if the probe were broken rather than the table gone, a describe-table against a table known to exist would ALSO fail.",
+   "observed": "FIRST CONTROL DID NOT TRIP AND WAS GENUINELY CAPABLE OF TRIPPING: 12 of 12 on two instruments at 04:02:06Z, unmoved across the 00:16Z, 01:24Z and 04:02Z readings that bracket the grant removal. SECOND CONTROL FIRED CORRECTLY: after the destroy, describe-table on opal-users returned ResourceNotFoundException while the same call on opal-users-v2, same region, same credentials, same moment, returned TableStatus ACTIVE with 75 items -- so the refusal is the table's absence and not the instrument's. A third check guarded the edit itself: the script that removed the declaration refused to run unless the block was byte-exact AND carried neither prevent_destroy nor deletion_protection, so a drifted or already-modified block would have stopped the act rather than been silently rewritten.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The load-bearing readings were taken more than once and, where possible, on different instruments. Row count: live scan --select COUNT and describe-table ItemCount, at 00:16Z, 01:24Z and 04:02Z. Snapshot: describe-backup at 00:47Z, 01:2xZ, 04:02Z and again after the destroy. Deletion protection: the declaration, the live describe-table, and the destroy plan's own body. Login: the same fixture call pair before and after.",
+   "observed": "STABLE. The row count read 12 on every instrument at every vintage across the whole face, including after the grant removal, which is what made a moved count a meaningful stop condition rather than noise. The snapshot read AVAILABLE / 12 items / 4,506 bytes on every read including one taken AFTER the table was destroyed. Deletion protection read false on all three surfaces. The two /auth/me payloads were byte-identical.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "A protection-removal apply (S9D-AC2's first act)",
+   "reason": "Not performed because there was no protection to remove: no lifecycle block, no deletion_protection_enabled attribute, and DeletionProtectionEnabled false on three separate reads including the destroy plan's own body. Performing an apply that changes nothing, purely so a criterion could be marked done, would be theatre rather than evidence. Surfaced to the issuer in the commit message BEFORE the destructive act."
+  },
+  {
+   "item": "terraform state rm, aws dynamodb delete-table, and console deletion",
+   "reason": "Forbidden by the face in terms -- S9D-AC3 fails on evidence of any of them even if the table is gone, because that shape puts the destructive act outside the plan where no gate and no reviewer can see it, and leaves an untracked live table if the second half fails. None was used."
+  },
+  {
+   "item": "An unscoped apply of the portal-auth root for the destroy",
+   "reason": "The destroy was TARGETED so the root's documented perpetual WAF churn could not ride this ledger and this author line for zero effect on the world. The VERIFICATION was deliberately unscoped, which is the half that would actually detect something riding along."
+  },
+  {
+   "item": "The us-east-2 copy of the table",
+   "reason": "There is none. Measured out of existence under TO-OP-S-9-11 (row Z-S113) -- us-east-2 holds zero DynamoDB tables in this account. The removed declaration's own comment claimed otherwise, and the tombstone corrects it so the stale claim does not outlive the resource."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPSEC202609-Z-S119: The retirement was built and STOPPED AT THE DELETE under TO-OP-S-9-11, with the table left standing at 12 rows and the decision offered to a human. This face is the discharge of that row -- Andrew ruled 'Recs approved' on 2026-09-04 ~03:4xZ and the delete was then performed through Terraform.",
+  "NFRA_OPSEC202609-Z-S113: The us-east-2 opal-users table does not exist and never gated anything, which is why the destroyed declaration's comment claiming it 'also exists in us-east-2' was corrected in the tombstone rather than carried forward as folklore about a table that no longer exists."
+ ],
+ "compiler_tools": [
+  {
+   "tool": "comp-read --enumerate",
+   "invocation": "comp-read infra/aws/terraform/portal-auth/dynamodb.tf --enumerate 'opal_users|opal-users'",
+   "result": "Run under TO-OP-S-9-11 and load-bearing here: it is what established that opal-users was STILL TERRAFORM-MANAGED at dynamodb.tf:151-165. That single fact is why this face exists in the shape it does -- a bare delete-table would have left the resource in state and the next plan would have proposed to re-create it as an empty table wearing the retired one's name."
+  },
+  {
+   "tool": "comp-iam refresh-census",
+   "invocation": "run three times under TO-OP-S-9-11 and TO-OP-S-9C; not re-run here",
+   "result": "DECLARED-NOT-APPLICABLE for this face by its own preflight, and correctly so: this face changes no principal. Its prior result is the precondition -- ZERO exact grants on the table across 224 roles -- so the table was destroyed already ungranted rather than leaving dangling permissions behind."
+  },
+  {
+   "tool": "comp-schedule",
+   "invocation": "issuer preflight, not re-run by the assignee",
+   "result": "This face builds no monitor, alarm or notification, and the human gate it discharged was a pre-existing CLAUDE.md reservation rather than an agent-made one, so the moratorium surface is untouched. Stated rather than left blank."
+  }
+ ]
+}

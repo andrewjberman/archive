@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-29",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "2fd3843047",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-29.log-destination-source-conditions.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/prd/NFRA_OPSEC202609_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "001709c96e"
+  },
+  "assignee": "0.7.0_AE_CloudOps~S",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opsec/s3.tf",
+      "kind": "terraform",
+      "commit_or_etag": "0844396fe0",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "One condition line added: aws:SourceAccount on AllowALBAccessLogDelivery. safe-apply rc=0 -- 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed', the bucket policy modified IN-PLACE, apply window 21:09:49Z-21:10:31Z. Verified on the applied plane: both service grants now carry aws:SourceAccount, and BOTH live delivery legs produced objects strictly after the apply."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THE CONTROL THAT HAD TO BE ABLE TO FAIL IS THE ALB DELIVERY ITSELF, and this face is built around it. The ALB grant carried NEITHER source condition before this change, so nothing established that logdelivery.elasticloadbalancing.amazonaws.com sends aws:SourceAccount. Adding a condition a service does not satisfy DENIES its writes -- and a refused S3 log delivery presents as an EMPTY PREFIX rather than an error, which is row Z-S49's silent-failure shape one bucket over. So the criterion grades this leg on a DELIVERED OBJECT after the apply and gives it no UNCOMPUTABLE branch. A pre-apply denominator was captured before the edit precisely so the after-read had something to be compared against.",
+      "expected": "At least one object under waf-logs/alb-opal-gateway/ with LastModified strictly after the apply timestamp, against a pre-apply count of 127 whose newest was 20:50:12Z.",
+      "observed": "FIRED AS EXPECTED AND PASSED. waf-logs/alb-opal-gateway/ went 127 -> 132 objects, carrying ...app.opal-gateway.89166a68f337e5a4_20260903T2120Z_54.161.142.181_35soq9es.log.gz, 458B, LastModified 2026-09-03T21:20:12Z -- strictly after the 21:10:31Z apply, and the key names the load balancer itself. The CloudFront leg also delivered twice more (79 -> 83, newest 21:18:26Z), so its permitted UNCOMPUTABLE branch was not needed. THE CONTROL ALSO PRODUCED A FINDING: because the ALB kept delivering through a condition it had never been tested against, logdelivery.elasticloadbalancing.amazonaws.com demonstrably DOES send aws:SourceAccount.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "UNSCOPED terraform plan -detailed-exitcode on infra/aws/terraform/opsec, before the edit and after the apply.",
+      "observed": "BEFORE: 'No changes' rc=0. AFTER: 'No changes. Your infrastructure matches the configuration.' rc=0. A genuine 0-diff on this root -- worth stating because the sibling portal-auth root does NOT converge (rows Z-S68 and Z-S75), so a clean re-plan here is a real result rather than a formality.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "aws:SourceArn was added to NEITHER grant.",
+      "reason": "The L4 floor says SourceArn ONLY where the service supports it, MEASURED per service and NEVER ASSUMED, because an asserted SourceArn is exactly how C-16 reached its wrong state. No instrument available to this seat establishes support for either principal -- egress to AWS documentation is prohibited, a census of all 34 bucket policies in the account found ZERO other grants to either principal, and no API reports which context keys a service sends. Not established, therefore not added. Row Z-S81 carries the instrument gap."
+    },
+    {
+      "item": "Nothing else on opal-data-security was changed.",
+      "reason": "The face says so in terms. Encryption stays AES256 -- the CMK flip is the RETIRED limb C-16 forbids (rows Z-S37, Z-S39) -- and versioning, the four public-access blocks, the waf-logs/ lifecycle and the prefixes are all untouched. Verified by re-read after the apply, not assumed from the plan."
+    },
+    {
+      "item": "The ALB enablement oracle was NOT used to test a SourceArn condition.",
+      "reason": "s3.tf:141-147 records that elbv2 modify-load-balancer-attributes performs a test write and fails loudly, so it COULD test such a condition -- but only by adding the condition first, and S29-AC2 makes a SourceArn added without a prior finding a FAIL even if the policy applies cleanly. Using the oracle to manufacture the finding that licenses the condition is the circularity the criterion exists to forbid."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S60: C-16 described the log destination's two service grants as 'each with SourceAccount + SourceArn' while one of the four asserted condition slots existed. Filed during TO-OP-S-17R-28's ALIGN limb, verified at source by the issuer, and routed to L4. THIS FACE IS ITS REMEDIATION HALF: both grants now carry aws:SourceAccount.",
+    "NFRA_OPSEC202609-Z-S81: no instrument available to a site-Z seat can establish whether an AWS service principal sends aws:SourceArn, which is the finding this face's floor requires before the condition may be added. Three instruments tried and recorded: documentation is barred by the egress rule, an account-wide census of 34 bucket policies found zero other grants to either principal, and no API reports a service's context keys. The floor's conservative branch -- add only SourceAccount -- was taken. OBSERVATION/INERT."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~S/logs/2026-09-03/session_1700-1815Z_NFRA_OPSEC202609_TO-OP-S-17R-28.md",
+  "acceptance": [
+    {
+      "criterion_id": "S29-AC1",
+      "criterion_verbatim": "S29-AC1 -- BOTH GRANTS CARRY SourceAccount, READ ON THE APPLIED PLANE: get-bucket-policy after, with both statements quoted in full, showing aws:SourceAccount present on each. The BEFORE state is quoted from this face (CloudFront: present; ALB: absent) as the comparison. Denominator: 2 of 2 grants.",
+      "method": "live_read",
+      "invocation": "aws s3api get-bucket-policy --bucket opal-data-security, before the edit and after the apply",
+      "output_evidence": "BEFORE, re-grounded by this seat at 20:57:05Z and matching the face's cut read exactly: 3 statements -- DenyInsecureTransport (no source conditions, correctly, being principal-independent); AllowCloudFrontAccessLogDelivery SourceAccount PRESENT, SourceArn ABSENT; AllowALBAccessLogDelivery BOTH ABSENT. AFTER, read immediately post-apply, both service statements quoted in full: AllowCloudFrontAccessLogDelivery -- Principal Service delivery.logs.amazonaws.com, Action s3:PutObject, Resource arn:aws:s3:::opal-data-security/waf-logs/cloudfront-access/*, Condition StringEquals { aws:SourceAccount 313476888478, s3:x-amz-acl bucket-owner-full-control }. AllowALBAccessLogDelivery -- Principal Service logdelivery.elasticloadbalancing.amazonaws.com, Action s3:PutObject, Resource arn:aws:s3:::opal-data-security/waf-logs/alb-opal-gateway/*, Condition StringEquals { aws:SourceAccount 313476888478, s3:x-amz-acl bucket-owner-full-control }. DENOMINATOR: 2 of 2 service grants carry aws:SourceAccount. Principals, actions and resources are UNCHANGED on both; the only delta in the whole document is the one added condition key.",
+      "denominator": "3 policy statements read before and after; 2 of 2 service grants now carrying aws:SourceAccount; 1 condition key added in total.",
+      "status": "PASS",
+      "status_reason": "The floor's non-negotiable half is met on both grants and read on the applied plane rather than inferred from the plan. The DenyInsecureTransport statement correctly carries no source condition -- it is principal-independent and a source condition there would be meaningless."
+    },
+    {
+      "criterion_id": "S29-AC2",
+      "criterion_verbatim": "S29-AC2 -- THE SourceArn DECISION IS MEASURED PER SERVICE, NOT ASSERTED: for EACH principal, a stated finding on whether it sends a SourceArn for this delivery type, with the source of that finding cited, and the resulting condition present or deliberately absent. A SourceArn added without that finding is a FAIL even if the policy applies cleanly -- that is the exact method that produced the defect. A measured negative is a PASS.",
+      "method": "live_read",
+      "invocation": "aws s3api list-buckets then get-bucket-policy across all 34 buckets in the account (estate-precedent census); aws logs describe-delivery-sources / describe-deliveries and aws elbv2 describe-load-balancers (delivery-identity reads)",
+      "output_evidence": "PER-PRINCIPAL FINDING, and for BOTH it is the same: NOT ESTABLISHED, therefore NOT ADDED. delivery.logs.amazonaws.com (CloudFront standard logging v2, delivering via the CloudWatch Logs delivery path -- delivery source opal-portal-cloudfront-access on arn:aws:cloudfront::313476888478:distribution/EVTSA9VEHNZVH): whether it sends aws:SourceArn is NOT ESTABLISHED. logdelivery.elasticloadbalancing.amazonaws.com (ALB arn:aws:elasticloadbalancing:us-east-1:313476888478:loadbalancer/app/opal-gateway/89166a68f337e5a4): NOT ESTABLISHED. Neither condition was added. THE SOURCE OF THE FINDING, CITED AS THE CRITERION REQUIRES -- three instruments tried, all three unavailable, none assumed absent: (1) AWS DOCUMENTATION is barred, CLAUDE.md's Agent Autonomy section excluding all egress off Opal infrastructure and requiring Andrew's explicit per-use word for any external vendor call; (2) ESTATE PRECEDENT is empty -- list-buckets enumerated 34 buckets and every get-bucket-policy was read, finding exactly ONE bucket that names either principal, opal-data-security itself, the subject of this change; (3) NO LIVE API reports which request-context keys a service principal populates. WHAT IS MEASURED, AND IT IS ABOUT THE OTHER KEY: aws:SourceAccount is now PROVEN for BOTH principals, and by the criterion's own kind of evidence rather than by assertion. CloudFront was already delivering through a grant carrying that condition; and the ALB, whose grant had never carried either condition, KEPT DELIVERING after this change added it -- object at 21:20:12Z. A condition a service does not satisfy denies its writes, so continued delivery is a positive measurement of the key. *** A FOURTH INSTRUMENT WAS CHECKED AFTER THIS ROW WAS FIRST WRITTEN, on the operator's prompt that comp-iam has been substantially upgraded, and it fails for a STRUCTURAL reason rather than a missing feature. comp-iam simulate is an applied-plane simulate-principal-policy wrapper that enforces the Rule 22a traps by construction -- ONE resource ARN (a comma-list is refused), an auto-derived positive control, and --no-control marking a resulting DENY as UNPROVEN rather than rc=1. It takes a ROLE, an action and a resource, and its --context flag lets the caller SUPPLY condition keys. It does not report, and cannot report, which keys an AWS SERVICE populates in a request. Simulation answers what a policy would decide GIVEN a context; the question here is what context the service SENDS, which is upstream of any simulator. So the count of instruments tried is FOUR, not three, and the finding is unchanged.",
+      "denominator": "2 principals, each with a stated finding; FOUR instruments attempted per principal (documentation, estate precedent, live API, upgraded comp-iam simulate); 34 bucket policies censused for estate precedent, 1 hit and it is the subject.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "NOT A PASS, AND THE DISTINCTION IS THE WHOLE POINT OF THIS ROW. The criterion says a MEASURED NEGATIVE is a PASS. What this seat has is NOT ESTABLISHED, which is a different claim: a measured negative asserts the service does not send the key, and nothing measured here supports that assertion. Filing not-established as measured-negative would be the same overreach in the opposite direction that produced C-16's defect -- and this face exists precisely to remedy an asserted condition. NOT A FAIL EITHER: the criterion's substantive requirement is that no SourceArn be added without a finding, and none was added. The conservative branch of the floor was taken. THE TELL WORTH NAMING, because it is why this needed a status rather than a sentence: THE CONSERVATIVE ACTION AND THE UNVERIFIABLE ONE ARE THE SAME ACTION. Adding only SourceAccount is both what a measured negative would license and what an inability to measure forces, so the record must state which of the two it is -- they look identical in the world and are not the same claim. Row Z-S81 @e4d6f01558 carries the instrument gap with two named shapes for whoever owns it, neither taken here: authorise a single narrow documentation read, which is an egress decision and Andrew's; or amend this criterion to permit the ALB enablement oracle as the finding, which turns the circularity into a ruled sequence."
+    },
+    {
+      "criterion_id": "S29-AC3",
+      "criterion_verbatim": "S29-AC3 -- BOTH LIVE LEGS STILL DELIVER AFTER THE CHANGE: for waf-logs/cloudfront-access/ and waf-logs/alb-opal-gateway/, at least one object with LastModified strictly AFTER the apply timestamp, against the pre-apply counts captured in deliverable 2. This limb does NOT get the UNCOMPUTABLE branch for the ALB leg, which was measured delivering continuously -- a stop there is a regression this task order caused. The CloudFront leg MAY file UNCOMPUTABLE with its window if that source is genuinely idle, stated as such with the pre-apply count as evidence of its normal rate.",
+      "method": "live_read",
+      "invocation": "aws s3api list-object-versions --bucket opal-data-security, pre-apply at 20:57:05Z and post-apply at 21:22:37Z",
+      "output_evidence": "APPLY WINDOW: 21:09:49Z to 21:10:31Z. The comparison point is 21:10:31Z. PRE-APPLY DENOMINATOR, captured BEFORE the edit as deliverable 2 requires: waf-logs/cloudfront-access/ 79 objects, newest 20:48:26Z; waf-logs/alb-opal-gateway/ 127 objects, newest 20:50:12Z; 206 versions bucket-wide. ALB LEG -- PASS, AND THIS IS THE ONE THAT MATTERED: 127 -> 132 objects, with ONE strictly after the apply -- waf-logs/alb-opal-gateway/AWSLogs/313476888478/elasticloadbalancing/us-east-1/2026/09/03/313476888478_elasticloadbalancing_us-east-1_app.opal-gateway.89166a68f337e5a4_20260903T2120Z_54.161.142.181_35soq9es.log.gz, 458B, LastModified 2026-09-03T21:20:12Z. The key names the load balancer itself. CLOUDFRONT LEG -- PASS: 79 -> 83 objects, TWO strictly after the apply -- EVTSA9VEHNZVH.2026-09-03-21.5fe2be22.gz at 21:13:25Z and EVTSA9VEHNZVH.2026-09-03-21.71665421.gz at 21:18:26Z. Its permitted UNCOMPUTABLE branch was therefore not needed and is not taken. Bucket-wide 206 -> 215 versions, and ZERO objects under cases/, reports/ or allowlists/ throughout.",
+      "denominator": "2 prefixes, each with a pre-apply count and newest timestamp and a post-apply re-read; 3 objects delivered strictly after the apply across both legs.",
+      "status": "PASS",
+      "status_reason": "Both legs deliver and the risky one is proven. The ALB grant gained a condition that had never been tested against that principal, and if the service did not send aws:SourceAccount the condition would have denied its writes -- silently, as an empty prefix rather than an error, which is exactly row Z-S49's shape. It kept delivering within ten minutes of the apply, against a pre-apply cadence of roughly five minutes. THE CONTROL THEREFORE PRODUCED A FINDING AS WELL AS A PASS: continued delivery through a newly-added condition is a positive measurement that logdelivery.elasticloadbalancing.amazonaws.com sends aws:SourceAccount. That is the measured evidence S29-AC2 could not obtain for SourceArn, obtained here for the other key by the criterion's own control."
+    },
+    {
+      "criterion_id": "S29-AC4",
+      "criterion_verbatim": "S29-AC4 -- NOTHING ELSE ON THE BUCKET MOVED: the apply's changed-resource list enumerated with its count, containing ONLY aws_s3_bucket_policy for this bucket; the UNSCOPED re-plan 0-diff after; and a re-read confirming encryption is still AES256 (not the project CMK), versioning still ON, the four public-access blocks still true, and the waf-logs/ lifecycle unchanged. 0 to destroy and 0 forces-replacement bind PLAN-WIDE.",
+      "method": "live_read",
+      "invocation": "terraform plan -detailed-exitcode (unscoped, before and after); aws s3api get-bucket-encryption / get-bucket-versioning / get-public-access-block / get-bucket-lifecycle-configuration",
+      "output_evidence": "CHANGED-RESOURCE LIST: count 1, containing ONLY aws_s3_bucket_policy.data_security, MODIFIED IN-PLACE. 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' Zero lines matching destroyed, must be replaced or forces replacement anywhere in the plan -- plan-wide. The plan's diff was a SINGLE + line, aws:SourceAccount = 313476888478. UNSCOPED RE-PLAN AFTER: 'No changes. Your infrastructure matches the configuration.' rc=0. THE FOUR PROPERTIES RE-READ ON THE APPLIED PLANE AFTER THE APPLY: encryption SSEAlgorithm AES256 -- and the discriminator holds, it is NOT the project CMK 64f25291, whose flip is the RETIRED limb C-16 forbids; versioning Status Enabled; public-access block 4 of 4 true; lifecycle EXACTLY ONE rule, waf-logs-glacier-90-expire-400, Filter.Prefix waf-logs/, GLACIER at 90 days, Expiration 400 days, nothing touching cases/, reports/ or allowlists/.",
+      "denominator": "1 resource changed of 1 expected; 2 unscoped plans; 4 bucket properties re-read; 1 lifecycle rule confirmed unchanged.",
+      "status": "PASS",
+      "status_reason": "The blast radius is exactly one condition key on one statement of one policy. The four properties were RE-READ after the apply rather than inferred from a clean plan, because the plan proves what Terraform intended and only the applied plane proves what the bucket now is. The 0-diff is a genuine result on this root, which is worth noting given the sibling portal-auth root does not converge (rows Z-S68, Z-S75)."
+    },
+    {
+      "criterion_id": "S29-AC5",
+      "criterion_verbatim": "S29-AC5 -- THE LEDGER CLOSES ON THE ARTIFACT AND PUSH STATE IS MEASURED: ledger entry CLOSED with its proof and the prior policy document named as the rollback; push state read by ls-remote + is-ancestor and stated as MEASURED.",
+      "method": "live_read",
+      "invocation": "deploy_ledger.py close; git ls-remote origin SITEZ; git merge-base --is-ancestor",
+      "output_evidence": "LEDGER opsec-s29-log-destination-source-conditions CLOSED, all 6 legs proven, sentinel removed. THE ROLLBACK WAS NAMED AND ACTUALLY HELD, not merely described: the prior policy document captured VERBATIM before the first edit, 874 bytes, sha256 f7d19e28aae82709, retained outside the tree and restorable by put-bucket-policy or by reverting the single condition line and re-applying. It was never needed. PUSH STATE, MEASURED: git ls-remote origin SITEZ reads 001709c96ef22a508255b1242734c73a9d37c854; git merge-base --is-ancestor returns FALSE for this face's commits -- LOCAL-ONLY. The push is the integrator lane's act, not this seat's.",
+      "denominator": "1 ledger entry with 6 legs, all closed; 1 rollback artifact captured and hashed; 1 ls-remote read plus is-ancestor per commit.",
+      "status": "PASS",
+      "status_reason": "The ledger closes on measurements, including the one leg whose target was a live-delivery observation rather than a configuration read. Capturing the rollback as an ARTIFACT with a hash, before the edit, is what makes it a rollback rather than a description of one."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "aws s3api list-buckets + get-bucket-policy (account-wide census)",
+      "invocation": "all 34 buckets enumerated, every policy read, filtered for the two service principals",
+      "result": "The estate-precedent instrument for S29-AC2. Exactly ONE hit and it is the subject bucket, so there was no working example to learn from. A measured zero rather than an assumed one."
+    },
+    {
+      "tool": "aws logs describe-delivery-sources / describe-deliveries, aws elbv2 describe-load-balancers",
+      "invocation": "to identify the delivery identities behind each principal",
+      "result": "Established WHAT the ARNs would be -- the CloudFront distribution EVTSA9VEHNZVH and the ALB app/opal-gateway/89166a68f337e5a4 -- but not whether either service SENDS them as aws:SourceArn, which is the question the criterion asks."
+    },
+    {
+      "tool": "aws s3api list-object-versions (pre and post apply)",
+      "invocation": "captured BEFORE the edit as deliverable 2, re-read after the apply",
+      "result": "The pre-apply denominator is what makes S29-AC3 checkable at all -- without it the after-read has nothing to be compared against, and 'objects exist' would have been mistaken for 'delivery continued'."
+    },
+    {
+      "tool": "safe-apply.sh (Rule 18) with a broker drain immediately before",
+      "invocation": "HALT_ACK=1 after the drain returned only messages already read and acked",
+      "result": "rc=0, one resource modified in place, apply window 21:09:49Z-21:10:31Z recorded as the S29-AC3 comparison point."
+    },
+    {
+      "tool": "terraform plan (UNSCOPED, before and after)",
+      "invocation": "on infra/aws/terraform/opsec",
+      "result": "0/0/0 before, 0-diff after. A genuine convergence on this root, unlike portal-auth."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open with 6 legs before the edit, rollback named, close-leg per limb, close",
+      "result": "CLOSED, 6 of 6. The rollback was captured as a hashed artifact before the first edit rather than described after it."
+    }
+  ]
+}

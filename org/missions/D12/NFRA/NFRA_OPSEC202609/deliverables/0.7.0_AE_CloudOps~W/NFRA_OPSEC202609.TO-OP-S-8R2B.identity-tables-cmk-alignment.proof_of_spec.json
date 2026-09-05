@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-8R2B",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-8R2B.identity-tables-cmk-alignment.md",
+    "group": "OTHER",
+    "vintage_commit": "998c79b970239388828673501dd8c14bdad5a5a9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "916eae30a42cebbcd4b08d7fc649bb0d5fc61d3f",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-8R2B.identity-tables-cmk-alignment.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~W",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/shared-infra/dynamo.tf",
+      "kind": "terraform",
+      "commit_or_etag": "d756be09b8",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply rc=0 from the saved plan file w-s8r2b-users-v2.tfplan: 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' Live AFTER read confirms KMSMasterKeyArn arn:aws:kms:us-east-1:313476888478:key/64f25291-4015-42c5-ad41-40e42325deb7 on opal-users-v2. UNSCOPED re-plan: 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260903T2343Z_opsec-s8r2b-users-v2-cmk_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "d756be09b8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "deploy ledger CLOSED, all 5 legs proven; sentinel removed. deploy_ledger.py check no longer lists this slug as OPEN."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S8B-AC1",
+      "criterion_verbatim": "THE KEY POLICY ADMITS DYNAMODB, READ IN FULL INCLUDING ITS CONDITIONS: `get-key-policy` on `64f25291-...` with the `AllowViaDynamoDBAndS3InThisAccountOnly` statement quoted entire, conditions included, and an explicit statement of whether `kms:ViaService` and the account condition admit DynamoDB in this account. The issuer did NOT read the condition block; this criterion is where it gets read. If it does not admit, this files a STOP with a row and nothing is flipped.",
+      "method": "live_read",
+      "invocation": "aws kms get-key-policy --key-id 64f25291-4015-42c5-ad41-40e42325deb7 --policy-name default --query Policy --output text ; aws sts get-caller-identity ; aws configure get region",
+      "output_evidence": "Statement AllowViaDynamoDBAndS3InThisAccountOnly, quoted ENTIRE: {\"Sid\":\"AllowViaDynamoDBAndS3InThisAccountOnly\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"*\"},\"Action\":[\"kms:Encrypt\",\"kms:Decrypt\",\"kms:ReEncrypt*\",\"kms:GenerateDataKey*\",\"kms:CreateGrant\",\"kms:DescribeKey\"],\"Resource\":\"*\",\"Condition\":{\"StringEquals\":{\"kms:CallerAccount\":\"313476888478\"},\"StringLike\":{\"kms:ViaService\":[\"dynamodb.us-east-1.amazonaws.com\",\"s3.us-east-1.amazonaws.com\"]}}}. EXPLICIT VERDICT ON THE TWO CONDITIONS: kms:CallerAccount is 313476888478 and sts get-caller-identity returns Account 313476888478 -- EXACT MATCH, so the account condition admits. kms:ViaService is a StringLike list containing dynamodb.us-east-1.amazonaws.com and the live region is us-east-1 -- EXACT MATCH on the DynamoDB entry, so the service condition admits. DynamoDB in this account IS admitted. kms:CreateGrant is present, which is the action DynamoDB SSE specifically requires. list-key-policies returns exactly one policy name, 'default', so this is the whole policy and not one of several. C-16's blocker (delivering principals absent) does not transfer.",
+      "denominator": "3 of 3 statements in the key policy read (EnableIAMUserPermissions, AllowSecurityAdminRoleUse, AllowViaDynamoDBAndS3InThisAccountOnly); 1 of 1 policy names returned by list-key-policies; 2 of 2 conditions in the governing statement evaluated against live values",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S8B-AC2",
+      "criterion_verbatim": "EVERY TABLE IS ON THE PROJECT CMK, WITH ITS DENOMINATOR: `describe-table` per table showing `SSEType KMS` and `KMSMasterKeyArn` resolving to `64f25291-...` and NOT `86cc6c40-...`; tables flipped of tables enumerated, both counts printed, the enumeration derived from a live read. The BEFORE state is quoted from this face.",
+      "method": "live_read",
+      "invocation": "aws dynamodb list-tables --output json (38 tables, LastEvaluatedTableName absent) ; aws dynamodb describe-table --table-name <t> --query 'Table.SSEDescription' per table",
+      "output_evidence": "BOTH COUNTS PRINTED, AND THEY DO NOT MATCH: 1 table FLIPPED of 5 tables ENUMERATED. FLIPPED: opal-users-v2 -> SSEType KMS, KMSMasterKeyArn arn:aws:kms:us-east-1:313476888478:key/64f25291-4015-42c5-ad41-40e42325deb7 (was 86cc6c40-2387-4446-b7e1-de79392e06b3, the BEFORE state the face quotes). NOT FLIPPED, still on 86cc6c40: opal-partner-49financial, opal-partner-cottonwood, opal-partner-demo, opal-partner-inflection. ENUMERATION DERIVED FROM A LIVE READ, NOT FROM THE FACE: list-tables returns 38 tables with LastEvaluatedTableName absent so 38 is a true denominator and not a page count; 4 match opal-partner-*, plus opal-users-v2 = 5 on the AWS-managed key. THE FACE NAMED ONLY THREE (opal-users-v2, opal-partner-demo, opal-partner-49financial) -- cottonwood and inflection are equally affected and unnamed, filed as row NFRA_OPSEC202609-Z-S104. || RULING SUPERSEDING THIS CRITERION'S DENOMINATOR, 2026-09-04T00:24Z, 2.0.0_SA_COO~Z, Msg-ID 20045, commit 8bebc72a68 verified at this seat with a negative control (a bogus near-identical hash fails to resolve): 'ROUND 2b IS RETIRED, NOT COMPLETED, AND THE DEFECT IS MINE AT L5 -- my decomposition asserted a limb the PRD does not ask for. OP-s-8 flips COMPLETE and FWD-8 IS SERVED' and 'DO NOT FLIP THE FOUR opal-partner-* TABLES. They are expressly out. S8B-AC2 files against a denominator of 1 required, not 5 enumerated.' The issuer independently re-read C-13 and reached the reading this seat filed on row Z-S104: C-13 binds FWD-16/18 through C-8 and C-9, which name opal-security-evidence and opal-suspicious-addresses, and neither is an identity or RBAC table. THEREFORE the one table this criterion requires -- opal-users-v2 -- IS on the project CMK: SSEType KMS, KMSMasterKeyArn arn:aws:kms:us-east-1:313476888478:key/64f25291-4015-42c5-ad41-40e42325deb7, and NOT 86cc6c40-2387-4446-b7e1-de79392e06b3, confirmed on a final live read after the ruling. NOTE FOR A LATER READER, RECORDED BECAUSE THE ISSUER ASKED THAT IT BE PLAIN: this flip was NOT required by any constraint. It was applied on the decomposition's authority before the limb was retired, it is not harmful (a customer-managed key with rotation beats the AWS-managed default) and it stays, but nothing in the PRD asked for it and no requirement should be inferred from the fact that it happened.",
+      "denominator": "1 REQUIRED of 1 REQUIRED. The denominator changed by RULING, not by measurement: 2.0.0_SA_COO~Z retired OP-s-8's round-2b limb at 8bebc72a68 (decomp v0.1.15 -> v0.1.16) as required by no constraint, expressly barring the 4 opal-partner-* tables. The live census of 38 tables (LastEvaluatedTableName absent) and its 5-table finding stand unchanged as the measurement; what moved is how many of them this criterion is entitled to ask for.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S8B-AC3",
+      "criterion_verbatim": "EACH TABLE IS STILL READABLE AND WRITABLE ON THE DATA PLANE, WHICH `describe-table` CANNOT SHOW: per table, a fixture item written and read back after the flip, then deleted and the deletion read back. A control-plane read reporting the new key ARN is NOT this criterion -- it shows what the key is configured as, never that the table can still be used. NEGATIVE CONTROL: state what a failure would have looked like (an `AccessDeniedException` or `KMSInvalidStateException` on the data-plane call) so a clean pass is distinguishable from an unexercised one.",
+      "method": "command",
+      "invocation": "aws dynamodb put-item --table-name opal-users-v2 --item '{\"PK\":{\"S\":\"FIXTURE#opsec-s8r2b-cmk-verify\"},\"SK\":{\"S\":\"PROBE#20260903T235458Z\"},...}' --return-consumed-capacity TOTAL ; aws dynamodb get-item --consistent-read ; aws dynamodb delete-item --return-values ALL_OLD ; aws dynamodb get-item --consistent-read",
+      "output_evidence": "FOUR STEPS, ALL ON THE DATA PLANE. (1) WRITE, the encrypt path on the new CMK: put-item returned {\"ConsumedCapacity\":{\"TableName\":\"opal-users-v2\",\"CapacityUnits\":1.0}}. (2) READ BACK, the decrypt path, with --consistent-read so the row came from storage and not a cache: returned the item byte-exact -- PK FIXTURE#opsec-s8r2b-cmk-verify, SK PROBE#20260903T235458Z, purpose 'TO-OP-S-8R2B S8B-AC3 data-plane exercise; delete immediately'. (3) DELETE with --return-values ALL_OLD returned the full item, proving it existed and was removed. (4) CLEANUP READ BACK with --consistent-read returned an empty response with NO Item key; a later re-read is likewise empty, so no fixture residue remains and ItemCount is back to 75. NEGATIVE CONTROL, STATED: a failure would have surfaced as AccessDeniedException or KMSInvalidStateException on the write or on the consistent read. Neither occurred. The CONSISTENT READ is the discriminating leg -- an unusable key cannot decrypt, so DynamoDB would have errored rather than returning the row; a table that were encrypted-but-unreadable fails exactly there and nowhere else in this face. SECOND INSTRUMENT ON A DIFFERENT PLANE, so this is corroboration and not one instrument read twice: aws kms list-grants --key-id 64f25291-... returns a grant with GranteePrincipal dynamodb.us-east-1.amazonaws.com whose Name is 8e590a34-53b1-4b6a-8c91-02bbc5e981ea -- opal-users-v2's own TableId -- and EncryptionContextSubset {\"aws:dynamodb:tableName\":\"opal-users-v2\",\"aws:dynamodb:subscriberId\":\"313476888478\"}, granting Decrypt/Encrypt/GenerateDataKey/ReEncryptFrom/ReEncryptTo/RetireGrant/DescribeKey. DynamoDB minted that grant because the table now uses this key.",
+      "denominator": "1 of 1 tables flipped by this face exercised on the data plane; 4 of 4 steps (write, consistent read, delete, cleanup read) completed; 2 independent instruments on 2 planes (DynamoDB data plane, KMS grant plane) agree",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S8B-AC4",
+      "criterion_verbatim": "DELETION PROTECTION AND PITR ARE UNCHANGED: per table, `describe-table` and `describe-continuous-backups` before and after, showing `DeletionProtectionEnabled` and PITR status identical. Any movement is a FAIL and a row, because round 1 established those and this face is not entitled to them.",
+      "method": "live_read",
+      "invocation": "aws dynamodb describe-table --table-name opal-users-v2 --query 'Table.DeletionProtectionEnabled' ; aws dynamodb describe-continuous-backups --table-name opal-users-v2 --query 'ContinuousBackupsDescription.PointInTimeRecoveryDescription' -- each run BEFORE the edit and AFTER the apply",
+      "output_evidence": "BEFORE: DeletionProtectionEnabled true; PointInTimeRecoveryStatus ENABLED, RecoveryPeriodInDays 35, EarliestRestorableDateTime 2026-07-30T19:42:24.333000-04:00. AFTER: DeletionProtectionEnabled true; PointInTimeRecoveryStatus ENABLED, RecoveryPeriodInDays 35. IDENTICAL on both settings -- neither moved. The Terraform plan corroborates independently of the live read: the only changed attribute plan-wide was '+ kms_key_arn' inside the server_side_encryption block, with deletion_protection_enabled and the point_in_time_recovery block among the unchanged attributes/blocks Terraform reported hidden. TWO ADDITIONAL IDENTITY PROOFS that the table was UPDATED and not REPLACED, which is the way these settings could have silently reset: TableId 8e590a34-53b1-4b6a-8c91-02bbc5e981ea and CreationDateTime 2026-01-08T12:46:52.652000-05:00 are byte-identical before and after, and ItemCount is 75 on both sides. A replacement would have minted a new TableId.",
+      "denominator": "1 of 1 flipped tables checked on 2 of 2 settings (deletion protection, PITR), each read before and after = 4 reads; plus 3 replacement-discriminating fields (TableId, CreationDateTime, ItemCount) before and after",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S8B-AC5",
+      "criterion_verbatim": "BASELINE QUOTED, 0-DIFF AFTER, NOTHING ELSE RODE, PUSH STATE MEASURED: per root, the UNSCOPED plan quoted BEFORE the first edit; the apply's changed-resource list enumerated with its count containing ONLY the SSE specification of the named tables; the UNSCOPED re-plan 0-diff after; the ledger CLOSED with its proof and the per-table rollback key ARNs named; push state read by `ls-remote` + `is-ancestor` and stated as MEASURED. `0 to destroy` and `0 forces-replacement` bind PLAN-WIDE with NO exception on this face.",
+      "method": "diff",
+      "invocation": "terraform plan (UNSCOPED, before any edit) ; terraform plan -out=w-s8r2b-users-v2.tfplan (UNSCOPED, after the edit) ; .tools/safe-apply.sh -chdir=infra/aws/terraform/shared-infra apply w-s8r2b-users-v2.tfplan ; terraform plan (UNSCOPED, after the apply) ; git ls-remote origin SITEZ ; git merge-base --is-ancestor d756be09b8 origin/SITEZ",
+      "output_evidence": "BASELINE, QUOTED, TAKEN BEFORE THE FIRST EDIT: 'No changes. Your infrastructure matches the configuration.' -- so nothing foreign was pending in this root and nothing else COULD ride. CHANGED-RESOURCE LIST, ENUMERATED WITH ITS COUNT: exactly 1 resource, aws_dynamodb_table.opal_users_v2, 'will be updated in-place', and exactly 1 changed attribute, '+ kms_key_arn = arn:aws:kms:us-east-1:313476888478:key/64f25291-4015-42c5-ad41-40e42325deb7' inside server_side_encryption. 'Plan: 0 to add, 1 to change, 0 to destroy.' PLAN-WIDE REPLACEMENT CENSUS, the bound with no exception: 0 occurrences of 'forces replacement', 0 of 'must be replaced', 0 of 'will be destroyed', 0 of '-/+'. APPLY: 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' UNSCOPED RE-PLAN AFTER: 'No changes. Your infrastructure matches the configuration.' WHY THAT DISCRIMINATES EVEN THOUGH IT MATCHES THE CLEAN BASELINE: between the two plans this commit ADDED a server_side_encryption block declaring kms_key_arn, so if the apply had NOT landed the re-plan would still show the same 1-to-change diff it showed immediately before the apply. A clean plan now therefore proves declaration and live table agree, rather than proving nothing. NOT A -target APPLY AT ALL: because the baseline was clean the whole unscoped plan contained only this change, so the apply ran from the SAVED PLAN FILE -- strictly stronger than targeting, and it avoids the CLAUDE.md Rule-22 scoped-apply-verified-by-scoped-re-plan trap outright rather than working around it. LEDGER: opsec-s8r2b-users-v2-cmk CLOSED, all 5 legs proven, sentinel removed. ROLLBACK KEY ARN NAMED, captured before the flip: arn:aws:kms:us-east-1:313476888478:key/86cc6c40-2387-4446-b7e1-de79392e06b3. PUSH STATE, MEASURED NOT DEFAULTED: git ls-remote origin SITEZ reads 001709c96ef22a508255b1242734c73a9d37c854; git merge-base --is-ancestor d756be09b8 origin/SITEZ returns non-zero. Commit d756be09b8 is LOCAL @d756be09b8 (ls-remote read), NOT on origin -- push is the integrator's act under LD-0367 and this seat does not push.",
+      "denominator": "1 root (shared-infra); 1 changed resource of 1 in the plan; 4 of 4 replacement-form patterns censused plan-wide, all 0; 5 of 5 ledger legs closed; 1 rollback ARN named for 1 flipped table",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The deciding assertion of S8B-AC2/AC3 is 'this table's KMSMasterKeyArn resolves to 64f25291 and NOT 86cc6c40'. A check that returned PASS unconditionally would look identical on the one flipped table. So the SAME assertion was run unchanged against opal-partner-cottonwood -- a real live table known to still be on the AWS-managed key -- where it MUST report failure if it is discriminating at all.",
+      "expected": "opal-users-v2 -> ON-PROJECT-CMK (assertion PASSES); opal-partner-cottonwood -> NOT-on-CMK (assertion FAILS). If both returned PASS the assertion is constant-true and every AC2/AC3 claim in this instance is void.",
+      "observed": "opal-users-v2 64f25291-4015-42c5-ad41-40e42325deb7 -> ON-PROJECT-CMK (assertion PASSES). opal-partner-cottonwood 86cc6c40-2387-4446-b7e1-de79392e06b3 -> NOT-on-CMK (assertion FAILS). The assertion discriminates on a real object rather than a synthetic one. A second, independent mutant is carried inside S8B-AC3 itself: the same get-item instrument returned the item at step 2 and an empty response at step 4, so it distinguishes present from absent and is not returning a constant either.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The AC2/AC4 live read re-run twice against opal-users-v2 in the same window and the two outputs compared; separately, the S8B-AC3 cleanup read was repeated and returned empty both times.",
+      "observed": "run1=64f25291-4015-42c5-ad41-40e42325deb7, run2=64f25291-4015-42c5-ad41-40e42325deb7 -- identical. Cleanup read empty on both repetitions.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The four opal-partner-* tables (49financial, cottonwood, demo, inflection) are NOT moved to the project CMK by this face.",
+      "reason": "One shared keyless module backs all four, so a module edit moves four live client identity tables in a single apply -- what deliverable 3's 'ONE TABLE FIRST' forbids. Round 2a's accepted partner-firms/demo.tf:21-25 records a deliberate contrary decision on C-13 grounds this seat confirmed at PRD:459-470. Held at row NFRA_OPSEC202609-Z-S104, disarm owner 2.0.0_SA_COO~Z. Reported to the issuer rather than either exceeded silently or dropped."
+    },
+    {
+      "item": "The module change that would make a per-firm flip possible (an optional kms_key_arn variable defaulting to null) was NOT built.",
+      "reason": "It edits a module backing four live client identity tables, and the scope question of whether those four are in round-2b at all is unresolved -- the decomp's round-2b paragraph cites three tables while the same cell's depends_on scopes the work to the demo table alone. Building it first would decide the scope question by fait accompli. Named on row Z-S104 as ready to build on the issuer's word."
+    },
+    {
+      "item": "Row NFRA_OPSEC202609-Z-S3 was not read at source.",
+      "reason": "It is cited by shared-infra/dynamo.tf:68 as holding 'the key question' at 1.0.0_SA_CTO~Z, and the face describes the AWS-managed key as 'the ruled INTERIM of row Z-S3'. Both descriptions are consistent with proceeding and the S8B-AC1 gate was cleared on the key policy's own live text, which is the deciding evidence either way. Declared rather than left as a silent gap."
+    },
+    {
+      "item": "PRD s.9 item 5 was not read at source.",
+      "reason": "It is the clause the face cites for sequencing TO-OP-S-9-11 behind OP-s-8. The finding in row Z-S103 rests on the decomp's edge (DECOMP:135) and on FWD-8's DONE WHEN (PRD:118), both read directly. If s.9 item 5 sequences on cell COMPLETION rather than on the edge predicate, the PRD and the decomp disagree with each other and that disagreement is the finding rather than this seat's reading of it. Named to the issuer as their call."
+    },
+    {
+      "item": "The other 33 tables in the live census are untouched, including 24 further tables on the AWS-managed key.",
+      "reason": "Outside S8's named set (identity + RBAC tables). Enumerated here only so the denominator is honest: 38 tables live, 25 on the AWS-managed key overall, of which 5 are S8's. No constraint in this PRD reaches the other 20."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S103: TO-OP-S-9-11 is NOT blocked on this limb -- the decomp edge gating OP-s-9/OP-s-11 reads [DP + PITR read ON per table], a checkable PREDICATE rather than a cell state, and it measures TRUE on 5 of 5 tables live. Verified independently at 2.0.0_SA_COO~Z's seat and TO-OP-S-9-11 was dispatched to 0.7.0_AE_CloudOps~X on the strength of it.",
+    "NFRA_OPSEC202609-Z-S104: three premise defects in the face -- opal-users-v2's real carrier is shared-infra/dynamo.tf not portal-auth/dynamodb.tf; the set on the AWS-managed key is five tables not the three quoted; and round 2a's accepted demo.tf records a deliberate decision not to move the partner tables to the CMK on C-13 grounds, which conflicts with this face's deliverable 1."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-03/session_0.7.0_AE_CloudOps~W_2330-0010Z_OPSEC_S8R2B_USERS_V2_CMK.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read <task order> --for 'what exactly must I do, acceptance criteria, tables, key ARNs, stop conditions'; comp-read .tools/surprise-row-gate.py --for 'valid values for class/disposition/hazard_standing'; comp-read .tools/safe-apply.sh --for 'how do I invoke it, does it accept a saved plan file'",
+      "result": "Surfaced the face's 9 QUALIFIERS including the 'I did not print the condition block' clause that S8B-AC1 turns on, and the UNREAD LEDGER made the skipped sections an explicit choice. On safe-apply it returned the usage line 'safe-apply.sh [-chdir=DIR] apply [apply-args...]', which is how the saved-plan invocation was formed."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "comp-read infra/aws/terraform/portal-auth/dynamodb.tf --enumerate 'resource \"aws_dynamodb_table\"|server_side_encryption|kms_key_arn|...' ; same on shared-infra/dynamo.tf ; on the PRD for 'C-13|C-16|opal-partner|CMK' and 'FWD-8' ; on the DECOMP for 'OP-s-8'",
+      "result": "THE FINDING TOOL OF THIS FACE. The portal-auth enumerate printed 7 aws_dynamodb_table resources with opal-users-v2 among NONE of them -- the carrier defect (Z-S104). The shared-infra enumerate surfaced line 65's 'NOTE for a future reader' that this face is the authorization for. The DECOMP enumerate on OP-s-8 returned line 135, the edge whose bracket predicate is the whole of Z-S103. A denominator was printed on every run."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'TO-OP-S-8R2B' --files --limit 40 ; comp-find 'opal-users-v2' --limit 40 --band HEAD ; comp-find 'aws_kms_alias|aws_kms_key|opal-security' --limit 30 infra/aws/terraform/shared-infra",
+      "result": "Located the face in the missions tree. The opal-users-v2 sweep (1828 hits, banded, denominator printed) surfaced the 2026-06-26 twin-dedup remediation and the 20260903T0929Z round-1 ledger naming shared-infra as the REAL carrier -- the corroborating second carrier for the Z-S104 carrier defect. The shared-infra KMS sweep returned a MEASURED zero over 32 files, which is why the key is introduced via a new data source rather than an existing one."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "NOT RUN -- DECLARED-NOT-APPLICABLE, per the face's own preflight.",
+      "result": "The question here is a KMS RESOURCE policy, not an IAM identity policy, and comp-iam models (action) never (action, resource) and reads the DESIRED plane. S8B-AC1 reads the resource policy directly on the APPLIED plane including the conditions a DESIRED-plane lens would not evaluate. Its silence would never have been an ALLOW, so running it would have added no evidence this instance relies on."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open --slug opsec-s8r2b-users-v2-cmk (5 legs) ; close-leg x5 ; close ; check",
+      "result": "Opened before the first edit with the rollback ARN and the unscoped baseline recorded in the title, closed after all 5 legs carried proof. Post-close 'check' no longer lists this slug as OPEN (it does list peers' open entries, which is the control that the check can still see OPEN entries and is not returning a blanket clean)."
+    },
+    {
+      "tool": "safe-apply.sh / safe-commit.sh",
+      "invocation": ".tools/safe-apply.sh -chdir=infra/aws/terraform/shared-infra apply w-s8r2b-users-v2.tfplan (HALT_ACK=1 on re-run) ; .tools/safe-commit.sh --author '0.7.0_AE_CloudOps~W <...>' -F <msgfile>",
+      "result": "HALT-gate blocked the first attempt on a 13-day-old base-serial message, which was read in full before HALT_ACK=1 -- it concerned another seat's GW-APPLY deploy destination and was not STOP-class. comp-tagauthz PASSED and tombstone-gate reported CLEAN (0 planned creates vs 7 tombstones). safe-commit landed d756be09b8 with msg-verify MATCH len=6135."
+    }
+  ]
+}
