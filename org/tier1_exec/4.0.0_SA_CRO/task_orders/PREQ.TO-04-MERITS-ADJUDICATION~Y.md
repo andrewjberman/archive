@@ -7,7 +7,7 @@
     <issued_to>4.0.0_SA_CRO~Y</issued_to>
     <assignee>4.0.0_SA_CRO~Y</assignee>
     <date>2026-09-05</date>
-    <status>pending -- GO rides the canonical dispatch of this exact filename under Andrew-direct CTO/CRO governance authority.</status>
+    <status>complete -- C1-C5 proven at org/tier1_exec/4.0.0_SA_CRO/deliverables/PREQ_04_MERITS_ADJUDICATION_PROOF~Y.json; final disposition AMEND -- CLOUDOPS READINESS PREDICATE ONLY.</status>
     <project_code>PREQ</project_code>
   </metadata>
 
