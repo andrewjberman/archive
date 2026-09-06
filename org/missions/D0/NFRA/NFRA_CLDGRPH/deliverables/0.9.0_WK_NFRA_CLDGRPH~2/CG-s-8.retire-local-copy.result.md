@@ -437,7 +437,7 @@ where this pass moved one of them it says so by name.
 **The RETIREMENT landed. Two absence CRITERIA still do not read zero, and neither zero is
 reachable by any act -- so the order stays OPEN.**
 
-- **The seam is gone.** `infra/aws/globgrph/_canonical.py` went from **746 lines to 79**: no
+- **The seam is gone.** `infra/aws/globgrph/_canonical.py` went from **746 lines to 78**: no
   `ensure_fresh`, no rebuild functions, no mkdir mutex, no heartbeat/liveness block, no atomic
   swap, no supervised rebuild child, no `.fallback.jsonl` sink writer, no `._refresh_status.json`
   failure-marker writer. What remains is a TOMBSTONE that REFUSES.
@@ -502,7 +502,7 @@ against the largest gateway response pass 1 measured (11 911 107 B) for scale.
 
 ## P2.2 (c) THE SEAM -- what was removed, what remains, and who imports it
 
-**`infra/aws/globgrph/_canonical.py`: 746 lines -> 79. Removed in full:** `ensure_fresh`,
+**`infra/aws/globgrph/_canonical.py`: 746 lines -> 78. Removed in full:** `ensure_fresh`,
 `_full_rebuild_only`, `_incremental_or_serve_stale`, `_incremental_or_full_rebuild`,
 `_default_rebuild`, `_run_child_supervised`, the mkdir mutex (`_owns_lock`, `_rmlock`, `_gen_path`,
 `_write_gen`, `ORPHAN_LOCK_S`, `MUTEX_WAIT_S`), the liveness block (`_liveness_on`, `_Heartbeat`,
@@ -802,7 +802,7 @@ and 26 of pass 1's table are now RESOLVED (repointed or deleted) and rows 22 and
 **KNOWN-STALE-IMPORTERS-OUT-OF-LANE**.
 
 **PER-CONSUMER LATENCY AND PAYLOAD THROUGH THE GATEWAY.** Pass 1's table (s.5.1) stands; this pass
-re-exercised every consumer after the tombstone removed 667 lines they used to be able to reach,
+re-exercised every consumer after the tombstone removed 668 lines they used to be able to reach,
 because a citation would not have been evidence for a tree that moved:
 
 | consumer | wall (pass 2) | wall (pass 1) | budget | verdict |
