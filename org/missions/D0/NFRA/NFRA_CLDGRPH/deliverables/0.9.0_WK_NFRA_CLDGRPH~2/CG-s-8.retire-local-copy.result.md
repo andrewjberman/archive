@@ -414,3 +414,479 @@ the comp-detect run in s.5.2. It is not in this order's `<paths>` and is left in
    over config, data and documentation.
 4. D7-AC3's invocation corrected from `bash` to `python`.
 5. A ruling on `kuzu_stitch_db` (W2-S17): retire it, or state that the estate keeps one local graph.
+
+
+---
+---
+
+# PASS 2 -- the RETIREMENT, executed on the AMENDED order
+
+**Worker:** `0.9.0_WK_NFRA_CLDGRPH~2` (same seat, same branch `wk-cldgrph-2-d7`).
+**Base for this pass:** `3aab23b264` (the issuer merged CLOUD in, bringing the amended order).
+**Push state: LOCAL** (never pushed). **Measured:** 2026-09-06 00:5xZ - 01:3xZ, every invocation
+bounded by `timeout`.
+
+**Everything above this line is PASS 1 and stands.** This section EXTENDS it. Pass 1's ten
+repointed consumers, its three green batteries and its census table are carried by citation, and
+where this pass moved one of them it says so by name.
+
+---
+
+## P2.0 CONCLUSION FIRST
+
+**The RETIREMENT landed. Two absence CRITERIA still do not read zero, and neither zero is
+reachable by any act -- so the order stays OPEN.**
+
+- **The seam is gone.** `infra/aws/globgrph/_canonical.py` went from **746 lines to 79**: no
+  `ensure_fresh`, no rebuild functions, no mkdir mutex, no heartbeat/liveness block, no atomic
+  swap, no supervised rebuild child, no `.fallback.jsonl` sink writer, no `._refresh_status.json`
+  failure-marker writer. What remains is a TOMBSTONE that REFUSES.
+- **The last live consumer is repointed.** `org/modules/heatmap/ms_heat_index.py` -- the class-B
+  consumer the cut's scoped census could not see -- now reads the served graph:
+  **6,134 MS nodes in 4.56 s**, `served_manifest=a2e68928695068b5`, dry run `0 writes`.
+- **The three seam tests moved with the behaviour they pin**: two DELETED (their subject no longer
+  exists), one REPOINTED (its subject survives), and the properties that outlive the seam carried
+  into a new battery that passes **6 of 6 with its RED MUTANT convicted 10 of 10**.
+- **D7-AC1 = 36 hits, D7-AC2 = 54 hits. Both FAIL by output.** And **zero of the 36 and zero of
+  the 54 is a live call into, or a live open of, the retired surface.** The anchored measurement
+  of actual calls returns **3, all three prose**; of actual local opens, **2, both out-of-grant
+  spike loaders on their own scratch path**. Row **W2-S21**.
+- **D7-AC3 passes on the corrected interpreter.** D7-AC4, AC5, AC6, AC7 re-run and pass; **D7-AC5's
+  three pins did NOT decay** at this HEAD.
+
+**MECHANICAL RESULT: 5 PASS (D7-AC3, D7-AC4, D7-AC5, D7-AC6, D7-AC7), 2 FAIL (D7-AC1, D7-AC2),
+1 RECORDED-judgment (D7-AC8). THE ORDER STAYS OPEN.** The flip was not reached for.
+
+---
+
+## P2.1 (a) THE MISSED CONSUMER -- `org/modules/heatmap/ms_heat_index.py`, repointed
+
+`read_ms_nodes()` opened the local canonical DB after calling `_canonical.ensure_fresh(db_path)`.
+It now does what every other class-B consumer does:
+
+```
+conn = projection_client.connect()
+q = conn.execute("MATCH (n:CloudNode) WHERE n.node_type IN ['MS_FILE','MS_FOLDER'] "
+                 "RETURN n.node_id, n.node_type, n.props")
+```
+
+**Three things changed beyond the transport, and each is stated rather than left implicit.**
+
+1. **The refresh call is not replaced by a poll -- it is unnecessary.** The service installs one
+   generation atomically, so a reader cannot be handed one vintage while a fresher one is
+   withheld, which is the exact condition `ensure_fresh` existed to remove. An unreachable service
+   RAISES instead of computing heat over a stale local copy: a visible gap, never a silent old
+   answer.
+2. **`db_path_basename` is gone from `graph_vintage`, replaced by `served_vintage` /
+   `served_manifest` / `served_artifact` / `transport`.** It named a FILE, not a generation. A
+   census before removing it found **1 hit across 28,986 files -- the producing line itself, zero
+   consumers**, so nothing downstream reads it.
+3. **One header invariant was AMBIGUOUS and is now precise.** The module docstring said "it opens
+   no gateway call". In context that meant the MICROSOFT Graph API, and it is still true -- but
+   the module now does make one call to the opal-globgrph projection gateway, so the sentence was
+   rewritten to say which gateway it means instead of quietly becoming false.
+
+**EXERCISED LIVE, not asserted:**
+
+| call | rows | wall | payload | result |
+|---|---|---|---|---|
+| `read_ms_nodes()` | **6 134** | **4.56 s** | -- | `served_vintage=2026-09-06T00:50:34.138427+00:00`, `served_manifest=a2e68928695068b512b086d88a1196b20d18e9302f7fbcca6c30f2e5ea9e0e2f` |
+| the same query measured at the client | 6 134 | 4.71 s | **5 198 893 B** | -- |
+| `ms_heat_index.py --dry-run` end to end | 6 134 | -- | -- | `OK: MS_HEAT_COMPUTED scored=6134/6134 bands={'hot': 59, 'warm': 268, 'cold': 5807} clusters=1071` / `OK: DRY_RUN (0 writes)` |
+| `ms_heat_index.py --self-test` | -- | -- | -- | `=== 9/9 PASS ===` (pure logic, unchanged by the repoint) |
+
+There is **no budget flag on this tool**, so it cannot exceed one; the 4.56 s read is recorded
+against the largest gateway response pass 1 measured (11 911 107 B) for scale.
+
+---
+
+## P2.2 (c) THE SEAM -- what was removed, what remains, and who imports it
+
+**`infra/aws/globgrph/_canonical.py`: 746 lines -> 79. Removed in full:** `ensure_fresh`,
+`_full_rebuild_only`, `_incremental_or_serve_stale`, `_incremental_or_full_rebuild`,
+`_default_rebuild`, `_run_child_supervised`, the mkdir mutex (`_owns_lock`, `_rmlock`, `_gen_path`,
+`_write_gen`, `ORPHAN_LOCK_S`, `MUTEX_WAIT_S`), the liveness block (`_liveness_on`, `_Heartbeat`,
+`_beat`, `_hb_path`, `_hb_age`, `HEARTBEAT_INTERVAL_S`, `HEARTBEAT_STALE_S`), `_atomic_swap`,
+`_unique_tmp`, `_gc_stale_tmps`, `_rm`, `_rm_kuzu`, the sink (`_FALLBACK_SINK_SUFFIX`,
+`_fallback_sink_path`, `_append_fallback_sink`), the refresh-status writer
+(`_refresh_status_path`, `_write_refresh_failure`, `_clear_refresh_failure`, `refresh_failure`),
+`needs_refresh`, `is_canonical`, `_served_vintage`, `_served_age_str`, `_parse_changed`,
+`_apply_summary_overlay`, and the constants `CANONICAL_DB_NAME` / `CANONICAL_DB_PATH` /
+`REBUILD_TIMEOUT_S` / `INCREMENTAL_TIMEOUT_S` / `TMP_GC_AGE_S` / `SWAP_RETRY*` / `RECHECK_SLEEP_S`.
+
+**WHAT REMAINS: a tombstone that REFUSES.** A module docstring stating the retirement and naming
+the replacement, and a PEP 562 module `__getattr__` that raises `RuntimeError` for every attribute,
+naming R7, the order and `projection_client`.
+
+**WHY IT WAS NOT DELETED, said plainly, because the face asked for exactly this.** The order
+offered both: state what remains and who imports it, OR delete the file and say so. **Two files
+outside this order's write grant still import it and call into it, and they are another seat's
+deliverables -- historical records, not live tool surface:**
+
+| importer | what it reaches for | disposition |
+|---|---|---|
+| `org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/NFRA_EDGES_P3_c3_subgraph.py:427` | `_canonical.ensure_fresh` (:413 doc, :451 doc), `_canonical.refresh_failure` (:443), `_canonical.CANONICAL_DB_PATH` (:429) | **KNOWN-STALE-IMPORTERS-OUT-OF-LANE** -- untouched |
+| `org/tier2_senior/0.8.0_AE_CloudComp/deliverables/l1a_item1b/sensor_kuzu_schema_residue.py:216` | `_canonical.CANONICAL_DB_PATH` (:218); and at **:88** it lists `_GLOBGRPH / "_canonical.py"` BY PATH in a set it opens | **KNOWN-STALE-IMPORTERS-OUT-OF-LANE** -- untouched |
+
+**SO: SAYING IT PLAINLY, AS ORDERED.** *Deleting `_canonical.py` would break both of those files'
+imports outright, and would additionally break `sensor_kuzu_schema_residue.py:88`, which does not
+import the module but READS IT AS A FILE. Retiring the seam breaks their CALLS either way -- there
+is no version of this retirement in which `ensure_fresh` still works for them. Repointing them is
+THEIR OWNERS' CALL, not this worker's: the grant that retired the seam does not reach another
+seat's deliverables, and a path missing from `<paths>` is a wall, not an oversight to route
+around.*
+
+**The tombstone is the better of the two options for them, and here is the reasoning rather than
+the preference.** Deletion gives them `ImportError: No module named '_canonical'` -- a message that
+names Python, not the decision, and that reads identically to a broken checkout. The tombstone
+gives them:
+
+```
+RuntimeError: _canonical.ensure_fresh is RETIRED (NFRA_CLDGRPH PRD R7 / FWD-7, cell CG-s-8,
+task order TO-CG-D-7). The local canonical Kuzu database and its rebuild seam no longer exist:
+the estate graph is BUILT in the cloud and SERVED, so there is no local copy to refresh and no
+rebuild to trigger. Use infra/aws/globgrph/projection_client.py (connect() / query() /
+vintage_line()). If this call is reached from a file outside NFRA_CLDGRPH's grant, repointing it
+belongs to that file's owner.
+```
+
+**Two design points in the refusal are load-bearing and are not stylistic.**
+
+- **It is `RuntimeError`, NOT `AttributeError`.** A caller writing
+  `getattr(_canonical, "ensure_fresh", None)` or `hasattr(...)` would read an AttributeError as
+  "older build, no refresh available" and carry on over whatever it found locally. There is no
+  local database left to carry on over, so the loud stop IS the safe behaviour. Both soft-probe
+  forms are pinned to raise (arm 2 of the new battery).
+- **It is `__getattr__`, NOT a list of retired names.** A hand-kept enumeration drifts; a symbol
+  nobody thought to enumerate would resolve to `AttributeError` and degrade silently. Module
+  `__getattr__` is MECE over the module's whole attribute space by construction, and the battery
+  proves it with a control name that never existed (`a_symbol_that_never_existed` refuses exactly
+  like `ensure_fresh`). Dunders fall through to a normal `AttributeError` so `inspect`, pytest
+  collection and the import machinery keep working -- a tombstone that broke introspection would
+  make the retirement look like a broken install.
+
+**`_provenance.py` is UNTOUCHED (the BOUNDS), and the dependency runs the other way.** `_canonical`
+referenced `_provenance._REFRESH_STATUS_SUFFIX`, not the reverse; `_provenance` owns its own
+`_read_refresh_failure`. Removing the WRITER therefore strands nothing -- it leaves a reader that
+is now inert. That reader's soundness is pinned rather than assumed (arm 4 below).
+
+**The anchored importer census, with the trap the face named.** `import _canonical` matches
+`_canonical_silver_lib` as a SUBSTRING and drags in twelve `data/canonical/schwab/*` files from
+another lane. Anchored:
+
+```
+python .tools/comp-find 'import _canonical\b|from _canonical\b' . --all --limit 60
+  DENOMINATOR: 84 hit(s) across 28984 file(s) scanned in scope [corpus=all]
+```
+Filtered to first-party `.py` (the rest are this channel, this deliverable and the order itself):
+**six importers**, and one of the six is a COMMENT (`kuzu_incremental_refresh.py:344`, "Run as a
+SUBPROCESS from _canonical"), not an import -- so the live population is **five**, of which
+**three were in grant and are now resolved** (`ms_heat_index.py` repointed; the two seam tests
+deleted; `test_comp_cluster_cli.py` repointed off it) and **two are out of lane** (the table above).
+
+---
+
+## P2.3 (b) THE THREE SEAM TESTS -- moved with the behaviour they pin
+
+**They were already broken before this pass touched them**, by pass 1's repoint of
+`comp_cluster_cli.py`. Baseline, measured first:
+
+```
+python -m pytest infra/aws/globgrph/tests/test_comp_cluster_cli.py \
+                 infra/aws/globgrph/tests/test_canonical_rebuild_liveness.py \
+                 infra/aws/globgrph/tests/test_canonical_refresh_failure_signal.py -q
+2 failed, 4 passed, 3 skipped, 6 errors in 0.34s
+```
+
+| test | 232+97+146 lines of subject | disposition |
+|---|---|---|
+| `tests/test_canonical_rebuild_liveness.py` | the #17 mutex / heartbeat / stale-lock steal / per-unique tmp / ownership-check-at-swap | **DELETED** -- with no local database there is no rebuild, hence no winner, no lock, no steal, no swap. (The 6 pytest ERRORs were `fixture 'td' not found`: it is a `__main__` script battery whose functions take a temp-dir argument, so pytest could never have collected it.) |
+| `tests/test_canonical_refresh_failure_signal.py` | the #25 failure-marker lifecycle: written on failure, surfaced by the header, cleared on recovery | **DELETED** -- the marker can no longer be written. Its ONE surviving half (the reader must not read a corrupt marker as healthy) is CARRIED, not dropped: arm 4 below. |
+| `tests/test_comp_cluster_cli.py` | the stdout/stderr split and the honest denominator | **REPOINTED** -- that subject SURVIVES, so the test moves with the source rather than with the seam. |
+
+**DELETING THEM SILENTLY WOULD HAVE LEFT THE RETIREMENT UNPINNED**, so the properties that outlive
+the seam are carried into a new battery: `.tools/tests/test_cg8_seam_retired_battery.py`.
+
+```
+python .tools/tests/test_cg8_seam_retired_battery.py
+OK seam_machinery: 0 of 10 seam token(s) in _canonical.py; RED MUTANT convicted on 10 of 10
+OK retired_symbols: 18 of 18 name(s) refused with RuntimeError (incl. 1 never-existed control); both soft-probe forms also refused
+OK import_sane: tombstone imports; 5 dunders resolve; __all__ -> AttributeError
+OK marker_reader: 4 of 4 -- absent reads None, corrupt reads unreadable-marker, header agrees with both
+OK no_importers: 0 importer(s) across 486 python file(s) in 4 tool home(s); POSITIVE CONTROL 20 file(s) import projection_client/_provenance; matcher convicts a real import and spares _canonical_silver_lib
+OK replacement: 5 of 5 client symbols present; 0 of 3 local-DB tokens; RED MUTANT convicted
+DENOMINATOR: 6 of 6 arm(s) recorded a pass
+PASS                                                                        [rc=0]
+```
+
+**THE BATTERY CONVICTED ITS OWN AUTHOR TWICE BEFORE IT PASSED, AND BOTH ARE WORTH THE READING**,
+because in each case the arm was right and the instrument was wrong:
+
+1. **Arm 1 first failed on `['kuzu_nessie_db', 'os.replace']` -- inside the tombstone's own
+   docstring**, where they appear in the sentence explaining that neither exists any more. A
+   retirement notice has to be able to NAME what it retired. The arm was reading text, not
+   machinery, so `_code_only()` was added: it strips the module docstring (via `ast`) and every
+   `#` comment (via `tokenize`, BLANKING each comment in place). **String literals inside
+   functions are deliberately kept** -- a database path in a constant is machinery, not
+   commentary.
+2. **The first `_code_only` returned the token stream joined by newlines, which silently broke
+   every multi-token pattern** (`os.mkdir` became `os`, `.`, `mkdir`), so the RED MUTANT went from
+   10 of 10 to 6 of 10 -- and the arm FAILED ON ITS OWN MUTANT rather than reporting a clean
+   estate it had not actually inspected. **That is precisely what the mutant is for**, and it is
+   the reason the sweep is trustworthy now.
+
+**Arm 5's import matcher carries TWO anchors and both were forced by a measured miss:** the
+trailing `(?![\w])` excludes `_canonical_silver_lib`, and the leading `^[ \t]*` requires the
+import at STATEMENT position -- without it the arm convicted `test_comp_cluster_cli.py` for
+listing `"import _canonical"` in a forbidden-token tuple, i.e. for FORBIDDING the thing. Both
+directions are asserted in the arm itself, alongside a lazy-import-inside-a-function positive.
+
+**The repointed `test_comp_cluster_cli.py`, and the oracle failure it exposed:**
+
+```
+python -m pytest infra/aws/globgrph/tests/test_comp_cluster_cli.py -q -rs
+9 passed, 1 skipped in 21.76s
+```
+
+- the CL2 header arm now matches `print(projection_client.vintage_line(...), file=sys.stderr)`;
+- the INFO/WARN refresh-diagnostic arm is **INVERTED** -- it asserts those two strings are ABSENT
+  (a diagnostic for a branch that cannot run is a false reassurance) and that every surviving
+  diagnostic still targets stderr, with a RED mutant on the stderr half;
+- a new `test_cl3_no_local_database_is_opened` pins the CLI to the served client;
+- **the integration gate no longer skips forever.** It was `skipif(not (kuzu importable and
+  CANONICAL_DB_PATH exists))` -- both permanently false, so all three integration arms would have
+  SKIPPED on every future run and reported green. It now probes the SERVICE and a skip names why.
+- **the independent-denominator arm caught a REAL instrument defect, row `NFRA_CLDGRPH-W2-S20`:**
+  `git -C portal ls-files 'src/pages/**/*.tsx'` returned **0** in this worktree and the arm read it
+  as `tool denominator 119 vs independent 0`. **`git -C` into an EMPTY submodule directory does not
+  fail -- it walks UP and answers from the PARENT repository.** Measured:
+  `git -C .../portal rev-parse --show-toplevel` -> `C:/tmp/wk-cldgrph-2-d7`, and
+  `git -C .../portal rev-parse HEAD` -> `3aab23b2641be309850d0b4bfbbdbb00b10873ae`, the worktree's
+  OWN head. The arm now resolves `--show-toplevel` first and SKIPS with a named reason, and asserts
+  `indep > 0` so a checked-out portal yielding zero is still a loud oracle failure. **Four other
+  first-party code sites shell the same shape** and are handed over in the row, not touched.
+
+**All five batteries together, at file grain:**
+```
+python -m pytest .tools/tests/test_comp_find_battery.py .tools/tests/test_g2_disclosure_battery.py \
+   .tools/tests/test_comp_similar_battery.py .tools/tests/test_cg8_seam_retired_battery.py \
+   infra/aws/globgrph/tests/test_comp_cluster_cli.py -q
+24 passed, 1 skipped in 69.00s
+```
+
+---
+
+## P2.4 (d) THE CRITERIA RE-RUN -- every zero, and every non-zero, beside its control
+
+### D7-AC1 -- **FAIL by output.** 36 hits, and none of them is the seam.
+
+```
+python .tools/comp-find 'ensure_fresh|_full_rebuild_only|_incremental_or_serve_stale|GLOBGRPH_KUZU_INCREMENTAL_REFRESH|GLOBGRPH_KUZU_REBUILD_LIVENESS|_FALLBACK_SINK_SUFFIX' \
+       .tools org/modules/graph org/modules/heatmap --all --limit 50
+  DENOMINATOR: 36 hit(s) across 810 file(s) scanned in scope [corpus=all]
+    | 77 EPHEMERAL-FLOOR, NOT searched | 5 BINARY, NOT searched
+  BANDS (true totals, not this page): HEAD=3 DEF=1 SURFACED=11 CONFIG=2 TEST=19
+  PAGE 1 of 1  (showing 36 of 36)                                       [rc=0 read UNPIPED]
+
+POSITIVE CONTROL -- same verb, same three paths, a pattern that IS present:
+python .tools/comp-find 'projection_client' .tools org/modules/graph org/modules/heatmap --all --limit 3
+  DENOMINATOR: 46 hit(s) across 810 file(s) scanned in scope [corpus=all]
+```
+**810 files scanned on both, so neither reading is `0 hit(s) across 0 file(s)` out-of-corpus.**
+
+**Where the 36 live, from the tool's own banded output:**
+
+| n | population | example |
+|---|---|---|
+| **22** | the **`tool_probe.ensure_fresh` family** -- a DIFFERENT tool-health freshness subsystem that shares the token | `org/modules/graph/compproof/tool_probe.py:1226 def ensure_fresh(...)`, `test_pulse_map_autorefresh.py` x6 (`_ensure_fresh_danger_map`) |
+| **10** | the batteries that must NAME the retired symbols to assert they REFUSE | `test_cg8_seam_retired_battery.py:182-185`, `test_cg6_thin_client_battery.py:59` (a FORBIDDEN-token list) |
+| **2** | prose explaining what was removed | `ms_heat_index.py:97,101` |
+| **2** | config/data quotes | `comp-coverage-map.yaml:959`, `nerves-risk-edges.json:17610` |
+| **0** | **a live call into the retired Kuzu seam** | -- |
+
+**THE SUBSTANTIVE MEASUREMENT, same three paths:**
+```
+python .tools/comp-find '_canonical\.ensure_fresh|_canonical\.CANONICAL_DB_PATH|_canonical\.needs_refresh|_canonical\.refresh_failure' \
+       .tools org/modules/graph org/modules/heatmap --all --limit 20
+  DENOMINATOR: 3 hit(s) across 810 file(s) scanned in scope [corpus=all]
+    org/modules/graph/cli.py:397        (docstring: what the removed STALE-SERVED arm used to read)
+    org/modules/graph/comp_aws_cli.py:2857  (comment)
+    org/modules/heatmap/ms_heat_index.py:97 (docstring: what this function used to do)
+```
+**Three hits, three pieces of prose, zero calls.**
+
+**AND THE COUNT WENT UP UNDER THIS PASS -- 29 before any edit, 36 after -- which is the finding,
+not an accident.** The delta is `+9` battery lines `+2` prose lines `-4` `ms_heat_index` seam
+lines. An arm shaped as a token census over the tool homes is **ANTI-CORRELATED with the
+retirement being properly pinned**: the better the absence is tested, the worse the arm reads.
+**The tokens were not contrived away.** Dropping them from the battery would leave the refusal
+unpinned in order to satisfy a matcher, which is the act this channel exists to refuse. Row
+**`NFRA_CLDGRPH-W2-S21`**.
+
+### D7-AC2 -- **FAIL by output.** 54 hits; 2 real opens, both out of grant.
+
+```
+python .tools/comp-find 'kuzu\.Database\(|CANONICAL_DB_PATH|kuzu_nessie_db' org/modules/graph .tools --all --limit 50
+  comp-find: WARNING: pattern contains '\|' / '\(' / '\)' -- python re treats these as LITERAL
+    characters ... A 0-hit result below may be this, not a real absence.
+  DENOMINATOR: 54 hit(s) across 800 file(s) scanned in scope [corpus=all]   [rc=0 read UNPIPED]
+
+POSITIVE CONTROL -- same verb, same paths:
+python .tools/comp-find 'projection_client' org/modules/graph .tools --all --limit 3
+  DENOMINATOR: 44 hit(s) across 800 file(s) scanned in scope [corpus=all]
+
+THE SUBSTANTIVE MEASUREMENT -- an actual local DB OPEN, same paths:
+python .tools/comp-find 'kuzu.Database\(' org/modules/graph .tools --all --limit 20
+  DENOMINATOR: 6 hit(s) across 800 file(s) scanned in scope [corpus=all]
+    org/modules/graph/tsgraph_spike/load_scratch_kuzu.py:97:  db = kuzu.Database(DB_PATH)      <- own scratch path, OUT OF GRANT
+    org/modules/graph/tsgraph_spike/load_clusters_scratch.py:43: db = kuzu.Database(DB_PATH)   <- own scratch path, OUT OF GRANT
+    .tools/tests/test_cg8_seam_retired_battery.py:350,366,370,371                              <- forbidden-token literals
+```
+**Two real opens, both on a spike loader's OWN `DB_PATH`, neither on `kuzu_nessie_db`, both outside
+this order's `<paths>`.** Baseline before this pass was 46; the +8 is this order's new battery
+naming what it forbids. **Note the tool prints its own false-zero warning on this criterion's
+pattern**, so even a true zero here would arrive with a caveat attached. Row **W2-S14** (pass 1)
+carries the out-of-grant half unchanged.
+
+### D7-AC3 -- **PASS by output** on the corrected interpreter (`python`, not `bash`).
+```
+python .tools/comp-find --corpus aws 'opal-globgrph' --budget 120 --limit 5
+  WITHIN BUDGET: scanned 1 of 1 pull; budget: 120 s (flag), used 7.36 s
+  VINTAGE: Built from the estate as of 2026-09-06 00:50:34 UTC.  manifest: a2e689286950
+  DENOMINATOR: 87 hit(s) across 2158 aws node(s) scanned [corpus=aws]
+  DRIFT (scanned): unset=232 AWS_MANAGED=37 DECLARED=1563 LIVE-INCREMENTAL=3 LIVE-no-DECLARED=323
+  PAGE 1 of 18  (showing 5 of 87)                                                 [rc=0]
+```
+Pass 1's row **W2-S15** named the `bash`-on-a-`python3`-shebang defect; the amendment fixed it and
+this is the measurement that closes it.
+
+### D7-AC4 -- **PASS by output.** 9 s wall (was 14.05 s in pass 1), rc=3 = the ratified NOT-FOUND state.
+```
+=== served cloud graph (opal-globgrph projection) ===
+  universe: 27292 nodes / 58771 edges (served, whole estate)
+  transport: HTTPS /graph/cypher -- no local database, no cache, no fallback
+VINTAGE: Built from the estate as of 2026-09-06 00:50:34 UTC.  [vintage=2026-09-06T00:50:34.138427+00:00 manifest=a2e689286950 nodes=27292 edges=58771]
+ANSWER-STATE: SUBJECT_ABSENT_FROM_CORPUS
+```
+
+### D7-AC5 -- **PASS by output. THE PINS DID NOT DECAY** at `3aab23b264`.
+```
+8b79ca1bdfd51c1823c0c6780086d55d7e9c751d7651820f873cf1d4b42a5b3d   kuzu_nessie_load.py
+80d60f8ffa3c3c5da735c781d695d233496d31ac7bd2b7dabde034b718b1ef71   kuzu_incremental_refresh.py
+9dd104db29d558e48ecb5a28f8df9464fdca502eb25acffc680fdf696b7fe059   projection_server.py
+```
+All three match the criterion's expect exactly. **Re-derived at THIS HEAD, not quoted forward from
+pass 1** -- which is the whole point of a decaying pin.
+
+### D7-AC6 -- **PASS by output.** `7 of 7 arm(s)` + `PASS`, rc=0, every arm's RED mutant convicted.
+
+### D7-AC7 -- **PASS by output**, on a list extended by four.
+```
+pre-commit gate clean (17 .py file(s) + .tools/comp-find; denominator 18 of 18)     [rc=0]
+```
+The gate script gained `_canonical.py`, `test_comp_cluster_cli.py`, `ms_heat_index.py` and
+`test_cg8_seam_retired_battery.py`. The two DELETED tests are deliberately NOT on the list and the
+script says why: a gate cannot check a file that no longer exists, and listing them would make the
+script `exit 2` on its own success. **It also emitted 4 `MANIFEST-ADVISORY` findings against the new
+battery saying it "opens a Kuzu connection directly"** -- all four are the string literals
+`"kuzu.Database("` in the forbidden-token tuple it uses to assert that nothing does. Advisory, not
+blocking (`OK: pre-commit gate clean for 17 of 17 file(s)`), and filed as row **W2-S22**: this is
+the THIRD instrument in this order to confuse a substring for code.
+
+---
+
+## P2.5 D7-AC8 (judgment; NO verdict -- `3.0.0_SA_CVO` grades this at L9)
+
+**THE CENSUS TABLE** is pass 1's s.1 as extended by P2.2's importer table above; rows 21, 24, 25
+and 26 of pass 1's table are now RESOLVED (repointed or deleted) and rows 22 and 23 are
+**KNOWN-STALE-IMPORTERS-OUT-OF-LANE**.
+
+**PER-CONSUMER LATENCY AND PAYLOAD THROUGH THE GATEWAY.** Pass 1's table (s.5.1) stands; this pass
+re-exercised every consumer after the tombstone removed 667 lines they used to be able to reach,
+because a citation would not have been evidence for a tree that moved:
+
+| consumer | wall (pass 2) | wall (pass 1) | budget | verdict |
+|---|---|---|---|---|
+| `comp-blast` (D7-AC4) | **9 s** | 14.05 s | 90 s | within |
+| `comp-find --corpus aws` (D7-AC3) | **7.36 s** (tool-reported) | 2.8 s | 120 s | within |
+| `comp-detect` | **5 s**, `GATE: clean (exit 0)` | 5.30 s | -- | within |
+| `comp-cluster --coverage` | **7 s**, `118/119 assigned, 1 VISIBLE unresolved (0 silent)` | 4.92 s | -- | within |
+| `comp-canon-motif` | **8 s**, `AC4 novel-candidate(s): 1` | 5.59 s | -- | within |
+| `comp-marker-read` + `comp-iam-live` | **7 s** combined; `status=current`, `iam_live rows=216` | -- | -- | within |
+| **`ms_heat_index`** (new this pass) | **4.56 s** read / 6 134 rows / 5 198 893 B | -- | none | within |
+| `comp-debt` | 6 s | 5.34 s | -- | **REFUSED on the STITCH surface** (row W2-S17, unchanged) |
+
+**NO CONSUMER EXCEEDED ITS BUDGET**, so no OBSERVATION row is owed on latency and none was filed on
+that ground. The largest response measured across both passes remains **11 911 107 B** (pass 1's
+edge pull); this pass's largest is the 5 198 893 B MS-node pull.
+
+**DOES ANYTHING USER-FACING STILL HOLD A PATH TO A LOCAL BUILD? Reading the evidence rather than
+asserting it:**
+
+- **No. There is no longer any code path, in or out of grant, that can trigger a local canonical
+  rebuild** -- because the code that performed one no longer exists. `ensure_fresh` is not
+  bypassed, not disabled, not flag-gated: it is deleted, and every name that reached it raises.
+  This is a stronger state than pass 1 could report, where the seam survived with zero callers.
+- **Two qualifications remain, and they are different in kind from the one above.** (i)
+  `kuzu_stitch_db` is a SECOND local Kuzu graph with a local producer (`.tools/comp-stitch-refresh`)
+  that no cell of this project retires; `comp-debt` still REFUSES without it (row **W2-S17**,
+  unchanged, still ARMED). (ii) Two out-of-lane deliverables still CALL retired names; they will
+  now fail loudly rather than rebuild, which is the correct failure but is still a failure their
+  owners have not been told about by anything except this document and the tombstone's own message.
+- **What this branch proves and what it does not.** It proves the CODE no longer reads the local
+  copy. It does not prove the BYTES are gone: the laptop's `kuzu_nessie_db*` directory is gitignored,
+  is not in this worktree, and is the issuer's to delete at the drain. `CG-x-7` (two machines, same
+  answer, local copy off) is the cell's stated closing condition and it is not this order's to run.
+- **THE INSTRUMENT CAVEAT THE CVO SHOULD CARRY, restated with this pass's numbers.** D7-AC1 and
+  D7-AC2 are TOKEN censuses, and a token census cannot distinguish "calls the seam" from "mentions
+  the seam" from "forbids the seam" from "a same-named function in another subsystem". **All 36 of
+  AC1's hits and all 54 of AC2's are one of the last three.** The predicates that measure the
+  retirement are the anchored `_canonical.<symbol>` call census (**3, all prose**) and the
+  `kuzu.Database(` open census (**2 real, both out-of-grant spike loaders on their own path**).
+
+---
+
+## P2.6 ROWS FILED THIS PASS
+
+Channel denominator: **109 rows before this append, 113 after**, counted by PARSING every fenced
+json block and summing their lengths (109 in 107 blocks -> 113 in 111 blocks), 0 unparseable
+blocks and 0 duplicate ids, never by an id grep. **FOUR rows, not three: the fourth arrived from
+the COMMIT ATTEMPT.** The surprise-row gate REFUSED the first commit because the three rows'
+`surfaced_at` values were written `2026-09-06T01:2xZ`, which the schema's timestamp pattern
+rejects -- a CORRECT refusal, and the rows were corrected before they ever entered the record
+rather than edited after it. The same run's commit-gate output carried the advisory that is now
+W2-S23. W2-S1..W2-S19 are this seat's prior rows; none is
+edited or renumbered.
+
+| id | class | hazard | one line |
+|---|---|---|---|
+| `NFRA_CLDGRPH-W2-S20` | OBSERVATION | **ARMED** (`2.0.0_SA_COO~A`) | `git -C <empty submodule dir>` answers from the PARENT repo, so an independent oracle returns a confident 0 and a denominator check reports a mismatch that is really an absent oracle; 4 more call sites named |
+| `NFRA_CLDGRPH-W2-S21` | BLOCKING | **ARMED** (`2.0.0_SA_COO~A`) | the narrowed D7-AC1 still cannot reach zero: `ensure_fresh` names a second unrelated family, and the battery proving the seam is gone must name the seam |
+| `NFRA_CLDGRPH-W2-S22` | OBSERVATION | INERT | the manifest advisory convicts the string literals in a forbidden-token list -- the third substring-for-code confusion in this order |
+| `NFRA_CLDGRPH-W2-S23` | OBSERVATION | **ARMED** (`2.0.0_SA_COO~A`) | the same manifest advises routing a REPOINTED consumer back through `comp-kuzu` to 'hit the canonical persisted Kuzu DB' -- a remedy that names the surface this order retired |
+
+**Pass 1 rows that this pass RESOLVES by act (the issuer disarms; this is the evidence):**
+`W2-S12` (AC1 vs AC5 contradiction -- the amendment narrowed AC1's paths), `W2-S13` (the seam
+could not be removed in grant -- the widened `<paths>` made it removable and it is removed, less
+the two out-of-lane importers named above), `W2-S15` (AC3's interpreter -- corrected and passing).
+`W2-S14`, `W2-S16` and `W2-S17` are unchanged.
+
+**Untracked artifacts, not committed:** `infra/aws/globgrph/tsgraph_detect_ledger.json` (written by
+the comp-detect runs) and `org/pipescript-suite-gate-audit.log`; neither is in this order's
+`<paths>`. `.scratch/` is this worker's own scratch and is not committed.
+
+---
+
+## P2.7 WHAT THE NEXT ORDER NEEDS
+
+1. **A ruling on D7-AC1 and D7-AC2**, which cannot reach zero for reasons no act inside this
+   project can move (W2-S21, W2-S14). Both would measure the property if re-cut to the anchored
+   predicates this pass ran beside them: `_canonical\.<symbol>` for the calls, `kuzu\.Database\(`
+   for the opens -- each already carries a printed denominator and a positive control.
+2. **A hand-off to the two out-of-lane owners** (`0.4.0_DS_ClientPlatform`,
+   `0.8.0_AE_CloudComp`) that their deliverables now raise on `_canonical.*`. They are historical
+   records; the correct act may well be "leave them", but that is a decision, not a default.
+3. **A ruling on `kuzu_stitch_db`** (W2-S17): retire it, or state that the estate keeps one local
+   graph. Unchanged from pass 1.
+4. **`CG-x-7`** -- two machines, same answer, local copy off -- is the cell's stated closing
+   condition and is the issuer's to run at the drain.
