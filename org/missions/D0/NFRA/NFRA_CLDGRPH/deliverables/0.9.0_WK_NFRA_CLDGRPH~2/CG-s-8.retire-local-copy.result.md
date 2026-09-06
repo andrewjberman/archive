@@ -890,3 +890,350 @@ the comp-detect runs) and `org/pipescript-suite-gate-audit.log`; neither is in t
    graph. Unchanged from pass 1.
 4. **`CG-x-7`** -- two machines, same answer, local copy off -- is the cell's stated closing
    condition and is the issuer's to run at the drain.
+
+---
+
+# PASS 3 -- the two ABSENCE ARMS RE-CUT AS BEHAVIOUR PROBES
+
+**Worker:** `0.9.0_WK_NFRA_CLDGRPH~2` (same seat, same branch `wk-cldgrph-2-d7`).
+**Base for this pass:** `565008157e` (`hand-off(NFRA_CLDGRPH.TO-CG-D-7 pass 3): merge CLOUD so the
+behavioural AC1/AC2 are the grant`), carrying the issuer's amendment `e27c871ccf`.
+**Push state: LOCAL** (never pushed, never merged, never rebased). **Measured:** 2026-09-06
+02:5xZ - 03:3xZ, every invocation bounded by `timeout 120`.
+
+**Everything above this line is PASS 1 and PASS 2 and stands.** Nothing in them is re-done. This
+section adds the two new probes, the declaration the pass-3 face ordered, and the residue reading.
+
+---
+
+## P3.0 CONCLUSION FIRST
+
+**`D7-AC1` now PASSES, and it passes for the right reason. `D7-AC2` FAILS -- and this time the
+failure is WORLD, not INSTRUMENT. The order stays OPEN and the flip was not reached for.**
+
+- **`D7-AC1` = `SEAM_REACHABLE=0 of 3`, `SEAM_PROBE_CONTROL=FIRED`, rc=0.** All three retired
+  symbols raise `RuntimeError` through `getattr` on the real imported module; a constant the
+  tombstone still defines returns through the same verb in the same process, so the zero is a
+  refusal and not a dead import. The verb was separately shown to return `3 of 3` against a module
+  where the seam IS present, so the arm can return non-zero on a positive.
+- **`D7-AC2` = `CONSUMERS_OPENING_LOCAL_DB=3 of 30`, both controls FIRED, rc=1.** Three files
+  inside the order's own `<paths>` open a local Kuzu database in CODE. One is the already-rowed
+  stitch surface (`comp_debt.py:215`, `kuzu_stitch_db`, out of R7's scope by the cell's own text).
+  **The other two hardcode `kuzu_nessie_db` itself** -- `kuzu_cost_enrich.py:227-231,242` and
+  `kuzu_ac_traversals.py:28,83` -- **and `kuzu_ac_traversals.py:90` still prints `run
+  kuzu_nessie_load.py first` to a user.** That is a live path to a local build, which is the exact
+  question `D7-AC8` asks. Row **W2-S26**, ARMED.
+- **This also corrects PASS 1.** The pass-1 census row 18 declared those two files as opening "a
+  `--db` argument supplied by the caller, never `CANONICAL_DB_PATH`". That is wrong on the facts:
+  neither file spells `CANONICAL_DB_PATH`, but both name the retired PATH STRING literally. The
+  constant was retired; the string it pointed at was not. A pattern-shaped census could not see it;
+  an AST-banded walk over a named population did.
+- **The two out-of-lane spike openers are DECLARED, not touched** (`load_scratch_kuzu.py:97`,
+  `load_clusters_scratch.py:43`) -- and the measurement adds the fact a line-number-only
+  declaration would leave out: each opens its OWN scratch store under `tsgraph_spike/out/`, never
+  `kuzu_nessie_db`. Row **W2-S25**, INERT.
+- **`D7-AC5`'s three pins did NOT decay at `565008157e`.** `D7-AC3`, `D7-AC4`, `D7-AC6`, `D7-AC7`
+  re-run and pass at this HEAD rather than being carried by citation.
+
+**MECHANICAL RESULT: 6 PASS (`D7-AC1`, `D7-AC3`, `D7-AC4`, `D7-AC5`, `D7-AC6`, `D7-AC7`), 1 FAIL
+(`D7-AC2`), 1 RECORDED-judgment (`D7-AC8`). THE ORDER STAYS OPEN.**
+
+---
+
+## P3.1 `D7-AC1` -- `seam_unreachable.sh`, and why a probe replaced a count
+
+The file is
+`org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/seam_unreachable.sh`.
+It imports `infra/aws/globgrph/_canonical.py` the way a caller would, reaches for the three symbols
+a caller would reach for, and counts how many hand back an object.
+
+```
+timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/seam_unreachable.sh
+SEAM_PROBE_TARGET=C:\tmp\wk-cldgrph-2-d7\infra\aws\globgrph\_canonical.py
+SEAM_PROBE_VERB=getattr(module, name) in-process; REACHABLE = returned without raising
+  ensure_fresh           REFUSED  RuntimeError
+  _full_rebuild_only     REFUSED  RuntimeError
+  _append_fallback_sink  REFUSED  RuntimeError
+SEAM_REACHABLE=0 of 3
+SEAM_REFUSAL_KIND_RUNTIMEERROR=3 of 3  (an AttributeError here would be a SILENT refusal a hasattr() caller carries on past)
+SEAM_PROBE_CONTROL=FIRED -- _RETIRED_BY -> 'NFRA_CLDGRPH PRD R7 / FWD-7, cell CG-s-8, task order TO-CG-D-7' returned through the SAME verb on the SAME module object, so attribute access is LIVE and the count above is a refusal
+[rc=0 read UNPIPED]
+```
+
+**Three design points, each of which is a control rather than a decoration.**
+
+- **`SEAM_PROBE_CONTROL` is what makes the zero mean anything.** A module that failed to import, or
+  a module object with no live attribute access, prints a perfect `0 of 3` and proves nothing. The
+  control reaches for `_RETIRED_BY` -- a constant the tombstone still defines, so `__getattr__`
+  never fires for it -- through the SAME verb, on the SAME object, in the SAME process. An import
+  failure never reaches the count at all: the script exits 2 as BLOCKED.
+- **`SEAM_REFUSAL_KIND_RUNTIMEERROR` catches a degradation the count cannot see.** A symbol that
+  raised `AttributeError` would still score 0 REACHABLE, but a caller writing
+  `getattr(_canonical, "ensure_fresh", None)` would read that as "older build, skip the refresh" and
+  carry on over whatever it found locally. There is nothing local left to carry on over, so the
+  loud stop is the safe behaviour, and the kind line is where its loss would show.
+- **The arm can return non-zero on a positive, and was shown to.** The same verb, run against a
+  scratch module in `.scratch/` that DEFINES the three symbols:
+  `ensure_fresh REACHED <function ...>` / `_full_rebuild_only REACHED` /
+  `_append_fallback_sink REACHED` / `SEAM_REACHABLE=3 of 3`. A detector that cannot return non-zero
+  on the positive case is a constant wearing a measurement's clothes; this one is not.
+
+**Why the predecessor could not work, stated once for the record and not re-litigated.** The old
+arm counted TEXT over a corpus. On this population the text count is ANTI-CORRELATED with the
+property: the tombstone must NAME what it retires, the CG-8 battery must NAME the symbols it
+asserts refuse, and the unanchored pattern collides with two unrelated freshness families. The
+count rose 29 -> 36 across the pass that removed the seam. The probe asks the question the property
+poses, and its answer moves the right way.
+
+---
+
+## P3.2 `D7-AC2` -- `consumers_no_local_db.sh`, the closed population, and the three real openers
+
+The file is
+`org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/consumers_no_local_db.sh`.
+Its population is transcribed from `TO-CG-D-7 <paths>` (lines 218-253 @`565008157e`), **32
+declared, 2 absent, N = 30** -- not a corpus sweep, because the criterion asks a question about a
+NAMED SET and a sweep answers a question about the corpus.
+
+```
+timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/consumers_no_local_db.sh
+CONSUMER_POPULATION_DECLARED=32  (the file list in TO-CG-D-7 <paths>)
+  ABSENT (excluded from the denominator): infra/aws/globgrph/tests/test_canonical_rebuild_liveness.py
+  ABSENT (excluded from the denominator): infra/aws/globgrph/tests/test_canonical_refresh_failure_signal.py
+CONSUMER_POPULATION_ABSENT=2
+CONSUMER_BAND_RULE=ast.Call on kuzu.Database / ast.Name|Attribute CANONICAL_DB_PATH; comments and string constants (docstrings, forbidden-token tuples, mutant fixtures) never inspected
+  OPENS  infra/aws/globgrph/comp_debt.py:215  [kuzu.Database(]  conn = kuzu.Connection(kuzu.Database(path, read_only=True))
+  OPENS  infra/aws/globgrph/kuzu_cost_enrich.py:127  [kuzu.Database(]  db = kuzu.Database(db_path)
+  OPENS  infra/aws/globgrph/kuzu_cost_enrich.py:197  [kuzu.Database(]  db = kuzu.Database(db_path)
+  OPENS  infra/aws/globgrph/kuzu_ac_traversals.py:92  [kuzu.Database(]  conn = kuzu.Connection(kuzu.Database(args.db, read_only=True))
+CONSUMERS_OPENING_LOCAL_DB=3 of 30
+CONSUMER_PROBE_CONTROL=FIRED -- planted opener caught 2 of 2 signature(s) CANONICAL_DB_PATH,kuzu.Database( at line(s) 2,4,4 through the SAME detector, in-process, on a temp string (never a tracked file)
+CONSUMER_PROBE_BAND_CONTROL=FIRED -- the same two tokens planted in a docstring, a comment and a string tuple scored 0, so the banding is exercised and not merely asserted
+[rc=1 read UNPIPED]
+```
+
+**The two absent files are the two seam tests PASS 2 deleted with the behaviour they pinned.** They
+are printed by name and excluded from the denominator rather than dropped in silence: a file that
+vanished and a file that passed are different findings, and only one of them belongs in a
+denominator.
+
+**THE BANDING IS EXERCISED, NOT ASSERTED, and this matters more than the headline.** The AST walk
+inspects `ast.Call` nodes whose callee is the attribute `kuzu.Database`, and `ast.Name`/
+`ast.Attribute` nodes spelling `CANONICAL_DB_PATH`. Comments do not survive parsing; string
+constants are never inspected. So the following are excluded **by construction**, not by a
+hand-kept skip list that would drift:
+
+| excluded site | what it is | why a text match would have counted it |
+|---|---|---|
+| `infra/aws/globgrph/_canonical.py:24,33,35` | module docstring | the tombstone must NAME `CANONICAL_DB_PATH` to say what it retired |
+| `org/modules/graph/comp_aws_cli.py:2857` | `#` comment | it explains the OLD default to a reader |
+| `.tools/tests/test_cg8_seam_retired_battery.py:92,182,350,366,370,371` | string literals | the battery's forbidden-token tuple and its RED mutant fixture |
+| `infra/aws/globgrph/tests/test_comp_cluster_cli.py:29,126,136` | docstring + string tuple | the same, for the repointed cluster battery |
+
+`CONSUMER_PROBE_BAND_CONTROL` plants the same two tokens in a docstring, a comment and a string
+tuple and requires a score of **0**. Without it, "banding" would be an unexercised claim, and a
+detector that also ignored real calls would satisfy the opposite control and still read clean.
+
+### The three openers, classified
+
+| # | site | opens | disposition |
+|---|---|---|---|
+| 1 | `infra/aws/globgrph/comp_debt.py:215` | `STITCH_DB = os.path.join(_HERE, "kuzu_stitch_db")` (`comp_debt.py:40`) | **OUT OF R7's SCOPE.** The cell's own text at `comp_debt.py:207-209` says so: "the STITCH surface is a SEPARATE local graph this order does not retire -- CG-s-8 retires `kuzu_nessie_db` only". Its nessie leg is served. Already carried by row **W2-S17** |
+| 2 | `infra/aws/globgrph/kuzu_cost_enrich.py:127,197` | `os.path.join(WORKSPACE, 'kuzu_nessie_db')` and `kuzu_stitch_db`, built at `:227-231`; `:242` opens the nessie path a second time | **THE RETIRED STORE, HARDCODED.** No argparse exists in this file; the caller supplies nothing. It WRITES (`ALTER TABLE CloudNode ADD cost_mtd_usd`, `SET`) |
+| 3 | `infra/aws/globgrph/kuzu_ac_traversals.py:92` | `args.db`, whose default at `:83` is `DEFAULT_DB_PATH` = `os.path.join(dirname(__file__), "kuzu_nessie_db")` (`:28`) | **THE RETIRED STORE, AS THE BARE-INVOCATION DEFAULT.** `:90` prints `ERROR: Kuzu DB not found at {args.db} -- run kuzu_nessie_load.py first` |
+
+**PASS 1'S CENSUS ROW 18 IS WRONG AND THIS IS ITS CORRECTION.** It read: "`kuzu_ac_traversals`,
+`kuzu_cost_enrich` -- DECLARED -- they open a `--db` argument supplied by the caller, never
+`CANONICAL_DB_PATH`; they are loader-side enrichment, not user-facing consumers." Neither file
+spells `CANONICAL_DB_PATH` -- that half is true and is exactly why a pattern-shaped census missed
+them. But both name the retired PATH STRING literally, and `kuzu_cost_enrich.py` takes no argument
+at all. **The constant was retired; the string it pointed at was not.**
+
+**WHY THIS WORKER DID NOT FIX THEM, although both ARE inside `<paths>`.** The pass-3 face
+enumerates five things and says "nothing else", and neither repointing nor deleting these two is
+among them. The choice is not cosmetic either: `kuzu_cost_enrich.py` WRITES, and the served graph
+is read-only over HTTPS, so it has no repoint target -- its only honest dispositions are DELETE or
+DECLARE-AS-DEAD, and a worker choosing between them on someone else's cell text is widening the
+order. `kuzu_ac_traversals.py` reads and could be repointed, but it is an NFRA_DEBTSCAN-era
+acceptance harness whose retirement is a scope call. **So the arm is reported FAIL by output at
+3 of 30, the flip is not reached for, and the order stays open.** Row **W2-S26**, ARMED,
+`disarm_owner` `2.0.0_SA_COO~A`.
+
+**A SECOND, SEPARABLE DIVERGENCE THE ISSUER SHOULD SEE BEFORE RE-CUTTING.** The arm's predicate
+counts ANY `kuzu.Database(` call, so the stitch open at row 1 keeps it non-zero even after rows 2
+and 3 are resolved. The predicate is wider than R7. Narrowing it here would have been the same
+move the amendment was written to stop -- improving a number by editing the instrument -- so it was
+not made; it is stated instead.
+
+---
+
+## P3.3 DECLARED, NOT TOUCHED -- the two openers outside `<paths>` (the pass-3 face's item 3)
+
+| site | line | statement | opens | in `<paths>`? | act |
+|---|---|---|---|---|---|
+| `org/modules/graph/tsgraph_spike/load_scratch_kuzu.py` | **97** | `db = kuzu.Database(DB_PATH)` | `DB_PATH` at **:32** = `os.path.join(HERE, "out", "scratch_kuzu_db")`; **:93** `shutil.rmtree(DB_PATH)  # our own scratch artifact` | **NO** | **DECLARED, untouched** |
+| `org/modules/graph/tsgraph_spike/load_clusters_scratch.py` | **43** | `db = kuzu.Database(DB_PATH)` | `DB_PATH` at **:23** = `os.path.join(HERE, "out", "scratch_clusters_db")`; **:40** `shutil.rmtree(DB_PATH)` | **NO** | **DECLARED, untouched** |
+
+**Both opens are real, both are CODE band, and both are harmless to R7** -- which is the part a
+line-number-only declaration would leave unsaid. Neither file imports `_canonical`, neither names
+`CANONICAL_DB_PATH`, and neither reads or writes the retired canonical store: each builds a
+throwaway spike database from its own inputs and deletes it first. **So nothing user-facing here
+holds a path back to a local CANONICAL build.** They are also outside `D7-AC2`'s population by
+construction, so they neither raise nor lower its count.
+
+Whether FWD-7 obliges this cell to retire a scratch loader at all is a SCOPE question the issuer
+put to `1.0.0_SA_CTO` in the same tick as the amendment (msg 94454). This worker is not waiting on
+it: declaring them is its act under either resolution, and the wall is the grant, not the
+difficulty. Row **W2-S25**.
+
+---
+
+## P3.4 THE CRITERIA AT `565008157e` -- every one re-run, none carried by citation
+
+| id | verdict | invocation | deciding line | rc |
+|---|---|---|---|---|
+| `D7-AC1` | **PASS** | `bash .../seam_unreachable.sh` | `SEAM_REACHABLE=0 of 3` then `SEAM_PROBE_CONTROL=FIRED` | 0 |
+| `D7-AC2` | **FAIL** | `bash .../consumers_no_local_db.sh` | `CONSUMERS_OPENING_LOCAL_DB=3 of 30` | 1 |
+| `D7-AC3` | **PASS** | `python .tools/comp-find --corpus aws 'opal-globgrph' --budget 120 --limit 5` | `VINTAGE: Built from the estate as of 2026-09-06 02:09:08 UTC.  manifest: faee7c538910` / `DENOMINATOR: 87 hit(s) across 2161 aws node(s) scanned` | 0 |
+| `D7-AC4` | **PASS** | `bash .tools/comp-blast component:AdvisorsTab.tsx --budget 90` | `VINTAGE: Built from the estate as of 2026-09-06 02:09:08 UTC.  [... nodes=27299 edges=58780]` | 3 (the ratified NOT-FOUND state) |
+| `D7-AC5` | **PASS** | `for f in ...; do git show HEAD:$f \| sha256sum; done` | `8b79ca1b...` / `80d60f8f...` / `9dd104db...` -- **all three still match at `565008157e`** | 0 |
+| `D7-AC6` | **PASS** | `python .tools/tests/test_g2_disclosure_battery.py` | `DENOMINATOR: 7 of 7 arm(s) recorded a pass` then `PASS` | 0 |
+| `D7-AC7` | **PASS** | `bash .../commit_gate_all.sh` | `pre-commit gate clean (17 .py file(s) + .tools/comp-find; denominator 18 of 18)` | 0 |
+| `D7-AC8` | **RECORDED** | reading act | no verdict -- `3.0.0_SA_CVO` grades at L9 | n/a |
+
+**`D7-AC5`: the pins did not decay.** Measured at HEAD `565008157e` by the criterion's own
+`git show HEAD:<f> | sha256sum`: `kuzu_nessie_load.py` ->
+`8b79ca1bdfd51c1823c0c6780086d55d7e9c751d7651820f873cf1d4b42a5b3d`,
+`kuzu_incremental_refresh.py` ->
+`80d60f8ffa3c3c5da735c781d695d233496d31ac7bd2b7dabde034b718b1ef71`, `projection_server.py` ->
+`9dd104db29d558e48ecb5a28f8df9464fdca502eb25acffc680fdf696b7fe059`. The cloud engine is untouched
+by all three passes.
+
+**`D7-AC7`'s list did not change this pass** -- the two new files are `.sh`, and `commit-gate.sh`
+dispatches by suffix. `MANIFEST-ADVISORY: 4 graph-access finding(s) ... Advisory -- not blocking`
+recurred exactly as row **W2-S22** describes (four string literals inside the battery's own
+forbidden-token tuple).
+
+---
+
+## P3.5 `D7-AC8` -- the reading act, PASS 3 addendum (judgment; NO verdict; `3.0.0_SA_CVO` grades this at L9)
+
+Pass 1's s.8 and pass 2's s.P2.5 stand. **This addendum answers one half of `D7-AC8` that the two
+earlier passes answered too generously: "whether anything user-facing still holds a path to a local
+build."** The census the amendment retired was not wasted -- it found real things, and they are
+named here with their lines. **All of them are DOCUMENTATION or DEFAULTS, none is the seam, and
+together they are a retirement the estate's own instructions still sell against.**
+
+### (a) The estate's dependency manifest still ROUTES a repointed consumer back to the retired surface
+
+`org/modules/graph/graph-call-manifest.yaml` is the file CLAUDE.md rule 20 sends every seat to
+before any cloud/infra/data change. At `565008157e` it still carries, measured by
+`python .tools/comp-read ... --enumerate 'comp-kuzu|kuzu_nessie_db|canonical DB path'` -> **61
+hits**:
+
+- **:156, :169** -- `freshness: "kuzu DB ...; DEFAULT surface = canonical Nessie kuzu_nessie_db;
+  auto-refreshes ENGINE-INTERNALLY on Nessie-HEAD-advance"`. The engine-internal auto-refresh IS
+  the seam this order removed.
+- **:213-216** -- a whole section header, `# ---- LOCAL-PROJECTION REFRESH MODES (comp-kuzu --mode
+  full / --mode inc ...) ----`.
+- **:221** -- `canonical_call: "comp-kuzu --mode full [--json] [--limit N] \"<Cypher>\"   # forces a
+  FULL kuzu_nessie_load unconditionally, then serves the query"`.
+- **:229** -- `anti_pattern: "running --mode full mid-task to answer a traversal (a 482s full
+  rebuild to serve a read) -> bare comp-kuzu (auto) or --mode inc"`.
+- **:235** -- `canonical_call: "comp-kuzu --mode inc ...   # incremental-OR-serve-labeled-stale"`.
+
+**THE RECOMMENDED CALL IS DEAD, and this was exercised rather than reasoned:**
+
+```
+timeout 120 bash .tools/comp-kuzu --mode full "MATCH (n:CloudNode) RETURN count(n)"
+usage: kuzu_cli.py [-h] [--json] [--limit LIMIT] [--schema] [query]
+kuzu_cli.py: error: unrecognized arguments: --mode MATCH (n:CloudNode) RETURN count(n)
+[rc=2 read UNPIPED]
+```
+
+So two registered tool entries in the manifest name a `canonical_call` the tool refuses to parse.
+Row **W2-S23** already carries the advisory half of this (the manifest's REMEDY fires on every
+correctly-repointed consumer); the `--mode` entries are the same defect one layer up, in the
+registry rather than the advisory. `graph-call-manifest.yaml` is NOT in this order's `<paths>` and
+is untouched.
+
+### (b) `.tools/tool_index.py` -- the help text a user reads still describes the retired default
+
+Measured by `python .tools/comp-read .tools/tool_index.py --enumerate
+'kuzu_nessie_db|auto-refresh|auto refresh|ENGINE-INTERNAL|engine-internal'` -> **19 hits, all CODE
+band** (they are dict values in the help tables, not docstrings). **Six lines name
+`kuzu_nessie_db`: :1067, :1087, :1103, :1173, :3269, :4054.** The canonical shape, at :1067-1068:
+
+```
+'above); DEFAULT surface (no --db-path) = canonical Nessie kuzu_nessie_db; auto-refreshes '
+'on Nessie-HEAD-advance ENGINE-INTERNALLY (Rule 20 QUERY-default posture UNCHANGED -- '
+```
+
+and the rebuild-flavoured ones at **:3269** and **:4054** (`(SAME kuzu_nessie_db store, not a new
+surface) -- forces a FULL ...`). The auto-refresh prose recurs at :860, :1982, :2460, :2503, :3456,
+:4230, :5100. `.tools/tool_index.py` IS in `<paths>`; pass 1 repointed ONE `ensure_fresh` mention
+in it and these were not part of pass 3's five, so they are named here rather than edited.
+
+### (c) `org/modules/graph/comp_aws_cli.py` -- one comment and one LIVE PRINT
+
+- **:2857** (comment): `#   comp-kuzu's DEFAULT surface is _canonical.CANONICAL_DB_PATH =
+  kuzu_nessie_db,` -- and `_canonical.CANONICAL_DB_PATH` now raises `RuntimeError`.
+- **:2866** (a `print`, i.e. text SERVED to an operator at runtime, not a comment):
+  `print("  comp-kuzu's canonical surface (kuzu_nessie_db, Nessie-sourced) still serves its")`
+  followed by :2867-2869 telling the operator how to "publish to THAT surface". **This is the
+  strongest item in the residue**, because it is the only one a user meets without opening a file.
+
+### (d) `org/modules/graph/debtscan/comp_similar.py:591` -- an equality on the retired name, in CODE
+
+`and cap.get("corpus_db") == "kuzu_nessie_db"` inside a self-check block, with :595 feeding
+`_capture_kuzu_vintage("=== comp-kuzu provenance ===\n  DB: kuzu_nessie_db\n")`. This is a
+provenance-header fixture, so it is a CORRECT thing for a test to hold today; it becomes wrong the
+moment the served header stops spelling that string. It is NOT in `<paths>` (the order grants
+`.tools/tests/test_comp_similar_battery.py`, a different file) and is untouched. Pass 1's census
+row 29 anticipated it.
+
+### The reading, stated plainly
+
+**Nothing user-facing can still BUILD the local copy through the retired seam** -- `D7-AC1`
+measures that behaviourally and the three symbols refuse. **But two things user-facing still POINT
+AT one**: `kuzu_ac_traversals.py:90` prints `run kuzu_nessie_load.py first`, and
+`kuzu_nessie_load.py` still exists and is byte-pinned by `D7-AC5`, so that instruction is
+executable rather than merely stale; and `comp_aws_cli.py:2866` tells an operator at runtime that
+`kuzu_nessie_db` "still serves". **A retirement the estate's own manifest, help text and runtime
+output continue to recommend is the shadow path R7 exists to close.** Whether that is enough to
+call the retirement REAL is `3.0.0_SA_CVO`'s call at L9; this section states what was measured and
+takes no verdict.
+
+**Per-consumer latency/payload through the gateway** is unchanged from pass 2's s.P2.5 and is not
+re-measured here: no consumer was repointed this pass, so a re-run would answer a question already
+answered at the same HEAD.
+
+---
+
+## P3.6 ROWS FILED THIS PASS
+
+The channel header claimed **114 rows**; **VERIFIED by parsing every fenced json block and summing
+their lengths -- 114 rows in 112 blocks, 114 unique ids, `W2-S1..W2-S24` contiguous** -- so the
+next id is `W2-S25` as the face said. After this append: **116 rows in 114 blocks**, restated in
+the header.
+
+| id | class | hazard | one line |
+|---|---|---|---|
+| `NFRA_CLDGRPH-W2-S25` | OBSERVATION | INERT | the two out-of-lane `tsgraph_spike` openers, DECLARED with their lines and what each opens -- both open their own scratch store, never `kuzu_nessie_db` |
+| `NFRA_CLDGRPH-W2-S26` | BLOCKING | **ARMED** (`disarm_owner` `2.0.0_SA_COO~A`) | `D7-AC2` fails on WORLD at 3 of 30; two files in the order's own `<paths>` hardcode the retired `kuzu_nessie_db` and one prints a local-rebuild instruction -- and this corrects pass 1's census row 18 |
+
+---
+
+## P3.7 WHAT THE NEXT ORDER NEEDS
+
+1. **`D7-AC2` needs a decision, not a re-cut of the instrument.** The probe is sound and both its
+   controls fire. The question is what to DO with `kuzu_cost_enrich.py` and `kuzu_ac_traversals.py`:
+   DELETE (they target a store that no longer exists), REPOINT (only `kuzu_ac_traversals.py` can be
+   -- the other WRITES), or DECLARE-AS-DEAD with the census note corrected. All three are one-file
+   acts inside the existing `<paths>`; none is a worker's call to make unasked.
+2. **If the predicate stays as written, the stitch open keeps the arm non-zero forever.** Either
+   the criterion names `kuzu_nessie_db` specifically, or `comp_debt.py`'s stitch leg is carried as
+   a standing declared exception -- row **W2-S17** is the place it already lives.
+3. **The residue in P3.5(a)-(c) is a documentation act inside two files this order already grants**
+   (`.tools/tool_index.py`, `org/modules/graph/comp_aws_cli.py`) plus one it does not
+   (`graph-call-manifest.yaml`). A single narrow order could close all three.
