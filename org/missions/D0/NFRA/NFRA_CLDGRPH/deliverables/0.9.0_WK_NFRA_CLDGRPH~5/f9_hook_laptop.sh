@@ -34,4 +34,11 @@ cat "$HOOK" | grep -o 'git-hooks/[a-z0-9-]*\.sh'
 echo "--- the file, verbatim, numbered ---"
 cat -n "$HOOK"
 echo "--- end ---"
+# The three deciding values again, in the order F9-AC3's own clause names them
+# (count, then the positive control, then the read's instant). Same values as above,
+# re-printed so the criterion's expect can be matched against a live run rather than
+# against a hand-reordered excerpt.
+echo "STITCH_HOOK_LINES_LAPTOP=$N of $TOTAL"
+echo "OTHER_HOOK_ENTRIES=$((M - S))"
+echo "HOOK_READ_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 exit 0
