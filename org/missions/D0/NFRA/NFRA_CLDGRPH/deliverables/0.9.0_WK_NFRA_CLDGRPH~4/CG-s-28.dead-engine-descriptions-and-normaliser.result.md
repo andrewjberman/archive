@@ -4,18 +4,72 @@
 `wk-cldgrph-6-4`, worktree `C:/tmp/wk-cldgrph-6-4`, base HEAD `c6b16d8f04`. **PUSH STATE: LOCAL** --
 never pushed, never merged, never rebased, not measured against a remote and not claimed.
 
-**THE ORDER STAYS OPEN.** Three source edits landed and both substantive criteria PASS by output
-(`F8-AC1`, `F8-AC2`). `F8-AC3` and `F8-AC4` FAIL, and neither failure is in the work: each names an
-instrument the world does not carry -- a `REGEN_COMMANDS=3` against a tree with two generator
-scripts, and a `--check` flag on a script with no argv parsing at all. Both are rows
-(`NFRA_CLDGRPH-W4-S2`, `NFRA_CLDGRPH-W4-S3`), both carry the measured substance beside the failure,
-and neither was papered over by choosing a denominator that fits.
+**PASS 2, ON THE ISSUER AMENDMENT @`c722bf8bdc` (2026-09-09 18:5xZ). THE ORDER IS COMPLETE.** All
+four mechanical criteria PASS by output at the amended cut; `F8-AC5` is recorded and never
+self-graded. What changed is in the section *PASS 2* below -- the pass-1 paragraph is kept UNEDITED
+beneath it, because the reasoning that left the order open is the reasoning the amendment acted on,
+and deleting it would leave the amendment unexplained.
+
+**PASS 1 LEFT THE ORDER OPEN, AND THAT IS WHAT THE AMENDMENT ANSWERED.** Three source edits landed
+and both substantive criteria PASSED by output (`F8-AC1`, `F8-AC2`). `F8-AC3` and `F8-AC4` FAILED,
+and neither failure was in the work: each named an instrument the world does not carry -- a
+`REGEN_COMMANDS=3` against a tree with two generator scripts, and a `--check` flag on a script with
+no argv parsing at all. Both were rows (`NFRA_CLDGRPH-W4-S2`, `NFRA_CLDGRPH-W4-S3`), both carried
+the measured substance beside the failure, and neither was papered over by choosing a denominator
+that fits. **THE `F8-AC3` PROBE IS BYTE-UNCHANGED BETWEEN THE TWO PASSES**: what changed is the
+expect the issuer cut, not the number the probe measured -- `REGEN_COMMANDS=2` is the same 2 it
+printed when the criterion read FAIL.
+
+## PASS 2 -- what the amendment ordered, and what it measured
+
+```json
+{
+  "amendment": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-F-8.dead-engine-descriptions-and-normaliser.md, section 'ISSUER AMENDMENT 2026-09-09 18:5xZ' @c722bf8bdc, standing authority @9f4a57262f",
+
+  "1_the_two_recut_criteria": {
+    "F8-AC3": "expect was 'REGEN_COMMANDS=3', now 'REGEN_CARRIERS=3 ... REGEN_COMMANDS=[1-9] ... SECOND_REGEN_DIFF_LINES=0 ... HAND_EDITED_CARRIERS=0 of 3'. RE-RUN at this HEAD, not re-quoted: REGEN_CARRIERS=3, REGEN_COMMANDS=2, SECOND_REGEN_DIFF_LINES=0, HAND_EDITED_CARRIERS=0 of 3, HAND_EDIT_CONTROL=FIRED, rc 0. MATCHES.",
+    "F8-AC4": "invocation was 'python .tools/gen_tool_registry.py --check', now 'timeout 120 python .tools/gen_tool_registry.py' with expect on the two WROTE lines. RE-RUN at this HEAD: both WROTE lines, rc 0 -- and REACHING them IS the parity pass, because assert_population_parity() at :138 is called at :219 and is raise-only. MATCHES. The two controls stand from pass 1 and were re-exercised this pass: positive assert_population_parity(pop,pop) -> 99; negative assert_population_parity({'a'},{'b'}) -> PopulationDivergence FIRED."
+  },
+
+  "2_the_widened_grant_one_file_one_string": {
+    "edited": "org/modules/graph/graph-call-manifest.yaml:1500 -- the freshness: field of entry cloud.cluster.page_panel_drilldown, and NOTHING else in the file (git diff --numstat reads 1 1 on one file: one line changed).",
+    "before": "live canonical Nessie->Kuzu graph (NFRA_TSGRAPH P2-1 extractor emit, P2-2 materialized); prints the comp-kuzu provenance header to stderr (current/BEHIND/UNKNOWN VINTAGE); auto-refreshes on HEAD-advance; Rule 20 QUERY-default -- never rebuilds",
+    "after": "the SERVED graph projection, cluster layer included (NFRA_TSGRAPH P2-1 extractor emit, P2-2 materialized; served since NFRA_CLDGRPH CG-s-8). Every call ends with a VINTAGE line on stderr stating in plain words how old the answer is. There is NO agent-runnable refresh and no HEAD-advance trigger: the projection is advanced by the marker-driven cloud worker (NFRA_CLDGRPH CG-s-2/3) on the estate's own schedule, never by a call. Rule 20 QUERY-default -- never rebuilds. See cloud.read.served_vintage.",
+    "house_style_not_invented": "the wording follows the entry's own siblings rather than a new form -- cloud.lookup.nodes_by_type:156 already reads 'the SERVED projection; every call ends with a VINTAGE line ... There is NO agent-runnable refresh and no database path'. 'never rebuilds' stays, as the amendment directs, and the successor pointer cloud.read.served_vintage is added because that is where E-1 put freshness for this graph.",
+    "CRLF_TRAP_HIT_AND_HANDLED": "graph-call-manifest.yaml is CRLF in this worktree (1899 CRLF of 1899 LF). A text-mode read-modify-write matched ZERO on the anchor and, if forced through, would have rewritten every line ending in the file -- a one-string grant turned into a 1899-line diff. The edit was done on BYTES with an assertion that the CRLF count is identical before and after. That is why the diff is one line.",
+    "manifest_invariants_after_the_edit": {
+      "manifest_check_cli selfcheck": "PASS: 3 finding(s) (B + C present, 2 ERROR-class), 0 false-positive -- and its own output prints this order's reworded raw_cypher note VERBATIM, which is an independent exercise of edit 3 through the checker's own fixture",
+      "manifest_check_cli completeness": "PASS: routable + placement + self-routes + existence, over 78 registered tool(s).",
+      "manifest_check_cli retired-alias": "retired-alias invariant PASS: 9 retired name(s) declared, all disjoint from live+excluded (99 live), successors valid; none cited across the 129 routing surface(s) in scope (1 tombstoned mention(s) exempted). / PASS: retired-alias.",
+      "comp-coverage-check": "PASS: comp-coverage-map.yaml is internally consistent -- every tool one home, every overlap declared, no phantom seam, inventory complete, projection current, grain stable. swept: 99 homed tool(s) (35 tools[] + 64 meta_tools[]) | 12 gate_contract rule(s), 0 unverifiable",
+      "yaml_parse": "128 entries parse; the entry's status, tool, canonical_call, cost, rebuild_trigger and anti_pattern are byte-unchanged"
+    },
+    "F8-AC1_after": "GENERATOR_SOURCED_HITS=0 of 0 hits ; CHECKER_HITS=0 ; MANIFEST_SOURCED_HITS=0 (NONE) ; OTHER_SOURCED_HITS=0 ; PHRASE_PROBE_CONTROL=FIRED. The last hit in the compiled index is gone AT ITS SOURCE, not at the carrier -- which is the only place it could be fixed, since tool_index.py reproduces the manifest verbatim as MANIFEST_DOC.",
+    "index_bytes": "543627 -> 543977 after regeneration; master sha256 3d2deb234dc29a28 unchanged, because the manifest is embedded in the INDEX and not in the master"
+  },
+
+  "3_the_scoped_census_across_the_two_passes": "python .tools/comp-find 'auto-refresh on HEAD-advance|auto-refreshes on HEAD-advance|canonical persisted Kuzu DB' .tools org/modules/graph --all: 21 hit(s) / 799 file(s) at the cut -> 7 / 799 after pass 1 -> 5 / 800 after pass 2. The remaining 5 are exactly W4-S4's out-of-grant set less the manifest entry, carried NAMED to L10 by the amendment (S74): comp_ws4_crosswalk.py:14, comp_debt/grounding_lib.py:205, comp_legacywriter.py:237, estate-coverage-resolver.json:1356, estate_census/pass1_inventory.json:1858.",
+
+  "4_the_new_row": "NFRA_CLDGRPH-W4-S6 -- the amendment opened ONE STRING and the entry it opened carries THREE substrate descriptions. cost: (:1498, 'reads the materialized cluster layer off the canonical Kuzu graph') and rebuild_trigger: (:1501, 'queries the live graph; the cluster layer re-derives with the graph refresh') were NOT touched, are outside the one-string grant, and -- the part worth carrying -- match NONE of the three censused phrases, so the entry can read 0 hits while still describing a dead engine in two fields. The same row carries the count correction W4-S4 cannot take in place (six out-of-grant residues became five).",
+
+  "5_rows_at_the_close": {
+    "W4-S1": "DISARMED by the amendment's grant widening (issuer ack S73 on CLOUD, not in this worktree's index) -- the string is fixed at source and F8-AC1 reads MANIFEST_SOURCED_HITS=0 (NONE)",
+    "W4-S2": "DISARMED by the F8-AC3 re-cut (issuer ack S72) -- the probe is byte-unchanged and still prints REGEN_COMMANDS=2",
+    "W4-S3": "DISARMED by the F8-AC4 re-cut (issuer ack S72) -- the generator itself is now the named instrument",
+    "W4-S4": "CARRIED NAMED to L10 by the amendment (S74); five members remain, per W4-S6",
+    "W4-S5": "INERT, no disarm owed -- the population-counter side effect, recorded so a repair is not read as a regression",
+    "W4-S6": "NEW this pass, OBSERVATION / ARMED to 2.0.0_SA_COO~A"
+  },
+
+  "6_what_this_pass_did_NOT_do": "no row was edited (W4-S1..W4-S5 stand as written, including W4-S4's six); no disarm was self-recorded (the acks are the issuer's and live on CLOUD); no manifest entry other than the one named was touched; no generated carrier was hand-edited; infra/system/ is still untouched and the comp-system phase-two discharge is still the drain's."
+}
+```
 
 ```json
 {
   "to_id": "NFRA_CLDGRPH.TO-CG-F-8",
   "cell": "CG-s-28",
-  "terminal_status": "OPEN -- F8-AC3 and F8-AC4 FAIL against their literal expects; F8-AC1 and F8-AC2 PASS-by-output; F8-AC5 recorded, never self-graded",
+  "terminal_status": "COMPLETE at PASS 2 on the issuer amendment @c722bf8bdc -- F8-AC1..F8-AC4 all PASS-by-output at the amended cut, F8-AC5 recorded and never self-graded. EVERYTHING BELOW THIS FIELD IN THIS BLOCK IS THE PASS-1 RECORD AND IS LEFT AS WRITTEN: it was true when written, the amendment acted on it, and the PASS 2 section above carries the deltas. Read the two together, not one instead of the other. PASS 1 read: OPEN -- F8-AC3 and F8-AC4 FAIL against their literal expects; F8-AC1 and F8-AC2 PASS-by-output.",
 
   "the_three_edits_by_line_at_this_HEAD": [
     {
@@ -129,6 +183,14 @@ and neither was papered over by choosing a denominator that fits.
 ```
 
 ## What this order fixed, and what it could not
+
+*(The prose below is the PASS 1 narrative, unedited. Two of its claims were overtaken by the
+issuer amendment and are corrected here rather than rewritten there, because the reasoning is
+what the amendment acted on: (i) "the one hit that survives is not the carrier's to fix" was
+true under the pass-1 grant -- the amendment widened the grant by that one string and the hit
+is now fixed AT SOURCE, so F8-AC1 reads `MANIFEST_SOURCED_HITS=0 (NONE)`; (ii) "two criteria
+could not be satisfied" was true against the original expects -- both were re-cut and both now
+PASS, with the F8-AC3 probe BYTE-UNCHANGED. What did not change: the measured numbers.)*
 
 **Two descriptions of a dead engine, in the two places that fan out.** `REFRESH['GRAPH-DB']` in
 `gen_tool_classification.py` is not one string: it is the value that lands on every GRAPH-DB tool in
