@@ -30,6 +30,7 @@ infra/aws/globgrph/_canonical.py
 infra/aws/globgrph/tests/test_comp_cluster_cli.py
 org/modules/heatmap/ms_heat_index.py
 .tools/tests/test_cg8_seam_retired_battery.py
+infra/aws/globgrph/kuzu_ac_traversals.py
 "
 
 # PASS 2 (TO-CG-D-7 amended) added the four rows above: the seam file itself (now a tombstone),
@@ -38,6 +39,12 @@ org/modules/heatmap/ms_heat_index.py
 # infra/aws/globgrph/tests/test_canonical_{rebuild_liveness,refresh_failure_signal}.py were
 # DELETED with the seam they pinned -- a gate cannot check a file that no longer exists, and
 # listing them would make this script exit 2 on its own success.
+#
+# PASS 4 (TO-CG-D-7 amendment 2026-09-09, on CTO ruling 94466 @1266d65641) adds ONE row:
+# infra/aws/globgrph/kuzu_ac_traversals.py, repointed through projection_client. The other file
+# pass 4 touched, infra/aws/globgrph/kuzu_cost_enrich.py, was DELETED (`git rm`) on that ruling and
+# is absent for the same reason as the two seam tests above: a removed file has no bytes to gate,
+# and a gate list is not a change log.
 
 N=0
 for f in $FILES; do
