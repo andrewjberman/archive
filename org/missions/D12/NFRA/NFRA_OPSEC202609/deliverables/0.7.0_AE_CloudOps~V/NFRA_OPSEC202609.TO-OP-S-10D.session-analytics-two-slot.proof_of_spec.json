@@ -1,0 +1,182 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-10D",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-10D.session-analytics-two-slot.md",
+    "group": "OTHER",
+    "vintage_commit": "9e2818276c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "6c5d4e5406",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-10D.session-analytics-two-slot.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~V",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/opalinvest_dev/lambda/session-analytics/src/auth.ts",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The import swap: the local scalar cache and its Secrets Manager client removed, replaced by getJwtKeySlots and verifyWithSlots from the shared module. Live CodeSha256 66qB33r/6QF+jkb/lcrSbRD+UvEnDhyDVK15rdV2+Ko= @2026-09-09T21:26:02Z, State Active, LastUpdateStatus Successful -- EQUAL to the value predicted before the apply from the deterministic build."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/portal-auth/session-analytics.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "source_code_hash moved from TW+G6NyLoKxqCdp6CtfU5WAixRf8phcP69Kxg6kx8EU= to 66qB33r/6QF+jkb/lcrSbRD+UvEnDhyDVK15rdV2+Ko=. That line IS the deploy: the hash is hardcoded rather than read via a data lookup (deliberately -- a plan-time lookup errors fabric-wide when the key is absent and blocks every lane on this root), so a fresh artifact with the line unchanged plans as No changes. Measured: the pre-edit plan with the new artifact already in S3 read exactly that."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "artifact_sha256 written by build-nodejs-lambda.sh itself, equal to the deployed CodeSha256 and to the independently recomputed artifact sha."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260909T2119Z_opsec-s10d-session-analytics-two-slot_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy-completion ledger, CLOSED -- all 5 legs proven, sentinel removed. L1 and L2 were CLOSED TWICE: the first close ran the proof text through bash and had its backtick-quoted symbol names eaten by command substitution, which is CLAUDE.md's execution-vector class applied to a CLI argument rather than a commit message. Repaired by re-closing through an argv list with no shell; the restored proofs are 1946 and 3029 characters against 1352 and 2226 before."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S10D-AC0",
+      "criterion_verbatim": "PackageType Image confirmed for the two image-packaged candidates, and EITHER their layers searched for the literal secret id with the result stated, OR an explicit UNCOMPUTABLE-BY-CONSTRUCTION naming what was attempted. A silent omission is a FAIL.",
+      "method": "command",
+      "invocation": ".tools/aws.cmd lambda get-function --function-name {opal-news-ai-sentiment,news-semantic-clustering} --query 'Configuration.[PackageType,ImageConfigResponse]'; then aws ecr batch-get-image + get-download-url-for-layer per blob, each blob streamed and gzip-decompressed in memory and searched.",
+      "output_evidence": "CLOSED ON THE CODE PLANE RATHER THAN FILED UNCOMPUTABLE. Both confirmed PackageType Image, Runtime None (ECR finbert-lambda:latest and news-semantic-clustering:latest), so there is no zip to fetch and the earlier census's 25 zeros never covered them. docker is not on this box, but the ECR API exposes each layer blob, so they were STREAMED and decompressed in memory without materialising either image. finbert-lambda:latest -- 14 of 14 blobs read (13 layers + config), 0 errors, 1,164,760,079 bytes compressed and about 2.77 GB decompressed searched: opal/auth/jwt-public-key 0, jwt-public-key 0, jsonwebtoken 0, jwt.verify 0. news-semantic-clustering:latest -- 13 of 13 blobs read, 0 errors: opal/auth/jwt-public-key 0, jwt-public-key 0, jwt.verify 0, jsonwebtoken 1 (a transitive npm dependency present in the image; no reference to the secret and no verify call site). NEITHER IS A READER, and the zeros are REAL ABSENCES because every blob was read and the error count is 0 -- the script reports INCOMPLETE rather than a zero when any blob fails. THE NEEDLE SET WAS DELIBERATELY WIDER THAN THE SECRET ID: searching also for the library name means even a dynamically-built id would very likely surface as a jsonwebtoken hit in a function that verifies. CORROBORATION ON A SECOND PLANE WITH ITS LIMIT STATED: news-semantic-clustering shows 0 CloudWatch Invocations over 30 days and 0 CloudTrail events over 90 days with NextToken ABSENT, so it is DEAD and could not break under a rotation regardless of content; opal-news-ai-sentiment is ALIVE at 37,740 invocations over 30 days, which is why its layers were read in full rather than reasoned about. WHY THE LIVE PLANE COULD NOT SUBSTITUTE: a CloudTrail GetSecretValue sweep was attempted FIRST and THROTTLED OUT with NextToken still present -- 43 pages, 2,150 events, a PARTIAL read -- and its own internal control settles it, because opal-session-analytics, a reader PROVEN on the code plane, also read 0 in that partial window. A zero from a partial page is not an absence.",
+      "denominator": "2 of 2 image-packaged candidates closed; 27 of 27 blobs read across the two images (14 + 13) with 0 errors. These 2 complete the 31-function upper bound whose other 29 were read in the TO-OP-S-10 phase-1 census (row Z-S157).",
+      "status": "PASS",
+      "status_reason": "Closed on the code plane with complete blob coverage and zero read errors, rather than filed UNCOMPUTABLE. The rotation denominator is therefore CLOSED at 4 readers of 31 candidates over 203 live functions."
+    },
+    {
+      "criterion_id": "S10D-AC1",
+      "criterion_verbatim": "The PRE-CHANGE baseline recorded verbatim, CodeSha256 reading TW+G6NyLoKxqCdp6CtfU5WAixRf8phcP69Kxg6kx8EU= or, if it has moved since 2026-09-09 20:4xZ, the new value recorded and the single-slot shape RE-CONFIRMED on those bytes before any change. A baseline taken after the change is not a baseline.",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda get-function-configuration --function-name opal-session-analytics --region us-east-1, run BEFORE any edit; then the artifact downloaded and its key-selection region read.",
+      "output_evidence": "BASELINE RE-READ AT THIS FACE'S OWN VINTAGE AND IT HAD NOT MOVED: CodeSha256 TW+G6NyLoKxqCdp6CtfU5WAixRf8phcP69Kxg6kx8EU=, exactly the value the face carries, LastModified 2026-09-04T05:44:08Z, State Active, Runtime nodejs20.x. Taken before the worktree was even created, so it is a baseline and not a reconstruction. THE SINGLE-SLOT SHAPE ON THOSE BYTES, quoted from the deployed artifact rather than from source: async function lJ(){ if(wq) return wq; if(wq=(await cJ.send(new uJ({SecretId:\"opal/auth/jwt-public-key\"}))).SecretString||\"\",!wq) throw Error(\"JWT public key not found\"); return wq } -- ONE scalar, a guard with NO time component, ONE occurrence of the secret id, and no two-slot symbol anywhere. Source agrees at src/auth.ts:42-56 with a single jwt.verify at :75. THE CONTROL COULD HAVE FAILED AND THE READ THAT PRODUCED IT NEARLY DID: a first pass searched the deployed bundle for the SOURCE identifier cachedPublicKey and returned 0, which reads as 'the single-slot cache is gone' and would have falsified this face's premise. It is not gone -- tsc renamed it to wq. An absence of a source-level name in a compiled artifact is not evidence about behaviour, and only opening the minified call site settled it.",
+      "denominator": "1 function, baseline read once before any change and re-read once after; the pre-change artifact searched in full (1 member).",
+      "status": "PASS",
+      "status_reason": "The premise held: the pre-change deployed bytes ARE single-slot with no time component. Had they not been, the correct act was to STOP and file a row rather than deploy, and this criterion is what would have caught it."
+    },
+    {
+      "criterion_id": "S10D-AC2",
+      "criterion_verbatim": "JUDGMENT criterion (judgment=\"true\", no invocation minted at cut): whether the shared module was genuinely REUSED rather than a third cache hand-rolled beside it.",
+      "method": "manual_read_with_citation",
+      "invocation": "NOT GRADED HERE BY INSTRUCTION. Evidence assembled for the adjudicator: the import site in src/auth.ts, a residual-symbol census on that file, and a literal-count census on the DEPLOYED artifact.",
+      "output_evidence": "EVIDENCE ONLY -- THIS LANE RECORDS NO VERDICT. (1) THE IMPORT SITE: src/auth.ts imports getJwtKeySlots and verifyWithSlots from ./lib/authkeys/jwtPublicKeys.mjs -- the same module TO-OP-S-10B deployed to the other two verifiers, reached through the build-time mirror the canonical build creates for any consumer with a src/ directory. No new cache variable, no new TTL constant and no new Secrets Manager client was introduced in this handler. (2) RESIDUAL-SYMBOL CENSUS on src/auth.ts: getJwtPublicKey 0, GetSecretValueCommand 0, SecretsManagerClient 0, secretsClient 0; cachedPublicKey reads 1 and that occurrence is inside the new docstring quoting the retired line, not live code -- distinguished rather than counted, because a census that cannot tell a comment from a call site is not a control. (3) ON THE DEPLOYED ARTIFACT, which is the part that cannot be argued from source: the shared module's distinctive literals each appear EXACTLY ONCE -- 'JWT public key secret is empty' 1, 'JWT public key envelope has no usable' 1, the not-valid-JSON message 1, the secret id 1, and the TTL literal 300000 once. ONE copy in the shipped bytes, not two. (4) WHY THE BAR MATTERS AND WHAT A FAILURE WOULD LOOK LIKE: a third hand-rolled cache in this handler would reproduce row Z-S155 exactly -- two independent caches on the same 300 s period in one process are indistinguishable to any per-process timing signal, so the defect would be invisible to the obvious instrument.",
+      "denominator": "1 handler; 1 import site; 4 residual symbols censused; 5 module literals counted on 1 deployed artifact.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion, reserved to 3.0.0_SA_CVO~Z at L9 by the face's own proof_of_spec block and by the issuer's instruction in msg 20617. This lane assembled the evidence and deliberately records no verdict: whether the reuse is GENUINE rather than nominal is exactly the kind of call a self-grading assignee should not make, and JUDGMENT criteria are graded at L9 and never self-graded."
+    },
+    {
+      "criterion_id": "S10D-AC3",
+      "criterion_verbatim": "A CodeSha256 DIFFERENT from S10D-AC1's baseline, and the downloaded post-deploy artifact searched for the secret id showing the current-or-previous accept path and a bounded time component. Searched on the DEPLOYED BYTES, never on source, and never for a source-level identifier.",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda get-function-configuration; then Code.Location downloaded, unzipped and the key-selection region extracted from the minified bundle.",
+      "output_evidence": "THE HASH MOVED AND THE MOVE WAS AN EQUALITY TEST, NOT CHANGE-DETECTION: live CodeSha256 66qB33r/6QF+jkb/lcrSbRD+UvEnDhyDVK15rdV2+Ko=, DIFFERENT from the baseline TW+G6NyLoKxqCdp6CtfU5WAixRf8phcP69Kxg6kx8EU= and EQUAL to the value predicted before the apply (the build is deterministic -- fixed timestamp, sorted entries -- so the hash was known in advance; a change-detection check cannot tell a correct deploy from a wrong one). State Active, LastUpdateStatus Successful, LastModified 2026-09-09T21:26:02Z. THE DEPLOYED BYTES, quoted: var i2=\"opal/auth/jwt-public-key\", n2=300000, y6=null, x4=0, f6=null; async function R4({now:q=Date.now(),region:Z=\"us-east-1\"}={}){ if(y6&&q-x4<n2) return y6; if(!f6)f6=new p2({region:Z}); let $=await f6.send(new l2({SecretId:i2})), Q=r2($.SecretString); return y6=Q, x4=q, Q } and function B4(q,Z,$,Q){ try{ return q.verify(Z,$.current,Q) } catch(J){ if(!$.previous||J.name===\"TokenExpiredError\") throw J; try{ return q.verify(... BOTH CLAIMS ARE VISIBLE IN THOSE BYTES: (a) A BOUNDED TIME COMPONENT -- the guard moved from 'if(wq) return wq' to 'if(y6 && q-x4 < n2) return y6' where n2 is the literal 300000 and x4 is the timestamp written back on each refresh; one scalar became slots-plus-timestamp. (b) THE CURRENT-OR-PREVIOUS ACCEPT PATH -- verify against slots.current, then fall through to slots.previous unless the error is TokenExpiredError, because a second slot must widen which KEYS are accepted and never which EXPIRIES are. SEARCHED ON THE ARTIFACT AND NOT FOR A SOURCE IDENTIFIER, which is the instrument discipline this face inherited: the pre-change grep for cachedPublicKey returned 0 while the single-slot cache was present as wq.",
+      "denominator": "1 deployed artifact, 1 member (dist/index.mjs), searched in full; 5 module literals counted; 2 code regions quoted.",
+      "status": "PASS",
+      "status_reason": "The deployed bytes carry both the bounded TTL and the current-or-previous accept path, quoted rather than asserted, and the hash equals a value predicted before the apply."
+    },
+    {
+      "criterion_id": "S10D-AC4",
+      "criterion_verbatim": "The function still verifying real traffic after the deploy: no new error class attributable to the key read, on a function averaging thousands of invocations a day. Silence alone is NOT sufficient -- state the invocation count over the window so a dead function cannot pass as a healthy one.",
+      "method": "live_read",
+      "invocation": ".tools/aws logs filter-log-events --log-group-name /aws/lambda/opal-session-analytics over the 30 minutes after the apply; plus CloudWatch Invocations and Errors over the SAME window.",
+      "output_evidence": "4,490 log events with nextToken ABSENT, so the window is complete and not a page. 0 error-ish lines (no ERROR, no 'Invalid token', no 'not found', no Exception). CloudWatch Invocations 1,107 over the same window; CloudWatch Errors 0 over the same window. THE DECISIVE PART IS NOT THE SILENCE, IT IS THE COLD STARTS: 14 INIT_START events appear in that window -- fourteen execution environments started fresh ON THE NEW BUNDLE. A cold start is exactly where a MODULE_NOT_FOUND on the new cross-tree relative import would fire and where a bad bundle announces itself. It did not fire, fourteen times over. WHY THE COUNT IS QUOTED BESIDE THE ZERO: an error-free read is what a DEAD function returns too, which is why this criterion asks for the count. 1,107 invocations with 0 errors is a healthy busy function; 0 invocations with 0 errors would have been an unread instrument. BASELINE FOR SCALE, measured before the deploy: 52,540 invocations over the preceding 7 days and 291,233 over 30 days.",
+      "denominator": "1 function; 30-minute post-deploy window; 4,490 log events (complete, nextToken absent); 1,107 invocations; 14 cold starts; 0 errors on two independent surfaces (log text and the Errors metric).",
+      "status": "PASS",
+      "status_reason": "Healthy on a busy function, with the invocation count stated so the zero-error reading cannot be a dead-function artifact, and with 14 cold starts on the new bundle as the load-bearing evidence."
+    },
+    {
+      "criterion_id": "S10D-AC5",
+      "criterion_verbatim": "NOTHING ROTATED BY THIS FACE: one version at AWSCURRENT with the same version id, LastChangedDate unchanged at 2026-04-06, RotationEnabled unset. This face teaches a reader; it never writes the secret.",
+      "method": "live_read",
+      "invocation": ".tools/aws secretsmanager describe-secret --secret-id {opal/auth/jwt-public-key,opal/auth/jwt-private-key} --region us-east-1, read at this session's start before any deploy and again after the apply.",
+      "output_evidence": "IDENTICAL AT BOTH READS. opal/auth/jwt-public-key: ONE version, id fabe94f0-019d-455d-8c72-47b3d709bd8b at AWSCURRENT, LastChangedDate 2026-04-06T13:31:00.259000-04:00, RotationEnabled unset, no DeletedDate. opal/auth/jwt-private-key, untouched by this face and read as a control: one version, LastChangedDate 2026-04-06T13:31:00.251000-04:00, RotationEnabled unset. No keypair was generated, no PutSecretValue was issued, and no signing switch occurred -- this face changed a READER and never the secret. THE TIMESTAMPS CARRY THEIR TRUE -04:00 OFFSET AND NOT A TYPED Z: that is the citation-hygiene trap commit bd6e7cb8c7 corrected on this project, where a literal Z on a local timestamp put the true instant four hours from what a reader would take it to mean.",
+      "denominator": "2 of 2 secrets, read twice each (pre-deploy and post-deploy), 4 reads total.",
+      "status": "PASS",
+      "status_reason": "Both secrets byte-identical in version count, version id, LastChangedDate and RotationEnabled across the whole face. The rotation remains TO-OP-S-10's act and is now unblocked on the consumer axis."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The claim this face stands on is that the DEPLOYED bytes now hold two slots and a bounded cache. The reading that would make that true on the source and false on the system is the one this face's own predecessor nearly published: searching the compiled artifact for a SOURCE-LEVEL identifier. tsc renames, so cachedPublicKey reads 0 in a bundle where the single-slot cache is present as wq -- an absence that reads as a fix.",
+      "expected": "A search keyed to a source identifier must return 0 on the PRE-CHANGE artifact even though that artifact is single-slot -- i.e. the naive instrument must be shown to produce a false CLEAN before any verdict rests on it.",
+      "observed": "It did: grep for cachedPublicKey on the pre-change deployed bundle returned 0 while the single-slot guard 'if(wq) return wq' was demonstrably present in the same bytes. The instrument was therefore discarded and every claim in S10D-AC1 and S10D-AC3 rests on the SECRET ID and the CACHE SHAPE read out of the minified call site instead. SECOND CONTROL ON A DIFFERENT INSTRUMENT, same session: the 31-function census first returned READERS=0 across the board because python cannot exec the .tools/aws bash shim on Windows (WinError 193) -- a summary line reading zero that meant the probe never ran, with the error count of 31 as the only tell. It was re-pointed at .tools/aws.cmd and POSITIVE-CONTROLLED before being trusted: a known reader HITs and a known non-reader does not. THIRD: the CloudTrail live-plane sweep threw ThrottlingException and ended with NextToken PRESENT, and its internal control -- a code-plane-PROVEN reader showing 0 reads in that partial window -- is what stopped a partial page being reported as an absence.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The load-bearing values were each obtained twice or on two independent instruments. (a) The artifact sha was computed by the build script and INDEPENDENTLY RECOMPUTED from the downloaded object, and separately PREDICTED before the apply from the deterministic build. (b) The baseline CodeSha256 was read at TO-OP-S-10 phase 1 and re-read at this face's own vintage before any edit. (c) Both secrets were read pre-deploy and post-deploy. (d) Post-deploy health was read on two surfaces -- the log text and the CloudWatch Errors metric -- plus the Invocations count. (e) Deliverable 0 was attempted on three instruments (code plane, CloudTrail EventName sweep, CloudTrail Username query) before the layer read closed it.",
+      "observed": "STABLE. The build sha, the independent recompute, the S3 metadata content-sha256 and the post-apply live CodeSha256 are the same value, and it equals the pre-apply prediction. The baseline was unchanged between the two reads. Both secrets identical across their two reads. Log text and the Errors metric agree at zero over a window carrying 1,107 invocations. THE ONE DELIBERATE NON-REPEAT: the ECR layer searches were run once per image. Repeating them would re-download 1.16 GB to re-derive a result whose own coverage check (27 of 27 blobs read, 0 errors) already reports incompleteness as INCOMPLETE rather than as a zero.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The rotation itself",
+      "reason": "TO-OP-S-10's act, explicitly barred here by the face and by msg 20617. This face teaches the third verifier; it writes no secret and switches no signing key. Both secrets were re-measured unchanged at close."
+    },
+    {
+      "item": "opalinvest-auth-handler, the SIGNER",
+      "reason": "Single-slot and CORRECTLY so, per the issuer's re-cut @dd39dab70e: a verifier accepts current-or-previous, a signer must know which key is CURRENT and switch at the right moment. It is one of the four readers but is not a defect and was not touched. Its rotation-time handling -- picking up a new private key, and whether its own read is cached without a TTL -- is TO-OP-S-10's question and is not answered here."
+    },
+    {
+      "item": "Whether the reuse is GENUINE rather than nominal (S10D-AC2)",
+      "reason": "A JUDGMENT criterion reserved to 3.0.0_SA_CVO~Z at L9 by the face's own proof_of_spec block. Evidence assembled, no verdict recorded by this lane."
+    },
+    {
+      "item": "A reader outside the five granting roles, or one that assembles the secret id at runtime",
+      "reason": "Out of the census frame entirely. The code plane says who CAN read and never who DOES; a literal needle cannot see a dynamically-built id; and an inline policy on some other principal, a resource policy on the secret, an EC2/ECS task or a human are all outside the five-role scope the denominator is built on. Stated so a later reader does not take 4-of-31 as a claim about the whole world."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S157: the STOP that produced this face -- the rotation consumer set is FOUR readers of which THREE are verifiers, and the third verifier was single-slot with no TTL on its deployed bytes at 52,540 invocations in 7 days. This face is that row's disarm: the condition it names is removed, and the two image-packaged candidates its 'what the census cannot see' clause called out are now closed on the code plane rather than left open."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-09/session_0.7.0_AE_CloudOps~V_2050-2145Z_OPSEC_S10D_THIRD_VERIFIER.md",
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open / close-leg / close --slug opsec-s10d-session-analytics-two-slot",
+      "result": "Opened before the deploy with the rollback named, CLOSED on 5 proven legs.",
+      "gap_found": "YES, and it is this face's own error rather than the tool's: L1 and L2 were first closed by passing the proof text through BASH, and backtick-quoted symbol names inside it were EATEN BY COMMAND SUBSTITUTION -- CLAUDE.md's execution-vector class, which the estate documents for commit messages, reaching a CLI argument instead. Detected by reading the stored proof back rather than trusting the OK line. Repaired by re-closing through an argv list with no shell; restored lengths 1946 and 3029 against 1352 and 2226."
+    },
+    {
+      "tool": "build-nodejs-lambda.sh",
+      "invocation": "bash infra/aws/lambda/ci/build-nodejs-lambda.sh portal-auth opal-session-analytics",
+      "result": "The lawful path TO-OP-S-10C established. Bundle 70.11 KB, handler export validated, deterministic zip, uploaded and independently re-verified.",
+      "gap_found": "Its Next-steps footer prints MSYS_NO_PATHCONV=1, a bare terraform apply, and .tools/terraform.exe -- all three wrong on this estate (the first fails the tag-authz gate closed, the second is banned by Rule 18, the third does not exist on site Z). Ignored, as on the two consumers earlier today."
+    },
+    {
+      "tool": "terraform plan",
+      "invocation": "terraform -chdir=infra/aws/terraform/portal-auth plan -target=aws_lambda_function.session_analytics",
+      "result": "Caught the deploy-nothing state: with the new artifact already in S3 the plan read No changes, because source_code_hash is hardcoded by design. After the hash edit: 0 add / 1 change / 0 destroy, exactly two attributes, 0 wafv2.",
+      "gap_found": "The same class as the qualified_arn pin trap -- a clean plan that ships nothing. Recorded on the .tf line itself so the next reader meets it at the file."
+    },
+    {
+      "tool": "ECR layer stream-search (custom, .tools/aws.cmd + get-download-url-for-layer)",
+      "invocation": "python layer_search.py {finbert-lambda,news-semantic-clustering} latest",
+      "result": "Closed deliverable 0 on the code plane: 27 of 27 blobs read across the two images, 0 errors, no hit on the secret id in either.",
+      "gap_found": "docker is not on this box, which is what made a custom streamer necessary; the ECR API is sufficient without it. The script reports INCOMPLETE rather than a zero when any blob fails, so a partial read cannot be mistaken for an absence."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'secretsClient|getJwtPublicKey' infra/aws/opalinvest_dev/lambda/session-analytics --limit 20",
+      "result": "Used for the residual-symbol census.",
+      "gap_found": "YES, and it cost a confusing minute: comp-find resolves against the MAIN workspace regardless of the shell's cwd, so run from a linked worktree it reported the UNMODIFIED file and appeared to show the edit had not applied. Confirmed by reading both trees' copies side by side. A comp-find result taken while working in a worktree describes the main tree, not the worktree."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> \"S10D-AC0,S10D-AC1,S10D-AC2,S10D-AC3,S10D-AC4,S10D-AC5\"",
+      "result": "Validated before the complete flip.",
+      "gap_found": "None new; the schema shapes learned on TO-OP-S-10B (declared_exclusions as objects, controls with a required determinism block and additionalProperties false, closed enums on kind and deployed_state) carried over and were written correctly first time."
+    }
+  ]
+}
