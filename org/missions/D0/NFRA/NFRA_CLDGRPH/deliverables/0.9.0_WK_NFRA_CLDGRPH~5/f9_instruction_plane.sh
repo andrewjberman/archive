@@ -48,10 +48,10 @@ git show "$LASTFULL:$INST" >/dev/null 2>&1; echo "POSITIVE_CONTROL_INSTALLER_AT_
 probe_tombstone() { # $1 = tombstone file; prints the comma-joined field names found
   local f="$1" found=""
   # 1) the 07-07 word quoted VERBATIM: the quoted block must equal the record's
-  #    .tools/stitch-refresh lines 6-10, comment markers stripped.
+  #    .tools/stitch-refresh lines 6-12 (the 07-07 paragraph), comment markers stripped.
   local want got
-  want="$(git show "HEAD:$SR" | sed -n '6,10p' | sed 's/^# \{0,1\}//' | tr -d '\r')"
-  got="$(sed -n '/^> Replaces the cloud stitch-produce/,/^> problem that does not exist/p' "$f" | sed 's/^> \{0,1\}//' | tr -d '\r')"
+  want="$(git show "HEAD:$SR" | sed -n '6,12p' | sed 's/^# \{0,1\}//' | tr -d '\r')"
+  got="$(sed -n '/^> Replaces the cloud stitch-produce/,/^> PORTAL_REPO_PAT/p' "$f" | sed 's/^> \{0,1\}//' | tr -d '\r')"
   [ -n "$got" ] && [ "$want" = "$got" ] && found="$found,superseded_word_verbatim"
   # 2) the later word
   cat "$f" | grep -q 'no machine is in the compile business' && cat "$f" | grep -q '2026-09-02' && found="$found,later_word"
