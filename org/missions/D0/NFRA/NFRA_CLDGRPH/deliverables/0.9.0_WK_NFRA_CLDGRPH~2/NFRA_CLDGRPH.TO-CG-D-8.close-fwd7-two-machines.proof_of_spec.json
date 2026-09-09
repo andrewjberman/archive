@@ -1,0 +1,177 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CLDGRPH.TO-CG-D-8",
+  "firm": "FABRIC",
+  "phase": "P5-DECOMMISSION",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+    "vintage_commit": "70918d5d2b",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-D-8.close-fwd7-two-machines.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/prd/NFRA_CLDGRPH_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "25c66d3358"
+  },
+  "assignee": "0.9.0_WK_NFRA_CLDGRPH~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/two_machines.sh",
+      "artifact_covered_by": [
+        "D8-AC1",
+        "D8-AC2",
+        "D8-AC5"
+      ],
+      "kind": "script",
+      "commit_or_etag": "d25fcb88e5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The paired-ask instrument, written by this order. One run = ONE paired ask: an SSM send-command to i-07dccb1615503ac99 (curl POST to the in-VPC Cloud Map name) and a .tools/comp-kuzu call from this laptop, with T0 taken before both and T1 when the laptop answer is in hand, so WINDOW_S is measured on ONE clock and never depends on the two machines agreeing. Rows are compared as CANONICAL JSON (sorted keys, no whitespace) and a zero-row answer is REFUSED rather than scored as agreement, because two empty answers agree vacuously. The SSM payload is written by python to a file and passed as --cli-input-json, because the CLI argv route would hand MSYS/Git-Bash a URL and a Cypher string to mangle. EXERCISED TWICE at this pin, both agreeing on the first try.",
+      "introduces": [
+        "GATEWAY_EXEC_INSIDE_LAPTOP_WINDOW",
+        "ROWS_EQUAL"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/gateway_no_db.sh",
+      "artifact_covered_by": [
+        "D8-AC4",
+        "D8-AC5"
+      ],
+      "kind": "script",
+      "commit_or_etag": "d25fcb88e5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The second machine's absence read, written by this order. READ ONLY on that host: hostname, date, find, wc -- nothing is written there. It prints FOUR readings, not one, because a single zero cannot carry this claim: the criterion's own GATEWAY_LOCAL_DB_COUNT; a GATEWAY_FIND_DENOMINATOR, since a zero over an empty walk is a DEAD FIND and reads identically to an absence; a GATEWAY_PROBE_CONTROL on a name that IS present (`hosts`), which must return non-zero; and an UNSCOPED GATEWAY_ANY_KUZU_COUNT, because a check scoped to the retired name cannot see a local graph under a different one. The payload takes the file:// route for the same MSYS reason: a bare `/` in argv is rewritten to the Git installation root, which would have searched the WRONG filesystem and returned a confident zero.",
+      "introduces": [
+        "GATEWAY_PROBE_CONTROL_VERDICT",
+        "GATEWAY_ANY_KUZU_COUNT"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-x-7.two-machines.result.md",
+      "artifact_covered_by": [
+        "D8-AC1",
+        "D8-AC2",
+        "D8-AC3",
+        "D8-AC4",
+        "D8-AC5"
+      ],
+      "kind": "doc",
+      "commit_or_etag": "d25fcb88e5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The order's record: the face's fenced JSON block built PROGRAMMATICALLY from the measured artifacts rather than transcribed by hand, then both paired-ask transcripts and the gateway absence transcript quoted whole, then the which-zero-is-which table the amendment requires, then the D8-AC5 reading."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d25fcb88e5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows W2-S28 and W2-S29 appended; header denominator restated 118 -> 120, counted by PARSING every fenced json block and summing their lengths (120 rows in 116 blocks, 120 unique ids), never by a loose id grep, which still matches the header line itself. No existing row edited."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D8-AC1",
+      "criterion_verbatim": "IDENTICAL ANSWERS INSIDE ONE MINUTE: the two `rows` arrays are equal and the window is under 60 s.",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/two_machines.sh | grep -E '^(ROWS_EQUAL|WINDOW_S)='",
+      "expect": "ROWS_EQUAL=true[\\s\\S]*WINDOW_S=([0-9]|[1-5][0-9])(\\.[0-9]+)?$",
+      "output_evidence": "ROWS_EQUAL=true\nWINDOW_S=4.229\n[script rc=0 read UNPIPED before the filter]\nTHE RUN BEHIND THOSE TWO LINES (attempt 2, the criterion's own invocation):\nQUESTION=MATCH (n:CloudNode) RETURN n.node_type AS t, count(*) AS c ORDER BY c DESC, t\nSSM_COMMAND_ID=6b9a5953-3137-4dcb-b1b2-23f30215530f\nT0_LAPTOP_UTC=2026-09-09T14:21:54.854556500Z\nT1_LAPTOP_UTC=2026-09-09T14:21:59.076784900Z\nLAPTOP_CLIENT_RC=0\nSSM_STATUS=Success\nGATEWAY_EXEC_START_AWSCLOCK=2026-09-09T14:21:56.879Z\n--- laptop stderr (its own VINTAGE line, verbatim) ---\nVINTAGE: Built from the estate as of 2026-09-09 12:23:34 UTC.  [vintage=2026-09-09T12:23:34.893879+00:00 manifest=83c6e1335f43 prefix=projection/2026-09-09T12:23:34.893879+00:00/]\n--- gateway StandardOutputContent (verbatim, from the second machine) ---\nGATEWAY_UTC=2026-09-09T14:21:56.883865535Z\n{\"rows\":[{\"t\":\"C2Motif\",\"c\":6303},{\"t\":\"MS_FILE\",\"c\":5058},{\"t\":\"Field\",\"c\":4969},{\"t\":\"JSXElement\",\"c\":2205},{\"t\":\"JSXRender\",\"c\":1433},{\"t\":\"PipelineFunction\",\"c\":1201},{\"t\":\"MS_FOLDER\",\"c\":1087},{\"t\":\"TypeDecl\",\"c\":807},{\"t\":\"IAM_POLICY\",\"c\":483},{\"t\":\"ReactComponent\",\"c\":442},{\"t\":\"Module\",\"c\":374},{\"t\":\"Prop\",\"c\":359},{\"t\":\"LOG_GROUP\",\"c\":250},{\"t\":\"S3Key\",\"c\":232},{\"t\":\"IAM_ROLE\",\"c\":216},{\"t\":\"LAMBDA\",\"c\":203},{\"t\":\"Component\",\"c\":199},{\"t\":\"EVENT_RULE\",\"c\":142},{\"t\":\"PipelineScript\",\"c\":133},{\"t\":\"Endpoint\",\"c\":125},{\"t\":\"Hook\",\"c\":111},{\"t\":\"DataFetch\",\"c\":106},{\"t\":\"EVENT_SOURCE\",\"c\":95},{\"t\":\"PanelCluster\",\"c\":91},{\"t\":\"SECRET\",\"c\":87},{\"t\":\"API_ROUTE\",\"c\":86},{\"t\":\"ReactQueryKey\",\"c\":57},{\"t\":\"CW_ALARM\",\"c\":51},{\"t\":\"ServedURL\",\"c\":45},{\"t\":\"DYNAMODB_TABLE\",\"c\":37},{\"t\":\"S3_BUCKET\",\"c\":34},{\"t\":\"EC2_INSTANCE\",\"c\":32},{\"t\":\"SECURITY_GROUP\",\"c\":26},{\"t\":\"SERVICE_PRINCIPAL\",\"c\":21},{\"t\":\"SSM_DOCUMENT\",\"c\":20},{\"t\":\"SQS_QUEUE\",\"c\":19},{\"t\":\"INSTANCE_PROFILE\",\"c\":18},{\"t\":\"SCHEDULE\",\"c\":18},{\"t\":\"MS_USER\",\"c\":17},{\"t\":\"SNS_TOPIC\",\"c\":16},{\"t\":\"LAMBDA_LAYER\",\"c\":15},{\"t\":\"Page\",\"c\":15},{\"t\":\"KMS_KEY\",\"c\":12},{\"t\":\"S3_BUCKET_POLICY\",\"c\":12},{\"t\":\"ECS_TASK_DEFINITION\",\"c\":9},{\"t\":\"API_GW\",\"c\":5},{\"t\":\"C3System\",\"c\":4},{\"t\":\"CODEBUILD_PROJECT\",\"c\":4},{\"t\":\"IAM_USER\",\"c\":4},{\"t\":\"Pipeline\",\"c\":3},{\"t\":\"ROUTE53_RECORD\",\"c\":3},{\"t\":\"VPC_ENDPOINT\",\"c\":3},{\"t\":\"CLOUDFRONT_DISTRIBUTION\",\"c\":2},{\"t\":\"ECS_CLUSTER\",\"c\":1},{\"t\":\"LOAD_BALANCER\",\"c\":1},{\"t\":\"MS_LIBRARY\",\"c\":1},{\"t\":\"MS_SITE\",\"c\":1},{\"t\":\"STATE_MACHINE\",\"c\":1}],\"vintage\":\"2026-09-09T12:23:34.893879+00:00\",\"age_line\":\"Built from the estate as of 2026-09-09 12:23:34 UTC.\",\"manifest_sha256\":\"83c6e1335f435691d12f66539623174f6cf32548605d86efe61d2070f0370bbf\",\"artifact_prefix\":\"projection/2026-09-09T12:23:34.893879+00:00/\"}\n\n--- end ---\nLAPTOP_ROW_COUNT=58\nGATEWAY_ROW_COUNT=58\nLAPTOP_VINTAGE=2026-09-09T12:23:34.893879+00:00\nGATEWAY_VINTAGE=2026-09-09T12:23:34.893879+00:00\nVINTAGE_IDENTICAL=true\nMANIFEST_SHA256_GATEWAY=83c6e1335f435691d12f66539623174f6cf32548605d86efe61d2070f0370bbf\nARTIFACT_PREFIX_GATEWAY=projection/2026-09-09T12:23:34.893879+00:00/\nROWS_EQUAL=true\nWINDOW_S=4.229\nGATEWAY_EXEC_INSIDE_LAPTOP_WINDOW=true  (AWS clock 2026-09-09T14:21:56.879000+00:00 vs laptop window 2026-09-09T14:21:54.816217+00:00 .. 2026-09-09T14:21:59.045337+00:00)\nCLOCK_SKEW_NOTE=the window above is measured on the LAPTOP clock alone (T1-T0), so it does not depend on the two machines agreeing; the AWS-clock line is reported beside it and, if the two clocks disagree, only that line moves.\nGATEWAY_OWN_UTC_AT_ASK=2026-09-09T14:21:56.883865535Z\nAND AN INDEPENDENT SECOND RUN OF THE SAME INSTRUMENT (attempt 1, 59 s earlier), recorded because nothing is discarded: ROWS_EQUAL=true, WINDOW_S=4.173, row counts 58/58, LAPTOP_VINTAGE=2026-09-09T12:23:34.893879+00:00, GATEWAY_VINTAGE=2026-09-09T12:23:34.893879+00:00, SSM 1bf885e5-d4fc-4199-b179-6398e2a4f418.",
+      "denominator": "58 of 58 node-type rows equal on both machines, compared as canonical JSON (sorted keys, no whitespace); 2 of 2 paired attempts agreed on the first try; window 4.229 s of the 60 s the criterion allows. Measured at d25fcb88e5.",
+      "status": "PASS",
+      "status_reason": "PASS BY OUTPUT. The two machines are genuinely different -- a laptop worktree over public HTTPS with a Secrets-Manager bearer, and an EC2 host inside the VPC calling the Cloud Map name in plaintext -- and they returned byte-identical answers. THE EQUALITY IS NOT VACUOUS: both sides returned 58 rows, and the script REFUSES a zero-row comparison explicitly, because two empty answers agree while proving nothing. THE WINDOW IS ONE CLOCK'S: WINDOW_S is the laptop's T1-T0, so it cannot be flattered by clock skew; the gateway's AWS-clock ExecutionStartDateTime falls INSIDE that window and the gateway's own `date` agrees with AWS's stamp to about 4 ms, so the skew is reported and immaterial rather than assumed away."
+    },
+    {
+      "criterion_id": "D8-AC2",
+      "criterion_verbatim": "IDENTICAL VINTAGE LINES: exactly one distinct vintage across the two answers.",
+      "method": "command",
+      "invocation": "bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/two_machines.sh | grep -E '^(LAPTOP|GATEWAY)_VINTAGE=' | cut -d= -f2 | sort -u | wc -l",
+      "expect": "^1$",
+      "output_evidence": "1\nTHE DISTINCT SET behind that 1, printed so the number is not bare:\n  2026-09-09T12:23:34.893879+00:00\nand the same filter over the OTHER run's transcript (attempt 1, an independent paired ask) also returns 1.\nNEGATIVE CONTROL, because a filter that can only ever print 1 is a constant: the SAME pipeline over a two-line fixture carrying different vintages ('LAPTOP_VINTAGE=2026-09-09T12:23:34.893879+00:00' and 'GATEWAY_VINTAGE=2026-09-09T13:23:34.000000+00:00') returns 2.\nDEVIATION, STATED (row NFRA_CLDGRPH-W2-S29): the tail of this pipeline was applied to the RECORDED STDOUT of the D8-AC1 run rather than to a THIRD firing of the script. Each run of two_machines.sh IS a paired ask against two machines, and the order's BOUNDS cap the paired ask at 'at most two attempts'; D8-AC1's literal invocation was the second. The bytes filtered here are the same bytes this criterion's own pipeline would have filtered, from a run of this criterion's own script, and the cross-check against the other attempt's transcript returns the same 1. Both runs are recorded whole in the deliverable; nothing was discarded.\nCorroborating fields from the same responses: manifest_sha256 83c6e1335f435691d12f66539623174f6cf32548605d86efe61d2070f0370bbf and artifact_prefix projection/2026-09-09T12:23:34.893879+00:00/ -- so the two machines agree not only on the vintage string but on the artifact identity behind it.",
+      "denominator": "1 distinct vintage across 2 answers from 2 machines, on each of 2 independent paired attempts; negative control returns 2. Measured at d25fcb88e5.",
+      "status": "PASS",
+      "status_reason": "PASS BY OUTPUT, with the instrument shown able to return 2 and the deviation from a third script firing stated above and filed as row NFRA_CLDGRPH-W2-S29. The pointer advances about hourly and did not move during either attempt, so the face's single re-run allowance was never needed."
+    },
+    {
+      "criterion_id": "D8-AC3",
+      "criterion_verbatim": "NO LOCAL DB ON THE LAPTOP READER (this worktree).",
+      "method": "command",
+      "invocation": "ls infra/aws/globgrph/ | grep -c kuzu_nessie_db",
+      "expect": "^0$",
+      "output_evidence": "0\nAND THE MEASUREMENT THAT CAN ACTUALLY FAIL, which the 2026-09-05 amendment requires beside this zero and which the issuer explicitly assigned to the WORKER because the deletion is the ISSUER's own act:\n  $ ls C:/Users/AndrewBerman/Desktop/ajb_workspace/infra/aws/globgrph/ | grep -c kuzu_nessie_db\n  MAIN_WORKSPACE_LOCAL_DB_COUNT=0   (grep rc=1, at 2026-09-09T14:14:15Z)\n  existence check: DIR-EXISTS; TOTAL_ENTRIES=69\n  POSITIVE CONTROL, same verb and same listing: grep -c kuzu_stitch_db -> 2\nTHE ISSUER'S LINE, quoted from the record rather than trusted (STEP_LOG.2.0.0_SA_COO~A.round4.json row seq=20, outputs[1]): 'MAIN_WORKSPACE_LOCAL_DB_COUNT=0 at 2026-09-09T14:08:02Z (was 6; command `ls infra/aws/globgrph/ | grep -c kuzu_nessie_db`, grep rc=1)'. The independent read AGREES with it.\nWHICH ZERO IS WHICH (the amendment forbids letting them stand side by side unlabelled): D8-AC3's zero is a WORKTREE property that was already true before the retirement began -- infra/aws/globgrph/.gitignore:3 ignores kuzu_nessie_db, so it is never checked out into any worktree, and the issuer measured this same 0 on 2026-09-05 with the laptop copy fully intact. MAIN_WORKSPACE_LOCAL_DB_COUNT is the one that carries FWD-7's claim, and it WAS 6 until 2026-09-09T14:08:02Z.\nUNSCOPED, in the same tick (row NFRA_CLDGRPH-W2-S28): the canonical family is genuinely gone -- no kuzu_nessie_db, no ._build_manifest.json, no .fallback.jsonl, no .rebuild.lock -- but the same directory still holds kuzu_db (9,224,192 B; its own manifest declares 1,166 nodes / 2,488 edges built 2026-06-12 from snapshots/20260612/graph-20260612.tar.gz), kuzu_ac7.db (4,050,944 B), the placed kuzu_stitch_db, and a stale .kuzu_nessie_load.0628067ab4da5610.lock whose NAME this census cannot match.",
+      "denominator": "0 of 60 worktree entries in infra/aws/globgrph/ match kuzu_nessie_db; 0 of 69 main-workspace entries match it, with a positive control of 2 on the same listing. Measured at d25fcb88e5.",
+      "status": "PASS",
+      "status_reason": "PASS BY OUTPUT on the criterion as written. The face's own amendment records that this arm CANNOT FAIL -- it measures a worktree, where the store is gitignored and was never checked out -- so it is reported as passing and the load-bearing measurement is carried beside it, independently made, with an existence check and a positive control. That second number is the one a grader should read."
+    },
+    {
+      "criterion_id": "D8-AC4",
+      "criterion_verbatim": "NO LOCAL DB ON THE SECOND MACHINE.",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/gateway_no_db.sh",
+      "expect": "GATEWAY_LOCAL_DB_COUNT=0",
+      "output_evidence": "SSM_COMMAND_ID=0fc194a1-c8d1-4072-a260-d2dd2d2608c3\nSSM_INSTANCE=i-07dccb1615503ac99\nSSM_STATUS=Success\n--- StandardOutputContent (verbatim, from the second machine) ---\nGATEWAY_HOST=ip-172-31-89-135.ec2.internal\nGATEWAY_UTC=2026-09-09T14:27:31Z\nGATEWAY_FIND_DENOMINATOR=32220\nGATEWAY_LOCAL_DB_COUNT=0\nGATEWAY_ANY_KUZU_COUNT=0\nGATEWAY_PROBE_CONTROL=1\n--- end ---\nGATEWAY_PROBE_CONTROL_VERDICT=FIRED -- the same find verb, same root, same depth, returned\n  1 hit(s) for a name that IS present, over a walk of 32220 path(s), so the arm's\n  zero is an absence and not a dead instrument\n[rc=0 read UNPIPED]",
+      "denominator": "0 of 32,220 paths walked on the second machine's root filesystem (depth 6) match kuzu_nessie_db*; 0 match *kuzu* of ANY name; the same find returns 1 for a name that IS present. Measured at d25fcb88e5.",
+      "status": "PASS",
+      "status_reason": "PASS BY OUTPUT, and the zero is an ABSENCE rather than a dead instrument because three things are printed beside it: the walk's own denominator (32,220 paths -- a zero over an empty walk would be a dead find and reads identically), a positive control on the same verb, root and depth (1 hit for `hosts`), and an UNSCOPED count (GATEWAY_ANY_KUZU_COUNT=0) showing the host holds no kuzu artifact under any name at all. This is a machine that has never held the graph. READ ONLY: hostname, date, find, wc; nothing was written on that host."
+    },
+    {
+      "criterion_id": "D8-AC5",
+      "criterion_verbatim": "THE SECOND READER: whether the gateway host stands for 'two people on two machines' as FWD-7 means it, with the issuer's substitution stated and the site-Z reader named as the alternative; and whether 'every developer machine off' is met given the issuer's deletion of the main workspace's copy (the step-log line). A reading act; NO verdict; graded by 3.0.0_SA_CVO at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-x-7.two-machines.result.md s.5 (no bounded command; the face declares this criterion judgment=true)",
+      "output_evidence": "(a) THE SECOND READER. The gateway host is a genuinely different MACHINE: different OS, different network position (inside vpc-0cc0c6a75e54605e3), no repository, no checkout, no local graph of any name (0 of 32,220 paths), and it reaches the service by a DIFFERENT TRANSPORT with DIFFERENT credentials -- plaintext HTTP to the Cloud Map name, versus the laptop's public HTTPS with a Secrets-Manager bearer. That difference is what makes the agreement meaningful: two answers identical in rows, vintage, manifest_sha256 and artifact_prefix, reached by two different paths, cannot be two copies of a graph. What the gateway is NOT is a different PERSON: it is driven by this same worker over SSM, so the human-independence half of 'two people' is MODELLED, not exercised. The issuer stated this substitution at the cut and named the alternative (the site-Z reader), which remains available to the CTO's round-N analysis if the substitution is refused; this worker has no bus, no skill and no session on site Z and could not have driven it.\n(b) 'EVERY DEVELOPER MACHINE OFF'. On the CANONICAL store, yes, and it is now measured on BOTH sides rather than on the producer's word: the issuer's deletion (step-log row 20, 6 -> 0 at 2026-09-09T14:08:02Z) and this worker's independent read (0 at 14:14:15Z, over a directory proven to exist and hold 69 entries, positive control 2). The honest qualification is row NFRA_CLDGRPH-W2-S28: the same directory still holds kuzu_db -- 9,224,192 B, whose own manifest declares 1,166 nodes / 2,488 edges built 2026-06-12 from the S3 snapshot tarball of THIS graph -- plus kuzu_ac7.db, the placed kuzu_stitch_db, and a stale nessie LOADER lock whose name the certifying census cannot match. Two of those carry a standing 3.0.0_SA_CVO do-NOT-delete (DIAL_RECORD_comp-kuzu_20260804.md:19, 'deletions ruled-not-taken'). So the question is not whether something was missed -- it is whether FWD-7's 'no local copy left that either could have read instead' means the CANONICAL copy or ANY local copy of this graph. A 1,166-node June copy is a copy someone could read instead of the served 27,304, which is the stale-answer failure R7 exists to end; and a standing preservation ruling is a reason it is still there. Both are true and this worker does not grade them.\nGRAIN, STATED: the node/edge figures for kuzu_db come from its BUILD MANIFEST, read as a plain file. This worker did NOT open the store -- the order's BOUNDS forbid running an engine, and kuzu.Database CREATES an absent store on open (3.0.0_SA_CVO, ADJUDICATION_v1 C-S20). The claim is 'the manifest beside it says 1,166 nodes', never 'this worker read 1,166 nodes out of it'.",
+      "denominator": "2 reading questions the face names (the substitution; 'every developer machine off'), both answered with their measurements and neither graded; 1 qualification carried as row W2-S28; 4 local kuzu artifacts named by size, mtime and manifest.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true: the face declares that PASS or FAIL on this criterion is INVALID. Recorded with its evidence and NO verdict; graded by 3.0.0_SA_CVO at L9.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Each absence and each equality arm carries a control that must behave the opposite way, because a zero and a dead instrument read identically. (a) D8-AC2's filter was run over a fixture carrying TWO different vintages and returned 2, so the 1 it returns on the real transcripts is a measurement and not a constant. (b) gateway_no_db.sh runs the SAME find verb, root and depth against a name that IS present on the host (`hosts`) and requires it to be non-zero, and prints the walk's own denominator so a zero over an empty walk is refused as a DEAD FIND. (c) the main-workspace census carries a positive control on the same listing (grep -c kuzu_stitch_db) and an existence check on the directory, because a zero from a missing directory reads exactly like a clean one. (d) two_machines.sh REFUSES a zero-row comparison rather than scoring two empty answers as equal.",
+      "expected": "negative control 2; gateway probe control >= 1 over a non-zero denominator; main-workspace positive control >= 1; empty-answer comparison refused",
+      "observed": "D8-AC2 filter over a differing-vintage fixture -> 2; GATEWAY_PROBE_CONTROL=1 over GATEWAY_FIND_DENOMINATOR=32220; MAIN_WORKSPACE positive control (kuzu_stitch_db) -> 2 over 69 entries with DIR-EXISTS; both paired runs returned 58 rows per side so the empty-answer refusal was never reached",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two_machines.sh was run TWICE against the same two machines with the same input, 59 seconds apart (14:20:55Z and 14:21:54Z), and the two runs were compared on every field that matters: equality verdict, row counts on both sides, both vintage strings, and the window.",
+      "observed": "run 1: ROWS_EQUAL=true, 58/58 rows, vintage 2026-09-09T12:23:34.893879+00:00 on both, WINDOW_S=4.173. run 2: ROWS_EQUAL=true, 58/58 rows, the same vintage on both, WINDOW_S=4.229. Identical on every field except the wall-clock window, which differs by 56 ms of network time and is expected to.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The site-Z reader as the second machine",
+      "reason": "The decomposition names site Z as the second reader; the issuer substituted the gateway host at the cut and stated the substitution in the face precisely so the CVO grades it (D8-AC5). This worker has no bus, no skill and no session on site Z and could not have driven it. The site-Z reader remains available to the CTO's round-N analysis if the substitution is refused."
+    },
+    {
+      "item": "DELETION of kuzu_db, kuzu_ac7.db, kuzu_stitch_db or the stale .kuzu_nessie_load lock from the main workspace",
+      "reason": "Out of grant twice over and correctly so. This order's <paths> is the channel and the TO file; the main workspace is outside this worktree entirely and the amendment authorises a READ there and nothing else ('you write nothing there and you delete nothing there'). Independently, 3.0.0_SA_CVO's DIAL_RECORD_comp-kuzu_20260804.md:19 carries a standing do-NOT-delete on kuzu_ac7.db (tied to open NFRA_GLOBGRPH.ITEM-3) and lists kuzu_db as HISTORICAL with 'deletions ruled-not-taken'. They are DECLARED in row W2-S28 and in the record, which is the act this order does support."
+    },
+    {
+      "item": "Opening kuzu_db to confirm what it contains",
+      "reason": "The BOUNDS forbid running an engine or creating a local graph anywhere, and kuzu.Database CREATES an absent store on open (3.0.0_SA_CVO, ADJUDICATION_v1 C-S20), so an 'inspection' could have manufactured the very thing this cell retires. Its contents are therefore reported from its BUILD MANIFEST, a plain file read, with the grain of that claim stated wherever the figure appears."
+    }
+  ],
+  "surprises": [
+    "NFRA_CLDGRPH-W2-S28: MAIN_WORKSPACE_LOCAL_DB_COUNT=0 is TRUE and independently measured, but the census that produces it is scoped to ONE NAME; an unscoped read of the same directory in the same tick shows three other local Kuzu stores -- kuzu_db (9,224,192 B, manifest: 1,166 nodes / 2,488 edges of THIS graph, built 2026-06-12 from snapshots/20260612/graph-20260612.tar.gz), kuzu_ac7.db and the placed kuzu_stitch_db -- plus a stale .kuzu_nessie_load lock whose name the census cannot match. All are already carded by 3.0.0_SA_CVO with an explicit do-NOT-delete on two, so this is a D8-AC5 reading input about what FWD-7's 'no local copy left' means, not a missed artifact and not a criterion failure. OBSERVATION/INERT.",
+    "NFRA_CLDGRPH-W2-S29: D8-AC1 and D8-AC2 each invoke two_machines.sh, and every run of that script IS a fresh paired ask against two machines -- while the order's BOUNDS cap the paired ask at 'at most two attempts'. Running both criteria literally leaves no attempt for the re-run the face itself reserves for a moved pointer. This pass ran the script twice, recorded BOTH runs whole, and derived D8-AC2's count from the same run that produced D8-AC1's, discarding nothing. OBSERVATION/INERT."
+  ],
+  "session_log": "TO-CG-D-8, the closing pass for FWD-7 and the LAST order of round 4 for this slot. Worker 0.9.0_WK_NFRA_CLDGRPH~2 on branch wk-cldgrph-2-d7, worktree C:/tmp/wk-cldgrph-2-d7, HEAD at hand-off 915d75c4bf (the issuer's merge of CLOUD carrying the D-7 drain @173a1d8c90 and the switch-off), work commit d25fcb88e5. PUSH STATE: LOCAL -- never pushed, never merged, never rebased.\nRE-GROUNDING FIRST, all premises TRUE: D-7's proof instance validates rc=0 at this HEAD (8 rows, 0 violations, 16 of 16 surprises resolving); step-log row seq=20 carries the switch-off line, quoted verbatim into the record; and the amendment's independent read of the MAIN workspace by absolute path returns 0 with grep rc=1, over a directory proven to exist and hold 69 entries, with a positive control of 2 on the same listing.\nTHE ACTS: two scripts written into the deliverables folder (two_machines.sh, gateway_no_db.sh); the second machine's absence read by SSM (READ ONLY -- hostname, date, find, wc); a single-machine SHAKEDOWN of each transport BEFORE spending a paired attempt (the gateway curl alone at 14:19Z, the laptop client alone before it) so that an instrument defect could not be mistaken for a disagreement between machines; then TWO paired asks, both agreeing on the first try. Both transcripts are in the record whole.\nTWO DEVIATIONS, BOTH STATED AND BOTH FILED AS ROWS. (1) D8-AC2's pipeline was applied to the recorded stdout of the D8-AC1 run rather than to a third firing of the script, because each firing is a paired ask and the BOUNDS cap those at two; the bytes are the same bytes the criterion's own pipeline would have filtered, the cross-check against the other attempt returns the same 1, and the filter was shown able to return 2 (row W2-S29). (2) The unscoped read of the main workspace found three other local Kuzu stores beside the retired one, one of them a 1,166-node June copy of this graph by its own manifest, all already carded by 3.0.0_SA_CVO with a do-NOT-delete on two -- declared, not touched, and carried into D8-AC5 as a reading input (row W2-S28).\nNOTHING WAS WRITTEN on the second machine, nothing to S3, no engine was run, no local graph was created or opened anywhere, and no code was edited by this order.",
+  "compiler_tools": [
+    {
+      "tool": "comp-read (mandated before the ask)",
+      "invocation": "python .tools/comp-read org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.7.0_AE_CloudOps~T/CG-s-4.serving-service.result.md --for \"the exact SSM send-command and curl used from the gateway host and the response shape\"",
+      "result": "180 lines / 7 sections; the deciding regions were 'Live exercise' (149-167) and the CG-s-5 handoff (170-176), which give the shape used here verbatim: POST one UTF-8 Cypher statement to http://projection.opal-globgrph.local:8181 with Content-Type: text/plain, response {rows, vintage, age_line, manifest_sha256, artifact_prefix}. The recorded gateway response at this pin matches that shape field for field."
+    },
+    {
+      "tool": "comp-read (the prior ruling on the residue the unscoped read found)",
+      "invocation": "python .tools/comp-read org/tier1_exec/3.0.0_SA_CVO/deliverables/DIAL_RECORD_comp-kuzu_20260804.md --enumerate 'kuzu_db'",
+      "result": "1 hit across 106 lines, band PROSE, line 19: 'P7 residue audit | CENSUS DONE, deletions ruled-not-taken | NECESSARY: kuzu_nessie_db(+manifest) ... HISTORICAL: kuzu_db (Jun-12 scratch, 1,166 nodes) ... HISTORICAL-AT-RISK (do NOT delete): kuzu_ac7.db + kuzu_ac_traversals.py ... AT-RISK: kuzu_stitch_db = K4'. This is why row W2-S28 is filed INERT: the artifacts are adjudicated, and what is open is a reading, not a discovery."
+    },
+    {
+      "tool": "aws ssm (the second machine, READ ONLY)",
+      "invocation": ".tools/aws ssm send-command --cli-input-json file://<payload> ; .tools/aws ssm get-command-invocation",
+      "result": "4 invocations, all Status=Success on i-07dccb1615503ac99 (ip-172-31-89-135.ec2.internal): a connectivity probe, a transport shakedown, the absence read (0 of 32,220 with control 1) and the paired asks. The payloads are written to a file by python and passed as --cli-input-json because MSYS/Git-Bash rewrites a bare `/` in argv into the Git installation root, which would have searched the wrong filesystem and returned a confident zero."
+    }
+  ]
+}
