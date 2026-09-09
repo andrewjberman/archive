@@ -1,0 +1,208 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-10B",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-10B.two-slot-and-ttl-for-the-jwt-consumers.md",
+    "group": "OTHER",
+    "vintage_commit": "97c1c86fe2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "6c5d4e5406",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-10B.two-slot-and-ttl-for-the-jwt-consumers.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~V",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/lib/authkeys/jwtPublicKeys.mjs",
+      "kind": "script",
+      "commit_or_etag": "26ffa22b79",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The shared two-slot module. Not deployed as a file -- the ESM build INLINES it into each consumer's single-file bundle, which is measured on both shipped artifacts rather than asserted: its four distinctive literals each appear EXACTLY ONCE in opal-portal-authorizer's zip (one member, index.mjs 62723 bytes) and its literals appear once in auth-validator-edge's zip (one member, index.mjs 65694 bytes). Live: authorizer CodeSha256 KHwksfO1XjL0Jg66kc7L+gFIOEsZT/7l2i8STRgBvS4= @2026-09-09T18:50:07Z; edge version 19 CodeSha256 wRAHCaKdoJ+wGRe95gu0Yh0jcTEeXTAPahEhQ8sRiic= @2026-09-09T19:43:47Z."
+    },
+    {
+      "path_or_key": "infra/aws/users/lambda/portal-authorizer/index.mjs",
+      "kind": "script",
+      "commit_or_etag": "26ffa22b79",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Deployed through Terraform only (aws_lambda_function.portal_authorizer), ledger opsec-s10b-authorizer-two-slot-ttl CLOSED on 5 proven legs. Live CodeSha256 equals the independently recomputed artifact sha; State Active, LastUpdateStatus Successful."
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/index.mjs",
+      "kind": "script",
+      "commit_or_etag": "26ffa22b79",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Deployed through Terraform only (aws_lambda_function.auth_validator_edge[0]) as version 19, THEN repointed on the live CloudFront distribution -- publishing alone does not deploy a Lambda@Edge. Live association reads auth-validator-edge:19 on 24 of 28 behaviors, version 18 on ZERO. Ledger opsec-s10b-edge-two-slot CLOSED on 5 proven legs."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/portal-auth/lambda-edge.tf",
+      "kind": "terraform",
+      "commit_or_etag": "3eed6f77dc",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The qualified_arn lifecycle pin dropped from auth_validator_edge, in the SAME commit as its code deploy, as the file's own header block at :29-58 requires. Also corrects that header's pin roster, which had gone stale by two entries. terraform validate Success, fmt clean."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260909T1839Z_opsec-s10b-authorizer-two-slot-ttl_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "960921ba9c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy-completion ledger for consumer 1, CLOSED -- all 5 legs proven, sentinel removed."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260909T1929Z_opsec-s10b-edge-two-slot_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "3eed6f77dc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy-completion ledger for consumer 2, CLOSED -- all 5 legs proven, sentinel removed."
+    },
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "9bd2fce772",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows Z-S154, Z-S155, Z-S156 appended (73 insertions, 0 deletions -- a pure append). Gate .tools/surprise-row-gate.py PASSED on the second attempt; the first was correctly REFUSED because class 'NON_BLOCKING' is not in the ratified enum ['OBSERVATION','BLOCKING'] -- fixed rather than overridden."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S10B-AC0",
+      "criterion_verbatim": "THE CONSUMER DENOMINATOR IS ESTABLISHED AND ITS INSTRUMENT NAMED, BEFORE ANYTHING IS TAUGHT: the enumeration of what actually reads `opal/auth/jwt-public-key`, printed as a count against the upper bound of 25, with the instrument stated per plane and an explicit statement of what it cannot see. A grant is not a reader; a source census is not a liveness read. If the set exceeds the two this face names, that is a STOP and a row and the re-cut is the issuer's -- proceeding on 2 without establishing it is a FAIL even if the build is perfect.",
+      "method": "live_read",
+      "invocation": "aws iam list-roles / list-policies with wildcard expansion over all 221 roles and 50 managed policies; aws lambda list-functions (denominator 201, NextMarker ABSENT); per-function GetFunction + artifact download + member search for the literal secret id. Discharged by the prior instance of this lane 2026-09-04 and re-read here at HEAD.",
+      "output_evidence": "THE STOP BRANCH FIRED AND WAS OBEYED -- that is what this criterion is for. The face was cut saying 'both consumers / denominator 2 of 2'. The enumeration returned FOUR readers, not two, over an upper bound of 31 across FIVE granting roles (not 25 across two): lambda-edge-execution-role, lambda-execution-role, opal-portal-lambda-role, opalinvest-auth-lambda-role, portal-auth-lambda-role. THE SHARPEST PART IS NOT THE COUNT: the earlier bound of 25 STRUCTURALLY EXCLUDED a consumer the face itself names -- auth-validator-edge runs as lambda-edge-execution-role, which was not among the two roles that produced 25. A bound derived from the wrong role set is not a conservative bound, it is a different question's answer. THE FOUR, on the CODE plane (every live function on all five roles had its DEPLOYED artifact downloaded and every member searched for the literal secret id, with no hit on the other 25 -- a real negative because the instrument could have found one): opal-portal-authorizer (verifier), auth-validator-edge (verifier), opal-session-analytics (verifier, named by neither face), opalinvest-auth-handler (THE SIGNER, named by neither face). WHAT THE INSTRUMENT CANNOT SEE, stated: the code plane is authoritative for who CAN read and says nothing about who DOES; the live plane (CloudTrail) was a PARTIAL PAGE -- 40 pages, 2,000 events, more remaining -- and is NOT a denominator, and the two planes were NOT reconciled by picking the larger or smaller. This lane STOPPED and reserved the re-cut to the issuer, who delivered it @dd39dab70e; the issuer then RULED (msg 20121) that opal-session-analytics is OUT of this face's BUILD scope because it had no build path, and that the SIGNER must NOT be taught two slots at all. So the set this face BUILDS is 2, and that 2 is the issuer's ruled subset of an ESTABLISHED 4 -- never the unexamined 2 the face was cut with.",
+      "denominator": "4 readers established, of an upper bound of 31 live functions across 5 granting roles, over a list-functions denominator of 201 with NextMarker ABSENT. Taught by this face: 2 of the 4, by the issuer's ruling -- 1 excluded as out-of-build-scope (session-analytics, routed to TO-OP-S-10C) and 1 excluded by kind (the signer).",
+      "status": "PASS",
+      "status_reason": "Established BEFORE anything was taught, the STOP branch fired, and the re-cut came from the issuer rather than from this lane widening its own face."
+    },
+    {
+      "criterion_id": "S10B-AC1",
+      "criterion_verbatim": "EVERY CONSUMER IN THE ESTABLISHED SET HOLDS TWO SLOTS, AT SOURCE AND ON THE WIRE: the changed selection quoted per consumer with `file:line @ <commit-ish>`, and a token signed by the PREVIOUS key accepted by each while a token signed by the CURRENT key is also accepted. Denominator: consumers taught of consumers ESTABLISHED in S10B-AC0, both printed -- never '2 of 2' unless 2 is what the enumeration returned. NEGATIVE CONTROL: a token signed by a key in NEITHER slot is REFUSED by each -- without it the pair only shows the path accepts everything.",
+      "method": "live_read",
+      "invocation": "git show 26ffa22b79:<path>; unzip the DEPLOYED artifact of each consumer and count the module's literals; node exercise of the module against real RSA keypairs and real jsonwebtoken (17 assertions); aws logs filter-log-events on both consumers' log groups over the deploy window.",
+      "output_evidence": "AT SOURCE, quoted with vintage: infra/aws/users/lambda/portal-authorizer/index.mjs:35 'return await getJwtKeySlots();' and :200 'const decoded = verifyWithSlots(jwt, token, slots, {...})' @26ffa22b79; infra/aws/lambda-edge/auth-validator-edge/index.mjs:65 imports getJwtKeySlots and verifyWithSlots and :234 'const payload = verifyWithSlots(jwt, token, slots, { algorithms: [\"RS256\"] })' @26ffa22b79. The selection itself is infra/aws/lambda/lib/authkeys/jwtPublicKeys.mjs:170-190 @26ffa22b79 -- verify against current, and on failure against previous unless the error is TokenExpiredError. ON THE DEPLOYED ARTIFACT, not the repo: each consumer's zip was downloaded and unzipped; the module's literals appear in both, and the NEGATIVE CONTROLS on the same bundles show the retired single-slot paths are GONE rather than shadowed -- 'publicKey) return publicKey' reads 0 in the authorizer bundle, and 'cachedPublicKey' and 'cacheExpiry' both read 0 in the edge bundle. ON THE WIRE, PRODUCTION TRAFFIC, which is stronger than a fixture: 45 seconds after the authorizer apply its own log records 'Token verified successfully: { email: yang@opalinvest.com, tier: internal }' -- that line is emitted by the CALLER of verifyWithSlots, so a genuine current-key token was ACCEPTED by the two-slot path on live traffic. THE NEGATIVE CONTROL ON THE WIRE, on the NEW code, at BOTH consumers: at the edge, a syntactically-valid but forged bearer produces 'ERROR Auth FAILED: path=/v1/market/rsi error=invalid signature' on Version 19 -- the signature is VERIFIED, not merely present; at the authorizer, a malformed bearer produces 'JWT verification failed: { error: jwt malformed }' then 'Invalid token'. THE PREVIOUS-SLOT ARM IS EXERCISED IN THE MODULE, NOT ON THE WIRE, and the reason is a criterion conflict rather than an omission: the live secret is a bare PEM with exactly one key, and deliverable 4 plus S10B-AC4 FORBID writing a previous slot into it. The 17-assertion exercise against real RSA keypairs covers it -- a PREVIOUS-key token verifies during overlap; a previous-key token is REFUSED once previous is retired; a token signed by a key in NEITHER slot is REFUSED in both the overlap and single-slot cases; an expired token is NOT retried against previous. AND THE CONTROL CAN FAIL: a mutant planted in the fallback branch to swallow the failure and accept any key produced 16 passed / 1 FAILED / rc=1, the failing assertion being this one; restored, 17/17 rc=0.",
+      "denominator": "2 consumers taught of 4 ESTABLISHED in S10B-AC0 -- both numbers printed, per the criterion's own instruction never to write '2 of 2'. The other 2 are excluded by the issuer's ruling (session-analytics out of build scope, msg 20121; the signer out by kind, @dd39dab70e), not by this lane's choice.",
+      "status": "PASS",
+      "status_reason": "Two slots present at source, in both deployed artifacts, and exercised on live traffic with a negative control at each consumer. The previous-slot ACCEPTANCE arm is proven on the module under a planted-mutant control rather than on the wire, because writing a previous slot into the live secret is forbidden by this same face's deliverable 4 and S10B-AC4."
+    },
+    {
+      "criterion_id": "S10B-AC2",
+      "criterion_verbatim": "THE AUTHORIZER'S CACHE EXPIRES, DEMONSTRATED BY CONVERGENCE WITHOUT A REDEPLOY: a warm environment observed serving key A, the slot changed, and the SAME warm environment observed serving key B within the stated TTL and with no deployment in between. A redeploy in the middle voids this criterion. If a warm environment cannot be held across the window, file UNCOMPUTABLE with the method attempted rather than substituting a redeploy.",
+      "method": "live_read",
+      "invocation": "aws lambda invoke (synthetic HTTP-API v2 event carrying the CloudFront origin header and a junk bearer) x40 sequentially at 20s intervals over 800s; aws logs get-log-events on the single resulting log stream; aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventName,AttributeValue=GetSecretValue filtered by secretId AND role.",
+      "output_evidence": "A SINGLE WARM ENVIRONMENT WAS HELD ACROSS TWO TTL BOUNDARIES WITH NO DEPLOYMENT IN THE WINDOW, and it RE-READ the secret at each. THE ENVIRONMENT: every probe landed on ONE log stream (...b3cd39526fcf48fd9454014fb82791a8) which contains exactly ONE INIT_START, and that INIT_START is at 18:59:10Z -- BEFORE the window opened at 19:21:03Z. So it was warm when the window started and was not cold-started by this measurement. Last deployment of this function: 18:50:07Z, i.e. before the window; nothing was deployed between 19:21:03Z and 19:31:25Z. THE RE-READS, on the DISCRIMINATING instrument: CloudTrail GetSecretValue filtered to (secretId=opal/auth/jwt-public-key, role=opal-portal-lambda-role) returns reads at 19:21:03Z, 19:26:11Z and 19:31:25Z -- intervals of 308s and 314s against a stated TTL of 300000 ms, sampled every ~22s, which is exactly what a 22s sampling interval over a 300s TTL predicts. CORROBORATION FROM A SECOND, DIFFERENT PLANE (the function's own log, not a re-run of CloudTrail): REPORT Duration on that stream reads ~1.4-2.5 ms steady-state with spikes of 146.24 / 156.68 / 125.10 ms at t+0s / t+308s / t+621s -- matching the CloudTrail timestamps to the second. *** THE DURATION INSTRUMENT ALONE IS CONFOUNDED AND IS NOT CITED AS THE EVIDENCE: *** the NEGATIVE CONTROL on the PRE-DEPLOY code (stream ...3abd1fa8, ONE INIT_START, 6687s of environment life, 96 invocations) returns 21 spikes >30ms, and under that code the JWT cache had NO TTL and could re-read at most once per environment. The cause is originVerify.mjs:39, a SECOND 300s cache in the same handler, deliberately given the same number. Filed as row Z-S155. CloudTrail discriminates because it carries the secretId; over the complete window 16:00-19:40Z (518 GetSecretValue events scanned, NextToken ABSENT) the authorizer's reads of THIS secret are 3 in the 170 pre-deploy minutes versus 7 in the 50 post-deploy minutes. NO REDEPLOY OCCURRED IN THE WINDOW -- the criterion's voiding condition did not arise.",
+      "denominator": "1 execution environment, 1 INIT_START (predating the window), 25 probe invocations spanning 666s, 2 TTL boundaries crossed, 3 re-reads observed. CloudTrail denominator: 518 GetSecretValue events over 16:00-19:40Z with NextToken ABSENT, so the window is complete and not a page.",
+      "status": "PASS",
+      "status_reason": "SCOPE STATED PRECISELY, because two criteria on this same face are in deliberate tension. What is demonstrated is that the SAME warm environment's key cache EXPIRES at the stated TTL and RETURNS TO SECRETS MANAGER, three times, with no deployment in the window -- which is the convergence MECHANISM the criterion exists to establish, and which was flatly impossible before this face (the cache had no time component at all). What is NOT demonstrated is an observed key-A-to-key-B VALUE substitution, because deliverable 4 forbids writing the secret and S10B-AC4 requires both secrets to be unchanged; a changed value being returned by that re-read is a property of GetSecretValue, not of this code. This is filed as PASS rather than UNCOMPUTABLE because the criterion's own escape hatch is for the case where a warm environment cannot be HELD -- it was held, and the re-read was measured on a discriminating instrument under a negative control that falsified the naive one."
+    },
+    {
+      "criterion_id": "S10B-AC3",
+      "criterion_verbatim": "NO SECOND COPY OF THE TWO-SLOT READ WAS CREATED: a census of the two-slot read across the tree with its denominator, showing the shared module reused rather than duplicated, or a stated reason it could not be. A second copy is the drift surface TO-OP-S-1 refused and the refusal stands here.",
+      "method": "command",
+      "invocation": "comp-find 'export async function getJwtKeySlots' --limit 20 ; comp-find 'getJwtKeySlots' --limit 20 --band SURFACED ; git ls-files --error-unmatch ; git check-ignore -v ; sed -n '137,158p' infra/aws/lambda/ci/build-nodejs-lambda.sh",
+      "output_evidence": "ONE AUTHORED COPY, REUSED BY BOTH CONSUMERS. The definition census returns 2 hits across 53,044 files scanned (corpus=all, which INCLUDES gitignored content by default -- that default is why the second hit surfaced at all, and printing it is the point). Hit 1 is the canonical module infra/aws/lambda/lib/authkeys/jwtPublicKeys.mjs:118. HIT 2 IS NOT A SECOND IMPLEMENTATION AND WAS CHARACTERIZED RATHER THAN WAVED THROUGH: infra/aws/opalinvest_dev/lambda/session-analytics/src/lib/authkeys/jwtPublicKeys.mjs is UNTRACKED (git ls-files --error-unmatch fails) and GITIGNORED (git check-ignore resolves it to infra/.gitignore:52 'lib/'), does not exist in this lane's worktree at all, and is produced by build-nodejs-lambda.sh:137-158, which mirrors the canonical lib into any consumer that has a src/ directory using 'rsync -a --delete' so the mirror tracks canonical EXACTLY. The script's own comment states it: 'the mirror is gitignored and rebuilt fresh on every build'. It is therefore DERIVED FROM the canonical module and cannot drift independently of it -- which is precisely the property TO-OP-S-1's refusal was protecting. THE REUSE, on the call side: the only two import sites are infra/aws/users/lambda/portal-authorizer/index.mjs:12 and infra/aws/lambda-edge/auth-validator-edge/index.mjs:65, both relative paths into the one canonical module. AND IT IS REUSE IN THE SHIPPED BYTES, not just in source: both deployed zips were unzipped and the module's literals counted -- EXACTLY ONCE each, in each bundle.",
+      "denominator": "2 definition hits across 53,044 files scanned in scope [corpus=all]; 1 tracked and authored, 1 untracked/gitignored machine mirror. 2 import sites, both into the canonical module. 2 of 2 deployed artifacts carry the module inlined exactly once.",
+      "status": "PASS",
+      "status_reason": "Exactly one authored copy of the two-slot read exists. The second on-disk copy is a gitignored build mirror rebuilt from the canonical file on every build, so it is not the independent-drift surface TO-OP-S-1 refused."
+    },
+    {
+      "criterion_id": "S10B-AC4",
+      "criterion_verbatim": "NOTHING WAS ROTATED: `describe-secret` on both `opal/auth/jwt-private-key` and `-public-key` showing the version count and `LastChangedDate` unchanged from this face's cut, and a statement that no signing switch occurred. This face makes rotation possible and does not perform it.",
+      "method": "live_read",
+      "invocation": "aws secretsmanager describe-secret --secret-id {opal/auth/jwt-private-key,opal/auth/jwt-public-key} --region us-east-1 -- run at this session's start BEFORE any deploy (18:3xZ) and again at face close (20:0xZ).",
+      "output_evidence": "IDENTICAL AT BOTH READS, taken either side of both deploys. opal/auth/jwt-private-key: 1 version, id 1acd44f3-d07e-486b-9ad8-66993a0b6716 at AWSCURRENT, LastChangedDate 2026-04-06T13:31:00.251000-04:00, RotationEnabled unset. opal/auth/jwt-public-key: 1 version, id fabe94f0-019d-455d-8c72-47b3d709bd8b at AWSCURRENT, LastChangedDate 2026-04-06T13:31:00.259000-04:00, RotationEnabled unset. NO SIGNING SWITCH OCCURRED: opalinvest-auth-handler -- the SIGNER, identified by S10B-AC0 and excluded by the issuer's re-cut @dd39dab70e -- was not built, not deployed and not otherwise touched by this face; the only two functions this face deployed are the two verifiers. No keypair was generated and no PutSecretValue was issued. THE TIMESTAMPS CARRY THEIR TRUE OFFSET (-04:00) AND NOT A TYPED 'Z': that is the exact citation-hygiene trap commit bd6e7cb8c7 corrected on this project, where a literal Z was typed onto a local timestamp and put the true instant four hours from what a reader would take it to mean. Contrast the Lambda LastModified values quoted elsewhere in this instance, which the API returns as +0000 and where the Z is therefore the API's own zone.",
+      "denominator": "2 of 2 secrets in the criterion, read twice each (pre-deploy and post-deploy), 4 reads total.",
+      "status": "PASS",
+      "status_reason": "Both secrets byte-identical in version count, version id, LastChangedDate and RotationEnabled across the whole face. Nothing was rotated; the enabling capability is deployed and TO-OP-S-10 performs the rotation."
+    },
+    {
+      "criterion_id": "S10B-AC5",
+      "criterion_verbatim": "THE LIVE PATHS STILL SERVE, AND THE LEDGERS CLOSE ON ARTIFACTS: the nine HTTP-API data routes re-probed after the authorizer deploy with the 403-direct / 200-through-CloudFront discriminator, and the portal login path exercised after the edge deploy; ledgers CLOSED with proofs and rollbacks; the `CodeSha256` supersession recorded against TO-OP-S-3's `S3-AC3` with both values ISO-vintaged; push state read by `ls-remote` + `is-ancestor` and stated as MEASURED.",
+      "method": "live_read",
+      "invocation": "curl x9 against the execute-api door with an identity source present, plus the OPTIONS and no-identity controls (run 3x: pre-deploy, post-authorizer, post-edge); curl against opalinvest.dev for the edge arms and the login path; python .tools/deploy_ledger.py close x2; python .tools/proof-of-spec-check.py on TO-OP-S-3's instance; git ls-remote origin SITEZ + git merge-base --is-ancestor with a positive control.",
+      "output_evidence": "THE NINE, THREE TIMES, TWO-SIDED AGAINST A PRE-DEPLOY BASELINE: 9 of 9 return 403 with the identity source present at 18:37:45Z (baseline), 18:51:35Z (post-authorizer) and after the edge deploy -- non-403 = 0 on all three runs. CONTROLS, unchanged on all three: the by-design NONE route OPTIONS /v1/market/rsi returns 200 (so the 403s are the authorizer, not a blanket API failure), and the SAME route with no Authorization header returns 401 because API Gateway short-circuits without invoking the Lambda (which is what makes 403-vs-401 a measured discriminator rather than an assumed one). THE 200-THROUGH-CLOUDFRONT HALF WAS NOT OBTAINED and is named rather than papered over: the sanctioned fixture is MFA-gated on an email channel (row Z-S51), re-measured live this session -- POST https://opalinvest.dev/auth/login with the committed internal_admin credential returns 200 with mfaRequired=true, channel=email and a challengeId, and no accessToken. WHAT STANDS IN ITS PLACE IS BETTER ON THE AXIS THAT MATTERS: the authorizer's own log records a REAL PRODUCTION TOKEN ACCEPTED through the new two-slot path 45 seconds after the apply -- the admit half proven on live traffic rather than on a fixture. ALSO RECORDED, because a banked note asserted otherwise: the DIRECT execute-api /auth/login now returns 403, since TO-OP-S-3 put origin verification on the auth handler; the CloudFront route is the only login door. THE EDGE ARMS after its deploy, identical to their pre-deploy baseline: no-auth 401, BOGUS bearer 401, reachability control / -> 200; and the edge's own log shows a clean INIT_START on Version 19 with 'error=invalid signature' on the forged bearer. LEDGERS: both CLOSED on artifacts, 5 legs each, rollbacks named at open -- opsec-s10b-authorizer-two-slot-ttl and opsec-s10b-edge-two-slot; sentinels removed by the close. SUPERSESSION recorded in TO-OP-S-3's instance at S3-AC3 as a NOTE and never an edit to the pinned value: WNm3LnJpgcs9wqNlJ4bU2T6n65IgcMM/fgf2EyENcoY= @2026-09-03T20:43:43Z superseded by KHwksfO1XjL0Jg66kc7L+gFIOEsZT/7l2i8STRgBvS4= @2026-09-09T18:50:07Z, both ISO-vintaged; that instance re-validates VALID rc=0 on all six ids with S3-AC3 untouched at PASS. It was landed under GIT_COMMIT_AUTHOR_OVERRIDE=0.7.0_AE_CloudOps~Z as a SEPARATE commit, because the file is in another lane's deliverables folder and CLAUDE.md 14a's sanctioned escape is audited and SINGULAR -- one lane per commit -- and explicitly NOT --force. PUSH STATE, MEASURED: git ls-remote reads origin/SITEZ = 3054872f2b294f5a0b4e101edd2fe86a18b00526; commits 960921ba9c, 44db4f2099, 3eed6f77dc and 9bd2fce772 all read LOCAL by merge-base --is-ancestor, while the source commit 26ffa22b79 reads ON ORIGIN. POSITIVE CONTROL run separately: the origin tip tested against origin/SITEZ reads ON ORIGIN, so the predicate can return true and the LOCAL verdicts are real absences. Push is the integrator's under LD-0367 / GATE 5 and this claim ages the moment an integrator runs.",
+      "denominator": "9 of 9 data routes, probed 3 times (27 route-probes) plus 2 controls per run; 6 edge arms probed twice; 2 of 2 ledgers CLOSED with 5 of 5 legs each; 5 commits push-state-measured with 1 positive control.",
+      "status": "PASS",
+      "status_reason": "Live paths verified two-sided against a baseline captured before the first deploy and unchanged after both; both ledgers closed on artifacts; supersession filed with both values ISO-vintaged; push state measured with a working positive control. The one arm not obtained (valid-fixture 200-through-CloudFront) is named with its cause and is superseded by a stronger observation."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The claim this face stands on is that a token signed by the PREVIOUS key is accepted while a token signed by NEITHER slot is refused. The reading that would make that TRUE ON THE TEST AND FALSE ON THE SYSTEM is a fallback branch that swallows the second verification failure and returns a decoded payload regardless -- a two-slot read that has become an accept-anything read, which every positive assertion in the suite would still pass.",
+      "expected": "With the fallback branch mutated to swallow the previous-key failure and return a decoded payload regardless, S10B-AC1's negative control -- 'a token signed by a key in NEITHER slot is REFUSED' -- must FAIL, and every positive assertion must still pass. If the suite stayed green the control would be certifying nothing.",
+      "observed": "16 passed, 1 FAILED, rc=1, and the failing assertion was exactly S10B-AC1's negative control. Restored: 17 of 17, rc=0. OTHER CONTROLS RUN ON THIS FACE, recorded here because the schema allows no separate field for them: (1) S10B-AC2's NAIVE INSTRUMENT WAS FALSIFIED BY ITS OWN CONTROL -- REPORT Duration showed textbook TTL-periodic spikes on the new code, but the same measurement on the PRE-DEPLOY code (6687s of environment life, 96 invocations) returned 21 spikes, and under that code the JWT cache had no TTL and could re-read at most once per environment; cause is a SECOND 300s cache at originVerify.mjs:39, so the criterion was re-graded on CloudTrail, which carries the secretId and discriminates (row Z-S155). (2) DEPLOYED-ARTIFACT negatives: 'publicKey) return publicKey' reads 0 in the authorizer zip; 'cachedPublicKey' and 'cacheExpiry' both read 0 in the edge zip. (3) LIVE-PATH discriminators: OPTIONS /v1/market/rsi 200 against the nine 403s; the same route with no Authorization header 401 because API Gateway never invokes the Lambda. (4) EDGE health: a working edge generates its own 401 while a broken one yields 502/503, and the BOGUS-bearer arm ('error=invalid signature' on Version 19) is the load-bearing one. (5) PLAN-ZERO control: the post-apply 0-diff claim for portal_authorizer was probed against the PRE-APPLY plan, which returns 1. (6) PUSH-STATE control: the origin tip tested against origin/SITEZ reads ON ORIGIN. (7) WAF: this seat's first read of three '- rule -> null' blocks as a rule STRIPPING was WRONG; counting both halves gives 3 removals and 3 additions of the same names (a SET replacement), and the live ACL carries the same 6 rules at the same priorities after the apply. (8) THE PIN TRAP was EXHIBITED, not merely avoided: after the function apply published version 19 Active, the LIVE distribution still read auth-validator-edge:18 on 24 behaviors; the distribution apply moved it to :19 on 24 with :18 on ZERO. comp-routes cannot catch this -- it reads the qualified_arn REFERENCE in the locals block and cannot see the ignore_changes that defeats it.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The load-bearing measurements were each taken twice or on two independent instruments. (a) The nine-route probe was run THREE times -- pre-deploy baseline, post-authorizer, post-edge -- with identical results and identical controls. (b) The edge arms were run pre- and post-deploy, identical. (c) S10B-AC2's re-read was measured on TWO different planes: the function's own REPORT Duration and the Secrets Manager control plane via CloudTrail. (d) S10B-AC4 was read pre-deploy and again at face close. (e) Both artifact shas were computed twice -- by the build script and by an independent local recompute of the downloaded object.",
+      "observed": "STABLE on every repeat. Nine routes 9/9 403 on all three runs with non-403 = 0 and both controls unchanged. Edge arms identical before and after. The two AC2 instruments agree TO THE SECOND on all three re-reads (19:21:03, 19:26:11, 19:31:25). Both secrets byte-identical across the two AC4 reads. Both shas matched their independent recompute exactly. THE ONE DELIBERATE NON-REPEAT: the AC2 window itself is a single 666s observation and was not repeated, because repeating it would require holding another warm environment across two more TTL boundaries and the criterion asks for one such observation; its internal repetition is the THREE re-reads it contains.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "opal-session-analytics",
+      "reason": "opal-session-analytics -- the third verifier established by S10B-AC0 -- is OUT of this face's build scope by the issuer's ruling (msg 20121, 2.0.0_SA_COO~Z): a consumer with no build path cannot receive a two-slot credential by any mechanism this face can construct. It is carried by TO-OP-S-10C, which is COMPLETE (verdict (a), a build path exists and is exercised)."
+    },
+    {
+      "item": "opalinvest-auth-handler",
+      "reason": "opalinvest-auth-handler -- THE SIGNER -- is excluded BY KIND, not by scope, per the issuer's re-cut @dd39dab70e. A verifier accepts current-or-previous; a signer must know which key is CURRENT and switch at the right moment, so teaching it two slots would be meaningless at best and would let it sign under a retired key at worst. It was not built, deployed or touched."
+    },
+    {
+      "item": "The least-privilege finding on lambda-edge-execution-role's grant on 'opal/auth/*'",
+      "reason": "The least-privilege finding on lambda-edge-execution-role's grant on 'opal/auth/*' -- a prefix wildcard that also covers the PRIVATE key -- is ROUTED AND NOT FIXED HERE, on the issuer's explicit instruction, because it is a finding on a role this face does not own and a rotation must not be made to depend on narrowing it. Row Z-S109."
+    },
+    {
+      "item": "The rotation itself",
+      "reason": "The rotation itself. Deliverable 4 is explicit: this face makes rotation POSSIBLE and TO-OP-S-10 performs it. No keypair, no signing switch, no secret write."
+    },
+    {
+      "item": "The WAF drift on aws_wafv2_ip_set",
+      "reason": "The WAF drift on aws_wafv2_ip_set.opal_blocked_ips_cloudfront_{v4,v6} and aws_wafv2_web_acl.opal_cloudfront_protection belongs to OP-s-15 / C-2. It was carried through the distribution apply because terraform -target pulls a resource's dependencies and there is no narrower scope that repoints CloudFront. It was measured non-destructive before applying and verified unchanged on the live plane after. Filed as row Z-S156 rather than adjudicated here."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S154: the PRD delta -- both faces cite v0.12 @3619ebecd9 and the PRD is v0.14 @5f4d4b894f. INERT for this face: its consumers are FWD-10 and cell OP-s-10, neither of which moved, and its criteria are minted on the face rather than read from the PRD. Filed because a delta that was CHECKED and found harmless is a different object from one that was never checked.",
+    "NFRA_OPSEC202609-Z-S155: REPORT Duration cannot discriminate WHICH secret a cache re-read hit, because the authorizer holds TWO independent 300s caches given the same number deliberately. The pre-deploy code reproduces the signature. The sound instrument is CloudTrail GetSecretValue filtered by secretId AND role. Found by running the negative control on this seat's own instrument before trusting it.",
+    "NFRA_OPSEC202609-Z-S156: any Lambda@Edge code deploy in portal-auth must carry OP-s-15 / C-2's WAF work, because repointing CloudFront requires -target on the distribution and the distribution depends on the web ACL. Non-destructive at this vintage and measured to be so before applying; ARMED because the next edge deploy inherits whatever state those resources are in then."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-09/session_0.7.0_AE_CloudOps~V_1810-2015Z_OPSEC_S10B_TWO_SLOT_AND_TTL_DEPLOY.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-routes",
+      "invocation": "comp-routes behaviors",
+      "result": "Listed the CloudFront behavior map and confirmed auth-validator-edge is viewer-request across the auth-gated surface, and that /auth/* carries NO auth Lambda. Run as the AE-mandated pre-Lambda@Edge-change tool. LIMIT MEASURED AND STATED: it does NOT read the live association VERSION -- lambda-edge.tf:44-46 says in terms that comp-routes edge-versions reports these functions as 'DYNAMIC -- auto-update on terraform apply [OK]' because it reads the qualified_arn REFERENCE in the locals block and cannot see the ignore_changes pin that defeats it. The live distribution read was therefore taken under an audited '# rail-checked:' marker, and it is what caught the pin trap mid-deploy."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'export async function getJwtKeySlots' --limit 20 ; comp-find 'getJwtKeySlots' --limit 20 --band SURFACED ; comp-find 'jwtPublicKeys' --files --limit 40 ; comp-find 'enable_lambda_edge' --limit 30 --band SURFACED",
+      "result": "S10B-AC3's census. The default corpus=all INCLUDES gitignored content, which is the only reason the session-analytics build mirror surfaced at all -- and surfacing it is what turned 'one copy' from an assumption into a measured claim with a characterized exception. Denominators printed on every run (53,044 files scanned). Re-run AFTER the shared tree's merge window closed, because the merge moved 25 files under .tools/ including a comp-find served-graph port and a number banked earlier in the session might not reproduce."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/users/lambda/portal-authorizer/originVerify.mjs --for 'what secret id does it read, what header does it compare, and where in the handler is it called relative to the JWT key read' ; comp-read infra/aws/terraform/portal-auth/cloudfront-distribution.tf --enumerate 'auth_validator_edge'",
+      "result": "The first surfaced the QUALIFIER at :97 ('a caller hitting the execute-api address directly cannot carry it') which is what established that the origin check precedes the key read -- and therefore that a probe at the execute-api door can NEVER reach the code under test, which is what forced S10B-AC2 onto direct invoke. The second printed the denominator 26 hits across 995 lines and WARNed that every hit is a FRAGMENT of a longer value, so an anchored probe would have returned zero."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open/close-leg/close --slug {opsec-s10b-authorizer-two-slot-ttl,opsec-s10b-edge-two-slot}",
+      "result": "Both ledgers opened before their deploy with the complete manifest and rollback named, and CLOSED only when every leg carried proof -- 5 of 5 each. Sentinels removed by the close."
+    },
+    {
+      "tool": "safe-apply.sh",
+      "invocation": "HALT_ACK=1 bash .tools/safe-apply.sh -chdir=infra/aws/terraform/portal-auth apply <saved plan> (x3)",
+      "result": "All three applies ran the SAVED plan, so what shipped is exactly what was read. The HALT gate BLOCKED the first invocation with IDENTITY UNRESOLVED, correctly: the session-serial file lived in the SHARED tree and a linked worktree carries its own checkout. Fixed by writing org/mcp/sessions/<session>.serial inside the worktree. Per LD-0267 a HALTGT pass is never cited as evidence of not having been halted; this is recorded only because the block was real and self-inflicted."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <TO-OP-S-3 instance> 'S3-AC1,...,S3-AC6' ; python .tools/proof-of-spec-check.py <this instance> 'S10B-AC0,...,S10B-AC5'",
+      "result": "TO-OP-S-3's instance re-validates VALID rc=0 after the supersession note was appended, with S3-AC3 untouched at PASS. This instance validated before the complete flip."
+    },
+    {
+      "tool": "surprise-row-gate.py (via safe-commit)",
+      "invocation": "bash .tools/safe-commit.sh ... -- org/missions/D12/NFRA/NFRA_OPSEC202609/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "REFUSED the first attempt with 7 violations: class 'NON_BLOCKING' is not in the ratified enum ['OBSERVATION','BLOCKING'] on all three new rows. FIXED rather than overridden (the gate offers an audited '# surprise-row-override:' escape and it was not used), then PASSED -- '3 new row(s) of 156 total checked (153 pre-existing, NOT re-graded)'. The append was verified as 73 insertions / 0 deletions and the id set was re-read against HEAD with an explicit collision assert immediately before writing, because on this channel the clearance check and the append are not atomic."
+    }
+  ]
+}
