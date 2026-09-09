@@ -181,6 +181,49 @@ under discussion would have returned the right answer to the question asked and 
 first three properties were about the timer I designed; the fourth is about defaults nobody chose,
 and it is the one most likely to keep this publisher quiet.
 
+### AMENDED 17:13Z -- battery blocks REMOVED on the issuer's ruling, and the widened read CLOSED
+
+`DisallowStartIfOnBatteries` and `StopIfGoingOnBatteries` both `True` -> `False`, together, because
+either alone leaves the run killable mid-publish. Ruled as a build-cell call rather than personal
+policy: sharpening (3) says the timer FIRES DAILY, and a task that refuses to start on battery on a
+laptop does not fire daily; the run is a `git status`, one bounded producer call and one small Put,
+already capped at one hour by (iii).
+
+**EXACTLY TWO REAL FIELDS MOVED, AND THE COUNT NEEDED CHECKING.** The diff flagged **three** rows.
+The third is `CimInstanceProperties`, which is the CIM **aggregate view** of the same object and
+necessarily differs wherever its constituents do -- verified by reading its own text, which shows
+`DisallowStartIfOnBatteries = False` and `StopIfGoingOnBatteries = False` and nothing else changed.
+Reported as "3 flagged, 2 real, 1 aggregate" rather than as "2", because the instrument said 3.
+
+### THE WIDENED READ, CLOSED
+
+The issuer asked for one line if the full object shows nothing else unchosen that changes **when**
+the timer fires. **It shows nothing else.** The read covered all 24 properties of the settings
+object AND the trigger, since "when" lives on the trigger and a settings-only read would have been
+scoped to the wrong half:
+
+| read | value | effect on WHEN it fires |
+|---|---|---|
+| `RunOnlyIfIdle` | False | none -- would have blocked on an active machine |
+| `RunOnlyIfNetworkAvailable` | False | none -- fires regardless; a network-less run FAILS loudly, which is wanted |
+| `Enabled` (task and trigger) | True | none |
+| trigger type | `MSFT_TaskDailyTrigger`, `DaysInterval 1` | daily, as designed |
+| `StartBoundary` | `2026-09-09T07:30:00` | 07:30 local |
+| `RandomDelay` | *(empty)* | none -- fires at 07:30, not smeared |
+| `Repetition` | *(no node in the exported XML)* | none -- fires once per day, not repeated |
+| `EndBoundary` | *(empty)* | none -- does not expire |
+
+Trigger XML in full: `<CalendarTrigger><StartBoundary>2026-09-09T07:30:00</StartBoundary>`
+`<ScheduleByDay><DaysInterval>1</DaysInterval></ScheduleByDay></CalendarTrigger>` -- minimal, with
+nothing unchosen in it.
+
+⚠ **One thing found that is NOT about timing and so does not reopen the read:** `RestartCount` is 0
+and `RestartInterval` is empty, so a run that FAILS is not retried. `StartWhenAvailable` rescues a
+*missed* fire, not a *failed* one. A failed publish therefore waits for the next day's fire, and that
+day renders SILENT -- correct, and stated so it is not mistaken for a retry that will happen.
+
+**The task is settled. No further device change under this order without a new ruling.**
+
 **(ii) `/ST 07:30` IS LOCAL TIME AND MOVES WITH THE CLOCK, AND IT IS BEFORE 13:00Z BOTH WAYS.**
 Today (EDT, UTC-4) it is **11:30Z**; after the November change (EST, UTC-5) it is **12:30Z**. Both
 precede the 13:00Z report, so the ordering `O21-AC1` grades survives the transition. Stated so a
