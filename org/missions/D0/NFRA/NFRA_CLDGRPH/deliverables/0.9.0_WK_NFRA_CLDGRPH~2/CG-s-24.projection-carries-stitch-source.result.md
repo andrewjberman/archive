@@ -1,177 +1,225 @@
-# CG-s-24 -- THE FOLD IS BUILT; THE JOIN IS BLOCKED ON A FROZEN TAXONOMY
+# CG-s-24 -- THE PROJECTION CARRIES THE STITCH SOURCE
 
 **TO:** `NFRA_CLDGRPH.TO-CG-F-4` · **cell:** CG-s-24 · **worker:** `0.9.0_WK_NFRA_CLDGRPH~2`,
-branch `wk-cldgrph-6-2` · **status: OPEN** -- F4-AC1 PASSES; F4-AC2, F4-AC3 and F4-AC4 are
-BLOCKING on `NFRA_CLDGRPH-W2-S45`. **Push state: LOCAL.**
+branch `wk-cldgrph-6-2` · **push state: LOCAL.**
+The served graph answers `GOLD_SCRIPT=1380` where it answered 0, and its VINTAGE line names the
+stitch that put it there.
 
 ```json
 {
   "cell": "CG-s-24",
   "to_id": "NFRA_CLDGRPH.TO-CG-F-4",
-  "outcome": "OPEN -- deliverable step 1 delivered and proven; steps 2-4 NOT taken, by the blocking row",
   "worker": "0.9.0_WK_NFRA_CLDGRPH~2",
   "branch": "wk-cldgrph-6-2",
   "push_state": "LOCAL",
 
-  "the_fold": {
-    "function": "infra/aws/globgrph/derive_runner.py fold_stitch_document (pure) + ingest_stitch_artifact (the S3 half)",
-    "called_from": "main(), last of the folds, immediately BEFORE drop_node_types/relabel_layers_by_node_type",
-    "contract": "additive, best-effort -- WARN: STITCH_INGEST_FAIL and the derive continues",
-    "guards": [
-      "sha256 of the artifact vs the marker's artifact_sha256 -- mismatch is a LOUD skip and the graph is left byte-identical",
-      "NODE_TYPE_LAYER membership -- an unmapped node_type is skipped, counted and named; folding one would make relabel_layers_by_node_type FAIL THE DERIVE CLOSED",
-      "both-ends resolution -- an edge is folded only if both endpoints resolve in THIS graph; a dangling edge is never created"
-    ],
-    "edge_types_folded": ["ROUTES_TO", "WRITES", "READS", "DERIVES_FROM", "STORED_IN"],
-    "fixture_counts": {"nodes": 3, "edges": 2, "skipped_dup": 1, "tests": "15 passed of 15"}
-  },
-
-  "the_vintage_carrier": {
-    "reader": "kuzu_nessie_load.read_stitch_vintage (ONE implementation, both engines)",
-    "into_pin": ["kuzu_incremental_refresh._read_head_tables", "kuzu_nessie_load's write_manifest call"],
-    "keys": ["stitch_built_at", "stitch_producer", "stitch_git_sha", "stitch_artifact_sha256",
-             "stitch_marker_last_modified"],
-    "onto_the_served_line": "projection_worker._age_line(vintage, manifest) appends 'Stitch source: <producer> built <built_at>.'",
-    "why_the_age_line": "no serve path calls _provenance.format_provenance_header; the served VINTAGE line is kuzu_cli._disclosure over four fields projection_server returns, and age_line is the only one reachable from this order's <paths> (row W2-S46)",
-    "delta_when_absent": "ZERO -- byte-identical to the pre-CG-s-24 sentence, asserted in the fixture test",
-    "prefix_preserved": "APPENDED not prefixed, so TO-CG-D-7's D7-AC3/D7-AC4 ('VINTAGE: Built from the estate as of') stay green"
-  },
-
-  "the_blocking_measurement": {
+  "the_gate_this_order_waited_for": {
     "row": "NFRA_CLDGRPH-W2-S45",
-    "stitch_artifact": {
-      "key": "s3://opal-313476888478-globgrph/stitch/stitch_graph.json",
-      "bytes": 38845013,
-      "sha256_verified_against_marker": true,
-      "distinct_node_types": 63,
-      "nodes": 29131
-    },
-    "node_types_absent_from_NODE_TYPE_LAYER": {
-      "GOLD_SCRIPT": 1380, "S3_DATA_KEY": 294, "REACT_QUERY_KEY": 94,
-      "PORTAL_COMPONENT": 22, "PORTAL_BUNDLE": 1
-    },
-    "consequence_unguarded": "relabel_layers_by_node_type raises NodeTypeLayerGap -> the nightly derive FAILS CLOSED, no commit, no marker",
-    "consequence_guarded": {
-      "nodes_dropped": 1791,
-      "edges_left_unresolvable": 2170,
-      "DERIVES_FROM": "216 of 216 lost",
-      "STORED_IN": "955 of 955 lost",
-      "WRITES": "309 of 949 lost",
-      "READS": "381 of 1191 lost",
-      "ROUTES_TO": "0 of 106 lost"
-    },
-    "ruling_needed_from": "1.0.0_SA_CTO (the map's own governance: every prior addition names a CTO arch-gate GO and a CVO re-sign)"
+    "cto_go": "20260909T2015Z (PRD v0.10 @4fc1bcb3e4 merged @04d9942aff; rule R17)",
+    "cvo_re_sign": "C-S40 @e7db04572e",
+    "entries_added": {"GOLD_SCRIPT": "pipeline", "REACT_QUERY_KEY": "portal",
+                      "PORTAL_COMPONENT": "portal", "PORTAL_BUNDLE": "portal",
+                      "S3_DATA_KEY": "aws"},
+    "node_type_layer_keys": 65,
+    "node_type_layer_by_layer": {"aws": 34, "portal": 18, "pipeline": 4, "ms": 7, "semctl": 2},
+    "cvo_census_agrees": "C-S40: 60 -> 65 keys; aws 33 -> 34; portal 15 -> 18; pipeline 3 -> 4; COND-A resource-type count 32 UNMOVED. Every number checked against the map committed here, not asserted.",
+    "go_line_provenance": "extracted programmatically from the CTO record's own backtick block (4 physical lines), never retyped -- row W2-S50 records that the face's inline quotation differs from it"
   },
 
-  "what_was_NOT_done_and_why": {
-    "image_act": "NOT TAKEN -- no build, no push, no tag moved",
-    "safe_apply": "NOT RUN -- no Terraform touched, no .tf file edited",
-    "never_2_entry": "NOT OPENED -- there was no image act to ledger",
-    "ad_hoc_derive": "NOT STARTED",
-    "reason": "the fold that could ship today carries NONE of the node types the accept names and loses 100% of the DERIVES_FROM and STORED_IN boundary edges; a seven-family NEVER-2 image act spent on that would have to be repeated after the ruling"
+  "the_fold": {
+    "function": "derive_runner.fold_stitch_document (pure) + ingest_stitch_artifact (S3)",
+    "guards": ["sha256 vs the marker", "NODE_TYPE_LAYER membership", "both-ends edge resolution"],
+    "stamp": "every node admitted under one of the five carries vocabulary=stitch-v1",
+    "fixture": "F4_TESTS=21 passed of 21, 11 named arms, 4 of them controls"
   },
 
-  "the_seven_families_UNTOUCHED": {
-    "read_at_utc": "2026-09-09T19:3xZ",
-    "families_by_digest": "7 of 7",
-    "families_on_latest": "0 of 7",
-    "distinct_digests": ["sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778"],
-    "revisions": {"globgrph-derive-runner": 7, "globgrph-projection-worker": 4,
-                  "globgrph-serving": 2, "globgrph-comp-learns-producer": 2,
-                  "globgrph-cse-producer": 2, "globgrph-fedobs-producer": 2,
-                  "globgrph-resource-summaries-producer": 2},
-    "note": "the ORDER's seven names resolve 3 of 7 -- row W2-S49"
+  "the_image_act": {
+    "ledger": "org/critical_paths/change_management/20260909T203713Z_cldgrph-cgs24-stitch-fold-image-and-sevenfamily-repin_deploy_completion.md",
+    "ledger_opened_utc": "2026-09-09T20:37:13Z",
+    "ledger_closed_utc": "2026-09-09T20:58:00Z",
+    "ledger_families_named": 7,
+    "codebuild": "globgrph-derive-build:f8abbe55-c611-4317-8df7-2edf15908de3 SUCCEEDED",
+    "source_commit": "27e4ac36de776c8da06df4179b8343f62c63392b",
+    "digest_before": "sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778",
+    "digest_after": "sha256:478d0a43742b2ed5a44631c6352b5713c5ba22f015d82a673cfb93428a9dae20",
+    "image_pushed_at": "2026-09-09T20:39:50Z",
+    "ecr_tags": ["20260909-203936", "latest"],
+    "latest_moved": true,
+    "families_pulling_latest": "0 of 7 -- all seven are pinned BY DIGEST, which is why the tag move is safe"
   },
 
-  "the_pre_fold_served_read": {
+  "the_seven_families": {
+    "globgrph-derive-runner": {"revision_before": 7, "revision_after": 8},
+    "globgrph-projection-worker": {"revision_before": 4, "revision_after": 5},
+    "globgrph-serving": {"revision_before": 2, "revision_after": 3},
+    "globgrph-comp-learns-producer": {"revision_before": 2, "revision_after": 3},
+    "globgrph-cse-producer": {"revision_before": 2, "revision_after": 3},
+    "globgrph-fedobs-producer": {"revision_before": 2, "revision_after": 3},
+    "globgrph-resource-summaries-producer": {"revision_before": 2, "revision_after": 3},
+    "on_new_digest": "7 of 7", "on_latest": "0 of 7",
+    "name_note": "the TRUE ACTIVE names; the order's cut named four of them without the globgrph- prefix and those four do not resolve (row W2-S49)"
+  },
+
+  "the_apply": {
+    "binary": ".tools/terraform.exe (91,104,424 B), never the PATH terraform",
+    "addresses": 18,
+    "addresses_note": "censused from a plan, not carried over; the order's 'ten' was E-2's, for a four-family act (row W2-S52)",
+    "unscoped_plan_pre": "Plan: 9 to add, 13 to change, 7 to destroy.  (22 addresses; NEVER applied)",
+    "foreign_left_as_found": ["aws_glue_partition.tool_activity[\"rolling_log\"]",
+                              "aws_glue_partition.tool_activity[\"rolling_log_summary\"]",
+                              "aws_glue_partition.tool_activity[\"routing\"]",
+                              "aws_sns_topic_subscription.critical_surface_alerts_email"],
+    "targeted_plan_pre": "Plan: 7 to add, 11 to change, 7 to destroy.  (18 addresses, 0 foreign)",
+    "apply": "Apply complete! Resources: 7 added, 11 changed, 7 destroyed.  rc 0",
+    "targeted_plan_post": "No changes. Your infrastructure matches the configuration.",
+    "halt_gate": "blocked the first attempt on IDENTITY UNRESOLVED; satisfied as it instructs by naming this worker in the gitignored org/mcp/sessions/<session>.serial, never overridden (row W2-S53)"
+  },
+
+  "the_derive": {
+    "task": "arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/deee298ca1bd422fa3fcc124cf42a86f",
+    "task_definition": "globgrph-derive-runner:8",
+    "image_is_the_new_digest": true,
+    "started_utc": "2026-09-09T20:51:45Z",
+    "last_status": "STOPPED", "exit_code": 0,
+    "stitch_ingest_line": "INFO: STITCH_INGEST nodes=1844 edges=723 skipped_dup=27423 stamped=1771 skipped_unmapped_type=0 skipped_edge_unresolved=2694 producer=stitch-codebuild vintage=2026-09-09T19:55:00Z",
+    "stitch_producer_at_fold": "stitch-codebuild",
+    "stitch_ingest_fail_lines": 0,
+    "relabel": "OK: NODE_TYPE_LAYER relabel applied -- 63 node_types all mapped (aws/portal/ms partition clean)",
+    "node_type_layer_gap_lines": 0,
+    "stitch_unmapped_type_lines": 0,
+    "control": "the two previous derives in the same log group carry 0 STITCH_INGEST lines -- an image without the fold cannot print it"
+  },
+
+  "the_projection": {
+    "worker_task_definition": "globgrph-projection-worker:5 (the new revision), started by EventBridge Pipes 21:05:19Z",
+    "pointer_before": "projection/2026-09-09T20:04:09.034708+00:00/",
+    "pointer_after": "projection/2026-09-09T21:05:17.968166+00:00/",
+    "manifest_sha256": "09be45b5ff92acc4c05e83357877020f710ce8d57e7eef5a83f27876ea4d9504",
+    "pointer_advanced": true
+  },
+
+  "the_served_read": {
     "invocation": "bash .tools/comp-kuzu --json \"MATCH (n:CloudNode) WHERE n.node_type IN ['GOLD_SCRIPT','S3_DATA_KEY','API_ROUTE'] RETURN n.node_type AS t, count(*) AS c ORDER BY t\"",
-    "answer": [{"t": "API_ROUTE", "c": 86}],
-    "served_stitch_types": "1 of 3 non-zero BEFORE any fold (row W2-S47: the order calls this control 0 of 3)",
-    "vintage_line": "VINTAGE: Built from the estate as of 2026-09-09 14:59:48 UTC.  [vintage=2026-09-09T14:59:48.778469+00:00 manifest=86ea84674078 prefix=projection/2026-09-09T14:59:48.778469+00:00/]",
-    "pointer": "projection/2026-09-09T14:59:48.778469+00:00/ -- UNCHANGED by this order"
+    "served_stitch_types": "3 of 3 non-zero",
+    "GOLD_SCRIPT": 1380, "S3_DATA_KEY": 294, "API_ROUTE": 151,
+    "pre_fold_control": {"GOLD_SCRIPT": 0, "S3_DATA_KEY": 0, "API_ROUTE": 86,
+                         "served_stitch_types": "1 of 3 -- NOT the 0 of 3 the criterion states (row W2-S47)"},
+    "stitch_v1_stamped": 1771,
+    "stitch_v1_query": "n.props CONTAINS 'stitch-v1' -- `vocabulary` is not a CloudNode column and the column form is a Binder exception, not a zero (row W2-S51)",
+    "vintage_line": "VINTAGE: Built from the estate as of 2026-09-09 21:05:17 UTC. Stitch source: stitch-codebuild built 2026-09-09T19:55:00Z.  [vintage=2026-09-09T21:05:17.968166+00:00 manifest=09be45b5ff92 prefix=projection/2026-09-09T21:05:17.968166+00:00/]",
+    "vintage_has_stitch": true,
+    "stitch_built_at": "2026-09-09T19:55:00Z"
   },
+
+  "cross_plane_agreements": [
+    "the derive's own log says stamped=1771 and the served graph answers 1771 for the stamp -- two planes, one number",
+    "the CVO's C-S40 census counted the five types at 1,791 nodes in the artifact; 1,791 - 1,771 = 20 = C-S40's own 'PORTAL_COMPONENT 20 of 22 ids identical to Component', which the fold's co-key skips as duplicates",
+    "the map committed here reads 65 keys with aws 34 / portal 18 / pipeline 4 / ms 7 / semctl 2 -- every figure in C-S40"
+  ],
 
   "surprise_rows_filed": ["NFRA_CLDGRPH-W2-S45", "NFRA_CLDGRPH-W2-S46", "NFRA_CLDGRPH-W2-S47",
-                          "NFRA_CLDGRPH-W2-S48", "NFRA_CLDGRPH-W2-S49"],
-  "commits": ["<the acts commit>", "<the instance commit>"]
+                          "NFRA_CLDGRPH-W2-S48", "NFRA_CLDGRPH-W2-S49", "NFRA_CLDGRPH-W2-S50",
+                          "NFRA_CLDGRPH-W2-S51", "NFRA_CLDGRPH-W2-S52", "NFRA_CLDGRPH-W2-S53",
+                          "NFRA_CLDGRPH-W2-S54"],
+  "commits": ["5d3c589f25 the fold + carrier (pre-gate)", "9c98dd1e63 the OPEN instance (pre-gate)",
+              "27e4ac36de the gate taken: +5 NODE_TYPE_LAYER entries + the stamp",
+              "<the acts commit>", "<the instance + flip commit>"]
 }
 ```
 
 ---
 
-## What happened
+## What the graph does now that it did not do this morning
 
-The order's route is sound and the fold is built. It stops one layer short of the served graph,
-on something the cut could not have seen from outside the file.
+Ask the served graph for a gold script and it answers. `GOLD_SCRIPT=1380`, `S3_DATA_KEY=294`,
+`API_ROUTE` up from 86 to 151 -- and the line the client prints under the answer says where the
+second half came from:
 
-`derive_runner.py` ends every derive with `relabel_layers_by_node_type`, which sets each node's
-layer from `NODE_TYPE_LAYER` and **raises `NodeTypeLayerGap` on any observed node_type absent from
-that map** -- deliberately, as the COND-2 durability cert, so a new resource type forces a map
-update instead of silently falling out of the frozen COND-A count. `main()` turns that into
-`ERROR: NODE_TYPE_LAYER_GAP -- failing derive CLOSED (no commit)` and `return 1`.
+    VINTAGE: Built from the estate as of 2026-09-09 21:05:17 UTC. Stitch source: stitch-codebuild
+    built 2026-09-09T19:55:00Z.  [vintage=2026-09-09T21:05:17.968166+00:00 manifest=09be45b5ff92 ...]
 
-The live stitch artifact carries **63 distinct node types, five of them absent from that map**:
-`GOLD_SCRIPT` (1380), `S3_DATA_KEY` (294), `REACT_QUERY_KEY` (94), `PORTAL_COMPONENT` (22),
-`PORTAL_BUNDLE` (1). Four of the five are the very types `CG-s-24` closes on. The map's own
-comment records why: the `pipeline` `GOLD_SCRIPT`/`S3_DATA_KEY` placeholder was **dropped from
-the taxonomy on 2026-06-26** because it was empty and conceptually muddy.
+Two sources, two vintages, one line, one graph. That is the JOIN.
 
-So the fold as ordered has two possible shapes and both are refused here:
+## The block, and what unblocked it
 
-* **fold them unguarded** -- the nightly derive fails closed. Not a risk to run once and see;
-  the derive is the estate's single writer.
-* **add the five to `NODE_TYPE_LAYER`** -- the map is a CVO-signed frozen baseline whose *every*
-  prior addition names a CTO arch-gate GO and a CVO re-sign in the comment beside it. TO-CG-F-4
-  does not mention the map and does not carry that gate. The path is granted; the authority is
-  not, and a worker adding five members to a frozen taxonomy on its own initiative is the
-  widening this seat is told not to do.
+This order was reported OPEN four hours ago on `W2-S45`: four of the five node types the accept
+names were absent from `NODE_TYPE_LAYER`, and folding them would have made
+`relabel_layers_by_node_type` fail the nightly derive **closed**. The map is a CVO-signed frozen
+taxonomy under a CTO arch-gate, and this seat had neither.
 
-**The guarded partial fold is not a third option, and that is measured rather than argued.**
-Skipping the five unmapped types drops 1,791 of 29,131 nodes and leaves 2,170 edges unresolvable
--- including **216 of 216 `DERIVES_FROM` and 955 of 955 `STORED_IN`**, which are precisely the two
-boundary edge types the PRD calls the JOIN. A fold that keeps 100% of the AWS layer it already
-has and loses 100% of the join is not a partial delivery; it is an image act spent for nothing.
+The CTO ruled (**GO 20260909T2015Z**, PRD v0.10 R17) and the CVO re-signed (**C-S40 @`e7db04572e`**).
+Five additive, **labelled-interim** entries; every node admitted under one of them stamped
+`vocabulary=stitch-v1`; four of the five retire under S31 when the vocabulary is unified at the
+producer. The map's comment carries the GO line copied out of the CTO record programmatically --
+which is how row `W2-S50` got written, because the face's inline quotation of that line and the
+record's own text differ by a clause and only the file's bytes are the ruling.
 
-That is why steps 2-4 were not taken. Not a narrowing of the order: the seven-family image act
-would have to be repeated after the ruling, and a NEVER-2 act that reaches seven task families is
-not the thing to spend twice.
+**The count was checked, not assumed.** The committed map reads **65 keys**, `aws` 34, `portal` 18,
+`pipeline` 4, `ms` 7, `semctl` 2 -- every figure in C-S40, and the COND-A *resource*-type count
+unmoved at 32 because `S3_DATA_KEY` joins the `aws` **layer** at object grain exactly as `S3Key`
+already does. The fixture asserts `len(NODE_TYPE_LAYER) == 65` on every run, so the next edit that
+moves the count fails a test instead of drifting.
 
-## What was delivered, and is proven
+**The guard stayed and still bites.** With the five now mapped, the fixture's unmapped-type arm
+would have tested nothing, so it plants `SOME_FUTURE_TYPE` instead -- the case the guard actually
+exists for. In the cloud the same guard printed `NODE_TYPE_LAYER relabel applied -- 63 node_types
+all mapped` and zero `STITCH_UNMAPPED_TYPE` lines.
 
-`fold_stitch_document` is built, gated and exercised: **15 of 15 fixture arms pass**. It carries
-three guards and each one is a class of silent damage that now cannot happen -- the sha256 check
-(an artifact its own marker does not describe is refused LOUD, leaving the graph byte-identical),
-the `NODE_TYPE_LAYER` guard (the finding above, made into a mechanism so a future stitch type
-change cannot take the derive down), and the both-ends rule the file's other folds already use.
+## The numbers that agree across planes
 
-The vintage carrier is built end to end and reads **one** stitch marker through **one** function
-used by **both** engines. It stops at `_age_line` because that is where the grant stops, and that
-turned out to be the only place it could go at all: the order's premise that
-`_provenance.format_provenance_header` prints the served header is false -- no serve path calls
-it. The served `VINTAGE:` line is assembled by `kuzu_cli._disclosure` from four fields
-`projection_server` returns, and `age_line` is the only one this order may touch. It is
-**appended, never prefixed**, because `TO-CG-D-7`'s D7-AC3 and D7-AC4 are complete criteria that
-expect the line to *start* `VINTAGE: Built from the estate as of`; and it is **zero-delta when no
-stitch is present**, asserted byte-for-byte in the fixture.
+Three independent readings landed on the same figure, which is what makes 1,771 a measurement:
 
-## For the ruling
+* the derive's own log: `stamped=1771`
+* the served graph: `n.props CONTAINS 'stitch-v1'` -> **1771**
+* the CVO's C-S40 census of the artifact: the five types are **1,791** nodes -- and 1,791 - 1,771 =
+  **20**, which is precisely C-S40's own "PORTAL_COMPONENT 20 of 22 ids identical to `Component`".
+  Those 20 are the duplicates the fold's co-key skips. The two censuses do not merely resemble each
+  other; they reconcile exactly, by a number neither of them was fitted to.
 
-Two options, and the second is measured to be worse than it looks:
+The fold took 1,844 nodes and 723 edges and skipped 27,423 duplicates -- the AWS layer the derive
+already had. It is additive, not a second copy.
 
-1. **Add the five to `NODE_TYPE_LAYER` under a CTO arch-gate + CVO re-sign**, naming each one's
-   layer. Worth noting for the sign-off: four of the five are not AWS resources, so the frozen
-   `aws` COND-A count need not move at all -- `GOLD_SCRIPT` is pipeline-shaped, `S3_DATA_KEY` is
-   storage under an S3 bucket (the map already rules `S3Key: aws`), `PORTAL_COMPONENT`,
-   `REACT_QUERY_KEY` and `PORTAL_BUNDLE` are portal.
-2. **Normalise the stitch's vocabulary onto the ratified types.** The artifact carries *both*
-   conventions side by side and the populations differ by up to an order of magnitude --
-   `GOLD_SCRIPT` 1380 vs `PipelineScript` 133, `S3_DATA_KEY` 294 vs `S3Key` 232,
-   `PORTAL_COMPONENT` 22 vs `Component` 199, `REACT_QUERY_KEY` 94 vs `ReactQueryKey` 57. Two
-   counts that far apart are not two names for one set; a rename would merge different grains and
-   change what every downstream count means, silently. `grain_baseline.json`'s own
-   `_naming_fragility_note` records this exact hazard, and its 2026-07-25 recertification
-   enumerates three distinct populations for `REACT_QUERY_KEY` alone. Row `W2-S48`.
+## The image act
 
-Either way the code is ready: option 1 needs five map entries and nothing else -- the fold, the
-carrier, the guards and the tests all stand, and the `STITCH_UNMAPPED_TYPE` WARN stays as the
-mechanism that catches the *next* type nobody mapped.
+One build, one push, one targeted apply, all inside a NEVER-2 entry that names all seven families
+by their **true** names and states the four the cut got wrong. The `:latest` tag moved with the push
+and **nothing pulls it** -- 0 of 7 families reference a tag, which is R13 working.
+
+**The apply set is eighteen, not ten.** The order carried E-2's ten over; that ten was correct for
+an act moving four families. This one moves seven, because all seven read
+`local.globgrph_image_digest`. The set was read off a plan rather than copied: an unscoped plan
+(never applied) censused 22 addresses -- the 18 plus four foreign, one of them
+`aws_sns_topic_subscription.critical_surface_alerts_email`, an alert destination the C3 moratorium
+forbids this order to land. An unscoped apply would have created a notifier nobody asked for. Row
+`W2-S52`.
+
+`safe-apply` refused the first attempt outright: **IDENTITY UNRESOLVED**, because the halt-gate
+resolves the acting principal from a `.serial` file that does not exist in a fresh linked worktree
+and will not guess. Its remedy writes a path this order's `<paths>` does not name. It was taken as
+the gate instructs -- this worker's own serial, into a gitignored runtime file that reaches no
+record and could clobber no sibling, since the directory was absent -- and never overridden. Row
+`W2-S53`, so the next order that applies Terraform can carry the grant or the provisioning.
+
+## One false zero, caught by its own shape
+
+The F4-AC4 reader printed `SERVED_STITCH_TYPES=0 of 3`, `GOLD_SCRIPT=0`, `(no VINTAGE line)` --
+twice -- over a graph that answered 1,380 to the same query typed by hand seconds later. The cause
+was a bare `bash` in a Python subprocess resolving to the WSL stub rather than the Git Bash running
+the script. The tell was in the same output: `POINTER_ADVANCED=true`, read through boto3, stayed
+correct while every shelled-out field went to zero. **A whole-output zero is a graph; a zero only in
+the shelled-out fields is the shell.** Fixed by exporting the executing interpreter, which the
+script now prints. Row `W2-S54`.
+
+## What this does not claim
+
+The fold carries the stitch's vintage; it does not make the stitch fresh -- that is the CodeBuild
+nightly's job (CG-s-23) and F-3's `F4`-morning read. On a night the stitch producer fails and the
+derive runs, the S3 objects are last night's and still verify against each other, so the fold
+succeeds on a **stale** stitch and the served line shows a day-old `stitch_built_at` beside a fresh
+Nessie vintage. That is correct and is the reason the vintage is carried rather than collapsed into
+one number. If the marker is unreadable the carrier returns nothing and the line simply has no
+stitch clause -- an absence, never a default.
+
+Both clones' post-commit hook pairs are gone (this laptop 19:46Z, site Z 19:58Z, row S81), so the
+cloud producer is the one writer of `stitch/`; the marker read at the fold was `stitch-codebuild`,
+and the record says so because the fold **carries** the producer rather than refusing on it.
