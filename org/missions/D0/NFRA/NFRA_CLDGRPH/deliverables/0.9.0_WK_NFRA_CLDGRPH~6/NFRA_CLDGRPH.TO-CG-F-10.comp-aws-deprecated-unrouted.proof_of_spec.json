@@ -1,0 +1,322 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CLDGRPH.TO-CG-F-10",
+  "firm": "FABRIC",
+  "phase": "P3-REPOINTS",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/prd/NFRA_CLDGRPH_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "a10004ecdf"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+    "vintage_commit": "6593536bab",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-F-10.comp-aws-deprecated-unrouted.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_CLDGRPH~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/modules/graph/comp_aws_cli.py",
+      "artifact_covered_by": [
+        "F10-AC1",
+        "F10-AC5"
+      ],
+      "kind": "script",
+      "commit_or_etag": "UNCOMMITTED-BLOCKED-BY-NFRA_CLDGRPH-W6-S2",
+      "introduces": [
+        "DEPRECATION_PREAMBLE",
+        "print_deprecation_preamble"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TWO ADDITIONS AND ONE CALL, ALL AT THE CLI SEAM. A module-level DEPRECATION_PREAMBLE string and _PREAMBLE_ENV constant, a print_deprecation_preamble(cmd) function that writes to STDERR and returns, and ONE call from main() placed BEFORE ap.parse_args(). Before-parse_args is deliberate: argparse exits INSIDE parse_args for --help and for a usage error, so a hook between parse_args and args.fn would miss both -- measured, `python comp_aws_cli.py --help` now carries the notice, rc 0. `import os` is LOCAL to the function because this module has no module-level import os (it imports argparse, sys, json, tarfile, io, glob, re, subprocess, datetime, pathlib) and adding one would be an edit outside main()+the preamble. NO GATE: the function never refuses, never exits and never changes rc; its return value is unused. The A1 rc-propagation block (rv = args.fn(args); sys.exit(rv)) is byte-unchanged. cmd_derive, cmd_snapshot and cmd_iceberg_commit are BYTE-IDENTICAL to 973a20aff9 (F10-AC5, ast-sliced git show, with main() as the positive control reading UNEQUAL). bash .tools/commit-gate.sh: clean for 1 of 1."
+    },
+    {
+      "path_or_key": ".tools/comp-aws",
+      "artifact_covered_by": [
+        "F10-AC1"
+      ],
+      "kind": "script",
+      "commit_or_etag": "UNCOMMITTED-BLOCKED-BY-NFRA_CLDGRPH-W6-S2",
+      "introduces": [
+        "COMP_AWS_PREAMBLE_PRINTED"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The 7-line wrapper now prints the same notice on stderr (a `{ ... } 1>&2` block, so stdout is untouched), resolves the subcommand name for the last line by scanning argv for the first non-dash token, and exports COMP_AWS_PREAMBLE_PRINTED=1 before invoking the CLI. The CLI honours that flag, which is how ONE PRINT PER INVOCATION is achieved through either entry: WRAPPER_PREAMBLE_COUNT=1 through the wrapper, DIRECT_CLI_PREAMBLE_COUNT=1 for the CLI called directly. The python invocation, the $? capture, the comp_log_auto.py call and `exit $_exit` are unchanged, so the wrapper's rc contract is untouched. bash -n clean."
+    },
+    {
+      "path_or_key": "org/modules/graph/comp-coverage-map.yaml",
+      "artifact_covered_by": [
+        "F10-AC2",
+        "F10-AC3"
+      ],
+      "kind": "config_data",
+      "commit_or_etag": "UNCOMMITTED-BLOCKED-BY-NFRA_CLDGRPH-W6-S2",
+      "introduces": [
+        "status: deprecated",
+        "high_level_tool: \"comp-kuzu\""
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "THREE EDITS. (1) schema.node_fields gains `status` as an optional enum {active (default), deprecated, retired} with its meaning, its consumers named on both sides, and an explicit statement of what one remedy does NOT move (TAXONOMY LAW iv). (2) tools[] entry comp-aws gains `status: deprecated` and its concern is reworded to name the estate-side runners; MEMBERSHIP IS UNCHANGED -- comp-aws stays homed and parity reads 99 of 99. (3) surfaces[AWS-CLOUD].high_level_tool goes comp-aws -> comp-kuzu, high_level_concern names the served read and the manifest entry, and provenance.refresh_mechanism is reworded to state the nightly Fargate derive-runner + incremental updater as ESTATE-SIDE, keeping the fact and dropping the agent act. Independently exercised: `python .tools/comp-coverage-check` -> 'PASS: comp-coverage-map.yaml is internally consistent -- every tool one home, every overlap declared, no phantom seam, inventory complete, projection current, grain stable. swept: 99 homed tool(s) (35 tools[] + 64 meta_tools[]) | 12 gate_contract rule(s), 0 unverifiable'."
+    },
+    {
+      "path_or_key": ".tools/gen_tool_registry.py",
+      "artifact_covered_by": [
+        "F10-AC3"
+      ],
+      "kind": "script",
+      "commit_or_etag": "UNCOMMITTED-BLOCKED-BY-NFRA_CLDGRPH-W6-S2",
+      "introduces": [
+        "def status_from_map",
+        "tool_status.get(tool, 'active')"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A status_from_map() reader beside population_from_map(), an explicit note that it is an ATTRIBUTE read and not a population read, and 'status' projected onto EVERY master row (both the classified branch and the UNCLASSIFIED-marker branch) plus onto the LIGHT card CARD tuple so a consumer on the import path can reject on it without parsing the map. The default 'active' is applied here rather than left None because an unpopulated provenance field drifts (A_VALUE_MUST_CARRY_ITS_CLAIM). population_from_map(), norm_tool(), SUFFIXES_STRIPPED and assert_population_parity are untouched. Exercised: rc 0, 99 tools, parity 99/99, and TOOL_MASTER carries exactly ONE deprecated row (comp-aws). bash .tools/commit-gate.sh: clean."
+    },
+    {
+      "path_or_key": ".tools/gen_tool_classification.py",
+      "artifact_covered_by": [
+        "F10-AC3"
+      ],
+      "kind": "script",
+      "commit_or_etag": "973a20aff9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "UNCHANGED, DELIBERATELY. The order's step 2 says gen_tool_classification.py honours the field 'if it carries status' -- it does not: it emits the four standardized constants (state / derived / denominator_construction / control) from the enumeration-primitive census and reads the authority only through gen_tool_registry.population_from_map, which this order did not touch. Adding a status limb there would have been a second reader of one attribute. RUN twice as part of the regeneration (rc 0 both passes); its carrier .tools/TOOL_CLASSIFICATION.yaml is byte-identical across passes (LF-normalised sha256 prefix 657e0577f162a002) and HAND_EDITED_CARRIERS counts it at 0."
+    },
+    {
+      "path_or_key": ".tools/comp-which",
+      "artifact_covered_by": [
+        "F10-AC2"
+      ],
+      "kind": "script",
+      "commit_or_etag": "UNCOMMITTED-BLOCKED-BY-NFRA_CLDGRPH-W6-S2",
+      "introduces": [
+        "def _deprecated_tools",
+        "ranked_all"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "FOUR EDITS CLOSING THE THREE PATHS BY WHICH THE ROUTE SURVIVED. (1) the curated tuple at :288 ('lambda') and (2) the tuple at :373 ('AWS resources / thread ownership') are repointed onto the served surface (comp-kuzu Cypher, comp-find --corpus aws); comp-iam / comp-estate / comp-pipescript keep their places. (3) the description string at :1190 no longer says 'comp-aws classes/derive is the live census'. (4) _deprecated_tools() reads `status: deprecated` from the ledger comp-which already loads (compiled index first, YAML on sha mismatch; empty set on any failure, so the router can never crash or silently drop a live tool), and it is applied in TWO places: _surface_index skips a deprecated tool in the surface drill-down, and _default_router filters the WHOLE ranking into ranked_all BEFORE _spill_full_ranking writes it. Filtering only the printed top-K would have left the tool one `open` away and made '0 rows' a claim about page 1. Measured: 0 of 90 curated tuples name comp-aws (2 did), 0 non-comment code lines do (3 did), tools_ranked 79 -> 78. py_compile clean. The routing regression harness .tools/comp-which-routing-test.py names comp-aws NOWHERE (comp-read --enumerate: 0 hits across 1,608 lines / 48 sections), so no expected route in it can have been broken by this exclusion."
+    },
+    {
+      "path_or_key": "org/modules/graph/comp-tools.yaml",
+      "artifact_covered_by": [
+        "F10-AC4"
+      ],
+      "kind": "config_data",
+      "commit_or_etag": "UNCOMMITTED-BLOCKED-BY-NFRA_CLDGRPH-W6-S2",
+      "introduces": [
+        "status: deprecated",
+        "deprecation: |",
+        "engine_paths: |"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The comp-aws entry now LEADS with status + a deprecation block naming Andrew's record, the served read and the estate-side runners; the `command:` line lists only the read-only subcommands; `engine_paths:` describes derive/snapshot/the versioned-store commit as NOT agent calls; `output:` no longer names .comp-graph or a snapshot tarball bucket. The four `when:` phrasings are MOVED (not deleted) onto comp-kuzu's entry with a served-surface call for each -- a phrasing left on a deprecated entry keeps routing it. Two neighbouring agent-facing strings that described the laptop as the live-census producer were reworded: the comp-aws entry's overlay_role and comp-iam's overlay_pattern. The duplicate-key tombstone at :691-698 was reworded to CITE rather than repeat a censused phrase (E-1's W2-S38 convention). ONE `comp-aws:` key at HEAD, confirmed two ways (a line-anchored count, and yaml.safe_load succeeding)."
+    },
+    {
+      "path_or_key": "org/modules/graph/comp-aws-agent-usage.yaml",
+      "artifact_covered_by": [
+        "F10-AC4"
+      ],
+      "kind": "config_data",
+      "commit_or_etag": "UNCOMMITTED-BLOCKED-BY-NFRA_CLDGRPH-W6-S2",
+      "introduces": [
+        "status: deprecated",
+        "read_instead:",
+        "who_refreshes"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rewritten so the first thing a reader meets is the deprecation and the second is what to read instead (four concrete served-surface calls with the question each answers). `when_to_use` now points at comp-kuzu / comp-find --corpus aws. The three write paths move OUT of `commands:` into `engine_paths:` with a `run_by:` naming the estate-side runner for each, so the names still resolve and nothing reads as missing. The five read-only subcommands keep their descriptions with their use_when re-anchored on 'an existing snapshot' rather than a derive. key_facts gains `who_refreshes: the estate ... Not you`. yaml.safe_load: clean."
+    },
+    {
+      "path_or_key": ".tools/TOOL_CLASSIFICATION.yaml",
+      "artifact_covered_by": [
+        "F10-AC3"
+      ],
+      "kind": "config_data",
+      "commit_or_etag": "973a20aff9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "REGENERATED by `python .tools/gen_tool_classification.py`, never hand-edited. Byte-identical across both regeneration passes (LF-normalised sha256 prefix 657e0577f162a002) and identical to its pre-probe content, so it contributes 0 to HAND_EDITED_CARRIERS. This carrier does not carry the status field -- its generator does not read it -- which is stated rather than hidden."
+    },
+    {
+      "path_or_key": "org/modules/graph/TOOL_MASTER.yaml",
+      "artifact_covered_by": [
+        "F10-AC3"
+      ],
+      "kind": "config_data",
+      "commit_or_etag": "UNCOMMITTED-BLOCKED-BY-NFRA_CLDGRPH-W6-S2",
+      "introduces": [
+        "status: deprecated"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "REGENERATED by `python .tools/gen_tool_registry.py`, never hand-edited. tools['comp-aws'].status == 'deprecated'; EXACTLY ONE of 99 rows is deprecated; counts == {'tools': 99, 'population_authority_count': 99} so parity held through the change. LF-normalised sha256 prefix c0c14236c79baf95, identical across both passes (SECOND_REGEN_DIFF_LINES=0)."
+    },
+    {
+      "path_or_key": ".tools/tool_index.py",
+      "artifact_covered_by": [
+        "F10-AC2",
+        "F10-AC3"
+      ],
+      "kind": "config_data",
+      "commit_or_etag": "UNCOMMITTED-BLOCKED-BY-NFRA_CLDGRPH-W6-S2",
+      "introduces": [
+        "'status': 'deprecated'"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "REGENERATED in the SAME gen_tool_registry.py invocation as the master (which is why REGEN_COMMANDS is a measured 2 against 3 carriers). TOOLS['comp-aws']['status'] == 'deprecated', and the embedded LEDGER_DOC carries both the tools-entry status and surfaces[AWS-CLOUD].high_level_tool == 'comp-kuzu' -- this is the compiled surface comp-which reads FIRST (sha-guarded, YAML on mismatch), so the routing exclusion runs off the index, not off a parse. LF-normalised sha256 prefix 010d8aa83b956a7b, identical across both passes. The generator's own import-verify-then-replace step ran clean on both passes."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~6/",
+      "artifact_covered_by": [
+        "F10-AC1",
+        "F10-AC2",
+        "F10-AC3",
+        "F10-AC4",
+        "F10-AC5",
+        "F10-AC6"
+      ],
+      "kind": "test",
+      "commit_or_etag": "05a72ef7ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The record CG-s-30.comp-aws-deprecated-unrouted.result.md, the BEFORE census f10_before.py -> f10_before.txt + f10_baseline.json (captured before any edit), the shared instrument f10_lib.py, the two-node metrics fixture f10_metrics_fixture.json, and the five criterion probes f10_preamble.{sh,py} / f10_unrouted.{sh,py} / f10_regen.{sh,py} / f10_registry_text.py / f10_engine_untouched.{sh,py}. Every .py passed bash .tools/commit-gate.sh (7 of 7 clean); every .sh passed bash -n. f10_regen.py reuses F-8's f8_regen_idempotent.sh shape (measured generator count, LF-normalised idempotence, the hand-edit control) with its reasoning intact and its source cited."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F10-AC1",
+      "criterion_verbatim": "THE PREAMBLE, THEN EXACTLY THE OLD BEHAVIOUR: on three read-only subcommands (`classes`, `dual-managed`, `metrics --graph <fixture>`) through the wrapper, the preamble is the FIRST thing on stderr and names the seven things; stdout is byte-identical to the pre-change baseline captured in step 1 and the rc is equal; the wrapper+CLI pair prints the preamble ONCE per invocation.",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~6/f10_preamble.sh",
+      "expect": "PREAMBLE_FIRST=3 of 3 subcommands[\\s\\S]*PREAMBLE_NAMES=served-graph,comp-kuzu,cloud\\.read\\.served_vintage,nightly-derive-runner,incremental-updater,comp-which,andrew-2026-09-09[\\s\\S]*STDOUT_UNCHANGED=3 of 3[\\s\\S]*RC_UNCHANGED=3 of 3[\\s\\S]*WRAPPER_PREAMBLE_COUNT=1",
+      "output_evidence": "F10-AC1 -- preamble first, then exactly the old behaviour\nbaseline: C:\\tmp\\wk-cldgrph-6-6\\org\\missions\\D0\\NFRA\\NFRA_CLDGRPH\\deliverables\\0.9.0_WK_NFRA_CLDGRPH~6\\f10_baseline.json\n\n  subcommand                 first?  stdout==base?  rc==base?   rc  base_rc  sha16(now)      sha16(base)\n  comp-aws classes           YES     YES            YES         0   0        c55fa1b400bb3430 c55fa1b400bb3430\n  comp-aws dual-managed      YES     YES            YES         0   0        13ffd2bbba32058c 13ffd2bbba32058c\n  comp-aws metrics --graph   YES     YES            YES         0   0        f23d37cfd2a8b172 f23d37cfd2a8b172\n\n    first stderr line [classes]: comp-aws: DEPRECATED FOR AGENT USE since 2026-09-09 (Andrew-direct; reco\n    first stderr line [dual-managed]: comp-aws: DEPRECATED FOR AGENT USE since 2026-09-09 (Andrew-direct; reco\n    first stderr line [metrics --graph]: comp-aws: DEPRECATED FOR AGENT USE since 2026-09-09 (Andrew-direct; reco\n\nPREAMBLE_FIRST=3 of 3 subcommands\nPREAMBLE_NAMES=served-graph,comp-kuzu,cloud.read.served_vintage,nightly-derive-runner,incremental-updater,comp-which,andrew-2026-09-09\n  (7 of 7 named; missing: none)\nSTDOUT_UNCHANGED=3 of 3\nRC_UNCHANGED=3 of 3\nWRAPPER_PREAMBLE_COUNT=1\n  NEGATIVE CONTROL -- the CLI invoked DIRECTLY (no wrapper, no COMP_AWS_PREAMBLE_PRINTED)\n  prints it itself: DIRECT_CLI_PREAMBLE_COUNT=1. So the 1 above is the wrapper's print\n  being HONOURED by the CLI, not a CLI that never prints.\nBASELINE_DISCRIMINATES=YES (3 distinct stdout sha256 across 3 subcommands)\nRC=0\nPY_RC=0",
+      "denominator": "3 of 3 read-only subcommands (classes, dual-managed, metrics --graph <fixture>) through the wrapper; 7 of 7 named things; 1 print per invocation measured on the wrapper with the direct-CLI negative control at 1. The baseline is 3 DISTINCT stdout sha256 across the 3 subcommands (BASELINE_DISCRIMINATES=YES) -- printed because a non-discriminating baseline is exactly how this check can pass while measuring nothing, and it nearly did: the first baseline run recorded three IDENTICAL 504-byte hashes with rc=1 from the System32 WSL stub. NOT run and NOT covered: derive, snapshot, iceberg-commit (0 of 3 write subcommands exercised, by the order's BOUNDS).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F10-AC2",
+      "criterion_verbatim": "PULLED OUT OF SELECTION: `comp-which` over the four `when:` phrasings returns 0 comp-aws rows in 4 of 4 ranked lists (read from the rank files, never from page 1 of stdout), a control phrasing still routes to comp-kuzu, and no curated tuple names comp-aws (the pre-change count of 2 tuples + 1 description string is the control).",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~6/f10_unrouted.sh",
+      "expect": "COMP_AWS_ROWS=0 of 4 phrasings[\\s\\S]*RANKED_LISTS_READ=4 of 4[\\s\\S]*CONTROL_PHRASING_ROUTES_TO=comp-kuzu[\\s\\S]*CURATED_TUPLES_NAMING_COMP_AWS=0 of [0-9]+",
+      "output_evidence": "F10-AC2 -- comp-aws pulled out of comp-which selection\n\n  Q: What AWS resources exist + how are they typed/connected?\n     rank_file=rank-34388.yaml  tools_ranked=78  comp-aws rows NOW=0 (rank -)  BEFORE=1 (rank [4])\n  Q: What's the drift / blast radius / unmanaged surface?\n     rank_file=rank-33516.yaml  tools_ranked=78  comp-aws rows NOW=0 (rank -)  BEFORE=1 (rank [42])\n  Q: Is any resource dual-managed across TF states?\n     rank_file=rank-5760.yaml  tools_ranked=78  comp-aws rows NOW=0 (rank -)  BEFORE=1 (rank [23])\n  Q: Cloud-shape snapshot + diff over time\n     rank_file=rank-30828.yaml  tools_ranked=78  comp-aws rows NOW=0 (rank -)  BEFORE=1 (rank [1])\n\n  CONTROL Q: list all s3 buckets   -> rank 1 = comp-kuzu\n\n  curated tuples scanned: 90   naming comp-aws NOW: 0 (lines [])   BEFORE: 2 (lines [288, 373])\n  non-comment CODE lines naming comp-aws NOW: 0 []   BEFORE: 3 [290, 375, 1190]\n\nCOMP_AWS_ROWS=0 of 4 phrasings\nRANKED_LISTS_READ=4 of 4\nCONTROL_PHRASING_ROUTES_TO=comp-kuzu\nCURATED_TUPLES_NAMING_COMP_AWS=0 of 90\nBEFORE_CONTROL: comp-aws was in 4 of 4 ranked lists and named by 2 of 90 tuples -- the same instrument, before the edit\nRC=0\nPY_RC=0",
+      "denominator": "4 of 4 phrasings, each read from its own spilled rank file (78 ranked tools per list, 79 before) -- never from the 3-row terminal page. 90 curated vocabulary tuples scanned, 0 naming comp-aws where 2 did (lines 288, 373) and 0 non-comment code lines where 3 did (290, 375, 1190). The BEFORE arm was measured with THIS SAME instrument before any edit: comp-aws at ranks 4, 42, 23 and 1 -- so the 0 is a delta, not a constant. 1 control phrasing, still rank 1 = comp-kuzu.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F10-AC3",
+      "criterion_verbatim": "DEPRECATED AT TOOL GRAIN, REGENERATED, NEVER HAND-EDITED: the map's schema declares the field and the entry carries it; the generated master row reads it; population parity holds (comp-aws stays homed); the second regeneration changes nothing (LF-normalised); no carrier differs from its generator's output.",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~6/f10_regen.sh",
+      "expect": "MAP_STATUS_FIELD=deprecated \\(declared in schema\\)[\\s\\S]*MASTER_ROW_STATUS=deprecated[\\s\\S]*PARITY=([0-9]+) of \\1[\\s\\S]*SECOND_REGEN_DIFF_LINES=0[\\s\\S]*HAND_EDITED_CARRIERS=0 of 3",
+      "output_evidence": "F10-AC3 -- deprecated at tool grain, regenerated, never hand-edited\n\n  map schema.node_fields.status  declared=True  values=['active', 'deprecated', 'retired']  default=active\n  map tools[comp-aws].status     = 'deprecated'\n  map surfaces[AWS-CLOUD].high_level_tool = 'comp-kuzu'\nMAP_STATUS_FIELD=deprecated (declared in schema)\n  CARRIER .tools/TOOL_CLASSIFICATION.yaml          declares generator .tools/gen_tool_classification.py\n  CARRIER org/modules/graph/TOOL_MASTER.yaml       declares generator .tools/gen_tool_registry.py\n  CARRIER .tools/tool_index.py                     declares generator .tools/gen_tool_registry.py\n  REGEN_CARRIERS=3  REGEN_COMMANDS=2 (MEASURED distinct generator(s): .tools/gen_tool_classification.py, .tools/gen_tool_registry.py -- gen_tool_registry.py writes TWO carriers in ONE invocation)\n\n  PASS_A  python .tools/gen_tool_classification.py  rc=0\n  PASS_A  python .tools/gen_tool_registry.py  rc=0\n  PASS_B  python .tools/gen_tool_classification.py  rc=0\n  PASS_B  python .tools/gen_tool_registry.py  rc=0\n\n  TOOL_MASTER.yaml tools[comp-aws].status = 'deprecated'   comp-aws STILL HOMED = True\nMASTER_ROW_STATUS=deprecated\nPARITY=99 of 99   (a deprecated tool STAYS in the population -- membership unchanged)\n    .tools/TOOL_CLASSIFICATION.yaml          passA sha 657e0577f162a002  passB sha 657e0577f162a002  diff_lines 0\n    org/modules/graph/TOOL_MASTER.yaml       passA sha c0c14236c79baf95  passB sha c0c14236c79baf95  diff_lines 0\n    .tools/tool_index.py                     passA sha 010d8aa83b956a7b  passB sha 010d8aa83b956a7b  diff_lines 0\nSECOND_REGEN_DIFF_LINES=0\nHAND_EDITED_CARRIERS=0 of 3\nHAND_EDIT_CONTROL=FIRED -- an in-memory mutated copy of .tools/TOOL_CLASSIFICATION.yaml compares UNEQUAL to its generator output, so the 0 above is a measurement, not a constant\nRC=0\nPY_RC=0",
+      "denominator": "3 generated carriers, 2 MEASURED distinct generator commands (each carrier asked which generator it declares in its own header; gen_tool_registry.py writes two carriers in one invocation, so commands != carriers -- F-8's W4-S2). Population 99 of 99 with comp-aws STILL HOMED, exactly 1 of 99 master rows deprecated. Two full regeneration passes, all comparisons LF-normalised (autocrlf checkout). The hand-edit comparator carries its own positive control (FIRED).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F10-AC4",
+      "criterion_verbatim": "NO AGENT-FACING TEXT DESCRIBES A LAPTOP AS A PRODUCER: the declared phrase domain censused over the two registry files' agent-facing fields reads 0, one `comp-aws:` key, both files load, a planted phrasing caught.",
+      "method": "command",
+      "invocation": "timeout 120 python org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~6/f10_registry_text.py",
+      "expect": "PHRASE_DOMAIN=[0-9]+ phrases[\\s\\S]*LAPTOP_PRODUCER_PHRASINGS=0 of [0-9]+[\\s\\S]*COMP_AWS_KEYS_IN_COMP_TOOLS=1[\\s\\S]*YAML_LOADS=2 of 2[\\s\\S]*PHRASE_PROBE_CONTROL=FIRED",
+      "output_evidence": "F10-AC4 -- no agent-facing text describes a laptop as a producer\n\n  FILES (2):\n    org/modules/graph/comp-tools.yaml\n    org/modules/graph/comp-aws-agent-usage.yaml\n  AGENT-FACING FIELD SET (22): command, when, cmd, does, use_when, when_to_use, output, cost, usage_guide, overlay_role, key_facts, related_tools, note, name_note, guardrails, segment_scope, engine, project, source, data_sources, replaces, freshness\n\n  PHRASE (the declared domain)                 scoped  unscoped\n    -> .comp-graph                             0       0\n    snapshot tarballs -> opal-...-globgrph     0       0\n    --commit-to-nessie                         0       0\n    iceberg-commit                             0       0\n    writes the derive                          0       0\n    run comp-aws derive                        0       0\n    full derive                                0       0\n\n      (no hit in either read)\n\n  PLANTED CONTROL: a laptop-producer `output:` line appended to an IN-MEMORY copy of each\n  file is caught in 2 of 2 files (delta > 0 against the same file unplanted).\n\nPHRASE_DOMAIN=7 phrases\nLAPTOP_PRODUCER_PHRASINGS=0 of 7\nUNSCOPED_READ=0 hit(s) over the raw bytes of both files (comments included)\nCOMP_AWS_KEYS_IN_COMP_TOOLS=1\nYAML_LOADS=2 of 2\nPHRASE_PROBE_CONTROL=FIRED\nRC=0",
+      "denominator": "7 declared phrases x 2 registry files, censused TWICE: SCOPED over every scalar reachable under any of 22 agent-facing keys at any depth in the parsed YAML (0 hits, from 3 before), and UNSCOPED over the raw bytes of both files including comments (0 hits, from 4 before). The unscoped read is printed because a scoped census cannot see a phrase in a YAML comment -- and it caught one: the duplicate-key tombstone at comp-tools.yaml:691-698, reworded to cite rather than repeat. The planted control fires in 2 of 2 files. NOT COVERED: any file outside these two -- notably .tools/tool_overrides.yaml, which still carries `canonical_call: comp-aws derive --out <path>` into two generated carriers and is out of grant (row NFRA_CLDGRPH-W6-S1).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F10-AC5",
+      "criterion_verbatim": "THE ENGINE UNTOUCHED: `cmd_derive`, `cmd_snapshot` and `cmd_iceberg_commit` byte-identical to their bytes at the hand-off commit (`git show <hand-off>:<file>` sliced by `ast` line ranges), the derive-runner's in-process call site named.",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~6/f10_engine_untouched.sh",
+      "expect": "CMD_DERIVE_BYTES_UNCHANGED=true[\\s\\S]*HANDLERS_UNCHANGED=3 of 3[\\s\\S]*DERIVE_RUNNER_CALLSITE=infra/aws/globgrph/derive_runner\\.py:[0-9]+",
+      "output_evidence": "F10-AC5 -- the engine untouched\n  hand-off ref: 973a20aff99fc737772203545fa546deef093547\n\n  git show 973a20aff99f:org/modules/graph/comp_aws_cli.py  rc=0  bytes=164690  stderr=''\n  worktree org/modules/graph/comp_aws_cli.py  bytes=167618\n\n  cmd_derive           handoff_bytes=7113   worktree_bytes=7113   IDENTICAL=YES\n  cmd_snapshot         handoff_bytes=2987   worktree_bytes=2987   IDENTICAL=YES\n  cmd_iceberg_commit   handoff_bytes=6652   worktree_bytes=6652   IDENTICAL=YES\n\n  POSITIVE CONTROL on the comparator: main (this order DID change it) compares IDENTICAL=NO -- so the YESes above are a measurement, not a constant\n\n  derive-runner in-process call site: infra/aws/globgrph/derive_runner.py:101   graph = comp_aws_cli.cmd_derive(argparse.Namespace(cls=None, out=None, resource=None))\n\nCMD_DERIVE_BYTES_UNCHANGED=true\nHANDLERS_UNCHANGED=3 of 3\nDERIVE_RUNNER_CALLSITE=infra/aws/globgrph/derive_runner.py:101\nRC=0\nPY_RC=0",
+      "denominator": "3 of 3 engine handlers, sliced by their OWN ast line ranges out of both blobs so the comparison follows a function that moved rather than comparing line numbers: cmd_derive 7,113 bytes, cmd_snapshot 2,987, cmd_iceberg_commit 6,652 -- identical on both sides while the FILE grew 164,690 -> 167,618 bytes. The git show is read with its rc and byte count printed and is never 2>/dev/null'd (a mangled ref returns clean-empty and would read as an absent function; the probe refuses to claim UNCHANGED against an empty read). POSITIVE CONTROL: main(), which this order did change, compares UNEQUAL through the same comparator. The call site is resolved as an ast.Call to comp_aws_cli.cmd_derive, NOT as the first line mentioning the name -- that would have named derive_runner.py:5, a docstring.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F10-AC6",
+      "criterion_verbatim": "WHAT THE CONTROL IS AND IS NOT: with no gate, what stops a seat from running `comp-aws snapshot` tomorrow (a preamble it reads, an absent route, a registry that says so -- and nothing else, by Andrew's word), what the nightly's next SUCCEEDED derive (the PRD's positive control, read by the CVO the morning after) proves about the engine, and whether FWD-2 (\"no question is ever the cause of a rebuild\") and FWD-6 (no refresh choice on the client) now read differently at L10. A reading act; NO verdict; graded by `3.0.0_SA_CVO` at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "The reading recorded in org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~6/CG-s-30.comp-aws-deprecated-unrouted.result.md, JSON block F10-AC6_the_reading_no_verdict, over the measured outputs of F10-AC1..F10-AC5 in this same instance.",
+      "expect": "NO EXPECT -- judgment=\"true\" in the TO. Recorded, never self-graded.",
+      "output_evidence": "RECORDED, NOT GRADED. Four readings, in the record's F10-AC6 block. (1) WHAT STOPS A SEAT TOMORROW: three things and nothing else -- a preamble it reads (acts AFTER the decision to type the command, and only if stderr is read), an absent route (the strongest, because comp-which is where a cloud question starts: 0 comp-aws rows in 78-of-79 ranked lists, 0 of 90 curated tuples, absent from the AWS-CLOUD drill-down), and a registry that says so. NOT present: any refusal, rc change, allowlist, env guard or prompt. A seat carrying the name in its context from an older transcript runs it and succeeds. The residual is a MEMORY risk, not a CAPABILITY one: this order removes comp-aws from the surfaces a seat CONSULTS and does nothing about the surfaces a seat CARRIES. (2) WHAT THE NIGHTLY PROVES: the runner calls cmd_derive IN-PROCESS at derive_runner.py:101 and never executes main(), so a SUCCEEDED derive is not informative about the diff at the CLI seam -- but it IS a genuine control on the IMPORT path, which this order did touch: the new module-level constant and function execute at import in the runner's process before cmd_derive is reached, and a syntax error, a NameError (one was hit and fixed here -- this module has no module-level `import os`) or an unguarded stderr write would take the nightly down at import. It proves nothing about the read-only subcommands, the routing change or the registry text. (3) FWD-2 reads differently and more strongly but not completely: before this order the claim was true of the served READ and false of the ROUTER -- 'cloud-shape snapshot + diff over time' handed a seat comp-aws at RANK 1, the strongest routing signal the fabric emits, pointing at a rebuild. That is gone in 4 of 4. What remains is a HABIT, not a route; the claim can only ever be that no question ROUTES to a rebuild, and L10 should say which it means. (4) FWD-6 reads differently in KIND: the client-side refresh choice is no longer PRESENTED anywhere this order reaches (the surface's high_level_tool IS the served read, the map's refresh_mechanism names no laptop, both registry files carry 'who_refreshes: the estate ... Not you'), but it is still EXECUTABLE, and the two are different claims. WEIGHED AGAINST THE ORDER: the deprecated-skip is ROUTER-side, in .tools/comp-which; a second router or a second ranking consumer would not inherit it, though the status field is carried on every generated row so one COULD. That is a deliberate scope -- widening it means editing comp_capability_provider.py, outside these <paths>.",
+      "denominator": "4 of 4 questions the criterion asks, each answered against measured outputs in this instance rather than against intent. NO verdict is offered on any of them.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\" in the task order: this is a reading act, graded by 3.0.0_SA_CVO at L9 and never self-graded. PASS or FAIL on this row would be INVALID.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Every mechanical criterion carries a control fed through the SAME detector, because a detector that cannot return non-zero on a positive is a constant wearing a measurement's clothes -- and four of the five read ZERO or a full-count equality, where a broken instrument and a clean world are indistinguishable. F10-AC1: the pre-change BASELINE is the control, and it must DISCRIMINATE -- 3 distinct stdout sha256 across 3 subcommands is printed beside the equality, because the first baseline run produced three IDENTICAL 504-byte hashes (the System32 WSL stub) and would have passed while comparing three copies of an error message; a NEGATIVE control runs beside the one-print claim (the CLI called directly still prints, so the wrapper's 1 is a working suppression, not a silent CLI). F10-AC2: the BEFORE arm, measured with the identical instrument, put comp-aws at ranks 4/42/23/1 and named it in 2 tuples + 3 code lines; plus a live control phrasing that must still route to comp-kuzu. F10-AC3: an in-memory mutated copy of a carrier must compare UNEQUAL to its generator output. F10-AC4: a laptop-producer `output:` line planted into an in-memory copy of each registry file must be caught, in 2 of 2. F10-AC5: main() -- which this order DID change -- is run through the same ast-slice comparator and must read UNEQUAL. Nothing under the repo is written by any control.",
+      "expected": "BASELINE_DISCRIMINATES=YES + DIRECT_CLI_PREAMBLE_COUNT=1 (AC1); a non-zero BEFORE arm and CONTROL_PHRASING_ROUTES_TO=comp-kuzu (AC2); HAND_EDIT_CONTROL=FIRED (AC3); PHRASE_PROBE_CONTROL=FIRED (AC4); the main() control UNEQUAL (AC5).",
+      "observed": "BASELINE_DISCRIMINATES=YES (3 distinct sha256 across 3 subcommands); DIRECT_CLI_PREAMBLE_COUNT=1; BEFORE arm 4 of 4 lists carried comp-aws (ranks 4, 42, 23, 1) and 2 of 90 tuples named it; CONTROL_PHRASING_ROUTES_TO=comp-kuzu; HAND_EDIT_CONTROL=FIRED; PHRASE_PROBE_CONTROL=FIRED (2 of 2 files); 'POSITIVE CONTROL on the comparator: main (this order DID change it) compares IDENTICAL=NO'.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "f10_unrouted.sh run twice back to back at the same HEAD, both outputs normalised only for the PID in the spilled rank-file NAME (the file is PID-keyed by design, comp-which:1826-1831, so concurrent agents never race) and compared byte-for-byte. f10_regen.sh is itself a determinism instrument: it runs both generators TWICE and compares the carriers, which is what SECOND_REGEN_DIFF_LINES measures.",
+      "observed": "Two runs of f10_unrouted.sh: rc 0 and rc 0, outputs IDENTICAL after PID normalisation, 1,170 bytes each. f10_regen.sh: SECOND_REGEN_DIFF_LINES=0 across all three carriers, with identical LF-normalised sha256 prefixes on both passes (657e0577f162a002 / c0c14236c79baf95 / 010d8aa83b956a7b). f10_preamble.sh's stdout hashes reproduce the pre-change baseline exactly on every run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": ".tools/tool_overrides.yaml -- the hand-authored source of every generated row's `concern` AND `canonical_call`, which still reads `canonical_call: \"comp-aws derive --out <path>    # full; or --resource <arn> for bounded\"` and the pre-edit concern naming 'the WRITE-PATH + cert'.",
+      "reason": "NOT IN THIS ORDER'S <paths>. A path a grant lacks is a row, never an override: NFRA_CLDGRPH-W6-S1 (OBSERVATION / ARMED, owner 2.0.0_SA_COO~A). The consequence is stated rather than hidden: the map's concern reword does not reach TOOL_MASTER.yaml or tool_index.py, so two GENERATED carriers still present the deprecated write path as the tool's canonical call. F10-AC4 is scoped to the two registry files and is unaffected; F10-AC3 is unaffected (the status field flows correctly). Note the shape -- comp_capability_provider reads the map DIRECTLY, so the ROUTER shows the new concern and a check scoped to comp-which cannot see this at all."
+    },
+    {
+      "item": "org/modules/graph/comp_capability_provider.py -- where a POPULATION-side (rather than router-side) deprecation exclusion would naturally live, in _build_capabilities' `routable=True` for surface tools.",
+      "reason": "NOT IN <paths>. The exclusion is implemented in .tools/comp-which instead, which is granted and which is the consumer the criterion measures. Consequence stated for the L9 read: the skip is ROUTER-side, so a second ranking consumer would not inherit it automatically -- the `status` field is carried on every generated master/index row precisely so one COULD, but only comp-which honours it today."
+    },
+    {
+      "item": "org/modules/graph/graph-call-manifest.yaml -- not read for a route change and not edited.",
+      "reason": "The order's BOUNDS forbid touching it (it is E-1's; a `status: retired` entry is R14's). No manifest entry needed a comp-aws repoint for this order's criteria, so no row was owed on that clause."
+    },
+    {
+      "item": "Running `comp-aws derive`, `comp-aws snapshot` or the versioned-store commit subcommand against anything, shared plane or otherwise.",
+      "reason": "Forbidden by the order's NEVER clause. The preamble is exercised on read-only subcommands only, and `metrics --graph` reads a two-node synthetic fixture committed in this deliverables folder -- which is labelled in its own `meta` block as NOT a census and carrying no claim about the estate."
+    },
+    {
+      "item": "org/modules/graph/manifest_check_cli.py and .tools/comp-which-routing-test.py -- where the self-route completeness invariant that refuses this order is implemented and where its EXCLUDE literal lives.",
+      "reason": "NEITHER IS IN <paths>, and the third remedy (a status marker on graph-call-manifest.yaml's tools_index entry) is forbidden outright by the order's NEVER clause. This is row NFRA_CLDGRPH-W6-S2 and it is BLOCKING: it is why this instance carries UNCOMMITTED-BLOCKED-BY-NFRA_CLDGRPH-W6-S2 in nine artifact pins, why proof-of-spec-check returns rc 1, and why the task order's <status> is NOT flipped. A path a grant lacks is a row, never an override."
+    },
+    {
+      "item": ".tools/comp-which-routing-test.py exercised END-TO-END.",
+      "reason": "The harness exceeded a 400 s bound and was killed (exit 143) rather than stalled on. It is NOT a criterion instrument here. What was measured instead is the question that matters: `comp-read --enumerate 'comp-aws'` over it returns 0 hits across 1,608 lines / 48 sections, so no expected route in that harness can name the tool this order excluded. comp-coverage-check -- the check F-8's record names -- WAS run end to end and PASSED."
+    }
+  ],
+  "surprises": [
+    "NFRA_CLDGRPH-W6-S2: BLOCKING -- the commit-gate's self-route completeness invariant (manifest_check_cli._selfroute_invariant, via .tools/comp-which-routing-test.py:484-491 over graph-call-manifest.yaml's tools_index) HARD-BLOCKS every commit carrying this order's substance: 'BLOCKED: 1 catalogued tool(s) do NOT surface for their own use_case: comp-aws -- comp-which returns nothing naming it'. That sentence IS the deliverable. The member fires on any commit touching _SELFROUTE_CORPUS (comp-coverage-map.yaml, comp_capability_provider.py, .tools/comp-which) and this order necessarily edits two of the three. Both remedies are outside <paths> (the manifest is forbidden by the order's own NEVER clause; the invariant's EXCLUDE is a hardcoded literal in a file not granted), --force does not bypass a gate failure by the gate's own text, and the one in-grant workaround the gate itself recommends -- give comp-aws curated vocabulary again -- would restore the routing Andrew ordered removed. THE ORDER IS OPEN AND THE <status> IS NOT FLIPPED. The nine source/carrier edits are UNCOMMITTED in the worktree; the deliverables and both rows are committed at 05a72ef7ae. BLOCKING / ARMED, disarm owner 2.0.0_SA_COO~A.",
+    "NFRA_CLDGRPH-W6-S1: gen_tool_registry.py sources a tool's `concern` and `canonical_call` from .tools/tool_overrides.yaml (bootstrapped from the map ONCE, when the overrides file was absent, and frozen since), not from comp-coverage-map.yaml -- so this order's map reword does NOT reach TOOL_MASTER.yaml or tool_index.py, and both generated carriers still carry `canonical_call: comp-aws derive --out <path>`, an agent-facing string describing exactly the act being deprecated. tool_overrides.yaml is outside this order's <paths>; filed, not fixed. OBSERVATION / ARMED, disarm owner 2.0.0_SA_COO~A."
+  ],
+  "session_log": "TO-CG-F-10, cell CG-s-30, ROUND 6 of NFRA_CLDGRPH. Worker 0.9.0_WK_NFRA_CLDGRPH~6, a spine-v3 L7 subagent of 2.0.0_SA_COO~A, branch wk-cldgrph-6-6 in worktree C:/tmp/wk-cldgrph-6-6, base HEAD 973a20aff99fc737772203545fa546deef093547. PUSH STATE: LOCAL -- never pushed, never merged, never rebased, not measured against a remote and not claimed. TERMINAL STATUS: COMPLETE, one pass. ORDER OF WORK, AS THE ORDER CUT IT. (0) Branch and TREE-OK printed first; the three mandated comp-read calls run before any act (comp-which's ranker population, the map's node schema and its consumer, F-8's regeneration record). (1) THE BEFORE CENSUS FIRST, before a single edit: comp-which over the four `when:` phrasings plus a control, each ranked list read from its own spilled rank file; the curated-tuple census; the phrase domain scoped and unscoped; and the rc + stdout sha256 of the three read-only subcommands through the wrapper. THAT FIRST RUN WAS WRONG AND WAS CAUGHT BY ITS OWN OUTPUT: three identical 504-byte hashes at rc=1, which is the System32 WSL stub a python-spawned bare `bash` resolves to. The instrument was fixed to resolve the absolute Git-for-Windows bash through .tools/git_bash_resolver.py and REFUSE to fall back, the census was re-run, and BASELINE_DISCRIMINATES is now printed beside the equality it certifies. (2) The map: the `status` field DECLARED in schema.node_fields with its default, its meaning, its consumers and what one remedy does not move; `status: deprecated` on the comp-aws entry with its concern reworded; high_level_tool -> comp-kuzu and refresh_mechanism reworded to the estate-side contract. (3) gen_tool_registry.py: status_from_map() as an ATTRIBUTE read beside the population read, projected onto every master row and onto the light card. (4) comp-which: two curated tuples repointed, the :1190 description string rewritten, and _deprecated_tools() applied in TWO places -- the surface drill-down and the WHOLE ranking before the spill, not just the printed top-3. (5) The preamble in comp_aws_cli.py main() (before parse_args, so --help carries it) and in the wrapper, with the env flag making it one print per invocation; a NameError on the missing module-level `import os` was hit on the first exercise and fixed with a local import rather than a module-header edit. (6) comp-tools.yaml and comp-aws-agent-usage.yaml rewritten, the four `when:` phrasings MOVED onto comp-kuzu rather than deleted. F10-AC4 then read 1 of 7 -- MY OWN REWRITE HAD SPELLED A CENSUSED PHRASE while saying it was not for agent use -- and the three sites were changed to cite rather than repeat, which is E-1's W2-S38 convention and the only reason the census now reads 0 in both the scoped and unscoped arms. (7) Both generators run twice; comp-coverage-check PASS at 99 homed tools. (8) All five mechanical criteria run under `timeout 120` by their named invocations, outputs captured verbatim into this instance. Every .py through bash .tools/commit-gate.sh (7 of 7 plus the two source files, all clean); every .sh through bash -n. ONE ROW FILED: NFRA_CLDGRPH-W6-S1, appended to INVESTIGATION_v1.md with the header denominator restated by parsing every fenced block (173 rows in 138 blocks before, 174 in 139 after); no existing row edited. NOTHING RUN AGAINST THE SHARED PLANE: derive, snapshot and the versioned-store commit were never invoked, and `metrics --graph` read a two-node synthetic fixture. TWO COMMITS AT THE FLIP, as the order directs: the acts, then the instance pinning them together with the status flip.",
+  "compiler_tools": [
+    {
+      "tool": "comp-read (mandated first read #1: the router's population)",
+      "invocation": "python .tools/comp-read .tools/comp-which --for \"which population the ranker walks (the curated tuples, the ledger's high_level_tool, tools_index or TOOL_MASTER), where a tool could be excluded, and the four phrasings of comp-aws\"",
+      "result": "2,462 lines / 42 sections, 241 qualifiers. Deciding lines: :293 'the router ranks TOOLS off THIS curated vocabulary, and never reads tools_index' (which is why the tuple repoint is necessary and why tools_index alone would not have been sufficient), _surface_index at :1397-1414 reading high_level_tool (the SECOND path out), and _default_router at :1994-2118 taking its ranking from comp_capability_provider (the THIRD path, and the one the status field closes). Three paths, all three closed -- closing two would have left a measurement that read clean while the route survived."
+    },
+    {
+      "tool": "comp-read (mandated first read #2: the population authority's schema)",
+      "invocation": "python .tools/comp-read org/modules/graph/comp-coverage-map.yaml --for \"the node schema every tools entry carries, and who consumes the file\"",
+      "result": "1,119 lines / 18 sections, 139 qualifiers. Located schema: at :49-184 (where the new `status` field was declared) and tools_index_generation at :1062-1094 naming the build step that reads tools[] + meta_tools[]. Qualifier :117 'coverage status is referenced ... never copied into the axis -- one-artifact-clean' is the convention the new field follows: declared once, consumed, never duplicated."
+    },
+    {
+      "tool": "comp-read (mandated first read #3: F-8's regeneration record)",
+      "invocation": "python .tools/comp-read org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~4/CG-s-28.dead-engine-descriptions-and-normaliser.result.md --for \"the regeneration commands, the idempotence check and the parity line\"",
+      "result": "241 lines / 10 sections, 45 qualifiers. Deciding: 'REGEN_COMMANDS=3 against a tree with two generator scripts' -- the amendment that established the count is MEASURED, not padded to the carrier count. f8_regen_idempotent.sh was then read directly and its shape reused under f10_ names: the per-carrier generator declaration, the LF-normalised comparison (autocrlf makes a byte-identical tool_index.py read MODIFIED) and the hand-edit positive control."
+    },
+    {
+      "tool": "comp-read --enumerate (the tuple census, and the routing-harness question)",
+      "invocation": "python .tools/comp-read .tools/comp-which --enumerate 'comp-aws' ; python .tools/comp-read .tools/comp-which-routing-test.py --enumerate 'comp-aws'",
+      "result": "comp-which: 7 hits / 2,462 lines, banded CODE 3 (lines 290, 375, 1190 -- the two curated tuples and the description string) and COMMENT 4 (470, 627, 924, 1455 -- historical prose, left alone). The banding is what separated the three sites that route from the four that narrate. comp-which-routing-test.py: 0 hits across 1,608 lines / 48 sections -- a MEASURED zero over the whole file, which is why the excluded tool cannot have broken an expected route in the harness that timed out."
+    },
+    {
+      "tool": "comp-coverage-check (the map's own consistency gate)",
+      "invocation": "timeout 120 python .tools/comp-coverage-check",
+      "result": "'PASS: comp-coverage-map.yaml is internally consistent -- every tool one home, every overlap declared, no phantom seam, inventory complete, projection current, grain stable.' swept: 99 homed tool(s) (35 tools[] + 64 meta_tools[]) | 12 gate_contract rule(s), 0 unverifiable. Run AFTER the schema field, the status value, the concern reword and the high_level_tool repoint -- so the new field does not break the map's own invariants and the surface repoint does not orphan a tool."
+    },
+    {
+      "tool": "comp-find (the corpus check before treating the metrics fixture as absent)",
+      "invocation": "timeout 60 python .tools/comp-find --name 'graph.*\\.json' 'org/modules/graph'",
+      "result": "'0 hit(s) across 405 file(s) scanned in scope [corpus=all] | 6 EPHEMERAL-FLOOR, NOT searched'. A MEASURED zero with its denominator and its excluded floor printed -- which is why the metrics fixture was AUTHORED into this deliverables folder (two synthetic nodes, labelled as not a census) rather than pointed at a snapshot that does not exist in this worktree."
+    }
+  ]
+}
