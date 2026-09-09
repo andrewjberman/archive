@@ -1,0 +1,92 @@
+[Container] 2026/09/09 18:48:20.658093 Running on CodeBuild On-demand
+[Container] 2026/09/09 18:48:20.658104 Waiting for agent ping
+[Container] 2026/09/09 18:48:20.895429 Waiting for DOWNLOAD_SOURCE
+[Container] 2026/09/09 18:48:27.068915 Phase is DOWNLOAD_SOURCE
+[Container] 2026/09/09 18:48:27.131869 CODEBUILD_SRC_DIR=/codebuild/output/src250802586/src
+[Container] 2026/09/09 18:48:27.132575 YAML location is /codebuild/readonly/buildspec.yml
+[Container] 2026/09/09 18:48:27.135472 Setting HTTP client timeout to higher timeout for S3 source
+[Container] 2026/09/09 18:48:27.136330 Processing environment variables
+[Container] 2026/09/09 18:48:27.349103 No runtime version selected in buildspec.
+[Container] 2026/09/09 18:48:27.372515 Moving to directory /codebuild/output/src250802586/src
+[Container] 2026/09/09 18:48:27.372540 Cache is not defined in the buildspec
+[Container] 2026/09/09 18:48:27.413414 Skip cache due to: no paths specified to be cached
+[Container] 2026/09/09 18:48:27.413806 Registering with agent
+[Container] 2026/09/09 18:48:27.450588 Phases found in YAML: 2
+[Container] 2026/09/09 18:48:27.450659  INSTALL: 1 commands
+[Container] 2026/09/09 18:48:27.450677  BUILD: 5 commands
+[Container] 2026/09/09 18:48:27.451042 Phase complete: DOWNLOAD_SOURCE State: SUCCEEDED
+[Container] 2026/09/09 18:48:27.451118 Phase context status code:  Message: 
+[Container] 2026/09/09 18:48:27.599419 Entering phase INSTALL
+[Container] 2026/09/09 18:48:27.635768 Running command pip install -q boto3 pyyaml || true
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+
+[notice] A new release of pip is available: 26.0.1 -> 26.2.1
+[notice] To update, run: pip install --upgrade pip
+
+[Container] 2026/09/09 18:48:41.247466 Phase complete: INSTALL State: SUCCEEDED
+[Container] 2026/09/09 18:48:41.247505 Phase context status code:  Message: 
+[Container] 2026/09/09 18:48:41.286935 Entering phase PRE_BUILD
+[Container] 2026/09/09 18:48:41.289875 Phase complete: PRE_BUILD State: SUCCEEDED
+[Container] 2026/09/09 18:48:41.289888 Phase context status code:  Message: 
+[Container] 2026/09/09 18:48:41.328836 Entering phase BUILD
+[Container] 2026/09/09 18:48:41.330120 Running command python3 infra/aws/globgrph/derive_stitch.py --out /tmp/stitch_graph.json
+WARN (extract_event_invoke): live-derived invoke edges (event-source/SNS -> Lambda) NOT verified this build (no creds / AWS unreachable) -- a MISSING SQS/stream/SNS invoke edge in comp-blast this build is COULD-NOT-VERIFY, not nonexistence.
+WARN (extract_event_invoke): live-derived invoke edges (event-source/SNS -> Lambda) NOT verified this build (no creds / AWS unreachable) -- a MISSING SQS/stream/SNS invoke edge in comp-blast this build is COULD-NOT-VERIFY, not nonexistence.
+AWS snapshot: snapshots/20260909/graph-20260909.tar.gz
+UNIONED nodes = 29267, edges = 61275
+stitch edges: {'routes_to': 20, 'writes': 158, 'reads': 166, 'derives_from': 216, 'stored_in': 955, 'lam_matched': 82, 'lam_unmatched': 6}
+LAMBDA join: matched=82 unmatched(code-vs-live drift)=6
+OK: genuine (non-wildcard) dangling edges = 0
+GRAIN-SENTINEL: PASS (0 identity-format + 0 magnitude violations)
+  COVERAGE: 34 of 63 live node type(s) band-checked; 29 UNCOVERED (live, absent from baseline -- NEVER EXAMINED); 1 zero-baseline (skipped by policy)
+    UNCOVERED: C2Motif, C3System, CODEBUILD_PROJECT, Component, DataFetch, Endpoint, Field, Hook, JSXElement, JSXRender, LOAD_BALANCER, MS_FILE ...
+OK: wrote /tmp/stitch_graph.json
+
+[Container] 2026/09/09 18:49:23.473785 Running command python3 - <<'PY'
+import json, hashlib, os, datetime
+g = json.load(open('/tmp/stitch_graph.json'))
+meta = g.get('meta', {})
+sha = hashlib.sha256(open('/tmp/stitch_graph.json','rb').read()).hexdigest()
+ssha = ''
+if os.path.exists('stitch_source_sha.txt'):
+    ssha = open('stitch_source_sha.txt').read().strip()
+marker = {
+    'built_at': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+    'aws_snapshot': meta.get('aws_snapshot'),
+    'git_sha': ssha,
+    'producer': 'stitch-codebuild',
+    'total_nodes': meta.get('total_nodes'),
+    'total_edges': meta.get('total_edges'),
+    'artifact_sha256': sha,
+}
+json.dump(marker, open('/tmp/stitch_marker.json','w'), indent=2)
+print('marker:', json.dumps(marker))
+PY
+
+marker: {"built_at": "2026-09-09T18:49:23Z", "aws_snapshot": "snapshots/20260909/graph-20260909.tar.gz", "git_sha": "de590a7d0227fb9c14ce35b96dcec86deb68df60", "producer": "stitch-codebuild", "total_nodes": 29267, "total_edges": 61275, "artifact_sha256": "a7c1d5898bac1d8c8dc771f9dd63ea747d7d4248ae2408130b0e8b9a9cf1c6cc"}
+
+[Container] 2026/09/09 18:49:23.938924 Running command aws s3 cp /tmp/stitch_graph.json s3://opal-313476888478-globgrph/stitch/stitch_graph.json
+Completed 1.0 MiB/37.0 MiB (6.0 MiB/s) with 1 file(s) remainingCompleted 2.0 MiB/37.0 MiB (11.7 MiB/s) with 1 file(s) remainingCompleted 3.0 MiB/37.0 MiB (17.2 MiB/s) with 1 file(s) remainingCompleted 4.0 MiB/37.0 MiB (22.4 MiB/s) with 1 file(s) remainingCompleted 5.0 MiB/37.0 MiB (27.6 MiB/s) with 1 file(s) remainingCompleted 6.0 MiB/37.0 MiB (32.7 MiB/s) with 1 file(s) remainingCompleted 7.0 MiB/37.0 MiB (37.5 MiB/s) with 1 file(s) remainingCompleted 8.0 MiB/37.0 MiB (41.8 MiB/s) with 1 file(s) remainingCompleted 9.0 MiB/37.0 MiB (37.9 MiB/s) with 1 file(s) remainingCompleted 10.0 MiB/37.0 MiB (41.7 MiB/s) with 1 file(s) remainingCompleted 11.0 MiB/37.0 MiB (45.4 MiB/s) with 1 file(s) remainingCompleted 12.0 MiB/37.0 MiB (49.1 MiB/s) with 1 file(s) remainingCompleted 13.0 MiB/37.0 MiB (53.0 MiB/s) with 1 file(s) remainingCompleted 14.0 MiB/37.0 MiB (56.6 MiB/s) with 1 file(s) remainingCompleted 15.0 MiB/37.0 MiB (60.1 MiB/s) with 1 file(s) remainingCompleted 16.0 MiB/37.0 MiB (63.4 MiB/s) with 1 file(s) remainingCompleted 17.0 MiB/37.0 MiB (66.6 MiB/s) with 1 file(s) remainingCompleted 18.0 MiB/37.0 MiB (69.4 MiB/s) with 1 file(s) remainingCompleted 19.0 MiB/37.0 MiB (72.3 MiB/s) with 1 file(s) remainingCompleted 20.0 MiB/37.0 MiB (75.4 MiB/s) with 1 file(s) remainingCompleted 21.0 MiB/37.0 MiB (78.6 MiB/s) with 1 file(s) remainingCompleted 22.0 MiB/37.0 MiB (81.1 MiB/s) with 1 file(s) remainingCompleted 23.0 MiB/37.0 MiB (84.3 MiB/s) with 1 file(s) remainingCompleted 24.0 MiB/37.0 MiB (87.6 MiB/s) with 1 file(s) remainingCompleted 25.0 MiB/37.0 MiB (90.2 MiB/s) with 1 file(s) remainingCompleted 26.0 MiB/37.0 MiB (92.9 MiB/s) with 1 file(s) remainingCompleted 27.0 MiB/37.0 MiB (95.2 MiB/s) with 1 file(s) remainingCompleted 28.0 MiB/37.0 MiB (98.4 MiB/s) with 1 file(s) remainingCompleted 29.0 MiB/37.0 MiB (99.9 MiB/s) with 1 file(s) remainingCompleted 30.0 MiB/37.0 MiB (102.1 MiB/s) with 1 file(s) remainingCompleted 31.0 MiB/37.0 MiB (105.1 MiB/s) with 1 file(s) remainingCompleted 32.0 MiB/37.0 MiB (107.1 MiB/s) with 1 file(s) remainingCompleted 33.0 MiB/37.0 MiB (109.0 MiB/s) with 1 file(s) remainingCompleted 34.0 MiB/37.0 MiB (112.0 MiB/s) with 1 file(s) remainingCompleted 35.0 MiB/37.0 MiB (112.2 MiB/s) with 1 file(s) remainingCompleted 36.0 MiB/37.0 MiB (112.4 MiB/s) with 1 file(s) remainingCompleted 36.0 MiB/37.0 MiB (112.1 MiB/s) with 1 file(s) remainingCompleted 37.0 MiB/37.0 MiB (112.2 MiB/s) with 1 file(s) remainingupload: ../../../../tmp/stitch_graph.json to s3://opal-313476888478-globgrph/stitch/stitch_graph.json
+
+[Container] 2026/09/09 18:49:35.811661 Running command aws s3 cp /tmp/stitch_marker.json s3://opal-313476888478-globgrph/stitch/stitch_marker.json
+Completed 330 Bytes/330 Bytes (3.5 KiB/s) with 1 file(s) remainingupload: ../../../../tmp/stitch_marker.json to s3://opal-313476888478-globgrph/stitch/stitch_marker.json
+
+[Container] 2026/09/09 18:49:36.587835 Running command echo "OK: stitch published (artifact-first, marker-last)"
+OK: stitch published (artifact-first, marker-last)
+
+[Container] 2026/09/09 18:49:36.595680 Phase complete: BUILD State: SUCCEEDED
+[Container] 2026/09/09 18:49:36.595768 Phase context status code:  Message: 
+[Container] 2026/09/09 18:49:36.645448 Entering phase POST_BUILD
+[Container] 2026/09/09 18:49:36.648358 Phase complete: POST_BUILD State: SUCCEEDED
+[Container] 2026/09/09 18:49:36.648374 Phase context status code:  Message: 
+[Container] 2026/09/09 18:49:36.705121 Set report auto-discover timeout to 5 seconds
+[Container] 2026/09/09 18:49:36.705994 Expanding base directory path:  .
+[Container] 2026/09/09 18:49:36.709175 Assembling file list
+[Container] 2026/09/09 18:49:36.709190 Expanding .
+[Container] 2026/09/09 18:49:36.712508 Expanding file paths for base directory .
+[Container] 2026/09/09 18:49:36.712524 Assembling file list
+[Container] 2026/09/09 18:49:36.712528 Expanding **/*
+[Container] 2026/09/09 18:49:36.759012 No matching auto-discover report paths found
+[Container] 2026/09/09 18:49:36.759045 Report auto-discover file discovery took 0.053925 seconds
+[Container] 2026/09/09 18:49:36.759071 Phase complete: UPLOAD_ARTIFACTS State: SUCCEEDED
+[Container] 2026/09/09 18:49:36.759078 Phase context status code:  Message: 
