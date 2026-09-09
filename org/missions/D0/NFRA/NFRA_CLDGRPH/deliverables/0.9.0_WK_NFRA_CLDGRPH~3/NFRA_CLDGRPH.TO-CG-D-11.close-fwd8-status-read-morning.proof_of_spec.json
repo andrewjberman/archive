@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CLDGRPH.TO-CG-D-11",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/prd/NFRA_CLDGRPH_PRD.md",
+    "group": "D",
+    "vintage_commit": "25c66d3358"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+    "vintage_commit": "70918d5d2b",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-D-11.close-fwd8-status-read-morning.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_CLDGRPH~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/morning.sh",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The morning read of TO-CG-D-11 deliverable 1: wall clock, pointer ETag before, procs before with a positive control, the whole comp-graph status output, procs after, pointer ETag after, then MORNING_READ / PROCS / POINTER_ETAG_BEFORE / POINTER_ETAG_AFTER / POINTER_ETAG_STRICT_DIFFERS / POINTER_MOVEMENT_ATTRIBUTION / POINTER_MOVED_ACROSS_READS. READS ONLY: s3api head-object and get-object, one ps snapshot, one status read. Carries a --selftest limb that feeds each control an input which must produce the opposite answer."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/missed.sh",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deliverable 2: the same read with COMP_GRAPH_POINTER_URI pointed at the plant fixture committed with TO-CG-D-4, plus a read-back of the plant's bytes and its sha256 before and after, so the fixture used is provably the fixture named and the read provably wrote nothing."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/CG-x-8.status-read-morning.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deliverable 3: the record. One fenced JSON block with the 13 named fields, the criteria table, the can-fail proof, the D11-AC4 reading, and four verbatim transcripts (morning, missed, selftest, and the three criterion invocations)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D11-AC1",
+      "criterion_verbatim": "D11-AC1 -- THE REAL MORNING READS YES WITH A TIME.",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/morning.sh | grep -E '^MORNING_READ='",
+      "output_evidence": "MORNING_READ=REFRESHED LAST NIGHT: YES at 2026-09-05T02:23:22.179104+00:00",
+      "denominator": "1 of 1 morning read required by the criterion, taken 2026-09-05T14:01:49Z and re-taken 2026-09-05T14:39:03Z with an identical deciding line; script rc 0 and grep rc 0 on both. The read is a REAL MORNING by the tool's own boundary: 02:00:00+00:00 that same calendar day, printed by the tool (boundary field) and derived at graph_status_cli.py:60-61 from cron(0 2 * * ? *) at infra/aws/terraform/globgrph/item2a.tf:439 -- 11h59m elapsed. The time in the answer is the built_at of the full derive_runner manifest at vintage 2026-09-05T02:11:10.919000+00:00, which is TO-CG-D-9's NIGHT_VINTAGE to the microsecond (CG-x-2.schedule-exercised.result.md:168,173 at HEAD 76c5f90155), compared rather than carried forward.",
+      "status": "PASS",
+      "expect": "MORNING_READ=REFRESHED LAST NIGHT: YES at 20[0-9]{2}-[0-9]{2}-[0-9]{2}T[0-9:.]+"
+    },
+    {
+      "criterion_id": "D11-AC2",
+      "criterion_verbatim": "D11-AC2 -- THE NIGHT THAT DID NOT RUN READS NO: the two readings differ on the deciding line.",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/missed.sh | grep -E '^MISSED_READ='",
+      "output_evidence": "MISSED_READ=REFRESHED LAST NIGHT: NO (last full: 2026-09-02T20:15:00.000000+00:00)",
+      "denominator": "1 of 1 missed-night read, taken 2026-09-05T14:02:56Z and re-taken 14:39Z identically; script rc 0, grep rc 0. THE TWO READINGS DIFFER ON THREE INDEPENDENT PLACES, not one: the verdict token (YES vs NO), the clause shape (at <time> vs (last full: <time>)), and the time (2026-09-05T02:23:22.179104+00:00 vs 2026-09-02T20:15:00.000000+00:00) -- same binary, same code path, same boundary 2026-09-05T02:00:00+00:00 printed in both, one environment variable different. THIS IS THE CAN-FAIL ARM AND IT WAS EXERCISED ON A FIXTURE, NEVER ON THE WORLD: nothing was stopped, disabled or provoked to obtain the NO; the plant is a local pointer+manifest pair committed with TO-CG-D-4 whose newest full vintage predates the boundary by 2d6h, read back and sha256-verified identical before and after the read (a46a35809dab2e63c57210023bf145275145c19ef946bf4fd75a77473f11d4bf).",
+      "status": "PASS",
+      "expect": "MISSED_READ=REFRESHED LAST NIGHT: NO \\(last full: "
+    },
+    {
+      "criterion_id": "D11-AC3",
+      "criterion_verbatim": "D11-AC3 -- NOTHING WAS RERUN: no engine process around the read, and the pointer did not move across the read (morning.sh compares the two ETags itself and prints POINTER_MOVED_ACROSS_READS=<true|false>).",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/morning.sh | grep -E '^(PROCS|POINTER_MOVED_ACROSS_READS)='",
+      "output_evidence": "PROCS=0\nPOINTER_MOVED_ACROSS_READS=false\n(the same run's supporting lines, from the transcript: PROCS_BEFORE=0 / PROCS_AFTER=0 / PROCS_POSITIVE_CONTROL=27 / PS_ROWS_DENOMINATOR=31/28 / POINTER_ETAG_BEFORE=\"4cc4f17a96e5bc5d6520a5aba7e40cf8\" / POINTER_ETAG_AFTER=\"4cc4f17a96e5bc5d6520a5aba7e40cf8\" / POINTER_ETAG_STRICT_DIFFERS=false / POINTER_MOVEMENT_ATTRIBUTION=n/a -- the pair is identical, so there is no movement to attribute)",
+      "denominator": "PROCS: 0 matches of 31 ps -ef rows before the read and 0 of 28 after (both denominators printed by the script), for pattern kuzu_nessie_load|derive_runner|projection_worker, counted on a snapshot captured into a variable with the grep -v grep discipline; ps rc captured and a rows<2 snapshot would have printed UNREADABLE rather than a number. POSITIVE CONTROL, same probe same run: 27 matches for pattern bash -- the zero is an absence, not a dead arm. POINTER: 2 of 2 ETag reads at rc 0 with their raw bytes printed (the .tools/aws shim emits CRLF; the CR is stripped explicitly, per row W1-S18) and the two values strictly equal, so POINTER_ETAG_STRICT_DIFFERS=false and the attributed arm was never needed -- no bare difference was converted into a verdict. Stable across 5 runs of morning.sh between 14:01Z and 14:39Z.",
+      "status": "PASS",
+      "expect": "PROCS=0[\\s\\S]*POINTER_MOVED_ACROSS_READS=false"
+    },
+    {
+      "criterion_id": "D11-AC4",
+      "criterion_verbatim": "D11-AC4 -- WHETHER THE PLANT STANDS FOR 'A NIGHT KNOWN NOT TO HAVE RUN' as FWD-8 means it (the issuer's reading: a real miss cannot be provoked without a production change; the plant exercises the same code path with a realistic manifest), and whether the morning read's time matches D-9's night. A reading act; NO verdict; graded by 3.0.0_SA_CVO at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "a reading act -- no invocation reduces it; the reading is recorded in full at org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/CG-x-8.status-read-morning.result.md section 'D11-AC4 -- the reading'",
+      "output_evidence": "THE READING, in five parts, recorded with NO verdict. (1) THE PLANT EXERCISES THE SAME CODE PATH A REAL MISS WOULD: _last_full_before_boundary (graph_status_cli.py:329-382) computes the boundary from the wall clock, finds no full/derive_runner manifest inside [boundary, boundary+6h), walks backwards for the newest full and returns ran=False; the plant reaches that branch with an empty window, a real miss reaches it with a window of incrementals that fail the mode=='full' AND writer_id=='derive_runner' test. STATED LIMIT: the plant does not exercise the REJECTION half of the window scan (its window is empty, so 0 of the up-to-12 in-window manifest GETs are spent rejecting incrementals). (2) REALISTIC ON SHAPE, NOT MERELY ON VERDICT: 14 fields, same names and nesting as the live S3 manifest read minutes earlier (the two projection.current blocks in the transcripts differ only in values), IN-BAND band status, writer_id derive_runner, producer.mode full, and its manifest_sha256 VERIFIES -- so it passes the straddle contract (graph_status_cli.py:282-296) rather than short-circuiting it into the UNVERIFIABLE branch at :419/:485. (3) THE COUNTERFACTUAL WAS NOT TESTED AROUND: a real miss needs the nightly rule disabled or a task stopped, a production change no worker may make and a NEVER on this order's face; it was not done. (4) WHAT A GRADER MAY HOLD AGAINST THE FIXTURE, said by the seat that built the reading: the plant proves the DECISION FUNCTION answers NO when no full nightly landed in the window; it does not prove the ESTATE would deliver that NO to an operator during a real miss, because in a real miss the pointer would also be stale and the reader would be talking to S3 rather than a local directory -- read_method: local-file in the NO transcript is the printed tell that this arm ran against a fixture. The honest statement: decision function EXERCISED, delivery path under a real miss INFERRED from shared code. (5) ON THE SECOND HALF -- whether the morning read's time matches D-9's night: it does, exactly, on both fields (built_at 2026-09-05T02:23:22.179104+00:00 and vintage 2026-09-05T02:11:10.919000+00:00), and the match was made by comparing two independently produced numbers rather than by carrying D-9's forward; no later full nightly exists in the window, so it is CG-x-2's own night. This is the half the worker would rate strongest.",
+      "denominator": "1 of 1 judgment criterion in this order's battery. NOT SELF-GRADED: no status of PASS or FAIL is asserted here and none would be valid.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\" at the cut: whether a planted pointer+manifest pair stands for 'a night known not to have run' as FWD-8 means it is a reading against the specification, and no invocation reduces it. SUBSTITUTE ORACLE: 3.0.0_SA_CVO at L9, which grades this criterion against the PRD acceptance 8 text and the issuer's stated reading, using the reading recorded in output_evidence and in org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/CG-x-8.status-read-morning.result.md. PASS or FAIL on this row would be INVALID.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "status": "FIRED-AS-EXPECTED",
+      "expected": "Every arm that grades a mechanical criterion must be shown returning the OPPOSITE of the result it reports, or its zero/false is a constant rather than a measurement. Four arms: the read itself, the ETag comparator, the process probe, and the read's third outcome.",
+      "observed": "(a) THE READ: D11-AC2 IS the can-fail arm for D11-AC1 -- the same binary on the same code path prints NO where the morning prints YES, so the YES is not a wedged answer. (b) THE COMPARATOR: bash morning.sh --selftest feeds the same pure function two different ETags and prints SELFTEST_COMPARATOR_DIFF=true beside SELFTEST_COMPARATOR_SAME=false, so POINTER_MOVED_ACROSS_READS=false is a measurement. (c) THE PROCESS PROBE: the same probe on pattern 'bash' returned 27 (in-run positive control) and 24 (selftest) over 29-31 ps rows, so its 0 on the engine pattern is an absence and not a dead arm; AND the TRAP was demonstrated live -- a bare `ps -ef | grep -c -E '<pattern>'` typed interactively returned 2 against a truth of 0 because ps -ef renders full argv and the probe counted its own wrapper, while the disciplined form returned 0 in the same second. (d) THE THIRD OUTCOME: the tool has an UNVERIFIABLE branch (graph_status_cli.py:419 and :485-486) that neither reading took -- one read at read_method boto3, one at local-file -- so neither YES nor NO is an error state wearing a verdict's clothes.",
+      "description": "Four arms, all exercised THIS pass in this worktree at HEAD 76c5f90155, each through the same detector that grades the real output. The order's own text names D11-AC2 and D11-AC3 as the controls that must be able to fail; both are shown able to."
+    },
+    "determinism": {
+      "status": "STABLE",
+      "observed": "Five runs of morning.sh (14:01:49Z primary, 14:1xZ AC1, 14:1xZ AC3, 14:39:03Z AC1 re-take, 14:39Z AC3 re-take) produced an identical MORNING_READ line, an identical ETag pair \"4cc4f17a96e5bc5d6520a5aba7e40cf8\" before and after on every run, PROCS=0 on every run, and POINTER_MOVED_ACROSS_READS=false on every run. Three runs of missed.sh produced an identical MISSED_READ line and an unchanged plant sha256. Script rc 0 on all eight runs; no rc 124.",
+      "method": "Re-invocation over a 38-minute span rather than back-to-back, deliberately: the live pointer is advanced by incremental_updater several times an hour (its vintage was 12:54:31 at 13:47Z), so a span that wide is a real test of stability rather than a repeat inside one quiet second. The answer held while the served pointer sat four vintages past the night, which is the property FWD-8 needs."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any provocation of a real missed night (disabling events-rule/opal-globgrph-derive-runner-nightly, stopping a task, moving the live pointer or marker).",
+      "reason": "A production change no worker may make, named as a NEVER on this order's face and as the issuer's own reading at the cut. The can-fail arm is exercised on a local fixture instead, and whether that fixture stands for a real miss is exactly what D11-AC4 asks 3.0.0_SA_CVO to grade."
+    },
+    {
+      "item": "Any verification that the night of 2026-09-05T02:11:10.919000+00:00 was itself unprovoked, correctly triggered, or correctly attributed to its EventBridge rule.",
+      "reason": "That is TO-CG-D-9's question and TO-CG-D-9 answered it (CloudTrail RunTask -> task arn -> MARKER_STAMPED log line -> 3-of-3 snapshot join to the manifest). This order reads the SERVED ANSWER on a morning and compares its time to D-9's recorded night; re-deriving D-9's attribution would be re-measuring what the cut already measured."
+    },
+    {
+      "item": "Any remediation of the three filed rows (the telemetry control's worktree blindness, the session-id-keyed serial mis-attribution, the invocation log's missing command text).",
+      "reason": "All three surfaces (.tools/hooks/post-tool-telemetry.sh, org/mcp/sessions/, the cell text) are outside this order's <paths>. Surfaced as rows with disarm owners named; a path this order lacks is a row, never an override."
+    }
+  ],
+  "surprises": [
+    "NFRA_CLDGRPH-W3-S3: the order's telemetry negative control (`comp-find '<serial>' org/mcp/agent_telemetry --all --limit 3`) scans ZERO files from a linked worktree because org/mcp/agent_telemetry/ is gitignored (.gitignore:261), so its confident 0-hit denominator at rc 0 is a NO MEASUREMENT textually identical to the clean zero the order expects; the substantive answer was obtained with a second instrument (0 across 160 files / 426,009 lines, positive controls 30,522 and 65,114).",
+    "NFRA_CLDGRPH-W3-S4: 'a worker writes no telemetry' is false and the zero is a naming artifact -- post-tool-telemetry.sh:121 resolves the serial from org/mcp/sessions/<session_id>.serial before OPAL_AGENT_SERIAL, this session's map entry still reads '0.9.0_WK_NFRA_CLDGRPH~2' (written 2026-09-04 08:50), and this worker's calls plus its parent's are written live into that sibling's file (1,342 rows, one session id, 100 percent serial_source session-id-keyed, including send_message/heartbeat/Agent calls no worker can make).",
+    "NFRA_CLDGRPH-W3-S5: a telemetry row carries {ts, ts_unix, serial, tool_name, kind, serial_source, session_id} and no command text, by an explicit privacy invariant at post-tool-telemetry.sh:72, so the invocation log the cell names as a negative control for 'nothing was rerun' cannot discriminate a read from a rerun in either direction; the discrimination came from the process table and the pointer ETags instead."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/CG-x-8.status-read-morning.result.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "timeout 180 python .tools/comp-read org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~1/CG-x-2.schedule-exercised.result.md --for \"the NIGHT_VINTAGE and its built_at\"",
+      "result": "The order's compiler_tools_mandate, run BEFORE the reads. rc 0. 1,347 lines, 70 sections, 90 qualifiers. It surfaced the night's identity and, more usefully, the qualifier at :179 recording that 2026-09-05T00:52:45.603017+00:00 advanced the pointer earlier the same night with JOIN=0/3 -- which is why the morning read's agreement with D-9 is stated on the 3-of-3-joined full vintage and never on 'the newest thing the pointer names'."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "timeout 180 python .tools/comp-read org/modules/graph/graph_status_cli.py --for \"REFRESHED LAST NIGHT: how the YES/NO branch is decided, the 02:00Z boundary, COMP_GRAPH_POINTER_URI\"",
+      "result": "rc 0. 707 lines, 30 sections. Located _pointer_base (:159-173, the COMP_GRAPH_POINTER_URI resolution the missed read depends on) and _last_full_before_boundary (:329-382, the branch that decides YES vs NO), which is what made it possible to state WHY the answer survives the pointer having advanced four vintages past the night instead of merely observing that it did."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "timeout 120 python .tools/comp-find '0.9.0_WK_NFRA_CLDGRPH~3' org/mcp/agent_telemetry --all --limit 3  THEN  timeout 120 python .tools/comp-find --hidden org/mcp/agent_telemetry",
+      "result": "The order's named negative control, run as written: rc 0, 'DENOMINATOR: 0 hit(s) across 0 file(s) scanned in scope [corpus=all]'. The census verb then refused the same path outright -- 'ERROR: 1 path(s) do not exist' / 'A count over a path that is not there is not a zero -- it is NO MEASUREMENT.' Rows W3-S3 and W3-S4 carry the finding; the telemetry_rows_for_serial value in the record is from a substitute instrument with its own denominator and positive controls."
+    }
+  ]
+}
