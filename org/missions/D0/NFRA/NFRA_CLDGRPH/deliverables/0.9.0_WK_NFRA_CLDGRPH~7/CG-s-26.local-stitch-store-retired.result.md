@@ -5,14 +5,24 @@
 (re-addressed from slot ~2 at 22:3xZ) · **Branch:** `wk-cldgrph-6-7` ·
 **Worktree:** `C:/tmp/wk-cldgrph-6-7` · **Push state:** LOCAL.
 
-**TERMINAL STATUS: OPEN.** Four of six criteria PASS by output, one is a judgment
-act with no verdict, and **F6-AC3 and F6-AC5 read FAIL** -- both for reasons that
-are recorded as rows and neither of which is the retirement itself. The WORK is
-done and verified: the store, its manifest and the local scratch are archived to
-S3 with S3-computed checksums equal to their pre-upload hashes, deleted from this
-device behind a re-read guard, the builder is retired by `git rm`, and the
-tombstone carries every field. The order stays open because a criterion that
-reads FAIL leaves it open, and a VALID instance is not a met order.
+**TERMINAL STATUS: COMPLETE**, after ONE re-cut. All five mechanical criteria PASS
+by output and F6-AC6 is a judgment act recorded without a verdict for
+`3.0.0_SA_CVO` at L9.
+
+The order first closed OPEN: F6-AC3 and F6-AC5 read FAIL and two rows carried
+them. The issuer graded all three of this seat's spec rows as **cut defects, not
+work defects**, and re-cut the face in place @`6b3aef13a1` under the standing
+authority @`9f4a57262f` -- F6-AC3's exclusion widened by the two `tsgraph_spike`
+scratch loaders that row `NFRA_CLDGRPH-W2-S25` had already declared, F6-AC5's
+expect widened from the cut-time slot's row-id namespace to any committing slot,
+and all six deliverables paths repointed to `~7`. Nothing about the WORK changed:
+the archive, the tombstone and the deletion stand exactly as committed
+@`6abd4a9d94`, and the re-cut moved no file out of the census.
+
+The work: the store, its manifest and the local scratch are archived to S3 with
+S3-computed checksums equal to their pre-upload hashes, deleted from this device
+behind a re-read guard, the builder is retired by `git rm`, and the tombstone
+carries every field.
 
 ---
 
@@ -222,33 +232,65 @@ as a counted graph.** That sentence is in the object in S3, not only in this fil
 
 ## 3. THE CRITERIA, AS MEASURED
 
+All five mechanical captures were re-run at the amended HEAD
+(`6b3aef13a1`) -- including AC1, AC2 and AC4, which the amendment did not require,
+so no reader has to ask whether a capture predates the re-cut.
+
 | id | deciding line(s) | verdict |
 |---|---|---|
 | F6-AC1 | `STITCH_STORE_PRESENT=0 of 3 files` · `STORE_PROBE_CONTROL=FIRED` | **PASS** |
 | F6-AC2 | `ARCHIVE_OBJECTS=4 of 4` · `SHA256_MATCH=3 of 3` · `ARCHIVE_MANIFEST_HAS=bytes_vs_manifest,builder_last_hash,sha256` | **PASS** |
-| F6-AC3 | `LOCAL_KUZU_BUILDERS=2 of 486 files` · `STITCH_LOADER_AT_HEAD=false` · `BUILDER_PROBE_CONTROL=FIRED` | **FAIL** (row W7-S4) |
+| F6-AC3 | `LOCAL_KUZU_BUILDERS=0 of 486 files` (was 2 of 486) · `STITCH_LOADER_AT_HEAD=false` · `BUILDER_PROBE_CONTROL=FIRED` | **PASS** after the re-cut |
 | F6-AC4 | `REFUSAL_NAMES_SERVED_STITCH=true` · `COMP_DEBT_RC_WITHOUT_STORE=0` | **PASS** |
-| F6-AC5 | `TOMBSTONE_PRESENT=true` · `TOMBSTONE_NAMES=<all 7>` · `REGISTRY_MENTIONS=2 (row NFRA_CLDGRPH-W7-S2)` | **FAIL** (row W7-S3) |
+| F6-AC5 | `TOMBSTONE_PRESENT=true` · `TOMBSTONE_NAMES=<all 7>` · `REGISTRY_MENTIONS=2 (row NFRA_CLDGRPH-W7-S2)` | **PASS** after the re-cut (output unchanged) |
 | F6-AC6 | a reading act -- section 5 | `UNVERIFIABLE-BY-INSTRUMENT`, graded by `3.0.0_SA_CVO` at L9 |
 
-**F6-AC3 FAILS on the criterion's own scope, and the cell's accept is MET.** The
-criterion asks for a `kuzu.Database(<repo path>)` write-open census over
-`infra/aws/globgrph/` **and the tool homes**; over the four tool homes it reads
-**2 of 486 files**, both in `org/modules/graph/tsgraph_spike/`
-(`load_scratch_kuzu.py:97`, `load_clusters_scratch.py:43`) -- tracked, not
-gitignored, last touched 2026-06-17, and neither in this order's `<paths>`. Over
-`infra/aws/globgrph/` alone -- which is what the cell's accept means by "beside
-the projection" -- it reads **0 of 66 files**. Both numbers are printed by the
-same run, and the narrower one was NOT substituted for the wider one: a scope
-chosen after seeing the answer is not a measurement. Row `NFRA_CLDGRPH-W7-S4`.
+**Graded by an instrument that cannot agree with itself.** The five `expect`
+regexes were PARSED OUT OF THE FACE AT HEAD (`git show`, not the worktree, never
+retyped into the grader) and matched against the captures, each beside a MUTATED
+expect that must not match: `MECHANICAL_CRITERIA_PASS=5 of 5`, controls OK 5 of 5.
+A separate check confirmed the `expect` strings stored in the instance are
+character-identical to the face's: `EXPECT_TRANSCRIPTION_DEFECTS=0 of 5`.
 
-**F6-AC5 FAILS on one character of a row-id coordinate.** Its `expect` admits
-`row NFRA_CLDGRPH-W2-S[0-9]+` and this order was re-addressed to slot ~7, whose
-rows the gate REQUIRES to mint `W7-S<k>`. The other two alternatives the regex
-admits are both false here (`none` needs zero mentions needing disposition,
-measured 2; `retired` needs an entry to mark, measured 0 entries whose subject is
-a retired name). The honest line could not be made to match without lying or
-minting an id the row gate would refuse. Row `NFRA_CLDGRPH-W7-S3`.
+**F6-AC3: what the re-cut changed, and what it deliberately did not.** The census
+had counted two `tsgraph_spike` loaders as builders. The issuer graded that a
+WRONG-NOUN measurement -- each `rmtree`s and re-opens its *own* scratch store
+under `tsgraph_spike/out/` and is not a builder of the local *stitch* store --
+citing row `NFRA_CLDGRPH-W2-S25`, which declared exactly that pair at TO-CG-D-7
+pass 3. **This seat re-grounded that premise before widening anything**, because
+an exclusion granted on a false premise is how a census goes quietly wrong:
+
+- Neither file contains a single occurrence of `kuzu_stitch` or `kuzu_nessie`.
+- Each has exactly one `DB_PATH` under `HERE/out/` (`scratch_kuzu_db` at
+  `load_scratch_kuzu.py:32`, `scratch_clusters_db` at
+  `load_clusters_scratch.py:23`), one `shutil.rmtree` of that same path, and one
+  `kuzu.Database(DB_PATH)`.
+- And a check the amendment did not ask for: the exclusion is **by basename**, so
+  it is only sound while each excluded basename is unique in the swept
+  population. All six were measured to occur **exactly once** across the 486
+  files. A duplicate would have silently excused a file nobody named; the
+  walker's docstring now carries that measurement and tells the next caller to
+  re-take it if the list grows.
+
+What did not change: the sweep is still **486 files and 1,031,935 ast nodes**, and
+`REAL-WIDE` is still the deciding line -- the two files moved from `BUILDERS` to
+`EXCLUDED BY NAME`, where the walker still enumerates them with their full
+resolution chains and prints the reason and the declaring row on the exclusion
+line itself. Nothing was narrowed to the cell's own home; `REAL-CELL-SCOPE` is
+still printed beside the wide line at `0 of 66`. The planted-builder control still
+fires 1 of 1 with its `read_only=True` sibling correctly uncounted.
+
+**F6-AC5: the output never changed.** Its `expect` had fixed the row-id namespace
+to `W2`, the slot the order was cut for, while the schema binds `W{n}` to the
+committing worker -- so a true line could never match. The re-cut widened the
+grammar to `row NFRA_CLDGRPH-W[0-9]+-S[0-9]+`; the line this probe printed before
+and after is the same, `REGISTRY_MENTIONS=2 (row NFRA_CLDGRPH-W7-S2)`, and no
+script changed. Row `NFRA_CLDGRPH-W7-S3` records the round trip.
+
+**`NFRA_CLDGRPH-W7-S2` is NOT disarmed and was not this seat's to disarm.**
+`graph-call-manifest.yaml:1237` and its generated mirror `.tools/tool_index.py:2443`
+still name the deleted store's db-path. Both carriers are outside this grant; the
+issuer carried the edit to the L8 packet as an open item for L9/L10.
 
 **Every probe carries a control that can fail, and each one fired:**
 
@@ -353,10 +395,12 @@ that the CVO cannot answer from the four instances alone.
 
 ## 6. THE SCRIPTS
 
-All under `org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~7/`
-(the order's face names `~2`; the owned-paths lane gate REFUSES that folder for
-serial ~7 with 18 VIOLATION lines -- row `NFRA_CLDGRPH-W7-S1`, with the measured
-refusal and the positive control quoted).
+All under `org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~7/`.
+The face originally named `~2`; the owned-paths lane gate REFUSED that folder for
+serial ~7 with 18 `ADHC_OWNPTH.005` violations (row `NFRA_CLDGRPH-W7-S1`, with the
+measured refusal and the positive control quoted), and the re-cut @`6b3aef13a1`
+repointed all six occurrences to `~7`, so every invocation above is now verbatim
+from the face.
 
 | file | what it is |
 |---|---|
