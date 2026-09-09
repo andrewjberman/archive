@@ -1,6 +1,25 @@
-# SMS Toll-Free Number + Carrier Verification -- PROGRAMMATIC REQUEST DRAFT (NOT SUBMITTED)
+# SMS Toll-Free Number + Carrier Verification -- PROGRAMMATIC REQUEST (SUBMITTED 2026-09-09 15:44Z)
 
-**Author:** 0.0.0_AB_MSTR | **Date:** 2026-09-09 | **Status:** AT ANDREW'S GATE. DO NOT SUBMIT WITHOUT HIS WORD.
+**Author:** 0.0.0_AB_MSTR | **Date:** 2026-09-09 | **Status:** **FILED.** All three acts ran on Andrew's word at this terminal
+~15:4xZ, VERBATIM: *"For the SMS filing, 1.) Opal Capital LLC. 2.) 88-3142464 3.) 786-261-7679. 4.) Whatever must be done to
+initiate SMS registrations and proceedings to make this operational should be pursued now."*
+
+| act | id | state read back from AWS at 15:44Z |
+|---|---|---|
+| A. toll-free number | `phone-0e98f7739a16415c83d951336a7da12a` = **+1 866-406-7943**, TRANSACTIONAL/SMS, USD 2.00/month | PENDING (activates on its own; ledger leg A closes at ACTIVE) |
+| B. toll-free registration | `registration-3721e9ded2cd4adaa831a42ba6d60e4c`, version 1, 22 of 22 fields, attachment `attachment-4cf99cb640da4060b0148f8250c43e01`, number associated | SUBMITTED; version REVIEWING since 15:44:40Z |
+| C. spend-limit increase | Service Quotas request `3f0cd234bd99405ab57967d9e4c96e8dO5rvrxd2`, L-2325465C -> USD 50/month | PENDING |
+
+Values filed differ from the draft below in three places, all his: companyName `Opal Capital LLC`; taxId `88-3142464` (EIN, US);
+supportPhoneNumber `+17862617679`. useCaseDetails was cut to 495 chars (field max 500) and the URL inside it de-schemed.
+Deploy-completion ledger: `org/critical_paths/change_management/20260909T1540Z_d12-sms-tfn-registration-and-production-access_deploy_completion.md`.
+Two CLI traps met and recorded: AWS CLI v1 FOLLOWS an `https://` argument value as a URL and fetches it (the website field
+arrived empty twice; filed via `--cli-input-json`), and `MSYS_NO_PATHCONV=1` does not help because the fetch is the CLI's, not MSYS's.
+
+---
+*The draft as it stood before his word follows unchanged.*
+
+**Draft status at the time:** AT ANDREW'S GATE. DO NOT SUBMIT WITHOUT HIS WORD.
 **Authorization so far:** Andrew-direct 2026-09-09 ~13:0xZ at the MSTR terminal, VERBATIM: *"We should be able to issue
 the request programmatically as we did for the SES"* -- said after this seat reported the account still in the SMS
 sandbox with no application on file. Read as: prepare the programmatic filing on the SES pattern (draft -> his approval
