@@ -1,0 +1,107 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_REPORT.TO-RP-s-7",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/decompositions/NFRA_REPORT_DECOMP.md",
+  "vintage_commit": "7d698685fe2f2f76bd830c4f8e981e1b039b8a3d",
+  "to_ref": "org/missions/D12/NFRA/NFRA_REPORT/task-orders/NFRA_REPORT.TO-RP-s-7.deprecation-determination-terminus-walk.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/prd/NFRA_REPORT_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "17c153a1cb88c2d4f9c357c663300f929d63faa4"
+ },
+ "assignee": "0.9.0_WK_NFRA_REPORT~1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/DEPRECATION.md",
+   "kind": "doc",
+   "commit_or_etag": "9b77231a25ccc30297e22c664530e34cddcc147e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commit_or_etag is the git BLOB sha (git hash-object <path>, content-addressed, resolvable before this commit exists). Verifiable post-commit via: git show <this commit>:org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/DEPRECATION.md | git hash-object --stdin -- must equal 9b77231a25ccc30297e22c664530e34cddcc147e. Documentation artifact (a deprecation-determination read); no artifact was deleted, retired or decommissioned to produce it -- every finding came from read-only comp-pipescript/comp-platinum/comp-blast/comp-read queries against the existing dependency graph and repo, per build-ladder rung 2 (query, never rebuild)."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- grep -c -i 'terminus' DEPRECATION.md; expect a count of 1 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i 'terminus' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/DEPRECATION.md",
+   "output_evidence": "grep -c output: 14 (rc=0) -- 14 lines carry 'terminus' (case-insensitive), well above the 1-line floor. Re-run twice, identical both times (see controls.determinism).",
+   "denominator": "14 matching lines out of 122 total lines in the file; expectation was >=1",
+   "status": "PASS",
+   "expect": "terminus"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- grep -c -i 'age' DEPRECATION.md; expect a count of 1 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i 'age' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/DEPRECATION.md",
+   "output_evidence": "grep -c output: 5 (rc=0) -- 5 lines carry 'age' (case-insensitive), above the 1-line floor. Manually verified NOT a substring artifact of 'usage/manage/storage': all 5 hits are section headers or sentences explicitly discussing the AGE heuristic and its supersession (lines 9, 13, 18, 20, 29). Re-run twice, identical both times (see controls.determinism).",
+   "denominator": "5 matching lines out of 122 total lines in the file; expectation was >=1",
+   "status": "PASS",
+   "expect": "age"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two mutants run against scratch copies of DEPRECATION.md (never against the committed file). For AC1: every case-insensitive 'terminus' replaced with 'ENDPOINT' and AC1's exact invocation re-run. For AC2: a first attempt truncated the file to 5 lines, which did NOT drop AC2 to zero (the title line itself contains 'TERMINUS' but not 'age'; a second, correct mutant replaced every case-insensitive 'age' with 'ZZZ' and AC2's exact invocation was re-run against that copy.",
+   "expected": "The terminus-stripped copy must drop AC1's count to 0, below the required 1. The age-stripped copy must drop AC2's count to 0, below the required 1.",
+   "observed": "Terminus-stripped copy: AC1 invocation returned 0 (rc=1) -- would FAIL AC1's >=1 bound. Age-stripped copy: AC2 invocation returned 0 (rc=1) -- would FAIL AC2's >=1 bound. Both mutants fired as designed. (The 5-line-truncation mutant tried first for AC1 returned 2, not 0 -- recorded because it is itself informative: the document's own title carries the word, so a naive truncation mutant is a weaker control than a targeted term-substitution one; the term-substitution mutant is the one that actually discriminates and is reported as the control.)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC2's exact invocations run twice in succession against the unmodified committed-content file (before commit, on the working-tree bytes that became the commit), output compared byte-for-byte.",
+   "observed": "Run 1: AC1=14, AC2=5. Run 2: AC1=14, AC2=5. Identical both times.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No decommissioning, retirement-register entry, or deletion of any of the ten candidate artifacts.",
+   "reason": "Ruling 8 makes decommissioning a function of the PROGRAM, not this cell; the retirement register with owner/reason/date is S8 (RP-s-8), downstream of this cell, and its own bound preserves never-widen sign-off (CTO+COO) for retiring served output. This cell CLASSIFIES (deprecated / alive / ambiguous / unresolved); it does not act on the classification."
+  },
+  {
+   "item": "3 of 10 candidates (INF_D_00, INF_D_03, INF_D_02b) are reported AMBIGUOUS and 2 of 10 (INF_D_07, INF_C_01) UNRESOLVED-BY-THIS-WALK, neither resolved to a final ALIVE/DEAD verdict.",
+   "reason": "The available instruments (comp-pipescript, comp-platinum, comp-blast) could not complete the walk to a confirmed terminus for these five -- comp-platinum returns only [SPECULATIVE] catch-all matches for the ambiguous three, and comp-pipescript's static parser cannot see the write itself for the unresolved two (declared blindness, filed as surprise rows NFRA_REPORT-Z-W1-S1/S2). Per this cell's own law (age/unresolved is never quietly treated as dead), none of the five is rendered as a deprecation candidate on incomplete evidence."
+  },
+  {
+   "item": "Pipeline-identity ambiguity (bd vs cot) for the three bare-named candidates (B_01, B_02, A_03) is not resolved -- the walk was run against black_diamond (bd-gold) only.",
+   "reason": "Andrew's ruling text does not specify which firm tree; both black_diamond and cot carry byte-identically-named scripts. Re-running the identical method against cot-gold was judged out of proportion to this cell's evidence bar once the METHOD was demonstrated and the estate-wide instrument gaps (surprise rows) were found and filed; declared in DEPRECATION.md Sec 3.3 rather than silently assumed."
+  }
+ ],
+ "surprises": [
+  "NFRA_REPORT-Z-W1-S1: comp-blast's served graph models NO edge between GOLD_SCRIPT and Lambda/portal nodes at all, confirmed by a positive-control failure on a definitely-live lambda (inf-api-positions) showing zero gold: ancestors upstream -- a bare comp-blast zero-count on a gold script is not terminus evidence for any gold artifact in the estate.",
+  "NFRA_REPORT-Z-W1-S2: comp-pipescript's static WRITES parser misses a dynamically-constructed S3 key (prefix concatenation or a key-building helper function), producing a false 'WRITES: (none detected)' for INF_D_07 and INF_C_01 -- the latter is textually a heavily-governed production chokepoint by its own in-repo comments, not a dead script."
+ ],
+ "session_log": "N/A -- worker subagent (0.9.0_WK_NFRA_REPORT~1) per CLAUDE.md rule 27: 'a worker's write surface is exactly the <paths> its non-terminal order names ... and it writes no telemetry (L7 reads from git)'. This TO's <paths> names no logs/ surface. The git commit history on branch wk-NFRA_REPORT-1d is the record.",
+ "compiler_tools": [
+  {
+   "tool": "comp-pipescript (io, consumers)",
+   "invocation": "comp-pipescript io <script> --pipeline {bd-gold,inf-gold} for all 10 candidates plus D_04.client_portal_summary.py (bd-gold) and D_04's own reads; comp-pipescript consumers B_01.holdings_lots.py --pipeline bd-gold",
+   "result": "Resolved WRITES/READS chains and the embedded 'PORTAL CONSUMERS (platinum keys -> routes -> components)' section for each candidate that writes a platinum/ key; surfaced the hop-1-vs-terminus inversion on B_01 (io on D_04 shows an IMPLICIT read of B_01's output that B_01's own 'consumers' command did not report); surfaced 2 parser misses (WRITES: none detected) on INF_D_07 and INF_C_01."
+  },
+  {
+   "tool": "comp-platinum reverse",
+   "invocation": "comp-platinum reverse <s3_key> --firm inf for clients_tab.json, filters/dimensions.json, advisors/{*}/composition.json, firm_composition.json, top_holdings.json, concentration_risk.json",
+   "result": "Distinguished CONFIRMED (untagged component names, real endpoint match, seen for INF_D_04/INF_D_00c via comp-pipescript's embedded resolver) from [SPECULATIVE] (catch-all fallback, seen for INF_D_00/INF_D_03/INF_D_02b/INF_D_07's reconstructed key) -- the tool's own vocabulary, not this cell's invention."
+  },
+  {
+   "tool": "comp-blast",
+   "invocation": "comp-blast <gold:node> --direction downstream/upstream --json for all 10 candidates plus a non-candidate control (INF_D_00b.portal_timeseries) and a known-live lambda (inf-api-positions) upstream",
+   "result": "Established the estate-wide declared blindness (surprise NFRA_REPORT-Z-W1-S1): zero non-gold/s3 prefixed nodes reachable from any gold script tested, including the positive-control lambda showing zero gold: ancestors despite being demonstrably live. This result is NOT used as terminus evidence in DEPRECATION.md because of that blindness."
+  },
+  {
+   "tool": "comp-read",
+   "invocation": "comp-read <script.py> --for 'what does this script write, and to what S3 key' on INF_D_07.concentration_risk.py and INF_C_01.canonical_nna.py",
+   "result": "Surfaced the actual write keys/mechanisms comp-pipescript's static parser missed (OUTPUT_PREFIX concatenation; a _write_s3(df, _nna_key()) helper), and surfaced INF_C_01's own governance-language comments (ATOMIC SET, NEVER#2 co-signed, SERVE-RELEASE-ACK) as textual evidence of active production status."
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/NFRA_REPORT.TO-RP-s-7.deprecation-determination-terminus-walk.proof_of_spec.json AC1,AC2",
+   "result": "run after this instance was written; see this deliverable's WORKER REPORT for the printed rc and denominator"
+  }
+ ]
+}
