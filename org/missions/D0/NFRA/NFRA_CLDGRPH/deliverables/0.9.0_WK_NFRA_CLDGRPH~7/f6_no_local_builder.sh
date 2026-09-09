@@ -13,8 +13,15 @@
 #                     docstring and a comment. A walker that cannot fire on (3)
 #                     makes (1) a constant.
 #
-# The four projection builders are EXCLUDED BY NAME and printed as excluded, so
-# the exclusion is visible rather than silent.
+# SIX files are EXCLUDED BY NAME and printed as excluded WITH THE REASON AND THE
+# DECLARING ROW ON THE SAME LINE, so the exclusion is visible rather than silent:
+# the four projection builders (the cloud worker's own modules) and the two
+# tsgraph_spike scratch loaders. The second pair was added by the issuer's re-cut
+# @6b3aef13a1: each opens its OWN scratch store under tsgraph_spike/out/ and never
+# the stitch or nessie store -- what row NFRA_CLDGRPH-W2-S25 declared at TO-CG-D-7
+# pass 3. Counting a declared spike scratch as a builder of the local STITCH store
+# measures the wrong noun. THE WIDE SWEEP STAYS THE DECIDING LINE: the population is
+# unchanged at 486 files and nothing was narrowed to the cell's own home.
 #
 # STITCH_LOADER_AT_HEAD is measured on BOTH planes: git show HEAD (the record)
 # and test -f (the worktree). false requires both to be absent, beside a positive
@@ -25,7 +32,8 @@ D=org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~7
 WALK="$D/f6_local_builder_ast.py"
 PY=${PYTHON:-python}
 LOADER=infra/aws/globgrph/kuzu_stitch_load.py
-EXCL=kuzu_nessie_load.py,kuzu_incremental_refresh.py,projection_worker.py,projection_server.py
+EXCL=kuzu_nessie_load.py,kuzu_incremental_refresh.py,projection_worker.py,projection_server.py,load_scratch_kuzu.py,load_clusters_scratch.py
+EXCL_NOTE="4 projection builders (cloud-side, in the worker task) + 2 tsgraph_spike scratch loaders DECLARED harmless by row NFRA_CLDGRPH-W2-S25 at TO-CG-D-7 pass 3: each rmtree-s and re-opens its OWN store under tsgraph_spike/out/ (scratch_kuzu_db, scratch_clusters_db) and names neither kuzu_stitch_db nor kuzu_nessie_db anywhere. Exclusion is BY BASENAME and all 6 basenames are unique in the 486-file sweep, so it cannot over-exclude -- issuer amendment 2026-09-09 23:2xZ @6b3aef13a1"
 
 echo "=== f6_no_local_builder.sh -- $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
 echo "HEAD=$(git rev-parse HEAD)  BRANCH=$(git rev-parse --abbrev-ref HEAD)"
@@ -33,11 +41,11 @@ echo "WALKER=$WALK"
 echo
 
 WIDE=$("$PY" "$WALK" infra/aws/globgrph .tools org/modules/graph org/modules/heatmap \
-        --exclude "$EXCL" --label REAL-WIDE)
+        --exclude "$EXCL" --exclude-note "$EXCL_NOTE" --label REAL-WIDE)
 echo "$WIDE"
 echo
 
-CELL=$("$PY" "$WALK" infra/aws/globgrph --exclude "$EXCL" --label REAL-CELL-SCOPE)
+CELL=$("$PY" "$WALK" infra/aws/globgrph --exclude "$EXCL" --exclude-note "$EXCL_NOTE" --label REAL-CELL-SCOPE)
 echo "$CELL"
 echo
 

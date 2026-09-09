@@ -1,17 +1,13 @@
-=== f6_no_local_builder.sh -- 2026-09-09T23:08:47Z ===
-HEAD=6abd4a9d9415258d2e432130d965f5255105f730  BRANCH=wk-cldgrph-6-7
+=== f6_no_local_builder.sh -- 2026-09-09T23:37:10Z ===
+HEAD=6b3aef13a1eee96c6490b288150e425ee26755e1  BRANCH=wk-cldgrph-6-7
 WALKER=org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~7/f6_local_builder_ast.py
 
 --- LOCAL-KUZU-BUILDER WALK [REAL-WIDE] ---
 PREDICATE: kuzu.Database(<path resolving under the repo>) with no read_only=True
-EXCLUDED_BY_NAME (4): kuzu_nessie_load.py,kuzu_incremental_refresh.py,projection_worker.py,projection_server.py
+EXCLUDED_BY_NAME (6): kuzu_nessie_load.py,kuzu_incremental_refresh.py,projection_worker.py,projection_server.py,load_scratch_kuzu.py,load_clusters_scratch.py  [4 projection builders (cloud-side, in the worker task) + 2 tsgraph_spike scratch loaders DECLARED harmless by row NFRA_CLDGRPH-W2-S25 at TO-CG-D-7 pass 3: each rmtree-s and re-opens its OWN store under tsgraph_spike/out/ (scratch_kuzu_db, scratch_clusters_db) and names neither kuzu_stitch_db nor kuzu_nessie_db anywhere. Exclusion is BY BASENAME and all 6 basenames are unique in the 486-file sweep, so it cannot over-exclude -- issuer amendment 2026-09-09 23:2xZ @6b3aef13a1]
 FILES_WALKED=486
-BUILDERS -- write-open on a repo path, NOT excluded by name (2):
-  BUILDER org/modules/graph/tsgraph_spike/load_clusters_scratch.py:43  arg=DB_PATH  class=REPO
-      resolution: DB_PATH <- DB_PATH=os.path.join(HERE, "out", "scratch_clusters_db") <- HERE=os.path.dirname(os.path.abspath(__file__))
-  BUILDER org/modules/graph/tsgraph_spike/load_scratch_kuzu.py:97  arg=DB_PATH  class=REPO
-      resolution: DB_PATH <- DB_PATH=os.path.join(HERE, "out", "scratch_kuzu_db") <- HERE=os.path.dirname(os.path.abspath(__file__))
-EXCLUDED BY NAME -- the projection's own builders, named in the criterion (4):
+BUILDERS -- write-open on a repo path, NOT excluded by name (0):
+EXCLUDED BY NAME -- the projection's own builders, named in the criterion (6):
   EXCLUDED infra/aws/globgrph/kuzu_incremental_refresh.py:225  arg=tmp_db_path  class=UNRESOLVED
       resolution: tmp_db_path
   EXCLUDED infra/aws/globgrph/kuzu_nessie_load.py:187  arg=args.db  class=UNRESOLVED
@@ -20,6 +16,10 @@ EXCLUDED BY NAME -- the projection's own builders, named in the criterion (4):
       resolution: str(db_path) <- db_path=readback_dir / ARTIFACT_NAME <- ARTIFACT_NAME="kuzu_nessie_db"
   EXCLUDED infra/aws/globgrph/projection_worker.py:565  arg=str(compacted_db)  class=REPO
       resolution: str(compacted_db) <- compacted_db=compact_root / ARTIFACT_NAME <- compact_root=Path(raw) <- ARTIFACT_NAME="kuzu_nessie_db"
+  EXCLUDED org/modules/graph/tsgraph_spike/load_clusters_scratch.py:43  arg=DB_PATH  class=REPO
+      resolution: DB_PATH <- DB_PATH=os.path.join(HERE, "out", "scratch_clusters_db") <- HERE=os.path.dirname(os.path.abspath(__file__))
+  EXCLUDED org/modules/graph/tsgraph_spike/load_scratch_kuzu.py:97  arg=DB_PATH  class=REPO
+      resolution: DB_PATH <- DB_PATH=os.path.join(HERE, "out", "scratch_kuzu_db") <- HERE=os.path.dirname(os.path.abspath(__file__))
 TEMP write-opens -- a path outside the repo; not a local store (4):
   TEMP infra/aws/globgrph/derive_runner.py:1444  arg=db_dir  class=TEMP
       resolution: db_dir <- db_dir=os.path.join(tempfile.mkdtemp(prefix="c2c3_kuzu_"), "db") <- db=kuzu.Database(db_dir)
@@ -54,12 +54,12 @@ AST_NODES_WALKED=1031935
 WRITE_OPENS_TEMP=4
 WRITE_OPENS_UNRESOLVED=1
 READ_ONLY_OPENS=8
-EXCLUDED_BY_NAME_HITS=4
-LOCAL_KUZU_BUILDERS=2 of 486 files
+EXCLUDED_BY_NAME_HITS=6
+LOCAL_KUZU_BUILDERS=0 of 486 files
 
 --- LOCAL-KUZU-BUILDER WALK [REAL-CELL-SCOPE] ---
 PREDICATE: kuzu.Database(<path resolving under the repo>) with no read_only=True
-EXCLUDED_BY_NAME (4): kuzu_nessie_load.py,kuzu_incremental_refresh.py,projection_worker.py,projection_server.py
+EXCLUDED_BY_NAME (6): kuzu_nessie_load.py,kuzu_incremental_refresh.py,projection_worker.py,projection_server.py,load_scratch_kuzu.py,load_clusters_scratch.py  [4 projection builders (cloud-side, in the worker task) + 2 tsgraph_spike scratch loaders DECLARED harmless by row NFRA_CLDGRPH-W2-S25 at TO-CG-D-7 pass 3: each rmtree-s and re-opens its OWN store under tsgraph_spike/out/ (scratch_kuzu_db, scratch_clusters_db) and names neither kuzu_stitch_db nor kuzu_nessie_db anywhere. Exclusion is BY BASENAME and all 6 basenames are unique in the 486-file sweep, so it cannot over-exclude -- issuer amendment 2026-09-09 23:2xZ @6b3aef13a1]
 FILES_WALKED=66
 BUILDERS -- write-open on a repo path, NOT excluded by name (0):
 EXCLUDED BY NAME -- the projection's own builders, named in the criterion (4):
@@ -142,7 +142,7 @@ real parse failures=0 (must be 0 -- an unparsed file may not hide inside the cou
 real unresolved write-opens=1 (enumerated above; NOT folded into the count)
 
 --- F6-AC3 VERDICT LINES ---
-LOCAL_KUZU_BUILDERS=2 of 486 files
+LOCAL_KUZU_BUILDERS=0 of 486 files
 LOCAL_KUZU_BUILDERS_BESIDE_PROJECTION=0 of 66 files
 STITCH_LOADER_AT_HEAD=false
 BUILDER_PROBE_CONTROL=FIRED

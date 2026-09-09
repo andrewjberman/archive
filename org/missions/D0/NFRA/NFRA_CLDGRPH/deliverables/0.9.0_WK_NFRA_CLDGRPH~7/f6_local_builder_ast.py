@@ -26,7 +26,13 @@ Only REPO write-opens count toward LOCAL_KUZU_BUILDERS. TEMP and UNRESOLVED
 sites are ENUMERATED on their own lines with their evidence chain and their own
 counters, so an unresolved site can never hide inside the zero -- read them.
 
-usage: f6_local_builder_ast.py <dir-or-file> [...] [--exclude a.py,b.py] [--label L]
+usage: f6_local_builder_ast.py <dir-or-file> [...] [--exclude a.py,b.py]
+       [--exclude-note "<why, with the declaring row cited>"] [--label L]
+
+EXCLUSION IS BY BASENAME, and that is only sound while each excluded basename is
+UNIQUE in the swept population -- measured here before the widening: all six occur
+exactly once across the 486 .py files of the four trees. A duplicate basename would
+silently excuse a second file, so re-measure that if the exclusion list grows.
 exit 0 always; the caller grades the printed lines.
 """
 from __future__ import annotations
@@ -130,11 +136,18 @@ def main() -> int:
         i = args.index("--exclude")
         exclude = [x.strip() for x in args[i + 1].split(",") if x.strip()]
         args = args[:i] + args[i + 2:]
+    note = ""
+    if "--exclude-note" in args:
+        i = args.index("--exclude-note")
+        note = args[i + 1]
+        args = args[:i] + args[i + 2:]
 
     files = py_files(args)
     print("--- LOCAL-KUZU-BUILDER WALK [%s] ---" % label)
     print("PREDICATE: kuzu.Database(<path resolving under the repo>) with no read_only=True")
-    print("EXCLUDED_BY_NAME (%d): %s" % (len(exclude), ",".join(exclude) or "(none)"))
+    print("EXCLUDED_BY_NAME (%d): %s%s"
+          % (len(exclude), ",".join(exclude) or "(none)",
+             ("  [%s]" % note) if note else ""))
     print("FILES_WALKED=%d" % len(files))
 
     builders, temps, unres, readonly, excluded_hits, failures = [], [], [], [], [], []
