@@ -103,8 +103,9 @@ def main():
     v = D.fold_stitch_document(g, body, marker_for(body))
     folded = g["classes_data"].get(D.STITCH_CLASS, {}).get("nodes", [])
     print()
-    print("FOLD_OK nodes=%d edges=%d skipped_dup=%d" % (
-        v["stitch_nodes_folded"], v["stitch_edges_folded"], v["stitch_nodes_skipped_dup"]))
+    print("FOLD_OK nodes=%d edges=%d skipped_dup=%d stamped=%d" % (
+        v["stitch_nodes_folded"], v["stitch_edges_folded"], v["stitch_nodes_skipped_dup"],
+        v["stitch_v1_stamped"]))
     print()
     check("happy_fold_nodes", v["stitch_nodes_folded"] == 3 and len(folded) == 3,
           "folded=%d" % v["stitch_nodes_folded"])
@@ -138,16 +139,19 @@ def main():
           "a partial fold under a wrong vintage is the failure this arm exists for")
 
     # ---- arm 4: an unmapped node_type must never reach the relabel ------------
+    # The five stitch-v1 types are MAPPED now (CTO GO 20260909T2015Z), so this arm uses a
+    # type nobody has mapped -- which is the case the guard actually exists for: the NEXT
+    # node_type a producer invents. Using a now-gated type here would test nothing.
     g3 = base_graph()
     doc3 = stitch_doc()
-    doc3["classes_data"]["mixed"]["nodes"].append(
-        {"id": "gold:some_script.py", "type": "GOLD_SCRIPT", "name": "some_script.py"})
+    doc3["classes_data"]["mixed"].setdefault("nodes", []).append(
+        {"id": "future:thing", "type": "SOME_FUTURE_TYPE", "name": "not in the map"})
     body3 = json.dumps(doc3).encode()
     v3 = D.fold_stitch_document(g3, body3, marker_for(body3))
     check("unmapped_type_skipped_and_counted", v3["stitch_nodes_skipped_unmapped_type"] == 1,
-          "skipped_unmapped_type=%d (GOLD_SCRIPT)" % v3["stitch_nodes_skipped_unmapped_type"])
+          "skipped_unmapped_type=%d (SOME_FUTURE_TYPE)" % v3["stitch_nodes_skipped_unmapped_type"])
     ids = {str(n.get("id")) for c in g3["classes_data"].values() for n in c["nodes"]}
-    check("unmapped_type_not_in_the_graph", "gold:some_script.py" not in ids)
+    check("unmapped_type_not_in_the_graph", "future:thing" not in ids)
     relabel_ok, err = True, ""
     try:
         D.drop_node_types(g3)
@@ -157,6 +161,41 @@ def main():
     check("folded_graph_SURVIVES_the_relabel", relabel_ok,
           err or "no NodeTypeLayerGap: the guard kept the unmapped type out, so the derive "
                  "that would have FAILED CLOSED commits")
+
+    # ---- arm 6b (R17): the stitch-v1 stamp, and ONLY on the admitted five ------
+    g5 = base_graph()
+    doc5 = stitch_doc()
+    doc5["classes_data"]["mixed"].setdefault("nodes", []).extend([
+        {"id": "gold:some_script.py", "type": "GOLD_SCRIPT", "name": "some_script.py"},
+        {"id": "s3key:gold/x.parquet", "type": "S3_DATA_KEY", "name": "gold/x.parquet"},
+    ])
+    body5 = json.dumps(doc5).encode()
+    v5 = D.fold_stitch_document(g5, body5, marker_for(body5))
+    folded5 = {str(n["id"]): n for n in g5["classes_data"][D.STITCH_CLASS]["nodes"]}
+    stamped_ids = sorted(i for i, n in folded5.items() if n.get("vocabulary") == "stitch-v1")
+    check("stitch_v1_stamped_count", v5["stitch_v1_stamped"] == 2,
+          "stamped=%d of %d folded" % (v5["stitch_v1_stamped"], v5["stitch_nodes_folded"]))
+    check("stitch_v1_stamp_on_the_admitted_five",
+          stamped_ids == ["gold:some_script.py", "s3key:gold/x.parquet"],
+          "stamped ids=%s" % stamped_ids)
+    check("stitch_v1_stamp_NOT_on_a_pre_existing_type",
+          folded5["stitch-node-0"].get("vocabulary") is None,
+          "the LAMBDA node carries no vocabulary -- the stamp labels the INTERIM population, "
+          "not the fold")
+    check("gated_five_now_ADMITTED",
+          v5["stitch_nodes_skipped_unmapped_type"] == 0 and v5["stitch_nodes_folded"] == 5,
+          "folded=%d skipped_unmapped_type=%d (GOLD_SCRIPT and S3_DATA_KEY are in the map now)"
+          % (v5["stitch_nodes_folded"], v5["stitch_nodes_skipped_unmapped_type"]))
+    relabel5_ok, err5 = True, ""
+    try:
+        D.drop_node_types(g5)
+        D.relabel_layers_by_node_type(g5)
+    except Exception as exc:  # noqa: BLE001
+        relabel5_ok, err5 = False, "%s: %s" % (type(exc).__name__, exc)
+    check("gated_five_SURVIVE_the_relabel", relabel5_ok,
+          err5 or "the five are mapped, so the derive that would have failed closed commits")
+    check("NODE_TYPE_LAYER_is_65_keys", len(D.NODE_TYPE_LAYER) == 65,
+          "keys=%d (CVO C-S40 @e7db04572e: 60 -> 65)" % len(D.NODE_TYPE_LAYER))
 
     # ---- arm 7: an unparseable artifact --------------------------------------
     g4 = base_graph()
@@ -189,8 +228,10 @@ def main():
     total = len(RESULTS)
     print()
     print("F4_TESTS=%d passed of %d" % (passed, total))
-    print("  DENOMINATOR: %d of %d arms passed; 10 named arms, 3 of them controls that must be"
-          " able to fail (the sha mismatch, the unmapped type, the both-ends rule)." % (passed, total))
+    print("  DENOMINATOR: %d of %d assertions passed across 11 named arms, 4 of them controls"
+          " that must be able to fail (the sha mismatch, the now-synthetic unmapped type, the"
+          " both-ends rule, and the pre-existing type that must NOT carry the stitch-v1 stamp)."
+          % (passed, total))
     return 0 if passed == total else 1
 
 
