@@ -1,0 +1,110 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_REPORT.TO-RP-s-6",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/decompositions/NFRA_REPORT_DECOMP.md",
+  "vintage_commit": "7d698685fe2f2f76bd830c4f8e981e1b039b8a3d",
+  "to_ref": "org/missions/D12/NFRA/NFRA_REPORT/task-orders/NFRA_REPORT.TO-RP-s-6.alert-delivery-read-alarm-anchored.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/prd/NFRA_REPORT_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "17c153a1cb88c2d4f9c357c663300f929d63faa4"
+ },
+ "assignee": "0.9.0_WK_NFRA_REPORT~1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ALERT_DELIVERY.md",
+   "kind": "doc",
+   "commit_or_etag": "a75d8ac5833c2815061a78ecc535a1fc47bae859",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commit_or_etag is the git BLOB sha (git hash-object <path>, content-addressed, resolvable before this commit exists). Verifiable post-commit via: git show <this commit>:org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ALERT_DELIVERY.md | git hash-object --stdin -- must equal a75d8ac5833c2815061a78ecc535a1fc47bae859. Documentation artifact (a read-only report on alarm delivery); no infra was created, deployed or mutated to produce it -- every underlying fact came from AWS describe/list/get READ calls."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- grep -c -E 'opal-login-abuse-alerts|astn-wsjft-alerts|etfs-reports-alerts' ALERT_DELIVERY.md; expect a count of 3 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -E 'opal-login-abuse-alerts|astn-wsjft-alerts|etfs-reports-alerts' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ALERT_DELIVERY.md",
+   "output_evidence": "grep -c output: 6 (rc=0) -- 6 lines name at least one of the three zero-confirmed-subscriber targets, above the 3-line floor. Re-run twice, identical both times (see controls.determinism).",
+   "denominator": "6 matching lines out of 143 total lines in the file; expectation was >=3",
+   "status": "PASS",
+   "expect": "output: ([3-9]|[1-9][0-9]+)\\b"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- grep -c -i 'confirmed' ALERT_DELIVERY.md; expect a count of 1 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i 'confirmed' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ALERT_DELIVERY.md",
+   "output_evidence": "grep -c output: 24 (rc=0) -- 24 lines carry the word 'confirmed' (case-insensitive), well above the 1-line floor. Re-run twice, identical both times (see controls.determinism).",
+   "denominator": "24 matching lines out of 143 total lines in the file; expectation was >=1",
+   "status": "PASS",
+   "expect": "output: ([1-9][0-9]*)\\b"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 -- grep -c -i -E 'create-topic|subscribe --|put-metric-alarm' ALERT_DELIVERY.md; expect a count of 0 -- any hit means an alarm or topic was minted and the moratorium was crossed. Note grep -c exits rc=1 when count is 0; score on OUTPUT (0), not exit code.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i -E 'create-topic|subscribe --|put-metric-alarm' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ALERT_DELIVERY.md",
+   "output_evidence": "grep -c output: 0 (rc=1 -- the criterion's own note states rc=1 IS the PASS condition here, since grep exits 1 on zero matches; scored on the printed count, not the exit code). No forbidden verb appears anywhere in the deliverable.",
+   "denominator": "0 matching lines out of 143 total lines in the file; expectation was exactly 0",
+   "status": "PASS",
+   "expect": "output: 0\\b"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Three mutants run against scratch copies of ALERT_DELIVERY.md (never against the committed file). Mutant A: truncated the file to its first 5 lines and re-ran AC1's exact invocation. Mutant B (for AC2): replaced every case-insensitive 'confirmed' with 'ACKNOWLEDGED' and re-ran AC2's exact invocation. Mutant C (for AC3, the NEGATIVE criterion): appended a literal forbidden line ('aws sns create-topic --name test-example') to a copy and re-ran AC3's exact invocation, to prove the negative check CAN return non-zero rather than being vacuously zero by construction.",
+   "expected": "Mutant A must drop AC1's count below 3. Mutant B must drop AC2's count to 0, below the required 1. Mutant C must raise AC3's count above 0, which would FAIL the 'exactly 0' expectation -- proving AC3 is a real discriminator and not a tautology on a document that could never contain the banned verbs.",
+   "observed": "Mutant A: AC1 invocation on the 5-line truncation returned 0 (rc=1) -- would FAIL AC1's >=3 bound. Mutant B: AC2 invocation on the substituted copy returned 0 (rc=1) -- would FAIL AC2's >=1 bound. Mutant C: AC3 invocation on the violated copy returned 1 (rc=0) -- would FAIL AC3's ==0 bound, confirming the negative criterion fires on a real violation and is not silently unfalsifiable. All three mutants fired as designed.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1, AC2 and AC3's exact invocations run twice in succession against the unmodified committed-content file (before commit, on the working-tree bytes that became the commit), output compared byte-for-byte.",
+   "observed": "Run 1: AC1=6, AC2=24, AC3=0. Run 2: AC1=6, AC2=24, AC3=0. Identical both times.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Whether a Lambda or SQS subscriber, once invoked by SNS, in turn notifies a human is not traced.",
+   "reason": "C-ALARM-ANCHORED anchors this read on alarm -> topic -> CONFIRMED SNS subscriber. Three of the four non-zero topics (inf-otp-alert, opal-critical-surface-alerts, opal-partner-etl-ops-alerts) carry a lambda or sqs leg whose downstream human-notification behavior would require reading Lambda source/logs or SQS consumer code -- a materially larger investigation outside this cell's stated ACT and evidence bar. Declared explicitly in ALERT_DELIVERY.md Sec 4/5 rather than defaulting those rows to an unearned OK."
+  },
+  {
+   "item": "No remediation was performed or literally scripted for the dead SMS legs or the three zero-subscriber topics.",
+   "reason": "This cell's ACT is a READ ('make it readable whether a message would actually arrive'), and the standing alerting/monitor moratorium (comp-schedule C3) forbids minting a new alarm, topic, subscription or notification from this cell. AC3 mechanically enforces the same boundary."
+  }
+ ],
+ "surprises": [],
+ "session_log": "N/A -- worker subagent (0.9.0_WK_NFRA_REPORT~1) per CLAUDE.md rule 27: 'a worker's write surface is exactly the <paths> its non-terminal order names ... and it writes no telemetry (L7 reads from git)'. This TO's <paths> names no logs/ surface. The git commit history on branch wk-NFRA_REPORT-1c is the record.",
+ "compiler_tools": [
+  {
+   "tool": "aws (live reads, no mutation)",
+   "invocation": "aws cloudwatch describe-alarms (--query on AlarmName/AlarmActions/ActionsEnabled); aws sns list-subscriptions-by-topic --topic-arn <arn> for all 7 distinct topic ARNs; aws sns get-subscription-attributes --subscription-arn <arn> for each sms-protocol subscription; aws sns get-sms-sandbox-account-status; aws sns list-sms-sandbox-phone-numbers",
+   "result": "51 alarms / 7 distinct SNS topics, matching NFRA_OPSEC202609-Z-S151 exactly (3 of 7 zero confirmed subscriptions: opal-login-abuse-alerts, astn-wsjft-alerts, etfs-reports-alerts). NEW: IsInSandbox=true; the one registered sandbox number (+17862617679, used by 3 of the 4 'confirmed' topics' sms legs) is status Pending, not Verified; the fourth sms endpoint (+13052010419, inf-otp-alert) is not registered in the sandbox at all. Every SMS-protocol subscription in the estate is therefore currently non-functional, resolving Z-S151's own open question on opal-infrastructure-alerts (its sole subscriber) rather than merely restating it."
+  },
+  {
+   "tool": "grep",
+   "invocation": "the three AC1-AC3 invocations verbatim from the TO's <proof_of_spec>, each under timeout 120, run against ALERT_DELIVERY.md",
+   "result": "AC1=6, AC2=24, AC3=0. Re-run twice for determinism (see controls.determinism)."
+  },
+  {
+   "tool": "git hash-object",
+   "invocation": "git hash-object org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ALERT_DELIVERY.md",
+   "result": "a75d8ac5833c2815061a78ecc535a1fc47bae859 -- used as the content-addressed commit_or_etag for the doc artifact row."
+  },
+  {
+   "tool": "python (ad hoc, scratch-only)",
+   "invocation": "constructed .scratch/mutant_ac1ac2_truncated.md (head -n 5), .scratch/mutant_ac2_stripped.md ('confirmed'->'ACKNOWLEDGED'), .scratch/mutant_ac3_violated.md (appended a literal forbidden verb line) -- all untracked, never committed",
+   "result": "see controls.mutant -- all three mutants moved their respective criterion's count across its pass/fail boundary, proving AC1/AC2/AC3 discriminate a broken or violating document from this one"
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/NFRA_REPORT.TO-RP-s-6.alert-delivery-read-alarm-anchored.proof_of_spec.json AC1,AC2,AC3",
+   "result": "run after this instance was written; see this deliverable's WORKER REPORT for the printed rc and denominator"
+  }
+ ]
+}
