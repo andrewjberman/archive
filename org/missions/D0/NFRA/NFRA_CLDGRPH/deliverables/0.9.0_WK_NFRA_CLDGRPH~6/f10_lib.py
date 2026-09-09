@@ -56,6 +56,20 @@ REGISTRY_FILES = [
     os.path.join(WS, "org", "modules", "graph", "comp-tools.yaml"),
     os.path.join(WS, "org", "modules", "graph", "comp-aws-agent-usage.yaml"),
 ]
+# ---- THE CORPUS GAINS THE TWO GENERATED CARRIERS (issuer ruling on row W6-S1, 2026-09-09) ------
+# WHY: the hand-authored registry files were the whole corpus, and they were CLEAN while
+# TOOL_MASTER.yaml and tool_index.py still carried
+#   canonical_call: "comp-aws derive --out <path>    # full; or --resource <arn> for bounded"
+# -- a laptop-producer phrasing in a GENERATED carrier, sourced from .tools/tool_overrides.yaml,
+# which no scoped read of the two registry files could ever see. A census scoped to the files a
+# human edits cannot see a defect in what the generator emits. These two are scanned for the
+# `canonical_call` and `concern` strings ONLY (that is what the overrides feed), and their counts
+# are printed PER FILE so a zero here is never folded into a zero there.
+GENERATED_CARRIERS = [
+    os.path.join(WS, "org", "modules", "graph", "TOOL_MASTER.yaml"),
+    os.path.join(WS, ".tools", "tool_index.py"),
+]
+CARRIER_FIELDS = ("canonical_call", "concern")
 # the agent-facing FIELD set censused (the scoped read); an UNSCOPED whole-file read runs beside it.
 AGENT_FACING_FIELDS = ("command", "when", "cmd", "does", "use_when", "when_to_use",
                        "output", "cost", "usage_guide", "overlay_role", "key_facts",
@@ -219,7 +233,69 @@ def phrase_census():
                     if n:
                         detail.append("SCOPED %s :: field %s :: %s x%d"
                                       % (os.path.basename(path), field, label, n))
-    return {"scoped": scoped, "unscoped": unscoped, "detail": detail, "yaml_loads": loads}
+    # ---- the two GENERATED carriers: canonical_call / concern strings only, PER FILE ----------
+    carrier = {}
+    by_source = {}
+    for path in GENERATED_CARRIERS:
+        with open(path, "r", encoding="utf-8", errors="replace") as fh:
+            raw = fh.read()
+        n_file = 0
+        for field in CARRIER_FIELDS:
+            # every value of this field, whichever carrier shape holds it: YAML `field: value` or
+            # the compiled index's `'field': 'value'` python literal. Matched on the LINE, so a
+            # multi-line folded value contributes its first line -- which is where a call string is.
+            for m in re.finditer(r"['\"]?%s['\"]?\s*:\s*(.+)" % re.escape(field), raw):
+                value = m.group(1)
+                for label, rx in PHRASE_DOMAIN:
+                    hits = len(re.findall(rx, value))
+                    if hits:
+                        n_file += hits
+                        # ATTRIBUTED TO ITS SOURCE, never folded into the registry-file count.
+                        # The two carriers embed MANIFEST_DOC and LEDGER_DOC verbatim, so a hit
+                        # here is EITHER overrides-sourced (what the W6-S1 ruling widened this
+                        # census for, and what a regeneration can fix) OR manifest-sourced (rides
+                        # in from graph-call-manifest.yaml `entries[]`, which no regeneration can
+                        # remove and which is OUT OF THIS ORDER'S GRANT). Collapsing the two would
+                        # make an unfixable residue look like an unfixed defect, and vice versa.
+                        # F-8 hit this exact shape at row NFRA_CLDGRPH-W4-S1.
+                        src = _attribute_carrier_hit(field, value)
+                        by_source[src] = by_source.get(src, 0) + hits
+                        detail.append("CARRIER %s :: field %s :: %s x%d :: SOURCE=%s"
+                                      % (os.path.basename(path), field, label, hits, src))
+        carrier[os.path.basename(path)] = n_file
+    return {"scoped": scoped, "unscoped": unscoped, "detail": detail, "yaml_loads": loads,
+            "carrier": carrier, "carrier_by_source": by_source}
+
+
+def _attribute_carrier_hit(field, value):
+    """Which UPSTREAM put this string into a generated carrier: the overrides file (fixable by a
+    reword + regeneration, and inside this order's grant) or graph-call-manifest.yaml's entries[]
+    (embedded verbatim as MANIFEST_DOC; no regeneration removes it and the file is out of grant).
+
+    Decided by asking each upstream whether IT carries the value -- not by guessing from the text.
+    """
+    import yaml
+    v = value.strip().rstrip(",").strip().strip("'\"")
+    try:
+        with open(os.path.join(WS, ".tools", "tool_overrides.yaml"), encoding="utf-8") as fh:
+            ov = (yaml.safe_load(fh) or {}).get("tools") or {}
+        for rec in ov.values():
+            if isinstance(rec, dict) and v and v in str(rec.get(field, "")):
+                return "tool_overrides.yaml"
+    except Exception:
+        pass
+    try:
+        with open(os.path.join(WS, "org", "modules", "graph", "graph-call-manifest.yaml"),
+                  encoding="utf-8") as fh:
+            mf = yaml.safe_load(fh) or {}
+        ents = mf.get("entries") or []
+        ents = list(ents.values()) if isinstance(ents, dict) else ents
+        for e in ents:
+            if isinstance(e, dict) and v and v in str(e.get("canonical_call", "")):
+                return "graph-call-manifest.yaml:entries[%s]" % e.get("id", "?")
+    except Exception:
+        pass
+    return "UNATTRIBUTED"
 
 
 def _agent_facing_strings(node, field=None, out=None):
