@@ -75,20 +75,62 @@ The task did **not** exist before this (`Get-ScheduledTask` -> ABSENT, checked f
 installed over blind. The next fire was verified **in UTC**, not trusted in local time, because the
 ordering against the 13:00Z report is the thing `O21-AC1` grades.
 
-### TWO PROPERTIES STATED, NOT FIXED
+### THREE PROPERTIES STATED, NOT FIXED -- one of which the issuer then RULED on
 
-**(i) THIS TIMER ONLY FIRES WHEN THE MACHINE IS AWAKE AND LOGGED ON, AND IT DOES NOT CATCH UP.**
+⚠ **READ THE AMENDMENT BELOW BEFORE ACTING ON (i): its catch-up clause is SUPERSEDED.** Property (i)
+is recorded here **as measured at install**, because that is what the ruling was made on; the
+`StartWhenAvailable` half of it was reversed forty minutes later and the corrected state is in the
+amendment. Left in sequence rather than silently rewritten -- a record that edits its own premise
+out cannot be checked against the decision it produced.
+
+**(i) THIS TIMER ONLY FIRES WHEN THE MACHINE IS AWAKE AND LOGGED ON, AND ~~IT DOES NOT CATCH UP~~
+(catch-up SUPERSEDED, see the amendment).**
 Measured rather than inferred from the absent `/RU`: `LogonType: Interactive`, so a laptop asleep,
-locked out or logged off at 07:30 local does not run it. And two settings read UNSET, which sharpens
-it further -- `WakeToRun` is not enabled, so the task will not wake the machine, and
-`StartWhenAvailable` is not enabled, so a **missed fire is not run late**. A reader who assumed
-either would be wrong.
+locked out or logged off at 07:30 local does not run it. **That half still stands** -- the logon
+dependency is unchanged and no setting removes it. Two settings read UNSET at install and sharpened
+it: `WakeToRun` not enabled, so the task will not wake the machine (**still true, ruled to stay
+off**); and `StartWhenAvailable` not enabled, so a missed fire was not run late (**now enabled --
+superseded**). A reader who assumed either at install would have been wrong.
 **That is not a defect to paper over: it is the local failure mode, and the seam already renders it
 honestly.** With no publish, the artifact ages past `OUTSET_SEAM_MAX_AGE_HOURS` (26 h, default,
 unset in `runtime.env`) and group A renders that device **SILENT** for that day while the other
 devices still render. The consumer's ceiling and this timer's logon dependency are the same fact seen
 from two ends, and "the laptop was closed" and "the publisher is broken" are correctly the same
 observation to a reader who is told the ceiling -- which is why the ceiling is named beside it here.
+
+### AMENDED 17:05Z -- catch-up ENABLED on the issuer's ruling
+
+`2.0.0_SA_COO` ruled on property (i): **set `StartWhenAvailable`, leave `WakeToRun` unset.** A
+catch-up run is still the timer's own fire, so it sits inside sharpening (3); a task that wakes a
+laptop in a bag is a device-behaviour change and stays off.
+
+**HOW, and why not the one-liner offered.** `Set-ScheduledTask -Settings (New-ScheduledTaskSettingsSet
+-StartWhenAvailable)` builds a FRESH settings object and would silently discard every other setting
+on the task. So the existing object was modified in place and written back, and BEFORE/AFTER were
+both captured to prove exactly one field moved:
+
+| setting | before | after |
+|---|---|---|
+| **StartWhenAvailable** | **False** | **True** |
+| WakeToRun | False | False |
+| Enabled | True | True |
+| ExecutionTimeLimit | PT72H | PT72H |
+| MultipleInstances | IgnoreNew | IgnoreNew |
+| Priority | 7 | 7 |
+| NextRunTime (UTC) | 2026-09-10 11:30:00 | 2026-09-10 11:30:00 |
+
+Read-back after the change: `State Ready`, `LogonType Interactive`, `RunLevel Limited`, action
+unchanged. **One field moved and the read-back proves it** -- the point of capturing the before state
+rather than only the after.
+
+**A THIRD PROPERTY, FOUND WHILE READING THE REST AND STATED FOR THE SAME REASON AS THE OTHER TWO.**
+`ExecutionTimeLimit` is `PT72H` and `MultipleInstances` is `IgnoreNew`, both `schtasks` defaults
+neither I nor the ruling chose. Together they mean a HUNG publish would block the next runs for up to
+**72 hours**, not one day -- and the consumer would render those days SILENT without saying why. It
+is unlikely rather than impossible: every subprocess in `publish_drift.py` is bounded (120 s for the
+git reads, 300 s for the producer), so there is no unbounded wait to hang on. Named here because a
+72-hour blocking window is not what "daily" reads like, and because the honest render of it is
+indistinguishable from a closed laptop.
 
 **(ii) `/ST 07:30` IS LOCAL TIME AND MOVES WITH THE CLOCK, AND IT IS BEFORE 13:00Z BOTH WAYS.**
 Today (EDT, UTC-4) it is **11:30Z**; after the November change (EST, UTC-5) it is **12:30Z**. Both
