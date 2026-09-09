@@ -221,3 +221,131 @@ bytes, and the record says so rather than implying a landed state.
 
 **The task order's `<status>` is NOT flipped.** All five mechanical criteria read PASS by output;
 a VALID instance is not a met order, and neither is a measured criterion on an uncommitted tree.
+
+---
+
+# PASS 2 -- ON THE ISSUER'S RE-HAND (ruling 2026-09-09 20:4xZ) AND THE CTO ADDENDUM (R14a, PRD v0.12 @`b77a6c3a27`)
+
+**The order is COMPLETE.** The section above stands as written: it is PASS 1's record, its numbers
+were true at its vintage, and the "TERMINAL STATUS: OPEN" heading it carries is superseded HERE
+rather than edited there. What changed is the WORLD, not the measurement -- the issuer widened the
+grant by three files and ruled the blocking invariant wrong in its RULE (not in its fact).
+
+```json
+{
+  "W6-S2_DISCHARGED": {
+    "the_ruling": "the self-route invariant must exempt a tool by its DECLARED status, never by a hard-coded set -- an enumerated ban list lapses silently (CLAUDE.md s.5), and a tool deprecated tomorrow would rediscover the block from scratch",
+    "SAFE_COMMIT_GATE": "PASS",
+    "the_line_that_used_to_block": "BLOCKED: 1 catalogued tool(s) do NOT surface for their own use_case: comp-aws -- comp-which returns nothing naming it",
+    "the_line_now": "[commit-gate]   SELFROUTE_EXEMPT=1 (deprecated: comp-aws[map-tool-grain])",
+    "the_gates_own_completeness_lines_at_the_landing_commit_aac6ffe73f": [
+      "[commit-gate]   [manifest-check] registration-invariant PASS: 95 tracked+committed comp-* executable(s) all accounted (tools_index 78 + excluded 17 + entries-tools 80) and ledgered (coverage-map 99).",
+      "[commit-gate]   [manifest-check] output-contract invariant PASS: 78 tools_index tool(s) all declare an output contract (declared 34 + pending 44); 2 extra declaration(s) for non-tools_index emitters.",
+      "[commit-gate]   [manifest-check] stage-2 vocab invariant PASS: 36 declared tool(s), all rail/grain/plane/scope values in the canon enums (grain, plane, rail, scope).",
+      "[commit-gate]   [manifest-check] retired-alias invariant PASS: 9 retired name(s) declared, all disjoint from live+excluded (99 live), successors valid.",
+      "[commit-gate] OK: pre-commit gate clean for 10 of 15 file(s)",
+      "[coverage-check] PASS: comp-coverage-map.yaml is internally consistent -- every tool one home, every overlap declared, no phantom seam, inventory complete, projection current, grain stable.",
+      "[coverage-check]   swept: 99 homed tool(s) (35 tools[] + 64 meta_tools[]) | 12 gate_contract rule(s), 0 unverifiable"
+    ],
+    "no_do_NOT_surface_line_appears_at_all": "the member RAN (its WARN lines for ~60 near-tie tools are all present in the same output, so it was not skipped) and comp-aws was EXEMPT BY DECLARATION with its exemption printed as a denominator"
+  },
+
+  "THE_TWO_GRAINS_SIDE_BY_SIDE": {
+    "MAP_STATUS": "deprecated",
+    "MANIFEST_ENTRY_STATUS": "deprecated",
+    "GRAINS_AGREE": true,
+    "R14a_condition": "an entry may carry `deprecated` ONLY when its tool is `deprecated` at TOOL grain in comp-coverage-map.yaml, so the two grains never disagree (PRD v0.12 @b77a6c3a27:205). Measured here rather than assumed.",
+    "consumer_discipline": "both values are do-not-route; only `retired` is do-not-call. comp-aws is deprecated, so it stays CALLABLE -- which is exactly Andrew's 'we do not need to gate it'."
+  },
+
+  "THE_EXEMPTION_AND_ITS_FOUR_CONTROLS": {
+    "printed_line": "SELFROUTE_EXEMPT=1 (deprecated: comp-aws[map-tool-grain])",
+    "why_printed": "an exemption nobody can see is indistinguishable from a check that stopped running, so selfroute_exempt_set() returns the set WITH a reason per tool and the caller prints it as a denominator",
+    "CONTROL_A_manifest_grain_alone": "with COVERAGE_MAP pointed at a non-existent path, the exempt set is still SELFROUTE_EXEMPT=1 (deprecated: comp-aws[manifest-entry-grain]) -- BOTH grains genuinely work, so the answer does not depend on which file a lane edited first",
+    "CONTROL_B_fail_closed": "with neither grain declaring, SELFROUTE_EXEMPT=0 -- a parse error yields NO exemption and the invariant keeps full strength, rather than exempting everything",
+    "CONTROL_C_wrong_value_not_exempted": "a tools_index entry planted with `status: canonical` does NOT enter the exempt set (only comp-aws appears) -- the filter reads the VALUE, it is not a presence test on the key",
+    "CONTROL_D_two_grains": "MAP_STATUS=deprecated, MANIFEST_ENTRY_STATUS=deprecated, GRAINS_AGREE=true",
+    "what_stayed_hard_coded": "EXCLUDE = {comp-grep, comp-glob, comp-which} -- three STRUCTURALLY unrankable tools (the never-dead-end fallback pair, surfaced via route()'s kind=fallback rather than as scored candidates, plus the router itself), not three tools somebody chose to skip. A comment now says which, so the next reader does not have to infer it."
+  },
+
+  "THE_MANIFEST_EDIT_ONE_ENTRY_AND_ITS_BYTES": {
+    "entry": "tools_index['comp-aws'] gains `status: deprecated`, its `does` reworded to the estate-side engine, and an R14a citation in a comment line above it",
+    "git_diff_numstat": "2 insertions / 1 deletion -- one flow-mapping line became a comment plus the line",
+    "CRLF_PRESERVED": "1899 CRLF before, 1900 after (the one added line), 0 lone LF. The edit was done on BYTES with the count asserted on both sides: a text-mode read-modify-write on this autocrlf checkout rewrites all 1899 line endings and turns a one-line change into a whole-file diff -- F-8 banked exactly this on exactly this file.",
+    "entries_with_a_status_key": "0 before, 1 after -- the ONE entry the ruling names; every other line of the manifest stays a row, never an edit",
+    "the_manifests_own_invariants_run_after": {
+      "manifest_check_cli selfcheck": "PASS: 3 finding(s) (B + C present, 2 ERROR-class), 0 false-positive.",
+      "manifest_check_cli completeness": "PASS: routable + placement + self-routes + existence, over 78 registered tool(s).",
+      "manifest_check_cli retired-alias": "PASS: retired-alias. -- 9 retired name(s) declared, all disjoint from live+excluded (99 live), successors valid; none cited across the 129 routing surface(s) in scope (1 tombstoned mention exempted)",
+      "comp-coverage-check": "PASS: comp-coverage-map.yaml is internally consistent -- 99 homed tool(s) (35 tools[] + 64 meta_tools[]), 12 gate_contract rule(s), 0 unverifiable"
+    }
+  },
+
+  "W6-S1_DISCHARGED_AND_WHAT_IT_UNCOVERED": {
+    "the_reword": "tool_overrides.yaml comp-aws entry ONLY -- canonical_call goes from 'comp-aws derive --out <path>    # full; or --resource <arn> for bounded' to 'comp-kuzu \"<Cypher>\"    # comp-aws is DEPRECATED for agent use; the engine runs in the nightly derive-runner', and `concern` to the estate-side engine text. 5 insertions / 3 deletions; CRLF 258 = 258.",
+    "reached_the_carriers": "TOOL_MASTER.yaml tools['comp-aws'].canonical_call and tool_index.py TOOLS['comp-aws']['canonical_call'] both now carry the served call -- measured by IMPORT, not by reading the generator",
+    "CARRIER_PHRASINGS_PER_FILE": "TOOL_MASTER.yaml=0, tool_index.py=1",
+    "CARRIER_OVERRIDES_SOURCED": 0,
+    "CARRIER_MANIFEST_SOURCED": "1 -- graph-call-manifest.yaml entries[cloud.iceberg.persist].canonical_call = 'comp-aws iceberg-commit', embedded verbatim as MANIFEST_DOC; out of grant, row NFRA_CLDGRPH-W6-S3",
+    "CARRIER_UNATTRIBUTED": 0,
+    "why_the_verdict_token_did_not_move": "F10-AC4's criterion text is 'the declared phrase domain censused over the TWO REGISTRY FILES' agent-facing fields reads 0'. LAPTOP_PRODUCER_PHRASINGS is that number and it reads 0 of 7. The carrier scan the ruling added is printed BESIDE it, split by upstream, because a manifest-sourced residue this order may not edit is carried by ROW ID -- F-8's W4-S1 precedent. An OVERRIDES-sourced hit would have FAILED the probe: that upstream IS in the grant, and the probe asserts on it."
+  },
+
+  "criterion_results_at_HEAD_aac6ffe73f": {
+    "F10-AC1": "PASS-by-output -- PREAMBLE_FIRST=3 of 3; all seven named; STDOUT_UNCHANGED=3 of 3; RC_UNCHANGED=3 of 3; WRAPPER_PREAMBLE_COUNT=1",
+    "F10-AC2": "PASS-by-output -- COMP_AWS_ROWS=0 of 4 phrasings; RANKED_LISTS_READ=4 of 4; CONTROL_PHRASING_ROUTES_TO=comp-kuzu; CURATED_TUPLES_NAMING_COMP_AWS=0 of 90",
+    "F10-AC3": "PASS-by-output -- MAP_STATUS_FIELD=deprecated (declared in schema); MASTER_ROW_STATUS=deprecated; PARITY=99 of 99; SECOND_REGEN_DIFF_LINES=0; HAND_EDITED_CARRIERS=0 of 3",
+    "F10-AC4": "PASS-by-output -- PHRASE_DOMAIN=7 phrases; LAPTOP_PRODUCER_PHRASINGS=0 of 7; COMP_AWS_KEYS_IN_COMP_TOOLS=1; YAML_LOADS=2 of 2; PHRASE_PROBE_CONTROL=FIRED",
+    "F10-AC5": "PASS-by-output -- CMD_DERIVE_BYTES_UNCHANGED=true; HANDLERS_UNCHANGED=3 of 3; DERIVE_RUNNER_CALLSITE=infra/aws/globgrph/derive_runner.py:101",
+    "F10-AC6": "RECORDED (judgment) -- PASS 1's four readings stand; the addendum below is what PASS 2 changes"
+  },
+
+  "F10-AC6_ADDENDUM_what_pass_2_changes_about_the_reading": "PASS 1's four readings stand. ONE THING IS NOW DIFFERENT AND IT MATTERS TO THE L9 GRADE: the deprecation is no longer only a ROUTER-side fact. PASS 1 recorded, AGAINST this order, that the skip lived in .tools/comp-which alone and that a second ranking consumer would not inherit it. After the re-hand, `deprecated` is DECLARED at two grains (the population authority and the manifest entry, agreeing by R14a's own condition) and READ by THREE independent consumers -- gen_tool_registry projects it onto every generated row, comp-which excludes on it, and the self-route invariant exempts on it. A value with consumers on both sides at both grains is the difference between a field that drifts to unpopulated and one that binds. FWD-6 therefore reads STRONGER than it did six hours ago: the client-side refresh choice is not merely unpresented, it is DECLARED-not-routed in the two files every registry consumer reads. FWD-2 is UNCHANGED and so is its limit -- no question ROUTES to a rebuild; a seat that remembers the name still can, by Andrew's design."
+}
+```
+
+## What the re-hand actually fixed, and why the first pass was right to stop
+
+The invariant was **right about the fact and wrong about the rule**. `comp-which returns nothing
+naming it` was true, and it was the deliverable. What made it a block was that
+"registered-implies-reachable" was enforced against a hard-coded three-name `EXCLUDE` -- so the only
+way a tool could ever be legitimately unrouted was for someone to edit that literal. That is the
+enumeration trap CLAUDE.md s.5 names, and it would have fired again for the next deprecation.
+
+The fix reads a tool's **own declaration** at both grains and prints the exempt set. It generalises:
+nothing about it is comp-aws-specific, and a future `retired` tool is exempt the moment its status
+says so, with the exemption visible in the gate's own output rather than buried in a set literal.
+
+**The workaround the gate itself recommended is still refused, and that refusal was load-bearing.**
+The gate's message says "give it distinctive curated vocabulary in `.tools/comp-which`" -- inside the
+first pass's grant, and it would have landed the commit six hours earlier. It would also have put
+comp-aws back in the vocabulary Andrew ordered removed, and the criterion would have kept reading
+`COMP_AWS_ROWS=0 of 4` because the four `when:` phrasings are not the same query as the self-route
+query. The order would have passed while the intent was quietly inverted. Stopping was the cheaper
+error.
+
+## Two rows this pass, one of them the census earning its keep
+
+`NFRA_CLDGRPH-W6-S3` -- the census widened for W6-S1 found a **second** upstream within one run:
+`tool_index.py` still carries `canonical_call: 'comp-aws iceberg-commit'`, and the probe attributes
+it BY MEASUREMENT (asking each upstream whether it holds the value, not guessing from the text) to
+`graph-call-manifest.yaml` `entries[cloud.iceberg.persist]`. Eleven `cloud.*` entries register
+comp-aws's subcommands as canonical calls and none carries a status; the ruling's `status:
+deprecated` reached the `tools_index` entry only. Out of grant, filed, and the design question --
+whether entry-grain `deprecated` should propagate to a deprecated tool's own entries -- named for
+R14/E-1 rather than answered here.
+
+`NFRA_CLDGRPH-W6-S4` -- the addendum's "merge CLOUD into your branch" was **not performed**. This
+seat's standing law admits no merge, push or rebase; with nine uncommitted edits in the worktree a
+merge is also CLAUDE.md 14b's named hazard ("local changes the merge would overwrite", which reads
+exactly like another seat's contention). The addendum's actual need -- that R14a resolve -- is met
+without it: `git cat-file -t b77a6c3a27` returns `commit`, its PRD blob carries R14a twice, and every
+citation in the routing test, the manifest entry, the overrides entry and this record names that
+commit-ish. It is **not** an ancestor of this branch's HEAD, and nothing here claims it is. The drain
+owns the merge.
+
+## TERMINAL STATUS: COMPLETE
+
+All five mechanical criteria PASS by output at HEAD `aac6ffe73f`, re-run **after** the acts landed
+rather than before. `SAFE_COMMIT_GATE=PASS`. The proof instance is re-validated with real pins and
+the task order's `<status>` is flipped in the same commit as the instance.
