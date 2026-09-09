@@ -4,6 +4,13 @@
 **Branch:** `wk-cldgrph-2-d7`, base `CLOUD@da35a5dfa0`. **Push state: LOCAL** (never pushed).
 **Measured:** 2026-09-05 22:5xZ - 2026-09-06 00:0xZ, all invocations bounded by `timeout`.
 
+> **READ P4.0 FIRST -- THE SECTIONS BELOW ARE IN PASS ORDER, NOT IN TRUTH ORDER.** This file
+> is append-per-pass: sections 1-10 are PASS 1, `P2.*` PASS 2, `P3.*` PASS 3 and `P4.*` PASS 4,
+> and each pass's CONCLUSION FIRST states the world AT THAT PASS. The conclusion immediately
+> below is PASS 1's (2026-09-06 00:0xZ) and is kept verbatim as the record of what was true
+> then. **The CURRENT state of this order is `P4.0`: 7 mechanical criteria PASS by output,
+> `D7-AC8` recorded, `D7-AC2` at `0 of 29`.**
+
 ---
 
 ## CONCLUSION FIRST
@@ -1237,3 +1244,292 @@ the header.
 3. **The residue in P3.5(a)-(c) is a documentation act inside two files this order already grants**
    (`.tools/tool_index.py`, `org/modules/graph/comp_aws_cli.py`) plus one it does not
    (`graph-call-manifest.yaml`). A single narrow order could close all three.
+
+---
+
+# PASS 4 -- the DISPOSITION EXECUTED: the writer DELETED, the last reader REPOINTED, the predicate NARROWED
+
+**Worker:** `0.9.0_WK_NFRA_CLDGRPH~2` (a FRESH spawn on the same branch; the pass-3 subagent died with
+every Claude seat at 2026-09-06 03:59Z). **Branch:** `wk-cldgrph-2-d7`, HEAD at spawn `5eb0324a7b`.
+**Push state: LOCAL** (never pushed; not measured against a remote and not claimed).
+**Measured:** 2026-09-09 13:3xZ - 14:2xZ, every invocation bounded by `timeout`.
+
+## P4.0 CONCLUSION FIRST
+
+**THE RETIREMENT IS COMPLETE INSIDE THIS CELL, AND THE ARM THAT SAID SO IS THE ONE THAT REFUSED TO
+SAY IT FOR THREE PASSES.** `D7-AC2` reads `CONSUMERS_OPENING_LOCAL_DB=0 of 29` with **all three**
+controls FIRED. Seven mechanical criteria PASS by output; `D7-AC8` is recorded without a verdict.
+
+- **`infra/aws/globgrph/kuzu_cost_enrich.py` is DELETED** (`git rm`), on `1.0.0_SA_CTO`'s ruling
+  94466 @`1266d65641`. The four findings that ruling rests on were **re-measured here at my own
+  HEAD with my own denominators printed beside his** (P4.2). It was the last WRITER against the
+  retired store, and deleting it also removes the stitch store's only writer.
+- **`infra/aws/globgrph/kuzu_ac_traversals.py` is REPOINTED** through `projection_client` and
+  exercised twice against the served graph. The line that told a user to `run kuzu_nessie_load.py
+  first` is gone; so is the `--db` flag, because a served graph has no path to point at (row
+  **W2-S27**).
+- **`D7-AC2`'s predicate is NARROWED to the canonical store**, as the pass-3 amendment directed and
+  under the same split `1.0.0_SA_CTO` ruled at 94456. `comp_debt.py:215` (the `kuzu_stitch_db`
+  reader, the issuer's placed manifest row) now prints as **`DECLARED-OUT-OF-CELL`** beside the
+  count -- named, never dropped. **The narrowing is exercised in BOTH directions by a third
+  control**, because a scope filter that quietly matched everything would read exactly like a clean
+  population.
+- **Nothing about the residue changed and nothing about it is claimed to have.** `tool_index.py`'s
+  six help-text hits, `comp_aws_cli.py:2857/2866`, `comp_similar.py:591` and the manifest advisory
+  are re-measured at this HEAD and are **unchanged**; they travel to L9 in `D7-AC8` exactly as pass
+  3 left them.
+
+**MECHANICAL RESULT: 7 PASS-by-output (D7-AC1..D7-AC7), 1 RECORDED-judgment (D7-AC8).**
+
+## P4.1 RE-GROUNDING AT MY HEAD (the amendment's act 1) -- four premises, all TRUE
+
+| premise | instrument | reading |
+|---|---|---|
+| the pass-3 instance validates rc 0 | `python .tools/proof-of-spec-check.py <instance> D7-AC1..D7-AC8` | `VALID (rc=0)`, `acceptance rows=8 \| violations=0`, `surprises-frame: 15 entries; 15 resolve to a channel row`; the D7-AC2 row reads `FAIL` |
+| `kuzu_cost_enrich.py` EXISTS | `test -f` + `wc -l` | EXISTS, 259 lines |
+| `_canonical.py` is the 78-line tombstone | `wc -l` | 78 lines |
+| `projection_client.py` exists | `test -f` + `wc -l` | EXISTS, 338 lines |
+
+`git rev-parse --abbrev-ref HEAD` -> `wk-cldgrph-2-d7`; `test -d org && test -d .tools` -> `TREE-OK`;
+`git rev-parse HEAD` -> `5eb0324a7b74444f5c41a8a00d38d3a019fa80b7`.
+
+**And the arm's BASELINE was taken before any write**, so the delta this pass produced is measured
+rather than asserted: `bash .../consumers_no_local_db.sh` at `5eb0324a7b` -> **`CONSUMERS_OPENING_LOCAL_DB=3 of 30`**,
+`CONSUMER_PROBE_CONTROL=FIRED`, `CONSUMER_PROBE_BAND_CONTROL=FIRED`, rc=1 -- the same three openers
+pass 3 recorded, at the same lines.
+
+## P4.2 (iii) THE DELETE -- `infra/aws/globgrph/kuzu_cost_enrich.py`
+
+**THE ACT:** `git rm infra/aws/globgrph/kuzu_cost_enrich.py` -> `rm 'infra/aws/globgrph/kuzu_cost_enrich.py'`, rc=0.
+
+**THE CTO'S FOUR FINDINGS, RE-MEASURED AT MY HEAD, WITH BOTH DENOMINATORS.** The instruction was to
+re-measure and print mine beside his -- not to restate his.
+
+| finding | CTO @`4510dcaa2a` | MINE @`5eb0324a7b` | verdict |
+|---|---|---|---|
+| one-off session artifact of a closed project | `--full-history` is ONE commit | `git log --full-history --oneline -- infra/aws/globgrph/kuzu_cost_enrich.py` -> **exactly one line**, `f8ba82b894 costrecon(TO-D4): full lever census + kuzu cost_mtd_usd enrichment ...` | CONFIRMED |
+| callers | 0 of 18 token hits | token census `comp-find 'kuzu_cost_enrich' --all --files --limit 200` -> **`114 hit(s) across 29033 file(s) scanned`, 36 files**, bands `HEAD=1 SURFACED=19 CONFIG=11 DOC=83`; CODE-caller census `comp-find 'import kuzu_cost_enrich\|from kuzu_cost_enrich\|kuzu_cost_enrich[.][a-z_]+[(]' --all` -> **`4 hit(s) across 29033 file(s)`**, and all four are non-callers (3 are THIS session's own comp-tool logs, 1 is prose in `ADJUDICATION_v1.md:761`) | **0 code callers CONFIRMED**; file count differs and the difference is explained below |
+| consumers of `cost_mtd_usd` | 0 of 14, none code | `comp-find 'cost_mtd_usd' --all --files --limit 200` -> **`65 hit(s) across 29033 file(s)`, 22 files**; `--band SURFACED` -> `26` hits of which **20 are inside `kuzu_cost_enrich.py` itself** (`:3,:25,:62,:124,:132,:133,:149,:162,:175,:184,:201,:202,:203,:213,:245,:246,:247,:250,:255`), the rest tool logs and `commits.jsonl` | **0 code consumers outside the file CONFIRMED** |
+| it OPENS and ALTERs the retired store | `:127`/`:197` open, `:132` writes, `:228`/`:242` hardcode | `:127` and `:197` `db = kuzu.Database(db_path)`; `:132` `conn.execute('ALTER TABLE CloudNode ADD cost_mtd_usd DOUBLE DEFAULT 0.0')`; `:227-231` `dbs = [os.path.join(WORKSPACE, 'kuzu_nessie_db'), os.path.join(WORKSPACE, 'kuzu_stitch_db')]`; no argparse in the file | CONFIRMED |
+
+⚠ **THE FILE COUNTS DIFFER AND THE DIFFERENCE IS NOT A DISAGREEMENT -- state it rather than let a
+reader reconcile two numbers.** His 18 and 14 are native `Grep` over the repo at `4510dcaa2a`; mine
+are `comp-find --corpus all`, which is `.gitignore`-BOUNDED (tracked + untracked + gitignored minus
+a printed ephemeral floor) and therefore also reads `.scratch/`, `.comp-graph/` and
+`org/mcp/*.jsonl`; and my branch carries the pass-1..pass-3 artifacts that POSTDATE his HEAD (this
+deliverable, the proof instance, this order's own face amendments, `consumers_no_local_db.sh`, the
+channel rows). **The two censuses agree exactly where the ruling rests: ZERO code callers and ZERO
+code consumers of the attribute.** The wider corpus can only ADD non-code carriers, which is the
+direction that cannot hide a caller.
+
+**THE SHA, so the deleted bytes are identifiable after the delete:**
+`git show HEAD:infra/aws/globgrph/kuzu_cost_enrich.py | sha256sum` ->
+`ead4be09c28f523cacbac5fcad1b18e054aebbc7825e08aa552ea61b55a64af5` -- the same digest
+`3.0.0_SA_CVO` recorded at its program-grain exercise (ADJUDICATION_v1 C-S21).
+
+**CENSUS ROW 18, CORRECTED (this seat's own pass-1 row, wrong twice and corrected twice).**
+
+| # | file | class | disposition (PASS 4) |
+|---|---|---|---|
+| 18 | `infra/aws/globgrph/kuzu_cost_enrich.py` | B (mis-classified at pass 1 as a caller-supplied `--db` consumer; corrected at pass 3 to a hardcoded opener; corrected here to its final disposition) | **REMOVED -- WRITER AGAINST A RETIRED LOCAL STORE, NO REPOINT TARGET.** Methodology preserved at `f8ba82b894` and `org/modules/graph/debtscan/2026-06-12_D4_costrecon_ae.md`. Callers 0; `cost_mtd_usd` consumers 0. The CAPABILITY (cost attribution on graph nodes) is PLACED by `1.0.0_SA_CTO` as a producer-side manifest row at L10, lane `0.8.0_AE_CloudComp` -- not this cell's act and not carried here. |
+
+**AND ONE CONSEQUENCE WORTH NAMING:** deleting it removes the **stitch store's only WRITER**. The
+stitch READER (`comp_debt.py:215`) is the issuer's placed row and was not touched.
+
+## P4.3 (ii) THE REPOINT -- `infra/aws/globgrph/kuzu_ac_traversals.py`
+
+**BEFORE** (@`5eb0324a7b`, 114 lines): `:28` `DEFAULT_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kuzu_nessie_db")`;
+`:83` `ap.add_argument("--db", default=DEFAULT_DB_PATH)`; `:87` `import kuzu`;
+`:90` `print(f"ERROR: Kuzu DB not found at {args.db} -- run kuzu_nessie_load.py first")`;
+`:92` `conn = kuzu.Connection(kuzu.Database(args.db, read_only=True))`.
+
+**AFTER** (129 lines): no `DEFAULT_DB_PATH`, no `--db`, no `import kuzu`, no `os` import at all.
+`main()` calls `projection_client.vintage_line()` and `projection_client.connect()` inside one
+`try`, and the refusal line reads:
+
+```
+ERROR: the SERVED cloud graph is unreachable ({type}: {ex}) -- this harness reads the served
+projection (infra/aws/globgrph/projection_client.py) and has NO local copy to fall back to;
+check the gateway, never rebuild a local database
+```
+
+An unreachable service now exits **3** -- a REFUSAL, distinguishable from `FAIL` (1) and
+`SUBSTRATE-MISSING` (2), which is the same fail-honest discipline the file already carried for
+absent substrate. **Two shape changes the face did not name are recorded as row W2-S27**: the
+`--db` flag is REMOVED rather than defaulted (there is no path to default to), and the preflight
+interpolates its node class because `ServedConnection.execute` carries no parameter dict; every
+value comes from `AC_SUBSTRATE`, a module-level literal in the same file.
+
+**THE REAL RUNS (bounded, quoted whole):**
+
+```
+$ timeout 60 python infra/aws/globgrph/kuzu_ac_traversals.py --help
+usage: kuzu_ac_traversals.py [-h] [--ac {AC5,AC8,AC9}]
+
+options:
+  -h, --help          show this help message and exit
+  --ac {AC5,AC8,AC9}  run one AC only
+rc=0
+```
+
+```
+$ timeout 120 python infra/aws/globgrph/kuzu_ac_traversals.py --ac AC8
+VINTAGE: Built from the estate as of 2026-09-09 12:23:34 UTC.  [vintage=2026-09-09T12:23:34.893879+00:00]
+AC8: SUBSTRATE-MISSING -- absent node classes: PORTAL_PAGE, PORTAL_COMPONENT, PORTAL_HOOK, REACT_QUERY_KEY, PORTAL_UTIL
+VERDICT: UNVALIDATED -- substrate missing; absence is NOT a pass (P2 stitch / P3-A / P3-C builds land the missing layers)
+rc=2   wall_s=2.55
+```
+
+```
+$ timeout 120 python infra/aws/globgrph/kuzu_ac_traversals.py --ac AC5
+VINTAGE: Built from the estate as of 2026-09-09 12:23:34 UTC.  [vintage=2026-09-09T12:23:34.893879+00:00]
+AC5: SUBSTRATE-MISSING -- absent node classes: PORTAL_COMPONENT, S3_DATA_KEY, GOLD_SCRIPT
+VERDICT: UNVALIDATED -- substrate missing; absence is NOT a pass (P2 stitch / P3-A / P3-C builds land the missing layers)
+rc=2   wall_s=3.04
+```
+
+⛔ **A `SUBSTRATE-MISSING` VERDICT AND A DEAD QUERY READ IDENTICALLY, so the preflight was shown to
+return a non-zero on a class that IS present** -- the same statement shape, the same transport, in
+the same tick: `MATCH (n:CloudNode) WHERE n.node_type = 'S3_BUCKET' RETURN count(*)` ->
+`rows=[{'COUNT_STAR()': 34}]`, `response_bytes=301`, `preflight_stmt_bytes=67`, `wall_s=1.77`. The
+absences above are real absences in the served universe, not a harness that cannot count.
+
+**Per-consumer gateway cost (D7-AC8's substance, this consumer):** 6 round trips for `--ac AC8`
+(1 health + 5 preflights) in 2.55 s; 8 for `--ac AC5` in 3.04 s; largest response measured **301 B**.
+Well inside any budget; the 1 MiB REQUEST limit is untouched (largest statement 254 B).
+
+## P4.4 (i) THE NARROWING -- and why it is not a softening
+
+**THE RULE, and its authority.** CG-s-8 retires four surfaces and every one is `kuzu_nessie_db` or
+its seam. An opener on a DIFFERENT local store is FWD-7's territory, not this cell's -- the split
+`1.0.0_SA_CTO` ruled at 94456 for the scratch loaders and the pass-3 amendment applied to the
+stitch open. So `consumers_no_local_db.sh` now RESOLVES each opener to the store it names and
+counts only CANONICAL ones.
+
+**RESOLUTION IS FAIL-CLOSED, WHICH IS THE ONLY WAY A NARROWING IS HONEST.** The resolver walks the
+opener's first argument through that file's own bindings -- module and function assignments, `for`
+targets over literal tuples, argparse defaults, `os.path.join` segments, f-strings, `BinOp`
+concatenation -- and collects every reachable string literal. Canonical -> **counted**. Some other
+store-shaped literal and no canonical -> **`DECLARED-OUT-OF-CELL`, printed with the store**. **No
+store literal reachable at all -> COUNTED AS CANONICAL**, because an opener whose target cannot be
+read is exactly the case a narrowing must not be allowed to swallow. The bindings index is
+deliberately over-inclusive (a name assigned twice contributes both expressions): a union that is
+too wide can only ever COUNT an opener a narrower read would have excused, never the reverse.
+
+**A THIRD CONTROL, BECAUSE THE NARROWING IS A NEW PREDICATE AND AN UNEXERCISED NARROWING IS A
+PROMISE.** `CONSUMER_NARROWING_CONTROL` plants two sources and asserts both directions in the same
+process, through the same detector: a stitch-store opener reached through a `for` target over a
+literal tuple (the exact shape of `comp_debt.py:215`) must classify OUT-OF-CELL on
+`kuzu_stitch_db`, and an opener on an unresolvable function parameter must classify
+`UNRESOLVED-COUNTED`. Either failing prints `=DEAD` and exits 1.
+
+**THE ARM, quoted whole:**
+
+```
+CONSUMER_POPULATION_DECLARED=32  (the file list in TO-CG-D-7 <paths>)
+  ABSENT (excluded from the denominator): infra/aws/globgrph/kuzu_cost_enrich.py
+  ABSENT (excluded from the denominator): infra/aws/globgrph/tests/test_canonical_rebuild_liveness.py
+  ABSENT (excluded from the denominator): infra/aws/globgrph/tests/test_canonical_refresh_failure_signal.py
+CONSUMER_POPULATION_ABSENT=3
+CONSUMER_BAND_RULE=ast.Call on kuzu.Database / ast.Name|Attribute CANONICAL_DB_PATH; comments and string constants (docstrings, forbidden-token tuples, mutant fixtures) never inspected
+CONSUMER_PREDICATE_SCOPE=the CANONICAL store 'kuzu_nessie_db' only (CG-s-8 retires that store and its seam; an opener on another local store is FWD-7 territory, not this cell -- the same split 1.0.0_SA_CTO ruled at 94456). Each opener is resolved to the store it names through its own file's bindings; an opener whose target cannot be resolved is COUNTED, never excused.
+  DECLARED-OUT-OF-CELL  infra/aws/globgrph/comp_debt.py:215  [kuzu.Database(]  store=kuzu_stitch_db  conn = kuzu.Connection(kuzu.Database(path, read_only=True))
+CONSUMERS_OPENING_OUT_OF_CELL_STORE=1 (printed above, excluded from the count by the narrowing, NOT dropped)
+CONSUMERS_OPENING_LOCAL_DB=0 of 29
+CONSUMER_PROBE_CONTROL=FIRED -- planted opener caught 2 of 2 signature(s) CANONICAL_DB_PATH,kuzu.Database( at line(s) 2,4,4 through the SAME detector, in-process, on a temp string (never a tracked file), both classified CANONICAL
+CONSUMER_PROBE_BAND_CONTROL=FIRED -- the same two tokens planted in a docstring, a comment and a string tuple scored 0, so the banding is exercised and not merely asserted
+CONSUMER_NARROWING_CONTROL=FIRED -- a planted stitch-store opener resolved through a `for` target over a literal tuple classified OUT-OF-CELL (store=kuzu_stitch_db, line 8) and a planted opener on an unresolvable parameter classified UNRESOLVED-COUNTED (line 3), so the narrowing is exercised in BOTH directions and the fail-closed limb is not a promise
+rc=0
+```
+
+**THE THREE-TO-ZERO IS ACCOUNTED FOR MEMBER BY MEMBER, so no reader has to infer which change did
+what:** `kuzu_cost_enrich.py:127,197` -> the file is DELETED and prints on the ABSENT line;
+`kuzu_ac_traversals.py:92` -> REPOINTED, no `kuzu.Database(` remains in it; `comp_debt.py:215` ->
+still there, still opening, now classified `DECLARED-OUT-OF-CELL` on the stitch store. Denominator
+falls 30 -> 29 for exactly one reason: one more declared file is absent.
+
+## P4.5 THE CRITERIA AT `5eb0324a7b` + this pass's writes -- every one re-run, none carried by citation
+
+| id | verdict | invocation (bounded) | deciding output | rc |
+|---|---|---|---|---|
+| D7-AC1 | **PASS by output** | `bash .../seam_unreachable.sh` | `SEAM_REACHABLE=0 of 3` / `SEAM_REFUSAL_KIND_RUNTIMEERROR=3 of 3` / `SEAM_PROBE_CONTROL=FIRED` | 0 |
+| D7-AC2 | **PASS by output** | `bash .../consumers_no_local_db.sh` | `CONSUMERS_OPENING_LOCAL_DB=0 of 29` / `CONSUMER_PROBE_CONTROL=FIRED` / `CONSUMER_PROBE_BAND_CONTROL=FIRED` / `CONSUMER_NARROWING_CONTROL=FIRED` | 0 |
+| D7-AC3 | **PASS by output** | `python .tools/comp-find --corpus aws 'opal-globgrph' --budget 120 --limit 5` | `VINTAGE: Built from the estate as of 2026-09-09 12:23:34 UTC.  manifest: 83c6e1335f43` then `DENOMINATOR: 87 hit(s) across 2158 aws node(s) scanned [corpus=aws]`; `WITHIN BUDGET: scanned 1 of 1 pull ... used 2.17 s` | 0 |
+| D7-AC4 | **PASS by output** | `bash .tools/comp-blast component:AdvisorsTab.tsx --budget 90` | `VINTAGE: Built from the estate as of 2026-09-09 12:23:34 UTC.  [vintage=... manifest=83c6e1335f43 nodes=27304 edges=58794]`; `transport: HTTPS /graph/cypher -- no local database, no cache, no fallback` | 3 (the ratified NOT-FOUND state, as at passes 1-3; rc is not in the expect) |
+| D7-AC5 | **PASS by output. THE PINS DID NOT DECAY** | `for f in ...; do git show HEAD:$f \| sha256sum ...` | `8b79ca1bdfd51c18...` / `80d60f8ffa3c3c5d...` / `9dd104db29d558e4...` -- all three identical to the cut | 0 |
+| D7-AC6 | **PASS by output** | `python .tools/tests/test_g2_disclosure_battery.py` | `DENOMINATOR: 7 of 7 arm(s) recorded a pass` then `PASS`; every arm's RED mutant convicted | 0 |
+| D7-AC7 | **PASS by output** | `bash .../commit_gate_all.sh` | `pre-commit gate clean (18 .py file(s) + .tools/comp-find; denominator 19 of 19)` | 0 |
+| D7-AC8 | RECORDED (judgment; NO verdict) | P4.6 below | -- | -- |
+
+**`commit_gate_all.sh` gained ONE row and lost none it could keep:**
+`infra/aws/globgrph/kuzu_ac_traversals.py` was added (18 files, was 17).
+`infra/aws/globgrph/kuzu_cost_enrich.py` is NOT in the list and cannot be -- a removed file has no
+bytes to gate, the same reason the two deleted seam tests are absent, and listing it would make the
+script exit 2 on its own success.
+
+**THE BATTERIES, direct AND under pytest at the file grain** (the compiler-tools mandate):
+`test_cg8_seam_retired_battery.py` -> `DENOMINATOR: 6 of 6 arm(s)` + `PASS`;
+`test_comp_find_battery.py` -> `COMP-FIND BATTERY: 12/12 PASS (denominator 12)`;
+`test_comp_similar_battery.py` -> `=== comp-similar battery: PASS (12/12) ===`;
+`test_comp_cluster_cli.py` -> rc=0; and
+`python -m pytest -q <the five files>` -> **`24 passed, 1 skipped in 40.69s`**.
+
+## P4.6 `D7-AC8` -- the reading act, PASS 4 addendum (judgment; NO verdict; `3.0.0_SA_CVO` grades this at L9)
+
+**(1) Does anything USER-FACING still hold a path to a local build?** On the executable plane, no:
+`SEAM_REACHABLE=0 of 3`, `CONSUMERS_OPENING_LOCAL_DB=0 of 29`, and the two `kuzu.Database(` calls
+that survive anywhere in this order's population are `comp_debt.py:215` (stitch, declared, placed)
+and -- outside the population entirely -- the two `tsgraph_spike` scratch loaders declared at row
+W2-S25, each of which `rmtree`s and rebuilds its OWN store. **The last file that could re-create the
+canonical store on the machine it ran on is gone**: `kuzu_cost_enrich.py` opened
+`os.path.join(WORKSPACE, 'kuzu_nessie_db')` unguarded, and `kuzu.Database` CREATES an absent store
+(`3.0.0_SA_CVO`'s measurement, kuzu 0.11.3, ADJUDICATION_v1 C-S20/C-S21).
+
+**(2) THE DOCUMENTATION PLANE IS UNCHANGED, AND THAT IS THE PART STILL WORTH GRADING.** Every item
+pass 3 named is re-measured at this HEAD and none moved:
+
+| residue | instrument at this HEAD | reading |
+|---|---|---|
+| `.tools/tool_index.py` help text | `comp-read .tools/tool_index.py --enumerate 'kuzu_nessie_db'` | **`6 hit(s) across 5789 lines`, `DOCSTRING=0 COMMENT=0 DEF=0 CODE=6`** (3 whole-value, 3 substring) at `:1067, :1087, :1103, :1173, :3269, :4054` -- still telling a user the DEFAULT surface is `kuzu_nessie_db` which "auto-refreshes ENGINE-INTERNALLY". Unchanged from pass 3. |
+| `org/modules/graph/comp_aws_cli.py` | `sed -n '2857p;2866p'` | `:2857` comment `comp-kuzu's DEFAULT surface is _canonical.CANONICAL_DB_PATH = kuzu_nessie_db,`; `:2866` a LIVE `print(...)` -- `comp-kuzu's canonical surface (kuzu_nessie_db, Nessie-sourced) still serves its`. Unchanged. |
+| `org/modules/graph/debtscan/comp_similar.py:591` | `sed -n '591p'` | `and cap.get("corpus_db") == "kuzu_nessie_db"` -- an equality on the retired name, in CODE. Unchanged. (Note the PATH: it is under `debtscan/`, not `org/modules/graph/` directly, and it is outside this order's `<paths>`.) |
+| `org/modules/graph/graph-call-manifest.yaml` | the commit gate's own MANIFEST-ADVISORY output, this pass | 25 findings, 5 "would block", still advising a repointed consumer to "Route graph queries through comp-kuzu so they hit the canonical persisted Kuzu DB". Row **W2-S23**, unchanged. |
+
+**The reading, stated plainly and without a verdict:** the retirement is real on the plane that
+executes and unfinished on the plane that instructs. Four of those five carriers are outside this
+order's `<paths>` or outside its cell; `tool_index.py` and `comp_aws_cli.py` are inside it, and this
+pass did not edit them because the amendment carried the residue "exactly as before, unchanged" and
+a worker does not widen its own order. Whether a retirement the estate's own manifest still argues
+against is COMPLETE is `3.0.0_SA_CVO`'s call at L9.
+
+**(3) Gateway cost, cumulative across the passes:** no repointed consumer exceeded its own budget in
+any pass; this pass's new consumer costs 6-8 round trips and a 301 B largest response. No cache, no
+shadow copy, no ephemeral download, no second transport was built at any point.
+
+## P4.7 ROWS FILED THIS PASS
+
+The channel header claimed **116 rows**; **VERIFIED by parsing every fenced json block and summing
+their lengths -- 116 rows in 114 blocks, 116 unique ids, `W2-S1..W2-S26` contiguous** -- so the next
+id is `W2-S27`. After this append: **117 rows in 115 blocks, 117 unique ids**, restated in the
+header.
+
+| id | class | hazard | one line |
+|---|---|---|---|
+| `NFRA_CLDGRPH-W2-S27` | OBSERVATION | INERT | the repoint of `kuzu_ac_traversals.py` could not be like-for-like: the served client carries neither a DB PATH nor a Cypher PARAMETER DICT, so the `--db` flag was removed outright and the preflight interpolates a module-level literal |
+
+**NO EXISTING ROW IS EDITED.** `W2-S26` (BLOCKING/ARMED, `disarm_owner` `2.0.0_SA_COO~A`) recorded
+`D7-AC2` failing at 3 of 30; this pass answers it at 0 of 29, but the disarm is the issuer's to
+record and the append-only rule forbids editing the row. It travels ANSWERED-BUT-ARMED.
+
+## P4.8 WHAT REMAINS, NAMED
+
+1. **The laptop's own `kuzu_nessie_db*` directory** (~47 MB, gitignored, in the MAIN workspace) is
+   the issuer's act at the drain (Andrew's word @`61d5ef55dd`), never this worker's. This branch
+   proves the CODE no longer reads it.
+2. **`comp_debt.py:215`'s stitch open** is FWD-7 territory and the issuer's placed manifest row.
+   The stitch store now has a READER and no WRITER on this branch.
+3. **The documentation residue** in P4.6(2): two carriers inside this order's `<paths>`
+   (`tool_index.py`, `comp_aws_cli.py`), two outside (`comp_similar.py:591`,
+   `graph-call-manifest.yaml`). A single narrow order closes all four.
+4. **Cost attribution on graph nodes** -- the capability `kuzu_cost_enrich.py` stood for -- is
+   PLACED by `1.0.0_SA_CTO` at L10 as a producer-side manifest row, lane `0.8.0_AE_CloudComp`.
