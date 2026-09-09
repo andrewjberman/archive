@@ -1,0 +1,95 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_REPORT.TO-RP-s-2",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/decompositions/NFRA_REPORT_DECOMP.md",
+  "vintage_commit": "7d698685fe2f2f76bd830c4f8e981e1b039b8a3d",
+  "to_ref": "org/missions/D12/NFRA/NFRA_REPORT/task-orders/NFRA_REPORT.TO-RP-s-2.row-structure-and-per-row-delta.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/prd/NFRA_REPORT_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "17c153a1cb88c2d4f9c357c663300f929d63faa4"
+ },
+ "assignee": "0.9.0_WK_NFRA_REPORT~1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ROW_STRUCTURE.md",
+   "kind": "doc",
+   "commit_or_etag": "18bc010a7cb433eb9d0a298fba3ba42a60cd9f60",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commit_or_etag is the git BLOB sha (git hash-object <path>, content-addressed and independent of which commit carries it) so the citation resolves even before this commit exists. Verifiable post-commit via: git show <this commit>:org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ROW_STRUCTURE.md | git hash-object --stdin -- must equal 18bc010a7cb433eb9d0a298fba3ba42a60cd9f60. Documentation artifact (the report's per-row delta rule), no live-infra deploy scope."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- grep -c -E 'worse|better|unchanged' ROW_STRUCTURE.md; expect a count of 3 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -E 'worse|better|unchanged' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ROW_STRUCTURE.md",
+   "output_evidence": "grep -c output: 25 (rc=0) -- 25 lines carry at least one of the three delta directions, well above the 3-line floor. Re-run twice, identical both times (see controls.determinism).",
+   "denominator": "25 matching lines out of 112 total lines in the file; expectation was >=3",
+   "status": "PASS",
+   "expect": "output: ([3-9]|[1-9][0-9]+)\\b"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- grep -c -i 'per row' ROW_STRUCTURE.md; expect a count of 1 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i 'per row' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ROW_STRUCTURE.md",
+   "output_evidence": "grep -c output: 3 (rc=0) -- 3 lines state the delta is PER ROW (case-insensitive), above the 1-line floor. Re-run twice, identical both times (see controls.determinism).",
+   "denominator": "3 matching lines out of 112 total lines in the file; expectation was >=1",
+   "status": "PASS",
+   "expect": "output: ([1-9][0-9]*)\\b"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two mutants run against scratch copies of ROW_STRUCTURE.md (never against the committed file) to prove AC1 and AC2 CAN fail. Mutant A: truncated the file to its first 5 lines (frontmatter only, before the delta vocabulary appears) and re-ran AC1's exact invocation. Mutant B: case-insensitively replaced every 'per row' with 'per-item' and re-ran AC2's exact invocation.",
+   "expected": "Mutant A must drop AC1's count below 3. Mutant B must drop AC2's count to 0, below the required 1.",
+   "observed": "Mutant A: grep -c -E 'worse|better|unchanged' on the 5-line truncation returned 0 (rc=1, no match) -- would FAIL AC1's >=3 bound. Mutant B: grep -c -i 'per row' on the substituted copy returned 0 (rc=1, no match) -- would FAIL AC2's >=1 bound. Both mutants fired as designed.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC2's exact invocations run twice in succession against the unmodified committed-content file (before commit, on the working-tree bytes that became the commit), output compared byte-for-byte.",
+   "observed": "Run 1: AC1=25, AC2=3. Run 2: AC1=25, AC2=3. Identical both times.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No report-level rollup, subject-line summary or VERDICT computation is built or amended by this cell.",
+   "reason": "RP-s-2 mirrors PRD manifest row S2, whose ACT is the row STRUCTURE and its PER-ROW delta -- not the aggregate. S4 (RP-s-4, downstream, depends on RP-s-1+RP-s-2) owns the VERDICT rule and must build it FROM these per-row deltas. Replacing the old max()-over-eight-rows rollup with a NEW aggregate here would repeat exactly the defect this cell exists to retire (bound: 'a max() over rows is the defect being replaced, not a template to follow')."
+  },
+  {
+   "item": "No severity order is asserted among BLIND, INERT, COARSE and UNCHECKED relative to one another.",
+   "reason": "Declared as a limit in ROW_STRUCTURE.md Sec 2 rule 2 rather than invented: ruling 12 orders OK<DEGRADED<BREACH by its own definitions ('outside standard, contained' vs 'NOT contained') and this cell reuses that order verbatim, but ruling 12 defines no comparable order among the four non-CHECKED, non-DENY-BY-DESIGN values, and manufacturing one would be a value judgment this cell was not chartered to make. Rows in that case still render `unchanged` on the delta, with the row's own Reason field naming which specific value it holds."
+  }
+ ],
+ "surprises": [],
+ "session_log": "N/A -- worker subagent (0.9.0_WK_NFRA_REPORT~1) per CLAUDE.md rule 27: 'a worker's write surface is exactly the <paths> its non-terminal order names ... and it writes no telemetry (L7 reads from git)'. This TO's <paths> names no logs/ surface. The git commit history on branch wk-NFRA_REPORT-1b is the record.",
+ "compiler_tools": [
+  {
+   "tool": "grep",
+   "invocation": "the two AC1/AC2 invocations verbatim from the TO's <proof_of_spec>, each under timeout 120, run against org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ROW_STRUCTURE.md",
+   "result": "AC1=25, AC2=3. Both rc=0. Re-run twice for determinism (see controls.determinism)."
+  },
+  {
+   "tool": "git hash-object",
+   "invocation": "git hash-object org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ROW_STRUCTURE.md",
+   "result": "18bc010a7cb433eb9d0a298fba3ba42a60cd9f60 -- used as the content-addressed commit_or_etag for the doc artifact row."
+  },
+  {
+   "tool": "python (ad hoc, scratch-only)",
+   "invocation": "constructed .scratch/mutant_ac1_truncated.md (head -n 5) and .scratch/mutant_ac2_stripped.md (case-insensitive 'per row' -> 'per-item' substitution) -- both untracked, never committed, used only to fire the mutant control",
+   "result": "see controls.mutant -- both mutants dropped their respective counts to 0, below the TO's stated floor, proving AC1/AC2 discriminate a broken document from this one"
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/NFRA_REPORT.TO-RP-s-2.row-structure-and-per-row-delta.proof_of_spec.json AC1,AC2",
+   "result": "run after this instance was written; see this deliverable's WORKER REPORT for the printed rc and denominator"
+  }
+ ]
+}
