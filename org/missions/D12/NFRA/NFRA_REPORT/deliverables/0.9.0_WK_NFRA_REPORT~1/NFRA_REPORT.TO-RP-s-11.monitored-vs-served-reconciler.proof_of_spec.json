@@ -1,0 +1,97 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_REPORT.TO-RP-s-11",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/decompositions/NFRA_REPORT_DECOMP.md",
+  "vintage_commit": "7d698685fe2f2f76bd830c4f8e981e1b039b8a3d",
+  "to_ref": "org/missions/D12/NFRA/NFRA_REPORT/task-orders/NFRA_REPORT.TO-RP-s-11.monitored-vs-served-reconciler.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/prd/NFRA_REPORT_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "393efbe8fbcd5113ae5b5995495f3fc0e710d357"
+ },
+ "assignee": "0.9.0_WK_NFRA_REPORT~1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/MONITORED_VS_SERVED.md",
+   "kind": "doc",
+   "commit_or_etag": "d339e53a8fcc0272b7a25319834d76466df74773",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commit_or_etag is the git BLOB sha (git hash-object <path>, content-addressed, resolvable before this commit exists). Verifiable post-commit via: git show <this commit>:org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/MONITORED_VS_SERVED.md | git hash-object --stdin -- must equal d339e53a8fcc0272b7a25319834d76466df74773. Documentation artifact (a read-only reconciliation); no alarm, topic or monitor was created -- every underlying fact came from comp-find --corpus aws READ queries against the live AWS plane."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- bash .tools/comp-find '.' --corpus aws IAM_ROLE --limit 5; expect output containing the word VINTAGE followed by a date, not the literal 'VINTAGE: UNREAD'.",
+   "method": "command",
+   "invocation": "timeout 120 bash .tools/comp-find '.' --corpus aws IAM_ROLE --limit 5",
+   "output_evidence": "LITERAL INVOCATION AS WRITTEN: rc=2, '.tools/comp-find: line 5: ...: command not found' / 'line 6: syntax error near unexpected token ('  -- .tools/comp-find is a Python script (#!/usr/bin/env python3), and bash cannot execute it; this is an interpreter mismatch, not a data-dependent failure (reproduced twice, byte-identical). Filed as surprise NFRA_REPORT-Z-W1-S3. || SUBSTANTIVE EVIDENCE, using the intended tool correctly invoked (the ~/bin/comp-find shim CLAUDE.md's own mechanism names): 'timeout 120 comp-find . --corpus aws IAM_ROLE --limit 5' -> rc=0, 'VINTAGE: Built from the estate as of 2026-09-09 21:05:17 UTC. Stitch source: stitch-codebuild built 2026-09-09T19:55:00Z.  manifest: 09be45b5ff92', 'DENOMINATOR: 219 hit(s) across 219 aws node(s) scanned [corpus=aws types=IAM_ROLE]'. VINTAGE is present, carries a real UTC date, and is NOT the literal string 'VINTAGE: UNREAD' -- the criterion's actual expectation is met by the named tool. Re-run twice, identical both times.",
+   "denominator": "1 of 1 literal invocation attempted (failed, interpreter mismatch, not data-dependent); 1 of 1 corrected invocation attempted (succeeded); AC1 graded on the corrected invocation's output per status_reason",
+   "status": "PASS",
+   "status_reason": "The invocation AS LITERALLY WRITTEN in the TO cannot execute under any circumstance (a shell/interpreter mismatch: bash cannot run a Python script), so it was filed as surprise NFRA_REPORT-Z-W1-S3 rather than silently corrected. Graded on the corrected, functionally-identical invocation using the SAME named tool (comp-find) via its documented shim, which is what the criterion's own expectation text (VINTEAGE present, not the literal 'VINTAGE: UNREAD') is substantively testing. This mirrors the general Surprise protocol ('an invocation does not produce the named result' -> file a row, keep working) rather than either silently substituting without a citable record, or failing a criterion whose only defect is a stray 'bash ' prefix on a Python script path."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- grep -c -i -E 'FWD-10' MONITORED_VS_SERVED.md; expect a count of 1 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i -E 'FWD-10' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/MONITORED_VS_SERVED.md",
+   "output_evidence": "grep -c output: 5 (rc=0) -- 5 lines carry 'FWD-10' (case-insensitive), above the 1-line floor. Re-run twice, identical both times (see controls.determinism).",
+   "denominator": "5 matching lines out of 148 total lines in the file; expectation was >=1",
+   "status": "PASS",
+   "expect": "FWD-10"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC1's own literal-vs-corrected pair is itself a control: the literal invocation deterministically fails (interpreter mismatch) regardless of AWS state, proving the criterion COULD fail (and does, verbatim, every time) -- it is not a tautology. For AC2, a scratch copy replaced every 'FWD-10' with 'ZZZ-10' and AC2's exact invocation was re-run.",
+   "expected": "The FWD-10-stripped copy must drop AC2's count to 0, below the required 1.",
+   "observed": "AC1: literal invocation rc=2 both times run (reproduced), corrected invocation rc=0 both times run, byte-identical VINTAGE line both times. AC2 mutant: grep -c -i -E 'FWD-10' on the stripped copy returned 0 (rc=1) -- would FAIL AC2's >=1 bound. Fired as designed.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC2's exact invocation and the corrected AC1 invocation each run twice in succession against the unmodified committed-content file / live AWS plane, output compared.",
+   "observed": "AC2: Run 1 = 5, Run 2 = 5, identical. AC1 (corrected): both runs returned the identical VINTAGE line (2026-09-09 21:05:17 UTC, manifest 09be45b5ff92) and DENOMINATOR (219 hits/219 nodes) -- the served graph did not change between reads.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No new alarm, monitor, or notification was created for any UNWATCHED surface found (E1DHJH4Y1W8YC2, sentiment-query-api, trade-submission-api).",
+   "reason": "The standing alerting/monitor moratorium binds this cell exactly as it bound RP-s-6; this cell reads and reports, it does not remediate. All three findings filed as surprise row NFRA_REPORT-Z-W1-S4 (ARMED) for visibility beyond this deliverable."
+   },
+  {
+   "item": "The API-gateway UNWATCHED verdicts (sentiment-query-api, trade-submission-api) are not held to the same confidence as the CloudFront verdict.",
+   "reason": "Measured and declared in MONITORED_VS_SERVED.md Sec 3b: the API-gateway match is a NAME/ID SUBSTRING search, weaker than the CloudFront case's exact DistributionId structural dimension match. Both are positive-controlled (a sibling surface is found by the identical method), but the API-gateway method could miss an alarm targeting the same Lambda under an unrelated name."
+  },
+  {
+   "item": "Gold-layer served artifacts are not individually re-walked for monitoring coverage in this cell.",
+   "reason": "RP-s-7's own finding (surprise row NFRA_REPORT-Z-W1-S1) established that comp-blast cannot see the GOLD_SCRIPT<->Lambda/portal edge at all; running that check anyway and reporting a result would be reporting instrument blindness as a world finding, exactly the trap the coordinator named. Rendered INSTRUMENT-CANNOT-SEE as a class rather than walked artifact-by-artifact."
+  }
+ ],
+ "surprises": [
+  "NFRA_REPORT-Z-W1-S3: RP-s-11's AC1 invocation as literally written ('bash .tools/comp-find ...') fails rc=2 because .tools/comp-find is a Python script, not a bash script -- the working form is the shimmed comp-find.",
+  "NFRA_REPORT-Z-W1-S4: two live, undeclared API Gateways (including one named 'trade-submission-api') and one live, declared CloudFront distribution match zero of the estate's 51 CloudWatch alarms, positive-controlled against siblings that do match."
+ ],
+ "session_log": "N/A -- worker subagent (0.9.0_WK_NFRA_REPORT~1) per CLAUDE.md rule 27: 'a worker's write surface is exactly the <paths> its non-terminal order names ... and it writes no telemetry (L7 reads from git)'. This TO's <paths> names no logs/ surface. The git commit history on branch wk-NFRA_REPORT-1f is the record.",
+ "compiler_tools": [
+  {
+   "tool": "comp-find --corpus aws",
+   "invocation": "comp-find . --corpus aws IAM_ROLE --limit 5 (AC1); comp-find . --corpus aws CLOUDFRONT_DISTRIBUTION --all; comp-find . --corpus aws API_GW --all; comp-find . --corpus aws LOAD_BALANCER --all; comp-find 'DistributionId'/'<name-or-id>' --corpus aws CW_ALARM --all (per candidate)",
+   "result": "Live AWS-plane reads, all bounded by node_type pathspec, all completed in <3s each (well under the 120s outer ceiling). Vintage carried on every call: 2026-09-09 21:05:17 UTC, manifest 09be45b5ff92. Established the WATCHED/UNWATCHED specimens in MONITORED_VS_SERVED.md Sec 3."
+  },
+  {
+   "tool": "git hash-object",
+   "invocation": "git hash-object org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/MONITORED_VS_SERVED.md",
+   "result": "d339e53a8fcc0272b7a25319834d76466df74773 -- used as the content-addressed commit_or_etag for the doc artifact row."
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/NFRA_REPORT.TO-RP-s-11.monitored-vs-served-reconciler.proof_of_spec.json AC1,AC2",
+   "result": "run after this instance was written; see this deliverable's WORKER REPORT for the printed rc and denominator"
+  }
+ ]
+}
