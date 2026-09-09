@@ -1,0 +1,101 @@
+NFRA_CLDGRPH.TO-CG-F-3 (CG-s-23) -- DELIVERABLE STEP 1
+THE EXIT 2 REPRODUCED ON THE SNAPSHOT AS PULLED, BEFORE ANY FIX
+Measured by 0.9.0_WK_NFRA_CLDGRPH~2 on 2026-09-09 between 18:23Z and 18:33Z,
+BEFORE the re-push (18:47:04Z) and BEFORE the derive_stitch repair (de590a7d02).
+
+ASIS_RC=2
+ASIS_CAUSE=GRAIN_SENTINEL
+ASIS_PORTAL_SRC_FILES=0
+
+HOW EACH NUMBER WAS TAKEN
+
+ASIS_RC=2
+  Two instruments, different planes, same answer.
+  (1) THE CLOUD'S OWN READING -- CloudWatch log of the rule-initiated build
+      opal-stitch-produce:3a5b2473-f46a-490a-ae5e-874a96c90b16 (72 events,
+      2026-09-09T03:00:17Z .. 03:01:07Z):
+        "Command did not exit successfully python3 infra/aws/globgrph/
+         derive_stitch.py --out /tmp/stitch_graph.json exit status 2"
+        "Phase context status code: COMMAND_EXECUTION_ERROR"
+  (2) THIS SEAT'S RUN OF THE SNAPSHOT'S OWN BYTES -- the July source.zip pulled
+      by s3api get-object, unzipped to .scratch/f3_asis_tree (7905 of 7905
+      entries, 0 errors), and its OWN infra/aws/globgrph/derive_stitch.py run
+      from that tree with --out .scratch/f3_asis_graph.json: shell rc 2.
+      NOT HEAD's bytes: the cause is diagnosed on the snapshot, per the order.
+
+ASIS_CAUSE=GRAIN_SENTINEL
+  NOT argparse, NOT an import failure. derive_stitch.main() returns 2 on exactly
+  one branch. CITED AT THE SNAPSHOT'S OWN VINTAGE, NOT HEAD'S -- the July zip's
+  copy is 255 lines and returns 2 at :238 under the print at :237, where HEAD's
+  copy is 267 lines and returns 2 at :248; reading the line numbers off HEAD
+  would have been the wrong grain for this claim, and the two files are not the
+  same bytes. The branch: run_grain_sentinel not passed ->
+  "ERROR: GRAIN_SENTINEL_FAIL -- refusing to emit grain-violating stitch graph". Both readings end on that literal line, and the cloud log shows
+  the derive ran far enough to print the snapshot key, the union counts and the
+  stitch stats first -- an argparse exit 2 would print a usage line and nothing
+  else, and an import failure would print a traceback and never reach the union.
+
+  The 8 violation groups, IDENTICAL in the cloud log and in this seat's local
+  run (the discriminating agreement -- same 8 classes, same counts, same ratios):
+    EXTERNAL_ENDPOINT    0 vs 3     0.00x
+    REACT_QUERY_KEY      0 vs 32    0.00x
+    SQS_QUEUE           19 vs 4     4.75x
+    PORTAL_COMPONENT     0 vs 27    0.00x
+    ECS_TASK_DEFINITION  9 vs 2     4.50x
+    SCHEDULE            18 vs 3     6.00x
+    API_ROUTE           86 vs 263   0.33x
+    IAM_USER             4 vs 1     4.00x
+
+  TWO CAUSES, ONE EXIT CODE, and the July zip carries both:
+  (a) THE PORTAL LAYER IS ABSENT. 0 files under portal/src (below). That is the
+      exact class .github/workflows/stitch-source-push.yml:53-61 records in its
+      own comment ("the zip below silently packed 0 files from portal/src for
+      every run since this workflow landed ... GRAIN-SENTINEL caught it
+      2026-07-07 (REACT_QUERY_KEY 0/32, PORTAL_COMPONENT 0/27, API_ROUTE
+      77/263)"). It accounts for REACT_QUERY_KEY, PORTAL_COMPONENT and API_ROUTE.
+  (b) THE ZIP'S grain_baseline.json IS THE PRE-07-25 ONE. The zip carries
+      org/modules/graph/grain_baseline.json with ONE recertification block
+      (2026-06-11) and EXTERNAL_ENDPOINT 3 / SQS_QUEUE 4 / ECS_TASK_DEFINITION 2
+      / SCHEDULE 3 / IAM_USER 1 / REACT_QUERY_KEY 32. HEAD's file carries EIGHT
+      recertification blocks and 0 / 12 / 7 / 10 / 4 / 85 -- the 2026-07-25
+      CTO-gated recalibration. So five of the eight groups are the STALE
+      BASELINE inside the July zip, not a live regression: the same estate read
+      against HEAD's baseline is inside the band.
+      This is why the fix for the EXIT 2 is the RE-PUSH and no code change: the
+      zip carries both the missing portal layer and the stale baseline, and HEAD
+      carries the repair for both. It is NOT the whole repair -- a HEAD-built zip
+      clears the sentinel and then returns 1 on 5 phantom dangling edges, which
+      CodeBuild also fails; that SECOND failure mode is a code cause inside the
+      grant and is fixed at de590a7d02. See CG-s-23.stitch-producer-repaired.result.md.
+
+ASIS_PORTAL_SRC_FILES=0
+  python zipfile over the pulled bytes: 7905 entries, 0 beginning "portal/",
+  0 beginning "portal/src/". Top-level split: infra 6791, data 587, org 366,
+  .tools 160, stitch_source_sha.txt 1.
+  The zip's stitch_source_sha.txt = 81064fbcae6dbf440d516eee067554f6a192becd
+  (the July HEAD it was cut from).
+
+THE OBJECT AS PULLED (s3api head-object + get-object, before the re-push)
+  LastModified   Tue, 07 Jul 2026 13:46:19 GMT
+  ContentLength  156995002
+  ETag           "5e8011947ede9e0e253dc3a64d36d479-19"
+
+WHAT THE LOCAL RUN COULD AND COULD NOT REPRODUCE
+  REPRODUCED: the exit code (2), the failing branch (GRAIN_SENTINEL_FAIL), all 8
+  violation groups with identical counts, the union counts (28918 nodes / 60834
+  edges -- byte-identical to the cloud's line), the same 5 dangling-edge lines.
+  DIFFERED, and MEASURED rather than assumed: the local Python is 3.12 with this
+  seat's own AWS credentials; the cloud's is the CodeBuild image's python3 under
+  the build role, whose policy is logs + S3 only (stitch-produce.tf:95-123). So
+  the cloud log carries the extract_event_invoke WARN TWICE ("live-derived invoke
+  edges ... NOT verified this build (no creds / AWS unreachable)") and the local
+  run carries it ZERO times (grep count 0 of 24 lines); the local run instead
+  carries 4 SyntaxWarning lines the cloud's python3 does not emit. NEITHER
+  difference touches the verdict: both runs printed the SAME union counts
+  (28918 nodes / 60834 edges), the SAME 5 dangling lines and the SAME 8 sentinel
+  groups, because the AWS layer both read is one object --
+  snapshots/20260909/graph-20260909.tar.gz -- and the grain sentinel is fed from
+  it and from the zip's own code layer, neither of which the invoke-edge
+  extractor contributes to.
+  THE LOG IS THE CLOUD'S OWN READING and is what the cause is named from; the
+  local run is the corroborating second instrument, not the primary.
