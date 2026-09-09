@@ -1,0 +1,240 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-8",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~1",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-8.the-one-terminal-ses-send.md",
+    "group": "OTHER",
+    "vintage_commit": "2baa6af162d7cad88f91fc59fd15f6b0b113f26f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "5376ecaa8bdbf0f775cb347c2ba849bfba67afb9",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-8.the-one-terminal-ses-send.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-one-terminal-ses-send.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "d0edf02b28864ca9a36e70fe061154e178f4cb14",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "APPLIED BY TARGET (-target=aws_lambda_function.orchestrator) after the issuer normalized the etfs-reports .tf tree to LF (row S2: the earlier aws_instance.reporter drift was a CRLF-checkout artifact, not real). Targeted plan: 0 to add, 1 to change, 0 to destroy; apply rc=0 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.'; served CodeSha256 stq9kk/+gatkLr7F/ldLzduW+i03aUCrx1ZG91wJWgY= == built zip's base64 sha256 (S8-AC6 MATCH); targeted 0-diff -detailed-exitcode rc=0; live terminal_qa invoke returned {\"mode\":\"terminal_qa\",...} (S8-AC7)."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/etfs-reports-orchestrator/test_terminal_send.py",
+      "kind": "test",
+      "commit_or_etag": "b124e0223bd6e7faec59aad30db27c93fe4d4f34",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5/5 passed locally, re-run clean after the --gate edit; NOT packaged (archive_file zips only lambda_function.py per the source map); boto3 clients stubbed at module level, zero real AWS calls."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/orchestrator_served_vs_built.py",
+      "kind": "script",
+      "commit_or_etag": "b124e0223bd6e7faec59aad30db27c93fe4d4f34",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local verify-only script; one live get-function-configuration read, no write. Re-run post-apply: VERDICT: MATCH."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-one-terminal-ses-send.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Result document; no deploy surface of its own."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260905T0550Z_etfs-guardrail-eg-s-8-orchestrator-terminal-send_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Ledger entry OPENED (commit d0edf02b28, before the apply) and CLOSED (this commit) after the get-function-configuration proof and the targeted 0-diff; python .tools/deploy_ledger.py close --slug etfs-guardrail-eg-s-8-orchestrator-terminal-send -> 'CLOSED ... all 1 legs proven; sentinel removed'."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "ee6e7e058032a03aec46f748da19bb0b76be8ddc",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "record-terraform-deploy.sh etfs-reports --function etfs-reports-orchestrator --author ... ; commit ee6e7e0580 'ci: record deploy etfs-reports @ d0edf02b [skip ci]', exactly 2 files (this + CHANGELOG.json below), both in-grant, confirmed via git show --stat."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/etfs-reports/CHANGELOG.json",
+      "kind": "config_data",
+      "commit_or_etag": "ee6e7e058032a03aec46f748da19bb0b76be8ddc",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Written by record-terraform-deploy.sh in the same commit as the source map row; under infra/aws/terraform/etfs-reports/, which is in this order's <paths> grant."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S8-AC1",
+      "criterion_verbatim": "the five-arm battery is green (record N passed).",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/etfs-reports-orchestrator/test_terminal_send.py -q",
+      "output_evidence": "5 passed in 0.32s (re-run after the --gate edit; arms unaffected)",
+      "denominator": "5 of 5 arms passed: (a) unresolved present -> one send naming all fields, (b) unresolved absent -> zero sends + alert unchanged, (c) terminal_qa no SES call, (d) absence_check no SES call, (e) only send_correction is a real-sending mode besides the terminal path",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S8-AC2",
+      "criterion_verbatim": "exactly three send call sites exist after this order (the two existing plus the terminal one) and the file creates no topic.",
+      "method": "command",
+      "invocation": "python -c \"import re; s=open('infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py').read(); print('SEND_CALL_SITES=%d NEW_TOPICS=%d' % (len(re.findall(r'send_raw_email\\(', s)), len(re.findall(r'create_topic\\(', s))))\"",
+      "output_evidence": "SEND_CALL_SITES=3 NEW_TOPICS=0",
+      "denominator": "3 of 3 expected send call sites; 0 of 0 topic-creation calls",
+      "expect": "SEND_CALL_SITES=3 NEW_TOPICS=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S8-AC3",
+      "criterion_verbatim": "the commit gate is clean.",
+      "method": "command",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py infra/aws/lambda/etfs-reports-orchestrator/test_terminal_send.py",
+      "output_evidence": "OK: pre-commit gate clean for 2 of 2 file(s) (re-run after the --gate edit)",
+      "denominator": "2 of 2 files clean",
+      "expect": "pre-commit gate clean",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S8-AC4",
+      "criterion_verbatim": "the TARGETED plan changes EXACTLY aws_lambda_function.orchestrator (source hash): 0 to add, 1 to change, 0 to destroy. Any other resource in the targeted plan -> do NOT apply, BLOCKING row. (Face carries the corrected drift story per row ETFS_GUARDRAIL-S2 in place of the original July-deferral story; invocation/expect unchanged.)",
+      "method": "command",
+      "invocation": ".tools/terraform.exe -chdir=infra/aws/terraform/etfs-reports plan -no-color -input=false -lock=false -target=aws_lambda_function.orchestrator (post row-S2 LF-normalization of the .tf tree)",
+      "output_evidence": "Plan: 0 to add, 1 to change, 0 to destroy -- only aws_lambda_function.orchestrator's source_code_hash. aws_instance.reporter shows NO change (confirms row S2's finding: the earlier 'drift' was a CRLF-checkout artifact, not real -- file infra/aws/terraform/etfs-reports/instance.tf now reads ASCII text, git diff --ignore-cr-at-eol is 0 lines).",
+      "denominator": "1 of 1 resource changed in the targeted plan (down from 2, after the LF-normalization)",
+      "expect": "1 to change",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S8-AC5",
+      "criterion_verbatim": "0-diff on the TARGETED plan after the apply (HALT_ACK=1 .tools/safe-apply.sh ... apply ... -target=aws_lambda_function.orchestrator, run only after AC4's targeted plan read exactly one resource).",
+      "method": "command",
+      "invocation": "python .tools/deploy_ledger.py open --slug etfs-guardrail-eg-s-8-orchestrator-terminal-send ... (committed d0edf02b28 before the apply) ; HALT_ACK=1 .tools/safe-apply.sh -chdir=infra/aws/terraform/etfs-reports apply -input=false -auto-approve -target=aws_lambda_function.orchestrator ; .tools/terraform.exe -chdir=infra/aws/terraform/etfs-reports plan ... -target=aws_lambda_function.orchestrator -detailed-exitcode ; bash infra/aws/lambda/ci/record-terraform-deploy.sh etfs-reports --function etfs-reports-orchestrator --author ... ; python .tools/deploy_ledger.py close-leg ... ; close",
+      "output_evidence": "Apply: comp-tagauthz PASSED, tombstone-gate CLEAN, 'Plan: 0 to add, 1 to change, 0 to destroy', 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.'. Targeted 0-diff: rc=0, 'No changes. Your infrastructure matches the configuration.'. record-terraform-deploy.sh: 'stamped 1 of 1 rows under etfs-reports', commit ee6e7e0580 (2 in-grant files only). Ledger: opened d0edf02b28, closed this commit, 'all 1 legs proven; sentinel removed'.",
+      "denominator": "1 of 1 apply targeted and applied; 1 of 1 targeted 0-diff clean (rc=0); 1 of 1 ledger leg proven and closed; 1 of 1 source-map record committed with 0 out-of-grant files",
+      "expect": "rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S8-AC6",
+      "criterion_verbatim": "the served CodeSha256 equals the base64 sha256 of the zip Terraform built; your script prints the two values and the one verdict line.",
+      "method": "command",
+      "invocation": "python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/orchestrator_served_vs_built.py",
+      "output_evidence": "SERVED_CODE_SHA256: stq9kk/+gatkLr7F/ldLzduW+i03aUCrx1ZG91wJWgY=\nBUILT_ZIP_SHA256_B64: stq9kk/+gatkLr7F/ldLzduW+i03aUCrx1ZG91wJWgY=\nVERDICT: MATCH",
+      "denominator": "2 of 2 hash values printed and compared, equal",
+      "expect": "VERDICT: MATCH",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S8-AC7",
+      "criterion_verbatim": "the deployed function's SEND-FREE rehearsal runs live and returns the built message's fields (no email is sent; the .tools/aws shim is CLI v1 -- if --cli-binary-format is refused as unknown, drop the flag and pass the payload as a plain JSON string; record the exact form that ran).",
+      "method": "command",
+      "invocation": ".tools/aws lambda invoke --function-name etfs-reports-orchestrator --cli-binary-format raw-in-base64-out --payload \"{\\\"mode\\\":\\\"terminal_qa\\\",\\\"month\\\":\\\"2026-08\\\"}\" /dev/stdout (REFUSED: 'Unknown options: --cli-binary-format'); form that ran: .tools/aws lambda invoke --function-name etfs-reports-orchestrator --payload \"{\\\"mode\\\":\\\"terminal_qa\\\",\\\"month\\\":\\\"2026-08\\\"}\" .scratch/terminal_qa_invoke_out.json",
+      "output_evidence": "StatusCode 200; {\"mode\": \"terminal_qa\", \"month\": \"2026-08\", \"subject\": \"URGENT: ETF month-end 2026-08 -- 0 date(s) unresolved after remediation\", \"to\": \"andrew@opalinvest.com\", \"body_head\": \"The ETF ownership coverage ladder for 2026-08 could not resolve 0 date(s) after every rung ran (probe, re-run the producer, re-check).\", \"ok\": true}",
+      "denominator": "1 of 1 live invocation succeeded (after dropping the refused v1-incompatible flag, as the criterion's own fallback names); no email sent (no coverage_unresolved.json exists yet for 2026-08 -- consistent with EG-s-4's holes=0 finding)",
+      "expect": "\"mode\": \"terminal_qa\"",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S8-AC8",
+      "criterion_verbatim": "graded by the CVO at L9: the send fires only from the terminal failure branch, exactly once, to andrew@ only, with dates/partner/provider a person can act on without a follow-up; no schedule, no topic, no alarm, no polling was added; the carve-out's width is not exceeded. FWD-7's EXERCISED grade needs a REAL terminal failure ... record the rehearsal and say so. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "source read of _run's refusal branch (the one call site of _send_terminal_unresolved); S8-AC2's byte census; test arms (a),(b); the LIVE terminal_qa rehearsal output (S8-AC7) as the strongest available evidence absent a real terminal failure",
+      "output_evidence": "RECORDED in org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-one-terminal-ses-send.result.md section 9: (1) the send is called from exactly one place, gated on the terminal branch AND a non-empty unresolved list; (2) every field appears in the email body, confirmed both locally (arm a) and live (S8-AC7's subject/body_head); (3) NEW_TOPICS=0, the only Terraform change applied is a source_code_hash update to an EXISTING function on its EXISTING trigger, and --gate (S8-AC9) only changes what the existing scheduled command passes to the existing renderer; (4) checked against PRD s.0's STILL-BANNED list -- none present; (5) FWD-7's EXERCISED grade is explicitly NOT claimed -- the deploy landed and the rehearsal ran LIVE, which is the strongest evidence available short of a real ladder failure, honestly stated as RECORDED not EXERCISED.",
+      "denominator": "4 of 4 named properties addressed with citations; 1 of 1 live rehearsal cited as the strongest available evidence",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L6/L9: a judgment criterion carries its output and no self-graded verdict; 3.0.0_SA_CVO is the oracle at L9 and its grade lands in the adjudication row."
+    },
+    {
+      "criterion_id": "S8-AC9",
+      "criterion_verbatim": "MINTED BY THE ISSUER on row ETFS_GUARDRAIL-S3: _render_command passes --gate (deliverable item 5), the one-line seam between the orchestrator and EG-s-6's gate that neither face carried.",
+      "method": "command",
+      "invocation": "python -c \"s=open('infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py').read(); i=s.find('def _render_command'); j=s.find('return [', i); print('GATE_FLAG_IN_RENDER_COMMAND=%s' % ('--gate' in s[i:j]))\"",
+      "output_evidence": "GATE_FLAG_IN_RENDER_COMMAND=True",
+      "denominator": "1 of 1 flag present in the render command string",
+      "expect": "GATE_FLAG_IN_RENDER_COMMAND=True",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The send's load-bearing claim is 'the terminal SES call fires if and only if coverage_unresolved.json exists AND names at least one day'. Mutated the SAME _run() refusal branch across two calls: once with the artifact absent, once present naming 2 days -- everything else held fixed.",
+      "expected": "Absent: zero send_raw_email calls, alert unchanged. Present: exactly one send_raw_email call, Destinations=[andrew@opalinvest.com], body naming both days.",
+      "observed": "test_unresolved_absent_no_send_ordinary_alert_unchanged and test_unresolved_present_sends_exactly_one_naming_every_date both PASS with only the coverage-artifact presence differing -- FIRED-AS-EXPECTED. A second mutant on the deploy axis: the SAME served-vs-built script read MISMATCH before the apply and MATCH after, with only the live deploy action differing -- also FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest infra/aws/lambda/etfs-reports-orchestrator/test_terminal_send.py -q executed twice (before and after the --gate edit); the served-vs-built script and the targeted plan executed twice post-apply.",
+      "observed": "Both pytest runs: '5 passed'. Both post-apply served-vs-built runs: identical MATCH. Both post-apply targeted plans: identical 'No changes' (-detailed-exitcode rc=0 both times).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Committing the ~450 other .tf files' eol-only normalization the issuer applied across infra/aws/terraform/.",
+      "reason": "Per the issuer's explicit instruction: those files carry no content change (git diff --ignore-cr-at-eol is empty) and are not in this order's <paths> pathspec. Left as an unstaged worktree difference, untouched."
+    },
+    {
+      "item": "Row ETFS_GUARDRAIL-W1-S8's originally-declared exclusions (applying the Terraform edit, opening the ledger, S8-AC7's live invoke) are now superseded.",
+      "reason": "All three were completed this turn once the false-drift reading (row S2) was corrected and the --gate seam (row S3) was added. Row W1-S8 itself is not edited (append-only); its disposition is this ruling."
+    }
+  ],
+  "surprises": [
+    "ETFS_GUARDRAIL-W1-S8: S8-AC4's amended targeted-plan invocation initially did not isolate aws_lambda_function.orchestrator from what appeared to be a pre-existing aws_instance.reporter drift, because orchestrator.tf's REPORTER_INSTANCE_ID env var is a REAL Terraform dependency on aws_instance.reporter.id -- no -exclude flag existed in this terraform v1.9.8 to route around it. No apply was attempted at that time; S8-AC7's live invoke was also declined because it would have triggered a real production render on the undeployed (old) function. BLOCKING/INERT, no disarm owner (a stop, not a live hazard) -- DISPOSITIONED by the issuer's rulings on rows ETFS_GUARDRAIL-S2 (the drift was a CRLF-checkout artifact, corrected) and ETFS_GUARDRAIL-S3 (the --gate seam, S8-AC9). All criteria subsequently PASSED."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/etfs-reports-orchestrator/test_terminal_send.py -q",
+      "result": "5 passed, both before and after the --gate edit."
+    },
+    {
+      "tool": "python (byte census)",
+      "invocation": "python -c \"import re; ... SEND_CALL_SITES ... NEW_TOPICS ...\" ; python -c \"... GATE_FLAG_IN_RENDER_COMMAND ...\"",
+      "result": "3/0 and True respectively."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py infra/aws/lambda/etfs-reports-orchestrator/test_terminal_send.py",
+      "result": "clean, both runs."
+    },
+    {
+      "tool": "terraform.exe v1.9.8",
+      "invocation": "file instance.tf ; git diff --ignore-cr-at-eol instance.tf ; plan (untargeted, post-normalization) ; plan -target=aws_lambda_function.orchestrator ; apply -target=... ; plan -target=... -detailed-exitcode",
+      "result": "confirmed ASCII/LF and 0-line eol-only diff; untargeted and targeted plans both '1 to change'; apply '1 changed'; post-apply targeted plan 'No changes' rc=0."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open --slug etfs-guardrail-eg-s-8-orchestrator-terminal-send ... ; close-leg ... ; close ...",
+      "result": "OPENED (1 leg), CLOSED -- 'all 1 legs proven; sentinel removed'."
+    },
+    {
+      "tool": "record-terraform-deploy.sh",
+      "invocation": "bash infra/aws/lambda/ci/record-terraform-deploy.sh etfs-reports --function etfs-reports-orchestrator --author \"0.9.0_WK_ETFS_GUARDRAIL~1 <0.9.0_WK_ETFS_GUARDRAIL~1@opal.agent>\"",
+      "result": "stamped 1 of 1 rows; committed ee6e7e0580, exactly 2 in-grant files (verified via git show --stat)."
+    },
+    {
+      "tool": "python (orchestrator_served_vs_built.py)",
+      "invocation": "python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/orchestrator_served_vs_built.py",
+      "result": "MATCH, post-apply."
+    },
+    {
+      "tool": ".tools/aws lambda invoke",
+      "invocation": "with --cli-binary-format (refused, CLI v1) then without (succeeded)",
+      "result": "StatusCode 200; {\"mode\":\"terminal_qa\",...} returned live, no email sent."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 new row(s) of 16 total, carrying step-7/step-10 fields; corpus baseline unchanged."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance, long-stem name> S8-AC1,S8-AC2,S8-AC3,S8-AC4,S8-AC5,S8-AC6,S8-AC7,S8-AC8,S8-AC9",
+      "result": "run before the complete flip; result recorded in the report."
+    }
+  ]
+}

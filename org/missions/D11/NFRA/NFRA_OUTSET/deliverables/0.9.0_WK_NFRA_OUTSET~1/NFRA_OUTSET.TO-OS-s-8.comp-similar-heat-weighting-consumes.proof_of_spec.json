@@ -1,0 +1,157 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OUTSET.TO-OS-s-8.comp-similar-heat-weighting-consumes",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OUTSET~2",
+ "spec_ref": {
+  "doc": "org/missions/D11/NFRA/NFRA_OUTSET/task-orders/NFRA_OUTSET.TO-OS-s-8.comp-similar-heat-weighting-consumes.md",
+  "group": "OTHER",
+  "vintage_commit": "b630052d6a"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D11/NFRA/NFRA_OUTSET/decompositions/NFRA_OUTSET_DECOMP.md",
+  "vintage_commit": "6f1655f376",
+  "to_ref": "org/missions/D11/NFRA/NFRA_OUTSET/task-orders/NFRA_OUTSET.TO-OS-s-8.comp-similar-heat-weighting-consumes.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/modules/graph/debtscan/comp_similar.py",
+   "kind": "script",
+   "commit_or_etag": "fe1d295bc4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the comp-similar engine module the .tools/comp-similar shim invokes directly; a repo-local CLI engine with no S3/Lambda deploy surface and not a deploy-scope path under Rule 13. Landed at fe1d295bc4 on branch wk-OUTSET-2; this proof rides the following commit.",
+   "introduces": [
+    "_BAND_RANK",
+    "def _merge_band",
+    "def _tool_argv",
+    "heat_banded",
+    "heat_args"
+   ],
+   "artifact_covered_by": ["O8-AC1", "O8-AC2"]
+  },
+  {
+   "path_or_key": ".tools/tests/test_os8_heat_consumed.py",
+   "kind": "test",
+   "commit_or_etag": "fe1d295bc4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "a directly-runnable test file (python .tools/tests/test_os8_heat_consumed.py, rc 0 on PASS); not a deploy-scope path. Landed at fe1d295bc4 on branch wk-OUTSET-2.",
+   "introduces": [
+    "def prefix_normalize_heat",
+    "def arm_exec",
+    "def arm_normalize",
+    "def arm_end_to_end"
+   ],
+   "artifact_covered_by": ["O8-AC1"]
+  },
+  {
+   "path_or_key": "org/missions/D11/NFRA/NFRA_OUTSET/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "fe1d295bc4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the project's append-only surprise channel; rows NFRA_OUTSET-W2-S1..W2-S6 appended by this worker across three commits (9766fe6d32 S1-S4, d7bfeb3ce7 S5, fe1d295bc4 S6); 14 rows before, 20 after. No existing row edited, reordered or dropped -- every append is a text splice, never a json.dump round trip. The pin names the LAST commit carrying a row of this worker's."
+  },
+  {
+   "path_or_key": "org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.9.0_WK_NFRA_OUTSET~1/comp-similar-heat-weighting-consumes.result.md",
+   "kind": "doc",
+   "commit_or_etag": "fe1d295bc4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the cell's result deliverable, at the exact path the task order's DELIVERABLE clause names. Landed at fe1d295bc4 on branch wk-OUTSET-2."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "O8-AC1",
+   "criterion_verbatim": "O8-AC1 -- a battery proving comp-similar's own output carries comp-heat's numbers, with a RED mutant restoring the empty-dict path. <invocation>python .tools/tests/test_os8_heat_consumed.py</invocation> <expect>PASS</expect>",
+   "method": "test_suite",
+   "invocation": "timeout 120 python .tools/tests/test_os8_heat_consumed.py",
+   "output_evidence": "=== OS-s-8 O8-AC1: comp-similar CONSUMES comp-heat (GREEN arms + RED mutants) ===\n  PASS  A1 exec GREEN (_tool_argv reaches comp-heat): comp-heat wrote 30551 freshness row(s) via _tool_argv; _run_json stdout parsed=False\n  PASS  A1 exec RED MUTANT (bare shim argv cannot reach comp-heat): bare argv raised OSError: [WinError 193] %1 is not a valid Win32 application -- exactly what _run_json swallowed into {}\n  PASS  A2 field GREEN (comp-heat 'band' is read): 51855 of 51855 heat key(s) carry a non-UNKNOWN data band from 30551 comp-heat row(s); source bands seen=['COLD', 'HOT', 'WARM']\n  PASS  A2 field RED MUTANT (pre-fix reader on the SAME bytes): pre-fix normalize_heat banded 0 of 25476 key(s) -- all UNKNOWN (denominator 30551 comp-heat rows)\n  PASS  A2 provenance (every emitted band is a comp-heat band): emitted=['COLD', 'HOT', 'WARM'] subset of comp-heat's own=['COLD', 'HOT', 'WARM']\n  PASS  A3 end-to-end GREEN (comp-similar output carries comp-heat's numbers): rc=0; heat_banded=208 of 1929 corpus resources; 8 of 8 candidate(s) cite a comp-heat band; heat_source=snapshot:<temp>/heat_full.json\n  PASS  A3 end-to-end RED MUTANT (pre-fix reader -> heat in name only): rc=0; heat_banded=0 of 1929 from 25476 key(s) offered; candidates=0\n  PASS  A3 end-to-end RED MUTANT (load path returns the empty dict): rc=0; heat_keys=0; heat_banded=0; candidates=0\n=== test_os8_heat_consumed: PASS (8/8) in 81.5s ===\nrc=0. Deciding line: '=== test_os8_heat_consumed: PASS (8/8) in 81.5s ==='.",
+   "denominator": "8 of 8 battery arms PASS (the battery prints its own denominator on its final line); 3 of 3 defects carry an EXECUTED RED mutant; the end-to-end arms run against 30551 real comp-heat freshness rows and the live 1929-resource corpus",
+   "status": "PASS",
+   "status_reason": "The <expect> string PASS is present and the battery exits rc 0. Regression, same session, same worktree: .tools/tests/test_comp_similar_battery.py -> 'comp-similar battery: PASS (12/12)' rc 0; bash .tools/comp-similar --self-test -> 'comp_similar self-test: PASS (11/11)' rc 0.",
+   "expect": "PASS"
+  },
+  {
+   "criterion_id": "O8-AC2",
+   "criterion_verbatim": "O8-AC2 -- QUOTE comp_similar.py:346 `load_heat_live` BEFORE and AFTER at file:line, plus one real comp-similar run showing heat numbers in its output -- or, if the empty path is correct by design, the DECLARATION saying so and why. Evidence. NO VERDICT.",
+   "method": "manual_read_with_citation",
+   "invocation": "git show HEAD:org/modules/graph/debtscan/comp_similar.py | sed -n '306,316p;339,347p;370,376p'  (BEFORE, read from the RECORD not the worktree) ; cat org/modules/graph/debtscan/comp_similar.py | grep -n 'def _tool_argv|def load_heat_live|heat_args|_tool_argv(REPO|heat_banded ='  (AFTER) ; timeout 120 python .tools/comp-heat freshness --json .scratch/ac2_heat.json --budget 60 ; timeout 120 bash .tools/comp-similar supersede --heat-json .scratch/ac2_heat.json --budget 90 --top 6",
+   "output_evidence": "BEFORE @79ec54bb37 -- comp_similar.py:346 'def load_heat_live(timeout=280, *, clock=None, deferred=None) -> dict:'; :367-368 'dbg = (_run_json([str(REPO / \".tools\" / \"comp-debris\"), \"--json\"], timeout=debris_timeout) if debris_timeout != 0 else None)'; :373-374 '_run_json([str(REPO / \".tools\" / \"comp-heat\"), \"freshness\", \"--json\", str(out_json)], timeout=heat_timeout)'; the swallow at :307-314 'def _run_json(cmd, timeout=180): try: p = subprocess.run(cmd, ...) ... except (subprocess.SubprocessError, OSError, ValueError): return None'; and beneath it :341-342 'base = os.path.basename(str(row[\"path\"]).rstrip(\"/\"))' / 'heat.setdefault(base, {}).setdefault(\"data\", _norm_band(row.get(\"class\", \"\")))'. THERE IS NO EARLY RETURN in load_heat_live: its control flow always reaches the comp-heat call. The empty dict is produced on the EXEC plane -- measured, this fabric: subprocess.run([str(REPO/'.tools'/'comp-heat'),'--help']) raises OSError [WinError 193] '%1 is not a valid Win32 application' (2 of 2 shims tried, 0 of 2 executed), _run_json catches OSError, out_json is never written, load_heat_live returns {}.\n\nAFTER (this commit) -- comp_similar.py:400 'def load_heat_live(timeout=280, *, clock=None, deferred=None) -> dict:'; :420-421 'dbg = (_run_json(_tool_argv(REPO / \".tools\" / \"comp-debris\", \"--json\"), timeout=debris_timeout) if debris_timeout != 0 else None)'; :429-435 'heat_args = [\"freshness\", \"--json\", str(out_json)] ... if heat_timeout is not None: heat_args += [\"--budget\", str(max(1, int(heat_timeout)))] ; _run_json(_tool_argv(REPO / \".tools\" / \"comp-heat\", *heat_args), timeout=heat_timeout)'; with _tool_argv at :323 (shebang-resolved interpreter: sys.executable for a python shim, .tools/git_bash_resolver.py bash_argv() for a bash shim), _merge_band at :158 (HOT-wins collision, order-free), the repaired join at :381-397 (reads 'band' with 'class' as a back-compat alias; keys under basename + stem + every path component + stem), and heat_banded at :853 (the corpus-join measurement).\n\nONE REAL RUN (rc=0):\nWITHIN BUDGET: scanned 1929 of 1929 ARN resource; budget: 90 s (flag), used 44.48 s\nheat: source=snapshot:.scratch/ac2_heat.json, 208 of 1929 corpus resources banded from 51861 heat key(s) (UNKNOWN heat -> never a candidate -- C3)\n=== superseded-twin candidates (advisory; verify before reap) [6] ===\n  [MEDIUM sim=1.002] yang-canon-interlock  ->replaced by->  yang-generate-peer-performance  cold{'data': 'COLD', 'invoke': 'UNKNOWN'}\n  [MEDIUM sim=1.002] yang-generate-correlation  ->replaced by->  yang-generate-peer-performance  cold{'data': 'COLD', 'invoke': 'UNKNOWN'}\n  [MEDIUM sim=1.002] yang-generate-etf-returns  ->replaced by->  yang-generate-peer-performance  cold{'data': 'COLD', 'invoke': 'UNKNOWN'}\n  [MEDIUM sim=1.002] yang-generate-factor-tilts  ->replaced by->  yang-generate-peer-performance  cold{'data': 'COLD', 'invoke': 'UNKNOWN'}\n  [MEDIUM sim=1.002] yang-generate-macro  ->replaced by->  yang-generate-peer-performance  cold{'data': 'COLD', 'invoke': 'UNKNOWN'}\n  [MEDIUM sim=1.002] yang-generate-macro-timeseries  ->replaced by->  yang-generate-peer-performance  cold{'data': 'COLD', 'invoke': 'UNKNOWN'}\nThe same invocation shape before the change printed 'heat: source=..., 30546 resources banded' and 0 candidates -- a confident zero from an all-UNKNOWN read.\n\nBOTH LIMBS OF THE 'or' ARE ANSWERED, because the criterion's two branches are not exclusive here. The empty-result path for the NAMED cause is GONE (the exec seam now reaches comp-heat and its numbers land in the output). A residual empty result is DECLARED rather than removed: --live-heat still returns {} if both subprocesses genuinely fail, and a snapshot that joins nothing still yields zero -- so the tool now prints 'HEAT READ BUT 0 OF <N> CORPUS RESOURCES BANDED (source=..., <k> key(s) offered) -> 0 supersede verdicts. The heat source did not JOIN this corpus by name: this is a BLIND result, not a measured zero -- C1/C3.' instead of a confident '0 candidates'.\n\nTHE LIMIT, NOT SOFTENED: 208 of 1929 is the join rate, not 1929 of 1929. comp-heat freshness is REPO-path-scoped and the corpus is AWS resources; only a resource whose name appears in a repo path can be banded from this source, and the remaining 1721 stay UNKNOWN (never a candidate, control C3). The docstring at :400 has always said this; the --heat-json seam is what lets a better data-heat source be substituted without touching this code.",
+   "denominator": "3 of 3 things the criterion asks for are present (BEFORE at file:line, AFTER at file:line, one real comp-similar run); the real run banded 208 of 1929 corpus resources from 51861 heat keys and 6 of 6 emitted candidates cite a comp-heat-derived band",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "judgment=true per the task order: this criterion carries its evidence and NO verdict. Oracle: 3.0.0_SA_CVO at L9. This worker writes no PASS or FAIL on it.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Three RED mutants, one per measured defect, all EXECUTED inside .tools/tests/test_os8_heat_consumed.py rather than described. (R1 EXEC) the pre-fix bare argv subprocess.run([str(<repo>/.tools/comp-heat), 'freshness', '--json']) restored beside the _tool_argv green arm. (R2/R3 FIELD+KEY) prefix_normalize_heat(), the pre-fix reader restored verbatim in behaviour (row.get('class','') + os.path.basename key), run over the SAME real comp-heat bytes and, separately, through comp_similar.main() against the SAME corpus, SAME snapshot and SAME argv as the green arm. (R-empty) normalize_heat monkeypatched to return {} -- the literal empty-dict path the cell names.",
+   "expected": "R1: the bare argv cannot start the tool at all. R2/R3: the pre-fix reader bands 0 keys on bytes the fixed reader bands, and comp-similar's own output falls to heat_banded=0 with 0 candidates while still offering tens of thousands of heat keys. R-empty: heat_keys=0, heat_banded=0, 0 candidates.",
+   "observed": "R1 fired: OSError [WinError 193] '%1 is not a valid Win32 application' (the arm records this as fabric-conditional in its own detail line and does not score a dead control silently). R2/R3 fired: 0 of 25476 keys banded on the same 30551 comp-heat rows the fixed reader bands 51855 of 51855; end to end heat_banded=0 of 1929 with candidates=0, against the green arm's heat_banded=208 of 1929 with 8 of 8 candidates citing a band. R-empty fired: heat_keys=0, heat_banded=0, candidates=0. 3 of 3 mutant families broke the green assertion they target.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the battery was run twice end to end after the final source state (once during construction at budget 30, which exposed a HARNESS defect -- the Rule T clock starts BEFORE build_corpus, so a 30 s budget was consumed by the ~37 s corpus build and the scan was cut to zero, producing a blind 0-candidate green arm that correctly FAILED; corrected to budget 90 and re-run). The end-to-end arms are additionally corroborated by a SEPARATE instrument: the real shim invocation `bash .tools/comp-similar supersede --heat-json <snapshot> --budget 90 --top 6` in a subprocess, which is O8-AC2's evidence and is not the battery's in-process comp_similar.main() call.",
+   "observed": "8 of 8 PASS at 81.5 s on the corrected run; the shim subprocess independently printed the same join measurement (208 of 1929) from a separately generated comp-heat snapshot (51861 keys vs the battery's 51855 -- the two snapshots were taken minutes apart and the repo moved under them, which is why the key counts differ and the join count does not). The harness defect the first run exposed is disclosed here rather than buried: a budget that does not cover the corpus build makes every downstream arm a blind zero, and the battery caught it by failing rather than by passing quietly.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the comp-debris (invoke-axis) leg exercised end to end",
+   "reason": "comp-debris is a live-AWS scan measured in minutes and the cell's verb is the comp-heat wire; the battery never invokes it (no network). Its argv is repaired by the same _tool_argv and covered by the A1 exec arm. Consequence stated honestly rather than hidden: every candidate in the real run still shows invoke: UNKNOWN, which under control C3 caps their confidence at MEDIUM."
+  },
+  {
+   "item": "extracting a shared exec helper for the other 15 candidate call sites of the WinError-193 class",
+   "reason": ".tools/ beyond .tools/comp-similar and .tools/tests/ is outside this order's <paths>, and 15 of the 16 candidate call sites are outside every <paths> block this project has cut. Filed as surprise row NFRA_OUTSET-W2-S2 (ARMED, disarm_owner 2.0.0_SA_COO) so the work is carried, not done off-grant."
+  },
+  {
+   "item": "raising the 208-of-1929 heat join rate",
+   "reason": "comp-heat freshness is REPO-path-scoped, not per-resource data heat; only a resource whose name appears in a repo path can be banded from this source. Raising it needs a different heat SOURCE (the --heat-json snapshot seam already accepts one), which is PRD s.6 decision-5's open item and not this cell. The ceiling is disclosed in the tool's own output line and in the result document rather than papered over."
+  },
+  {
+   "item": "regenerating infra/system/06_current_state.{json,md}",
+   "reason": "GRANTED by this order against the safe-commit.sh:789 comp-system trigger, and MEASURED not to be needed: `comp-system --gate --changed org/modules/graph/debtscan/comp_similar.py .tools/tests/test_os8_heat_consumed.py` returns rc 0 'NOT_APPLICABLE: ... no comp-system _SOURCE in the changeset; not a trigger-surface commit, gate open'. Nothing is stale, so nothing is regenerated and the pair is untouched."
+  },
+  {
+   "item": "the pre-existing ANSWER-STATE: PARTIAL_OR_BLIND on the CORPUS VINTAGE arm ('corpus built: UNKNOWN -- vintage undisclosed by the retrieval')",
+   "reason": "a separately-owned disclosure in summary_corpus/coverage, unrelated to heat and unchanged by this order. What DID change is that the heat arm no longer contributes 'heat source absent' to that same line."
+  }
+ ],
+ "surprises": [
+  "NFRA_OUTSET-W2-S1: the cell named ONE defect ('load_heat_live returns {} before reaching comp-heat') and the world held THREE stacked on the same wire -- an exec-plane OSError (the real cause of the empty dict), a field mismatch (read 'class', comp-heat emits 'band'; 43 of 43 rows UNKNOWN) and a key mismatch (basename joined 0 of 1774 corpus names). The latter two do not produce an empty dict; they produce a confident zero. All three fixed inside this order's <paths>.",
+  "NFRA_OUTSET-W2-S2: the exec cause is a CLASS -- on this fabric a python module that subprocesses an extensionless .tools/ shim gets OSError [WinError 193], and the surrounding 'except OSError: return None' converts a tool that never ran into a clean-looking empty result. Measured 2 of 2 shims tried; 16 of 269 python files under org/modules/ are candidate call sites, 15 of them outside every <paths> grant this project has cut. ARMED, disarm_owner 2.0.0_SA_COO.",
+  "NFRA_OUTSET-W2-S3: CUT DEFECT -- the order's <issued_to> is 0.9.0_WK_NFRA_OUTSET~1 and every deliverable path it names is under deliverables/0.9.0_WK_NFRA_OUTSET~1/, but the order was spawned to 0.9.0_WK_NFRA_OUTSET~2, whose rows must carry the W2 coordinate. Resolved the only way the grant allows: authored as ~2, written at the ~1 paths the order names. ARMED, disarm_owner 2.0.0_SA_COO. RESOLVED IN THE WORLD by the issuer at b630052d6a; the folder-name half stands.",
+  "NFRA_OUTSET-W2-S4: BLOCKING -- the same mismatch mechanically REFUSED this worker's finished commit on 3 of 4 pathspecs (owned-paths-validate.py:213-215 keys the worker grant on <issued_to>). Positive control discriminating on the serial alone: 4 of 4 granted to ~1, 0 of 4 to ~2. Not worked around: no override, no re-authoring as ~1 (that would attribute these acts to a concurrently-live worker and force the rows into W1-S10.. against a live allocator). CLEARED by the issuer's b630052d6a amendment; grant re-measured 5 of 5 after the carry-in commit 26a8bc43f8.",
+  "NFRA_OUTSET-W2-S5: the comp-system wall the issuer warned of did NOT fire on this surface -- both arms return NOT_APPLICABLE rc 0 because no file in the changeset is a comp-system _SOURCE; safe-commit.sh:789's grep decides only whether to SPAWN comp-system. Positive control on a known _SOURCE corroborates the tool defect with a worse consequence: from a linked worktree the PATH shim FAILS OPEN (gate-open rc 0) where the worktree-local tool is fail-closed rc 2. ARMED, disarm_owner 2.0.0_SA_COO, outside this grant.",
+  "NFRA_OUTSET-W2-S6: a checked-out task-order amendment does not restore the grant -- owned-paths-validate.py:173-181 reads every order with `git show HEAD:<path>` ('a task order staged but absent at HEAD grants nothing yet'). Measured 0 of 4 with the amendment present and STAGED in the worktree, 5 of 5 after committing it (26a8bc43f8). ARMED, disarm_owner 2.0.0_SA_COO: b630052d6a amends a second order for another live slot, which is in the same position."
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent. The audit trail is this instance, the result deliverable at org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.9.0_WK_NFRA_OUTSET~1/comp-similar-heat-weighting-consumes.result.md, rows NFRA_OUTSET-W2-S1..S3 in the project's investigation file, and five commits on branch wk-OUTSET-2 in worktree C:/tmp/wk-OUTSET-2 from base HEAD 79ec54bb37: 9766fe6d32 (rows W2-S1..S4, the BLOCKING refusal), d7bfeb3ce7 (row W2-S5), 26a8bc43f8 (carrying the issuer's b630052d6a <issued_to> amendment onto this branch, without which the grant reads 0 of 4), fe1d295bc4 (the engine change, the battery, the result document and row W2-S6) and the commit carrying this proof plus the <status> flip. Never pushed by this worker; push state read with git ls-remote.",
+ "compiler_tools": [
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "timeout 120 bash .tools/commit-gate.sh org/modules/graph/debtscan/comp_similar.py .tools/tests/test_os8_heat_consumed.py",
+   "result": "'OK: pre-commit gate clean for 2 of 2 file(s)', rc 0 (py_compile + ds-precommit + ruff py39 all clean)"
+  },
+  {
+   "tool": "comp-system --gate --changed",
+   "invocation": "timeout 120 comp-system --gate --changed org/modules/graph/debtscan/comp_similar.py .tools/tests/test_os8_heat_consumed.py",
+   "result": "rc 0, 'NOT_APPLICABLE: subject=--gate --changed; no comp-system _SOURCE in the changeset; not a trigger-surface commit, gate open' -- so the granted 06_current_state pair is correctly untouched"
+  },
+  {
+   "tool": "comp-heat (the tool this cell consumes, read as a producer not a subject)",
+   "invocation": "timeout 120 python .tools/comp-heat freshness [.tools/tests|<repo>] --json OUT --budget 60",
+   "result": "the producing instrument: emits {paths: [{path, age_days, score, band, source}], summary, vintage, budget}. Reading its ACTUAL output rather than the consumer's assumption about it is what exposed the 'class' vs 'band' defect."
+  },
+  {
+   "tool": ".tools/comp-similar --self-test and .tools/tests/test_comp_similar_battery.py",
+   "invocation": "timeout 120 bash .tools/comp-similar --self-test ; timeout 120 python .tools/tests/test_comp_similar_battery.py",
+   "result": "regression controls: 'comp_similar self-test: PASS (11/11)' rc 0 and 'comp-similar battery: PASS (12/12)' rc 0 -- the 5 PRD controls (C1 no-verdict-without-heat, C2 no-name-collapse, C3 blind-row+denominator, C4 dogfood, C5 hold-aware) and the T-12 answer-state contract are unaffected"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.9.0_WK_NFRA_OUTSET~1/NFRA_OUTSET.TO-OS-s-8.comp-similar-heat-weighting-consumes.proof_of_spec.json O8-AC1,O8-AC2",
+   "result": "see the WORKER REPORT -- the rc is the only verdict and it is read before the status flip"
+  }
+ ]
+}

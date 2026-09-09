@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OUTSET.TO-OS-s-15",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D11/NFRA/NFRA_OUTSET/prd/NFRA_OUTSET_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "7fb59f239b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D11/NFRA/NFRA_OUTSET/decompositions/NFRA_OUTSET_DECOMP.md",
+    "vintage_commit": "6f1655f376",
+    "to_ref": "org/missions/D11/NFRA/NFRA_OUTSET/task-orders/NFRA_OUTSET.TO-OS-s-15.reachability-of-the-heat-engine-legs.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OUTSET~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.9.0_WK_NFRA_OUTSET~3/reachability-of-the-heat-engine-legs.result.md",
+      "kind": "doc",
+      "commit_or_etag": "7a0126b323",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A decide cell's result document. Nothing is deployed, built or removed by this cell; the artifact IS the decision and its evidence. PATH DECIDED BY A MEASUREMENT, NOT A PREFERENCE: the order's <paths> block names the ~1 folder, but writing there was TRIED FIRST and the lane gate REFUSED the commit (owned-paths clause 4 resolves the owner from the serial IN THE PATH, and ADHC_OWNPTH.005 finds no non-terminal TO issued_to ~3) -- row NFRA_OUTSET-W3-S5 carries the refusal verbatim and the negative control proving nothing landed. Relocated to this worker's own serial folder, which the SAME order grants in its <preflight> lane clause ('and to its own deliverables folder by the tree convention'), with the order's specified filename unchanged. Re-seat divergence itself is row NFRA_OUTSET-W3-S1.",
+      "artifact_covered_by": ["O15-AC1", "O15-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D11/NFRA/NFRA_OUTSET/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "7a0126b323",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Append-only channel; 6 rows added (NFRA_OUTSET-W3-S1..S6), of which S1..S5 landed in 7a0126b323 (96 insertions, 0 deletions) and S6 rides the follow-on commit that absorbs amendment b630052d6a. Before EACH splice the pre-existing byte prefix was asserted byte-identical and the array re-parsed with all ids distinct (19 then 21 rows); no existing row was edited or reordered. Two line-ending defects introduced by this worker's own first splice (a bare CR and a bare LF at the join) were found by a CR/LF/CRLF byte census and repaired before the commit -- final state 521 CR = 521 LF = 521 CRLF, zero bare endings.",
+      "artifact_covered_by": ["O15-AC1", "O15-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "O15-AC1",
+      "criterion_verbatim": "FOR EACH of object_locality.py, object_recommend.py, object_report.py: state REACHABLE-FROM-CLI or RETIRE-CANDIDATE, with the file:line the CLI would call and the measured fact that the CLI reaches O1 only. A DECISION with its evidence. NOTHING IS BUILT BY THIS CELL. NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "Two instruments on different substrates, each bounded by `timeout 120`. (A) native Grep over the worktree for `object_locality|object_recommend|object_report` with a positive control on `object_freshness` in the same invocation shape. (B) `timeout 120 python .scratch/ast_importers.py` (ast-parse every tracked *.py) and `timeout 120 python .scratch/ast_tools.py` (ast-parse every tracked extensionless python-shebang script, which is the only pass that covers .tools/comp-heat itself). Plus `timeout 120 python .tools/comp-heat --help`; `timeout 120 python object_locality.py --self-test`; `timeout 120 python object_report.py --root <heatmap dir> --top 5`; and a two-engine falsifier `timeout 120 python .scratch/o2_vs_s0.py`.",
+      "output_evidence": "IMPORTS BY .tools/comp-heat (instrument B, extensionless pass): `heat_map: 3 ['.tools/comp-heat:165','.tools/comp-heat:349','.tools/comp-heat:418']` and `object_freshness: 3 ['.tools/comp-heat:166','.tools/comp-heat:271','.tools/comp-heat:419']`; `object_locality: 0 []`, `object_recommend: 0 []`, `object_report: 0 []` -- THE CLI REACHES O1 (and S0) ONLY, MEASURED. IMPORTERS OF EACH LEG (instrument B, *.py pass): `object_locality: 3` = ms_heat_index.py:62, object_recommend.py:43, object_report.py:38; `object_recommend: 1` = object_report.py:39; `object_report: 0`. Instrument A agrees and its positive control fired: `object_freshness` = 239 occurrences across 73 files (live sweep), vs object_locality 75/51, object_recommend 18/13, object_report 12/11, whose only *.py import statements are the same lines. SUBCOMMAND SET MEASURED: `usage: comp-heat [-h] {freshness,drift,score,federated,compare} ...`, rc=0. THE READING, per leg, with the file:line the CLI would call -- O2 object_locality.py: NOT-REACHABLE-FROM-CLI and NOT A RETIRE-CANDIDATE (CLI would call it at .tools/comp-heat:214, which today calls heat_map.cluster_by_locality instead of object_locality.aggregate_tree:80 + maximal_cold_subtrees:112); it is load-bearing outside the CLI via ms_heat_index.py:62, and its capability is NOT duplicated by the CLI's substitute -- exercised falsifier, 8 synthetic scores all cold at 400 days under dead/{a,b,c,d}/: `CLI filter n>=3 and cold_frac>=0.8 -> 0 'cold SUBTREES': []` versus `O2 maximal_cold_subtrees -> 1 root(s): ['dead']` (n=8, n_cold=8, cold_frac=1.0), rc=0. O3 object_recommend.py: NOT-REACHABLE-FROM-CLI, NOT A RETIRE-CANDIDATE, WIRE IT (CLI would call object_recommend.assess:99 via a new subparser in the registry block .tools/comp-heat:630-668) -- because comp-heat freshness ALREADY ships `cold SUBTREES (n>=3, cold_frac>=0.8) -- archive candidates (ADVISORY)` at :236 with no inbound-reference check, while comp-heat's own docstring at :11-13 says `It never recommends-to-delete (that is O3, separately guardrailed)`. O4 object_report.py: NOT-REACHABLE-FROM-CLI, weakest case, still not a retire (CLI would call object_report.classify:49 / render_md:55, same registry block). LEGS STILL EXECUTE: `OK: object_locality self-test passed (5/5)` rc=0, and the full O2->O3->O4 chain `=== O4 hygiene report (ADVISORY-ONLY -- never auto-archives) ===` rc=0 (read without a pipe). NO RUNNER for any leg: a search of *.{tf,yaml,yml,sh,json,cmd,bat,toml,cfg,ini} returned only proof-of-spec docs, deliverables, sidecars, audit logs and one Terraform comment (infra/aws/terraform/shared-infra/s3.tf:357) -- zero invocations. NOTHING WAS BUILT AND NOTHING REMOVED: .tools/comp-heat and org/modules/heatmap/ were read and never written.",
+      "denominator": "30,559 tracked files at HEAD 61904105639022e4f0a3601a3954860ca7283be6 = 5,624 matching *.py (all 5,624 AST-parsed, 0 unparseable) PLUS 42 extensionless tracked python-shebang scripts (39 parsed; 3 unparseable, all vendored numpy .pyx/.pxd under infra/aws/lambda/layers/, none heatmap-related). The second pass is load-bearing: .tools/comp-heat has no extension and a *.py-only census would have returned a confident zero for the CLI itself. Instrument A's coverage stated separately: positive control 239 occurrences / 73 files. 3 of 3 named legs answered.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true. This criterion asks for a DECISION with its evidence; no invocation decides it and no regex grades it. Evidence and a reasoned reading are recorded here and in the result document, and NO verdict is written. The oracle is 3.0.0_SA_CVO at L9, per the task order's ACCEPTANCE preamble ('a PASS or FAIL written on one is INVALID') and spine v3 annex 4a. Recorded limit: the criterion's own two-value vocabulary (REACHABLE-FROM-CLI or RETIRE-CANDIDATE) is not MECE over the measured world -- O2 is neither -- which is filed as NFRA_OUTSET-W3-S2 rather than resolved by bending the answer to the vocabulary.",
+      "judgment": true
+    },
+    {
+      "criterion_id": "O15-AC2",
+      "criterion_verbatim": "NEVER-AUTO-DELETE (PRD R-5, ABSOLUTE) is restated in your answer for any leg touching removal: the list is advisory and nothing is removed by a tool. A leg that cannot honour that is a RETIRE-CANDIDATE and you say so.",
+      "method": "manual_read_with_citation",
+      "invocation": "`timeout 120 python .scratch/removal_scan.py` -- an AST call-graph scan of org/modules/heatmap/{object_locality,object_recommend,object_report}.py and .tools/comp-heat for filesystem-mutating calls (remove, unlink, rmtree, rmdir, removedirs, delete, delete_object, delete_objects, move, rename, replace), write calls (open, write_text, mkdir, makedirs) and subprocess dispatch (run, Popen, call, check_output, system, execv); every raw hit then resolved by reading its line. R-5 read at source: `grep -n \"R-5\" org/missions/D11/NFRA/NFRA_OUTSET/prd/NFRA_OUTSET_PRD.md`.",
+      "output_evidence": "R-5 RESTATED VERBATIM from NFRA_OUTSET_PRD.md@7fb59f239b:220 -- `**R-5 (the never-auto-delete doctrine):** FWD-8's list is advisory and nothing is removed by a tool. Absolute.` All three legs touch removal (each exists to name things a human might archive), so R-5 is restated for each and each is MEASURED against it rather than trusted on its docstring. SCAN OUTPUT, rc=0: `object_locality.py: REMOVAL/MOVE calls=2 ['replace@74','replace@76'] | write calls=1 ['open@216'] | subprocess/system=0`; `object_recommend.py: REMOVAL/MOVE calls=0 [] | write calls=1 ['open@148'] | subprocess/system=2 ['run@52','run@78']`; `object_report.py: REMOVAL/MOVE calls=0 [] | write calls=2 ['open@103','open@126'] | subprocess/system=0`; `.tools/comp-heat: REMOVAL/MOVE calls=2 ['replace@73','replace@171'] | write calls=3 ['open@82','open@328','open@293'] | subprocess/system=0`. EVERY `replace` HIT RESOLVED INDIVIDUALLY AND ALL FOUR ARE str.replace, ZERO os.replace: object_locality.py:74 `parts = path.replace(\"\\\\\", \"/\").split(\"/\")[:-1]` and :76 `return [path.replace(\"\\\\\", \"/\")] if path else []`; .tools/comp-heat:73 `.isoformat().replace(\"+00:00\", \"Z\")` and :171 `rel = a.path.replace(\"\\\\\", \"/\").strip(\"/\")`. So: ZERO filesystem-removal calls across all four files -- the never-auto-delete property is STRUCTURAL, not declarative. Every write is to an operator-named output path (--json OUT at object_locality:216 and object_recommend:148; --out report.md at object_report:126). Both object_recommend subprocess calls are read-only `git grep`. CONCLUSION RECORDED, NO VERDICT: no leg fails R-5 and NONE IS A RETIRE-CANDIDATE ON R-5 GROUNDS. Three supporting observations: (1) O3 IMPLEMENTS R-5's spirit -- referenced_by/referenced_index return ['<grep-error>'] on any exception or unexpected rc so uncertainty resolves to HOLD, and it EMITS `comp-blast <node> --direction up --check-consumers` as a required per-candidate gate rather than auto-running it; (2) O4 never renders a delete instruction -- header `ADVISORY-ONLY -- never auto-archives`, and its AUDIT-TRAIL class exists to stop dated log dirs reading as archive-me; (3) THE R-5 GAP IS IN THE LIVE TOOL, NOT THE DEAD LEGS -- comp-heat freshness:236 prints `archive candidates (ADVISORY)` with no inbound-reference check, which is exactly the asymmetry making O3 a wire rather than a retire. NOTHING WAS REMOVED BY THIS CELL AND NO RETIREMENT WAS ENACTED: a retire reading here is a RECOMMENDATION to the issuer, never an act.",
+      "denominator": "4 of 4 files scanned (the 3 named legs + .tools/comp-heat as the caller); 3 of 3 legs restated against R-5; 4 of 4 raw `replace` hits individually resolved to str.replace; 0 of 4 files contain any filesystem-removal call.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true. The criterion asks for a restatement and a reasoned reading of whether each leg can honour R-5; no invocation decides it. R-5 is quoted verbatim at its vintage, the removal-capability question is answered by measurement rather than by docstring, and NO verdict is written. The oracle is 3.0.0_SA_CVO at L9 per the task order's ACCEPTANCE preamble.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The failure this cell had to avoid is a FALSE ABSENCE: an empty search read as 'nothing calls this leg' retires something live, and comp-find CONTENT mode has two measured silent false-zero modes on this project (NFRA_OUTSET-S2 rc=124 with zero bytes; NFRA_OUTSET-S6 sub-floor --budget returning rc=0 with a full confident denominator). Control: a POSITIVE CONTROL certain to exist, run on the same instrument in the same invocation shape as every zero-bearing query, plus a SECOND instrument on a different substrate (Python ast parse vs text match) to re-derive the same census.",
+      "expected": "The positive control returns a large non-zero count, proving the sweep was live; and the two instruments agree on the import census, so a zero from either is a measurement rather than silence.",
+      "observed": "FIRED. Positive control `object_freshness` -> 239 occurrences across 73 files reaching .tools/, infra/, org/ and docs/ (instrument A, native Grep). Instrument B (ast) independently returned the identical import sets: object_locality 3 importers, object_recommend 1, object_report 0, and .tools/comp-heat naming only heat_map and object_freshness. A SECOND, DIFFERENT MUTANT ALSO FIRED AND CHANGED THE ANSWER: instrument B's first pass globbed *.py, which silently EXCLUDED .tools/comp-heat itself (no extension) -- the coverage gap was caught and closed with a second pass over the 42 extensionless python-shebang tracked scripts, without which this cell would have reported a confident zero for the very file the question is about. A THIRD control was run on the substantive claim rather than the instrument: rather than reason that heat_map.cluster_by_locality duplicates O2, both engines were imported unmodified and run on the same 8 synthetic scores -- CLI grouper+filter returned 0 cold subtrees where O2 returned 1, falsifying the cheapest reason to retire O2.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Both AST censuses and the two-engine falsifier are pure functions of the tree at a fixed HEAD (61904105639022e4f0a3601a3954860ca7283be6) over a fixed synthetic input, with no clock, no network and no random seed. The import census was additionally re-derived by a SECOND instrument on a different substrate (native Grep text match vs Python ast parse), which is corroboration rather than repetition.",
+      "observed": "The two independent instruments returned identical importer sets for all three legs and for .tools/comp-heat. object_locality --self-test returned 5/5 rc=0. No measurement in this cell depends on wall-clock, AWS state or a live service; the only vintage-bearing value quoted (the ms_heat S3 object's 2026-07-17 last_modified) is explicitly declared as read from another seat's artifact and NOT measured here.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write to .tools/comp-heat or org/modules/heatmap/",
+      "reason": "This is a `decide` cell and it is read-only on the contested surface by construction -- three sibling cells hold the .tools/comp-heat write grant this round and were queued on one slot for exactly that reason. NFRA_OUTSET-W3-S4 identifies a defect whose disarm NEEDS such a write; it was filed and reported, not taken."
+    },
+    {
+      "item": "Building, wiring or retiring any leg",
+      "reason": "The task order states NOTHING IS BUILT BY THIS CELL, and PRD s.8 rules OS-s-15's decision before OS-s-16's build. A retire reading is a recommendation to the issuer; NEVER-AUTO-DELETE is absolute and this cell removed nothing."
+    },
+    {
+      "item": "An estate-wide count of cold subtrees the flat grouper misses",
+      "reason": "The falsifier proves the miss exists on a synthetic case at rc=0. The estate-wide magnitude needs a full-corpus comp-heat freshness run diffed against an O2 run over the same scores -- that is OS-s-16's measurement and is outside a decide cell's bounds and its 120 s per-invocation bound."
+    },
+    {
+      "item": "Verification that ms_heat_index.py is still scheduled, and any read of the S3/Iceberg plane",
+      "reason": "O2's import edge from ms_heat_index.py:62 is MEASURED here; that producer's cadence is not. The S3 object's vintage is cited from org/tier1_exec/1.0.0_SA_CTO/deliverables/NFRA_TOOLUNIFY_CENSUS/C.sidecar.json as another seat's artifact, read not measured. Sibling OS-s-7's cadence finding concerns the code_heat parquet, a DIFFERENT artifact, and is cited as 0.7.0_AE_CloudOps~W's measurement rather than adopted as this cell's."
+    },
+    {
+      "item": "Detection of a dynamic import (importlib with a computed module name)",
+      "reason": "Both instruments resolve STATIC imports only. Nothing in the census suggests a dynamic one, but the coverage claim is bounded to static imports and is stated as such rather than left implied."
+    },
+    {
+      "item": "comp-adversary",
+      "reason": "The task order's <preflight> declares it NOT-APPLICABLE at the cut and names it the assignee's instrument at report time; this cell's only artifact is the one it would read, and its two criteria are judgment-graded by 3.0.0_SA_CVO at L9, which is that function."
+    }
+  ],
+  "surprises": [
+    "NFRA_OUTSET-W3-S1: the order's <issued_to> and <paths> name slot 0.9.0_WK_NFRA_OUTSET~1 but slot ~3 executed it after a re-seat, so the deliverables folder name is not a reliable carrier of which worker produced the artifact; written to the granted ~1 path regardless, because the <paths> block IS the grant.",
+    "NFRA_OUTSET-W3-S2: O15-AC1's two-value answer vocabulary (REACHABLE-FROM-CLI or RETIRE-CANDIDATE) is not MECE over the measured world -- object_locality.py is unreached by comp-heat AND load-bearing for ms_heat_index.py:62, so neither value is true of it; recorded as a third reading with evidence rather than bent to fit.",
+    "NFRA_OUTSET-W3-S3: object_recommend.py hardcodes subprocess timeout=180 at :78 and timeout=60 at :52, neither derived from nor overridable by a caller's budget, so comp-heat's Rule T ceiling (default 90 s, wired by OS-s-1) would not bind O3 if OS-s-16 wires it -- a scoping constraint the fenced cell's face must name.",
+    "NFRA_OUTSET-W3-S4: ARMED -- comp-heat freshness renders a flat os.path.dirname grouping under the label `cold SUBTREES ... archive candidates`, and an exercised falsifier (8-of-8 cold at 400 days across 4 leaf dirs) returned 0 candidates from the CLI against 1 maximal cold root from O2, so the live answer to FWD-8 under-reports whole dead subtrees; false-negative direction, R-5 not breached, disarm needs a .tools/comp-heat write this read-only cell does not hold.",
+    "NFRA_OUTSET-W3-S5: BLOCKING (resolved same-turn) -- the lane gate REFUSED this worker's commit into the very deliverables folder the order's <paths> block grants, on two independent limbs (owned-paths clause 4 resolves the owner from the serial IN THE PATH; ADHC_OWNPTH.005 finds no non-terminal TO issued_to ~3). No override was used and no gate was bypassed: the artifacts were relocated to deliverables/0.9.0_WK_NFRA_OUTSET~3/, which the same order grants in its <preflight>. A <paths> grant is not self-executing, and a re-seat is the condition that exposes it.",
+    "NFRA_OUTSET-W3-S6: PARTLY CORRECTS the issuer's premise for amendment b630052d6a (<issued_to> re-addressed ~1 -> ~3). Measured: a mis-addressed <issued_to> disables the deliverables limb ALONE, not 'any path' -- the task-orders file and the surprise channel are lane ANY, consult no serial, and were admitted in the same call, which is how commit 7a0126b323 landed all four paths BEFORE the amendment reached this worktree. The amendment was absorbed by rebuilding the file from CLOUD and re-applying only the <status> line (diff vs CLOUD now = 1 line), NOT by the instructed `git checkout CLOUD -- <path>`, which on an already-committed face would have silently reverted the complete flip to pending."
+  ],
+  "session_log": "org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.9.0_WK_NFRA_OUTSET~3/reachability-of-the-heat-engine-legs.result.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-schedule",
+      "invocation": "RUN AT THE ISSUANCE by 2.0.0_SA_COO, not re-run here (task order <preflight>): the gate ledger read once for this issuance and quoted in the issuance commit.",
+      "result": "0 armed gates name NFRA_OUTSET, comp-heat or the estate-report runner."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "DECLARED-NOT-APPLICABLE per the task order's <preflight> -- a repo-surface decide cell reads and changes no principal, policy or resource.",
+      "result": "Not applicable. This cell touched no AWS plane; the one S3-related value it quotes is cited from another seat's committed artifact and declared as read-not-measured."
+    },
+    {
+      "tool": "comp-adversary",
+      "invocation": "DECLARED-NOT-APPLICABLE per the task order's <preflight> (fresh cut, no prior artifact to validate against).",
+      "result": "Not applicable at the cut; the adversarial function for this cell's two judgment criteria is 3.0.0_SA_CVO's L9 adjudication."
+    },
+    {
+      "tool": "comp-heat",
+      "invocation": "timeout 120 python .tools/comp-heat --help",
+      "result": "rc=0; subcommand set measured as {freshness,drift,score,federated,compare} and the Rule T epilog present ('every subcommand accepts --budget <seconds> ... default 90s'). Read-only; comp-heat was the SUBJECT of this cell and was never written."
+    },
+    {
+      "tool": "native Grep (Rule 21 carve-out, chosen over comp-find)",
+      "invocation": "Grep for `object_locality|object_recommend|object_report` over the worktree, with a positive control on `object_freshness` in the same invocation shape.",
+      "result": "Control 239 occurrences / 73 files (sweep live). comp-find CONTENT mode was deliberately NOT used as the deciding instrument: NFRA_OUTSET-S2 and NFRA_OUTSET-S6 record two silent false-zero modes on it, and a false zero on a reachability question fails in the direction of retiring something live."
+    }
+  ]
+}

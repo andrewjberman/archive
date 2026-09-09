@@ -1,0 +1,201 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OUTSET.TO-OS-s-1.rule-t-budget-across-comp-heat",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OUTSET~1",
+ "spec_ref": {
+  "doc": "org/missions/D11/NFRA/NFRA_OUTSET/task-orders/NFRA_OUTSET.TO-OS-s-1.rule-t-budget-across-comp-heat.md",
+  "group": "OTHER",
+  "vintage_commit": "ddff1d8eeb"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D11/NFRA/NFRA_OUTSET/decompositions/NFRA_OUTSET_DECOMP.md",
+  "vintage_commit": "6f1655f376",
+  "to_ref": "org/missions/D11/NFRA/NFRA_OUTSET/task-orders/NFRA_OUTSET.TO-OS-s-1.rule-t-budget-across-comp-heat.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/comp-heat",
+   "kind": "script",
+   "commit_or_etag": "53092092cf",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "a .tools/ CLI entrypoint invoked directly by callers; no S3/Lambda deploy surface; not a deploy-scope path under Rule 13.",
+   "introduces": [
+    "import _compbudget",
+    "_add_budget",
+    "FEDERATED_LIVE_FLOOR_S",
+    "_reached_line"
+   ],
+   "artifact_covered_by": ["O1-AC1", "O1-AC2", "O1-AC3", "O1-AC5", "O1-AC6"]
+  },
+  {
+   "path_or_key": "org/modules/heatmap/object_freshness.py",
+   "kind": "script",
+   "commit_or_etag": "53092092cf",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "a repo-local engine module comp-heat imports; no deploy surface.",
+   "introduces": [
+    "def build_budgeted",
+    "def uncommitted_writes_budgeted",
+    "def _git_bounded"
+   ],
+   "artifact_covered_by": ["O1-AC2", "O1-AC3", "O1-AC5"]
+  },
+  {
+   "path_or_key": ".tools/tests/test_os1_budget_battery.py",
+   "kind": "test",
+   "commit_or_etag": "53092092cf",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "a directly-runnable + pytest-collectible test file; not a deploy-scope path.",
+   "artifact_covered_by": ["O1-AC4", "O1-AC5"]
+  },
+  {
+   "path_or_key": "org/missions/D11/NFRA/NFRA_OUTSET/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the project's surprise-channel investigation file (created by this worker); rows S8/S9 added in this commit -- PENDING-THIS-COMMIT, rides the commit that carries this proof."
+  },
+  {
+   "path_or_key": "org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.9.0_WK_NFRA_OUTSET~1/rule-t-budget-across-comp-heat.result.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the cell's result deliverable; updated in this commit for the amended O1-AC2 -- PENDING-THIS-COMMIT, rides the commit that carries this proof."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "O1-AC1",
+   "criterion_verbatim": "O1-AC1 -- --help DISCLOSES the budget carrier -- flag > COMP_BUDGET_S > default, in the s.4.4 form.",
+   "method": "command",
+   "invocation": "timeout 30 python .tools/comp-heat --help",
+   "output_evidence": "epilog carries: 'RULE T (NFRA_COMPEFFICACY PRD s.4.4): every subcommand accepts --budget <seconds> (flag > env COMP_BUDGET_S > default 90s; 0 = unbounded) and a --cursor resume hint; a cut run prints BUDGET REACHED with its scanned-of-total denominator instead of running past the caller's ceiling -- see `comp-heat <subcommand> --help`.' Also verified per-subcommand: `comp-heat freshness/drift/score/compare/federated --help` each show both --budget and --cursor (grep -c on each: 3,4,3,4,4 respectively).",
+   "denominator": "1 of 1 top-level invocation matches <expect>; 5 of 5 subcommand --help texts also carry --budget/--cursor",
+   "status": "PASS",
+   "expect": "--budget"
+  },
+  {
+   "criterion_id": "O1-AC2",
+   "criterion_verbatim": "O1-AC2 -- a completing run prints WITHIN BUDGET with `scanned n of N`. AMENDED by the issuer at ddff1d8eeb (drain on row NFRA_OUTSET-W1-S1): the original --budget 5 'demanded a result the honest implementation cannot produce' (the engine pays a measured 6.2-11.7s whole-repo git-log cost regardless of scope, OS-s-2's own unbuilt cell) -- 'the only way to pass the criterion as written was to wire the budget dishonestly'. Raised to --budget 60, 'which clears the measured floor with margin'; the criterion's intent (a completing run discloses WITHIN BUDGET with its denominator) is unchanged.",
+   "method": "command",
+   "invocation": "timeout 120 .tools/comp-heat freshness .tools --budget 60",
+   "output_evidence": "budget: 60 s (flag)\nWITHIN BUDGET: scanned 30275 of 30275 files; budget: 60 s (flag), used {6.343, 3.281, 3.016, 3.938, 3.407} s -- 5 of 5 consecutive runs, this worktree, post-amendment. rc=0 every time.",
+   "denominator": "5 of 5 invocations match <expect>; each scanned 30275 of 30275 files (full reconciled denominator, 0 dropped)",
+   "status": "PASS",
+   "status_reason": "Graded against the AMENDED invocation (--budget 60), per the issuer's ddff1d8eeb repair of NFRA_OUTSET-W1-S1. Unlike the original --budget 5 criterion (cache-dependent: FAIL 3/3 cold in S1, PASS 17/17 warm in S6), --budget 60 clears even S1's worst cold-cache measurement (11.7s) by >5x margin, so this PASS does not depend on cache state -- superseding the flaky evidence in S1/S6, which is preserved in full below and in the channel as history, not deleted. The underlying root cause S1 found (no path-scoped git call; every freshness call pays the whole-repo cost; OS-s-2's own open, depends_on OS-s-1 cell) is unchanged and still governs a caller who passes a budget close to the measured floor -- see NFRA_OUTSET-W1-S8.",
+   "expect": "WITHIN BUDGET"
+  },
+  {
+   "criterion_id": "O1-AC3",
+   "criterion_verbatim": "O1-AC3 -- a cut run prints BUDGET REACHED with its REACHED denominator, never a silent partial.",
+   "method": "command",
+   "invocation": "timeout 120 python .tools/comp-heat freshness --budget 0.001",
+   "output_evidence": "budget: 0.001 s (flag)\nBUDGET REACHED: 0.001 s (flag); scanned 0 of UNKNOWN (enumeration itself hit budget) files; results are a PREFIX, not the answer; resume: comp-heat freshness --cursor START\nDEFERRED: 0 of 0 files(s) did not return -- each names its reason below\nANSWER-STATE: PARTIAL_OR_BLIND -- rc=3.",
+   "denominator": "1 of 1 invocation matches <expect>",
+   "status": "PASS",
+   "expect": "BUDGET REACHED"
+  },
+  {
+   "criterion_id": "O1-AC4",
+   "criterion_verbatim": "O1-AC4 -- a NEW battery: one arm per subcommand (freshness, drift, score, compare, federated) plus a RED mutant that ignores --budget; each arm prints its own denominator.",
+   "method": "test_suite",
+   "invocation": "timeout 120 python .tools/tests/test_os1_budget_battery.py ; also python -m pytest -q .tools/tests/test_os1_budget_battery.py",
+   "output_evidence": "OS1-BUDGET BATTERY: 21/21 PASS (denominator 21), real 32.281s. pytest: '1 passed in 27.22s'. Arms: 6 --help disclosure checks, freshness/drift/compare WITHIN+REACHED (6 arms), score WITHIN (1 arm), federated default+tiny refuse-before-dispatch (2 arms), 4 RED-mutant-breaks arms (freshness/drift/score/compare, targeting _compbudget.resolve_budget via a temporary sibling module + temporary comp-heat copy -- .tools/_compbudget.py itself never rewritten), 1 federated-exclusion-asserted arm, 1 mutation-anchor-uniqueness arm. Regression check: pre-existing .tools/tests/test_comp_heat_battery.py (T20 answer-state battery) re-run: 'Ran 2 tests ... OK' -- unaffected.",
+   "denominator": "21 of 21 arms PASS (printed by the battery itself, its own final line)",
+   "status": "PASS",
+   "expect": "PASS"
+  },
+  {
+   "criterion_id": "O1-AC5",
+   "criterion_verbatim": "O1-AC5 -- the commit gate is clean on every .py/.sh this order touches.",
+   "method": "command",
+   "invocation": "timeout 120 bash .tools/commit-gate.sh .tools/comp-heat ; timeout 120 bash .tools/commit-gate.sh org/modules/heatmap/object_freshness.py .tools/tests/test_os1_budget_battery.py",
+   "output_evidence": "First: 'OK: pre-commit gate clean for 1 of 1 file(s)'. Second: 'OK: pre-commit gate clean for 2 of 2 file(s)'. rc=0 both.",
+   "denominator": "3 of 3 touched .py files clean (0 .sh files touched by this order)",
+   "status": "PASS",
+   "expect": "pre-commit gate clean"
+  },
+  {
+   "criterion_id": "O1-AC6",
+   "criterion_verbatim": "O1-AC6 -- THE VERDICT-BEARING LIMB, graded by the CVO at L9: for any subcommand whose rc carries a verdict, the rc at BUDGET REACHED must be a NON-CLEAN value distinct from BOTH the clean and the failing verdict, carrying PARTIAL_OR_BLIND in the tool's own voice. RECORD the rc of each subcommand at a cut budget and at a clean run, side by side. NO VERDICT.",
+   "method": "command",
+   "invocation": "for each of freshness/drift/score/compare/federated: one WITHIN-BUDGET invocation (generous --budget) and one BUDGET-REACHED invocation (tiny --budget), rc read via $? after each",
+   "output_evidence": "freshness: clean rc=0 (WITHIN BUDGET); cut rc=3 (BUDGET REACHED, prints 'ANSWER-STATE: PARTIAL_OR_BLIND'). drift: clean rc=0; cut rc=0 (terminal line carries the state, rc unchanged -- non-verdict tool). score: clean rc=0; cut rc=0 (forced via --budget 1e-07, 3 of 3 repeated; O(1) work, Rule T non-application per PRD s.4.4). compare: clean rc=0; cut rc=3 (prints 'ANSWER-STATE: PARTIAL_OR_BLIND'). federated: clean NOT EXERCISED (would require --budget >= 200, dispatching to the live Trino plane, out of scope for this battery); cut rc=0 (refuse-before-dispatch, prints 'BUDGET REACHED:' + 'refusing to dispatch to the LIVE Trino plane'). This worker's own (non-binding) reading: freshness/compare are verdict-bearing (pre-existing RC_BY_STATE already differentiates 0/1/2/3 by answer content) and correctly return the non-clean 3 at BUDGET REACHED, distinct from both 0 (clean) and their own existing failing rcs 1/2; drift/score/federated are non-verdict (rc has never differentiated answer content) and fall under the FORM's own default clause (rc stays 0 at expiry for a non-verdict tool). Full table in the result deliverable.",
+   "denominator": "5 of 5 subcommands' clean-vs-cut rc pairs recorded (federated's clean/live-dispatch rc deliberately not exercised, live plane out of scope)",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "judgment=true per the task order; this criterion carries its evidence and NO verdict. Oracle: 3.0.0_SA_CVO at L9.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the battery's RED mutant targets _compbudget.resolve_budget (via a temporary sibling module a temporary comp-heat copy imports instead of the real .tools/_compbudget.py) so the caller's --budget flag is ignored and a huge budget is always resolved -- exercised against freshness/drift/score/compare's cut-budget invocations",
+   "expected": "each of freshness/drift/score/compare stops printing BUDGET REACHED (and starts printing WITHIN BUDGET instead) under the mutant, at the SAME --budget value that produces BUDGET REACHED on production",
+   "observed": "all 4 mutant arms fired as expected (RED-MUTANT-FRESHNESS-NO-LONGER-CUTS, RED-MUTANT-DRIFT-NO-LONGER-CUTS, RED-MUTANT-SCORE-NO-LONGER-CUTS, RED-MUTANT-COMPARE-NO-LONGER-CUTS all PASS in the battery, meaning the mutant correctly broke the cut behavior each time); federated is DELIBERATELY EXCLUDED from this exact mutation (it is the only mutation in the battery that could make federated dispatch to the live Trino plane, since federated's own refuse-before-dispatch floor check reads budget_s from the same mutated resolve_budget) -- the exclusion itself is asserted by the battery (RED-MUTANT-FEDERATED-DELIBERATELY-NOT-EXERCISED, PASS) rather than silently omitted. An earlier draft mutated comp-heat's own local _spent() instead and only 2 of 5 subcommands broke (freshness/drift/compare's cut is independently enforced by a subprocess-level timeout=remaining() bound one layer deeper) -- corrected before this instance was written; the misleading docstring that first claimed _spent() as a 'single choke point' was fixed in the same commit.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the full battery (the mutant + 21-arm mechanism this control actually governs) was run twice, once directly with `python`, once under `python -m pytest -q`; O1-AC2's own ad-hoc timing invocation is NOT part of the battery and was run 27 times total across the session (7 early, 3 mid, 17 late) as a SEPARATE, disclosed timing investigation, not a determinism control on this proof's own mechanism",
+   "observed": "battery (the control this field governs): 21/21 PASS both times (direct 32.281s, pytest 27.22s -- timing differs, verdicts identical) -- STABLE. O1-AC2's own real-wall-clock invocation is EXPLICITLY NOT stable across the session (3 of 3 early repeats: BUDGET REACHED/FAIL, cold OS file-cache; 17 of 17 late repeats: WITHIN BUDGET/PASS, warm cache) -- this is disclosed in O1-AC2's own row, in declared_exclusions, and in surprise rows S1+S6 rather than folded into this control, because it is a measured property of the MACHINE'S cache state at invocation time, not of this proof's own battery/mutant mechanism (which stayed 21/21 across both cache states).",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "OS-s-2's path-scoped git call for freshness (would let the engine actually answer a small-scope query fast regardless of OS file-cache state)",
+   "reason": "a separate, dependent cell (NFRA_OUTSET_PRD.md s.7 row OS-s-2, depends_on OS-s-1); this order's BOUNDS forbid a second implementation. O1-AC2 now PASSES robustly against the issuer's amended --budget 60 invocation (5/5, 3.0-6.3s, >5x margin over the worst cold-cache cost measured); the underlying whole-repo cost is still real and would still make a TIGHT caller-supplied budget cache-dependent, per surprise rows NFRA_OUTSET-W1-S1, -S6 (the correction) and -S8 (the amendment re-measurement)."
+  },
+  {
+   "item": "genuinely bounding federated's live call's OWN internal duration once dispatched",
+   "reason": ".tools/_trino_fed.py (the only place a real timeout could be passed into the transport) is outside this order's <paths>; mitigated at the wrapper level with a nominal-budget floor check instead. Filed as surprise row NFRA_OUTSET-W1-S2 (OS-s-5's own cell)."
+  },
+  {
+   "item": "--cursor skip-ahead for freshness's pipeline-dependent phases (enumerate -> tracked-history -> untracked-mtime -> score)",
+   "reason": "each phase's data feeds the next and nothing persists between invocations (a cache file is outside this order's paths); --cursor is accepted and echoed in every resume line, not a silent gap -- documented in build_budgeted()'s own docstring as a named non-application, the same shape as the FORM's own KILLED-OUTSIDE uncovered member."
+  },
+  {
+   "item": "investigating why object_freshness.py's tracked_last_write() drops 10 of 30,276 tracked paths",
+   "reason": "a pre-existing engine characteristic found incidentally, out of this order's scope (Rule T budget wiring only); filed as surprise row NFRA_OUTSET-W1-S3."
+  },
+  {
+   "item": "regenerating infra/system/06_current_state.{md,json}",
+   "reason": "the commit gate's own FIX path for the comp-system-gate staleness block; infra/system/ is outside this order's <paths>; used the gate's own sanctioned system-current-override trailer instead. Filed as surprise row NFRA_OUTSET-W1-S5."
+  }
+ ],
+ "surprises": [
+  "NFRA_OUTSET-W1-S1: O1-AC2's own <expect> (WITHIN BUDGET at freshness .tools --budget 5) is contradicted by the engine's unscoped whole-repo scan cost (OS-s-2's own open cell), measured 6.2-11.7s across 7 runs, never under 5s -- CORRECTED (not reversed) by S6 below.",
+  "NFRA_OUTSET-W1-S2: a bare elapsed-time budget check on comp-heat federated is a race that a tiny --budget does not reliably trip before dispatching to the live ~3-4min Trino plane; found and fixed in-draft with a second, nominal-budget floor check (FEDERATED_LIVE_FLOOR_S); the live call's own duration still cannot be bounded because .tools/_trino_fed.py is outside this order's <paths>.",
+  "NFRA_OUTSET-W1-S3: object_freshness.py's tracked_last_write() silently drops 10 of 30,276 currently tracked paths in this worktree (never appear in the git log --name-only walk it reads); found incidentally, not investigated (out of scope).",
+  "NFRA_OUTSET-W1-S4: the issuing harness named a longer proof-of-spec instance filename than the TO file's own <proof_of_spec> block at the same commit; this worker used the harness-given (longer) name.",
+  "NFRA_OUTSET-W1-S5: safe-commit.sh's comp-system-gate blocked the first commit attempt (.tools/comp-heat matches its trigger grep); infra/system/06_current_state.{md,json} (the gate's own fix path) is outside this order's <paths>, so this worker used the gate's own sanctioned system-current-override -F-file trailer instead of widening the lane.",
+  "NFRA_OUTSET-W1-S6: corrects S1 -- re-measured 17 of 17 additional times later in the same session (warm OS file-cache), the same freshness .tools --budget 5 invocation reliably PASSES (3.17-5.0s); S1's root cause (no path-scoped git call, OS-s-2's own cell) remains true and ARMED, its FAIL verdict for O1-AC2 does not.",
+  "NFRA_OUTSET-W1-S7: with all six acceptance criteria now PASS/RECORDED, this order's own <paths> block does not name the task-orders/ folder the TO file lives in, so this worker read that as blocking its own <status> flip regardless of acceptance outcome -- CORRECTED (not reversed) by S9 below.",
+  "NFRA_OUTSET-W1-S8: the issuer amended O1-AC2 at ddff1d8eeb (--budget 5 -> --budget 60, repairing the cache-flaky criterion S1/S6 measured); re-run against the amended invocation, 5 of 5 consecutive runs print WITHIN BUDGET (3.0-6.3s), >5x margin over the worst cold-cache cost S1 measured -- no longer cache-dependent to pass.",
+  "NFRA_OUTSET-W1-S9: corrects S7 -- .owned-paths.yaml already reads org/missions/*/*/*/task-orders/** as lane ANY (LD-0521 Amendment 2, 2026-09-03, @a4c9b25b4c) specifically for a worker's own status flip on a TO it holds; S7 checked the TO's own <paths> prose, not the mechanical lane gate that actually governs the commit, so the flip is not blocked."
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (org/XXX.md startup mechanics do not mint one for this seat type); the audit trail is this deliverable, the code+battery+surprise-row commit 53092092cf on branch wk-OUTSET-1, this deliverable's own commit (PENDING at write time), and org/git-author-override-audit.log's SYSTEM-CURRENT-OVERRIDE entry timestamped 2026-09-04T22:37:10Z (locally, gitignored per *.log).",
+ "compiler_tools": [
+  {
+   "tool": "comp-schedule (read, not run, as the Rule T reference implementation)",
+   "invocation": "Read .tools/comp-schedule in full (827 lines) before writing any comp-heat budget code, per the TO's own instruction",
+   "result": "supplied the FORM's exact shape: resolve_budget/Clock/disclosure_line/within_budget_line/budget_reached_line/deferred_bucket from _compbudget, plus its own answer-state + rc vocabulary pattern this worker mirrored for comp-heat's existing RC_BY_STATE"
+  },
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "on .tools/comp-heat; on org/modules/heatmap/object_freshness.py + .tools/tests/test_os1_budget_battery.py",
+   "result": "clean, 1 of 1 then 2 of 2 files (O1-AC5's own evidence)"
+  },
+  {
+   "tool": ".tools/surprise-row-gate.py",
+   "invocation": "python .tools/surprise-row-gate.py org/missions/D11/NFRA/NFRA_OUTSET/surprise-channel/investigations/INVESTIGATION_v1.md (staged)",
+   "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields -- run twice, once at 4 rows and again at 5 rows after adding S5, both clean"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> O1-AC1,O1-AC2,O1-AC3,O1-AC4,O1-AC5,O1-AC6",
+   "result": "see the WORKER REPORT -- validated on the committed bytes before reporting"
+  }
+ ]
+}
