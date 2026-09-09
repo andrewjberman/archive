@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_REPORT.TO-RP-s-9",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_REPORT/prd/NFRA_REPORT_PRD.md",
+    "group": "D",
+    "vintage_commit": "17c153a1cb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_REPORT/decompositions/NFRA_REPORT_DECOMP.md",
+    "vintage_commit": "7d698685fe",
+    "to_ref": "org/missions/D12/NFRA/NFRA_REPORT/task-orders/NFRA_REPORT.TO-RP-s-9.cost-anomaly-detector-segment-then-box.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_REPORT~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/COST_ANOMALY.md",
+      "kind": "doc",
+      "commit_or_etag": "cd5332f68e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW, the cell deliverable. s.0 names why the existing infrastructure_monitor Lambda's MTD-vs-prior-calendar-month comparison is itself the source of F9's noisy readings, and adopts a true trailing-30-vs-baseline-30-day window instead. s.1 builds and control-tests the SEGMENT-grain detector on live aws ce get-cost-and-usage data (Pipeline tag, 60 real days): (untagged), 45% of spend, sits at -4.5% and does not fire; inf (+639.6%) and bd (+37.3%) do fire, with the inf spike corroborated against RP-s-5's own EC2_MANIFEST.json (inf-gold-layer-runner/inf-exporter live-RUNNING at RP-s-5's read). s.2/s.2a answer the coordinator's addendum on BOX grain plainly: RP-s-5 completed the inventory half; live-tested this turn, aws ce get-cost-and-usage-with-resources returns AccessDeniedException (payer-account resource-level CE data opt-in disabled) and the only active CE tags are segment-or-coarser, so literal box-grain dollars remain unreachable for reasons independent of RP-s-5 -- with a System-tag intermediate view cross-referenced against the manifest (including a CrawlHarness cost dropping to exactly $0.00, corroborating RP-s-5's own dead-instance finding for orion-crawl-harness).",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "cd5332f68e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "1 row appended: NFRA_REPORT-Z-W2-S4 (box-grain cost attribution independently blocked by a payer-account CE setting and tag coarseness/drift, OBSERVATION/ARMED, disarm_owner 2.0.0_SA_COO~ZZ). `python .tools/surprise-row-gate.py <file>` (run against the staged blob before this commit) -> rc=0, '1 new row(s) of 4 total checked (3 pre-existing, NOT re-graded)', 'OK: 1 file(s), all new rows carry their step-7/step-10 fields', standing corpus pass 'OK: corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved)'.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: grep -c -E '15%|15 percent' .../COST_ANOMALY.md -- expect a count of 1 or greater (Andrew's threshold carried verbatim in figures)",
+      "method": "command",
+      "invocation": "timeout 120 grep -c -E '15%|15 percent' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/COST_ANOMALY.md",
+      "output_evidence": "grep -c output: 3 (matching lines), rc=0 -- the threshold appears in s.1's detector rule ('abs(delta_pct) >= 15.0'), the section header, and the mdpf sub-threshold discussion.",
+      "denominator": "3 of the deliverable's lines carry '15%'/'15 percent', over 1 of 1 file.",
+      "status": "PASS",
+      "expect": "output: [1-9][0-9]*"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: grep -c -E '30 ?day|trailing 30' .../COST_ANOMALY.md -- expect a count of 1 or greater (the trailing window named)",
+      "method": "command",
+      "invocation": "timeout 120 grep -c -E '30 ?day|trailing 30' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/COST_ANOMALY.md",
+      "output_evidence": "grep -c output: 5 (matching lines), rc=0 -- s.0's methodology section and s.1's detector rule both name the trailing-30-day window explicitly, distinct from the existing Lambda's MTD-vs-prior-month window.",
+      "denominator": "5 of the deliverable's lines carry '30day'/'30 day'/'trailing 30', over 1 of 1 file.",
+      "status": "PASS",
+      "expect": "output: [1-9][0-9]*"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: grep -c -i -E 'RP-s-5|compute manifest' .../COST_ANOMALY.md -- expect a count of 1 or greater (the box-grain limb references the manifest dependency)",
+      "method": "command",
+      "invocation": "timeout 120 grep -c -i -E 'RP-s-5|compute manifest' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/COST_ANOMALY.md",
+      "output_evidence": "grep -c -i output: 21 (matching lines), rc=0 -- s.2/s.2a is a full re-assessment of RP-s-5's own manifest and what it did/did not discharge for box grain, per the coordinator's explicit addendum on this TO.",
+      "denominator": "21 case-insensitive hits over 1 of 1 file.",
+      "status": "PASS",
+      "expect": "output: [1-9][0-9]*"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The SEGMENT-grain detector itself carries a REAL, live, two-sided control rather than a synthetic mutant: the same 15%-threshold arithmetic applied to (untagged) -- 45% of spend, the single largest line -- returns -4.5% and does NOT fire, while the identical arithmetic applied to inf and bd returns +639.6% and +37.3% and DOES fire. A detector with no discriminating power would either fire on all three or none; it fires on exactly the two with a real, independently-corroborated (RP-s-5 live-RUNNING boxes) divergence. Base-commit control for AC1-AC3: before this cell's commit, no file existed at the deliverable path at all (git show HEAD~1:<path> -- fatal: path does not exist), so all three greps would have failed on a missing file rather than returning a clean nonzero count.",
+      "expected": "(untagged) does not cross the 15% line; inf and bd do; the pre-commit read of the deliverable path fails (file absent)",
+      "observed": "(untagged) -4.5% (stable, CONTROL); inf +639.6% (ANOMALY); bd +37.3% (ANOMALY); git show HEAD~1:org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/COST_ANOMALY.md -> fatal: path does not exist in 'HEAD~1' (rc=128).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1/AC2/AC3 re-run twice: once against the worktree before the commit, once against HEAD cd5332f68e after it. The underlying CE pull (a live, dated API call over a fixed historical window [2026-07-11,2026-09-09)) is itself deterministic for that window -- re-querying the same closed historical range returns the same finalized daily costs (only the current, still-accruing day is 'Estimated': true, and that day is excluded from both 30-day buckets by construction).",
+      "observed": "AC1: 3 both times. AC2: 5 both times. AC3: 21 both times. The account-total sanity check (Sep 1-9 CE read: $340.63) was also compared against the L1 brief's independently-measured $340.02 MTD (a different read, ~2 hours earlier) and agreed to within rounding/estimation drift, not exact-match -- which is the expected result for two reads of a partially-estimated period, not a discrepancy.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Enabling Cost Explorer resource-level data at the payer account, fixing the System tag's bd-pipeline/BDPipeline casing drift, or retiring the stale M365MCPGateway cost tag.",
+      "reason": "All three are billing-account/Terraform-tag changes outside this cell's <paths> and outside comp-schedule's battery finding for this project (no armed gate owned by this project, and none of these changes is authorized here). Filed as row NFRA_REPORT-Z-W2-S4."
+    },
+    {
+      "item": "Editing infra/aws/lambda/infrastructure_monitor/lambda_function.py to adopt the trailing-30-day window this cell demonstrates.",
+      "reason": "Not in this cell's <paths>; the improved methodology and its live evidence are handed to whoever owns that Lambda."
+    },
+    {
+      "item": "A materiality dollar floor other than $0.50/day, or resolving the mdpf +97.7% mechanical-but-sub-dollar case one way or the other.",
+      "reason": "Andrew's word sets the percent threshold, not a dollar floor; the $0.50/day choice is this cell's own and is stated plainly (not hidden) so a grader can substitute a different number without redoing the underlying CE pull."
+    }
+  ],
+  "surprises": [
+    "NFRA_REPORT-Z-W2-S4: box-grain cost attribution is blocked by a payer-account Cost Explorer setting (resource-level data opt-in DISABLED, confirmed live) and by cost-allocation tag coarseness/drift -- both independent of RP-s-5's manifest fix and outside this project's write surface, so RP-s-5 landing does NOT fully unblock box grain as the original bound's stated reason implied it would. OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~ZZ, UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/COST_ANOMALY.md",
+  "compiler_tools": [
+    {
+      "tool": "aws ce (get-cost-and-usage, get-cost-and-usage-with-resources, list-cost-allocation-tags)",
+      "invocation": "aws ce get-cost-and-usage --time-period Start=2026-07-11,End=2026-09-09 --granularity DAILY --group-by Type=TAG,Key=Pipeline (and again Key=System); aws ce get-cost-and-usage-with-resources --group-by Type=DIMENSION,Key=RESOURCE_ID; aws ce list-cost-allocation-tags --status Active; aws ce get-cost-and-usage --granularity MONTHLY for the two 30-day halves and for Sep 1-9 (sanity check against the brief's $340.02)",
+      "result": "60 of 60 daily result objects returned for both tag pulls. Resource-level query: AccessDeniedException (opt-in disabled). 7 of 7 active cost-allocation tags enumerated, unchanged since the brief's 2026-07-07 measurement. Sep 1-9 total $340.63 vs brief's $340.02 -- agreement within rounding/estimation, a positive control on the CE methodology."
+    },
+    {
+      "tool": "aws ec2 describe-instances (Tags)",
+      "invocation": "aws ec2 describe-instances --region us-east-1 --query '...Tags...' over all 32 live instances",
+      "result": "Confirmed the System tag's per-box mapping: 1:1 for opal-gateway/OpalGateway and opal-website-wp/website; many-to-one for bd-pipeline (5 rows) and InflectionPipeline (4 rows); null on 9 of 27 declared rows; a casing drift (bd-pipeline vs BDPipeline) on a 6th bd-* row -- the evidentiary basis for s.2/s.2a's box-grain-is-not-reachable finding."
+    },
+    {
+      "tool": "python3 (CE JSON reconciliation script)",
+      "invocation": "python3 -c \"...\" parses the CE JSON, splits into baseline [today-60,today-30) and trailing [today-30,today) 30-day buckets per tag value, computes daily averages and pct move",
+      "result": "Exact figures reported in COST_ANOMALY.md s.1/s.2a: inf +639.6%, bd +37.3%, mdpf +97.7% (sub-floor), (untagged) -4.5%, cot -0.5%; System-grain InflectionPipeline +397.5%, bd-pipeline +45.5%, M365MCPGateway -83.2%, OpalGateway NEW-COST, website +8.8%, CrawlHarness -100%."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "git add org/missions/D12/NFRA/NFRA_REPORT/surprise-channel/investigations/INVESTIGATION_v1.md && python .tools/surprise-row-gate.py <file> ; git reset <file>",
+      "result": "rc=0. '1 new row(s) of 4 total checked (3 pre-existing, NOT re-graded)'; 'OK: 1 file(s), all new rows carry their step-7/step-10 fields'; standing corpus pass unchanged (4 known, 0 new, 0 resolved). Unstaged afterward so safe-commit.sh performed its own staging per rule 14a."
+    }
+  ]
+}
