@@ -1,10 +1,9 @@
 # NFRA_OUTSET.TO-OS-s-18 -- THE PUBLISH: result
 
 **Assignee:** `0.7.0_AE_CloudOps~W` · **Issuer:** `2.0.0_SA_COO` · **Issuance:** `37b2a19129`
-**Worked:** 2026-09-09 12:55Z -> 13:40Z (main tree, `CLOUD`). The seat was respawned 12:50:19Z after
+**Worked:** 2026-09-09 12:55Z -> 14:00Z (main tree, `CLOUD`). The seat was respawned 12:50:19Z after
 the 2026-09-05 device crash took it mid-cell.
-**Order status at this write:** `pending`. **NOT flipped to complete, and the reason is a CUT DEFECT
-filed as `NFRA_OUTSET-S18` (BLOCKING).**
+**Face vintage:** `cb43d05200` (AMENDED -- see below). **Order status at this write: `complete`.**
 
 ---
 
@@ -14,21 +13,37 @@ The seam is real now. An outset tool's artifact is published at
 `s3://opal-estate-report/outset/comp_heat_drift.json`, the runner's role holds `s3:GetObject` on the
 prefix on the DESIRED and APPLIED planes, and **the role itself read the object** at 13:09Z -- not a
 simulation, the actual principal making the actual call. A failed publish reads FAILED at every level
-tested, including the rendered report text. **What did not land is the battery FILE.**
-`.tools/tests/` is lane `TOOL_BATTERIES` owned by `0.8.0_AE_CloudComp`, and the `<paths>`-block-as-grant
-mechanism the face's preflight relies on is implemented for WORKER serials only, so for this seat the
-order's grant is inert and the criterion's own `<invocation>` path cannot exist at HEAD. That is the
-issuer's to resolve; I stopped the criterion rather than overriding the lane.
+tested, including the rendered report text.
+
+**This order was blocked once, mid-flight, and the block was the issuer's.** The battery could not be
+committed at the path the face originally named: `.tools/tests/` is lane `TOOL_BATTERIES` owned by
+`0.8.0_AE_CloudComp`, and the `<paths>`-block-as-grant mechanism the preflight relies on is
+implemented for WORKER serials only, so for a seat the order's grant is inert. I filed
+`NFRA_OUTSET-S18` (BLOCKING) with the whole write surface measured at once and stopped the criterion
+rather than overriding the lane. The issuer ruled remedy **(c)** at `cb43d05200` and moved the
+invocation path into this seat's own deliverables folder. The battery runs and passes there. Disarm
+recorded as `NFRA_OUTSET-S19`.
 
 ---
 
-## O18-AC1 -- MECHANICAL. Battery written, PASSES, CANNOT BE LANDED BY THIS SEAT.
+## O18-AC1 -- MECHANICAL. **PASS.**
 
-**Invocation, exactly as the face cuts it:** `timeout 300 python .tools/tests/test_os18_seam_readable.py`
+**Invocation, exactly as the AMENDED face cuts it:**
+`timeout 300 python org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.7.0_AE_CloudOps~W/test_os18_seam_readable.py`
 **Expect:** `OS18-SEAM-READABLE` · **Observed:** `OS18-SEAM-READABLE`, rc **0** (read from a
 non-piped invocation -- a pipeline's rc is its last stage's, so `cmd | tail` would have reported
 `tail`'s 0 regardless).
-**Second required grain:** `python -m pytest -q .tools/tests/test_os18_seam_readable.py` -> `1 passed`, rc 0.
+**Second required grain:** `python -m pytest -q <same path>` -> `1 passed`, rc 0.
+**Determinism:** two same-input repeats, both rc 0, and the verdict set (arm name plus
+PASS/FAIL/NOT-EVALUATED) **identical** across both. The verdict set rather than a stdout hash is the
+right comparand and the reason is stated: the battery stamps a UTC timestamp and `mkdtemp` paths into
+its own output, so a byte hash would test the clock rather than the arms.
+**Lineage read before running, from the record and not the message:**
+`git merge-base --is-ancestor cb43d05200 HEAD` -> YES, and the criterion re-read with
+`git show HEAD:<face>` rather than by path, because a path read reads the WORKTREE and would
+fabricate the vintage.
+**At the graded run: 12 of 12 evaluated arms PASSED, 1 NOT-EVALUATED** (arm A1; the host had
+self-stopped). The run below at 13:10:23Z is the one that carries the EXERCISED reading.
 
 **DENOMINATOR: 13 of 13 evaluated arms PASSED, 0 NOT-EVALUATED (run at 13:10:23Z).** Verbatim:
 
@@ -77,13 +92,28 @@ A re-run at 13:12Z, after it self-stopped at **13:11:04Z**, recorded **12 of 12 
 NOT-EVALUATED**, quoting the instance state as the reason. A verdict vocabulary with no NOT-EVALUATED
 value encodes non-evaluation as a verdict; this one has the value and the arm is never counted as a pass.
 
-### Why it is not committed
+### The block, and how it cleared
 
-`.tools/safe-commit.sh` refused: `owned-paths lane violation ... lane=TOOL_BATTERIES ... agent=0.7.0_AE_CloudOps~W
-not in permitted_agents`, rc 1, with commit-gate and to-pipeline-gate passing immediately before it.
-Verified against the repository and not the tool's stdout: the file is absent from `git log`. Root
-cause, remedies and the override I declined are in **`NFRA_OUTSET-S18`**. The battery is complete and
-sits in the working tree ready to land unchanged.
+`.tools/safe-commit.sh` refused the battery at its original path: `owned-paths lane violation ...
+lane=TOOL_BATTERIES ... agent=0.7.0_AE_CloudOps~W not in permitted_agents`, rc 1, with commit-gate and
+to-pipeline-gate passing immediately before it. Verified against the repository rather than the tool's
+stdout: the file was absent from `git log`. I censused the **whole** write surface in one act rather
+than hitting one wall at a time -- 13 paths, **3 refused, 10 permitted**, with a negative control on
+`0.9.0_WK_NFRA_OUTSET~1` returning a different and larger refusal set, so the reading was about the
+grant and not about the tool. Filed as `NFRA_OUTSET-S18`, and the audited
+`GIT_COMMIT_AUTHOR_OVERRIDE` escape was declined and named.
+
+The issuer ruled remedy **(c)** at `cb43d05200`, moving both `O18-AC1`'s and `O19-AC1`'s invocation
+paths into this seat's deliverables folder, which owned-paths clause 4 permits because the serial is
+in the path. The registry was not widened and the cells were not re-seated.
+
+**The move was NOT byte-for-byte, and that is disclosed rather than left to a diff.** The battery
+derived the workspace root as `Path(__file__).resolve().parents[2]` -- correct where it was cut and
+wrong six levels down, where it would have resolved to the project directory and failed as a **wrong
+root** with every derived path missing, not as an obvious move error. Replaced with a derivation:
+`git rev-parse --show-toplevel`, falling back to a marker walk. That is the estate's own rule for
+workspace roots, and it makes the file location-independent, so a further move costs nothing. The
+`<expect>` string, every arm and every assertion are unchanged.
 
 ---
 
@@ -178,7 +208,8 @@ grain, which is the grain `s3:GetObject` is authorized on.
 |---|---|---|---|
 | `NFRA_OUTSET-S16` | OBSERVATION | ARMED | The seam is readable and published-to and **nothing configures the consumer to look**: `ESTATE_OUTSET_SEAM_PREFIX` is absent from `runtime.env` in `instance.tf` and named by neither order. Setting it is not a config edit -- `user_data_replace_on_change = true`, so it is an instance replacement. |
 | `NFRA_OUTSET-S17` | OBSERVATION | ARMED | The publish has **no cadence**. Written by hand at 13:03:50Z against a 26 h ceiling, so it reads STALE from about 2026-09-10T15:03Z. The seam's steady state under the work as cut is FAILED. No schedule was built -- the moratorium reserves that to Andrew. |
-| `NFRA_OUTSET-S18` | **BLOCKING** | ARMED | The cut defect above. Three granted paths unwritable by this seat; the two battery files are the `<invocation>` targets of `O18-AC1` and `O19-AC1`. |
+| `NFRA_OUTSET-S18` | **BLOCKING** | ARMED, now disarmed | The cut defect above. Three granted paths unwritable by this seat; the two battery files were the `<invocation>` targets of `O18-AC1` and `O19-AC1`. |
+| `NFRA_OUTSET-S19` | OBSERVATION | INERT | Disarm ack for `S18` on `cb43d05200`, verified at this seat on the face at HEAD, and disclosing that the move was not byte-for-byte. Grades nothing. |
 
 ## WHAT I DID NOT DO, AND WILL NOT UNASKED
 
@@ -189,6 +220,15 @@ grain, which is the grain `s3:GetObject` is authorized on.
   is not a cut defect and I am not claiming one -- I can reach the file and am declining, because an
   instance replacement neither criterion asks for is scope I do not hold.
 - **Did not build a producer schedule.** Standing moratorium.
-- **Did not start `TO-OS-s-19`.** It is sequenced behind this order, this order is not terminal, and
-  its own `O19-AC1` battery file hits the identical lane refusal.
+- **Did not start the box** to green arm A1 in the graded run. Starting it fires a full report run
+  with the currently-served 2026-08-25 runner. A NOT-EVALUATED arm is cheaper and more honest than a
+  manufactured one, and the exercised reading already exists with its own vintage.
 - **Did not push.** `git push` is refused under this order's BOUNDS.
+
+## NEXT: `TO-OS-s-19`
+
+Unblocked by the same amendment. The window is measured and clear: today's run was 13:00:45Z ->
+13:11:04Z, so the box is stopped and the next scheduled fire is **2026-09-10 13:00Z**, which puts an
+upload today outside the window. The baseline is already read: the served
+`code/estate_report_runner.py` is **125,857 B, LastModified 2026-08-25T05:36:35Z**, matching the
+face's own figure exactly.
