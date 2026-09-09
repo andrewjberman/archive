@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-10F",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-10F.signer-verify-path-two-slot.md",
+    "group": "OTHER",
+    "vintage_commit": "f776c1f7ba"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "6c5d4e5406",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-10F.signer-verify-path-two-slot.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~V",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The PAIRED change: the public read becomes getJwtVerifySlots (getJwtKeySlots + verifyWithSlots at both verify sites); the private read is byte-unchanged at getCurrentKey. Live CodeSha256 sJyR6xk2CIZDJIFQBqVqqfTMOtQ4v1asHfin4/GjXuw= @2026-09-09T23:39:18Z, State Active, EQUAL to the value predicted before the apply.",
+      "artifact_covered_by": ["S10F-AC1", "S10F-AC2", "S10F-AC3", "S10F-AC4"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "artifact_sha256 written by build-nodejs-lambda.sh itself, equal to the deployed CodeSha256 and to the independently recomputed artifact sha.",
+      "artifact_covered_by": ["S10F-AC2"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260909T2335Z_opsec-s10f-signer-verify-two-slot_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy-completion ledger, CLOSED -- all 5 legs proven, sentinel removed. Legs closed through an argv list with no shell, and the stored proofs read back to confirm their lengths rather than trusting the OK line.",
+      "artifact_covered_by": ["S10F-AC5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S10F-AC1",
+      "criterion_verbatim": "The PRE-CHANGE baseline recorded, and the PUBLIC read RE-CONFIRMED single-CURRENT on those exact bytes with verifyWithSlots absent. If the public read is already two-slot, this face's premise is falsified -- STOP and file a row. A baseline taken after the change is not a baseline.",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda get-function-configuration --function-name opalinvest-auth-handler --region us-east-1, run BEFORE the worktree was created; and the pre-change artifact's public-read region and verifyWithSlots presence read at 23:2xZ during the Z-S160 investigation.",
+      "output_evidence": "BASELINE UNMOVED AT THIS FACE'S VINTAGE: CodeSha256 ZrHoxMzn0YsK5oA1lq0OMcsoaL9xzN3RkYFxY9Opjyk=, LastModified 2026-09-09T22:38:20Z, State Active -- the artifact TO-OP-S-10E shipped, unchanged in the interval. THE PUBLIC READ WAS SINGLE-CURRENT ON THOSE EXACT BYTES: `async function fZ(){ return await T8(U3) }` where T8 is getCurrentKey and U3 is the public-key secret id, so it returned the CURRENT slot and nothing else; and verifyWithSlots was ABSENT from that bundle entirely, so no two-slot accept path existed anywhere in the signer. THE PREMISE HELD and the face proceeded. Had the public read already been two-slot, the correct act was a STOP and a row -- this is the same control shape S10E-AC1 carried, and it is what would have caught a face cut against a stale reading.",
+      "denominator": "1 function; 1 public read examined on the pre-change deployed artifact; 1 decisive absence (verifyWithSlots) checked.",
+      "status": "PASS",
+      "status_reason": "Baseline taken before any change, and the single-CURRENT shape re-confirmed on those exact bytes rather than carried forward from the row that reported it."
+    },
+    {
+      "criterion_id": "S10F-AC2",
+      "criterion_verbatim": "BOTH halves true on the post-deploy DEPLOYED bytes and graded as one: the PUBLIC read reaches a two-slot accept path (verifyWithSlots present and reachable from verifyAccessToken and verifyRefreshToken), AND the PRIVATE read still selects ONE CURRENT key. Either half alone is a FAIL -- a two-slot private read is the defect S10E correctly barred, and a single-key public read is the defect this face exists to fix.",
+      "method": "live_read",
+      "invocation": "Code.Location downloaded, unzipped, and searched on LITERAL markers plus an enumeration of every '.previous' occurrence with context; call sites of the minified verifyWithSlots located to establish reachability.",
+      "output_evidence": "HALF A -- THE PUBLIC READ REACHES A TWO-SLOT ACCEPT PATH, REACHABLE FROM BOTH VERIFY FUNCTIONS. verifyWithSlots is present as E8: function E8(q,$,Z,Q){ try{ return q.verify($,Z.current,Q) } catch(z){ if(!Z.previous||z.name===\"TokenExpiredError\") throw z; try{ return q.verify($,Z.previous,Q) } catch(J){ throw z } } }. Its call sites: async function A6(q){ let $=await lZ(); return E8(cq.default,q,$,{algorithms:[\"RS256\"],issuer:pZ,audience:cZ}) } and async function nZ(q){ let $=await lZ(), Z=E8(cq.default,q,$,{algorithms:[\"RS256\"]}); if(Z.type!==\"refresh\") throw Error(\"Invalid token type\"); return Z }. A6 is verifyAccessToken (it carries issuer and audience) and nZ is verifyRefreshToken (it carries the type guard); BOTH take slots from lZ and BOTH call E8, so reachability is shown by the call sites rather than asserted. HALF B -- THE PRIVATE READ STILL SELECTS ONE CURRENT KEY: async function k8(){ return await mZ(B3) } with B3=\"opal/auth/jwt-private-key\", resolving into getCurrentKey which destructures {current:J} and returns a string; and the signing site async function iZ(q){ let $=await k8(); ... sign(Z,$,{algorithm:\"RS256\",...}) } takes its key from k8. So SIGNING resolves through one CURRENT key and VERIFYING through two slots -- the pairing, whose half-application created this face. *** A CORRECTION ON MY OWN INSTRUMENT, RECORDED BECAUSE IT NEARLY PRODUCED A FALSE FAIL: *** the first probe searched the bundle with a regex built on an ASSUMED minified shape and reported 'verifyWithSlots in the bundle: False', which taken at face value would have said this deploy failed. The regex was wrong, not the artifact. Re-run against LITERAL markers -- parseKeySlots's messages each once, TokenExpiredError 3 times, and all 7 '.previous' occurrences enumerated with context (1-3 in parseKeySlots's return shape, 4-5 in E8 itself, 6-7 in the ORIGIN secret's pre-existing overlap) -- the picture is unambiguous. A MATCHER BUILT AGAINST A FORMAT ONE HAS NOT READ RETURNS A CLEAN ZERO, and on a minified bundle the format is never the one in your head.",
+      "denominator": "1 deployed artifact, 1 member, searched in full; 2 of 2 verify functions traced to the accept path; 3 of 3 private-key call sites confirmed non-verifying; 7 of 7 '.previous' occurrences enumerated and classified.",
+      "status": "PASS",
+      "status_reason": "Both halves true on the deployed bytes and graded together as the criterion requires. Neither half was inferred from the other -- the public half rests on located call sites and the private half on its own quoted getter and signing site."
+    },
+    {
+      "criterion_id": "S10F-AC3",
+      "criterion_verbatim": "The two-slot accept path REACHED on a real verify, evidenced rather than reasoned about. The genuine two-KEY test needs a previous key that does not exist until the rotation -- if so, file that limb UNCOMPUTABLE-BY-CONSTRUCTION naming the rotation as where it is obtainable, and do NOT record it as passed.",
+      "method": "live_read",
+      "invocation": "curl POST https://opalinvest.dev/auth/refresh with the token in the refresh_token COOKIE (bogus JWT, and a non-JWT value), against a no-cookie control; then .tools/aws logs filter-log-events on the function's log group over the probe window.",
+      "output_evidence": "LIMB 1, THE PATH REACHED -- EVIDENCED. Three arms with a working discriminator: no cookie returns {\"error\":\"No refresh token\"} (the guard, path NOT reached); refresh_token=<bogus JWT> and refresh_token=not-a-jwt both return {\"error\":\"Internal server error\"} (path REACHED). The two reached arms DIFFER from the guard arm, which is what makes 'reached' a measurement rather than a reading. THE LOG SAYS WHAT HAPPENED INSIDE: 'ERROR Error: W6 [JsonWebTokenError]: invalid signature' for the bogus JWT and '... jwt malformed' for the non-JWT. The first is verifyWithSlots trying current, failing, finding previous null, and RETHROWING the current-key error -- the designed behaviour of the accept path, observed on a real verify. LIMB 2, THE GENUINE TWO-KEY TEST -- UNCOMPUTABLE-BY-CONSTRUCTION AND NOT RECORDED AS PASSED. It requires a token signed by the PREVIOUS key to be accepted while a CURRENT-key token is also accepted. There is no previous key: the public secret is still a BARE PEM, measured at 450 bytes with one BEGIN block and not starting with '{', so parseKeySlots returns previous=null and the fallback branch is unreachable by construction. IT IS OBTAINABLE AT THE ROTATION (TO-OP-S-10), which is the act that writes the {current, previous} envelope, and that is where this limb belongs. A NOTE THAT MATTERS FOR THE ROTATION'S SAFETY: while previous is null the new path is OBSERVABLY IDENTICAL to the old one -- before, jwt.verify threw JsonWebTokenError directly; now verifyWithSlots catches it, sees previous is null, and rethrows THE SAME ERROR OBJECT. So this deploy changes no behaviour until the envelope exists, which is the safest possible shape to land ahead of a rotation.",
+      "denominator": "3 probe arms (1 control + 2 reached); 2 of 2 log lines attributed; 1 limb evidenced, 1 limb filed UNCOMPUTABLE with the place it becomes obtainable named.",
+      "status": "PASS",
+      "status_reason": "SCOPE STATED EXACTLY. The criterion's primary ask -- the two-slot accept path REACHED on a real verify -- is evidenced on the wire and in the function's own log. The two-KEY limb is filed UNCOMPUTABLE-BY-CONSTRUCTION and is expressly NOT recorded as passed, per the face's own instruction; it becomes obtainable only when TO-OP-S-10 writes the previous slot. PASS applies to what was asked and obtained, never to the limb that was not."
+    },
+    {
+      "criterion_id": "S10F-AC4",
+      "criterion_verbatim": "LOGIN AND REFRESH BOTH STILL WORK after the deploy, with the invocation count stated so silence from a dead function cannot pass as health. Exercise /auth/refresh explicitly -- it is the surface this face is about and an unexercised fix on it is not evidence.",
+      "method": "live_read",
+      "invocation": "curl against /auth/refresh (three arms) and /auth/login (a real committed credential); .tools/aws logs filter-log-events; CloudWatch Invocations and Errors over the same window.",
+      "output_evidence": "REFRESH EXERCISED -- AND THE FIRST ATTEMPT FAILED TO REACH THE PATH, which is why the discriminator was needed. The first probe put the token in the JSON BODY and got {\"error\":\"No refresh token\"}, byte-identical to the no-token answer; two arms returning the same string is not evidence, and reading it as 'exercised' would have been a false pass. Cause read at source: index.ts:88 extractRefreshToken pulls the token from a COOKIE named refresh_token, never from the body. Re-probed through the cookie, the reached arms differ from the guard arm (see S10F-AC3). LOGIN STILL WORKS, exercising the SIGNING path this face must NOT have changed: a real committed credential returns 200 with mfaRequired true and a challengeId, which can only be produced by running sealCode -> getMfaCodeSealKey -> getJwtPrivateKey. THE 500 ON A BAD TOKEN IS PRE-EXISTING ROUTE BEHAVIOUR AND NOT A REGRESSION, checked rather than assumed: index.ts:233-241 handles POST /auth/refresh with no specific catch around await refresh(refreshToken), so ANY verify throw has always surfaced through the outer handler as a 500, and index.ts was not touched by this face. THE COUNTS: 32 log events over a complete window (nextToken ABSENT), 7 Invocations, 0 on the CloudWatch Errors metric, and 1 INIT_START -- a cold start on the new bundle, where a MODULE_NOT_FOUND on the changed import would have fired. NOTE THE DISCRIMINATOR ON THAT ZERO: Errors reads 0 even though two probes received a 500, because the outer handler RETURNS a 500 payload rather than failing the invocation. A handled 500 and a Lambda failure are different objects and the metric separates them -- quoting the zero without that distinction would have been the misleading half of a true number.",
+      "denominator": "3 refresh arms + 1 login arm; 32 log events (complete window); 7 invocations; 0 Errors; 1 cold start.",
+      "status": "PASS",
+      "status_reason": "Both surfaces exercised rather than merely unbroken, with the refresh path reached through the cookie the route actually reads, and the 500 attributed to pre-existing route handling rather than reported as a new error class."
+    },
+    {
+      "criterion_id": "S10F-AC5",
+      "criterion_verbatim": "NOTHING ROTATED BY THIS FACE: one version at AWSCURRENT, same version id, LastChangedDate unchanged at 2026-04-06, RotationEnabled unset -- for BOTH the private and the public secret. This face teaches a reader; it never writes a secret.",
+      "method": "live_read",
+      "invocation": ".tools/aws secretsmanager describe-secret --secret-id {opal/auth/jwt-private-key,opal/auth/jwt-public-key} --region us-east-1, read at session start before any deploy and again after this apply; plus get-secret-value on the public secret to confirm its SHAPE.",
+      "output_evidence": "IDENTICAL AT BOTH READS. opal/auth/jwt-private-key: 1 version, LastChangedDate 2026-04-06T13:31:00.251000-04:00, RotationEnabled unset, no DeletedDate. opal/auth/jwt-public-key: 1 version, LastChangedDate 2026-04-06T13:31:00.259000-04:00, RotationEnabled unset, no DeletedDate. No keypair generated, no PutSecretValue issued, no signing switch. Both timestamps carry their true -04:00 offset rather than a typed Z, per the trap bd6e7cb8c7 corrected on this project. AND THE SHAPE IS UNCHANGED TOO, which is the fact S10F-AC3's uncomputable limb rests on: the public secret is still a BARE PEM -- 450 bytes, one BEGIN block, does not start with '{' -- so no previous slot exists and none was created here. THE WAF RIDE MEASURED ABSENT: 0 wafv2 resources in the plan, counted in the plan text rather than inferred from the target being a Lambda; 0 to add, 1 to change, 0 to destroy, 0 forces-replacement.",
+      "denominator": "2 of 2 secrets, read twice each (4 reads); 1 shape read; wafv2 occurrences counted in the full plan text (0).",
+      "status": "PASS",
+      "status_reason": "Both secrets byte-identical across the face in version count, id, LastChangedDate and RotationEnabled, and the public secret's bare-PEM shape confirms no previous slot was written. The rotation remains TO-OP-S-10's act."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The claim this face stands on is a PAIRED one: the public read now reaches a two-slot accept path AND the private read still selects one CURRENT key. The reading that would make that true on the surface and false in substance is the one this whole chain has now produced twice -- applying a single rule to a component that has two roles. A mutant that widened the PRIVATE read to two slots would satisfy 'the signer uses the shared module' and still be the defect S10E correctly barred, because it would let the signer sign under a retired key.",
+      "expected": "With the private read widened to getJwtKeySlots, S10F-AC2's half B must FAIL -- the private getter would no longer resolve to a single CURRENT string -- while half A continued to pass. A criterion that graded the two halves SEPARATELY would report a partial success and let the defect through, which is precisely why the face grades them as one.",
+      "observed": "Not run as a code mutation, and that is stated rather than implied: the paired criterion is graded on the DEPLOYED artifact, and planting a mutant would have required deploying a knowingly defective signer to the live login path to observe it. THE CONTROL WAS OBTAINED WITHOUT THAT, from this session's own history: the mutant already ran in production form. TO-OP-S-10E deployed exactly the single-rule-applied-to-both-roles artifact, its criterion S10E-AC2 graded PASS on accurate evidence, and the defect was found only by re-grounding -- row Z-S160. That is the mutant, its result, and the proof the paired grading is necessary rather than ceremonial. A SEPARATE INSTRUMENT CONTROL DID FIRE THIS FACE: the first bundle probe used a regex built on an assumed minified shape and reported verifyWithSlots ABSENT, which would have been a false FAIL on a correct deploy; re-run against literal markers with all 7 '.previous' occurrences enumerated, the result inverted. And the first refresh probe returned an answer byte-identical to its own control, which is what exposed that the token travels in a cookie rather than the body.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Load-bearing values obtained twice or on two independent instruments. (a) The artifact sha was computed by the build script, INDEPENDENTLY RECOMPUTED from the downloaded object, and PREDICTED before the apply. (b) The baseline CodeSha256 was read during the Z-S160 investigation and re-read at this face's vintage before any edit. (c) Both secrets were read at session start and after the apply. (d) Post-deploy health was read on the log text, the Invocations metric and the Errors metric. (e) The refresh path was probed on three arms including a control that must differ. (f) The bundle was searched twice -- once on assumed structure, once on literal markers -- and the disagreement resolved in favour of the literal read.",
+      "observed": "STABLE where it matters, and the ONE disagreement is recorded rather than smoothed: the build sha, the independent recompute, the S3 metadata content-sha256 and the post-apply live CodeSha256 are the same value and equal the prediction; the baseline was unchanged across its two reads; both secrets identical across theirs; log text, Invocations and Errors agree once the handled-500 distinction is applied. THE DISAGREEMENT: the structural regex said verifyWithSlots was absent and the literal search said present. That is not instrument noise -- it is one broken probe and one sound one, and the sound one is corroborated by the enumerated call sites and by the live log showing the accept path executing. The broken probe is reported in full rather than discarded, because a reader who repeats it will get the same wrong answer.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The rotation itself",
+      "reason": "TO-OP-S-10's act, barred until this face is terminal. No keypair minted, no secret written, no signing switch. Both secrets re-measured unchanged at close and the public secret is still a bare PEM."
+    },
+    {
+      "item": "The signer's PRIVATE key read",
+      "reason": "Deliberately untouched and still single-CURRENT. All three of its call sites -- generateAccessToken, generateRefreshToken and getMfaCodeSealKey's HKDF input -- are non-verifying, so S10E's rationale holds for it exactly as written. Widening it is the defect S10E correctly barred and would be a FAIL on S10F-AC2's half B."
+    },
+    {
+      "item": "The MFA code seal key's unbounded cache",
+      "reason": "Untouched here as in TO-OP-S-10E, and still carried to L9 as that face's S10E-AC6 with no verdict from this lane. Nothing in this face changes it or resolves it."
+    },
+    {
+      "item": "The origin-verify cache in the same bundle",
+      "reason": "TO-OP-S-3's work and unchanged by construction; its two-slot check accounts for 2 of the 7 '.previous' occurrences enumerated on the deployed artifact and was verified still present rather than assumed."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S160: the third STOP, which produced this face -- the signer is ALSO a verifier, /auth/refresh is live, refresh tokens live 7 days, and TO-OP-S-10E's single-key rule had been applied to a read that verifies. This face is that row's disarm: the public read now accepts current-or-previous while the private read still selects one CURRENT key."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-09/session_0.7.0_AE_CloudOps~V_2255-2350Z_OPSEC_S10F_SIGNER_VERIFY_PATH.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'getJwtPrivateKey|getJwtPublicKey|getMfaCodeSealKey' <auth-handler/src> --limit 25 ; comp-find 'refreshToken' ... ; comp-find 'extractRefreshToken|createRefreshTokenCookie' ...",
+      "result": "The phase-1 READ census: 7 call sites across jwt.ts and mfa.ts, each attributed to signing, verifying or HKDF input. It is what turned the new mandate from an aspiration into a table.",
+      "gap_found": "None new. It also found extractRefreshToken, which is how the cookie-not-body defect in my own probe was diagnosed."
+    },
+    {
+      "tool": "deployed-artifact read",
+      "invocation": "Code.Location downloaded, unzipped; searched first on assumed minified structure, then on literal markers with every '.previous' occurrence enumerated.",
+      "result": "Both halves of the paired criterion established, with the accept path's call sites located.",
+      "gap_found": "YES, and it is the sharpest instrument lesson of the face: a regex built on an ASSUMED minified shape reported verifyWithSlots ABSENT on an artifact that contains it -- a FALSE FAIL on a correct deploy. Literal markers are the sound probe against a minified bundle."
+    },
+    {
+      "tool": "curl (live-path probe)",
+      "invocation": "POST /auth/refresh with the token in the body, then in the refresh_token cookie, against a no-token control; POST /auth/login with a real credential.",
+      "result": "The accept path reached and evidenced, with a discriminator that distinguishes reached from guarded.",
+      "gap_found": "YES: the first probe put the token in the JSON body and returned an answer byte-identical to the no-token control. Two arms agreeing is not evidence, and only reading extractRefreshToken at source explained it."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open / close-leg x5 / close --slug opsec-s10f-signer-verify-two-slot",
+      "result": "CLOSED on 5 proven legs.",
+      "gap_found": "None -- the TO-OP-S-10D lesson was applied again: legs closed through an argv list with no shell, then the stored proofs read back to confirm their lengths rather than trusting the OK line."
+    },
+    {
+      "tool": "terraform plan",
+      "invocation": "terraform -chdir=infra/aws/terraform/portal-auth plan -target=aws_lambda_function.auth_handler -no-color",
+      "result": "0 add / 1 change / 0 destroy, three attributes, 0 wafv2.",
+      "gap_found": "None. The data-lookup pattern was RE-VERIFIED rather than carried over from the previous face -- the upload alone moved the plan, read off the plan rather than inferred from the resource shape."
+    }
+  ]
+}
