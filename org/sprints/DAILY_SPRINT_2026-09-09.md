@@ -1,7 +1,8 @@
 TODAY SPRINT
 
-* Investor Reporting is now its own product line. The unification proposal is written, cut into
-  twelve outcomes, and YCharts generation for the dashboard is mapped out with Alyssa.
+* Investor Reporting is now its own product line, under Opal Workflows. The unification proposal
+  is written, cut into twelve outcomes, and YCharts generation for the dashboard is mapped out
+  with Alyssa.
 
 * The company data map rebuilds only in the cloud now. Both machines are out of the map-building
   business, and every tool reads the one copy.
@@ -72,7 +73,8 @@ PROJECTS
 
 * Item 9 - Opal Workflows
 
-  Four pieces active, none blocked. No movement today.
+  Investor Reporting lands here: the proposal is done, twelve outcomes cut, and YCharts generation
+  for the dashboard mapped out with Alyssa. The four tax pieces are unchanged.
 
 * Item 10 - Partner Implementations
 
@@ -130,8 +132,8 @@ PROCESS
   Status: Guardrail at its round close; next read 1 October.
 
 * Item 9 - Opal Workflows
-  **Timeline: This week.**
-  Status: Four pieces active, nothing blocked. No movement today.
+  **Timeline: Spec cut today.**
+  Status: Investor Reporting scoped here; the four tax pieces unchanged.
 
 * Item 10 - Partner Implementations
   **Timeline: Canterbury next week.**
