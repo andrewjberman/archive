@@ -132,6 +132,55 @@ git reads, 300 s for the producer), so there is no unbounded wait to hang on. Na
 72-hour blocking window is not what "daily" reads like, and because the honest render of it is
 indistinguishable from a closed laptop.
 
+### AMENDED 17:09Z -- execution limit PT72H -> PT1H on the issuer's ruling
+
+Same method as the catch-up change: the existing settings object modified in place, BEFORE and AFTER
+captured across the WHOLE object, and the "exactly one field moved" claim asserted rather than
+assumed.
+
+| setting | before | after | moved |
+|---|---|---|---|
+| **ExecutionTimeLimit** | **PT72H** | **PT1H** | **YES** |
+| StartWhenAvailable | True | True | |
+| WakeToRun | False | False | |
+| Enabled | True | True | |
+| MultipleInstances | IgnoreNew | IgnoreNew | |
+| Priority | 7 | 7 | |
+| AllowDemandStart | True | True | |
+| DisallowStartIfOnBatteries | True | True | |
+| StopIfGoingOnBatteries | True | True | |
+
+**fields moved: 1.** State `Ready`, LogonType `Interactive`, NextRunTime `2026-09-10 11:30:00Z`.
+Every subprocess in `publish_drift.py` is bounded (120 s git reads, 300 s producer), so a run still
+alive at one hour is a hung run by definition; killing it lets the next day's fire proceed instead of
+being ignored under `IgnoreNew`. A killed run publishes nothing and that day renders SILENT, exactly
+as before -- no control is weakened.
+
+### **(iv) A FOURTH PROPERTY, AND ON A LAPTOP IT MATTERS MORE THAN THE THREE ABOVE**
+
+Widening the read to the WHOLE settings object for the table above surfaced two `schtasks` defaults
+that no ruling and no author chose, and that nothing had yet looked at:
+
+    DisallowStartIfOnBatteries : True
+    StopIfGoingOnBatteries     : True
+
+**On a laptop these are not footnotes.** The first means the task **will not start while the machine
+is on battery**; the second means a run in progress **is stopped if the machine switches to
+battery**. Combined with the logon dependency already recorded, the timer as installed fires only
+when the laptop is **awake AND logged on AND on AC power** at 07:30 local -- and `StartWhenAvailable`
+only rescues the first two, because a catch-up attempt made on battery is refused by the same rule.
+
+Left as measured and NOT changed, for the same reason as (i) and (iii): battery policy is a
+device-behaviour decision on someone's personal machine, not a build-cell choice. The honest render
+is unchanged -- no publish means the artifact ages past the 26 h ceiling and group A renders that
+device SILENT while the others still render.
+
+⛔ **THE GENERAL POINT, which is why this is in the record at all:** properties (iii) and (iv) were
+both found by reading the WHOLE settings object while changing ONE field. A scoped read of the field
+under discussion would have returned the right answer to the question asked and shown neither. The
+first three properties were about the timer I designed; the fourth is about defaults nobody chose,
+and it is the one most likely to keep this publisher quiet.
+
 **(ii) `/ST 07:30` IS LOCAL TIME AND MOVES WITH THE CLOCK, AND IT IS BEFORE 13:00Z BOTH WAYS.**
 Today (EDT, UTC-4) it is **11:30Z**; after the November change (EST, UTC-5) it is **12:30Z**. Both
 precede the 13:00Z report, so the ordering `O21-AC1` grades survives the transition. Stated so a
