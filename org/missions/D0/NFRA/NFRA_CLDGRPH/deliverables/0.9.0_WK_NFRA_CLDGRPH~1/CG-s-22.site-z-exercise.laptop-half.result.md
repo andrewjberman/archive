@@ -6,8 +6,13 @@ THIS IS THE LAPTOP HALF; SITE Z'S RECORD IS THE OTHER HALF; THE PAIR IS GRADED A
 **Assignee:** `0.9.0_WK_NFRA_CLDGRPH~1` · **Branch:** `wk-cldgrph-6-1` (LOCAL) ·
 **Worktree:** `C:/tmp/wk-cldgrph-6-1` · **HEAD at hand-off:** `2c4e462a7b02c3ea00aadb7f87d209880b108a67`.
 
-**TERMINAL STATUS: OPEN.** `F2-AC3` reads **1**, not `0`, and the order does not flip. The reason is
-in s.3 and in row `NFRA_CLDGRPH-W1-S33`, and it is not a local copy of the graph.
+**TERMINAL STATUS: COMPLETE, on the second pass.** On the FIRST pass `F2-AC3` read **1**, not `0`,
+and the order was left OPEN with row `NFRA_CLDGRPH-W1-S33` -- the count was never a local copy of
+the graph, it was this order's predecessor's own tombstone, and s.3 below is that reading as
+written. The issuer RE-CUT the criterion's pattern at `a12187c5a3` (standing authority @`9f4a57262f`,
+effect not purpose) to match WHOLE store names; the amended invocation reads **0** with its own
+anchored control FIRED, and s.8 records the re-hand. All four mechanical criteria now read PASS
+by output.
 
 **WHAT THIS ORDER DID NOT DO.** No local graph was created, opened or downloaded; no engine ran;
 nothing was written to S3; no code was edited. One transport only -- `.tools/comp-kuzu --json` to the
@@ -105,7 +110,8 @@ not compared: both are `3.0.0_SA_CVO`'s at L9, and this seat cannot see site Z's
 |---|---|---|---|
 | F2-AC1 | `bash .../f2_instants_kept.sh` | `INSTANTS_KEPT=3 of 3 within 5s` · `INSTANT_PROBE_CONTROL=FIRED` | PASS |
 | F2-AC2 | `bash .../f2_answers_recorded.sh` | `ANSWERS_RECORDED=3 of 3` · `ROWS_COUNT_EACH=58,58,58` · `VINTAGE_EACH_PRESENT=true` | PASS |
-| F2-AC3 | `ls <main workspace>/infra/aws/globgrph/ \| grep -c -E 'kuzu_nessie_db\|kuzu_db\|kuzu_ac7'` | `1` (expected `^0$`) | **FAIL** |
+| F2-AC3 (first pass) | `ls <main workspace>/infra/aws/globgrph/ \| grep -c -E 'kuzu_nessie_db\|kuzu_db\|kuzu_ac7'` | `1` (expected `^0$`) | FAIL -- superseded, see s.8 |
+| F2-AC3 (as amended @`a12187c5a3`) | `ls <main workspace>/infra/aws/globgrph/ \| grep -c -E '^(kuzu_nessie_db\|kuzu_db\|kuzu_ac7\|kuzu_ac7\.db)$'` | `0` with `AMENDED_PATTERN_CONTROL=FIRED` | PASS |
 | F2-AC4 | `bash .../f2_skew.sh` | `SKEW_S_MAX=0.347` · `SKEW_SOURCE=gateway Date header` | PASS |
 | F2-AC5 | the reading below | judgment | RECORDED, no verdict |
 
@@ -205,3 +211,50 @@ under the previous order. Channel denominator restated 154 -> 155 by parsing eve
 | `f2_answers_recorded.sh` / `f2_ac2_output.txt` | F2-AC2 |
 | `f2_skew.sh` / `f2_ac4_output.txt` | F2-AC4 |
 | `f2_plant/planted_late_ask.txt` | F2-AC1's control: a capture whose ask began 12.345 s late |
+
+## 8. THE RE-HAND: F2-AC3 RE-CUT BY THE ISSUER, AND WHAT THE SECOND READ ACTUALLY ADDS
+
+`2.0.0_SA_COO~A` ruled on `W1-S33` and amended the criterion at `a12187c5a3` under the standing
+authority @`9f4a57262f`: the census pattern was the issuer's defect, it matched NAMES, and it caught
+`kuzu_db.TOMBSTONE.md` -- the tombstone `TO-CG-F-1` ordered this same slot to write. The amended
+invocation matches WHOLE store names:
+
+```
+ls C:/Users/AndrewBerman/Desktop/ajb_workspace/infra/aws/globgrph/ \
+  | grep -c -E '^(kuzu_nessie_db|kuzu_db|kuzu_ac7|kuzu_ac7\.db)$'      ->  0
+```
+
+Run verbatim at `a12187c5a3`, 2026-09-09T21:11Z. **Both reads are kept** (`f2_ac3_amended_output.txt`):
+`AMENDED_COUNT=0`, `ORIGINAL_COUNT=1` with the one matched name printed, `STORES_PRESENT_BY_LS_D=0 of 3`.
+
+**What the second read adds, and what it does not.** It does NOT establish that the machine is clean;
+`ls -d` established that at 18:52Z, before the amendment existed, and s.1's census recorded it. What
+the second read adds is that the INSTRUMENT now answers the question the clause asks. That ordering is
+the whole reason this is a re-cut on EFFECT rather than a softened bar: the world was measured first,
+the pattern was corrected second, and the corrected pattern agrees with the measurement that preceded
+it. Had `ls -d` read anything other than 0 of 3, no pattern change could have produced this PASS.
+
+**The control had to change with the pattern, and the old one would not have served.** A substring
+census is controlled by a name known present, matched loosely. An ANCHORED census has a failure mode
+the loose one does not: a bad anchor, a stray space, a CR from a Windows listing, and the regex matches
+nothing EVER -- reading 0 on a dirty machine exactly as on a clean one. So the control here is the same
+anchored form against a whole name that IS present, `^(kuzu_stitch_db)$`, which returns 1
+(`AMENDED_PATTERN_CONTROL=FIRED`). `kuzu_stitch_db` is S26's, last in its chain, CG-s-20's question,
+deliberately still on this device and not the canonical graph.
+
+**One trap in the amended line, filed as `NFRA_CLDGRPH-W1-S34`** (OBSERVATION, INERT): it exits **rc 1
+exactly when it PASSES**. `grep -c` returns 1 when it counts zero matches, and a pipeline's status is
+its last command's. Output and exit code are anti-correlated across the two states this criterion
+distinguishes -- on a machine where a store IS present the same line prints `1` and exits `0`. The face
+grades on the printed output and the checker grades the `expect` pattern, so nothing is wrong today;
+it is filed for the seat that re-runs the line by hand at L9, which is likely precisely because the
+order names F2-AC3 as one of the two controls that must be able to FAIL.
+
+**`W1-S33` is not edited.** Its BLOCKING/ARMED standing stands as written even though the amendment
+answers it: the append-only rule forbids editing it, and the disarm is `2.0.0_SA_COO~A`'s to record.
+
+**Unchanged by the re-hand:** s.4 and s.5. The pointer advanced between T1 and T2 (vintage
+`2026-09-09T14:59:48.778469+00:00` -> `2026-09-09T20:04:09.034708+00:00`, the same 58-row shape, a
+different rows sha256), so the pair is graded on `(instant, vintage, sha256)` and never on sha256 or
+row count alone; and the personhood limb of FWD-7 is still unexercised -- two SEATS on two machines is
+what this order delivers, and the reading says so.
