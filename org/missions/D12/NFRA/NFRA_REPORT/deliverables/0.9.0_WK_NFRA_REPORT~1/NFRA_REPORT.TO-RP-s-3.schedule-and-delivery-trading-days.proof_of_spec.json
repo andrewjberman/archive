@@ -1,0 +1,110 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_REPORT.TO-RP-s-3",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/decompositions/NFRA_REPORT_DECOMP.md",
+  "vintage_commit": "7d698685fe2f2f76bd830c4f8e981e1b039b8a3d",
+  "to_ref": "org/missions/D12/NFRA/NFRA_REPORT/task-orders/NFRA_REPORT.TO-RP-s-3.schedule-and-delivery-trading-days.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/prd/NFRA_REPORT_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "393efbe8fbcd5113ae5b5995495f3fc0e710d357"
+ },
+ "assignee": "0.9.0_WK_NFRA_REPORT~1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/SCHEDULE.md",
+   "kind": "doc",
+   "commit_or_etag": "581c6a9fbc98720f6fbeb1f3126aca889352259a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commit_or_etag is the git BLOB sha (git hash-object <path>, content-addressed, resolvable before this commit exists). Verifiable post-commit via: git show <this commit>:org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/SCHEDULE.md | git hash-object --stdin -- must equal 581c6a9fbc98720f6fbeb1f3126aca889352259a. Documentation/law artifact naming the trading-calendar frontier; no scheduler, detector or calendar source was created or edited -- none of those paths is in this cell's write surface."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- grep -c -E '[a-z_/]+/lib/trading_calendar\\.py' SCHEDULE.md; expect a count of 1 or greater -- a bare 'lib/trading_calendar.py' with no directory prefix fails this.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -E '[a-z_/]+/lib/trading_calendar\\.py' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/SCHEDULE.md",
+   "output_evidence": "grep -c output: 1 (rc=0). The matching line writes the frontier as 'toplevel/lib/trading_calendar.py', where 'toplevel' stands for $(git rev-parse --show-toplevel) -- a DERIVED repo-root anchor, never a hardcoded worktree-specific path (CLAUDE.md LD-0405), and never the bare repo-relative fragment alone. Verified against the criterion's own stated trap first: grep of the identical pattern against a standalone string 'lib/trading_calendar.py bare' (no prefix) returns 0, confirming the pattern genuinely discriminates a resolved-looking path from a bare one, and this deliverable's real content is on the passing side because it deliberately supplies the prefix, not because the pattern is weak.",
+   "denominator": "1 matching line out of 114 total lines in the file; expectation was >=1",
+   "status": "PASS",
+   "expect": "output: 1\\b"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- grep -c -i -E 'basename|five|5 file' SCHEDULE.md; expect a count of 1 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i -E 'basename|five|5 file' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/SCHEDULE.md",
+   "output_evidence": "grep -c output: 6 (rc=0) -- 6 lines acknowledge the basename ambiguity and the 5-file census, above the 1-line floor.",
+   "denominator": "6 matching lines out of 114 total lines in the file; expectation was >=1",
+   "status": "PASS",
+   "expect": "output: 6\\b"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 -- grep -c -i -E 'labor day|2026-09-07' SCHEDULE.md; expect a count of 1 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i -E 'labor day|2026-09-07' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/SCHEDULE.md",
+   "output_evidence": "grep -c output: 2 (rc=0) -- 2 lines name Labor Day / 2026-09-07 as the measured failure this schedule must not repeat.",
+   "denominator": "2 matching lines out of 114 total lines in the file; expectation was >=1",
+   "status": "PASS",
+   "expect": "output: 2\\b"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Three mutants run against scratch copies of SCHEDULE.md (never against the committed file). AC1: the exact matching substring 'toplevel/lib/trading_calendar.py' replaced with 'REDACTED'. AC2: every case-insensitive 'basename'/'five'/'5 file' replaced with 'ZZZ'. AC3: every case-insensitive 'labor day'/'2026-09-07' replaced with 'ZZZ'.",
+   "expected": "Each mutant must drop its respective criterion's count to 0, below its >=1 floor.",
+   "observed": "AC1 mutant: 0 (rc=1) -- would FAIL. AC2 mutant: 0 (rc=1) -- would FAIL. AC3 mutant: 0 (rc=1) -- would FAIL. All three fired as designed. AC1's own discrimination was additionally verified against the criterion's own stated trap (a bare 'lib/trading_calendar.py' with no prefix, tested standalone, correctly returns 0) before writing the deliverable's real content.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1, AC2 and AC3's exact invocations run twice in succession against the unmodified committed-content file (before commit, on the working-tree bytes that became the commit), output compared byte-for-byte.",
+   "observed": "Run 1: AC1=1, AC2=6, AC3=2. Run 2: AC1=1, AC2=6, AC3=2. Identical both times.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No scheduler, EventBridge rule, cron expression, detector source, lib/trading_calendar.py, its three vendored copies, or its test file is created or edited.",
+   "reason": "None of those paths is in this cell's write surface, and the bound is explicit that this is deliberate: this cell specifies WHICH frontier a schedule must key on and WHY, it does not wire or edit one. Reading (diffing the three vendored copies, reading the canonical module's API) is not writing and was used freely for grounding."
+  },
+  {
+   "item": "The vendored-copy drift risk named in SCHEDULE.md Sec 4 is described but not remediated or monitored.",
+   "reason": "Fixing the vendoring mechanism (e.g. a build-time sync check) is outside this cell's paths and outside its ACT (naming the frontier, not building drift detection). Named as a declared limit on the determination rather than left implicit."
+  }
+ ],
+ "surprises": [],
+ "session_log": "N/A -- worker subagent (0.9.0_WK_NFRA_REPORT~1) per CLAUDE.md rule 27: 'a worker's write surface is exactly the <paths> its non-terminal order names ... and it writes no telemetry (L7 reads from git)'. This TO's <paths> names no logs/ surface. The git commit history on branch wk-NFRA_REPORT-1f is the record.",
+ "compiler_tools": [
+  {
+   "tool": "comp-find --name",
+   "invocation": "comp-find --name 'trading_calendar.py' --limit 20; re-confirmed at --corpus raw",
+   "result": "5 hits, identical denominator at both corpus scopes: lib/trading_calendar.py, lib/tests/test_trading_calendar.py, and 3 infra/aws/lambda/*/trading_calendar.py copies."
+  },
+  {
+   "tool": "diff",
+   "invocation": "diff lib/trading_calendar.py against each of the 3 infra/aws/lambda/*/trading_calendar.py copies",
+   "result": "0 lines of difference in all three cases -- byte-identical, establishing they are vendored deployment copies of the one canonical source rather than independent implementations."
+  },
+  {
+   "tool": "comp-read",
+   "invocation": "comp-read lib/trading_calendar.py --for 'what functions does this module expose for determining if a date is a trading day'",
+   "result": "is_trading_day(date) -> bool, docstring 'True iff date is a NYSE trading day (weekday + not a NYSE holiday)' -- the concrete API a compliant scheduler calls, cited rather than assumed."
+  },
+  {
+   "tool": "git rev-parse --show-toplevel",
+   "invocation": "git rev-parse --show-toplevel; basename of same",
+   "result": "Confirmed this worktree's own top-level folder name (wk-NFRA_REPORT-1f) is worker-specific and NOT a stable identity -- grounds Sec 3's choice to express the resolved frontier via a derived anchor ('toplevel/...') rather than a hardcoded literal path, per CLAUDE.md LD-0405."
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/NFRA_REPORT.TO-RP-s-3.schedule-and-delivery-trading-days.proof_of_spec.json AC1,AC2,AC3",
+   "result": "run after this instance was written; see this deliverable's WORKER REPORT for the printed rc and denominator"
+  }
+ ]
+}
