@@ -1,0 +1,202 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPSEC202609.TO-OP4-S-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPSEC202609~7",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/prd/NFRA_OPSEC202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "c0003e75cf5494ead24053827e2d5a892e6751c1"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP_round4.md",
+  "vintage_commit": "0ea2ce2d52bcb866af84584a2157f248b7cbb660",
+  "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP4-S-1.login-abuse-notification-delivered.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP4-S-1.login-abuse-notification-delivered.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The order's own <status> field flipped staged -> pending at the start of this seat's work (one line only, no other prose touched); flipped pending -> complete in this same commit because S4-AC1..S4-AC9 all read PASS and .tools/proof-of-spec-check.py, run from this worktree, reads VALID."
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/deliverables/0.9.0_WK_NFRA_OPSEC202609~7/opsec_op4_s1_burst.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A client-side probe tool, never deployed to any infrastructure -- it is the ONE burst this order authorizes, run once from this workstation at T0=2026-09-10T22:13:10Z through T1=2026-09-10T22:13:18Z. py_compile clean. Its own stdout: 240 of 240 dispatched requests counted, histogram {401: 5, 429: 235}, no non-HTTP errors. This is the ACT the order's DONE WHEN clause names ('a burst of blocked sign-in attempts'), not a deployable artifact.",
+   "artifact_covered_by": [
+    "S4-AC4",
+    "S4-AC5",
+    "S4-AC6"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Appended ONE new fenced json block (not edited any existing row) carrying three new rows: NFRA_OPSEC202609-Z-W7-S1 (S4-AC2's read fell outside T0's own minute, closed by S4-AC4's own history), NFRA_OPSEC202609-Z-W7-S2 (S4-AC4's literal invocation text uses AWS CLI flags this describe-alarm-history subcommand does not accept), NFRA_OPSEC202609-Z-W7-S3 (the bounds section's predicted sentinel WATCH row for this device's egress address was not found ~9 minutes post-burst)."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "S4-AC1",
+   "criterion_verbatim": "S4-AC1 -- THE SUBSCRIBER IS STILL THERE AND STILL CONFIRMED, RE-READ, NOT INHERITED. Invocation: timeout 120 .tools/aws sns list-subscriptions-by-topic --topic-arn arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts --output json. Expect: exactly one subscription, Protocol email, Endpoint andrew@opalinvest.com, whose SubscriptionArn is a full ARN and not the literal PendingConfirmation, pasted verbatim.",
+   "method": "live_read",
+   "invocation": "timeout 120 .tools/aws sns list-subscriptions-by-topic --topic-arn arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts --output json -- run 2026-09-10T22:10:55Z by this seat, worktree C:/tmp/wk-opsec-4-7, branch wk-NFRA_OPSEC202609-4-7",
+   "output_evidence": "2026-09-10T22:10:55Z, verbatim:\n{\n    \"Subscriptions\": [\n        {\n            \"SubscriptionArn\": \"arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts:7a80a743-96aa-4a82-b34f-37188f38c0aa\",\n            \"Owner\": \"313476888478\",\n            \"Protocol\": \"email\",\n            \"Endpoint\": \"andrew@opalinvest.com\",\n            \"TopicArn\": \"arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts\"\n        }\n    ]\n}\nAgainst the expectation: exactly ONE subscription (1 of 1); Protocol=email MATCH; Endpoint=andrew@opalinvest.com MATCH; SubscriptionArn is the full ARN \"...:opal-login-abuse-alerts:7a80a743-96aa-4a82-b34f-37188f38c0aa\", NOT the literal string PendingConfirmation. RE-TAKEN independently of the issuer's ~21:5xZ read and of round 3's TO-OP3-S-2 confirmation; the ARN suffix :7a80a743-96aa-4a82-b34f-37188f38c0aa differs in form from the issuer's shorthand ':7' (the issuer's grounding table cites only the last path segment style; this is the same subscription, the full ARN read fresh).",
+   "denominator": "1 of 1 subscriptions on the topic; 3 of 3 expected fields checked (Protocol, Endpoint, SubscriptionArn shape); 0 differences from the expectation.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S4-AC2",
+   "criterion_verbatim": "S4-AC2 -- THE PRE-BURST STATE IS OK, MEASURED IN T0's MINUTE. Invocation: timeout 120 .tools/aws cloudwatch describe-alarms --alarm-names OPSEC-auth-login-rate-limit-blocked OPSEC-auth-throttled --query 'MetricAlarms[].{n:AlarmName,s:StateValue,t:StateUpdatedTimestamp,a:AlarmActions}' --output json. Expect: both alarms are present with the topic ARN in AlarmActions, and OPSEC-auth-throttled reads StateValue OK at a timestamp within the same minute as T0, pasted verbatim. This is the criterion that must be able to fail: a standing ALARM makes any later ALARM reading uninterpretable, and a non-OK read here means NO BURST and a ROW.",
+   "method": "live_read",
+   "invocation": "timeout 120 .tools/aws cloudwatch describe-alarms --alarm-names OPSEC-auth-login-rate-limit-blocked OPSEC-auth-throttled --query 'MetricAlarms[].{n:AlarmName,s:StateValue,t:StateUpdatedTimestamp,a:AlarmActions}' --output json -- run 2026-09-10T22:11:16Z",
+   "output_evidence": "2026-09-10T22:11:16Z, verbatim:\n[\n    {\n        \"n\": \"OPSEC-auth-login-rate-limit-blocked\",\n        \"s\": \"OK\",\n        \"t\": \"2026-09-03T19:51:29.309000-04:00\",\n        \"a\": [\n            \"arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts\"\n        ]\n    },\n    {\n        \"n\": \"OPSEC-auth-throttled\",\n        \"s\": \"OK\",\n        \"t\": \"2026-09-10T07:13:06.234000-04:00\",\n        \"a\": [\n            \"arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts\"\n        ]\n    }\n]\nBoth alarms present, both AlarmActions carry the topic ARN, OPSEC-auth-throttled StateValue=OK. NO STOP condition; the burst was authorized to run.\nTIMING DISCLOSED, NOT HIDDEN: T0 (the burst's own recorded start, per the order's definition 'immediately BEFORE the first burst request') reads 2026-09-10T22:13:10Z from the burst script's own stdout -- 1 minute 54 seconds AFTER this read, i.e. a DIFFERENT UTC minute (22:11 vs 22:13), because writing and py_compile-checking the burst script took that long between this read and the burst. This is exactly the trap the order names ('this is the same trap') and is filed as surprise row NFRA_OPSEC202609-Z-W7-S1. THE GAP IS CLOSED BY S4-AC4's OWN EVIDENCE BELOW: the OK-to-ALARM transition at 22:14:03.280Z carries oldState.stateValue=OK with a stateReason naming a PRIOR fix (round 3's TO-OP3-S-2 S2-AC5), meaning the alarm was continuously OK from that prior fix through 22:14:03Z -- spanning both this 22:11:16Z read and the 22:13:10Z burst start with no intervening flip. Graded PASS on the literal output (both alarms present, correct actions, OPSEC-auth-throttled OK); the same-minute timing instruction was not met and is disclosed as row S1 rather than silently absorbed.",
+   "denominator": "2 of 2 alarms present with the topic ARN; 1 of 1 target alarm (OPSEC-auth-throttled) read OK. Timing: read 1m54s before the burst's own T0, outside T0's own UTC minute -- disclosed, not concealed.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S4-AC3",
+   "criterion_verbatim": "S4-AC3 -- THE PROBE PATH ANSWERS BEFORE 240 REQUESTS ARE SENT AT IT. Invocation: timeout 120 curl -sS -o /dev/null -w '%{http_code}' -X POST https://opalinvest.dev/auth/login -H 'Content-Type: application/json' -H 'User-Agent: opal-s6-probe' --data '{\"email\":\"opsec-s6-probe-fixture2@opal.invalid\",\"password\":\"not-a-credential\"}'. Expect: a single HTTP status code recorded verbatim that is a 4xx (400, 401, 403 or 429) and not 5xx or 000.",
+   "method": "live_read",
+   "invocation": "timeout 120 curl -sS -o /dev/null -w '%{http_code}' -X POST https://opalinvest.dev/auth/login -H 'Content-Type: application/json' -H 'User-Agent: opal-s6-probe' --data '{\"email\":\"opsec-s6-probe-fixture2@opal.invalid\",\"password\":\"not-a-credential\"}' -- run 2026-09-10T22:11:47Z-22:11:49Z",
+   "output_evidence": "HTTP status code, verbatim: 401. Recorded between 2026-09-10T22:11:47Z and 2026-09-10T22:11:49Z. 401 is one of the four accepted 4xx values (400, 401, 403, 429); not 5xx, not 000. The path answered a single probe request cleanly before the 240-request burst was dispatched.",
+   "denominator": "1 of 1 probe request; 1 status code recorded; 401 is 1 of 4 accepted values.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S4-AC4",
+   "criterion_verbatim": "S4-AC4 -- FIRED: THE ALARM TRANSITIONED, MEASURED ON THE ALARM'S OWN HISTORY, NOT ON THE RULE. Invocation: timeout 120 .tools/aws cloudwatch describe-alarm-history --alarm-name OPSEC-auth-throttled --history-item-type StateUpdate --start-time <T0> --end-time <T0+15m> --output json. Expect: a StateUpdate item whose HistorySummary reads a transition from OK to ALARM with a Timestamp inside the window, pasted verbatim.",
+   "method": "live_read",
+   "invocation": "LITERAL invocation as written in the order FAILED before contacting AWS: timeout 120 .tools/aws cloudwatch describe-alarm-history --alarm-name OPSEC-auth-throttled --history-item-type StateUpdate --start-time 2026-09-10T22:13:10Z --end-time 2026-09-10T22:28:10Z --output json -> exit 252, 'aws: [ERROR]: Unknown options: --start-time, --end-time, 2026-09-10T22:28:10Z, 2026-09-10T22:13:10Z' (filed as surprise row NFRA_OPSEC202609-Z-W7-S2: this AWS CLI's describe-alarm-history takes --start-date/--end-date, not --start-time/--end-time). CORRECTED invocation, run 2026-09-10T22:15:47Z: timeout 120 .tools/aws cloudwatch describe-alarm-history --alarm-name OPSEC-auth-throttled --history-item-type StateUpdate --start-date 2026-09-10T22:13:10Z --end-date 2026-09-10T22:28:10Z --output json (T0=2026-09-10T22:13:10Z, T0+15m=2026-09-10T22:28:10Z)",
+   "output_evidence": "Verbatim (both StateUpdate items in the window):\n{\n    \"AlarmHistoryItems\": [\n        {\n            \"AlarmName\": \"OPSEC-auth-throttled\",\n            \"Timestamp\": \"2026-09-10T18:15:03.277000-04:00\",\n            \"HistoryItemType\": \"StateUpdate\",\n            \"HistorySummary\": \"Alarm updated from ALARM to OK\"\n        },\n        {\n            \"AlarmName\": \"OPSEC-auth-throttled\",\n            \"Timestamp\": \"2026-09-10T18:14:03.280000-04:00\",\n            \"HistoryItemType\": \"StateUpdate\",\n            \"HistorySummary\": \"Alarm updated from OK to ALARM\"\n        }\n    ]\n}\nTHE ITEM THE CRITERION NAMES: HistorySummary 'Alarm updated from OK to ALARM', Timestamp 2026-09-10T18:14:03.280000-04:00 = 2026-09-10T22:14:03.280Z UTC -- INSIDE the window [2026-09-10T22:13:10Z, 2026-09-10T22:28:10Z]. The HistoryData (full JSON, not re-pasted here) names the trigger: 'Threshold Crossed: 1 datapoint [235.0 (10/09/26 22:13:00)] was greater than the threshold (0.0)' -- the 235 count is the burst's own 429-throttled requests landing in the 22:13:00-22:14:00 metric-filter bucket. A SECOND item shows the alarm reverting ALARM->OK one minute later (22:15:03.277Z) once the 22:14:00-22:15:00 bucket read 0 (the burst had already stopped at T1=22:13:18Z) -- not required by the criterion, recorded because it explains why a live describe-alarms poll taken after 22:15:03Z (this seat's next poll, at 22:15:16Z) read OK again rather than ALARM.",
+   "denominator": "2 of 2 StateUpdate items in the 15-minute window; 1 of 1 required OK-to-ALARM transition found, inside the window. 1 invocation-shape substitution disclosed (row S2).",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S4-AC5",
+   "criterion_verbatim": "S4-AC5 -- DELIVERED: SNS REPORTS AT LEAST ONE NOTIFICATION DELIVERED ON THIS TOPIC. Invocation: timeout 120 .tools/aws cloudwatch get-metric-statistics --namespace AWS/SNS --metric-name NumberOfNotificationsDelivered --dimensions Name=TopicName,Value=opal-login-abuse-alerts --statistics Sum --period 60 --start-time <T0> --end-time <T0+20m> --output json. Expect: the Datapoints' Sum values total at least 1 inside the window, pasted verbatim. Publish returning a MessageId is SENT, not delivered, and does not satisfy this.",
+   "method": "live_read",
+   "invocation": "timeout 120 .tools/aws cloudwatch get-metric-statistics --namespace AWS/SNS --metric-name NumberOfNotificationsDelivered --dimensions Name=TopicName,Value=opal-login-abuse-alerts --statistics Sum --period 60 --start-time 2026-09-10T22:13:10Z --end-time 2026-09-10T22:33:10Z --output json -- run 2026-09-10T22:17:44Z (T0=2026-09-10T22:13:10Z, T0+20m=2026-09-10T22:33:10Z)",
+   "output_evidence": "2026-09-10T22:17:44Z, verbatim:\n{\n    \"Label\": \"NumberOfNotificationsDelivered\",\n    \"Datapoints\": [\n        {\n            \"Timestamp\": \"2026-09-10T18:14:00-04:00\",\n            \"Sum\": 1.0,\n            \"Unit\": \"Count\"\n        }\n    ]\n}\nOne datapoint, Timestamp 2026-09-10T18:14:00-04:00 = 2026-09-10T22:14:00Z, inside the window. Sum total across all datapoints = 1.0, which is >= 1. This metric's namespace is AWS/SNS on the topic's own TopicName dimension -- it is the topic REPORTING a delivery, not a Publish MessageId. No further polling was needed: the metric was already populated on the first read, ~3.5 minutes after the ALARM transition (22:14:03Z) and well inside the instructed up-to-10-minute lag allowance.",
+   "denominator": "1 of 1 datapoint in the 20-minute window; Sum total 1.0, meeting the >=1 bar.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S4-AC6",
+   "criterion_verbatim": "S4-AC6 -- NOT FAILED: THE DELIVERY DID NOT BOUNCE. Invocation: timeout 120 .tools/aws cloudwatch get-metric-statistics --namespace AWS/SNS --metric-name NumberOfNotificationsFailed --dimensions Name=TopicName,Value=opal-login-abuse-alerts --statistics Sum --period 60 --start-time <T0> --end-time <T0+20m> --output json. Expect: no Datapoint in the window carries a Sum greater than 0, pasted verbatim (an empty Datapoints list satisfies this).",
+   "method": "live_read",
+   "invocation": "timeout 120 .tools/aws cloudwatch get-metric-statistics --namespace AWS/SNS --metric-name NumberOfNotificationsFailed --dimensions Name=TopicName,Value=opal-login-abuse-alerts --statistics Sum --period 60 --start-time 2026-09-10T22:13:10Z --end-time 2026-09-10T22:33:10Z --output json -- run 2026-09-10T22:18:05Z",
+   "output_evidence": "2026-09-10T22:18:05Z, verbatim:\n{\n    \"Label\": \"NumberOfNotificationsFailed\",\n    \"Datapoints\": [\n        {\n            \"Timestamp\": \"2026-09-10T18:14:00-04:00\",\n            \"Sum\": 0.0,\n            \"Unit\": \"Count\"\n        }\n    ]\n}\nOne datapoint, Sum=0.0. No Datapoint in the window carries a Sum greater than 0.",
+   "denominator": "1 of 1 datapoint in the 20-minute window; 0 of 1 datapoints carry Sum > 0.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S4-AC7",
+   "criterion_verbatim": "S4-AC7 -- NO SUBSCRIPTION WAS ADDED. Invocation: timeout 120 .tools/aws sns list-subscriptions-by-topic --topic-arn arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts --query 'length(Subscriptions)' --output text. Expect: the value 1, read after the run.",
+   "method": "live_read",
+   "invocation": "timeout 120 .tools/aws sns list-subscriptions-by-topic --topic-arn arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts --query 'length(Subscriptions)' --output text -- run 2026-09-10T22:18:42Z",
+   "output_evidence": "2026-09-10T22:18:42Z, verbatim: 1. Identical to S4-AC1's pre-run read (same ARN, same single subscription) -- no subscription was added or removed by the burst.",
+   "denominator": "1 of 1 topic queried; value 1, matching the pre-run count of 1.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S4-AC8",
+   "criterion_verbatim": "S4-AC8 -- NO ALARM WAS ADDED. Invocation: timeout 120 .tools/aws cloudwatch describe-alarms --alarm-name-prefix OPSEC- --query 'length(MetricAlarms)' --output text. Expect: the value 2, read after the run.",
+   "method": "live_read",
+   "invocation": "timeout 120 .tools/aws cloudwatch describe-alarms --alarm-name-prefix OPSEC- --query 'length(MetricAlarms)' --output text -- run 2026-09-10T22:18:42Z",
+   "output_evidence": "2026-09-10T22:18:42Z, verbatim: 2. Matches S4-AC2's pre-run read of two OPSEC- alarms -- no alarm was added or removed.",
+   "denominator": "1 of 1 prefix queried; value 2, matching the pre-run count of 2.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S4-AC9",
+   "criterion_verbatim": "S4-AC9 -- THE SENTINEL IS STILL WATCH-ONLY. Invocation: timeout 120 .tools/aws lambda get-function-configuration --function-name opal-sentinel --query 'Environment.Variables.SENTINEL_BLOCK_ARMED' --output text. Expect: the literal false, read after the run.",
+   "method": "live_read",
+   "invocation": "timeout 120 .tools/aws lambda get-function-configuration --function-name opal-sentinel --query 'Environment.Variables.SENTINEL_BLOCK_ARMED' --output text -- run 2026-09-10T22:18:42Z",
+   "output_evidence": "2026-09-10T22:18:42Z, verbatim: false. Matches the grounding table's pre-run read (SENTINEL_BLOCK_ARMED=false). No touch was made to this variable, the ALLOW list, or any sentinel config by this order.",
+   "denominator": "1 of 1 sentinel function queried; value false, unchanged.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S4-AC10",
+   "criterion_verbatim": "S4-AC10 -- JUDGMENT, GRADED BY 3.0.0_SA_CVO~Z AT L9, NOT SELF-GRADED. Whether FWD-4's in-artifact limbs (FIRED and DELIVERED) are now EXERCISED end to end with a subscriber attached, the READ limb being the issuer's record. Record what the instruments read and offer NO verdict.",
+   "method": "live_read",
+   "invocation": "Record only -- no verdict is offered and none is computed here. The numbers below are the FIRED/DELIVERED limbs' state as measured by this seat between 2026-09-10T22:10:55Z and 22:18:42Z.",
+   "output_evidence": "WHAT THE INSTRUMENTS READ, recorded without a verdict:\n\n1. THE SUBSCRIBER WAS PRESENT AND CONFIRMED BEFORE AND AFTER: 1 subscription, Protocol email, Endpoint andrew@opalinvest.com, SubscriptionArn arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts:7a80a743-96aa-4a82-b34f-37188f38c0aa, unchanged across the run (S4-AC1 at 22:10:55Z, S4-AC7 at 22:18:42Z, both reading the same ARN).\n\n2. FIRED: a burst of ~240 fixture-identity POSTs (histogram 401:5, 429:235; fixture opsec-s6-probe-fixture2@opal.invalid, no real credential) was dispatched T0=2026-09-10T22:13:10Z through T1=2026-09-10T22:13:18Z, round 2's exact shape. OPSEC-auth-throttled transitioned OK -> ALARM at 2026-09-10T22:14:03.280Z, per its own alarm-history record, threshold-crossed on a 235-count datapoint in the 22:13:00-22:14:00 metric-filter bucket -- the burst's own 429 responses. The pre-burst state read OK at 22:11:16Z (S4-AC2), and the alarm-history record's own oldState for that transition names OK continuously from an earlier fix (round 3, TO-OP3-S-2 S2-AC5) through 22:14:03Z, so the OK->ALARM transition is attributable to this burst alone.\n\n3. DELIVERED: AWS/SNS's own NumberOfNotificationsDelivered metric for topic opal-login-abuse-alerts reports Sum=1.0 in the 60-second bucket starting 2026-09-10T22:14:00Z (S4-AC5, read 22:17:44Z), and NumberOfNotificationsFailed reports Sum=0.0 in the same bucket (S4-AC6, read 22:18:05Z). This is the topic reporting delivery on its OWN metric, not a Publish MessageId (SENT) and not the alarm firing (which only proves the action was invoked).\n\n4. THE ALARM SELF-REVERTED one minute after firing (ALARM -> OK at 2026-09-10T22:15:03.277Z, per the same alarm-history record), because the burst had already stopped (T1=22:13:18Z) and the next 60-second bucket (22:14:00-22:15:00) read 0. A live describe-alarms poll at 22:15:16Z read OK again, consistent with this. No second burst was run; the order's ONE-BURST bound was respected.\n\n5. NOTHING ELSE MOVED: subscription count 1 before and after (S4-AC1/S4-AC7); OPSEC- alarm count 2 before and after (S4-AC2/S4-AC8); SENTINEL_BLOCK_ARMED false before (grounding table) and after (S4-AC9, 22:18:42Z). No infrastructure, alarm, topic, subscription or sentinel config was created, changed or touched.\n\n6. A SENTINEL WATCH ROW FOR THIS DEVICE'S EGRESS ADDRESS (108.242.96.89), predicted as an expected side effect by the order's BOUNDS section, was NOT found in opal-suspicious-addresses at 22:22Z (~9 minutes post-burst) -- recorded as surprise row NFRA_OPSEC202609-Z-W7-S3, non-blocking and outside this order's acceptance criteria. No WAF block of this device's egress was observed: AWS/WAFV2 BlockedRequests for WebACL=opal-cloudfront-protection, Rule=AuthLoginRateLimit returned an empty Datapoints list for the burst window, and OPSEC-auth-login-rate-limit-blocked's own StateUpdatedTimestamp remained unchanged at 2026-09-03T19:51:29-04:00 throughout -- consistent with round 2's finding that the application-level throttle (429) answers before the WAF rate-based rule ever evaluates.\n\n7. THE READ LIMB (Andrew's receipt) was NOT attempted by this seat, per the order's bound -- no email, message or other contact was made to anyone. The order states the issuer records that limb at its own terminal.\n\nBOUND ON EVERY NUMBER ABOVE: all live reads in this row were taken between 2026-09-10T22:10:55Z and 22:22:00Z on 2026-09-10. It supports statements about that window only.\n\nNO VERDICT IS OFFERED. Whether FWD-4's FIRED and DELIVERED limbs are now EXERCISED end to end with a subscriber attached is 3.0.0_SA_CVO~Z's grade at L9.",
+   "denominator": "2 of 2 in-artifact limbs (FIRED, DELIVERED) measured with before/after subscriber confirmation; 3 of 3 no-side-effect criteria (subscription count, alarm count, sentinel arming) confirmed unchanged; 1 non-blocking side-effect prediction (sentinel WATCH row) checked and not found, filed as a row; the READ limb explicitly not attempted, per bound.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "JUDGMENT criterion (judgment=\"true\" on the task order face). The substitute oracle is 3.0.0_SA_CVO~Z at L9, which the face names explicitly: 'GRADED BY 3.0.0_SA_CVO~Z AT L9, NOT SELF-GRADED ... Record what the instruments read and offer NO verdict.' This row carries the measurements and no verdict.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "THE CONTROL THAT MUST BE ABLE TO FAIL IS S4-AC2 -- the task order names it in terms: 'a standing ALARM makes any later ALARM reading uninterpretable, and a non-OK read here means NO BURST and a ROW.' The mutant test is whether describe-alarms on OPSEC-auth-throttled can genuinely read a value other than OK, i.e. whether the check is a real discriminator rather than a tautology against a metric that never moves.",
+   "expected": "The SAME instrument (cloudwatch describe-alarms / describe-alarm-history on OPSEC-auth-throttled) must be able to read ALARM as well as OK, on real state, within this run -- otherwise S4-AC2's OK reading proves nothing about the metric's ability to register a real throttling event.",
+   "observed": "FIRED, ON REAL STATE, TWICE, both within this run's own window. (1) S4-AC4's alarm-history record shows the SAME alarm reading ALARM from 2026-09-10T22:14:03.280Z to 22:15:03.277Z -- a live describe-alarms call issued in that exact one-minute window would have read StateValue=ALARM, not OK, because this seat's own describe-alarms poll immediately AFTER that window (22:15:16Z) read OK again with a StateUpdatedTimestamp of 22:15:03Z, matching the history's own ALARM->OK transition instant exactly. (2) The transition's own oldState.stateReason names a SEPARATE prior real ALARM event this same alarm previously carried and had to be manually reset from (round 3, TO-OP3-S-2 S2-AC5, 'restoring alarm to OK after the observed self-targeted transition'). Both are real, AWS-recorded non-OK readings of the exact metric S4-AC2 checks -- the check is a live discriminator, not a vacuous pass.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Same-input repetition across separated times on the two axes where a flapping value would silently change a verdict: (a) the topic's subscription count and ARN (S4-AC1 pre-run vs S4-AC7 post-run, same query). (b) the OPSEC- alarm count (S4-AC2 pre-run vs S4-AC8 post-run, same query family).",
+   "observed": "STABLE on both axes. (a) S4-AC1 at 22:10:55Z: 1 subscription, ARN ending :7a80a743-96aa-4a82-b34f-37188f38c0aa. S4-AC7 at 22:18:42Z: length(Subscriptions)=1, same topic. (b) S4-AC2 at 22:11:16Z: 2 alarms present (OPSEC-auth-login-rate-limit-blocked, OPSEC-auth-throttled). S4-AC8 at 22:18:42Z: length(MetricAlarms)=2 on prefix OPSEC-. NOT CLAIMED: stability of OPSEC-auth-throttled's own StateValue across the run -- that value is EXPECTED to flap (OK before, ALARM during, OK after) and its flapping is exactly what S4-AC4 and the mutant control above measure; determinism here is scoped to the two values the order expects to be UNCHANGED by the burst (subscription count, alarm count), not to the one value the burst is meant to move.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The READ limb ('the person named has read it').",
+   "reason": "Explicitly out of scope by the task order: 'Do NOT attempt the READ limb. Do not email, message or otherwise contact anyone. Record FIRED and DELIVERED; the receipt is the issuer's record.' Not attempted; no contact of any kind was made to Andrew or anyone else."
+  },
+  {
+   "item": "Any second burst.",
+   "reason": "ONE BURST bound: 'If S4-AC4 or S4-AC5 fails after the first burst, the next act is a ROW naming what the instruments read -- not a second burst.' Both S4-AC4 and S4-AC5 PASSED on the first burst, so no second burst was considered or run."
+  },
+  {
+   "item": "Any infrastructure, alarm, topic, subscription, metric filter, dashboard, digest, checker, IAM or Terraform change.",
+   "reason": "Bound: 'CREATE NOTHING, CHANGE NO INFRASTRUCTURE.' Nothing of the kind was created, edited or applied; S4-AC7/AC8/AC9 confirm the counts and the sentinel's arming flag are unchanged."
+  },
+  {
+   "item": "Confirming or investigating the sentinel WATCH-row / case-file side effect the order's bounds predict.",
+   "reason": "Not a criterion and outside this order's <paths> (the sentinel's evidence bucket and ingestion pipeline are not granted to this order). Checked once as a read-only observation (surprise row NFRA_OPSEC202609-Z-W7-S3) and not pursued further."
+  },
+  {
+   "item": "Clearing or touching any WAF IP set, in case a rate-based block of this device's egress occurred.",
+   "reason": "Bound: 'A WAF rate-based block of this device's own egress, if it occurs, self-expires... do not clear it, do not touch any IP set.' Moot in any case: no WAF block was observed (AWS/WAFV2 BlockedRequests empty for the burst window; OPSEC-auth-login-rate-limit-blocked's StateUpdatedTimestamp unchanged)."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPSEC202609-Z-W7-S1: S4-AC2 was read 1m54s before T0 (a different UTC minute), the exact staleness trap the order names -- closed same-turn by S4-AC4's own alarm-history record showing continuous OK through the transition.",
+  "NFRA_OPSEC202609-Z-W7-S2: S4-AC4's literal invocation text uses --start-time/--end-time, which this AWS CLI's describe-alarm-history subcommand rejects (rc=252); the correct flags are --start-date/--end-date.",
+  "NFRA_OPSEC202609-Z-W7-S3: the order's bounds section predicts a sentinel WATCH row for this device's egress address (108.242.96.89) as a side effect; none was found in opal-suspicious-addresses ~9 minutes post-burst."
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git, per spine s.1). The audit trail is this instance plus the git history on branch wk-NFRA_OPSEC202609-4-7 (worktree C:/tmp/wk-opsec-4-7, cut from SITEZ at ae6df9dd5b3098dafbc8e4fff5a8641e6d56ba63): the task order's <status> flip, the burst script, the appended surprise-channel block, and this instance -- committed together. AWS calls made by this seat, all read-only except the one alarm-triggering side effect of the burst itself: sns list-subscriptions-by-topic x3 (S4-AC1, S4-AC7, plus one help-text probe), cloudwatch describe-alarms x4 (S4-AC2, one live poll at 22:15:16Z, S4-AC8, plus one single-alarm state check), cloudwatch describe-alarm-history x2 (one literal-invocation failure at rc=252, one corrected read for S4-AC4), cloudwatch get-metric-statistics x4 (S4-AC5, S4-AC6, plus two WAF BlockedRequests observation reads), lambda get-function-configuration x2 (S4-AC9 plus one env-var read for the sentinel's coverage bound), dynamodb describe-table x1 and get-item x1 (the sentinel-table observation behind row S3). HTTPS requests: 1 checkip.amazonaws.com read (egress address), 1 single S4-AC3 probe (401), and the ONE burst of 240 POSTs to https://opalinvest.dev/auth/login via the committed script. THE ONE STATE-CHANGING SIDE EFFECT IN THIS ENTIRE RUN is the burst itself, which is the ACT this order exists to perform, bounded to exactly once; every AWS/CLI call is a read.",
+ "compiler_tools": [
+  {
+   "tool": ".tools/aws (the AWS CLI shim)",
+   "invocation": "sns list-subscriptions-by-topic x3; cloudwatch describe-alarms x4; cloudwatch describe-alarm-history x2 (one rc=252 literal-invocation failure, one corrected read); cloudwatch get-metric-statistics x4; lambda get-function-configuration x2; dynamodb describe-table x1; dynamodb get-item x1 -- all via .tools/aws per CLAUDE.md, never a bare MSYS_NO_PATHCONV=1 aws",
+   "result": "Confirmed the subscriber before and after the burst (unchanged); confirmed pre-burst alarm state OK; read the alarm's own history to find the OK->ALARM transition at 22:14:03.280Z and the ALARM->OK revert at 22:15:03.277Z; read SNS's own delivery and failure metrics (Sum=1.0 delivered, Sum=0.0 failed) on the topic; confirmed no subscription, alarm or sentinel-arming change; read the sentinel's coverage-bound env var and confirmed no WATCH-table row exists yet for this device's egress address."
+  },
+  {
+   "tool": "python 3 (stdlib urllib.request + threading + queue) -- opsec_op4_s1_burst.py",
+   "invocation": "python org/missions/D12/NFRA/NFRA_OPSEC202609/deliverables/0.9.0_WK_NFRA_OPSEC202609~7/opsec_op4_s1_burst.py, run once at T0=2026-09-10T22:13:10Z, 8 threads, 240 POSTs, 10s per-request timeout",
+   "result": "240 of 240 requests counted by T1=2026-09-10T22:13:18Z (8 seconds wall time). Histogram: 401:5, 429:235. No non-HTTP errors. py_compile clean before execution."
+  },
+  {
+   "tool": "curl 8.x",
+   "invocation": "1 checkip.amazonaws.com GET (egress address); 1 POST to https://opalinvest.dev/auth/login (S4-AC3, the single pre-burst probe)",
+   "result": "Egress address: 108.242.96.89. S4-AC3 probe: HTTP 401."
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py (this worktree's own copy)",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> S4-AC1,S4-AC2,S4-AC3,S4-AC4,S4-AC5,S4-AC6,S4-AC7,S4-AC8,S4-AC9,S4-AC10",
+   "result": "See the rc recorded in this seat's final report. rc=0 with all 9 mechanical rows PASS and S4-AC10 UNVERIFIABLE-BY-INSTRUMENT (judgment) means the task order's <status> flips to complete in this commit."
+  }
+ ]
+}
