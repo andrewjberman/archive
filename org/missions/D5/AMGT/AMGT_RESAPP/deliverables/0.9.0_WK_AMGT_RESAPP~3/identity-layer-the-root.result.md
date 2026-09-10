@@ -38,6 +38,52 @@ worktree `wk-AMGT_RESAPP-1-3` cut from SITEZ @3dbada33de.
    recorded) did not affect any criterion; `f6_remeasure.py`'s own population is workbooks, not
    folders, and is unaffected.
 
+## REOPEN (commit 0d2cfbfc11, row AMGT_RESAPP-Z-W7-S3) -- the shared-template-placeholder fix
+
+`2.0.0_SA_COO~ZZZ` reopened this order (`complete` -> `pending`) on row `AMGT_RESAPP-Z-W7-S3`
+(`0.9.0_WK_AMGT_RESAPP~7`): 16 of the 48 MEASURED `bloomberg_ticker` values in the original
+`universe.json` were the single string `"AAPL US"`, read honestly from a "FactSet Based ONE PAGER"
+workbook's plain `Model` sheet row 2 beside `"Ticker:"` -- the template's unfilled example ticker, not
+any of those sixteen companies' own. A new criterion, AC7 (UNSCOPED, C-SHARED-DEFECT), was added to the
+task order: no MEASURED ticker may be shared by two or more folders.
+
+**The ORIGINAL measurement is preserved, not deleted.** The AC2 invocation, run against the
+pre-amendment `universe.json` and recorded in the instance committed at `9377323a70ede3d9270f3f2bd9c702ecbe864dc2`,
+read verbatim:
+
+    universe 89 of 89 folders; ticker statuses {'MEASURED': 48, 'INFERRED': 0, 'UNRESOLVED': 41} partition OK
+
+That line is a true measurement of the pre-amendment text and code; it is not retracted, only
+superseded by a corrected build.
+
+**The fix:** `build_universe.py` gained `_detect_and_downgrade_shared_placeholders()`, a whole-population
+pass run after the per-folder scan and before the partition is computed -- exactly the read AC1-AC5
+cannot make, being per-folder/per-key checks (Rule 22: "a check scoped to the members cannot see a defect
+in what the members share"). Rule applied: a MEASURED ticker value held by two or more folders is a
+shared template default, not any one folder's subject ticker; every folder holding it is downgraded to
+UNRESOLVED, evidence naming the value, the sibling folders, and the original per-folder read it
+supersedes. `sa_symbol` is recomputed for each downgraded folder (it had been `INFERRED` off a value that
+no longer stands). Committed at `628b975b492a36c1ff96e108ec4d905e14b55096`.
+
+**Re-run after the fix**, verbatim:
+
+    AC1: IDENTITY SELF-TEST: 4 keys, 3 statuses, unresolved-refused=True, resolved-admitted=True: PASS
+    AC2: universe 89 of 89 folders; ticker statuses {'MEASURED': 32, 'INFERRED': 0, 'UNRESOLVED': 57} partition OK
+    AC3: F6 RE-MEASURED: stale-set 48 / own-set 4 / no-CSC 2 of 54 workbooks; vintage 2026-09-10T23:20Z (unaffected -- CSC-sheet scoring never touched bloomberg_ticker)
+    AC4: 0
+    AC5: sa_symbol MEASURED 0 | ir_domain MEASURED 0 | social_account MEASURED 0
+    AC7: MEASURED 32 | distinct 32 | values shared by two or more folders 0 []
+
+All 16 downgraded folders match the amendment's named set exactly (AstraZeneca AZN, Canadian National
+Railway CNR, Clorox CLX, Copa CPA, Imperial Brands IMB LN, JD.com 9618 HK, Michelin ML FP, Mitsubishi UFJ
+Financial Group 8306 JP, Nestle NESN SW, Nokia FH, Orange ORA FP, SAP GY, Sanofi SAN FP, Shopify SHOP CA,
+Tokyo Marine 8766 JP, Total Energies TTE FP) -- read from `universe.json`'s
+`shared_ticker_placeholders_downgraded["AAPL US"]`, which lists all 16 by folder name.
+
+No new surprise row was filed for this reopen: row `AMGT_RESAPP-Z-W7-S3` is another seat's, and its
+disposition is the CVO's, per the coordinator's instruction. Nothing NEW was found while applying the
+fix that this worker's own rows (`AMGT_RESAPP-Z-W3-S1`, `AMGT_RESAPP-Z-W3-S2`) do not already cover.
+
 ## What is NOT done (declared, not hidden)
 
 - The numeric `sa_id` and the live SA fetch path: AMGT-s-b4's, out of lane (Andrew-direct @d09e26e1b1;

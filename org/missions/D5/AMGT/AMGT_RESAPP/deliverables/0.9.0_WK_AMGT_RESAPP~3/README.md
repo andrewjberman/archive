@@ -3,6 +3,44 @@
 Worker: `0.9.0_WK_AMGT_RESAPP~3` | Task order:
 `org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-s-12.identity-layer-the-root.md`
 
+## AMENDMENT 1 (reopen, row AMGT_RESAPP-Z-W7-S3) -- the shared-template-placeholder fix
+
+`0.9.0_WK_AMGT_RESAPP~7` measured (re-measured by `2.0.0_SA_COO~ZZZ` at HEAD) that 16 of the original 48
+MEASURED `bloomberg_ticker` values in `universe.json` were the single string `"AAPL US"`, each read
+honestly from a "FactSet Based ONE PAGER" workbook's plain `Model` sheet at row 2 beside `"Ticker:"` --
+on AstraZeneca, Canadian National Railway, Clorox, Copa, Imperial Brands, JD.com, Michelin, Mitsubishi
+UFJ, Nestle, Nokia, Orange, SAP, Sanofi, Shopify, Tokyo Marine and TotalEnergies (none of which is
+Apple). The per-folder scan could read the cell correctly and still be wrong, because a per-folder read
+cannot tell a filled-in cell from an unfilled template default -- both are syntactically valid
+Bloomberg-shaped strings. That is exactly the shape of defect F6 measures on the CSC sheet, just found on
+the identity block instead, and it was invisible to AC1-AC5 because every one of them is a per-member or
+per-key check; none of them reads what the MEMBERS SHARE.
+
+**The fix, in `build_universe.py`:** a new whole-population pass,
+`_detect_and_downgrade_shared_placeholders()`, runs AFTER the per-folder scan and BEFORE the partition is
+computed. The rule it applies (task order AC7, C-SHARED-DEFECT): **a MEASURED ticker value held by two or
+more folders is the shared template's default, not any one of those folders' subject ticker** -- every
+folder holding it is downgraded to UNRESOLVED, evidence naming the shared value, the sibling-folder count
+and names, and the original per-folder read (workbook/sheet/cell) that produced it; `sa_symbol` is
+recomputed too, since it was `INFERRED` off a value that no longer stands. The general rule is preferred
+over an enumerated `"AAPL US"` ban because an enumerated ban lapses silently the day the template ships a
+different example ticker; the literal is kept ONLY as a non-enforcing sanity constant
+(`_KNOWN_TEMPLATE_PLACEHOLDER_TICKERS`) that prints a `WARN:` if it ever survives as MEASURED after the
+general pass runs (it does not, on this corpus, at this vintage).
+
+**Partition, before and after** (89 of 89 folders both times, denominator unchanged):
+
+| | MEASURED | INFERRED | UNRESOLVED |
+|---|---|---|---|
+| Original (instance @9377323a70, text pre-amendment) | 48 | 0 | 41 |
+| After the fix (this instance) | 32 | 0 | 57 |
+
+The 16-folder delta is exactly the `"AAPL US"` set above (`universe.json`'s
+`shared_ticker_placeholders_downgraded` names all 16 by folder). `sa_symbol` moved from `INFERRED 26` to
+`INFERRED 10` for the same reason (all 16 downgraded names had a `" US"` suffix and had been `INFERRED`
+off the placeholder). **The original measurement is not deleted** -- it is preserved verbatim below as
+the measurement of the pre-amendment text, and in the proof instance's `session_log` note.
+
 ## What is here
 
 | File | What it is |
@@ -25,9 +63,12 @@ well, at its own 2026-09-10 vintage -- this build re-measured its own 89 indepen
 - `workbook_partition`: 49 of 89 folders carry at least one `*ONE PAGER*.xlsx` workbook; 40 carry none (a
   `.docx`/`.pdf` earnings update instead, e.g. Adobe, China Construction Bank, British American Tobacco --
   measured directly, not assumed).
-- `ticker_status_partition`: **MEASURED 48 / INFERRED 0 / UNRESOLVED 41**, summing to 89.
-  - Of the 41 UNRESOLVED: 40 are folders with no one-pager workbook at all (evidence: "no *ONE PAGER*.xlsx
-    workbook found in this folder"); **1 is a folder WITH a workbook that carries none usable** --
+- `ticker_status_partition`: **MEASURED 32 / INFERRED 0 / UNRESOLVED 57** (post-AMENDMENT-1; originally
+  MEASURED 48 / INFERRED 0 / UNRESOLVED 41 before the shared-placeholder pass -- see the AMENDMENT 1
+  section above), summing to 89.
+  - Of the (post-fix) 57 UNRESOLVED: 40 are folders with no one-pager workbook at all (evidence: "no
+    *ONE PAGER*.xlsx workbook found in this folder"); 16 are the `"AAPL US"` shared-template-placeholder
+    folders (AMENDMENT 1); **1 is a folder WITH a workbook that carries none usable** --
     `Rio Tinto RIO LN`'s `Model` sheet reads `Identifier = 'HESAY-US EQUITY'` with `Sector:` /
     `Location:` both `#N/A Invalid Security` beside it. That is not Rio Tinto's ticker (Rio Tinto is
     `RIO LN`) -- it is unrepointed, broken template residue, the same *shape* of defect F6 measures on
@@ -41,9 +82,12 @@ well, at its own 2026-09-10 vintage -- this build re-measured its own 89 indepen
     (MEASURED) once the ticker-shape validator was widened to accept the `*` character that this corpus
     uses as a footnote marker (measured directly on this workbook; not present anywhere in the sample used
     to write the first draft of the validator).
-- `sa_symbol` over the 89: `INFERRED 26 / UNRESOLVED 63 / MEASURED 0` -- the rule (c) infers a slug only for
-  US-listed names whose Bloomberg ticker ends ` US`/` US EQUITY`; every ex-US name (the majority of this
-  corpus) is UNRESOLVED, honestly, rather than guessed.
+- `sa_symbol` over the 89: `INFERRED 10 / UNRESOLVED 79 / MEASURED 0` (post-AMENDMENT-1; originally
+  `INFERRED 26 / UNRESOLVED 63` -- the 16-point drop is exactly the 16 `"AAPL US"` folders, whose
+  `sa_symbol` had been INFERRED off the now-retracted placeholder and is recomputed to UNRESOLVED once
+  `bloomberg_ticker` is UNRESOLVED) -- the rule (c) infers a slug only for US-listed names whose Bloomberg
+  ticker ends ` US`/` US EQUITY`; every ex-US name (the majority of this corpus) is UNRESOLVED, honestly,
+  rather than guessed.
 - `ir_domain` and `social_account`: **UNRESOLVED for all 89**, every one with evidence `"no vendor word at
   this cut (G-24; ...)"` -- bound (d), exercised on the whole universe, not asserted in prose only.
 
@@ -86,10 +130,12 @@ threshold and sheet-scan are its own, stated in the script's docstring so a re-r
 
 Per key, per record, this layer says plainly what it could not resolve and why:
 
-- **bloomberg_ticker**: MEASURED where a workbook carried a readable, shape-valid identifier; UNRESOLVED
-  where the folder has no one-pager workbook, or the workbook's identity block is itself broken residue
-  (Rio Tinto). Never guessed from the folder name -- evidence always cites the workbook path and the
-  sheet/row the value came from.
+- **bloomberg_ticker**: MEASURED where a workbook carried a readable, shape-valid identifier that no other
+  folder also carries; UNRESOLVED where the folder has no one-pager workbook, the workbook's identity
+  block is itself broken residue (Rio Tinto), or the value is a template default shared by two or more
+  folders (AMENDMENT 1, the `"AAPL US"` set -- AC7). Never guessed from the folder name -- evidence always
+  cites the workbook path and the sheet/row the value came from, and a downgraded cell's evidence also
+  names the sibling folders that share the value and the original per-folder read it superseded.
 - **sa_symbol**: INFERRED only for US names via the stated ticker-root rule, evidence naming the rule and
   the input ticker; UNRESOLVED everywhere else, including every non-US name and every folder with no
   ticker to derive from. Never MEASURED (AC5).
