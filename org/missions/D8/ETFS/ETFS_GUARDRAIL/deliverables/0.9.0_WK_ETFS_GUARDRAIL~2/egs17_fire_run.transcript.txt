@@ -1,0 +1,265 @@
+EGS17 BATTERY -- ETFS_GUARDRAIL.TO-EG-s-17 / S17-AC1
+run at 2026-09-09T23:15:24Z by 0.9.0_WK_ETFS_GUARDRAIL~2
+caller identity: {"UserId": "AIDAUR7FNW6PEXHN2JIOH", "Account": "313476888478", "Arn": "arn:aws:iam::313476888478:user/Andrew_Berman"}
+
+================ ARM-A: THE HOLE CENSUS + PROBES ================
+trading calendar source: NYSE/pandas_market_calendars
+WINDOW: last 20 TRADING days through yesterday (denominator = 20)
+  2026-08-11
+  2026-08-12
+  2026-08-13
+  2026-08-14
+  2026-08-17
+  2026-08-18
+  2026-08-19
+  2026-08-20
+  2026-08-21
+  2026-08-24
+  2026-08-25
+  2026-08-26
+  2026-08-27
+  2026-08-28
+  2026-08-31
+  2026-09-01
+  2026-09-02
+  2026-09-03
+  2026-09-04
+  2026-09-08
+
+--- partner cottonwood -- s3://opal-data-etfs/daily/cottonwood/ -- keys under prefix (denominator) = 61
+  2026-08-11  PRESENT
+  2026-08-12  PRESENT
+  2026-08-13  PRESENT
+  2026-08-14  PRESENT
+  2026-08-17  PRESENT
+  2026-08-18  PRESENT
+  2026-08-19  PRESENT
+  2026-08-20  PRESENT
+  2026-08-21  PRESENT
+  2026-08-24  PRESENT
+  2026-08-25  PRESENT
+  2026-08-26  PRESENT
+  2026-08-27  PRESENT
+  2026-08-28  PRESENT
+  2026-08-31  PRESENT
+  2026-09-01  PRESENT
+  2026-09-02  PRESENT
+  2026-09-03  PRESENT
+  2026-09-04  PRESENT
+  2026-09-08  ABSENT
+  ABSENT: 1 of 20 trading days -> ['2026-09-08']
+
+--- partner 49financial -- s3://opal-data-etfs/daily/49financial/ -- keys under prefix (denominator) = 89
+  2026-08-11  PRESENT
+  2026-08-12  PRESENT
+  2026-08-13  PRESENT
+  2026-08-14  PRESENT
+  2026-08-17  PRESENT
+  2026-08-18  PRESENT
+  2026-08-19  PRESENT
+  2026-08-20  PRESENT
+  2026-08-21  PRESENT
+  2026-08-24  PRESENT
+  2026-08-25  PRESENT
+  2026-08-26  PRESENT
+  2026-08-27  PRESENT
+  2026-08-28  PRESENT
+  2026-08-31  PRESENT
+  2026-09-01  PRESENT
+  2026-09-02  PRESENT
+  2026-09-03  PRESENT
+  2026-09-04  PRESENT
+  2026-09-08  PRESENT
+  ABSENT: 0 of 20 trading days -> []
+
+--- PROBE (non-writing) for every ABSENT date ---
+  probe cot-etf-ownership-daily 2026-09-08 -> {"status": "probe", "date": "2026-09-08", "partition": true, "priced": 12016, "output_exists": false}
+    CLASS C (REAL HOLE): partition present, priced=12016, output absent
+  probes run (denominator) = 1 for 1 absent dates across 2 partners
+ARM-A: HOLD -- census complete over 20 trading days x 2 partners; 1 absent; 1 REAL class-C hole(s): cottonwood/2026-09-08
+
+================ ARM-B: THE RULE'S OWN PAYLOAD, READ LIVE ================
+aws events describe-rule --name cot-etf-ownership-daily-schedule  rc=0
+{
+ "Name": "cot-etf-ownership-daily-schedule",
+ "Arn": "arn:aws:events:us-east-1:313476888478:rule/cot-etf-ownership-daily-schedule",
+ "ScheduleExpression": "cron(30 10 * * ? *)",
+ "State": "ENABLED",
+ "Description": "Daily -> compute the Cottonwood ETF-ownership slice from the latest cot canonical/holdings -> opal-data-etfs/daily/cottonwood/",
+ "EventBusName": "default",
+ "CreatedBy": "313476888478"
+}
+aws events list-targets-by-rule --rule cot-etf-ownership-daily-schedule  rc=0
+{
+ "Targets": [
+  {
+   "Id": "CotEtfOwnershipDailyLambda",
+   "Arn": "arn:aws:lambda:us-east-1:313476888478:function:cot-etf-ownership-daily"
+  }
+ ]
+}
+
+Target.Input present on any of 1 target(s)? False
+
+INVOKE PAYLOAD (this battery's):
+{
+ "version": "0",
+ "id": "egs17-manual-20260909T231545Z",
+ "detail-type": "Scheduled Event",
+ "source": "aws.events",
+ "account": "313476888478",
+ "time": "2026-09-09T23:15:45Z",
+ "region": "us-east-1",
+ "resources": [
+  "arn:aws:events:us-east-1:313476888478:rule/cot-etf-ownership-daily-schedule"
+ ],
+ "detail": {}
+}
+ARM-B: HOLD -- Target.Input ABSENT on 1 of 1 target(s) of rule cot-etf-ownership-daily-schedule, so the rule delivers the DEFAULT EventBridge scheduled-event envelope; this battery's payload IS that envelope (source=aws.events, detail-type=Scheduled Event, resources=[the rule arn], no date field). NOTE: the face's 'plus the date field' is NOT taken -- see the surprise row; a date field routes the handler AWAY from the catch-up sweep.
+GUARD: head-object on daily/cottonwood/2026-09-08.json before the fire -> rc=255 (ABSENT, class-C confirmed)
+
+FIRING cot-etf-ownership-daily at 2026-09-08 with the rule's own payload -- start UTC 2026-09-09T23:15:47Z
+aws lambda invoke rc=0  end UTC 2026-09-09T23:15:50Z
+INVOKE ENVELOPE (verbatim):
+{
+    "StatusCode": 200,
+    "ExecutedVersion": "$LATEST"
+}
+RESPONSE PAYLOAD (verbatim):
+{"status": "ok", "date": "2026-09-08", "key": "daily/cottonwood/2026-09-08.json", "slices": 4, "total_ownership": 53641351.75, "source_as_of": "2026-09-08", "catchup_processed": [], "catchup_failed": [], "catchup_skipped_unpriced": []}
+
+================ ARM-C: THE INITIATOR, FROM CLOUDTRAIL ================
+--- trail census (the instrument must exist before its silence means anything) ---
+trails in account (denominator) = 2
+  opal-organization-trail -- Lambda data events captured? False
+  opal-served-key-write-trail -- Lambda data events captured? False
+trails capturing AWS::Lambda::Function DATA events: 0 of 2
+
+aws cloudtrail lookup-events ResourceName=cot-etf-ownership-daily 2026-09-09T23:15:47Z..2026-09-09T23:15:56Z rc=0
+  events scanned (denominator) = 0 ; eventName=Invoke = 0
+ARM-C: FAIL -- INSTRUMENT ABSENT: lambda:Invoke is a CloudTrail DATA event and 0 of 2 trails capture AWS::Lambda::Function data events, so NO Invoke record exists for this or any invocation. Positive control: this battery's own probe/fire invocations DID occur and produced 0 Invoke records in 0 events scanned. The initiator is instead evidenced by the AssumeRole record at the invoke instant (ARM-G) and by the off-cron time signature.
+
+================ ARM-D: catchup_processed NAMES THE RECOVERED DATE ================
+producer response (verbatim): {"status": "ok", "date": "2026-09-08", "key": "daily/cottonwood/2026-09-08.json", "slices": 4, "total_ownership": 53641351.75, "source_as_of": "2026-09-08", "catchup_processed": [], "catchup_failed": [], "catchup_skipped_unpriced": []}
+catchup_processed = []
+response.date     = "2026-09-08"
+response.status   = "ok"
+
+CloudWatch log stream for THIS invocation:  (log events denominator = 0)
+lines naming CATCHUP: 0 of 0
+ARM-D: FAIL -- the producer's own fire DID recover 2026-09-08 -- but by the LATEST-PARTITION path, not the catch-up sweep, so catchup_processed = [] and no CATCHUP: line exists. The recovered date is the NEWEST partition, and _catchup_missing_dates skips it (skip_date). See the surprise row: on this producer a one-day hole is structurally UNREACHABLE by catchup_processed.
+
+================ ARM-E: THE SLICE EXISTS AFTER ================
+aws s3api head-object --bucket opal-data-etfs --key daily/cottonwood/2026-09-08.json  rc=0
+{
+ "LastModified": "Wed, 09 Sep 2026 23:15:52 GMT",
+ "ContentLength": 1345,
+ "ETag": "\"5da999e2fbfadfe302df35ef24407372\"",
+ "ContentType": "application/json"
+}
+LastModified UTC = 2026-09-09T23:15:52+00:00 ; invoke start UTC = 2026-09-09T23:15:47+00:00 ; after? True
+second reader: aws s3 cp rc=0
+rows parsed by the SECOND reader (denominator) = 4
+  cottonwood 2026-09-08 DIVZ ownership_value=19079942.93 account_count=330 source_as_of=2026-09-08
+  cottonwood 2026-09-08 IDVZ ownership_value=15516123.03 account_count=331 source_as_of=2026-09-08
+  cottonwood 2026-09-08 PFDE ownership_value=12430725.84 account_count=320 source_as_of=2026-09-08
+  cottonwood 2026-09-08 PFOE ownership_value=6614559.95 account_count=319 source_as_of=2026-09-08
+distinct date in rows = ['2026-09-08'] ; distinct source_as_of = ['2026-09-08']
+ARM-E: HOLD -- size=1345 bytes, LastModified=Wed, 09 Sep 2026 23:15:52 GMT (>= invoke), second-reader rows=4, every row dated 2026-09-08
+
+================ ARM-F: POSITIVE CONTROL (a READ, never a re-run) ================
+a PRESENT date on the same producer, chosen as the control: 2026-09-04 (head-object read only -- this battery never invokes against it)
+head-object daily/cottonwood/2026-09-04.json rc=0 LastModified=Wed, 09 Sep 2026 10:30:30 GMT
+lines in THIS invocation's log naming 2026-09-04: 0 of 0
+NOT-LISTED is the evidence: the producer's own catch-up loop `continue`s on an existing output with no log line, so a present date appears in NEITHER catchup_processed NOR the log.
+ARM-F: HOLD -- control 2026-09-04 is PRESENT (head-object rc=0) and is named in 0 of 0 log lines of this invocation -- not reported recovered, and never fired at
+
+================ ARM-G: THE SCHEDULE'S OWN FIRINGS, FROM HISTORY ================
+
+--- cot-etf-ownership-daily (cottonwood) rc=0 ; window 2026-08-10T23:16:11Z..2026-09-09T23:16:11Z
+    events scanned (denominator) = 73 ; eventName=Invoke = 0 ; eventName=AssumeRole = 71
+    rule cot-etf-ownership-daily-schedule ScheduleExpression = cron(30 10 * * ? *)
+    PRIOR FIRINGS (one row per calendar day; execution-role AssumeRole at the fire instant):
+      2026-08-11  scheduled=10:30:24Z  off-cron=-
+      2026-08-12  scheduled=10:30:24Z  off-cron=-
+      2026-08-13  scheduled=10:30:24Z  off-cron=-
+      2026-08-14  scheduled=10:30:24Z  off-cron=-
+      2026-08-15  scheduled=10:30:24Z  off-cron=-
+      2026-08-16  scheduled=10:30:24Z  off-cron=-
+      2026-08-17  scheduled=10:30:24Z  off-cron=-
+      2026-08-18  scheduled=10:30:24Z  off-cron=-
+      2026-08-19  scheduled=10:30:24Z  off-cron=-
+      2026-08-20  scheduled=10:30:24Z  off-cron=-
+      2026-08-21  scheduled=10:30:24Z  off-cron=-
+      2026-08-22  scheduled=10:30:24Z  off-cron=-
+      2026-08-23  scheduled=10:30:24Z  off-cron=-
+      2026-08-24  scheduled=10:30:24Z  off-cron=-
+      2026-08-25  scheduled=10:30:24Z  off-cron=-
+      2026-08-26  scheduled=10:30:24Z  off-cron=-
+      2026-08-27  scheduled=10:30:24Z  off-cron=-
+      2026-08-28  scheduled=10:30:24Z  off-cron=-
+      2026-08-29  scheduled=10:30:24Z  off-cron=-
+      2026-08-30  scheduled=10:30:24Z  off-cron=-
+      2026-08-31  scheduled=10:30:24Z  off-cron=-
+      2026-09-01  scheduled=10:30:24Z  off-cron=16:50:17Z
+      2026-09-02  scheduled=10:30:24Z  off-cron=-
+      2026-09-03  scheduled=10:30:24Z  off-cron=-
+      2026-09-04  scheduled=10:30:24Z  off-cron=-
+      2026-09-05  scheduled=10:30:24Z  off-cron=01:45:49Z,06:21:57Z,06:30:35Z
+      2026-09-06  scheduled=10:30:24Z  off-cron=-
+      2026-09-07  scheduled=10:30:24Z  off-cron=-
+      2026-09-08  scheduled=10:30:24Z  off-cron=-
+      2026-09-09  scheduled=10:30:24Z  off-cron=22:58:18Z,23:15:36Z
+    days with a fire at the cron instant 10:30Z: 30 of 30 days seen
+
+--- bd-49f-etf-ownership-daily (49financial) rc=0 ; window 2026-08-10T23:16:11Z..2026-09-09T23:16:11Z
+    events scanned (denominator) = 64 ; eventName=Invoke = 0 ; eventName=AssumeRole = 62
+    rule bd-49f-etf-ownership-scheduled-floor ScheduleExpression = cron(45 10 * * ? *)
+    PRIOR FIRINGS (one row per calendar day; execution-role AssumeRole at the fire instant):
+      2026-08-11  scheduled=10:45:05Z  off-cron=-
+      2026-08-12  scheduled=10:45:05Z  off-cron=-
+      2026-08-13  scheduled=10:45:05Z  off-cron=-
+      2026-08-14  scheduled=10:45:05Z  off-cron=-
+      2026-08-15  scheduled=10:45:05Z  off-cron=-
+      2026-08-16  scheduled=10:45:05Z  off-cron=-
+      2026-08-17  scheduled=10:45:05Z  off-cron=-
+      2026-08-18  scheduled=10:45:05Z  off-cron=-
+      2026-08-19  scheduled=10:45:05Z  off-cron=-
+      2026-08-20  scheduled=10:45:05Z  off-cron=-
+      2026-08-21  scheduled=10:45:05Z  off-cron=-
+      2026-08-22  scheduled=10:45:05Z  off-cron=-
+      2026-08-23  scheduled=10:45:05Z  off-cron=-
+      2026-08-24  scheduled=10:45:05Z  off-cron=-
+      2026-08-25  scheduled=10:45:05Z  off-cron=-
+      2026-08-26  scheduled=10:45:05Z  off-cron=-
+      2026-08-27  scheduled=10:45:05Z  off-cron=-
+      2026-08-28  scheduled=10:45:05Z  off-cron=-
+      2026-08-29  scheduled=10:45:05Z  off-cron=-
+      2026-08-30  scheduled=10:45:05Z  off-cron=-
+      2026-08-31  scheduled=10:45:05Z  off-cron=-
+      2026-09-01  scheduled=10:45:05Z  off-cron=-
+      2026-09-02  scheduled=10:45:05Z  off-cron=-
+      2026-09-03  scheduled=10:45:05Z  off-cron=-
+      2026-09-04  scheduled=10:45:05Z  off-cron=-
+      2026-09-05  scheduled=10:45:05Z  off-cron=03:11:51Z
+      2026-09-06  scheduled=10:45:05Z  off-cron=-
+      2026-09-07  scheduled=10:45:05Z  off-cron=-
+      2026-09-08  scheduled=10:45:05Z  off-cron=-
+      2026-09-09  scheduled=10:45:05Z  off-cron=-
+    days with a fire at the cron instant 10:45Z: 30 of 30 days seen
+
+--- NEGATIVE CONTROL: this battery's manual invoke ---
+    function=cot-etf-ownership-daily invoked_at_utc=2026-09-09T23:15:47Z by arn:aws:iam::313476888478:user/Andrew_Berman (the launching seat) (serial 0.9.0_WK_ETFS_GUARDRAIL~2)
+    a different initiator and an OFF-CRON instant -- it appears in the off-cron column above, never in the scheduled column.
+ARM-G: FAIL -- the schedule's own prior firings ARE listed with denominators (above), but NOT from CloudTrail `Invoke` events: 0 Invoke events exist across both producers because lambda:Invoke is a DATA event no trail captures. The listing above is the AssumeRole management event at each fire instant -- a DIFFERENT instrument than the criterion names. See the surprise row.
+
+================ SUMMARY ================
+ARM-A HOLD
+ARM-B HOLD
+ARM-C FAIL
+ARM-D FAIL
+ARM-E HOLD
+ARM-F HOLD
+ARM-G FAIL
+arms holding: 4 of 7
+TOKEN WITHHELD: 3 of 7 arms did not hold -- ARM-C, ARM-D, ARM-G
