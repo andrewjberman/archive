@@ -16,8 +16,11 @@ Run from the worktree root:
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import json
 import os
+import urllib.request
+import zipfile
 import subprocess
 import sys
 
@@ -26,6 +29,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 HERE = os.path.dirname(os.path.abspath(__file__))
 AWS = os.path.join(ROOT, ".tools", "aws.cmd" if sys.platform == "win32" else "aws")
 
+FUNCTION = "etfs-reports-orchestrator"
 BUCKET = "opal-data-etfs"
 MONTH = "2026-09"
 PREFIX = "platinum/reports/%s/" % MONTH
@@ -155,10 +159,14 @@ def main() -> int:  # noqa: C901
            len(all_starts), SCHEDULER_ROLE, len(sched_hits), len(ar), flags_ok))
 
     # ---------------------------------------------------------------- arm (c)
+    # RE-CUT 2026-09-10 ~02:3xZ on row W1-S22. The cut's premise (an incomplete month
+    # refuses) was wrong: the gate's refusal axis is the coverage CLASS, not the month's
+    # completeness. This arm now READS THE LADDER and ACCEPTS the verdict the producer
+    # gives, then reads the discriminating pair FOR THAT BRANCH.
     rc, listing, raw = aws_json(["s3api", "list-objects-v2", "--bucket", BUCKET,
                                  "--prefix", PREFIX])
     contents = (listing or {}).get("Contents", [])
-    print("objects under s3://%s/%s : %d" % (BUCKET, PREFIX, len(contents)))
+    print("objects under s3://%s/%s : %d (denominator)" % (BUCKET, PREFIX, len(contents)))
     for c in contents:
         print("  %-62s LastModified(UTC)=%s Size=%d" % (c["Key"], c["LastModified"], c["Size"]))
 
@@ -177,40 +185,119 @@ def main() -> int:  # noqa: C901
             ask_doc = doc
         print("  artifact %-26s %s" % (name, "PRESENT" if doc is not None else "ABSENT"))
 
+    # THE PRODUCER'S OWN RULE, quoted from source with file:line @ commit-ish -- so the
+    # class table below is read against the RULE and not against this order's expectation.
+    print("  THE C-vs-D BOUNDARY, from the classifier's own source:")
+    print("    data/etfs/scripts/coverage/classifier.py:146-148 @c866edd324 -- class D:")
+    print('      if not answer.get("partition"):')
+    print('          result[date_str] = {"class": "D",')
+    print('                               "reason": "upstream partition missing (genuinely absent)",')
+    print("    data/etfs/scripts/coverage/classifier.py:160-163 @c866edd324 -- class C:")
+    print('      result[date_str] = {"class": "C",')
+    print('                           "reason": "upstream present and priced > 0, no slice -- "')
+    print('                                     "producer never fired for this date",')
+    print("    THE REFUSAL AXIS, data/etfs/scripts/presentation/render_month_end.py:957-963 "
+          "@4b85a9ae68:")
+    print('      if summary["C"] > 0:')
+    print("          any_c = True")
+    print('      verdict = "REFUSE" if any_c else "PUBLISH"')
+    print("    => the gate refuses on class C ALONE. A missing upstream partition inside an OPEN "
+          "month is class D, so it cannot drive a REFUSE.")
+
     verdict = (verdict_doc or {}).get("verdict")
+    print("  VERDICT AS THE PRODUCER GIVES IT (accepted, never asserted in advance): %r" % verdict)
     classes_printed = 0
+    total_c = 0
     if verdict_doc:
         for p, d in verdict_doc.get("per_partner", {}).items():
-            s = d["summary"]
+            sm = d["summary"]
             classes_printed += 1
-            print("    %-12s %s | A=%s B=%s C=%s D=%s UNKNOWN=%s covered=%s trading_days=%s"
-                  % (p, d["coverage_line"], s.get("A"), s.get("B"), s.get("C"), s.get("D"),
-                     s.get("UNKNOWN"), s.get("covered"), s.get("trading_days")))
+            total_c += int(sm.get("C") or 0)
+            print("    %-12s %s | A=%s COVERED=%s B=%s C=%s D=%s UNKNOWN=%s trading_days=%s holes=%s"
+                  % (p, d["coverage_line"], sm.get("A"), sm.get("COVERED"), sm.get("B"),
+                     sm.get("C"), sm.get("D"), sm.get("UNKNOWN"), sm.get("trading_days"),
+                     sm.get("holes")))
+    print("    class C across %d of %d partners = %d -- consistent with verdict %r"
+          % (classes_printed, classes_printed, total_c, verdict))
+
     n_unres = sum(len(v) for v in (unresolved_doc or {}).values()) if unresolved_doc else 0
-    print("    unresolved entries: %d across %d partner(s)"
+    print("    unresolved entries: %d across %d partner(s) (denominator)"
           % (n_unres, len(unresolved_doc or {})))
+    rung1_recorded = 0
     if unresolved_doc:
         for p, rows in unresolved_doc.items():
             for r in rows:
-                print("      %s %s class=%s reason=%s" % (p, r.get("date"), r.get("class"),
-                                                          (r.get("reason") or "")[:120]))
+                reason = r.get("reason") or ""
+                if "rung 1" in reason:
+                    rung1_recorded += 1
+                print("      %s %s class=%s" % (p, r.get("date"), r.get("class")))
+                print("        REASON VERBATIM: %s" % reason)
+    print("    rung 1 producer-invoke outcomes recorded with their raised error verbatim: "
+          "%d of %d unresolved date(s)" % (rung1_recorded, n_unres))
+
+    # THE DISCRIMINATING PAIR, RE-POINTED ONTO WHAT THE VERDICT ACTUALLY DECIDES.
     code_ref, meta_ref = head(REFUSED_KEY)
-    print("    refused HTML %s -> HTTP %d %s" % (REFUSED_KEY, code_ref, meta_ref or ""))
     pub = []
     for k in PUBLISH_KEYS:
         code, meta = head(k)
         pub.append(code)
         print("    PUBLISH key %s -> HTTP %d %s" % (k, code, meta or ""))
-    print("    THE DISCRIMINATING PAIR: refused/ = %d, publish keys = %s (want 200 and 404,404)"
-          % (code_ref, pub))
-    arm("c", verdict == "REFUSE" and code_ref == 200 and all(c == 404 for c in pub)
-        and n_unres > 0,
-        "coverage_verdict.json verdict=%s (want REFUSE) over %d partner class-sets; "
-        "coverage_unresolved.json entries=%d; refused/etf_ownership.html HTTP %d (want 200); "
-        "2026-09 publish keys HTTP %s of 2 (want 404 each)"
-        % (verdict, classes_printed, n_unres, code_ref, pub))
+    print("    refused HTML %s -> HTTP %d %s" % (REFUSED_KEY, code_ref, meta_ref or ""))
+    print("  BRANCH TAKEN: %s" % verdict)
+    cov_lines_ok = 0
+    csv_keys = [c["Key"] for c in contents if c["Key"].endswith(".csv")]
+    if verdict == "PUBLISH":
+        for k in csv_keys:
+            dest = os.path.join(ROOT, ".scratch", "egs15_" + os.path.basename(k))
+            rc3, _ = aws(["s3api", "get-object", "--bucket", BUCKET, "--key", k, dest])
+            last = ""
+            if rc3 == 0:
+                rows = [ln for ln in open(dest, encoding="utf-8").read().splitlines() if ln.strip()]
+                last = rows[-1] if rows else ""
+            ok = last.startswith("# coverage:") and "trading days" in last and "carried" in last
+            cov_lines_ok += 1 if ok else 0
+            print("    served CSV %-46s LAST ROW: %s" % (os.path.basename(k), last))
+        pair_ok = all(c == 200 for c in pub) and cov_lines_ok == len(csv_keys) and len(csv_keys) > 0
+        print("    PAIR FOR THE PUBLISH BRANCH: publish keys %s (want 200,200) and %d of %d served "
+              "CSVs carry the coverage line (want all)" % (pub, cov_lines_ok, len(csv_keys)))
+    else:
+        pair_ok = all(c == 404 for c in pub) and code_ref == 200
+        print("    PAIR FOR THE REFUSE BRANCH: publish keys %s (want 404,404) beside refused/ HTTP "
+              "%d (want 200)" % (pub, code_ref))
+
+    # BOUNDS re-cut on W1-S24: the worker's hand writes nothing here; the LADDER may.
+    # Enumerate every key the run wrote, with size, UTC and the rung that caused it.
+    print("  EVERY KEY THIS RUN WROTE, with the rung that caused it:")
+    rc, dl, raw = aws_json(["s3api", "list-objects-v2", "--bucket", BUCKET, "--prefix", "daily/"])
+    daily = (dl or {}).get("Contents", [])
+    written_daily = [c for c in daily if str(c["LastModified"]).startswith("2026-09-10T01:")]
+    for c in written_daily:
+        print("    %-46s %7d B  %s  <- RUNG 1 (re-run the producer: it exists to make a producer "
+              "emit the slice it is missing)" % (c["Key"], c["Size"], c["LastModified"]))
+    for c in contents:
+        base = os.path.basename(c["Key"])
+        if base.startswith("coverage_"):
+            rung = "THE GATE/LADDER (coverage artifact)"
+        else:
+            rung = "THE RENDERER (publish branch, verdict=%s)" % verdict
+        print("    %-46s %7d B  %s  <- %s" % (c["Key"], c["Size"], c["LastModified"], rung))
+    print("    daily/ denominator: %d key(s) total, %d written in the run window"
+          % (len(daily), len(written_daily)))
+    print("    THE WORKER'S OWN HAND WROTE 0 of %d keys under daily/ and 0 of %d under %s"
+          % (len(daily), len(contents), PREFIX))
+
+    arm("c", verdict in ("PUBLISH", "REFUSE") and verdict_doc is not None
+        and unresolved_doc is not None and n_unres > 0 and rung1_recorded == n_unres
+        and classes_printed > 0 and pair_ok,
+        "verdict=%r accepted as the producer gives it over %d partner class-sets (class C total "
+        "%d); %d unresolved date(s) each with class + verbatim reason, %d carrying rung 1's raised "
+        "error; discriminating pair read for the %s branch -> %s"
+        % (verdict, classes_printed, total_c, n_unres, rung1_recorded, verdict,
+           "HOLDS" if pair_ok else "FAILS"))
 
     # ---------------------------------------------------------------- arm (d)
+    # RE-CUT on W1-S22: the alert limb reads BY BRANCH, and a zero without a control is
+    # not a reading.
     alert_lines = [e["message"].strip() for e in events
                    if "FAILED" in e["message"] or "REFUSE" in e["message"]]
     rc, sns, raw = aws_json(["cloudwatch", "get-metric-statistics", "--namespace", "AWS/SNS",
@@ -219,12 +306,36 @@ def main() -> int:  # noqa: C901
                              "--start-time", w_start_s, "--end-time", w_end_s,
                              "--period", "300", "--statistics", "Sum"])
     alerts = sum(d["Sum"] for d in (sns or {}).get("Datapoints", []))
-    arm("d", alerts >= 1 or bool(alert_lines),
-        "the refusal's alert: %s publishes in the run window = %g; alert-shaped log lines = %d "
-        "(the orchestrator alerts on the non-Success branch; a PUBLISH verdict is quiet by design)"
-        % (ALERT_TOPIC, alerts, len(alert_lines)))
+    # POSITIVE CONTROL: the 23:14:43Z failed fire's window, where the topic DID publish.
+    rc, sns_c, raw = aws_json(["cloudwatch", "get-metric-statistics", "--namespace", "AWS/SNS",
+                               "--metric-name", "NumberOfMessagesPublished",
+                               "--dimensions", "Name=TopicName,Value=" + ALERT_TOPIC,
+                               "--start-time", "2026-09-09T23:14:00Z",
+                               "--end-time", "2026-09-09T23:20:00Z",
+                               "--period", "300", "--statistics", "Sum"])
+    ctl_pts = (sns_c or {}).get("Datapoints", [])
+    alerts_ctl = sum(d["Sum"] for d in ctl_pts)
+    print("(d) BRANCH: %s" % verdict)
+    print("    %s publishes in the RUN window (%s -> %s) = %g"
+          % (ALERT_TOPIC, w_start_s, w_end_s, alerts))
+    print("    POSITIVE CONTROL, the 23:14:43Z failed fire's window (2026-09-09T23:14:00Z -> "
+          "23:20:00Z) = %g over %d datapoint(s) -- the topic and this metric DO record a publish, "
+          "so the run-window zero is a READING, not an absence" % (alerts_ctl, len(ctl_pts)))
+    print("    alert-shaped orchestrator log lines in the window = %d" % len(alert_lines))
+    if verdict == "PUBLISH":
+        d_ok = (alerts == 0) and (alerts_ctl >= 1)
+        d_txt = ("on a PUBLISH the alert limb requires ZERO publishes in the run window beside a "
+                 "live positive control: run=%g (want 0), control=%g (want >=1) -> %s"
+                 % (alerts, alerts_ctl, "HOLDS" if d_ok else "FAILS"))
+    else:
+        d_ok = (alerts >= 1) or bool(alert_lines)
+        d_txt = ("on a REFUSE the alert text must be produced: publishes=%g, alert-shaped log "
+                 "lines=%d" % (alerts, len(alert_lines)))
+    arm("d", d_ok, d_txt)
 
     # ---------------------------------------------------------------- arm (e)
+    # RE-CUT on rows W1-S25 and W1-S26. This arm no longer tries to observe a send; it
+    # PROVES THE DEFECT that makes the terminal send unreachable in production.
     msg_ids = [e["message"].strip() for e in events if "MessageId" in e["message"]]
     rc, ses, raw = aws_json(["cloudtrail", "lookup-events", "--lookup-attributes",
                              "AttributeKey=EventName,AttributeValue=SendRawEmail",
@@ -234,19 +345,90 @@ def main() -> int:  # noqa: C901
                             "AttributeKey=EventName,AttributeValue=StartInstances",
                             "--start-time", w_start_s, "--end-time", w_end_s], timeout=180)
     control = len((c2 or {}).get("Events", []))
-    if not ses_events and control > 0:
-        print("SES-PLANE-UNREAD")
+    rc, trails, raw = aws_json(["cloudtrail", "describe-trails"])
+    n_trails = len((trails or {}).get("trailList", []))
+
+    # (i) THE TWO SHAPES, SIDE BY SIDE.
+    served_keys = sorted((unresolved_doc or {}).keys())
+    fixture_shape = ["unresolved"]
+    print("(e)(i) THE TWO SHAPES:")
+    print("    SERVED  s3://%s/%scoverage_unresolved.json top-level keys: %s"
+          % (BUCKET, PREFIX, served_keys))
+    print("    FIXTURE test_terminal_send.py:118 top-level keys:            %s" % fixture_shape)
+    shapes_disagree = "unresolved" not in served_keys and len(served_keys) > 0
+    print("    DISAGREE -> %s" % shapes_disagree)
+
+    # (ii) THE GUARD, FROM THE DEPLOYED BYTES.
+    guard_line_no, guard_src, dep_sha = None, None, None
+    try:
+        rc, gf, raw = aws_json(["lambda", "get-function", "--function-name", FUNCTION])
+        url = (gf or {}).get("Code", {}).get("Location")
+        zp = os.path.join(ROOT, ".scratch", "egs15_deployed_fn.zip")
+        urllib.request.urlretrieve(url, zp)
+        blob = zipfile.ZipFile(zp).read("lambda_function.py")
+        dep_sha = hashlib.sha256(blob).hexdigest()
+        for n, ln in enumerate(blob.decode("utf-8").splitlines(), 1):
+            if "unresolved_days =" in ln:
+                guard_line_no, guard_src = n, ln.strip()
+                break
+    except Exception as exc:  # noqa: BLE001
+        print("    DEPLOYED-BYTES READ FAILED: %s" % str(exc)[:200])
+    print("(e)(ii) THE GUARD, QUOTED FROM THE DEPLOYED BYTES (not the worktree):")
+    print("    deployed lambda_function.py sha256 %s (%s)" % (dep_sha, FUNCTION))
+    print("    infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py:%s @bd0e384890"
+          % guard_line_no)
+    print("      %s" % guard_src)
+    print("    NOTE ON GRAIN: rows W1-S25 and this face cite ':439'; the guard is at :%s in the "
+          "DEPLOYED bytes -- :439 is the `except` clause. Corrected in row W1-S29."
+          % guard_line_no)
+
+    # (iii) THE GUARD EVALUATED AGAINST THE SERVED DOCUMENT.
+    guard_value = (unresolved_doc or {}).get("unresolved") or []
+    print("(e)(iii) THE GUARD EVALUATED AGAINST THE SERVED DOCUMENT:")
+    print("    (served_doc or {}).get(\"unresolved\") or []  ==  %r" % (guard_value,))
+    print("    bool(...) == %s  ->  `if unresolved_days:` is FALSY  ->  _send_terminal_unresolved "
+          "is SKIPPED" % bool(guard_value))
+    print("    ...even though the served document carries %d unresolved date(s) under %s"
+          % (n_unres, served_keys))
+    terminal_sends = len([m for m in msg_ids if TERMINAL_RECIPIENT in m])
+    print("    terminal-branch send_raw_email calls in the run window = %d" % terminal_sends)
+    print("    ATTRIBUTION: that zero is caused by THIS DEFECT, not merely by the absent refusal --"
+          " the guard reads falsy against the SERVED document, so the send would be skipped on a "
+          "genuine REFUSE too.")
+    defect_proved = shapes_disagree and guard_value == [] and n_unres > 0 and terminal_sends == 0
+
+    # (iv) BOTH ORACLES, PRINTED AND NOT GRADED.
+    print("SES-PLANE-UNREAD")
+    print("    CloudTrail SendRawEmail = %d over the run window across a denominator of %d of %d "
+          "trail(s) in the account, beside a same-window positive control of %d management "
+          "event(s) -- so the zero is a COVERAGE fact, not a send fact"
+          % (len(ses_events), n_trails, n_trails, control))
+    print("NO-APPLICATION-LOG-LINE")
+    print("    the handler emits ZERO application log lines: %d of %d events in the run window are "
+          "runtime-generated, so no MessageId can ever appear for EITHER branch"
+          % (len(events), len(events)))
+    print("    NEITHER of these is graded by this arm.")
+
+    # (v) THE ORDINARY SEND, WITH THE ISSUER'S DELIVERY READ CITED.
     ses_delta = rec.get("ses_delta_measured")
-    print("(e) terminal send: MessageId lines in the log = %d; CloudTrail SendRawEmail = %d "
-          "beside a positive control of %d management event(s); SES counter delta across the run "
-          "= %s (recorded, account-wide); the ORDINARY monthly send must be 0 on a refusal"
-          % (len(msg_ids), len(ses_events), control, ses_delta))
-    terminal_ok = bool(msg_ids) and TERMINAL_RECIPIENT in " ".join(msg_ids)
-    ordinary_zero = (ses_delta == 0)
-    arm("e", terminal_ok and ordinary_zero,
-        "exactly ONE send_raw_email on the terminal branch to %s with its MessageId -> %s; the "
-        "ordinary monthly send count on a refusal (SES delta across the run) = %s, want 0"
-        % (TERMINAL_RECIPIENT, terminal_ok, ses_delta))
+    print("(e)(v) THE ORDINARY SEND (the one that DID fire):")
+    print("    SES SentLast24Hours delta across the run = %s (ONE send to TWO destinations); "
+          "LIMIT: the counter is ACCOUNT-WIDE" % ses_delta)
+    print("    ISSUER'S DELIVERY READ, cited not re-derived (2.0.0_SA_COO's gateway): subject "
+          "'Opal ETF Ownership -- Month-End Report (2026-09)', 2026-09-10T01:21:28Z, toRecipients "
+          "aj@opalinvest.com AND andrew@opalinvest.com")
+    print("    SO THE RECORD SAYS EXACTLY WHICH SEND FIRED (the ordinary monthly report, to both) "
+          "AND WHICH COULD NOT (the ONE terminal send to andrew@ alone).")
+    print("    THE FIX IS NOT THIS WORKER'S: lambda_function.py is READ-ONLY under this order and "
+          "the repair is a cell the issuer cuts (W1-S25, escalated to the CTO for the L10).")
+
+    arm("e", defect_proved,
+        "the DEFECT is proven: served top-level keys %s vs fixture %s DISAGREE -> %s; the deployed "
+        "guard at :%s reads %r (falsy) against a document carrying %d unresolved date(s); "
+        "terminal-branch sends = %d, attributed to the defect; SES-PLANE-UNREAD and "
+        "NO-APPLICATION-LOG-LINE printed, neither graded"
+        % (served_keys, fixture_shape, shapes_disagree, guard_line_no, guard_value, n_unres,
+           terminal_sends))
 
     # ---------------------------------------------------------------- arm (f)
     asks = (ask_doc or {}).get("asks") or []

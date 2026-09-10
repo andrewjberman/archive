@@ -1,225 +1,158 @@
 # EG-s-15 -- THE SEPTEMBER-TO-DATE REFUSAL: criteria verbatim, with rc and denominator
 
 **Worker:** `0.9.0_WK_ETFS_GUARDRAIL~1` (RE-SEATED; the predecessor session died at ~01:33Z on an API
-session limit, not a defect of the work) · **Branch:** `wk-etfs_guardrail-2-1` · **TO:**
-`ETFS_GUARDRAIL.TO-EG-s-15` @`7f3742e9a3`
+session limit, not a defect of the work) · **Branch:** `wk-etfs_guardrail-2-1` · **Face:** the RE-CUT
+`ETFS_GUARDRAIL.TO-EG-s-15` @`dc99d82c4d` (the ONE re-cut `1.0.0_SA_CTO` authorised at 94877)
 
 ## 0. THE HEADLINE
 
-**The deploy is LANDED AND CORRECT. The run PRODUCED NO REFUSAL, because the order's central premise
-does not hold.** Those are two different facts and this record keeps them apart.
+**The deploy is LANDED AND CORRECT. There was no refusal to observe. The run instead proved something
+worth more than the pass it replaced.**
 
-September-to-date is incomplete, but its two holes classify **D** ("carried for missing data"), not **C**,
-and the pre-publish gate refuses only on class C -- `C = 0` for **3 of 3** partners. So
-`coverage_verdict.json` reads **PUBLISH**, the renderer exited `Success`, and the orchestrator's refusal
-branch (`status != "Success"`) was never entered. FWD-2, FWD-7 and FWD-8 remain NOT_EVALUATED on real data.
+September-to-date *is* incomplete, but the gate's refusal axis is the coverage **CLASS**, not the month's
+completeness: it refuses on class **C**, and a missing upstream partition inside an OPEN month is class
+**D**. `C = 0` for 3 of 3 partners, so the verdict is **PUBLISH** and the refusal branch cannot be entered
+by this data. That premise was the issuer's, ruled so, and arm (c) is re-cut to read the producer's own
+rule instead of asserting an outcome.
 
-**The single most consequential finding (row `W1-S25`), reachable only by running on real data:** even had
-the gate returned REFUSE, **the ONE terminal SES send could not have fired.** `_run` reads
-`(unresolved_doc or {}).get("unresolved")` while the renderer writes `coverage_unresolved.json` **keyed by
-partner**, so the guard sees `[]`. The round-1 EG-s-8 proof passed because its fixture was built to the
-docstring's shape. **FWD-7 is unreachable in production as deployed.**
+**What the run proved (rows `W1-S25`, `W1-S29`) — FWD-7's terminal send is UNREACHABLE IN PRODUCTION:**
+the deployed guard reads a key the renderer never writes.
 
-**I did NOT re-fire the invoke.** It had already completed (01:19:02Z -> 01:20:28Z, StatusCode 200). Under
-NEVER-2 a completed act is closed by measuring the artifact, never re-executed; re-firing would have sent a
-second real email and re-published served keys.
+    DEPLOYED  lambda_function.py:435 @bd0e384890  (zip sha256 dc05ea90c94dc41e..., 28,504 B)
+      unresolved_days = (unresolved_doc or {}).get("unresolved") or []
 
-## 1. CRITERIA
+    SERVED    coverage_unresolved.json top-level keys : ['49financial', 'cottonwood']
+    FIXTURE   test_terminal_send.py:118 top-level keys: ['unresolved']          -> DISAGREE
+
+Evaluated live against the served document the guard returns `[]` — falsy — so
+`_send_terminal_unresolved` is skipped **even on a genuine REFUSE**. Round-1's EG-s-8 proof passed only
+because its fixture was built to the docstring's shape. A **second site at `:516`** (the `terminal_qa`
+rehearsal) reads the same way, so the send-free rehearsal is blind to it too.
+
+**Nothing was re-fired.** The activation completed at 01:19:02Z→01:20:28Z; both re-runs are reads against
+that same run. Andrew's standing constraint (no test mail to aj@) is satisfied here **by construction**.
+
+## 1. CRITERIA — 4 of 4 MECHANICAL PASS BY OUTPUT
 
 | id | status | rc | deciding line |
 |---|---|---|---|
-| S15-AC1 | **PASS** | 0 | `7 passed in 0.41s` |
-| S15-AC2 | **FAIL** | 0 | `No changes. Your infrastructure matches the configuration.` (expect `1 to change`) |
+| S15-AC1 | **PASS** | 0 | `7 passed in 0.22s` |
+| S15-AC2 | **PASS** | 0 | `PLAN-GATE-HELD` (three limbs) |
 | S15-AC3 | **PASS** | 0 | `VERDICT: MATCH` |
-| S15-AC4 | **FAIL** | 1 | `EGS15-NO-REFUSAL -- failing arms: c, d, e` (expect `EGS15-REFUSAL-LADDER-RAN`) |
-| S15-AC5 | **RECORDED (judgment)** | n/a | graded by `3.0.0_SA_CVO` at L9 -- **no worker verdict** |
+| S15-AC4 | **PASS** | 0 | `ARMS 9 of 9 PASS` → `EGS15-REFUSAL-LADDER-RAN` |
+| S15-AC5 | **RECORDED (judgment)** | n/a | graded by `3.0.0_SA_CVO` at L9 — **no worker verdict** |
 
-### S15-AC1 -- PASS
-`timeout 120 python -m pytest infra/aws/lambda/etfs-reports-orchestrator/test_terminal_send.py -q` -> rc=0
+### S15-AC1 — PASS
+`timeout 120 python -m pytest .../test_terminal_send.py -q` → rc=0, `7 passed in 0.22s`.
+**Denominator: 7 of 7**; round-1 count 5, so the bar (`>= round-1 + 2`) is met exactly. Re-run after the
+CLOUD merge.
 
-    7 passed in 0.41s
+### S15-AC2 — PASS, `PLAN-GATE-HELD`
+The transcript **exists** (this worker's own session captured it in this worktree), so
+`PLAN-GATE-UNRECORDED` does not apply. Because `.scratch/` is not committed and the pre-apply plan is not
+reproducible after the apply, it is preserved whole at `egs15_plan_gate_transcript.md`.
 
-**Denominator: 7 of 7.** Round-1 count 5, so the face's bar (`>= round-1 + 2`) is met exactly. The two new
-arms assert `run` WITH `month` renders that month and WITHOUT it renders `_last_month()`.
+- **(i)** Pre-apply plan, mtime **2026-09-10T01:14:13Z**: action list contains
+  `# aws_lambda_function.orchestrator will be updated in-place` with
+  `~ source_code_hash "CvFmg9Zm…" -> "M5Dopbky…"`, `# (27 unchanged attributes hidden)`, and
+  `Plan: 0 to add, 1 to change, 0 to destroy.` **That is the only resource in the action list** — every
+  other resource appears solely as `Refreshing state...`, a read, not a change.
+- **(ii)** The apply at **01:16:19Z** (after 01:14:13Z), through `safe-apply.sh` (its own gate banner heads
+  the transcript): `aws_lambda_function.orchestrator: Modifications complete after 6s` and
+  `Apply complete! Resources: 0 added, 1 changed, 0 destroyed.`
+- **(iii)** The same targeted plan re-run now with `-detailed-exitcode` → **rc 0**,
+  `No changes. Your infrastructure matches the configuration.`
 
-### S15-AC2 -- FAIL (on the literal match; NOT re-worded)
-`.tools/terraform.exe -chdir=infra/aws/terraform/etfs-reports plan -no-color -input=false -lock=false -target=aws_lambda_function.orchestrator` -> rc=0
+(i) and (iii) now **agree instead of contradicting** — (iii) is the post-state S15-AC3 also requires.
 
-    No changes. Your infrastructure matches the configuration.
-    Terraform has compared your real infrastructure against your configuration
-    and found no differences, so no changes are needed.
+### S15-AC3 — PASS
+`VERDICT: MATCH`, rc=0, `SERVED_CODE_SHA256 == BUILT_ZIP_SHA256_B64 == M5Dopbky3W1f1j97cqAB403Kh7IofIv/p0fCtRg7W80=`.
+**Third instrument this session:** the deployed zip fetched from `get-function`'s presigned location hashes
+`dc05ea90c94dc41e…`, 28,504 B, **byte-equal** to the worktree file at `bd0e384890` — and equal to the
+issuer's independent read. **3 instruments in agreement.**
 
-Binary confirmed first: `.tools/terraform.exe version` -> `Terraform v1.9.8` (NOT the PATH v1.14.5).
+### S15-AC4 — PASS, 9 of 9 arms
+Re-run **once** against the same run. Arms (c), (d), (e) re-cut.
 
-**The criterion is time-dependent.** Its `<expect>` can only match BEFORE the apply it gates; after the
-apply, `No changes` is the CORRECT state -- and is what S15-AC3 separately requires. **The reading that DID
-match is cited, not re-derived** (ledger leg L2): plan 2026-09-10T01:13Z, rc=0, only resource
-`aws_lambda_function.orchestrator` updated in place, `~source_code_hash
-'CvFmg9ZmBrSMZSSlplJGd7BWp99FXn5+ODaRbKTe/QI=' -> 'M5Dopbky3W1f1j97cqAB403Kh7IofIv/p0fCtRg7W80='`, 27
-unchanged attributes hidden, `Plan: 0 to add, 1 to change, 0 to destroy`; then `HALT_ACK=1 safe-apply`
-01:15:35Z -> 01:16:19Z rc=0 `Apply complete! Resources: 0 added, 1 changed, 0 destroyed.`
+- **(c)** The producer's rule quoted *first*, then the table read against it:
+  `classifier.py:146-148 @c866edd324` class **D** = `upstream partition missing (genuinely absent)`;
+  `classifier.py:160-163 @c866edd324` class **C** = `upstream present and priced > 0, no slice`;
+  `render_month_end.py:957-963 @4b85a9ae68` — `if summary["C"] > 0: any_c = True` then
+  `verdict = "REFUSE" if any_c else "PUBLISH"`. Verdict **accepted as given**: `PUBLISH`. Class C across
+  **3 of 3** partners = **0**. 2 unresolved dates, **2 of 2** carrying rung 1's verbatim raised error.
+  Branch **PUBLISH** → pair read for *that* branch: publish keys `[200, 200]`, **3 of 3** served CSVs carry
+  the coverage line.
+- **(d)** Branch PUBLISH: `etfs-reports-alerts` publishes in the run window = **0**, beside the **positive
+  control** from the 23:14:43Z failed fire's window = **1** over 1 datapoint. A zero with a control is a
+  reading.
+- **(e)** The **defect proven** (see §0), plus `SES-PLANE-UNREAD` (SendRawEmail 0 across **2 of 2** trails,
+  beside a live positive control) and `NO-APPLICATION-LOG-LINE` (**4 of 4** window events
+  runtime-generated) — **neither graded**. The ordinary send that *did* fire is cited from the issuer's
+  gateway: `Opal ETF Ownership -- Month-End Report (2026-09)`, 2026-09-10T01:21:28Z, to aj@ **and** andrew@.
+- **(a)(b)(f)(g)(h)(i)** unchanged and passing: ledger opened before plan and invoke; `START RequestId` 1 of
+  1 with scheduler-role AssumeRole 0 of 35; ask names date+provider 1 of 1; egress 0 of 173 attributable in
+  a 5,626-event window; run-id in 3 log lines; box `stopped`.
 
-**Denominator: 1 of 1** resource in the targeted plan, both pre-apply and post-apply. Filed as row
-`W1-S28`; a worker judges form, never significance, and re-cutting a criterion is the issuer's act.
+**Every key the run wrote, with its causing rung** (the BOUNDS' served-slice line, re-cut on `W1-S24`):
 
-### S15-AC3 -- PASS
-`timeout 300 python .../orchestrator_served_vs_built.py` (round-1 script, **re-run not rewritten**) -> rc=0
+| key | size | UTC | caused by |
+|---|---|---|---|
+| `daily/inflection/2026-09-09.json` | 1,209 | 01:20:16Z | **RUNG 1** (re-run the producer) |
+| `coverage_{egress_ask,unresolved,verdict}.json` | 1,017 / 1,414 / 2,705 | 01:20:20Z | the gate/ladder |
+| `etf_ownership.html` / `.pdf` | 33,793 / 173,126 | 01:20:23Z | the renderer, PUBLISH branch |
+| 3 × `opaletfs_*_202609.csv` | 584 / 552 / 552 | 01:20:23Z | the renderer, PUBLISH branch |
 
-    SERVED_CODE_SHA256:   M5Dopbky3W1f1j97cqAB403Kh7IofIv/p0fCtRg7W80=
-    BUILT_ZIP_SHA256_B64: M5Dopbky3W1f1j97cqAB403Kh7IofIv/p0fCtRg7W80=
-    VERDICT: MATCH
+`daily/` denominator **273** keys, **1** written in the window. **The worker's own hand wrote 0 of 273
+under `daily/` and 0 of 8 under `platinum/reports/2026-09/`.**
 
-0-diff beside it: the post-apply targeted plan prints `No changes`, rc=0.
+### S15-AC5 — RECORDED (judgment), NO VERDICT
+Full evidence with vintages is in the instance's `S15-AC5` row: the ladder rung by rung with verbatim
+producer errors, why there is no refusal text, which send fired and which could not, the unchanged
+scheduled path, and the six things this order could not see.
 
-**Independent corroboration, cited not re-derived** -- the ISSUER's read at its own seat with a *different*
-instrument: `aws lambda get-function` presigned zip -> `lambda_function.py` sha256 `dc05ea90c94dc41e...`,
-28,504 B, BYTE-EQUAL to `git show bd0e384890:<path>` and to the same path at CLOUD; live `LastModified`
-2026-09-10T01:16:14Z, `CodeSha256 M5Dopbky3W1f1j97cqAB403Kh7IofIv/p0fCtRg7W80=`, Version `$LATEST`.
-**Denominator: 1 of 1 served function, 2 independent instruments agreeing.**
+## 2. ROWS FILED (10): `W1-S20` .. `W1-S29`
 
-### S15-AC4 -- FAIL (on the WORLD, not the instrument)
-`timeout 900 python .../test_egs15_september_refusal.py` -> rc=1, `ARMS 6 of 9 PASS`
-
-    EGS15-NO-REFUSAL -- failing arms: c, d, e
-
-**PASSING (6):**
-- **(a)** ledger entry opened 01:12:30Z, before the 01:13Z plan and the 01:19:02Z invoke, quoting both
-  sign-off ids and naming what the run may write. Read AFTER the NEVER-2 append, per row `W1-S16`.
-- **(b)** `StatusCode 200`; `START RequestId 9fbc33e0-174c-4c82-b392-2b1dafe4a835` = **1 of 1** in the log
-  group read BY TIME; `etfs-reports-scheduler-role` AssumeRole **0 of 35** events -> a manual fire, not a
-  rule fire. Synchronous-invoke flags present.
-- **(f)** `coverage_egress_ask.json` written, **1 of 1** asks carry both a date and a provider.
-- **(g)** **0** vendor-facing calls by this run's principals, of **173 attributable** events within a
-  **5,626-event** window.
-- **(h)** run-id present in 3 log lines; `ARTIFACT-CARRIES-NO-RUN-ID` printed as the face directs.
-- **(i)** box `i-070477bf35fc54409` `State.Name=stopped`.
-
-**FAILING (3):**
-- **(c)** `verdict=PUBLISH (want REFUSE)` over 3 partner class-sets; **the discriminating pair is
-  INVERTED**: `refused/etf_ownership.html` HTTP **404** beside publish keys HTTP **[200, 200]** (want 200
-  and 404,404).
-- **(d)** alert publishes in the run window = **0**; a PUBLISH verdict is quiet by design.
-- **(e)** terminal send to andrew@ -> **False**; the ordinary monthly send (which must be 0 on a refusal)
-  = **2 destinations**. `SES-PLANE-UNREAD`.
-
-**Denominators:** 9 arms (6/3); 8 of 8 objects under `platinum/reports/2026-09/`; 2 of 2 publish keys
-head-object 200; `refused/` 0 keys; 3 of 3 partners class C = 0.
-
-### S15-AC5 -- RECORDED (judgment="true"), NO VERDICT
-Full evidence with vintages is in the proof-of-spec instance's `S15-AC5` row: the ladder rung by rung, the
-absence of any refusal text, which branch the send fired from, the `W1-S25` key-shape defect, the proof
-that the scheduled path is unaltered, and the five things this order could not see.
-
-## 2. THE RUN'S ARTIFACTS (every S3 time UTC via `s3api`)
-
-**8 of 8 keys** under `platinum/reports/2026-09/`:
-
-| key | size | LastModified (UTC) |
+| id | class / hazard | disposition by the issuer |
 |---|---|---|
-| `coverage_egress_ask.json` | 1,017 | 2026-09-10T01:20:20Z |
-| `coverage_unresolved.json` | 1,414 | 2026-09-10T01:20:20Z |
-| `coverage_verdict.json` | 2,705 | 2026-09-10T01:20:20Z |
-| **`etf_ownership.html`** | **33,793** | **2026-09-10T01:20:23Z** |
-| **`etf_ownership.pdf`** | **173,126** | **2026-09-10T01:20:23Z** |
-| `opaletfs_49financial_202609.csv` | 584 | 2026-09-10T01:20:23Z |
-| `opaletfs_cottonwood_202609.csv` | 552 | 2026-09-10T01:20:23Z |
-| `opaletfs_inflection_202609.csv` | 552 | 2026-09-10T01:20:23Z |
+| W1-S20 | OBSERVATION / INERT | form only |
+| W1-S21 | OBSERVATION / ARMED | **issuer owns it** — a hand-off defect of its own spawn procedure |
+| W1-S22 | BLOCKING / ARMED | premise was the issuer's → **arm (c) re-cut** |
+| W1-S23 | BLOCKING / ARMED | CTO: a RECORD breach, not a world breach; the September keys **stay** |
+| W1-S24 | OBSERVATION / ARMED | **BOUNDS re-cut** — the ladder may write; the worker's hand may not |
+| W1-S25 | BLOCKING / ARMED | **arm (e) re-cut to prove it**; repair escalated to the CTO as its own cell |
+| W1-S26 | OBSERVATION / ARMED | folded into arm (e) as two printed, ungraded oracles |
+| W1-S27 | OBSERVATION / ARMED | escalated as a code cell |
+| W1-S28 | OBSERVATION / INERT | **S15-AC2 re-cut** to `PLAN-GATE-HELD` |
+| W1-S29 | OBSERVATION / ARMED | **NEW** — the guard is at `:435`, not `:439`; second site at `:516` |
 
-The two bolded rows are the PUBLISH keys the order said would stay ABSENT. `refused/` prefix = **0 keys**,
-and **0 keys** containing `refused` anywhere under `platinum/reports/` (negative control: the absence is
-not a prefix typo).
+`W1-S29` is a correction to **my own** row `W1-S25`, whose `:439` the re-cut face inherited. Reading the
+deployed bytes as arm (e) requires is what surfaced it. The channel is append-only, so the correction is a
+new row and `W1-S25` stands as written; the battery prints the discrepancy inline.
 
-**Coverage:** 49financial `5/6 trading days; 1 carried`, cottonwood `5/6; 1 carried`, inflection `6/6; 0
-carried`. Both holes are 2026-09-09, class **D**, from absent upstream partitions (HeadObject 404 on
-`schwab/08242234/silver/fact_rps/` and `blackdiamond/cottonwood/silver/fact_holdings/`).
+Row gate: `1 new row(s) of 54 total checked (53 pre-existing, NOT re-graded)`, rc=0 — the union the issuer
+drained is intact, none lost. Corpus baseline clean (4 known, 0 new, 0 resolved).
 
-**A SERVED DAILY SLICE WAS WRITTEN** (row `W1-S24`, the order's BOUNDS forbade it):
-`daily/inflection/2026-09-09.json`, 1,209 B, 01:20:16Z -- **1 of 273** keys under `daily/`, the only one in
-the window. Rung 1 re-ran inflection's producer successfully, which is the ladder's designed behaviour.
+## 3. THE NEVER-2 LEDGER — CLOSED
 
-## 3. THE SEND PLANE
+Opened 2026-09-10T01:12:30Z, window 4.0h, 8 legs. L1–L3 by the predecessor; **L4–L8 closed from measured
+world state**; entry **CLOSED ~01:47Z inside the window**, sentinel removed, all 8 legs proven. The NEVER-2
+detail was appended **last**, after the final mutation, per `W1-S16`. Committed at `8f7229e9f2`.
 
-`SES-PLANE-UNREAD.` CloudTrail `SendRawEmail` = 0 and `SendEmail` = 0 over 01:17-01:23Z **while the
-same-window positive controls are live**: `StartInstances` 1 at 01:19:07Z and `StopInstances` 1 at
-01:20:29Z, both `Username etfs-reports-orchestrator`. So the zero is not evidence of no send.
+## 4. WHAT I DID NOT DO
 
-**The log fallback is ALSO unavailable** (row `W1-S26`): the orchestrator emits **zero** application log
-lines -- **4 of 4** events in the window are runtime-generated (`INIT_START`, `START`, `END`, `REPORT`) --
-so no `MessageId` exists for either branch. Combined with `W1-S25`, FWD-7 can neither fire nor be recorded.
+Re-fire the invoke or apply anything a second time (the issuer's ruling and Andrew's standing constraint
+both forbid it; every re-run here is a read). Change any code — `lambda_function.py` is READ-ONLY and the
+`:435`/`:516` repair is the issuer's cell. Delete the September keys or the daily slice. Add any trail,
+alarm, monitor, topic, schedule or env var. Send anything. Read any inbox. Edit an existing surprise row.
+Re-word a criterion — every divergence went to a row and the issuer re-cut.
 
-The only send oracle available is SES's account-wide counter: `SentLast24Hours` **82 -> 84** across the run
-= one send to two destinations, i.e. the ORDINARY monthly report to both recipients (`_email_report`,
-`Destinations=EMAIL_RECIPIENTS`). **LIMIT, stated:** the counter is account-wide, so +2 is consistent with
--- not exclusive to -- this send.
+## 5. PROOF-OF-SPEC AND STATUS
 
-## 4. VENDOR EGRESS -- 0, WITH ITS DENOMINATOR AND ITS BOUND
+`proof-of-spec-check ... S15-AC1,S15-AC2,S15-AC3,S15-AC4,S15-AC5` → **`VALID (rc=0)`**,
+`surprises-frame: 10 entries; 10 open with a row id; 10 resolve to a channel row`.
 
-**5,626** CloudTrail events in the run window; **19 distinct EventSources, all 19 `*.amazonaws.com`**.
-**173** events attributable to this run's principals (`etfs-reports-orchestrator`,
-`etfs-reports-reporter-role`, the three producers, `Andrew_Berman`); of those, **0** touch a vendor-facing
-resource. 175 events mention a vendor WORD, every one a RESOURCE NAME read by an unrelated inventory
-principal -- not egress, not this run.
+**`<status>` FLIPPED to `complete`** — rc 0 **and** every mechanical criterion PASSES by output.
 
-**LIMIT, stated:** CloudTrail records AWS API calls, never outbound HTTPS, and this estate has no separate
-egress-gateway log I could find. The complementary control is rung 3, which **STOPPED and wrote an ask**
-instead of calling out: `coverage_egress_ask.json` names 2026-09-09 / cottonwood / Black Diamond with
-`Authorization: PER-USE -- a person decides; nothing here is executed by any process`.
+## 6. PUSH STATE (MEASURED)
 
-**GAP (row `W1-S27`):** the ask names **1 of 2** class-D unresolved dates -- 49financial/2026-09-09 has no
-ask row, and the omission is invisible without cross-reading `coverage_unresolved.json`.
-
-## 5. THE NEVER-2 LEDGER -- CLOSED
-
-`org/critical_paths/change_management/20260910T0112Z_etfs-guardrail-eg-s-15-september-refusal_deploy_completion.md`
-
-Opened 2026-09-10T01:12:30Z, window 4.0h, 8 legs. L1-L3 closed by the predecessor; **L4-L8 closed this
-session from measured world state**; entry **CLOSED ~01:47Z, inside the window**, sentinel removed, all 8
-legs proven. The NEVER-2 detail was appended **LAST**, after the final mutation, per row `W1-S16`
-(`deploy_ledger.py` re-renders the entry from the sentinel on every mutation and destroys hand-added text).
-
-`hold` was considered and rejected: it is entry-level and gated on a named external/sovereign dependency,
-and nothing external was pending -- the run had completed and every leg had a definite measured answer.
-
-## 6. ROWS FILED (9): `ETFS_GUARDRAIL-W1-S20` .. `W1-S28`
-
-| id | class / hazard | one line |
-|---|---|---|
-| W1-S20 | OBSERVATION / INERT | the "one line" also needed a signature change (`_run` took no `event`) |
-| W1-S21 | OBSERVATION / ARMED | `safe-apply`'s HALT-GATE fails closed in any fresh worktree (gitignored serial file) |
-| W1-S22 | **BLOCKING** / ARMED | **the order's central premise fails** -- incomplete does not mean REFUSE (class D, not C) |
-| W1-S23 | **BLOCKING** / ARMED | the run published to served keys and emailed BOTH recipients; terminal send fired 0 times |
-| W1-S24 | OBSERVATION / ARMED | the ladder wrote a served daily slice, which the BOUNDS forbade |
-| W1-S25 | **BLOCKING** / ARMED | **the ONE terminal send is unreachable on real data** (key-shape mismatch; fixture hid it) |
-| W1-S26 | OBSERVATION / ARMED | arm (e)'s log oracle cannot exist for the terminal branch either |
-| W1-S27 | OBSERVATION / ARMED | the rung-3 ask names 1 of 2 unresolved dates |
-| W1-S28 | OBSERVATION / INERT | S15-AC2's `<expect>` can only match before the apply |
-
-All ARMED rows carry `disarm_owner: 2.0.0_SA_COO`. Row gate: `9 new row(s) of 49 total checked (40
-pre-existing, NOT re-graded)`, `OK: all new rows carry their step-7/step-10 fields`, rc=0; corpus gate `OK:
-corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved)` over `documents=35 rows=818`.
-
-**Note on a stale citation:** the battery's arm (g) text cites "row W1-S23" for the egress-gateway limit.
-That id was allocated by the predecessor before the rows were minted; the egress-limit fact is carried by
-this document's section 4 and by leg L7. `W1-S23` as filed is the publish/email inversion.
-
-## 7. WHAT I DID NOT DO
-
-Re-fire the invoke (already complete -- a re-fire is a REWIND under NEVER-2); a second `terraform apply`;
-`update-function-code`; any code change (`lambda_function.py` is READ-only for me); any S3 delete of the
-September objects or the daily slice; any new trail, alarm, monitor, topic, schedule or env var; any send
-of my own; any inbox read (the issuer's); any re-word of S15-AC2 or S15-AC4.
-
-## 8. PROOF-OF-SPEC AND STATUS
-
-`python .tools/proof-of-spec-check.py .../ETFS_GUARDRAIL.TO-EG-s-15.the-september-refusal.proof_of_spec.json S15-AC1,S15-AC2,S15-AC3,S15-AC4,S15-AC5`
--> **`VALID (rc=0)`**, `surprises-frame: 9 entries; 9 open with a row id; 9 resolve to a channel row`.
-
-**The `<status>` is NOT flipped.** A VALID instance is not a met order: S15-AC2 and S15-AC4 are FAIL by
-output, so `ETFS_GUARDRAIL.TO-EG-s-15` stays open and this is its final report.
-
-## 9. PUSH STATE (MEASURED)
-
-`git ls-remote origin refs/heads/CLOUD` -> `c6bcb7b12b0d0134274f689f470a91252d100546`.
-`git ls-remote origin refs/heads/wk-etfs_guardrail-2-1` -> **empty**: this branch is **LOCAL**, never
-pushed. The one-line change at `bd0e384890` is nonetheless already on CLOUD -- the issuer drained EG-s-14
-@`4b85a9ae68` and it rode along.
+`git ls-remote origin refs/heads/wk-etfs_guardrail-2-1` → **empty**: LOCAL, never pushed.
