@@ -77,99 +77,111 @@ ROW_FACTS = [
     # --- STATE_MODEL.md / ROW_STRUCTURE.md's own canonical worked specimens (quoted verbatim) ---
     {
         "property": "Website security (opalinvest.com / www)",
+        "attribution": "Website",
         "family": "axis",
         "prev": {"axis1": "DENY-BY-DESIGN", "axis2": None, "axis3": None},
         "curr": {"axis1": "DENY-BY-DESIGN", "axis2": None, "axis3": None},
-        "citation": "STATE_MODEL.md sec.4; ROW_STRUCTURE.md sec.3 (worked specimen row 1)",
+        "citation": "STATE_MODEL.md sec.4; ROW_STRUCTURE.md sec.3 (worked specimen row 1); ATTRIB Website: brief O4 / PRD sec.6 first ruling names this exact surface (opalinvest.com/www) as the Website property",
         "evidence": "opalinvest.com/www resolve to a bare EC2 elastic IP with no CloudFront; AWS WAF cannot attach. Andrew's own word: 'we do whatever we can without having to engage with GoDaddy.' Permanent, recorded, not pending.",
     },
     {
         "property": "Blocked-address sentinel row (worked specimen, per STATE_MODEL.md sec.5)",
+        "attribution": "UNGROUPED",
         "family": "axis",
         "prev": {"axis1": "BLIND", "axis2": None, "axis3": None},
         "curr": {"axis1": "CHECKED", "axis2": "OK", "axis3": "desired"},
-        "citation": "STATE_MODEL.md sec.5; ROW_STRUCTURE.md sec.3 (worked specimen row 2)",
+        "citation": "STATE_MODEL.md sec.5; ROW_STRUCTURE.md sec.3 (worked specimen row 2); ATTRIB UNGROUPED: no round-1 record ties this control to a named property; rendered per ATTRIBUTION.md sec.3's own rule rather than guessed",
         "evidence": "Previously: 'no sentinel existed yet.' Now: sentinel_block_armed counts and evaluates hits against the address (Axis1=CHECKED, CAN fire), but no wafv2 IP set enforces the block yet -- 3rd axis renders 'desired' because the enforcement reconciler (TO-OP-S-15-19) is staged, not applied.",
     },
     {
         "property": "opal-login-abuse-alerts (SNS topic)",
+        "attribution": "UNGROUPED",
         "family": "axis",
         "prev": {"axis1": "INERT", "axis2": None, "axis3": None},
         "curr": {"axis1": "INERT", "axis2": None, "axis3": None},
-        "citation": "ALERT_DELIVERY.md sec.1/sec.2 (re-confirming NFRA_OPSEC202609-Z-S151, ~15:45Z, IDENTICAL result at ~21:01Z)",
+        "citation": "ALERT_DELIVERY.md sec.1/sec.2 (re-confirming NFRA_OPSEC202609-Z-S151, ~15:45Z, IDENTICAL result at ~21:01Z); ATTRIB UNGROUPED: ALERT_DELIVERY.md names no Dashboard/Website/Gateway/Graph surface for this topic",
         "evidence": "0 confirmed subscriptions on both reads, same instrument (list-subscriptions-by-topic), a real absence per the positive control (4 of 7 topics DO return non-zero).",
     },
     {
         "property": "astn-wsjft-alerts (SNS topic)",
+        "attribution": "UNGROUPED",
         "family": "axis",
         "prev": {"axis1": "INERT", "axis2": None, "axis3": None},
         "curr": {"axis1": "INERT", "axis2": None, "axis3": None},
-        "citation": "ALERT_DELIVERY.md sec.1 (RESULT: IDENTICAL to NFRA_OPSEC202609-Z-S151)",
+        "citation": "ALERT_DELIVERY.md sec.1 (RESULT: IDENTICAL to NFRA_OPSEC202609-Z-S151); ATTRIB UNGROUPED: ALERT_DELIVERY.md names no Dashboard/Website/Gateway/Graph surface for this topic",
         "evidence": "0 confirmed subscriptions, both reads.",
     },
     {
         "property": "etfs-reports-alerts (SNS topic)",
+        "attribution": "UNGROUPED",
         "family": "axis",
         "prev": {"axis1": "INERT", "axis2": None, "axis3": None},
         "curr": {"axis1": "INERT", "axis2": None, "axis3": None},
-        "citation": "ALERT_DELIVERY.md sec.1 (RESULT: IDENTICAL to NFRA_OPSEC202609-Z-S151)",
+        "citation": "ALERT_DELIVERY.md sec.1 (RESULT: IDENTICAL to NFRA_OPSEC202609-Z-S151); ATTRIB UNGROUPED: ALERT_DELIVERY.md names no Dashboard/Website/Gateway/Graph surface for this topic",
         "evidence": "0 confirmed subscriptions, both reads.",
     },
     {
         "property": "opal-infrastructure-alerts (SNS topic)",
+        "attribution": "UNGROUPED",
         "family": "axis",
         "prev": {"axis1": "UNCHECKED", "axis2": None, "axis3": None},
         "curr": {"axis1": "CHECKED", "axis2": "BREACH", "axis3": None},
-        "citation": "ALERT_DELIVERY.md sec.4 (resolves NFRA_OPSEC202609-Z-S151's own explicitly-unresolved question)",
+        "citation": "ALERT_DELIVERY.md sec.4 (resolves NFRA_OPSEC202609-Z-S151's own explicitly-unresolved question); ATTRIB UNGROUPED: ALERT_DELIVERY.md names no Dashboard/Website/Gateway/Graph surface for this topic",
         "evidence": "Prior investigation explicitly did NOT report this row as healthy past the confirmed-subscription count (UNCHECKED, deliberately not asserted). This session traced past the SNS layer to the SMS sandbox: the one confirmed subscriber's endpoint (+17862617679) is sandbox status Pending, not Verified -- the topic reaches nobody despite showing '1 confirmed subscription'.",
     },
     {
         "property": "inf-otp-alert (SNS topic)",
+        "attribution": "UNGROUPED",
         "family": "axis",
         "prev": {"axis1": "CHECKED", "axis2": "UNASSERTED", "axis3": None},
         "curr": {"axis1": "CHECKED", "axis2": "UNASSERTED", "axis3": None},
-        "citation": "ALERT_DELIVERY.md sec.4 (Axis 2 left UNASSERTED, not defaulted to OK)",
+        "citation": "ALERT_DELIVERY.md sec.4 (Axis 2 left UNASSERTED, not defaulted to OK); ATTRIB UNGROUPED: ALERT_DELIVERY.md names no Dashboard/Website/Gateway/Graph surface for this topic",
         "evidence": "Confirmed subscribers exist (lambda, sms) but the SMS leg is dead and the lambda leg's own downstream notification is not traced either session -- Axis2 is honestly UNASSERTED, not OK, on both reads.",
     },
     {
         "property": "opal-critical-surface-alerts (SNS topic)",
+        "attribution": "UNGROUPED",
         "family": "axis",
         "prev": {"axis1": "CHECKED", "axis2": "UNASSERTED", "axis3": None},
         "curr": {"axis1": "CHECKED", "axis2": "UNASSERTED", "axis3": None},
-        "citation": "ALERT_DELIVERY.md sec.4",
+        "citation": "ALERT_DELIVERY.md sec.4; ATTRIB UNGROUPED: ALERT_DELIVERY.md names no Dashboard/Website/Gateway/Graph surface for this topic",
         "evidence": "Same shape as inf-otp-alert: sqs+sms legs, sms dead, sqs consumer's own downstream notification untraced either session.",
     },
     {
         "property": "opal-partner-etl-ops-alerts (SNS topic)",
+        "attribution": "UNGROUPED",
         "family": "axis",
         "prev": {"axis1": "CHECKED", "axis2": "UNASSERTED", "axis3": None},
         "curr": {"axis1": "CHECKED", "axis2": "UNASSERTED", "axis3": None},
-        "citation": "ALERT_DELIVERY.md sec.4",
+        "citation": "ALERT_DELIVERY.md sec.4; ATTRIB UNGROUPED: ALERT_DELIVERY.md names no Dashboard/Website/Gateway/Graph surface for this topic",
         "evidence": "Same shape: sqs+sms legs, sms dead, sqs consumer's downstream notification untraced either session.",
     },
     {
         "property": "comp (instrument, ruling-12 worked example)",
+        "attribution": "UNGROUPED",
         "family": "axis",
         "prev": {"axis1": "CHECKED", "axis2": "DEGRADED", "axis3": None},
         "curr": {"axis1": "CHECKED", "axis2": "OK", "axis3": None},
-        "citation": "ROW_STRUCTURE.md sec.3 (worked specimen row 4)",
+        "citation": "ROW_STRUCTURE.md sec.3 (worked specimen row 4); ATTRIB UNGROUPED: a comp-rail instrument, not a named business surface",
         "evidence": "CHECKED both editions; found value's rank dropped from DEGRADED(1) to OK(0) -- carries a stale-instrument qualifier, still fully applied.",
     },
     # --- DEPRECATION.md / RETIREMENT_REGISTER.md's real ten-candidate walk ---
     {
         "property": "B_01.holdings_lots.py (deprecation candidate)",
+        "attribution": "Dashboard",
         "family": "axis",
         "prev": {"axis1": "COARSE", "axis2": None, "axis3": None},
         "curr": {"axis1": "CHECKED", "axis2": "OK", "axis3": None},
-        "citation": "DEPRECATION.md sec.0/sec.2 (ruling 6's age heuristic + the CRO's one-hop check, both superseded by ruling 9's terminus walk)",
+        "citation": "DEPRECATION.md sec.0/sec.2 (ruling 6's age heuristic + the CRO's one-hop check, both superseded by ruling 9's terminus walk); ATTRIB Dashboard: DEPRECATION.md sec.2, 2-hop terminus via D_04 reaches ClientsTab/DistributionTab (Platinum portal)",
         "evidence": "Ruling 6 (age) and the un-walked one-hop check are BOTH the wrong grain (COARSE) for this question. The terminus walk (2-hop, via D_04) confirms ALIVE: reaches ClientsTab/DistributionTab, not speculative.",
     },
     {
         "property": "INF_D_04.client_portal_summary.py (deprecation candidate)",
+        "attribution": "Dashboard",
         "family": "axis",
         "prev": {"axis1": "COARSE", "axis2": None, "axis3": None},
         "curr": {"axis1": "CHECKED", "axis2": "OK", "axis3": None},
-        "citation": "DEPRECATION.md sec.2",
+        "citation": "DEPRECATION.md sec.2; ATTRIB Dashboard: DEPRECATION.md sec.2, confirmed termini getPlatinumFirmDashboard->ClientsTab etc (Platinum portal)",
         "evidence": "Direct terminus, CONFIRMED, not speculative: getPlatinumAdvisorNnaClients -> DistributionTab, getPlatinumFirmDashboard -> ClientsTab, getHeaderMetrics -> PartnerAnalytics/ClientsTab.",
     },
     {
@@ -182,111 +194,137 @@ ROW_FACTS = [
         # the demonstrated round-trip: a recorded classification is cited on the NEXT edition,
         # not re-derived from scratch. See RETIREMENT_ROUNDTRIP.md.
         "property": "INF_D_00.portal_aggregates.py (deprecation candidate)",
+        "attribution": "Dashboard",
         "family": "axis",
         "prev": {"axis1": "COARSE", "axis2": None, "axis3": None},
         "curr": {"axis1": "COARSE", "axis2": None, "axis3": None},
-        "citation": "RETIREMENT_ROUNDTRIP.md sec.2 (Edition B); RETIREMENT_REGISTER.md sec.3 row 1 (CARRIED, owner 0.9.0_WK_NFRA_REPORT~1, 2026-09-09) -- cited via the register's current-state view, not re-walked this edition",
+        "citation": "RETIREMENT_ROUNDTRIP.md sec.2 (Edition B); RETIREMENT_REGISTER.md sec.3 row 1 (CARRIED, owner 0.9.0_WK_NFRA_REPORT~1, 2026-09-09) -- cited via the register's current-state view, not re-walked this edition; ATTRIB Dashboard: DEPRECATION.md sec.2, writes platinum/firm/clients_tab.json (same Platinum-portal namespace)",
         "evidence": "Edition A (EDITION_SPECIMEN.md@5e2131d851) quoted the comp-platinum walk directly (both platinum keys return only [SPECULATIVE] catch-all matches, no confirmed terminus). Edition B does not re-run that walk: it cites RETIREMENT_REGISTER.md's own CARRIED row -- owner, reason and date already recorded there -- and stops there. Still COARSE, still not RETIRED: no resolution is claimed, only that re-derivation is suppressed.",
     },
     {
         # RP-s-18 round-trip edit -- same mechanism as the INF_D_00 row above.
         "property": "INF_D_07.concentration_risk.py (deprecation candidate)",
+        "attribution": "Dashboard",
         "family": "axis",
         "prev": {"axis1": "COARSE", "axis2": None, "axis3": None},
         "curr": {"axis1": "COARSE", "axis2": None, "axis3": None},
-        "citation": "RETIREMENT_ROUNDTRIP.md sec.2 (Edition B); RETIREMENT_REGISTER.md sec.3 row 4 (CARRIED, owner 0.9.0_WK_NFRA_REPORT~1, 2026-09-09) -- cited via the register's current-state view, not re-walked this edition",
+        "citation": "RETIREMENT_ROUNDTRIP.md sec.2 (Edition B); RETIREMENT_REGISTER.md sec.3 row 4 (CARRIED, owner 0.9.0_WK_NFRA_REPORT~1, 2026-09-09) -- cited via the register's current-state view, not re-walked this edition; ATTRIB Dashboard: DEPRECATION.md sec.2, writes firm/concentration_risk.json (same Platinum-portal firm/ namespace)",
         "evidence": "Edition A (EDITION_SPECIMEN.md@5e2131d851) quoted the comp-pipescript walk directly (static parser cannot see this script's dynamic-key write at all, surprise row NFRA_REPORT-Z-W1-S2). Edition B does not re-run that walk: it cites RETIREMENT_REGISTER.md's own CARRIED row -- owner, reason and date already recorded there -- and stops there. Still COARSE, still not RETIRED: no resolution is claimed, only that re-derivation is suppressed.",
     },
     # --- MONITORED_VS_SERVED.md's own WATCHED/UNWATCHED/INSTRUMENT-CANNOT-SEE axis ---
     {
         "property": "CloudFront distribution EVTSA9VEHNZVH (opalinvest.dev / www)",
+        "attribution": "Dashboard",
         "family": "watch",
         "prev": {"watch": "NO-INSTRUMENT-EVER"},
         "curr": {"watch": "WATCHED"},
-        "citation": "MONITORED_VS_SERVED.md sec.3a",
+        "citation": "MONITORED_VS_SERVED.md sec.3a; ATTRIB Dashboard: PRD sec.6 / COMPUTE_MANIFEST_FINDINGS.md sec.5, Dashboard = 'the entire serverless system feeding opalinvest.dev'",
         "evidence": "3 of 51 alarms match this distribution's DistributionId dimension structurally.",
     },
     {
         "property": "CloudFront distribution E1DHJH4Y1W8YC2 (no alias; wp-origin target)",
+        "attribution": "UNGROUPED",
         "family": "watch",
         "prev": {"watch": "NO-INSTRUMENT-EVER"},
         "curr": {"watch": "UNWATCHED-CONFIRMED"},
-        "citation": "MONITORED_VS_SERVED.md sec.3a",
+        "citation": "MONITORED_VS_SERVED.md sec.3a; ATTRIB UNGROUPED: MONITORED_VS_SERVED.md sec.3a declines to resolve which named surface this routes to",
         "evidence": "0 of 51 alarms match, positive-controlled by the sibling distribution's 3 matches on the identical structural sweep -- a real absence, not a broken probe.",
     },
     {
         "property": "opal-session-analytics-api (API Gateway, LIVE-no-DECLARED)",
+        "attribution": "UNGROUPED",
         "family": "watch",
         "prev": {"watch": "NO-INSTRUMENT-EVER"},
         "curr": {"watch": "WATCHED"},
-        "citation": "MONITORED_VS_SERVED.md sec.3b",
+        "citation": "MONITORED_VS_SERVED.md sec.3b; ATTRIB UNGROUPED: MONITORED_VS_SERVED.md sec.3b names no domain/surface tie beyond its own name",
         "evidence": "4 of 51 alarms match by name/ID substring (errors, estimated-monthly-cost, high-invocations, throttles).",
     },
     {
         "property": "sentiment-query-api (API Gateway, LIVE-no-DECLARED)",
+        "attribution": "UNGROUPED",
         "family": "watch",
         "prev": {"watch": "NO-INSTRUMENT-EVER"},
         "curr": {"watch": "UNWATCHED-CONFIRMED"},
-        "citation": "MONITORED_VS_SERVED.md sec.3b",
+        "citation": "MONITORED_VS_SERVED.md sec.3b; ATTRIB UNGROUPED: MONITORED_VS_SERVED.md sec.3b names no domain/surface tie beyond its own name",
         "evidence": "0 of 51 alarms match (weaker, substring method; still positive-controlled by session-analytics's 4 matches on the identical method).",
     },
     {
         "property": "trade-submission-api (API Gateway, LIVE-no-DECLARED, financially consequential)",
+        "attribution": "Dashboard",
         "family": "watch",
         "prev": {"watch": "NO-INSTRUMENT-EVER"},
         "curr": {"watch": "UNWATCHED-CONFIRMED"},
-        "citation": "MONITORED_VS_SERVED.md sec.3b; ANOMALY_BREAKDOWN.md sec.3 (30 connected resources: 4 lambdas, 4 DynamoDB tables, 1 S3 bucket, 2 KMS keys); surprise row NFRA_REPORT-Z-W1-S4, DISARMED/GRADUATED by NFRA_REPORT-Z-S7",
+        "citation": "MONITORED_VS_SERVED.md sec.3b; ANOMALY_BREAKDOWN.md sec.3 (30 connected resources: 4 lambdas, 4 DynamoDB tables, 1 S3 bucket, 2 KMS keys); surprise row NFRA_REPORT-Z-W1-S4, DISARMED/GRADUATED by NFRA_REPORT-Z-S7; ATTRIB Dashboard: INVESTIGATION_v1.md row NFRA_REPORT-Z-S7, 'THE CONSUMER IS THE PORTAL: portal/src/api/endpoints/trade-submission.ts...'",
         "evidence": "0 of 51 alarms match. NFRA_REPORT-Z-S7 (1.0.0_SA_CTO~Z) found the substance is larger than this row alone shows: a live, portal-consumed trade submission AND approval workflow behind this undeclared front door, with a second, DECLARED front door reaching the same handler. Open call at Andrew; nothing built (alerting moratorium armed).",
     },
     {
         "property": "Gold-layer served surfaces (aggregate, ~1380 GOLD_SCRIPT nodes)",
+        "attribution": "UNGROUPED",
         "family": "watch",
         "prev": {"watch": "NO-INSTRUMENT-EVER"},
         "curr": {"watch": "INSTRUMENT-CANNOT-SEE"},
-        "citation": "MONITORED_VS_SERVED.md sec.3c/sec.4; DEPRECATION.md sec.3 (NFRA_REPORT-Z-W1-S1: comp-blast models NO edge GOLD_SCRIPT->Lambda/portal)",
+        "citation": "MONITORED_VS_SERVED.md sec.3c/sec.4; DEPRECATION.md sec.3 (NFRA_REPORT-Z-W1-S1: comp-blast models NO edge GOLD_SCRIPT->Lambda/portal); ATTRIB UNGROUPED: MONITORED_VS_SERVED.md sec.3c/4, an aggregate the enumerator cannot resolve to any one named property",
         "evidence": "Not renderable as WATCHED or UNWATCHED -- the enumerator itself cannot resolve this edge class for ANY gold-layer artifact, alive or dead. 0 of ~1380 resolvable by this method; denominator is what could NOT be resolved, never folded into either confirmed state.",
     },
     # --- COST_ANOMALY.md's segment-grain detector (brand new this session; brief F9 the prior state) ---
     {
         "property": "Cost segment: inf (Pipeline tag)",
+        "attribution": "UNGROUPED",
         "family": "axis",
         "prev": {"axis1": "UNCHECKED", "axis2": None, "axis3": None},
         "curr": {"axis1": "CHECKED", "axis2": "BREACH", "axis3": None},
-        "citation": "COST_ANOMALY.md sec.1; brief F9 ('cost has no standard so it cannot fail')",
+        "citation": "COST_ANOMALY.md sec.1; brief F9 ('cost has no standard so it cannot fail'); ATTRIB UNGROUPED: COST_ANOMALY.md sec.1, a Pipeline-tag cost segment, not a named business surface",
         "evidence": "Trailing 30d $16.253/day vs baseline 30d $2.197/day = +639.6%, over the $0.50/day floor -- ANOMALY, rendered as the outside-standard-not-contained family per C-COST-15's own 15% threshold.",
     },
     {
         "property": "Cost segment: bd (Pipeline tag)",
+        "attribution": "UNGROUPED",
         "family": "axis",
         "prev": {"axis1": "UNCHECKED", "axis2": None, "axis3": None},
         "curr": {"axis1": "CHECKED", "axis2": "BREACH", "axis3": None},
-        "citation": "COST_ANOMALY.md sec.1",
+        "citation": "COST_ANOMALY.md sec.1; ATTRIB UNGROUPED: COST_ANOMALY.md sec.1, a Pipeline-tag cost segment, not a named business surface",
         "evidence": "Trailing 30d $5.641/day vs baseline 30d $4.109/day = +37.3%, over the $0.50/day floor -- ANOMALY.",
     },
     {
         "property": "Cost segment: (untagged) (largest single line, 45% of spend)",
+        "attribution": "UNGROUPED",
         "family": "axis",
         "prev": {"axis1": "UNCHECKED", "axis2": None, "axis3": None},
         "curr": {"axis1": "CHECKED", "axis2": "OK", "axis3": None},
-        "citation": "COST_ANOMALY.md sec.1",
+        "citation": "COST_ANOMALY.md sec.1; ATTRIB UNGROUPED: COST_ANOMALY.md sec.1, an untagged cost segment, not a named business surface",
         "evidence": "Trailing 30d $17.623/day vs baseline 30d $18.463/day = -4.5% -- stable, the detector's own negative control on its largest line.",
     },
     # --- COMPUTE_MANIFEST_FINDINGS.md's own substrate finding (brief F8 the prior state) ---
     {
         "property": "ECS cluster opal-globgrph (compute substrate)",
+        "attribution": "Graph",
         "family": "axis",
         "prev": {"axis1": "BLIND", "axis2": None, "axis3": None},
         "curr": {"axis1": "CHECKED", "axis2": "OK", "axis3": None},
-        "citation": "COMPUTE_MANIFEST_FINDINGS.md sec.1; brief F8 ('the manifest is EC2-ONLY -- ECS absent entirely')",
+        "citation": "COMPUTE_MANIFEST_FINDINGS.md sec.1; brief F8 ('the manifest is EC2-ONLY -- ECS absent entirely'); ATTRIB Graph: PRD sec.6 v0.7 closure block names opal-globgrph as Graph's referent verbatim",
         "evidence": "aws ecs list-clusters found 1 of 1 live cluster, ACTIVE, FARGATE, 3 of 3 services running -- a compute unit the manifest never named at all.",
+    },
+    # --- RP-s-20 addition (PRD v0.7, FWD-4's fourth ratified member): opal-gateway HAD NO ROW IN
+    # THE EDITION AT ALL before this cell (measured at issuance: GATEWAY_ROWS=0). Grounded the same
+    # way every other ROW_FACTS entry is grounded -- a QUOTED fact with a citation to a round-1
+    # deliverable, not a fresh measurement. ---
+    {
+        "property": "opal-gateway (compute substrate, MCP server)",
+        "attribution": "Gateway",
+        "family": "axis",
+        "prev": {"axis1": "UNCHECKED", "axis2": None, "axis3": None},
+        "curr": {"axis1": "CHECKED", "axis2": "OK", "axis3": None},
+        "citation": "COMPUTE_MANIFEST_FINDINGS.md sec.3a/sec.4a/sec.5 (0.9.0_WK_NFRA_REPORT~2); PRD sec.6 v0.7 closure block ('opal-gateway (EC2, the MCP server)... BOTH live, BOTH always-on'); ATTRIB Gateway: PRD sec.6 v0.7 closure block names opal-gateway as Gateway's referent verbatim, and ATTRIBUTION.md sec.4 (RP-s-20 amendment) renders it so",
+        "evidence": "opal-gateway is a declared, persistent EC2 box (t4g.nano), confirmed running live, systemd-managed (opal-gateway.service) behind an ALB, no explicit stop path found in its own extensive _status history -- this report's own vocabulary never rendered a row for it before this cell (0 of 0 prior editions), so Axis 1 moves UNCHECKED (deliberately not asserted by this report until now) to CHECKED/OK (looked, and the result is trustworthy: live, running, no anomaly recorded).",
     },
     # --- illustrative only, per ROW_STRUCTURE.md sec.3's own "not a live row" practice ---
     {
         "property": "(ILLUSTRATIVE ONLY -- NOT A LIVE ROW, per ROW_STRUCTURE.md sec.3's own labeling practice)",
+        "attribution": "UNGROUPED",
         "family": "axis",
         "prev": {"axis1": "CHECKED", "axis2": "OK", "axis3": None},
         "curr": {"axis1": "BLIND", "axis2": None, "axis3": None},
-        "citation": "ROW_STRUCTURE.md sec.3 (worked specimen row 5, explicitly labeled illustrative)",
+        "citation": "ROW_STRUCTURE.md sec.3 (worked specimen row 5, explicitly labeled illustrative); ATTRIB UNGROUPED: not a live row, no real surface to attribute",
         "evidence": "The regression case ROW_STRUCTURE.md itself uses to show the function is structurally CAPABLE of 'worse' -- 'a problem that broke overnight'. Excluded from the top-line VERDICT computation below precisely because it is not real (see compute_verdict).",
         "illustrative": True,
     },
@@ -425,15 +463,24 @@ def render_markdown(rows, needs_andrew, breach_rows, worse_rows, vintage):
     lines.append("")
     lines.append("## 2. EVERY ROW, WITH ITS OWN DELTA -- never a max() over rows")
     lines.append("")
-    lines.append("| Property (`QUOTED`) | Previous state (`QUOTED`) | This edition (`QUOTED`) | "
+    lines.append("| Property (`QUOTED`) | Attribution (`QUOTED`, `FWD-4`/`ATTRIBUTION.md`) | "
+                  "Previous state (`QUOTED`) | This edition (`QUOTED`) | "
                   "Delta (`COMPUTED`) | Citation (`QUOTED`) |")
-    lines.append("|---|---|---|---|---|")
+    lines.append("|---|---|---|---|---|---|")
     for r in rows:
         prev_s = fmt_state(r)
         curr_s = fmt_state(r, which="curr")
         tag = " *(ILLUSTRATIVE, NOT LIVE)*" if r.get("illustrative") else ""
-        lines.append("| %s%s | %s | %s | **%s** | %s |" % (
-            r["property"], tag, prev_s, curr_s, r["delta"], r["citation"]))
+        lines.append("| %s%s | `%s` | %s | %s | **%s** | %s |" % (
+            r["property"], tag, r["attribution"], prev_s, curr_s, r["delta"], r["citation"]))
+    lines.append("")
+    lines.append("**`Attribution` column, per `FWD-4` / `ATTRIBUTION.md` (cell `RP-s-13`, amended "
+                  "at PRD v0.7 by `RP-s-20`):** every row above rolls up to one of the four ratified "
+                  "members (`Dashboard`, `Website`, `Gateway`, `Graph`) or, where this project's own "
+                  "record names no ratified group for it, the mandatory rendered `UNGROUPED` value -- "
+                  "never omitted, never guessed. Each row's own `attribution` value is QUOTED in "
+                  "`compose_edition.py`'s `ROW_FACTS`, with its grounding folded into that row's own "
+                  "`Citation` cell (the `ATTRIB ...` fragment) rather than re-derived here.")
     lines.append("")
     lines.append("### Per-row reading (`GENERATED` -- restates only what the table above already "
                   "carries; delete this subsection and the table is unchanged)")
