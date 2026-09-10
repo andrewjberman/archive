@@ -405,8 +405,8 @@ def arm_b(before_res):
         "cottonwood", MONTH,
         {r["date"]: {"class": r["class"], "probe": None} for r in recs},
         invoke=None, s3=None, write_ask=False)
-    lad_vals = {r["provider"] for r in lad["unresolved"]}
-    skip_vals = {r["provider"] for r in recs}
+    lad_vals = {r.get("provider") for r in lad["unresolved"]}
+    skip_vals = {r.get("provider") for r in recs}  # .get: a MUTANT that drops the field must FAIL the clause, not crash the battery
     print("  remediate.remediate_month -> %r  (%d record(s))" % (lad_vals, len(lad["unresolved"])))
     print("  skipped branch            -> %r  (%d record(s))" % (skip_vals, len(recs)))
     check("b", lad_vals == skip_vals and lad_vals == {"Black Diamond"},
@@ -443,14 +443,14 @@ def arm_c(after):
                                                            for d in COVERED}},
                               ["DIVZ"], ladder=False, probe=probe)
     skipped = res["unresolved"][partner]
-    vals = {r["provider"] for r in skipped}
+    vals = {r.get("provider") for r in skipped}
     print("  SKIPPED branch : %d record(s), provider value(s) %r" % (len(skipped), vals))
 
     lad = REM.remediate_month(partner, MONTH,
                               {r["date"]: {"class": r["class"], "probe": None}
                                for r in skipped},
                               invoke=None, s3=None, write_ask=False)
-    lvals = {r["provider"] for r in lad["unresolved"]}
+    lvals = {r.get("provider") for r in lad["unresolved"]}
     print("  LADDER  branch : %d record(s), provider value(s) %r" % (len(lad["unresolved"]),
                                                                     lvals))
     check("c", vals == {"<no provider mapped>"},
@@ -458,7 +458,7 @@ def arm_c(after):
           "-- never a guess, never None")
     check("c", vals == lvals,
           "BYTE-IDENTICAL to what the ladder branch renders for the same partner")
-    check("c", all(r["provider"] is not None for r in skipped),
+    check("c", all(r.get("provider") is not None for r in skipped),
           "no record carries a null provider")
     return res
 
@@ -484,6 +484,14 @@ def arm_d(after):
           "and did NOT write rung 3's own artifact %s -- so EG-s-26's disclosure "
           "(`ABSENT BY CONSTRUCTION`) stays TRUE, and a rehearsal run can never merge "
           "into the document a person authorises real egress on" % rung3_key)
+    if equiv_key not in skip_stub.store:
+        # FAIL-SOFT, and deliberately: the MUTANT control breaks exactly this, and a
+        # battery that CRASHES instead of recording a FAIL cannot be used as its own
+        # mutant oracle -- the crash and a real defect would look different only in the
+        # traceback.
+        check("d", False, "no ask record was written, so nothing can be compared against "
+                          "a real rung-3 ask -- the rest of this arm is UNEVALUATED")
+        return None, None, None
     equiv = json.loads(skip_stub.store[equiv_key])
     print("")
     print("THE RECORD, WHOLE:")
@@ -673,6 +681,8 @@ def arm_f():
     print("  served == committed   %s" % ev["served_equals_committed"])
     print("  NEGATIVE CONTROL prior != served: %s" % (ev["prior_sha256"] != ev["served_sha256"]))
     print("  rollback              %s" % ev["rollback_command"])
+    print("  version history       %d version(s) on the key; %s"
+          % (ev.get("version_history_count", 0), ev.get("latest_placement_note", "")))
     print("  ledger entry          %s" % ev["ledger_entry"])
     check("f", ev["served_equals_committed"] is True,
           "the SERVED object is byte-equal to the committed bytes, both sha256 printed, "
@@ -696,7 +706,17 @@ def arm_f():
           "ZERO GUARD: both listings NON-EMPTY before any delta is graded (an empty "
           "listing and an untouched population are the same value)")
     check("f", len(art["changed"]) <= 1 and not art["added"] and not art["removed"],
-          "at most ONE key of %d moved in the artifact prefix, none added, none removed"
+          "at most ONE key of %d changed between the listing pair, none added, none removed"
+          % art["after_count"])
+    moved = art.get("moved_since_entry_opened", [])
+    print("    MOVED SINCE THE ENTRY OPENED (LastModified >= opened_at -- the measurement "
+          "that survives a re-run, since a before/after listing pair on a second "
+          "invocation reports zero and reads exactly like 'never touched'):")
+    for k, lm in moved:
+        print("      %s  %s" % (k, lm))
+    print("      %d of %d key(s)" % (len(moved), art["after_count"]))
+    check("f", len(moved) == 1 and moved[0][0] == ev["key"],
+          "EXACTLY ONE key of %d moved during the act, and it is the ordered key"
           % art["after_count"])
 
     rep = ev["reports_prefix_census"]
@@ -707,9 +727,15 @@ def arm_f():
         print("      CHANGED %s" % k)
     check("f", rep["before_count"] > 0,
           "ZERO GUARD on the reports listing: non-empty (%d key(s))" % rep["before_count"])
-    check("f", not rep["changed"] and rep["before_count"] == rep["after_count"],
+    rmoved = rep.get("moved_since_entry_opened", [])
+    print("    MOVED SINCE THE ENTRY OPENED: %d of %d key(s) %s"
+          % (len(rmoved), rep["after_count"], rmoved))
+    print("    DISCLOSURE ON THIS DENOMINATOR: %s" % rep.get("disclosure", ""))
+    check("f", not rep["changed"] and rep["before_count"] == rep["after_count"]
+          and not rmoved,
           "NO WRITE under platinum/reports/ during this cell's deploy: 0 of %d key(s) "
-          "moved" % rep["after_count"])
+          "moved, by BOTH instruments (listing pair and LastModified)"
+          % rep["after_count"])
 
     print("")
     print("  SES: %s" % ev["ses_note"])
