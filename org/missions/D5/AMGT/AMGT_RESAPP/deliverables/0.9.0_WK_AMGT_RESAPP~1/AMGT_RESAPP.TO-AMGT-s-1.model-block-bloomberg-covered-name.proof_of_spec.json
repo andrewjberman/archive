@@ -1,0 +1,299 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-s-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-s-1.model-block-bloomberg-covered-name.md",
+    "group": "OTHER",
+    "vintage_commit": "908880f6d1b5728223bc40aab1a3137a712a0c99"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "ed25feaee5f82262350627c51718c17e45ac61fd",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-s-1.model-block-bloomberg-covered-name.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "6983401df7a84ea1386df5d34d5c6293b3a560bd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A box-side script run directly under `python` (blpapi+boto3); no AWS/deploy surface -- this cell's artifact IS the script. Exercised live: `pull` landed 6 raw objects across 3 securities; `derive` (re-run twice, each minting a fresh stamp) landed 3 derived objects, read back and confirmed by check_landing.py/check_join.py against the live opal-data-research bucket.",
+      "introduces": [
+        "stage_pull",
+        "stage_derive",
+        "s3_put_if_absent",
+        "merge_by_fiscal_year",
+        "_resolved_unit",
+        "_resolved_sign",
+        "_currency_caveat"
+      ],
+      "artifact_covered_by": ["AC1", "AC2", "AC4", "AC5", "AC7"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/select_securities.py",
+      "kind": "script",
+      "commit_or_etag": "6983401df7a84ea1386df5d34d5c6293b3a560bd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the stated, re-runnable security-selection rule (bound (d)); run standalone, printed SELECTED: control=SAP GY Equity | us_name=BA US Equity | adr=BABA US Equity.",
+      "introduces": ["load_measured_entries", "drop_duplicate_values", "pick"],
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/build_field_map.py",
+      "kind": "script",
+      "commit_or_etag": "6983401df7a84ea1386df5d34d5c6293b3a560bd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "reads raw bytes back from S3 (never the pull's in-memory result) and applies F4's magnitude-comparison method per field, per security; deterministic (two full re-runs, byte-identical field_map.json, see controls.determinism).",
+      "introduces": ["classify_unit", "classify_sign", "detect_reporting_currency_mismatch", "merge_by_fiscal_year"],
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/field_map.json",
+      "kind": "config_data",
+      "commit_or_etag": "6983401df7a84ea1386df5d34d5c6293b3a560bd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "32 fields; 28 measured-on-3 for both unit and sign; 0 inferred; 1 reporting-currency finding (BABA US Equity) -- the artifact AC3 reads directly.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/check_landing.py",
+      "kind": "test",
+      "commit_or_etag": "6983401df7a84ea1386df5d34d5c6293b3a560bd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "runnable as `python .../check_landing.py`; reads S3 directly (list_objects_v2 + list_object_versions), never the pull's own log; rc 0, printed the exact AC2 line twice (determinism control).",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/check_join.py",
+      "kind": "test",
+      "commit_or_etag": "6983401df7a84ea1386df5d34d5c6293b3a560bd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "runnable as `python .../check_join.py`; independently re-derives the fiscal-year join straight from raw histdata.json in S3; rc 0, printed the exact AC4 line twice (determinism control).",
+      "artifact_covered_by": ["AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/pull_log.json",
+      "kind": "config_data",
+      "commit_or_etag": "6983401df7a84ea1386df5d34d5c6293b3a560bd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "every security requested (3 unique) and every ReferenceDataRequest/HistoricalDataRequest issued (6 total) -- the artifact AC7 reads directly.",
+      "artifact_covered_by": ["AC7"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/model_block_SAP_GY_Equity.json",
+      "kind": "config_data",
+      "commit_or_etag": "6983401df7a84ea1386df5d34d5c6293b3a560bd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a copy of the control security's latest landed derived model_block.json (stamp 20260910T232018Z), for AC5's read.",
+      "artifact_covered_by": ["AC5"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/model_block_BA_US_Equity.json",
+      "kind": "config_data",
+      "commit_or_etag": "6983401df7a84ea1386df5d34d5c6293b3a560bd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a copy of the US-domiciled name's latest landed derived model_block.json (stamp 20260910T232018Z), for AC5's read.",
+      "artifact_covered_by": ["AC5"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/model_block_BABA_US_Equity.json",
+      "kind": "config_data",
+      "commit_or_etag": "6983401df7a84ea1386df5d34d5c6293b3a560bd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a copy of the ADR's latest landed derived model_block.json (stamp 20260910T232019Z), carrying the currency_caveat finding on every currency-sensitive figure, for AC5's/AC8's read.",
+      "artifact_covered_by": ["AC5", "AC8"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/README.md",
+      "kind": "doc",
+      "commit_or_etag": "de74e551cada70a6a87fc05094d29a62d557f70f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "session narrative: securities + selection rule, mechanism summary, the two surprise findings, and the AC8 judgment answer (a figure from the ADR's block defended from the record alone).",
+      "artifact_covered_by": ["AC8"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "de74e551cada70a6a87fc05094d29a62d557f70f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows AMGT_RESAPP-Z-W1-S1 and AMGT_RESAPP-Z-W1-S2 appended (both OBSERVATION, INERT); surprise-row-gate.py OK: 2 new row(s) of 8 total checked (6 pre-existing, NOT re-graded)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a line containing \"DAPI: UP\" -- the terminal is signed in and an entitled session answered a real request at the moment this worker started; anything else is the signed-out signature and this criterion is REFUSED with a BLOCKING row, never rescued by a sign-in",
+      "method": "command",
+      "invocation": "python integrations/bloomberg/auth/dapi_check.py",
+      "output_evidence": "DAPI: UP (session + SPX Index/PX_LAST returned -- entitled session live)",
+      "denominator": "1 of 1 run, rc 0",
+      "status": "PASS",
+      "expect": "DAPI: UP"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "one line of the exact shape \"LANDING: raw 6 objects across 3 securities; derived 3 objects; raw-before-derived True; overwrites 0\" -- read back from S3 by this script (list the prefixes, compare each security's raw stamp to its derived stamp), never from the pull's own log; \"raw-before-derived False\", fewer than 6 raw objects, or \"overwrites\" above 0 is NOT met",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/check_landing.py",
+      "output_evidence": "LANDING: raw 6 objects across 3 securities; derived 3 objects; raw-before-derived True; overwrites 0",
+      "denominator": "6 raw objects (2 per security x 3) + 3 derived objects (1 per security x 3), reading each security's LATEST stamp per STORE_CONTRACT.md section 4 rule 2; overwrites counted across every key EVER written under the 3 securities' prefixes via S3 object-version count",
+      "status": "PASS",
+      "expect": "LANDING: raw 6 objects across 3 securities; derived 3 objects; raw-before-derived True; overwrites 0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"measured-on-3\" of at least 20, \"inferred 0\", and exactly three securities listed of which one is \"SAP GY Equity\" -- the map is MEASURED per field on the control plus a US name and an ADR, with no inferred unit anywhere; fewer than 20 measured on all three is a finding to record per field but leaves this criterion NOT met",
+      "method": "command",
+      "invocation": "python -c \"import json; m=json.load(open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/field_map.json')); f=m['fields']; three=[x for x in f if x['unit_status']=='MEASURED' and x['sign_status']=='MEASURED' and len(x['measured_on'])>=3]; inf=[x for x in f if 'INFERRED' in (x['unit_status'],x['sign_status'])]; print('fields', len(f), 'measured-on-3', len(three), 'inferred', len(inf), 'securities', sorted(set(s for x in f for s in x['measured_on'])))\"",
+      "output_evidence": "fields 32 measured-on-3 28 inferred 0 securities ['BA US Equity', 'BABA US Equity', 'SAP GY Equity']",
+      "denominator": "32 of 32 fields checked; 28 of 32 measured-on-3 (>=20 required); 0 of 32 inferred; 3 of 3 securities listed, SAP GY Equity present",
+      "status": "PASS",
+      "expect": "measured-on-3 (\\d+).*inferred 0.*SAP GY Equity"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "a summary line \"JOIN: 3 of 3 securities at 10 FY rows; orphan price rows 0\" -- the fiscal-year join yields exactly ten rows for ten fiscal years on every security with no price row left unjoined; \"14 rows\" anywhere, or an orphan count above 0, is the date-string defect and is NOT met",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/check_join.py",
+      "output_evidence": "JOIN: 3 of 3 securities at 10 FY rows; orphan price rows 0",
+      "denominator": "3 of 3 securities at exactly 10 FY rows each; 0 orphan price rows summed across all 3 (SAP's own raw response splits 4 of 10 years into 14 raw rows, matching the CRO's F5 finding exactly -- the join merges them back to 10, 0 orphans)",
+      "status": "PASS",
+      "expect": "JOIN: 3 of 3 securities at 10 FY rows; orphan price rows 0"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "\"complete True\" with \"figures\" above 0 -- every figure in every derived block carries the six fields an analyst defends a number with (C-BLOOMBERG-BASIS: the basis stated beside the number); a copy of each landed model_block.json is written to the deliverables folder under model_block_<security_key>.json for this read",
+      "method": "command",
+      "invocation": "python -c \"import json,glob; ps=sorted(glob.glob('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/model_block_*.json')); n=0; ok=0; [(n:=n+1, ok:=ok+(1 if all(k in fg and fg[k] not in (None,'') for k in ('value','unit','sign','basis','vintage','source')) else 0)) for p in ps for fg in json.load(open(p))['figures']]; print('figures', n, 'carrying value+unit+sign+basis+vintage+source', ok, 'complete', n>0 and n==ok)\"",
+      "output_evidence": "figures 578 carrying value+unit+sign+basis+vintage+source 578 complete True",
+      "denominator": "578 of 578 figures across all 3 model_block_<security_key>.json copies carry all six fields non-empty",
+      "status": "PASS",
+      "expect": "complete True"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "exactly \"0\" -- NEGATIVE: no file under the module names FactSet, CapIQ or a normalized-EPS reconstruction; the basis is Bloomberg's and is stated, never reverse-engineered",
+      "method": "command",
+      "invocation": "grep -r -c -i -E 'factset|recurring.?eps|normali[sz]ed.?eps|capiq|IQ_' integrations/bloomberg/research/ | grep -v -c ':0$'",
+      "output_evidence": "AC6 invocation deciding output, verbatim:\n0\n(the second grep -v -c ':0$' emitted exactly this one line: the digit 0 -- zero of the per-file ':<count>' rows were anything other than ':0')",
+      "denominator": "1 of 1 file under integrations/bloomberg/research/ (model_block_pull.py) scanned; 0 of 1 matched any forbidden token",
+      "status": "PASS",
+      "expect": "^0$"
+    },
+    {
+      "criterion_id": "AC7",
+      "criterion_verbatim": "\"unique securities requested 3\" (or fewer, never more) -- NEGATIVE: the cost axis is unique securities touched (F2) and this order is capped at three covered names; a fourth is a widening and is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import json; l=json.load(open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/pull_log.json')); print('unique securities requested', len(set(l['securities'])), '| requests', len(l['requests']))\"",
+      "output_evidence": "unique securities requested 3 | requests 6",
+      "denominator": "3 of 3 unique securities requested (SAP GY Equity, BA US Equity, BABA US Equity); 6 total Bloomberg calls (1 ReferenceDataRequest + 1 HistoricalDataRequest per security)",
+      "status": "PASS",
+      "expect": "unique securities requested 3"
+    },
+    {
+      "criterion_id": "AC8",
+      "criterion_verbatim": "pick one figure from the ADR's block -- could an analyst, challenged \"where is that from, on what basis, as of when\", answer from the record alone? And where a unit DIFFERED between SAP and the US name or the ADR, is that difference in the map as a per-security fact rather than smoothed into one convention?",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "read org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/README.md section 'AC8 (judgment)', field_map.json's cross_security_findings, and model_block_BABA_US_Equity.json's EBITDA_ADJUSTED FY2025 figure",
+      "output_evidence": "README.md answers with a named figure (BABA US Equity, FY2025, EBITDA_ADJUSTED: value 209364.0, unit MILLIONS, sign POSITIVE, basis {mnemonic, Bloomberg's-own-definition}, vintage, source bloomberg-dapi, currency_caveat) and states plainly what the record does not resolve on its own (which currency the MILLIONS figure is denominated in) while disclosing that gap via the currency_caveat rather than a bare number; no field's classified UNIT (percent/decimal, absolute/millions, per-share, ratio) differed across the three securities in this measurement (field_map.json cross_security_findings has 0 unit-family entries), but a currency/basis difference on the ADR was found, is recorded per-security (field_map.json's per_security_detail + cross_security_findings[0]), and is propagated into every affected figure rather than smoothed into one shared convention.",
+      "denominator": "N/A -- judgment criterion, read against the deliverable text and the two cited artifacts, no invocation output to count",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3 L6/L9: a judgment row carries its output and NO verdict; the grade is 3.0.0_SA_CVO~Z's at L9 adjudication, not self-graded here."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "model_block_pull.py's load-bearing claim (STORE_CONTRACT.md section 4 rule 1) is that s3_put_if_absent REFUSES to write to a key that already exists. .scratch/mutant_test_s3_guard.py (not committed) exercises the REAL guard against an in-memory stub S3 client (no live bucket touched), then a MUTANT copy with the existence check removed, against the same stub.",
+      "expected": "REAL guard raises RuntimeError on a second write to the same key; MUTANT (existence check disabled) silently overwrites instead.",
+      "observed": "REAL: 'REFUSING TO OVERWRITE existing key (STORE_CONTRACT rule 1): s3://opal-data-research/raw/bloomberg/TEST_Equity/20990101T000000Z/refdata.json' (raised as expected). MUTANT: store now holds the SECOND write's bytes (overwrote=True) -- the guard's absence is exactly what would let an overwrite through. CONTROL FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "check_landing.py and check_join.py each run twice against the live (unchanged) S3 state; build_field_map.py run twice with its field_map.json output hashed both times.",
+      "observed": "check_landing.py: identical 'LANDING: raw 6 objects across 3 securities; derived 3 objects; raw-before-derived True; overwrites 0' both runs. check_join.py: identical 'JOIN: 3 of 3 securities at 10 FY rows; orphan price rows 0' both runs. build_field_map.py: field_map.json sha256 identical across both runs (08003d1b602c1d96e274d2a645e66e142c7b1954a0b23f21ca47758491b5c244).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The EXERCISED bar of FWD-1 (an analyst using a page without opening a spreadsheet or terminal)",
+      "reason": "Explicitly not this cell's per the task order text: 'this cell builds the block; the EXERCISED bar is served by the page and is not claimed here.' AMGT-s-1 lands raw and derived bytes only."
+    },
+    {
+      "item": "Reconstructing FactSet's recurring/normalized EPS",
+      "reason": "Bound (f) / AC6: Bloomberg's own definitions are adopted and stated; no vendor's proprietary per-share normalization is reverse-engineered. IS_EPS is Bloomberg's own reported EPS, landed and labelled as such, never smoothed to match another vendor's figure."
+    },
+    {
+      "item": "A fourth security, or a wider field set beyond the CRO's mapped ~15 header + ~19 line-item fields",
+      "reason": "F2/G-24: at most three unique securities, all covered names; AC7 verifies exactly 3."
+    },
+    {
+      "item": "Resolving the ADR's fiscal-vs-calendar join gap to an exact currency-conversion + ADR-ratio reconciliation",
+      "reason": "Filed as surprise row AMGT_RESAPP-Z-W1-S2: the discriminating fact (a real mismatch, and roughly where) is established; isolating currency vs timing-gap vs ADR-ratio as the precise cause would need an additional, uncosted Bloomberg call outside this order's three-security cap, and was not attempted."
+    },
+    {
+      "item": "Repairing AMGT-s-12's universe.json duplicate-ticker defect",
+      "reason": "Filed as surprise row AMGT_RESAPP-Z-W1-S1: outside this worker's <paths> grant (a different cell's deliverable); select_securities.py excludes the defect rather than silently trusting it, so it did not propagate."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W1-S1: AMGT-s-12's universe.json carries a measurement defect -- 16 of its 48 MEASURED bloomberg_ticker values, across unrelated folders including the CRO's own control folder SAP GY, all read the identical string 'AAPL US'. select_securities.py excludes every duplicate-valued entry before picking a US-domiciled name and an ADR, so the defect did not propagate into this order's three securities (the control, SAP GY Equity, is taken directly from the task order text/CRO brief, never from this universe.json row). Not fixed here -- outside this worker's <paths> grant, and a different cell's deliverable.",
+    "AMGT_RESAPP-Z-W1-S2: for the ADR (BABA US Equity, fiscal year end 31 March), Bloomberg's raw historical response never carries a single row with both a price field and a fundamentals field -- 100% of its rows split fiscal-period-end (March) fundamentals from calendar-year-end (December) price/ratios. Grouping by the calendar year of `date` (this order's fiscal-year join rule) satisfies AC4's row-count and orphan-count bar exactly (10 FY rows, 0 orphans, same as the other two securities) but, for this specific security, merges each fiscal year's fundamentals with a price observation roughly nine months later rather than one at the fiscal period end. A self-consistent check (Bloomberg's own PE_RATIO vs a naive PX_LAST/IS_EPS computed from the same fiscal-year-merged group) reconciles to 6 decimal places on the control (December FYE) and disagrees by a factor of ~5.9x on BABA -- consistent with a currency difference, the ~9-month timing gap, an ADR share-ratio effect, or some combination; not isolated to one cause, and not reconciled further (bound (f): state the finding, never guess past what was measured)."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/README.md",
+  "compiler_tools": [
+    {
+      "tool": "dapi_check.py (the estate's DAPI health probe)",
+      "invocation": "python integrations/bloomberg/auth/dapi_check.py",
+      "result": "rc 0; DAPI: UP (session + SPX Index/PX_LAST returned -- entitled session live), re-run immediately before the pull per the perishability bound"
+    },
+    {
+      "tool": "model_block_pull.py pull",
+      "invocation": "python integrations/bloomberg/research/model_block_pull.py pull",
+      "result": "rc 0; PULL DONE: 3 of 3 securities landed raw (6 objects, raw/bloomberg/<security_key>/<stamp>/{refdata.json,histdata.json})"
+    },
+    {
+      "tool": "model_block_pull.py derive",
+      "invocation": "python integrations/bloomberg/research/model_block_pull.py derive",
+      "result": "rc 0 (run 3 times total -- once initial, twice more to embed field_map.json's measured units/signs and then the currency-caveat finding; each run minted a fresh stamp, 0 overwrites, per check_landing.py); DERIVE DONE: 3 of 3 securities derived, 10 FY rows / 0 orphans each"
+    },
+    {
+      "tool": "build_field_map.py",
+      "invocation": "python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/build_field_map.py",
+      "result": "rc 0; FIELD MAP BUILT: 32 fields, 28 measured-on-3 (unit+sign), 0 cross-security unit findings, 1 reporting-currency findings"
+    },
+    {
+      "tool": "check_landing.py",
+      "invocation": "python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/check_landing.py",
+      "result": "rc 0; LANDING: raw 6 objects across 3 securities; derived 3 objects; raw-before-derived True; overwrites 0 (AC2)"
+    },
+    {
+      "tool": "check_join.py",
+      "invocation": "python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/check_join.py",
+      "result": "rc 0; JOIN: 3 of 3 securities at 10 FY rows; orphan price rows 0 (AC4)"
+    },
+    {
+      "tool": ".scratch/mutant_test_s3_guard.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/mutant_test_s3_guard.py",
+      "result": "rc 0; REAL guard raised RuntimeError as expected; MUTANT (guard disabled) overwrote silently; CONTROL FIRED-AS-EXPECTED"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile integrations/bloomberg/research/model_block_pull.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/{select_securities,build_field_map,check_landing,check_join}.py",
+      "result": "rc 0, no output -- all 5 files compile clean"
+    },
+    {
+      "tool": "ruff check --target-version py39",
+      "invocation": "ruff check --target-version py39 integrations/bloomberg/research/model_block_pull.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/{select_securities,build_field_map,check_landing,check_join}.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "safe-commit.sh (commit-gate + surprise-row-gate + to-pipeline-gate + missions-tree-check pre-commit chain)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~1 <0.9.0_WK_AMGT_RESAPP~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit 1 (6983401df7): code+data, commit-gate OK, to-pipeline-gate OK, surprise-row-gate OK (no rows in this commit). commit 2 (de74e551ca): README.md + investigation file, surprise-row-gate OK: 2 new row(s) of 8 total checked (6 pre-existing, NOT re-graded)."
+    }
+  ]
+}
