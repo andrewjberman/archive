@@ -196,6 +196,32 @@ The gate's two remedies are staging `infra/system/06_current_state.{md,json}` (o
 spending the audited `system-current-override`. **A path I need that `<paths>` does not name is a
 BLOCKING row, never an override.** Row `W2-S6`.
 
+### 4b. THE REMEDY WAS APPLIED, AND THE BLOCK SURVIVED IT — the loop does not converge
+
+`2.0.0_SA_COO` regenerated and landed `infra/system/06_current_state.{md,json}` at `ec39a2668f`
+(comp-system rc 0, `as_of HEAD=d30e3ca107`) and directed a re-run, on the gate's own instruction
+*"Wait for landing, then re-run"*. CLOUD was merged (the harness's sha256 `bf778f5d99c2…` unchanged
+across the merge, so the measured object did not move) and **the re-run was refused again, with NEW
+fingerprints**: `(491f0189b4…, 260) -> (a8192f19f4…, 260)`.
+
+**The regeneration was correct — that is the point.** Measured rather than inferred: with HEAD's
+version of the harness swapped into this worktree, `comp_system._source_fingerprint()` returns
+`['491f0189b4c0a30adedecf4eb7dc0efc77f5e501a29c3755f45d287b1adefc70', 260]`, **byte-identical to what
+06 records**. So 06 describes every *committed* source here perfectly and **this seat's uncommitted
+edit is the sole remaining delta** (same file count, content only). The edited copy was then restored
+and re-verified at `bf778f5d99c2…`.
+
+**The loop, closed and proven:** regenerate 06 → the pending edit re-drifts it → the gate refuses
+because a source is uncommitted → the edit cannot be committed → 06 can never cover it.
+`_source_fingerprint()` reads the **worktree** (`content_fingerprint(_SOURCES, rel_root=WS)`), while a
+regeneration on another branch necessarily reads a tree the edit is not in; and `_dirty_sources()`
+takes `line[3:]` of `git status --porcelain`, so **staging the source does not help either**. Its own
+docstring names the intent the predicate cannot express here — *"regenerating now would launder a
+PEER'S unlanded work"* — and the predicate cannot tell a peer's unlanded work from **the file this
+very commit is landing**. The only exit is a regeneration in a tree where the edit is present, with 06
+and the source in **one** commit: `infra/system/` inside `<paths>`. Row `W2-S9`; the override remains
+unspent.
+
 **The measured behaviour of limb (ii) is on the record even though git does not carry it:** the two
 argparse refusals both fire (`--rebaseline` with `--out`; `--out` naming the baseline path), the bare
 run writes `.comp-graph/routing-test/…` and says so, the committed baseline is byte-identical across
@@ -263,6 +289,7 @@ set above the maximum observed rather than at it.
 | `NFRA_COMPEFFICACY-W2-S6` | **BLOCKING** | ARMED | a granted path is uncommittable by the lane it was granted to; the staleness pre-dates the order |
 | `NFRA_COMPEFFICACY-W2-S7` | OBSERVATION | INERT | the face commands `deploy_ledger.py open` while `<paths>` does not name `org/critical_paths/` |
 | `NFRA_COMPEFFICACY-W2-S8` | OBSERVATION | ARMED | `E2-AC1`'s 900 s bound vs arm (e)'s 651.6–826 s subject |
+| `NFRA_COMPEFFICACY-W2-S9` | **BLOCKING** | ARMED | the W2-S6 remedy was applied and the block survived it; 06 can only describe committed content, so the loop does not converge |
 
 ---
 
@@ -273,10 +300,12 @@ set above the maximum observed rather than at it.
 - **The committed CloudComp baseline was never written** — sha256 `1befbed889…` before the first run,
   after the second, and now; `git status` clean on it across both 650–830 s runs.
 - **`infra/system/06_current_state.{md,json}` was not touched** and no `system-current-override` was
-  spent — out of grant, hence row `W2-S6` rather than a bypass.
-- **`<status>` was NOT flipped to `complete`.** Both mechanical criteria pass by output and the
-  instance validates, but DELIVERABLE 1 says *the fix, both limbs, committed on your branch*, and
-  limb (ii) is not committed. A valid instance is not a met order.
+  spent — out of grant, hence rows `W2-S6` and `W2-S9` rather than a bypass, and still unspent after
+  the issuer's regeneration failed to clear the block.
+- **`<status>` was NOT flipped to `complete`, and was re-withheld after the remedy.** Both
+  mechanical criteria pass by output and the instance validates rc 0, but DELIVERABLE 1 says *the fix,
+  both limbs, committed on your branch*, and limb (ii) is not committed — the re-run directed after
+  the regeneration was refused again (row `W2-S9`). A valid instance is not a met order.
 - **Nothing pushed, merged or rebased** beyond merging CLOUD into this branch as the issuer directed.
 - **The backup is still in place** at `C:/tmp/wk-compeff-8-1/.scratch/bin-backup-pre-ce-e-2` (211
   files) for the length of the order.
