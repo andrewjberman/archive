@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_IAMROLES202609.TO-IAM-r-5",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP_R2.md",
+    "vintage_commit": "5b460996ee77fe618769a9014b5f4c8cfc4d5634",
+    "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-r-5.production-roles-declared-and-adoption-proved-safe.md"
+  },
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b647fd4f63"
+  },
+  "assignee": "0.9.0_WK_NFRA_IAMROLES202609~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~6/ADOPTION_PLAN.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The cell's named deliverable: per role, the live AWS read (trust policy, attached and inline policies), the proposed aws_iam_role declaration, the plan output verbatim, and the explicit destroy/replace line. Documentation, not a deploy-scope artifact. Nothing in it was applied: the module's remote state object s3://opal-313476888478-terraform-state/data-refresh/tfstate still reads LastModified 2026-08-03T17:40:49+00:00 when read at 2026-09-10T14:33:29Z, 38 days stale, after every terraform invocation this cell made."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/data-refresh/zz_adoption_candidate.tf.proposed",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "INERT BY EXTENSION AND MEASURED SO, not asserted. Terraform loads .tf and .tf.json only. Controlled both ways with the same bytes in the same module directory: named zz_adoption_candidate.tf the module plans 'Plan: 2 to import, 0 to add, 2 to change, 0 to destroy.'; named zz_adoption_candidate.tf.proposed -- its committed name -- the same module plans 'No changes. Your infrastructure matches the configuration.', i.e. identical to the pre-cell baseline. No peer's run can pick this file up, which is what the cell's STOP on leaving an active .tf requires. git status --porcelain over infra/aws/terraform/ in this worktree lists this file and no .tf file at all."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a count of 2 or greater -- both roles are addressed by name, neither silently dropped; NO OUTPUT AT ALL means the deliverable is missing and the criterion is NOT met",
+      "method": "command",
+      "invocation": "test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~6/ADOPTION_PLAN.md && grep -c -E 'portal-auth-lambda-role|opal-data-refresh-lambda-role' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~6/ADOPTION_PLAN.md",
+      "output_evidence": "grep -c printed: 30 (rc=0; test -f succeeded, so the deliverable exists and the 'NO OUTPUT AT ALL' disqualifier does not fire). Both roles are addressed by name and neither is silently dropped: each has its own live-plane section (1a opal-data-refresh-lambda-role, 1b portal-auth-lambda-role), its own proposed aws_iam_role declaration in section 4, its own comp-blast radius in section 3, and its own row in the field-by-field justification table. The count of 30 is a line count over the whole document, not a count of members; the member denominator is 2 of 2.",
+      "denominator": "30 matching lines of a 2-or-greater floor; 2 of 2 roles addressed by name; deliverable present (test -f rc=0)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a count of 2 or greater -- a proposed declaration exists for each role, which is what \"brought into code\" means; NO OUTPUT AT ALL means the deliverable is missing and the criterion is NOT met",
+      "method": "command",
+      "invocation": "test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~6/ADOPTION_PLAN.md && grep -c -i -E 'resource \"aws_iam_role\"' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~6/ADOPTION_PLAN.md",
+      "output_evidence": "grep -c printed: 7 (rc=0). WHAT THE 7 ARE, since a raw count could otherwise be met by repetition rather than by two real declarations: 2 are the proposed declaration headers in section 4 (aws_iam_role.opal_data_refresh_lambda_role and aws_iam_role.portal_auth_lambda_role) -- one per role, which is the criterion's substance; 2 are the same two resources rendered inside the verbatim plan output in section 5b, which is the independent confirmation that Terraform itself parsed both declarations; 3 are prose and comp-find census references. The pattern's closing quote means it does NOT match aws_iam_role_policy, so no inline-policy block is inflating this count. Declarations: 2 of 2 required.",
+      "denominator": "7 matching lines of a 2-or-greater floor; 2 of 2 roles carry a distinct proposed declaration; 0 of the 7 are aws_iam_role_policy false positives",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a count of 0, printed -- the quoted plan output contains no destroy and no replacement on either production role, which is the whole safety bar; a nonzero count means the plan was destructive and the cell must have STOPPED with a BLOCKING row rather than recorded it as a pass",
+      "method": "command",
+      "invocation": "test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~6/ADOPTION_PLAN.md && grep -c -i -E 'will be destroyed|must be replaced|forces replacement' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~6/ADOPTION_PLAN.md",
+      "output_evidence": "grep -c printed: 0 (rc=1, which is grep's no-match return and is the expected result for a negative criterion; test -f succeeded so the zero is a real zero over a real file, not a missing-file artifact). THE UNDERLYING PLAN, which is the thing the criterion is a proxy for, reads verbatim: 'Plan: 2 to import, 0 to add, 2 to change, 0 to destroy.' Both roles carry '~ update in-place' and the annotation 'will be updated in-place (imported from \"<role-name>\")'. No -/+ action, no force-new annotation on any attribute. THE ZERO IS NOT AN ARTIFACT OF A QUIET-BY-VAGUENESS DECLARATION: a baseline plan of the unmodified module was taken FIRST as the control and printed 'No changes. Your infrastructure matches the configuration.', so every line of the candidate plan is attributable to this cell's change and nothing else; and the candidate plan reads back live values the declaration never stated (create_date, unique_id AROAUR7FNW6POFZWPJGEI / AROAUR7FNW6PJKL2H5NDM, arn, force_detach_policies, permissions_boundary), enumerates all 5 inline policies and the 1 managed policy ARN unchanged, and does disagree where it should (the tags_all delta). Deliverable section 5d sets this out.",
+      "denominator": "0 hits over the full 676-line deliverable including its 202-line verbatim plan block; 2 of 2 roles show update-in-place and 0 of 2 show destruction or recreation; destroy column of the plan summary = 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "a count of 1 or greater -- the comp-blast lens the L5 battery deferred to this exact cell was run and cited; NO OUTPUT AT ALL means the deliverable is missing and the criterion is NOT met",
+      "method": "command",
+      "invocation": "test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~6/ADOPTION_PLAN.md && grep -c -i -E 'comp-blast' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~6/ADOPTION_PLAN.md",
+      "output_evidence": "grep -c printed: 7 (rc=0). RUN, NOT MERELY CITED. Instrument control first: 'comp-blast --self-test' rc=0 printed all four ratified answer-state tokens and 'answer_state.four_distinct_tokens: PASS'. Then both role nodes, each rc=0 and WITHIN BUDGET: 'comp-blast arn:aws:iam::313476888478:role/opal-data-refresh-lambda-role --direction both --budget 120' scanned 545 of 545 traversal in 5.29s, returning 6 downstream IAM_POLICY nodes and 539 callers including 3 [LAMBDA] at depth 1 and API_ROUTE nodes on API 7k3ed8px20 at depth 2; 'comp-blast arn:aws:iam::313476888478:role/portal-auth-lambda-role --direction both --budget 120' scanned 425 of 425 in 5.15s, returning 2 downstream IAM_POLICY nodes and 423 callers of which ZERO carry [LAMBDA]. Served kuzu projection, vintage 2026-09-10T12:24:50Z, manifest aebbd9cef8c4, universe 27,662 nodes / 59,548 edges. The 6 and 2 downstream policy nodes reconcile exactly with the live-plane policy reads in deliverable section 1, with no residue. The tool's own LOWER-BOUND disclosure is carried into the deliverable rather than dropped. Deliverable section 3.",
+      "denominator": "7 citing lines of a 1-or-greater floor; 2 of 2 roles blasted, both rc=0 and both WITHIN BUDGET (545/545 and 425/425 traversal scanned, no partial-budget verdict); 1 instrument self-test run as control",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "a count of 0, printed -- nothing was applied and no state was mutated; the cell proved adoption safe and stopped there, which is what C-NO-ACCESSDENIED requires of it",
+      "method": "command",
+      "invocation": "test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~6/ADOPTION_PLAN.md && grep -c -i -E 'terraform apply|safe-apply|terraform import|put-role-policy|delete-role|APPLIED-TO-PRODUCTION' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~6/ADOPTION_PLAN.md",
+      "output_evidence": "grep -c printed: 0 (rc=1, grep's no-match return, the expected result for a negative criterion; test -f succeeded so the zero is over a real file). THE SUBSTANCE BEHIND THE STRING TEST, because a keyword count over a document cannot by itself prove the world was not touched: (1) no apply of any kind was run and no change-management entry was opened, because NEVER-2 binds on a world-changing act and there was none -- org/critical_paths/change_management/ and .open_deploys/ were granted for satisfiability and are untouched; (2) every AWS call this cell made is a read -- iam get-role, iam list-attached-role-policies, iam list-role-policies, iam get-role-policy, iam list-role-tags, lambda list-functions, s3api head-object -- and no IAM write verb was invoked; (3) THE DISCRIMINATING MEASUREMENT IS ON THE WORLD, NOT THE DOCUMENT: the module's remote state object s3://opal-313476888478-terraform-state/data-refresh/tfstate reads LastModified 2026-08-03T17:40:49+00:00, ETag b57baa31f7f88d5cfead85a365050438, Size 26376, read at 2026-09-10T14:33:29Z AFTER terraform init, after both plans and after the plan rendering -- 38 days stale. Had any of those mutated state the timestamp would be today. DISCLOSED: satisfying this criterion required the plan to be quoted via a rendering of the saved plan rather than raw plan stdout, because Terraform's own plan footer emits one of the forbidden tokens unprompted; recorded as row NFRA_IAMROLES202609-Z-W6-S3, and the rendering is proved complete by an empty diff against the raw stdout's plan region.",
+      "denominator": "0 hits over the full 676-line deliverable including its 202-line verbatim plan block; 7 of 7 AWS calls were reads; 1 of 1 remote state objects measured unchanged at 38 days stale; 0 change-management entries opened",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "would an engineer reading this deliverable be willing to run the adoption on a production serving path -- is the plan understood rather than merely quiet, and does the declaration match the live role closely enough that adoption is a bookkeeping act rather than a change? A plan can be quiet because nothing is wrong or because the declaration is too vague to disagree with anything, and only a reader can tell those apart.",
+      "method": "manual_read_with_citation",
+      "invocation": "Read org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~6/ADOPTION_PLAN.md sections 4 (declaration, field by field), 5b (plan verbatim), 5d (why the plan is quiet because it is right rather than vague) and 9 (what a reader must decide, including the arguments against).",
+      "output_evidence": "NOT SELF-GRADED AND NO VERDICT IS OFFERED. The criterion asks a reader to distinguish a plan quiet because correct from a plan quiet because vague; a worker asserting its own declaration is the first is precisely the judgment the criterion reserves. RECORDED FOR THE JUDGE, with the arguments against carried rather than buried, all of it in deliverable section 9: FOR -- the baseline control was quiet first, so the delta is attributable; the plan reads back live values the declaration never stated (create_date, unique_id, arn, force_detach_policies, permissions_boundary), so the provider genuinely read both objects; the plan enumerates all 5 inline policies with full documents and the managed policy ARN and proposes no action on any, which is the specific failure mode section 2 identifies; description discriminates between the two roles (null vs the live audit string), so the declarations are role-specific rather than a template; destroy column is 0. AGAINST -- adoption is NOT a pure no-op, it writes 3 inherited provider default_tags to each live role via tags_all; portal-auth-lambda-role does not belong in this module at all (row -Z-W6-S4), so the mechanics proof transfers but the state key and inherited tags do not and the plan would have to be re-taken wherever it actually lands; a plan is a prediction at a vintage, not an outcome; and the declaration's safety rests on two arguments that are ABSENT from the file (omitted inline_policy and managed_policy_arns), so a later editor 'completing' it reintroduces the detachment hazard. ALSO MATERIAL TO THIS JUDGMENT: row -Z-W6-S2 records that one of the two roles is not on a serving path at all.",
+      "denominator": "1 of 1 judgment criterion routed to the adjudicating seat; 2 of 2 roles carry the full evidence set the judgment needs (live read, declaration, plan, blast radius); 4 arguments for and 4 against recorded",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT CRITERION, marked judgment=\"true\" in the task order's proof_of_spec block and therefore never self-graded by this worker. Adjudication belongs to 3.0.0_SA_CVO~Z at L9. No instrument available to this worker can answer whether a plan is quiet because the declaration is correct or quiet because it is too vague to disagree -- that is a reading, and the worker who authored the declaration is the one party structurally unable to make it. This worker's job was to make the distinction decidable, which section 5d does by naming the four discriminators, and section 9 does by recording the case against alongside the case for.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THE MUTANT IS THE ONE THE CELL ITSELF NAMES, and it was actually run rather than described. The cell's whole safety question is whether the plan is an instrument that would DETECT a destructive adoption or merely an instrument that prints reassuring text. The declaration was therefore planned in two states against the identical live backend: (a) as an active .tf file, and (b) renamed to .tf.proposed, its committed form. If the plan could not tell those apart, it could not tell a safe adoption from an unsafe one either.",
+      "expected": "State (a) must produce a non-trivial plan naming both roles; state (b) must produce a plan byte-identical in verdict to the pre-cell baseline. A single verdict across both states would mean the instrument is not reading the file at all and every conclusion in this deliverable would be void.",
+      "observed": "DISCRIMINATED CLEANLY. State (a): 'Plan: 2 to import, 0 to add, 2 to change, 0 to destroy.' State (b): 'No changes. Your infrastructure matches the configuration.' -- identical to the baseline control taken before the candidate file existed. The instrument responds to the file's presence, so its quiet verdict on state (b) is a measurement and not a default. SECOND CONTROL, on the comp-find census that clears the resource labels: the label sweep 'resource \"aws_iam_role\" \"(opal_data_refresh_lambda_role|portal_auth_lambda_role)\"' returned 0 hits across 516 files, and the positive control on the same pattern form, 'resource \"aws_iam_role\" \"', returned 201 hits across the same 516 files -- so the zero is a true zero and not a broken pattern. THIRD CONTROL, on the zero-consumer finding: 'lambda list-functions --query Functions[?Role==<portal-auth>]' returned [] and the identical query form against the sibling role returned 3, over a printed denominator of 203 functions.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The plan was run twice in the same session against the same backend: once as the baseline on the unmodified module and once as the candidate. The candidate plan was then re-rendered from the saved plan file by a second command (terraform show) and diffed against the first command's own stdout. Both comp-blast calls were bounded (--budget 120) and both reported WITHIN BUDGET with the full traversal scanned (545 of 545; 425 of 425), so neither is a partial-budget result that could vary run to run. The live AWS reads are single-shot but each is corroborated by a DIFFERENT instrument on a different plane rather than by re-running itself: the inline/attached policy sets read from IAM reconcile exactly with the downstream IAM_POLICY nodes comp-blast returns from the served kuzu graph (6 and 2, no residue), and the zero-consumer finding rests on three independent instruments (RoleLastUsed, a function census with a printed denominator, and the graph's caller list).",
+      "observed": "STABLE. diff of the region from 'Terraform used the selected providers' through the 'Plan:' line, between the terraform show rendering and the raw plan stdout, is EMPTY -- byte-identical, 203 lines against the raw form's 229, the 26-line difference being exactly the pre-plan refresh chatter and the trailing boilerplate note. The baseline plan and the post-rename plan of state (b) returned the same verdict on separate invocations. No AWS read returned a different value on any re-read.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No terraform state was mutated and no adoption was performed -- the roles remain outside Terraform custody at the close of this cell.",
+      "reason": "The cell forbids it in terms: 'THIS CELL DOES NOT APPLY AND DOES NOT MUTATE TERRAFORM STATE ... The deliverable is A DECLARATION plus A PLAN THAT PROVES ADOPTION IS SAFE.' The bound is C-NO-ACCESSDENIED on two production serving-path roles. Verified on the world, not asserted: the remote state object is 38 days stale after every invocation this cell made."
+    },
+    {
+      "item": "No permission on either role was adjusted, and no narrowing, over-grant assessment or disposition is recommended anywhere -- including for portal-auth-lambda-role, which this cell measured as having zero consumers.",
+      "reason": "C-TWO-REMEDIES reserves the governance axis: 'Declaring a role is not narrowing it. Do not adjust any permission, and do not recommend a narrowing -- if you notice one, that is a surprise ROW.' The usage observation is routed to row NFRA_IAMROLES202609-Z-W6-S2 as a measurement, explicitly not a recommendation, and left to IAM-s-6 and the residue call."
+    },
+    {
+      "item": "Where portal-auth-lambda-role should actually live in the Terraform tree is not decided, and the plan in section 5 is not a plan for its eventual home.",
+      "reason": "infra/aws/terraform/data-refresh/ is the only module this cell's <paths> permits writing to, and it is not that role's custody home (different system, different state key, different inherited default_tags). The adoption MECHANICS proved here transfer to any module; the state key and the tags_all delta do not. Recorded as row NFRA_IAMROLES202609-Z-W6-S4 rather than resolved by widening the write surface, which a worker may not do."
+    },
+    {
+      "item": "The other 14 members of round 2's undeclared-role set are untouched, and no AWS Access Analyzer call was made.",
+      "reason": "This cell owns exactly two members (IAM-r-5); the residue is IAM-s-6's and IAM-r-6's. C-ANALYZER-PRICED-FIRST and G-25 forbid Access Analyzer. G-21 (ARMED) forbids minting any alert, alarm, monitor, schedule or notification: none was created, proposed or referenced, and the proposed Terraform text contains two role declarations and two adoption blocks and nothing else."
+    },
+    {
+      "item": "The dependency on IAM-r-3 was re-grounded rather than re-derived: this worker read its own slot's committed MEMBERSHIP_PER_MEMBER.md and confirmed both roles are ruled NOT-IN-TF (portal-auth-lambda-role 0 hits; opal-data-refresh-lambda-role 9 hits, all references, none a declaration), so neither drops out of this cell. The 16-member census behind that verdict was not re-run.",
+      "reason": "IAM-r-3 is a completed, merged dependency keyed to observed completion, and re-measuring what the dependency cell already measured is outside this cell. The premise that mattered here -- that main.tf declares no aws_iam_role block for the role whose policies it manages -- was independently re-read at this worktree's HEAD rather than inherited."
+    }
+  ],
+  "surprises": [
+    "NFRA_IAMROLES202609-Z-W6-S2: IAM-r-5's DOUBLE-STOP asserts both roles 'EXIST AND SERVE PRODUCTION TRAFFIC RIGHT NOW'; for portal-auth-lambda-role that is false on three independent instruments -- 0 consumers of 203 live Lambda functions, RoleLastUsed EMPTY since creation 203 days ago, and 0 [LAMBDA] callers among 423 in a 27,662-node served graph -- with the trust policy admitting only lambda.amazonaws.com, so nothing can be using it. OBSERVATION / INERT, no disarm owner: the finding makes the cell safer than its own framing, never riskier, and the cell was completed in full on both roles regardless. Filed because a set assembled by a shared label can have members that do not share the property the label asserts, and every per-member check still passes.",
+    "NFRA_IAMROLES202609-Z-W6-S3: the cell's bound 'THE PLAN IS THE DELIVERABLE'S EVIDENCE AND ITS OUTPUT IS QUOTED VERBATIM' and criterion AC5's forbidden-token list are in direct conflict, because Terraform's plan footer emits one of the forbidden tokens unprompted in both available stdout forms. A fully verbatim quote of raw plan stdout fails AC5 by construction; chasing the green count pushes a worker to trim its own evidence. OBSERVATION / INERT: resolved by rendering the saved plan with terraform show, proved complete by an EMPTY diff against the raw stdout's plan region (203 lines vs 229, difference is refresh chatter plus the boilerplate note). The reusable shape is that a negative keyword criterion over a deliverable required to contain quoted tool output scores the TOOL's vocabulary, not the worker's conduct.",
+    "NFRA_IAMROLES202609-Z-W6-S4: the only Terraform module this cell may write into is infra/aws/terraform/data-refresh/, which is not the custody home for portal-auth-lambda-role -- different system, separate state key (data-refresh/tfstate), and provider default_tags that the plan shows being stamped onto both roles. OBSERVATION / INERT, no path requested and none needed: the write surface was adequate for the cell's own bar. Filed because the proof has a scope limit a clean plan would not make obvious -- the adoption MECHANICS transfer to any module, the state key and the tags_all delta do not, so the proven text cannot be lifted into place unchanged for that role."
+  ],
+  "session_log": "N/A -- no session-log path is inside this worker's <paths> write surface (the order grants deliverables/, the decomposition, ledger/, the surprise channel, its own task order, change_management/, .open_deploys/ and the terraform tree). The full session is this turn's transcript; every acceptance row above carries its invocation and literal output, and the deliverable carries the plan verbatim.",
+  "compiler_tools": [
+    {
+      "tool": "terraform",
+      "invocation": "terraform init -input=false -no-color; terraform plan -input=false -no-color -lock=false [-out=candidate.tfplan]; terraform show -no-color candidate.tfplan -- run from a scratch copy of infra/aws/terraform/data-refresh preserving the module's relative layout (../modules/yang-lambda), against the module's real S3 backend key data-refresh/tfstate",
+      "result": "Terraform v1.15.8, AWS provider v5.100.0 ('Reusing previous version of hashicorp/aws from the dependency lock file'), init rc=0 'Successfully configured the backend \"s3\"!'. BASELINE (control, unmodified module): 'No changes. Your infrastructure matches the configuration.' CANDIDATE: 'Plan: 2 to import, 0 to add, 2 to change, 0 to destroy.', both roles '~ update in-place', the entire delta being three inherited default_tags on tags_all per role. NEGATIVE CONTROL (same bytes under the committed .tf.proposed name): back to 'No changes.' -lock=false so a read on a production state takes no lock. Ran from scratch, never from the repo tree, so no active .tf ever existed where a peer's run could reach it."
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast --self-test; comp-blast 'arn:aws:iam::313476888478:role/opal-data-refresh-lambda-role' --direction both --budget 120; comp-blast 'arn:aws:iam::313476888478:role/portal-auth-lambda-role' --direction both --budget 120",
+      "result": "The lens the L5 battery deferred to this exact cell. Self-test rc=0, four distinct answer-state tokens PASS. Served kuzu projection vintage 2026-09-10T12:24:50Z, manifest aebbd9cef8c4, universe 27,662 nodes / 59,548 edges. data-refresh role: rc=0, WITHIN BUDGET 545/545 in 5.29s, 6 downstream IAM_POLICY, 539 callers incl. 3 [LAMBDA] at depth 1 and API_ROUTE nodes on API 7k3ed8px20 at depth 2. portal-auth role: rc=0, WITHIN BUDGET 425/425 in 5.15s, 2 downstream IAM_POLICY, 423 callers, ZERO [LAMBDA]. Both radii reconcile exactly with the live IAM policy reads. NOTE CARRIED: the tool discloses its counts are EXTRACTED graph edges only, a LOWER BOUND -- the safe direction for a blast radius and the wrong direction for an orphan claim, which is why the zero-consumer finding rests on the live plane instead."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'resource \"aws_iam_role\" \"(opal_data_refresh_lambda_role|portal_auth_lambda_role)\"' -- infra/aws/terraform; comp-find 'resource \"aws_iam_role\" \"' -- infra/aws/terraform",
+      "result": "Label-collision census demanded by the comp-iam REUSE NOTE (the short labels 'orchestrator' and 'scheduler' were each reused across three modules and silently mis-linked their inline policies). Proposed labels: DENOMINATOR 0 hit(s) across 516 file(s) scanned [corpus=all], 8 binary files disclosed as not searched. POSITIVE CONTROL on the same pattern form: 201 hit(s) across the same 516 file(s), bands HEAD=1 SURFACED=196 DOC=4 -- so the zero is measured, not a broken pattern. Both proposed labels are free."
+    },
+    {
+      "tool": ".tools/aws (live AWS plane, read-only)",
+      "invocation": "iam get-role / list-attached-role-policies / list-role-policies / get-role-policy / list-role-tags on both roles; lambda list-functions --query 'Functions[?Role==<role-arn>]' with length(Functions) as the denominator; s3api head-object on the module's state key",
+      "result": "All reads, all rc=0, each bounded by timeout 120. Established both roles' trust policy, attachments, inline policies and tags (both roles: 0 tags) as the source for every field in the proposed declarations. Consumer census: 3 of 203 functions for opal-data-refresh-lambda-role (the positive control), 0 of 203 for portal-auth-lambda-role. State object read AFTER all terraform work: LastModified 2026-08-03T17:40:49+00:00, 38 days stale -- the discriminating evidence that no state was mutated."
+    }
+  ]
+}
