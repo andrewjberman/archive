@@ -1,0 +1,203 @@
+==============================================================================
+I5-AC2 -- THE HOME, DECIDED ON THE EVIDENCE (CG-s-45, TO-CG-I-5)
+==============================================================================
+worker : 0.9.0_WK_NFRA_CLDGRPH~4
+
+CUT DISCIPLINE, for every number below:
+  COVERAGE   : the workflow's entire run population (API total_count, not a
+               page) and the workflow file as it stands in THIS worktree.
+  GRAIN      : one run for the counts; one STEP for the failure point; one
+               YAML key for the pin.
+  ENVIRONMENT: live GitHub API + this checkout. No stored baseline is used;
+               where a number is carried from AC1 it is re-measured here.
+  TREE_READ  = C:/tmp/wk-cldgrph-9-4   branch wk-cldgrph-9-4
+
+==============================================================================
+STEP 1 -- WHICH ROUTE IS REAL, and the question has TWO answers
+==============================================================================
+  BY OUTCOME the hand route is the only real one. It is the only route that
+  has ever placed a CORRECT source zip in S3 -- 5 of 5 served zips, and the
+  committed route's own 8 successes packed ZERO portal/src files, so its
+  correct-publish count over its whole life is 0 of 855.
+
+  BY TRIGGER the committed route is the only real one, and this is the half
+  that decides a HOME. Its trigger fired 855 times on exactly the right paths
+  with the right branch pin, the right OIDC role, a concurrency group and a
+  PR exclusion. NONE of that is broken. What is broken is one repo secret,
+  three steps in.
+
+  THE HAND ROUTE HAS NO TRIGGER AT ALL. It ran five times because a task
+  order told a worker to run it five times. That is not a cadence, it is five
+  instructions. And it cannot acquire one: the only mechanism in this estate
+  that could fire a repo-subset packer on a repo change IS a GitHub Action,
+  because the nightly Fargate derive-runner is repo-less -- which is the
+  stated reason LEG-1 exists at all (.github/workflows/stitch-source-push.yml, header).
+
+  So the two answers do not conflict; they are answers to different
+  questions. 'Which route produced the artifact' is the hand route. 'Which
+  route can OWN the artifact' is the workflow, and a home is an ownership
+  question, not a history one.
+
+==============================================================================
+STEP 2 -- WHAT WOULD HAVE TO BE TRUE FOR THE HAND ROUTE TO BE THE HOME
+==============================================================================
+  Three things, and the third is disqualifying:
+   1. a production location chosen for the script. Out of this worker's
+      <paths>, and already assigned: CG-s-38 item 1 names 1.0.0_SA_CTO to
+      decide which plane owns a repo-subset packer.
+   2. an owner to run it. CG-s-38 item 1 names 0.7.0_AE_CloudOps.
+   3. A TRIGGER. There is none, and building one means building a
+      push-triggered CI job that zips the repo subset and puts it on the same
+      S3 key -- which is the workflow, rebuilt beside the workflow. That is a
+      SHADOW PIPELINE and a DUPLICATE OUTPUT PATH under CLAUDE.md s.5, on
+      which Andrew holds a complete veto. Absent that, the hand route stays
+      human-triggered forever, and 'a production input refreshed only when
+      somebody remembers' is the finding this cell exists to close, not a
+      resolution of it.
+
+  AND THE STANDING COST OF CHOOSING IT: two live producers of one served key,
+  with no ordering between them. The moment the secret is provisioned the
+  workflow starts publishing too, and a hand push and a pushed-triggered run
+  can interleave on the same object with no lock and no versioning on the
+  bucket to reconstruct which won.
+
+==============================================================================
+STEP 3 -- THE DECISION
+==============================================================================
+HOME_DECIDED=WORKFLOW
+
+ON_EVIDENCE printed:
+  [measured, this run] runs total                       = 855
+  [measured, this run] successes ever                   = 8
+  [measured, this run] runs since the portal step landed= 847
+  [measured, this run] successes since it landed        = 0
+  [measured, AC1]      served zips produced by the workflow = 0 of 5
+  [measured, AC1]      served zips produced by hand         = 5 of 5
+  [measured, AC1]      correct publishes by the workflow ever = 0
+  [measured, AC1]      failing step = 3, 'Checkout portal', on the missing
+                       secrets.PORTAL_REPO_PAT; steps 4 and 5 SKIPPED
+  [held]               the home belongs where the TRIGGER is, because a
+                       producer without a trigger is a script, and this cell
+                       is about a producer having no production existence.
+  [held]               the workflow's failure is ONE PROVISIONING ACT wide.
+                       Everything else about it -- trigger, paths, branch
+                       pin, OIDC role, recipe, S3 target -- is already right
+                       and already committed.
+  [inferred]           therefore f3_build_source_zip.py does not need a
+                       production home; it needs a DATED interim owner and
+                       then retirement by disuse. Placing it permanently
+                       would ratify the second producer.
+
+  AND THE PART OF THE DECISION THAT IS NOT MINE, said out loud: I am deciding
+  WHERE THE HOME IS, on evidence. I am not deciding that the workflow SHALL
+  run -- provisioning secrets.PORTAL_REPO_PAT is a GitHub repo secret, which
+  is outside every agent lane here and is 0.0.0_AB_MSTR's act with Andrew's
+  word. If that act is refused, the decision above is void and the estate is
+  back to HAND_ROUTE with all three costs in step 2 payable. I am not
+  proposing a monitor, an alarm or a freshness check on any of this: the
+  standing moratorium forbids it and a monitor on an unsettled route would
+  measure the wrong thing precisely.
+
+==============================================================================
+STEP 4 -- THE PIN
+==============================================================================
+PIN_DISPOSITION=RESOLVES
+
+  MEASURED IN THIS WORKTREE, this run:
+    .github/workflows/stitch-source-push.yml ref: value        = ${{ steps.portalpin.outputs.sha }}
+    resolver step (id: portalpin) present   = True
+    the old literal still used as the ref   = False
+    superproject gitlink at HEAD            = 5907cbca98eb091124e38a32debefa355c1d4376
+
+  WHY IT WAS FIXED HERE RATHER THAN FILED. Round 8's CG-s-38 held this file in
+  its grant and deliberately did NOT touch the pin, on the reasoning that an
+  unexercised behaviour change to a production route is what this estate keeps
+  paying for. That reasoning was right on the evidence it had. AC1 changed the
+  evidence: the step the pin lives in has NEVER SUCCEEDED, not once in 846
+  attempts, so there is no working behaviour to break -- and the pin has
+  therefore never been exercised even as a literal.
+
+  AND THE PIN WAS NOT WRONG WHEN IT WAS WRITTEN, which is the part that makes
+  it a defect rather than a mistake. `git ls-tree 4074fdf5ac portal` reads
+  b96562720505fa143aad7cc5dd75115e6c609912 -- exactly the literal -- and 4074fdf5ac is the commit
+  that added the step. It was a correct snapshot with no update step, and the
+  comment above it went on asserting a property it had stopped having.
+
+  THE FAILURE MODE THE FIX IS SHAPED AROUND, because a naive fix here is worse
+  than the literal: actions/checkout treats an EMPTY ref as the DEFAULT BRANCH.
+  A resolver that degraded quietly would publish a zip built from an unrelated
+  portal head, and every downstream vintage record would faithfully carry that
+  wrong sha. The step therefore tests for 40-hex and exits 1 otherwise.
+
+  STATE, and it is not EXERCISED AT THE WORKFLOW GRAIN: that change is
+  DESIRED. No run of the altered workflow can be observed until the PAT
+  exists, and triggering one is inside this round's egress hold anyway.
+
+  WHAT IS EXERCISED, NOW, IN THIS RUN -- and the block executed below is
+  EXTRACTED FROM THE COMMITTED WORKFLOW, not a transcription of it. A harness
+  copied from the implementation scores the implementation's blind spot as a
+  pass; this one cannot diverge from the file because it IS the file. The only
+  substitutions are disclosed: GITHUB_OUTPUT is pointed at a temp file, and
+  each NEGATIVE arm replaces the single token `portal` with the path being
+  tested.
+    bash: C:\Program Files\Git\usr\bin\bash.exe (2456832 bytes -- not the WSL stub)
+
+    POSITIVE  the committed block, verbatim
+      rc=0  AS EXPECTED
+      | OK: portal gitlink resolved from the superproject tree: 5907cbca98eb091124e38a32debefa355c1d4376
+      GITHUB_OUTPUT written: sha=5907cbca98eb091124e38a32debefa355c1d4376
+
+    NEGATIVE  a path that is a TREE, not a gitlink (.tools)
+      rc=1  AS EXPECTED
+      | ERROR: the .tools gitlink did not resolve to a 40-hex sha (got: '').
+      | ERROR: refusing to hand actions/checkout an empty ref, which it would
+      | ERROR: silently resolve to the .tools default branch and publish.
+      GITHUB_OUTPUT written: (nothing -- no ref handed on)
+
+    NEGATIVE  a path absent from the tree
+      rc=1  AS EXPECTED
+      | ERROR: the i5_no_such_path gitlink did not resolve to a 40-hex sha (got: '').
+      | ERROR: refusing to hand actions/checkout an empty ref, which it would
+      | ERROR: silently resolve to the i5_no_such_path default branch and publish.
+      GITHUB_OUTPUT written: (nothing -- no ref handed on)
+
+    THE NEGATIVES ARE THE ARMS THAT MATTER. They prove the step REFUSES rather
+    than handing actions/checkout an empty ref, which is the silent-default-
+    branch path. The positive alone would pass just as happily if the guard
+    were absent, so it bounds nothing on its own.
+    superproject gitlink at HEAD, read independently: 5907cbca98eb091124e38a32debefa355c1d4376
+
+==============================================================================
+STEP 5 -- THE ROAD NOT TAKEN
+==============================================================================
+ALTERNATIVE_COST printed:
+
+  IF HOME_DECIDED HAD BEEN HAND_ROUTE:
+    * one CTO ruling to choose the owning plane, plus a file move (cheap);
+    * one AE owner to run it (cheap);
+    * A TRIGGER THAT DOES NOT EXIST AND CANNOT BE BUILT WITHOUT DUPLICATING
+      THE WORKFLOW -- a shadow pipeline and a duplicate output path, on which
+      Andrew holds a complete veto. This is the disqualifying cost, and it is
+      structural rather than a matter of effort;
+    * permanently two writers of one served key, unordered, on a bucket with
+      versioning OFF (AC1 instrument C), so a collision is not reconstructable
+      afterwards;
+    * and the pin question would not go away -- it would move, because the
+      hand script takes its portal checkout as a command-line argument, which
+      is the same unupdated literal with a human holding it.
+
+  IF PIN_DISPOSITION HAD BEEN LITERAL-WITH-OWNER:
+    * zero cost today, because the step cannot run either way;
+    * and the entire cost on the day the PAT lands: the first successful run
+      in 65 days would pack a portal 65 days stale and publish it, and every
+      vintage record downstream would report that sha correctly. The defect
+      would be INVISIBLE precisely because the four-hop vintage feed CG-s-38
+      built works. A correct pipeline reporting a wrong input is the worst
+      shape available, and it was one line away.
+
+  IF I HAD FILED THE HOME DECISION INSTEAD OF DECIDING IT (HOME_DECIDED=FILED):
+    * it costs the estate another round to learn what AC1 already measured,
+      and the cell's own question -- which route is real -- would come back
+      unanswered with the evidence sitting in the record. The FILING that IS
+      warranted is narrower and is I5-AC3's: the interim owner of a script
+      that is still production until the secret lands.
