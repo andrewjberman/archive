@@ -1,0 +1,220 @@
+#!/usr/bin/env python3
+"""ETFS_GUARDRAIL.TO-EG-s-4 -- the coverage classifier.
+
+Tells apart FOUR kinds of "no slice for this trading day" (plus the two non-hole
+outcomes) reading ONLY the aggregation bucket (opal-data-etfs: daily/<partner>/*.json,
+config/etf_universe.json) and the trading calendar. It NEVER reads any per-firm data
+bucket or prefix -- the ETFS layer holds no such grant (NEVER#1) and this module
+grants none (see S4-AC6: the module names no per-firm bucket, by bytes, not promise).
+
+THE TAXONOMY (brief s.2; PRD s.7.2 S4; property 4):
+  A         -- market closed (not a trading day). NOTHING; carry-forward is correct.
+  COVERED   -- a slice exists for the trading day (daily/<partner>/<date>.json present).
+  B         -- source present but UNPRICED (upstream partition exists, priced == 0).
+               NOTHING -- the producer's ZERO-vs-MISSING contract wrote no slice on
+               purpose; filling it FABRICATES. Class B is EXPECTED, never a hole.
+  C         -- producer never fired though the upstream is ready (partition exists,
+               priced > 0, no slice). Re-run candidate -- the ladder's rung 1 (EG-s-7).
+  D         -- upstream genuinely absent (partition missing). Targeted egress
+               candidate -- rung 3, a person decides.
+  UNKNOWN   -- no probe answered for this day (no probe supplied, or the probe
+               returned None). NEVER guessed; the ladder's rung 0/1 resolves it.
+
+THE PRINCIPAL (decomposition v0.1.1 s.6a, row ETFS_GUARDRAIL-S1): the upstream check
+(partition exists? priced count?) is the PRODUCER's, injected here as a callable
+`probe(partner, date) -> {"partition": bool, "priced": int, "output_exists": bool} |
+None`. This module never probes on its own account and never reads a firm bucket.
+
+THE CALENDAR: resolved via the same two-candidate, fail-closed pattern used elsewhere
+in the estate (data/mdpf/scripts/gold/mdpf_calendar_binding.py) -- `trading_calendar`
+as a flat sibling (the deploy places it beside this package at build time, from lib/,
+per EG-s-6's artifact upload; NEVER committed here, per CTO~Z's ruling @1da1e2b73b
+against a fifth in-repo copy, amended onto this order at the drain on row
+ETFS_GUARDRAIL-W1-S1), else `lib.trading_calendar` (repo layout, local/QA). No third
+candidate, no fallback shim -- a calendar-touching run that cannot see the canonical
+calendar refuses rather than silently diverging.
+
+No new dependency: stdlib + boto3 only. No fabrication: this module never writes to S3.
+"""
+from __future__ import annotations
+
+import argparse
+import calendar as _calmod
+import datetime as dt
+import os
+import sys
+from typing import Callable, Optional
+
+try:
+    import trading_calendar as tcal  # flat sibling (deployed package, build-time copy)
+except ImportError:
+    try:
+        _repo_root = os.path.normpath(os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", ".."))
+        if _repo_root not in sys.path:
+            sys.path.insert(0, _repo_root)
+        from lib import trading_calendar as tcal  # type: ignore[no-redef]  # repo layout
+    except ImportError as _e:
+        raise ImportError(
+            "CANONICAL CALENDAR ABSENT: neither `trading_calendar` (flat sibling, "
+            "deployed-package layout) nor `lib.trading_calendar` (repo layout) "
+            "resolves. The authority is lib/trading_calendar.py; the reporter-box "
+            "deploy must carry it as trading_calendar.py beside this package "
+            "(build-time copy, EG-s-6). Do NOT vendor a committed copy here -- "
+            "fix the layout."
+        ) from _e
+
+ETFS_BUCKET = os.environ.get("ETFS_BUCKET", "opal-data-etfs")
+
+ProbeFn = Callable[[str, str], Optional[dict]]
+
+_CLASS_NAMES = ("A", "COVERED", "B", "C", "D", "UNKNOWN")
+
+
+def _month_dates(month: str) -> list:
+    """Every calendar day of `month` (YYYY-MM) up to the month cap: a complete month
+    runs to its end; an in-progress month (the current UTC month) runs to yesterday
+    UTC; a wholly future month yields no dates yet."""
+    year, mon = int(month[0:4]), int(month[5:7])
+    month_start = dt.date(year, mon, 1)
+    last_day_of_month = dt.date(year, mon, _calmod.monthrange(year, mon)[1])
+    today_utc = dt.datetime.now(dt.timezone.utc).date()
+    yesterday_utc = today_utc - dt.timedelta(days=1)
+
+    if month_start > yesterday_utc:
+        return []
+    cap = last_day_of_month if last_day_of_month <= yesterday_utc else yesterday_utc
+    n_days = (cap - month_start).days + 1
+    return [month_start + dt.timedelta(days=i) for i in range(n_days)]
+
+
+def _load_series(partner: str, month: str, s3=None) -> dict:
+    """date_str -> True for every daily/<partner>/<date>.json object under `month`.
+    ONLY opal-data-etfs is read; no firm bucket, no firm prefix."""
+    if s3 is None:
+        import boto3  # local import: not needed when `series` is supplied by the caller
+        s3 = boto3.client("s3")
+    prefix = "daily/%s/%s" % (partner, month)
+    series: dict = {}
+    paginator = s3.get_paginator("list_objects_v2")
+    for page in paginator.paginate(Bucket=ETFS_BUCKET, Prefix=prefix):
+        for obj in page.get("Contents", []):
+            key = obj["Key"]
+            base = key.rsplit("/", 1)[-1]
+            if base.endswith(".json"):
+                series[base[:-len(".json")]] = True
+    return series
+
+
+def classify_month(partner: str, month: str, *, s3=None, probe: Optional[ProbeFn] = None,
+                    series: Optional[dict] = None) -> dict:
+    """date_str -> {"class": one of A/COVERED/B/C/D/UNKNOWN, "reason": str,
+    "probe": <the probe's answer or None>} for every calendar day of `month`
+    (to the month cap). `series` lets a caller pass an already-loaded date -> row
+    map (the renderer's load_all_daily shape) so the bucket is not listed twice --
+    only PRESENCE of a key matters here, not its contents."""
+    if series is None:
+        series = _load_series(partner, month, s3=s3)
+
+    result: dict = {}
+    for d in _month_dates(month):
+        date_str = d.isoformat()
+
+        if not tcal.is_trading_day(d):
+            result[date_str] = {"class": "A", "reason": "market closed (not a trading day)",
+                                 "probe": None}
+            continue
+
+        if date_str in series:
+            result[date_str] = {"class": "COVERED", "reason": "slice exists", "probe": None}
+            continue
+
+        if probe is None:
+            result[date_str] = {"class": "UNKNOWN",
+                                 "reason": "no probe supplied -- upstream state unknown",
+                                 "probe": None}
+            continue
+
+        answer = probe(partner, date_str)
+        if answer is None:
+            result[date_str] = {"class": "UNKNOWN",
+                                 "reason": "probe returned no answer for this day",
+                                 "probe": None}
+            continue
+
+        if not answer.get("partition"):
+            result[date_str] = {"class": "D",
+                                 "reason": "upstream partition missing (genuinely absent)",
+                                 "probe": answer}
+            continue
+
+        priced = answer.get("priced", 0)
+        if priced == 0:
+            result[date_str] = {"class": "B",
+                                 "reason": "upstream present, priced == 0 -- the "
+                                           "ZERO-vs-MISSING contract wrote no slice on "
+                                           "purpose; NOT a hole",
+                                 "probe": answer}
+            continue
+
+        result[date_str] = {"class": "C",
+                             "reason": "upstream present and priced > 0, no slice -- "
+                                       "producer never fired for this date",
+                             "probe": answer}
+
+    return result
+
+
+def summarize(classes: dict) -> dict:
+    """Counts per class plus trading_days, covered, holes (= C + UNKNOWN + D; B is
+    NOT a hole), expected_empty (= B)."""
+    counts = {name: 0 for name in _CLASS_NAMES}
+    for entry in classes.values():
+        counts[entry["class"]] += 1
+
+    trading_days = counts["COVERED"] + counts["B"] + counts["C"] + counts["D"] + counts["UNKNOWN"]
+    holes = counts["C"] + counts["UNKNOWN"] + counts["D"]
+    expected_empty = counts["B"]
+
+    summary = dict(counts)
+    summary["trading_days"] = trading_days
+    summary["covered"] = counts["COVERED"]
+    summary["holes"] = holes
+    summary["expected_empty"] = expected_empty
+    return summary
+
+
+def coverage_line(partner: str, summary: dict) -> str:
+    """The per-partner line: '<covered>/<trading_days> trading days; <carried> carried
+    for missing data' -- carried = trading days with no slice (B + C + D + UNKNOWN),
+    because the renderer's carry-forward visually fills every one of them."""
+    carried = summary["B"] + summary["C"] + summary["D"] + summary["UNKNOWN"]
+    return "%d/%d trading days; %d carried for missing data" % (
+        summary["covered"], summary["trading_days"], carried)
+
+
+def _main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description="ETFS coverage classifier")
+    parser.add_argument("--partner", required=True)
+    parser.add_argument("--month", required=True, help="YYYY-MM")
+    parser.add_argument("--no-probe", action="store_true",
+                         help="classify with no upstream probe (non-covered trading "
+                              "days read UNKNOWN)")
+    args = parser.parse_args(argv)
+
+    probe = None if args.no_probe else None  # this order exercises --no-probe only;
+    # the ladder (EG-s-7) supplies the live probe in a later order.
+
+    classes = classify_month(args.partner, args.month, probe=probe)
+    summary = summarize(classes)
+
+    print("CLASSIFY: partner=%s month=%s trading_days=%d COVERED=%d A=%d B=%d C=%d D=%d "
+          "UNKNOWN=%d" % (
+              args.partner, args.month, summary["trading_days"], summary["COVERED"],
+              summary["A"], summary["B"], summary["C"], summary["D"], summary["UNKNOWN"]))
+    print(coverage_line(args.partner, summary))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(_main())
