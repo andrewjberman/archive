@@ -1,0 +1,39 @@
+I2-AC2 -- CONSUMERS OF THE aws_keys VALUE
+  TREE          : C:/tmp/wk-cldgrph-9-2 (branch wk-cldgrph-9-2, HEAD b5bb2f16a0ad960406fea53ead0b0e1a1d24526f)
+  ENVIRONMENT   : comp-find corpus=all in THIS worktree; AST parse of the worktree copy of infra/aws/globgrph/derive_stitch.py
+  GRAIN         : instrument 1 is TEXT (a mention and a call read alike); instrument 2 is AST (bind vs read, and dead vs live)
+  COVERAGE      : names carrying the value = {aws_keys, _index_aws}. A consumer that reaches the set through neither name is OUT OF REACH of this census and is declared, not assumed away.
+
+  INSTRUMENT 1 -- REPO CENSUS: 139 hit(s) across 30057 file(s) scanned [corpus=all]
+  TREE CONTROL  : a file existing ONLY on this branch (deliverables/0.9.0_WK_NFRA_CLDGRPH~2/i2_window.py) -> 2 hit(s): FIRED
+  SUBTRACTION   : 138 parsed hit lines - 99 non-executable (doc/json/log/config, a MENTION not a consumer) - 4 substring-different-symbol (comp_aws_keys_in_comp_tools, aws_keys.txt) - 25 this order's own harness files - 4 comment/docstring lines inside executable files = 6 CONSUMER LINE(S)
+  (parsed hit lines 138 <= 139 reported hits: comp-find prints one line per hit and this parse keeps only path:line: forms)
+
+  CONSUMER LINES, EACH NAMED:
+    infra/aws/globgrph/derive_stitch.py:74  def _index_aws(aws: dict) -> tuple[dict, dict, set]:
+    infra/aws/globgrph/derive_stitch.py:128  lam_by_name, bkt_by_name, aws_keys = _index_aws(aws)
+    infra/aws/globgrph/derive_stitch.py:144  all_keys = aws_keys | portal_keys
+    infra/aws/globgrph/derive_stitch.py:487  (see build_stitched_graph, `all_keys`), where it used to end `| aws_keys` -- the snapshot's
+    org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~1/g2_local_fold.sh:163  lam_by_name, bkt_by_name, aws_keys = DS._index_aws(graph)
+    org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~1/g2_local_fold.sh:165  print("  -- PRODUCER PLANE: derive_stitch._index_aws on the real snapshot --")
+
+  INSTRUMENT 2 -- AST DATAFLOW in build_stitched_graph (710 line(s) in the file):
+    :128  aws_keys  BIND | lam_by_name, bkt_by_name, aws_keys = _index_aws(aws)
+    :144  all_keys  BIND | all_keys = aws_keys | portal_keys
+    :144  aws_keys  READ | all_keys = aws_keys | portal_keys
+    :272  all_keys  BIND | all_keys = set()
+    :278  all_keys  READ | all_keys.add(nid)
+    :280  all_keys  READ | all_keys.add(narn)
+    :286  all_keys  READ | if (e["source"] not in all_keys or e["target"] not in all_keys)
+    :286  all_keys  READ | if (e["source"] not in all_keys or e["target"] not in all_keys)
+
+  FINDING (measured, by AST): all_keys is BOUND at [144, 272] and READ at [278, 280, 286, 286].
+  FINDING (measured): the bind at :144 is DEAD -- no read of all_keys occurs between it and the rebind at :272. It is not a consumer of the snapshot shape; it is a leftover.
+  FINDING (measured, by AST): aws_keys is BOUND at [128] and READ at [144]; of those reads, [144] sit on the dead bind's own line, leaving 0 LIVE read(s).
+  FINDING (held, not measured): `aws_keys` also carries the DUAL IDENTITY of an AWS node (arn AND id, _index_aws:83-85, row W2-S68). Any remedy that simply DELETES the union would drop the arn alias for every AWS node whose id != arn and would re-open W2-S68. The remedy must PRESERVE the alias while re-deriving it from the post-collapse population.
+
+AWS_KEYS_CONSUMERS=6 of 30057 scanned
+TREE_READ=WORKTREE
+TREE_POSITIVE_CONTROL=FIRED
+EACH_CONSUMER_NAMED: infra/aws/globgrph/derive_stitch.py:74; infra/aws/globgrph/derive_stitch.py:128; infra/aws/globgrph/derive_stitch.py:144; infra/aws/globgrph/derive_stitch.py:487; org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~1/g2_local_fold.sh:163; org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~1/g2_local_fold.sh:165
+OUT_OF_REACH_DECLARED: a consumer reaching the set through neither `aws_keys` nor `_index_aws` (e.g. a re-implementation) is not visible to this census.
