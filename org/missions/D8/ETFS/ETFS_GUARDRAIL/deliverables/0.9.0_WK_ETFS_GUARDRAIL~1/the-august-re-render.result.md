@@ -1,8 +1,8 @@
 # ETFS_GUARDRAIL.TO-EG-s-14 -- THE AUGUST RE-RENDER: result
 
 **Worker:** `0.9.0_WK_ETFS_GUARDRAIL~1` | **Branch:** `wk-etfs_guardrail-2-1`
-**Ran:** 2026-09-09 23:01Z - 2026-09-10 00:50Z (two fires: the failed first, then the amended re-run)
-**Order:** `../../task-orders/ETFS_GUARDRAIL.TO-EG-s-14.the-august-re-render.md` @`5507841f04` (AMENDED)
+**Ran:** 2026-09-09 23:01Z - 2026-09-10 01:05Z (two fires: the failed first, then the amended re-run; then the arm (f) re-cut read)
+**Order:** `../../task-orders/ETFS_GUARDRAIL.TO-EG-s-14.the-august-re-render.md` @`d17b328c1e` (AMENDED TWICE)
 **Ledger:** `org/critical_paths/change_management/20260909T2312Z_etfs-guardrail-eg-s-14-august-rerender_deploy_completion.md` -- **CLOSED, all 8 legs proven**
 
 ## CONCLUSION
@@ -21,14 +21,12 @@ layout, committed (`0c8bdbe`) and deployed (`00:16:35Z`, DEPLOYED == BUILT on tw
 rewritten, `# coverage: 21/21 trading days; 0 carried for missing data` on 3 of 3 CSVs, gate verdict
 `PUBLISH`, box `stopped`.
 
-**`S14-AC1` still FAILS by output -- 6 of 7 arms, `EGS14-NOT-RERENDERED`, rc=1 -- on arm (f) alone.**
-Arm (f) names two instruments that cannot show a send in this estate: the deployed handler prints
-NOTHING on the success path (no `MessageId` is ever logged) and no CloudTrail trail captures SES
-calls -- the same COVERAGE-ABSENT class the amendment already ruled for `lambda:Invoke`. The send
-itself is evidenced by two other instruments (SES's own counter, +2 delivery attempts = one message
-to two destinations; and the alert topic at 0 publishes with a live positive control of 1 in the
-failed fire's window). **The `<status>` is NOT flipped** -- a worker cannot re-cut its own criterion.
-Row `ETFS_GUARDRAIL-W1-S18` carries the exact re-cut the issuer would need.
+**`S14-AC1` PASSES by output -- 7 of 7 arms, `EGS14-AUGUST-RERENDERED`, rc=0** -- after the issuer
+re-cut arm (f) (@`d17b328c1e`, on row `ETFS_GUARDRAIL-W1-S18`) onto the instruments that exist: the
+SES counter (+2 delivery attempts = one message to two destinations, account-wide and said so), the
+alert topic at 0 publishes beside a live positive control of 1 in the failed fire's window, the
+deployed JOIN, and the issuer's own gateway read of the delivered mail. The battery was re-run ONCE
+on the re-cut against the SAME run -- no third invoke. **The `<status>` is flipped to `complete`.**
 
 ## FIRE 1 -- THE FAILED FIRST FIRE (kept verbatim)
 
@@ -177,12 +175,20 @@ read 5 of 5 first, so both archives hold the same prior bytes. Nothing deleted, 
 | live `EMAIL_RECIPIENT` | `aj@opalinvest.com,andrew@opalinvest.com` (the JOIN, split into both envelopes by `EMAIL_RECIPIENTS`) |
 
 **Stated limit:** `get-send-statistics` is account-wide, so +2 in a 15-minute bucket is consistent
-with -- not exclusive to -- this send; the exclusive discriminator is the alert-absence with its
-positive control plus the code path. Delivery AT the two inboxes stays the issuer's read.
+with -- not exclusive to -- this send; the exclusive discriminators are the alert-absence with its
+positive control and the delivered envelope itself.
+
+**THE DELIVERY (the issuer's read, cited @`d17b328c1e`, never re-derived here):** at
+`andrew@opalinvest.com` through the gateway -- subject `Opal ETF Ownership -- Month-End Report
+(2026-08)`, from `noreply@opalinvest.dev`, received **2026-09-10T00:25:59Z**, `toRecipients` =
+`aj@opalinvest.com` AND `andrew@opalinvest.com` (the JOIN on the DELIVERED envelope), body naming
+`s3://opal-data-etfs/platinum/reports/2026-08/etf_ownership.pdf` and `Per-firm CSV grids attached: 3`.
+**The `aj@opalinvest.com` mailbox is NOT read by any instrument** -- the envelope carries the address;
+receipt at that box is UNREAD, and this record says so rather than inferring it.
 
 ## CRITERIA
 
-### S14-AC1 -- FAIL by output (6 of 7 arms)
+### S14-AC1 -- PASS by output (7 of 7 arms)
 
 `timeout 900 python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs14_august_rerender.py`
 -> rc=1:
@@ -193,14 +199,21 @@ ARM b   PASS State ENABLED=True; cron(0 10 1 * ? *)=True; America/New_York=True;
 ARM c   PASS _last_month() ... = 2026-08
 ARM d   PASS published-after-invoke 5 of 5; CSV last row '# coverage:' with the /21 denominator 3 of 3; archive sha256 match 10 of 10 (two archives)
 ARM e   PASS manual fire pinned: START RequestId a027eeb0-... appears 1 of 1 time(s) in the log group read BY TIME; etfs-reports-scheduler-role AssumeRole in the window = 0 (rule did not fire); CloudTrail Invoke COVERAGE-ABSENT (0 of 2 trails select AWS::Lambda::Function); positive control management events in the window = 2
-ARM f   FAIL SES MessageId(s) in the orchestrator log for this run: 0; CloudTrail SendRawEmail in the run's minute: 0; Destinations must name aj@opalinvest.com + andrew@opalinvest.com
+(f1) SES get-send-statistics -- ACCOUNT-WIDE counter, stated: recorded total DeliveryAttempts 80 (read 2026-09-10T00:19Z) -> 82 (read 00:32Z), DELTA +2; LIVE re-read now: 2 attempt(s) over 1 data point(s) covering the run, of 64 points total
+     data point 2026-09-10T00:18:00Z DeliveryAttempts=2 Bounces=0 Rejects=0
+(f2) etfs-reports-alerts NumberOfMessagesPublished: run window = 0; POSITIVE CONTROL, the FAILED first fire's window = 1
+(f3) deployed EMAIL_RECIPIENT read LIVE = 'aj@opalinvest.com,andrew@opalinvest.com' -> equals the JOIN: True
+(f4) NOT GRADED: 0 MessageId line(s) OF 0 POSSIBLE; CloudTrail SendRawEmail COVERAGE-ABSENT: 0 of 2 trails select the SES data plane (events returned: 0)
+(f5) THE DELIVERY -- the ISSUER's gateway read, cited from the face @d17b328c1e; NOT re-derived by this worker (no mailbox instrument): andrew@opalinvest.com, subject 'Opal ETF Ownership -- Month-End Report (2026-08)', from noreply@opalinvest.dev, received 2026-09-10T00:25:59Z, toRecipients = aj@opalinvest.com AND andrew@opalinvest.com; aj@ mailbox NOT READ by any instrument -- the envelope carries the address, receipt there is UNREAD
+ARM f   PASS (f1) ... True; (f2) alerts run=0 vs failed-fire control=1 -> True; (f3) deployed JOIN -> True; (f4) not graded; (f5) issuer's delivery read at 2026-09-10T00:25:59Z naming both recipients -> True
 ARM g   PASS reporter box i-070477bf35fc54409 State.Name=stopped (describe-instances)
-ARMS 6 of 7 PASS
-EGS14-NOT-RERENDERED -- failing arms: f
+ARMS 7 of 7 PASS
+EGS14-AUGUST-RERENDERED
 ```
 
-Denominator: 7 of 7 arms evaluated, 6 PASS / 1 FAIL. The token `EGS14-AUGUST-RERENDERED` was NOT
-printed, so the order stays open (row `ETFS_GUARDRAIL-W1-S18`).
+Denominator: 7 of 7 arms evaluated, 7 PASS, rc=0. Run once on the re-cut against the SAME run
+(request id `a027eeb0-e954-4dde-9c4f-1d91cad77f67`); arms (a)-(e) and (g) reproduce the 00:38:47Z
+run line for line.
 
 ### S14-AC2 -- JUDGMENT, graded by the CVO at L9. Evidence, no verdict.
 
@@ -247,9 +260,9 @@ opaletfs_inflection_202608.csv     before rows=5 after rows=6 | identical rows 5
 | `ETFS_GUARDRAIL-W1-S14` | OBSERVATION | ARMED (`2.0.0_SA_COO`) | the invoke is synchronous -- **RULED**, the flags are cut into the bound and were used |
 | `ETFS_GUARDRAIL-W1-S15` | OBSERVATION | INERT | `ARTIFACT-CARRIES-NO-TRIGGER-FIELD` |
 | `ETFS_GUARDRAIL-W1-S16` | OBSERVATION | ARMED (`2.0.0_SA_COO`) | `deploy_ledger.py` regenerates the entry -- **RULED** as an ordering clause; honoured (appended after the CLOSE) |
-| `ETFS_GUARDRAIL-W1-S17` | OBSERVATION | INERT | the tool has no `add-leg` verb and `open` refuses on an existing slug; the three new legs were appended to the sentinel |
-| `ETFS_GUARDRAIL-W1-S18` | BLOCKING | INERT | arm (f)'s two named instruments cannot show any send; the send is evidenced by two others -- the only failing arm |
-| `ETFS_GUARDRAIL-W1-S19` | OBSERVATION | ARMED (`2.0.0_SA_COO`) | the BOX render carries no Opal logo (`/opt/portal/...` absent); numbers identical |
+| `ETFS_GUARDRAIL-W1-S17` | OBSERVATION | INERT | the tool has no `add-leg` verb -- **RULED**, to the CVO's `deploy_ledger` remediation row |
+| `ETFS_GUARDRAIL-W1-S18` | BLOCKING | INERT | arm (f)'s two named instruments cannot show any send -- **RULED** @`d17b328c1e`: arm (f) re-cut onto (f1)-(f5) and it now PASSES |
+| `ETFS_GUARDRAIL-W1-S19` | OBSERVATION | ARMED (`2.0.0_SA_COO`) | the BOX render carries no Opal logo -- **RULED**, NAMED for the CTO's L10 as a cell, not cut mid-round |
 
 ## WHAT WAS NOT DONE, AND WHY
 
@@ -264,4 +277,5 @@ opaletfs_inflection_202608.csv     before rows=5 after rows=6 | identical rows 5
   `<paths>`; the SES/CloudTrail gaps are rows, not builds.
 - **No inbox read and nothing sent by me** -- no mailbox instrument; the orchestrator's run is the
   one send.
-- **No `<status>` flip** -- S14-AC1 FAILS by output on arm (f).
+- **No third invoke** for the re-cut arm -- the issuer's ruling is explicit that the served objects and the send ARE the record; the battery was re-run once against the same run.
+- **The `<status>` IS flipped to `complete`** -- S14-AC1 PASSES by output (7 of 7), the proof instance validates rc=0, and every row filed under this order is dispositioned by the issuer.

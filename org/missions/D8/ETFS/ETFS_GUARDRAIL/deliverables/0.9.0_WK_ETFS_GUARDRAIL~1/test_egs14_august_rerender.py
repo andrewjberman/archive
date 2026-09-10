@@ -342,37 +342,89 @@ def main() -> int:  # noqa: C901
            n_lambda_sel, n_trails, ctrl_total))
 
     # ---------------------------------------------------------------- arm (f)
+    # RE-CUT 2026-09-10 ~01:0xZ on row W1-S18 (face @d17b328c1e): the deployed handler
+    # prints nothing on its success path (_email_report, lambda_function.py:296-300,
+    # neither logs nor stores the SES response) and no trail selects the SES data plane,
+    # so the SEND is graded on (f1) SES's own counter, (f2) the alert topic with its
+    # positive control, (f3) the deployed JOIN and (f5) the issuer's delivery read; (f4)
+    # is printed and NOT graded.
+    # (f1) SES's own counter -- the recorded pre/post totals plus a LIVE window read.
+    rec_ses = rec["ses_send_statistics"]
+    rc, st, raw = aws_json(["ses", "get-send-statistics"])
+    pts = sorted((st or {}).get("SendDataPoints", []), key=lambda p: p["Timestamp"])
+    lo = (to_dt(invoke_start) - dt.timedelta(minutes=16)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    in_window = [p for p in pts if lo <= p["Timestamp"] <= w_end_s]
+    attempts_live = sum(p["DeliveryAttempts"] for p in in_window)
+    f1 = (rec_ses["delta"] == 2 and attempts_live >= 2)
+    print("(f1) SES get-send-statistics -- ACCOUNT-WIDE counter, stated: recorded total "
+          "DeliveryAttempts %d (read %s) -> %d (read %s), DELTA +%d; LIVE re-read now: %d "
+          "attempt(s) over %d data point(s) covering the run (%s -> %s), of %d points total"
+          % (rec_ses["total_delivery_attempts_before"], rec_ses["read_before_utc"],
+             rec_ses["total_delivery_attempts_after"], rec_ses["read_after_utc"],
+             rec_ses["delta"], attempts_live, len(in_window), lo, w_end_s, len(pts)))
+    for p in in_window:
+        print("     data point %s DeliveryAttempts=%d Bounces=%d Rejects=%d"
+              % (p["Timestamp"], p["DeliveryAttempts"], p["Bounces"], p["Rejects"]))
+    print("     +2 = ONE send_raw_email to TWO destinations (the JOIN); the counter is "
+          "ACCOUNT-WIDE, so this is consistent with -- not exclusive to -- this send")
+
+    # (f2) the alert topic: 0 in the run window, 1 in the failed fire's window (control).
+    def alerts_between(a: str, b: str) -> float:
+        rc2, sns, _ = aws_json(["cloudwatch", "get-metric-statistics",
+                                "--namespace", "AWS/SNS",
+                                "--metric-name", "NumberOfMessagesPublished",
+                                "--dimensions", "Name=TopicName,Value=" + ALERT_TOPIC,
+                                "--start-time", a, "--end-time", b,
+                                "--period", "300", "--statistics", "Sum"])
+        return sum(d["Sum"] for d in (sns or {}).get("Datapoints", []))
+    ff_start = to_dt(ff["invoke_start_utc"]) - dt.timedelta(minutes=2)
+    ff_end = to_dt(ff["invoke_end_utc"]) + dt.timedelta(minutes=5)
+    alerts_run = alerts_between(w_start_s, w_end_s)
+    alerts_ff = alerts_between(ff_start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                               ff_end.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    f2 = (alerts_run == 0 and alerts_ff >= 1)
+    print("(f2) %s NumberOfMessagesPublished: run window = %g; POSITIVE CONTROL, the FAILED "
+          "first fire's window (%s -> %s) = %g -- every failure branch of _run publishes "
+          "there, so 0 beside a live 1 says the send did not fail"
+          % (ALERT_TOPIC, alerts_run, ff["invoke_start_utc"], ff["invoke_end_utc"], alerts_ff))
+
+    # (f3) the deployed JOIN.
+    rc, cfg, raw = aws_json(["lambda", "get-function-configuration", "--function-name", FN])
+    live_recips = (cfg or {}).get("Environment", {}).get("Variables", {}).get(
+        "EMAIL_RECIPIENT", "")
+    f3 = live_recips == ",".join(RECIPIENTS)
+    print("(f3) deployed EMAIL_RECIPIENT read LIVE = %r -> equals the JOIN %r: %s"
+          % (live_recips, ",".join(RECIPIENTS), f3))
+
+    # (f4) printed, NOT graded.
     msg_ids = [e["message"].strip() for e in events if "MessageId" in e["message"]]
     rc, ses, raw = aws_json(["cloudtrail", "lookup-events", "--lookup-attributes",
                              "AttributeKey=EventName,AttributeValue=SendRawEmail",
                              "--start-time", w_start_s, "--end-time", w_end_s], timeout=180)
     ses_events = (ses or {}).get("Events", [])
-    rc, cfg, raw = aws_json(["lambda", "get-function-configuration", "--function-name", FN])
-    live_recips = (cfg or {}).get("Environment", {}).get("Variables", {}).get(
-        "EMAIL_RECIPIENT", "")
-    join_ok = all(r in live_recips for r in RECIPIENTS)
-    # SUBSTITUTE MEASUREMENTS (printed, not scored -- the named limbs above are the arm):
-    rc, st, raw = aws_json(["ses", "get-send-statistics"])
-    pts = sorted((st or {}).get("SendDataPoints", []), key=lambda p: p["Timestamp"])
-    in_window = [p for p in pts if w_start_s[:16] <= p["Timestamp"][:16] <= w_end_s[:16]]
-    attempts = sum(p["DeliveryAttempts"] for p in in_window)
-    rc, sns, raw = aws_json(["cloudwatch", "get-metric-statistics", "--namespace", "AWS/SNS",
-                             "--metric-name", "NumberOfMessagesPublished",
-                             "--dimensions", "Name=TopicName,Value=" + ALERT_TOPIC,
-                             "--start-time", w_start_s, "--end-time", w_end_s,
-                             "--period", "300", "--statistics", "Sum"])
-    alerts = sum(d["Sum"] for d in (sns or {}).get("Datapoints", []))
-    print("SES: MessageId lines in the run's log: %d; CloudTrail SendRawEmail in the "
-          "window: %d; live EMAIL_RECIPIENT=%r (JOIN of both recipients -> %s)"
-          % (len(msg_ids), len(ses_events), live_recips, join_ok))
-    print("  SUBSTITUTE (printed, not scored): SES get-send-statistics DeliveryAttempts in "
-          "the window = %d over %d data point(s); %s NumberOfMessagesPublished in the "
-          "window = %g (every failure branch of _run publishes there, so 0 = the send did "
-          "not fail)" % (attempts, len(in_window), ALERT_TOPIC, alerts))
-    arm("f", bool(msg_ids) and bool(ses_events) and join_ok,
-        "SES MessageId(s) in the orchestrator log for this run: %d; CloudTrail "
-        "SendRawEmail in the run's minute: %d; Destinations must name %s"
-        % (len(msg_ids), len(ses_events), " + ".join(RECIPIENTS)))
+    print("(f4) NOT GRADED: %d MessageId line(s) OF 0 POSSIBLE (the handler prints nothing "
+          "on the success path); CloudTrail SendRawEmail COVERAGE-ABSENT: %d of %d trails "
+          "select the SES data plane (events returned: %d)"
+          % (len(msg_ids), 0, n_trails, len(ses_events)))
+
+    # (f5) the issuer's delivery read -- CITED, never re-derived here.
+    d5 = rec["issuer_delivery_read"]
+    f5 = (d5["received_utc"] and sorted(d5["to_recipients"]) == sorted(RECIPIENTS)
+          and "Month-End Report (2026-08)" in d5["subject"])
+    print("(f5) THE DELIVERY -- the ISSUER's gateway read, cited from %s; NOT re-derived by "
+          "this worker (no mailbox instrument)." % d5["source"])
+    print("     mailbox read: %s | subject %r | from %s | received %s"
+          % (d5["mailbox_read"], d5["subject"], d5["from"], d5["received_utc"]))
+    print("     toRecipients = %s (the JOIN on the DELIVERED envelope); body names %s"
+          % (" AND ".join(d5["to_recipients"]), "; ".join(d5["body_names"])))
+    print("     aj@opalinvest.com: %s" % d5["aj_mailbox"])
+    arm("f", f1 and f2 and f3 and f5,
+        "(f1) SES counter delta +%d (account-wide) and %d live attempt(s) in the window -> "
+        "%s; (f2) alerts run=%g vs failed-fire control=%g -> %s; (f3) deployed JOIN -> %s; "
+        "(f4) 0 MessageId of 0 possible + COVERAGE-ABSENT %d of %d trails, not graded; "
+        "(f5) issuer's delivery read at %s naming both recipients -> %s"
+        % (rec_ses["delta"], attempts_live, f1, alerts_run, alerts_ff, f2, f3,
+           0, n_trails, d5["received_utc"], f5))
 
     # ---------------------------------------------------------------- arm (g)
     rc, inst, raw = aws_json(["ec2", "describe-instances", "--instance-ids", INSTANCE,
