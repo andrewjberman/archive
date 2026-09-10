@@ -1,0 +1,129 @@
+==============================================================================
+I4-AC2 -- TWO REMEDIES, THEIR OWNERS, THEIR COSTS AND THEIR LIMITS
+==============================================================================
+TREE                    : WORKTREE (C:/tmp/wk-cldgrph-9-3) branch wk-cldgrph-9-3 HEAD b5bb2f16a0ad960406fea53ead0b0e1a1d24526f
+MEASURED INPUT (I4-AC1) : 118 citations / STILL_VALID 21 / OVERWRITTEN 12 / UNDECIDABLE 85
+                          read from i4_census.capture.json (this run's own capture)
+
+THE AUTHORITIES, RE-READ AT RUN TIME (not transcribed) -- claim: measured
+  [PRESENT] docs/architecture/NFRA_GLOBGRPH_PRD.md:191 @b5bb2f16a0
+        the PRD's own prefix layout: unique timestamped keys, kept indefinitely
+        > can't-rename). Prefix layout: `snapshots/{snapshot_date}/graph-{run_id}.tar.gz` (gzip archive, **unique
+  [PRESENT] docs/reference/record-retention-policy-v1.md:19 @b5bb2f16a0
+        record-retention-policy-v1, Andrew-ratified 2026-06-12: Tier 1 durable audit record
+        > | 1 -- Durable audit record | Daily graph snapshot tarballs `s3://opal-313476888478-globgrph/snapshots/{date}/graph-{run_id}.tar.gz` | **Indefinite** 
+  [PRESENT] infra/aws/terraform/shared-infra/s3.tf:305 @b5bb2f16a0
+        the bucket's own Terraform: WHY versioning is off -- it rests on the unique-key property
+        > # history lives at the Iceberg-snapshot + Nessie-catalog + unique-timestamped-
+  [PRESENT] infra/aws/globgrph/derive_runner.py:493 @b5bb2f16a0
+        the producer as built: ONE key per DATE, overwritten by every run on that date
+        > key = f"snapshots/{date_str}/graph-{date_str}.tar.gz"
+  [PRESENT] infra/aws/globgrph/derive_stitch.py:66 @b5bb2f16a0
+        the only in-estate reader of the archive resolves through a POINTER, not a date
+        > Key="snapshots/latest.txt")["Body"].read().decode().strip()
+  AUTHORITIES_RESOLVED=5 of 5
+
+------------------------------------------------------------------------------
+REMEDIES_COMPARED=2 of 2
+------------------------------------------------------------------------------
+
+REMEDY 1 -- WRITER_KEY: the archive key names the WRITE, not the calendar day.
+  WHAT IT IS            : derive_runner.archive_snapshot() builds
+                          snapshots/{date}/graph-{date}.tar.gz. The spec already
+                          says graph-{run_id} with UNIQUE TIMESTAMPED KEYS. Making
+                          the key carry the run's own instant (or a content hash)
+                          is CONFORMANCE, not a new decision. claim: measured
+                          (three authorities above, re-read this run).
+  OWNER_PER_REMEDY printed: 0.8.0_AE_CloudComp -- the engine owner, and the disarm
+                          owner already named on rows W1-S43 and W2-S61.
+                          SECOND owner on the same act: AE 0.7.0, who owns the
+                          record-retention-policy-v1 row that declares this key
+                          Tier-1 indefinite. A property with two writers needs
+                          two rules read; both are named rather than one assumed.
+  COST_PER_REMEDY printed : ONE producer edit (one f-string), plus the deploy path
+                          the round-9 egress hold forbids: image build + push +
+                          ECS revision. READ-SIDE COST IS ZERO -- the only
+                          in-estate reader resolves snapshots/latest.txt, a
+                          POINTER, so a new key shape does not break it
+                          (derive_stitch.py, cited above). claim: measured.
+                          STORAGE COST IS REAL AND UNBOUNDED: one object per RUN
+                          instead of one per DAY, on a prefix with NO lifecycle
+                          rule -- the bucket's two rules are abort-incomplete-mpu
+                          (prefix "") and an expiry scoped to
+                          warehouse/ms_heat/snapshots/, which does NOT match
+                          snapshots/. claim: measured, s3api
+                          get-bucket-lifecycle-configuration, 2026-09-10.
+                          On 2026-09-10 alone the date key took at least THREE
+                          writes (two logged sizes, a third live), so 'per run'
+                          is not hypothetical. claim: measured (I4-AC1 rows).
+  WHAT_EACH_DOES_NOT_FIX printed: it does NOT recover one byte already lost. The
+                          OVERWRITTEN citations stay unrecoverable -- the bucket
+                          keeps ONE version, VersionId 'null'. It does NOT make
+                          the UNDECIDABLE citations decidable: a citation with no
+                          discriminator is undecidable whatever the key looks
+                          like. And it does NOT stop a future overwrite of the
+                          POINTER (snapshots/latest.txt), which is mutable by
+                          design and is what every reader actually follows.
+
+REMEDY 2 -- CITATION_GRAMMAR: an S3 object is cited as bucket/key@ETag.
+  WHAT IT IS            : the estate already requires file:line @ commit-ish for a
+                          GIT object (CLAUDE.md rule 22: 'a citation without a
+                          vintage is not a citation'). There is no equivalent for
+                          an S3 object, and that gap is the whole of this cell.
+                          claim: measured -- rule 22 names file:line and no S3 form.
+  OWNER_PER_REMEDY printed: 1.0.0_SA_CTO for the law edit (CLAUDE.md rule 22 or the
+                          annex), and 3.0.0_SA_CVO for the record bar it grades at
+                          L9. A law edit has three surfaces -- commit, same-turn
+                          broadcast to live seats, push state -- and a WORKER HAS
+                          NO SEND TOOL, so a worker cannot land the second surface
+                          even if it wrote the first. That is a lane fact, not a
+                          difficulty. claim: measured (this face's STANDING LAW).
+  COST_PER_REMEDY printed : near zero per citation -- one extra head-object at
+                          citation time, an ETag already returned by every read a
+                          seat is taking anyway. RETROSPECTIVE cost is the real
+                          one: 118 existing citations in this project's record
+                          alone, 85 of them with no discriminator, and the
+                          UNSCOPED arm found 34 more OUTSIDE this project. Those
+                          cannot be repaired by anyone: the bytes to re-read are
+                          gone, so a back-fill would be inventing a vintage.
+  WHAT_EACH_DOES_NOT_FIX printed: it does NOT stop the next overwrite. It makes a citation
+                          FALSIFIABLE -- a later reader can prove the referent
+                          moved -- which is strictly weaker than the referent not
+                          moving. It does not preserve a Tier-1 record that the
+                          retention policy calls indefinite. And it cannot be
+                          applied backwards, for the reason above.
+
+------------------------------------------------------------------------------
+THE THIRD THING, NAMED BECAUSE NEITHER ORDERED REMEDY COVERS IT
+------------------------------------------------------------------------------
+  Neither remedy makes an ALREADY-LOST byte recoverable, and neither prevents the
+  NEXT loss on any other key in this bucket. The only mechanism that does either
+  is bucket VERSIONING (or object lock), which s3.tf says is off ON PURPOSE and
+  justifies by the unique-key property the producer does not provide. So the
+  versioning decision and the writer defect are ONE question, not two, and
+  fixing the writer is also what makes the versioning-off decision true.
+  This is NOT proposed as a third remedy here: it is outside the domain the cell
+  declared, it is an infrastructure act under a standing egress hold, and its
+  owner (AE 0.7.0 / 0.8.0_AE_CloudComp with the CTO's ruling on the record) is
+  not this worker. Named so the two-way comparison is not read as exhaustive.
+
+------------------------------------------------------------------------------
+CHOSEN=WRITER_KEY
+------------------------------------------------------------------------------
+  WHY, in one line: it is the only one of the two that stops the loss, and it is
+  already specified -- choosing the other would mean writing new law to describe
+  a workaround for a producer that does not do what three ratified documents say
+  it does.
+  WHAT WOULD HAVE CHOSEN THE OTHER (the falsifier, stated so the choice is
+  testable rather than asserted): if the archive key had been an UNDOCUMENTED
+  convention -- no PRD line, no retention row, no Terraform justification -- then
+  changing the writer would have been a design decision with a real approval
+  cost, the citation grammar would have been the cheaper close, and CHOSEN would
+  read CITATION_GRAMMAR. The authorities above are what moved it, and they were
+  read BEFORE the choice, not after.
+  NOT EXCLUSIVE: the citation grammar is the cheap complement and needs no
+  owner's permission to practise. This order's own record is written in it
+  (bucket/key@ETag) whatever anyone else does -- see i4_remedy.sh, which is where
+  the TAKEN-or-FILED branch is settled and where the blockers are named.
+
+OK: I4-AC2 complete -- 2 of 2 remedies compared, owners, costs and limits printed.
