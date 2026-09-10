@@ -13,7 +13,8 @@ own recipe byte-for-byte in intent, from a local worktree:
 
 portal/ is a bare gitlink in this repo (mode 160000, no .gitmodules), so
 portal/src is taken from a SEPARATE portal checkout named on the command line
-and its HEAD is recorded.  stitch_source_sha.txt = the superproject HEAD.
+and its HEAD is recorded.  stitch_source_sha.txt = the superproject HEAD and portal_sha.txt
+= the portal checkout's HEAD (CG-s-38 hop 1).
 
 Usage:
   python f3_build_source_zip.py --repo <worktree> --portal <portal checkout> --out <zip>
@@ -107,6 +108,12 @@ def main() -> int:
             counts[sub] = n
         z.writestr("stitch_source_sha.txt", head + "\n")
         counts["stitch_source_sha.txt"] = 1
+        # NFRA_CLDGRPH CG-s-38 hop 1 (PACK), on THE ROUTE THAT ACTUALLY RAN: portal_head
+        # was already computed above and written only to a scratch REPORT, so it died with
+        # the run. Written INTO the archive beside stitch_source_sha.txt it reaches the
+        # marker (hop 2), the manifest (hop 3) and the served vintage line (hop 4).
+        z.writestr("portal_sha.txt", portal_head + "\n")
+        counts["portal_sha.txt"] = 1
         n = 0
         for full, rel in _data_scripts(repo):
             z.write(full, rel)
