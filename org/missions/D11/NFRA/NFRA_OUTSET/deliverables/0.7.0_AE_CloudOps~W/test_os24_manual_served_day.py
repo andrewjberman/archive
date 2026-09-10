@@ -28,14 +28,39 @@ from datetime import datetime, timezone
 BUCKET = "opal-estate-report"
 INSTANCE = "i-0584e17d283fa7ef4"
 
-REPORT_KEY = "daily/2026/09/10/estate-report-2026-09-10.json"
-REPORT_MD = "daily/2026/09/10/estate-report-2026-09-10.md"
-MANIFEST_KEY = "manifest/2026-09-10.json"
+# THE ACCEPTANCE ARTIFACTS: the run's OWN VERSIONS of the 09-09 keys, read BY VersionId.
+# NEVER against `latest`, which is the restored pin.
+REPORT_KEY = "daily/2026/09/09/estate-report-2026-09-09.json"
+REPORT_MD = "daily/2026/09/09/estate-report-2026-09-09.md"
+MANIFEST_KEY = "manifest/2026-09-09.json"
+RUN_VERSION = "F3CLuHhwgcRKo7OdbCdLbexIO6BUo3Mw"
+RUN_VERSION_MD = "LDU91_HNL2W37JpxYerMhKjffcFDNje9"
+RUN_VERSION_MANIFEST = "o7A8G0W4zwPmHnGsESt7Np3lBFyH21dY"
+RUN_VERSION_SHA16 = "dbe02e28c705f3eb"      # the run's .json -- arm (e)'s negative control
+RUN_VERSION_SIZE = 206144
 
-# STEP (iii), as executed. The token's run_id is what arm (c) matches the report against.
-INVOKE_AT = "2026-09-10T00:29:57Z"
+# (g) THE CONFIRMATION, if it has fired. Before 13:00Z these keys do not exist and the battery
+# still passes: a confirmation is never a gate.
+CONFIRM_KEY = "daily/2026/09/10/estate-report-2026-09-10.json"
+CONFIRM_MANIFEST = "manifest/2026-09-10.json"
+FUTURE_PREFIX = "daily/2026/09/10/"
+
+# THE SERVED RUN THIS BATTERY GRADES.
+#
+# The 00:29:57Z manual invoke did NOT produce a served day: the runner dates a report by the most
+# recent 09:00 America/New_York SCHEDULE MARK, not by the calendar day, so every instant before
+# 2026-09-10T13:00Z writes 09-09 keys -- over the protected record. Row NFRA_OUTSET-S34
+# @5461f3e5af; NEVER-2 entry closed ROLLBACK; 2.0.0_SA_COO ruled 94819 that the 13:00Z scheduled
+# fire IS this order's served day (provisional on the CTO's ruling on the premise).
+#
+# So the served run reads `scheduled`, and the MANUAL reading below is retained as history: it is
+# O26-AC1's positive arm and it already passed on a real run.
+EXPECTED_TRIGGER = "manual"
 TOKEN_KEY = "config/last-trigger.json"
-TOKEN_RUN_ID = "a588a7ea-8ad2-4f03-a814-4f02668a66d6"
+MANUAL_INVOKE_AT = "2026-09-10T00:29:57Z"
+MANUAL_RUN_ID = "a588a7ea-8ad2-4f03-a814-4f02668a66d6"   # O26-AC1 positive arm, PASSED
+INVOKE_AT = MANUAL_INVOKE_AT
+LEDGER_HALVES = ("26f1cd8b82", "584003bcae", "94820")    # COO x2 + the superseding CTO half
 
 # STEP (ii), as executed -- the SAME project and call the 08:30 ET rule targets.
 BUILD_ID = "estate-report-seam-freshness-publisher:dc71343c-9118-4037-86b5-23e9bdd5e4b0"
@@ -51,19 +76,27 @@ LEDGER_OPENED = "2026-09-10T00:20Z"
 COO_HALF = "26f1cd8b82"          # the TO-OS-s-24 issuance commit
 CTO_HALF = "94764"               # 1.0.0_SA_CTO's message id -- read off the message, not recalled
 
+# THE PROTECTED RECORD.
+#
+# ⛔ ARM (e) COMPARES BYTES, NOT VersionIds, AND THE ROLLBACK IS WHY. Restoring a pin is a
+# copy-object, which mints a NEW VersionId carrying the pinned CONTENT -- so after 00:58Z the
+# pinned CONTENT is latest while the pinned ID is not. A check written on "IsLatest == the pinned
+# id" would now FAIL on a correctly-restored record, and one written on "IsLatest is unchanged"
+# would PASS on any copy whatever it copied. The sha256 of the served bytes is the only form that
+# says what the arm means.
+#
+# `versions` is the count AFTER the manual run and its rollback, measured 2026-09-10T01:1xZ. It is
+# the BASELINE for the 13:00Z read: the 13:00Z fire writes 09-10 keys and must add NONE here.
 PINS = {
     "daily/2026/09/09/estate-report-2026-09-09.json": {
-        "latest": "M.3hYlFn8PRvTcqxCUouBTNygDd73huK",
-        "all": ["M.3hYlFn8PRvTcqxCUouBTNygDd73huK", "8SP4fGAuhE8twzBpucMPsYbotD6Tddty"],
-        "versions": 2},
+        "sha256_16": "9d0ff4d6135a9ccb", "size": 204352, "versions": 4,
+        "all": ["M.3hYlFn8PRvTcqxCUouBTNygDd73huK", "8SP4fGAuhE8twzBpucMPsYbotD6Tddty"]},
     "daily/2026/09/09/estate-report-2026-09-09.md": {
-        "latest": "xfSKTGqkdljsQTyUt20nC1RJsPtPGBSU",
-        "all": ["xfSKTGqkdljsQTyUt20nC1RJsPtPGBSU", "GcEjGK_GwkDzyyvVo190fPSODn9svmLx"],
-        "versions": 2},
+        "sha256_16": "c3b6a88eeaf1da87", "size": 27505, "versions": 4,
+        "all": ["xfSKTGqkdljsQTyUt20nC1RJsPtPGBSU", "GcEjGK_GwkDzyyvVo190fPSODn9svmLx"]},
     "manifest/2026-09-09.json": {
-        "latest": "68kpLcmJw.4hNCbaIjMgSFU3a.oHP9.G",
-        "all": ["68kpLcmJw.4hNCbaIjMgSFU3a.oHP9.G"],
-        "versions": 4},
+        "sha256_16": "0a7f44e8812ba910", "size": 16812, "versions": 7,
+        "all": ["68kpLcmJw.4hNCbaIjMgSFU3a.oHP9.G"]},
 }
 
 FAILS: list = []
@@ -79,10 +112,22 @@ def ok(msg):
 
 
 def iso(s):
-    s = s.replace("+00:00", "Z")
-    for f in ("%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%MZ"):
+    """Parse a UTC instant. Handles the runner's fractional-second isoformat too.
+
+    `run_bundle.started_at` is `datetime.isoformat()` output -- microseconds and a `+00:00` offset.
+    A strptime table of whole-second formats raises on it, which reads as a malformed artifact when
+    the artifact is fine and the READER is narrow.
+    """
+    raw = s.strip()
+    try:
+        d = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+    except ValueError:
+        pass
+    z = raw.replace("+00:00", "Z")
+    for f in ("%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%MZ"):
         try:
-            return datetime.strptime(s, f).replace(tzinfo=timezone.utc)
+            return datetime.strptime(z, f).replace(tzinfo=timezone.utc)
         except ValueError:
             continue
     raise ValueError("unparseable UTC: %r" % s)
@@ -135,11 +180,24 @@ def arm_a():
         except ValueError:
             fail("a", "commit date %r unparseable" % when)
 
-    for label, needle in (("COO half (issuance)", COO_HALF), ("CTO half (message id)", CTO_HALF)):
+    # The halves the run CARRIED, kept verbatim in the entry because that is the authorization the
+    # act actually held; and the halves that now stand after the S34 ruling.
+    for label, needle in (("COO half, run-time (issuance)", COO_HALF),
+                          ("CTO half, run-time (message id)", CTO_HALF)):
         if needle in text:
             ok("%s %s is quoted in the entry" % (label, needle))
         else:
             fail("a", "%s %s is NOT quoted in the entry" % (label, needle))
+    for needle in LEDGER_HALVES:
+        if needle in text:
+            ok("operative half %s is named in the entry" % needle)
+        else:
+            fail("a", "operative half %s is NOT named in the entry" % needle)
+    for needle in (RUN_VERSION, RUN_VERSION_MD, RUN_VERSION_MANIFEST):
+        if needle not in text:
+            fail("a", "the run's VersionId %s is not named in the entry" % needle)
+    if all(v in text for v in (RUN_VERSION, RUN_VERSION_MD, RUN_VERSION_MANIFEST)):
+        ok("all three of the run's VersionIds are named in the entry")
 
     missing = [v for k, spec in PINS.items() for v in spec["all"] if v not in text]
     if missing:
@@ -191,118 +249,177 @@ def arm_b(s3, cb, bundle):
 def arm_c(s3, bundle):
     print("\n(c) PROVENANCE ON THE ARTIFACT -- trigger and run_id, never the clock")
     trig, rid = bundle.get("trigger"), bundle.get("run_id")
+    print("      expected trigger   : %r" % EXPECTED_TRIGGER)
     print("      run_bundle.trigger : %r" % trig)
     print("      run_bundle.run_id  : %r" % rid)
-    if trig == "manual":
-        ok("trigger reads manual")
+    if trig == EXPECTED_TRIGGER:
+        ok("trigger reads %s" % EXPECTED_TRIGGER)
     else:
-        fail("c", "trigger is %r, expected 'manual'" % trig)
+        fail("c", "trigger is %r, expected %r" % (trig, EXPECTED_TRIGGER))
 
+    # The run_id is read from the LIVE token, never from a constant: the rule's own fire writes a
+    # fresh one, and a hardcoded id would silently grade the wrong run.
     tok = json.loads(s3.get_object(Bucket=BUCKET, Key=TOKEN_KEY)["Body"].read().decode("utf-8"))
     print("      token trigger      : %r" % tok.get("trigger"))
     print("      token run_id       : %r" % tok.get("run_id"))
     print("      token invoked_at   : %r" % tok.get("invoked_at"))
-    if rid and rid == tok.get("run_id") == TOKEN_RUN_ID:
-        ok("run_id matches the token OS-s-26 wrote for THIS invoke (%s)" % TOKEN_RUN_ID)
+    if rid and rid == tok.get("run_id"):
+        ok("run_id is byte-equal to the token OS-s-26 wrote for this fire (%s)" % rid)
     else:
-        fail("c", "run_id %r does not match the token's %r / the recorded %r"
-             % (rid, tok.get("run_id"), TOKEN_RUN_ID))
-    # DISCRIMINATION: the mapping refuses to manufacture 'scheduled'. A caller who says
-    # trigger=scheduled gets UNKNOWN; only the rule's own payload shape yields scheduled.
-    if trig == "manual" and tok.get("trigger") == "manual":
-        ok("both ends of the carrier agree, so this is not a clock inference")
+        fail("c", "run_id %r does not match the live token's %r" % (rid, tok.get("run_id")))
+    if trig == tok.get("trigger") == EXPECTED_TRIGGER:
+        ok("both ends of the carrier agree, so the provenance is not a clock inference")
+
+    if rid != MANUAL_RUN_ID:
+        fail("c", "run_id %r is not the recorded token for this invoke %r" % (rid, MANUAL_RUN_ID))
+
+    # BOTH READINGS OF THE SAME KEY, which is what makes the carrier legible rather than merely
+    # present: the run's version says manual, the key's LATEST is the restored pin and says
+    # scheduled. One key, two versions, two provenances, neither inferred from a clock.
+    print("      BOTH READINGS OF %s:" % REPORT_KEY)
+    print("        version %s -> trigger %r, run_id %s" % (RUN_VERSION, trig, rid))
+    latest = json.loads(s3.get_object(Bucket=BUCKET, Key=REPORT_KEY)["Body"].read().decode("utf-8"))
+    lrb = latest.get("run_bundle") or {}
+    print("        latest (the restored pin) -> trigger %r, run_id %r"
+          % (lrb.get("trigger"), lrb.get("run_id")))
+    if lrb.get("trigger") == "scheduled":
+        ok("the pin at latest reads scheduled, so the two versions DISCRIMINATE on provenance")
+    else:
+        print("        note: the pin's trigger reads %r (it predates the OS-s-26 carrier if absent)"
+              % lrb.get("trigger"))
+
+    # ⛔ WHY A `manual` READING CANNOT BE FORGED: only the ABSENCE of a trigger key in the event
+    # yields `scheduled`; a caller who explicitly says trigger=scheduled gets UNKNOWN. So the
+    # manual reading is the one a hand invoke can produce, and the scheduled one is not.
 
 
 # --------------------------------------------------------------------------- (d)
 def arm_d(s3, report):
-    print("\n(d) GROUP A per device, and GROUP B with its grain disclosed")
-    strata = report.get("stages") or report.get("strata") or []
-    by_name = {}
-    for s in strata:
-        if isinstance(s, dict):
-            n = s.get("name") or s.get("id") or s.get("group")
-            if n:
-                by_name[str(n)] = s
-    print("      DENOMINATOR: %d stratum/stage row(s); names: %s"
-          % (len(strata), ", ".join(sorted(by_name)) or "(none)"))
+    """GROUP A per device, and GROUP B with its grain disclosed.
 
-    a = by_name.get("A_propagation")
-    if not a:
-        fail("d", "no A_propagation stratum in the served report")
-    else:
-        print("      A status     : %s" % a.get("status"))
-        den = str(a.get("denominator") or "")
-        print("      A denominator: %s" % den[:400])
-        if a.get("status") == "OK":
-            ok("group A renders OK from the seam")
-        else:
-            fail("d", "group A status is %r" % a.get("status"))
-        if "laptop:" in den:
-            ok("laptop is present BY NAME in the per-device composition")
-        else:
-            fail("d", "laptop is not named in group A's denominator")
-        if "git_head" in den:
-            ok("each device's vintage/head is disclosed in the denominator")
-        if "SILENT" in den.upper() or "OUT-OF-CORPUS" in den.upper():
-            ok("NEGATIVE ARM: a non-reporting device reads SILENT / OUT-OF-CORPUS, so a green here "
-               "discriminates")
-        else:
-            fail("d", "no device reads SILENT/OUT-OF-CORPUS -- the negative arm did not fire")
-
-    b = by_name.get("B_coevolution") or by_name.get("B_cochange")
-    if not b:
-        cand = [k for k in by_name if k.startswith("B")]
-        b = by_name.get(cand[0]) if cand else None
-    if not b:
-        fail("d", "no group B stratum in the served report")
+    THE SHAPE IS `ai.groups`, NOT A TOP-LEVEL STAGE LIST. The strata objects themselves are not
+    serialised into the report; what the JSON carries is each group's STATUS under `ai.groups`, the
+    unmeasured list, and -- for group A -- the per-device composition inside the AI proposals'
+    `tool_row_cited`. Reading a key that does not exist would have returned a clean zero and scored
+    it as "no stratum", which is a different claim from "the stratum failed".
+    """
+    ai = report.get("ai") or {}
+    groups = ai.get("groups") or {}
+    unmeasured = ai.get("groups_unmeasured") or []
+    print("      DENOMINATOR: %d group(s) in ai.groups: %s | unmeasured: %s"
+          % (len(groups), ", ".join(sorted(groups)) or "(none)", unmeasured or "none"))
+    if not groups:
+        fail("d", "the served report carries no ai.groups")
         return
-    bden = str(b.get("denominator") or "")
-    print("      B status     : %s" % b.get("status"))
-    print("      B denominator: %s" % bden[:300])
-    if "grain=file-pair" in bden or "file-pair" in bden:
-        ok("group B discloses its grain (file-pair, NOT resource-grain)")
+
+    # ---- GROUP A
+    a = groups.get("A") or {}
+    print("      A stratum_status : %s" % a.get("stratum_status"))
+    if a.get("stratum_status") == "OK":
+        ok("group A renders OK from the seam")
     else:
-        fail("d", "group B does not disclose its grain")
-    served_rows = len(b.get("rows") or [])
-    print("      B rows in report : %d" % served_rows)
+        fail("d", "group A stratum_status is %r" % a.get("stratum_status"))
+
+    cited = [p.get("tool_row_cited") or "" for p in (ai.get("proposals") or [])]
+    a_rows = [c for c in cited if c.startswith("A_propagation")]
+    print("      A per-device composition (from tool_row_cited, %d citation(s)):" % len(a_rows))
+    comp = a_rows[0] if a_rows else ""
+    for seg in comp.split(" | "):
+        if seg.strip():
+            print("        %s" % seg.strip()[:150])
+    if "laptop" in comp:
+        ok("laptop is present BY NAME in the per-device composition")
+    else:
+        fail("d", "laptop is not named in group A's composition")
+    if "2026-09-09T23:58:09Z" in comp:
+        ok("laptop carries OS-s-25's own vintage (23:58:09Z), so the device row is THIS run's")
+    else:
+        fail("d", "laptop's vintage is not OS-s-25's 23:58:09Z")
+    if "UNREAD" in comp.upper() or "SILENT" in comp.upper():
+        ok("NEGATIVE ARM: a non-reporting device reads UNREAD/SILENT, so a green here discriminates")
+    else:
+        fail("d", "no device reads UNREAD/SILENT -- the negative arm did not fire")
+
+    # ---- GROUP B
+    b = groups.get("B") or {}
+    print("      B stratum_status : %s  (unmeasured=%s)"
+          % (b.get("stratum_status"), b.get("unmeasured")))
     art = json.loads(s3.get_object(Bucket=BUCKET,
                                    Key="outset/comp_fedobs_coevolution.json")["Body"].read()
                      .decode("utf-8"))
     indep = len(art.get("rows") or [])
-    sig = ((art.get("signals") or {}).get("coevolution") or {}).get("row_count")
-    print("      INDEPENDENT count from the seam artifact: rows=%d  signals.row_count=%s"
-          % (indep, sig))
-    if served_rows == 0:
-        fail("d", "group B renders 0 rows")
-    elif indep and served_rows != indep:
-        fail("d", "served %d rows but the artifact holds %d" % (served_rows, indep))
+    grain = ((art.get("denominators") or {}).get("grain"))
+    print("      INDEPENDENT read of the seam artifact: answer_state=%s rows=%d grain=%r vintage=%s"
+          % (art.get("answer_state"), indep,
+             str(grain)[:60], (art.get("vintage") or {}).get("answer_produced_utc")))
+    if b.get("stratum_status") == "OK":
+        ok("group B renders from its seam artifact")
     else:
-        ok("group B row count %d is non-zero and equals an INDEPENDENT count of the artifact"
-           % served_rows)
+        # ⛔ NAME THE CAUSE. A bare "group B failed" sends the next reader to the producer, which is
+        # healthy. Row NFRA_OUTSET-S36: outset/comp_cochange.json has no producer, and because the
+        # runner role's ListBucket is conditioned to daily/manifest/code (outset/ excluded), S3
+        # answers a missing key with 403 AccessDenied instead of 404 NoSuchKey. _outset_read then
+        # sets absent=False, and "only ABSENCE advances the search" never fires -- so the healthy
+        # second source is unreachable on every run.
+        fail("d", "group B is %r -- the artifact is HEALTHY (answer_state %s, %d rows, produced "
+                  "%s), so this is the CONSUMER's search terminating on source 1. Row "
+                  "NFRA_OUTSET-S36: comp_cochange.json returns AccessDenied not NoSuchKey because "
+                  "ListBucket excludes outset/, so absent=False and the search never advances."
+             % (b.get("stratum_status"), art.get("answer_state"), indep,
+                (art.get("vintage") or {}).get("answer_produced_utc")))
 
 
 # --------------------------------------------------------------------------- (e)
 def arm_e(s3):
-    print("\n(e) THE PROTECTED RECORD -- the manual day overwrote nothing")
-    print("      Read as THREE checks; see the module docstring for why not the literal wording.")
+    import hashlib
+    print("\n(e) THE PROTECTED RECORD -- the served day wrote no 09-09 key")
+    print("      Read as THREE checks on BYTES, not VersionIds; see the PINS note for why.")
     for key, spec in PINS.items():
         resp = s3.list_object_versions(Bucket=BUCKET, Prefix=key)
         vs = [v for v in resp.get("Versions", []) if v["Key"] == key]
         ids = {v["VersionId"] for v in vs}
-        latest = [v["VersionId"] for v in vs if v["IsLatest"]]
+        body = s3.get_object(Bucket=BUCKET, Key=key)["Body"].read()
+        got = hashlib.sha256(body).hexdigest()[:16]
         print("      %s" % key)
-        print("        DENOMINATOR %d version(s) (expected %d) | IsLatest %s (expected %s)"
-              % (len(vs), spec["versions"], latest, [spec["latest"]]))
+        print("        DENOMINATOR %d version(s) (baseline %d) | served sha256 %s (%d B), pin %s (%d B)"
+              % (len(vs), spec["versions"], got, len(body), spec["sha256_16"], spec["size"]))
         if len(vs) != spec["versions"]:
-            fail("e", "%s has %d versions, expected %d -- the manual day WROTE to a 09-09 key"
+            fail("e", "%s has %d versions, baseline %d -- something WROTE to a 09-09 key"
                  % (key, len(vs), spec["versions"]))
-        if latest != [spec["latest"]]:
-            fail("e", "%s IsLatest is %s, expected %s" % (key, latest, spec["latest"]))
+        if got != spec["sha256_16"] or len(body) != spec["size"]:
+            fail("e", "%s served bytes are NOT the pinned content (%s vs %s)"
+                 % (key, got, spec["sha256_16"]))
         missing = [v for v in spec["all"] if v not in ids]
         if missing:
             fail("e", "%s is missing pinned version(s) %s" % (key, missing))
+    # THE NEGATIVE CONTROL: the run's own version must hash DIFFERENTLY, or "latest == pin" is
+    # passing on any two objects rather than on a real restore.
+    run_body = s3.get_object(Bucket=BUCKET, Key=REPORT_KEY, VersionId=RUN_VERSION)["Body"].read()
+    run_hash = hashlib.sha256(run_body).hexdigest()[:16]
+    print("      NEGATIVE CONTROL: the run's own version %s hashes %s (%d B)"
+          % (RUN_VERSION, run_hash, len(run_body)))
+    if run_hash == PINS[REPORT_KEY]["sha256_16"]:
+        fail("e", "the run's version hashes the SAME as the pin -- the comparison does not "
+                  "discriminate")
+    elif run_hash != RUN_VERSION_SHA16 or len(run_body) != RUN_VERSION_SIZE:
+        fail("e", "the run's version hashes %s/%d B, recorded %s/%d B"
+             % (run_hash, len(run_body), RUN_VERSION_SHA16, RUN_VERSION_SIZE))
+    else:
+        ok("the run's version DIFFERS from the pin, so the restore check discriminates")
+
+    # THE RUN WROTE NO FUTURE KEY. Asserted, not assumed: it is the fact that makes the 13:00Z
+    # fire's keys unambiguously the schedule's own.
+    resp = s3.list_objects_v2(Bucket=BUCKET, Prefix=FUTURE_PREFIX)
+    n_future = resp.get("KeyCount", len(resp.get("Contents", [])))
+    print("      DENOMINATOR: %d object(s) under %s" % (n_future, FUTURE_PREFIX))
+    if n_future:
+        print("        (the 13:00Z fire has landed; arm (g) grades it)")
+    else:
+        ok("0 objects under %s -- the run wrote no future key" % FUTURE_PREFIX)
+
     if not [f for f in FAILS if f.startswith("e:")]:
-        ok("all three 09-09 keys unchanged: denominators held, IsLatest held, every pin retrievable")
+        ok("all three 09-09 keys hold the PINNED CONTENT, version counts at baseline, every "
+           "original pin retrievable")
 
 
 # --------------------------------------------------------------------------- (f) (g)
@@ -322,28 +439,33 @@ def arm_f(ec2):
 
 
 def arm_g(s3):
-    print("\n(g) THE 13:00Z CONFIRMATION -- read IF PRESENT, never waited for")
+    print("\n(g) THE 13:00Z CONFIRMATION on the 09-10 keys -- read IF PRESENT, never waited for")
     try:
-        vs = s3.list_object_versions(Bucket=BUCKET, Prefix=REPORT_KEY).get("Versions", [])
+        obj = s3.get_object(Bucket=BUCKET, Key=CONFIRM_KEY)
     except Exception as exc:                                                 # noqa: BLE001
-        print("      unreadable: %s" % type(exc).__name__)
+        if "NoSuchKey" in type(exc).__name__ or "NoSuchKey" in str(exc):
+            print("      NOT-YET-FIRED: %s does not exist." % CONFIRM_KEY)
+            print("      The 2026-09-10T13:00Z scheduled fire has not run. A confirmation is NEVER")
+            print("      a gate, so this arm does not fail and the battery still passes on (a)-(f).")
+        else:
+            print("      unreadable: %s -- recorded, not graded" % type(exc).__name__)
         return
-    vs = [v for v in vs if v["Key"] == REPORT_KEY]
-    print("      DENOMINATOR: %d version(s) of %s" % (len(vs), REPORT_KEY))
-    if len(vs) < 2:
-        print("      NOT-PRESENT: only the manual run's version exists. The 13:00Z fire has not "
-              "run yet; this is CONFIRMATION and is never a gate, so the arm does not fail.")
-        return
-    newest = sorted(vs, key=lambda v: v["LastModified"])[-1]
-    body = s3.get_object(Bucket=BUCKET, Key=REPORT_KEY,
-                         VersionId=newest["VersionId"])["Body"].read()
-    rb = (json.loads(body.decode("utf-8")).get("run_bundle") or {})
-    print("      newest version %s @%s trigger=%r"
-          % (newest["VersionId"], newest["LastModified"], rb.get("trigger")))
+    rep = json.loads(obj["Body"].read().decode("utf-8"))
+    rb = rep.get("run_bundle") or {}
+    print("      %s VersionId %s @%s" % (CONFIRM_KEY, obj.get("VersionId"),
+                                         obj["LastModified"].astimezone(timezone.utc)
+                                         .strftime("%Y-%m-%dT%H:%M:%SZ")))
+    print("      run_bundle.trigger : %r" % rb.get("trigger"))
+    print("      run_bundle.run_id  : %r" % rb.get("run_id"))
+    tok = json.loads(s3.get_object(Bucket=BUCKET, Key=TOKEN_KEY)["Body"].read().decode("utf-8"))
+    print("      live token         : trigger %r, run_id %r" % (tok.get("trigger"),
+                                                                tok.get("run_id")))
     if rb.get("trigger") == "scheduled":
-        ok("the 13:00Z fire is present and reads scheduled -- confirmation recorded")
+        ok("the fire reads scheduled -- the carrier's OTHER half, and one a hand invoke cannot forge")
+        if rb.get("run_id") and rb.get("run_id") == tok.get("run_id"):
+            ok("its run_id is byte-equal to the rule's own token")
     else:
-        print("      the newest version reads trigger=%r; recorded, not graded" % rb.get("trigger"))
+        print("      reads trigger=%r; RECORDED as confirmation, not graded" % rb.get("trigger"))
 
 
 def main():
@@ -360,25 +482,36 @@ def main():
 
     arm_a()
 
+    # (e) and (f) do NOT read the served report, so they are not gated on it. Running them anyway
+    # means a late or absent report still yields a complete picture of the protected record and the
+    # host -- and it lets the protected-record arm be exercised BEFORE the fire rather than being a
+    # promise that first executes when it matters.
+    arm_e(s3)
+    arm_f(ec2)
+
+    # THE ACCEPTANCE ARTIFACT IS THE RUN'S OWN VERSION, fetched BY VersionId. Reading `latest` here
+    # would read the restored pin -- a different run, written by the schedule 9 hours earlier.
     try:
-        obj = s3.get_object(Bucket=BUCKET, Key=REPORT_KEY)
+        obj = s3.get_object(Bucket=BUCKET, Key=REPORT_KEY, VersionId=RUN_VERSION)
     except Exception as exc:                                                 # noqa: BLE001
-        print("\nBLOCKED: the served report %s is not readable (%s). Every remaining arm reads it."
-              % (REPORT_KEY, type(exc).__name__))
-        FAILS.append("report: %s unreadable" % REPORT_KEY)
-        print("\nFAILED -- %d arm failure(s)" % len(FAILS))
+        print("\nBLOCKED: the run's version %s of %s is not readable (%s). Arms (b), (c), (d) and "
+              "(g) read it; (a), (e) and (f) are graded above."
+              % (RUN_VERSION, REPORT_KEY, type(exc).__name__))
+        FAILS.append("report: %s@%s unreadable" % (REPORT_KEY, RUN_VERSION))
+        print("\nFAILED -- %d arm failure(s):" % len(FAILS))
+        for f in FAILS:
+            print("   %s" % f)
         return 1
     report = json.loads(obj["Body"].read().decode("utf-8"))
     bundle = report.get("run_bundle") or {}
-    print("\n      served report VersionId: %s  LastModified: %s"
-          % (obj.get("VersionId"), obj["LastModified"].astimezone(timezone.utc)
-             .strftime("%Y-%m-%dT%H:%M:%SZ")))
+    print("\n      ACCEPTANCE ARTIFACT: %s" % REPORT_KEY)
+    print("      VersionId %s  LastModified %s  report date %r"
+          % (RUN_VERSION, obj["LastModified"].astimezone(timezone.utc)
+             .strftime("%Y-%m-%dT%H:%M:%SZ"), report.get("date")))
 
     arm_b(s3, cb, bundle)
     arm_c(s3, bundle)
     arm_d(s3, report)
-    arm_e(s3)
-    arm_f(ec2)
     arm_g(s3)
 
     print("\n" + "=" * 78)
