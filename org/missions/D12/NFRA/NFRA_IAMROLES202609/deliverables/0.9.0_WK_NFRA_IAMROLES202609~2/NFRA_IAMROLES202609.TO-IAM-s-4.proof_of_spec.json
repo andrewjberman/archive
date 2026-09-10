@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_IAMROLES202609.TO-IAM-s-4",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP.md",
+    "vintage_commit": "9e72041da5",
+    "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-s-4.condition-axis-reader-what-a-policy-requires.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "076f37eeb2"
+  },
+  "assignee": "0.9.0_WK_NFRA_IAMROLES202609~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/condition-axis-reader.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only static-analysis reader, not a deployed runtime component -- nothing to deploy. Rides this same commit alongside the TO status flip (worker identity mandate: instance + deliverables + flip together)."
+    },
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/CONDITION_AXIS.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the FWD-3 exhibit document (the required deliverable AC2/AC3/AC4 grade against). Not a deployed artifact. Rides this same commit alongside the TO status flip."
+    },
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/SESSION_LOG.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "this cell's session log (an L7 worker has no standing session-log surface; written into this worker's own deliverables directory). Rides this same commit alongside the TO status flip."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "per-statement output naming what each statement REQUIRES of the caller, printing the literal token REQUIRES-NOTHING for any statement with no Condition block, and printing a denominator of statements examined",
+      "method": "command",
+      "invocation": "python org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/condition-axis-reader.py --policy infra/aws/terraform/estate-report/iam.tf",
+      "output_evidence": "rc=0. Excerpt: '[aws_iam_role_policy.runner_selfstop (policy)] statement 1/1 -- Sid=SelfStopThisInstanceOnly Effect=Allow\\n    REQUIRES-NOTHING' ... '[aws_iam_role_policy.runner (policy)] statement 3/5 -- Sid=ListOwnPrefixes Effect=Allow\\n    REQUIRES (DESIRED, read from policy text -- NOT yet EXERCISED):\\n      - StringLike  s3:prefix = [\"daily/*\", \"manifest/*\", \"code/*\"]   [call parameter -- scopes the LIST call, not the caller]' ... '[aws_iam_role.outset_drift_publisher_laptop (assume_role_policy / trust)] statement 1/1 -- Sid=<unnamed> Effect=Allow\\n    REQUIRES (DESIRED, read from policy text -- NOT yet EXERCISED):\\n      - StringEquals  sts:RoleSessionName = \"outset-drift-laptop\"   [caller session identity]' ... trailer: 'DENOMINATOR: 17 statement(s) examined across 11 policy document(s) (Statement arrays) read from infra/aws/terraform/estate-report/iam.tf\\n  REQUIRES-NOTHING : 15\\n  REQUIRES         : 2\\n  UNKNOWN          : 0'. Every one of the 17 statements got a per-statement verdict line; the literal token REQUIRES-NOTHING appears 15 times; a denominator line is printed.",
+      "denominator": "17 of 17 statements in the file rendered a verdict (15 REQUIRES-NOTHING, 2 REQUIRES, 0 UNKNOWN); denominator line printed by the tool itself.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a count of 1 or greater -- FWD-3's DONE WHEN met: at least one REAL policy statement surfaced as scoped yet requiring nothing of its caller; NO OUTPUT AT ALL means the deliverable is missing and the criterion is NOT met",
+      "method": "command",
+      "invocation": "test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/CONDITION_AXIS.md && grep -c 'REQUIRES-NOTHING' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/CONDITION_AXIS.md",
+      "output_evidence": "grep -c printed: 10 (the file exists, per test -f, and grep -c reports the literal token REQUIRES-NOTHING occurring 10 times in CONDITION_AXIS.md).",
+      "denominator": "10 occurrences of the literal token REQUIRES-NOTHING found in CONDITION_AXIS.md (>=1 required by AC2)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a count of 1 or greater -- every claim read from policy TEXT is labelled DESIRED, per C-DESIRED-UNTIL-EXERCISED; NO OUTPUT AT ALL means the deliverable is missing and the criterion is NOT met",
+      "method": "command",
+      "invocation": "test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/CONDITION_AXIS.md && grep -c -E 'DESIRED' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/CONDITION_AXIS.md",
+      "output_evidence": "grep -c printed: 7 (the file exists, per test -f, and grep -c -E reports the token DESIRED occurring 7 times in CONDITION_AXIS.md).",
+      "denominator": "7 occurrences of DESIRED found in CONDITION_AXIS.md (>=1 required by AC3)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "a count of 0, printed -- brief Part VII item 5 honoured mechanically: no population claim was made from an inference over sampled policies; NO OUTPUT AT ALL means the deliverable is missing and the criterion is NOT met",
+      "method": "command",
+      "invocation": "test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/CONDITION_AXIS.md && grep -c -i -E 'the estate is (broadly )?silent|no policy requires|all policies|every policy in the estate' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/CONDITION_AXIS.md",
+      "output_evidence": "grep -c printed: 0 (the file exists, per test -f, and grep -c -i -E reports zero occurrences of the forbidden population-claim sentence shapes in CONDITION_AXIS.md).",
+      "denominator": "0 occurrences of the forbidden population-claim sentence shapes found in CONDITION_AXIS.md (0 required by AC4); the file EXISTS (test -f held) and grep printed a count, so this is a measured zero, not a missing-deliverable non-output.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "FWD-3's ACCEPT: A rule that is careful about WHAT someone can touch but asks NOTHING about who they are or how they proved it is visible as such. Being tightly scoped stops being able to hide asking for no second factor.",
+      "method": "manual_read_with_citation",
+      "invocation": "read CONDITION_AXIS.md 'THE EXHIBIT' section (this deliverable) against FWD-3's ACCEPT text, and the reader's live output at org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/condition-axis-reader.py --policy infra/aws/terraform/estate-report/iam.tf",
+      "output_evidence": "The exhibited statement `aws_iam_role_policy.runner_selfstop` / Sid=SelfStopThisInstanceOnly is ARN-pinned to exactly one EC2 instance for exactly one action (ec2:StopInstances) -- the tightest possible (action, resource) scoping short of a deny-everything-else default -- and the reader renders it as the literal token REQUIRES-NOTHING: no MFA condition, no source-address condition, no principal-tag condition, no session-age condition, no Condition block at all. The same run shows the reader is NOT vacuously printing REQUIRES-NOTHING for everything: two statements in the same file (ListOwnPrefixes's s3:prefix condition, and outset_drift_publisher_laptop's trust-policy sts:RoleSessionName pin) render as REQUIRES with their condition text. Whether THAT contrast is sufficient to call the absence 'visible AS SUCH to a reviewer' in the sense FWD-3's ACCEPT intends is a judgment call this cell does not self-grade.",
+      "denominator": "N/A -- judgment criterion, no computed count (task order: judgment criteria carry output and no verdict)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion per the task order's own instruction: 'never self-graded; record it UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming 3.0.0_SA_CVO~Z'. The oracle for this row is 3.0.0_SA_CVO~Z at L9 adjudication; this worker records the output only.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The reader's own Condition-detection branch was bypassed with an unconditional early return forcing every statement to REQUIRES-NOTHING, to prove the real script's REQUIRES=2 verdict on estate-report/iam.tf is a property of the policy text being parsed, not decoration the script prints regardless of input.",
+      "expected": "Mutant run (Condition-detection short-circuited): REQUIRES-NOTHING=17, REQUIRES=0, UNKNOWN=0 -- a visibly WRONG result (it would silently hide ListOwnPrefixes's and outset_drift_publisher_laptop's real Condition blocks). Unmutated run: REQUIRES-NOTHING=15, REQUIRES=2, UNKNOWN=0.",
+      "observed": "Mutant (.scratch/mutant_reader.py, not committed) against infra/aws/terraform/estate-report/iam.tf: 'REQUIRES-NOTHING : 17 / REQUIRES : 0 / UNKNOWN : 0' -- fired exactly as expected, swallowing both real Condition blocks. The unmutated deliverable script, run immediately after, reproduced 'REQUIRES-NOTHING : 15 / REQUIRES : 2 / UNKNOWN : 0' -- the mutant is discriminated from the real behaviour and the real behaviour is restored.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python condition-axis-reader.py --policy infra/aws/terraform/estate-report/iam.tf, run twice on identical input, full stdout diffed byte-for-byte.",
+      "observed": "diff .scratch/run1.txt .scratch/run2.txt produced no output (identical); both runs report DENOMINATOR: 17 statement(s) ... REQUIRES-NOTHING : 15 / REQUIRES : 2 / UNKNOWN : 0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No estate-wide census of condition-key usage was produced, and no aggregate/population claim about the estate's use of MFA, source-address or tag conditions was made.",
+      "reason": "BOUNDS (task order, PRD section 8 row S4 / brief Part VII item 5): that sentence shape is explicitly forbidden from an inference over sampled policies, and this cell is explicitly not commissioned to run the census that would license it. AC4 grades this negatively (0 occurrences of the forbidden shapes)."
+    },
+    {
+      "item": "No `aws iam simulate-principal-policy` battery was run against any live role, and no claim in this deliverable is EXERCISED or APPLIED.",
+      "reason": "C-DESIRED-UNTIL-EXERCISED (task order BOUNDS): that instrument and that verb belong to cell IAM-s-8, downstream, not this one. Every finding here is read from policy TEXT and labelled DESIRED."
+    },
+    {
+      "item": "No policy file was narrowed, modified, or had a condition added.",
+      "reason": "Task order BOUNDS: 'DO NOT MODIFY ANY POLICY. This cell READS. Narrowing is IAM-s-8's question and applying is nobody's in this round.' All eight iam.tf files named in <paths> were read only; none were modified (verified: this instance's own artifacts_produced lists only the two new deliverable files, and no iam.tf path appears there)."
+    }
+  ],
+  "surprises": [
+    "NFRA_IAMROLES202609-W2-S1: the WORKER FACE names this instance's path without the TO file's descriptive suffix, but to-pipeline-gate.py's check_complete_flip discovers a complete-flip's instance by the TO FILE'S OWN full basename (suffix included) -- an instance written only at the WORKER-FACE-named path is invisible to the gate and the flip is refused. OBSERVATION/ARMED (affects every sibling task order issued from the same template); resolved in-lane for this cell by also writing a second, byte-identical copy at the gate-required filename; disarm owned by 2.0.0_SA_COO~ZI (the fan-out's issuer)."
+  ],
+  "session_log": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "Read/Bash (manual HCL-lite parser, self-built for this cell)",
+      "invocation": "python condition-axis-reader.py --policy infra/aws/terraform/{estate-report,mdpf-pipeline,inf-pipeline,cot-pipeline,news-pipeline,etfs-reports,bd-pipeline,fred-pipeline}/iam.tf",
+      "result": "All 8 files in the cell's read surface parsed cleanly: 0 PARSE-ERROR, 0 SKIPPED arrays, 0 UNKNOWN statements across 255 statements total (17+39+68+25+27+7+67+5). Confirms the reader is not merely working on the one exhibit file but generalises across the whole read surface named in <paths>."
+    },
+    {
+      "tool": "grep (Grep tool, native)",
+      "invocation": "search for `Condition\\s*=` across infra/aws/terraform/**/iam.tf",
+      "result": "Located every Condition-block occurrence across the estate's iam.tf files, used to pick a real cross-file contrast example (bd-pipeline's ec2:ResourceTag/System tag condition) for CONDITION_AXIS.md beyond the single exhibit file, without needing to read files outside this cell's <paths>."
+    }
+  ]
+}
