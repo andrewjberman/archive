@@ -251,8 +251,12 @@ def arm_e(new_mod, old_src, new_src, s3):
         a = fn_body(old_src, marker, "\n\ndef ")
         b = fn_body(new_src, marker, "\n\ndef ")
         same = a == b and bool(a)
+        # The LABEL is derived by slicing, not by str.strip -- strip() removes any character in
+        # its set from BOTH ends, so "def tool_row_ref(" came back as "tool_row_r". A battery
+        # whose whole subject is faithful strings should not mangle its own.
+        label = marker[len("def "):].rstrip("(")
         print("        %-26s old %d B / new %d B  sha256 %s / %s  EQUAL=%s"
-              % (marker.strip("def ("), len(a), len(b),
+              % (label, len(a), len(b),
                  hashlib.sha256(a.encode()).hexdigest()[:12],
                  hashlib.sha256(b.encode()).hexdigest()[:12], same))
         if not same:
