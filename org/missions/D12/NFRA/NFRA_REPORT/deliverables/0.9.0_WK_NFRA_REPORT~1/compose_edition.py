@@ -173,20 +173,29 @@ ROW_FACTS = [
         "evidence": "Direct terminus, CONFIRMED, not speculative: getPlatinumAdvisorNnaClients -> DistributionTab, getPlatinumFirmDashboard -> ClientsTab, getHeaderMetrics -> PartnerAnalytics/ClientsTab.",
     },
     {
+        # RP-s-18 round-trip edit (manifest row S8, FWD-7): prev = Edition A's own curr
+        # (EDITION_SPECIMEN.md@5e2131d851), unedited axis values (still COARSE -- the walk
+        # is not re-run and no new resolution is asserted). Only the CITED SOURCE of curr
+        # changes: Edition A's evidence quoted the comp-platinum WALK directly; Edition B's
+        # evidence cites RETIREMENT_REGISTER.md's already-recorded CARRIED row (owner, reason,
+        # date) via its sec.2 current-state-view query INSTEAD of repeating the walk. That is
+        # the demonstrated round-trip: a recorded classification is cited on the NEXT edition,
+        # not re-derived from scratch. See RETIREMENT_ROUNDTRIP.md.
         "property": "INF_D_00.portal_aggregates.py (deprecation candidate)",
         "family": "axis",
         "prev": {"axis1": "COARSE", "axis2": None, "axis3": None},
         "curr": {"axis1": "COARSE", "axis2": None, "axis3": None},
-        "citation": "DEPRECATION.md sec.2; RETIREMENT_REGISTER.md sec.3 (CARRIED)",
-        "evidence": "comp-platinum returns only [SPECULATIVE] catch-all matches for both platinum keys this script writes -- the walk could not resolve a confirmed terminus. Still the wrong grain to call it either alive or dead; recorded CARRIED, not RETIRED.",
+        "citation": "RETIREMENT_ROUNDTRIP.md sec.2 (Edition B); RETIREMENT_REGISTER.md sec.3 row 1 (CARRIED, owner 0.9.0_WK_NFRA_REPORT~1, 2026-09-09) -- cited via the register's current-state view, not re-walked this edition",
+        "evidence": "Edition A (EDITION_SPECIMEN.md@5e2131d851) quoted the comp-platinum walk directly (both platinum keys return only [SPECULATIVE] catch-all matches, no confirmed terminus). Edition B does not re-run that walk: it cites RETIREMENT_REGISTER.md's own CARRIED row -- owner, reason and date already recorded there -- and stops there. Still COARSE, still not RETIRED: no resolution is claimed, only that re-derivation is suppressed.",
     },
     {
+        # RP-s-18 round-trip edit -- same mechanism as the INF_D_00 row above.
         "property": "INF_D_07.concentration_risk.py (deprecation candidate)",
         "family": "axis",
         "prev": {"axis1": "COARSE", "axis2": None, "axis3": None},
         "curr": {"axis1": "COARSE", "axis2": None, "axis3": None},
-        "citation": "DEPRECATION.md sec.2/sec.3; RETIREMENT_REGISTER.md sec.3 (CARRIED)",
-        "evidence": "comp-pipescript's static parser cannot see this script's write at all (dynamic key concatenation, surprise row NFRA_REPORT-Z-W1-S2) -- the walk cannot even confirm the write, let alone a terminus. Recorded CARRIED, not RETIRED, not ALIVE.",
+        "citation": "RETIREMENT_ROUNDTRIP.md sec.2 (Edition B); RETIREMENT_REGISTER.md sec.3 row 4 (CARRIED, owner 0.9.0_WK_NFRA_REPORT~1, 2026-09-09) -- cited via the register's current-state view, not re-walked this edition",
+        "evidence": "Edition A (EDITION_SPECIMEN.md@5e2131d851) quoted the comp-pipescript walk directly (static parser cannot see this script's dynamic-key write at all, surprise row NFRA_REPORT-Z-W1-S2). Edition B does not re-run that walk: it cites RETIREMENT_REGISTER.md's own CARRIED row -- owner, reason and date already recorded there -- and stops there. Still COARSE, still not RETIRED: no resolution is claimed, only that re-derivation is suppressed.",
     },
     # --- MONITORED_VS_SERVED.md's own WATCHED/UNWATCHED/INSTRUMENT-CANNOT-SEE axis ---
     {
