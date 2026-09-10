@@ -1,0 +1,71 @@
+IB-s-17 BATTERY -- S17-AC1, five arms. READ-ONLY: no write, no vendor call, no apply.
+repo C:\tmp\wk-irpt-1-1
+the system key: alias/investor-reporting -> arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963cea8111 (rotation=None)
+
+(a) THE BUCKET IS THERE, ENCRYPTED, CLOSED.
+    head-bucket opal-data-ycharts -> rc=0 200 OK (no body)
+    get-bucket-encryption -> SSEAlgorithm=aws:kms KMSMasterKeyID=arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963cea8111
+    alias alias/investor-reporting resolves to key arn arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963cea8111
+    get-public-access-block -> {"BlockPublicAcls": true, "BlockPublicPolicy": true, "IgnorePublicAcls": true, "RestrictPublicBuckets": true}
+      4 of 4 axis(es) true
+    get-bucket-versioning -> Status=Enabled
+
+(b) THE LAYOUT IS DECLARED FROM THE REGISTRY.
+    NOTE: this is the one arm that reads a FILE rather than the applied plane,
+    because layout.json IS a declaration -- the claim under test is that it was
+    derived from the registry, and the registry is the only thing that can show it.
+    registry enabled client firms: ['49financial', 'cottonwood', 'inflection']
+    layout.json firms            : ['49financial', 'cottonwood', 'inflection']
+    3 of 3 firm id(s) match the registry
+    quarantine prefix -> 'quarantine/'
+    prefix families declared: ['generations', 'intake', 'requests']
+      49financial  3 of 3 family prefix(es): ['firms/49financial/generations/{id}/attempts/{a}/', 'firms/49financial/intake/YYYY/MM/DD/{id}/', 'firms/49financial/requests/{id}/revisions/{r}/']
+      cottonwood   3 of 3 family prefix(es): ['firms/cottonwood/generations/{id}/attempts/{a}/', 'firms/cottonwood/intake/YYYY/MM/DD/{id}/', 'firms/cottonwood/requests/{id}/revisions/{r}/']
+      inflection   3 of 3 family prefix(es): ['firms/inflection/generations/{id}/attempts/{a}/', 'firms/inflection/intake/YYYY/MM/DD/{id}/', 'firms/inflection/requests/{id}/revisions/{r}/']
+    3 of 3 firm(s) carry all three prefix families
+    _keys/keys.py vs layout.json: AGREE
+    list-objects-v2 -> 0 object(s) in the bucket (expected 0: prefixes are DECLARED, never created as empty objects)
+
+(c) TABLES AND QUEUES, N OF N.
+    irpt-requests      keys=tenant:HASH,request_revision:RANGE SSE=ENABLED/KMS PITR=ENABLED billing=PAY_PER_REQUEST key-is-ours=True
+    irpt-jobs          keys=tenant:HASH,job:RANGE        SSE=ENABLED/KMS PITR=ENABLED billing=PAY_PER_REQUEST key-is-ours=True
+    irpt-outbox        keys=tenant:HASH,seq:RANGE        SSE=ENABLED/KMS PITR=ENABLED billing=PAY_PER_REQUEST key-is-ours=True
+    irpt-checkpoints   keys=source:HASH,cursor:RANGE     SSE=ENABLED/KMS PITR=ENABLED billing=PAY_PER_REQUEST key-is-ours=True
+    4 of 4 table(s) SSE-KMS with OUR key, PITR enabled, PAY_PER_REQUEST
+    irpt-intake            KmsMasterKeyId=7f4d3042-10d8-49a7-b55e-3c963cea8111   MaxMessageSize=4096 RedrivePolicy names irpt-intake-dlq=True
+    irpt-intake-dlq        KmsMasterKeyId=7f4d3042-10d8-49a7-b55e-3c963cea8111   MaxMessageSize=4096 (dead-letter target)
+    irpt-generation        KmsMasterKeyId=7f4d3042-10d8-49a7-b55e-3c963cea8111   MaxMessageSize=4096 RedrivePolicy names irpt-generation-dlq=True
+    irpt-generation-dlq    KmsMasterKeyId=7f4d3042-10d8-49a7-b55e-3c963cea8111   MaxMessageSize=4096 (dead-letter target)
+    irpt-export            KmsMasterKeyId=7f4d3042-10d8-49a7-b55e-3c963cea8111   MaxMessageSize=4096 RedrivePolicy names irpt-export-dlq=True
+    irpt-export-dlq        KmsMasterKeyId=7f4d3042-10d8-49a7-b55e-3c963cea8111   MaxMessageSize=4096 (dead-letter target)
+    3 of 3 work queue(s) KMS-encrypted with a RedrivePolicy naming their DLQ
+    3 of 3 dead-letter queue(s) KMS-encrypted
+    MaximumMessageSize 4096 on 6 of 6: an attachment cannot fit, so 'ids not
+      attachments' is refused by the TRANSPORT and not only by the producer.
+
+(d) THE KEY GRAMMAR REFUSES A CLIENT NAME -- THE DIFFERENCE CONTROL.
+    python -m pytest infra/aws/lambda/investor-reporting/_keys/tests/test_keys.py -q
+    45 passed in 0.17s
+    45 of 45 test(s) passed, 0 failed
+    a well-formed key: irpt/v1/49financial/holdings_snapshot/asf=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/src=src-1/sch=sch-1/cfg=cfg-1/p=as_of=2026-09-09
+    7 of 7 II.3 component(s) present in the key: tenant, account-set fingerprint, source revision, schema revision, config revision, operation, operation parameter
+    5 of 5 client/firm-name component(s) REFUSED at construction
+    idempotent: same inputs give the same key -> True
+    discriminating: a different account-set fingerprint gives a different key -> True
+
+(e) THE LEDGER IS CLOSED AND ITS SENTINEL COMMITTED.
+    deploy_ledger.py check -> rc=1
+      OPEN: advi-insure-gold-chain-membership age=177.9h window=12.0h [PAST-WINDOW] stranded=['L4'] author=0.7.0_AE_CloudOps~R
+      OPEN: advi-insure-iam-insurance-silver-read age=222.8h window=36.0h [PAST-WINDOW] stranded=['L4'] author=0.7.0_AE_CloudOps
+      HELD-STALE: d12-sms-origination-identity-activation held=8.4d (>4.0d) gate=external/AWS toll-free provisioning + carrier verification (SP-1), ~1-3wk from filing, Andrew-gated. Then SP-2 (SMS_ORIGINATION_IDENTITY) on Andrew's explicit GO. Source of record: sms.ts:22-59. re-read=event=AWS approves the toll-free origination identity AND/OR the account leaves the SMS sandbox. WARN: BOTH ARE OUT-OF-BAND, ACCOUNT-LEVEL EVENTS WITH NO DEPLOY AND NO CODE REVIEW ATTACHED -- sms.ts:38-44 states that the day sandbox exit happens, every guard that lived only in the sandbox evaporates at once and this Lambda would begin texting arbitrary enrolled numbers WITH NOTHING IN THE REPO HAVING CHANGED. Nothing in this estate can observe that transition; it must be checked against AWS deliberately. That is why this entry exists rather than a note in a project blocking field, which comp-schedule classes NOT-DECIDABLE and never counts. open-verify=['SP-1', 'SP-3'] author=1.0.0_SA_CTO~Z -- nudge the gate or reconsider
+      OPEN: d12-sms-tfn-registration-and-production-access age=31.3h window=504.0h [in-window] stranded=['A', 'V1', 'V2', 'V3'] author=0.0.0_AB_MSTR
+      HELD-STALE: freshguard-leg4-writer-wiring-finish held=63.4d (>4.0d) gate=external/FAIL-BY-DESIGN standing state (declared 2026-08-20, 0.7.0_AE_CloudOps per MSTR 63015): L4's recorded FAIL IS the designed verdict; close path = CAS merge fix d27000a68 (dormant, GLOBGRPH_MARKER_CAS=off) behind CTO GO-conditions incl. the 8c0b67afd runtime probe (UNRUN) and a MARKER_CAS_* metric-filter alarm -- alarm-building sits under the Andrew 2026-07-28 moratorium, so this gate needs Andrew's word, then a fresh T_d' cycle. Re-dated deliberately; staleness on this entry is NOT drift. re-read=event=Andrew's word on the MARKER_CAS_* metric-filter alarm (blocked by the 2026-07-28 alarm moratorium), then a fresh T_d' cycle -- quoted from this hold's own gate.ref open-verify=['L4'] author=0.7.0_AE_CloudOps -- nudge the gate or reconsider
+      OPEN: opsec-s15-reconciler-function age=163.9h window=4.0h [PAST-WINDOW] stranded=['L6'] author=0.7.0_AE_CloudOps~T
+    line(s) naming this slug: 0
+    git log -1 --format=%H -- org/critical_paths/.open_deploys/irpt-bckend-s17.json
+      f44cab8208d24c7d83d83b7bd92f86d292577eba
+    working-tree status of the sentinel: clean (committed, no pending change)
+
+AWS calls made by this battery: 27, all read-only (describe-continuous-backups, describe-key, describe-table, get-bucket-encryption, get-bucket-versioning, get-key-rotation-status, get-public-access-block, get-queue-attributes, get-queue-url, head-bucket, list-objects-v2)
+arms: 5 of 5 evaluated; arms holding: 5 of 5; assertions failed: 0
+IBS17-STORAGE-APPLIED
