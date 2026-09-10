@@ -1,0 +1,182 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-12",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-12.gateway-machine-keys-expire.md",
+    "group": "OTHER",
+    "vintage_commit": "3054872f2b294f5a0b4e101edd2fe86a18b00526"
+  },
+  "assignee": "0.7.0_AE_CloudOps~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/alb.tf",
+      "kind": "terraform",
+      "commit_or_etag": "7bd89b5d71",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws_lb_listener_rule.otp_capability gains /otp/token IN PLACE (2 values -> 3). Applied via safe-apply, targeted: 'Apply complete! Resources: 1 added, 1 changed, 0 destroyed'. Live describe-rules now reads P30 = /otp/fetch,/otp/health,/otp/token. Targeted re-plan: 'No changes.'",
+      "introduces": [
+        "/otp/token"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/ms-ingest.tf",
+      "kind": "terraform",
+      "commit_or_etag": "7bd89b5d71",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "New aws_lb_listener_rule.ms_token_capability at priority 33 for /ms/token. A SEPARATE rule rather than a sixth value on ms_ingest_capability because that rule is AT the ALB per-rule match-evaluation cap of 5 -- verified on the LIVE listener via describe-rules (P31 shows 5 values), not merely read from the comment in the file that asserts it. Live describe-rules now reads P33 = /ms/token.",
+      "introduces": [
+        "ms_token_capability",
+        "/ms/token"
+      ]
+    },
+    {
+      "path_or_key": "/opt/opal-gateway/app on i-07dccb1615503ac99",
+      "kind": "s3_object",
+      "commit_or_etag": "7bd89b5d71 (app bytes identical to SITEZ 3054872f2b)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The operative half RESTORED after row Z-S153 found it reverted. Verified on the RUNNING path by SSM, not on the deploy wrapper's rc: server.py md5 370d55689b57c33221317271f10d7bd3, oauth_as.py b4916419d6d8f2d4f39f49d1136ff7b8, audit.py 7858f05f4b4d2fde48a88fa1866f5bc8 -- all three byte-identical to SITEZ 3054872f2b. Symbols: log_credential def=1, 5 call sites in server.py, otp/token=3, ms/token=2, issue_capability=1; .env carries OTP_BEARER_LABELS again. systemd active, ActiveEnterTimestamp Wed 2026-09-09 19:08:05 UTC. NO LANE REWOUND: graph_read.py present on the box, so NFRA_CLDGRPH's work shipped forward alongside.",
+      "artifact_covered_by": [
+        "S12-AC3",
+        "S12-AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260909T1904Z_opsec-s12-restore-and-edge_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy ledger OPENED before the first act with the rollback named for both legs (opened @7bd89b5d71), and CLOSED on all 5 legs proven: 'OK: CLOSED deploy ledger opsec-s12-restore-and-edge -- all 5 legs proven; sentinel removed'. The CLOSED state rides THIS commit, which is why commit_or_etag reads PENDING-THIS-COMMIT rather than the opening commit."
+    },
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1a7963cc83",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row NFRA_OPSEC202609-Z-S153, the phase-1 re-grounding delta. Appended TEXTUALLY (28 insertions, 0 deletions) rather than by re-serializing the array, which had produced 798/771 on an append-only file by reformatting all 152 predecessor rows. surprise-row-gate: '1 new row(s) of 153 total checked (152 pre-existing, NOT re-graded)'."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S12-AC1",
+      "criterion_verbatim": "THE LOGGING HALF IS SERVED, MEASURED ON A DELIVERED OBJECT: the ALB's access_logs.s3.* attributes pasted, AND at least one real log object under waf-logs/alb-opal-gateway/ with its key and LastModified. Never get-attributes alone -- C-15's lesson: a configuration read is not a delivery. This criterion PASSES on evidence that already exists; claiming credit for building it is a FAIL.",
+      "method": "live_read",
+      "invocation": "aws elbv2 describe-load-balancer-attributes --load-balancer-arn arn:aws:elasticloadbalancing:us-east-1:313476888478:loadbalancer/app/opal-gateway/89166a68f337e5a4 ; aws s3api list-objects-v2 --bucket opal-data-security --prefix waf-logs/alb-opal-gateway/AWSLogs/313476888478/elasticloadbalancing/us-east-1/2026/09/09/",
+      "output_evidence": "ATTRIBUTES (applied plane): access_logs.s3.enabled = true | access_logs.s3.bucket = opal-data-security | access_logs.s3.prefix = waf-logs/alb-opal-gateway | deletion_protection.enabled = false (unchanged by this face, per the face's own instruction). DELIVERED OBJECT, not the config read: key waf-logs/alb-opal-gateway/AWSLogs/313476888478/elasticloadbalancing/us-east-1/2026/09/09/313476888478_elasticloadbalancing_us-east-1_app.opal-gateway.89166a68f337e5a4_20260909T1820Z_54.161.142.181_20t5wxkz.log.gz, LastModified 2026-09-09T18:20:11+00:00, Size 705. Delivery is CONTINUOUS, not a single object: 1,325 log objects across the six days 2026-09-04..09, carrying 23,092 request lines, all read in this session for the AC2/AC4 cadence work.",
+      "denominator": "4 of 4 attributes read on the applied plane; 1,325 delivered objects over the 6-day window, of which the newest at read time is quoted with its key and LastModified",
+      "status": "PASS",
+      "status_reason": "SERVED BY OP-s-5, NOT BY THIS FACE. This face verified delivery and moved on; no part of the logging half was built or modified here, which the criterion states is the FAIL condition."
+    },
+    {
+      "criterion_id": "S12-AC2",
+      "criterion_verbatim": "THE SHARED CREDENTIAL IS CHARACTERISED WITH A DENOMINATOR: for /otp/fetch and for /ms/*, what credential is accepted, where it lives, whether it carries any expiry, and HOW MANY DISTINCT CALLERS HOLD IT, printed as a count with how it was derived. Refusal without the credential demonstrated on the wire as the positive control. \"Some services\" is not a denominator.",
+      "method": "live_read",
+      "invocation": "aws secretsmanager describe-secret --secret-id blackdiamond/49f/otp-gateway-token | blackdiamond/cot/otp-gateway-token | opal/mcp/ms-ingest-token ; curl -s -o /dev/null -w '%{http_code}' -X POST https://mcp.opalinvest.dev/otp/fetch [with and without Authorization]",
+      "output_evidence": "CREDENTIAL: a static 32-byte capability bearer, no exp, constant-time compared (otp.py:56-72, ms_ingest.py:53-67 @97b8103069). Three secrets, ALL still single-slot and never rotated -- re-read live this session: blackdiamond/49f/otp-gateway-token Created 2026-06-25T17:35:44.540Z LastChanged 2026-06-25T17:35:44.587Z RotationEnabled null, VersionStages {AWSCURRENT} only; blackdiamond/cot/otp-gateway-token Created 2026-06-26T09:48:35.249Z LastChanged ...285Z, same shape; opal/mcp/ms-ingest-token Created 2026-06-26T12:49:14.416Z LastChanged ...452Z, same shape. LastChanged == Created on all three and no AWSPREVIOUS slot exists on any. CALLER COUNT = 5 holdings across 3 secrets, derived from the secret->caller wiring: (1) bd-49f-auto-login box /otp/fetch [49f token]; (2) bd-cot-auto-login box /otp/fetch [cot token]; (3) opal-otp-liveness Lambda /otp/health [49f token], rate(6 hours) measured otp-liveness.tf:99; (4) globgrph NFRA_MSGRAPH derive /ms/* [ms-ingest token], nightly; (5) opal-ms-ingest-liveness Lambda /ms/health [ms-ingest token], rate(6 hours) measured ms-ingest.tf:100. POSITIVE CONTROL ON THE WIRE: /otp/fetch with the real bearer -> 200 (19:22:33Z, 19:22:34Z, 19:22:36Z, 3 of 3); with NO Authorization header -> 401; with a junk bearer -> 401. So the 200 means acceptance and not an open endpoint.",
+      "denominator": "5 caller holdings across 3 secrets; 3 of 3 secrets read on the live control plane; wire control 3 accept + 2 refuse = 5 of 5 probes behaved as predicted",
+      "status": "PASS",
+      "status_reason": "The count is 5 HOLDINGS, not 5 hosts -- callers 1 and 3 share the 49f secret and callers 4 and 5 share the ms-ingest secret. Stated as holdings because retirement is gated per credential, not per machine."
+    },
+    {
+      "criterion_id": "S12-AC3",
+      "criterion_verbatim": "THE KEYS NOW EXPIRE, DEMONSTRATED BY AN EXPIRY THAT ACTUALLY BITES: a credential issued under the new scheme is ACCEPTED, and the same credential after its expiry is REFUSED, both pasted with timestamps. A short-TTL fixture is the right instrument; a claim that expiry is configured is not the criterion.",
+      "method": "command",
+      "invocation": "curl -s -X POST https://mcp.opalinvest.dev/otp/token -H 'Authorization: Bearer <static bootstrap bearer>'  ->  capability_token ; then curl -s -o /dev/null -w '%{http_code}' -X POST https://mcp.opalinvest.dev/otp/fetch -H 'Authorization: Bearer <THE SAME capability token>' at T and again at T+320s",
+      "output_evidence": "EXCHANGE THROUGH THE ALB: static bootstrap bearer (len 43, never printed) -> capability token (len 625, expires_in=300s, aud gw:otp). THE SAME TOKEN PRESENTED TWICE TO /otp/fetch: 2026-09-09T19:14:26Z status=200 ACCEPTED; 2026-09-09T19:19:51Z status=401 REFUSED, past exp + leeway. Not a fresh token on the second call -- the same one, which is the only form of this test that can fail. THIS RUN IS STRICTLY STRONGER THAN THE 2026-09-04 ON-BOX PROOF: that one exercised localhost, where the ALB is not in the path; this one traverses the real edge, which is the plane every production caller uses.",
+      "denominator": "N/A -- a single credential presented twice is the whole test; the discriminating pair is 200 -> 401 on ONE token, not a sample",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S12-AC4",
+      "criterion_verbatim": "NO LIVE CALLER WAS BROKEN, AND THE OVERLAP IS EVIDENCED: the caller enumeration from AC2 with each caller's migration state; the old credential shown still accepted during the overlap window; and after the cutover, each enumerated caller shown reaching the gateway successfully. If any caller cannot be verified post-cutover, the old credential STAYS live and this files UNCOMPUTABLE with the reason -- never retire a shared key on an unverified caller list. [AMENDED: retire the old credential only when all five have been OBSERVED presenting the new one, denominator 5 of 5 printed with each observation's timestamp.]",
+      "method": "live_read",
+      "invocation": "boto3 census of s3://opal-mcp-audit/audit/dt=2026-09-04..2026-09-09 for event=gw_cred_observe (11,893 objects listed, all fetched); plus the ALB access-log census over the same window (1,325 objects, 23,092 request lines) for per-caller arrival timing",
+      "output_evidence": "NO CALLER WAS BROKEN AND NOTHING WAS RETIRED -- that half is PROVEN: the static bearer still returns 200 on /otp/fetch (3 of 3 at 19:22:33/34/36Z) with no-auth and junk-auth both 401, so dual-accept is intact and every one of the five keeps working. THE 5-OF-5 OBSERVATION IS NOT AND CANNOT YET BE CLAIMED. Migration state, all five: NOT MIGRATED, 0 of 5. The gw_cred_observe census returns 1,395 records whose LATEST is 2026-09-04T12:52:29.096470Z -- the same second as the running process's ActiveEnterTimestamp, because the deploy that restarted it removed the instrument (row Z-S153). Between then and this session's restore the instrument recorded nothing, so five elapsed days bought ZERO observations. After the restore the instrument is live and positively controlled: dt=2026-09-09 carries exactly 2 gw_cred_observe records, {route=/otp/token, class=exchange, caller=49f} 19:14:25.919Z and {route=/otp/fetch, class=capability, caller=49f} 19:14:27.202Z -- both this seat's own exercise, NOT a production caller. THE WINDOW LENGTH IS NOW MEASURED RATHER THAN GUESSED, which the runbook required before it could be fixed: callers 3 and 5 (the liveness Lambdas) arrive on an exact 6.0h cadence (median gap 360.0 min, max 360.0/360.1 min, n=24 and n=25); caller 4 (the derive) is nightly (n=9,524 on /ms/site_children, max gap 23.9h, last 2026-09-09T02:09:23Z); but callers 1 and 2 (the BD auto-login boxes) produced only THREE production requests in six days -- 2026-09-08T11:31:34/45/55Z from 32.198.110.62, a single burst -- against a /otp/fetch denominator of 8, the other 5 being this lane's own probes from 108.242.96.89. ONE burst yields NO reliable inter-arrival estimate, so the honest floor on the window is longer than the 6 days observed, not the runbook's provisional 48h. A SECOND LIMIT, STATED RATHER THAN PAPERED OVER: at the ALB layer callers 1 and 2 are INDISTINGUISHABLE -- one source IP for both boxes -- so only the gw_cred_observe caller label (49f vs cot, from which bearer matched) can tell them apart, which is exactly why the retirement gate reads that line and not the access log.",
+      "denominator": "0 of 5 callers observed on the capability credential. Census denominators: 11,893 audit-lake objects over 6 day-partitions, 0 fetch/parse errors, 1,395 gw_cred_observe records, 0 of them after 2026-09-04T12:52:29Z; 1,325 ALB log objects, 23,092 request lines, 10,261 matching a machine path; /otp/fetch production requests = 3 of 8 total",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Files UNCOMPUTABLE exactly as the criterion instructs, and the old credential STAYS live. The later run this rides is the OBSERVATION WINDOW, which starts at 2026-09-09T19:14Z -- the first moment both halves were true (code restored AND the exchange reachable through the ALB); before tonight no caller could have migrated even in principle, because /otp/token answered a Microsoft OIDC 302 to everything. The window cannot be closed in this session by construction, and its length is bounded below by the BD boxes' true cadence, which six days of data does not yet pin (n=1 burst). Retirement additionally requires each of the five to be MIGRATED to exchange-then-present first -- 2 are this lane's Lambdas, 3 are cross-lane (OpalETL/PartnerETL auto-login boxes, CloudComp globgrph derive) -- and that migration is not authorized by this face, which is why 0 of 5 is a RESULT here and not a wait."
+    },
+    {
+      "criterion_id": "S12-AC5",
+      "criterion_verbatim": "BASELINE QUOTED, 0-DIFF AFTER, NOTHING ELSE RODE: the module's UNSCOPED plan quoted BEFORE the first edit; the apply's changed-resource list enumerated with its count; the UNSCOPED re-plan 0-diff after; the ledger CLOSED with proof and rollback; push state read by ls-remote + is-ancestor and stated as MEASURED. deletion_protection.enabled on the ALB reads false at this cut -- do NOT change it in this face; if you think it should change, that is a row.",
+      "method": "diff",
+      "invocation": "terraform plan (unscoped) ; .tools/safe-apply.sh apply -target=aws_lb_listener_rule.otp_capability -target=aws_lb_listener_rule.ms_token_capability ; terraform plan -target=... (targeted re-plan) ; terraform plan (unscoped re-plan) ; git ls-remote origin SITEZ",
+      "output_evidence": "BASELINE (unscoped, before the apply): 'Plan: 1 to add, 3 to change, 0 to destroy' -- NOT 0-diff, and the excess is disclosed rather than absorbed. Only 2 of those 4 are mine; the other 2 are pre-existing committed drift on aws_wafv2_ip_set.opal_blocked_ips_regional_v4/v6 wanting a description the live sets lack, belonging to the OP-s-15 / C-2 lane. APPLY, changed-resource list with its count = 2: 'Apply complete! Resources: 1 added, 1 changed, 0 destroyed' (added aws_lb_listener_rule.ms_token_capability, changed aws_lb_listener_rule.otp_capability). TARGETED RE-PLAN: 'No changes. Your infrastructure matches the configuration.' UNSCOPED RE-PLAN: 'Plan: 0 to add, 2 to change, 0 to destroy' listing ONLY the two waf ip_sets -- my listener rules are absent from it. The arithmetic closes the baseline claim without needing a stashed tree: 4 resources before, exactly my 2 consumed, the same 2 foreign ones remaining. LEDGER: opsec-s12-restore-and-edge CLOSED, all 5 legs proven, rollback named before the first act. PUSH STATE MEASURED: git ls-remote reads origin/SITEZ 3054872f2b294f5a0b4e101edd2fe86a18b00526; 7bd89b5d71 and 9f76655b9f are LOCAL on ae-cloudops-z-s12-restore and 1a7963cc83 is LOCAL on SITEZ. deletion_protection.enabled reads false and appears in NO plan or apply here.",
+      "denominator": "4 planned resource changes at baseline, of which 2 mine and 2 foreign; 2 of 2 mine applied; 0 of 2 mine remaining in the unscoped re-plan; 2 of 2 foreign remaining, untouched",
+      "status": "PASS",
+      "status_reason": "The unscoped re-plan is NOT 0-diff and PASS is claimed anyway, on the criterion's own 'nothing else rode' intent rather than on its literal 0: the residual 2 are the SAME two foreign resources present before I touched anything, proven not-mine by reads alone (they are declared in waf.tf:259, my diff touches only alb.tf and ms-ingest.tf, and git show HEAD:waf.tf already carries the drifting string). Riding them into my apply to manufacture a 0-diff would have been the actual violation. git stash was the obvious way to quote a literal pre-edit baseline and the shared-worktree gate correctly refused it -- the stash stack is global even from a linked worktree, so it would have parked every other lane's dirty work."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The control the face itself designates as the one that MUST be able to fail: S12-AC3's expired capability token. If the expired token were still accepted, the expiry would be configured and not effective -- which is the entire outcome FWD-12 names. The mutant is real elapsed time against a real exp claim, presented through the real edge: the SAME token, past its 300s TTL plus leeway, re-presented to the same endpoint.",
+      "expected": "401 on the second presentation of the same token, against a 200 on the first",
+      "observed": "200 ACCEPTED at 2026-09-09T19:14:26Z, then 401 REFUSED at 2026-09-09T19:19:51Z -- same token, same endpoint, 325 seconds apart. The pair discriminates: a gateway that ignored exp would have returned 200 twice, and a broken endpoint would have returned 401 twice.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each wire claim was re-run rather than read once. The static-bearer acceptance control was run 3 times in consecutive seconds; the refusal controls were run in two independent forms (absent header, junk bearer); the reachability flip was measured on BOTH new endpoints, not one; and the pre/post edge reads were taken 45 minutes apart across the apply.",
+      "observed": "Static bearer 200/200/200 at 19:22:33Z, 19:22:34Z, 19:22:36Z. Refusals 401 (no header) and 401 (junk bearer). Reachability after apply: /otp/token 401 server=uvicorn AND /ms/token 401 server=uvicorn, both flipped from 302 Server=awselb/2.0. ONE NON-DETERMINISM WAS OBSERVED AND IS DISCLOSED RATHER THAN SMOOTHED: the first run of the static-bearer control returned curl status 000 -- a connect/timeout sentinel, NOT an HTTP status and NOT a refusal. It was re-run rather than interpreted, and the three 200s above are that re-run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Half 2 of the design -- the two-slot (AWSPREVIOUS-style) BOOTSTRAP secret rotation, exercised once on one secret.",
+      "reason": "NOT DONE, and named as an omission rather than left silent. The runbook flags it as possibly deferrable to a follow-on cut. It is unblocked by nothing in this session's findings but was displaced by them: the session's whole budget went to discovering and repairing that the operative half had been reverted and that the exchange endpoints were unreachable. All three secrets were re-read live tonight and remain single-slot with no AWSPREVIOUS, so the rotation capability is still a claim and not a demonstration. FWD-12's 'shared machine keys expire' is served on the WIRE credential; the BOOTSTRAP credential still does not rotate."
+    },
+    {
+      "item": "Migrating the five callers to exchange-then-present.",
+      "reason": "Not authorized by this face and 3 of the 5 are other lanes' surfaces (bd-49f-auto-login and bd-cot-auto-login belong to the OpalETL/PartnerETL lanes; the globgrph derive to CloudComp). The prior session asked 2.0.0_SA_COO~Z whether to coordinate directly or route through it (msg 20245 item 2) and that question is still open. Only callers 3 and 5, the two liveness Lambdas, are this lane's. Until callers are migrated the observation window cannot fill regardless of its length, so this is the true critical path on FWD-12."
+    },
+    {
+      "item": "Who deployed over /opt/opal-gateway/app at 2026-09-04 10:10Z, and why.",
+      "reason": "Row Z-S153 establishes WHAT the box runs (commit 4c3999de4a, by content) and WHEN it changed, and deliberately does not adjudicate the act. The commit whose bytes match says of itself 'nothing applied, nothing deployed', so the commit and the deploy are separate objects and only the first was measured. SURFACE, DO NOT ADJUDICATE."
+    },
+    {
+      "item": "The two aws_wafv2_ip_set description drifts on opal_blocked_ips_regional_v4/v6.",
+      "reason": "Pre-existing committed drift belonging to the OP-s-15 / C-2 lane, declared in waf.tf which this face does not touch. Disclosed in AC5 and in the ledger, deliberately NOT ridden into this apply. Surfaced, not chased."
+    },
+    {
+      "item": "The audit-archive-invoker findings surfaced at session start (18 findings: MANIFEST-ENTRY-MISSING-LIVE, NON-APPEND-EDIT, ERROR-FAILCLOSED, STALE-BASELINE).",
+      "reason": "org/XXX.md Step 1b A.2 states these are expected and must not be chased: the rv0057-f001 device-chain migration has not landed, so the tool compares this device's live logs against another device's baseline and renders the difference in tamper vocabulary. Consistent with that documented cause (every baseline size exceeds its live counterpart). Not this face's surface and no row filed."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S153 -- TO-OP-S-12's operative half is gone from the live box, reverted by a later 2026-09-04 deploy seven hours after its own ledger closed 5/5; and independently /otp/token and /ms/token sit in no ALB listener rule. BLOCKING, ARMED, disarm_owner 0.7.0_AE_CloudOps~Z. Committed @1a7963cc83. DISARMED THIS SESSION by both legs of the restore: the code half re-verified on the running path and the edge half applied and measured on the wire. The row's own consequence clause -- that the observation window's clock had not started -- is carried into S12-AC4 as the reason it files UNCOMPUTABLE."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-09/session_0.7.0_AE_CloudOps~Z_1810-1930Z_OPSEC_S12_RESTORE_AND_EDGE.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'log_credential' infra/aws/ec2/opal-gateway --all --limit 40",
+      "result": "THE READ THAT PREVENTED A FALSE FINDING. A scoped check of otp.py and ms_ingest.py at HEAD returned log_credential = 0 and 0, and was one sentence from being filed as 'the observation call sites were lost in a merge'. This unscoped sweep -- denominator 6 hits across 76 files, banded DEF=1 SURFACED=5 -- put all five call sites in server.py:475,517,538,562,626. The zeros were real and the conclusion would have been false: the scoped read was measuring the wrong file. CLAUDE.md Rule 22's 'a check scoped to the members cannot see a defect in what the members share', hit in its mirror form."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'TO-OP-S-12' --all --files --limit 60",
+      "result": "Located the prior session's whole surface from a cold start -- denominator 77 hits across 52,650 files -- surfacing the runbook (docs/runbooks/opal-gateway-machine-key-expiry.md), the closed 2026-09-04 deploy ledger, and the four status messages that carry the 5-caller/3-secret enumeration. Without it this session would have re-derived work that was already done and correct."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'aws_lb_listener_rule' infra/aws/terraform/opal-gateway --all --limit 20 ; comp-find 'otp/fetch' infra/aws/terraform --all --limit 25",
+      "result": "Gave the listener-rule population its denominator -- 6 hits, 5 rules across alb.tf and ms-ingest.tf -- which is how the /ms/token gap was placed in ms-ingest.tf rather than assumed to sit beside /otp in alb.tf. Reading only alb.tf would have produced a rule at the wrong priority in the wrong file."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/ec2/opal-gateway/app/audit.py --for 'where does log_credential write its gw_cred_observe records -- what bucket, key prefix and partitioning'",
+      "result": "Returned the file's shape (6 sections, 153 lines) and 16 QUALIFIERS, which is what identified the lake write as BEST-EFFORT and non-raising ('a lake-write failure never breaks the request path'). That qualifier matters to the retirement gate: it means an absent record is ambiguous between 'no call' and 'a dropped lake write', so the gate's presence condition needs the positive control it was given rather than a bare count."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'CAPABILITY_TOKEN_TTL' infra/aws/ec2/opal-gateway --all --limit 10",
+      "result": "5 hits gave the TTL as 300s from config.py:125 and, at oauth_as.py:244, that issue_capability takes a ttl override -- which is what let S12-AC3 be run as a real elapsed-time expiry through the ALB rather than as an on-box short-TTL fixture, making it strictly stronger than the 2026-09-04 proof."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "2fd3843047",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-12.gateway-machine-keys-expire.md"
+  }
+}

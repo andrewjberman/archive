@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_IAMROLES202609.TO-IAM-s-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "076f37eeb2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP.md",
+    "vintage_commit": "9e72041da5",
+    "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-s-1.permission-grain-usage-instrument.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_IAMROLES202609~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/modules/graph/comp_iam_usage.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "introduces": [
+        "permission-cold",
+        "granted_permissions",
+        "access_advisor_action_level",
+        "permission_ledger",
+        "_render_permissions",
+        "_self_test_permissions"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4",
+        "AC5"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local dev tool, no separate deploy step -- code is committed to the repo and exercised directly from the working tree via .tools/comp-iam-usage. Exercised LIVE against real AWS (role opal-data-refresh-lambda-role, account 313476888478): py_compile clean, self-test 19 of 19 PASS, and permission-cold produced a correct 3-state render with a printed denominator=22 against the live IAM + Access Advisor APIs (see AC1/AC2 rows)."
+    },
+    {
+      "path_or_key": ".tools/comp-iam-usage",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "introduces": [
+        "permission-cold"
+      ],
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Shim forwarder to comp_iam_usage.py; comment banner extended to name the new permission-cold subcommand and its Access-Advisor-not-Access-Analyzer distinction. Exercised live: `.tools/comp-iam-usage permission-cold --role opal-data-refresh-lambda-role --lookback 90` runs end-to-end through this shim (AC2)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a count of 9 or greater -- the pre-existing regression bar is still green; measured 9 at the cut, so a count below 9 means the extension broke working code",
+      "method": "test_suite",
+      "invocation": ".tools/comp-iam-usage self-test | grep -c '\\[PASS\\]'",
+      "output_evidence": "19  (rc=0 from the self-test itself; grep -c counts 19 '[PASS]' lines: the original 9 role-grain assertions -- dormant_role_is_reap, breakglass_never_used_is_stillborn_NOT_reap, new_never_used_is_too_young, blind_is_unknown_NOT_unused, held_excluded, hot_is_hot, limits_a_action_resource_named, limits_b_2arn_poisoning_named, limits_c_condition_named -- all still PASS, plus 10 new permission-grain assertions added by this cell (AC4). 19 >= 9.)",
+      "denominator": "19 of 19 self-test assertion lines printed [PASS] (0 [FAIL]); threshold is >=9",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "output naming the role, printing the lookback as 90 days, rendering each granted permission as used / never-used / unobservable, and printing a DENOMINATOR of granted permissions examined; measured rc=2 (subcommand absent) at the cut, so only a real build satisfies this",
+      "method": "live_read",
+      "invocation": ".tools/comp-iam-usage permission-cold --role opal-data-refresh-lambda-role --lookback 90",
+      "output_evidence": "comp-iam-usage permission-cold -- PERMISSION-grain usage for role 'opal-data-refresh-lambda-role' (ADVISORY; NEVER deletes)\n  lookback 90 days | granted permissions examined (DENOMINATOR)=22\n  counts: used=6 never-used=2 unobservable=14\n    never-used     cloudfront:GetInvalidation\n    unobservable   dynamodb:GetItem                          (service 'dynamodb' has no action-level tracking in Access Advisor)\n    used           cloudfront:CreateInvalidation             last-used=2026-08-01 (39d ago)\nrc=0. Role opal-data-refresh-lambda-role resolved live (arn:aws:iam::313476888478:role/opal-data-refresh-lambda-role); 22 granted permissions is the union of 1 attached-managed + 5 inline policies read live via list_attached_role_policies/get_policy/get_policy_version/list_role_policies/get_role_policy; usage classified via a live IAM Access Advisor ACTION_LEVEL job (generate_service_last_accessed_details / get_service_last_accessed_details) against the SAME role, not a fixture. Run twice back-to-back and diffed byte-identical (controls.determinism).",
+      "denominator": "22 of 22 granted permissions rendered (used=6 + never-used=2 + unobservable=14 = 22); the tool's own printed DENOMINATOR line agrees",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a count of 3 or greater -- all three pre-existing role-grain surfaces survived the extension (C-EXTEND-NOT-BUILD, mechanically); measured 5 at the cut",
+      "method": "command",
+      "invocation": ".tools/comp-iam-usage --help | grep -c -E 'role-cold|who-can-reach|reach-check'",
+      "output_evidence": "5  (unchanged from the pre-extension measurement: 2 lines carry the combined choice-list -- the usage line and the positional-arguments '{...}' line, each naming all three surfaces plus the new permission-cold -- and 3 lines are each surface's own help heading: 'role-cold ...', 'who-can-reach ...', 'reach-check ...'. All three pre-existing subparsers are still registered in argparse and still route in main(); permission-cold was ADDED as a fourth subcommand, none removed or renamed.)",
+      "denominator": "5 matching lines of 20 total --help lines; threshold is >=3",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "a count of 1 or greater -- at least one self-test assertion now exercises the PERMISSION grain; measured 0 at the cut, so this criterion is NOT satisfiable by the current tool and only a real extension moves it",
+      "method": "test_suite",
+      "invocation": ".tools/comp-iam-usage self-test | grep -c -i 'permission'",
+      "output_evidence": "12  (10 new [PASS] lines named permission_denominator_matches_granted_count, permission_malformed_token_is_unobservable, permission_unobservable_when_service_lacks_action_tracking, permission_wildcard_is_unobservable_not_dropped, permission_used_within_lookback, permission_untracked_action_is_unobservable_not_never_used, permission_tracked_never_accessed_is_never_used, permission_stale_beyond_lookback_is_never_used_not_used, permission_blind_advisor_job_is_unobservable_not_unused, permission_access_analyzer_distinction_named -- plus the 'PERMISSION-GRAIN NOTES' banner heading and the final OK-summary line, both also case-insensitively matching 'permission'.) A MUTANT control fired on this exact bar: reverting the unobservable-on-no-tracking branch to 'never-used' flips permission_unobservable_when_service_lacks_action_tracking to [FAIL] and rc to 1 (see controls.mutant) -- the bar is a real regression gate, not a tautology.",
+      "denominator": "12 of 48 total self-test output lines case-insensitively match 'permission'; threshold is >=1",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "Pick any role. A reviewer can see which of the things it is allowed to do it has never actually done, and over what period that was judged.",
+      "method": "manual_read_with_citation",
+      "invocation": ".tools/comp-iam-usage permission-cold --role opal-data-refresh-lambda-role --lookback 90 (the same live read AC2 exercises -- no separate mechanical invocation was named by the TO for this judgment row)",
+      "output_evidence": "See AC2's output_evidence verbatim. A reviewer handed that output sees, unaided: the ROLE named on line 1 ('opal-data-refresh-lambda-role'); the PERIOD judged on line 2 ('lookback 90 days'), stated in the same units FWD-2 asks for; a DENOMINATOR on the same line (22 granted permissions examined); and, per permission, one of the three states the cell requires -- e.g. cloudfront:GetInvalidation rendered never-used (granted, never called), dynamodb:GetItem rendered unobservable (granted, but this account's Access Advisor does not track dynamodb at action grain -- named as a reason on the row, not hidden), and cloudfront:CreateInvalidation rendered used with a last-used date and age. Nothing renders unobservable as clean or vice versa (FWD-7, carried). Whether this rendering is what a reader who did not build it would call an answer to FWD-2's ACCEPT sentence is a JUDGMENT this builder does not grade.",
+      "denominator": "N/A -- judgment criterion, no mechanical count",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true per the TO; graded at L9 by 3.0.0_SA_CVO~Z, never self-graded by the builder or the COO",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC4's own regression bar was tested against a world where it could only FAIL: a scratch copy of comp_iam_usage.py (.scratch/mutant_comp_iam_usage.py, never committed) had the FWD-7 discipline REVERSED on the one branch most likely to regress silently -- permission_ledger's 'service has no action-level tracking -> unobservable' branch was changed to render 'never-used' instead (the exact class C-EXTEND-NOT-BUILD warns against: an extension quietly re-introducing a fixed limit). Same fixture, same self-test.",
+      "expected": "permission_unobservable_when_service_lacks_action_tracking flips to [FAIL] and only that assertion; overall self-test rc becomes 1 ('ERROR: comp-iam-usage self-test FAILED')",
+      "observed": "python .scratch/mutant_comp_iam_usage.py self-test -> rc=1; exactly one line reads '[FAIL] permission_unobservable_when_service_lacks_action_tracking', all other 18 lines unchanged at [PASS]. The correct (unmutated) file re-run immediately after: rc=0, 19 of 19 [PASS], byte-identical to the pre-mutant run.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs compared, both re-runnable: (1) `.tools/comp-iam-usage self-test` (fully offline) run twice back-to-back, stdout diffed. (2) `.tools/comp-iam-usage permission-cold --role opal-data-refresh-lambda-role --lookback 90` (live AWS reads: list_attached_role_policies, get_policy, get_policy_version, list_role_policies, get_role_policy, generate_service_last_accessed_details, get_service_last_accessed_details) run twice within about a minute of each other against the same live role, stdout diffed.",
+      "observed": "Both pairs byte-identical (`diff` exit 0, no output) -- the offline self-test by construction, and the live permission-cold read because no new API activity landed on this role in the window between the two runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Wildcard action expansion (e.g. 's3:*') into the concrete actions it covers",
+      "reason": "Out of scope for AC1-AC5: a wildcard token in the granted set is carried VERBATIM and rendered unobservable, never silently dropped or falsely resolved against a specific tracked action. Expanding a wildcard into the full concrete action list a service exposes is a future refinement the cell does not require -- opal-data-refresh-lambda-role (AC2's test role) happens to carry no wildcard actions, so this path is exercised only by the offline self-test's 's3:*' fixture row, not by a live read."
+    },
+    {
+      "item": "AWS Access Analyzer (the access-analyzer:* unused-access finding type)",
+      "reason": "C-ANALYZER-PRICED-FIRST bars it -- no per-role price has been read by anyone, and availability is not authorization. permission-cold uses IAM Access Advisor instead (free, core-IAM, iam:GenerateServiceLastAccessedDetails / iam:GetServiceLastAccessedDetails), the SAME API family role-cold already used for RoleLastUsedDate. Access Analyzer is never called anywhere in this extension."
+    },
+    {
+      "item": "(role, action, RESOURCE)-grain permission usage -- e.g. does this role use s3:GetObject on THIS bucket specifically vs any other",
+      "reason": "IAM Access Advisor's ACTION_LEVEL granularity is (principal, action)-only, not resource-precise. comp-iam-usage's pre-existing reach-check already answers the resource-precise question for one NAMED (role, action, resource) triple via simulate-principal-policy; permission-cold answers the coarser question FWD-2 actually asks -- 'which of its granted permissions has this role never used' -- at the action grain, not the resource grain."
+    }
+  ],
+  "surprises": [],
+  "session_log": "2026-09-10, worktree C:/tmp/wk-iamroles-1, branch wk-NFRA_IAMROLES202609-1, based on SITEZ. PUSH STATE: LOCAL (no push attempted; this seat never pushes). Order of acts: (1) grounded the worktree premise (branch name, org/ + .tools/ present). (2) read the TO, decomp cell text, and the existing comp_iam_usage.py + .tools/comp-iam-usage in full; confirmed the pre-extension baseline live: self-test rc=0 9 of 9 PASS, --help count 5, permission-cold absent (rc=2), self-test 'permission' count 0 -- all four match the TO's stated cut measurements exactly. (3) confirmed live AWS access works (role-cold --limit 3 against real roles) and that the AC2 test role opal-data-refresh-lambda-role exists live with 1 attached-managed + 5 inline policies, 22 granted actions across 6 services. (4) probed IAM Access Advisor's generate_service_last_accessed_details/get_service_last_accessed_details with Granularity=ACTION_LEVEL against that exact role BEFORE writing any code, to ground the unobservable-vs-never-used design in an OBSERVED response shape rather than an assumed one -- found action-level tracking present for cloudfront/logs/states and ABSENT for s3/dynamodb/lambda in this account, which is exactly the FWD-7 unobservable case the TO's bounds require. (5) extended comp_iam_usage.py: _actions_from_doc, granted_permissions, access_advisor_action_level, permission_ledger, _render_permissions, a new _self_test_permissions block (10 offline assertions, no AWS), and the permission-cold CLI subcommand in main() (--role, --lookback, --json); extended the .tools/comp-iam-usage shim's comment banner to name the new surface and the Access-Advisor-not-Access-Analyzer distinction. (6) py_compile clean; commit-gate.sh clean on both files (ruff + ds-precommit + manifest-check; STANDING DRIFT noted for comp-iam-usage(+1), reported not blocking). (7) ran all four mechanical criteria against the corrected code and the real role -- AC1=19, AC2 full 3-state render with denominator=22, AC3=5, AC4=12, matching this instance's rows. (8) built the mutant control in a SCRATCH COPY only (.scratch/mutant_comp_iam_usage.py, never committed, never touches org/modules/graph/comp_iam_usage.py): reversed the unobservable-on-no-tracking branch, confirmed self-test rc flips to 1 with exactly one assertion FAILing, then confirmed the real file is unaffected and still 19 of 19 PASS. (9) ran both determinism pairs (self-test x2, live permission-cold x2), diffed byte-identical. (10) wrote this instance and flipped the TO's <status> to complete, staging both code files, the TO, and this instance in ONE commit via safe-commit.sh so PENDING-THIS-COMMIT resolves CO-COMMITTED. WHAT I DID NOT DO: touch any path outside org/modules/graph/comp_iam_usage.py, .tools/comp-iam-usage, this deliverables folder, and the TO file; call AWS Access Analyzer; expand a wildcard action; build or edit any monitor, alarm or notification; delete anything; file a surprise row (nothing surfaced outside the TO's mandate on this cell -- the unobservable-heavy result for opal-data-refresh-lambda-role is exactly the band the TO's bounds anticipated, not an off-task finding).",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile org/modules/graph/comp_iam_usage.py",
+      "result": "COMPILE-OK, no output, rc=0"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh org/modules/graph/comp_iam_usage.py .tools/comp-iam-usage",
+      "result": "OK: pre-commit gate clean for 1 of 1 file(s) on each invocation (py_compile + ds-precommit-check + ruff + comp-manifest-check); manifest-check reports STANDING DRIFT comp-iam-usage(+1) for the new subcommand registration, explicitly 'reported, not blocking'"
+    },
+    {
+      "tool": "boto3 IAM Access Advisor probe (ad-hoc, pre-build, read-only)",
+      "invocation": "python generate_service_last_accessed_details(Arn=role_arn, Granularity='ACTION_LEVEL') then get_service_last_accessed_details(JobId=job_id) against arn:aws:iam::313476888478:role/opal-data-refresh-lambda-role",
+      "result": "JobStatus COMPLETED; TrackedActionsLastAccessed present for cloudfront/logs/states, ABSENT for s3/dynamodb/lambda -- this observed shape is what permission_ledger's unobservable branch is built against, not an assumption"
+    }
+  ]
+}

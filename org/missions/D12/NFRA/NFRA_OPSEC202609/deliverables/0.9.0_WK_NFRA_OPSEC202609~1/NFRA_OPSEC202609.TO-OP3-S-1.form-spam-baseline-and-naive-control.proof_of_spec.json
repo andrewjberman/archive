@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP3-S-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP_round3.md",
+    "vintage_commit": "598bca6e96",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP3-S-1.form-spam-baseline-and-naive-control.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/prd/NFRA_OPSEC202609_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5f4d4b894f"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPSEC202609~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/deliverables/0.9.0_WK_NFRA_OPSEC202609~1/OP3-s-1.baseline.json",
+      "kind": "config_data",
+      "commit_or_etag": "6c4b8b899497b6f6bc096cbeb2342acb55b52559",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A census artifact, not a deployed surface. Committed BEFORE any control was armed (C-18's whole mechanism): add-timestamp 2026-09-10T07:21:40-04:00 (2026-09-10T11:21:40Z), strictly before the control's real arming instant 2026-09-10T11:36:22Z -- see S1-AC2. Content verified: `python -c \"import json;d=json.load(open(...));print(sorted(d.keys()))\"` prints a list containing window, denominator, discriminator, each non-empty (S1-AC1)."
+    },
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/deliverables/0.9.0_WK_NFRA_OPSEC202609~1/OP3-s-1.after.json",
+      "kind": "config_data",
+      "commit_or_etag": "f5fe1d34b84c7bf3ced0c8ec34f67f40a86f5f63",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The after-census, taken after the control was armed and soaked (~32 minutes real wall-clock, two confirmed `date -u` reads bracketing two chained sleeps). Uses the byte-identical denominator and discriminator method text as the baseline -- `python -c \"...print(a['denominator']==b['denominator'], a['discriminator']==b['discriminator'])\"` prints `True True` (S1-AC6). THIS ROW ALSO CARRIES THE LIVE CONTROL'S DEPLOY EVIDENCE, since the control itself (a Gravity Forms plugin setting on i-0152e3fe2599fa630, /usr/local/lsws/wordpress) is not a repo artifact the checker can resolve at a pin, and its arming instant is what this file's own `arming_timestamp` field records: 2026-09-10T11:36:22Z, `enableHoneypot=true`, applied and read back over AWS SSM (`wp eval` GFAPI::get_form/update_form). SEQUENCE, CORRECTED IN-SESSION (row NFRA_OPSEC202609-Z-W1-S2): a first write set the WRONG key ($form['honeypot']=true, at ~11:23:22Z) -- GFAPI::update_form returned true but the plugin's own is_honeypot_enabled() reads a different key ('enableHoneypot') and never saw this write; caught by comparing live rendered HTML before/after (byte-identical, no honeypot field rendered) and reading the plugin source. CORRECTED at 2026-09-10T11:36:22Z: $form['enableHoneypot']=true, GFAPI::update_form returned true, and `wp eval` re-read confirms enableHoneypot=true live. honeypotAction was left UNSET (Gravity Forms core default 'spam'): on failure the submission is not aborted early, the entry is created with status=spam (GFCommon::set_spam_filter), no notification email fires, and the entry is excluded from the default/active Entries view -- the LEAST-refusing mode this platform offers, chosen deliberately over a hard early-abort mode to honor C-17's 'never silently and unrecoverably eat a real enquiry'. A related LiteSpeed full-page-cache trap (row NFRA_OPSEC202609-Z-W1-S3, max-age 604800s) meant the DB-level arm alone did not change what a cached visitor received until `wp litespeed-purge all` was run -- run explicitly after each of the two arming writes, confirmed via x-litespeed-cache: hit-then-miss on immediate re-fetch. LIVE READ-BACK PASTED VERBATIM in S1-AC3's acceptance row below."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S1-AC1",
+      "criterion_verbatim": "S1-AC1 -- THE BASELINE EXISTS AND NAMES ITS THREE FIELDS. the printed list contains `window`, `denominator` and `discriminator`, each with a non-empty value.",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D12/NFRA/NFRA_OPSEC202609/deliverables/0.9.0_WK_NFRA_OPSEC202609~1/OP3-s-1.baseline.json'));print(sorted(d.keys()))\"",
+      "output_evidence": "['box', 'captured_at', 'captured_by', 'denominator', 'discriminator', 'measured', 'phase', 'site_anti_automation_posture_at_capture', 'window'] -- window, denominator and discriminator all present; each is a non-empty string (window: 175 chars naming the exact ISO window; denominator: ~750 chars naming the two-surface counting method; discriminator: ~1400 chars naming the UA-pattern method and its cross-check).",
+      "denominator": "3 of 3 required keys present (window, denominator, discriminator), all non-empty; run twice for determinism, byte-identical both times.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S1-AC2",
+      "criterion_verbatim": "S1-AC2 -- THE BASELINE PREDATES THE CONTROL. the baseline's add-timestamp is strictly EARLIER than the arming timestamp.",
+      "method": "diff",
+      "invocation": "git log --diff-filter=A --format=%aI -- org/missions/D12/NFRA/NFRA_OPSEC202609/deliverables/0.9.0_WK_NFRA_OPSEC202609~1/OP3-s-1.baseline.json ; compared against the control's real arming timestamp as recorded in this instance's artifacts_produced row above",
+      "output_evidence": "git log output: 2026-09-10T07:21:40-04:00 (= 2026-09-10T11:21:40Z). Control's arming timestamp (the CORRECTED enableHoneypot=true write, confirmed live): 2026-09-10T11:36:22Z. 11:21:40Z < 11:36:22Z -- baseline predates arming by 14m42s. (The earlier WRONG-KEY write at ~11:23:22Z, which armed nothing, would ALSO postdate the baseline by 1m42s -- the baseline predates both the no-op and the real arm.) MUTANT CONTROL run to prove this check can fail: substituting a synthetic arming timestamp of 2026-09-10T06:00:00-04:00 (before the baseline) into the identical comparison flips the result to False -- see `controls.mutant` below.",
+      "denominator": "1 comparison (baseline add-timestamp vs. control arming timestamp), N/A beyond that -- boolean check.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S1-AC3",
+      "criterion_verbatim": "S1-AC3 -- THE CONTROL IS IN COUNT, NOT BLOCK OR CHALLENGE. its action/mode reads COUNT (or the platform's equivalent non-refusing mode), and no rule reads BLOCK or CHALLENGE.",
+      "method": "live_read",
+      "invocation": "wp eval '$f=GFAPI::get_form(1); echo var_export($f[\"enableHoneypot\"]??\"unset\",true); echo var_export($f[\"honeypotAction\"]??\"unset(defaults-to-spam)\",true);' --path=/usr/local/lsws/wordpress --allow-root, over SSM; plus aws wafv2 / aws cloudfront reasoning for the edge half",
+      "output_evidence": "enableHoneypot = true (bool). honeypotAction = 'unset(defaults-to-spam)' -- left at Gravity Forms core's own default. Read at the source (includes/honeypot/class-gf-honeypot-handler.php, handle_abort_submission()): when honeypotAction=='spam' (the default, i.e. NOT explicitly set to anything else), the submission is explicitly NOT aborted early ('Do not abort submission if honeypot action is set to create an entry ... return false'); on failure GFCommon::set_spam_filter marks the entry status=spam via the gform_entry_is_spam filter -- the entry is created, flagged, unnotified, and excluded from the default Entries view, but never destroyed. THIS IS THE LEAST-REFUSING MODE THE PLATFORM OFFERS FOR THIS CONTROL: Gravity Forms core has no separate 'log-only / count' mode distinct from this -- the only alternative (honeypotAction set to any other value) aborts the submission with NO entry created at all, which is strictly MORE refusing. NO RULE OF ANY KIND READS BLOCK OR CHALLENGE: this origin carries zero WAF ACLs, zero CloudFront distributions, and zero edge rules of any description (C-19 forecloses the edge entirely for this project -- 'THE EDGE HALF IS UNBUILDABLE, NOT DEFERRED'; TO-OP-S-13's CloudFront distribution fronts the PORTAL, not this site, confirmed by PRD row Z-S101). The only automation control on this origin, at all, is this one Gravity Forms setting.",
+      "denominator": "1 form-level setting read (form_id=1); 0 WAF/edge rules of any kind exist on this origin (the whole rule population, not a sample).",
+      "status": "PASS",
+      "status_reason": "The criterion's own parenthetical -- '(or the platform's equivalent non-refusing mode)' -- is read as anticipating exactly this: a platform (WordPress/Gravity Forms) with no native WAF-style COUNT action. The mode actually applied (honeypotAction default 'spam': flag-and-preserve, never destroy, never notify) is the platform's least-refusing equivalent, chosen deliberately over the more-refusing early-abort alternative specifically to honor C-17's ban on unrecoverably eating a real enquiry. Recorded as PASS on that reading; the CVO may re-grade at L9 if a stricter reading of 'COUNT' is intended."
+    },
+    {
+      "criterion_id": "S1-AC4",
+      "criterion_verbatim": "S1-AC4 -- A SCRIPTED SUBMISSION IS REFUSED OR CHALLENGED WITH NO HUMAN ACTING. the response shows refusal or challenge, and the entry does NOT appear in the entry store.",
+      "method": "live_read",
+      "invocation": "A python/requests script (.scratch/scripted_bot_probe.py, not committed -- scratch only) GETs https://opalinvest.com/contact/ with a clearly-marked non-browser User-Agent, replays every DOM-visible hidden field EXCEPT input_8 (the honeypot, unknown to a bot written before this control existed) and WITHOUT version_hash (JS-injected only, never present in raw DOM -- the exact naive-replay shape PRD ADDENDUM_01 s.1.4 describes as the attack), then POSTs to https://opalinvest.com/contact/. Cross-checked against wp_gf_entry / wp_gf_entry_notes over SSM.",
+      "output_evidence": "REQUEST: POST https://opalinvest.com/contact/, UA='OpalOpsecS1AC4-ScriptedProbe/1.0 (+NFRA_OPSEC202609; marker=s1ac4-opsec-scriptedprobe-20260910)', fields input_1..input_7 + is_submit_1/gform_submission_method/gform_unique_id/state_1/gform_target_page_number_1/gform_source_page_number_1/gform_field_values/gform_theme/gform_style_settings/gform_currency/gform_submit -- no input_8, no version_hash. RESPONSE: HTTP 200, x-litespeed-cache: None (dynamic, uncached), body contains gform_confirmation_message_1 = 'Thanks for contacting us! We will get in touch with you shortly.' -- THE IDENTICAL TEXT a normal successful submission shows (confirmed byte-identical to the S1-AC5 real-visitor probe's confirmation text). NO VISIBLE REFUSAL OR CHALLENGE REACHES THE SUBMITTER. STORE-SIDE OUTCOME (SSM, wp db query): entry id=22 created, status='spam', ip=108.242.96.89, user_agent=the marked scripted UA. wp_gf_entry_notes for entry 22: 'This entry has been flagged as spam. Reason: The version_hash was not included in the submission.' Zero notification-type notes exist for entry 22 (contrast: every other entry in the store carries 2 notification rows). The row IS present in the wp_gf_entry TABLE (a SELECT with no status filter returns it); it is EXCLUDED from the default/active Entries view Gravity Forms' admin UI shows and from this TO's own baseline/after denominator definition (both count status='active' rows as 'the entry store').",
+      "denominator": "1 scripted probe sent, 1 outcome observed both in the HTTP response and in the entry store (2 independent reads: response body, wp_gf_entry+wp_gf_entry_notes).",
+      "status": "FAIL",
+      "status_reason": "COMPOUND CRITERION, GRADED ON THE LITERAL TEXT RATHER THAN THE FAVOURABLE HALF. Half 2 (entry does not appear in the [active] entry store) holds under this TO's own denominator definition (status='active' only). Half 1 (the RESPONSE shows refusal or challenge) DOES NOT HOLD: the HTTP response the scripted submitter receives is the ordinary success confirmation, byte-identical to a genuine successful submission -- Gravity Forms' honeypot, at its default (and, per C-17, the safer) action, refuses SILENTLY: the refusal is real and machine-readable (a stored, reasoned spam flag; zero notification), but it is not VISIBLE to the submitter as the criterion's plain text asks for. Reporting this as PASS would suppress the half that does not favour a clean result; reporting FAIL with the full facts lets the CVO weigh whether a silent-but-verifiable refusal satisfies FWD-19's intent (it plainly satisfies the OUTCOME -- no lead reaches a human, nobody is notified -- even though it does not satisfy this criterion's literal wording). No configuration change was made to force a visible refusal, because the only available alternative (honeypotAction != 'spam') aborts with NO entry retained at all, which trades a literal-AC4 pass for a C-17 violation risk -- judged the wrong trade and not taken."
+    },
+    {
+      "criterion_id": "S1-AC5",
+      "criterion_verbatim": "S1-AC5 -- A REAL SUBMISSION IN A BROWSER SUCCEEDS UNCHANGED IN THE SAME WINDOW. the entry is present and its fields are unaltered.",
+      "method": "live_read",
+      "invocation": "A python/requests script (.scratch/real_visitor_probe.py, not committed -- scratch only) reproduces exactly what a real browser's form serialization sends: GETs the live page with a genuine desktop Chrome UA, extracts version_hash from the page's own gform_theme_config JS blob (a value only a rendering/reading client would have; no JS execution required since GF embeds it as a literal), leaves input_8 (honeypot) present but untouched/empty exactly as a human would, and POSTs realistic advisor-inquiry content. This seat has no GUI browser tool in this environment -- named as the limitation this probe stands in for; the server-side effect (the only thing GF's own validation can see) is identical to a genuine browser's.",
+      "output_evidence": "REQUEST: POST https://opalinvest.com/contact/, UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) ... Chrome/128.0.0.0 ...', input_1='Jonathan Whitfield', input_3='Whitfield Family Office', input_4='jwhitfield@example-advisor.invalid', input_5='(561) 555-0199' (server-normalized from 5615550199), input_6='$250M', input_7 carrying the S1-AC5 marker text, input_8='' (honeypot present, empty), version_hash='3306833645cc55ebae51b15fd27abcd8' (extracted live from the page). RESPONSE: HTTP 200, confirmation 'Thanks for contacting us! We will get in touch with you shortly.'. STORE-SIDE (SSM, wp db query): entry id=23, status='active', date_created 2026-09-10 11:44:51, ip=108.242.96.89. ALL SEVEN FIELD VALUES READ BACK FROM wp_gf_entry_meta MATCH WHAT WAS SUBMITTED EXACTLY, unaltered: 1='Jonathan Whitfield', 3='Whitfield Family Office', 4='jwhitfield@example-advisor.invalid', 5='(561) 555-0199', 6='$250M', 7=the full marker message verbatim. wp_gf_entry_notes for entry 23: TWO 'notification' rows reading 'WordPress successfully passed the notification email to the sending server.' -- the normal admin-notification path fired exactly as it does for every other legitimate entry in the store (entries 17-21 each carry the identical two-row pattern).",
+      "denominator": "1 real-visitor-equivalent submission sent, 7 of 7 submitted field values read back identically, 1 of 1 expected status (active), 2 of 2 expected notification rows present.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S1-AC6",
+      "criterion_verbatim": "S1-AC6 -- THE AFTER-READ USES THE SAME WINDOW LENGTH, DENOMINATOR AND DISCRIMINATOR AS THE BASELINE. both comparisons print `True`.",
+      "method": "command",
+      "invocation": "python -c \"import json;a=json.load(open('org/missions/D12/NFRA/NFRA_OPSEC202609/deliverables/0.9.0_WK_NFRA_OPSEC202609~1/OP3-s-1.baseline.json'));b=json.load(open('org/missions/D12/NFRA/NFRA_OPSEC202609/deliverables/0.9.0_WK_NFRA_OPSEC202609~1/OP3-s-1.after.json'));print(a['denominator']==b['denominator'], a['discriminator']==b['discriminator'])\"",
+      "output_evidence": "True True -- run twice (determinism), byte-identical both times.",
+      "denominator": "2 of 2 field comparisons True (denominator, discriminator). NOTE ON THE WORD 'LENGTH' IN THE CRITERION'S OWN TITLE: this mechanical check compares the denominator/discriminator METHOD TEXT (which is window-length-independent by design -- both carry a per-day rate normalization precisely so unequal windows stay comparable), not the calendar window itself. The two windows' actual LENGTHS differ sharply (36.82 days baseline vs ~0.022 days/32 minutes after) -- disclosed in full, un-smoothed, in OP3-s-1.after.json's own `window` field and in row NFRA_OPSEC202609-Z-W1-S5, and carried into S1-AC7's judgment rather than hidden here.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S1-AC7",
+      "criterion_verbatim": "S1-AC7 -- JUDGMENT, GRADED BY 3.0.0_SA_CVO~Z AT L9, NOT SELF-GRADED. Whether the observed before/after change constitutes the NAIVE MAJORITY of automated fillouts no longer arriving, with real enquiries still arriving. Record the two numbers and the delta and offer NO verdict.",
+      "method": "live_read",
+      "invocation": "Comparison of OP3-s-1.baseline.json's measured.access_log.post_contact_automated_rate_per_day against OP3-s-1.after.json's measured.access_log.post_contact_organic_automated_rate_per_day, plus the two direct mechanism probes (S1-AC4, S1-AC5).",
+      "output_evidence": "THE TWO NUMBERS: baseline automated rate = 0.217 automated /contact/ POSTs per day (8 of 53 total over 36.82 days). After-window organic automated rate = 0.0 (0 of 0 organic POSTs over ~0.022 days / 32 minutes -- ALL traffic in the after-window was this seat's own two labeled test probes, explicitly excluded from the organic count). THE DELTA: 0.217 -> 0.0 per day, a 100% reduction ON THE OBSERVED (organic) COUNT, but the after-window is ~1,660x shorter than the baseline window and the baseline rate itself predicts an expected value of ~0.0048 automated submissions in a window this short -- an observed zero is statistically indistinguishable from 'no signal yet' at this length, not distinguishable evidence the rate actually fell. SEPARATELY, THE TWO DIRECT MECHANISM CHECKS (not rate-based, and not subject to the window-length problem): the labeled scripted no-human submission (S1-AC4) was flagged spam, unnotified, excluded from the active store, with a stored machine reason -- though the HTTP response itself showed no visible refusal (see S1-AC4's FAIL on that literal half). The labeled real-visitor-equivalent submission (S1-AC5) succeeded unchanged, notified normally, all fields intact. ALSO RECORDED FOR CONTEXT (row NFRA_OPSEC202609-Z-W1-S5): the baseline's own magnitude is modest against Andrew's 'a lot' framing -- 8 of 53 POSTs (15.1%) over 36.82 days, roughly one templated-UA submission every 4.6 days. No verdict is offered on whether this is the naive majority stopping, whether zero-in-32-minutes is meaningful, or whether Andrew's 'a lot' is satisfied by this magnitude -- all three are S1-AC7's judgment, reserved for 3.0.0_SA_CVO~Z at L9.",
+      "denominator": "N/A -- judgment criterion; the two rate numbers and their denominators (8/53/36.82d before, 0/0/~0.022d after) are the full output. Mechanism checks: 2 of 2 probes produced their expected mechanism outcome (S1-AC4 store-side refusal-shaped despite the response-text FAIL; S1-AC5 clean pass).",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true per the task order; the checker refuses a self-graded PASS/FAIL on this row by design. The substitute oracle is 3.0.0_SA_CVO~Z at L9, per spine v3.0 L9/annex 4a -- the grade will land as a `grades` entry on a future adjudication row citing this instance@this-commit.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The criterion that must be able to FAIL is S1-AC2 (named explicitly in this TO's <proof_of_spec> section): if the baseline did not predate the control's arming, FWD-19 becomes ungradeable and the round is wasted. The mutant substitutes a synthetic arming timestamp EARLIER than the real baseline add-timestamp into the identical comparison S1-AC2 runs.",
+      "expected": "The SAME comparison (baseline_add_timestamp < arming_timestamp) must flip from True to False when fed a synthetic arming timestamp that precedes the baseline -- proving the check discriminates rather than always reading True by construction.",
+      "observed": "Real check: baseline 2026-09-10T11:21:40Z < real arming 2026-09-10T11:36:22Z -> True (S1-AC2 PASS). Mutant check: baseline 2026-09-10T11:21:40Z < synthetic arming 2026-09-10T10:00:00Z -> False. The identical python comparison correctly flips.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "S1-AC1's invocation and S1-AC6's invocation were each run twice against the same committed artifacts, outputs compared byte-for-byte.",
+      "observed": "S1-AC1: ['box', 'captured_at', 'captured_by', 'denominator', 'discriminator', 'measured', 'phase', 'site_anti_automation_posture_at_capture', 'window'] on both runs, identical. S1-AC6: 'True True' on both runs, identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any AWS WAF Bot Control managed rule group, CAPTCHA/Challenge action, or rate-based rule on a CloudFront/ALB edge in front of this origin.",
+      "reason": "C-19: unbuildable, not deferred. This origin has no edge at all; both candidate edges (CloudFront, ALB) require a GoDaddy DNS record change, which C-19 forecloses entirely. TO-OP-S-13's CloudFront distribution fronts the PORTAL, not this site (PRD row Z-S101)."
+    },
+    {
+      "item": "Changing Gravity Forms' honeypotAction away from its default 'spam' value to a harder early-abort mode.",
+      "reason": "C-17 explicitly bars any control that risks silently and unrecoverably eating a real advisor enquiry. The default preserves a flagged submission (status=spam, recoverable) rather than discarding it outright; the harder mode would create NO entry at all on a false positive. Chosen deliberately, even though it costs a literal PASS on S1-AC4's 'visible refusal' half -- see that row's status_reason."
+    },
+    {
+      "item": "Enabling Gravity Forms' submission-speed check (enableSubmitSpeedCheck).",
+      "reason": "Not named by PRD ADDENDUM_01's 'single setting' recommendation. The honeypot's own bundled checks (empty-field test, URL detection, state validation, version_hash presence) already demonstrated a full refusal path against a naive scripted probe without it -- adding a second control was judged gold-plating against Andrew's 'narrow is fine'."
+    },
+    {
+      "item": "robots.txt directives for scrapers/AI crawlers.",
+      "reason": "Named in PRD ADDENDUM_01 s.4 item 5 as part of FWD-19's WIDER shape, but not part of this cell's (OP3-s-1) deliverable list, which names only the baseline census, the on-box control, the after-read, the real-visitor check, and this proof instance."
+    },
+    {
+      "item": "A multi-day soak window matching the baseline's 36.82-day span.",
+      "reason": "Not achievable inside one bounded agent session. The after-window actually achieved (~32 minutes, two confirmed real wall-clock sleeps) is disclosed in full in OP3-s-1.after.json and in S1-AC7's output above as UNDERPOWERED BY WINDOW LENGTH -- reported plainly rather than presented as a settled volume verdict."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-W1-S1: the TO's grounding named SSM document 'opal-website-edge-protection' does not exist -- it is TO-OP-S-13's WAF Web ACL name, not an SSM document. SSM reachability to i-0152e3fe2599fa630 and the origin access-log path are BOTH independently confirmed live, so this is a correction to the TO's cited artifact, not a BLOCKING stop.",
+    "NFRA_OPSEC202609-Z-W1-S2: this seat's own first arming write set the wrong Gravity Forms dict key ('honeypot' instead of 'enableHoneypot'); GFAPI::update_form returned true with zero functional effect -- a DESIRED-vs-APPLIED gap invisible to the write call's own success signal, caught only by comparing live rendered HTML and reading the plugin source. Corrected before any probe or after-read.",
+    "NFRA_OPSEC202609-Z-W1-S3: LiteSpeed's full-page cache (max-age 604800s) served pre-arm markup after a CORRECT database-level arm until explicitly purged -- required twice in this session, once per arming write. This deliverable's own after-window was purged explicitly before every test; the hazard is for any future change to this form made without an equally explicit purge.",
+    "NFRA_OPSEC202609-Z-W1-S4: the honeypot's version_hash check is a static per-plugin-version constant, readable from the page's raw JS config with one regex and no JS engine -- used deliberately in this seat's S1-AC5 probe. Informational only; FWD-19's own ACCEPT line states a sophisticated bypass is not a failure of this outcome.",
+    "NFRA_OPSEC202609-Z-W1-S5: measured automated volume (8 of 53 POSTs, 36.82-day window, ~0.22/day, roughly one every 4.6 days) is modest against Andrew's 'a lot' framing. Recorded for S1-AC7's judgment; no verdict offered by this seat."
+  ],
+  "session_log": "2026-09-10, worktree C:/tmp/wk-opsec3-1, branch wk-NFRA_OPSEC202609-3-1, based on SITEZ. PUSH STATE: LOCAL (no push attempted; this seat never pushes). Order of acts, matching the TO's own compiler_tools_mandate: (1) confirmed the worktree (git rev-parse branch, test -d org/.tools) and re-grounded phase-1 premises -- AWS sts get-caller-identity live, SSM describe-instance-information PingStatus Online for i-0152e3fe2599fa630, the origin access-log path confirmed reachable over SSM, and the grounding's named SSM document found NOT to exist (filed as row Z-W1-S1). Also grounded the Gravity Forms entry store (wp-cli 2.12.0 over SSM), the WordPress root (/usr/local/lsws/wordpress), and the honeypot's OFF-by-default state, all matching PRD ADDENDUM_01's reading. (2) THE BASELINE CENSUS, first act, nothing armed: censused BOTH surfaces C-18 names (origin access log across all 16 retained rotated files, 616,500 lines scanned, 53 POST /contact/ in the 36.82-day window the log's own retention allows; the Gravity Forms entry store via wp db query, 18 in-window / 21 all-time entries) with a discriminator built from a MEASURED artifact (a literal escaped-quote-wrapped User-Agent that a form-spam tool's templated string produced, cross-checked 8-for-8 between the two surfaces) rather than an assumed heuristic; confirmed the status-code trap the TO warns about (WordPress login 200/302 asymmetry) does NOT apply to this iframe-submitted form (all 53 in-window POSTs read 200). Committed the baseline artifact (6c4b8b8994) BEFORE any write to the form. (3) Armed the control: Gravity Forms' own honeypot, the on-box control PRD ADDENDUM_01 names as inside C-19's reach. First attempt set the wrong key and silently no-opped (row Z-W1-S2); caught, corrected, and the LiteSpeed page cache purged (row Z-W1-S3) so the fix actually reached what a visitor's browser receives, confirmed live (input_8 rendered, version_hash present). Real arming instant: 2026-09-10T11:36:22Z. (4) Ran the two direct mechanism probes inside the after-window: a labeled scripted no-human-acting submission (S1-AC4) and a labeled real-visitor-equivalent submission (S1-AC5), both read back against wp_gf_entry / wp_gf_entry_meta / wp_gf_entry_notes. (5) Held a genuine soak (two real wall-clock sleeps bracketed by `date -u` reads, ~32 minutes total from arming to the after-capture) before taking the after-read, using the identical denominator/discriminator method text as the baseline (verified True/True) and explicitly excluding this seat's own two test probes from the organic counts. Committed the after artifact (f5fe1d34b8). (6) Filed five surprise rows (Z-W1-S1..S5), including a self-inflicted CRLF line-ending corruption from a python text-mode write on the shared investigation file (caught immediately via `file` + a CRLF byte count, fixed in a follow-up commit fc07462c34 that reverted every line to LF-only with no content change). (7) Wrote this proof instance, self-grading each mechanical criterion against the exact TO text rather than the favourable reading -- S1-AC4 is graded FAIL on its literal 'response shows refusal' half even though the store-side outcome is refusal-shaped, because the HTTP response shown to a scripted submitter is byte-identical to a genuine success and reporting otherwise would suppress the half that does not favour a clean result. WHAT THIS SEAT DID NOT DO: touch any path outside this TO's <paths> block and this deliverables folder; build any WAF/edge control, alarm, monitor, or notification; call any external vendor API; change honeypotAction off its safer default; push, merge, rebase, or touch another branch.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/aws (SSM shim)",
+      "invocation": "aws ssm describe-instance-information / list-documents / send-command / get-command-invocation against i-0152e3fe2599fa630, run via the explicit .tools/ path per the TO's own bare-name warning",
+      "result": "SSM confirmed reachable (PingStatus Online); every phase-1/2/3 read and write against the box (log census, wp-cli reads, GFAPI writes, cache purges) ran through this channel; 0 bare-name comp-tool or aws invocations used."
+    },
+    {
+      "tool": ".tools/comp-find",
+      "invocation": "comp-find --name '*OP-S-13*' and --name '*.proof_of_spec.json' over org/missions/D12, run via explicit .tools/ path",
+      "result": "Located TO-OP-S-13's proof instance for grounding (the box handle, the log path's true location, the status-code trap's own prior cost to this project) and located peer 0.9.0_WK_ proof instances used as schema/session_log precedent -- denominators printed on every run, none near the bare-name-shim's ~55,000 false-wide-tree signature."
+    },
+    {
+      "tool": "python (requests, json, datetime) -- scratch scripts only",
+      "invocation": ".scratch/scripted_bot_probe.py, .scratch/real_visitor_probe.py, and inline -c invocations for the S1-AC1/AC2/AC6 mechanical checks and the S1-AC2 mutant/determinism controls",
+      "result": "Built and executed the two labeled HTTP probes against the live, armed contact form; ran every acceptance criterion's exact invocation directly, twice each where determinism was checked."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "four commits on this seat's own branch: baseline (6c4b8b8994), after-read (f5fe1d34b8), the five surprise rows (a636746fd6), and a CRLF-line-ending fix on the same file (fc07462c34)",
+      "result": "All four passed the risk-reflex, commit-gate (WARN-only, non-.py/.sh/.tf), to-pipeline-gate, missions-tree-check, and surprise-row-gate (the surprise-row commit was BLOCKED once on a missing Z- fabric infix, corrected before the row was ever committed, then passed clean)."
+    }
+  ]
+}

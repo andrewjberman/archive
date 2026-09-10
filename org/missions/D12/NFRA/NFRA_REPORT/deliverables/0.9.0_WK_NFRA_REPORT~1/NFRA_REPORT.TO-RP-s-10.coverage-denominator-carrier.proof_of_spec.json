@@ -1,0 +1,95 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_REPORT.TO-RP-s-10",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/decompositions/NFRA_REPORT_DECOMP.md",
+  "vintage_commit": "7d698685fe2f2f76bd830c4f8e981e1b039b8a3d",
+  "to_ref": "org/missions/D12/NFRA/NFRA_REPORT/task-orders/NFRA_REPORT.TO-RP-s-10.coverage-denominator-carrier.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/prd/NFRA_REPORT_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "393efbe8fbcd5113ae5b5995495f3fc0e710d357"
+ },
+ "assignee": "0.9.0_WK_NFRA_REPORT~1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/COVERAGE.md",
+   "kind": "doc",
+   "commit_or_etag": "6636287c50822ef5911b7431f4d5794cb2cbeaeb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commit_or_etag is the git BLOB sha (git hash-object <path>, content-addressed, resolvable before this commit exists). Verifiable post-commit via: git show <this commit>:org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/COVERAGE.md | git hash-object --stdin -- must equal 6636287c50822ef5911b7431f4d5794cb2cbeaeb. Documentation artifact (the coverage/denominator discipline as a bound on every other row's numbers); no code was built to enforce it -- Sec 3 declares that gap explicitly rather than describing a check that does not exist."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- grep -c -i 'denominator' COVERAGE.md; expect a count of 1 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i 'denominator' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/COVERAGE.md",
+   "output_evidence": "grep -c output: 16 (rc=0) -- 16 lines carry 'denominator' (case-insensitive), well above the 1-line floor. Re-run twice, identical both times (see controls.determinism).",
+   "denominator": "16 matching lines out of 123 total lines in the file; expectation was >=1",
+   "status": "PASS",
+   "expect": "denominator"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- grep -c -i -E 'every count|each count' COVERAGE.md; expect a count of 1 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i -E 'every count|each count' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/COVERAGE.md",
+   "output_evidence": "grep -c output: 5 (rc=0) -- 5 lines state the rule as binding EVERY/EACH count, above the 1-line floor. Re-run twice, identical both times (see controls.determinism).",
+   "denominator": "5 matching lines out of 123 total lines in the file; expectation was >=1",
+   "status": "PASS",
+   "expect": "output: 5\\b"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two mutants run against scratch copies of COVERAGE.md (never against the committed file). Mutant A: every case-insensitive 'denominator' replaced with 'ZZZFRAME' and AC1's exact invocation re-run. Mutant B: every case-insensitive 'every count'/'each count' replaced with 'a number' and AC2's exact invocation re-run.",
+   "expected": "Mutant A must drop AC1's count to 0, below the required 1. Mutant B must drop AC2's count to 0, below the required 1.",
+   "observed": "Mutant A: AC1 invocation returned 0 (rc=1) -- would FAIL AC1's >=1 bound. Mutant B: AC2 invocation returned 0 (rc=1) -- would FAIL AC2's >=1 bound. Both mutants fired as designed.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC2's exact invocations run twice in succession against the unmodified committed-content file (before commit, on the working-tree bytes that became the commit), output compared byte-for-byte.",
+   "observed": "Run 1: AC1=16, AC2=5. Run 2: AC1=16, AC2=5. Identical both times.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No renderer, schema or lint step is built to mechanically enforce a denominator on the report artifact's own future numbers.",
+   "reason": "Outside this cell's paths (a code artifact would live outside org/missions/D12/NFRA/NFRA_REPORT/deliverables|decompositions|prd and the two other admitted paths), and premature: every report-content cell run so far in this decomposition (S1/S2/S4/S6/S7/S8/S9/S10/S11/S12/S13) is tagged 'wire' in the PRD's own lane column -- none has built the report's own generator code yet, so there is no artifact for a consumer to run against. Declared as the cell's central finding in COVERAGE.md Sec 3 rather than hidden."
+  },
+  {
+   "item": "The one real consuming half identified (proof-of-spec-check.py's required, non-empty acceptance[].denominator field) is not claimed to validate the TRUTH of a denominator, only its PRESENCE.",
+   "reason": "Measured directly: the schema requires minLength>=1 and the checker's conditional_checks rejects thin output_evidence, but nothing cross-checks a stated 'N of M' against an independently measured M. Stated honestly in COVERAGE.md Sec 3 rather than overclaiming the precedent's strength."
+  }
+ ],
+ "surprises": [],
+ "session_log": "N/A -- worker subagent (0.9.0_WK_NFRA_REPORT~1) per CLAUDE.md rule 27: 'a worker's write surface is exactly the <paths> its non-terminal order names ... and it writes no telemetry (L7 reads from git)'. This TO's <paths> names no logs/ surface. The git commit history on branch wk-NFRA_REPORT-1e is the record.",
+ "compiler_tools": [
+  {
+   "tool": "grep",
+   "invocation": "the two AC1/AC2 invocations verbatim from the TO's <proof_of_spec>, each under timeout 120, run against COVERAGE.md",
+   "result": "AC1=16, AC2=5. Both rc=0. Re-run twice for determinism (see controls.determinism)."
+  },
+  {
+   "tool": "git hash-object",
+   "invocation": "git hash-object org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/COVERAGE.md",
+   "result": "6636287c50822ef5911b7431f4d5794cb2cbeaeb -- used as the content-addressed commit_or_etag for the doc artifact row."
+  },
+  {
+   "tool": "comp-find (grounding, not acceptance)",
+   "invocation": "comp-find 'denominator' .tools --limit 20",
+   "result": "865 hits across 404 files -- established that estate tools carry their OWN denominator by construction (comp-find, comp-heat, comp-schedule, comp-adversary, etc.) as PRODUCER-side discipline, distinct from a CONSUMER that would reject a report row lacking one -- the distinction COVERAGE.md Sec 3 turns on."
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/NFRA_REPORT.TO-RP-s-10.coverage-denominator-carrier.proof_of_spec.json AC1,AC2",
+   "result": "run after this instance was written; see this deliverable's WORKER REPORT for the printed rc and denominator"
+  }
+ ]
+}

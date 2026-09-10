@@ -1,0 +1,106 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_REPORT.TO-RP-s-12",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/decompositions/NFRA_REPORT_DECOMP.md",
+  "vintage_commit": "7d698685fe2f2f76bd830c4f8e981e1b039b8a3d",
+  "to_ref": "org/missions/D12/NFRA/NFRA_REPORT/task-orders/NFRA_REPORT.TO-RP-s-12.anomaly-breakdown-computed-plus-account.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/prd/NFRA_REPORT_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "393efbe8fbcd5113ae5b5995495f3fc0e710d357"
+ },
+ "assignee": "0.9.0_WK_NFRA_REPORT~1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ANOMALY_BREAKDOWN.md",
+   "kind": "doc",
+   "commit_or_etag": "4535a78063e7bfc65cfda3dd3436e8636293c035",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commit_or_etag is the git BLOB sha (git hash-object <path>, content-addressed, resolvable before this commit exists). Verifiable post-commit via: git show <this commit>:org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ANOMALY_BREAKDOWN.md | git hash-object --stdin -- must equal 4535a78063e7bfc65cfda3dd3436e8636293c035. Documentation artifact (a read-only connectedness breakdown + generated reading); no graph was rebuilt -- every connected-resource list came from comp-blast READ queries against the already-served, cached graph, per org/modules/graph/graph-call-manifest.yaml's trace.blast.what_breaks entry."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- test -f org/modules/graph/graph-call-manifest.yaml && echo PRESENT; expect the literal string PRESENT.",
+   "method": "command",
+   "invocation": "timeout 120 bash -c \"test -f org/modules/graph/graph-call-manifest.yaml && echo PRESENT\"",
+   "output_evidence": "PRESENT (rc=0). Re-run twice, identical both times (see controls.determinism). The dependency graph's call manifest is readable and was queried (comp-blast, per its trace.blast.what_breaks canonical entry) rather than rebuilt for this cell.",
+   "denominator": "1 of 1 file existence check; N/A beyond boolean presence",
+   "status": "PASS",
+   "expect": "\\bPRESENT\\b"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- grep -c -E 'COMPUTED|GENERATED|QUOTED' ANOMALY_BREAKDOWN.md; expect a count of 3 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -E 'COMPUTED|GENERATED|QUOTED' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ANOMALY_BREAKDOWN.md",
+   "output_evidence": "grep -c output: 13 (rc=0) -- 13 lines carry COMPUTED, GENERATED or QUOTED, well above the 3-line floor. Re-run twice, identical both times (see controls.determinism).",
+   "denominator": "13 matching lines out of 148 total lines in the file; expectation was >=3",
+   "status": "PASS",
+   "expect": "output: ([3-9]|[1-9][0-9]+)\\b"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 (JUDGMENT) -- whether stripping every GENERATED sentence leaves the deliverable still true and still checkable (C-AI part 2). NEVER self-graded.",
+   "method": "manual_read_with_citation",
+   "invocation": "N/A -- judgment criterion, no invocation; the deciding surface is ANOMALY_BREAKDOWN.md Sec 3-4 (two worked GENERATED paragraphs, each immediately preceded by the COMPUTED evidence it reads) and Sec 5 (the strip test performed explicitly).",
+   "output_evidence": "Sec 3's GENERATED paragraph (trade-submission-api) states only: which resources are connected (already listed in the COMPUTED table above it) and that RP-s-11 already found zero matching alarms (already a citable fact in a sibling deliverable) -- removing the paragraph leaves the table and the citation intact and independently verifiable. Sec 4b's GENERATED paragraph (E1DHJH4Y1W8YC2) states only that two independent instruments (comp-blast's PHANTOM-CONSUMER, RP-s-11's zero-alarm sweep) agree, and explicitly REFUSES to conclude safe-to-delete/orphaned -- removing it leaves the PHANTOM-CONSUMER block and the positive control (353 dependents on the sibling) intact. Sec 5 performs the strip test explicitly across the whole document and names what remains (the manifest entry, the 30-resource table, the PHANTOM-CONSUMER block plus positive control, and the three cited surprise rows) as still true and checkable without any GENERATED sentence. Submitted for grading, not verdicted here.",
+   "denominator": "N/A -- judgment criterion, no mechanical denominator; 2 of 2 worked GENERATED paragraphs strip-tested explicitly in Sec 5, plus the per-row blind-spot limb (Sec 2/3/4) requested by the coordinator's steer",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "JUDGMENT criterion per the TO's own <proof_of_spec> (judgment=\"true\"): PASS or FAIL on it is INVALID and it is never self-graded. Graded by 3.0.0_SA_CVO~Z at L9 per the TO's explicit instruction.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Mutants run against scratch copies of ANOMALY_BREAKDOWN.md and a scratch nonexistent-path variant of AC1 (never against the committed file or the real manifest). AC1: tested test -f against a deliberately nonexistent filename. AC2: (a) truncated the file to its first 5 lines, (b) replaced every occurrence of COMPUTED/GENERATED/QUOTED with 'ZZZ' across the whole file.",
+   "expected": "AC1's nonexistent-path variant must produce NO 'PRESENT' output (rc!=0 path). AC2's truncation must drop the count below 3; the full-strip mutant must drop it to 0.",
+   "observed": "AC1: test -f against org/modules/graph/graph-call-manifest-DOES-NOT-EXIST.yaml produced no output and rc=1 -- would FAIL AC1's 'PRESENT' expectation. AC2: 5-line truncation returned 1 (below the 3-line floor, would FAIL); full-strip mutant returned 0 (rc=1, would FAIL). All three fired as designed.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC2's exact invocations run twice in succession against the unmodified committed-content file / the unmodified manifest file, output compared byte-for-byte.",
+   "observed": "AC1: 'PRESENT' both runs. AC2: 13 both runs. Identical both times.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No safe-to-delete, orphaned, or 'this surface is unused' conclusion is drawn for E1DHJH4Y1W8YC2 despite its PHANTOM-CONSUMER (zero-dependent) result.",
+   "reason": "comp-blast's own output text states a zero result is 'NOT provably no consumer' when a dynamic/FUNC-key consumer is possible -- exactly the class NFRA_REPORT-Z-W1-S2 measured independently. Sec 4b states this refusal explicitly rather than overreaching past what two agreeing-but-limited instruments can support."
+  },
+  {
+   "item": "Only two anomalous rows (trade-submission-api, E1DHJH4Y1W8YC2) are worked through in full; the mechanism is not exhaustively re-run against every anomaly this project's other cells have surfaced.",
+   "reason": "The cell's ACT asks for a general MECHANISM (per-row breakdown + declared blind spots), demonstrated on real, already-anomalous rows from this project's own prior work (RP-s-11) rather than re-litigated against every finding in every sibling deliverable -- a bounded, real demonstration rather than an unbounded sweep, consistent with the bound against an unbounded graph sweep."
+  }
+ ],
+ "surprises": [],
+ "session_log": "N/A -- worker subagent (0.9.0_WK_NFRA_REPORT~1) per CLAUDE.md rule 27: 'a worker's write surface is exactly the <paths> its non-terminal order names ... and it writes no telemetry (L7 reads from git)'. This TO's <paths> names no logs/ surface. The git commit history on branch wk-NFRA_REPORT-1f is the record.",
+ "compiler_tools": [
+  {
+   "tool": "comp-blast",
+   "invocation": "comp-blast arn:aws:apigateway:us-east-1::/apis/w8jnzvs21g --direction both --json (trade-submission-api); comp-blast arn:aws:cloudfront::313476888478:distribution/E1DHJH4Y1W8YC2 --direction both --check-consumers, with positive control comp-blast arn:aws:cloudfront::313476888478:distribution/EVTSA9VEHNZVH --direction both --check-consumers",
+   "result": "trade-submission-api: 30 of 30 traversal, 30 distinct connected resources across 7 categories (Lambda, DynamoDB, S3, KMS, IAM, API routes, code-graph clusters). E1DHJH4Y1W8YC2: PHANTOM-CONSUMER, 0 of 0, tool's own caveat text quoted verbatim in the deliverable. EVTSA9VEHNZVH (control): CONSUMER-OK, 353 dependents -- proves the zero above is not a broken probe."
+  },
+  {
+   "tool": "graph-call-manifest.yaml (read-only citation)",
+   "invocation": "grep/read of org/modules/graph/graph-call-manifest.yaml's trace.blast.what_breaks entry (id, use_case, canonical_call, tool, mode, anti_pattern)",
+   "result": "Confirmed comp-blast is the CANONICAL tool for this cell's use case and that the manifest explicitly names 'Explore-agent sweep or manual grep for dependents' as the anti-pattern this cell avoids by using the canonical call directly."
+  },
+  {
+   "tool": "git hash-object",
+   "invocation": "git hash-object org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/ANOMALY_BREAKDOWN.md",
+   "result": "4535a78063e7bfc65cfda3dd3436e8636293c035 -- used as the content-addressed commit_or_etag for the doc artifact row."
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/NFRA_REPORT.TO-RP-s-12.anomaly-breakdown-computed-plus-account.proof_of_spec.json AC1,AC2,AC3",
+   "result": "run after this instance was written; see this deliverable's WORKER REPORT for the printed rc and denominator"
+  }
+ ]
+}

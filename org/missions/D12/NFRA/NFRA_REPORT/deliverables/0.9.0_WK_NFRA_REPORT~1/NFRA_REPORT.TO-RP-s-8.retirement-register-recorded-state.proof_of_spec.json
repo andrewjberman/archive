@@ -1,0 +1,100 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_REPORT.TO-RP-s-8",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/decompositions/NFRA_REPORT_DECOMP.md",
+  "vintage_commit": "7d698685fe2f2f76bd830c4f8e981e1b039b8a3d",
+  "to_ref": "org/missions/D12/NFRA/NFRA_REPORT/task-orders/NFRA_REPORT.TO-RP-s-8.retirement-register-recorded-state.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/prd/NFRA_REPORT_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "393efbe8fbcd5113ae5b5995495f3fc0e710d357"
+ },
+ "assignee": "0.9.0_WK_NFRA_REPORT~1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/RETIREMENT_REGISTER.md",
+   "kind": "doc",
+   "commit_or_etag": "f36da9a600d8ef159eb3c8dc17f0152c69f7b305",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commit_or_etag is the git BLOB sha (git hash-object <path>, content-addressed, resolvable before this commit exists). Verifiable post-commit via: git show <this commit>:org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/RETIREMENT_REGISTER.md | git hash-object --stdin -- must equal f36da9a600d8ef159eb3c8dc17f0152c69f7b305. Documentation/law artifact specifying the register's shape and containing its first real, worked entries (0 RETIRED, 5 CARRIED, sourced from DEPRECATION.md's own real result); no artifact was deleted, and no alerting was minted -- the standing moratorium and the classify-not-delete bound are both intact."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- grep -c -i -E 'owner|reason|date' RETIREMENT_REGISTER.md; expect a count of 3 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i -E 'owner|reason|date' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/RETIREMENT_REGISTER.md",
+   "output_evidence": "grep -c output: 16 (rc=0), well above the 3-line floor. Graded against the BOUND, not the grep, per the TO's own note that this criterion is an OR-alternation counted by line and could be satisfied by three unrelated mentions: manually verified all 5 worked register rows (Sec 3 table) carry Owner, Reason and DATE TOGETHER as distinct columns on the SAME row, for every row, not merely somewhere in the document.",
+   "denominator": "16 matching lines out of 101 total lines in the file (weak grep denominator); SUBSTANTIVE denominator: 5 of 5 register rows carry all three of owner+reason+date jointly, verified by direct table inspection",
+   "status": "PASS",
+   "status_reason": "PASS on the substantive bound (every row carries owner+reason+date jointly, verified by inspection of Sec 3's table), not merely on the weak grep count, per the TO's own explicit warning that the grep alone cannot test this.",
+   "expect": "output: 16\\b"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- grep -c -i -E 'never-widen|classif' RETIREMENT_REGISTER.md; expect a count of 1 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i -E 'never-widen|classif' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/RETIREMENT_REGISTER.md",
+   "output_evidence": "grep -c output: 5 (rc=0) -- Sec 4 states the classify-not-delete bound and the never-widen sign-off requirement explicitly, above the 1-line floor.",
+   "denominator": "5 matching lines out of 101 total lines in the file; expectation was >=1",
+   "status": "PASS",
+   "expect": "output: 5\\b"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two mutants run against scratch copies of RETIREMENT_REGISTER.md (never against the committed file): every case-insensitive 'owner'/'reason'/'date' replaced with 'ZZZ' (AC1); every case-insensitive 'never-widen'/'classif' replaced with 'ZZZ' (AC2).",
+   "expected": "Each mutant must drop its respective criterion's count to 0, below its floor.",
+   "observed": "AC1 mutant: 0 (rc=1). AC2 mutant: 0 (rc=1). Both fired as designed. Additionally, per the TO's own warning about AC1's weakness, the SUBSTANTIVE control is the per-row table inspection in output_evidence above -- a document with three unrelated mentions of 'date' and no actual owner+reason+date-bearing row would pass AC1's grep but fail the bound this cell is actually held to; this deliverable's real content passes both.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC2's exact invocations run twice in succession against the unmodified committed-content file, output compared byte-for-byte.",
+   "observed": "Run 1: AC1=16, AC2=5. Run 2: identical. Stable.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No RETIRED rows exist in this register.",
+   "reason": "True as of this vintage: RP-s-7's walk confirmed nothing dead among its ten candidates. An empty RETIRED set is stated as a measured fact (Sec 3), not an omission -- fabricating a retirement to populate the table would violate 'RETIRED is a decision, never a default.'"
+  },
+  {
+   "item": "The five CARRIED rows' underlying ambiguity is not resolved, and no future owner for resolving it is assigned.",
+   "reason": "This register RECORDS the carried classification (accountable for the statement being accurate and citable); it does not assign or perform the further investigation that would resolve the ambiguity -- that is separate, future work outside this cell's ACT (recording state, not resolving deprecation determinations)."
+  },
+  {
+   "item": "No mutable 'current status' field or database is built; the current-state view (Sec 2) is specified as a query definition, not implemented as running code.",
+   "reason": "This is a report-lane LAW cell (wire lane per the PRD manifest); no register-rendering code exists yet for any RP-s-* cell to wire into. The query definition (latest row per item id) is stated precisely enough to be implemented later without ambiguity, per build-ladder rung 2 discipline (specify before building)."
+  }
+ ],
+ "surprises": [],
+ "session_log": "N/A -- worker subagent (0.9.0_WK_NFRA_REPORT~1) per CLAUDE.md rule 27: 'a worker's write surface is exactly the <paths> its non-terminal order names ... and it writes no telemetry (L7 reads from git)'. This TO's <paths> names no logs/ surface. The git commit history on branch wk-NFRA_REPORT-1f is the record.",
+ "compiler_tools": [
+  {
+   "tool": "grep",
+   "invocation": "the two AC1/AC2 invocations verbatim from the TO's <proof_of_spec>, each under timeout 120, run against RETIREMENT_REGISTER.md",
+   "result": "AC1=16, AC2=5. Both rc=0. Re-run twice for determinism."
+  },
+  {
+   "tool": "git hash-object",
+   "invocation": "git hash-object org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/RETIREMENT_REGISTER.md",
+   "result": "f36da9a600d8ef159eb3c8dc17f0152c69f7b305 -- used as the content-addressed commit_or_etag for the doc artifact row."
+  },
+  {
+   "tool": "manual cross-reference (no new AWS/graph read)",
+   "invocation": "Read DEPRECATION.md (this same worker's RP-s-7 deliverable, already committed) Sec 2's table for the 3 AMBIGUOUS and 2 UNRESOLVED-BY-THIS-WALK candidates, used verbatim as Sec 3's 5 real CARRIED rows.",
+   "result": "Confirmed each of the 5 rows' status and reason text matches DEPRECATION.md's own findings exactly, so the register's first real entries are checkable against an already-published sibling deliverable rather than invented."
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/NFRA_REPORT.TO-RP-s-8.retirement-register-recorded-state.proof_of_spec.json AC1,AC2",
+   "result": "run after this instance was written; see this deliverable's WORKER REPORT for the printed rc and denominator"
+  }
+ ]
+}

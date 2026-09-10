@@ -1,0 +1,191 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP-S-10E",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-10E.signer-key-read-ttl.md",
+    "group": "OTHER",
+    "vintage_commit": "204b608f94"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP.md",
+    "vintage_commit": "6c5d4e5406",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP-S-10E.signer-key-read-ttl.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~V",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/lib/authkeys/jwtPublicKeys.mjs",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Gains getCurrentKey -- a BOUNDED, SINGLE-CURRENT read keyed per secret id, for the SIGNER. Returns a string, never a slot pair. Inlined into the signer's bundle by the ESM build; live CodeSha256 ZrHoxMzn0YsK5oA1lq0OMcsoaL9xzN3RkYFxY9Opjyk= @2026-09-09T22:38:20Z, EQUAL to the value predicted before the apply.",
+      "artifact_covered_by": [
+        "S10E-AC2",
+        "S10E-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Both JWT key reads wired to getCurrentKey; the local SecretsManagerClient, its GetSecretValueCommand import and both unbounded scalar caches deleted. The MFA seal cache is deliberately unchanged and now carries a docstring recording the consequence that creates.",
+      "artifact_covered_by": [
+        "S10E-AC1",
+        "S10E-AC2",
+        "S10E-AC4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "artifact_sha256 written by build-nodejs-lambda.sh itself, equal to the deployed CodeSha256 and to the independently recomputed artifact sha.",
+      "artifact_covered_by": [
+        "S10E-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260909T2230Z_opsec-s10e-signer-key-read-ttl_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy-completion ledger, CLOSED -- all 5 legs proven, sentinel removed. Every leg was closed through an argv list with NO shell, which is the repair learned on TO-OP-S-10D where backticks in proof text were eaten by command substitution while the OK line still reported success; the stored proofs were then READ BACK to confirm their lengths rather than trusting that line.",
+      "artifact_covered_by": [
+        "S10E-AC5"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S10E-AC1",
+      "criterion_verbatim": "The PRE-CHANGE baseline recorded verbatim, and the UNBOUNDED shape of both JWT reads RE-CONFIRMED on those exact bytes before any change. If either read is already bounded, this face's premise is falsified -- STOP and file a row rather than deploying anyway. A baseline taken after the change is not a baseline.",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda get-function-configuration --function-name opalinvest-auth-handler --region us-east-1, run BEFORE the worktree was created; then the artifact downloaded and both key-read regions extracted from the minified bundle.",
+      "output_evidence": "BASELINE RE-READ AT THIS FACE'S OWN VINTAGE AND UNMOVED: CodeSha256 X8YBkwUqnuTDLW7XvqovWT9+TujBXbTaXQaEdwHxwZc=, LastModified 2026-09-04T02:14:11Z, State Active, runtime nodejs22.x, role opalinvest-auth-lambda-role. BOTH READS UNBOUNDED ON THOSE EXACT BYTES: async function E8(){ if(pq) return pq; if(pq=(await vZ.send(new yZ({SecretId:\"opal/auth/jwt-private-key\"}))).SecretString||\"\",!pq) throw Error(\"JWT private key not found\"); return pq } and async function hZ(){ if(cq) return cq; ... SecretId:\"opal/auth/jwt-public-key\" ... }. Two bare scalars, pq and cq, neither carrying a time component. A THIRD unbounded cache, A6 (the MFA seal key), sits beside them. THE INTERNAL CONTROL THAT MAKES THIS A DEFECT RATHER THAN AN ESTATE CONVENTION IS IN THE SAME BUNDLE: the origin-verify read IS bounded -- q2=300000 with the guard 'if(d6 && q-b1<q2) return d6'. The function demonstrably knows the idiom, applies it to the origin secret, and applies it to NEITHER JWT key. Source agrees at src/jwt.ts:21-35 and :38-50 with no TTL constant anywhere in the file. THE PREMISE HELD, so the face proceeded; had either read already been bounded, the correct act was a STOP and a row.",
+      "denominator": "1 function; 2 JWT key reads examined, both unbounded; 1 further unbounded cache observed (the MFA seal key); 1 bounded cache in the same bundle as the control.",
+      "status": "PASS",
+      "status_reason": "Baseline taken before any change and the unbounded shape re-confirmed on those exact bytes, with a same-artifact control showing the bounded idiom is present elsewhere in the file."
+    },
+    {
+      "criterion_id": "S10E-AC2",
+      "criterion_verbatim": "A CodeSha256 DIFFERENT from S10E-AC1's baseline, and the downloaded post-deploy artifact showing BOTH JWT key reads carrying a bounded time component, each still selecting ONE key. Quote both from the DEPLOYED bytes. A two-slot accept path on the signer is a FAIL, not a bonus.",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda get-function-configuration; then Code.Location downloaded, unzipped, and every occurrence of the key-read region and of the token 'previous' enumerated with context.",
+      "output_evidence": "THE HASH MOVED AND IT WAS AN EQUALITY TEST AGAINST A PREDICTED VALUE: live CodeSha256 ZrHoxMzn0YsK5oA1lq0OMcsoaL9xzN3RkYFxY9Opjyk=, DIFFERENT from the baseline X8YBkwUqnuTDLW7XvqovWT9+TujBXbTaXQaEdwHxwZc= and EQUAL to the sha independently recomputed from the uploaded artifact before the apply. State Active, LastUpdateStatus Successful, LastModified 2026-09-09T22:38:20Z. BOTH READS NOW BOUNDED, quoted from the deployed bytes: async function T8(q,{now:$=Date.now(),region:Z=\"us-east-1\"}={}){ if(!q||typeof q!==\"string\") throw Error(\"getCurrentKey requires a secret id\"); let Q=yZ.get(q); if(Q && $-Q.atMs<F3) return Q.value; if(!S8) S8=new X3({region:Z}); let z=await S8.send(new H3({SecretId:q})), {current:J}=Y3(z.SecretString); return yZ.set(q,{value:J,atMs:$}), J }. Both call sites resolve through it, with the two secret ids present as x3=\"opal/auth/jwt-private-key\" and U3=\"opal/auth/jwt-public-key\". EACH STILL SELECTS ONE KEY: the destructure is {current:J} and the return is J, a STRING. *** AND THE 'NO TWO-SLOT' CLAIM WAS TESTED PROPERLY RATHER THAN ASSERTED, BECAUSE THE TOKEN 'previous' DOES APPEAR IN THE BUNDLE AND A CARELESS READ WOULD CALL THAT A FAIL. *** All seven occurrences were enumerated with context: hits 1-5 are inside parseKeySlots (Y3), which RETURNS a {current, previous} shape -- a parse artifact, whose other half T8 discards; hits 6-7 are inside isOriginVerified (f1) and belong to the ORIGIN secret's two-slot overlap, which is TO-OP-S-3's, correct, and pre-existing. THE DECISIVE TEST: verifyWithSlots is NOT bundled at all. There is no fallback accept path on any JWT key.",
+      "denominator": "1 deployed artifact, 1 member, searched in full; 2 of 2 JWT key reads quoted; 7 of 7 occurrences of 'previous' enumerated and classified; 1 decisive absence (verifyWithSlots) checked.",
+      "status": "PASS",
+      "status_reason": "Both reads bounded and single-key on the deployed bytes, and the two-slot prohibition verified by enumerating every candidate occurrence rather than by asserting absence."
+    },
+    {
+      "criterion_id": "S10E-AC3",
+      "criterion_verbatim": "NEGATIVE CONTROL: the origin-verify bounded cache is UNCHANGED in the post-deploy artifact -- its guard and its window still present and still 300000. State how the JWT TTL constant is distinguished from it in the new bytes, so no later reader repeats the conflation Z-S159 warns about.",
+      "method": "live_read",
+      "invocation": "The post-deploy artifact searched for the origin-verify region and for every occurrence of the literal 300000, compared against the same regions in the pre-change artifact.",
+      "output_evidence": "THE ORIGIN CACHE IS UNTOUCHED, quoted from the post-deploy bytes: Z2=\"opal/auth/origin-verify\", Q2=\"x-opal-origin-verify\", g6=null, v1=0, z2=300000; async function J2(){ let q=Date.now(); if(g6&&q-v1<z2) return g6; let $=await $2.send(new e3({SecretId:Z2})); ... }. Guard present, window present, still 300000, identical in shape to the pre-change artifact where the same cache read d6/b1/q2. Its client ($2) is also still its own, separate from the shared module's. HOW THE TWO ARE DISTINGUISHED, which is the half of this criterion that protects the next reader: the count of 300000 in the bundle moved from 1 to 2. The ORIGIN window is z2, declared inline beside the origin secret id and read ONLY by J2. The JWT window is F3, the shared module's exported JWT_KEY_TTL_MS, read ONLY by T8 and adjacent to the two JWT secret ids. DISTINCT VARIABLES, DISTINCT ADJACENCY, DISTINCT READERS -- so the discriminator is STRUCTURAL, not a value difference. The two windows are deliberately the SAME NUMBER (one convergence window for a runbook to reason about), which is precisely why the number alone can never tell them apart and why Z-S159's conflation was possible in the first place.",
+      "denominator": "1 artifact; 2 of 2 occurrences of 300000 located and attributed; origin region quoted before and after.",
+      "status": "PASS",
+      "status_reason": "The control resource is unchanged and the two same-valued windows are separated on structure rather than on value, which is the only separation that survives them sharing a number."
+    },
+    {
+      "criterion_id": "S10E-AC4",
+      "criterion_verbatim": "LOGIN STILL WORKS after the deploy: no new error class, and the INVOCATION COUNT stated over the window so silence from a dead function cannot pass as health. A cold start on the new bundle observed is stronger than an absence of errors -- state whether one occurred.",
+      "method": "live_read",
+      "invocation": "curl POST https://opalinvest.dev/auth/login with bad credentials and with a real committed credential; .tools/aws logs filter-log-events on /aws/lambda/opalinvest-auth-handler over the 20 minutes after the apply; CloudWatch Invocations and Errors over the same window.",
+      "output_evidence": "ARM 1, the refusal: bad credentials return 401 -- the handler is alive and refusing. ARM 2, AND IT IS THE LOAD-BEARING ONE: a REAL committed credential returns 200 with mfaRequired true, channel email and a challengeId. That response can only be produced by running sealCode, which calls getMfaCodeSealKey, which calls getJwtPrivateKey -- THE EXACT READ THIS FACE REPLACED. So the new bounded read executed successfully on a real request against the live login path; a broken key read would have surfaced as a 500 rather than a challenge. COLD STARTS: TWO INIT_START events in the window, i.e. two fresh execution environments on the NEW bundle -- precisely where a MODULE_NOT_FOUND on the new cross-tree relative import would fire. It did not. THE ONE ERROR-CLASS LINE IS MINE AND IS THE EXPECTED REFUSAL, named rather than reported as a defect: 'ERROR Error: Invalid email or password' at 22:40:33Z is arm 1's own probe working. THE DISCRIMINATOR THAT SETTLES IT: the CloudWatch Errors metric reads 0 over the same window, so that log line is a HANDLED application-level refusal and not a Lambda invocation error. THE COUNT: 6 Invocations against 0 Errors over a complete log window (29 events, nextToken ABSENT). This is a login endpoint rather than a high-traffic API so the absolute number is small by nature; what matters is that it is NON-ZERO and includes a real credential login, so the zero-error reading belongs to a live function and not to an unread instrument.",
+      "denominator": "2 login arms probed; 29 log events over a complete window (nextToken absent); 2 cold starts; 6 invocations; 0 on the Errors metric; 1 error-class log line, attributed.",
+      "status": "PASS",
+      "status_reason": "The changed code path was exercised end to end by a real login rather than merely left unbroken, with two cold starts on the new bundle and the single error line attributed to this seat's own negative probe."
+    },
+    {
+      "criterion_id": "S10E-AC5",
+      "criterion_verbatim": "The plan MEASURED and its counts stated: what is added, changed and destroyed, and whether ANY wafv2 resource appears. Z-S156's ride is confirmed ABSENT by reading the plan, never assumed absent because this is not Lambda@Edge. A non-zero wafv2 count means STOP and report.",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/portal-auth plan -input=false -no-color -target=aws_lambda_function.auth_handler -out=<plan>, then the saved plan text searched for wafv2 and for the action counts.",
+      "output_evidence": "PLAN MEASURED: 'Plan: 0 to add, 1 to change, 0 to destroy', 0 forces-replacement. WAFV2 RESOURCES IN THIS PLAN: 0 -- counted in the plan text, not inferred from the target being a Lambda. Z-S156's ride is a property of the DISTRIBUTION's dependency on the web ACL; this target is a function, so the ride should not apply -- but 'should not' is an inference and this criterion asks for a measurement, so it was measured. THE CHANGE SET IS EXACTLY THREE ATTRIBUTES: last_modified to (known after apply); s3_object_version gHtYwhDqSYN4xFto8w7OzAEQWu25fkpF to EGaYFb8t6aCbIi2FAhfF0YtzM_cqIMiW; source_code_hash X8YBkwUqnuTDLW7XvqovWT9+TujBXbTaXQaEdwHxwZc= to ZrHoxMzn0YsK5oA1lq0OMcsoaL9xzN3RkYFxY9Opjyk=. AND THE OTHER TRAP WAS CHECKED HERE TOO: session-analytics hardcodes source_code_hash so an upload alone plans as 'No changes'; auth_handler is the OTHER pattern, resolving both s3_object_version and source_code_hash through data.aws_s3_object.auth_handler_artifact, so the upload alone SHOULD move the plan. It did -- verified by reading the plan rather than inferred from the resource shape.",
+      "denominator": "1 scoped plan; 3 of 3 changed attributes enumerated; wafv2 occurrences counted in the full plan text (0); 0 to destroy; 0 forces-replacement.",
+      "status": "PASS",
+      "status_reason": "Counts read off the plan text and the WAF ride confirmed absent by measurement rather than by the inference that a Lambda target cannot pull it."
+    },
+    {
+      "criterion_id": "S10E-AC6",
+      "criterion_verbatim": "JUDGMENT criterion (judgment=\"true\", no invocation minted at cut): the MFA code seal key, HKDF-derived from the JWT private key and deliberately NOT changed by this face -- whether the rotation runbook should also bound it, or should instead bump the v1 label at rotation time.",
+      "method": "manual_read_with_citation",
+      "invocation": "NOT GRADED HERE BY INSTRUCTION. Evidence assembled for the adjudicator from src/jwt.ts, src/mfa.ts and the deployed bytes.",
+      "output_evidence": "EVIDENCE ONLY -- THIS LANE RECORDS NO VERDICT. (1) THE MECHANISM: getMfaCodeSealKey derives an AES-256-GCM key by HKDF from the JWT private key with the label 'opal-mfa-code-seal-v1', and caches it in cachedMfaSealKey with NO time component. That cache is UNCHANGED by this face, as instructed. (2) THE CONSEQUENCE THIS FACE CREATES, which is NEW and is why it is raised rather than merely inherited: the private key it derives from now refreshes on a bounded window and this derived value does not, so a container living across a TTL boundary holds a seal key derived from a private key it no longer holds. (3) THERE IS NO FUNCTIONAL REGRESSION: seal and unseal within one container still use the same key, and across containers this already diverged before the change. (4) WHAT IS WEAKENED is the invalidation intent the source itself records at the v1 note -- 'changing it invalidates every sealed code in flight, which is the correct behaviour for a key rotation'. After a rotation a long-lived container keeps sealing and unsealing with the OLD derived key even once its private key has refreshed, so that invalidation is less reliable than the note assumes. (5) FAILURE STAYS GRACEFUL EITHER WAY: unsealCode returns null on a wrong key and mfa.ts's callers mint a REPLACEMENT code rather than sending nothing, and verification uses hashCode against the stored row and is untouched -- so the observable effect is that resend-idempotency lapses during the window, not that MFA breaks. (6) THE TWO CANDIDATE REMEDIES, offered without a recommendation: bound this cache too, or bump the v1 label as a deliberate step in the rotation runbook. The consequence is now recorded in a docstring on the function itself so the next reader meets it at the file.",
+      "denominator": "1 derived key; 2 call sites (sealCode, unsealCode); 2 candidate remedies named; 0 verdicts recorded by this lane.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion, reserved to 3.0.0_SA_CVO~Z at L9 by the face's own proof_of_spec block and by the issuer's instruction in msg 20638. Whether the runbook should bound the seal cache or bump the v1 label is a design call, and it is not an assignee's to make mid-face. Evidence assembled, no verdict written."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The claim this face stands on is that the signer's key read is now BOUNDED and still returns exactly ONE key -- the CURRENT one. The reading that would make that true on the surface and false in substance is a read that hands the signer the PREVIOUS slot: it would still be bounded, still return a single string, and still pass every shape-level assertion, while letting the signer mint tokens under a retired key. That is the exact failure S10E-AC2 calls a FAIL rather than a bonus.",
+      "expected": "With getCurrentKey mutated to destructure previous instead of current, the assertion 'THE SIGNER NEVER RECEIVES previous' must FAIL, and the value-identity assertions must fail with it. If the suite stayed green the control would be certifying nothing.",
+      "observed": "3 passed, 6 FAILED, rc=1 -- and the failing set includes 'THE SIGNER NEVER RECEIVES previous', 'bare PEM returns the key', 'a CHANGED key is picked up after expiry', 'per-secret-id cache: private read returns the PRIVATE key' and 'envelope -> returns CURRENT'. Notably the two CACHE-MECHANICS assertions (hit inside the window, expiry past it) still PASSED under the mutant, which is the point: a timing-shaped test cannot see a wrong-VALUE defect, and only the identity assertions caught it. Restored: 9 of 9, rc=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The load-bearing values were each obtained twice or on two independent instruments. (a) The artifact sha was computed by the build script, INDEPENDENTLY RECOMPUTED from the downloaded object, and separately PREDICTED before the apply. (b) The baseline CodeSha256 was read at TO-OP-S-10 phase 1 and re-read at this face's own vintage before any edit. (c) Both secrets were read at session start and again after the apply. (d) Post-deploy health was read on two surfaces -- the log text and the CloudWatch Errors metric -- plus the Invocations count. (e) The origin-verify control region was quoted from the pre-change and post-change artifacts. (f) The local exercise was run clean and mutated.",
+      "observed": "STABLE. The build sha, the independent recompute, the S3 metadata content-sha256 and the post-apply live CodeSha256 are the same value and equal the pre-apply prediction. The baseline was unchanged between its two reads. Both secrets identical across their two reads. Log text and the Errors metric agree that the single ERROR line is a handled refusal rather than an invocation failure. The origin cache is byte-equivalent in shape before and after. The exercise gives 9/9 clean and 3/9 mutated, reproducibly.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The rotation itself",
+      "reason": "TO-OP-S-10's act, barred by msg 20638 until this face is terminal. Nothing was rotated, no keypair minted, no secret written; both secrets re-measured unchanged at close."
+    },
+    {
+      "item": "Two slots on the signer",
+      "reason": "Explicitly barred by the issuer's re-cut @dd39dab70e and by S10E-AC2, which calls a two-slot accept path here a FAIL rather than a bonus. A verifier accepts current-or-previous; a signer must know which key is CURRENT. The property installed is a bounded WINDOW, not a second slot."
+    },
+    {
+      "item": "The MFA code seal key's own unbounded cache",
+      "reason": "Named on the face and deliberately not changed. The consequence this face's change creates for it is documented in a docstring on the function and routed to S10E-AC6 as judgment, with no verdict from this lane."
+    },
+    {
+      "item": "The origin-verify cache in the same bundle",
+      "reason": "This face's NEGATIVE CONTROL (S10E-AC3) and TO-OP-S-3's work. Untouched by construction, and verified untouched on the post-deploy bytes rather than assumed so."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-S159: the second STOP, which produced this face -- opalinvest-auth-handler cached BOTH JWT keys in bare scalars with no time component on its deployed bytes, so a signing switch could never converge and S10-AC4 was unsatisfiable at any wait length. This face is that row's disarm on the two KEY reads; the MFA-seal half the row also raised is carried to S10E-AC6 as judgment rather than closed here."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-09/session_0.7.0_AE_CloudOps~V_2210-2255Z_OPSEC_S10E_SIGNER_TTL.md",
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open / close-leg / close --slug opsec-s10e-signer-key-read-ttl",
+      "result": "Opened before the deploy with the rollback named, CLOSED on 5 proven legs.",
+      "gap_found": "None new -- and this face APPLIED the lesson TO-OP-S-10D learned the hard way: every leg was closed through an argv list with NO shell, so backticks and parentheses in the proof text are inert, and the stored proofs were then READ BACK to confirm their lengths rather than trusting the OK line."
+    },
+    {
+      "tool": "build-nodejs-lambda.sh",
+      "invocation": "bash infra/aws/lambda/ci/build-nodejs-lambda.sh portal-auth opalinvest-auth-handler",
+      "result": "Deterministic zip, uploaded, independently re-verified before the apply.",
+      "gap_found": "Its Next-steps footer again prints MSYS_NO_PATHCONV=1, a bare terraform apply and .tools/terraform.exe -- all three wrong on this estate. Ignored, as on the three consumers earlier today."
+    },
+    {
+      "tool": "terraform plan",
+      "invocation": "terraform -chdir=infra/aws/terraform/portal-auth plan -target=aws_lambda_function.auth_handler -no-color",
+      "result": "0 add / 1 change / 0 destroy, exactly three attributes, 0 wafv2, 0 forces-replacement.",
+      "gap_found": "None here, and that is itself the finding: auth_handler resolves its hash through a data lookup, so unlike session-analytics the upload alone DID move the plan. Both patterns now exist in this one root and the difference decides whether a code upload is a deploy or a no-op."
+    },
+    {
+      "tool": "node (local exercise + planted mutant)",
+      "invocation": "node s10e_exercise.mjs <module> [--mutate]",
+      "result": "9 of 9 clean; 3 of 9 under a mutant that hands the signer previous instead of current.",
+      "gap_found": "The two CACHE-MECHANICS assertions still passed under the mutant. A timing-shaped test cannot see a wrong-VALUE defect -- only the identity assertions caught it, which is worth knowing for anyone testing a cache."
+    },
+    {
+      "tool": "deployed-artifact read",
+      "invocation": "Code.Location downloaded, unzipped, key regions and every occurrence of 'previous' enumerated with context.",
+      "result": "Both reads bounded and single-key; verifyWithSlots absent; the origin control unchanged.",
+      "gap_found": "The token 'previous' IS present in the bundle and a careless read would have called that a two-slot FAIL. Enumerating all seven occurrences showed five inside parseKeySlots's own return shape and two inside the ORIGIN secret's pre-existing overlap. The decisive test was the ABSENCE of verifyWithSlots, not the presence of a word."
+    }
+  ]
+}

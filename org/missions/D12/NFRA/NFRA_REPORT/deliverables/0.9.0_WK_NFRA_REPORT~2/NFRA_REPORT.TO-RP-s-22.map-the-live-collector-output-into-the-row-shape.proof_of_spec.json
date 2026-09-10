@@ -1,0 +1,153 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_REPORT.TO-RP-s-22",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/decompositions/NFRA_REPORT_DECOMP_R4.md",
+  "vintage_commit": "20327a663f652cde867f0962206f346b2e6d3a60",
+  "to_ref": "org/missions/D12/NFRA/NFRA_REPORT/task-orders/NFRA_REPORT.TO-RP-s-22.map-the-live-collector-output-into-the-row-shape.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/prd/NFRA_REPORT_PRD_ADDENDUM_01.md",
+  "group": "OTHER",
+  "vintage_commit": "b75e35f36ee5abc0481b0910cb37d38615e2813c"
+ },
+ "assignee": "0.9.0_WK_NFRA_REPORT~2",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/infrastructure_monitor/edition_rows.py",
+   "kind": "script",
+   "commit_or_etag": "2e551ad049cca4b7fc7be199c7c2606c5aca1aed",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commit_or_etag is the git BLOB sha (git hash-object <path>, content-addressed, resolvable before this commit exists). Verifiable post-commit via: git show <this commit>:infra/aws/lambda/infrastructure_monitor/edition_rows.py | git hash-object --stdin -- must equal 2e551ad049cca4b7fc7be199c7c2606c5aca1aed. This is a pure-stdlib module (AC5 refuses boto3/anthropic/any third-party import) that maps an already-collected report dict; BOUNDS explicitly forbids editing lambda_function.py (RP-s-23's cell wires this module in), so no AWS surface is touched or deployed by this cell -- running rows_from_report() makes zero live calls, verified by AC5 (no non-stdlib import, therefore no boto3 either) and by this module's own docstring/design."
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/SECTION_MAPPING.md",
+   "kind": "doc",
+   "commit_or_etag": "57df41392aadbf3fbacc0b293ccdeb2aa9cb1340",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commit_or_etag is the git BLOB sha (git hash-object <path>). Verifiable post-commit via: git show <this commit>:org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/SECTION_MAPPING.md | git hash-object --stdin -- must equal 57df41392aadbf3fbacc0b293ccdeb2aa9cb1340. The task order's own required second deliverable: the 13-section partition with its denominator, and for every OMITTED section the reason it cannot be collected live."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "cd \"C:/Users/Opal Bloomberg/Desktop/ajb_workspace\" && timeout 120 python -c \"import ast;src=open('infra/aws/lambda/infrastructure_monitor/edition_rows.py',encoding='utf-8').read();t=ast.parse(src);names={n.name for n in t.body if isinstance(n,ast.FunctionDef)};print('MODULE_LEVEL_DEFS=%d HAS_rows_from_report=%s' % (len(t.body),'rows_from_report' in names))\"",
+   "method": "command",
+   "invocation": "SUBSTITUTED PER TASK ORDER INSTRUCTION (worker face: 'For THIS cell's criteria substitute C:/tmp/wk-report-4-2 instead, because the files under test are yours and uncommitted'): cd \"C:/tmp/wk-report-4-2\" && timeout 120 python -c \"import ast;src=open('infra/aws/lambda/infrastructure_monitor/edition_rows.py',encoding='utf-8').read();t=ast.parse(src);names={n.name for n in t.body if isinstance(n,ast.FunctionDef)};print('MODULE_LEVEL_DEFS=%d HAS_rows_from_report=%s' % (len(t.body),'rows_from_report' in names))\"",
+   "output_evidence": "MODULE_LEVEL_DEFS=33 HAS_rows_from_report=True (rc=0). Re-run twice in succession, identical both times. The substitution does not change what the criterion tests -- it parses the same file this cell produced, only at its uncommitted worktree path rather than the main checkout's (identical bytes, since edition_rows.py is a brand-new file with no other copy anywhere in the tree at this point in the round).",
+   "denominator": "33 module-level AST nodes in edition_rows.py; HAS_rows_from_report checked against that set",
+   "status": "PASS",
+   "expect": "MODULE_LEVEL_DEFS=\\d+ HAS_rows_from_report=True"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "cd \"C:/Users/Opal Bloomberg/Desktop/ajb_workspace\" && timeout 180 python -c \"import importlib.util,sys,json\\ns=importlib.util.spec_from_file_location('er','infra/aws/lambda/infrastructure_monitor/edition_rows.py');m=importlib.util.module_from_spec(s);sys.modules['er']=m;s.loader.exec_module(m)\\nKEYS=['lambda_health','smartx_pipeline','data_freshness','deploy_drift','producer_drift','sns_egress','graph_head','contract_integrity','aws_costs','cost_depth','security_sweep','ai_analysis','openai_cost']\\nrep={'timestamp':'2026-09-10T13:00:00Z','status':'success','sections':{k:{'status':'OK','probe':k} for k in KEYS}}\\nrep['sections']['ai_analysis']=None\\nrows,om=m.rows_from_report(rep,None)\\ncovered=set()\\nfor o in om: covered.add(o.get('section') if isinstance(o,dict) else o)\\nfor r in rows:\\n    sec=r.get('section') or r.get('source_section')\\n    if sec: covered.add(sec)\\nmissing=[k for k in KEYS if k not in covered]\\nprint('SECTIONS=%d COVERED=%d MISSING=%s ROWS=%d OMISSIONS=%d' % (len(KEYS),len(covered&set(KEYS)),missing,len(rows),len(om)))\"",
+   "method": "command",
+   "invocation": "SUBSTITUTED PER TASK ORDER INSTRUCTION, same as AC1 above: cd \"C:/tmp/wk-report-4-2\" && <same python -c body as criterion_verbatim, module loaded from the worktree path>",
+   "output_evidence": "SECTIONS=13 COVERED=13 MISSING=[] ROWS=10 OMISSIONS=3 (rc=0). Re-run twice in succession, identical both times. ROWS=10 = the 10 sections whose real field name is defensible without inventing a literal (lambda_health, smartx_pipeline, data_freshness, deploy_drift, producer_drift, sns_egress, graph_head, contract_integrity, cost_depth, security_sweep); OMISSIONS=3 = aws_costs + openai_cost (always) + ai_analysis (CONDITIONAL-BY-DESIGN, realized as an omission here because the fixture forces it None).",
+   "denominator": "13 collector sections (SECTIONS=13); COVERED=13 of 13; ROWS=10 + OMISSIONS=3 = 13",
+   "status": "PASS",
+   "expect": "SECTIONS=13 COVERED=13 MISSING=\\[\\]"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "cd \"C:/Users/Opal Bloomberg/Desktop/ajb_workspace\" && timeout 180 python -c \"import importlib.util,sys\\ns=importlib.util.spec_from_file_location('er2','infra/aws/lambda/infrastructure_monitor/edition_rows.py');m=importlib.util.module_from_spec(s);sys.modules['er2']=m;s.loader.exec_module(m)\\nKEYS=[...13 keys...]\\nrep={'sections':{k:{'status':'OK','probe':k} for k in KEYS}};rep['sections']['ai_analysis']=None\\nrows,om=m.rows_from_report(rep,None)\\nnoreason=[o for o in om if not (isinstance(o,dict) and str(o.get('reason','')).strip())]\\nprint('OMISSIONS=%d WITHOUT_REASON=%d' % (len(om),len(noreason)))\"",
+   "method": "command",
+   "invocation": "SUBSTITUTED PER TASK ORDER INSTRUCTION, same as AC1 above: cd \"C:/tmp/wk-report-4-2\" && <same python -c body as criterion_verbatim, module loaded from the worktree path>",
+   "output_evidence": "OMISSIONS=3 WITHOUT_REASON=0 (rc=0). Re-run twice in succession, identical both times. All 3 omissions this run (aws_costs, openai_cost, ai_analysis-when-None) carry a non-empty, dict-shaped 'reason' string, verified by proof_of_spec_check's own grep-free predicate above.",
+   "denominator": "3 omissions produced this run; 0 of 3 lack a reason",
+   "status": "PASS",
+   "expect": "OMISSIONS=3 WITHOUT_REASON=0"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "cd \"C:/Users/Opal Bloomberg/Desktop/ajb_workspace\" && timeout 180 python -c \"import importlib.util,sys,json\\ns=importlib.util.spec_from_file_location('er3','infra/aws/lambda/infrastructure_monitor/edition_rows.py');m=importlib.util.module_from_spec(s);sys.modules['er3']=m;s.loader.exec_module(m)\\nKEYS=[...13 keys...]\\ndef rep(st):\\n    r={'sections':{k:{'status':st,'probe':k,'functions_with_errors':(3 if st!='OK' else 0)} for k in KEYS}};r['sections']['ai_analysis']=None;return r\\na,_=m.rows_from_report(rep('OK'),None)\\nb,_=m.rows_from_report(rep('BREACH'),None)\\nprint('ROWS_A=%d ROWS_B=%d DIFFER=%s' % (len(a),len(b),json.dumps(a,sort_keys=True,default=str)!=json.dumps(b,sort_keys=True,default=str)))\"",
+   "method": "command",
+   "invocation": "SUBSTITUTED PER TASK ORDER INSTRUCTION, same as AC1 above: cd \"C:/tmp/wk-report-4-2\" && <same python -c body as criterion_verbatim, module loaded from the worktree path>",
+   "output_evidence": "ROWS_A=10 ROWS_B=10 DIFFER=True (rc=0). Re-run twice in succession, identical both times. Diagnosed per-section (not part of the formal criterion, run separately for grounding): 3 of the 10 mapped sections (lambda_health via functions_with_errors, smartx_pipeline and cost_depth via status) actually change axis2 between the two synthetic reports (OK vs BREACH); the other 7 read UNASSERTED in both (their real field name -- overall_status, or security_sweep's issue-count fields -- is absent from this generic fixture). DIFFER=True holds because at least one row differs when the full row list is JSON-compared, which is what AC4 measures. Filed as surprise row NFRA_REPORT-Z-W2-S7 (see surprises below) since this is exactly the fixture-vs-real-shape gap the task order asked to be surfaced.",
+   "denominator": "10 rows in each of ROWS_A and ROWS_B; 3 of 10 sections' axis2 differ between the two synthetic reports, sufficient for the whole-row-list DIFFER=True this criterion measures",
+   "status": "PASS",
+   "expect": "ROWS_A=10 ROWS_B=10 DIFFER=True"
+  },
+  {
+   "criterion_id": "AC5",
+   "criterion_verbatim": "cd \"C:/Users/Opal Bloomberg/Desktop/ajb_workspace\" && timeout 120 python -c \"import ast,sys;src=open('infra/aws/lambda/infrastructure_monitor/edition_rows.py',encoding='utf-8').read();t=ast.parse(src);mods=set()\\nfor n in ast.walk(t):\\n    if isinstance(n,ast.Import):\\n        for a in n.names: mods.add(a.name.split('.')[0])\\n    elif isinstance(n,ast.ImportFrom):\\n        if n.module: mods.add(n.module.split('.')[0])\\nstd=set(sys.stdlib_module_names);bad=sorted(m for m in mods if m not in std)\\nprint('IMPORTS=%d NON_STDLIB=%d NAMES=%s' % (len(mods),len(bad),bad))\"",
+   "method": "command",
+   "invocation": "SUBSTITUTED PER TASK ORDER INSTRUCTION, same as AC1 above: cd \"C:/tmp/wk-report-4-2\" && timeout 120 python -c \"import ast,sys;src=open('infra/aws/lambda/infrastructure_monitor/edition_rows.py',encoding='utf-8').read();t=ast.parse(src);mods=set()\\nfor n in ast.walk(t):\\n    if isinstance(n,ast.Import):\\n        for a in n.names: mods.add(a.name.split('.')[0])\\n    elif isinstance(n,ast.ImportFrom):\\n        if n.module: mods.add(n.module.split('.')[0])\\nstd=set(sys.stdlib_module_names);bad=sorted(m for m in mods if m not in std)\\nprint('IMPORTS=%d NON_STDLIB=%d NAMES=%s' % (len(mods),len(bad),bad))\"",
+   "output_evidence": "IMPORTS=2 NON_STDLIB=0 NAMES=[] (rc=0). The 2 imports are `from __future__ import annotations` and `from typing import ...` -- both stdlib. Re-run twice in succession, identical both times.",
+   "denominator": "2 distinct top-level import module names in edition_rows.py; 0 of 2 non-stdlib",
+   "status": "PASS",
+   "expect": "NON_STDLIB=0 NAMES=\\[\\]"
+  },
+  {
+   "criterion_id": "AC6",
+   "criterion_verbatim": "cd \"C:/Users/Opal Bloomberg/Desktop/ajb_workspace\" && timeout 120 python -c \"src=open('infra/aws/lambda/infrastructure_monitor/edition_rows.py',encoding='utf-8').read();bad=[(i+1,l) for i,l in enumerate(src.splitlines()) if any(ord(c)>126 for c in l)];print('LINES=%d NON_ASCII_LINES=%d FIRST=%s' % (len(src.splitlines()),len(bad),bad[:2]))\"",
+   "method": "command",
+   "invocation": "SUBSTITUTED PER TASK ORDER INSTRUCTION, same as AC1 above: cd \"C:/tmp/wk-report-4-2\" && timeout 120 python -c \"src=open('infra/aws/lambda/infrastructure_monitor/edition_rows.py',encoding='utf-8').read();bad=[(i+1,l) for i,l in enumerate(src.splitlines()) if any(ord(c)>126 for c in l)];print('LINES=%d NON_ASCII_LINES=%d FIRST=%s' % (len(src.splitlines()),len(bad),bad[:2]))\"",
+   "output_evidence": "LINES=548 NON_ASCII_LINES=0 FIRST=[] (rc=0). Re-run twice in succession, identical both times.",
+   "denominator": "548 lines in edition_rows.py; 0 carry a non-ASCII character",
+   "status": "PASS",
+   "expect": "LINES=\\d+ NON_ASCII_LINES=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC1's exact invocation (cd substituted, per the task order's own instruction) was re-run against the module TEMPORARILY MOVED ASIDE (mv edition_rows.py -> .scratch/, never a committed path) -- reproducing the task order's own printed RED ARM ('AC1 unparseable, file absent FAILS') by independent execution rather than trusting the printed baseline. The file was restored and its git-hash-object re-verified identical to the pre-mutant hash before continuing.",
+   "expected": "AC1 raises FileNotFoundError (the RED ARM's own stated failure mode) with the module absent.",
+   "observed": "FileNotFoundError: [Errno 2] No such file or directory: 'infra/aws/lambda/infrastructure_monitor/edition_rows.py' -- fired exactly as expected. A second control (importlib spec_from_file_location + exec_module, AC2/AC3/AC4's own loading method) against the same absent path raised the same class of error (FileNotFoundError via get_data), confirming AC2/AC3/AC4 would equally fail on an absent module, matching the task order's own RED ARM table for those criteria. File restored: git hash-object infra/aws/lambda/infrastructure_monitor/edition_rows.py == 2e551ad049cca4b7fc7be199c7c2606c5aca1aed both before and after the mutant, byte-identical (diff confirmed 0 lines).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "All six criteria's exact (substituted) invocations were each run twice in succession against the same uncommitted worktree bytes.",
+   "observed": "AC1=(33,True)/(33,True). AC2=(13,13,[],10,3)/(13,13,[],10,3). AC3=(3,0)/(3,0). AC4=(10,10,True)/(10,10,True). AC5=(2,0,[])/(2,0,[]). AC6=(548,0,[])/(548,0,[]). Identical both times for all six.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "This cell does not edit lambda_function.py, does not wire edition_rows.py into lambda_handler, and does not add any alarm/topic/subscription/schedule/notification.",
+   "reason": "BOUNDS: wiring is RP-s-23's cell and is not in this cell's <paths>; the standing alerting/monitoring-build moratorium (CLAUDE.md NEVER list) forbids the latter regardless of scope. edition_rows.py is a pure-python module receiving an already-collected `report` dict; it performs no live AWS read of its own (AC5's stdlib-only check refuses boto3 as it refuses any third-party import)."
+  },
+  {
+   "item": "Neither aws_costs nor openai_cost is rendered as a MAPPED row; neither is graded OK/DEGRADED/BREACH.",
+   "reason": "Both sections' real return shape (verified by direct reading of get_aws_costs()/get_openai_cost_section() at lambda_function.py:1137-1192 and openai_cost_tracker.py:158-229) carries no status/severity field of any kind -- a raw dollar/token accounting only. Grading either would require this cell to invent a threshold the collector itself does not assert, which is exactly what C-NO-FROZEN-FACTS forbids ('never rendered from a literal'). Both are OMITTED-WITH-REASON instead; the reason is recorded in SECTION_MAPPING.md and in each omission's own 'reason' field."
+  },
+  {
+   "item": "7 of the 10 MAPPED sections (data_freshness, deploy_drift, producer_drift, sns_egress, graph_head, contract_integrity, security_sweep) do not discriminate between the AC2/AC3/AC4 fixture's all-OK and all-BREACH synthetic reports -- they read axis2=UNASSERTED in both.",
+   "reason": "Each of those 7 extractors reads ONLY the section's real field name (overall_status, or security_sweep's critical/high/medium/low issue-count fields), which the task order's own declared-synthetic fixture never populates (it only ever sets 'status'/'probe'[/'functions_with_errors']). Falling back to the fixture's generic key would make this criterion discriminate 10-for-10 against THIS fixture while reading a field that does not exist in the REAL collector output for those 7 sections -- the opposite trade the cell asks for (map the REAL collector's output, never a literal). Filed and grounded as surprise row NFRA_REPORT-Z-W2-S7, per the task order's own instruction that a fixture disagreeing with the world here 'is exactly what this project exists to catch.'"
+  }
+ ],
+ "surprises": [
+  "NFRA_REPORT-Z-W2-S7: only 3 of edition_rows.py's 10 MAPPED sections (lambda_health, smartx_pipeline, cost_depth) actually discriminate between the AC2/AC3/AC4 fixture's all-OK and all-BREACH synthetic reports; the other 7 read axis2=UNASSERTED in both runs because their real field name (overall_status, or security_sweep's issue-count fields) is absent from the fixture's uniform {status, probe} shape. AC2/AC3/AC4 all still PASS (coverage, reason and the aggregate row-SET-differs requirement are unaffected), so this is the declared fixture-vs-real-shape gap the task order itself asked to be surfaced, not a defect against this cell's own criteria. Filed and grounded in org/missions/D12/NFRA/NFRA_REPORT/surprise-channel/investigations/INVESTIGATION_v1.md, class OBSERVATION, hazard_standing INERT."
+ ],
+ "session_log": "N/A -- worker subagent (0.9.0_WK_NFRA_REPORT~2) per CLAUDE.md rule 27: 'a worker's write surface is exactly the <paths> its non-terminal order names ... and it writes no telemetry (L7 reads from git)'. This TO's <paths> names no logs/ surface. The git commit history on branch wk-NFRA_REPORT-4-2 is the record.",
+ "compiler_tools": [
+  {
+   "tool": "python -c (six AC invocations, substituted per the task order's own instruction to run from the worktree since the files under test are uncommitted)",
+   "invocation": "cd \"C:/tmp/wk-report-4-2\" && <each of AC1-AC6's exact python -c body from the task order's <proof_of_spec>>, each under timeout 120/180",
+   "result": "AC1=(33,True), AC2=(13,13,[],10,3), AC3=(3,0), AC4=(10,10,True), AC5=(2,0,[]), AC6=(548,0,[]). All PASS against their named expectation. Each re-run twice for determinism (see controls.determinism)."
+  },
+  {
+   "tool": "python (per-section discrimination diagnostic, not a formal criterion -- grounding for the surprise row)",
+   "invocation": "cd \"C:/tmp/wk-report-4-2\" && python -c \"<load edition_rows.py, call rows_from_report on the AC4 rep('OK') and rep('BREACH') fixtures, print each mapped section's curr.axis2 for both runs>\"",
+   "result": "lambda_health/smartx_pipeline/cost_depth differ between runs; data_freshness/deploy_drift/producer_drift/sns_egress/graph_head/contract_integrity/security_sweep all read UNASSERTED in both runs; aws_costs/ai_analysis/openai_cost omitted in both runs. Grounds surprise row NFRA_REPORT-Z-W2-S7."
+  },
+  {
+   "tool": "mv / git hash-object (mutant control)",
+   "invocation": "mv infra/aws/lambda/infrastructure_monitor/edition_rows.py aside, re-run AC1/AC2's loading path against the absent file, restore, git hash-object to confirm byte-identical restoration",
+   "result": "FileNotFoundError on both AC1's ast.parse path and AC2/AC3/AC4's importlib loading path, reproducing the task order's own RED ARM independently. Restored file hash 2e551ad049cca4b7fc7be199c7c2606c5aca1aed, identical before and after (diff: 0 lines)."
+  },
+  {
+   "tool": "commit-gate.sh",
+   "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/infrastructure_monitor/edition_rows.py",
+   "result": "All checks passed! OK: no unguarded strict-utf8 log reads. OK: pre-commit gate clean for 1 of 1 file(s)."
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/NFRA_REPORT.TO-RP-s-22.proof_of_spec.json AC1,AC2,AC3,AC4,AC5,AC6",
+   "result": "run after this instance was written; see this worker's WORKER REPORT for the printed rc and denominator"
+  }
+ ]
+}

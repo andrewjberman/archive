@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_REPORT.TO-RP-s-5",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_REPORT/prd/NFRA_REPORT_PRD.md",
+    "group": "D",
+    "vintage_commit": "17c153a1cb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_REPORT/decompositions/NFRA_REPORT_DECOMP.md",
+    "vintage_commit": "7d698685fe",
+    "to_ref": "org/missions/D12/NFRA/NFRA_REPORT/task-orders/NFRA_REPORT.TO-RP-s-5.compute-manifest-substrate-ec2-and-ecs.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_REPORT~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "f9f7b2b122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A state-tracking manifest, not a deployed artifact -- nothing to push. `_schema_version` bumped 1.0 -> 1.1. `machine_type`(+`_basis`) added to the 18 of 27 rows that carried a lifecycle word in `instance_type`, backfilled by live `aws ec2 describe-instances --region us-east-1` (32-instance sweep, 2026-09-09T20:10Z), WITHOUT changing `instance_type` itself (sync-ec2-manifest.sh, outside this cell's <paths>, selects on the literal string \"persistent\" there). `lifecycle`(+`_basis`) added to 8 of the 9 rows that carried a real machine type but no lifecycle value at all, extending the free-text convention already on this file's own estate-report-runner row. `always_on_group: \"Website\"` added to opal-website-wp. New top-level `ecs_clusters.opal-globgrph` section (1 cluster, 3 services, all ALWAYS-ON, `always_on_group: \"Graph\"`). `estate-report-runner.instance_id` corrected (4th documented churn) and `bd-gold-detail-generator.instance_id` backfilled (was null), both by live Name-tag lookup. Validated: `python -m json.tool infra/aws/ec2/EC2_MANIFEST.json` succeeds (JSON-VALID); `python3 -c \"import json; m=json.load(open(...)); assert len(m['services'])==27\"` confirms row count unchanged.",
+      "artifact_covered_by": ["AC1", "AC6"]
+    },
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/COMPUTE_MANIFEST_FINDINGS.md",
+      "kind": "doc",
+      "commit_or_etag": "f9f7b2b122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW, the cell deliverable. Premise re-grounding (s.1), the full live-vs-declared EC2 reconciliation with denominators at every step (s.2), the schema-fix tables for all 27 rows with evidence citations (s.3), the ECS enumeration and its resolution of ruling 15b's own 'Graph group MAY BE EMPTY' open item (s.4), the Gateway-vs-Graph naming conflict across the PRD/project-register vs ruling 15b/this TO (s.4a), the always-on-by-group table naming two ungrouped always-on boxes (s.5), the 3 filed surprise rows (s.6) and declared exclusions (s.7).",
+      "artifact_covered_by": ["AC2", "AC3", "AC6"]
+    },
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "f9f7b2b122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW FILE -- this project's channel had no prior investigations document. 3 rows appended: NFRA_REPORT-Z-W2-S1 (live compute exceeds declared manifest, OBSERVATION/INERT), NFRA_REPORT-Z-W2-S2 (Gateway-vs-Graph naming split across the PRD/project-register vs ruling 15b/this TO, OBSERVATION/ARMED, disarm_owner 1.0.0_SA_CTO~Z), NFRA_REPORT-Z-W2-S3 (the TO's carried manifest-age premise is stale at re-grounding, OBSERVATION/INERT). `python .tools/surprise-row-gate.py org/missions/D12/NFRA/NFRA_REPORT/surprise-channel/investigations/INVESTIGATION_v1.md` (run against the staged blob before this commit) -> rc=0, '3 new row(s) of 3 total checked (0 pre-existing, NOT re-graded)', 'OK: 1 file(s), all new rows carry their step-7/step-10 fields', and the standing corpus pass 'OK: corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved)'.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: test -f infra/aws/ec2/EC2_MANIFEST.json && echo PRESENT -- expect the literal string PRESENT",
+      "method": "command",
+      "invocation": "timeout 120 bash -c 'test -f infra/aws/ec2/EC2_MANIFEST.json && echo PRESENT'",
+      "output_evidence": "PRESENT\nrc=0",
+      "denominator": "N/A -- boolean presence check on 1 named path",
+      "status": "PASS",
+      "expect": "PRESENT"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: grep -c -E '[0-9]+ of [0-9]+' .../COMPUTE_MANIFEST_FINDINGS.md -- expect a count of 1 or greater (a coverage claim with no denominator fails FWD-10's discipline)",
+      "method": "command",
+      "invocation": "timeout 120 grep -c -E '[0-9]+ of [0-9]+' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/COMPUTE_MANIFEST_FINDINGS.md",
+      "output_evidence": "grep -c output: 18 (matching lines), rc=0. Sample matches from the same file: '18 of 27 rows carry a LIFECYCLE WORD', '22 of 24 resolved live', '8 of 32 live instances remain undeclared', '3 of 3 ECS services'.",
+      "denominator": "18 lines matching the 'N of M' denominator pattern, counted over the whole deliverable file (1 of 1 file checked); re-run at HEAD f9f7b2b122 (post-commit) with the identical result.",
+      "status": "PASS",
+      "expect": "output: [1-9][0-9]*"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: grep -c -i 'ECS' .../COMPUTE_MANIFEST_FINDINGS.md -- expect a count of 1 or greater",
+      "method": "command",
+      "invocation": "timeout 120 grep -c -i 'ECS' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/COMPUTE_MANIFEST_FINDINGS.md",
+      "output_evidence": "grep -c -i output: 16 (case-insensitive matching lines), rc=0. ECS is addressed as its own section (s.4, 'ECS enumeration'), not a passing mention -- opal-globgrph is a live ECS cluster with 3 always-on Fargate services.",
+      "denominator": "16 case-insensitive 'ECS' hits over the whole deliverable file (1 of 1 file checked); re-run at HEAD f9f7b2b122 (post-commit) with the identical result.",
+      "status": "PASS",
+      "expect": "output: [1-9][0-9]*"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "AC6 (JUDGMENT): whether the schema fix correctly separates MACHINE TYPE from LIFECYCLE on the 18-of-27 rows that conflate them, and whether the always-on set is correctly grouped. NEVER self-graded. Record UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming 3.0.0_SA_CVO~Z, who grades it at L9. PASS or FAIL on it is INVALID.",
+      "method": "manual_read_with_citation",
+      "invocation": "read: org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/COMPUTE_MANIFEST_FINDINGS.md s.3 (the schema fix, both directions -- 18 of 27 rows given machine_type, 9 of 27 given lifecycle) and s.4/s.5 (the ECS finding resolving the Graph group, and the always-on-by-group table naming opal-gateway and canonical-schwab-si2 as ungrouped)",
+      "output_evidence": "RECORDED, NOT GRADED. Summary of what was done: instance_type left byte-unchanged on all 27 rows (sync-ec2-manifest.sh dependency, out of this cell's <paths>); machine_type added additively to the 18 conflated rows (16 of 18 live-resolved, 2 of 18 UNRESOLVED and stated as such rather than guessed); lifecycle added additively to 8 of the 9 rows that had none, following the pre-existing estate-report-runner precedent rather than inventing a new field shape; always_on_group populated only where evidence supports it (opal-website-wp = Website; the 3 opal-globgrph ECS services = Graph), left ABSENT (not force-filled) for opal-gateway and canonical-schwab-si2, which are both real always-on EC2 boxes that do not fit any of the three literal group names -- carried open as row NFRA_REPORT-Z-W2-S2 rather than resolved by this seat's own guess. Andrew's ruling 15b's own open sub-item ('the Graph group MAY BE EMPTY') is answered NOT EMPTY by this cell's live ECS enumeration, which is a factual finding independent of any judgment call.",
+      "denominator": "27 of 27 rows carry an explicit machine_type XOR lifecycle value (18 given machine_type, 9 already had it; 9 given lifecycle, 1 already had it) -- MECE over the two-field split confirmed by direct count, not asserted.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\" at the cut: whether the schema fix is CORRECT (not merely present) and whether the always-on grouping is CORRECT is a judgment call this seat cannot self-grade. Graded by 3.0.0_SA_CVO~Z at L9. PASS/FAIL from this seat would be INVALID.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2/AC3 are both grep -c counts over a file this seat authored, so the live control is the BASE-COMMIT absence: before this cell's commit, no file existed at org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/COMPUTE_MANIFEST_FINDINGS.md at all (git show HEAD~1:<path> -- fatal: path does not exist), so both greps would have failed the invocation outright (non-zero grep rc from a missing file, not a clean 0) rather than merely returning 0. A stronger in-file mutant: grep -c -E '[0-9]+ of [0-9]+' against a copy of the file with every 'N of M' substring string-replaced to 'N/M' returns 0, the FAIL value AC2's expect pattern would reject.",
+      "expected": "the base-commit (pre-this-turn) read of the deliverable path fails (file absent); the in-file mutant (N of M -> N/M) returns 0 against AC2's own regex",
+      "observed": "git show HEAD~1:org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/COMPUTE_MANIFEST_FINDINGS.md -> fatal: path 'org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/COMPUTE_MANIFEST_FINDINGS.md' does not exist in 'HEAD~1' (rc=128, confirmed the file is new at f9f7b2b122); sed 's/\\([0-9]\\) of \\([0-9]\\)/\\1\\/\\2/g' applied to a scratch copy then grep -c -E '[0-9]+ of [0-9]+' -> 0, which is the value AC2's expect (^(?!0$)[0-9]+$) rejects.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1/AC2/AC3 re-run twice: once against the worktree before the commit, once against HEAD f9f7b2b122 after it.",
+      "observed": "AC1: PRESENT both times. AC2: 18 both times. AC3: 16 both times. json.load + len(services)==27 both times (before and after commit).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Editing infra/aws/ec2/sync-ec2-manifest.sh to select on the new `lifecycle` field instead of the literal string \"persistent\" in `instance_type`.",
+      "reason": "The script is not in this cell's <paths>. The schema fix is additive specifically so the script's existing (narrow) coverage is not broken by this cell -- see COMPUTE_MANIFEST_FINDINGS.md s.3 preamble."
+    },
+    {
+      "item": "Resolving which of the 8 live-undeclared historical-prices-fetcher/seeking-alpha-scraper instances (if any) is canonical, or terminating any of them.",
+      "reason": "No evidence names a canonical instance; recorded as finding NFRA_REPORT-Z-W2-S1, not remediated -- outside this cell's EC2/ECS-enumeration-only bound."
+    },
+    {
+      "item": "Resolving the Gateway-vs-Graph naming split between the PRD/project-register and ruling 15b/this TO.",
+      "reason": "Carried open per this cell's own BOUNDS ('OPEN SUB-ITEM, carried not resolved'); filed as row NFRA_REPORT-Z-W2-S2, disarm_owner 1.0.0_SA_CTO~Z."
+    },
+    {
+      "item": "Any alarm, monitor, SNS, or notification.",
+      "reason": "This cell's BOUNDS explicitly forbid it ('THIS CELL IS EC2/ECS ENUMERATION ONLY. It creates no alarm, no monitor and no notification.'); none created."
+    },
+    {
+      "item": "Any IAM grant, role, or policy change.",
+      "reason": "Every AWS call this cell made was a read (describe-instances, list-clusters, describe-clusters, list-services, describe-services, describe-scheduled-actions) under the existing operator credential; comp-iam's battery finding for this decomposition says no cell requires one, and none was created, changed, or required."
+    }
+  ],
+  "surprises": [
+    "NFRA_REPORT-Z-W2-S1: the live EC2 fleet (32 instances, us-east-1) exceeds the 27-service declared manifest by 10 undeclared instances -- 8 remain undeclared after this cell's two backfills (bd-gold-detail-generator, estate-report-runner's churned id). OBSERVATION, INERT, UNDER_INVESTIGATION.",
+    "NFRA_REPORT-Z-W2-S2: the PRD (s.6) and the registered project record (org/projects/NFRA_REPORT.json) both name the third always-on property 'Gateway', while Andrew's own verbatim ruling 15b and this TO name it 'Graph' -- two different, both-real, both-running compute surfaces (opal-gateway EC2 vs the opal-globgrph ECS cluster this cell found live). OBSERVATION, ARMED, disarm_owner 1.0.0_SA_CTO~Z, UNDER_INVESTIGATION.",
+    "NFRA_REPORT-Z-W2-S3: the TO's carried premise 'the manifest is itself 2014.2h old' (L1 brief vintage) is stale as of this cell's re-grounding -- the manifest's own _last_updated is ~62 minutes old (an intervening opal-gateway deploy touched it after the brief's vintage). OBSERVATION, INERT, UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~2/COMPUTE_MANIFEST_FINDINGS.md",
+  "compiler_tools": [
+    {
+      "tool": "aws (sts/ec2/ecs/application-autoscaling, .tools/aws shim)",
+      "invocation": "aws sts get-caller-identity; aws ec2 describe-instances --region us-east-1 (+us-east-2/us-west-2 controls); aws ecs list-clusters/describe-clusters/list-services/describe-services --region us-east-1; aws application-autoscaling describe-scheduled-actions --service-namespace ecs",
+      "result": "Account 313476888478 confirmed. 32 of 32 live EC2 instances read (0 in the two control regions). 1 of 1 ECS cluster (opal-globgrph, ACTIVE, FARGATE), 3 of 3 services (globgrph-nessie/trino/serving), each desiredCount=1/runningCount=1/ACTIVE. 0 of 0 scheduled scaling actions anywhere in the ecs namespace -- the basis for calling the 3 ECS services ALWAYS-ON."
+    },
+    {
+      "tool": "python3 (json load/diff/reconciliation script)",
+      "invocation": "python3 -c \"...\" joins infra/aws/ec2/EC2_MANIFEST.json against the live describe-instances JSON by instance_id and by Name tag",
+      "result": "Exact counts: 27 services, 18 lifecycle-word rows, 9 machine-type rows (18+9=27); 25 of 27 rows had a non-null instance_id pre-fix (24 of 25 unique); 22 of 24 resolved live, 2 stale (orion-crawl-harness, estate-report-runner); 10 of 32 live instances undeclared pre-fix, 8 of 32 post-fix."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'RP-s-5' / '15b' / 'Graph' over org/missions/D12/NFRA/NFRA_REPORT and comp-find --name for sync-ec2-manifest.sh / investigation_item.schema.json / the FIVE_RULINGS deliverable",
+      "result": "Located ruling 15b's source (org/tier1_exec/4.0.0_SA_CRO/deliverables/ANDREW_DIRECT_20260909_1458Z_INFRA_REPORT_FIVE_RULINGS.md:313,341-371) and confirmed 'Graph'/'Gateway' each appear in exactly the artifacts cited in row S2; confirmed sync-ec2-manifest.sh is the estate's one hit for the PORT verb's build-ladder rung 2."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "git add org/missions/D12/NFRA/NFRA_REPORT/surprise-channel/investigations/INVESTIGATION_v1.md && python .tools/surprise-row-gate.py org/missions/D12/NFRA/NFRA_REPORT/surprise-channel/investigations/INVESTIGATION_v1.md ; git reset <same path>",
+      "result": "rc=0. '3 new row(s) of 3 total checked (0 pre-existing, NOT re-graded)'; 'OK: 1 file(s), all new rows carry their step-7/step-10 fields'; standing corpus pass 'OK: corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved)'. Unstaged afterward so safe-commit.sh performed its own staging per rule 14a."
+    },
+    {
+      "tool": "python -m json.tool",
+      "invocation": "python3 -m json.tool infra/aws/ec2/EC2_MANIFEST.json > /dev/null",
+      "result": "rc=0, JSON-VALID after the schema-fix edit; len(m['services'])==27 confirmed unchanged (no row added or dropped by the edit)."
+    }
+  ]
+}
