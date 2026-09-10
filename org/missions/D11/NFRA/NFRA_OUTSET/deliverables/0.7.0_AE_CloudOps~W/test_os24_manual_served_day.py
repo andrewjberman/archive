@@ -34,6 +34,12 @@ REPORT_KEY = "daily/2026/09/09/estate-report-2026-09-09.json"
 REPORT_MD = "daily/2026/09/09/estate-report-2026-09-09.md"
 MANIFEST_KEY = "manifest/2026-09-09.json"
 RUN_VERSION = "F3CLuHhwgcRKo7OdbCdLbexIO6BUo3Mw"
+
+# RE-POINTED PLANE for O24-AC1 arm (d) only (issuer ruling 95241, 2026-09-10T14:37Z):
+# the first SCHEDULED run with the S36 grant exercised. Every OTHER arm stays on the
+# manual served day, which is where its subject lives.
+SCHEDULED_REPORT_KEY = "daily/2026/09/10/estate-report-2026-09-10.json"
+SCHEDULED_REPORT_VERSION = "kIo74Zug6entwLkwzLOw5TYMktp7RJ1R"
 RUN_VERSION_MD = "LDU91_HNL2W37JpxYerMhKjffcFDNje9"
 RUN_VERSION_MANIFEST = "o7A8G0W4zwPmHnGsESt7Np3lBFyH21dY"
 RUN_VERSION_SHA16 = "dbe02e28c705f3eb"      # the run's .json -- arm (e)'s negative control
@@ -382,10 +388,38 @@ def arm_d(s3, report):
     else:
         fail("d", "no device reads UNREAD/SILENT -- the negative arm did not fire")
 
-    # ---- GROUP B
-    b = groups.get("B") or {}
-    print("      B stratum_status : %s  (unmeasured=%s)"
-          % (b.get("stratum_status"), b.get("unmeasured")))
+    # ---- GROUP B. RE-POINTED 2026-09-10T14:37Z BY THE ISSUER (2.0.0_SA_COO, msg 95241) onto the
+    # 13:00Z SCHEDULED run, shape (a), with ONE CONDITION: the manual day's INSTRUMENT_FAILED
+    # reading is PRESERVED as the BEFORE state rather than erased.
+    #
+    # WHY THE RE-POINT IS NOT A WEAKENING, in the issuer's own distinction: on ETFS_GUARDRAIL
+    # TO-EG-s-21 the ARTIFACT was deficient and FIXABLE, so re-pointing would have let an outcome
+    # grade REALIZED while the property stayed false, and the CTO ruled FIX THE ARTIFACT. HERE the
+    # artifact is a HISTORICAL IMMUTABLE RECORD and the thing under test is ALREADY FIXED: the
+    # manual day was produced 00:29:57Z, the S36 grant landed 02:43Z, and no act by any seat can
+    # make a 00:29Z artifact reflect an 02:43Z fix. The criterion was pointed at a day that
+    # predates its own subject.
+    #
+    # AND THE PRESERVED BEFORE-STATE IS WHAT KEEPS THIS FROM LOSING EVIDENCE: the two readings
+    # together are a DIFFERENCE CONTROL ACROSS THE FIX, which is stronger than either alone.
+    b_before = groups.get("B") or {}
+    print("      BEFORE -- the MANUAL served day (00:29:57Z, PRESERVED not erased):")
+    print("        B stratum_status : %s  (unmeasured=%s)"
+          % (b_before.get("stratum_status"), b_before.get("unmeasured")))
+    after_doc = json.loads(s3.get_object(Bucket=BUCKET, Key=SCHEDULED_REPORT_KEY,
+                                         VersionId=SCHEDULED_REPORT_VERSION)["Body"]
+                           .read().decode("utf-8"))
+    b = ((after_doc.get("ai") or {}).get("groups") or {}).get("B") or {}
+    print("      AFTER  -- the 13:00Z SCHEDULED run (the re-pointed plane):")
+    print("        B stratum_status : %s  (unmeasured=%s, candidates_raw=%s, candidates_kept=%s)"
+          % (b.get("stratum_status"), b.get("unmeasured"), b.get("candidates_raw"),
+             b.get("candidates_kept")))
+    print("      WHAT SEPARATES THEM: the S36 exact-key ListBucket grant, applied @a9972bf008 at "
+          "2026-09-10T02:43Z -- after the manual run, before the scheduled one.")
+    if b_before.get("stratum_status") == "OK":
+        fail("d", "the BEFORE state is already OK, so there is no difference across the fix and "
+                  "the re-point rests on nothing")
+        return
     # ⛔ THE INDEPENDENT READ IS OF THE VERSION *THIS RUN* WOULD HAVE READ, not of `latest`.
     # Until 2026-09-10T14:3xZ this read `latest` and printed today's 12:31:13Z publish beside a
     # run that started at 00:30:30Z -- a wrong-vintage citation inside a failure message, which is
@@ -395,7 +429,8 @@ def arm_d(s3, report):
     fed_key = "outset/comp_fedobs_coevolution.json"
     # The run start comes from the report being graded, not from a module-level constant, so this
     # arm cannot drift out of agreement with the run it is reading.
-    run_start = iso(str((report.get("run_bundle") or {}).get("started_at")))
+    # the independent count is of the version the RE-POINTED run read, not the manual one
+    run_start = iso(str((after_doc.get("run_bundle") or {}).get("started_at")))
     fvs = [v for v in s3.list_object_versions(Bucket=BUCKET, Prefix=fed_key).get("Versions", [])
            if v["Key"] == fed_key and v["LastModified"].astimezone(timezone.utc) < run_start]
     if not fvs:
