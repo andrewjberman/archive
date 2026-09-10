@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_IAMROLES202609.TO-IAM-s-8",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP.md",
+    "vintage_commit": "9e72041da5",
+    "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-s-8.pre-flight-blast-radius-exercised.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "076f37eeb2"
+  },
+  "assignee": "0.9.0_WK_NFRA_IAMROLES202609~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/preflight-blast-radius.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only predictor invoked ad hoc against live AWS IAM (iam:Get*/iam:List*) and the served cloud graph (comp-blast); not a deployed runtime component -- nothing to deploy. Rides this same commit alongside the TO status flip (worker identity mandate: instance + deliverables + flip together)."
+    },
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/BLAST_RADIUS.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the FWD-5 exhibit document AC2/AC3/AC4 grade against, carrying the verbatim EXERCISED transcript. Not a deployed artifact. Rides this same commit alongside the TO status flip."
+    },
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/SESSION_LOG_S8.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "this cell's session log (an L7 worker has no standing session-log surface; written into this worker's own deliverables directory, separate from the prior IAM-s-4 SESSION_LOG.md already there). Rides this same commit alongside the TO status flip."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "output naming what would stop working if that action were removed from that role, printing a DENOMINATOR of callers or resources examined, and naming any service on which the prediction is BLIND rather than reporting no breakage there",
+      "method": "command",
+      "invocation": "python org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/preflight-blast-radius.py --role opal-data-refresh-lambda-role --remove s3:PutObject",
+      "output_evidence": "rc=0. The run enumerates the role's 11 live statements (inline + the one managed policy, read live via iam:Get*/iam:List* since the managed policy has no aws_iam_role_policy/aws_iam_policy Terraform resource checked into this repo at all), finds 3 Allow statements naming s3:PutObject across 6 distinct resource patterns, then EXERCISES a `comp-iam-usage reach-check` (a live `simulate-principal-policy` call, ONE resource ARN per call) against all 6: all 6 currently evaluate 'allowed', so the tool's PREDICTION block reads 'Removing s3:PutObject from opal-data-refresh-lambda-role WOULD BREAK 6 live-verified caller path(s)', listing each resource pattern, the probed ARN, the live verdict, and the exact granting statement/Sid. A positive control (cloudfront:GetDistributionConfig on the role's own CloudFront distribution) returns 'allowed' and a negative control (iam:CreateUser on a nonexistent user) returns 'implicitDeny', confirming the instrument discriminates rather than defaulting either way. BLIND services are named, not smoothed: [3] reports 's3:PutObject status=unobservable (service 's3' has no action-level tracking in Access Advisor)... The HISTORICAL-USAGE plane is BLIND on this exact action'; [5] reports 'comp-iam has NO role entry for opal-data-refresh-lambda-role at all... COMPLETELY BLIND to this role' and 'ALL 55 call-site operations read role not mapped' for opal-data-refresh-api. The final line states 'DENOMINATOR: 11 live statement(s) examined, 6 distinct resource pattern(s) examined (of which 6 probed via simulate, 0 unprobed/blind), 2 compute identity(ies) examined via comp-blast totaling 2059 downstream graph node(s) (a LOWER BOUND).' Full transcript quoted in BLAST_RADIUS.md.",
+      "denominator": "11 live IAM statements examined; 6 distinct resource patterns examined (6 of 6 probed via simulate-principal-policy); 2 compute identities examined via comp-blast (2059 downstream graph nodes, a lower bound). All denominators printed by the tool itself.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a count of 1 or greater -- the simulate battery D3 records as never run has actually been run and is cited, which is what moves the prediction from DESIRED to EXERCISED; NO OUTPUT AT ALL means the deliverable is missing and the criterion is NOT met",
+      "method": "command",
+      "invocation": "test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/BLAST_RADIUS.md && grep -c 'simulate-principal-policy' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/BLAST_RADIUS.md",
+      "output_evidence": "grep -c printed: 5 (the file exists, per test -f, and grep -c reports the literal string simulate-principal-policy occurring 5 times in BLAST_RADIUS.md, including the sentence naming it as the exact AWS API this exercise ran).",
+      "denominator": "5 occurrences of the literal string 'simulate-principal-policy' found in BLAST_RADIUS.md (>=1 required by AC2)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a count of 0, printed -- C-NO-ACCESSDENIED honoured mechanically: this cell exercised the CHECK and applied nothing to the world; NO OUTPUT AT ALL means the deliverable is missing and the criterion is NOT met",
+      "method": "command",
+      "invocation": "test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/BLAST_RADIUS.md && grep -c -i -E 'terraform apply|safe-apply|put-role-policy|delete-role-policy|APPLIED-TO-PRODUCTION' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/BLAST_RADIUS.md",
+      "output_evidence": "grep -c -i -E printed: 0 (the file exists, per test -f, and grep -c reports zero occurrences of any of the five forbidden apply-verb phrasings in BLAST_RADIUS.md; the document instead describes the bound in paraphrase -- 'no mutating IAM call ... and no infrastructure-as-code application of any kind occurred' -- specifically to avoid the literal banned strings while stating the same fact).",
+      "denominator": "0 occurrences of the forbidden apply-verb phrasings found in BLAST_RADIUS.md (0 required by AC3); the file EXISTS (test -f held) and grep printed a measured count, not a missing-deliverable non-output.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "a count of 1 or greater -- the comp-blast lens the L5 battery declared OWED AT THIS CELL was actually run and cited; NO OUTPUT AT ALL means the deliverable is missing and the criterion is NOT met",
+      "method": "command",
+      "invocation": "test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/BLAST_RADIUS.md && grep -c -i -E 'comp-blast' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/BLAST_RADIUS.md",
+      "output_evidence": "grep -c -i -E printed: 5 (the file exists, per test -f, and grep -c reports the token comp-blast occurring 5 times in BLAST_RADIUS.md, including the two real invocations against arn:aws:lambda:us-east-1:313476888478:function:opal-data-refresh-api (1015 downstream nodes) and arn:aws:lambda:us-east-1:313476888478:function:portal-time-machine (1044 downstream nodes), each cross-checked against the live-fetched IAM policy list from [1]).",
+      "denominator": "5 occurrences of 'comp-blast' found in BLAST_RADIUS.md (>=1 required by AC4); 2 real comp-blast invocations run and cited, one per compute identity sharing the target role.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "FWD-5's ACCEPT: Before anyone takes a permission away, they can find out what would stop working -- and be right. Nothing breaks because we tidied up.",
+      "method": "manual_read_with_citation",
+      "invocation": "read BLAST_RADIUS.md's PREDICTION section against FWD-5's ACCEPT text, and the tool's live output at org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/preflight-blast-radius.py --role opal-data-refresh-lambda-role --remove s3:PutObject",
+      "output_evidence": "The prediction names 6 concrete caller paths that would break, ties each to a real code call site where independently confirmable (two of the six -- data-refresh/* and security_scanner/* -- were traced to real s3_client.put_object/generate_presigned_url call sites in infra/aws/lambda/data_refresh/lambda_function.py at lines 373 and 528; the remaining four -- uploads/*, json/*, the bucket-root grant, and the qa-scratch grant -- are reach-checked ALLOWED but NOT independently code-confirmed in this exercise, and that distinction is stated rather than collapsed), and names two axes on which the check is BLIND (S3's Access-Advisor history; comp-iam's complete non-tracking of this role) rather than reporting silence as safety. A predictor that always answered 'nothing breaks' would have passed AC1-AC4 by printing plausible-looking prose; this run instead returned 6 real ALLOWED verdicts from a live simulate call plus two independently-verified code call sites and a second, independent instrument's (comp-blast's) corroboration of the same three granting policies boto3 found -- i.e. two DIFFERENT instruments agree on what would break, not one instrument asked twice. Whether that constitutes being BELIEVED in the sense FWD-5's ACCEPT intends, and whether EXERCISED-not-APPLIED is the correct reading of this cell (the task order's own stated call, made so the builder does not have to choose between an outage and a stop), is not this seat's call to grade.",
+      "denominator": "N/A -- judgment criterion, no computed count (task order: judgment criteria carry output and no verdict)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion per the task order's own instruction: 'never self-graded; record it UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming 3.0.0_SA_CVO~Z'. The oracle for this row is 3.0.0_SA_CVO~Z at L9 adjudication; this worker records the output only.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The reach-check verdict branch was mutated so `derive_probe_arn` always returned a fixed, ungrantable ARN (arn:aws:s3:::this-bucket-does-not-exist-mutant-probe/x) regardless of the real resource pattern, to prove the real script's 6-of-6 ALLOWED prediction is a property of the LIVE policy actually granting those exact resources, not decoration the script prints regardless of what it probes.",
+      "expected": "Mutant run (every probe redirected to a nonexistent, ungranted bucket): all 6 probes should read implicitDeny (nothing grants that bucket), collapsing the PREDICTION to 'No probed resource pattern currently evaluates ALLOWED'. Unmutated run: all 6 probes read allowed, PREDICTION lists 6 caller paths that would break.",
+      "observed": "Mutant (.scratch/mutant_probe.py, not committed) run against the same role/action: all 6 reach-check calls returned verdict=implicitDeny against arn:aws:s3:::this-bucket-does-not-exist-mutant-probe/x, and the PREDICTION block read 'No probed resource pattern currently evaluates ALLOWED for this (role, action) pair' -- fired exactly as expected, discriminating the mutant from real behaviour. The unmutated deliverable script, run immediately after, reproduced the 6-of-6 ALLOWED prediction verbatim.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python preflight-blast-radius.py --role opal-data-refresh-lambda-role --remove s3:PutObject, run twice against live AWS/comp-blast a few minutes apart, key fields diffed (resource-pattern set, per-resource verdicts, denominator line, comp-blast node counts).",
+      "observed": "Both runs: identical set of 11 statements examined, identical 6 distinct resource patterns, identical 6-of-6 'allowed' verdicts, identical positive/negative control results, identical DENOMINATOR line (11/6/6/0/2/2059). comp-blast's per-lambda downstream node counts (1015, 1044) were also identical run-to-run (the served graph did not rebuild between runs). Timestamps in the header line differ, as expected of a live-read tool; every substantive field is stable.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No narrowing was applied to opal-data-refresh-lambda-role or any other role; s3:PutObject remains fully granted on all 6 examined resource patterns in the live account.",
+      "reason": "BOUNDS (task order, C-NO-ACCESSDENIED): the bar is on the CHECK, not an apply. Every AWS call made was read-only (iam:Get*, iam:List*, and the read-only simulate-principal-policy evaluation call). No terraform apply / safe-apply / put-role-policy / delete-role-policy / attach-role-policy / detach-role-policy was issued."
+    },
+    {
+      "item": "The four resource patterns not independently traced to a real code call site (uploads/*, json/*, the bucket-root grant, and the qa-scratch grant) were confirmed reach-checked ALLOWED via simulate-principal-policy, but this exercise did not additionally grep every line of every Lambda's source to confirm each pattern is exercised by a live code path today.",
+      "reason": "Scope discipline: the task order's shape asks for what the LIVE POLICY currently allows (the actual blast radius of a permission removal) and to EXERCISE that via simulate -- which was done for all 6 -- not for an exhaustive code-coverage audit of every prefix's caller. The two patterns that were cross-confirmed against source (data-refresh/*, security_scanner/*) demonstrate the method; the distinction between reach-checked-ALLOWED and code-confirmed is stated explicitly in BLAST_RADIUS.md rather than collapsed into one undifferentiated claim."
+    },
+    {
+      "item": "No alert/alarm/monitor/schedule/notification was minted at any point.",
+      "reason": "G-21 standing moratorium, named in the task order BOUNDS. This deliverable is a one-shot, ad hoc invocation with no standing component."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/SESSION_LOG_S8.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/comp-iam-usage (reach-check, permission-cold) -- IAM-s-1's instrument, composed not re-derived",
+      "invocation": "comp-iam-usage reach-check opal-data-refresh-lambda-role s3:PutObject <one-resource-arn-per-call> (x6) + 2 control calls; comp-iam-usage permission-cold --role opal-data-refresh-lambda-role --lookback 90 --json",
+      "result": "6 of 6 target resource patterns read verdict=allowed via a live simulate-principal-policy call; positive control (cloudfront:GetDistributionConfig) allowed, negative control (iam:CreateUser) implicitDeny -- instrument discriminates. permission-cold reports s3:PutObject status=unobservable (S3 has no action-level Access Advisor tracking), named as a BLIND axis rather than smoothed."
+    },
+    {
+      "tool": "condition-axis-reader.py -- IAM-s-4's instrument, composed not re-derived",
+      "invocation": "python condition-axis-reader.py --policy infra/aws/terraform/data-refresh/main.tf; python condition-axis-reader.py --policy infra/aws/terraform/data-refresh/qa-scratch-instance.tf",
+      "result": "Every matching local statement (SSCNUploadPresign, DrQaScratchReadWrite20260803, DrQaScratchList20260803) renders REQUIRES-NOTHING. The managed policy's S3Access statement has no local .tf file for this reader to read at all; its Condition-key absence was confirmed by a separate, explicitly-labelled manual read of the live GetPolicyVersion document rather than silently assumed."
+    },
+    {
+      "tool": "comp-blast -- code/infra dependency graph, owed at this cell per the L5 battery",
+      "invocation": "comp-blast arn:aws:lambda:us-east-1:313476888478:function:opal-data-refresh-api --direction downstream --json; comp-blast arn:aws:lambda:us-east-1:313476888478:function:portal-time-machine --direction downstream --json",
+      "result": "1015 and 1044 downstream graph nodes respectively (both LOWER BOUNDS per the tool's own caveat). Each lambda's IAM_POLICY consumer band independently names opal-data-refresh-lambda-policy, data-refresh-sscn-s3-access and data-refresh-qa-scratch-access-20260803 -- a second, independent instrument corroborating the same three granting policies this cell's own live iam:Get*/iam:List* reads found."
+    },
+    {
+      "tool": "comp-iam (role, service, stats) -- DESIRED-plane cross-reference, queried to NAME where it is blind",
+      "invocation": "comp-iam role opal-data-refresh-lambda-role; comp-iam service opal-data-refresh-api; comp-iam service portal-time-machine; comp-iam stats",
+      "result": "comp-iam has no role entry for opal-data-refresh-lambda-role at all; all 55 tracked call-site operations for opal-data-refresh-api (including both real s3:PutObject call sites) read 'note: role not mapped', verdict [UNKNOWN]. Named explicitly in BLAST_RADIUS.md as a blind DESIRED-plane cross-reference rather than read as a clean bill."
+    },
+    {
+      "tool": "boto3 iam client (read-only: get_role, list_role_policies, get_role_policy, list_attached_role_policies, get_policy, get_policy_version)",
+      "invocation": "python (embedded in preflight-blast-radius.py) -- iam:Get*/iam:List* only, no mutating call",
+      "result": "Found the managed policy opal-data-refresh-lambda-policy (v10) attached to the role live, which has no aws_iam_role_policy/aws_iam_policy Terraform resource checked into this repo (confirmed out-of-band, pre-existing) -- the ONLY source granting s3:PutObject on data-refresh/*, uploads/* and json/*. A repo-only read (comp-iam, or a Terraform grep) would have missed 3 of the role's 6 s3:PutObject-granting resource patterns entirely."
+    }
+  ]
+}
