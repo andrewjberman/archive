@@ -24,6 +24,7 @@ a hope.
 """
 import argparse
 import collections
+import gzip
 import hashlib
 import io
 import json
@@ -75,6 +76,12 @@ def fetch_artifact(path_or_none):
                               "marker": marker, "sha256_verified": ok}
 
 
+def _provisional_total(g) -> int:
+    """How many members the four provisional names still have in this artifact."""
+    return sum(1 for v in g.get("classes_data", {}).values() for n in v.get("nodes", [])
+               if str(n.get("type", "")) in PROVISIONAL)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--artifact", default="")
@@ -83,6 +90,25 @@ def main() -> int:
     g, prov = fetch_artifact(a.artifact or None)
     if prov.get("sha256_verified") is False:
         raise SystemExit("BLOCKED: the artifact does not match its own marker's sha256")
+
+    # THIS CENSUS MEASURES A POPULATION THIS ORDER'S OWN PUBLISH REMOVES, so the live key
+    # stops being able to answer it the moment the unified build lands: after 2026-09-09
+    # 23:52Z the published artifact carries 0 members under all four provisional names and
+    # this script would print "0 of 0" -- a true reading of the wrong object, and
+    # indistinguishable from a census that found nothing. When the live artifact has no
+    # members left, fall back to the PINNED BEFORE OBJECT committed beside this script
+    # (id/type/source of every node of the artifact published before the unification,
+    # identified by the source object's sha256) and SAY SO on its own line. The fallback is
+    # never silent and never preferred: the live key is always read first.
+    if not _provisional_total(g):
+        pinned = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                              "f11_precensus_nodes.json.gz")
+        if os.path.isfile(pinned):
+            with gzip.open(pinned, "rt", encoding="utf-8") as fh:
+                g2 = json.load(fh)
+            prov = {"source": pinned, "pinned_provenance": g2.get("_provenance", {}),
+                    "superseded": prov, "sha256_verified": None}
+            g = g2
 
     idx = DS.build_canonical_index(g["classes_data"])
 
@@ -95,6 +121,21 @@ def main() -> int:
 
     print("F11-AC1 -- THE IDENTITY CENSUS, BEFORE ANY MERGE")
     print("  artifact : %s" % prov["source"])
+    if prov.get("superseded"):
+        sup = prov["superseded"]
+        pp = prov.get("pinned_provenance", {})
+        print("  PLANE SUBSTITUTED, AND THIS IS THE WHOLE REASON WHY:")
+        print("     the LIVE artifact was read FIRST (%s" % sup.get("source"))
+        mk = sup.get("marker") or {}
+        print("      producer=%s built_at=%s sha256_verified=%s) and it carries ZERO members"
+              % (mk.get("producer"), mk.get("built_at"), sup.get("sha256_verified")))
+        print("      under all four provisional names -- because THIS ORDER's own publish")
+        print("      retired them at 2026-09-09T23:52Z. A census of the post-publish object")
+        print("      is a true 0 of 0 about the wrong object.")
+        print("     so the BEFORE object is used: %s" % pp.get("source_object"))
+        print("      pulled %s, source sha256 %s" % (pp.get("pulled_during"),
+                                                     pp.get("source_sha256")))
+        print("      fields kept: %s" % ", ".join(pp.get("fields_kept", [])))
     if prov.get("marker"):
         print("  marker   : producer=%s built_at=%s sha256_verified=%s"
               % (prov["marker"].get("producer"), prov["marker"].get("built_at"),
