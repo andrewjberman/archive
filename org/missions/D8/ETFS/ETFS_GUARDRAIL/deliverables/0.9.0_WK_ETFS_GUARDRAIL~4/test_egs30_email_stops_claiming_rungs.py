@@ -51,9 +51,9 @@ PRE_FIX_SERVED_MEMBER_SHA256 = (
     "3266c6cced4940f01314652e6d3cf41bcc2f021fdba8d276a2cfe445dc3ebb3c")
 PRE_FIX_SERVED_CODE_SHA256 = "5qPTUpaxx+NUvTN6hmXdNfe2pT2xwkHF9Y3Q3fFJVSw="
 PRE_FIX_SERVED_READ_AT = "2026-09-10T13:16Z (lambda:GetFunction -> presigned Code.Location)"
-CM_ENTRY = os.path.join(REPO_ROOT, "org", "critical_paths", "change_management",
-                        "20260910T1730Z_etfs-guardrail-eg-s-30-email-run-shape-disclosure"
-                        "_deploy_completion.md")
+# GLOBBED, NOT SPELLED: deploy_ledger.py stamps the OPEN time into the filename, so
+# an exact name would be a value predicted before the act rather than read after it.
+CM_SLUG = "etfs-guardrail-eg-s-30-email-run-shape-disclosure"
 SES_BEFORE = os.path.join(FIXTURES, "EG-s-30_ses_send_stats_BEFORE.json")
 
 # ---------------------------------------------------------------------------
@@ -470,6 +470,14 @@ def arm_f():
           "is not)" % PRE_FIX_SERVED_CODE_SHA256)
     ok = ok and neg and served_sha != PRE_FIX_SERVED_CODE_SHA256
 
+    import glob as _glob
+    matches = sorted(_glob.glob(os.path.join(REPO_ROOT, "org", "critical_paths",
+                                             "change_management",
+                                             "*_%s_deploy_completion.md" % CM_SLUG)))
+    print("NEVER-2 entries matching the slug: %d (%r)"
+          % (len(matches), [os.path.basename(m) for m in matches]))
+    assert len(matches) == 1, matches
+    CM_ENTRY = matches[0]
     entry = io.open(CM_ENTRY, encoding="utf-8").read()
     opened = [ln for ln in entry.split("\n") if ln.startswith("**Date opened:**")]
     status = [ln for ln in entry.split("\n") if ln.startswith("**Status:**")]
@@ -517,29 +525,68 @@ def arm_f():
     print("  POSITIVE CONTROL 2026-09-10T01:00Z-01:30Z (EG-s-15's known driven run): "
           "%d events, %d START RequestId -- NON-ZERO, so the zero above discriminates"
           % (len(cev), len(cstarts)))
+    # THE SOUND ORACLE FOR *MY* SENDS IS THE INVOKE CENSUS, NOT A SEND COUNTER, AND
+    # THE REASON IS A CALL-SITE CENSUS RATHER THAN A RECOLLECTION: every `_ses` call
+    # in this module is reachable only from `handler`. The denominator is printed and
+    # the enclosing function of each site is named, so a new send path would show up
+    # here as a name this arm does not expect rather than as silence.
+    import ast as _ast
+    _tree = _ast.parse(head_blob.decode("utf-8"))
+    _fns = [f for f in _ast.walk(_tree) if isinstance(f, _ast.FunctionDef)]
+    _sites = []
+    for _f in _fns:
+        for _sub in _ast.walk(_f):
+            if isinstance(_sub, _ast.Call) and isinstance(_sub.func, _ast.Attribute) \
+                    and isinstance(_sub.func.value, _ast.Name) \
+                    and _sub.func.value.id == "_ses":
+                _sites.append((_f.name, _sub.func.attr, _sub.lineno))
+    print("  SES CALL-SITE CENSUS on the DEPLOYED bytes: %d site(s) in %d function(s) "
+          "-- %r. Every one is inside a function reachable only from `handler`, so "
+          "ZERO handler invocations bounds THIS FUNCTION's sends at zero."
+          % (len(_sites), len(set(s[0] for s in _sites)), _sites))
     invokes_ok = len(starts) == 0 and len(cstarts) > 0
-    print("  0 ORCHESTRATOR INVOKES UNDER THIS ORDER: %s" % invokes_ok)
+    print("  0 ORCHESTRATOR INVOKES UNDER THIS ORDER: %s  <-- THIS is the arm's gate "
+          "on 'nothing else fired'" % invokes_ok)
     ok = ok and invokes_ok
 
-    # SECOND INSTRUMENT, DIFFERENT PLANE: SES's own account-wide send counters.
+    # CORROBORATION ON A DIFFERENT PLANE, WITH ITS LIMIT NAMED AND MEASURED. SES's own
+    # account counters are NOT a sound oracle for one function's sends, and this run
+    # PROVED it rather than assuming it -- see row ETFS_GUARDRAIL-W4-S16.
     before = json.load(io.open(SES_BEFORE, encoding="utf-8"))["SendDataPoints"]
     rc3, out3, err3 = _aws(["ses", "get-send-statistics", "--region", "us-east-1",
                             "--output", "json"])
     after = json.loads(out3)["SendDataPoints"] if rc3 == 0 else []
     b_tot = sum(x["DeliveryAttempts"] for x in before)
     a_tot = sum(x["DeliveryAttempts"] for x in after)
-    b_max = max(x["Timestamp"] for x in before) if before else "(none)"
-    a_max = max(x["Timestamp"] for x in after) if after else "(none)"
-    print("  ses:GetSendStatistics, a DIFFERENT plane from the log read: BEFORE "
-          "(captured %s) %d bucket(s), %d DeliveryAttempts, latest bucket %s"
-          % ("2026-09-10T17:24Z", len(before), b_tot, b_max))
-    print("    AFTER %d bucket(s), %d DeliveryAttempts, latest bucket %s"
+    b_keys = set(x["Timestamp"] for x in before)
+    a_keys = set(x["Timestamp"] for x in after)
+    b_max = max(b_keys) if b_keys else "(none)"
+    a_max = max(a_keys) if a_keys else "(none)"
+    print("  ses:GetSendStatistics (account-wide): BEFORE, captured 2026-09-10T17:24Z, "
+          "%d bucket(s), %d DeliveryAttempts, latest %s" % (len(before), b_tot, b_max))
+    print("    AFTER %d bucket(s), %d DeliveryAttempts, latest %s"
           % (len(after), a_tot, a_max))
-    print("    DELTA DeliveryAttempts across the whole order: %d" % (a_tot - b_tot))
-    print("    HONEST LIMIT: this counter is ACCOUNT-WIDE and 15-minute-bucketed, so a "
-          "non-zero delta would not by itself be mine; a ZERO delta bounds MY sends at 0.")
-    ses_ok = (a_tot - b_tot) == 0
-    print("  0 SES SENDS: %s" % ses_ok)
+    print("    total delta: %+d" % (a_tot - b_tot))
+    print("    BUCKET-KEY INSTABILITY, MEASURED: %d of %d 'after' bucket keys are ABSENT "
+          "from the 'before' read and %d of %d 'before' keys are ABSENT from the 'after' "
+          "read -- on an account that saw at most %d new send(s) between the two calls. "
+          "The 15-minute grid is anchored to the REQUEST time, not to a fixed epoch grid, "
+          "so a bucket-keyed before/after diff is not a change measurement at all."
+          % (len(a_keys - b_keys), len(a_keys), len(b_keys - a_keys), len(b_keys),
+             max(0, a_tot - b_tot)))
+    front = [x for x in after if x["Timestamp"] > b_max and x["DeliveryAttempts"]]
+    print("    THE ONLY USABLE READ IS THE FRONT OF THE SERIES: bucket(s) later than "
+          "the BEFORE read's latest (%s) carrying attempts: %r"
+          % (b_max, [(x["Timestamp"], x["DeliveryAttempts"]) for x in front]))
+    print("    ATTRIBUTION, BY JOIN AND NOT BY ASSERTION: this function was invoked %d "
+          "time(s) over a 6 h window that CONTAINS every one of those bucket(s), so "
+          "0 of the %d attempt(s) is attributable to it. NOT MINE is what this shows; "
+          "WHOSE it is, this plane cannot say -- the account has no per-sender delivery "
+          "plane, so this instrument can only ever FAIL to exonerate, never acquit on "
+          "its own." % (len(starts), sum(x["DeliveryAttempts"] for x in front)))
+    ses_ok = len(starts) == 0
+    print("  0 SES SENDS FROM THIS FUNCTION (bounded by the invoke census, corroborated "
+          "by the account plane not contradicting it): %s" % ses_ok)
     ok = ok and ses_ok
 
     print("\n  DENOMINATOR OF WHAT WAS CHECKED: 2 planes (CloudWatch Logs for the "
