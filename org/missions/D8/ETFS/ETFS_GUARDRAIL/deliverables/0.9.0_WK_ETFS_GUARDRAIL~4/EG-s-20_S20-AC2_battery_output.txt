@@ -1,0 +1,213 @@
+
+==============================================================================
+0. THE SUBJECT: the DEPLOYED bytes, fetched now
+==============================================================================
+FunctionName            : etfs-reports-orchestrator
+served CodeSha256       : ag4La0jgP8JEr55FCvXx+gnR5pDqw1CpvbEHZBrBTPc=
+served LastModified     : 2026-09-10T03:54:09.000+0000
+served CodeSize         : 13785
+zip members             : ['lambda_function.py'] (denominator: 1 of 1)
+deployed lambda_function.py : 40790 B  sha256 ac0484b73a26865eab649917cec7d1bf9c5d604ccd293cc72f17cb83e9e17000
+deployed source lines       : 727
+EMAIL_RECIPIENT (live env)  : aj@opalinvest.com,andrew@opalinvest.com
+APPLY UTC (LastModified)    : 2026-09-10T03:54:09+00:00
+
+==============================================================================
+(a) BOTH SITES FIXED, quoted from the DEPLOYED source with line numbers
+==============================================================================
+SITE ONE  -- the live guard in _run's refusal branch
+  :602              unresolved_days = _normalize_unresolved(unresolved_doc)
+SITE TWO  -- the terminal_qa send-free rehearsal
+  :713          unresolved_days = _normalize_unresolved(artifacts["unresolved"])
+  (pre-fix, from the blob deployed until 2026-09-10T01:16:14Z, sha256 dc05ea90c94dc41e...:
+   :435  unresolved_days = (unresolved_doc or {}).get("unresolved") or []
+   :516  msg = _build_terminal_email(month, unresolved_doc.get("unresolved") or [], artifacts["ask"]))
+  [HOLD] a1-site-one-fixed -- the live guard calls _normalize_unresolved at :602
+  [HOLD] a2-site-two-fixed -- the terminal_qa rehearsal calls _normalize_unresolved at :713
+
+CENSUS over the DEPLOYED source for reads of the absent key.
+  INSTRUMENT 1 -- RAW TEXT (comments and docstrings included):
+    '.get("unresolved")'  : 3 hit(s) / 727 lines scanned
+      :195  `(doc or {}).get("unresolved") or []` was always `[]` against real bytes and the
+      :598  # `(unresolved_doc or {}).get("unresolved") or []`, a key the renderer
+      :709  # `unresolved_doc.get("unresolved") or []` against the SAME partner-keyed
+    '["unresolved"]'      : 3 hit(s) / 727 lines scanned
+      :188  render_month_end.py:961 `any_unresolved[p] = ladder_result["unresolved"]`, :971
+      :591  unresolved_doc = artifacts["unresolved"]
+      :713  unresolved_days = _normalize_unresolved(artifacts["unresolved"])
+  INSTRUMENT 2 -- AST (a DIFFERENT instrument: comments and docstrings do not exist in it):
+    EXECUTABLE `.get("unresolved")` calls : 0  (denominator: 3142 AST nodes walked)
+    EXECUTABLE `["unresolved"]` subscripts: 2
+      :591  receiver=artifacts -- the ARTIFACTS MAP built by _read_coverage_artifacts (keys verdict/unresolved/ask) -- NOT a read of the coverage document
+      :713  receiver=artifacts -- the ARTIFACTS MAP built by _read_coverage_artifacts (keys verdict/unresolved/ask) -- NOT a read of the coverage document
+  [HOLD] a3-zero-executable-reads-of-the-absent-key -- 0 executable .get("unresolved") calls and 0 coverage-document ["unresolved"] subscripts; the 6 raw-text hits are 3 DOCSTRING/COMMENT quotations of the historical defect and 2 artifacts-map reads
+
+UNSCOPED RE-READ of the population (CVO row S11 named it and nobody had measured it):
+  _read_coverage_artifacts loads THREE documents; a check scoped to the member that
+  was found cannot see the same defect in its siblings. All THREE readers against all
+  THREE served writers:
+    s3://opal-data-etfs/platinum/reports/2026-09/coverage_verdict.json -- 2705 B, top-level keys ['generated_at', 'holes', 'month', 'per_partner', 'unresolved', 'verdict']
+    s3://opal-data-etfs/platinum/reports/2026-09/coverage_unresolved.json -- 1414 B, top-level keys ['49financial', 'cottonwood']
+    s3://opal-data-etfs/platinum/reports/2026-09/coverage_egress_ask.json -- 1017 B, top-level keys ['asks', 'authorization', 'generated_at', 'month']
+    coverage_verdict.json        reader=verdict    no key read at all -- the whole document is json.dumps'd into the alert text -- reader/writer AGREE: True
+    coverage_unresolved.json     reader=unresolved _normalize_unresolved -- partner-keyed, WAS THE DEFECT, fixed by this order -- reader/writer AGREE: True
+    coverage_egress_ask.json     reader=ask        ask.get('asks') + per-row date/partner/provider/class/reason + ask.get('authorization') -- reader/writer AGREE: True
+  [HOLD] a4-all-three-readers-censused -- 3 of 3 coverage readers checked against the served writers; 1 of 3 was defective (coverage_unresolved.json) and is the one this order fixes; 2 of 3 were already correct
+
+==============================================================================
+(b) THE GUARD IS NOW TRUTHY AGAINST REAL SERVED BYTES -- the discriminating pair
+==============================================================================
+SERVED coverage_unresolved.json (s3://opal-data-etfs/platinum/reports/2026-09/coverage_unresolved.json):
+  top-level keys : ['49financial', 'cottonwood']  (denominator: 2 of 2)
+  'unresolved' in doc : False
+  imported the DEPLOYED source as a module (sha256 ac0484b73a26865e), boto3 clients STUBBED
+
+  PRE-FIX  expression  (unresolved_doc or {}).get("unresolved") or []
+      -> []   len=0   guard truthy: False
+  POST-FIX expression  _normalize_unresolved(unresolved_doc)
+      -> len=2   guard truthy: True
+         2026-09-09 | 49financial | D | rung 1 invoke raised (absent upstream partition): producer i
+         2026-09-09 | cottonwood | D | rung 1 invoke raised (absent upstream partition): producer i
+  [HOLD] b1-pre-fix-guard-falsy-on-real-bytes -- the pre-fix expression evaluates to [] against the real served document -- the defect
+  [HOLD] b2-post-fix-guard-truthy-on-real-bytes -- the post-fix guard evaluates TRUTHY with 2 row(s), each carrying its partner
+
+  THE REHEARSAL, run on the DEPLOYED code over the SAME served bytes (send-free):
+    {"mode": "terminal_qa", "month": "2026-09", "subject": "URGENT: ETF month-end 2026-09 -- 2 date(s) unresolved after remediation", "to": "andrew@opalinvest.com", "unresolved_count": 2, "unresolved_dates": ["2026-09-09", "2026-09-09"], "destinations": ["andrew@opalinvest.com"], "ok": true}
+  [HOLD] b3-rehearsal-reports-the-real-count -- terminal_qa now reports unresolved_count=2 over the real month -- pre-fix this same input returned a clean ok:true over an EMPTY table
+
+==============================================================================
+(c) THE RECIPIENT PROPERTY, BOTH DIRECTIONS, resolved from the DEPLOYED bytes
+==============================================================================
+Andrew-direct 2026-09-10 ~02:5xZ, verbatim: "make sure no test run hits aj's email,
+that is not appropriate."
+
+PRODUCER'S SET (the Lambda's live environment): EMAIL_RECIPIENT = aj@opalinvest.com,andrew@opalinvest.com
+DEPLOYED constants: TEST_MARKER='test_run' TEST_FORBIDDEN_RECIPIENTS=['aj@opalinvest.com'] TEST_DEFAULT_RECIPIENTS=['andrew@opalinvest.com']
+
+TEST-INVOCATION RESOLUTION -- every branch, adversarial (denominator: 12 event(s) x 2 recipient carrier(s) = 24 resolution(s)):
+  report  (EMAIL_RECIPIENT)      {"mode": "run", "test_run": true}                                        -> ['andrew@opalinvest.com']
+  terminal (TERMINAL_RECIPIENT)  {"mode": "run", "test_run": true}                                        -> ['andrew@opalinvest.com']
+  report  (EMAIL_RECIPIENT)      {"mode": "run", "test_run": true, "test_recipients": ["aj@opalinvest.com -> []
+  terminal (TERMINAL_RECIPIENT)  {"mode": "run", "test_run": true, "test_recipients": ["aj@opalinvest.com -> []
+  report  (EMAIL_RECIPIENT)      {"mode": "run", "test_run": true, "test_recipients": "aj@opalinvest.com" -> []
+  terminal (TERMINAL_RECIPIENT)  {"mode": "run", "test_run": true, "test_recipients": "aj@opalinvest.com" -> []
+  report  (EMAIL_RECIPIENT)      {"mode": "run", "test_run": true, "test_recipients": "aj@opalinvest.com, -> ['andrew@opalinvest.com']
+  terminal (TERMINAL_RECIPIENT)  {"mode": "run", "test_run": true, "test_recipients": "aj@opalinvest.com, -> ['andrew@opalinvest.com']
+  report  (EMAIL_RECIPIENT)      {"mode": "run", "test_run": true, "test_recipients": ["AJ@OpalInvest.COM -> []
+  terminal (TERMINAL_RECIPIENT)  {"mode": "run", "test_run": true, "test_recipients": ["AJ@OpalInvest.COM -> []
+  report  (EMAIL_RECIPIENT)      {"mode": "run", "test_run": true, "test_recipients": ["  aj@opalinvest.c -> []
+  terminal (TERMINAL_RECIPIENT)  {"mode": "run", "test_run": true, "test_recipients": ["  aj@opalinvest.c -> []
+  report  (EMAIL_RECIPIENT)      {"mode": "run", "test_run": true, "test_recipients": ["aj@opalinvest.com -> []
+  terminal (TERMINAL_RECIPIENT)  {"mode": "run", "test_run": true, "test_recipients": ["aj@opalinvest.com -> []
+  report  (EMAIL_RECIPIENT)      {"mode": "run", "test_run": true, "test_recipients": []}                 -> ['andrew@opalinvest.com']
+  terminal (TERMINAL_RECIPIENT)  {"mode": "run", "test_run": true, "test_recipients": []}                 -> ['andrew@opalinvest.com']
+  report  (EMAIL_RECIPIENT)      {"mode": "run", "test_run": true, "test_recipients": null}               -> ['andrew@opalinvest.com']
+  terminal (TERMINAL_RECIPIENT)  {"mode": "run", "test_run": true, "test_recipients": null}               -> ['andrew@opalinvest.com']
+  report  (EMAIL_RECIPIENT)      {"mode": "run", "test_run": true, "test_recipients": ["qa@opalinvest.dev -> ['qa@opalinvest.dev']
+  terminal (TERMINAL_RECIPIENT)  {"mode": "run", "test_run": true, "test_recipients": ["qa@opalinvest.dev -> ['qa@opalinvest.dev']
+  report  (EMAIL_RECIPIENT)      {"mode": "run", "test_run": 1, "month": "2026-09"}                       -> ['andrew@opalinvest.com']
+  terminal (TERMINAL_RECIPIENT)  {"mode": "run", "test_run": 1, "month": "2026-09"}                       -> ['andrew@opalinvest.com']
+  report  (EMAIL_RECIPIENT)      {"mode": "terminal_qa", "test_run": true, "test_recipients": ["aj@opalin -> []
+  terminal (TERMINAL_RECIPIENT)  {"mode": "terminal_qa", "test_run": true, "test_recipients": ["aj@opalin -> []
+  [HOLD] c1-test-invocation-cannot-reach-aj -- aj@opalinvest.com appears in 0 of 24 resolved test-invocation recipient lists
+
+SCHEDULED-INVOCATION RESOLUTION -- UNCHANGED (the EventBridge schedule's own input is
+jsonencode({mode = "run"}), which carries no marker):
+  report   {"mode": "run"}                          -> header='aj@opalinvest.com,andrew@opalinvest.com' envelope=['aj@opalinvest.com', 'andrew@opalinvest.com']
+  report   {}                                       -> header='aj@opalinvest.com,andrew@opalinvest.com' envelope=['aj@opalinvest.com', 'andrew@opalinvest.com']
+  report   null                                     -> header='aj@opalinvest.com,andrew@opalinvest.com' envelope=['aj@opalinvest.com', 'andrew@opalinvest.com']
+  report   {"mode": "run", "month": "2026-09"}      -> header='aj@opalinvest.com,andrew@opalinvest.com' envelope=['aj@opalinvest.com', 'andrew@opalinvest.com']
+  report   {"mode": "absence_check"}                -> header='aj@opalinvest.com,andrew@opalinvest.com' envelope=['aj@opalinvest.com', 'andrew@opalinvest.com']
+  terminal {"mode": "run"}                          -> header='andrew@opalinvest.com' envelope=['andrew@opalinvest.com']
+  EMAIL_RECIPIENTS (the module's own derivation, unchanged): ['aj@opalinvest.com', 'andrew@opalinvest.com']
+  [HOLD] c2-scheduled-invocation-unchanged-and-joint -- the scheduled payload still resolves to BOTH recipients in order across 5 payload shape(s), and the terminal path stays andrew@-only
+
+AND A TEST INVOCATION THAT FILTERS TO EMPTY SENDS NOTHING (no silent substitution):
+SKIP: terminal unresolved send -- resolved recipient list is EMPTY for month 2026-09 (test invocation; every recipient filtered)
+  send_raw_email calls after a test invocation whose only recipient is forbidden: 0
+  [HOLD] c3-empty-test-envelope-sends-nothing -- 0 SES calls when the test branch filters every recipient away
+OK: terminal unresolved SES send month=2026-09 rows=2 destinations=["andrew@opalinvest.com"] MessageId=0100-battery-stub
+  a DEFAULT test invocation's terminal send -> 1 call(s), Destinations=['andrew@opalinvest.com']
+  [HOLD] c4-default-test-invocation-reaches-andrew-only -- a default test invocation's terminal send carries exactly ['andrew@opalinvest.com'] -- which is what EG-s-21's driven refusal needs
+
+==============================================================================
+(d) DEPLOYED == BUILT
+==============================================================================
+committed blob HEAD:infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py
+  40790 B  sha256 ac0484b73a26865eab649917cec7d1bf9c5d604ccd293cc72f17cb83e9e17000   (git show rc=0, HEAD 670269d25b94401b1020fd95d0862fcc4a861a17)
+deployed zip member lambda_function.py
+  40790 B  sha256 ac0484b73a26865eab649917cec7d1bf9c5d604ccd293cc72f17cb83e9e17000
+served CodeSha256 (whole zip, base64) : ag4La0jgP8JEr55FCvXx+gnR5pDqw1CpvbEHZBrBTPc=
+fetched zip sha256 (base64)           : ag4La0jgP8JEr55FCvXx+gnR5pDqw1CpvbEHZBrBTPc=
+NEGATIVE CONTROL -- the PRE-FIX blob at ea47e92a72 must NOT match:
+  28504 B  sha256 dc05ea90c94dc41e21a92b63a69a3bc3f278dbc878c11324e35b56a295241fd8   (rc=0)  equal to deployed: False
+  [HOLD] d1-deployed-equals-committed -- the deployed zip member's sha256 equals the committed blob's
+  [HOLD] d2-served-equals-fetched-zip -- the served CodeSha256 equals the base64 sha256 of the zip actually fetched
+  [HOLD] d3-negative-control-prefix-differs -- the pre-fix blob is retrievable (28504 B) and does NOT match -- the equality above discriminates
+
+==============================================================================
+(e) THE NEVER-2 ENTRY: OPEN before the apply, CLOSED AND COMMITTED before these reads
+==============================================================================
+entry   : org/critical_paths/change_management/20260910T0347Z_etfs-guardrail-eg-s-20-send-path_deploy_completion.md
+opened  : 2026-09-10T03:47:51.476797+00:00
+apply   : 2026-09-10T03:54:09+00:00   (the served function's own LastModified)
+status  : CLOSED -- nothing stranded -- closed 20260910T040342Z
+commits touching the entry (denominator: 2):
+  670269d25b94401b1020fd95d0862fcc4a861a17 2026-09-10T00:05:38-04:00 L7(ETFS_GUARDRAIL.TO-EG-s-20, 0.9.0_WK_ETFS_GUARDRAIL~4): the NEVER-2 entry CLOSED 
+  6b79c796637753a9e8e4331c4faa4c1945691978 2026-09-09T23:48:53-04:00 L7(ETFS_GUARDRAIL.TO-EG-s-20, 0.9.0_WK_ETFS_GUARDRAIL~4): the terminal-send guard f
+CLOSE commit 670269d25b is an ancestor of HEAD: rc=0
+OPEN  commit 6b79c79663
+  entry names ROLLBACK                                       : True
+  entry names NEVER-WIDEN HALVES                             : True
+  entry names CodeSha256 M5Dopbky3W1f1j97cqAB403Kh7IofIv     : True
+  [HOLD] e1-entry-opened-before-the-apply -- opened 2026-09-10T03:47:51.476797+00:00 < apply 2026-09-10T03:54:09+00:00
+  [HOLD] e2-entry-closed-and-committed -- status CLOSED, 2 commit(s) on the entry, the CLOSE commit an ancestor of HEAD
+  [HOLD] e3-entry-names-rollback-and-both-halves -- the entry names the rollback, both never-widen halves and the pre-state CodeSha256
+
+==============================================================================
+(f) THE PLAN: exactly one resource pre-apply, and No changes after
+==============================================================================
+PRE-APPLY PLAN TRANSCRIPT (PRESERVED -- unreproducible after the apply):
+  org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~4/EG-s-20_preapply_plan_transcript.txt  (2607 B)
+    | PLAN START 2026-09-10T03:50:35Z (targeted, -out=C:/tmp/wk-etfs-3-4/.scratch/egs20.tfplan, .tools/terraform.exe v1.9.8)
+    | # aws_lambda_function.orchestrator will be updated in-place
+    | ~ source_code_hash               = "M5Dopbky3W1f1j97cqAB403Kh7IofIv/p0fCtRg7W80=" -> "ag4La0jgP8JEr55FCvXx+gnR5pDqw1CpvbEHZBrBTPc="
+    | Plan: 0 to add, 1 to change, 0 to destroy.
+    | PLAN END 2026-09-10T03:50:43Z
+  resources in the plan (denominator: 1): ['aws_lambda_function.orchestrator']
+  the hash the plan PREDICTED : ag4La0jgP8JEr55FCvXx+gnR5pDqw1CpvbEHZBrBTPc=
+  the hash the world SERVES   : ag4La0jgP8JEr55FCvXx+gnR5pDqw1CpvbEHZBrBTPc=
+  [HOLD] f1-plan-read-exactly-one-resource -- the targeted plan carried exactly 1 resource and read 'Plan: 0 to add, 1 to change, 0 to destroy.'
+  [HOLD] f2-served-is-what-the-plan-predicted -- the served CodeSha256 is exactly the value the reviewed plan said it would become
+
+POST-APPLY RE-PLAN, run now:
+  .tools/terraform.exe plan -detailed-exitcode -target=aws_lambda_function.orchestrator -> rc=0
+    | No changes. Your infrastructure matches the configuration.
+  [HOLD] f3-post-apply-replan-no-changes -- rc=0 and 'No changes. Your infrastructure matches the configuration.'
+
+==============================================================================
+VERDICT
+==============================================================================
+arms: 20 of 20 HOLD
+  a1-site-one-fixed                          HOLD
+  a2-site-two-fixed                          HOLD
+  a3-zero-executable-reads-of-the-absent-key HOLD
+  a4-all-three-readers-censused              HOLD
+  b1-pre-fix-guard-falsy-on-real-bytes       HOLD
+  b2-post-fix-guard-truthy-on-real-bytes     HOLD
+  b3-rehearsal-reports-the-real-count        HOLD
+  c1-test-invocation-cannot-reach-aj         HOLD
+  c2-scheduled-invocation-unchanged-and-joint HOLD
+  c3-empty-test-envelope-sends-nothing       HOLD
+  c4-default-test-invocation-reaches-andrew-only HOLD
+  d1-deployed-equals-committed               HOLD
+  d2-served-equals-fetched-zip               HOLD
+  d3-negative-control-prefix-differs         HOLD
+  e1-entry-opened-before-the-apply           HOLD
+  e2-entry-closed-and-committed              HOLD
+  e3-entry-names-rollback-and-both-halves    HOLD
+  f1-plan-read-exactly-one-resource          HOLD
+  f2-served-is-what-the-plan-predicted       HOLD
+  f3-post-apply-replan-no-changes            HOLD
+
+EGS20-SEND-PATH-CORRECT-AND-TEST-SAFE
