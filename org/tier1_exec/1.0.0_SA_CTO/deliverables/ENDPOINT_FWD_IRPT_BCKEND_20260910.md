@@ -1,12 +1,12 @@
-# ENDPOINT (L2, `/endpoint --forward`) — **IRPT_BACKEND** — Investor Reporting, ingestion, scoping and execution
+# ENDPOINT (L2, `/endpoint --forward`) — **IRPT_BCKEND** — Investor Reporting, ingestion, scoping and execution
 
 **Seat:** `1.0.0_SA_CTO` (L2, CTO only) · **Stamp:** 2026-09-10 ~19:1xZ · **Re-cut ~19:2xZ** (see the ⛔ block)
 **Brief consumed:** `docs/briefs/investor-reporting-ir-bk-brief-20260910.md` @`efa5a94bf1`, **50,647 bytes**,
 authored `4.0.0_SA_CRO` 2026-09-10T18:58:22Z. No `generated:` line; the vintage is the commit.
-**Counterpart:** `ENDPOINT_FWD_IRPT_FRONTEND_20260910.md` — cut together, cite each other.
+**Counterpart:** `ENDPOINT_FWD_IRPT_FNTEND_20260910.md` — cut together, cite each other.
 **Commission:** Andrew-direct ~18:3xZ (*"the backend etl/multi-tenant/etc investor reporting project"*), macro
 `IRPT` in D9, D9 whole to laptop. Records under this seat's deliverables, all committed.
-**Project code assigned at this seat (L3 act, mine):** **`IRPT_BACKEND`** — conforms to the contract's project
+**Project code NAMED BY ANDREW ~19:3xZ (superseding this seat's `IRPT_FRONTEND`/`IRPT_BACKEND`):** **`IRPT_BCKEND`** — conforms to the contract's project
 grammar `^[A-Z]{4}_[A-Z0-9]{3,18}$`; 0 hits across 8,323 files over the register planes (18 binary and 206
 ephemeral-floor files disclosed as NOT covered). **Placement: D9 · fabric `laptop`**, both on his word.
 
@@ -27,10 +27,19 @@ that strategy works very well. I do not believe they send OTP so dont need that 
 the no-OTP branch are FIXED on his word; L5 chooses YCharts-specific implementation details, never whether to
 honor the strategy. Corrected in that section.
 
-⛔⛔ **THIS ENDPOINT INTRODUCES TWO NEW OUTCOMES, `FWD-9` AND `FWD-10`, AND THEY ARE UNRATIFIED.** Andrew ratified
-eight at ~17:3xZ. The BK brief carries seven outcomes; the subtraction (§UNCOVERED) shows two are served by NO
-ratified id. They take the next unused numbers, never a freed one, and **they change what "done" means for this
-product — so they go back to him rather than landing on this seat's word.**
+⛔⛔ **THREE OUTCOMES BEYOND THE RATIFIED EIGHT, ALL ON ANDREW'S WORD AT ~19:2xZ** (record
+`ANDREW_DIRECT_20260910_192xZ_FWD9_YES_FWD10_IMPOSSIBLE_BY_INGESTION_GATE.md`). **`FWD-9` RATIFIED** — *"call 1
+yes."* **`FWD-10` RE-CUT IN PLACE ON HIS WORD** — neither accepted nor refused as cut; he said the property is the
+wrong SHAPE: *"this should be impossible because there should be clear gates that assign firm based on email upon
+ingestion"* — so it is now a CONSTRUCTION property, id unchanged, `ACCEPT` re-tested per `/endpoint` F0.
+**`FWD-11` NEW** — *"I want a 'Global' view … an Opal User can … run reports/analysis on ALL FIRMS"*, with his
+mechanism word for this side: *"the backend multitenant api/scoped/ layout."* ⚠ **`FWD-10` and `FWD-11` are
+marked RATIFIED ON HIS WORD because his sentences ARE the outcomes; one word reverses either and the id goes vacant.**
+
+⛔ **THE CUT IS HARD, ON HIS FOURTH SENTENCE:** *"clearly cut between a FE and BK project … we do not try to wrap
+all of this in one massive project."* Every id below has EXACTLY ONE `ACCEPT OWNER`. This project owns the grade
+on ten; `IRPT_FNTEND` owns `FWD-1` and `FWD-6` and appears here only as a CONTRIBUTOR. Two projects, two
+decompositions, two task-order sets, two adjudications; no umbrella is recreated by cross-reference.
 
 ⛔ **NO FWD BELOW IS A WAIT.** The one genuine cadence — the mailbox poll under `FWD-9` — is DRIVEN on demand
 for its proof and the organic case is the negative arm, per Rule 27's L2 clause.
@@ -56,7 +65,7 @@ for its proof and the organic case is the negative arm, per Rule 27's L2 clause.
                     authorized set; cold and warm timings recorded against the whole
                     captured firm-directory denominator; VENDOR REQUEST COUNT DURING
                     SEARCH IS ZERO. No latency target is invented at L2
-         ACCEPT     ** IRPT_FRONTEND ** -- see the counterpart
+         ACCEPT     ** IRPT_FNTEND ** -- see the counterpart
          OWNER
          THIS       the compact directory keyed to the signed-in firm and advisor;
          PROJECT    resolving a selection to the exact permitted account set BEFORE
@@ -79,9 +88,9 @@ for its proof and the organic case is the negative arm, per Rule 27's L2 clause.
                     advisor, account, relationship, report and PDF identifiers,
                     INCLUDING A REVOKED GRANT AGAINST A WARM CACHE; the negative
                     requests reveal no protected data
-         ACCEPT     ** IRPT_BACKEND ** -- server-side enforcement on every route is
+         ACCEPT     ** IRPT_BCKEND ** -- server-side enforcement on every route is
          OWNER      this project's
-         CROSSES    IRPT_FRONTEND handles the refusal: no protected stale display,
+         CROSSES    IRPT_FNTEND handles the refusal: no protected stale display,
                     honest permission states, and the negative fixtures
          SOURCE     brief O2; CTO 95142 (entitlement is an OUTCOME, not a property of
                     a search box); CLAUDE.md s.5 cross-firm rule -- carried; BK brief O1
@@ -90,6 +99,11 @@ for its proof and the organic case is the negative arm, per Rule 27's L2 clause.
                     SUBSTRATE-SHAPED with BOTH SHAPES LIVE (bucket-scoped Deny and
                     key-prefix + IAM condition). It is graded on its own, never as a
                     side effect of FWD-1
+         ⛔ SEAMS (this cut, Andrew ~19:2xZ): the SAME cross-firm rule binds a second
+                    time at INGESTION -- the firm is fixed from the sender's email
+                    before anything is stored (FWD-10) -- and is GRANTED rather than
+                    denied for the Opal-user global view (FWD-11). Three seams, one
+                    rule; a grade on this outcome does not grade the other two
 
   FWD-3  An advisor reads the provider's performance result in an Opal report and
          exports the same result
@@ -120,9 +134,9 @@ for its proof and the organic case is the negative arm, per Rule 27's L2 clause.
                     return uses a VENDOR CALCULATION for the exact selected account
                     set -- summing or averaging account returns is not a substitute
                     and a fabricated aggregate fails this outcome
-         ACCEPT     ** IRPT_BACKEND ** -- canonical meaning, units, dates and the
+         ACCEPT     ** IRPT_BCKEND ** -- canonical meaning, units, dates and the
          OWNER      vendor-calculation-only rule are this project's
-         CROSSES    IRPT_FRONTEND renders it; the PDF is that project's package run
+         CROSSES    IRPT_FNTEND renders it; the PDF is that project's package run
                     by this project's worker
          SOURCE     brief O3, F2, F3; Andrew's "just generating a frontend view of
                     what Black Diamond/Orion already provide" -- carried; BK brief O2
@@ -142,11 +156,12 @@ for its proof and the organic case is the negative arm, per Rule 27's L2 clause.
                     attribution; a MODELED comparison is described as modeled;
                     unsupported variants are VISIBLE as unsupported
          PROOF      replay each approved variant end to end
-         ACCEPT     ** IRPT_BACKEND ** -- the chain from validated input to
+         ACCEPT     ** IRPT_BCKEND ** -- the chain from validated input to
          OWNER      certified section is this project's
-         CROSSES    IRPT_FRONTEND presents the variants and renders the sections
+         CROSSES    IRPT_FNTEND presents the variants and renders the sections
          SOURCE     brief O4, F7; Andrew's "just pulling a report of what YCharts
-                    already provides" -- carried; BK brief O4
+                    already provides" -- carried; BK brief O4; the intake's durability
+                    is FWD-9 below, at Andrew
          ✅ THE EXPRESS QUALIFICATION IS **DISCHARGED**, 2026-09-10. It read: the
                     evidence is gated on ANDREW'S ANALYST handing it over, a named
                     person's decision, so FWD-4 reads NOT_REALIZED with its reason
@@ -168,7 +183,6 @@ for its proof and the organic case is the negative arm, per Rule 27's L2 clause.
                     OBTAINS and EXPORTS in the tab, so FWD-4's substance holds -- but
                     the request channel is mail, not a click, and a cell must not
                     assume a synchronous request path
-                    (this cut: the intake itself is FWD-9 below, at Andrew)
          ⛔ UNSUPPORTED POSITIONS ARE NOT SILENTLY REMOVED TO OBTAIN A SUCCESSFUL
                     REPORT. Lifted to the ACCEPT from `4.0.0_SA_CRO`'s revised O2
                     because it is the session's recurring failure wearing a client's
@@ -201,9 +215,9 @@ for its proof and the organic case is the negative arm, per Rule 27's L2 clause.
                     unmatched join, a blended model and a multi-relationship
                     membership; UNIQUE UNDERLYING HOLDINGS RECONCILE BEFORE AND AFTER
                     THE OVERLAY; coverage and join exceptions carry DENOMINATORS
-         ACCEPT     ** IRPT_BACKEND ** -- join correctness and the reconcile-before-
+         ACCEPT     ** IRPT_BCKEND ** -- join correctness and the reconcile-before-
          OWNER      and-after control are this project's
-         CROSSES    IRPT_FRONTEND draws the drilldown on this project's
+         CROSSES    IRPT_FNTEND draws the drilldown on this project's
                     revision-bound nodes
          SOURCE     brief O5, F4; Andrew's per-partner overlay mapping, verbatim --
                     carried; BK brief O5; WS4 child brief @4a1d1ed9aa
@@ -227,9 +241,9 @@ for its proof and the organic case is the negative arm, per Rule 27's L2 clause.
          PROOF      controlled-clock / source-fixture exercise driving ALL FIVE arms:
                     an added client, a changed eligibility, a MISSED trigger, a
                     FAILED refresh, and an OVER-AGE directory request
-         ACCEPT     ** IRPT_BACKEND ** -- ingestion, projection, refresh and the
+         ACCEPT     ** IRPT_BCKEND ** -- ingestion, projection, refresh and the
          OWNER      expiry/fallback behaviour are this project's
-         CROSSES    IRPT_FRONTEND shows the as-of and the capability gap
+         CROSSES    IRPT_FNTEND shows the as-of and the capability gap
          SOURCE     ⭐ **NOT IN THE BRIEF'S SIX. ADDED AT L2** -- carried; BK brief
                     O1 + O7
          (FWD-7 continues below; FWD-8 follows it.)
@@ -273,10 +287,10 @@ for its proof and the organic case is the negative arm, per Rule 27's L2 clause.
          PROOF      replay one known drawdown window twice and diff the selected
                     moments; replay a window that PREDATES the news history and
                     confirm it renders MISSING HISTORY rather than an empty topic list
-         ACCEPT     ** IRPT_BACKEND ** -- deterministic inflection selection,
+         ACCEPT     ** IRPT_BCKEND ** -- deterministic inflection selection,
          OWNER      evidence and prose validity, the frozen bundle, and export
                     execution are this project's
-         CROSSES    IRPT_FRONTEND supplies the template and rendering package this
+         CROSSES    IRPT_FNTEND supplies the template and rendering package this
                     project executes, and the chart composition on which the dated
                     markers land; the topic/sentiment retrieval is a NEW seam whose
                     owner is named at L5 (carried from the ratified OWNER line)
@@ -299,10 +313,15 @@ for its proof and the organic case is the negative arm, per Rule 27's L2 clause.
                     there reads as "NOTHING NOTABLE HAPPENED" rather than "WE HAVE NO
                     DATA". The absent-versus-zero distinction is the failure this
                     estate has paid for repeatedly and it is graded here
+         ⛔ NOT A BI SURFACE. This is a BOUNDED read of DATED signals for the selected
+                    account's own periods. The 2026-09-09 brief's exclusion of broad
+                    BI/agent query capability still stands and this does not reopen it
+         ⚠ PENDING INPUT: the high-definition advisor logos. Andrew supplies them; they
+                    are RECORDED AS PENDING and are neither invented nor scraped
 
   FWD-9  A forwarded holdings email becomes a durable, correctly scoped
          analysis request without anyone re-keying it
-         ** NEW -- UNRATIFIED -- AT ANDREW **
+         ** RATIFIED -- Andrew ~19:2xZ, "call 1 yes." **
          DONE WHEN  EXERCISED -- a real forwarded message with its attachment
                     has become a request an advisor can see and correct
          ACCEPT     an advisor forwards a client's holdings by email during the
@@ -317,63 +336,140 @@ for its proof and the organic case is the negative arm, per Rule 27's L2 clause.
                     retries, a restart while an attachment is being saved,
                     checkpoint recovery, a repeated forward, a new request with
                     identical holdings, an unresolved owner, ambiguous positions
-         ACCEPT     ** IRPT_BACKEND **
+         ACCEPT     ** IRPT_BCKEND **
          OWNER
-         CROSSES    IRPT_FRONTEND consumes the correction state
-         SOURCE     BK brief O3
-         WHY NEW    the ratified FWD-4 begins "from an analyst-approved input" and
-                    takes that input AS GIVEN -- nothing ratified grades HOW a
-                    forwarded email becomes one. The subtraction below is the
-                    record.
+         CROSSES    IRPT_FNTEND consumes the correction state
+         SOURCE     BK brief O3; Andrew-direct ~19:2xZ (ratification)
+         WHY NEW    NARROWED on 3.0.0_SA_CVO's review @8b2bbe2085: the ratified
+                    FWD-4 ALREADY names the email channel, attachments, correction
+                    and programmatic inputs in its notes, so the intake is NOT
+                    wholly uncovered and my first cut said it was. What NO ratified
+                    outcome grades is DURABILITY -- a restart mid-attachment,
+                    checkpoint recovery, a repeated forward not becoming two
+                    requests, a genuinely new request with identical holdings not
+                    being discarded. That is this outcome's territory.
+         ⛔ THE FIRM IS DECIDED FROM THE SENDER'S EMAIL AT INGESTION (Andrew
+                    ~19:2xZ, in his FWD-10 sentence): "attributed to the right
+                    advisor and client" above is BOUND by the sender's domain the
+                    moment the message arrives, and cannot be changed after. The
+                    construction and its proof live in FWD-10
          ⚠ CADENCE  the brief names a 15-minute poll from 08:00 to 23:45 New
                     York, every day. That is the BRIEF's number, not ratified
                     here; no accept grades on it at L2. Its proof is DRIVEN.
 
-  FWD-10 An operator can diagnose and recover one tenant's flow without
-         corrupting another's result
-         ** NEW -- UNRATIFIED -- AT ANDREW **
-         DONE WHEN  EXERCISED -- one firm's flow has been deliberately broken
-                    and recovered while another firm's stayed correct
-         ACCEPT     when something goes wrong for one firm, the person running
-                    the system can see exactly what failed and where, fix that
-                    one thing, and be certain the fix touched no other firm's
-                    results; a failed run never publishes a report that looks
-                    complete but is not, never overwrites a newer result with an
-                    older one, and never brings back a permission that was taken
-                    away
-         PROOF      a failed source partition, a stale model map, a duplicated
-                    event, an expired lease, a queue replay, a worker restart and
-                    a revocation during a job; a manifest names every upstream
-                    dependency and its owner
-         ACCEPT     ** IRPT_BACKEND **
+  FWD-10 A request can only ever land in its own firm's storage, because its
+         firm is fixed from the sender's email the moment it is ingested --
+         so corrupting another firm's result is IMPOSSIBLE BY CONSTRUCTION
+         ** RE-CUT IN PLACE on Andrew ~19:2xZ; id unchanged; RATIFIED ON HIS
+            WORD -- one word reverses **
+         DONE WHEN  EXERCISED -- a request has been ingested, bound to its firm
+                    from the sender's domain, and every failure mode driven with
+                    no effect on a second firm
+         ACCEPT     the moment a request arrives, the firm it belongs to is decided
+                    from the sender's email address and cannot be changed later;
+                    that request, and everything produced from it, can only be
+                    stored in that firm's own locations, which are written down as
+                    a fixed list before the first request ever arrives; when
+                    something goes wrong for one firm, the person running the
+                    system can see what failed and fix it, and no other firm's
+                    results can have been touched, because there is no path by
+                    which they could be; a failed run never publishes a report
+                    that looks complete but is not, never overwrites a newer
+                    result with an older one, and never brings back a permission
+                    that was taken away
+         PROOF      ingest a request from each firm's domain and confirm it lands
+                    only in that firm's enumerated locations; attempt to write a
+                    bound request into a second firm's location and confirm
+                    refusal; then the failure arms -- a failed source partition, a
+                    stale model map, a duplicated event, an expired lease, a queue
+                    replay, a worker restart, a revocation during a job -- each
+                    shown to touch no second firm; a manifest names every
+                    upstream dependency and its owner
+         ACCEPT     ** IRPT_BCKEND **
          OWNER
-         CROSSES    IRPT_FRONTEND surfaces the partial, stale and unavailable
-                    states through the shared status contract
-         SOURCE     BK brief O7
-         WHY NEW    the ratified FWD-6 grades the ADVISOR continuing to work; it
-                    never grades an OPERATOR recovering a tenant, and no ratified
-                    outcome names cross-tenant isolation at all. For a
-                    multi-tenant product that is a safety property, not a nicety.
+         CROSSES    IRPT_FNTEND surfaces the partial, stale and unavailable
+                    states through the shared status contract; the ENUMERATED
+                    LOCATIONS list is a maintained artifact whose OWNER is named
+                    at L4 -- CLAUDE.md s.5: "a new firm name is a GATE EDIT"
+         SOURCE     BK brief O7 (the failure arms); Andrew-direct ~19:2xZ verbatim
+                    (the construction); CLAUDE.md s.5 cross-firm rule, BUCKET or
+                    KEY-PREFIX, both shapes live
+         ⛔ WHY THE RE-CUT. My first form was a RECOVERY property -- an operator
+                    recovers one tenant without corrupting another. Andrew: "this
+                    should be impossible." Impossibility is a CONSTRUCTION claim,
+                    and it is PROVEN by driving the failure modes and showing no
+                    cross-tenant effect -- so the recovery arms survive as the
+                    PROOF, not as the outcome. 3.0.0_SA_CVO's narrowing (FWD-2
+                    already grades cross-firm ACCESS) stands: FWD-2 grades who may
+                    SEE, FWD-10 grades where a request may LAND and what a failure
+                    may not touch
+
+  FWD-11 An Opal user can run reports and analysis on ALL firms from one
+         Global view, the way Model Portfolios already does it
+         ** NEW -- Andrew ~19:2xZ -- RATIFIED ON HIS WORD, one word reverses **
+         DONE WHEN  EXERCISED -- an Opal user has opened the global view, picked
+                    a client at a second firm, and run a report and an export
+         ACCEPT     someone at Opal, signed in as Opal rather than as any firm,
+                    can pick any client from any firm and use every tab and
+                    export on them; a firm's advisor can never reach that view or
+                    see a second firm through it; the global view shows the same
+                    numbers that firm's own advisor would see for that client,
+                    never a recomputed or blended one; which firm each result
+                    belongs to is always visible
+         PROOF      an Opal user opens the global view, selects clients at two
+                    different firms, runs a report and an export on each; replay
+                    the same requests as a firm advisor and confirm refusal;
+                    compare the global-view figures to the firm-scoped figures for
+                    the same client and revision
+         ACCEPT     ** IRPT_BCKEND ** -- a cross-firm entitlement CLASS: the same
+         OWNER      cross-firm rule as FWD-2 and FWD-10, GRANTED to an Opal
+                    principal rather than denied to a firm one
+         CROSSES    IRPT_FNTEND supplies the view, the firm selector and the
+                    always-visible firm attribution
+         SOURCE     Andrew-direct ~19:2xZ, verbatim: "I want a 'Global' view, just
+                    like how it's done in Model Portfolios, whereby an Opal User
+                    can go through and run reports/analysis on ALL FIRMS"
+         ⛔ MECHANISM IS HIS WORD, THIS SIDE (Andrew ~19:2xZ, third message):
+                    "the backend multitenant api/scoped/ layout." The scoped
+                    layout is FIXED as the pattern; L5 chooses its Investor
+                    Reporting specifics inside it, never whether to follow it.
+                    What that layout looks like in code is NOT READ at L2 -- L4
+                    reads the existing implementation and cites it
+         ⛔ PRECEDENT NAMED, NOT READ. "just like how it's done in Model
+                    Portfolios" is recorded as the precedent. HOW MP does it is not
+                    read at L2 and is not recalled here. An endpoint that guessed
+                    the mechanism from a title is the guess this phase exists to
+                    prevent
+         ⛔ NOT IN EITHER BRIEF. This came from Andrew after the briefs landed,
+                    so the briefs' subtraction was complete over the briefs and
+                    still missed it. The denominator for "what is nobody doing"
+                    includes his words after the brief, not only the brief
 ```
 
-**COUNT: 9 outcomes carried. 7 are ratified ids, text verbatim (`FWD-1`, `2`, `3`, `4`, `5`, `7`, `8`); 2 are
-NEW (`FWD-9`, `FWD-10`). ACCEPT owner: IRPT_BACKEND 8, IRPT_FRONTEND 1 (`FWD-1`, contributed to here).**
+**COUNT: 11 outcomes carried. 7 ratified ids, text verbatim (`FWD-1`, `2`, `3`, `4`, `5`, `7`, `8`); `FWD-9`
+RATIFIED; `FWD-10` RE-CUT and ratified on his word; `FWD-11` NEW and ratified on his word. ACCEPT owner:
+IRPT_BCKEND 10, IRPT_FNTEND 1 (`FWD-1`, contributed to here).**
+NEW (`FWD-9`, `FWD-10`). ACCEPT owner: IRPT_BCKEND 8, IRPT_FNTEND 1 (`FWD-1`, contributed to here).**
 
 ---
 
 ## THE UNCOVERED PARTITION — hunted BY SUBTRACTION, and this is where the two new ids come from
 
 **Denominator: the BK brief's 7 outcomes (O1–O7).** O1→FWD-1 + FWD-2 · O2→FWD-3 · O4→FWD-4 · O5→FWD-5 ·
-O6→FWD-8 · O7's directory-refresh half→FWD-7. **7 minus 5 (whole) minus 1 (half) leaves O3 wholly uncovered and
-O7's diagnosability-and-isolation half uncovered.** Those are `FWD-9` and `FWD-10`.
+O6→FWD-8 · O7's directory-refresh half→FWD-7. **7 minus 5 (whole) minus 1 (half) leaves O3's DURABILITY half (restart, checkpoint, idempotency) uncovered and
+O7's RECOVERY-isolation half uncovered.** Those are `FWD-9` and `FWD-10`.
 
 ⛔ **WHY MY DISTRIBUTION AMENDMENT DID NOT FIND THESE.** It asked *where do the eight belong*. It never asked
 *what do the briefs contain that the eight miss*. A partition of a fixed set is structurally unable to see a
 member outside the set. **Only a subtraction from the BRIEF's own denominator can.** Andrew asked whether I had
 run this phase; I had not, and this section is the difference.
 
+**And `FWD-11` is from OUTSIDE the brief.** It arrived as an Andrew-direct minutes after the briefs landed. The
+subtraction above was complete over the briefs' seven and still could not have found it — the denominator for
+"what is nobody doing" is the brief PLUS his words after it.
+
 **Reverse subtraction — ratified ids the BK brief does NOT serve: `FWD-6`.** Advisor-facing degradation is
-IRPT_FRONTEND's; BK contributes the status contract inside O7. Not uncovered; owned elsewhere.
+IRPT_FNTEND's; BK contributes the status contract inside O7. Not uncovered; owned elsewhere.
 
 ## WHAT L2 DOES NOT DECIDE
 
@@ -391,10 +487,9 @@ inside that strategy, never whether to follow it.
 ## WHERE THIS LANDS (F4) — **NOT YET LANDED**
 
 Ready to paste under **`## ENDPOINT (step 2, /endpoint --forward)`** in
-`org/missions/D9/IRPT/IRPT_BACKEND/prd/IRPT_BACKEND_PRD.md`. **That path does not exist.** Same three
-prerequisites as the counterpart, **plus one this side alone carries: `FWD-9` and `FWD-10` must be RATIFIED or
-REFUSED by Andrew before the PRD header's `endpoint_outcomes` can list them.** A PRD may land with the seven
-ratified ids and take the two on his word; it may not list an unratified id as if he had confirmed it.
+`org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md`. **That path does not exist.** Same three
+prerequisites as the counterpart, **`FWD-9`, `FWD-10` and `FWD-11` are on his word at ~19:2xZ and the PRD header may list all
+eleven.** If he reverses any of the three, that id goes vacant and the header drops it — never renumbered.
 
 ## PROVENANCE (F5)
 

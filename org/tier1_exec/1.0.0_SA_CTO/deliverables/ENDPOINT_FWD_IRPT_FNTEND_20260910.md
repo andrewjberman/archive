@@ -1,12 +1,12 @@
-# ENDPOINT (L2, `/endpoint --forward`) — **IRPT_FRONTEND** — Investor Reporting, the advisor-facing product
+# ENDPOINT (L2, `/endpoint --forward`) — **IRPT_FNTEND** — Investor Reporting, the advisor-facing product
 
 **Seat:** `1.0.0_SA_CTO` (L2, CTO only) · **Stamp:** 2026-09-10 ~19:1xZ · **Re-cut ~19:2xZ** (see the ⛔ block)
 **Brief consumed:** `docs/briefs/investor-reporting-ir-fe-brief-20260910.md` @`efa5a94bf1`, **30,287 bytes**,
 authored `4.0.0_SA_CRO` 2026-09-10T18:58:22Z. No `generated:` line; the vintage is the commit.
-**Counterpart:** `ENDPOINT_FWD_IRPT_BACKEND_20260910.md` — cut together, cite each other.
+**Counterpart:** `ENDPOINT_FWD_IRPT_BCKEND_20260910.md` — cut together, cite each other.
 **Commission:** Andrew-direct ~18:3xZ (*"the frontend and client facing investor reporting project"*), macro `IRPT`
 in D9 (~18:3xZ), D9 whole to laptop (~18:5xZ). Records under this seat's deliverables, all committed.
-**Project code assigned at this seat (L3 act, mine):** **`IRPT_FRONTEND`** — conforms to the contract's project
+**Project code NAMED BY ANDREW ~19:3xZ (superseding this seat's `IRPT_FRONTEND`/`IRPT_BACKEND`):** **`IRPT_FNTEND`** — conforms to the contract's project
 grammar `^[A-Z]{4}_[A-Z0-9]{3,18}$`; 0 hits across 8,323 files over the register planes (18 binary and 206
 ephemeral-floor files disclosed as NOT covered). **Placement: D9 · fabric `laptop`**, both on his word.
 
@@ -25,9 +25,16 @@ lines are the one thing replaced, and this paragraph is the record of it.
 project's half.** Its eight ratified ids are PERMANENT and carried unchanged; its distribution amendment
 (@`58266dab2d`) is the source of the ACCEPT-owner column and is not re-derived.
 
-⛔ **FWD-n IDS ARE PERMANENT AND NEVER REUSED.** **This endpoint introduces NO new outcome.** The FE brief's six
-outcomes map one-to-one onto six ratified ids (§UNCOVERED). Two NEW outcomes surfaced on the BACKEND side and
-live in the counterpart.
+⛔ **FWD-n IDS ARE PERMANENT AND NEVER REUSED.** The FE brief's six outcomes map one-to-one onto six ratified ids
+(§UNCOVERED). Three outcomes beyond the eight are BACKEND-owned and live in the counterpart (`FWD-9` ratified,
+`FWD-10` re-cut on Andrew's word, `FWD-11` new on Andrew's word at ~19:2xZ); **`FWD-11` is carried here too**,
+because the Global view is this project's surface, with his mechanism word for this side: *"the same firm
+dropdown pattern as Model Portfolios."*
+
+⛔ **THE CUT IS HARD, ON HIS FOURTH SENTENCE:** *"clearly cut between a FE and BK project … we do not try to wrap
+all of this in one massive project."* Every id has EXACTLY ONE `ACCEPT OWNER`. This project owns the grade on
+`FWD-1` and `FWD-6`; `IRPT_BCKEND` owns every other id and this project appears there only as a CONTRIBUTOR.
+Two projects, two decompositions, two task-order sets, two adjudications.
 
 ⛔ **NO FWD BELOW IS A WAIT.**
 
@@ -52,9 +59,9 @@ live in the counterpart.
                     authorized set; cold and warm timings recorded against the whole
                     captured firm-directory denominator; VENDOR REQUEST COUNT DURING
                     SEARCH IS ZERO. No latency target is invented at L2
-         ACCEPT     ** IRPT_FRONTEND ** -- the accept is an exercised advisor
+         ACCEPT     ** IRPT_FNTEND ** -- the accept is an exercised advisor
          OWNER      journey and "survives a tab switch" is selection state
-         CROSSES    IRPT_BACKEND supplies the permitted account set, the directory
+         CROSSES    IRPT_BCKEND supplies the permitted account set, the directory
                     as-of, and the zero-vendor-request guarantee -- observed here,
                     enforced there
          SOURCE     brief O1; Andrew's "search for Clients by name, this routes the
@@ -89,7 +96,7 @@ live in the counterpart.
                     return uses a VENDOR CALCULATION for the exact selected account
                     set -- summing or averaging account returns is not a substitute
                     and a fabricated aggregate fails this outcome
-         ACCEPT     ** IRPT_BACKEND ** -- a parity claim from capture through export;
+         ACCEPT     ** IRPT_BCKEND ** -- a parity claim from capture through export;
          OWNER      canonical meaning, units and dates are that project's
          THIS       the common Opal layout; the UI distinguishing TWR/MWR, net/gross,
          PROJECT    cumulative/annualized, UNITS and UNAVAILABLE; the rendered view
@@ -114,14 +121,15 @@ live in the counterpart.
                     attribution; a MODELED comparison is described as modeled;
                     unsupported variants are VISIBLE as unsupported
          PROOF      replay each approved variant end to end
-         ACCEPT     ** IRPT_BACKEND ** -- the chain from validated input to
+         ACCEPT     ** IRPT_BCKEND ** -- the chain from validated input to
          OWNER      certified section is that project's
          THIS       variant selection, the mapping and comparison review, request
          PROJECT    history and status, and the Opal-branded native sections as
                     rendered; "unsupported VISIBLE as unsupported" is this project's
                     display obligation on BACKEND's release state
          SOURCE     brief O4, F7; Andrew's "just pulling a report of what YCharts
-                    already provides" -- carried; FE brief O3
+                    already provides" -- carried; FE brief O3; the intake itself is
+                    BACKEND's FWD-9, at Andrew
          ✅ THE EXPRESS QUALIFICATION IS **DISCHARGED**, 2026-09-10. It read: the
                     evidence is gated on ANDREW'S ANALYST handing it over, a named
                     person's decision, so FWD-4 reads NOT_REALIZED with its reason
@@ -143,7 +151,6 @@ live in the counterpart.
                     OBTAINS and EXPORTS in the tab, so FWD-4's substance holds -- but
                     the request channel is mail, not a click, and a cell must not
                     assume a synchronous request path
-                    (this cut: the intake itself is now BACKEND's FWD-9, at Andrew)
          ⛔ UNSUPPORTED POSITIONS ARE NOT SILENTLY REMOVED TO OBTAIN A SUCCESSFUL
                     REPORT. Lifted to the ACCEPT from `4.0.0_SA_CRO`'s revised O2
                     because it is the session's recurring failure wearing a client's
@@ -170,7 +177,7 @@ live in the counterpart.
                     unmatched join, a blended model and a multi-relationship
                     membership; UNIQUE UNDERLYING HOLDINGS RECONCILE BEFORE AND AFTER
                     THE OVERLAY; coverage and join exceptions carry DENOMINATORS
-         ACCEPT     ** IRPT_BACKEND ** -- the accept turns on join correctness and
+         ACCEPT     ** IRPT_BCKEND ** -- the accept turns on join correctness and
          OWNER      the reconcile-before-and-after control
          THIS       the model-first view, the drill into accounts and securities,
          PROJECT    and keeping target / actual / inferred VISIBLY distinct and the
@@ -193,10 +200,10 @@ live in the counterpart.
                     cached reports keep their original as-of and revision
          PROOF      delay or fail one provider, switch clients during an outstanding
                     request, expire a cache entry, and complete jobs OUT OF ORDER
-         ACCEPT     ** IRPT_FRONTEND ** -- continued use under degradation, and the
+         ACCEPT     ** IRPT_FNTEND ** -- continued use under degradation, and the
          OWNER      "late response cannot populate the current tab" control, are
                     this project's lifecycle
-         CROSSES    IRPT_BACKEND supplies the status states and the as-of / revision
+         CROSSES    IRPT_BCKEND supplies the status states and the as-of / revision
                     each result carries
          SOURCE     brief O6 -- carried; FE brief O6
 
@@ -219,7 +226,7 @@ live in the counterpart.
          PROOF      replay one known drawdown window twice and diff the selected
                     moments; replay a window that PREDATES the news history and
                     confirm it renders MISSING HISTORY rather than an empty topic list
-         ACCEPT     ** IRPT_BACKEND ** -- deterministic inflection selection,
+         ACCEPT     ** IRPT_BCKEND ** -- deterministic inflection selection,
          OWNER      evidence validity and export execution are that project's
          THIS       the Opal template from the brand guidelines, the export shell,
          PROJECT    the dashboard-stays-default behaviour, placing BACKEND's dated
@@ -244,14 +251,37 @@ live in the counterpart.
                     there reads as "NOTHING NOTABLE HAPPENED" rather than "WE HAVE NO
                     DATA". The absent-versus-zero distinction is the failure this
                     estate has paid for repeatedly and it is graded here
+         ⛔ NOT A BI SURFACE. This is a BOUNDED read of DATED signals for the selected
+                    account's own periods. The 2026-09-09 brief's exclusion of broad
+                    BI/agent query capability still stands and this does not reopen it
+         ⚠ PENDING INPUT: the high-definition advisor logos. Andrew supplies them; they
+                    are RECORDED AS PENDING and are neither invented nor scraped
+
+  FWD-11 An Opal user can run reports and analysis on ALL firms from one
+         Global view, the way Model Portfolios already does it
+         ** NEW -- Andrew ~19:2xZ -- RATIFIED ON HIS WORD, one word reverses **
+         (ACCEPT owned by IRPT_BCKEND -- the entitlement class; full block in
+         the counterpart)
+         THIS       the Global view itself: the firm selector, picking any client
+         PROJECT    at any firm, every tab and export working on them, and the
+                    firm each result belongs to ALWAYS visible; a firm advisor's
+                    session never renders this view
+         ⛔ MECHANISM IS HIS WORD, THIS SIDE (Andrew ~19:2xZ, third message):
+                    "the same firm dropdown pattern as Model Portfolios on the
+                    frontend." The MP firm dropdown is FIXED as the pattern; L5
+                    chooses Investor Reporting specifics inside it, never whether
+                    to follow it. HOW MP implements it is NOT READ at L2 -- L4
+                    reads the existing component and cites it
+         SOURCE     Andrew-direct ~19:2xZ verbatim; precedent "just like how it's
+                    done in Model Portfolios" -- named, NOT READ at L2
 ```
 
-**COUNT: 6 outcomes carried, 6 of 6 are ratified ids, text verbatim. ACCEPT owner: IRPT_FRONTEND 2 (`FWD-1`,
-`FWD-6`), IRPT_BACKEND 4 (`FWD-3`, `FWD-4`, `FWD-5`, `FWD-8`).**
+**COUNT: 7 outcomes carried. 6 of 6 ratified ids verbatim, plus `FWD-11` on his word. ACCEPT owner:
+IRPT_FNTEND 2 (`FWD-1`, `FWD-6`), IRPT_BCKEND 5 (`FWD-3`, `FWD-4`, `FWD-5`, `FWD-8`, `FWD-11`).**
 
 ⛔ **A PROJECT WHOSE "DONE" INCLUDES FOUR OUTCOMES ANOTHER PROJECT GRADES IS NOT A DEFECT; IT IS THE SPLIT
-ANDREW ORDERED, STATED HONESTLY.** IRPT_FRONTEND is CLOSED when its two owned outcomes grade REALIZED **and**
-its contribution to the four crossing outcomes is graded as met by IRPT_BACKEND's adjudication.
+ANDREW ORDERED, STATED HONESTLY.** IRPT_FNTEND is CLOSED when its two owned outcomes grade REALIZED **and**
+its contribution to the four crossing outcomes is graded as met by IRPT_BCKEND's adjudication.
 
 ---
 
@@ -273,7 +303,7 @@ analysis sections are "supported" (paired fixtures decide). Any live vendor call
 ## WHERE THIS LANDS (F4) — **NOT YET LANDED**
 
 Ready to paste under **`## ENDPOINT (step 2, /endpoint --forward)`** in
-`org/missions/D9/IRPT/IRPT_FRONTEND/prd/IRPT_FRONTEND_PRD.md`. **That path does not exist.** It needs
+`org/missions/D9/IRPT/IRPT_FNTEND/prd/IRPT_FNTEND_PRD.md`. **That path does not exist.** It needs
 `MACROS.yaml` D9 `[IRPT]` landed by `0.0.0_AB_MSTR` (record @`643116f787`, ratification already given), the D9
 `LAPTOP` flip, and the register row.
 
