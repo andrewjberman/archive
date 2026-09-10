@@ -1,0 +1,222 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPSEC202609.TO-OP3A-S-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP3A-S-1.in-lane-liveness-caller-migration.md",
+    "group": "OTHER",
+    "vintage_commit": "f20bc65d71500429191d50b85501be3e3d095f9c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP_round3A.md",
+    "vintage_commit": "f20bc65d71500429191d50b85501be3e3d095f9c",
+    "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP3A-S-1.in-lane-liveness-caller-migration.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPSEC202609~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "7b5b28506d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A surprise-channel row is a record artifact, not a deployable. Landed on branch wk-NFRA_OPSEC202609-3A-4 at 7b5b28506d, LOCAL (a worker never pushes; the branch has no upstream). safe-commit's own gates ran green: surprise-row-gate '1 new row(s) of 182 total checked (181 pre-existing, NOT re-graded)', surprise-corpus 'documents=44 rows=945 malformed_blocks=0 failures=4 baseline=4 known=4 new=0', msg-verify MATCH len=3215.",
+      "introduces": [
+        "NFRA_OPSEC202609-Z-W4-S1"
+      ],
+      "artifact_covered_by": [
+        "S3A-AC4",
+        "S3A-AC5",
+        "S3A-AC6",
+        "S3A-AC7",
+        "S3A-AC8"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/deliverables/0.9.0_WK_NFRA_OPSEC202609~4/NFRA_OPSEC202609.TO-OP3A-S-1.in-lane-liveness-caller-migration.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This instance. A proof-of-spec is a record artifact, never deployed. Validated with the WORKTREE's own copy of .tools/proof-of-spec-check.py, not the main checkout's.",
+      "artifact_covered_by": [
+        "S3A-AC1",
+        "S3A-AC2",
+        "S3A-AC3",
+        "S3A-AC9"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S3A-AC1",
+      "criterion_verbatim": "`git show HEAD:infra/aws/terraform/opal-gateway/otp-liveness.tf` and the same for `ms-ingest.tf`, with the credential and URL lines pasted. EXPECT: the four values this face names are quoted back from source, each with its file and line; any that differ from this face are stated as differences rather than silently adopted.",
+      "method": "manual_read_with_citation",
+      "invocation": "cd /c/tmp/wk-opsec-3a-4 && git show HEAD:infra/aws/terraform/opal-gateway/otp-liveness.tf > .scratch/otp-liveness.HEAD.tf && git show HEAD:infra/aws/terraform/opal-gateway/ms-ingest.tf > .scratch/ms-ingest.HEAD.tf && grep -n 'OTP_HEALTH_URL|OTP_BEARER_SECRET_ID' .scratch/otp-liveness.HEAD.tf && grep -n 'MS_HEALTH_URL|MS_INGEST_BEARER_SECRET_ID' .scratch/ms-ingest.HEAD.tf   [HEAD = f20bc65d71500429191d50b85501be3e3d095f9c]",
+      "output_evidence": "otp-liveness.tf:83:      OTP_HEALTH_URL       = \"https://mcp.opalinvest.dev/otp/health\"\notp-liveness.tf:84:      OTP_BEARER_SECRET_ID = \"blackdiamond/49f/otp-gateway-token\"\nms-ingest.tf:86:      MS_HEALTH_URL              = \"https://mcp.opalinvest.dev/ms/health\"\nms-ingest.tf:87:      MS_INGEST_BEARER_SECRET_ID = \"opal/mcp/ms-ingest-token\"\nZERO DIFFERENCES FROM THE FACE: the face names otp-liveness.tf:83-84 and ms-ingest.tf:86-87 and all four values and all four line numbers match at HEAD. Nothing was silently adopted because nothing differed. File sizes at HEAD: 120 and 174 lines.",
+      "denominator": "4 of 4 values named by the face re-taken from source (2 URLs + 2 secret ids), across 2 of 2 files, at 4 of 4 exact line numbers.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S3A-AC2",
+      "criterion_verbatim": "a request to `https://mcp.opalinvest.dev/otp/health` presenting the CURRENT static bearer, with the request and the observed status code pasted. EXPECT: the status code is recorded verbatim, whatever it is.",
+      "method": "live_read",
+      "invocation": "BEARER=$(.tools/aws secretsmanager get-secret-value --secret-id blackdiamond/49f/otp-gateway-token --query SecretString --output text | tr -d '\\r' | awk '{print $1}'); curl -s -o .scratch/ac2.body -w \"http_status=%{http_code}\\n\" -H \"Authorization: Bearer $BEARER\" https://mcp.opalinvest.dev/otp/health",
+      "output_evidence": "UTC 2026-09-10T16:13:51Z\nsecret_fetch_rc=0  bearer_len=43\nhttp_status=200\ncurl_rc=0\nbody: {\"ok\":true}   (11 bytes)\nCONTROLS, run as SEPARATE invocations at 2026-09-10T16:14:22Z so the 200 discriminates:\n  no-auth   -> http_status=401  {\"error\":\"unauthorized\"}\n  junk-auth -> http_status=401  {\"error\":\"unauthorized\"}\nVERDICT ON THE NAMED STOP CONDITION: 200. Dual-accept is INTACT today. No STOP, no row on this criterion. The previous evening's premise is RE-TAKEN, not inherited.",
+      "denominator": "1 of 1 bearer-presenting request named by the criterion, plus 2 of 2 discriminating controls (no-auth, junk-auth) as separate invocations.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S3A-AC3",
+      "criterion_verbatim": "a request to `https://mcp.opalinvest.dev/otp/token`, with the request and the observed response pasted. EXPECT: the response is recorded verbatim and it is stated whether it is a Microsoft OIDC 302 or something else.",
+      "method": "live_read",
+      "invocation": "curl -s -D .scratch/ac3a.hdr -o .scratch/ac3a.body -w \"http_status=%{http_code}\\n\" https://mcp.opalinvest.dev/otp/token   (then POST no-auth, POST junk-auth, POST with the static bearer, then the returned capability_token against GET /otp/health, each a separate invocation)",
+      "output_evidence": "IT IS NOT A MICROSOFT OIDC 302. IT IS A 405 WITH allow: POST -- the request reaches the gateway app itself (server: uvicorn), not the OIDC edge.\nAC3-a GET /otp/token, no auth, UTC 2026-09-10T16:14:52Z -> http_status=405\n  HTTP/1.1 405 Method Not Allowed / Date: Thu, 10 Sep 2026 16:14:52 GMT / Content-Type: text/plain; charset=utf-8 / Content-Length: 18 / Connection: keep-alive / server: uvicorn / allow: POST\n  body: Method Not Allowed\nAC3-b POST /otp/token, no auth -> http_status=401, www-authenticate: Bearer, body {\"error\":\"unauthorized\"}\nAC3-c POST /otp/token, junk bearer -> http_status=401, body {\"error\":\"unauthorized\"}\nAC3-d POST /otp/token, STATIC BEARER, UTC 2026-09-10T16:16:04Z -> http_status=200, Content-Type: application/json, Content-Length: 702, cache-control: no-store\n  body keys (token value masked): capability_token = <str len=625, 2 dots, prefix eyJhbGciOiJS>, token_type = 'Bearer', expires_in = 300, aud = 'gw:otp'\nAC3-e the returned capability_token presented to GET /otp/health, UTC 2026-09-10T16:16:48Z -> http_status=200, body {\"ok\":true}\n  JWT header: {\"alg\": \"RS256\", \"kid\": \"ac4c49e6c8bec6d4\", \"typ\": \"JWT\"}\n  JWT claims: {\"iss\": \"https://mcp.opalinvest.dev\", \"sub\": \"49f\", \"aud\": \"gw:otp\", \"iat\": 1789057008, \"nbf\": 1789057008, \"exp\": 1789057308, \"jti\": \"YittbmTBKmoTa_qH\", \"typ\": \"capability\"}  (exp - iat = 300 s, matching expires_in)\nTHE MS SIDE IS THE IDENTICAL SHAPE, read the same way: GET /ms/token = 405 allow: POST; POST no-auth = 401; POST with the static bearer = 200 with {capability_token, token_type 'Bearer', expires_in 300, aud 'gw:ms'}; that token against GET /ms/health = 200 {\"ok\":true}; claims sub=ms aud=gw:ms.\nCROSS-AUDIENCE CONTROL (separate invocation): the gw:ms capability token presented to /otp/health returns 401 {\"error\":\"unauthorized\"}. Audience binding is ENFORCED, so the 200s above are not 'any JWT passes'.\nREAD FROM THE ENDPOINT, NOT ASSUMED: the exchange contract is POST + Authorization: Bearer <static bearer>, no request body, response 200 JSON, credential lifetime 300 s.",
+      "denominator": "5 of 5 /otp/token probes (GET no-auth, POST no-auth, POST junk, POST bearer, capability-token replay), plus 5 of 5 mirrored /ms/token probes, plus 1 cross-audience negative control. 11 invocations total.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S3A-AC4",
+      "criterion_verbatim": "the diff of `otp-liveness.tf` and any source file it packages, after the change. EXPECT: the diff shows `opal-otp-liveness` obtaining its credential through the exchange endpoint rather than presenting the static bearer directly.",
+      "method": "diff",
+      "invocation": "git diff HEAD -- infra/aws/terraform/opal-gateway/otp-liveness.tf infra/aws/lambda/m365-otp-liveness/lambda_function.py   (run; empty -- no change was made). Blocker established by: comp-find 'source_file' -- infra/aws/terraform/opal-gateway ; comp-find --name '*.py' -- infra/aws/terraform/opal-gateway ; read of .owned-paths.yaml:45-47 and of this order's <paths> block at f20bc65d71500429191d50b85501be3e3d095f9c",
+      "output_evidence": "git diff HEAD: EMPTY. No change was made to either file.\ncomp-find 'source_file' -- infra/aws/terraform/opal-gateway : DENOMINATOR 2 hit(s) across 22 file(s) scanned [corpus=all]\n  infra/aws/terraform/opal-gateway/otp-liveness.tf:12: source_file = \"${path.module}/../../lambda/m365-otp-liveness/lambda_function.py\"\n  infra/aws/terraform/opal-gateway/ms-ingest.tf:23: source_file = \"${path.module}/../../lambda/m365-ms-ingest-liveness/lambda_function.py\"\ncomp-find --name '*.py' -- infra/aws/terraform/opal-gateway : 0 hit(s) across 28 file(s) scanned [corpus=all]\nTO <paths> block at f20bc65d71500429191d50b85501be3e3d095f9c, 5 entries verbatim: infra/aws/terraform/opal-gateway/ ; the task-order file ; deliverables/0.9.0_WK_NFRA_OPSEC202609~4/ ; surprise-channel/investigations/INVESTIGATION_v1.md ; org/critical_paths/change_management/ . infra/aws/lambda/ appears in NONE.\nTHE .tf PLANE CANNOT SATISFY THIS CRITERION ON ITS OWN: otp-liveness.tf's whole contribution to the credential question is two env vars (OTP_HEALTH_URL, OTP_BEARER_SECRET_ID); the choice to present the static bearer directly is made at lambda_function.py's urllib.request.Request(HEALTH_URL, headers={'Authorization': f'Bearer {bearer}'}).\nBLOCKED ON WRITE SURFACE, filed as row NFRA_OPSEC202609-Z-W4-S1 @7b5b28506d (BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO~Z). The credential decision for both callers is made entirely in the PACKAGED PYTHON, not in the .tf: otp-liveness.tf:12 packages ../../lambda/m365-otp-liveness/lambda_function.py and ms-ingest.tf:23 packages ../../lambda/m365-ms-ingest-liveness/lambda_function.py (comp-find 'source_file' over the granted directory: DENOMINATOR 2 hit(s) across 22 file(s), both pointing outside the grant). This order's <paths> block names infra/aws/terraform/opal-gateway/ and does NOT name infra/aws/lambda/; per .owned-paths.yaml:45-47 a 0.9.0_WK_* serial 'is admitted to exactly the <paths> a NON-TERMINAL task order ... names at HEAD ... A path the order does not name is a lane refusal', so the constraint is MECHANICAL. comp-find --name '*.py' -- infra/aws/terraform/opal-gateway returns 0 hit(s) across 28 file(s): there is no Python inside the grant to edit. Two terraform-only workarounds (a duplicate source under the granted directory; archive_file inline content) were REFUSED rather than used, because both orphan the canonical source and stand up a duplicate source path, which CLAUDE.md s.5 vetoes. NO EDIT WAS MADE and no override was taken.",
+      "denominator": "0 of 1 required source edits made. 2 of 2 packaged-source references resolve outside the write grant; 0 of 28 files in the granted directory are Python.",
+      "status": "FAIL",
+      "status_reason": "The criterion cannot be met by this worker. It requires editing infra/aws/lambda/m365-otp-liveness/lambda_function.py, which this order's <paths> block does not name and .owned-paths.yaml:45-47 therefore refuses. FAIL is stated rather than talked into a pass: no override was taken, no duplicate source was created, and no gateway-side edit was attempted. Filed as blocking row NFRA_OPSEC202609-Z-W4-S1 @7b5b28506d; disarm is 2.0.0_SA_COO~Z adding infra/aws/lambda/m365-otp-liveness/ to the grant. Everything ELSE this criterion depends on is established and green (AC2 dual-accept, AC3 exchange contract, IAM measured sufficient), so a successor with the wider grant starts at the code edit."
+    },
+    {
+      "criterion_id": "S3A-AC5",
+      "criterion_verbatim": "the diff of `ms-ingest.tf` and any source file it packages, after the change. EXPECT: the diff shows `opal-ms-ingest-liveness` obtaining its credential through the exchange endpoint rather than presenting the static bearer directly.",
+      "method": "diff",
+      "invocation": "git diff HEAD -- infra/aws/terraform/opal-gateway/ms-ingest.tf infra/aws/lambda/m365-ms-ingest-liveness/lambda_function.py   (run; empty -- no change was made). Same blocker instruments as S3A-AC4.",
+      "output_evidence": "git diff HEAD: EMPTY. No change was made to either file.\nms-ingest.tf:23 packages ../../lambda/m365-ms-ingest-liveness/lambda_function.py -- outside the write grant, exactly as for S3A-AC4.\nms-ingest.tf's contribution to the credential question is two env vars (MS_HEALTH_URL:86, MS_INGEST_BEARER_SECRET_ID:87); the static-bearer presentation is at lambda_function.py's urllib.request.Request(HEALTH_URL, headers={'Authorization': f'Bearer {bearer}'}).\nNOTE, since ms-ingest.tf is IN the grant and could have been edited alone: an env-var-only edit (e.g. adding MS_TOKEN_URL) would be INERT -- the packaged code never reads it -- so it was NOT made. A DESIRED-not-APPLIED artifact that looks like a migration is worse than an honest FAIL.\nBLOCKED ON WRITE SURFACE, filed as row NFRA_OPSEC202609-Z-W4-S1 @7b5b28506d (BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO~Z). The credential decision for both callers is made entirely in the PACKAGED PYTHON, not in the .tf: otp-liveness.tf:12 packages ../../lambda/m365-otp-liveness/lambda_function.py and ms-ingest.tf:23 packages ../../lambda/m365-ms-ingest-liveness/lambda_function.py (comp-find 'source_file' over the granted directory: DENOMINATOR 2 hit(s) across 22 file(s), both pointing outside the grant). This order's <paths> block names infra/aws/terraform/opal-gateway/ and does NOT name infra/aws/lambda/; per .owned-paths.yaml:45-47 a 0.9.0_WK_* serial 'is admitted to exactly the <paths> a NON-TERMINAL task order ... names at HEAD ... A path the order does not name is a lane refusal', so the constraint is MECHANICAL. comp-find --name '*.py' -- infra/aws/terraform/opal-gateway returns 0 hit(s) across 28 file(s): there is no Python inside the grant to edit. Two terraform-only workarounds (a duplicate source under the granted directory; archive_file inline content) were REFUSED rather than used, because both orphan the canonical source and stand up a duplicate source path, which CLAUDE.md s.5 vetoes. NO EDIT WAS MADE and no override was taken.",
+      "denominator": "0 of 1 required source edits made. 1 of 1 packaged-source reference for this caller resolves outside the write grant.",
+      "status": "FAIL",
+      "status_reason": "Identical blocker to S3A-AC4: requires editing infra/aws/lambda/m365-ms-ingest-liveness/lambda_function.py, outside this order's <paths>. Filed as blocking row NFRA_OPSEC202609-Z-W4-S1 @7b5b28506d. No override taken, no inert half-edit made to the .tf that IS in grant."
+    },
+    {
+      "criterion_id": "S3A-AC6",
+      "criterion_verbatim": "a manual invocation of `opal-otp-liveness` after the change, with the invocation result and the function's own log output pasted. EXPECT: the probe reports the gateway healthy, and the log shows which credential path it took.",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda invoke --function-name opal-otp-liveness --log-type Tail --query 'LogResult' --output text .scratch/otp.invoke.json  (then base64-decode the log tail)",
+      "output_evidence": "INVOKED AT UTC 2026-09-10T16:25:29Z, ON THE UNCHANGED CODE -- there is no 'after the change' state to invoke in.\ninvoke_rc=0\npayload: {\"ok\": true, \"detail\": \"status=200\"}\nlog tail (verbatim, complete):\n  START RequestId: 2f5b6254-ff60-4c0c-abb8-c382262d18bb Version: $LATEST\n  END RequestId: 2f5b6254-ff60-4c0c-abb8-c382262d18bb\n  REPORT RequestId: 2f5b6254-ff60-4c0c-abb8-c382262d18bb\tDuration: 2603.16 ms\tBilled Duration: 2869 ms\tMemory Size: 128 MB\tMax Memory Used: 91 MB\tInit Duration: 265.76 ms\nLIMB 1 OF THE EXPECTATION IS MET: the probe reports the gateway healthy (ok true, status=200).\nLIMB 2 IS NOT MET AND CANNOT BE WITHOUT A SOURCE EDIT: the log shows NOTHING about which credential path was taken. The function emits no such line -- the only print( in the body is the SES-skip except-handler. WHICH PATH IT ACTUALLY TOOK, established on a DIFFERENT instrument since the log is silent: the deployed zip was downloaded via lambda get-function Code.Location (1996 bytes, single entry lambda_function.py) and its lambda_function.py is BYTE-IDENTICAL to the repo source -- sha256 fd13b4905476d692752a277cae109c2721288ba9d7469adb9a0cc0c29d73c70f, 3947 bytes, both sides. That running body presents the STATIC BEARER directly to HEALTH_URL and never calls /otp/token.\nSIDE-EFFECT SAFETY, checked BEFORE invoking rather than inferred after: /otp/health was measured 200 ok:true at 16:13:51Z, so the alert branch (SNS publish + SES send) could not fire. No alert was created, and no monitor/alarm/notification was built.\nBLOCKED ON WRITE SURFACE, filed as row NFRA_OPSEC202609-Z-W4-S1 @7b5b28506d (BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO~Z). The credential decision for both callers is made entirely in the PACKAGED PYTHON, not in the .tf: otp-liveness.tf:12 packages ../../lambda/m365-otp-liveness/lambda_function.py and ms-ingest.tf:23 packages ../../lambda/m365-ms-ingest-liveness/lambda_function.py (comp-find 'source_file' over the granted directory: DENOMINATOR 2 hit(s) across 22 file(s), both pointing outside the grant). This order's <paths> block names infra/aws/terraform/opal-gateway/ and does NOT name infra/aws/lambda/; per .owned-paths.yaml:45-47 a 0.9.0_WK_* serial 'is admitted to exactly the <paths> a NON-TERMINAL task order ... names at HEAD ... A path the order does not name is a lane refusal', so the constraint is MECHANICAL. comp-find --name '*.py' -- infra/aws/terraform/opal-gateway returns 0 hit(s) across 28 file(s): there is no Python inside the grant to edit. Two terraform-only workarounds (a duplicate source under the granted directory; archive_file inline content) were REFUSED rather than used, because both orphan the canonical source and stand up a duplicate source path, which CLAUDE.md s.5 vetoes. NO EDIT WAS MADE and no override was taken.",
+      "denominator": "1 of 1 manual invocations run; 1 of 2 expectation limbs met (healthy YES, credential-path log NO); 0 of 1 required source edits made.",
+      "status": "FAIL",
+      "status_reason": "FAIL on the criterion's literal text on two independent counts, both downstream of the same blocker. (1) 'after the change' has no referent: the change is blocked at S3A-AC4. (2) 'the log shows which credential path it took' is unsatisfiable on the current code at all -- neither function has ever emitted a credential-path line, so that clause was ALSO a lambda_function.py edit, and that file is outside the grant. The invocation was still run and is recorded verbatim so the CVO has the numbers. Row NFRA_OPSEC202609-Z-W4-S1 @7b5b28506d names both limbs."
+    },
+    {
+      "criterion_id": "S3A-AC7",
+      "criterion_verbatim": "a manual invocation of `opal-ms-ingest-liveness` after the change, with the invocation result and the function's own log output pasted. EXPECT: the probe reports the gateway healthy, and the log shows which credential path it took.",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda invoke --function-name opal-ms-ingest-liveness --log-type Tail --query 'LogResult' --output text .scratch/ms.invoke.json  (then base64-decode the log tail)",
+      "output_evidence": "INVOKED AT UTC 2026-09-10T16:26:09Z, ON THE UNCHANGED CODE.\ninvoke_rc=0\npayload: {\"ok\": true, \"detail\": \"status=200\"}\nlog tail (verbatim, complete):\n  START RequestId: 704f45d4-e279-4a6b-bd1f-1420088b6048 Version: $LATEST\n  END RequestId: 704f45d4-e279-4a6b-bd1f-1420088b6048\n  REPORT RequestId: 704f45d4-e279-4a6b-bd1f-1420088b6048\tDuration: 2868.13 ms\tBilled Duration: 3203 ms\tMemory Size: 128 MB\tMax Memory Used: 91 MB\tInit Duration: 334.36 ms\nLIMB 1 MET (gateway healthy). LIMB 2 NOT MET: no credential-path line exists in the log.\nPATH ESTABLISHED ON A DIFFERENT INSTRUMENT: deployed zip 1697 bytes, single entry; its lambda_function.py sha256 8f2b0aca27da50324b981dcc439999c1032406b5768935492c5030cbea046000, 3301 bytes, BYTE-IDENTICAL to the repo source. Static bearer presented directly to MS_HEALTH_URL; /ms/token never called.\nSIDE-EFFECT SAFETY: /ms/health measured 200 ok:true at 16:17:44Z before invoking, so the alert branch could not fire.\nBLOCKED ON WRITE SURFACE, filed as row NFRA_OPSEC202609-Z-W4-S1 @7b5b28506d (BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO~Z). The credential decision for both callers is made entirely in the PACKAGED PYTHON, not in the .tf: otp-liveness.tf:12 packages ../../lambda/m365-otp-liveness/lambda_function.py and ms-ingest.tf:23 packages ../../lambda/m365-ms-ingest-liveness/lambda_function.py (comp-find 'source_file' over the granted directory: DENOMINATOR 2 hit(s) across 22 file(s), both pointing outside the grant). This order's <paths> block names infra/aws/terraform/opal-gateway/ and does NOT name infra/aws/lambda/; per .owned-paths.yaml:45-47 a 0.9.0_WK_* serial 'is admitted to exactly the <paths> a NON-TERMINAL task order ... names at HEAD ... A path the order does not name is a lane refusal', so the constraint is MECHANICAL. comp-find --name '*.py' -- infra/aws/terraform/opal-gateway returns 0 hit(s) across 28 file(s): there is no Python inside the grant to edit. Two terraform-only workarounds (a duplicate source under the granted directory; archive_file inline content) were REFUSED rather than used, because both orphan the canonical source and stand up a duplicate source path, which CLAUDE.md s.5 vetoes. NO EDIT WAS MADE and no override was taken.",
+      "denominator": "1 of 1 manual invocations run; 1 of 2 expectation limbs met; 0 of 1 required source edits made.",
+      "status": "FAIL",
+      "status_reason": "Identical to S3A-AC6: no 'after the change' state exists (blocked at S3A-AC5), and the 'log shows which credential path' clause is itself a source edit outside the grant. Invocation run and recorded anyway. Row NFRA_OPSEC202609-Z-W4-S1 @7b5b28506d."
+    },
+    {
+      "criterion_id": "S3A-AC8",
+      "criterion_verbatim": "the deploy-ledger entry under `org/critical_paths/change_management/`, read after closure. EXPECT: the entry is CLOSED, names its rollback, and states its push state as a MEASURED value.",
+      "method": "manual_read_with_citation",
+      "invocation": "No invocation was possible: no ledger entry exists for this order. The order's own bound is 'A deploy-ledger entry under org/critical_paths/change_management/ is OPENED before any apply and CLOSED at completion' -- and NO APPLY RAN, because the change that would have been applied is blocked at S3A-AC4/AC5.",
+      "output_evidence": "ZERO ledger entries were created by this order and none was closed. safe-apply was NOT run; terraform was NOT run in any form; nothing was deployed.\nTHE ARTIFACT DOES NOT EXIST AND WAS DELIBERATELY NOT MANUFACTURED. Writing a CLOSED ledger entry for a deploy that did not happen would be a false artifact in a record other seats act on, and the estate's own standing warning is that an entry proves only what a device saw. The honest state is: no change, therefore no apply, therefore no entry, therefore no closure to read.\nPUSH STATE OF THE WORK THAT DID LAND, stated as a MEASURED value even though the ledger row does not exist: commit 7b5b28506d (row NFRA_OPSEC202609-Z-W4-S1) is LOCAL on branch wk-NFRA_OPSEC202609-3A-4 -- a worker never pushes, and the branch has no upstream.\nBLOCKED ON WRITE SURFACE, filed as row NFRA_OPSEC202609-Z-W4-S1 @7b5b28506d (BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO~Z). The credential decision for both callers is made entirely in the PACKAGED PYTHON, not in the .tf: otp-liveness.tf:12 packages ../../lambda/m365-otp-liveness/lambda_function.py and ms-ingest.tf:23 packages ../../lambda/m365-ms-ingest-liveness/lambda_function.py (comp-find 'source_file' over the granted directory: DENOMINATOR 2 hit(s) across 22 file(s), both pointing outside the grant). This order's <paths> block names infra/aws/terraform/opal-gateway/ and does NOT name infra/aws/lambda/; per .owned-paths.yaml:45-47 a 0.9.0_WK_* serial 'is admitted to exactly the <paths> a NON-TERMINAL task order ... names at HEAD ... A path the order does not name is a lane refusal', so the constraint is MECHANICAL. comp-find --name '*.py' -- infra/aws/terraform/opal-gateway returns 0 hit(s) across 28 file(s): there is no Python inside the grant to edit. Two terraform-only workarounds (a duplicate source under the granted directory; archive_file inline content) were REFUSED rather than used, because both orphan the canonical source and stand up a duplicate source path, which CLAUDE.md s.5 vetoes. NO EDIT WAS MADE and no override was taken.",
+      "denominator": "0 of 1 ledger entries exist. 0 of 1 applies run. 0 of 2 planned caller migrations deployed.",
+      "status": "FAIL",
+      "status_reason": "No artifact exists to read, because the deploy it would record was blocked upstream at S3A-AC4/AC5 by the write-grant refusal (row NFRA_OPSEC202609-Z-W4-S1 @7b5b28506d). Graded FAIL rather than N/A-BY-CONSTRUCTION deliberately: the criterion is not inapplicable to this order -- the order plainly intended a deploy -- it is UNMET, and marking it N/A would let a blocked order read as a complete one."
+    },
+    {
+      "criterion_id": "S3A-AC9",
+      "criterion_verbatim": "JUDGMENT, GRADED BY `3.0.0_SA_CVO~Z` AT L9, NOT SELF-GRADED. Whether FWD-12's IN-LANE half is now EXERCISED. Record what the two probes did and offer NO verdict.",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda invoke --function-name opal-otp-liveness / opal-ms-ingest-liveness --log-type Tail (both at UTC 2026-09-10T16:25:29Z and 16:26:09Z), plus the deployed-zip content comparison against the repo sources, plus the /otp/token and /ms/token exchange reads.",
+      "output_evidence": "NUMBERS ONLY. NO VERDICT IS OFFERED ON WHETHER FWD-12'S IN-LANE HALF IS EXERCISED.\nWHAT THE TWO PROBES DID:\n  opal-otp-liveness, invoked 2026-09-10T16:25:29Z: rc=0, payload {\"ok\": true, \"detail\": \"status=200\"}. Log tail carried START/END/REPORT only; Duration 2603.16 ms, Init 265.76 ms, Max Memory 91 MB.\n  opal-ms-ingest-liveness, invoked 2026-09-10T16:26:09Z: rc=0, payload {\"ok\": true, \"detail\": \"status=200\"}. Log tail carried START/END/REPORT only; Duration 2868.13 ms, Init 334.36 ms, Max Memory 91 MB.\nWHICH CREDENTIAL EACH PRESENTED, measured on the deployed bytes because the logs are silent: both deployed lambda_function.py bodies are byte-identical to their repo sources (sha256 fd13b490...c70f / 3947 B and 8f2b0aca...6000 / 3301 B), and both build urllib.request.Request(HEALTH_URL, headers={'Authorization': f'Bearer {bearer}'}) where bearer is the Secrets-Manager static value. NEITHER probe called an exchange endpoint.\nMIGRATION COUNT: 0 of 2 in-lane callers changed. 0 of 5 total holdings migrated (3 of 5 are other lanes' and out of scope by Andrew's ruling @9382d107a3 s.1).\nWHAT IS ESTABLISHED AND NOT: the exchange endpoints EXIST and WORK end to end for both callers' credentials today (POST -> 200 -> capability JWT, aud-bound, 300 s TTL, accepted by the corresponding /health), the IAM the exchange path needs is ALREADY GRANTED (simulate-principal-policy allowed on both, implicitDeny on the cross-role negative control), and dual-accept is INTACT (200 with the static bearer; 401 for no-auth and junk-auth). What is NOT established is any caller-side change: the migration itself is blocked by this order's write grant (row NFRA_OPSEC202609-Z-W4-S1 @7b5b28506d).\nBOUND ON EVERY NUMBER ABOVE: all of it was measured inside a single ~15-minute window (16:13Z-16:31Z) on 2026-09-10. It supports 'the exchange works and dual-accept is intact AT THAT MOMENT'. It does NOT support any claim about stability over the 6-hour probe cadence, and no such claim is made.",
+      "denominator": "2 of 2 in-lane callers invoked; 0 of 2 migrated; 2 of 2 exchange endpoints read end to end; measurement window 16:13:51Z-16:31:00Z on 2026-09-10 (~17 minutes).",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Marked judgment=\"true\" in the task order and reserved to 3.0.0_SA_CVO~Z at L9. The substitute oracle IS that adjudication: this worker records the numbers and offers no verdict, per the order's explicit instruction.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three separate mutations, each run as its OWN invocation, against the three assertions this order actually leans on. (1) DUAL-ACCEPT: replace the valid static bearer with no credential, then with a junk credential, at the same URL. (2) AUDIENCE BINDING: present the gw:ms capability token to /otp/health, i.e. a structurally valid, correctly signed, unexpired JWT with the WRONG aud. (3) IAM SCOPE: simulate opal-otp-liveness-role against the MS secret ARN, a resource its policy must not reach.",
+      "expected": "(1) 401 for both, not 200 -- otherwise a 200 would prove nothing about the bearer. (2) 401 -- otherwise the /otp/health 200 would only prove 'some JWT was accepted'. (3) implicitDeny -- otherwise simulate-principal-policy would be answering 'allowed' to everything and both positive results would be worthless.",
+      "observed": "(1) no-auth http_status=401 {\"error\":\"unauthorized\"}; junk-auth http_status=401 {\"error\":\"unauthorized\"}. (2) gw:ms token -> /otp/health http_status=401 {\"error\":\"unauthorized\"}. (3) opal-otp-liveness-role x secretsmanager:GetSecretValue x arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/mcp/ms-ingest-token-mXFTKk -> decision \"implicitDeny\". All three fired.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each health result was reached twice by TWO DIFFERENT instruments rather than the same command re-run: (a) a local curl presenting the Secrets-Manager static bearer, and (b) the deployed Lambda itself doing the same thing from AWS. Different client, different network path, different credential-fetch code.",
+      "observed": "/otp/health: curl at 16:13:51Z -> http_status=200 {\"ok\":true}; opal-otp-liveness at 16:25:29Z -> {\"ok\": true, \"detail\": \"status=200\"}. /ms/health: curl at 16:17:44Z -> 200 {\"ok\":true}; opal-ms-ingest-liveness at 16:26:09Z -> {\"ok\": true, \"detail\": \"status=200\"}. 4 of 4 agree. The two exchange endpoints were each exercised twice (POST for the contract read, POST again to mint the token replayed at /health) and returned the same shape both times, with a different jti each time as a 300 s credential should.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The three CROSS-LANE callers: bd-49f-auto-login (OpalETL), bd-cot-auto-login (PartnerETL), and the globgrph NFRA_MSGRAPH derive (CloudComp).",
+      "reason": "Out of scope by the order's BOUNDS and by Andrew's ruling @9382d107a3 s.1, which states it 'does NOT move the three callers into OPSEC's territory; PRD s.3's boundary stands.' Their code was NOT read for modification and NOT touched. They remain 3 of 5 holdings, migrated through their own lanes."
+    },
+    {
+      "item": "Retirement of the static bearer and revocation of either secret (blackdiamond/49f/otp-gateway-token, opal/mcp/ms-ingest-token).",
+      "reason": "Explicitly forbidden by the order. Dual-accept must stay intact because three other callers still depend on it. Neither secret was modified, rotated, or deleted; both were only READ."
+    },
+    {
+      "item": "Any alarm, monitor, notification, SNS subscription or freshness checker.",
+      "reason": "Not authorised by this order and covered by the standing moratorium. None was created. The two existing 6h EventBridge rules were not touched -- their cadence, targets and state are unchanged."
+    },
+    {
+      "item": "Any gateway-side (app) edit.",
+      "reason": "0.7.0_AE_CloudOps's lane, not this order's write surface. None was needed: the exchange endpoints already exist and already work (S3A-AC3), so no gateway change was even a candidate."
+    },
+    {
+      "item": "The optional per-criterion `expect` regex field on every acceptance row.",
+      "reason": "OMITTED DELIBERATELY AND DECLARED. This task order's <expect> clauses are prose sentences ('the status code is recorded verbatim, whatever it is'), not Python regexes. Carrying prose into a field the checker DOTALL-matches would manufacture either a false PASS or a meaningless FAIL. Consequence stated plainly: these rows are graded as SELF-REPORT (the pre-v3 state), not by mechanical pattern match."
+    },
+    {
+      "item": "A terraform-only workaround for the blocked migration (a second copy of the lambda source under the granted directory, or archive_file inline `content`).",
+      "reason": "Technically available and REFUSED. Both orphan the canonical source at infra/aws/lambda/ and create a duplicate source path, which CLAUDE.md s.5 vetoes outright. Widening the order's design to route around its own write grant is not this worker's call."
+    },
+    {
+      "item": "A deploy-ledger entry under org/critical_paths/change_management/.",
+      "reason": "No apply ran, so per the order's own bound ('OPENED before any apply') there was nothing to open. Not manufactured. This is why S3A-AC8 is FAIL and not PASS."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPSEC202609-Z-W4-S1: the order's <paths> write grant cannot reach the artifact its own criteria name -- S3A-AC4/AC5 require diffing 'any source file it packages', but both callers' credential logic lives in infra/aws/lambda/m365-{otp,ms-ingest}-liveness/lambda_function.py (otp-liveness.tf:12, ms-ingest.tf:23) and infra/aws/lambda/ is not in <paths>; per .owned-paths.yaml:45-47 that is a mechanical lane refusal, and 0 of 28 files in the granted directory are Python. BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO~Z."
+  ],
+  "session_log": "No separate session log: a spine-v3 L7 worker writes no telemetry and L7 is read from git. The session's record is commit 7b5b28506d on branch wk-NFRA_OPSEC202609-3A-4 (the surprise row) plus the commit carrying this instance.",
+  "compiler_tools": [
+    {
+      "tool": "git show (source re-grounding, S3A-AC1)",
+      "invocation": "git show HEAD:infra/aws/terraform/opal-gateway/otp-liveness.tf ; git show HEAD:infra/aws/terraform/opal-gateway/ms-ingest.tf   [HEAD = f20bc65d71]",
+      "result": "4 of 4 face values re-taken at 4 of 4 exact line numbers; zero differences."
+    },
+    {
+      "tool": "curl 8.21.0 (live gateway reads, S3A-AC2/AC3)",
+      "invocation": "curl -s -D <hdr> -o <body> -w 'http_status=%{http_code}' [-X POST] [-H 'Authorization: Bearer ...'] https://mcp.opalinvest.dev/{otp,ms}/{health,token}",
+      "result": "11 invocations. static bearer -> /otp/health 200; no-auth 401; junk 401; GET /otp/token 405 allow:POST; POST /otp/token + static bearer 200 with a 300 s aud-bound RS256 capability JWT; that JWT -> /otp/health 200; /ms/* mirror identically; gw:ms JWT -> /otp/health 401."
+    },
+    {
+      "tool": ".tools/aws iam simulate-principal-policy (the preflight's UNMEASURED IAM item)",
+      "invocation": "MSYS_NO_PATHCONV=1 .tools/aws iam simulate-principal-policy --policy-source-arn arn:aws:iam::313476888478:role/<role> --action-names secretsmanager:GetSecretValue --resource-arns <one ARN per call>   [3 separate invocations]",
+      "result": "opal-otp-liveness-role x 49f secret = allowed; opal-ms-ingest-liveness-role x ms secret = allowed; opal-otp-liveness-role x ms secret = implicitDeny (negative control, separate invocation). The exchange path reads the SAME secret it reads today, so the existing grant is sufficient and NO IAM change is needed. This closes the preflight's declared blind spot."
+    },
+    {
+      "tool": ".tools/aws lambda get-function + zipfile/hashlib (deployed-vs-build-input, Rule 22a)",
+      "invocation": "aws lambda get-function --query Code.Location -> curl the presigned zip -> compare the zip's lambda_function.py sha256 against the repo source",
+      "result": "opal-otp-liveness fd13b4905476d692752a277cae109c2721288ba9d7469adb9a0cc0c29d73c70f (3947 B) IDENTICAL to repo; opal-ms-ingest-liveness 8f2b0aca27da50324b981dcc439999c1032406b5768935492c5030cbea046000 (3301 B) IDENTICAL to repo. The block is about the RUNNING code, not a stale checkout. INSTRUMENT DEFECT DISCLOSED: a first substring heuristic for the word 'token' in the running body returned True on BOTH functions and was a FALSE POSITIVE -- it matched the docstring prose 'delegated Graph token'. It is not quoted as evidence anywhere; the load-bearing test is the literal Request(HEALTH_URL, headers={'Authorization': f'Bearer {bearer}'}) match, which is exact."
+    },
+    {
+      "tool": "comp-find (write-surface census)",
+      "invocation": "comp-find 'source_file' -- infra/aws/terraform/opal-gateway ; comp-find --name '*.py' -- infra/aws/terraform/opal-gateway",
+      "result": "2 hit(s) across 22 file(s) -- both source_file references point outside the grant. 0 hit(s) across 28 file(s) for *.py -- no Python inside the grant."
+    },
+    {
+      "tool": ".tools/safe-commit.sh (worktree copy, worker author)",
+      "invocation": "bash .tools/safe-commit.sh --author '0.9.0_WK_NFRA_OPSEC202609~4 <0.9.0_WK_NFRA_OPSEC202609~4@opal.agent>' -F .scratch/msg-row.txt -- <paths>",
+      "result": "7b5b28506d, LOCAL on wk-NFRA_OPSEC202609-3A-4. surprise-row-gate OK (1 new row of 182); surprise-corpus OK (4 known, 0 new); to-pipeline-gate OK; missions-tree-check 0 violations; msg-verify MATCH len=3215."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py (WORKTREE copy, per the order's explicit instruction)",
+      "invocation": "cd /c/tmp/wk-opsec-3a-4 && python .tools/proof-of-spec-check.py <this instance> S3A-AC1,S3A-AC2,S3A-AC3,S3A-AC4,S3A-AC5,S3A-AC6,S3A-AC7,S3A-AC8,S3A-AC9",
+      "result": "recorded in the worker's final report; only the exit code is the verdict."
+    }
+  ]
+}

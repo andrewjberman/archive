@@ -65,16 +65,30 @@ all sixteen:
 
 ## DISPOSITION TABLE -- 16 of 16
 
-1. `bd-merge-daily-lambda-role` -- ADOPT. Absent from the fresh 191-role comp-iam parse and from
+1. `bd-merge-daily-lambda-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+   `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
+   exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
+   assumption; THE OWNER FINDING below carries its four planes and their denominators.
+   Absent from the fresh 191-role comp-iam parse and from
    every first-party Terraform file in this repo (`comp-find infra/ --all`: only two world-model
    census/inventory JSON hits, no SURFACED or DEF band); an ordinary bd-domain role with 17 already
    Terraform-declared bd- siblings (`bd-processor-lambda-role`, `bd-silver-merge-role`,
    `bd-daily-trigger-lambda-role` and others, per the same comp-iam parse) and nothing in this repo
    distinguishing it as a candidate for exception.
-2. `bd-pipeline-task-role` -- ADOPT. Same evidence pattern as #1: absent from the fresh comp-iam
+2. `bd-pipeline-task-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+   `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
+   exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
+   assumption; THE OWNER FINDING below carries its four planes and their denominators.
+   Same evidence pattern as #1: absent from the fresh comp-iam
    parse, no SURFACED/DEF source hit, no documented rationale, an ordinary bd- role among many
    already-declared bd- siblings.
-3. `codebuild-semantic-clustering-role` -- ADOPT. Manually built via a documented one-off setup
+3. `codebuild-semantic-clustering-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+   `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
+   exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
+   assumption; THE OWNER FINDING below carries its four planes and their denominators.
+   The closest thing to a named human anywhere in this row's record is a job title in a build log
+   (`CODEBUILD_SETUP.md:3`, "Engineer: Data Scientist"), which is neither a seat nor an acceptance.
+   Manually built via a documented one-off setup
    (`infra/aws/lambda/news_semantic_clustering/CODEBUILD_SETUP.md`, dated 2026-02-17, "Engineer:
    Data Scientist", "What Was Created: 1. IAM Role for CodeBuild -- Role Name:
    codebuild-semantic-clustering-role"). That document records what an engineer built, never a
@@ -94,13 +108,21 @@ all sixteen:
    classification, carried forward unchanged by `IAM-r-1` -- `IAM-r-3`'s own per-member
    re-confirmation was not present in this worker's tree at write time; see CLASS RULINGS,
    MEMBERSHIP NOTE below.
-5. `finbert-ec2-backfill-role` -- ADOPT. Absent from the fresh comp-iam parse and from every
+5. `finbert-ec2-backfill-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+   `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
+   exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
+   assumption; THE OWNER FINDING below carries its four planes and their denominators.
+   Absent from the fresh comp-iam parse and from every
    first-party source file (census/inventory JSON only); an EC2 backfill role with no service-default
    naming pattern and no documented exclusion rationale anywhere in this repo.
-6. `lambda-ec2-runtime-monitor-role` -- ADOPT. Same evidence pattern: absent from the fresh
+6. `lambda-ec2-runtime-monitor-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+   `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
+   exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
+   assumption; THE OWNER FINDING below carries its four planes and their denominators.
+   Same evidence pattern: absent from the fresh
    comp-iam parse, no SURFACED/DEF source hit beyond census JSON, no documented rationale for
    exclusion.
-7. `lambda-test-role` -- RETIRE owner=UNASSIGNED reason=three planes agree that nothing declares
+7. `lambda-test-role` -- RETIRE owner=NO-ACCEPTING-SEAT reason=three planes agree that nothing declares
    it and nothing uses it -- 0 Terraform hits across 415 tracked `.tf` files (IAM-r-3's per-member
    verdict list), 1 of 2382 live nodes with no consumer node pointing at it, and no LastUsedDate
    inside AWS's 400-day tracking window -- so the honest answer is that this role should not
@@ -110,22 +132,47 @@ all sixteen:
    and it named the decision owed as "whether this role is still exercised at all and, if not,
    whether it should be retired" -- that is the question the evidence now settles. See THE
    RETIREMENT VALUE section below for the three planes, the positive control, the falsifier and
-   the four-postulate record.
-8. `opal-data-refresh-lambda-role` -- EXEMPT owner=UNASSIGNED reason=production serving-path role
+   the four-postulate record. OWNER AMENDED BY `IAM-t-1` from `UNASSIGNED`: the owner search ran
+   and returned empty for this row too, and this row alone needs one thing the other eleven do
+   not -- its terminal act deletes a live IAM object, which this estate reserves for human
+   confirmation (CLAUDE.md, Agent Autonomy: "Human confirmation ONLY for: recursive deletion,
+   destructive git, dropping tables/S3 deletes, stopping EC2, anything unrecoverable"), so no
+   agent seat can be its terminal owner alone. Nothing was minted, scheduled or deleted by
+   recording that. See THE OWNER FINDING below.
+8. `opal-data-refresh-lambda-role` -- EXEMPT owner=NO-ACCEPTING-SEAT reason=production serving-path role
    (backs the deployed `opal-data-refresh-api` Lambda via a literal `role_arn`,
-   `infra/aws/terraform/data-refresh/main.tf:38`) that Terraform already touches through three
+   `infra/aws/terraform/data-refresh/main.tf:38`) that Terraform already touches through five
    `aws_iam_role_policy` attachments explicitly naming it "the pre-existing
-   opal-data-refresh-lambda-role" (`main.tf:53`) but never creates or owns as a resource. IAM-s-5's
+   opal-data-refresh-lambda-role" (`main.tf:53`) but never creates or owns as a resource. THE
+   COUNT IS FIVE, CORRECTED FROM THREE BY `IAM-t-1` AND RE-READ AT SOURCE rather than inherited:
+   `data-refresh/main.tf:58`, `:80`, `:99`, `:138` and `data-refresh/qa-scratch-instance.tf:36`,
+   each carrying `role = "opal-data-refresh-lambda-role"` two lines below its
+   `resource "aws_iam_role_policy"` line. Five is the tree-wide figure of record
+   (`ledger/ROUND_ANALYSIS.round2.md` section 8; row `Z-W5-S2`); substance is unaffected at any
+   count and no disposition moves. IAM-s-5's
    own character note flags an exemption here as "a much heavier claim" than for a background role;
    this worker cannot make that heavier call or name who accepts it. The decision owed is an explicit
    sign-off (adopt via import, or formally except) from a seat holding Terraform-change authority.
-9. `opal-smartx-lambda-role` -- ADOPT. Absent from the fresh comp-iam parse and from all Terraform
+   OWNER AMENDED BY `IAM-t-1` from `UNASSIGNED`: the owner search ran and returned empty here too.
+   The decision owed is unchanged, and the adopting TEXT for this role is already written and inert
+   at `infra/aws/terraform/data-refresh/zz_adoption_candidate.tf.proposed:29-30` (`IAM-r-5`) -- so
+   what is missing on this row is not the work, it is a seat that has accepted it. See THE OWNER
+   FINDING below.
+9. `opal-smartx-lambda-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+   `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
+   exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
+   assumption; THE OWNER FINDING below carries its four planes and their denominators.
+   It is the ONE of the twelve that appears in this estate's hand-maintained IAM inventory, and that
+   file's only owner statement is at FILE grain (`infra/aws/manifests/iam/iam-roles.yaml:3`,
+   `# Owner: Andrew Berman`, `Last Updated: 2026-01-02`, `total_roles: 8`) -- not a row-grain
+   acceptance, and round 2's own table records that nothing is owed by Andrew.
+   Absent from the fresh comp-iam parse and from all Terraform
    source; documented only in a hand-maintained, non-Terraform inventory
    (`infra/aws/manifests/iam/iam-roles.yaml`, "Last Updated: 2026-01-02") and the portal-functions
    manifest (`infra/aws/manifests/lambda/opal-portal-functions.yaml:138,736-737`). An inventory entry
    describes the role; it is not a decision to except it from Terraform, so FWD-4's exemption bar is
    not met.
-10. `portal-auth-lambda-role` -- EXEMPT owner=UNASSIGNED reason=production serving-path role per
+10. `portal-auth-lambda-role` -- EXEMPT owner=NO-ACCEPTING-SEAT reason=production serving-path role per
     IAM-s-5's own character note ("PRODUCTION SURFACES ON THE SERVING PATH ... a much heavier
     claim"), and unlike `opal-data-refresh-lambda-role` this one has ZERO Terraform source touch at
     all (fresh comp-iam parse: absent; `comp-find infra/ --all`: only world-model census/inventory
@@ -134,8 +181,17 @@ all sixteen:
     a distinctly-named sibling created in the same module) -- a genuinely separate, undeclared role
     next to an already-declared one for the same functional area. The heavier stakes IAM-s-5 named
     apply in full; the decision owed is an explicit sign-off from a seat with Terraform-change
-    authority on whether to adopt or except, not a call this worker can make.
-11. `portfolio-management-lambda-role` -- ADOPT. Absent from the fresh comp-iam parse and from all
+    authority on whether to adopt or except, not a call this worker can make. OWNER AMENDED BY
+    `IAM-t-1` from `UNASSIGNED`: the owner search ran and returned empty here too, and this row's
+    adopting text is likewise already written and inert, in the same file
+    (`infra/aws/terraform/data-refresh/zz_adoption_candidate.tf.proposed:66-67`, `IAM-r-5`, whose
+    own row `Z-W6-S1` records that this module is the wrong custody home for it). See THE OWNER
+    FINDING below.
+11. `portfolio-management-lambda-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
+    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
+    assumption; THE OWNER FINDING below carries its four planes and their denominators.
+    Absent from the fresh comp-iam parse and from all
     Terraform source (census/inventory JSON only). It is NOT the same object as the
     Terraform-declared `portfolio-export-lambda-role` (`infra/aws/terraform/portfolio-management/
     main.tf:227`, a distinctly-named sibling created in the same module) -- a genuinely separate,
@@ -160,7 +216,11 @@ all sixteen:
     Terraform source at this cell's own re-measurement; see the filed surprise row -- this is not a
     governance finding about the role, it is an instrument discrepancy the governance disposition
     corrects for.
-14. `sentiment_query_api-role` -- ADOPT. Absent from the fresh comp-iam parse and from all
+14. `sentiment_query_api-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
+    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
+    assumption; THE OWNER FINDING below carries its four planes and their denominators.
+    Absent from the fresh comp-iam parse and from all
     Terraform source (census/inventory JSON only); an ordinary API-serving lambda role with no
     service-default naming pattern and no documented exclusion rationale.
 15. `vpc-flow-logs-role` -- EXEMPT owner=1.0.0_SA_CTO~Z reason=AWS-managed service role, minted by a
@@ -173,7 +233,11 @@ all sixteen:
     service-default candidates; membership is INHERITED from round 1's classification, not
     independently re-confirmed by `IAM-r-3` in this worker's tree -- see CLASS RULINGS, MEMBERSHIP
     NOTE below.
-16. `workspace-sync-lambda-role` -- ADOPT. Absent from the fresh comp-iam parse and from all
+16. `workspace-sync-lambda-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
+    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
+    assumption; THE OWNER FINDING below carries its four planes and their denominators.
+    Absent from the fresh comp-iam parse and from all
     Terraform source (census/inventory JSON only); an ordinary sync-lambda role with no
     service-default naming pattern and no documented exclusion rationale.
 
@@ -191,6 +255,16 @@ carries `RETIRE`, the fourth value, so the arithmetic above reads 1 `DECLARED` +
 exemption rows + 1 `RETIRE` = 16. The paragraph above is left exactly as its author wrote it, at
 its own vintage; this line is the amendment, and the value it names is defined in THE RETIREMENT
 VALUE section below.
+
+**AMENDED BY `IAM-t-1` (2026-09-10) -- TWELVE OWNER FIELDS AND ONE STALE COUNT; NO DISPOSITION
+MOVED.** The nine `ADOPT` rows gained an `owner=` and a `reason=`, which they had never carried at
+all; rows 7, 8 and 10 moved from `owner=UNASSIGNED` to `owner=NO-ACCEPTING-SEAT`, a value THE OWNER
+FINDING section below defines and evidences; and row 8's attachment count is corrected from three to
+five, re-read at source. The arithmetic above is UNCHANGED -- 1 `DECLARED` + 9 `ADOPT` + 5 exemption
+rows + 1 `RETIRE` = 16 -- because no disposition token moved and no research was re-opened. What
+moved is the owner field, which is the half of `FWD-4`'s bar ("in code, or a named owner and a
+reason") that nine of sixteen rows could not be measured against, because a census of
+`owner=UNASSIGNED` cannot see a row that carries no owner field at all.
 
 ## CLASS RULINGS
 
@@ -564,6 +638,180 @@ Filed in `../../surprise-channel/investigations/INVESTIGATION_v1.md`:
   blocks attaching to `opal-data-refresh-lambda-role` by name; this cell measured FIVE, the fifth in
   `data-refresh/qa-scratch-instance.tf:36-38`. The zero-declarations half of the cut's claim
   reproduced exactly, and no disposition moves either way.
+
+## THE OWNER FINDING -- `IAM-t-1`: TWELVE ROWS CARRY NO SEAT, AND THAT IS A MEASUREMENT
+
+`FWD-4` asks that each member be in code, or carry a named owner and a reason. Twelve rows were
+short of that: nine `ADOPT` rows with no owner field at all, and three rows whose owner field read
+`UNASSIGNED`. This section is what this cell did about the twelve, and it is a FINDING rather than
+an assignment: whether the owners exist inside this fabric was measured, and the measurement is
+below with its denominators. This section EXTENDS the record above; it re-opens nothing in it, moves
+no disposition token, and touches no grant on any of the sixteen.
+
+### THE OWNER VALUE, STATED
+
+`owner=NO-ACCEPTING-SEAT reason=<what the search established, and how>`
+
+It records A COMPLETED SEARCH WITH AN EMPTY RESULT: a lane able to perform this row's act exists in
+this estate's own record, no seat in that lane has accepted this row, and an L7 cell has no channel
+by which one could accept. **IT IS NOT A NAME AND MUST NEVER BE READ AS ONE.** It commits nobody,
+and that is deliberate -- writing a serial for a seat that has not accepted would forge a commitment
+on another agent's behalf, which is the one thing this cell was forbidden to do however reasonable
+the guess.
+
+### WHY IT IS NOT `UNASSIGNED`, WHICH THIS DOCUMENT ALREADY CARRIED
+
+| owner value | what a reader may conclude | what moves it |
+|---|---|---|
+| a seat serial | that seat accepted this row, in writing | the seat performs the act |
+| `UNASSIGNED` | a decision is owed; **whether anyone ever looked is unknown** | putting the question |
+| `NO-ACCEPTING-SEAT` | the question WAS put, by search; here is the denominator | an acceptance |
+
+The two sentinels are not interchangeable and the difference is the whole point of the value. Rows
+7, 8 and 10 carried `UNASSIGNED` because at their vintage no owner search had been run -- their
+author said so in terms ("this worker cannot make that heavier call or name who accepts it"). This
+cell ran a search that covers those three rows as well as the nine, so leaving them at `UNASSIGNED`
+would now UNDERSTATE what is known: it would read as an unasked question when the question has been
+asked and answered.
+
+### BUILD LADDER -- does the estate already carry a sentinel that says this?
+
+Checked before minting, because a new token nobody needs is its own defect. Three candidates exist
+and all three name a DIFFERENT fact:
+
+- `UNASSIGNED` -- this document's own sentinel, 12 occurrences at this cell's cut, 3 of them on
+  member rows. It means the slot is empty. It cannot distinguish "nobody has looked" from "we
+  looked and found nobody", and that distinction is this cell's entire finding.
+- `UNASSERTED` -- the `Lifecycle_Stage` sentinel cited in THE RETIREMENT VALUE above. It means the
+  property was never asserted at all: again an absence of a statement, not a result.
+- `NONE-STATED` -- `ledger/ROUND_ANALYSIS.round2.md` section 2's reading of the nine `ADOPT` rows.
+  It names an absent FIELD, which is the condition this cell is repairing rather than a value it
+  could adopt.
+
+**TOKEN CENSUS, three corpora, each with its denominator printed.** Corpus A, this document
+pre-edit: `NO-ACCEPTING-SEAT` 0, `ACCEPTING` 0, `UNASSIGNED` 12. Corpus B, the project tree,
+`comp-find 'NO-ACCEPTING-SEAT' org/missions/D12/NFRA/NFRA_IAMROLES202609 --all` -> `0 hit(s) across
+63 file(s) scanned in scope`. Corpus C, the estate, `comp-find 'NO-ACCEPTING-SEAT' --all` -> `3
+hit(s) across 29409 file(s) scanned`, and **all three are this cell's own search telemetry**
+(`org/mcp/comp-tool-runs.jsonl:7`, `org/mcp/comp-which-rail.log:7` -- the rail logs into the corpus
+it searches, so a probe finds its own footprint). Read past the footprint, the token collides with
+nothing anywhere in this estate.
+
+### THE SEARCH -- FOUR PLANES, EACH WITH ITS DENOMINATOR
+
+**1. CAPABILITY: is there a lane that can perform these acts at all? YES.** `.owned-paths.yaml`
+binds `infra/aws/**` to lane `CLOUD_OPS_OR_ETL` (`:1845-1847`, "AWS infra (Terraform, IAM, Lambda)
+-- AE 0.5/0.6/0.6.1/0.7 only"), and that lane enumerates 11 permitted agents (`:342-353`) -- the AE
+families plus one gate-constrained sweep executor. `.tools/owned-paths-validate.py:278-287` then
+admits any tilde-suffixed spawn of an enumerated base serial, so the lane is wider than its
+enumeration reads. **The act these twelve rows name is inside a lane, and the lane is not empty.**
+
+**2. ACTIVITY: is that lane alive on this fabric? YES -- it is the busiest family in the estate.**
+Repo-wide over the last 14 days: **935 commits by 41 distinct AE serials**, out of **5,785 commits
+by 120 distinct authors** in the same window. On `infra/aws/terraform/` itself, all history: **1,486
+commits by 74 distinct authors**, led by `0.7.0_AE_CloudOps` with 533. The hands that write this
+estate's Terraform are identifiable, numerous and working today.
+
+**3. THIS PROJECT'S RECORD: has any of them been here? NO -- zero, against a printed denominator.**
+`git log` over `org/missions/D12/NFRA/NFRA_IAMROLES202609/`: **65 commits, 10 distinct authors** --
+`2.0.0_SA_COO~ZI` 26, `3.0.0_SA_CVO~Z` 11, `2.0.0_SA_COO` 8, `1.0.0_SA_CTO~Z` 5, and this project's
+six worker slots. **Not one commit by any member of the adopting lane.** A `comp-find` for any AE
+serial across the project returns `6 hit(s) across 63 file(s) scanned`, and all six are citations or
+git vintages -- two blame lines in `IAM-s-7`'s historical-completion deliverable, two path citations
+to a SIBLING project's deliverable folder, two of the same in the channel. **None is an acceptance,
+a tasking or a reply.**
+
+**4. ACCEPTANCE: is there an acceptance anywhere for these twelve? NO -- and the instrument can see
+one when it exists.** POSITIVE CONTROL, run so that a true absence and a blind search cannot read
+alike: `comp-find 'accepted' org/missions/D12/NFRA/NFRA_IAMROLES202609 --all` -> `9 hit(s) across 63
+file(s) scanned`, and one of the nine IS the acceptance this document already rests on --
+`ledger/ROUND_ANALYSIS.round2.md:237-238`, "three rows already name `1.0.0_SA_CTO~Z`, and that seat
+accepted those three". **A search that surfaces an acceptance for three rows and none for twelve is
+a measured absence, not a broken matcher.**
+
+**A FIFTH PLACE AN OWNER MIGHT HAVE BEEN WRITTEN, checked because a governance owner need not be an
+agent.** The estate's hand-maintained IAM inventory (`infra/aws/manifests/iam/iam-roles.yaml`,
+`Last Updated: 2026-01-02`, `total_roles: 8`) carries exactly ONE owner statement and it is at FILE
+grain: `# Owner: Andrew Berman` (`:3`). Against the twelve rows it covers exactly one
+(`opal-smartx-lambda-role`, 3 hits) and none of the other eleven. A file-grain human attribution on
+an 8-role inventory eight months stale is not a row-grain acceptance for a 16-role population, and
+round 2's own "what is owed" table records that **nothing is owed by Andrew** and that this
+escalation is raised by the recut when a cell finds it -- so what the search found is recorded here
+and is NOT converted into an owner field.
+
+**AND THE HALF NO SEARCH CAN IMPROVE.** An L7 worker holds no send tool and cannot be messaged. The
+twelve rows therefore could not have been closed from inside this cell at any depth of effort: the
+result is not a shallow search, it is a structural one.
+
+### WHAT THIS FINDING DOES NOT SAY
+
+- **It does not say that no seat could own these rows.** The opposite is measured: the lane exists
+  and is busy. What is missing is an ASK and an ACCEPTANCE, and neither is an L7 act.
+- **It names no candidate seat on any row, and authorship is not acceptance.**
+  `0.7.0_AE_CloudOps` has 533 commits on `infra/aws/terraform/` and has never appeared in this
+  project's record; converting that into `owner=0.7.0_AE_CloudOps` would be exactly the forged
+  commitment this cell was forbidden to write, and it would be forged against the most plausible
+  candidate, which is the version that would survive review.
+- **It says nothing about any member's permissions, in either direction** (`C-TWO-REMEDIES`, bound
+  D6). Governance placement and grant scope are two remedies that do not move together.
+- **Nothing was minted that will fire.** No alert, alarm, monitor, schedule or notification was
+  created by this cell; `G-21` stays ARMED and untouched. No Terraform was modified: every citation
+  above is a read.
+
+### WHAT CLOSES EACH ROW -- so the value is a stop on a route, not a resting place
+
+- **The nine `ADOPT` rows:** one seat with the `CLOUD_OPS_OR_ETL` lane accepts, in writing, and that
+  row's owner becomes its serial. Rows 4, 12 and 15 are the precedent already in this document: a
+  recorded decision with a decider, and the rows carry the decider's name.
+- **Rows 8 and 10:** the same, and for these two the work is already done and waiting. The adopting
+  text exists, committed and inert, at
+  `infra/aws/terraform/data-refresh/zz_adoption_candidate.tf.proposed` -- `resource "aws_iam_role"
+  "opal_data_refresh_lambda_role"` at `:29-30` and `resource "aws_iam_role" "portal_auth_lambda_role"`
+  at `:66-67`, authored by `IAM-r-5` with a recorded plan. **THE TEXT IS NOT THE BLOCKER ON THESE
+  TWO ROWS; THE ACCEPTANCE IS** -- which is the single most useful thing a reader can take from this
+  section.
+- **Row 7:** an owner for the retirement, plus one requirement the other eleven do not carry -- its
+  terminal act deletes a live IAM object, which this estate reserves for human confirmation. Reading
+  that pre-existing constitutional stop is not building a gate and none was built.
+- **The escalation, raised HERE and not before.** `ledger/ROUND_ANALYSIS.round2.md` section 9 states
+  that a finding of this shape is raised when a cell finds it. This cell found it: **twelve of
+  sixteen rows need a seat in the `CLOUD_OPS_OR_ETL` lane to be ASKED, the ask is an ISSUANCE, and
+  an issuance is `2.0.0_SA_COO~ZI`'s act rather than a worker's.** Filed as
+  `NFRA_IAMROLES202609-Z-W7-S1` in `../../surprise-channel/investigations/INVESTIGATION_v1.md`.
+
+### RULE 24 FOUR-POSTULATE RECORD FOR THE OWNER FIELD (this cell, `IAM-t-1`)
+
+The owner field is a value set with two sentinels and an open set of serials, so rule 24 binds it.
+
+- **MECE over a declared domain.** The domain is the **15 member rows with an act still owed** --
+  the sixteen minus the one `DECLARED` row, which owes nothing and therefore carries no owner field
+  and needs none. Every one of the 15 now carries exactly one owner value: **3 a seat serial, 12
+  `NO-ACCEPTING-SEAT`, 0 `UNASSIGNED`**. THE HUNT FOR AN UNCOVERED MEMBER, and it found one state
+  worth naming: a row whose act belongs to NO lane at all -- nobody in this estate could perform it
+  even after accepting. Eleven of the twelve acts are repo writes inside `CLOUD_OPS_OR_ETL`, so that
+  state is empty for them. **Row 7 is the near miss and is stated rather than smoothed:** its repo
+  half sits in that lane, but its terminal half is an AWS-plane deletion no repo lane governs and a
+  human confirmation gates. It still takes `NO-ACCEPTING-SEAT` -- no seat has accepted it either --
+  and its reason names the extra requirement, because a value that hid it would be the round-1
+  defect again in a new place.
+- **SAME GRAIN.** The owner value is a property of ONE member row: who has accepted THE ACT THAT ROW
+  NAMES. It is asserted twelve times because a search returned empty twelve times. **The honest
+  qualifier, since one search covers twelve rows:** the rows' acts are not identical -- nine
+  adoptions, two sign-offs, one retirement -- and the search's per-row result was the same for a
+  per-row reason each time, which is why each row's `reason=` names its own act rather than pointing
+  at a class the way rows 4, 12 and 15 point at the class ruling.
+- **INTENT COHERENCE.** One axis, one intent: **WHO HAS ACCEPTED THE ACT THIS ROW NAMES?** A serial
+  answers "this seat, in writing"; `NO-ACCEPTING-SEAT` answers "nobody, measured"; `UNASSIGNED`
+  answers "not asked". The field never says whether the act is a good idea -- that is the
+  disposition token beside it, a separate axis with its own four-postulate record above -- and never
+  says how widely the role grants, which is `IAM-s-1`'s axis and does not move with this one.
+- **STATE COHERENCE (which values one remedy does NOT move).** An acceptance moves ONE row's owner
+  field from `NO-ACCEPTING-SEAT` to a serial and touches nothing else: not that row's disposition
+  token, not another row's owner, not any grant. PERFORMING the act afterwards moves the DISPOSITION
+  (`ADOPT` -> `DECLARED`) and leaves the owner field standing as the record of who did it -- the two
+  fields move on different events, which is why they are two fields. A row that goes back to
+  `UNASSIGNED` is a regression, not a state: once a search has run, its result is a fact about the
+  fabric at a vintage and a later reader is owed the vintage, not the empty slot.
 
 ## WHY ONE DISPOSITION DID NOT FIT ALL SIXTEEN (measured, not inherited)
 

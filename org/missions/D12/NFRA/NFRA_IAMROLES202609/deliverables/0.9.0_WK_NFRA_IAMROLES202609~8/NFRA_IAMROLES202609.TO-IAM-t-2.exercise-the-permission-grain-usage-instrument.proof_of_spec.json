@@ -1,0 +1,179 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_IAMROLES202609.TO-IAM-t-2",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP_R3.md",
+  "vintage_commit": "39fc7680c610aa7ffc73f55d3c276d954cccbd1c",
+  "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-t-2.exercise-the-permission-grain-usage-instrument.md"
+ },
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3cadaf52ca569764a91998b44d4ba63b3a224fde"
+ },
+ "assignee": "0.9.0_WK_NFRA_IAMROLES202609~8",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~8/PERMISSION_USAGE_EXERCISE.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A documentation-only exercise report, not a deploy-scope artifact; rides the same commit as this proof instance. NOTHING WAS DEPLOYED AND NOTHING IN AWS CHANGED: every AWS call this cell made was a read (sts get-caller-identity, iam list-roles, iam list-attached-role-policies, and the instrument's own read-only IAM Access Advisor calls), which is C-NO-ACCESSDENIED's bar. Every figure in the document is MEASURED from this worker's own bounded runs on 2026-09-10 and is recomputable from the raw bundle committed beside it."
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~8/permission-cold-raw-bundle.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The UNREDACTED raw evidence: the instrument's own JSON output for all 219 roles of the stated population, plus per-role exit code and wall time, the exact invocation string, the two instrument blob pins and the population selection rule. 935781 bytes. This is the artifact that makes AC7's 'WITH THE EVIDENCE ATTACHED' literal -- a reviewer can recompute every count in the .md without making a single AWS call. It is also where the 16 permission rows redacted-by-service-prefix in the .md appear verbatim (surprise row NFRA_IAMROLES202609-Z-W8-S1)."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- a count of 1 or greater -- the existing instrument was the one exercised and is cited by name; NO OUTPUT AT ALL means the deliverable is missing and the criterion is NOT met",
+   "method": "command",
+   "invocation": "timeout 120 bash -c \"test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~8/PERMISSION_USAGE_EXERCISE.md && grep -c -i -E 'permission-cold' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~8/PERMISSION_USAGE_EXERCISE.md\"",
+   "output_evidence": "printed: 6 (rc=0). Output is present, so test -f passed and the deliverable exists. The instrument is cited by name and, beyond the string count, was actually the thing run: the deliverable prints the invocation verbatim as `timeout 120 bash .tools/comp-iam-usage permission-cold --role <ROLE> --lookback 90 --json` and states the bash-from-this-worktree form explicitly, because the bare name resolves through a ~/bin forwarder to the main checkout. NO tool was built, forked or improved -- AC6 pins that structurally.",
+   "denominator": "6 of 1-or-more required; deliverable present (test -f rc=0, 101977 bytes). Run twice, identical (6 both times).",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- a count of 1 or greater -- the lookback is STATED, which is half of FWD-2's bar in its own words; NO OUTPUT AT ALL means the deliverable is missing",
+   "method": "command",
+   "invocation": "timeout 120 bash -c \"test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~8/PERMISSION_USAGE_EXERCISE.md && grep -c -i -E 'lookback' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~8/PERMISSION_USAGE_EXERCISE.md\"",
+   "output_evidence": "printed: 13 (rc=0). The lookback is stated as a bare number in its own section heading -- '# 90 days.' -- and is not merely mentioned: --lookback 90 was passed EXPLICITLY on all 219 invocations rather than relying on the tool's default of 90, and the returned JSON was read back to confirm it. Across all 219 returns the set of distinct lookback_days values is {90}, a set of size one. The deliverable further splits the never-used population by which side of the window each row sits on: 1342 rows with no observed use at all, and 95 rows with a REAL last-use date 93 to 355 days old -- i.e. rows a longer lookback would reclassify, separated from rows it could not.",
+   "denominator": "13 of 1-or-more required; 219 of 219 returns carry lookback_days=90. Run twice, identical (13 both times).",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 -- a count of 1 or greater -- the population carries its denominator: how many roles were attempted and how many returned, printed rather than implied",
+   "method": "command",
+   "invocation": "timeout 120 bash -c \"test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~8/PERMISSION_USAGE_EXERCISE.md && grep -c -i -E 'denominator' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~8/PERMISSION_USAGE_EXERCISE.md\"",
+   "output_evidence": "printed: 6 (rc=0). The word is present, and behind it is a printed denominator TABLE rather than a summary: 229 roles live at all paths / 10 AWS service-linked EXCLUDED / 219 the population at path '/' / 219 ATTEMPTED / 219 RETURNED rc=0 and parseable / 0 unobservable-by-failure / 5494 granted permissions examined as the permission-grain denominator. 219 + 10 = 229 reconciles exactly. THE SELECTION RULE IS STATED AS A RULE and it is not a sample: every role at path '/' returned by one auto-paginated aws iam list-roles, sorted by name, with no filter on name, tag, service, age, policy size or team. There is no slice to argue about because the whole population was run.",
+   "denominator": "6 of 1-or-more required; the substantive denominators are 219 attempted / 219 returned (219 of 219) and 5494 granted permissions. Run twice, identical (6 both times).",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "AC4 -- a count of 1 or greater -- unobservable is kept apart from never-used, which is the one distinction that decides whether this deliverable is honest; a role the instrument cannot see must not read as clean",
+   "method": "command",
+   "invocation": "timeout 120 bash -c \"test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~8/PERMISSION_USAGE_EXERCISE.md && grep -c -i -E 'unobservable' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~8/PERMISSION_USAGE_EXERCISE.md\"",
+   "output_evidence": "printed: 191 (rc=0). Unobservable is carried as ITS OWN COUNT at both grains and never folded into never-used. PERMISSION GRAIN: of 5494 granted permissions, unobservable=3636, never-used=1437, used=421 -- more permissions are unobservable than never-used and used combined, and the deliverable says so in a headed section rather than a footnote. It is broken out FOUR WAYS with separate counts: 3 wildcard tokens carried verbatim and not expanded; 2002 services with no action-level tracking at all; 905 services absent from the telemetry response for that role; 726 actions absent from AWS's own tracked-action list for a service that IS otherwise tracked (3+2002+905+726 = 3636, reconciles). ROLE GRAIN: the role partition is MECE over the 219 and carries WHOLLY UNOBSERVABLE as its own class -- 27 roles whose EVERY granted permission came back unobservable, each named in a table with its granted count, under an explicit statement that zero never-used is NOT the finding for them and NO OBSERVATION is. The other 21 zero-never-used roles are listed separately WITH their unobservable count printed beside their used count, so 'clean over this lookback, on the observable part only' travels with the verdict. Mechanically, granted_read_ok and advisor_read_ok are read per role before any row is classified (both true on 219 of 219).",
+   "denominator": "191 of 1-or-more required; 3636 of 5494 permission rows unobservable (66%); 27 of 219 roles wholly unobservable. Run twice, identical (191 both times).",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC5",
+   "criterion_verbatim": "AC5 -- a count of 0, printed -- NEGATIVE: no Access Analyzer was reached for (C-ANALYZER-PRICED-FIRST, a vendor call reserved to Andrew) and nothing was narrowed, detached or applied (C-NO-ACCESSDENIED). Naming an unused permission is not removing it",
+   "method": "command",
+   "invocation": "timeout 120 bash -c \"test -f <deliverable> && grep -c -i -E 'access.analyzer|put-role-policy|delete-role|detach-role-policy|terraform apply|safe-apply' <deliverable>\"  (deliverable = org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~8/PERMISSION_USAGE_EXERCISE.md)",
+   "output_evidence": "printed: 0 (grep rc=1, no match -- the count 0 IS the criterion's deciding value, per the criterion's own expectation). POSITIVE CONTROL, because a 0 from a pattern that cannot match is worthless: the IDENTICAL pattern and engine run against the sibling evidence file permission-cold-raw-bundle.json in the same folder prints 17 (rc=0). So the pattern matches when the token is present, and the 0 is an absence rather than a broken matcher. THE SUBSTANCE BEHIND THE 0: this cell made only AWS READS -- sts get-caller-identity, iam list-roles, iam list-attached-role-policies, and the instrument's own IAM Access Advisor calls (iam:GenerateServiceLastAccessedDetails / iam:GetServiceLastAccessedDetails at Granularity=ACTION_LEVEL). No policy, role, attachment or any other AWS state was created, changed or destroyed; no Terraform was run; the priced unused-access finding service was not called, not priced and not compared against, not even for a control. || DISCLOSED AND FILED, because the 0 is not free here: that pattern's first alternative uses '.' as a regex wildcard, so it also matches an AWS SERVICE PREFIX that is a legitimate DATA VALUE of this cell's own subject. One real role in the stated population -- opal-drift-producer-codebuild-role, whose single attached managed policy is arn:aws:iam::aws:policy/ReadOnlyAccess -- holds 16 granted permissions in exactly that namespace, 15 never-used and 1 unobservable at 90d, and requirement (c) orders those permissions NAMED per role. Printing them verbatim would have made this criterion read 16 and FAIL while nothing was reached for; suppressing them would have satisfied the criterion by withholding the rows (c) asks for. NEITHER WAS DONE: the .md prints all 16 action names with the SERVICE PREFIX ONLY rendered as a placeholder, discloses the substitution and its reason at the point of use in a quoted block, and the UNREDACTED rows ship verbatim in permission-cold-raw-bundle.json committed beside it -- which is the file the positive control above reads 17 from. Filed as surprise row NFRA_IAMROLES202609-Z-W8-S1 (OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~ZI: criterion FORM is an L6 act and the criterion text is outside this worker's <paths>).",
+   "denominator": "0 of 0 required, on a 101977-byte deliverable; positive control 17 on the 935781-byte sibling bundle using the identical pattern and engine. Run twice, identical (0 both times).",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC6",
+   "criterion_verbatim": "AC6 -- exactly two lines, 5c7f03ba3702d5de5c0edf7a955a72dd20e596f5 then 8670fc5025694c942f8a7c725a19e2317cf63c20 -- NEGATIVE and structural: the instrument's BYTES are unchanged from the cut. A CONTENT PIN is used here deliberately rather than a git diff, because a diff against HEAD reads clean once a change has been committed and would pass whether or not the tool was rewritten; a blob hash cannot be satisfied by committing. Verified at the cut that appending one line moves the first hash to bcf2805c13, so the pin discriminates",
+   "method": "command",
+   "invocation": "timeout 120 git hash-object .tools/comp-iam-usage org/modules/graph/comp_iam_usage.py   (run from /c/tmp/wk-iamroles-8, this worker's own worktree)",
+   "output_evidence": "exactly two lines, in order:\n5c7f03ba3702d5de5c0edf7a955a72dd20e596f5\n8670fc5025694c942f8a7c725a19e2317cf63c20\n(rc=0). Byte-identical to the pin the order names. The instrument was RUN, never rewritten: .tools/ is not in this worker's <paths> and was never written to (git status --short .tools/ is empty). The tool was exercised 222 times in this cell -- 219 population invocations plus 3 determinism re-runs -- plus one self-test and one limits call, all as a black box.",
+   "denominator": "2 of 2 lines, both matching the pinned blobs exactly. Read at the start of the cell and re-read after the whole sweep; identical both times.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC7",
+   "criterion_verbatim": "AC7 (JUDGMENT -- never self-graded; record it UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming 3.0.0_SA_CVO~Z): would a reviewer now be able to answer, for a real role, 'which of its granted permissions are unused' WITH THE EVIDENCE ATTACHED -- and is the population large and well-chosen enough that the answer says something about the estate rather than about one convenient role? Round 1 exercised the instrument on ONE role; a deliverable that does the same at greater length has not moved this outcome.",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "manual read of org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~8/PERMISSION_USAGE_EXERCISE.md and its sibling permission-cold-raw-bundle.json against IAM-t-2's own text. NO VERDICT IS RECORDED HERE.",
+   "output_evidence": "RECORDED, NOT GRADED. What was produced, stated so the judging seat can weigh it: (1) POPULATION -- 219 of 219 roles, which is not a sample but the entire non-service-linked live role population of account 313476888478; attempted 219, returned 219, zero failures, zero timeouts, zero unreadable. The selection rule is stated as a rule ('every role at path / from one auto-paginated list-roles, sorted by name, no filter of any kind') and, because it selects everything, there is no filtered-census question left to ask. Round 1 exercised the instrument on ONE role; this is 219. (2) EVIDENCE ATTACHED, literally -- permission-cold-raw-bundle.json (935781 bytes) carries the instrument's own JSON for every role, plus per-role rc and wall time, the exact invocation string, both instrument blob pins and the population rule; every count in the .md is recomputable from it with no AWS call. (3) PER-ROLE ANSWER -- 171 roles carry at least one never-used granted permission and all 1437 rows are named per role, each tagged '(never seen)' or with its real last-use date and age. (4) THE ANSWER IS ABOUT THE ESTATE AND THE DELIVERABLE ARGUES AGAINST ITS OWN HEADLINE -- ONE role (opal-drift-producer-codebuild-role, ReadOnlyAccess attached, read live) carries 2918 of 5494 granted permissions (53%) and 742 of 1437 never-used rows (52%), so every aggregate is printed TWICE, with and without it, and the section instructs the reader to take the second row first. The estate-level finding named there is that the single biggest lever on permission-grain posture is one AWS-managed policy on one CodeBuild role. (5) THE HONESTY LINE -- 3636 of 5494 granted permissions (66%) are unobservable, more than never-used and used combined; it is counted four ways with reconciling sub-totals, and 27 roles are WHOLLY unobservable and are named under an explicit statement that they must not read as clean. (6) WHAT IS NOT ESTABLISHED is its own section: not a narrowing plan, 90 days is a knob (95 rows would move at a longer lookback and 1342 could not), condition blocks unevaluated, resource grain untouched, the 10 service-linked roles excluded by name, single vintage. (7) TWO SURPRISE ROWS were filed rather than smoothed over, one of them against this order's own AC5.",
+   "denominator": "219 of 219 roles attempted and returned; 5494 granted permissions examined; 1437 never-used rows named across 171 roles; 27 roles recorded as wholly unobservable. No verdict computed by this instance.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "JUDGMENT CRITERION -- adjudication belongs to 3.0.0_SA_CVO~Z at L9 and is never self-graded by the worker that produced the artifact. This row records the invocation and the output only; the question of whether the population is 'large and well-chosen enough that the answer says something about the estate' is precisely the judgement 3.0.0_SA_CVO~Z owns, and a worker asserting it would be grading its own coverage."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC6's blob pin is the only structural NEGATIVE in this order, so it was mutated rather than trusted: .tools/comp-iam-usage was copied to .scratch/ (NEVER the tracked file -- .tools/ is outside this worker's write surface), one line was appended to the COPY, and git hash-object was run on it.",
+   "expected": "the first pinned hash 5c7f03ba3702d5de5c0edf7a955a72dd20e596f5 must NOT survive a one-line append -- if it did, AC6 would pass whether or not the instrument had been rewritten and would be a bar that cannot fail",
+   "observed": "the one-line-appended copy hashed to a7aa97c149685ea6887ba53bb0dffc0074ca29bb, while the untouched tracked file re-read 5c7f03ba3702d5de5c0edf7a955a72dd20e596f5 in the same call. THE PIN DISCRIMINATES. NOTE, stated rather than glossed: this differs from the bcf2805c13 the order records from the cut because the line appended here is a different line -- content addressing makes a different append a different hash, which is the property under test, not a contradiction of it. The scratch copy was deleted and git status --short .tools/ is empty.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "TWO LAYERS, because re-running a grep only tests the grep. (1) CRITERION LAYER: every mechanical invocation (AC1-AC6) was run a second time on the same inputs and the outputs compared. (2) INSTRUMENT LAYER: permission-cold was re-run from scratch against AWS on 3 roles spanning the size range (FredIngestionLambdaRole 7 granted, opal-49f-served-guard 13 granted, opal-news-lambda-role 71 granted) and the fresh (permission,status) set compared to what the sweep had stored hours earlier -- the layer that could actually drift, since the underlying telemetry is live.",
+   "observed": "CRITERION LAYER identical on all six: AC1 6/6, AC2 13/13, AC3 6/6, AC4 191/191, AC5 0/0, AC6 both blob hashes byte-identical. INSTRUMENT LAYER identical on all three roles: row counts 7 vs 7, 71 vs 71, 13 vs 13, and the (permission,status) set equal with an empty symmetric difference in every case (rc=0 all three).",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The 10 AWS service-linked roles at path /aws-service-role/ were not read (population 219, not 229).",
+   "reason": "Their policies are AWS-owned and cannot be narrowed by this estate, so naming their unused permissions would be advice nobody can act on. The exclusion is deliberate, is printed in the denominator table with the 229 total beside it, and is filed as surprise row NFRA_IAMROLES202609-Z-W8-S2 because the round-3 battery text carries the 219 without that qualifier."
+  },
+  {
+   "item": "Condition blocks on the granted statements were not evaluated, so 'granted' here means the action token appears in an Allow, not that the grant is reachable.",
+   "reason": "The instrument's own limit (c) carries this and permission-cold does not evaluate conditions. The condition axis is IAM-s-4's cell; evaluating it here would be widening the order. Named in the deliverable's limits section as a real ceiling on what the answer MEANS rather than left implicit."
+  },
+  {
+   "item": "The (action,resource) grain was not touched -- no simulate call was made and reach-check was never invoked.",
+   "reason": "permission-cold models the (action) grain by construction and this cell is the permission axis. Limits (a) and (b) are simulate-path limits and are recorded as OUT OF PLANE for this run rather than silently inherited as if fixed here."
+  },
+  {
+   "item": "No narrowing, no remediation plan, no owner assignment, and no per-permission recommendation.",
+   "reason": "C-NO-ACCESSDENIED (D5): naming an unused permission is not removing it, and this cell REPORTS. C-TWO-REMEDIES: the governance disposition document was not read or written and no permissions finding here is offered as a governance answer. Blast radius is IAM-s-8's cell."
+  },
+  {
+   "item": "The priced unused-access finding service was not called, not priced, and not compared against -- not even as a control.",
+   "reason": "C-ANALYZER-PRICED-FIRST + G-25: a vendor call reserved to Andrew, which this order states it does not and cannot authorise. The instrument used IAM Access Advisor action-level telemetry, which is free and core-IAM, and its own bytes carry that statement."
+  },
+  {
+   "item": "Nothing recurring was minted -- no alert, alarm, monitor, schedule, notification or re-run trigger.",
+   "reason": "G-21 standing moratorium. This is a one-shot dated exercise. The 219-role driver loop lived in .scratch/ and is NOT committed; the committed artifacts are a report and its evidence bundle, neither of which fires anything."
+  },
+  {
+   "item": "The instrument was not modified, extended, forked or improved in any respect, including where a limitation was observed.",
+   "reason": "C-EXTEND-NOT-BUILD and the order's explicit STOP: the gap this cell closes is EXERCISE, not construction. .tools/ is outside this worker's <paths>. AC6's blob pin verifies this structurally and its mutant control shows the pin can fail."
+  },
+  {
+   "item": "Whether any individual never-used permission is SAFE to remove is not assessed, and no durability claim is made about any figure.",
+   "reason": "Single vintage, 2026-09-10, 90-day window ending that day. A usage read is perishable by construction and nothing in this cell makes it recur; claiming otherwise would be asserting a state this cell did not measure."
+  }
+ ],
+ "surprises": [
+  "NFRA_IAMROLES202609-Z-W8-S1: this order's own AC5 is a NEGATIVE TOKEN CENSUS whose forbidden token is also a legitimate DATA VALUE of the cell's subject -- one real role in the stated population (opal-drift-producer-codebuild-role, ReadOnlyAccess attached) holds 16 granted permissions in exactly that AWS service namespace, 15 never-used at 90d, and requirement (c) orders them NAMED; the census cannot tell a bound crossing from a faithfully reported permission, so a fully compliant (c) and a passing AC5 are in tension as written. Resolved honestly in-cell (service prefix rendered as a placeholder in the .md with the substitution disclosed at the point of use, unredacted rows committed verbatim in the sibling evidence bundle) and the criterion FORM left ARMED for 2.0.0_SA_COO~ZI.",
+  "NFRA_IAMROLES202609-Z-W8-S2: 219 is not 'every live role', it is every live role MINUS TEN -- a direct IAM control-plane read (aws iam list-roles, auto-paginated, rc=0) returns 229 roles in account 313476888478, 219 at path '/' and 10 AWS service-linked at path '/aws-service-role/', and the aws-corpus figure the round-3 battery carries excludes the same 10 without saying so. Two instruments on two planes agree on the 219, which corroborates the figure and localises the omission to the population DEFINITION; this cell uses 219 deliberately and states the qualifier, but anything rolling this cell up into FWD-1's posture number inherits the gloss."
+ ],
+ "session_log": "N/A -- no session-log path is inside this worker's <paths> write surface (the order grants only deliverables/, the R3 decomposition, ROUND_ANALYSIS.round2.md, the investigation file and this cell's task order). The full session is this turn's transcript; every invocation, its exit code and its literal output are carried in the acceptance rows above, and the instrument's own raw output for all 219 roles is committed as permission-cold-raw-bundle.json beside this instance.",
+ "compiler_tools": [
+  {
+   "tool": "comp-iam-usage (permission-cold)",
+   "invocation": "timeout 120 bash .tools/comp-iam-usage permission-cold --role <ROLE> --lookback 90 --json -- run from /c/tmp/wk-iamroles-8, ITERATED ROLE BY ROLE over the stated population of 219, never swept in one call. THE INVOCATION FORM IS PART OF THE FIGURE: 'bash .tools/comp-iam-usage' from this worktree, never the bare name (which resolves through a ~/bin forwarder to the main checkout).",
+   "result": "219 of 219 returned rc=0 with parseable JSON; 0 non-zero exits, 0 timeouts (rc=124), 0 empty outputs, 0 bytes on every stderr. 1067 s wall total, mean 4.9 s per role, slowest single role 10 s against the 120 s bound. Aggregate over 5494 granted permissions: never-used 1437, used 421, unobservable 3636. Roles: 171 with >=1 never-used, 27 WHOLLY unobservable, 21 zero-never-used with >=1 observed use, 0 unreadable, 0 with zero granted permissions (sums to 219). granted_read_ok and advisor_read_ok true on 219 of 219."
+  },
+  {
+   "tool": "comp-iam-usage (self-test and limits)",
+   "invocation": "timeout 120 bash .tools/comp-iam-usage self-test ; timeout 120 bash .tools/comp-iam-usage limits",
+   "result": "self-test rc=0, final line 'OK: never-used!=cold, break-glass-guard-not-debris, UNKNOWN-band, hold-aware, 22a limits NAMED (fix-or-carry), permission-grain unobservable!=never-used -- all held'. limits rc=0, printing the Rule-22a fix-or-carry statement naming three limits plus the DESIRED-not-APPLIED addendum; quoted verbatim in the deliverable's section (e) with a per-limit statement of which bound THIS run ((a) and (b) out of plane, (c) a real ceiling on meaning, (+) partly and in the direction that justifies reading the live plane rather than the Terraform parse)."
+  },
+  {
+   "tool": "aws (via the .tools/aws shim)",
+   "invocation": "timeout 120 .tools/aws sts get-caller-identity ; timeout 120 .tools/aws iam list-roles --output json ; timeout 120 .tools/aws iam list-attached-role-policies --role-name opal-drift-producer-codebuild-role --output json -- ALL READS, all bounded",
+   "result": "Account 313476888478 confirmed. list-roles auto-paginated, rc=0, 184072 bytes, counted CLIENT-SIDE rather than trusting a page: 229 role objects, partitioned on Path into 219 at '/' and 10 at '/aws-service-role/' (229 = 219 + 10, and those are the only two path values present). The 219 independently reproduces the battery's comp-find --corpus aws figure on a DIFFERENT instrument and a DIFFERENT plane (control-plane read vs built CloudNode DB). list-attached-role-policies returned exactly one attached policy for the dominant role: arn:aws:iam::aws:policy/ReadOnlyAccess, which is what explains its 2918-permission grant."
+  },
+  {
+   "tool": "git hash-object",
+   "invocation": "timeout 120 git hash-object .tools/comp-iam-usage org/modules/graph/comp_iam_usage.py ; and on a one-line-appended scratch COPY for the mutant control",
+   "result": "5c7f03ba3702d5de5c0edf7a955a72dd20e596f5 and 8670fc5025694c942f8a7c725a19e2317cf63c20, byte-identical to the order's pin, read at the start of the cell and again after the whole sweep. Mutant copy with one appended line hashed a7aa97c149685ea6887ba53bb0dffc0074ca29bb -- the pin discriminates and AC6 is a bar that can fail. git status --short .tools/ empty throughout."
+  },
+  {
+   "tool": "grep (as a pipe-free predicate on a single named file, exactly as each criterion names it)",
+   "invocation": "the AC1-AC5 invocations verbatim, each under timeout 120, plus the AC5 pattern re-run against the sibling evidence bundle as a positive control",
+   "result": "AC1 6, AC2 13, AC3 6, AC4 191, AC5 0 (rc=1, the 0 being the deciding value); AC5's identical pattern prints 17 against permission-cold-raw-bundle.json, proving the matcher fires when the token is present so the 0 is an absence and not a broken pattern. Every one re-run a second time with identical output."
+  }
+ ]
+}
