@@ -1,198 +1,134 @@
-# ETFS_GUARDRAIL.TO-EG-s-21 -- THE DRIVEN REFUSAL: BLOCKED AT THE CUT, NOT INVOKED
+# ETFS_GUARDRAIL.TO-EG-s-21 -- THE DRIVEN REFUSAL: STILL BLOCKED, AND STILL NOT INVOKED
 
-**Assignee:** `0.9.0_WK_ETFS_GUARDRAIL~4` (L7 worker subagent of `2.0.0_SA_COO`, round 3, cell `EG-s-21`)
-**Worktree:** `/c/tmp/wk-etfs-3-4` on `wk-etfs_guardrail-3-4`
-**Window:** 2026-09-10 ~04:3xZ -> ~04:5xZ
-**Outcome:** `S21-AC1` **FAIL**. The order stays OPEN; its `<status>` is NOT flipped.
-**Row:** `ETFS_GUARDRAIL-W4-S2` -- BLOCKING / ARMED.
+**Assignee:** `0.9.0_WK_ETFS_GUARDRAIL~4` · **Branch:** `wk-etfs_guardrail-3-4`
+**Outcome:** `S21-AC1` **FAIL**. `<status>` NOT flipped. **The single permitted run is UNSPENT.**
+**Row:** `ETFS_GUARDRAIL-W4-S6` -- BLOCKING / ARMED.
 
-> **NOTHING WAS INVOKED.** No orchestrator invoke, no producer probe invoke, no SES send, no S3
-> write, no S3 delete. Every AWS call this seat made is a read: `lambda:GetFunction`
-> (+`Configuration`), an HTTPS GET of the presigned code location, and `s3:GetObject` on the box's
-> renderer artifact and the served coverage documents. **NO CODE WAS CHANGED.**
+> **NOTHING WAS INVOKED.** No orchestrator invoke, no producer invoke, no SES send, no S3 write,
+> no S3 delete. Every AWS call is a read; the renderer was executed only in-process with
+> `remediate` and `s3` replaced by stubs.
 
 ---
 
-## 1. THE PRECONDITION HOLDS -- measured at my own run's time, not inherited
+## 1. THE PRECONDITION HOLDS -- and it needed re-taking, because the bytes changed
 
-The face makes this the one bound with no override, and requires it re-taken on the bytes deployed
-at *my* run's time because "a proof taken before a later deploy is a proof about different bytes".
+The coordinator was right that my 04:35Z read was stale: **`EG-s-24` redeployed the function at
+05:42:07Z**, so that read was about different bytes.
 
 | | |
 |---|---|
-| read at | **2026-09-10T04:35:14Z** (and again inside the battery, ~04:4xZ) |
-| served `CodeSha256` | `ag4La0jgP8JEr55FCvXx+gnR5pDqw1CpvbEHZBrBTPc=` |
-| `LastModified` | 2026-09-10T03:54:09.000+0000 |
-| zip member | `lambda_function.py`, 1 of 1, 40,790 B, sha256 `ac0484b73a26865eab649917cec7d1bf9c5d604ccd293cc72f17cb83e9e17000` |
-| deployed constants | `TEST_MARKER='test_run'`, `TEST_FORBIDDEN_RECIPIENTS=['aj@opalinvest.com']`, `TEST_DEFAULT_RECIPIENTS=['andrew@opalinvest.com']` |
+| read at | **2026-09-10T06:09:59Z** (and again in the battery) |
+| served `CodeSha256` | `rCrGrYPZNKgWQ4uX3NGFGqm7v1s+KcfQlJ7na+soz+g=` |
+| zip member | 47,075 B, sha256 `8d8cb2c23d7c00d943a985d381e45b96315f7dcf6047fe1bc3cc2234854d801f` |
+| result | **aj@opalinvest.com in 0 of 18** resolved test-invocation lists; scheduled path still `['aj@opalinvest.com','andrew@opalinvest.com']` |
 
-**aj@opalinvest.com appears in 0 of 18 resolved test-invocation recipient lists** (9 adversarial
-events x 2 recipient carriers), and the marker-free scheduled payload still resolves to
-`['aj@opalinvest.com', 'andrew@opalinvest.com']`. The module was imported with every boto3 client
-replaced by a stub that **raises** on any call, so no code path inside it could reach AWS.
+This also serves as a regression check on my own `EG-s-24` change: the recipient path survived it.
 
-That is arm (a), and it is the only arm of `S21-AC1` that can be measured.
+**So the block is not the recipient bound. That one passes.**
 
----
+## 2. THE FORCING IS DEFEATED BY THE LADDER
 
-## 2. WHY ARMS (b)-(g) CANNOT BE MEASURED -- two blocking findings
-
-The cell requires three things that cannot simultaneously hold:
-
-1. a class-C-or-worse condition **FORCED** by "the least invasive mechanism that reaches the
-   classifier's real code path";
-2. that forcing **DISCLOSED on the produced verdict document**, with the run id;
-3. the **ORCHESTRATOR's** terminal send fired on the refusal branch (arm (e) = FWD-10);
-
-while binding **"NO CODE CHANGE"** and granting `<paths>` that deliberately exclude
-`lambda_function.py` and never mention the renderer at all.
-
-### FINDING 1 -- no forcing can reach the classifier through an orchestrator invocation
-
-The deployed orchestrator builds a **fixed** render command:
+`--fixture-remove` mutates the in-memory series that `coverage_gate` uses for its **first**
+classify. With `ladder=True` -- the only path the orchestrator's fixed `--gate` command takes --
+the gate then **re-classifies from real current S3**:
 
 ```
-f"python3 render_month_end.py --month {month} --pdf --gate --s3-out {out}"
+render_month_end.py:991   classes = classifier.classify_month(p, month, series=series, probe=probe)
+render_month_end.py:999   classes = classifier.classify_month(p, month, s3=s3, probe=probe)
+                          # "re-classify from REAL current S3 state, never the in-memory series"
 ```
 
-An AST census over the same deployed bytes (3,142 nodes walked) shows the handler reads **exactly
-four** event keys -- `mode`, `month`, `probe`, `test_recipients`. So `month` is the only
-event-derived input that reaches the box. No forcing spec can ride an invocation.
+`_apply_fixture_remove` call sites on the served renderer: **3** (`:441` def, `:455` HTML path,
+`:1116` in `main` before the gate) -- **none inside `coverage_gate`**, which receives
+`fixture_remove` only to *record* it in the `forcing` field.
 
-**The mechanism the face prefers already exists and is unreachable.** The renderer's own
-`--fixture-remove` is documented "EG-s-6 QA: remove these slices from the loaded series IN MEMORY
-before rendering/gating; **nothing on S3 is ever touched**" -- literally "an input fixture the
-classifier reads", which the face prefers over editing a real month. The orchestrator simply never
-threads it.
+**Measured hermetically on the served bytes** (66,756 B, sha256 `b08a646d5755f501…`), identical
+fixture / month / probe, the only difference being the ladder:
 
-**And arm (e) closes the obvious substitute.** A renderer-only SSM run *could* carry the flag, but
-the terminal send lives only in the orchestrator (`_send_terminal_unresolved` at deployed `:307` and
-`:605`), and the deployed renderer has **0 SES call sites** (0 of 4 call-site tokens over 62,880 B).
+| | verdict | C | holes | ladder asked to fix |
+|---|---|---|---|---|
+| `ladder=False` | **REFUSE** | 1 | `['2026-08-04']` | *skipped* |
+| `ladder=True` | **PUBLISH** | 0 | `[]` | `('cottonwood', ['2026-08-04'])` |
 
-> A number I printed and then had to correct: a bare substring count of `ses` in the renderer
-> returns **12** -- `uses`, `series`, `closes`. My first run printed that as "occurrences of any SES
-> send: 12", a figure that *contradicted the very claim it was printed to support*. The battery now
-> counts call-site tokens and word boundaries and discloses the artifact beside the real value.
+And `--no-ladder` is **not threaded** -- the deployed command a forced invoke would send is
+`… --month 2026-08 --pdf --gate --s3-out … --fixture-remove cottonwood:2026-08-04`, with no way to
+select the only mode in which the forcing works.
 
-### FINDING 2 -- the verdict artifact has no field able to disclose a forced condition
+**The second harm is worse than the first.** On the ladder path the first classify *does* yield C,
+so rung 1 invokes the producer for that date -- a real invoke that would **rewrite a served
+`daily/<partner>/<date>.json` slice**. That is exactly the unintended served write round 1 rowed as
+`W1-S24`.
 
-Censused over **the renderer the box actually pulls** -- `s3://opal-313476888478-lambda-artifacts/ec2/etfs-reports/render_month_end.py`,
-62,880 B, sha256 `55701125e86740f3bf51a715aba8f68e8441d3eb7bffc99a43b7d3ff29b973e9`, byte-equal to
-the repo build input (the GRAIN that matters: the box `aws s3 cp`s this artifact at run time, so the
-repo file is the build input, not the deployed object):
+**And there is no organic C to fall back on:** 2026-08 reads PUBLISH, holes 0, C = 0 of 3 partners
+(21 of 21 trading days covered); 2026-09 reads PUBLISH, holes 2, C = 0 of 3.
 
-| | |
-|---|---|
-| disclosure tokens | `forced`, `FORCED`, `is_forced`, `run_id`, `runid`, `run-id`, `request_id`, `requestId`, `trigger`, `driven` -- **10 of 10 ZERO** |
-| positive controls | `generated_at` 1, `fixture_remove` 22, `verdict` 23, `unresolved` 13, `per_partner` 6 -- **all non-zero** |
-| served verdict keys | `['generated_at', 'holes', 'month', 'per_partner', 'unresolved', 'verdict']` |
+So a driven run today would **publish rather than refuse, rewrite a served daily slice, and consume
+the single permitted act** -- proving nothing about FWD-9 or FWD-10.
 
-The controls are what make the zeros an **absence** rather than a dead read. Producing such a field
-is a code change to `data/etfs/scripts/presentation/render_month_end.py` **plus** a re-upload of the
-S3 renderer artifact -- a second lane, outside the grant, and forbidden by the face's own bound.
+## 3. WHY MY OWN `EG-s-24` DID NOT CATCH THIS
 
----
+`EG-s-24`'s bar was that the forcing spec **reaches** the classifier and that the scheduled path
+cannot reach it. Both are true and remain true -- the spec does reach the renderer's real code path
+and is applied at `:1116`. What no arm asked was whether reaching the classifier **changes the
+verdict**, which is a property of the gate's control flow, not of the seam.
 
-## 3. WHY I DID NOT FIRE ANYWAY
+**A seam proved to deliver its input is not a seam proved to have an effect.** That is mine, and it
+is the same family as `W4-S4` and `W4-S5`: I keep proving the thing I built rather than the property
+it was built to establish.
 
-An unforced run **cannot** refuse. The classifier's own rule, quoted from the deployed artifact:
+## 4. WHAT A RE-CUT NEEDS -- two shapes, different fidelity, both outside this order
 
-```
-render_month_end.py:963   verdict = "REFUSE" if any_c else "PUBLISH"
-```
+1. **Thread `--no-ladder` beside the forcing** in `_render_command` (one line, `EG-s-24`'s file,
+   already deployed and out of this order's NO-CODE-CHANGE bound). Yields a genuine class-C REFUSE
+   -- measured above -- but the ladder never runs, so `coverage_unresolved.json` rows read
+   `"ladder skipped (--no-ladder)"` with rungs all zero, and arm (d), which wants **the ladder's
+   outputs** on the refusal branch, gets a degenerate answer.
+2. **Apply the fixture to the re-classify** inside `coverage_gate` (renderer, `EG-s-25`'s surface).
+   The ladder runs for real, rung 1 fires, and the re-classify still sees the date removed, so the
+   verdict is REFUSE **with real ladder output** -- the faithful analogue of the organic case, at
+   the cost of a renderer change and a forced date unresolvable by construction.
 
-Class **C only**. D and UNKNOWN are reported, never refused. The last real run's served verdict:
-
-| partner | A | COVERED | B | C | D | UNKNOWN | holes |
-|---|---|---|---|---|---|---|---|
-| 49financial | 3 | 5 | 0 | **0** | 1 | 0 | `['2026-09-09']` |
-| cottonwood | 3 | 5 | 0 | **0** | 1 | 0 | `['2026-09-09']` |
-| inflection | 3 | 6 | 0 | **0** | 0 | 0 | `[]` |
-
-`verdict=PUBLISH holes=2`, class C = **0 of 3 partners**.
-
-So firing would have spent this order's **one permitted run** on a PUBLISH that writes the served
-publish keys and sends the **ordinary monthly email to both recipients** -- precisely what round 1
-did by accident (`W1-S22`, `W1-S23`, `W1-S24`) -- while proving nothing about FWD-10. Knowingly
-repeating a measured mistake is worse than not acting, and the face's "ONE driven run" bound means
-the run spent that way is not recoverable.
-
----
-
-## 4. WHAT A RE-CUT NEEDS -- both small, both outside this grant
-
-1. **Thread a forcing spec from the event into `_render_command`** in
-   `infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py` -- the same shape as EG-s-15's
-   `month` override. Note CLAUDE.md's NEVER clause: such an override **creates a new reachable
-   state on the manual path**, and the sign-off must cover that state or the override does not land.
-2. **Have the renderer record the forcing and a run id on `coverage_verdict.json`** in
-   `data/etfs/scripts/presentation/render_month_end.py`, re-uploaded to the artifact prefix.
-
-Both are code cells. `EG-s-21` as cut is a *run-it-as-deployed* cell, and the capability it needs to
-run was never built. That is the whole finding.
-
----
+I did not choose between them: `EG-s-21` binds **NO CODE CHANGE** and both live outside its grant.
 
 ## 5. THE CRITERIA
 
 ### `S21-AC1` -- FAIL
 
 ```
-$ timeout 900 python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~4/test_egs21_driven_refusal.py
-ARM (a) PRECONDITION : HOLDS -- 0 of 18 resolutions reach aj@
-ARMS (b)-(g)         : NOT MEASURABLE -- the cell's forcing premise fails.
-    BLOCKING: no forcing reaches the classifier through the orchestrator
-    BLOCKING: the verdict artifact cannot disclose a forced condition or a run id
-
-NOTHING WAS INVOKED. NO SEND WAS FIRED. NO S3 KEY WAS WRITTEN OR DELETED.
-
-EGS21-BLOCKED-NO-FORCING-PATH
-rc=2
+$ timeout 900 python org/.../test_egs21_driven_refusal.py
+ARM (a) PRECONDITION : HOLDS -- 0 of 18 reach aj@
+ARMS (c)-(g)         : NOT REACHABLE -- no refusal can be produced.
+    BLOCKING: the forcing does not change the verdict on the ladder path
+    BLOCKING: --no-ladder is not reachable from any event
+NOTHING WAS INVOKED. NO SEND. NO S3 WRITE OR DELETE. EG-s-21's ONE RUN IS UNSPENT.
+EGS21-BLOCKED-FORCING-DEFEATED-BY-LADDER      rc=2
 ```
 
-Expected `EGS21-REFUSAL-DRIVEN-AND-SENT`; got `EGS21-BLOCKED-NO-FORCING-PATH`. **No match, so FAIL.**
-The battery is written so it *cannot* print the success token -- a battery that could pass without a
-driven refusal would be the confident-wrong shape this project exists to kill.
-
-Full output: `EG-s-21_S21-AC1_battery_output.txt`.
+Expected `EGS21-REFUSAL-DRIVEN-AND-SENT`; no match, so **FAIL**. The battery has no branch that can
+print the success token.
 
 ### `S21-AC2` -- RECORDED, judgment, NO VERDICT
 
-The criterion asks how a person would read the refusal, whether the driven condition is a faithful
-analogue, whether the disclosure is enough, and what the send's evidence proves about delivery.
-**No refusal was produced, so three of those four have no object to grade.** What can be recorded:
+Three of the four limbs still have no object, because no refusal exists. What is recordable:
 
-- **The disclosure question is answerable in advance, and its answer is the block.** The face is
-  right that a driven artifact which looks organic is the confident-wrong shape. On the deployed
-  renderer there is *no way to make it look driven*: a forced run and an organic run would emit
-  byte-identical schemas, distinguishable only by an out-of-band note in a ledger entry. That is
-  exactly the failure mode the requirement exists to prevent, which is why I read the requirement as
-  load-bearing rather than decorative and stopped instead of firing without it.
-- **On emission vs delivery, unchanged from EG-s-20:** the `MessageId` line added at `:307`/`:605`
-  is an emission oracle, not a delivery oracle. Nothing here moves that.
-- **On the faithfulness of the analogue, one thing is worth the CVO's attention:** `--fixture-remove`
-  forces a C by hiding a slice the classifier would otherwise see, so the *probe* still reports the
-  upstream present and priced -- which is precisely the real class-C shape ("upstream present and
-  priced > 0, no slice -- producer never fired for this date"). It is a faithful analogue. The
-  mechanism is sound; only its reachability is missing.
+- **The disclosure limb is now ANSWERED, and it answers well.** `EG-s-25` landed and I exercised it:
+  every `coverage_gate` return now carries
+  `{"forced": true, "mechanism": "--fixture-remove", "fixture_remove_spec": "cottonwood:2026-08-04",
+  "removed_slice_count": 1, "run_id": …, "run_id_source": …, "disclosure_version": "1"}`.
+  It is written on **both** branches -- my `ladder=True` run PUBLISHED and still recorded
+  `forced: true`, which is the honest and useful direction: a forced run that fails to force still
+  says it was forced.
+- **Faithfulness of the analogue, sharpened.** Shape 1 (`--no-ladder`) is *not* a faithful analogue:
+  it skips the very rungs FWD-9's refusal is supposed to have exhausted. Shape 2 is faithful. The
+  choice between them is a fidelity decision, not a convenience one, and it belongs to the cut.
+- **Emission vs delivery:** unchanged. The `MessageId` line at the terminal send is an emission
+  oracle only, and nothing here moves it.
 
-**Evidence vintage:** deployed orchestrator as of `LastModified 2026-09-10T03:54:09Z`; deployed
-renderer sha256 `55701125e86740f3...` read 2026-09-10 ~04:4xZ; served verdict `generated_at
-2026-09-10T01:20:19.883859+00:00`; code citations `@9e3040a75f`.
-
----
+**Vintage:** orchestrator `LastModified 2026-09-10T05:42:07Z`, member `8d8cb2c23d7c00d9…`; served
+renderer `b08a646d5755f501…`; served verdicts read 2026-09-10 ~06:1xZ; code `@c1e2d3acd9`.
 
 ## 6. WHAT I DID NOT DO
 
-- **No invocation of anything** -- not the orchestrator, not a producer probe, not SSM.
-- **No NEVER-2 entry opened.** The face requires one *before the act*; there was no act. Opening and
-  closing an entry for a deploy that never happened would put a false event in the change-management
-  record.
-- **No code change**, and no write to `.tools/`, the renderer, or the orchestrator.
-- **No S3 write and no S3 delete.** NEVER-AUTO-DELETE was never approached.
-- **No status flip.** `S21-AC1` FAILs, so `ETFS_GUARDRAIL.TO-EG-s-21` stays `pending`.
-- **No second attempt at anything.** The "ONE driven run" bound is intact and unspent.
-
-## 7. PUSH STATE (MEASURED)
-
-See the WORKER REPORT. Commits are LOCAL on `wk-etfs_guardrail-3-4`; the issuer drains the branch.
+No invoke of any kind, no send, no S3 write or delete, no code change, no override, no `<status>`
+flip. No NEVER-2 entry was opened -- the face requires one *before the act*, and there was no act;
+an entry for a run that never happened would put a false event in the change-management record.
