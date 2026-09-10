@@ -1,0 +1,33 @@
+INSTRUMENT: derive_runner.normalize_edge_endpoints and derive_runner.fold_stitch_document, called DIRECTLY on a local fixture; the served join is reimplemented from kuzu_nessie_load.py:204/:249-253 so an arm reads the JOIN's rule and not the fold's own
+COVERAGE: 4 fixture graphs, 11 nodes and 5 edges in total; every arm prints its own denominator; no S3, no network, no container
+GRAIN: one edge ENDPOINT per arm, and the node CLASS the simulated join lands it on
+ENVIRONMENT of the stored baseline: the fixture's node SHAPE is the real snapshots/20260910 artifact's, measured by TO-CG-G-1's census (S3_BUCKET carries id=name + arn=arn; S3_BUCKET_POLICY carries the bucket NAME in its own arn column, 15 of 15 nodes); the 0-of-955 comparison in arm 6 is round 6's own measurement, issuer-stated at this cut, not re-derived here
+
+INFO: ENDPOINT_CANONICALIZE aliases=2 endpoints_rewritten=1 edges_touched=1 of 3 resolvable_before=3 resolvable_after=3 by_edge_type={"STORED_IN": 1}
+INFO: ENDPOINT_CANONICALIZE aliases=0 endpoints_rewritten=0 edges_touched=0 of 1 resolvable_before=0 resolvable_after=0 by_edge_type={}
+WARN: ENDPOINT_ALIAS_AMBIGUOUS alias='shared-name' claimed_by=['arn:aws:s3:::shared-name', 'arn:aws:sqs:us-east-1:1:shared-name'] -- NOT rewritten. Two resources answer to one string; the fold refuses to choose between them
+INFO: STITCH_INGEST nodes=1 edges=1 skipped_dup=0 stamped=0 skipped_unmapped_type=0 skipped_edge_unresolved=0 producer=g2_fixture_fold vintage=fixture
+  -- the arms --
+  NAME_ENDPOINT_REWRITTEN      PASS   target=arn:aws:s3:::opal-data-bd target_type=S3_BUCKET resolved=True endpoints_rewritten=1
+  ARN_ENDPOINT_UNCHANGED       PASS   target=arn:aws:s3:::opal-data-cot target_type=S3_BUCKET resolved=True
+  SINGLE_IDENTITY_UNTOUCHED    PASS   source=opal-data-bd/gold/x.parquet target=scripts/build.py resolved=True (neither end carries a second identity)
+  AMBIGUOUS_ALIAS_REFUSED      PASS   ambiguous_aliases=1 endpoints_rewritten=0 target_left_as=shared-name
+  NON_LOSING                   PASS   fixture before=3 after=3 of 3 edge(s); ambiguous-fixture before=0 after=0 of 1 edge(s)
+  FOLD_ADMITS_CANONICAL        PASS   admitted=1 of 1 canonical STORED_IN edge; the pre-fix id set (_stitch_existing_ids, short ids only) would have admitted 0 of 1 -- round 6 measured that arm at 0 of 955
+
+FIXTURE_ARMS=6 of 6 passed
+NAME_ENDPOINT_REWRITTEN=true
+ARN_ENDPOINT_UNCHANGED=true
+SINGLE_IDENTITY_UNTOUCHED=true
+AMBIGUOUS_ALIAS_REFUSED=true
+NON_LOSING=true
+FOLD_ADMITS_CANONICAL=true
+
+INFO: ENDPOINT_CANONICALIZE aliases=0 endpoints_rewritten=0 edges_touched=0 of 3 resolvable_before=2 resolvable_after=2 by_edge_type={}
+  -- the negative control (a MUTANT, not a comment) --
+     canonical_node_key replaced with the pre-fix rule (return the short id);
+     arm 1 re-run and REQUIRED to fail. Observed: FAILED (as required)   target=opal-data-bd target_type=S3_BUCKET_POLICY resolved=True endpoints_rewritten=0
+NEGATIVE_CONTROL=FIRED
+
+DENOMINATOR: 6 of 6 arm(s) passed over 4 fixture graph(s), 11 node(s) and 5 edge(s); 1 of 1 mutant run; 0 S3 object(s) read, 0 network call(s) made.
+FIXTURE_RESULT=PASS
