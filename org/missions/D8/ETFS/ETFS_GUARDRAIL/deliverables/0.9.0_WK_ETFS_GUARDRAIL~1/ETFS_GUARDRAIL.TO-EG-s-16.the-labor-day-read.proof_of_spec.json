@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-16",
+  "phase": "INVESTIGATION",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~1",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-16.the-labor-day-read.md",
+    "group": "OTHER",
+    "vintage_commit": "3ee6b6e0d0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "acf75d72d8d3292f1db5e16f9b22d221cb3bad27",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-16.the-labor-day-read.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-labor-day-read.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs16_labor_day.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S16-AC1 battery, arms (a)-(f), READ-ONLY on the plane: no invoke, no write, no deploy. Reads EG-s-15's already-written run plus the trading calendar and the two producers' log groups. 4 of 6 arms PASS; arms (b) and (c) FAIL on the artifact's SHAPE, not on the world (row W1-S30)."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-labor-day-read.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Criteria verbatim with rc and denominator, and the two rows this order filed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S16-AC1",
+      "criterion_verbatim": "a battery you write, printing the token ONLY when every arm holds on EG-s-15's real run: (a) lib/trading_calendar.py says 2026-09-07 is NOT a trading day (print the call and its answer; positive control: 2026-09-08 IS); (b) platinum/reports/2026-09/coverage_verdict.json (the object EG-s-15's run wrote; its UTC printed) classifies 2026-09-07 as class A (market closed) for EVERY partner it covers, and 2026-09-07 appears in NO partner's holes; (c) expected_empty (or the verdict's equivalent field, named) carries 2026-09-07 with the partners' hole counts UNAFFECTED by it (print the hole list with and without the date -- equal); (d) NO daily slice exists for 2026-09-07 for cottonwood or 49financial ...; (e) RE-CUT ... list-objects-v2 ... == 0 keys BEFORE and AFTER EG-s-15's run window ... and the two producers' log groups over that window carry no `wrote` line naming 2026-09-07 (lines scanned printed); (f) the run this reads is EG-s-15's ... Denominators on every list. <expect>EGS16-LABOR-DAY-CLASS-A</expect>",
+      "method": "command",
+      "invocation": "timeout 300 python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs16_labor_day.py",
+      "output_evidence": "rc=1. FINAL LINE: 'EGS16-NOT-ESTABLISHED -- failing arms: b, c'. 'ARMS 4 of 6 PASS'. The token EGS16-LABOR-DAY-CLASS-A was NOT printed.\nPASSING (4):\n(a) PASS -- is_trading_day(date(2026,9,7)) -> False (the target, Labor Day); is_trading_day(date(2026,9,8)) -> True (POSITIVE CONTROL). Every non-trading day 2026-09-01..09-09: ['2026-09-05','2026-09-06','2026-09-07'] -> 3 of 9 days. NOTE, measured not assumed: there are THREE non-trading days in that stretch (09-05 Sat, 09-06 Sun, 09-07 Labor Day), and that count is what corroborates the verdict's A=3.\n(d) PASS -- daily/cottonwood/ -> 0 keys naming 2026-09-07 of 62 (denominator); daily/49financial/ -> 0 of 89. POSITIVE CONTROLS present: daily/cottonwood/2026-09-08.json 1345 B 2026-09-09T23:15:52Z and daily/49financial/2026-09-08.json 1305 B 2026-09-09T10:45:13Z. PRINTED BUT NOT GRADED, the uncovered member: daily/inflection/ -> 1 key of 122 names 2026-09-07 (row W1-S31).\n(e) PASS -- COVERAGE-ABSENT printed for the CloudTrail limb (no data-event selector covers opal-data-etfs; versioning DISABLED, W1-S12), so the write is read from the objects and the producers' logs. AFTER the run: 0 keys naming 2026-09-07 under 2 of 2 prefixes, and 0 of 62 / 0 of 89 keys carry a LastModified inside the run window. /aws/lambda/bd-49f-etf-ownership-daily 14 lines scanned (nextToken False), 0 naming 2026-09-07, 0 containing 'wrote'; /aws/lambda/cot-etf-ownership-daily 11 lines scanned, 0 and 0. THE 'BEFORE' LIMB'S LIMIT IS STATED IN THE OUTPUT: no listing was taken before the run and a prefix listing is not retrospective; the BEFORE state is INFERRED from two measurements (0 keys now, nothing modified in the window) plus the absence of any delete, and is labelled an inference rather than a read.\n(f) PASS -- the verdict object's LastModified 2026-09-10T01:20:20Z falls inside EG-s-15's run window 01:19:02Z -> 01:20:28Z, whose request id is 9fbc33e0-174c-4c82-b392-2b1dafe4a835.\nFAILING (2), BOTH ON THE ARTIFACT'S SHAPE AND NEITHER ON THE WORLD (row W1-S30):\n(b) FAIL -- what IS readable and passes: 2026-09-07 appears in NO partner's holes (3 of 3) and class A == 3 for 3 of 3 partners, exactly the calendar's 3 non-trading days. What is NOT readable: the served verdict contains the literal string '2026-09-07' ZERO times in the entire document. Its per_partner entries carry only ['summary','coverage_line','holes'] and its summary only counts ['A','B','C','COVERED','D','UNKNOWN','covered','expected_empty','holes','trading_days']. So the object holds no per-date class map and cannot be read to say it 'classifies 2026-09-07 as class A'; only the NEGATIVE (not a hole) and the COUNT are readable, and a count is not a per-date classification.\n(c) FAIL -- the hole-count limb HOLDS: the hole list is IDENTICAL with and without the date for 3 of 3 partners (49financial ['2026-09-09'], cottonwood ['2026-09-09'], inflection []). The 'carries' limb cannot: classifier.py:168-170 @c866edd324 defines expected_empty in its own docstring as '(= B)' and :178 sets expected_empty = counts[\"B\"]; measured on the served object expected_empty == B == 0 for 3 of 3 partners. Class A ('market closed') and class B ('upstream present, priced == 0') are different axes, so a class-A date cannot appear in expected_empty by construction. The face's equivalent-field hatch was exercised: the only per_partner field carrying dates at all is `holes`, and 2026-09-07 is in none of them.",
+      "denominator": "6 arms, 4 PASS / 2 FAIL; 3 of 3 partners on every verdict read; 3 of 9 days non-trading; 0 of 62 and 0 of 89 daily keys naming the date for the two enumerated partners (1 of 122 for the uncovered third); 14 and 11 producer log lines scanned; 0 occurrences of the literal date in the 2705-byte verdict object",
+      "expect": "EGS16-LABOR-DAY-CLASS-A",
+      "status": "FAIL",
+      "status_reason": "The token appears in output_evidence only in the sentence stating it was NOT printed; the battery printed EGS16-NOT-ESTABLISHED and exited rc=1. The failure is a CUT DEFECT, not a world defect: arms (b) and (c) name evidence the served artifact does not carry, for any month, and the substance the cell exists to prove (2026-09-07 is not a hole, hole counts unaffected, no slice for the enumerated partners, nothing written in the window, A count == the calendar's non-trading-day count) is measured and holds. Filed as row ETFS_GUARDRAIL-W1-S30 with two disarm paths named for the issuer. NOT re-worded and NOT worked around: the per-date map could have been re-derived by running the classifier locally, but that substitutes a different instrument for the one the criterion names, and choosing the instrument is the issuer's act."
+    },
+    {
+      "criterion_id": "S16-AC2",
+      "criterion_verbatim": "graded by the CVO at L9: that a real closed-market day was told apart from a hole by the deployed classifier on real data (the A/B/C/D verdicts across the month printed as a table with the calendar beside them), that no backfill was attempted against it, and where the fixture-based proofs of round 1 would have been blind. Evidence with vintage. NO VERDICT. [judgment=true]",
+      "method": "manual_read_with_citation",
+      "invocation": "Evidence assembled for the CVO; NOT self-graded (spine v3 L9: a judgment criterion is graded at L9 and never self-graded).",
+      "output_evidence": "RECORDED FOR L9, NO VERDICT.\n1. THE CLOSED DAY WAS TOLD APART FROM A HOLE, ON REAL DATA. The deployed classifier's verdict for 2026-09, written by EG-s-15's run at 2026-09-10T01:20:20Z, beside the calendar:\n    partner       A  COVERED  B  C  D  UNKNOWN  trading_days  holes        coverage_line\n    49financial   3  5        0  0  1  0        6             ['2026-09-09'] 5/6 trading days; 1 carried\n    inflection    3  6        0  0  0  0        6             []             6/6 trading days; 0 carried\n    cottonwood    3  5        0  0  1  0        6             ['2026-09-09'] 5/6 trading days; 1 carried\n  THE CALENDAR BESIDE IT (lib/trading_calendar.py, is_trading_day, measured this session): 09-01 Tue True, 09-02 Wed True, 09-03 Thu True, 09-04 Fri True, 09-05 Sat FALSE, 09-06 Sun FALSE, 09-07 Mon FALSE (Labor Day), 09-08 Tue True, 09-09 Wed True. Six trading days and THREE non-trading -- and every partner's A == 3 and trading_days == 6. The classifier and the calendar agree exactly, on real data, for 3 of 3 partners. 2026-09-07 is in NO partner's holes, and each hole list is identical with the date removed. The only holes in the month are 2026-09-09, class D, on 49financial and cottonwood -- a genuinely absent upstream partition, not a closed market. THE RULE, quoted: classifier.py:122-125 @c866edd324 'if not tcal.is_trading_day(d): result[date_str] = {\"class\": \"A\", \"reason\": \"market closed (not a trading day)\"}; continue'.\n2. WAS ANYTHING BACKFILLED AGAINST IT? SPLIT ANSWER, and this is the finding. For the two partners the criterion enumerates: NO -- daily/cottonwood/ 0 of 62 keys and daily/49financial/ 0 of 89 keys name 2026-09-07, no key under either prefix was modified during the run window, and neither producer's log group carries a line naming the date (14 and 11 lines scanned). FOR THE THIRD PARTNER, WHICH THE CRITERION DOES NOT ENUMERATE: YES -- daily/inflection/2026-09-07.json exists, 1209 B, written 2026-09-07T15:00:41Z, carrying four priced ETF rows with account_count 562 and source_as_of 2026-09-07, citing s3://opal-data-inf/gold/canonical/holdings_2026-09-07.parquet. inflection also has 09-05 (Sat) and 09-06 (Sun), and a sha256 over each file's (ticker, ownership_value, account_count) tuples is IDENTICAL across 09-05, 09-06, 09-07 and 09-08 while DIFFERING from 09-04 -- carried-forward duplicates, not independently priced days. Note this was NOT written by EG-s-15's run (its LastModified is 09-07, three days before), so it is standing behaviour of inflection's own producer, not an act of the run this order reads. Row W1-S31.\n3. WHERE THE ROUND-1 FIXTURE PROOFS WOULD HAVE BEEN BLIND, three places. (i) A fixture supplies its own calendar answer, so it can only confirm that a date the fixture CALLS non-trading is classified A; it cannot confirm that the real calendar calls 2026-09-07 non-trading, which is the half that matters for a real holiday (a weekend is easy; a moveable federal holiday is where a calendar is actually tested). (ii) A fixture asserts the classifier's OUTPUT and therefore cannot notice that the PERSISTED verdict drops the per-date class map -- the gap this order hit in arms (b)/(c) and filed as W1-S30 -- because a fixture reads the in-memory dict, not the served object. (iii) A fixture builds only the partners it names, so it cannot surface a partner whose producer writes on closed days; that required listing the real prefixes, and it is exactly what the criterion's own 2-of-3 enumeration also misses. THE STRUCTURAL BLINDNESS BEHIND (iii), quoted: the class-A branch at classifier.py:122-125 @c866edd324 `continue`s BEFORE the `if date_str in series` slice check at :128 -- so the classifier never examines whether a slice exists on a non-trading day, for any partner, in any month. A check scoped to trading days cannot see a defect on the non-trading ones.\n4. WHAT THIS ORDER COULD NOT SEE. (i) Whether daily/inflection/2026-09-07.json is INTENDED (a deliberate carry-forward in inflection's feed) or a defect -- inflection's producer is outside this project's surface and this worker does not assert which. (ii) The BEFORE state of the daily prefixes: no listing predates EG-s-15's run and a prefix listing is not retrospective, so the before-state is an inference from 0 keys now plus nothing modified in the window, and is labelled so. (iii) S3 object-level PutObject on opal-data-etfs -- COVERAGE-ABSENT, no data-event selector covers the bucket and versioning is disabled (W1-S12), so every write question is answered from the object and the producer's log instead. (iv) Which dates the run classified A: the served verdict carries counts, not a per-date map (W1-S30).",
+      "denominator": "4 evidence heads; 3 of 3 partners on every verdict read; 9 of 9 calendar days measured; citations carry vintages (@c866edd324 for the classifier; UTC LastModified via s3api for every object; fixed UTC window bounds for the log reads)",
+      "expect": "JUDGMENT -- graded by 3.0.0_SA_CVO at L9; no worker verdict recorded",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\" at the cut: graded by 3.0.0_SA_CVO at L9 and NEVER self-graded by the worker (spine v3 L9). Evidence is recorded above with vintages and NO VERDICT is offered. SUBSTITUTE ORACLE for the limb no instrument here settles -- whether inflection's closed-day slices are intended or defective -- is the issuer's read against inflection's own producer spec, which is outside this project's surface; row W1-S31 carries it."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The load-bearing claim is that the deployed classifier told a real closed-market day apart from a hole. The discriminator is the POSITIVE CONTROL the face names: 2026-09-08 is a trading day, and it must behave differently from 2026-09-07 on every instrument. It does: the calendar answers True vs False; the daily prefixes carry a 2026-09-08 slice for BOTH enumerated partners (1345 B and 1305 B) and ZERO for 2026-09-07. A second, independent control on the same claim: the month's ONLY holes are 2026-09-09 (class D) -- so the verdict demonstrably CAN mark a date a hole, and did, three days after the target; the absence of 09-07 from the hole lists is therefore a reading and not an inability to report holes. THIRD, on the count: the A count was checked against an INDEPENDENTLY measured calendar rather than assumed -- 3 non-trading days measured, A == 3 in the artifact, for 3 of 3 partners; had the count been 2 or 4 the arm would have failed.",
+      "expected": "2026-09-07: calendar False, class A, in no hole list, hole list unchanged without it, no daily slice for the enumerated partners, no producer log line. 2026-09-08 (control): calendar True, slice PRESENT for both. 2026-09-09 (hole control): present in 49financial's and cottonwood's holes as class D.",
+      "observed": "Exactly that on every limb: calendar 09-07 False / 09-08 True; A == 3 == the measured non-trading-day count for 3 of 3 partners; 09-07 in 0 of 3 hole lists and each hole list identical without it; 0 of 62 and 0 of 89 daily keys for 09-07 against present 09-08 slices; 0 producer log lines of 14 and 11 scanned; and 09-09 present as a class-D hole for 2 of 3 partners. The controls fired and discriminated. The two FAILING arms did NOT fail on any of this -- they failed because the artifact carries no per-date class map and expected_empty counts class B, which is a property of the ARTIFACT's shape, measured and quoted from the classifier's own source.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "READ-ONLY by the order's BOUNDS and by Andrew's standing constraint: no invoke, no write, no deploy, and in particular NO invocation of etfs-reports-orchestrator in any mode that can reach _email_report. Every read is idempotent and re-runnable: s3api list-objects-v2 / head-object / get-object, logs filter-log-events over FIXED ms bounds, and a pure function call into lib/trading_calendar.py. The battery was run twice this session (once with a defective timestamp parser in arm (f), once after fixing it); every measured number was identical across both runs and only the arm-(f) verdict changed.",
+      "observed": "Run 1 and run 2 agree on all data: 3 non-trading days; A=3 for 3 of 3 partners; 0 occurrences of the literal date in the verdict; 0 of 62 and 0 of 89 daily keys; 1 of 122 for inflection; 14 and 11 producer log lines. Arm (f) moved FAIL -> PASS purely because of an instrument bug in this battery, not a change in the world: s3api head-object renders LastModified in RFC-1123 ('Thu, 10 Sep 2026 01:20:20 GMT') while list-objects-v2 renders ISO-8601, and the first parser branched on `\"T\" in value`, which matches the 'T' of 'Thu' and truncated the string. Fixed by discriminating on SHAPE (positions of '-' and 'T'), and the note is left in the battery's source so the next reader does not repeat it.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any invocation of etfs-reports-orchestrator, or of any function that can reach _email_report.",
+      "reason": "Andrew's standing constraint ('make sure no test run hits aj's email') plus this order's own BOUNDS ('READ-ONLY on the plane. No invoke, no write, no deploy'). This order reads EG-s-15's already-written run and fires nothing. I verified the face myself against the constraint before starting rather than relying on the relayed read, and found no arm requiring an invocation."
+    },
+    {
+      "item": "Re-deriving the per-date class map by running the classifier locally to satisfy arms (b) and (c).",
+      "reason": "The criterion names a specific instrument -- 'the object EG-s-15's run wrote'. Re-deriving with a local classifier run answers a different question with a different instrument, and substituting the instrument is the issuer's act, not a worker's. Filed as row W1-S30 with two disarm paths named."
+    },
+    {
+      "item": "Grading inflection under arm (d), or investigating why its producer writes on closed days.",
+      "reason": "The face's arm (d) enumerates cottonwood and 49financial. The finding is PRINTED beside the graded partners with its denominator so it is visible, but grading it would widen the criterion. inflection's producer is outside this project's surface entirely. Filed as row W1-S31."
+    },
+    {
+      "item": "Any edit to lib/trading_calendar.py or data/etfs/scripts/coverage/classifier.py.",
+      "reason": "Both are READ under this order's <paths> ('import the calendar for the battery's own check; never edit')."
+    },
+    {
+      "item": "A retrospective 'BEFORE' listing of the daily prefixes.",
+      "reason": "A prefix listing is not retrospective and none was taken before EG-s-15's run. The before-state is inferred from two present measurements and is LABELLED an inference in the battery's own output rather than reported as a read."
+    }
+  ],
+  "surprises": [
+    "ETFS_GUARDRAIL-W1-S30: BLOCKING / ARMED (disarm_owner 2.0.0_SA_COO) -- S16-AC1 arms (b) and (c) name evidence the served coverage_verdict.json does not carry: it holds per-class COUNTS plus a `holes` date list and no per-date class map (the literal 2026-09-07 appears 0 times), and `expected_empty` is the class B count by the classifier's own definition, so it cannot carry a class-A date. This is what blocks S16-AC1; two disarm paths are named for the issuer.",
+    "ETFS_GUARDRAIL-W1-S31: OBSERVATION / ARMED (disarm_owner 2.0.0_SA_COO) -- a daily slice EXISTS on the closed-market day for the one partner arm (d) does not enumerate: daily/inflection/2026-09-07.json, 1209 B, written 2026-09-07T15:00:41Z, four priced rows with source_as_of on a day the market was shut, and 09-05/09-06 likewise, all carried-forward duplicates of the same values. The classifier is structurally blind to it because class A short-circuits before the slice check (classifier.py:122-125 @c866edd324)."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "the S16-AC1 battery (this worker's)",
+      "invocation": "timeout 300 python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs16_labor_day.py",
+      "result": "rc=1 -- 'ARMS 4 of 6 PASS' then 'EGS16-NOT-ESTABLISHED -- failing arms: b, c'."
+    },
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile .../test_egs16_labor_day.py",
+      "result": "rc=0 -- compiles clean."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md  (graded with the file STAGED -- it grades the staged set)",
+      "result": "rc=0 -- '2 new row(s) of 57 total checked (55 pre-existing, NOT re-graded)' and 'OK: all new rows carry their step-7/step-10 fields'; corpus gate 'OK: corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved)'."
+    },
+    {
+      "tool": "lib/trading_calendar.py (READ, imported by the battery, never edited)",
+      "invocation": "from lib.trading_calendar import is_trading_day ; is_trading_day(date(2026, 9, d)) for d in 1..9",
+      "result": "09-01..09-04 True, 09-05 False, 09-06 False, 09-07 False, 09-08 True, 09-09 True -- 3 non-trading days of 9, which is the count the verdict's A=3 is checked against."
+    },
+    {
+      "tool": ".tools/aws (CLI shim) -- s3api / logs",
+      "invocation": "s3api list-objects-v2 on platinum/reports/2026-09/ and daily/<partner>/ ; s3api head-object and get-object on the verdict and the inflection slices ; logs filter-log-events on both producer log groups over fixed ms bounds",
+      "result": "All rc=0. 0 of 62 (cottonwood) and 0 of 89 (49financial) daily keys name 2026-09-07; 1 of 122 for inflection; 14 and 11 producer log lines scanned with 0 naming the date and 0 containing 'wrote'. INSTRUMENT NOTE: head-object renders LastModified RFC-1123, list-objects-v2 renders ISO-8601; both UTC, and the battery now parses either by shape."
+    }
+  ]
+}
