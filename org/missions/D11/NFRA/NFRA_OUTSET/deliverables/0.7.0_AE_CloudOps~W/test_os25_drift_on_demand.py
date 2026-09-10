@@ -39,10 +39,17 @@ EXPECTED_PUBLISHER = ("arn:aws:sts::313476888478:assumed-role/"
 # 11:30Z scheduled fire replaces the key's latest version.
 RERUN_START = "2026-09-09T23:58:07Z"
 RERUN_VERSION = "3AE8of7Q44VkfbsNNpwWD0EH8lqPj.Sn"
+RERUN_PRODUCED = "2026-09-09T23:58:09Z"      # the producer's own answer instant, as the consumer cites it
 
-# ARM (e): OS-s-24's manual served day. Filled from that order's own read, never re-derived here.
-OS24_REPORT_KEY = "daily/2026/09/10/estate-report-2026-09-10.json"
-OS24_REPORT_VERSION = os.environ.get("OS24_REPORT_VERSION", "")
+# ARM (e): OS-s-24's manual served day, RE-POINTED @584003bcae on the CTO's ruling 94820.
+#
+# The 00:29:57Z run IS the manual served day, and its OWN VERSION of the 09-09 key is the
+# acceptance artifact -- not `latest`, which is the restored pin from the 13:00Z schedule nine
+# hours earlier. Reading latest here would grade a different run and would still look like a
+# clean read, which is the whole reason the VersionId is pinned in the face rather than implied.
+OS24_REPORT_KEY = "daily/2026/09/09/estate-report-2026-09-09.json"
+OS24_REPORT_VERSION = os.environ.get("OS24_REPORT_VERSION",
+                                     "F3CLuHhwgcRKo7OdbCdLbexIO6BUo3Mw")
 
 # ARM (a): THE NEVER-FIRED CONFIGURATION READ. Captured at ~2026-09-09T22:54:2xZ, BEFORE the first
 # on-demand run. It is EVIDENCE OF RECORD and is deliberately not re-derived: once a task has fired,
@@ -391,42 +398,48 @@ def arm_e(s3):
     body = s3.get_object(Bucket=BUCKET, Key=OS24_REPORT_KEY,
                          VersionId=OS24_REPORT_VERSION)["Body"].read()
     rep = json.loads(body.decode("utf-8"))
-    blob = json.dumps(rep)
-    devices = {}
-    for stage in rep.get("stages", []):
-        for k, v in (stage.items() if isinstance(stage, dict) else []):
-            if k == "devices" and isinstance(v, dict):
-                devices.update(v)
-    if not devices:
-        # fall back to a scan: the composition may sit deeper in the bundle
-        def walk(node):
-            if isinstance(node, dict):
-                if "device" in node and ("state" in node or "answer_state" in node):
-                    devices[str(node.get("device"))] = node
-                for vv in node.values():
-                    walk(vv)
-            elif isinstance(node, list):
-                for vv in node:
-                    walk(vv)
-        walk(rep)
-    print("      DENOMINATOR: %d device row(s) found in the served report" % len(devices))
-    for name, row in sorted(devices.items()):
-        print("        %-14s %s" % (name, json.dumps(row)[:160]))
-    if "laptop" not in devices:
-        fail("e", "the served report names no `laptop` device row")
+    ai = rep.get("ai") or {}
+    print("      run_bundle.trigger : %r  run_id %r"
+          % ((rep.get("run_bundle") or {}).get("trigger"),
+             (rep.get("run_bundle") or {}).get("run_id")))
+
+    # The per-device composition travels in the AI proposals' tool_row_cited, one line per device.
+    cited = [p.get("tool_row_cited") or "" for p in (ai.get("proposals") or [])]
+    rows = [c for c in cited if c.startswith("A_propagation")]
+    print("      DENOMINATOR: %d A_propagation citation(s) in the served report" % len(rows))
+    if not rows:
+        fail("e", "the served report carries no A_propagation composition")
+        return
+    comp = rows[0]
+    segs = [s.strip() for s in comp.split(" | ") if s.strip()]
+    print("      DENOMINATOR: %d device segment(s)" % len(segs))
+    for s in segs:
+        print("        %s" % s[:150])
+
+    a_status = ((ai.get("groups") or {}).get("A") or {}).get("stratum_status")
+    print("      group A stratum_status: %r" % a_status)
+    if a_status != "OK":
+        fail("e", "group A is %r, so the consumer's read is not a clean positive" % a_status)
+
+    # THE POSITIVE HALF: laptop reads with THIS run's vintage, not yesterday's hand publish.
+    if "laptop" in comp and RERUN_PRODUCED in comp:
+        ok("laptop reads with THIS vintage (%s) -- the re-run's own artifact" % RERUN_PRODUCED)
     else:
-        ok("laptop is present by name in the served group A composition")
-    silent = [n for n, r in devices.items()
-              if n != "laptop" and ("SILENT" in json.dumps(r).upper()
-                                    or "INSTRUMENT_FAILED" in json.dumps(r).upper())]
+        fail("e", "laptop does not read with this run's vintage %s" % RERUN_PRODUCED)
+
+    # THE NEGATIVE HALF, and it must be a DIFFERENT device: a rostered device with no publish
+    # inside the ceiling reads UNREAD/SILENT while laptop reads. Without it, a green here would
+    # not discriminate -- every device could be rendering from one stale blob and look identical.
+    others = [s for s in segs if not s.startswith("A_propagation@laptop")]
+    silent = [s for s in others if "UNREAD" in s.upper() or "SILENT" in s.upper()
+              or "INSTRUMENT_FAILED" in s.upper()]
     if silent:
-        ok("NEGATIVE ARM: %d non-reporting device(s) read SILENT/INSTRUMENT_FAILED: %s"
-           % (len(silent), silent))
+        ok("NEGATIVE ARM fires on %d of %d other rostered device(s): %s"
+           % (len(silent), len(others), silent[0][:90]))
     else:
-        fail("e", "no device reads SILENT/INSTRUMENT_FAILED -- the negative arm did not fire, so a "
-                  "green here would not discriminate")
-    if "laptop" in blob:
-        ok("the served report carries the laptop reading")
+        fail("e", "no other rostered device reads UNREAD/SILENT -- the negative arm did not fire")
+    print("      CITED BY KEY + VersionId, never re-derived: %s @%s"
+          % (OS24_REPORT_KEY, OS24_REPORT_VERSION))
 
 
 def main():

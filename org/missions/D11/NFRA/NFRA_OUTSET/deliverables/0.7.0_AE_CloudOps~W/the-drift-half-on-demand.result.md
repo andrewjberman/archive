@@ -3,8 +3,10 @@
 **Seat:** `0.7.0_AE_CloudOps~W` · **Order:** `NFRA_OUTSET.TO-OS-s-25`, amended @`a6be2b52dd`,
 mechanism addendum @`77858dc2f8` · **Written:** 2026-09-10T00:45Z
 
-**STATUS: O25-AC1 passes arms (a)-(d2); arm (e) reads OS-s-24's manual served day and is
-outstanding at this writing.** The complete flip follows that read, as the face requires.
+**STATUS: O25-AC1 PASSES. rc=0, stdout ends `OS25-DRIFT-ON-DEMAND`, all six arms evaluated and
+passed.** Arm (e) was unblocked by the OS-s-24 re-cut @`584003bcae` on the CTO's ruling 94820: the
+00:29:57Z run IS the manual served day, and its own version of the 09-09 key is the acceptance
+artifact.
 
 ---
 
@@ -109,10 +111,43 @@ absence-handling is "record NOT-YET and re-read" would record NOT-YET forever, a
 every later seat as "coming" -- the more expensive of the two wrong answers. The battery re-reads
 coverage LIVE, so if a selector is ever added the arm FAILS rather than keeping a stale line.
 
-### (e) The negative arm from OS-s-24's manual served day. OUTSTANDING
+### (e) The negative arm from OS-s-24's manual served day. PASS
 
-Read FROM OS-s-24's report and cited by key + VersionId, never re-derived here. OS-s-24's run was
-invoked 2026-09-10T00:29:57Z and the report had not landed at this writing.
+Read FROM OS-s-24's report, cited by key + VersionId, never re-derived:
+`daily/2026/09/09/estate-report-2026-09-09.json` @ VersionId `F3CLuHhwgcRKo7OdbCdLbexIO6BUo3Mw`.
+
+⛔ **THE VersionId IS THE WHOLE POINT AND `latest` WOULD HAVE BEEN A CLEAN WRONG READ.** That key's
+`latest` is the restored 15:32:41Z pin, written by the SCHEDULE nine hours before this run. Reading
+it would have returned a well-formed report with a laptop row in it and graded a different run
+entirely. The report carries `run_bundle.trigger` `manual` and `run_id`
+`a588a7ea-8ad2-4f03-a814-4f02668a66d6`, which is how the right version is known to be the right one.
+
+The consumer's per-device composition, 3 device segments over a declared roster:
+
+```
+A_propagation@laptop: comp-heat drift produced 2026-09-09T23:58:09Z (tool vintage: none reported), age 0.6 h
+site-z: UNREAD (s3://opal-estate-report/outset/site-z/comp_heat_drift.json)
+_os22_probe_device: comp-heat drift (OS-s-22 PROBE FIXTURE) produced 2026-09-09T15:55:15Z (tool vintage: none reported), age 8.6 h
+```
+
+`ai.groups.A.stratum_status` = **OK**.
+
+- **POSITIVE half:** `laptop` reads with **THIS run's** vintage, 2026-09-09T23:58:09Z at age 0.6 h.
+  Not the 15:55Z hand publish, not the 22:54Z first run.
+- **NEGATIVE half, and it must be a DIFFERENT device or the green means nothing:** `site-z` reads
+  UNREAD. 1 of the 2 other rostered devices. Without it every device could be rendering from one
+  blob and look identical.
+
+The three devices sit in three different states and are **never summed**, which is the S23 ruling
+working as intended.
+
+⛔ **A FINDING INSIDE THIS PASS, filed as `NFRA_OUTSET-S36`:** site-z reads UNREAD because the
+consumer got **AccessDenied**, not NoSuchKey, on a key that has simply never been published. The
+runner role's only `ListBucket` statement is conditioned to `daily/*`, `manifest/*`, `code/*`, so
+`outset/` is excluded and S3 masks a missing key as a permission failure. Group A survives it
+because a failed read is SILENT **per device**; group B does not, because its source list is a
+precedence chain that only ABSENCE advances. That is why group B is INSTRUMENT_FAILED on this same
+report while group A is OK.
 
 ---
 
