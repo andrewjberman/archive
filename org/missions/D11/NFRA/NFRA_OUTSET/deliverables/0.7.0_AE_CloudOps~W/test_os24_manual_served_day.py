@@ -221,15 +221,33 @@ def arm_b(s3, cb, bundle):
         return
     st = iso(started)
     print("      DENOMINATOR: %d seam key(s)" % len(SEAM_KEYS))
+    # ⛔ THIS ARM READ `latest` UNTIL 2026-09-10T14:2xZ AND THAT WAS A DEFECT IN THIS BATTERY,
+    # not in the world. `head_object` with no VersionId answers about the key AS IT IS NOW, and
+    # both seam keys were re-published by the 12:30Z scheduled build hours after the run being
+    # graded. So the arm compared TODAY'S vintage against a run that started at 00:30:30Z and
+    # reported a failure that says nothing about that run. It PASSED on the day it was written
+    # and became wrong later without anything changing in the subject -- the time-bomb form of
+    # the same `latest`-versus-VersionId trap this project has now met four times.
+    #
+    # THE FIX IS NOT A PINNED LITERAL. The arm selects, per key, the LATEST VERSION WHOSE
+    # LastModified PRECEDES THE RUN START -- which IS, by construction, the version that run
+    # read. That stays correct for every future re-run and needs no maintenance.
     for k in SEAM_KEYS:
-        h = s3.head_object(Bucket=BUCKET, Key=k)
-        lm = h["LastModified"].astimezone(timezone.utc)
-        good = lm < st
-        print("        %-42s %s  %s" % (k, lm.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                        "precedes" if good else "DOES NOT PRECEDE"))
-        if not good:
-            fail("b", "%s vintage %s does not precede the run start %s"
-                 % (k, lm.strftime("%Y-%m-%dT%H:%M:%SZ"), started))
+        vs = s3.list_object_versions(Bucket=BUCKET, Prefix=k).get("Versions", [])
+        vs = [v for v in vs if v["Key"] == k]
+        eligible = [v for v in vs
+                    if v["LastModified"].astimezone(timezone.utc) < st]
+        print("        %-42s %d version(s), %d predating the run start"
+              % (k, len(vs), len(eligible)))
+        if not eligible:
+            fail("b", "%s has NO version predating the run start %s -- the run cannot have read "
+                      "this key" % (k, started))
+            continue
+        v = max(eligible, key=lambda x: x["LastModified"])
+        lm = v["LastModified"].astimezone(timezone.utc)
+        print("          the version THIS RUN read: %s  %s  %d B  (latest is a LATER publish and "
+              "is deliberately not read)" % (v["VersionId"][:20] + "..",
+                                             lm.strftime("%Y-%m-%dT%H:%M:%SZ"), v["Size"]))
     if not [f for f in FAILS if f.startswith("b:")]:
         ok("all %d seam artifacts predate the run start" % len(SEAM_KEYS))
 
@@ -257,16 +275,40 @@ def arm_c(s3, bundle):
     else:
         fail("c", "trigger is %r, expected %r" % (trig, EXPECTED_TRIGGER))
 
-    # The run_id is read from the LIVE token, never from a constant: the rule's own fire writes a
-    # fresh one, and a hardcoded id would silently grade the wrong run.
-    tok = json.loads(s3.get_object(Bucket=BUCKET, Key=TOKEN_KEY)["Body"].read().decode("utf-8"))
-    print("      token trigger      : %r" % tok.get("trigger"))
-    print("      token run_id       : %r" % tok.get("run_id"))
-    print("      token invoked_at   : %r" % tok.get("invoked_at"))
+    # ⛔ THIS ARM READ THE TOKEN KEY AT `latest` UNTIL 2026-09-10T14:2xZ, AND THAT WAS A DEFECT IN
+    # THIS BATTERY. The token key is OVERWRITTEN BY EVERY INVOKE. When this was written the manual
+    # invoke's token WAS latest, so it passed; the 13:00Z scheduled fire then replaced it, and the
+    # arm began comparing THIS run's report against a LATER run's token -- a failure that says
+    # nothing about the run being graded. Same class as arm (b)'s, and the same lesson: an arm
+    # that reads a mutable key at `latest` is correct only on the day it is written.
+    #
+    # THE FIX SEARCHES RATHER THAN PINS: every version of the token key is read and the one whose
+    # run_id EQUALS this report's run_id is selected. That identifies the token by the CARRIER
+    # rather than by recency or by a hardcoded VersionId, so it stays correct for every future
+    # invoke and cannot silently grade the wrong one.
+    vs = [v for v in s3.list_object_versions(Bucket=BUCKET, Prefix=TOKEN_KEY).get("Versions", [])
+          if v["Key"] == TOKEN_KEY]
+    print("      DENOMINATOR: %d version(s) of %s" % (len(vs), TOKEN_KEY))
+    tok, tok_vid = None, None
+    for v in sorted(vs, key=lambda x: x["LastModified"], reverse=True):
+        cand = json.loads(s3.get_object(Bucket=BUCKET, Key=TOKEN_KEY,
+                                        VersionId=v["VersionId"])["Body"].read().decode("utf-8"))
+        mark = "  <- THIS RUN'S" if cand.get("run_id") == rid else ""
+        print("        %s  invoked_at %s  trigger %-9s run_id %s%s"
+              % (v["VersionId"][:20] + "..", cand.get("invoked_at"), cand.get("trigger"),
+                 cand.get("run_id"), mark))
+        if cand.get("run_id") == rid:
+            tok, tok_vid = cand, v["VersionId"]
+    if tok is None:
+        fail("c", "no version of the token key carries this report's run_id %r -- the carrier "
+                  "does not connect this run to any recorded invoke" % rid)
+        return
+    print("      selected token version: %s" % tok_vid)
     if rid and rid == tok.get("run_id"):
-        ok("run_id is byte-equal to the token OS-s-26 wrote for this fire (%s)" % rid)
+        ok("run_id is byte-equal to the token OS-s-26 wrote FOR THIS INVOKE (%s), identified by "
+           "the carrier rather than by recency" % rid)
     else:
-        fail("c", "run_id %r does not match the live token's %r" % (rid, tok.get("run_id")))
+        fail("c", "run_id %r does not match the selected token's %r" % (rid, tok.get("run_id")))
     if trig == tok.get("trigger") == EXPECTED_TRIGGER:
         ok("both ends of the carrier agree, so the provenance is not a clock inference")
 
@@ -344,27 +386,57 @@ def arm_d(s3, report):
     b = groups.get("B") or {}
     print("      B stratum_status : %s  (unmeasured=%s)"
           % (b.get("stratum_status"), b.get("unmeasured")))
-    art = json.loads(s3.get_object(Bucket=BUCKET,
-                                   Key="outset/comp_fedobs_coevolution.json")["Body"].read()
-                     .decode("utf-8"))
+    # ⛔ THE INDEPENDENT READ IS OF THE VERSION *THIS RUN* WOULD HAVE READ, not of `latest`.
+    # Until 2026-09-10T14:3xZ this read `latest` and printed today's 12:31:13Z publish beside a
+    # run that started at 00:30:30Z -- a wrong-vintage citation inside a failure message, which is
+    # the same defect arms (b) and (c) carried. The comparison it feeds is "does the report's row
+    # count equal an independent count of the artifact", and the only artifact that question can
+    # mean is the one the run could actually have opened.
+    fed_key = "outset/comp_fedobs_coevolution.json"
+    # The run start comes from the report being graded, not from a module-level constant, so this
+    # arm cannot drift out of agreement with the run it is reading.
+    run_start = iso(str((report.get("run_bundle") or {}).get("started_at")))
+    fvs = [v for v in s3.list_object_versions(Bucket=BUCKET, Prefix=fed_key).get("Versions", [])
+           if v["Key"] == fed_key and v["LastModified"].astimezone(timezone.utc) < run_start]
+    if not fvs:
+        fail("d", "%s has no version predating the run start; the independent count has no "
+                  "subject" % fed_key)
+        return
+    fv = max(fvs, key=lambda x: x["LastModified"])
+    art = json.loads(s3.get_object(Bucket=BUCKET, Key=fed_key,
+                                   VersionId=fv["VersionId"])["Body"].read().decode("utf-8"))
     indep = len(art.get("rows") or [])
     grain = ((art.get("denominators") or {}).get("grain"))
-    print("      INDEPENDENT read of the seam artifact: answer_state=%s rows=%d grain=%r vintage=%s"
+    print("      INDEPENDENT read of the version THIS RUN would have read (%s.., %s):"
+          % (fv["VersionId"][:20], fv["LastModified"].astimezone(timezone.utc)
+             .strftime("%Y-%m-%dT%H:%M:%SZ")))
+    print("        answer_state=%s rows=%d grain=%r vintage=%s"
           % (art.get("answer_state"), indep,
              str(grain)[:60], (art.get("vintage") or {}).get("answer_produced_utc")))
     if b.get("stratum_status") == "OK":
         ok("group B renders from its seam artifact")
     else:
-        # ⛔ NAME THE CAUSE. A bare "group B failed" sends the next reader to the producer, which is
-        # healthy. Row NFRA_OUTSET-S36: outset/comp_cochange.json has no producer, and because the
-        # runner role's ListBucket is conditioned to daily/manifest/code (outset/ excluded), S3
-        # answers a missing key with 403 AccessDenied instead of 404 NoSuchKey. _outset_read then
-        # sets absent=False, and "only ABSENCE advances the search" never fires -- so the healthy
-        # second source is unreachable on every run.
-        fail("d", "group B is %r -- the artifact is HEALTHY (answer_state %s, %d rows, produced "
-                  "%s), so this is the CONSUMER's search terminating on source 1. Row "
-                  "NFRA_OUTSET-S36: comp_cochange.json returns AccessDenied not NoSuchKey because "
-                  "ListBucket excludes outset/, so absent=False and the search never advances."
+        # ⛔ NAME THE CAUSE, AND KEEP IT CURRENT. A bare "group B failed" sends the next reader to
+        # the producer, which is healthy.
+        #
+        # UPDATED 2026-09-10T14:3xZ: THE DEFECT IS FIXED AND THIS DAY STILL CANNOT PASS, and those
+        # are two different facts that the earlier wording ran together. Row NFRA_OUTSET-S36's
+        # mechanism was that outset/ sat outside the runner role's ListBucket Condition, so S3
+        # answered a missing comp_cochange.json with 403 rather than 404, absent stayed False, and
+        # "only ABSENCE advances the search" never fired. THAT GRANT LANDED @a9972bf008 and is now
+        # EXERCISED: on the 2026-09-10 13:00Z scheduled run group B reads OK from source 2.
+        #
+        # But THIS run is the 00:29:57Z MANUAL SERVED DAY, produced BEFORE the grant, and its
+        # artifact is IMMUTABLE. So this arm can never pass on the day the face points it at -- not
+        # because the work is unfinished but because the fix postdates the evidence. That is an
+        # ISSUER question (re-point the arm to the run where the fix is exercised, or record the
+        # FAIL with its cause), and the battery states it rather than resolving it.
+        fail("d", "group B is %r on the MANUAL SERVED DAY -- the artifact is HEALTHY (answer_state "
+                  "%s, %d rows, produced %s), so this is the CONSUMER's search terminating on "
+                  "source 1 under row NFRA_OUTSET-S36. THE S36 GRANT IS NOW APPLIED AND EXERCISED "
+                  "(@a9972bf008; group B reads OK on the 2026-09-10 13:00Z run), but THIS run "
+                  "predates it and its artifact is immutable, so this arm CANNOT pass on the day "
+                  "the face names. Pitched to the issuer; not resolved here."
              % (b.get("stratum_status"), art.get("answer_state"), indep,
                 (art.get("vintage") or {}).get("answer_produced_utc")))
 
