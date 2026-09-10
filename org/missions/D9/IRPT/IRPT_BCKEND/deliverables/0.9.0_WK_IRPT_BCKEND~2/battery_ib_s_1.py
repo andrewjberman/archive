@@ -18,7 +18,6 @@ from __future__ import annotations
 import argparse
 import ast
 import datetime as dt
-import hashlib
 import json
 import socket
 import subprocess
@@ -43,6 +42,7 @@ ARTIFACT_BUCKET = "opal-313476888478-lambda-artifacts"
 ARTIFACT_KEY = "investor-reporting/irpt-directory-search.zip"
 LEDGER_SLUG = "irpt-bckend-s1"
 SENTINEL = _REPO / "org" / "critical_paths" / ".open_deploys" / (LEDGER_SLUG + ".json")
+LEDGER_DIR = _REPO / "org" / "critical_paths" / "change_management"
 
 RESULTS: "list[tuple[str, str, str]]" = []   # (arm, verdict, deciding line)
 
@@ -471,42 +471,88 @@ def arm_f(state: dict) -> None:
         lines.append("no QA objects landed (--skip-land)")
 
     # --- served bytes: CodeSha256 == sha256 of the BUILT zip, never a filename ---
-    zip_path = state.get("zip_path")
+    # The BUILT side is read from the ARTIFACT'S OWN `content-sha256` metadata, which
+    # build-and-upload.sh computed over the zip it wrote and then verified with its own
+    # head-object. Reading it here rather than from a value this battery was handed keeps the
+    # two sides of the comparison on DIFFERENT objects (the served function vs the stored
+    # artifact); a sha carried in a state file would be the producer's self-report.
+    rc_a, out_a = _aws(["s3api", "head-object", "--bucket", ARTIFACT_BUCKET,
+                        "--key", ARTIFACT_KEY, "--output", "json"])
+    built_sha = None
+    artifact_size = None
+    try:
+        meta = json.loads(out_a)
+        built_sha = meta.get("Metadata", {}).get("content-sha256")
+        artifact_size = meta.get("ContentLength")
+    except Exception:
+        pass
+    print("  head-object s3://{}/{} rc={} ContentLength={} content-sha256={}".format(
+        ARTIFACT_BUCKET, ARTIFACT_KEY, rc_a, artifact_size, built_sha))
+
     rc, out = _aws(["lambda", "get-function-configuration", "--function-name", FUNCTION_NAME,
                     "--query", "CodeSha256", "--output", "text"])
     served = out.strip()
     print("  get-function-configuration {} CodeSha256 rc={} -> {}".format(
         FUNCTION_NAME, rc, served))
-    built_sha = state.get("built_sha")
-    if zip_path and Path(zip_path).is_file():
-        import base64
-        built_sha = base64.b64encode(
-            hashlib.sha256(Path(zip_path).read_bytes()).digest()).decode()
-    print("  built zip sha256 (base64) -> {}".format(built_sha))
-    if rc != 0 or not served or served != built_sha:
+    if rc != 0 or rc_a != 0 or not served or not built_sha or served != built_sha:
         ok = False
-        lines.append("CodeSha256 {} != built zip sha {}".format(served, built_sha))
+        lines.append("CodeSha256 {} != built artifact content-sha256 {}".format(
+            served, built_sha))
     else:
-        lines.append("CodeSha256 == built zip sha256 ({})".format(served))
+        lines.append("CodeSha256 == built artifact content-sha256 ({})".format(served))
 
-    # --- the ledger: CLOSED, and the sentinel committed ---
-    if SENTINEL.is_file():
-        entry = json.loads(SENTINEL.read_text(encoding="utf-8"))
-        status = entry.get("status")
-        print("  sentinel {} status={}".format(SENTINEL.name, status))
-        p = subprocess.run(["git", "log", "-1", "--format=%H", "--",
-                            str(SENTINEL.relative_to(_REPO)).replace("\\", "/")],
-                           cwd=str(_REPO), capture_output=True, text=True, timeout=60)
-        commit = p.stdout.strip()
-        print("  sentinel committed at {}".format(commit or "NOT COMMITTED"))
-        if status not in ("closed", "CLOSED", "complete") or not commit:
-            ok = False
-            lines.append("ledger status {} / sentinel commit {}".format(status, commit))
-        else:
-            lines.append("ledger CLOSED, sentinel committed {}".format(commit[:10]))
-    else:
+    # NEGATIVE CONTROL on the comparison: it must be able to DISAGREE.
+    bogus = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+    print("  NEGATIVE CONTROL: served == a bogus sha? {} (must be False, else the "
+          "comparison is a constant)".format(served == bogus))
+    if served == bogus:
         ok = False
-        lines.append("sentinel {} ABSENT".format(SENTINEL))
+
+    # --- the ledger: CLOSED, committed, and clean under the estate's OWN checker ---
+    # THE SENTINEL IS ABSENT AT CLOSE BY THE TOOL'S CONTRACT, not by an omission:
+    # `deploy_ledger.py close` REMOVES org/critical_paths/.open_deploys/<slug>.json as the
+    # act of closing (its own close line says "sentinel removed"). So a file-existence test
+    # on the sentinel can only pass for an entry that is still OPEN -- i.e. exactly the state
+    # this arm exists to rule out. The graded object is therefore the ENTRY, read three ways:
+    # its Status line, its commit, and `deploy_ledger.py check`, which is the instrument the
+    # estate itself runs and which ALSO sweeps for the false-clean bypass class.
+    entries = sorted(LEDGER_DIR.glob("*_" + LEDGER_SLUG + "_deploy_completion.md"))
+    print("  ledger entries matching {}: {} of {} files in change_management/".format(
+        LEDGER_SLUG, len(entries), len(list(LEDGER_DIR.glob("*.md")))))
+    if len(entries) != 1:
+        ok = False
+        lines.append("expected exactly 1 ledger entry, found {}".format(len(entries)))
+    else:
+        entry = entries[0]
+        text = entry.read_text(encoding="utf-8", errors="replace")
+        status_line = next((ln for ln in text.splitlines()
+                            if ln.startswith("**Status:**")), "")
+        legs_closed = text.count("| CLOSED ")
+        print("  {}".format(status_line.strip()))
+        print("  legs CLOSED: {} of 5".format(legs_closed))
+        rel = str(entry.relative_to(_REPO)).replace("\\", "/")
+        gp = subprocess.run(["git", "log", "-1", "--format=%H", "--", rel],
+                            cwd=str(_REPO), capture_output=True, text=True, timeout=60)
+        commit = gp.stdout.strip()
+        print("  ledger entry committed at {}".format(commit or "NOT COMMITTED"))
+        print("  sentinel {}: {} -- ABSENT BY CONTRACT at close "
+              "(deploy_ledger.py close removes it)".format(
+                  SENTINEL.name, "present" if SENTINEL.is_file() else "absent"))
+        cp = subprocess.run([sys.executable, str(_REPO / ".tools" / "deploy_ledger.py"),
+                             "check"], cwd=str(_REPO), capture_output=True, text=True,
+                            timeout=120)
+        chk = (cp.stdout + cp.stderr).strip().splitlines()
+        print("  deploy_ledger.py check rc={} -> {}".format(
+            cp.returncode, chk[-1] if chk else "(no output)"))
+        bypass = any("BYPASS" in ln for ln in chk)
+        if ("CLOSED" not in status_line or legs_closed != 5 or not commit
+                or SENTINEL.is_file() or bypass):
+            ok = False
+            lines.append("ledger status/legs/commit/sentinel: {} / {} of 5 / {} / {}".format(
+                status_line.strip(), legs_closed, commit, SENTINEL.is_file()))
+        else:
+            lines.append("ledger CLOSED with 5 of 5 legs proven, committed {}, sentinel "
+                         "removed by the close, no BYPASS".format(commit[:10]))
 
     blocked = state.get("safe_deploy_refusal")
     if blocked:
