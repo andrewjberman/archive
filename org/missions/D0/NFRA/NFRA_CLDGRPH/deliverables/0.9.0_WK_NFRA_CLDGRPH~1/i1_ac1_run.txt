@@ -1,0 +1,171 @@
+==============================================================================
+i1_settle.py -- CG-s-41 / I1-AC1 -- SETTLE THE INFERRED LINK
+==============================================================================
+TREE_READ cwd              = C:\tmp\wk-cldgrph-9-1
+TREE_READ repo_toplevel    = C:/tmp/wk-cldgrph-9-1
+TREE_READ branch           = wk-cldgrph-9-1
+TREE_READ head             = 0596d4fc9846234d693b2e405e00bb6f69f001a9
+ENVIRONMENT of the baseline: NONE STORED. This script carries no stored
+  baseline at all; every number below is read LIVE in this run from AWS
+  us-east-1 account 313476888478, at the vintage the marker names.
+HARNESS GRAIN: the ROW in globgrph.graph_nodes -- not a served projection
+  of it, not a count of it, the rows themselves.
+
+-- ARM A: WAREHOUSE PLANE (pyiceberg StaticTable over S3 data files) --
+MARKER  s3://opal-313476888478-globgrph/warehouse/_branch_head.main.json
+  writer_id        = incremental_updater
+  committed_at_iso = 2026-09-10T12:24:50.576632+00:00   <- THE VINTAGE OF EVERY ARM-A NUMBER
+  nessie_commit    = b469f536ff01d8b17b08da29d2d0e40ac0f77d4afad9355bdac68ecc59eb263f
+  graph_nodes.snapshot_id     = 8962011897599565293
+  graph_nodes.last_write_iso  = 2026-09-10T12:24:50.454000+00:00
+  metadata_location = s3://opal-313476888478-globgrph/warehouse/globgrph/graph_nodes_4c6c23bd-fffa-427e-9cd9-7a9deaa3426d/metadata/00000-ca35ead7-f467-468c-8c4f-68146af9a651.metadata.json
+  pyiceberg 0.9.1 loaded the table; current_snapshot_id = 8962011897599565293
+  SNAPSHOT_AGREES_WITH_MARKER = true  (the table I read IS the one the writer stamped)
+
+DENOMINATOR: 27685 rows scanned in globgrph.graph_nodes -- the WHOLE table.
+  EXCLUDED FROM THIS DENOMINATOR: nothing. No filter, no pushdown, no
+  limit, no partition scope. 6 of the table's 9 columns were projected
+  (props and layer and drift_class are not read); every ROW is present.
+  S3_BUCKET rows        = 34
+  S3_BUCKET_POLICY rows = 12
+  rows with source='incremental' (the Lambda's own mark) = 3
+
+THE KEY SHAPE OF EACH CLASS, read off the rows (not off the docstring):
+  S3_BUCKET        : arn column is a FULL s3 ARN in 34 of 34; node_id is the BARE NAME in 34 of 34
+  S3_BUCKET_POLICY : arn column CARRIES THE BARE BUCKET NAME and equals node_id in 12 of 12
+  -> the two classes therefore contend for ONE string in ONE column
+     (node_id), and the policy also puts that string in `arn`.
+
+EVERY row with source='incremental' (the whole set, no head, no sample):
+  node_id='opal-data-bd'                     type=S3_BUCKET        arn='arn:aws:s3:::opal-data-bd'              snapshot_ts=1789019823779
+  node_id='opal-data-cot'                    type=S3_BUCKET        arn='arn:aws:s3:::opal-data-cot'             snapshot_ts=1789040311968
+  node_id='opal-data-inf'                    type=S3_BUCKET        arn='arn:aws:s3:::opal-data-inf'             snapshot_ts=1789043088093
+
+-- ARM B: AWS CONTROL PLANE (s3 get-bucket-policy, boto3, us-east-1) --
+WHY THIS ARM EXISTS: a bucket with no policy ROW may simply have no
+  policy. Only a LIVE policy with NO row is a destroyed row. This arm is
+  a different plane, a different service and a different instrument from
+  arm A -- confirming arm A with arm A would be repetition, not
+  corroboration.
+DENOMINATOR: 34 of 34 S3_BUCKET node_ids probed on the live control plane -- ALL of them, none excluded.
+  live policy PRESENT=15  ABSENT=19  UNREADABLE=0
+  DISCRIMINATION CONTROL: the probe returned BOTH values over this
+  population, so it is not a constant -- a PRESENT is informative.
+
+THE CROSS-TAB (live policy) x (policy ROW) x (touched by the Lambda),
+over all 34 buckets -- every cell, nothing suppressed:
+  live=ABSENT    row=NOROW lambda=UNTOUCHED  n=19
+        opal-313476888478-globgrph
+        opal-313476888478-lambda-layers
+        opal-313476888478-terraform-state
+        opal-313476888478-yang-qa-scratch
+        opal-data-astn
+        opal-data-etfs
+        opal-data-imo
+        opal-data-mdpf
+        opal-data-news-av
+        opal-data-news-v2
+        opal-data-pm
+        opal-data-portfolio
+        opal-data-trade-submissions
+        opal-estate-report
+        opal-infrastructure-snapshots
+        opal-mcp-athena-results
+        opal-mcp-audit
+        opal-runner-shared
+        opal-website-backups
+  live=PRESENT   row=NOROW lambda=INCR       n=3
+        opal-data-bd
+        opal-data-cot
+        opal-data-inf
+  live=PRESENT   row=ROW   lambda=UNTOUCHED  n=12
+        opal-313476888478-lambda-artifacts
+        opal-cloudtrail-logs-313476888478
+        opal-cur-313476888478
+        opal-data-49financial
+        opal-data-assets
+        opal-data-demo
+        opal-data-portal-v2
+        opal-data-security
+        opal-data-security-access-logs
+        opal-security-evidence
+        opal-served-key-write-trail-logs
+        opalinvest-portal
+
+  DESTROYED CELL (live policy PRESENT, policy ROW absent, bucket TOUCHED
+  by the incremental updater): n=3 -> ['opal-data-bd', 'opal-data-cot', 'opal-data-inf']
+  THE FALSIFIER FOR THE ATTRIBUTION (live policy PRESENT, row absent,
+  bucket NOT touched by the Lambda): n=0 -> []
+  A non-empty falsifier cell would mean something OTHER than the Lambda
+  also removes policy rows, and the attribution would not hold.
+
+-- ARM C: FILTER REPLAY (the writer's own predicate over arm A's rows) --
+SOURCE OF THE PREDICATE, quoted from the file this cell fixes:
+  lambda_function.py:436  up_arns = [(n.get('arn') or n.get('id')) for n in nodes]
+  lambda_function.py:437  up_ids  = [n.get('id','') for n in nodes]
+  lambda_function.py:443  combined_filter = _match_filter(up_arns+del_arns, up_ids+del_ids)
+  lambda_function.py:399-404  In('arn', arns)  OR  In('node_id', ids)
+  lambda_function.py:501  table.overwrite(pa_table, overwrite_filter=combined_filter)
+  pyiceberg overwrite = DELETE every row matching the filter, THEN append
+  the upsert rows. So every row the filter matches and the batch does not
+  re-append is DESTROYED.
+
+REPLAY POPULATION: all 27685 rows. For each of the 34 S3_BUCKET node_ids in
+  the table, the batch-of-one filter the Lambda WOULD build on its next
+  CloudTrail event for that bucket is evaluated against every row.
+
+  DENOMINATOR: 34 of 34 buckets replayed (all of them).
+  BUCKETS WHOSE NEXT UPSERT DESTROYS A FOREIGN-CLASS ROW: 12 of 34
+    upsert of S3_BUCKET 'opal-313476888478-lambda-artifacts' DESTROYS node_id='opal-313476888478-lambda-artifacts' node_type=S3_BUCKET_POLICY   matched_on=node_id
+    upsert of S3_BUCKET 'opal-cloudtrail-logs-313476888478' DESTROYS node_id='opal-cloudtrail-logs-313476888478' node_type=S3_BUCKET_POLICY   matched_on=node_id
+    upsert of S3_BUCKET 'opal-cur-313476888478'            DESTROYS node_id='opal-cur-313476888478'            node_type=S3_BUCKET_POLICY   matched_on=node_id
+    upsert of S3_BUCKET 'opal-data-49financial'            DESTROYS node_id='opal-data-49financial'            node_type=S3_BUCKET_POLICY   matched_on=node_id
+    upsert of S3_BUCKET 'opal-data-assets'                 DESTROYS node_id='opal-data-assets'                 node_type=S3_BUCKET_POLICY   matched_on=node_id
+    upsert of S3_BUCKET 'opal-data-demo'                   DESTROYS node_id='opal-data-demo'                   node_type=S3_BUCKET_POLICY   matched_on=node_id
+    upsert of S3_BUCKET 'opal-data-portal-v2'              DESTROYS node_id='opal-data-portal-v2'              node_type=S3_BUCKET_POLICY   matched_on=node_id
+    upsert of S3_BUCKET 'opal-data-security'               DESTROYS node_id='opal-data-security'               node_type=S3_BUCKET_POLICY   matched_on=node_id
+    upsert of S3_BUCKET 'opal-data-security-access-logs'   DESTROYS node_id='opal-data-security-access-logs'   node_type=S3_BUCKET_POLICY   matched_on=node_id
+    upsert of S3_BUCKET 'opal-security-evidence'           DESTROYS node_id='opal-security-evidence'           node_type=S3_BUCKET_POLICY   matched_on=node_id
+    upsert of S3_BUCKET 'opal-served-key-write-trail-logs' DESTROYS node_id='opal-served-key-write-trail-logs' node_type=S3_BUCKET_POLICY   matched_on=node_id
+    upsert of S3_BUCKET 'opalinvest-portal'                DESTROYS node_id='opalinvest-portal'                node_type=S3_BUCKET_POLICY   matched_on=node_id
+
+  THE REPLAY OVER EVERY CLASS THE UPDATER CAN EMIT -- I ran this because
+  my first negative control CHOSE LAMBDA as the uncontended class and the
+  instrument came back NON-ZERO. The control was right and my choice of
+  control was wrong, so here is the whole population instead of a pick:
+    (the 6 classes bounded_derive_node returns, lambda_function.py:265-327)
+    S3_BUCKET        rows=34    upserts that DESTROY a foreign-class row=12   destroyed classes=['S3_BUCKET_POLICY']
+    LAMBDA           rows=203   upserts that DESTROY a foreign-class row=16   destroyed classes=['EVENT_RULE', 'IAM_ROLE']
+    IAM_ROLE         rows=219   upserts that DESTROY a foreign-class row=9    destroyed classes=['CODEBUILD_PROJECT', 'LAMBDA']
+    DYNAMODB_TABLE   rows=37    upserts that DESTROY a foreign-class row=0    destroyed classes=NONE
+    SNS_TOPIC        rows=16    upserts that DESTROY a foreign-class row=0    destroyed classes=NONE
+    SQS_QUEUE        rows=19    upserts that DESTROY a foreign-class row=0    destroyed classes=NONE
+    NEGATIVE CONTROL=FIRED -- classes where the replay returns ZERO: DYNAMODB_TABLE, SNS_TOPIC, SQS_QUEUE.
+    The replay is therefore NOT a constant: it returns 0 on 3 of the 6 classes and non-zero on 3. It discriminates.
+
+  AND THE UNSCOPED READ, because a check scoped to S3_BUCKET cannot see a
+  defect in what the CLASSES SHARE (CLAUDE.md Rule 22). Over the WHOLE
+  table, which node_id strings does more than one node_type claim?
+    DENOMINATOR: 27632 distinct node_id strings over 27685 rows -- the whole table, nothing excluded.
+    node_id strings claimed by MORE THAN ONE node_type = 30
+      S3_BUCKET + S3_BUCKET_POLICY                   n=12  updater-reachable=YES
+      IAM_ROLE + LAMBDA                              n=8   updater-reachable=YES
+      EVENT_RULE + LAMBDA                            n=8   updater-reachable=YES
+      CODEBUILD_PROJECT + IAM_ROLE                   n=1   updater-reachable=YES
+      EVENT_RULE + SSM_DOCUMENT                      n=1   updater-reachable=no
+    -> THE COLLISION IS NOT ONE PAIR. The cell and derive_runner.py:2306-
+       2308 both say 'exactly one class' holds a short id as its key, and
+       that is TRUE OF THE CANONICAL KEY SPACE (arn-or-id). The DESTRUCTION
+       does not run in that space: _match_filter matches the RAW node_id
+       COLUMN, and in THAT space 5 pairs collide. Filed as a row.
+
+==============================================================================
+== SETTLE VERDICT (ordered for the accept) ==
+SETTLED=YES
+INSTRUMENT printed: pyiceberg 0.9.1 StaticTable.from_metadata over s3://opal-313476888478-globgrph/... (the metadata_location the WRITER itself stamped into warehouse/_branch_head.main.json), plus boto3 s3:GetBucketPolicy on the AWS control plane.
+INSTRUMENT COVERAGE printed: 27685 of 27685 rows of globgrph.graph_nodes (the entire table, no filter) at vintage 2026-09-10T12:24:50.576632+00:00; and 34 of 34 S3_BUCKET node_ids probed live. NOT COVERED: rows written after that vintage, and the graph_edges table (a different cell).
+DESTROYED_ROW_KEY printed: the S3_BUCKET_POLICY row whose node_id IS THE BARE BUCKET NAME. Concretely, for the 12 buckets still carrying a policy row today: opal-313476888478-lambda-artifacts, opal-cloudtrail-logs-313476888478, opal-cur-313476888478, opal-data-49financial, opal-data-assets, opal-data-demo, opal-data-portal-v2, opal-data-security, opal-data-security-access-logs, opal-security-evidence, opal-served-key-write-trail-logs, opalinvest-portal
+DESTROYED_ROW_KEY printed (already destroyed, arm B): opal-data-bd, opal-data-cot, opal-data-inf -- these 3 buckets have a LIVE bucket policy on the AWS control plane and NO S3_BUCKET_POLICY row in the warehouse, and they are exactly the buckets the incremental updater has written.
+MATCHED_ON printed: node_id -- the `node_id` column limb of _match_filter's In('arn',...) OR In('node_id',...). The policy row's OWN canonical key IS the bare bucket name, so the bucket's upsert filter names it. The `arn` limb does NOT match (the bucket's arn is the full ARN); the destruction is entirely the node_id limb.
+PROVENANCE LABELS: every number above is `measured` (an instrument returned it in THIS run). Nothing here is `held` or `inferred`.
+elapsed=13.7s
