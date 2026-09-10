@@ -301,6 +301,23 @@ def main() -> int:
               "the router's own harness, pointed at the WORKING tree, rc=%d" % rt_rc)
         print("  BARE-FORM CONTROL (recorded, arm not scored on it): %s"
               % rec.get("bare_form_control"))
+        # THE AMENDED BOUND, MEASURED AND PRINTED BESIDE THE VERDICT, NEVER AS IT.
+        # The face as amended @2fbb844173 prefixes clause (g) with `timeout 600`. Two
+        # consecutive WORKING runs of this harness took 680 s and 826 s, so the literal
+        # amended command returns rc 124 -- a property of the harness's runtime, not of the
+        # change. Recorded exactly the way the issuer ruled the bare form should be recorded.
+        probe_path = os.path.join(L.HERE, "cep4_amended_bound_probe.json")
+        if os.path.exists(probe_path):
+            with open(probe_path, "r", encoding="utf-8") as fh:
+                pr = json.load(fh)
+            print("  AMENDED-BOUND PROBE (recorded, arm not scored on it):")
+            print("    invocation : %s" % pr.get("invocation"))
+            print("    rc         : %s   window %s -> %s   elapsed_s %s"
+                  % (pr.get("rc"), pr.get("started"), pr.get("ended"),
+                     pr.get("elapsed_s")))
+            print("    reading    : %s" % pr.get("reading"))
+        else:
+            print("  AMENDED-BOUND PROBE: not present (%s)" % probe_path)
 
     # ---- verdict ------------------------------------------------------------------------------
     hdr("VERDICT")
