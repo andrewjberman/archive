@@ -83,13 +83,17 @@ all sixteen:
    manages CodeBuild roles of this exact shape in Terraform (`opal-drift-producer-codebuild-role`,
    `opal-stitch-produce-codebuild-role`, both present in the fresh comp-iam parse) -- this one is the
    outlier against that convention, not the norm.
-4. `ecsTaskExecutionRole` -- EXEMPT owner=UNASSIGNED reason=plausible AWS-service-default role (the
-   literal conventional name AWS's own ECS quick-create task-execution-role wizard assigns); absent
-   from the fresh 191-role comp-iam parse and from every first-party source file in this repo (only
-   world-model census/inventory JSON mentions it), with nothing in-repo evidencing how it was
-   actually created. This worker has no CloudTrail or console-history access to confirm the origin
-   and no authority to sign an exception; the decision owed is confirmation of the creation path
-   plus a named owner from a cloud-ops-authority seat who accepts or rejects the exemption.
+4. `ecsTaskExecutionRole` -- EXEMPT owner=1.0.0_SA_CTO~Z reason=AWS-managed service role, minted by a
+   console or service action (the literal conventional name AWS's own ECS quick-create
+   task-execution-role wizard assigns), correctly outside our Terraform -- CLASS RULING, see CLASS
+   RULINGS below; ruling recorded at
+   `task-orders/NFRA_IAMROLES202609.TO-IAM-r-4.record-the-service-default-class-ruling.md` and
+   `ledger/ROUND_ANALYSIS.round1.md` §4. Absent from the fresh 191-role comp-iam parse and from every
+   first-party source file in this repo (only world-model census/inventory JSON mentions it), no
+   change from round 1's research. Membership in the not-in-Terraform set is INHERITED from round 1's
+   classification, carried forward unchanged by `IAM-r-1` -- `IAM-r-3`'s own per-member
+   re-confirmation was not present in this worker's tree at write time; see CLASS RULINGS,
+   MEMBERSHIP NOTE below.
 5. `finbert-ec2-backfill-role` -- ADOPT. Absent from the fresh comp-iam parse and from every
    first-party source file (census/inventory JSON only); an EC2 backfill role with no service-default
    naming pattern and no documented exclusion rationale anywhere in this repo.
@@ -131,12 +135,16 @@ all sixteen:
     main.tf:227`, a distinctly-named sibling created in the same module) -- a genuinely separate,
     undeclared role alongside an already-declared one in the same domain, with no documented
     rationale anywhere in this repo for treating it differently.
-12. `rds-monitoring-role` -- EXEMPT owner=UNASSIGNED reason=plausible AWS-service-default role (the
-    literal name AWS's own RDS Enhanced Monitoring console flow offers when no role is specified);
-    absent from the fresh comp-iam parse and from all first-party Terraform source, with nothing
-    in-repo evidencing its creation path. Same unconfirmed-origin situation as
-    `ecsTaskExecutionRole`: the decision owed is confirmation plus a named owner, not a call this
-    worker can authorize.
+12. `rds-monitoring-role` -- EXEMPT owner=1.0.0_SA_CTO~Z reason=AWS-managed service role, minted by a
+    console or service action (the literal name AWS's own RDS Enhanced Monitoring console flow offers
+    when no role is specified), correctly outside our Terraform -- CLASS RULING, see CLASS RULINGS
+    below; ruling recorded at
+    `task-orders/NFRA_IAMROLES202609.TO-IAM-r-4.record-the-service-default-class-ruling.md` and
+    `ledger/ROUND_ANALYSIS.round1.md` §4. Absent from the fresh comp-iam parse and from all
+    first-party Terraform source, no change from round 1's research. Same class as
+    `ecsTaskExecutionRole` and `vpc-flow-logs-role`; membership is INHERITED from round 1's
+    classification, not independently re-confirmed by `IAM-r-3` in this worker's tree -- see CLASS
+    RULINGS, MEMBERSHIP NOTE below.
 13. `seeking-alpha-scraper-role` -- DECLARED. This one is factually already declared:
     `resource "aws_iam_role" "seeking_alpha_role" { name = "seeking-alpha-scraper-role" ... }` at
     `infra/aws/terraform/seeking-alpha/main.tf:240-241`, and this cell's fresh `comp-iam roles`
@@ -149,11 +157,16 @@ all sixteen:
 14. `sentiment_query_api-role` -- ADOPT. Absent from the fresh comp-iam parse and from all
     Terraform source (census/inventory JSON only); an ordinary API-serving lambda role with no
     service-default naming pattern and no documented exclusion rationale.
-15. `vpc-flow-logs-role` -- EXEMPT owner=UNASSIGNED reason=plausible AWS-service-default role (the
-    literal name AWS's own VPC Flow Logs console setup offers when no role is specified); absent from
-    the fresh comp-iam parse and from all first-party Terraform source, with nothing in-repo
-    evidencing its creation path. Same unconfirmed-origin situation as the other two service-default
-    candidates: the decision owed is confirmation plus a named owner.
+15. `vpc-flow-logs-role` -- EXEMPT owner=1.0.0_SA_CTO~Z reason=AWS-managed service role, minted by a
+    console or service action (the literal name AWS's own VPC Flow Logs console setup offers when no
+    role is specified), correctly outside our Terraform -- CLASS RULING, see CLASS RULINGS below;
+    ruling recorded at
+    `task-orders/NFRA_IAMROLES202609.TO-IAM-r-4.record-the-service-default-class-ruling.md` and
+    `ledger/ROUND_ANALYSIS.round1.md` §4. Absent from the fresh comp-iam parse and from all
+    first-party Terraform source, no change from round 1's research. Same class as the other two
+    service-default candidates; membership is INHERITED from round 1's classification, not
+    independently re-confirmed by `IAM-r-3` in this worker's tree -- see CLASS RULINGS, MEMBERSHIP
+    NOTE below.
 16. `workspace-sync-lambda-role` -- ADOPT. Absent from the fresh comp-iam parse and from all
     Terraform source (census/inventory JSON only); an ordinary sync-lambda role with no
     service-default naming pattern and no documented exclusion rationale.
@@ -166,6 +179,61 @@ in this repo's Terraform. Nine are recommended for adoption and remain undeclare
 (not this one) brings them in. Six carry an open governance decision this worker could not
 authorize. No `ADOPT` row is an accomplished fact, and no `DECLARED` row is a recommendation still
 owed.**
+
+## CLASS RULINGS
+
+One ruling disposes of a class rather than one role at a time, stated here once so a reader sees
+disposition-table rows 4, 12 and 15 (`ecsTaskExecutionRole`, `rds-monitoring-role`,
+`vpc-flow-logs-role`) sharing ONE decision rather than three coincidental exemptions.
+
+**RULING -- AWS-MANAGED SERVICE-DEFAULT ROLES.** Decider: `1.0.0_SA_CTO~Z`, ruled as ARCHITECTURE.
+AWS-managed service roles -- a role minted by a console quick-create wizard or another AWS service
+action, never by this estate's own Terraform, carrying AWS's own conventional literal name for that
+service's default role -- stay OUTSIDE this repo's Terraform, deliberately. That placement is the
+correct, settled state for a member of this class, not a gap awaiting adoption and not a per-role
+decision awaiting a named exemption owner. Reason: a role of this shape is provisioned and owned by
+the AWS service itself at the moment a console/service action creates the resource it attaches to
+(an ECS task launch, RDS Enhanced Monitoring, VPC Flow Logs); bringing it under this estate's
+Terraform management would fight the issuing service's own lifecycle rather than describe
+infrastructure this estate built. This cell RECORDS the ruling; it does not re-derive or re-litigate
+it -- round 1 read a per-role-owner requirement for these three as heavier than the outcome demands,
+and that reading is corrected here, not re-opened.
+
+**RULING'S RECORD (pointer).** Stated as GIVEN in
+`task-orders/NFRA_IAMROLES202609.TO-IAM-r-4.record-the-service-default-class-ruling.md` (this cell's
+own issuance, which quotes the ruling and names the decider); traced to
+`ledger/ROUND_ANALYSIS.round1.md` §4 ("THE POPULATION DEFECT") and §6 ("R2-C -- the three governance
+decisions"), the round-1 analysis `1.0.0_SA_CTO~Z` wrote, which this cell's issuance cites as its
+authority chain together with the round-2 decomposition's `IAM-r-4` row
+(`../../decompositions/NFRA_IAMROLES202609_DECOMP_R2.md`).
+
+**CLASS BOUNDARY -- which future roles this ruling covers.** A role falls in this class when (a) it
+is absent from this repo's Terraform source under a name-level `comp-iam`/`comp-find infra/ --all`
+check, AND (b) its name is AWS's own literal conventional name for a specific service's
+auto-created default role (the ECS quick-create task-execution-role, RDS Enhanced Monitoring's
+console-offered role, VPC Flow Logs' console-offered role, and roles of that identical shape minted
+by other AWS services the same way), AND (c) nothing in this repo's Terraform creates or manages it
+as a resource. A role failing any one of the three -- present in Terraform, custom-named rather than
+AWS's own conventional default name, or created by THIS estate's own automation rather than an AWS
+console/service wizard -- is a DIFFERENT member and this ruling does not reach it: it does not cover
+`opal-data-refresh-lambda-role` or `portal-auth-lambda-role` (production serving-path roles, a
+different remedy shape, owned elsewhere in this round), nor `lambda-test-role` (residue, a different
+remedy shape, owned elsewhere in this round), nor any of the nine `ADOPT` members above (no
+service-default naming pattern, no plausible console/service-minted origin).
+
+**MEMBERSHIP NOTE (dependency on `IAM-r-3`).** This cell disposes the three members as members of the
+not-in-Terraform set on round 1's classification, carried forward unchanged through `IAM-r-1`.
+`IAM-r-3` -- the cell that re-confirms true membership per member, against a Terraform resource-block
+read rather than a name match -- was still in flight on the measurement chain as this cell was
+worked, and no `IAM-r-3` deliverable or verdict list was present anywhere in this worker's tree at
+write time (checked by name across the whole repo). Membership for these three is therefore
+INHERITED from round 1, not independently re-confirmed by this cell. This same round has already
+shown the class this ruling exempts can carry a false positive elsewhere in the same sixteen
+(`seeking-alpha-scraper-role`, row 13 above, corrected from `LIVE-no-DECLARED` to `DECLARED`) -- if
+`IAM-r-3` later finds any of these three is in fact already declared, that member's row is a second
+instance of that identical defect and needs re-disposing to `DECLARED`, not this ruling re-litigated;
+the ruling itself would be unaffected, since it governs the CLASS, not any one member's true
+membership in it.
 
 ## RULE 24 FOUR-POSTULATE RECORD FOR THE REPLACEMENT VOCABULARY (this cell, IAM-r-1)
 
