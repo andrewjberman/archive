@@ -1,0 +1,129 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPSEC202609.TO-OP3-S-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPSEC202609~2",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/prd/NFRA_OPSEC202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "5f4d4b894fd0900ae90cb5a453ffe7fedfc59017"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP_round3.md",
+  "vintage_commit": "598bca6e96d25106f2e68dab0c6fb0b3fef0de64",
+  "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP3-S-2.login-alarm-subscription.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "row NFRA_OPSEC202609-Z-W2-S1 appended (append-only splice, no existing row edited) recording S2-AC4's genuine FAIL and the mailbox-access gap behind it. Co-committed in the SAME commit as this proof instance -- the row and the proof that cites it land together."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "THE CONTROL THAT MUST BE ABLE TO FAIL IS S2-AC4 -- the TO names it explicitly. A created-but-unconfirmed SNS email subscription must read SubscriptionArn=PendingConfirmation, never a fabricated real ARN; if this worker could make S2-AC4 read PASS regardless of whether confirmation actually happened, the criterion would certify nothing.",
+   "expected": "If the subscription is genuinely unconfirmed (the negative branch), list-subscriptions-by-topic reads the literal string PendingConfirmation and S2-AC4 is graded FAIL; no self-report, wait-and-hope, or field substitution converts that into PASS.",
+   "observed": "FIRED, ON REAL STATE, NOT SIMULATED: 7 reads of list-subscriptions-by-topic across ~7 minutes (immediately after Subscribe, 5x in a bounded ~90s poll, and once more after the S2-AC5/S2-AC6 work) all read SubscriptionArn=PendingConfirmation. This worker holds no mailbox-read capability for andrew@opalinvest.com (measured 0 hits across the estate, comp-find 'imap|gmail_api|mail\\.google\\.com|read_inbox|inbox_reader' --corpus all) and did not fabricate a confirmed state; S2-AC4 is graded FAIL. The control demonstrates it CAN fail and, on this run, DID.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "aws sns list-subscriptions-by-topic on the same topic ARN, same call, run identically 7 times across the session (t=0 right after Subscribe; 5x in a bounded ~90s poll loop at roughly 18s intervals; once more ~7 minutes after Subscribe, after the S2-AC5/S2-AC6 work).",
+   "observed": "All 7 reads returned byte-identical structure and values: exactly one subscription, Protocol=email, Endpoint=andrew@opalinvest.com, SubscriptionArn=the literal string PendingConfirmation. The reading is stable, not a transient/flaky probe result.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "S2-AC4's PASS state (a confirmed SubscriptionArn).",
+   "reason": "Not achievable by this worker in this session: SNS email confirmation requires opening the confirmation email AWS sent to andrew@opalinvest.com and clicking its link (or reading its Token out-of-band), and no agent on this fabric holds mailbox-read access to that address. Filed as surprise row NFRA_OPSEC202609-Z-W2-S1, ARMED, disarm_owner andrew@opalinvest.com. Everything upstream of it (the topic identified from the alarms themselves, the zero-subscriber before-state, the correct single subscriber created, one transition observed end to end at the publish leg, and the alarms otherwise unchanged) is built and evidenced above."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPSEC202609-Z-W2-S1: S2-AC4 could not be made to pass by this worker -- no agent on this fabric holds mailbox-read access to andrew@opalinvest.com, and SNS email confirmation is delivered only through that inbox; the subscription stayed literally PendingConfirmation across 7 reads over ~7 minutes."
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git, per spine s.1). The audit trail is this instance plus the git history on branch wk-NFRA_OPSEC202609-3-2: the investigation row append (surprise-channel), this proof_of_spec.json, and the live AWS reads/writes cited in each acceptance row's invocation/output_evidence (aws cloudwatch describe-alarms x3, aws sns list-subscriptions-by-topic x9 total across S2-AC2/AC3/AC4's before+after+polling, aws sns subscribe x1, aws cloudwatch set-alarm-state x2 self-targeted on OPSEC-auth-throttled ALARM then OK, aws cloudwatch describe-alarm-history x2). No AWS mutation beyond the one subscribe call and the one self-targeted transition-and-restore; no terraform touched; no second recipient, topic, alarm, channel or cadence created.",
+ "compiler_tools": [
+  {
+   "tool": ".tools/aws.cmd (the AWS CLI shim)",
+   "invocation": "cloudwatch describe-alarms / sns list-subscriptions-by-topic / sns subscribe / cloudwatch set-alarm-state / cloudwatch describe-alarm-history, all via .tools/aws.cmd per CLAUDE.md (never a bare MSYS_NO_PATHCONV=1 aws)",
+   "result": "Identified the two login-abuse alarms and their shared topic ARN from the alarms themselves (not assumed, per the TO's comp-adversary preflight note about C-16's wrong-state incident); captured the zero-subscriber before-state; created and could not confirm the one subscription; observed one transition end to end at the publish leg; confirmed the alarms' config fields unchanged."
+  },
+  {
+   "tool": ".tools/comp-find",
+   "invocation": "comp-find 'Z-S83' / 'ConfirmSubscription|confirm-subscription|PendingConfirmation' / 'imap|gmail_api|mail\\.google\\.com|read_inbox|inbox_reader' --corpus all, each run by its explicit .tools/ path per this TO's own instruction (never the bare shim, which would census the main checkout from this worktree)",
+   "result": "Established, with a printed denominator each time, that (a) Z-S83 is an unrelated prior row cited only by analogy in this TO's prose, (b) the estate already names PendingConfirmation as a known, documented failure mode elsewhere (critical-alarm-egress.yaml, infrastructure_monitor lambda, alarm-reachability-check.py) but never a remedy for it, and (c) 0 of 137 hits across the whole repo constitute a mailbox-read capability -- the gap this worker hit is real and estate-wide, not a local tooling oversight."
+  },
+  {
+   "tool": ".tools/jq.exe",
+   "invocation": "project describe-alarms output onto the 13 config fields (excluding state fields) for the S2-AC1 (before) and S2-AC6 (after) reads, then diff",
+   "result": "0 differences -- confirmed byte-identical config on both alarms, isolating the state-field movement this row's own S2-AC5 transition-and-restore caused from any unintended drift"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "S2-AC1",
+   "criterion_verbatim": "S2-AC1 -- BOTH ALARMS' TOPIC IS IDENTIFIED FROM THE ALARMS THEMSELVES, NOT ASSUMED. `aws cloudwatch describe-alarms` filtered to the two login-abuse alarms, with their `AlarmActions` pasted. Expect: both alarms' `AlarmActions` resolve to the SAME topic ARN, and that ARN is the one acted on below.",
+   "method": "live_read",
+   "invocation": "aws cloudwatch describe-alarms --alarm-names OPSEC-auth-login-rate-limit-blocked OPSEC-auth-throttled --output json  (the two alarms were first located by describe-alarms --query \"MetricAlarms[?contains(AlarmName,'Login')||contains(AlarmName,'login')||contains(AlarmName,'Auth')||contains(AlarmName,'auth')]\" filtered against 'login-abuse' in AlarmActions -- 6 candidates, 2 pointing at a topic literally named opal-login-abuse-alerts, 4 (FIRMSEP-auth-*) pointing at the unrelated opal-infrastructure-alerts topic and excluded)",
+   "output_evidence": "{\n    \"MetricAlarms\": [\n        {\n            \"AlarmName\": \"OPSEC-auth-login-rate-limit-blocked\",\n            \"AlarmArn\": \"arn:aws:cloudwatch:us-east-1:313476888478:alarm:OPSEC-auth-login-rate-limit-blocked\",\n            \"AlarmDescription\": \"OP-s-6/FWD-4 - WAF rule AuthLoginRateLimit blocked a request on opal-cloudfront-protection (BlockedRequests > 0). Login-abuse signal on the authentication path.\",\n            \"AlarmConfigurationUpdatedTimestamp\": \"2026-09-03T19:45:34.527000-04:00\",\n            \"ActionsEnabled\": true,\n            \"OKActions\": [],\n            \"AlarmActions\": [\n                \"arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts\"\n            ],\n            \"InsufficientDataActions\": [],\n            \"StateValue\": \"OK\",\n            \"StateReason\": \"Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].\",\n            \"StateReasonData\": \"{\\\"version\\\":\\\"1.0\\\",\\\"queryDate\\\":\\\"2026-09-03T23:51:29.308+0000\\\",\\\"statistic\\\":\\\"Sum\\\",\\\"period\\\":60,\\\"recentDatapoints\\\":[],\\\"threshold\\\":0.0,\\\"evaluatedDatapoints\\\":[{\\\"timestamp\\\":\\\"2026-09-03T23:50:00.000+0000\\\"}]}\",\n            \"StateUpdatedTimestamp\": \"2026-09-03T19:51:29.309000-04:00\",\n            \"MetricName\": \"BlockedRequests\",\n            \"Namespace\": \"AWS/WAFV2\",\n            \"Statistic\": \"Sum\",\n            \"Dimensions\": [\n                {\n                    \"Name\": \"WebACL\",\n                    \"Value\": \"opal-cloudfront-protection\"\n                },\n                {\n                    \"Name\": \"Rule\",\n                    \"Value\": \"AuthLoginRateLimit\"\n                }\n            ],\n            \"Period\": 60,\n            \"EvaluationPeriods\": 1,\n            \"Threshold\": 0.0,\n            \"ComparisonOperator\": \"GreaterThanThreshold\",\n            \"TreatMissingData\": \"notBreaching\",\n            \"StateTransitionedTimestamp\": \"2026-09-03T19:51:29.309000-04:00\"\n        },\n        {\n            \"AlarmName\": \"OPSEC-auth-throttled\",\n            \"AlarmArn\": \"arn:aws:cloudwatch:us-east-1:313476888478:alarm:OPSEC-auth-throttled\",\n            \"AlarmDescription\": \"OP-s-6/FWD-4 - opalinvest-auth-handler emitted auth_throttled: a caller exceeded the login throttle and is blocked. Login-abuse signal on the authentication path.\",\n            \"AlarmConfigurationUpdatedTimestamp\": \"2026-09-03T19:45:34.535000-04:00\",\n            \"ActionsEnabled\": true,\n            \"OKActions\": [],\n            \"AlarmActions\": [\n                \"arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts\"\n            ],\n            \"InsufficientDataActions\": [],\n            \"StateValue\": \"OK\",\n            \"StateReason\": \"Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].\",\n            \"StateReasonData\": \"{\\\"version\\\":\\\"1.0\\\",\\\"queryDate\\\":\\\"2026-09-04T00:10:36.140+0000\\\",\\\"statistic\\\":\\\"Sum\\\",\\\"period\\\":60,\\\"recentDatapoints\\\":[],\\\"threshold\\\":0.0,\\\"evaluatedDatapoints\\\":[{\\\"timestamp\\\":\\\"2026-09-04T00:09:00.000+0000\\\"}]}\",\n            \"StateUpdatedTimestamp\": \"2026-09-03T20:10:36.141000-04:00\",\n            \"MetricName\": \"AuthThrottled\",\n            \"Namespace\": \"opal/authabuse\",\n            \"Statistic\": \"Sum\",\n            \"Dimensions\": [],\n            \"Period\": 60,\n            \"EvaluationPeriods\": 1,\n            \"Threshold\": 0.0,\n            \"ComparisonOperator\": \"GreaterThanThreshold\",\n            \"TreatMissingData\": \"notBreaching\",\n            \"StateTransitionedTimestamp\": \"2026-09-03T20:10:36.141000-04:00\"\n        }\n    ],\n    \"CompositeAlarms\": [],\n    \"LogAlarms\": []\n}",
+   "denominator": "2 of 2 named alarms returned; both AlarmActions arrays have exactly 1 element each, and both elements are the identical string arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts",
+   "status": "PASS",
+   "expect": "\"AlarmName\":\\s*\"OPSEC-auth-login-rate-limit-blocked\"[\\s\\S]*?\"AlarmActions\":\\s*\\[\\s*\"arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts\"\\s*\\][\\s\\S]*\"AlarmName\":\\s*\"OPSEC-auth-throttled\"[\\s\\S]*?\"AlarmActions\":\\s*\\[\\s*\"arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts\"\\s*\\]"
+  },
+  {
+   "criterion_id": "S2-AC2",
+   "criterion_verbatim": "S2-AC2 -- THE ZERO-SUBSCRIBER BEFORE-STATE IS CAPTURED. `aws sns list-subscriptions-by-topic --topic-arn <that ARN>` run BEFORE the change, output pasted. Expect: the subscription list is empty, confirming Z-S151 on the applied plane before it is altered.",
+   "method": "live_read",
+   "invocation": "aws sns list-subscriptions-by-topic --topic-arn arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts --output json   (run BEFORE aws sns subscribe)",
+   "output_evidence": "{\n    \"Subscriptions\": []\n}",
+   "denominator": "1 topic queried of 1 identified in S2-AC1; 0 subscriptions returned of 0 (empty array, no NextToken)",
+   "status": "PASS",
+   "expect": "\"Subscriptions\":\\s*\\[\\s*\\]"
+  },
+  {
+   "criterion_id": "S2-AC3",
+   "criterion_verbatim": "S2-AC3 -- THE SUBSCRIBER IS EXACTLY THE ONE C-20 NAMES. `aws sns list-subscriptions-by-topic --topic-arn <that ARN>` run AFTER, output pasted. Expect: exactly ONE subscription, protocol `email`, endpoint `andrew@opalinvest.com`.",
+   "method": "live_read",
+   "invocation": "aws sns subscribe --topic-arn arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts --protocol email --notification-endpoint andrew@opalinvest.com   (rc=0, output {\"SubscriptionArn\": \"pending confirmation\"});  then aws sns list-subscriptions-by-topic --topic-arn arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts --output json",
+   "output_evidence": "{\n    \"Subscriptions\": [\n        {\n            \"SubscriptionArn\": \"PendingConfirmation\",\n            \"Owner\": \"313476888478\",\n            \"Protocol\": \"email\",\n            \"Endpoint\": \"andrew@opalinvest.com\",\n            \"TopicArn\": \"arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts\"\n        }\n    ]\n}",
+   "denominator": "1 subscription in the Subscriptions array (0 before per S2-AC2, +1 after -- exactly the one this row created); 1 of 1 matches protocol=email and endpoint=andrew@opalinvest.com; PRD v0.14 C-20 names exactly this one address and no other subscription was created",
+   "status": "PASS",
+   "expect": "\"Subscriptions\":\\s*\\[\\s*\\{\\s*\"SubscriptionArn\":\\s*\"[^\"]+\",\\s*\"Owner\":\\s*\"[^\"]+\",\\s*\"Protocol\":\\s*\"email\",\\s*\"Endpoint\":\\s*\"andrew@opalinvest\\.com\""
+  },
+  {
+   "criterion_id": "S2-AC4",
+   "criterion_verbatim": "S2-AC4 -- THE SUBSCRIPTION IS CONFIRMED, NOT MERELY CREATED. the same listing, reading the `SubscriptionArn` field. Expect: `SubscriptionArn` is a real ARN and NOT the literal string `PendingConfirmation`.",
+   "method": "live_read",
+   "invocation": "same listing as S2-AC3 (aws sns list-subscriptions-by-topic --topic-arn arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts), SubscriptionArn field read; re-polled 5x over a bounded ~90s loop (2026-09-10T11:09:54Z..11:11:12Z) and once more at ~11:16Z (~7 minutes after Subscribe, after the S2-AC5/S2-AC6 work) to give the confirmation every reasonable chance to land before this row was written",
+   "output_evidence": "\"SubscriptionArn\": \"PendingConfirmation\"  (identical on all 7 reads across ~7 minutes: t+0s, t+18s, t+37s, t+57s, t+77s poll iterations, plus the pre-poll read and the final ~11:16:xxZ read -- never once a real ARN)",
+   "denominator": "7 of 7 reads across ~7 minutes show the literal string PendingConfirmation; 0 of 7 show a real SubscriptionArn",
+   "status": "FAIL",
+   "status_reason": "THIS IS THE CONTROL THE TASK ORDER NAMES AS THE ONE THAT MUST BE ABLE TO FAIL, AND IT DID: SNS email-protocol confirmation is delivered ONLY by a link inside the email AWS sends to andrew@opalinvest.com; confirming it requires either opening that email and clicking the link, or reading its Token and calling `aws sns confirm-subscription --token <token>`. This worker's tool set for the whole session (Bash/Read/Edit/Write/Glob/Grep) carries no mailbox-read capability for that address, and none exists anywhere in the estate (measured: `.tools/comp-find 'imap|gmail_api|mail\\.google\\.com|read_inbox|inbox_reader' --corpus all` -> 0 of 137 hits is a mailbox-read tool). The worker's own standing law also forbids messaging anyone to ask, and building a mailbox-read capability is new infrastructure the alert moratorium and this TO both forbid. Filed as surprise row NFRA_OPSEC202609-Z-W2-S1 (ARMED, disarm_owner andrew@opalinvest.com or a future mailbox-capable seat). S2-AC4 is therefore graded FAIL-by-output, honestly, rather than reported PASS on a state this worker could not produce.",
+   "expect": "\"SubscriptionArn\":\\s*\"arn:aws:sns:us-east-1:\\d+:opal-login-abuse-alerts:[0-9a-fA-F-]+\""
+  },
+  {
+   "criterion_id": "S2-AC5",
+   "criterion_verbatim": "S2-AC5 -- ONE TRANSITION IS OBSERVED END TO END. an alarm state transition (a self-targeted `set-alarm-state` is acceptable and is the safe form), with the alarm history entry pasted. Expect: the history shows the transition AND the notification action firing to that topic.",
+   "method": "live_read",
+   "invocation": "aws cloudwatch set-alarm-state --alarm-name OPSEC-auth-throttled --state-value ALARM --state-reason '...S2-AC5: self-targeted transition...' (rc=0); then aws cloudwatch describe-alarm-history --alarm-name OPSEC-auth-throttled --history-item-type StateUpdate --max-records 5 and --history-item-type Action --max-records 5; then aws cloudwatch set-alarm-state --alarm-name OPSEC-auth-throttled --state-value OK --state-reason '...restoring...' (rc=0) to leave the alarm as found",
+   "output_evidence": "STATE HISTORY (aws cloudwatch describe-alarm-history --alarm-name OPSEC-auth-throttled --history-item-type StateUpdate --max-records 5), most-recent item: {\"AlarmName\": \"OPSEC-auth-throttled\", \"AlarmType\": \"MetricAlarm\", \"Timestamp\": \"2026-09-10T07:11:58.987000-04:00\", \"HistoryItemType\": \"StateUpdate\", \"HistorySummary\": \"Alarm updated from OK to ALARM\", \"HistoryData\": \"{...\\\"newState\\\":{\\\"stateValue\\\":\\\"ALARM\\\",\\\"stateReason\\\":\\\"NFRA_OPSEC202609.TO-OP3-S-2 S2-AC5: self-targeted transition to observe end-to-end delivery to opal-login-abuse-alerts. Worker 0.9.0_WK_NFRA_OPSEC202609~2.\\\"}}\"}\n\nACTION HISTORY (same call, --history-item-type Action), most-recent item: {\"AlarmName\": \"OPSEC-auth-throttled\", \"AlarmType\": \"MetricAlarm\", \"Timestamp\": \"2026-09-10T07:11:59.020000-04:00\", \"HistoryItemType\": \"Action\", \"HistorySummary\": \"Successfully executed action arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts\", \"HistoryData\": \"{\\\"actionState\\\":\\\"Succeeded\\\",...\\\"notificationResource\\\":\\\"arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts\\\",...\\\"email\\\":\\\"You are receiving this email because your Amazon CloudWatch Alarm \\\\\\\"OPSEC-auth-throttled\\\\\\\" ... has entered the ALARM state, because \\\\\\\"NFRA_OPSEC202609.TO-OP3-S-2 S2-AC5: self-targeted transition...\\\\\\\" at \\\\\\\"Thursday 10 September, 2026 11:11:58 UTC\\\\\\\".\\\",\\\"error\\\":null}\"}\n\nFull JSON (both calls, unedited) captured to .scratch_ac5_stateupdate.json and .scratch_ac5_action.json in the worktree at the time of the run; excerpted above to the deciding fields (HistorySummary + the notificationResource/actionState pair) because the full HistoryData blob is a multiply-escaped ~3500-character string carrying the entire alarm/email payload.",
+   "denominator": "1 of 1 self-targeted transition observed; 1 of 1 Action-history item at the same timestamp shows actionState=Succeeded against notificationResource=arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts (the same ARN identified in S2-AC1); this is the topic-PUBLISH leg only -- CloudWatch's own 'Succeeded' means the sns:Publish call to the topic succeeded, not that any subscriber received it (that leg is S2-AC4, and it is the one that FAILs here)",
+   "status": "PASS",
+   "expect": "\"HistorySummary\":\\s*\"Alarm updated from OK to ALARM\"[\\s\\S]*\"HistorySummary\":\\s*\"Successfully executed action arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts\""
+  },
+  {
+   "criterion_id": "S2-AC6",
+   "criterion_verbatim": "S2-AC6 -- NOTHING ELSE MOVED. `aws cloudwatch describe-alarms` for the two alarms after, compared to `S2-AC1`'s output. Expect: thresholds, periods, metrics and actions are byte-identical to before; the only estate change is the added subscription.",
+   "method": "diff",
+   "invocation": "aws cloudwatch describe-alarms --alarm-names OPSEC-auth-login-rate-limit-blocked OPSEC-auth-throttled --output json  (after); jq-projected onto {AlarmName,AlarmDescription,ActionsEnabled,OKActions,AlarmActions,InsufficientDataActions,MetricName,Namespace,Statistic,Dimensions,Period,EvaluationPeriods,Threshold,ComparisonOperator,TreatMissingData} for both the S2-AC1 (before) and this (after) capture, then diffed",
+   "output_evidence": "diff of the two jq-projected config-field documents: NO DIFF -- byte-identical config. Full after-read pasted for the record: {\n    \"MetricAlarms\": [\n        {\n            \"AlarmName\": \"OPSEC-auth-login-rate-limit-blocked\",\n            \"AlarmArn\": \"arn:aws:cloudwatch:us-east-1:313476888478:alarm:OPSEC-auth-login-rate-limit-blocked\",\n            \"AlarmDescription\": \"OP-s-6/FWD-4 - WAF rule AuthLoginRateLimit blocked a request on opal-cloudfront-protection (BlockedRequests > 0). Login-abuse signal on the authentication path.\",\n            \"AlarmConfigurationUpdatedTimestamp\": \"2026-09-03T19:45:34.527000-04:00\",\n            \"ActionsEnabled\": true,\n            \"OKActions\": [],\n            \"AlarmActions\": [\n                \"arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts\"\n            ],\n            \"InsufficientDataActions\": [],\n            \"StateValue\": \"OK\",\n            \"StateReason\": \"Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].\",\n            \"StateReasonData\": \"{\\\"version\\\":\\\"1.0\\\",\\\"queryDate\\\":\\\"2026-09-03T23:51:29.308+0000\\\",\\\"statistic\\\":\\\"Sum\\\",\\\"period\\\":60,\\\"recentDatapoints\\\":[],\\\"threshold\\\":0.0,\\\"evaluatedDatapoints\\\":[{\\\"timestamp\\\":\\\"2026-09-03T23:50:00.000+0000\\\"}]}\",\n            \"StateUpdatedTimestamp\": \"2026-09-03T19:51:29.309000-04:00\",\n            \"MetricName\": \"BlockedRequests\",\n            \"Namespace\": \"AWS/WAFV2\",\n            \"Statistic\": \"Sum\",\n            \"Dimensions\": [\n                {\n                    \"Name\": \"WebACL\",\n                    \"Value\": \"opal-cloudfront-protection\"\n                },\n                {\n                    \"Name\": \"Rule\",\n                    \"Value\": \"AuthLoginRateLimit\"\n                }\n            ],\n            \"Period\": 60,\n            \"EvaluationPeriods\": 1,\n            \"Threshold\": 0.0,\n            \"ComparisonOperator\": \"GreaterThanThreshold\",\n            \"TreatMissingData\": \"notBreaching\",\n            \"StateTransitionedTimestamp\": \"2026-09-03T19:51:29.309000-04:00\"\n        },\n        {\n            \"AlarmName\": \"OPSEC-auth-throttled\",\n            \"AlarmArn\": \"arn:aws:cloudwatch:us-east-1:313476888478:alarm:OPSEC-auth-throttled\",\n            \"AlarmDescription\": \"OP-s-6/FWD-4 - opalinvest-auth-handler emitted auth_throttled: a caller exceeded the login throttle and is blocked. Login-abuse signal on the authentication path.\",\n            \"AlarmConfigurationUpdatedTimestamp\": \"2026-09-03T19:45:34.535000-04:00\",\n            \"ActionsEnabled\": true,\n            \"OKActions\": [],\n            \"AlarmActions\": [\n                \"arn:aws:sns:us-east-1:313476888478:opal-login-abuse-alerts\"\n            ],\n            \"InsufficientDataActions\": [],\n            \"StateValue\": \"OK\",\n            \"StateReason\": \"NFRA_OPSEC202609.TO-OP3-S-2 S2-AC5: restoring alarm to OK after the observed self-targeted transition. Worker 0.9.0_WK_NFRA_OPSEC202609~2.\",\n            \"StateUpdatedTimestamp\": \"2026-09-10T07:13:06.234000-04:00\",\n            \"MetricName\": \"AuthThrottled\",\n            \"Namespace\": \"opal/authabuse\",\n            \"Statistic\": \"Sum\",\n            \"Dimensions\": [],\n            \"Period\": 60,\n            \"EvaluationPeriods\": 1,\n            \"Threshold\": 0.0,\n            \"ComparisonOperator\": \"GreaterThanThreshold\",\n            \"TreatMissingData\": \"notBreaching\",\n            \"StateTransitionedTimestamp\": \"2026-09-10T07:13:06.234000-04:00\"\n        }\n    ],\n    \"CompositeAlarms\": [],\n    \"LogAlarms\": []\n}",
+   "denominator": "13 config fields x 2 alarms = 26 field-comparisons, 0 differences (StateValue/StateReason/StateUpdatedTimestamp/StateTransitionedTimestamp deliberately EXCLUDED from the diffed projection because this row's own S2-AC5 test moved them on OPSEC-auth-throttled and then restored StateValue to OK -- that movement is this criterion's own exercise, not drift, and the criterion's own wording scopes to 'thresholds, periods, metrics and actions', none of which are state fields)",
+   "status": "PASS",
+   "expect": "NO DIFF -- byte-identical config"
+  }
+ ]
+}
