@@ -69,6 +69,14 @@ def served(*names):
 served_derives = served("derives_from", "DERIVES_FROM")
 served_stored = served("stored_in", "STORED_IN")
 
+# W2-S68's second half: WHICH node the boundary edge lands on. The bucket carries two names in
+# this estate (id and arn) and more than one node can answer to one of them, so "the edge
+# resolved" is not the same claim as "the edge resolved onto a bucket". Printed, never assumed.
+tgt_rows, _ = kuzu("MATCH (a:CloudNode)-[e:CloudEdge]->(b:CloudNode) WHERE e.edge_type = "
+                   "'STORED_IN' RETURN b.node_type AS t, count(*) AS c ORDER BY t")
+src_rows, _ = kuzu("MATCH (a:CloudNode)-[e:CloudEdge]->(b:CloudNode) WHERE e.edge_type = "
+                   "'STORED_IN' RETURN a.node_type AS t, count(*) AS c ORDER BY t")
+
 admitted = int(uni.get("admitted", 0))
 merged = int(uni.get("merged", 0))
 created = int(uni.get("created", 0))
@@ -98,6 +106,13 @@ print("     %s" % json.dumps({k: uni.get(k) for k in
                                "idmap_size", "retyped_prior_cycle", "collapsed_copies")},
                              sort_keys=True))
 print("     per_type: %s" % json.dumps(uni.get("per_type", {}), sort_keys=True))
+print()
+print("  -- what the STORED_IN edges actually LAND ON, served side --")
+print("     target node_type: %s" % ({r["t"]: r["c"] for r in (tgt_rows or [])} or "(no STORED_IN edge served)"))
+print("     source node_type: %s" % ({r["t"]: r["c"] for r in (src_rows or [])} or "(no STORED_IN edge served)"))
+print("     THE CLAIM THIS SEPARATES: 'the edge resolved' is not 'the edge resolved onto a")
+print("     bucket'. A bucket answers to two names here (node id and arn) and another class")
+print("     can hold the other one, so the landing type is read rather than inferred.")
 print()
 print("  -- every stitch edge family, served side, printed UNSCOPED --")
 for t in sorted(served_edges):
