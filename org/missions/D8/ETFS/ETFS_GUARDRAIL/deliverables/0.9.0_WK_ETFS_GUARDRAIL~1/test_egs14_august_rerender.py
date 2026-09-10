@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
 """ETFS_GUARDRAIL.TO-EG-s-14 S14-AC1 battery -- THE AUGUST RE-RENDER.
 
-Prints EGS14-AUGUST-RERENDERED only when EVERY arm (a)-(g) holds. Every arm
-re-measures LIVE (the schedule, S3, CloudWatch, CloudTrail, EC2) except the
-invoke response itself, which is read from the committed invoke_record.json
-(the response headers exist only at the client) and is CROSS-CHECKED live: the
-recorded x-amzn-RequestId must appear as a START RequestId in the orchestrator's
-CloudWatch log group.
+Prints EGS14-AUGUST-RERENDERED only when EVERY arm (a)-(g) holds. Every arm re-measures
+LIVE (the schedule, S3, CloudWatch, CloudTrail, EC2, SES, SNS) except the invoke response
+itself, which is read from the committed invoke_record.json (the response headers exist
+only at the client) and is CROSS-CHECKED live: the recorded x-amzn-RequestId must appear
+as a START RequestId in the orchestrator's log group READ BY TIME.
 
-Bounds: every AWS call goes through the vendored CLI v1 shim `.tools/aws` under
-a per-call timeout; `--output text` is never used (CRLF); every S3 time is UTC
-via s3api; every list prints its denominator. ASCII only.
+ARM (e) IS THE AMENDED CUT (@5507841f04, rows W1-S13 / W2-S7): lambda:Invoke is a
+CloudTrail DATA event and 0 of 2 trails in this account select AWS::Lambda::Function, so
+(i) the MANUAL fire is pinned by `logs filter-log-events` over the window -- never one
+stream picked by its lastEventTimestamp -- carrying the client's request id exactly once,
+(ii) a RULE-initiated fire would leave `etfs-reports-scheduler-role` AssumeRole events in
+the window and there must be 0, and (iii) the CloudTrail Invoke read prints COVERAGE-ABSENT
+with its 2-trail denominator, never a pass and never a fail.
+
+Bounds: every AWS call goes through the vendored CLI v1 shim under a per-call timeout;
+`--output text` is never used (CRLF); every S3 time is UTC via s3api; every list prints its
+denominator. ASCII only.
 
 Run from the worktree root:
   timeout 900 python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs14_august_rerender.py
@@ -28,9 +35,8 @@ import sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                     "..", "..", "..", "..", "..", "..", ".."))
 HERE = os.path.dirname(os.path.abspath(__file__))
-# The vendored shim is a bash script `.tools/aws` plus a Windows forwarder
-# `.tools/aws.cmd` (both or neither). CPython on win32 cannot exec the bash one
-# (WinError 193), so resolve the .cmd there.
+# The vendored shim is a bash script `.tools/aws` plus a Windows forwarder `.tools/aws.cmd`
+# (both or neither). CPython on win32 cannot exec the bash one (WinError 193).
 AWS = os.path.join(ROOT, ".tools", "aws.cmd" if sys.platform == "win32" else "aws")
 
 BUCKET = "opal-data-etfs"
@@ -39,9 +45,12 @@ SERVED_PREFIX = "platinum/reports/%s/" % MONTH
 FN = "etfs-reports-orchestrator"
 FN_ARN = "arn:aws:lambda:us-east-1:313476888478:function:%s" % FN
 SCHEDULE = "etfs-reports-monthly-run"
+SCHEDULER_ROLE = "etfs-reports-scheduler-role"
 INSTANCE = "i-070477bf35fc54409"
 LOG_GROUP = "/aws/lambda/%s" % FN
+ALERT_TOPIC = "etfs-reports-alerts"
 COO_SIGNOFF = "4155c85a1f"
+COO_SIGNOFF_AMENDMENT = "5507841f04"
 CTO_SIGNOFF = "94775"
 RECIPIENTS = ["aj@opalinvest.com", "andrew@opalinvest.com"]
 LEDGER_SENTINEL = os.path.join(
@@ -80,39 +89,76 @@ def aws_json(args: list[str], timeout: int = 120):
         return rc, None, "JSON-PARSE-FAILED: %s :: %s" % (e, out[:300])
 
 
+def to_dt(s: str) -> dt.datetime:
+    return dt.datetime.strptime(s, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+
+
 def iso(ts: float) -> str:
     return dt.datetime.fromtimestamp(ts, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def main() -> int:
+def main() -> int:  # noqa: C901
     print("EGS14 BATTERY -- ETFS_GUARDRAIL.TO-EG-s-14, month %s" % MONTH)
     print("run_at_utc %s" % dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
 
-    rec_path = os.path.join(HERE, "invoke_record.json")
-    rec = json.load(open(rec_path, encoding="utf-8"))
+    rec = json.load(open(os.path.join(HERE, "invoke_record.json"), encoding="utf-8"))
     invoke_start = rec["invoke_start_utc"]
+    invoke_end = rec["invoke_end_utc"]
     req_id = rec["x_amzn_request_id"]
-    print("invoke_record: StatusCode=%s RequestId=%s start=%s end=%s"
-          % (rec["status_code"], req_id, invoke_start, rec["invoke_end_utc"]))
+    ff = rec["failed_first_fire"]
+    print("invoke_record (THE RE-INVOKE): StatusCode=%s RequestId=%s start=%s end=%s ssm=%s/%s"
+          % (rec["status_code"], req_id, invoke_start, invoke_end,
+             rec["ssm_command_id"], rec["ssm_status"]))
+    print("FAILED FIRST FIRE (kept for the record): %s -> %s RequestId=%s ssm=%s/%s -- %s"
+          % (ff["invoke_start_utc"], ff["invoke_end_utc"], ff["x_amzn_request_id"],
+             ff["ssm_command_id"], ff["ssm_status"], ff["ssm_error"][:90]))
+
+    w_start = to_dt(invoke_start) - dt.timedelta(minutes=2)
+    w_end = to_dt(invoke_end) + dt.timedelta(minutes=5)
+    w_start_s = w_start.strftime("%Y-%m-%dT%H:%M:%SZ")
+    w_end_s = w_end.strftime("%Y-%m-%dT%H:%M:%SZ")
+    print("READ WINDOW (UTC): %s -> %s" % (w_start_s, w_end_s))
 
     # ---------------------------------------------------------------- arm (a)
-    led = json.load(open(LEDGER_SENTINEL, encoding="utf-8"))
-    md = open(os.path.join(ROOT, led["entry_path"]), encoding="utf-8").read()
-    opened_at = led["opened_at"]
+    # The ENTRY FILE is the graded object. `deploy_ledger.py close` REMOVES the sentinel
+    # (all legs proven), so the sentinel is read only when it still exists; otherwise the
+    # entry is resolved by slug under change_management/ and its own "Date opened:" line
+    # is the opened-at. Either way the .md is what carries the NEVER-2 detail (row W1-S16:
+    # it must be appended AFTER the final ledger mutation, and this arm is read after that).
+    if os.path.exists(LEDGER_SENTINEL):
+        led = json.load(open(LEDGER_SENTINEL, encoding="utf-8"))
+        entry_path, opened_at = led["entry_path"], led["opened_at"]
+        sentinel_state = "PRESENT (entry still open/held)"
+    else:
+        cm = os.path.join(ROOT, "org", "critical_paths", "change_management")
+        hits = sorted(f for f in os.listdir(cm)
+                      if "etfs-guardrail-eg-s-14-august-rerender" in f and f.endswith(".md"))
+        entry_path = os.path.join("org", "critical_paths", "change_management",
+                                  hits[-1]).replace("\\", "/")
+        opened_at = ""
+        for ln in open(os.path.join(ROOT, entry_path), encoding="utf-8").read().splitlines():
+            if ln.startswith("**Date opened:**"):
+                opened_at = ln.split("**Date opened:**", 1)[1].strip()
+                break
+        sentinel_state = "REMOVED by `close` (all legs proven) -- entry read by slug, %d of " \
+                         "%d matching .md" % (len(hits), len(hits))
+    print("ledger sentinel: %s" % sentinel_state)
+    md = open(os.path.join(ROOT, entry_path), encoding="utf-8").read()
+    led = {"entry_path": entry_path, "opened_at": opened_at}
     opened_before = opened_at < invoke_start.replace("Z", "")
     keys_named = sum(1 for n in PUBLISH_NAMES if (SERVED_PREFIX + n) in md)
     tab = json.load(open(os.path.join(HERE, "archive_table.json"), encoding="utf-8"))
     sha_named = sum(1 for n in PUBLISH_NAMES if tab["prior"][n]["sha256"] in md)
     has_rollback = "copy-object" in md and "ROLLBACK" in md
-    both_signoffs = COO_SIGNOFF in md and CTO_SIGNOFF in md
+    signoffs = [COO_SIGNOFF in md, COO_SIGNOFF_AMENDMENT in md, CTO_SIGNOFF in md]
     ok_a = (opened_before and keys_named == len(PUBLISH_NAMES)
-            and sha_named == len(PUBLISH_NAMES) and has_rollback and both_signoffs)
+            and sha_named == len(PUBLISH_NAMES) and has_rollback and all(signoffs))
     arm("a", ok_a,
-        "ledger %s opened_at=%s < invoke %s -> %s; served keys named %d of %d; "
-        "prior sha256 named %d of %d; rollback=%s; signoffs COO %s + CTO %s -> %s"
+        "ledger %s opened_at=%s < invoke %s -> %s; served keys named %d of %d; prior sha256 "
+        "named %d of %d; rollback=%s; signoffs COO %s + %s and CTO %s -> %d of 3"
         % (led["entry_path"], opened_at, invoke_start, opened_before,
-           keys_named, len(PUBLISH_NAMES), sha_named, len(PUBLISH_NAMES),
-           has_rollback, COO_SIGNOFF, CTO_SIGNOFF, both_signoffs))
+           keys_named, len(PUBLISH_NAMES), sha_named, len(PUBLISH_NAMES), has_rollback,
+           COO_SIGNOFF, COO_SIGNOFF_AMENDMENT, CTO_SIGNOFF, sum(signoffs)))
 
     # ---------------------------------------------------------------- arm (b)
     rc, sched, raw = aws_json(["scheduler", "get-schedule", "--name", SCHEDULE])
@@ -131,22 +177,23 @@ def main() -> int:
             "request id present": bool(req_id),
         }
         arm("b", all(checks.values()),
-                   "; ".join("%s=%s" % (k, v) for k, v in checks.items())
-                   + " (%d of %d)" % (sum(checks.values()), len(checks)))
+            "; ".join("%s=%s" % (k, v) for k, v in checks.items())
+            + " (%d of %d)" % (sum(checks.values()), len(checks)))
 
     # ---------------------------------------------------------------- arm (c)
     spec = importlib.util.spec_from_file_location(
         "orch_eg14", os.path.join(ROOT, "infra", "aws", "lambda",
                                   "etfs-reports-orchestrator", "lambda_function.py"))
     os.environ.setdefault("REPORTER_INSTANCE_ID", INSTANCE)
-    os.environ.setdefault("REPORTS_SNS_TOPIC", "arn:aws:sns:us-east-1:313476888478:etfs-reports-alerts")
+    os.environ.setdefault("REPORTS_SNS_TOPIC",
+                          "arn:aws:sns:us-east-1:313476888478:etfs-reports-alerts")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     lm = mod._last_month()
     arm("c", lm == MONTH,
-               "_last_month() (handler's own function, imported from "
-               "infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py) = %s; "
-               "_report_keys(%s) = %s" % (lm, MONTH, mod._report_keys(MONTH)))
+        "_last_month() (handler's own function, imported from "
+        "infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py) = %s; "
+        "_report_keys(%s) = %s" % (lm, MONTH, mod._report_keys(MONTH)))
 
     # ---------------------------------------------------------------- arm (d)
     sys.path.insert(0, ROOT)
@@ -173,85 +220,111 @@ def main() -> int:
               % (n, lm_utc, invoke_start, fresh[-1]))
 
     cov_ok = []
-    print("COVERAGE-LINE TABLE (denominator: %d served CSVs)" % len(CSV_NAMES))
+    print("COVERAGE-LINE TABLE (denominator: %d served CSVs; month trading days = %d)"
+          % (len(CSV_NAMES), len(tdays)))
     for n in CSV_NAMES:
-        k = SERVED_PREFIX + n
         dest = os.path.join(ROOT, ".scratch", "battery_" + n)
-        rc2, out2 = aws(["s3api", "get-object", "--bucket", BUCKET, "--key", k, dest])
+        rc2, out2 = aws(["s3api", "get-object", "--bucket", BUCKET,
+                         "--key", SERVED_PREFIX + n, dest])
         if rc2 != 0:
             cov_ok.append(False)
             print("  %-46s GET rc=%d (absent?)" % (n, rc2))
             continue
-        body = open(dest, "rb").read()
-        last = body.decode("utf-8").splitlines()[-1]
+        text = open(dest, "rb").read().decode("utf-8")
+        lines = text.splitlines()
+        last = lines[-1]
         has = last.startswith("# coverage:")
-        cov_ok.append(has)
-        print("  %-46s rows=%d LAST_ROW=%r startswith '# coverage:' -> %s"
-              % (n, len(body.decode("utf-8").splitlines()), last[:90], has))
-        if has:
-            print("      denominator check: month trading days = %d (lib/trading_calendar.py)"
-                  % len(tdays))
+        denom_ok = ("/%d trading days" % len(tdays)) in last
+        cov_ok.append(has and denom_ok)
+        print("  %-46s rows=%d LAST_ROW=%r startswith '# coverage:' -> %s; carries the "
+              "month denominator /%d -> %s" % (n, len(lines), last[:80], has,
+                                               len(tdays), denom_ok))
 
-    print("ARCHIVE TABLE (prior vs archive sha256, denominator %d of %d)"
+    print("ARCHIVE TABLE (prior vs archive sha256; two archives, denominator %d of %d each)"
           % (len(tab["prior"]), len(PUBLISH_NAMES)))
     arch_ok = []
-    for n, v in tab["prior"].items():
-        dest = os.path.join(ROOT, ".scratch", "battery_arch_" + n)
-        rc3, _ = aws(["s3api", "get-object", "--bucket", BUCKET,
-                      "--key", tab["archive_prefix"] + n, dest])
-        h = hashlib.sha256(open(dest, "rb").read()).hexdigest() if rc3 == 0 else "GET-FAILED"
-        eq = (h == v["sha256"])
-        arch_ok.append(eq)
-        print("  %-46s prior=%s archive(%s)=%s EQUAL=%s"
-              % (n, v["sha256"], tab["archive_prefix"] + n, h, eq))
+    for pref_key in ("archive_prefix", "archive2_prefix"):
+        pref = tab[pref_key]
+        for n, v in tab["prior"].items():
+            dest = os.path.join(ROOT, ".scratch", "battery_arch_" + pref_key + "_" + n)
+            rc3, _ = aws(["s3api", "get-object", "--bucket", BUCKET,
+                          "--key", pref + n, dest])
+            h = hashlib.sha256(open(dest, "rb").read()).hexdigest() if rc3 == 0 else "GET-FAILED"
+            eq = (h == v["sha256"])
+            arch_ok.append(eq)
+            print("  %-46s prior=%s %s%s -> %s EQUAL=%s"
+                  % (n, v["sha256"][:24], pref, n, h[:24], eq))
 
-    arm("d", all(fresh) and all(cov_ok) and all(arch_ok),
-               "published-after-invoke %d of %d; CSV last row '# coverage:' %d of %d; "
-               "archive sha256 match %d of %d"
-               % (sum(fresh), len(fresh), sum(cov_ok), len(cov_ok),
-                  sum(arch_ok), len(arch_ok)))
+    ok_d = all(fresh) and all(cov_ok) and all(arch_ok)
+    arm("d", ok_d,
+        "published-after-invoke %d of %d; CSV last row '# coverage:' with the /%d "
+        "denominator %d of %d; archive sha256 match %d of %d (two archives)"
+        % (sum(fresh), len(fresh), len(tdays), sum(cov_ok), len(cov_ok),
+           sum(arch_ok), len(arch_ok)))
 
     # ---------------------------------------------------------------- arm (e)
-    rc, ct, raw = aws_json(["cloudtrail", "lookup-events",
-                            "--lookup-attributes", "AttributeKey=EventName,AttributeValue=Invoke",
-                            "--start-time", "2026-09-09T23:14:00Z",
-                            "--end-time", "2026-09-09T23:25:00Z"], timeout=180)
-    ct_events = (ct or {}).get("Events", [])
-    rc, ctc, raw = aws_json(["cloudtrail", "lookup-events",
-                             "--lookup-attributes",
-                             "AttributeKey=EventName,AttributeValue=StartInstances",
-                             "--start-time", "2026-09-09T23:14:00Z",
-                             "--end-time", "2026-09-09T23:25:00Z"], timeout=180)
-    ctrl_events = (ctc or {}).get("Events", [])
-    print("CloudTrail Invoke events in the run window: %d (denominator: events returned)"
-          % len(ct_events))
-    for e in ct_events:
-        print("  %s %s user=%s" % (e.get("EventTime"), e.get("EventName"), e.get("Username")))
-    print("CloudTrail POSITIVE CONTROL (StartInstances, same window): %d" % len(ctrl_events))
-    for e in ctrl_events:
-        print("  %s %s user=%s" % (e.get("EventTime"), e.get("EventName"), e.get("Username")))
+    start_ms = int(w_start.timestamp() * 1000)
+    end_ms = int(w_end.timestamp() * 1000)
+    rc, ev, raw = aws_json(["logs", "filter-log-events", "--log-group-name", LOG_GROUP,
+                            "--start-time", str(start_ms), "--end-time", str(end_ms)],
+                           timeout=180)
+    events = (ev or {}).get("events", [])
+    print("log group %s read BY TIME (%s -> %s): %d event(s)"
+          % (LOG_GROUP, w_start_s, w_end_s, len(events)))
+    streams = sorted({e.get("logStreamName", "") for e in events})
+    for e in events:
+        print("  LOG %s %s" % (iso(e["timestamp"] / 1000.0), e["message"].strip()[:200]))
+    start_lines = [e for e in events if e["message"].startswith("START RequestId: " + req_id)]
+    print("  START RequestId: %s -> %d of %d START line(s) in the window (streams: %d)"
+          % (req_id, len(start_lines),
+             len([e for e in events if e["message"].startswith("START RequestId")]),
+             len(streams)))
 
-    rc, streams, raw = aws_json(["logs", "describe-log-streams",
-                                 "--log-group-name", LOG_GROUP,
-                                 "--order-by", "LastEventTime", "--descending",
-                                 "--max-items", "3"])
-    log_txt = ""
-    stream_name = ""
-    if streams and streams.get("logStreams"):
-        stream_name = streams["logStreams"][0]["logStreamName"]
-        rc, ev, raw = aws_json(["logs", "get-log-events",
-                                "--log-group-name", LOG_GROUP,
-                                "--log-stream-name", stream_name,
-                                "--start-from-head"])
-        for e in (ev or {}).get("events", []):
-            log_txt += "%s %s" % (iso(e["timestamp"] / 1000.0), e["message"])
-    req_in_log = ("START RequestId: " + req_id) in log_txt
-    print("orchestrator log stream: %s" % stream_name)
-    for line in log_txt.splitlines():
-        print("  LOG %s" % line[:220])
+    rc, ct, raw = aws_json(["cloudtrail", "lookup-events",
+                            "--lookup-attributes",
+                            "AttributeKey=EventName,AttributeValue=AssumeRole",
+                            "--start-time", w_start_s, "--end-time", w_end_s], timeout=240)
+    ar_events = (ct or {}).get("Events", [])
+    sched_role_hits = []
+    for e in ar_events:
+        blob = e.get("CloudTrailEvent", "") or ""
+        if SCHEDULER_ROLE in blob or any(SCHEDULER_ROLE in (r.get("ResourceName") or "")
+                                         for r in e.get("Resources", [])):
+            sched_role_hits.append(e)
+    print("  CloudTrail AssumeRole in the window: %d event(s) scanned; naming %s: %d "
+          "(the rule did not fire)" % (len(ar_events), SCHEDULER_ROLE, len(sched_role_hits)))
+
+    rc, cti, raw = aws_json(["cloudtrail", "lookup-events",
+                             "--lookup-attributes",
+                             "AttributeKey=EventName,AttributeValue=Invoke",
+                             "--start-time", w_start_s, "--end-time", w_end_s], timeout=180)
+    inv_events = (cti or {}).get("Events", [])
+    rc, trails, raw = aws_json(["cloudtrail", "describe-trails",
+                                "--query", "trailList[].Name"])
+    n_trails = len(trails or [])
+    n_lambda_sel = 0
+    for t in (trails or []):
+        rc, sel, raw = aws_json(["cloudtrail", "get-event-selectors", "--trail-name", t])
+        blob = json.dumps(sel or {})
+        if "AWS::Lambda::Function" in blob:
+            n_lambda_sel += 1
+    print("  COVERAGE-ABSENT: %d of %d trails select AWS::Lambda::Function "
+          "(CloudTrail Invoke events returned in the window: %d -- neither a pass nor a fail)"
+          % (n_lambda_sel, n_trails, len(inv_events)))
+    print("  POSITIVE CONTROL (management events are logged in this window):")
+    ctrl_total = 0
+    for name in ("StartInstances", "StopInstances"):
+        rc, c2, raw = aws_json(["cloudtrail", "lookup-events", "--lookup-attributes",
+                                "AttributeKey=EventName,AttributeValue=" + name,
+                                "--start-time", w_start_s, "--end-time", w_end_s],
+                               timeout=180)
+        c2e = (c2 or {}).get("Events", [])
+        ctrl_total += len(c2e)
+        for e in c2e:
+            print("    %s %s user=%s" % (e.get("EventTime"), name, e.get("Username")))
 
     trigger_field = False
-    for n in CSV_NAMES + ["etf_ownership.html"]:
+    for n in CSV_NAMES:
         p = os.path.join(ROOT, ".scratch", "battery_" + n)
         if os.path.exists(p):
             body = open(p, "rb").read().decode("utf-8", "replace")
@@ -259,42 +332,55 @@ def main() -> int:
                 trigger_field = True
     if not trigger_field:
         print("ARTIFACT-CARRIES-NO-TRIGGER-FIELD")
-    arm("e", bool(ct_events) and req_in_log,
-               "CloudTrail Invoke events=%d (data-event selector on Lambda: none on either "
-               "trail -- positive control StartInstances=%d proves the window is logged); "
-               "recorded request id %s present as START RequestId in %s -> %s"
-               % (len(ct_events), len(ctrl_events), req_id, LOG_GROUP, req_in_log))
+    ok_e = (len(start_lines) == 1 and len(sched_role_hits) == 0 and ctrl_total > 0)
+    arm("e", ok_e,
+        "manual fire pinned: START RequestId %s appears %d of 1 time(s) in the log group "
+        "read BY TIME; %s AssumeRole in the window = %d (rule did not fire); CloudTrail "
+        "Invoke COVERAGE-ABSENT (%d of %d trails select AWS::Lambda::Function); positive "
+        "control management events in the window = %d"
+        % (req_id, len(start_lines), SCHEDULER_ROLE, len(sched_role_hits),
+           n_lambda_sel, n_trails, ctrl_total))
 
     # ---------------------------------------------------------------- arm (f)
-    msg_ids = [ln for ln in log_txt.splitlines() if "MessageId" in ln]
-    rc, ses, raw = aws_json(["cloudtrail", "lookup-events",
-                             "--lookup-attributes",
+    msg_ids = [e["message"].strip() for e in events if "MessageId" in e["message"]]
+    rc, ses, raw = aws_json(["cloudtrail", "lookup-events", "--lookup-attributes",
                              "AttributeKey=EventName,AttributeValue=SendRawEmail",
-                             "--start-time", "2026-09-09T23:14:00Z",
-                             "--end-time", "2026-09-09T23:25:00Z"], timeout=180)
+                             "--start-time", w_start_s, "--end-time", w_end_s], timeout=180)
     ses_events = (ses or {}).get("Events", [])
-    live_recips = None
-    rc, cfg, raw = aws_json(["lambda", "get-function-configuration",
-                             "--function-name", FN])
-    if cfg:
-        live_recips = cfg["Environment"]["Variables"].get("EMAIL_RECIPIENT", "")
-    join_ok = all(r in (live_recips or "") for r in RECIPIENTS)
-    print("SES: MessageId lines in the run's log: %d; CloudTrail SendRawEmail in window: %d; "
-          "live EMAIL_RECIPIENT=%r (JOIN of both recipients -> %s)"
+    rc, cfg, raw = aws_json(["lambda", "get-function-configuration", "--function-name", FN])
+    live_recips = (cfg or {}).get("Environment", {}).get("Variables", {}).get(
+        "EMAIL_RECIPIENT", "")
+    join_ok = all(r in live_recips for r in RECIPIENTS)
+    # SUBSTITUTE MEASUREMENTS (printed, not scored -- the named limbs above are the arm):
+    rc, st, raw = aws_json(["ses", "get-send-statistics"])
+    pts = sorted((st or {}).get("SendDataPoints", []), key=lambda p: p["Timestamp"])
+    in_window = [p for p in pts if w_start_s[:16] <= p["Timestamp"][:16] <= w_end_s[:16]]
+    attempts = sum(p["DeliveryAttempts"] for p in in_window)
+    rc, sns, raw = aws_json(["cloudwatch", "get-metric-statistics", "--namespace", "AWS/SNS",
+                             "--metric-name", "NumberOfMessagesPublished",
+                             "--dimensions", "Name=TopicName,Value=" + ALERT_TOPIC,
+                             "--start-time", w_start_s, "--end-time", w_end_s,
+                             "--period", "300", "--statistics", "Sum"])
+    alerts = sum(d["Sum"] for d in (sns or {}).get("Datapoints", []))
+    print("SES: MessageId lines in the run's log: %d; CloudTrail SendRawEmail in the "
+          "window: %d; live EMAIL_RECIPIENT=%r (JOIN of both recipients -> %s)"
           % (len(msg_ids), len(ses_events), live_recips, join_ok))
-    for m in msg_ids:
-        print("  %s" % m[:220])
-    arm("f", bool(msg_ids) and bool(ses_events),
-               "SES MessageId(s) in the orchestrator log for this run: %d; CloudTrail "
-               "SendRawEmail in the run's minute: %d; Destinations must name %s"
-               % (len(msg_ids), len(ses_events), " + ".join(RECIPIENTS)))
+    print("  SUBSTITUTE (printed, not scored): SES get-send-statistics DeliveryAttempts in "
+          "the window = %d over %d data point(s); %s NumberOfMessagesPublished in the "
+          "window = %g (every failure branch of _run publishes there, so 0 = the send did "
+          "not fail)" % (attempts, len(in_window), ALERT_TOPIC, alerts))
+    arm("f", bool(msg_ids) and bool(ses_events) and join_ok,
+        "SES MessageId(s) in the orchestrator log for this run: %d; CloudTrail "
+        "SendRawEmail in the run's minute: %d; Destinations must name %s"
+        % (len(msg_ids), len(ses_events), " + ".join(RECIPIENTS)))
 
     # ---------------------------------------------------------------- arm (g)
     rc, inst, raw = aws_json(["ec2", "describe-instances", "--instance-ids", INSTANCE,
-                              "--query", "Reservations[].Instances[].[InstanceId,State.Name]"])
+                              "--query",
+                              "Reservations[].Instances[].[InstanceId,State.Name]"])
     state = inst[0][1] if inst else "UNREAD"
     arm("g", state == "stopped",
-               "reporter box %s State.Name=%s (describe-instances)" % (INSTANCE, state))
+        "reporter box %s State.Name=%s (describe-instances)" % (INSTANCE, state))
 
     passed = sum(1 for _, ok, _ in ARMS if ok)
     print("ARMS %d of %d PASS" % (passed, len(ARMS)))
