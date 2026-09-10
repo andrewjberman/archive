@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-15",
+  "phase": "INVESTIGATION",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~1",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-15.the-september-refusal.md",
+    "group": "OTHER",
+    "vintage_commit": "7f3742e9a3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "acf75d72d8d3292f1db5e16f9b22d221cb3bad27",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-15.the-september-refusal.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-september-refusal.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "bd0e384890",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "THE ONE LINE at _run: month = (event or {}).get('month') or _last_month() (:389), with the event threaded in via a DEFAULTED parameter (:382, row W1-S20). Committed BEFORE the apply at bd0e384890 (2 files, 62 insertions / 3 deletions). Deployed by TARGETED terraform through .tools/safe-apply.sh with .tools/terraform.exe v1.9.8: plan 2026-09-10T01:13Z read 'Plan: 0 to add, 1 to change, 0 to destroy' on aws_lambda_function.orchestrator ALONE (~source_code_hash CvFmg9ZmBrSMZSSlplJGd7BWp99FXn5+ODaRbKTe/QI= -> M5Dopbky3W1f1j97cqAB403Kh7IofIv/p0fCtRg7W80=); apply 01:15:35Z -> 01:16:19Z rc=0 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' SERVED == BUILT re-derived THIS session: orchestrator_served_vs_built.py -> SERVED_CODE_SHA256 == BUILT_ZIP_SHA256_B64 == M5Dopbky3W1f1j97cqAB403Kh7IofIv/p0fCtRg7W80=, 'VERDICT: MATCH' rc=0, and a post-apply targeted plan reads 'No changes.' Never update-function-code, never a bare apply, no second apply this session."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/etfs-reports-orchestrator/test_terminal_send.py",
+      "kind": "test",
+      "commit_or_etag": "bd0e384890",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two arms added (run WITH month -> that month; run WITHOUT -> _last_month()), asserting on the SSM command text the box would run. 7 passed, round-1 count 5, +2 as the face requires."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260910T0112Z_etfs-guardrail-eg-s-15-september-refusal_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER-2 entry, 8 legs, window 4.0h, opened 2026-09-10T01:12:30Z BEFORE the plan and BEFORE the invoke, quoting both never-widen halves (COO = issuance 4155c85a1f + amendment 5507841f04; CTO = broker msg 94775). L1-L3 closed by the predecessor session; L4-L8 closed THIS session from MEASURED world state; entry CLOSED (all 8 legs proven, sentinel removed) at ~2026-09-10T01:47Z, inside the 4.0h window. The NEVER-2 detail was appended LAST, after the final ledger mutation, per row W1-S16 (deploy_ledger.py re-renders the entry from the sentinel on every mutation)."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs15_september_refusal.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S15-AC4 refusal battery, arms (a)-(i) on REAL data, printing the token only when every arm holds. Ran 6 of 9 PASS and printed EGS15-NO-REFUSAL -- failing arms c, d, e."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/egs15_invoke_record.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The invoke's request id, UTC bounds, StatusCode, SSM command id and the SES counter reads, recorded by the predecessor session at the moment of the fire."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S15-AC1",
+      "criterion_verbatim": "the existing battery plus your two arms (`run` with `month` -> that month; `run` without -> `_last_month()`) is green (record N passed, N >= the round-1 count + 2). <expect>passed</expect>",
+      "method": "test_suite",
+      "invocation": "timeout 120 python -m pytest infra/aws/lambda/etfs-reports-orchestrator/test_terminal_send.py -q",
+      "output_evidence": "7 passed in 0.41s   (rc=0)",
+      "denominator": "7 of 7 tests passed; round-1 count was 5, so 5 + 2 = 7 -- the face's bar met exactly",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S15-AC2",
+      "criterion_verbatim": "the TARGETED plan changes EXACTLY `aws_lambda_function.orchestrator` (source hash): `0 to add, 1 to change, 0 to destroy`. <expect>1 to change</expect>",
+      "method": "command",
+      "invocation": ".tools/terraform.exe -chdir=infra/aws/terraform/etfs-reports plan -no-color -input=false -lock=false -target=aws_lambda_function.orchestrator",
+      "output_evidence": "RUN THIS SESSION (rc=0): 'No changes. Your infrastructure matches the configuration. / Terraform has compared your real infrastructure against your configuration and found no differences, so no changes are needed.' plus the standard 'Warning: Resource targeting is in effect'. The string '1 to change' does NOT appear, so the literal match against <expect> FAILS. THE READING THAT DID MATCH IS PRE-APPLY AND IS CITED, NOT RE-DERIVED (ledger L2 proof, entry 20260910T0112Z_..._deploy_completion.md): plan at 2026-09-10T01:13Z, rc=0, only resource aws_lambda_function.orchestrator updated in-place, ~source_code_hash 'CvFmg9ZmBrSMZSSlplJGd7BWp99FXn5+ODaRbKTe/QI=' -> 'M5Dopbky3W1f1j97cqAB403Kh7IofIv/p0fCtRg7W80=', 27 unchanged attributes hidden, 'Plan: 0 to add, 1 to change, 0 to destroy'; then HALT_ACK=1 safe-apply 01:15:35Z -> 01:16:19Z rc=0 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' Binary confirmed before the plan: .tools/terraform.exe version -> Terraform v1.9.8 (NOT the PATH v1.14.5). The criterion is time-dependent: its <expect> can only match BEFORE the apply it gates, and after the apply 'No changes' is the CORRECT state -- which is what S15-AC3 separately requires. NOT RE-WORDED: filed as row ETFS_GUARDRAIL-W1-S28 for the issuer, and reported FAIL on the literal match.",
+      "denominator": "1 of 1 resource in the targeted plan, both pre-apply (1 to change) and post-apply (0 changes)",
+      "expect": "1 to change",
+      "status": "FAIL",
+      "status_reason": "The string '1 to change' DOES appear in output_evidence, but only inside the CITED PRE-APPLY reading quoted from ledger leg L2 -- not in this session's run of the named invocation, which printed 'No changes.' The criterion is graded on the invocation the face names, run now, so it FAILS the literal match. The substance it tests (the targeted plan changed exactly aws_lambda_function.orchestrator and nothing else) was measured and holds at L2. NOT re-worded: filed as row ETFS_GUARDRAIL-W1-S28 for the issuer's cut."
+    },
+    {
+      "criterion_id": "S15-AC3",
+      "criterion_verbatim": "the served `CodeSha256` equals the base64 sha256 of the zip Terraform built (the round-1 script in your deliverables folder; re-run, do not rewrite), read AFTER the apply; a 0-diff targeted plan (`-detailed-exitcode` rc=0) recorded beside it. <expect>VERDICT: MATCH</expect>",
+      "method": "live_read",
+      "invocation": "timeout 300 python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/orchestrator_served_vs_built.py",
+      "output_evidence": "RE-RUN THIS SESSION, script unmodified (rc=0):\nSERVED_CODE_SHA256: M5Dopbky3W1f1j97cqAB403Kh7IofIv/p0fCtRg7W80=\nBUILT_ZIP_SHA256_B64: M5Dopbky3W1f1j97cqAB403Kh7IofIv/p0fCtRg7W80=\nVERDICT: MATCH\n0-DIFF BESIDE IT: the targeted plan run this session prints 'No changes. Your infrastructure matches the configuration.' rc=0. INDEPENDENT CORROBORATION (cited, not re-derived): the ISSUER'S read at its own seat with a different instrument -- aws lambda get-function presigned zip -> lambda_function.py sha256 dc05ea90c94dc41e..., 28,504 B, BYTE-EQUAL to git show bd0e384890:<path> and to the same path at CLOUD; live LastModified 2026-09-10T01:16:14Z, CodeSha256 M5Dopbky3W1f1j97cqAB403Kh7IofIv/p0fCtRg7W80=, Version $LATEST. The issuer's CodeSha256 and this session's SERVED_CODE_SHA256 agree, and the two instruments differ (get-function zip bytes vs the Terraform-built zip hash).",
+      "denominator": "1 of 1 served function compared; 2 independent instruments agreeing on the same CodeSha256",
+      "expect": "VERDICT: MATCH",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S15-AC4",
+      "criterion_verbatim": "a battery you write, printing the token ONLY when every arm holds on REAL data: (a) the ledger entry opened BEFORE the plan and BEFORE the invoke...; (b) the invoke on the rule's target with {\"mode\":\"run\",\"month\":\"2026-09\"}...; (c) after the run: the ladder's rungs..., coverage_verdict.json reading REFUSE..., the refusal HTML under refused/ (head-object 200...), and the 2026-09 PUBLISH keys ABSENT (head-object 404 on each...) -- the discriminating pair; (d) the alert text produced...; (e) the ONE terminal email...; (f) coverage_egress_ask.json written...; (g) VENDOR EGRESS 0...; (h) the run-id...; (i) the box `stopped` at the read. <expect>EGS15-REFUSAL-LADDER-RAN</expect>",
+      "method": "command",
+      "invocation": "timeout 900 python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs15_september_refusal.py",
+      "output_evidence": "rc=1. FINAL LINE: 'EGS15-NO-REFUSAL -- failing arms: c, d, e' -- the token EGS15-REFUSAL-LADDER-RAN was NOT printed. 'ARMS 6 of 9 PASS'.\nPASSING (6): (a) ledger entry opened 01:12:30Z before the 01:13Z plan and the 01:19:02Z invoke, quoting both sign-off ids and naming what the run may write -- read AFTER the NEVER-2 append per W1-S16. (b) 'payload {\"mode\":\"run\",\"month\":\"2026-09\"} on the rule's target -> True; StatusCode 200; START RequestId 9fbc33e0-174c-4c82-b392-2b1dafe4a835 = 1 of 1 in the log group read BY TIME; etfs-reports-scheduler-role AssumeRole in the window = 0 of 35 events scanned; synchronous-invoke flags present -> True'. (f) 'coverage_egress_ask.json written with the dates and the provider named: 1 of 1 asks carry both'. (g) '0 vendor-facing calls by this run's principals, of 173 attributable event(s) within a 5626-event window; rung 3 stopped and asked instead of egressing'. (h) 'run-id ... present in the orchestrator's log for the run (3 line(s))', with ARTIFACT-CARRIES-NO-RUN-ID printed as the face directs. (i) 'reporter box i-070477bf35fc54409 State.Name=stopped'.\nFAILING (3), ALL ON THE WORLD, NOT ON THE INSTRUMENT:\n(c) 'coverage_verdict.json verdict=PUBLISH (want REFUSE) over 3 partner class-sets; coverage_unresolved.json entries=2; refused/etf_ownership.html HTTP 404 (want 200); 2026-09 publish keys HTTP [200, 200] of 2 (want 404 each)'. THE DISCRIMINATING PAIR IS INVERTED: refused/ = 404, publish keys = [200, 200]. The two holes are class D and the gate refuses only on class C (C=0 for 3 of 3 partners).\n(d) 'the refusal's alert: etfs-reports-alerts publishes in the run window = 0; alert-shaped log lines = 0 (the orchestrator alerts on the non-Success branch; a PUBLISH verdict is quiet by design)'.\n(e) 'exactly ONE send_raw_email on the terminal branch to andrew@opalinvest.com with its MessageId -> False; the ordinary monthly send count on a refusal (SES delta across the run) = 2, want 0'. SES-PLANE-UNREAD printed: MessageId lines in the log = 0, CloudTrail SendRawEmail = 0 beside a positive control of 1 management event.\nROOT OF THE FAILURE, GROUNDED: the order's premise -- that an incomplete month yields a refusal -- does not hold (row W1-S22). The run PUBLISHED and emailed both recipients (row W1-S23), and the ladder wrote a served daily slice (row W1-S24). A SEPARATE LATENT DEFECT means the terminal send could not have fired even on a REFUSE (row W1-S25): _run reads (unresolved_doc or {}).get('unresolved') while the renderer writes coverage_unresolved.json keyed BY PARTNER, so the guard sees [].",
+      "denominator": "9 arms, 6 PASS / 3 FAIL; 8 of 8 objects under platinum/reports/2026-09/ enumerated; 2 of 2 publish keys head-object 200; refused/ 0 keys; 3 of 3 partners class C = 0; 5626 CloudTrail events in the window of which 173 attributable to this run's principals, 0 vendor-facing",
+      "expect": "EGS15-REFUSAL-LADDER-RAN",
+      "status": "FAIL",
+      "status_reason": "The token EGS15-REFUSAL-LADDER-RAN appears in output_evidence only in the sentence stating it was NOT printed. The battery printed 'EGS15-NO-REFUSAL -- failing arms: c, d, e' and exited rc=1, with 6 of 9 arms passing. The failure is ON THE WORLD, not the instrument: no refusal occurred, because September's holes classify D and the gate refuses only on class C (row W1-S22). Arms c, d and e cannot hold on a PUBLISH run by construction."
+    },
+    {
+      "criterion_id": "S15-AC5",
+      "criterion_verbatim": "graded by the CVO at L9: the ladder on real data rung by rung (what each rung found, what rung 3 named), the refusal's text as a person would read it (dates, partners, providers, no follow-up needed), that the send fired exactly once from the terminal branch and nowhere else, that the one-line change altered nothing on the scheduled path (the `month`-absent arm), and what this order could not see (the inbox). Evidence with vintage. NO VERDICT. [judgment=true]",
+      "method": "manual_read_with_citation",
+      "invocation": "Evidence assembled for the CVO; NOT self-graded (spine v3 L9: a judgment criterion is graded at L9 and never self-graded).",
+      "output_evidence": "RECORDED FOR L9, NO VERDICT.\n1. THE LADDER RUNG BY RUNG, on real data @2026-09-10T01:20Z. Rung 1 (re-run the producer) fired for all three partners: inflection SUCCEEDED and wrote daily/inflection/2026-09-09.json (1209 B, 01:20:16Z) taking it to 6/6 covered; 49financial and cottonwood RAISED on absent upstream partitions -- HeadObject 404 on s3://opal-data-assets/schwab/08242234/silver/fact_rps/date=2026-09-09/data.parquet (producer bd-49f-etf-ownership-daily, requestId d45278cc-4848-4156-afae-818aa707fcb7) and on s3://opal-data-assets/blackdiamond/cottonwood/silver/fact_holdings/date=2026-09-09/data.parquet (producer cot-etf-ownership-daily, requestId 2d72278e-5820-49dd-b413-e94faafcda99). Both were classified D ('carried for missing data'), NOT C. Rung 3 STOPPED and wrote coverage_egress_ask.json (1017 B, 01:20:20Z) naming date 2026-09-09, partner cottonwood, provider 'Black Diamond', with 'Authorization: PER-USE -- a person decides; nothing here is executed by any process'. IT NAMED ONE OF THE TWO unresolved dates: 49financial/2026-09-09 has no ask row (row W1-S27).\n2. THERE IS NO REFUSAL TEXT TO READ. coverage_verdict.json reads verdict=PUBLISH, holes=2; no refusal HTML exists (refused/ prefix = 0 keys; 0 keys containing 'refused' anywhere under platinum/reports/). What a person DID receive instead is the ORDINARY monthly report for a partial month, carrying the coverage lines '5/6 trading days; 1 carried for missing data' (49financial, cottonwood) and '6/6 ... 0 carried' (inflection). Nothing in it is fabricated; it is a mid-month report delivered on the month-end channel (row W1-S23).\n3. THE SEND DID NOT FIRE FROM THE TERMINAL BRANCH -- it fired from the ORDINARY one. The terminal branch (lambda_function.py:418-441 @bd0e384890) is guarded by `if status != \"Success\"`; the render exited Success. Terminal sends to andrew@ = 0. The ordinary _email_report send (:289, Destinations=EMAIL_RECIPIENTS = the JOIN) fired once to two destinations: SES SentLast24Hours 82 -> 84 across the run (LIMIT: account-wide). SES-PLANE-UNREAD: CloudTrail SendRawEmail = 0 and SendEmail = 0 over 01:17-01:23Z while the same-window positive controls are live (StartInstances 01:19:07Z, StopInstances 01:20:29Z, both Username etfs-reports-orchestrator). AND THE LOG FALLBACK IS ALSO UNAVAILABLE: the orchestrator emits ZERO application log lines (4 of 4 events in the window are runtime-generated), so no MessageId exists for either branch (row W1-S26).\n4. MOST CONSEQUENTIAL FOR FWD-7: the terminal send could NOT have fired even on a genuine REFUSE. _run reads unresolved_days = (unresolved_doc or {}).get('unresolved') or [] (:439) but the renderer writes coverage_unresolved.json keyed BY PARTNER ({'49financial': [...], 'cottonwood': [...]}) with no 'unresolved' key -- so the guard is falsy and _send_terminal_unresolved is skipped. The round-1 EG-s-8 proof passed because its FIXTURE (test_terminal_send.py:118 @bd0e384890) supplies the docstring's shape, which the real renderer does not produce. Second-order: _build_terminal_email prints u.get('partner') and u.get('provider'), both absent from real rows, so the table would render 'None | None' (row W1-S25).\n5. THE ONE-LINE CHANGE ALTERED NOTHING ON THE SCHEDULED PATH. month = (event or {}).get('month') or _last_month() (:389 @bd0e384890): the scheduled payload {\"mode\":\"run\"} carries no `month`, so the expression falls through to _last_month() exactly as before. Proven by the pytest arm 'run WITHOUT month -> _last_month()' in the 7-passed battery, and by construction (the event parameter is DEFAULTED, :382, so an argument-less _run() still works -- row W1-S20).\n6. WHAT THIS ORDER COULD NOT SEE. (i) THE INBOX at andrew@ and aj@ -- delivery is the issuer's read, not this worker's; SENT != EMITTED != READ and no agent-side ACK exists here. (ii) Whether any SES send occurred at all, on the CloudTrail plane -- SES-PLANE-UNREAD, with the account-wide counter the only send oracle. (iii) S3 object-level PutObject on opal-data-etfs -- COVERAGE-ABSENT (the served-key trail names only platinum/firm/; versioning DISABLED, W1-S12), so every write is read from the object itself. (iv) Outbound HTTPS -- CloudTrail records AWS API calls only, and this estate has no separate egress-gateway log this worker could find; the egress claim rests on principal-attributed AWS calls (0 of 173) plus rung 3's stop-and-ask. (v) Whether a class-C-producing condition exists in any month -- choosing one is an issuer cut (row W1-S22).",
+      "denominator": "6 evidence heads; all citations carry a vintage (@bd0e384890 for source, UTC LastModified via s3api for objects, UTC window bounds for log and trail reads)",
+      "expect": "JUDGMENT -- graded by 3.0.0_SA_CVO at L9; no worker verdict recorded",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\" at the cut: graded by 3.0.0_SA_CVO at L9 and NEVER self-graded by the worker (spine v3 L9). The evidence is recorded above with vintages and NO VERDICT is offered. SUBSTITUTE ORACLE for the one limb no instrument here can reach: delivery at the inbox is the ISSUER's read at andrew@ and aj@opalinvest.com, which the face already assigns to the issuer."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The load-bearing claim of this order is 'a month incomplete by construction makes the refusal REAL'. The discriminator the face itself names is the PAIR: refused/etf_ownership.html head-object 200 BESIDE the 2026-09 publish keys head-object 404. That pair is fully discriminating -- a refusal and a publish cannot both produce it -- and it came back INVERTED: refused/ = 404, publish keys = [200, 200]. So the instrument could have distinguished the two outcomes and did; the claim is false, not unmeasured. Second control on the SAME question from a different plane: the renderer's own SSM stdout reads 'VERDICT: PUBLISH holes=2' followed by OK: lines for the publish keys, and coverage_verdict.json's stored field reads 'PUBLISH' -- three independent surfaces (the S3 object listing, the artifact's own field, the producer's stdout) agreeing. NEGATIVE CONTROL on the refusal surface: 0 keys containing 'refused' anywhere under platinum/reports/, so the absence is not a prefix typo. POSITIVE CONTROLS on the two coverage-absent planes: CloudTrail SendRawEmail = 0 is reported as SES-PLANE-UNREAD rather than as 'no send', because StartInstances = 1 and StopInstances = 1 in the SAME window prove management events ARE recorded there while SES sending calls are not selected.",
+      "expected": "If the order's premise held, the face's own discriminating pair would read: refused/etf_ownership.html head-object 200 BESIDE 2026-09 etf_ownership.{pdf,html} head-object 404,404, and coverage_verdict.json verdict=REFUSE.",
+      "observed": "INVERTED: refused/etf_ownership.html HTTP 404 (refused/ prefix = 0 keys, and 0 keys containing 'refused' anywhere under platinum/reports/) BESIDE etf_ownership.pdf HTTP 200 (173126 B) and etf_ownership.html HTTP 200 (33793 B), both LastModified 2026-09-10T01:20:23Z; coverage_verdict.json verdict=PUBLISH, holes=2, class C = 0 for 3 of 3 partners. The control DISCRIMINATED -- it could have returned either outcome and returned this one.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "NOTHING WAS RE-RUN THAT WOULD MOVE THE WORLD. The activation had already completed (01:19:02Z -> 01:20:28Z) when this session was re-seated; re-invoking it would have been a REWIND under NEVER-2 and would have sent a second real email and re-published served keys, so L4 was closed by MEASURING the artifact, not by repeating the act. Every read this session is idempotent (s3api head/list, logs filter-log-events over a FIXED ms window, cloudtrail lookup-events over FIXED UTC bounds, ec2 describe-instances, terraform plan, pytest). The two criteria re-derived this session (S15-AC1 7 passed, S15-AC3 VERDICT: MATCH) are stable across runs; S15-AC2's output is deliberately NOT stable across the apply boundary and that instability is the finding (row W1-S28). Log and trail windows are stated in UTC with their denominators (4 of 4 log events; 34/35 AssumeRole rows; 5626 trail events) so any re-read is comparable.",
+      "observed": "S15-AC1 re-run this session: 7 passed (stable). S15-AC3 re-run this session: VERDICT: MATCH with the same SERVED/BUILT pair (stable), and it agrees with the ISSUER's independent get-function read of the same CodeSha256. S15-AC2 is deliberately NOT stable across the apply boundary -- pre-apply '1 to change', post-apply 'No changes' -- and that instability IS the finding (row W1-S28). No world-moving act was repeated.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Re-firing the activation invoke.",
+      "reason": "It had already completed at 01:19:02Z -> 01:20:28Z with StatusCode 200 and request id 9fbc33e0-174c-4c82-b392-2b1dafe4a835. CLAUDE.md NEVER-2: world-done -> close SUPERSEDED, never re-execute; a re-execute of an overtaken act is a REWIND. Re-firing would also have sent a second real email and re-published served keys."
+    },
+    {
+      "item": "Any fix to the coverage_unresolved.json key-shape mismatch that makes the terminal send unreachable.",
+      "reason": "lambda_function.py is READ-only for this worker (the prompt's bound and the AMENDMENT's order-of-work clause), and no criterion authorises the change. Filed as row ETFS_GUARDRAIL-W1-S25 for the issuer; it needs a NEW cell because the renderer under data/etfs/scripts/ must change with it."
+    },
+    {
+      "item": "Deleting or overwriting the September publish keys the run wrote, or the daily slice the ladder wrote.",
+      "reason": "No S3 delete is within this order's bounds and none was authorised. Recorded as rows W1-S23 and W1-S24 for the issuer to disposition."
+    },
+    {
+      "item": "A second terraform apply, update-function-code, or any new trail/alarm/monitor/topic/schedule/env var.",
+      "reason": "Explicitly forbidden by the order's BOUNDS and by the standing monitor moratorium. None was performed."
+    },
+    {
+      "item": "Re-wording S15-AC2 so its expectation matches the post-apply world.",
+      "reason": "A worker judges a surprise's FORM, never its significance, and re-cutting a criterion is the issuer's act under the standing re-cut authority @9f4a57262f / @1ced87e810. Filed as row W1-S28 and reported FAIL on the literal match instead."
+    },
+    {
+      "item": "The inbox read at andrew@opalinvest.com and aj@opalinvest.com.",
+      "reason": "Assigned to the issuer by the face; a worker has no mail surface and SENT != EMITTED != READ."
+    }
+  ],
+  "surprises": [
+    "ETFS_GUARDRAIL-W1-S20: OBSERVATION / INERT -- the TO's 'one line' also required a signature change (_run took no event argument), so the event is threaded via a DEFAULTED parameter. Form only; deployed behaviour is exactly as specified.",
+    "ETFS_GUARDRAIL-W1-S21: OBSERVATION / ARMED (disarm_owner 2.0.0_SA_COO) -- safe-apply's HALT-GATE fails closed in any fresh worktree (rc=3 IDENTITY UNRESOLVED) because org/mcp/sessions/<session>.serial is gitignored and not provisioned at hand-off.",
+    "ETFS_GUARDRAIL-W1-S22: BLOCKING / ARMED (disarm_owner 2.0.0_SA_COO) -- THE ORDER'S CENTRAL PREMISE FAILS: an incomplete month does not refuse. September's two holes classify D, the gate refuses only on class C, C=0 for 3 of 3 partners, verdict=PUBLISH. This is what blocks S15-AC4.",
+    "ETFS_GUARDRAIL-W1-S23: BLOCKING / ARMED (disarm_owner 2.0.0_SA_COO) -- the run PUBLISHED a partial-month September report to the served keys and EMAILED it to BOTH recipients; the terminal send to andrew@ fired zero times. Both halves of the face's expectation inverted.",
+    "ETFS_GUARDRAIL-W1-S24: OBSERVATION / ARMED (disarm_owner 2.0.0_SA_COO) -- the ladder WROTE a served daily slice (daily/inflection/2026-09-09.json, 1 of 273 keys, 01:20:16Z), which the order's BOUNDS forbade; the bound is unsatisfiable for any run that exercises rung 1.",
+    "ETFS_GUARDRAIL-W1-S25: BLOCKING / ARMED (disarm_owner 2.0.0_SA_COO) -- LATENT AND SEVERE: the ONE terminal SES send is UNREACHABLE on real data (reader expects {'unresolved': [...]}, renderer writes partner-keyed), and the round-1 fixture hid it. FWD-7 cannot fire in production as deployed.",
+    "ETFS_GUARDRAIL-W1-S26: OBSERVATION / ARMED (disarm_owner 2.0.0_SA_COO) -- arm (e)'s log-based send oracle cannot exist for the terminal branch either: the orchestrator emits zero application log lines and no trail selects SES. Extends W1-S18 to the branch FWD-7 depends on.",
+    "ETFS_GUARDRAIL-W1-S27: OBSERVATION / ARMED (disarm_owner 2.0.0_SA_COO) -- the rung-3 ask names 1 of 2 class-D unresolved dates; 49financial/2026-09-09 has no ask row, and the omission is invisible without cross-reading coverage_unresolved.json.",
+    "ETFS_GUARDRAIL-W1-S28: OBSERVATION / INERT -- S15-AC2's <expect> can only match BEFORE the apply; run as the face names it now, the targeted plan prints 'No changes'. Recorded as a row, not re-worded."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "timeout 120 python -m pytest infra/aws/lambda/etfs-reports-orchestrator/test_terminal_send.py -q",
+      "result": "rc=0 -- '7 passed in 0.41s' (round-1 count 5, +2 as the face requires)."
+    },
+    {
+      "tool": ".tools/terraform.exe v1.9.8 (the estate binary, NOT the PATH v1.14.5)",
+      "invocation": ".tools/terraform.exe version ; .tools/terraform.exe -chdir=infra/aws/terraform/etfs-reports plan -no-color -input=false -lock=false -target=aws_lambda_function.orchestrator",
+      "result": "'Terraform v1.9.8 on windows_amd64'; plan rc=0 -- 'No changes. Your infrastructure matches the configuration.' (post-apply; the pre-apply '1 to change' reading is cited from ledger leg L2)."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc=0 -- '9 new row(s) of 49 total checked (40 pre-existing, NOT re-graded)' and 'OK: 1 file(s), all new rows carry their step-7/step-10 fields'; corpus gate 'OK: corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved)' over documents=35 rows=818."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py close-leg --slug etfs-guardrail-eg-s-15-september-refusal --leg-id {L4..L8} --proof <measured> ; python .tools/deploy_ledger.py close --slug etfs-guardrail-eg-s-15-september-refusal",
+      "result": "Each close-leg rc=0 ('OK: leg Ln closed'), final 'Remaining open: NONE'; close rc=0 -- 'OK: CLOSED deploy ledger ... all 8 legs proven; sentinel removed'. Inside the 4.0h window (opened 01:12:30Z, closed ~01:47Z)."
+    },
+    {
+      "tool": "the S15-AC4 battery (this worker's)",
+      "invocation": "timeout 900 python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs15_september_refusal.py",
+      "result": "rc=1 -- 'ARMS 6 of 9 PASS' then 'EGS15-NO-REFUSAL -- failing arms: c, d, e'."
+    },
+    {
+      "tool": ".tools/aws (CLI shim) -- s3api / logs / cloudtrail / ec2 / ssm / lambda",
+      "invocation": "s3api list-objects-v2 + get-object + head-object; logs filter-log-events over fixed ms bounds; cloudtrail lookup-events over fixed UTC bounds; ec2 describe-instances; ssm list-command-invocations --details",
+      "result": "All rc=0. Key readings: 8 of 8 objects under platinum/reports/2026-09/; refused/ KeyCount 0; 4 of 4 log events with 1 of 1 START RequestId; 0 of 35 AssumeRole rows for the scheduler role; SendRawEmail 0 beside StartInstances 1 / StopInstances 1; box State.Name=stopped; 1 of 273 daily/ keys written in the window."
+    }
+  ]
+}
