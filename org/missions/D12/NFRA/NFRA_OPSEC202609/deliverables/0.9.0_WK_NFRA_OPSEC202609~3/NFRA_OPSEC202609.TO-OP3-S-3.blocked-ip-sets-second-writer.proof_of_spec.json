@@ -1,0 +1,156 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPSEC202609.TO-OP3-S-3",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/prd/NFRA_OPSEC202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "5f4d4b894fd0900ae90cb5a453ffe7fedfc59017"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_OPSEC202609/decompositions/NFRA_OPSEC202609_DECOMP_round3.md",
+  "vintage_commit": "598bca6e96d25106f2e68dab0c6fb0b3fef0de64",
+  "to_ref": "org/missions/D12/NFRA/NFRA_OPSEC202609/task-orders/NFRA_OPSEC202609.TO-OP3-S-3.blocked-ip-sets-second-writer.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_OPSEC202609~3",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_OPSEC202609/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "13aeb26a2b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Row NFRA_OPSEC202609-Z-W3-S1 appended (new fenced ```json block). .tools/surprise-row-gate.py OK: 1 new row of 169 total, all step-7/step-10 fields present."
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20260910T1135Z_opsec-op3s3-blocked-ip-second-writer-verify_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "13aeb26a2b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Deploy ledger CLOSED via .tools/deploy_ledger.py, 6 of 6 legs proven, sentinel removed on close (created and deleted inside this same uncommitted session, so it never lands as a tracked file)."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "S3-AC1",
+   "criterion_verbatim": "exactly FOUR sets are listed, matching Z-S136's count, each showing its declared addresses value.",
+   "method": "manual_read_with_citation",
+   "invocation": "Read infra/aws/terraform/opal-gateway/waf.tf and infra/aws/terraform/portal-auth/waf-cloudfront.tf at the aws_wafv2_ip_set resource blocks; .tools/comp-find 'resource \"aws_wafv2_ip_set\"' infra/aws/terraform to confirm denominator and location.",
+   "output_evidence": "4 of 4 aws_wafv2_ip_set resources found, ALL outside this order's <paths> grant: opal_blocked_ips_regional_v4 (opal-gateway/waf.tf:259-298, addresses=[] at :264, lifecycle{ignore_changes=[addresses]} at :294-296); opal_blocked_ips_regional_v6 (waf.tf:300-339, addresses=[] at :305, lifecycle at :335-337); opal_blocked_ips_cloudfront_v4 (portal-auth/waf-cloudfront.tf:337-385, addresses=[] at :348, lifecycle at :378-380); opal_blocked_ips_cloudfront_v6 (waf-cloudfront.tf:387-429, addresses=[] at :392, lifecycle at :422-424). comp-find: 4 hit(s) across 516 file(s) scanned (8 BINARY not searched) for the literal resource declaration under infra/aws/terraform.",
+   "denominator": "4 of 4 resource declarations (comp-find denominator), matching Z-S136's count of 4",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S3-AC2",
+   "criterion_verbatim": "each set's live Addresses array is recorded, whether empty or not, as the before-state.",
+   "method": "live_read",
+   "invocation": ".tools/aws wafv2 list-ip-sets --scope REGIONAL|CLOUDFRONT --region us-east-1, then .tools/aws wafv2 get-ip-set --name <name> --scope <scope> --id <id> --region us-east-1 for each of the four.",
+   "output_evidence": "opal-blocked-ips-regional (f073f448-eb85-4d23-9306-0cadf4573331) Addresses:[]; opal-blocked-ips-regional-ipv6 (85f90377-7cba-45dd-baca-397310d61f8e) Addresses:[]; opal-blocked-ips-cloudfront (b2e008a6-40d9-4d07-bef5-1caa8b682bb3) Addresses:[]; opal-blocked-ips-cloudfront-ipv6 (eb1a0caa-60a0-492e-a685-e5456cea8b7d) Addresses:[]. All four read BEFORE any test action this session.",
+   "denominator": "4 of 4 sets read live",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S3-AC3",
+   "criterion_verbatim": "for each of the four, either a stated divergence or a stated agreement -- an agreement is a legitimate result and is NOT a reason to skip the remedy, because the hazard is what the NEXT apply would do.",
+   "method": "diff",
+   "invocation": "S3-AC1's declared addresses=[] set beside S3-AC2's live Addresses:[] for each of the four sets.",
+   "output_evidence": "AGREEMENT on all four: declared addresses=[] equals live Addresses:[] on opal-blocked-ips-regional, opal-blocked-ips-regional-ipv6, opal-blocked-ips-cloudfront, opal-blocked-ips-cloudfront-ipv6. SEPARATELY, and load-bearing for what follows: declared state on all four ALSO carries lifecycle{ignore_changes=[addresses]}, which row Z-S136's own 2026-09-04 measurement found ABSENT on all four. That is a divergence from the ROW, not from S3-AC1 vs S3-AC2, and it is what triggered this order's STOP-on-mismatch standing law -- filed as NFRA_OPSEC202609-Z-W3-S1.",
+   "denominator": "4 of 4 sets compared, 4 of 4 agree (declared empty == live empty)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S3-AC4",
+   "criterion_verbatim": "the plan does NOT propose removing that address.",
+   "method": "command",
+   "invocation": ".tools/aws wafv2 update-ip-set --name opal-blocked-ips-regional --scope REGIONAL --id f073f448-eb85-4d23-9306-0cadf4573331 --addresses 192.0.2.55/32 --lock-token ec5dab4c-5689-41db-83d4-3a3e7ec98be4 --region us-east-1; then terraform -chdir=infra/aws/terraform/opal-gateway plan -input=false -lock=false -no-color.",
+   "output_evidence": "update-ip-set returned NextLockToken ef5b9f46-c03a-41f5-a08c-f08f021ce9b0; get-ip-set confirmed Addresses:[\"192.0.2.55/32\"] live. Plan: 0 to add, 2 to change, 0 to destroy -- the only diff on opal_blocked_ips_regional_v4 is '+ description = ...'; addresses is among the '7 unchanged attributes hidden'. 192.0.2.55/32 does not appear anywhere in the plan output -- NOT proposed for removal. IDENTICAL diff shape to the plan taken immediately before the address was added (also 'Plan: 0 to add, 2 to change, 0 to destroy', same description-only diff).",
+   "denominator": "1 of 1 test address added, 1 of 1 plan run, 0 of 0 removal proposals for it",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S3-AC5",
+   "criterion_verbatim": "the test address is absent, and the set's membership matches its S3-AC2 before-state.",
+   "method": "live_read",
+   "invocation": ".tools/aws wafv2 update-ip-set --name opal-blocked-ips-regional --scope REGIONAL --id f073f448-eb85-4d23-9306-0cadf4573331 --addresses (empty) --lock-token ef5b9f46-c03a-41f5-a08c-f08f021ce9b0 --region us-east-1; then .tools/aws wafv2 get-ip-set on the same set.",
+   "output_evidence": "update-ip-set returned NextLockToken 6b49f6fb-3e87-4621-aa8b-d822b9f16891. get-ip-set opal-blocked-ips-regional post-cleanup: Addresses:[] -- matches S3-AC2's before-state exactly (empty).",
+   "denominator": "1 of 1 test address removed, 1 of 1 set matches its S3-AC2 before-state",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S3-AC6",
+   "criterion_verbatim": "the changed list contains only the IP-set resources this order names; the re-plan reads 0 to add / 0 to destroy / no forces-replacement.",
+   "method": "command",
+   "invocation": "N/A -- no safe-apply was run this session; see status_reason.",
+   "output_evidence": "No safe-apply changed-resource list exists for this session: S3-AC1-AC3 found nothing in this cell's declared-persistence scope needing to change (the lifecycle guard is already committed and already effective per S3-AC4). Supplementary evidence collected instead: two unscoped plans on opal-gateway (immediately before and after the S3-AC4 test address) both read 'Plan: 0 to add, 2 to change, 0 to destroy', both changes description-only; one unscoped plan on portal-auth reads 'Plan: 0 to add, 1 to change, 0 to destroy', the one change being an UNRELATED WAF managed-rule-group addition on the web ACL (AWSManagedRulesAmazonIpReputationList, known-bad-inputs), touching neither cloudfront IP set. Zero drift on the addresses attribute of any of the four sets, on either root, across all 3 plans run this session.",
+   "denominator": "0 safe-applies run (nothing in-scope to apply); 3 of 3 plans run this session show 0 address-attribute changes across 4 of 4 sets",
+   "status": "N/A-BY-CONSTRUCTION",
+   "status_reason": "The criterion's premise -- that this order's own safe-apply produces a changed-resource list -- does not hold: S3-AC1 found the remedy already committed by a DIFFERENT, earlier TO (TO-OP-S-15-19, commit 3758b14afc, 2026-09-04), five days predating this TO's 2026-09-10 cut. The only live drift present on either root belongs to resources this cell's decomposition postulate (iv) explicitly excludes ('moves nothing about which addresses deserve blocking') and which the opsec module's own founding comment bars from riding this project's applies ('no other resource rides the apply') -- applying it would widen scope beyond this cell. Filed as NFRA_OPSEC202609-Z-W3-S1."
+  },
+  {
+   "criterion_id": "S3-AC7",
+   "criterion_verbatim": "the entry is CLOSED, names its rollback, and its push state is stated as a MEASURED value.",
+   "method": "live_read",
+   "invocation": "Read org/critical_paths/change_management/20260910T1135Z_opsec-op3s3-blocked-ip-second-writer-verify_deploy_completion.md after python .tools/deploy_ledger.py close; git ls-remote origin SITEZ.",
+   "output_evidence": "Status: CLOSED -- nothing stranded -- closed 20260910T113732Z. 6 of 6 legs proven (L1-L6). ROLLBACK is leg L5 (activation: test address removed via aws wafv2 update-ip-set, cleanup), verified by leg L6 (post-cleanup get-ip-set matches the S3-AC2 baseline exactly); no terraform apply occurred this session so no infra rollback beyond the reverted test address is owed. PUSH STATE MEASURED: git ls-remote origin SITEZ returns 3277ee562b721cf40b08ce341e5f566a0d993885 -- this worker's commits (13aeb26a2b and this instance's own commit) are LOCAL-ONLY; this worker never pushes.",
+   "denominator": "6 of 6 ledger legs closed",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "S3-AC4's assertion is 'a live terraform plan does not propose removing a runtime-added address'. A passing assertion never seen to fail is untested, so this cites the MUTANT condition directly rather than constructing a synthetic one: the SAME instrument (terraform plan against these same four resources) evaluated BEFORE the lifecycle guard existed, since this seat cannot edit opal-gateway/waf.tf or portal-auth/waf-cloudfront.tf to remove the guard itself (neither is in this order's <paths>).",
+   "expected": "Under the mutant (no lifecycle guard) condition, the plan proposes removing a live-added address rather than leaving it untouched.",
+   "observed": "Row Z-S136's own GROUNDED evidence (2026-09-04, before commit 3758b14afc): the portal-auth unscoped plan read '0 to add, 3 to change, 0 to destroy' with the diff '- \"203.0.113.42/32\"' -- Terraform WAS queued to delete a live blocked address under the no-guard condition. TO-OP-S-15-19's own commit message records the same mutant-to-fixed transition measured on all four sets: 'BEFORE the fix ... AFTER the fix: portal-auth unscoped plan mentions 203.0.113.42 ZERO times'. So the assertion under test DOES fail under the mutant (no-guard) condition and DOES pass under the current, guarded condition this seat independently re-measured live today -- the check is not vacuously true.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "terraform plan run twice against infra/aws/terraform/opal-gateway with the same declared source: once immediately before adding the S3-AC4 test address, once immediately after.",
+   "observed": "Both runs returned 'Plan: 0 to add, 2 to change, 0 to destroy' with an IDENTICAL diff shape (description-only; addresses absent from the diff on both regional sets), despite the underlying LIVE Addresses value differing between the two runs (empty, then one element). The plan's treatment of addresses is stable at 'ignored' across both runs, exactly as the lifecycle block requires.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "infra/aws/terraform/opal-gateway/waf.tf and infra/aws/terraform/portal-auth/waf-cloudfront.tf were not edited.",
+   "reason": "Neither is in this order's <paths> grant (only infra/aws/terraform/opsec/ is granted for terraform), and neither needed editing: S3-AC1 found the lifecycle guard already committed there by TO-OP-S-15-19 (commit 3758b14afc), five days before this TO's cut."
+  },
+  {
+   "item": "No safe-apply was run against opal-gateway or portal-auth.",
+   "reason": "Nothing in this cell's scope needs changing (see S3-AC6's status_reason); the only live drift belongs to resources this cell's decomposition postulate (iv) excludes, and applying it would ride unrelated changes onto this apply, which both the opsec module's founding comment and this cell's own bound forbid."
+  },
+  {
+   "item": "The description-field drift on the regional pair (empty live vs. populated declared) and the WAF managed-rule-group additions on portal-auth's web ACL were observed but not touched.",
+   "reason": "Out of this cell's scope (persistence of already-blocked addresses only, per postulate (iv)) and belong to other cells/TOs."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPSEC202609-Z-W3-S1: this TO's premise is stale -- the lifecycle-guard remedy Z-S136 called for is already committed and live-effective (commit 3758b14afc, TO-OP-S-15-19, 2026-09-04, five days before this TO's 2026-09-10 cut), demonstrated live today; separately, this order's <paths> would not have reached the fix even had one been needed, since opal-gateway/waf.tf and portal-auth/waf-cloudfront.tf are not granted."
+ ],
+ "session_log": "N/A -- no session-log path is inside this worker's <paths> write surface (task order names only deliverables/prd/decompositions/surprise-channel/task-orders/critical_paths-change_management). The full session is this turn's transcript; the acceptance rows above and the closed deploy-ledger entry carry every invocation and output verbatim.",
+ "compiler_tools": [
+  {
+   "tool": ".tools/comp-find",
+   "invocation": "comp-find 'resource \"aws_wafv2_ip_set\"' infra/aws/terraform ; comp-find 'ip_set' infra/aws/terraform/opsec",
+   "result": "Established the S3-AC1 denominator (4 of 4 resource declarations) and their location, both OUTSIDE this order's <paths> -- opsec/ carries only data \"aws_wafv2_ip_set\" read references for the reconciler. This is the finding that anchors the surprise row."
+  },
+  {
+   "tool": ".tools/aws wafv2",
+   "invocation": "list-ip-sets (REGIONAL, CLOUDFRONT) / get-ip-set x4 / update-ip-set (add, then remove) on opal-blocked-ips-regional",
+   "result": "S3-AC2, S3-AC4, S3-AC5's live reads and the test-address add/remove, fully reverted and confirmed."
+  },
+  {
+   "tool": "terraform v1.15.8 (-lockfile=readonly init, then plan)",
+   "invocation": "terraform -chdir=infra/aws/terraform/opal-gateway|portal-auth init -input=false -lockfile=readonly ; plan -input=false -lock=false -no-color",
+   "result": "S3-AC4/AC6's live demonstration and its supplementary evidence. -lockfile=readonly chosen specifically because opal-gateway and portal-auth are NOT in this order's <paths>: init succeeded on both roots without touching the tracked .terraform.lock.hcl (git status --porcelain confirmed clean before and after on both); the ephemeral .terraform/ provider cache is gitignored (**/.terraform/, .gitignore:205)."
+  },
+  {
+   "tool": ".tools/deploy_ledger.py",
+   "invocation": "open --slug opsec-op3s3-blocked-ip-second-writer-verify --leg L1..L6 ; close-leg x6 ; close",
+   "result": "S3-AC7's closed ledger entry, 6 of 6 legs proven, sentinel removed on close."
+  },
+  {
+   "tool": ".tools/surprise-row-gate.py",
+   "invocation": "org/missions/D12/NFRA/NFRA_OPSEC202609/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "result": "OK: 1 new row of 169 total, all step-7/step-10 fields present (after correcting the id to carry the Z- fabric infix the gate requires for fabric=site-z, per the id pattern's own composition rule)."
+  }
+ ]
+}
