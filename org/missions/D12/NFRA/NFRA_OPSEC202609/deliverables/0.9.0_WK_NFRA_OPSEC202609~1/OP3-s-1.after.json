@@ -1,0 +1,47 @@
+{
+  "phase": "AFTER -- taken after the control is armed and soaked. Control: Gravity Forms core honeypot (form_id=1, enableHoneypot=true, honeypotAction left at its default 'spam'), COUNT-equivalent per S1-AC3's reasoning in the proof instance.",
+  "captured_at": "2026-09-10T12:08:19Z",
+  "captured_by": "0.9.0_WK_NFRA_OPSEC202609~1",
+  "box": "i-0152e3fe2599fa630 (Elastic IP 18.208.18.213, OpenLiteSpeed, WordPress root /usr/local/lsws/wordpress), reached via AWS SSM",
+  "arming_timestamp": "2026-09-10T11:36:22Z",
+  "window": "2026-09-10T11:36:22Z (the control's arming instant) through 2026-09-10T12:08:19Z (this capture), 0.02219 days (~31m57s). ⛔ THIS WINDOW IS ~1,660x SHORTER THAN THE BASELINE'S 36.82-DAY WINDOW -- named plainly rather than smoothed over. A single agent session cannot hold a multi-week soak; the window used is what a live SSM soak inside this session could genuinely produce, bounded by real wall-clock sleeps (two 10-minute holds after arming, confirmed by `date -u` reads before and after each). The two numbers and their implied rates are carried below for S1-AC7's judgment rather than asserted as a settled volume verdict.",
+  "denominator": "Two counts over [window], both restricted to Gravity Forms form_id=1 (the /contact/ form): (A) origin OpenLiteSpeed access-log lines matching an HTTP POST to path /contact/, counted by concatenating every retained access.log* file on i-0152e3fe2599fa630 whose lines fall inside [window] and grepping the literal string 'POST /contact/' (verbatim path match; no query-string variant was observed); (B) Gravity Forms entry-store rows in wp_gf_entry for form_id=1 whose date_created falls inside [window], read via `wp db query` over SSM (root, WP-CLI 2.12.0). Each count is split into AUTOMATED vs HUMAN-LIKE by the discriminator below; a per-day rate (count / window-days) is carried alongside the raw count so that a before-window and an after-window of unequal length stay comparable.",
+  "discriminator": "A submission (an access-log line, by its User-Agent request-header field; or a GF entry, by its stored user_agent column) is classed AUTOMATED if that User-Agent string (i) is wrapped in a literal escaped double-quote pair -- the WHOLE declared browser string begins AND ends with a raw \" character, an artifact no real browser ever emits on its own UA header and which a form-spam tool's templated UA literal produced here -- or (ii) contains a case-insensitive 'bot' token or a self-declared non-browser client string (e.g. 'DomainIntelBot/1.0'). Otherwise HUMAN-LIKE. MEASURED, not assumed: every quoted-UA/bot-token hit in the access log matches a quoted-UA/bot-token row in the GF entry store at the same source IP and the same timestamp (8 of 8 cross-checked in this baseline read), and several flagged addresses (185.220.100.253, 185.220.100.255, 185.220.101.174 among them) fall in the 185.220.100.0/22 range historically documented as Tor exit-node infrastructure -- offered as CORROBORATING, not load-bearing, since no live IP-reputation vendor lookup was run (none is authorized for this task). THE STATUS-CODE TRAP NAMED IN THE TASK ORDER'S GROUNDING SECTION DOES NOT APPLY TO THIS ENDPOINT: WordPress's failed-login-returns-200/success-returns-302 asymmetry is a wp-login.php behavior specific to that form; Gravity Forms submits form 1 via gform_submission_method=iframe, so BOTH an accepted and a rejected /contact/ POST return HTTP 200 from the origin alike (confirmed: all 53 in-window log lines read status 200, including the ones that never produced a stored entry) -- status code carries NO discriminating signal for this endpoint and none is used here.",
+  "measured": {
+    "access_log": {
+      "instrument": "SSM AWS-RunShellScript on i-0152e3fe2599fa630, root shell, grep 'POST /contact/' over the current (unrotated since arming) access.log; confirmed no new rotated file was created during the window (single active access.log throughout, 43264 lines at capture)",
+      "post_contact_total_in_window": 2,
+      "post_contact_organic_total": 0,
+      "post_contact_organic_automated": 0,
+      "post_contact_organic_human_like": 0,
+      "post_contact_organic_automated_rate_per_day": 0.0,
+      "post_contact_organic_human_like_rate_per_day": 0.0,
+      "excluded_as_this_seats_own_test_traffic": [
+        "108.242.96.89 [10/Sep/2026:11:40:15] UA='OpalOpsecS1AC4-ScriptedProbe/1.0 (+NFRA_OPSEC202609; marker=s1ac4-opsec-scriptedprobe-20260910)' -- the S1-AC4 scripted no-human probe, see acceptance row",
+        "108.242.96.89 [10/Sep/2026:11:44:51] UA='Mozilla/5.0 ... Chrome/128.0.0.0 ...' -- the S1-AC5 real-visitor-equivalent probe, see acceptance row"
+      ],
+      "all_200_status": true
+    },
+    "gf_entry_store": {
+      "instrument": "SSM AWS-RunShellScript, `wp db query` against wp_gf_entry / wp_gf_entry_meta as root, WP-CLI 2.12.0",
+      "form_id": 1,
+      "in_window_total": 2,
+      "in_window_organic_total": 0,
+      "in_window_organic_automated": 0,
+      "in_window_organic_human_like": 0,
+      "excluded_as_this_seats_own_test_entries": [
+        "entry id 22, status=spam, ip=108.242.96.89, date_created=2026-09-10 11:40:15 -- the S1-AC4 probe's outcome",
+        "entry id 23, status=active, ip=108.242.96.89, date_created=2026-09-10 11:44:51 -- the S1-AC5 probe's outcome"
+      ]
+    },
+    "organic_traffic_note": "ZERO organic (non-test) POSTs to /contact/ arrived, in either surface, during the ~32-minute after-window. This is NOT read as a volume drop: the baseline's own measured automated rate (0.217/day, i.e. roughly one automated fillout every 4.6 days) predicts an EXPECTED count of ~0.0048 automated submissions in a window this short -- an observed zero is indistinguishable from the pre-control rate at this window length. The organic before/after comparison is therefore UNDERPOWERED BY WINDOW LENGTH, named plainly per C-18's own violation clause ('an after-read on a different window ... than the before-read') rather than presented as a clean naive-majority result. What IS measured cleanly, independent of window length, is the mechanism check: a labeled scripted (no-human) submission and a labeled real-visitor-equivalent submission, both run inside this same after-window -- see S1-AC3/AC4/AC5 in the proof instance."
+  },
+  "control_configuration_read_back": {
+    "instrument": "wp eval GFAPI::get_form(1) over SSM, root, WP-CLI 2.12.0, read AFTER arming",
+    "enableHoneypot": true,
+    "honeypotAction": "unset (Gravity Forms core default: 'spam' -- on failure the submission is NOT aborted early; GFCommon::set_spam_filter marks the entry status='spam', no notification email fires, and the entry stays OUT of the default/active Entries view but is not destroyed)",
+    "enableSubmitSpeedCheck": "unset (not enabled; only the honeypot-field-empty + version_hash-presence + state-validity checks are live, all part of Gravity Forms' own bundled honeypot feature, not a separate control this seat added)",
+    "no_waf_or_edge_rule_of_any_kind_touches_this_origin": true,
+    "site_anti_automation_posture_unchanged_otherwise": "reCAPTCHA/hCaptcha/Turnstile still absent; Akismet not installed; simple-cloudflare-turnstile plugin present but INACTIVE (pre-existing, untouched by this seat)"
+  }
+}
