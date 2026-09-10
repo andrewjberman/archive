@@ -1,0 +1,140 @@
+diff --git a/infra/aws/lambda/m365-ms-ingest-liveness/lambda_function.py b/infra/aws/lambda/m365-ms-ingest-liveness/lambda_function.py
+index 82d9adfd53..efd7ef89ae 100644
+--- a/infra/aws/lambda/m365-ms-ingest-liveness/lambda_function.py
++++ b/infra/aws/lambda/m365-ms-ingest-liveness/lambda_function.py
+@@ -21,6 +21,9 @@ import boto3
+ 
+ HEALTH_URL = os.environ["MS_HEALTH_URL"]
+ BEARER_SECRET_ID = os.environ["MS_INGEST_BEARER_SECRET_ID"]
++# FWD-12: the gateway's capability-token EXCHANGE endpoint. Derived from HEALTH_URL when the
++# declaration does not set it, so the two planes cannot disagree silently.
++TOKEN_URL = os.environ.get("MS_TOKEN_URL", HEALTH_URL.rsplit("/", 1)[0] + "/token")
+ ALERT_TOPIC_ARN = os.environ["ALERT_TOPIC_ARN"]
+ ALERT_EMAIL = os.environ.get("ALERT_EMAIL", "")
+ SES_SENDER = os.environ.get("SES_SENDER", "")
+@@ -32,6 +35,21 @@ def _bearer() -> str:
+     return raw.split()[0] if raw else ""
+ 
+ 
++def _capability(static_bearer: str) -> str:
++    """FWD-12: trade the long-lived static bearer for a short-TTL capability token at the gateway's
++    exchange endpoint, so the credential presented to the PROBE url EXPIRES rather than being held.
++    The static bearer is presented ONCE, to the exchange endpoint only. Raising here is deliberate:
++    the caller runs this inside the probe's EXISTING try, so a failed exchange is a failed probe on
++    the path that already exists -- no new alert trigger, no new branch."""
++    req = urllib.request.Request(
++        TOKEN_URL, data=b"", method="POST", headers={"Authorization": f"Bearer {static_bearer}"}
++    )
++    with urllib.request.urlopen(req, timeout=20) as r:
++        tok = json.loads(r.read().decode())
++    print(f"cred_path=exchange url={TOKEN_URL} aud={tok.get('aud')} ttl={tok.get('expires_in')}s")
++    return tok["capability_token"]
++
++
+ _SUBJECT = "ALERT: MS-ingest gateway liveness FAIL -- Andrew delegated-token refresh may have lapsed"
+ 
+ 
+@@ -63,8 +81,9 @@ def lambda_handler(event, context):
+     if not bearer:
+         _alert("bearer secret empty/missing")
+         return {"ok": False, "alerted": True, "detail": "no_bearer"}
+-    req = urllib.request.Request(HEALTH_URL, headers={"Authorization": f"Bearer {bearer}"})
+     try:
++        bearer = _capability(bearer)  # FWD-12: static bearer -> short-TTL capability token
++        req = urllib.request.Request(HEALTH_URL, headers={"Authorization": f"Bearer {bearer}"})
+         with urllib.request.urlopen(req, timeout=20) as r:
+             ok = r.status == 200 and bool(json.loads(r.read().decode()).get("ok"))
+             detail = f"status={r.status}"
+@@ -75,4 +94,4 @@ def lambda_handler(event, context):
+     if not ok:
+         _alert(detail)
+         return {"ok": False, "alerted": True, "detail": detail}
+-    return {"ok": True, "detail": detail}
++    return {"ok": True, "cred_path": "exchange", "detail": detail}
+diff --git a/infra/aws/lambda/m365-otp-liveness/lambda_function.py b/infra/aws/lambda/m365-otp-liveness/lambda_function.py
+index a03d3a1609..3da8fd19d7 100644
+--- a/infra/aws/lambda/m365-otp-liveness/lambda_function.py
++++ b/infra/aws/lambda/m365-otp-liveness/lambda_function.py
+@@ -20,6 +20,9 @@ import boto3
+ 
+ HEALTH_URL = os.environ["OTP_HEALTH_URL"]
+ BEARER_SECRET_ID = os.environ["OTP_BEARER_SECRET_ID"]
++# FWD-12: the gateway's capability-token EXCHANGE endpoint. Derived from HEALTH_URL when the
++# declaration does not set it, so the two planes cannot disagree silently.
++TOKEN_URL = os.environ.get("OTP_TOKEN_URL", HEALTH_URL.rsplit("/", 1)[0] + "/token")
+ ALERT_TOPIC_ARN = os.environ["ALERT_TOPIC_ARN"]
+ # SES is an APP-LEVEL send (no user/delegated token) -> it survives the EXACT failure this rider
+ # alerts on (gateway can't mint Andrew's delegated token). Optional (best-effort): a missing/sandbox
+@@ -36,6 +39,21 @@ def _bearer() -> str:
+     return raw.split()[0] if raw else ""
+ 
+ 
++def _capability(static_bearer: str) -> str:
++    """FWD-12: trade the long-lived static bearer for a short-TTL capability token at the gateway's
++    exchange endpoint, so the credential presented to the PROBE url EXPIRES rather than being held.
++    The static bearer is presented ONCE, to the exchange endpoint only. Raising here is deliberate:
++    the caller runs this inside the probe's EXISTING try, so a failed exchange is a failed probe on
++    the path that already exists -- no new alert trigger, no new branch."""
++    req = urllib.request.Request(
++        TOKEN_URL, data=b"", method="POST", headers={"Authorization": f"Bearer {static_bearer}"}
++    )
++    with urllib.request.urlopen(req, timeout=20) as r:
++        tok = json.loads(r.read().decode())
++    print(f"cred_path=exchange url={TOKEN_URL} aud={tok.get('aud')} ttl={tok.get('expires_in')}s")
++    return tok["capability_token"]
++
++
+ _SUBJECT = "ALERT: OTP gateway liveness FAIL -- Andrew delegated-token refresh may have lapsed"
+ 
+ 
+@@ -72,8 +90,9 @@ def lambda_handler(event, context):
+     if not bearer:
+         _alert("bearer secret empty/missing")
+         return {"ok": False, "alerted": True, "detail": "no_bearer"}
+-    req = urllib.request.Request(HEALTH_URL, headers={"Authorization": f"Bearer {bearer}"})
+     try:
++        bearer = _capability(bearer)  # FWD-12: static bearer -> short-TTL capability token
++        req = urllib.request.Request(HEALTH_URL, headers={"Authorization": f"Bearer {bearer}"})
+         with urllib.request.urlopen(req, timeout=20) as r:
+             ok = r.status == 200 and bool(json.loads(r.read().decode()).get("ok"))
+             detail = f"status={r.status}"
+@@ -84,4 +103,4 @@ def lambda_handler(event, context):
+     if not ok:
+         _alert(detail)
+         return {"ok": False, "alerted": True, "detail": detail}
+-    return {"ok": True, "detail": detail}
++    return {"ok": True, "cred_path": "exchange", "detail": detail}
+diff --git a/infra/aws/terraform/opal-gateway/ms-ingest.tf b/infra/aws/terraform/opal-gateway/ms-ingest.tf
+index ce16a2fa1e..3c3dc90ee3 100644
+--- a/infra/aws/terraform/opal-gateway/ms-ingest.tf
++++ b/infra/aws/terraform/opal-gateway/ms-ingest.tf
+@@ -83,7 +83,11 @@ resource "aws_lambda_function" "ms_ingest_liveness" {
+ 
+   environment {
+     variables = {
+-      MS_HEALTH_URL              = "https://mcp.opalinvest.dev/ms/health"
++      MS_HEALTH_URL = "https://mcp.opalinvest.dev/ms/health"
++      # NFRA_OPSEC202609 OP3A-s-1 / FWD-12: the probe presents its static bearer ONCE, HERE, and
++      # probes with the short-TTL capability token it gets back (ms_token_capability, priority 33).
++      # The static bearer is NOT retired and this secret is NOT revoked -- dual-accept stands.
++      MS_TOKEN_URL               = "https://mcp.opalinvest.dev/ms/token"
+       MS_INGEST_BEARER_SECRET_ID = "opal/mcp/ms-ingest-token"
+       ALERT_TOPIC_ARN            = data.aws_sns_topic.critical_surface_alerts.arn
+       ALERT_EMAIL                = "andrew@opalinvest.com"
+diff --git a/infra/aws/terraform/opal-gateway/otp-liveness.tf b/infra/aws/terraform/opal-gateway/otp-liveness.tf
+index f2f4a9097c..5fe2f55b14 100644
+--- a/infra/aws/terraform/opal-gateway/otp-liveness.tf
++++ b/infra/aws/terraform/opal-gateway/otp-liveness.tf
+@@ -80,7 +80,11 @@ resource "aws_lambda_function" "otp_liveness" {
+ 
+   environment {
+     variables = {
+-      OTP_HEALTH_URL       = "https://mcp.opalinvest.dev/otp/health"
++      OTP_HEALTH_URL = "https://mcp.opalinvest.dev/otp/health"
++      # NFRA_OPSEC202609 OP3A-s-1 / FWD-12: the probe presents its static bearer ONCE, HERE, and
++      # probes with the short-TTL capability token it gets back. The static bearer is NOT retired
++      # and this secret is NOT revoked -- three cross-lane callers still rely on dual-accept.
++      OTP_TOKEN_URL        = "https://mcp.opalinvest.dev/otp/token"
+       OTP_BEARER_SECRET_ID = "blackdiamond/49f/otp-gateway-token"
+       ALERT_TOPIC_ARN      = data.aws_sns_topic.critical_surface_alerts.arn
+       # SES app-level human channel (best-effort; goes live when ALERT_EMAIL is SES-verified or
