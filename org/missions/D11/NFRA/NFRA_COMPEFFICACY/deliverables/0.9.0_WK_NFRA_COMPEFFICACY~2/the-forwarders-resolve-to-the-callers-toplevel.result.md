@@ -9,7 +9,7 @@ A bare-name comp-tool now runs **the file the caller changed**: from a fresh lin
 `comp-which --which` answers that worktree's `.tools/comp-which`, from the main tree it answers the
 main tree's, and a marker planted in the worktree's copy **executes** from the worktree and not from
 the main tree. **210 of 210** regenerated forwarders carry the resolution and `--which`, on both
-planes. **`<status>` was NOT flipped**: limb (ii) is edited, exercised and **not landed** — the
+planes. **`<status>` is flipped to `complete`**: limb (i) landed at `13df262a9b` and limb (ii) at `9879030790`, after two correct withholdings — the
 commit-gate refuses any commit touching a `.tools/comp-*` file while `infra/system/06_current_state`
 is stale, and that staleness pre-dates this order (row `NFRA_COMPEFFICACY-W2-S6`, BLOCKING).
 
@@ -222,7 +222,29 @@ very commit is landing**. The only exit is a regeneration in a tree where the ed
 and the source in **one** commit: `infra/system/` inside `<paths>`. Row `W2-S9`; the override remains
 unspent.
 
-**The measured behaviour of limb (ii) is on the record even though git does not carry it:** the two
+### 4c. IT LANDED — the loop closed from inside the tree, at the third attempt
+
+`2.0.0_SA_COO` widened this order's `<paths>` at `e618f3f88d` to include
+`infra/system/06_current_state.md` and `infra/system/06_current_state.json` — the exit §4b had
+named. CLOUD merged (harness sha256 `bf778f5d99c2…` unchanged again), then
+`bash .tools/comp-system --budget 600` **in this tree, with the edit present** → rc 0,
+`wrote infra\system\06_current_state.md + infra\system\06_current_state.json
+(grounded-against-live; as_of HEAD=2ab188729b)`, plus `PRESENT_WITH_ZERO_RESULTS: subject=managed-region
+drift; 0 changed rows across 26 regions in 6 files`.
+
+**The numbers close exactly.** The gate's second refusal computed this worktree at
+`a8192f19f4f25688734f53121074ad71be22aaaaf454dd8b4a78c232e9dfface / 260` against 06's recorded
+`491f0189b4… / 260`. After the in-tree compile, 06's `header/source_fingerprint` **reads
+`a8192f19f4… / 260`** — the delta the loop could not close from outside, closed from inside. All three
+files then committed in **one** commit, `9879030790`, and `git show 9879030790:.tools/comp-which-routing-test.py | sha256sum`
+= `bf778f5d99c2…`, the bytes `cee2_harness_runtime.json` names — so arm (e)'s evidence describes exactly
+the committed file.
+
+**`system-current-override:` was never spent, in any of the three attempts.** The override exists for a
+case where regeneration is impossible; here it was impossible only *from outside the tree*, and that
+distinction is the whole finding.
+
+**The measured behaviour of limb (ii), now also carried by git:** the two
 argparse refusals both fire (`--rebaseline` with `--out`; `--out` naming the baseline path), the bare
 run writes `.comp-graph/routing-test/…` and says so, the committed baseline is byte-identical across
 two full runs, and the bound is stated from `MEASURED_RUNTIME_S = (680, 826)` /
@@ -289,7 +311,7 @@ set above the maximum observed rather than at it.
 | `NFRA_COMPEFFICACY-W2-S6` | **BLOCKING** | ARMED | a granted path is uncommittable by the lane it was granted to; the staleness pre-dates the order |
 | `NFRA_COMPEFFICACY-W2-S7` | OBSERVATION | INERT | the face commands `deploy_ledger.py open` while `<paths>` does not name `org/critical_paths/` |
 | `NFRA_COMPEFFICACY-W2-S8` | OBSERVATION | ARMED | `E2-AC1`'s 900 s bound vs arm (e)'s 651.6–826 s subject |
-| `NFRA_COMPEFFICACY-W2-S9` | **BLOCKING** | ARMED | the W2-S6 remedy was applied and the block survived it; 06 can only describe committed content, so the loop does not converge |
+| `NFRA_COMPEFFICACY-W2-S9` | **BLOCKING** | ARMED | the W2-S6 remedy was applied and the block survived it; 06 can only describe committed content, so the loop does not converge. **RESOLVED** by the remedy it named: grant widened @`e618f3f88d`, 06 compiled in this tree, all three files in one commit @`9879030790` |
 
 ---
 
@@ -299,13 +321,15 @@ set above the maximum observed rather than at it.
   about the generator every future seat runs.
 - **The committed CloudComp baseline was never written** — sha256 `1befbed889…` before the first run,
   after the second, and now; `git status` clean on it across both 650–830 s runs.
-- **`infra/system/06_current_state.{md,json}` was not touched** and no `system-current-override` was
-  spent — out of grant, hence rows `W2-S6` and `W2-S9` rather than a bypass, and still unspent after
-  the issuer's regeneration failed to clear the block.
-- **`<status>` was NOT flipped to `complete`, and was re-withheld after the remedy.** Both
-  mechanical criteria pass by output and the instance validates rc 0, but DELIVERABLE 1 says *the fix,
-  both limbs, committed on your branch*, and limb (ii) is not committed — the re-run directed after
-  the regeneration was refused again (row `W2-S9`). A valid instance is not a met order.
+- **`system-current-override:` was never spent**, across all three refusals.
+  `infra/system/06_current_state.{md,json}` was untouched while it was out of grant — hence rows
+  `W2-S6` and `W2-S9` rather than a bypass — and was written only after `e618f3f88d` put it inside
+  `<paths>`, by regenerating it in this tree rather than by hand.
+- **`<status>` was withheld TWICE and is flipped now.** Both withholdings were correct at the
+  time: DELIVERABLE 1 says *the fix, both limbs, committed on your branch*, and limb (ii) was not
+  committed (rows `W2-S6`, then `W2-S9` after the first remedy was refused again). It is flipped now
+  because the deliverable is **met** — limb (i) at `13df262a9b`, limb (ii) at `9879030790` — not
+  because the criteria were re-read.
 - **Nothing pushed, merged or rebased** beyond merging CLOUD into this branch as the issuer directed.
 - **The backup is still in place** at `C:/tmp/wk-compeff-8-1/.scratch/bin-backup-pre-ce-e-2` (211
   files) for the length of the order.
