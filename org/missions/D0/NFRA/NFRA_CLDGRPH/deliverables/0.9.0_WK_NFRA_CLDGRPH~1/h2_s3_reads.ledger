@@ -1,0 +1,23 @@
+# NFRA_CLDGRPH TO-CG-H-2 -- S3 ACTS TAKEN BY 0.9.0_WK_NFRA_CLDGRPH~1, ONE LINE EACH.
+#
+# The order's standing law PERMITS a READ of an Opal S3 object (get-object / head-object /
+# list) FROM s3://opal-313476888478-globgrph to local disk: it publishes nothing, reaches no
+# SNS topic and pages nobody. It FORBIDS every write. This ledger exists so that "I took no
+# read" and "I took a read I was allowed" are distinguishable in the record -- a zero here
+# would have been indistinguishable from a hold that was never tested.
+#
+# FORM: <CLASS> <verb> <target> rc=<rc> -- <purpose>
+# CLASS is READ or WRITE. A WRITE line in this file is a violation by construction; there are
+# none, and h2_no_egress.sh counts both classes rather than asserting the count it wants.
+#
+READ s3api-head-object s3://opal-313476888478-globgrph/snapshots/20260909/graph-20260909.tar.gz rc=0 -- vintage of the object row W2-S75 names
+READ s3api-list-objects-v2 s3://opal-313476888478-globgrph/snapshots/ rc=0 -- what snapshot keys exist and when each was last written
+READ s3api-get-bucket-versioning s3://opal-313476888478-globgrph rc=0 -- can the overwritten 21:05:21Z bytes be recovered (answer: no Status, unversioned)
+READ s3api-list-object-versions s3://opal-313476888478-globgrph/snapshots/20260909/ rc=0 -- one version, VersionId null, confirming the same
+READ s3api-get-object s3://opal-313476888478-globgrph/snapshots/20260909/graph-20260909.tar.gz rc=0 -- the tarball W2-S75 needed, to local disk under .scratch/
+READ s3api-get-object s3://opal-313476888478-globgrph/snapshots/20260910/graph-20260910.tar.gz rc=0 -- the following cycle, for the population trend
+READ s3api-get-object s3://opal-313476888478-globgrph/snapshots/latest.txt rc=0 -- which key the producer would read back on its next cycle
+READ boto3-get-object s3://opal-313476888478-globgrph/snapshots/20260909/graph-20260909.tar.gz rc=0 -- h2_snapshot_census.py, first run (cold cache)
+READ boto3-get-object s3://opal-313476888478-globgrph/snapshots/20260910/graph-20260910.tar.gz rc=0 -- h2_snapshot_census.py, first run (cold cache)
+READ boto3-head-object s3://opal-313476888478-globgrph/snapshots/20260909/graph-20260909.tar.gz rc=0 -- h2_snapshot_census.py, later run (warm cache: bytes local, vintage still read live)
+READ boto3-head-object s3://opal-313476888478-globgrph/snapshots/20260910/graph-20260910.tar.gz rc=0 -- h2_snapshot_census.py, later run (warm cache)
