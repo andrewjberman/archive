@@ -1,6 +1,6 @@
 # NFRA_REPORT -- EDITION SPECIMEN
 
-**Composed by:** `compose_edition.py` (cell `RP-s-15`, `0.9.0_WK_NFRA_REPORT~1`) -- **Composed at (this run):** 2026-09-10T01:44:19Z
+**Composed by:** `compose_edition.py` (cell `RP-s-15`, `0.9.0_WK_NFRA_REPORT~1`) -- **Composed at (this run):** 2026-09-10T02:49:57Z
 
 **REGION KEY, per C-AI part 1 (declared per region, legible without knowing how this report is built):**
 - `QUOTED` -- transcribed from a round-1 deliverable, with a citation. See `compose_edition.py`'s `ROW_FACTS`.

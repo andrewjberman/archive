@@ -1,0 +1,134 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_REPORT.TO-RP-s-16",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/decompositions/NFRA_REPORT_DECOMP_R2.md",
+  "vintage_commit": "e37b4e4a2cb455b96abc5c4ea291fc518c8b7a11",
+  "to_ref": "org/missions/D12/NFRA/NFRA_REPORT/task-orders/NFRA_REPORT.TO-RP-s-16.run-on-trading-mornings-and-deliver.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/prd/NFRA_REPORT_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "1aae9c43fe60ff08f4bf5d88eb7ae852135f3321"
+ },
+ "assignee": "0.9.0_WK_NFRA_REPORT~1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/RUN_AND_DELIVERY.md",
+   "kind": "doc",
+   "commit_or_etag": "9df305a5c1a419aae40aa512bf4dca67771693cb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commit_or_etag is the git BLOB sha (git hash-object <path>, content-addressed). Verifiable post-commit: git show <this commit>:.../RUN_AND_DELIVERY.md | git hash-object --stdin -- must equal 9df305a5c1a419aae40aa512bf4dca67771693cb. This is the cell's own deliverable: names the resolved trading-calendar frontier, records three real runs of the gate below, and states the declared limit on delivery (section 3). No live-infra deploy scope -- a markdown document."
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/run_gate.py",
+   "kind": "script",
+   "commit_or_etag": "d66fb8a85c2bd37bc7dc33bd0b5d75c3c993aa77",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commit_or_etag is the git BLOB sha. Verifiable post-commit: git show <this commit>:.../run_gate.py | git hash-object --stdin -- must equal d66fb8a85c2bd37bc7dc33bd0b5d75c3c993aa77. This is the ACT built and run for real: a trading-day gate that resolves toplevel/lib/trading_calendar.py by a derived repo root, refuses to run the composer on a non-trading day, and invokes the unedited compose_edition.py (subprocess) on a trading day. It is a local script invoked by hand this session, not a wired, unattended, live-infra trigger -- it mints no alert/alarm/topic/subscription and calls no AWS API at all (every action is local git/python/subprocess)."
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/EDITION_SPECIMEN.md",
+   "kind": "doc",
+   "commit_or_etag": "644406002bacb461606825ce33994195319babef",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commit_or_etag is the git BLOB sha of the specimen as re-composed by this cell's RUN 3 (`python run_gate.py`, no --date, gated True on 2026-09-10, invoked the unedited compose_edition.py). Verifiable post-commit: git show <this commit>:.../EDITION_SPECIMEN.md | git hash-object --stdin -- must equal 644406002bacb461606825ce33994195319babef, AND diffing this blob against RP-s-15's own committed EDITION_SPECIMEN.md blob (9b0546e272f81185ebd83c90f92123d78f1a730c) shows exactly one changed line -- the 'Composed at (this run)' timestamp -- confirming the gate called the real composer rather than a stub. Not this cell's own composer logic (RP-s-15's, unedited); included here because this cell's own gate run is what produced this exact byte content."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "grep -c -E '[a-z_/]+/lib/trading_calendar\\.py' .../RUN_AND_DELIVERY.md; expect a count of 1 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -E '[a-z_/]+/lib/trading_calendar\\.py' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/RUN_AND_DELIVERY.md",
+   "output_evidence": "3 (rc=0) -- all three occurrences are the resolved form 'toplevel/lib/trading_calendar.py' (sections 1, 2 and 3), matching the [a-z_/]+ prefix + literal frontier-path pattern; never a bare basename. Re-run twice this session, identical count both times (determinism, below).",
+   "denominator": "3 matching lines out of 74 total lines in the file; expectation was >=1",
+   "status": "PASS",
+   "expect": "([1-9]|[1-9][0-9]+)\\b"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "grep -c -i -E 'labor day|holiday' .../RUN_AND_DELIVERY.md; expect a count of 1 or greater.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i -E 'labor day|holiday' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/RUN_AND_DELIVERY.md",
+   "output_evidence": "4 (rc=0) -- section 0 names 'Labor Day, 2026-09-07' as the measured starting-state failure (brief F2); section 1 cites the frontier's own docstring ('NYSE holiday'); section 2's RUN 1 re-creates and shows FIXED the exact Labor Day failure via a live invocation of the gate; the same RUN 1 narrative repeats the phrase once more in its closing sentence.",
+   "denominator": "4 matching lines out of 74 total lines in the file; expectation was >=1",
+   "status": "PASS",
+   "expect": "([1-9]|[1-9][0-9]+)\\b"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "grep -c -i -E 'create-topic|put-metric-alarm|subscribe --' .../RUN_AND_DELIVERY.md; expect a count of 0 -- grep -c exits rc=1 on zero and THAT IS THE PASS; score the OUTPUT, not the exit code.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i -E 'create-topic|put-metric-alarm|subscribe --' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/RUN_AND_DELIVERY.md",
+   "output_evidence": "0 (rc=1, the documented PASS shape). The document discusses subscriptions, topics and alarms only in prose (e.g. 'a working non-SMS subscriber', 'CloudWatch alarm'), never as a literal AWS CLI verb string -- the alerting moratorium's absence limb is satisfied by construction, not by accident, and no alarm/topic/subscription was in fact created, edited or repaired by this cell (section 3 states plainly that no infra path is in this cell's write surface).",
+   "denominator": "0 matching lines out of 74 total lines in the file; expectation was exactly 0",
+   "status": "PASS",
+   "expect": "^0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two mutants run against scratch copies of RUN_AND_DELIVERY.md in this worktree's own .scratch/ (never against the committed file, removed after the test). Mutant A: every 'trading_calendar.py' path occurrence replaced with 'REDACTED_MODULE' and every case-insensitive 'labor day'/'holiday' occurrence replaced with a neutral token, then re-ran AC1's and AC2's exact invocations. Mutant B: the real file plus three appended lines using the literal forbidden CLI verb strings ('aws sns create-topic --name test', 'aws cloudwatch put-metric-alarm --alarm-name x', 'aws sns subscribe --protocol email'), then re-ran AC3's exact invocation.",
+   "expected": "Mutant A must drop AC1's count to 0 (rc=1) and AC2's count to 0 (rc=1). Mutant B must raise AC3's count above 0 (rc=0).",
+   "observed": "Mutant A: grep -c -E '[a-z_/]+/lib/trading_calendar\\.py' on the redacted copy returned 0 (rc=1) -- would FAIL AC1's >=1 bound. Same copy's holiday/Labor-Day terms redacted: grep -c -i -E 'labor day|holiday' returned 0 (rc=1) -- would FAIL AC2's >=1 bound. Mutant B: grep -c -i -E 'create-topic|put-metric-alarm|subscribe --' on the CLI-verb-injected copy returned 3 (rc=0) -- would FAIL AC3's required-0 bound. All mutants fired as designed.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Ran all three AC1-AC3 invocations twice in succession against the same committed RUN_AND_DELIVERY.md content, no regeneration between runs (the document is static prose, not a generated artifact -- determinism here is about the GATE's own re-run behavior, which is control-tested separately below via three live invocations of run_gate.py).",
+   "observed": "Pass 1: AC1=3, AC2=4, AC3=0(rc=1). Pass 2: identical -- AC1=3, AC2=4, AC3=0(rc=1). Separately, run_gate.py itself was invoked three times this session (--date 2026-09-07, --date 2026-09-05, no --date) and is fully deterministic on its gating input: both non-trading-day dates returned SKIP/rc=0 with no composer invocation, and the real trading day returned rc=0 having invoked compose_edition.py, whose own re-run determinism is separately established by RP-s-15's proof-of-spec instance (byte-identical output apart from the composed-at timestamp) and re-confirmed here by diffing this cell's freshly-composed EDITION_SPECIMEN.md blob against RP-s-15's own committed blob: exactly one line differs (the timestamp).",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No recurring, unattended trigger (EventBridge rule, cron, Lambda schedule) is created or wired to invoke run_gate.py automatically every trading morning.",
+   "reason": "This cell's write surface (org/missions/D12/NFRA/NFRA_REPORT/{deliverables,decompositions,prd,task-orders}, this project's investigation file, and the CTO's round-N-analysis doc) contains no infra or scheduler path. RUN_AND_DELIVERY.md section 3 states this as LAW for whoever holds that write surface next rather than silently building it out of scope."
+  },
+  {
+   "item": "No SNS topic, subscription, or CloudWatch alarm is created, edited, subscribed to, or repaired to a working, human-reaching state.",
+   "reason": "The standing alerting/monitor moratorium is ARMED (decomposition sec.4, carried into this cell's BOUNDS verbatim: 'it mints no alarm, topic, subscription or notification. Repair of an existing non-delivering topic is permitted; creation is not'). ALERT_DELIVERY.md@3919310a37 (this project's own RP-s-6) already found that zero of the estate's seven alarm-backed SNS topics affirmatively reach a human end to end today, so there is no verified-working existing egress to point the composer's output at, and no path in this cell's write surface to repair the broken ones even if there were -- named on evidence in RUN_AND_DELIVERY.md section 3, not silently assumed satisfied."
+  },
+  {
+   "item": "Does not close the EXERCISED bar FWD-1 needs (a real edition run on a real trading morning AND read by Andrew).",
+   "reason": "NFRA_REPORT_DECOMP_R2.md sec.5 point 6, verbatim: 'It closes when a real edition runs and a real reader reads it. A cell can produce the edition; it cannot produce the reading.' This cell produces and RUNS a real, gated edition (RUN 3, this session) and states the law an unattended trigger and a repaired egress must satisfy; it cannot, by its own write surface, put that edition in front of Andrew going forward without a human running run_gate.py by hand."
+  },
+  {
+   "item": "Does not re-derive the trading-calendar frontier census (the five-file basename trap, the byte-for-byte diff of the three vendored Lambda copies).",
+   "reason": "This cell's own BOUNDS: 'ROUND 1's SCHEDULE CELL ALREADY SETTLED THE FRONTIER AND YOU INHERIT IT RATHER THAN RE-DERIVING IT.' SCHEDULE.md@5ec7f6649b (cell RP-s-3) already ran that census; RUN_AND_DELIVERY.md section 1 cites it rather than repeating the diff."
+  }
+ ],
+ "surprises": [
+  "NFRA_REPORT-Z-W1-S5: the comp-rail (comp-find/comp-read/comp-which) resolves its search corpus by the tool script's own on-disk location (a shim hardcoded to the MAIN ajb_workspace checkout, plus _comprail.repo_root() running `git rev-parse --show-toplevel` with cwd=_HERE, the script's own directory), never the caller's cwd -- every invocation from inside this cell's OWN linked worktree (wk-NR2-1) silently scanned the MAIN tree instead, empirically confirmed with a canary file unique to this worktree that scored a MEASURED zero at both default and --corpus raw scope."
+ ],
+ "session_log": "N/A -- worker subagent (0.9.0_WK_NFRA_REPORT~1) per CLAUDE.md rule 27: 'a worker's write surface is exactly the <paths> its non-terminal order names ... and it writes no telemetry (L7 reads from git)'. This TO's <paths> names no logs/ surface. The git commit history on branch wk-NR2-1 is the record.",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python lib/trading_calendar.py exercise (interactive one-liner): is_trading_day('2026-09-07'), is_trading_day('2026-09-08'), is_trading_day('2026-09-09'), is_trading_day('2026-09-05')",
+   "result": "calendar_source=NYSE/hardcoded-fallback-2024-2027. 2026-09-07 (Labor Day, Mon)=False; 2026-09-08 (Tue)=True; 2026-09-09 (Wed)=True; 2026-09-05 (Sat)=False -- confirms the frontier's own holiday table and weekday logic before building the gate around it."
+  },
+  {
+   "tool": "python (run_gate.py)",
+   "invocation": "python run_gate.py --date 2026-09-07 ; python run_gate.py --date 2026-09-05 ; python run_gate.py (no override, real trading day)",
+   "result": "First two: SKIP, rc=0, composer NOT invoked. Third: gating date resolved to 2026-09-10 (a trading day), composer WAS invoked via subprocess, wrote a fresh EDITION_SPECIMEN.md (25 rows, verdict SOMETHING needs Andrew today, delta counts {unchanged:10, better:14, worse:1}), rc=0."
+  },
+  {
+   "tool": "git hash-object / diff",
+   "invocation": "git hash-object on all three produced artifacts; diff of the freshly-composed EDITION_SPECIMEN.md against its pre-RUN-3 committed content",
+   "result": "RUN_AND_DELIVERY.md=9df305a5c1a419aae40aa512bf4dca67771693cb; run_gate.py=d66fb8a85c2bd37bc7dc33bd0b5d75c3c993aa77; EDITION_SPECIMEN.md=644406002bacb461606825ce33994195319babef. Diff against the pre-RUN-3 blob: exactly 1 line changed (the composed-at timestamp), confirming the gate invoked the real, unedited composer."
+  },
+  {
+   "tool": "grep",
+   "invocation": "the three AC1-AC3 invocations verbatim from the TO's <proof_of_spec>, each under timeout 120, run twice against RUN_AND_DELIVERY.md, plus against two scratch mutants (see controls.mutant)",
+   "result": "Real file, both passes: AC1=3, AC2=4, AC3=0(rc=1). Mutant A: AC1=0(rc=1), AC2=0(rc=1). Mutant B: AC3=3(rc=0). All mutants fired; the real file passes all three both times."
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/NFRA_REPORT.TO-RP-s-16.run-on-trading-mornings-and-deliver.proof_of_spec.json AC1,AC2,AC3",
+   "result": "run after this instance was written; see this worker's final report for the printed rc and denominator"
+  }
+ ]
+}
