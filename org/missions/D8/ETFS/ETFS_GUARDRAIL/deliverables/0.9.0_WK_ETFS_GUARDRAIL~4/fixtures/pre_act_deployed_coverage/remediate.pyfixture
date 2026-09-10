@@ -1,0 +1,245 @@
+#!/usr/bin/env python3
+"""ETFS_GUARDRAIL.TO-EG-s-7 -- the remediation ladder, rungs 0-2, UNATTENDED.
+
+Ruling 4: "Rungs 1-2 unattended; rung 3 STOPS AND ASKS." Ruling 6: egress (rung 3,
+EG-sb-7, a different order) is the third fallback and almost never fires. Property 9:
+"No rung, under any failure, writes a value that was not measured. If all three fail,
+the day stays missing and is reported as missing."
+
+THE LADDER:
+  rung 0 -- PROBE (already run, upstream of this module, INSIDE classify_month's
+            injected `probe` callable -- the per-day `class`/`probe` fields this
+            module reads from `classes` ARE rung 0's answer). partition False -> D;
+            priced 0 -> B (STOP: expected, no rung 1); priced > 0 -> C.
+  rung 1 -- RE-RUN THE PRODUCER for every non-COVERED, non-A, non-B day (C, D or
+            UNKNOWN): invoke the firm-scoped producer with {"date": d} (the dated
+            backfill path every producer already has). It LOUD-fails on an absent
+            partition (D), skips an unpriced day (B is never reached here -- rung 0
+            already stopped it), or writes the slice (C recovered). Caught, once,
+            no retry storm.
+  rung 2 -- RE-CHECK: re-read opal-data-etfs/daily/<partner>/<date>.json after a rung
+            1 invoke that did not raise. For Inflection, a D verdict is ALSO stated
+            against the bucket the DEPLOYED producer actually reads (EG-s-12), not
+            the repo's committed-but-unapplied design.
+  rung 3 -- STOP AND ASK A PERSON (ETFS_GUARDRAIL.TO-EG-sb-7). A DIFFERENT ACTOR,
+            not a later automated step (ruling card 4: no standing pre-authorization
+            for targeted egress -- per-use only). Fires ONLY over days still in
+            `unresolved` after rungs 1-2 (D genuinely absent, UNKNOWN never
+            determined, or a residual class the recheck could not confirm). Writes
+            ONE artifact -- `platinum/reports/<month>/coverage_egress_ask.json` in
+            opal-data-etfs -- naming the dates, the partner and its provider, and
+            RETURNS. Nothing else happens: no provider call, no HTTP client, no
+            credential, no invoke. The ask reaches a person through the orchestrator's
+            refusal text (EG-s-8, a different order); this module writes only the
+            artifact and its shape.
+
+NO FABRICATION ANYWHERE: rungs 1-2 never write to S3 (no put_object; the producer is
+the only writer of a DATA value) and the module carries no HTTP client / provider
+call of its own anywhere (rung 3 writes an ASK, never a value, and is a STOP by
+construction, not merely by policy).
+"""
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import json
+import os
+import sys
+from typing import Callable, Optional
+
+ETFS_BUCKET = os.environ.get("ETFS_BUCKET", "opal-data-etfs")
+
+_PRODUCER_BY_PARTNER = {
+    "cottonwood": "cot-etf-ownership-daily",
+    "49financial": "bd-49f-etf-ownership-daily",
+    "inflection": "inf-etf-ownership-daily",
+}
+
+# EG-sb-7: the provider BEHIND each firm-scoped producer's upstream -- who rung 3
+# would ask, per-use, if a day is genuinely absent and a person says yes.
+_PROVIDER_BY_PARTNER = {
+    "cottonwood": "Black Diamond",
+    "49financial": "Schwab",
+    "inflection": "Orion",  # EG-s-12: the deployed producer reads the legacy
+                             # monolith path; Orion is still the vendor behind it.
+}
+
+# EG-s-12's measured answer: the DEPLOYED inf-etf-ownership-daily reads the legacy
+# monolith path, NOT the repo's committed-but-never-applied Orion design. A D
+# verdict for Inflection is stated against THIS bucket/prefix.
+_INFLECTION_DEPLOYED_UPSTREAM = (
+    "opal-data-inf/gold/canonical/holdings_<date>.parquet (the DEPLOYED producer's "
+    "own read, per EG-s-12 -- NOT opal-data-assets/orion/inflection/silver/"
+    "fact_positions, which is committed but never applied)"
+)
+
+InvokeFn = Callable[[str, dict], dict]
+
+
+def _slice_exists(s3, partner: str, date_str: str) -> bool:
+    """Rung 2: does daily/<partner>/<date>.json exist NOW? Read-only."""
+    key = "daily/%s/%s.json" % (partner, date_str)
+    try:
+        s3.head_object(Bucket=ETFS_BUCKET, Key=key)
+        return True
+    except Exception:  # noqa: BLE001 - any "not found"/error shape reads as absent
+        return False
+
+
+def rung3_stop_and_ask(partner: str, month: str, unresolved: list, *,
+                        s3=None, write: bool = True) -> dict:
+    """Rung 3 -- STOP AND ASK A PERSON. Builds the ask from EVERY day still in
+    `unresolved` (D genuinely absent, UNKNOWN never determined, or any residual
+    class rungs 1-2 could not confirm -- each keeps its OWN class in the ask, named
+    separately, never conflated into one bucket), writes the artifact under
+    `platinum/reports/<month>/coverage_egress_ask.json` when `write=True` AND there
+    is something to ask, and RETURNS. Nothing else happens -- no provider call, no
+    HTTP client, no credential, no invoke; `authorization` states PER-USE, standing
+    for nobody (ruling card 4)."""
+    provider = _PROVIDER_BY_PARTNER.get(partner, "<no provider mapped>")
+    asks = [
+        {
+            "date": entry["date"],
+            "partner": partner,
+            "provider": provider,
+            "class": entry["class"],
+            "reason": entry["reason"],
+        }
+        for entry in unresolved
+    ]
+    ask = {
+        "month": month,
+        "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "asks": asks,
+        "authorization": "PER-USE -- a person decides; nothing here is executed by any process",
+    }
+
+    if write and asks and s3 is not None:
+        key = "platinum/reports/%s/coverage_egress_ask.json" % month
+        s3.put_object(
+            Bucket=ETFS_BUCKET,
+            Key=key,
+            Body=json.dumps(ask, indent=2).encode("utf-8"),
+            ContentType="application/json",
+        )
+
+    return ask
+
+
+def remediate_month(partner: str, month: str, classes: dict, *,
+                     invoke: Optional[InvokeFn] = None, s3=None,
+                     dry_run: bool = False, write_ask: bool = True) -> dict:
+    """Runs rungs 1-2 over a `classes` map (classify_month's output) for `partner`/
+    `month`. Returns {"resolved": [date...], "expected_empty": [date...],
+    "unresolved": [{"date","class","reason"}...], "rungs": {"probe","rerun","recheck"},
+    "ask": <rung3_stop_and_ask's return, present only when unresolved is non-empty
+    and dry_run is False>}.
+
+    `dry_run=True` classifies and PLANS the rung-1 invokes without making them --
+    zero calls to `invoke`, zero calls to `s3`, and rung 3 does NOT fire (a plan is
+    not a confirmed failure; asking a person about it would be premature).
+
+    Rung 3 fires as the LAST step, only when `unresolved` is non-empty: it never
+    invokes, never calls HTTP, and only ever writes the ask artifact via `s3`
+    (never a data value) -- see `rung3_stop_and_ask`."""
+    producer = _PRODUCER_BY_PARTNER.get(partner)
+
+    resolved: list = []
+    expected_empty: list = []
+    unresolved: list = []
+    rungs = {"probe": 0, "rerun": 0, "recheck": 0}
+
+    for date_str, entry in classes.items():
+        cls = entry["class"]
+
+        if cls in ("A", "COVERED"):
+            continue  # nothing to do -- not this ladder's concern
+
+        if entry.get("probe") is not None:
+            rungs["probe"] += 1  # rung 0 already answered this day (upstream)
+
+        if cls == "B":
+            # STOP -- expected, no rung 1 (ruling 4/property 4: never re-run against
+            # a day the producer's own ZERO-vs-MISSING contract already skipped).
+            expected_empty.append(date_str)
+            continue
+
+        # cls in (C, D, UNKNOWN): rung 1 is owed.
+        if dry_run:
+            rungs["rerun"] += 1
+            unresolved.append({
+                "date": date_str, "class": cls,
+                "reason": "dry-run: rung 1 invoke planned for %s, not executed" % (
+                    producer or "<no producer mapped>"),
+            })
+            continue
+
+        if invoke is None or producer is None:
+            unresolved.append({
+                "date": date_str, "class": cls,
+                "reason": "no invoke callable or no producer mapped for partner %r" % partner,
+            })
+            continue
+
+        rungs["rerun"] += 1
+        try:
+            invoke(producer, {"date": date_str})
+        except Exception as exc:  # noqa: BLE001 - the producer's own LOUD-fail shape
+            reason = "rung 1 invoke raised (absent upstream partition): %s" % exc
+            if partner == "inflection":
+                reason += " -- deployed upstream: %s" % _INFLECTION_DEPLOYED_UPSTREAM
+            unresolved.append({"date": date_str, "class": "D", "reason": reason})
+            continue
+
+        # rung 2 -- RE-CHECK. No fabrication: only a READ decides "resolved".
+        rungs["recheck"] += 1
+        if s3 is not None and _slice_exists(s3, partner, date_str):
+            resolved.append(date_str)
+        else:
+            reason = "rung 1 invoke returned but no slice landed on rung 2 re-check"
+            if partner == "inflection":
+                reason += " -- deployed upstream: %s" % _INFLECTION_DEPLOYED_UPSTREAM
+            unresolved.append({"date": date_str, "class": cls, "reason": reason})
+
+    result = {
+        "resolved": resolved,
+        "expected_empty": expected_empty,
+        "unresolved": unresolved,
+        "rungs": rungs,
+    }
+
+    # rung 3 -- STOP AND ASK A PERSON, the ladder's LAST step, only when there is
+    # something left to ask about. A dry-run plan is not a confirmed failure.
+    if unresolved and not dry_run:
+        result["ask"] = rung3_stop_and_ask(partner, month, unresolved, s3=s3, write=write_ask)
+
+    return result
+
+
+def _main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description="ETFS remediation ladder (rungs 1-2)")
+    parser.add_argument("--partner", required=True)
+    parser.add_argument("--month", required=True, help="YYYY-MM")
+    parser.add_argument("--dry-run", action="store_true",
+                         help="the only live mode this order exercises: plan the "
+                              "invokes, make none")
+    args = parser.parse_args(argv)
+
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from classifier import classify_month, summarize  # sibling import, same package
+
+    classes = classify_month(args.partner, args.month, probe=None)
+    summary = summarize(classes)
+    result = remediate_month(args.partner, args.month, classes,
+                              invoke=None, dry_run=args.dry_run)
+
+    print("LADDER: partner=%s month=%s holes=%d rung0=%d rung1=%d rung2=%d "
+          "unresolved=%d dry_run=%s" % (
+              args.partner, args.month, summary["holes"],
+              result["rungs"]["probe"], result["rungs"]["rerun"],
+              result["rungs"]["recheck"], len(result["unresolved"]), args.dry_run))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(_main())

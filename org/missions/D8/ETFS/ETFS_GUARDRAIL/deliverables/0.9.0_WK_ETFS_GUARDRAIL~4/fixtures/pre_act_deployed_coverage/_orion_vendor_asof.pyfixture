@@ -1,0 +1,139 @@
+"""Per-vendor as_of NORMALIZATION -- Orion forward-label -> true settled trading day.
+
+ADVI_ETLFIX (2026-07-02, DS-lead + 0.6.1 co, CTO arch-gated). SHARED single source of
+the NYSE trading-day calendar so the pull-stamp sites (pull_inflection_*.py) and the
+served-facing gold sites (INF_D_00/D_04/D_03/D_05/D_06) agree to the DAY. Single-homed in
+code/silver; the sync_scripts flatten puts it in the runtime dir so BOTH gold and pull
+scripts import it (one calendar source, zero drift).
+
+THIRD CONSUMER (2026-07-09, NFRA_COMPDIFF value-parity fix): `next_trading_day()` -- the
+inverse of `prior_trading_day()` -- lets infra/aws/compdiff/value_parity_reader.py recover
+the raw Orion partition date from an already-normalized served data_as_of, so the value-
+parity guard's source-anchor lookup and this module's served-label normalization stay
+correct BY CONSTRUCTION (single calendar, both directions) instead of silently drifting
+apart the way they did between 07-02 and 07-06 (see the ADVI_BREAKS phantom-divergence
+incident this fix closes).
+
+WHY (mechanism; original seal 0.6.1 2026-07-02, premise REFRESHED 2026-08-03):
+  Orion serves the latest SETTLED close -- currentValue/currentPrice reflect the prior
+  NYSE trading day until the run-date's own close settles OVERNIGHT -- while Orion's
+  asOfDate field ECHOES the requested run-date. So the data-vs-label offset is exactly
+  ONE NYSE-trading-day for any pull made before the run-date's close has settled.
+  PREMISE HISTORY: the 2026-07-02 seal grounded this at the then-live PRE-open schedule
+  (cron(0 13)=09:00 ET). The 2026-07-01 +47min window shift (@b2f61bed83) moved the API
+  dim pulls to 09:17-10:27 ET -- POST-open -- retiring the pre-open premise. The offset
+  was RE-EXERCISED under the post-shift schedule 2026-08-03 (CTO-authorized A/B probe
+  @15d0326c80: the 09:32 ET production capture == a fresh post-close {today} pull == a
+  fresh prior-trading-day pull, 22/22 assets identical on value columns, asOfDate echo
+  live both directions). Per the seal-decay rule that is an EXERCISED grounding at its
+  stated sample (1 trading day / 3 clients / 22 assets), not a blanket re-seal.
+  Originally grounded on bronze/positions {run-date}.jsonl.gz (asOfDate echoes run-date)
+  + the AUA advancing off the prior baseline.
+
+PER-VENDOR: Orion-only. Schwab/BD custodial feeds are already accurate (settled-date labels)
+  and MUST NOT be normalized -- do not call this on non-Orion vintages.
+
+LABEL-ONLY: this normalizes a DATE LABEL (data_as_of). It never touches values.
+
+py3.9-safe: stdlib datetime only, no new runner dependency (the inf-gold-layer-runner has NO
+market-calendar lib -- confirmed 0.6.1 2026-07-02). NYSE closed-dates are HARDCODED (actual
+observed closed dates, so no runtime observance computation) for 2025-2027; extend forward as
+needed. A date outside the covered years falls back to weekend-only (logged by the caller if
+it matters) -- covered range must lead the live window.
+"""
+from __future__ import annotations
+
+import datetime as dt
+
+# NYSE ACTUAL closed dates (the dates the exchange is CLOSED, observance already applied --
+# Sat holiday -> preceding Fri closed; Sun holiday -> following Mon closed). Weekends are
+# handled separately in is_nyse_trading_day. Verified against the NYSE holiday calendar.
+NYSE_CLOSED_DATES: frozenset[str] = frozenset({
+    # 2025
+    "2025-01-01",  # New Year's Day
+    "2025-01-20",  # MLK Jr. Day
+    "2025-02-17",  # Presidents' Day
+    "2025-04-18",  # Good Friday
+    "2025-05-26",  # Memorial Day
+    "2025-06-19",  # Juneteenth
+    "2025-07-04",  # Independence Day
+    "2025-09-01",  # Labor Day
+    "2025-11-27",  # Thanksgiving
+    "2025-12-25",  # Christmas
+    # 2026
+    "2026-01-01",  # New Year's Day
+    "2026-01-19",  # MLK Jr. Day
+    "2026-02-16",  # Presidents' Day
+    "2026-04-03",  # Good Friday
+    "2026-05-25",  # Memorial Day
+    "2026-06-19",  # Juneteenth (Fri)
+    "2026-07-03",  # Independence Day OBSERVED (Jul 4 = Sat -> preceding Fri closed) -- the live July-4 trap
+    "2026-09-07",  # Labor Day
+    "2026-11-26",  # Thanksgiving
+    "2026-12-25",  # Christmas (Fri)
+    # 2027
+    "2027-01-01",  # New Year's Day (Fri)
+    "2027-01-18",  # MLK Jr. Day
+    "2027-02-15",  # Presidents' Day
+    "2027-03-26",  # Good Friday
+    "2027-05-31",  # Memorial Day
+    "2027-06-18",  # Juneteenth OBSERVED (Jun 19 = Sat -> preceding Fri closed)
+    "2027-07-05",  # Independence Day OBSERVED (Jul 4 = Sun -> following Mon closed)
+    "2027-09-06",  # Labor Day
+    "2027-11-25",  # Thanksgiving
+    "2027-12-24",  # Christmas OBSERVED (Dec 25 = Sat -> preceding Fri closed)
+})
+
+_MIN_YEAR = 2025
+_MAX_YEAR = 2027
+
+
+def is_nyse_trading_day(d: dt.date) -> bool:
+    """True if d is an NYSE trading day (weekday AND not a hardcoded closed date).
+
+    For a year outside the hardcoded coverage, degrades to weekend-only (holidays not
+    caught) -- keep NYSE_CLOSED_DATES leading the live window. Callers whose correctness
+    depends on holiday precision beyond the coverage should extend the set."""
+    if d.weekday() >= 5:  # Sat=5, Sun=6
+        return False
+    return d.isoformat() not in NYSE_CLOSED_DATES
+
+
+def prior_trading_day(d: dt.date) -> dt.date:
+    """The most recent NYSE trading day STRICTLY BEFORE d (skips weekends + holidays)."""
+    cur = d - dt.timedelta(days=1)
+    # Bound the walk so a coverage gap can never infinite-loop (a >10-day gap is impossible
+    # on the real NYSE calendar -- the longest closure is a weekend + a single holiday).
+    for _ in range(10):
+        if is_nyse_trading_day(cur):
+            return cur
+        cur -= dt.timedelta(days=1)
+    return cur
+
+
+def next_trading_day(d: dt.date) -> dt.date:
+    """The next NYSE trading day STRICTLY AFTER d (skips weekends + holidays). The inverse
+    of prior_trading_day -- added 2026-07-09 (NFRA_COMPDIFF value-parity fix) so a consumer
+    holding an already-normalized (true-settled) date can recover the raw Orion forward-label
+    partition date the normalization was derived from. Same bounded-walk safety as
+    prior_trading_day."""
+    cur = d + dt.timedelta(days=1)
+    for _ in range(10):
+        if is_nyse_trading_day(cur):
+            return cur
+        cur += dt.timedelta(days=1)
+    return cur
+
+
+def orion_normalize_as_of(labeled_max: dt.date) -> dt.date:
+    """Normalize an ORION-forward-labeled max as_of date to the TRUE settled trading day.
+
+    Orion pre-open forward-labels the prior settled close as the run-date, so the true
+    vintage is the prior NYSE trading day of the labeled date (SEALED systematic-1-trading-day,
+    2026-07-02). LABEL-only; Orion-only (never call on schwab/bd -- their labels are accurate).
+
+    NOTE (coverage): if `labeled_max` (or its prior-trading-day) falls outside the hardcoded
+    NYSE coverage (< 2025 or > 2027), the holiday precision degrades to weekend-only. Extend
+    NYSE_CLOSED_DATES before the coverage lapses.
+    """
+    return prior_trading_day(labeled_max)
