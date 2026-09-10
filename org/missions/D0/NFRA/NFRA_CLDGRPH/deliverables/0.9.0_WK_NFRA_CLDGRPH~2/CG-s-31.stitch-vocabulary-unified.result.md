@@ -1,18 +1,17 @@
-# CG-s-31 -- THE VOCABULARY IS UNIFIED, PUBLISHED AND SERVED; BOTH AUTHORISED ACTS LANDED AND BOTH CRITERIA STILL FAIL, EACH FOR A REASON THE ACT EXPOSED
+# CG-s-31 -- THE VOCABULARY IS UNIFIED, PUBLISHED AND SERVED, THE STAMP IS GONE AND THE FAN-OUT WITH IT; ONE CRITERION LEFT, AND IT IS THE SEAM RESERVED TO ROUND 7
 
-**TO:** `NFRA_CLDGRPH.TO-CG-F-11` (SECOND CYCLE) - **cell:** CG-s-31 - **worker:**
-`0.9.0_WK_NFRA_CLDGRPH~2`, branch `wk-cldgrph-6-2` - **status: OPEN** -- F11-AC1, AC4, AC5 PASS by
-output; **F11-AC2 FAILS** (`STITCH_V1_STAMPED_SERVED=1`, row `W2-S69` -- the fold's writer IS
-retired, the PRODUCER copies the stamp forward) and **F11-AC3 FAILS** (`STORED_IN_RESOLVED=764 of
-955`, all 764 on S3_BUCKET_POLICY, row `W2-S70` -- a bucket has two identities and each plane
-accepts a different one); F11-AC6 is judgment, RECORDED, no verdict.
+**TO:** `NFRA_CLDGRPH.TO-CG-F-11` (FOUR CYCLES) - **cell:** CG-s-31 - **worker:**
+`0.9.0_WK_NFRA_CLDGRPH~2`, branch `wk-cldgrph-6-2` - **status: OPEN** -- F11-AC1, **AC2**, AC4,
+AC5 PASS by output; **F11-AC3 is the only mechanical FAIL** (`STORED_IN_RESOLVED=135 of 137`, all
+135 landing on `S3_BUCKET_POLICY` -- the bucket-identity seam ruled to round 7, rows `W2-S70` and
+the CVO's `S96/S97`); F11-AC6 is judgment, RECORDED, no verdict.
 **Push state: LOCAL** (measured: no push by this seat).
 
 ```json
 {
   "cell": "CG-s-31",
   "to_id": "NFRA_CLDGRPH.TO-CG-F-11",
-  "outcome": "OPEN after TWO cycles -- the vocabulary is unified, published and served; the image act landed whole (7 of 7 families on the new digest, the fold's stamp writer retired) and the STORED_IN fix admitted 955 edges where zero were admitted before; F11-AC2 and F11-AC3 still FAIL, each on a cause the act itself exposed (W2-S69, W2-S70)",
+  "outcome": "OPEN after FOUR cycles, on F11-AC3 ALONE -- the vocabulary is unified, published and served; the stamp is gone from the served graph (F11-AC2 PASSES: STITCH_V1_STAMPED_SERVED=0); the STORED_IN fan-out is gone (955 emitted -> 137, every key at exactly 1); and AC3 still fails because the resolved edges land on S3_BUCKET_POLICY, which is the bucket-identity seam the CTO reserved to round 7 (row W2-S70)",
   "worker": "0.9.0_WK_NFRA_CLDGRPH~2",
   "branch": "wk-cldgrph-6-2",
   "push_state": "LOCAL",
@@ -210,18 +209,23 @@ accepts a different one); F11-AC6 is judgment, RECORDED, no verdict.
   },
   "the_two_failures": {
     "F11-AC2 stitch-v1 stamp": {
-      "measured": "STITCH_V1_STAMPED_SERVED=1 after the image act, expected 0",
-      "cause_now": "NOT the fold any more -- it printed stamped=0 on the new image. The PRODUCER copies the stamped node forward: derive_stitch reads the snapshot derive_runner archives (W2-S61's cycle), that snapshot holds the node the OLD fold stamped, and _collapse_stitch_copies kept the archived copy because its tie-break (`retyped_from`) has no signal once the snapshot is already canonical (retyped_prior_cycle={})",
-      "measured_in_the_artifact": "exactly 1 node carries 'stitch-v1', in bucket 'stitch_cloud' -- the archived side, not the fresh emission",
-      "what_would_close_it": "one producer change (mark this cycle's emission explicitly, or drop the retired key on read) plus ONE more producer cycle; this order's sign spent its build, derive and projection",
-      "row": "NFRA_CLDGRPH-W2-S69 (BLOCKING, ARMED -> 2.0.0_SA_COO~A)"
+      "status_now": "PASS -- STITCH_V1_STAMPED_SERVED=0 on the served graph, read 2026-09-10T02:43Z",
+      "what_it_took": "THREE causes in series, each hidden behind the last: the map entry (cycle 1), the DEPLOYED fold image still writing it (cycle 2's image act, stamped 1 -> 0), and the producer carrying its own prior output forward out of the archived snapshot (cycle 3). Only the third moved the served count.",
+      "rows": [
+        "NFRA_CLDGRPH-W2-S67 (the image)",
+        "NFRA_CLDGRPH-W2-S69 (the carry-forward)"
+      ]
     },
     "F11-AC3 STORED_IN": {
-      "measured": "STORED_IN_RESOLVED=764 of 955, all 764 landing on S3_BUCKET_POLICY",
-      "cause": "a bucket has TWO identities and each plane accepts a different one: the artifact keys it by NAME, the fold admits only the NAME (0 of 955 admitted with the ARN, 955 with the name), and the SERVED graph gives the NAME to the S3_BUCKET_POLICY node and keys S3_BUCKET by ARN",
-      "before_and_after": "0 of 955 with no landing -> 764 of 955 with a WRONG-CLASS landing",
-      "what_would_close_it": "a decision about which identity a bucket HAS in this estate -- the fold rewriting a name endpoint onto the arn, or the AWS layer keying buckets by arn everywhere -- and its own cycle",
-      "row": "NFRA_CLDGRPH-W2-S70 (BLOCKING, ARMED -> 2.0.0_SA_COO~A)"
+      "status_now": "FAIL, and it is the ONLY mechanical FAIL left",
+      "measured": "STORED_IN_RESOLVED=135 of 137 (was 0 of 955, then 764 of 955), all 135 landing on S3_BUCKET_POLICY; DERIVES_FROM_RESOLVED=216 of 216; RECONCILED admitted=1790 merged+created=1790 lost=0",
+      "what_this_order_fixed": "the fan-out (955 -> 137, every key at exactly 1, 0 edges contradicted by their own source node) and the edge carry-forward",
+      "what_is_left_and_whose": "the bucket-identity seam: an AWS resource node IS its arn in the served graph and the name is an attribute, so the fold must normalize a name endpoint onto the arn AND the producer must emit the canonical endpoint -- both planes together, producer-alone REFUSED on this seat's own measurement (0 of 955 admitted with the arn). Ruled to round 7 by 1.0.0_SA_CTO with its own image act and its own sign.",
+      "rows": [
+        "NFRA_CLDGRPH-W2-S70",
+        "NFRA_CLDGRPH-W2-S71 (the fan-out, fixed here)",
+        "3.0.0_SA_CVO S96/S97"
+      ]
     }
   },
   "the_map_for_the_cvo": {
@@ -258,14 +262,18 @@ accepts a different one); F11-AC6 is judgment, RECORDED, no verdict.
     "NFRA_CLDGRPH-W2-S67",
     "NFRA_CLDGRPH-W2-S68",
     "NFRA_CLDGRPH-W2-S69",
-    "NFRA_CLDGRPH-W2-S70"
+    "NFRA_CLDGRPH-W2-S70",
+    "NFRA_CLDGRPH-W2-S71",
+    "NFRA_CLDGRPH-W2-S72"
   ],
   "commits": [
     "22e388d221 -- the nine recertifications + _collapse_stitch_copies + W2-S64/65",
     "402fa8e8ea -- cycle 1's acts, captures, NEVER-2 entry and W2-S66/67/68",
     "865b7a4b0a -- cycle 1's proof instance",
     "b6c92e3174 -- the STORED_IN identity fix and the reader that prints what the edges land on",
-    "9c9b68cb6f -- the image act: serving.tf re-pinned, the NEVER-2 entry, the seven-family census before and after, the node-diff instrument"
+    "9c9b68cb6f -- the image act: serving.tf re-pinned, the NEVER-2 entry, the seven-family census before and after, the node-diff instrument",
+    "22bc65fab0 -- cycle 3: the explicit fresh-emission identity and the retired-prop drop",
+    "f9000bd0dd -- cycle 4: one STORED_IN per key, and the prior cycle's edges dropped on read"
   ],
   "the_second_cycle": {
     "why": "the issuer ruled W2-S68 into a SECOND producer cycle @d5d7d8b6aa and the CTO's half of the never-widen sign landed @f3b17ade51, making W2-S67's image act this order's; both folded into ONE derive so one test covers both rows",
@@ -353,6 +361,93 @@ accepts a different one); F11-AC6 is judgment, RECORDED, no verdict.
       "ecr_tag_digest": "before sha256:478d0a43... after sha256:17ccc9b0... -- the TAG moved with the push and no family reads it; the PINS are what moved for the seven",
       "five_magnitudes": "167 / 1217 / 381 / 201 / 125, unchanged on the served graph"
     }
+  },
+  "the_third_cycle": {
+    "why": "row W2-S69 -- the stamp had a SECOND writer, the producer's own carry-forward",
+    "two_remedies_and_why_both": "(1) the collapse's tie-break is now the OBJECT IDENTITY of this run's emission (Python id() over the portal graph, captured before the union) instead of the `retyped_from` mark, which lost its signal the moment the archived snapshot itself went canonical; (2) RETIRED_STITCH_PROPS = ('vocabulary',) is popped from every surviving stitch node. The tie-break decides WHICH copy survives; the drop decides what a survivor may carry. Only (1) leaves the value one iteration-order change from returning; only (2) leaves two copies of every member differing in their props.",
+    "local_proof": {
+      "nodes_carrying_vocabulary": "1 -> 0",
+      "stitch_v1_anywhere": "1 -> 0",
+      "collapsed": {
+        "prior_cycle_copy": 335,
+        "cross_class_copy": 0,
+        "retired_props_dropped": 0
+      },
+      "why_the_drop_counter_is_zero": "the copy that carried the stamp is the copy the tie-break DROPPED -- remedy (2) never fires while remedy (1) holds, which is the belt-and-braces the ruling asked for",
+      "reconciliation": "admitted 1790 = 1521 + 269, lost 0 (unmoved)",
+      "five_magnitudes": "167 / 1217 / 381 / 201 / 125 (unmoved)",
+      "grain_sentinel": "PASS"
+    },
+    "cycle": {
+      "ledger": "org/critical_paths/change_management/20260910T021200Z_cldgrph-cgs31-third-cycle-stitch-source-repush-stamp-retired_deploy_completion.md",
+      "zip": {
+        "sha256": "9974d612c36bebc48f4c97c2326670c02a39e662577c66b87aeeb334cbaa09cc",
+        "served_after": "Thu, 10 Sep 2026 02:13:37 GMT, ETag \"75042226c3ef237a6ccf9996f0617967-22\""
+      },
+      "build": "opal-stitch-produce:312bb1cb-5565-4a51-b5b7-d4055abd2cb3 SUCCEEDED",
+      "marker": "built_at 2026-09-10T02:15:44Z, git_sha 22bc65fab0, nodes 27746",
+      "derive": "task bc59354a831441ee9e9da0f35b54c8e5 on globgrph-derive-runner:9, exit 0; STITCH_INGEST nodes=338 edges=1678 stamped=0 skipped_unmapped_type=0 vintage=2026-09-10T02:15:44Z",
+      "projection": "pointer 2026-09-10T02:12:05 -> 02:28:23",
+      "served_result": "STITCH_V1_STAMPED_SERVED 1 -> 0. F11-AC2 PASSES."
+    },
+    "the_ctos_node_diff_now": "27,665 nodes on each side, every one read with id + type + props: NODES_ADDED=0 NODES_REMOVED=0 TYPE_CHANGED=0 and PROPS_KEY_DELTA={'~edges_snapshot_id': 6287, '~nodes_snapshot_id': 6287, '~running_tasks': 1, '-vocabulary': 1} -- the ONE '-vocabulary' is on PORTAL_BUNDLE and nothing else in the graph lost or gained a key. The other two are not this order's: C2Motif nodes carry the motif layer's own Nessie snapshot pins, which move every run, and ECS_CLUSTER.running_tasks is a live count."
+  },
+  "the_fourth_cycle": {
+    "why": "3.0.0_SA_CVO's rows S96/S97 and this seat's W2-S71: the 955 STORED_IN edges were 191 keys times a FIVE-way fan-out ({5: 191} per-key), and the served graph asserted each gold key was stored in four firms' buckets at once",
+    "the_defect_measured_before_the_fix": {
+      "emitted": 955,
+      "distinct_keys": 191,
+      "distinct_targets": 5,
+      "per_key_distribution": "{5: 191}",
+      "keys_whose_own_props_name_a_bucket": "137 of 191",
+      "edges_contradicted_by_their_source_node": "548 of 955",
+      "edges_from_keys_with_no_bucket_prop": "270 (54 keys x 5)",
+      "supported": 137
+    },
+    "two_changes": "(1) ONE edge per key, to the bucket the key's OWN props name, the target read AFTER the merge because the props belong to the canonical node the key merges onto (unify now hands its idmap back through idmap_out rather than putting 1,521 entries in the meta); a key with no bucket gets NO edge and is counted. (2) THE PRIOR CYCLE'S STORED_IN EDGES ARE DROPPED ON READ -- the archive carry-forward found on NODES (W2-S61) and PROPS (W2-S69) is on the EDGES too, and it would have hidden this fix completely: measured, 137 emitted and 955 still in the artifact.",
+    "local_proof": {
+      "emitted": "955 -> 137",
+      "denominator": "137 of the 191 firm-relative keys carry a bucket in props; 137 + 54 no-bucket = 191",
+      "per_key_distribution": "{1: 137}",
+      "no_bucket_keys": 54,
+      "prior_cycle_dropped_on_read": 955,
+      "contradicted_by_own_source": "0 of 137 (was 548 of 955)",
+      "targets": {
+        "opal-data-bd": 124,
+        "opal-data-inf": 11,
+        "opal-data-mdpf": 2
+      },
+      "derives_from": "216, both-ends-present 216 of 216 (unchanged)",
+      "reconciliation": "admitted 1790 = 1521 + 269, lost 0 (unmoved)",
+      "five_magnitudes": "167 / 1217 / 381 / 201 / 125 (unmoved)",
+      "unioned": {
+        "nodes": 27746,
+        "edges": "61306 -> 60488 (the 818 the fan-out added)"
+      },
+      "grain_sentinel": "PASS"
+    },
+    "cycle": {
+      "ledger": "org/critical_paths/change_management/20260910T024600Z_cldgrph-cgs31-fourth-cycle-storedin-fanout-one-edge-per-key_deploy_completion.md",
+      "zip": {
+        "sha256": "486216313fee32d333236edadcea67f4f5b1adb365e408b36e38826c77de98d5",
+        "served_after": "Thu, 10 Sep 2026 02:46:36 GMT, ETag \"7a6d0d496d1c3ae019a444c09b17309b-22\""
+      },
+      "build": "opal-stitch-produce:e9c74983-5aa5-47cc-8aa4-a80baf610939 SUCCEEDED",
+      "derive": "task 37a71d0097814c7e961741004de18420 on globgrph-derive-runner:9, exit 0; STITCH_INGEST nodes=338 edges=860 stamped=0 skipped_unmapped_type=0 vintage=2026-09-10T03:01:17Z -- edges 1678 -> 860, exactly the 818 the fan-out used to add",
+      "projection": "pointer 2026-09-10T02:28:23 -> 03:02:00, manifest e0a94e2ff376",
+      "served_result": "STORED_IN_RESOLVED 764 of 955 -> 135 of 137, and every one of the 135 still lands on S3_BUCKET_POLICY -- F11-AC3 still FAILS, as the CTO's W2-S70 ruling says it must until the identity seam is closed in round 7. The 2 unresolved are the keys whose bucket name has no node to answer to."
+    }
+  },
+  "the_confirmations": {
+    "opal-globgrph-derive-runner-nightly (02:00Z, cron(0 2 * * ? *), ENABLED)": "IT FIRED AND IT AGREES WITH THE AD-HOC TEST, LINE FOR LINE. Task 2229aae52b7448b699d0caa4028221ca, startedBy events-rule/opal-globgrph-derive-runner-nightly, taskDefinition globgrph-derive-runner:9 (the image this order deployed), exit code 0, 02:00:22Z -> 02:13:33Z. Its line: 'INFO: STITCH_INGEST nodes=338 edges=1678 skipped_dup=27407 stamped=0 skipped_unmapped_type=0 skipped_edge_unresolved=1740 producer=stitch-codebuild vintage=2026-09-10T01:06:24Z' -- identical to the 01:17Z ad-hoc derive's on the same artifact. A rule-initiated fire on the new image, stamping nothing.",
+    "opal-stitch-produce-nightly (03:00Z, cron(0 3 * * ? *), ENABLED)": "SUCCEEDED, AND THAT IS THE FIRST RULE-INITIATED SUCCESS THIS PROJECT HAS. Build opal-stitch-produce:c80ed318, initiator rule/opal-stitch-produce-nightly, started 03:00:12Z: the same 03:00:12Z slot that failed 67 of 67 times from 2026-07-07 to 2026-09-09 (CG-s-23's finding). It built from the zip this cycle pushed -- marker git_sha f9000bd0dd, built_at 2026-09-10T03:01:17Z, total_edges 60488 -- and the ad-hoc derive folded THAT artifact, so the confirmation and the test are the same object.",
+    "form": "the manual-trigger form (Andrew-direct 2026-09-09 ~21:4xZ): the ad-hoc acts are the TEST, the rule fires are the CONFIRMATION, and nothing waited on them"
+  },
+  "the_standing_constraint": {
+    "direct": "Andrew, ~2026-09-10T02:5xZ, relayed verbatim: 'make sure no test run hits aj's email, that is not appropriate.' Standing, every project, every seat.",
+    "what_this_order_measured": "THE DERIVE PATH ALREADY REACHES A RECIPIENT, and a token census could not see it. Every derive -- ad-hoc and nightly alike -- prints 'OK: SNS_PUBLISHED subject=[SEV1][PAGE] critical-surface backend change 20260910' and a [SEV2][digest] beside it, and arn:aws:sns:us-east-1:313476888478:opal-critical-surface-alerts carries TWO live subscriptions: an internal SQS queue AND an SMS subscription to a personal phone. The issuer's comp-find over infra/aws/globgrph for the mailer vocabulary read 0 of 104 files and is not wrong -- it is scoped: the publish goes through boto3 from the critical-surface scan and is spelled with none of those tokens. Row W2-S72, BLOCKING, ARMED to 2.0.0_SA_COO~A.",
+    "what_this_seat_did": "The fourth cycle's derive was started at 02:50:18Z, BEFORE the constraint arrived, and was mid-run when it did; it was NOT stopped (the same publishes fire on every nightly, one had already gone at 02:0xZ, and stopping a derive mid-run risks a half-written graph -- NEVER-2 weighs heavier than one more of a standing send). NO further derive, build or push was started. No recipient override was attempted: the constraint says the safety must be proven by a read of the deployed path, and that read is not this seat's alone.",
+    "the_second_cycle_already_honoured_it": "the eighteen-address apply left aws_sns_topic_subscription.critical_surface_alerts_email UNAPPLIED as a foreign address under the C3 moratorium -- so the EMAIL destination is still DESIRED-not-applied. The SMS one is live and was not visible from that plane."
   }
 }
 ```
@@ -411,3 +506,36 @@ still fail, each because the act made the real cause visible:
 The instrument that caught the second one is the one this order added in the same commit as the
 fix: the AC3 reader prints **what the edges land on**, not merely that they resolved. A criterion
 that had only counted would have read 764 of 955 as progress.
+
+
+## THE THIRD AND FOURTH CYCLES, IN ONE PARAGRAPH EACH
+
+**The stamp took three causes in series, and only the third one moved the served count.** The map
+entry went in cycle 1; the DEPLOYED fold image was still writing it, which cycle 2's image act
+retired (`stamped` 1 -> 0 in the fold's own line); and the value still arrived, because the
+producer reads back the snapshot the derive archives and kept the ARCHIVED copy of
+`PORTAL_BUNDLE portal`. Cycle 3 fixed that with BOTH available remedies -- the collapse's
+tie-break is now the object identity of this run's emission rather than a data mark that lost its
+signal, and the retired key is dropped from any survivor -- and the served count went to **0**.
+The CTO's whole-graph node diff reads `-vocabulary` on exactly one node, with no node added,
+removed or re-typed.
+
+**The 955 boundary edges were never 955 facts.** The CVO's S96/S97 and this seat's own
+re-derivation agree: 191 keys times a five-way fan-out, `{5: 191}` per key, and 137 of those keys
+carry the answer in their own props -- so 548 edges were contradicted by the node they start from
+and 270 more came from keys that name no bucket at all. Cycle 4 emits **one edge per key from the
+key's own props** (955 -> 137, `{1: 137}`, 0 contradicted, 54 no-bucket keys counted rather than
+guessed) and drops the prior cycle's edges on read, because the archive carry-forward is on the
+EDGES too and would have hidden the whole fix (137 emitted, 955 still in the artifact). The
+served resolution is now **135 of 137** and every one of them still lands on `S3_BUCKET_POLICY`:
+that is F11-AC3's remaining failure and it is the identity seam the CTO reserved to round 7, not
+something a producer can close alone.
+
+## THE TWO NIGHTLY FIRES, READ RATHER THAN WAITED FOR
+
+Both rules fired on their own schedules and both agree with the ad-hoc tests. The 02:00Z derive
+ran on `globgrph-derive-runner:9` -- the image this order deployed -- exit 0, printing a
+`STITCH_INGEST` line identical to the ad-hoc derive's on the same artifact. And the 03:00Z
+`opal-stitch-produce-nightly` **SUCCEEDED**: the same cron slot that had failed 67 of 67 times
+since 2026-07-07, now building from the zip this order pushed. The producer CG-s-23 repaired is
+running itself, in the vocabulary CG-s-31 unified, with no stamp and no fan-out.
