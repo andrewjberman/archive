@@ -13,8 +13,9 @@ cd "$(dirname "$0")/../../../../../../.." || exit 1
 echo "I3-AC3 -- BRANCH AND PROOF"
 echo "  TREE  : $(pwd)"
 echo "  BRANCH: $(git rev-parse --abbrev-ref HEAD)   HEAD: $(git rev-parse HEAD)"
-echo "  FILE  : the branch's whole change is in infra/aws/globgrph/derive_stitch.py --"
-git diff --stat -- infra/aws/globgrph/derive_stitch.py | sed 's/^/          /'
+echo "  FILE  : the branch's whole change is in infra/aws/globgrph/derive_stitch.py,"
+echo "          measured against the ORDER'S BASE 4ff4abd9a4 --"
+git diff --stat 4ff4abd9a4d6d2f60fd74fef32ce64158c6bd34b -- infra/aws/globgrph/derive_stitch.py | sed 's/^/          /'
 echo ""
 
 python "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/i3_branch_arms.py"

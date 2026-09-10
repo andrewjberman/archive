@@ -38,6 +38,11 @@ BOUNDS, STATED RATHER THAN NARROWED.
       seen by A or B. C is what covers that hole, at the payload grain.
   (3) The MS-family attribution is INFERRED, not measured: this run does not query the
       served graph. It is stated as inferred and the arithmetic remainder is printed.
+  (4) NON-PRODUCER LOCATIONS ARE EXCLUDED BY A PRINTED RULE, NOT BY A NAME LIST -- mission
+      deliverables, seat deliverables, tests, spikes and the tool index. A name list would
+      have to be extended every time this order's OWN harnesses became tracked, and a
+      classification that changes the moment its evidence is committed is not a
+      classification. Every excluded member is still printed with the rule that excluded it.
 """
 from __future__ import annotations
 
@@ -108,6 +113,24 @@ CLASSIFIED = {
         "a sibling worker's analysis script; not an estate producer."),
 }
 WRITER_KINDS = ("WRITER-CODE", "WRITER-PAYLOAD")
+
+# Locations that cannot hold an ESTATE PRODUCER, as a RULE rather than a name list. Same set
+# i3_fixture.NON_PRODUCER_PREFIXES uses, so the two scripts cannot disagree about a member.
+NON_PRODUCER_PREFIXES = (
+    ("org/missions/", "a mission deliverable -- a harness, fixture or capture, never served"),
+    ("org/tier1_exec/", "a seat deliverable"),
+    ("org/tier2_senior/", "a seat deliverable"),
+    ("org/modules/graph/tsgraph_spike/", "a P0 spike; its out/ payload is never served"),
+    ("infra/aws/globgrph/tests/", "a test -- asserts behaviour, emits nothing served"),
+    (".tools/tool_index.py", "an INDEX that DESCRIBES edge types"),
+)
+
+
+def by_rule(path: str):
+    for prefix, why in NON_PRODUCER_PREFIXES:
+        if path.startswith(prefix):
+            return "NON-PRODUCER", "excluded by rule `%s` -- %s" % (prefix, why)
+    return None
 
 
 def sh(args, timeout=90):
@@ -235,6 +258,8 @@ def main() -> int:
         pn, cn = b_emit[f]
         if f in CLASSIFIED:
             kindf, why = CLASSIFIED[f]
+        elif by_rule(f):
+            kindf, why = by_rule(f)
         else:
             kindf, why = "UNCLASSIFIED", "not read by this run"
             unclassified.append(f)

@@ -104,11 +104,11 @@ def retirement_tells() -> tuple:
                  "SOLE_WRITTEN_EDGE_TYPES={%s} PRIOR_CYCLE_DROP_REQUEST=(%s)"
                  % (members.strip(), request.strip())))
 
-    rc2, diff = sh(["git", "diff", "--", "infra/aws/globgrph/derive_runner.py"])
+    rc2, diff = sh(["git", "diff", BASELINE_PIN, "--", "infra/aws/globgrph/derive_runner.py"])
     stitch_types = re.search(r"STITCH_EDGE_TYPES = frozenset\(\{([^}]*)\}\)",
                              RUNNER.read_text(encoding="utf-8"))
     types_txt = stitch_types.group(1) if stitch_types else ""
-    rows.append(("4 derive_runner UNTOUCHED; its allow-list unchanged",
+    rows.append(("4 derive_runner UNTOUCHED SINCE THE ORDER'S BASE; allow-list unchanged",
                  diff.strip() == "" and "OWNED_BY" not in types_txt,
                  "diff bytes=%d ; STITCH_EDGE_TYPES={%s}" % (len(diff), types_txt.strip())))
 
@@ -124,7 +124,11 @@ def main() -> int:
           " control as a violation." % self_name)
     texts = [(str(p), p.read_text(encoding="utf-8", errors="replace")) for p in mine]
 
-    _rc, diff = sh(["git", "diff", "--", "infra/aws/globgrph/derive_stitch.py"])
+    # AGAINST THE ORDER'S BASE, NEVER THE INDEX: once the acts are committed a worktree
+    # diff is empty, and an empty diff would silently shrink this detector's coverage to
+    # the authored files alone while still printing a clean zero.
+    _rc, diff = sh(["git", "diff", BASELINE_PIN, "--",
+                    "infra/aws/globgrph/derive_stitch.py"])
     texts.append(("worktree diff of derive_stitch.py", diff))
 
     counts = scan(texts)

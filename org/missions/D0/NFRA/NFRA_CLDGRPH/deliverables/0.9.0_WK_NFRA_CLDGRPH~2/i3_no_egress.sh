@@ -18,10 +18,13 @@ echo "                kind; they are disclosed by name at the end of the detecto
 echo "  GRAIN       : STATIC over authored bytes + git's own diff. It cannot see an act that"
 echo "                left no trace in either; the probe states what the detector CAN see."
 echo ""
-echo "  ARM 1 -- GIT-SIDE WRITE SURFACE (tracked files this order changed):"
-git diff --stat -- infra/aws/globgrph/derive_stitch.py | sed 's/^/    /'
+BASE=4ff4abd9a4d6d2f60fd74fef32ce64158c6bd34b
+echo "  ARM 1 -- GIT-SIDE WRITE SURFACE (tracked files this order changed, measured"
+echo "           against the ORDER'S BASE ${BASE} and NOT against the index -- a worktree"
+echo "           diff reads EMPTY once the acts are committed):"
+git diff --stat "${BASE}" -- infra/aws/globgrph/derive_stitch.py | sed 's/^/    /'
 echo "    (the other production file this cell READ, and did not touch:)"
-git diff --stat -- infra/aws/globgrph/derive_runner.py | sed 's/^/    /'
+git diff --stat "${BASE}" -- infra/aws/globgrph/derive_runner.py | sed 's/^/    /'
 echo "    (untracked, this order's deliverables:)"
 git status --porcelain -- "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/" | sed 's/^/    /'
 echo ""
