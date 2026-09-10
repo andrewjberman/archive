@@ -25,8 +25,8 @@ Volume: 601 commits from 46 workers, since 00:00 ET.
 - **D1 Model Portfolios** - One commit. Name discovery closed; nothing else moved.
 - **D2 Advisor Intelligence**  _(no work today)_ - No work today. The advisor surfaces were narrowed this week and the client-facing half moved to Investor Reporting.
 - **D3 Portfolio Analytics**  _(no work today)_ - No work today.
-- **D4 Asset Management**  _(no work today)_ - No work today.
-- **D5 Alternative Research** - Andrew ruled that this directive holds all of the research and analysis work, settling a scope question directly. The authenticated sign-in pattern the research application needs was found already proven twice elsewhere in the estate, so nothing needs inventing. Its credential has lapsed.
+- **D4 Positioning**  _(no work today)_ - No work today.
+- **D5 Asset Management** - Andrew ruled that this directive holds all of the research and analysis work, settling a scope question directly. The authenticated sign-in pattern the research application needs was found already proven twice elsewhere in the estate, so nothing needs inventing. Its credential has lapsed.
 - **D6 Opal AI**  _(no work today)_ - No work today.
 - **D7 Opal Ticketing**  _(no work today)_ - No work today.
 - **D8 Data Pipelines** - The fund-screening guardrail closed. Seven goals met; the two whose test run was never spent are named UNTESTED rather than quietly passed.
@@ -39,7 +39,7 @@ Volume: 601 commits from 46 workers, since 00:00 ET.
 
 - **D0 Agent Infrastructure** (Finished, ok) - Called finished by Andrew. One review round stays open on paperwork, not on the build.
 - **D1 Model Portfolios** (Quiet, idle) - One commit, a close. No open work moved today.
-- **D5 Alternative Research** (Scoping, act) - Scope settled by Andrew today. The build starts on a renewed credential.
+- **D5 Asset Management** (Scoping, act) - Scope settled by Andrew today. The build starts on a renewed credential.
 - **D8 Data Pipelines** (Closed, ok) - Closed with two goals named untested. Saying so is what makes the other seven mean something.
 - **D9 Opal Workflows** (Specs landed, act) - Both projects registered and specified today; the two build lanes are being seated now.
 - **D11 Substrate & Tooling** (Running, act) - Continuous drift measurement issued; the cell was cut without waiting on a question that turned out not to gate it.
