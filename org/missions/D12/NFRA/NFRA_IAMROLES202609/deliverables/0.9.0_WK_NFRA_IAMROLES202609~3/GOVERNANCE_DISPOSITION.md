@@ -35,17 +35,29 @@ inherited from the L5 lane's character notes:
    hand-maintained inventory doc (neither of which is Terraform and neither of which decides
    anything).
 
-Where step 1 or 2 found the role genuinely declared, the disposition is `IN-CODE` as a fact, not a
-recommendation. Where neither found a declaration AND no documented rationale for exclusion names a
-decision-maker, this worker -- who holds no send tool and cannot obtain a sign-off -- did not invent
-an owner and did not quietly mark the line `IN-CODE` to dodge the requirement. Two different
+Where step 1 or 2 found the role genuinely declared -- an `aws_iam_role` resource block naming it
+exists in this repo's Terraform, cited by path -- the disposition is `DECLARED`: a fact, never a
+recommendation. Where neither step found a declaration AND no documented rationale for exclusion
+names a decision-maker, this worker -- who holds no send tool and cannot obtain a sign-off -- did
+not invent an owner and did not quietly mark the line `DECLARED` to manufacture a fact that is not
+there. That member's disposition is `ADOPT`: a recommendation that it be brought into Terraform, not
+an accomplished fact and not yet a `DECLARED` state. Where neither step found a declaration AND a
+real, unresolved decision (a service-default origin, a production-serving-path stake, or a residue
+question) is owed to a named owner, the disposition is `EXEMPT owner=UNASSIGNED reason=<what is
+owed and why>` -- unchanged from round 1, with the reason named per row below. Three different
 shapes resulted from that split, matching the cell's own warning that one disposition would not fit
 all sixteen:
 
 - Members with **no service-default character, no serving-path criticality, and no documented
-  exclusion rationale** are dispositioned `IN-CODE` -- the ordinary default state FWD-4 asks for
-  absent any reason to except them, consistent with already-declared siblings of the same shape
-  elsewhere in this estate's Terraform.
+  exclusion rationale**, and for which neither check found an `aws_iam_role` resource block, are
+  dispositioned `ADOPT` -- a recommendation, not a fact, that they be brought into code, absent any
+  reason to except them and consistent with already-declared siblings of the same shape elsewhere in
+  this estate's Terraform. FWD-4's ordinary default state is what these members are recommended
+  toward, not what they presently are.
+- One member sharing that same no-service-default, no-serving-path shape (`seeking-alpha-scraper-role`,
+  row 13) is in fact ALREADY declared -- a real `aws_iam_role` resource block exists and is cited
+  directly -- and carries `DECLARED`, not `ADOPT`: the ordinary default state FWD-4 asks for, already
+  met, not still owed.
 - Members that are **plausibly AWS service-default, sit on a production serving path, or read as
   residue** carry a real, unresolved decision that only a named owner can make (adopt or except).
   For those, the disposition is `EXEMPT owner=UNASSIGNED reason=<what is owed and why>`, per the
@@ -53,16 +65,16 @@ all sixteen:
 
 ## DISPOSITION TABLE -- 16 of 16
 
-1. `bd-merge-daily-lambda-role` -- IN-CODE. Absent from the fresh 191-role comp-iam parse and from
+1. `bd-merge-daily-lambda-role` -- ADOPT. Absent from the fresh 191-role comp-iam parse and from
    every first-party Terraform file in this repo (`comp-find infra/ --all`: only two world-model
    census/inventory JSON hits, no SURFACED or DEF band); an ordinary bd-domain role with 17 already
    Terraform-declared bd- siblings (`bd-processor-lambda-role`, `bd-silver-merge-role`,
    `bd-daily-trigger-lambda-role` and others, per the same comp-iam parse) and nothing in this repo
    distinguishing it as a candidate for exception.
-2. `bd-pipeline-task-role` -- IN-CODE. Same evidence pattern as #1: absent from the fresh comp-iam
+2. `bd-pipeline-task-role` -- ADOPT. Same evidence pattern as #1: absent from the fresh comp-iam
    parse, no SURFACED/DEF source hit, no documented rationale, an ordinary bd- role among many
    already-declared bd- siblings.
-3. `codebuild-semantic-clustering-role` -- IN-CODE. Manually built via a documented one-off setup
+3. `codebuild-semantic-clustering-role` -- ADOPT. Manually built via a documented one-off setup
    (`infra/aws/lambda/news_semantic_clustering/CODEBUILD_SETUP.md`, dated 2026-02-17, "Engineer:
    Data Scientist", "What Was Created: 1. IAM Role for CodeBuild -- Role Name:
    codebuild-semantic-clustering-role"). That document records what an engineer built, never a
@@ -78,10 +90,10 @@ all sixteen:
    actually created. This worker has no CloudTrail or console-history access to confirm the origin
    and no authority to sign an exception; the decision owed is confirmation of the creation path
    plus a named owner from a cloud-ops-authority seat who accepts or rejects the exemption.
-5. `finbert-ec2-backfill-role` -- IN-CODE. Absent from the fresh comp-iam parse and from every
+5. `finbert-ec2-backfill-role` -- ADOPT. Absent from the fresh comp-iam parse and from every
    first-party source file (census/inventory JSON only); an EC2 backfill role with no service-default
    naming pattern and no documented exclusion rationale anywhere in this repo.
-6. `lambda-ec2-runtime-monitor-role` -- IN-CODE. Same evidence pattern: absent from the fresh
+6. `lambda-ec2-runtime-monitor-role` -- ADOPT. Same evidence pattern: absent from the fresh
    comp-iam parse, no SURFACED/DEF source hit beyond census JSON, no documented rationale for
    exclusion.
 7. `lambda-test-role` -- EXEMPT owner=UNASSIGNED reason=the name itself reads as test/scratch
@@ -97,7 +109,7 @@ all sixteen:
    own character note flags an exemption here as "a much heavier claim" than for a background role;
    this worker cannot make that heavier call or name who accepts it. The decision owed is an explicit
    sign-off (adopt via import, or formally except) from a seat holding Terraform-change authority.
-9. `opal-smartx-lambda-role` -- IN-CODE. Absent from the fresh comp-iam parse and from all Terraform
+9. `opal-smartx-lambda-role` -- ADOPT. Absent from the fresh comp-iam parse and from all Terraform
    source; documented only in a hand-maintained, non-Terraform inventory
    (`infra/aws/manifests/iam/iam-roles.yaml`, "Last Updated: 2026-01-02") and the portal-functions
    manifest (`infra/aws/manifests/lambda/opal-portal-functions.yaml:138,736-737`). An inventory entry
@@ -113,7 +125,7 @@ all sixteen:
     next to an already-declared one for the same functional area. The heavier stakes IAM-s-5 named
     apply in full; the decision owed is an explicit sign-off from a seat with Terraform-change
     authority on whether to adopt or except, not a call this worker can make.
-11. `portfolio-management-lambda-role` -- IN-CODE. Absent from the fresh comp-iam parse and from all
+11. `portfolio-management-lambda-role` -- ADOPT. Absent from the fresh comp-iam parse and from all
     Terraform source (census/inventory JSON only). It is NOT the same object as the
     Terraform-declared `portfolio-export-lambda-role` (`infra/aws/terraform/portfolio-management/
     main.tf:227`, a distinctly-named sibling created in the same module) -- a genuinely separate,
@@ -125,7 +137,7 @@ all sixteen:
     in-repo evidencing its creation path. Same unconfirmed-origin situation as
     `ecsTaskExecutionRole`: the decision owed is confirmation plus a named owner, not a call this
     worker can authorize.
-13. `seeking-alpha-scraper-role` -- IN-CODE. This one is factually already declared:
+13. `seeking-alpha-scraper-role` -- DECLARED. This one is factually already declared:
     `resource "aws_iam_role" "seeking_alpha_role" { name = "seeking-alpha-scraper-role" ... }` at
     `infra/aws/terraform/seeking-alpha/main.tf:240-241`, and this cell's fresh `comp-iam roles`
     re-run lists it directly by that exact name with `tf_resource: seeking_alpha_role`, `source:
@@ -134,7 +146,7 @@ all sixteen:
     Terraform source at this cell's own re-measurement; see the filed surprise row -- this is not a
     governance finding about the role, it is an instrument discrepancy the governance disposition
     corrects for.
-14. `sentiment_query_api-role` -- IN-CODE. Absent from the fresh comp-iam parse and from all
+14. `sentiment_query_api-role` -- ADOPT. Absent from the fresh comp-iam parse and from all
     Terraform source (census/inventory JSON only); an ordinary API-serving lambda role with no
     service-default naming pattern and no documented exclusion rationale.
 15. `vpc-flow-logs-role` -- EXEMPT owner=UNASSIGNED reason=plausible AWS-service-default role (the
@@ -142,12 +154,52 @@ all sixteen:
     the fresh comp-iam parse and from all first-party Terraform source, with nothing in-repo
     evidencing its creation path. Same unconfirmed-origin situation as the other two service-default
     candidates: the decision owed is confirmation plus a named owner.
-16. `workspace-sync-lambda-role` -- IN-CODE. Absent from the fresh comp-iam parse and from all
+16. `workspace-sync-lambda-role` -- ADOPT. Absent from the fresh comp-iam parse and from all
     Terraform source (census/inventory JSON only); an ordinary sync-lambda role with no
     service-default naming pattern and no documented exclusion rationale.
 
-**Coverage: 16 of 16 members carry a disposition token above -- 10 `IN-CODE`, 6 exempt (with owner
-and reason on each of those 6 lines).**
+**Coverage: 16 of 16 members carry a disposition token above -- 1 `DECLARED` (a fact: an
+`aws_iam_role` resource block exists, cited by path), 9 `ADOPT` (a recommendation: not yet declared,
+should be brought into code), 6 `EXEMPT owner=... reason=...` rows (owner and reason recorded on
+each of those 6 disposition-table lines). Read plainly: ONE of sixteen roles is presently declared
+in this repo's Terraform. Nine are recommended for adoption and remain undeclared until a later act
+(not this one) brings them in. Six carry an open governance decision this worker could not
+authorize. No `ADOPT` row is an accomplished fact, and no `DECLARED` row is a recommendation still
+owed.**
+
+## RULE 24 FOUR-POSTULATE RECORD FOR THE REPLACEMENT VOCABULARY (this cell, IAM-r-1)
+
+The prior single token carried two intents -- a measured fact for some rows, a recommendation for
+others -- graded FAIL at L9 on exactly that ground (rule 24(iii)). Its replacement, `DECLARED` /
+`ADOPT` / the third (exempt) value, is itself a schema and rule 24 binds it. The four postulates,
+checked against this document as it now reads:
+
+- **MECE over a declared domain**: the declared domain is the 16 members `IAM-s-5` measured (see
+  INPUT SET AND ITS VINTAGE above -- unchanged, not re-measured by this cell). Every one of the 16
+  rows in the DISPOSITION TABLE carries exactly one of the three values -- 1 `DECLARED` + 9 `ADOPT` +
+  6 exempt = 16, matching the coverage line above. No row carries zero values or two, and the domain
+  is closed at 16 because `IAM-r-3` (not this cell) owns any change to that membership.
+- **SAME GRAIN**: each value is a property of ONE member (one IAM role name), never of the set as a
+  whole and never of a sub-population as a unit. `DECLARED` and `ADOPT` are both resolved at the
+  member level by the same two-step method (the fresh `comp-iam roles` name check plus the
+  `comp-find infra/ --all` first-party-source check, see METHOD above); the exempt value likewise
+  names one member's individually-reasoned owner and reason, never a class-wide default.
+- **INTENT COHERENCE**: one axis, one intent. This axis answers exactly one question per member --
+  "does an `aws_iam_role` resource block naming this member exist in this repo's Terraform, right
+  now" -- `DECLARED` answers yes (a fact, resource block cited), `ADOPT` answers no with no
+  documented exclusion (a recommendation, not yet true), and the exempt value answers no with a real
+  unresolved decision owed to a named owner (deliberately outside Terraform pending that decision).
+  It never answers whether a member's *permissions* are correctly scoped -- that is `IAM-s-1`'s axis
+  and does not move with this one (SCOPE HELD, bound D6, below).
+- **STATE COHERENCE** (which values one remedy does NOT move): bringing one `ADOPT` member into
+  Terraform (a future `IAM-r-3`/`IAM-r-5` act, not performed here) moves ONLY that member's row from
+  `ADOPT` to `DECLARED` -- it touches no exempt row and no other `ADOPT` row. Assigning a named
+  owner to one exempt row (the `EXEMPT owner=UNASSIGNED reason=<what is owed and why>` pattern used
+  per row in the DISPOSITION TABLE above) resolves ONLY that member's open decision -- it touches no
+  `DECLARED` row and no `ADOPT` row, and it does not itself change which of the three values that
+  row carries; only its `owner=` field moves from `UNASSIGNED` to a name. Neither remedy changes any
+  member's permission grant, in either direction (C-TWO-REMEDIES, bound D6, held throughout this
+  document and unchanged by this cell).
 
 ## WHY ONE DISPOSITION DID NOT FIT ALL SIXTEEN (measured, not inherited)
 
@@ -201,8 +253,10 @@ recommends adding, tightening, or adjusting any grant on any of the 16 -- that j
 `IAM-s-1` and is a different remedy that does not move together with this one. A role's governance
 placement (in code, or a recorded and owned exception) says nothing about whether its permissions
 are right-sized, and this deliverable does not conflate the two in either direction. No Terraform
-was modified, created, deleted, or edited to produce this deliverable; every `IN-CODE` token above
-is an assessment for a later act by a seat with that lane, never an act performed here.
+was modified, created, deleted, or edited to produce this deliverable; every `ADOPT` token above is
+a recommendation for a later act by a seat with that lane, never an act performed here, and every
+`DECLARED` token above reports a fact already true in Terraform, not an act performed by this
+deliverable.
 
 ## SURPRISE ROWS FILED
 
