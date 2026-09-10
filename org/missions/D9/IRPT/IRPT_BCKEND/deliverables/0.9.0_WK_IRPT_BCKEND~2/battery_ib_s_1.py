@@ -19,6 +19,7 @@ import argparse
 import ast
 import datetime as dt
 import json
+import os
 import socket
 import subprocess
 import sys
@@ -438,9 +439,21 @@ def arm_e(state: dict) -> None:
 
 # ============================================================================ arm (f)
 def _aws(args: "list[str]") -> "tuple[int, str]":
-    cmd = [str(_REPO / ".tools" / "aws")] + args
-    p = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
-    return p.returncode, (p.stdout + p.stderr).replace("\r", "").strip()
+    """The estate's aws shim, invoked the way a PYTHON parent has to invoke it.
+
+    `.tools/aws` is a bash script, not a PE binary: handing it to CreateProcess raises
+    `OSError: [WinError 193] %1 is not a valid Win32 application` -- measured here, not
+    reasoned. `.tools/aws.cmd` is the Windows-plane forwarder that exists for exactly this
+    call site (CLAUDE.md Git section: "AWS via the .tools/aws shim (+aws.cmd, both or
+    neither)"). Never a bare `aws`: that bypasses the MSYS path-mangling guard the shim IS.
+    The shim also emits CRLF, so every field parse downstream must not inherit a trailing CR.
+    """
+    shim = _REPO / ".tools" / ("aws.cmd" if os.name == "nt" else "aws")
+    if not shim.is_file():
+        return 127, "BLOCKED: aws shim absent at " + str(shim)
+    p = subprocess.run([str(shim)] + args, capture_output=True, text=True, timeout=120)
+    out = (p.stdout + p.stderr).replace(chr(13), "").strip()
+    return p.returncode, out
 
 
 def arm_f(state: dict) -> None:
@@ -449,7 +462,13 @@ def arm_f(state: dict) -> None:
     lines = []
 
     # --- the QA objects, per firm, by head-object ---
+    # THE COUNTER IS THE MEASUREMENT'S OWN, not the build's. `landed[firm]["uploaded"]` is
+    # the BUILD's flag and reads False here by design (arm (a) builds without acting), so
+    # counting it would print "0 of 3" beside three rc=0 head-objects -- a summary field
+    # contradicting the evidence directly above it, which is not repaired by that evidence
+    # being right. `head_ok` counts what this arm actually measured, and nothing else.
     landed = state.get("landed") or {}
+    head_ok = 0
     for firm_id, info in sorted(landed.items()):
         rc, out = _aws(["s3api", "head-object", "--bucket", info["bucket"],
                         "--key", info["latest_key"], "--output", "json"])
@@ -463,12 +482,16 @@ def arm_f(state: dict) -> None:
         if rc != 0 or not size:
             ok = False
             lines.append("{} QA latest.json NOT landed".format(firm_id))
+        else:
+            head_ok += 1
     if landed:
-        lines.append("{} of {} firm QA latest.json objects head-object OK".format(
-            sum(1 for i in landed.values() if i.get("uploaded")), len(landed)))
+        if head_ok != len(landed):
+            ok = False
+        lines.append("{} of {} firm QA latest.json objects head-object rc=0 with a "
+                     "non-zero ContentLength".format(head_ok, len(landed)))
     else:
         ok = False
-        lines.append("no QA objects landed (--skip-land)")
+        lines.append("no QA objects to grade (--skip-land)")
 
     # --- served bytes: CodeSha256 == sha256 of the BUILT zip, never a filename ---
     # The BUILT side is read from the ARTIFACT'S OWN `content-sha256` metadata, which
@@ -538,13 +561,28 @@ def arm_f(state: dict) -> None:
         print("  sentinel {}: {} -- ABSENT BY CONTRACT at close "
               "(deploy_ledger.py close removes it)".format(
                   SENTINEL.name, "present" if SENTINEL.is_file() else "absent"))
+        # `deploy_ledger.py check` is an ESTATE-WIDE sweep and its rc is an ESTATE-WIDE
+        # verdict: rc=1 means SOME entry somewhere is open, which on a shared repo is
+        # routinely another seat's live work and says nothing about this cell. Gating on that
+        # rc would be a check scoped to the wrong population. What this arm grades is whether
+        # THIS SLUG appears among the open/bypass findings -- and the full output is printed
+        # with its denominator so the reader can see the estate state rather than infer it.
         cp = subprocess.run([sys.executable, str(_REPO / ".tools" / "deploy_ledger.py"),
                              "check"], cwd=str(_REPO), capture_output=True, text=True,
                             timeout=120)
         chk = (cp.stdout + cp.stderr).strip().splitlines()
-        print("  deploy_ledger.py check rc={} -> {}".format(
-            cp.returncode, chk[-1] if chk else "(no output)"))
-        bypass = any("BYPASS" in ln for ln in chk)
+        print("  deploy_ledger.py check rc={} (ESTATE-WIDE, not this cell) -- "
+              "{} output line(s):".format(cp.returncode, len(chk)))
+        for ln in chk:
+            print("    | " + ln.strip())
+        mine = [ln for ln in chk if LEDGER_SLUG in ln]
+        print("  lines naming {}: {} of {} (0 = this cell is not among the open/bypass "
+              "findings)".format(LEDGER_SLUG, len(mine), len(chk)))
+        bypass = any("BYPASS" in ln for ln in mine)
+        if mine:
+            ok = False
+            lines.append("{} still named by deploy_ledger.py check: {}".format(
+                LEDGER_SLUG, mine))
         if ("CLOSED" not in status_line or legs_closed != 5 or not commit
                 or SENTINEL.is_file() or bypass):
             ok = False
