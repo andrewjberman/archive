@@ -1,162 +1,137 @@
-# ETFS_GUARDRAIL.TO-EG-s-24 -- THE FORCING SEAM: BUILT AND GREEN, UNCOMMITTABLE BY ME
+# ETFS_GUARDRAIL.TO-EG-s-24 -- THE FORCING SEAM, THREADED AND DEPLOYED
 
-**Assignee:** `0.9.0_WK_ETFS_GUARDRAIL~4` (L7 worker subagent of `2.0.0_SA_COO`, round 3, cell `EG-s-24`)
-**Worktree:** `/c/tmp/wk-etfs-3-4` on `wk-etfs_guardrail-3-4`, HEAD `11c0810142` (unchanged by this order)
-**Face:** read at `d30e3ca107` -- it is NOT in this branch's ancestry, and that is the whole problem.
-**Outcome:** `S24-AC1` **FAIL**, blocked at the commit. `<status>` NOT flipped (it cannot be).
-**Rows:** `ETFS_GUARDRAIL-W4-S3` (BLOCKING / ARMED), `ETFS_GUARDRAIL-W4-S4` (OBSERVATION / INERT, a correction to my own `W4-S1`).
+**Assignee:** `0.9.0_WK_ETFS_GUARDRAIL~4` · **Face:** hardened at `e618f3f88d` · **Branch:** `wk-etfs_guardrail-3-4`
+**Outcome:** `S24-AC1` **PASS by output** (10 of 10 arms), `S24-AC2` RECORDED.
+**Rows:** `W4-S3` (the two-gate bind, now cleared by the merge), `W4-S4` (my correction to `W4-S1`), `W4-S5` (the second writer).
 
-> **NO DEPLOY, NO INVOKE, NO SEND.** The plan was never run and `safe-apply` was never called,
-> because L1 (code committed before the apply) could not be satisfied. The served function is
-> untouched at `CodeSha256 ag4La0jgP8JEr55FCvXx+gnR5pDqw1CpvbEHZBrBTPc=`. `EG-s-21`'s single
-> permitted driven run remains **unspent**.
+> **NO SEND, NO ORCHESTRATOR INVOKE.** `EG-s-21`'s single permitted driven run is **unspent**.
 
 ---
 
-## 1. THE WORK IS DONE, AND IT IS GREEN
+## 1. UNBLOCKING FIRST -- the merge, done under the guard
 
-`python -m pytest infra/aws/lambda/etfs-reports-orchestrator/ -q` -> **26 passed** (was 20; +6 new
-arms in `test_forcing_seam.py`). `.tools/commit-gate.sh` -> `pre-commit gate clean for 2 of 2
-file(s)`. ASCII-clean and LF, checked explicitly.
+`W4-S3` was right and the fix was one act: `bash .tools/safe-merge.sh CLOUD`. It conflicted on the
+append-only channel exactly as the tool's own header predicts (3 of 3 on round 4's drains). I
+resolved by **union from the three index stages** rather than by splicing markers: base was a strict
+prefix of ours; CLOUD had additionally bumped the header denominator; so the union is CLOUD's trunk
+plus my `W4-S2/S3/S4` sections. **0 duplicate ids, 0 markers left, all 8 JSON blocks parse.**
+`--continue` graded the *merged* index and landed `0228b9c456`; the row gate printed **66 rows**,
+matching the header I had written. The lane gate then resolved and the code commit landed unmodified.
 
-**The seam**, in `infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py`:
+## 2. THE SEAM
 
 ```
 FORCING_KEY     = "force_fixture_remove"
 FORCING_SPEC_RE = ^[a-z0-9][a-z0-9_-]{0,31}:\d{4}-\d{2}-\d{2}(,\d{4}-\d{2}-\d{2})*$
-_forcing_spec(event) -> the validated spec, or "" for OFF
-_render_command(month, forcing="")      <- DEFAULTED, so every existing caller is unchanged
-_render_command(month, _forcing_spec(event))    <- the one call site
+MONTH_RE        = ^\d{4}-(0[1-9]|1[0-2])$          <- the second writer's fence (s.3)
+_forcing_spec(event) -> validated spec, or "" for OFF   (needs test_run AND the forcing key)
+_render_command(month, forcing="")                      <- DEFAULTED; "" appends nothing
 ```
 
-**The safety property, which is what the cell is for.** CLAUDE.md: an override letting a scheduled
-producer run off its own inputs **creates a new reachable state on the manual path**. This one is
-worse-shaped than EG-s-15's `--month` override -- that changed *which* month was rendered; this
-changes *what data* the month is rendered over. Four mechanical fences:
+Forcing requires the **test marker**, which is exactly what `EG-s-20`'s forbidden-filter keys on, so
+**a run that drops its own input data can never be a run whose recipients include aj@.**
 
-1. **The default is OFF, and OFF is bit-for-bit.** `""` appends nothing, so the marker-free command
-   is byte-identical to the pre-change one -- asserted against the **actual pre-change blob**, read
-   from git at a pinned commit and verified *by content* against the sha256 measured on the deployed
-   zip member, with a positive control on `git show` and an explicit wrong-pin assert (Rule 22a).
-2. **Two independent conditions, neither in the scheduled payload.** The event must carry BOTH
-   `test_run` AND `force_fixture_remove`; the schedule's own input is `jsonencode({mode = "run"})`.
-3. **The coupling is the safety composition.** Forcing requires the TEST marker -- exactly the marker
-   EG-s-20's forbidden-filter keys on -- so **a run that drops its own input data can never be a run
-   whose recipients include aj@**. An arm asserts both directions.
-4. **The spec is shell-bound, so it is validated.** It interpolates into a single-quoted
-   `su - ec2-user -c '...'` handed to SSM. 13 injection attempts (quote-break, `;`, `&&`, backticks,
-   `$( )`, newline, a second `--s3-out`, path traversal, malformed dates) each resolve to OFF and
-   leave the command **equal to the clean one**.
+## 3. CONDITION (b) FOUND A SECOND WRITER, AND MY OWN EARLIER CENSUS COULD NOT SEE IT
 
-**Three of my own test assertions were wrong and the tests caught them, not the code.** An injection
-arm asserted "no `'` in the command" and failed on the *wrapper's* own closing quote; a later
-version asserted "no `$(`" and failed on the orchestrator's own `CHROME=$(ls -d ...)`; and the
-recipient arm asserted both recipients while never setting `EMAIL_RECIPIENT`, so its converse limb
-would have passed **vacuously** against a set that never contained aj@. All three are now delta-based
-or explicitly pinned, each carrying the reason inline.
+I had censused the **four event keys the handler reads** and called that the writer census.
+Censusing the **command builder's own source** gives:
 
----
+| | |
+|---|---|
+| DENOMINATOR | **6** inputs reaching the built command |
+| parameters | `month`, `forcing` |
+| module globals | `ETFS_BUCKET`, `REPORTS_PREFIX`, `ARTIFACT_PREFIX`, `REGION` |
+| exclusions | those 4 are each `os.environ.get(<name>, <literal>)`, Terraform-set, and no event key maps to any -- **4 of 6 excluded** |
+| **invoker-writable** | **2, not 1** |
 
-## 2. WHY IT CANNOT BE COMMITTED -- two correct gates, jointly blocking
+`month` was interpolated into the same single-quoted SSM string **unvalidated**. Measured, not reasoned:
 
-| attempt | pathspec | result |
-|---|---|---|
-| 1 | code + tests + **the face** + ledger | **L6 gate REFUSED**: *"a NEW tree task order committed under `0.9.0_WK_ETFS_GUARDRAIL~4`. COO is the only agent that does task orders (LD-0521 A3)"* -- plus 3 more, because my branch's decomposition is the v0.3 index (**22 cell ids, `EG-s-24` absent**) while the cell was minted in v0.6 at `d30e3ca107` |
-| 2 | code + tests + ledger (face removed from worktree) | **lane gate REFUSED**: *"agent=`0.9.0_WK_ETFS_GUARDRAIL~4` not in permitted_agents -- WORKER: no NON-TERMINAL task order at HEAD issued_to this serial names this path in its `<paths>` block (ADHC_OWNPTH.005: the order is the grant; a missing path is a cut defect, never an override)"* |
-| 3 | same, with the face materialised **untracked** in the worktree | **refused identically** -- so the grant resolves from **HEAD**, not the worktree. This is the discriminating read. |
+```
+event {"mode":"run","month":"2026-08 --fixture-remove cottonwood:2026-08-04"}
+  _forcing_spec(event) -> ''          (the purpose-built fence correctly refuses)
+  '--fixture-remove' in the built command -> True
+```
 
-`git log -1` -> `11c0810142~0.9.0_WK_ETFS_GUARDRAIL~4~L7(...EG-s-21...)`; negative control
-`git log -1 --format=%h deadbeefdeadbeef` -> `fatal: ambiguous argument`. **HEAD is unchanged and
-nothing landed** -- asked of the repository, not of the tool's stdout, per the refusal's own warning.
+The same hole reached `--s3-out`, `--no-ladder`, or a quote-break out of the shell string. It
+**pre-dates this cell** (it arrived with `EG-s-15`'s month override and was live in the served
+function from 01:16:14Z) and it is row **`W4-S5`**. Fixed by `MONTH_RE`, enforced **inside
+`_render_command`** -- the one place the string is built -- failing **loud** rather than falling back.
 
-**The bind is exact:** gate 2 resolves my grant from a task order *at HEAD*; gate 1 forbids me
-putting that task order at HEAD.
+**A fence on one writer of a property is not a fence on the property.** That is the finding.
 
-**This is the banked hazard running backwards.** The estate has recorded that a worker's own
-`<status>` flip *withdraws* its grant on its own branch. Here the same coupling bites at the start:
-my `EG-s-20` face at HEAD names `infra/aws/lambda/etfs-reports-orchestrator/` but I flipped it to
-`complete`, so it is **terminal and grants nothing**; my `EG-s-21` face at HEAD is non-terminal but
-its `<paths>` deliberately excludes that directory; and the `EG-s-24` face that *does* grant it lives
-only at `d30e3ca107`, which I may not merge.
+## 4. THE DEPLOY
 
-**I took neither printed override.** The L6 refusal offers `# pipeline-override: <reason>` and the
-lane refusal has `GIT_COMMIT_AUTHOR_OVERRIDE=<LANE>`. Using the first would be a worker acting as
-the issuer on the one artefact the workflow reserves to the issuer; using the second would be a
-worker writing its own lane grant. My standing instruction is that a path my order lacks is a
-**BLOCKING row, never an override**, and both refusals are correct.
+| | |
+|---|---|
+| pre | `ag4La0jgP8JEr55FCvXx+gnR5pDqw1CpvbEHZBrBTPc=`, 03:54:09Z, 13,785 B |
+| post | `rCrGrYPZNKgWQ4uX3NGFGqm7v1s+KcfQlJ7na+soz+g=`, 05:42:07Z, 16,210 B |
 
----
+Entry opened **05:38:12Z**, code committed `3a326438d3` **before** the apply, targeted plan to a
+saved plan file (`Plan: 0 to add, 1 to change, 0 to destroy.`, 1 of 1 resource), apply 05:41:32Z ->
+05:42:12Z, entry **closed and committed** `98ef9d28dc` before the grading read. Served == built ==
+predicted; member == `git show HEAD:<path>`; pre-change blob does **not** match. Re-plan rc=0
+`No changes.` Halt gate passed with **no `HALT_ACK`**, printing *"worker … has no inbox; scanning
+its issuer 2.0.0_SA_COO"*.
 
-## 3. NOTHING IS LOST -- what is preserved, and the one-line fix
+**Condition (a), verified by my own sha256 before AND after the apply:** `EG-s-25`'s renderer served
+at 66,756 B / `b08a646d5755f501…` (05:19:37Z) against my pre-`EG-s-25` baseline 62,880 B /
+`55701125e86740f3…` with **zero** disclosure tokens; it now carries `forced` 9, `run_id` 27.
+**Disclosure existed before forcing became reachable.**
 
-Committed to this deliverables folder (which *is* reachable, by tree convention):
+## 5. THE CRITERIA
 
-| artefact | size | sha256 |
-|---|---|---|
-| `EG-s-24_UNCOMMITTED_lambda_function.patch` | 7,751 B | `7d67b7ec9fd6909d0ae1c615b04ffc87315f73542505c94cc656106257e7c223` |
-| `EG-s-24_UNCOMMITTED_test_forcing_seam.py` | 13,365 B | `d3878289eecb1a45e8ea6153e7c9bf78d08b12ee805863d2e7f1396695267c05` |
+### `S24-AC1` -- PASS by output
 
-The worktree files they were taken from: `lambda_function.py` 45,641 B sha256
-`fe46e12c51b77747a4779536297ad19cd0d47a3a6e4b703e114565a7ca4ba95f`; `test_forcing_seam.py` 13,365 B
-sha256 `d3878289eecb1a45…`.
+```
+$ timeout 600 python org/.../test_egs24_forcing_seam.py
+arms: 10 of 10 HOLD
+EGS24-FORCING-THREADED-SCHEDULE-CLEAN     rc=0
+```
 
-**The cheapest fix is the issuer's and the code needs no change:** put `d30e3ca107` (or just the
-`EG-s-24` face plus the v0.6 decomposition) into this worker branch's ancestry, and the same commit
-lands unmodified.
-
----
-
-## 4. THE CRITERIA
-
-### `S24-AC1` -- FAIL
-
-The battery `test_egs24_forcing_seam.py` was **not written**, deliberately. Arms (a)-(d) are
-measurable only against **deployed** bytes, and arm (e) is a deploy that could not begin: its own L1
-is "committed BEFORE the apply", and the commit is what is blocked. Writing a battery that reads the
-*worktree* would be precisely the Rule 22a error this project has been correcting all night --
-proving a property of bytes nobody serves. The hermetic evidence that the seam is correct is the
-6 new pytest arms (26 of 26 green); the evidence that it is not *deployed* is that the served
-`CodeSha256` is unchanged.
+(a) pre-change code: 5 of 5 shapes carry no `--fixture-remove`, token absent from its whole source ·
+(b) 5 of 5 marker-free shapes build a **byte-identical** command · (c) 0 of 20 payloads reach the
+flag in code, 8 of 8 month injections refused, and **on the deployed payload** the live rule sends
+1 key `['mode']` with positive control `mode='run'` present while `test_run`,
+`force_fixture_remove` and `month` all read absent · (d) the spec reaches `--fixture-remove`
+verbatim and parses under the renderer's own `_parse_fixture_remove`, and cannot persist (0 globals,
+0 env writes, 0 SSM/S3 persistence, warm-container tested) · (e) three-read equality with a negative
+control, entry opened-before / closed-before · (f) 0 START RequestId in my window against **1 of 4**
+in a positive-control window.
+Hermetic side: `pytest infra/aws/lambda/etfs-reports-orchestrator/ -q` -> **27 passed** (20 before).
 
 ### `S24-AC2` -- RECORDED, judgment, NO VERDICT
 
 - **The forcing key's shape, and why it cannot be confused with a scheduled field.** Two keys must
-  co-occur (`test_run` + `force_fixture_remove`); the schedule's entire input is
-  `jsonencode({mode = "run"})`. `force_fixture_remove` is a verb-phrase in the imperative, not a
-  noun a scheduler would emit, and it is matched **exactly** -- `FORCE_FIXTURE_REMOVE`,
-  `Force_Fixture_Remove`, `fixture_remove`, `--fixture-remove` and a nested `detail.*` copy are all
-  tested and all resolve to OFF.
-- **What a caller could still do wrong.** Three things, none of which reach the world. (i) Pass a
-  well-formed spec naming a partner that does not exist -- the renderer's `_apply_fixture_remove`
-  uses `daily.get(p, {}).pop(d, None)`, so it is a silent no-op and the run would PUBLISH while the
-  operator believed it forced; that is a *disclosure* problem and it is `EG-s-25`'s field, which is
-  exactly why the two cells are paired. (ii) Pass dates that are already absent -- same shape.
-  (iii) Force on a month whose holes are class D, which does not refuse; the class table, not the
-  forcing, decides.
-- **Other callers of `_render_command`, censused not recalled:** an AST walk finds **1** call site
-  (`:643`), and a pytest arm asserts that count and that `forcing` is **defaulted**, so an unknown
-  future caller keeps the old behaviour.
-- **What this seam does NOT make reachable.** It cannot write or delete an S3 key; it cannot change
-  which month is published; it cannot reach a recipient (the recipient path is EG-s-20's and is
-  keyed on the same marker); it cannot survive into a scheduled fire; and it cannot put a shell
-  metacharacter into the SSM command. It makes exactly one thing reachable: `--fixture-remove` on a
-  test invocation.
+  co-occur (`test_run` + `force_fixture_remove`) and the schedule's entire deployed Input is
+  `{"mode":"run"}`. It is a verb-phrase in the imperative, not a noun a scheduler emits, and it is
+  matched exactly: `FORCE_FIXTURE_REMOVE`, `fixture_remove`, `--fixture-remove` and a nested
+  `detail.*` copy all resolve to OFF.
+- **What a caller could still do wrong.** (i) Name a partner or date that does not exist -- the
+  renderer's `_apply_fixture_remove` does `daily.get(p, {}).pop(d, None)`, a silent no-op, so the run
+  would PUBLISH while the operator believed it forced. That is a *disclosure* problem and it is
+  precisely what `EG-s-25` now writes onto the verdict, which is why the ordering condition exists.
+  (ii) Force on a month whose holes are class D, which does not refuse: the class table decides, not
+  the forcing. (iii) Force a month with no served data at all and read the empty result as a refusal.
+- **Other callers of `_render_command`, censused not recalled:** AST walk -> **1** call site; a pytest
+  arm asserts that count *and* that `forcing` is defaulted, so an unknown future caller is unchanged.
+- **What this seam does NOT make reachable:** no S3 write or delete; no change to which month
+  publishes beyond the `YYYY-MM` already accepted (now *narrower* than before, since `MONTH_RE`
+  rejects `current`/`last`, which the orchestrator never sent); no recipient change; no survival into
+  a scheduled fire; no persistence into a later invocation; no shell metacharacter into the SSM
+  command.
+- **One thing I would flag to the CVO.** `MONTH_RE` is *stricter* than the renderer's own
+  `_resolve_month`, which accepts `current` and `last`. The orchestrator never sent those, so nothing
+  regresses -- but the two validators now disagree about what a legal month is, and a future seat
+  wiring `current` through the orchestrator will meet a loud refusal rather than a silent pass. I
+  judge that the right side to fail on; it is recorded so it is a choice and not a surprise.
 
-**Evidence vintage:** code as measured in the worktree 2026-09-10 ~05:0xZ (uncommitted, sha256s
-above); deployed orchestrator unchanged at `LastModified 2026-09-10T03:54:09Z`; gate refusals quoted
-verbatim from this session.
+**Vintage:** deployed orchestrator `LastModified 2026-09-10T05:42:07Z`; served renderer
+`b08a646d5755f501…`; live schedule read 05:3xZ; code `@98ef9d28dc`.
 
----
+## 6. WHAT I DID NOT DO
 
-## 5. WHAT I DID NOT DO
-
-- **No deploy.** No `terraform plan`, no `safe-apply`, no `update-function-code`.
-- **No invoke, no send.** `EG-s-21`'s one run is unspent.
-- **No override**, of either gate.
-- **No edit to the renderer** (`EG-s-25`, `0.9.0_WK_ETFS_GUARDRAIL~5`) or to
-  `data/etfs/scripts/coverage/` (`EG-s-23`, `0.9.0_WK_ETFS_GUARDRAIL~1`). I read
-  `render_month_end.py` only to import `_parse_fixture_remove` in a test and to cite line numbers.
-- **No `<status>` flip**, on any face.
-- **The NEVER-2 entry `20260910T0508Z_etfs-guardrail-eg-s-24-forcing-seam` is left OPEN** with 5
-  legs and is *uncommitted* -- its sentinel could not ride the blocked commit either. It is named
-  here so it is not later mistaken for an abandoned deploy: **no deploy ever started.**
+No send, no orchestrator invoke, no S3 write or delete, no override of any gate. No edit to
+`data/etfs/scripts/presentation/` (`EG-s-25`, `~5`) or `data/etfs/scripts/coverage/` (`EG-s-23`,
+`~1`) -- I imported the renderer's parser and read its line numbers, nothing more. The 05:08Z entry
+opened before the merge was **deleted while still untracked**: no deploy ever began under it and it
+never entered the record.

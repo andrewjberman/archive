@@ -305,9 +305,15 @@ entry_commits = [x for x in log_out.split() if x]
 print("  entry opened %s < apply %s : %s"
       % (opened_at.isoformat(), APPLY_UTC.isoformat(), opened_at < APPLY_UTC))
 print("  entry status: %s | commits on the entry: %d" % (status[:60], len(entry_commits)))
-for tok in ("NEW REACHABLE STATE", "deliberately dropped input data", "DENOMINATOR = 6",
-            "b08a646d5755f501"):
-    print("    sign-off names %-34s : %s" % (tok, tok in entry_text))
+# CASE-INSENSITIVE: the sign-off names the new state in CAPITALS ("...PRODUCED OVER
+# DELIBERATELY DROPPED INPUT DATA"), and a case-sensitive probe reported that as ABSENT --
+# a defect in the probe, not in the record. The requirement is that the sign-off names the
+# state in its own words, and case is not part of that requirement.
+_entry_lc = entry_text.lower()
+SIGNOFF_TOKENS = ("new reachable state", "deliberately dropped input data",
+                  "denominator = 6", "b08a646d5755f501")
+for tok in SIGNOFF_TOKENS:
+    print("    sign-off names %-34s : %s" % (tok, tok in _entry_lc))
 hold("e-deployed-equals-built-equals-reviewed",
      CONF["CodeSha256"] == ZIP_B64 and predicted and predicted.group(1) == CONF["CodeSha256"]
      and COMMITTED_SHA == SHA and PRE_SHA != SHA
@@ -316,11 +322,12 @@ hold("e-deployed-equals-built-equals-reviewed",
      "the pre-change blob does NOT match; the plan carried 1 of 1 resource")
 hold("e-entry-ordering-and-signoff",
      opened_at < APPLY_UTC and status.startswith("CLOSED") and len(entry_commits) >= 2
-     and "deliberately dropped input data" in entry_text and "DENOMINATOR = 6" in entry_text
-     and "b08a646d5755f501" in entry_text,
-     "the entry opened before the apply, is CLOSED across %d commits, names the new reachable "
-     "state in its own words, PRINTS the writer count, and carries my own sha256 of the served "
-     "EG-s-25 renderer" % len(entry_commits))
+     and all(t in _entry_lc for t in SIGNOFF_TOKENS),
+     "the entry opened %s before the apply %s, is CLOSED across %d commits, and its sign-off "
+     "carries %d of %d required tokens -- the new reachable state in its own words, the writer "
+     "count, and my own sha256 of the served EG-s-25 renderer"
+     % (opened_at.isoformat(), APPLY_UTC.isoformat(), len(entry_commits),
+        sum(1 for t in SIGNOFF_TOKENS if t in _entry_lc), len(SIGNOFF_TOKENS)))
 
 # =====================================================================================
 head("(f) NO SEND, NO INVOKE")
