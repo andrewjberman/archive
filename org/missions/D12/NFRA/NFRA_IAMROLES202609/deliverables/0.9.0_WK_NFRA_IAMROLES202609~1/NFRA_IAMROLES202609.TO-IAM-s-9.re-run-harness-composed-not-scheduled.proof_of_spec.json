@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_IAMROLES202609.TO-IAM-s-9",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "076f37eeb2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP.md",
+    "vintage_commit": "9e72041da5",
+    "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-s-9.re-run-harness-composed-not-scheduled.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_IAMROLES202609~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~1/rerun-assessment.sh",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "introduces": [
+        "=== NFRA_IAMROLES202609 re-run harness"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4",
+        "AC5"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local, invoke-by-hand shell script committed to the repo; nothing to deploy. Exercised directly by the mechanical invocations the TO names, and end-to-end by a full non-dry-run pass in this session (session_log) that reproduced IAM-s-2's own posture figures byte-for-byte."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the harness prints every assessment step it would run, in order, and exits 0 without touching AWS -- this is FWD-8's EXERCISED bar met on the dry-run arm",
+      "method": "command",
+      "invocation": "bash org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~1/rerun-assessment.sh --dry-run",
+      "output_evidence": "Assessment steps, in the order this harness always runs them:\n  STEP 1/4 -- role-grain coldness sample ...: .../.tools/comp-iam-usage role-cold --limit 10\n  STEP 2/4 -- permission-grain usage for ONE role ...: .../.tools/comp-iam-usage permission-cold --role opal-data-refresh-lambda-role --lookback 90\n  STEP 3/4 -- Terraform-declared IAM cross-reference ...: .../.tools/comp-iam stats\n  STEP 4/4 -- live role-population plane ...: .../.tools/comp-find '.' --corpus aws IAM_ROLE --all --budget 90\n\nDRY RUN -- none of the four steps above executed. No AWS API was touched.\nVINTAGE (dry-run call time, UTC): 2026-09-10T09:46:46Z\nRC=0. Re-run twice more (09:55Z pair) and diffed modulo the timestamp lines: IDENTICAL both times.",
+      "denominator": "4 of 4 assessment steps printed, in the same fixed order, on every run; exit code 0 on all 3 runs taken this session",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a count of 0, printed -- G-21 honoured mechanically, the harness acquired no schedule, alarm or notification; NO OUTPUT AT ALL means the harness is missing and the criterion is NOT met",
+      "method": "command",
+      "invocation": "test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~1/rerun-assessment.sh && grep -c -i -E 'cloudwatch|sns|put-rule|schedule|alarm|crontab|cron ' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~1/rerun-assessment.sh",
+      "output_evidence": "0  (grep's own exit code is 1 because no line matched; 'a count of 0, printed' is exactly what the TO's expect text calls for, and 0 -- not an empty stream -- is what printed). The file contains no EventBridge rule, no Scheduler entry, no cron line, no CloudWatch alarm, no SNS publish and no Lambda schedule -- it only orchestrates the three existing read-only comp-tools by hand-invocation.",
+      "denominator": "0 of the file's lines match cloudwatch|sns|put-rule|schedule|alarm|crontab|cron  (case-insensitive); threshold is exactly 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a count of 2 or greater -- the harness COMPOSES the estate's existing instruments rather than reimplementing them (build-ladder rung 2); NO OUTPUT AT ALL means the harness is missing and the criterion is NOT met",
+      "method": "command",
+      "invocation": "test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~1/rerun-assessment.sh && grep -c -E 'comp-iam-usage|comp-iam|comp-find' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~1/rerun-assessment.sh",
+      "output_evidence": "8  (rc=0). The three variable assignments (COMP_IAM_USAGE=.../.tools/comp-iam-usage, COMP_IAM=.../.tools/comp-iam, COMP_FIND=.../.tools/comp-find), the header comment naming all three by name, and further step-description/comment lines naming them again all match. No new IAM-usage or role-population logic is implemented in this file; every actual AWS read is delegated to one of these three already-landed tools, invoked by explicit .tools/ path.",
+      "denominator": "8 of the file's lines match comp-iam-usage|comp-iam|comp-find; threshold is >=2",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "a count of 1 or greater -- the denominator and vintage travel with the run, which is what makes two runs COMPARABLE; NO OUTPUT AT ALL means the harness is missing and the criterion is NOT met",
+      "method": "command",
+      "invocation": "test -f org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~1/rerun-assessment.sh && grep -c -i -E 'denominator|vintage' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~1/rerun-assessment.sh",
+      "output_evidence": "10  (rc=0). VINTAGE is stamped once per invocation (date -u at call time) and printed both up front and in the COMPARABILITY FOOTER; the footer explicitly instructs the reader to put this run's step-2 DENOMINATOR beside a prior run's, and this run's step-4 DENOMINATOR beside a prior run's, never mixing the two planes.",
+      "denominator": "10 of the file's lines match denominator|vintage (case-insensitive); threshold is >=1",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "FWD-8's ACCEPT in plain English -- could someone who did not build this ask the same question next quarter and get an answer they can put beside this one, without it quietly stopping because only one person knew how? Whether the harness is genuinely re-runnable BY A STRANGER, and whether it carries IAM-s-2's one-role scope caveat rather than implying an estate-wide claim, is graded by 3.0.0_SA_CVO~Z at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "no separate mechanical invocation named by the TO for this judgment row -- read rerun-assessment.sh's header comment and its per-run COMPARABILITY FOOTER against FWD-8's ACCEPT sentence, and against the end-to-end non-dry-run pass captured in session_log",
+      "output_evidence": "The harness resolves its own repo root via `git rev-parse --show-toplevel` (no hardcoded device path), takes only --role/--lookback/--dry-run flags with stated defaults matching IAM-s-1/IAM-s-2's own role and lookback, and its default mode -- run end to end this session -- reproduced IAM-s-2's exact posture figures (granted permissions examined (DENOMINATOR)=22, used=6 never-used=2 unobservable=14) via a live re-read, then printed a COMPARABILITY FOOTER naming the one-role scope of that figure, the separateness of the role-population plane, and IAM-s-6's finding that at least one member of the LIVE-no-DECLARED band is a classifier false positive -- carried forward by name rather than restated as settled. Whether this constitutes an answer 'someone who did not build this' can pick up next quarter, per FWD-8's ACCEPT sentence, is the judgment this builder does not grade.",
+      "denominator": "N/A -- judgment criterion, no mechanical count",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true per the TO; graded at L9 by 3.0.0_SA_CVO~Z, never self-graded by the builder or the COO",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The harness's one independent branch of its own (everything else is a fixed sequence of calls into already-landed instruments) is the --dry-run guard at line ~90 (`if [ \"$DRY_RUN\" -eq 1 ]; then ... exit 0; fi`), which is exactly the assertion AC1 depends on ('exits 0 without touching AWS'). Mutated a scratch copy (.scratch/rerun-assessment.MUTANT.sh, never committed) by flipping the guard to `-eq 0`, then ran the EXACT AC1 invocation shape (`bash <mutant> --dry-run`) against it.",
+      "expected": "AC1's own invocation, run against the mutant, should FAIL to hold ('exits 0 without touching AWS') because the guard that keeps the dry-run arm from touching AWS has been inverted.",
+      "observed": "The mutant, invoked with --dry-run, printed the same step list and then proceeded to ACTUALLY RUN step 1 against live AWS ('--- running step 1/4 ---' followed by a real comp-iam-usage role-cold read: 'window 90d (hot 7d) | 10 roles sampled ... bands: HOT=5 COLD-DORMANT=3 ...') -- i.e. --dry-run no longer avoided touching AWS. The assertion under test broke exactly as expected when mutated, and the unmutated harness (AC1's real output_evidence above) does not exhibit this.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The AC1 invocation (`bash rerun-assessment.sh --dry-run`) was run three times this session (09:46:46Z, then a 09:55Z back-to-back pair), each redirected to a scratch file and diffed against the others with the two UTC-timestamp lines stripped out first.",
+      "observed": "All three runs printed byte-identical step descriptions, ordering and the DRY RUN closing notice, differing only in the two timestamp lines (which are expected to differ by construction -- each run stamps its own call time). Separately, the non-dry-run pass's step-2 output (used=6 never-used=2 unobservable=14, denominator=22) matched IAM-s-2's already-landed record digit-for-digit.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AWS Access Analyzer, as a fifth composed instrument",
+      "reason": "C-ANALYZER-PRICED-FIRST + G-25, named explicitly in this cell's BOUNDS: no per-role price has been read by anyone and taking it off the shelf is a vendor call requiring Andrew's explicit per-use word. Only IAM Access Advisor (via comp-iam-usage) is composed, exactly as IAM-s-1 through IAM-s-3 already used it."
+    },
+    {
+      "item": "Any scheduling surface (EventBridge rule, EventBridge Scheduler entry, cron line, CloudWatch alarm, SNS publish, Lambda schedule)",
+      "reason": "G-21, the standing alerting/monitor moratorium, named as the bound most likely to be crossed by accident. The harness is invoked by hand only; it acquires no timer of any kind (verified mechanically by AC2)."
+    },
+    {
+      "item": "Any write/narrow/delete/apply action against IAM (revoking a permission, deleting a role, editing a policy)",
+      "reason": "Cell bound: 'the harness is not a licence to widen. It re-runs the assessment. It does not narrow a permission, delete a role, or apply anything.' Every composed instrument (comp-iam-usage, comp-iam, comp-find) is read-only/ADVISORY by its own header comment; this harness adds no write path."
+    },
+    {
+      "item": "Reimplementing any of comp-iam-usage's, comp-iam's or comp-find's own classification logic (used/never-used/unobservable, Terraform-parse gaps, DECLARED/LIVE-no-DECLARED)",
+      "reason": "Build-ladder rung 2, named in the cell text: 'a harness that reimplements what those already do has re-bought working code.' This script contains no permission-usage or drift-classification logic of its own; every classifying read is delegated to the three existing tools by explicit .tools/ path invocation."
+    }
+  ],
+  "surprises": [
+    "NFRA_IAMROLES202609-Z-W1-S4: This worker's dispatch prompt for TO-IAM-s-9 carried two clauses about carrying IAM-s-2's one-role scope caveat forward (an added BOUNDS paragraph and an expanded AC5 meaning-note) that are absent from the committed TO file on disk; this cell's own deliverable complies with the stricter, dispatch-only instruction regardless, so no criterion here is short of it, but the committed record a future L9 reader sees is narrower than what this worker was actually told."
+  ],
+  "session_log": "2026-09-10, worktree C:/tmp/wk-iamroles-1, branch wk-NFRA_IAMROLES202609-1, based on SITEZ (site-z fabric). PUSH STATE: LOCAL (no push attempted; this seat never pushes). Order of acts: (1) grounded the worktree premise (branch wk-NFRA_IAMROLES202609-1, org/ + .tools/ present) -- TREE-OK. (2) re-read both landed dependencies in full: IAM-s-2's POSTURE_NUMBER.md (POSTURE: 8 of 22 on opal-data-refresh-lambda-role, vintage 2026-09-10, explicit one-role scope statement) and IAM-s-3's COVERAGE_VOCABULARY.md (used/never-used/unobservable vocabulary). (3) read this cell's own TO file on disk in full and diffed it against this session's dispatch prompt, finding the BOUNDS/AC5 discrepancy filed as Z-W1-S4 below. (4) confirmed the three composed instruments exist and are executable (.tools/comp-iam-usage, .tools/comp-iam, .tools/comp-find) and read their own --help/header text for exact subcommand syntax (role-cold, permission-cold, stats, --corpus aws). (5) test-ran each composed instrument individually, bounded, from this worktree: comp-iam-usage role-cold --limit 10 (2.5s), comp-iam stats (fast), comp-find '.' --corpus aws IAM_ROLE --all --budget 45 (reproduced DECLARED=203 LIVE-no-DECLARED=16 of 219, matching IAM-s-5/IAM-s-6's own figures exactly). (6) wrote rerun-assessment.sh: resolves its own repo root via git rev-parse --show-toplevel (no hardcoded path), takes --dry-run/--role/--lookback, prints its 4 fixed steps by explicit .tools/ path, and in default mode actually runs them under an internal per-step timeout, closing with a COMPARABILITY FOOTER carrying the vintage and both planes' scope caveats forward (IAM-s-2's one-role scope; IAM-s-6's LIVE-no-DECLARED false-positive finding, named rather than restated as settled). Never wrote a schedule, alarm, SNS publish or any other G-21 surface. (7) ran all four mechanical criteria's exact invocations verbatim under timeout 120: AC1 (--dry-run, 4 steps printed in order, exit 0, three runs diffed identical modulo timestamps), AC2 (grep count 0 for the forbidden-surface pattern), AC3 (grep count 8 for comp-iam-usage|comp-iam|comp-find), AC4 (grep count 10 for denominator|vintage). (8) ran a full non-dry-run pass end to end (bounded, ~90s total) and confirmed it reproduced IAM-s-2's posture figures byte-for-byte (used=6 never-used=2 unobservable=14, denominator=22) and completed all 4 steps with exit code 0 each. (9) ran the mutant control: a scratch copy (never committed, .scratch/, removed after use) with the --dry-run guard inverted actually touched AWS on --dry-run, confirming the guard AC1 depends on is load-bearing. (10) filed surprise row NFRA_IAMROLES202609-Z-W1-S4 (next unused slot for this worker, as named in the identity block) for the dispatch-prompt-vs-committed-TO content discrepancy found in step 3 -- not blocking, since this deliverable complies with the stricter instruction either way. (11) wrote this instance and flipped the TO's <status> to complete, staging the TO, the harness script, the investigation file and this instance in ONE commit via safe-commit.sh so PENDING-THIS-COMMIT resolves CO-COMMITTED. WHAT I DID NOT DO: call AWS Access Analyzer; mint any alert/alarm/SNS/schedule/notification/cron entry; narrow, delete or apply any IAM change; reimplement any classification logic already living in comp-iam-usage/comp-iam/comp-find; touch any path outside this TO's <paths> grant; edit any existing surprise-channel row.",
+  "compiler_tools": [
+    {
+      "tool": "grep (POSIX, via Git Bash)",
+      "invocation": "grep -c -i -E 'cloudwatch|sns|put-rule|schedule|alarm|crontab|cron ' / grep -c -E 'comp-iam-usage|comp-iam|comp-find' / grep -c -i -E 'denominator|vintage', each against rerun-assessment.sh",
+      "result": "0 / 8 / 10 respectively -- matches all three mechanical criteria's stated thresholds exactly, run under timeout 120 as the TO requires"
+    },
+    {
+      "tool": ".tools/comp-iam-usage, .tools/comp-iam, .tools/comp-find (live AWS / Terraform-parse reads, composed by rerun-assessment.sh)",
+      "invocation": "comp-iam-usage role-cold --limit 10 ; comp-iam-usage permission-cold --role opal-data-refresh-lambda-role --lookback 90 ; comp-iam stats ; comp-find '.' --corpus aws IAM_ROLE --all --budget 90",
+      "result": "role-cold: 10 roles sampled, bands HOT=2 COLD-DORMANT=1 (small-limit smoke run) / HOT=5 COLD-DORMANT=3 STILLBORN-OR-GUARD=2 (limit-10 full run). permission-cold: used=6 never-used=2 unobservable=14, denominator=22 (byte-identical to IAM-s-2). comp-iam stats: 191 TF roles parsed / 188 services / 1084 operations / 304 gaps (same-day re-run; differs from the L5-lane's 195, a known drift already recorded by Z-W3-S2). comp-find --corpus aws IAM_ROLE: DENOMINATOR 219 hit(s), DECLARED=203 LIVE-no-DECLARED=16 (matches IAM-s-5/IAM-s-6 exactly)"
+    }
+  ]
+}
