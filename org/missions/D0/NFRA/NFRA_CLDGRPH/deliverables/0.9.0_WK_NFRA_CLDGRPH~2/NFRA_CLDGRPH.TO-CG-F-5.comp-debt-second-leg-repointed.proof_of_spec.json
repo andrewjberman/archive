@@ -1,0 +1,227 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CLDGRPH.TO-CG-F-5",
+  "firm": "FABRIC",
+  "phase": "P3-REPOINTS",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+    "vintage_commit": "c6b16d8f04",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-F-5.comp-debt-second-leg-repointed.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/prd/NFRA_CLDGRPH_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "50f0e219ba"
+  },
+  "assignee": "0.9.0_WK_NFRA_CLDGRPH~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/globgrph/comp_debt.py",
+      "artifact_covered_by": ["F5-AC1", "F5-AC2", "F5-AC3"],
+      "kind": "script",
+      "commit_or_etag": "1e7ef0aa986fabd3b549d1d600f87a73233e53a8",
+      "introduces": ["_isolated_sweep_for", "served_vintage_line", "per_surface_count"],
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The repoint. Deleted: STITCH_DB, STITCH_STALE_HOURS, _stitch_freshness, the unscoped _ISOLATED_SWEEP constant and the kuzu import. Added: _isolated_sweep_for(scope), a two-query dispatch on ONE ServedConnection, per-surface counts, the dedup count, and the leg's own served vintage line. EXERCISED, not merely committed: `python infra/aws/globgrph/comp_debt.py --json` returns rc 0 in 4.8 s from a worktree where infra/aws/globgrph/kuzu_stitch_db does not exist, scoring 515 isolates (nessie 308 + stitch 207) with the stitch vintage on the line. The pre-CG-s-25 code could not have produced any scorecard here: _stitch_freshness raised SystemExit on an absent store."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f5_test_comp_debt_stitch.py",
+      "artifact_covered_by": ["F5-AC1"],
+      "kind": "test",
+      "commit_or_etag": "1e7ef0aa98",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "F5-AC1's invocation. projection_client is replaced in sys.modules BEFORE comp_debt is imported, so every row the dispatcher sees comes from the fixture -- which is also the assertion behind STITCH_LEG_SOURCE: a leg still opening a local store could not be accounted for by the stub and the counts would not add up. 9 named arms, 15 assertions, no network."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f5_real_run.sh",
+      "artifact_covered_by": ["F5-AC2"],
+      "kind": "test",
+      "commit_or_etag": "1e7ef0aa98",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "F5-AC2's invocation. Runs the tool live, reads the stitch denominator from the served graph in the same process, imports the budget bound from projection_client rather than re-typing it, and prints the entry it used and why it is not .tools/comp-debt."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f5_no_local_open.py",
+      "artifact_covered_by": ["F5-AC3"],
+      "kind": "script",
+      "commit_or_etag": "1e7ef0aa98",
+      "introduces": ["opens_in", "PLANT"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The AST walker. It looks for three shapes (a kuzu import in either form, kuzu.Database/kuzu.Connection calls, and any call carrying read_only= for a re-aliased import) and writes + walks a PLANTED file on every run, so its 0 over the real files is a measurement rather than a walker that cannot see."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f5_no_local_open.sh",
+      "artifact_covered_by": ["F5-AC3"],
+      "kind": "test",
+      "commit_or_etag": "1e7ef0aa98",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "F5-AC3's invocation. Four independent readings -- the AST walk, the constant checked in comp-read's CODE band only, the PROCESS run from a store-less worktree, and the planted control -- because 'the tool does not open a store' can be wrong in four ways and no single instrument sees them all."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f5_baseline_delta.sh",
+      "artifact_covered_by": ["F5-AC4"],
+      "kind": "test",
+      "commit_or_etag": "1e7ef0aa98",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "F5-AC4's invocation. Computes the delta on RESIDUALS because that is the only quantity the baseline file holds, prints the census beside it and says why it cannot be the delta, and checks BASELINE_EDITED with THREE instruments after the raw one produced a false accusation (row W2-S58)."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-s-25.comp-debt-second-leg-repointed.result.md",
+      "artifact_covered_by": ["F5-AC5"],
+      "kind": "doc",
+      "commit_or_etag": "1e7ef0aa98",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The order's record: one fenced JSON block (the two queries and their scopes, the per-surface counts, the dedup count, the budget numbers, the vintage lines, the baseline delta and the census) then prose."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f5_comp_debt_transcript.txt",
+      "artifact_covered_by": ["F5-AC2"],
+      "kind": "doc",
+      "commit_or_etag": "1e7ef0aa98",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The WHOLE scorecard transcript of the real run, unabridged -- all 131 residual lines and all 20 printed NEW alarms -- so a grader reads what the tool said rather than what this instance says it said."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "artifact_covered_by": ["F5-AC2", "F5-AC3", "F5-AC4"],
+      "kind": "doc",
+      "commit_or_etag": "1e7ef0aa98",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five rows appended, W2-S55..W2-S59, none edited and none renumbered. Header denominator restated by parsing every fenced block: 202 rows in 161 blocks before, 207 in 166 after."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F5-AC1",
+      "criterion_verbatim": "THE REPOINT, EXERCISED WITHOUT A NETWORK: the stitch leg's source is the thin client, a node present on both surfaces is deduplicated, the remaining refusal names the served source for both legs, every test passes with its denominator.",
+      "method": "test_suite",
+      "invocation": "timeout 120 python org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f5_test_comp_debt_stitch.py",
+      "expect": "STITCH_LEG_SOURCE=projection_client[\\s\\S]*DEDUP_ACROSS_SURFACES=[1-9][0-9]*[\\s\\S]*UNREACHABLE_REFUSAL_NAMES=served nessie\\+stitch[\\s\\S]*F5_TESTS=([0-9]+) passed of \\1",
+      "output_evidence": "STITCH_LEG_SOURCE=projection_client\nDEDUP_ACROSS_SURFACES=1\nUNREACHABLE_REFUSAL_NAMES=served nessie+stitch\n\n  both_legs_are_served                 PASS statements=2 on ONE connection\n  no_kuzu_import_in_the_module         PASS sys.modules has no 'kuzu' after a full dispatch\n  scope_rides_the_cypher               PASS each statement carries its own type set\n  stitch_scope_IS_the_named_constant   PASS statement types ['GOLD_SCRIPT', 'S3_DATA_KEY'] == REACH_STITCH_TYPES\n  dedup_across_surfaces_counts         PASS the shared ARN arrived on BOTH legs and is one entry\n  per_surface_counts_reported          PASS per_surface={'nessie': 2, 'stitch': 3}\n  out_of_scope_row_never_admitted      PASS the scope guard holds even if the service over-returns\n  gold_subnode_dropped_and_counted     PASS gold:script_level_one:main dropped, gold:script_level_one kept\n  census_is_the_deduped_union          PASS census=4 (2+3 rows admitted, 1 shared)\n  suppression_still_applies            PASS the LAMBDA isolate is cleared and LOGGED, not dropped silently\n  residual_is_the_remainder            PASS residual=3 = census 4 - suppressed 1\n  vintage_is_the_ANSWERS_not_a_health_call PASS\n  unreachable_refusal_names_both_scopes PASS the refusal names the stitch scope's types and says there is no local fallback\n  retired_names_absent_from_code       PASS the three stitch-local names survive only in the docstring that records their retirement\n  no_kuzu_open_in_source               PASS\n\nF5_TESTS=15 passed of 15",
+      "denominator": "15 of 15 assertions across 9 named arms; 4 of the 9 are controls that must be able to fail (the duplicate returned by BOTH legs, the function-granular sub-node, the out-of-scope row the service could over-return, and the unreachable refusal's text); no network, no AWS, no Kuzu.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F5-AC2",
+      "criterion_verbatim": "THE REAL RUN ANSWERS THE STITCH LEG FROM THE SERVED GRAPH inside the tool's own budget with the stitch vintage disclosed (a denominator of stitch-typed nodes > 0 from the served graph; the pre-F-4 answer would have been a refusal -- the control).",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f5_real_run.sh",
+      "expect": "COMP_DEBT_RC=0[\\s\\S]*STITCH_LEG_ISOLATED=[0-9]+ of [1-9][0-9]* stitch-typed nodes[\\s\\S]*VINTAGE_LINE_HAS_STITCH=true[\\s\\S]*WITHIN_BUDGET=true",
+      "output_evidence": "COMP_DEBT_RC=0\nSTITCH_LEG_ISOLATED=207 of 1674 stitch-typed nodes\nNESSIE_LEG_ISOLATED=308\nVINTAGE_LINE_HAS_STITCH=true\nWITHIN_BUDGET=true\n\n  -- the leg --\n     census (deduped union)      : 515\n     per surface                 : {'nessie': 308, 'stitch': 207}\n     deduped across surfaces     : 0\n     gold sub-nodes dropped      : 1133\n     suppressed (logged)         : 384\n     residual (REAL orphans)     : 131\n     new vs baseline             : 112\n\n  -- the vintage, ONE line for BOTH legs, from the ANSWER's own response --\n     VINTAGE: Built from the estate as of 2026-09-09 21:05:17 UTC. Stitch source: stitch-codebuild built 2026-09-09T19:55:00Z.  [vintage=2026-09-09T21:05:17.968166+00:00 manifest=09be45b5ff92]\n\n  -- the budget --\n     bound   : 120 s = 2 x projection_client.DEFAULT_QUERY_TIMEOUT_S (60 s), one per scope\n     measured: 4.8 s wall clock for the WHOLE tool (both families, both legs)\n\n  -- the CONTROL: what this run would have been before CG-s-24 --\n     a REFUSAL. The pre-F-4 leg opened kuzu_stitch_db and _stitch_freshness raised SystemExit when it was absent; this worktree has never had that store. The store's presence now: False",
+      "denominator": "1 of 1 real run; 1674 of 1674 stitch-typed nodes in the served graph are the denominator of the stitch leg's 207 isolates (GOLD_SCRIPT 1380 + S3_DATA_KEY 294, counted in the same process through the same client); 2 of 2 scopes swept on 1 connection.",
+      "status": "PASS",
+      "status_reason": "PASS, with the budget's provenance stated because it is not what the criterion assumed: comp_debt.py prints NO budget line of its own (row W2-S55). The bound is the only one the tool carries -- projection_client.DEFAULT_QUERY_TIMEOUT_S, IMPORTED not re-typed, spent once per scope -- and the acceptance script prints both the bound and the measurement rather than echoing a tool self-report. Separately, the entry is `python infra/aws/globgrph/comp_debt.py`, not `.tools/comp-debt`, which does not exist (row W2-S56)."
+    },
+    {
+      "criterion_id": "F5-AC3",
+      "criterion_verbatim": "NO LOCAL STORE OPENED: the AST census of `comp_debt.py` (and the tool's entry) reads 0 opens, the constant is gone, the tool runs from a worktree with no store present, and a planted open is caught.",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f5_no_local_open.sh",
+      "expect": "LOCAL_OPEN_SITES=0 of [1-9][0-9]* files[\\s\\S]*STITCH_DB_CONSTANT_PRESENT=false[\\s\\S]*RUNS_WITHOUT_STORE=true[\\s\\S]*LOCAL_OPEN_PROBE_CONTROL=FIRED",
+      "output_evidence": "LOCAL_OPEN_SITES=0 of 2 files\nSTITCH_DB_CONSTANT_PRESENT=false\nRUNS_WITHOUT_STORE=true\nLOCAL_OPEN_PROBE_CONTROL=FIRED\n\n  -- the AST walk, per file --\n     infra/aws/globgrph/comp_debt.py              0 open/import site(s)\n     infra/aws/globgrph/projection_client.py      0 open/import site(s)\n\n  -- the constant, by BAND (a docstring mention is not a survival) --\n     DOCSTRING   2\n     COMMENT     1\n     DEF         0\n     CODE        0\n     CODE-band hits naming the retired store: 0\n\n  -- the PROCESS reading, the one that is the world and not the source --\n     store path            : infra/aws/globgrph/kuzu_stitch_db\n     store exists here     : False\n     tool exit code        : 0\n     scorecard produced    : True\n     REACHABILITY  D1        comp-kuzu 0-edge sweep            515        384   112\n     surfaces: {'nessie': 308, 'stitch': 207}  deduped_across_surfaces=0  gold_subnodes_dropped=1133\n\n  -- the CONTROL --\n     the SAME walker found : 3 site(s) ['import kuzu', 'kuzu.Connection(...)', 'kuzu.Database(...)']",
+      "denominator": "2 of 2 files on the REACHABILITY path walked by AST (comp_debt.py and projection_client.py; canon_motif_scorer is a DIFFERENT family that uses the kuzu library legitimately and is declared out of this population rather than silently included); 3 of 3 open-shapes searched for; 1 of 1 planted control, which fired on all three shapes; 1 of 1 process run from a worktree with no store.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F5-AC4",
+      "criterion_verbatim": "THE BASELINE UNTOUCHED AND THE DELTA NAMED: the isolated count against `comp_debt_baseline.json` printed, the baseline byte-unchanged at HEAD, and a non-zero delta carried by a row id (zero delta prints its sentinel).",
+      "method": "command",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f5_baseline_delta.sh",
+      "expect": "ISOLATED_DELTA_VS_BASELINE=-?[0-9]+[\\s\\S]*BASELINE_EDITED=false[\\s\\S]*DELTA_ROW=(NFRA_CLDGRPH-W2-S[0-9]+|NONE_DELTA_ZERO)",
+      "output_evidence": "ISOLATED_DELTA_VS_BASELINE=96\nBASELINE_EDITED=false\nDELTA_ROW=NFRA_CLDGRPH-W2-S57\n\n  -- what is being compared --\n     baseline REACHABILITY n : 35 residual key(s)\n     this run's residuals    : 131\n     delta                   : +96\n     of which NEW keys       : 112 (not in the baseline's key set)\n     this run's CENSUS       : 515 isolates before suppression -- the baseline holds NO census figure, so it cannot be the criterion's delta.\n\n  -- the baseline's own vintage, which is the reason for the delta --\n     provenance.db     : kuzu_nessie_db\n     DB: kuzu_nessie_db  (19917 nodes / 34948 edges)\n\n  -- the byte check, three instruments (W2-S58) --\n     git diff --quiet HEAD   : rc 0   UNCHANGED (git's own eol-aware comparison)\n     sha256, LF-NORMALISED   : 48bdbef2da0b52f034399a09 vs 48bdbef2da0b52f034399a09 -> True\n     sha256, RAW             : 4221d43a45d80aa05fac86bb vs 48bdbef2da0b52f034399a09 -> False   <- the WRONG instrument on this box\n     raw byte counts         : worktree 4504 (CRLF 71) vs HEAD 4433 (CRLF 0); difference 71",
+      "denominator": "1 of 1 family the baseline scores for this cell (REACHABILITY); 35 of 35 baseline residual keys compared against 131 live residuals; 3 of 3 byte-identity instruments run and all three printed.",
+      "status": "PASS",
+      "status_reason": "PASS, and two facts a grader should carry. (1) The delta is on RESIDUALS, not on the census, because the baseline file holds residual keys and n and has never held a census figure -- a census-vs-baseline number would compare against a quantity that is not there. The census (515) is printed beside it and explicitly excluded. (2) BASELINE_EDITED required THREE instruments: the raw sha256 pair against `git show HEAD:` reads EDITED for an untouched file on this autocrlf box (4504 vs 4433 bytes, 71 CRLF, 71 lines), so the verdict is git's own eol-aware comparison AND an LF-normalised hash, with the raw pair printed so the trap is visible (row W2-S58). The delta itself is row W2-S57, armed to 3.0.0_SA_CVO: the baseline's universe is a July local store and this run's is the September served graph, and the choice between re-establishing and adjudicating the 112 new keys is the CVO's."
+    },
+    {
+      "criterion_id": "F5-AC5",
+      "criterion_verbatim": "THE LEG, READ: what the tool's REACHABILITY sweep now measures (two type scopes on one served graph under one vintage), what it lost (the 48 h stitch-specific freshness bar -- whether the served VINTAGE line's age is an adequate replacement and why), and what the baseline delta, if any, says about the July store versus the September served stitch. A reading act; NO verdict; graded by `3.0.0_SA_CVO` at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "the reading is in org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-s-25.comp-debt-second-leg-repointed.result.md and below; graded by 3.0.0_SA_CVO at L9, not by this worker",
+      "output_evidence": "THE READING, WITH NO VERDICT ON IT.\n(1) WHAT THE SWEEP NOW MEASURES. Two TYPE SCOPES on ONE served graph, under ONE vintage. It used to be two SURFACES -- two different graphs, two different freshness stories, one statement stretched across both and the type filter done in Python afterwards. Now each scope names itself in its own Cypher and the union is a dedup, not a reconciliation. Live: nessie 308 isolates, stitch 207 of 1,674 stitch-typed nodes, union 515, 384 suppressed and logged, 131 real orphans, 1,133 function-granular gold sub-nodes dropped as isolated-by-design.\n(2) WHAT IT LOST, AND WHETHER THE REPLACEMENT IS ADEQUATE. It lost a 48-hour bar that REFUSED. That bar existed for the D1 592-hour-stale finding: a sweep over a stale surface phantoms orphans, because a 0-edge node is indistinguishable from a node whose edges were not rebuilt. The replacement is the served VINTAGE line, and the honest answer is that it is adequate for a DIFFERENT reason than the bar was, not a like-for-like swap. The bar was a REFUSAL -- it stopped the scan. The vintage line is a DISCLOSURE -- it labels the answer and trusts the reader. What makes that trade sound here is that the failure mode the bar guarded against cannot occur the same way: a served projection is swapped atomically behind a pointer, so what is served IS a coherent generation, and there is no BEHIND state in which a caller silently reads yesterday's edges. What the vintage line does NOT do is stop a reader who does not look. A reader who takes 131 orphans and never reads the line above them can still be reading a graph built from a stitch that failed last night -- which is the residual risk, and it is why the line is printed once for BOTH legs, on the family's own row, from the response that produced those very counts rather than from a health call at another moment.\n(3) WHAT THE DELTA SAYS. +96 residuals, 112 of them keys the baseline never held, overwhelmingly GOLD_SCRIPT and S3_DATA_KEY. That is not a regression and it is not really a measurement of the estate either: it is the difference between two universes. The baseline was established against kuzu_nessie_db plus a July local stitch store; this run reads the September served graph whose stitch layer was folded in hours ago by CG-s-24. The July store's stitch was a frozen local projection of a graph nobody was maintaining -- that is why CG-s-20 declared it interim and why _stitch_freshness refused on it. So the delta is best read as: the stitch scope has moved from a stale private copy to a fresh shared one, and 112 orphans that were invisible or differently-named in July are now visible under the interim stitch-v1 vocabulary. Two consequences a grader should weigh. First, the alarm now fires 112 times on every run, and a standing alarm that always fires is an alarm that stops being read -- so this needs a decision, not a shrug. Second, whatever is decided will need doing TWICE unless it waits: S31 (TO-CG-F-11) renames GOLD_SCRIPT into PipelineScript/PipelineFunction and merges S3_DATA_KEY into S3Key, which will change every one of these residual KEYS again, because a key is family::class/deviation::sites and the class is the node_type. Re-establishing the baseline today buys a quiet scan for exactly as long as it takes F-11 to land.\n(4) WHAT THIS ORDER DID NOT DECIDE. It did not touch the baseline, did not run --establish-baseline (that flag REWRITES the CVO's file), and did not change the family registry's stale 'pending' declaration (row W2-S59). The store's bytes are untouched and merely unread; CG-s-26 retires them.",
+      "denominator": "N/A -- a reading act, graded by 3.0.0_SA_CVO at L9. The measured inputs behind it: 515 isolates across 2 scopes of 1 served graph; 1,674 stitch-typed nodes as the stitch denominator; 131 residuals against 35 baseline keys; 15 of 15 fixture assertions; 0 of 2 files with a local open; 4.8 s against a 120 s bound.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "judgment": true,
+      "status_reason": "JUDGMENT criterion: graded by 3.0.0_SA_CVO at L9 and never self-graded -- PASS or FAIL on it from this worker is INVALID by the order's own proof_of_spec block. The substitute oracle is the CVO's reading of the record and of this row against CG-s-25's accept, and the CVO is also the owner of the baseline decision row W2-S57 raises."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Every criterion carries a control that could have made it read the other way. F5-AC1's fixture is built to trip its own dispatcher four times: a node id returned by BOTH legs (the dedup must count it once and report the drop -- the LIVE graph's scopes are disjoint, so this mechanism is ONLY ever provable on a fixture), a function-granular gold:a:b (dropped and counted while gold:a survives), an out-of-scope JSXElement the service could over-return (the Python scope guard holds even though the Cypher already filters), and a health() that raises (the refusal's text must name both scopes). F5-AC3 writes and walks a PLANTED file with three open-shapes on every run. F5-AC2's control is historical and stated rather than run: the pre-CG-s-25 code raised SystemExit on an absent store, and this worktree has never had one, so the old code could not have produced a scorecard here at all. F5-AC4's control is the baseline's own bytes.",
+      "expected": "F5-AC4's byte-identity check -- raw sha256 of the worktree baseline against `git show HEAD:` -- confirms BASELINE_EDITED=false on a file this order never opened for writing.",
+      "observed": "IT FAILED, AND IT FAILED IN THE ACCUSING DIRECTION: the first run printed BASELINE_EDITED=TRUE. The file had not been touched. Measured cause: core.autocrlf gives the checkout CRLF while the record keeps LF -- worktree 4,504 bytes with 71 CRLF, HEAD 4,433 with 0, difference exactly 71, and the file has exactly 71 lines. LF-normalised the hashes are identical and `git diff --quiet HEAD` returns 0. The check now runs three instruments and prints all three including the raw pair that disagrees, so the trap is visible rather than silently corrected; filed as NFRA_CLDGRPH-W2-S58. Every other control fired as designed: the fixture's four arms, the planted AST probe (3 of 3 shapes), and the absent store the tool ran without.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "F5-AC1 was run three times (during development and for the committed capture) and its deciding lines compared; F5-AC2, F5-AC3 and F5-AC4 each run the tool live against the served graph and were each run at least twice, before and after their captures.",
+      "observed": "STABLE. F5-AC1 is identical every run: it has no clock, no network and no AWS, and its fixture rows are built in-process. F5-AC3 and F5-AC4 are identical across runs. F5-AC2 carries ONE value that moves and it is declared: the measured wall clock (4.8 s here, a few tenths either way) -- the VERDICT against the 120 s bound is stable by three orders of magnitude, and a measurement that did not move would be the suspicious one. NOT ASSERTED AS STABLE ACROSS TIME: all three live criteria read the served graph, so their counts are properties of the generation at projection/2026-09-09T21:05:17.968166+00:00/; the next derive will move them, which is what the vintage line on every capture is for.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "EDITING comp_debt_baseline.json or running --establish-baseline",
+      "reason": "The baseline is the CVO's adjudicated bar and explicitly out of this order's grant. --establish-baseline REWRITES it, so it was not exercised anywhere in this order, not even to see what it would produce. The +96 delta is printed and carried by row NFRA_CLDGRPH-W2-S57 instead, armed to 3.0.0_SA_CVO."
+    },
+    {
+      "item": "DELETING OR MOVING the kuzu_stitch_db store's bytes",
+      "reason": "CG-s-26's, and the LAST cell in this worker's chain. This order makes the store UNREAD -- no code path names it, and the tool runs to completion in a worktree where it does not exist -- but its bytes are untouched wherever they exist."
+    },
+    {
+      "item": "CHANGING the FAMILY_REGISTRY's REACHABILITY status from 'pending'",
+      "reason": "The registry and the module docstring both still declare the leg pending on a Cypher that is present and running. It is one word plus a docstring line, but it is a claim about COVERAGE and this order's grant is a claim about TRANSPORT; editing it would be a second, undeclared assertion riding a repoint. Row NFRA_CLDGRPH-W2-S59, left as found."
+    },
+    {
+      "item": "ADDING a budget line to comp_debt.py",
+      "reason": "The order assumed the tool prints one; it does not (row W2-S55). Adding one would be designing a new output surface this cell was not asked for. The acceptance script instead imports the only bound the tool carries -- projection_client.DEFAULT_QUERY_TIMEOUT_S -- and prints the bound beside the measurement so neither is mistaken for a tool self-report."
+    },
+    {
+      "item": "EDITING projection_client.py, or reaching the served graph by any second transport",
+      "reason": "Both are explicit BOUNDS. The leg uses projection_client.connect() and nothing else; the two statements are inlined literals because the client takes neither a db path nor a parameter dict (W2-S27)."
+    },
+    {
+      "item": "SCANNING canon_motif_scorer.py in the no-local-open census",
+      "reason": "It is a DIFFERENT family and uses the kuzu library legitimately, so including it would make the census fail for a reason that has nothing to do with this cell. The population is declared as the two files on the REACHABILITY path and the exclusion is printed in the script's own denominator line rather than left as a silent scope choice."
+    }
+  ],
+  "surprises": [
+    "NFRA_CLDGRPH-W2-S55: comp_debt.py prints no budget line, contrary to the face; the criterion's bound is projection_client.DEFAULT_QUERY_TIMEOUT_S x 2 scopes = 120 s, imported not re-typed, against a measured 4.8 s.",
+    "NFRA_CLDGRPH-W2-S56: `.tools/comp-debt` does not exist, comp-which returns no curated rule for it (from a fail-closed lexical fallback), and comp-find surfaces a DIFFERENT comp_debt package -- two things in this estate answer to that name. The entry is python infra/aws/globgrph/comp_debt.py. ARMED to 2.0.0_SA_COO~A.",
+    "NFRA_CLDGRPH-W2-S57: the REACHABILITY residual count moved +96 with 112 NEW keys against the CVO baseline, because the baseline's universe is kuzu_nessie_db plus a July local stitch store and this run's is the September served graph. The baseline was NOT touched. ARMED to 3.0.0_SA_CVO.",
+    "NFRA_CLDGRPH-W2-S58: a raw sha256 byte-identity check against `git show HEAD:` reads EDITED for an untouched file on this autocrlf box (4504 vs 4433 bytes, 71 CRLF, 71 lines); the check now runs three instruments and prints all three. The failure direction accuses a worker of editing a file it was forbidden to touch, and it looks like rigour.",
+    "NFRA_CLDGRPH-W2-S59: the family registry and the module docstring still declare REACHABILITY 'pending' on a Cypher that is present and running, and the contradiction is invisible in the output. Left as found -- transport, not coverage."
+  ],
+  "session_log": "TO-CG-F-5, cell CG-s-25, round 6 of NFRA_CLDGRPH. Worker 0.9.0_WK_NFRA_CLDGRPH~2, a spine-v3 L7 subagent of 2.0.0_SA_COO~A, on branch wk-cldgrph-6-2 in worktree C:/tmp/wk-cldgrph-6-2, continued after TO-CG-F-4's drain. PUSH STATE: LOCAL -- never pushed, never merged, never rebased, not measured against a remote and not claimed.\nTREE CHECK FIRST: git rev-parse --abbrev-ref HEAD -> wk-cldgrph-6-2; test -d org && test -d .tools -> TREE-OK; HEAD 971375191a (CLOUD merged in at the drain).\nPREMISES RE-GROUND BEFORE ANY WRITE, both TRUE: F-4's instance re-validated VALID (rc 0) at this HEAD; comp-kuzu answered GOLD_SCRIPT 1380 and S3_DATA_KEY 294 with 'Stitch source: stitch-codebuild built 2026-09-09T19:55:00Z.' on the VINTAGE line -- the repoint is onto a graph that carries the types, not the refusal-becomes-crash C-S33 warned of.\nTHE COMPILER MANDATE RAN FIRST AND FOUND THE FACE'S OWN GAP: comp-read on comp_debt.py mapped the stitch sites, the two refusals, the nessie leg's projection_client route and the baseline comparison; then comp-which and comp-find, run exactly as the face instructed, showed that `.tools/comp-debt` does not exist and that comp-find's answer is a DIFFERENT comp_debt package (row W2-S56). The entry used is python infra/aws/globgrph/comp_debt.py.\nTHE REPOINT: STITCH_DB, STITCH_STALE_HOURS and _stitch_freshness deleted with their reason recorded in the module docstring; the unscoped _ISOLATED_SWEEP constant deleted after a repo-wide census (1 of 1 code reference, its own); _isolated_sweep_for(scope) added so the type scope rides the Cypher; dispatch_reachability rewritten as two scoped queries on ONE ServedConnection with the dedup kept, per-surface counts added and the leg's vintage taken from the connection AFTER the queries; the surviving unreachable refusal extended to name both served scopes; the scorecard prints the leg's vintage line and its surface counts. REACH_STITCH_TYPES kept as THE one named constant, with the S31/TO-CG-F-11 note.\nEVERY criterion invocation ran under timeout 120 and each was run at least twice. Every .py passed .tools/commit-gate.sh (3 of 3, rc 0, one non-blocking MANIFEST-ADVISORY). Five surprise rows appended, none edited; the header denominator restated by parsing every fenced block (202 in 161 blocks -> 207 in 166).\nONE CONTROL FAILED AND WAS REPAIRED RATHER THAN ACCEPTED: F5-AC4's byte check accused this worker of editing the CVO's baseline. It had not been opened. The cause was autocrlf, measured to the byte, and the check now runs git's own comparison plus an LF-normalised hash plus the raw pair, all printed. Row W2-S58.\nTWO COMMITS: 1e7ef0aa98 (the acts) and this instance pinning it, with the status flip.",
+  "compiler_tools": [
+    {
+      "tool": "comp-read (the order's compiler_tools_mandate, before any act)",
+      "invocation": "python .tools/comp-read infra/aws/globgrph/comp_debt.py --for \"every site that names the stitch store, the two refusals, how the nessie leg reaches projection_client, the budget line, and the baseline comparison\"",
+      "result": "363 lines / 19 sections. Top-scored _stitch_freshness (:128-166) with the two refusals' own text; freshness_assert (:71-93) 'import projection_client / h = projection_client.health()'; dispatch_reachability (:213-250) ':218 _stitch_freshness(allow_stale)' and ':227 conn = projection_client.connect()'; and the module header carrying 'REACH_STITCH_TYPES = {\"GOLD_SCRIPT\", \"S3_DATA_KEY\"}' at :48 -- the one named constant the coordinator asked for already existed, so it was kept and annotated rather than invented."
+    },
+    {
+      "tool": "comp-which + comp-find (the face's own instruction to find the tool's real entry)",
+      "invocation": "python .tools/comp-which \"comp-debt standing debt scan reachability\" ; python .tools/comp-find -i 'comp_debt|comp-debt' .tools org/modules --limit 40",
+      "result": "comp-which: 'ALARM: POTION semantic embedder unavailable -> falling back to lexical relevance (POTION hash-mismatch on tokenizer.json ... FAIL-CLOSED)' then '!! NO CURATED RULE MATCHED THIS QUESTION -- these are FUZZY GUESSES', top-3 comp-iam-usage 0.43 / comp-axes 0.28 / comp-closure 0.28. comp-find: the DEF band is org/modules/graph/comp_debt/signals/*.py -- a different fusion/guard package. Neither instrument can reach infra/aws/globgrph/comp_debt.py, whose argparse prog is nonetheless 'comp-debt'. Row W2-S56."
+    },
+    {
+      "tool": "comp-find (the pre-deletion census that authorised removing a constant)",
+      "invocation": "python .tools/comp-find '_ISOLATED_SWEEP' --all",
+      "result": "1 code reference, comp_debt.py:78 itself; the remaining hits are this order's own scratch, a tool-run log and two prose records. The constant was deleted on that denominator rather than on an assumption that nothing else used it."
+    },
+    {
+      "tool": "comp-read --enumerate (the CODE-band census F5-AC3 grades on)",
+      "invocation": "python .tools/comp-read infra/aws/globgrph/comp_debt.py --enumerate 'kuzu\\.(Database|Connection)|STITCH_DB|_stitch_freshness|kuzu_stitch_db'",
+      "result": "11 hits, banded DOCSTRING 6 / COMMENT 1 / DEF 0 / CODE 4 -- and every CODE hit is 'comp-kuzu' in a FAMILY_REGISTRY source string or a docstring's 'kuzu lacks SPLIT()', none of them an open. CODE-band hits naming the retired store: 0. The banding is the whole point: a text scan would have counted the docstring that RECORDS the retirement as a survival."
+    },
+    {
+      "tool": "commit-gate (every .py touched)",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/globgrph/comp_debt.py <the two f5_*.py>",
+      "result": "rc 0, 'pre-commit gate clean for 3 of 3 file(s)', with one non-blocking 'MANIFEST-ADVISORY: 2 graph-access finding(s)'."
+    },
+    {
+      "tool": "proof-of-spec-check (this instance, before the flip)",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/NFRA_CLDGRPH.TO-CG-F-5.comp-debt-second-leg-repointed.proof_of_spec.json F5-AC1,F5-AC2,F5-AC3,F5-AC4,F5-AC5",
+      "result": "RECORDED AT THE COMMIT THAT CARRIES THIS FILE -- see the commit message for the rc and the verbatim verdict line. The flip is taken only on rc 0 with every mechanical row PASS-by-output."
+    }
+  ]
+}

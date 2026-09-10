@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-22",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~1",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-22.the-classifier-tells-a-closed-day-with-a-slice-from-one-without.md",
+    "group": "OTHER",
+    "vintage_commit": "eab3712b31"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "eab3712b31d11ab288ce083f36d8315cc9f1b929",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-22.the-classifier-tells-a-closed-day-with-a-slice-from-one-without.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-classifier-tells-a-closed-day-with-a-slice-from-one-without.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/coverage/classifier.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "THE CHANGE: the class-A branch of classify_month now resolves `carries_slice = date_str in series` and returns a FOURTH key `slice_on_closed_day` (bool) on the class-A record, with the reason string extended ONLY on the carrying branch. The genuinely-empty closed day keeps its reason byte-identical. No new member joins _CLASS_NAMES and summarize() is untouched. DELIBERATELY NOT DEPLOYED: this cell's BOUNDS forbid any s3 cp / Terraform / Lambda update, and arm (f) MEASURES the resulting gap rather than assuming it -- DEPLOYED != BUILT, deployed sha256 23c30889af9e6408ddccdd541eb0e895540165012e3fd7eb0baff2228082fdae (10157 B) vs built sha256 b2ab67fd35362249ae072803b2a6107af1daac483a985d276005ec7cf9736cc2 (12226 B). rule 14 gate: 'OK: pre-commit gate clean for 2 of 2 file(s)', rc=0."
+    },
+    {
+      "path_or_key": "data/etfs/scripts/coverage/tests/test_classifier.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TWO PERMANENT REGRESSION ARMS added to the estate's OWN suite, because the defect existed precisely because nothing covered it and a one-shot battery does not guard the next change: test_closed_day_carrying_a_slice_is_distinguishable_from_one_carrying_nothing (both cases still class A, the records TEXTUALLY unequal, and the empty day's reason string byte-identical to before) and test_slice_on_a_closed_day_moves_no_sum (A, trading_days, holes and expected_empty all unmoved). Suite goes 8 passed -> 10 passed, 0 failed on both sides. THEY ARE NOT CONSTANTS: both assert `with_slice != without`, which arm (a) measured BYTE-IDENTICAL on the pre-change classifier, so both would FAIL against the code as it stood."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs22_classifier_discriminates.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S22-AC1 battery, arms (a)-(g), every number beside its denominator. 7 of 7 PASS, token EGS22-CLASSIFIER-DISCRIMINATES printed, rc=0. READ-ONLY on S3; no SES client and no Lambda invoke, proven by arm (g) from the run itself."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-classifier-tells-a-closed-day-with-a-slice-from-one-without.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Criteria verbatim with rc and denominator, the shape decision, and the deploy gap."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S22-AC1",
+      "criterion_verbatim": "PASSES BY OUTPUT. One battery, run by the invocation you name in your report, printing every number beside its denominator and ending with the literal token EGS22-CLASSIFIER-DISCRIMINATES only when all seven arms hold. (a) THE DEFECT REPRODUCES FIRST, ON THE PRODUCER'S OWN BYTES ... If this arm does not reproduce the defect ... stop; (b) THE DISCRIMINATOR ... TEXTUALLY UNEQUAL. State the shape you chose in one sentence; (c) POSITIVE CONTROL -- A GENUINELY EMPTY CLOSED DAY STILL READS AS IT DID ...; (d) THE ZERO-vs-MISSING CONTRACT IS UNDISTURBED ...; (e) NO ORDINARY DAY MOVES, AND THE ARITHMETIC IS PROVEN NOT ASSUMED ...; (f) DEPLOYED-vs-BUILT, MEASURED ...; (g) NO SEND AND NO INVOKE.",
+      "method": "command",
+      "invocation": "timeout 300 python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs22_classifier_discriminates.py",
+      "output_evidence": "rc=0. 'ARMS 7 of 7 PASS' then the token 'EGS22-CLASSIFIER-DISCRIMINATES'.\n(a) PASS -- THE DEFECT REPRODUCED FIRST, BEFORE ANY EDIT. The producer's own bytes were FETCHED LIVE from s3://opal-data-etfs/daily/inflection/2026-09-07.json this run: 1209 bytes, sha256 09ca15d4b99a96d76325dad0899e50bb7ec2983656163b7ad1f6f70c016ab6fa, 4 rows, tickers ['DIVZ','IDVZ','PFDE','PFOE'], source_as_of 2026-09-07 -- PRICED rows on a US market holiday. The PRE-CHANGE classifier was loaded from git c866edd324:data/etfs/scripts/coverage/classifier.py (10157 bytes) and run on both cases: closed day WITH a real slice -> {\"class\": \"A\", \"probe\": null, \"reason\": \"market closed (not a trading day)\"} and closed day with NO slice -> the SAME string. TEXTUALLY EQUAL -> True; keys naming the slice -> NONE. The premise held, so the cell proceeded.\n(b) PASS -- SHAPE, in one sentence: a FIELD, `slice_on_closed_day` (bool) on the class-A record, NOT a new class value. POST-CHANGE the two records print side by side and are TEXTUALLY UNEQUAL: slice_on_closed_day=True with the reason extended to '... -- and a slice EXISTS for this date, which a closed day should not carry', versus slice_on_closed_day=False with the reason byte-identical to before.\n(c) PASS -- POSITIVE CONTROL: 6 of 6 genuinely-empty closed days across 3 of 3 partners (the partner list taken FROM the served artifact and printed as the denominator) still read class A, still carry the ORIGINAL reason string 'market closed (not a trading day)' verbatim, and appear in NO partner's holes.\n(d) PASS -- python -m pytest data/etfs/scripts/coverage/tests/test_classifier.py -q by its own path: PRE-CHANGE rc=0, 8 passed, 0 failed (measured this session BEFORE the edit); POST-CHANGE rc=0, 10 passed, 0 failed. NO REGRESSION -- 0 failed on both sides; the +2 is the two permanent regression arms added to the estate's own suite. The class-B ZERO-vs-MISSING arms inside that suite are untouched and green.\n(e) PASS -- recomputed over the REAL served slices for EVERY partner the artifact lists, probe=None on BOTH sides (a real probe INVOKES producer Lambdas, which the BOUNDS and arm (g) forbid). PRE and POST tables are IDENTICAL for all three partners: 49financial A=3 COVERED=5 B=0 C=0 D=0 UNKNOWN=1 trading_days=6 holes=1; cottonwood the same; inflection A=3 COVERED=6 B=0 C=0 D=0 UNKNOWN=0 trading_days=6 holes=0. COUNTS THAT MOVED: NONE. RECORDS THAT CHANGED TEXTUALLY: 9 of 27 (the partner-day denominator), and ALL NINE are class A -- the three non-trading days x three partners, with slice_on_closed_day=True for inflection's 09-05/06/07 and False for the other six. IN WORDS: neither trading_days nor holes moved for any partner, and that is CORRECT, because summarize() computes trading_days = COVERED+B+C+D+UNKNOWN and holes = C+UNKNOWN+D and class A is a member of NEITHER sum; the change adds a field and no new member to _CLASS_NAMES, so no count can move by construction.\n(f) PASS -- DEPLOYED != BUILT, in those literal words. DEPLOYED s3://opal-313476888478-lambda-artifacts/ec2/etfs-reports/coverage/classifier.py = 10157 bytes, sha256 23c30889af9e6408ddccdd541eb0e895540165012e3fd7eb0baff2228082fdae. BUILT (this worktree, the bytes this cell commits) = 12226 bytes, sha256 b2ab67fd35362249ae072803b2a6107af1daac483a985d276005ec7cf9736cc2. CRLF in each: 0 and 0, so the difference is not an eol artifact. CORROBORATION: the deployed bytes hash EQUAL to the pre-change blob at git c866edd324 -> True, so what the box reads today is exactly this classifier before the change. This cell deploys nothing and DEPLOYED != BUILT is the EXPECTED answer.\n(g) PASS -- 0 SES clients and 0 Lambda invokes over the whole battery: boto3.client was WRAPPED before any other work and recorded 0 client(s) constructed (denominator 0); 6 AWS CLI invocations across services ['s3api'] only, of which 0 name ses/sesv2/lambda; and every classify_month call passed probe=None so no producer Lambda was invoked to build any class.",
+      "denominator": "7 of 7 arms PASS; 3 of 3 partners from the served artifact; 27 partner-day records compared with 9 changed and 0 counts moved; 6 of 6 genuinely-empty closed days; suite 8 -> 10 passed with 0 failed both sides; 6 AWS CLI calls all s3api; 0 boto3 clients",
+      "expect": "EGS22-CLASSIFIER-DISCRIMINATES",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S22-AC2",
+      "criterion_verbatim": "JUDGMENT, RECORDED AND NOT SELF-GRADED. Your record states, for 3.0.0_SA_CVO at L9: which shape you chose and why; if a class value, its four-postulate record and its token census; what this change does NOT repair, naming row S20 and the producer explicitly; and the DEPLOYED-vs-BUILT number from arm (f) with the sentence that the served verdict object cannot discriminate until someone deploys it. Do not grade yourself PASS on this criterion -- it is graded at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "Evidence assembled for the CVO; NOT self-graded (spine v3 L9: a judgment criterion is graded at L9 and never self-graded).",
+      "output_evidence": "RECORDED FOR L9, NO VERDICT.\n1. THE SHAPE, AND WHY. I took the FIELD -- `slice_on_closed_day` (bool) on the class-A record -- not a new class value. The face priced the difference and said the field is cheaper; I did not take it on cost. The affirmative reason is CLAUDE.md rule 24 (iii) INTENT COHERENCE, one axis and one intent: the class axis answers 'what is this day's coverage state, and is it a hole', and a closed day is class A on that axis whether or not an artifact turned up -- it is not a trading day and it is not a hole either way. Whether an artifact APPEARED on a day the market was shut is an ORTHOGONAL fact about a different actor. Rule 24 (iv) STATE COHERENCE says the same thing from the remedy side: the remedy for a closed-day-carrying-a-slice is the partner producer (PRD v0.6 row S20) and it moves NO other class value, while fixing a class-C hole moves nothing here -- different remedies, therefore different axes, therefore a field beside the class and not a member of it. NO FOUR-POSTULATE RECORD AND NO TOKEN CENSUS ARE OWED, because no value joined _CLASS_NAMES: it remains the six-member tuple (\"A\",\"COVERED\",\"B\",\"C\",\"D\",\"UNKNOWN\").\n2. THE ARITHMETIC TRAP THE FACE NAMED, AND WHY IT DOES NOT FIRE. summarize() computes trading_days = COVERED+B+C+D+UNKNOWN and holes = C+UNKNOWN+D, with class A in NEITHER sum. Had I added a class value it would have joined summarize()'s counts dict and silently moved every partner's trading_days unless I decided about both sums. A field joins no sum, and arm (e) proves it rather than asserting it: 27 partner-day records recomputed on both sides across 3 of 3 partners, 0 counts moved, trading_days and holes identical for every partner, and the 9 records that changed are ALL class A.\n3. WHAT THIS CHANGE DOES NOT REPAIR, named explicitly. It does not stop `inflection`'s producer writing PRICED values onto days the US market was shut. daily/inflection/2026-09-07.json still holds 4 priced rows with source_as_of 2026-09-07 (sha256 09ca15d4b99a96d7..., fetched live this run), and 09-05 and 09-06 carry the same carried-forward value-sha. That producer is PRD v0.6 row S20, ruled OUTSIDE this project by 1.0.0_SA_CTO at 94947 and leaving as a brief to 4.0.0_SA_CRO to enter at L1 as its own project; this cell's BOUNDS forbid touching it and I did not. What this change repairs is narrower and is the half that was ours: FWD-4's own instrument can now SEE the violation and SAY it. Detection, not prevention.\n4. THE DEPLOY GAP, AS A NUMBER. DEPLOYED != BUILT. Deployed at s3://opal-313476888478-lambda-artifacts/ec2/etfs-reports/coverage/classifier.py: 10157 bytes, sha256 23c30889af9e6408ddccdd541eb0e895540165012e3fd7eb0baff2228082fdae -- which hashes EQUAL to the pre-change blob at git c866edd324, so the box is reading exactly the un-fixed classifier. Built and committed here: 12226 bytes, sha256 b2ab67fd35362249ae072803b2a6107af1daac483a985d276005ec7cf9736cc2. THE SENTENCE THE FACE ASKS FOR: the served verdict object cannot discriminate a closed day carrying a slice from one carrying nothing until someone deploys these bytes to that artifact prefix -- this cell deploys nothing, the deploy is a separate act with a separate owner, and until it happens every future monthly render will keep producing the byte-identical class-A record that arm (a) reproduced.\n5. ONE CAVEAT OF MY OWN, unprompted. Arm (e)'s recomputation runs with probe=None on both sides, because a real probe invokes producer Lambdas and the BOUNDS forbid that. That is why its tables read UNKNOWN=1 where the SERVED 2026-09 verdict reads D=1: the served verdict was produced WITH a probe. The comparison is still sound -- it is a before/after of the same recomputation under the same probe setting, which is what arm (e) asks -- but it is not a reproduction of the served artifact's own counts, and I am not claiming it is.",
+      "denominator": "5 evidence heads; every citation carries a vintage (@c866edd324 for the pre-change classifier and the deployed-equal check; live sha256 for the fetched slice and the deployed artifact; 27 partner-day records across 3 of 3 partners for the arithmetic)",
+      "expect": "JUDGMENT -- graded by 3.0.0_SA_CVO at L9; no worker verdict recorded",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded at L9 by 3.0.0_SA_CVO and explicitly NOT self-graded, as the face directs ('Do not grade yourself PASS on this criterion'). The record above states the shape and its reason, why no four-postulate record or token census is owed (no value joined _CLASS_NAMES), what is NOT repaired with row S20 and the producer named, and the DEPLOYED-vs-BUILT number with the required sentence. SUBSTITUTE ORACLE for the one thing no instrument here can settle -- whether detection without prevention is the right stopping point for FWD-4 -- is the CVO's read against the PRD, since the prevention half was ruled out of this project's surface."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The load-bearing claim is that the classifier now DISCRIMINATES a closed day carrying a slice from one carrying nothing. The control is built into the order of work and is the strongest available: arm (a) runs the SAME two inputs against the PRE-CHANGE classifier (loaded from git c866edd324, not from a description of it) BEFORE any edit exists, and requires them to be BYTE-IDENTICAL. So the post-change inequality in arm (b) is measured against a demonstrated negative, not against an assumption -- if the pre-change records had differed, arm (a) would have stopped the cell rather than let a fix be built on a refused premise. SECOND control, on 'nothing else moves': arm (e) recomputes all 27 partner-day records on BOTH sides and would fail on any moved count or on any changed record that is not class A. THIRD, on the new tests being real guards rather than restatements: they assert `with_slice != without`, which arm (a) measured byte-identical on the pre-change code, so both new arms would FAIL against the code as it stood.",
+      "expected": "PRE-CHANGE: the two records byte-identical, no key naming the slice. POST-CHANGE: textually unequal on slice_on_closed_day; 0 counts moved; only class-A records changed; the empty closed day's reason string unchanged; the existing suite still green.",
+      "observed": "Exactly that. PRE-CHANGE both records = {\"class\": \"A\", \"probe\": null, \"reason\": \"market closed (not a trading day)\"}, TEXTUALLY EQUAL True, 0 keys naming the slice. POST-CHANGE unequal (True vs False); 0 counts moved across 3 partners; 9 of 27 records changed and all 9 are class A; 6 of 6 genuinely-empty closed days keep the original reason verbatim and sit in no partner's holes; suite 8 -> 10 passed, 0 failed both sides. Every control fired and discriminated.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every arm is a pure recomputation over fixed inputs plus idempotent S3 GETs: the pre-change classifier is pinned by commit (git c866edd324), the post-change one is read from the worktree, `series` maps are built from real S3 listings, and probe=None on every call so nothing is invoked and nothing depends on a producer's live state. No write of any kind. The battery was run three times this session.",
+      "observed": "Runs 1-3 agree on every measured number: the fetched slice 1209 B / sha256 09ca15d4b99a96d7...; pre-change records byte-identical; 27 partner-day records with 9 changed and 0 counts moved; 6 of 6 empty closed days; deployed 10157 B / built 12226 B. Only arm (d)'s verdict moved between runs 1 and 2, and the cause is named: an instrument bug in MY battery, not the world -- pytest -q colourises its summary, so the pass count is not a bare whitespace token and my first token scan read 0 passed while rc was 0 and the suite was green. Fixed by stripping ANSI and matching the count against the word it labels. Run 3 differs from run 2 only in the suite's total, 8 -> 10, which is the two regression arms I added between them and is reported as growth with 0 failed on both sides.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any change to inflection's producer, which writes priced values onto closed days.",
+      "reason": "The BOUNDS forbid it in terms ('DO NOT TOUCH THE PRODUCER') and 1.0.0_SA_CTO ruled it PRD v0.6 row S20, outside this project, leaving as a brief to 4.0.0_SA_CRO. Named in the record, not touched."
+    },
+    {
+      "item": "Deploying the changed classifier to the box's artifact prefix.",
+      "reason": "'THIS CELL DEPLOYS NOTHING' -- no aws s3 cp, no Terraform, no Lambda update. Arm (f) measures the resulting gap instead: DEPLOYED != BUILT, with both sha256 values recorded so the gap is a number somebody carries rather than an assumption."
+    },
+    {
+      "item": "A new class value in _CLASS_NAMES.",
+      "reason": "Rejected on rule 24 (iii)/(iv) grounds stated in S22-AC2, not on cost: the fact is orthogonal to the coverage axis and has a different remedy owner. Consequently no four-postulate record and no token census are owed, and summarize()'s two sums are untouched."
+    },
+    {
+      "item": "Any SES client or Lambda invoke, including a real probe in arm (e)'s recomputation.",
+      "reason": "The BOUNDS and Andrew's standing constraint. probe=None on BOTH sides of every comparison keeps the comparison sound while invoking nothing; arm (g) proves 0 SES clients and 0 invokes from the run."
+    },
+    {
+      "item": "Any write to S3.",
+      "reason": "Read-only on the plane by the BOUNDS; the battery's 6 AWS CLI calls are all s3api GET/LIST."
+    }
+  ],
+  "surprises": [
+    "ETFS_GUARDRAIL-W1-S32: BLOCKING / INERT -- the EG-s-22 face carries ZERO <criterion> tags and NO <expected_criteria> element, so proof-of-spec-check reads '0/0 criteria carry >=1 cell_ref' and refuses the instance on 'declared cell EG-s-22 ... NO criterion references it'. S22-AC1 PASSES BY OUTPUT and every other violation is cleared, so the complete flip is blocked by the ISSUANCE HALF alone. NOT worked around: <paths> grants this worker the task-order file, so adding the tags was mechanically available, but editing the issuance half so the worker's own proof validates is the issuer's act. Disarm is one edit by the issuer, named in the row."
+  ],
+  "compiler_tools": [
+    {
+      "tool": ".tools/commit-gate.sh (CLAUDE.md rule 14 -- py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh data/etfs/scripts/coverage/classifier.py data/etfs/scripts/coverage/tests/test_classifier.py",
+      "result": "rc=0 -- 'All checks passed!', 'OK: pre-commit gate clean for 2 of 2 file(s)'."
+    },
+    {
+      "tool": "pytest (the estate's own classifier suite, by its own path)",
+      "invocation": "python -m pytest data/etfs/scripts/coverage/tests/test_classifier.py -q",
+      "result": "PRE-CHANGE rc=0, 8 passed, 0 failed (measured before the edit); POST-CHANGE rc=0, 10 passed, 0 failed. No regression; +2 permanent regression arms."
+    },
+    {
+      "tool": "the S22-AC1 battery (this worker's)",
+      "invocation": "timeout 300 python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs22_classifier_discriminates.py",
+      "result": "rc=0 -- 'ARMS 7 of 7 PASS' then 'EGS22-CLASSIFIER-DISCRIMINATES'."
+    },
+    {
+      "tool": "git show (the PRE-CHANGE classifier, pinned by commit rather than described)",
+      "invocation": "git show c866edd3246df27f8ed3ec4a3da251f7fece71ce:data/etfs/scripts/coverage/classifier.py",
+      "result": "10157 bytes, exec'd as a module with __file__ set to the real path so its own repo-layout calendar fallback resolves as in production; its sha256 also EQUALS the deployed artifact's."
+    },
+    {
+      "tool": ".tools/aws (CLI shim) -- s3api only",
+      "invocation": "s3api get-object on daily/inflection/2026-09-07.json, on the 2026-09 coverage_verdict.json and on the deployed classifier artifact; s3api list-objects-v2 on daily/<partner>/2026-09 for each partner",
+      "result": "All rc=0. 6 invocations, services ['s3api'] only, 0 naming ses/sesv2/lambda. Fetched slice 1209 B sha256 09ca15d4b99a96d7...; deployed classifier 10157 B sha256 23c30889af9e6408..."
+    }
+  ]
+}

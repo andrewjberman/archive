@@ -1,0 +1,171 @@
+==============================================================================
+H4-AC2 -- WHO OR WHAT REPUBLISHED THE PROJECTION
+==============================================================================
+TREE_READ      : C:\tmp\wk-cldgrph-8-3
+  branch       : wk-cldgrph-8-3   HEAD: 2fd5cae09f67dd31ae1d8da1ced56c24d52c6001
+  positive ctl : org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/h4_lib.py -> PRESENT
+  tag          : h4_actor
+
+WINDOW=2026-09-10T03:31:02 .. 2026-09-10T05:32:57   SWEEP=2026-09-10T02:00:00 .. 2026-09-10T06:30:00
+
+THE BUILDS AND THE IDENTITIES THEY CARRY
+  build 2026-09-10T03:31:02.025931+00:00
+    writer_id (self-declared) : cse_producers_nightly
+    nessie_commit_hash        : a85b52699f694688803af94f2470fd8b8a88744966647a69bf8abbe917ae8fa9
+    nodes_snapshot_id         : 682701759662556333
+    edges_snapshot_id         : 6492629246124063416
+    node/edge/skipped         : 27665 / 59683 / 388
+  build 2026-09-10T05:32:57.959776+00:00
+    writer_id (self-declared) : incremental_updater
+    nessie_commit_hash        : 667d3188f6f419ffe0cd6501531083e7e5edfb0dbdc4c20c420ba69bdb166489
+    nodes_snapshot_id         : 3134279746947811755
+    edges_snapshot_id         : 6492629246124063416
+    node/edge/skipped         : 27664 / 59559 / 512
+
+  NOTE ON GRAIN: `writer_id` is what the MARKER said, copied into the
+  manifest by projection_worker.py:351. It is SELF-DECLARED (the marker
+  records who claims to have stamped it). It is therefore treated here as a
+  LEAD, and the attribution below is made on the HASH, which the writer and
+  the reader compute independently of each other.
+
+==============================================================================
+COVERAGE_TABLE printed -- every instrument swept, with what it can and
+cannot see and its retention. A BLIND row contributes NO zero to any count.
+==============================================================================
+  [SEES ] /aws/lambda/opal-globgrph-incremental-updater
+          retention: 14 day(s)
+          CAN SEE: the incremental_updater Lambda: SQS-delivered
+          resource-change events -> one Nessie commit on
+          globgrph.graph_nodes -> branch-head marker
+          CANNOT SEE: nothing about ECS-side derives; nothing older than its
+          retention
+          MEASURED: liveness probe returned 32 event(s) (bounded at 50 -- a
+          probe, not a census); the paginated MARKER_STAMPED sweep returned
+          5 line(s)
+  [SEES ] /ecs/globgrph-cse-producer
+          retention: 30 day(s)
+          CAN SEE: the cse_producers_nightly ECS task: the nightly CSE
+          producer legs and their marker stamp
+          CANNOT SEE: nothing about the Lambda plane; nothing older than its
+          retention
+          MEASURED: liveness probe returned 17 event(s) (bounded at 50 -- a
+          probe, not a census); the paginated MARKER_STAMPED sweep returned
+          1 line(s)
+  [SEES ] /ecs/globgrph/derive-runner
+          retention: 90 day(s)
+          CAN SEE: the derive_runner ECS task: the full estate derive and
+          its marker stamp
+          CANNOT SEE: nothing about the Lambda plane; nothing older than its
+          retention
+          MEASURED: liveness probe returned 50 event(s) (bounded at 50 -- a
+          probe, not a census); the paginated MARKER_STAMPED sweep returned
+          3 line(s)
+  [SEES ] /aws/ecs/opal-globgrph-projection-worker
+          retention: 90 day(s)
+          CAN SEE: the projection worker: the EventBridge-Pipe records it
+          woke on, the incremental refresh deltas, the artifact write and
+          the pointer put
+          CANNOT SEE: it does not record WHY the warehouse moved, only that
+          it did
+          MEASURED: liveness probe returned 50 event(s) (bounded at 50 -- a
+          probe, not a census); the paginated MARKER_STAMPED sweep returned
+          0 line(s)
+  [SEES ] CodeBuild project globgrph-derive-build
+          retention: AWS-managed build history
+          CAN SEE: the build history of the container/source images this
+          estate publishes, with each build's initiator
+          CANNOT SEE: nothing about what the built code then did at run time
+          MEASURED: 57 build id(s) retained; 0 started inside the sweep
+  [SEES ] CodeBuild project opal-stitch-produce
+          retention: AWS-managed build history
+          CAN SEE: the build history of the container/source images this
+          estate publishes, with each build's initiator
+          CANNOT SEE: nothing about what the built code then did at run time
+          MEASURED: 74 build id(s) retained; 0 started inside the sweep
+  [SEES ] CloudTrail lookup-events (management plane)
+          retention: 90 days
+          CAN SEE: management-plane API calls in the window (RunTask,
+          StartBuild, UpdateFunctionCode, PutBucketPolicy and the like),
+          90-day history
+          CANNOT SEE: S3 object-level PutObject/GetObject (DATA events,
+          absent from the lookup plane) and Lambda Invoke -- i.e. it cannot
+          see the publish itself
+          MEASURED: inclusive-second control run BOTH ways (lookup-events
+          --start-time is INCLUSIVE at the second):
+          start=2026-09-10T03:31:02 -> 50 event(s);
+          start=2026-09-10T03:31:03 (+1s) -> 50 event(s), both bounded at
+          --max-items 50
+  [BLIND] S3 object VERSION HISTORY of the pointer projection/current.json
+          retention: n/a
+          CAN SEE: nothing here
+          CANNOT SEE: every prior state of the pointer object
+          MEASURED: get-bucket-versioning Status='<absent>' -- versioning
+          was never enabled (Andrew-locked OFF), so the pointer has one
+          version and no history.
+  [BLIND] ECS STOPPED-TASK control-plane history (ecs describe-tasks)
+          retention: about 1 hour
+          CAN SEE: which task ran, on what task definition, with what exit
+          code -- for tasks that stopped RECENTLY
+          CANNOT SEE: anything older than roughly one hour
+          MEASURED: list-tasks --desired-status STOPPED returns 0 retained
+          task(s); the window closed at 2026-09-10T05:32:57, hours before
+          this run.
+
+==============================================================================
+ACTOR printed -- one named act per build, bound by content identity
+==============================================================================
+  BUILD 2026-09-10T03:31:02.025931+00:00
+    ACTOR      : ECS task in cluster opal-globgrph, family globgrph-cse-producer (writer_id cse_producers_nightly), the nightly CSE producer
+    ACT        : the MARKER_STAMPED that advanced the Nessie branch head
+                 the projection then loaded
+    WHERE      : /ecs/globgrph-cse-producer
+    WHEN       : 2026-09-10T03:31:02Z
+  BUILD 2026-09-10T05:32:57.959776+00:00
+    ACTOR      : AWS Lambda `opal-globgrph-incremental-updater` (writer_id incremental_updater), SQS-triggered by resource-change events
+    ACT        : the MARKER_STAMPED that advanced the Nessie branch head
+                 the projection then loaded
+    WHERE      : /aws/lambda/opal-globgrph-incremental-updater
+    WHEN       : 2026-09-10T05:32:58Z
+
+==============================================================================
+EVIDENCE printed -- the lines themselves, verbatim, with the identity that
+binds each to its build. The manifest and the log compute this hash
+independently; neither reads the other.
+==============================================================================
+  BUILD 2026-09-10T03:31:02.025931+00:00
+    manifest nessie_commit_hash = a85b52699f694688803af94f2470fd8b8a88744966647a69bf8abbe917ae8fa9
+    manifest nodes_snapshot_id  = 682701759662556333
+    LOG 2026-09-10T03:31:02Z  /ecs/globgrph-cse-producer
+        OK: MARKER_STAMPED writer=cse_producers_nightly hash=a85b52699f694688803af94f2470fd8b8a88744966647a69bf8abbe917ae8fa9 nodes_snap=682701759662556333 edges_snap=6492629246124063416
+        HASH MATCH: yes    nodes_snap MATCH: yes
+  BUILD 2026-09-10T05:32:57.959776+00:00
+    manifest nessie_commit_hash = 667d3188f6f419ffe0cd6501531083e7e5edfb0dbdc4c20c420ba69bdb166489
+    manifest nodes_snapshot_id  = 3134279746947811755
+    LOG 2026-09-10T05:32:58Z  /aws/lambda/opal-globgrph-incremental-updater
+        [INFO]	2026-09-10T05:32:58.799Z	234a09eb-d30b-5c8f-bc61-6af791bd9ef1	OK: MARKER_STAMPED writer=incremental_updater hash=667d3188f6f419ffe0cd6501531083e7e5edfb0dbdc4c20c420ba69bdb166489 nodes_snap=3134279746947811755 edges_snap=6492629246124063416
+        HASH MATCH: yes    nodes_snap MATCH: yes
+
+  WHAT WOKE THE ATTRIBUTED WRITER (the same Lambda's own records):
+    resource-change event on arn:aws:s3:::opal-data-bd
+    resource-change event on arn:aws:s3:::opal-data-bd/platinum/firm/leaderboard.json
+    resource-change event on arn:aws:s3:::opal-data-bd/platinum/firm/dashboard.json
+    resource-change event on arn:aws:s3:::opal-data-bd/platinum/firm/fee_efficiency.json
+    resource-change event on arn:aws:s3:::opal-data-bd/platinum/firm/mix_summary.json
+    -> 5 distinct resource ARN(s) in the batch(es) that produced this build
+    -> these are S3 object writes; the Lambda collapses an object ARN to its
+       BUCKET node (lambda_function.py:264-272) and upserts that node.
+
+==============================================================================
+SUMMARY
+==============================================================================
+ATTRIBUTION=ATTRIBUTED
+INSTRUMENTS_SWEPT=9 of 9
+COVERAGE_TABLE printed
+ACTOR printed
+EVIDENCE printed
+ELIMINATION_USED=false
+  (every actor above is named by a 64-hex content match between the build's
+   own manifest and one writer's own log line, in that writer's own log
+   group. No actor is named because the others were ruled out.)
+BLIND_INSTRUMENTS=2
+OK: H4-AC2 complete -- read only, nothing published.

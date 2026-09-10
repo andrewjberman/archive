@@ -1,0 +1,47 @@
+H2-AC1 CARRIER ASYMMETRY -- NFRA_CLDGRPH CG-s-37
+TREE_READ=C:\tmp\wk-cldgrph-8-1
+SOURCE=C:\tmp\wk-cldgrph-8-1\infra\aws\globgrph\derive_stitch.py
+SOURCE_VINTAGE: HEAD=df7e3f6cb37fe1f2297eb26ce5a778c1700c491c worktree_bytes_match_HEAD_blob=true
+INSTRUMENT=python ast parse of ONE file (not a grep, not the card)
+COVERAGE: statements swept=315 of 315 in derive_stitch.py (denominator = every statement in the file; nothing excluded)
+GRAIN: one row per carrier -- behaviour, deciding line, counter
+BASELINE_ENVIRONMENT: round-7 substrate cards @f3b5f26f77 under C:\tmp\wk-cldgrph-8-1\org\missions\D0\NFRA\NFRA_CLDGRPH\cards (READ ONLY)
+
+CARRIERS_READ=3 of 3 from SOURCE
+NODES=DROP
+PROPS=DROP
+EDGES=DROP
+
+---- CARRIER NODES ----
+  SOURCE_BEHAVIOUR = DROP
+  DECIDING_LINE printed per carrier: derive_stitch.py:494 -- archived
+  COUNTER = prior_cycle_not_reemitted
+  COUNTER_OCCURRENCES_IN_SOURCE = 3 (>1 means it is carried past the site that increments it, i.e. a reader can see it fire)
+  NOTE = an archived stitch node this cycle did NOT re-emit is removed on read; the DEDUPE rule at line 491 still resolves the re-emitted collision
+  CARD_CLAIM = DEDUPE  (probe: drops an archived copy only when the same id is in this run's fresh emission)
+  CARD_VS_SOURCE = DISAGREE (card says DEDUPE, source says DROP) -- REPORTED, NOT RECONCILED; THE SOURCE WINS
+
+---- CARRIER PROPS ----
+  SOURCE_BEHAVIOUR = DROP
+  DECIDING_LINE printed per carrier: derive_stitch.py:508 -- for k in RETIRED_STITCH_PROPS: n.pop(k, None)
+  COUNTER = retired_props_dropped
+  COUNTER_OCCURRENCES_IN_SOURCE = 3 (>1 means it is carried past the site that increments it, i.e. a reader can see it fire)
+  NOTE = unconditional on the member's origin: the key is popped from every surviving stitch-sourced node, archived or fresh. COVERAGE BOUND: the population is the RETIRED_STITCH_PROPS enumeration, hand-maintained
+  CARD_CLAIM = DROP  (probe: the retired key is popped from every surviving stitch-sourced node)
+  CARD_VS_SOURCE = AGREE
+
+---- CARRIER EDGES ----
+  SOURCE_BEHAVIOUR = DROP
+  DECIDING_LINE printed per carrier: derive_stitch.py:159 -- edges = [e for e in edges if str(e.get('edge_type', '')) != 'STORED_IN']
+  COUNTER = stored_in_prior_cycle_dropped
+  COUNTER_OCCURRENCES_IN_SOURCE = 3 (>1 means it is carried past the site that increments it, i.e. a reader can see it fire)
+  NOTE = unconditional on this cycle's emission: an edge of this producer's own type arriving in the snapshot IS a previous cycle's output. COVERAGE BOUND: one literal edge type; every other edge this producer writes is protected only by the dedup
+  CARD_CLAIM = DROP  (probe: the prior cycle's edges are dropped unconditionally on read)
+  CARD_VS_SOURCE = AGREE
+
+CARD_VS_SOURCE_DISAGREEMENTS=1 reported
+  DISAGREEMENT NODES: card=DEDUPE source=DROP -- the cards are vintage f3b5f26f77 and this order changed the source; the card is not edited by this order (READ ONLY surface)
+CARD_PROBES_UNREADABLE=0 
+
+ASYMMETRY_VERDICT: the three carriers of ONE mechanism answer 'DROP / DROP / DROP' (nodes/props/edges).
+CAPTURE=h2_carrier_asymmetry.capture.json

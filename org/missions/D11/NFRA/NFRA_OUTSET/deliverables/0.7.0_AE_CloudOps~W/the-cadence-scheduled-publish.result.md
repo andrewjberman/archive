@@ -232,6 +232,28 @@ same reason, by a different mechanism (`aws_scheduler_schedule` with an IANA zon
 
 ---
 
+## THE FIRE GATE IS LIFTED -- verified at this seat, not taken from the relay
+
+`origin/CLOUD` is **`b2393aec71`** (my own `git ls-remote` at 18:1xZ, after Andrew's second push
+window). All six commits this order depends on are ancestors of the remote tip: `9ba4fdd9e9`
+(freshness publisher), `437a020853` (the exit-code fix), `31363a4fdd` (group-B publisher),
+`569c698d4a` (device role + entrypoint), `12771a5e2e` (role ledger close), `299c0f9d97` (this
+deliverable).
+
+⛔ **AND THE CHECK THAT ACTUALLY MATTERS IS NOT ANCESTRY.** A commit can be an ancestor of the tip
+while a LATER commit deletes the file it added -- so "the commit is on origin" and "the clone will
+find the entrypoint" are different claims, and only the second one is what tomorrow's 12:30Z build
+depends on. Verified by asking the remote tip for the blobs themselves (`git cat-file -e
+FETCH_HEAD:<path>`):
+
+    PRESENT at remote tip: infra/aws/terraform/estate-report/seam_freshness_publish.py
+    PRESENT at remote tip: infra/aws/terraform/estate-report/seam_groupb_publish.py
+    PRESENT at remote tip: infra/aws/ec2/outset-drift-device/publish_drift.py
+
+This is the exact failure the first QA build hit at 15:37Z: the clone SUCCEEDED (30,707 files) and
+the entrypoint was ABSENT, because the commit holding it was local. That failure is what makes this
+a file-level check rather than a commit-level one.
+
 ## O21-AC2 evidence -- THE TRIGGER'S SHAPE AND HOME. Recorded, NO VERDICT.
 
 **Where the producers run and why, in one line each.** Freshness: cloud, because it reads commit

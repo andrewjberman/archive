@@ -1,0 +1,112 @@
+==============================================================================
+H4-AC1 -- THE WINDOW'S PROJECTION BUILDS, FROM ARTIFACTS
+==============================================================================
+TREE_READ      : C:\tmp\wk-cldgrph-8-3
+  branch       : wk-cldgrph-8-3   HEAD: 2fd5cae09f67dd31ae1d8da1ced56c24d52c6001
+  positive ctl : org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/h4_lib.py -> PRESENT
+  tag          : h4_timeline
+
+WINDOW=2026-09-10T03:31:02 .. 2026-09-10T05:32:57  (CLOSED interval, both endpoints INCLUDED: each endpoint
+        IS itself a served vintage, so excluding them would drop the two
+        builds the cell is about.)
+MARGIN=2026-09-10T01:00:00 .. 2026-09-10T08:00:00  (either side, as the cell asks)
+
+INSTRUMENT   : s3api list-objects-v2 over s3://opal-313476888478-globgrph/projection/ with
+               delimiter '/', auto-paginated CLIENT-SIDE (a --query length()
+               would have returned the PAGE count, not the population).
+GRAIN        : one CommonPrefix == one PUBLISHED PROJECTION BUILD, keyed by
+               its own committed_at instant; the artifact is immutable per key.
+ENVIRONMENT  : LIVE AWS, account 313476888478, us-east-1, read at run time.
+ARTIFACT_PREFIXES_TOTAL=245 (every build ever published under this prefix)
+  earliest   : 2026-09-03T13:23:54.000000+00:00
+  latest     : 2026-09-10T12:24:50.576632+00:00
+
+MANIFEST_ID_PER_BUILD printed -- one row per build in the margin window.
+  manifest_id = sha256 of the _build_manifest.json BYTES as fetched (12 hex
+  shown); content_sha256 = the manifest's OWN claim about the kuzu artifact.
+  IN? = inside the closed window this cell is about.
+
+  IN? instant                              writer_id             mode        nodes  edges  skipped  manifest_id
+  -------------------------------------------------------------------------------------------------------------
+   no 2026-09-10T01:27:30.508695+00:00     derive_runner         full         27665  60312      577  9ff1aa5a019b
+   no 2026-09-10T02:12:05.682041+00:00     derive_runner         full         27665  60312      577  57ce55a318c5
+   no 2026-09-10T02:28:23.048900+00:00     derive_runner         full         27665  60312      577  c4d5a482e0a6
+   no 2026-09-10T03:02:00.831539+00:00     derive_runner         full         27665  59683      388  e0a94e2ff376
+  YES 2026-09-10T03:31:02.025931+00:00     cse_producers_nightly incremental  27665  59683      388  5361815924ce
+  YES 2026-09-10T05:32:57.959776+00:00     incremental_updater   incremental  27664  59559      512  fb4766e16fdd
+   no 2026-09-10T05:40:53.132475+00:00     incremental_updater   incremental  27664  59559      512  d2b9e5e9872d
+   no 2026-09-10T05:57:16.403567+00:00     incremental_updater   incremental  27664  59559      512  8ea66ca427c1
+
+  snapshot ids and stitch source per build (the producer inputs):
+    2026-09-10T01:27:30  nodes_snap=971069656843217057   edges_snap=9001165909946850306  stitch_built_at=2026-09-10T01:06:24Z stitch=74f996b4d474
+    2026-09-10T02:12:05  nodes_snap=2032889357875627645  edges_snap=896819304728988371   stitch_built_at=2026-09-10T02:15:44Z stitch=6b9da08cfae3
+    2026-09-10T02:28:23  nodes_snap=7026414442792142605  edges_snap=5539892288615041107  stitch_built_at=2026-09-10T02:15:44Z stitch=6b9da08cfae3
+    2026-09-10T03:02:00  nodes_snap=682701759662556333   edges_snap=6492629246124063416  stitch_built_at=2026-09-10T03:01:17Z stitch=5467aa385fa1
+    2026-09-10T03:31:02  nodes_snap=682701759662556333   edges_snap=6492629246124063416  stitch_built_at=2026-09-10T03:01:17Z stitch=5467aa385fa1
+    2026-09-10T05:32:57  nodes_snap=3134279746947811755  edges_snap=6492629246124063416  stitch_built_at=2026-09-10T03:01:17Z stitch=5467aa385fa1
+    2026-09-10T05:40:53  nodes_snap=6287784406868926416  edges_snap=6492629246124063416  stitch_built_at=2026-09-10T03:01:17Z stitch=5467aa385fa1
+    2026-09-10T05:57:16  nodes_snap=5762773532190809638  edges_snap=6492629246124063416  stitch_built_at=2026-09-10T03:01:17Z stitch=5467aa385fa1
+
+WHICH BUILD EACH OF THE THREE INHERITED READS SAW
+  (matched on the served vintage string, which IS the artifact prefix -- the
+   service reports the manifest's `vintage`, and the manifest's `vintage`
+   equals its `committed_at`, which is the key. No inference.)
+  R1 CG-s-32 class census baseline     vintage 2026-09-10T03:31:02
+      -> build 2026-09-10T03:31:02.025931+00:00  writer=cse_producers_nightly  nodes=27665 edges=59683 skipped=388
+      -> manifest_id 5361815924ce   (source of the read: row NFRA_CLDGRPH-W1-S39 / CG-s-32.boundary-edge-class-census.result.md)
+  R2 CG-s-33 loss read                 vintage 2026-09-10T05:32:57
+      -> build 2026-09-10T05:32:57.959776+00:00  writer=incremental_updater  nodes=27664 edges=59559 skipped=512
+      -> manifest_id fb4766e16fdd   (source of the read: row NFRA_CLDGRPH-W1-S39)
+  R3 issuer's third read               vintage 2026-09-10T05:57:16
+      -> build 2026-09-10T05:57:16.403567+00:00  writer=incremental_updater  nodes=27664 edges=59559 skipped=512
+      -> manifest_id 8ea66ca427c1   (source of the read: TO-CG-H-4 face, MEASURED block (manifest 8ea66ca427c1))
+
+THE DELTA ACROSS THE WINDOW, FROM THE TWO MANIFESTS (not from any row's prose)
+  nodes                        : 27665 -> 27664   (-1)
+  edges (stored)               : 59683 -> 59559   (-124)
+  edges_skipped_missing_endpoint: 388 -> 512   (+124)
+  nodes_snapshot_id            : 682701759662556333 -> 3134279746947811755   (MOVED)
+  edges_snapshot_id            : 6492629246124063416 -> 6492629246124063416   (UNMOVED)
+  stitch source                : 2026-09-10T03:01:17Z -> 2026-09-10T03:01:17Z   (UNMOVED)
+  writer_id                    : cse_producers_nightly -> incremental_updater
+
+  READING: the EDGES table did not move (same snapshot id) and the stitch
+  source did not move. The NODES table moved by one snapshot, the loaded
+  node count fell by 1, and edges_skipped_missing_endpoint rose by 124 --
+  the SAME number as the edge fall (124). The 124 edges were NOT deleted from
+  the warehouse; they became UNLOADABLE because their endpoint node left the
+  nodes table. That identity is the whole mechanism and it is arithmetic, not
+  a hypothesis.
+
+BLIND INSTRUMENTS -- an instrument that CANNOT have seen this window is
+reported as BLIND with its reason, never as a contributing zero. Each verdict
+below is MEASURED by the call named beside it.
+
+  BLIND : S3 object VERSION HISTORY of projection/current.json
+          get-bucket-versioning returns Status='<absent>' -- versioning was
+          NEVER enabled on this bucket (Andrew-locked OFF), so the pointer
+          object has exactly one version and no history to walk.
+  BLIND : ECS STOPPED-TASK history (ecs describe-tasks)
+          list-tasks --desired-status STOPPED returns 0 retained task(s); oldest
+          retained stoppedAt=<none retained>. ECS keeps stopped task records for
+          about one hour, and this window closed at 2026-09-10T05:32:57 -- the
+          tasks that ran in it are gone from the ECS control plane. Their LOGS
+          survive; the TASK RECORDS do not.
+  BLIND : CloudTrail lookup-events for the S3 PutObject that IS the publish
+          cloudtrail lookup-events serves MANAGEMENT events only; an S3
+          object-level PutObject is a DATA event and is not in the lookup
+          history. The publish act itself therefore cannot be read from
+          CloudTrail's lookup plane at any retention. The projection worker's
+          OWN log records it (POINTER_PUT_OK) and is used instead.
+  SEES  : Container Insights performance stream -- 1216 events in window
+
+==============================================================================
+SUMMARY
+==============================================================================
+WINDOW=2026-09-10T03:31:02 .. 2026-09-10T05:32:57
+BUILDS_FOUND=2
+ARTIFACT_KEYS_SWEPT=8 of 8
+MANIFEST_ID_PER_BUILD printed  (8 manifest ids above, one per swept build)
+BLIND_INSTRUMENTS=3 reported with reason
+INSTRUMENTS_THAT_SEE_THE_WINDOW=1
+OK: H4-AC1 complete -- read only, nothing published.

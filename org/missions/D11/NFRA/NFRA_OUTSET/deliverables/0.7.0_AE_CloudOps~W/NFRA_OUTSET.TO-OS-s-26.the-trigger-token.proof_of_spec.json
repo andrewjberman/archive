@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OUTSET.TO-OS-s-26",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.7.0_AE_CloudOps~W",
+  "spec_ref": {
+    "doc": "org/missions/D11/NFRA/NFRA_OUTSET/task-orders/NFRA_OUTSET.TO-OS-s-26.the-trigger-token.md",
+    "group": "OTHER",
+    "vintage_commit": "d2ee75c98b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D11/NFRA/NFRA_OUTSET/decompositions/NFRA_OUTSET_DECOMP.md",
+    "vintage_commit": "d2ee75c98b",
+    "to_ref": "org/missions/D11/NFRA/NFRA_OUTSET/task-orders/NFRA_OUTSET.TO-OS-s-26.the-trigger-token.md"
+  },
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~W/logs/2026-09-10/session_W_1220-1400Z_outset_round3_batteries.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.7.0_AE_CloudOps~W/test_os26_trigger_token.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The battery. It imports the SERVED runner rather than the worktree copy, so arm (b) exercises the function the estate actually runs and arm (d) stays an independent check instead of verifying a premise the battery had already assumed. commit-gate.sh rc=0.",
+      "artifact_covered_by": [
+        "O26-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-estate-report/config/last-trigger.json",
+      "kind": "s3_object",
+      "commit_or_etag": "QRHqSjmNPdImTp_rmka.gCcoK1MLWfDR",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "THE CARRIER ITSELF, at the version the orchestrator wrote for the MANUAL invoke: 117 B, LastModified 2026-09-10T00:30:07Z, trigger=manual, run_id=a588a7ea-8ad2-4f03-a814-4f02668a66d6, invoked_at=2026-09-10T00:30:05Z. Fetched BY VersionId because the key is overwritten by every invoke -- latest now holds the 13:00Z scheduled token (77904431-4b72-4033-8f68-4eaba9704b1e), and reading it would compare this run's report against a LATER run's token.",
+      "artifact_covered_by": [
+        "O26-AC1",
+        "O26-AC2"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-estate-report/code/estate_report_runner.py",
+      "kind": "s3_object",
+      "commit_or_etag": "d9b82ec4578251ed3c335e992e2fbe84",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The served runner carrying the token READ half, 180,310 B, VersionId Vl2cyFrB8dphstJ8IX2iNt01oDrMt7Sp. Arm (d): served ETag == md5 of git show HEAD:infra/aws/ec2/estate-report-runner/estate_report_runner.py, re-downloaded bytes sha256-equal, and a one-bit mutant at fixed length reports MISMATCH.",
+      "artifact_covered_by": [
+        "O26-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/estate-report/orchestrator.tf",
+      "kind": "terraform",
+      "commit_or_etag": "959c99016e",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The orchestrator's WRITE half and its grant. Read back on the APPLIED plane at this grading: statement WriteTheTriggerTokenOnly, Action s3:PutObject, Resource EXACTLY ONE ARN -- arn:aws:s3:::opal-estate-report/config/last-trigger.json.",
+      "artifact_covered_by": [
+        "O26-AC1",
+        "O26-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260909T2243Z_estate-report-runner-trigger-token-read_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "9b5fed4570",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The runner deploy's NEVER-2 entry, opened before the upload at d1c0fa3c83 and closed at 9b5fed4570 with the ETag control. O26-AC2 evidence.",
+      "artifact_covered_by": [
+        "O26-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "O26-AC1",
+      "criterion_verbatim": "a battery you write, proving THE CARRIER END TO END ON THE REAL PLANE: (a) the POSITIVE arm reads OS-s-24's manual served day's report: run_bundle.trigger == manual and run_bundle.run_id present and EQUAL to the token the orchestrator wrote for that invoke (the token object's run_id, head-object + get-object with the invoke's UTC), never inferred from started_at; (b) the two NEGATIVE arms are exercised at the runner-s own token-read function against the REAL bucket, without a served-key write: with the token key ABSENT the function returns UNKNOWN (the key read via head-object 404 beside a 200 on a present key as the control), and with a STALE token (invoked_at older than a supplied boot instant) the function returns UNKNOWN; a token whose invoked_at is newer than the boot instant returns its trigger value (the positive control of the same function); (c) the grants read on the APPLIED plane: the orchestrator role's Put reach is exactly the one key and the runner role's Get reach is exactly the one key (comp-iam or get-role-policy, DESIRED == APPLIED, printed), with a negative control (a sibling key under config/ is NOT reachable); (d) the runner's served ETag equals md5 of the HEAD blob, with the OS-s-19 control; (e) the 13:00Z scheduled fire's report, IF PRESENT at the read, carries run_bundle.trigger == scheduled -- read as CONFIRMATION and recorded, never waited for. Denominators on every list; timeout 600.",
+      "method": "command",
+      "invocation": "timeout 600 python org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.7.0_AE_CloudOps~W/test_os26_trigger_token.py",
+      "expect": "OS26-TRIGGER-TOKEN-CARRIED",
+      "output_evidence": "stdout ends OS26-TRIGGER-TOKEN-CARRIED, rc=0 CAPTURED UNPIPED (redirected to a file; $? read from the python process, never through a pipeline whose rc is its last stage's). Graded 2026-09-10T13:17:04Z. THE FUNCTION UNDER TEST IS THE SERVED ONE: the battery downloads code/estate_report_runner.py @Vl2cyFrB8dphstJ8IX2iNt01oDrMt7Sp (180,310 B) and imports THAT, so arm (b) exercises the estate's code and arm (d) is an independent check rather than a premise the battery assumed. ||| VERBATIM RUN OUTPUT FOLLOWS ||| ==============================================================================\nO26-AC1 -- THE TRIGGER TOKEN, END TO END\nrun at 2026-09-10T13:17:04Z\nrepo   C:/Users/AndrewBerman/Desktop/ajb_workspace\nserved runner imported from code/estate_report_runner.py @Vl2cyFrB8dph (180310 B)\n\n(a) THE POSITIVE ARM: the served report's run_id EQUALS the token written for that invoke\n      report daily/2026/09/09/estate-report-2026-09-09.json @F3CLuHhwgcRK..  2026-09-10T00:52:49Z\n      run_bundle.trigger = 'manual'   run_bundle.run_id = 'a588a7ea-8ad2-4f03-a814-4f02668a66d6'\n      token  config/last-trigger.json @QRHqSjmNPdIm..  117 B  LastModified 2026-09-10T00:30:07Z\n      token.trigger = 'manual'   token.run_id = 'a588a7ea-8ad2-4f03-a814-4f02668a66d6'   token.invoked_at = '2026-09-10T00:30:05Z'\n  OK: THE CARRIER IS PROVEN END TO END: the orchestrator wrote run_id a588a7ea-8ad2-4f03-a814-4f02668a66d6 at 2026-09-10T00:30:05Z and the RUNNER stamped that same id into the served report -- matched on the ID, never on the clock\n  .. started_at on the report is '2026-09-10T00:30:30.554548+00:00' and is NOT used by this arm\n\n(b) THE TWO NEGATIVE ARMS, on the SERVED function, against the REAL bucket\n    no put-object, no delete, no served-key write of any kind (PRD R-5)\n      head-object config/last-trigger-NO-SUCH-KEY-os26-battery.json -> 404\n      head-object config/last-trigger.json -> 200   (the control: a uniformly failing call cannot read as a verdict)\n  OK: 404 on the absent key beside 200 on the present one -- absence is measured, not assumed\n      ABSENT token   -> ('UNKNOWN', None)\n  OK: an ABSENT token reads UNKNOWN -- never 'scheduled', which would be a confident claim manufactured out of nothing\n      STALE token    -> ('UNKNOWN', None)   [token invoked_at 2026-09-10T13:00:44Z, boot instant 2026-09-10T13:00:45Z]\n  OK: a STALE token reads UNKNOWN -- a token from an earlier invoke is not this run's\n      FRESH token    -> ('scheduled', '77904431-4b72-4033-8f68-4eaba9704b1e')   [boot instant 2026-09-10T13:00:43Z, one second BEFORE invoked_at]\n  OK: the SAME function returns 'scheduled' on a fresh token -- it is not a constant, so both negative arms are measurements\n\n(c) THE GRANTS ON THE APPLIED PLANE, exact-key, with a sibling-key negative control\n      ORCHESTRATOR Put   estate-report-orchestrator-role/estate-report-orchestrator  statements=1  resources=1\n        resources: arn:aws:s3:::opal-estate-report/config/last-trigger.json\n        matches the token key : ['arn:aws:s3:::opal-estate-report/config/last-trigger.json']\n        matches a SIBLING key : NONE   <- must be NONE\n  OK: ORCHESTRATOR Put reaches the token key and NOT a sibling under config/ (1 resource(s) declared)\n      RUNNER Get         estate-report-runner-role/estate-report-runner  statements=1  resources=6\n        resources: arn:aws:s3:::opal-estate-report/daily/*, arn:aws:s3:::opal-estate-report/code/*, arn:aws:s3:::opal-estate-report/manifest/*, arn:aws:s3:::opal-estate-report/kuzu_nessie_db, arn:aws:s3:::opal-estate-report/outset/*, arn:aws:s3:::opal-estate-report/config/last-trigger.json\n        matches the token key : ['arn:aws:s3:::opal-estate-report/config/last-trigger.json']\n        matches a SIBLING key : NONE   <- must be NONE\n  OK: RUNNER Get reaches the token key and NOT a sibling under config/ (6 resource(s) declared)\n  OK: matcher positive control: a `config/*` wildcard DOES match the sibling key, so the NONE above is a property of the grant and not of the matcher\n\n(d) THE SERVED RUNNER == THE BUILD INPUT (the OS-s-19 control)\n      served  180310 B  VersionId Vl2cyFrB8dph..  ETag d9b82ec4578251ed3c335e992e2fbe84\n      HEAD    180310 B  md5  d9b82ec4578251ed3c335e992e2fbe84\n      served sha256 37579654c920ee7a1fbe4c5b89aa0e06\n      HEAD   sha256 37579654c920ee7a1fbe4c5b89aa0e06\n  OK: the served ETag EQUALS md5 of the HEAD blob, and the re-downloaded bytes agree\n  OK: NEGATIVE CONTROL: one bit flipped at offset 100 with the length held fixed -> MISMATCH. The match above is a measurement.\n\n(e) CONFIRMATION, NEVER WAITED FOR: the 13:00Z scheduled fire\n      daily/2026/09/10/ -> 0 object(s), 0 .json\n  .. NOT-YET-FIRED. Recorded and NOT waited for; the verdict comes from (a)-(d).\n\n==============================================================================\nOS26-TRIGGER-TOKEN-CARRIED\n",
+      "denominator": "5 arms declared, 5 evaluated, 0 NOT-EVALUATED, 10 OK, 0 FAIL. Arm (b): 3 function calls (ABSENT, STALE, FRESH) + 2 head-object status reads (404 absent / 200 present); 0 put-object, 0 delete, 0 served-key writes. Arm (c): 2 roles, 1 matching statement each, 1 and 6 declared resources, 1 token-key match each, 0 sibling matches each, 1 matcher positive control. Arm (d): 2 digests each side + 1 one-bit mutant at fixed length. Arm (e): 0 objects under daily/2026/09/10/ at the read.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "O26-AC2",
+      "criterion_verbatim": "THE CARRIER'S SHAPE AND WHAT IT CANNOT SEE: the event-to-trigger mapping as built, the token's fields, how the runner decides STALE (the boot instant it compares against and where it reads it), the two grants' applied reach before and after, the runner deploy's NEVER-2 entry (opened before, closed after, ETag control), and the one blindness worth stating -- a token written by a third caller with a forged trigger value is trusted. Evidence with vintage. NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "NOT-APPLICABLE -- judgment=true; 3.0.0_SA_CVO grades it at L9.",
+      "output_evidence": "MAPPING AS BUILT: EventBridge Scheduler estate-report-0900et (cron(0 9 * * ? *) America/New_York, read ENABLED live) invokes the orchestrator Lambda, which writes ONE object to config/last-trigger.json and THEN calls StartInstances. ||| TOKEN FIELDS: trigger (declared domain {scheduled, manual}), run_id (a UUID per invoke), invoked_at (UTC, second precision). Live example read at this grading: trigger=scheduled, run_id=77904431-4b72-4033-8f68-4eaba9704b1e, invoked_at=2026-09-10T13:00:44Z, 120 B. ||| HOW STALE IS DECIDED, AND WHY THE COMPARISON IS NOT THE OBVIOUS ONE: the token is written BEFORE StartInstances, so invoked_at is ALWAYS earlier than this boot; a naive newer-than-boot test would read UNKNOWN on every run including the correct ones. The caller supplies (run start - TRIGGER_TOKEN_MAX_AGE_S), 3600 s, as the boot instant and the token is fresh iff invoked_at >= boot_instant. The runner reads the boot instant from its own started_at, in _trigger_for_run. ||| GRANTS BEFORE AND AFTER: before, neither role named the key (it did not exist). After, read on the APPLIED plane -- orchestrator estate-report-orchestrator-role/estate-report-orchestrator statement WriteTheTriggerTokenOnly, s3:PutObject, Resource list of EXACTLY ONE ARN; runner estate-report-runner-role/estate-report-runner statement ReadPredecessorAndOwnCode, s3:GetObject, 6 resources of which config/last-trigger.json is an EXACT KEY and not a config/* wildcard. A sibling key under config/ matches NEITHER list. ||| NEVER-2 ENTRY: org/critical_paths/change_management/20260909T2243Z_estate-report-runner-trigger-token-read_deploy_completion.md, opened before the upload at d1c0fa3c83, closed at 9b5fed4570, ETag control recorded there. ||| THE ONE BLINDNESS: a token written by a THIRD caller with a forged trigger value is TRUSTED. The runner authenticates nothing about the writer -- it checks shape, declared domain and freshness window and nothing else. Today only the orchestrator role holds s3:PutObject on that key, which is what makes the blindness tolerable rather than absent, so the control is ENTIRELY IAM-s; any future widening of that grant silently widens what the report will believe about its own provenance. A value carries its claim only as far as the identity that may write it.",
+      "denominator": "Token fields enumerated: 3 of 3 present in the live object. Grants read on the applied plane: 2 roles, 2 statements, 7 resources total, 0 of them a config/* wildcard. NEVER-2 commits cited: 2 of 2 (open d1c0fa3c83, close 9b5fed4570). Blindnesses stated: 1, with its compensating control named and its failure mode named.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\" on the face; 3.0.0_SA_CVO grades it at L9. Evidence recorded with vintage and denominators and NO verdict written -- including on whether the IAM-only control over the forged-trigger blindness is sufficient, which is a design judgment and not this seat's call.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Arm (b) is the arm whose pass could most easily be a constant: a _trigger_token_read that returned UNKNOWN unconditionally would pass BOTH negative arms and look identical to a correct one. So the SAME function, on the SAME real bucket, is given a token whose invoked_at is one second AFTER the supplied boot instant. Arm (d) carries a second mutant: one bit flipped at offset 100 of the served bytes with the length held FIXED, so a length check cannot be what catches it. Arm (c) carries a third: the ARN matcher is asked whether a config/* wildcard matches the sibling key, because if the matcher returned False for everything the sibling NONE would pass for the wrong reason.",
+      "expected": "The fresh-token call must return the token's own trigger value rather than UNKNOWN. The one-bit mutant must compare MISMATCH. The config/* wildcard must MATCH the sibling key.",
+      "observed": "FRESH token -> (scheduled, 77904431-4b72-4033-8f68-4eaba9704b1e) against UNKNOWN on both negatives, so the function is not a constant. One-bit mutant -> MISMATCH at identical length. config/* wildcard -> MATCHES the sibling, so the NONE in arm (c) is a property of the GRANT and not of the matcher. ALL THREE CONTROLS FIRED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every world-facing read in arms (a)-(d) is version-addressed (get_object with an explicit VersionId), an applied-plane policy read, or a digest of bytes fetched in the same call. The only run-to-run variables are arm (e), which reads today's prefix and is DECLARED not to affect the verdict, and arm (b)'s FRESH control, which reads whatever token is currently latest.",
+      "observed": "Arm (b)'s FRESH control read the LIVE 13:00Z token and returned scheduled -- a value that will change with the next invoke, which is why the arm asserts EQUALS THE TOKEN'S OWN trigger rather than a fixed string. Every other arm is pinned and reproducible from the ids recorded here.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The 13:00Z scheduled fire's published report.",
+      "reason": "The face makes arm (e) explicitly conditional -- IF PRESENT at the read, read as CONFIRMATION and recorded, never waited for. At 13:17:04Z daily/2026/09/10/ held 0 objects and the arm printed NOT-YET-FIRED. NOTE WHAT IS NOT EXCLUDED: arm (b)'s positive control already read the live 13:00Z token and returned scheduled, so that value is proven to travel from the orchestrator into the runner's own read function. The unproven hop is the last one -- that value appearing in the published report -- and it is not claimed."
+    },
+    {
+      "item": "simulate-principal-policy as the instrument for arm (c).",
+      "reason": "Four independent false-deny modes, and against a narrowly scoped principal -- which both these roles are -- a false deny reads as a correct negative. The wrong-grain mode was measured at this seat as row NFRA_OUTSET-S3. The applied Resource list was read directly instead, with a local matcher carrying its own positive control."
+    },
+    {
+      "item": "Any write, overwrite or delete of a served key to produce a negative arm.",
+      "reason": "PRD R-5 (NEVER-AUTO-DELETE) is absolute and the face bounds arm (b) with without a served-key write. Both negatives were produced by pointing the real function at a nonexistent key and by supplying a boot instant through the parameter the runner's own docstring says the caller supplies."
+    },
+    {
+      "item": "Whether the token's trigger value is TRUE rather than merely DECLARED.",
+      "reason": "Recorded as O26-AC2's stated blindness rather than tested: the runner authenticates nothing about the writer, and the only control is that one role holds Put on that key. Testing it would mean forging a token, which is a served-key write."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/ec2/estate-report-runner/estate_report_runner.py --enumerate 'NoSuchKey|FileNotFoundError|_outset_loader|def _outset|OUTSET_DEVICES|_seam_loader|ClientError'",
+      "result": "DENOMINATOR 12 hits across 3,088 lines / 82 sections, 5 whole-value and 7 substring, banded DEF=4 CODE=8. It located _outset_loader and _trigger_token_read and showed the loader had NO NoSuchKey arm -- which is what told this seat that a missing key raises a generic ClientError rather than FileNotFoundError. That reading drove the OS-s-22 disclosure arm and is why arm (b) here asserts UNKNOWN on ABSENT rather than assuming a typed exception."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'estate_report_runner.py' --all --limit 10",
+      "result": "DENOMINATOR 1 hit across 157,955 files scanned, corpus=all, 104,516 EPHEMERAL-FLOOR not searched. Exactly ONE copy of the runner exists in the repo, so the BUILD INPUT arm (d) compares against is unambiguous -- there is no second checkout that could be the real source. RUN ON THE MAIN TREE, so the comp-rail linked-worktree corpus defect relayed at 95126 cannot have touched it."
+    }
+  ]
+}

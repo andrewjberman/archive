@@ -1,0 +1,136 @@
+diff --git a/infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py b/infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py
+index e3291488a6..c24f5236e3 100644
+--- a/infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py
++++ b/infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py
+@@ -35,6 +35,7 @@ from __future__ import annotations
+ import datetime
+ import json
+ import os
++import re
+ import time
+ from email.mime.application import MIMEApplication
+ from email.mime.multipart import MIMEMultipart
+@@ -101,6 +102,40 @@ TERMINAL_RECIPIENT = "andrew@opalinvest.com"
+ TEST_MARKER = "test_run"
+ TEST_FORBIDDEN_RECIPIENTS = frozenset({"aj@opalinvest.com"})
+ TEST_DEFAULT_RECIPIENTS = ("andrew@opalinvest.com",)
++# ETFS_GUARDRAIL.TO-EG-s-24 -- THE FORCING SEAM, AND WHY IT IS SHAPED THIS WAY.
++#
++# The renderer has carried `--fixture-remove` since EG-s-6 (declared at
++# render_month_end.py:1022, parsed by _parse_fixture_remove at :852, applied at
++# :1030/:1033/:1040/:1047). It drops dates from the loaded series IN MEMORY and
++# touches nothing on S3. This orchestrator never threaded it, so FWD-9's forced
++# class-C condition was unreachable by construction and no seat could drive a
++# refusal -- row W4-S2, which is why EG-s-21 could not be executed as cut.
++#
++# WARN: THIS OVERRIDE IS WORSE-SHAPED THAN A `--month` OVERRIDE AND IS TREATED AS SUCH.
++# CLAUDE.md: an override that lets a scheduled producer run off its own inputs
++# CREATES A NEW REACHABLE STATE on the manual path, and the sign-off covers that
++# state or the override does not land. A `--month` override changes WHICH month is
++# rendered; THIS one makes the monthly report DROP ITS OWN INPUT DATA. A scheduled
++# fire able to reach it would publish a report over data it silently removed. So:
++#
++#   1. THE DEFAULT IS OFF. `_forcing_spec` returns "" for every event that does not
++#      ask for forcing explicitly, and "" appends NOTHING to the render command --
++#      the marker-free command string is bit-for-bit what it was before this change.
++#   2. TWO INDEPENDENT CONDITIONS, NEITHER IN THE SCHEDULED PAYLOAD. The event must
++#      carry BOTH the TEST_MARKER (`test_run`, EG-s-20's own marker) AND
++#      FORCING_KEY. The EventBridge schedule's input is jsonencode({mode = "run"})
++#      (infra/aws/terraform/etfs-reports/orchestrator.tf) and carries neither.
++#   3. THE COUPLING IS THE SAFETY COMPOSITION, NOT CONVENIENCE: because forcing
++#      requires the TEST marker, a run that removes its own input data can NEVER be
++#      a run whose recipients include aj@ -- EG-s-20's filter runs last on exactly
++#      that marker. Data-forcing and Andrew's ~02:5xZ constraint cannot come apart.
++#   4. THE SPEC IS SHELL-BOUND. _render_command interpolates into a single-quoted
++#      `su - ec2-user -c '...'` string handed to SSM, so an unvalidated spec is a
++#      command-injection surface. FORCING_SPEC_RE admits ONLY
++#      `<partner>:<YYYY-MM-DD>[,<YYYY-MM-DD>...]` -- no quote, space, semicolon,
++#      backtick or `$` can survive it. Anything else resolves to "" (OFF) and says so.
++FORCING_KEY = "force_fixture_remove"
++FORCING_SPEC_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,31}:\d{4}-\d{2}-\d{2}(,\d{4}-\d{2}-\d{2})*$")
+ # The shared critical-surface channel the COO polls every /drive cycle. Every fail-loud alert ALSO
+ # goes here so a failed/no-show monthly run is caught structurally (not just by Andrew's email sub).
+ CRITICAL_SNS_TOPIC = os.environ.get("CRITICAL_SNS_TOPIC", "")
+@@ -147,6 +182,43 @@ def _is_test_invocation(event) -> bool:
+     return bool((event or {}).get(TEST_MARKER))
+ 
+ 
++def _forcing_spec(event) -> str:
++    """The ONLY way a `--fixture-remove` spec reaches the renderer
++    (ETFS_GUARDRAIL.TO-EG-s-24). Returns the validated spec, or "" for OFF.
++
++    "" IS THE DEFAULT AND "" APPENDS NOTHING, so any event that does not ask for
++    forcing explicitly produces the byte-identical command this function's caller
++    built before this change.
++
++    THREE GATES, ALL OF WHICH MUST PASS, AND THE SCHEDULED PAYLOAD PASSES NONE:
++      1. the invocation carries TEST_MARKER (so forcing can never ride a run whose
++         recipients include aj@ -- see the block above FORCING_KEY);
++      2. it carries FORCING_KEY as a TOP-LEVEL, non-empty str (a nested value, a
++         list, a dict, a number, None or a differently-cased key is NOT the key);
++      3. the value matches FORCING_SPEC_RE exactly -- `<partner>:<YYYY-MM-DD>[,...]`.
++
++    A value that fails 2 or 3 is REFUSED LOUDLY and resolves to OFF: a malformed
++    forcing spec must never silently become a normal publishing run that the reader
++    then mistakes for a forced one."""
++    ev = event or {}
++    if not _is_test_invocation(ev):
++        return ""
++    raw = ev.get(FORCING_KEY)
++    if raw is None:
++        return ""
++    if not isinstance(raw, str) or not raw.strip():
++        print("SKIP: %s ignored -- not a non-empty string (got %s); forcing is OFF"
++              % (FORCING_KEY, type(raw).__name__))
++        return ""
++    spec = raw.strip()
++    if not FORCING_SPEC_RE.match(spec):
++        print("SKIP: %s REFUSED -- %r does not match <partner>:<YYYY-MM-DD>[,...]; "
++              "forcing is OFF" % (FORCING_KEY, spec[:120]))
++        return ""
++    print("OK: forcing spec accepted -- --fixture-remove %s (TEST invocation)" % spec)
++    return spec
++
++
+ def _split_addrs(value) -> list:
+     """A joined RFC 5322 string or an already-split list -> a clean address list."""
+     if value is None:
+@@ -338,10 +410,18 @@ def _wait_ssm_online(deadline: float) -> bool:
+     return False
+ 
+ 
+-def _render_command(month: str) -> list[str]:
++def _render_command(month: str, forcing: str = "") -> list[str]:
+     """The SSM shell run as ec2-user: pull the renderer, ensure chromium (idempotent, persists on
+-    EBS across stop/start), render LAST month to PDF + upload to platinum/reports/. ASCII only."""
++    EBS across stop/start), render LAST month to PDF + upload to platinum/reports/. ASCII only.
++
++    `forcing` (EG-s-24) is the VALIDATED `--fixture-remove` spec from `_forcing_spec`, or "".
++    IT IS DEFAULTED, so every existing caller is unchanged, and "" appends NOTHING -- the
++    marker-free command string is bit-for-bit what this function returned before EG-s-24."""
+     out = f"s3://{ETFS_BUCKET}/{REPORTS_PREFIX}/"
++    # Interpolated into the single-quoted `su - ec2-user -c '...'` below. Only
++    # FORCING_SPEC_RE-validated text ever reaches here (_forcing_spec is the sole
++    # producer of a non-empty value), so no shell metacharacter can appear.
++    fixture = f" --fixture-remove {forcing}" if forcing else ""
+     inner = (
+         "set -e; "
+         "mkdir -p /opt/etfs-reports && cd /opt/etfs-reports && "
+@@ -365,7 +445,7 @@ def _render_command(month: str) -> list[str]:
+         # the box's OLD renderer would reject the unknown flag -- the two land the
+         # same night and the rollback (remove the flag, one deploy) is the
+         # issuer's if EG-s-6 does not land before the 10-01 fire.
+-        f"python3 render_month_end.py --month {month} --pdf --gate --s3-out {out}"
++        f"python3 render_month_end.py --month {month} --pdf --gate --s3-out {out}{fixture}"
+     )
+     return [f"su - ec2-user -c '{inner}'"]
+ 
+@@ -560,7 +640,7 @@ def _run(event: dict | None = None) -> None:
+             InstanceIds=[INSTANCE_ID],
+             DocumentName="AWS-RunShellScript",
+             Comment=f"ETFS month-end render {month}",
+-            Parameters={"commands": _render_command(month)},
++            Parameters={"commands": _render_command(month, _forcing_spec(event))},
+             TimeoutSeconds=600,
+         )
+         cmd_id = cmd["Command"]["CommandId"]
