@@ -1,332 +1,381 @@
-# ETFS_GUARDRAIL.TO-EG-s-21 -- THE DRIVEN REFUSAL: EVERYTHING IS READY AND ONE CLAUSE IS UNREACHABLE IN EVERY MONTH
+# ETFS_GUARDRAIL.TO-EG-s-21 -- THE DRIVEN REFUSAL: result
 
-**Assignee:** `0.9.0_WK_ETFS_GUARDRAIL~4` (L7 of `2.0.0_SA_COO`) · **Branch:** `wk-etfs_guardrail-3-21` (LOCAL)
-**Worktree:** `C:/tmp/wk-etfs-3-21` · **Base:** `1d62717c65` · **Battery runs:** 16:30:40Z, 16:34:49Z, **16:45:42Z** (3 of 3 identical)
-**Outcome:** `S21-AC1` **FAIL** (arm (e) of the battery = arm (d) of the criterion). `<status>` NOT flipped.
-**THE SINGLE PERMITTED DRIVEN RUN IS UNSPENT.** No invoke, no send, no S3 write, no S3 delete.
-**Rows filed:** `ETFS_GUARDRAIL-W4-S8` (BLOCKING/ARMED), `-W4-S9` (OBSERVATION/ARMED), `-W4-S10` (INERT),
-`-W4-S11` (INERT), `-W4-S12` (OBSERVATION/ARMED -- a false-blocking commit gate).
+**Assignee:** `0.9.0_WK_ETFS_GUARDRAIL~4` · **Branch:** `wk-etfs_guardrail-3-21` · **Base/HEAD at work:** `a6e2031ff8`
+**Task order vintage:** `org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-21.the-driven-refusal.md`@`a6e2031ff8`
+**Decomp:** `org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md`@`9c74724d7d`, cell `EG-s-21`
+**Worked:** 2026-09-10 ~18:2xZ - ~19:0xZ
 
 ---
 
-## 0. THE CONCLUSION FIRST, BECAUSE IT IS NOT THE ONE THE LAST THREE REFUSALS GAVE
+## CONCLUSION, FIRST
 
-**The two cells cut to unblock this order WORKED. Both are on the served bytes and I measured both
-myself.** The forcing now reaches the verdict; the egress ask is now recorded on the ladder-skipped
-branch with its provenance and its provider. Five of the battery's six arms HOLD, and the run that
-would have been fired is fully specified below down to the byte counts it would write.
+**THE DRIVEN RUN WAS NOT FIRED. THE ROUND'S SINGLE PERMITTED DRIVEN RUN IS STILL UNSPENT.**
 
-**It is blocked by a clause nobody has looked at yet, one grain ABOVE the criterion, in the PRD's own
-accept.** `S21-AC1` arm (d) -- and `FWD-9`'s ACCEPT at `ETFS_GUARDRAIL_PRD.md:566-567` (restated at
-`:187`) -- require of the driven run's month that **"the publish keys for that month STAY ABSENT (a 404
-beside the refused 200)"**. There is no such month, and there cannot be one without an S3 delete, which
-this order forbids absolutely:
+`S21-AC1` is **FAIL** -- the battery ran, arm (a) PASSED, and arms (b)-(g) are `NOT-RUN-BLOCKED`. The
+token `EGS21-REFUSAL-DRIVEN-AND-SENT` was not printed, rc=1.
 
-> a forced class C requires a slice the fixture can **REMOVE** (`_apply_fixture_remove` drops dates from an
-> already-loaded series; `classifier.py:191-194 @8471f83a18` needs *no slice* **plus** a probe answering
-> partition-present and priced>0) -- so the candidate months are exactly the months in which some partner
-> **has** a daily slice. **Measured: 275 slices across 3 partners, months = {2026-05 .. 2026-09}, 0 slices
-> outside that range. And 5 of those 5 months already serve `etf_ownership.pdf` AND `.html`. 404-able: 0 of 5.**
+The reason is not the recipient bound and it is not the forcing design. Both of those are clean and both
+are recorded below. The reason is that **the path this order drives cannot reach a REFUSE verdict on the
+bytes the reporter box will execute.** The served renderer calls `remediate._provider_for(p)` at
+`data/etfs/scripts/presentation/render_month_end.py:1162` on the `--no-ladder` branch -- which R-EG-6
+shape 1 makes the ONLY branch that yields a driven REFUSE -- and the `coverage` package the box holds
+does not define that symbol. Exercised: `AttributeError`, raised inside `coverage_gate` **before any
+verdict object exists**. Firing would have spent the irreplaceable run on an SSM `Failed` that writes no
+`coverage_verdict.json`, no refusal artifacts and fires no terminal send.
 
-That set is written as a **subtraction from a printed denominator**, not as a forward list, precisely
-because a forward list is how the last five of these got missed (CLAUDE.md rule 24).
+**Row `ETFS_GUARDRAIL-W4-S17`** -- BLOCKING / ARMED, `disarm_owner` `2.0.0_SA_COO`.
 
-**I did not fire.** Firing would have spent a non-renewable act on a run I had already measured to fail
-arm (d) -- which is the waste this face's own `<status>` line names, on different grounds. The remedy is
-one ruling, not one round: arm (d)'s `404` names **one world-state** of the property *"this run did not
-publish"*, exactly as the pre-`R-EG-8` clause named **one writer** of the egress-ask property. Re-cut to
-the property -- *the publish keys are byte-identical across the run (ETag + VersionId + LastModified read
-on both sides), or absent* -- and **the run is satisfiable today, on 2026-07, with no code, no deploy and
-no data change.** That is `W4-S8`, disarm owner `1.0.0_SA_CTO`.
+**Nothing was written to S3. Nothing was deleted. No SES message was sent. No code was changed.
+No NEVER-2 change-management entry was opened** -- an entry names an act's blast radius, and there was no
+act; an entry opened and never closed is itself the hazard CLAUDE.md NEVER-2 names.
 
 ---
 
-## 1. WHAT I RE-GROUNDED BEFORE ANYTHING ELSE
+## 1. THE BOUND WITH NO OVERRIDE: `aj@opalinvest.com` -- CLEAN, AND MEASURED FIRST
 
-| premise the face carries | world at 2026-09-10 ~16:3xZ | verdict |
+Taken **before** any invocation, on the bytes deployed **at this run's time**, and re-read after (the
+battery re-takes it end to end on every run; the last run is the record).
+
+**GRAIN.** `aws lambda get-function` -> `Code.Location` -> the zip downloaded and hashed:
+
+```
+deployed zip sha256=9e3becb33921248e1df978fd48e996672e10d0d018290bc74ef06095b7768b95
+base64 njvsszkhJI4d+Xj9SOmWZy4Q0NAYKQvHTvBglbd2i5U= == CodeSha256, LastModified=2026-09-10T17:44:50.000+0000
+```
+
+The digest of the bytes I read equals the `CodeSha256` the service reports, so the object I read IS the
+object that runs. Its single member `lambda_function.py` is **byte-identical** to
+`infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py`@`a6e2031ff8` LF-normalized (both
+`sha256 9337c58c31a04e0b845d72b583c1a7f6250a3ae03455576275ff037d9bacfd4f`). These are EG-s-30's bytes,
+exactly as the face said; that is not re-derived here, it is confirmed as the grain of everything below.
+
+**TWO INSTRUMENTS, ON DIFFERENT SUBSTRATES, EACH WITH A LIVE NEGATIVE CONTROL.**
+
+*Instrument 1 -- offline, the deployed artifact executed with the live `EMAIL_RECIPIENT`
+(`'aj@opalinvest.com,andrew@opalinvest.com'`).* Four adversarial test events x two call sites
+(`report` base = `EMAIL_RECIPIENT`, `terminal` base = `TERMINAL_RECIPIENT`), including
+`test_recipients: ["aj@opalinvest.com"]`, mixed case `"AJ@OpalInvest.COM"`, and a joined RFC 5322 string:
+
+```
+offline instrument on deployed bytes: aj@ hits 0 of 8 adversarial TEST resolutions
+negative control LIVE: scheduled report envelope=['aj@opalinvest.com', 'andrew@opalinvest.com'] (carries aj@),
+                       scheduled header='aj@opalinvest.com,andrew@opalinvest.com'
+```
+
+The `test_recipients: ["aj@opalinvest.com"]` case resolves to header `''` and envelope `[]` -- the
+"filters away to empty, and an empty envelope is NO SEND" property the code claims, observed.
+
+*Instrument 2 -- the RUNNING function, live, send-free `recipients_qa` with an adversarial probe.*
+Different substrate (the deployed process with its own environment, not my copy of its bytes):
+
+```
+test={"report": ["andrew@opalinvest.com"], "terminal": ["andrew@opalinvest.com"]}
+scheduled={"report": ["aj@opalinvest.com", "andrew@opalinvest.com"], "terminal": ["andrew@opalinvest.com"]}
+```
+
+**Why the negative control matters more than the zero.** A resolver that returned `[]` for everything
+would also produce "0 aj@ hits". The scheduled branch DOES return `aj@opalinvest.com` on both
+instruments, so the instrument can express the failure and its zero on the test branch is
+discriminating rather than vacuous.
+
+`EG-s-20` terminal, its flip cited: `<status>complete -- 2026-09-10 ~04:0xZ by 0.9.0_WK_ETFS_GUARDRAIL~4 ...`,
+flip commit `9e3040a75f6b882648e1b3d4f3a9946ee32e1ad5` (2026-09-10T00:22:06-04:00).
+
+**Arm (a) PASSES.** The bound is satisfied and it is not what stopped this order.
+
+---
+
+## 2. WHAT STOPPED IT: A SHARED DEPENDENCY UNDER TWO CORRECTLY-VERIFIED FILES
+
+### 2.1 The measurement
+
+`aws s3api list-objects-v2 --bucket opal-313476888478-lambda-artifacts --prefix ec2/etfs-reports`
+-- **denominator 7 objects**, printed in full by the battery:
+
+| key | size | LastModified |
 |---|---|---|
-| `EG-s-20` terminal | `<status>complete`, drained `5d292ff11f` | HOLDS |
-| `EG-s-27` terminal, `--no-ladder` threaded | `<status>complete`; measured in the FORCED command on served bytes | HOLDS |
-| `EG-s-29` terminal, rung-3-equivalent ask | `<status>complete`; served renderer sha256 `ba410ee5c9c4263e8fe37ade171aa4d61f834df246d0f57f30299dbba03a031a`, 77,130 B, VersionId `lvBC1IFEk3Fpfry_ysQfCNf5PIA8f00E`, LastModified 2026-09-10T14:09:53Z -- **matches the issuer's own verified read exactly** | HOLDS |
-| the face's `<status>` "DO NOT FIRE ... rung 3 never fires" | that reason is **FALSE** at this commit (arm (d) re-cut; the equivalent writes the ask) -- but the *instruction* is still right for a different reason | `W4-S11` |
-| `2026-08` has 6 keys, ask deleted by the issuer | confirmed: 6 keys, `coverage_egress_ask_ladder_skipped.json` absent | HOLDS |
-| the new cross-fabric gates (`1d62717c65`) | exercised at commit; output read, not exit codes | see s.7 |
+| `ec2/etfs-reports/render_month_end.py` | 77130 | **2026-09-10T14:09:53.000Z** |
+| `ec2/etfs-reports/coverage/classifier.py` | 10157 | **2026-09-05T06:53:40.000Z** |
+| `ec2/etfs-reports/coverage/remediate.py` | 11011 | **2026-09-05T06:53:44.000Z** |
+| `ec2/etfs-reports/coverage/__init__.py` | 89 | 2026-09-05T06:53:37.000Z |
+| `ec2/etfs-reports/coverage/trading_calendar.py` | 6979 | 2026-09-05T06:54:58.000Z |
+| `ec2/etfs-reports/coverage/_orion_vendor_asof.py` | 6979 | 2026-09-05T06:55:02.000Z |
+| `ec2/etfs-reports/probe.sh` | 2177 | 2026-06-25T23:23:06.000Z |
 
-**GRAIN NOTE.** The repo's `data/etfs/scripts/presentation/render_month_end.py` at `903c5cba50` is
-**byte-identical** to the served artifact (both 77,130 B / `ba410ee5...`), so a `file:line` citation into
-the repo file resolves to the bytes the box actually pulls. That is a content resolution, not a
-`merge-base` claim (rule 22a).
+Byte comparison against repo HEAD `a6e2031ff8` (LF-normalized):
+
+```
+SERVED render_month_end.py sha256=ba410ee5c9c4263e8fe37ade171aa4d61f834df246d0f57f30299dbba03a031a  == repo(LF): True
+coverage/classifier.py      deployed= 10157 repo= 12226 IDENTICAL=False
+coverage/remediate.py       deployed= 11011 repo= 16550 IDENTICAL=False
+```
+
+Top-level defs enumerated rather than grepped:
+
+```
+DEPLOYED remediate defs: ['_slice_exists', 'rung3_stop_and_ask', 'remediate_month', '_main']
+REPO     remediate defs: ['_provider_for', '_slice_exists', '_read_prior_asks', 'rung3_stop_and_ask', 'remediate_month', '_main']
+```
+
+`_provider_for` -- the symbol EG-s-29 added the call to -- is **ABSENT** from the deployed package.
+
+### 2.2 The exercise, with a difference control
+
+Reading is not enough for a claim this expensive, so the battery **runs** the served renderer's
+`--no-ladder` gate branch twice: once over the DEPLOYED `coverage` package, once over the REPO one.
+Same renderer file in both arms; the package is the only variable. Zero AWS calls (stub probe, supplied
+series, module `s3` replaced by a capturing stub):
+
+```
+[DEPLOYED] remediate=coverage has _provider_for=False; 21 trading slices, 20 after forcing
+[DEPLOYED] coverage_gate RAISED: AttributeError: module 'coverage.remediate' has no attribute '_provider_for'
+[DEPLOYED]   at provider_for_partner = remediate._provider_for(p)
+[REPO] remediate=coverage has _provider_for=True; 21 trading slices, 20 after forcing
+OK: s3://opal-data-etfs/platinum/reports/2026-08/coverage_egress_ask_ladder_skipped.json (rung-3-EQUIVALENT egress ask, ...)
+[REPO] VERDICT=REFUSE holes=1 C=1 puts=['platinum/reports/2026-08/coverage_egress_ask_ladder_skipped.json']
+DEPLOYED-package result="AttributeError: ... no attribute '_provider_for'" ; REPO-package result='REFUSE' ;
+difference control discriminates=True
+```
+
+The forcing design is **correct** -- it yields exactly the driven REFUSE the order wants, with `C=1`
+and the arm-(d) egress ask written by EG-s-29's rung-3-equivalent. It is the *substrate* that cannot
+run it.
+
+### 2.3 Why the box cannot already be repaired -- by subtraction over both branches, not by assumption
+
+1. **The box is stopped and has been since before the symbol existed.**
+   `i-070477bf35fc54409 state=stopped LaunchTime=2026-09-10T01:19:07.000Z
+   reason='User initiated (2026-09-10 01:20:29 GMT)'`; `ssm describe-instance-information` returns
+   **0 rows**. A stopped instance's filesystem cannot be written. `_provider_for` first entered the repo
+   at `7e544cb4d7`, committer date `2026-09-10T08:33:05-04:00` = **12:33:05Z** -- eleven hours after the
+   box stopped. So no pre-stop copy on that box can contain it.
+2. **If `/opt/etfs-reports/coverage/` is ABSENT, the self-bootstrap pulls from the same stale prefix.**
+   `render_month_end.py:118-129` fires `aws s3 cp --recursive .../ec2/etfs-reports/coverage/` only on
+   `ImportError` -- and that prefix is the 2026-09-05 copy measured above.
+
+Both branches of the only unknown land on a `remediate.py` with no `_provider_for`, so **the unknown is
+closed rather than assumed**. This is the one place I did not have a direct instrument (I did not boot
+the box: stopping an EC2 is a human-confirmation act under CLAUDE.md, and the subtraction answers the
+question without one).
+
+**A consequence worth stating for whoever remediates:** re-uploading `coverage/*.py` to the artifact
+prefix is **necessary but not sufficient**. The bootstrap fires only on `ImportError`, so an *existing*
+box directory is never refreshed by a run. Two acts, not one.
+
+### 2.4 What firing anyway would have cost -- measured, not predicted
+
+```
+POSITIVE CONTROL platinum/reports/2026-08/coverage_verdict.json
+    -> PRESENT LastModified=Thu, 10 Sep 2026 00:24:44 GMT ETag="6d13a29621407b94c876b9a60677ea4b"
+       VersionId=<ABSENT -- opal-data-etfs is UNVERSIONED>
+TARGET           platinum/reports/2026-08/coverage_unresolved.json
+    -> ABSENT-OR-ERROR (aws rc=255: An error occurred (404) when calling the HeadObject operation: Not Found)
+(control PRESENT + target ABSENT => the absence is the OBJECT'S, not the CALL'S)
+```
+
+The `AttributeError` exits the renderer non-zero, so the orchestrator takes its `status != "Success"`
+branch (`lambda_function.py:889`). There it reads the month's existing coverage artifacts; 2026-08's
+`coverage_unresolved.json` is a measured 404, `_normalize_unresolved(None)` returns `[]` on the deployed
+handler, and the ONE terminal send is gated on `if unresolved_days:`. **So FWD-10's send would not fire
+either.** The run would have produced an SNS "render FAILED" alert and nothing else -- and would have
+left a `refused/`-free month whose `coverage_verdict.json` still reads `PUBLISH` from 00:24:43Z, which a
+later reader could easily mis-join to my run. That is the waste row `W4-S6` exists to prevent.
+
+### 2.5 The scope of the break, stated so it is not read wider than it was measured
+
+**The scheduled (ladder-ON) monthly fire is NOT broken by this.** `remediate_month`'s signature is
+character-identical between the deployed and repo copies, and `classifier.py`'s def list is identical
+(`['_month_dates','_load_series','classify_month','summarize','coverage_line','_main']` on both sides;
+the size delta is EG-s-22's additive `slice_on_closed_day`). Only the `--no-ladder` branch crashes.
+
+A second, non-blocking consequence of the same staleness: the deployed `remediate_month` predates
+EG-s-28, so an **organic** refusal rendered from this box would still carry unresolved rows with no
+`provider` -- the very defect EG-s-28 and EG-s-29 closed in the repo.
+
+### 2.6 THIS IS THE SECOND EXECUTION OF THIS ORDER, AND IT CONTRADICTS THE FIRST -- HERE IS WHY BOTH ARE RIGHT
+
+The same slot executed `EG-s-21` earlier today (`a02bc48b98`, 2026-09-10T12:48:56-04:00; drained
+`f1f5eef023` with the order STILL OPEN). It also refused to fire, on a different ground -- FWD-9's
+accept named a 404 no month could produce -- and `R-EG-9` then re-cut arm (d) off that 404, which is why
+this face was re-dispatched. **Its deliverables at those paths are overwritten by this execution; the
+prior versions stand in git at `a02bc48b98`.** My `EG-s-21_S21-AC1_battery_output.txt`,
+`test_egs21_driven_refusal.py` and this file replace them.
+
+That result states, at its s.3: *"forcing ENGAGED ladder=False -> VERDICT=REFUSE holes=1"*, and its
+grounding table records the served renderer's identity exactly (`ba410ee5c9c4263e...`, 77,130 B,
+LastModified 2026-09-10T14:09:53Z) with an explicit and correct GRAIN NOTE that a `file:line` citation
+into the repo file resolves to the bytes the box pulls. **Every one of those statements is true.**
+
+**The two measurements do not conflict; they are on different substrates, and mine is the one the box
+executes.** That battery loaded the served renderer *in this repo checkout*, where
+`render_month_end.py:115-119` puts `data/etfs/scripts/` on `sys.path` and
+`from coverage import classifier, remediate` therefore resolves to the **repo** package -- the
+`REPO-package` arm of my difference control, which returns `REFUSE holes=1` for me too. The box resolves
+the SAME import against `/opt/etfs-reports/coverage/`, whose only supply is the 2026-09-05 artifact
+prefix. The prior execution verified the served RENDERER and was right about it; it did not verify what
+the renderer IMPORTS, and neither did EG-s-29 or EG-s-30. The GRAIN NOTE is exactly right about
+`render_month_end.py` and silent about the package beneath it -- which is why this needed a second
+instrument rather than a second reading.
+
+### 2.7 The shape of the defect
+
+EG-s-29 verified its own served file. EG-s-30 verified its own served file. **Both were right.** The
+defect lives in what those files SHARE, and no per-file check could see it -- CLAUDE.md Rule 22's
+shared-dependency clause landing exactly as written: *"A CHECK SCOPED TO THE MEMBERS CANNOT SEE A DEFECT
+IN WHAT THE MEMBERS SHARE."* The face's "TWO THINGS LANDED AFTER THIS FACE WAS CUT" section correctly
+told me not to re-derive that `render_month_end.py` and the orchestrator are served and current. They
+are. The renderer is simply not self-contained.
 
 ---
 
-## 2. THE MECHANISM I CHOSE, AND WHAT I REJECTED
+## 3. THE FORCING DESIGN, RECORDED SO A RE-CUT NEED NOT RE-DERIVE IT
 
-**CHOSEN: `--fixture-remove cottonwood:2026-07-15` + `--no-ladder`, on month `2026-07`, via a
-`test_run` invocation of `etfs-reports-orchestrator`.** Nothing on S3 is touched to create the
-condition -- the fixture drops one date from the series **in memory** -- so the cell's bound
-(*no served artifact of a real month is altered to create the condition*) is satisfied structurally
-rather than by care.
+Chosen and exercised, never executed against the world.
 
-**WHY `2026-07` AND NOT `2026-08`.** This is the choice the issuer's seating message assumed the other
-way, so it is stated with its evidence:
+- **Month `2026-08`.** Its served `coverage_verdict.json` (LastModified 2026-09-10T00:24:44Z, generated
+  2026-09-10T00:24:43.743827+00:00) reads `verdict=PUBLISH holes=0` with **21 of 21 trading days
+  `COVERED` for all three partners and zero B/C/D/UNKNOWN**. An unambiguous prior verdict is exactly
+  what arm (f)'s before/after needs, and August carries no organic noise to confound the forced hole.
+- **Partner `cottonwood`.** `render_month_end.py:847-850` makes only `cottonwood` and `49financial`
+  probe-capable. This matters and is easy to get wrong: a non-probe-capable partner's missing day
+  classifies **UNKNOWN**, and `coverage_gate` sets `any_c` only on class **C**, so forcing Inflection
+  would have produced a hole and a **PUBLISH** verdict.
+- **Slice `2026-08-14`, spec `cottonwood:2026-08-14`.** One trading day, one slice, in memory only.
+- **REJECTED, and why:** (i) editing or deleting any served object of a real month -- forbidden outright
+  by the order and by NEVER-AUTO-DELETE, and unnecessary because `--fixture-remove` reaches the
+  classifier's real code path without touching S3; (ii) a month with no served publish keys -- there is
+  none that also carries removable slices (the face records 404-able 0 of 5), and arm (d)'s
+  unmoved-`LastModified` discriminator needs the publish keys to EXIST; (iii) 2026-09 -- in progress,
+  and its 2026-09-10T01:20Z run already left `coverage_unresolved.json` and `coverage_egress_ask.json`
+  in place, so a forced run's artifacts could not be told from the organic ones without extra argument.
+- **The undo is structural.** `--fixture-remove` mutates only the in-process `daily` dict
+  (`render_month_end.py:441-449`, *"nothing on S3 is ever touched"*) and the flag is per-invocation.
+  There is no persistent state to reverse; arm (f)'s proof is the classifier re-run on the same inputs
+  without the flag, which is a local read.
+- **Blast radius that the NEVER-2 entry would have named** (recorded here because the entry was
+  correctly not opened): on the REFUSE branch `platinum/reports/2026-08/{coverage_verdict.json,
+  coverage_unresolved.json, coverage_egress_ask_ladder_skipped.json, refused/etf_ownership.html,
+  refused/opaletfs_*_202608.csv}`; **on the PUBLISH branch the same `coverage_verdict.json` PLUS the
+  served publish keys `etf_ownership.html`, `etf_ownership.pdf` and the three `opaletfs_*_202608.csv`
+  -- overwritten with FORCED, data-removed content.** The bucket is unversioned, so that rollback is a
+  re-render of 2026-08 unforced, not a version restore. That second branch is the whole reason the
+  sign-off must name the radius and not the producer's decision.
 
-| | 2026-07 | 2026-08 |
-|---|---|---|
-| unforced verdict (needed for the undo arm) | PUBLISH, 0 gaps, 22 of 22 trading days x 3 partners | PUBLISH, 0 gaps, 21 of 21 x 3 |
-| `coverage_verdict.json` served today | **ABSENT** -- the run creates it | **PRESENT, 1,225 B, 2026-09-10T00:24:44Z -- the run OVERWRITES the record of August's real publish** |
-| keys the refusal run would alter | **0** (all 7 writes are new keys) | 1 (the verdict of a real published month) |
-| publish keys 404-able | no | no |
-
-August is strictly worse on the only axis where they differ, and identical on the blocking one. On
-2026-07 **the run alters nothing at all**; it only adds.
-
-**REJECTED, with reasons:**
-
-- **A month with no served publish keys** (the cell's own preference). *Does not exist* -- s.0. The three
-  months without cottonwood coverage (2026-05, -06) also have no provable PUBLISH baseline, so the undo
-  arm could not discriminate there even if the 404 were free.
-- **A future/empty month (2026-10+, 2026-04).** `classifier._month_dates` returns `[]` for a wholly
-  future month, and a month with no slice cannot carry a *forced* class C at all -- the fixture would
-  remove nothing (`removed_slice_count: 0`) and any REFUSE would be organic, which destroys the undo arm.
-- **Editing a real month's daily slices to create the hole.** Never considered seriously: it alters served
-  data and the fixture already reaches the same code path without touching S3.
-- **Re-pointing `REPORTS_PREFIX`/`--s3-out` at a scratch prefix.** `_render_command` builds `--s3-out`
-  from the function's own environment; changing it is a configuration change on a Terraform-managed
-  deployed producer, outside this order's `<paths>` and outside its NO-CODE-CHANGE bound, and it would
-  leave a new reachable state on the scheduled path.
-- **Deleting or moving 2026-07's publish keys to manufacture the 404.** Forbidden absolutely
-  (NEVER-AUTO-DELETE; *no S3 delete under this order at all*), and it would destroy a served report.
-
----
-
-## 3. WHAT THE RUN WOULD HAVE DONE -- MEASURED, NOT PREDICTED
-
-The battery loads the **served** renderer in-process with `s3` replaced by a facade that reads through and
-**captures** `put_object` instead of sending it, and drives `coverage_gate` twice with the real S3 series.
-
-```
-REAL PROBE (read-only) cot-etf-ownership-daily <- {"date": '2026-07-15', "probe": true}:
-  {"status": "probe", "date": "2026-07-15", "partition": true, "priced": 10791, "output_exists": true}
-  write-free control on daily/cottonwood/2026-07-15.json:
-  ETag "46a75c130740bc32e39cc6877eed4827" -> "46a75c130740bc32e39cc6877eed4827"  UNCHANGED=True
-
-  forcing DISENGAGED ladder=False -> VERDICT=PUBLISH  holes=0 C per partner={'cottonwood': 0, ...}
-  forcing ENGAGED    ladder=False -> VERDICT=REFUSE   holes=1 C per partner={'cottonwood': 1, ...}
-```
-
-`10791` priced rows and `partition: true` are what make the removed date **class C** and not class D --
-read against the classifier's own boundary, quoted at `file:line` so the class is graded by the rule:
-
-```
-classifier.py:177-179  @8471f83a18   {"class": "D", "reason": "upstream partition missing (genuinely absent)"}
-classifier.py:191-194  @8471f83a18   {"class": "C", "reason": "upstream present and priced > 0, no slice --
-                                      producer never fired for this date"}
-```
-
-The forced per-partner class table the run would write:
-
-```
-cottonwood   {"A":9,"COVERED":21,"B":0,"C":1,"D":0,"UNKNOWN":0,"trading_days":22,"covered":21,"holes":1}  holes=['2026-07-15']
-49financial  {"A":9,"COVERED":22,"B":0,"C":0,"D":0,"UNKNOWN":0,"trading_days":22,"covered":22,"holes":0}
-inflection   {"A":9,"COVERED":22,"B":0,"C":0,"D":0,"UNKNOWN":0,"trading_days":22,"covered":22,"holes":0}
-```
-
-The disclosure that would ride on `coverage_verdict.json` (`EG-s-25` + `EG-s-26`, `disclosure_version 2`):
-
-```json
-{"forced": true, "mechanism": "--fixture-remove", "fixture_remove_spec": "cottonwood:2026-07-15",
- "removed_slice_count": 1, "ladder_ran": false, "ladder_skip_mechanism": "--no-ladder",
- "rung3_stop_and_ask_reachable": false, "coverage_egress_ask_possible": false,
- "run_shape": "FORCED (--fixture-remove, 1 slice(s) removed) and LADDER SKIPPED (...)",
- "run_id": "<minted by the run>", "run_id_source": "..."}
-```
-
-`EG-s-29`'s ask, captured verbatim from the bytes the run would put (1,182 B):
-
-```
-platinum/reports/2026-07/coverage_egress_ask_ladder_skipped.json
-  written_by  : render_month_end.coverage_gate on the --no-ladder branch (...TO-EG-s-29) -- a
-                RUNG-3-EQUIVALENT. RUNG 3 DID NOT RUN and did not write this.
-  rung3_ran   : False
-  asks        : [{"date": "2026-07-15", "partner": "cottonwood", "provider": "Black Diamond",
-                  "class": "C", "reason": "ladder skipped (--no-ladder)"}]
-```
-
-**The full write set, enumerated (7 keys, all NEW, none overwritten, none deleted):**
-
-```
-NEW  platinum/reports/2026-07/coverage_egress_ask_ladder_skipped.json   1182 B  (coverage_gate, no-ladder branch)
-NEW  platinum/reports/2026-07/coverage_verdict.json                             (main, always written)
-NEW  platinum/reports/2026-07/coverage_unresolved.json                          (main, unresolved non-empty)
-NEW  platinum/reports/2026-07/refused/etf_ownership.html                        (main, REFUSE branch)
-NEW  platinum/reports/2026-07/refused/opaletfs_49financial_202607.csv           (main, REFUSE branch)
-NEW  platinum/reports/2026-07/refused/opaletfs_cottonwood_202607.csv            (main, REFUSE branch)
-NEW  platinum/reports/2026-07/refused/opaletfs_inflection_202607.csv            (main, REFUSE branch)
-```
-
-and the terminal envelope it would resolve, on the bytes deployed at 2026-09-10T12:16:53Z:
-`['andrew@opalinvest.com']` -- with `aj@opalinvest.com` in **0 of 18** resolved test-invocation lists and
-the scheduled path still `['aj@opalinvest.com','andrew@opalinvest.com']`.
-
-**That is the entire act, priced. It is ready. One clause of one arm is what it cannot satisfy.**
+**How to confirm the disarm rather than assume it:** after the coverage package is redeployed AND the
+box re-pulls it, re-run this battery. Its DEPLOYED arm must print `VERDICT=REFUSE holes=1` instead of
+the `AttributeError`. The difference control is already built and already discriminates.
 
 ---
 
-## 4. THE BLOCKER, WITH ITS DENOMINATOR
-
-```
-  daily slices scanned: 275 across 3 partners -> months carrying a slice:
-      ['2026-05','2026-06','2026-07','2026-08','2026-09']
-  slices OUTSIDE that month range: 0
-  served keys under s3://opal-data-etfs/platinum/reports/ : 36 (denominator)
-
-  month   | pdf 200 | html 200 | 404-able | slice to force | unforced verdict
-  --------+---------+----------+----------+----------------+-----------------
-  2026-05 | True    | True     | False    | 49financial,in | NOT PROVEN (gaps {'cottonwood': 20, ...})
-  2026-06 | True    | True     | False    | cottonwood,49f | NOT PROVEN (gaps {'cottonwood': 7, ...})
-  2026-07 | True    | True     | False    | cottonwood,49f | PUBLISH (0 gaps)
-  2026-08 | True    | True     | False    | cottonwood,49f | PUBLISH (0 gaps)
-  2026-09 | True    | True     | False    | cottonwood,49f | NOT PROVEN (gaps {'cottonwood': 1, ...})
-```
-
-**0 of 5.** The intersection of *{months that can carry a forced class C}* and *{months serving no publish
-key}* is EMPTY, and the two sets are disjoint by construction rather than by accident: a month has slices
-because a report was produced for it, and a report produced for it is exactly what put the publish keys
-there.
-
-**WHAT IS NOT CLAIMED.** I am not claiming the property arm (d) reaches for is unprovable. It is provable
-today, and stronger than a 404: read `etf_ownership.{pdf,html}` and the three CSVs with `s3api
-head-object` **before and after** the run and show ETag + VersionId + LastModified identical, beside the
-refusal artifacts' fresh 200s. That is a difference control on the actual claim (*this run did not
-publish*), where a 404 on a never-published month is only an absence. **But substituting it is a re-cut of
-a criterion, and a re-cut is not mine to make** -- especially not this one, whose whole history is a
-sequence of seats discovering that a criterion named one instance of a property instead of the property.
-
----
-
-## 5. THE CRITERIA
+## 4. CRITERIA
 
 ### `S21-AC1` -- **FAIL**
 
-**Invocation (the face's, verbatim):**
-`timeout 900 python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~4/test_egs21_driven_refusal.py`
-**Expected:** `EGS21-REFUSAL-DRIVEN-AND-SENT` · **Got:** `EGS21-BLOCKED-NO-MONTH-CAN-SATISFY-FWD9-404`, **rc=2**.
-**Denominator: 5 of 6 arms HOLD.** Full transcript: `EG-s-21_S21-AC1_battery_output.txt` (126 lines).
+`invocation`: `timeout 900 python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~4/test_egs21_driven_refusal.py`
+`expect`: `EGS21-REFUSAL-DRIVEN-AND-SENT` -- **NOT PRINTED**, rc=1.
 
 ```
-arms: 5 of 6 HOLD
-  (a) PRECONDITION                       HOLD   aj@ in 0 of 18 resolved lists, bytes of 2026-09-10T12:16:53Z
-  (b) DEPENDENCIES SERVED                HOLD   --no-ladder in the FORCED command, absent from the marker-free one;
-                                                _skipped_branch_egress_ask at [1066, 1176]
-  (c) FORCING REACHES THE VERDICT        HOLD   ENGAGED REFUSE (C on cottonwood) vs DISENGAGED PUBLISH, same bytes
-  (d) ASK LIMB                           HOLD   ask recorded at the ladder-skipped key, rung3_ran=false, provider 1 of 1
-  (e) A MONTH EXISTS THAT CAN SATISFY THE ACCEPT   BLOCKED   0 of 5
-  (f) NO SIDE EFFECT                     HOLD   the one probe invoke ETag-controlled UNCHANGED=True
+ARM a    PASS             the test-invocation recipient path CANNOT reach aj@opalinvest.com on the bytes
+                          deployed at this run's time; two instruments, both with a live negative control
+ARM b    NOT-RUN-BLOCKED  the forcing's DISCLOSURE is read from a produced artifact; no artifact is produced
+ARM c    NOT-RUN-BLOCKED  coverage_verdict.json is never written -- coverage_gate raises before it returns
+ARM d    NOT-RUN-BLOCKED  no refusal artifacts and no egress ask exist to head-object
+ARM e    NOT-RUN-BLOCKED  the terminal send guard is False (coverage_unresolved.json 404 -> [])
+ARM f    NOT-RUN-BLOCKED  there is no forcing to undo -- the run did not happen
+ARM g    NOT-RUN-BLOCKED  the run wrote no keys, so there is no write enumeration to make
+ARM PRE  BLOCKING         DEPLOYED-package result="AttributeError: ... no attribute '_provider_for'" ;
+                          REPO-package result='REFUSE' ; difference control discriminates=True
+
+S21-AC1 RESULT: FAIL -- token NOT printed.
 ```
 
-The battery has **no branch that can print the success token**: the success token requires arm (e), and
-arm (e) is a census of the world, not of my code.
+**Denominator: 1 of 7 arms holds (a); 6 of 7 NOT-RUN-BLOCKED.** Full transcript:
+`org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~4/EG-s-21_S21-AC1_battery_output.txt`.
 
-Mapping to the criterion's own arms, so the CVO does not have to derive it:
-`(a)` -> battery (a), **HOLDS**. `(b)` forcing declared+disclosed -> the disclosure half is measured
-(s.3); the **declaration** half (the entry's opened-at preceding the invoke) is **NOT DONE and
-deliberately so** -- see s.6. `(c)` -> battery (c), the REFUSE and the class table are measured on served
-bytes but read from a captured verdict rather than from a served `coverage_verdict.json`, because no run
-was fired. `(d)` -> the ask limb HOLDS; the **404 limb is the blocker**. `(e)` terminal send, `(f)` undo
-on served artifacts, `(g)` key enumeration -> **NOT REACHED**; `(f)`'s discriminating pair is nevertheless
-measured hermetically (PUBLISH <-> REFUSE on the identical inputs) and `(g)`'s key list is enumerated in
-advance in s.3.
+### `S21-AC2` -- RECORDED, NO VERDICT (judgment; `3.0.0_SA_CVO` grades at L9)
 
-### `S21-AC2` -- **RECORDED for `3.0.0_SA_CVO` at L9. NO VERDICT.**
+Evidence, with vintage, on each limb the criterion names:
 
-Evidence, with vintage (all at 2026-09-10 ~16:3xZ unless stated):
-
-- **The refusal as a person would read it.** Three surfaces, and they do not agree. (1) `coverage_verdict.json`
-  -- complete and self-disclosing: month, per-partner class table, the forced hole's date, and the whole
-  `forcing` record with `forced: true`, `ladder_ran: false` and the run id. (2) `coverage_egress_ask_ladder_skipped.json`
-  -- names the date, partner, provider (`Black Diamond`), class and rung-3's own per-use authorization
-  string, with provenance FIRST. (3) **the terminal EMAIL, which is the surface `FWD-10` actually names,
-  and it is the weakest**: its header asserts *"could not resolve 1 date(s) after every rung ran (probe,
-  re-run the producer, re-check)"* on a run where **zero rungs ran**, it carries **no forcing field at
-  all**, and the only contradiction of its own header is the per-row `reason: ladder skipped (--no-ladder)`.
-  Rows `W4-S9` and `W4-S10`. A reader of the artifact cannot mistake this run for organic; **a reader of
-  the email cannot tell.**
-- **Is the driven condition a faithful analogue?** On the axis `FWD-9` grades -- *the gate refuses over a
-  class-C hole* -- **yes, and identically**: the gate's decision is `any_c` over the classification, and
-  the forced hole classifies through `classifier.classify_month`'s ordinary path with a **real, measured**
-  probe answer (`partition: true, priced: 10791`), not a stub. `R-EG-6` (iii) already fixed the boundary:
-  the ladder's ORCHESTRATION is not covered. It differs on one axis a grader should see anyway: an organic
-  class C would have survived rungs 1-2, and this one was never offered to them, so the artifact's
-  `rungs: {probe: 0, rerun: 0, recheck: 0}` is a *skip*, not a *failure to repair* -- and the artifact says
-  exactly that in four fields.
-- **Is the disclosure enough?** On the artifact, yes, and it is now double-keyed: `forced: true` and
-  `ladder_ran: false` in one object, plus the equivalent ask at a **different key** whose name and whose
-  `written_by` both say it is not rung 3's. On the email, no -- see above.
-- **What would the send's evidence actually prove?** `EG-s-20` made `_send_terminal_unresolved` print
-  `MessageId=...` (`lambda_function.py:407-410` on the deployed bytes), so the strongest available oracle
-  would be an **application log line naming the SES MessageId and the resolved destinations**. That is an
-  **EMISSION** oracle: it proves SES accepted the message and assigned it an id. It is not delivery.
-  Nothing on this account can prove delivery: per-recipient SES events need a configuration set, this
-  account has one (bounce+complaint) and **no first-party sender names it**, so no delivery plane exists to
-  read -- the CloudTrail limb stays `SES-PLANE-UNREAD` against its 2-trail denominator. `FWD-10`'s DONE
-  WHEN (*"READ at Andrew's own inbox"*) is therefore only closable by a **gateway/inbox read by Andrew**,
-  which no seat can take on demand and which no instrument in this estate substitutes for.
-- **What the un-fired state costs and does not cost.** `FWD-9` and `FWD-10` remain NOT-EVALUATED. Nothing
-  regressed; the mechanism is measured working end-to-end short of the invoke.
+- **The refusal as a person would read it.** No refusal document was produced, so there is nothing to
+  read as a person. What CAN be stated with vintage is the shape it would have had: the ladder-skipped
+  branch (`render_month_end.py:1148-1180`@`a6e2031ff8`) builds one unresolved row per C/D/UNKNOWN date
+  carrying `date`, `class`, `provider` (single-writer via `remediate._provider_for`) and
+  `reason: "ladder skipped (--no-ladder)"`. **Its `provider` field is precisely the field that cannot
+  be produced on the box today** -- so the operational property R-EG-8 refused to weaken is the same
+  property that blocks the run. That is a fact for the CVO, not a verdict from me.
+- **Faithful analogue or not.** The driven condition removes a slice the classifier would otherwise see
+  and reaches the real classification code path, but it differs from the organic case in two ways the
+  artifact itself discloses (`_forcing_record`, `disclosure_version 2`,
+  `render_month_end.py:889-954`): `forced: true` with the spec and removed count, and `ladder_ran: false`
+  with `rung3_stop_and_ask_reachable: false` and `coverage_egress_ask_possible: false`. Whether
+  "ladder skipped" is a difference that MATTERS to what FWD-9 claims is a judgment; I record that the
+  divergence is explicit in the record rather than implicit.
+- **Is the disclosure enough that a later reader cannot mistake this for organic?** Unexercised on a
+  real artifact. The disclosure is `ALWAYS PRESENT` by construction on both branches, and the
+  ladder-skipped ask is written to its own key `coverage_egress_ask_ladder_skipped.json` with a
+  `written_by` provenance field inside it -- protected twice, by key name and by content. What is NOT
+  yet shown by any act is that a reader meeting the served bytes actually reaches the disclosure first.
+- **What the terminal send's evidence would prove about DELIVERY vs EMISSION.** Nothing was sent, so
+  this is stated as a limit rather than a finding: the deployed handler prints a `MessageId` at its
+  correction site (`lambda_function.py:843-845`) and `_send_terminal_unresolved` is the one terminal
+  call site; a `MessageId` is an **emission** oracle (SES accepted the message), never a delivery one.
+  Per the estate's own record, no Opal sender names an SES configuration set, so no delivery plane
+  exists to read, and CloudTrail's SES limb would remain `SES-PLANE-UNREAD`. Any future grade of FWD-10
+  should say EMITTED, not DELIVERED.
 
 ---
 
-## 6. WHAT I DID NOT DO, AND WHY EACH ONE IS DELIBERATE
+## 5. CONTROLS
 
-- **No orchestrator invoke, no SES send, no SSM command, no EC2 start/stop, no S3 write, no S3 delete.**
-  The battery's stubs RAISE on every non-read call; the renderer's `put_object` is captured, never sent.
-- **No NEVER-2 entry opened or closed.** The face requires it opened **before the act**, and there was no
-  act. An entry for a run that never happened puts a false event in the change-management record --
-  the same call my predecessor on this slot made, and it is still right. `org/critical_paths/` is untouched
-  by this commit. The entry's *content* is nevertheless pre-written in s.3 (write set, both branches,
-  rollback per key) so the next seating opens it in one act.
-- **No code change**, no override of any gate, no widening of the order, and no `git push`.
-- **One mutating capability was exercised and it is disclosed:** a single read-only `probe` invoke of
-  `cot-etf-ownership-daily` per battery run (2 runs, 2 probes). `_probe` is documented write-free at
-  `infra/aws/lambda/cot-pipeline/cot-etf-ownership-daily/lambda_function.py:285-294` (*"Never reaches
-  put_object"*) and I did not take that on the docstring: the slice's ETag is read **before and after**
-  each probe and is unchanged. I used it rather than assuming, because the whole point of the pre-flight
-  was to know the forced date's class **before** spending a non-renewable act on it.
+- **Mutant / difference control -- FIRED AS EXPECTED.** The `coverage` package is swapped under an
+  otherwise identical served renderer: DEPLOYED -> `AttributeError`, REPO -> `REFUSE holes=1`. The
+  control is a real one (the "mutant" is the artifact actually serving), and it discriminates in the
+  direction that matters -- had it returned REFUSE on both arms, my blocking claim would be false.
+- **Negative control on arm (a) -- LIVE.** The scheduled branch returns `aj@opalinvest.com` on both
+  instruments, so the test branch's zero is not a dead instrument.
+- **Positive control on the absence -- LIVE.** `coverage_verdict.json` HEADs 200 while
+  `coverage_unresolved.json` returns 404 from the same call shape, so the 404 is the object's and not
+  the call's.
+- **Determinism -- STABLE.** Two full battery runs, 54 lines each, **0 differing lines** excluding the
+  start timestamp and the per-run presigned-URL-derived line; rc=1 both times.
 
-## 7. THE GATES, INCLUDING ONE THAT REFUSED CORRECT CODE
+## 6. DECLARED EXCLUSIONS
 
-`1d62717c65` modified twelve `.tools/` files including `safe-commit.sh`, `to-pipeline-gate.py`,
-`surprise-row-gate.py` and `proof-of-spec-check.py`, and added `prd-manifest-gate.py`, none of which had
-run on this fabric. I read their **output**, not their exit codes. Nothing was overridden and no gate was
-bypassed.
+- **The driven run itself.** Not fired. Bound 2 permits one and it is unspent; firing it into a path
+  that raises before writing a verdict would have consumed it for nothing.
+- **The NEVER-2 change-management entry.** Not opened. It names an act's blast radius; there was no act.
+- **Any code change, artifact upload or box repair.** Out of `<paths>` and against the NO CODE CHANGE
+  bound. The remediation (redeploy `coverage/*.py` AND make the box re-pull) is the issuer's to route.
+- **Booting the reporter box to read `/opt/etfs-reports/coverage/` directly.** Not done: it would have
+  required stopping an EC2 afterwards (a human-confirmation act), and the subtraction in s.2.3 closes
+  the question without it. Stated as a coverage limit, not hidden.
+- **The pre-existing pytest red** `test_served_artifact_has_the_shape_the_writer_produces`. Owned by
+  `ETFS_GUARDRAIL-W4-S14` / `ETFS_GUARDRAIL-S38`; not touched in either direction, and the fixture was
+  not refreshed.
+- **Probing `cot-etf-ownership-daily` for 2026-08-14 to confirm `partition/priced`.** Not done: the run
+  is blocked regardless, so the check could not change the outcome.
 
-- `.tools/proof-of-spec-check.py` refused this instance twice on its own terms and was right both times
-  (`controls` requires a `determinism` block and a `mutant.status`, and admits no sibling keys;
-  `kind: "evidence"` is not in its enum). Fixed by writing what it asked for, not by trimming the record:
-  the two extra controls I had written are folded into `mutant.description` with their own EXPECTED and
-  OBSERVED, because a control moved out of the record to fit a shape is a control nobody reads.
-- `.tools/surprise-row-gate.py` invoked bare on this worktree printed
-  `OK: no surprise-channel rows in this commit (denominator: 0 dispatched path(s))` -- a **vacuous pass on
-  an empty input set**, which is why the rows are graded at the commit and not by that read.
-- **`.tools/ds-precommit-check.py` BLOCKED this cell's own battery on four FALSE findings, and that is row
-  `W4-S12`.** It reported `undefined name 'kw'` / `'r'` against a textbook hand-rolled S3 continuation
-  loop whose names are bound two lines above every use, in a script that had already run to completion
-  twice. **Reproduced minimally in 12 lines with no imports: ds-precommit gives 4 findings and rc=1; ruff
-  `--target-version py39` on the identical bytes gives `All checks passed!` and rc=0.** Two instruments,
-  same bytes, opposite verdicts -- and the fail-closed one is the wrong one. Rule 14's gate is universal
-  and `--force` does not bypass it, so the code was uncommittable in that shape. **It is NOT the merge's
-  doing:** `ds-precommit-check.py` is not among the twelve `.tools/` files `1d62717c65` changed, so this
-  is estate-wide and pre-existing. I complied rather than fought it **only because the replacement is
-  independently better** -- `get_paginator(...).paginate(...)` auto-paginates, and a single
-  `list_objects_v2` returns a PAGE whose length is not a denominator -- and I left the reason in a comment
-  at the call site so the next reader does not mistake the shape for a preference. The 36-key denominator
-  is identical before and after the rewrite.
+## 7. ROWS FILED
 
-## 8. FOR WHOEVER SEATS THIS NEXT
+Both appended to
+`org/missions/D8/ETFS/ETFS_GUARDRAIL/surprise-channel/investigations/INVESTIGATION_v1.md`.
 
-Everything except the ruling is done. When `W4-S8` is dispositioned, the next seating is: open the NEVER-2
-entry with the s.3 write set; invoke
-`etfs-reports-orchestrator` with `{"mode":"run","month":"2026-07","test_run":true,"force_fixture_remove":"cottonwood:2026-07-15"}`
-(`--cli-read-timeout 0 --cli-connect-timeout 60`, synchronous, ~12-15 min, NOT-RETURNED at 15); read the
-five publish keys' ETag/VersionId/LastModified **before and after**; close and commit the entry; then
-grade. No code, no deploy, no data change is needed between here and there.
+- **`ETFS_GUARDRAIL-W4-S17`** -- **BLOCKING / ARMED**, `disarm_owner` `2.0.0_SA_COO`,
+  `disposition` `UNDER_INVESTIGATION`, `grounding.status` `GROUNDED` (10 evidence items). The stale
+  `coverage` package under the current renderer.
+- **`ETFS_GUARDRAIL-W4-S18`** -- **OBSERVATION / INERT**, `disposition` `UNDER_INVESTIGATION`. An
+  artifact the issuer deleted has reappeared: the prior execution's grounding table records *"2026-08
+  has 6 keys, ask deleted by the issuer ... confirmed: 6 keys, `coverage_egress_ask_ladder_skipped.json`
+  absent"* at ~16:3xZ, and I read the same prefix at ~18:3xZ with **7 keys**, including
+  `platinum/reports/2026-08/coverage_egress_ask_ladder_skipped.json`, 7867 B,
+  **LastModified 2026-09-10T17:28:01.000Z**, carrying `generated_at 2026-09-10T17:28:00.106557+00:00`
+  and 40 asks across `["49financial","cottonwood"]` -- for a month whose served verdict is
+  `PUBLISH holes=0`. Writer unattributed by this seat (S3 alone cannot name it and I did not read
+  CloudTrail). It is INERT for this order because no run happened, but it is **material to arm (d)**: the
+  arm asks for *"an egress ask RECORDED FOR THE RUN"*, and on this month that key is now PRE-EXISTING, so
+  presence alone no longer discriminates. A re-cut should require a before/after on the ask key
+  (LastModified moved + the run's own `run_id`), exactly as arm (d) already requires for the publish keys.
+
+## 8. PUSH STATE
+
+**LOCAL.** Committed on `wk-etfs_guardrail-3-21` only. No `git push` was run by this seat.
