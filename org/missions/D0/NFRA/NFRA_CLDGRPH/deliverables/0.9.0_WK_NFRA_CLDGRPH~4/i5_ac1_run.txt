@@ -1,0 +1,298 @@
+==============================================================================
+I5-AC1 -- WHICH ROUTE HAS ACTUALLY RUN (CG-s-45, TO-CG-I-5)
+==============================================================================
+worker  : 0.9.0_WK_NFRA_CLDGRPH~4
+question: has the committed workflow ever executed, and what produced each of
+          round 6's five served source zips?
+hold    : every call below is a READ. Nothing pushed, triggered or applied.
+
+==============================================================================
+INSTRUMENT A -- THE WORKFLOW'S OWN EXECUTION PLANE (GitHub Actions runs)
+==============================================================================
+  COVERAGE   : every run GitHub holds for stitch-source-push.yml, counted by
+               the API's own total_count -- NOT a page length. Retention:
+               run metadata is retained 400 d by default; the workflow is 65 d
+               old, so the window covers its whole life. The earliest run's
+               head_sha IS the commit that introduced the file, which is the
+               control that no run predates the read.
+  GRAIN      : one workflow RUN (and, for two named runs, one STEP).
+  ENVIRONMENT: live GitHub API through the gh CLI at this seat. No baseline;
+               nothing stored, nothing replayed.
+  TREE       : not a tree read at all -- this instrument is off-repo by
+               construction, which is why it can answer a question no file in
+               any checkout can.
+  ACT CLASS  : GET only. No dispatch, no re-run, no cancel.
+
+  RUNS_TOTAL                 = 855
+               (the denominator: every run of this workflow, ever, taken from
+                the API's own total_count and not from a page length)
+  RUNS_SUCCESS               = 8
+  RUNS_FAILURE               = 832
+  RUNS_OTHER                 = 15
+               (total MINUS success MINUS failure -- written as a subtraction
+                from the printed denominator so a state I did not think of
+                cannot vanish silently: it lands here and the arithmetic
+                still closes)
+
+  EVERY SUCCESS THIS WORKFLOW HAS EVER HAD (8 of 855, enumerated, not sampled):
+    2026-07-07T12:02:32Z  run 28864601991  head e32896edd0
+    2026-07-07T12:09:17Z  run 28864993470  head 49175888f2
+    2026-07-07T12:12:58Z  run 28865209269  head 7af2db2092
+    2026-07-07T12:16:01Z  run 28865388173  head 75d93eaf70
+    2026-07-07T12:25:32Z  run 28865944954  head 1adbd6e4e4
+    2026-07-07T12:36:48Z  run 28866619241  head 2b6026c671
+    2026-07-07T13:07:43Z  run 28868558323  head 360da0cbe5
+    2026-07-07T13:45:34Z  run 28871059541  head 81064fbcae
+
+  THE CUT THAT MATTERS. 4074fdf5ac (2026-07-07T14:09:20Z) added the 'Checkout portal' step and the
+  literal pin at .github/workflows/stitch-source-push.yml:66. Runs created AFTER that commit:
+    RUNS_AFTER_PORTAL_STEP           = 847
+    SUCCESSES_AFTER_PORTAL_STEP      = 0
+    CONSECUTIVE_FAILING_RUNS         = 847 of 847
+
+  So: WORKFLOW_EVER_RAN is YES and it is not close -- 855 runs.
+  WORKFLOW_EVER_SUCCEEDED is also YES, 8 times, ALL of them on 2026-07-07
+  between 2026-07-07T12:02:32Z and 2026-07-07T13:45:34Z -- every one of them BEFORE the portal
+  step existed. Since the portal step landed the workflow has succeeded
+  ZERO times in 847 attempts.
+
+  AND THE 8 SUCCESSES DID NOT PUBLISH A CORRECT ZIP EITHER. The step they
+  ran without is the one that puts portal/src in the archive; the workflow's
+  own comment records the consequence, ground-root-caused 2026-07-07 by
+  0.7.0_AE_CloudOps~B: 'the zip below silently packed 0 files from portal/src
+  for every run since this workflow landed (e32896edd)' -- REACT_QUERY_KEY
+  0/32, PORTAL_COMPONENT 0/27, API_ROUTE 77/263.
+  CORRECT PUBLISHES BY THIS ROUTE = 0 of 855.
+
+  STEP GRAIN -- WHY IT FAILS, read off two named runs (not inferred):
+    NEWEST RUN run=34515089238 job='zip stitch source subset -> S3' -> failure
+        step 1  Set up job                                                     success
+        step 2  Run actions/checkout@v4                                        success
+        step 3  Checkout portal (separate private repo, gitlink-pinned)        failure
+        step 4  Configure AWS (OIDC, dedicated source-push role)               skipped
+        step 5  Zip stitch source subset (all build_graph reads; data ARTIFACT skipped
+        step 9  Post Checkout portal (separate private repo, gitlink-pinned)   success
+        step 10 Post Run actions/checkout@v4                                   success
+        step 11 Complete job                                                   success
+    LAST SUCCESS run=28871059541 job='zip stitch source subset -> S3' -> success
+        step 1  Set up job                                                     success
+        step 2  Run actions/checkout@v4                                        success
+        step 3  Configure AWS (OIDC, dedicated source-push role)               success
+        step 4  Zip stitch source subset (all build_graph reads; data ARTIFACT success
+        step 7  Post Configure AWS (OIDC, dedicated source-push role)          success
+        step 8  Post Run actions/checkout@v4                                   success
+        step 9  Complete job                                                   success
+
+==============================================================================
+INSTRUMENT B -- THE NEVER-2 DEPLOY LEDGER (this worktree, walked)
+==============================================================================
+  COVERAGE   : every file under both of these roots --
+                 org/critical_paths/change_management
+                 org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~4
+               EXCLUDED from the walk: .git and __pycache__ directories, and
+               nothing else. The denominator below is stated AFTER that
+               exclusion and the exclusion is named, so the number says what
+               it left out rather than only how big it is.
+  GRAIN      : one deploy-ledger ENTRY = one deploy act (opened/closed, owner,
+               order, act line). This is the estate's own record of who did
+               what to a served surface -- not a reconstruction.
+  ENVIRONMENT: this checkout, read at run time. No stored baseline.
+  TREE_READ  = C:/tmp/wk-cldgrph-9-4
+               branch wk-cldgrph-9-4   HEAD b5bb2f16a0ad
+
+  DENOMINATOR: 749 file(s) scanned across the two roots.
+  POSITIVE CONTROL (the tree clause): a file that exists ONLY on this branch
+  must appear in this instrument's hits, or the walk is reading another
+  checkout and its zero would be well-formed and wrong.
+    control token I5_TREE_CONTROL_TOKEN_20260910_WK4 -> 2 hit(s): org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~4/i5_route.py, org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~4/i5_tree_control.txt
+    TREE_CONTROL = FIRED
+
+  LEDGER ENTRIES RECORDING A PutObject TO stitch-source/source.zip: 5 of 749 file(s) scanned.
+
+    org/critical_paths/change_management/20260909T184608Z_stitch-source-repush_deploy_completion.md
+      opened 20260909T184608Z  status CLOSED
+      owner  0.9.0_WK_NFRA_CLDGRPH~2
+      order  NFRA_CLDGRPH.TO-CG-F-3
+      act    aws s3 cp <local zip> s3://opal-313476888478-globgrph/stitch-source/source.zip
+      names the hand producer f3_build_source_zip.py / an aws s3 cp: True
+
+    org/critical_paths/change_management/20260909T234900Z_cldgrph-cgs31-stitch-source-repush-unified-vocabulary_deploy_completion.md
+      opened 20260909T234900Z  status CLOSED
+      owner  0.9.0_WK_NFRA_CLDGRPH~2
+      order  NFRA_CLDGRPH.TO-CG-F-11
+      act    aws s3 cp .scratch/f11/source_gate.zip s3://opal-313476888478-globgrph/stitch-source/source.zip
+      names the hand producer f3_build_source_zip.py / an aws s3 cp: True
+
+    org/critical_paths/change_management/20260910T011500Z_cldgrph-cgs31-second-cycle-storedin-and-derive-image-repin_deploy_completion.md
+      opened 20260910T011500Z  status CLOSED
+      owner  0.9.0_WK_NFRA_CLDGRPH~2
+      order  NFRA_CLDGRPH.TO-CG-F-11
+      names the hand producer f3_build_source_zip.py / an aws s3 cp: True
+
+    org/critical_paths/change_management/20260910T021200Z_cldgrph-cgs31-third-cycle-stitch-source-repush-stamp-retired_deploy_completion.md
+      opened 20260910T021200Z  status CLOSED
+      owner  0.9.0_WK_NFRA_CLDGRPH~2
+      order  NFRA_CLDGRPH.TO-CG-F-11
+      act    aws s3 cp .scratch/f11/source_cycle3.zip s3://opal-313476888478-globgrph/stitch-source/source.zip
+      names the hand producer f3_build_source_zip.py / an aws s3 cp: True
+
+    org/critical_paths/change_management/20260910T024600Z_cldgrph-cgs31-fourth-cycle-storedin-fanout-one-edge-per-key_deploy_completion.md
+      opened 20260910T024600Z  status CLOSED
+      owner  0.9.0_WK_NFRA_CLDGRPH~2
+      order  NFRA_CLDGRPH.TO-CG-F-11
+      act    aws s3 cp .scratch/f11/source_cycle4.zip s3://opal-313476888478-globgrph/stitch-source/source.zip
+      names the hand producer f3_build_source_zip.py / an aws s3 cp: True
+
+==============================================================================
+INSTRUMENT C -- THE SERVED OBJECT AND ITS BUCKET (live AWS read)
+==============================================================================
+  COVERAGE   : the one key stitch-source/source.zip in bucket opal-313476888478-globgrph,
+               plus the bucket's versioning configuration, which decides
+               whether a per-write history EXISTS to be read at all.
+  GRAIN      : the CURRENT object -- one LastModified, one ETag, one
+               ContentType. This instrument can see the LAST writer's
+               fingerprint and nothing before it.
+  ENVIRONMENT: live us-east-1 through the .tools/aws shim (CLI v1).
+  TREE       : none -- this is the served plane, not a checkout.
+  ACT CLASS  : head-object / list-objects-v2 / get-bucket-versioning. READS.
+
+  LastModified  : Thu, 10 Sep 2026 02:46:36 GMT
+  ContentLength : 181379879
+  ETag          : "7a6d0d496d1c3ae019a444c09b17309b-22"
+  ContentType   : application/x-zip-compressed
+  get-bucket-versioning -> (EMPTY BODY = versioning has never been enabled)
+
+  WHAT THIS INSTRUMENT CAN AND CANNOT DO:
+    CAN : name the vintage of the object being served right now, and carry
+          ONE independent fingerprint of the LAST writer (below).
+    CANNOT: reach any earlier write. Versioning is off, so there is exactly
+          one version and the four earlier pushes are unrecoverable HERE.
+          Reported BLIND rather than counted as zero.
+
+  THE FINGERPRINT, and it is INFERRED, not measured:
+    MEASURED : ContentType = 'application/x-zip-compressed'.
+    INFERRED : `aws s3 cp` guesses ContentType with Python mimetypes. On
+               Windows that reads the registry and .zip resolves to
+               'application/x-zip-compressed'; on the ubuntu-latest runner
+               /etc/mime.types resolves .zip to 'application/zip'. The served
+               object therefore carries the fingerprint of a WINDOWS uploader,
+               which the GitHub runner is not.
+    LIMIT    : this discriminates the uploader's OPERATING SYSTEM, never its
+               identity. It is offered as a THIRD axis agreeing with A and B,
+               not as a substitute for either.
+
+==============================================================================
+INSTRUMENT D -- THE CLOUDTRAIL S3 DATA-EVENT PLANE (expected BLIND, controlled)
+==============================================================================
+  COVERAGE   : EventName=PutObject over 2026-09-10T02:00Z..03:30Z, a window
+               that PROVABLY contains a write to the key (instrument C read
+               LastModified 2026-09-10T02:46:36Z inside it).
+  GRAIN      : one API call with its principal -- the only instrument here
+               that could name WHO wrote, rather than what or when.
+  ENVIRONMENT: live CloudTrail lookup-events, us-east-1.
+  TREE       : none.
+  NOTE       : lookup-events --start-time is INCLUSIVE at the second; the
+               window is opened 46 min early so that cannot matter here.
+
+  PutObject events in the window : 0
+  POSITIVE CONTROL, same window, no EventName filter: 3 event(s).
+  THE CONTROL IS THE WHOLE POINT. Without it, 0 PutObject reads as 'nobody
+  wrote the object', which is FALSE -- instrument C shows the object WAS
+  written at 02:46:36Z inside this window. With it, the 0 is diagnosed:
+  the trail is ALIVE (3 management events came back) and S3 OBJECT-LEVEL
+  DATA EVENTS ARE SIMPLY NOT LOGGED on this account.
+
+  CONSEQUENCE: the ONE instrument that could have named the writing PRINCIPAL
+  is absent. Attribution below therefore rests on A (the workflow could not
+  have done it) and B (the estate's own act record says who did), which are
+  different substrates -- not on one method run twice.
+
+==============================================================================
+THE JOIN -- ATTRIBUTING THE FIVE SERVED ZIPS
+==============================================================================
+  The face names FIVE served pushes in round 6. Instrument B finds 5 ledger
+  entries recording a PutObject to the key on or after 2026-09-01, and the
+  denominator that number came out of is printed above (749 file(s)).
+
+  RULE OF ATTRIBUTION, stated before it is applied so it cannot be fitted to
+  the answer: a zip is attributed to the WORKFLOW only if a SUCCESSFUL run of
+  the workflow exists at or before the push and after the previous one. It is
+  attributed to the HAND ROUTE only if a deploy-ledger entry names an owner,
+  an order and an `aws s3 cp` act. Anything satisfying neither is UNATTRIBUTED
+  and is reported as such, never folded into the larger bucket.
+
+    ZIP 1  20260909T184608Z
+           ledger  : 20260909T184608Z_stitch-source-repush_deploy_completion.md
+           owner   : 0.9.0_WK_NFRA_CLDGRPH~2   order: NFRA_CLDGRPH.TO-CG-F-3
+           workflow successes anywhere near this push: 0 (last success ever = 2026-07-07T13:45:34Z)
+           VERDICT : HAND_ROUTE
+    ZIP 2  20260909T234900Z
+           ledger  : 20260909T234900Z_cldgrph-cgs31-stitch-source-repush-unified-vocabulary_deploy_completion.md
+           owner   : 0.9.0_WK_NFRA_CLDGRPH~2   order: NFRA_CLDGRPH.TO-CG-F-11
+           workflow successes anywhere near this push: 0 (last success ever = 2026-07-07T13:45:34Z)
+           VERDICT : HAND_ROUTE
+    ZIP 3  20260910T011500Z
+           ledger  : 20260910T011500Z_cldgrph-cgs31-second-cycle-storedin-and-derive-image-repin_deploy_completion.md
+           owner   : 0.9.0_WK_NFRA_CLDGRPH~2   order: NFRA_CLDGRPH.TO-CG-F-11
+           workflow successes anywhere near this push: 0 (last success ever = 2026-07-07T13:45:34Z)
+           VERDICT : HAND_ROUTE
+    ZIP 4  20260910T021200Z
+           ledger  : 20260910T021200Z_cldgrph-cgs31-third-cycle-stitch-source-repush-stamp-retired_deploy_completion.md
+           owner   : 0.9.0_WK_NFRA_CLDGRPH~2   order: NFRA_CLDGRPH.TO-CG-F-11
+           workflow successes anywhere near this push: 0 (last success ever = 2026-07-07T13:45:34Z)
+           VERDICT : HAND_ROUTE
+    ZIP 5  20260910T024600Z
+           ledger  : 20260910T024600Z_cldgrph-cgs31-fourth-cycle-storedin-fanout-one-edge-per-key_deploy_completion.md
+           owner   : 0.9.0_WK_NFRA_CLDGRPH~2   order: NFRA_CLDGRPH.TO-CG-F-11
+           workflow successes anywhere near this push: 0 (last success ever = 2026-07-07T13:45:34Z)
+           VERDICT : HAND_ROUTE
+
+  AND THE SUBTRACTION THAT MAKES THIS MORE THAN A LEDGER READ. Instrument A
+  is not corroborating instrument B -- it is EXCLUDING the alternative. The
+  workflow's last success of any kind was 2026-07-07T13:45:34Z. Every one of the
+  five pushes is after it. So the committed route could not have produced any
+  of them even if no ledger entry existed at all, and the ledger's naming of
+  the hand producer is then the POSITIVE identification on top of that.
+
+==============================================================================
+SUMMARY -- I5-AC1
+==============================================================================
+WORKFLOW_EVER_RAN=YES
+
+EVIDENCE printed -- and it is not the one the cell expected:
+  * The committed route has run 855 times. It is not an unrun route; it is a
+    route that FIRES CORRECTLY ON EVERY PUSH AND CANNOT FINISH.
+  * It has succeeded 8 times, ALL on 2026-07-07, ALL before the portal
+    checkout step existed. Last success ever: 2026-07-07T13:45:34Z.
+  * Since that step landed (4074fdf5ac, 2026-07-07T14:09:20Z): 847 runs, 0 successes.
+  * It fails at step 3, 'Checkout portal (separate private repo,
+    gitlink-pinned)', which needs secrets.PORTAL_REPO_PAT. Steps 4 and 5 --
+    the AWS credentials and the zip-and-publish -- are SKIPPED every time.
+  * The 8 successes published a zip with ZERO portal/src entries, because
+    the step that packs portal is the step that did not yet exist.
+    CORRECT PUBLISHES BY THE COMMITTED ROUTE, EVER: 0 of 855.
+  * The literal pin at .github/workflows/stitch-source-push.yml:66 lives INSIDE the step that has
+    never once succeeded. It has therefore never been exercised at all.
+
+ZIPS_ATTRIBUTED=5 of 5
+  All 5 attributed to the HAND ROUTE: a local build by
+  org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f3_build_source_zip.py
+  plus one `aws s3 cp`, each with a NEVER-2 ledger entry naming its owner and
+  order. ZERO attributed to the committed workflow. ZERO unattributed.
+
+INSTRUMENT printed -- four, on four substrates, two of them blind:
+  A  GitHub Actions run history   LIVE  denominator 855 runs
+  B  NEVER-2 deploy ledger walk   LIVE   denominator 749 files, tree control FIRED
+  C  served S3 object             LIVE  1 key; versioning OFF -> no write history
+  D  CloudTrail S3 data events    BLIND 0 PutObject in a window that contains one
+
+BLIND_REPORTED=2
+  BLIND C2/s3-object-version-history
+        bucket versioning is NOT enabled, so S3 holds exactly one version of the key and NO per-write history exists to attribute the five pushes with. This is an ABSENT INSTRUMENT, not a zero.
+  BLIND D/cloudtrail-data-events
+        S3 object-level data events are not logged: 0 PutObject returned for a window that provably contains one, while the same window returns 3 management events. The identity plane does not exist to be read.
+
+  NEITHER BLIND INSTRUMENT CONTRIBUTED A ZERO TO ANY COUNT ABOVE. Both were
+  asked, both failed to answer, and both are named here with the reason. The
+  CloudTrail one carries a positive control precisely so that its 0 could not
+  be read as 'no write happened'.

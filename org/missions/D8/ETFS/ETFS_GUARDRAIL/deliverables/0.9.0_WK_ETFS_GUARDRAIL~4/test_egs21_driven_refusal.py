@@ -1,41 +1,30 @@
 #!/usr/bin/env python3
-"""ETFS_GUARDRAIL.TO-EG-s-21 -- S21-AC1 battery, FOURTH seating (EG-s-27 + EG-s-29 terminal).
+"""ETFS_GUARDRAIL.TO-EG-s-21 -- S21-AC1 battery: THE DRIVEN REFUSAL.
 
-IT DOES NOT INVOKE THE ORCHESTRATOR AND FIRES NO SEND. Every AWS call is a READ:
-lambda:GetFunction(+Configuration), an HTTPS GET of the presigned code location,
-s3:GetObject / HeadObject / ListObjectsV2, and ONE read-only producer PROBE invoke
-(cot-etf-ownership-daily {"date": d, "probe": true} -- infra/aws/lambda/cot-pipeline/
-cot-etf-ownership-daily/lambda_function.py:285-294 `_probe`, "Never reaches
-put_object"), whose write-freeness is CONTROLLED here by an ETag read before and
-after. The served renderer is executed in-process with `s3` replaced by a
-capture-only stub, so `coverage_gate`'s put_object calls are RECORDED, never sent.
+Prints EGS21-REFUSAL-DRIVEN-AND-SENT on stdout ONLY when every arm (a)..(g) holds.
 
-WHAT CHANGED SINCE THE THIRD SEATING, AND IT IS REAL:
-  * EG-s-27 threaded `--no-ladder` beside the forcing, so the forcing now REACHES
-    THE VERDICT instead of dying at the ladder's re-classify.  ARM (b) measures it
-    on the SERVED orchestrator.
-  * EG-s-29 made the ladder-skipped branch write a RUNG-3-EQUIVALENT egress ask.
-    ARM (d) measures it on the SERVED renderer.
-  * R-EG-8 re-cut S21-AC1 arm (d) to name the PROPERTY (an egress ask RECORDED for
-    the run) instead of one writer of it.
+WHAT THIS BATTERY DOES NOT DO, AND WHY THAT IS THE POINT
+--------------------------------------------------------
+It does NOT invoke `etfs-reports-orchestrator` in `run` mode. The order permits exactly
+ONE driven run and that run is still UNSPENT, because arm (a)'s companion PRE-FLIGHT --
+"can the path this order drives actually reach a REFUSE verdict?" -- measures NO. The
+served renderer calls `remediate._provider_for` on the `--no-ladder` branch (the only
+branch that yields a driven REFUSE, R-EG-6 shape 1) and the `coverage` package the
+reporter box holds does not define it. Firing would spend the run on an SSM Failed that
+writes no verdict, no refusal artifacts and sends nothing. Row ETFS_GUARDRAIL-W4-S17.
 
-AND THE ORDER IS STILL NOT EXECUTABLE, ON NEW GROUND ONE GRAIN ABOVE THE CRITERION.
-S21-AC1 arm (d) and PRD v0.5 FWD-9's ACCEPT both require, of the driven run's month,
-that "the publish keys for that month STAY ABSENT (a 404 beside the refused 200)".
-ARM (e) is a CENSUS BY SUBTRACTION over the month space:
+So this battery MEASURES the blocking condition with a difference control rather than
+asserting it, records arm (a) in full (it PASSES), and records arms (b)..(g) as
+NOT-RUN-BLOCKED. It never converts an instrument's limit into a verdict.
 
-    candidate months = {months for which ANY partner daily slice exists}
-                       (the fixture can only remove a slice that EXISTS, so a month
-                        with no slice cannot carry a FORCED class C at all)
-    = exactly {2026-05 .. 2026-09}, measured, 0 slices outside that range
-    and 5 of those 5 months ALREADY SERVE platinum/reports/<month>/etf_ownership.pdf
-    AND .html -- so 0 of 5 can produce the 404 the accept names.
-
-There is therefore NO month in which a driven run can satisfy arm (d), and the
-single permitted run is NOT spent on one that cannot. That is a BLOCKING row
-(ETFS_GUARDRAIL-W4-S8), not a licence to re-read the arm more kindly.
-
-Prints EGS21-BLOCKED-NO-MONTH-CAN-SATISFY-FWD9-404. It cannot print the success token.
+EVERY AWS CALL HERE IS A READ OR A STRUCTURALLY SEND-FREE MODE:
+  - lambda get-function-configuration / get-function  (read)
+  - lambda invoke mode=recipients_qa                  (send-free by construction:
+    lambda_function.py's recipients_qa branch resolves and returns; no `_ses` call
+    site is reachable on it)
+  - s3api list-objects-v2 / get-object / head-object  (read)
+  - ec2 describe-instances, ssm describe-instance-information (read)
+NO s3 write, NO s3 delete, NO ec2 start/stop, NO ssm send-command, NO SES send.
 """
 from __future__ import annotations
 
@@ -43,432 +32,396 @@ import base64
 import datetime
 import hashlib
 import importlib.util
-import io
 import json
 import os
+import re
+import shutil
+import subprocess
 import sys
-import types
-import urllib.request
-import zipfile
+import tempfile
+import traceback
 
-import boto3
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.abspath(os.path.join(HERE, *([".."] * 7)))
-FUNCTION = "etfs-reports-orchestrator"
 REGION = "us-east-1"
-ARTIFACT_BUCKET = "opal-313476888478-lambda-artifacts"
-ARTIFACT_KEY = "ec2/etfs-reports/render_month_end.py"
+FUNCTION = "etfs-reports-orchestrator"
 ETFS_BUCKET = "opal-data-etfs"
-REPORTS_PREFIX = "platinum/reports"
-PARTNERS = ("cottonwood", "49financial", "inflection")
+ARTIFACT_BUCKET = "opal-313476888478-lambda-artifacts"
+ARTIFACT_PREFIX = "ec2/etfs-reports"
+INSTANCE_ID = "i-070477bf35fc54409"
+FORBIDDEN = "aj@opalinvest.com"
+REQUIRED = "andrew@opalinvest.com"
 
-# The month/partner/date this order WOULD have driven, chosen in the result document
-# and re-derived by ARM (e) here: the only month whose unforced verdict is PUBLISH,
-# whose forced partner has a slice to remove, and which serves NO coverage artifact
-# that the run would overwrite.
-CAND_MONTH, CAND_PARTNER, CAND_DATE = "2026-07", "cottonwood", "2026-07-15"
-COT_PRODUCER = "cot-etf-ownership-daily"
+# The forcing this order designed. Recorded here so the design is not re-derived.
+FORCE_MONTH = "2026-08"
+FORCE_PARTNER = "cottonwood"
+FORCE_DATE = "2026-08-14"
+FORCE_SPEC = "%s:%s" % (FORCE_PARTNER, FORCE_DATE)
 
-BLOCKERS: list = []
-ARMS: dict = {}
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                          *([".."] * 7)))
 
-
-def head(t):
-    print("")
-    print("=" * 78)
-    print(t)
-    print("=" * 78)
+RESULTS: list = []
 
 
-def line(tag, msg):
-    print("  [%s] %s" % (tag, msg))
+def record(arm: str, state: str, detail: str) -> None:
+    RESULTS.append((arm, state, detail))
+    print("ARM %-4s %-16s %s" % (arm, state, detail))
 
 
-def arm(name, ok, msg):
-    ARMS[name] = ok
-    line("HOLD" if ok else "BLOCKED", "%s -- %s" % (name, msg))
-    if not ok:
-        BLOCKERS.append("%s: %s" % (name, msg))
+def aws(*args: str) -> str:
+    """Bounded AWS read via the vendored shim. Returns stdout (CR-stripped)."""
+    # BOTH SHIM FORMS EXIST (CLAUDE.md: ".tools/aws shim (+aws.cmd, both or neither)").
+    # CreateProcess cannot exec the bash form, so on win32 resolve aws.cmd.
+    shim = os.path.join(REPO_ROOT, ".tools", "aws.cmd" if sys.platform == "win32" else "aws")
+    out = subprocess.run([shim] + list(args), capture_output=True, text=True, timeout=180,
+                         shell=False)
+    if out.returncode != 0:
+        raise RuntimeError("aws rc=%d: %s" % (out.returncode, (out.stderr or "")[:400]))
+    return out.stdout.replace("\r", "")
 
 
-_lam = boto3.client("lambda", region_name=REGION)
-_s3 = boto3.client("s3", region_name=REGION)
-STARTED = datetime.datetime.now(datetime.timezone.utc).isoformat()
-print("battery started (UTC): %s" % STARTED)
-print("worktree HEAD is the branch's; every claim below is measured at this run's time.")
-
-# =====================================================================================
-head("(a) THE PRECONDITION, re-taken at THIS run's time on the CURRENT deployed bytes")
-# =====================================================================================
-fn = _lam.get_function(FunctionName=FUNCTION)
-CONF = fn["Configuration"]
-zb = urllib.request.urlopen(fn["Code"]["Location"]).read()
-ORCH = zipfile.ZipFile(io.BytesIO(zb)).read("lambda_function.py")
-ORCH_SHA = hashlib.sha256(ORCH).hexdigest()
-print("served CodeSha256   : %s" % CONF["CodeSha256"])
-print("served LastModified : %s" % CONF["LastModified"])
-print("zip member          : %d B sha256 %s" % (len(ORCH), ORCH_SHA))
-print("zip sha256 (b64)    : %s" % base64.b64encode(hashlib.sha256(zb).digest()).decode())
-print("live EMAIL_RECIPIENT: %s" % CONF["Environment"]["Variables"]["EMAIL_RECIPIENT"])
-print("EG-s-20 terminal    : <status>complete -- 2026-09-10 ~04:0xZ by "
-      "0.9.0_WK_ETFS_GUARDRAIL~4</status>, drained 5d292ff11f "
-      "(org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/"
-      "ETFS_GUARDRAIL.TO-EG-s-20.the-send-path-correct-and-test-safe.md)")
+# ---------------------------------------------------------------- arm (a) part 1
+def deployed_bytes(tmp: str) -> tuple:
+    cfg = json.loads(aws("lambda", "get-function-configuration", "--function-name", FUNCTION,
+                          "--region", REGION, "--output", "json"))
+    url = aws("lambda", "get-function", "--function-name", FUNCTION, "--region", REGION,
+              "--query", "Code.Location", "--output", "text").strip()
+    zip_path = os.path.join(tmp, "orch.zip")
+    subprocess.run(["curl", "-s", "-o", zip_path, url], check=True, timeout=180)
+    raw = open(zip_path, "rb").read()
+    hex_sha = hashlib.sha256(raw).hexdigest()
+    b64_sha = base64.b64encode(hashlib.sha256(raw).digest()).decode()
+    import zipfile
+    src = zipfile.ZipFile(zip_path).read("lambda_function.py")
+    mod_path = os.path.join(tmp, "deployed_lambda_function.py")
+    open(mod_path, "wb").write(src)
+    return cfg, hex_sha, b64_sha, mod_path
 
 
-class _Stub:
-    """Every AWS client the orchestrator module builds at import. Any call RAISES --
-    a battery that silently invoked would be worse than one that crashes."""
-
-    def __init__(self, svc):
-        self._svc = svc
-
-    def __getattr__(self, n):
-        def _c(**kw):
-            raise AssertionError("STUB REFUSAL: %s.%s -- this battery invokes nothing"
-                                 % (self._svc, n))
-        return _c
-
-
-op = os.path.join(REPO, ".scratch", "egs21d_orch.py")
-os.makedirs(os.path.dirname(op), exist_ok=True)
-io.open(op, "wb").write(ORCH)
-_real = boto3.client
-boto3.client = lambda service, **kw: _Stub(service)
-os.environ.setdefault("REPORTER_INSTANCE_ID", "i-0000000000000stub")
-os.environ.setdefault("REPORTS_SNS_TOPIC", "arn:aws:sns:us-east-1:000000000000:stub")
-os.environ["EMAIL_RECIPIENT"] = CONF["Environment"]["Variables"]["EMAIL_RECIPIENT"]
-_sp = importlib.util.spec_from_file_location("egs21d_orch", op)
-ORCHM = importlib.util.module_from_spec(_sp)
-_sp.loader.exec_module(ORCHM)
-boto3.client = _real
-
-EVENTS = [
-    {"mode": "run", "month": CAND_MONTH, "test_run": True},
-    {"mode": "run", "month": CAND_MONTH, "test_run": True,
-     "force_fixture_remove": "%s:%s" % (CAND_PARTNER, CAND_DATE)},
-    {"mode": "run", "test_run": True, "test_recipients": ["aj@opalinvest.com"]},
-    {"mode": "run", "test_run": True, "test_recipients": "aj@opalinvest.com,andrew@opalinvest.com"},
-    {"mode": "run", "test_run": True, "test_recipients": ["AJ@OpalInvest.COM"]},
-    {"mode": "run", "test_run": True, "test_recipients": ["  aj@opalinvest.com  "]},
-    {"mode": "run", "test_run": True, "test_recipients": []},
-    {"mode": "run", "test_run": True, "test_recipients": None},
-    {"mode": "run", "test_run": 1, "month": CAND_MONTH},
-]
-leak, n = 0, 0
-for ev in EVENTS:
-    for base in (ORCHM.EMAIL_RECIPIENT, ORCHM.TERMINAL_RECIPIENT):
-        h, env = ORCHM._resolve_recipients(ev, base)
-        n += 1
-        if any(a.lower() == "aj@opalinvest.com" for a in env) or "aj@" in h.lower():
-            leak += 1
-_, sched_env = ORCHM._resolve_recipients({"mode": "run"}, ORCHM.EMAIL_RECIPIENT)
-_, term_env = ORCHM._resolve_recipients(
-    {"mode": "run", "month": CAND_MONTH, "test_run": True,
-     "force_fixture_remove": "%s:%s" % (CAND_PARTNER, CAND_DATE)},
-    ORCHM.TERMINAL_RECIPIENT)
-print("scheduled envelope (must stay BOTH): %s" % sched_env)
-print("the driven run's TERMINAL envelope  : %s" % term_env)
-arm("(a) PRECONDITION", leak == 0
-    and sched_env == ["aj@opalinvest.com", "andrew@opalinvest.com"]
-    and term_env == ["andrew@opalinvest.com"],
-    "aj@opalinvest.com in %d of %d resolved test-invocation recipient lists on the bytes "
-    "deployed at %s; the scheduled path is unchanged; the driven run's terminal envelope "
-    "resolves to %s" % (leak, n, CONF["LastModified"], term_env))
-
-# =====================================================================================
-head("(b) THE TWO UNBLOCKING CELLS ARE ON THE SERVED BYTES -- EG-s-27 and EG-s-29")
-# =====================================================================================
-REND_HEAD = _s3.head_object(Bucket=ARTIFACT_BUCKET, Key=ARTIFACT_KEY)
-REND = _s3.get_object(Bucket=ARTIFACT_BUCKET, Key=ARTIFACT_KEY)["Body"].read()
-REND_SHA = hashlib.sha256(REND).hexdigest()
-RTEXT = REND.decode("utf-8")
-RL = RTEXT.split("\n")
-print("SERVED renderer : %d B sha256 %s" % (len(REND), REND_SHA))
-print("                  VersionId %s LastModified %s"
-      % (REND_HEAD.get("VersionId"), REND_HEAD["LastModified"].astimezone(
-          datetime.timezone.utc).isoformat()))
-repo_rend = io.open(os.path.join(REPO, "data", "etfs", "scripts", "presentation",
-                                 "render_month_end.py"), "rb").read()
-print("REPO  renderer  : %d B sha256 %s  -- CONTENT-RESOLVED MATCH: %s"
-      % (len(repo_rend), hashlib.sha256(repo_rend).hexdigest(),
-         hashlib.sha256(repo_rend).hexdigest() == REND_SHA))
-
-forced_cmd = ORCHM._render_command(CAND_MONTH, "%s:%s" % (CAND_PARTNER, CAND_DATE))[0]
-plain_cmd = ORCHM._render_command(CAND_MONTH, "")[0]
-tail = forced_cmd[forced_cmd.index("render_month_end.py --month"):]
-print("the command a FORCED test invoke would send:")
-print("    %s" % tail)
-ask_sites = [i for i, x in enumerate(RL, 1) if "_skipped_branch_egress_ask(" in x]
-basename_ok = "coverage_egress_ask_ladder_skipped.json" in RTEXT
-arm("(b) DEPENDENCIES SERVED",
-    "--fixture-remove" in forced_cmd and "--no-ladder" in forced_cmd
-    and "--no-ladder" not in plain_cmd and len(ask_sites) >= 2 and basename_ok,
-    "EG-s-27: --no-ladder present in the FORCED command and absent from the marker-free "
-    "one; EG-s-29: _skipped_branch_egress_ask at %s (denominator %d) and the "
-    "ladder-skipped basename present on the served renderer"
-    % (ask_sites, len(ask_sites)))
-
-# =====================================================================================
-head("(c) THE FORCING NOW REACHES THE VERDICT -- difference control on SERVED bytes")
-# =====================================================================================
-sys.path.insert(0, os.path.join(REPO, "data", "etfs", "scripts"))
-sys.path.insert(0, os.path.join(REPO, "data", "inf", "scripts", "silver"))
-import _orion_vendor_asof  # noqa: F401,E402
-from coverage import classifier as CLS  # noqa: E402
-
-# The classifier's own C-vs-D boundary, read at file:line so the class below is read
-# against the RULE and not against my paraphrase of it.
-cls_path = os.path.join(REPO, "data", "etfs", "scripts", "coverage", "classifier.py")
-cls_lines = io.open(cls_path, encoding="utf-8").read().split("\n")
-print("classifier.py @8471f83a18 -- the C-vs-D boundary, verbatim:")
-for i in (177, 178, 179, 192, 193, 194):
-    print("  :%-4d %s" % (i, cls_lines[i - 1].strip()))
-
-# real series, read from S3 (presence only, exactly what classify_month reads)
-pag = _s3.get_paginator("list_objects_v2")
-series_all: dict = {}
-for p in PARTNERS:
-    ss = {}
-    for pg in pag.paginate(Bucket=ETFS_BUCKET, Prefix="daily/%s/" % p):
-        for o in pg.get("Contents", []):
-            b = o["Key"].rsplit("/", 1)[-1]
-            if b.endswith(".json") and len(b) == 15:
-                ss[b[:-5]] = True
-    series_all[p] = ss
-print("daily slice census (denominator = objects listed): %s"
-      % {p: len(series_all[p]) for p in PARTNERS})
-
-# THE ONE REAL INVOKE IN THIS BATTERY, AND IT IS A READ. Controlled on both sides.
-slice_key = "daily/%s/%s.json" % (CAND_PARTNER, CAND_DATE)
-h_before = _s3.head_object(Bucket=ETFS_BUCKET, Key=slice_key)
-_pr = _lam.invoke(FunctionName=COT_PRODUCER,
-                  Payload=json.dumps({"date": CAND_DATE, "probe": True}).encode("utf-8"))
-PROBE_ANSWER = json.loads(_pr["Payload"].read())
-h_after = _s3.head_object(Bucket=ETFS_BUCKET, Key=slice_key)
-print("REAL PROBE (read-only) %s <- {\"date\": %r, \"probe\": true}: %s"
-      % (COT_PRODUCER, CAND_DATE, json.dumps(PROBE_ANSWER)))
-print("  write-free control on %s: ETag %s -> %s  UNCHANGED=%s"
-      % (slice_key, h_before["ETag"], h_after["ETag"],
-         h_before["ETag"] == h_after["ETag"]))
-
-_captured: list = []
+def load_deployed_handler(mod_path: str, env: dict):
+    saved = {k: os.environ.get(k) for k in env}
+    os.environ.update(env)
+    try:
+        spec = importlib.util.spec_from_file_location("egs21_deployed_handler", mod_path)
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        return m
+    finally:
+        for k, v in saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
 
 
-class _CaptureS3:
-    """Read-through list/get; put_object CAPTURED, never sent."""
+def arm_a(tmp: str) -> bool:
+    """(a) THE PRECONDITION, re-taken at THIS run's time on the DEPLOYED bytes."""
+    ok = True
+    cfg, hex_sha, b64_sha, mod_path = deployed_bytes(tmp)
+    if b64_sha != cfg["CodeSha256"]:
+        record("a", "FAIL", "downloaded zip digest %s != CodeSha256 %s" % (b64_sha, cfg["CodeSha256"]))
+        return False
+    record("a", "measured", "deployed zip sha256=%s (base64 %s == CodeSha256), LastModified=%s"
+           % (hex_sha, b64_sha, cfg["LastModified"]))
 
-    def get_paginator(self, name):
-        return _s3.get_paginator(name)
+    env_recipient = cfg["Environment"]["Variables"]["EMAIL_RECIPIENT"]
+    record("a", "measured", "live EMAIL_RECIPIENT (the PRODUCER's set) = %r" % env_recipient)
 
-    def get_object(self, **kw):
-        return _s3.get_object(**kw)
+    m = load_deployed_handler(mod_path, {
+        "REPORTER_INSTANCE_ID": cfg["Environment"]["Variables"]["REPORTER_INSTANCE_ID"],
+        "REPORTS_SNS_TOPIC": cfg["Environment"]["Variables"]["REPORTS_SNS_TOPIC"],
+        "EMAIL_RECIPIENT": env_recipient,
+        "AWS_DEFAULT_REGION": REGION,
+    })
 
-    def head_object(self, **kw):
-        return _s3.head_object(**kw)
+    # INSTRUMENT 1 -- offline, on the deployed artifact, with a NEGATIVE CONTROL.
+    cases = {
+        "test plain": {"test_run": True},
+        "test + aj override": {"test_run": True, "test_recipients": [FORBIDDEN]},
+        "test + aj mixed case": {"test_run": True,
+                                  "test_recipients": ["AJ@OpalInvest.COM", REQUIRED]},
+        "test + joined string": {"test_run": True,
+                                  "test_recipients": "%s, %s" % (FORBIDDEN, REQUIRED)},
+    }
+    hits = 0
+    n = 0
+    for name, ev in cases.items():
+        for label, base in (("report", m.EMAIL_RECIPIENT), ("terminal", m.TERMINAL_RECIPIENT)):
+            hdr, dest = m._resolve_recipients(ev, base)
+            n += 1
+            bad = [a for a in dest if a.lower() == FORBIDDEN]
+            if FORBIDDEN in (hdr or "").lower():
+                bad = bad + ["<in To header>"]
+            if bad:
+                hits += 1
+                record("a", "FAIL", "TEST branch %s/%s reached aj@: header=%r envelope=%s"
+                       % (name, label, hdr, dest))
+    record("a", "measured", "offline instrument on deployed bytes: aj@ hits %d of %d "
+                            "adversarial TEST resolutions" % (hits, n))
+    if hits:
+        ok = False
 
-    def list_objects_v2(self, **kw):
-        return _s3.list_objects_v2(**kw)
+    # THE NEGATIVE CONTROL -- if the scheduled branch does NOT carry aj@, the instrument
+    # is blind and its zero above means nothing.
+    sched_hdr, sched_dest = m._resolve_recipients({}, m.EMAIL_RECIPIENT)
+    if FORBIDDEN not in [a.lower() for a in sched_dest]:
+        record("a", "FAIL", "NEGATIVE CONTROL DEAD: scheduled report envelope %s does not "
+                            "contain aj@, so the test-branch zero is not discriminating"
+               % sched_dest)
+        ok = False
+    else:
+        record("a", "measured", "negative control LIVE: scheduled report envelope=%s "
+                                "(carries aj@), scheduled header=%r" % (sched_dest, sched_hdr))
+
+    # INSTRUMENT 2 -- the RUNNING function, send-free recipients_qa, adversarial probe.
+    payload = os.path.join(tmp, "rq.json")
+    open(payload, "w", encoding="utf-8").write(json.dumps(
+        {"mode": "recipients_qa",
+         "probe": {"test_recipients": [FORBIDDEN, "AJ@OpalInvest.COM", REQUIRED]}}))
+    out_path = os.path.join(tmp, "rq_out.json")
+    aws("lambda", "invoke", "--function-name", FUNCTION, "--region", REGION,
+        "--payload", "file://" + payload, out_path, "--output", "json")
+    live = json.loads(open(out_path, encoding="utf-8").read())
+    live_test = live["test"]
+    live_bad = [a for grp in live_test.values() for a in grp if a.lower() == FORBIDDEN]
+    record("a", "measured", "live recipients_qa on the RUNNING function: test=%s scheduled=%s"
+           % (json.dumps(live_test), json.dumps(live["scheduled"])))
+    if live_bad:
+        record("a", "FAIL", "RUNNING function's test resolution reached aj@: %s" % live_bad)
+        ok = False
+    if FORBIDDEN not in [a.lower() for a in live["scheduled"]["report"]]:
+        record("a", "FAIL", "live negative control DEAD (scheduled.report lacks aj@)")
+        ok = False
+    if REQUIRED not in live_test["terminal"]:
+        record("a", "FAIL", "live test.terminal does not contain %s: %s" % (REQUIRED, live_test["terminal"]))
+        ok = False
+
+    # EG-s-20 terminal, its flip cited.
+    to20 = os.path.join(REPO_ROOT, "org", "missions", "D8", "ETFS", "ETFS_GUARDRAIL",
+                        "task-orders",
+                        "ETFS_GUARDRAIL.TO-EG-s-20.the-send-path-correct-and-test-safe.md")
+    status = ""
+    with open(to20, encoding="utf-8") as f:
+        for line in f:
+            if line.startswith("<status>"):
+                status = line.strip()
+                break
+    flip = subprocess.run(["git", "log", "--full-history", "-1", "--format=%H %cI %s",
+                           "-S", "complete -- 2026-09-10", "--", to20],
+                          capture_output=True, text=True, cwd=REPO_ROOT, timeout=180).stdout.strip()
+    if not status.startswith("<status>complete"):
+        record("a", "FAIL", "EG-s-20 status is not complete: %s" % status[:160])
+        ok = False
+    else:
+        record("a", "measured", "EG-s-20 TERMINAL: %s" % status[:200])
+        record("a", "measured", "EG-s-20 flip commit: %s" % (flip or "<not isolated by -S>"))
+
+    record("a", "PASS" if ok else "FAIL",
+           "the test-invocation recipient path CANNOT reach %s on the bytes deployed at this "
+           "run's time; two instruments, both with a live negative control" % FORBIDDEN)
+    return ok
+
+
+# ------------------------------------------------------- the PRE-FIRE feasibility gate
+def preflight_can_the_path_refuse(tmp: str) -> tuple:
+    """Can the driven run reach a REFUSE verdict at all?
+
+    Returns (feasible: bool, detail: str). Measured by EXERCISE with a DIFFERENCE
+    CONTROL, never by reading the renderer alone -- the renderer is current and the
+    package it imports is not, and a per-file check of the renderer certifies clean.
+    """
+    listing = json.loads(aws("s3api", "list-objects-v2", "--bucket", ARTIFACT_BUCKET,
+                              "--prefix", ARTIFACT_PREFIX, "--output", "json"))
+    contents = {c["Key"]: c for c in listing.get("Contents", [])}
+    print("  artifact prefix denominator: %d object(s)" % len(contents))
+    for k in sorted(contents):
+        print("    %-58s %8d  %s" % (k, contents[k]["Size"], contents[k]["LastModified"]))
+
+    box = os.path.join(tmp, "box_sim")
+    repo_sim = os.path.join(tmp, "repo_sim")
+    for d in (box, repo_sim):
+        os.makedirs(os.path.join(d, "coverage"), exist_ok=True)
+
+    renderer_repo = os.path.join(REPO_ROOT, "data", "etfs", "scripts", "presentation",
+                                 "render_month_end.py")
+    dep_renderer = os.path.join(tmp, "render_month_end.deployed.py")
+    aws("s3api", "get-object", "--bucket", ARTIFACT_BUCKET,
+        "--key", "%s/render_month_end.py" % ARTIFACT_PREFIX, dep_renderer, "--output", "json")
+    dep_r = open(dep_renderer, "rb").read()
+    repo_r = open(renderer_repo, "rb").read().replace(b"\r\n", b"\n")
+    print("  SERVED render_month_end.py sha256=%s  == repo(LF): %s"
+          % (hashlib.sha256(dep_r).hexdigest(), dep_r == repo_r))
+
+    # The SERVED renderer is what BOTH arms run. Only the coverage package differs.
+    for d in (box, repo_sim):
+        shutil.copy(dep_renderer, os.path.join(d, "render_month_end.py"))
+
+    cov_names = ["__init__.py", "classifier.py", "remediate.py", "trading_calendar.py",
+                 "_orion_vendor_asof.py"]
+    for name in cov_names:
+        aws("s3api", "get-object", "--bucket", ARTIFACT_BUCKET,
+            "--key", "%s/coverage/%s" % (ARTIFACT_PREFIX, name),
+            os.path.join(box, "coverage", name), "--output", "json")
+    repo_map = {
+        "__init__.py": os.path.join(REPO_ROOT, "data/etfs/scripts/coverage/__init__.py"),
+        "classifier.py": os.path.join(REPO_ROOT, "data/etfs/scripts/coverage/classifier.py"),
+        "remediate.py": os.path.join(REPO_ROOT, "data/etfs/scripts/coverage/remediate.py"),
+        "trading_calendar.py": os.path.join(REPO_ROOT, "lib/trading_calendar.py"),
+    }
+    for name, src in repo_map.items():
+        data = open(src, "rb").read().replace(b"\r\n", b"\n")
+        open(os.path.join(repo_sim, "coverage", name), "wb").write(data)
+    shutil.copy(os.path.join(box, "coverage", "_orion_vendor_asof.py"),
+                os.path.join(repo_sim, "coverage", "_orion_vendor_asof.py"))
+
+    for name in ("classifier.py", "remediate.py"):
+        b = open(os.path.join(box, "coverage", name), "rb").read()
+        r = open(os.path.join(repo_sim, "coverage", name), "rb").read()
+        print("  coverage/%-18s deployed=%6d repo=%6d IDENTICAL=%s"
+              % (name, len(b), len(r), b == r))
+    dep_defs = re.findall(r"^def (\w+)", open(os.path.join(box, "coverage", "remediate.py"),
+                                               encoding="utf-8").read(), re.M)
+    repo_defs = re.findall(r"^def (\w+)", open(os.path.join(repo_sim, "coverage", "remediate.py"),
+                                                encoding="utf-8").read(), re.M)
+    print("  DEPLOYED remediate defs: %s" % dep_defs)
+    print("  REPO     remediate defs: %s" % repo_defs)
+
+    results = {}
+    for label, sim in (("DEPLOYED", box), ("REPO", repo_sim)):
+        results[label] = _exercise(sim, label)
+    feasible = results["DEPLOYED"] == "REFUSE"
+    detail = ("DEPLOYED-package result=%r ; REPO-package result=%r ; difference control "
+              "discriminates=%s" % (results["DEPLOYED"], results["REPO"],
+                                     results["DEPLOYED"] != results["REPO"]))
+    return feasible, detail
+
+
+class _StubS3:
+    def __init__(self):
+        self.puts = []
 
     def put_object(self, **kw):
-        _captured.append({k: v for k, v in kw.items() if k != "Body"}
-                         | {"BodyLen": len(kw.get("Body") or b""),
-                            "Body": kw.get("Body")})
+        self.puts.append(kw.get("Key"))
         return {}
 
 
-rp = os.path.join(REPO, ".scratch", "egs21d_rend.py")
-io.open(rp, "wb").write(REND)
-_capture = _CaptureS3()
-_real2 = boto3.client
-boto3.client = lambda service, **kw: _capture if service == "s3" else _Stub(service)
-RM = types.ModuleType("egs21d_rend")
-RM.__file__ = rp
-sys.modules["egs21d_rend"] = RM
-exec(compile(REND, rp, "exec"), RM.__dict__)
-boto3.client = _real2
-RM.s3 = _capture
+def _exercise(sim_dir: str, label: str) -> str:
+    """Run the SERVED renderer's --no-ladder gate branch over `sim_dir`'s coverage
+    package. ZERO AWS calls: stub probe, supplied series, module `s3` stubbed."""
+    for mod in [m for m in list(sys.modules) if m == "coverage" or m.startswith("coverage.")]:
+        del sys.modules[mod]
+    for p in list(sys.path):
+        if p.endswith("box_sim") or p.endswith("repo_sim"):
+            sys.path.remove(p)
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "egs21_rme_%s" % label, os.path.join(sim_dir, "render_month_end.py"))
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+    except Exception as e:  # noqa: BLE001
+        return "IMPORT-FAIL: %s: %s" % (type(e).__name__, e)
+    m.s3 = _StubS3()
+    d = datetime.date(2026, 8, 1)
+    series = {}
+    while d <= datetime.date(2026, 8, 31):
+        if m.classifier.tcal.is_trading_day(d):
+            series[d.isoformat()] = {"any": 1}
+        d += datetime.timedelta(days=1)
+    daily = {FORCE_PARTNER: dict(series)}
+    fx = m._parse_fixture_remove(FORCE_SPEC)
+    m._apply_fixture_remove(daily, fx)
+    print("  [%s] remediate=%s has _provider_for=%s; %d trading slices, %d after forcing"
+          % (label, os.path.basename(os.path.dirname(m.remediate.__file__)),
+             hasattr(m.remediate, "_provider_for"), len(series), len(daily[FORCE_PARTNER])))
+    try:
+        v = m.coverage_gate(FORCE_MONTH, [FORCE_PARTNER], daily, [], ladder=False,
+                            probe=lambda p, ds: {"partition": True, "priced": 4},
+                            fixture_remove=fx, fixture_remove_spec=FORCE_SPEC,
+                            run_id="EGS21-PREFLIGHT", run_id_source="offline exercise")
+    except Exception as e:  # noqa: BLE001
+        print("  [%s] coverage_gate RAISED: %s: %s" % (label, type(e).__name__, e))
+        tb = traceback.format_exc().strip().split("\n")
+        print("  [%s]   at %s" % (label, tb[-3].strip() if len(tb) > 3 else tb[-1]))
+        return "%s: %s" % (type(e).__name__, e)
+    print("  [%s] VERDICT=%s holes=%s C=%s puts=%s"
+          % (label, v["verdict"], v["holes"],
+             v["per_partner"][FORCE_PARTNER]["summary"]["C"], m.s3.puts))
+    return v["verdict"]
 
 
-def _probe_stub(partner, date_str):
-    """The MEASURED answer above for the candidate date; None elsewhere (no partner
-    other than cottonwood has an uncovered trading day in this month, so no other
-    date reaches a probe -- see the coverage table printed by ARM (e))."""
-    if partner == CAND_PARTNER and date_str == CAND_DATE:
-        return {"partition": bool(PROBE_ANSWER.get("partition")),
-                "priced": int(PROBE_ANSWER.get("priced", 0) or 0)}
-    return None
+def blocked_arms_cost(tmp: str) -> None:
+    """What firing anyway would have produced -- measured, not asserted."""
+    # AN ABSENCE NEEDS A POSITIVE CONTROL BESIDE IT: an rc!=0 from a broken call and an
+    # rc!=0 from a genuine 404 are the same number. Read a key that MUST exist first.
+    def head(key: str) -> str:
+        try:
+            out = json.loads(aws("s3api", "head-object", "--bucket", ETFS_BUCKET,
+                                  "--key", key, "--output", "json"))
+            return "PRESENT LastModified=%s ETag=%s VersionId=%s" % (
+                out.get("LastModified"), out.get("ETag"),
+                out.get("VersionId", "<ABSENT -- opal-data-etfs is UNVERSIONED>"))
+        except RuntimeError as e:
+            return "ABSENT-OR-ERROR (%s)" % " ".join(str(e).split())[:120]
+
+    ctrl_key = "platinum/reports/%s/coverage_verdict.json" % FORCE_MONTH
+    print("  POSITIVE CONTROL %s\n      -> %s" % (ctrl_key, head(ctrl_key)))
+    tgt_key = "platinum/reports/%s/coverage_unresolved.json" % FORCE_MONTH
+    print("  TARGET           %s\n      -> %s" % (tgt_key, head(tgt_key)))
+    print("  (control PRESENT + target ABSENT => the absence is the OBJECT'S, not the CALL'S)")
+    ec2 = json.loads(aws("ec2", "describe-instances", "--instance-ids", INSTANCE_ID,
+                          "--region", REGION, "--output", "json"))
+    inst = ec2["Reservations"][0]["Instances"][0]
+    print("  reporter box %s state=%s LaunchTime=%s reason=%r"
+          % (INSTANCE_ID, inst["State"]["Name"], inst.get("LaunchTime"),
+             inst.get("StateTransitionReason")))
+    ssm = json.loads(aws("ssm", "describe-instance-information", "--region", REGION,
+                          "--filters", "Key=InstanceIds,Values=%s" % INSTANCE_ID,
+                          "--output", "json"))
+    print("  ssm describe-instance-information denominator: %d (Online rows)"
+          % len(ssm.get("InstanceInformationList", [])))
 
 
-RESULTS = {}
-for engaged in (False, True):
-    daily = {p: dict(series_all[p]) for p in PARTNERS}
-    fixture = {CAND_PARTNER: [CAND_DATE]} if engaged else {}
-    spec = "%s:%s" % (CAND_PARTNER, CAND_DATE) if engaged else ""
-    RM._apply_fixture_remove(daily, fixture)
-    _captured.clear()
-    v = RM.coverage_gate(CAND_MONTH, list(PARTNERS), daily, ["DIVZ"], ladder=False,
-                         probe=_probe_stub, fixture_remove=fixture,
-                         fixture_remove_spec=spec,
-                         run_id="EGS21-BATTERY-HERMETIC", run_id_source="battery")
-    cs = {p: v["per_partner"][p]["summary"]["C"] for p in PARTNERS}
-    RESULTS[engaged] = (v, list(_captured))
-    print("  forcing %-10s ladder=False -> VERDICT=%-8s holes=%d C per partner=%s"
-          % ("ENGAGED" if engaged else "DISENGAGED", v["verdict"], v["holes"], cs))
+def main() -> int:
+    print("EGS21 BATTERY -- ETFS_GUARDRAIL.TO-EG-s-21, 0.9.0_WK_ETFS_GUARDRAIL~4")
+    print("started %sZ" % datetime.datetime.now(datetime.timezone.utc)
+          .strftime("%Y-%m-%dT%H:%M:%S"))
+    tmp = tempfile.mkdtemp(prefix="egs21_")
+    try:
+        print("\n--- ARM (a) THE PRECONDITION (deployed bytes, this run's time) ---")
+        a_ok = arm_a(tmp)
 
-V_ON, CAP_ON = RESULTS[True]
-V_OFF, CAP_OFF = RESULTS[False]
-c_partners = [p for p in PARTNERS if V_ON["per_partner"][p]["summary"]["C"] > 0]
-print("  forced per-partner class table (the object arm (c) would read):")
-for p in PARTNERS:
-    s = V_ON["per_partner"][p]["summary"]
-    print("    %-12s %s | holes=%s" % (p, json.dumps(s), V_ON["per_partner"][p]["holes"]))
-print("  forcing record on the forced verdict: %s" % json.dumps(V_ON["forcing"]))
-arm("(c) FORCING REACHES THE VERDICT",
-    V_ON["verdict"] == "REFUSE" and V_OFF["verdict"] == "PUBLISH" and len(c_partners) >= 1,
-    "same served renderer, same month, same real series, same measured probe -- only the "
-    "forcing differs: ENGAGED=%s (class C on %s) vs DISENGAGED=%s. This is the arm-(f) "
-    "undo pair as well: removing the forcing returns the classifier to PUBLISH."
-    % (V_ON["verdict"], c_partners, V_OFF["verdict"]))
+        print("\n--- PRE-FIRE FEASIBILITY GATE (not an arm; it decides whether firing is legal) ---")
+        feasible, detail = preflight_can_the_path_refuse(tmp)
+        print("  %s" % detail)
 
-# =====================================================================================
-head("(d) THE EGRESS ASK WOULD BE RECORDED FOR THE RUN -- EG-s-29's rung-3-equivalent")
-# =====================================================================================
-ask_puts = [c for c in CAP_ON if "egress_ask" in c["Key"]]
-print("  put_object calls CAPTURED (never sent) on the forced run: %d" % len(CAP_ON))
-for c in CAP_ON:
-    print("    %s  %d B" % (c["Key"], c["BodyLen"]))
-ask_ok = False
-if ask_puts:
-    rec = json.loads(ask_puts[-1]["Body"])
-    print("  the ask's provenance, verbatim from the bytes the run would write:")
-    print("    written_by : %s" % rec.get("written_by"))
-    print("    rung3_ran  : %s" % rec.get("rung3_ran"))
-    print("    equivalent_of: %s" % rec.get("equivalent_of"))
-    print("    asks       : %s" % json.dumps(rec.get("asks")))
-    ask_ok = (rec.get("rung3_ran") is False
-              and "RUNG-3-EQUIVALENT" in (rec.get("written_by") or "")
-              and ask_puts[-1]["Key"].endswith("coverage_egress_ask_ladder_skipped.json"))
-unres_providers = [r.get("provider") for rs in V_ON["unresolved"].values() for r in rs]
-print("  unresolved rows' provider field (FWD-10 accept (ii)): %s of %s stated"
-      % (len([p for p in unres_providers if p]), len(unres_providers)))
-arm("(d) ASK LIMB", ask_ok and all(unres_providers),
-    "an egress ask IS recorded for the run, at the ladder-skipped key, and its record "
-    "says WHICH wrote it (rung3_ran=false); every unresolved row names its provider")
+        print("\n--- WHAT FIRING ANYWAY WOULD HAVE COST (measured) ---")
+        blocked_arms_cost(tmp)
 
-# =====================================================================================
-head("(e) THE BLOCKER -- NO MONTH CAN SATISFY arm (d)'s 404 / FWD-9's 'STAY ABSENT'")
-# =====================================================================================
-print("FWD-9 ACCEPT, verbatim (org/missions/D8/ETFS/ETFS_GUARDRAIL/prd/"
-      "ETFS_GUARDRAIL_PRD.md:566-567, restated at :187, @1d62717c65):")
-print("  \"the verdict object reads REFUSE with the classifier's own class table quoted")
-print("   at file:line, THE PUBLISH KEYS FOR THAT MONTH STAY ABSENT (a 404 beside the")
-print("   refused 200), the refusal reaches a person, and the FORCING is disclosed\"")
-print("")
-print("THE CANDIDATE SET IS WRITTEN AS A SUBTRACTION FROM A PRINTED DENOMINATOR, never")
-print("as a forward list (CLAUDE.md rule 24): a forced class C requires a slice the")
-print("fixture can REMOVE, so the candidates are exactly the months in which some")
-print("partner HAS a daily slice -- minus nothing.")
-months = sorted({d[:7] for p in PARTNERS for d in series_all[p]})
-total_slices = sum(len(series_all[p]) for p in PARTNERS)
-print("  daily slices scanned: %d across %d partners -> months carrying a slice: %s"
-      % (total_slices, len(PARTNERS), months))
-print("  slices OUTSIDE that month range: %d"
-      % len([d for p in PARTNERS for d in series_all[p] if d[:7] not in months]))
+        print()
+        if not feasible:
+            for arm, why in (
+                ("b", "the forcing's DISCLOSURE is read from a produced artifact; no artifact is produced"),
+                ("c", "coverage_verdict.json is never written -- coverage_gate raises before it returns"),
+                ("d", "no refusal artifacts and no egress ask exist to head-object"),
+                ("e", "the terminal send guard is False (coverage_unresolved.json 404 -> [])"),
+                ("f", "there is no forcing to undo -- the run did not happen"),
+                ("g", "the run wrote no keys, so there is no write enumeration to make"),
+            ):
+                record(arm, "NOT-RUN-BLOCKED", why)
+            record("PRE", "BLOCKING", detail)
+            print("\nS21-AC1 RESULT: FAIL -- token NOT printed.")
+            print("BLOCKING ROW: ETFS_GUARDRAIL-W4-S17")
+            print("THE SINGLE PERMITTED DRIVEN RUN IS UNSPENT.")
+            print("arm (a): %s" % ("PASS" if a_ok else "FAIL"))
+            return 1
 
-# auto-paginate, then count client-side: a single list_objects_v2 returns a PAGE and
-# its length is a page count, not a denominator (CLAUDE.md, put the control on the
-# retrieval). Written with the paginator rather than a hand-rolled continuation loop
-# because .tools/ds-precommit-check.py false-BLOCKS the latter -- row W4-S12.
-listed = []
-for _page in _s3.get_paginator("list_objects_v2").paginate(
-        Bucket=ETFS_BUCKET, Prefix=REPORTS_PREFIX + "/"):
-    listed += _page.get("Contents", [])
-print("  served keys under s3://%s/%s/ : %d (denominator)"
-      % (ETFS_BUCKET, REPORTS_PREFIX, len(listed)))
-keyset = {o["Key"]: o for o in listed}
+        # Unreachable in this world; kept so a re-cut after the disarm has the shape.
+        print("PRE-FIRE GATE CLEAR -- but this battery does not fire: the driven run is the "
+              "issuer's to re-authorize (ONE run, and it needs a fresh ruling).")
+        print("\nS21-AC1 RESULT: FAIL -- token NOT printed (arms b..g unmeasured).")
+        return 1
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
 
-print("")
-print("  month   | pdf 200 | html 200 | 404-able | slice to force | unforced verdict")
-print("  --------+---------+----------+----------+----------------+-----------------")
-n_404 = 0
-for m in months:
-    pdf = "%s/%s/etf_ownership.pdf" % (REPORTS_PREFIX, m)
-    htm = "%s/%s/etf_ownership.html" % (REPORTS_PREFIX, m)
-    has_pdf, has_htm = pdf in keyset, htm in keyset
-    can404 = (not has_pdf) and (not has_htm)
-    n_404 += 1 if can404 else 0
-    td = [d for d in CLS._month_dates(m) if CLS.tcal.is_trading_day(d)]
-    forcible = [p for p in PARTNERS
-                if any(d.isoformat() in series_all[p] for d in td)]
-    gaps = {p: len([d for d in td if d.isoformat() not in series_all[p]])
-            for p in PARTNERS}
-    unforced = "PUBLISH (0 gaps)" if all(v == 0 for v in gaps.values()) \
-        else "NOT PROVEN (gaps %s)" % gaps
-    print("  %s | %-7s | %-8s | %-8s | %-14s | %s"
-          % (m, has_pdf, has_htm, can404, ",".join(forcible)[:14], unforced))
-arm("(e) A MONTH EXISTS THAT CAN SATISFY THE ACCEPT", n_404 > 0,
-    "%d of %d months that can carry a FORCED class C serve NO publish key -- so the "
-    "404 the accept names is unreachable in every one of them. The single permitted "
-    "driven run is NOT spent on a run measured in advance to fail arm (d)."
-    % (n_404, len(months)))
 
-print("")
-print("  WHAT THE RUN WOULD HAVE WRITTEN on %s, enumerated from the CAPTURED puts plus"
-      % CAND_MONTH)
-print("  render_month_end.main()'s REFUSE branch (:1305-1332 of the served file):")
-for c in CAP_ON:
-    print("    NEW  s3://%s/%s  (%d B, coverage_gate)"
-          % (ETFS_BUCKET, c["Key"], c["BodyLen"]))
-for k in ("%s/%s/coverage_verdict.json" % (REPORTS_PREFIX, CAND_MONTH),
-          "%s/%s/coverage_unresolved.json" % (REPORTS_PREFIX, CAND_MONTH),
-          "%s/%s/refused/etf_ownership.html" % (REPORTS_PREFIX, CAND_MONTH)):
-    print("    %-4s s3://%s/%s" % ("NEW" if k not in keyset else "OVERWRITE",
-                                   ETFS_BUCKET, k))
-for p in ("49financial", "cottonwood", "inflection"):
-    k = "%s/%s/refused/opaletfs_%s_%s.csv" % (REPORTS_PREFIX, CAND_MONTH, p,
-                                              CAND_MONTH.replace("-", ""))
-    print("    %-4s s3://%s/%s" % ("NEW" if k not in keyset else "OVERWRITE",
-                                   ETFS_BUCKET, k))
-print("    -- and the PUBLISH keys %s/%s/etf_ownership.{pdf,html} + the three "
-      "opaletfs_*.csv ALREADY EXIST (LastModified 2026-09-01T17:38:05Z), which is "
-      "exactly why the 404 cannot be produced." % (REPORTS_PREFIX, CAND_MONTH))
-
-# =====================================================================================
-head("(f) NOTHING WAS INVOKED, SENT, WRITTEN OR DELETED")
-# =====================================================================================
-print("  orchestrator invokes         : 0")
-print("  SES sends                    : 0")
-print("  SSM send_command             : 0")
-print("  EC2 start/stop               : 0")
-print("  S3 put_object / delete_object: 0 real (%d CAPTURED by the stub, never sent)"
-      % (len(CAP_ON) + len(CAP_OFF)))
-print("  producer invokes             : 1, read-only PROBE, ETag-controlled UNCHANGED=%s"
-      % (h_before["ETag"] == h_after["ETag"]))
-arm("(f) NO SIDE EFFECT", h_before["ETag"] == h_after["ETag"],
-    "the only mutating capability exercised was the read-only probe, and its control "
-    "shows the slice byte-identical before and after")
-
-# =====================================================================================
-head("VERDICT")
-# =====================================================================================
-held = [k for k, v in ARMS.items() if v]
-print("arms: %d of %d HOLD" % (len(held), len(ARMS)))
-for k, v in ARMS.items():
-    print("  %-38s %s" % (k, "HOLD" if v else "BLOCKED"))
-print("")
-for b in BLOCKERS:
-    print("BLOCKING: %s" % b)
-print("")
-print("NOTHING WAS INVOKED. NO SEND. NO S3 WRITE OR DELETE. EG-s-21's ONE RUN IS UNSPENT.")
-print("battery ended (UTC): %s" % datetime.datetime.now(datetime.timezone.utc).isoformat())
-print("")
-if ARMS.get("(a) PRECONDITION") and ARMS.get("(b) DEPENDENCIES SERVED") \
-        and ARMS.get("(c) FORCING REACHES THE VERDICT") and ARMS.get("(d) ASK LIMB") \
-        and ARMS.get("(f) NO SIDE EFFECT") \
-        and not ARMS.get("(e) A MONTH EXISTS THAT CAN SATISFY THE ACCEPT"):
-    print("EGS21-BLOCKED-NO-MONTH-CAN-SATISFY-FWD9-404")
-    sys.exit(2)
-print("EGS21-INDETERMINATE -- the expected blocking shape did not hold; re-read the output")
-sys.exit(1)
+if __name__ == "__main__":
+    sys.exit(main())

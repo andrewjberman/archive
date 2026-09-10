@@ -1,0 +1,48 @@
+I2-AC3 -- THE REMEDY, AND THE CHECK THAT NOW SEES
+  TREE          : C:/tmp/wk-cldgrph-9-2 (branch wk-cldgrph-9-2, HEAD b5bb2f16a0ad960406fea53ead0b0e1a1d24526f)
+  ENVIRONMENT   : BEFORE = producer bytes at b5bb2f16a0ad960406fea53ead0b0e1a1d24526f (git show); AFTER = the producer file in this worktree. No S3, no network, no producer run against the live snapshot.
+  GRAIN         : the producer's OWN check in BOTH arms; only its bytes differ
+  COVERAGE      : the SAME one fixture in both arms (1 dropped stitch node, 1 archived edge onto it, 1 archived edge onto a re-emitted node)
+
+REMEDY=AWS_KEYS_MOVED
+WHY printed:
+  1. THE EVIDENCE FROM I2-AC2. The only live read of the key set is the dangling
+     filter itself, the bind at :144 is DEAD, and the only consumer of _index_aws
+     outside this producer is a capture harness that calls it directly
+     (g2_local_fold.sh:163) -- so moving the CHECK'S key set touches no second
+     consumer, while _index_aws itself is left untouched.
+  2. THE EDGE-SIDE DROP CANNOT BE MADE SAFE FROM THIS SOURCE. STORED_IN is
+     droppable by its literal type because nothing else in the estate writes one
+     (derive_stitch.py:155-157). The other stitch edge types -- WRITES, READS,
+     ROUTES_TO, DERIVES_FROM -- collide with the AWS layer's own ARN-keyed
+     READS/WRITES/ASSUMES edges carried in unchanged (module docstring :20-21),
+     so a type-shaped drop would delete estate this order never touched. The
+     archived edges carry no discriminator this producer can trust, and measuring
+     whether one exists needs a producer run the egress hold forbids.
+  3. THE CHECK IS THE GENERAL CONTROL; THE DROP IS A POINT FIX. Dropping the edge
+     closes THIS window and leaves the check still answering a question about the
+     moment before the collapse -- the next shrinking emission would be invisible
+     again. Moving the key set makes the producer SAY the number instead of
+     hiding it, which is also the only way the unmeasured magnitude ever gets
+     measured: the first real run prints it.
+  4. THE COST, STATED. main() returns 1 when genuine_dangling != 0, so the first
+     nightly run after this lands can go ERROR where it used to print OK. That is
+     the finding surfacing, not a regression -- but it is a CONSEQUENCE, not a
+     side effect, and it is named here rather than discovered at 02:00Z.
+
+  BYTES BY CONTENT (never by ancestry): BEFORE has 'CG-s-43'=False and '| aws_keys'=True; AFTER has 'CG-s-43'=True and '| aws_keys'=True
+
+INFO: STITCH_UNIFY type=Component admitted=1 merged=0 carried=1 reasons={'no-canonical-component': 1}
+INFO: STITCH_UNIFY_COLLAPSED {'prior_cycle_copy': 1, 'prior_cycle_not_reemitted': 1, 'cross_class_copy': 0, 'retired_props_dropped': 0} -- one node per stitch id, this cycle's emission kept over the copy read back from the snapshot this producer archived
+INFO: STITCH_UNIFY_TOTAL admitted=1 merged=0 created=1 lost=0 edges_rewritten=0
+  BEFORE (pinned pre-remedy bytes): genuine_dangling=0 of 2 edges | dropped_ids=['comp:i2-retired'] | node-absent/edge-present=1 | window edge SEEN=False | OVER-FIRE control (edge onto the re-emitted node flagged)=False
+INFO: STITCH_UNIFY type=Component admitted=1 merged=0 carried=1 reasons={'no-canonical-component': 1}
+INFO: STITCH_UNIFY_COLLAPSED {'prior_cycle_copy': 1, 'prior_cycle_not_reemitted': 1, 'cross_class_copy': 0, 'retired_props_dropped': 0} -- one node per stitch id, this cycle's emission kept over the copy read back from the snapshot this producer archived
+INFO: STITCH_UNIFY_TOTAL admitted=1 merged=0 created=1 lost=0 edges_rewritten=0
+  AFTER  (this worktree's bytes)   : genuine_dangling=1 of 2 edges | dropped_ids=['comp:i2-retired'] | node-absent/edge-present=1 | window edge SEEN=True | OVER-FIRE control (edge onto the re-emitted node flagged)=False
+      DANGLING: comp:i2-retired -[FETCHES]-> arn:aws:lambda:us-east-1:313476888478:function:i2-anchor
+
+CHECK_SEES_WINDOW=true
+BLIND_BEFORE=true (genuine_dangling=0 while 1 edge(s) named a dropped node)
+SEEING_AFTER=true (genuine_dangling=1, and the flagged edge IS the window edge; the re-emitted node's edge stayed resolvable, so the remedy did not over-fire)
+MAGNITUDE_ON_LIVE_SNAPSHOT=UNMEASURED (not manufactured)

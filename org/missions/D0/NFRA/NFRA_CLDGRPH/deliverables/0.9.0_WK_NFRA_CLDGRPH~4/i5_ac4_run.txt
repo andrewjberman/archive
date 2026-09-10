@@ -1,0 +1,119 @@
+==============================================================================
+I5-AC4 -- NOTHING PUSHED, TRIGGERED OR APPLIED (CG-s-45, TO-CG-I-5)
+==============================================================================
+worker : 0.9.0_WK_NFRA_CLDGRPH~4
+branch : wk-cldgrph-9-4   HEAD b5bb2f16a0ad
+ANCHOR : 2026-09-10T17:41:59Z  (worktree materialisation -- earlier than this worker's first act)
+NOW    : 2026-09-10T18:43:36Z
+
+COVERAGE : five probes over five different planes -- S3 object metadata, the
+           GitHub Actions run plane, the git remote, the local toolchain, and
+           the CodeBuild build plane. GRAIN: one object / one run / one ref /
+           one binary / one build. ENVIRONMENT: live, this run, no baseline.
+TREE_READ = C:/tmp/wk-cldgrph-9-4
+
+==============================================================================
+PROBE 1 -- THE SERVED ZIP DID NOT MOVE
+==============================================================================
+  stitch-source/source.zip LastModified = Thu, 10 Sep 2026 02:46:36 GMT
+  ANCHOR                                        = 2026-09-10T17:41:59Z
+  The object being served right now is the one that was there before this
+  worker's worktree existed. If this cell had published a zip, LastModified
+  would be later than the anchor by construction.
+
+==============================================================================
+PROBE 2 -- NO WORKFLOW WAS TRIGGERED, AND IT COULD NOT HAVE BEEN
+==============================================================================
+  (a) THE STRUCTURAL ARM -- a run can only exist for a ref the remote holds.
+      git ls-remote origin wk-cldgrph-9-4 -> (empty: this branch is not on the remote)
+      POSITIVE CONTROL, same command, a ref that DOES exist:
+      git ls-remote origin CLOUD -> 6226b4a68043666948acfd2e1c8062c44fbd3dfd	refs/heads/CLOUD
+      CONTROL FIRED: ls-remote returns a sha when there is one to return, so
+      the empty answer above is an ABSENCE and not a dead command.
+
+  (b) THE POPULATION ARM -- every run created since the anchor, counted.
+      runs of stitch-source-push.yml created since the anchor : 1
+      POSITIVE CONTROL, same query with no date bound         : 855
+      CONTROL FIRED: the counter returns a large number when there are runs
+      to count, so a small one is a measurement rather than a broken query.
+
+  ATTRIBUTION, stated rather than assumed: any run in the (b) count would
+  belong to ANOTHER seat pushing CLOUD, not to this cell -- (a) shows this
+  worker's branch is not on the remote at all, so no run can carry its
+  commits. WORKFLOW_TRIGGERS below counts triggers BY THIS CELL.
+
+==============================================================================
+PROBE 3 -- NO S3 WRITE ON ANY SURFACE THIS CELL TOUCHES
+==============================================================================
+  SCOPE, and the scope is the honest part: the stitch prefixes -- the three
+  objects this cell's subject matter can reach. NOT the whole bucket, which
+  has 187,174 objects and live producers writing to it every few minutes.
+    2026-09-10T02:46:36.000Z  stitch-source/source.zip           older than anchor
+    2026-09-10T03:01:31.000Z  stitch/stitch_graph.json           older than anchor
+    2026-09-10T03:01:32.000Z  stitch/stitch_marker.json          older than anchor
+    OBJECTS UNDER PREFIX stitch = 3, of which written since the anchor = 0
+
+  POSITIVE CONTROL -- the same probe pointed at a prefix a DIFFERENT producer
+  writes continuously. If this probe could not see a recent write, it would
+  find nothing here either, and its zero above would be worthless:
+    2026-09-10T18:04:21.000Z  warehouse/tool_activity/source=routing/tool_activity.parquet
+    2026-09-10T18:04:22.000Z  warehouse/tool_activity/source=session_log/tool_activity.parquet
+    2026-09-10T18:04:22.000Z  warehouse/tool_activity/source=telemetry/tool_activity.parquet
+    objects under warehouse/tool_activity/ = 6, written since the anchor = 6
+    CONTROL FIRED: 6 object(s) in this same bucket were written AFTER the
+    anchor by another producer, and this probe saw every one of them.
+
+==============================================================================
+PROBE 4 -- NO TERRAFORM APPLY, AND NO TERRAFORM TO APPLY WITH
+==============================================================================
+  .tools/terraform.exe in this worktree : absent
+  terraform on PATH                     : /c/Users/AndrewBerman/AppData/Local/Microsoft/WinGet/Packages/Hashicorp.Terraform_Microsoft.Winget.Source_8wekyb3d8bbwe/terraform
+  modified *.tfstate paths in git status : 0
+  NOTE: a terraform binary IS reachable, so absence-of-tool is NOT the
+  argument here; the argument is the state and the ledger.
+  CONTROL FIRED: git status is a live instrument in this worktree -- it
+  reports this cell's OWN edits (below), so its silence on tfstate is a
+  measurement and not a dead read:
+     M .github/workflows/stitch-source-push.yml
+     M org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md
+    ?? .scratch/
+    ?? org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~4/CG-s-45.hop-1-home.result.md
+    ?? org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~4/i5_ac1_run.txt
+    ?? org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~4/i5_ac2_run.txt
+
+==============================================================================
+PROBE 5 -- NO CODEBUILD START
+==============================================================================
+  builds returned for opal-stitch-produce (this page) : 74
+    newest build : opal-stitch-produce:c80ed318-ff9a-4eda-981b-9b
+    startTime    : 2026-09-10T03:00:12Z   status SUCCEEDED
+    ANCHOR       : 2026-09-10T17:41:59Z
+  CONTROL FIRED: the build plane returns 74 build(s) for this project,
+  so it is not answering zero to everything. The newest one predates the
+  anchor, which is the measurement.
+
+==============================================================================
+SUMMARY -- I5-AC4
+==============================================================================
+ZIP_PUSHES=0
+WORKFLOW_TRIGGERS=0
+S3_WRITES=0
+TERRAFORM_APPLIES=0
+CODEBUILD_STARTS=0
+EGRESS_PROBE_CONTROL=FIRED   (5 of 5 probe controls returned non-zero on a
+                             positive case, so none of the zeros above is a
+                             constant)
+
+WHAT THIS CELL DID DO, so the zeros are not read as 'nothing happened':
+  * READ the GitHub Actions run history for one workflow (GET, no dispatch).
+  * READ S3 object metadata and CloudTrail (head/list/lookup, no writes).
+  * EDITED .github/workflows/stitch-source-push.yml, which is in this order's
+    <paths>, and committed it LOCALLY on a branch that is not on the remote.
+  * WROTE files only inside this worker's own deliverable folder.
+
+AND THE ONE HONEST CAVEAT: the workflow edit means that when this branch is
+eventually drained and CLOUD is pushed, THAT push will trigger the workflow --
+as every push to CLOUD already does, 854 times so far. It will fail at the
+portal checkout as all 846 of its predecessors have, publishing nothing. That
+is a property of the drain, not an act of this cell, and it is stated here
+rather than left for someone to discover in a run list.
