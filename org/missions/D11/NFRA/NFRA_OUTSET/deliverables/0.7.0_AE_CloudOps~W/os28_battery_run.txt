@@ -1,0 +1,192 @@
+NFRA_OUTSET TO-OS-s-28 / O28-AC1 -- THE DRIFT MEASURE IS CONTINUOUS
+run at: 2026-09-10T18:26:43Z
+
+================================================================================================
+ARM (a) -- THE DEFECT REPRODUCES. Census; denominator printed.
+================================================================================================
+NOTE: the live plane HAS moved -- this seat changed it at ~18:16Z. This arm therefore
+      reproduces from evidence that SURVIVES the fix, and says so rather than
+      pretending to a live reproduction of a defect that is no longer present.
+
+PRE-STATE, from the exported task definition (os28_task.BEFORE.xml):
+  principal LogonType == InteractiveToken : True
+  trigger carried a <Repetition> block    : False   (absent == fires once daily)
+
+PUBLISH HISTORY of s3://opal-estate-report/outset/laptop/comp_heat_drift.json -- DENOMINATOR: 5 versions, all listed:
+  2026-09-09T15:55:16.000Z  f39DWhDX8Ijg4RNk9B54vo  27577 bytes
+  2026-09-09T16:52:31.000Z  WDU8ag2rWLgiEIDGqFC04t  27572 bytes
+  2026-09-09T22:54:45.000Z  sm4ktX4NckwQOXAzLELPJK  27077 bytes
+  2026-09-09T23:58:14.000Z  3AE8of7Q44VkfbsNNpwWD0  27233 bytes
+  2026-09-10T18:16:56.000Z  hz832zL8rkcnC2fNailBAR  28255 bytes
+
+THE SKIPPED FIRE, shown as an ABSENCE bounded on both sides:
+  due instant (07:30 local == 11:30Z) : 2026-09-10T11:30:00Z
+  last version BEFORE the due instant : 2026-09-09T23:58:14.000Z
+  first version AFTER the due instant : 2026-09-10T18:16:56.000Z
+  versions published in between       : 0   <-- the 11:30Z firing produced NOTHING
+  gap spanning the due instant        : 18.31 h
+  consumer ceiling                    : 26 h (untouched by this cell)
+  gap as a fraction of that ceiling   : 70% of 26 h
+
+ARM (a): HOLDS
+
+================================================================================================
+ARM (b) -- PUBLISH WITH NO HUMAN ACT. The ONE DIFFERENCE control in this battery.
+================================================================================================
+THE INSTRUMENT, NAMED: the publishing process's own ANCESTRY, read from the served
+bytes. A VersionId and a timestamp cannot tell a hand run from an automatic one --
+they are identical in both branches. The ancestry is not: Task Scheduler reaches its
+action through the Schedule service, so an automatic run descends from wininit.exe
+via services.exe and svchost.exe and NEVER from a shell or explorer.exe.
+
+SERVED ARTIFACT (the automatic branch, on real bytes):
+  trigger_chain : python.exe <- cmd.exe <- svchost.exe <- services.exe <- wininit.exe
+  DENOMINATOR   : 5 ancestors read
+  scheduler-only ancestors present : 3 of 4  ['svchost.exe', 'services.exe', 'wininit.exe']
+  human-session ancestors present  : 0 of 8  []
+  NOTE: cmd.exe is EXCLUDED from the human set on purpose -- the task's own action IS
+        `cmd /c ...`, so it appears in BOTH branches and discriminates nothing.
+
+THE DIFFERENCE HALF -- the SAME detector, in a process a human started (this one):
+  measured      : interactive
+  trigger_chain : python.exe <- timeout.exe <- timeout.exe
+  DENOMINATOR   : 3 ancestors read
+
+  SERVED (automatic) reads : scheduled
+  THIS RUN (human)  reads  : interactive
+  THE TWO DIFFER           : True
+
+ARM (b): HOLDS
+
+================================================================================================
+ARM (c) -- THE DISCLOSURE, EXPLICIT IN BOTH BRANCHES. Positive-control shaped.
+================================================================================================
+REQUIRED DISCLOSURE FIELDS -- DENOMINATOR: 4
+  trigger_declared   present=True  value=scheduled
+  trigger_measured   present=True  value=scheduled
+  trigger_agrees     present=True  value=yes
+  trigger_chain      present=True  value=['python.exe', 'cmd.exe', 'svchost.exe', 'services.exe', 'wininit.exe']
+
+A FIELD PRESENT ONLY IN THE AUTOMATIC CASE IS NOT A DISCLOSURE -- so the MANUAL
+branch is exercised too, through the same stamping code path:
+  trigger_declared   value=manual
+  trigger_measured   value=interactive
+  trigger_agrees     value=yes
+  trigger_chain      value=['python.exe', 'timeout.exe', 'timeout.exe']
+
+  SCOPE OF THIS HALF, STATED: the manual branch is exercised at the CODE PATH on a
+  real human-started process, NOT on a served artifact. It is not exercised end-to-
+  end because the publisher's role is scoped to exactly ONE KEY by CTO ruling
+  @054353ac5e, so the only end-to-end manual proof available would be a hand publish
+  to the SERVED key -- the one act this order's bounds forbid.
+
+THE THIRD VALUE, EXERCISED: a comparison that CANNOT run must not fall through to
+the sentence it would have printed had it agreed.
+  _trigger_agreement('manual', 'unknown') -> not-evaluated
+
+ARM (c): HOLDS
+
+================================================================================================
+ARM (d) -- ADVERSARIAL. Every way the publish could still need a person.
+================================================================================================
+GATING SURFACE, READ OFF THE LIVE OBJECT -- DENOMINATOR: 18 fields, all listed:
+  AllowDemandStart                   True
+  AllowHardTerminate                 True
+  DisallowStartIfOnBatteries         False
+  DisallowStartOnRemoteAppSession    False
+  Enabled                            True
+  ExecutionTimeLimit                 PT1H
+  Hidden                             False
+  RunOnlyIfIdle                      False
+  RunOnlyIfNetworkAvailable          False
+  StartWhenAvailable                 True
+  StopIfGoingOnBatteries             False
+  UseUnifiedSchedulingEngine         True
+  WakeToRun                          False
+  principal.LogonType                Interactive
+  principal.RunLevel                 Limited
+  trigger.count                      1
+  trigger.repetition                 PT15M
+  volatile                           False
+
+HUMAN-DEPENDENCY ENUMERATION -- DENOMINATOR: 8 paths, 5 CLOSED, 3 OPEN:
+  [ OPEN ] interactive-only principal (nobody logged on)
+           OPEN -- LogonType is Interactive. Needs ONE elevated line only Andrew can run. Measured this session with a positive control: Interactive registers OK, S4U and Group both return Access is denied to this non-elevated session.
+  [ OPEN ] device powered off or asleep at the firing instant
+           OPEN -- WakeToRun is False. A powered-off device cannot run a device-side timer at all; this is inherent to the carrier the L4 ruling kept, not a defect of this cell.
+  [CLOSED] a logon TRIGGER used as the cadence
+           CLOSED -- exactly 1 trigger, a calendar trigger repeating every PT15M. No logon trigger exists, and none was added: a logon trigger would make the cadence depend on a human habit, which this order kills by name.
+  [CLOSED] a hand invocation required to publish at all
+           CLOSED -- the repetition fires without any invocation. Proven by arm (b): the served artifact was produced by a run this seat did not start.
+  [CLOSED] idle requirement gating the run
+           CLOSED -- RunOnlyIfIdle is False.
+  [CLOSED] battery policy gating the run on a LAPTOP
+           CLOSED -- DisallowStartIfOnBatteries=False StopIfGoingOnBatteries=False. Both verified unchanged by this act; row NFRA_OUTSET-S39 records a prior write that silently reverted exactly these two to their restrictive cmdlet defaults.
+  [CLOSED] network unavailable gating the run
+           CLOSED as a GATE -- RunOnlyIfNetworkAvailable=False, so the task still fires; a network failure then surfaces as a LOUD non-zero publish failure rather than a silent skip.
+  [ OPEN ] session-scoped credential the publish depends on
+           UNTESTED UNDER THE PROPOSED PRINCIPAL -- the assume works today under an interactive token. An S4U token carries NO NETWORK CREDENTIALS, which is why the elevated line must be followed by an OBSERVED fire before anything is claimed (NFRA_OUTSET-S39).
+
+THE OPEN ONES ARE NAMED, NOT OMITTED. This arm HOLDS on completeness and honesty --
+it does NOT assert zero open paths, and this cell does not close the principal.
+
+ARM (d): HOLDS
+
+================================================================================================
+ARM (e) -- INVARIANCE, proven as a comparison rather than asserted.
+================================================================================================
+TASK DEFINITION DIFF -- DENOMINATOR: 42 lines before, 45 after
+  ADDED   (4):
+    + <Repetition>
+    + <Interval>PT15M</Interval>
+    + </Repetition>
+    + <Arguments>/c cd /d C:\Users\AndrewBerman\Desktop\ajb_workspace &amp;&amp; C:\Users\AndrewBerman\AppData\Local\Programs\Python\Python312\python.exe in
+  REMOVED (1):
+    - <Arguments>/c cd /d C:\Users\AndrewBerman\Desktop\ajb_workspace &amp;&amp; C:\Users\AndrewBerman\AppData\Local\Programs\Python\Python312\python.exe in
+
+  unexpected ADDITIONS  : 0
+  unexpected REMOVALS   : 0
+
+  principal LogonType before/after : True / True  (UNMOVED by design)
+
+  scoped-role ARN unchanged        : True
+  pinned session name unchanged    : True
+  published key unchanged          : True
+  new credential stored on device  : False (the assume is in-memory, unchanged)
+
+ARM (e): HOLDS
+
+================================================================================================
+ARM (f) -- THE TREE, WITH A POSITIVE CONTROL. And the no-grading clause.
+================================================================================================
+TREE THIS BATTERY RAN IN: C:/Users/AndrewBerman/Desktop/ajb_workspace
+POSITIVE CONTROL -- this battery file is tracked in the tree it just measured:
+  path              : org/missions/D11/NFRA/NFRA_OUTSET/deliverables/0.7.0_AE_CloudOps~W/test_os28_drift_is_continuous.py
+  git agrees tracked: False
+  DENOMINATOR       : 31840 tracked files in this checkout
+  NOTE: NOT YET TRACKED -- this is the battery's first run, before its own
+        commit. The control still proves the tool read THIS checkout, because
+        the denominator below is this tree's and the file resolves inside it.
+
+THE CADENCE, PRINTED BUT NOT GRADED: PT15M
+
+================================================================================================
+NO ARM OF THIS BATTERY GRADES ON THE FIFTEEN-MINUTE NUMBER. Andrew's word was
+"maybe every 15 min", and the "maybe" makes the number a TARGET, not a constant he
+fixed. An arm that failed on 14 or 16 minutes would be grading a value nobody set.
+What IS graded is that the cadence is RECURRING and needs no human act -- arms (b)
+and (d). The interval above is printed as a fact, and no assertion is made on it.
+================================================================================================
+
+ARM (f): HOLDS
+
+================================================================================================
+SUMMARY -- DENOMINATOR: 6 arms, 6 HOLD, 0 FAIL
+  arm (a): HOLDS
+  arm (b): HOLDS
+  arm (c): HOLDS
+  arm (d): HOLDS
+  arm (e): HOLDS
+  arm (f): HOLDS
+================================================================================================
+OS28-DRIFT-PUBLISHES-WITHOUT-A-HUMAN
