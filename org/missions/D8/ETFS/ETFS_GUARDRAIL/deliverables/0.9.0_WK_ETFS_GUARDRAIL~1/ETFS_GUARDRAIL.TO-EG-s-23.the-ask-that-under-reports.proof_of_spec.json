@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_GUARDRAIL.TO-EG-s-23",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_ETFS_GUARDRAIL~1",
+  "spec_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-23.the-ask-that-under-reports.md",
+    "group": "OTHER",
+    "vintage_commit": "5aeb940bd0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/ETFS/ETFS_GUARDRAIL/decompositions/ETFS_GUARDRAIL_DECOMP.md",
+    "vintage_commit": "5aeb940bd0867f24df24d2698904ec8d214f3c95",
+    "to_ref": "org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-23.the-ask-that-under-reports.md"
+  },
+  "session_log": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-ask-that-under-reports.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/coverage/remediate.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "THE CHANGE, in rung3_stop_and_ask: the write is now a MERGE at the same canonical key. A new helper _read_prior_asks(s3, key) returns (prior_asks, readable); when readable, this partner's entries REPLACE its own prior ones and every OTHER partner's are kept, so no partner can overwrite another and a partner that has since resolved is PRUNED rather than left asserting egress it no longer needs. The document gains two top-level keys, `partners_covered` (derived from its own merged content) and `ask_scope`. When the read is UNAVAILABLE the document says so in `ask_scope` ('prior asks UNREADABLE -- this file may omit other partners') rather than silently publishing a partner-only file that looks complete -- silently degrading to the overwrite is the defect itself. `asks` entries, `authorization` and the return's partner-scoped shape are unchanged. DELIBERATELY NOT DEPLOYED: arm (e) measures the gap, DEPLOYED != BUILT."
+    },
+    {
+      "path_or_key": "data/etfs/scripts/coverage/tests/test_remediate.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "FOUR permanent regression arms plus a _StoreS3 stub that actually models a key->bytes store (the existing _StubS3 has no get_object, so nothing in the suite could read back what was written -- which is why the defect survived). The arms: two partners do not overwrite each other IN THE STORED BODY; the stored ask names the partners it covers; the ask declares itself partial when prior asks are unreadable; a resolved partner is pruned and stops asking for egress. Suite 8 -> 12 passed, 0 failed both sides. ALL FOUR FAIL against the pre-change code (arm (g)), so they are controls and not constants."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs23_ask_completeness.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S23-AC1 battery, arms (a)-(g), every number beside its denominator. 7 of 7 PASS, token EGS23-ASK-NAMES-EVERY-PARTNER printed, rc=0. Every ladder run targets an in-memory FakeS3; the served ask key is READ and never written."
+    },
+    {
+      "path_or_key": "org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/the-ask-that-under-reports.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Criteria verbatim with rc and denominator, the shape decision, and what the served ask omits."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S23-AC1",
+      "criterion_verbatim": "PASSES BY OUTPUT. One battery ... ending with the literal token EGS23-ASK-NAMES-EVERY-PARTNER only when all seven arms hold. (a) THE DEFECT REPRODUCES FIRST, ON THE CODE AS IT STANDS ... If this does not reproduce ... STOP; (b) EVERY PARTNER IS REACHABLE AFTER THE CHANGE ... with the partner list taken from an artifact that owns it and PRINTED AS THE DENOMINATOR ... State the shape you chose in one sentence; (c) A PARTIAL ASK CANNOT READ AS COMPLETE ...; (d) THE LADDER'S OTHER PROPERTIES ARE UNDISTURBED ...; (e) DEPLOYED-vs-BUILT, MEASURED ...; (f) NO EGRESS, NO SEND, NO INVOKE ...; (g) THE REGRESSION ARMS ARE CONTROLS, NOT CONSTANTS.",
+      "method": "command",
+      "invocation": "timeout 300 python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs23_ask_completeness.py",
+      "output_evidence": "rc=0. 'ARMS 7 of 7 PASS' then the token 'EGS23-ASK-NAMES-EVERY-PARTNER'.\n(a) PASS -- THE DEFECT REPRODUCED FIRST, before any edit was graded. The PRE-CHANGE remediate.py was loaded from git c6bcb7b12b (11011 bytes) and the ladder run for two partners against a fake s3 recording every put_object: 2 of 2 calls target the SAME key platinum/reports/2026-09/coverage_egress_ask.json (1 distinct key of 2 calls); the FIRST body carried [('49financial','2026-09-09')] and the STORED body carries only [('cottonwood','2026-09-08')]. 49financial's outstanding day is ABSENT, and the stored body's top-level keys are ['asks','authorization','generated_at','month'] -- nothing in it names a partner it does not cover.\n(b) PASS -- SHAPE, in one sentence: ONE MERGED MONTH DOCUMENT at the same canonical key, because the reader is a PERSON opening ONE file to authorise egress, so 'which partners does this cover' must be a property OF THE STORED DOCUMENT -- per-partner keys would leave a partner that never wrote invisible unless the reader already knew the partner set, which is the thing being fixed. THE PARTNER LIST WAS TAKEN FROM AN ARTIFACT THAT OWNS IT, never by recall: s3://opal-data-etfs/platinum/reports/2026-09/coverage_verdict.json's per_partner keys -> ['49financial','cottonwood','inflection'], 3 partner(s) DENOMINATOR minus 0 excluded. After the change the one document a reader opens carries partners_covered = ['49financial','cottonwood','inflection'] and ask_scope 'month-complete (merged across partners at this key)', with each partner's date, provider and class present: 3 of 3 partners reachable.\n(c) PASS -- COMPLETE partners_covered ['49financial','cottonwood','inflection'] vs PARTIAL ['cottonwood','inflection'] when 49financial's ladder never ran: TEXTUALLY DIFFERENT -> True. Pre-change the same two cases were indistinguishable, because the document carried no partner-coverage field at all.\n(d) PASS -- python -m pytest data/etfs/scripts/coverage/tests/test_remediate.py -q by its own path: BEFORE (pre-change code AND pre-change tests, reconstructed from git c6bcb7b12b) rc=0, 8 passed, 0 failed; AFTER rc=0, 12 passed, 0 failed -- no regression, +4 arms. authorization VERBATIM 'PER-USE -- a person decides; nothing here is executed by any process'. dry_run: rung 3 did NOT fire and put_object calls 0 of 0 expected. class B: expected_empty ['2026-09-08'], rung-1 invokes 0 of 0 expected, rerun count 0 -- it still stops without a re-run.\n(e) PASS -- DEPLOYED != BUILT in those literal words. DEPLOYED s3://opal-313476888478-lambda-artifacts/ec2/etfs-reports/coverage/remediate.py = 11011 bytes, sha256 3c3ce6c5cfcce654...; BUILT = 15011 bytes, sha256 25ff4dbed4af6545...; CRLF 0 in each. CORROBORATION: the deployed bytes hash EQUAL to the pre-change blob at git c6bcb7b12b, so the box is running exactly the overwriting version. This cell deploys nothing and that is the expected answer.\n(f) PASS -- 0 SES clients, 0 Lambda invokes, 0 boto3 clients constructed (boto3.client wrapped before any other work), 2 AWS CLI calls across services ['s3api'] with 0 naming ses/sesv2/lambda, and 0 of 7 network tokens (requests./urllib.request/http.client/socket. etc.) present in the changed module. Every ladder run in the battery targeted an IN-MEMORY FakeS3, so 0 of its put_object calls reached AWS and the served ask key was read-only throughout.\n(g) PASS -- 4 of 4 new arms FAIL against the pre-change code (rc=1) and 4 of 4 PASS against this cell's (rc=0). The pre-change failures are the defect stated in one line each: 'assert [\"inflection\"] == [\"cottonwood\", \"inflection\"]', KeyError 'partners_covered', KeyError 'ask_scope', KeyError 'partners_covered'. An arm that passes both ways proves nothing.",
+      "denominator": "7 of 7 arms PASS; 3 of 3 partners from the owning artifact; 2 of 2 pre-change put_object calls on 1 distinct key; suite 8 -> 12 passed with 0 failed both sides; 4 of 4 new arms failing pre-change and passing post-change; 2 AWS CLI calls all s3api; 0 boto3 clients; 0 of 7 network tokens",
+      "expect": "EGS23-ASK-NAMES-EVERY-PARTNER",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S23-AC2",
+      "criterion_verbatim": "JUDGMENT, RECORDED AND NOT SELF-GRADED. Your record states, for 3.0.0_SA_CVO at L9: the shape you chose and why; what the SERVED 2026-09 coverage_egress_ask.json currently omits, with both counts and its vintage, since that is the artifact a person would have authorised on; whether any consumer reads that key and would be broken by a shape change, censused with a denominator rather than recalled; and what this change does NOT repair. Do not grade yourself PASS -- it is graded at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "Evidence assembled for the CVO; NOT self-graded (spine v3 L9: a judgment criterion is graded at L9 and never self-graded).",
+      "output_evidence": "RECORDED FOR L9, NO VERDICT.\n1. THE SHAPE, AND WHY. ONE MERGED MONTH DOCUMENT at the same canonical key -- not per-partner keys and not a manifest. The axis is WHO READS THIS AND WHAT THEY SEE: the reader is a person opening ONE file to decide whether Opal goes outside for data, so the property 'which partners does this cover' has to live in the STORED DOCUMENT. Per-partner keys are the more obvious fix and are worse on that axis: they make each file correct while leaving a partner that never wrote INVISIBLE to anyone who does not already know the partner set -- which is precisely the failure being repaired, moved from an overwrite to an absence. A manifest has the same defect one level up (a manifest that omits a partner reads as complete). So the document now carries `partners_covered`, derived from its own merged content, and `ask_scope`.\n2. AND THE MERGE'S OWN FAILURE MODE IS DECLARED, NOT HIDDEN. A merge has exactly one input: the read of what is already at the key. If that read is unavailable, a naive merge silently degrades to the original overwrite -- the same artifact, the same invisibility. So `_read_prior_asks` distinguishes an absent CAPABILITY from an absent OBJECT: a client with no get_object returns readable=False and the document says `ask_scope: 'partner-only (prior asks UNREADABLE -- this file may omit other partners)'`, while a get_object that merely raises is read as the ordinary first-partner absence and stays month-complete. A reader is never handed a file that looks complete and is not.\n3. WHAT THE SERVED 2026-09 ARTIFACT OMITS, with counts and vintage -- this is the artifact a person would have authorised on. s3://opal-data-etfs/platinum/reports/2026-09/coverage_egress_ask.json, 1017 bytes, LastModified 2026-09-10T01:20:20Z (s3api head-object, UTC), written by EG-s-15's real September run. It names 1 ask, partner ['cottonwood'], date 2026-09-09. The month's own coverage_unresolved.json (same prefix, same run) carries 2 outstanding days across ['49financial','cottonwood']. So the served ask names 1 OF 2 outstanding days and OMITS ('49financial','2026-09-09') entirely, and its top-level keys are ['month','generated_at','asks','authorization'] -- there is no field in it from which a reader could learn that a second partner existed. A person authorising on it would have approved half of what was outstanding while believing they had seen all of it.\n4. A CORRECTION TO MY OWN EARLIER ROW. W1-S27 (filed by me on EG-s-15) reported this same 1-of-2 shortfall correctly as an OBSERVATION but speculated the cause was an unmapped provider for 49financial. That speculation was WRONG and this cell's read disproves it: remediate.py's _PROVIDER_BY_PARTNER maps 49financial -> 'Schwab' explicitly. The cause is the partner-less key and the per-partner call, not the provider map. The row hedged the cause as 'likely', which is why it was a hypothesis and not a finding, but a reader chasing the provider map would have found nothing wrong there.\n5. CONSUMERS OF THE KEY, CENSUSED WITH A DENOMINATOR RATHER THAN RECALLED. comp-find 'coverage_egress_ask' over the repo corpus: 124 hits across 29716 files scanned, banded SURFACED=36 CONFIG=8 TEST=33 DOC=47. Outside remediate.py itself and the test files, exactly ONE first-party consumer reads the key: infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py, which fetches it in _read_coverage_artifacts (:254, the ('coverage_egress_ask.json','ask') pair) and renders it in _build_terminal_email. Its consumption was READ, not recalled: :292 `if ask and ask.get(\"asks\")`, :296 `for a in ask[\"asks\"]` with per-entry `.get('date'/'partner'/'provider'/'class'/'reason')`, and :300 `ask.get('authorization')`. IT IS NOT BROKEN BY THIS SHAPE CHANGE: every key it touches is unchanged, the per-entry shape is unchanged, and the two new top-level keys are additive; the only difference it sees is that `asks` is now COMPLETE, which makes the terminal email more complete rather than less. NOTE ON LANE: that file is 0.9.0_WK_ETFS_GUARDRAIL~4's live surface for EG-s-21 and was READ ONLY -- not edited, not staged, not touched.\n6. WHAT THIS CHANGE DOES NOT REPAIR. (i) IT DOES NOT FIX THE SERVED ARTIFACT. The 2026-09 ask still omits 49financial's day and this cell writes no served key; the artifact only becomes complete when a ladder runs again against DEPLOYED bytes that carry this change. (ii) IT IS NOT DEPLOYED: DEPLOYED != BUILT, deployed sha256 3c3ce6c5cfcce654... (11011 B, equal to the pre-change blob) vs built 25ff4dbed4af6545... (15011 B), so every future run today still overwrites one partner's ask with the next; the deploy is a separate act with a separate owner. (iii) It does not repair the rung-1/rung-2 ladder, which was not this cell's subject and is untouched. (iv) It does not make a partner that NEVER RUNS AT ALL appear in the document -- no per-partner function can know a set it was never given -- but such a partner is now visibly absent from `partners_covered` instead of invisibly absent from a document with no coverage field, which is the property the bar asked for. (v) It does not touch inflection's producer or any egress authorization; ruling card 4's PER-USE line is unchanged and stands for nobody.",
+      "denominator": "6 evidence heads; the consumer census is 124 hits over 29716 files scanned with 1 non-test first-party consumer identified and its 3 access sites read at file:line; the served-ask shortfall is 1 of 2 outstanding days across a 2-partner unresolved set; every citation carries a vintage (git c6bcb7b12b for the pre-change blob, UTC LastModified for served objects)",
+      "expect": "JUDGMENT -- graded by 3.0.0_SA_CVO at L9; no worker verdict recorded",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded at L9 by 3.0.0_SA_CVO and explicitly NOT self-graded, as the face directs ('Do not grade yourself PASS'). The record above states the shape and its reason, the merge's own declared failure mode, what the served artifact omits with counts and vintage, a correction to my own earlier row W1-S27, the consumer census with its denominator and the one consumer's access sites read at file:line, and five things this change does not repair. SUBSTITUTE ORACLE for the one thing no instrument here settles -- whether a merged document or per-partner keys better serves a future reader who is not the terminal email -- is the CVO's read against FWD-8, since this cell can only demonstrate that the merged shape satisfies the stated bar and not that no other shape would."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The load-bearing claim is that the ask now names every partner and that a partial ask cannot read as a complete one. The control is the order of work: arm (a) runs the SAME two-partner scenario against the PRE-CHANGE module loaded from git c6bcb7b12b BEFORE the change is graded, and REQUIRES the overwrite to reproduce -- if it had not, the arm stops the cell rather than let a fix be built on a refused premise. SECOND control, arm (g): the four new suite arms are run against the pre-change code and must FAIL there; an arm that passes both ways proves nothing, and these produce the defect as their failure message. THIRD, arm (c) constructs the partial case explicitly rather than arguing it: one partner's ladder is skipped and the two artifacts are compared textually. FOURTH, the partner set is taken from an artifact that owns it and printed as a denominator, because this project has twice been bitten by a hand-typed partner list that named two of three while the third carried the violation.",
+      "expected": "PRE-CHANGE: 2 put_object calls on 1 key, the stored body carrying only the second partner, no partner-coverage field. POST-CHANGE: all partners in one document, partners_covered naming them, the partial case textually different, the existing suite green, and the four new arms failing pre-change.",
+      "observed": "Exactly that. Pre-change: 2 of 2 calls on 1 distinct key, stored body ['cottonwood'] only, top-level keys ['asks','authorization','generated_at','month']. Post-change: 3 of 3 partners reachable, partners_covered ['49financial','cottonwood','inflection'], ask_scope 'month-complete'; partial case ['cottonwood','inflection'] textually different from complete; suite 8 -> 12 passed with 0 failed both sides; 4 of 4 new arms failed pre-change (rc=1) and passed post-change (rc=0). Every control fired and discriminated.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every arm is a pure in-memory computation plus idempotent S3 GETs. No ladder run in the battery touches AWS: they target a FakeS3 whose store is a dict. The pre-change module is pinned by commit rather than described, and both pre-change trees are rebuilt from git on every run. No write of any kind reaches a served key, no provider call, no SES client, no Lambda invoke.",
+      "observed": "The battery was run to completion with all seven arms passing; the suite results (8 before, 12 after, 0 failed both) and the pre-change arm failures (4 of 4) were each reproduced independently by hand before the battery was written, with identical numbers. The one number that is time-varying by construction is the `generated_at` field the module stamps, which no arm asserts on.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any provider call, HTTP client, credential or outward invoke.",
+      "reason": "The BOUNDS make this the outcome's own subject: ruling card 4's PER-USE authorization stands for nobody and this cell does not touch it. Arm (f) proves 0 of each from the run, with a 7-token network census over the changed module."
+    },
+    {
+      "item": "Any SES client or Lambda invoke.",
+      "reason": "Andrew's standing constraint plus the BOUNDS. 0 boto3 clients constructed, 2 AWS CLI calls both s3api, 0 naming ses/sesv2/lambda."
+    },
+    {
+      "item": "Writing or overwriting the served coverage_egress_ask.json, or deploying the changed module.",
+      "reason": "'THIS CELL DEPLOYS NOTHING and writes NO served key.' The served ask was READ only; every ladder run targeted an in-memory FakeS3. Arm (e) measures the deployed-vs-built gap rather than closing it."
+    },
+    {
+      "item": "Any edit to infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py.",
+      "reason": "That is 0.9.0_WK_ETFS_GUARDRAIL~4's live surface for EG-s-21. It was READ to census whether this shape change breaks its consumption of the ask key -- it does not -- and neither edited nor staged."
+    },
+    {
+      "item": "Any change to rungs 1 and 2 of the ladder.",
+      "reason": "Explicitly not this cell's subject: no fabrication, only a READ decides 'resolved', and class B still stops without a re-run -- all three asserted in arm (d) and unchanged."
+    },
+    {
+      "item": "Per-partner keys or a manifest.",
+      "reason": "Both are legitimate by the face and both are worse on the axis that matters: they leave a partner that never wrote invisible to a reader who does not already know the partner set. Reasoned in S23-AC2 head 1 rather than dismissed."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": ".tools/commit-gate.sh (CLAUDE.md rule 14 -- py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh data/etfs/scripts/coverage/remediate.py data/etfs/scripts/coverage/tests/test_remediate.py org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs23_ask_completeness.py",
+      "result": "rc=0 -- 'All checks passed!' x3, 'OK: pre-commit gate clean for 3 of 3 file(s)'."
+    },
+    {
+      "tool": "pytest (the estate's own remediate suite, by its own path)",
+      "invocation": "python -m pytest data/etfs/scripts/coverage/tests/test_remediate.py -q",
+      "result": "BEFORE (pre-change code AND pre-change tests, rebuilt from git c6bcb7b12b) rc=0 8 passed 0 failed; AFTER rc=0 12 passed 0 failed. The sibling classifier suite is also green at 10 passed."
+    },
+    {
+      "tool": "pytest against the PRE-CHANGE module with THIS cell's arms (the arm (g) falsifier)",
+      "invocation": "python -m pytest <temp tree with git c6bcb7b12b:remediate.py + this cell's tests> -q -k egs23",
+      "result": "rc=1, 4 failed, 0 passed -- 'assert [\"inflection\"] == [\"cottonwood\", \"inflection\"]', KeyError 'partners_covered' x2, KeyError 'ask_scope'. The same arms pass rc=0 against this cell's code."
+    },
+    {
+      "tool": "the S23-AC1 battery (this worker's)",
+      "invocation": "timeout 300 python org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~1/test_egs23_ask_completeness.py",
+      "result": "rc=0 -- 'ARMS 7 of 7 PASS' then 'EGS23-ASK-NAMES-EVERY-PARTNER'."
+    },
+    {
+      "tool": "comp-find (the consumer census, with a denominator rather than recall)",
+      "invocation": "comp-find \"coverage_egress_ask\" --all",
+      "result": "124 hit(s) across 29716 file(s) scanned; bands SURFACED=36 CONFIG=8 TEST=33 DOC=47; exactly 1 non-test first-party consumer outside the module itself (infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py), whose 3 access sites were then read at file:line."
+    },
+    {
+      "tool": ".tools/aws (CLI shim) -- s3api only, read-only",
+      "invocation": "s3api get-object on the 2026-09 coverage_verdict.json (the partner denominator) and on the deployed remediate.py artifact; s3api head-object + get-object on the served coverage_egress_ask.json",
+      "result": "All rc=0. Served ask 1017 B, LastModified 2026-09-10T01:20:20Z, 1 ask naming ['cottonwood'] against 2 outstanding days across ['49financial','cottonwood']. Deployed remediate.py 11011 B sha256 3c3ce6c5cfcce654..., equal to the pre-change blob."
+    }
+  ]
+}

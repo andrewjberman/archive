@@ -1,0 +1,61 @@
+=== CG-s-38 / H3-AC3 -- HOP 1 DECIDED, THE CHAIN MEASURED FOR HALVES ===
+TREE_READ=C:/tmp/wk-cldgrph-8-2  branch=wk-cldgrph-8-2
+TREE_CONTROL=org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/h3_tree_control.txt exists=True (only on this branch)
+INSTRUMENT: literal content match over the five feed files, plus TWO LIVE EXERCISES -- the hand builder run for real over throwaway git repos, and the buildspec's own inline python extracted from the Terraform and executed.
+GRAIN: one archive ENTRY and one marker KEY -- read back out of a real zip and a real json file, never inferred from the producer's own log line.
+ENVIRONMENT: python 3.12.10 on win32, local filesystem only; no AWS, no CodeBuild, no apply. Every state below is DESIRED or LOCAL-EXERCISED.
+
+  ARM 1 -- the two producers, by content
+    ROUTE A  org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f3_build_source_zip.py
+             THE ROUTE THAT ACTUALLY RAN: all five served source-zip pushes in round 6 were made by hand from this script (CG-s-35's census).
+             writes portal_sha.txt into the archive = true
+    ROUTE B  .github/workflows/stitch-source-push.yml
+             the COMMITTED route; no run of it has ever been observed to succeed (it needs secrets.PORTAL_REPO_PAT).
+             writes portal_sha.txt into the archive = true
+
+  ARM 2 -- the chain, all four hops: a WRITE whose READER is missing is a half
+    1 PACK  route A writes portal_sha.txt          true
+    1 PACK  route B writes portal_sha.txt          true
+    2 STAMP buildspec READS portal_sha.txt         true
+    2 STAMP buildspec writes marker['portal_sha']  true
+    3 COPY  hop 3 READS marker portal_sha          true
+    3 COPY  hop 3 writes stitch_portal_sha         true
+    4 PRINT hop 4 READS stitch_portal_sha          true
+    4 PRINT hop 4 renders it                       true
+    CHAIN_LINKS_PRESENT=8 of 8
+
+  ARM 3 (EXERCISE, ROUTE A) -- the hand builder run for real over two throwaway git repos, then the zip OPENED and read back
+    fixture repo HEAD   = eec8c0f3e7cfc913dc430f32da42ca12482f7bb0
+    fixture portal HEAD = 9b8454173a0fcf838ef33aa5e1a611ce7a7ff412
+    builder rc=0, zip entries=5
+    archive carries stitch_source_sha.txt=true  portal_sha.txt=true
+    portal_sha.txt CONTENT read back = 9b8454173a0fcf838ef33aa5e1a611ce7a7ff412
+    CONTENT_EQUALS_PORTAL_HEAD=true
+
+  ARM 4 (EXERCISE, HOP 2) -- the buildspec's OWN inline python, extracted from the Terraform and executed verbatim
+    SUBSTITUTION DISCLOSED (the only one): the two hard-coded /tmp paths were repointed at C:/tmp/wk-cldgrph-8-2/.scratch/h3_hop1/buildspec so this exercise cannot collide with another slot. Not one other character of the extracted block was changed.
+    WITH portal_sha.txt   -> rc=0 keys=8 portal_sha=5907cbca98eb091124e38a32debefa355c1d4376
+    WITHOUT it (control)  -> rc=0 keys=7 portal_sha_present=false
+    STAMP_CARRIES_THE_KEY=true   ABSENT_IS_ABSENT=true
+
+HOP1_BRANCH=COMMITTED_PRODUCER
+PRODUCER_PATH printed:
+  org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f3_build_source_zip.py   <- the route that actually produced every served zip in round 6
+  .github/workflows/stitch-source-push.yml   <- the committed route, unobserved
+WRITES_PORTAL_SHA=true
+HALF_DONE=false
+  HALF_DONE is the ARM 2 measurement: 8 of 8 chain links present, so no hop writes a key its consumer does not read.
+HOP2_STATE=DESIRED
+  Hop 2 is a COMMITTED buildspec inside a Terraform resource. It is DESIRED and nothing more: no apply has run and none is permitted this round, so the LIVE CodeBuild project still carries the seven-key marker. The extracted-block exercise above proves the TEXT is correct; it proves nothing about the project.
+
+RESIDUAL OWNED ITEMS -- (a) was taken for the KEY, and these are what (a) does not reach. Named here so the branch token cannot be read as 'hop 1 is finished':
+  ITEM 1  BLOCKER printed: the route that produces the served zip lives in a MISSION DELIVERABLE FOLDER (org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2). A deliverable folder is a record of a task order, not a production home: it has no schedule, no trigger, no owner outside this project, and it is archived when the mission closes. No path in this order's grant is a production home, so the move cannot be made from here.
+          OWNER_NAMED printed: 1.0.0_SA_CTO to place it (which plane owns a repo-subset packer), then 0.7.0_AE_CloudOps to run it.
+  ITEM 2  BLOCKER printed: the committed route pins the portal at a LITERAL sha under a comment saying the pin IS the gitlink sha; at HEAD the gitlink is 5907cbca98eb... and the pin is b96562720505... Nothing updates it. Changing a production route's checkout ref is not this cell's change and no exercise of it is available under the egress hold.
+          OWNER_NAMED printed: 0.7.0_AE_CloudOps (the disarm owner rows W2-S40 and W2-S63 already carry).
+  ITEM 3  BLOCKER printed: secrets.PORTAL_REPO_PAT is unprovisioned, which is why route B has never run and why route A exists at all.
+          OWNER_NAMED printed: 0.7.0_AE_CloudOps, with 0.0.0_AB_MSTR for the repo secret itself.
+
+  DENOMINATOR: 2 producers, 8 chain links, 1 zip built and reopened (5 entries), 2 marker runs of the extracted buildspec block, 3 residual items.
+  WHAT THIS DOES NOT CERTIFY: that either route will RUN. Route B has never been observed to succeed and route A is a hand act. This certifies that the producer CODE on both routes writes the key, and that hop 2's own text reads it.
+H3_AC3_RESULT=PASS

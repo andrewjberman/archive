@@ -1,0 +1,155 @@
+==============================================================================
+G4-AC3 -- THE CARRIER QUESTION, WITH ITS DENOMINATOR
+==============================================================================
+QUESTION  : is there a carrier a reader ALREADY consults that could hold the
+            portal layer's vintage, and if so is it merely unfed?
+POPULATION: every surface that stands between the portal checkout and a reader
+            asking 'how old is the portal half of this answer' -- the two
+            DECLARING surfaces in the repo, the three PRODUCER-side carriers,
+            and the three READER-side carriers. Enumerated below and swept in
+            full; the denominator is the enumeration, and it excludes surfaces
+            no reader of the served graph consults (test files, sensor scripts).
+
+------------------------------------------------------------------------------
+C1  the served VINTAGE line (projection_worker._age_line)
+     where     : infra/aws/globgrph/projection_worker.py:241-263 (def at line 241)
+     EXISTS as a surface a reader consults : True
+     CARRIES a portal vintage TODAY        : False
+     COULD carry one without a new surface : True
+     evidence  : EXERCISED with a stitch-only manifest -> 'Built from the estate as of 2026-09-10 03:02:00 UTC. Stitch source: stitch-codebuild built 2026-09-10T03:01:17Z.'
+     evidence  : EXERCISED with the SAME manifest plus stitch_portal_sha=5907cbca -> 'Built from the estate as of 2026-09-10 03:02:00 UTC. Stitch source: stitch-codebuild built 2026-09-10T03:01:17Z.'
+     evidence  : the two outputs are IDENTICAL -- the extra key changes nothing
+     evidence  : portal vintage rendered: False
+     evidence  : EXTENSION PROVEN, not assumed: the ' Stitch source: ... built ...' clause is itself an append CG-s-24 added to this same function; a portal clause is the same shape, appended after it
+     evidence  : the function's own docstring: 'this is where a stitch vintage becomes readable at all' (row NFRA_CLDGRPH-W2-S46)
+------------------------------------------------------------------------------
+C2  the build manifest's source_vintage dict (kuzu_nessie_load.read_stitch_vintage)
+     where     : infra/aws/globgrph/kuzu_nessie_load.py:51-79
+     EXISTS as a surface a reader consults : True
+     CARRIES a portal vintage TODAY        : False
+     COULD carry one without a new surface : True
+     evidence  : the keys it emits, parsed from the return literal: stitch_built_at, stitch_producer, stitch_git_sha, stitch_artifact_sha256, stitch_marker_last_modified
+     evidence  : portal tokens among them: NONE
+     evidence  : the dict is the ONLY feed into C1: projection_worker reads source_vintage.get('stitch_built_at') and nothing else
+     evidence  : additive-extension contract present in infra/aws/globgrph/_provenance.py: True
+     evidence  : the module's own words on why the stitch keys travel here: 'the branch-head marker ... has a closed shape and no extension point ... So the stitch vintage travels from the producer's own marker'
+------------------------------------------------------------------------------
+C3  the comp-kuzu provenance header (_provenance.format_provenance_header)
+     where     : infra/aws/globgrph/_provenance.py:753-857
+     EXISTS as a surface a reader consults : False
+     CARRIES a portal vintage TODAY        : False
+     COULD carry one without a new surface : False
+     evidence  : EXERCISED: handed 7 non-empty source_vintage keys; it PRINTED 3 and DROPPED 4
+     evidence  : printed: edges_snapshot_id, nodes_metadata_key, nodes_snapshot_id
+     evidence  : DROPPED SILENTLY: stitch_built_at, stitch_git_sha, stitch_portal_sha, stitch_producer
+     evidence  : the drop is structural, not a bug in the fixture: the function has NO loop over source_vintage -- it hard-codes one branch per source_kind (tarball -> tarball_key; nessie -> nodes/edges snapshot-id + nodes metadata; stitch -> stitch_path/stitch_mtime)
+     evidence  : and no reader reaches it anyway: no serve path calls it (row NFRA_CLDGRPH-W3-S14, restated in infra/aws/globgrph/projection_worker.py:245-247)
+     evidence  : SO THIS ORDER'S PREMISE THAT IT 'prints every source_vintage key it is given' DOES NOT HOLD -- filed as row NFRA_CLDGRPH-W3-S17
+------------------------------------------------------------------------------
+C4  the stitch marker s3://.../stitch/stitch_marker.json
+     where     : infra/aws/terraform/globgrph/stitch-produce.tf (inline CodeBuild buildspec, the marker dict)
+     EXISTS as a surface a reader consults : True
+     CARRIES a portal vintage TODAY        : False
+     COULD carry one without a new surface : True
+     evidence  : DECLARED keys, parsed from the buildspec literal: built_at, aws_snapshot, git_sha, producer, total_nodes, total_edges, artifact_sha256
+     evidence  : APPLIED keys, from a live read of the object captured at org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f3_marker_capture.json: artifact_sha256, aws_snapshot, built_at, git_sha, producer, total_edges, total_nodes
+     evidence  : DECLARED and APPLIED agree: True
+     evidence  : git_sha is the SUPERPROJECT sha read from stitch_source_sha.txt, which does not move when the gitlink's target moves -- measured here: marker git_sha de590a7d0227fb9c14ce35b96dcec86deb68df60
+     evidence  : portal tokens in either plane: NONE
+     evidence  : it CAN carry one -- kuzu_nessie_load.read_stitch_vintage already copies five marker fields verbatim, so a sixth needs no new surface
+------------------------------------------------------------------------------
+C5  the served PORTAL_BUNDLE node 'portal' and its props
+     where     : infra/aws/globgrph/extract_portal_stitch.py:131-142 (emit + the synthetic root)
+     EXISTS as a surface a reader consults : True
+     CARRIES a portal vintage TODAY        : False
+     COULD carry one without a new surface : True
+     evidence  : every prop the producer writes on a portal node: id, arn, type, name, layer, drift_class, source, file_path
+     evidence  : portal tokens among them: NONE
+     evidence  : the producer's own comment at :141 says the synthetic root's 'identity = version tag': True -- and the call at :142 is emit('portal', 'PORTAL_BUNDLE', 'portal') with no version argument, so the version tag is a comment, not a value
+     evidence  : this is the ONE node in the served graph that IS the portal layer, and it is the cheapest place a graph reader could ask
+------------------------------------------------------------------------------
+C6  stitch_source_sha.txt packed inside the source zip
+     where     : one entry in every source.zip; read by the buildspec into marker.git_sha
+     EXISTS as a surface a reader consults : True
+     CARRIES a portal vintage TODAY        : False
+     COULD carry one without a new surface : True
+     evidence  : July zip's value: 81064fbcae6dbf440d516eee067554f6a192becd (a SUPERPROJECT sha)
+     evidence  : F-3 zip's repo_head: de590a7d0227fb9c14ce35b96dcec86deb68df60 (a SUPERPROJECT sha)
+     evidence  : the zip carries 435 portal/src FILES and not one byte naming which portal they came from -- the packer knows (it ran `git -C <portal> rev-parse HEAD`) and writes the answer only into its own scratch report, never into the archive
+     evidence  : a SECOND one-line entry beside this one is the whole feed C4 needs
+------------------------------------------------------------------------------
+C7  the superproject gitlink (git ls-tree HEAD -- portal)
+     where     : this repository's tree at HEAD
+     EXISTS as a surface a reader consults : True
+     CARRIES a portal vintage TODAY        : True
+     COULD carry one without a new surface : False
+     evidence  : gitlink at this worktree's HEAD: 5907cbca98eb091124e38a32debefa355c1d4376
+     evidence  : it AGREES with the built portal today (True) -- it did not on 2026-09-09, when row W2-S40 measured gitlink 30ca034b against a checkout at 18c0c5cb
+     evidence  : but it is not a carrier of the ANSWER: the packer reads `git -C <portal> rev-parse HEAD`, not the gitlink (org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f3_build_source_zip.py:84), so the gitlink can agree or disagree and the zip is unaffected -- measured: does the packer call ls-tree at all? False
+     evidence  : and no served surface reads this repo's tree
+------------------------------------------------------------------------------
+C8  the GH-Action's pinned portal ref (.github/workflows/stitch-source-push.yml)
+     where     : .github/workflows/stitch-source-push.yml (the 'Checkout portal' step)
+     EXISTS as a surface a reader consults : True
+     CARRIES a portal vintage TODAY        : True
+     COULD carry one without a new surface : False
+     evidence  : pinned ref: b96562720505fa143aad7cc5dd75115e6c609912
+     evidence  : it is a THIRD value: it matches neither the portal actually packed into every round-6 zip (5907cbca) nor the superproject gitlink (5907cbca), which today agree with each other and not with it
+     evidence  : and this route has not produced a served zip since 2026-07-07T13:46:19Z, so what it declares has never described anything the estate served in round 6
+     evidence  : a DECLARATION, and a stale one -- the opposite failure from an unfed carrier
+
+------------------------------------------------------------------------------
+DECISION_EVIDENCE printed
+------------------------------------------------------------------------------
+  swept        : 8 candidates, each measured on its own bytes -- 2 EXERCISED
+                 (C1, C3 called), 6 read at source or at a captured artifact;
+                 0 skipped, 0 asserted from prose
+  exists AND could hold it without a new surface : 5 of 8  (C1, C2, C4, C5, C6)
+  actually holds it today                        : 0 of 8
+  holds a portal sha but is NOT a carrier of the answer : C7, C8 (a repo
+                 declaration and a stale workflow pin; C8's value has described
+                 nothing served since 2026-07-07)
+
+  THE FINDING, PLAINLY: the carrier EXISTS AND IS UNFED. It is not missing.
+  C1 is the sentence a reader already reads, it already carries a SECOND
+  source's vintage (the stitch clause CG-s-24 appended to this very function),
+  and C2/C4 are the additive dict and marker that feed it. Nothing new has to
+  be built and no new surface has to be served.
+
+  BUT THE UNFED-NESS IS NOT ONE LINE AT THE DISPLAY END, AND SAYING SO WOULD
+  UNDERSTATE THE OWNER'S COST. The feed is a four-hop chain and the FIRST hop
+  is the one that is missing:
+    hop 1  PACK   the portal sha into the source zip (a second one-line file
+                  beside stitch_source_sha.txt). The packer that actually built
+                  every round-6 zip is a WORKER DELIVERABLE, not a producer:
+                  org/missions/.../0.9.0_WK_NFRA_CLDGRPH~2/f3_build_source_zip.py:84
+                  already computes the value and throws it away. The committed
+                  producer for this route does not exist; route 1
+                  (.github/workflows/stitch-source-push.yml:66) exists and pins a
+                  stale sha. OWNER: 0.7.0_AE_CloudOps (the same disarm_owner
+                  rows W2-S40 and W2-S63 already carry).
+    hop 2  STAMP  infra/aws/terraform/globgrph/stitch-produce.tf, the inline
+                  buildspec's marker dict (the block whose keys are printed under
+                  C4 above): one entry, 'portal_sha': open('portal_sha.txt')....
+                  OWNER: 0.7.0_AE_CloudOps (Terraform plane).
+    hop 3  COPY   infra/aws/globgrph/kuzu_nessie_load.py:71-77 -- one line,
+                  'stitch_portal_sha': m.get('portal_sha'), beside the five
+                  marker fields it already copies. OWNER: the globgrph engine
+                  owner (this project's plane).
+    hop 4  PRINT  infra/aws/globgrph/projection_worker.py:257-262 -- two lines,
+                  the same shape as the stitch clause immediately above them.
+                  OWNER: the globgrph engine owner (this project's plane).
+  NOT WRITTEN HERE. This order is READ ONLY on producer code; the sites are
+  named with their files, their lines and their owners, and the next cut carries
+  them.
+
+  AND ONE CARRIER MUST NOT BE CHOSEN: C3. Even wired, it would drop the new key
+  silently -- measured above, 3 of 7 keys printed. A remedy routed there would
+  look done and change nothing a reader sees.
+
+==============================================================================
+EXISTING_CARRIER=true
+CARRIER_UNFED=true
+DECISION_EVIDENCE printed
+CANDIDATES_SWEPT=8 of 8
+==============================================================================

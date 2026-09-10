@@ -1,0 +1,68 @@
+=== H5-AC2 -- ONE EDGE, TWO DECLARED SHAPES, MADE CHECKABLE ===
+BRANCH=wk-cldgrph-8-4 HEAD=2fd5cae09f67dd31ae1d8da1ced56c24d52c6001
+DECLARATION_SOURCE=git show HEAD:<file> (the record; NOT the worktree)
+
+SHAPE_A printed :: ServedURL-[SERVED_FROM]->S3_BUCKET_POLICY
+  declared in  : infra/aws/globgrph/debtscan_canon_scorer.py@2fd5cae09f lines 48,144 (denominator: 377 lines in file)
+  role         : the SCORED_FROM per-class source-provenance string (:48) and the
+                 score_auth_canon docstring (:144). Both are LITERAL PROSE -- the
+                 arithmetic below reads the target class from the graph at runtime.
+SHAPE_B printed :: (ServedURL)-[SERVED_FROM]->(S3)
+  declared in  : infra/aws/globgrph/canon_motif_scorer.py@2fd5cae09f lines 94,131 (denominator: 381 lines in file)
+  role         : the emitted `dominant_motif` VALUE (:131) and its docstring (:94).
+                 Also a literal -- score_served_lineage counts DISTINCT ServedURL
+                 sources and never reads the target's class at all.
+
+QUERY_FORM=edge_type-as-property
+  (the served graph carries edge_type as a PROPERTY of one CloudEdge REL table; the
+   typed form `MATCH ()-[e:SERVED_FROM]->()` errors at the binder and a binder error
+   is a wrong-form signal, never a zero -- banked as row S112.)
+  STATEMENT: MATCH (s:CloudNode)-[e:CloudEdge]->(t:CloudNode) WHERE s.node_type = 'ServedURL' AND e.edge_type = 'SERVED_FROM' RETURN t.node_type AS tt, count(*) AS c
+  SERVED_VINTAGE: 2026-09-10T12:24:50.576632+00:00
+  AGE_LINE: Built from the estate as of 2026-09-10 12:24:50 UTC. Stitch source: stitch-codebuild built 2026-09-10T03:01:17Z.
+  RESULT: [{'tt': 'S3_BUCKET_POLICY', 'c': 27}]
+
+--- CONTROLS (a single-class answer from a query that CANNOT return two classes is
+--- not a measurement of the class; both arms run on the SAME statement shape) ---
+  POSITIVE (live family, same statement shape, OWNED_BY): [{'tt': 'S3_BUCKET', 'c': 232}, {'tt': 'MS_USER', 'c': 6153}]
+    returns >=2 distinct target classes : True
+    can return S3_BUCKET specifically   : True (so a SERVED_FROM answer of
+      S3_BUCKET_POLICY is a property of the DATA, not of the query form)
+  NEGATIVE (an edge_type that does not exist): [{'c': 0}] -> zero=True
+POSITIVE_CONTROL_ARMS=multi_class:True bucket_reachable:True negative_zero:True served_nonzero:True
+
+SERVED_TODAY: 27 SERVED_FROM edge(s) from ServedURL; by target class {'S3_BUCKET_POLICY': 27}
+MATCHES_SERVED_TODAY=A
+
+COMMITTED RE-POINT (CG-s-33), read at HEAD:infra/aws/globgrph/derive_runner.py@2fd5cae09f
+  SCOPE: the SERVED_FROM stitch function, lines 1870-1979 (emit site at 1959); coverage is
+         that block only, and the file-wide count is printed beside it so the scope
+         is visible: canonical_node_key file-wide=1, bare-name file-wide=1
+  target resolver now `canonical_node_key(n)` at line(s) [1905]; CG-s-33 marker at [1898];
+  the pre-fix bare-name form `nid = n.get("id")` IN THIS BLOCK at [] (empty = gone)
+  canonical_node_key yields the ARN-form S3_BUCKET node id, so the deployed edge will
+  land on S3_BUCKET -- shape B.
+MATCHES_COMMITTED_REPOINT=B
+DEPLOY_STATE=COMMITTED-NOT-DEPLOYED (the committed producer says B; the served plane
+  still says A -- the two disagreeing IS the not-deployed evidence)
+
+--- WHAT CHANGES ON EACH SIDE OF THE DEPLOY ---
+  outlier_frac read from org/modules/graph/canon-patterns.yaml@2fd5cae09f = 0.1
+  A (debtscan score_auth_canon) BEFORE: shapes={'API_ROUTE-ROUTES_TO->LAMBDA': 86, 'ServedURL-SERVED_FROM->S3_BUCKET_POLICY': 27} dominant=('API_ROUTE-ROUTES_TO->LAMBDA', 86) threshold=8 outliers=[]
+  A (debtscan score_auth_canon) AFTER : shapes={'API_ROUTE-ROUTES_TO->LAMBDA': 86, 'ServedURL-SERVED_FROM->S3_BUCKET': 27} dominant=('API_ROUTE-ROUTES_TO->LAMBDA', 86) threshold=8 outliers=[]
+  A dominant flips=False  outlier set changes=False
+  A DECLARATION after the deploy: 'ServedURL-[SERVED_FROM]->S3_BUCKET_POLICY' becomes FALSE at infra/aws/globgrph/debtscan_canon_scorer.py:48,144 -- and it is the
+    per-class SOURCE-PROVENANCE string, so it is COPIED INTO THE EMITTED SCORECARD
+    (`scored_from`), where a later reader takes it for the audited source decision.
+  B (canon_motif score_served_lineage): score_served_lineage counts DISTINCT ServedURL sources carrying a SERVED_FROM edge and never reads t.node_type: its number is INVARIANT under the re-point.
+  B DECLARATION after the deploy: '(ServedURL)-[SERVED_FROM]->(S3)' becomes TRUE -- the same act that falsifies A
+    REPAIRS B.
+
+BREAKS_ON_DEPLOY=A
+  READ THIS PRECISELY: A breaks as a DECLARATION, not as an exception. Its arithmetic
+  is class-agnostic, so nothing raises, no count spikes, and the outlier set is
+  UNCHANGED ([] -> []). The failure is that the scored artifact keeps emitting a
+  source-provenance line that no longer describes the graph it scored -- a silent
+  false record, which is the harder failure to notice and the one this placement names.
+POSITIVE_CONTROL=FIRED
+OK: disagreement stated.

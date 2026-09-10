@@ -1,0 +1,307 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CLDGRPH.TO-CG-F-4",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+    "vintage_commit": "c6b16d8f04",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-F-4.projection-carries-stitch-source.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/prd/NFRA_CLDGRPH_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "50f0e219ba"
+  },
+  "assignee": "0.9.0_WK_NFRA_CLDGRPH~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/globgrph/derive_runner.py",
+      "artifact_covered_by": [
+        "F4-AC1",
+        "F4-AC3",
+        "F4-AC4"
+      ],
+      "kind": "script",
+      "commit_or_etag": "27e4ac36de776c8da06df4179b8343f62c63392b",
+      "introduces": [
+        "STITCH_V1_TYPES",
+        "STITCH_V1_STAMP"
+      ],
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The fold, its three guards, the five CTO-gated NODE_TYPE_LAYER entries (GO 20260909T2015Z, CVO re-sign C-S40 @e7db04572e) and the vocabulary=stitch-v1 stamp. EXERCISED IN THE CLOUD: CodeBuild globgrph-derive-build:f8abbe55 built this exact commit into image sha256:478d0a43..., and ECS task deee298ca1bd422fa3fcc124cf42a86f on globgrph-derive-runner:8 ran it to exit 0, printing 'INFO: STITCH_INGEST nodes=1844 edges=723 skipped_dup=27423 stamped=1771 ... producer=stitch-codebuild vintage=2026-09-09T19:55:00Z' and 'OK: NODE_TYPE_LAYER relabel applied -- 63 node_types all mapped'. The map committed here reads 65 keys / aws 34 / portal 18 / pipeline 4 / ms 7 / semctl 2, every figure in C-S40, with the COND-A resource-type count unmoved at 32."
+    },
+    {
+      "path_or_key": "infra/aws/globgrph/kuzu_nessie_load.py",
+      "artifact_covered_by": [
+        "F4-AC4"
+      ],
+      "kind": "script",
+      "commit_or_etag": "5d3c589f25",
+      "introduces": [
+        "read_stitch_vintage"
+      ],
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The ONE stitch-vintage reader both engines use. In the image and exercised: the served manifest at projection/2026-09-09T21:05:17.968166+00:00/ carries the stitch keys, which is the only way the age line below could have been rendered. CG-s-27's required edge_count_semantics and artifact_claim kwargs are untouched at the call site."
+    },
+    {
+      "path_or_key": "infra/aws/globgrph/kuzu_incremental_refresh.py",
+      "artifact_covered_by": [
+        "F4-AC4"
+      ],
+      "kind": "script",
+      "commit_or_etag": "5d3c589f25",
+      "introduces": [
+        "read_stitch_vintage"
+      ],
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The default engine's pin gains the same stitch keys from the same reader, imported rather than re-implemented. In image sha256:478d0a43..., which globgrph-projection-worker:5 ran to publish the 21:05:17 generation."
+    },
+    {
+      "path_or_key": "infra/aws/globgrph/projection_worker.py",
+      "artifact_covered_by": [
+        "F4-AC4"
+      ],
+      "kind": "script",
+      "commit_or_etag": "5d3c589f25",
+      "introduces": [
+        "stitch_built_at"
+      ],
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "_age_line(vintage, manifest) appends the stitch clause and _validate_manifest_shape re-derives from the manifest itself, so the builder and the publication guard read one source. PROVEN ON THE SERVED PLANE: the thin client prints 'VINTAGE: Built from the estate as of 2026-09-09 21:05:17 UTC. Stitch source: stitch-codebuild built 2026-09-09T19:55:00Z.' -- the worker published that sentence and its own guard accepted it."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/globgrph/serving.tf",
+      "artifact_covered_by": [
+        "F4-AC2",
+        "F4-AC3"
+      ],
+      "kind": "terraform",
+      "commit_or_etag": "f8360785de",
+      "introduces": [
+        "478d0a43742b2ed5a44631c6352b5713c5ba22f015d82a673cfb93428a9dae20"
+      ],
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "local.globgrph_image_digest moved to sha256:478d0a43... and APPLIED: 'Apply complete! Resources: 7 added, 11 changed, 7 destroyed.' rc 0 over the 18 targeted addresses, then 'No changes. Your infrastructure matches the configuration.' Live: describe-task-definition over the seven TRUE family names reads 7 of 7 on the new digest, 0 on :latest. The comment block was also corrected in the same edit -- it still claimed the four producers 'stay on :latest by design', true when CG-s-15 wrote it and false since CG-s-18 applied. THE IMAGE ITSELF is evidence rather than a repo artifact and so carries no row of its own: ECR opal-globgrph-derive-runner sha256:478d0a43742b2ed5a44631c6352b5713c5ba22f015d82a673cfb93428a9dae20, pushed 2026-09-09T20:39:50Z, tags [20260909-203936, latest], 131,531,350 B, from CodeBuild globgrph-derive-build:f8abbe55-c611-4317-8df7-2edf15908de3 over source commit 27e4ac36de -- its identity is a digest, not a commit-ish, and this row is where it is pinned."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260909T203713Z_cldgrph-cgs24-stitch-fold-image-and-sevenfamily-repin_deploy_completion.md",
+      "artifact_covered_by": [
+        "F4-AC2"
+      ],
+      "kind": "doc",
+      "commit_or_etag": "f8360785de",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The NEVER-2 entry, OPENED at 20:37:13Z before the build and CLOSED at 20:58:00Z after the seven families were read live. It names ALL SEVEN families by their TRUE names in a table, says which four the task order's cut got wrong and why that failure is soft, names globgrph-nessie and globgrph-trino as outside the population, states that :latest moves and that nothing pulls it, carries the pre-state and the rollback digest, and enumerates the 18 applied addresses plus the 4 foreign ones left as found."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f4_test_stitch_ingest.py",
+      "artifact_covered_by": [
+        "F4-AC1"
+      ],
+      "kind": "test",
+      "commit_or_etag": "27e4ac36de",
+      "introduces": [
+        "stitch_v1_stamped_count",
+        "NODE_TYPE_LAYER_is_65_keys"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "F4-AC1's invocation. 11 named arms, 21 assertions, no network and no AWS. The gate amendment's arm proves the stamp lands on the five and NOT on a pre-existing type, that the five are now ADMITTED, that the folded graph survives relabel_layers_by_node_type, and that the map is exactly the 65 keys the CVO re-signed. The unmapped-type arm was re-pointed at SOME_FUTURE_TYPE, because with the five gated in it would otherwise have tested nothing."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f4_families_pinned.sh",
+      "artifact_covered_by": [
+        "F4-AC2"
+      ],
+      "kind": "test",
+      "commit_or_etag": "f8360785de",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "F4-AC2's invocation. Reads all seven live by their TRUE names, counts an exception as an ERROR rather than a negative, reads the ledger's status and family count from the file itself, reads ECR :latest live, and prints the control: the task order's own seven names resolve 3 of 7."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f4_derive_folded.sh",
+      "artifact_covered_by": [
+        "F4-AC3"
+      ],
+      "kind": "test",
+      "commit_or_etag": "f8360785de",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "F4-AC3's invocation. Re-reads the pinned task, its task-definition ARN and its whole CloudWatch stream live (paginated to the end), and prints the two PREVIOUS derives from the same log group as the control -- they carry 0 STITCH_INGEST lines."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f4_served_stitch.sh",
+      "artifact_covered_by": [
+        "F4-AC4"
+      ],
+      "kind": "test",
+      "commit_or_etag": "f8360785de",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "F4-AC4's invocation. Shells out to the thin client so the VINTAGE line it parses is the literal line a reader sees, reads the pointer from S3, counts the stitch-v1 stamp on n.props, and EXERCISES the n.vocabulary column form beside it so its refusal is shown rather than described. It resolves the executing bash explicitly -- a bare `bash` here is the WSL stub and produced a false zero over a correctly answering graph (row W2-S54)."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-s-24.projection-carries-stitch-source.result.md",
+      "artifact_covered_by": [
+        "F4-AC5"
+      ],
+      "kind": "doc",
+      "commit_or_etag": "f8360785de",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The order's record: one fenced JSON block (the gate, the fold's counts, the digest before/after, the seven revisions, the 18-address apply with its plan lines, the derive task id and its INFO line, the pointer before/after, the served answer, the VINTAGE line, and the three-plane agreement on 1,771) then prose."
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "artifact_covered_by": [
+        "F4-AC1",
+        "F4-AC2",
+        "F4-AC3",
+        "F4-AC4"
+      ],
+      "kind": "doc",
+      "commit_or_etag": "f8360785de",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Ten rows across this order, W2-S45..W2-S54, none edited and none renumbered. This commit carries W2-S50..S54; the header denominator was restated by parsing every fenced block, 170 rows in 140 blocks before and 175 in 145 after."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F4-AC1",
+      "criterion_verbatim": "THE FOLD, EXERCISED ON A FIXTURE: three stitch nodes folded, one duplicate (an ARN already in the graph) skipped and counted, the sha256-mismatch arm skipping LOUD, every test passing with its denominator.",
+      "method": "test_suite",
+      "invocation": "timeout 120 python org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f4_test_stitch_ingest.py",
+      "expect": "FOLD_OK nodes=3 edges=[0-9]+ skipped_dup=1[\\s\\S]*SHA_MISMATCH_ARM=SKIPPED_LOUD[\\s\\S]*F4_TESTS=([0-9]+) passed of \\1",
+      "output_evidence": "FOLD_OK nodes=3 edges=2 skipped_dup=1 stamped=0\n\n  happy_fold_nodes                   PASS folded=3\n  duplicate_skipped_and_counted      PASS skipped_dup=1\n  duplicate_keeps_the_ORIGINAL       PASS survivor name='opal-data-bd'\n  both_ends_rule_folds_2_of_3        PASS edges=2 of 3 stitch-typed\n  non_stitch_edge_types_not_folded   PASS folded kinds=['ROUTES_TO', 'STORED_IN']\n  vintage_carries_the_marker         PASS producer=stitch-codebuild built_at=2026-09-09T18:49:23Z\n\nSHA_MISMATCH_ARM=SKIPPED_LOUD\n  sha_mismatch_returns_None          PASS\n  sha_mismatch_leaves_graph_UNTOUCHED PASS\n  unmapped_type_skipped_and_counted  PASS skipped_unmapped_type=1 (SOME_FUTURE_TYPE)\n  unmapped_type_not_in_the_graph     PASS\n  folded_graph_SURVIVES_the_relabel  PASS no NodeTypeLayerGap\nINFO: STITCH_INGEST nodes=5 edges=2 skipped_dup=1 stamped=2 skipped_unmapped_type=0 ...\n  stitch_v1_stamped_count            PASS stamped=2 of 5 folded\n  stitch_v1_stamp_on_the_admitted_five PASS stamped ids=['gold:some_script.py', 's3key:gold/x.parquet']\n  stitch_v1_stamp_NOT_on_a_pre_existing_type PASS the LAMBDA node carries no vocabulary\n  gated_five_now_ADMITTED            PASS folded=5 skipped_unmapped_type=0\n  gated_five_SURVIVE_the_relabel     PASS\n  NODE_TYPE_LAYER_is_65_keys         PASS keys=65 (CVO C-S40 @e7db04572e: 60 -> 65)\n  unparseable_artifact_skips_LOUD    PASS\n\nAGE_LINE_NO_STITCH='Built from the estate as of 2026-09-09 14:59:48 UTC.'\nAGE_LINE_WITH_STITCH='Built from the estate as of 2026-09-09 14:59:48 UTC. Stitch source: stitch-codebuild built 2026-09-09T18:49:23Z.'\n  age_line_delta_ZERO_without_a_stitch PASS byte-identical to the pre-CG-s-24 sentence\n  age_line_carries_the_stitch_when_present PASS\n  age_line_keeps_D7_AC3_AC4_prefix   PASS\n\nF4_TESTS=21 passed of 21",
+      "denominator": "21 of 21 assertions across 11 named arms; 4 of the 11 are controls that must be able to fail (the sha256 mismatch, the now-synthetic unmapped type, the both-ends rule, and the pre-existing type that must NOT carry the stamp); 5 of 5 .py files in this order passed .tools/commit-gate.sh.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F4-AC2",
+      "criterion_verbatim": "R13 AND NEVER-2: all seven ACTIVE globgrph task definitions reference the NEW digest by `describe-task-definition` (live), none references `:latest`, the ledger entry names seven and is CLOSED.",
+      "method": "live_read",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f4_families_pinned.sh",
+      "expect": "FAMILIES_ON_NEW_DIGEST=7 of 7[\\s\\S]*LATEST_TAG_REFERENCED_BY=0 of 7[\\s\\S]*LEDGER_FAMILIES_NAMED=7[\\s\\S]*LEDGER_ENTRY_STATUS=CLOSED",
+      "output_evidence": "FAMILIES_ON_NEW_DIGEST=7 of 7\nLATEST_TAG_REFERENCED_BY=0 of 7\nLEDGER_FAMILIES_NAMED=7\nLEDGER_ENTRY_STATUS=CLOSED\nDESCRIBE_ERRORS=0 of 7   <- an exception is an ERROR, never a negative\n\n  -- the seven, live --\n     globgrph-derive-runner                 rev 8   on_new=True  on_old=False latest=False\n     globgrph-projection-worker             rev 5   on_new=True  on_old=False latest=False\n     globgrph-serving                       rev 3   on_new=True  on_old=False latest=False\n     globgrph-comp-learns-producer          rev 3   on_new=True  on_old=False latest=False\n     globgrph-cse-producer                  rev 3   on_new=True  on_old=False latest=False\n     globgrph-fedobs-producer               rev 3   on_new=True  on_old=False latest=False\n     globgrph-resource-summaries-producer   rev 3   on_new=True  on_old=False latest=False\n\n  -- the digest --\n     new (this act) : sha256:478d0a43742b2ed5a44631c6352b5713c5ba22f015d82a673cfb93428a9dae20\n     prior          : sha256:1b89853fe44133f10a60dc2b3e7b463c0d3b68b827a2ddff249bf427ecde2778\n     ECR :latest    : sha256:478d0a43...  tags=['20260909-203936', 'latest']\n\n  -- the CONTROL on the names (W2-S49) --\n     the TASK ORDER's seven names resolve : 3 of 7\n     the TRUE ACTIVE names resolve        : 7 of 7\n\nTHE APPLY, from .scratch-captured terraform output:\n  unscoped plan (pre, NEVER applied)  Plan: 9 to add, 13 to change, 7 to destroy.   (22 addresses, 4 foreign)\n  targeted plan (pre)                 Plan: 7 to add, 11 to change, 7 to destroy.   (18 addresses, 0 foreign)\n  apply                               Apply complete! Resources: 7 added, 11 changed, 7 destroyed.\n  targeted plan (post)                No changes. Your infrastructure matches the configuration.",
+      "denominator": "7 of 7 families read live by describe-task-definition (9 ACTIVE families in the account; globgrph-nessie and globgrph-trino pull other images and are named in the ledger as outside the population); 7 of 7 ledger table rows parsed from the file; 1 of 1 ledger status line; 18 of 18 applied addresses, censused from a plan; 4 of 4 foreign addresses identified and left as found.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F4-AC3",
+      "criterion_verbatim": "ONE REAL DERIVE ON THE NEW DIGEST FOLDED THE STITCH: the task's log carries the INFO line with non-zero counts and no FAIL line (the pre-fix image's log, with no STITCH_INGEST line at all, is the control).",
+      "method": "live_read",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f4_derive_folded.sh",
+      "expect": "DERIVE_TASK=arn:aws:ecs:[^\\s]+[\\s\\S]*STITCH_INGEST nodes=[1-9][0-9]* edges=[1-9][0-9]*[\\s\\S]*STITCH_INGEST_FAIL_LINES=0",
+      "output_evidence": "DERIVE_TASK=arn:aws:ecs:us-east-1:313476888478:task/opal-globgrph/deee298ca1bd422fa3fcc124cf42a86f\nDERIVE_TASK_DEFINITION=arn:aws:ecs:us-east-1:313476888478:task-definition/globgrph-derive-runner:8\nDERIVE_IMAGE_IS_THE_NEW_DIGEST=True\nDERIVE_LAST_STATUS=STOPPED exit_code=0\nINFO: STITCH_INGEST nodes=1844 edges=723 skipped_dup=27423 stamped=1771 skipped_unmapped_type=0 skipped_edge_unresolved=2694 producer=stitch-codebuild vintage=2026-09-09T19:55:00Z\nSTITCH_INGEST_LINES=1\nSTITCH_INGEST_FAIL_LINES=0\n\n  -- the taxonomy guard, in the cloud, on the real artifact --\n     OK: NODE_TYPE_LAYER relabel applied -- 63 node_types all mapped (aws/portal/ms partition clean)\n     NODE_TYPE_LAYER_GAP lines: 0\n     STITCH_UNMAPPED_TYPE lines: 0\n\n  -- the CONTROL: the PREVIOUS derive in the same log group --\n     393fa1a4cabe  first_event=2026-09-09T02:00:40Z  events=288  STITCH_INGEST lines=0\n     60afcae6b19d  first_event=2026-09-08T02:01:53Z  events=288  STITCH_INGEST lines=0",
+      "denominator": "1 of 1 ad-hoc derive on the new digest; 1844 nodes and 723 edges folded, 27423 duplicates skipped, 1771 stamped; 291 of 291 log events read (whole stream, paginated to the end); 2 previous derives read as the control, both with 0 STITCH_INGEST lines.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F4-AC4",
+      "criterion_verbatim": "THE SERVED GRAPH ANSWERS FOR THE STITCH TYPES with the stitch vintage on the VINTAGE line and the pointer advanced past the pre-fold vintage (the pre-fold answer, 0 of 3, is the control; a positive control on a type the projection already carried).",
+      "method": "live_read",
+      "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f4_served_stitch.sh",
+      "expect": "SERVED_STITCH_TYPES=([1-9][0-9]*) of 3 non-zero[\\s\\S]*GOLD_SCRIPT=[1-9][0-9]*[\\s\\S]*VINTAGE_HAS_STITCH=true stitch_built_at=2026-09-(09|10)T[\\s\\S]*POINTER_ADVANCED=true",
+      "output_evidence": "SERVED_STITCH_TYPES=3 of 3 non-zero\nAPI_ROUTE=151\nGOLD_SCRIPT=1380\nS3_DATA_KEY=294\nSTITCH_V1_STAMPED=1771\nVINTAGE_HAS_STITCH=true stitch_built_at=2026-09-09T19:55:00Z stitch_producer=stitch-codebuild\nPOINTER_ADVANCED=true\n\n  -- the VINTAGE line, verbatim, as the CLI printed it --\n     VINTAGE: Built from the estate as of 2026-09-09 21:05:17 UTC. Stitch source: stitch-codebuild built 2026-09-09T19:55:00Z.  [vintage=2026-09-09T21:05:17.968166+00:00 manifest=09be45b5ff92 prefix=projection/2026-09-09T21:05:17.968166+00:00/]\n\n  -- the pointer --\n     before this order's derive : projection/2026-09-09T20:04:09.034708+00:00/\n     now                        : projection/2026-09-09T21:05:17.968166+00:00/\n     manifest_sha256            : 09be45b5ff92acc4c05e83357877020f710ce8d57e7eef5a83f27876ea4d9504\n\n  -- the CONTROLS --\n     PRE-FOLD: API_ROUTE=86, GOLD_SCRIPT=0, S3_DATA_KEY=0 -> 1 of 3 non-zero (row W2-S47)\n     THE STAMP IS ON props, NOT ON A COLUMN, and the refusal is exercised:\n       MATCH (n:CloudNode) WHERE n.vocabulary = 'stitch-v1' RETURN count(*) AS c\n       -> ERROR: projection service 502: ... Binder exception: Cannot find property vocabulary for n.",
+      "denominator": "3 of 3 node types the criterion names, in ONE statement against the served graph; 1 of 1 pointer read from S3; 3 of 3 thin-client calls (types, stamp, and the column-form control); 1 of 1 VINTAGE line, parsed from the CLI's own stderr.",
+      "status": "PASS",
+      "status_reason": "PASS, with two facts a grader should carry. (1) The criterion's stated control does not hold: the pre-fold answer was 1 of 3, not 0 of 3, because API_ROUTE is derive-produced and always has been -- so SERVED_STITCH_TYPES does not discriminate and GOLD_SCRIPT does. GOLD_SCRIPT went 0 -> 1380 (row W2-S47). (2) The stitch vintage reaches the VINTAGE line through projection_worker._age_line, not through _provenance.format_provenance_header, which no serve path calls (row W2-S46, the design accepted by the issuer at 20:1xZ). STITCH_V1_STAMPED=1771 is counted on n.props CONTAINS 'stitch-v1' because `vocabulary` is not a CloudNode column and the column form raises a Binder exception rather than returning 0 (row W2-S51); it agrees exactly with the derive log's own stamped=1771."
+    },
+    {
+      "criterion_id": "F4-AC5",
+      "criterion_verbatim": "THE JOIN, READ: what the served graph now IS (one graph with two sources under one vintage line), what the fold does NOT guarantee (the stitch's own freshness is the producer's, F-3's nightly), where a second compile business could re-enter (a local Kuzu of the stitch -- S26 retires it), and what a reader should expect of the two vintages on a night the stitch nightly fails but the derive runs. A reading act; NO verdict; graded by 3.0.0_SA_CVO at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "the reading is in org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/CG-s-24.projection-carries-stitch-source.result.md and below; graded by 3.0.0_SA_CVO at L9, not by this worker",
+      "output_evidence": "THE READING, WITH NO VERDICT ON IT.\n(1) WHAT THE SERVED GRAPH NOW IS. One graph, two sources, one vintage line. The Nessie/Iceberg derive supplies the estate as before; the cloud stitch supplies what a repo-less runner cannot see -- 1,844 nodes and 723 inter-system edges folded, 27,423 duplicates skipped by co-key because they were already there. GOLD_SCRIPT went 0 -> 1380, S3_DATA_KEY 0 -> 294, API_ROUTE 86 -> 151. The line reads 'Built from the estate as of 2026-09-09 21:05:17 UTC. Stitch source: stitch-codebuild built 2026-09-09T19:55:00Z.' -- two ages, both stated, neither collapsed into the other. 1,771 of the folded nodes carry vocabulary=stitch-v1, so the interim population the CTO admitted is a query and not an archaeology exercise when S31 retires four of the five.\n(2) WHAT THE FOLD DOES NOT GUARANTEE. Freshness. The fold verifies IDENTITY -- sha256 of the artifact against its own marker -- and never RECENCY. The stitch's age is the CodeBuild nightly's property (CG-s-23) and the marker's built_at is carried, not improved. Nothing here makes a stale stitch fresh, and nothing here hides one.\n(3) THE NIGHT THE STITCH FAILS AND THE DERIVE RUNS. The fold is best-effort by the derive's own contract, so the derive commits with the stitch it can verify. If the producer failed, last night's two objects still verify against EACH OTHER, so the fold succeeds on a STALE stitch and the served line shows a day-old stitch_built_at beside a fresh Nessie vintage. That is the correct behaviour and precisely why the vintage is CARRIED rather than merged: a reader comparing the two ages is doing the right thing, and a reader who sees only one age is reading a line that predates this work. If the marker is unreadable, read_stitch_vintage returns nothing, the manifest carries no stitch keys and the sentence has no stitch clause -- an ABSENCE, never a default. The fixture asserts that absent case is byte-identical to the pre-CG-s-24 sentence.\n(4) WHERE A SECOND COMPILE BUSINESS COULD RE-ENTER. Two doors. The local Kuzu of the stitch (kuzu_stitch_db / kuzu_stitch_load.py) is CG-s-26's to retire and was untouched here. The post-commit hook that republished stitch/ from either clone with producer=stitch-local is GONE from both (this laptop 19:46Z, site Z 19:58Z, rows S78/S81), so the cloud producer is the one writer -- and the marker read at this fold was stitch-codebuild, printed in the log line rather than asserted. The fold CARRIES the producer field and does not refuse on it (the issuer's ruling on S71), so if a hand-made stitch ever appears again the served line will say so instead of silently serving it.\n(5) A THIRD DOOR, NAMED BECAUSE IT IS NEW. The five stitch-v1 types are a SECOND VOCABULARY for concepts the graph already types (GOLD_SCRIPT 1380 beside PipelineScript, S3_DATA_KEY 294 beside S3Key, PORTAL_COMPONENT beside Component, REACT_QUERY_KEY beside ReactQueryKey). That is admitted as a LABELLED INTERIM under R17 and is exactly why every admitted node is stamped. Until S31 unifies it at the producer, a reader who counts 'scripts' without deciding which vocabulary they mean will double-count, and the CVO's own C-S40 census gives the overlap numbers to do it correctly.",
+      "denominator": "N/A -- a reading act, graded by 3.0.0_SA_CVO at L9. The measured inputs behind it: 1844 nodes / 723 edges folded and 27423 duplicates skipped in one derive; 1771 stamped, agreeing across the derive log and the served graph; 3 of 3 node types non-zero; 7 of 7 families on the new digest; 65 of 65 map keys checked against C-S40; 21 of 21 fixture assertions.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "judgment": true,
+      "status_reason": "JUDGMENT criterion: graded by 3.0.0_SA_CVO at L9 and never self-graded -- PASS or FAIL on it from this worker is INVALID by the order's own proof_of_spec block. The substitute oracle is the CVO's reading of the record and of this row against CG-s-24's accept."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Every criterion carries a control that could have made it read the other way, and three of them are live rather than fixtures. F4-AC1: the sha256 arm feeds a CORRECT artifact under a forty-zero marker and asserts both the None return AND that the graph is byte-identical after; the duplicate arm plants the same ARN under a DIFFERENT name and asserts the ORIGINAL survives; the unmapped arm was re-pointed at SOME_FUTURE_TYPE the moment the five were gated in, because a control aimed at a now-mapped type tests nothing; the stamp arm asserts a pre-existing type is NOT stamped. F4-AC2: the task order's own seven family names are read in the same call as the true ones -- 3 of 7 versus 7 of 7 -- and an exception is printed as an ERROR rather than counted as a negative. F4-AC3: the two PREVIOUS derives in the same log group, read from the same API, carry 0 STITCH_INGEST lines; an image without the fold cannot print the line. F4-AC4: the pre-fold answer was captured BEFORE the image act, and the n.vocabulary column form is executed on every run so its refusal is shown, not described. THE APPLY had its own control: an unscoped plan run first and never applied, whose 4 foreign addresses were identified and left as found.",
+      "expected": "F4-AC4's stated control -- the pre-fold served answer is 0 of 3 -- FIRES, i.e. the query returns nothing before the fold.",
+      "observed": "IT DID NOT FIRE, and that is reported rather than smoothed: the pre-fold answer was 1 of 3 (API_ROUTE=86, captured 2026-09-09T19:2xZ before the image act and committed at f4_prefold_served_query.txt), because API_ROUTE is a derive-produced type. So SERVED_STITCH_TYPES was already satisfied by an unfolded graph and only GOLD_SCRIPT discriminates -- and it did, 0 -> 1380. Filed as NFRA_CLDGRPH-W2-S47. A SECOND control failed and was fixed rather than reported clean: f4_served_stitch.sh's first two runs printed three zeros and no VINTAGE line over a graph that was answering 1380 by hand at that instant, because a bare `bash` in a Python subprocess is the WSL stub; the tell was that the boto3-read POINTER_ADVANCED=true in the SAME output stayed correct while every shelled-out field went to zero (row W2-S54). Every other control fired as designed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "F4-AC1 was run three times across the order (pre-gate, post-gate, and for the committed capture) and its deciding lines compared; F4-AC2, F4-AC3 and F4-AC4 each read live AWS and served state and were run at least twice, before and after their captures.",
+      "observed": "STABLE. F4-AC1 produced identical deciding lines every run -- 'FOLD_OK nodes=3 edges=2 skipped_dup=1 stamped=0', 'SHA_MISMATCH_ARM=SKIPPED_LOUD', 'F4_TESTS=21 passed of 21'; it has no clock, no network and no AWS, so its sha256 arm is deterministic by construction. F4-AC2 and F4-AC3 read a settled plane and repeat exactly. F4-AC4 is the one with a KNOWN NON-DETERMINISM AND IT IS DECLARED: between the pointer advancing and the serving process installing the new generation there is a swap window in which the service answers nothing; a run inside it returns no rows and no VINTAGE line. That is a property of the world, not of the script, and it is distinguishable from a real zero by the pointer field, which is read from S3 and stays correct. The committed capture was taken after the swap and re-verified.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "PROPOSING or WIDENING the NODE_TYPE_LAYER gate beyond the five entries the CTO's GO names",
+      "reason": "The five entries, their layers, the stamp and the interim label are the CTO's ruling (GO 20260909T2015Z, R17) with the CVO's re-sign (C-S40 @e7db04572e). This worker added exactly those five and nothing else, copied the GO line out of the CTO record programmatically rather than retyping it, and verified the resulting key count against the CVO's census (65 keys, aws 34 / portal 18 / pipeline 4 / ms 7 / semctl 2) rather than asserting it. The CVO's re-sign hash is the CVO's to write and was not touched."
+    },
+    {
+      "item": "RENAMING the stitch's five types onto the ratified vocabulary",
+      "reason": "Measured to be a grain violation before the gate was asked for: both vocabularies are in the SAME artifact at populations differing by up to an order of magnitude (GOLD_SCRIPT 1380 vs PipelineScript 133; S3_DATA_KEY 294 vs S3Key 232; PORTAL_COMPONENT 22 vs Component 199; REACT_QUERY_KEY 94 vs ReactQueryKey 57). Row NFRA_CLDGRPH-W2-S48. The CTO ruled the interim-with-a-stamp route instead, and S31 (TO-CG-F-11) unifies it at the producer."
+    },
+    {
+      "item": "APPLYING the four foreign addresses the unscoped plan carried",
+      "reason": "aws_glue_partition.tool_activity x3 and aws_sns_topic_subscription.critical_surface_alerts_email are not this act's. The SNS subscription is an alert destination and the C3 moratorium forbids this order to land one, so an unscoped apply would have created a notifier nobody asked for. The unscoped plan was run to CENSUS the addresses and never applied; the four are named in the NEVER-2 entry as left-as-found."
+    },
+    {
+      "item": "EDITING infra/aws/globgrph/_provenance.py, kuzu_cli.py or projection_server.py",
+      "reason": "None is in this order's <paths> (_provenance.py is CG-s-27's, in slot ~3). That constraint is what put the vintage carrier on projection_worker._age_line, and the issuer accepted that design at 20:1xZ after row W2-S46 corrected the premise that _provenance.format_provenance_header prints the served header -- no serve path calls it."
+    },
+    {
+      "item": "A SECOND ad-hoc derive, or a second image act",
+      "reason": "The order allows ONE derive; it succeeded on the first run, folded 1,844 nodes and printed no FAIL line, so no second was started. One image act, one apply."
+    },
+    {
+      "item": "TOUCHING the stitch STORE, any local Kuzu, the post-commit hooks, or any monitor/alarm",
+      "reason": "All are explicit BOUNDS. The stitch store is CG-s-26's; the hooks were already removed by other seats (rows S78/S81) and were never opened here; no alarm, monitor or notifier was created -- including the one the unscoped plan offered."
+    },
+    {
+      "item": "COMMITTING the org/mcp/sessions/<session>.serial the halt-gate required",
+      "reason": "It could not be committed and was not: org/mcp/sessions/ is gitignored (.gitignore:423) and `git status --porcelain org/mcp` is empty. It is a runtime identity file, written with this worker's own serial because safe-apply's halt-gate refuses to run until the principal is named and explicitly forbids overriding it. Row NFRA_CLDGRPH-W2-S53, so the next order that applies Terraform can carry the grant or the provisioning."
+    }
+  ],
+  "surprises": [
+    "NFRA_CLDGRPH-W2-S45: BLOCKING at the first pass and now RESOLVED BY RULING -- four of the five node types the accept names were absent from the CVO-signed frozen NODE_TYPE_LAYER, and folding them would have made the nightly derive FAIL CLOSED. The CTO's arch-gate GO 20260909T2015Z and the CVO's C-S40 re-sign admitted five labelled-interim entries; the disarm is those seats' to record, not this worker's.",
+    "NFRA_CLDGRPH-W2-S46: the order's premise that the served header prints every source_vintage key via _provenance.format_provenance_header is false -- no serve path calls it. The carrier is projection_worker._age_line, appended never prefixed, zero-delta when absent; accepted by the issuer at 20:1xZ and now proven on the served plane.",
+    "NFRA_CLDGRPH-W2-S47: F4-AC4's stated control ('the pre-fold answer, 0 of 3') measured 1 of 3 -- API_ROUTE=86 was already served -- so only the GOLD_SCRIPT limb discriminates. It did: 0 -> 1380.",
+    "NFRA_CLDGRPH-W2-S48: the stitch artifact carries BOTH naming conventions for four of the same concepts at populations differing by up to an order of magnitude, so a rename would merge grains. The measured input to the CTO's ruling, which chose the labelled-interim route instead.",
+    "NFRA_CLDGRPH-W2-S49: four of the seven family names the order enumerates do not resolve (the real ones carry a globgrph- prefix) and describe-task-definition RAISES rather than returning a negative, so an R13 sweep on those names can print a clean '0 of 7' having read only 3. The NEVER-2 entry and F4-AC2 both use the true names and print the control.",
+    "NFRA_CLDGRPH-W2-S50: the face's inline quotation of the CTO GO line and the record's own text differ by a clause ('+5 PROVISIONAL stitch-v1 types --'). The face said to copy from the file; the comment in derive_runner.py carries the record's bytes, extracted programmatically.",
+    "NFRA_CLDGRPH-W2-S51: `vocabulary` is not a CloudNode column -- the stamp rides the additive props JSON by the schema seam's own design -- so the amendment's n.vocabulary query is a Binder exception, not a zero. The count is taken on n.props CONTAINS 'stitch-v1' = 1771 and the column form is exercised beside it on every run. ARMED to 2.0.0_SA_COO~A.",
+    "NFRA_CLDGRPH-W2-S52: the apply set is 18 addresses, censused from a plan, not the 10 the face carried over from E-2's four-family act; the unscoped plan's 4 foreign addresses include an SNS alert subscription under moratorium and were left as found.",
+    "NFRA_CLDGRPH-W2-S53: safe-apply's halt-gate refuses until the acting principal is named in org/mcp/sessions/<session>.serial, a gitignored path outside this order's <paths> and absent in a fresh linked worktree. Written as the gate instructs, never overridden. ARMED to 2.0.0_SA_COO~A.",
+    "NFRA_CLDGRPH-W2-S54: a bare `bash` in a Python subprocess is the WSL stub and turned a correctly answering served graph into three silent zeros on the criterion-reading path; the discriminator was that the boto3-read pointer field in the same output stayed correct. Fixed by exporting the executing interpreter, which the reader now prints."
+  ],
+  "session_log": "TO-CG-F-4, cell CG-s-24, round 6 of NFRA_CLDGRPH. Worker 0.9.0_WK_NFRA_CLDGRPH~2, a spine-v3 L7 subagent of 2.0.0_SA_COO~A, on branch wk-cldgrph-6-2 in worktree C:/tmp/wk-cldgrph-6-2. PUSH STATE: LOCAL -- never pushed, never merged, never rebased, not measured against a remote and not claimed.\nTWO PASSES. PASS 1 (from HEAD 2e0c77dcbd) built the fold, the carrier and the fixture, MEASURED the blocking finding and reported the order OPEN with F4-AC2/AC3/AC4 FAIL: four of the five node types the accept names were absent from a CTO-arch-gated, CVO-signed frozen NODE_TYPE_LAYER, and the image act was deliberately not taken because the only fold that could ship lost 216 of 216 DERIVES_FROM and 955 of 955 STORED_IN. PASS 2 (from HEAD 10c46c2df5, the issuer's two amendments) took the CTO's gate and ran steps 2-4 to completion.\nTREE CHECK FIRST, both passes: branch wk-cldgrph-6-2, HEAD printed, TREE-OK, and .tools/terraform.exe verified PRESENT at 91,104,424 B.\nPREMISES RE-GROUND BEFORE ANY WRITE: F-3's instance re-validated VALID at this HEAD; the stitch marker read producer=stitch-codebuild with a git_sha resolving in this repository; the CTO record read from CLOUD @04d9942aff (it is not on this branch) and the GO line extracted from its own backtick block rather than retyped; the map's key count checked against the CVO's C-S40 census before anything was built.\nTHE ORDER OF ACTS. (1) The five entries + the stamp + the fixture arm, gated and COMMITTED FIRST -- build-derive-image.sh takes its zip from the working tree and its SOURCE_COMMIT from git rev-parse HEAD, so an image over an uncommitted change would carry a source label naming bytes it does not contain. (2) The NEVER-2 entry OPENED with the pre-state and all seven TRUE family names. (3) build-derive-image.sh dry-run, then --go: CodeBuild SUCCEEDED, digest sha256:478d0a43... (4) serving.tf's digest local moved; terraform init; an UNSCOPED plan run first and never applied, to census addresses; the targeted 18-address plan; safe-apply (blocked once on IDENTITY UNRESOLVED, satisfied as the gate instructs, never overridden); the post-plan clean. (5) Seven families read live, ledger CLOSED. (6) ONE ad-hoc derive on globgrph-derive-runner:8 -> exit 0, STITCH_INGEST nodes=1844 stamped=1771. (7) The projection worker published and the pointer advanced; the thin-client reads. (8) The record, the instance, the validation, the flip.\nEVERY criterion invocation ran under timeout 120; the derive and pointer waits were polled loops (describe-tasks / head-object every 30 s), never a bare sleep. Every .py passed .tools/commit-gate.sh. Ten surprise rows filed across the order, none edited. FIVE COMMITS: 5d3c589f25 and 9c98dd1e63 (pass 1), 27e4ac36de (the gate), then the two at the flip -- f8360785de (the acts) and this instance pinning them.",
+  "compiler_tools": [
+    {
+      "tool": "comp-read (the order's compiler_tools_mandate, before any act)",
+      "invocation": "python .tools/comp-read infra/aws/globgrph/derive_runner.py --for \"how the additive folds are structured ... and the graph dict's classes_data shape\" ; python .tools/comp-read infra/aws/globgrph/kuzu_incremental_refresh.py --for \"how pin is built and what source_vintage carries\" ; python .tools/comp-read infra/aws/globgrph/projection_worker.py --for \"how the served manifest is built\"",
+      "result": "derive_runner.py 2456 lines / 71 sections -- the QUALIFIER that set the fold's shape: ':2217 commit_to_iceberg reads NODES from classes_data[*][\"nodes\"] but EDGES from graph[\"edges\"] (top-level) -- edges nested in classes_data are SILENTLY DROPPED at commit'. kuzu_incremental_refresh.py 375 lines / 15 sections, _read_head_tables:98 'pin = {' -- built from the branch-head marker, which is why the engine and not the marker became the carrier. projection_worker.py 687 lines / 33 sections, :255 'if manifest.get(\"age_line\") != _age_line(vintage)' -- the exact-equality guard the carrier had to satisfy."
+    },
+    {
+      "tool": "comp-read --enumerate + comp-find (the two censuses that decided the design)",
+      "invocation": "python .tools/comp-read infra/aws/globgrph/derive_runner.py --enumerate 'NODE_TYPE_LAYER|DROP_NODE_TYPES' ; python .tools/comp-find 'VINTAGE' .tools infra/aws/globgrph org/modules/graph --files ; python .tools/comp-read infra/aws/globgrph/kuzu_cli.py --enumerate 'VINTAGE|vintage|manifest' ; python .tools/comp-find 'globgrph_image_digest' infra/aws/terraform/globgrph --all",
+      "result": "NODE_TYPE_LAYER: '20 hit(s) across 2456 lines' including :2055 'CTO arch-gate GO 223537Z + CVO sign 224410Z' and :2163 'derive FAILS CLOSED' -- the governance and the failure mode in one read, which is what made W2-S45 a BLOCKING row rather than an edit. kuzu_cli.py: '20 hit(s) across 169 lines', hit 12/20 at :60 'return \"VINTAGE: %s  [vintage=%s manifest=%s prefix=%s]\"' -- format_provenance_header is nowhere on the serve path (W2-S46). globgrph_image_digest: 7 references across serving.tf, projection.tf, item2a.tf and resource_summaries_producer.tf -- ALL SEVEN families, which is why the apply set is 18 and not E-2's 10 (W2-S52)."
+    },
+    {
+      "tool": "comp-kuzu (the thin client -- pre-fold control, post-fold answer, and the column-form refusal)",
+      "invocation": "bash .tools/comp-kuzu --json \"MATCH (n:CloudNode) WHERE n.node_type IN ['GOLD_SCRIPT','S3_DATA_KEY','API_ROUTE'] RETURN n.node_type AS t, count(*) AS c ORDER BY t\" ; ... WHERE n.props CONTAINS 'stitch-v1' ... ; ... WHERE n.vocabulary = 'stitch-v1' ...",
+      "result": "PRE-FOLD (19:2xZ, before the image act): [{'t': 'API_ROUTE', 'c': 86}] -- 1 of 3, not the 0 of 3 the criterion states. POST (21:2xZ): API_ROUTE 151, GOLD_SCRIPT 1380, S3_DATA_KEY 294, and the stamp count 1771 on props. The column form: 'Binder exception: Cannot find property vocabulary for n.' -- an HTTP 500, not a zero, which is why the count is taken on props and the refusal is printed beside it."
+    },
+    {
+      "tool": "terraform (.tools/terraform.exe -- init, the unscoped census plan, the targeted plan, the post-plan) and safe-apply",
+      "invocation": ".tools/terraform.exe -chdir=infra/aws/terraform/globgrph init/plan ; bash .tools/safe-apply.sh -chdir=infra/aws/terraform/globgrph apply -input=false -no-color -auto-approve -target=<18 addresses>",
+      "result": "unscoped plan 'Plan: 9 to add, 13 to change, 7 to destroy.' over 22 addresses (4 foreign, never applied); targeted plan 'Plan: 7 to add, 11 to change, 7 to destroy.' over exactly 18; apply 'Apply complete! Resources: 7 added, 11 changed, 7 destroyed.' rc 0; post-plan 'No changes. Your infrastructure matches the configuration.' The first apply attempt exited 3 on the halt-gate's IDENTITY UNRESOLVED and was satisfied by naming the principal, never by an override."
+    },
+    {
+      "tool": "commit-gate (every .py touched)",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/globgrph/{derive_runner,kuzu_nessie_load,kuzu_incremental_refresh,projection_worker}.py ; bash .tools/commit-gate.sh <the fixture>",
+      "result": "rc 0 every time: 'pre-commit gate clean for 4 of 4 file(s)' then '1 of 1'. 5 of 5 .py files in this order gated. The 5 non-ASCII WARN lines in derive_runner.py (:2, :270, :430, :1001, :1145) are pre-existing and none is in the added code; one ruff error (an unused import) was raised on the fixture and fixed before its commit."
+    },
+    {
+      "tool": "proof-of-spec-check (this instance, before the flip)",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/NFRA_CLDGRPH.TO-CG-F-4.projection-carries-stitch-source.proof_of_spec.json F4-AC1,F4-AC2,F4-AC3,F4-AC4,F4-AC5",
+      "result": "RECORDED AT THE COMMIT THAT CARRIES THIS FILE -- see the commit message for the rc and the verbatim verdict line. The flip is taken only on rc 0 with every mechanical row PASS-by-output."
+    }
+  ]
+}

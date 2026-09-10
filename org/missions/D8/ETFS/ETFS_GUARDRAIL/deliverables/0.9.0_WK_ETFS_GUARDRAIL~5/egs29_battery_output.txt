@@ -1,0 +1,345 @@
+====================================================================================================
+ETFS_GUARDRAIL.TO-EG-s-29 -- S29-AC1 BATTERY
+0.9.0_WK_ETFS_GUARDRAIL~5   0.9.0_WK_ETFS_GUARDRAIL~5
+====================================================================================================
+
+====================================================================================================
+ARM (a) -- THE DEFECT REPRODUCES FIRST, AND THE WRITER POPULATION IS ENUMERATED FROM SOURCE
+====================================================================================================
+BEFORE side pinned by COMMIT and resolved by CONTENT:
+  ref            2a672685b99ebe46dfe1d4b08053e2d48283879e
+  subject        L2(Investor Reporting Lightweight, ENDPOINT --forward on the CRO's L1 @03c74dc): SEVEN outcomes, and the seventh is one 
+  blob bytes     69879   sha256 9b9cdd9c39cbe92bbcb94c9550eebcf924b0f18744b81c61c3f66cfe75237a76
+  [PASS] a :: NEGATIVE CONTROL: the BEFORE blob does NOT carry this cell's fix (marker `_skipped_branch_egress_ask` absent) -- so it is genuinely the before side and not the same file twice
+
+CENSUS -- every per-day record CONSTRUCTOR across BOTH files, by AST, read
+from the source and not from the task order's list (that list is the issuer's,
+and a list is exactly how the fifth writer went uncounted).
+  rule: an ast.Dict literal whose keys contain BOTH "date" and "class"
+  remediate.py at   7e544cb4d7 L7(EG-s-28 FIX + BATTERY): every unresolved record names its provider at 4 of 4 sites, and the fence is on the PROPERTY rather than on today's four writers
+
+  BEFORE render_month_end.py @2a672685b9
+    DENOMINATOR: 1 per-day record site(s); 1 UNRESOLVED-record site(s), 0 ASK-ENTRY site(s)
+      line 1047  coverage_gate                UNRESOLVED  provider=False keys=date,class,reason
+    UNRESOLVED sites carrying `provider`: 0 of 1
+  [PASS] a :: the BEFORE renderer has 1 UNRESOLVED site and 0 of 1 carries `provider`
+
+  AFTER  render_month_end.py (worktree)
+    DENOMINATOR: 1 per-day record site(s); 1 UNRESOLVED-record site(s), 0 ASK-ENTRY site(s)
+      line 1164  coverage_gate                UNRESOLVED  provider=True  keys=date,class,provider,reason
+    UNRESOLVED sites carrying `provider`: 1 of 1
+  [PASS] a :: the AFTER renderer has 1 UNRESOLVED site and 1 of 1 carries `provider`
+
+  remediate.py (worktree, EG-s-28 terminal)
+    DENOMINATOR: 5 per-day record site(s); 4 UNRESOLVED-record site(s), 1 ASK-ENTRY site(s)
+      line 147   rung3_stop_and_ask           ASK-ENTRY   provider=True  keys=date,partner,provider,class,reason
+      line 265   remediate_month              UNRESOLVED  provider=True  keys=date,class,provider,reason
+      line 273   remediate_month              UNRESOLVED  provider=True  keys=date,class,provider,reason
+      line 286   remediate_month              UNRESOLVED  provider=True  keys=date,class,provider,reason
+      line 298   remediate_month              UNRESOLVED  provider=True  keys=date,class,provider,reason
+    UNRESOLVED sites carrying `provider`: 4 of 4
+  [PASS] a :: remediate.py has 4 UNRESOLVED sites and 4 of 4 carry `provider` (EG-s-28, unmoved by this cell)
+
+  POPULATION ACROSS BOTH FILES: 5 UNRESOLVED-record site(s) -- 4 in remediate.py + 1 in render_month_end.py. The task order says the same; it was MEASURED here rather than adopted, which is the whole point: EG-s-28 asked whether four was the POPULATION or merely the list it was handed, and it was not.
+  [PASS] a :: the writer population is 5 of 5, measured from source
+
+THE DEFECT ITSELF, on the BEFORE bytes (hermetic; boto3 poisoned):
+  --no-ladder verdict=REFUSE holes=4   unresolved records: 4
+    2026-08-25 | cottonwood | (not stated) | C | ladder skipped (--no-ladder)
+    2026-08-26 | cottonwood | (not stated) | D | ladder skipped (--no-ladder)
+    2026-08-27 | cottonwood | (not stated) | UNKNOWN | ladder skipped (--no-ladder)
+    2026-08-31 | cottonwood | (not stated) | C | ladder skipped (--no-ladder)
+  records LACKING `provider`: 4 of 4
+  S3 puts made by the BEFORE branch: 0 (rung 3 unreachable, no ask of any kind)
+  [PASS] a :: the premise HOLDS: 0 of 4 records on the BEFORE skipped branch carry `provider`
+  [PASS] a :: the BEFORE skipped branch records NO egress ask (0 put_object) -- the second half of the defect
+
+====================================================================================================
+ARM (b) -- EVERY RECORD ON THE SKIPPED BRANCH NAMES ITS PROVIDER  [DIFFERENCE control]
+====================================================================================================
+OK: s3://opal-data-etfs/platinum/reports/2026-08/coverage_egress_ask_ladder_skipped.json (rung-3-EQUIVALENT egress ask, written by the --no-ladder branch; rung 3 did not run)
+THE CASE reaches every record-producing path on this branch: classes present in the records = ['C', 'D', 'UNKNOWN'] (the branch records exactly C, D and UNKNOWN; A/B/COVERED are excluded by the branch's own filter and are present in the month)
+  month class census (denominator = 31 calendar-mapped day(s) of the month): {'A': 10, 'COVERED': 16, 'B': 1, 'C': 2, 'D': 1, 'UNKNOWN': 1}
+
+    2026-08-25 | cottonwood | Black Diamond | C | ladder skipped (--no-ladder)
+    2026-08-26 | cottonwood | Black Diamond | D | ladder skipped (--no-ladder)
+    2026-08-27 | cottonwood | Black Diamond | UNKNOWN | ladder skipped (--no-ladder)
+    2026-08-31 | cottonwood | Black Diamond | C | ladder skipped (--no-ladder)
+  carrying `provider`: 4 of 4
+  [PASS] b :: 4 of 4 records on the AFTER skipped branch carry `provider`
+
+THE VALUE IS COMPARED AGAINST remediate.py, not asserted: the same partner's
+record built by remediate.remediate_month (the module EG-s-28 fixed) is asked
+for its provider, and the two are compared byte for byte.
+  remediate.remediate_month -> {'Black Diamond'}  (4 record(s))
+  skipped branch            -> {'Black Diamond'}  (4 record(s))
+  [PASS] b :: the skipped branch's provider EQUALS remediate.py's for the same partner
+
+DIFFERENCE CONTROL -- the SAME run, engaged and disengaged (BEFORE bytes vs
+AFTER bytes, same month, same series, same probe):
+  BEFORE: 4 record(s), 0 carry `provider`
+  AFTER : 4 record(s), 4 carry `provider`
+  [PASS] b :: date/class/reason IDENTICAL either side -- the ONLY difference is the new field, so the control discriminates the change and nothing else
+
+====================================================================================================
+ARM (c) -- AN UNMAPPED PARTNER STILL READS AS UNKNOWN  [POSITIVE control: the honest-absence path can still fire]
+====================================================================================================
+PARTNER 'acmecapital' is absent from remediate._PROVIDER_BY_PARTNER (mapped partners: ['49financial', 'cottonwood', 'inflection'])
+OK: s3://opal-data-etfs/platinum/reports/2026-08/coverage_egress_ask_ladder_skipped.json (rung-3-EQUIVALENT egress ask, written by the --no-ladder branch; rung 3 did not run)
+  SKIPPED branch : 4 record(s), provider value(s) {'<no provider mapped>'}
+  LADDER  branch : 4 record(s), provider value(s) {'<no provider mapped>'}
+  [PASS] c :: the skipped branch renders the honest absence marker '<no provider mapped>' -- never a guess, never None
+  [PASS] c :: BYTE-IDENTICAL to what the ladder branch renders for the same partner
+  [PASS] c :: no record carries a null provider
+
+====================================================================================================
+ARM (d) -- THE EGRESS ASK IS RECORDED FOR THE RUN  [DIFFERENCE control; this is the arm that unblocks EG-s-21]
+====================================================================================================
+OK: s3://opal-data-etfs/platinum/reports/2026-08/coverage_egress_ask_ladder_skipped.json (rung-3-EQUIVALENT egress ask, written by the --no-ladder branch; rung 3 did not run)
+PUT CENSUS, --no-ladder run: 1 object(s)
+    s3://opal-data-etfs/platinum/reports/2026-08/coverage_egress_ask_ladder_skipped.json  (1710 B)
+  [PASS] d :: the run RECORDED an egress ask at platinum/reports/2026-08/coverage_egress_ask_ladder_skipped.json
+  [PASS] d :: and did NOT write rung 3's own artifact platinum/reports/2026-08/coverage_egress_ask.json -- so EG-s-26's disclosure (`ABSENT BY CONSTRUCTION`) stays TRUE, and a rehearsal run can never merge into the document a person authorises real egress on
+
+THE RECORD, WHOLE:
+{
+  "written_by": "render_month_end.coverage_gate on the --no-ladder branch (ETFS_GUARDRAIL.TO-EG-s-29) -- a RUNG-3-EQUIVALENT. RUNG 3 DID NOT RUN and did not write this.",
+  "rung3_ran": false,
+  "ask_content_built_by": "remediate.rung3_stop_and_ask -- imported and called, not re-implemented, so asks/ask_scope/partners_covered/authorization below are rung 3's own output",
+  "equivalent_of": "s3://opal-data-etfs/platinum/reports/2026-08/coverage_egress_ask.json -- rung 3's own artifact, which is ABSENT BY CONSTRUCTION for a --no-ladder run (rung 3 is its sole writer and this run never reached it)",
+  "stored_at": "s3://opal-data-etfs/platinum/reports/2026-08/coverage_egress_ask_ladder_skipped.json",
+  "month": "2026-08",
+  "generated_at": "2026-09-10T14:26:00.190538+00:00",
+  "ask_scope": "month-complete (merged across partners at this key)",
+  "partners_covered": [
+    "cottonwood"
+  ],
+  "asks": [
+    {
+      "date": "2026-08-25",
+      "partner": "cottonwood",
+      "provider": "Black Diamond",
+      "class": "C",
+      "reason": "ladder skipped (--no-ladder)"
+    },
+    {
+      "date": "2026-08-26",
+      "partner": "cottonwood",
+      "provider": "Black Diamond",
+      "class": "D",
+      "reason": "ladder skipped (--no-ladder)"
+    },
+    {
+      "date": "2026-08-27",
+      "partner": "cottonwood",
+      "provider": "Black Diamond",
+      "class": "UNKNOWN",
+      "reason": "ladder skipped (--no-ladder)"
+    },
+    {
+      "date": "2026-08-31",
+      "partner": "cottonwood",
+      "provider": "Black Diamond",
+      "class": "C",
+      "reason": "ladder skipped (--no-ladder)"
+    }
+  ],
+  "authorization": "PER-USE -- a person decides; nothing here is executed by any process"
+}
+
+PUT CENSUS, LADDER run over the SAME input: 1 object(s)
+    s3://opal-data-etfs/platinum/reports/2026-08/coverage_egress_ask.json  (1135 B)
+  [PASS] d :: the ladder run wrote a REAL rung-3 ask at platinum/reports/2026-08/coverage_egress_ask.json -- so the comparison below is against a real one, not a reconstruction
+
+THE REAL RUNG-3 ASK, WHOLE:
+{
+  "month": "2026-08",
+  "generated_at": "2026-09-10T14:26:00.195207+00:00",
+  "ask_scope": "month-complete (merged across partners at this key)",
+  "partners_covered": [
+    "cottonwood"
+  ],
+  "asks": [
+    {
+      "date": "2026-08-25",
+      "partner": "cottonwood",
+      "provider": "Black Diamond",
+      "class": "C",
+      "reason": "rung 1 invoke returned but no slice landed on rung 2 re-check"
+    },
+    {
+      "date": "2026-08-26",
+      "partner": "cottonwood",
+      "provider": "Black Diamond",
+      "class": "D",
+      "reason": "rung 1 invoke returned but no slice landed on rung 2 re-check"
+    },
+    {
+      "date": "2026-08-27",
+      "partner": "cottonwood",
+      "provider": "Black Diamond",
+      "class": "UNKNOWN",
+      "reason": "rung 1 invoke returned but no slice landed on rung 2 re-check"
+    },
+    {
+      "date": "2026-08-31",
+      "partner": "cottonwood",
+      "provider": "Black Diamond",
+      "class": "C",
+      "reason": "rung 1 invoke returned but no slice landed on rung 2 re-check"
+    }
+  ],
+  "authorization": "PER-USE -- a person decides; nothing here is executed by any process"
+}
+
+EVERY FIELD THAT DIFFERS (denominator = the union of both key sets):
+  ask_content_built_by   DIFFERS
+      equivalent : "remediate.rung3_stop_and_ask -- imported and called, not re-implemented, so asks/ask_scope/partners_covered/authorization below are rung 3's own output"
+      rung 3     : "<ABSENT>"
+  ask_scope              IDENTICAL
+  asks                   DIFFERS
+      equivalent : [{"date": "2026-08-25", "partner": "cottonwood", "provider": "Black Diamond", "class": "C", "reason": "ladder skipped (--no-ladder)"}, {"date": "2026-08-26", "partner": "cottonwood", "provider": "Black Diamond", "class": "D", "reason": "ladder skipped (--no-ladder)"}, {"date": "2026-08-27", "partner": "cottonwood", "provider": "Black Diamond", "class": "UNKNOWN", "reason": "ladder skipped (--no-la
+      rung 3     : [{"date": "2026-08-25", "partner": "cottonwood", "provider": "Black Diamond", "class": "C", "reason": "rung 1 invoke returned but no slice landed on rung 2 re-check"}, {"date": "2026-08-26", "partner": "cottonwood", "provider": "Black Diamond", "class": "D", "reason": "rung 1 invoke returned but no slice landed on rung 2 re-check"}, {"date": "2026-08-27", "partner": "cottonwood", "provider": "Blac
+  authorization          IDENTICAL
+  equivalent_of          DIFFERS
+      equivalent : "s3://opal-data-etfs/platinum/reports/2026-08/coverage_egress_ask.json -- rung 3's own artifact, which is ABSENT BY CONSTRUCTION for a --no-ladder run (rung 3 is its sole writer and this run never reached it)"
+      rung 3     : "<ABSENT>"
+  generated_at           DIFFERS
+      equivalent : "2026-09-10T14:26:00.190538+00:00"
+      rung 3     : "2026-09-10T14:26:00.195207+00:00"
+  month                  IDENTICAL
+  partners_covered       IDENTICAL
+  rung3_ran              DIFFERS
+      equivalent : false
+      rung 3     : "<ABSENT>"
+  stored_at              DIFFERS
+      equivalent : "s3://opal-data-etfs/platinum/reports/2026-08/coverage_egress_ask_ladder_skipped.json"
+      rung 3     : "<ABSENT>"
+  written_by             DIFFERS
+      equivalent : "render_month_end.coverage_gate on the --no-ladder branch (ETFS_GUARDRAIL.TO-EG-s-29) -- a RUNG-3-EQUIVALENT. RUNG 3 DID NOT RUN and did not write this."
+      rung 3     : "<ABSENT>"
+  7 of 11 field(s) differ: ['ask_content_built_by', 'asks', 'equivalent_of', 'generated_at', 'rung3_ran', 'stored_at', 'written_by']
+  [PASS] d :: the record SAYS it was written by the skipped branch and not by rung 3 -- a reader cannot mistake the equivalent for the original
+  [PASS] d :: the PER-USE authorization semantics are rung 3's OWN string, byte-identical
+  ask rows carrying date+partner+provider: 4 of 4
+  [PASS] d :: every ask row carries its date, its partner AND its provider
+  [PASS] d :: `ask_scope` is rung 3's own merge verdict ('month-complete (merged across partners at this key)'), not a restatement
+  [PASS] d :: `partners_covered` identical -- the month-completeness EG-s-23 added is inherited, not re-implemented
+
+====================================================================================================
+ARM (e) -- THE LADDER BRANCH DID NOT MOVE  [INVARIANCE]
+====================================================================================================
+
+  scenario 'COMPLETE (no holes)' (ladder=True)
+    verdict   BEFORE=PUBLISH  AFTER=PUBLISH  SAME
+    holes     BEFORE=0        AFTER=0        SAME
+    A         BEFORE=10       AFTER=10       SAME
+    COVERED   BEFORE=21       AFTER=21       SAME
+    B         BEFORE=0        AFTER=0        SAME
+    C         BEFORE=0        AFTER=0        SAME
+    D         BEFORE=0        AFTER=0        SAME
+    UNKNOWN   BEFORE=0        AFTER=0        SAME
+    unresolved records BYTE-IDENTICAL: True (2 B either side)
+    forcing record (EG-s-25) + skip record (EG-s-26) BYTE-IDENTICAL on the LADDER branch: True
+    WHOLE verdict object byte-identical (volatile generated_at/run_id stripped): True
+    rung-3 asks written: BEFORE 0, AFTER 0; ladder-skipped key written: BEFORE 0, AFTER 0
+
+  scenario '5 HOLES (C/D/UNKNOWN/B mix)' (ladder=True)
+    verdict   BEFORE=REFUSE   AFTER=REFUSE   SAME
+    holes     BEFORE=4        AFTER=4        SAME
+    A         BEFORE=10       AFTER=10       SAME
+    COVERED   BEFORE=16       AFTER=16       SAME
+    B         BEFORE=1        AFTER=1        SAME
+    C         BEFORE=2        AFTER=2        SAME
+    D         BEFORE=1        AFTER=1        SAME
+    UNKNOWN   BEFORE=1        AFTER=1        SAME
+    unresolved records BYTE-IDENTICAL: True (590 B either side)
+    forcing record (EG-s-25) + skip record (EG-s-26) BYTE-IDENTICAL on the LADDER branch: True
+    WHOLE verdict object byte-identical (volatile generated_at/run_id stripped): True
+    rung-3 asks written: BEFORE 1, AFTER 1; ladder-skipped key written: BEFORE 0, AFTER 0
+
+  DENOMINATOR: 24 compared quantit(ies) across 2 scenario(s) on ladder=True; 24 IDENTICAL
+  [PASS] e :: the ladder branch did not move: 24 of 24
+  [PASS] e :: NEGATIVE CONTROL on the comparator: the two scenarios DISAGREE with each other (['PUBLISH', 'REFUSE']), so 'identical' is a measurement and not a constant
+
+  EG-s-25's forcing record and EG-s-26's skip record, on BOTH branches:
+    ladder=True  present 12 of 12 field(s); moved 0 of 12: none
+OK: s3://opal-data-etfs/platinum/reports/2026-08/coverage_egress_ask_ladder_skipped.json (rung-3-EQUIVALENT egress ask, written by the --no-ladder branch; rung 3 did not run)
+    ladder=False present 12 of 12 field(s); moved 0 of 12: none
+  [PASS] e :: both records are PRESENT and UNCHANGED on their respective branches -- including `coverage_egress_ask_possible: false` and the skip_note naming coverage_egress_ask.json as absent by construction, which this cell keeps TRUE by writing its equivalent to a different key
+
+====================================================================================================
+ARM (f) -- THE DEPLOY IS REAL AND REVERSIBLE, AND NOTHING ELSE FIRED  [CENSUS]
+====================================================================================================
+EVIDENCE FILE: C:\tmp\wk-etfs-3-29\org\missions\D8\ETFS\ETFS_GUARDRAIL\deliverables\0.9.0_WK_ETFS_GUARDRAIL~5\egs29_deploy_evidence.json
+  bucket/key            s3://opal-313476888478-lambda-artifacts/ec2/etfs-reports/render_month_end.py
+  disposition           SUPERSEDED WITHIN THIS ACT -- the latest version already carries this cell's committed bytes -- placed by an earlier invocation of THIS script under THIS ledger entry (entry opened 2026-09-10T14:09:00.717455+00:00, object LastModified 2026-09-10T14:09:53.000Z). NEVER-2: a re-execute of an overtaken promote is a REWIND, so no second copy is issued and the PRIOR below is the version BEFORE that upload.
+  prior VersionId       TkhI7NPt_hpJUaXYAlBnjZggJQDz.wBG
+  prior sha256          9b9cdd9c39cbe92bbcb94c9550eebcf924b0f18744b81c61c3f66cfe75237a76  (69879 B)
+  committed sha256      ba410ee5c9c4263e8fe37ade171aa4d61f834df246d0f57f30299dbba03a031a  (77130 B)
+  served  VersionId     lvBC1IFEk3Fpfry_ysQfCNf5PIA8f00E
+  served  sha256        ba410ee5c9c4263e8fe37ade171aa4d61f834df246d0f57f30299dbba03a031a  (77130 B)  RE-DOWNLOADED by VersionId: True
+  served == committed   True
+  NEGATIVE CONTROL prior != served: True
+  rollback              .tools/aws s3api copy-object --bucket opal-313476888478-lambda-artifacts --key ec2/etfs-reports/render_month_end.py --copy-source 'opal-313476888478-lambda-artifacts/ec2/etfs-reports/render_month_end.py?versionId=TkhI7NPt_hpJUaXYAlBnjZggJQDz.wBG'
+  version history       9 version(s) on the key; the latest version already carries this cell's committed bytes -- placed by an earlier invocation of THIS script under THIS ledger entry (entry opened 2026-09-10T14:09:00.717455+00:00, object LastModified 2026-09-10T14:09:53.000Z). NEVER-2: a re-execute of an overtaken promote is a REWIND, so no second copy is issued and the PRIOR below is the version BEFORE that upload.
+  ledger entry          org/critical_paths/change_management/ (slug etfs-guardrail-egs29-renderer-skipped-branch-property-20260910); open entry at org/critical_paths/.open_deploys/etfs-guardrail-egs29-renderer-skipped-branch-property-20260910.json until closed
+  [PASS] f :: the SERVED object is byte-equal to the committed bytes, both sha256 printed, the served copy RE-DOWNLOADED by its VersionId rather than trusted from the PUT
+  [PASS] f :: the served read was by VersionId (not a bare GET that could race another writer)
+  [PASS] f :: NEGATIVE CONTROL: prior sha256 DIFFERS from served, so the equality above discriminates and the rollback is a real restore, not a no-op
+  [PASS] f :: the prior sha256 + VersionId were recorded BEFORE the copy
+
+  ARTIFACT PREFIX ec2/etfs-reports/ : 7 key(s) before, 7 after; changed 0, added 0, removed 0
+  [PASS] f :: ZERO GUARD: both listings NON-EMPTY before any delta is graded (an empty listing and an untouched population are the same value)
+  [PASS] f :: at most ONE key of 7 changed between the listing pair, none added, none removed
+    MOVED SINCE THE ENTRY OPENED (LastModified >= opened_at -- the measurement that survives a re-run, since a before/after listing pair on a second invocation reports zero and reads exactly like 'never touched'):
+      ec2/etfs-reports/render_month_end.py  2026-09-10T14:09:53.000Z
+      1 of 7 key(s)
+  [PASS] f :: EXACTLY ONE key of 7 moved during the act, and it is the ordered key
+
+  SERVED REPORTS s3://opal-data-etfs/platinum/reports/ : 37 key(s) before, 37 after; delta 0
+  [PASS] f :: ZERO GUARD on the reports listing: non-empty (37 key(s))
+    MOVED SINCE THE ENTRY OPENED: 0 of 37 key(s) []
+    DISCLOSURE ON THIS DENOMINATOR: THE DENOMINATOR IS NOT CLEAN AND IS NOT PRESENTED AS CLEAN: one of these keys, platinum/reports/2026-08/coverage_egress_ask_ladder_skipped.json (LastModified 2026-09-10T13:54:44Z), was written by a UNIT TEST RUN of this cell's own suite BEFORE this entry opened -- surprise row ETFS_GUARDRAIL-W5-S11, ARMED, with its removal command and its owner. It predates opened_at, so it does not appear in moved_since_entry_opened, and this act wrote nothing under this prefix.
+  [PASS] f :: NO WRITE under platinum/reports/ during this cell's deploy: 0 of 37 key(s) moved, by BOTH instruments (listing pair and LastModified)
+
+  SES: the claim is TIME OVERLAP over 2026-09-10T14:09:00.717455+00:00..2026-09-10T14:13:00Z, not a whole-day zero -- other seats send legitimate mail and grading this act on their traffic would convict it of their sends
+    datapoints overlapping the act window: 0 of 6 for the UTC day
+  [PASS] f :: NO SES SEND: 0 datapoint(s) overlap the act window (the claim is TIME OVERLAP, not a whole-day zero -- other seats send legitimate mail)
+  LAMBDA: 13 function(s) checked of 203 in the account (denominator BY SUBTRACTION: 203 total MINUS 190 whose name carries neither 'etf' nor 'report'); invocations summed = 0
+  [PASS] f :: NO LAMBDA INVOKE across the checked functions in the act window
+  ARGV CENSUS, second instrument on a different axis (what was ISSUED, not what FIRED): 0 of 25 recorded step(s) touch anything but s3api/s3/cloudwatch/lambda-list: ['cloudwatch', 'lambda', 's3api']
+  [PASS] f :: 0 of 25 recorded steps issued an SES call, a lambda invoke or an SSM command
+
+  HERMETICITY OF THIS BATTERY ITSELF: boto3.client and subprocess.run were poisoned before any renderer import.
+    boto3 call attempts: 0      subprocess.run attempts: 0
+  [PASS] f :: this battery made 0 AWS calls and 0 subprocess.run calls of its own
+
+====================================================================================================
+ARM (g) -- THE TREE THIS BATTERY MEASURED IN  [CENSUS + positive control on the tool]
+====================================================================================================
+  worktree      C:\tmp\wk-etfs-3-29
+  branch        wk-etfs_guardrail-3-29
+  HEAD          903c5cba503a2f1cd8b98ef11021637e48983ad3
+  git dir       C:/Users/AndrewBerman/Desktop/ajb_workspace/.git/worktrees/wk-etfs-3-29
+  renderer      C:\tmp\wk-etfs-3-29\data\etfs\scripts\presentation\render_month_end.py (77130 B, sha256 ba410ee5c9c4263e8fe37ade171aa4d61f834df246d0f57f30299dbba03a031a)
+
+  ROW S35 -- the comp-rail resolved its corpus from the tool's INSTALL LOCATION until 838b963638, so a worktree-run census silently scanned the MAIN tree and returned a well-formed zero with a real denominator. PROVEN PRESENT HERE, not assumed:
+    .tools/_comprail.py `def corpus_root` occurrences: 1
+    838b963638 is an ancestor of HEAD: rc=0 (0 = yes)
+  [PASS] g :: the comp-rail corpus fix is IN THIS TREE (marker present AND the commit is in ancestry) -- proven, not assumed
+
+  POSITIVE CONTROL that a repo-wide census reads THIS worktree: a file that exists ONLY on this branch must appear in the hits.
+    probe file            org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~5/test_egs29_skipped_branch_carries_the_property.py
+    tracked at HEAD       'org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~5/test_egs29_skipped_branch_carries_the_property.py'
+    working-tree status   'M org/missions/D8/ETFS/ETFS_GUARDRAIL/deliverables/0.9.0_WK_ETFS_GUARDRAIL~5/test_egs29_skipped_branch_carries_the_property.py'
+    present on disk       True
+    present on CLOUD      False (git cat-file rc=128; 0 = present)
+  [PASS] g :: the probe file exists in THIS worktree and NOT on CLOUD -- so any census that finds it read this tree, and one that misses it read another
+
+    census of '_skipped_branch_egress_ask' over the ordered path (denominator = 1 file, 1407 line(s)): 2 hit(s) at line(s) [1066, 1176]
+  [PASS] g :: the cell's own marker is present in the file it names
+
+====================================================================================================
+RESULT: every clause of every arm holds (a,b,c,d,e,f,g -- 7 of 7)
+EGS29-SKIPPED-BRANCH-CARRIES-THE-PROPERTY

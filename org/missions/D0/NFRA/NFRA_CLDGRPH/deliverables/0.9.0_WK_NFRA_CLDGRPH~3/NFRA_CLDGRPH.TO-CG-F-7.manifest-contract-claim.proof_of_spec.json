@@ -1,0 +1,278 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_CLDGRPH.TO-CG-F-7",
+ "firm": "FABRIC",
+ "phase": "P5-DECOMMISSION",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/decompositions/NFRA_CLDGRPH_DECOMP.md",
+  "vintage_commit": "c6b16d8f04",
+  "to_ref": "org/missions/D0/NFRA/NFRA_CLDGRPH/task-orders/NFRA_CLDGRPH.TO-CG-F-7.manifest-contract-claim.md"
+ },
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CLDGRPH/prd/NFRA_CLDGRPH_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "30027295be"
+ },
+ "assignee": "0.9.0_WK_NFRA_CLDGRPH~3",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/globgrph/_provenance.py",
+   "artifact_covered_by": [
+    "F7-AC1",
+    "F7-AC2",
+    "F7-AC3",
+    "F7-AC4",
+    "F7-AC5"
+   ],
+   "kind": "script",
+   "commit_or_etag": "987e920554",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "THE WRITER AND THE READER, one file. write_manifest gains two REQUIRED keyword-only parameters with NO default (edge_count_semantics in {stored, attempted}; artifact_claim in {served_projection, interim_local_projection, historical}), each validated against its closed vocabulary (ValueError otherwise), and computes content_sha256 and bytes_written_at itself from db_path. schema_version stays 1: the four keys are ADDITIVE. format_provenance_header gains the `counts:` claim line immediately after the DB/counts line it qualifies, plus four `!!` arms (provenance_claim absent, source_kind beginning UNKNOWN, BYTES NEWER THAN MANIFEST, BYTES DIFFER FROM MANIFEST) and three never-silent UNKNOWN readings; the pre-existing `!! UNKNOWN VINTAGE` early return is UNTOUCHED. New helpers: _iter_store_files, _sha256_file, store_content_sha256, store_bytes_size, store_mtime_iso, _parse_iso, _claim_lines, _bytes_vs_manifest_lines. git diff --numstat: 203 insertions / 2 deletions. commit-gate.sh: clean."
+  },
+  {
+   "path_or_key": "infra/aws/globgrph/kuzu_nessie_load.py",
+   "artifact_covered_by": [
+    "F7-AC2"
+   ],
+   "kind": "script",
+   "commit_or_etag": "987e920554",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Call site :252 gains edge_count_semantics=\"stored\", artifact_claim=\"served_projection\" and nothing else (5 insertions / 0 deletions). STORED because edges_stored is the post-MERGE count read back from the store (S8), not the merge_attempts upper bound. commit-gate: clean."
+  },
+  {
+   "path_or_key": "infra/aws/globgrph/kuzu_incremental_refresh.py",
+   "artifact_covered_by": [
+    "F7-AC2",
+    "F7-AC4"
+   ],
+   "kind": "script",
+   "commit_or_etag": "987e920554",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Call site now at :256 gains the same two kwargs (4 insertions / 0 deletions); rn/re_ are the POST-APPLY counts the correctness guard immediately above reads back out of the store, and this DB is swapped in as the served projection. NO derive or pin logic touched, so slot ~2's F-4 edits to this file stay textually separable at the drain. commit-gate: clean."
+  },
+  {
+   "path_or_key": "infra/aws/globgrph/kuzu_stitch_load.py",
+   "artifact_covered_by": [
+    "F7-AC2"
+   ],
+   "kind": "script",
+   "commit_or_etag": "987e920554",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Call site now at :123 gains edge_count_semantics=\"attempted\", artifact_claim=\"interim_local_projection\"; the local _stamp_claim helper (:37-72) and its 8-line call site are REMOVED -- 9 insertions / 45 deletions. `written` increments once per MERGE EXECUTED and MERGE is idempotent, so it is an UPPER BOUND on the edges in the store: the honest semantics is `attempted`. With the claim REQUIRED at the writer, a post-hoc read-modify-rewrite of the file just written is dead code, and leaving it would keep a SECOND way to stamp a claim -- the two-carrier defect the row it was born from was filed against. commit-gate: clean."
+  },
+  {
+   "path_or_key": "infra/aws/globgrph/tests/test_provenance_claim.py",
+   "artifact_covered_by": [
+    "F7-AC1"
+   ],
+   "kind": "test",
+   "commit_or_etag": "987e920554",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The seven arms (a)-(g) as 13 collected tests, all on TEMP paths with FAKE store bytes: no kuzu import, no engine opened, no loader run, no main-workspace store or manifest touched (this order's BOUNDS). Includes the arms that must NOT fire: test_f_untouched_store_reads_ok asserts no `!!` anywhere on a store nobody touched, and test_a_claim_is_required_and_vocabulary_closed asserts the refused calls left NO manifest behind. commit-gate: clean."
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/f7_producers_census.py",
+   "artifact_covered_by": [
+    "F7-AC2"
+   ],
+   "kind": "script",
+   "commit_or_etag": "987e920554",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AST walk (never a grep: a call spanning six lines is one node here and six lines there) over 68 .py files under infra/aws/globgrph/ for every write_manifest call, with its exclusions PRINTED rather than silent (kuzu_load.py EXCLUDED-if-present and reported present with 1 call site; _provenance.py's def; 3 test call sites counted separately because the CG-s-27 suite calls the writer WITHOUT the kwargs on purpose). A **kwargs splat is reported UNDETERMINED, never as clean."
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/f7_header_arms.sh",
+   "artifact_covered_by": [
+    "F7-AC3"
+   ],
+   "kind": "script",
+   "commit_or_etag": "987e920554",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The F7-AC3 harness (with f7_header_arms.py, which it invokes): five arms rendered by format_provenance_header -- the function the estate calls, not an inner helper -- on temp stores with fake bytes, each FULL header printed before its one-line ARM_ summary, so the summary is a restatement of a visible render and never a substitute for one."
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/f7_header_arms.py",
+   "artifact_covered_by": [
+    "F7-AC3"
+   ],
+   "kind": "script",
+   "commit_or_etag": "987e920554",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The renderer behind f7_header_arms.sh. Carries the arm-5 NEGATIVE CONTROL: the same store is rendered BEFORE the rewrite and the BYTES NEWER line must be absent there (ARM_BYTES_NEWER_NEGATIVE_CONTROL=clean-before-rewrite), so the loud arm is a measurement and not a constant."
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/f7_signature_bind.py",
+   "artifact_covered_by": [
+    "F7-AC2",
+    "F7-AC4"
+   ],
+   "kind": "script",
+   "commit_or_etag": "987e920554",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "THE SUBSTITUTE FOR F7-AC4'S DEAD CONTROL (NFRA_CLDGRPH-W3-S16). Binds every producer call site's argument NAMES against inspect.signature(_provenance.write_manifest) and repeats the bind with the CG-s-27 kwargs removed, which must be REFUSED at every site. Measured at 987e920554: SITES_BINDING=3 of 3; STRIPPED_CALLER_REFUSED=3 of 3 ('missing a required argument: edge_count_semantics'); BIND_CONTROL=FIRED; rc=0. Discriminates a left-behind caller WITHOUT opening an engine."
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/CG-s-27.manifest-contract-claim.result.md",
+   "artifact_covered_by": [
+    "F7-AC1",
+    "F7-AC2",
+    "F7-AC3",
+    "F7-AC4",
+    "F7-AC5"
+   ],
+   "kind": "doc",
+   "commit_or_etag": "987e920554",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The record: ONE fenced JSON block (the four-field spec with its vocabularies, required-ness and null semantics; the legacy alias with its direction and its RETIREMENT TRIGGER; the reader's arms; the three call sites by line BEFORE and AFTER at this HEAD with the excluded kuzu_load.py named; the test denominators including the collected-by-file split that carries W3-S16; and a rendered header EXAMPLE for each of the five arms verbatim from the harness) followed by prose in three sections, s.3 being the F7-AC5 reading in five parts (3a-3e)."
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "artifact_covered_by": [
+    "F7-AC3",
+    "F7-AC4",
+    "F7-AC5"
+   ],
+   "kind": "doc",
+   "commit_or_etag": "987e920554",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Three rows appended (W3-S14, W3-S15, W3-S16) and the header denominator restated 152 -> 155 by PARSING every fenced json block (155 rows in 127 blocks; 152 in 124 before), never by a loose id grep, which still matches the header line itself. No existing row edited, no id renumbered. surprise-row-gate at commit: '3 new row(s) of 155 total checked (152 pre-existing, NOT re-graded) ... OK: all new rows carry their step-7/step-10 fields'; surprise-corpus: 'OK: corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved)'."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "F7-AC1",
+   "criterion_verbatim": "THE CONTRACT, EXERCISED ON TEMP STORES: the seven arms (a)-(g) each a test, all passing, the collected count non-zero (a zero-collection is the false green named above).",
+   "method": "command",
+   "invocation": "timeout 120 python -m pytest infra/aws/globgrph/tests/test_provenance_claim.py -q -p no:cacheprovider",
+   "expect": "([1-9][0-9]*) passed",
+   "denominator": "13 tests COLLECTED, 13 passed, 0 failed -- and the collected count was read on its own invocation (--collect-only: '13 tests collected in 0.03s'), not inferred from the pass line, because the false green this clause names is a ZERO collection that prints no failure. The 13 cover the seven arms: (a) 2 tests, (b) 1, (c) 1, (d) 3 (parametrised over UNKNOWN_tarball / unknown_local_copy / UNKNOWN), (e) 1, (f) 4, (g) 1.",
+   "status": "PASS",
+   "output_evidence": "$ timeout 120 python -m pytest infra/aws/globgrph/tests/test_provenance_claim.py -q -p no:cacheprovider\n.............                                                    [100%]\n13 passed in 0.14s\nrc=0\n$ ... --collect-only\n13 tests collected in 0.03s\n\nMEASURED AT 987e920554 (the commit carrying the acts). THE SEVEN ARMS, each its own test:\n  (a) test_a_writer_stamps_all_four_claim_fields -- all four fields present; content_sha256 == hashlib.sha256(FAKE_BYTES).hexdigest() (the hash is over the ACTUAL bytes, not a placeholder); a DIRECTORY store hashes to a different 64-char digest\n  (a) test_a_claim_is_required_and_vocabulary_closed -- TypeError on each omitted kwarg; ValueError on each out-of-vocabulary value; and the refused calls left NO manifest behind\n  (b) test_b_header_prints_claim_beside_counts -- the claim line is at index+1 from the counts line it qualifies (BESIDE is asserted as adjacency, not as mere presence)\n  (c) test_c_no_manifest_still_prints_unknown_vintage -- '!! UNKNOWN VINTAGE -- no _build_manifest.json beside this DB.' and NO 'counts:' line (a manifest-less store must not acquire a quiet claim)\n  (d) test_d_unknown_source_kind_keeps_the_bang_prefix x3 -- case-insensitive\n  (e) test_e_manifest_without_claim_prints_provenance_claim_absent -- plus 'bytes-vs-manifest: UNKNOWN (no bytes_written_at)'\n  (f) test_f_bytes_newer_than_manifest_reads_so (with a clean-before-rewrite control in the same test), test_f_directory_store_inner_rewrite_is_caught, test_f_same_mtime_different_bytes_is_caught_by_the_hash, test_f_untouched_store_reads_ok (the arm that must NOT fire: asserts NO '!!' anywhere)\n  (g) test_g_legacy_edge_count_claim_reads_with_legacy_key -- 'edge_count_semantics=attempted (legacy key)' and NO '!! provenance_claim: absent'\nBOUNDS HONOURED: no kuzu import, no engine opened, no loader run, TEMP paths and FAKE bytes throughout."
+  },
+  {
+   "criterion_id": "F7-AC2",
+   "criterion_verbatim": "EVERY REMAINING PRODUCER STAMPS THE CLAIM through the one writer (the denominator = every `write_manifest` call site under `infra/aws/globgrph/` at your HEAD, `kuzu_load.py` named as EXCLUDED-if-present); no `_stamp_claim` helper remains outside it; a planted call without the kwargs is caught.",
+   "method": "command",
+   "invocation": "timeout 120 python org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/f7_producers_census.py",
+   "expect": "PRODUCERS_STAMPING=([0-9]+) of \\1[\\s\\S]*LEGACY_HELPER_SITES=0[\\s\\S]*PRODUCER_PROBE_CONTROL=FIRED",
+   "denominator": "3 of 3 producer call sites, out of 68 .py files walked under infra/aws/globgrph/. THE EXCLUSIONS ARE PRINTED, not silent: kuzu_load.py EXCLUDED-if-present and reported PRESENT with 1 call site (TO-CG-F-1 retires it; outside this grant, not edited); _provenance.py contributes 0 producer calls (it holds the def); 3 test call sites counted and named separately, because the CG-s-27 suite calls the writer WITHOUT the kwargs on purpose to prove the TypeError arm and would otherwise poison the denominator. LEGACY_HELPER_SITES counts _stamp_claim FUNCTION DEFINITIONS outside kuzu_load.py: 1 before this order (kuzu_stitch_load.py:37), 0 after.",
+   "status": "PASS",
+   "output_evidence": "$ timeout 120 python org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/f7_producers_census.py\n=== TO-CG-F-7 / CG-s-27 -- write_manifest producer census ===\nSCOPE: infra\\aws\\globgrph | PY_FILES_SCANNED=68\nEXCLUDED_PRESENT: infra/aws/globgrph/kuzu_load.py (1 write_manifest call site(s)) -- retired by TO-CG-F-1, outside this grant, NOT counted\nDEFINITION_FILE_CALLS=0 (_provenance.py holds the def, not a producer call)\nTEST_CALL_SITES=3 (excluded and printed: the CG-s-27 suite calls the writer WITHOUT the kwargs on purpose, to prove the TypeError arm)\n\nPRODUCER CALL SITES (the denominator):\n  infra/aws/globgrph/kuzu_incremental_refresh.py       :256   STAMPS\n  infra/aws/globgrph/kuzu_nessie_load.py               :252   STAMPS\n  infra/aws/globgrph/kuzu_stitch_load.py               :123   STAMPS\n\nPROBE_NEGATIVE: planted call without the kwargs -> NOT-STAMPING (caught)\nPROBE_POSITIVE: planted call with the kwargs    -> STAMPING\n\nPRODUCERS_STAMPING=3 of 3\nLEGACY_HELPER_SITES=0\nPRODUCER_PROBE_CONTROL=FIRED\nrc=0\n\nMEASURED AT 987e920554. THE CONTROL THAT CAN FAIL: two modules are planted in a temp dir and fed through the SAME walker -- one write_manifest call WITHOUT the kwargs, one WITH. The negative must read NOT-STAMPING and name both missing kwargs, the positive must read STAMPING; FIRED means both. A walker that could not return NOT-STAMPING would report '3 of 3' on any code at all. INDEPENDENT SECOND INSTRUMENT on the same claim, different axis (the writer's live signature rather than the call's AST): f7_signature_bind.py -> SITES_BINDING=3 of 3, STRIPPED_CALLER_REFUSED=3 of 3, BIND_CONTROL=FIRED."
+  },
+  {
+   "criterion_id": "F7-AC3",
+   "criterion_verbatim": "THE RENDERED HEADER, FIVE ARMS ON REAL RENDERS (the function the estate calls, not an inner helper): the claim beside the counts; no manifest; UNKNOWN kind; claim absent; bytes newer -- each line printed as rendered.",
+   "method": "command",
+   "invocation": "timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/f7_header_arms.sh",
+   "expect": "ARM_CLAIM_BESIDE_COUNTS=true[\\s\\S]*ARM_NO_MANIFEST=!! UNKNOWN VINTAGE[\\s\\S]*ARM_UNKNOWN_KIND=!![\\s\\S]*ARM_CLAIM_ABSENT=!! provenance_claim: absent[\\s\\S]*ARM_BYTES_NEWER=!! BYTES NEWER THAN MANIFEST",
+   "denominator": "5 of 5 arms rendered, each by _provenance.format_provenance_header(db_path, check_nessie_distance=False) -- the module-level function the estate calls, reached through the package the estate imports, not an inner helper and not a re-implementation. Each arm prints its FULL header before its ARM_ summary line, so the summary is a restatement of a visible render. Plus a 6th line, ARM_BYTES_NEWER_NEGATIVE_CONTROL, which is not one of the five.",
+   "status": "PASS",
+   "output_evidence": "$ timeout 120 bash org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/f7_header_arms.sh   (tail; the full renders print above each summary line)\n=== SUMMARY (each value is the line as rendered above) ===\nARM_CLAIM_BESIDE_COUNTS=true\nARM_CLAIM_LINE_AS_RENDERED=counts: 1166 nodes / 2488 edges (edge_count_semantics=attempted; artifact_claim=historical)\nARM_NO_MANIFEST=!! UNKNOWN VINTAGE -- no _build_manifest.json beside this DB.\nARM_UNKNOWN_KIND=!! source_kind UNKNOWN_tarball -- the origin of these bytes is NOT identified; the counts and the vintage below are unverified (S53).\nARM_CLAIM_ABSENT=!! provenance_claim: absent -- counts carry no semantics (S53): this manifest does not say whether edge_count counts EDGES STORED or MERGE ATTEMPTS, so a consumer cannot reject on it. Rebuild through _provenance.write_manifest to stamp it.\nARM_BYTES_NEWER=!! BYTES NEWER THAN MANIFEST -- store mtime 2026-09-09T18:49:22.472390+00:00 > bytes_written_at 2026-09-09T18:48:22.468854+00:00; the counts above describe an OLDER store (W3-S11)\nARM_BYTES_NEWER_NEGATIVE_CONTROL=clean-before-rewrite\nF7_HEADER_ARMS_RC=0\nrc=0\n\nMEASURED AT 987e920554. ARM 1's full render, showing the claim BESIDE the counts (adjacent lines, not merely both present):\n  === comp-kuzu provenance ===\n    DB: kuzu_db_healthy  (1166 nodes / 2488 edges)\n    counts: 1166 nodes / 2488 edges (edge_count_semantics=attempted; artifact_claim=historical)\n    source: nessie\n    built: 2026-09-09T18:48:22.46xxxx+00:00 (age: 0.0h)\n    bytes-vs-manifest: OK (mtime ...; content_sha256 matches)\n  ============================\nARM 2 keeps the PRD's negative arm VERBATIM and unchanged by this order. ARM 5 carries its own negative control in the same run: the SAME store rendered BEFORE the rewrite had no BYTES NEWER line, so the arm is a measurement and not a constant. BOUNDS: temp stores, fake bytes, no engine."
+  },
+  {
+   "criterion_id": "F7-AC4",
+   "criterion_verbatim": "THE CALLERS' EXISTING TESTS STAY GREEN with a non-zero collected count (the writer's new REQUIRED kwargs would break a caller that was not updated -- the control that can fail).",
+   "method": "command",
+   "invocation": "timeout 120 python -m pytest infra/aws/globgrph/tests/test_kuzu_incremental_refresh.py infra/aws/globgrph/tests/test_projection_worker.py -q -p no:cacheprovider",
+   "expect": "([1-9][0-9]*) passed(?![\\s\\S]*failed)",
+   "denominator": "10 tests COLLECTED, 10 passed, 0 failed -- AND THE SPLIT IS THE FINDING: test_projection_worker.py contributes 10 of 10, test_kuzu_incremental_refresh.py contributes 0 of 10 ('--collect-only' on that file alone: 'no tests collected in 0.04s'). It is a main()-style self-test under `if __name__ == \"__main__\"`, so the ONLY file of the two that reaches write_manifest contributes nothing to this criterion. Filed as NFRA_CLDGRPH-W3-S16 and substituted in-grant by f7_signature_bind.py.",
+   "status": "PASS",
+   "output_evidence": "$ timeout 120 python -m pytest infra/aws/globgrph/tests/test_kuzu_incremental_refresh.py infra/aws/globgrph/tests/test_projection_worker.py -q -p no:cacheprovider\n..........                                                       [100%]\n10 passed in 0.87s\nrc=0\n$ ... --collect-only\n10 tests collected in 0.28s   (every node id listed under test_projection_worker.py)\n$ ... test_kuzu_incremental_refresh.py --collect-only\nno tests collected in 0.04s\n\nMEASURED AT 987e920554. PASS-BY-OUTPUT: the named invocation produced the named result, non-zero collected count, no failures.\nWHAT THIS OUTPUT DOES NOT PROVE, MEASURED AND FILED (NFRA_CLDGRPH-W3-S16): the criterion's own stated control is DEAD. With the CG-s-27 kwargs stripped back out of kuzu_incremental_refresh.py, this same invocation still reads '10 passed', rc=0 -- run once, then the file restored byte-for-byte with sha256 asserted equal (before=64914181d01359c1 after=64914181d01359c1 match=True) before anything was committed. This is NOT the import-time-SystemExit false green the clause warns about; it is a second mechanism with the same signature (a self-test with no pytest-shaped functions).\nTHE SUBSTITUTE CONTROL, IN GRANT AND ON A DIFFERENT AXIS (the writer's live signature, not the tests): f7_signature_bind.py binds each producer call site's argument NAMES against inspect.signature(write_manifest) -> SITES_BINDING=3 of 3; then repeats the bind with the CG-s-27 kwargs removed -> STRIPPED_CALLER_REFUSED=3 of 3, each 'missing a required argument: edge_count_semantics'; BIND_CONTROL=FIRED, rc=0. A caller left behind IS caught -- without opening an engine, which this order's BOUNDS forbid.\nUNSCOPED READ OF THE POPULATION THESE TWO FILES BELONG TO (the shared dependency a per-member check cannot see): the whole tests home reads '2 failed, 79 passed, 1 skipped in 37.67s'. The 2 are test_code_heat_emit.py::test_emit and test_code_heat_parity.py::test_parity, both 'PARITY_FAIL repo=portal: zero rows emitted' from an EMPTY portal submodule in this linked worktree (`ls portal` -> 0 entries); neither module references _provenance or write_manifest (0 hits / 298 lines). Filed as NFRA_CLDGRPH-W3-S15. Separately, the only OTHER live caller of format_provenance_header in the repository, .tools/tests/test_cg8_seam_retired_battery.py, reads '6 passed in 3.78s'."
+  },
+  {
+   "criterion_id": "F7-AC5",
+   "criterion_verbatim": "THE CONTRACT, READ: whether a consumer can now REJECT on the claim (which field, which value, at which read site), what the served header will show the morning after F-4's derive lands (a manifest written by the cloud worker through this writer), what the legacy alias costs (a second spelling alive for one round -- when it retires), and whether `!! BYTES NEWER THAN MANIFEST` could false-fire on a store the projection worker legitimately copies (mtime semantics on S3 -> local copy). A reading act; NO verdict; graded by `3.0.0_SA_CVO` at L9.",
+   "method": "manual_read_with_citation",
+   "invocation": "read org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/CG-s-27.manifest-contract-claim.result.md s.3 (3a-3e) @987e920554",
+   "denominator": "4 questions asked by the criterion, 4 answered (3a-3d), plus 3e naming what this order deliberately did not do. NOT self-graded: no PASS/FAIL appears on this row.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "JUDGMENT criterion (judgment=\"true\" in the task order). Graded by 3.0.0_SA_CVO at L9 against the specification that issued it; a PASS or FAIL written here by the assignee would be INVALID per the order's <proof_of_spec> block. The reading is recorded, the verdict is not.",
+   "output_evidence": "THE READING, s.3 of the record, four questions and a fifth section.\n\n3a. CAN A CONSUMER REJECT? Yes at the manifest, not yet at a served surface. Three refusals are now expressible. The weakest and most useful: `artifact_claim != \"served_projection\"` -- a consumer can refuse an interim or historical store outright without knowing how either was built. This is exactly the refusal E-3 wanted and could not have, because its two claim cards were written by a helper only two of four producers called, so a consumer reading a card-less manifest could not tell 'not a served projection' from 'nobody said'. Now it can: the absent case renders `!! provenance_claim: absent` and reads `edge_count_semantics=absent` IN A FIELD -- not as a missing key that .get() turns into None and a truthiness test turns into 'fine'. The sharper: `edge_count_semantics == \"attempted\"` means the number is an UPPER BOUND, so any consumer comparing two edge counts (a parity check, a drift alarm, a 'did tonight lose edges' question) has been silently comparing an upper bound against a true count whenever one side is a stitch store. Read site: one dict lookup on read_manifest(db), no engine. The strongest, and new in kind: bytes_written_at + content_sha256 let a consumer refuse a manifest THAT NO LONGER DESCRIBES THE BYTES BESIDE IT -- every other field describes the build; these two describe the BINDING, which is the thing that actually goes stale. HONEST LIMIT: all three are AVAILABLE to a consumer that reads; none is ENFORCED anywhere. S53's consuming half is now possible, not yet mandatory, and this cell was not scoped to make it so.\n\n3b. WHAT THE SERVED HEADER SHOWS THE MORNING AFTER F-4: NOTHING -- and this is the answer I would most want the L9 seat to check. F-4's derive will call this writer and its manifest WILL carry stored / served_projection / a content_sha256 / a bytes_written_at, which rendered is arm 1 above. But NOTHING RENDERS IT: repo-wide there is one definition of format_provenance_header and three live call sites -- two in test files (.tools/tests/test_cg8_seam_retired_battery.py:268,277) and one in org/tier2_senior/0.8.0_AE_CloudComp/deliverables/l1a_item1b/sensor_kuzu_schema_residue.py:280. Neither projection_client.py nor projection_server.py nor kuzu_cli.py references _provenance AT ALL (0 hits across 3 files scanned); projection_server.py parses a DIFFERENT manifest schema (pointer / manifest_sha256 / age_line / vintage / committed_at, :109-187) that write_manifest does not produce. So C-S27's observation that the served header 'still reads 1166 nodes / 2488 edges with nothing beside it' describes a header no serving path emits at all. The morning after F-4 lands, an operator sees what they see today; a seat calling format_provenance_header by hand sees the full claim. The gap is a WIRING cell and it is not this one (NFRA_CLDGRPH-W3-S14). Caution for whoever cuts it: content_sha256 on a large served store is not free and the header renders on EVERY invocation -- this implementation already refuses above 64 MiB and PRINTS the skip, but a serve path should compare mtime only and reach for the hash on demand.\n\n3c. WHAT THE LEGACY ALIAS COSTS AND WHEN IT RETIRES: one spelling of one concept alive in two forms for one round, READ-ONLY, rendered '(legacy key)' so it is never invisible. The cost is a READING cost: a future seat searching for edge_count_semantics misses the two E-3 cards on disk, and a schema census counts two keys where the taxonomy has one. The mitigation is that the writer can only produce the NEW spelling, so the legacy set is CLOSED at exactly the manifests already on disk -- it cannot grow. IT RETIRES WHEN no manifest on disk carries edge_count_claim: concretely, when the two main-workspace claim cards' stores (F-1's and F-6's) are retired or rebuilt through this writer. Naming the TRIGGER matters more than naming a date -- 'one round' is how a legacy key becomes permanent. ONE THING FOR THE RETIRING SEAT: E-3's cards spell the VALUE 'merge_attempts' while this vocabulary spells it 'attempted', and the reader passes the legacy value through VERBATIM rather than translating it, so a card renders 'edge_count_semantics=merge_attempts (legacy key)'. That is honest -- it shows what is actually written -- but it means the closed vocabulary is closed only for values THIS writer produced.\n\n3d. COULD `!! BYTES NEWER THAN MANIFEST` FALSE-FIRE ON A LEGITIMATE COPY? YES, and this is the arm most likely to cry wolf. The mechanism: the projection worker fetches a store from S3 and writes it locally; the manifest was written by the PRODUCER stamping the PRODUCER's local mtime; the copy's local mtime is the COPY time, necessarily later, often by hours. S3 HAS NO CLIENT-SETTABLE MTIME FOR A DOWNLOADED OBJECT -- `aws s3 cp` sets the local mtime to now unless the caller restores it -- so the false fire is not a possibility, it is the DEFAULT on any copy path that does not think about it. Three bounds, none eliminating it: (i) the disciplinary answer is that a copy path should re-stamp the manifest through this writer after landing the bytes (correct: the local store's binding IS new) or preserve mtimes deliberately; (ii) THE HASH IS THE DISCRIMINATOR and it is already computed -- a false fire has content_sha256 MATCHING and only the mtime moved, a true fire usually has both moved -- but this implementation checks mtime FIRST and returns on the loud arm without consulting the hash, which is the cheap ordering and the WRONG one for exactly this case; a serve-path cell should invert it (mtime newer AND hash differs -> !! BYTES NEWER; mtime newer but hash matches -> a quieter 'bytes-vs-manifest: copied (mtime moved, content identical)'); (iii) the 2.0 s tolerance handles filesystem granularity and nothing else -- it is no defence against a copy. I did not make the inversion here because it changes what the arm MEANS rather than whether it works, and it costs a hash on every render, which is a serve-path decision rather than a writer one. Nobody is currently exposed: per 3b, no serve path renders this header yet.\n\n3e. WHAT THIS ORDER DELIBERATELY DID NOT DO: did not touch kuzu_load.py (F-1's, outside the grant) though it is STILL PRESENT and its write_manifest call WILL raise TypeError on the required kwargs the moment it runs -- stated in the census output and the record rather than fixed, because it is the one way this cell's edit can break a file it is forbidden to touch; did not edit projection_server.py (it needs no edit, and finding out why is W3-S14); did not run any loader, open any store with an engine, or touch a main-workspace store or manifest; did not correct _provenance.py's module docstring where it claims kuzu_cli.py prints this header on every comp-kuzu invocation (measured: it does not) -- correcting the sentence without the wiring moves a false claim rather than removing it, and the wiring is out of grant; did not give test_kuzu_incremental_refresh.py a pytest-collectable surface, which would open kuzu engines the BOUNDS forbid outright (W3-S16, routed to the lane)."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Every criterion that could pass by being DEAD carries a specimen that must make it fail, fed through the SAME instrument as the real subject. (a) F7-AC2: two modules are planted in a temp dir -- one write_manifest call WITHOUT the CG-s-27 kwargs, one WITH -- and walked by the same AST walker; the negative must read NOT-STAMPING and name both missing kwargs, the positive must read STAMPING (PRODUCER_PROBE_CONTROL=FIRED means both). A walker that could not return NOT-STAMPING would report '3 of 3' over any code at all. (b) F7-AC3: the BYTES NEWER arm renders the SAME store BEFORE the rewrite and that render must carry no BYTES NEWER line (ARM_BYTES_NEWER_NEGATIVE_CONTROL=clean-before-rewrite). (c) F7-AC1 carries its own arms-that-must-not-fire: test_f_untouched_store_reads_ok asserts NO '!!' anywhere on an untouched store, test_c_no_manifest_still_prints_unknown_vintage asserts a manifest-less store acquires NO quiet 'counts:' line, and test_g_...reads_with_legacy_key asserts a legacy card does NOT trip the absent arm. (d) F7-AC4's SPECIFIED control was RUN and found DEAD -- the kwargs stripped out of kuzu_incremental_refresh.py, the invocation still '10 passed' rc=0, the file restored byte-for-byte (sha256 asserted equal) before any commit -- and REPLACED in-grant by f7_signature_bind.py, whose own control (the same bind with the kwargs removed) refuses at 3 of 3 sites. Filed as NFRA_CLDGRPH-W3-S16.",
+   "expected": "Each control must be able to return the FAILING value on its own specimen: F7-AC2's AST walker must read a planted kwarg-less write_manifest call as NOT-STAMPING (and a planted stamping call as STAMPING); F7-AC3's BYTES NEWER arm must be ABSENT from the same store rendered before the rewrite; F7-AC1's must-not-fire arms must show no '!!' on an untouched store, no 'counts:' line on a manifest-less store, and no absent-arm on a legacy card; F7-AC4's specified control (a caller left behind) must make its invocation FAIL. Additionally, the signature-bind substitute must REFUSE every producer call site once the CG-s-27 kwargs are removed from the bind.",
+   "observed": "PRODUCER_PROBE_CONTROL=FIRED (negative plant NOT-STAMPING naming both missing kwargs; positive plant STAMPING). ARM_BYTES_NEWER_NEGATIVE_CONTROL=clean-before-rewrite. F7-AC1's must-not-fire arms all green inside the 13 passed. BIND_CONTROL=FIRED: SITES_BINDING=3 of 3 and STRIPPED_CALLER_REFUSED=3 of 3, each 'missing a required argument: edge_count_semantics'. THE ONE EXCEPTION, MEASURED AND FILED: F7-AC4's SPECIFIED control DID NOT FIRE -- with the CG-s-27 kwargs stripped out of kuzu_incremental_refresh.py the AC4 invocation still read '10 passed', rc=0 (the file then restored byte-for-byte, sha256 before=64914181d01359c1 after=64914181d01359c1 match=True, before any commit). Cause: test_kuzu_incremental_refresh.py collects ZERO under pytest (a main()-style self-test), so the only one of the two named files that reaches the writer contributes nothing. Filed as NFRA_CLDGRPH-W3-S16 and replaced in-grant by f7_signature_bind.py, which is the discriminating instrument F7-AC4 was meant to be and needs no engine. F7-AC4 itself is recorded PASS-BY-OUTPUT (the named invocation produced the named result); this row is what that output does not prove.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Every mechanical criterion was run TWICE on the same input -- once before the acts commit and once after, at 987e920554 -- and the verdict-bearing lines compared. F7-AC2 and the signature bind are pure static reads (AST + inspect.signature) with no clock, no network and no ordering dependence: the walker sorts its directory entries and its output, so the same tree prints the same lines. F7-AC1 and F7-AC4 are pytest runs with -p no:cacheprovider, so no run-to-run cache can carry state. F7-AC3 embeds timestamps by construction (the arm it proves is ABOUT mtimes), so its determinism claim is scoped to the ARM LABELS and the arm-5 timestamps are expected to differ between runs and do.",
+   "observed": "STABLE on every verdict-bearing line. F7-AC1: '13 passed' both runs (0.17s then 0.14s) with '13 tests collected' read on its own --collect-only invocation. F7-AC2: byte-identical output both runs -- 'PRODUCERS_STAMPING=3 of 3', 'LEGACY_HELPER_SITES=0', 'PRODUCER_PROBE_CONTROL=FIRED', the same three call sites at :256/:252/:123, the same 'PY_FILES_SCANNED=68'. F7-AC3: the five ARM_ labels and their rendered text identical both runs; only the arm-5 mtime pair differed (18:36:28 > 18:35:28 first run; 18:49:22 > 18:48:22 second) -- which is the arm behaving, not drift, and the 60s gap is the harness's own os.utime offset, identical in both. F7-AC4: '10 passed' both runs (1.01s then 0.87s), '10 tests collected' both. f7_signature_bind.py: identical output. The AC4 negative control was run ONCE by construction (it mutates a tracked file); its determinism claim is the sha256 equality of the restore, asserted in the same process.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "infra/aws/globgrph/kuzu_load.py -- its write_manifest call site (:305) and its own _stamp_claim def (:185)",
+   "reason": "Named EXCLUDED by the order ('it is OUTSIDE your grant; do not edit it; if it is still present at your HEAD, leave it and say so'). IT IS STILL PRESENT at 987e920554 and the census says so on its own line. CONSEQUENCE STATED RATHER THAN FIXED: with edge_count_semantics and artifact_claim now REQUIRED, kuzu_load.py's call will raise TypeError the moment it runs. TO-CG-F-1 (slot ~1) retires the file in this same round, which resolves it; if F-1 does not land, this is the one way this cell's edit reaches a file it may not touch. Not chased: editing it would widen the order, and a path the grant lacks is a statement, never an override."
+  },
+  {
+   "item": "infra/aws/globgrph/projection_server.py -- in <paths>, NOT edited",
+   "reason": "The face grants it 'only if it renders its own' served header. Measured: it does not render the provenance header at all -- it parses a DIFFERENT manifest schema (pointer / manifest_sha256 / age_line / vintage / committed_at) and references _provenance nowhere. A granted path is not an obligation to edit; an edit here would have been a change with no criterion behind it. Recorded as NFRA_CLDGRPH-W3-S14."
+  },
+  {
+   "item": "WIRING any serve-path or CLI caller of format_provenance_header",
+   "reason": "Outside <paths> and outside the cell. The consequence -- that the claim is stamped and renderable but reaches no operator-facing surface -- is the substance of NFRA_CLDGRPH-W3-S14 and of the F7-AC5 reading 3b, so it travels to L9 measured rather than assumed."
+  },
+  {
+   "item": "REORDERING the bytes-vs-manifest arm to consult content_sha256 before firing BYTES NEWER on an mtime move",
+   "reason": "The face specifies the arm as 'a store whose bytes are newer than the manifest prints !! BYTES NEWER THAN MANIFEST -- store mtime <t1> > bytes_written_at <t0>', which is what was built and tested. Inverting the order changes what the arm MEANS (see F7-AC5 3d) and costs a hash on every render; that is a serve-path decision for the seat that wires a caller, not a writer-side change to make inside a cell that was not asked for it."
+  },
+  {
+   "item": "REPAIRING the 2 red tests in infra/aws/globgrph/tests/ (test_code_heat_emit, test_code_heat_parity)",
+   "reason": "Their input is an EMPTY portal submodule in a linked worktree; neither module references _provenance or write_manifest. Fixing a submodule checkout is neither in <paths> nor in the cell, and 'keep them green' cannot bind a test whose input is absent from every linked worktree by construction. Recorded as NFRA_CLDGRPH-W3-S15."
+  },
+  {
+   "item": "GIVING test_kuzu_incremental_refresh.py a pytest-collectable surface",
+   "reason": "It would open kuzu engines, which this order's BOUNDS forbid outright ('never open a store with an engine; kuzu.Database CREATES an absent store'). The dead control is recorded (NFRA_CLDGRPH-W3-S16, ARMED to 0.8.0_AE_CloudComp) and substituted by an engine-free instrument rather than fixed out of bounds."
+  },
+  {
+   "item": "CORRECTING _provenance.py's module docstring claim that kuzu_cli.py prints this header on every comp-kuzu invocation",
+   "reason": "Measured false at this HEAD (kuzu_cli.py: 0 hits for 'provenance|_build_manifest|header' across 169 lines). The file IS in the grant, but the WIRING the sentence describes is not, and correcting the sentence alone moves a false claim one step rather than removing it. Stated in W3-S14 so the seat that wires the caller fixes both together."
+  },
+  {
+   "item": "BUMPING schema_version past 1",
+   "reason": "The four keys are ADDITIVE and every pre-CG-s-27 manifest still parses and still reads (loudly). A bump would have invalidated the two E-3 claim cards and any consumer pinning ==1 for no gain."
+  }
+ ],
+ "surprises": [
+  "NFRA_CLDGRPH-W3-S14: THE CLAIM HAS NO SERVED RENDER TO REACH -- the face says the served header is rendered by projection_client.py / projection_server.py ('imported there or the served manifest is rendered by its own function'); measured, NEITHER references _provenance at all (0 hits / 3 files, kuzu_cli.py and comp_cluster_cli.py included), and repo-wide format_provenance_header has ONE definition and THREE live call sites, none in a produce or serve path (two test files and one sensor under org/tier2_senior/). projection_server.py parses a DIFFERENT manifest schema this writer does not produce. No projection_server.py edit was made because the file needs none. Second finding in the same read: _provenance.py:7's own docstring claims kuzu_cli.py prints this header on every comp-kuzu invocation and kuzu_cli.py has 0 hits for it. OBSERVATION, INERT.",
+  "NFRA_CLDGRPH-W3-S15: TWO TESTS RED IN THE ORDERED TESTS HOME FOR A REASON THIS CELL DID NOT CAUSE -- the face says 'keep them green'; the unscoped directory run reads '2 failed, 79 passed, 1 skipped', both failures 'PARITY_FAIL repo=portal: zero rows emitted (empty heat view)' from an EMPTY portal submodule in this linked worktree (ls portal -> 0 entries), in modules with 0 hits for '_provenance|write_manifest'. The two files the face names by name are green at 10 passed. OBSERVATION, INERT.",
+  "NFRA_CLDGRPH-W3-S16: F7-AC4'S NAMED CONTROL IS DEAD -- with the CG-s-27 kwargs stripped back out of kuzu_incremental_refresh.py the AC4 invocation still reads '10 passed', rc=0 (file restored byte-for-byte, sha256 asserted equal, before any commit), because test_kuzu_incremental_refresh.py collects ZERO under pytest (a main()-style self-test, not the import-time SystemExit the face warns about but a second mechanism with the same signature) and all 10 collected tests come from test_projection_worker.py, which never calls the writer. SUBSTITUTE DELIVERED IN-GRANT: f7_signature_bind.py -- SITES_BINDING=3 of 3, STRIPPED_CALLER_REFUSED=3 of 3, BIND_CONTROL=FIRED -- discriminating a left-behind caller without opening an engine. OBSERVATION, ARMED, disarm_owner 0.8.0_AE_CloudComp (the disarm would need an engine-opening test surface, which this order's BOUNDS forbid)."
+ ],
+ "session_log": "TO-CG-F-7 (cell CG-s-27), slot ~3's ONLY order of round 6. Worker 0.9.0_WK_NFRA_CLDGRPH~3 on branch wk-cldgrph-6-3, worktree C:/tmp/wk-cldgrph-6-3, HEAD at hand-off c6b16d8f04, acts commit 987e920554, this instance + the status flip in the commit that cites it. PUSH STATE: LOCAL -- never pushed, never merged, never rebased.\nFIRST ACT, the bar: `git rev-parse --abbrev-ref HEAD` -> wk-cldgrph-6-3; `test -d org && test -d .tools` -> TREE-OK. The worktree carries the paths the order names.\nRE-GROUNDING THE FACE'S PREMISES, one by one: TRUE -- write_manifest at _provenance.py:49 with the six parameters the face lists and no claim field; read_manifest at :77; format_provenance_header at :560 with the UNKNOWN VINTAGE arm at :591-595 and the counts line at :605 ('DB: {label}  ({nc} nodes / {ec} edges)' -- the '1166 nodes / 2488 edges' shape C-S27 quotes); MANIFEST_SUFFIX and manifest_path at :44; DEFAULT_AGE_WARN_HOURS at :41. TRUE -- the four call sites and the two _stamp_claim defs exactly where the face puts them; kuzu_load.py STILL PRESENT. FALSE, and filed as W3-S14 -- the served-header premise: neither projection file renders this header, and no module in infra/aws/globgrph calls format_provenance_header at all.\nTHE WORK, in the deliverable's order: (1) the writer's four fields and the reader's arms; (2) the three call sites, kwargs only, with kuzu_stitch_load.py's dead _stamp_claim helper removed; (3) the seven-arm suite as 13 tests on temp paths with fake bytes; (4) the AST census with its printed exclusions and its planted-call control; (5) the record, this instance, the flip. Every .py through .tools/commit-gate.sh (clean, 9 of 11 files gated -- the .sh took bash -n, the .md none).\nWHAT THE ORDER DID NOT SAY AND I DID ANYWAY, all three filed as rows rather than assumed: ran the tests home UNSCOPED once after the per-file pass (Rule 22's shared-dependency clause) and found 2 red from an empty portal submodule (W3-S15); ran F7-AC4's SPECIFIED control to see whether it could fail, found it dead, and built an engine-free substitute inside the grant (W3-S16); censused the header's callers repo-wide rather than only in the two files the face named, which is what turned the face's binary question into a measured 'neither' (W3-S14).\nONE REFUSAL, CORRECT AND MINE: the first commit attempt was BLOCKED by the surprise-row gate -- three surfaced_at values written '2026-09-09T18:4xZ', which the schema's timestamp pattern rejects (the same trap W2-S23 recorded in this channel). Corrected to 2026-09-09T18:46Z BEFORE the rows ever entered the record, which is a correction, not an edit of an existing row; the second attempt passed with 'surprise-corpus OK: corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved)'.\nBOUNDS HONOURED THROUGHOUT: no loader run; no store opened with an engine (kuzu is never imported by anything this order added); no main-workspace store or manifest touched; no file edited outside <paths> plus this slot's deliverables folder; every criterion invocation under timeout 120 and none hit it; every script and capture carries the f7_ prefix (W3-S13's collision lesson). The comp-system two-phase gate did not fire -- this order edits nothing under org/modules/graph/.\nTWO CONTROLS THE SCHEMA HAS NO SLOT FOR, recorded here because dropping them to fit the shape would be the defect this project keeps finding. (i) UNSCOPED RE-READ (Rule 22's shared-dependency clause -- a check scoped to the members cannot see a defect in what the members share): Rule 22's shared-dependency clause: a check scoped to the members cannot see a defect in what the members share. The two files F7-AC4 names share a tests home, so the home was read UNSCOPED once after the per-file pass; and the writer's four producers share ONE writer, so the writer's own signature was read as an object (inspect.signature) rather than only through its callers. RESULT: The unscoped home run: '2 failed, 79 passed, 1 skipped in 37.67s' -- 2 RED that a scoped pass on the two named files could never see (test_code_heat_emit, test_code_heat_parity; empty portal submodule; neither references _provenance). Filed as NFRA_CLDGRPH-W3-S15. The unscoped caller census (comp-find over the whole repo rather than over the files the face named) is what found that NO serve path renders this header -- NFRA_CLDGRPH-W3-S14 -- which the face's own scoping (projection_client.py / projection_server.py) would have hidden as a binary choice between two answers when the true answer was neither. (ii) INDEPENDENT INSTRUMENT (Rule 22 -- confirmation via the first instrument's method is repetition): Rule 22: a second seat's confirmation via the FIRST seat's method is repetition. The claim 'every remaining producer stamps' is measured by TWO instruments on DIFFERENT axes: (i) an AST walk of each CALL SITE's keyword names (f7_producers_census.py -- reads the callers), and (ii) a bind of those names against the WRITER's live inspect.signature (f7_signature_bind.py -- reads the callee, and would catch a call that names the kwargs but mis-spells another parameter). Neither can see what the other sees. RESULT: AST walk: PRODUCERS_STAMPING=3 of 3. Signature bind: SITES_BINDING=3 of 3, and the stripped-caller bind REFUSED 3 of 3. Agreement across two axes.",
+ "compiler_tools": [
+  {
+   "tool": "comp-read (mandated BEFORE ANY ACT by the order's compiler_tools_mandate)",
+   "invocation": "python .tools/comp-read infra/aws/globgrph/_provenance.py --for \"write_manifest's fields, read_manifest, and every branch of format_provenance_header including the counts line and the UNKNOWN VINTAGE arm\"",
+   "result": "656 lines / 23 sections via python-ast. Ranked format_provenance_header [560-656] top at score 6.98 and surfaced ':593 lines.append(\"  !! UNKNOWN VINTAGE -- no _build_manifest.json beside this DB.\")' directly, plus write_manifest [49-74] and read_manifest [77-86]. 75 QUALIFIERS in file, 28 near the regions, of which the two that shaped the edit: ':23 a --force wipe of the DB never clobbers the (about-to-be-rewritten) manifest' and ':26 An absent manifest yields a loud UNKNOWN VINTAGE warning -- never silence (F1)' -- the second is why the new arms were placed strictly INSIDE the manifest-present path and the early return was left byte-identical. UNREAD LEDGER declared 27 of 656 lines shown; the four regions the edit touches were then read in full by sed, so nothing was edited from a summary."
+  },
+  {
+   "tool": "comp-find (mandated: every reader of the manifest is a consumer the new fields reach)",
+   "invocation": "python .tools/comp-find 'format_provenance_header|read_manifest\\b' infra/aws/globgrph .tools org/modules/graph --limit 40",
+   "result": "DENOMINATOR 15 hits / 879 files scanned [corpus=all]; DEF=3 SURFACED=8 TEST=4, all 15 shown on one page. The DECIDING read: the only consumer of THIS manifest is _provenance.py:590 itself plus test_kuzu_incremental_refresh.py:111. org/modules/graph/comp_promote_materializer.py's _read_manifest (:190, and cse_emit_promote.py's two calls into it) is a DIFFERENT manifest with a different schema -- a wrong-object hazard the tool's DEF band made visible before it could be mistaken for a consumer of the new fields."
+  },
+  {
+   "tool": "comp-find (this seat's addition, unscoped -- the census the face's scoping would have hidden)",
+   "invocation": "python .tools/comp-find 'format_provenance_header' . --band SURFACED --limit 60",
+   "result": "DENOMINATOR 104 hits / 29102 files scanned [corpus=all]; bands DEF=1 SURFACED=40 CONFIG=30 TEST=3 DOC=30. Outside _provenance.py's own comment, the only first-party CODE hits are .tools/tests/test_cg8_seam_retired_battery.py:268,277 and org/tier2_senior/0.8.0_AE_CloudComp/deliverables/l1a_item1b/sensor_kuzu_schema_residue.py:280; the rest of the SURFACED band is org/audit/archive rail logs and this seat's own tool telemetry. This is the measurement behind NFRA_CLDGRPH-W3-S14 and the F7-AC5 reading 3b."
+  },
+  {
+   "tool": "comp-find (the producer denominator at the cut, re-derived at this HEAD)",
+   "invocation": "python .tools/comp-find 'write_manifest\\(|_stamp_claim' infra/aws/globgrph --limit 40",
+   "result": "DENOMINATOR 9 hits / 80 files [corpus=all]; DEF=3 SURFACED=6. Confirms the face's cut-time census: 4 call sites (kuzu_incremental_refresh:254, kuzu_load:305, kuzu_nessie_load:252, kuzu_stitch_load:153) and 2 _stamp_claim defs (kuzu_load:185, kuzu_stitch_load:37). The tool WARNED that '\\(' is a literal in python re, so the count is for the literal string 'write_manifest(' -- disclosed here because a warned pattern's number is only as good as the warning being read. The authoritative denominator for F7-AC2 is the AST walk, not this."
+  },
+  {
+   "tool": "comp-read --enumerate (the wrong-object guard on two absence claims)",
+   "invocation": "python .tools/comp-read infra/aws/globgrph/kuzu_cli.py --enumerate 'provenance|_build_manifest|header'  AND  ... code_heat_emit.py --enumerate '_provenance|write_manifest'",
+   "result": "kuzu_cli.py: 'ENUMERATE-END: 0 hit(s) | 0 whole | 0 sub | DOCSTRING=0 | COMMENT=0 | DEF=0 | CODE=0', 169 lines / 8 sections scanned -- a MEASURED zero with a printed denominator, which is what turns 'the docstring says kuzu_cli prints the header' into W3-S14's second finding. code_heat_emit.py: 0 hits / 298 lines / 14 sections -- the discriminator that keeps W3-S15's 2 red tests off this cell's account."
+  },
+  {
+   "tool": "commit-gate.sh (universal, every .py edit)",
+   "invocation": "bash .tools/commit-gate.sh <each edited .py>, then again inside safe-commit.sh",
+   "result": "Clean on all 5 edited/added .py under infra/aws/globgrph and all 3 deliverable scripts; at commit: 'OK: pre-commit gate clean for 9 of 11 file(s)' plus 'OK: bash -n syntax-checked f7_header_arms.sh' (the 2 ungated files are the .md record and the .md channel)."
+  }
+ ]
+}

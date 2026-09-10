@@ -1,0 +1,73 @@
+H2-AC3 SNAPSHOT CENSUS -- NFRA_CLDGRPH CG-s-37, resolving row W2-S75
+TREE_READ=C:\tmp\wk-cldgrph-8-1
+INSTRUMENT=boto3 get_object -> tarfile -> json -> full walk of classes_data (a READ of an Opal S3 object; nothing is written to S3, nothing is published)
+GRAIN=one node object per row, grouped by its own `source` stamp and by `type`
+ENVIRONMENT=comparison values from the round-6/7 RECORD (W2-S61 @80daa1fff6, the producer comment @f3b5f26f77, commit 139cbe1d40) -- not re-run
+
+OBJECT=s3://opal-313476888478-globgrph/snapshots/20260909/graph-20260909.tar.gz
+  origin: LOCAL CACHE C:\tmp\wk-cldgrph-8-1\.scratch\h2_snap_graph-20260909.tar.gz (bytes previously fetched by this order's own permitted GET)
+  bytes=1674681 tar_member=aws-shape_20260909.json
+  LastModified_NOW=2026-09-10T00:09:02Z
+  VINTAGE CITED BY THE THREE FIGURES=2026-09-09T21:05:21Z
+  VINTAGE_MISMATCH=true -- the date-keyed object was OVERWRITTEN after the figures were taken and the bucket is UNVERSIONED (get-bucket-versioning returns no Status, list-object-versions returns one version, VersionId 'null'), so the 21:05:21Z bytes are not recoverable by anyone
+
+---- CENSUS BY SOURCE (the discriminator: the node's own stamp) ----
+BY_SOURCE_DENOMINATOR=27687  (every node object in the tarball, 46 class buckets, nothing excluded)
+  source=None                          14846
+  source=semctl-c2c3-compose            6287
+  source=ms                             6173
+  source=portal-stitch                   335
+  source=semctl-c2c3-materialize          46
+STITCH_POPULATION_NOW=335 nodes with source=portal-stitch
+
+---- CENSUS BY TYPE ----
+BY_TYPE_DENOMINATOR=27687  (the same sweep, re-grouped; a denominator certifies the SWEEP, not the SET)
+  stitch-sourced, by type:
+    S3Key                 149   [CANONICAL]
+    ReactQueryKey          68   [CANONICAL]
+    API_ROUTE              65   [NEITHER-MAP]
+    PipelineScript         34   [CANONICAL]
+    PipelineFunction       16   [CANONICAL]
+    Component               2   [CANONICAL]
+    PORTAL_BUNDLE           1   [NEITHER-MAP]
+  PROVISIONAL_NAMED=0  CANONICAL_NAMED=269  IN_NEITHER_MAP=66  (sum 335 = the stitch population)
+  PORTAL_BUNDLE present in the current bytes: true (count 1)
+  CROSS-CHECK, MEASURED NOW AND NOT ARGUED: CANONICAL_NAMED=269 against figure 3's CARRIED=269. A stitch node that MERGES onto a canonical id is removed by the unify (the canonical node stays, source=None), so the only stitch-sourced nodes that reach the artifact -- and therefore the fold and the archive -- are the CARRIED ones plus the types in no map (API_ROUTE 65 + PORTAL_BUNDLE 1 = 66). 269 + 66 = 335 = the stitch population. The 1,521 MERGED are inside figure 3's denominator and outside every snapshot census by construction.
+
+---- THE FOLLOWING CYCLE, FOR THE TREND (snapshots/20260910/graph-20260910.tar.gz, LastModified 2026-09-10T03:02:04Z) ----
+  total nodes=27688  stitch population=335  stitch by type={"PORTAL_BUNDLE": 1, "Component": 2, "ReactQueryKey": 68, "API_ROUTE": 65, "S3Key": 149, "PipelineScript": 34, "PipelineFunction": 16}
+
+---- THE THREE FIGURES, EACH ATTRIBUTED TO THE POPULATION IT ACTUALLY COUNTED ----
+POPULATION_PER_FIGURE printed:
+
+FIGURE 1: 1,771  (row W2-S61 @80daa1fff6, five-way per-type census: GOLD_SCRIPT 1380 + S3_DATA_KEY 294 + REACT_QUERY_KEY 94 + PORTAL_COMPONENT 2 + PORTAL_BUNDLE 1)
+  POPULATION = the ARCHIVED SNAPSHOT ALONE at 2026-09-09T21:05:21Z: every node in the tarball carrying source=portal-stitch, ALL types.
+  PORTAL_BUNDLE: INSIDE (it is the '+1').   CANONICAL-NAMED stitch nodes: OUTSIDE -- at that vintage the archived stitch nodes carried provisional names only.
+  FRESH (this-cycle) emission: OUTSIDE -- a snapshot cannot contain it.
+  BASIS=MEASURED-THEN (a record of a read of bytes that no longer exist; NOT re-readable now -- see VINTAGE_MISMATCH above).
+
+FIGURE 2: 1,791  (derive_stitch.py:311-314 @f3b5f26f77, 'the 21:05Z snapshot carries 1,791 nodes with source=portal-stitch under the four PROVISIONAL names')
+  POPULATION = NOT the snapshot. The sentence names the snapshot and the number does not fit it: the snapshot census is 1,771 INCLUDING PORTAL_BUNDLE, and PORTAL_BUNDLE is absent from PROVISIONAL_TO_CANONICAL, so 'under the four provisional names' is at most 1,770 -- a SUBSET, and 1,791 is LARGER. The population 1,791 fits is the RUN-TIME union AFTER _retype_prior_cycle and _collapse_stitch_copies: archived stitch nodes that survived the collapse PLUS this cycle's own emission.
+  ARITHMETIC (over the record's own numbers): archived-and-retyped 1,770 (= 1,771 minus the one PORTAL_BUNDLE the retype map does not name; the local run printed STITCH_UNIFY_PRIOR_CYCLE retyped=1770) + 20 surviving fresh members = 1,790 admitted, + 1 PORTAL_BUNDLE (never admitted, it is in no map) = 1,791.
+  PORTAL_BUNDLE: INSIDE.   CANONICAL-NAMED stitch nodes: INSIDE (the fresh emission is canonical-named).   FRESH emission: INSIDE -- that is the whole difference.
+  BASIS=INFERRED (arithmetic over MEASURED-THEN records; the object that would falsify it was overwritten before this order could read it).
+
+FIGURE 3: 1,790  (commit 139cbe1d40's subject: 1,521 merged by identity + 269 carried; the round-6 analysis's 'LOST 0 of 1,790')
+  POPULATION = unify_stitch_vocabulary's `admitted` counter: run-time nodes with source=portal-stitch WHOSE TYPE IS IN STITCH_CANONICAL_TYPES, counted after the retype and after the collapse. A RUN-TIME population, not a snapshot one, and a TYPE-FILTERED one at that.
+  PORTAL_BUNDLE: OUTSIDE -- PORTAL_BUNDLE is not in STITCH_CANONICAL_TYPES, so the admitted census never sees it. That single node is the whole 1,791-vs-1,790 gap.
+  CANONICAL-NAMED stitch nodes: INSIDE.   FRESH emission: INSIDE.
+  BASIS=MEASURED-THEN (the producer's own STITCH_UNIFY_TOTAL line in that run's log).
+
+RESIDUAL, NAMED RATHER THAN SMOOTHED: the 20 members separating the snapshot population (1,771) from the run-time one (1,791) are, on this reading, fresh members this cycle emitted whose ids were not already in the archive. Their MEMBERSHIP is not recoverable -- it needs the 21:05:21Z bytes, and those are gone.
+
+WHAT THE CURRENT BYTES DO SHOW, MEASURED NOW: the same key's stitch population is 335, not ~1,771, and it is CANONICAL-named. The snapshot's stitch population is therefore whatever the LAST fold wrote, not an accumulation -- and it has already SHRUNK by a factor of ~5.3 since the figures were taken. A shrinking stitch population is exactly the condition under which the missing NODES drop-on-read (this order's fix) carries stale members forward.
+
+CAPTURE=h2_snapshot_census.capture.json
+CENSUS_STATUS=DONE
+FIGURES_ACCOUNTED=3 of 3
+POPULATION_PER_FIGURE printed:
+  1,771 = the ARCHIVED SNAPSHOT alone, all types, PORTAL_BUNDLE inside, no fresh emission [MEASURED-THEN]
+  1,791 = the RUN-TIME union after retype+collapse, PORTAL_BUNDLE inside, fresh emission inside -- NOT a snapshot population despite the sentence [INFERRED]
+  1,790 = unify's `admitted`: run-time, TYPE-FILTERED to STITCH_CANONICAL_TYPES, PORTAL_BUNDLE outside [MEASURED-THEN]
+BY_SOURCE_DENOMINATOR=27687
+BY_TYPE_DENOMINATOR=27687
