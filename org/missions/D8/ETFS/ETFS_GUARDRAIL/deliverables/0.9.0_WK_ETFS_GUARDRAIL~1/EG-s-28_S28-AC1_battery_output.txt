@@ -1,0 +1,156 @@
+ETFS_GUARDRAIL.TO-EG-s-28 / S28-AC1 -- battery
+worker: 0.9.0_WK_ETFS_GUARDRAIL~1   repo root: C:/tmp/wk-etfs-2-1
+HEAD: 32ae4ede666eb546c14c9b250f20de1124eeecca   issuance pin: 32ae4ede66
+
+==============================================================================
+(a) THE DEFECT REPRODUCES FIRST -- site denominator ENUMERATED FROM SOURCE
+==============================================================================
+  PRE-CHANGE BYTES resolved BY CONTENT, not by ancestry:
+    git show 32ae4ede66:data/etfs/scripts/coverage/remediate.py -> 15011 bytes  sha256=25ff4dbed4af6545592d5870b8222e84ac75b7237a4397ce5741ceb4d8803a2a
+    expected sha256                         =25ff4dbed4af6545592d5870b8222e84ac75b7237a4397ce5741ceb4d8803a2a
+  PASS:  (a) pre-change blob is the one this order was cut against (content pin)
+
+  DENOMINATOR: 4 `unresolved.append` site(s) in data/etfs/scripts/coverage/remediate.py @32ae4ede66, read from its AST
+    line  240  keys=['date', 'class', 'reason']  provider=NO
+    line  248  keys=['date', 'class', 'reason']  provider=NO
+    line  261  keys=['date', 'class', 'reason']  provider=NO
+    line  272  keys=['date', 'class', 'reason']  provider=NO
+  0 of 4 site(s) carry `provider`
+  PASS:  (a) the AST census finds sites at all (it can go non-zero)
+  PASS:  (a) 0 of 4 pre-change site(s) carry `provider`
+
+  LADDER RUN on the PRE-CHANGE module (3 unresolved record(s)):
+    {"class": "C", "date": "2026-08-04", "reason": "rung 1 invoke returned but no slice landed on rung 2 re-check"}
+    {"class": "D", "date": "2026-08-18", "reason": "rung 1 invoke raised (absent upstream partition): no fact_holdings partition for date 2026-08-18"}
+    {"class": "UNKNOWN", "date": "2026-08-21", "reason": "rung 1 invoke returned but no slice landed on rung 2 re-check"}
+  3 of 3 record(s) LACK `provider`
+  PASS:  (a) the run produced unresolved records to judge
+  PASS:  (a) every pre-change record lacks `provider` -- the defect reproduces
+
+==============================================================================
+(b) EVERY SITE IS FIXED, NOT SOME -- N of N, each named with the branch it serves
+==============================================================================
+  DENOMINATOR: 4 `unresolved.append` site(s) in the CHANGED data/etfs/scripts/coverage/remediate.py, read from its AST
+    line  265  provider=YES  site 1/4 -- DRY-RUN: rung 1 planned, not executed (dry_run=True)
+    line  273  provider=YES  site 2/4 -- NO INVOKE CALLABLE or NO PRODUCER MAPPED for the partner
+    line  286  provider=YES  site 3/4 -- RUNG 1 RAISED: the producer's LOUD-fail on an absent partition (class D)
+    line  298  provider=YES  site 4/4 -- RUNG 2 RE-CHECK: the invoke returned but no slice landed
+  4 of 4 site(s) carry `provider`
+  PASS:  (b) the site denominator is unchanged (4 before, 4 after) -- no site was deleted to make the count read clean
+  PASS:  (b) 4 of 4 site(s) carry `provider`
+  PASS:  (b) every site is NAMED with the branch it serves (4 named, 4 sites)
+
+  LADDER RUNS on the CHANGED module -- every branch that can produce a record:
+    rung-1-raised + rung-2-no-slice  3 of 3 record(s) name a provider
+        {"class": "C", "date": "2026-08-04", "provider": "Black Diamond", "reason": "rung 1 invoke returned but no slice landed on rung 2 re-check"}
+        {"class": "D", "date": "2026-08-18", "provider": "Black Diamond", "reason": "rung 1 invoke raised (absent upstream partition): no fact_holdings partition for date 2026-08-18"}
+        {"class": "UNKNOWN", "date": "2026-08-21", "provider": "Black Diamond", "reason": "rung 1 invoke returned but no slice landed on rung 2 re-check"}
+  PASS:  (b) rung-1-raised + rung-2-no-slice: 3 of 3 record(s) name a provider
+    dry-run planned                  3 of 3 record(s) name a provider
+        {"class": "C", "date": "2026-08-04", "provider": "Black Diamond", "reason": "dry-run: rung 1 invoke planned for cot-etf-ownership-daily, not executed"}
+        {"class": "D", "date": "2026-08-18", "provider": "Black Diamond", "reason": "dry-run: rung 1 invoke planned for cot-etf-ownership-daily, not executed"}
+        {"class": "UNKNOWN", "date": "2026-08-21", "provider": "Black Diamond", "reason": "dry-run: rung 1 invoke planned for cot-etf-ownership-daily, not executed"}
+  PASS:  (b) dry-run planned: 3 of 3 record(s) name a provider
+    no invoke callable               3 of 3 record(s) name a provider
+        {"class": "C", "date": "2026-08-04", "provider": "Black Diamond", "reason": "no invoke callable or no producer mapped for partner 'cottonwood'"}
+        {"class": "D", "date": "2026-08-18", "provider": "Black Diamond", "reason": "no invoke callable or no producer mapped for partner 'cottonwood'"}
+        {"class": "UNKNOWN", "date": "2026-08-21", "provider": "Black Diamond", "reason": "no invoke callable or no producer mapped for partner 'cottonwood'"}
+  PASS:  (b) no invoke callable: 3 of 3 record(s) name a provider
+  PASS:  (b) the provider named for cottonwood is its mapped vendor, Black Diamond
+
+==============================================================================
+(c) AN UNKNOWN PROVIDER STILL READS AS UNKNOWN -- positive control on the honest-absence path
+==============================================================================
+  `a-partner-with-no-mapping` in _PROVIDER_BY_PARTNER: False  (mapped partners: ['49financial', 'cottonwood', 'inflection'])
+    {"class": "C", "date": "2026-08-04", "provider": "<no provider mapped>", "reason": "no invoke callable or no producer mapped for partner 'a-partner-with-no-mapping'"}
+    {"class": "D", "date": "2026-08-18", "provider": "<no provider mapped>", "reason": "no invoke callable or no producer mapped for partner 'a-partner-with-no-mapping'"}
+    {"class": "UNKNOWN", "date": "2026-08-21", "provider": "<no provider mapped>", "reason": "no invoke callable or no producer mapped for partner 'a-partner-with-no-mapping'"}
+  distinct provider value(s) over 3 record(s): ['<no provider mapped>']
+  PASS:  (c) an unmapped partner yields the honest absence marker for every record
+  PASS:  (c) it is neither None nor the literal string 'None'
+  PASS:  (c) NO GUESS: no mapped vendor name leaked onto an unmapped partner
+
+==============================================================================
+(d) THE TERMINAL MESSAGE NOW NAMES A REAL PROVIDER -- the DIFFERENCE control
+==============================================================================
+  instrument: the orchestrator's OWN _normalize_unresolved + _build_terminal_email
+    infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py  47075 bytes  sha256=8d8cb2c23d7c00d943a985d381e45b96315f7dcf6047fe1bc3cc2234854d801f
+
+  SAME INPUT, ENGAGED vs DISENGAGED -- same month, same partner, same dates:
+    BEFORE dates=['2026-08-04', '2026-08-18', '2026-08-21']  partners=['cottonwood']
+    AFTER  dates=['2026-08-04', '2026-08-18', '2026-08-21']  partners=['cottonwood']
+  PASS:  (d) the two documents differ ONLY in the field under test
+
+  BEFORE -- provider column, 3 row(s):
+    2026-08-04 | cottonwood  | (not stated)
+    2026-08-18 | cottonwood  | (not stated)
+    2026-08-21 | cottonwood  | (not stated)
+  AFTER  -- provider column, 3 row(s):
+    2026-08-04 | cottonwood  | Black Diamond
+    2026-08-18 | cottonwood  | Black Diamond
+    2026-08-21 | cottonwood  | Black Diamond
+  PASS:  (d) both messages render one row per date (3 of 3)
+  PASS:  (d) DISENGAGED: 3 of 3 row(s) render `(not stated)`
+  PASS:  (d) ENGAGED: 3 of 3 row(s) render the real provider `Black Diamond`
+  PASS:  (d) the AFTER message contains no `(not stated)` anywhere in its body
+  PASS:  (d) the two message bodies differ (the control could have shown no change)
+
+  AFTER message body, verbatim:
+    | The ETF ownership coverage ladder for 2026-08 could not resolve 3 date(s) after every rung ran (probe, re-run the producer, re-check).
+    | 
+    | date       | partner     | provider     | class | reason
+    | 2026-08-04 | cottonwood | Black Diamond | C | rung 1 invoke returned but no slice landed on rung 2 re-check
+    | 2026-08-18 | cottonwood | Black Diamond | D | rung 1 invoke raised (absent upstream partition): no fact_holdings partition for date 2026-08-18
+    | 2026-08-21 | cottonwood | Black Diamond | UNKNOWN | rung 1 invoke returned but no slice landed on rung 2 re-check
+    | 
+    | -- Opal Capital automated reporting
+
+==============================================================================
+(e) NOTHING ELSE MOVED, AND THE DEPLOY GAP IS MEASURED, NOT CLOSED
+==============================================================================
+  BEFORE  data/etfs/scripts/coverage/tests/test_remediate.py @32ae4ede66 -> rc=0  12 passed in 0.07s
+  AFTER   data/etfs/scripts/coverage/tests/test_remediate.py (worktree) -> rc=0  16 passed in 0.06s
+  PASS:  (e) the pre-change battery passed (rc=0) -- the baseline is real
+  PASS:  (e) the post-change battery passes (rc=0)
+  counts: 12 test(s) before, 16 test(s) after (+4, all additive)
+  PASS:  (e) no pre-existing test was removed (12 -> 16)
+
+  THE ASK'S OWN RECORD (rung 3) -- unchanged by this cell:
+    BEFORE: [{"class": "D", "date": "2026-08-18", "partner": "cottonwood", "provider": "Black Diamond", "reason": "r"}]
+    AFTER : [{"class": "D", "date": "2026-08-18", "partner": "cottonwood", "provider": "Black Diamond", "reason": "r"}]
+  PASS:  (e) rung 3's ask is byte-identical before and after (generated_at aside)
+  PASS:  (e) an unresolved record CARRYING the new field produces the same ask -- no leak into the artifact a person authorises egress on
+
+  DEPLOYED vs BUILT -- MEASURED, NOT CLOSED (this cell deploys nothing):
+    DEPLOYED s3://opal-313476888478-lambda-artifacts/ec2/etfs-reports/coverage/remediate.py  sha256=3c3ce6c5cfcce654ad3d5794962b6c24bfbee629db49a8f289b00f3979e876d5  bytes=11011  [provenance: measured]
+    BUILT    data/etfs/scripts/coverage/remediate.py (worktree, LF)      sha256=401bed2ace84d1566e004ef9cf1b2eec941c4859eee6b05f6110c61b90d8d05f  bytes=16550  [provenance: measured]
+    PRE-CHANGE @32ae4ede66                sha256=25ff4dbed4af6545592d5870b8222e84ac75b7237a4397ce5741ceb4d8803a2a  [provenance: measured]
+  PASS:  (e) the DEPLOYED sha256 is MEASURED, not held
+  PASS:  (e) DEPLOYED != BUILT
+  PASS:  (e) DEPLOYED != the PRE-CHANGE build either -- the prefix was already behind this repo before this cell touched anything
+    S33/S34 (INVESTIGATION_v1.md @32ae4ede66): an upload to this artifact prefix DOES NOT REACH THE BOX -- the renderer pulls the coverage package only inside an `except ImportError` branch, and the box's /opt/etfs-reports/coverage/ persists on EBS, so the running bytes do not move when the prefix does. DEPLOYED != BUILT here understates the gap to the RUNNING plane, and nothing in this cell closes either gap.
+
+==============================================================================
+(f) NO SEND, NO INVOKE, NO EGRESS
+==============================================================================
+  DENOMINATOR 1 -- stubbed calls recorded across 5 ladder run(s) in this process: 10, kinds=[('lambda-stub', 'cot-etf-ownership-daily'), ('s3', 'head_object')]
+    of which STUB producer 'invokes' (never a boto3 call, a local callable): 6
+    of which put_object on the STUB s3 (write_ask=False everywhere): 0
+  PASS:  (f) zero writes attempted even against the stub
+  DENOMINATOR 2 -- boto3 clients created by the imported orchestrator: every one is _StubBoto, which RAISES on any method; recorded AWS attempts through it: 0 of 0
+  PASS:  (f) the orchestrator module made 0 AWS calls -- _build_terminal_email BUILDS, it does not send (_send_terminal_unresolved was never called)
+  DENOMINATOR 3 -- token census over the 2 module(s) this battery EXECUTED code from:
+    data/etfs/scripts/coverage/remediate.py                        {'send_raw_email(': 0, 'send_email(': 0, '.invoke(': 0, 'requests.': 0, 'urllib.request': 0}
+    infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py  {'send_raw_email(': 3, 'send_email(': 0, '.invoke(': 0, 'requests.': 0, 'urllib.request': 0}
+  PASS:  (f) remediate.py carries NO send, NO invoke and NO HTTP client of its own (0 hits for each of 5 tokens)
+  DENOMINATOR 4 -- REAL AWS calls made by this battery: 1, enumerated:
+    s3 GetObject -- s3://opal-313476888478-lambda-artifacts/ec2/etfs-reports/coverage/remediate.py (READ-ONLY)
+  PASS:  (f) every real AWS call is a READ (GetObject) on our own artifact prefix -- 0 sends, 0 invokes, 0 writes, 0 vendor egress
+  Andrew's ~02:5xZ constraint: nothing here can violate it -- no SES call site was reached, no Lambda was invoked, and no vendor endpoint exists in any module this battery ran.
+
+==============================================================================
+VERDICT
+==============================================================================
+  arms: 6 of 6 evaluated; assertions failed: 0
+
+EGS28-EVERY-UNRESOLVED-NAMES-ITS-PROVIDER
