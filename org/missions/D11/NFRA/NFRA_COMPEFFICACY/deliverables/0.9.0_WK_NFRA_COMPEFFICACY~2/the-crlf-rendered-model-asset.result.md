@@ -4,15 +4,21 @@
 **branch:** `wk-nfra_compefficacy-8-1`, cut from CLOUD@`e8f74b6717` | **fix commit:** `d9be5ef2c0`
 | **worktree:** `C:/tmp/wk-compeff-8-1` | **date:** 2026-09-09/10
 
+**TWO PASSES. THIS RECORD DESCRIBES BOTH AND KEEPS THE FIRST.** Pass 1 delivered the fix and read
+`E1-AC1` **FAIL** on arm (e). The issuer ruled on row `NFRA_COMPEFFICACY-W2-S2`, drained this branch
+to CLOUD@`b20c0b68c7` and **RE-CUT arm (e)** @`d38c8e1079` (the amendment sits above
+`<expected_criteria>` on the face). Pass 2 re-ran the battery once on the re-cut arm from the merged
+branch at `b20c0b68c7`. Section 5 carries both readings; nothing from pass 1 is deleted.
+
 **HEADLINE.** The fix is real and measured: a fresh linked worktree cut from the fixed branch renders
 **2 of 2** tracked members of `org/modules/graph/potion/model/` byte-identical to the MAIN tree and to
 `MANIFEST.json`, `comp-which` there emits **0 bytes** on stderr instead of the potion ALARM, and the
 same 78 candidates come back ordered differently at **76 of 78** positions from the lexical fallback.
-**E1-AC2 PASSES by output. E1-AC1 FAILS by output on arm (e) only -- 9 of 11 arms PASS** -- and it
-fails for a reason no fix inside this order's grant can remove: the baseline arm (e) compares against
-was itself captured under the lexical fallback, so arm (e) contradicts arms (b) and (c) of the same
-criterion. Row `NFRA_COMPEFFICACY-W2-S2` (BLOCKING, ARMED) carries it. **TO-CE-E-1 STAYS OPEN; the
-`<status>` was NOT flipped to `complete`.**
+On the re-cut arm the MAIN tree and a fresh linked worktree produce **BYTE-EQUAL ranked output on 5 of
+5** questions while an UNFIXED worktree is byte-equal on **0 of 5** and matches the stale baseline on
+**5 of 5** -- the pair that proves that baseline tracks the FALLBACK and not the ranking.
+**E1-AC1 PASSES by output (12 of 12 arms, rc 0, token printed). E1-AC2 PASSES by output (rc 0).**
+`<status>` flipped to `complete`.
 
 ---
 
@@ -124,7 +130,7 @@ borrowed from a heuristic.
 ```
 $ timeout 300 python org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.9.0_WK_NFRA_COMPEFFICACY~2/cee1_fresh_worktree_probe.py
 ```
-rc **0**, elapsed **59.4 s** of the 300 s bound. Verbatim:
+rc **0**, elapsed **47.3 s** of the 300 s bound (pass 2, ref `b20c0b68c7`; pass 1 read the same result in 59.4 s at ref `d9be5ef2c0`). Verbatim, pass 1:
 
 ```
 CE-e-1 / E1-AC2 -- FRESH-WORKTREE PROBE of the vendored POTION model asset
@@ -167,12 +173,12 @@ FRESH-WORKTREE-ASSET-MATCHES-MANIFEST
 unpinned tracked member separately and never counts it as a match -- a member the manifest does not
 pin is not evidence of agreement.
 
-### E1-AC1 -- FAIL by output (9 of 11 arms PASS; arms failed: `e:main`, `e:fresh`)
+### E1-AC1 -- PASS by output, PASS 2 on the re-cut arm (12 of 12 arms)
 
 ```
 $ timeout 900 python org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.9.0_WK_NFRA_COMPEFFICACY~2/test_cee1_model_asset_rendering.py
 ```
-rc **1**, elapsed **105.3 s** of the 900 s bound. The summary, verbatim:
+rc **0**, elapsed **131.1 s** of the 900 s bound. The summary, verbatim:
 
 ```
   [PASS] a                        the manifest's declared hash equals the MAIN tree's bytes for 2 of 2 tracked member(s), and every tracked member is pinned
@@ -182,22 +188,31 @@ rc **1**, elapsed **105.3 s** of the 900 s bound. The summary, verbatim:
   [PASS] c:ranks-semantically     the same 78 candidates are ordered DIFFERENTLY from the lexical fallback at 76 of 78 positions -- the ranker is not the fallback
   [PASS] d:alarm-reproduced       the negative control (no fix) reproduces the ALARM line verbatim on stderr
   [PASS] d:lexical-reproduced     the negative control's ranking is the LEXICAL one, 78 candidates, differing from the fixed tree's at 76 positions
-  [FAIL] e:main                   P4-AC1's three byte-equality arms (c, f, e:real-byte-equal) PASS at the MAIN tree: c=False f=False e=False (denominator 3 of 3 arms, 5 of 5 questions)
-  [FAIL] e:fresh                  P4-AC1's three byte-equality arms PASS in the FRESH worktree: c=False f=False e=False (denominator 3 of 3 arms, 5 of 5 questions)
-  [PASS] e:main-equals-fresh      the FRESH worktree now reads IDENTICALLY to the MAIN tree, 5 of 5 questions -- the checkout-property RED is gone
+  [PASS] e:baseline-named-invalid the stale baseline is recorded as fallback-captured on its own evidence: 7 of 7 of its captured questions carry the ALARM
+  [PASS] e:tree-invariance        FWD-9 on this instrument: the MAIN tree and a FRESH linked worktree produce BYTE-EQUAL ranked output on 5 of 5 questions
+  [PASS] e:control-not-invariant  THE CONTROL FAILS INVARIANCE as it must: an UNFIXED worktree is byte-equal to the MAIN tree on 0 of 5 questions -- so the arm can fail
+  [PASS] e:control-tracks-baseline and THE CONTROL matches the stale baseline on 5 of 5 questions -- the pair proves that baseline tracks the FALLBACK, not the ranking
   [PASS] f                        2 of 2 worktrees this run cut are removed and their branches deleted; 0 leak(s)
 
-  9 of 11 arm(s) PASS   elapsed 105.3s
-  arms failed: e:main, e:fresh
-NOT ENFORCED -- 2 arm(s) failed. NO TOKEN.
+  12 of 12 arm(s) PASS   elapsed 131.1s
+CEE1-MODEL-ASSET-RENDERS-LF
 ```
 
-The two refs the run cut, printed by the battery:
+**PASS 1, KEPT:** the same invocation before the re-cut read rc **1**, `9 of 11 arm(s) PASS`,
+`arms failed: e:main, e:fresh`, `NOT ENFORCED -- 2 arm(s) failed. NO TOKEN.` Arms (a)-(d) and (f) were
+identical; the two failures were the old arm (e)'s byte-equality-against-`cep4_before.json` checks, and
+`e:main-equals-fresh` (`5 of 5`, PASS) is the measurement the re-cut arm now grades on.
+
+The two refs the pass-2 run cut, printed by the battery:
 
 ```
-  AFTER  ref   : wk-nfra_compefficacy-8-1         sha d9be5ef2c0c1b8005d08a3f6d4fa63f5ed72db1b  carries `org/modules/graph/potion/model/**`: YES
+  AFTER  ref   : wk-nfra_compefficacy-8-1         sha b20c0b68c7d2b70e07f8baf22a51aef669f5b6a8  carries `org/modules/graph/potion/model/**`: YES
   BEFORE ref   : d9be5ef2c0c1b8005d08a3f6d4fa63f5ed72db1b^ sha e8f74b6717dada37c908b2417456306d06c07b86  carries `org/modules/graph/potion/model/**`: NO
 ```
+
+The BEFORE ref stays pinned to the fix commit's PARENT rather than to CLOUD, and pass 2 is why that
+mattered: CLOUD now carries the fix (`b20c0b68c7`), so a control cut from the literal ref CLOUD would
+have stopped being a control the moment the drain landed. It is `NO` above at both vintages.
 
 **Arm (c)/(d), the ranker discriminator -- printed, not asserted.** Same question
 (`what produces canonical_prices.parquet?`), each tree's own spilled rank file, `comp-which` invoked
@@ -227,7 +242,7 @@ Section 6 below. Graded by `3.0.0_SA_CVO` at L9.
 
 ---
 
-## 5. ARM (e): WHY IT FAILS, AND WHY NO FIX IN THIS GRANT COULD MAKE IT PASS
+## 5. ARM (e): THE PASS-1 FAILURE, THE ISSUER'S RE-CUT, AND THE PASS-2 READING
 
 Arm (e) requires `P4-AC1`'s three byte-equality arms (`c`, `f`, `e:real-byte-equal` -- the four C-S46
 regression phrasings plus the real-subject question) to PASS at the MAIN tree AND in the fresh
@@ -260,8 +275,55 @@ clause to the cross-tree equality this battery already prints) -- an artifact un
 `deliverables/0.9.0_WK_NFRA_COMPEFFICACY~1/`, which **this order's `<paths>` does not grant**.
 
 Filed as `NFRA_COMPEFFICACY-W2-S2` (BLOCKING, ARMED, `disarm_owner` `2.0.0_SA_COO` -- the assignment
-`S40` already made). **E1-AC1 is reported FAIL and the order is NOT flipped to `complete`.** A valid
+`S40` already made). **In pass 1 E1-AC1 was reported FAIL and the order was NOT flipped.** A valid
 instance is not a met order.
+
+### 5b. THE RULING AND THE RE-CUT (issuer, 2026-09-10 ~02:5xZ, @`d38c8e1079`)
+
+`2.0.0_SA_COO` accepted the row and named the defect its own: *"THE ARM WAS SELF-CONTRADICTORY AND
+THAT IS A CUT DEFECT, NOT A WORKER FAILURE ... the only world it could pass in was one where the
+defect was still present."* Arm (e) is re-cut onto **TREE-INVARIANCE** -- the property FWD-9 actually
+asserts -- with an UNFIXED worktree as the control that lets it fail, and `cep4_before.json` **named
+in the record as INVALID for a semantic comparison** rather than silently dropped. Re-capturing it is
+round 7's artifact and the issuer's per `S40`. `<invocation>` and `<expect>` UNCHANGED; judged on
+EFFECT: HARDER.
+
+### 5c. PASS 2 -- THE RE-CUT ARM, MEASURED (rc 0, 12 of 12)
+
+Four sub-arms replace the two that failed. Three trees, the same 5 questions, one run:
+
+```
+  the stale artifact, NAMED AND NOT USED AS A COMPARATOR: C:/Users/AndrewBerman/Desktop/ajb_workspace/org/missions/D11/NFRA/NFRA_COMPEFFICACY/deliverables/0.9.0_WK_NFRA_COMPEFFICACY~1/cep4_before.json
+  ITS ENVIRONMENT (R-8), read off the artifact: 7 of 7 captured questions carry the potion ALARM in their own `terminal` block.
+  -> CAPTURED UNDER THE LEXICAL FALLBACK. It names no environment field; the ALARM
+     inside its own payload is the only tell. It is INVALID FOR A SEMANTIC
+     COMPARISON and is NOT a comparator for any arm here. Its diff numbers below
+     are DIAGNOSTICS. Re-capturing it is round 7's artifact and 2.0.0_SA_COO's per
+     NFRA_COMPEFFICACY-S40 -- not this cell's to write.
+
+  THE PAIR, printed because together they are the proof the stale baseline
+  tracks the FALLBACK and not the ranking:
+    MAIN vs FRESH-FIXED    : 5 of 5 ranked outputs BYTE-EQUAL
+    MAIN vs FRESH-UNFIXED  : 0 of 5 ranked outputs BYTE-EQUAL
+    FRESH-UNFIXED vs the stale baseline: 5 of 5 questions diff 0 line(s)  (per-question diff lines [0, 0, 0, 0, 0])
+    MAIN         vs the stale baseline: 0 of 5 questions diff 0 line(s)  (per-question diff lines [784, 800, 836, 806, 874])
+    potion ALARM fired: MAIN 0 of 5, FRESH-FIXED 0 of 5, FRESH-UNFIXED 5 of 5
+  [PASS] e:baseline-named-invalid the stale baseline is recorded as fallback-captured on its own evidence: 7 of 7 of its captured questions carry the ALARM
+  [PASS] e:tree-invariance        FWD-9 on this instrument: the MAIN tree and a FRESH linked worktree produce BYTE-EQUAL ranked output on 5 of 5 questions
+  [PASS] e:control-not-invariant  THE CONTROL FAILS INVARIANCE as it must: an UNFIXED worktree is byte-equal to the MAIN tree on 0 of 5 questions -- so the arm can fail
+  [PASS] e:control-tracks-baseline and THE CONTROL matches the stale baseline on 5 of 5 questions -- the pair proves that baseline tracks the FALLBACK, not the ranking
+```
+
+**Why this arm can fail and the old one could not.** The old arm's comparator was a frozen artifact
+captured in a defective environment, so it graded the environment, not the tool. The new arm compares
+two LIVE trees that share everything except the attribute under test, and it carries a third tree in
+which the attribute is reverted -- and that third tree reads `0 of 5` invariant. The `5 of 5` and the
+`0 of 5` are the same measurement pointed at a present and an absent fix.
+
+**The stale baseline is now diagnosed rather than merely rejected.** `FRESH-UNFIXED vs baseline: 5 of
+5 diff 0 lines` beside `MAIN vs baseline: 0 of 5` is the discriminating pair: an artifact that agrees
+with the broken tree and disagrees with both correct ones is tracking the FALLBACK, not the ranking.
+That is a stronger statement than "it is stale", and it is the reason it may not be a comparator.
 
 ---
 
@@ -381,9 +443,9 @@ The 11 listed are all pre-existing; none belongs to this cell.
 
 | id | class | hazard | one-line subject |
 |---|---|---|---|
-| `NFRA_COMPEFFICACY-W2-S1` | OBSERVATION | INERT | the accept's fresh tree cannot be cut from the literal ref `CLOUD` while the fix is on the worker branch; both scripts default to the invoking worktree's branch (which IS `CLOUD` post-drain) and print the ref they resolved |
-| `NFRA_COMPEFFICACY-W2-S2` | **BLOCKING** | ARMED | E1-AC1 arm (e) is unsatisfiable alongside arms (b)/(c) -- the baseline it compares against was captured under the lexical fallback; `disarm_owner` `2.0.0_SA_COO` |
-| `NFRA_COMPEFFICACY-W2-S3` | OBSERVATION | ARMED | the attribute converts a silent conversion into a visible `M` in the 4 of 5 live worktrees holding CRLF bytes; a broad `git add` there would commit the CRLF blob and break the pin estate-wide; `disarm_owner` `2.0.0_SA_COO` |
+| `NFRA_COMPEFFICACY-W2-S1` | OBSERVATION | INERT (accepted as recorded) | the accept's fresh tree cannot be cut from the literal ref `CLOUD` while the fix is on the worker branch; both scripts default to the invoking worktree's branch (which IS `CLOUD` post-drain) and print the ref they resolved |
+| `NFRA_COMPEFFICACY-W2-S2` | **BLOCKING** | ARMED | E1-AC1 arm (e) is unsatisfiable alongside arms (b)/(c) -- the baseline it compares against was captured under the lexical fallback; `disarm_owner` `2.0.0_SA_COO`. **RULED @`d38c8e1079`: accepted, the arm was the issuer's and is re-cut onto tree-invariance.** |
+| `NFRA_COMPEFFICACY-W2-S3` | OBSERVATION | ARMED | the attribute converts a silent conversion into a visible `M` in the 4 of 5 live worktrees holding CRLF bytes; a broad `git add` there would commit the CRLF blob and break the pin estate-wide; `disarm_owner` `2.0.0_SA_COO`. **RULED @`d38c8e1079`: INERT, resolves on any fresh checkout; not writing outside `<paths>` was correct.** |
 
 ---
 
@@ -401,7 +463,8 @@ The 11 listed are all pre-existing; none belongs to this cell.
 - **`potion_embed.py` was NOT touched** -- out of grant, and the order names it as the verifier this
   cell must not change.
 - **`cep4_before.json` was NOT re-captured** and `deliverables/0.9.0_WK_NFRA_COMPEFFICACY~1/` was READ
-  and never written -- out of grant. That is why arm (e) is a row rather than a repair.
-- **The `<status>` was NOT flipped to `complete`** -- E1-AC1 FAILS by output.
+  and never written -- out of grant. That is why arm (e) was a row rather than a repair, and the
+  re-cut arm reads it only to take its 7-of-7 ALARM census, never as a comparator.
+- **The `<status>` was flipped to `complete` in PASS 2 ONLY** -- and was deliberately withheld in pass 1, where E1-AC1 failed by output. The flip withdraws this worker's own grant, so it rides the commit that also carries the passing readings.
 - **Nothing was pushed, merged or rebased.** The issuer drains the branch.
 - **No comp-tool was invoked by bare PATH name** in any measurement.

@@ -15,9 +15,19 @@ THE ARMS, as the task order cuts them:
       candidate ordering beside the LEXICAL ordering of the SAME candidates, and they differ.
   (d) THE NEGATIVE CONTROL -- a second worktree WITHOUT the fix reproduces the ALARM and the lexical
       ranking. A detector that cannot return non-zero on the positive case is a constant.
-  (e) THE ROUND-7 READING RE-TAKEN -- P4-AC1's three byte-equality arms (c, f, e:real-byte-equal;
-      the four C-S46 regression phrasings + the real-subject question) recomputed at the MAIN tree AND
-      in the fresh worktree, denominators printed.
+  (e) TREE-INVARIANCE (RE-CUT 2026-09-10 ~02:5xZ by the issuer on row NFRA_COMPEFFICACY-W2-S2) --
+      for the four C-S46 regression phrasings plus the real-subject control (5 of 5, denominator
+      printed) the ranked output in the MAIN tree and in a FRESH linked worktree are BYTE-EQUAL TO
+      EACH OTHER. That sentence IS FWD-9's ("a tool cleared here stays cleared from any seat"), and
+      it is the only comparison whose two sides share an environment. THE CONTROL, so the arm can
+      fail: an UNFIXED worktree is NOT byte-equal to the main tree on the same 5 of 5, AND its own
+      diff against cep4_before.json is 0 lines -- both printed, because that PAIR is the proof the
+      stored baseline tracks the FALLBACK and not the ranking. cep4_before.json is NAMED HERE AS
+      INVALID FOR A SEMANTIC COMPARISON (7 of 7 of its captured questions carry the potion ALARM in
+      their own `terminal` block, read off the artifact and printed) and is NOT a comparator for any
+      arm; re-capturing it is round 7's artifact and belongs to 2.0.0_SA_COO per S40.
+      THE ARM AS FIRST CUT required agreement WITH that baseline, which contradicted arms (b) and
+      (c): the only world it could pass in was one where the defect was still present.
   (f) BOTH WORKTREES REMOVED -- `git worktree list` printed as the proof, branches deleted.
 
 THE TWO REFS THIS SCRIPT CUTS, and why neither is the literal string CLOUD (row
@@ -198,8 +208,16 @@ def load_cep4_lib(tree, tag):
     return m
 
 
-def p4_byte_equality(tree, tag, before):
-    """Return (arm_c_ok, arm_f_ok, arm_e_ok, per_question_rows) for the tree, printing as it goes."""
+def p4_ranked_output(tree, tag, before):
+    """The ranked output of the 5 C-S46 questions in ONE tree, printed with its
+    diagnostics and GRADED BY NOBODY HERE.
+
+    Returns {question: ranked_rows} plus, per question, the diff-line count against the
+    stale baseline and whether the potion ALARM fired. THE BASELINE NUMBERS ARE PRINTED
+    AS DIAGNOSTICS AND ARE NEVER A COMPARATOR (re-cut arm (e)): cep4_before.json was
+    captured under the LEXICAL FALLBACK, so agreement with it is evidence of the DEFECT,
+    not of correctness. Arm (e) grades TREE-INVARIANCE, between two live trees.
+    """
     L = load_cep4_lib(tree, tag)
     if L is None:
         print("  BLOCKED: no cep4_lib.py under %s/%s" % (tree, P4_DELIV_REL))
@@ -207,6 +225,8 @@ def p4_byte_equality(tree, tag, before):
     print("  cep4_lib WS  : %s" % L.WS.replace("\\", "/"))
     print("  comp-which   : %s" % L.COMP_WHICH.replace("\\", "/"))
     rows = []
+    baseline_diffs = []
+    alarms = []
     all_equal = True
     for i, q in enumerate(L.PHRASINGS, 1):
         rc_c, out_c, spill_c = L.comp_which(q)
@@ -224,6 +244,8 @@ def p4_byte_equality(tree, tag, before):
               % (i, rc_c, b["rc"], L.rank_row_count(spill_c), b["rank_row_count"],
                  len(d_rows), len(d_term), ALARM_NEEDLE in out_c, q[:46]))
         rows.append((q, rows_now))
+        baseline_diffs.append(len(d_rows))
+        alarms.append(ALARM_NEEDLE in out_c)
     carriers = [q for q in L.PHRASINGS if L.GOLD_ID.search(q)]
     rc_r, out_r, spill_r = L.comp_which(L.REAL_Q)
     b_real = before["questions"][L.REAL_Q]
@@ -234,13 +256,14 @@ def p4_byte_equality(tree, tag, before):
           % (rc_r, b_real["rc"], L.rank_row_count(spill_r), b_real["rank_row_count"],
              len(d_real), ALARM_NEEDLE in out_r, L.REAL_Q))
     rows.append((L.REAL_Q, rows_real))
-    print("   arm c            : %s  (4 of 4 phrasings byte-equal on ranked list AND terminal block)"
-          % ("PASS" if all_equal else "FAIL"))
-    print("   arm f            : %s  (%d of 4 phrasings carry a gold id; byte-equality %s)"
-          % ("PASS" if (not carriers and all_equal) else "FAIL", len(carriers),
-             "holds" if all_equal else "does not hold"))
-    print("   arm e:real-byte-equal: %s  (1 of 1)" % ("PASS" if not d_real else "FAIL"))
-    return (all_equal, (not carriers and all_equal), (not d_real), dict(rows))
+    baseline_diffs.append(len(d_real))
+    alarms.append(ALARM_NEEDLE in out_r)
+    n = len(baseline_diffs)
+    print("   DIAGNOSTIC (not a verdict): %d of %d question(s) diff 0 lines against the stale"
+          " baseline; potion ALARM fired on %d of %d; %d of 4 phrasings carry a gold id."
+          % (sum(1 for d in baseline_diffs if d == 0), n, sum(1 for a in alarms if a), n,
+             len(carriers)))
+    return {"rows": dict(rows), "baseline_diffs": baseline_diffs, "alarms": alarms, "n": n}
 
 
 def main(argv):
@@ -454,46 +477,71 @@ def main(argv):
               "fixed tree's at %d positions" % (len(ord_b), ndiff))
 
         # --------------------------------------------------------------- (e) THE ROUND-7 READING RE-TAKEN
-        hdr("(e) THE ROUND-7 READING RE-TAKEN -- P4-AC1's three byte-equality arms, MAIN and FRESH")
+        hdr("(e) TREE-INVARIANCE -- the MAIN tree and a FRESH worktree rank IDENTICALLY, and an "
+            "UNFIXED one does not (arm re-cut on row NFRA_COMPEFFICACY-W2-S2)")
         bpath = os.path.join(MAIN, *P4_DELIV_REL.split("/"), "cep4_before.json")
-        print("  stored baseline: %s" % bpath.replace("\\", "/"))
+        print("  the stale artifact, NAMED AND NOT USED AS A COMPARATOR: %s" % bpath.replace("\\", "/"))
         if not os.path.isfile(bpath):
-            print("  BLOCKED: the stored BEFORE baseline is absent.")
-            check("e", False, "the stored baseline P4-AC1 compares against is absent")
+            print("  BLOCKED: the stale baseline is absent -- its ALARM census cannot be taken.")
+            check("e", False, "the stale baseline whose environment this arm records is absent")
         else:
             before_json = json.load(open(bpath, encoding="utf-8"))
-            alarms = sum(1 for q, v in before_json["questions"].items()
-                         if ALARM_NEEDLE in (v.get("terminal") or ""))
+            n_alarm = sum(1 for _q, v in before_json["questions"].items()
+                          if ALARM_NEEDLE in (v.get("terminal") or ""))
             nq = len(before_json["questions"])
-            print("  THE BASELINE'S OWN ENVIRONMENT (R-8), read off the baseline: %d of %d captured "
-                  "questions carry the potion ALARM in their `terminal` block" % (alarms, nq))
-            print("  -> the stored baseline was captured under the LEXICAL FALLBACK. It names no")
-            print("     environment field; the ALARM in its own payload is the only tell.")
+            print("  ITS ENVIRONMENT (R-8), read off the artifact: %d of %d captured questions carry "
+                  "the potion ALARM in their own `terminal` block." % (n_alarm, nq))
+            print("  -> CAPTURED UNDER THE LEXICAL FALLBACK. It names no environment field; the ALARM")
+            print("     inside its own payload is the only tell. It is INVALID FOR A SEMANTIC")
+            print("     COMPARISON and is NOT a comparator for any arm here. Its diff numbers below")
+            print("     are DIAGNOSTICS. Re-capturing it is round 7's artifact and 2.0.0_SA_COO's per")
+            print("     NFRA_COMPEFFICACY-S40 -- not this cell's to write.")
+            check("e:baseline-named-invalid", n_alarm == nq and nq > 0,
+                  "the stale baseline is recorded as fallback-captured on its own evidence: %d of %d "
+                  "of its captured questions carry the ALARM" % (n_alarm, nq))
             print("")
-            print("  MAIN TREE  %s" % MAIN)
-            res_main = p4_byte_equality(MAIN, "main", before_json)
+            print("  MAIN TREE     %s" % MAIN)
+            r_main = p4_ranked_output(MAIN, "main", before_json)
             print("")
-            print("  FRESH TREE %s" % slot_a)
-            res_fresh = p4_byte_equality(slot_a, "fresh", before_json)
-            if res_main is None or res_fresh is None:
-                check("e", False, "cep4_lib.py unreadable in one of the two trees")
+            print("  FRESH FIXED   %s" % slot_a)
+            r_fix = p4_ranked_output(slot_a, "fixed", before_json)
+            print("")
+            print("  FRESH UNFIXED %s   (THE CONTROL)" % slot_b)
+            r_unfix = p4_ranked_output(slot_b, "unfixed", before_json)
+            if r_main is None or r_fix is None or r_unfix is None:
+                check("e", False, "cep4_lib.py unreadable in one of the three trees")
             else:
-                cm, fm, em, rows_main = res_main
-                cf, ff, ef, rows_fresh = res_fresh
-                same = sum(1 for q in rows_main if rows_main[q] == rows_fresh.get(q))
+                rm, rf, ru = r_main["rows"], r_fix["rows"], r_unfix["rows"]
+                nq5 = len(rm)
+                eq_fix = sum(1 for q in rm if rm[q] == rf.get(q))
+                eq_unfix = sum(1 for q in rm if rm[q] == ru.get(q))
+                base0_unfix = sum(1 for d in r_unfix["baseline_diffs"] if d == 0)
+                base0_main = sum(1 for d in r_main["baseline_diffs"] if d == 0)
                 print("")
-                print("  CROSS-TREE: the MAIN tree's ranked lists vs the FRESH tree's, same questions: "
-                      "%d of %d BYTE-EQUAL" % (same, len(rows_main)))
-                check("e:main", cm and fm and em,
-                      "P4-AC1's three byte-equality arms (c, f, e:real-byte-equal) PASS at the MAIN "
-                      "tree: c=%s f=%s e=%s (denominator 3 of 3 arms, 5 of 5 questions)"
-                      % (cm, fm, em))
-                check("e:fresh", cf and ff and ef,
-                      "P4-AC1's three byte-equality arms PASS in the FRESH worktree: c=%s f=%s e=%s "
-                      "(denominator 3 of 3 arms, 5 of 5 questions)" % (cf, ff, ef))
-                check("e:main-equals-fresh", same == len(rows_main) and len(rows_main) > 0,
-                      "the FRESH worktree now reads IDENTICALLY to the MAIN tree, %d of %d questions "
-                      "-- the checkout-property RED is gone" % (same, len(rows_main)))
+                print("  THE PAIR, printed because together they are the proof the stale baseline")
+                print("  tracks the FALLBACK and not the ranking:")
+                print("    MAIN vs FRESH-FIXED    : %d of %d ranked outputs BYTE-EQUAL" % (eq_fix, nq5))
+                print("    MAIN vs FRESH-UNFIXED  : %d of %d ranked outputs BYTE-EQUAL" % (eq_unfix, nq5))
+                print("    FRESH-UNFIXED vs the stale baseline: %d of %d questions diff 0 line(s)  "
+                      "(per-question diff lines %s)"
+                      % (base0_unfix, nq5, r_unfix["baseline_diffs"]))
+                print("    MAIN         vs the stale baseline: %d of %d questions diff 0 line(s)  "
+                      "(per-question diff lines %s)"
+                      % (base0_main, nq5, r_main["baseline_diffs"]))
+                print("    potion ALARM fired: MAIN %d of %d, FRESH-FIXED %d of %d, FRESH-UNFIXED "
+                      "%d of %d"
+                      % (sum(1 for a in r_main["alarms"] if a), nq5,
+                         sum(1 for a in r_fix["alarms"] if a), nq5,
+                         sum(1 for a in r_unfix["alarms"] if a), nq5))
+                check("e:tree-invariance", eq_fix == nq5 and nq5 > 0,
+                      "FWD-9 on this instrument: the MAIN tree and a FRESH linked worktree produce "
+                      "BYTE-EQUAL ranked output on %d of %d questions" % (eq_fix, nq5))
+                check("e:control-not-invariant", eq_unfix == 0 and nq5 > 0,
+                      "THE CONTROL FAILS INVARIANCE as it must: an UNFIXED worktree is byte-equal to "
+                      "the MAIN tree on %d of %d questions -- so the arm can fail" % (eq_unfix, nq5))
+                check("e:control-tracks-baseline", base0_unfix == nq5 and nq5 > 0,
+                      "and THE CONTROL matches the stale baseline on %d of %d questions -- the pair "
+                      "proves that baseline tracks the FALLBACK, not the ranking" % (base0_unfix, nq5))
 
     finally:
         # ------------------------------------------------------------------------------ (f) CLEANUP
