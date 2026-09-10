@@ -1,0 +1,109 @@
+
+==============================================================================
+0. THE SUBJECT: the DEPLOYED orchestrator
+==============================================================================
+served CodeSha256   : rCrGrYPZNKgWQ4uX3NGFGqm7v1s+KcfQlJ7na+soz+g=
+served LastModified : 2026-09-10T05:42:07.000+0000
+served CodeSize     : 16210
+zip member          : lambda_function.py, 47075 B, sha256 8d8cb2c23d7c00d943a985d381e45b96315f7dcf6047fe1bc3cc2234854d801f
+pre-change blob     : 0228b9c456:lambda_function.py -> 40790 B, sha256 ac0484b73a26865eab649917cec7d1bf9c5d604ccd293cc72f17cb83e9e17000
+  content-verified against the sha256 measured on the PREVIOUSLY deployed member: True
+
+==============================================================================
+(a) THE SEAM REPRODUCES ITS OWN ABSENCE FIRST -- against the PRE-CHANGE code
+==============================================================================
+PRE-CHANGE handler event keys (denominator 4): ['mode', 'month', 'probe', 'test_recipients']
+  pre-change commands containing --fixture-remove: 0 of 5
+  [HOLD] a-absence-reproduced -- the pre-change code produces NO --fixture-remove for 5 of 5 shapes and the token appears nowhere in its source -- the seam genuinely did not exist
+
+==============================================================================
+(b) THE SCHEDULED PATH IS BIT-FOR-BIT UNCHANGED
+==============================================================================
+  {"mode": "run"}                                          identical=True len=723
+  {}                                                       identical=True len=723
+  null                                                     identical=True len=723
+  {"mode": "run", "month": "2026-08"}                      identical=True len=723
+  {"version": "0", "id": "abc", "detail-type": "Scheduled  identical=True len=723
+  [HOLD] b-scheduled-bit-for-bit -- 5 of 5 marker-free payload shapes build a command byte-identical to the pre-change one
+
+==============================================================================
+(c) THE SCHEDULED PATH CANNOT REACH THE FORCING -- code AND deployed payload
+==============================================================================
+SKIP: force_fixture_remove ignored -- not a non-empty string (got str); forcing is OFF
+SKIP: force_fixture_remove ignored -- not a non-empty string (got list); forcing is OFF
+SKIP: force_fixture_remove ignored -- not a non-empty string (got int); forcing is OFF
+SKIP: force_fixture_remove ignored -- not a non-empty string (got list); forcing is OFF
+SKIP: force_fixture_remove REFUSED -- "cottonwood:2026-08-04'; id; echo '" does not match <partner>:<YYYY-MM-DD>[,...]; forcing is OFF
+SKIP: force_fixture_remove REFUSED -- 'cottonwood:2026-8-4' does not match <partner>:<YYYY-MM-DD>[,...]; forcing is OFF
+  CODE GRAIN: payloads reaching --fixture-remove: 0 of 20
+  SECOND WRITER (`month`): refused 8 of 8 injection shapes
+  DEPLOYED PAYLOAD GRAIN -- the live rule's own Input, read now:
+    State=ENABLED  Schedule=cron(0 10 1 * ? *)  Input(VERBATIM)='{"mode":"run"}'
+    keys (denominator 1): ['mode']
+      mode                   present=True  value='run'
+      test_run               present=False value='<ABSENT>'
+      force_fixture_remove   present=False value='<ABSENT>'
+      month                  present=False value='<ABSENT>'
+  [HOLD] c-code-grain -- 0 of 20 payload shapes reach --fixture-remove in the DEPLOYED code
+  [HOLD] c-second-writer-fenced -- the `month` writer refuses 8 of 8 injections (it accepted them before this cell -- row W4-S5)
+  [HOLD] c-deployed-payload -- the LIVE rule sends 1 key(s) ['mode']; 0 of 3 forcing-capable keys present, and the POSITIVE CONTROL mode='run' reads present so the absences are real
+
+==============================================================================
+(d) THE FORCING WORKS WHEN EXPLICITLY ASKED -- and cannot persist
+==============================================================================
+OK: forcing spec accepted -- --fixture-remove cottonwood:2026-08-04,2026-08-05 (TEST invocation)
+  resolved spec : 'cottonwood:2026-08-04,2026-08-05'
+  command tail  : render_month_end.py --month 2026-08 --pdf --gate --s3-out s3://opal-data-etfs/platinum/reports/ --fixture-remove cottonwood:2026-08-04,2026-08-05'
+  renderer's own _parse_fixture_remove(spec) -> {'cottonwood': ['2026-08-04', '2026-08-05']}
+  [HOLD] d-forcing-works -- the spec reaches --fixture-remove verbatim and parses under the renderer's own parser
+  PERSISTENCE (hardened condition d), on the DEPLOYED module object:
+OK: forcing spec accepted -- --fixture-remove cottonwood:2026-08-04,2026-08-05 (TEST invocation)
+    `global` stmts 0 | os.environ WRITES 0 | put_parameter/put_object 0
+    warm container: forced->flag=True, next scheduled call->flag=False, == never-forced build:True
+  [HOLD] d-cannot-persist -- no global, no env write, no SSM/S3 persistence, and a warm container that just forced builds a byte-identical never-forced command on the next call
+
+==============================================================================
+(e) THE DEPLOY IS REAL AND MATCHES WHAT WAS REVIEWED
+==============================================================================
+  served CodeSha256      : rCrGrYPZNKgWQ4uX3NGFGqm7v1s+KcfQlJ7na+soz+g=
+  fetched zip sha256 b64 : rCrGrYPZNKgWQ4uX3NGFGqm7v1s+KcfQlJ7na+soz+g=
+  plan PREDICTED         : rCrGrYPZNKgWQ4uX3NGFGqm7v1s+KcfQlJ7na+soz+g=
+  zip member sha256      : 8d8cb2c23d7c00d943a985d381e45b96315f7dcf6047fe1bc3cc2234854d801f
+  committed HEAD blob    : 8d8cb2c23d7c00d943a985d381e45b96315f7dcf6047fe1bc3cc2234854d801f (47075 B)
+  NEGATIVE CONTROL, pre-change blob: ac0484b73a26865eab649917cec7d1bf9c5d604ccd293cc72f17cb83e9e17000 -- equal to deployed: False
+  plan resources (denominator 1): ['aws_lambda_function.orchestrator']
+  entry opened 2026-09-10T05:38:12.476293+00:00 < apply 2026-09-10T05:42:07+00:00 : True
+  entry status: CLOSED -- nothing stranded -- closed 20260910T054634Z | commits on the entry: 2
+    sign-off names new reachable state                : True
+    sign-off names deliberately dropped input data    : True
+    sign-off names denominator = 6                    : True
+    sign-off names b08a646d5755f501                   : True
+  [HOLD] e-deployed-equals-built-equals-reviewed -- served == fetched zip == the hash the plan predicted; the member equals the committed blob; the pre-change blob does NOT match; the plan carried 1 of 1 resource
+  [HOLD] e-entry-ordering-and-signoff -- the entry opened 2026-09-10T05:38:12.476293+00:00 before the apply 2026-09-10T05:42:07+00:00, is CLOSED across 2 commits, and its sign-off carries 4 of 4 required tokens -- the new reachable state in its own words, the writer count, and my own sha256 of the served EG-s-25 renderer
+
+==============================================================================
+(f) NO SEND, NO INVOKE
+==============================================================================
+  ORDERING RE-CHECK: served renderer 66756 B sha256 b08a646d5755f501f10b0b3c8d0512702c20b38e02263dc3b33a2f963d71020f (EG-s-25 present: forced=9 run_id=27)
+  CloudWatch /aws/lambda/etfs-reports-orchestrator since 2026-09-10T03:42:07+00:00: 0 event(s) scanned, 0 of them START RequestId
+  POSITIVE CONTROL 01:00-01:30Z (contains EG-s-15's known driven run): 4 event(s), 1 START RequestId -- a non-zero here is what makes the zero above a real absence
+  this battery's own AWS calls, all READS: lambda:GetFunction, HTTPS GET of Code.Location, s3:GetObject x1, scheduler:GetSchedule, logs:FilterLogEvents (5 kinds)
+  the module under test was imported with EVERY boto3 client replaced by a stub that RAISES on any call, so no SES/EC2/SSM call is reachable through it
+  [HOLD] f-no-send-no-invoke -- 0 START RequestId in my 2 h window (of 0 events), against 1 in the control window (of 4) -- the control is NON-ZERO, so my zero is a measured absence and not an empty-set vacuous pass; and the battery makes 5 kinds of AWS call, all reads
+
+==============================================================================
+VERDICT
+==============================================================================
+arms: 10 of 10 HOLD
+  a-absence-reproduced                       HOLD
+  b-scheduled-bit-for-bit                    HOLD
+  c-code-grain                               HOLD
+  c-second-writer-fenced                     HOLD
+  c-deployed-payload                         HOLD
+  d-forcing-works                            HOLD
+  d-cannot-persist                           HOLD
+  e-deployed-equals-built-equals-reviewed    HOLD
+  e-entry-ordering-and-signoff               HOLD
+  f-no-send-no-invoke                        HOLD
+
+EGS24-FORCING-THREADED-SCHEDULE-CLEAN
