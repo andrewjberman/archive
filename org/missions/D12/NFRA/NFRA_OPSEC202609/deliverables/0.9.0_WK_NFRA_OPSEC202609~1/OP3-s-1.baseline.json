@@ -1,0 +1,49 @@
+{
+  "phase": "BASELINE -- taken before any control is armed (C-18). Nothing on the box or the form has been modified by this seat as of this write.",
+  "captured_at": "2026-09-10T11:19:02Z",
+  "captured_by": "0.9.0_WK_NFRA_OPSEC202609~1",
+  "box": "i-0152e3fe2599fa630 (Elastic IP 18.208.18.213, OpenLiteSpeed, WordPress root /usr/local/lsws/wordpress), reached via AWS SSM (PingStatus Online, LastPing 2026-09-10T07:03:53-04:00, AgentVersion 3.3.4793.0)",
+  "window": "2026-08-04T15:31:44Z through 2026-09-10T11:19:02Z (36.82 days). LOWER BOUND IS THE ORIGIN ACCESS LOG'S OWN RETENTION FLOOR, NOT A CHOICE: the Gravity Forms entry store's first-ever row dates to 2026-07-16T20:39:51Z, but the origin's oldest surviving rotated access-log file (access.log.2026_08_08) opens at 2026-08-04T15:31:44Z -- OpenLiteSpeed's own rotation has already pruned everything before that instant. C-18 requires the census to run against BOTH the entry store and the origin access logs; the window used here is the INTERSECTION where both surfaces have complete, un-pruned coverage, so entry-store rows 1-3 (2026-07-16, 2026-08-02, 2026-08-02) are EXCLUDED from the in-window counts below and reported separately as ALL-TIME context only. UPPER BOUND is this capture's own timestamp -- the instant before any control is armed.",
+  "denominator": "Two counts over [window], both restricted to Gravity Forms form_id=1 (the /contact/ form): (A) origin OpenLiteSpeed access-log lines matching an HTTP POST to path /contact/, counted by concatenating every retained access.log* file on i-0152e3fe2599fa630 whose lines fall inside [window] and grepping the literal string 'POST /contact/' (verbatim path match; no query-string variant was observed); (B) Gravity Forms entry-store rows in wp_gf_entry for form_id=1 whose date_created falls inside [window], read via `wp db query` over SSM (root, WP-CLI 2.12.0). Each count is split into AUTOMATED vs HUMAN-LIKE by the discriminator below; a per-day rate (count / window-days) is carried alongside the raw count so that a before-window and an after-window of unequal length stay comparable.",
+  "discriminator": "A submission (an access-log line, by its User-Agent request-header field; or a GF entry, by its stored user_agent column) is classed AUTOMATED if that User-Agent string (i) is wrapped in a literal escaped double-quote pair -- the WHOLE declared browser string begins AND ends with a raw \" character, an artifact no real browser ever emits on its own UA header and which a form-spam tool's templated UA literal produced here -- or (ii) contains a case-insensitive 'bot' token or a self-declared non-browser client string (e.g. 'DomainIntelBot/1.0'). Otherwise HUMAN-LIKE. MEASURED, not assumed: every quoted-UA/bot-token hit in the access log matches a quoted-UA/bot-token row in the GF entry store at the same source IP and the same timestamp (8 of 8 cross-checked in this baseline read), and several flagged addresses (185.220.100.253, 185.220.100.255, 185.220.101.174 among them) fall in the 185.220.100.0/22 range historically documented as Tor exit-node infrastructure -- offered as CORROBORATING, not load-bearing, since no live IP-reputation vendor lookup was run (none is authorized for this task). THE STATUS-CODE TRAP NAMED IN THE TASK ORDER'S GROUNDING SECTION DOES NOT APPLY TO THIS ENDPOINT: WordPress's failed-login-returns-200/success-returns-302 asymmetry is a wp-login.php behavior specific to that form; Gravity Forms submits form 1 via gform_submission_method=iframe, so BOTH an accepted and a rejected /contact/ POST return HTTP 200 from the origin alike (confirmed: all 53 in-window log lines read status 200, including the ones that never produced a stored entry) -- status code carries NO discriminating signal for this endpoint and none is used here.",
+  "measured": {
+    "access_log": {
+      "instrument": "SSM AWS-RunShellScript on i-0152e3fe2599fa630, root shell, cat of all 16 retained access.log* files piped to grep 'POST /contact/'",
+      "files_scanned": ["access.log.2026_08_08","access.log.2026_08_11","access.log.2026_08_11.01","access.log.2026_08_11.02","access.log.2026_08_12","access.log.2026_08_12.01","access.log.2026_08_15","access.log.2026_08_18","access.log.2026_08_18.01","access.log.2026_08_23","access.log.2026_08_27","access.log.2026_08_30","access.log.2026_09_01","access.log.2026_09_02","access.log.2026_09_06","access.log"],
+      "total_lines_scanned_all_paths": 616500,
+      "post_contact_total": 53,
+      "post_contact_automated": 8,
+      "post_contact_human_like": 45,
+      "post_contact_automated_rate_per_day": 0.217,
+      "post_contact_human_like_rate_per_day": 1.222,
+      "all_200_status": true,
+      "automated_addresses": ["185.220.100.255 (07 Aug)","80.67.167.81 (09 Aug)","45.84.107.76 (16 Aug)","115.245.247.206 DomainIntelBot/1.0 (22 Aug)","5.255.125.196 (26 Aug)","192.42.116.103 (04 Sep)","109.71.252.88 (07 Sep)","185.220.100.253 (09 Sep)"]
+    },
+    "gf_entry_store": {
+      "instrument": "SSM AWS-RunShellScript, `wp db query` against wp_gf_entry / wp_gf_entry_meta as root, WP-CLI 2.12.0",
+      "form_id": 1,
+      "form_title": "Contact",
+      "honeypot_setting_at_capture": "unset (off) -- confirmed live, matches PRD ADDENDUM_01 s.1.3's reading",
+      "in_window_total": 18,
+      "in_window_automated": 8,
+      "in_window_human_like": 10,
+      "in_window_automated_rate_per_day": 0.217,
+      "in_window_human_like_rate_per_day": 0.272,
+      "all_time_total_informational": 21,
+      "all_time_automated_informational": 10,
+      "all_time_human_like_informational": 11,
+      "all_time_note": "All-time span is 2026-07-16 to capture; the 3 entries before the log-retention floor (ids 1-3) are counted here for context only and are EXCLUDED from in_window_* above so the two surfaces (log vs entry store) are compared over the identical window.",
+      "all_statuses_active": true,
+      "entry_ids_in_window": [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],
+      "automated_entry_ids": [4,5,7,11,15,18,20,21],
+      "human_like_entry_ids": [6,8,9,10,12,13,14,16,17,19]
+    },
+    "cross_check": "All 8 automated log-side hits and all 8 automated entry-store hits (in-window) resolve to the SAME 8 (ip, date) pairs -- every automated POST in this window reached the entry store (0 of 8 were dropped by any existing filter, consistent with the addendum's finding that no anti-automation control exists on this form today)."
+  },
+  "site_anti_automation_posture_at_capture": {
+    "recaptcha_hcaptcha_turnstile": "ABSENT on the live page (Bricks recaptchaIds:[] empty array) -- confirmed unchanged from PRD ADDENDUM_01",
+    "gravity_forms_honeypot": "OFF -- confirmed live via wp eval GFAPI::get_forms(), form 1 honeypot key unset",
+    "akismet": "not installed (0.7.0_AE_CloudOps~U's plugin census and this seat's `wp plugin list` agree: gravityforms, litespeed-cache, omnisend, wp-mail-smtp, wps-limit-login, advanced-custom-post-type, automaticcss-plugin, pdf-embedder, redirection(inactive), safe-svg, wp-seopress, updrafplus, simple-cloudflare-turnstile(INACTIVE) -- no Akismet plugin present)",
+    "edge_waf": "NONE in front of this origin (unchanged from PRD C-19 measurement 2026-09-09); TO-OP-S-13's CloudFront distribution fronts a DIFFERENT surface, real visitor traffic to opalinvest.com does not traverse it (row Z-S101)"
+  }
+}
