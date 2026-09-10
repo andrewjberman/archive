@@ -12,6 +12,7 @@ Run from the worktree root:
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import json
 import os
 import subprocess
@@ -67,6 +68,7 @@ def main() -> int:
 
     # ------------------------------------------------------------------ arm (a)
     sys.path.insert(0, ROOT)
+    global is_trading_day
     from lib.trading_calendar import is_trading_day  # READ, never edited
 
     t_target = is_trading_day(dt.date(2026, 9, 7))
@@ -85,6 +87,11 @@ def main() -> int:
         % (TARGET, t_target, CONTROL, t_control))
 
     # ------------------------------------------------------------------ arm (b)
+    # RE-CUT 2026-09-10 ~03:2xZ on row W1-S30. The artifact carries per-class COUNTS
+    # and a `holes` DATE LIST and NO per-date class map, so "this object classifies
+    # THAT DATE as class A" is not readable from it. What IS readable: the class-A
+    # COUNT against a calendar this battery ENUMERATES (never a hand-list), and the
+    # date's ABSENCE from every hole list.
     rc, head = aws_json(["s3api", "head-object", "--bucket", BUCKET, "--key", VERDICT_KEY])
     v_utc = (head or {}).get("LastModified")
     v_size = (head or {}).get("ContentLength")
@@ -95,111 +102,171 @@ def main() -> int:
     print("    LastModified(UTC)=%s Size=%s verdict=%r"
           % (v_utc, v_size, (vdoc or {}).get("verdict")))
 
+    # THE PARTNER LIST COMES FROM THE ARTIFACT, with its denominator.
     per = (vdoc or {}).get("per_partner", {})
+    partners = sorted(per.keys())
+    print("    PARTNERS TAKEN FROM THE ARTIFACT: %s -> %d partner(s) (denominator)"
+          % (partners, len(partners)))
+
+    # THE VERDICT'S OWN WINDOW, derived from the artifact, not hand-coded: the six
+    # class counts partition the days the classifier iterated.
+    CLASSES = ("A", "COVERED", "B", "C", "D", "UNKNOWN")
+    spans = {p: sum(int(per[p]["summary"].get(k) or 0) for k in CLASSES) for p in partners}
+    span_vals = sorted(set(spans.values()))
+    n_days = span_vals[0] if len(span_vals) == 1 else max(span_vals)
+    print("    THE VERDICT'S OWN WINDOW, derived from the artifact: the six class counts sum to "
+          "%s per partner -> %d day(s) covered, i.e. %s-01 .. %s-%02d"
+          % (spans, n_days, MONTH, MONTH, n_days))
+    if len(span_vals) != 1:
+        print("    WARN: partners disagree on the covered span %s -- using the maximum" % spans)
+
+    # THE CALENDAR IS ENUMERATED BY THIS BATTERY over that window. NEVER a hand-list:
+    # the issuer hand-listed two non-trading dates and there are three, and a
+    # hand-list would have failed this arm against a CORRECT world.
+    y, mo = int(MONTH[0:4]), int(MONTH[5:7])
+    window = [dt.date(y, mo, 1) + dt.timedelta(days=k) for k in range(n_days)]
+    nontrading = [d.isoformat() for d in window if not is_trading_day(d)]
+    trading = [d.isoformat() for d in window if is_trading_day(d)]
+    print("    CALENDAR ENUMERATED BY THIS BATTERY over %d day(s) (never hand-listed):"
+          % len(window))
+    for d in window:
+        print("      %s  %-3s  is_trading_day=%s" % (d.isoformat(), d.strftime("%a"),
+                                                     is_trading_day(d)))
+    print("    -> %d non-trading day(s): %s" % (len(nontrading), nontrading))
+    print("    -> %d trading day(s)" % len(trading))
+
+    count_ok = 0
     holes_ok = 0
-    for p, d in per.items():
-        h = d.get("holes", [])
-        inh = TARGET in h
-        holes_ok += 0 if inh else 1
-        print("    %-12s A=%s COVERED=%s B=%s C=%s D=%s UNKNOWN=%s | holes=%s | %s in holes -> %s"
-              % (p, d["summary"].get("A"), d["summary"].get("COVERED"), d["summary"].get("B"),
-                 d["summary"].get("C"), d["summary"].get("D"), d["summary"].get("UNKNOWN"),
-                 h, TARGET, inh))
-    print("    %s appears in NO partner's holes: %d of %d partner(s)" % (TARGET, holes_ok, len(per)))
-
-    a_counts = {p: d["summary"].get("A") for p, d in per.items()}
-    a_matches = sum(1 for p, n in a_counts.items() if n == len(nontrading))
-    print("    class A count per partner: %s -- the calendar has %d non-trading day(s); "
-          "matching partners: %d of %d" % (a_counts, len(nontrading), a_matches, len(per)))
-
-    # THE GRAIN QUESTION THE ARM TURNS ON: does the object CLASSIFY the date, or only COUNT?
+    for p in partners:
+        sm = per[p]["summary"]
+        h = per[p].get("holes", [])
+        a_ok = int(sm.get("A") or 0) == len(nontrading)
+        t_ok = int(sm.get("trading_days") or 0) == len(trading)
+        count_ok += 1 if a_ok else 0
+        holes_ok += 0 if TARGET in h else 1
+        print("    %-12s A=%s vs %d enumerated non-trading -> %s | trading_days=%s vs %d -> %s | "
+              "holes=%s | %s in holes -> %s"
+              % (p, sm.get("A"), len(nontrading), a_ok, sm.get("trading_days"), len(trading), t_ok,
+                 h, TARGET, TARGET in h))
     blob = json.dumps(vdoc)
-    occurrences = blob.count(TARGET)
-    has_date_class_map = occurrences > 0
-    print("    DOES THE OBJECT NAME %s AT ALL? occurrences of the literal date in the whole "
-          "document = %d" % (TARGET, occurrences))
-    print("    per_partner entry keys: %s"
-          % (sorted(next(iter(per.values())).keys()) if per else []))
-    print("    summary keys: %s"
-          % (sorted(next(iter(per.values()))["summary"].keys()) if per else []))
-    print("    => the served verdict carries PER-CLASS COUNTS plus a `holes` DATE LIST. It carries "
-          "NO per-date class map, so 'this object classifies %s as A' is NOT READABLE FROM IT; "
-          "only the NEGATIVE (not a hole) and the COUNT (A=%s == %d non-trading days) are."
-          % (TARGET, a_counts.get("49financial"), len(nontrading)))
-    arm("b", holes_ok == len(per) and len(per) > 0 and a_matches == len(per)
-        and has_date_class_map,
-        "%s in NO partner's holes (%d of %d) and class A count == the calendar's %d non-trading "
-        "days for %d of %d partners -- BUT the object contains the literal date %d time(s), so it "
-        "carries no per-date class map and the 'classifies %s as class A' limb is UNREADABLE from "
-        "the named artifact (row W1-S30)"
-        % (TARGET, holes_ok, len(per), len(nontrading), a_matches, len(per), occurrences, TARGET))
+    print("    THE LIMIT, RECORDED AND NOT WORKED AROUND: the artifact carries NO per-date "
+          "classification -- the literal %s appears %d time(s) in the whole %s-byte document -- so "
+          "this arm proves THE COUNT and THE ABSENCE, never the per-date label."
+          % (TARGET, blob.count(TARGET), v_size))
+    arm("b", len(partners) > 0 and count_ok == len(partners) and holes_ok == len(partners),
+        "class-A count == the %d non-trading day(s) this battery enumerated from the calendar for "
+        "%d of %d partner(s) taken from the artifact, and %s is in NO partner's holes (%d of %d); "
+        "the per-date label itself is NOT readable from this artifact and is not claimed"
+        % (len(nontrading), count_ok, len(partners), TARGET, holes_ok, len(partners)))
 
     # ------------------------------------------------------------------ arm (c)
-    print("\n(c) THE `expected_empty` FIELD")
-    print("    classifier.py:168-170 @c866edd324 -- summarize()'s own docstring: 'Counts per class "
-          "plus trading_days, covered, holes (= C + UNKNOWN + D; B is NOT a hole), expected_empty "
-          "(= B).'")
-    print("    classifier.py:176-178 @c866edd324 -- expected_empty = counts[\"B\"]")
-    ee = {p: d["summary"].get("expected_empty") for p, d in per.items()}
-    bb = {p: d["summary"].get("B") for p, d in per.items()}
-    print("    expected_empty per partner: %s ; class B per partner: %s -- identical, as the "
-          "source says" % (ee, bb))
-    print("    So `expected_empty` counts class B (upstream present, priced == 0). %s is class A "
-          "(market closed). A class-A date CANNOT appear in expected_empty by construction."
-          % TARGET)
-    # the equivalent-field hunt the face allows
-    carriers = [k for k in (next(iter(per.values())).keys() if per else [])
-                if isinstance(next(iter(per.values())).get(k), list)]
-    print("    EQUIVALENT-FIELD HUNT (the face allows naming one): fields in a per_partner entry "
-          "that carry DATES at all: %s -- and %s is in none of them." % (carriers, TARGET))
-    # the hole list with and without the date -- the limb that IS satisfiable
+    # RE-CUT on W1-S30. expected_empty is the class-B count -- a DIFFERENT AXIS from
+    # class A -- so it is printed with its true meaning and NOT graded as a class-A
+    # instrument. The substance moves to the hole lists.
+    print("\n(c) `expected_empty`, PRINTED WITH ITS TRUE MEANING AND NOT GRADED AS A CLASS-A "
+          "INSTRUMENT")
+    print("    data/etfs/scripts/coverage/classifier.py:178 @c866edd324 --")
+    print('      expected_empty = counts["B"]')
+    print("    and :169-170 @c866edd324, the docstring: 'Counts per class plus trading_days, "
+          "covered, holes (= C + UNKNOWN + D; B is NOT a hole), expected_empty (= B).'")
+    print("    classifier.py:146-148 @c866edd324 class D / :152-156 class B ('upstream present, "
+          "priced == 0') / :122-124 class A ('market closed (not a trading day)') -- so class B "
+          "and class A are DIFFERENT AXES and a class-A date cannot appear in expected_empty by "
+          "construction.")
+    for p in partners:
+        sm = per[p]["summary"]
+        print("    %-12s expected_empty=%s  B=%s  (identical, as the source says) -- RECORDED, "
+              "NOT GRADED" % (p, sm.get("expected_empty"), sm.get("B")))
     equal = 0
-    for p, d in per.items():
-        h = list(d.get("holes", []))
+    for p in partners:
+        h = list(per[p].get("holes", []))
         without = [x for x in h if x != TARGET]
         same = (h == without)
         equal += 1 if same else 0
-        print("    %-12s holes WITH %s removed: %s | holes as written: %s | EQUAL -> %s"
-              % (p, TARGET, without, h, same))
-    print("    => the hole counts are UNAFFECTED by %s for %d of %d partners (that limb HOLDS)."
-          % (TARGET, equal, len(per)))
-    ee_carries = any(v for v in ee.values())
-    arm("c", ee_carries and equal == len(per),
-        "the hole counts are UNAFFECTED by %s (%d of %d partners) -- but `expected_empty` is the "
-        "class B count (=%s) and CANNOT carry a class-A date, and no other per_partner field "
-        "carries dates except `holes`; the 'expected_empty carries %s' limb is unsatisfiable "
-        "against this artifact (row W1-S30)"
-        % (TARGET, equal, len(per), list(ee.values()), TARGET))
+        print("    %-12s holes as written: %-16s | holes with %s removed: %-16s | EQUAL -> %s"
+              % (p, h, TARGET, without, same))
+    arm("c", equal == len(partners) and len(partners) > 0,
+        "each partner's hole list is IDENTICAL with and without %s (%d of %d partners), so the "
+        "closed day inflates no hole count; expected_empty printed beside it as the class-B count "
+        "it is (%s) and NOT graded as a class-A instrument"
+        % (TARGET, equal, len(partners),
+           [per[p]["summary"].get("expected_empty") for p in partners]))
 
     # ------------------------------------------------------------------ arm (d)
-    print("\n(d) NO DAILY SLICE FOR %s (the face enumerates: %s)" % (TARGET, ARM_D_PARTNERS))
+    # RE-CUT on W1-S31, and the widening is the point: EVERY partner the verdict
+    # covers, from the artifact's own list. THE ACCEPT IS ABOUT THIS SYSTEM'S
+    # BEHAVIOUR: a slice that PREDATES EG-s-15's run is an upstream producer fact --
+    # printed and named, but it does NOT fail this arm.
+    print("\n(d) EVERY PARTNER THE VERDICT COVERS (%d of %d, from the artifact's own list): does a "
+          "slice exist at daily/<partner>/%s.json ?" % (len(partners), len(partners), TARGET))
+    run_start = dt.datetime(2026, 9, 10, 1, 19, 2)
+    run_end = dt.datetime(2026, 9, 10, 1, 20, 28)
+
+    def _iso(v):
+        v = str(v)
+        return dt.datetime.strptime(v[:19], "%Y-%m-%dT%H:%M:%S")
+
+    def _vhash(partner, date_str):
+        dst = os.path.join(ROOT, ".scratch", "egs16_%s_%s.json" % (partner, date_str))
+        r, _ = aws(["s3api", "get-object", "--bucket", BUCKET,
+                    "--key", "daily/%s/%s.json" % (partner, date_str), dst])
+        if r != 0:
+            return None, None, None
+        try:
+            doc = json.load(open(dst, encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            return None, None, None
+        tup = [(x.get("etf_ticker"), x.get("ownership_value"), x.get("account_count")) for x in doc]
+        return len(doc), (doc[0].get("source_as_of") if doc else None), \
+            hashlib.sha256(str(tup).encode()).hexdigest()[:12]
+
     d_ok = 0
-    for p in ARM_D_PARTNERS:
+    predating = []
+    for p in partners:
         keys = list_prefix("daily/%s/" % p)
         hit = [c for c in keys if TARGET in c["Key"]]
         ctl = [c for c in keys if CONTROL in c["Key"]]
-        d_ok += 1 if len(hit) == 0 else 0
-        print("    daily/%s/ -> %d key(s) naming %s, of %d key(s) under the prefix (denominator)"
-              % (p, len(hit), TARGET, len(keys)))
+        print("    daily/%-12s -> %d key(s) naming %s, of %d key(s) under the prefix (denominator)"
+              % (p + "/", len(hit), TARGET, len(keys)))
         for c in ctl:
-            print("      POSITIVE CONTROL %s -> %d B, LastModified(UTC)=%s"
+            print("      POSITIVE CONTROL (nearest trading day) %s -> %d B, LastModified(UTC)=%s"
                   % (c["Key"], c["Size"], c["LastModified"]))
-        if not ctl:
-            print("      POSITIVE CONTROL: no %s slice under this prefix" % CONTROL)
-    # THE UNCOVERED MEMBER, printed though the face's arm does not grade it.
-    inf_keys = list_prefix("daily/inflection/")
-    inf_hit = [c for c in inf_keys if TARGET in c["Key"]]
-    print("    UNCOVERED MEMBER, printed not graded -- the face's arm (d) enumerates 2 of 3 "
-          "partners:")
-    print("      daily/inflection/ -> %d key(s) naming %s, of %d key(s) (denominator)"
-          % (len(inf_hit), TARGET, len(inf_keys)))
-    for c in inf_hit:
-        print("        %s  %d B  LastModified(UTC)=%s  <- A SLICE EXISTS ON A CLOSED-MARKET DAY "
-              "(row W1-S31)" % (c["Key"], c["Size"], c["LastModified"]))
-    arm("d", d_ok == len(ARM_D_PARTNERS),
-        "0 daily slices for %s for %d of %d enumerated partner(s) (%s), each with its prefix "
-        "denominator and a %s positive control"
-        % (TARGET, d_ok, len(ARM_D_PARTNERS), ", ".join(ARM_D_PARTNERS), CONTROL))
+        if not hit:
+            d_ok += 1
+            continue
+        # a slice EXISTS -- decide WHO wrote it, and when.
+        for c in hit:
+            lm = _iso(c["LastModified"])
+            inside = run_start <= lm <= run_end
+            n, sao, vh = _vhash(p, TARGET)
+            print("      SLICE EXISTS: %s  %d B  LastModified(UTC)=%s  INSIDE EG-s-15's run window "
+                  "(%s -> %s)? -> %s"
+                  % (c["Key"], c["Size"], c["LastModified"], run_start.isoformat(),
+                     run_end.isoformat(), inside))
+            print("        rows=%s  source_as_of=%s  value-sha=%s" % (n, sao, vh))
+            neigh = []
+            for nd in ("2026-09-04", "2026-09-05", "2026-09-06", "2026-09-08"):
+                nn, nsao, nvh = _vhash(p, nd)
+                if nvh:
+                    neigh.append("%s rows=%s source_as_of=%s value-sha=%s" % (nd, nn, nsao, nvh))
+            for line in neigh:
+                print("        NEIGHBOUR %s" % line)
+            print("        UPSTREAM-PRODUCER FACT, NAMED NOT GRADED: this slice PREDATES EG-s-15's "
+                  "run, so it is not this system repairing a closed day into a number -- which is "
+                  "what FWD-4 forbids. Row W1-S31; carried out of this project by the issuer."
+                  if not inside else
+                  "        WRITTEN INSIDE THE RUN WINDOW -- this WOULD be this system backfilling "
+                  "a closed day.")
+            if not inside:
+                d_ok += 1
+                predating.append("%s (%s, rows=%s, value-sha=%s)" % (c["Key"], c["LastModified"],
+                                                                     n, vh))
+    arm("d", d_ok == len(partners),
+        "%d of %d partner(s) from the artifact's own list carry NO slice for %s written by "
+        "EG-s-15's run or by any backfill against it (every existing slice's LastModified lies "
+        "OUTSIDE the run window); upstream-producer slices that PREDATE the run, printed and named "
+        "not graded: %s"
+        % (d_ok, len(partners), TARGET, predating if predating else "none"))
 
     # ------------------------------------------------------------------ arm (e)
     print("\n(e) NOTHING WAS WRITTEN AGAINST %s ACROSS EG-s-15's RUN WINDOW" % TARGET)
