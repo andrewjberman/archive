@@ -1,6 +1,6 @@
-# TO NFRA_SYSPARITY.RB1-SITEZ -- CLOSE THE RULE-BANK VERSION DRIFT: head is v1.8, EIGHT SDK assertion sites across SEVEN files still assert v1.2, and the eighth file's hits are a DELIBERATE NEGATIVE CONTROL that must not be touched
+# TO NFRA_SYSPARITY.TO-RB1-SITEZ -- CLOSE THE RULE-BANK VERSION DRIFT: head is v1.8, EIGHT SDK assertion sites across SEVEN files still assert v1.2, and the eighth file's hits are a DELIBERATE NEGATIVE CONTROL that must not be touched
 
-<to_id>NFRA_SYSPARITY.RB1-SITEZ</to_id>
+<to_id>NFRA_SYSPARITY.TO-RB1-SITEZ</to_id>
 <project>NFRA_SYSPARITY</project>
 <issued_to>0.7.0_AE_CloudOps~Z</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
@@ -91,5 +91,5 @@ Criterion ids minted at cut by the issuer: `RB1-AC1`, `RB1-AC2`, `RB1-AC3`, `RB1
 infra/system/sdk/
 infra/system/system_parity.py
 org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml
-org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_SYSPARITY.RB1-SITEZ.rule-bank-version-drift.md
+org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_SYSPARITY.TO-RB1-SITEZ.rule-bank-version-drift.md
 </paths>
