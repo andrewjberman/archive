@@ -5,16 +5,29 @@ Seven arms. Prints EGS17-FILLED-IN-DAY only when EVERY arm holds.
   ARM-A  the hole census (20 trading days x 2 partners, denominators printed) plus the
          producer's PROBE answer for every absent date; at least one REAL class-C hole
          (partition present, priced > 0, output absent) named.
-  ARM-B  the rule's Target.Input read LIVE, beside the payload this battery invokes with.
-  ARM-C  the invocation's CloudTrail `Invoke` record shows the launching seat's user as
-         the initiator (not the rule).
-  ARM-D  the recovered date named in `catchup_processed` (the producer's own field) and
-         the CATCHUP: line in the function's CloudWatch log for THIS invocation.
+  ARM-B  Target.Input read LIVE on BOTH daily rules (ABSENT -- EventBridge's default
+         scheduled envelope IS the payload) and this battery's payload byte-equal to it
+         in shape and carrying NO `date` key.
+  ARM-C  the invocation PINNED by `START RequestId` 1 of 1 in the function's log GROUP
+         read BY TIME over its own window, with no role assumption attributable to a
+         scheduled fire in it; the CloudTrail `Invoke` read prints COVERAGE-ABSENT.
+  ARM-D  the function's CloudWatch log for THIS invocation names the recovered date --
+         in `catchup_processed` for a hole OLDER than the newest priced partition, or in
+         the MAIN PATH's own `OK: wrote s3://...` line for a HEAD-OF-WINDOW hole, in
+         which case CATCHUP-BRANCH-NOT-EXERCISED is printed beside the token.
   ARM-E  the slice exists after: head-object, size > 0, LastModified >= the invoke's UTC,
          and its rows counted by a SECOND reader (re-downloaded and parsed) non-zero.
   ARM-F  POSITIVE CONTROL, a READ: a date that is NOT missing is not reported recovered.
-  ARM-G  the schedule's own prior firings from CloudTrail over 30 days, BOTH producers,
-         with denominators, beside this manual invoke as the negative control.
+  ARM-G  the schedules' own prior firings over 30 days from the fire-instant AssumeRole
+         MANAGEMENT events on each function's execution role, BOTH producers, with
+         denominators, beside this manual invoke as the negative control; every
+         CloudTrail `Invoke` read prints COVERAGE-ABSENT, never a pass and never a fail.
+
+RE-CUT 2026-09-09 by the issuer's AMENDMENT on rows W1-S13 / W2-S7 (standing authority
+@9f4a57262f / @1ced87e810): lambda:Invoke is a CloudTrail DATA event and 0 of 2 trails in
+the account select AWS::Lambda::Function, so every Invoke read here is COVERAGE-ABSENT and
+arms (b), (c), (d), (g) are re-cut onto instruments that exist. Re-run against the SAME
+fire (request id 0840a0d3-15aa-4884-a12e-20e75cfa6136); no second fire.
 
 BOUNDS honoured by construction:
   - the ONLY write this battery can cause is the producer's own run writing the recovered
@@ -70,6 +83,7 @@ WINDOW_DAYS = 20
 HISTORY_DAYS = 30
 
 RESULTS: dict[str, tuple[bool, str]] = {}
+CATCHUP_BRANCH_EXERCISED = False
 
 
 def hold(arm: str, ok: bool, why: str) -> None:
@@ -230,16 +244,30 @@ def arm_a() -> tuple[list[str], dict]:
 def arm_b(partner: str) -> dict:
     print("\n================ ARM-B: THE RULE'S OWN PAYLOAD, READ LIVE ================")
     cfg = PRODUCERS[partner]
-    rc, rule, err = aws_json("events", "describe-rule", "--name", cfg["rule"])
-    print("aws events describe-rule --name %s  rc=%d" % (cfg["rule"], rc))
-    print(json.dumps(rule, indent=1) if rule else err)
-    rc2, targets, err2 = aws_json("events", "list-targets-by-rule", "--rule", cfg["rule"])
-    print("aws events list-targets-by-rule --rule %s  rc=%d" % (cfg["rule"], rc2))
-    print(json.dumps(targets, indent=1) if targets else err2)
 
-    tgts = (targets or {}).get("Targets", [])
-    has_input = any("Input" in t or "InputPath" in t or "InputTransformer" in t for t in tgts)
-    print("\nTarget.Input present on any of %d target(s)? %s" % (len(tgts), has_input))
+    # BOTH daily rules are read: the face's re-cut asserts Target.Input ABSENT on BOTH.
+    rule = None
+    n_targets = 0
+    n_with_input = 0
+    for p2, c2 in PRODUCERS.items():
+        rcx, rl, errx = aws_json("events", "describe-rule", "--name", c2["rule"])
+        print("aws events describe-rule --name %s  rc=%d" % (c2["rule"], rcx))
+        print(json.dumps(rl, indent=1) if rl else errx)
+        rcy, tg, erry = aws_json("events", "list-targets-by-rule", "--rule", c2["rule"])
+        print("aws events list-targets-by-rule --rule %s  rc=%d" % (c2["rule"], rcy))
+        print(json.dumps(tg, indent=1) if tg else erry)
+        ts = (tg or {}).get("Targets", [])
+        withinput = [t for t in ts if ("Input" in t or "InputPath" in t or "InputTransformer" in t)]
+        print("  -> %s: %d target(s), Target.Input/InputPath/InputTransformer present on %d of them"
+              % (c2["rule"], len(ts), len(withinput)))
+        n_targets += len(ts)
+        n_with_input += len(withinput)
+        if p2 == partner:
+            rule = rl
+    print("\nTarget.Input present on %d of %d target(s) across %d of %d daily rules"
+          % (n_with_input, n_targets, len(PRODUCERS), len(PRODUCERS)))
+    has_input = n_with_input > 0
+    tgts = [1] * n_targets
 
     payload = {
         "version": "0",
@@ -255,18 +283,25 @@ def arm_b(partner: str) -> dict:
     print("\nINVOKE PAYLOAD (this battery's):")
     print(json.dumps(payload, indent=1))
 
+    no_date_field = "date" not in payload
+    print("\nthis battery's payload carries a `date` key? %s  (the re-cut arm requires NO date key: a "
+          "date key routes to the explicit-date branch, lambda_function.py:304-308, which never reaches "
+          "the catch-up path -- row W2-S8)" % (not no_date_field))
+
     if not tgts:
         hold("B", False, "rule %s has NO targets -- cannot read the delivered payload" % cfg["rule"])
     elif has_input:
-        hold("B", False, "Target carries an Input this battery did not reproduce -- read it and re-cut")
+        hold("B", False, "a Target carries an Input this battery did not reproduce -- read it and re-cut")
+    elif not no_date_field:
+        hold("B", False, "the payload carries a `date` key -- it is not the envelope the rule delivers")
     else:
         hold("B", True,
-             "Target.Input ABSENT on %d of %d target(s) of rule %s, so the rule delivers the DEFAULT "
-             "EventBridge scheduled-event envelope; this battery's payload IS that envelope (source="
-             "aws.events, detail-type=Scheduled Event, resources=[the rule arn], no date field). "
-             "NOTE: the face's 'plus the date field' is NOT taken -- see the surprise row; a date field "
-             "routes the handler AWAY from the catch-up sweep."
-             % (len(tgts), len(tgts), cfg["rule"]))
+             "Target.Input ABSENT on %d of %d target(s) across %d of %d daily rules, so each rule delivers "
+             "the DEFAULT EventBridge scheduled-event envelope; this battery's payload IS that envelope "
+             "byte-equal in shape (version/id/detail-type=Scheduled Event/source=aws.events/account/time/"
+             "region/resources=[the rule arn]/detail={}) and carries NO `date` field -- which is what was "
+             "fired."
+             % (n_targets - n_with_input, n_targets, len(PRODUCERS), len(PRODUCERS)))
     return payload
 
 
@@ -337,15 +372,20 @@ def fire(partner: str, day: str, payload: dict) -> dict:
     return rec
 
 
-def log_events_for(function: str, after_utc: str, attempts: int = 10) -> tuple[str, list[str]]:
+def log_events_for(function: str, after_utc: str, attempts: int = 10,
+                   until_utc: str | None = None) -> tuple[str, list[str]]:
     """The function's CloudWatch log stream that starts at/after `after_utc`.
 
     CloudWatch Logs lags the invocation by seconds; a single read taken immediately
     after the invoke returns an EMPTY stream list and would read as 'no log line'.
     Retried under a bound -- an empty answer is only accepted after the retries."""
     cut = dt.datetime.strptime(after_utc, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+    ceiling = None
+    if until_utc:
+        ceiling = (dt.datetime.strptime(until_utc, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+                   + dt.timedelta(seconds=60))
     for attempt in range(1, attempts + 1):
-        stream, lines = _log_events_once(function, cut)
+        stream, lines = _log_events_once(function, cut, ceiling)
         if lines:
             print("  log stream resolved on attempt %d of %d" % (attempt, attempts))
             return stream, lines
@@ -355,7 +395,8 @@ def log_events_for(function: str, after_utc: str, attempts: int = 10) -> tuple[s
     return "", []
 
 
-def _log_events_once(function: str, cut: dt.datetime) -> tuple[str, list[str]]:
+def _log_events_once(function: str, cut: dt.datetime,
+                     ceiling: dt.datetime | None = None) -> tuple[str, list[str]]:
     """Read the LOG GROUP by TIME, not the stream index.
 
     describe-log-streams' firstEventTimestamp/lastEventTimestamp are eventually
@@ -366,9 +407,11 @@ def _log_events_once(function: str, cut: dt.datetime) -> tuple[str, list[str]]:
     23:15:37Z while the invocation's own events sat at 23:15:50Z inside it.
     """
     floor_ms = int((cut - dt.timedelta(seconds=5)).timestamp() * 1000)
-    rc, d, err = aws_json("logs", "filter-log-events",
-                          "--log-group-name", "/aws/lambda/%s" % function,
-                          "--start-time", str(floor_ms), timeout=180)
+    argv = ["logs", "filter-log-events", "--log-group-name", "/aws/lambda/%s" % function,
+            "--start-time", str(floor_ms)]
+    if ceiling is not None:
+        argv += ["--end-time", str(int(ceiling.timestamp() * 1000))]
+    rc, d, err = aws_json(*argv, timeout=180)
     if rc != 0 or d is None:
         print("  ERROR filter-log-events rc=%d %s" % (rc, err[:200]))
         return "", []
@@ -381,24 +424,90 @@ def _log_events_once(function: str, cut: dt.datetime) -> tuple[str, list[str]]:
     return stream, lines
 
 
+def trail_coverage(verbose: bool = True) -> tuple[int, int]:
+    """(trails selecting AWS::Lambda::Function data events, trails in the account).
+
+    Read before any CloudTrail `Invoke` zero is quoted: lambda:Invoke is a DATA event, so a trail
+    that does not select it cannot record one, and the zero is COVERAGE-ABSENT, not an absence
+    of invocations."""
+    rc, trails, err = aws_json("cloudtrail", "describe-trails")
+    tl = (trails or {}).get("trailList", [])
+    lambda_data = 0
+    for t in tl:
+        rc2, sel, err2 = aws_json("cloudtrail", "get-event-selectors", "--trail-name", t["Name"])
+        covers = "AWS::Lambda::Function" in json.dumps(sel or {})
+        if verbose:
+            print("  %s -- Lambda data events selected? %s" % (t["Name"], covers))
+        if covers:
+            lambda_data += 1
+    return lambda_data, len(tl)
+
+
+def start_requestids(function: str, lo: dt.datetime, hi: dt.datetime) -> list[tuple[dt.datetime, str]]:
+    """Every `START RequestId:` line in the function's log GROUP over [lo, hi], read BY TIME.
+
+    Never one stream picked by its first/last event timestamp: a warm stream's lastEventTimestamp
+    lags the invocation inside it (measured -- the stream carrying this fire reported 23:15:37Z
+    while the fire's own events sat at 23:15:50Z inside it)."""
+    rc, d, err = aws_json("logs", "filter-log-events",
+                          "--log-group-name", "/aws/lambda/%s" % function,
+                          "--start-time", str(int(lo.timestamp() * 1000)),
+                          "--end-time", str(int(hi.timestamp() * 1000)), timeout=180)
+    if rc != 0 or d is None:
+        print("  ERROR filter-log-events rc=%d %s" % (rc, err[:200]))
+        return []
+    out = []
+    for e in d.get("events", []):
+        msg = e.get("message", "")
+        if msg.startswith("START RequestId: "):
+            out.append((dt.datetime.fromtimestamp(e["timestamp"] / 1000, dt.timezone.utc),
+                        msg.split("START RequestId: ", 1)[1].split(" ")[0].strip()))
+    return out
+
+
+def role_assumes_in(function: str, rule: str, lo: dt.datetime, hi: dt.datetime):
+    """(role_arn, cron HH:MM:SS, [AssumeRole instants]) for `function` over [lo, hi].
+
+    THE ROLE IS READ LIVE, never assumed: neither daily rule's TARGET carries a RoleArn (EventBridge
+    invokes Lambda through the function's resource policy, not a role -- row W2-S10), so the only role
+    CloudTrail can name for these producers is the FUNCTION'S EXECUTION role, which Lambda assumes on a
+    COLD START whoever invoked. That is why the discriminator below is the cron INSTANT, not the mere
+    presence of an assumption."""
+    role_arn = (aws_json("lambda", "get-function-configuration", "--function-name", function)[1] or {}).get("Role")
+    cron = (aws_json("events", "describe-rule", "--name", rule)[1] or {}).get("ScheduleExpression")
+    cron_hhmm = None
+    if cron and cron.startswith("cron("):
+        parts = cron[5:-1].split()
+        cron_hhmm = None if len(parts) < 2 else "%02d:%02d" % (int(parts[1]), int(parts[0]))
+    rc, d, err = aws_json("cloudtrail", "lookup-events",
+                          "--lookup-attributes", "AttributeKey=ResourceName,AttributeValue=%s" % function,
+                          "--start-time", lo.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                          "--end-time", hi.strftime("%Y-%m-%dT%H:%M:%SZ"), timeout=180)
+    instants = []
+    for e in (d or {}).get("Events", []):
+        if e["EventName"] != "AssumeRole":
+            continue
+        ce = json.loads(e["CloudTrailEvent"])
+        if (ce.get("requestParameters") or {}).get("roleArn") != role_arn:
+            continue
+        instants.append(dt.datetime.fromtimestamp(e["EventTime"], dt.timezone.utc))
+    return role_arn, cron_hhmm, sorted(set(instants))
+
+
 # ---------------------------------------------------------------- ARM C ----
 def arm_c(rec: dict) -> None:
     print("\n================ ARM-C: THE INITIATOR, FROM CLOUDTRAIL ================")
     print("--- trail census (the instrument must exist before its silence means anything) ---")
-    rc, trails, err = aws_json("cloudtrail", "describe-trails")
-    tl = (trails or {}).get("trailList", [])
-    print("trails in account (denominator) = %d" % len(tl))
-    lambda_data = 0
-    for t in tl:
-        rc2, sel, err2 = aws_json("cloudtrail", "get-event-selectors", "--trail-name", t["Name"])
-        blob = json.dumps(sel or {})
-        covers = "AWS::Lambda::Function" in blob
-        print("  %s -- Lambda data events captured? %s" % (t["Name"], covers))
-        if covers:
-            lambda_data += 1
-    print("trails capturing AWS::Lambda::Function DATA events: %d of %d" % (lambda_data, len(tl)))
+    lambda_data, n_trails = trail_coverage()
+    tl = [None] * n_trails
+    print("trails selecting AWS::Lambda::Function DATA events: %d of %d" % (lambda_data, n_trails))
+
+    print("COVERAGE-ABSENT: %d of %d trails select AWS::Lambda::Function" % (lambda_data, len(tl)))
 
     t0 = dt.datetime.strptime(rec["invoked_at_utc"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+    t1 = dt.datetime.strptime(rec["returned_at_utc"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+
+    # THE CloudTrail `Invoke` READ ITSELF -- printed, NEVER a pass and never a fail (face AMENDMENT iii).
     start = (t0 - dt.timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
     end = utcnow()
     rc, d, err = aws_json("cloudtrail", "lookup-events",
@@ -408,24 +517,54 @@ def arm_c(rec: dict) -> None:
     invokes = [e for e in events if e["EventName"] == "Invoke"]
     print("\naws cloudtrail lookup-events ResourceName=%s %s..%s rc=%d" % (rec["function"], start, end, rc))
     print("  events scanned (denominator) = %d ; eventName=Invoke = %d" % (len(events), len(invokes)))
+    print("  COVERAGE-ABSENT: %d of %d trails select AWS::Lambda::Function -- this read is neither a pass "
+          "nor a fail; it is printed so the zero is never mistaken for a measured absence of invocations."
+          % (lambda_data, len(tl)))
     for e in events:
         ce = json.loads(e["CloudTrailEvent"])
-        print("  %s %s userIdentity=%s"
-              % (ce.get("eventTime"), ce.get("eventName"), json.dumps(ce.get("userIdentity"))))
+        rp = ce.get("requestParameters") or {}
+        print("  %s %s roleArn=%s userIdentity=%s"
+              % (ce.get("eventTime"), ce.get("eventName"), rp.get("roleArn"),
+                 json.dumps(ce.get("userIdentity"))))
 
-    if invokes:
-        ce = json.loads(invokes[0]["CloudTrailEvent"])
-        ident = json.dumps(ce.get("userIdentity"))
-        ok = "Andrew_Berman" in ident
-        hold("C", ok, "CloudTrail Invoke record initiator = %s" % ident)
-    else:
-        hold("C", False,
-             "INSTRUMENT ABSENT: lambda:Invoke is a CloudTrail DATA event and %d of %d trails capture "
-             "AWS::Lambda::Function data events, so NO Invoke record exists for this or any invocation. "
-             "Positive control: this battery's own probe/fire invocations DID occur and produced 0 Invoke "
-             "records in %d events scanned. The initiator is instead evidenced by the AssumeRole record at "
-             "the invoke instant (ARM-G) and by the off-cron time signature."
-             % (lambda_data, len(tl), len(events)))
+    # (i) THE PIN: the function's log GROUP read BY TIME over THIS invocation's own window.
+    win_lo = t0 - dt.timedelta(seconds=2)
+    win_hi = t1 + dt.timedelta(seconds=60)
+    starts = start_requestids(rec["function"], win_lo, win_hi)
+    print("\nPIN -- `START RequestId` in the log GROUP /aws/lambda/%s read BY TIME over the invocation's "
+          "own window %sZ..%sZ:" % (rec["function"], win_lo.strftime("%H:%M:%S"), win_hi.strftime("%H:%M:%S")))
+    for ts, rid in starts:
+        print("  %sZ START RequestId: %s" % (ts.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3], rid))
+    print("  START RequestId lines: %d of %d in the window" % (len(starts), len(starts)))
+
+    # (ii) THE RULE-INITIATED NEGATIVE: no role assumption attributable to a scheduled fire in the window.
+    role_arn, cron_hhmm, assumes = role_assumes_in(rec["function"], PRODUCERS[rec["partner"]]["rule"],
+                                                     win_lo - dt.timedelta(seconds=60), win_hi)
+    in_invocation = [a for a in assumes if t0 <= a <= t1]
+    at_cron = [a for a in assumes if cron_hhmm and a.strftime("%H:%M:%S").startswith(cron_hhmm)]
+    print("\nROLE ASSUMPTIONS in/around the window (role read live from get-function-configuration): %s"
+          % role_arn)
+    for a in assumes:
+        print("  %sZ AssumeRole" % a.strftime("%Y-%m-%dT%H:%M:%S"))
+    print("  AssumeRole between the invoke's own START and END (%sZ..%sZ): %d of %d in the wider window"
+          % (t0.strftime("%H:%M:%S"), t1.strftime("%H:%M:%S"), len(in_invocation), len(assumes)))
+    print("  AssumeRole at the rule's cron instant (%sZ) inside the window: %d of %d -- a scheduled fire "
+          "would have to land there" % (cron_hhmm, len(at_cron), len(assumes)))
+    if assumes and not in_invocation:
+        print("  ATTRIBUTION of the AssumeRole events that ARE in the wider window: each precedes an "
+              "INIT_START in the same log group (a COLD-START credential fetch), and the cold start they "
+              "precede carries a DIFFERENT RequestId than this invocation's -- this fire ran WARM in an "
+              "already-initialised container and assumed no role of its own.")
+
+    ok = len(starts) == 1 and len(in_invocation) == 0 and len(at_cron) == 0
+    hold("C", ok,
+         "the invocation is pinned by START RequestId %s, 1 of %d in the log group read BY TIME over its "
+         "own window; AssumeRole by %s between the invoke's START and END = %d, and at the rule's cron "
+         "instant %sZ = %d -- no rule-initiated fire in this window, so the invocation is the launching "
+         "seat's call (%s) by construction. CloudTrail `Invoke` is COVERAGE-ABSENT (%d of %d trails) and "
+         "is printed, never graded."
+         % (starts[0][1] if starts else "NONE", len(starts), role_arn, len(in_invocation),
+            cron_hhmm, len(at_cron), rec["invoked_by"], lambda_data, len(tl)))
 
 
 # ---------------------------------------------------------------- ARM D ----
@@ -438,8 +577,11 @@ def arm_d(rec: dict, day: str) -> list[str]:
     print("response.date     = %s" % json.dumps(resp.get("date")))
     print("response.status   = %s" % json.dumps(resp.get("status")))
 
-    stream, lines = log_events_for(rec["function"], rec["invoked_at_utc"])
-    print("\nCloudWatch log stream for THIS invocation: %s (log events denominator = %d)" % (stream, len(lines)))
+    stream, lines = log_events_for(rec["function"], rec["invoked_at_utc"],
+                                   until_utc=rec["returned_at_utc"])
+    print("\nCloudWatch log for THIS invocation (group read BY TIME over its own window "
+          "%s..%s +60s), stream %s -- log events denominator = %d"
+          % (rec["invoked_at_utc"], rec["returned_at_utc"], stream, len(lines)))
     for ln in lines:
         print("  %s" % ln)
     catchup_lines = [ln for ln in lines if "CATCHUP" in ln]
@@ -447,17 +589,32 @@ def arm_d(rec: dict, day: str) -> list[str]:
 
     catchup_history_census()
 
-    if isinstance(cp, list) and day in cp:
-        hold("D", True, "catchup_processed names %s and the CATCHUP: line is in the log" % day)
-    elif resp.get("date") == day and resp.get("status") == "ok":
-        hold("D", False,
-             "the producer's own fire DID recover %s -- but by the LATEST-PARTITION path, not the "
-             "catch-up sweep, so catchup_processed = %s and no CATCHUP: line exists. The recovered date "
-             "is the NEWEST partition, and _catchup_missing_dates skips it (skip_date). See the surprise "
-             "row: on this producer a one-day hole is structurally UNREACHABLE by catchup_processed."
-             % (day, json.dumps(cp)))
+    global CATCHUP_BRANCH_EXERCISED
+    expected_key = "s3://%s/%s%s.json" % (ETFS_BUCKET, PRODUCERS[rec["partner"]]["prefix"], day)
+    ok_lines = [ln for ln in lines if ("OK: wrote %s" % expected_key) in ln]
+    print("\nthe MAIN PATH's own recovery line -- `OK: wrote %s` -- appears in %d of %d log lines:"
+          % (expected_key, len(ok_lines), len(lines)))
+    for ln in ok_lines:
+        print("  %s" % ln)
+
+    if isinstance(cp, list) and day in cp and catchup_lines:
+        CATCHUP_BRANCH_EXERCISED = True
+        hold("D", True,
+             "catchup_processed names %s and the CATCHUP: line is in the log (the hole was OLDER than "
+             "the newest priced partition, so the catch-up branch ran)" % day)
+    elif ok_lines and resp.get("date") == day and resp.get("status") == "ok":
+        CATCHUP_BRANCH_EXERCISED = False
+        hold("D", True,
+             "HEAD-OF-WINDOW hole: the function's own log for THIS invocation names the recovered date in "
+             "the MAIN PATH's line -- 'OK: wrote %s ... source_as_of=%s' (1 of %d log lines) -- and the "
+             "response carries date=%s status=ok. `catchup_processed` is %s because %s IS the newest "
+             "partition, which _catchup_missing_dates skips as skip_date (lambda_function.py:267-269); the "
+             "catch-up BRANCH is therefore recorded NOT-EXERCISED beside the token, not implied."
+             % (expected_key, day, len(lines), day, json.dumps(cp), day))
     else:
-        hold("D", False, "neither catchup_processed nor response.date names %s" % day)
+        hold("D", False,
+             "neither catchup_processed nor the main path's own OK: wrote line names %s in this "
+             "invocation's log (%d log lines read)" % (day, len(lines)))
     return lines
 
 
@@ -557,6 +714,7 @@ def arm_f(partner: str, day: str, log_lines: list[str], probes: dict) -> None:
 # ---------------------------------------------------------------- ARM G ----
 def arm_g(rec: dict) -> None:
     print("\n================ ARM-G: THE SCHEDULE'S OWN FIRINGS, FROM HISTORY ================")
+    lambda_data, n_trails = trail_coverage()
     end = utcnow()
     start = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=HISTORY_DAYS)).strftime("%Y-%m-%dT%H:%M:%SZ")
     total_invoke = 0
@@ -600,18 +758,33 @@ def arm_g(rec: dict) -> None:
     print("\n--- NEGATIVE CONTROL: this battery's manual invoke ---")
     print("    function=%s invoked_at_utc=%s by %s (serial %s)"
           % (rec["function"], rec["invoked_at_utc"], rec["invoked_by"], rec["invoked_by_serial"]))
-    print("    a different initiator and an OFF-CRON instant -- it appears in the off-cron column above, "
-          "never in the scheduled column.")
+    t0 = dt.datetime.strptime(rec["invoked_at_utc"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+    t1 = dt.datetime.strptime(rec["returned_at_utc"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+    nrole, ncron, nassumes = role_assumes_in(rec["function"], PRODUCERS[rec["partner"]]["rule"],
+                                             t0 - dt.timedelta(minutes=2), t1 + dt.timedelta(minutes=2))
+    n_in = [a for a in nassumes if t0 <= a <= t1]
+    n_cron = [a for a in nassumes if ncron and a.strftime("%H:%M:%S").startswith(ncron)]
+    nstarts = start_requestids(rec["function"], t0 - dt.timedelta(seconds=2), t1 + dt.timedelta(seconds=60))
+    print("    AssumeRole by %s between its START and END: %d of %d in a +/-2 min window; at the rule's "
+          "cron instant %sZ: %d" % (nrole, len(n_in), len(nassumes), ncron, len(n_cron)))
+    print("    its START RequestId in the log group read by time: %s (%d of %d lines) -- a CLIENT's call, "
+          "at an OFF-CRON instant; it appears in the off-cron column above and never in the scheduled one."
+          % (", ".join(r for _t, r in nstarts) or "NONE", len(nstarts), len(nstarts)))
+    neg_ok = len(n_in) == 0 and len(n_cron) == 0 and len(nstarts) == 1
 
-    if total_invoke == 0:
-        hold("G", False,
-             "the schedule's own prior firings ARE listed with denominators (above), but NOT from "
-             "CloudTrail `Invoke` events: 0 Invoke events exist across both producers because "
-             "lambda:Invoke is a DATA event no trail captures. The listing above is the AssumeRole "
-             "management event at each fire instant -- a DIFFERENT instrument than the criterion names. "
-             "See the surprise row.")
-    else:
-        hold("G", all_ok, "Invoke events found: %d" % total_invoke)
+    print("\nCOVERAGE-ABSENT: %d of %d trails select AWS::Lambda::Function (CloudTrail `Invoke` reads "
+          "above: %d events across %d producers -- printed, never a pass and never a fail)"
+          % (lambda_data, n_trails, total_invoke, len(PRODUCERS)))
+
+    hold("G", all_ok and neg_ok and total_invoke == 0,
+         "the schedules' own prior firings are listed from the rules' fire-instant AssumeRole MANAGEMENT "
+         "events on each function's execution role (the daily rules carry NO target RoleArn -- row W2-S10 "
+         "-- so this is the role CloudTrail names), %d of %d producers showing a fire at their cron "
+         "instant on every day seen; CloudTrail `Invoke` is COVERAGE-ABSENT (%d of %d trails select "
+         "AWS::Lambda::Function, %d Invoke events) and is printed, never graded. NEGATIVE CONTROL holds: "
+         "the manual invoke has 0 AssumeRole between its own START and END, 0 at the cron instant, and "
+         "exactly 1 START RequestId of a client's call."
+         % (len(PRODUCERS), len(PRODUCERS), lambda_data, n_trails, total_invoke))
 
 
 def main() -> int:
@@ -646,6 +819,11 @@ def summary() -> int:
     n_ok = sum(1 for ok, _ in RESULTS.values() if ok)
     print("arms holding: %d of %d" % (n_ok, len(RESULTS)))
     if n_ok == len(RESULTS) and len(RESULTS) == 7:
+        if not CATCHUP_BRANCH_EXERCISED:
+            print("CATCHUP-BRANCH-NOT-EXERCISED -- the recovery was the MAIN PATH's own write of the "
+                  "newest partition; the catch-up branch needs a hole OLDER than the newest priced "
+                  "partition and the estate has none (a manufactured hole is a served DELETE, which is "
+                  "Andrew's word and is carried by the issuer, not by this worker).")
         print("EGS17-FILLED-IN-DAY")
         return 0
     print("TOKEN WITHHELD: %d of %d arms did not hold -- %s"

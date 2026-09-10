@@ -1,9 +1,19 @@
 # TO-EG-s-17 -- THE FILLED-IN DAY: result
 
-**Worker:** `0.9.0_WK_ETFS_GUARDRAIL~2` | **Branch:** `wk-etfs_guardrail-2-2` (worktree `C:/tmp/wk-etfs-2-2`, cut from CLOUD at `4155c85a1f`)
-**Task order:** `org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-17.the-filled-in-day.md`@`4155c85a1f`
+**Worker:** `0.9.0_WK_ETFS_GUARDRAIL~2` | **Branch:** `wk-etfs_guardrail-2-2` (worktree `C:/tmp/wk-etfs-2-2`; the fire ran at `4155c85a1f`, this pass at `b8637e5216`)
+**Task order:** `org/missions/D8/ETFS/ETFS_GUARDRAIL/task-orders/ETFS_GUARDRAIL.TO-EG-s-17.the-filled-in-day.md`@`5507841f04` (AMENDED)
 **AWS identity for every call:** `arn:aws:iam::313476888478:user/Andrew_Berman` (`sts get-caller-identity`, UserId AIDAUR7FNW6PEXHN2JIOH) -- the launching seat's, per decomposition s.3 decision 1.
 **Battery:** `test_egs17_filled_in_day.py` (this folder). **Firing run transcript, verbatim:** `egs17_fire_run.transcript.txt`. **Invoke record:** `invoke_record.json`.
+
+> **PASS 2, 2026-09-10 ~00:2xZ.** The issuer's AMENDMENT (@`5507841f04`, on rows `W1-S13` / `W2-S7`, standing
+> authority @`9f4a57262f` / @`1ced87e810`) re-cut arms (b), (c), (d) and (g) onto instruments that exist, after
+> pass 1 measured that `lambda:Invoke` is a CloudTrail DATA event no trail selects. The battery was re-run on the
+> re-cut arms **against the SAME fire** -- request id `0840a0d3-15aa-4884-a12e-20e75cfa6136`, no second fire and no
+> new write (the served object still carries the original ETag `5da999e2fbfadfe302df35ef24407372` and LastModified
+> `Wed, 09 Sep 2026 23:15:52 GMT`). The pre-fire census is read from `egs17_fire_run.transcript.txt`; it cannot be
+> re-measured, because the fire filled the hole. **Result: 7 of 7 arms hold, rc=0, `EGS17-FILLED-IN-DAY` printed,
+> with `CATCHUP-BRANCH-NOT-EXERCISED` printed beside it.** Sections 1, 3-9 below are pass-1 measurements and stand
+> unchanged; sections 2, 6 and 10 carry the pass-2 re-cut.
 
 ---
 
@@ -12,21 +22,29 @@
 A REAL class-C hole existed and was FILLED by the producer's own fire with its rule's own payload:
 **cottonwood 2026-09-08**, recovered at 2026-09-09T23:15:51Z, 4 ETF rows, $53,641,351.75, `source_as_of=2026-09-08`.
 
-**S17-AC1 does not pass.** 4 of its 7 arms hold. Three do not, for reasons that are properties of the WORLD, not of
-the work, and each is filed as a row:
+**S17-AC1 PASSES by output on the amended face: 7 of 7 arms hold.**
 
-| arm | verdict | why |
+| arm | verdict | evidence |
 |---|---|---|
-| (a) hole census + probes | HOLD | 20 trading days x 2 partners, 1 absent, 1 real class-C hole |
-| (b) rule's payload read live | HOLD | `Target.Input` ABSENT on 1 of 1 target; the default scheduled envelope is what the rule delivers, and is what was fired |
-| (c) CloudTrail Invoke initiator | **FAIL** | no trail in the account selects Lambda data events -- 0 Invoke records exist for ANY invocation (`ETFS_GUARDRAIL-W2-S7`) |
-| (d) `catchup_processed` names the date | **FAIL** | the hole IS the newest partition, so the sweep skips it as `skip_date`; the fire recovered it by the latest-partition path with `catchup_processed: []` (`ETFS_GUARDRAIL-W2-S8`) |
-| (e) slice exists after | HOLD | head-object 1345 B at 23:15:52Z, second reader re-downloaded and parsed 4 rows |
-| (f) positive control (a present date) | HOLD | 2026-09-04 present, named in 0 of 4 log lines, never fired at |
-| (g) schedules' firings from history | **FAIL** | same instrument absence as (c); delivered from AssumeRole management events instead (`ETFS_GUARDRAIL-W2-S7`) |
+| (a) hole census + probes | HOLD | 20 trading days x 2 partners = 40 cells, 1 absent, 1 real class-C hole (probe `partition=true, priced=12016, output_exists=false`) |
+| (b) the rule's own payload | HOLD | `Target.Input` ABSENT on **0 of 2 targets across 2 of 2 daily rules**; the payload fired is that default envelope and carries **no `date` key** |
+| (c) the invocation pinned | HOLD | `START RequestId: 0840a0d3-...` **1 of 1** in the log group read BY TIME over its own window; AssumeRole inside the invocation **0**, at the rule's cron instant **0**; `COVERAGE-ABSENT: 0 of 2 trails select AWS::Lambda::Function` printed, never graded |
+| (d) the log names the recovered date | HOLD | HEAD-OF-WINDOW hole -> the MAIN PATH's own line, `OK: wrote s3://opal-data-etfs/daily/cottonwood/2026-09-08.json`, **1 of 4** log lines; `CATCHUP-BRANCH-NOT-EXERCISED` printed beside the token |
+| (e) slice exists after | HOLD | head-object 1345 B at 23:15:52Z (after the 23:15:47Z invoke), second reader re-downloaded and parsed 4 rows |
+| (f) positive control (a present date) | HOLD | 2026-09-04 PRESENT, named in **0 of 4** log lines, never fired at |
+| (g) schedules' firings from history | HOLD | the fire-instant AssumeRole management events: cot **30 of 30 days at 10:30:24Z**, bd **30 of 30 at 10:45:05Z**; negative control holds (0 AssumeRole in the manual invoke, 1 client START RequestId); `COVERAGE-ABSENT` printed |
 
-Per the order's `<proof_of_spec>` clause -- "flip only when S17-AC1 PASSES by output" -- **the `<status>` line is NOT flipped
-and the order stays open.**
+Per the order's `<proof_of_spec>` clause -- "flip only when S17-AC1 PASSES by output" -- **the `<status>` line IS
+flipped to `complete` in the same commit as this deliverable.**
+
+### What the token does NOT claim
+
+`CATCHUP-BRANCH-NOT-EXERCISED` is printed beside `EGS17-FILLED-IN-DAY`, not implied. The recovery was the producer's
+own MAIN PATH writing the newest partition; `_catchup_missing_dates` never ran a date, because the only real hole in
+the estate IS the newest partition and the sweep skips it as `skip_date`. Exercising the catch-up BRANCH needs a hole
+OLDER than the newest priced partition; the estate has none, and making one is a served DELETE -- Andrew's word,
+carried by the issuer, never by this worker. Unscoped corroboration: **0 CATCHUP lines in 152 cot / 103 bd log events
+over 30 days.**
 
 ---
 
@@ -92,10 +110,17 @@ aws events list-targets-by-rule --rule cot-etf-ownership-daily-schedule   rc=0
                "Arn": "arn:aws:lambda:us-east-1:313476888478:function:cot-etf-ownership-daily" } ]
 ```
 
-**There is no `Target.Input`, no `InputPath` and no `InputTransformer`** -- on 1 of 1 target of this rule, and on
-1 of 1 target of the bd twin's rule (`bd-49f-etf-ownership-scheduled-floor`, `cron(45 10 * * ? *)`). Neither
+**There is no `Target.Input`, no `InputPath` and no `InputTransformer`** -- measured on BOTH daily rules in pass 2:
+`Target.Input present on 0 of 2 target(s) across 2 of 2 daily rules` (`cot-etf-ownership-daily-schedule`,
+`cron(30 10 * * ? *)`; `bd-49f-etf-ownership-scheduled-floor`, `cron(45 10 * * ? *)`). Neither
 `events list-targets-by-rule` nor an EventBridge Scheduler schedule carries a payload for these producers, because
 they are EventBridge RULES with no Input override: the rule delivers the DEFAULT scheduled-event envelope.
+
+**Neither target carries a `RoleArn` either** (0 of 2) -- an EventBridge rule invokes a Lambda through the
+function's own resource policy (`Principal: events.amazonaws.com` + `AWS:SourceArn` = the rule ARN), not by
+assuming a role. That is row `ETFS_GUARDRAIL-W2-S10` and it is why arms (c) and (g) below are graded on the
+execution role's assumption at the INVOCATION interval and at the CRON INSTANT, rather than on a "rule role" that
+does not exist for these two rules.
 
 The payload fired was therefore that envelope:
 
@@ -105,8 +130,9 @@ The payload fired was therefore that envelope:
  "resources": ["arn:aws:events:us-east-1:313476888478:rule/cot-etf-ownership-daily-schedule"], "detail": {}}
 ```
 
-**The order's "plus the date field the port honors" was deliberately NOT taken, and this is the crux of
-`ETFS_GUARDRAIL-W2-S8`:** adding a `date` key routes the handler to the explicit-date branch
+**The payload carries NO `date` key** -- which the amended arm (b) now requires, and which is what was fired. The
+original face's "plus the date field the port honors" was deliberately NOT taken, and that was the crux of
+`ETFS_GUARDRAIL-W2-S8` (ruled, and the arm re-cut to match): adding a `date` key routes the handler to the explicit-date branch
 (`lambda_function.py`@`4155c85a1f`:304-308), which returns `_process_date(...)` DIRECTLY and never populates
 `catchup_processed` at all. "The scheduled payload plus the date field" and "the recovered date named in
 `catchup_processed`" cannot both be satisfied by the deployed code. The envelope WITHOUT a date field is both
@@ -228,10 +254,29 @@ execution role, and that IS a management event. Listing them by day gives the sc
 
 The per-day table is printed in full in the battery's ARM-G output. **Rule (4) -- the schedule fires -- is met from
 history on both producers, 30 of 30 days, with the manual invokes appearing in a separate off-cron column** as the
-negative control. What this instrument CANNOT do, stated rather than glossed: `AssumeRole`'s userIdentity is
-`{"type":"AWSService","invokedBy":"lambda.amazonaws.com"}` for a rule-initiated and a person-initiated invoke
-alike, so it distinguishes them only by the cron instant. That is why arm (g) is recorded FAIL rather than
-re-labelled a pass: it is a different instrument than the criterion names.
+negative control.
+
+**PASS 2, the amended arm (g).** The AMENDMENT re-cut this arm onto exactly this instrument, so it is now graded
+rather than recorded: the `Invoke` read prints `COVERAGE-ABSENT: 0 of 2 trails select AWS::Lambda::Function` and is
+never a pass or a fail, and the firing history comes from the fire-instant `AssumeRole` management events above.
+
+What this instrument CANNOT do, stated rather than glossed: `AssumeRole`'s userIdentity is
+`{"type":"AWSService","invokedBy":"lambda.amazonaws.com"}` for a rule-initiated and a person-initiated invoke alike,
+and the assumption itself is a COLD-START artifact, not an initiator signal. So the discrimination is carried by the
+INSTANT, measured at two grains and both printed:
+
+```
+NEGATIVE CONTROL -- this battery's manual invoke (2026-09-09T23:15:47Z):
+  AssumeRole by arn:aws:iam::313476888478:role/cot-etf-ownership-daily-role
+    between its own START and END           : 0 of 1 in a +/-2 min window
+    at the rule's cron instant 10:30Z       : 0
+  START RequestId in the log group by time  : 0840a0d3-15aa-4884-a12e-20e75cfa6136 (1 of 1) -- a CLIENT's call
+```
+
+The 1 AssumeRole that IS in the surrounding window sits at 23:15:36Z and belongs to the PROBE's cold start:
+`AssumeRole 23:15:36Z -> INIT_START 23:15:37.757Z -> START RequestId ec6e9232-... 23:15:40.735Z`. The fire's own
+`START 23:15:50.560Z` has no preceding `INIT_START` and no assumption -- it ran warm. A scheduled fire would have
+had to land at 10:30:24Z, 12 h 45 m earlier, and that fire's log names a different date (2026-09-04).
 
 ---
 
@@ -294,14 +339,16 @@ Read, not assumed, at `lambda_function.py`@`4155c85a1f`:180-191 and exercised li
 
 | not done | why |
 |---|---|
-| manufactured a hole | decomposition s.6 bound 1 -- a controlled hole means deleting a served object, which needs a human's word. A real hole existed, so the question did not arise. |
+| fired a SECOND time in pass 2 | the amendment: "RE-RUN the battery on the re-cut arms against the SAME fire ... NO second fire, no new write." Proven, not asserted: the served object still carries ETag `5da999e2fbfadfe302df35ef24407372`, ContentLength 1345 and LastModified `Wed, 09 Sep 2026 23:15:52 GMT` after three pass-2 runs -- byte-identical to the single original write. |
+| manufactured a hole | decomposition s.6 bound 1 -- a controlled hole means deleting a served object, which needs a human's word. A real hole existed, so the question did not arise; and a hole the catch-up BRANCH could name would have to be mid-window, which only a served delete can create. |
 | deleted or overwrote any served object | the ONE write in this order is the producer's own run creating `daily/cottonwood/2026-09-08.json`, a key that did not exist (guard: head-object rc=255 before the fire). |
 | fired at a date whose slice exists | guarded in code; the only non-probe invoke targeted the confirmed class-C date. |
 | fired the bd-49f producer | 0 absent dates of 20 -- no hole, no fire. Its history was read only. |
 | changed any code or deployed anything | "NO CODE CHANGE, NO DEPLOY" -- the defects found are rows with measurements, not hot fixes. |
 | built a CloudTrail data-event trail | outside `<paths>`, and a monitoring/observability build is gated behind Andrew's explicit word (CLAUDE.md HARD STOPS). |
 | read any firm bucket directly | NEVER#1 -- `opal-data-etfs` and the firm-scoped producers only; the probe answered for the firm data. |
-| flipped `<status>` to complete | S17-AC1 does not PASS by output; the order's own clause forbids the flip. |
+| (pass 1) flipped `<status>` to complete | S17-AC1 did not PASS by output then; the order's own clause forbade the flip. In pass 2, on the amended face, S17-AC1 PASSES 7 of 7 and the flip is made in the same commit as this deliverable. |
+| re-cut any arm myself | a re-cut is the issuer's act. Pass 1 filed the measurements as rows and stopped; the AMENDMENT @`5507841f04` is the issuer's, under the standing authority. Where the amendment's own instrument description did not match the world (there is no "rule role" on these two rules), the finer grain was measured, printed at BOTH grains, and filed as `ETFS_GUARDRAIL-W2-S10` -- never silently re-read. |
 
 ## 10. ROWS FILED
 
@@ -310,3 +357,8 @@ Read, not assumed, at `lambda_function.py`@`4155c85a1f`:180-191 and exercised li
 | `ETFS_GUARDRAIL-W2-S7` | BLOCKING / INERT | no trail selects Lambda data events, so the CloudTrail `Invoke` record arms (c) and (g) name does not exist for any invocation; firings delivered from `AssumeRole` instead |
 | `ETFS_GUARDRAIL-W2-S8` | BLOCKING / **ARMED**, disarm `2.0.0_SA_COO` | the only real hole is the newest partition, which the sweep skips as `skip_date`, so `catchup_processed` came back empty on a fire that filled the hole -- and the cause is a measured 76-minute schedule/landing race that repeats daily |
 | `ETFS_GUARDRAIL-W2-S9` | OBSERVATION / INERT | the producer's docstring still calls 2026-07-31 a known upstream gap; the deployed probe answers `partition=true, priced=10960, output_exists=true` |
+| `ETFS_GUARDRAIL-W2-S10` | OBSERVATION / INERT | the amendment's arms (c)/(g) name "the rule's role", but 0 of 2 daily-rule targets carry a `RoleArn` -- an EventBridge rule invokes a Lambda through the function's resource policy, so the only role CloudTrail names is the EXECUTION role, assumed on a cold start by either initiator. Arms graded at the finer grain (invocation interval + cron instant), both printed |
+
+**Ruled by the issuer @`5507841f04`:** `W2-S7` and `W2-S8` -> arms (b), (c), (d), (g) re-cut in place; the
+76-minute schedule/landing race and `W2-S9`'s stale docstring are carried to the CTO's L10 by the issuer, with
+nothing owed by this worker. `W2-S10` is filed by this pass and is not blocking -- both arms it touches HOLD.
