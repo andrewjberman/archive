@@ -1,0 +1,90 @@
+==============================================================================
+H4-AC3 -- THE FOURTH POINT, READ NOW THROUGH THE SERVING PLANE
+==============================================================================
+TREE_READ      : C:\tmp\wk-cldgrph-8-3
+  branch       : wk-cldgrph-8-3   HEAD: 2fd5cae09f67dd31ae1d8da1ced56c24d52c6001
+  positive ctl : org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~3/h4_lib.py -> PRESENT
+  tag          : h4_fourth_point
+
+INSTRUMENT   : projection_client.query -> POST <base_url>/graph/cypher.
+               This is the ONLY way a laptop seat reaches the served graph;
+               no local store is opened, named or read.
+GRAIN        : one row of the served CloudEdge/CloudNode tables. Counts are
+               count(*) over the whole table, never a sample and never a page.
+ENVIRONMENT  : the LIVE serving plane at run time. The comparison values are
+               the three prior reads of this cell, each at its own vintage,
+               taken through this same client by the round-7 worker and the
+               issuer -- so the prior environment IS this environment, at an
+               earlier vintage.
+
+NEGATIVE CONTROL -- the wrong query form must FAIL, not return zero
+  statement : MATCH ()-[e:STORED_IN]->() RETURN count(*) AS c
+  RESULT    : RAISED -- projection service HTTP 502: projection service HTTP 500 on /cypher: {"error":"Binder exception: Table STORED_IN does not exist."} 
+              Good: the binder refuses the relationship-table form, so a
+              zero from the PROPERTY form below is a measurement.
+  NEGATIVE_CONTROL=RAISED
+
+SERVED_VINTAGE printed
+  SERVED_VINTAGE = 2026-09-10T12:24:50.576632+00:00
+  (the SERVICE's own vintage line, returned on the same response as the
+   counts below -- not a client clock and not a file mtime.)
+MANIFEST_ID printed
+  MANIFEST_ID    = aebbd9cef8c4cfd5515c42dc75793cf4ffcee1f57ad91f444d01be8ea968d5da
+  (manifest_sha256 as the service reports it on the counting query itself,
+   so the vintage and the number cannot come apart.)
+QUERY_FORM=edge_type-as-property
+  statement used : MATCH (a:CloudNode)-[e:CloudEdge]->(b:CloudNode)
+                   WHERE e.edge_type = '<FAMILY>' RETURN count(*) AS c
+
+THE COUNTS AT THIS VINTAGE
+  STORED_IN=0
+  SERVED_FROM=27
+  S3_BUCKET_POLICY_NODES=12
+  TOTAL_NODES=27662
+  TOTAL_EDGES=59548
+  OWNED_BY=6385
+  EDGE_FAMILIES_PRESENT=54
+  STORED_IN_IN_FAMILY_LIST=no -- the family has no rows at all
+
+POSITIVE CONTROL -- a family known present, through the SAME path, same run
+  OWNED_BY returned 6385 through the identical statement shape. A zero from
+  STORED_IN is therefore a measurement about the graph, not a broken query.
+  POSITIVE_CONTROL=FIRED
+
+THE FOURTH POINT AGAINST THE THREE THIS CELL INHERITED
+  vintage              STORED_IN  S3_BUCKET_POLICY  nodes    edges   OWNED_BY  source
+  2026-09-10T03:31:02        135                15  27665    59683   6385     CG-s-32 baseline (row W1-S39)
+  2026-09-10T05:32:57         11                14  27664    59559   6385     CG-s-33 loss read (row W1-S39)
+  2026-09-10T05:57:16         11                14  -        -       6385     issuer's third read (TO face)
+  2026-09-10T12:24:50          0                12  27662    59548   6385     THIS READ (h4_fourth_point, taken now)
+
+READING (a statement of what the four points say, no verdict):
+  The family is now EMPTY. It went 135 -> 11 inside the window this cell was
+  cut to explain, held at 11 across two reads twenty-five minutes apart, and
+  has since reached 0. THE LOSS DID NOT STOP; the three-point reading that
+  it had stopped was a plateau between two drops, which is exactly what a
+  three-point read of an event-driven process cannot distinguish from a halt.
+  SERVED_FROM stands at 27. Its TARGET CLASSES, measured in this same run
+  (denominator = 27 SERVED_FROM edges, every one of them, no sample):
+    -> S3_BUCKET_POLICY         27
+  27 of 27 SERVED_FROM edges hang off S3_BUCKET_POLICY -- the same parent
+  class that carried STORED_IN away. The mechanism is still loaded.
+
+==============================================================================
+SUMMARY
+==============================================================================
+SERVED_VINTAGE printed
+MANIFEST_ID printed
+QUERY_FORM=edge_type-as-property
+SERVED_VINTAGE=2026-09-10T12:24:50.576632+00:00
+MANIFEST_ID=aebbd9cef8c4cfd5515c42dc75793cf4ffcee1f57ad91f444d01be8ea968d5da
+STORED_IN=0
+SERVED_FROM=27
+SERVED_FROM_ON_S3_BUCKET_POLICY=27 of 27
+S3_BUCKET_POLICY_NODES=12
+TOTAL_NODES=27662
+TOTAL_EDGES=59548
+OWNED_BY=6385
+NEGATIVE_CONTROL=RAISED
+POSITIVE_CONTROL=FIRED
+OK: H4-AC3 complete -- read only, nothing published.
