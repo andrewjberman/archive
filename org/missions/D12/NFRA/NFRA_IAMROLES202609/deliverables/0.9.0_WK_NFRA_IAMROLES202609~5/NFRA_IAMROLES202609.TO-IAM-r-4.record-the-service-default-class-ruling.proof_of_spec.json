@@ -1,0 +1,139 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_IAMROLES202609.TO-IAM-r-4",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP_R2.md",
+  "vintage_commit": "fde51f6e6a",
+  "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-r-4.record-the-service-default-class-ruling.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "076f37eeb2"
+ },
+ "assignee": "0.9.0_WK_NFRA_IAMROLES202609~5",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~3/GOVERNANCE_DISPOSITION.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A documentation-only governance-disposition deliverable, not a deploy-scope artifact. This cell edits IAM-r-1's own document in place (rows 4, 12, 15 replaced; a new CLASS RULINGS section inserted before the RULE 24 section; nothing else touched -- verified by `git diff --stat` = 86 insertions / 18 deletions and a line-level diff showing only the three numbered rows changed). No Terraform or IAM object touched, per BOUNDS ('DO NOT MODIFY ANY TERRAFORM AND DO NOT CREATE, DELETE OR EDIT ANY ROLE'). Rides the same commit as this proof instance."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "a count of 3 -- all three members carry the ruling's decider on their own row; measured 0 at the cut",
+   "method": "command",
+   "invocation": "grep -c -E '(ecsTaskExecutionRole|rds-monitoring-role|vpc-flow-logs-role).*owner=1\\.0\\.0_SA_CTO~Z' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~3/GOVERNANCE_DISPOSITION.md",
+   "output_evidence": "grep -c printed: 3 (rc=0), reproduced identically on a second run after finishing all edits. This worker's own pre-edit baseline re-measurement (same invocation, run before touching the file) read 0, matching the TO's cited baseline exactly. All three rows -- 4 (ecsTaskExecutionRole), 12 (rds-monitoring-role), 15 (vpc-flow-logs-role) -- now open with 'owner=1.0.0_SA_CTO~Z' on their first line, so the role name and the ruling's decider co-occur on the same grep-matched line for each.",
+   "denominator": "3 of 3 required members carry the ruling's decider; baseline 0, final 3, no other row touched",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "a count of 1 or greater -- the rule is stated ONCE as a class, so a reader sees three rows sharing one decision rather than three coincidental ones; measured 0 at the cut",
+   "method": "command",
+   "invocation": "grep -c -i -E 'CLASS RULING' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~3/GOVERNANCE_DISPOSITION.md",
+   "output_evidence": "grep -c printed: 6 (rc=0), reproduced identically on a second run. This worker's own pre-edit baseline read 0, matching the TO's cited baseline exactly. The 6 case-insensitive hits are: the new section heading '## CLASS RULINGS'; the bolded 'RULING -- AWS-MANAGED SERVICE-DEFAULT ROLES' sub-heading text referencing 'CLASS'; the three disposition-table rows (4, 12, 15) each pointing readers to 'CLASS RULINGS below' inline where the token EXEMPT is assigned; and the 'RULING'S RECORD' pointer paragraph. The rule itself (decider, reason, class boundary) is written out exactly ONCE, in the new CLASS RULINGS section -- the three row-level mentions are pointers into that single statement, not restatements of it, satisfying the TO's own framing ('a reader sees three rows sharing one decision rather than three coincidental ones').",
+   "denominator": "6 of >=1 required; the rule's substance is stated once, the three rows and one cross-reference point at it",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "a count of 0 -- every exemption line, the three you wrote and the ones already there, carries a named owner and a reason; a regression bar that must read 0 before and after",
+   "method": "command",
+   "invocation": "grep -E 'EXEMPT' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~3/GOVERNANCE_DISPOSITION.md | grep -c -v -E 'owner=[^ ]+ +reason='",
+   "output_evidence": "grep -c printed: 0 (rc=1, grep's ordinary no-match exit code -- the printed count '0' is the criterion's deciding value), both before this cell's edits and after, reproduced on a second run of the final state. The three rewritten rows now read 'EXEMPT owner=1.0.0_SA_CTO~Z reason=AWS-managed service role, minted by a...' -- owner and reason both present on the same matched line -- and the other 13 rows (including the three unrelated EXEMPT rows, 7/8/10, untouched by this cell) are unchanged. A discriminating check was also run on a disposable scratch copy (never committed): appending one line containing the bare token 'EXEMPT' with no owner=/reason= pattern raised this same invocation's count from 0 to 1 on that scratch copy, confirming the bar fires on a real injected defect rather than passing vacuously; the scratch copy was discarded and never touched the tracked file.",
+   "denominator": "0 of (however many EXEMPT-bearing lines exist) lack the owner/reason pattern, before and after this cell's edit; regression-bar discriminating power confirmed on a disposable scratch copy",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "a count of 0, printed -- C-TWO-REMEDIES honoured: the governance half did not stray into the permissions half",
+   "method": "command",
+   "invocation": "grep -c -i -E 'narrow|revoke|over-granted|remove permission' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~3/GOVERNANCE_DISPOSITION.md",
+   "output_evidence": "grep -c printed: 0 (rc=1, no match -- the printed count '0' is the criterion's deciding value), both before and after this cell's edit, reproduced on a second run. The CLASS RULINGS section and the three rewritten rows discuss only where each role sits relative to Terraform (governance placement) and never its permission scope, per bound C-TWO-REMEDIES ('you may not narrow a permission, recommend narrowing one, or read a permissions finding as a governance answer').",
+   "denominator": "0 of 0 -- no permissions-axis vocabulary present, unchanged before and after",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC5",
+   "criterion_verbatim": "AC5 (JUDGMENT -- never self-graded; record it UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming 3.0.0_SA_CVO~Z): does a governance reader now see a DECISION for these three -- who decided, on what reasoning, applying to what class -- rather than a gap dressed as an exemption? And is the class boundary drawn so a reader can tell which future roles it covers?",
+   "method": "manual_read_with_citation",
+   "invocation": "manual read of the new CLASS RULINGS section and the three rewritten disposition-table rows against the TO's own framing of the round-1 stall ('recorded these three as needing a named exemption owner and stalled because no owner could be named ... That reading was heavier than the outcome demands') and the outcome's own words ('something deliberately kept outside the normal way of doing things SAYS WHO DECIDED THAT AND WHY')",
+   "output_evidence": "Each of the three rows (4, 12, 15) now reads 'EXEMPT owner=1.0.0_SA_CTO~Z reason=AWS-managed service role, minted by a console or service action ... correctly outside our Terraform -- CLASS RULING, see CLASS RULINGS below' with a pointer to the ruling's record (this cell's own task order and `ledger/ROUND_ANALYSIS.round1.md` §4). The CLASS RULINGS section names the DECIDER (`1.0.0_SA_CTO~Z`), the REASONING (a service-minted role is owned by the issuing AWS service's own lifecycle at creation time; bringing it under this estate's Terraform would fight that lifecycle rather than describe infrastructure this estate built), and a CLASS BOUNDARY stated as three joint conditions (absent from Terraform by name-level check; carries AWS's own literal conventional default-role name for a specific service; not created or managed by this estate's own Terraform) with explicit negative examples naming which round-1 members the ruling does NOT reach (`opal-data-refresh-lambda-role`, `portal-auth-lambda-role`, `lambda-test-role`, the nine ADOPT members) so a later reader can place a new role against the boundary rather than guess. A MEMBERSHIP NOTE states plainly that these three are dispositioned on round 1's classification, INHERITED rather than independently re-confirmed by `IAM-r-3` (whose deliverable was not present anywhere in this worker's tree, checked by name across the whole repo before writing), and names the consequence if `IAM-r-3` later finds one is in fact declared (a second instance of the `seeking-alpha-scraper-role` defect corrected in this same document, requiring that member's row alone to move to `DECLARED` -- the ruling itself, being about the class, would be unaffected). No owner reads UNASSIGNED on these three rows; no row asserts a fact this worker could not support from the given ruling.",
+   "denominator": "N/A -- judgment criterion, no verdict computed by this instance",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Judgment criterion per the TO's own annotation ('never self-graded ... record it UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming 3.0.0_SA_CVO~Z'); the grade lands in 3.0.0_SA_CVO~Z's L9 adjudication. Output recorded above with no PASS/FAIL assigned by this worker.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "N/A-SPEC-NAMES-NONE: this cell is a record-the-ruling edit to an existing governance-assessment document (a doc, not code); the TO names no code path or assertion this cell authors that a mutant could exercise in the ordinary sense. In its place, a real discriminating check was run against AC3's regression bar (a strict per-line grep with no tolerance): on a disposable scratch copy of the final document (never committed, discarded immediately after), appending one line containing the bare token 'EXEMPT' with no owner=/reason= pattern raised the AC3 invocation's count from 0 to 1, proving the bar fires on a real injected defect rather than passing vacuously against this cell's own edit.",
+   "expected": "N/A -- no mutant applicable to a doc-record-the-ruling deliverable; the AC3 regression bar substitutes as the discriminating check",
+   "observed": "AC3's regression bar read 0 against the real, committed-bound final text and 1 against a disposable scratch copy carrying one injected bare-EXEMPT line -- discriminating behaviour confirmed, no permanent artifact from the injection retained anywhere in the tracked tree.",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "Each of AC1-AC4's invocations was run at least twice against the final file state (once immediately after the last edit, once as a separate re-verification pass for this proof instance), all using `timeout 120` per the TO's own bound.",
+   "observed": "STABLE across both final re-runs: AC1=3, AC2=6, AC3=0, AC4=0, reproduced identically.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No owner-hunt was performed for the three members, and no attempt was made to name a different decider or reopen whether the ruling is correct.",
+   "reason": "BOUNDS: 'RECORD, DO NOT RE-RULE, AND DO NOT SEEK OWNERS. The ruling is given.' The TO states the ruling as GIVEN and names 1.0.0_SA_CTO~Z as the decider; this cell recorded it verbatim against each row and did not solicit or invent an alternative owner."
+  },
+  {
+   "item": "No independent re-measurement of the three members' true Terraform-declaration status was launched; membership is recorded as INHERITED from round 1's classification, not confirmed by IAM-r-3.",
+   "reason": "DEPENDENCIES: 'if IAM-r-3 found any of your three is not actually in the set, say so and dispose only those that are' and the cell text's own instruction: 'treat the three members' membership as INHERITED rather than confirmed ... Do NOT block on it; do NOT re-measure all sixteen yourself.' No IAM-r-3 deliverable or verdict list of any name was found anywhere in this worker's tree (checked via comp-find --name '*IAM-r-3*' and '*true-membership*' across the whole repo, both returning only the IAM-r-3 task-order file itself, no deliverable). Noted in each of the three rows and in the CLASS RULINGS MEMBERSHIP NOTE."
+  },
+  {
+   "item": "The other thirteen members' rows were not touched.",
+   "reason": "BOUNDS: 'DO NOT TOUCH THE OTHER THIRTEEN MEMBERS' ROWS. Three members, three rows, plus the class section.' Verified mechanically: `git diff` on the deliverable shows exactly rows 4, 12, 15 changed (by their leading row-number token) plus the new CLASS RULINGS section; no other numbered row appears in the diff."
+  },
+  {
+   "item": "No Terraform was created, modified, imported, or deleted; no IAM role was created, deleted, or edited.",
+   "reason": "BOUNDS: 'DO NOT MODIFY ANY TERRAFORM AND DO NOT CREATE, DELETE OR EDIT ANY ROLE.' No infra/ path is in this cell's <paths> write surface and none was touched."
+  },
+  {
+   "item": "No alert, alarm, monitor, schedule, or notification was minted.",
+   "reason": "BOUNDS: 'DO NOT MINT ANY ALERT, ALARM, MONITOR, SCHEDULE OR NOTIFICATION (G-21, ARMED).' This cell is a text edit to an existing markdown document; no such artifact was created."
+  }
+ ],
+ "surprises": [],
+ "session_log": "N/A -- no session-log path is inside this worker's <paths> write surface (task order names only deliverables/, the round-2 decomposition file, ledger/ROUND_ANALYSIS.round1.md, surprise-channel/investigations/INVESTIGATION_v1.md, and this cell's own task-order file). The full session is this turn's transcript and the acceptance rows above carry every invocation and output verbatim.",
+ "compiler_tools": [
+  {
+   "tool": "grep (baseline, pre-edit)",
+   "invocation": "grep -c -E '(ecsTaskExecutionRole|rds-monitoring-role|vpc-flow-logs-role).*owner=1\\.0\\.0_SA_CTO~Z' / grep -c -i -E 'CLASS RULING' / grep -E 'EXEMPT' | grep -c -v -E 'owner=[^ ]+ +reason=' / grep -c -i -E 'narrow|revoke|over-granted|remove permission', all against GOVERNANCE_DISPOSITION.md before any edit by this cell",
+   "result": "0 / 0 / 0 / 0 -- re-grounded the TO's cited baselines against live state before editing rather than trusting the cited numbers verbatim; all four baselines matched the TO exactly."
+  },
+  {
+   "tool": "comp-find (name search for IAM-r-3's deliverable)",
+   "invocation": "comp-find --name '*IAM-r-3*' . ; comp-find --name '*true-membership*' . (whole-repo corpus=all)",
+   "result": "Both return exactly 1 hit -- the IAM-r-3 task-order file itself. No deliverable, verdict list, or proof-of-spec instance for IAM-r-3 exists anywhere in this worktree at write time, confirming the dependency note's premise (IAM-r-3 not landed) before writing membership as INHERITED."
+  },
+  {
+   "tool": "grep (final AC1-AC4 re-verification, two runs)",
+   "invocation": "The four criteria invocations exactly as named in the TO's proof_of_spec block, run once immediately after the last edit and once again as a separate re-verification pass",
+   "result": "AC1=3, AC2=6, AC3=0, AC4=0 on both runs -- all four mechanical criteria satisfy their named expectations on the final committed text, reproducibly."
+  },
+  {
+   "tool": "grep (mutant/discrimination check on a disposable scratch copy)",
+   "invocation": "cp GOVERNANCE_DISPOSITION.md to a scratchpad path outside the tracked tree; append one line with bare 'EXEMPT' and no owner=/reason= pattern; re-run AC3's exact invocation against the scratch copy; delete the scratch copy",
+   "result": "AC3's invocation read 1 against the mutated scratch copy (vs. 0 against the real file, before and after) -- the regression bar is discriminating, not vacuous. No tracked file was touched by this check."
+  },
+  {
+   "tool": "git diff --stat / git diff (row-level scope verification)",
+   "invocation": "git diff --stat org/.../GOVERNANCE_DISPOSITION.md ; git diff org/.../GOVERNANCE_DISPOSITION.md | grep -E '^[-+][0-9]+\\.'",
+   "result": "86 insertions(+), 18 deletions(-) total; the only numbered disposition-table lines appearing in the diff are rows 4, 12 and 15 (each once as a '-' line and once as a '+' line) -- confirming the other thirteen rows were not touched, per BOUNDS."
+  }
+ ]
+}
