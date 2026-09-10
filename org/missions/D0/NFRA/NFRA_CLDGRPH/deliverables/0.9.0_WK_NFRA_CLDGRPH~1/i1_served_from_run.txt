@@ -1,0 +1,95 @@
+==============================================================================
+i1_served_from.py -- CG-s-41 -- SERVED_FROM's 27, DEMONSTRATED NOT ASSERTED
+==============================================================================
+TREE_READ cwd    = C:\tmp\wk-cldgrph-9-1
+TREE_READ branch = wk-cldgrph-9-1
+TREE_READ head   = 0596d4fc9846234d693b2e405e00bb6f69f001a9
+
+-- 1. THE 27, MEASURED IN THE WAREHOUSE --
+  VINTAGE: 2026-09-10T12:24:50.576632+00:00 (the marker the writer itself stamped)
+  graph_edges last_write = 2026-09-10T03:02:00.737000+00:00
+  graph_nodes last_write = 2026-09-10T12:24:50.454000+00:00
+  DENOMINATOR: 62327 edge rows and 27685 node rows -- both tables entire, no filter, no limit.
+  SERVED_FROM = 27      <- the family this deliverable is about
+  STORED_IN   = 137      <- the family round 8 measured losing 124
+  OWNED_BY    = 6385    <- THE POSITIVE CONTROL the cell names. A family
+                          this size reading non-zero is what tells a real
+                          zero apart from an empty read.
+  POSITIVE_CONTROL=FIRED (OWNED_BY=6385, non-zero)
+
+  THE SERVED KEY RULE, extracted from infra/aws/globgrph/kuzu_nessie_load.py (not restated):
+    node key      = graph_key(arn) or graph_key(node_id)   [:217, 'S9: ONE key rule']
+    edge endpoint = graph_key(src_id) / graph_key(dst_id)  [:259-260]
+
+  WHERE THE 27 LAND (every distinct endpoint, not a sample):
+    dst_id=opal-data-portal-v2          n=27  -> resolves to node_type=S3_BUCKET_POLICY
+      node_id 'opal-data-portal-v2' is claimed by 2 class(es): ['S3_BUCKET', 'S3_BUCKET_POLICY']
+      STATUS: ARMED. The endpoint resolves to the POLICY row, and an
+        S3_BUCKET upsert of the same name destroys that row.
+  SERVED_FROM edges ARMED by the collision = 27 of 27
+
+  AND THE ALREADY-FIRED HALF, for contrast -- STORED_IN's endpoints:
+    dst_id=opal-data-bd                 n=124 -> node_type=NOTHING ; classes at that node_id=['S3_BUCKET']
+    dst_id=opal-data-inf                n=11  -> node_type=NOTHING ; classes at that node_id=['S3_BUCKET']
+    dst_id=opal-data-mdpf               n=2   -> node_type=NOTHING ; classes at that node_id=['S3_BUCKET']
+    -> read the node_type column above, not this sentence's expectation:
+       these endpoints now resolve to NOTHING. The POLICY row they used
+       to land on is destroyed, and the BUCKET row does NOT answer to the
+       bare name -- its served key is the full ARN. So they DANGLE. That
+       is 124 (opal-data-bd) + 11 (opal-data-inf) = the 135 STORED_IN
+       edges derive_runner.py:2308 names, plus 2 on opal-data-mdpf, which
+       has NO live bucket policy at all and therefore never had a policy
+       row to land on -- a different cause with the same appearance, and
+       the reason 137 is not 135.
+       SERVED_FROM is the SAME SHAPE ONE STEP EARLIER: its policy row is
+       still alive, so its 27 have not fallen yet.
+
+==============================================================================
+-- 2. THE SAME ARM, ON THE REAL 27 --
+  PRE-FIX predicate : extracted from git 0596d4fc98:infra/aws/lambda/globgrph/incremental_updater/lambda_function.py
+  POST-FIX predicate: imported from the module on disk
+
+  FIXTURE SEED: 232 REAL node rows lifted from the live table -- every row
+    whose node_id or arn is an endpoint of one of the 27 SERVED_FROM edges
+    or of the 200 OWNED_BY control edges. Denominator 232 of 27685 live rows.
+  EDGES UNDER TEST: the 27 real SERVED_FROM rows, endpoint strings verbatim.
+  THE ACT UNDER TEST: one incremental upsert of S3_BUCKET 'opal-data-portal-v2' -- the same
+    shape as the three that already fired (opal-data-bd, -cot, -inf).
+
+  ARM 1 -- RED (pre-fix predicate)
+    filter: Or(left=EqualTo(term=Reference(name='arn'), literal=literal('arn:aws:s3:::opal-data-portal-v2')), right=EqualTo(term=Reference(name='node_id'), literal=literal('opal-data-portal-v2')))
+    node rows 232 -> 231
+    SERVED_FROM edges with an unresolvable endpoint: 0 before -> 27 AFTER
+    SERVED_FROM_ORPHANED_BEFORE_FIX=27 of 27
+
+  ARM 2 -- GREEN (post-fix predicate, same fixture, same act)
+    filter: Or(left=EqualTo(term=Reference(name='arn'), literal=literal('arn:aws:s3:::opal-data-portal-v2')), right=And(left=EqualTo(term=Reference(name='node_id'), literal=literal('opal-data-portal-v2')), right=EqualTo(term=Reference(name='node_type'), literal=literal('S3_BUCKET'))))
+    node rows 232 -> 232
+    SERVED_FROM edges with an unresolvable endpoint: 0 before -> 0 AFTER
+    SERVED_FROM_ORPHANED_AFTER_FIX=0 of 27
+
+  NEGATIVE CONTROL -- the 200 OWNED_BY edges in the same fixture, whose
+    endpoints are on uncontended keys. They must be untouched by BOTH arms:
+    red   arm: 0 orphaned before -> 0 after
+    green arm: 0 orphaned before -> 0 after
+    CONTROL_UNMOVED=true
+
+==============================================================================
+== SERVED_FROM VERDICT ==
+SERVED_FROM_EDGES=27 of 27 measured live
+BASELINE_RED_CAPTURED=true
+SERVED_FROM_ORPHANED_BEFORE=27
+SERVED_FROM_ORPHANED_AFTER=0
+PARENT_POLICY_ROW destroyed by the pre-fix arm = True ; alive after the post-fix arm = True
+NEGATIVE_CONTROL=FIRED (OWNED_BY sample unmoved in both arms)
+POSITIVE_CONTROL=FIRED (OWNED_BY=6385 live, so a zero would have been visible as a zero)
+SERVED_FROM_COVERED=YES
+
+COVERAGE, stated: this exercises ALL 27 SERVED_FROM edges (not a sample)
+  against 232 real node rows, through the real overwrite verb. It does NOT
+  exercise the Kuzu loader itself, the projection service, or a deployed
+  Lambda. The key rule used to resolve endpoints is the loader's OWN,
+  extracted from its source, so the resolution is not a second rule.
+PROVENANCE: the live counts and both orphan counts are `measured`. That
+  the same mechanism covers both families is DEMONSTRATED here, not held.
+elapsed=5.2s

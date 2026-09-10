@@ -1,0 +1,105 @@
+==============================================================================
+i1_arm.py -- CG-s-41 / I1-AC3 -- THE OVERWRITE ARM, RED FIRST
+==============================================================================
+TREE_READ cwd    = C:\tmp\wk-cldgrph-9-1
+TREE_READ branch = wk-cldgrph-9-1
+TREE_READ head   = 0596d4fc9846234d693b2e405e00bb6f69f001a9
+ENVIRONMENT of the baseline: THIS RUN. The red baseline is not a stored
+  number from another machine or another night -- it is captured in this
+  process, on this fixture, seconds before the green arm runs on the same
+  fixture. Nothing is compared across environments.
+HARNESS GRAIN: the ROW in an Iceberg table, after a real overwrite call.
+
+-- THE TWO PREDICATES, BOTH OBTAINED BY CONTENT, NEITHER RETYPED --
+  PRE-FIX  : _match_filter extracted from `git show 0596d4fc98:infra/aws/lambda/globgrph/incremental_updater/lambda_function.py`
+             signature = def _match_filter(arns: list[str], ids: list[str])
+  POST-FIX : _match_filter IMPORTED from the module at infra/aws/lambda/globgrph/incremental_updater/lambda_function.py
+             signature = def _match_filter(keys: list[tuple])
+  (the two signatures DIFFER, which is the point: the key gained its class)
+
+-- THE FIXTURE --
+  pyiceberg 0.9.1, SqlCatalog(sqlite) + local warehouse C:\tmp\wk-cldgrph-9-1\.scratch\i1_arm_wh
+  schema = the live graph_nodes 9-column schema (node_id/node_type required)
+  DENOMINATOR: 6 seed rows -- 2 colliding pairs (4 rows) + 2 distinct-key control rows. Nothing else.
+    node_id=opal-data-bd             type=S3_BUCKET          arn=arn:aws:s3:::opal-data-bd
+    node_id=opal-data-bd             type=S3_BUCKET_POLICY   arn=opal-data-bd
+    node_id=opal-cot-value-parity    type=LAMBDA             arn=arn:aws:lambda:us-east-1:313476888478:function:opal-cot-value-parity
+    node_id=opal-cot-value-parity    type=IAM_ROLE           arn=arn:aws:iam::313476888478:role/opal-cot-value-parity
+    node_id=opal-control-table       type=DYNAMODB_TABLE     arn=arn:aws:dynamodb:us-east-1:313476888478:table/opal-control-table
+    node_id=opal-control-topic       type=SNS_TOPIC          arn=arn:aws:sns:us-east-1:313476888478:opal-control-topic
+
+==============================================================================
+-- ARM 1: RED. The PRE-FIX predicate, run BEFORE anything is claimed. --
+
+  upsert opal-data-bd (S3_BUCKET)
+    filter built by the PRE-FIX code: Or(left=EqualTo(term=Reference(name='arn'), literal=literal('arn:aws:s3:::opal-data-bd')), right=EqualTo(term=Reference(name='node_id'), literal=literal('opal-data-bd')))
+    rows before = 6, rows after = 5
+    DESTROYED -> node_id=opal-data-bd             node_type=S3_BUCKET_POLICY   arn=opal-data-bd
+    own-class rows remaining for this key = 1 (must be 1: replaced, not duplicated)
+
+  upsert opal-cot-value-parity (LAMBDA)
+    filter built by the PRE-FIX code: Or(left=EqualTo(term=Reference(name='arn'), literal=literal('arn:aws:lambda:us-east-1:313476888478:function:opal-cot-value-parity')), right=EqualTo(term=Reference(name='node_id'), literal=literal('opal-cot-value-parity')))
+    rows before = 6, rows after = 5
+    DESTROYED -> node_id=opal-cot-value-parity    node_type=IAM_ROLE           arn=arn:aws:iam::313476888478:role/opal-cot-value-parity
+    own-class rows remaining for this key = 1 (must be 1: replaced, not duplicated)
+
+  DESTROYED_BEFORE=2
+  RED CAPTURE WRITTEN: C:\tmp\wk-cldgrph-9-1\org\missions\D0\NFRA\NFRA_CLDGRPH\deliverables\0.9.0_WK_NFRA_CLDGRPH~1\i1_arm_red_capture.txt (3125 bytes)
+  BASELINE_RED_CAPTURED=true
+
+==============================================================================
+-- ARM 2: GREEN. The POST-FIX predicate, same fixture, same overwrite. --
+
+  upsert opal-data-bd (S3_BUCKET)
+    filter built by the POST-FIX code: Or(left=EqualTo(term=Reference(name='arn'), literal=literal('arn:aws:s3:::opal-data-bd')), right=And(left=EqualTo(term=Reference(name='node_id'), literal=literal('opal-data-bd')), right=EqualTo(term=Reference(name='node_type'), literal=literal('S3_BUCKET'))))
+    rows before = 6, rows after = 6
+    foreign-class rows destroyed = 0
+    own-class rows remaining for this key = 1 (replaced, not duplicated -- the upsert still works)
+
+  upsert opal-cot-value-parity (LAMBDA)
+    filter built by the POST-FIX code: Or(left=EqualTo(term=Reference(name='arn'), literal=literal('arn:aws:lambda:us-east-1:313476888478:function:opal-cot-value-parity')), right=And(left=EqualTo(term=Reference(name='node_id'), literal=literal('opal-cot-value-parity')), right=EqualTo(term=Reference(name='node_type'), literal=literal('LAMBDA'))))
+    rows before = 6, rows after = 6
+    foreign-class rows destroyed = 0
+    own-class rows remaining for this key = 1 (replaced, not duplicated -- the upsert still works)
+
+  DESTROYED_AFTER=0
+  UPSERT_STILL_REPLACES=true (no duplicate rows introduced by the narrowing)
+
+-- NEGATIVE CONTROL: two rows with genuinely DISTINCT keys --
+  red   arm, upsert opal-data-bd             : control rows surviving = 2 of 2 [('opal-control-table', 'DYNAMODB_TABLE'), ('opal-control-topic', 'SNS_TOPIC')]
+  red   arm, upsert opal-cot-value-parity    : control rows surviving = 2 of 2 [('opal-control-table', 'DYNAMODB_TABLE'), ('opal-control-topic', 'SNS_TOPIC')]
+  green arm, upsert opal-data-bd             : control rows surviving = 2 of 2 [('opal-control-table', 'DYNAMODB_TABLE'), ('opal-control-topic', 'SNS_TOPIC')]
+  green arm, upsert opal-cot-value-parity    : control rows surviving = 2 of 2 [('opal-control-table', 'DYNAMODB_TABLE'), ('opal-control-topic', 'SNS_TOPIC')]
+  DISTINCT_KEYS_BOTH_SURVIVE=true
+  NEGATIVE_CONTROL=FIRED
+  (FIRED means: the control rows were present in the population, were
+   exposed to both predicates, and survived both. It is what separates
+   'the fix stopped the destruction' from 'the predicate matches nothing'.)
+
+-- THE DELETE PATH (same filter, opposite intent) --
+  delete_keys_from_event(DeleteBucket opal-data-bd) -> [('arn:aws:s3:::opal-data-bd', 'opal-data-bd', 'S3_BUCKET')]
+  rows removed = 1
+    removed node_id=opal-data-bd             node_type=S3_BUCKET
+  the BUCKET row is gone       : True
+  the POLICY row is UNTOUCHED  : True
+  (before the fix a DeleteBucket removed both, because the bare name
+   matched both. The policy is now stale until the nightly derive drops
+   it -- that is the named, accepted cost of the narrowing.)
+
+==============================================================================
+== ARM VERDICT (ordered for the accept) ==
+BASELINE_RED_CAPTURED=true
+OVERWRITE_ARM=PASS
+DESTROYED_BEFORE=2
+DESTROYED_AFTER=0
+DISTINCT_KEYS_BOTH_SURVIVE=true
+NEGATIVE_CONTROL=FIRED
+
+COVERAGE of this arm, stated rather than implied: it exercises the two
+  colliding pairs it seeds (S3_BUCKET/S3_BUCKET_POLICY and
+  IAM_ROLE/LAMBDA) over 6 fixture rows. It does NOT exercise the live
+  27,685-row table, the Nessie catalog, the SQS handler or a deployed
+  Lambda -- nothing here is deployed and nothing here touched AWS.
+PROVENANCE: DESTROYED_BEFORE / DESTROYED_AFTER / the control results are
+  `measured` -- pyiceberg returned them in this run.
+elapsed=2.0s
