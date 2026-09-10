@@ -1,0 +1,77 @@
+=== CG-s-38 / H3-AC1 -- THE FOUR-HOP PORTAL-VINTAGE FEED, RE-DERIVED BY CONTENT ===
+TREE_READ=C:/tmp/wk-cldgrph-8-2  branch=wk-cldgrph-8-2  head=5c74e16742441fbea3b91d114dbaacc68ac9561d
+TREE_CONTROL=org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/h3_tree_control.txt exists=True -- a file that exists ONLY on this branch; a census that
+  cannot see it read some other tree, and a denominator is not a tree.
+  control on BASE 2fd5cae09f: ABSENT (correct: minted on this branch)
+INSTRUMENT: python ast.parse for the two engine hops (node kind + name, never a line number as INPUT); literal statement match for the Terraform buildspec and the GitHub workflow, which are not python.
+COVERAGE: 5 files, whole-file each -- infra/aws/globgrph/kuzu_nessie_load.py, infra/aws/globgrph/projection_worker.py, infra/aws/terraform/globgrph/stitch-produce.tf, .github/workflows/stitch-source-push.yml, org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f3_build_source_zip.py.
+GRAIN: one AST node / one line. ENVIRONMENT: this linked worktree, python 3.12.10 on win32, git as the only other instrument.
+
+PIN-TEST BASELINE=2fd5cae09f (this worktree's cut base). The task order says it measured at de3970331f.
+  BYTE-IDENTICAL BETWEEN THE TWO: 6 of 6 hop file(s) -- so the issuer's numbers and this baseline are the same object, and any disagreement below is a reading, not a vintage.
+
+HOP 1 PACK -- write the portal sha INTO THE ARCHIVE, on both routes
+  route A (THE ROUTE THAT ACTUALLY RAN, five served pushes in round 6, all by hand):
+    file org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f3_build_source_zip.py
+    portal head computed at :85 (round-7 cited :84)
+    NOW WRITES the archive entry portal_sha.txt at :115
+  route B (THE COMMITTED ROUTE, which nobody has observed to run):
+    file .github/workflows/stitch-source-push.yml
+    portal_sha.txt written at :85, packed into the zip at :93
+    the LITERAL portal pin is still at :66 -> b96562720505fa143aad7cc5dd75115e6c609912
+    the repo's own portal GITLINK at HEAD -> 5907cbca98eb091124e38a32debefa355c1d4376
+    PIN_EQUALS_GITLINK=false  <- the comment above the pin says it IS the gitlink sha
+  change required : write portal_sha.txt into the archive beside stitch_source_sha.txt  [DONE on both routes]
+  NOT done here   : nothing updates the literal pin. Left alone deliberately -- see the owned item in the record; changing a production route's checkout ref is not this cell's change and has no test available under the egress hold.
+  OWNER           : 0.7.0_AE_CloudOps (the disarm owner rows W2-S40 and W2-S63 already carry), with 1.0.0_SA_CTO to place the hand route's production home
+  STATE_THIS_ROUND: DESIRED (committed producer code; route B needs a push + secrets.PORTAL_REPO_PAT, route A needs a hand run -- neither is APPLIED, and the egress hold forbids exercising either against S3)
+
+HOP 2 STAMP -- the buildspec's marker dict carries the key
+  file infra/aws/terraform/globgrph/stitch-produce.tf, the inline buildspec's marker dict at :177-191
+  declared keys NOW  (8): built_at, aws_snapshot, git_sha, producer, total_nodes, total_edges, artifact_sha256, portal_sha
+  declared keys BASE (7): built_at, aws_snapshot, git_sha, producer, total_nodes, total_edges, artifact_sha256
+  round-7 recorded 7 declared keys and a LIVE marker carrying exactly those seven
+  change required : one entry, marker['portal_sha'], read from portal_sha.txt in the unpacked archive  [DONE, and conditional: absent is absent]
+  OWNER           : 0.7.0_AE_CloudOps (Terraform plane)
+  STATE_THIS_ROUND: DESIRED -- committed Terraform. NOT applied. A committed buildspec is a WISH about a CodeBuild project until an apply lands, and no apply is permitted in this round.
+
+HOP 3 COPY -- read_stitch_vintage copies the key into source_vintage
+  file infra/aws/globgrph/kuzu_nessie_load.py
+  BASE: the returned dict literal is at :71-77 carrying 5 key(s)
+  ROUND-7 CITED :71-77 for this hop. MEASURED at the baseline: :71-77. MATCH=true
+  THE TASK ORDER'S OWN RE-MEASUREMENT SAYS :68-78 IS THE RETURN DICT. Measured here at the same bytes: :68-70 is the `if not m.get("built_at")` guard and its early return, :78 is the `except` line. The round-7 citation had NOT moved.
+  NOW : the payload is at :71-77 carrying 6 key(s): stitch_built_at, stitch_producer, stitch_git_sha, stitch_artifact_sha256, stitch_marker_last_modified, stitch_portal_sha
+  change required : one key beside the five it already copies  [DONE]
+  OWNER           : the globgrph engine owner -- this project's plane
+  STATE_THIS_ROUND: DESIRED (committed) + LOCALLY EXERCISED over real bytes by h3_local_endtoend.py. NOT deployed: the engine runs in ECS and no image act, apply or run-task is permitted here.
+
+HOP 4 PRINT -- _age_line renders it in the served VINTAGE line
+  file infra/aws/globgrph/projection_worker.py
+  BASE: the stitch clause (the `if` that appends it) is at :260-262
+  ROUND-7 CITED :257-262 for this hop. CONTAINS the measured clause=true
+  NOW : stitch clause :261-263, PORTAL clause :270-271 (same shape, appended after)
+  change required : the same shape as the stitch clause above it  [DONE]
+  OWNER           : the globgrph engine owner -- this project's plane
+  STATE_THIS_ROUND: DESIRED (committed) + LOCALLY EXERCISED. The SERVED line does not change until the projection is rebuilt and republished, which is a held act.
+
+--- OWNER AND STATE, ONE ROW PER HOP ---
+  hop       state         owner                                          site
+  1 PACK    DESIRED       0.7.0_AE_CloudOps                              org/missions/D0/NFRA/NFRA_CLDGRPH/deliverables/0.9.0_WK_NFRA_CLDGRPH~2/f3_build_source_zip.py + .github/workflows/stitch-source-push.yml
+  2 STAMP   DESIRED       0.7.0_AE_CloudOps                              infra/aws/terraform/globgrph/stitch-produce.tf
+  3 COPY    DESIRED       globgrph engine owner (this project)           infra/aws/globgrph/kuzu_nessie_load.py
+  4 PRINT   DESIRED       globgrph engine owner (this project)           infra/aws/globgrph/projection_worker.py
+
+--- THE ROUND-7 PINS, TESTED AT THE BASELINE ---
+  hop 1 PACK   f3_build_source_zip.py:84 computes portal_head; workflow:66 is the pin   HELD_AT_BASELINE=true
+  hop 2 STAMP  the buildspec marker dict declares exactly 7 keys                        HELD_AT_BASELINE=true
+  hop 3 COPY   kuzu_nessie_load.py:71-77 is read_stitch_vintage's return dict           HELD_AT_BASELINE=true
+  hop 4 PRINT  projection_worker.py:257-262 contains the stitch clause                  HELD_AT_BASELINE=true
+
+HOPS_REDERIVED=4 of 4 at HEAD
+PINS_MOVED_SINCE_ROUND7=0 of 4
+  DENOMINATOR: 4 hops, 4 round-7 pin claims, 5 files read whole, 7 marker keys enumerated at the baseline and 8 now.
+  AND THE FINDING IS THE OTHER WAY ROUND: it is the CORRECTION that had drifted, not the record. The round-7 table's four citations all still hold at the commit this order was cut from; the task order's own MEASURED block re-cites hop 3 as :68-78, which at those same bytes is the guard plus the except, not the return dict. A record that cites lines does age -- these had not yet, and the re-read that assumed they had introduced the only error of the four. Filed as a row.
+OWNER_PER_HOP printed
+STATE_PER_HOP printed
+REDERIVED_BY=CONTENT
+  WHAT THIS DOES NOT CERTIFY: not one hop is APPLIED. Hops 1 and 2 cannot reach APPLIED in this round by the order's own bounds (no apply, no push, no S3 write), and hops 3 and 4 are committed producer code that no deploy has carried. Every STATE above is DESIRED, two of them additionally exercised LOCALLY.
