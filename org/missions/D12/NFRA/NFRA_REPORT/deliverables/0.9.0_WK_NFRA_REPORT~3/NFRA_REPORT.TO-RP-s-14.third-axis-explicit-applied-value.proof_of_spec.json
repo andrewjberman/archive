@@ -1,0 +1,105 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_REPORT.TO-RP-s-14",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/decompositions/NFRA_REPORT_DECOMP_R2.md",
+  "vintage_commit": "e37b4e4a2cb455b96abc5c4ea291fc518c8b7a11",
+  "to_ref": "org/missions/D12/NFRA/NFRA_REPORT/task-orders/NFRA_REPORT.TO-RP-s-14.third-axis-explicit-applied-value.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_REPORT/prd/NFRA_REPORT_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "1aae9c43fe60ff08f4bf5d88eb7ae852135f3321"
+ },
+ "assignee": "0.9.0_WK_NFRA_REPORT~3",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/STATE_MODEL.md",
+   "kind": "doc",
+   "commit_or_etag": "244f1380162f1942559a0fbef1e0f8f1477fb5cf",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "commit_or_etag is the git BLOB sha (git hash-object <path>, content-addressed, independent of which commit carries it). Verifiable post-commit via: git show <this commit>:org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/STATE_MODEL.md | git hash-object --stdin -- must equal 244f1380162f1942559a0fbef1e0f8f1477fb5cf. This is round 1's committed deliverable AMENDED IN PLACE (not rewritten) by this cell -- the pre-amendment blob was 5a557b6444804a5e4cf55c215010dcf642092bb2 (still resolvable at any earlier commit that carried it). Documentation artifact; no live-infra deploy scope."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- grep -c -i -E 'explicit' STATE_MODEL.md; expect a count of 1 or greater -- the amended rule requires an explicit value when applied.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -i -E 'explicit' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/STATE_MODEL.md",
+   "output_evidence": "output: 8 (rc=0) -- 8 lines now carry the case-insensitive token 'explicit', up from 0 measured on the pre-amendment file (baseline taken before any edit this cell made).",
+   "denominator": "8 matching lines out of 165 total lines in the amended file (wc -l); expectation was >=1; PRE-EDIT baseline on this same file was 0",
+   "status": "PASS",
+   "expect": "output: ([1-9]|[1-9][0-9]+)\\b"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- grep -c -E 'desired|applied|exercised' STATE_MODEL.md; expect a count of 3 or greater -- all three third-axis values survive the amendment.",
+   "method": "command",
+   "invocation": "timeout 120 grep -c -E 'desired|applied|exercised' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/STATE_MODEL.md",
+   "output_evidence": "output: 17 (rc=0) -- 17 lines carry at least one of the third-axis tokens, up from 13 measured on the pre-amendment file (baseline taken before any edit this cell made); all three words (desired, applied, exercised) are present in the `state: desired | applied | exercised` enum line, unedited.",
+   "denominator": "17 matching lines out of 165 total lines in the amended file; expectation was >=3; PRE-EDIT baseline on this same file was 13",
+   "status": "PASS",
+   "expect": "output: ([3-9]|[1-9][0-9]+)\\b"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 -- grep -o -E 'DENY-BY-DESIGN' STATE_MODEL.md; expect the literal string DENY-BY-DESIGN -- the six ratified axis-1 values are untouched, the least-used one is the probe, so a silent narrowing fails.",
+   "method": "command",
+   "invocation": "timeout 120 grep -o -E 'DENY-BY-DESIGN' org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/STATE_MODEL.md",
+   "output_evidence": "DENY-BY-DESIGN (repeated, 10 occurrences total, rc=0) -- identical count to the pre-amendment file (10); the Axis-1 enum table (Sec 1) and every downstream mention of this ratified value are byte-identical to before this cell's edit.",
+   "denominator": "10 of 10 occurrences printed non-empty; expectation was any non-empty match; PRE-EDIT count on this same file was also 10 (unchanged, proving §1's six-value enum was not touched)",
+   "status": "PASS",
+   "expect": "DENY-BY-DESIGN"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two mutants run against SCRATCH copies of the amended STATE_MODEL.md (never against the committed file). Mutant A (non-discriminating-floor check): truncated the file to its first 7 lines (the frontmatter only, before the first 'EXPLICIT' token this cell's edit introduced) and re-ran all three of this TO's exact invocations. Mutant B (targeted narrowing, matching AC3's documented purpose): renamed every literal occurrence of `DENY-BY-DESIGN` to `DENY_BY_DESIGN_REMOVED` (simulating a silent narrowing/removal of the least-used ratified Axis-1 value) and re-ran AC3's exact invocation.",
+   "expected": "Mutant A must drop AC1 to 0 (<1), AC2 to 0 (<3), and AC3 to empty/no-match -- proving none of the three criteria is a tautology that any document would pass. Mutant B must drop AC3's match to empty (rc=1, no output) while leaving AC1/AC2 unaffected -- proving AC3 specifically detects an Axis-1 value narrowing, which is exactly the failure mode the TO names AC3 as the probe for.",
+   "observed": "Mutant A: AC1's invocation returned 0 (rc=1); AC2's invocation returned 0 (rc=1); AC3's invocation returned empty (rc=1). All three would FAIL against the truncated document. Mutant B: AC3's invocation returned empty (rc=1, no match for the literal string) -- would FAIL. Both mutants fired exactly as expected; the committed criteria are not satisfiable by an empty, truncated, or silently-narrowed document.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Each of AC1/AC2/AC3's exact invocations run twice in succession against the unmodified, already-edited committed-content file, output compared byte-for-byte.",
+   "observed": "Run 1: AC1=8, AC2=17, AC3=10 occurrences (non-empty). Run 2: AC1=8, AC2=17, AC3=10 occurrences (non-empty). Identical both times.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Round 1's other worked specimens and sections not touched by this cell's scope (the six ratified Axis-1 values in §1, the three Axis-2 values in §2, the Website `DENY-BY-DESIGN` worked specimen's REASON text in §4, and all specimen ROW CONTENT in §7's table) were left byte-identical.",
+   "reason": "BOUND, explicit in the TO: 'DO NOT EDIT, REMOVE OR REDEFINE ANY OF RULING 12's SIX RATIFIED AXIS-1 VALUES or the three axis-2 values. This amendment touches the THIRD axis's rendering rule only.' The cell's own text also rules 'THE SPECIMEN IS CORRECT AND THE RULE IS THE DEFECT. AMEND THE RULE, NOT THE SPECIMEN' -- so §7's table row VALUES (Website=DENY-BY-DESIGN/--/--, sentinel=CHECKED/OK-or-DEGRADED/desired, opal-login-abuse-alerts=INERT/--/--, comp=CHECKED/OK/-- (fully applied)) are unedited; only the table's HEADER wording and §5's/§0's PROSE describing the rendering rule were amended, to remove the now-false claim that the axis is silent when a row is fully applied."
+  },
+  {
+   "item": "STATE_MODEL.md was amended in place; it was not rewritten as a new document, and round 1's other deliverables in the same folder (ROW_STRUCTURE.md, SCHEDULE.md, VERDICT.md, etc.) were not touched.",
+   "reason": "BOUND, explicit in the TO: 'STATE_MODEL.md is round 1's committed deliverable. You are amending it in place, not rewriting it.' This cell's <paths> write surface does not name those sibling files, and the ACT is scoped to the third axis's rendering rule in this one document."
+  }
+ ],
+ "surprises": [],
+ "session_log": "N/A -- worker subagent (0.9.0_WK_NFRA_REPORT~3) per CLAUDE.md rule 27: 'a worker's write surface is exactly the <paths> its non-terminal order names ... and it writes no telemetry (L7 reads from git)'. This TO's <paths> names no logs/ surface. The git commit history on branch wk-NR2-3 is the record.",
+ "compiler_tools": [
+  {
+   "tool": "grep",
+   "invocation": "the three AC1-AC3 invocations verbatim from the TO's <proof_of_spec>, each under timeout 120, run against org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/STATE_MODEL.md both before (baseline) and after this cell's edit",
+   "result": "PRE-EDIT baseline: AC1=0, AC2=13, AC3=10. POST-EDIT: AC1=8, AC2=17, AC3=10 (unchanged, proving no axis-1 narrowing). All rc=0 post-edit. Re-run twice for determinism (see controls.determinism)."
+  },
+  {
+   "tool": "git hash-object",
+   "invocation": "git hash-object org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~1/STATE_MODEL.md",
+   "result": "244f1380162f1942559a0fbef1e0f8f1477fb5cf -- the amended file's blob sha, used as commit_or_etag for the doc artifact row; the pre-amendment blob 5a557b6444804a5e4cf55c215010dcf642092bb2 remains resolvable at earlier commits."
+  },
+  {
+   "tool": "python/sed (ad hoc, scratch-only)",
+   "invocation": "head -7 STATE_MODEL.md > .scratch/mutant_truncated.md; sed 's/DENY-BY-DESIGN/DENY_BY_DESIGN_REMOVED/g' STATE_MODEL.md > .scratch/mutant_narrowed.md -- both untracked scratch files, never committed, used only to fire the mutant controls",
+   "result": "see controls.mutant -- Mutant A dropped all three counts to 0/empty; Mutant B dropped AC3 to empty while leaving AC1/AC2 untouched, proving AC3 discriminates a silent Axis-1 narrowing specifically"
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D12/NFRA/NFRA_REPORT/deliverables/0.9.0_WK_NFRA_REPORT~3/NFRA_REPORT.TO-RP-s-14.third-axis-explicit-applied-value.proof_of_spec.json AC1,AC2,AC3",
+   "result": "run after this instance was written; see this deliverable's WORKER REPORT for the printed rc and denominator"
+  }
+ ]
+}

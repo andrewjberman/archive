@@ -5,7 +5,8 @@ batch 5 ("THE NAMING LAW"), plus its forward-pointer recording `1.0.0_SA_CTO~Z`'
 cell's two expressibility gaps, and `NFRA_REPORT_PRD.md` §5/§6 (`C-FWD2-FIRST`, `C-WEBSITE-BLIND`,
 `C-SENTINEL-STATE`). This document is the report's naming law: every row the report renders states
 its position on Axis 1, then (only where Axis 1 says a look happened) its position on Axis 2, then
-(only where the row is not fully `applied`) its position on the third axis below.
+an EXPLICIT position on the third axis below — rendered in every case, never omitted, per the
+round-N analysis §4(a) amendment applied in §5.
 
 ## 1. AXIS 1 — THE INSTRUMENT: did the check happen, and could it?
 
@@ -81,15 +82,22 @@ vocabulary VERBATIM — no synonym is minted.**
 state: desired | applied | exercised
 ```
 
-This axis is **rendered only when the row's state is not `applied`.** A fully applied-and-exercised
-control carries no third-axis text at all — the omission itself says "this is real," which is why the
-axis is silent everywhere except the DESIRED-not-APPLIED case it exists to name.
+**AMENDED at L4 by the round-N analysis §4(a): ABSENCE MAY NOT CARRY MEANING ON THIS AXIS.** The
+axis therefore **renders an EXPLICIT value in every case — it is never silent.** A blank that means
+"applied" is indistinguishable from a blank a broken renderer left behind, which is exactly the
+confusion FWD-2 exists to remove one axis over (Axis 1's `BLIND` family) and this axis may not
+reintroduce it on its own ground. A fully applied-and-exercised control therefore renders an explicit
+marker naming that state — the literal form is `— (fully applied)`, shown already in §7's `comp`
+specimen below — instead of carrying no third-axis text at all; the DESIRED-not-APPLIED case renders
+its own explicit value (`desired`) for the identical reason. Every row states its third-axis position
+in words: `desired`, `applied`/`exercised` (rendered as the explicit fully-applied marker), or a
+not-applicable marker with its reason attached (§4's Website row).
 
 **Worked specimen — the blocked-address sentinel table (`C-SENTINEL-STATE`):**
 
 | Property | Axis 1 | Axis 2 | 3rd axis | Reason (attached) |
 |---|---|---|---|---|
-| Blocked-address row (per address, sentinel table) | `CHECKED` (the sentinel does look/count hits against the address; it is not `INERT` — it CAN fire) | `OK` or `DEGRADED` per what the sentinel actually observes on that address | **`desired`** (rendered because it is NOT `applied`) | The address is watch-listed and the sentinel counts and evaluates it, but no IP set enforces the block: `sentinel_block_armed` runs watch-only and the enforcement reconciler (`TO-OP-S-15-19`) is staged, not applied. A report rendering this table without the third axis reports INTENT AS FACT — exactly what `C-SENTINEL-STATE` forbids. |
+| Blocked-address row (per address, sentinel table) | `CHECKED` (the sentinel does look/count hits against the address; it is not `INERT` — it CAN fire) | `OK` or `DEGRADED` per what the sentinel actually observes on that address | **`desired`** (the explicit value naming this row's actual state — NOT `applied`) | The address is watch-listed and the sentinel counts and evaluates it, but no IP set enforces the block: `sentinel_block_armed` runs watch-only and the enforcement reconciler (`TO-OP-S-15-19`) is staged, not applied. A report rendering this table without the third axis reports INTENT AS FACT — exactly what `C-SENTINEL-STATE` forbids. |
 
 Note what this specimen is NOT: it is not `comp-iam`-sourced evidence. `comp-iam` does not model
 `wafv2` — the plane this row's enforcement path lives on — so `comp-iam` silence is never cited here,
@@ -130,7 +138,7 @@ A reader who knows nothing about how this report is built should be able to tell
 seeing this"** apart from **"we looked, and here is how bad it is"** from the row alone, no legend
 required beyond this document. Four specimens, spanning the family:
 
-| Row | Axis 1 | Axis 2 | 3rd axis (shown only if not `applied`) | Reads as |
+| Row | Axis 1 | Axis 2 | 3rd axis (always explicit — §5) | Reads as |
 |---|---|---|---|---|
 | Website security (§4) | `DENY-BY-DESIGN` | — | — | **"We have no way of seeing this, permanently, by design — here is why."** Never confusable with a found problem; never confusable with `OK`. |
 | Blocked-address sentinel row (§5) | `CHECKED` | `OK`/`DEGRADED` (whatever is actually observed) | `desired` | **"We looked, we see this address, but the block itself is only INTENDED — nothing enforces it yet."** Never confusable with an applied control. |
@@ -141,7 +149,8 @@ The first row and the third row both answer "we have no way of seeing this" (per
 control-exists-but-cannot-fire — two DIFFERENT reasons, never collapsed into one value). The second and
 fourth both answer "we looked" — one with an attached DESIRED-not-APPLIED caveat, one without. No row
 in this table is green (`CHECKED`+`OK` with nothing else attached) except the fourth, and the fourth
-says so by carrying no third-axis text at all.
+says so by carrying the explicit `— (fully applied)` marker rather than a DESIRED-not-APPLIED value —
+the marker is present text, never an omission.
 
 ## 8. What this document does NOT do
 
