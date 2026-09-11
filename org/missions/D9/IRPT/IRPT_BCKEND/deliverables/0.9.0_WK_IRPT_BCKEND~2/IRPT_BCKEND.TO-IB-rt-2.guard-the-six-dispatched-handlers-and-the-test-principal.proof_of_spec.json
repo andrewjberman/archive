@@ -1,0 +1,317 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-rt-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "e6ba5d9878"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "0d57ceb2f9",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rt-2.guard-the-six-dispatched-handlers-and-the-test-principal.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "kind": "script",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "THE SERVED BOUNDARY: contract version -> firm from the VERIFIED principal -> operation -> _authz.guard(). Named served.py and NOT entry.py because a deployed zip flattens one function's files into one directory and each function's own entry module is entry.py -- two files of one name in one zip is the deployed function importing itself, which the in-process census caught first. It proves its guard wiring AT IMPORT by running the real decorator and refusing to load unmarked. NOT DEPLOYED: arm (e) is blocked three ways.",
+      "artifact_covered_by": [
+        "RT2-AC1",
+        "RT2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/routetable.py",
+      "kind": "script",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The REAL route table, derived from routes.json + lambda-source-map.json + each function's own Terraform handler = string, so the census's population cannot be supplied by the thing it measures (rows W1-S10, W2-S20). It returns an UNRESOLVED value WITH ITS REASON rather than None, because None is what a route with no declared handler looks like. It also PURGES another function's bare-name modules before each import -- three handler.py plus job.py and status.py share one interpreter in process, and the first version silently gave performance the DIRECTORY handler.",
+      "artifact_covered_by": [
+        "RT2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/loaders.py",
+      "kind": "script",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one dependency triple read from the FIRM'S OWN bucket, plus the recorded-artifact triple for an in-process exercise. The firm->bucket map (Terraform, from data/firm_registry.json) is the TRUST ANCHOR and a firm it cannot map is refused, never defaulted; the opaque firm id is READ from the artifact and never recomputed, because re-deriving it would put two definitions of one id space in the estate.",
+      "artifact_covered_by": [
+        "RT2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_unguarded_census.py",
+      "kind": "test",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 cases: the denominator is real before any verdict is read off it; 0 of 8 in lane; 3 of 11 whole-file with each of the three ASSERTED to be irpt-status's (so the moment they are guarded, this fails and the failure is the notice that row W2-S19 is resolved); the control on three different victims; and the mark is earned.",
+      "artifact_covered_by": [
+        "RT2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_guarded_entries.py",
+      "kind": "test",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "70 cases through the REAL entry points: 30 swaps, 5 difference controls, the firm-from-the-principal pair, the projection pair, the version check with the storage loaders REMOVED, and the envelope shape. The only substitution is the storage boundary and it carries a difference control.",
+      "artifact_covered_by": [
+        "RT2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/entry.py",
+      "kind": "script",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "irpt-directory-search's guarded entry. handler.py is NOT edited -- its search() and resolve() are pure and correct; what was wrong was WHO SUPPLIED THE SCOPE. Returns full DirectoryEntry documents in search RANK order (search() returns hits, which are a search result and not a document) and WITHHOLDS a partly-permitted entry rather than trimming it, counting it in status instead. The first route in this project whose response validates against its v1 response contract.",
+      "artifact_covered_by": [
+        "RT2-AC1",
+        "RT2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/entry.py",
+      "kind": "script",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "irpt-performance-adapter's guarded entry, and the wiring change handler.py's own docstring asked for. It matters more here than anywhere else: run() sends resolved_scope.scope_ids to the vendor AS THE CALCULATION'S ACCOUNT SET, so a caller-supplied scope was a caller-supplied calculation. No live vendor call is introduced; the transport mode is unchanged.",
+      "artifact_covered_by": [
+        "RT2-AC1",
+        "RT2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/narrative/entry.py",
+      "kind": "script",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "irpt-narrative's guarded entry WITH the scope check on the supplied report. Two different things were missing: no wrapper, and no check on the object -- the guard authorizes the CALLER and the report arrives in the request, so a guarded caller could still narrate another firm's report. The refusal reports COUNTS, never ids.",
+      "artifact_covered_by": [
+        "RT2-AC1",
+        "RT2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/entry.py",
+      "kind": "script",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "irpt-export-render's guarded entry for the three export routes, including the NEW export-status read -- a READ, not a render, so a caller polling for status cannot make a render happen by polling. handler.py is DELIBERATELY NOT EDITED (row W2-S22). The receipt key's firm segment comes from the verified principal.",
+      "artifact_covered_by": [
+        "RT2-AC1",
+        "RT2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/entry.py",
+      "kind": "script",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "irpt-ycharts-generate's guarded REQUEST handler for POST /analysis. The route pointed a browser at a QUEUE CONSUMER, which answered with the worker's consent refusal -- a correct sentence about the wrong question. The request half accepts the browser's fields, REFUSES any server-owned field rather than overwriting it, mints identity from the verified principal, and enqueues. The queue half (job.lambda_handler) is UNCHANGED and keeps its consent gate.",
+      "artifact_covered_by": [
+        "RT2-AC1",
+        "RT2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/directory/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "handler re-pointed to entry.lambda_handler. NOT APPLIED: arm (e) is blocked three ways and this cell opened no ledger entry. STAGED-AWAITING-GATE is the honest state: the declaration has changed and the world has not.",
+      "artifact_covered_by": [
+        "RT2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/performance/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "handler re-pointed to entry.lambda_handler. NOT APPLIED.",
+      "artifact_covered_by": [
+        "RT2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/narrative/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "handler re-pointed to entry.lambda_handler. NOT APPLIED.",
+      "artifact_covered_by": [
+        "RT2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/export/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "handler re-pointed to entry.lambda_handler. NOT APPLIED, and this root is the one another cell is applying this window (row W2-S22).",
+      "artifact_covered_by": [
+        "RT2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ycharts/generate.tf",
+      "kind": "terraform",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "handler re-pointed from job.lambda_handler to entry.lambda_handler -- the request half, not the queue consumer. NOT APPLIED.",
+      "artifact_covered_by": [
+        "RT2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/PATH_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 entries appended for cell B3 (IB-rt-2); entries_total 348 -> 358. Append only -- no existing entry rewritten or deleted.",
+      "artifact_covered_by": [
+        "RT2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/RT2_test_principal_human_gated.md",
+      "kind": "doc",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ARM (f). The mint path named by secret NAME only, the three reasons a worker may not walk it, and the operator's exact act in four steps ending in a verified delete -- plus the thing that would otherwise be over-read: the act belongs AFTER the deploy. 0 secret values in the record.",
+      "artifact_covered_by": [
+        "RT2-AC1",
+        "RT2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rt_2.py",
+      "kind": "test",
+      "commit_or_etag": "4356085122",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Arms (a)-(g), 10 graded arms. Emits IBRT2-SIX-GUARDED only when every arm passes; at this commit it prints 'BLOCKED: 3 of 10 arms FAIL or are BLOCKED -- the token is withheld.' Its counts read the pytest run's own JUnit XML, never the terminal prose, and a prefix that matches nothing is printed as VACUOUS.",
+      "artifact_covered_by": [
+        "RT2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rt_2.result.md",
+      "kind": "doc",
+      "commit_or_etag": "3009ce540b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The full run record: every arm, every denominator, the four defects this cell found in itself, and the nine rows.",
+      "artifact_covered_by": [
+        "RT2-AC1",
+        "RT2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "RT2-AC1",
+      "criterion_verbatim": "RT2-AC1 -- PASSES BY OUTPUT -- the census reads zero on the real file, the control reads one, every refusal is the envelope, the principal is real or the gate is named. (a) ZERO OF N, AND THE CONTROL. unguarded_routes() over docs/contracts/investor-reporting/v1/routes.json at HEAD reads 0 of N (N = handler-bearing routes, printed); the throwaway copy with one handler unregistered reads 1 of N. (b) SIX SWAPS ON EACH OF THE SIX, IN-PROCESS. For each of the six handlers: swapped firm / advisor / account / relationship / report / PDF identifiers refused with 0 protected bytes (byte census per swap); a valid principal served; 36 of 36 refusals. (c) THE FIRM COMES FROM THE PRINCIPAL. A request whose body or path carries a different firm than the verified principal is refused FIRM_BINDING; a reconciling pair is served; printed. (d) THE PROJECTION IS ON THE SERVED PATH. Through the real directory dispatcher: a grant present with no projection -> UNPROJECTED-ID refusal; a grant with the projection -> the narrowed intersection (N of M accounts, printed). (e) DEPLOYED AND VERIFIED. For each function changed: get-function-configuration CodeSha256 equals the built zip's; each root's plan after the apply reads No changes (printed per root); ledgers CLOSED with sentinels committed (hashes). (g) ENVELOPE CONFORMANCE, SERVED (amendment, row W2-S16). IB-rt-1's paired producer-to-consumer test re-run against the DEPLOYED functions (invoke by name with the validator's injected header set): 11 of 11 responses validate against their response schema and data against the document schema; a mismatched X-Contract-Version refused CONTRACT_VERSION on 11 of 11; printed per operation. ISSUER AMENDMENT: arm (g)'s denominator is the ROUTES THAT HAVE A DEPLOYED HANDLER AT THIS CELL'S HEAD, printed as N of N, with the one published route that has NO handler at HEAD (holdings-snapshot, IB-rt-7's) named and EXCLUDED on its own line, never counted as a pass or a fail. (f) THE PRINCIPAL. Either: one authenticated request through the real path served and one swapped-firm request refused, the principal minted through the named existing path (secret names only, no values); or: the HUMAN-GATED record printed verbatim naming the operator's exact act -- and the arm reads HUMAN-GATED, which is admitted by this criterion as a PASS of the arm's own rule, never as a skip.",
+      "method": "command",
+      "invocation": "timeout 900 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rt_2.py",
+      "output_evidence": "rc=0 AND THE TOKEN IS WITHHELD -- the battery's last lines read verbatim: '  7 of 10 arms PASS' then 'BLOCKED: 3 of 10 arms FAIL or are BLOCKED -- the token is withheld.' The expected token IBRT2-SIX-GUARDED does NOT appear in the output. || THE MEASUREMENT TAKEN BEFORE ANYTHING WAS BUILT: the census over the REAL declared entry points read 11 of 11 routes UNGUARDED, not the 6 of 11 this face inherits -- every one of the six dispatched functions' declared entry point was unwrapped, including the five the summary treats as already done (row IRPT_BCKEND-W2-S20). The old number counted a table the round-1 battery had partly populated itself. The population here is DERIVED from three artifacts nobody writes for the census's benefit: routes.json, lambda-source-map.json (source_dir + tf_file), and that Terraform file's own handler = \"<module>.<attr>\". || ARM (a1) ZERO IN LANE -- PASS: '0 of 8 route(s) this order may open reach an unguarded handler', over a printed denominator of '12 published route(s) = 11 with a declared handler + 1 without', with holdings-snapshot EXCLUDED and named. || ARM (a2) ZERO OVER THE WHOLE FILE -- **BLOCKED**: '3 of 11 route(s) still reach an unguarded handler and ALL 3 dispatch to irpt-status'. The criterion's bar is 0 of N with N = 11. infra/aws/lambda/investor-reporting/ops/ and infra/aws/terraform/investor-reporting/ops/ appear in NEITHER half of this order's <paths>; BLOCKING row IRPT_BCKEND-W2-S19, disarm owner 2.0.0_SA_COO~B. Not graded around and no override taken. || ARM (a3) THE CONTROL FIRES -- PASS: '3 of 3 victim(s) moved the verdict to 1 of 8', on a throwaway copy of the TABLE and never of a handler; nothing in the real tree is patched. THREE victims rather than one, because a control that only removes the first entry cannot tell a working census from one that checks index 0. AND THE MARK IS EARNED: served.py runs the REAL guard decorator at import and refuses to load if the result is not marked, and Entry.handle re-asserts it per request -- a module that merely SET __irpt_guarded__ would make the census agree with it by construction. || ARM (b) THE SWAPS -- PASS on what is reachable: '30 of 30 in-lane swaps hold and 5 of 5 difference controls hold'. THE BAR IS 36 of 36 ACROSS SIX HANDLERS; 30 of 36 are measured and 6 of 36 are irpt-status's and out of lane. Per-swap codes printed: firm -> FIRM_BINDING on 5 of 5; account/relationship/report/pdf -> OBJECT_NOT_COVERED on 20 of 20; advisor -> REFUSED on 4 and SERVED-WITHOUT-WIDENING on 1. 'REFUSED' IS THE WRONG BAR FOR THE ADVISOR SWAP AND SAYING SO IS THE POINT: ADVISOR_B is a real advisor of the same firm with a grant of its own, so a LIST operation answering it is correct -- the answer is DIFFERENT, not refused -- and what must hold is that it never WIDENS: 0 of 7 of the authorized advisor's ids appear in the swapped advisor's answer. BYTE CENSUS, RELATIVE TO WHO IS ASKING: 0 protected bytes in 30 of 30. A5 and ADVISOR_B are advisor B's OWN account and id -- protected from A, not from B -- and the caller's own firm id is present because the v1 envelope requires it; a list that protected them unconditionally would fail on a right answer. THE DIFFERENCE CONTROL: the same recorded artifacts SERVE the authorized request and REFUSE every swap; if the substitution were doing the work, both would look the same. || ARM (c) THE FIRM IS THE PRINCIPAL'S -- PASS: '5 of 5 functions refuse a request-controlled firm token with FIRM_BINDING and never echo it; 5 of 5 serve a reconciling claim'. The firm comes from the edge validator's injected X-Firm-Id; a firm in the body, the path or the query is a CLAIM and is compared and then dropped, never logged. || ARM (d) THE PROJECTION -- PASS: '5 of 5 functions refuse UNPROJECTED_GRANT on a grant whose ids never join, and 5 of 5 distinguish it from a revoked grant'. The two are INDISTINGUISHABLE IN THE RESULT -- a viewer with an unjoinable grant and a viewer with no grant both receive nothing -- and only the order of the checks tells them apart; the revoked case is what holds that order in place. || ARM (b/c/d) THE ENVELOPE -- PASS: '5 of 5 refusals carry a full StatusEnvelope' -- operation, one of the nine states, source dates, SAFE-only actions, a public reason CODE and an opaque correlation id from the estate's own minter. || ARM (e) DEPLOYED AND VERIFIED -- **BLOCKED**: '0 of 5 roots applied, 0 of 5 CodeSha256 verified, 0 ledger entries opened', for THREE INDEPENDENT reasons. (1) THE BUILD INPUTS DO NOT RESOLVE (row W2-S21): irpt-ycharts-generate declares 25 files of which 7 have NEVER existed in this repository -- git ls-tree at 88c97c1529, the commit IB-s-9's CLOSED ledger names as 'the COMMITTED source ... 25 members, byte-identical rebuild', does not carry them -- irpt-status declares 7 of which 5 are absent, and irpt-directory-search fails the builder's own disk-to-manifest parity check because two functions share one source dir. (2) ANOTHER CELL IS APPLYING THE EXPORT FUNCTION THIS WINDOW (row W2-S22), per the issuer's own hand-off. (3) THE SHARED CODE HAS NO IN-LANE CARRIER (row W2-S24): _authz reaches the zips through the irpt-common LAYER, whose source dir, build script and lambda-layer-map.json are outside this order's <paths>, and the layer was republished as v5 at 13:08Z today by another cell; the per-function alternative is vendoring and 0 of 7 IRPT lambda directories carry the BUILD_MANIFEST.json the estate's own vendor-manifest.sh reads. || ARM (f) THE PRINCIPAL -- PASS OF THE ARM'S OWN RULE: 'HUMAN-GATED: 9 of 9 required elements present and 0 secret values'. The mint path EXISTS and is named by secret NAME only (opal/auth/jwt-private-key, opal/auth/jwt-public-key, DynamoDB opal-users-v2, the firmId claim, the authorizer's CodeSha256) with a precedent that closed cleanly; a worker may not walk it because it is outside <paths>, it is a write to the production authentication plane, and the alternative is a worker reading a private key to mint itself an identity. The record also states the thing that would otherwise be over-read: THE OPERATOR ACT BELONGS AFTER THE DEPLOY -- run today it would reach the old unguarded handler and return a passing-looking 200 from the very code this cell replaces. || ARM (g) ENVELOPE CONFORMANCE, SERVED -- **BLOCKED**: '0 of 11 DEPLOYED responses measured', because nothing was deployed; the amendment's denominator (routes with a DEPLOYED handler at this HEAD) is 0 and a 0 of 0 is printed as VACUOUS, never as a pass. IN PROCESS: 'served-and-conforming: 1 of 5 in-lane function(s)' -- directory-search is the FIRST route in this project whose response validates against its v1 response contract -- and the X-Contract-Version check reads 'mismatched refused CONTRACT_VERSION 5 of 5; absent refused too 5 of 5', WITH THE STORAGE LOADERS REPLACED BY FUNCTIONS THAT RAISE, which is the proof that nothing was read before the version was checked rather than an assertion about it. The other 4 refuse for their own reason, and NO REFUSAL CAN EVER VALIDATE AGAINST A RESPONSE CONTRACT (row W2-S25): v1 requires firm_id (the opaque id, which only exists inside a firm's directory artifact) and data (the document, no null branch), and a version refusal must answer BEFORE any bucket is read. || FOUR DEFECTS THIS CELL FOUND IN ITSELF BEFORE THEY COULD BE SERVED, each caught only by printing the deciding value rather than the verdict: the published operation ids are hyphenated and _keys.OPERATION_RE admits no hyphen, so EVERY guarded request was refused KEY_REFUSED -- a legitimate code, so a refused-or-not assertion passed and only the per-swap CODE showed all thirty were refused for one wrong reason (row W2-S26); five entry modules and the shared boundary were all named `entry`, which in a flattened zip is the deployed function importing itself; three handler.py plus job.py and status.py share one interpreter in process, so performance got the DIRECTORY handler and raised AttributeError that the boundary classified as UNEXPECTED -- a wrong answer with a plausible code; and two authorized requests landed in the residual reason, which each function now fills with the refusal classes only IT raises, consulted ONLY after the estate's own rule returns UNEXPECTED. || WHAT WAS NOT DONE, DELIBERATELY: no root was applied and no ledger entry opened; export/handler.py was not edited; errors.py's closed PUBLIC_REASONS was not extended; ops/ was not opened; no layer was rebuilt; no secret value was read; no IAM was granted; no vendor call was made.",
+      "denominator": "7 of 10 arms PASS, 3 BLOCKED, token WITHHELD. Within them: 12 published routes = 11 handler-bearing + 1 excluded and named; 0 of 8 in-lane routes unguarded and 3 of 11 whole-file (all three irpt-status's, out of lane); 3 of 3 control victims move the verdict to 1 of 8; 30 of 30 in-lane swaps hold out of a 36-of-36 bar, with 0 protected bytes in 30 of 30 refusals; 5 of 5 difference controls; 5 of 5 firm refusals and 5 of 5 reconciling claims; 5 of 5 UNPROJECTED_GRANT and 5 of 5 revoked-grant discriminations; 5 of 5 full StatusEnvelopes; 0 of 5 roots applied and 0 of 5 CodeSha256 verified; 9 of 9 elements in the HUMAN-GATED record with 0 secret values; 0 of 11 deployed responses (VACUOUS, not a pass) with 1 of 5 conforming in process and 5 of 5 version refusals; 104 of 104 pytest cases pass. THE DENOMINATORS THAT DECIDE ARE 3 of 11, 0 of 5 and 0 of 11.",
+      "status": "FAIL",
+      "status_reason": "THREE ARMS ARE BLOCKED BY CONDITIONS THIS ORDER'S <paths> CANNOT REACH, AND THE ORDER STAYS OPEN. (a2) the criterion's bar is 0 of N with N = 11 handler-bearing routes; 3 of them dispatch to irpt-status and neither its source dir nor its Terraform root is in the grant (row W2-S19). (e) nothing was applied: the build inputs of three of the six functions do not resolve at all -- seven files the ycharts zip declares have never been in this repository (row W2-S21) -- another cell is applying the export function this window on the issuer's own statement (row W2-S22), and the shared code has no in-lane carrier to the zips because the layer and its map are out of lane and the layer was republished by another cell at 13:08Z today (row W2-S24). (g) with nothing deployed, the amendment's denominator is 0 and a 0 of 0 is VACUOUS. Each blocked arm carries a BLOCKING row with disarm owner 2.0.0_SA_COO~B and each states its remedy shapes without preference. NOTHING WAS WIDENED TO MAKE AN ARM PASS: no ops/ file was opened, no export handler edited, no layer rebuilt, no closed enum extended, no secret read, no IAM granted. The seven arms that pass are met on the REAL entry points -- and the work they cover is LARGER than the face's inherited summary, because the census read 11 of 11 unguarded rather than 6 of 11. A VALID instance is not a met order.",
+      "expect": "IBRT2-SIX-GUARDED"
+    },
+    {
+      "criterion_id": "RT2-AC2",
+      "criterion_verbatim": "RT2-AC2 -- JUDGMENT, RECORDED AND NOT SELF-GRADED. State for 3.0.0_SA_CVO: which of the six were unguarded for a reason that ALSO protected them (the consent gate, the identity-less request shape, the absent operation) and whether guarding changed that protection; whether the test principal, if minted, differs from a real advisor's in any claim the validator reads; and what the in-process swaps cannot show that IB-rtb-1's real-path run must. No verdict: the instance row carries the output under UNVERIFIABLE-BY-INSTRUMENT with status_reason naming 3.0.0_SA_CVO at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "Direct source reads and measured runs at branch HEAD, each named so the CVO can re-derive with a different instrument: ycharts/generate/job.py:586-610 (the consent gate); export/ at fa89acb5d3 (no status operation; dispatch.py is the SSM render dispatcher); performance/handler.py:160-177 and narrative/handler.py:216-240 (both read the scope or the report OUT OF THE REQUEST); directory/handler.py:316-342 (same); infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts:8,162-193 (the claims a real session carries) and src/db.ts:21 (opal-users-v2); infra/aws/lambda/lib/authkeys/jwtPublicKeys.mjs:57 (what the authorizer verifies); infra/aws/terraform/partners-api/api-gateway.tf (13 authorizer_id references, 0 caching declarations); performance/tenants.py:81,91,101 (the third firm id spelling). Full text: org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rt_2.result.md and RT2_test_principal_human_gated.md.",
+      "output_evidence": "(1) WHICH OF THE SIX WERE UNGUARDED FOR A REASON THAT ALSO PROTECTED THEM, AND WHETHER GUARDING CHANGED THAT PROTECTION. Measured, not assumed -- and the honest denominator is SIX of six unguarded, not three (row W2-S20). (i) irpt-ycharts-generate WAS protected, and by the strongest thing in the project: job.lambda_handler reads Andrew's per-use consent from the environment and REFUSES a live YCharts call outright. A browser request reaching it got that refusal -- a correct sentence about the wrong question. GUARDING CHANGED THE PROTECTION'S SHAPE AND MADE IT STRONGER: the request half is now a separate entry that never touches the vendor at all, so there is no path from an HTTP request to a YCharts call to gate; the queue half keeps its consent gate UNCHANGED and is still what the irpt-generation queue drives. The gate was not relaxed, removed or duplicated. (ii) irpt-export-render WAS protected by an ABSENT OPERATION: there was no export-status read, so the route answered the controller's capabilities blob. Guarding ADDED the operation, which is a new reachable surface -- so the protection that came from absence is gone and is replaced by an explicit one: the receipt key's firm segment is built from the VERIFIED principal, so a caller holding another firm's export id reads a key that does not exist rather than another firm's receipt, and that check sits BELOW the scope check rather than instead of it. submit-export is deliberately NOT wired to the controller (another cell is changing it this window) and refuses NOT_READY. (iii) irpt-narrative and irpt-performance-adapter were protected by NOTHING, and both were worse than unguarded: each read the viewer's scope OUT OF THE REQUEST. performance passes resolved_scope.scope_ids to the vendor AS THE CALCULATION'S ACCOUNT SET, so a caller-supplied scope was a caller-supplied CALCULATION, not merely a caller-supplied filter; narrative built a packet from a report the request supplied, so even a guarded caller could hand in another firm's report. Guarding closed both, and narrative needed BOTH halves -- the guard authorizes the CALLER and the object arrives in the request. (iv) irpt-directory-search was protected by its own projection rules, which are correct and enforce nothing while the caller supplies the scope they filter by. (v) irpt-status is the sixth and this order may not open it (row W2-S19); whether its three routes were protected by anything is NOT ASSERTED here, because this cell did not read its code for that purpose. || (2) WHETHER THE TEST PRINCIPAL DIFFERS FROM A REAL ADVISOR'S IN ANY CLAIM THE VALIDATOR READS. IT WAS NOT MINTED -- the arm is HUMAN-GATED -- so this is answered about the PRESCRIPTION rather than about an artifact. The record prescribes a principal that differs in NO claim the validator reads: firmId = 49financial (an EXISTING entitlement class, not a new one), a real advisor id from that firm's ownership map, role/userType/partner identity as a real advisor carries them. The ONLY differences are outside the claim set -- a reserved-TLD e-mail (`@opal.test`, which can never receive mail), no MFA enrolment and no phone number, and a lifetime bounded by one run ending in a verified delete. THAT INDISTINGUISHABILITY IS THE POINT AND IS ALSO THE HAZARD: a principal the authorizer cannot tell from a real advisor is exactly what makes the test meaningful and exactly why a worker may not create one. || (3) WHAT THE IN-PROCESS SWAPS CANNOT SHOW THAT IB-rtb-1's REAL-PATH RUN MUST, enumerated by SUBTRACTION from the request path rather than by recall. (i) THE HEADERS ARE SUPPLIED HERE: every case hands the boundary the nine injected headers, so the swaps prove what the boundary does GIVEN them and nothing about whether auth-validator-edge injects them for a real token -- and the whole firm decision rests on X-Firm-Id being the VERIFIED half. (ii) THE AUTHORIZER'S RESULT CACHE: naqxlm returns a prior allow for its TTL and that TTL is not declared in partners-api/api-gateway.tf, so a revocation's time-to-effect is unmeasurable in process; the warm-cache arm here reauthorizes against a CURRENT resolve, which is a different cache. (iii) WHETHER THE DEPLOYED BYTES ARE THESE BYTES: nothing was deployed (arm (e)), so every route still serves the OLD unguarded handler and the census's 0 of 8 is a statement about the SOURCE, not the served plane. (iv) CLOUDFRONT PRECEDENCE among 28 ordered behaviors -- an in-process call never consults an ordered list. (v) THE STORAGE BOUNDARY: the swaps read recorded artifacts, so they cannot show that the firm->bucket map resolves live, that the ownership map is where the loader looks, or that a real directory artifact declares the opaque id the binding proves against. (vi) THE THIRD FIRM ID SPELLING (row W2-S27): performance/tenants.py routes on F-49F/F-COT/F-INF, so an AUTHORIZED, correctly scoped request cannot resolve a vendor route at all -- it refuses DEPENDENCY_UNAVAILABLE, and only a real-path run against a real firm shows what a caller actually receives. || (4) OFFERED UNASKED, BECAUSE IT DECIDES RT2-AC1: three arms are BLOCKED and none of the three is a judgment this worker may make. ops/ is out of lane; the export function is held by another cell this window; and the shared code has no in-lane carrier to the zips. Each is a row with disarm owner 2.0.0_SA_COO~B, and each states its remedy shapes WITHOUT PREFERENCE -- a worker judges a surprise's form, never its significance.",
+      "denominator": "SIX of six dispatched functions were unguarded (not three); of the five this order may open, 1 was protected by a consent gate, 1 by an absent operation, 3 by nothing -- and 2 of those 3 were WORSE than unguarded because they read the viewer's scope out of the request. The sixth (irpt-status, 3 of 11 routes) is out of lane and is NOT assessed. The principal: 0 minted, 5 claims prescribed identical to a real advisor's, 3 differences all outside the claim set. What the in-process run cannot show: 6 items, enumerated by subtraction from the request path.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT CRITERION -- carried with its output and NO verdict. The oracle is 3.0.0_SA_CVO at L9. Note for that reading: this instance's other row (RT2-AC1) is a FAIL, so the order is not flipped and both rows arrive together.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "status": "FIRED-AS-EXPECTED",
+      "expected": "Each control was built to be capable of failing on THIS cell's own work: the census to read non-zero when a handler is unregistered; the swaps to serve the authorized request and refuse the swapped one from the SAME recorded artifacts; the version check to raise rather than refuse if anything read storage first; the revoked grant NOT to read as an unprojected one; the byte census to fail on another principal's ids.",
+      "observed": "FOUR CONTROLS FIRED ON THIS CELL'S OWN WORK BEFORE ANY CLAIM WAS MADE, and each had produced a PLAUSIBLE-LOOKING RESULT first. (1) Printing the refusal CODE per swap showed all thirty were refused KEY_REFUSED -- a legitimate member of the vocabulary -- because the published operation ids are hyphenated and _keys.OPERATION_RE admits no hyphen; a refused-or-not assertion had passed. (2) The in-process census refused to resolve five entry points with 'partially initialized module', which is the deployed function importing itself: five entry modules and the shared boundary were all named `entry`. (3) After that, performance's authorized request read UNEXPECTED because three handler.py plus job.py and status.py share one interpreter and it had bound the DIRECTORY handler -- a wrong answer with a plausible code. (4) Two authorized requests landed in the residual reason, which the estate's own enum calls a MEMBER and not an escape hatch. THE REST HELD: 3 of 3 control victims moved the census verdict; 5 of 5 difference controls; the version refusal holds with the storage loaders replaced by functions that raise; the revoked grant does not read as unprojected; and the byte census caught its own first definition, which listed the CALLER'S OWN firm id as protected and so failed on every correct answer.",
+      "description": "One control per claim that could pass while being false. THE CENSUS: its population is derived from three artifacts nobody writes for it, and a throwaway copy with one handler unregistered must read 1 of N for three different victims. THE MARK: served.py runs the real guard decorator at import and refuses to load unmarked, so the census cannot be satisfied by a module setting an attribute. THE SWAPS: a DIFFERENCE control -- the same recorded artifacts must SERVE the authorized request, or the thirty negatives prove nothing. THE VERSION CHECK: exercised with the storage loaders REPLACED BY FUNCTIONS THAT RAISE, so 'checked first' is proven rather than asserted. THE PROJECTION: paired with a REVOKED grant, because UNPROJECTED and EMPTY are indistinguishable in the result. THE BYTE CENSUS: relative to who is asking, so it cannot pass by protecting nothing or fail by protecting the caller's own id. THE ADVISOR SWAP: asserted on WIDENING rather than on refusal, because a list operation answering a different advisor is correct behaviour."
+    },
+    "determinism": {
+      "status": "STABLE",
+      "method": "The battery and both pytest suites re-run at the same HEAD with no argument or environment change; the arm verdict lines and every denominator compared.",
+      "observed": "Identical: 7 of 10 arms PASS and the token withheld on every run; 104 of 104 pytest cases pass. No network call, no AWS call, no vendor call, no deploy -- every input is a file in the worktree, so there is no non-local input at all."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Guarding the three routes that dispatch to irpt-status",
+      "reason": "OUT OF LANE. infra/aws/lambda/investor-reporting/ops/ and infra/aws/terraform/investor-reporting/ops/ are in NEITHER half of this order's <paths>. BLOCKING row IRPT_BCKEND-W2-S19, disarm owner 2.0.0_SA_COO~B. No ops/ file was opened for edit."
+    },
+    {
+      "item": "Applying any Terraform root, and opening any change-management ledger entry",
+      "reason": "BLOCKED THREE INDEPENDENT WAYS, each a row: the build inputs of three of the six functions do not resolve at HEAD (W2-S21); another cell is applying the export function in this window on the issuer's own statement (W2-S22); and the shared code has no in-lane carrier to the zips (W2-S24). A deploy whose input cannot be reproduced, on a function another cell is applying, is the half-landed state NEVER-2 exists to prevent. A ledger entry was NOT opened, because opening one for an act that will not happen publishes a false OPEN."
+    },
+    {
+      "item": "Editing infra/aws/lambda/investor-reporting/export/handler.py",
+      "reason": "REFUSED ON THE ISSUER'S OWN INSTRUCTION at hand-off, and the guard was put where the <paths> allow instead -- a new module that becomes the entry point by its Terraform handler string. Row W2-S22 records that the instruction and the grant point opposite ways on the same directory."
+    },
+    {
+      "item": "Adding CONTRACT_VERSION to _authz/errors.py's closed PUBLIC_REASONS",
+      "reason": "NOT THIS CELL'S EDIT. errors.py is IB-rt-4's, IB-rt-4 is live in another slot this hour, and adding a member to a closed enum is a schema change that Rule 24 says arrives with its four-postulate record and a token census -- a proposal, not a worker's mid-round edit. The boundary derives its own vocabulary AS errors.PUBLIC_REASONS PLUS exactly two, each named with its reason, and builds the StatusEnvelope itself while still taking the correlation id from the one minter. Row W2-S23."
+    },
+    {
+      "item": "Minting a test principal",
+      "reason": "HUMAN-GATED, which the criterion admits as a PASS of the arm's own rule and never as a skip. The mint path exists and is named; a worker may not walk it (outside <paths>, a write to the production authentication plane, and the alternative is reading a private key to mint itself an identity). No secret value was read; no new permission, user pool or vendor call was created."
+    },
+    {
+      "item": "Reconciling the third firm id spelling in performance/tenants.py",
+      "reason": "NOT REPAIRED HERE (row W2-S27). The tenant table routes on F-49F/F-COT/F-INF -- neither the registry spelling nor the issued opaque id -- so an authorized request cannot resolve a vendor route. Inventing a mapping in this cell would put a FOURTH definition of one id space in the estate; which of them is the id space is not a worker's call. The boundary classifies the refusal so it does not reach a caller as the residual."
+    },
+    {
+      "item": "Any live vendor call, monitor, alarm, SNS or SES send",
+      "reason": "Bounds 1 and 2. Measured rather than asserted: the ycharts REQUEST half has no vendor import in its closure at all, and the QUEUE half's consent gate is unchanged -- so the request path is not merely ungated, it has nothing to gate. The performance transport mode is unchanged and still `recorded`."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W2-S19: BLOCKING -- three of the eleven handler-bearing routes dispatch to irpt-status, whose source dir and Terraform root are in neither half of this order's <paths>, so arm (a) cannot read 0 of 11. ARMED: disarm owner 2.0.0_SA_COO~B.",
+    "IRPT_BCKEND-W2-S20: the real census reads 11 of 11 unguarded, not the face's inherited 6 of 11 -- the old number counted a table the round-1 battery had partly populated itself, which is row W1-S10's own lesson recurring inside the summary that records it.",
+    "IRPT_BCKEND-W2-S21: BLOCKING -- two served functions cannot be rebuilt from committed source (seven of irpt-ycharts-generate's twenty-five declared build inputs have never been in this repository, and a CLOSED ledger entry records a byte-identical rebuild from a commit that does not carry them); a third fails the builder's parity check because two functions share one source dir. ARMED: disarm owner 2.0.0_SA_COO~B.",
+    "IRPT_BCKEND-W2-S22: BLOCKING -- two cells are pointed at one served function in one window: the issuer's hand-off says IB-rt-4 is re-applying the export function from slot ~3 while this order's <paths> grant it to this cell. ARMED: disarm owner 2.0.0_SA_COO~B.",
+    "IRPT_BCKEND-W2-S23: the ONE error envelope's closed PUBLIC_REASONS cannot express CONTRACT_VERSION, which arm (g) requires as the served public reason; v1's own StatusEnvelope admits it, so the boundary builds the envelope itself rather than editing another cell's closed enum mid-round.",
+    "IRPT_BCKEND-W2-S24: BLOCKING -- the guard is written and has no in-lane carrier to the five zips: _authz is distributed by the irpt-common LAYER, whose source dir, build script and layer map are outside this order's <paths>, and the layer was republished as v5 at 13:08Z today by another cell. ARMED: disarm owner 2.0.0_SA_COO~B.",
+    "IRPT_BCKEND-W2-S25: v1's response contracts cannot represent a refusal at all -- firm_id (the opaque id, knowable only after a bucket read) and data (the document, no null branch) are both required -- so refusals use the second shape the amendment names, with a StatusEnvelope on both.",
+    "IRPT_BCKEND-W2-S26: the published operation ids are hyphenated and _keys.OPERATION_RE admits no hyphen, so every guarded request was refused KEY_REFUSED for a reason that had nothing to do with the caller; the boundary now converts once and refuses at CONSTRUCTION if a published id has no admissible key spelling.",
+    "IRPT_BCKEND-W2-S27: a THIRD firm id spelling -- performance/tenants.py routes on F-49F/F-COT/F-INF, neither the registry spelling nor the issued opaque id -- so an authorized, correctly scoped performance request cannot resolve a vendor route at all."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rt_2.result.md",
+  "compiler_tools": [
+    {
+      "tool": "battery_ib_rt_2.py (the RT2-AC1 acceptance battery, arms a-g / 10 graded arms)",
+      "invocation": "timeout 900 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rt_2.py",
+      "result": "rc=0, 7 of 10 arms PASS, 3 BLOCKED, TOKEN WITHHELD. The battery prints: 'A battery that prints its token beside a blocked arm is not evidence, it is a signature.'"
+    },
+    {
+      "tool": "pytest (Python 3.12) over the two _authz suites",
+      "invocation": "timeout 600 python -m pytest infra/aws/lambda/investor-reporting/_authz/tests/ -q",
+      "result": "104 passed in 6.6s (7 census cases + 70 guarded-entry cases + 27 pre-existing)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "run over all 11 .py files this cell wrote, before the commit",
+      "result": "OK: pre-commit gate clean for 11 of 11 file(s)"
+    },
+    {
+      "tool": "comp-iam service (preflight, Phase 1)",
+      "invocation": "comp-iam service irpt-ycharts-generate | irpt-narrative | irpt-export-render | irpt-performance-adapter | irpt-directory-search",
+      "result": "4 of 5 resolved -- irpt-ycharts-generate-role (7 statements), irpt-narrative-role (4), irpt-export-render-role (7), irpt-performance-adapter-role (1). irpt-directory-search returned NOTHING: its role is named irpt-directory-role, so the function-name lookup does not reach it. BLIND SPOT, stated: DESIRED plane only, and no IAM was granted or applied by this cell -- nothing in the five roles changed."
+    }
+  ]
+}
