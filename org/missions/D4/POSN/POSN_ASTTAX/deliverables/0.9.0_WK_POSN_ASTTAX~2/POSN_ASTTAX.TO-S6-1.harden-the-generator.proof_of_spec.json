@@ -1,0 +1,236 @@
+{
+  "schema_version": "1.0",
+  "to_id": "POSN_ASTTAX.TO-S6-1",
+  "decomp_ref": {
+    "doc": "org/missions/D4/POSN/POSN_ASTTAX/decompositions/POSN_ASTTAX_DECOMP_round2.md",
+    "vintage_commit": "2b07a3431409f95f3ba768ad2a9ac431f66a9e55",
+    "to_ref": "org/missions/D4/POSN/POSN_ASTTAX/task-orders/POSN_ASTTAX.TO-S6-1.harden-the-generator.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D4/POSN/POSN_ASTTAX/prd/POSN_ASTTAX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "66ded3a0c56009fcdef37635d9ef793dbfce3fc5"
+  },
+  "assignee": "0.9.0_WK_POSN_ASTTAX~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NOT DEPLOYED, by this order's BOUNDS ('DO NOT DEPLOY. Commit the source change') and by CLAUDE.md section 5 ('NEVER aws lambda update-function-code -- Terraform only'). No deploy command of any kind was run; the serving Lambda still runs the pre-fix bytes until a Terraform-plane act lands, which is outside this order's write surface. The change is proved at the SOURCE level by S6-AC5, which loads both byte-vintages directly.",
+      "introduces": [
+        "if isinstance(value, str) and value.strip().lower() == 'unknown':",
+        "asset_allocations.get(asset_class, 0) + weight * 100",
+        "management_allocations.get(management_style, 0) + weight * 100",
+        "WARN: calculate_allocations: unseeded asset_class",
+        "WARN: calculate_allocations: unseeded management_style"
+      ],
+      "artifact_covered_by": [
+        "S6-AC1",
+        "S6-AC2",
+        "S6-AC4",
+        "S6-AC5",
+        "S6-AC6",
+        "S6-AC7"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~2/ac5_negative_control.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local, read-only negative control (no AWS call, no write, nothing deployed). It loads two byte-vintages of the generator in one process and exits non-zero unless the pre-fix arm RAISES and the post-fix arm COMPLETES; committed so a verifier can re-run S6-AC5 rather than trust its transcript.",
+      "artifact_covered_by": [
+        "S6-AC5"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~2/ac7_visibility_instruments.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local, read-only instrument set for the JUDGMENT criterion (no AWS call, no write, nothing deployed). Committed so the CVO's L9 grade can re-run the readings it is grading instead of reading a summary.",
+      "artifact_covered_by": [
+        "S6-AC7"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Append-only channel file; four rows appended by this worker (POSN_ASTTAX-Z-W2-S1..S4) in three new fenced blocks, no existing row edited. Not a deployable artifact.",
+      "artifact_covered_by": [
+        "S6-AC6"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/task-orders/POSN_ASTTAX.TO-S6-1.harden-the-generator.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The task order itself: <status> flipped staged -> complete after proof-of-spec-check.py returned rc=0 on this instance with all seven expected ids. Not a deployable artifact.",
+      "artifact_covered_by": [
+        "S6-AC6"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S6-AC1",
+      "criterion_verbatim": "both allocation dicts and both subscript sites pasted verbatim, with the literal keys of each dict enumerated and the two subscript line numbers named.",
+      "method": "command",
+      "invocation": "timeout 120 sed -n '218,246p' infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py   [run pre-edit @2d8b5f7314; reproducible byte-identically as `MSYS_NO_PATHCONV=1 git show <this-commit>^:<gen> > /tmp/pre.py && sed -n '218,246p' /tmp/pre.py`. The post-edit re-read of the same region is `timeout 120 sed -n '227,272p' <gen>`.]",
+      "output_evidence": "INVOCATION RUN VERBATIM AT THE PRE-EDIT VINTAGE (@2d8b5f7314, the premise re-take this\ncriterion asks for), rc=0. Reproduced here byte-identically by running the same sed against the\npre-edit blob extracted with `MSYS_NO_PATHCONV=1 git show HEAD:<gen>` (94164 bytes, identical to\nthe file as read when the criterion was first run):\n-----8<----- sed -n '218,246p' (pre-edit) -----8<-----\n    Returns:\n        tuple of (asset_allocations, management_allocations)\n    \"\"\"\n    asset_allocations = {\n        'cash': 0,\n        'fixed_income': 0,\n        'equity': 0,\n        'hedge': 0\n    }\n\n    management_allocations = {\n        'active': 0,\n        'passive': 0\n    }\n\n    for holding in holdings:\n        ticker = holding['ticker']\n        weight = holding['weight']\n\n        # Asset class allocation\n        asset_class = classify_etf(ticker)\n        asset_allocations[asset_class] += weight * 100  # Convert to percentage\n\n        # Management style allocation\n        management_style = classify_management_style(ticker)\n        management_allocations[management_style] += weight * 100\n\n    # Round to 1 decimal\n    for key in asset_allocations:\n-----8<----- end -----8<-----\n\nDICT 1 -- asset_allocations, declared pre-edit at :221-226. FOUR literal keys, enumerated from the\noutput above: 'cash', 'fixed_income', 'equity', 'hedge' (each initialised to 0).\nDICT 2 -- management_allocations, declared pre-edit at :228-231. TWO literal keys, enumerated:\n'active', 'passive' (each initialised to 0).\nSUBSCRIPT SITE 1 -- line :239, `asset_allocations[asset_class] += weight * 100`: a DIRECT subscript\non a value returned by classify_etf(ticker), with no .get() and no membership test.\nSUBSCRIPT SITE 2 -- line :243, `management_allocations[management_style] += weight * 100`: same\nshape, on classify_management_style(ticker).\nBoth subscript line numbers named: :239 and :243. Both match the issuer's reading exactly, as do\nboth dict declarations at :221-226 and :228-231 -- the shapes had NOT changed, so the fix proceeded\nas specified rather than being improvised (the order's step 1 condition for stopping was not met).\n\nSAME REGION RE-READ AFTER THE EDIT (the two dicts are unchanged; the two subscripts are the lines\nthis order replaced). The region moved from 218-246 to 227-272 because the fix inserts 30 net lines\n-- filed as POSN_ASTTAX-Z-W2-S2 because the round-2 siblings cite this file by line number:\n-----8<----- sed -n '227,272p' (post-edit) -----8<-----\n\n    Returns:\n        tuple of (asset_allocations, management_allocations)\n    \"\"\"\n    asset_allocations = {\n        'cash': 0,\n        'fixed_income': 0,\n        'equity': 0,\n        'hedge': 0\n    }\n\n    management_allocations = {\n        'active': 0,\n        'passive': 0\n    }\n\n    for holding in holdings:\n        ticker = holding['ticker']\n        weight = holding['weight']\n\n        # Asset class allocation.\n        # TOLERATE AN UNSEEDED CLASS WITHOUT SWALLOWING IT. The registry is an\n        # open vocabulary: a retag can introduce an asset_class these dicts were\n        # never seeded with, and the direct subscript this replaced raised\n        # KeyError -- which killed the generator, left positioning_data.json\n        # unrewritten and blanked the positioning page for every partner firm.\n        # An unseeded value now accumulates under ITS OWN NAME rather than being\n        # folded into a catch-all bucket (which would hide WHICH value arrived),\n        # so it rides the served payload, stays countable, and is logged here.\n        # The canonical keys stay seeded, so every fixed-list consumer of these\n        # dicts keeps finding them. POSN_ASTTAX.TO-S6-1 / cell AT2-s-6.\n        asset_class = classify_etf(ticker)\n        if asset_class not in asset_allocations:\n            print(\"WARN: calculate_allocations: unseeded asset_class %r (ticker\"\n                  \" %s) -- carried under its own key, not dropped\"\n                  % (asset_class, ticker))\n        asset_allocations[asset_class] = (\n            asset_allocations.get(asset_class, 0) + weight * 100)  # Convert to percentage\n\n        # Management style allocation (same rule, same reason)\n        management_style = classify_management_style(ticker)\n        if management_style not in management_allocations:\n            print(\"WARN: calculate_allocations: unseeded management_style %r\"\n                  \" (ticker %s) -- carried under its own key, not dropped\"\n                  % (management_style, ticker))\n        management_allocations[management_style] = (\n-----8<----- end -----8<-----",
+      "denominator": "2 of 2 allocation dicts and 2 of 2 unguarded subscript sites, out of the 29 lines printed by the named window (218-246); 6 of 6 literal keys enumerated (4 asset + 2 management). Whole-file denominator for the dict/subscript population: 1 of 1 definition of calculate_allocations() in 2268 lines pre-edit.",
+      "expect": "asset_allocations = \\{.*'cash': 0.*'fixed_income': 0.*'equity': 0.*'hedge': 0.*management_allocations = \\{.*'active': 0.*'passive': 0.*asset_allocations\\[asset_class\\] \\+= weight \\* 100.*management_allocations\\[management_style\\] \\+= weight \\* 100.*:239.*:243",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC2",
+      "criterion_verbatim": "the default guard pasted verbatim, and a stated reading of whether the string \"unknown\" is truthy under it.",
+      "method": "command",
+      "invocation": "timeout 120 sed -n '68,84p' infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py   [the named invocation, run pre-edit; it does NOT contain the guard -- see POSN_ASTTAX-Z-W2-S1. The guard is at :66 and is pasted from `timeout 120 sed -n '53,66p'` on the same pre-edit bytes; post-edit the region reads `timeout 120 sed -n '64,76p' <gen>`.]",
+      "output_evidence": "THE NAMED INVOCATION, RUN VERBATIM AT THE PRE-EDIT VINTAGE (@2d8b5f7314), rc=0:\n-----8<----- sed -n '68,84p' (pre-edit) -----8<-----\n\n# Active vs Passive management classification\n# Source: Yang's model PKL \"Active Fund\" column (0=passive, 1=active)\n# Last updated: 2025-12-23\n\n# Hard-coded beta overrides for specific ETFs (per Yang's direction 2026-01-13)\nETF_BETA_OVERRIDES = {\n    'PFDE': 1.05,  # Pathfinder Disciplined US Equities\n    'PFOE': 1.22,  # Pathfinder Focused Opportunities\n}\n\ndef classify_management_style(ticker):\n    \"\"\"Classify an ETF as active or passive management (registry-backed)\"\"\"\n    return registry_field(ticker, 'management_style', 'passive')  # Default to passive if unknown\n\n\n# ETF Geography classification\n-----8<----- end -----8<-----\nTHAT WINDOW DOES NOT CONTAIN THE GUARD. It holds ETF_BETA_OVERRIDES (:74-77) and def\nclassify_management_style (:79-81), which is a CALLER of the guard. Filed as\nPOSN_ASTTAX-Z-W2-S1; the order's `:72,:81` citation is wrong on both numbers (old :72 is a blank\nline). Census that located the guard: native Grep for 'if value else' over the whole file @\n2d8b5f7314 returned EXACTLY ONE hit -- line 66 -- so there is ONE guard, not two.\n\nTHE DEFAULT GUARD ITSELF, PASTED VERBATIM (pre-edit :53-66, def registry_field):\n-----8<----- sed -n '53,66p' (pre-edit) -----8<-----\ndef registry_field(ticker, field, default):\n    \"\"\"Classification field from the etf-classifications registry (the SSOT).\n\n    The inline ETF_CLASSIFICATIONS / ETF_MANAGEMENT_STYLE / ETF_SECTOR_MAPPING /\n    ETF_SUB_ASSET_CLASS_MAPPING dicts this replaced (deleted 2026-08-18, Andrew\n    chase-down) were third copies of the classification data; census before the\n    swap: asset_class and management_style had ZERO value disagreements with the\n    registry, sector/sub_asset differed only where the inline vocab had drifted\n    off canon. ETF_GEOGRAPHY_MAPPING stays inline: the registry carries no\n    geography field (schema widening is a separate taxonomy act).\n    \"\"\"\n    classification = etf_classifier.get_classification(ticker)\n    value = (classification or {}).get(field)\n    return value if value else default\n-----8<----- end -----8<-----\n\nSTATED READING OF TRUTHINESS UNDER THAT GUARD: the guard is the single expression\n`return value if value else default`, whose test is the plain truthiness of `value`. The string\n\"unknown\" is a non-empty str, and a non-empty str is TRUTHY in Python, so `value if value else\ndefault` takes the `value` branch and RETURNS THE PLACEHOLDER. The guard therefore CANNOT fire on\n\"unknown\": the default is unreachable for exactly the rows that most need it. It fires only for\nNone, missing fields and the empty string. Exercised, not merely read -- the S6-AC5 run shows\nPRE-FIX `classify_management_style(\"DBC\") -> 'unknown'` on a registry row whose management_style\nis \"unknown\", against a call site that passes 'passive' as the default.\n\nTHE GUARD AFTER THE EDIT (same region, post-edit :64-76) -- the placeholder is normalised to None\nimmediately above the unchanged guard expression, so the existing default path does the work:\n-----8<----- sed -n '64,76p' (post-edit) -----8<-----\n    classification = etf_classifier.get_classification(ticker)\n    value = (classification or {}).get(field)\n    # A PLACEHOLDER MUST NOT DEFEAT A DEFAULT. The registry carries the literal\n    # string \"unknown\" as a not-yet-classified marker (measured 2026-09-11 by\n    # scan: 187 of 285 rows carry management_style \"unknown\"), and \"unknown\" is\n    # TRUTHY in Python -- so the value-if-value-else-default guard below could\n    # never fire on it and the raw placeholder reached the caller as though it\n    # were a real classification. Only \"unknown\" is neutralised here; a wider\n    # placeholder vocabulary would be a taxonomy act, not this cell.\n    # POSN_ASTTAX.TO-S6-1 / cell AT2-s-6.\n    if isinstance(value, str) and value.strip().lower() == 'unknown':\n        value = None\n    return value if value else default\n-----8<----- end -----8<-----\nPOST-FIX the same call returns 'passive' (S6-AC5, PRE vs POST line, same input). Only the literal\n\"unknown\" is neutralised: a wider placeholder vocabulary is a taxonomy act and is declared as an\nexclusion, not silently widened.",
+      "denominator": "1 of 1 `value if value else default` guard in the file (native Grep for 'if value else', whole file, 2268 lines pre-edit: 1 hit, line 66) -- the criterion's premise of TWO sites at :72/:81 does not hold; 17 of 17 lines of the named window printed and accounted for.",
+      "expect": "return value if value else default.*TRUTHY.*CANNOT fire",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC3",
+      "criterion_verbatim": "the Count and ScannedCount pasted verbatim, with ScannedCount stated as the table denominator and any LastEvaluatedKey named (paginate and total client-side if present).",
+      "method": "live_read",
+      "invocation": "timeout 120 .tools/aws dynamodb scan --table-name etf-classifications --filter-expression \"management_style = :u\" --expression-attribute-values '{\":u\":{\"S\":\"unknown\"}}' --select COUNT --output json",
+      "output_evidence": "timeout 120 .tools/aws dynamodb scan --table-name etf-classifications --filter-expression\n\"management_style = :u\" --expression-attribute-values '{\":u\":{\"S\":\"unknown\"}}' --select COUNT\n--output json   (rc=0):\n{\n    \"Count\": 187,\n    \"ScannedCount\": 285,\n    \"ConsumedCapacity\": null\n}\n\nCount = 187 (rows whose management_style is exactly the string \"unknown\").\nScannedCount = 285 = THE TABLE DENOMINATOR for this scan: a scan with a filter expression reads\nevery item and filters server-side, so ScannedCount is the number of rows examined.\nLastEvaluatedKey: ABSENT from the response (the three keys returned are Count, ScannedCount and\nConsumedCapacity), so this is a SINGLE COMPLETE PAGE and no client-side pagination/total was\nneeded. Stated explicitly because a paginated scan would have made 187 a page count, not a total.\nSECOND INSTRUMENT (different API, so not a repetition of the first): `.tools/aws dynamodb\ndescribe-table --table-name etf-classifications --query 'Table.{ItemCount:ItemCount,\nStatus:TableStatus}' --output json` returned {\"ItemCount\": 285, \"Status\": \"ACTIVE\"} --\ncorroborating the 285 denominator (ItemCount is eventually consistent, up to ~6h stale, and is\noffered as corroboration of the denominator only, never as the numerator).\nRE-RUN: the scan was run twice this session, 187/285 both times.\nAGAINST THE INHERITED FIGURE: the order states 187 of 285 from the DT brief and says it was never\nre-derived. This is its first independent count and it MATCHES exactly -- 187 of 285 (65.6%).",
+      "denominator": "187 of 285 -- ScannedCount 285 is the table denominator (single page, no LastEvaluatedKey in the response); corroborated by describe-table ItemCount=285 as a second, different instrument.",
+      "expect": "\"Count\": 187.*\"ScannedCount\": 285.*LastEvaluatedKey: ABSENT",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC4",
+      "criterion_verbatim": "AST-OK with a line count, proving the edited file still parses.",
+      "method": "command",
+      "invocation": "timeout 120 python -c \"import ast,sys; src=open('infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py',encoding='utf-8').read(); ast.parse(src); print('AST-OK', len(src.splitlines()), 'lines')\"",
+      "output_evidence": "AST-OK 2298 lines   (rc=0)\nRun AFTER the edit, on the edited bytes (96268 bytes; 2298 lines, up from 2268 pre-edit). ast.parse() raised nothing, so the edited file is syntactically valid Python.\nTHREE FURTHER INSTRUMENTS ON THE SAME BYTES, each standalone: `python -m py_compile <gen>` -> rc=0 (PY-COMPILE-OK; bytecode actually generated, which ast.parse does not do); `python -m ruff check --target-version py39 <gen>` -> 'All checks passed!' rc=0; `python .tools/ds-precommit-check.py <gen>` -> rc=0. And the Rule-14 gate itself over all three .py files this order touches: 'OK: pre-commit gate clean for 3 of 3 file(s)' rc=0 (see POSN_ASTTAX-Z-W2-S3 for what that gate required in a sparse worktree).",
+      "denominator": "1 of 1 edited Python file parses; 2298 of 2298 lines parsed as one module (ast parses whole-file or raises); 3 of 3 .py files this order touches pass the Rule-14 gate.",
+      "expect": "AST-OK 2298 lines",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC5",
+      "criterion_verbatim": "TWO runs printed side by side: the PRE-FIX code raising KeyError on a holding whose asset_class is \"Commodities\", and the POST-FIX code completing and rendering that holding visibly. Both outputs pasted verbatim.",
+      "method": "test_suite",
+      "invocation": "MSYS_NO_PATHCONV=1 git show HEAD:infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py > .scratch/prefix_lambda_function.py && timeout 120 python org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~2/ac5_negative_control.py .scratch/prefix_lambda_function.py",
+      "output_evidence": "timeout 120 python org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~2/ac5_negative_control.py .scratch/prefix_lambda_function.py   (rc=0)\n-----8<----- both runs, verbatim, side by side as printed -----8<-----\n==================== PRE-FIX  (HEAD 2d8b5f7314, before this order) ====================\nsource: .scratch/prefix_lambda_function.py   bytes=94164\nholdings: [{\"ticker\": \"AGG\", \"weight\": 0.6}, {\"ticker\": \"SPY\", \"weight\": 0.35}, {\"ticker\": \"DBC\", \"weight\": 0.05}]\nregistry DBC row: {\"asset_class\": \"Commodities\", \"management_style\": \"unknown\", \"name\": \"Commodity Index\"}\nclassify_etf(\"DBC\")               -> 'Commodities'\nclassify_management_style(\"DBC\")  -> 'unknown'   (placeholder guard)\nOUTCOME: RAISED KeyError: 'Commodities'\ntraceback tail: ['    asset_allocations[asset_class] += weight * 100  # Convert to percentage', '    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^', \"KeyError: 'Commodities'\"]\nserved allocation payload: NONE -- generator dies, positioning_data.json is never rewritten\n\n==================== POST-FIX (edited worktree bytes) ====================\nsource: infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py   bytes=96268\nholdings: [{\"ticker\": \"AGG\", \"weight\": 0.6}, {\"ticker\": \"SPY\", \"weight\": 0.35}, {\"ticker\": \"DBC\", \"weight\": 0.05}]\nregistry DBC row: {\"asset_class\": \"Commodities\", \"management_style\": \"unknown\", \"name\": \"Commodity Index\"}\nclassify_etf(\"DBC\")               -> 'Commodities'\nclassify_management_style(\"DBC\")  -> 'passive'   (placeholder guard)\nWARN: calculate_allocations: unseeded asset_class 'Commodities' (ticker DBC) -- carried under its own key, not dropped\nOUTCOME: COMPLETED, no exception\nasset_allocations      = {\"cash\": 0, \"fixed_income\": 60.0, \"equity\": 35.0, \"hedge\": 0, \"Commodities\": 5.0}\nmanagement_allocations = {\"active\": 0, \"passive\": 100.0}\nserved payload fragment (this dict is serialized whole as portfolios[model]['allocation']): {\"allocation\": {\"cash\": 0, \"fixed_income\": 60.0, \"equity\": 35.0, \"hedge\": 0, \"Commodities\": 5.0}}\n\"Commodities\" present in served asset_allocations: True   value=5.0\nsum of asset_allocations = 100.0   (weights total 100.0)\n\n==================== DISCRIMINATION ====================\nPRE-FIX  outcome: RAISED\nPOST-FIX outcome: COMPLETED\ncontrol discriminates (must be RAISED then COMPLETED): True\n-----8<----- end -----8<-----\n\nHOW THE PRE-FIX BEHAVIOUR WAS OBTAINED (not a stash, not a hand-made copy): the pre-fix BYTES were\nextracted from the git object store with `MSYS_NO_PATHCONV=1 git show HEAD:<gen> >\n.scratch/prefix_lambda_function.py` (HEAD = 2d8b5f7314, i.e. the pre-fix vintage, since the\nfix was uncommitted at that moment), and the harness then loads BOTH vintages in ONE process as\ntwo separate module objects -- a parameterised import -- so the two runs differ ONLY in the bytes\nunder test. After this commit the same extraction is `git show <this-commit>^:<gen>`.\nPOSITIVE CONTROL ON THE EXTRACTED BYTES, so the 'old' arm is provably old: 94164 bytes, and\nhas_old_direct_subscript=True / has_new_marker=False, against the post-fix file's 96268 bytes with\nhas_old_direct_subscript=False / has_new_marker=True (marker = 'TOLERATE AN UNSEEDED CLASS WITHOUT\nSWALLOWING IT'). The marker FAILS on the old bytes, which is what makes the arms distinguishable.\nWHY THIS CANNOT PASS BOTH WAYS: the harness exits 1 unless it observes RAISED then COMPLETED, and\nit printed 'control discriminates (must be RAISED then COMPLETED): True' at rc=0. PRE-FIX raised\nKeyError: 'Commodities' AT THE SUBSCRIPT ITSELF (traceback tail names\n`asset_allocations[asset_class] += weight * 100`); POST-FIX completed and carried Commodities=5.0\ninto the dict that is serialized whole as portfolios[model]['allocation'].\nSTUBBED / NOT STUBBED: only boto3, pandas and etf_classifications_dynamodb (a dict-backed\nETFClassifier) are stubbed -- the AWS/dataframe boundary. Every line of registry_field,\nclassify_etf, classify_management_style and calculate_allocations under test is the file's own.\nNo AWS call is made; nothing is written; no deploy.\nDETERMINISM: run twice, byte-identical (2120 bytes each, sha256 prefix 5cb51d2cf8d6dc22 both).",
+      "denominator": "2 of 2 byte-vintages exercised on the same input (pre-fix 94164 bytes / post-fix 96268 bytes); 1 of 1 unexpected-value probe (asset_class 'Commodities'); 3 of 3 holdings allocated, summing to 100.0 of 100.0 percent; 2 of 2 runs byte-identical for determinism.",
+      "expect": "PRE-FIX.*OUTCOME: RAISED KeyError: 'Commodities'.*POST-FIX.*OUTCOME: COMPLETED.*\"Commodities\": 5\\.0.*control discriminates \\(must be RAISED then COMPLETED\\): True",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC6",
+      "criterion_verbatim": "the diffstat pasted verbatim, showing this order touched ONLY the generator file and no registry or infrastructure path.",
+      "method": "diff",
+      "invocation": "timeout 120 git -C . diff --stat HEAD -- infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py   [plus the unscoped controls the expectation actually requires: `timeout 120 git -C . diff --stat HEAD` and `timeout 120 git -C . status --porcelain`]",
+      "output_evidence": "timeout 120 git -C . diff --stat HEAD -- infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py   (rc=0):\n .../yang-generate-positioning/lambda_function.py   | 40 +++++++++++++++++++---\n 1 file changed, 35 insertions(+), 5 deletions(-)\n\nTHE PATH-SCOPED DIFFSTAT ABOVE CANNOT ANSWER THE QUESTION IT IS ASKED: scoped to one pathspec, it\nwould print the same thing whether or not other paths were also touched. The UNSCOPED reads that\ncan, run beside it:\n--- unscoped diff --stat HEAD ---\n .../yang-generate-positioning/lambda_function.py   |  40 ++++++-\n .../investigations/INVESTIGATION_v1.md             | 122 +++++++++++++++++++++\n 2 files changed, 157 insertions(+), 5 deletions(-)\n--- git status --porcelain (untracked included) ---\n M infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py\n M org/missions/D4/POSN/POSN_ASTTAX/surprise-channel/investigations/INVESTIGATION_v1.md\n?? .scratch/\n?? org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~2/\n\nREADING, against this order's four-path write surface:\n  1. infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py -- MODIFIED (in grant).\n  2. org/missions/D4/POSN/POSN_ASTTAX/surprise-channel/investigations/INVESTIGATION_v1.md --\n     MODIFIED, append-only, 4 new rows in 3 new fenced blocks (in grant).\n  3. org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~2/ -- UNTRACKED, new: this\n     instance plus the two instrument scripts (in grant).\n  4. the task order file itself -- the <status> flip, made after this read and committed with it\n     (in grant).\n  PLUS .scratch/ -- UNTRACKED and NEVER COMMITTED (this worker's own scratch per the worker\n  contract: pre-fix blob, evidence captures, the extracted gate modules). It is excluded from the\n  commit pathspec, so it is not part of this order's write surface.\nZERO registry paths and ZERO infrastructure paths appear in either unscoped read: no Terraform, no\nIAM, no schedule, no org/projects, no other lambda. NO REGISTRY WRITE OF ANY KIND WAS ISSUED --\nthe only DynamoDB calls this order made are the S6-AC3 `scan --select COUNT` and one\n`describe-table`, both read-only; no put-item/update-item/delete-item, and no deploy (no\n`aws lambda update-function-code`, no Terraform).",
+      "denominator": "2 tracked files modified of 2 total in the unscoped `diff --stat HEAD` (1 generator + 1 append-only channel file), and 4 entries of 4 in `status --porcelain` (those 2 + this worker's deliverables dir + .scratch/); 4 of 4 are inside the order's four-path grant, .scratch/ excluded from the commit; 0 registry and 0 infrastructure paths.",
+      "expect": "1 file changed, 35 insertions\\(\\+\\), 5 deletions\\(-\\).*2 files changed, 157 insertions\\(\\+\\), 5 deletions\\(-\\).*ZERO registry paths and ZERO infrastructure paths",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC7",
+      "criterion_verbatim": "JUDGMENT, GRADED BY 3.0.0_SA_CVO~Z AT L9, NOT SELF-GRADED. Whether an unexpected classification value is now both NON-FATAL and VISIBLE, rather than non-fatal by being silently discarded. Record what the instruments read and offer NO verdict.",
+      "method": "test_suite",
+      "invocation": "timeout 120 python org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~2/ac7_visibility_instruments.py .scratch/prefix_lambda_function.py",
+      "output_evidence": "RECORDED, NO VERDICT OFFERED. Three instrument arms beyond S6-AC5:\ntimeout 120 python org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~2/ac7_visibility_instruments.py .scratch/prefix_lambda_function.py\n(rc=0):\n-----8<----- verbatim -----8<-----\n---------- ARM 1: the placeholder path alone (management_style \"unknown\") ----------\nPRE-FIX  registry_field -> 'unknown' | calculate_allocations RAISED KeyError: 'unknown'\nPOST-FIX registry_field -> 'passive' | calculate_allocations COMPLETED | mgmt={\"active\": 0, \"passive\": 100.0}\n\n---------- ARM 2: visibility of the unexpected value (POST-FIX only) ----------\nWARN: calculate_allocations: unseeded asset_class 'Commodities' (ticker DBC) -- carried under its own key, not dropped\nWARN: calculate_allocations: unseeded management_style 'Overlay' (ticker DBC) -- carried under its own key, not dropped\nasset_allocations keys      = ['cash', 'fixed_income', 'equity', 'hedge', 'Commodities']\nmanagement_allocations keys = ['active', 'passive', 'Overlay']\nunexpected asset value named+counted:      Commodities=20.0\nunexpected mgmt  value named+counted:      Overlay=20.0\nasset total=100.0  mgmt total=100.0  (nothing discarded into a void)\nserialized as the payload does it: {\"allocation\": {\"cash\": 0, \"fixed_income\": 80.0, \"equity\": 0, \"hedge\": 0, \"Commodities\": 20.0}, \"management\": {\"active\": 0, \"passive\": 80.0, \"Overlay\": 20.0}}\n\n---------- ARM 3: the fixed-list consumers, replayed on a 5-key dict ----------\ndelta loop (direct subscript, 4 canonical keys) OK: {\"cash\": 0, \"fixed_income\": -20.0, \"equity\": 0, \"hedge\": 0}\nmanagement delta loop OK: {\"active\": 0, \"passive\": 80.0}\nbenchmark spread loop (.get over 4 canonical keys) OK: {\"cash\": 0, \"fixed_income\": 80.0, \"equity\": 0, \"hedge\": 0}\nNOTE: those consumers iterate a LITERAL four/two-key list, so the extra key is\n      carried in \"allocation\" but does NOT appear in \"delta\" or the spreads.\n-----8<----- end -----8<-----\n\nWHAT THE INSTRUMENTS READ, stated without grading:\n(a) NON-FATAL: the two arms that raised pre-fix (KeyError 'Commodities' on the asset dict, KeyError\n    'unknown' on the management dict -- note the placeholder population is a KeyError source in its\n    own right, not only a mis-classification) both complete post-fix.\n(b) NAMED AND COUNTED, not bucketed: post-fix the unexpected values appear under their OWN names --\n    asset_allocations keys ['cash','fixed_income','equity','hedge','Commodities'] with\n    Commodities=20.0, management_allocations keys ['active','passive','Overlay'] with Overlay=20.0.\n    Totals stay 100.0 and 100.0, so no weight is discarded into a void.\n(c) ON THE SERVED PATH: that dict is the object assigned to portfolios[model_code]['allocation'] at\n    the generator's build site (post-edit :1990), and the payload is json.dumps'd whole before\n    upload -- so an unexpected key rides into positioning_data.json rather than stopping at the\n    function boundary. Printed as the payload does it in ARM 2.\n(d) IN THE LOG: each unseeded value also emits one ASCII 'WARN: calculate_allocations: unseeded\n    asset_class ... -- carried under its own key, not dropped' line to the Lambda log.\n(e) THE LIMIT OF (b)/(c), stated rather than omitted: the downstream consumers in the same file\n    iterate LITERAL key lists -- the delta loops (post-edit :1959-1961 and :1964-1966) and the two\n    benchmark spread loops (post-edit :893-896 and :952-955) -- so an unexpected class is carried\n    in 'allocation' (post-edit :1990) but does NOT appear in 'delta' or in\n    the spreads. ARM 3 replays all three against a 5-key dict: none raises, and each returns the\n    four/two canonical keys only. The canonical keys are still SEEDED precisely so those direct\n    subscripts keep resolving.\n(f) THE SHAPE CHOSEN, AND WHY (the order requires this stated): plain dicts KEPT, canonical keys\n    KEPT SEEDED, and the two write sites changed to `d[k] = d.get(k, 0) + weight * 100` guarded by\n    a `k not in d` WARN. Rejected: (i) collections.defaultdict, because a defaultdict mints a key on\n    any READ too, which would convert a future downstream typo or missing key into a silent 0 --\n    trading a loud KeyError for exactly the silent swallow this criterion asks about; this shape\n    tolerates only on the WRITE path, where the unexpected value IS the input, and leaves reads\n    strict. (ii) an 'unclassified'/'other' catch-all bucket, because it erases WHICH value arrived\n    -- non-fatal but invisible, the exact failure mode named. (iii) a bare .get() with no WARN and\n    no own-name key, same objection.\n(g) WHAT WAS NOT DONE, so it is not read as coverage: the unknown-default semantics were NOT\n    touched (post-edit :219 still defaults asset_class to 'fixed_income' while :390 and :550\n    default to 'equity' -- AT2-s-1's cell), the placeholder vocabulary was NOT widened beyond the\n    literal \"unknown\", nothing was retagged, and nothing was deployed.\nGRADED BY 3.0.0_SA_CVO~Z AT L9.",
+      "denominator": "3 of 3 instrument arms run (placeholder path, visibility, fixed-list consumers); 2 of 2 allocation dicts probed with an unexpected value; 3 of 3 in-file fixed-list consumers replayed against a 5-key dict; 2 of 2 byte-vintages compared in arm 1.",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: no invocation of this worker's can decide it. The oracle is 3.0.0_SA_CVO~Z at L9, whose adjudication row carries the grade; this row carries the instrument readings and offers no verdict, per the criterion's own text and the task order's judgment=\"true\" declaration."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The mutant IS the pre-fix vintage, and it is the load-bearing control of this order: S6-AC5 loads the unfixed bytes (git show HEAD:<gen>, 94164 bytes @2d8b5f7314) and the fixed bytes (96268) in one process and runs the identical input through both. A harness that passed on both would prove the change did nothing, so the script exits 1 unless it observes RAISED then COMPLETED. Positive control that the arms really differ: the new marker string is absent from the old bytes and the old direct subscript is absent from the new ones.",
+      "expected": "PRE-FIX: KeyError raised at the direct subscript on asset_class 'Commodities' (and, in the AC7 arm, KeyError 'unknown' on management_style). POST-FIX: completes, with 'Commodities' present and non-zero in the returned dict.",
+      "observed": "Exactly that, rc=0: \"PRE-FIX outcome: RAISED\" / \"POST-FIX outcome: COMPLETED\" / \"control discriminates (must be RAISED then COMPLETED): True\"; pre-fix traceback tail names `asset_allocations[asset_class] += weight * 100` with KeyError: 'Commodities'; post-fix asset_allocations = {\"cash\": 0, \"fixed_income\": 60.0, \"equity\": 35.0, \"hedge\": 0, \"Commodities\": 5.0}. The AC7 arm 1 adds PRE-FIX KeyError: 'unknown' -> POST-FIX COMPLETED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The S6-AC5 harness was run twice, same input, same two byte-vintages, outputs captured to separate files and compared byte-for-byte plus sha256. The S6-AC3 live scan was also run twice. The S6-AC1/AC2 reads are sed over fixed bytes and the S6-AC4 parse is deterministic by construction.",
+      "observed": "AC5: 2120 bytes both runs, identical=True, sha256 prefix 5cb51d2cf8d6dc22 both times. AC3: Count=187 / ScannedCount=285 both times. No ordering instability in the allocation dicts (insertion order is fixed by the seeded keys, with the unexpected key appended last in both runs).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The unknown-default DISAGREEMENT was not touched: post-edit :219 defaults asset_class to 'fixed_income' while :390 and :550 default it to 'equity'.",
+      "reason": "Expressly another cell's. BOUNDS: 'DO NOT \"FIX\" THE UNKNOWN-DEFAULT SEMANTICS ... That disagreement is AT2-s-1's cell, not yours. You make the guard fire correctly; you do not choose what it fires TO.' This order only makes the guard reachable; every call site keeps the default it already passed."
+    },
+    {
+      "item": "The placeholder vocabulary was not widened: only the literal \"unknown\" (case-insensitive, whitespace-stripped) is treated as falsy.",
+      "reason": "The order says 'treat \"unknown\" as falsy' and nothing more. Other plausible placeholders exist nearby -- resolve_display_name already filters 'nan', 'none', '--' for FALLBACK names -- but adopting that set as the registry's placeholder vocabulary is a taxonomy act (Rule 24) needing its own census and ruling, not a quiet widening inside a hardening cell."
+    },
+    {
+      "item": "An unexpected class is carried in the served 'allocation'/'management' maps but does NOT appear in 'delta', 'management_delta' or the benchmark spreads.",
+      "reason": "Those consumers iterate LITERAL key lists (post-edit :1959-1961, :1964-1966, and the two spread loops at :893-896 and :952-955). Widening them is a display/consumer decision beyond 'make both allocation dicts tolerate a key they do not carry', and it would change what the page renders rather than stopping it from blanking. Measured non-fatal: AC7 arm 3 replays all three against a 5-key dict and none raises. Recorded here so the gap is not read as coverage."
+    },
+    {
+      "item": "No registry write, no retag, no deploy.",
+      "reason": "BOUNDS: 'DO NOT RETAG ANYTHING. No registry write of any kind' (the retag is AT2-s-2, gated on this cell) and 'DO NOT DEPLOY'. The only DynamoDB calls made were one filtered scan --select COUNT and one describe-table, both read-only."
+    },
+    {
+      "item": "The two sparse-cone gate defects surfaced as POSN_ASTTAX-Z-W2-S3 and -S4 were not fixed, and the population of similarly affected gates was not enumerated.",
+      "reason": ".tools/ and the sparse cone are both outside this order's four-path write surface, and widening the cone is expressly forbidden by the worker face (it re-materializes ~33k files and re-OOMs the device). Each is filed as a row with a disarm_owner. No census of .tools was run because that is not this order's scope -- so the affected-gate population is UNKNOWN, explicitly not 2."
+    },
+    {
+      "item": "THE COMMIT THIS INSTANCE DESCRIBES HAS NOT LANDED: every artifact row reads PENDING-THIS-COMMIT and, as of this instance's authoring, no commit exists. HEAD is still 2d8b5f7314 and `git log --author='0.9.0_WK_POSN_ASTTAX~2 <'` is empty (asked of git, not of safe-commit's stdout; negative control: the same query against a bogus hash errors).",
+      "reason": "The commit was REFUSED by the missions-tree-check pre-commit hook, fail-closed and with no override path, for a register row that IS present in git and merely invisible in this sparse cone -- filed as POSN_ASTTAX-Z-W2-S5 (BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO~Z). The PENDING-THIS-COMMIT pins become true, and this instance's artifact rows resolve, on the first commit that carries these five paths; proof-of-spec-check returns VALID rc=0 in exactly that staged state, which is the state such a commit would have. Nothing here was back-dated or re-pinned to pretend otherwise."
+    },
+    {
+      "item": "No line-number re-pin of the six sibling round-2 task orders was attempted.",
+      "reason": "They are outside this order's write surface. The exposure this order's own +30 lines create for them is filed as POSN_ASTTAX-Z-W2-S2, ARMED, disarm_owner 2.0.0_SA_COO~Z, carrying the full old->new citation map so the disarm needs no further measurement."
+    }
+  ],
+  "surprises": [
+    "POSN_ASTTAX-Z-W2-S1: the order cites the default guard at ':72,:81' but at this vintage there is exactly ONE 'value if value else default' guard, at :66 inside registry_field() -- old :81 is a CALLER of it and old :72 is a blank line -- so S6-AC2's named window (lines 68-84) does not contain the guard the criterion asks for; the guard's SHAPE was confirmed exactly as described, so the fix proceeded un-improvised.",
+    "POSN_ASTTAX-Z-W2-S2: this order's own fix inserts 30 net lines into the generator, so every line citation below :66 in the round-2 decomposition and in the six sibling orders held behind this chain head is now stale by +10 or +30 -- including AT2-s-1's three cited lines :209, :360 and :520, which move to :219, :390 and :550; the full content-matched old->new map is in the row, ARMED to 2.0.0_SA_COO~Z.",
+    "POSN_ASTTAX-Z-W2-S3: the Rule-14 commit gate (.tools/commit-gate.sh, universal, fail-closed, no --force bypass) cannot RUN in a cone-mode sparse worktree -- commit_gate_runner.py:96 dies with ModuleNotFoundError on comp_constants_cli because org/modules/graph is outside the cone, then rc=2 on a missing repo-root comp-constants.config.yaml -- so a .py commit is refused by a gate CRASH rather than by a finding; remedied for this order without widening the cone (object -store extraction into .scratch + PYTHONPATH), after which the same gate passed 3 of 3 files.",
+    "POSN_ASTTAX-Z-W2-S4: a SECOND gate fails in the same worktree for a DIFFERENT reason -- .tools/surprise-row-gate.py's standing-corpus pass loads investigation_item.schema.json from the FILESYSTEM and fail-closes with FileNotFoundError when that path is outside the cone, while the gate's own per-commit grader reads the same schema from the STAGED INDEX where it is readable; the four rows were independently validated 4 of 4 against that schema extracted from HEAD (jsonschema 4.26.0) and the commit carries the gate's own audited override line.",
+    "POSN_ASTTAX-Z-W2-S5: BLOCKING -- a THIRD gate of that same class refused THIS ORDER'S COMMIT and has no override path ('never bypass'): the missions-tree-check pre-commit hook runs missions-tree-index.py, which globs org/projects/*.json from the FILESYSTEM, so in this cone it read 'flat index rows=0' against the 368 register rows git ls-files reports in the index, and raised INDEX-MISSING for org/projects/POSN_ASTTAX.json -- a file present in BOTH the HEAD tree and the index at blob 0cae36d55b. Every criterion of this order is met and proof-of-spec-check returned VALID rc=0 with all paths staged, but the work is COMPLETE AND UNCOMMITTED on branch wk-posn_asttax-2-6; two remedies are named in the row, both outside this worker's four-path write surface."
+  ],
+  "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface (the order names only the task-order file, this worker's deliverables/ dir, the surprise-channel investigations file and the generator). The full session is this turn's transcript; every invocation, its exit code and its verbatim output are carried in the acceptance rows above.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/commit-gate.sh (Rule 14: py_compile + AST undefined-name + ruff py39 + ds-precommit + comp-constants drift + manifest-check + log-open-lint)",
+      "invocation": "PYTHONPATH=<extracted graph modules> timeout 120 bash .tools/commit-gate.sh <the 3 .py files this order touches>",
+      "result": "'All checks passed!' x3, 'OK: no unguarded strict-utf8 log reads.' x3, 'OK: pre-commit gate clean for 3 of 3 file(s)', rc=0. WITHOUT the PYTHONPATH remedy the same invocation dies with ModuleNotFoundError: comp_constants_cli at rc=1 in this sparse worktree -- filed as POSN_ASTTAX-Z-W2-S3."
+    },
+    {
+      "tool": "ruff (target py39), standalone",
+      "invocation": "timeout 120 python -m ruff check --target-version py39 <gen>",
+      "result": "'All checks passed!' rc=0 on the edited generator."
+    },
+    {
+      "tool": "py_compile + ds-precommit-check.py, standalone",
+      "invocation": "timeout 120 python -m py_compile <gen> ; timeout 120 python .tools/ds-precommit-check.py <gen>",
+      "result": "PY-COMPILE-OK rc=0; ds-precommit-check rc=0 (no output)."
+    },
+    {
+      "tool": "jsonschema 4.26.0 Draft7Validator against investigation_item.schema.json extracted from HEAD (9854 bytes)",
+      "invocation": "MSYS_NO_PATHCONV=1 git show HEAD:org/surprise_channel/schemas/investigation_item.schema.json > .scratch/inv_schema.json ; python -c '<validate every fenced row in INVESTIGATION_v1.md>'",
+      "result": "5 of 5 rows VALID (1 pre-existing + this worker's 4), denominator = every row in the file across all 3 fenced blocks. Run because the row gate itself could not load the schema in this worktree -- POSN_ASTTAX-Z-W2-S4."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "timeout 120 python .tools/surprise-row-gate.py <INVESTIGATION_v1.md>",
+      "result": "BLOCKED rc=1 -- 'standing corpus pass could not run (FileNotFoundError: ... investigation_item.schema.json) -- fail-closed'; it graded 0 new rows because it reads STAGED bytes (its :40) and the rows were unstaged at that moment. Filed as POSN_ASTTAX-Z-W2-S4; the commit carries the gate's documented audited '# surprise-row-override:' line with the independent validation named."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py (run from inside this worktree, as the order requires)",
+      "invocation": "timeout 120 python .tools/proof-of-spec-check.py <this instance> S6-AC1,S6-AC2,S6-AC3,S6-AC4,S6-AC5,S6-AC6,S6-AC7",
+      "result": "recorded in the final worker report with its exit code (the only verdict)."
+    }
+  ]
+}
