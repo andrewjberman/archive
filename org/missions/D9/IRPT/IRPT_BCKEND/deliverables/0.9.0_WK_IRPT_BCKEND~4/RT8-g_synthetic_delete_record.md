@@ -62,4 +62,50 @@ here.
 
 ## IV. THE ACT
 
-(appended after the deletes)
+Four `s3api delete-object` calls, one per LITERAL key. **Never a prefix delete, never
+`--recursive`**, and the script re-read the gate immediately before the first call and would have
+exited without deleting had the prefix held anything but the four named keys.
+
+| key (under the prefix) | response |
+|---|---|
+| `r1/report.pdf` | `{"DeleteMarker": true, "VersionId": "04OM8jGc8DHS0zMtKePd0CBx_XLv7m.s"}` |
+| `v0-11-overview/report.pdf` | `{"DeleteMarker": true, "VersionId": "bcN4jQdogQePZ8emyzeS2kxNpzjEjHja"}` |
+| `v0-11-comparison/report.pdf` | `{"DeleteMarker": true, "VersionId": "pJAftP6QXIngQ7ulEMrT4tAzmQxS8xrc"}` |
+| `v0-11-multicomp/report.pdf` | `{"DeleteMarker": true, "VersionId": "1N6DK5Q94qf0CcJSda4QZOSODZVV0rY2"}` |
+
+`DeleteMarker: true` on 4 of 4 is the bucket telling us what kind of delete this was, and it is
+the reason section III was written BEFORE the act rather than discovered here.
+
+## V. THE AFTER-READ
+
+- `head-object`: **404 Not Found on 4 of 4** keys.
+- `list-objects-v2` under the exports prefix: **0 objects**.
+- `list-objects-v2` under the WHOLE `GENIBS14SYN/` generation: **0 objects** -- so nothing under
+  this generation survived that the word did not cover, because there was nothing there to begin
+  with.
+- **THE BLAST-RADIUS CONTROL**, which is the half that makes the four-of-four mean something: the
+  object the word does NOT cover --
+  `firms/49financial/generations/GENRT8PROOF/attempts/1/exports/rt8-a/bundle.json` -- **still
+  `head-object` 200 at 660 bytes**. Without it, a delete that removed everything would read
+  identically to one that removed exactly four.
+
+**`4 of 4 deleted, 0 of 4 remaining, 0 unexpected objects`** -- battery arm (g), which reads the
+LIVE world for the 404s rather than trusting the receipts: a receipt is a claim, the 404 beside it
+is the measurement.
+
+## VI. WHAT ARM (e) NOW SAYS, AND WHY IT CHANGED
+
+Arm (e) used to read FIVE live objects and assert 5 of 5 still headed 200. Four of them are gone by
+the same word, so that assertion is no longer available and **keeping it, or quietly dropping the
+four from the denominator, would both misdescribe the world.** The arm now has two halves and
+labels them: the LIVE census (1 of 1 `EXCLUDED_BY_BOTH`, 4 of 4 readers admitting 0 of 1, the
+ordinary-object control still admitting 1 of 1), and the four deleted keys re-run from the
+committed record in `RT8-g_delete_receipts.json` (4 of 4 `EXCLUDED_BY_BOTH`, 4 of 4 readers
+admitting 0 of 4). The readers are pure functions of `(key, metadata)`, which the record supplies;
+what the record cannot supply is whether the objects exist, and that is arm (g)'s live 404.
+
+## VII. THE LEDGER
+
+`irpt-bckend-rt8-synthetic-delete`, 4 legs, CLOSED with every leg carrying proof. Its sentinel was
+committed at `ba9bedabf9` BEFORE the first delete and removed by the close. The entry carries the
+verbatim inventory, the four receipts, the after-read and the blast-radius control.
