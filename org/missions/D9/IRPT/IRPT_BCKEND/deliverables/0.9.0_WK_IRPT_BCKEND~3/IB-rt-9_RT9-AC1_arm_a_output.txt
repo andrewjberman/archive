@@ -3,7 +3,7 @@ session STALE -- states: ['BAD_REQUEST', 'BAD_REQUEST']. No capture triggered (v
 IB-rt-9 / RT9-AC1 -- ARM (a) ONLY, under the managed wind-down
 ==============================================================================
 (a1) CENSUS -- every reader of ycharts/session/current in the repository
-      DENOMINATOR: 33107 file(s) scanned (git ls-files, tracked) | 58 name the secret | 7 are CODE | 4 of those RESOLVE it (a Secrets Manager read API) | 3 only MENTION it
+      DENOMINATOR: 33179 file(s) scanned (git ls-files, tracked) | 61 name the secret | 8 are CODE | 5 of those RESOLVE it (a Secrets Manager read API) | 3 only MENTION it | 1 of the resolvers are this cell's OWN TEST HARNESS, listed below and excluded from the estate denominator
       MIGRATED     infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js
                    the v0.9 runner: leases, fences and persists the versioned bundle
       MIGRATED     infra/aws/lambda/investor-reporting/ycharts/generate/transport.py
@@ -18,10 +18,13 @@ IB-rt-9 / RT9-AC1 -- ARM (a) ONLY, under the managed wind-down
                    names the secret but calls no Secrets Manager read API
       MENTION      org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/battery_ib_s_8.py
                    names the secret but calls no Secrets Manager read API
+      HARNESS      org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/battery_ib_rt_9.py
+                   this cell's own battery under deliverables/: its FAKE Secrets Manager client defines the read API and reaches no AWS
   PASS    a1 readers migrated or retired: 4 of 4  --  denominator is the census, not the table
+  PASS    a1 the HARNESS exclusion removed 0 declared estate reader(s): 1 of 1 excluded file(s) are under deliverables/  --  an exclusion that can remove a real reader is a hole, not a class
 
 (a2) CENSUS -- legacy any-non-403 authentication predicates
-      DENOMINATOR: 6727 code file(s) scanned, 6174 of them comment/string-stripped | 0 line(s) match (a NEGATIVE 403 comparison AND an authentication word, in CODE)
+      DENOMINATOR: 6738 code file(s) scanned, 6185 of them comment/string-stripped | 0 line(s) match (a NEGATIVE 403 comparison AND an authentication word, in CODE)
   PASS    a2 legacy any-non-403 probes remaining: 0
   PASS    a2 POSITIVE CONTROL: the detector fires on the retired predicate verbatim  --  the line this cell removed from ycharts-session-probe
   PASS    a2 NEGATIVE CONTROL: the detector is silent on a correct 403-means-refused line  --  ycharts_session.js:272, which the first shape of this detector wrongly flagged
@@ -78,8 +81,8 @@ IB-rt-9 / RT9-AC1 -- ARM (a) ONLY, under the managed wind-down
   NOT RUN  (b) FENCING    two capture attempts on the fixture -- not built
   NOT RUN  (c) ROTATION   publish a new version, old refused -- not built
   NOT RUN  (d) EVICTION   401 mid-job, ONE refresh, resume at checkpoint -- not built
-  NOT RUN  (e) ABSORBED   ledger + state mv + apply -- FORBIDDEN this session (managed wind-down, 0.0.0_AB_MSTR 2026-09-11 17:30Z)
+  NOT RUN  (e) ABSORBED   ledger + state mv + apply -- BLOCKED, row IRPT_BCKEND-W3-S26: the ycharts root's plan carries an unapplied handler flip to entry.lambda_handler and entry.py is in no zip, so the apply this arm REQUIRES takes irpt-ycharts-generate down
   NOT RUN  (f) NO EGRESS  guard log across the whole battery -- not built
 ------------------------------------------------------------------------------
 ARM (a) checks failed: 0
-FINAL: ARM-A-ONLY, INCOMPLETE-UNDER-WINDDOWN -- RT9-AC1 is NOT met by this run and its acceptance token is deliberately absent from this output.
+FINAL: ARM-A-ONLY, INCOMPLETE -- RT9-AC1 is NOT met by this run and its acceptance token is deliberately absent from this output in EVERY form, including negated: the expect is graded as a REGEX and a negated line would match. Arm (e) is BLOCKED by row IRPT_BCKEND-W3-S26.
