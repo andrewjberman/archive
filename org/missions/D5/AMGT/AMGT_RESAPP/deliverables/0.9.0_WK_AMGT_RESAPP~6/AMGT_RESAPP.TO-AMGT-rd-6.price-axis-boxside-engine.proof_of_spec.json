@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rd-6",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rd-6.price-axis-boxside-engine.md",
+    "group": "OTHER",
+    "vintage_commit": "b67133bd8054acf1fdcffb51c3c6d96664811170"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "d0efe81ca84b3856c917a3efefb59d56d3414591",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rd-6.price-axis-boxside-engine.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/price_axis_pull.py",
+      "kind": "script",
+      "commit_or_etag": "c0d41b2ae0b414a56b78f65d4703b50769754d24",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Exercised live, box-side, this session: DAPI: UP (dapi_check.py), then a real run against 127.0.0.1:8194 -- 32 of 34 MEASURED tickers scored, 32 rows written to opal-amgt-security-metrics and confirmed by an independent Query on the table's real KeySchema (axis_date=PRICE#2026-09-10): Count 32. A full-table scan --select COUNT read 42 (32 PRICE + 10 CHATTER), proving no overwrite between axes. Host: hostname Opal_Bloomberg (the Bloomberg terminal box), not AMGT-rd-3's harvester EC2 box -- see the host-record deliverable.",
+      "introduces": ["price_axis_pull.py", "load_universe", "TABLE_NAME"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "lib/research/price/axis.py",
+      "kind": "script",
+      "commit_or_etag": "c0d41b2ae0b414a56b78f65d4703b50769754d24",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The pure ranking logic actually used by the live run above -- rank_scores() produced every rank/rank_sort value written to the table this session (rank 1 = PBR US +19.24%, rank 32 = BABA US -15.09%). Proven separately via pytest (AC1) with no Bloomberg session required.",
+      "introduces": ["WINDOW_DAYS", "compute_return_pct", "rank_scores", "zero_pad_rank"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/price/tests/test_price_axis.py",
+      "kind": "test",
+      "commit_or_etag": "c0d41b2ae0b414a56b78f65d4703b50769754d24",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A test suite is exercised, not deployed. See AC1's output_evidence for the passing run and the mutant control below for the fired/reverted mutation.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_price_axis_pull.py",
+      "kind": "test",
+      "commit_or_etag": "c0d41b2ae0b414a56b78f65d4703b50769754d24",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A test suite is exercised, not deployed. Confirms the raw client this engine imports opens 127.0.0.1:8194 and confirms UNIVERSE_PATH points at AMGT-s-12's landed universe.json, without opening a live session.",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~6/AMGT-rd-6.host-record.md",
+      "kind": "doc",
+      "commit_or_etag": "1961f8c4113e5b0d250ba5257a7128531bfba3a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Item (c) of the cell's WHAT TO PRODUCE: names the host (measured: hostname Opal_Bloomberg, DAPI: UP) and the two existing box-side pulls this engine follows (etf_daily_pull.py, AMGT-s-1's model_block_pull.py), plus this session's live run figures and the instrument-trap correction (aws dynamodb scan --output text upper-cases attribute names for display; the real stored names are lowercase).",
+      "artifact_covered_by": ["AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~6/price_axis_rows_2026-09-10.json",
+      "kind": "config_data",
+      "commit_or_etag": "1961f8c4113e5b0d250ba5257a7128531bfba3a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "price_axis_pull.py's own written record copy of the 32 ranked rows landed to DynamoDB this session, independent of the store -- a reader can check what was computed without a live AWS read.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a summary line with a passed count and no \"failed\" -- including a test pinning the window to 30 DAYS, matching chatter. A suite that does not pin the window is NOT met",
+      "method": "test_suite",
+      "invocation": "timeout 110 python -m pytest lib/research integrations/bloomberg/research/tests -q -k \"price\" 2>&1 | tail -3",
+      "output_evidence": "15 passed, 63 deselected in 1.17s",
+      "denominator": "15 of 15 price-keyword-selected tests passed (63 non-price tests deselected by -k); two of the 15 explicitly pin WINDOW_DAYS==30 (test_price_window_is_30_days_matching_chatter in lib/research/price/tests/test_price_axis.py, and test_price_axis_pull_window_matches_committed_gate in integrations/bloomberg/research/tests/test_price_axis_pull.py)",
+      "status": "PASS",
+      "expect": "15 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pre-computed PRICE-axis rows present alongside whatever chatter rows exist -- each carrying a ticker and a price-axis score. An empty table, or a table carrying only chatter rows, means this engine never wrote and is NOT met",
+      "method": "live_read",
+      "invocation": "timeout 110 .tools/aws dynamodb scan --table-name opal-amgt-security-metrics --max-items 12 --output text 2>&1 | tail -10",
+      "output_evidence": "PX_START\t1524.2\nPX_START_DATE\t2026-08-11\nRANK\t13\nRANK_SORT\t00013\nSCORE\t0.3149\nSOURCE\tbloomberg-dapi\nTICKER\tHSBA LN\nTRADING_DAYS_OBSERVED\t22\nWINDOW_DAYS\t30\nNEXTTOKEN\t...(truncated)",
+      "denominator": "this page shows 1 of the 32 landed PRICE rows (source=bloomberg-dapi is a PRICE-only attribute, absent from the 10 live CHATTER rows); a full-table scan --select COUNT (run this session, not part of the graded invocation) read Count 42 = 32 PRICE + 10 CHATTER, and a Query on axis_date=PRICE#2026-09-10 read Count 32 -- both axes coexist, neither overwrote the other",
+      "status": "PASS",
+      "expect": "bloomberg-dapi"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a printed denominator showing the price engine reaching Bloomberg through the LOOPBACK DAPI path (127.0.0.1:8194 / blpapi), i.e. box-side. A denominator of 0 hits across 0 files is OUT-OF-CORPUS and is NOT met. Evidence that the engine instead calls Bloomberg from a Lambda, or targets the harvester EC2 box, is the defect this criterion exists to catch and is NOT met",
+      "method": "command",
+      "invocation": "timeout 110 comp-find \"8194|blpapi|localhost|127.0.0.1\" lib/research integrations/bloomberg --limit 20 2>&1 | tail -12",
+      "output_evidence": "(9 content-match lines on 8194 across bbg_fallback.ps1 / bbg_signin.ps1) ... MORE: 83 hit(s) not shown. Next: --page 2 (or --all, or --band <B>)",
+      "denominator": "the untruncated run (page 1 of this same invocation, captured this session) reports DENOMINATOR: 103 hit(s) across 107 file(s) scanned in scope [corpus=all], BANDS: DEF=9 SURFACED=70 TEST=4 DOC=20 -- the DEF band includes integrations/bloomberg/mcp/blp_client.py:35-36 (DEFAULT_HOST=\"127.0.0.1\", DEFAULT_PORT=8194), the exact client price_axis_pull.py imports and calls; zero hits name a Lambda invoke or the harvester EC2 box anywhere in this scope",
+      "status": "PASS",
+      "expect": "8194"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "(JUDGMENT) does the engine run on the BLOOMBERG TERMINAL box in the established ETF-daily-pull shape -- not on the new harvester EC2 box and not as a Lambda -- and did it follow the LIVE precedent (AMGT-s-1's box-side job) rather than inventing a second path to the same data?",
+      "method": "manual_read_with_citation",
+      "invocation": "read integrations/bloomberg/research/price_axis_pull.py, integrations/bloomberg/pipeline/etf_daily_pull.py, integrations/bloomberg/research/model_block_pull.py, and org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~6/AMGT-rd-6.host-record.md",
+      "output_evidence": "Measured this session: hostname Opal_Bloomberg, python on PATH resolves to the Python311 (PY_AWS) interpreter, dapi_check.py printed DAPI: UP, and price_axis_pull.py ran end to end against the live DAPI and wrote real rows -- all on this one machine, no deploy step, no EC2 target. Shape-for-shape: like etf_daily_pull.py and AMGT-s-1's model_block_pull.py, this script imports integrations/bloomberg/mcp/blp_client.py unmodified, calls blp.historical_data() in chunks (mirroring etf_daily_pull.py's chunks() helper), and lands its own output (DynamoDB here, S3 there) -- no new client, no new session-opening code, no HTTP/Lambda invocation path anywhere in the module (AC3's own denominator). This engine does not depend on AMGT-rd-3 (the task order's own DEPENDENCIES section) and nothing in it names that EC2 host.",
+      "denominator": "N/A -- judgment criterion, no verdict computed by this instance",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion per the task order's own annotation: do NOT grade it; record UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming 3.0.0_SA_CVO~Z as the oracle. PASS or FAIL on a judgment row is INVALID. The grade lands in 3.0.0_SA_CVO~Z's L9 adjudication row.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "lib/research/price/axis.py: WINDOW_DAYS flipped from 30 to 29 in-session, then the AC1 invocation re-run, then reverted back to 30 and re-run a third time to confirm the clean pass returned.",
+      "expected": "the two window-pinning tests (test_price_window_is_30_days_matching_chatter, test_price_axis_pull_window_matches_committed_gate) fail on the mutated value; every other price test is unaffected.",
+      "observed": "with WINDOW_DAYS=29: '2 failed, 13 passed, 63 deselected' -- both failures read 'assert 29 == 30'. After reverting to WINDOW_DAYS=30: '15 passed, 63 deselected' again, byte-identical to the pre-mutation run.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 invocation (pytest -k price) was run three times in this session: once before the mutation, once immediately after reverting it, and once more as the formal graded run recorded above.",
+      "observed": "'15 passed, 63 deselected' all three times (1.08s / 0.82-0.86s / 1.17s -- timing varies, the pass/fail result and counts do not). The live DynamoDB write is separately idempotent: PutItem on (axis_date, ticker) overwrites the same key rather than duplicating, confirmed by the Query count staying at 32 across repeated live reads this session.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "0-100 normalization and TOP_N truncation",
+      "reason": "Those are the CHATTER axis's own committed parameters (AMGT-rd-5's cell text: '30-day window, 0-100 NORMALIZED, TOP_N=10'). This cell's text states only the 30-day window for price ('matching chatter'); no normalization or TOP_N is named for price, and none is invented here (bound: no qualification threshold exists upstream and none may be invented). The price axis writes every scored ticker (32 of 34), unranked-truncated, as a plain percentage return."
+    },
+    {
+      "item": "A recurring Task Scheduler registration for this engine",
+      "reason": "Not named as a bound in this cell (contrast AMGT-rd-5's explicit 'BLOCK SCHEDULED. Production pipelines MUST be scheduled'); this cell's WHAT TO PRODUCE names only the engine, the write, and the host record. This cell's <paths> also does not grant integrations/bloomberg/pipeline/ (register_daily_task.ps1's home) or infra/aws/terraform/amgt-resapp/, so a real recurring registration is outside this order's write surface regardless of whether it were named."
+    },
+    {
+      "item": "Raw-bytes-before-derived landing to S3 (C-RAW-BEFORE-DERIVED, AMGT-s-1's own bound)",
+      "reason": "Not named as a bound for this cell; rd-6's WRITE section names only the opal-amgt-security-metrics DynamoDB destination. AMGT-s-1's raw-before-derived S3 staging is that cell's own requirement and is not carried forward here -- this engine persists a JSON record copy of its computed rows (not raw vendor bytes) to the deliverables folder, in addition to the DynamoDB write."
+    },
+    {
+      "item": "Enel IM, ROG SW -- 2 of the 34 universe tickers",
+      "reason": "Bloomberg returned fewer than 2 PX_LAST observations for each inside the 30-day window (measured, this session) -- a data-quality fact of the vendor's own response for those securities, not a code omission. Both are named in the host record and in price_axis_rows_2026-09-10.json's insufficient list; neither is silently dropped."
+    },
+    {
+      "item": "The CHATTER axis (AMGT-rd-5) and the starred watchlist (AMGT-rd-7)",
+      "reason": "Separate cells, built by other workers; this order builds only the PRICE axis. Verified this session that both axes coexist in the shared table with zero overwrite (32 PRICE + 10 CHATTER = 42 total)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "N/A -- no session-log path is inside this worker's <paths> write surface (the task order names only integrations/bloomberg/, lib/research/, org/missions/D5/AMGT/AMGT_RESAPP/deliverables/, the surprise-channel investigation file, and the task-order file itself). The full session is this turn's transcript; every invocation and output is carried verbatim in the acceptance rows above and in the host-record deliverable.",
+  "compiler_tools": [
+    {
+      "tool": "dapi_check.py (pre-flight, per integrations/bloomberg/READ_HERE.md)",
+      "invocation": "timeout 60 python integrations/bloomberg/auth/dapi_check.py",
+      "result": "DAPI: UP (session + SPX Index/PX_LAST returned -- entitled session live). No sign-in attempted by this worker (bound: sign-in is 0.0.3_BG_BBGTerminal's budgeted act, never this worker's)."
+    },
+    {
+      "tool": "aws dynamodb describe-table (pre-run re-measure of the landed store)",
+      "invocation": "timeout 60 .tools/aws dynamodb describe-table --table-name opal-amgt-security-metrics --query \"Table.[TableName,TableStatus,BillingModeSummary.BillingMode,KeySchema]\" --output json",
+      "result": "[\"opal-amgt-security-metrics\", \"ACTIVE\", \"PAY_PER_REQUEST\", [{\"AttributeName\": \"axis_date\", \"KeyType\": \"HASH\"}, {\"AttributeName\": \"ticker\", \"KeyType\": \"RANGE\"}]] -- confirms AMGT-rd-2's key schema live, read before writing a single row."
+    },
+    {
+      "tool": "py_compile + commit-gate.sh (pre-commit)",
+      "invocation": "python -m py_compile <6 files>; bash .tools/commit-gate.sh <6 files>",
+      "result": "compile rc=0 on all 6; commit-gate: 'OK: pre-commit gate clean for 6 of 6 file(s)' (py_compile + ds-precommit + ruff, all clean)."
+    },
+    {
+      "tool": "price_axis_pull.py --dry-run (pre-flight rehearsal, no DynamoDB write)",
+      "invocation": "OPAL_WS_ROOT=<this worktree> timeout 100 python integrations/bloomberg/research/price_axis_pull.py --dry-run",
+      "result": "universe 34; as-of 2026-09-10; scored 32 of 34 (2 insufficient: Enel IM, ROG SW); ranked 32 rows, rank 1 = PBR US (19.2415%), rank 32 = BABA US (-15.088%); wrote a record-copy JSON; DRY-RUN: not writing to DynamoDB. First cut of this run surfaced the instrument-trap bug (see the host record and the mutant/determinism notes) via a live write failure, fixed in the same session before this proof was written."
+    },
+    {
+      "tool": "price_axis_pull.py (live write)",
+      "invocation": "OPAL_WS_ROOT=<this worktree> timeout 110 python integrations/bloomberg/research/price_axis_pull.py",
+      "result": "written 32 of 32 row(s) to opal-amgt-security-metrics; failed 0."
+    },
+    {
+      "tool": "aws dynamodb query (independent confirmation, real KeySchema, not the pull's own log)",
+      "invocation": "timeout 60 .tools/aws dynamodb query --table-name opal-amgt-security-metrics --key-condition-expression \"axis_date = :ad\" --expression-attribute-values '{\":ad\":{\"S\":\"PRICE#2026-09-10\"}}' --select COUNT --output json",
+      "result": "{\"Count\": 32, \"ScannedCount\": 32}"
+    },
+    {
+      "tool": "aws dynamodb scan --select COUNT (whole-table coexistence check)",
+      "invocation": "timeout 60 .tools/aws dynamodb scan --table-name opal-amgt-security-metrics --select COUNT --output json",
+      "result": "{\"Count\": 42, \"ScannedCount\": 42}  -- 32 PRICE + 10 CHATTER, matches expectation exactly."
+    },
+    {
+      "tool": "safe-commit.sh (code commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~6 <0.9.0_WK_AMGT_RESAPP~6@opal.agent>\" -F .scratch/amgt-rd-6-code-commit-msg.txt -- lib/research/price/ integrations/bloomberg/research/price_axis_pull.py integrations/bloomberg/research/tests/test_price_axis_pull.py",
+      "result": "commit c0d41b2ae0b414a56b78f65d4703b50769754d24: risk-reflex REFLEX CLEAN; commit-gate OK 6 of 6; to-pipeline-gate OK; surprise-row-gate OK (0 rows); msg-verify MATCH."
+    },
+    {
+      "tool": "safe-commit.sh (deliverables commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~6 <0.9.0_WK_AMGT_RESAPP~6@opal.agent>\" -F .scratch/amgt-rd-6-deliverables-commit-msg.txt -- org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~6/AMGT-rd-6.host-record.md org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~6/price_axis_rows_2026-09-10.json",
+      "result": "commit 1961f8c4113e5b0d250ba5257a7128531bfba3a7: risk-reflex REFLEX CLEAN; missions-tree-check 0 violations; to-pipeline-gate OK; surprise-row-gate OK (0 rows); msg-verify MATCH."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~6/AMGT_RESAPP.TO-AMGT-rd-6.price-axis-boxside-engine.proof_of_spec.json AC1,AC2,AC3,AC4",
+      "result": "proof-of-spec-check | structural=jsonschema | acceptance rows=4 | violations=0 | alignment-forward-1 4/4 | alignment-forward-2 1/1 | alignment-backward 1/1 | artifact-resolution 6 resolved at pin, 0 UNRESOLVED-HERE | surprises-frame 0 entries, 0 open | VALID (rc=0)"
+    }
+  ]
+}
