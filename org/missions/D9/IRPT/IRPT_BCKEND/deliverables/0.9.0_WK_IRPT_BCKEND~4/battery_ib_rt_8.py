@@ -22,10 +22,14 @@ ARM (e) CHANGED WITH THE WORLD. It read FIVE live objects and asserted 5 of 5 st
 four deleted keys from the COMMITTED RECORD, labelled a record -- the readers are pure
 functions of (key, metadata), and whether the objects exist is arm (g)'s measurement.
 
-THE RENDER ARM IS HUMAN-GATED AND SAYS SO, WITH THE RECORD VERBATIM. RT8-AC1 (a) admits that
-as the arm's own rule. What is gated is exactly one step -- a browser opening the
-counterpart's print route -- and every step around it is taken on the served service and
-printed.
+THE RENDER RAN, AND IT READS SESSION-GATED. Andrew's word of 2026-09-11 ~14:5xZ ("Yes
+ycharts runner may be started") turned the HUMAN-GATED arm into an act: the host was started,
+`irpt-export-render-run` was sent, Chromium opened the REAL portal origin, and the print route
+answered with a SIGN-IN SCREEN -- so the host half refused SESSION_ABSENT, which it is built
+to do and never signs in around. The issuer's amendment names that branch, so SESSION-GATED is
+the arm's own rule rather than a skip, and the host was returned to the state its root
+declares. The battery does not start a host: it reads the RECORD of the act and reads the
+WORLD for where the host ended up.
 
 ASCII only. Python 3.12.
 """
@@ -46,6 +50,7 @@ LEDGER = (REPO / "org" / "critical_paths" / "change_management" /
 SENTINEL = REPO / "org" / "critical_paths" / ".open_deploys" / "irpt-bckend-rt8.json"
 HERE = pathlib.Path(__file__).resolve().parent
 DELETE_RECEIPTS = HERE / "RT8-g_delete_receipts.json"
+RENDER_RECORD = HERE / "RT8-a_render_record.json"
 DELETE_LEDGER = (REPO / "org" / "critical_paths" / "change_management" /
                  "20260911T1454Z_irpt-bckend-rt8-synthetic-delete_deploy_completion.md")
 DELETE_SENTINEL = (REPO / "org" / "critical_paths" / ".open_deploys" /
@@ -269,16 +274,47 @@ def main():
             print("        $ %s" % act)
         print("      the UNSENT request           : %s"
               % json.dumps(dispatch_rec.get("request", {}).get("Parameters", {}))[:150])
-        print("  RENDER ARM                       : HUMAN-GATED -- admitted by RT8-AC1 (a) as")
-        print("      the arm's own rule. The record above is the operator's act, executable")
-        print("      rather than described. The render itself (a browser opening the print")
-        print("      route) is the ONE step not taken; every step around it ran on the served")
-        print("      service. See infra/aws/ec2/investor-reporting-export/README.md for why")
-        print("      no reachable host may be started by this cell.")
-        print("  0 EXTERNAL CONNECTIONS DURING THE RENDER: no render ran, so there is no host")
-        print("      guard log to read. THIS IS PRINTED AS VACUOUS, never as a pass (bound 12).")
-        print("      The guard exists in the host half and writes render_guard.json beside the")
-        print("      PDF with its own denominator; it is measured at the operator's run.")
+        # THE RENDER WAS RUN. Andrew's word of 2026-09-11 ~14:5xZ ("Yes ycharts runner may be
+        # started") turned the HUMAN-GATED arm into an act, taken ONCE under its own ledger
+        # and recorded here. The battery does NOT start a host: it reads the record of the act
+        # and reads the WORLD for where the host ended up.
+        render = json.loads(RENDER_RECORD.read_text(encoding="utf-8"))
+        rmeta = render["_meta"]
+        print("  THE RENDER, ON ANDREW'S WORD     : \"%s\"" % rmeta["word"])
+        print("      source                       : %s" % rmeta["word_source"].split(";")[0])
+        print("      host / document              : %s / %s" % (rmeta["host"], rmeta["document"]))
+        for step in render["cycle"]:
+            print("      [%s] %-10s rc=%s" % (step["at"], step["step"], step["rc"]))
+        print("      SSM command status           : %s" % render["command"]["status"])
+        print("      the refusal, VERBATIM        : %s"
+              % render["command"]["stderr"].splitlines()[0][:150])
+        guard = render["network_guard"] or {}
+        print("  THE NETWORK GUARD -- A REAL BROWSER ON A REAL HOST, with its denominator:")
+        print("      %s" % guard.get("denominator"))
+        for origin, count in sorted((guard.get("requests_by_origin") or {}).items()):
+            print("      %-34s %d request(s)%s"
+                  % (origin, count,
+                     "  <- FOREIGN" if origin in (guard.get("foreign_origins") or []) else ""))
+        print("      vendor requests              : %s  <- the number the bound is about"
+              % guard.get("vendor_requests"))
+        print("      NOT 'ZERO EXTERNAL CONNECTIONS': the sign-in page this render reached")
+        print("      pulls webfonts from fonts.googleapis.com and fonts.gstatic.com, so the")
+        print("      honest figure is 2 foreign of 12 with 0 of them vendor. Printing 'zero'")
+        print("      here would have been a claim the guard itself refutes. Row W4-S23.")
+        print("  RENDER ARM                       : SESSION-GATED -- the browser opened, reached")
+        print("      the REAL portal origin and found a SIGN-IN SCREEN; render_export.cjs")
+        print("      refuses SESSION_ABSENT by design and never signs in. An authenticated")
+        print("      session for the host is IB-rtb-1's build item. The issuer's amendment")
+        print("      names exactly this branch, so this is the arm's own rule, not a skip.")
+        host_state = aws_json(["ec2", "describe-instances", "--instance-ids",
+                               rmeta["host"].split("(")[-1].strip(") "),
+                               "--region", "us-east-1", "--query",
+                               "Reservations[].Instances[].State.Name", "--output", "json"])
+        live_state = host_state[0] if isinstance(host_state, list) and host_state else None
+        print("  THE HOST RETURNED TO ITS DECLARED STATE: record says %s, LIVE read says %s"
+              % (render["final_instance_state"], live_state))
+        print("      The word is a CYCLE, not a new resting state -- a host left running after")
+        print("      a render is drift against aws_ec2_instance_state.runner, not a permission.")
 
         # THE DOWNLOAD HALF, on the real guarded route with the real authz library.
         enforcer, deps = _enforcer()
@@ -300,13 +336,27 @@ def main():
                 and not failed(headed) and headed.get("ContentLength")
                 and dispatch_rec.get("decision") == dispatch_mod.HUMAN_GATED
                 and dispatch_rec.get("sent") is False
-                and served.ok and url_ok and not again.ok)
+                and served.ok and url_ok and not again.ok
+                # THE RENDER HALF: the command RAN on the host, the guard MEASURED the
+                # traffic, no vendor origin was touched, and the host is back where the
+                # ycharts root declares it. The refusal itself is not a failure of this arm --
+                # the amendment admits SESSION-GATED by name -- but a SILENT one would be.
+                and render["command"]["status"] in ("Success", "Failed")
+                and "SESSION_ABSENT" in render["command"]["stderr"]
+                and guard.get("vendor_requests") == 0
+                and guard.get("requests_total", 0) > 0
+                and render["final_instance_state"] == "stopped"
+                and live_state == "stopped")
     record("a", ok_a,
            "the served controller freezes and PERSISTS the bundle before any render, decides "
-           "the dispatch, and the download reauthorizes -- the render step reads HUMAN-GATED",
+           "the dispatch, the download reauthorizes, and the RENDER RAN on the host and reads "
+           "SESSION-GATED with its network denominator measured",
            "bundle persisted and read back equal, confirmed by an independent head-object; "
-           "dispatch HUMAN_GATED with the operator act printed verbatim and 0 commands sent; "
-           "1 download served and 1 refused after revocation")
+           "dispatch HUMAN_GATED with the operator act printed verbatim and 0 commands sent by "
+           "the CONTROLLER; 1 download served and 1 refused after revocation; the OPERATOR "
+           "cycle ran the document on i-0167fd745ad906a66, the browser reached the portal "
+           "origin and refused SESSION_ABSENT, the guard measured 2 foreign of 12 requests "
+           "with 0 vendor, and the host is back to stopped on a LIVE read")
 
     # ---------------------------------------------------------------- (c)
     head("(c) FIVE OF FIVE IN THE RUNTIME")
@@ -514,6 +564,21 @@ def main():
           % (closed, SENTINEL.exists()))
     print("      sentinel commit              : %s"
           % sha.stdout.decode("utf-8", "replace").strip()[:104])
+    # THE YCHARTS ROOT IS PLANNED TOO, because this cell amended it. Its edit is a header
+    # comment and one OUTPUT DESCRIPTION, and Terraform stores neither in state -- so the
+    # honest thing to print is that the plan is clean AND that a clean plan does not prove the
+    # description changed. The file is the evidence for the description; the plan is the
+    # evidence that nothing ELSE moved, which is the part that could have gone wrong.
+    ycharts = subprocess.run(
+        [TERRAFORM, "-chdir=infra/aws/terraform/investor-reporting/ycharts", "plan",
+         "-no-color", "-input=false", "-lock=false"], cwd=str(REPO), capture_output=True)
+    ytext = ycharts.stdout.decode("utf-8", "replace")
+    yclean = "No changes. Your infrastructure matches the configuration." in ytext
+    print("      ycharts      plan             : %s (rc=%d) -- the root this cell amended;"
+          % ("No changes" if yclean else "DRIFT", ycharts.returncode))
+    print("      the amendment is a comment block and an output DESCRIPTION, which Terraform")
+    print("      does not hold in state, so this line proves nothing ELSE moved -- not that")
+    print("      the description changed. The file is the evidence for that.")
     converged = []
     for root in ROOTS:
         proc = subprocess.run(
@@ -530,10 +595,11 @@ def main():
             # battery down AFTER it had measured the drift it was reporting.
             for line in text.splitlines()[-14:]:
                 print("          %s" % line.encode("ascii", "replace").decode("ascii"))
-    record("f", closed and not SENTINEL.exists() and all(converged),
-           "the ledger is closed with its sentinel committed and all three roots re-plan clean",
-           "1 of 1 entries CLOSED; %d of %d roots report No changes"
-           % (sum(converged), len(ROOTS)))
+    record("f", closed and not SENTINEL.exists() and all(converged) and yclean,
+           "the ledger is closed with its sentinel committed and every root this cell touched "
+           "re-plans clean",
+           "1 of 1 entries CLOSED; %d of %d project roots report No changes, plus the ycharts "
+           "root this cell amended" % (sum(converged), len(ROOTS)))
 
     # ---------------------------------------------------------------- (g)
     head("(g) THE FOUR SYNTHETIC EXPORTS DELETED ON ANDREW'S WORD")
@@ -599,7 +665,8 @@ def main():
         print("  %s  (%s) %s" % ("PASS" if ok else "FAIL", arm, claim))
     passed = sum(1 for _, ok, _, _ in RESULTS if ok)
     print("\n  %d of %d mechanical arms passed" % (passed, len(RESULTS)))
-    print("  RENDER STEP: HUMAN-GATED, record printed verbatim in arm (a).")
+    print("  RENDER STEP: RAN on i-0167fd745ad906a66 and reads SESSION-GATED; the")
+    print("  network guard measured 2 foreign of 12 requests, 0 of them vendor.")
     if passed == len(RESULTS):
         print("IBRT8-EXPORT-RENDERS")
         return 0

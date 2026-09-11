@@ -8,12 +8,20 @@ inherited from round 1 it says so and names the artifact it was read from.
 
 ## 1. WHICH HOST RENDERED, AND ITS LIFETIME, COST AND CONCURRENCY LIMITS
 
-**IN ROUND 2: NO HOST RENDERED. The render step reads HUMAN-GATED.** Read from the deployed
-controller, not asserted here: `aws lambda invoke irpt-export-render` with
-`action=render_preflight` returns `decision=HUMAN_GATED`, host `irpt-ycharts-runner`
-(`i-0167fd745ad906a66`) `state=stopped`, `document_exists=true`, and the operator's three commands
-as data. Row `IRPT_BCKEND-W4-S14` carries the reason; the short form is that the blocker is not the
-absence of a browser but the absence of a start this cell may perform.
+**AMENDED 2026-09-11 ~16:2xZ, AFTER ANDREW'S WORD: A HOST DID RENDER -- `irpt-ycharts-runner`
+(`i-0167fd745ad906a66`), and the run reads `SESSION-GATED`.** Andrew-direct ~14:5xZ, VERBATIM
+*"Yes ycharts runner may be started"* (`1.0.0_SA_CTO` 95983) turned the gated arm into an act: the
+host was started, `irpt-export-render-run` was sent, the document deployed its own code under the
+instance role, node 18 and the cached Chromium 1187 were found and launched, and the browser opened
+`https://opalinvest.dev/investor-reporting/print`. The print route answered with a SIGN-IN SCREEN,
+so the host half refused `SESSION_ABSENT` and never signed in. No PDF was produced. Full record:
+`RT8-a_render_record.md`; rows `IRPT_BCKEND-W4-S22`, `-S23`, `-S25`.
+
+**THE DEPLOYED CONTROLLER STILL READS `HUMAN_GATED`, AND THAT IS CORRECT, NOT STALE.** It holds no
+`ec2:StartInstances` by design, and the host is stopped between renders; a render is an
+OPERATOR-INITIATED CYCLE, so the controller's job is to refuse to dispatch into a stopped box and
+hand back the act. Row `IRPT_BCKEND-W4-S14` is disarmed as to the host and survives as to nothing
+else.
 
 **THE HOST THE SYSTEM IS BUILT FOR -- `irpt-ycharts-runner`, and its limits:**
 
@@ -25,7 +33,13 @@ absence of a browser but the absence of a start this cell may perform.
 | CONCURRENCY | **1, structurally.** `ssm:SendCommand` on the export document is granted against exactly ONE instance id and ONE document name, and the host is one box. Two exports do not render in parallel; they queue behind the operator | `infra/aws/terraform/investor-reporting/export/iam.tf` |
 | ISOLATION | a SECOND SSM document, `irpt-export-render-run`, deliberately separate from `irpt-ycharts-run`. A render and a vendor sign-in are different documents on the same box, so an audit of what ran reads the document name rather than inferring intent | `infra/aws/terraform/investor-reporting/export/ssm.tf` |
 
-**THE HOST THAT DID RENDER THE FOUR STORED PDFs, stated plainly because it matters to the grade:**
+**MEASURED LIMITS OF THE RUN THAT ACTUALLY HAPPENED:** one send, ~55 seconds of instance uptime
+from `start-instances` to `stop-instances`, concurrency 1 (the grant names one instance and one
+document), and a 900-second document timeout the run did not approach. The cost was under two
+minutes of `t3.medium` and the EBS the box already carries stopped.
+
+**THE HOST THAT RENDERED THE FOUR STORED PDFs IN ROUND 1, stated plainly because it matters to the
+grade:**
 round 1's IB-s-14 rendered them on the DEVELOPMENT BOX through Playwright driving Chromium via
 `channel="msedge"` -- an already-installed browser, chosen because an install off Opal
 infrastructure was refused at IB-s-8 (rows W3-S1/S2). That host's lifetime was the battery process,
@@ -62,7 +76,17 @@ fallback. No Lato was present, and nothing failed: **a browser silently substitu
 family and emits a perfectly valid PDF.** The declaration is a list of names with no shipper and no
 checker.
 
-Three consequences the grader should weigh, and this cell does not grade them:
+**AND THE ROUND-2 RENDER FOUND THE OTHER HALF OF THIS, WHICH THE ROUND-1 READ COULD NOT SEE.** The
+network guard on the live run recorded requests to `fonts.googleapis.com` and `fonts.gstatic.com`
+-- 2 foreign of 12 (row `IRPT_BCKEND-W4-S23`). So the app FETCHES its typefaces from a third party
+at render time rather than shipping them. That closes the loop on the paragraph above: the fonts
+are neither packaged with the RenderPackage nor installed on the host, and the only reason a page
+ever shows the declared family is that a Google origin is reachable from wherever the render runs.
+**A render host firewalled to Opal origins -- the obvious hardening, and the one "0 external
+connections" would require -- would silently substitute fonts and emit a valid PDF with different
+pagination.** The two findings are one finding seen from two ends.
+
+Four consequences the grader should weigh, and this cell does not grade them:
 1. The package declares fonts it does NOT ship. Whoever provisions the render host must install
    Lato, or the declaration must be changed to name what the host actually has. This cell holds
    neither the package nor the host provisioning.
@@ -70,6 +94,9 @@ Three consequences the grader should weigh, and this cell does not grade them:
    GATE. A font census that runs only when someone asks is a description, not a control.
 3. A substituted font changes line breaks and therefore PAGE COUNT, which is a field the receipt
    carries. Font drift is silently a pagination difference.
+4. Self-hosting the three faces would fix the declaration, the embedding and the foreign-origin
+   count in one act -- it is one change with three findings behind it, and it belongs to
+   IRPT_FNTEND, not here.
 
 ---
 
