@@ -89,3 +89,67 @@ Cheapest discriminating next read, for whoever picks this up: **check the portal
 tickets behind the 403.** That is the one limb the surfacing seat could not reach, and it separates
 "the intake is broken and clients are waiting" from "the intake is broken and nothing is queued" --
 two states with very different urgency and identical logs from this side.
+
+---
+
+## UPDATE 2026-09-11 ~15:1xZ -- DIAGNOSED. NOBODY IS WAITING. STILL PARKED; THE REMEDY IS ANDREW'S.
+
+**`1.0.0_SA_CTO` (laptop), msg 95986**, relayed as bus `45a2fa1f`, answered the open question above
+read-only from the laptop, in about twenty minutes. **No lane was claimed and none was needed.**
+
+### THE ANSWER: the store is EMPTY, so nothing is queued behind the 403
+
+```
+aws dynamodb query --table-name opal-tickets --index-name status-index, status = open
+  -> Count 0, ScannedCount 0
+Teams buzz channel (19:2e18...@thread.tacv2, read through the LAPTOP gateway)
+  -> 2 posts, both 2026-08-20 -- the water test is still the last thing that ever reached it
+```
+
+>> **THIS IS AN IDLE INTEGRATION WITH A DEAD CREDENTIAL, NOT A CLIENT WAITING.** The
+"cursor unchanged on every pass" reading bounded it to a **STALL rather than a LOSS**; this bounds it
+further -- **there was nothing to have lost.** <<
+
+### THE MECHANISM -- and the two exit codes are ONE fault, not two
+
+`integrations/ticketing/intake/runner.py:159` issues `GET {api_base}/api/scoped/tickets?status=open`
+against the shared portal API `7k3ed8px20` (ticket-center root, authorizer `naqxlm`, CloudFront
+behaviors 4a/4b in portal-auth), Bearer token from the pinned gateway record --
+`runner_config.json gateway_pin`, server `opal-gateway-bbg`, identity `opalbloomberg`.
+
+```
+exit 2 (IDENTITY) = the intake's OWN refusal when the pin reads expired (runner.py:123-127) -- NO CALL MADE
+exit 5 (FETCH)    = the call WAS made and the API answered 403
+```
+
+**Same credential seen from two sides**, which is why the streak switched from 2669 exit-2 to a
+current exit-5 run rather than being two separate defects.
+
+**NOT a regression from today's work:** the IRPT api root references authorizer `naqxlm` and declares
+no authorizer resource; IB-s-15's single CloudFront behavior was appended AFTER the tickets behaviors;
+nothing today touched `/api/scoped/tickets`. **The 403 streak is the token pin, not the plane.**
+
+### THE REMEDY -- ON THIS DEVICE, AND ANDREW'S ACT
+
+**Re-pin the gateway token for identity `opalbloomberg` on site Z.** Credential-class, his terminal.
+Surfaced to him on the laptop side.
+
+⛔ **NOBODY ON EITHER FABRIC TOUCHES `run_intake.cmd` OR `runner_config.json`** -- site-Z scheduled
+tasks run the WORKING TREE, so an edit there IS the deploy. That constraint originated in this carrier
+and is being honoured on the laptop side too.
+
+### PRIORITY: LOW, BUT NOT "NO RUSH" -- and the asymmetry is the reason
+
+LOW **while the store reads zero open**. But the **FIRST client submission through the dashboard form
+would land in `opal-tickets` and sit UN-BUZZED** -- the intake is what moves a ticket to the channel.
+**So it should be re-credentialed BEFORE the next real ticket, not after one goes quiet.**
+
+### WHY THIS RESOLVED SO FAST -- worth keeping
+
+The finding shipped **with its own open question named**, and that question is the one that resolved
+it. `0.0.3_BG_BBGTerminal` surfaced it unasked off a printed 204-task denominator; the four limits
+travelled with it rather than being smoothed away. **A finding shipped with its own open question gets
+answered; one shipped as an alarm gets argued about.**
+
+**STILL PARKED.** Un-parking condition is narrowed from three options to exactly one: **Andrew re-pins
+the token.** The diagnosis closed the UNKNOWN; it did not close the item.
