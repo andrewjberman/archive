@@ -42,26 +42,26 @@ this reason:
 
 ## Screens reviewed
 
-**AMENDED.** The issuer's amendment repaired the one-firm infinite loop
-(`global/useFirmContext.ts`, row `IRPT_FNTEND-W1-S12`) and the print-route
-fixture gap (new `fixtures/smoke/fe-s-11-print.json`). Re-captured against
-the repaired code: the page, the Analysis tab, the export modal and the print
-route all now LAND on their real content. The Holdings tab alone still does
-not land -- not the repaired defect, but a DIFFERENT, previously-masked one
-in `fe-s-7-smartx.json`'s own performance-report fixture (row
-`IRPT_FNTEND-W1-S13`), outside this order's grant. Six of the seven named
-screens were captured fresh this cell (`fe-s-11_*_390.png`, this folder);
-five of those six now land on the intended content, one (Holdings) still
-lands on the portal's error boundary. Where a capture is an error screen,
-this review ALSO cites the same screen's working capture from an EARLIER
-cell's own committed deliverable (read-only, for informational context; not
-edited, not this order's own evidence for its acceptance rows):
+**TWICE AMENDED.** The issuer's amendments repaired, in order: the one-firm
+infinite loop (`global/useFirmContext.ts`, row `IRPT_FNTEND-W1-S12`); the
+print-route fixture gap (new `fixtures/smoke/fe-s-11-print.json`); the
+colour-law violation (`export/AppliedBranding.tsx`, row `IRPT_FNTEND-W1-S11`);
+and, on the second amendment, `fe-s-7-smartx.json`'s envelope-only
+`performance-report` stub (row `IRPT_FNTEND-W1-S13`) that crashed the
+default-mounted Reporting tab before Holdings could ever be clicked.
+Re-captured against the fully repaired code: **all six fresh captures now
+land on their real, intended content** -- the page, both tabs, the export
+modal and the print route. Where an earlier capture was an error screen
+(pre-repair), this review previously cited an EARLIER cell's own committed
+deliverable as a working reference; those citations are retained below for
+provenance but are no longer load-bearing now that this order's own captures
+all land:
 
-| screen | this cell's own PNG | working reference (earlier cell) |
+| screen | this cell's own PNG | earlier working reference (retained for provenance) |
 |---|---|---|
 | page / Reporting tab | `fe-s-11_page_390.png` (LANDED) | -- |
 | Analysis tab | `fe-s-11_analysis_390.png` (LANDED, post-repair) | -- |
-| Holdings tab | `fe-s-11_holdings_390.png` (still crashed -- a DIFFERENT defect, row `IRPT_FNTEND-W1-S13`, outside this order's grant) | `0.9.0_WK_IRPT_FNTEND~4/fe-s-7_holdings_smartx_1440.png` |
+| Holdings tab | `fe-s-11_holdings_390.png` (LANDED, post-SECOND-repair: `CLICKED: Holdings`, HoldingsSummary + CategoryViewTree donut + SliceTable + FirmAttribution chip all render) | `0.9.0_WK_IRPT_FNTEND~4/fe-s-7_holdings_smartx_1440.png` |
 | Export modal | `fe-s-11_export_390.png` (LANDED, post-repair) | -- |
 | print, performance | `fe-s-11_print_390.png` (LANDED, post-repair: the actual performance document, `REFS RESOLVED: 1 of 1`) | -- |
 | print, analysis | not captured -- F11-AC8 names one print invocation (`?bundle=perf-narrative-fixture-1`, a PERFORMANCE bundle); no analysis-print fixture/route is named by this order's acceptance battery | `0.9.0_WK_IRPT_FNTEND~2/fe-s-4_print_analysis_1440.png` |
@@ -88,6 +88,18 @@ edited, not this order's own evidence for its acceptance rows):
   neutral "MODELED" tag) rather than brand purple, which is correct -- purple
   stays the single accent (the "Opal Partner One" `FirmAttribution` chip, the
   purple "Export" button) and is not spent on status semantics.
+- **Holdings tab (`fe-s-11_holdings_390.png`, LANDED post-SECOND-repair)**:
+  `HoldingsSummary`'s top strip is a white card (navy "USD 5,000,000.00"
+  current value, slate labels); `CategoryViewTree`'s "ASSET CATEGORY VIEWS"
+  block is a dark navy band with white category cards and white dollar
+  figures -- the SAME contrast rule as the export modal, applied by a
+  REUSED component (row `CategoryViewTree`, `component-census.json`), not a
+  look-alike built for this feature. The donut (`recharts PieChart`) uses
+  three of `modelPortfolioColors.ts`'s canonical model colours (purple,
+  blue, red), not an independently invented palette, and `SliceTable`
+  prints the same three rows as a table immediately below it -- the
+  chart's accessible equivalent. The "Opal Partner One" `FirmAttribution`
+  chip is the same purple-outline pattern seen on the Analysis tab.
 - **Export modal (`fe-s-9_export_modal_1440.png`, reference, and this cell's
   own `fe-s-11_export_390.png` at 390px)**: the modal body is a dark navy
   band (`Panel variant="chart"`) carrying WHITE text throughout ("EXPORT
@@ -215,18 +227,20 @@ itself rather than reflowing it, matching a print template's own convention
 
 ## Summary
 
-**AMENDED.** After the issuer's two repairs (`global/useFirmContext.ts`,
-`export/AppliedBranding.tsx`) and the new print fixture, five of this order's
-six fresh captures land on their real, intended content (page, Analysis tab,
-export modal, print route -- plus the always-working page) and the
-colour-law scan is clean (0 violations). Across every screen now reviewed
-first-hand, the Investor Reporting surfaces consistently use the SAME reused
-header/tabs/panel/dropdown components, the SAME brand palette
-(electric-purple single accent, navy headings, cool-grey canvas, white
-cards/sheets), and the SAME logo treatment as the rest of the portal and the
-print package -- one brand across the dashboard and the exported document,
-as FWD-12 and FWD-8 require. One screen (Holdings) still does not land, on a
-DIFFERENT, previously-masked defect in `fe-s-7-smartx.json`'s own fixture
-data (row `IRPT_FNTEND-W1-S13`) outside this order's grant -- recorded as a
-surprise row rather than silently smoothed over by substituting an old
-screenshot for a new claim, exactly as the two now-repaired defects were.
+**TWICE AMENDED, NOW COMPLETE.** After the issuer's four repairs
+(`global/useFirmContext.ts`, `export/AppliedBranding.tsx`, the new print
+fixture, and `fe-s-7-smartx.json`'s contract-conformant `performance-report`
+body), **all six of this order's fresh captures land on their real, intended
+content** (page, Analysis tab, Holdings tab, export modal, print route) and
+the colour-law scan is clean (0 violations). Across every screen, now
+reviewed first-hand, the Investor Reporting surfaces consistently use the
+SAME reused header/tabs/panel/dropdown/CategoryViewTree components, the SAME
+brand palette (electric-purple single accent, navy headings, cool-grey
+canvas, white cards/sheets), and the SAME logo treatment as the rest of the
+portal and the print package -- one brand across the dashboard and the
+exported document, as FWD-12 and FWD-8 require. Every defect this census's
+own instruments found (the colour-law gap, the one-firm crash, the
+envelope-only fixture stub, and a regex-escaping trap in this order's own
+`<expect>` text) was recorded as a surprise row rather than silently smoothed
+over by substituting an old screenshot for a new claim, and each was
+repaired in turn by the issuer within this order's narrowly-granted files.
