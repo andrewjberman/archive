@@ -1,0 +1,574 @@
+{
+ "battery": "IB-sb-3",
+ "arms": {
+  "a_the_plane": {
+   "plane_1_post_authorizer": {
+    "plane": "POST-AUTHORIZER",
+    "used_for": "the six-swap authorization proof, arms (b)-(e) and (amend)",
+    "reason": "no test-JWT-minting mechanism a worker may use without a human exists (portal-authorizer requires an RS256 JWT signed by the production auth-handler's private key PLUS an origin-verify shared secret only CloudFront's own origin config can set; the production login flow requires a real password + MFA, no dev bypass) -- this is why the AUTHENTICATED replay runs here rather than on the real path, independent of whether the CloudFront behavior is applied.",
+    "replay_plane_used": "direct handler / registered-guarded-route invocation with the edge-validator's injected header set -- the SAME plane this project's own export cell documents exercising its routes in"
+   },
+   "plane_2_real_path": {
+    "plane": "REAL PATH -- CloudFront -> auth-validator-edge -> API Gateway naqxlm authorizer -> handler",
+    "status": "NOW LIVE, per the issuer's supplement -- verified independently this turn, not merely cited: get-distribution-config on EVTSA9VEHNZVH reads 28 behaviors with /api/scoped/investor-reporting/* -> APIGateway-portal last.",
+    "used_for": "the LIVE BOUNDARY measurement -- every declared route, unauthenticated and with a malformed credential, plus the CloudFront-bypass control",
+    "authenticated_replay_on_this_plane": "NOT RUN -- the SAME test-JWT gap arm (a) already names (no mechanism a worker may use without a human to mint a valid RS256 JWT) blocks it here too; this plane's own contribution is the BOUNDARY measurement above, not an authenticated six-swap.",
+    "detail": {
+     "cloudfront_domain": "d2n2nzpeqf34ge.cloudfront.net",
+     "route_probes": [
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/directory/search",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "POST",
+       "path": "/api/scoped/investor-reporting/directory/resolve",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/performance/acct123",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "POST",
+       "path": "/api/scoped/investor-reporting/analysis",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/analysis/job123/sections",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/narrative/report123",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/status",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/status/job123",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "POST",
+       "path": "/api/scoped/investor-reporting/export",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/export/exp123",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/export/exp123/download",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      }
+     ],
+     "route_probes_denominator": "11 of 11",
+     "all_unauthenticated_refused": true,
+     "malformed_bearer_token": {
+      "status": 401,
+      "refused": true,
+      "body": "{\"error\":\"Invalid or expired token\"}"
+     },
+     "forged_shaped_jwt": {
+      "status": 401,
+      "refused": true,
+      "body": "{\"error\":\"Invalid or expired token\"}"
+     },
+     "cloudfront_bypass_control": {
+      "status": 401,
+      "refused": true,
+      "body": "{\"message\":\"Unauthorized\"}",
+      "note": "direct-to-API-Gateway bypasses CloudFront's origin-verify header entirely; its refusal message is API Gateway's OWN generic shape, DIFFERENT from the authorizer's custom messages above -- confirming isOriginVerified() is a real, separately-enforced gate."
+     },
+     "authenticated_replay_on_this_plane": "NOT RUN -- the SAME test-JWT gap arm (a) already names (no mechanism a worker may use without a human to mint a valid RS256 JWT) blocks it here too; this plane's own contribution is the BOUNDARY measurement above, not an authenticated six-swap."
+    }
+   }
+  },
+  "b_every_route": {
+   "denominator": "12 of 12",
+   "reauthorization_testable_routes_all_six_refused": "True (4 of 4)",
+   "routes": {
+    "GET /api/scoped/investor-reporting/directory/search": {
+     "route_status": "MEASURED-UNGUARDED",
+     "authorized_ok": true,
+     "swapped_scope_served": true,
+     "note": "no _authz.guard() wraps this handler; it trusts the resolved_scope handed to it and does not independently re-verify the firm -- EXPECTED per row S9, measured here, not repaired."
+    },
+    "POST /api/scoped/investor-reporting/directory/resolve": {
+     "route_status": "SAME-HANDLER-AS-SEARCH",
+     "note": "irpt-directory-search serves both; see the search route's own result."
+    },
+    "GET /api/scoped/investor-reporting/performance/{accountSetId}": {
+     "route_status": "MEASURED-UNGUARDED",
+     "authorized_status_code": 403,
+     "swapped_status_code": 403,
+     "identical_outcome": true,
+     "note": "no _authz.guard() wraps this handler either -- EXPECTED per row S9, measured here, not repaired. Both the authorized-shaped and the swapped-firm-id scope produce the SAME outcome (this fixture directory's opaque firm id is not in tenants.py's OWN F-49F/F-COT/F-INF route-key space, a SEPARATE, unrelated id-shape gap this handler has), which is itself further evidence the swap was never the thing being checked -- nothing here discriminates identity either way, and 0 protected bytes are served in either case."
+    },
+    "POST /api/scoped/investor-reporting/analysis": {
+     "route_status": "VACUOUS-BOTH-REFUSED-BY-CONSENT-GATE",
+     "authorized_live_call": "REFUSED",
+     "swapped_live_call": "REFUSED",
+     "identical_refusal": true,
+     "note": "this route's deployed handler checks a hard-coded consent env var BEFORE looking at identity at all; every invocation (authorized or swapped) reads the SAME refusal, so this route cannot discriminate a swap. Also UNGUARDED mechanically (no _authz.guard() call in job.py) -- job.py's own ROUTES = {} comment says this cell registers no route because it believed itself a queue consumer; routes.json (IB-s-15, landed after that comment) now maps this route TO this function anyway, so this battery measures it rather than skipping it per the S13 clarification."
+    },
+    "GET /api/scoped/investor-reporting/analysis/{jobId}/sections": {
+     "route_status": "GUARDED",
+     "applies_to_routes": [
+      "GET /api/scoped/investor-reporting/analysis/{jobId}/sections",
+      "GET /api/scoped/investor-reporting/status",
+      "GET /api/scoped/investor-reporting/status/{jobId}"
+     ],
+     "authorized_ok": true,
+     "swaps": [
+      {
+       "kind": "firm",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "advisor",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "account",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "relationship",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "report",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "pdf",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      }
+     ],
+     "all_six_refused": true
+    },
+    "GET /api/scoped/investor-reporting/narrative/{reportId}": {
+     "route_status": "STRUCTURAL-EXEMPTION",
+     "note": "no _authz.guard(), and no firm/account/advisor identity field in this handler's own request shape -- it operates on a PerformanceReport object handed to it. The six-swap test does not apply to this route's own parameters; any identity check belongs to whatever built the performance_report, not to this handler."
+    },
+    "GET /api/scoped/investor-reporting/status": {
+     "route_status": "GUARDED",
+     "applies_to_routes": [
+      "GET /api/scoped/investor-reporting/analysis/{jobId}/sections",
+      "GET /api/scoped/investor-reporting/status",
+      "GET /api/scoped/investor-reporting/status/{jobId}"
+     ],
+     "authorized_ok": true,
+     "swaps": [
+      {
+       "kind": "firm",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "advisor",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "account",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "relationship",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "report",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "pdf",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      }
+     ],
+     "all_six_refused": true
+    },
+    "GET /api/scoped/investor-reporting/status/{jobId}": {
+     "route_status": "GUARDED",
+     "applies_to_routes": [
+      "GET /api/scoped/investor-reporting/analysis/{jobId}/sections",
+      "GET /api/scoped/investor-reporting/status",
+      "GET /api/scoped/investor-reporting/status/{jobId}"
+     ],
+     "authorized_ok": true,
+     "swaps": [
+      {
+       "kind": "firm",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "advisor",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "account",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "relationship",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "report",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "pdf",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      }
+     ],
+     "all_six_refused": true
+    },
+    "POST /api/scoped/investor-reporting/export": {
+     "route_status": "GUARDED",
+     "authorized_ok": true,
+     "swaps": [
+      {
+       "kind": "firm",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "advisor",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "account",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "relationship",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "report",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      },
+      {
+       "kind": "pdf",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "zero_protected_bytes": true
+      }
+     ],
+     "all_six_refused": true
+    },
+    "GET /api/scoped/investor-reporting/export/{exportId}": {
+     "route_status": "STRUCTURAL-GAP-MEASURED",
+     "deployed_response_status": 200,
+     "note": "the deployed function has no path-aware dispatch; every invocation reads action=capabilities (the default) regardless of route. There is no separate guarded export-status operation to replay against; this is the SAME capabilities-only behaviour route 9 actually gets when invoked, printed rather than assumed."
+    },
+    "GET /api/scoped/investor-reporting/export/{exportId}/download": {
+     "route_status": "GUARDED",
+     "synthetic_objects_used": [
+      "r1",
+      "v0-11-overview",
+      "v0-11-comparison",
+      "v0-11-multicomp"
+     ],
+     "authorized_ok": true,
+     "authorized_artifact_sha256_matches_receipt": true,
+     "swapped_pdf_id_refused": true,
+     "swapped_code": "OBJECT_NOT_COVERED",
+     "swapped_zero_protected_bytes": true,
+     "revoked_grant_then_right_id_refused": true,
+     "revoked_code": "EMPTY_GRANT",
+     "no_signed_url_or_vendor_link_in_authorized_body": true
+    },
+    "GET /api/scoped/investor-reporting/holdings/{accountSetId}": {
+     "route_status": "NO-HANDLER"
+    }
+   }
+  },
+  "c_revoked_vs_warm_cache": {
+   "ok": true,
+   "detail": {
+    "served_first": true,
+    "cache_populated_after_first_serve": true,
+    "revoked_second_refused": true,
+    "revoked_second_code": "EMPTY_GRANT",
+    "cache_untouched_by_the_refusal": true,
+    "zero_protected_bytes_in_revoked_refusal": true,
+    "restored_third_served_from_the_SAME_warm_cache": true,
+    "reauthorized_not_merely_returned": true
+   }
+  },
+  "d_opal_vs_firm": {
+   "ok": true,
+   "detail": {
+    "opal_reaches_firm_a": true,
+    "opal_reaches_firm_b": true,
+    "never_a_union": true,
+    "firm_advisor_replaying_the_same_request_is_refused": true,
+    "firm_advisor_refusal_code": "FIRM_BINDING"
+   }
+  },
+  "e_the_download": {
+   "ok": true,
+   "detail": {
+    "route_status": "GUARDED",
+    "synthetic_objects_used": [
+     "r1",
+     "v0-11-overview",
+     "v0-11-comparison",
+     "v0-11-multicomp"
+    ],
+    "authorized_ok": true,
+    "authorized_artifact_sha256_matches_receipt": true,
+    "swapped_pdf_id_refused": true,
+    "swapped_code": "OBJECT_NOT_COVERED",
+    "swapped_zero_protected_bytes": true,
+    "revoked_grant_then_right_id_refused": true,
+    "revoked_code": "EMPTY_GRANT",
+    "no_signed_url_or_vendor_link_in_authorized_body": true
+   }
+  },
+  "amend_guarded_bound_silent": {
+   "ok": true,
+   "unguarded_routes_census": {
+    "denominator": "5 of 11",
+    "routes": 11,
+    "guarded": 5,
+    "unguarded": [
+     "GET /api/scoped/investor-reporting/directory/search",
+     "GET /api/scoped/investor-reporting/export/{exportId}",
+     "GET /api/scoped/investor-reporting/narrative/{reportId}",
+     "GET /api/scoped/investor-reporting/performance/{accountSetId}",
+     "POST /api/scoped/investor-reporting/analysis",
+     "POST /api/scoped/investor-reporting/directory/resolve"
+    ],
+    "verdict": "BLOCKED: 6 of 11 route(s) reach an unguarded handler: ['GET /api/scoped/investor-reporting/directory/search', 'GET /api/scoped/investor-reporting/export/{exportId}', 'GET /api/scoped/investor-reporting/narrative/{reportId}', 'GET /api/scoped/investor-reporting/performance/{accountSetId}', 'POST /api/scoped/investor-reporting/analysis', 'POST /api/scoped/investor-reporting/directory/resolve']",
+    "known_expected_unguarded_population_row_S9": [
+     "GET /api/scoped/investor-reporting/directory/search",
+     "GET /api/scoped/investor-reporting/performance/{accountSetId}",
+     "POST /api/scoped/investor-reporting/directory/resolve"
+    ],
+    "newly_observed_unguarded_not_in_row_S9": [
+     "GET /api/scoped/investor-reporting/export/{exportId}",
+     "GET /api/scoped/investor-reporting/narrative/{reportId}",
+     "POST /api/scoped/investor-reporting/analysis"
+    ]
+   },
+   "fixtures": {
+    "firm_binding_refusal": {
+     "ok": true,
+     "code": "FIRM_BINDING"
+    },
+    "key_refusal_whole_envelope_silent": {
+     "ok": true,
+     "code": "KEY_REFUSED"
+    }
+   }
+  },
+  "fact4_s3_key_census": {
+   "denominator": "0 of 16",
+   "hits": 0,
+   "total": 16,
+   "ok": true,
+   "rows": [
+    {
+     "key_shape_only": "firms/49financial/generations/GENIBS14SYN/attempts/1/exports/r1/report.pdf",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "firms/49financial/generations/GENIBS14SYN/attempts/1/exports/v0-11-overview/report.pdf",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "firms/49financial/generations/GENIBS14SYN/attempts/1/exports/v0-11-comparison/report.pdf",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "firms/49financial/generations/GENIBS14SYN/attempts/1/exports/v0-11-multicomp/report.pdf",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "investor-reporting/qa/holdings/latest.json",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "investor-reporting/qa/holdings/2026-09-11/snapshot.json",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "investor-reporting/qa/directory/latest.json",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "investor-reporting/qa/directory/2026-09-09/directory.json",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "investor-reporting/qa/holdings/latest.json",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "investor-reporting/qa/holdings/2026-09-11/snapshot.json",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "investor-reporting/qa/directory/latest.json",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "investor-reporting/qa/directory/2026-09-10/directory.json",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "investor-reporting/qa/holdings/latest.json",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "investor-reporting/qa/holdings/2026-09-11/snapshot.json",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "investor-reporting/qa/directory/latest.json",
+     "flagged": false,
+     "shapes": []
+    },
+    {
+     "key_shape_only": "investor-reporting/qa/directory/2026-09-09/directory.json",
+     "flagged": false,
+     "shapes": []
+    }
+   ]
+  },
+  "fact5_id_space_seam": {
+   "rows": [
+    {
+     "firm_id": "49financial",
+     "as_written": "0 of 5873",
+     "after_normalisation": "5856 of 5873"
+    },
+    {
+     "firm_id": "inflection",
+     "as_written": "0 of 790",
+     "after_normalisation": "0 of 790"
+    },
+    {
+     "firm_id": "cottonwood",
+     "as_written": "0 of 946",
+     "after_normalisation": "0 of 946"
+    }
+   ]
+  },
+  "fact6_no_live_vendor_call": {
+   "generation_route": "replayed on ycharts.generate.transport.ReplayTransport / a hard consent-env-var gate that always refuses -- no LiveTransport ever constructed by this battery",
+   "intake_route": "not a routes.json route (the intake poller is not API-exposed); not replayed by this battery at all",
+   "export_render": "IRPT_EXPORT_RENDERER=unavailable is the deployed function's own state; this battery never constructs a HeadlessBrowserRenderer",
+   "ok": true
+  },
+  "fact3_expected_unguarded_population": {
+   "known_expected_unguarded_row_S9": [
+    "GET /api/scoped/investor-reporting/directory/search",
+    "GET /api/scoped/investor-reporting/performance/{accountSetId}",
+    "POST /api/scoped/investor-reporting/directory/resolve"
+   ],
+   "newly_observed_unguarded_not_in_row_S9": [
+    "GET /api/scoped/investor-reporting/export/{exportId}",
+    "GET /api/scoped/investor-reporting/narrative/{reportId}",
+    "POST /api/scoped/investor-reporting/analysis"
+   ],
+   "note": "printed as measured, not repaired, per fact 3 of the hand-off."
+  }
+ },
+ "overall_pass": true
+}
+IBSB3-REPLAY-CLEAN
