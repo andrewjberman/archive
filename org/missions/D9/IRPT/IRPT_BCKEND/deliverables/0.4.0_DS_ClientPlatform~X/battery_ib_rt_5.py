@@ -51,7 +51,7 @@ RANGES = [
     ("2dbc92e956", "holdings_snapshot.py", "tests/test_holdings_snapshot.py"),
 ]
 # Measured pre-edit, on this worktree, BEFORE the CODE_TREES change. Both suites
-# were ALREADY failing for reasons this cell does not touch (row IRPT_BCKEND-S27).
+# were ALREADY failing for reasons this cell does not touch (row IRPT_BCKEND-S29).
 BASELINE = {".tools/test_code_trees_invariant.py": (3, 18),
             ".tools/test_safe_deploy.py": (7, 14)}
 
@@ -120,7 +120,7 @@ for script, (fails, total) in sorted(BASELINE.items()):
                 % (script, fails, total, now[0], now[1],
                    "UNMOVED (control holds)" if same else "*** MOVED ***"))
 det += ctrl
-det.append("NOTE: both suites were ALREADY red pre-edit (row IRPT_BCKEND-S27); BOUNDS")
+det.append("NOTE: both suites were ALREADY red pre-edit (row IRPT_BCKEND-S29); BOUNDS")
 det.append("  names the self-test run 'the control', and UNMOVED is what a control asserts.")
 record("(a) DECLARED", ok_a1 and ok_a2, "\n".join(det))
 
@@ -146,7 +146,7 @@ det.append("MEMBERS verified: %d of %d  |  KEYS at the prefix: %s of 1 minted"
            % (verified, len(MEMBERS), count))
 det.append("DENOMINATOR NOTE: the face grades 'each of the 2 keys'. The guard mints ONE")
 det.append("  object (tar members inside one payload; mint_bundle does a single s3 cp).")
-det.append("  Reported here as 2 of 2 MEMBERS on 1 of 1 KEY -- row IRPT_BCKEND-S25.")
+det.append("  Reported here as 2 of 2 MEMBERS on 1 of 1 KEY -- row IRPT_BCKEND-S27.")
 record("(b) MINTED", verified == len(MEMBERS) and rc == 0 and count == "1", "\n".join(det))
 
 # ------------------------------------------------------------------ (c) MEMBER

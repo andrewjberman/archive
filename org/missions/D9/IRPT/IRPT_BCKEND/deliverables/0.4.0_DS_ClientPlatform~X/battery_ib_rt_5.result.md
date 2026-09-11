@@ -52,7 +52,7 @@ The three invariant failures are a frozen `PIPELINE_MAP` that predates the `advi
 tree (added 2026-08-18); the seven deploy failures are fixtures built outside the
 workspace (`INDEX_MISSING`) and `Strings must be encoded before hashing`. None is
 reachable from a bundle addition, and the byte-identical invariant output is the
-discriminator that says so. Row `IRPT_BCKEND-S27`.
+discriminator that says so. Row `IRPT_BCKEND-S29`.
 
 ⚠ `pytest .tools/tests/` collects **ZERO** -- `test_fabric_check_classify.py`
 raises `SystemExit` at import and takes the whole directory with it
@@ -81,7 +81,7 @@ MEMBERS verified: 2 of 2   |   KEYS at the prefix: 1 of 1
 members are tar members inside one gzip payload and `mint_bundle` does a single
 `s3 cp` to a single `b['s3_key']`. Minting two loose twins would satisfy the
 literal words and is refused here -- the X-iii design freezes the loose leg for a
-bundle member (CTO 2026-08-06, no S3 roster twin). Row `IRPT_BCKEND-S25`.
+bundle member (CTO 2026-08-06, no S3 roster twin). Row `IRPT_BCKEND-S27`.
 
 **The per-member sha keys are distinct, and that is load-bearing.** The L5 note
 says `sha_metadata_key: script-sha256` for both members. `build_bundle_payload`
@@ -89,11 +89,11 @@ assigns `shas[spec["sha_metadata_key"]]` inside a loop over sorted members, so o
 shared key collides: only `holdings_snapshot.py`'s sha would have reached S3,
 under a stamp that reads as though it covered both files. `accrual_bridge` -- the
 shape this order says to copy -- is per-member for exactly this reason. Row
-`IRPT_BCKEND-S26`.
+`IRPT_BCKEND-S28`.
 
 ### (c) MEMBER now, with the input held fixed
 Instead of editing a runner (BOUNDS 1 forbids it while `RT5-AC1(c)` asks for a
-no-op commit -- row `IRPT_BCKEND-S29`), the gate's own `--commit-range` path was
+no-op commit -- row `IRPT_BCKEND-S31`), the gate's own `--commit-range` path was
 run over the two **real commits that added the runners**: `3654197107` (IB-s-1)
 and `2dbc92e956` (IB-s-12). That is byte-identical input to what produced round
 1's SKIP-NOT-MEMBER finding, so the before/after varies only the declaration.
@@ -171,7 +171,41 @@ key**, and those keys are permanent 404s by design now. `battery_ib_s_12.py` als
 probes `--mint-bundle holdings_snapshot`, a bundle name that does not exist (the
 declared bundle is `investor_reporting`, of which that file is a *member*), so it
 will still print `DEPLOY LEG: BLOCKED` after a successful first-mint. Row
-`IRPT_BCKEND-S30`. The current instrument for this surface is this battery.
+`IRPT_BCKEND-S32`. The current instrument for this surface is this battery.
+
+---
+
+## Row ids were RE-MINTED before the drain -- read this before chasing a citation
+
+These six rows were first written as `IRPT_BCKEND-S25..S30`. They are now
+**`S27..S32`**, on the issuer's instruction (2.0.0_SA_COO~B, msg 95962), because
+`CLOUD` HEAD `c8189bb6ae` already carried `IRPT_BCKEND-S25` and `S26` minted by the
+issuer *after* this branch was cut at `7478fdf144`. Both of mine collided on id, and
+the drain's row gate refuses a duplicate id across the merged index.
+
+Verified independently before the remap rather than taken on the instruction alone:
+`CLOUD` HEAD carries 78 rows with seat-form `k = 1..26` contiguous, `S25` and `S26`
+both `surfaced_by: 2.0.0_SA_COO~B`, and `27..32` free 6 of 6.
+
+| was | is |
+|---|---|
+| S25 | **S27** |
+| S26 | **S28** |
+| S27 | **S29** |
+| S28 | **S30** |
+| S29 | **S31** |
+| S30 | **S32** |
+
+Content is unchanged; only the ids moved. 34 references were remapped in ONE pass
+across the channel, this file, the proof instance and the battery -- one pass because
+the source and target ranges OVERLAP, so a sequential rename would have carried the
+old `S25` through `S27` and on to `S29`.
+
+⚠ **The four earlier commit messages on this branch (`36e4fbf826`, `e9a6ba27db`,
+`9a98a1292f`, `8d17355974`) name the OLD ids.** Commit messages are immutable, so a
+citation of `IRPT_BCKEND-S25` or `S26` read out of those messages now resolves to the
+ISSUER's rows, not to mine. This table is the mapping; the ids in this file, the
+proof instance and the channel are the current ones.
 
 ---
 
@@ -179,9 +213,9 @@ will still print `DEPLOY LEG: BLOCKED` after a successful first-mint. Row
 
 | id | one line |
 |---|---|
-| `IRPT_BCKEND-S25` | the mechanism mints 1 key, the face grades 2 |
-| `IRPT_BCKEND-S26` | one shared `sha_metadata_key` collides and silently drops a member's sha |
-| `IRPT_BCKEND-S27` | the guard's self-tests were already red pre-edit; the run is a control |
-| `IRPT_BCKEND-S28` | the face's `IRPT_BCKEND-D-S<k>` id form is refused by the ratified schema |
-| `IRPT_BCKEND-S29` | `RT5-AC1(c)` asks for a runner edit that BOUNDS 1 forbids |
-| `IRPT_BCKEND-S30` | round-1 batteries read ABSENT after a correct first-mint |
+| `IRPT_BCKEND-S27` | the mechanism mints 1 key, the face grades 2 |
+| `IRPT_BCKEND-S28` | one shared `sha_metadata_key` collides and silently drops a member's sha |
+| `IRPT_BCKEND-S29` | the guard's self-tests were already red pre-edit; the run is a control |
+| `IRPT_BCKEND-S30` | the face's `IRPT_BCKEND-D-S<k>` id form is refused by the ratified schema |
+| `IRPT_BCKEND-S31` | `RT5-AC1(c)` asks for a runner edit that BOUNDS 1 forbids |
+| `IRPT_BCKEND-S32` | round-1 batteries read ABSENT after a correct first-mint |
