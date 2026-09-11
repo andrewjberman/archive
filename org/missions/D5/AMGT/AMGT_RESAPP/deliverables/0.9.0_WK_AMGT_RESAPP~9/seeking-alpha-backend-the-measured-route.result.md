@@ -113,3 +113,91 @@ alongside them, because it blocks every vendor round-trip before any of the five
 - Bright Data's proxy root CA was not obtained and not pinned; certificate verification was never
   disabled in the shipped module.
 - The five C-SA-UNMEASURED limits remain unmeasured, now for an additional, prior reason (see AC7).
+
+--------------------------------------------------------------------------------------------------
+
+## RE-RUN, 2026-09-11 -- `verify=False` landed upstream, AC1 now PASSES
+
+**Everything above is the honest measurement at its own vintage (2026-09-10T23:15-23:20Z) and is kept,
+not deleted or rewritten.** This section is a SECOND, later vintage against a REPAIRED dependency, per
+spine v3 rule 27's "a RIDE, not a re-cut": the order and its criteria are unchanged; only the world (the
+reference script's own committed default) moved.
+
+**Authorization and cause chain (independently verified by this worker, not merely relayed):**
+- `ANDREW-DIRECT 2026-09-11 ~03:42Z` ("Canonical method here: ... lets get that done with COO"),
+  recorded by `3.0.0_SA_CVO~Z` at commit `770ee8fb18` -- the worktree's own HEAD, confirmed by
+  `git log --oneline -1` before touching anything.
+- The CRO's reference fix, verified directly (not taken on the message's word): `git log -1 --date=iso-strict
+  -- org/tier1_exec/4.0.0_SA_CRO/scripts/sa_rest_fetch.py` -> commit `0d02e7ce47`, author `4.0.0_SA_CRO~Z`,
+  `2026-09-10T22:26:53-04:00` = `2026-09-11T02:26:53Z` -- exactly 3h11m after this worker's `W9-S2` row
+  (`2026-09-10T23:15:24Z`), confirming the row was correct at its own vintage and could not have known
+  the fix. The file at that commit carries `kwargs = {"impersonate": "chrome", "timeout": 70, "verify":
+  False}` with its own comment naming the same cause this worker's `W9-S2` diagnosed (Bright Data's proxy
+  SSL-bumps traffic; every scratch prototype had `verify=False`; the committed version never did).
+- The parked session's freshness, verified by a LIVE `aws secretsmanager describe-secret` read (not the
+  message's claim alone): `seeking-alpha/session` `LastChangedDate` `2026-09-10T22:13:40.784-04:00` =
+  `2026-09-11T02:13:40Z`, `VersionId 3882be57-6a3e-4693-8a7a-2c768bf28af1` -- matching the canonical
+  method doc's stated `2026-09-11T02:13:39Z` / same VersionId exactly, which a chat message alone could
+  not have produced (it requires a real harvester run against the live AWS account).
+- Andrew's SA-domain word is the per-use vendor-egress authorization (G-24) for this one re-run, per the
+  same record.
+
+**The one code change** (`integrations/seekingalpha/rest_fetch.py`, `build_session`): added `verify=False`
+to the `curl_cffi.Session(...)` constructor, with an inline comment naming the reason and citing
+`AMGT_RESAPP-Z-W9-S2`, matching `HEAD:org/tier1_exec/4.0.0_SA_CRO/scripts/sa_rest_fetch.py:92` exactly.
+Nothing else in the module changed. AC5's structural grep re-ran clean (`0`) -- `verify=False` is not one
+of the seven banned literals and is not a POST, a modal fetch, an unlocker, or a schedule.
+
+**The re-run, one ticker per invocation as before:** `run-ticker BABA/BA/COST` then
+`finalize --expected BABA,BA,COST`. All 18 requests (3 tickers x symbol/report/analysis/news/2 articles)
+returned `200 OK` -- zero `TRANSPORT_ERROR`, zero `REHARVEST`, zero `AUTH_FAIL`. Real `sa_id`s measured:
+BABA=137271, BA=769, COST=58. The pre-fix `TRANSPORT_ERROR` state files are preserved, not overwritten, at
+`request_log.pre_verify_fix_20260910T2315Z.json` / `sa_ids.pre_verify_fix_20260910T2315Z.json`.
+
+**Criteria, re-measured:**
+- **AC1 PASS**: `SA LANDING: tickers 3; raw objects 18 across 3 keys; symbol+report present for 3 of 3;
+  sa_ids MEASURED 3`.
+- **AC2 PASS**: `4 passed` (unchanged).
+- **AC3 PASS**: `requests 18 | with Referer 18 | via proxy 18 | non-GET 0 | min gap s 2.71`.
+- **AC4 PASS**: `unique tickers 3 | runs 1`.
+- **AC5 PASS**: `0` (re-verified after the `verify=False` addition).
+- **AC6 PASS**: `0` (unchanged).
+- **AC7**: see below -- now answerable against real landed data.
+
+## AC7, re-answered against real data
+
+**createdAt/previousReportDate preservation:** OBSERVED and CONFIRMED. The landed BABA report
+(`raw/seekingalpha/BABA_US/20260911T040214Z/report.json`, read back directly from S3) carries
+`createdAt: 2026-09-08T00:00:22.351-04:00` and `previousReportDate: 2026-09-03T00:01:14.183-04:00` --
+present, dated, and untouched, because `land_raw` writes `response.content` byte-for-byte (never a
+re-serialization); nothing in the shipped code has ever had an opportunity to reshape these fields. This
+is the FWD-6 what-changed axis the source itself carries, served, not restated.
+
+**Which of C-SA-UNMEASURED's five limits this run could newly observe:**
+1. **Session lifetime (TTL)** -- PARTIALLY OBSERVED, still not bounded: the jar (captured
+   `2026-09-11T02:13:39Z`) served 18 successful authenticated calls at `04:02-04:03Z`, ~1h49m later --
+   a NEW positive data point past the original investigation's ~30-minute window, but this run never
+   pushed to failure, so the TTL's outer bound is still unmeasured.
+2. **Headless harvest** -- still NOT APPLICABLE (the harvester is not run by this order in any form).
+3. **MFA** -- still NOT APPLICABLE (no sign-in attempted by this order).
+4. **Rate limits and terms** -- 18 calls at a measured min gap of 2.71s produced zero rate-limit
+   responses (no 429, no throttling signal) -- more calls than the reference's own count, still not a
+   bound (faster pacing was never tried, per C-SA-UNMEASURED); terms were not read (Andrew's question).
+5. **`has_paid_subscription` gate on other paywalled surfaces** -- STILL NOT OBSERVED FOR A LOCKED ONE:
+   both articles fetched (BABA `4944152`, `4941330`) read `isPaywalled: False, isLockedPro: False` --
+   the same "free" shape the reference's own two articles showed; a PRO-locked article was still never
+   tried.
+
+Four of five limits remain genuinely unmeasured past what the reference already knew; only session
+lifetime gained a new (still unbounded) data point. Nothing here was assumed to be resolved by this run.
+
+## What is NOT done, re-stated after the re-run
+
+- The five-limit list above is still mostly open -- a successful run answers "does the fetcher work,
+  correctly landing and preserving raw bytes" (yes), not "are the vendor's own operational limits now
+  known" (still mostly no).
+- Bright Data's proxy root CA was never obtained or pinned; `verify=False` accepts the proxy's own
+  SSL-bump broadly (any certificate), which is the documented, Andrew-authorized default for this one
+  vendor relationship, not a narrower pinned-CA trust anchor -- named here rather than glossed over.
+- The harvester was still not run by this worker; the fresh session it produced (`captured_at
+  2026-09-11T02:13:39Z`) was `4.0.0_SA_CRO~Z`'s act, not this order's.

@@ -34,10 +34,10 @@
     {
       "path_or_key": "integrations/seekingalpha/rest_fetch.py",
       "kind": "script",
-      "commit_or_etag": "ca7c0a28f11b4e3097e09f1f97474b4719b11370",
+      "commit_or_etag": "513ae51e2361262d31b9985d33978e6e15a036df",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The ETL: build_session, _do_get (logging + classification + ProxyTransportError), land_raw, run_ticker (symbol->report->analysis->news->articles), run-ticker/finalize CLI. A script a person runs (AC6); no deploy surface.",
-      "introduces": ["build_session", "run_ticker", "land_raw", "ProxyTransportError", "ReHarvestNeeded", "SessionAuthFailed"],
+      "deploy_evidence": "The ETL: build_session, _do_get (logging + classification + ProxyTransportError), land_raw, run_ticker (symbol->report->analysis->news->articles), run-ticker/finalize CLI. RE-RUN UPDATE: build_session's curl_cffi.Session constructor now carries verify=False (one keyword, with an inline comment naming the cause and the authorization) matching HEAD:org/tier1_exec/4.0.0_SA_CRO/scripts/sa_rest_fetch.py:92 -- the fix that resolves AMGT_RESAPP-Z-W9-S2. A script a person runs (AC6); no deploy surface.",
+      "introduces": ["verify=False"],
       "artifact_covered_by": ["AC1", "AC3", "AC4", "AC5", "AC6"]
     },
     {
@@ -75,25 +75,39 @@
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~9/sa_ids.json",
       "kind": "config_data",
-      "commit_or_etag": "ca7c0a28f11b4e3097e09f1f97474b4719b11370",
+      "commit_or_etag": "513ae51e2361262d31b9985d33978e6e15a036df",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The persisted {ticker: {sa_id, slug, status, measured_at}} map -- this run's real content: all three tickers status TRANSPORT_ERROR, sa_id/slug null (never fabricated).",
+      "deploy_evidence": "RE-RUN UPDATE: the persisted {ticker: {sa_id, slug, status, measured_at}} map now reads all three tickers status MEASURED with real sa_ids (BABA=137271, BA=769, COST=58), after the verify=False fix. The prior TRANSPORT_ERROR content is preserved separately, not overwritten (see sa_ids.pre_verify_fix_20260910T2315Z.json below).",
       "artifact_covered_by": ["AC1"]
     },
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~9/request_log.json",
       "kind": "config_data",
-      "commit_or_etag": "ca7c0a28f11b4e3097e09f1f97474b4719b11370",
+      "commit_or_etag": "513ae51e2361262d31b9985d33978e6e15a036df",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "9 logged requests across 3 tickers, 1 run: every entry's referer/via_proxy/method/t populated even though every one ended TRANSPORT_ERROR (the GET was correctly formed; it never got an HTTP response).",
+      "deploy_evidence": "RE-RUN UPDATE: 18 logged requests across 3 tickers, 1 run, all classification OK, all status_code 200 -- the prior 9-request TRANSPORT_ERROR log is preserved separately (request_log.pre_verify_fix_20260910T2315Z.json), not overwritten.",
       "artifact_covered_by": ["AC1", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~9/request_log.pre_verify_fix_20260910T2315Z.json",
+      "kind": "config_data",
+      "commit_or_etag": "513ae51e2361262d31b9985d33978e6e15a036df",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Archived, byte-for-byte copy of the pre-fix run's request_log.json (9 requests, all TRANSPORT_ERROR) taken before resetting the active file for the re-run -- a measurement is never deleted."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~9/sa_ids.pre_verify_fix_20260910T2315Z.json",
+      "kind": "config_data",
+      "commit_or_etag": "513ae51e2361262d31b9985d33978e6e15a036df",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Archived, byte-for-byte copy of the pre-fix run's sa_ids.json (3 tickers, all TRANSPORT_ERROR, sa_id/slug null) taken before resetting the active file for the re-run."
     },
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~9/seeking-alpha-backend-the-measured-route.result.md",
       "kind": "doc",
-      "commit_or_etag": "ca7c0a28f11b4e3097e09f1f97474b4719b11370",
+      "commit_or_etag": "513ae51e2361262d31b9985d33978e6e15a036df",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Session log: sequence of work, the AC5 'password' literal fix, the ticker-selection rule, the full TLS-finding diagnosis (never printing a secret value), and the AC7 judgment answer.",
+      "deploy_evidence": "Session log: sequence of work, the AC5 'password' literal fix, the ticker-selection rule, the full TLS-finding diagnosis, the AC7 judgment answer AT THE ORIGINAL VINTAGE (preserved, not deleted), and a new appended section documenting the re-run's authorization chain (independently verified, not merely relayed), the one-keyword fix, and AC7 re-answered against real landed data.",
       "artifact_covered_by": ["AC7"]
     },
     {
@@ -110,11 +124,11 @@
       "criterion_verbatim": "one line of the exact shape \"SA LANDING: tickers 3; raw objects <n> across 3 keys; symbol+report present for 3 of 3; sa_ids MEASURED 3\" -- read back from S3 and sa_ids.json by this script, never from the fetcher's own log; a ticker with no report object, or an sa_id not MEASURED, is NOT met -- and a run that stopped on REHARVEST_NEEDED records that status as its finding and leaves this criterion NOT met, never rescued by a harvest",
       "method": "command",
       "invocation": "python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~9/check_landing.py",
-      "output_evidence": "SA LANDING: tickers 3; raw objects 0 across 3 keys; symbol+report present for 0 of 3; sa_ids MEASURED 0",
-      "denominator": "3 of 3 tickers checked (BABA, BA, COST); 0 of 3 landed a symbol+report pair; 0 of 3 sa_ids MEASURED",
-      "status": "FAIL",
-      "status_reason": "The real, reproduced output of this exact run: every one of 9 attempted GETs (3 tickers x symbol/analysis/news) failed at the TLS handshake through astn/brightdata/residential-proxy before reaching Seeking Alpha -- filed as AMGT_RESAPP-Z-W9-S2 (BLOCKING, INERT). Not rescued by disabling certificate verification (a security-posture change this cell's BOUNDS do not authorize) or by running the harvester (out of scope regardless, and the finding is transport-layer, not session-layer). AC2-AC6 all pass on this same run's real output -- the fetcher, detectors, structural bans, and request logging are all built and exercised correctly as far as the transport layer allows.",
-      "expect": "SA LANDING: tickers 3; raw objects \\d+ across 3 keys; symbol\\+report present for 3 of 3; sa_ids MEASURED 3"
+      "output_evidence": "SA LANDING: tickers 3; raw objects 18 across 3 keys; symbol+report present for 3 of 3; sa_ids MEASURED 3",
+      "denominator": "3 of 3 tickers checked (BABA, BA, COST); 3 of 3 landed a symbol+report pair; 3 of 3 sa_ids MEASURED",
+      "status": "PASS",
+      "expect": "SA LANDING: tickers 3; raw objects \\d+ across 3 keys; symbol\\+report present for 3 of 3; sa_ids MEASURED 3",
+      "status_reason": "RE-RUN at a later vintage against a repaired dependency (a RIDE per 1.0.0_SA_CTO~Z's ruling, order and criteria unchanged): this criterion FAILED at the 2026-09-10T23:15-23:20Z vintage (0 of 3 landed -- see session_log and request_log.pre_verify_fix_20260910T2315Z.json, preserved not deleted) because astn/brightdata/residential-proxy SSL-bumps HTTPS and curl_cffi's default strict verification rejected it (AMGT_RESAPP-Z-W9-S2, still on file, disposition unchanged). The reference script (org/tier1_exec/4.0.0_SA_CRO/scripts/sa_rest_fetch.py) landed verify=False for the identical cause at commit 0d02e7ce47 (2026-09-11T02:26:53Z, independently verified via git log --date=iso-strict, not merely relayed), and Andrew's direct word (2026-09-11 ~03:42Z, recorded at commit 770ee8fb18 by 3.0.0_SA_CVO~Z, the worktree's own re-cut HEAD) authorized riding that same fix here. Adding the identical one keyword (with a citing comment) and re-running produced this PASS on real landed data (sa_ids: BABA=137271, BA=769, COST=58, independently read back from S3, not from the fetcher's own log)."
     },
     {
       "criterion_id": "AC2",
@@ -131,10 +145,11 @@
       "criterion_verbatim": "\"with Referer\" and \"via proxy\" both EQUAL to \"requests\", \"non-GET 0\", and a \"min gap s\" of 2.0 or more -- every request carried the per-ticker Referer, went through the residential proxy, was a GET, and the pacing never went faster than the investigation's (C-SA-SESSION-SHAPE, C-SA-NO-POST-THROUGH-PROXY, C-SA-UNMEASURED)",
       "method": "command",
       "invocation": "python -c \"import json; l=json.load(open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~9/request_log.json')); r=l['requests']; print('requests', len(r), '| with Referer', sum(1 for x in r if x.get('referer')), '| via proxy', sum(1 for x in r if x.get('via_proxy')), '| non-GET', sum(1 for x in r if x.get('method')!='GET'), '| min gap s', round(min((r[i+1]['t']-r[i]['t']) for i in range(len(r)-1)),2) if len(r)>1 else 'n/a')\"",
-      "output_evidence": "requests 9 | with Referer 9 | via proxy 9 | non-GET 0 | min gap s 2.34",
-      "denominator": "9 of 9 logged requests carry referer + via_proxy; 0 of 9 non-GET; min gap over 8 consecutive pairs = 2.34s",
+      "output_evidence": "requests 18 | with Referer 18 | via proxy 18 | non-GET 0 | min gap s 2.71",
+      "denominator": "18 of 18 logged requests carry referer + via_proxy; 0 of 18 non-GET; min gap over 17 consecutive pairs = 2.71s",
       "status": "PASS",
-      "expect": "with Referer 9 \\| via proxy 9 \\| non-GET 0 \\| min gap s 2\\."
+      "expect": "with Referer 18 \\| via proxy 18 \\| non-GET 0 \\| min gap s 2\\.",
+      "status_reason": "RE-RUN with verify=False landed (see AC1); 18 = 3 tickers x (symbol+report+analysis+news+2 articles), all succeeding this time instead of failing at the TLS layer. The prior run's 9-request TRANSPORT_ERROR log (also PASS on this same census, since referer/proxy/method were correct even when the vendor was never reached) is preserved at request_log.pre_verify_fix_20260910T2315Z.json."
     },
     {
       "criterion_id": "AC4",
@@ -142,7 +157,7 @@
       "method": "command",
       "invocation": "python -c \"import json; l=json.load(open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~9/request_log.json')); print('unique tickers', len(set(x['ticker'] for x in l['requests'])), '| runs', l['runs'])\"",
       "output_evidence": "unique tickers 3 | runs 1",
-      "denominator": "3 of 3 tickers attempted (BABA, BA, COST); runs field = 1 (never incremented across the 3 per-ticker CLI invocations, by design -- one exploration-word test session, not 3)",
+      "denominator": "3 of 3 tickers attempted (BABA, BA, COST); runs field = 1 (never incremented, either across the original 3 per-ticker invocations or this re-run's 3 -- one exploration-word test session throughout, per Andrew's per-use word for this one re-run)",
       "status": "PASS",
       "expect": "unique tickers 3 \\| runs 1"
     },
@@ -171,8 +186,8 @@
       "criterion_verbatim": "read the landed virtual_analysts JSON for one ticker beside the reference's description of it -- does the ETL preserve createdAt and previousReportDate untouched (FWD-6's what-changed axis, served by the source), and does the deliverable state plainly which of C-SA-UNMEASURED's five limits this run could and could not observe?",
       "method": "manual_read_with_citation",
       "judgment": true,
-      "invocation": "read org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~9/seeking-alpha-backend-the-measured-route.result.md sections 'What actually happened' and 'AC7 (judgment)'",
-      "output_evidence": "No virtual_analysts report was ever landed this run (every request failed at the TLS layer before any vendor response existed), so createdAt/previousReportDate preservation could not be exercised against a real payload; the code path that would carry them (land_raw writes response.content byte-for-byte, never a re-serialization) is present and unexercised. The deliverable states plainly, per limb: (1) session TTL -- NOT OBSERVABLE (TLS failure precedes the vendor ever seeing the request); (2) headless harvest -- NOT APPLICABLE (harvester not run by this order); (3) MFA -- NOT APPLICABLE (no sign-in attempted); (4) rate limits/terms -- NOT OBSERVABLE for rate limits, terms not read (unchanged from the reference); (5) has_paid_subscription gate on other paywalled surfaces -- NOT OBSERVABLE (no article ever fetched). This run observed zero of the five, because the TLS finding sits in front of all of them.",
+      "invocation": "read org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~9/seeking-alpha-backend-the-measured-route.result.md sections 'AC7 (judgment -- recorded, not self-graded)' (original vintage, preserved) and 'AC7, re-answered against real data' (the re-run)",
+      "output_evidence": "RE-RUN, against real landed data: createdAt/previousReportDate CONFIRMED preserved untouched -- the landed BABA report (raw/seekingalpha/BABA_US/20260911T040214Z/report.json, read back directly from S3 by this worker) carries createdAt=2026-09-08T00:00:22.351-04:00 and previousReportDate=2026-09-03T00:01:14.183-04:00, present and dated, because land_raw writes response.content byte-for-byte -- nothing in the shipped code ever had an opportunity to reshape these fields. Of C-SA-UNMEASURED's five limits: (1) session TTL -- PARTIALLY OBSERVED, still not bounded (the jar captured 2026-09-11T02:13:39Z served 18 successful calls ~1h49m later, a new positive data point past the original ~30-minute window, but never pushed to failure); (2) headless harvest -- still NOT APPLICABLE; (3) MFA -- still NOT APPLICABLE; (4) rate limits/terms -- 18 calls at min gap 2.71s produced zero rate-limit signals, still not a bound, terms still not read; (5) has_paid_subscription gate on other paywalled surfaces -- STILL NOT OBSERVED for a locked article (both fetched, 4944152 and 4941330, read isPaywalled=False/isLockedPro=False, the same free shape the reference itself saw). Four of five limits remain genuinely open; only session lifetime gained an unbounded new data point. The ORIGINAL vintage's answer (0 of 5 observed, TLS blocked every round-trip) is preserved in the deliverable, not deleted.",
       "denominator": "N/A -- judgment criterion, read against the deliverable text, no invocation output to count",
       "status": "UNVERIFIABLE-BY-INSTRUMENT",
       "status_reason": "spine v3 L6/L9: a judgment row carries its output and NO verdict; the grade is 3.0.0_SA_CVO~Z's at L9 adjudication, not self-graded here."
@@ -186,8 +201,8 @@
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "check_landing.py run twice in immediate succession against the same (unchanged) S3 state and sa_ids.json -- stdout compared byte-for-byte.",
-      "observed": "diff of two consecutive runs' stdout: IDENTICAL. Both printed 'SA LANDING: tickers 3; raw objects 0 across 3 keys; symbol+report present for 0 of 3; sa_ids MEASURED 0'. Also: python -m pytest integrations/seekingalpha/tests -q run twice (before and after the AC5 'password' fix, and again after the log-open-ok fix) -- '4 passed' every time, no flake.",
+      "method": "check_landing.py run twice in immediate succession against the same (unchanged) S3 state and sa_ids.json -- stdout compared byte-for-byte. Done at BOTH vintages: the pre-fix TRANSPORT_ERROR state and the post-fix PASS state.",
+      "observed": "Pre-fix vintage: two consecutive runs IDENTICAL, both 'SA LANDING: tickers 3; raw objects 0 across 3 keys; symbol+report present for 0 of 3; sa_ids MEASURED 0'. Post-fix vintage (this re-run): two consecutive runs IDENTICAL, both 'SA LANDING: tickers 3; raw objects 18 across 3 keys; symbol+report present for 3 of 3; sa_ids MEASURED 3'. Also: python -m pytest integrations/seekingalpha/tests -q run repeatedly across both vintages -- '4 passed' every time, no flake (the detectors are unchanged by the verify=False fix).",
       "status": "STABLE"
     }
   },
@@ -197,8 +212,8 @@
       "reason": "BOUNDS: THE HARVESTER IS NOT RUN BY THIS ORDER. A dead/unreachable session is a status and a row, never a headed-browser run, never a sign-in."
     },
     {
-      "item": "Trusting Bright Data's proxy root CA, or disabling TLS certificate verification, to route around the transport-layer finding",
-      "reason": "A security-posture decision outside this cell's BOUNDS (which name no such authorization); filed as AMGT_RESAPP-Z-W9-S2 (BLOCKING, INERT) rather than resolved unilaterally. verify stayed at its safe default for every real attempt."
+      "item": "Obtaining and pinning Bright Data's specific proxy root CA as a scoped trust anchor (a narrower alternative to verify=False)",
+      "reason": "Not done at either vintage. At the original vintage, disabling verification at all was outside this cell's BOUNDS and was correctly not done (AMGT_RESAPP-Z-W9-S2 filed instead). At this re-run vintage, Andrew's direct word (2026-09-11 ~03:42Z) and the CTO's ruling (msg 21152) authorized riding the reference's own verify=False default for this specific vendor proxy -- a broader accept-any-cert flag, not the narrower CA-pin this worker still did not build or obtain. Named here rather than glossed over."
     },
     {
       "item": "Fixing AMGT-s-12's universe.json 'AAPL US' data-quality anomaly (16 of 89 folders share that literal value)",
@@ -213,8 +228,8 @@
       "reason": "C-SA-UNMEASURED: the terms question is Andrew's, not this worker's; nothing in this order reads or rules on them."
     },
     {
-      "item": "Observing session TTL, rate limits beyond 2s pacing, MFA behavior, headless harvest, or the has_paid_subscription gate on other paywalled surfaces",
-      "reason": "None of C-SA-UNMEASURED's five limits could be exercised this run -- every vendor round-trip failed at the TLS transport layer before reaching Seeking Alpha (AC7)."
+      "item": "Bounding session TTL, testing rate limits faster than 2s pacing, MFA behavior, headless harvest, or fetching a PRO-locked/paywalled article",
+      "reason": "At the original vintage none of C-SA-UNMEASURED's five limits could be exercised (every vendor round-trip failed at the TLS transport layer). At this re-run, session lifetime gained one new (still unbounded) positive data point (~1h49m served); the other four remain genuinely unmeasured -- headless/MFA are out of this cell's scope regardless (the harvester), faster pacing and terms-reading are Andrew's call (C-SA-UNMEASURED), and no PRO-locked article was tried (both fetched were free, matching the reference's own finding)."
     }
   ],
   "surprises": [
@@ -256,7 +271,32 @@
     {
       "tool": "safe-commit.sh (commit-gate + surprise-row-gate + to-pipeline-gate pre-commit chain)",
       "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~9 <0.9.0_WK_AMGT_RESAPP~9@opal.agent>\" -F <msgfile> -- <paths>",
-      "result": "First attempt BLOCKED: commit-gate found a strict-utf8 log-read without errors= in rest_fetch.py (a false-positive-shaped hit on a single-writer JSON state file, keyed on the 'log_path' identifier); fixed with an inline '# log-open-ok: <reason>' override on the open() statement's own physical line (per org/modules/graph/compproof/log_open_lint.py's _override_on, which requires the marker on the call's own line span, not a preceding comment). Second attempt: commit ca7c0a28f11b4e3097e09f1f97474b4719b11370 -- commit-gate OK (2 audited log-open-ok overrides), to-pipeline-gate OK, surprise-row-gate OK: 2 new row(s) of 8 total checked (6 pre-existing, NOT re-graded)."
+      "result": "First attempt BLOCKED: commit-gate found a strict-utf8 log-read without errors= in rest_fetch.py (a false-positive-shaped hit on a single-writer JSON state file, keyed on the 'log_path' identifier); fixed with an inline '# log-open-ok: <reason>' override on the open() statement's own physical line (per org/modules/graph/compproof/log_open_lint.py's _override_on, which requires the marker on the call's own line span, not a preceding comment). Second attempt: commit ca7c0a28f11b4e3097e09f1f97474b4719b11370 -- commit-gate OK (2 audited log-open-ok overrides), to-pipeline-gate OK, surprise-row-gate OK: 2 new row(s) of 8 total checked (6 pre-existing, NOT re-graded). RE-RUN commit 513ae51e2361262d31b9985d33978e6e15a036df: commit-gate OK, to-pipeline-gate OK, surprise-row-gate OK: no new rows (none needed)."
+    },
+    {
+      "tool": "git log (independent verification of the reference fix, NOT taken on the relaying message's word)",
+      "invocation": "git rev-parse --abbrev-ref HEAD && git log --oneline -1  (confirm worktree re-cut to 770ee8fb18);  git log -1 --format=\"%H %an %ad %s\" --date=iso-strict -- org/tier1_exec/4.0.0_SA_CRO/scripts/sa_rest_fetch.py",
+      "result": "Branch wk-AMGT_RESAPP-1-9 at 770ee8fb18 (matches the relayed claim). Reference fix: commit 0d02e7ce47c62bea58f88f058956a005f417c889, author 4.0.0_SA_CRO~Z, 2026-09-10T22:26:53-04:00 (=2026-09-11T02:26:53Z), 3h11m after this worker's own W9-S2 row (2026-09-10T23:15:24Z) -- confirms the row was correct at its vintage and the fix post-dates it. sed -n '85,93p' of that file at HEAD shows verify: False in the curl_cffi kwargs with a comment naming the identical Bright Data SSL-bump cause."
+    },
+    {
+      "tool": "aws secretsmanager describe-secret (independent verification of the parked session's freshness, a LIVE read, not a claim)",
+      "invocation": ".tools/aws secretsmanager describe-secret --secret-id seeking-alpha/session --region us-east-1",
+      "result": "LastChangedDate 2026-09-10T22:13:40.784-04:00 (=2026-09-11T02:13:40Z), VersionId 3882be57-6a3e-4693-8a7a-2c768bf28af1 -- matches the canonical method doc's stated 2026-09-11T02:13:39Z and VersionId exactly, corroborating that a real harvester run against the live AWS account produced this session (not something a chat message alone could fabricate)."
+    },
+    {
+      "tool": "rest_fetch.py run-ticker, re-run (one invocation per ticker, under timeout 120, at 2s+ pacing, verify=False now in effect)",
+      "invocation": "python integrations/seekingalpha/rest_fetch.py run-ticker BABA --security-key BABA_US --state-dir <deliverables-dir>  (repeated for BA/BA_US and COST/COST_US, then finalize --expected BABA,BA,COST)",
+      "result": "BABA: 'OK: BABA sa_id=137271 landed under raw/seekingalpha/BABA_US/'. BA: 'OK: BA sa_id=769 landed under raw/seekingalpha/BA_US/'. COST: 'OK: COST sa_id=58 landed under raw/seekingalpha/COST_US/'. finalize: 'OK: status=COMPLETE tickers_measured=3'. All rc 0."
+    },
+    {
+      "tool": "check_landing.py, re-run (AC1, after the fix)",
+      "invocation": "python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~9/check_landing.py",
+      "result": "SA LANDING: tickers 3; raw objects 18 across 3 keys; symbol+report present for 3 of 3; sa_ids MEASURED 3"
+    },
+    {
+      "tool": "aws s3api get-object (AC7's read-back of the landed BABA report, direct from S3)",
+      "invocation": "boto3 s3 get_object(Bucket='opal-data-research', Key='raw/seekingalpha/BABA_US/20260911T040214Z/report.json')",
+      "result": "createdAt=2026-09-08T00:00:22.351-04:00, previousReportDate=2026-09-03T00:01:14.183-04:00, enoughAnalysis=True, responseContent 5981 chars, ratingsResponse 2048 chars, raw body 8437 bytes -- confirms createdAt/previousReportDate land present and untouched."
     }
   ]
 }
