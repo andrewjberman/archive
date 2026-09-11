@@ -16,7 +16,6 @@ import datetime as dt
 import hashlib
 import json
 import os
-import re
 import subprocess
 import sys
 import time
@@ -27,8 +26,9 @@ _PKG = os.path.join(_REPO, "infra", "aws", "lambda", "investor-reporting")
 _DIR = os.path.join(_PKG, "directory")
 _GOLD = os.path.join(_REPO, "data", "assets", "scripts", "gold", "investor_reporting")
 
-for p in (_HERE, _DIR, os.path.join(_PKG, "_authz"), os.path.join(_PKG, "_scope"),
-          os.path.join(_PKG, "_keys"), os.path.join(_REPO, "lib"), _GOLD):
+for p in (_HERE, _DIR, os.path.join(_PKG, "_authz"), os.path.join(_PKG, "_authz", "tests"),
+          os.path.join(_PKG, "_scope"), os.path.join(_PKG, "_keys"),
+          os.path.join(_REPO, "lib"), _GOLD):
     if p not in sys.path:
         sys.path.insert(0, p)
 
@@ -111,6 +111,36 @@ def arms_a_to_e():
 
 
 # ============================================================================ arm (f)
+def _sleep_calls(path):
+    """Real `sleep(...)` CALL SITES, read from the AST -- never from the text.
+
+    THE FIRST VERSION OF THIS CENSUS WAS A REGEX AND IT FAILED ITS OWN ARM: it matched the
+    literal `time.sleep(5)` inside this battery's own positive-control STRING and reported two
+    sleeps longer than a second in a cell that contains none. A text scan reads the TEXT; an AST
+    read reads the CODE, and a string constant is not a call.
+
+    Returns [(line, seconds_or_None)] -- a non-literal argument is reported as None rather than
+    assumed short, because `sleep(n)` with a computed n is exactly the one worth looking at.
+    """
+    import ast
+    with open(path, "r", encoding="utf-8") as fh:
+        tree = ast.parse(fh.read())
+    out = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        fn = node.func
+        name = (fn.attr if isinstance(fn, ast.Attribute)
+                else fn.id if isinstance(fn, ast.Name) else "")
+        if name != "sleep":
+            continue
+        secs = None
+        if node.args and isinstance(node.args[0], ast.Constant) and                 isinstance(node.args[0].value, (int, float)):
+            secs = float(node.args[0].value)
+        out.append((node.lineno, secs))
+    return out
+
+
 def arm_f(elapsed):
     section("ARM (f) -- NO WAIT")
     ok = True
@@ -118,33 +148,44 @@ def arm_f(elapsed):
     if elapsed >= 60:
         ok = False
 
-    # SOURCE CENSUS: no sleep longer than one second anywhere in this cell's own code.
     files = [os.path.join(_HERE, "ib_s_4_controlled_clock.py"),
              os.path.join(_HERE, "battery_ib_s_4.py"),
              os.path.join(_DIR, "refresh.py"), os.path.join(_DIR, "expiry.py")]
-    pat = re.compile(r"(?:time\.)?sleep\(\s*([0-9.]+)")
+    print("  DENOMINATOR: %d source file(s) censused for a sleep CALL SITE (AST, not text)"
+          % len(files))
     hits = []
     for f in files:
-        with open(f, "r", encoding="utf-8") as fh:
-            for i, line in enumerate(fh.read().splitlines(), 1):
-                for m in pat.finditer(line):
-                    hits.append((os.path.basename(f), i, float(m.group(1))))
-    print("  DENOMINATOR: %d source file(s) censused for a sleep call" % len(files))
-    over = [h for h in hits if h[2] > 1.0]
-    print("  sleep call(s) found: %d, of which longer than 1 s: %d" % (len(hits), len(over)))
+        for line, secs in _sleep_calls(f):
+            hits.append((os.path.basename(f), line, secs))
+    over = [h for h in hits if h[2] is None or h[2] > 1.0]
+    print("  sleep call site(s): %d, of which longer than 1 s (or non-literal): %d"
+          % (len(hits), len(over)))
     for h in over:
         print("    OVER: %s:%d sleep(%s)" % h)
     if over:
         ok = False
-    # POSITIVE CONTROL: the matcher must be able to find one.
-    probe = len(pat.findall("time.sleep(5)  # a synthetic offender"))
-    print("  POSITIVE CONTROL on the matcher: a synthetic `time.sleep(5)` line matches %d -- "
-          "the census can go non-zero" % probe)
-    if probe != 1:
+
+    # POSITIVE CONTROL on the AST census itself -- a synthetic MODULE, parsed the same way.
+    import ast as _ast
+    probe_src = chr(10).join(["import time", "time.sleep(5)", "sleep(0.2)"])
+    probe = []
+    for node in _ast.walk(_ast.parse(probe_src)):
+        if isinstance(node, _ast.Call):
+            fn = node.func
+            nm = (fn.attr if isinstance(fn, _ast.Attribute)
+                  else fn.id if isinstance(fn, _ast.Name) else "")
+            if nm == "sleep":
+                probe.append(node.args[0].value)
+    print("  POSITIVE CONTROL: a synthetic module containing time.sleep(5) and sleep(0.2) is "
+          "censused by the SAME reader -> %d call site(s) %s, of which %d over 1 s"
+          % (len(probe), probe, len([x for x in probe if x > 1.0])))
+    if len(probe) != 2 or len([x for x in probe if x > 1.0]) != 1:
         ok = False
+    print("  (the earlier TEXT version of this census counted the string above as a sleep and "
+          "failed the arm in a cell with no sleep at all -- the instrument, not the world)")
     record("f", "PASS" if ok else "FAIL",
-           "harness %.3f s < 60 s; %d of %d sleep call(s) over 1 s across %d source file(s)"
-           % (elapsed, len(over), len(hits), len(files)))
+           "harness %.3f s < 60 s; %d of %d real sleep call site(s) longer than 1 s across %d "
+           "source file(s), AST-read" % (elapsed, len(over), len(hits), len(files)))
 
 
 # ============================================================================ arm (g)
@@ -260,8 +301,17 @@ def arm_h():
     lines = []
     # The guard's own explicit first-mint mechanism, run ONCE for the record.
     sd = os.path.join(_REPO, ".tools", "safe-deploy.sh")
-    p = subprocess.run(["bash", sd, "--mint-bundle", "investor_reporting"], cwd=_REPO,
-                       capture_output=True, text=True, timeout=180)
+    # BARE `bash` RESOLVES TO THE WSL STUB ON THIS BOX and returns "Windows Subsystem for Linux
+    # has no installed distributions" -- which this arm would otherwise have recorded AS THE
+    # GUARD'S REFUSAL. It is not: it is a wrong-interpreter error, and reporting it as the
+    # guard's verdict would be a fabricated citation. The estate's own resolver names the real
+    # Git Bash.
+    sys.path.insert(0, os.path.join(_REPO, ".tools"))
+    import git_bash_resolver as _gb
+    argv = _gb.bash_argv(sd, "--mint-bundle", "investor_reporting")
+    print("  interpreter: %s (resolved via .tools/git_bash_resolver.py -- a bare `bash` here is "
+          "the WSL stub)" % argv[0])
+    p = subprocess.run(argv, cwd=_REPO, capture_output=True, text=True, timeout=180)
     out = (p.stdout + p.stderr).replace(chr(13), "").strip()
     print("  safe-deploy.sh --mint-bundle investor_reporting rc=%d" % p.returncode)
     for line in out.splitlines():
@@ -343,8 +393,10 @@ def arm_i():
         bucket = buckets.get(fid)
         t0 = time.time()
         res = dr.run_firm(firm, buckets, qa=True, upload=False, local_out=None, explicit=None)
+        # run_firm returns the LANDED PAYLOAD, not a bare entry list -- read the shape the
+        # runner actually returns rather than the one a reader would assume.
         dir_ids = set()
-        for e in res["entries"]:
+        for e in (res.get("payload") or {}).get("entries", []):
             dir_ids.update((e.get("ids") or {}).get("account_ids") or [])
         rc, out = _aws(["s3api", "get-object", "--bucket", bucket, "--key",
                         "investor-reporting/qa/holdings/latest.json",
@@ -363,7 +415,9 @@ def arm_i():
                 with open(os.path.join(_REPO, ".scratch", "holdsnap_%s.json" % fid), "r",
                           encoding="utf-8") as fh:
                     snap = json.load(fh)
-                hold_ids = _account_ids_of(snap)
+                hold_ids, hold_raw = _account_ids_of(snap)
+                if hold_raw and not hold_ids:
+                    print("    WARN: the snapshot carries ids this arm could not normalise")
         resolved = len(hold_ids & dir_ids)
         totals.append((fid, resolved, len(hold_ids)))
         print("    %-12s directory accounts=%-6d holdings accounts=%-6d RESOLVED %d of %d "
@@ -376,6 +430,10 @@ def arm_i():
     nonzero = [t for t in totals if t[1] > 0]
     print("  POSITIVE CONTROL: %d of %d firms resolve NON-ZERO, so a zero elsewhere is a real "
           "id-space gap and not a broken comparison" % (len(nonzero), len(totals)))
+    print("    (a zero on EVERY firm would mean the COMPARISON is broken, not the world: row "
+          "W1-S7 records 49financial resolving 7,431 of 7,453. This arm's first run read 0 of 3 "
+          "for exactly that reason -- the snapshot namespaces its ids and the directory does "
+          "not -- and the control is what caught it.)")
     if not nonzero:
         ok = False
     record("i", "PASS" if ok else "FAIL",
@@ -383,22 +441,24 @@ def arm_i():
            "directory: %s" % (commit, "; ".join("%s %d of %d" % t for t in totals)))
 
 
-def _account_ids_of(node, out=None):
-    """Every account id anywhere in a holdings snapshot, by shape rather than by a fixed path."""
-    if out is None:
-        out = set()
-    if isinstance(node, dict):
-        for k, v in node.items():
-            if k in ("account_ids", "opaque_account_ids") and isinstance(v, list):
-                out.update(str(x) for x in v)
-            elif k in ("opaque_account_id", "account_id_opaque") and isinstance(v, str):
-                out.add(v)
-            else:
-                _account_ids_of(v, out)
-    elif isinstance(node, list):
-        for v in node:
-            _account_ids_of(v, out)
-    return out
+def _account_ids_of(snapshot):
+    """The holdings snapshot's account id set, NORMALISED to the directory's spelling.
+
+    THE SNAPSHOT NAMESPACES ITS IDS AND THE DIRECTORY DOES NOT. A holdings id reads
+    `49f:acct:acc_e57c30bb3e2ba80252fa0bd4`; the directory carries the bare `acc_...` tail that
+    `directory_runner.opaque_id` emits. Comparing the two spellings directly returns ZERO for
+    every firm -- which is exactly what this arm measured on its first run, and it would have
+    been reported as a three-firm id-space gap if the arm had no control.
+
+    THE CONTROL IS WHAT CAUGHT IT: "0 of 3 firms resolve non-zero" is not a finding, it is a
+    broken instrument, because row W1-S7 records 49financial resolving 7,431 of 7,453. A zero
+    everywhere means the comparison, not the world.
+
+    The prefix is stripped rather than the directory's ids being decorated, because the tail is
+    the thing both sides actually derive from the same function.
+    """
+    raw = (snapshot.get("scope") or {}).get("account_ids") or []
+    return {str(x).rsplit(":", 1)[-1] for x in raw}, len(raw)
 
 
 # ============================================================================ arm (amend)
