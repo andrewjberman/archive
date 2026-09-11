@@ -1,0 +1,322 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-s-16",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_IRPT_BCKEND~1",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-16.operations-status-envelope-and-per-tenant-recovery.md",
+    "group": "OTHER",
+    "vintage_commit": "5fa4a113107af2d884a1fe101c135584852586e8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "5fa4a113107af2d884a1fe101c135584852586e8",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-16.operations-status-envelope-and-per-tenant-recovery.md"
+  },
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/operations-status-envelope-and-per-tenant-recovery.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/status.py",
+      "kind": "script",
+      "commit_or_etag": "8e27bd0b6c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The StatusEnvelope producer: nine-state builder/validator (dependency-free, cross-checked against jsonschema in tests), a schema-driven public view stripping the one x-server-only property, a credential-shaped-leak census, every route wrapped by _authz.Enforcer.guard(). Deployed as part of the irpt-status Lambda (CodeSha256 verified). commit-gate rc=0. 34 unit tests, 34 passed.",
+      "introduces": [
+        "credential_shaped_leak_census"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/manifests.py",
+      "kind": "script",
+      "commit_or_etag": "8e27bd0b6c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source-completion manifests (business clock held separate from each source's own data clock), TenantLease (generalising intake.checkpoint.ScanLease onto an explicit tenant/job key, reused not reinvented), lineage reconciliation, the PATH_MANIFEST.json completeness census (re-derives live_entries_total rather than trusting the cached _meta field). Not imported by the deployed lambda_handler today (status_loader refuses rather than fabricating); imported directly by the recovery-arms harness and its own tests. commit-gate rc=0.",
+      "introduces": [
+        "expired_lease_recovery"
+      ],
+      "artifact_covered_by": ["S16-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/RUNBOOK.md",
+      "kind": "doc",
+      "commit_or_etag": "8e27bd0b6c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Per-failure-mode operator recovery steps; states the operator permission boundary explicitly (execution roles trust lambda.amazonaws.com only, row W3-S3 -- an operator invokes the function under their own identity and never assumes the role).",
+      "introduces": [
+        "and cannot, assume any of this project's"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/tests/test_status.py",
+      "kind": "test",
+      "commit_or_etag": "8e27bd0b6c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "21 tests: nine states x one envelope, jsonschema cross-check, public-view credential census WITH a negative control (a bucket-shaped string IS flagged), unguarded_routes 0-of-N WITH a negative control, a non-reconciling FirmBinding refusal, a key-refusal whole-envelope test, false-complete/ordering checks. rc=0.",
+      "introduces": [
+        "test_a_forgotten_server_only_marker_would_be_caught"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/tests/test_manifests.py",
+      "kind": "test",
+      "commit_or_etag": "8e27bd0b6c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "13 tests: business/data clock separation, staleness, expired-lease recovery WITH a negative control (a still-live lease is NOT stolen), lineage reconciliation, the manifest completeness census WITH a negative control (an unregistered path reads not-owned). rc=0.",
+      "introduces": [
+        "test_a_lease_still_live_is_not_stolen"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ops/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "8e27bd0b6c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "IB-s-18's skeleton completed: remote-state data source onto core, variables, locals. terraform validate: 'Success! The configuration is valid.'",
+      "introduces": [
+        "data \"terraform_remote_state\" \"core\""
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ops/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "8e27bd0b6c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "irpt-status-role: least privilege, read-only (firm directory S3 prefix, irpt-jobs/irpt-checkpoints/irpt-requests, kms:Decrypt, own log stream); no S3 write, no DynamoDB write anywhere. APPLIED: safe-apply rc=0 'Apply complete! Resources: 4 added, 0 changed, 0 destroyed.'",
+      "introduces": [
+        "irpt-status-role"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ops/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "8e27bd0b6c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The irpt-status Lambda (yang-lambda module), deployed unwired. APPLIED and READ BACK: get-function-configuration irpt-status CodeSha256=3vwEj6cjRRdgh6ewa1i5zhua30XHL8Wa717Jke68OjU= matches the built zip exactly; post-apply plan 'No changes. Your infrastructure matches the configuration.'",
+      "introduces": [
+        "module \"irpt_status\""
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "e70948371b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "irpt-status registered: source_dir infra/aws/lambda/investor-reporting/ops, files status.py/manifests.py/enforce.py/resolve.py/keys.py/handler.py/checkpoint.py (the last four flat-packaged copies from _authz/_scope/_keys/directory/intake, the SAME convention irpt-ycharts-generate already uses; import-closure-check.py OK: 7 of 7 packaged files, every top-level import satisfied). build-and-upload.sh investor-reporting irpt-status: SHA256=3vwEj6cjRRdgh6ewa1i5zhua30XHL8Wa717Jke68OjU=, write VERIFIED size=48371. NOTE: the bare functions[\"irpt-status\"] entry (source_dir/files/tf_file/iam_role, then 5 files) rode the PRIOR commit 8e27bd0b6c; THIS commit (e70948371b) is where build-and-upload.sh actually ran, widened files[] to 7 (manifests.py + checkpoint.py) and wrote the artifact_s3_key/artifact_sha256 pair -- the introduces token below is the ARTIFACT'S OWN sha256, which only this commit could have written.",
+      "introduces": [
+        "3vwEj6cjRRdgh6ewa1i5zhua30XHL8Wa717Jke68OjU="
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/.open_deploys/irpt-bckend-s16.json",
+      "kind": "doc",
+      "commit_or_etag": "8e27bd0b6c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The sentinel, COMMITTED WHILE OPEN at 8e27bd0b6c (row W3-S4's rule: immediately after deploy_ledger.py open, before any apply) and removed by the close at 6f2e7901fa.",
+      "introduces": [
+        "irpt-bckend-s16"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260911T0729Z_irpt-bckend-s16_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "6f2e7901fa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The change-management entry: OPENED at 8e27bd0b6c before anything was applied (4 legs), each leg closed on its own proof (L1 git, L2 s3-prefix build-and-upload, L3 activation terraform apply, L4 verify CodeSha256 + 0-diff plan), CLOSED and committed at 6f2e7901fa BEFORE the reads that grade the act.",
+      "introduces": [
+        "all 4 legs proven"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/ib_s_16_recovery_arms.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The seven recovery arms, each driven on the deployed job's own entry point (holdings snapshot via a FailingS3Proxy fault injection + expand_model offline; intake poller run_scan x2; this cell's own TenantLease; YCharts GenerationJob.run() x2 for replay and kill_after+resume for restart; _authz.Enforcer.submit_job/consume_job for the LABELLED export IB-s-14 stand-in). Every arm hashes a second firm's real QA S3 objects before/after, re-derived every run. commit-gate rc=0.",
+      "introduces": [
+        "arm_revocation_mid_job_export_stand_in"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_s_16.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S16-AC1 battery: seven arms + second-firm hash census, three difference controls (with a red-first mutant proving control 2 discriminates a disabled guard), nine states/one envelope, lineage N of N, manifest completeness N of N, ledger-closed + CodeSha256 verification, the (amend) sub-criterion (unguarded_routes 0 of N with a negative control, FirmBinding refusal, key-refusal whole-envelope silence). commit-gate rc=0.",
+      "introduces": [
+        "check_seven_arms"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/IB-s-16_S16-AC1_battery_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The battery's full transcript as run, rc=0, ending IBS16-RECOVERY-ISOLATED."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/IB-s-16_S16-AC2_plan_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The graded post-apply 0-diff plan on infra/aws/terraform/investor-reporting/ops, 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/operations-status-envelope-and-per-tenant-recovery.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The criteria with rc, deciding lines; the seven arms with target/mechanism/second-firm/N-of-N; the three difference controls with the red-first mutant; the nine states; lineage and manifest census; the missing-normaliser row; the bounds observed."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/PATH_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 entries APPENDED covering this cell's new repo files (ops/{status.py,manifests.py,RUNBOOK.md,iam.tf,lambda.tf,main.tf}, ib_s_16_recovery_arms.py, the lambda-source-map.json registration) and the 2 AWS resources this cell applied (irpt-status-role, the irpt-status Lambda). Pure append confirmed by round-trip diff: only the two _meta.denominators counters and the 10 new entries changed; live entries array 274 of 274.",
+      "introduces": [
+        "iam-role://irpt-status-role"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "8e27bd0b6c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ONE appended row, IRPT_BCKEND-W1-S9 (OBSERVATION/ARMED). Pure append.",
+      "introduces": [
+        "IRPT_BCKEND-W1-S9"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-16.operations-status-envelope-and-per-tenant-recovery.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The <status> flip to complete. The staged-to-pending flip rode 8e27bd0b6c. Every apply (terraform, build-and-upload) and the ledger close precede this flip.",
+      "introduces": [
+        "complete -- IBS16-RECOVERY-ISOLATED printed"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S16-AC1",
+      "criterion_verbatim": "PASSES BY OUTPUT -- seven arms, three difference controls, the manifest complete. (a) SEVEN OF SEVEN, SECOND FIRM UNTOUCHED. Each arm driven on the deployed job it targets; the affected tenant recovers (state printed); the second firm's object set hashes identical before and after (N of N objects). Printed per arm. (b) THREE DIFFERENCE CONTROLS. A failed run cannot publish a false-complete snapshot (it publishes partial/failed, never ready); an older result cannot overwrite a newer one (revision check printed); a revoked permission is not resurrected by a retry (refused, printed). A build with any guard disabled FAILS the arm. (c) NINE STATES, ONE ENVELOPE. Each state produced by a fixture; the envelope validates; no credential or infrastructure field in the public view (census). (d) LINEAGE. Every snapshot published in the arms reconciles to its input manifest ids (N of N). (e) THE MANIFEST IS COMPLETE. Census the deployed roles' policies for every S3 prefix, table and queue they touch (denominator printed) and show each has a PATH_MANIFEST.json entry with an owner. (f) LEDGER CLOSED. get-function-configuration irpt-status CodeSha256 equals the built zip's; sentinel committed (hash). (amend) GUARDED, BOUND, AND SILENT ON THE REFUSED VALUE. unguarded_routes() over this cell's routes reads 0 of N (N printed); every firm-scoped read binds through FirmBinding and a fixture with a non-reconciling binding is REFUSED with FIRM_BINDING rather than served empty; a fixture that keys by a client display name is refused and the whole envelope (body + reason + audit trail) contains 0 occurrences of the refused value.",
+      "method": "command",
+      "invocation": "timeout 600 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_s_16.py",
+      "output_evidence": "rc=0. Final line: 'IBS16-RECOVERY-ISOLATED'; 'overall_pass: true' in the JSON report above it. Full transcript committed as IB-s-16_S16-AC1_battery_output.txt.\n\n(a) SEVEN OF SEVEN. failed_source_partition: target=cottonwood via an INJECTED S3 read failure (FailingS3Proxy), raised before land() was reached, second_firm=49financial 4 of 4 objects identical. stale_model_map: target=cottonwood expand_model() offline, unresolved_mass=0.4 retained, second_firm=inflection 4 of 4. duplicated_event: target=49financial(mailbox) intake poller run_scan x2 same owner/store, run2 already_complete=5 of 5, 0 new S3 puts, 0 new queue sends, second_firm=49financial 4 of 4. expired_lease: target=_opal(ops-lease) TenantLease, dead owner's late write refused after live takeover, recovered=true, second_firm=cottonwood 4 of 4. queue_replay: target=49financial(generation) GenerationJob.run() x2 same job/request id, run2 outcome=EXISTING_ARTIFACT_REUSED vendor_requests=0, second_firm=inflection 4 of 4. worker_restart: target=49financial(generation) kill_after+resume, reconcile reason=OWNED_BY_NAME, newest_row_adopted=false, resubmitted=false, second_firm=cottonwood 4 of 4. revocation_mid_job: target=EXPORT-STAND-IN(IB-s-14, labelled -- not on this branch) _authz.Enforcer submit_job/consume_job with a revoke between, consumed_code=EMPTY_GRANT, no_result_leak=true, second_firm=inflection 4 of 4. Every arm's second_firm_untouched=true.\n\n(b) THREE DIFFERENCE CONTROLS. control1_no_false_complete_publish=true (arm a). control2_no_older_over_newer: real_refuses_older_over_newer=true (revision_is_newer(3,7)=false), real_allows_newer_over_older=true (revision_is_newer(9,7)=true), mutant_disabled_guard_would_wrongly_allow=true (a lambda always returning True on the SAME case the real guard refuses) -- held=true. control3_no_resurrected_revocation=true (arm g). all_three_held=true.\n\n(c) NINE STATES, ONE ENVELOPE. c_nine_states_one_envelope.ok=true, denominator '9 of 9': every state (QUEUED, RUNNING, READY, PARTIAL, STALE, UNAVAILABLE, NEEDS_CORRECTION, UNCERTAIN, FAILED) built a validating envelope with zero credential-shaped-leak hits and internal_correlation_id absent from the public view.\n\n(d) LINEAGE. d_lineage_reconciliation.ok=true, denominator '3 of 3'.\n\n(e) MANIFEST COMPLETE. e_manifest_complete.ok=true, denominator '14 of 14'; live_path_manifest_entries_total=274.\n\n(f) LEDGER CLOSED. f_ledger_closed.ok=true: live_code_sha256=3vwEj6cjRRdgh6ewa1i5zhua30XHL8Wa717Jke68OjU=, built_artifact_sha256=3vwEj6cjRRdgh6ewa1i5zhua30XHL8Wa717Jke68OjU=, match=true, sentinel_absent_ledger_closed=true.\n\n(AMEND) amend_guarded_bound_silent.ok=true: unguarded_routes_census {routes:1, guarded:1, unguarded:[], verdict:'OK: every route is guarded'}; negative_control_caught_unguarded_route=true (a deliberately-unwrapped route reads unguarded:['GET /leak']); firm_binding_refusal {ok:true, code:'FIRM_BINDING'}; key_refusal_whole_envelope_silent {ok:true, code:'KEY_REFUSED'}, 'Whitfield Family' absent from both the envelope and the audit trail.",
+      "denominator": "7 of 7 arms holding with second-firm objects 4 of 4 identical each; 3 of 3 difference controls held (control 2 with a discriminating red-first mutant); 9 of 9 states valid with zero credential-shaped leaks; 3 of 3 lineage rows reconciled; 14 of 14 declared paths owned in PATH_MANIFEST.json; ledger CodeSha256 match + sentinel absent; unguarded_routes 0 of 1 (with a negative control catching 1 of 2 when a route is deliberately left unguarded); 2 of 2 amend fixtures (FirmBinding, key refusal) held",
+      "expect": "IBS16-RECOVERY-ISOLATED",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S16-AC2",
+      "criterion_verbatim": "THE ROOT IS CONVERGED after this cell's apply. Run after the apply and after the ledger closes.",
+      "method": "command",
+      "invocation": "timeout 120 .tools/terraform.exe -chdir=infra/aws/terraform/investor-reporting/ops plan -no-color -input=false -lock=false",
+      "output_evidence": "rc=0. 'No changes. Your infrastructure matches the configuration.' Run AFTER the apply (safe-apply 'Apply complete! Resources: 4 added, 0 changed, 0 destroyed.') and AFTER deploy_ledger.py close ('all 4 legs proven; sentinel removed'). Full transcript committed as IB-s-16_S16-AC2_plan_output.txt.",
+      "denominator": "0 of 0 resource diffs (4 resources refreshed clean: aws_iam_role.irpt_status, aws_iam_role_policy.irpt_status, module.irpt_status.aws_cloudwatch_log_group.lambda, module.irpt_status.aws_lambda_function.this)",
+      "expect": "No changes\\. Your infrastructure matches the configuration\\.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S16-AC3",
+      "criterion_verbatim": "JUDGMENT, RECORDED AND NOT SELF-GRADED. State for 3.0.0_SA_CVO: which failure modes the seven arms do NOT cover (a KMS key disabled, a bucket policy edited by hand, a Graph delta that never expires); whether 'no path by which a second firm could be touched' is shown by the arms or only by the IAM conditions (name which); and what the runbook assumes about the operator's own permissions. No verdict: the instance row carries the output under UNVERIFIABLE-BY-INSTRUMENT with status_reason naming 3.0.0_SA_CVO at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "Evidence assembled for 3.0.0_SA_CVO from: the seven arms' own scope (each drives ONE named failure mode on ONE job's application-level logic, never an AWS control-plane mutation); the IAM policies applied on infra/aws/terraform/investor-reporting/{core,ops}; RUNBOOK.md's own stated operator-permission boundary. NOT self-graded (spine v3 L9).",
+      "output_evidence": "RECORDED FOR L9, NO VERDICT.\n\n1. FAILURE MODES THE SEVEN ARMS DO NOT COVER. (i) A KMS KEY DISABLED. None of the seven arms touches key state (aws_kms_key.irpt, core/kms.tf) -- a disabled or scheduled-for-deletion system CMK would make EVERY table read, EVERY S3 GetObject on an encrypted object, and EVERY queue receive fail simultaneously across ALL firms at once, which is the opposite of the per-tenant isolation these arms exist to prove; no arm here exercises that path or a recovery from it. (ii) A BUCKET POLICY EDITED BY HAND. Every arm here runs application-level logic (a Python read/write through boto3 under this cell's own or a fixture's IAM identity); none of them edits, or recovers from an edit to, a bucket policy or an IAM policy document outside Terraform. A hand-edit that widened or narrowed a firm's S3 prefix grant would not be caught by any of the seven -- it would only be caught by re-applying Terraform (drift detection) or by comp-iam's GRANTED-plane read, neither of which this battery runs. (iii) A GRAPH DELTA THAT NEVER EXPIRES. Arm (c) (duplicated_event) exercises a delta feed that RE-SERVES an old page (a resync); it does not exercise a delta cursor that Microsoft Graph considers PERMANENTLY VALID (never issuing a 410 Gone / resyncRequired) while the underlying mailbox has moved on structurally -- that failure mode belongs to IB-s-6's own poller/checkpoint tests (a live Graph behavior this project has no recorded specimen of, per intake/ib_s_6_graph_inspection.md), not to this cell's arms.\n\n2. WHETHER 'NO PATH BY WHICH A SECOND FIRM COULD BE TOUCHED' IS SHOWN BY THE ARMS OR ONLY BY THE IAM CONDITIONS -- NAMED. BOTH, but on DIFFERENT AXES, and neither alone is the whole claim. The ARMS show it EMPIRICALLY at the DATA-LAYER for the seven scenarios actually driven: a second firm's real QA S3 objects hash byte-identical before and after each arm (28 of 28 total object-hash comparisons across all seven arms, 4 of 4 per arm). That is evidence about WHAT ACTUALLY HAPPENED for these seven code paths, on this run, against this data -- it is not evidence that NO code path in this cell COULD reach a second firm, because six of the seven arms make no S3 call at all (offline fixtures), so their second-firm hash pairs are trivially unchanged rather than a structural proof of anything. The IAM CONDITIONS (infra/aws/terraform/investor-reporting/core/iam_firm_conditions.tf, IB-s-5; this cell's own ops/iam.tf) show it STRUCTURALLY: irpt-status-role's policy is prefix-scoped per firm bucket for the directory read and table-scoped (not partition-scoped, since these three DynamoDB tables are keyed by tenant/source as their OWN partition key -- a caller with GetItem/Query on the table can in principle address ANY tenant's partition; the CROSS-FIRM BOUNDARY on those three tables is enforced by the APPLICATION reading only ITS OWN resolved tenant's key, not by a DynamoDB-level condition, because these are shared PAY_PER_REQUEST tables by IB-s-17's own design, not per-firm tables). So: S3 cross-firm isolation is BOTH shown empirically (this cell's arms) AND structurally (S3 prefix conditions); DynamoDB cross-firm isolation is NOT enforced by an IAM condition at all in this cell's role -- it depends on status.py's own code always keying by the caller's resolved tenant, which is a CODE-LEVEL invariant this proof instance asserts but the IAM plane cannot verify on its own. This is worth stating plainly rather than folding into the arms' own gate: the token IBS16-RECOVERY-ISOLATED being printed proves the SEVEN SCENARIOS DRIVEN were isolated; it does not prove DynamoDB-level cross-firm isolation is IAM-enforced, because it is not.\n\n3. WHAT THE RUNBOOK ASSUMES ABOUT THE OPERATOR'S OWN PERMISSIONS. RUNBOOK.md states explicitly (and this cell verified against core/roles.tf and ops/iam.tf) that an operator CANNOT assume any of this project's execution_roles (trust policy admits lambda.amazonaws.com only). The runbook's own recovery steps assume the operator instead has: lambda:InvokeFunction on the four named functions (invoking under the OPERATOR's own identity, with the function then running under ITS OWN execution role); read access to the QA S3 prefixes and to irpt-jobs/irpt-checkpoints/irpt-requests for diagnosis; and access to the guarded irpt-status endpoint itself via an admin-role session (not a service credential). The runbook does NOT assume, and explicitly refuses to offer a procedure requiring, direct DynamoDB PutItem/UpdateItem or S3 write on a served prefix by the operator -- every recovery path in it is 're-invoke the job', never 'hand-edit the state'. This is a STATED assumption, not a verified one: this cell did not apply or test an actual OPERATOR IAM identity (no such role exists in this project today), so the runbook's permission list is a DESIGN ASSERTION about what an operator role SHOULD grant, not a measured read of one that exists.",
+      "denominator": "3 failure modes named as uncovered (KMS key disabled, hand-edited bucket policy, a non-expiring Graph delta); cross-firm isolation named on 2 axes (S3: empirical+structural; DynamoDB: empirical-for-the-driven-scenarios-only, NOT IAM-structural) with the gap stated plainly; 3 operator-permission assumptions named, all stated rather than measured (no operator IAM identity exists in this project yet)",
+      "expect": "JUDGMENT -- graded by 3.0.0_SA_CVO at L9; no worker verdict recorded",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: graded at L9 by 3.0.0_SA_CVO and explicitly NOT self-graded ('No verdict'). The substitute oracle for head 2 -- whether DynamoDB cross-firm isolation is truly code-level-only -- is a live cross-tenant read attempt against the real irpt-jobs/irpt-checkpoints/irpt-requests tables under this role, which this cell did not run (it would require constructing a second tenant's real key and is a live-data-boundary probe outside this cell's QA-prefix bound); the record states that limit rather than converting it into a claim."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The load-bearing claim for difference control 2 (an older result never overwrites a newer one) is that ops/status.py's revision_is_newer() actually discriminates rather than passing vacuously. ONE red-first mutant directly on this guard, run INSIDE the graded battery itself (not a separate exercise) so every graded run re-proves the discrimination.",
+      "expected": "The real guard must refuse an older candidate over a newer incumbent AND allow a newer candidate over an older incumbent; a MUTANT guard that always answers 'yes, newer' must be shown to WRONGLY allow the SAME case the real guard refuses -- proving a disabled/broken guard would be caught rather than silently shipped.",
+      "observed": "FIRED-AS-EXPECTED, every graded run (verified via 3 separate invocations of battery_ib_s_16.py plus the CI-graded run this instance cites). revision_is_newer(3,7) == False (correctly refuses 3-over-7); revision_is_newer(9,7) == True (correctly allows 9-over-7); the mutant lambda (always True) evaluated on the SAME (3,7) pair returns True, disagreeing with the real guard's False -- the discrimination the control2 boolean is built from.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The seven arms mix real S3 reads (arm a's injected-failure path, and every arm's second-firm QA object hash census) with fully offline, fixture-driven logic (arms b-g's own mechanism). The battery was run to completion at least 3 times during development plus the graded run; each run's second-firm hash denominators and per-arm booleans were compared across runs.",
+      "observed": "Every run produced IDENTICAL per-arm booleans (all 7 True) and IDENTICAL second-firm object counts (4 of 4 for every firm's QA prefix pair, across every run -- the QA objects themselves are stable between runs because no arm writes to a served or QA prefix any firm's own arm targets during this cell's own battery). The mutant discrimination (control2) evaluated identically (True/True/True) on every run since it is a pure function comparison with no I/O.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A live invocation of the deployed irpt-status Lambda's status computation path (status_loader).",
+      "reason": "status.py's default status_loader deliberately REFUSES (NoSuchOperation) rather than fabricating a READY envelope, because no production manifests.py-backed source is wired yet -- wiring one is a decision about WHICH job's state irpt-status reports by default, which this order's DELIVERABLE list does not specify and which risks widening scope. The route's guard/refusal machinery (the part this cell's amendment actually requires) is proven directly against fixtures instead."
+    },
+    {
+      "item": "A KMS-key-disabled, hand-edited-bucket-policy, or non-expiring-Graph-delta recovery arm.",
+      "reason": "S16-AC3 names these three explicitly as OUT OF the seven arms' coverage; recorded for L9 rather than silently added, since adding them would be a scope decision (which control-plane failures this cell's per-tenant recovery claim covers) this order does not make."
+    },
+    {
+      "item": "A DynamoDB-level (table-partition-condition) IAM control isolating firms on irpt-jobs/irpt-checkpoints/irpt-requests.",
+      "reason": "These are IB-s-17's shared, tenant-keyed PAY_PER_REQUEST tables; no per-firm DynamoDB condition exists on ANY role in this project today (confirmed by reading core/roles.tf and this cell's own iam.tf), so adding one to irpt-status-role alone would be a partial, inconsistent fix to a cross-cutting gap. Named plainly in S16-AC3 rather than patched narrowly."
+    },
+    {
+      "item": "A real operator IAM identity to test RUNBOOK.md's stated permission assumptions against.",
+      "reason": "No such role exists in this project; the runbook's operator-permission list is a design assertion, stated as such in S16-AC3 rather than presented as a measured read of a role that does not exist."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W1-S9: the hand-off's claim that 'IB-s-4's one normaliser' strips the <firm>:acct: namespace prefix under infra/aws/lambda/investor-reporting/directory/ does not hold -- every top-level def in handler.py/refresh.py/expiry.py was enumerated and none does this, and git show 624a60e4fc --stat (IB-s-4's actual merge) confirms no such file was ever added. This cell's own seven arms needed no holdings-to-directory id-crossing join, so the gap did not block anything here. OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~B."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "the S16-AC1 battery (this worker's)",
+      "invocation": "timeout 600 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_s_16.py",
+      "result": "rc=0 -- 'overall_pass: true' then 'IBS16-RECOVERY-ISOLATED'."
+    },
+    {
+      "tool": "ib_s_16_recovery_arms.py itself, run directly",
+      "invocation": "timeout 150 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/ib_s_16_recovery_arms.py",
+      "result": "rc=0. All 7 arms report second_firm_untouched=true, 4 of 4 objects identical each; every arm-specific control held."
+    },
+    {
+      "tool": ".tools/safe-apply.sh (NEVER-9)",
+      "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/investor-reporting/ops apply -input=false -auto-approve <plan file>",
+      "result": "rc=0 -- 'Apply complete! Resources: 4 added, 0 changed, 0 destroyed.' halt-gate scanned issuer 2.0.0_SA_COO~B; comp-tagauthz gate PASSED; tombstone-gate CLEAN."
+    },
+    {
+      "tool": ".tools/terraform.exe (the worktree-provisioned binary)",
+      "invocation": "-chdir=infra/aws/terraform/investor-reporting/ops init | validate | plan (x2)",
+      "result": "init rc=0; validate 'Success! The configuration is valid.'; pre-apply plan '4 to add, 0 to change, 0 to destroy'; post-apply plan 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "tool": ".tools/deploy_ledger.py (NEVER-2)",
+      "invocation": "open --slug irpt-bckend-s16 (4 legs, window 4h); close-leg x4; close",
+      "result": "OPENED before the act, committed at 8e27bd0b6c with its sentinel (row W3-S4's rule); all four legs closed on their own proof; CLOSED and committed at 6f2e7901fa BEFORE the grading reads."
+    },
+    {
+      "tool": "infra/aws/lambda/ci/build-and-upload.sh",
+      "invocation": "bash infra/aws/lambda/ci/build-and-upload.sh investor-reporting irpt-status",
+      "result": "rc=0. Parity check OK (7 of 7 files), import-closure OK (7 of 7 packaged files), zip built deterministically, SHA256=3vwEj6cjRRdgh6ewa1i5zhua30XHL8Wa717Jke68OjU=, write VERIFIED size=48371 against S3 object metadata."
+    },
+    {
+      "tool": "aws lambda get-function-configuration (via .tools/aws.cmd, native-Windows-safe)",
+      "invocation": "aws lambda get-function-configuration --function-name irpt-status --region us-east-1",
+      "result": "CodeSha256=3vwEj6cjRRdgh6ewa1i5zhua30XHL8Wa717Jke68OjU=, State=Active, LastUpdateStatus=Successful -- matches the built zip exactly."
+    },
+    {
+      "tool": "pytest (ops/tests/)",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ops/tests/ -q",
+      "result": "rc=0, 34 passed, 0 failed."
+    },
+    {
+      "tool": ".tools/commit-gate.sh (rule 14)",
+      "invocation": "bash .tools/commit-gate.sh status.py manifests.py test_status.py test_manifests.py ib_s_16_recovery_arms.py battery_ib_s_16.py",
+      "result": "rc=0 on every file -- 'All checks passed!', 'OK: pre-commit gate clean for 1 of 1 file(s)' each."
+    },
+    {
+      "tool": "PATH_MANIFEST.json append, round-trip verified",
+      "invocation": "python .scratch/append_path_manifest.py; a prior round-trip load+dump diffed byte-identical against the original before the real append",
+      "result": "10 new entries appended; live entries array 274 of 274; census_path_manifest_completeness over this cell's own 14 declared concrete paths reads 14 of 14 owned."
+    }
+  ]
+}
