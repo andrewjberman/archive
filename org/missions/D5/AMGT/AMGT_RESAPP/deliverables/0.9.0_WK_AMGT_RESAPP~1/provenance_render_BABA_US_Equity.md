@@ -16,7 +16,7 @@
 - 2.58157 RATIO (dimensionless multiple) · SHORT_INT_RATIO (Short interest ratio (days-to-cover).) · as of 2026-09-10T23:20:19Z · Bloomberg
 
 ## Fiscal year 2016
-- 87.81 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
+- 79.03 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2016-03-31 · Bloomberg
 - 101143.0 MILLIONS · SALES_REV_TURN (Total revenue/turnover, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 29102.0 MILLIONS · IS_OPER_INC (Operating income, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 28.7731 PERCENT · OPER_MARGIN (Operating margin, percent.) · as of 2026-09-10T23:20:19Z · Bloomberg
@@ -36,7 +36,7 @@
 - 6.9477 RATIO (dimensionless multiple) · PX_TO_BOOK_RATIO (Price/book ratio.) · as of 2026-09-10T23:20:19Z · Bloomberg
 
 ## Fiscal year 2017
-- 172.43 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
+- 107.83 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2017-03-31 · Bloomberg
 - 158273.0 MILLIONS · SALES_REV_TURN (Total revenue/turnover, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 48055.0 MILLIONS · IS_OPER_INC (Operating income, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 30.3621 PERCENT · OPER_MARGIN (Operating margin, percent.) · as of 2026-09-10T23:20:19Z · Bloomberg
@@ -56,7 +56,7 @@
 - 10.1787 RATIO (dimensionless multiple) · PX_TO_BOOK_RATIO (Price/book ratio.) · as of 2026-09-10T23:20:19Z · Bloomberg
 
 ## Fiscal year 2018
-- 137.07 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
+- 183.54 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2018-03-29 · Bloomberg
 - 250266.0 MILLIONS · SALES_REV_TURN (Total revenue/turnover, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 69314.0 MILLIONS · IS_OPER_INC (Operating income, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 27.6961 PERCENT · OPER_MARGIN (Operating margin, percent.) · as of 2026-09-10T23:20:19Z · Bloomberg
@@ -76,7 +76,7 @@
 - 6.6287 RATIO (dimensionless multiple) · PX_TO_BOOK_RATIO (Price/book ratio.) · as of 2026-09-10T23:20:19Z · Bloomberg
 
 ## Fiscal year 2019
-- 212.1 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
+- 182.45 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2019-03-29 · Bloomberg
 - 376844.0 MILLIONS · SALES_REV_TURN (Total revenue/turnover, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 57084.0 MILLIONS · IS_OPER_INC (Operating income, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 15.1479 PERCENT · OPER_MARGIN (Operating margin, percent.) · as of 2026-09-10T23:20:19Z · Bloomberg
@@ -96,7 +96,7 @@
 - 7.7167 RATIO (dimensionless multiple) · PX_TO_BOOK_RATIO (Price/book ratio.) · as of 2026-09-10T23:20:19Z · Bloomberg
 
 ## Fiscal year 2020
-- 232.73 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
+- 194.48 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2020-03-31 · Bloomberg
 - 509711.0 MILLIONS · SALES_REV_TURN (Total revenue/turnover, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 91430.0 MILLIONS · IS_OPER_INC (Operating income, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 17.9376 PERCENT · OPER_MARGIN (Operating margin, percent.) · as of 2026-09-10T23:20:19Z · Bloomberg
@@ -116,7 +116,7 @@
 - 5.4024 RATIO (dimensionless multiple) · PX_TO_BOOK_RATIO (Price/book ratio.) · as of 2026-09-10T23:20:19Z · Bloomberg
 
 ## Fiscal year 2021
-- 118.79 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
+- 226.73 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2021-03-31 · Bloomberg
 - 717289.0 MILLIONS · SALES_REV_TURN (Total revenue/turnover, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 89678.0 MILLIONS · IS_OPER_INC (Operating income, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 12.5024 PERCENT · OPER_MARGIN (Operating margin, percent.) · as of 2026-09-10T23:20:19Z · Bloomberg
@@ -136,7 +136,7 @@
 - 2.1892 RATIO (dimensionless multiple) · PX_TO_BOOK_RATIO (Price/book ratio.) · as of 2026-09-10T23:20:19Z · Bloomberg
 
 ## Fiscal year 2022
-- 88.09 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
+- 108.8 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2022-03-31 · Bloomberg
 - 853062.0 MILLIONS · SALES_REV_TURN (Total revenue/turnover, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 69638.0 MILLIONS · IS_OPER_INC (Operating income, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 8.1633 PERCENT · OPER_MARGIN (Operating margin, percent.) · as of 2026-09-10T23:20:19Z · Bloomberg
@@ -156,7 +156,7 @@
 - 1.7369 RATIO (dimensionless multiple) · PX_TO_BOOK_RATIO (Price/book ratio.) · as of 2026-09-10T23:20:19Z · Bloomberg
 
 ## Fiscal year 2023
-- 77.51 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
+- 102.18 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2023-03-31 · Bloomberg
 - 868687.0 MILLIONS · SALES_REV_TURN (Total revenue/turnover, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 100351.0 MILLIONS · IS_OPER_INC (Operating income, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 11.552 PERCENT · OPER_MARGIN (Operating margin, percent.) · as of 2026-09-10T23:20:19Z · Bloomberg
@@ -177,7 +177,7 @@
 - 1.2902 PERCENT · EQY_DVD_YLD_IND (Indicated dividend yield, percent.) · as of 2026-09-10T23:20:19Z · Bloomberg
 
 ## Fiscal year 2024
-- 84.79 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
+- 72.36 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2024-03-28 · Bloomberg
 - 941168.0 MILLIONS · SALES_REV_TURN (Total revenue/turnover, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 113350.0 MILLIONS · IS_OPER_INC (Operating income, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 12.0435 PERCENT · OPER_MARGIN (Operating margin, percent.) · as of 2026-09-10T23:20:19Z · Bloomberg
@@ -198,7 +198,7 @@
 - 1.1794 PERCENT · EQY_DVD_YLD_IND (Indicated dividend yield, percent.) · as of 2026-09-10T23:20:19Z · Bloomberg
 
 ## Fiscal year 2025
-- 146.58 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
+- 132.23 PRICE (local trading currency, per share/unit) · PX_LAST (Last traded/closing price, in the security's trading currency.) · as of 2025-03-31 · Bloomberg
 - 996347.0 MILLIONS · SALES_REV_TURN (Total revenue/turnover, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 140905.0 MILLIONS · IS_OPER_INC (Operating income, millions of the reporting currency.) · as of 2026-09-10T23:20:19Z · Bloomberg
 - 14.1422 PERCENT · OPER_MARGIN (Operating margin, percent.) · as of 2026-09-10T23:20:19Z · Bloomberg
